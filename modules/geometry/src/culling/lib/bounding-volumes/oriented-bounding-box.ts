@@ -7,7 +7,7 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See ../../../../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
-import {NumericArray} from '@math.gl/core/types';
+import {NumericArray} from '@math.gl/core';
 import {Vector3, Matrix3, Matrix4} from '@math.gl/core';
 
 import type {BoundingVolume} from './bounding-volume';

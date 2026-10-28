@@ -90,6 +90,11 @@ jobs:
       - name: Check consolidated packages, exports, and assets
         run: yarn check:packages
 
+      - name: Test and build solar terminator
+        run: |
+          yarn workspace math.gl-sun-terminator test
+          yarn workspace math.gl-sun-terminator build
+
       - name: Test and build tectonic time machine
         run: |
           yarn workspace math.gl-tectonic-time-machine test
@@ -146,6 +151,12 @@ jobs:
       - name: Check geographic seam and rhumb APIs, public types and selective budgets
         run: |
           python3 modules/geospatial/scripts/generate-geographic-seam-reference.py --check
+          python3 modules/geospatial/scripts/generate-geographic-atlas-reference.py --check
+          node modules/geospatial/scripts/check-geographic-atlas-package.mjs
+          node modules/geospatial/scripts/qualify-geographic-atlas.mjs --output /tmp/geographic-atlas-node.json
+          python3 modules/geospatial/scripts/generate-geographic-cuts-reference.py --check
+          node modules/geospatial/scripts/check-geographic-cuts-package.mjs
+          node modules/geospatial/scripts/qualify-latitude-cuts.mjs --output /tmp/latitude-cuts-node.json
           yarn check:geographic-seams-package
           node modules/geospatial/scripts/qualify-geographic-seams.mjs --output /tmp/geographic-seams-node.json
 
@@ -196,6 +207,8 @@ jobs:
           path: |
             /tmp/projection-accuracy.json
             /tmp/geographic-seams-node.json
+            /tmp/latitude-cuts-node.json
+            /tmp/geographic-atlas-node.json
             /tmp/c8-g7-node.json
             /tmp/g89-node.json
             /tmp/exact-area-node.json
@@ -226,6 +239,10 @@ jobs:
 
       - name: Install Chromium for coverage
         run: yarn playwright install --with-deps chromium
+
+      - name: Test solar terminator rendering and cut-map detail
+        timeout-minutes: 5
+        run: yarn workspace math.gl-sun-terminator test:browser:ci
 
       - name: Check regressions from landed example reviews
         timeout-minutes: 2
@@ -462,7 +479,10 @@ jobs:
 
       - name: Qualify geographic seam and rhumb controls
         timeout-minutes: 2
-        run: node modules/geospatial/scripts/qualify-geographic-seams.mjs --browser ${{ matrix.browser }} --output /tmp/geographic-seams-${{ matrix.browser }}.json
+        run: |
+          node modules/geospatial/scripts/qualify-geographic-seams.mjs --browser ${{ matrix.browser }} --output /tmp/geographic-seams-${{ matrix.browser }}.json
+          node modules/geospatial/scripts/qualify-latitude-cuts.mjs --browser ${{ matrix.browser }} --output /tmp/latitude-cuts-${{ matrix.browser }}.json
+          node modules/geospatial/scripts/qualify-geographic-atlas.mjs --browser ${{ matrix.browser }} --output /tmp/geographic-atlas-${{ matrix.browser }}.json
 
       # Retain the complete matrix and three samples in PRs. A bounded 4 ms
       # window supports scorecard diagnostics; master retains the 12 ms profile.
@@ -483,6 +503,8 @@ jobs:
           name: projection-browser-qualification-${{ matrix.browser }}
           path: |
             /tmp/geographic-seams-${{ matrix.browser }}.json
+            /tmp/latitude-cuts-${{ matrix.browser }}.json
+            /tmp/geographic-atlas-${{ matrix.browser }}.json
             /tmp/c8-g7-${{ matrix.browser }}.json
             /tmp/g89-${{ matrix.browser }}.json
             /tmp/exact-area-${{ matrix.browser }}.json

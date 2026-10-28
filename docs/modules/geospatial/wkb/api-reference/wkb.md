@@ -84,6 +84,6 @@ Recursively finds the widest coordinate tuple. Empty geometry is XY; three value
 
 ## GeoArrow boundary
 
-Use `@math.gl/geospatial/wkb` for individual format values. Use `decodeGeoArrowWKB`, `encodeGeoArrowWKB`,
+Use `@math.gl/geospatial` for individual format values. Use `decodeGeoArrowWKB`, `encodeGeoArrowWKB`,
 `decodeGeoArrowWKT`, and `encodeGeoArrowWKT` from `@math.gl/geospatial/geoarrow` for serialized column
 descriptors, offsets, validity, chunks, CRS, and metadata preservation.

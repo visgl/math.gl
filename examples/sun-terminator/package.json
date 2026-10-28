@@ -1,0 +1,38 @@
+{
+  "name": "math.gl-sun-terminator",
+  "version": "5.0.0-alpha.12",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "test": "node --test test/*.test.js",
+    "test:browser": "node test/browser.mjs",
+    "test:projections:browser": "node test/projections-browser.mjs",
+    "test:camera:browser": "node test/camera-browser.mjs",
+    "test:cuts:browser": "node test/cut-morph-browser.mjs",
+    "test:browser:ci": "node test/run-browser.mjs",
+    "test:states:browser": "node test/state-detail-browser.mjs"
+  },
+  "dependencies": {
+    "@deck.gl-community/geo-layers": "^9.4.8",
+    "@deck.gl-community/panels": "^9.4.8",
+    "@deck.gl/core": "~9.4.0",
+    "@deck.gl/extensions": "~9.4.0",
+    "@deck.gl/geo-layers": "~9.4.0",
+    "@deck.gl/layers": "~9.4.0",
+    "@loaders.gl/core": "^4.5.1",
+    "@luma.gl/core": "~9.4.0",
+    "@luma.gl/engine": "~9.4.0",
+    "@math.gl/earth": "workspace:*",
+    "@math.gl/geospatial": "workspace:*",
+    "d3-geo": "^2.0.2",
+    "h3-js": "^4.5.0"
+  },
+  "devDependencies": {
+    "pngjs": "^7.0.0",
+    "vite": "^8.2.2"
+  }
+}

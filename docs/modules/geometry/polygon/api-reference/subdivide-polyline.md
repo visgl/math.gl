@@ -7,7 +7,7 @@
 Subdivides source-coordinate edges until sampled error after a supplied transform is within a tolerance. Use it to approximate curved projected paths and polygon boundaries before rendering or triangulation.
 
 ```ts
-import {subdividePolyline} from '@math.gl/geometry/polygon';
+import {subdividePolyline} from '@math.gl/geometry';
 
 const result = subdividePolyline([0, 0, 1, 0], {
   transform: ([x, y]) => [x, y + x * x],

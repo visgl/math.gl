@@ -4,7 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {HeightField, TerrainSampleStatus as Status} from '@math.gl/geospatial/terrain';
-import {HeightFieldGeometry} from '@math.gl/geospatial/terrain/geometry';
+import {HeightFieldGeometry} from '@math.gl/geospatial/terrain';
 
 test('mesh centroids and geometric normals agree with triangle sampling for both diagonals and handedness', () => {
   for (const diagonal of ['00-11', '10-01'] as const) {

@@ -116,3 +116,27 @@ filled-side atlas adapter (`cutSphericalPolygon`, `projectSphericalPolygon`,
 hemisphere/complement/hole controls qualify the spherical profile. This is broader
 map-polygon coverage; it is not arbitrary ellipsoidal/rhumb cuts or polygon repair.
 See [global spherical cuts](../docs/modules/geospatial/api-reference/global-geographic-cuts.md).
+
+## C5 latitude-domain increment
+
+The optional `geographic-cuts` entry adds line/polygon clipping to a closed latitude
+band for explicit linear, ellipsoidal geodesic and rhumb source curves, composed
+with the existing meridian chart. Generated parallel/meridian/pole edges have
+explicit descriptors and a projection subdivision adapter. This enables bounded
+polar orthographic surface visibility and finite Mercator latitude domains while
+preserving holes, disconnected components and original source intervals.
+
+See [latitude cuts](../docs/modules/geospatial/api-reference/latitude-geographic-cuts.md)
+for shape restrictions, ownership, limits, 310 native/independent Node/browser
+controls and unchanged existing budgets. Arbitrary oblique horizons, curved cut
+networks and general ellipsoidal/rhumb global complements remain future work.
+
+## C5 oblique visibility and cut graph delivery
+
+`geographic-atlas` extends latitude-only visibility to arbitrary-direction
+orthographic surface horizons on the declared ellipsoid. A shared normal-space
+circle graph adds finite multi-chart cells, explicit generated-curve provenance,
+shared vertex identities and an octahedral faceted-map consumer. See the
+[atlas API and 502-case qualification](../docs/modules/geospatial/api-reference/geographic-atlas.md).
+Arbitrary boundary callbacks, unresolved multiple junctions, dataset-wide shared
+feature topology and perspective/terrain visibility remain outside this profile.

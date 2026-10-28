@@ -19,7 +19,7 @@ export function isFloat16Array(value: unknown): value is Float16Array {
  *
  * @remarks This is `undefined` when the runtime does not provide `Float16Array`. The value is
  * captured when this module is evaluated, so a polyfill must be installed before importing
- * `@math.gl/core/types`.
+ * `@math.gl/core`.
  */
 export const NativeFloat16ArrayConstructor: TypedArrayConstructor | undefined =
   globalThis.Float16Array;

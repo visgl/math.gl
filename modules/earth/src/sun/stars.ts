@@ -25,8 +25,8 @@ export {createMilkyWayBackground} from './star-milky-way';
 export type {MilkyWayBackground, MilkyWaySample} from './star-milky-way';
 
 /** Brightest 7,000 BSC5 sources, sorted by visual magnitude then HR number. */
-export const STAR_CATALOG: readonly StarRecord[] = Object.freeze(
-  STAR_CATALOG_DATA.map(row =>
+export const STAR_CATALOG: readonly StarRecord[] = /* @__PURE__ */ Object.freeze(
+  /* @__PURE__ */ STAR_CATALOG_DATA.map(row =>
     Object.freeze({
       id: row[0],
       designation: row[10],
@@ -46,7 +46,7 @@ export const STAR_CATALOG: readonly StarRecord[] = Object.freeze(
 );
 
 /** Metadata describes the fixed input selection, not a completeness guarantee at future epochs. */
-export const STAR_CATALOG_INFO = Object.freeze({
+export const STAR_CATALOG_INFO = /* @__PURE__ */ Object.freeze({
   count: 7000,
   epochYear: 2000,
   faintestMagnitude: 6.3,

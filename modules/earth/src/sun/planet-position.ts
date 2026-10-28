@@ -102,7 +102,7 @@ const SUN_RADIUS = 695700;
 
 /**
  * Positions and disk geometry for rendering seven planets and four Galilean moons.
- * Import from @math.gl/earth/sun/planets; requires the optional astronomy-engine peer.
+ * Import from @math.gl/earth/sun; requires the optional astronomy-engine peer.
  * The ephemeris accounts for light travel, precession and nutation; not aberration.
  */
 export function getPlanetSkyInfo(

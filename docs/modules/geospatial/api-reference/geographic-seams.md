@@ -10,7 +10,7 @@ curve's seam intersections, rather than replacing curved edges with straight
 longitude/latitude chords.
 
 ```ts
-import {splitGeographicPolyline, splitGeographicPolygon} from '@math.gl/geospatial/globe';
+import {splitGeographicPolyline, splitGeographicPolygon} from '@math.gl/geospatial';
 
 const route = splitGeographicPolyline([170, 30, -170, 30], {
   edgeModel: 'geodesic'
@@ -111,6 +111,9 @@ holes and arbitrary global complements are outside this profile. The caller must
 supply simple valid rings; this API is not a global validity checker or repair
 operation. Detected graph ambiguities, inconsistent closing attributes and
 unresolvable degeneracies reject instead of silently changing topology.
+
+For latitude-domain clipping with the same source curve semantics, use
+[ellipsoidal and rhumb latitude cuts](./latitude-geographic-cuts.md).
 
 This tranche covers periodic meridian seams. Arbitrary interrupted-chart networks
 remain with [MapEngine](../projection/api-reference/map-engine.md) and its explicit clipping

@@ -9,6 +9,7 @@ export type {
   NearestIndexResult,
   RayIndexOptions
 } from './box-index';
+export type {IndexQueryBudget, IndexQueryResult, SearchIndexOptions} from './box-index';
 export {TriangleBVH} from './triangle-bvh';
 export type {
   TriangleBVHOptions,
@@ -16,3 +17,4 @@ export type {
   TriangleRayResult,
   TriangleRayOptions
 } from './triangle-bvh';
+export type {TriangleNearestOptions, TriangleSegmentResult} from './triangle-bvh';

@@ -14,11 +14,11 @@ const capsule = new CapsuleGeometry({height: 2, radiusBottom: 0.5, radiusTop: 0.
 Every generated mesh uses `triangle-list` topology and the glTF attribute semantics `POSITION`,
 `NORMAL` and `TEXCOORD_0`. This package contains no GPU or renderer abstractions.
 
-Related CPU geometry modules are available from subpaths: `@math.gl/geometry/utils`,
-`@math.gl/geometry/curves`, `@math.gl/geometry/polygon`, `@math.gl/geometry/culling`, and
-`@math.gl/geometry/spatial-index`. These APIs are implemented in this package. Polygon processing includes general tessellation
+Related CPU geometry modules are available from subpaths: `@math.gl/geometry`,
+`@math.gl/geometry`, `@math.gl/geometry`, `@math.gl/geometry/culling`, and
+`@math.gl/geometry`. These APIs are implemented in this package. Polygon processing includes general tessellation
 and mesh refinement, with Mercator clipping helpers. Globe mesh subdivision is available from
-`@math.gl/geospatial/globe`.
+`@math.gl/geospatial`.
 
 The experimental `HingeTree` evaluates rigid panels connected by hinges. See the
 [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and

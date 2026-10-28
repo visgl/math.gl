@@ -11,7 +11,7 @@ import {
   HermiteCurve,
   CatmullRomCurve,
   CurveArcLength
-} from '@math.gl/geometry/curves';
+} from '@math.gl/geometry';
 
 function close(actual: ArrayLike<number>, expected: ArrayLike<number>, digits = 10): void {
   expect(actual.length).toBe(expected.length);

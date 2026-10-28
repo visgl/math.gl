@@ -4,12 +4,18 @@
 
 import {
   getClosestPointOnTriangle,
+  getClosestPointsSegmentTriangle,
   intersectRayTriangle,
   normalizeQueryDirection,
   validateQueryPoint,
   type QueryPoint
 } from '../culling/queries';
-import {BoxIndex} from './box-index';
+import {
+  BoxIndex,
+  type IndexQueryBudget,
+  type IndexQueryResult,
+  type SearchIndexOptions
+} from './box-index';
 
 export type TriangleBVHOptions = {
   /** Packed xyz vertices. Copied at construction. */
@@ -24,6 +30,11 @@ export type TriangleQueryResult = {
   point: [number, number, number];
 };
 export type TriangleRayResult = TriangleQueryResult & {barycentric: [number, number, number]};
+export type TriangleSegmentResult = TriangleQueryResult & {
+  segmentPoint: [number, number, number];
+  segmentFraction: number;
+};
+export type TriangleNearestOptions = {maxDistance?: number; filter?: (index: number) => boolean};
 
 /** Optional application constraints for the nearest accepted triangle intersection. */
 export type TriangleRayOptions = {
@@ -91,16 +102,33 @@ export class TriangleBVH {
     return this.boxes.search(minimum, maximum);
   }
 
+  searchQuery(
+    minimum: QueryPoint,
+    maximum: QueryPoint,
+    options: SearchIndexOptions = {}
+  ): IndexQueryResult<number[]> {
+    return this.boxes.searchQuery(minimum, maximum, options);
+  }
+
   /** Nearest accepted exact hit; application rejection never clips away later candidates. */
   intersectRay(
     origin: QueryPoint,
     direction: QueryPoint,
     options: TriangleRayOptions = {}
   ): TriangleRayResult | null {
+    return this.intersectRayQuery(origin, direction, {...options, maxWork: Infinity}).result;
+  }
+
+  intersectRayQuery(
+    origin: QueryPoint,
+    direction: QueryPoint,
+    options: TriangleRayOptions & IndexQueryBudget = {}
+  ): IndexQueryResult<TriangleRayResult | null> {
     validateQueryPoint(origin, 3);
     const unit = normalizeQueryDirection(direction, 3);
     let result: TriangleRayResult | null = null;
-    this.boxes.intersectRay(origin, direction, {
+    const query = this.boxes.intersectRayQuery(origin, direction, {
+      maxWork: options.maxWork,
       maxDistance: options.maxDistance,
       filter: options.filter,
       intersectItem: (index, maximum) => {
@@ -133,23 +161,149 @@ export class TriangleBVH {
         return null;
       }
     });
-    return result;
+    return {...query, result};
   }
 
-  nearest(
+  nearest(point: QueryPoint, options: TriangleNearestOptions = {}): TriangleQueryResult | null {
+    return this.nearestQuery(point, {...options, maxWork: Infinity}).result;
+  }
+
+  nearestQuery(
     point: QueryPoint,
-    options: {maxDistance?: number; filter?: (index: number) => boolean} = {}
-  ): TriangleQueryResult | null {
-    const result = this.boxes.nearest(point, {
+    options: TriangleNearestOptions & IndexQueryBudget = {}
+  ): IndexQueryResult<TriangleQueryResult | null> {
+    let candidate: TriangleQueryResult | null = null;
+    const query = this.boxes.nearestQuery(point, {
       ...options,
       distanceToItem: index => {
         const closest = getClosestPointOnTriangle(point, ...this.triangle(index));
-        return Math.hypot(point[0] - closest[0], point[1] - closest[1], point[2] - closest[2]);
+        const distance = Math.hypot(
+          point[0] - closest[0],
+          point[1] - closest[1],
+          point[2] - closest[2]
+        );
+        if (
+          !candidate ||
+          distance < candidate.distance ||
+          (distance === candidate.distance && index < candidate.index)
+        )
+          candidate = {index, distance, point: closest};
+        return distance;
       }
     });
-    return result
-      ? {...result, point: getClosestPointOnTriangle(point, ...this.triangle(result.index))}
-      : null;
+    // Reuse the winning refinement rather than running an extra kernel outside the budget.
+    return {...query, result: query.result ? candidate : null};
+  }
+
+  /** All triangle contacts with a closed sphere, sorted by original index (not distance).
+   * Uses closest points on faces, edges and vertices. No contact manifold reduction.
+   */
+  intersectSphere(
+    center: QueryPoint,
+    radius: number,
+    options: SearchIndexOptions = {}
+  ): IndexQueryResult<TriangleQueryResult[]> {
+    validateQueryPoint(center, 3);
+    if (!Number.isFinite(radius) || radius < 0)
+      throw new RangeError('Sphere radius must be finite and nonnegative');
+    const minimum: number[] = [],
+      maximum: number[] = [];
+    for (let axis = 0; axis < 3; axis++) {
+      // Outward allowance keeps the broad phase from dropping roundoff-sized tangencies.
+      // The exact kernel below still uses the caller's unmodified radius.
+      const padding =
+        8 * Math.max(Number.MIN_VALUE, Number.EPSILON * Math.max(Math.abs(center[axis]), radius));
+      minimum.push(center[axis] - radius - padding);
+      maximum.push(center[axis] + radius + padding);
+    }
+    const hits = new Map<number, TriangleQueryResult>();
+    const query = this.boxes.searchQuery(minimum, maximum, {
+      ...options,
+      filter: index => {
+        if (options.filter && !options.filter(index)) return false;
+        const point = getClosestPointOnTriangle(center, ...this.triangle(index));
+        const distance = Math.hypot(
+          center[0] - point[0],
+          center[1] - point[1],
+          center[2] - point[2]
+        );
+        if (!point.every(Number.isFinite) || !Number.isFinite(distance))
+          throw new RangeError('Sphere query arithmetic overflow');
+        if (distance > radius) return false;
+        hits.set(index, {index, distance, point});
+        return true;
+      }
+    });
+    return {...query, result: query.result.map(index => hits.get(index)!)};
+  }
+
+  /** Minimum Euclidean distance along the whole closed segment, not first intersection. */
+  nearestSegment(
+    start: QueryPoint,
+    end: QueryPoint,
+    options: TriangleNearestOptions = {}
+  ): TriangleSegmentResult | null {
+    return this.nearestSegmentQuery(start, end, {...options, maxWork: Infinity}).result;
+  }
+
+  nearestSegmentQuery(
+    start: QueryPoint,
+    end: QueryPoint,
+    options: TriangleNearestOptions & IndexQueryBudget = {}
+  ): IndexQueryResult<TriangleSegmentResult | null> {
+    const {minimum, maximum} = segmentBounds(start, end);
+    let candidate: TriangleSegmentResult | null = null;
+    const query = this.boxes.nearestBoxQuery(minimum, maximum, {
+      ...options,
+      distanceToItem: index => {
+        const closest = this.segmentClosest(index, start, end);
+        if (
+          !candidate ||
+          closest.distance < candidate.distance ||
+          (closest.distance === candidate.distance && index < candidate.index)
+        )
+          candidate = closest;
+        return closest.distance;
+      }
+    });
+    return {...query, result: query.result ? candidate : null};
+  }
+
+  /** Closed capsule overlap, with one closest pair per accepted triangle.
+   * A straight translating sphere covers this volume, but segmentFraction is not first-impact time.
+   */
+  intersectCapsule(
+    start: QueryPoint,
+    end: QueryPoint,
+    radius: number,
+    options: SearchIndexOptions = {}
+  ): IndexQueryResult<TriangleSegmentResult[]> {
+    if (!Number.isFinite(radius) || radius < 0)
+      throw new RangeError('Capsule radius must be finite and nonnegative');
+    const {minimum, maximum} = segmentBounds(start, end, radius);
+    const hits = new Map<number, TriangleSegmentResult>();
+    const query = this.boxes.searchQuery(minimum, maximum, {
+      ...options,
+      filter: index => {
+        if (options.filter && !options.filter(index)) return false;
+        const closest = this.segmentClosest(index, start, end);
+        if (closest.distance > radius) return false;
+        hits.set(index, closest);
+        return true;
+      }
+    });
+    return {...query, result: query.result.map(index => hits.get(index)!)};
+  }
+
+  private segmentClosest(index: number, start: QueryPoint, end: QueryPoint): TriangleSegmentResult {
+    const closest = getClosestPointsSegmentTriangle(start, end, ...this.triangle(index));
+    return {
+      index,
+      distance: closest.distance,
+      point: closest.trianglePoint,
+      segmentPoint: closest.segmentPoint,
+      segmentFraction: closest.segmentFraction
+    };
   }
 
   private triangle(index: number): [Float64Array, Float64Array, Float64Array] {
@@ -159,4 +313,33 @@ export class TriangleBVH {
     };
     return [vertex(0), vertex(1), vertex(2)];
   }
+}
+
+function segmentBounds(
+  start: QueryPoint,
+  end: QueryPoint,
+  radius?: number
+): {minimum: number[]; maximum: number[]} {
+  validateQueryPoint(start, 3);
+  validateQueryPoint(end, 3);
+  for (let axis = 0; axis < 3; axis++)
+    if (!Number.isFinite(end[axis] - start[axis]))
+      throw new RangeError('Segment coordinate span overflow');
+  const minimum: number[] = [],
+    maximum: number[] = [];
+  for (let axis = 0; axis < 3; axis++) {
+    // Capsule broad-phase padding only; nearest lower bounds need no expansion.
+    const padding =
+      radius === undefined
+        ? 0
+        : radius +
+          8 *
+            Math.max(
+              Number.MIN_VALUE,
+              Number.EPSILON * Math.max(Math.abs(start[axis]), Math.abs(end[axis]), radius)
+            );
+    minimum.push(Math.min(start[axis], end[axis]) - padding);
+    maximum.push(Math.max(start[axis], end[axis]) + padding);
+  }
+  return {minimum, maximum};
 }

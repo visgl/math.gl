@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {cutPolylineByMercatorBounds, cutPolygonByMercatorBounds} from '@math.gl/geometry/polygon';
+import {cutPolylineByMercatorBounds, cutPolygonByMercatorBounds} from '@math.gl/geometry';
 
 import {flatten} from './lineclip.spec';
 

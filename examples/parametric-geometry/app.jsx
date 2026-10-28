@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {useEffect, useMemo, useState} from 'react';
-import {TorusGeometry, LatheGeometry, ParametricGeometry} from '@math.gl/geometry/parametric';
+import {TorusGeometry, LatheGeometry, ParametricGeometry} from '@math.gl/geometry';
 import {Geometry} from '@math.gl/geometry';
 import Mesh from '../geometry-viewer/mesh';
 import '../geometry-viewer/styles.css';

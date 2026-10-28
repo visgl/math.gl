@@ -4,8 +4,8 @@
 
 import {expect, test} from 'vitest';
 import {HeightField, TerrainSampleStatus as Status} from '@math.gl/geospatial/terrain';
-import {TerrainSurface, createTerrainSurface} from '@math.gl/geospatial/terrain/surface';
-import {intersectRayTriangle, getClosestPointOnTriangle} from '@math.gl/geometry/culling/queries';
+import {TerrainSurface, createTerrainSurface} from '@math.gl/geospatial/terrain';
+import {intersectRayTriangle, getClosestPointOnTriangle} from '@math.gl/geometry/culling';
 
 function plane(): TerrainSurface {
   return new TerrainSurface({

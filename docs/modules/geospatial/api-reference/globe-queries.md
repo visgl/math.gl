@@ -13,7 +13,7 @@ viewports or GPU state. Existing `SphereShape` remains useful for general transf
 shape picking; `EllipsoidOccluder` specializes in planetary segment and limb queries.
 
 ```js
-import {EllipsoidOccluder, getGlobeHorizonBounds, splitGlobeBounds} from '@math.gl/geospatial/globe';
+import {EllipsoidOccluder, getGlobeHorizonBounds, splitGlobeBounds} from '@math.gl/geospatial';
 
 const globe = new EllipsoidOccluder([6371000, 6371000, 6371000]);
 const camera = [2 * 6371000, 0, 0];

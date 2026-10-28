@@ -293,7 +293,7 @@ Float32 paths also account for input/output rounding. Browser qualification repe
 these references in Chromium, Firefox and WebKit.
 
 These are synthetic grids for checking operation semantics, not a claim of geoid-model
-accuracy. Additional tests cover the prepared `@math.gl/earth/geoid` adapter, horizontal-grid
+accuracy. Additional tests cover the prepared `@math.gl/earth` adapter, horizontal-grid
 ordering, nodata/coverage, optional/null fallbacks, buffer ownership, missing Z and partial
 flat-array writes. Compound/vertical CRS execution, epochs and general
 pipeline parsing remain outside this subset.

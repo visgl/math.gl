@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {A5Decoder} from '@math.gl/dggs/a5';
+import {A5Decoder} from '@math.gl/dggs';
 
 const A5_TOKEN = '1ae2988000000000';
 const A5_INDEX = 1937278465245970432n;

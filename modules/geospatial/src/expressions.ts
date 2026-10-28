@@ -7,7 +7,7 @@ import {eastNorthUpToFixedFrame} from './ellipsoid-transforms';
 import {Ellipsoid} from './ellipsoid';
 import {isWGS84} from './type-utils';
 import {toDegrees, toRadians} from '@math.gl/core';
-import type {ExpressionFunctionLibrary} from '@math.gl/core/expressions';
+import type {ExpressionFunctionLibrary} from '@math.gl/core';
 
 /** WGS84 ellipsoid helpers available to the expression evaluator. */
 export const GEOSPATIAL_FUNCTION_LIBRARY: ExpressionFunctionLibrary = {

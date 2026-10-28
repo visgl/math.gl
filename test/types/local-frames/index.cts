@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import core = require('@math.gl/core');
-import geo = require('@math.gl/geospatial/ellipsoid');
+import geo = require('@math.gl/geospatial');
 import root = require('@math.gl/geospatial');
 const {Vector2, Vector3, Matrix4, Quaternion} = core;
 const {Ellipsoid, LocalReferenceFrame, EllipsoidTangentPlane} = geo;
@@ -59,7 +59,7 @@ frame.fixedToLocalVectorsFlat(batch, batch);
 // @ts-expect-error Packed frame outputs require Float64 storage.
 frame.localToFixedPointsFlat(batch, new Float32Array(3));
 
-import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial/ellipsoid';
+import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial';
 import {getOrientedBoundingBoxQuaternion, makeOrientedBoundingBoxFromQuaternion} from '@math.gl/geometry/culling';
 const enu: Matrix4 = eastNorthUpToFixedFrame(Ellipsoid.WGS84, [6378137, 0, 0]);
 const reused: number[] = localFrameToFixedFrame(Ellipsoid.WGS84, 'north', 'east', 'down', [6378137, 0, 0], []);

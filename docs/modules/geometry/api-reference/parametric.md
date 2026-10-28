@@ -9,7 +9,7 @@ import Example from '@site/src/components/parametric-geometry';
 <Example inline interactive height={540} />
 
 ```typescript
-import {TorusGeometry, LatheGeometry, ParametricGeometry} from '@math.gl/geometry/parametric';
+import {TorusGeometry, LatheGeometry, ParametricGeometry} from '@math.gl/geometry';
 const ring = new TorusGeometry({majorRadius: 2, minorRadius: 0.5});
 const vase = new LatheGeometry({points: [[0.5, -1], [0.8, 0], [0.6, 1]]});
 const wave = new ParametricGeometry({sample: (u, v) => [u, v, Math.sin(u * 6) * 0.2]});

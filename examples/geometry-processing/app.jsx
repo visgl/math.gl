@@ -10,7 +10,7 @@ import {
   mergeGeometries,
   weldGeometry,
   getDegenerateTriangles
-} from '@math.gl/geometry/utils';
+} from '@math.gl/geometry';
 import Mesh from '../geometry-viewer/mesh';
 import '../geometry-viewer/styles.css';
 import './styles.css';

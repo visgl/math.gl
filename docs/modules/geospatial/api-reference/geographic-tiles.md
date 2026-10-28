@@ -6,7 +6,7 @@
 
 ```typescript
 import {getGeographicTile, getGeographicTileBounds, getGeographicTileRanges}
-  from '@math.gl/geospatial/tiles';
+  from '@math.gl/geospatial';
 
 getGeographicTile(175, 20, 3); // {x: 7, y: 3, level: 3}
 getGeographicTileBounds({x: 7, y: 3, level: 3}); // [135, 0, 180, 22.5]
@@ -73,7 +73,7 @@ in a spatial index; tile refinement and cache policy belong in the tile system.
 ## Explicit tile matrix grids
 
 For projected grids or service-defined origins, resolutions and tile dimensions, use
-[Tile matrix utilities](./tile-matrix.md) from `@math.gl/geospatial/tile-matrix`. They provide
+[Tile matrix utilities](./tile-matrix.md) from `@math.gl/geospatial`. They provide
 compact extent ranges and resolution-based matrix selection without assuming this geographic
 quadtree layout. Their far outer edges are excluded and queries do not wrap; the geographic
 helpers above retain their world-edge and antimeridian semantics.

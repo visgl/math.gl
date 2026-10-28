@@ -1,6 +1,6 @@
 # Coordinate utilities
 
-`@math.gl/geospatial/coordinates` supplies strict angle text, standard/forced WGS84
+`@math.gl/geospatial` supplies strict angle text, standard/forced WGS84
 UTM/UPS grid selection and MGRS cells. It reuses math.gl's existing transverse
 Mercator and polar stereographic kernels; it does not select a datum, epoch or
 vertical transformation. Angles are degrees, latitude precedes longitude, and
@@ -10,7 +10,7 @@ projected distances are metres.
 import {
   projectGrid, unprojectGrid, transferGrid, formatMGRS, parseMGRS,
   parseGeographicCoordinates, formatGeographicCoordinates
-} from '@math.gl/geospatial/coordinates';
+} from '@math.gl/geospatial';
 
 const point = parseGeographicCoordinates('48°51′29.52″N, 2°17′40.20″E');
 const grid = projectGrid(point.latitude, point.longitude);

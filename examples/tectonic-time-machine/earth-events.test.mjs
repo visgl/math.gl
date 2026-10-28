@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {EARTH_EVENTS, EVENT_CATEGORIES, filterEarthEvents, eventIsReconstructable, vegetationCoverage, LAND_PLANTS_AGE_MA} from './earth-events.js';
+import {EARTH_EVENTS, EVENT_CATEGORIES, filterEarthEvents, eventIsReconstructable, vegetationCoverage, microbialCoverage, LAND_PLANTS_AGE_MA} from './earth-events.js';
 
 test('chronology is sourced, unique and spans planetary formation through K-Pg', () => {
   assert.equal(new Set(EARTH_EVENTS.map(e => e.id)).size, EARTH_EVENTS.length);
@@ -36,4 +36,15 @@ test('land vegetation starts at the sourced event and fades in after emergence',
   assert.equal(vegetationCoverage(-430), .5);
   for (const time of [-390, 0, 300]) assert.equal(vegetationCoverage(time), 1);
   assert.ok(vegetationCoverage(-469) < .001);
+});
+
+
+test('microbial visual cues follow evidence and yield to land vegetation',()=>{
+  assert.equal(microbialCoverage(-4000),0);
+  assert.equal(microbialCoverage(-3430),0);
+  assert.ok(microbialCoverage(-3330)>0&&microbialCoverage(-3330)<1);
+  assert.equal(microbialCoverage(-3230),1);
+  assert.equal(microbialCoverage(-430),.5);
+  assert.equal(microbialCoverage(-390),0);
+  assert.ok(EARTH_EVENTS.some(event=>event.id==='microbial-reefs'&&event.ageMa===3430));
 });

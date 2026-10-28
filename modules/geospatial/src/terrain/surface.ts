@@ -2,9 +2,14 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {TriangleBVH, BoxIndex} from '@math.gl/geometry/spatial-index';
+import {
+  TriangleBVH,
+  BoxIndex,
+  type IndexQueryBudget,
+  type IndexQueryResult
+} from '@math.gl/geometry';
 import type {HeightField} from './height-field';
-import {HeightFieldGeometry} from './geometry';
+import {createTerrainMesh} from './mesh';
 import {TerrainSampleStatus as Status, type TerrainSample} from './types';
 
 export type TerrainSurfaceProps = {
@@ -30,6 +35,25 @@ export type TerrainSurfaceHit = {
   normal: [number, number, number];
 };
 export type TerrainSurfaceRayHit = TerrainSurfaceHit & {barycentric: [number, number, number]};
+export type TerrainQueryOptions = IndexQueryBudget & {maxDistance?: number};
+export type TerrainQueryResult<T> = IndexQueryResult<T>;
+export type TerrainSphereContact = Omit<TerrainSurfaceHit, 'normal'> & {
+  /** Unit direction from the closest terrain point toward the center; upward face normal at zero distance. */
+  normal: [number, number, number];
+  /** Upward triangle normal, independent of the contact feature or side. */
+  faceNormal: [number, number, number];
+  penetration: number;
+};
+export type TerrainSegmentHit = TerrainSurfaceHit & {
+  /** Closest point on the input segment, in world coordinates. */
+  segmentPoint: [number, number, number];
+  /** Closest-pair parameter, not first-impact time. */
+  segmentFraction: number;
+};
+export type TerrainCapsuleContact = TerrainSphereContact & {
+  segmentPoint: [number, number, number];
+  segmentFraction: number;
+};
 export type TerrainSurfaceTopology = {
   /** 3 * triangleIndex + local edge; each edge runs vertex j to (j+1)%3. -1 = boundary/inactive. */
   halfedges: Int32Array;
@@ -230,11 +254,21 @@ export class TerrainSurface {
     direction: readonly [number, number, number],
     options: {maxDistance?: number} = {}
   ): TerrainSurfaceRayHit | null {
-    const hit = this.bvh.intersectRay(this.localPoint(origin), direction, {
+    return this.intersectRayQuery(origin, direction, {...options, maxWork: Infinity}).result;
+  }
+
+  /** A partial hit is provisional; an incomplete null result does not establish a miss. */
+  intersectRayQuery(
+    origin: readonly [number, number, number],
+    direction: readonly [number, number, number],
+    options: TerrainQueryOptions = {}
+  ): TerrainQueryResult<TerrainSurfaceRayHit | null> {
+    const query = this.bvh.intersectRayQuery(this.localPoint(origin), direction, {
       ...options,
       filter: i => Boolean(this.validity[i])
     });
-    return hit ? {...this.toHit(hit), barycentric: [...hit.barycentric]} : null;
+    const hit = query.result;
+    return {...query, result: hit ? {...this.toHit(hit), barycentric: [...hit.barycentric]} : null};
   }
 
   /** Closed segment query. A zero-length segment has no directional intersection. */
@@ -242,6 +276,14 @@ export class TerrainSurface {
     start: readonly [number, number, number],
     end: readonly [number, number, number]
   ): TerrainSurfaceRayHit | null {
+    return this.intersectSegmentQuery(start, end).result;
+  }
+
+  intersectSegmentQuery(
+    start: readonly [number, number, number],
+    end: readonly [number, number, number],
+    options: IndexQueryBudget = {}
+  ): TerrainQueryResult<TerrainSurfaceRayHit | null> {
     this.localPoint(start);
     this.localPoint(end);
     const direction: [number, number, number] = [
@@ -251,7 +293,14 @@ export class TerrainSurface {
     ];
     const distance = Math.hypot(...direction);
     if (!Number.isFinite(distance)) throw new Error('Terrain segment length overflow');
-    return distance ? this.intersectRay(start, direction, {maxDistance: distance}) : null;
+    if (!distance) {
+      // Validate even when there is no directional query to perform.
+      const limit = options.maxWork ?? Infinity;
+      if (limit !== Infinity && (!Number.isSafeInteger(limit) || limit < 0))
+        throw new Error('Invalid terrain query work limit');
+      return {result: null, complete: true, work: 0};
+    }
+    return this.intersectRayQuery(start, direction, {...options, maxDistance: distance});
   }
 
   /** Exact Euclidean nearest point, not vertical ground clearance. */
@@ -259,11 +308,127 @@ export class TerrainSurface {
     point: readonly [number, number, number],
     options: {maxDistance?: number} = {}
   ): TerrainSurfaceHit | null {
-    const hit = this.bvh.nearest(this.localPoint(point), {
+    return this.nearestQuery(point, {...options, maxWork: Infinity}).result;
+  }
+
+  nearestQuery(
+    point: readonly [number, number, number],
+    options: TerrainQueryOptions = {}
+  ): TerrainQueryResult<TerrainSurfaceHit | null> {
+    const query = this.bvh.nearestQuery(this.localPoint(point), {
       ...options,
       filter: i => Boolean(this.validity[i])
     });
-    return hit ? this.toHit(hit) : null;
+    return {...query, result: query.result ? this.toHit(query.result) : null};
+  }
+
+  /** Two-sided contacts with the triangle sheet, not solid-ground penetration or swept collision.
+   * Adjacent triangles may contribute coincident contacts. Incomplete lists are not manifolds.
+   */
+  intersectSphere(
+    center: readonly [number, number, number],
+    radius: number,
+    options: IndexQueryBudget & {maxContacts?: number} = {}
+  ): TerrainQueryResult<TerrainSphereContact[]> {
+    const local = this.localPoint(center);
+    const query = this.bvh.intersectSphere(local, radius, {
+      maxWork: options.maxWork,
+      maxResults: options.maxContacts,
+      filter: i => Boolean(this.validity[i])
+    });
+    return {
+      ...query,
+      result: query.result.map(hit => {
+        const contact = this.toHit(hit);
+        // Compute in the local frame: adding a large world origin can round the contact point.
+        const normal: [number, number, number] = hit.distance
+          ? [
+              (local[0] - hit.point[0]) / hit.distance,
+              (local[1] - hit.point[1]) / hit.distance,
+              (local[2] - hit.point[2]) / hit.distance
+            ]
+          : [...contact.normal];
+        return {...contact, faceNormal: contact.normal, normal, penetration: radius - hit.distance};
+      })
+    };
+  }
+
+  /** Minimum Euclidean clearance along a closed segment; this is not vertical clearance. */
+  nearestSegment(
+    start: readonly [number, number, number],
+    end: readonly [number, number, number],
+    options: {maxDistance?: number} = {}
+  ): TerrainSegmentHit | null {
+    return this.nearestSegmentQuery(start, end, {...options, maxWork: Infinity}).result;
+  }
+
+  nearestSegmentQuery(
+    start: readonly [number, number, number],
+    end: readonly [number, number, number],
+    options: TerrainQueryOptions = {}
+  ): TerrainQueryResult<TerrainSegmentHit | null> {
+    const query = this.bvh.nearestSegmentQuery(this.localPoint(start), this.localPoint(end), {
+      ...options,
+      filter: i => Boolean(this.validity[i])
+    });
+    const hit = query.result;
+    return {
+      ...query,
+      result: hit
+        ? {
+            ...this.toHit(hit),
+            segmentPoint: this.worldPoint(hit.segmentPoint),
+            segmentFraction: hit.segmentFraction
+          }
+        : null
+    };
+  }
+
+  /** Contacts with a closed capsule's entire axis, including its interior and both caps.
+   * Fractions locate minimum separation, not the first time a translating sphere touches terrain.
+   */
+  intersectCapsule(
+    start: readonly [number, number, number],
+    end: readonly [number, number, number],
+    radius: number,
+    options: IndexQueryBudget & {maxContacts?: number} = {}
+  ): TerrainQueryResult<TerrainCapsuleContact[]> {
+    const query = this.bvh.intersectCapsule(this.localPoint(start), this.localPoint(end), radius, {
+      maxWork: options.maxWork,
+      maxResults: options.maxContacts,
+      filter: i => Boolean(this.validity[i])
+    });
+    return {
+      ...query,
+      result: query.result.map(hit => {
+        const contact = this.toHit(hit);
+        const normal: [number, number, number] = hit.distance
+          ? [
+              (hit.segmentPoint[0] - hit.point[0]) / hit.distance,
+              (hit.segmentPoint[1] - hit.point[1]) / hit.distance,
+              (hit.segmentPoint[2] - hit.point[2]) / hit.distance
+            ]
+          : [...contact.normal];
+        return {
+          ...contact,
+          normal,
+          faceNormal: contact.normal,
+          penetration: radius - hit.distance,
+          segmentPoint: this.worldPoint(hit.segmentPoint),
+          segmentFraction: hit.segmentFraction
+        };
+      })
+    };
+  }
+
+  private worldPoint(point: readonly [number, number, number]): [number, number, number] {
+    const world: [number, number, number] = [
+      point[0] + this.origin[0],
+      point[1] + this.origin[1],
+      point[2] + this.origin[2]
+    ];
+    if (!world.every(Number.isFinite)) throw new Error('Terrain query result overflow');
+    return world;
   }
 
   private localPoint(point: readonly [number, number, number]): [number, number, number] {
@@ -288,13 +453,8 @@ export class TerrainSurface {
     distance: number;
     point: [number, number, number];
   }): TerrainSurfaceHit {
-    const point: [number, number, number] = [
-      hit.point[0] + this.origin[0],
-      hit.point[1] + this.origin[1],
-      hit.point[2] + this.origin[2]
-    ];
-    if (!point.every(Number.isFinite) || !Number.isFinite(hit.distance))
-      throw new Error('Terrain query result overflow');
+    const point = this.worldPoint(hit.point);
+    if (!Number.isFinite(hit.distance)) throw new Error('Terrain query result overflow');
     const i = hit.index * 3;
     return {
       triangleIndex: hit.index,
@@ -341,10 +501,10 @@ export function createTerrainSurface(
   field: HeightField,
   options: {origin?: readonly [number, number, number]} = {}
 ): TerrainSurface {
-  const mesh = new HeightFieldGeometry(field, {...options, precision: 'float64'});
+  const mesh = createTerrainMesh(field, options);
   return new TerrainSurface({
-    positions: mesh.attributes['POSITION'].value as Float64Array,
-    indices: mesh.indices!.value as Uint16Array | Uint32Array,
+    positions: mesh.positions,
+    indices: mesh.indices,
     origin: mesh.origin,
     heightReference: field.heightReference
   });

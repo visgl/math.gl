@@ -1,10 +1,10 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import coordinates = require('@math.gl/geospatial/coordinates');
-import buffers = require('@math.gl/geospatial/geodesic-buffer');
-import ellipsoid = require('@math.gl/geospatial/ellipsoid');
-import triaxial = require('@math.gl/geospatial/triaxial');
+import coordinates = require('@math.gl/geospatial');
+import buffers = require('@math.gl/geospatial');
+import ellipsoid = require('@math.gl/geospatial');
+import triaxial = require('@math.gl/geospatial');
 const grid:coordinates.GridCoordinate=coordinates.projectGrid(20,30);
 coordinates.unprojectGrid(grid);coordinates.parseMGRS(coordinates.formatMGRS(20,30));
 const line=new ellipsoid.EllipsoidGeodesic({semiMajorAxis:1,semiMinorAxis:1}).line(20,30,40);

@@ -4,13 +4,13 @@
 
 import {expect, test} from 'vitest';
 import {HeightField, TerrainSampleStatus as Status} from '@math.gl/geospatial/terrain';
-import {TiledHeightField, type TerrainTile} from '@math.gl/geospatial/terrain/tiled';
+import {TiledHeightField, type TerrainTile} from '@math.gl/geospatial/terrain';
 import {
   packTerrainHeightField,
   unpackTerrainHeightField,
   TERRAIN_BUFFER_VERSION
-} from '@math.gl/geospatial/terrain/packed';
-import type {TileMatrix} from '@math.gl/geospatial/tile-matrix';
+} from '@math.gl/geospatial/terrain';
+import type {TileMatrix} from '@math.gl/geospatial';
 
 const matrix: TileMatrix = {
   id: 'fine',

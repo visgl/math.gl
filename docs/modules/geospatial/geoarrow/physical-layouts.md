@@ -149,7 +149,7 @@ of out-of-line data buffers; short values remain inline in the view record. No c
 required at the descriptor boundary.
 
 Inspection does not decode serialized payloads. Decode explicitly with `decodeGeoArrowWKB` or
-`decodeGeoArrowWKT` from `@math.gl/geospatial/geoarrow/wkb` before coordinate algorithms.
+`decodeGeoArrowWKT` from `@math.gl/geospatial/geoarrow` before coordinate algorithms.
 
 ## Boxes
 

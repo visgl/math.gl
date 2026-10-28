@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Packed-frame expectations use the original independent Decimal frame geometry.
-import {Ellipsoid, LocalReferenceFrame} from '@math.gl/geospatial/ellipsoid';
-import type {LocalFrameAxis} from '@math.gl/core/local-frame';
+import {Ellipsoid, LocalReferenceFrame} from '@math.gl/geospatial';
+import type {LocalFrameAxis} from '@math.gl/core';
 import type {C8Row} from './c8-qualification';
 import reference from './c8-reference.json';
 export const frameBatchMethods = [

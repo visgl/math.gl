@@ -1,0 +1,64 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.sun-terminator {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #07121e;
+  color: #e7f1fa;
+  font: 13px/1.45 system-ui, sans-serif;
+}
+.sun-terminator canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sun-terminator .sun-panel {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: min(300px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  pointer-events: auto;
+}
+.sun-panel .deck-widget-box { max-width: 100%; }
+.sun-controls { padding: var(--panel-padding); font-size: var(--panel-font-size); color: var(--menu-text); color-scheme: dark; }
+.sun-controls .intro { margin: 0 0 10px; color: var(--button-icon-idle); }
+.sun-controls label { display: flex; align-items: center; gap: var(--panel-gap); margin: 6px 0; }
+.sun-controls label > span { flex: 0 0 72px; color: var(--menu-text); white-space: nowrap; }
+.sun-controls input, .sun-controls select, .sun-controls button {
+  box-sizing: border-box;
+  min-width: 0;
+  font: inherit;
+  color: var(--button-text);
+  background: var(--button-background);
+  border: 1px solid var(--button-stroke);
+  border-radius: var(--panel-input-corner-radius);
+  height: var(--panel-control-height);
+  padding: var(--panel-control-padding);
+  color-scheme: dark;
+}
+.sun-controls input, .sun-controls select { flex: 1; width: 0; }
+.sun-controls .time-row { display: flex; align-items: center; gap: 6px; }
+.sun-controls .time-row label { flex: 1; min-width: 0; }
+.sun-controls .time-row button { flex: 0 0 50px; cursor: pointer; }
+.sun-controls [role='status'] { margin: 10px 0; font-size: inherit; color: var(--button-icon-idle); }
+.sun-controls .credits { font-size: inherit; color: var(--button-icon-idle); }
+.sun-controls .credits summary { cursor: pointer; }
+.sun-controls .credits p { margin-bottom: 0; }
+.sun-controls a { color: var(--panel-focus-color); }
+
+.sun-controls :is(input, select, button):focus-visible,
+.sun-controls summary:focus-visible {
+  outline: 2px solid var(--panel-focus-color);
+  outline-offset: 2px;
+}
+.sun-controls :is(select, button):hover { background: var(--panel-hover-background); }
+.sun-controls button[aria-pressed='true'] {
+  color: var(--panel-accent-color);
+  border-color: var(--panel-accent-color);
+}
+.sun-controls option { background: var(--menu-background); color: var(--menu-text); }
+.sun-terminator .sun-panel { z-index: 1; }
+.sun-controls output { flex: 0 0 42px; text-align: right; font-variant-numeric: tabular-nums; }

@@ -26,7 +26,7 @@ import {
   octPack,
   octUnpack,
   zigZagDeltaDecode
-} from '@math.gl/geometry/utils';
+} from '@math.gl/geometry';
 import {expect, test} from 'vitest';
 import {getAttributeValues, getPositionAttribute, isGeometry} from '../../src/utils/geometry';
 

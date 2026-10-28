@@ -4,48 +4,48 @@
 
 ### Grouped package subpaths
 
-Use the grouped subpaths for new imports: `@math.gl/core/types`, `@math.gl/core/expressions`,
-`@math.gl/geometry/utils`, `@math.gl/geometry/curves`, `@math.gl/geometry/polygon`,
-`@math.gl/geometry/culling`, `@math.gl/geometry/spatial-index`, `@math.gl/geospatial/ellipsoid`,
-`@math.gl/geospatial/globe`, `@math.gl/geospatial/tiles`, `@math.gl/geospatial/crs`,
+Use the grouped subpaths for new imports: `@math.gl/core`, `@math.gl/core`,
+`@math.gl/geometry`, `@math.gl/geometry`, `@math.gl/geometry`,
+`@math.gl/geometry/culling`, `@math.gl/geometry`, `@math.gl/geospatial`,
+`@math.gl/geospatial`, `@math.gl/geospatial`, `@math.gl/geospatial/crs`,
 `@math.gl/geospatial/projection`,
-`@math.gl/geospatial/web-mercator`, `@math.gl/geospatial/wkb`, `@math.gl/geospatial/geoarrow`,
-`@math.gl/geospatial/expressions`, and the `@math.gl/earth` geoid, sun, and timezone subpaths.
+`@math.gl/geospatial`, `@math.gl/geospatial`, `@math.gl/geospatial/geoarrow`,
+`@math.gl/geospatial`, and the `@math.gl/earth` geoid, sun, and timezone subpaths.
 The original standalone packages have been removed. Update both import specifiers and package
 dependencies. Install the grouped package root, such as `@math.gl/geometry`, even when importing
-from `@math.gl/geometry/polygon`. DGGS stays
+from `@math.gl/geometry`. DGGS stays
 available as the separate `@math.gl/dggs` package. The unscoped `math.gl` package has been removed;
 replace imports from it with `@math.gl/core`.
 
 Version 5 removes deprecated APIs and moves low-level functions to focused subpath imports.
 
-Import `subdivideGlobeMesh` and `SubdivideGlobeMeshOptions` from `@math.gl/geospatial/globe`;
-they are no longer exported by `@math.gl/polygon` or `@math.gl/geometry/polygon`.
+Import `subdivideGlobeMesh` and `SubdivideGlobeMeshOptions` from `@math.gl/geospatial`;
+they are no longer exported by `@math.gl/polygon` or `@math.gl/geometry`.
 
 ### Removed standalone packages
 
 | Removed package | Install | Import from |
 | --- | --- | --- |
-| `@math.gl/types` | `@math.gl/core` | `@math.gl/core/types` |
-| `@math.gl/expressions` | `@math.gl/core` | `@math.gl/core/expressions` |
-| `@math.gl/geometry-utils` | `@math.gl/geometry` | `@math.gl/geometry/utils` |
-| `@math.gl/curves` | `@math.gl/geometry` | `@math.gl/geometry/curves` |
-| `@math.gl/polygon` | `@math.gl/geometry` | `@math.gl/geometry/polygon` |
+| `@math.gl/types` | `@math.gl/core` | `@math.gl/core` |
+| `@math.gl/expressions` | `@math.gl/core` | `@math.gl/core` |
+| `@math.gl/geometry-utils` | `@math.gl/geometry` | `@math.gl/geometry` |
+| `@math.gl/curves` | `@math.gl/geometry` | `@math.gl/geometry` |
+| `@math.gl/polygon` | `@math.gl/geometry` | `@math.gl/geometry` |
 | `@math.gl/culling` | `@math.gl/geometry` | `@math.gl/geometry/culling` |
-| `@math.gl/spatial-index` | `@math.gl/geometry` | `@math.gl/geometry/spatial-index` |
+| `@math.gl/spatial-index` | `@math.gl/geometry` | `@math.gl/geometry` |
 | `@math.gl/crs` | `@math.gl/geospatial` | `@math.gl/geospatial/crs` |
 | `@math.gl/projection` | `@math.gl/geospatial` | `@math.gl/geospatial/projection` |
-| `@math.gl/wkb` | `@math.gl/geospatial` | `@math.gl/geospatial/wkb` |
+| `@math.gl/wkb` | `@math.gl/geospatial` | `@math.gl/geospatial` |
 | `@math.gl/geoarrow` | `@math.gl/geospatial` | `@math.gl/geospatial/geoarrow` |
-| `@math.gl/geoid` | `@math.gl/earth` | `@math.gl/earth/geoid` |
+| `@math.gl/geoid` | `@math.gl/earth` | `@math.gl/earth` |
 | `@math.gl/sun` | `@math.gl/earth` | `@math.gl/earth/sun` |
 | `@math.gl/timezone` | `@math.gl/earth` | `@math.gl/earth/timezone` |
 | `@math.gl/proj` | `@math.gl/web-mercator` | `@math.gl/web-mercator` |
 
 Nested entrypoints keep their suffix, for example `@math.gl/crs/wkt` becomes
-`@math.gl/geospatial/crs/wkt`, and `@math.gl/timezone/lookup` becomes
-`@math.gl/earth/timezone/lookup`. DGGS expression helpers move from
-`@math.gl/expressions/dggs` to `@math.gl/dggs/expressions`.
+`@math.gl/geospatial/crs`, and `@math.gl/timezone/lookup` becomes
+`@math.gl/earth/timezone`. DGGS expression helpers move from
+`@math.gl/expressions/dggs` to `@math.gl/dggs`.
 
 ### Polygon, culling, and viewport APIs
 
@@ -62,8 +62,8 @@ Frame and quaternion helpers are standalone named exports so unused operations c
 
 | Removed API | Replacement |
 | --- | --- |
-| `ellipsoid.eastNorthUpToFixedFrame(origin, result)` | `eastNorthUpToFixedFrame(ellipsoid, origin, result)` from `@math.gl/geospatial/ellipsoid` |
-| `ellipsoid.localFrameToFixedFrame(a, b, c, origin, result)` | `localFrameToFixedFrame(ellipsoid, a, b, c, origin, result)` from `@math.gl/geospatial/ellipsoid` |
+| `ellipsoid.eastNorthUpToFixedFrame(origin, result)` | `eastNorthUpToFixedFrame(ellipsoid, origin, result)` from `@math.gl/geospatial` |
+| `ellipsoid.localFrameToFixedFrame(a, b, c, origin, result)` | `localFrameToFixedFrame(ellipsoid, a, b, c, origin, result)` from `@math.gl/geospatial` |
 | `box.quaternion` | `getOrientedBoundingBoxQuaternion(box)` from `@math.gl/geometry/culling` |
 | `box.fromCenterHalfSizeQuaternion(center, halfSize, quaternion)` | `makeOrientedBoundingBoxFromQuaternion(center, halfSize, quaternion, box)` from `@math.gl/geometry/culling` |
 
@@ -79,7 +79,7 @@ The OBB factory allocates a new box when its optional result is omitted.
 ### Rotation and coordinate conversions
 
 - Replace `euler.getQuaternion()` and `euler.toQuaternion()` with `quaternion.fromEuler(euler)` or `new Quaternion().fromEuler(euler)`.
-- Replace `quaternion.transformVector4(vector, result)` with `result.copy(vector).transformByQuaternion(quaternion)` for `Vector4` results, or `transformQuat(result, vector, quaternion)` from `@math.gl/core/vec4` for arrays.
+- Replace `quaternion.transformVector4(vector, result)` with `result.copy(vector).transformByQuaternion(quaternion)` for `Vector4` results, or `transformQuat(result, vector, quaternion)` from `@math.gl/core` for arrays.
 - Replace `quaternion.slerp({start, target, ratio})` with `quaternion.slerp(start, target, ratio)`.
 - `SphericalCoordinates` conversions use `Vector3Like`. `toVector3()` returns an array by default; pass a result argument to reuse a vector or typed array.
 
@@ -115,14 +115,14 @@ The deprecated `mat3`, `mat4`, `quat`, `vec2`, `vec3`, and `vec4` namespaces are
 
 ```js
 // v5
-import * as mat4 from '@math.gl/core/mat4';
-import * as vec3 from '@math.gl/core/vec3';
+import {mat4} from '@math.gl/core';
+import {vec3} from '@math.gl/core';
 
 // v4
 import {mat4, vec3} from '@math.gl/core';
 ```
 
-Available subpaths: `@math.gl/core/mat3`, `/mat4`, `/quat`, `/vec2`, `/vec3`, and `/vec4`.
+Available subpaths: `@math.gl/core`, `/mat4`, `/quat`, `/vec2`, `/vec3`, and `/vec4`.
 
 ### CRS and proj4 definitions
 

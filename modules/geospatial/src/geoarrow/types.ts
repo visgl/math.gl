@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {SpatialReference} from '../crs/index';
-import type {TypedArray} from '@math.gl/core/types';
+import type {TypedArray} from '@math.gl/core';
 /** Minimal tagged geometry shape used only by compatibility builders.
  *
  * The physical GeoArrow APIs never create these values. Keeping the structural type here avoids

@@ -188,7 +188,7 @@ worldAreas.project([12, 55]);
 [Equal Earth](https://proj.org/en/stable/operations/projections/eqearth.html) is a
 useful starting point for area-preserving world maps. A projection converts points;
 it does not choose polygon seam splits or tessellation. Use
-[`@math.gl/geometry/polygon`](../../../geometry/polygon/api-reference/polygon.md) for the relevant geometric
+[`@math.gl/geometry`](../../../geometry/polygon/api-reference/polygon.md) for the relevant geometric
 operations. Cube-face selection and tiling likewise belong to the application.
 
 ### Discontinuous map layouts (experimental)

@@ -1,7 +1,7 @@
 # GeodesicIntersections
 
 ```ts
-import {GeodesicIntersections, type GeodesicIntersectionPath} from '@math.gl/geospatial/ellipsoid';
+import {GeodesicIntersections, type GeodesicIntersectionPath} from '@math.gl/geospatial';
 const g = new GeodesicIntersections({semiMajorAxis: 6378137, semiMinorAxis: 6356752.314245179});
 const a: GeodesicIntersectionPath = {latitude: 0, longitude: -30, azimuth: 90};
 const b: GeodesicIntersectionPath = {latitude: -20, longitude: 0, azimuth: 0};

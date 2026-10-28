@@ -8,7 +8,7 @@ import {config} from '@math.gl/core';
 import {
   spheroidToCartesian as forwardKernel,
   cartesianToSpheroid as inverseKernel
-} from '@math.gl/core/spheroid';
+} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
 import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
 import {geocentric} from '@math.gl/geospatial/projection/projections/geocent';

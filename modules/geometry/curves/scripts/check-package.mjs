@@ -28,13 +28,13 @@ assert.equal(table.length, 5);
   await writeFile(
     join(temporary, 'consumer.mjs'),
     `import assert from 'node:assert/strict';
-import * as curves from '@math.gl/geometry/curves';
+import * as curves from '@math.gl/geometry';
 ${assertions}`
   );
   await writeFile(
     join(temporary, 'consumer.cjs'),
     `const assert = require('node:assert/strict');
-const curves = require('@math.gl/geometry/curves');
+const curves = require('@math.gl/geometry');
 ${assertions}`
   );
   for (const filename of ['consumer.mjs', 'consumer.cjs']) {
@@ -43,8 +43,8 @@ ${assertions}`
   await writeFile(
     join(temporary, 'consumer.ts'),
     `
-import {Curve, CubicBezierCurve, CatmullRomCurve, CurveArcLength} from '@math.gl/geometry/curves';
-import type {NumericArray} from '@math.gl/core/types';
+import {Curve, CubicBezierCurve, CatmullRomCurve, CurveArcLength} from '@math.gl/geometry';
+import type {NumericArray} from '@math.gl/core';
 const curve = new CubicBezierCurve([0, 0] as const, new Float64Array(2), [1, 2], [3, 4]);
 const point: number[] = curve.getPoint(0.5);
 const output: Float64Array = curve.getPoint(0.5, new Float64Array(2));
@@ -90,7 +90,7 @@ new CatmullRomCurve([[0, 0], [1, 1]], {parameterization: 'invalid'});
     {stdio: 'inherit'}
   );
   const bundle = await build({
-    stdin: {contents: "export {LineCurve} from '@math.gl/geometry/curves';", resolveDir: temporary},
+    stdin: {contents: "export {LineCurve} from '@math.gl/geometry';", resolveDir: temporary},
     bundle: true,
     format: 'esm',
     platform: 'browser',

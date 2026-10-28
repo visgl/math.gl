@@ -23,8 +23,8 @@ assert.equal(reference.provenance.projReferenceSHA256,await hash('modules/geospa
 assert.equal(reference.rhumb.length,100);assert.equal(reference.geodesic.length,180);
 for(const format of ['esm','cjs']) {
   const load=format==='esm'?name=>import(name):name=>require(name);
-  const {RhumbPath,EllipsoidRhumb}=await load('@math.gl/geospatial/ellipsoid');
-  const {splitGeographicPolygon,splitGeographicPolyline,subdivideRhumbPolyline}=await load('@math.gl/geospatial/globe');
+  const {RhumbPath,EllipsoidRhumb}=await load('@math.gl/geospatial');
+  const {splitGeographicPolygon,splitGeographicPolyline,subdivideRhumbPolyline}=await load('@math.gl/geospatial');
   const full=await load('@math.gl/geospatial');
   for(const name of ['RhumbPath','splitGeographicPolygon','splitGeographicPolyline','subdivideRhumbPolyline']) assert.equal(typeof full[name],'function');
   const rhumb=new EllipsoidRhumb({semiMajorAxis:1,semiMinorAxis:1});

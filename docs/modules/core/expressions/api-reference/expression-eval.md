@@ -55,7 +55,7 @@ import {
   BASIC_MATH_FUNCTION_LIBRARY,
   compile,
   type ExpressionFunctionLibrary
-} from '@math.gl/core/expressions';
+} from '@math.gl/core';
 
 const statistics: ExpressionFunctionLibrary = {
   mean: (...values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length

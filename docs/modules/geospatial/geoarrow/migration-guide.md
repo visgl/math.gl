@@ -12,9 +12,9 @@ table objects.
 | File/network loading, schemas, GeoParquet metadata | loaders.gl |
 | Adapting table/vector buffers to descriptors | loaders.gl or the table runtime integration |
 | Physical validation, traversal, bounds, mapping, winding | `@math.gl/geospatial/geoarrow` |
-| Individual WKB/WKT parsing and formatting | `@math.gl/geospatial/wkb` |
-| WKB/WKT column descriptors and adapters | `@math.gl/geospatial/geoarrow/wkb` |
-| Polygon/MultiPolygon tessellation | `@math.gl/geospatial/geoarrow/tessellation` |
+| Individual WKB/WKT parsing and formatting | `@math.gl/geospatial` |
+| WKB/WKT column descriptors and adapters | `@math.gl/geospatial/geoarrow` |
+| Polygon/MultiPolygon tessellation | `@math.gl/geospatial/geoarrow` |
 | GPU buffer creation and rendering | luma.gl/deck.gl |
 | Worker scheduling and ownership policy | the application or loader |
 
@@ -38,7 +38,7 @@ transfer-list deduplication. Those semantics are represented directly in `GeoArr
 | Arrow bounds kernel | `getGeoArrowBounds` |
 | Arrow coordinate mapper | `mapGeoArrowCoordinates` or `mapGeoArrowCoordinatesInto` |
 | Arrow builder output | `GeoArrowBuilderTarget` and borrowed descriptors |
-| Arrow WKB/WKT construction | `@math.gl/geospatial/geoarrow/wkb` plus plain descriptors |
+| Arrow WKB/WKT construction | `@math.gl/geospatial/geoarrow` plus plain descriptors |
 | Arrow transfer traversal | descriptor `getGeoArrowTransferList` |
 
 The loaders adapter should inspect Arrow schema/type metadata, then expose the physical buffers. It
@@ -53,7 +53,7 @@ explicitly requests normalization. Request the final coordinate layout, float wi
 width in that call so math.gl writes those buffers once.
 
 Use `getGeoArrowWKBVertexCount` when sizing or policy decisions need a serialized vertex count. It
-uses the shared `@math.gl/geospatial/wkb` structural visitor in count-only mode, so loaders.gl does not need to
+uses the shared `@math.gl/geospatial` structural visitor in count-only mode, so loaders.gl does not need to
 retain its separate WKB count parser.
 
 For mixed output, adapt math.gl's stable per-chunk child schema directly to Arrow dense unions.
@@ -70,7 +70,7 @@ renderer-oriented options. The math.gl API separates these layers:
 | Arrow-specific interleaving | `interleaveGeoArrowCoordinates` |
 | Arrow dense-union normalization | `normalizeGeoArrowUnion` |
 | `tessellateArrowPolygons` | `tessellateGeoArrowPolygons` |
-| implicit worker fallback | explicit `@math.gl/geospatial/geoarrow/worker` transfer payload |
+| implicit worker fallback | explicit `@math.gl/geospatial/geoarrow` transfer payload |
 | renderer-owned result assumptions | positions, row indices, indices, dimensions, and counts |
 
 The tessellation kernel retains the prototype's important behavior: Polygon/MultiPolygon and dense
@@ -124,7 +124,7 @@ All downstream consumers can then share math.gl kernels without importing the ru
 2. Compare descriptor inspection, count, bounds, conversion, WKB/WKT, and tessellation against the
    existing Arrow-backed fixtures.
 3. Replace luma's private interleaving and tessellation imports with
-   `@math.gl/geospatial/geoarrow` and `@math.gl/geospatial/geoarrow/tessellation`.
+   `@math.gl/geospatial/geoarrow` and `@math.gl/geospatial/geoarrow`.
 4. Keep worker orchestration in luma/loaders and use `prepareGeoArrowTransfer` for payloads.
 5. Delete the duplicated kernels only after exact output fixtures and buffer-identity assertions
    pass in the consumer repositories.

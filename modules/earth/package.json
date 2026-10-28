@@ -27,11 +27,6 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./geoid": {
-      "types": "./dist/geoid/index.d.ts",
-      "import": "./dist/geoid/index.js",
-      "require": "./dist/geoid/index.cjs"
-    },
     "./sun": {
       "types": "./dist/sun/index.d.ts",
       "import": "./dist/sun/index.js",
@@ -44,35 +39,15 @@
     },
     "./geoid/geoid-egm96-low.pgm": "./geoid/data/geoid-egm96-low.pgm",
     "./geoid/geoid-egm96-hi.pgm": "./geoid/data/geoid-egm96-hi.pgm",
-    "./sun/planets": {
-      "types": "./dist/sun/planets.d.ts",
-      "import": "./dist/sun/planets.js",
-      "require": "./dist/sun/planets.cjs"
-    },
-    "./sun/astronomy": {
-      "types": "./dist/sun/astronomy.d.ts",
-      "import": "./dist/sun/astronomy.js",
-      "require": "./dist/sun/astronomy.cjs"
-    },
+    "./timezone/timezone-geometry-low.json": "./timezone/data/timezone-geometry-low.json",
+    "./timezone/timezone-geometry-low.parquet": "./timezone/data/timezone-geometry-low.parquet",
+    "./timezone/timezone-geometry-hi.json": "./timezone/data/timezone-geometry-hi.json",
+    "./timezone/timezone-geometry-hi.parquet": "./timezone/data/timezone-geometry-hi.parquet",
     "./sun/stars": {
       "types": "./dist/sun/stars.d.ts",
       "import": "./dist/sun/stars.js",
       "require": "./dist/sun/stars.cjs"
-    },
-    "./timezone/lookup": {
-      "types": "./dist/timezone/lookup.d.ts",
-      "import": "./dist/timezone/lookup.js",
-      "require": "./dist/timezone/lookup.cjs"
-    },
-    "./timezone/temporal": {
-      "types": "./dist/timezone/temporal.d.ts",
-      "import": "./dist/timezone/temporal.js",
-      "require": "./dist/timezone/temporal.cjs"
-    },
-    "./timezone/timezone-geometry-low.json": "./timezone/data/timezone-geometry-low.json",
-    "./timezone/timezone-geometry-low.parquet": "./timezone/data/timezone-geometry-low.parquet",
-    "./timezone/timezone-geometry-hi.json": "./timezone/data/timezone-geometry-hi.json",
-    "./timezone/timezone-geometry-hi.parquet": "./timezone/data/timezone-geometry-hi.parquet"
+    }
   },
   "files": [
     "dist",
@@ -87,15 +62,8 @@
   ],
   "sideEffects": false,
   "dependencies": {
-    "@math.gl/core": "5.0.0-alpha.20"
-  },
-  "peerDependencies": {
-    "astronomy-engine": "^2.1.19"
-  },
-  "peerDependenciesMeta": {
-    "astronomy-engine": {
-      "optional": true
-    }
+    "@math.gl/core": "5.0.0-alpha.20",
+    "astronomy-engine": "2.1.19"
   },
   "devDependencies": {
     "astronomy-engine": "2.1.19"

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original distance-parameterized adapter over the attributed math.gl rhumb solver.
 
-import type {NumericArray} from '@math.gl/core/types';
+import type {NumericArray} from '@math.gl/core';
 import {EllipsoidRhumb, type RhumbLine} from './ellipsoid-rhumb';
 import {validateGeographicPosition} from './geodesic-path';
 import {WGS84_RADIUS_X, WGS84_RADIUS_Z} from './constants';

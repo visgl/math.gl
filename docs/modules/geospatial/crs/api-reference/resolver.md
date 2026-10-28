@@ -1,11 +1,11 @@
 # Opt-in CRS resolution
 
-`@math.gl/geospatial/crs/resolver` resolves authority identifiers using application-supplied
+`@math.gl/geospatial/crs` resolves authority identifiers using application-supplied
 providers. It has no bundled authority database and performs no network access or coordinate
 transformation. Import it explicitly; the CRS root does not load it.
 
 ```ts
-import {createCRSResolver, createCRSDictionaryProvider} from '@math.gl/geospatial/crs/resolver';
+import {createCRSResolver, createCRSDictionaryProvider} from '@math.gl/geospatial/crs';
 
 const resolver = createCRSResolver({providers: [
   createCRSDictionaryProvider({

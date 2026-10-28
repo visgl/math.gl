@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {TypedArray, TypedArrayConstructor} from '@math.gl/core/types';
+import type {TypedArray, TypedArrayConstructor} from '@math.gl/core';
 
 /**
  * Iterates over the fixed-size elements of a typed array.

@@ -13,7 +13,7 @@ import {
 } from '../../src/types/bigint';
 import {getBounds2D, isBounds2D} from '../../src/types/bounds-types';
 
-test('@math.gl/core/types bounds helpers preserve and truncate dimensions', () => {
+test('@math.gl/core bounds helpers preserve and truncate dimensions', () => {
   const bounds2d = [
     [1, 2],
     [3, 4]
@@ -31,7 +31,7 @@ test('@math.gl/core/types bounds helpers preserve and truncate dimensions', () =
   ]);
 });
 
-test('@math.gl/core/types bigint compatibility exports select native implementations', () => {
+test('@math.gl/core bigint compatibility exports select native implementations', () => {
   expect(BigIntAvailable).toBe(true);
   expect(BigInt64ArrayAvailable).toBe(true);
   expect(BigUint64ArrayAvailable).toBe(true);

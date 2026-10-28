@@ -16,6 +16,7 @@ import {
   chartPoint
 } from './edge';
 import type {Edge} from './edge';
+import {clipLatitudeEdge, type LatitudeRange} from './latitude';
 import {GeographicSeamError} from './types';
 import type {
   GeographicPolygonRing,
@@ -38,7 +39,8 @@ function winding(
   context: Context,
   side?: 'left' | 'right',
   generatedBoundary = true,
-  longitudeShift = 0
+  longitudeShift = 0,
+  verticalSide?: 'south' | 'north'
 ): {value: number; boundary: boolean} {
   let value = 0,
     boundary = false;
@@ -69,7 +71,11 @@ function winding(
         x = context.projectLongitude(edge.sample(t)[0], longitudeShift);
       if ((generatedBoundary || edge.source) && Math.abs(x - point[0]) <= ANGULAR_TOLERANCE)
         boundary = true;
-      if (a[1] > point[1] !== b[1] > point[1] && (side === 'left' ? x >= point[0] : x > point[0]))
+      if (
+        (verticalSide === 'south' ? a[1] >= point[1] : a[1] > point[1]) !==
+          (verticalSide === 'south' ? b[1] >= point[1] : b[1] > point[1]) &&
+        (side === 'left' ? x >= point[0] : x > point[0])
+      )
         value += b[1] > a[1] ? 1 : -1;
     }
   }
@@ -79,7 +85,8 @@ function contains(
   ring: Ring,
   p: readonly number[],
   context: Context,
-  side?: 'left' | 'right'
+  side?: 'left' | 'right',
+  verticalSide?: 'south' | 'north'
 ): boolean {
   context.tick();
   // Compare in the output chart, using the same arithmetic as graph endpoints.
@@ -90,21 +97,24 @@ function contains(
     k++
   ) {
     context.tick();
-    if (winding(ring.membership, p, context, side, false, -360 * k).value !== 0) return true;
+    if (winding(ring.membership, p, context, side, false, -360 * k, verticalSide).value !== 0)
+      return true;
   }
   return false;
 }
-function filled(
+export function filled(
   rings: Ring[],
   p: readonly number[],
   context: Context,
-  side?: 'left' | 'right'
+  side?: 'left' | 'right',
+  verticalSide?: 'south' | 'north'
 ): boolean {
   return (
-    contains(rings[0], p, context, side) && !rings.slice(1).some(r => contains(r, p, context, side))
+    contains(rings[0], p, context, side, verticalSide) &&
+    !rings.slice(1).some(r => contains(r, p, context, side, verticalSide))
   );
 }
-function prepare(input: GeographicPolygonRing, index: number, context: Context): Ring {
+export function prepare(input: GeographicPolygonRing, index: number, context: Context): Ring {
   const positions = context.read(input.positions);
   if (
     positions.length > 1 &&
@@ -210,7 +220,7 @@ function canonicalAlias(edge: Edge, context: Context): Edge {
   };
   return {...edge, a: move(edge.a), b: move(edge.b), sample: t => move(edge.sample(t))};
 }
-function interior(edges: Edge[], context: Context): {point: number[]; sign: number} {
+export function interior(edges: Edge[], context: Context): {point: number[]; sign: number} {
   const ys = Array.from(new Set(edges.flatMap(e => [e.a[1], e.b[1]]))).sort((a, b) => a - b);
   let index = 1;
   for (let i = 2; i < ys.length; i++) if (ys[i] - ys[i - 1] > ys[index] - ys[index - 1]) index = i;
@@ -253,6 +263,20 @@ function output(edges: Edge[], sign: number, context: Context): GeographicSeamRi
 export function splitGeographicPolygon(
   inputs: readonly GeographicPolygonRing[],
   options: GeographicSeamOptions
+): GeographicSeamPolygon[] {
+  return processPolygon(inputs, options);
+}
+export function clipLatitudePolygon(
+  inputs: readonly GeographicPolygonRing[],
+  options: GeographicSeamOptions,
+  latitudeRange: LatitudeRange
+): GeographicSeamPolygon[] {
+  return processPolygon(inputs, options, latitudeRange);
+}
+function processPolygon(
+  inputs: readonly GeographicPolygonRing[],
+  options: GeographicSeamOptions,
+  latitudeRange?: LatitudeRange
 ): GeographicSeamPolygon[] {
   const context = new Context(options);
   if (!inputs.length) return [];
@@ -415,6 +439,55 @@ export function splitGeographicPolygon(
         })
       )
         add(straight(a, b));
+    }
+  }
+  if (latitudeRange) {
+    const sourceGraph = graph.slice();
+    graph.length = 0;
+    nodes.clear();
+    for (const edge of sourceGraph)
+      for (const part of clipLatitudeEdge(edge, latitudeRange, context)) {
+        const boundary = part.a[1] === part.b[1] && latitudeRange.includes(part.a[1]);
+        if (
+          boundary &&
+          !filled(
+            rings,
+            [(part.a[0] + part.b[0]) / 2, part.a[1]],
+            context,
+            undefined,
+            part.a[1] === latitudeRange[0] ? 'north' : 'south'
+          )
+        )
+          continue;
+        add(part);
+      }
+    for (const boundary of latitudeRange) {
+      const events = Array.from(nodes.values())
+        .filter(n => n.p[1] === boundary)
+        .sort((a, b) => a.p[0] - b.p[0]);
+      const aligned = graph.filter(e => e.a[1] === boundary && e.b[1] === boundary);
+      for (let i = 1; i < events.length; i++) {
+        context.tick();
+        const a = events[i - 1].p,
+          b = events[i].p,
+          longitude = (a[0] + b[0]) / 2;
+        if (longitude === a[0] || longitude === b[0])
+          throw new GeographicSeamError('precision', 'Unresolvable latitude event separation');
+        if (
+          filled(
+            rings,
+            [longitude, boundary],
+            context,
+            undefined,
+            boundary === latitudeRange[0] ? 'north' : 'south'
+          ) &&
+          !aligned.some(e => {
+            context.tick();
+            return longitude > Math.min(e.a[0], e.b[0]) && longitude < Math.max(e.a[0], e.b[0]);
+          })
+        )
+          add(straight(a, b));
+      }
     }
   }
   for (const node of nodes.values())

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {type Bounds2D} from '@math.gl/core/types';
+import {type Bounds2D} from '@math.gl/core';
 import {withDGGSBoundaryOptions, type DGGSCell, type DGGSDecoder} from './dggs-decoder';
 
 import {getS2IndexFromToken, getS2TokenFromIndex} from './s2-geometry/s2-token';

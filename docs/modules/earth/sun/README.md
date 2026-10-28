@@ -21,16 +21,10 @@ npm install @math.gl/earth
 
 ## Entry points
 
-| Import | Contents | Additional dependency |
-| --- | --- | --- |
-| `@math.gl/earth/sun` | Sun, Moon, lighting, observer, atmosphere and globe helpers. | None |
-| `@math.gl/earth/sun/planets` | Planet/Galilean-moon positions and visibility searches. | `astronomy-engine` |
-| `@math.gl/earth/sun/astronomy` | Consistent sky snapshots and reusable cached contexts. | `astronomy-engine` |
-| `@math.gl/earth/sun/stars` | 7,000-star catalog, motion, layer data and Milky Way background. | None |
-
-For the optional ephemerides, run `npm install astronomy-engine`. Import these
-entry points explicitly; their APIs are not re-exported from the main module.
-All new Moon, planet, star and sky APIs are available from v5.0.
+The named Sun, Moon, sky, planet and star functions are exported from
+`@math.gl/earth` and `@math.gl/earth/sun`. The data catalog remains
+available from `@math.gl/earth/sun/stars`. `astronomy-engine` is a declared
+runtime dependency; bundlers can remove it for unrelated named imports.
 
 ## Coordinates and units
 
@@ -62,7 +56,7 @@ The module also provides [moon position, direction, phase and direct moonlight](
 
 ## Planets
 
-The optional [planet sky API](./api-reference/get-planet-sky-info.md) returns positions, disk sizes, phases and planet magnitudes, including the four Galilean moons. It also estimates twilight visibility and searches rise/set and visible time windows. Install `astronomy-engine` and import from `@math.gl/earth/sun/planets`.
+The optional [planet sky API](./api-reference/get-planet-sky-info.md) returns positions, disk sizes, phases and planet magnitudes, including the four Galilean moons. It also estimates twilight visibility and searches rise/set and visible time windows. Import from `@math.gl/earth/sun`.
 
 ## Sky
 
@@ -78,4 +72,4 @@ The solar position calculation is a fork of @mourner's [SunCalc](https://github.
 
 The adapted lunar code and numeric reference samples use SunCalc 1.9.0 under BSD-2-Clause. The full notice is shipped in `LICENSE-SUNCALC`, and SPDX comments record the original owner and provenance. Original moonlight and star-field calculations use math.gl’s MIT license.
 
-The optional [`@math.gl/earth/sun/stars`](./api-reference/stars.md) entry point contains 7,000 bright stars, projected proper motions, distance-aware motion and brightness where measurements exist, an illustrative Galactic orbit model, and a procedural Milky Way background. Numeric Julian epochs support long animations independently of the observer’s rendering date.
+The [star catalog](./api-reference/stars.md) contains 7,000 bright stars, projected proper motions, distance-aware motion and brightness where measurements exist, an illustrative Galactic orbit model, and a procedural Milky Way background. Numeric Julian epochs support long animations independently of the observer’s rendering date.

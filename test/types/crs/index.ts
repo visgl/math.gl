@@ -16,7 +16,7 @@ import {
 
 const serialized: CRSDefinition = 'EPSG:4326';
 
-import {createCRSResolver, createCRSDictionaryProvider} from '@math.gl/geospatial/crs/resolver';
+import {createCRSResolver, createCRSDictionaryProvider} from '@math.gl/geospatial/crs';
 import type {CRSInput} from '@math.gl/geospatial/crs';
 const resolver = createCRSResolver({
   providers: [
