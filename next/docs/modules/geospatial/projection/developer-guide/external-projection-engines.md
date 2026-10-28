@@ -421,3 +421,7 @@ Applications written against math.gl's projection interfaces can also use asynch
 Its latest-view runner discards superseded results, while the processor serializes operation reuse, rejects partial failures and drains accepted work before disposal. Cancellation is cooperative rather than native-call preemption. Copying into and out of upstream WASM is separate from the explicitly verified transfer of completed buffers to the downstream task. Changed CRS/operation/grid state requires a new processor; source data and view revisions must still participate in result invalidation.
 
 This recipe does not put Promise-returning functions into `CRSDescriptor.converter`. An async-only engine produces prepared geometry before the renderer consumes it. It also does not infer spherical stream clipping or repair topology: combine it with explicit geometry preparation for lines, polygons and rasters. Its XYZ/time policy and ownership boundaries are documented in the example README.
+
+## Geometry streams and projection domains[​](#geometry-streams-and-projection-domains "Direct link to Geometry streams and projection domains")
+
+The [Projection domains example](https://visgl.github.io/math.gl/next/examples/projection-domains) combines native math.gl GeoArrow streaming and task workers with D3 clipping, interrupted lobes, and inverse-mapped synthetic rasters. It preserves source feature identity and illustrates why point conversion, validity domains and geometry topology are separate concerns. See its source for the explicit sampling limits.
