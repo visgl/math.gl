@@ -4,11 +4,11 @@ External libraries can provide CRS definitions, execute coordinate operations, o
 
 ## Integrate proj-wasm[​](#integrate-proj-wasm "Direct link to Integrate proj-wasm")
 
-[proj-wasm](https://github.com/willcohen/clj-proj) provides PROJ through WebAssembly. The [runnable Node and browser example](https://github.com/visgl/math.gl/tree/master/examples/proj-wasm-crs) pins **0.1.0** and demonstrates two distinct uses of its public API.
+[proj-wasm](https://github.com/willcohen/clj-proj) provides PROJ through WebAssembly. The [runnable Node and browser example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/proj-wasm-crs) pins **0.1.0** and demonstrates two distinct uses of its public API.
 
 ### Resolve definitions for native math.gl execution[​](#resolve-definitions-for-native-mathgl-execution "Direct link to Resolve definitions for native math.gl execution")
 
-The example's `createProjWasmProvider` owns a PROJ context, disables network access, uses `projCreateFromDatabase` and `projAsProjjson`, and destroys each temporary PJ object. It records the package and EPSG database revision in lookup provenance. Its source is in `examples/proj-wasm-crs/provider.mjs`:
+The example's `createProjWasmProvider` owns a PROJ context, disables network access, uses `projCreateFromDatabase` and `projAsProjjson`, and destroys each temporary PJ object. It records the package and EPSG database revision in lookup provenance. Its source is in `examples/geospatial/proj-wasm-crs/provider.mjs`:
 
 ```
 import * as proj from 'proj-wasm';
@@ -63,8 +63,6 @@ Node integration tests and a Chromium smoke test exercise the actual pinned pack
 Applications written against math.gl's projection interfaces can still work with external projection engines using this recipe: adapt a backend to `ProjectionEngine`, return a synchronous `PreparedProjection`, and inject it into the application. The rendering code below is unchanged when you select math.gl, proj4js or D3.
 
 <!-- -->
-
-Projection engine math.glLocation London (0)
 
 The same application projects a graticule and a location through the selected engine.
 

@@ -68,7 +68,7 @@ Returns one ordinary degree rectangle or two at the antimeridian. Valid latitude
 
 For WGS84, use `Ellipsoid.WGS84.radii` and its Cartesian conversions with `EllipsoidOccluder`. For spherical deck GlobeView, convert camera and object positions to the same common frame/units, or convert both to ECEF. Do not mix the common-space radius with meter positions. Convert axes into the documented X/Y/Z convention before calling the geographic bounds helper. The helper does not accept WGS84 ECEF as a spherical approximation implicitly.
 
-The [standalone example](https://github.com/visgl/math.gl/tree/master/examples/globe-primitives) composes these queries with [subdivideGlobeMesh](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/subdivide-globe-mesh.md), demonstrating elevated labels, true ray misses and polar/antimeridian coverage without Kepler dependencies.
+The [standalone example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/globe-primitives) composes these queries with [subdivideGlobeMesh](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/subdivide-globe-mesh.md), demonstrating elevated labels, true ray misses and polar/antimeridian coverage without Kepler dependencies.
 
 ## Provenance and limits[​](#provenance-and-limits "Direct link to Provenance and limits")
 
