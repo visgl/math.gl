@@ -182,3 +182,5 @@ The official MIT-licensed schema is vendored unchanged and can be imported or re
 `@math.gl/geospatial/crs/projjson.schema.json`. It is the PROJJSON runtime validation source of truth. The
 package does not add a second Zod schema. It also does not perform coordinate transformations,
 authority-registry lookup, semantic CRS comparison, or WKT/PROJ-to-PROJJSON conversion.
+
+See [raster mesh preparation](./developer-guide/raster-mesh-preparation.md) for composing domain clipping, refinement and UV provenance.

@@ -265,7 +265,8 @@
             "type": "category",
             "label": "Developer Guide",
             "items": [
-              "modules/geospatial/crs/developer-guide/coordinate-reference-systems"
+              "modules/geospatial/crs/developer-guide/coordinate-reference-systems",
+              "modules/geospatial/crs/developer-guide/raster-mesh-preparation"
             ]
           },
           "modules/geospatial/crs/api-reference/spatial-reference",
