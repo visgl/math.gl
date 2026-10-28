@@ -1,4 +1,4 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-export default {worker: {format: 'es'}};
+export default {base:'./',worker:{format:'es'},build:{rollupOptions:{input:['index.html','lab.html'],external:['proj-wasm']}}};
