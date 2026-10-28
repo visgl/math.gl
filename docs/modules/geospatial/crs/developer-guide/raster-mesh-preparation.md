@@ -63,3 +63,14 @@ all possible transforms. Sampling scale is explicitly supplied and the canvas fi
 For a real camera, include camera/view policy and texture-error criteria in the sampling decision.
 Rebuild on changed projection parameters, domain sampling, data, UVs or view tolerance. A backend
 execution key alone is insufficient to identify a derived raster mesh.
+
+## Qualified inverse-mesh recipe
+
+The [projection-domain preparation recipe](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains/warp)
+adds actual EPSG:3031 pole-containing and rotated source grids, Fiji/UTM seam crossings, native
+interrupted charts, and orthographic/tilted-perspective horizons. Target triangles refine against
+source-texel interpolation error before image-footprint clipping. Source IDs and chart ownership
+survive preparation. Independent PROJ reference points test coverage; different post-clipping
+probes test texture error. Invalid samples and exhausted budgets reject the operation rather than
+silently producing a partial mesh. This remains a qualified example recipe with explicit sampled
+coverage and boundary assumptions, not generic raster reprojection support.
