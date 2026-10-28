@@ -1,5 +1,7 @@
 # ProjectionEngine
 
+Native engine constructors optionally accept `resolver: CRSResolver` from `@math.gl/geospatial/crs`. `createProjectionAsync()` and `getCRS()` prepare external identifiers; `createProjection()` remains synchronous and never looks them up. See [authority resolution](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#opt-in-authority-resolution) for precedence, caching and metadata rules.
+
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
 `ProjectionEngine` is a reusable factory interface. Each engine holds projection plugins, CRS readers, aliases and grids; each `createProjection()` call creates an independent transform for a specific CRS pair.

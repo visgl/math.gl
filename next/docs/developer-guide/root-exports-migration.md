@@ -40,7 +40,7 @@ The APIs below moved to package or capability roots. The old API subpaths are no
 | `@math.gl/geospatial/coordinates`                       | `@math.gl/geospatial`          |
 | `@math.gl/geospatial/crs/metadata`                      | `@math.gl/geospatial/crs`      |
 | `@math.gl/geospatial/crs/proj-string`                   | `@math.gl/geospatial/crs`      |
-| `@math.gl/geospatial/crs/resolver`                      | `@math.gl/geospatial/crs`      |
+| `@math.gl/geospatial/crs`                               | `@math.gl/geospatial/crs`      |
 | `@math.gl/geospatial/crs/spatial-reference`             | `@math.gl/geospatial/crs`      |
 | `@math.gl/geospatial/crs/wkt`                           | `@math.gl/geospatial/crs`      |
 | `@math.gl/geospatial/ellipsoid`                         | `@math.gl/geospatial`          |
