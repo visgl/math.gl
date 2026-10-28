@@ -32,6 +32,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./turf": {
+      "types": "./dist/turf.d.ts",
+      "import": "./dist/turf.js",
+      "require": "./dist/turf.cjs"
     }
   },
   "files": [
@@ -41,7 +46,15 @@
   "dependencies": {
     "@math.gl/core": "5.0.0-alpha.12",
     "@math.gl/culling": "5.0.0-alpha.12",
+    "@math.gl/geoarrow": "5.0.0-alpha.12",
     "@math.gl/types": "5.0.0-alpha.12"
   },
-  "gitHead": "e1a95300cb225a90da6e90333d4adf290f7ba501"
+  "gitHead": "e1a95300cb225a90da6e90333d4adf290f7ba501",
+  "devDependencies": {
+    "@turf/area": "^7.2.0",
+    "@turf/bearing": "^7.2.0",
+    "@turf/boolean-point-in-polygon": "^7.2.0",
+    "@turf/centroid": "^7.2.0",
+    "@turf/distance": "^7.2.0"
+  }
 }

@@ -8,6 +8,7 @@ import type {Bench} from '@probe.gl/bench';
 
 import {coreBench} from '../../modules/core/test/bench';
 import {geospatialBench} from '../../modules/geospatial/test/bench';
+import {turfBench} from '../../modules/geospatial/test/turf-bench';
 import {cullingBench} from '../../modules/culling/test/bench';
 import {polygonBench} from '../../modules/polygon/test/bench';
 import {projectionBench} from '../../modules/projection/test/bench';
@@ -16,6 +17,7 @@ import {geoarrowBench} from '../../modules/geoarrow/test/bench';
 export default function addBenchmarks(suite: Bench, addReferenceBenchmarks: boolean): Bench {
   coreBench(suite, addReferenceBenchmarks);
   geospatialBench(suite, addReferenceBenchmarks);
+  turfBench(suite);
   cullingBench(suite, addReferenceBenchmarks);
   polygonBench(suite, addReferenceBenchmarks);
   geoarrowBench(suite);
