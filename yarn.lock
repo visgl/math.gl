@@ -16032,9 +16032,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-geoarrow-stream-worker@workspace:examples/geoarrow-stream-worker":
+"math.gl-geoarrow-stream-worker@workspace:examples/geospatial/geoarrow-stream-worker":
   version: 0.0.0-use.local
-  resolution: "math.gl-geoarrow-stream-worker@workspace:examples/geoarrow-stream-worker"
+  resolution: "math.gl-geoarrow-stream-worker@workspace:examples/geospatial/geoarrow-stream-worker"
   dependencies:
     "@math.gl/core": "workspace:*"
     "@math.gl/geospatial": "workspace:*"

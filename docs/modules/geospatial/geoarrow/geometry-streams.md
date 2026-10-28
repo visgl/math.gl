@@ -56,7 +56,7 @@ limits. This is a synchronous operation and should run in a worker for expensive
 
 ## Reuse the task runtime
 
-The [runnable worker example](https://github.com/visgl/math.gl/tree/master/examples/geoarrow-stream-worker)
+The [runnable worker example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/geoarrow-stream-worker)
 uses `runTask` and `createWorker` from `@math.gl/core/tasks`. It sends a plain geometry column and a
 projection factory name, creates the D3 stream inside the worker, and returns transferable typed
 arrays. It demonstrates antimeridian splitting, holes, null rows, source identity and hemisphere
@@ -79,7 +79,7 @@ it does not require changes to the worker runtime.
 External WASM engines can be initialized in a persistent worker resource and use asynchronous
 batch transforms. They can use the same task transport, but must provide their own geometry
 clipping/topology stage; scalar or batch point conversion is not a replacement for a stream.
-See the existing [proj-wasm example](https://github.com/visgl/math.gl/tree/master/examples/proj-wasm-crs).
+See the existing [proj-wasm example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/proj-wasm-crs).
 No Promise-returning converter is adapted into the synchronous CRS descriptor contract.
 
 For deck.gl, use the returned polygon offsets, positions and indices as binary attributes under
