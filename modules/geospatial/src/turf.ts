@@ -1074,8 +1074,20 @@ function segmentCrossing(a: TurfSegment, b: TurfSegment): Point | null {
     ex = s[0] - r[0],
     ey = s[1] - r[1];
   const denominator = dx * ey - dy * ex;
-  // Collinear overlaps have no isolated intersection point.
-  if (denominator === 0) return null;
+  const onSegment = (a: Point, b: Point, v: Point) =>
+    (v[0] - a[0]) * (b[1] - a[1]) - (v[1] - a[1]) * (b[0] - a[0]) === 0 &&
+    v[0] >= Math.min(a[0], b[0]) &&
+    v[0] <= Math.max(a[0], b[0]) &&
+    v[1] >= Math.min(a[1], b[1]) &&
+    v[1] <= Math.max(a[1], b[1]);
+  const endpoints = [p, q, r, s].filter(v => onSegment(p, q, v) && onSegment(r, s, v));
+  if (denominator === 0) {
+    const unique = endpoints.filter(
+      (v, i) => !endpoints.slice(0, i).some(w => w[0] === v[0] && w[1] === v[1])
+    );
+    return unique.length === 1 ? unique[0] : null;
+  }
+  if (endpoints.length) return endpoints[0];
   const rx = r[0] - p[0],
     ry = r[1] - p[1];
   const t = (rx * ey - ry * ex) / denominator,

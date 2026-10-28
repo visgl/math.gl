@@ -479,3 +479,38 @@ test('intersections handle separated chunks, duplicate joins and collinear overl
   });
   expect(materializeGeoArrowRows(kinks(one))[0]).toEqual({type: 'MultiPoint', coordinates: []});
 });
+
+test('isolated collinear contacts and shared floating-point endpoints', async () => {
+  const {lineIntersect} = await import('../src/turf');
+  const {materializeGeoArrowRows} = await import('../src/geoarrow/index');
+  const line = (coordinates: number[][]) => column([{type: 'LineString', coordinates}]);
+  expect(
+    materializeGeoArrowRows(
+      lineIntersect(
+        line([
+          [0, 0],
+          [1, 0]
+        ]),
+        line([
+          [1, 0],
+          [2, 0]
+        ])
+      )
+    )[0]
+  ).toEqual({type: 'MultiPoint', coordinates: [[1, 0]]});
+  expect(
+    materializeGeoArrowRows(
+      lineIntersect(
+        line([
+          [-1.6, -5.9],
+          [1.1, 7.2],
+          [2.1, 9.2]
+        ]),
+        line([
+          [-0.9, 7.2],
+          [3.1, 7.2]
+        ])
+      )
+    )[0]
+  ).toEqual({type: 'MultiPoint', coordinates: [[1.1, 7.2]]});
+});
