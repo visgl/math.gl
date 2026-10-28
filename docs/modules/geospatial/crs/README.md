@@ -14,6 +14,14 @@ transformation boundaries, and cross-library integration in depth.
 For definitions of surface models, paths, reference systems, and distortion properties,
 see [Geospatial terminology](../developer-guide/terminology.md).
 
+## Prepared descriptors
+
+Use [`createCRSDescriptor`](./api-reference/crs-descriptor.md) from
+`@math.gl/geospatial/crs` to assemble metadata, prepared external converters and
+rendering policy without importing a projection engine. Descriptor and converter
+types are exported from the same entry point. The builder is also available from
+`@math.gl/geospatial`.
+
 ## Installation
 
 ```bash

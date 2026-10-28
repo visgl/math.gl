@@ -4,8 +4,11 @@
 // SPDX-FileComment: Original caller-owned scalar output validation and commit helpers.
 import type {ProjectionPoint} from './types';
 
-export type ProjectionCoordinate = readonly number[] | Float32Array | Float64Array;
-export type ProjectionOutput = number[] | Float32Array | Float64Array;
+import type {
+  CRSCoordinate as ProjectionCoordinate,
+  CRSOutput as ProjectionOutput
+} from '../../crs/crs-descriptor-types';
+export type {ProjectionCoordinate, ProjectionOutput};
 const FLOAT32_MAX = 3.4028234663852886e38;
 
 /** Validate storage before executing user hooks; no views or coordinate copies are created. */

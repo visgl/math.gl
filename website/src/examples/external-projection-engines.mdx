@@ -1,0 +1,38 @@
+# Switch projection engines
+
+Applications written against math.gl's projection interfaces can still work with
+external projection engines using this recipe: implement `ProjectionEngine`,
+return a complete synchronous `PreparedProjection`, and inject the chosen engine
+into the same application code.
+
+import Example from '@site/src/components/external-projection-engines';
+
+<Example />
+
+## The recipe
+
+The application calls `prepareMap(engine)` once, then uses only `project()` and
+`unproject()`. Switching between math.gl, proj4js and D3 changes the factory,
+not the rendering code. See the [adapters and shared output handling](https://github.com/visgl/math.gl/tree/master/website/src/components/external-projection-engines).
+
+```typescript
+const engine = createExampleEngine(backend); // math.gl, proj4js or D3
+const projection = await prepareMap(engine);
+const xy = projection.project([12, 55]);
+const longitudeLatitude = projection.unproject(xy);
+```
+
+This comparison deliberately uses only longitude/latitude XY and spherical Web
+Mercator. D3's scale, translation and Y direction are configured to match its
+point formula in metres. This does not make other D3 projections equivalent to
+EPSG CRSs. Extra ordinates are rejected by these external adapters; no datum,
+vertical or epoch operation is implied. The interface permits differing backend
+capabilities, so production applications must declare and validate their own domain.
+
+The graticule is sampled inside ±80° latitude. It contains no seam-crossing
+geometry. General lines and polygons need clipping, antimeridian splitting and
+resampling; retain D3's streaming pipeline where appropriate.
+
+proj4js and D3 are website dependencies only. Published math.gl packages do not
+acquire them. proj-wasm has an asynchronous execution API and is covered separately
+in the [external-engine guide](/docs/modules/geospatial/projection/developer-guide/external-projection-engines).

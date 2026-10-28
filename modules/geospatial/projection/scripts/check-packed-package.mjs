@@ -75,6 +75,7 @@ try {
   );
   assert(!('proj4' in packageManifest.dependencies));
   assert(!('./classic' in packageManifest.exports));
+  assert(!('./projection/crs-descriptor' in packageManifest.exports));
   const subpaths = Object.keys(packageManifest.exports)
     .filter(path => path.startsWith('./projection/'))
     .map(path => '.' + path.slice('./projection'.length));
@@ -95,6 +96,8 @@ try {
     assert(!cjs.includes('function clenshaw'), path + ' must not inline a projection kernel');
   }
   const entrySmoke = `
+    const crs = await load('@math.gl/geospatial/crs');
+    assert.equal(typeof crs.createCRSDescriptor, 'function');
     const stable = await load('@math.gl/geospatial/projection');
     assert.equal(stable.ProjectionTransform, api.ProjectionTransform);
     for (const oldName of ['Projection', 'CustomProjectionEngine', 'CRSProjectionEngine', 'LazyCRSProjectionEngine']) assert(!(oldName in stable), oldName + ' must not remain as an alpha alias');
