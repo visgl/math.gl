@@ -12,6 +12,23 @@ This module is still experimental. It may have issues and functionality may chan
 
 It is not a general abstraction over the full API surface of DGGS implementations. Applications that need parent/child traversal, neighbors, fills, compaction, metrics, or OGC API - DGGS support should use a full implementation or an abstraction such as [DGGAL](https://dggal.org/).
 
+## Feature support
+
+Common capabilities of full grid systems compared with this deliberately small decoding interface.
+
+Support describes the public API in the current repository. Notes identify limits and experimental features.
+
+| Feature | math.gl support | Notes |
+| --- | --- | --- |
+| Multi-grid cell centers and boundaries | ✅ Implemented | [A5](./api-reference/a5-decoder.md), GeoHash, H3, Quadkey, S2 and full Plus Code decoders share a compact geometry interface. |
+| String and supported numeric identifiers | ✅ Implemented | Decoder-specific contracts distinguish strings, tokens and BigInt identifiers; numeric support is not uniform across grids. |
+| Column-name discovery and decoder registry | ✅ Implemented | Conventional column detection and [DGGSDecoder](./api-reference/dggs-decoder.md) integrate with visualization adapters. |
+| Parent/child and neighbor traversal | ❌ Not implemented | The common decoder API does not expose the native grids’ full hierarchy or neighborhood operations. |
+| Polygon fills, covering and compaction | ❌ Not implemented | Use full H3/S2/A5 or other native grid APIs for covering, compaction and grid-specific topology. |
+| Uniform cell metrics and analytical aggregation | ❌ Not implemented | No shared area/distance/aggregation engine is provided across all grid systems. |
+| Short Plus Code recovery | ❌ Not implemented | Short codes require a reference location; only full codes are decoded. |
+| OGC API - DGGS services | ❌ Not implemented | This is a geometry-decoding library, not a service/protocol implementation or a full DGGS abstraction. |
+
 ## Installation
 
 ```bash

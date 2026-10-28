@@ -9,6 +9,23 @@ and Node workers. Geospatial operations consume the same runtime through
 
 ![Requests flow from the main thread through a bounded queue to reusable workers, with optional shared control state](/images/tasks.svg)
 
+## Feature support
+
+Capabilities of a local numerical task runtime, including explicit ownership and bounded execution.
+
+Support describes the public API in the current repository. Notes identify limits and experimental features.
+
+| Feature | math.gl support | Notes |
+| --- | --- | --- |
+| Browser and Node worker pools | ✅ Implemented | [Typed processing and reusable workers](./api-reference/runtime.md), with module-worker URLs and worker construction options. |
+| Bounded scheduling and admission | ✅ Implemented | Queue, concurrency, byte-budget and priority controls; [scheduling](../developer-guide/workers.md) exposes overload behavior. |
+| Copy, transfer and shared ownership | ✅ Implemented | Explicit ownership policies, transfer validation, SharedArrayBuffer controls, and [shared-memory examples](./developer-guide/shared-memory.md). |
+| Cancellation, deadlines and progress | ✅ Implemented | Cooperative cancellation retains worker leases until settlement; unresponsive processors can be terminated. |
+| Persistent resources and WASM instances | ✅ Implemented | [Resource lifetime](./developer-guide/persistent-resources.md) and [WASM recipes](./developer-guide/wasm.md) reuse application-owned initialization across tasks. |
+| Streaming batches and main-thread routing | ✅ Implemented | Demand-driven batching and [runTask routing](./developer-guide/execution.md) with a caller-supplied size policy. |
+| Automatic workload cost prediction | ❌ Not implemented | Auto routing requires an explicit size policy and a local implementation; it is not a learned or self-tuning cost model. |
+| Distributed execution and durable job recovery | ❌ Not implemented | Pools run local browser/Node workers. Remote clusters, persisted queues and recovery across process restarts are outside this runtime. |
+
 ## What you can build
 
 | Workload | Starting point |

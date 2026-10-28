@@ -22,6 +22,24 @@ The geometry group also provides `@math.gl/geometry`, `/curves`, `/polygon`, `/c
 `/spatial-index` subpaths. The polygon module combines general tessellation and mesh refinement with
 geographic helpers such as Mercator clipping and globe subdivision.
 
+## Feature support
+
+CPU geometry capabilities, from primitive meshes to processing and spatial queries.
+
+Support describes the public API in the current repository. Notes identify limits and experimental features.
+
+| Feature | math.gl support | Notes |
+| --- | --- | --- |
+| Primitive mesh tessellation | ✅ Implemented | [Boxes, capsules, cylinders, planes, spheres and convenience shapes](#api) produce renderer-independent indexed buffers. |
+| Parametric surfaces, lathes and tori | ✅ Implemented | [ParametricGeometry, TorusGeometry and LatheGeometry](./api-reference/parametric.md) sample explicit surface functions. |
+| Normals, UVs and index-width selection | ✅ Implemented | Primitive POSITION/NORMAL/TEXCOORD_0 attributes and automatic Uint32 promotion for large meshes. |
+| Mesh processing and curve evaluation | ✅ Implemented | [Transform/merge/weld utilities](./utils/README.md) and [Cartesian curves](./curves/README.md) are exposed by the geometry group. |
+| Rigid articulated panel forests | ✅ Implemented | Experimental [HingeTree](./api-reference/hinge-tree.md) evaluates hinge transforms with reusable matrix output. |
+| Analytic queries and spatial indexes | ✅ Implemented | [Culling](./culling/README.md), [polygon operations](./polygon/README.md), and [static BVHs](./spatial-index/README.md); each has separate numerical limits. |
+| General solid modeling and manifold repair | ❌ Not implemented | No public 3D Boolean solid, arbitrary remeshing, or general manifold-repair engine. |
+| Deformable or constrained rigid-body simulation | ❌ Not implemented | HingeTree has no closed-loop constraints, collisions, forces, or bending solver. |
+| GPU resource allocation and rendering | ❌ Not implemented | The module supplies CPU data; GPU buffers, materials, draw calls, and device lifetime belong to rendering libraries. |
+
 ## Installation
 
 ```bash

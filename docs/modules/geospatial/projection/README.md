@@ -22,6 +22,26 @@ and the [modern PROJ audit](modern-proj-audit.md) for coverage and remaining gap
 For definitions of surface models, paths, reference systems, and distortion properties,
 see [Geospatial terminology](../developer-guide/terminology.md).
 
+## Feature support
+
+Capabilities expected of a modern coordinate-transformation engine, with explicit catalogue and qualification boundaries.
+
+Support describes the public API in the current repository. Notes identify limits and experimental features.
+
+| Feature | math.gl support | Notes |
+| --- | --- | --- |
+| Geographic, projected and geocentric transforms | ✅ Implemented | [Projection engines](./api-reference/projection-engine.md) and the [algorithm catalogue](./developer-guide/projections.md) support the documented definitions and parameters. |
+| Bulk buffers and reusable output storage | ✅ Implemented | [ProjectionBuffer](./api-reference/projection-buffer.md) supports strided/interleaved/column layouts and explicit ownership contracts. |
+| Explicit unit, axis and datum pipelines | ✅ Implemented | [ProjectionPipeline](./api-reference/projection-pipeline.md) composes supported stages in a declared order. |
+| Horizontal and vertical grid operations | ✅ Implemented | [Prepared datum/height grids](./api-reference/datum-grids.md), including supported NTv2 and decoded GeoTIFF inputs; data loading stays explicit. |
+| Coordinate epochs and deformation models | ✅ Implemented | [Temporal models](./temporal-models.md) and [deformation operations](./developer-guide/deformation-models.md) have model/coverage-specific contracts. |
+| Reviewed operation selection | ✅ Implemented | [OperationCatalog](./api-reference/operation-catalog.md) selects application-supplied operations by area, epoch, accuracy and grid metadata. |
+| Lazy/selective loading and worker execution | ✅ Implemented | [Entry-point choices](./developer-guide/projection-engine.md) and [persistent worker recipes](./acceleration.md) separate startup, transfer and warm execution costs. |
+| Complete modern PROJ numerical/parameter parity | ◐ Partial | The [independent validation](./independent-validation.md) and [modern PROJ audit](./modern-proj-audit.md) report tested domains and retained findings. |
+| Unrestricted EPSG operation discovery | ❌ Not implemented | No bundled complete authority/operation database or automatic remote-grid search; the application reviews catalogue entries. |
+| Arbitrary PROJ pipeline/compound-CRS execution | ◐ Partial | Supported typed stages and reader profiles are implemented; unrestricted pipeline/compound semantics remain [bounded roadmap work](https://github.com/visgl/math.gl/blob/master/dev-docs/projection-roadmap.md). |
+| Built-in WASM/SIMD/GPU algorithm backends | ❌ Not implemented | Worker acceleration and external-engine adapters exist; native accelerated math.gl kernels are not delivered by the acceleration probes. |
+
 ## Tectonic time machine
 
 <TectonicTimeMachine inline height={600} />
