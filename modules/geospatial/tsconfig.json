@@ -10,6 +10,7 @@
   "references": [
     {"path": "../types"},
     {"path": "../core"},
-    {"path": "../culling"}
+    {"path": "../culling"},
+    {"path": "../geoarrow"}
   ]
 }
