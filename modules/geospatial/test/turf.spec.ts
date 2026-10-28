@@ -419,3 +419,63 @@ test('native boundary intersections and kinks preserve row alignment', async () 
   const sliced = sliceGeoArrowColumn(column([a, a, a]), 1, 3);
   expect(materializeGeoArrowRows(api.lineIntersect(sliced, column([b])))).toHaveLength(2);
 });
+
+test('intersections handle separated chunks, duplicate joins and collinear overlaps', async () => {
+  const {lineIntersect, kinks} = await import('../src/turf');
+  const {materializeGeoArrowRows} = await import('../src/geoarrow/index');
+  const geometry = {
+    type: 'LineString' as const,
+    coordinates: [
+      [0, 0],
+      [1, 1],
+      [2, 0]
+    ]
+  };
+  const one = makeGeoArrowColumnFromGeometryRows([geometry], {coordinateLayout: 'separated'});
+  const two = {...one, chunks: [...one.chunks, ...one.chunks]};
+  const horizontal = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 1],
+        [2, 1]
+      ]
+    }
+  ]);
+  expect(materializeGeoArrowRows(lineIntersect(two, horizontal))).toEqual([
+    {type: 'MultiPoint', coordinates: [[1, 1]]},
+    {type: 'MultiPoint', coordinates: [[1, 1]]}
+  ]);
+  expect(
+    materializeGeoArrowRows(lineIntersect(one, horizontal, {removeDuplicates: false}))[0]
+  ).toEqual({
+    type: 'MultiPoint',
+    coordinates: [
+      [1, 1],
+      [1, 1]
+    ]
+  });
+  const straight = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [2, 0]
+      ]
+    }
+  ]);
+  const overlap = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [1, 0],
+        [3, 0]
+      ]
+    }
+  ]);
+  expect(materializeGeoArrowRows(lineIntersect(straight, overlap))[0]).toEqual({
+    type: 'MultiPoint',
+    coordinates: []
+  });
+  expect(materializeGeoArrowRows(kinks(one))[0]).toEqual({type: 'MultiPoint', coordinates: []});
+});
