@@ -41,3 +41,8 @@ See [polygon utilities](./api-reference/polygon-utils.md) for winding and area c
 ## Attribution
 
 The `earcut` implementation derives from Mapbox's earcut library under the ISC license. Source headers and distributed notices retain the applicable attribution.
+
+`clipTriangleMesh` clips prepared target-plane triangles to disjoint convex regions, including
+periodic copies, and preserves original-vertex weights for UV and other attribute interpolation.
+Concave domains and holes can be supplied as triangulated regions. See the
+[clipping API reference](./api-reference/clip-triangle-mesh.md).
