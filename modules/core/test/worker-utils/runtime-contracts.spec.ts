@@ -554,3 +554,25 @@ test('a persistent resource and main thread both update application-owned atomic
     await resource.destroy();
   }
 });
+
+test('resource disposal does not inherit an already-cancelled initialization control buffer', async () => {
+  const descriptor = {
+    ...runtime,
+    id: 'resource-dispose-control',
+    name: 'resource dispose control',
+    worker: new URL('./fixtures/resource-worker.mjs', import.meta.url).href
+  };
+  const state = createSharedWorkerState();
+  const disposed = new SharedArrayBuffer(4);
+  const resource = await createWorkerResource(
+    descriptor,
+    {value: 0, disposed},
+    {
+      sharedState: state.buffer,
+      cancellationMode: 'cooperative'
+    }
+  );
+  state.cancel();
+  await resource.destroy();
+  assert.equal(Atomics.load(new Int32Array(disposed), 0), 1);
+});

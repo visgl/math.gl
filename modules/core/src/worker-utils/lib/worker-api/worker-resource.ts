@@ -166,7 +166,10 @@ export async function createWorkerResource<Init, Input, Output>(
         try {
           await Promise.allSettled([...pending]);
           if (!incarnation?.terminated)
-            await invoke({operation: 'dispose'}, {signal: undefined, onProgress: undefined});
+            await invoke(
+              {operation: 'dispose'},
+              {signal: undefined, onProgress: undefined, sharedState: false}
+            );
           if (timedOut) throw timeoutError;
         } finally {
           clearTimeout(timer);

@@ -76,9 +76,9 @@ export default class WorkerThread {
    * @note Can free up significant memory
    */
   destroy(): Promise<void> {
-    if (this.terminated) return this.termination ?? Promise.resolve();
     this.onMessage = NOOP;
     this.onError = NOOP;
+    if (this.terminated) return this.termination ?? Promise.resolve();
     this.terminated = true;
     this.termination = Promise.resolve(this.worker.terminate()).then(() => undefined);
     void this.termination.catch(() => undefined);

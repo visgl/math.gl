@@ -259,7 +259,9 @@ export default class WorkerPool {
       this.count--;
     });
     this.isDestroyed = true;
-    this.destruction = Promise.all(workers.map(worker => worker.destroy())).then(() => undefined);
+    this.destruction = Promise.all(workers.map(worker => worker.destroy())).then(() => {
+      this.workers.clear();
+    });
     void this.destruction.catch(() => undefined);
     return this.destruction;
   }
