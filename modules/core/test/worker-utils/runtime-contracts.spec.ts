@@ -85,6 +85,27 @@ test('in-flight budget gates dispatch and priorities are stable', async () => {
   }
 });
 
+test('lowered concurrency retires surplus idle workers before dispatch', async () => {
+  const pool = new WorkerPool({source, maxConcurrency: 3, maxMobileConcurrency: 3});
+  try {
+    const jobs = await Promise.all([start(pool, 0), start(pool, 0), start(pool, 0)]);
+    jobs.forEach(job => job.done({}));
+    pool.setProps({maxConcurrency: 1, maxMobileConcurrency: 1});
+    const first = await start(pool, 0);
+    let started = false;
+    const second = start(pool, 0).then(job => {
+      started = true;
+      return job;
+    });
+    await tick();
+    assert.equal(started, false);
+    first.done({});
+    (await second).done({});
+  } finally {
+    await pool.destroy();
+  }
+});
+
 test('queue overflow rejects before transfer; abort releases queued capacity', async () => {
   const pool = new WorkerPool({source, maxConcurrency: 1, maxQueuedBytes: 8, maxInFlightBytes: 16});
   try {

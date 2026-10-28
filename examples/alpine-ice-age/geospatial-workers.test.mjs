@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import {MapEngine} from '@math.gl/geospatial/discontinuous';
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
 import {projectBulkInWorker, setupMapInWorker} from '@math.gl/geospatial/workers';
-import {NullWorker, processOnWorker} from '@math.gl/core/worker-utils';
+import {NullWorker, processOnWorker, WorkerPool} from '@math.gl/core/worker-utils';
 
 test('packaged null worker uses the shared protocol', async () => {
   assert.equal(await processOnWorker(NullWorker, 'hello'), 'hello');
@@ -22,6 +22,26 @@ test('pooled explorer worker retains cached grids after their results are transf
     assert(first.positions.length > 0);
     assert.deepEqual(second.positions, first.positions);
     assert.deepEqual(second.indices, first.indices);
+  }
+});
+
+test('cooperative grid cancellation releases the same worker for reuse', async () => {
+  const worker = {id: 'ice-grid-cancel', name: 'ice-grid-cancel', module: 'geospatial', version: 'latest',
+    worker: new URL('./discontinuous-grid-worker.js', import.meta.url).href, options: {}};
+  const pool = new WorkerPool({url: worker.worker, maxConcurrency: 1});
+  const controller = new AbortController();
+  try {
+    const cancelled = processOnWorker(worker, {view: 'butterfly', step: 1, discontinuous: true}, {
+      workerPool: pool, signal: controller.signal, cancellationMode: 'cooperative', cancellationTimeout: 1000,
+      onProgress: () => controller.abort(new Error('stop grid'))
+    });
+    await assert.rejects(cancelled, /stop grid/);
+    const result = await processOnWorker(worker, {view: 'butterfly', step: 30, discontinuous: true}, {workerPool: pool});
+    assert(result.positions.length > 0);
+    assert.equal(pool.stats.workersCreated, 1);
+    assert.equal(pool.stats.workerRestarts, 0);
+  } finally {
+    await pool.destroy();
   }
 });
 

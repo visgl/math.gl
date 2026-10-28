@@ -12,6 +12,7 @@ createWorker(async ({view, step, discontinuous}, _options, context) => {
     return {...grid, positions: grid.positions.slice(), indices: grid.indices.slice()};
   }
   const {map, ...grid} = await prepareDiscontinuousGrid(view, step, {
+    signal: {throwIfAborted: context.throwIfAborted},
     onProgress: context.reportProgress
   });
   return {...grid, positions: grid.positions.slice(), indices: grid.indices.slice(), preparedMap: map.toPrepared()};

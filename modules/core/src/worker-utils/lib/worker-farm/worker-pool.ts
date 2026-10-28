@@ -616,8 +616,8 @@ export default class WorkerPool {
     // If a worker has completed and returned to the queue, it can be used
     while (this.idleQueue.length > 0) {
       const worker = this.idleQueue.shift();
-      if (worker?.terminated) {
-        this.totals.workerRestarts++;
+      if (worker && (worker.terminated || this.count > this._getMaxConcurrency())) {
+        if (worker.terminated) this.totals.workerRestarts++;
         void worker.destroy().then(() => this.workers.delete(worker));
         this.count--;
       } else if (worker) {
