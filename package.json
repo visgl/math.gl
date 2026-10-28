@@ -31,7 +31,7 @@
     "lint": "ocular-lint",
     "metrics": "ocular-metrics",
     "playwright:install": "playwright install chromium",
-    "publish-beta": "ocular-publish version-only-beta",
+    "publish-beta": "node scripts/publish-beta.mjs",
     "publish-prod": "ocular-publish version-only-prod",
     "test": "ocular-test node headless",
     "test-browser": "ocular-test browser",
