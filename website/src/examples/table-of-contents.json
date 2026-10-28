@@ -19,29 +19,35 @@
     "id": "expressions"
   },
   {
-    "type": "doc",
-    "label": "Solar terminator",
-    "id": "sun-terminator"
-  },
-  {
-    "type": "doc",
-    "label": "Timezone globe",
-    "id": "timezone-globe"
-  },
-  {
-    "type": "doc",
-    "label": "Geoid globe",
-    "id": "geoid-globe"
-  },
-  {
-    "type": "doc",
-    "label": "Tectonic time machine",
-    "id": "tectonic-time-machine"
-  },
-  {
-    "type": "doc",
-    "label": "Glaciation Explorer",
-    "id": "alpine-ice-age"
+    "type": "category",
+    "label": "Earth",
+    "items": [
+      {
+        "type": "doc",
+        "label": "Solar terminator",
+        "id": "sun-terminator"
+      },
+      {
+        "type": "doc",
+        "label": "Timezone globe",
+        "id": "timezone-globe"
+      },
+      {
+        "type": "doc",
+        "label": "Geoid globe",
+        "id": "geoid-globe"
+      },
+      {
+        "type": "doc",
+        "label": "Tectonic time machine",
+        "id": "tectonic-time-machine"
+      },
+      {
+        "type": "doc",
+        "label": "Glaciation Explorer",
+        "id": "alpine-ice-age"
+      }
+    ]
   },
   {
     "type": "doc",
