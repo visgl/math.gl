@@ -157,11 +157,11 @@ function copyUnit(unit: CRSUnit): CRSUnit {
         (positive(unit.degreesPerUnit) && unit.metersPerUnit === undefined)),
     'unit'
   );
-  return Object.freeze({
-    name: unit.name,
-    metersPerUnit: unit.metersPerUnit,
-    degreesPerUnit: unit.degreesPerUnit
-  });
+  return Object.freeze(
+    unit.metersPerUnit !== undefined
+      ? {name: unit.name, metersPerUnit: unit.metersPerUnit}
+      : {name: unit.name, degreesPerUnit: unit.degreesPerUnit}
+  );
 }
 
 function copyScale(value: CRSRenderingScale): CRSRenderingScale {

@@ -58,6 +58,12 @@ describe('backend-independent descriptor construction', () => {
     expect(descriptor.axis).toBe('neu');
     expect(descriptor.xUnit.degreesPerUnit).toBe(1);
     expect(descriptor.zUnit.metersPerUnit).toBe(1);
+    expect(descriptor.xUnit).toEqual(native.xUnit);
+    expect(descriptor.zUnit).toEqual(native.zUnit);
+    expect('metersPerUnit' in descriptor.xUnit).toBe(false);
+    expect(Object.hasOwn(descriptor.xUnit, 'metersPerUnit')).toBe(false);
+    expect('degreesPerUnit' in descriptor.zUnit).toBe(false);
+    expect(Object.hasOwn(descriptor.zUnit, 'degreesPerUnit')).toBe(false);
     expect(descriptor.converter.WGS84.from([12, 55, 123])).toEqual([55, 12, 123]);
     expect(descriptor.converter['EPSG:3857'].from([0, 0])).toEqual(
       native.converter['EPSG:3857'].from([0, 0])
