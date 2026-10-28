@@ -115,7 +115,7 @@ export default class WorkerFarm {
    *   const job = WorkerFarm.getWorkerFarm().getWorkerPool({name, url}).startJob(...);
    */
   getWorkerPool(options: WorkerPoolTarget): WorkerPool {
-    const {name, source, url, getUrl, loadWorker} = options;
+    const {name, source, url, getUrl, loadWorker, workerType} = options;
     const workerPoolKey = getWorkerPoolKey(options);
     let workerPool = this.workerPools.get(workerPoolKey);
     if (!workerPool) {
@@ -124,7 +124,8 @@ export default class WorkerFarm {
         source,
         url,
         getUrl,
-        loadWorker
+        loadWorker,
+        workerType
       });
       workerPool.setProps(this._getWorkerPoolProps());
       this.workerPools.set(workerPoolKey, workerPool);
@@ -151,11 +152,13 @@ export default class WorkerFarm {
 
 /** Returns a cache key that distinguishes each worker source and factory. */
 function getWorkerPoolKey(options: WorkerPoolTarget): string {
-  const {name, source, url, urlKey, loadWorker} = options;
+  const {name, source, url, urlKey, loadWorker, workerType} = options;
   const sourceKey = source ? `source:${source}` : '';
   const urlKeyPart = url || urlKey ? `url:${url || urlKey}` : '';
   const loadWorkerKey = loadWorker ? `loadWorker:${getLoadWorkerId(loadWorker)}` : '';
-  return [name, sourceKey, urlKeyPart, loadWorkerKey].filter(Boolean).join('|');
+  return [name, sourceKey, urlKeyPart, loadWorkerKey, `type:${workerType || 'classic'}`]
+    .filter(Boolean)
+    .join('|');
 }
 
 /** Returns a stable identifier for a worker factory function. */

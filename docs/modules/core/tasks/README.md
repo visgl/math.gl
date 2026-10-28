@@ -16,7 +16,7 @@ and Node workers. Geospatial operations consume the same runtime through
 | Project many coordinates or prepare a map | Ready-to-use geospatial workers below |
 | Run a typed numerical operation | [Custom worker tutorial](./developer-guide/custom-workers.md) |
 | Stream batches with demand-driven input | [Batch processing](./developer-guide/custom-workers.md#stream-batches) |
-| Reuse a projection, spatial index, dataset, or WASM instance | [Persistent resources](./developer-guide/persistent-resources.md) |
+| Reuse a projection, spatial index, dataset, or WASM instance | [Persistent resources](./developer-guide/persistent-resources.md); [WASM in workers](./developer-guide/wasm.md) |
 | Share counters or cancellation between caller and worker | [Shared memory](./developer-guide/shared-memory.md) |
 | Control overload and diagnose latency | [Scheduling and instrumentation](../developer-guide/workers.md#scheduling-and-memory-budgets) |
 | Look up options and lifecycle rules | [API reference](./api-reference/runtime.md) |

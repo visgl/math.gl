@@ -15,9 +15,14 @@ const workerURLCache = new Map();
  * @param props.url Worker URL
  * @returns loadable url
  */
-export function getLoadableWorkerURL(props: {source?: string; url?: string}) {
+export function getLoadableWorkerURL(props: {
+  source?: string;
+  url?: string;
+  workerType?: 'classic' | 'module';
+}) {
   assert((props.source && !props.url) || (!props.source && props.url)); // Either source or url must be defined
 
+  if (props.url && props.workerType === 'module') return props.url;
   let workerURL = workerURLCache.get(props.source || props.url);
   if (!workerURL) {
     // Differentiate worker urls from worker source code

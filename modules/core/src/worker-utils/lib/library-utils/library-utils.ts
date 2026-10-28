@@ -164,7 +164,7 @@ export function getLibraryUrl(
 }
 
 async function loadLibraryFromFile(libraryUrl: string, moduleLibraryUrl: string): Promise<any> {
-  if (libraryUrl.endsWith('wasm')) {
+  if (/\.wasm(?:[?#]|$)/i.test(libraryUrl)) {
     return await loadAsArrayBuffer(libraryUrl);
   }
 
@@ -242,6 +242,7 @@ async function loadAsArrayBuffer(url: string): Promise<ArrayBuffer> {
   const {readFileAsArrayBuffer} = globalThis.loaders || {};
   if (isBrowser || !readFileAsArrayBuffer || url.startsWith('http')) {
     const response = await fetch(url);
+    if (!response.ok) throw new Error(`Failed to load ${url}: HTTP ${response.status}`);
     return await response.arrayBuffer();
   }
   try {

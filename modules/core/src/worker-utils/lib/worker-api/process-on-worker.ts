@@ -454,24 +454,25 @@ export function getWorkerPoolTarget(
   name: string
 ): WorkerPoolTarget {
   if (options['source']) {
-    return {name, source: options['source']};
+    return {name, source: options['source'], workerType: options.workerType};
   }
 
   const customWorkerUrl = getCustomWorkerURL(worker, options);
   if (customWorkerUrl) {
-    return {name, url: customWorkerUrl};
+    return {name, url: customWorkerUrl, workerType: options.workerType};
   }
 
   if (isBrowser && worker.loadWorker) {
     return {
       name,
+      workerType: options.workerType,
       loadWorker: worker.loadWorker,
       getUrl: () => getWorkerURL(worker, options),
       urlKey: getDefaultWorkerURL(worker)
     };
   }
 
-  return {name, url: getWorkerURL(worker, options)};
+  return {name, url: getWorkerURL(worker, options), workerType: options.workerType};
 }
 
 /**
@@ -571,7 +572,8 @@ function reportProgress(
 
 /** Keep runtime objects, callbacks and cancellation controls on the calling thread. */
 function serializableOptions(options: ProcessOnWorkerOptions): Record<string, any> {
-  const {signal, onProgress, onMetrics, workerPool, admission, ...serializable} = options;
+  const {signal, onProgress, onMetrics, workerPool, admission, workerType, ...serializable} =
+    options;
   return serializable;
 }
 

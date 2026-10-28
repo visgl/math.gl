@@ -34,6 +34,26 @@ const source = `self.onmessage = ({data: {type, payload}}) => {
 
 afterEach(() => WorkerFarm.getWorkerFarm().destroy());
 
+test('module worker URL overrides preserve compiled WASM options', async () => {
+  const code = `export {}; self.onmessage = ({data}) => {
+    if (data.type === 'process') self.postMessage({source: 'loaders.gl', type: 'done',
+      payload: {result: data.payload.options.compiled instanceof WebAssembly.Module}});
+  };`;
+  const url = URL.createObjectURL(new Blob([code], {type: 'application/javascript'}));
+  const compiled = new WebAssembly.Module(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0]));
+  try {
+    await expect(
+      processOnWorker(worker, null, {
+        [worker.id]: {workerUrl: url},
+        workerType: 'module',
+        compiled
+      })
+    ).resolves.toBe(true);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+});
+
 test('createWorker leaves the browser window message handler untouched', async () => {
   const original = window.onmessage;
   const handler = () => {};
@@ -158,6 +178,35 @@ test('browser resources initialize once and dispose deterministically', async ()
     await resource.destroy();
   }
   await expect(resource.run(1)).rejects.toThrow('destroyed');
+});
+
+test('browser WASM resource retains its instance after cooperative cancellation', async () => {
+  const {createWorkerResource} = await import('../../src/worker-utils');
+  const resource = await createWorkerResource(
+    {
+      ...worker,
+      loadWorker: () =>
+        new Worker(new URL('./fixtures/wasm-resource-worker.mjs', import.meta.url), {
+          type: 'module'
+        })
+    },
+    new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0])
+  );
+  try {
+    await expect(resource.run('first')).resolves.toEqual({valid: true, calls: 1});
+    const controller = new AbortController();
+    await expect(
+      resource.run('cancel', {
+        signal: controller.signal,
+        cancellationMode: 'cooperative',
+        onProgress: () => controller.abort(new Error('stop WASM'))
+      })
+    ).rejects.toThrow('stop WASM');
+    await expect(resource.run('next')).resolves.toEqual({valid: true, calls: 3});
+    expect(resource.stats.workersCreated).toBe(1);
+  } finally {
+    await resource.destroy();
+  }
 });
 
 test('browser capability detection follows isolation and retains the message fallback', () => {

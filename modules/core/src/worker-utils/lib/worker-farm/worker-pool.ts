@@ -24,6 +24,8 @@ export type WorkerPoolProps = {
   name?: string;
   source?: string; // | Function;
   url?: string;
+  /** Browser worker script type; ignored for Node workers. */
+  workerType?: 'classic' | 'module';
   /** Lazily resolves a classic worker fallback URL. */
   getUrl?: () => string;
   /** Creates a browser Worker directly. */
@@ -93,6 +95,7 @@ export default class WorkerPool {
   name: string = 'unnamed';
   source?: string; // | Function;
   url?: string;
+  workerType?: 'classic' | 'module';
   /** Lazily resolves a classic worker fallback URL. */
   getUrl?: () => string;
   /** Creates a browser Worker directly. */
@@ -226,6 +229,7 @@ export default class WorkerPool {
   constructor(props: WorkerPoolProps) {
     this.source = props.source;
     this.url = props.url;
+    this.workerType = props.workerType;
     this.getUrl = props.getUrl;
     this.loadWorker = props.loadWorker;
     this.setProps(props);
@@ -634,6 +638,7 @@ export default class WorkerPool {
           name,
           source: this.source,
           url: this.url,
+          workerType: this.workerType,
           getUrl: this.getUrl,
           loadWorker: this.loadWorker
         });
