@@ -34,3 +34,45 @@ void batches;
 void projected;
 void map;
 void direct;
+
+import {
+  createWorkerResource,
+  createResourceWorker,
+  type WorkerResourceObject,
+  type WorkerJobMetrics,
+  WorkerPool
+} from '@math.gl/core/worker-utils';
+declare const resourceWorker: WorkerResourceObject<{initial: number}, {delta: number}, number>;
+const resource = await createWorkerResource(resourceWorker, {initial: 1});
+const resourceResult: Promise<number> = resource.run({delta: 2});
+// @ts-expect-error Resource inputs retain their declared shape.
+resource.run({delta: 'wrong'});
+// @ts-expect-error Initialization is separately typed.
+createWorkerResource(resourceWorker, {initial: 'wrong'});
+createResourceWorker({
+  initialize: (input: {initial: number}) => ({value: input.initial}),
+  run: (state, input: {delta: number}, context) => {
+    context.signal?.throwIfAborted();
+    return state.value + input.delta;
+  }
+});
+const pool = new WorkerPool({
+  maxQueuedJobs: 8,
+  maxQueuedBytes: 1024,
+  onMetrics: (metrics: WorkerJobMetrics) => {
+    void metrics.executionMs;
+  }
+});
+const admission = await pool.reserve(16);
+void processOnWorker(
+  worker,
+  {count: 1},
+  {
+    workerPool: pool,
+    admission,
+    priority: 1,
+    cancellationMode: 'cooperative',
+    inputOwnership: 'share'
+  }
+);
+void resourceResult;

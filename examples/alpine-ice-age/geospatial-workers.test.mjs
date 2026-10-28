@@ -57,3 +57,14 @@ test('cancelling a running bulk job preserves copied input', async () => {
   }), {name: 'AbortError'});
   assert.equal(coordinates.byteLength, 800000);
 });
+
+test('cached projection grids skip reprojecting and emit completed progress', async () => {
+  const {prepareProjectionGrid, cacheProjectionGrid} = await import('./projection-grid.js');
+  const cached = {positions: new Float32Array([1, 2]), indices: new Uint32Array([0])};
+  cacheProjectionGrid('cached-test', cached);
+  const progress = [];
+  // An unknown projection would fail if preparation did not return before projection setup.
+  const result = await prepareProjectionGrid('cached-test', {reportProgress: p => progress.push(p)});
+  assert.equal(result, cached);
+  assert.deepEqual(progress, [{phase: 'projection-grid', completed: 1, total: 1, unit: 'tasks'}]);
+});

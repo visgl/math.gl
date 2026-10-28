@@ -72,25 +72,44 @@ function isTransferable(object: unknown) {
  * @param object
  */
 export function getTransferListForWriter(object: object | null): object {
-  if (object === null) {
-    return {};
-  }
-  const clone = Object.assign({}, object);
-
-  Object.keys(clone).forEach(key => {
-    // Typed Arrays and Arrays are passed with no change
+  const seen = new Map<object, any>();
+  function clone(value: any): any {
+    if (typeof value === 'function' || value instanceof RegExp) return {};
+    if (!value || typeof value !== 'object') return value;
+    if (seen.has(value)) return seen.get(value);
+    // Preserve structured-clone built-ins and backing-buffer identity.
     if (
-      typeof object[key] === 'object' &&
-      !ArrayBuffer.isView(object[key]) &&
-      !(object[key] instanceof Array)
-    ) {
-      clone[key] = getTransferListForWriter(object[key]);
-    } else if (typeof clone[key] === 'function' || clone[key] instanceof RegExp) {
-      clone[key] = {};
+      ArrayBuffer.isView(value) ||
+      value instanceof ArrayBuffer ||
+      (typeof SharedArrayBuffer !== 'undefined' && value instanceof SharedArrayBuffer) ||
+      value instanceof Date ||
+      isTransferable(value)
+    )
+      return value;
+    const result: any =
+      value instanceof Map
+        ? new Map()
+        : value instanceof Set
+          ? new Set()
+          : Array.isArray(value)
+            ? []
+            : {};
+    seen.set(value, result);
+    if (value instanceof Map) {
+      for (const [key, item] of value) result.set(clone(key), clone(item));
+    } else if (value instanceof Set) {
+      for (const item of value) result.add(clone(item));
     } else {
-      clone[key] = object[key];
+      for (const key of Object.keys(value)) {
+        Object.defineProperty(result, key, {
+          value: clone(value[key]),
+          enumerable: true,
+          writable: true,
+          configurable: true
+        });
+      }
     }
-  });
-
-  return clone;
+    return result;
+  }
+  return object === null ? {} : clone(object);
 }

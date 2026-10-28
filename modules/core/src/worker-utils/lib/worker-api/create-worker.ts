@@ -17,6 +17,7 @@ import WorkerBody from '../worker-farm/worker-body';
 
 /** Counter for jobs */
 let requestId = 0;
+let activeController: AbortController | null = null;
 let activeInputBatches: AsyncQueue<any> | null = null;
 let activeOutputAcknowledgements: AsyncQueue<void> | null = null;
 
@@ -43,9 +44,25 @@ export async function createWorker(
 
   // eslint-disable-next-line complexity
   WorkerBody.onmessage = async (type: WorkerMessageType, payload: WorkerMessagePayload) => {
+    if (type === 'cancel') {
+      activeController?.abort();
+      activeInputBatches?.close();
+      activeOutputAcknowledgements?.close();
+      return;
+    }
+    const controller =
+      type === 'process' || type === 'process-in-batches' ? new AbortController() : undefined;
+    if (controller) activeController = controller;
+    const startedAt = performance.now();
     const reporter =
       type === 'process' || type === 'process-in-batches' ? createProgressReporter() : undefined;
-    const jobContext = {...context, reportProgress: reporter?.report};
+    const jobContext = {
+      ...context,
+      signal: controller?.signal,
+      reportProgress: (progress: WorkerProgress) => {
+        if (!controller?.signal.aborted) reporter?.report(progress);
+      }
+    };
     try {
       switch (type) {
         case 'preload':
@@ -62,8 +79,12 @@ export async function createWorker(
             jobContext,
             payload.context || {}
           );
+          controller?.signal.throwIfAborted();
           reporter?.finish();
-          WorkerBody.postMessage('done', {result});
+          await WorkerBody.postMessage('done', {
+            result,
+            executionMs: performance.now() - startedAt
+          });
           break;
 
         case 'process-in-batches':
@@ -82,11 +103,13 @@ export async function createWorker(
               payload.context || {}
             );
             for await (const batch of resultIterator) {
+              controller?.signal.throwIfAborted();
               await WorkerBody.postMessage('output-batch', {result: batch});
               await outputAcknowledgements.next();
             }
+            controller?.signal.throwIfAborted();
             reporter?.finish();
-            await WorkerBody.postMessage('done', {});
+            await WorkerBody.postMessage('done', {executionMs: performance.now() - startedAt});
           } finally {
             activeInputBatches = null;
             activeOutputAcknowledgements = null;
@@ -119,9 +142,12 @@ export async function createWorker(
     } catch (error) {
       reporter?.finish();
       const message = error instanceof Error ? error.message : '';
-      WorkerBody.postMessage('error', {error: message});
+      await WorkerBody.postMessage('error', {error: message});
+    } finally {
+      if (controller && activeController === controller) activeController = null;
     }
   };
+  await WorkerBody.postMessage('ready', {});
 }
 
 /** Requests exactly one input batch whenever the worker-side processor advances its iterator. */
@@ -137,38 +163,46 @@ async function* createDemandDrivenIterator(inputBatches: AsyncQueue<any>): Async
 }
 
 function processOnMainThread(arrayBuffer: ArrayBuffer, options = {}, jobContext = {}) {
+  const signal = activeController?.signal;
+  signal?.throwIfAborted();
   return new Promise((resolve, reject) => {
     const id = requestId++;
-
-    /**
-     */
+    const cleanup = () => {
+      signal?.removeEventListener('abort', abort);
+      void WorkerBody.removeEventListener(onMessage);
+    };
+    const abort = () => {
+      cleanup();
+      reject(signal?.reason);
+    };
     const onMessage = (type: string, payload: WorkerMessagePayload) => {
-      if (payload.id !== id) {
-        // not ours
-        return;
-      }
-
-      switch (type) {
-        case 'done':
-          WorkerBody.removeEventListener(onMessage);
-          resolve(payload.result);
-          break;
-
-        case 'error':
-          WorkerBody.removeEventListener(onMessage);
-          reject(payload.error);
-          break;
-
-        default:
-        // ignore
+      if (payload.id !== id) return;
+      if (type === 'done') {
+        cleanup();
+        resolve(payload.result);
+      } else if (type === 'error') {
+        cleanup();
+        reject(payload.error);
       }
     };
-
-    WorkerBody.addEventListener(onMessage);
-
-    // Ask the main thread to decode data
-    const payload = {id, input: arrayBuffer, options, context: jobContext};
-    WorkerBody.postMessage('process', payload);
+    void WorkerBody.addEventListener(onMessage)
+      .then(async () => {
+        if (signal?.aborted) {
+          abort();
+          return;
+        }
+        signal?.addEventListener('abort', abort, {once: true});
+        await WorkerBody.postMessage('process', {
+          id,
+          input: arrayBuffer,
+          options,
+          context: jobContext
+        });
+      })
+      .catch(error => {
+        cleanup();
+        reject(error);
+      });
   });
 }
 

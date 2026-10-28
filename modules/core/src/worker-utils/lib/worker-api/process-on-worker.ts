@@ -13,7 +13,8 @@ import type {
 import type WorkerJob from '../worker-farm/worker-job';
 import AsyncQueue from '../async-queue/async-queue';
 import WorkerFarm from '../worker-farm/worker-farm';
-import type {WorkerPoolTarget} from '../worker-farm/worker-pool';
+import type WorkerPool from '../worker-farm/worker-pool';
+import type {WorkerPoolTarget, WorkerAdmission} from '../worker-farm/worker-pool';
 import {
   getCustomWorkerURL,
   getConfiguredWorkerURL,
@@ -21,11 +22,15 @@ import {
   getWorkerURL,
   getWorkerName
 } from './get-worker-url';
-import {getTransferListForWriter} from '../worker-utils/get-transfer-list';
+import {getTransferList, getTransferListForWriter} from '../worker-utils/get-transfer-list';
 import {isBrowser} from '../env-utils/globals';
+import {getInputByteLength} from '../worker-utils/get-input-byte-length';
 
 /** Options for worker processing */
 export type ProcessOnWorkerOptions = WorkerOptions & {
+  /** Isolated pool, required when using an admission reservation. */
+  workerPool?: WorkerPool;
+  admission?: WorkerAdmission;
   /** Cancels the job by terminating its worker. */
   signal?: AbortSignal;
   /** Diagnostic name shown for the worker job. */
@@ -87,16 +92,18 @@ export async function processOnWorker<Input, Output, Options extends object>(
 ): Promise<Output> {
   if (
     options.inputOwnership !== undefined &&
-    !['copy', 'transfer'].includes(options.inputOwnership)
+    !['copy', 'transfer', 'share'].includes(options.inputOwnership)
   )
     throw new Error('Invalid worker input ownership');
   throwIfAborted(options.signal);
+  validateSharedInput(options, [data, serializableOptions(options), jobContext]);
   const name = getWorkerName(worker as WorkerObject);
 
-  const workerFarm = WorkerFarm.getWorkerFarm(options);
-  const workerPool = workerFarm.getWorkerPool(
-    getWorkerPoolTarget(worker as WorkerObject, options, name)
-  );
+  const workerPool =
+    options.workerPool ??
+    WorkerFarm.getWorkerFarm(options).getWorkerPool(
+      getWorkerPoolTarget(worker as WorkerObject, options, name)
+    );
 
   const jobName = options.jobName || worker.name;
   const job = await workerPool.startJob(
@@ -104,13 +111,20 @@ export async function processOnWorker<Input, Output, Options extends object>(
     // eslint-disable-next-line
     onMessage.bind(null, context, options),
     undefined,
-    options.signal
+    options.signal,
+    {
+      inputBytes: getInputByteLength([data, serializableOptions(options), jobContext]),
+      priority: options.priority,
+      admission: options.admission,
+      cancellationMode: options.cancellationMode,
+      cancellationTimeout: options.cancellationTimeout
+    }
   );
 
   try {
-    if (options.signal?.aborted) job.abort(getAbortReason(options.signal));
+    if (options.signal?.aborted && !job.isCancelled) job.abort(getAbortReason(options.signal));
     // AbortSignal cannot be structured-cloned. It controls the job on this thread only.
-    const {signal: _signal, onProgress: _onProgress, ...workerOptions} = options;
+    const workerOptions = serializableOptions(options);
     const transferableOptions = getTransferListForWriter(workerOptions);
     const transferableContext = getTransferListForWriter(jobContext);
     if (job.isRunning) {
@@ -121,14 +135,14 @@ export async function processOnWorker<Input, Output, Options extends object>(
           options: transferableOptions,
           context: transferableContext
         },
-        options.inputOwnership === 'copy' ? [] : undefined
+        options.inputOwnership === 'copy' || options.inputOwnership === 'share' ? [] : undefined
       );
     }
 
     const result = await job.result;
     return result.result;
   } catch (error) {
-    job.abort(error);
+    if (!job.isCancelled) job.abort(error);
     throw error;
   }
 }
@@ -155,7 +169,7 @@ export function processOnWorkerInBatches<
 ): AsyncIterable<OutputBatch> {
   if (
     options.inputOwnership !== undefined &&
-    !['copy', 'transfer'].includes(options.inputOwnership)
+    !['copy', 'transfer', 'share'].includes(options.inputOwnership)
   )
     throw new Error('Invalid worker input ownership');
   return processOnWorkerInBatchesIterator(
@@ -177,8 +191,18 @@ async function* processOnWorkerInBatchesIterator<InputBatch, OutputBatch>(
 ): AsyncIterable<OutputBatch> {
   throwIfAborted(options.signal);
   const name = getWorkerName(worker);
-  const workerFarm = WorkerFarm.getWorkerFarm(options);
-  const workerPool = workerFarm.getWorkerPool(getWorkerPoolTarget(worker, options, name));
+  const workerPool =
+    options.workerPool ??
+    WorkerFarm.getWorkerFarm(options).getWorkerPool(getWorkerPoolTarget(worker, options, name));
+  validateSharedInput(options, [serializableOptions(options), jobContext]);
+  const contextBytes = getInputByteLength([serializableOptions(options), jobContext]);
+  const inputBytes = options.inputBytes ?? contextBytes;
+  if (workerPool.requiresInputBytes && options.inputBytes === undefined) {
+    throw new Error('Byte-bounded batch sessions require inputBytes');
+  }
+  if (!Number.isSafeInteger(inputBytes) || inputBytes < contextBytes) {
+    throw new RangeError('Batch inputBytes must cover options and context buffers');
+  }
   const outputBatches = new AsyncQueue<OutputBatch>();
   const inputIterator = getAsyncIterator(input);
   let outputFinished = false;
@@ -213,6 +237,7 @@ async function* processOnWorkerInBatchesIterator<InputBatch, OutputBatch>(
     .startJob(
       options.jobName || worker.name,
       (activeJob, type, payload) => {
+        if (activeJob.isCancelled && type !== 'done' && type !== 'error') return;
         switch (type) {
           case 'progress':
             reportProgress(activeJob, options, payload);
@@ -230,14 +255,25 @@ async function* processOnWorkerInBatchesIterator<InputBatch, OutputBatch>(
                   inputFinished = true;
                   activeJob.postMessage('input-done', {});
                 } else {
+                  validateSharedInput(options, nextBatch.value);
+                  if (
+                    options.inputBytes !== undefined &&
+                    getInputByteLength(nextBatch.value) + contextBytes > inputBytes
+                  ) {
+                    throw new RangeError('Worker batch exceeds reserved inputBytes');
+                  }
                   activeJob.postMessage(
                     'input-batch',
                     {input: nextBatch.value},
-                    options.inputOwnership === 'copy' ? [] : undefined
+                    options.inputOwnership === 'copy' || options.inputOwnership === 'share'
+                      ? []
+                      : undefined
                   );
                 }
               })
-              .catch(error => activeJob.abort(error));
+              .catch(error => {
+                if (!activeJob.isCancelled) activeJob.abort(error);
+              });
             break;
 
           case 'output-batch':
@@ -269,7 +305,14 @@ async function* processOnWorkerInBatchesIterator<InputBatch, OutputBatch>(
         }
       },
       undefined,
-      options.signal
+      options.signal,
+      {
+        inputBytes,
+        priority: options.priority,
+        admission: options.admission,
+        cancellationMode: options.cancellationMode,
+        cancellationTimeout: options.cancellationTimeout
+      }
     )
     .catch(error => {
       closeJobInput();
@@ -282,12 +325,16 @@ async function* processOnWorkerInBatchesIterator<InputBatch, OutputBatch>(
   });
 
   try {
-    const {signal: _signal, onProgress: _onProgress, ...workerOptions} = options;
+    const workerOptions = serializableOptions(options);
     if (job.isRunning) {
-      job.postMessage('process-in-batches', {
-        options: getTransferListForWriter(workerOptions),
-        context: getTransferListForWriter(jobContext)
-      });
+      job.postMessage(
+        'process-in-batches',
+        {
+          options: getTransferListForWriter(workerOptions),
+          context: getTransferListForWriter(jobContext)
+        },
+        options.inputOwnership === 'copy' || options.inputOwnership === 'share' ? [] : undefined
+      );
     }
 
     try {
@@ -305,7 +352,7 @@ async function* processOnWorkerInBatchesIterator<InputBatch, OutputBatch>(
     }
     await job.result;
   } finally {
-    if (job.isRunning) {
+    if (job.isRunning && !job.isCancelled) {
       job.abort(createAbortError('Worker batch iterator was closed'));
     }
     closeJobInput();
@@ -363,13 +410,24 @@ export async function preloadWorker(
   preloadOptions: PreloadWorkerOptions = {}
 ): Promise<void> {
   const name = getWorkerName(worker);
-  const workerFarm = WorkerFarm.getWorkerFarm(options);
-  const workerPool = workerFarm.getWorkerPool(getWorkerPoolTarget(worker, options, name));
+  const workerPool =
+    options.workerPool ??
+    WorkerFarm.getWorkerFarm(options).getWorkerPool(getWorkerPoolTarget(worker, options, name));
   const count =
-    preloadOptions.count ?? options.maxConcurrency ?? options['core']?.maxConcurrency ?? 1;
+    preloadOptions.count ??
+    options.maxConcurrency ??
+    options.workerPool?.maxConcurrency ??
+    options['core']?.maxConcurrency ??
+    1;
+  if (!Number.isSafeInteger(count) || count < 0) throw new RangeError('Invalid preload count');
 
   const preloadJobs = Array.from({length: count}, async () => {
-    const job = await workerPool.startJob(`${worker.name} preload`, onPreloadMessage);
+    const job = await workerPool.startJob(
+      `${worker.name} preload`,
+      onPreloadMessage,
+      undefined,
+      options.signal
+    );
     job.postMessage('preload', {});
     return await job.result;
   });
@@ -384,7 +442,7 @@ export async function preloadWorker(
  * @param name Versioned worker name.
  * @returns A target suitable for worker-pool lookup.
  */
-function getWorkerPoolTarget(
+export function getWorkerPoolTarget(
   worker: WorkerObject,
   options: ProcessOnWorkerOptions,
   name: string
@@ -422,6 +480,7 @@ async function onMessage(
   type: WorkerMessageType,
   payload: WorkerMessagePayload
 ) {
+  if (job.isCancelled && type !== 'done' && type !== 'error') return;
   switch (type) {
     case 'progress':
       reportProgress(job, options, payload);
@@ -494,10 +553,25 @@ function reportProgress(
   options: ProcessOnWorkerOptions,
   payload: WorkerMessagePayload
 ): void {
-  if (!job.isRunning || !payload.progress) return;
+  if (!job.isRunning || job.isCancelled || !payload.progress) return;
   try {
     options.onProgress?.(payload.progress);
   } catch (error) {
     job.abort(error);
+  }
+}
+
+/** Keep runtime objects, callbacks and cancellation controls on the calling thread. */
+function serializableOptions(options: ProcessOnWorkerOptions): Record<string, any> {
+  const {signal, onProgress, onMetrics, workerPool, admission, ...serializable} = options;
+  return serializable;
+}
+
+/** Share mode forbids accidentally cloning or detaching ordinary transferable storage. */
+export function validateSharedInput(options: WorkerOptions, input: unknown): void {
+  if (options.inputOwnership === 'share' && getTransferList(input).length) {
+    throw new Error(
+      'Share ownership requires SharedArrayBuffer storage; ordinary transferables are not allowed'
+    );
   }
 }

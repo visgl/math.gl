@@ -12,6 +12,14 @@ export default class WorkerJob {
   readonly name: string;
   readonly workerThread: WorkerThread;
   isRunning: boolean = true;
+  isCancelled = false;
+  failed = false;
+  postMessageMs = 0;
+  executionMs?: number;
+  /** Settles only when the worker can be reused, even after cooperative cancellation. */
+  readonly completion: Promise<void>;
+  private complete: () => void = () => {};
+  private cancellationTimer?: ReturnType<typeof setTimeout>;
   /** Promise that resolves when Job is done */
   readonly result: Promise<any>;
 
@@ -21,6 +29,9 @@ export default class WorkerJob {
   constructor(jobName: string, workerThread: WorkerThread) {
     this.name = jobName;
     this.workerThread = workerThread;
+    this.completion = new Promise(resolve => {
+      this.complete = resolve;
+    });
     this.result = new Promise((resolve, reject) => {
       this._resolve = resolve;
       this._reject = reject;
@@ -36,15 +47,20 @@ export default class WorkerJob {
     payload: WorkerMessagePayload,
     transferList?: Transferable[]
   ): void {
-    if (!this.isRunning) return;
-    this.workerThread.postMessage(
-      {
-        source: 'loaders.gl', // Lets worker ignore unrelated messages
-        type,
-        payload
-      },
-      transferList
-    );
+    if (!this.isRunning || this.isCancelled) return;
+    const startedAt = performance.now();
+    try {
+      this.workerThread.postMessage(
+        {
+          source: 'loaders.gl', // Lets worker ignore unrelated messages
+          type,
+          payload
+        },
+        transferList
+      );
+    } finally {
+      this.postMessageMs += performance.now() - startedAt;
+    }
   }
 
   /**
@@ -55,7 +71,10 @@ export default class WorkerJob {
       return;
     }
     this.isRunning = false;
-    this._resolve(value);
+    this.executionMs = value?.executionMs;
+    clearTimeout(this.cancellationTimer);
+    this.complete();
+    if (!this.isCancelled) this._resolve(value);
   }
 
   /**
@@ -66,7 +85,27 @@ export default class WorkerJob {
       return;
     }
     this.isRunning = false;
+    this.failed = true;
+    clearTimeout(this.cancellationTimer);
+    this.complete();
     this._reject(error);
+  }
+
+  /** Reject immediately, but keep the lease until acknowledgement or hard-cancel timeout. */
+  cancel(reason?: unknown, timeout = 1000): void {
+    if (!this.isRunning || this.isCancelled) return;
+    if (!Number.isFinite(timeout) || timeout < 0) {
+      this.abort(new RangeError('cancellationTimeout must be finite and nonnegative'));
+      return;
+    }
+    this.isCancelled = true;
+    this._reject(reason ?? createAbortError(`Worker job "${this.name}" was cancelled`));
+    try {
+      this.workerThread.postMessage({source: 'loaders.gl', type: 'cancel', payload: {}}, []);
+      this.cancellationTimer = setTimeout(() => this.abort(reason), timeout);
+    } catch (error) {
+      this.abort(error);
+    }
   }
 
   /**
@@ -77,6 +116,7 @@ export default class WorkerJob {
     if (!this.isRunning) {
       return;
     }
+    this.isCancelled = true;
     this.workerThread.destroy();
     this.error(
       arguments.length ? reason : createAbortError(`Worker job "${this.name}" was aborted`)

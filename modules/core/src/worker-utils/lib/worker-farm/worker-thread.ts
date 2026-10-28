@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {LoadWorker} from '../../types';
-import {NodeWorker, NodeWorkerType} from '../node/worker_threads';
+import {NodeWorker, type NodeWorkerType} from '../node/worker_threads';
 import {isBrowser} from '../env-utils/globals';
 import {assert} from '../env-utils/assert';
 import {getLoadableWorkerURL} from '../worker-utils/get-loadable-worker-url';
@@ -36,6 +36,10 @@ export default class WorkerThread {
   /** Creates a browser Worker directly. */
   readonly loadWorker: LoadWorker | undefined;
   terminated: boolean = false;
+  readonly creationTimeMs: number;
+  startupTimeMs?: number;
+  private termination?: Promise<void>;
+  private createdAt = performance.now();
   worker: Worker | NodeWorkerType;
   onMessage: (message: any) => void;
   onError: (error: Error) => void;
@@ -62,18 +66,23 @@ export default class WorkerThread {
     // biome-ignore lint/suspicious/noConsole: Preserve upstream worker diagnostics.
     this.onError = error => console.log(error); // eslint-disable-line
 
+    const startedAt = performance.now();
     this.worker = isBrowser ? this._createBrowserWorker() : this._createNodeWorker();
+    this.creationTimeMs = performance.now() - startedAt;
   }
 
   /**
    * Terminate this worker thread
    * @note Can free up significant memory
    */
-  destroy(): void {
+  destroy(): Promise<void> {
+    if (this.terminated) return this.termination ?? Promise.resolve();
     this.onMessage = NOOP;
     this.onError = NOOP;
-    this.worker.terminate(); // eslint-disable-line @typescript-eslint/no-floating-promises
     this.terminated = true;
+    this.termination = Promise.resolve(this.worker.terminate()).then(() => undefined);
+    void this.termination.catch(() => undefined);
+    return this.termination;
   }
 
   /** Keeps this worker from preventing Node.js process exit while idle. */
@@ -157,18 +166,26 @@ export default class WorkerThread {
     worker.onmessage = event => {
       if (!event.data) {
         this.onError(new Error('No data received'));
+      } else if (event.data.type === 'ready') {
+        this.startupTimeMs = performance.now() - this.createdAt;
       } else {
         this.onMessage(event.data);
       }
     };
     // This callback represents an uncaught exception in the worker thread
     worker.onerror = (error: ErrorEvent): void => {
-      this.onError(this._getErrorFromErrorEvent(error));
-      this.terminated = true;
+      const onError = this.onError;
+      const reason = this._getErrorFromErrorEvent(error);
+      this.destroy();
+      onError(reason);
     };
     // TODO - not clear when this would be called, for now just log in case it happens
     // biome-ignore lint/suspicious/noConsole: Preserve upstream worker diagnostics.
-    worker.onmessageerror = event => console.error(event); // eslint-disable-line
+    worker.onmessageerror = () => {
+      const onError = this.onError;
+      this.destroy();
+      onError(new Error('Worker message could not be deserialized'));
+    }; // eslint-disable-line
 
     return worker;
   }
@@ -194,13 +211,14 @@ export default class WorkerThread {
       throw new Error('no worker');
     }
     worker.on('message', data => {
-      // console.error('message', data);
-      this.onMessage(data);
+      if (data?.type === 'ready') this.startupTimeMs = performance.now() - this.createdAt;
+      else this.onMessage(data);
     });
     worker.on('error', error => {
       this.terminated = true;
       this.onError(error as Error);
     });
+    this.termination = new Promise(resolve => worker.on('exit', () => resolve()));
     worker.on('exit', code => {
       if (!this.terminated) {
         this.terminated = true;

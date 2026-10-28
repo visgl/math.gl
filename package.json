@@ -50,7 +50,8 @@
     "check:tree-shaking": "node scripts/check-tree-shaking.mjs",
     "check:packages": "node scripts/check-packages.mjs",
     "check:attributions": "node scripts/check-attributions.mjs",
-    "check:terrain-dem": "node scripts/qualify-terrain-dem.mjs"
+    "check:terrain-dem": "node scripts/qualify-terrain-dem.mjs",
+    "benchmark:workers": "node test/bench/workers/index.mjs"
   },
   "devDependencies": {
     "@turf/destination": "^7.4.0",

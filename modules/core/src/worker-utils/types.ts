@@ -14,10 +14,45 @@ export type WorkerProgress = {
   unit: string;
 };
 
+/** One settled worker lease. Times are milliseconds; postMessageMs is synchronous serialization/transfer. */
+export type WorkerJobMetrics = {
+  name: string;
+  outcome: 'completed' | 'failed' | 'cancelled';
+  queueWaitMs: number;
+  durationMs: number;
+  workerCreationMs: number;
+  /** Runtime ready handshake latency; absent for legacy custom workers. */
+  workerStartupMs?: number;
+  postMessageMs: number;
+  /** Processor time reported by createWorker; absent for legacy workers. */
+  executionMs?: number;
+  inputBytes: number;
+};
+
+export type WorkerPoolStats = {
+  queuedJobs: number;
+  activeJobs: number;
+  queuedBytes: number;
+  inFlightBytes: number;
+  peakQueuedBytes: number;
+  peakInFlightBytes: number;
+  pendingAdmissions: number;
+  reservations: number;
+  workersCreated: number;
+  workerRestarts: number;
+  completed: number;
+  failed: number;
+  cancelled: number;
+};
+
 /** Shared worker execution options. */
 export type WorkerOptions = {
   /** Copy input or transfer its backing buffers; transfer preserves the loaders.gl default. */
-  inputOwnership?: 'copy' | 'transfer';
+  inputOwnership?: 'copy' | 'transfer' | 'share';
+  /** Hard termination is the compatibility default. Cooperative mode requires createWorker support. */
+  cancellationMode?: 'terminate' | 'cooperative';
+  /** Grace period before hard termination; defaults to 1000 ms. */
+  cancellationTimeout?: number;
   /** Cancels queued or running work. */
   signal?: AbortSignal;
   /** Receives phase progress. Throwing aborts the job with that error. */
@@ -27,6 +62,18 @@ export type WorkerOptions = {
   worker?: boolean;
   /** Declares batch-protocol support for a custom worker, or disables batch offloading. */
   workerInBatches?: boolean;
+  /** Per-pool input byte budgets. Queue overflow rejects before input transfer. */
+  maxQueuedJobs?: number;
+  maxPendingAdmissions?: number;
+  priorityAgingMs?: number;
+  onMetrics?: (metrics: WorkerJobMetrics) => void;
+  performanceMarks?: boolean;
+  maxQueuedBytes?: number;
+  maxInFlightBytes?: number;
+  /** Larger values start first; equal priorities preserve submission order. */
+  priority?: number;
+  /** Reserved input bytes for a batch session; bounds each batch's retained buffers. */
+  inputBytes?: number;
   maxConcurrency?: number;
   maxMobileConcurrency?: number;
   reuseWorkers?: boolean;
@@ -44,6 +91,8 @@ export type WorkerOptions = {
 export type LoadWorker = () => Worker | null;
 
 export type WorkerContext = {
+  /** Worker-side signal; long CPU loops must yield and check it to cooperate. */
+  signal?: AbortSignal;
   /** Reports progress from the active worker job. */
   reportProgress?: (progress: WorkerProgress) => void;
   process?: Process;
@@ -125,6 +174,8 @@ export type WorkerObject<
               <= error
  */
 export type WorkerMessageType =
+  | 'ready'
+  | 'cancel'
   | 'progress'
   | 'preload'
   | 'process'
@@ -140,6 +191,7 @@ export type WorkerMessageType =
 export type WorkerMessagePayload = {
   /** Phase progress from the worker. */
   progress?: WorkerProgress;
+  executionMs?: number;
   id?: number;
   options?: {[key: string]: any};
   context?: WorkerJobContext;

@@ -87,6 +87,15 @@ jobs:
       - name: Check worker API types
         run: yarn check:worker-types
 
+      - name: Qualify worker scheduling, ownership and lifecycle workloads
+        run: node test/bench/workers/index.mjs --quick --output=/tmp/worker-qualification.json
+
+      - name: Upload worker runtime qualification
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: worker-runtime-qualification
+          path: /tmp/worker-qualification.json
+
       - name: Check selective imports and optional dependency removal
         run: yarn check:tree-shaking
 

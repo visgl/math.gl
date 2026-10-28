@@ -12,6 +12,8 @@ export type {
   WorkerObject,
   WorkerOptions,
   WorkerProgress,
+  WorkerJobMetrics,
+  WorkerPoolStats,
   WorkerContext,
   WorkerJobContext,
   Process,
@@ -84,3 +86,11 @@ export const NullWorker: WorkerObject = {
     null: {}
   }
 };
+
+export type {WorkerAdmission, WorkerPoolProps} from './lib/worker-farm/worker-pool';
+export {createWorkerResource, createResourceWorker} from './lib/worker-api/worker-resource';
+export type {
+  WorkerResource,
+  WorkerResourceObject,
+  ResourceRequest
+} from './lib/worker-api/worker-resource';

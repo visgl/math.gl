@@ -5,7 +5,7 @@
 import WorkerPool from './worker-pool';
 import type {WorkerPoolTarget} from './worker-pool';
 import WorkerThread from './worker-thread';
-import type {LoadWorker} from '../../types';
+import type {LoadWorker, WorkerJobMetrics} from '../../types';
 
 /**
  * @param maxConcurrency - max count of workers
@@ -15,6 +15,13 @@ import type {LoadWorker} from '../../types';
  * @param onDebug - callback intended to allow application to log worker pool activity
  */
 export type WorkerFarmProps = {
+  maxQueuedJobs?: number;
+  maxPendingAdmissions?: number;
+  priorityAgingMs?: number;
+  onMetrics?: (metrics: WorkerJobMetrics) => void;
+  performanceMarks?: boolean;
+  maxQueuedBytes?: number;
+  maxInFlightBytes?: number;
   maxConcurrency?: number;
   maxMobileConcurrency?: number;
   reuseWorkers?: boolean;
@@ -22,6 +29,13 @@ export type WorkerFarmProps = {
 };
 
 const DEFAULT_PROPS: Required<WorkerFarmProps> = {
+  maxQueuedJobs: Infinity,
+  maxPendingAdmissions: 128,
+  priorityAgingMs: 1000,
+  onMetrics: () => {},
+  performanceMarks: false,
+  maxQueuedBytes: Infinity,
+  maxInFlightBytes: Infinity,
   maxConcurrency: 3,
   maxMobileConcurrency: 1,
   reuseWorkers: true,
@@ -67,11 +81,10 @@ export default class WorkerFarm {
    * @param reason Optional error delivered to active jobs.
    * @note Can free up significant memory
    */
-  destroy(reason?: unknown): void {
-    for (const workerPool of this.workerPools.values()) {
-      workerPool.destroy(reason);
-    }
-    this.workerPools = new Map<string, WorkerPool>();
+  destroy(reason?: unknown): Promise<void> {
+    const pools = [...this.workerPools.values()];
+    this.workerPools.clear();
+    return Promise.all(pools.map(pool => pool.destroy(reason))).then(() => undefined);
   }
 
   /**
@@ -79,7 +92,12 @@ export default class WorkerFarm {
    * @param props
    */
   setProps(props: WorkerFarmProps): void {
-    this.props = {...this.props, ...props};
+    // Task payloads, signals and callbacks outside farm configuration must not be retained.
+    const configuration: WorkerFarmProps = {};
+    for (const key of Object.keys(DEFAULT_PROPS)) {
+      if (props[key] !== undefined) configuration[key] = props[key];
+    }
+    this.props = {...this.props, ...configuration};
     // Update worker pool props
     for (const workerPool of this.workerPools.values()) {
       workerPool.setProps(this._getWorkerPoolProps());
@@ -116,6 +134,13 @@ export default class WorkerFarm {
 
   _getWorkerPoolProps() {
     return {
+      maxQueuedJobs: this.props.maxQueuedJobs,
+      maxPendingAdmissions: this.props.maxPendingAdmissions,
+      priorityAgingMs: this.props.priorityAgingMs,
+      onMetrics: this.props.onMetrics,
+      performanceMarks: this.props.performanceMarks,
+      maxQueuedBytes: this.props.maxQueuedBytes,
+      maxInFlightBytes: this.props.maxInFlightBytes,
       maxConcurrency: this.props.maxConcurrency,
       maxMobileConcurrency: this.props.maxMobileConcurrency,
       reuseWorkers: this.props.reuseWorkers,

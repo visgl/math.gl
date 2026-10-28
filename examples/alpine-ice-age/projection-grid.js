@@ -46,6 +46,11 @@ function sourcePositions(view) {
 }
 
 export async function prepareProjectionGrid(view, context) {
+  context.signal?.throwIfAborted();
+  if (grids.has(view)) {
+    context.reportProgress?.({phase: 'projection-grid', completed: 1, total: 1, unit: 'tasks'});
+    return grids.get(view);
+  }
   const {projectBulk} = await import('@math.gl/geospatial/workers/operations');
   const positions = sourcePositions(view);
   if (view !== 'globe') await projectBulk({
