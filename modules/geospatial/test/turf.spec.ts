@@ -322,3 +322,34 @@ test('native geometry conversion and decomposition preserve topology', async () 
   expect(api.booleanConcave(concave).values[0]).toBe(1);
   expect(getGeoArrowRowCount(api.lineSegment(sliceGeoArrowColumn(input, 1, 2)))).toBe(0);
 });
+
+test('point-on-line tolerance works perpendicular to axis-aligned segments', async () => {
+  const {booleanPointOnLine} = await import('../src/turf');
+  const horizontal = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [2, 0]
+      ]
+    }
+  ]);
+  const vertical = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [0, 2]
+      ]
+    }
+  ]);
+  expect(booleanPointOnLine(column([point(1, 1e-10)]), horizontal, {epsilon: 1e-8}).values[0]).toBe(
+    1
+  );
+  expect(booleanPointOnLine(column([point(1e-10, 1)]), vertical, {epsilon: 1e-8}).values[0]).toBe(
+    1
+  );
+  expect(booleanPointOnLine(column([point(3, 1e-10)]), horizontal, {epsilon: 1e-8}).values[0]).toBe(
+    0
+  );
+});

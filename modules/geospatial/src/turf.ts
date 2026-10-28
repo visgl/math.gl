@@ -829,12 +829,13 @@ export function booleanPointOnLine(
         v = point(right.array.child, j);
       if (!u || !v) continue;
       const cross = (p[0] - u[0]) * (v[1] - u[1]) - (p[1] - u[1]) * (v[0] - u[0]);
-      if (
+      const axis = Math.abs(v[0] - u[0]) >= Math.abs(v[1] - u[1]) ? 0 : 1;
+      if (u[0] === v[0] && u[1] === v[1]) {
+        if (p[0] !== u[0] || p[1] !== u[1]) continue;
+      } else if (
         Math.abs(cross) > epsilon ||
-        p[0] < Math.min(u[0], v[0]) ||
-        p[0] > Math.max(u[0], v[0]) ||
-        p[1] < Math.min(u[1], v[1]) ||
-        p[1] > Math.max(u[1], v[1])
+        p[axis] < Math.min(u[axis], v[axis]) ||
+        p[axis] > Math.max(u[axis], v[axis])
       )
         continue;
       if (
