@@ -97,6 +97,11 @@ jobs:
           yarn workspace math.gl-raster-mesh-preparation test
           yarn workspace math.gl-raster-mesh-preparation build
 
+      - name: Test projection domains example
+        run: |
+          yarn workspace math.gl-projection-domains test
+          yarn workspace math.gl-projection-domains build
+
       - name: Check worker API types
         run: yarn check:worker-types
 
@@ -279,6 +284,10 @@ jobs:
           yarn workspace math.gl-proj-wasm-crs test
           yarn workspace math.gl-proj-wasm-crs build
           yarn workspace math.gl-proj-wasm-crs test:browser
+
+      - name: Test projection domains in Chromium
+        timeout-minutes: 3
+        run: yarn workspace math.gl-projection-domains test:browser
 
       - name: Test solar terminator rendering and cut-map detail
         timeout-minutes: 5
