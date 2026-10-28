@@ -100,3 +100,29 @@ test('abort between native calls discards partial output', async () => {
   try {await assert.rejects(processor.transform(batch(), {signal: controller.signal}), /cancelled/); assert.equal(count, 1);}
   finally {await processor.dispose();}
 });
+
+test('latest runner honors pre-aborted and in-flight caller signals and removes listeners', async () => {
+  const calls = [];
+  const latest = createLatestBatchRunner({transform: (input, options) => new Promise(resolve => calls.push({resolve, signal: options.signal}))});
+  const early = new AbortController(), earlyReason = new Error('already cancelled'); early.abort(earlyReason);
+  await assert.rejects(latest.run(batch(), {signal: early.signal}), error => error === earlyReason);
+  assert.equal(calls.length, 0);
+  const caller = new AbortController(), reason = new Error('view unmounted');
+  let added = 0, removed = 0;
+  const add = caller.signal.addEventListener.bind(caller.signal), remove = caller.signal.removeEventListener.bind(caller.signal);
+  caller.signal.addEventListener = (...args) => {added++; return add(...args);};
+  caller.signal.removeEventListener = (...args) => {removed++; return remove(...args);};
+  const pending = latest.run(batch(), {signal: caller.signal});
+  caller.abort(reason);
+  assert.equal(calls[0].signal.reason, reason);
+  // Even a processor that completes despite cooperative cancellation cannot publish.
+  calls[0].resolve('cancelled output');
+  await assert.rejects(pending, error => error === reason);
+  assert.equal(added, 1); assert.equal(removed, 1);
+  const oldCaller = new AbortController();
+  const old = latest.run(batch(), {signal: oldCaller.signal}), current = latest.run(batch());
+  oldCaller.abort();
+  assert.equal(calls[2].signal.aborted, false);
+  calls[1].resolve('stale'); calls[2].resolve('new');
+  assert.equal(await old, null); assert.equal(await current, 'new');
+});

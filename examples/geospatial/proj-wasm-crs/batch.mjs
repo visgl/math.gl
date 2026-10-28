@@ -77,14 +77,23 @@ function aborted(signal) {
 export function createLatestBatchRunner(processor) {
   let generation = 0, controller;
   return {
-    async run(batch, options) {
+    async run(batch, options = {}) {
       const current = ++generation;
       controller?.abort();
-      controller = new AbortController();
+      const requestController = new AbortController();
+      controller = requestController;
+      const callerSignal = options.signal;
+      const abortFromCaller = () => requestController.abort(callerSignal.reason);
+      if (callerSignal?.aborted) abortFromCaller();
+      else callerSignal?.addEventListener('abort', abortFromCaller, {once: true});
       try {
-        const result = await processor.transform(batch, {...options, signal: controller.signal});
-        return current === generation ? result : null;
+        aborted(requestController.signal);
+        const result = await processor.transform(batch, {...options, signal: requestController.signal});
+        if (current !== generation) return null;
+        aborted(requestController.signal);
+        return result;
       } catch (error) {if (current !== generation) return null; throw error;}
+      finally {callerSignal?.removeEventListener('abort', abortFromCaller);}
     },
     cancel() {generation++; controller?.abort();}
   };

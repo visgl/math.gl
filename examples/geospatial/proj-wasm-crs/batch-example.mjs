@@ -26,6 +26,6 @@ export async function runBatchExample(proj) {
       workerParity: consumed.positions.every((value, i) => value === projected[i]), staleDiscarded: true};
   } finally {
     latest.cancel();
-    try {await processor.dispose();} finally {WorkerFarm.getWorkerFarm().destroy();}
+    try {await processor.dispose();} finally {await WorkerFarm.getWorkerFarm().destroy();}
   }
 }

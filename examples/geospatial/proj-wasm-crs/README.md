@@ -98,7 +98,7 @@ nonfinite results or cancellation reject the entire batch; partial buffers are n
 Empty input returns empty output. Inverse mode uses the same normalized operation.
 
 The latest-view runner cancels superseded requests cooperatively and discards both stale results
-and stale errors. Current errors still propagate. Cancellation is checked around async native calls;
+and stale errors. Current errors still propagate. A caller `options.signal` is combined with supersession cancellation; its abort reason propagates for the current request and listeners are removed when the request settles. Cancellation is checked around async native calls;
 it cannot interrupt an already-running native operation. Disposal rejects new work immediately,
 waits for accepted work to settle, then destroys normalized/original operations and the context.
 It is idempotent and does not shut down an application-owned PROJ pool.
