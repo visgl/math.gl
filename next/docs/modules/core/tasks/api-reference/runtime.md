@@ -36,6 +36,8 @@ Auto without a policy uses workers. Unknown zero-byte input uses workers unless 
 
 Browser callers can use a bundler-resolved module-worker factory. Node callers need a loadable compiled worker module URL. Custom URLs and `workerUrl` overrides must implement the runtime protocol. An omitted `packageName` preserves the legacy loaders.gl URL convention; do not rely on that convention for new math.gl packages.
 
+For browser URL or source targets, set `workerType: 'module'` to load an ES module; the default is `'classic'` for compatibility. Module URLs use the browser's native worker loading and origin rules. This option does not change Node's module resolution.
+
 ## processOnWorker[​](#processonworker "Direct link to processOnWorker")
 
 ```
