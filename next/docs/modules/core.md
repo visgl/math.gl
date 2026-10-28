@@ -4,6 +4,8 @@
 
 `@math.gl/core` provides array-based vectors, matrices, quaternions, and coordinate helpers. Use it to compose transforms, rotate geometry, and work with reusable numeric objects.
 
+The optional [`@math.gl/core/tasks`](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md) entry provides typed worker processing, bounded scheduling, persistent resources, cancellation, and shared state.
+
 Shared types and expression parsing are available at `@math.gl/core` and `@math.gl/core`. The basic math expression library is included there; geospatial and DGGS expression functions live at `@math.gl/geospatial` and `@math.gl/dggs`.
 
 <!-- -->
