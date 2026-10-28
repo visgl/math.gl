@@ -243,3 +243,29 @@ test('native generated circles, bounds polygons, arcs, and line sampling', async
   expect(bbox(api.along(line, 5, {units: 'degrees'})).values[0]).toBeCloseTo(5, 10);
   expect(bbox(api.along(line, 20, {units: 'degrees'})).values[0]).toBeCloseTo(10, 10);
 });
+
+test('line predicates, ring orientation and explicit-origin scale', async () => {
+  const api = await import('../src/turf');
+  const line = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [2, 0]
+      ]
+    }
+  ]);
+  const p = column([point(0, 0), point(1, 0), point(1, 1), null]);
+  expect([...api.booleanPointOnLine(p, line).values]).toEqual([1, 1, 0, 0]);
+  expect([...api.booleanPointOnLine(p, line, {ignoreEndVertices: true}).values]).toEqual([
+    0, 1, 0, 0
+  ]);
+  expect(api.booleanPointOnLine(p, line).validity[0]).toBe(7);
+  const ring = column([{type: 'LineString', coordinates: polygon.coordinates[0]}]);
+  expect(api.booleanClockwise(ring).values[0]).toBe(0);
+  const rewound = api.rewind(column([polygon]), {reverse: true});
+  expect(area(rewound).values[0]).toBeCloseTo(area(column([polygon])).values[0], 2);
+  const scaled = api.transformScale(column([point(1, 0)]), 2, {origin: [0, 0]});
+  expect(bbox(scaled).values[0]).toBeCloseTo(2, 9);
+  expect(bbox(scaled).values[1]).toBeCloseTo(0, 9);
+});

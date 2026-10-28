@@ -4,7 +4,7 @@
 
 import type {GeoArrowArray, GeoArrowColumn} from './geoarrow/types';
 import {isGeoArrowValueValid} from './geoarrow/layout';
-import {getGeoArrowRowBounds, mapGeoArrowCoordinates} from './geoarrow/kernels';
+import {getGeoArrowRowBounds, mapGeoArrowCoordinates, rewindGeoArrow} from './geoarrow/kernels';
 
 /** A nullable, row-aligned numeric or boolean result. Validity is an Arrow bitmap. */
 export type TurfBatchResult<T extends Float64Array | Uint8Array> = {
@@ -801,5 +801,106 @@ export function along(
       previous = p;
     }
     return previous;
+  });
+}
+
+/** Tests points against LineStrings, pairing rows or broadcasting one row. */
+export function booleanPointOnLine(
+  pointColumn: GeoArrowColumn,
+  lineColumn: GeoArrowColumn,
+  options: {ignoreEndVertices?: boolean; epsilon?: number} = {}
+): TurfBatchResult<Uint8Array> {
+  const epsilon = options.epsilon ?? 0;
+  if (!Number.isFinite(epsilon) || epsilon < 0)
+    throw new RangeError('epsilon must be finite and nonnegative');
+  const a = rows(pointColumn, points),
+    b = rows(lineColumn, ['geoarrow.linestring']),
+    n = paired(a, b),
+    out = result(n, true) as TurfBatchResult<Uint8Array>;
+  for (let i = 0; i < n; i++) {
+    const left = a[a.length === 1 ? 0 : i],
+      right = b[b.length === 1 ? 0 : i];
+    if (!left.valid || !right.valid) continue;
+    const p = point(left.array, left.index);
+    if (!p || right.array.kind !== 'list') continue;
+    const [start, end] = range(right.array, right.index);
+    for (let j = start + 1; j < end; j++) {
+      const u = point(right.array.child, j - 1),
+        v = point(right.array.child, j);
+      if (!u || !v) continue;
+      const cross = (p[0] - u[0]) * (v[1] - u[1]) - (p[1] - u[1]) * (v[0] - u[0]);
+      if (
+        Math.abs(cross) > epsilon ||
+        p[0] < Math.min(u[0], v[0]) ||
+        p[0] > Math.max(u[0], v[0]) ||
+        p[1] < Math.min(u[1], v[1]) ||
+        p[1] > Math.max(u[1], v[1])
+      )
+        continue;
+      if (
+        options.ignoreEndVertices &&
+        ((j === start + 1 && p[0] === u[0] && p[1] === u[1]) ||
+          (j === end - 1 && p[0] === v[0] && p[1] === v[1]))
+      )
+        continue;
+      out.values[i] = 1;
+      break;
+    }
+    valid(out.validity, i);
+  }
+  return out;
+}
+
+/** Tests clockwise orientation of each closed LineString in XY coordinates. */
+export function booleanClockwise(column: GeoArrowColumn): TurfBatchResult<Uint8Array> {
+  const input = rows(column, ['geoarrow.linestring']),
+    out = result(input.length, true) as TurfBatchResult<Uint8Array>;
+  input.forEach((row, i) => {
+    if (!row.valid || row.array.kind !== 'list') return;
+    const [a, b] = range(row.array, row.index);
+    let sum = 0;
+    for (let j = a + 1; j < b; j++) {
+      const p = point(row.array.child, j - 1),
+        q = point(row.array.child, j);
+      if (p && q) sum += (q[0] - p[0]) * (q[1] + p[1]);
+    }
+    out.values[i] = Number(sum > 0);
+    valid(out.validity, i);
+  });
+  return out;
+}
+
+/** Reorients polygon outer rings counterclockwise and holes clockwise, or reverses that convention. */
+export function rewind(column: GeoArrowColumn, options: {reverse?: boolean} = {}): GeoArrowColumn {
+  rows(column, polygons);
+  return rewindGeoArrow(column, {outer: options.reverse ? 'clockwise' : 'counter-clockwise'});
+}
+
+/** Scales rhumb distances from an explicit origin; preserves additional ordinates. */
+export function transformScale(
+  column: GeoArrowColumn,
+  factor: number,
+  options: {origin: readonly [number, number]}
+): GeoArrowColumn {
+  rows(column, native);
+  if (!Number.isFinite(factor) || factor <= 0 || !options.origin.every(Number.isFinite))
+    throw new RangeError('factor must be positive and origin must be finite');
+  const origin: Point = [options.origin[0], options.origin[1]];
+  return mapGeoArrowCoordinates(column, p => {
+    const delta = (p[1] - origin[1]) * RAD;
+    const psi = Math.log(
+      Math.tan((p[1] * RAD) / 2 + Math.PI / 4) / Math.tan((origin[1] * RAD) / 2 + Math.PI / 4)
+    );
+    const q = Math.abs(psi) > 1e-11 ? delta / psi : Math.cos(origin[1] * RAD);
+    let longitude = Math.abs(p[0] - origin[0]) * RAD;
+    if (longitude > Math.PI) longitude = 2 * Math.PI - longitude;
+    return [
+      ...rhumbDestinationPoint(
+        origin,
+        Math.hypot(delta, q * longitude) * factor,
+        rhumbAngle(origin, [p[0], p[1]]) / RAD
+      ),
+      ...p.slice(2)
+    ];
   });
 }
