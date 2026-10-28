@@ -11,7 +11,7 @@
   "workspaces": [
     "dev-modules/*",
     "modules/*",
-    "examples/*",
+    "examples/*/*",
     "website"
   ],
   "scripts": {

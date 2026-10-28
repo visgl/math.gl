@@ -213,3 +213,143 @@ test('native rhumb operations match Turf across the antimeridian', async () => {
   expect(rotation.values[0]).toBeCloseTo(0, 8);
   expect(rotation.values[1]).toBeCloseTo(-1, 8);
 });
+
+test('native generated circles, bounds polygons, arcs, and line sampling', async () => {
+  const api = await import('../src/turf');
+  const {materializeGeoArrowRows} = await import('../src/geoarrow/index');
+  const {default: oracleCircle} = await import('@turf/circle');
+  const input = column([point(10, 20), null]);
+  const generated = api.circle(input, 10, {steps: 8});
+  const actual = materializeGeoArrowRows(generated);
+  const expected = oracleCircle([10, 20], 10, {steps: 8}).geometry;
+  expect(actual[1]).toBeNull();
+  expect(actual[0].type).toBe('Polygon');
+  if (actual[0].type !== 'Polygon') throw new Error('Expected polygon');
+  actual[0].coordinates[0].forEach((p, i) => {
+    expect(p[0]).toBeCloseTo(expected.coordinates[0][i][0], 10);
+    expect(p[1]).toBeCloseTo(expected.coordinates[0][i][1], 10);
+  });
+  expect([...bbox(api.bboxPolygon(column([polygon]))).values]).toEqual([0, 0, 10, 10]);
+  expect(materializeGeoArrowRows(api.lineArc(input, 10, 0, 90, {steps: 8}))[1]).toBeNull();
+  const line = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [10, 0]
+      ]
+    }
+  ]);
+  expect(bbox(api.along(line, 5, {units: 'degrees'})).values[0]).toBeCloseTo(5, 10);
+  expect(bbox(api.along(line, 20, {units: 'degrees'})).values[0]).toBeCloseTo(10, 10);
+});
+
+test('line predicates, ring orientation and explicit-origin scale', async () => {
+  const api = await import('../src/turf');
+  const line = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [2, 0]
+      ]
+    }
+  ]);
+  const p = column([point(0, 0), point(1, 0), point(1, 1), null]);
+  expect([...api.booleanPointOnLine(p, line).values]).toEqual([1, 1, 0, 0]);
+  expect([...api.booleanPointOnLine(p, line, {ignoreEndVertices: true}).values]).toEqual([
+    0, 1, 0, 0
+  ]);
+  expect(api.booleanPointOnLine(p, line).validity[0]).toBe(7);
+  const ring = column([{type: 'LineString', coordinates: polygon.coordinates[0]}]);
+  expect(api.booleanClockwise(ring).values[0]).toBe(0);
+  const rewound = api.rewind(column([polygon]), {reverse: true});
+  expect(area(rewound).values[0]).toBeCloseTo(area(column([polygon])).values[0], 2);
+  const scaled = api.transformScale(column([point(1, 0)]), 2, {origin: [0, 0]});
+  expect(bbox(scaled).values[0]).toBeCloseTo(2, 9);
+  expect(bbox(scaled).values[1]).toBeCloseTo(0, 9);
+});
+
+test('native geometry conversion and decomposition preserve topology', async () => {
+  const api = await import('../src/turf');
+  const {materializeGeoArrowRows, getGeoArrowRowCount, validateGeoArrowColumn} = await import(
+    '../src/geoarrow/index'
+  );
+  const input = column([polygon, null]);
+  const lines = api.polygonToLine(input);
+  expect(lines.encoding).toBe('geoarrow.multilinestring');
+  expect(lines.chunks).toBe(input.chunks);
+  expect(validateGeoArrowColumn(lines).valid).toBe(true);
+  expect(getGeoArrowRowCount(api.explode(input))).toBe(10);
+  expect(getGeoArrowRowCount(api.lineSegment(input))).toBe(8);
+  const ring = column([{type: 'LineString', coordinates: polygon.coordinates[0]}]);
+  const converted = api.lineToPolygon(ring);
+  expect(validateGeoArrowColumn(converted).valid).toBe(true);
+  expect(materializeGeoArrowRows(converted)[0]).toEqual({
+    type: 'Polygon',
+    coordinates: [polygon.coordinates[0]]
+  });
+  expect(() =>
+    api.lineToPolygon(
+      column([
+        {
+          type: 'LineString',
+          coordinates: [
+            [0, 0],
+            [1, 1]
+          ]
+        }
+      ])
+    )
+  ).toThrow(/closed/);
+  expect(api.booleanConcave(input).validity[0]).toBe(1);
+  expect(api.booleanConcave(input).values[0]).toBe(0);
+  const concave = column([
+    {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [0, 0],
+          [4, 0],
+          [2, 1],
+          [4, 4],
+          [0, 4],
+          [0, 0]
+        ]
+      ]
+    }
+  ]);
+  expect(api.booleanConcave(concave).values[0]).toBe(1);
+  expect(getGeoArrowRowCount(api.lineSegment(sliceGeoArrowColumn(input, 1, 2)))).toBe(0);
+});
+
+test('point-on-line tolerance works perpendicular to axis-aligned segments', async () => {
+  const {booleanPointOnLine} = await import('../src/turf');
+  const horizontal = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [2, 0]
+      ]
+    }
+  ]);
+  const vertical = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [0, 2]
+      ]
+    }
+  ]);
+  expect(booleanPointOnLine(column([point(1, 1e-10)]), horizontal, {epsilon: 1e-8}).values[0]).toBe(
+    1
+  );
+  expect(booleanPointOnLine(column([point(1e-10, 1)]), vertical, {epsilon: 1e-8}).values[0]).toBe(
+    1
+  );
+  expect(booleanPointOnLine(column([point(3, 1e-10)]), horizontal, {epsilon: 1e-8}).values[0]).toBe(
+    0
+  );
+});

@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {useEffect, useRef} from 'react';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import {mountTimezoneGlobe} from 'website-examples/timezone-globe/app';
-import 'website-examples/timezone-globe/styles.css';
+import {mountTimezoneGlobe} from 'website-examples/earth/timezone-globe/app';
+import 'website-examples/earth/timezone-globe/styles.css';
 
 export default function Globe() {
   const root = useRef(null);

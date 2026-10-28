@@ -120,9 +120,9 @@ credits when redistributing generated assets or derived data.
 | EGM96 geoid grids | NGA model, GeographicLib distribution; [source archive, public-domain attribution and checksums](https://github.com/visgl/math.gl/blob/master/modules/earth/geoid/data/README.md). |
 | Optional timezone boundary geometry | © OpenStreetMap and Timezone Boundary Builder contributors; [ODbL terms, version and simplification](https://github.com/visgl/math.gl/blob/master/modules/earth/timezone/data/README.md). This is separate from the CC0 tz-lookup table. |
 | Bright-star data | [Bretton Wade's YaleBrightStarCatalog conversion](https://github.com/brettonw/YaleBrightStarCatalog); pinned commit and BSD notice accompany the derived data. |
-| Earth texture imagery | [Imagery sources and terms](https://github.com/visgl/math.gl/blob/master/examples/unfolding-polyhedron/IMAGERY.md); [land-mask provenance](https://github.com/visgl/math.gl/blob/master/examples/unfolding-polyhedron/data/README.md). |
-| Ice Age Explorer | [Dataset authors, publications, versions and licenses](https://github.com/visgl/math.gl/blob/master/examples/alpine-ice-age/README.md); the displayed reconstruction is distinct from the rendering code. |
-| Tectonic Time Machine | [Model and imagery attribution](https://github.com/visgl/math.gl/blob/master/examples/tectonic-time-machine/ATTRIBUTION.md). |
+| Earth texture imagery | [Imagery sources and terms](https://github.com/visgl/math.gl/blob/master/examples/geometry/unfolding-polyhedron/IMAGERY.md); [land-mask provenance](https://github.com/visgl/math.gl/blob/master/examples/geometry/unfolding-polyhedron/data/README.md). |
+| Ice Age Explorer | [Dataset authors, publications, versions and licenses](https://github.com/visgl/math.gl/blob/master/examples/geospatial/alpine-ice-age/README.md); the displayed reconstruction is distinct from the rendering code. |
+| Tectonic Time Machine | [Model and imagery attribution](https://github.com/visgl/math.gl/blob/master/examples/geospatial/tectonic-time-machine/ATTRIBUTION.md). |
 
 ## Maintaining provenance
 

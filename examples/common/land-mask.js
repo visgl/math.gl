@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import land from '../unfolding-polyhedron/data/land.json' with {type: 'json'};
+import land from '../geometry/unfolding-polyhedron/data/land.json' with {type: 'json'};
 
 // Natural Earth 1:110m polygons are split at the antimeridian. Keep holes, and
 // use their planar longitude/latitude convention (including the Antarctic cap).

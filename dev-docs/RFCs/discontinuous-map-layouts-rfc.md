@@ -8,7 +8,7 @@
 The independent experimental `HingeTree` utility now lives in `@math.gl/geometry`.
 It snapshots parent/pivot/axis/rest-transform descriptors, validates rigid transforms
 and acyclic connectivity, and evaluates a forest into reusable Float64 matrix buffers.
-The `examples/unfolding-polyhedron` example constructs six unit squares directly
+The `examples/geometry/unfolding-polyhedron` example constructs six unit squares directly
 and folds them into a cube. Tests cover rigid motion, shared hinge endpoints,
 descendants, root placement, deep trees, and the flat/closed cube endpoints.
 No reference application code, shaders, or mesh assets were copied. The example

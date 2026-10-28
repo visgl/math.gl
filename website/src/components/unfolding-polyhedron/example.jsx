@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {useEffect, useRef} from 'react';
-import {mountUnfolding} from 'website-examples/unfolding-polyhedron/app';
-import 'website-examples/unfolding-polyhedron/style.css';
+import {mountUnfolding} from 'website-examples/geometry/unfolding-polyhedron/app';
+import 'website-examples/geometry/unfolding-polyhedron/style.css';
 
 export default function Example({compact = false}) {
   const root = useRef(null);

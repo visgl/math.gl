@@ -4,13 +4,13 @@
 
 import {expect, test} from 'vitest';
 import {createGraticule} from '../../../geospatial/src/discontinuous/myriahedral/graticule';
-import {createMyriahedralLayout} from '../../../../examples/myriahedral-maps/layout';
+import {createMyriahedralLayout} from '../../../../examples/geospatial/myriahedral-maps/layout';
 import {
   dot,
   faceNormal,
   subtract,
   edgeKey
-} from '../../../../examples/unfolding-polyhedron/polyhedra';
+} from '../../../../examples/geometry/unfolding-polyhedron/polyhedra';
 
 for (const columns of [24, 48, 72, 96]) {
   test(`graticule ${columns}: planar outward faces and a closed shared seam`, () => {

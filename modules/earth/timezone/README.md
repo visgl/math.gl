@@ -110,7 +110,7 @@ its file URL. GeoParquet 1.1 contains `tzid` strings and WKB `geometry` with
 OGC:CRS84 coordinates. Geometry contains no date-specific rules or offsets.
 These assets are never imported by the root, lookup, or temporal entry points.
 
-See the [deck.gl 9.4 globe example](../../../examples/timezone-globe/README.md)
+See the [deck.gl 9.4 globe example](../../../examples/earth/timezone-globe/README.md)
 for a date slider, offset colors, and local-time hover details. Boundaries are
 approximate; IANA does not define geographic polygons. Individual identifiers
 may require a newer runtime timezone database.
