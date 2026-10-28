@@ -4,7 +4,7 @@
 
 import type {GeoArrowArray, GeoArrowColumn} from './geoarrow/types';
 import {isGeoArrowValueValid} from './geoarrow/layout';
-import {getGeoArrowRowBounds, mapGeoArrowCoordinates} from './geoarrow/kernels';
+import {getGeoArrowRowBounds, mapGeoArrowCoordinates, rewindGeoArrow} from './geoarrow/kernels';
 
 /** A nullable, row-aligned numeric or boolean result. Validity is an Arrow bitmap. */
 export type TurfBatchResult<T extends Float64Array | Uint8Array> = {
@@ -655,4 +655,397 @@ export function transformRotate(
       ...p.slice(2)
     ];
   });
+}
+
+function generatedPaths(
+  source: GeoArrowColumn,
+  count: number,
+  size: number,
+  polygon: boolean,
+  generate: (row: number, vertex: number) => Point | null
+): GeoArrowColumn {
+  const values = new Float64Array(count * size * 2),
+    validity = new Uint8Array(Math.ceil(count / 8));
+  const offsets = new Int32Array(count + 1);
+  for (let row = 0; row < count; row++) {
+    offsets[row + 1] = (row + 1) * size;
+    let present = true;
+    for (let vertex = 0; vertex < size; vertex++) {
+      const p = generate(row, vertex);
+      if (p) values.set(p, (row * size + vertex) * 2);
+      else present = false;
+    }
+    if (present) valid(validity, row);
+  }
+  const coordinates: GeoArrowArray = {
+    kind: 'fixed-size-list',
+    size: 2,
+    length: count * size,
+    child: {kind: 'primitive', length: values.length, values}
+  };
+  const paths: GeoArrowArray = {kind: 'list', length: count, offsets, child: coordinates};
+  const geometry: GeoArrowArray = polygon
+    ? {
+        kind: 'list',
+        length: count,
+        offsets: Int32Array.from({length: count + 1}, (_, i) => i),
+        child: paths,
+        validity: {values: validity}
+      }
+    : {...paths, validity: {values: validity}};
+  return {
+    encoding: polygon ? 'geoarrow.polygon' : 'geoarrow.linestring',
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    spatialReference: source.spatialReference,
+    metadata: source.metadata,
+    edges: source.edges,
+    chunks: [geometry]
+  };
+}
+
+function checkedSteps(steps = 64): number {
+  if (!Number.isInteger(steps) || steps < 4 || steps > 65536)
+    throw new RangeError('steps must be an integer from 4 through 65536');
+  return steps;
+}
+
+/** Generates one spherical circle polygon per point. */
+export function circle(
+  column: GeoArrowColumn,
+  radius: number,
+  options: TurfDistanceOptions & {steps?: number} = {}
+): GeoArrowColumn {
+  const input = rows(column, points),
+    steps = checkedSteps(options.steps);
+  if (!Number.isFinite(radius) || radius < 0)
+    throw new RangeError('radius must be finite and nonnegative');
+  const radians = radius / units(1, options.units);
+  return generatedPaths(column, input.length, steps + 1, true, (i, j) => {
+    const row = input[i],
+      p = row.valid ? point(row.array, row.index) : null;
+    return p ? destinationPoint(p, radians, (-360 * (j % steps)) / steps) : null;
+  });
+}
+
+/** Generates a rectangular polygon from each row's bounds. */
+export function bboxPolygon(column: GeoArrowColumn): GeoArrowColumn {
+  rows(column, native);
+  const bounds = getGeoArrowRowBounds(column);
+  return generatedPaths(column, bounds.length, 5, true, (i, j) => {
+    const b = bounds[i];
+    if (!b) return null;
+    return [b[j === 1 || j === 2 ? 2 : 0], b[j === 2 || j === 3 ? 3 : 1]];
+  });
+}
+
+/** Generates a clockwise spherical arc per center point. Equal bearings generate a full circle. */
+export function lineArc(
+  column: GeoArrowColumn,
+  radius: number,
+  bearing1: number,
+  bearing2: number,
+  options: TurfDistanceOptions & {steps?: number} = {}
+): GeoArrowColumn {
+  const input = rows(column, points),
+    steps = checkedSteps(options.steps);
+  if (![radius, bearing1, bearing2].every(Number.isFinite) || radius < 0)
+    throw new RangeError('Radius and bearings must be finite; radius must be nonnegative');
+  const start = ((bearing1 % 360) + 360) % 360,
+    end = ((bearing2 % 360) + 360) % 360;
+  const sweep = (end - start + 360) % 360 || 360;
+  const segments = Math.ceil((sweep * steps) / 360),
+    radians = radius / units(1, options.units);
+  return generatedPaths(column, input.length, segments + 1, false, (i, j) => {
+    const row = input[i],
+      p = row.valid ? point(row.array, row.index) : null;
+    return p ? destinationPoint(p, radians, start + Math.min((j * 360) / steps, sweep)) : null;
+  });
+}
+
+/** Samples each LineString at a surface distance from its start, clamped at its end. */
+export function along(
+  column: GeoArrowColumn,
+  distanceValue: number,
+  options: TurfDistanceOptions = {}
+): GeoArrowColumn {
+  const input = rows(column, ['geoarrow.linestring']);
+  if (!Number.isFinite(distanceValue) || distanceValue < 0)
+    throw new RangeError('distance must be finite and nonnegative');
+  const target = distanceValue / units(1, options.units);
+  return pointOutput(column, input.length, i => {
+    const row = input[i];
+    if (!row.valid || row.array.kind !== 'list') return null;
+    const [a, b] = range(row.array, row.index);
+    let previous: Point | null = null,
+      travelled = 0;
+    for (let j = a; j < b; j++) {
+      const p = point(row.array.child, j);
+      if (!p) {
+        previous = null;
+        continue;
+      }
+      if (previous) {
+        const segment = angular(previous, p);
+        if (travelled + segment >= target) {
+          const delta = (p[0] - previous[0]) * RAD;
+          const heading = Math.atan2(
+            Math.sin(delta) * Math.cos(p[1] * RAD),
+            Math.cos(previous[1] * RAD) * Math.sin(p[1] * RAD) -
+              Math.sin(previous[1] * RAD) * Math.cos(p[1] * RAD) * Math.cos(delta)
+          );
+          return destinationPoint(previous, target - travelled, heading / RAD);
+        }
+        travelled += segment;
+      } else if (target === 0) return p;
+      previous = p;
+    }
+    return previous;
+  });
+}
+
+/** Tests points against LineStrings, pairing rows or broadcasting one row. */
+export function booleanPointOnLine(
+  pointColumn: GeoArrowColumn,
+  lineColumn: GeoArrowColumn,
+  options: {ignoreEndVertices?: boolean; epsilon?: number} = {}
+): TurfBatchResult<Uint8Array> {
+  const epsilon = options.epsilon ?? 0;
+  if (!Number.isFinite(epsilon) || epsilon < 0)
+    throw new RangeError('epsilon must be finite and nonnegative');
+  const a = rows(pointColumn, points),
+    b = rows(lineColumn, ['geoarrow.linestring']),
+    n = paired(a, b),
+    out = result(n, true) as TurfBatchResult<Uint8Array>;
+  for (let i = 0; i < n; i++) {
+    const left = a[a.length === 1 ? 0 : i],
+      right = b[b.length === 1 ? 0 : i];
+    if (!left.valid || !right.valid) continue;
+    const p = point(left.array, left.index);
+    if (!p || right.array.kind !== 'list') continue;
+    const [start, end] = range(right.array, right.index);
+    for (let j = start + 1; j < end; j++) {
+      const u = point(right.array.child, j - 1),
+        v = point(right.array.child, j);
+      if (!u || !v) continue;
+      const cross = (p[0] - u[0]) * (v[1] - u[1]) - (p[1] - u[1]) * (v[0] - u[0]);
+      const axis = Math.abs(v[0] - u[0]) >= Math.abs(v[1] - u[1]) ? 0 : 1;
+      if (u[0] === v[0] && u[1] === v[1]) {
+        if (p[0] !== u[0] || p[1] !== u[1]) continue;
+      } else if (
+        Math.abs(cross) > epsilon ||
+        p[axis] < Math.min(u[axis], v[axis]) ||
+        p[axis] > Math.max(u[axis], v[axis])
+      )
+        continue;
+      if (
+        options.ignoreEndVertices &&
+        ((j === start + 1 && p[0] === u[0] && p[1] === u[1]) ||
+          (j === end - 1 && p[0] === v[0] && p[1] === v[1]))
+      )
+        continue;
+      out.values[i] = 1;
+      break;
+    }
+    valid(out.validity, i);
+  }
+  return out;
+}
+
+/** Tests clockwise orientation of each closed LineString in XY coordinates. */
+export function booleanClockwise(column: GeoArrowColumn): TurfBatchResult<Uint8Array> {
+  const input = rows(column, ['geoarrow.linestring']),
+    out = result(input.length, true) as TurfBatchResult<Uint8Array>;
+  input.forEach((row, i) => {
+    if (!row.valid || row.array.kind !== 'list') return;
+    const [a, b] = range(row.array, row.index);
+    let sum = 0;
+    for (let j = a + 1; j < b; j++) {
+      const p = point(row.array.child, j - 1),
+        q = point(row.array.child, j);
+      if (p && q) sum += (q[0] - p[0]) * (q[1] + p[1]);
+    }
+    out.values[i] = Number(sum > 0);
+    valid(out.validity, i);
+  });
+  return out;
+}
+
+/** Reorients polygon outer rings counterclockwise and holes clockwise, or reverses that convention. */
+export function rewind(column: GeoArrowColumn, options: {reverse?: boolean} = {}): GeoArrowColumn {
+  rows(column, polygons);
+  return rewindGeoArrow(column, {outer: options.reverse ? 'clockwise' : 'counter-clockwise'});
+}
+
+/** Scales rhumb distances from an explicit origin; preserves additional ordinates. */
+export function transformScale(
+  column: GeoArrowColumn,
+  factor: number,
+  options: {origin: readonly [number, number]}
+): GeoArrowColumn {
+  rows(column, native);
+  if (!Number.isFinite(factor) || factor <= 0 || !options.origin.every(Number.isFinite))
+    throw new RangeError('factor must be positive and origin must be finite');
+  const origin: Point = [options.origin[0], options.origin[1]];
+  return mapGeoArrowCoordinates(column, p => {
+    const delta = (p[1] - origin[1]) * RAD;
+    const psi = Math.log(
+      Math.tan((p[1] * RAD) / 2 + Math.PI / 4) / Math.tan((origin[1] * RAD) / 2 + Math.PI / 4)
+    );
+    const q = Math.abs(psi) > 1e-11 ? delta / psi : Math.cos(origin[1] * RAD);
+    let longitude = Math.abs(p[0] - origin[0]) * RAD;
+    if (longitude > Math.PI) longitude = 2 * Math.PI - longitude;
+    return [
+      ...rhumbDestinationPoint(
+        origin,
+        Math.hypot(delta, q * longitude) * factor,
+        rhumbAngle(origin, [p[0], p[1]]) / RAD
+      ),
+      ...p.slice(2)
+    ];
+  });
+}
+
+/** Views Polygon rings as a MultiLineString column without copying buffers. */
+export function polygonToLine(column: GeoArrowColumn): GeoArrowColumn {
+  rows(column, ['geoarrow.polygon']);
+  return {...column, encoding: 'geoarrow.multilinestring'};
+}
+
+/** Views closed LineStrings as single-ring polygons. Open and degenerate rings are rejected. */
+export function lineToPolygon(column: GeoArrowColumn): GeoArrowColumn {
+  const input = rows(column, ['geoarrow.linestring']);
+  for (const row of input) {
+    if (!row.valid || row.array.kind !== 'list') continue;
+    const [a, b] = range(row.array, row.index);
+    if (a === b) continue;
+    const first = point(row.array.child, a),
+      last = point(row.array.child, b - 1);
+    if (b - a < 4 || !first || !last || first[0] !== last[0] || first[1] !== last[1])
+      throw new RangeError('lineToPolygon requires closed rings with at least four coordinates');
+  }
+  return {
+    ...column,
+    encoding: 'geoarrow.polygon',
+    chunks: column.chunks.map(chunk => ({
+      kind: 'list' as const,
+      length: chunk.length,
+      validity: chunk.validity,
+      offsets: Int32Array.from({length: chunk.length + 1}, (_, i) => i),
+      child: chunk
+    }))
+  };
+}
+
+/** Emits all nonempty XY vertices as point rows in traversal order. Null geometries emit no rows. */
+export function explode(column: GeoArrowColumn): GeoArrowColumn {
+  const input = rows(column, native);
+  let count = 0;
+  for (const row of input)
+    if (row.valid) walk(row.array, row.index, depths[column.encoding], () => count++);
+  const values = new Float64Array(count * 2);
+  let index = 0;
+  for (const row of input)
+    if (row.valid)
+      walk(row.array, row.index, depths[column.encoding], p => {
+        values.set(p, index * 2);
+        index++;
+      });
+  return {
+    encoding: 'geoarrow.point',
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    spatialReference: column.spatialReference,
+    metadata: column.metadata,
+    edges: column.edges,
+    chunks: [
+      {
+        kind: 'fixed-size-list',
+        size: 2,
+        length: count,
+        child: {kind: 'primitive', length: values.length, values}
+      }
+    ]
+  };
+}
+
+/** Emits each adjacent pair from line and polygon rings as a two-vertex LineString. */
+export function lineSegment(column: GeoArrowColumn): GeoArrowColumn {
+  const input = rows(column, ['geoarrow.linestring', 'geoarrow.multilinestring', ...polygons]);
+  const visit = (emit: (p: Point, q: Point) => void) => {
+    for (const row of input)
+      if (row.valid)
+        lines(row.array, row.index, depths[column.encoding], (array, a, b) => {
+          for (let j = a + 1; j < b; j++) {
+            const p = point(array, j - 1),
+              q = point(array, j);
+            if (p && q) emit(p, q);
+          }
+        });
+  };
+  let count = 0;
+  visit(() => count++);
+  const values = new Float64Array(count * 4),
+    offsets = Int32Array.from({length: count + 1}, (_, i) => i * 2);
+  let index = 0;
+  visit((p, q) => {
+    values.set(p, index * 4);
+    values.set(q, index * 4 + 2);
+    index++;
+  });
+  return {
+    encoding: 'geoarrow.linestring',
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    spatialReference: column.spatialReference,
+    metadata: column.metadata,
+    edges: column.edges,
+    chunks: [
+      {
+        kind: 'list',
+        length: count,
+        offsets,
+        child: {
+          kind: 'fixed-size-list',
+          size: 2,
+          length: count * 2,
+          child: {kind: 'primitive', length: values.length, values}
+        }
+      }
+    ]
+  };
+}
+
+/** Tests whether a Polygon's exterior ring contains turns of both orientations. Holes are ignored. */
+export function booleanConcave(column: GeoArrowColumn): TurfBatchResult<Uint8Array> {
+  const input = rows(column, ['geoarrow.polygon']),
+    out = result(input.length, true) as TurfBatchResult<Uint8Array>;
+  input.forEach((row, i) => {
+    if (!row.valid || row.array.kind !== 'list') return;
+    valid(out.validity, i);
+    const [firstRing, lastRing] = range(row.array, row.index);
+    const rings = row.array.child;
+    if (
+      firstRing === lastRing ||
+      rings.kind !== 'list' ||
+      !isGeoArrowValueValid(rings.validity, firstRing)
+    )
+      return;
+    const [a, b] = range(rings, firstRing),
+      n = b - a - 1;
+    if (n < 3) return;
+    let positive = false,
+      negative = false;
+    for (let j = 0; j < n; j++) {
+      const p = point(rings.child, a + j),
+        q = point(rings.child, a + ((j + 1) % n)),
+        r = point(rings.child, a + ((j + 2) % n));
+      if (!p || !q || !r) continue;
+      const cross = (q[0] - p[0]) * (r[1] - q[1]) - (q[1] - p[1]) * (r[0] - q[0]);
+      positive ||= cross > 0;
+      negative ||= cross < 0;
+    }
+    out.values[i] = Number(positive && negative);
+  });
+  return out;
 }
