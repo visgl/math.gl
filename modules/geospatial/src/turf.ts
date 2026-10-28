@@ -1268,13 +1268,13 @@ export function booleanParallel(a: GeoArrowColumn, b: GeoArrowColumn): TurfBatch
         v = point(p[j].array, p[j].index + 1),
         w = point(q[j].array, q[j].index),
         z = point(q[j].array, q[j].index + 1);
-      if (
-        !u ||
-        !v ||
-        !w ||
-        !z ||
-        Math.abs((rhumbAngle(u, v) - rhumbAngle(w, z)) / RAD) % 180 > 1e-10
-      ) {
+      if (!u || !v || !w || !z) {
+        parallel = false;
+        break;
+      }
+      const difference = (rhumbAngle(u, v) - rhumbAngle(w, z)) / RAD;
+      const deviation = Math.abs(difference - Math.round(difference / 180) * 180);
+      if (deviation > 1e-10) {
         parallel = false;
         break;
       }

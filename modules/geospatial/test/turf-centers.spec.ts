@@ -63,3 +63,26 @@ test('parallel compares segment headings with broadcasting', () => {
     ).values[0]
   ).toBe(0);
 });
+
+test('parallel tolerance includes reversed diagonal headings', () => {
+  const a = makeGeoArrowColumnFromGeometryRows([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [1, 1]
+      ]
+    }
+  ]);
+  const b = makeGeoArrowColumnFromGeometryRows([
+    {
+      type: 'LineString',
+      coordinates: [
+        [1, 1],
+        [0, 0]
+      ]
+    }
+  ]);
+  expect(booleanParallel(a, b).values[0]).toBe(1);
+  expect(booleanParallel(b, a).values[0]).toBe(1);
+});
