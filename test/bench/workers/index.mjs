@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
+import {runTask, runTaskInBatches} from '@math.gl/core/task-runtime';
 import {readFile, writeFile} from 'node:fs/promises';
 import {cpus} from 'node:os';
 import {Worker} from 'node:worker_threads';
@@ -61,6 +62,23 @@ try {
     });
   }
 } finally {await echoPool.destroy();}
+
+const localEcho = {...NullWorker, process: input => input};
+await measure('math.gl/tiny-auto-main-thread', count, async () => {
+  assert.equal(await runTask(localEcho, 42, {
+    mainThread: {maxSize: 1, getSize: () => 1}
+  }), 42);
+});
+await measure('math.gl/adaptive-independent-batches', 1, async () => {
+  const routes = [];
+  const batches = [new Uint8Array(16), new Uint8Array(2048)];
+  let index = 0;
+  for await (const result of runTaskInBatches(localEcho, batches, {
+    mainThread: {maxSize: 1024}, inputOwnership: 'copy',
+    onExecution: route => routes.push(route)
+  })) assert.equal(result.byteLength, batches[index++].byteLength);
+  assert.deepEqual(routes, ['main-thread', 'worker']);
+});
 
 const raw = new Worker("require('worker_threads').parentPort.on('message', value => require('worker_threads').parentPort.postMessage(value));", {eval: true});
 try {

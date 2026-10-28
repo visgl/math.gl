@@ -21,6 +21,10 @@ npm ci --prefix test/bench/workers --ignore-scripts
 node test/bench/workers/index.mjs --compare --output=/tmp/worker-results.json
 ```
 
+The harness also compares tiny auto-routed local tasks with worker dispatch and
+asserts that mixed-size independent batches select local/worker execution in input
+order. The local route still honors copy/transfer serialization contracts.
+
 The JSON records environment metadata, first-request latency, warm mean, p50/p95,
 throughput, process CPU time and sampled process RSS. RSS includes worker threads;
 5 ms sampling can miss transient peaks and JavaScript GC affects later readings.

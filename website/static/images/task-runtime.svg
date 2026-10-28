@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" role="img" aria-labelledby="title description">
+  <title id="title">Task runtime architecture</title>
+  <desc id="description">A main thread submits typed work through a bounded scheduler to reusable workers. Optional shared memory connects cancellation and progress state.</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1"><stop stop-color="#081625"/><stop offset="1" stop-color="#142d43"/></linearGradient>
+    <linearGradient id="queue" x2="1" y2="1"><stop stop-color="#164b60"/><stop offset="1" stop-color="#153448"/></linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10" fill="none" stroke="#74e2cd" stroke-width="1.5"/></marker>
+  </defs>
+  <rect width="960" height="480" rx="24" fill="url(#background)"/>
+  <g fill="none" stroke="#74e2cd" stroke-width="3" marker-end="url(#arrow)">
+    <path d="M260 218H340"/><path d="M600 218H650V118H698"/>
+    <path d="M600 218H698"/><path d="M600 218H650V318H698"/>
+  </g>
+  <g font-family="system-ui, sans-serif">
+    <text x="42" y="56" fill="#9eebdf" font-size="16" letter-spacing="3">TASK RUNTIME</text>
+    <rect x="40" y="128" width="220" height="180" rx="18" fill="#142d43" stroke="#497b94" stroke-width="2"/>
+    <text x="65" y="168" fill="#eff9ff" font-size="25" font-weight="650">Main thread</text>
+    <text x="65" y="206" fill="#bfd4e0" font-size="18">Typed requests</text>
+    <text x="65" y="238" fill="#bfd4e0" font-size="18">Small tasks run here</text>
+    <text x="65" y="270" fill="#bfd4e0" font-size="18">Owned results</text>
+    <rect x="340" y="108" width="260" height="220" rx="18" fill="url(#queue)" stroke="#74e2cd" stroke-width="2"/>
+    <text x="365" y="153" fill="#eff9ff" font-size="25" font-weight="650">Bounded queue</text>
+    <text x="365" y="194" fill="#d0eceb" font-size="18">Tasks + input bytes</text>
+    <text x="365" y="228" fill="#d0eceb" font-size="18">Priorities + admission</text>
+    <g fill="#74e2cd"><rect x="367" y="265" width="40" height="22" rx="5"/><rect x="417" y="265" width="40" height="22" rx="5"/><rect x="467" y="265" width="40" height="22" rx="5"/></g>
+    <rect x="517" y="265" width="40" height="22" rx="5" fill="none" stroke="#74e2cd" stroke-dasharray="4 3"/>
+    <g fill="#18394c" stroke="#497b94" stroke-width="2"><rect x="700" y="78" width="220" height="80" rx="16"/><rect x="700" y="178" width="220" height="80" rx="16"/><rect x="700" y="278" width="220" height="80" rx="16"/></g>
+    <g fill="#eff9ff" font-size="22" font-weight="600"><text x="728" y="127">Worker 1</text><text x="728" y="227">Worker 2</text><text x="728" y="327">Worker 3</text></g>
+    <path d="M150 310V394H810V360" fill="none" stroke="#9aa9ee" stroke-width="2" stroke-dasharray="7 6"/>
+    <rect x="254" y="373" width="450" height="44" rx="22" fill="#242e4b" stroke="#9aa9ee"/>
+    <text x="479" y="401" text-anchor="middle" fill="#dce0ff" font-size="18">Optional shared cancellation + progress</text>
+    <text x="479" y="453" text-anchor="middle" fill="#adc6d5" font-size="16">Local execution + pooled workers · explicit ownership</text>
+  </g>
+</svg>

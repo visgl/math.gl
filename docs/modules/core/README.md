@@ -6,7 +6,7 @@
 
 `@math.gl/core` provides array-based vectors, matrices, quaternions, and coordinate helpers. Use it to compose transforms, rotate geometry, and work with reusable numeric objects.
 
-The optional [`@math.gl/core/worker-utils`](./developer-guide/workers.md) entry provides pooled worker processing, cancellation and progress.
+The optional [`@math.gl/core/task-runtime`](./task-runtime/README.md) entry provides typed worker processing, bounded scheduling, persistent resources, cancellation, and shared state.
 
 Shared types and expression parsing are available at `@math.gl/core` and
 `@math.gl/core`. The basic math expression library is included there; geospatial and

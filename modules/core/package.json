@@ -40,6 +40,11 @@
       "types": "./dist/worker-utils/index.d.ts",
       "import": "./dist/worker-utils/index.js",
       "require": "./dist/worker-utils/index.cjs"
+    },
+    "./task-runtime": {
+      "types": "./dist/task-runtime/index.d.ts",
+      "import": "./dist/task-runtime/index.js",
+      "require": "./dist/task-runtime/index.cjs"
     }
   },
   "files": [

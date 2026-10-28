@@ -78,3 +78,33 @@ test('bulk projection publishes progress in optional shared control state', asyn
   assert.equal(state.snapshot.completed, 2);
   assert.equal(state.snapshot.total, 2);
 });
+
+test('task runtime routes small projection batches locally with worker numerical parity', async () => {
+  const {runTask} = await import('@math.gl/core/task-runtime');
+  const {BulkProjectionWorker} = await import('@math.gl/geospatial/workers');
+  const coordinates = new Float64Array([0, 0, 10, 20, 30, 40]);
+  const original = coordinates.slice();
+  const input = {projection: {from: 'EPSG:4326', to: 'EPSG:3857'}, coordinates};
+  const routes = [];
+  const local = await runTask(BulkProjectionWorker, input, {
+    mainThread: {maxSize: 3, getSize: request => request.coordinates.length / 2},
+    inputOwnership: 'copy', onExecution: route => routes.push(route)
+  });
+  const worker = await runTask(BulkProjectionWorker, input, {
+    mainThread: {maxSize: 2, getSize: request => request.coordinates.length / 2},
+    inputOwnership: 'copy', onExecution: route => routes.push(route)
+  });
+  assert.deepEqual(routes, ['main-thread', 'worker']);
+  assert.deepEqual(local, worker);
+  assert.deepEqual(coordinates, original);
+});
+
+test('explicit main-thread map setup matches the worker descriptor', async () => {
+  const {runTask} = await import('@math.gl/core/task-runtime');
+  const {MapSetupWorker} = await import('@math.gl/geospatial/workers');
+  const description = {version: 1, id: 'local-map', definition: {type: 'mercator'}};
+  const local = await runTask(MapSetupWorker, description, {execution: 'main-thread', inputOwnership: 'copy'});
+  const remote = await setupMapInWorker(description);
+  assert.deepEqual(MapEngine.fromPrepared(local).getLayout(), MapEngine.fromPrepared(remote).getLayout());
+  assert.deepEqual(MapEngine.fromPrepared(local).projectPoint([10, 20]), MapEngine.fromPrepared(remote).projectPoint([10, 20]));
+});

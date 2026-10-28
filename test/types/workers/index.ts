@@ -97,3 +97,23 @@ if (shared && capabilities.sharedMemory) {
 
 // @ts-expect-error Configure resource pool budgets at creation, not on an individual call.
 resource.run({delta: 1}, {maxQueuedBytes: 1024});
+
+import {runTask, runTaskInBatches, type TaskDescriptor} from '@math.gl/core/task-runtime';
+declare const typedTask: TaskDescriptor<{count: number}, {value: number}, {precision: number}>;
+const localResult: Promise<{value: number}> = runTask(
+  typedTask,
+  {count: 1},
+  {
+    mainThread: {maxSize: 10, getSize: input => input.count},
+    precision: 2
+  }
+);
+const adaptiveResults: AsyncIterable<{value: number}> = runTaskInBatches(typedTask, [{count: 2}], {
+  mainThread: {maxSize: 10, getSize: input => input.count}
+});
+// @ts-expect-error Task inputs retain their declared shape.
+runTask(typedTask, {count: 'wrong'});
+// @ts-expect-error Operation options remain typed on both execution paths.
+runTask(typedTask, {count: 1}, {precision: 'wrong'});
+void localResult;
+void adaptiveResults;

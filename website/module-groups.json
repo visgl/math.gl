@@ -2,9 +2,10 @@
   {
     "id": "foundations",
     "label": "Foundations",
-    "description": "Vectors, matrices, shared numeric types and expression evaluation.",
+    "description": "Vectors, matrices, task execution, shared numeric types and expression evaluation.",
     "modules": [
       "core",
+      "core/task-runtime",
       "core/types",
       "core/expressions"
     ]

@@ -87,6 +87,9 @@ jobs:
       - name: Check worker API types
         run: yarn check:worker-types
 
+      - name: Check task runtime exports and execution routes
+        run: yarn check:task-runtime
+
       - name: Qualify worker scheduling, ownership and lifecycle workloads
         run: node test/bench/workers/index.mjs --quick --output=/tmp/worker-qualification.json
 

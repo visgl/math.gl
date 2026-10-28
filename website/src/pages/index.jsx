@@ -33,6 +33,14 @@ const modules = [
     theme: 'violet'
   },
   {
+    name: 'Task runtime',
+    packageName: '@math.gl/core/task-runtime',
+    description: 'Run small tasks locally and larger jobs in worker pools, with bounded queues and shared state.',
+    image: 'task-runtime.svg',
+    imageAlt: 'Main thread connected through a bounded queue to reusable workers',
+    theme: 'teal'
+  },
+  {
     name: 'Projection',
     packageName: '@math.gl/geospatial/projection',
     description: 'Project coordinates, transform reference systems, and work across epochs.',

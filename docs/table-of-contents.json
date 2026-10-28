@@ -52,8 +52,7 @@
               "modules/core/developer-guide/homogeneous-coordinates",
               "modules/core/developer-guide/coordinate-systems",
               "modules/core/developer-guide/rotations",
-              "modules/core/developer-guide/floating-point",
-              "modules/core/developer-guide/workers"
+              "modules/core/developer-guide/floating-point"
             ]
           },
           "modules/core/api-reference/euler",
@@ -71,6 +70,20 @@
           "modules/core/api-reference/vector2",
           "modules/core/api-reference/vector3",
           "modules/core/api-reference/vector4"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "@math.gl/core/task-runtime",
+        "items": [
+          "modules/core/task-runtime/README",
+          "modules/core/developer-guide/workers",
+          "modules/core/task-runtime/developer-guide/execution",
+          "modules/core/task-runtime/developer-guide/custom-workers",
+          "modules/core/task-runtime/developer-guide/persistent-resources",
+          "modules/core/task-runtime/developer-guide/shared-memory",
+          "modules/core/task-runtime/developer-guide/benchmarks",
+          "modules/core/task-runtime/api-reference/runtime"
         ]
       },
       {

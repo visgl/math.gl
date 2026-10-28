@@ -27,6 +27,8 @@ export const MapSetupWorker: WorkerObject<MapDescription, PreparedMap> = {
   ...descriptor,
   id: 'map-setup',
   name: 'Map setup',
+  process: async (input, _options, context) =>
+    (await import('./operations')).setupMap(input, context || {}).toPrepared(),
   worker: new URL('./map-worker.js', moduleUrl).href,
   loadWorker: () => new Worker(new URL('./map-worker.js', import.meta.url), {type: 'module'})
 };
@@ -34,6 +36,8 @@ export const BulkProjectionWorker: WorkerObject<BulkProjectionTask, ProjectionAr
   ...descriptor,
   id: 'bulk-projection',
   name: 'Bulk projection',
+  process: async (input, _options, context) =>
+    (await import('./operations')).projectBulk(input, context || {}),
   worker: new URL('./projection-worker.js', moduleUrl).href,
   loadWorker: () => new Worker(new URL('./projection-worker.js', import.meta.url), {type: 'module'})
 };
