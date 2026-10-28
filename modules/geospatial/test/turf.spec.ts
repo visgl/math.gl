@@ -353,3 +353,164 @@ test('point-on-line tolerance works perpendicular to axis-aligned segments', asy
     0
   );
 });
+
+test('native boundary intersections and kinks preserve row alignment', async () => {
+  const api = await import('../src/turf');
+  const {materializeGeoArrowRows, validateGeoArrowColumn} = await import('../src/geoarrow/index');
+  const {lineIntersect: oracle} = await import('@turf/line-intersect');
+  const a = {
+    type: 'LineString' as const,
+    coordinates: [
+      [0, 0],
+      [2, 2],
+      [4, 0]
+    ]
+  };
+  const b = {
+    type: 'LineString' as const,
+    coordinates: [
+      [0, 1],
+      [4, 1]
+    ]
+  };
+  const result = api.lineIntersect(column([a, null]), column([b]));
+  expect(validateGeoArrowColumn(result).valid).toBe(true);
+  const output = materializeGeoArrowRows(result);
+  expect(output[0]).toEqual({
+    type: 'MultiPoint',
+    coordinates: oracle(a, b).features.map(f => f.geometry.coordinates)
+  });
+  expect(output[1]).toBeNull();
+  const bow = column([
+    {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [0, 0],
+          [2, 2],
+          [0, 2],
+          [2, 0],
+          [0, 0]
+        ]
+      ]
+    }
+  ]);
+  expect(materializeGeoArrowRows(api.kinks(bow))[0]).toEqual({
+    type: 'MultiPoint',
+    coordinates: [[1, 1]]
+  });
+  expect(materializeGeoArrowRows(api.kinks(column([polygon])))[0]).toEqual({
+    type: 'MultiPoint',
+    coordinates: []
+  });
+  const parallel = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 3],
+        [4, 3]
+      ]
+    }
+  ]);
+  expect(materializeGeoArrowRows(api.lineIntersect(column([a]), parallel))[0]).toEqual({
+    type: 'MultiPoint',
+    coordinates: []
+  });
+  const sliced = sliceGeoArrowColumn(column([a, a, a]), 1, 3);
+  expect(materializeGeoArrowRows(api.lineIntersect(sliced, column([b])))).toHaveLength(2);
+});
+
+test('intersections handle separated chunks, duplicate joins and collinear overlaps', async () => {
+  const {lineIntersect, kinks} = await import('../src/turf');
+  const {materializeGeoArrowRows} = await import('../src/geoarrow/index');
+  const geometry = {
+    type: 'LineString' as const,
+    coordinates: [
+      [0, 0],
+      [1, 1],
+      [2, 0]
+    ]
+  };
+  const one = makeGeoArrowColumnFromGeometryRows([geometry], {coordinateLayout: 'separated'});
+  const two = {...one, chunks: [...one.chunks, ...one.chunks]};
+  const horizontal = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 1],
+        [2, 1]
+      ]
+    }
+  ]);
+  expect(materializeGeoArrowRows(lineIntersect(two, horizontal))).toEqual([
+    {type: 'MultiPoint', coordinates: [[1, 1]]},
+    {type: 'MultiPoint', coordinates: [[1, 1]]}
+  ]);
+  expect(
+    materializeGeoArrowRows(lineIntersect(one, horizontal, {removeDuplicates: false}))[0]
+  ).toEqual({
+    type: 'MultiPoint',
+    coordinates: [
+      [1, 1],
+      [1, 1]
+    ]
+  });
+  const straight = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [0, 0],
+        [2, 0]
+      ]
+    }
+  ]);
+  const overlap = column([
+    {
+      type: 'LineString',
+      coordinates: [
+        [1, 0],
+        [3, 0]
+      ]
+    }
+  ]);
+  expect(materializeGeoArrowRows(lineIntersect(straight, overlap))[0]).toEqual({
+    type: 'MultiPoint',
+    coordinates: []
+  });
+  expect(materializeGeoArrowRows(kinks(one))[0]).toEqual({type: 'MultiPoint', coordinates: []});
+});
+
+test('isolated collinear contacts and shared floating-point endpoints', async () => {
+  const {lineIntersect} = await import('../src/turf');
+  const {materializeGeoArrowRows} = await import('../src/geoarrow/index');
+  const line = (coordinates: number[][]) => column([{type: 'LineString', coordinates}]);
+  expect(
+    materializeGeoArrowRows(
+      lineIntersect(
+        line([
+          [0, 0],
+          [1, 0]
+        ]),
+        line([
+          [1, 0],
+          [2, 0]
+        ])
+      )
+    )[0]
+  ).toEqual({type: 'MultiPoint', coordinates: [[1, 0]]});
+  expect(
+    materializeGeoArrowRows(
+      lineIntersect(
+        line([
+          [-1.6, -5.9],
+          [1.1, 7.2],
+          [2.1, 9.2]
+        ]),
+        line([
+          [-0.9, 7.2],
+          [3.1, 7.2]
+        ])
+      )
+    )[0]
+  ).toEqual({type: 'MultiPoint', coordinates: [[1.1, 7.2]]});
+});
