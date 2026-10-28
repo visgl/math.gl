@@ -5,7 +5,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "test": "node --test provider.test.mjs batch.test.mjs integration.test.mjs",
+    "test": "node --test provider.test.mjs batch.test.mjs integration.test.mjs raster.test.mjs",
     "build": "node build-browser.mjs",
     "start": "node server.mjs",
     "test:browser": "node browser-test.mjs",

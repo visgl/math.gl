@@ -32,6 +32,11 @@ try {
   for (let i = 0; i < 3; i++)
     assert.ok(Math.abs(result.batch.projected[i] - result.mathgl[i]) < 1e-6);
 
+  assert(result.raster.transferred);assert(result.raster.workerParity);
+  assert(result.raster.triangles>100);
+  assert(result.raster.batches>1);
+  assert(result.raster.maximumDifference<1e-8);
+  assert(result.raster.probeError<=4);
   assert.match(result.unsupported, /compound|vertical/i);
   assert.deepEqual(external, [], 'Example loads all assets locally');
   console.log(

@@ -21,6 +21,10 @@ await build({entryPoints: [fileURLToPath(new URL('./consume-worker.mjs', import.
   outfile: fileURLToPath(new URL('consume-worker.mjs', output)), bundle: true, format: 'esm',
   platform: 'browser', external: ['node:*']});
 
+await build({entryPoints: [fileURLToPath(new URL('./raster-worker.mjs', import.meta.url))],
+  outfile: fileURLToPath(new URL('raster-worker.mjs', output)), bundle: true, format: 'esm',
+  platform: 'browser', external: ['node:*']});
+
 // Keep upstream module/worker URLs and adjacent WASM/database assets intact.
 // Copy installed, lockfile-pinned packages including their notices; no CDN is needed.
 // Resolve package roots through this repository's node_modules installation.
