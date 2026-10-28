@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import ExamplePanel from 'website-examples/common/example-panel';
 import React, {useEffect, useState} from 'react';
 import {createExampleEngine, prepareMap, RADIUS} from './engines';
 
@@ -35,10 +36,10 @@ export default function ExternalProjectionEngines() {
     }
   } catch (caught) { error = String(caught); }
   return <section aria-label="Projection engine comparison" style={{border: '1px solid #778899', borderRadius: 8, padding: 16, margin: '20px 0'}}>
-    <div style={{display: 'flex', flexWrap: 'wrap', gap: 20}}>
+    <ExamplePanel title="Projection engine comparison">
       <label>Projection engine <select aria-label="Projection engine" value={backend} onChange={event => setBackend(event.target.value)}>{['math.gl', 'proj4js', 'D3'].map(name => <option key={name}>{name}</option>)}</select></label>
       <label>Location <select aria-label="Location" value={cityIndex} onChange={event => setCityIndex(Number(event.target.value))}>{cities.map(([name], i) => <option key={name} value={i}>{name}</option>)}</select></label>
-    </div>
+    </ExamplePanel>
     <p>The same application projects a graticule and a location through the selected engine.</p>
     {error ? <p role="alert">{error}</p> : !result ? <p role="status">Preparing engine…</p> : <>
       <svg viewBox="0 0 800 460" role="img" aria-label={`Mercator graticule with ${city[0]}, projected by ${backend}`} style={{width: '100%', background: '#102638', borderRadius: 6}}>

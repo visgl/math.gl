@@ -15895,19 +15895,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"math.gl-albers-usa@workspace:examples/albers-usa":
+"math.gl-albers-usa@workspace:examples/geospatial/albers-usa":
   version: 0.0.0-use.local
-  resolution: "math.gl-albers-usa@workspace:examples/albers-usa"
+  resolution: "math.gl-albers-usa@workspace:examples/geospatial/albers-usa"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@math.gl/geospatial": "workspace:*"
     d3-geo: "npm:^2.0.2"
     vite: "npm:^8.2.2"
   languageName: unknown
   linkType: soft
 
-"math.gl-alpine-ice-age@workspace:examples/alpine-ice-age":
+"math.gl-alpine-ice-age@workspace:examples/geospatial/alpine-ice-age":
   version: 0.0.0-use.local
-  resolution: "math.gl-alpine-ice-age@workspace:examples/alpine-ice-age"
+  resolution: "math.gl-alpine-ice-age@workspace:examples/geospatial/alpine-ice-age"
   dependencies:
     "@deck.gl/core": "npm:~9.4.0"
     "@deck.gl/layers": "npm:~9.4.0"
@@ -15928,9 +15929,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-benchmark-example@workspace:examples/benchmarks":
+"math.gl-benchmark-example@workspace:examples/core/benchmarks":
   version: 0.0.0-use.local
-  resolution: "math.gl-benchmark-example@workspace:examples/benchmarks"
+  resolution: "math.gl-benchmark-example@workspace:examples/core/benchmarks"
   dependencies:
     "@math.gl/core": "workspace:*"
     probe.gl: "npm:^5.0.0"
@@ -15941,9 +15942,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-core-transforms@workspace:examples/core-transforms":
+"math.gl-core-transforms@workspace:examples/core/core-transforms":
   version: 0.0.0-use.local
-  resolution: "math.gl-core-transforms@workspace:examples/core-transforms"
+  resolution: "math.gl-core-transforms@workspace:examples/core/core-transforms"
   dependencies:
     "@deck.gl-community/panels": "npm:^9.4.8"
     "@luma.gl/core": "npm:~9.4.2"
@@ -15956,9 +15957,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-culling-playground@workspace:examples/culling-playground":
+"math.gl-culling-playground@workspace:examples/geometry/culling-playground":
   version: 0.0.0-use.local
-  resolution: "math.gl-culling-playground@workspace:examples/culling-playground"
+  resolution: "math.gl-culling-playground@workspace:examples/geometry/culling-playground"
   dependencies:
     "@deck.gl-community/panels": "npm:^9.4.8"
     "@luma.gl/core": "npm:~9.4.2"
@@ -15973,10 +15974,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-culling-queries@workspace:examples/culling-queries":
+"math.gl-culling-queries@workspace:examples/geometry/culling-queries":
   version: 0.0.0-use.local
-  resolution: "math.gl-culling-queries@workspace:examples/culling-queries"
+  resolution: "math.gl-culling-queries@workspace:examples/geometry/culling-queries"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@luma.gl/core": "npm:~9.4.2"
     "@luma.gl/engine": "npm:~9.4.2"
     "@luma.gl/shadertools": "npm:~9.4.2"
@@ -15988,10 +15990,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-curves-example@workspace:examples/curves":
+"math.gl-curves-example@workspace:examples/geometry/curves":
   version: 0.0.0-use.local
-  resolution: "math.gl-curves-example@workspace:examples/curves"
+  resolution: "math.gl-curves-example@workspace:examples/geometry/curves"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@luma.gl/core": "npm:~9.4.2"
     "@luma.gl/engine": "npm:~9.4.2"
     "@luma.gl/shadertools": "npm:~9.4.2"
@@ -16003,18 +16006,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-elastic-maps@workspace:examples/elastic-maps":
+"math.gl-elastic-maps@workspace:examples/geospatial/elastic-maps":
   version: 0.0.0-use.local
-  resolution: "math.gl-elastic-maps@workspace:examples/elastic-maps"
+  resolution: "math.gl-elastic-maps@workspace:examples/geospatial/elastic-maps"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@math.gl/geospatial": "workspace:*"
     vite: "npm:^8.2.2"
   languageName: unknown
   linkType: soft
 
-"math.gl-expression-playground@workspace:examples/expressions":
+"math.gl-expression-playground@workspace:examples/core/expressions":
   version: 0.0.0-use.local
-  resolution: "math.gl-expression-playground@workspace:examples/expressions"
+  resolution: "math.gl-expression-playground@workspace:examples/core/expressions"
   dependencies:
     "@math.gl/core": "workspace:*"
     "@math.gl/dggs": "workspace:*"
@@ -16028,10 +16032,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-geographic-tiles@workspace:examples/geographic-tiles":
+"math.gl-geographic-tiles@workspace:examples/geospatial/geographic-tiles":
   version: 0.0.0-use.local
-  resolution: "math.gl-geographic-tiles@workspace:examples/geographic-tiles"
+  resolution: "math.gl-geographic-tiles@workspace:examples/geospatial/geographic-tiles"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@luma.gl/core": "npm:~9.4.2"
     "@luma.gl/engine": "npm:~9.4.2"
     "@luma.gl/shadertools": "npm:~9.4.2"
@@ -16044,10 +16049,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-geoid-globe@workspace:examples/geoid-globe":
+"math.gl-geoid-globe@workspace:examples/earth/geoid-globe":
   version: 0.0.0-use.local
-  resolution: "math.gl-geoid-globe@workspace:examples/geoid-globe"
+  resolution: "math.gl-geoid-globe@workspace:examples/earth/geoid-globe"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@deck.gl/core": "npm:~9.4.0"
     "@deck.gl/layers": "npm:~9.4.0"
     "@loaders.gl/core": "npm:^4.4.3"
@@ -16059,10 +16065,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-geometry-processing@workspace:examples/geometry-processing":
+"math.gl-geometry-processing@workspace:examples/geometry/geometry-processing":
   version: 0.0.0-use.local
-  resolution: "math.gl-geometry-processing@workspace:examples/geometry-processing"
+  resolution: "math.gl-geometry-processing@workspace:examples/geometry/geometry-processing"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@luma.gl/core": "npm:~9.4.2"
     "@luma.gl/engine": "npm:~9.4.2"
     "@luma.gl/shadertools": "npm:~9.4.2"
@@ -16075,9 +16082,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-geometry-viewer@workspace:examples/geometry-viewer":
+"math.gl-geometry-viewer@workspace:examples/geometry/geometry-viewer":
   version: 0.0.0-use.local
-  resolution: "math.gl-geometry-viewer@workspace:examples/geometry-viewer"
+  resolution: "math.gl-geometry-viewer@workspace:examples/geometry/geometry-viewer"
   dependencies:
     "@deck.gl-community/panels": "npm:^9.4.8"
     "@luma.gl/core": "npm:~9.4.2"
@@ -16111,10 +16118,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-parametric-geometry@workspace:examples/parametric-geometry":
+"math.gl-parametric-geometry@workspace:examples/geometry/parametric-geometry":
   version: 0.0.0-use.local
-  resolution: "math.gl-parametric-geometry@workspace:examples/parametric-geometry"
+  resolution: "math.gl-parametric-geometry@workspace:examples/geometry/parametric-geometry"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@luma.gl/core": "npm:~9.4.2"
     "@luma.gl/engine": "npm:~9.4.2"
     "@luma.gl/shadertools": "npm:~9.4.2"
@@ -16139,9 +16147,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-polygon-playground@workspace:examples/polygon-playground":
+"math.gl-polygon-playground@workspace:examples/geometry/polygon-playground":
   version: 0.0.0-use.local
-  resolution: "math.gl-polygon-playground@workspace:examples/polygon-playground"
+  resolution: "math.gl-polygon-playground@workspace:examples/geometry/polygon-playground"
   dependencies:
     "@deck.gl-community/editable-layers": "npm:^9.4.8"
     "@deck.gl-community/panels": "npm:^9.4.8"
@@ -16163,9 +16171,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-proj-wasm-crs@workspace:examples/proj-wasm-crs":
+"math.gl-proj-wasm-crs@workspace:examples/geospatial/proj-wasm-crs":
   version: 0.0.0-use.local
-  resolution: "math.gl-proj-wasm-crs@workspace:examples/proj-wasm-crs"
+  resolution: "math.gl-proj-wasm-crs@workspace:examples/geospatial/proj-wasm-crs"
   dependencies:
     "@math.gl/geospatial": "workspace:*"
     esbuild: "npm:^0.28.1"
@@ -16174,19 +16182,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-quincuncial-star@workspace:examples/quincuncial-star":
+"math.gl-quincuncial-star@workspace:examples/geospatial/quincuncial-star":
   version: 0.0.0-use.local
-  resolution: "math.gl-quincuncial-star@workspace:examples/quincuncial-star"
+  resolution: "math.gl-quincuncial-star@workspace:examples/geospatial/quincuncial-star"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@math.gl/geospatial": "workspace:*"
     vite: "npm:^8.2.2"
   languageName: unknown
   linkType: soft
 
-"math.gl-spatial-index-example@workspace:examples/spatial-index":
+"math.gl-spatial-index-example@workspace:examples/geometry/spatial-index":
   version: 0.0.0-use.local
-  resolution: "math.gl-spatial-index-example@workspace:examples/spatial-index"
+  resolution: "math.gl-spatial-index-example@workspace:examples/geometry/spatial-index"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@luma.gl/core": "npm:~9.4.2"
     "@luma.gl/engine": "npm:~9.4.2"
     "@luma.gl/shadertools": "npm:~9.4.2"
@@ -16198,9 +16208,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-sun-terminator@workspace:examples/sun-terminator":
+"math.gl-sun-terminator@workspace:examples/earth/sun-terminator":
   version: 0.0.0-use.local
-  resolution: "math.gl-sun-terminator@workspace:examples/sun-terminator"
+  resolution: "math.gl-sun-terminator@workspace:examples/earth/sun-terminator"
   dependencies:
     "@deck.gl-community/geo-layers": "npm:^9.4.8"
     "@deck.gl-community/panels": "npm:^9.4.8"
@@ -16220,9 +16230,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-tectonic-time-machine@workspace:examples/tectonic-time-machine":
+"math.gl-tectonic-time-machine@workspace:examples/geospatial/tectonic-time-machine":
   version: 0.0.0-use.local
-  resolution: "math.gl-tectonic-time-machine@workspace:examples/tectonic-time-machine"
+  resolution: "math.gl-tectonic-time-machine@workspace:examples/geospatial/tectonic-time-machine"
   dependencies:
     "@deck.gl/core": "npm:~9.4.0"
     "@deck.gl/layers": "npm:~9.4.0"
@@ -16240,10 +16250,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-timezone-globe@workspace:examples/timezone-globe":
+"math.gl-timezone-globe@workspace:examples/earth/timezone-globe":
   version: 0.0.0-use.local
-  resolution: "math.gl-timezone-globe@workspace:examples/timezone-globe"
+  resolution: "math.gl-timezone-globe@workspace:examples/earth/timezone-globe"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@deck.gl/core": "npm:~9.4.0"
     "@deck.gl/layers": "npm:~9.4.0"
     "@loaders.gl/core": "npm:^4.4.3"
@@ -16255,19 +16266,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-unfolding-polyhedron@workspace:examples/unfolding-polyhedron":
+"math.gl-unfolding-polyhedron@workspace:examples/geometry/unfolding-polyhedron":
   version: 0.0.0-use.local
-  resolution: "math.gl-unfolding-polyhedron@workspace:examples/unfolding-polyhedron"
+  resolution: "math.gl-unfolding-polyhedron@workspace:examples/geometry/unfolding-polyhedron"
   dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
     "@math.gl/core": "workspace:*"
     "@math.gl/geometry": "workspace:*"
     vite: "npm:^8.2.2"
   languageName: unknown
   linkType: soft
 
-"math.gl-zoom-driven-map-morphing@workspace:examples/zoom-driven-map-morphing":
+"math.gl-zoom-driven-map-morphing@workspace:examples/web-mercator/zoom-driven-map-morphing":
   version: 0.0.0-use.local
-  resolution: "math.gl-zoom-driven-map-morphing@workspace:examples/zoom-driven-map-morphing"
+  resolution: "math.gl-zoom-driven-map-morphing@workspace:examples/web-mercator/zoom-driven-map-morphing"
   dependencies:
     "@deck.gl-community/panels": "npm:^9.4.8"
     "@deck.gl/core": "npm:~9.4.0"

@@ -77,4 +77,4 @@ provides torus, lathe and sampled surface generators, with an interactive galler
 
 The experimental `HingeTree` evaluates rigid panels connected by hinges. See the
 [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and
-[unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/unfolding-polyhedron).
+[unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/geometry/unfolding-polyhedron).

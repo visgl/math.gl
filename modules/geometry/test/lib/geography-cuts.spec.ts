@@ -3,11 +3,15 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {describe, expect, it} from 'vitest';
-import {isLand, landArc, oceanWeight} from '../../../../examples/unfolding-polyhedron/geography';
-import {createDymaxion} from '../../../../examples/unfolding-polyhedron/dymaxion';
-import {createCutLayout} from '../../../../examples/unfolding-polyhedron/cut-layout';
-import {createLayout} from '../../../../examples/unfolding-polyhedron/layout';
-import {createSolid, type Vec3} from '../../../../examples/unfolding-polyhedron/polyhedra';
+import {
+  isLand,
+  landArc,
+  oceanWeight
+} from '../../../../examples/geometry/unfolding-polyhedron/geography';
+import {createDymaxion} from '../../../../examples/geometry/unfolding-polyhedron/dymaxion';
+import {createCutLayout} from '../../../../examples/geometry/unfolding-polyhedron/cut-layout';
+import {createLayout} from '../../../../examples/geometry/unfolding-polyhedron/layout';
+import {createSolid, type Vec3} from '../../../../examples/geometry/unfolding-polyhedron/polyhedra';
 
 const point = (lon: number, lat: number): Vec3 => {
   lon *= Math.PI / 180;

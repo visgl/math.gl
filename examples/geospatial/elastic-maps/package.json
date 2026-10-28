@@ -1,0 +1,18 @@
+{
+  "name": "math.gl-elastic-maps",
+  "version": "5.0.0-alpha.19",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@deck.gl-community/panels": "^9.4.8",
+    "@math.gl/geospatial": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^8.2.2"
+  }
+}
