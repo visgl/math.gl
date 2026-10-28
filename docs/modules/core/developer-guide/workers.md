@@ -187,6 +187,8 @@ worker URL or browser factory, and calls
 `await createWorkerResource(descriptor, {scale: 2})`. The returned handle has typed
 `run(input, options)`, `stats` and `destroy()` methods. Each handle owns a dedicated
 single-worker pool: calls serialize, preserving affinity and initialization.
+Pool configuration belongs to resource creation; `run` accepts only per-call
+ownership, scheduling, progress and cancellation controls.
 The default resource queue holds at most 32 waiting calls; configure byte budgets
 for large inputs. This first version
 trades cross-resource worker sharing for explicit lifetime guarantees.
@@ -279,7 +281,11 @@ continue over normal progress messages. Each snapshot field is atomic, but a
 snapshot is not a transaction across fields. The revision counter wraps as int32.
 Counters support nonnegative signed int32 values; `total: -1` means unknown.
 
-Use one fresh control buffer per job and do not reuse a cancelled buffer. Calling
+Use one fresh control buffer per job and do not reuse a cancelled buffer.
+For resource handles, a signal or control buffer supplied at creation applies only
+to initialization; later `run` calls receive fresh automatic control state unless
+the caller provides their own. Creation-time `sharedState: false` remains a
+default opt-out for that resource. Pass cancellation signals on each `run` call. Calling
 `state.cancel()` directly is observed by cooperating processors, but it does not
 by itself reject a queued caller or start a termination deadline; use AbortSignal
 for runtime-managed cancellation. Cancellation never rolls back shared writes.

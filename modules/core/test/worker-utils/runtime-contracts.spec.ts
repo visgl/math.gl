@@ -636,3 +636,36 @@ test('cooperative cancellation before resource dispatch preserves initialized st
     await resource.destroy();
   }
 });
+
+test('resource runs do not inherit initialization signals or shared control buffers', async () => {
+  const descriptor = {
+    ...runtime,
+    id: 'resource-controls',
+    name: 'resource controls',
+    worker: new URL('./fixtures/resource-worker.mjs', import.meta.url).href
+  };
+  const state = createSharedWorkerState();
+  const initialization = new AbortController();
+  const resource = await createWorkerResource(
+    descriptor,
+    {value: 10},
+    {
+      sharedState: state.buffer,
+      signal: initialization.signal,
+      cancellationMode: 'cooperative'
+    }
+  );
+  try {
+    initialization.abort(new Error('initialization has finished'));
+    const controller = new AbortController();
+    const result = resource.run(100, {signal: controller.signal});
+    controller.abort(new Error('cancel this call'));
+    await assert.rejects(result, /cancel this call/);
+    assert.equal(state.snapshot.cancelled, false);
+    state.cancel();
+    assert.equal(await resource.run(2), 12);
+    assert.equal(resource.stats.workersCreated, 1);
+  } finally {
+    await resource.destroy();
+  }
+});

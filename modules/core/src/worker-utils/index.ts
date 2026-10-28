@@ -91,6 +91,7 @@ export type {WorkerAdmission, WorkerPoolProps} from './lib/worker-farm/worker-po
 export {createWorkerResource, createResourceWorker} from './lib/worker-api/worker-resource';
 export type {
   WorkerResource,
+  WorkerResourceRunOptions,
   WorkerResourceObject,
   ResourceRequest
 } from './lib/worker-api/worker-resource';

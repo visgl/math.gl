@@ -20,8 +20,19 @@ export type WorkerResourceObject<Init, Input, Output> = WorkerObject<
   ResourceRequest<Init, Input>,
   {value?: Output}
 >;
+/** Per-call controls; pool configuration belongs to createWorkerResource. */
+export type WorkerResourceRunOptions = Pick<
+  WorkerOptions,
+  | 'inputOwnership'
+  | 'signal'
+  | 'onProgress'
+  | 'priority'
+  | 'cancellationMode'
+  | 'cancellationTimeout'
+  | 'sharedState'
+>;
 export type WorkerResource<Input, Output> = {
-  run(input: Input, options?: WorkerOptions): Promise<Output>;
+  run(input: Input, options?: WorkerResourceRunOptions): Promise<Output>;
   /** Stops accepting calls, drains submitted work, disposes state, then terminates the worker. */
   destroy(options?: {timeout?: number}): Promise<void>;
   readonly stats: WorkerPool['stats'];
@@ -74,7 +85,14 @@ export async function createWorkerResource<Init, Input, Output>(
   const invoke = async (request: ResourceRequest<Init, Input>, callOptions: WorkerOptions) => {
     if (incarnation?.terminated)
       throw new Error('Worker resource was invalidated; create a new resource');
-    const prepared = prepareSharedState({...options, ...callOptions});
+    // Creation-time signals and control buffers apply only to initialization.
+    // Preserve false as a resource-wide opt-out, but never reuse an operation's control buffer.
+    const prepared = prepareSharedState({
+      ...options,
+      signal: undefined,
+      sharedState: options.sharedState === false ? false : undefined,
+      ...callOptions
+    });
     const {signal, onProgress, onMetrics, ...serializable} = prepared;
     validateSharedInput(serializable, [request, serializable]);
     const {sharedState: _controlBuffer, ...inputOptions} = serializable;

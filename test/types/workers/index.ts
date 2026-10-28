@@ -94,3 +94,6 @@ if (shared && capabilities.sharedMemory) {
     {sharedState: shared.buffer, cancellationMode: 'cooperative'}
   );
 }
+
+// @ts-expect-error Configure resource pool budgets at creation, not on an individual call.
+resource.run({delta: 1}, {maxQueuedBytes: 1024});
