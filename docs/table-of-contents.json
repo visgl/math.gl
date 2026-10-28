@@ -253,7 +253,8 @@
             ]
           },
           "modules/geospatial/crs/api-reference/spatial-reference",
-          "modules/geospatial/crs/api-reference/resolver"
+          "modules/geospatial/crs/api-reference/resolver",
+          "modules/geospatial/crs/api-reference/crs-descriptor"
         ]
       },
       {

@@ -22,6 +22,12 @@ const probes = [
   {symbol:'getTimezoneOffset', packages:['@math.gl/earth'], forbidden:[/astronomy-engine/, /tz-lookup/, /bright-stars/], budget:1500},
   {symbol:'parseWKB', packages:['@math.gl/geospatial'], forbidden:[/martini/, /delatin/, /surface\./, /geometry\//], budget:4500},
   {
+    symbol: 'createCRSDescriptor',
+    packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial'],
+    forbidden: [/\/projection\//, /\/crs\/(wkt|proj-string|projjson|resolver)/, /proj-wasm/, /proj4/, /\/core\//],
+    budget: 8000
+  },
+  {
     symbol: 'createSpatialReference',
     packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial'],
     forbidden: [/\/resolver\./, /\/projection\//, /\/wkt-crs\./],

@@ -74,3 +74,16 @@ export type {
   CRSResolverOptions,
   CRSResolver
 } from './resolver';
+
+export {createCRSDescriptor} from './crs-descriptor';
+export type {CRSDescriptorOptions} from './crs-descriptor';
+export type {
+  CRSCoordinate,
+  CRSOutput,
+  CRSDescriptor,
+  CRSConversion,
+  CRSConverter,
+  CRSBounds,
+  CRSRenderingScale,
+  CRSRenderingScaleCallback
+} from './crs-descriptor-types';

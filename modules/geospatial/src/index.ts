@@ -11,6 +11,7 @@ export {
   PROJJSON_SCHEMA_URL,
   PROJJSON_SCHEMA_VERSION,
   createSpatialReference,
+  createCRSDescriptor,
   inferCRSRepresentation,
   encodeWKTCRS,
   parseWKTCRS,
@@ -62,6 +63,15 @@ export type {
   PROJParameter,
   PROJStringAst,
   CRSMetadata,
+  CRSDescriptorOptions,
+  CRSCoordinate,
+  CRSOutput,
+  CRSDescriptor,
+  CRSConversion,
+  CRSConverter,
+  CRSBounds,
+  CRSRenderingScale,
+  CRSRenderingScaleCallback,
   CRSUnit
 } from './crs/index';
 export {createCRSDictionaryProvider, createCRSResolver, CRSResolutionError} from './crs/resolver';
