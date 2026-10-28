@@ -31,6 +31,50 @@ const tick = () => new Promise(resolve => setImmediate(resolve));
 const start = (pool, bytes, priority = 0, signal: AbortSignal = undefined) =>
   pool.startJob('test', undefined, undefined, signal, {inputBytes: bytes, priority});
 
+test('close drains accepted work, rejects new work and releases admissions', async () => {
+  const pool = new WorkerPool({source, maxConcurrency: 1, maxQueuedJobs: 2});
+  const first = await start(pool, 0);
+  const second = start(pool, 0);
+  const reservation = await pool.reserve(0);
+  const waiting = pool.reserve(0);
+  const waitingRejected = assert.rejects(waiting, /closing/);
+  const closing = pool.close();
+  assert.equal(pool.close(), closing);
+  await waitingRejected;
+  await assert.rejects(start(pool, 0), /closing/);
+  await assert.rejects(pool.reserve(0), /closing/);
+  reservation.release();
+  first.done({});
+  (await second).done({});
+  await closing;
+  assert.equal(pool.stats.activeJobs, 0);
+  assert.equal(pool.stats.reservations, 0);
+  await assert.rejects(start(pool, 0), /destroyed/);
+});
+
+test('close deadline terminates active work and settles queued jobs', async () => {
+  const pool = new WorkerPool({source, maxConcurrency: 1});
+  const first = await start(pool, 0);
+  const rejectedFirst = assert.rejects(first.result, /destroyed/);
+  const rejectedSecond = assert.rejects(start(pool, 0), /destroyed/);
+  await pool.close({timeout: 10});
+  await Promise.all([rejectedFirst, rejectedSecond]);
+  assert.equal(pool.stats.activeJobs, 0);
+});
+
+test('close settles when the last queued job is aborted and destroy is idempotent', async () => {
+  const pool = new WorkerPool({source, maxConcurrency: 1});
+  const first = await start(pool, 0);
+  const controller = new AbortController();
+  const queued = start(pool, 0, 0, controller.signal);
+  const rejected = assert.rejects(queued, /stop/);
+  const closing = pool.close();
+  controller.abort(new Error('stop'));
+  first.done({});
+  await rejected;
+  await Promise.all([closing, pool.destroy()]);
+});
+
 test('module URLs remain direct and worker types use separate pools', async () => {
   const url = 'https://example.test/worker.mjs';
   assert.equal(getLoadableWorkerURL({url, workerType: 'module'}), url);
