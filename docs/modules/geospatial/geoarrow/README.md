@@ -23,6 +23,7 @@ Support describes the public API in the current repository. Notes identify limit
 | Coordinate mapping and reusable destinations | ✅ Implemented | Coordinate transforms can write caller-owned targets with validated layouts. |
 | WKB/WKT column codecs | ✅ Implemented | Serialized columns retain offsets, validity, chunks and metadata through the documented codecs. |
 | Polygon tessellation and transfer preparation | ✅ Implemented | Flat positions/indices include row attribution; explicit resource limits and transfer helpers bound supported operations. |
+| XY geometry streaming and streamed tessellation | ✅ Implemented | [Geometry streams](./geometry-streams.md) accept external geometry engines and retain source-row attribution, with a task-worker recipe. Z/M and serialized input are outside this stream profile. |
 | Direct Arrow Table/RecordBatch integration | ◐ Partial | The descriptor ABI is runtime-neutral. Applications or loaders adapt their Arrow runtime at the boundary. |
 | Complete GIS topology/overlay engine | ❌ Not implemented | No general GEOS-style union, overlay, topology-repair or spatial-database engine is provided by these column kernels. |
 | GPU-resident column execution | ❌ Not implemented | The kernels are synchronous CPU operations; GPU upload/compute and device memory ownership belong to consumers. |

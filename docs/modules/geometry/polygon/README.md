@@ -22,6 +22,7 @@ Support describes the public API in the current repository. Notes identify limit
 | Polyline/polygon clipping and grid cuts | ✅ Implemented | [Clipping](./api-reference/clip-polygon.md) and grid/Mercator helpers split geometry at supported boundaries. |
 | Projection-aware edge subdivision | ✅ Implemented | [subdividePolyline](./api-reference/subdivide-polyline.md) uses target-space tolerances and retains original-edge attribution. |
 | Conforming triangle-mesh refinement | ✅ Implemented | [subdivideTriangleMesh](./api-reference/subdivide-triangle-mesh.md) shares edge subdivisions and returns interpolation provenance. |
+| Projected triangle-mesh clipping | ✅ Implemented | [clipTriangleMesh](./api-reference/clip-triangle-mesh.md) supports disjoint convex target-plane regions, periodic copies and original-vertex weights; prepare geographic topology separately. |
 | Certified continuous projection-error bounds | ❌ Not implemented | Adaptive sampling tests an approximation criterion; it does not prove a global continuous maximum error. |
 | General Boolean topology and invalid-ring repair | ❌ Not implemented | Clipping/triangulation do not supply a full union/difference/topology-repair engine for arbitrary malformed polygons. |
 | Global geodesic and spherical polygon topology | ◐ Partial | Use the separate [geospatial seam/atlas APIs](../../geospatial/api-reference/geographic-seams.md) for their explicit edge models and supported domains. |
