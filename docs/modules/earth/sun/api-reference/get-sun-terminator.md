@@ -1,6 +1,8 @@
 {/* SPDX-License-Identifier: MIT */}
 {/* SPDX-FileCopyrightText: Copyright (c) vis.gl contributors */}
 
+import SunTerminator from '@site/src/components/sun-terminator';
+
 # getSunTerminator
 
 Returns the geometric solar-altitude outline and the direction toward the Sun.
@@ -62,6 +64,10 @@ Boundary points satisfy equality. At 0° the boundary is a great circle; negativ
 thresholds describe smaller circles enclosing the dark region. Geometry covers
 the entire sphere; clip it to the supported latitude range when displaying a
 Web Mercator map.
+
+## Interactive example
+
+<SunTerminator inline />
 
 ## Accuracy and rendering
 
