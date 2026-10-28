@@ -8,7 +8,7 @@ import {ProjectionTransform} from './typescript-projection';
 import type {ProjectionTransformOptions} from './typescript-projection';
 import type {CRSEngine, CRSDescriptor, GetCRSOptions} from './types';
 import type {ProjectionEngineOptions, CreateProjectionOptions} from '../types';
-import {hasCRSOverrides, snapshotEngineOptions} from './projection-engine';
+import {hasCRSOverrides, snapshotEngineOptions} from './engine-options';
 import {createProjectionDescriptor, preloadProjection} from './projection-descriptor';
 import type {ProjectionDescriptor} from './projection-descriptor';
 import type {ProjectionPlugin} from './types';
@@ -107,7 +107,10 @@ export class LazyProjectionEngine implements CRSEngine {
       definition,
       this.options,
       options,
-      this.useDefinitionSignature
+      this.useDefinitionSignature,
+      this.options.resolver
+        ? async (input, config) => (await import('./crs/resolve')).prepareCRSInput(input, config)
+        : undefined
     );
   }
 
@@ -121,8 +124,16 @@ export class LazyProjectionEngine implements CRSEngine {
     });
   }
 
-  createProjectionAsync(options: CreateProjectionOptions = {}): Promise<ProjectionTransform> {
-    const config = {...this.options, ...options};
+  async createProjectionAsync(options: CreateProjectionOptions = {}): Promise<ProjectionTransform> {
+    // Public call options contain only JSON CRS metadata and primitive conventions.
+    // Capture them before optional imports yield to caller mutations.
+    let config: ProjectionEngineOptions<ProjectionDescriptor> & CreateProjectionOptions = {
+      ...this.options,
+      ...JSON.parse(JSON.stringify(options))
+    };
+    if (config.resolver) {
+      config = await (await import('./crs/resolve')).prepareEngineOptions(config);
+    }
     return ProjectionTransform.create({
       ...config,
       projections: configuredProjections(config)

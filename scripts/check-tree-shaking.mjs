@@ -23,13 +23,13 @@ const probes = [
   {symbol:'parseWKB', packages:['@math.gl/geospatial'], forbidden:[/martini/, /delatin/, /surface\./, /geometry\//], budget:4500},
   {
     symbol: 'createSpatialReference',
-    packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial/crs'],
+    packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial'],
     forbidden: [/\/resolver\./, /\/projection\//, /\/wkt-crs\./],
     budget: 6000
   },
   {
     symbol: 'createCRSResolver',
-    packages: ['@math.gl/geospatial/crs'],
+    packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial'],
     forbidden: [/\/projection\//, /\/wkt-crs\./, /proj-wasm/, /\/core\//],
     budget: 8000
   },

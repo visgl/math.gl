@@ -10492,6 +10492,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chokidar@npm:^4.0.3":
+  version: 4.0.3
+  resolution: "chokidar@npm:4.0.3"
+  dependencies:
+    readdirp: "npm:^4.0.1"
+  checksum: 10c0/a58b9df05bb452f7d105d9e7229ac82fa873741c0c40ddcc7bb82f8a909fbe3f7814c9ebe9bc9a2bef9b737c0ec6e2d699d179048ef06ad3ec46315df0ebe6ad
+  languageName: node
+  linkType: hard
+
 "chownr@npm:^2.0.0":
   version: 2.0.0
   resolution: "chownr@npm:2.0.0"
@@ -10726,6 +10735,13 @@ __metadata:
   dependencies:
     delayed-stream: "npm:~1.0.0"
   checksum: 10c0/0dbb829577e1b1e839fa82b40c07ffaf7de8a09b935cadd355a73652ae70a88b4320db322f6634a4ad93424292fa80973ac6480986247f1734a1137debf271d5
+  languageName: node
+  linkType: hard
+
+"comlink@npm:^4.4.2":
+  version: 4.4.2
+  resolution: "comlink@npm:4.4.2"
+  checksum: 10c0/38aa1f455cf08e94aaa8fc494fd203cc0ef02ece6c21404b7931ce17567e8a72deacddab98aa5650cfd78332ff24c34610586f6fb27fd19dc77e753ed1980deb
   languageName: node
   linkType: hard
 
@@ -12820,6 +12836,21 @@ __metadata:
   dependencies:
     xml-js: "npm:^1.6.11"
   checksum: 10c0/c0849bde569da94493224525db00614fd1855a5d7c2e990f6e8637bd0298e85c3d329efe476cba77e711e438c3fb48af60cd5ef0c409da5bcd1f479790b0a372
+  languageName: node
+  linkType: hard
+
+"ffi-wasm@npm:0.0.3":
+  version: 0.0.3
+  resolution: "ffi-wasm@npm:0.0.3"
+  dependencies:
+    resource-tracker: "npm:^0.0.1"
+    worker-router: "npm:@wcohen/worker-router@^0.0.2"
+  peerDependencies:
+    squint-cljs: ^0.14.210
+  peerDependenciesMeta:
+    squint-cljs:
+      optional: true
+  checksum: 10c0/0853c01edcbbf4c4051fc8026a241f6b9cbb2e17bac79262d1a7f8240df9ed74b9af32acb8c7639876240640a3c8b7e1abff32f33a296c45a2febf7ebbff5396
   languageName: node
   linkType: hard
 
@@ -16115,6 +16146,17 @@ __metadata:
     react: "npm:^19.2.8"
     react-dom: "npm:^19.2.8"
     vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
+"math.gl-proj-wasm-crs@workspace:examples/proj-wasm-crs":
+  version: 0.0.0-use.local
+  resolution: "math.gl-proj-wasm-crs@workspace:examples/proj-wasm-crs"
+  dependencies:
+    "@math.gl/geospatial": "workspace:*"
+    esbuild: "npm:^0.28.1"
+    playwright: "npm:^1.62.1"
+    proj-wasm: "npm:0.1.0"
   languageName: unknown
   linkType: soft
 
@@ -19793,6 +19835,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"proj-wasm@npm:0.1.0":
+  version: 0.1.0
+  resolution: "proj-wasm@npm:0.1.0"
+  dependencies:
+    ffi-wasm: "npm:0.0.3"
+    resource-tracker: "npm:^0.0.1"
+    squint-cljs: "npm:^0.14.210"
+  checksum: 10c0/777326cd92ada2bec8422eca4e7ae06515ab9a683d3fac958f767839aaefedf2ebf3c97ee33d62b8b3837a42b8747d31900af07db26e008ccb2f4371751e2a79
+  languageName: node
+  linkType: hard
+
 "proj4@npm:2.22.0":
   version: 2.22.0
   resolution: "proj4@npm:2.22.0"
@@ -20320,6 +20373,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"readdirp@npm:^4.0.1":
+  version: 4.1.2
+  resolution: "readdirp@npm:4.1.2"
+  checksum: 10c0/60a14f7619dec48c9c850255cd523e2717001b0e179dc7037cfa0895da7b9e9ab07532d324bfb118d73a710887d1e35f79c495fa91582784493e085d18c72c62
+  languageName: node
+  linkType: hard
+
 "readdirp@npm:~3.6.0":
   version: 3.6.0
   resolution: "readdirp@npm:3.6.0"
@@ -20759,6 +20819,15 @@ __metadata:
   bin:
     resolve: bin/resolve
   checksum: 10c0/e12af106e16e652bd83060e8afacece4ee3dcbd0f4cf028e3d9ad178e6ced9ecb1c87ee60158b239582313902a717f8adc57a9b76ea54b1994141ba15f420c65
+  languageName: node
+  linkType: hard
+
+"resource-tracker@npm:^0.0.1":
+  version: 0.0.1
+  resolution: "resource-tracker@npm:0.0.1"
+  dependencies:
+    squint-cljs: "npm:^0.14.202"
+  checksum: 10c0/69b7ad8514bf4097023ddf030502609f129de03eb77cae6778976aa58e9e95618137599f688e30b2056e24deeaeb308b29a260eff57577201348fe201f6e2bf7
   languageName: node
   linkType: hard
 
@@ -21658,6 +21727,17 @@ __metadata:
   version: 1.0.3
   resolution: "sprintf-js@npm:1.0.3"
   checksum: 10c0/ecadcfe4c771890140da5023d43e190b7566d9cf8b2d238600f31bec0fc653f328da4450eb04bd59a431771a8e9cc0e118f0aa3974b683a4981b4e07abc2a5bb
+  languageName: node
+  linkType: hard
+
+"squint-cljs@npm:^0.14.202, squint-cljs@npm:^0.14.208, squint-cljs@npm:^0.14.210":
+  version: 0.14.211
+  resolution: "squint-cljs@npm:0.14.211"
+  dependencies:
+    chokidar: "npm:^4.0.3"
+  bin:
+    squint: node_cli.js
+  checksum: 10c0/f5bc873fbb80ec81d17818eae555b79521cff4a83a78eddcd8ef133b1745bf8891b83f12879a03162e3ae68ca760ab81a95b8a5f1fc8e5d3f097a4561e2f0ced
   languageName: node
   linkType: hard
 
@@ -23512,6 +23592,16 @@ __metadata:
   version: 1.0.0
   resolution: "wordwrap@npm:1.0.0"
   checksum: 10c0/7ed2e44f3c33c5c3e3771134d2b0aee4314c9e49c749e37f464bf69f2bcdf0cbf9419ca638098e2717cff4875c47f56a007532f6111c3319f557a2ca91278e92
+  languageName: node
+  linkType: hard
+
+"worker-router@npm:@wcohen/worker-router@^0.0.2":
+  version: 0.0.2
+  resolution: "@wcohen/worker-router@npm:0.0.2"
+  dependencies:
+    comlink: "npm:^4.4.2"
+    squint-cljs: "npm:^0.14.208"
+  checksum: 10c0/0302c82554d5874641098035f454540c8390b857e01c3aa43458a926187df493fbf6c7d443ee41f300fad290f831ceb0a6f9be74f719053576aeff33042194b5
   languageName: node
   linkType: hard
 

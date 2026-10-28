@@ -48,7 +48,7 @@ collisions below. Projection catalogs and data assets retain their paths.
 | `@math.gl/geospatial/coordinates` | `@math.gl/geospatial` |
 | `@math.gl/geospatial/crs/metadata` | `@math.gl/geospatial/crs` |
 | `@math.gl/geospatial/crs/proj-string` | `@math.gl/geospatial/crs` |
-| `@math.gl/geospatial/crs/resolver` | `@math.gl/geospatial/crs` |
+| `@math.gl/geospatial/crs` | `@math.gl/geospatial/crs` |
 | `@math.gl/geospatial/crs/spatial-reference` | `@math.gl/geospatial/crs` |
 | `@math.gl/geospatial/crs/wkt` | `@math.gl/geospatial/crs` |
 | `@math.gl/geospatial/ellipsoid` | `@math.gl/geospatial` |

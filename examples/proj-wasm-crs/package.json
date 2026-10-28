@@ -1,0 +1,22 @@
+{
+  "name": "math.gl-proj-wasm-crs",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test provider.test.mjs integration.test.mjs",
+    "build": "node build-browser.mjs",
+    "start": "node server.mjs",
+    "test:browser": "node browser-test.mjs",
+    "example": "node node.mjs"
+  },
+  "dependencies": {
+    "@math.gl/geospatial": "workspace:*",
+    "proj-wasm": "0.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1",
+    "playwright": "^1.62.1"
+  }
+}
