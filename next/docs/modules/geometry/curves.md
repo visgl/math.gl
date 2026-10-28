@@ -10,6 +10,24 @@ Loading <!-- -->Curve flight lab<!-- -->…
 
 The curves module provides renderer-independent parametric curves for 2D and 3D Cartesian coordinates. Use it for camera paths, trajectories, interpolation, and sampled line geometry.
 
+## Feature support[​](#feature-support "Direct link to Feature support")
+
+A curve-toolkit checklist for Cartesian path evaluation and traversal.
+
+Support describes the public API in the current repository. Notes identify limits and experimental features.
+
+| Feature                                      | math.gl support    | Notes                                                                                                                                                                                                               |
+| -------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Line, Bézier, Hermite and Catmull–Rom curves | ✅ Implemented     | [Curve classes](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/curves.md) support finite 2D/3D control points and copied construction data.                           |
+| Derivatives and unit tangents                | ✅ Implemented     | Point, derivative and tangent evaluation accept caller-owned output storage.                                                                                                                                        |
+| Arc-length traversal and spaced sampling     | ✅ Implemented     | [CurveArcLength](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/curve-arc-length.md) caches a sampled length approximation and maps distance fractions to parameters. |
+| Certified continuous arc-length/error bounds | ❌ Not implemented | Arc length is numerically approximated; the sampling table does not certify a continuous error envelope.                                                                                                            |
+| Rational curves and NURBS                    | ❌ Not implemented | The public API has no rational weights, knot vectors, or NURBS surface/curve evaluator.                                                                                                                             |
+| Moving frames and swept meshes               | ❌ Not implemented | Frenet/parallel-transport frames and sweep/extrusion generation are outside the current curve API.                                                                                                                  |
+| Geodesic interpolation and seam handling     | ❌ Not implemented | These curves operate in Cartesian coordinates. Use [geospatial paths](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geodesic-path.md) for surface routes.                 |
+
+## Usage[​](#usage "Direct link to Usage")
+
 ```
 import {CatmullRomCurve, CurveArcLength} from '@math.gl/geometry';
 

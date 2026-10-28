@@ -8,6 +8,24 @@ The [Coordinate Reference Systems developer guide](https://visgl.github.io/math.
 
 For definitions of surface models, paths, reference systems, and distortion properties, see [Geospatial terminology](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/terminology.md).
 
+## Feature support[​](#feature-support "Direct link to Feature support")
+
+CRS metadata, syntax, and application-owned preparation capabilities.
+
+Support describes the public API in the current repository. Notes identify limits and experimental features.
+
+| Feature                                              | math.gl support    | Notes                                                                                                                                                                                                                        |
+| ---------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Typed PROJJSON CRS definitions                       | ✅ Implemented     | Strict PROJJSON v0.7 types describe geographic, projected, compound and other supported CRS object shapes.                                                                                                                   |
+| WKT1/WKT2 syntax round trips                         | ✅ Implemented     | Ordered syntax ASTs preserve unknown nodes, delimiters, duplicates and numeric lexemes; optional profile validation is separate.                                                                                             |
+| PROJ strings and pipeline syntax                     | ✅ Implemented     | Ordered syntax parsing/encoding retains steps and duplicate parameters; successful parsing does not execute an operation.                                                                                                    |
+| Spatial-reference provenance and epochs              | ✅ Implemented     | [SpatialReference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/spatial-reference.md) distinguishes explicit/default/unknown/missing CRS state and retains coordinate epochs. |
+| Prepared converter descriptors and target domains    | ✅ Implemented     | [createCRSDescriptor](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/crs-descriptor.md) assembles external converters and explicit rendering/domain policy.                     |
+| Asynchronous CRS resolution                          | ✅ Implemented     | [Application-owned catalogues/providers](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/resolver.md) resolve definitions without a mandatory projection backend.                |
+| Universal semantic conversion between serializations | ◐ Partial          | WKT/PROJ syntax models preserve syntax; they do not promise lossless universal conversion into canonical PROJJSON semantics.                                                                                                 |
+| Bundled comprehensive authority database             | ❌ Not implemented | No complete built-in EPSG database or implicit catalogue/grid downloads. Applications supply resolution resources.                                                                                                           |
+| Coordinate transformation execution                  | ❌ Not implemented | Use a [projection engine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) or an external converter; metadata/codec acceptance does not establish executable support.                |
+
 ## Prepared descriptors[​](#prepared-descriptors "Direct link to Prepared descriptors")
 
 Use [`createCRSDescriptor`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/crs-descriptor.md) from `@math.gl/geospatial/crs` to assemble metadata, prepared external converters and rendering policy without importing a projection engine. Descriptor and converter types are exported from the same entry point. The builder is also available from `@math.gl/geospatial`.

@@ -4,6 +4,24 @@
 
 Geographic inputs use `[longitude, latitude]` in degrees, with optional altitude in metres. For CRS conversions beyond Web Mercator, use [projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md).
 
+## Feature support[​](#feature-support "Direct link to Feature support")
+
+Map-camera and coordinate capabilities for spherical Web Mercator.
+
+Support describes the public API in the current repository. Notes identify limits and experimental features.
+
+| Feature                                            | math.gl support    | Notes                                                                                                                                                                                                        |
+| -------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Longitude/latitude and world-coordinate conversion | ✅ Implemented     | [Coordinate utilities](https://visgl.github.io/math.gl/next/docs/modules/web-mercator/api-reference/web-mercator-utils.md) define spherical Mercator, zoom scales and projection/view matrices. |
+| EPSG:3857 metre-coordinate conversion              | ✅ Implemented     | Explicit forward/inverse helpers distinguish metre coordinates from pixel-scaled world coordinates.                                                                                                          |
+| Zoom, pitch and bearing camera projection          | ✅ Implemented     | [WebMercatorViewport](https://visgl.github.io/math.gl/next/docs/modules/web-mercator/api-reference/web-mercator-viewport.md) projects/unprojects geographic and screen positions.               |
+| Bounds fitting and viewport normalization          | ✅ Implemented     | fitBounds, getBounds and normalized camera properties support explicit viewport/padding contracts.                                                                                                           |
+| Distance scales and metre offsets                  | ✅ Implemented     | Latitude-dependent scale helpers and addMetersToLngLat support local approximations within documented limits.                                                                                                |
+| Fly-to interpolation                               | ✅ Implemented     | flyToViewport and getFlyToDuration provide camera-path interpolation helpers.                                                                                                                                |
+| Ellipsoidal Mercator and arbitrary CRS cameras     | ❌ Not implemented | This camera model is spherical Web Mercator; use the [projection module](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) for other CRS transforms.                  |
+| Terrain-depth and mesh intersection picking        | ❌ Not implemented | Screen/plane unprojection is not a terrain/depth-buffer intersection engine.                                                                                                                                 |
+| General globe/flat rendering and GPU ownership     | ❌ Not implemented | The public viewport API does not supply a complete globe renderer, shared render-state transition, or GPU resource lifecycle.                                                                                |
+
 ## Example Usage[​](#example-usage "Direct link to Example Usage")
 
 ```

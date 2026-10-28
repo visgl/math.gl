@@ -111,9 +111,9 @@ This module is still experimental. It may have issues and functionality may chan
 
 #### earth
 
-The earth group collects Earth model, solar, and timezone utilities. Import the specific utility you
+The earth group collects Earth model, solar, and timezone utilities. Specific utilities are available
 
-- [@math.gl/earth](https://visgl.github.io/math.gl/next/docs/modules/earth.md): The earth group collects Earth model, solar, and timezone utilities. Import the specific utility you
+- [@math.gl/earth](https://visgl.github.io/math.gl/next/docs/modules/earth.md): The earth group collects Earth model, solar, and timezone utilities. Specific utilities are available
 - [Overview](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md): The @math.gl/earth module evaluates geoid heights from Earth gravity model grids.
 - [createGeoidFromGrid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/create-geoid-from-grid.md): Creates a Geoid from a complete global grid of decoded unsigned 16-bit samples.
 - [Geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/geoid.md): class Geoid - "Gravity Height Model"
