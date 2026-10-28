@@ -64,3 +64,25 @@ yarn exec vitest run --project node modules/geospatial/projection/test/lib/exter
 ```
 
 proj-wasm's asynchronous public API cannot directly supply these synchronous converters. Use it for definition resolution followed by native preparation, or for separate asynchronous preprocessing. See [external engines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/external-projection-engines.md).
+
+## Explicit projection domains[​](#explicit-projection-domains "Direct link to Explicit projection domains")
+
+`createCRSDescriptor` accepts an optional `projectionDomain`, also constructible with `createCRSProjectionDomain` from `@math.gl/geospatial/crs` or the geospatial root. It describes a sampled validity boundary in the descriptor's target horizontal axes and units:
+
+```
+const projectionDomain = createCRSProjectionDomain({
+
+  polygons: [{outer: [[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]]}],
+
+  periodic: {axis: 0, minimum: -180, period: 360}
+
+});
+```
+
+Each component has a closed `outer` ring and optional closed `holes`. Winding is unrestricted. Components must have disjoint interiors; rings must be simple, with holes strictly inside their outer ring and disjoint from other holes. Construction validates finite, closed, nondegenerate rings and period arithmetic, then deeply snapshots and freezes the geometry. It does not prove polygon topology or projection validity. Empty `polygons` mean an empty domain; an omitted `projectionDomain` means the backend has not supplied one.
+
+`renderingBounds` remain a rendering envelope, and `areaOfUse` remains geographic CRS metadata. Neither is converted into a domain. A backend must supply hemisphere boundaries or interrupted lobes explicitly, with sampling accuracy appropriate to its application. `periodic` describes a canonical target interval and does not unwrap or clip geometry. Seam vertices may carry different UVs and must remain distinct.
+
+Domain changes do not change the CRS metadata signature automatically. Rebuild the descriptor and invalidate derived geometry when projection parameters or domain sampling change; use a separate application revision key where CRS metadata alone does not identify the prepared operation. No external engine dependency is introduced, and native descriptors do not infer this field.
+
+For native interrupted/composite maps, `MapEngine` already owns spherical clipping and sampled region outlines. Keep using that map pipeline for source geometry. This descriptor field is an interchange contract for prepared target-plane domains, including external backends; it does not replace native map topology. Convert outlines only when their placements, holes and sampling match the descriptor's target space, rather than treating layout frames as validity boundaries.

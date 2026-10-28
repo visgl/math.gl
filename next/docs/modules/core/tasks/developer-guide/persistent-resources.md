@@ -1,6 +1,6 @@
 # Persistent worker resources
 
-Use a resource handle when initialization is expensive or requests share a projection, index, cached dataset, or WASM instance. Initialization runs once in one dedicated worker. Subsequent calls serialize on that same worker incarnation.
+Use a resource handle when initialization is expensive or requests share a projection, index, cached dataset, or WASM instance. Initialization runs once in one dedicated worker. Subsequent calls serialize on that same worker incarnation. For asset loading and WASM-specific cancellation, see [WASM in workers](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/wasm.md).
 
 ## Worker: initialize a projection once[​](#worker-initialize-a-projection-once "Direct link to Worker: initialize a projection once")
 

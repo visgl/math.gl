@@ -90,6 +90,7 @@ math.gl provides a documentation index, individually retrievable Markdown pages,
 - [Choose main-thread or worker execution](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/execution.md): For small independent batches, worker dispatch can cost more than the numerical
 - [Persistent worker resources](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/persistent-resources.md): Use a resource handle when initialization is expensive or requests share a
 - [Shared memory and atomic state](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/shared-memory.md): SharedArrayBuffer lets the caller and workers observe the same bytes. It is useful
+- [WebAssembly in workers](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/wasm.md): Use a persistent worker resource when compiling or initializing a WebAssembly
 - [Overview](https://visgl.github.io/math.gl/next/docs/modules/core/types.md): @math.gl/core provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
 - [Array Types](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/array-types.md): math.gl provides a number of numeric array types.
 - [Bounds](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds.md): A common need for geospatial and 3D applications is to be able to express bounds
