@@ -21,4 +21,4 @@ Function calls are rejected when using `parseExpressionString()`.
 
 That restriction mirrors the original use inside `@deck.gl/json`, where accessor expressions are evaluated against plain data objects rather than executable environments.
 
-Because of that restriction, function libraries such as `BASIC_MATH_FUNCTION_LIBRARY` and `GEOSPATIAL_FUNCTION_LIBRARY` are intended for `eval()`, `evalAsync()`, `compile()`, and `compileAsync()`, not for `parseExpressionString()`.
+Because of that restriction, function libraries such as `BASIC_MATH_FUNCTION_LIBRARY` and `GEOSPATIAL_FUNCTION_LIBRARY` are intended for `evaluate()`, `evaluateAsync()`, `compile()`, and `compileAsync()`, not for `parseExpressionString()`.

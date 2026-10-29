@@ -14,8 +14,8 @@ export {
   addUnaryOp,
   compile,
   compileAsync,
-  eval,
-  evalAsync,
+  evaluate,
+  evaluateAsync,
   parse
 } from './expression-eval';
 export {BASIC_MATH_FUNCTION_LIBRARY, mergeFunctionLibraries} from './function-libraries';

@@ -11,13 +11,13 @@ The core evaluator API is useful when you want direct control over parsing, AST 
 
 Parses a string into a JSEP AST. Passing an AST returns it unchanged.
 
-## `eval(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): unknown`
+## `evaluate(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): unknown`
 
 Evaluates a parsed expression against the supplied context object.
 
-## `evalAsync(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): Promise<unknown>`
+## `evaluateAsync(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): Promise<unknown>`
 
-Async variant of `eval`. Useful when expressions may call async functions present on the context object.
+Async variant of `evaluate`. Useful when expressions may call async functions present on the context object.
 
 ## `compile(expression: string | Expression, options?: ExpressionEvaluationOptions): (context: ExpressionContext) => unknown`
 
