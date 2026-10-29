@@ -51,6 +51,12 @@ try {
   }
   assert(difference/countPixels<8,'UV-only rendering must match full mesh replacement');
   if(process.env.CAPTURE_REUSE)await page.screenshot({path:process.env.CAPTURE_REUSE});
+  await page.evaluate(()=>{document.querySelector('[data-display]').click();document.querySelector('[data-wire]').click();});
+  await page.waitForFunction(()=>document.querySelector('[data-status]').textContent.startsWith('Display comparison complete'),null,{timeout:120000});
+  assert(await page.isChecked('[data-wire]'));
+  assert(await page.evaluate(()=>window.projectionLab.results.inverse.meshes[0].diagnostics.qualification));
+  await page.uncheck('[data-wire]');
+
   for(const engine of ['proj4','d3','wasm','native']) {
     await page.selectOption('[data-engine]',engine);await ready('antarctica',engine,'orthographic');
     const count=await page.evaluate(()=>window.projectionLab.results.inverse.diagnostics.triangles);assert(count>100);

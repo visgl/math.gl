@@ -32,7 +32,7 @@ const $=selector=>root.querySelector(selector),source=$('[data-source]'),target=
 const texture=document.createElement('canvas');texture.width=texture.height=256;const ctx=texture.getContext('2d');
 for(let y=0;y<8;y++)for(let x=0;x<8;x++){ctx.fillStyle=(x+y)%2?'#215f83':'#60aaa7';ctx.fillRect(x*32,y*32,32,32);ctx.fillStyle='#eaf8ff';ctx.font='10px monospace';ctx.fillText(`${x},${y}`,x*32+5,y*32+19);}
 ctx.strokeStyle='#ffd48b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(128,128,9,0,Math.PI*2);ctx.stroke();
-const decks={},results={};let generation=0,active,disposed=false,wasmPromise,wasmHandle,benchmarking=false,reuseMode=false,measurementRows=null;
+const decks={},results={};let generation=0,active,disposed=false,wasmPromise,wasmHandle,benchmarking=false,reuseMode=false,displayComparing=false,measurementRows=null;
 const pending=new Set(),imageCache=new Map();let imagePromise;
 async function getEarthTexture(name,signal) {
   if(imageCache.has(name))return imageCache.get(name);
@@ -108,7 +108,7 @@ function constrain() {
   schedule();
 }
 for(const el of [source,target,engine,tolerance,lon,lat])el.addEventListener('change',constrain);
-for(const control of [wire,imagery])control.addEventListener('change',()=>{if(reuseMode){active?.abort();schedule();return;}for(const mode of Object.keys(results))render(mode,results[mode]);});
+for(const control of [wire,imagery])control.addEventListener('change',()=>{if(displayComparing)return;if(reuseMode){active?.abort();schedule();return;}for(const mode of Object.keys(results))render(mode,results[mode]);});
 async function benchmark(){
   if(benchmarking||disposed)return;benchmarking=true;$('[data-export]').disabled=true;const button=$('[data-benchmark]');button.disabled=true;
   const controller=new AbortController();active?.abort();const current=++generation;active=controller;
@@ -178,7 +178,7 @@ async function compareDisplay(){
   if(benchmarking||disposed)return;
   const s=spec();
   if(s.source!=='antarctica'||s.target!=='orthographic'||capability(s.engine,s.source,s.target,'forward')){status.textContent='Display comparison requires Antarctica, Orthographic and an engine with forward preparation.';return;}
-  benchmarking=true;const button=$('[data-display]');button.disabled=true;$('[data-export]').disabled=true;
+  benchmarking=true;displayComparing=true;const button=$('[data-display]');button.disabled=true;$('[data-export]').disabled=true;
   active?.abort();const controller=new AbortController(),current=++generation;active=controller;
   try{
     const rows=[],qualified={};
@@ -200,7 +200,7 @@ async function compareDisplay(){
     $('[data-measurements]').hidden=false;$('[data-measurements]').textContent=JSON.stringify(measurementRows,null,2);
     status.textContent='Display comparison complete. Both strategies passed the same display-pixel and texture-error gates at both declared scales. Pan/zoom does not change these recorded scales.';
   }catch(error){if(!disposed&&current===generation&&!controller.signal.aborted)status.textContent=error.message;}
-  finally{benchmarking=false;if(!disposed){button.disabled=false;$('[data-export]').disabled=!measurementRows;}}
+  finally{benchmarking=false;displayComparing=false;if(!disposed){button.disabled=false;$('[data-export]').disabled=!measurementRows;}}
 }
 $('[data-display]').addEventListener('click',()=>track(compareDisplay()));
 $('[data-reuse]').addEventListener('click',()=>track(compareReuse()));
