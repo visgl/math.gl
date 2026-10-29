@@ -118,6 +118,11 @@
       {
         "type": "doc",
         "id": "benchmarks"
+      },
+      {
+        "type": "doc",
+        "label": "Terrain sampling",
+        "id": "terrain-sampling"
       }
     ]
   },

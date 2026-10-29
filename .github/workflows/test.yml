@@ -322,6 +322,11 @@ jobs:
       - name: Run headless tests with coverage
         run: yarn test-coverage
 
+      - name: Test and build terrain sampling example
+        run: |
+          yarn workspace math.gl-terrain-sampling build
+          yarn workspace math.gl-terrain-sampling test:browser
+
       - name: Run lint
         run: yarn lint
 
