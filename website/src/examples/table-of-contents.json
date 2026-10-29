@@ -23,6 +23,18 @@
   },
   {
     "type": "category",
+    "label": "@math.gl/dggs",
+    "collapsed": false,
+    "items": [
+      {
+        "type": "doc",
+        "label": "DGGS cell explorer",
+        "id": "dggs-cell-explorer"
+      }
+    ]
+  },
+  {
+    "type": "category",
     "label": "@math.gl/geometry",
     "collapsed": false,
     "items": [
