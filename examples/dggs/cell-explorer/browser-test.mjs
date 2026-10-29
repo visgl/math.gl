@@ -34,6 +34,9 @@ try {
   await page.getByLabel('Compare six').check();
   await page.getByLabel('Unwrap antimeridian').uncheck();
   await page.getByLabel('Compare six').uncheck();
+  await page.getByRole('button',{name:'Antimeridian sample'}).click();
+  const widths=await page.evaluate(async()=>{const {decodeCell}=await import('/model.js');return [false,true].map(unwrap=>{const {boundary}=decodeCell('h3','835ba5fffffffff',unwrap);const values=boundary.map(point=>point[0]);return Math.max(...values)-Math.min(...values);});});
+  assert(widths[0]>180 && widths[1]<180);
   await page.getByRole('combobox').selectOption('a5');
   await page.getByRole('button',{name:'Fit cell'}).click();
   await page.waitForTimeout(500);

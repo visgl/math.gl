@@ -31,7 +31,7 @@ export function decodeCell(grid, token, unwrap = true) {
 }
 
 export function s2Hierarchy(token) {
-  const index = getS2IndexFromToken(token);
+  const index = getS2IndexFromToken(token.trim());
   const level = getS2Level(index);
   const parentBit = (index & -index) << 2n;
   return {

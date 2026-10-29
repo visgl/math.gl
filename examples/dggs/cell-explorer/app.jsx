@@ -113,6 +113,14 @@ export default function CellExplorer() {
           Fit cell
         </button>
         <button onClick={() => setToken(SAMPLES[grid])}>Reset ID</button>
+        <button
+          onClick={() => {
+            setGrid('h3');
+            setToken('835ba5fffffffff');
+          }}
+        >
+          Antimeridian sample
+        </button>
         <label>
           <input
             type="checkbox"
