@@ -1,10 +1,12 @@
 # ProjectionEngine
 
+math.gl's general projection interface is **projection-engine agnostic**. Applications depend on `ProjectionEngine` and its prepared transform contract, not a particular projection catalogue or backend. Native math.gl, proj4js, D3 and other engines can participate through adapters with explicit coordinate, dimensional and execution semantics. See [external projection engines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/external-projection-engines.md).
+
 Native engine constructors optionally accept `resolver: CRSResolver` from `@math.gl/geospatial/crs`. `createProjectionAsync()` and `getCRS()` prepare external identifiers; `createProjection()` remains synchronous and never looks them up. See [authority resolution](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#opt-in-authority-resolution) for precedence, caching and metadata rules.
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
-`ProjectionEngine` is a reusable factory interface. Each engine holds projection plugins, CRS readers, aliases and grids; each `createProjection()` call creates an independent transform for a specific CRS pair.
+`ProjectionEngine` is a reusable factory interface for a specific CRS pair. Native implementations manage projection plugins, CRS readers, aliases and grids; external adapters need not use that internal architecture. Prepared point and buffer transforms are synchronous, including transforms returned by asynchronous initialization. An async-only backend uses the separate batch preparation recipe rather than returning Promises from synchronous methods.
 
 ```
 import type { ProjectionEngine } from "@math.gl/geospatial/projection/types";
@@ -19,9 +21,9 @@ const mercator = engine.createProjection({ from: "WGS84", to: "EPSG:3857" });
 
 const utm = engine.createProjection({ from: "WGS84", to: "EPSG:32631" });
 
-await mercator.project([12, 55]);
+mercator.project([12, 55]);
 
-await utm.project([12, 55]);
+utm.project([12, 55]);
 ```
 
 The `/types` entry exports only types. An `import type` adds no runtime code to a bundle. The default `projectionEngine` includes the built-in projection catalogue, compatibility readers and named datum catalogue. For selective imports, configure your own engine:

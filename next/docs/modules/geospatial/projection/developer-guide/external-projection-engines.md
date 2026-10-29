@@ -1,5 +1,7 @@
 # Using external projection engines
 
+math.gl's general projection interface is **projection-engine agnostic**. The contract describes coordinate operations and their execution semantics; it does not require proj4js, native math.gl, or a particular projection catalogue. Adapters supply operations, while chart boundaries, validity domains and data/view cache policies remain explicit application or backend responsibilities.
+
 External libraries can provide CRS definitions, execute coordinate operations, or do both. Use the opt-in [`CRSResolver`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/resolver.md) for definition lookup. Libraries with synchronous coordinate operations can also implement the [`ProjectionEngine`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md) interface. Applications written against math.gl's projection interfaces can still use external projection engines through these adapters. math.gl does not register or load external libraries for you, and they are not dependencies of published math.gl packages.
 
 ## Integrate proj-wasm[​](#integrate-proj-wasm "Direct link to Integrate proj-wasm")
