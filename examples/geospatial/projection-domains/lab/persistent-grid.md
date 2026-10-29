@@ -33,3 +33,17 @@ normal/color attributes generated for SimpleMeshLayer, while reuse records UV wr
 initial persistent-geometry allocation, texture upload, instance attributes, uniforms and driver
 allocation overhead. For the 1,089-vertex patch, each replacement submits 72,492 geometry bytes
 versus an 8,712-byte UV update. CPU submission time is still not GPU completion time.
+
+## Explicit invalidation and fallback
+
+**Exercise reuse limits** demonstrates two accepted centers followed by one outside
+the fixed patch's qualified center range. `updateOrRebuild` handles typed policy
+reasons (`domain-policy`, `source-coverage`, `texture-error`) and invokes the
+caller's full-mesh preparation. It does not swallow backend errors, malformed
+batches, cancellation or fallback failures. A fallback result is published only
+if its generation is current. The UI displays the rebuilt full mesh and exports
+the reason; the fixed patch is retired, not stretched to cover the new domain.
+
+This is an example-owned policy boundary, not an automatic cache or generalized
+view-following implementation. Independent tests also exercise coverage and texture
+invalidation, cancellation during fallback and propagation of backend failures.

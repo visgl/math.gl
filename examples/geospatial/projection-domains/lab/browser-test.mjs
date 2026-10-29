@@ -40,6 +40,13 @@ try {
   assert(await page.evaluate(()=>window.projectionLab.results.inverse.meshes[0].diagnostics.qualification.maximumDisplayError<=2));
   assert.match(await page.locator('.maps h2').first().innerText(),/qualified/);
   for(const row of displayReport.rows)for(const q of row.charts){assert(q.maximumDisplayError<=q.displayTolerance);assert(q.maximumTextureError<=q.textureTolerance);}
+  await page.click('[data-limits]');
+  await page.waitForFunction(()=>document.querySelector('#lab').dataset.limits,null,{timeout:120000});
+  const limits=JSON.parse(await page.locator('#lab').getAttribute('data-limits'));
+  assert.deepEqual(limits.map(r=>r.mode),['reuse','reuse','rebuild']);assert.equal(limits[2].reason,'domain-policy');
+  assert(await page.evaluate(()=>window.projectionLab.results.inverse.meshes[0].indices.length>0));
+  await page.locator('[data-lon]').dispatchEvent('change');
+  await ready('antarctica','native','orthographic');
   await page.click('[data-reuse]');
   await page.waitForFunction(()=>document.querySelector('#lab').dataset.reuse,null,{timeout:120000});
   const reuse=JSON.parse(await page.locator('#lab').getAttribute('data-reuse'));
