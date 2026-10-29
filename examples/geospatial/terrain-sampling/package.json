@@ -1,0 +1,22 @@
+{
+  "name": "math.gl-terrain-sampling",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "test:browser": "node browser-test.mjs"
+  },
+  "dependencies": {
+    "@deck.gl-community/panels": "^9.4.8",
+    "@math.gl/geospatial": "workspace:*",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1",
+    "vite": "^8.2.2"
+  }
+}

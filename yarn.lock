@@ -16357,6 +16357,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"math.gl-terrain-sampling@workspace:examples/geospatial/terrain-sampling":
+  version: 0.0.0-use.local
+  resolution: "math.gl-terrain-sampling@workspace:examples/geospatial/terrain-sampling"
+  dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
+    "@math.gl/geospatial": "workspace:*"
+    playwright: "npm:^1.62.1"
+    react: "npm:^19.2.8"
+    react-dom: "npm:^19.2.8"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
 "math.gl-timezone-globe@workspace:examples/earth/timezone-globe":
   version: 0.0.0-use.local
   resolution: "math.gl-timezone-globe@workspace:examples/earth/timezone-globe"
