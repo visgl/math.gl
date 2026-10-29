@@ -19,8 +19,14 @@ export function createHorizonDomain({kind='orthographic',center=[0,-90],toleranc
   let samples=0;
   const sample=bearing=>{
     if(++samples>65536)throw new RangeError('Horizon total sample budget exhausted');
-    const latitude=Math.asin(Math.max(-1,Math.min(1,Math.sin(phi)*Math.cos(radius)+Math.cos(phi)*Math.sin(radius)*Math.cos(bearing))));
-    const longitude=lambda+Math.atan2(Math.sin(bearing)*Math.sin(radius)*Math.cos(phi),Math.cos(radius)-Math.sin(phi)*Math.sin(latitude));
+    // Rotate a local horizon circle in Cartesian space. The usual longitude
+    // formula degenerates to atan2(0,0) at exact polar centers.
+    const origin=[Math.cos(phi)*Math.cos(lambda),Math.cos(phi)*Math.sin(lambda),Math.sin(phi)];
+    const north=[-Math.sin(phi)*Math.cos(lambda),-Math.sin(phi)*Math.sin(lambda),Math.cos(phi)];
+    const east=[-Math.sin(lambda),Math.cos(lambda),0];
+    const xyz=origin.map((v,i)=>v*Math.cos(radius)+(north[i]*Math.cos(bearing)+east[i]*Math.sin(bearing))*Math.sin(radius));
+    const latitude=Math.atan2(xyz[2],Math.hypot(xyz[0],xyz[1]));
+    const longitude=Math.atan2(xyz[1],xyz[0]);
     const p=projection.project([longitude*180/Math.PI,latitude*180/Math.PI]).slice(0,2);
     if(!p.every(Number.isFinite))throw new RangeError('Invalid horizon sample');return p;
   };

@@ -21,3 +21,13 @@ test('native interrupted domains retain chart identity and inverse branches',()=
   assert.equal(charts.length,map.regions.length);
   for(const region of map.regions){const c=charts.find(c=>c.id===region.id),p=c.project(region.interior);assert(p);assert(c.unproject(p.position).length);assert.equal(c.domain.polygons.length,1);}
 });
+
+test('exact north and south polar centers have finite closed perspective horizons',()=>{
+  for(const kind of ['orthographic','perspective'])for(const latitude of [-90,90]) {
+    const result=createHorizonDomain({kind,center:[37,latitude]});
+    const ring=result.domain.polygons[0].outer;
+    assert(ring.length>20);assert(ring.length<65536);assert.deepEqual(ring[0],ring.at(-1));
+    for(const p of ring){assert(p.every(Number.isFinite));const q=result.projection.project(result.projection.unproject(p));assert(Math.hypot(q[0]-p[0],q[1]-p[1])<1e-6);}
+  }
+  assert(createHorizonDomain({kind:'perspective'}).domain.polygons[0].outer.length>20);
+});
