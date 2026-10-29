@@ -24,7 +24,7 @@ root.innerHTML=`<section class="maps"><article><h2>Target grid → inverse UVs</
 <label>Engine<select data-engine>${Object.entries(engines).map(([id,label])=>`<option value="${id}">${label}</option>`).join('')}</select></label>
 <label>Error threshold<select data-tolerance><option value="2">2 pixels</option><option value="1">1 pixel</option><option value=".5">0.5 pixels</option><option value="4">4 pixels</option></select></label>
 <label>Center longitude <input data-lon type="range" min="-180" max="180" value="0" step="5"></label><label>Center latitude <input data-lat type="range" min="-90" max="-50" value="-90" step="5"></label><label><input data-imagery type="checkbox" checked> Earth imagery</label><label><input data-wire type="checkbox"> Mesh edges</label>
-<button data-reuse>Compare UV-only updates</button><button data-benchmark>Measure moving center</button><button data-export disabled>Export measurements</button>
+<button data-display>Compare display error</button><button data-reuse>Compare UV-only updates</button><button data-benchmark>Measure moving center</button><button data-export disabled>Export measurements</button>
 <p data-note></p><pre data-measurements hidden></pre><small><span data-imagery-note>NASA Blue Marble overview imagery, resampled into the source grid. Uncheck Earth imagery for the diagnostic checkerboard.</span> <a href="https://science.nasa.gov/earth/earth-observatory/blue-marble/" target="_blank" rel="noreferrer">NASA / GIBS credit</a>. Domains and error criteria are sampled. No COG loading or tile selection.</small></aside>
 <p class="lab-status" role="status" data-status>Preparing chart geometry…</p>`;
 const disposeInfo=mountInfoBox(root.querySelector('aside'),{title:'Antarctica & Fiji',theme:'sleek-dark',width:280});
@@ -173,6 +173,28 @@ async function compareReuse() {
   }
   finally{benchmarking=false;if(!disposed){button.disabled=false;$('[data-export]').disabled=!measurementRows;}}
 }
+
+async function compareDisplay(){
+  if(benchmarking||disposed)return;
+  const s=spec();
+  if(s.source!=='antarctica'||s.target!=='orthographic'||capability(s.engine,s.source,s.target,'forward')){status.textContent='Display comparison requires Antarctica, Orthographic and an engine with forward preparation.';return;}
+  benchmarking=true;const button=$('[data-display]');button.disabled=true;$('[data-export]').disabled=true;
+  active?.abort();const controller=new AbortController(),current=++generation;active=controller;
+  try{
+    const rows=[];
+    for(const pixelsPerUnit of [[180,90],[360,180]])for(const mode of ['inverse','forward']){
+      const displayPolicy={pixelsPerUnit,displayTolerance:Number(tolerance.value),textureTolerance:2};
+      const result=await runTask(task,{...s,mode,displayPolicy},{execution:'worker',workerPool:pool,signal:controller.signal});
+      if(disposed||current!==generation)return;
+      rows.push({mode,...result.diagnostics,charts:result.meshes.map(m=>m.diagnostics.qualification)});
+    }
+    measurementRows={schemaVersion:1,engine:s.engine,policy:'shared independent affine display-pixel and source-texel probes; native chart reference; two anisotropic zoom scales; finite sampling, not a continuous error certificate',rows};
+    $('[data-measurements]').hidden=false;$('[data-measurements]').textContent=JSON.stringify(measurementRows,null,2);
+    status.textContent='Display comparison complete. Both strategies passed the same display-pixel and texture-error gates at both declared scales. Pan/zoom does not change these recorded scales.';
+  }catch(error){if(!disposed&&current===generation&&!controller.signal.aborted)status.textContent=error.message;}
+  finally{benchmarking=false;if(!disposed){button.disabled=false;$('[data-export]').disabled=!measurementRows;}}
+}
+$('[data-display]').addEventListener('click',()=>track(compareDisplay()));
 $('[data-reuse]').addEventListener('click',()=>track(compareReuse()));
 $('[data-benchmark]').addEventListener('click',()=>track(benchmark()));
 $('[data-export]').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(measurementRows,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='projection-lab-measurements.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),0);});

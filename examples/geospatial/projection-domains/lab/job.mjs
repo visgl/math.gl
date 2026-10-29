@@ -4,6 +4,7 @@
 import {createCharts} from '../warp/fixtures.mjs';
 import {prepareInverseAsync} from '../warp/async.mjs';
 import {capability,createBackend} from './backends.mjs';
+import {qualifyDisplayMesh} from './display-error.mjs';
 import {prepareForward} from './forward.mjs';
 /** Data-only job specification is the rebuild boundary. No result cache is used:
  * engine, source, center, target, direction or tolerance changes always rebuild. */
@@ -16,9 +17,10 @@ export async function prepareJob(spec,{signal,proj}={}) {
     if(signal?.aborted)throw signal.reason;
     const backend=await createBackend(engine,chart,target,center,proj);
     try {
-      meshes.push(mode==='inverse'
-        ? await prepareInverseAsync(chart,backend.evaluate,{tolerance,batchSize:1024,signal})
-        : prepareForward(chart,backend.forward,{tolerance,pixelsPerUnit}));
+      const prepare=async threshold=>mode==='inverse'
+        ? await prepareInverseAsync(chart,backend.evaluate,{tolerance:threshold,batchSize:1024,signal})
+        : prepareForward(chart,backend.forward,{tolerance:threshold,pixelsPerUnit,displayScale:spec.displayPolicy?.pixelsPerUnit});
+      meshes.push(spec.displayPolicy?await qualifyDisplayMesh(prepare,chart,{...spec.displayPolicy,initialTolerance:tolerance,signal}):await prepare(tolerance));
     } finally {await backend.dispose();}
   }
   if(signal?.aborted)throw signal.reason;

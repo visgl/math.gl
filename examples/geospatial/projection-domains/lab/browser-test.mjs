@@ -26,6 +26,11 @@ try {
   assert(await page.evaluate(()=>window.initialMesh===window.projectionLab.results.inverse.meshes));
   await page.check('[data-imagery]');
   if(process.env.CAPTURE_INITIAL)await page.screenshot({path:process.env.CAPTURE_INITIAL});
+  await page.click('[data-display]');
+  await page.waitForFunction(()=>document.querySelector('[data-status]').textContent.startsWith('Display comparison complete'),null,{timeout:120000});
+  const displayReport=JSON.parse(await page.locator('[data-measurements]').innerText());
+  assert.equal(displayReport.rows.length,4);
+  for(const row of displayReport.rows)for(const q of row.charts){assert(q.maximumDisplayError<=q.displayTolerance);assert(q.maximumTextureError<=q.textureTolerance);}
   await page.click('[data-reuse]');
   await page.waitForFunction(()=>document.querySelector('#lab').dataset.reuse,null,{timeout:120000});
   const reuse=JSON.parse(await page.locator('#lab').getAttribute('data-reuse'));
