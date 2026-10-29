@@ -89,6 +89,41 @@ It recognizes PROJJSON objects, common WKT roots, PROJ strings with a `proj` par
 authority-like identifiers, OGC URNs, and URLs. Other strings are returned as `opaque`. It does not
 validate syntax, resolve an identifier, or establish semantic equivalence.
 
+## `normalizeCRSIdentifier()`
+
+Rewrites recognized spellings of one authority CRS identifier to `AUTHORITY:CODE`.
+
+```ts
+normalizeCRSIdentifier(identifier: CRSIdentifier): CRSIdentifier
+```
+
+Use it to compare identifiers that reach an application in different spellings, for example a
+tile matrix set's `http://www.opengis.net/def/crs/EPSG/0/32619` and a view's `EPSG:32619`.
+
+| Input | Result |
+| --- | --- |
+| `epsg:32619` | `EPSG:32619` |
+| `urn:ogc:def:crs:EPSG::32619` | `EPSG:32619` |
+| `http://www.opengis.net/def/crs/EPSG/0/32619` | `EPSG:32619` |
+| `CRS:84`, `urn:ogc:def:crs:OGC:1.3:CRS84` | `OGC:CRS84` |
+| `urn:ogc:def:crs:EPSG:6.6:4326` | unchanged |
+| `WGS84`, WKT, PROJ strings | unchanged |
+
+Rules:
+
+- Authorities are upper-cased. OGC codes are upper-cased; other codes keep their spelling.
+- The WMS 1.3 codes `CRS:84`, `CRS:83` and `CRS:27` become `OGC:CRS84`, `OGC:CRS83` and
+  `OGC:CRS27`.
+- A URN or URI version is removed only when it is empty or `0`, or when it is `1.3` on those three
+  OGC codes, which the OGC register publishes only at that version. Any other versioned identifier
+  is returned unchanged, so it does not compare equal to an unversioned identifier.
+- Unrecognized strings are returned unchanged.
+
+It never equates different registry entries. `EPSG:4326` and `OGC:CRS84` stay distinct because
+their axis orders differ, and Web Mercator aliases such as `EPSG:900913` stay distinct from
+`EPSG:3857`. It does not resolve definitions, establish datum equivalence or change axis order.
+Keep the source's original identifier in metadata and use the result only for comparison.
+
 ## Representation values
 
 `SpatialReferenceRepresentation` is one of:
