@@ -38,6 +38,13 @@ try {
   await page.getByLabel('Plan view:',{exact:false}).click({position:{x:50,y:50}});
   assert.match(await page.getByTestId('sample-status').innerText(),/VALID/);
   console.log('Terrain: mesh, interpolation differences, diagonals, missing samples, outside domain, normals, and pointer controls passed.');
+  await page.setViewportSize({width:390,height:400});
+  assert.equal(await page.locator('.terrain-sampling').evaluate(element=>element.clientHeight),400);
+  await page.getByText('Triangle interpolation matches').scrollIntoViewIfNeeded();
+  const bottom=await page.getByText('Triangle interpolation matches').boundingBox();
+  assert(bottom.y>=0 && bottom.y+bottom.height<=401);
+  await page.setViewportSize({width:1200,height:950});
+  await page.locator('.terrain-sampling').evaluate(element=>element.scrollTop=0);
   assert.deepEqual(errors,[]);
   if(process.env.SCREENSHOT_PATH) await page.screenshot({path:process.env.SCREENSHOT_PATH});
 } finally {await browser.close();await server.close();}
