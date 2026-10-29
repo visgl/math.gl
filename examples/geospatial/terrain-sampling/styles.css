@@ -7,5 +7,4 @@
 .terrain-stage .terrain-plan {width:150px;height:150px;touch-action:none;cursor:crosshair}
 .terrain-sampling label {display:block;margin:14px 0}.terrain-sampling select,.terrain-sampling input[type=range] {display:block;width:100%}
 .terrain-sampling table {width:100%;border-collapse:collapse}.terrain-sampling td,.terrain-sampling th {padding:5px;text-align:left;border-bottom:1px solid #426277}
-html,body,#root {height:100%}
 @media(max-width:700px) {.terrain-sampling {grid-template-columns:1fr}.terrain-sampling .example-panel {width:100%}}
