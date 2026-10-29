@@ -31,3 +31,23 @@ test('exact north and south polar centers have finite closed perspective horizon
   }
   assert(createHorizonDomain({kind:'perspective'}).domain.polygons[0].outer.length>20);
 });
+
+// PROJ reference coordinates are generated offline, not through the engine under test.
+import {readFileSync} from 'node:fs';
+test('parameterized perspective limbs agree with independent PROJ boundaries',()=>{
+  const corpus=JSON.parse(readFileSync(new URL('../qualification/horizons.json',import.meta.url)));
+  for(const fixture of corpus.cases){
+    const result=createHorizonDomain({kind:'perspective',...fixture,tolerance:1e-5,maxAngularStep:3});
+    const ring=result.domain.polygons[0].outer;
+    for(const {geographic,target} of fixture.points){
+      const actual=result.projection.project(geographic);
+      assert(Math.hypot(actual[0]-target[0],actual[1]-target[1])<1e-9);
+      // Every 3-degree oracle bearing is an initial vertex of the adaptive ring.
+      assert(Math.min(...ring.map(p=>Math.hypot(p[0]-target[0],p[1]-target[1])))<1e-9);
+    }
+    for(const key of ['height','tilt','azimuth'])assert.notEqual(result.identity,
+      createHorizonDomain({kind:'perspective',...fixture,[key]:fixture[key]+.01,tolerance:1e-5,maxAngularStep:3}).identity);
+  }
+  for(const options of [{height:0},{height:11},{height:1,tilt:60},{tilt:NaN},{azimuth:Infinity}])
+    assert.throws(()=>createHorizonDomain({kind:'perspective',...options}),/perspective/);
+});

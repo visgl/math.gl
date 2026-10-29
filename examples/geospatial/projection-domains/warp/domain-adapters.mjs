@@ -8,14 +8,19 @@ import {getMapLayout} from '@math.gl/geospatial/discontinuous';
 /** Qualified unit-sphere families, not arbitrary domain inference. An injected
  * engine must implement the requested spherical operation with the same units.
  */
-export function createHorizonDomain({kind='orthographic',center=[0,-90],tolerance=.001,maxAngularStep=4,maxDepth=16,engine=new FullProjectionEngine()}={}) {
+export function createHorizonDomain({kind='orthographic',center=[0,-90],height=1,tilt=20,azimuth=0,tolerance=.001,maxAngularStep=4,maxDepth=16,engine=new FullProjectionEngine()}={}) {
   if(!['orthographic','perspective'].includes(kind)||center.length!==2||!center.every(Number.isFinite)||Math.abs(center[1])>90||
     !Number.isFinite(tolerance)||tolerance<=0||!Number.isFinite(maxAngularStep)||maxAngularStep<=0||maxAngularStep>45||
     !Number.isInteger(maxDepth)||maxDepth<0||maxDepth>20)throw new RangeError('Invalid horizon policy');
+  // Keep the entire limb finite. At the limiting tilt the perspective
+  // denominator vanishes on the horizon; a closed bounded polygon is invalid.
+  if(kind==='perspective'&&(!Number.isFinite(height)||height<.1||height>10||
+    !Number.isFinite(tilt)||Math.abs(tilt)*Math.PI/180>=Math.atan(Math.sqrt(height*(height+2)))-Math.PI/180||
+    !Number.isFinite(azimuth)))throw new RangeError('Unsupported perspective height or tilt');
   const [lon,lat]=center;
-  const definition=kind==='orthographic'?`+proj=ortho +lat_0=${lat} +lon_0=${lon} +R=1`:`+proj=tpers +lat_0=${lat} +lon_0=${lon} +R=1 +h=1 +tilt=20 +azi=0`;
+  const definition=kind==='orthographic'?`+proj=ortho +lat_0=${lat} +lon_0=${lon} +R=1`:`+proj=tpers +lat_0=${lat} +lon_0=${lon} +R=1 +h=${height} +tilt=${tilt} +azi=${azimuth}`;
   const projection=engine.createProjection({from:'WGS84',to:definition});
-  const radius=(kind==='orthographic'?Math.PI/2:Math.PI/3)-1e-7,phi=lat*Math.PI/180,lambda=lon*Math.PI/180;
+  const radius=(kind==='orthographic'?Math.PI/2:Math.acos(1/(1+height)))-1e-7,phi=lat*Math.PI/180,lambda=lon*Math.PI/180;
   let samples=0;
   const sample=bearing=>{
     if(++samples>65536)throw new RangeError('Horizon total sample budget exhausted');
