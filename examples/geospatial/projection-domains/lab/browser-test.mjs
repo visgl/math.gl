@@ -103,9 +103,9 @@ try {
   await page.selectOption('[data-source]','antarctica');await page.selectOption('[data-target]','orthographic');await ready('antarctica','native','orthographic');
   const previousReport=await page.locator('[data-measurements]').innerText();
   for(const button of ['data-benchmark','data-reuse','data-display','data-limits']) {
-    await page.evaluate(button=>{document.querySelector(`[${button}]`).click();document.querySelector('[data-lon]').dispatchEvent(new Event('change',{bubbles:true}));},button);
+    await page.evaluate(button=>{document.querySelector(`button[${button}]`).click();document.querySelector('[data-lon]').dispatchEvent(new Event('change',{bubbles:true}));},button);
     await ready('antarctica','native','orthographic');
-    await page.waitForFunction(()=>['data-benchmark','data-reuse','data-display','data-limits'].every(name=>!document.querySelector(`[${name}]`).disabled));
+    await page.waitForFunction(()=>['data-benchmark','data-reuse','data-display','data-limits'].every(name=>!document.querySelector(`button[${name}]`).disabled));
     assert.equal(await page.isDisabled('[data-export]'),false);assert.equal(await page.locator('[data-measurements]').innerText(),previousReport);
   }
   // An unavailable image fails comparison, then restores the full fixture and
