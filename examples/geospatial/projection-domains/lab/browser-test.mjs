@@ -66,6 +66,28 @@ try {
   assert.match(await page.locator('[data-measurements]').innerText(),/endToEndMs/);
   await page.uncheck('[data-wire]');
   if(process.env.CAPTURE_SCREENSHOT)await page.screenshot({path:process.env.CAPTURE_SCREENSHOT});
+  // Cancellation retains the last completed report for both measurement modes.
+  await page.selectOption('[data-source]','antarctica');await page.selectOption('[data-target]','orthographic');await ready('antarctica','native','orthographic');
+  const previousReport=await page.locator('[data-measurements]').innerText();
+  for(const button of ['data-benchmark','data-reuse']) {
+    await page.evaluate(button=>{document.querySelector(`[${button}]`).click();document.querySelector('[data-lon]').dispatchEvent(new Event('change',{bubbles:true}));},button);
+    await ready('antarctica','native','orthographic');
+    await page.waitForFunction(()=>!document.querySelector('[data-benchmark]').disabled&&!document.querySelector('[data-reuse]').disabled);
+    assert.equal(await page.isDisabled('[data-export]'),false);assert.equal(await page.locator('[data-measurements]').innerText(),previousReport);
+  }
+  // An unavailable image fails comparison, then restores the full fixture and
+  // ordinary wire/texture controls rather than leaving a partial comparison.
+  const failurePage=await browser.newPage({viewport:{width:1300,height:1000}});
+  failurePage.on('pageerror',e=>errors.push(e.message));
+  await failurePage.route('**/*.jpg',route=>route.abort());await failurePage.goto(url);
+  await failurePage.waitForFunction(()=>document.querySelector('#lab').dataset.ready,null,{timeout:120000});
+  await failurePage.click('[data-reuse]');
+  await failurePage.waitForFunction(()=>document.querySelector('[data-status]').textContent.includes('UV comparison failed'),null,{timeout:120000});
+  assert.equal(await failurePage.locator('.maps h2').first().innerText(),'Target grid → inverse UVs');
+  await failurePage.evaluate(()=>{window.restoredMesh=window.projectionLab.results.inverse;});
+  await failurePage.check('[data-wire]');
+  assert(await failurePage.evaluate(()=>window.restoredMesh===window.projectionLab.results.inverse));
+  await failurePage.evaluate(()=>window.projectionLab.dispose());await failurePage.close();
   await page.evaluate(()=>window.projectionLab.dispose());
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
   console.log('Projection lab: four real engines, polar/Fiji/interrupted/horizon fixtures, supersession, measurements and disposal passed');

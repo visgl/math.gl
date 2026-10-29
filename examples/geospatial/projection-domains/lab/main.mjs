@@ -123,7 +123,7 @@ async function benchmark(){
     measurementRows={schemaVersion:1,engine:s.engine,tolerance:s.tolerance,source:s.source,target:s.target,policy:'five sequential orthographic centers; cold/warm work included; no FPS claim',rows};const text=$('[data-measurements]');text.hidden=false;text.textContent=JSON.stringify(measurementRows,null,2);$('[data-export]').disabled=false;
     status.textContent='Moving-center measurements complete. These include worker transport and rebuilding; they are not a frame-rate guarantee.';
   }catch(error){if(!disposed&&!controller.signal.aborted)status.textContent=error.message;}
-  finally{benchmarking=false;if(!disposed)button.disabled=false;}
+  finally{benchmarking=false;if(!disposed){button.disabled=false;$('[data-export]').disabled=!measurementRows;}}
 }
 async function compareReuse() {
   if(benchmarking||disposed)return;
@@ -164,8 +164,14 @@ async function compareReuse() {
     root.dataset.reuse=JSON.stringify({models:models.size,uvBuffers:uvBuffers.size,replacementModels:replacementModels.size,updates:uploads.length});
     $('[data-measurements]').hidden=false;$('[data-measurements]').textContent=JSON.stringify(measurementRows,null,2);$('[data-export]').disabled=false;
     status.textContent='UV-only comparison complete: fixed interior patch, unchanged topology. Left reuses geometry; right replaces it. Change a selector to restore the full fixture.';
-  } catch(error){if(!disposed&&!controller.signal.aborted)status.textContent=error.message;}
-  finally{benchmarking=false;if(!disposed)button.disabled=false;}
+  } catch(error){
+    if(!disposed&&!controller.signal.aborted&&current===generation){
+      const restoredGeneration=generation+1;
+      await update();
+      if(!disposed&&generation===restoredGeneration)status.textContent=`UV comparison failed: ${error.message}. Returned to full-fixture mode.`;
+    }
+  }
+  finally{benchmarking=false;if(!disposed){button.disabled=false;$('[data-export]').disabled=!measurementRows;}}
 }
 $('[data-reuse]').addEventListener('click',()=>track(compareReuse()));
 $('[data-benchmark]').addEventListener('click',()=>track(benchmark()));
