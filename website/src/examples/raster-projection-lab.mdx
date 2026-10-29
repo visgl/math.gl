@@ -74,3 +74,8 @@ EPSG:3031 grid, with two adjacent point-sampled tiles and transparent nodata nea
 the pole. It is synthetic test data, not observed imagery or elevation. It is
 available for the Antarctic source and changes only texture data, preserving the
 prepared mesh and its error policy.
+
+**Exercise reuse limits** moves the fixed Antarctic patch through three centers.
+The last center leaves its qualified policy, so the example retires the patch and
+prepares a full inverse mesh. The exported report names the invalidation reason.
+This explicit fallback is not a generic horizon tracker or a frame-rate guarantee.

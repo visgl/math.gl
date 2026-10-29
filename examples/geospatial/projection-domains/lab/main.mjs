@@ -8,6 +8,7 @@ import {runTask,WorkerPool} from '@math.gl/core/tasks';
 import {prepareJob} from './job.mjs';
 import {createCharts} from '../warp/fixtures.mjs';
 import {createPersistentGrid,updatePersistentUV} from './persistent-grid.mjs';
+import {updateOrRebuild} from './reuse-policy.mjs';
 import {PersistentUVLayer,ReplacementMeshLayer} from './persistent-layer.mjs';
 import {engines,capability,createBackend} from './backends.mjs';
 import {mountInfoBox} from '../../../common/info-box.js';
@@ -26,7 +27,7 @@ root.innerHTML=`<section class="maps"><article><h2>Target grid → inverse UVs</
 <label>Error threshold<select data-tolerance><option value="2">2 pixels</option><option value="1">1 pixel</option><option value=".5">0.5 pixels</option><option value="4">4 pixels</option></select></label>
 <label>Center longitude <input data-lon type="range" min="-180" max="180" value="0" step="5"></label><label>Center latitude <input data-lat type="range" min="-90" max="-50" value="-90" step="5"></label><label><input data-imagery type="checkbox" checked> Earth imagery</label><label><input data-wire type="checkbox"> Mesh edges</label>
 <label><input data-native-polar type="checkbox"> Native polar diagnostic (synthetic, with nodata)</label>
-<button data-display>Compare display error</button><button data-reuse>Compare UV-only updates</button><button data-benchmark>Measure moving center</button><button data-export disabled>Export measurements</button>
+<button data-display>Compare display error</button><button data-limits>Exercise reuse limits</button><button data-reuse>Compare UV-only updates</button><button data-benchmark>Measure moving center</button><button data-export disabled>Export measurements</button>
 <p data-note></p><pre data-measurements hidden></pre><small><span data-imagery-note>NASA Blue Marble overview imagery, resampled into the source grid. Uncheck Earth imagery for the diagnostic checkerboard.</span> <a href="https://science.nasa.gov/earth/earth-observatory/blue-marble/" target="_blank" rel="noreferrer">NASA / GIBS credit</a>. Domains and error criteria are sampled. No COG loading or tile selection.</small></aside>
 <p class="lab-status" role="status" data-status>Preparing chart geometry…</p>`;
 const disposeInfo=mountInfoBox(root.querySelector('aside'),{title:'Antarctica & Fiji',theme:'sleek-dark',width:280});
@@ -209,6 +210,40 @@ async function compareDisplay(){
   finally{benchmarking=false;displayComparing=false;if(!disposed){button.disabled=false;$('[data-export]').disabled=!measurementRows;}}
 }
 $('[data-display]').addEventListener('click',()=>track(compareDisplay()));
+async function exerciseReuseLimits(){
+  if(benchmarking||disposed)return;
+  if(source.value!=='antarctica'||target.value!=='orthographic'){status.textContent='Reuse-limit demonstration requires Antarctica and Orthographic.';return;}
+  benchmarking=true;displayComparing=true;const button=$('[data-limits]');button.disabled=true;$('[data-export]').disabled=true;
+  active?.abort();const controller=new AbortController(),current=++generation;active=controller;
+  const selectedEngine=engine.value,grid=createPersistentGrid(),rows=[];delete root.dataset.limits;
+  try{
+    let rebuilt;
+    for(const center of [[0,-90],[15,-85],[30,-70]]){
+      const chart=createCharts('antarctica','orthographic',{center})[0],proj=selectedEngine==='wasm'?await getWasm():undefined;
+      const backend=await createBackend(selectedEngine,chart,'orthographic',center,proj);
+      let outcome;
+      try{outcome=await updateOrRebuild(grid,backend.evaluate,()=>prepareJob({source:'antarctica',target:'orthographic',center,engine:selectedEngine,mode:'inverse',tolerance:Number(tolerance.value)},{signal:controller.signal,proj}),{center,tolerance:Number(tolerance.value),signal:controller.signal});}
+      finally{await backend.dispose();}
+      if(disposed||current!==generation)return;
+      rows.push({center,mode:outcome.mode,reason:outcome.reason??null});
+      if(outcome.mode==='rebuild')rebuilt=outcome.result;
+    }
+    if(rebuilt){
+      rebuilt.sourceName='antarctica';
+      try{rebuilt.earthTexture=await getEarthTexture('antarctica',controller.signal);}
+      catch(error){if(disposed||current!==generation||controller.signal.aborted)return;$('[data-imagery-note]').textContent=`Earth imagery unavailable: ${error.message}. Showing diagnostic checkerboard.`;}
+      if(disposed||current!==generation)return;
+      reuseMode=false;results.inverse=rebuilt;delete results.forward;render('inverse',rebuilt);decks.forward.setProps({layers:[]});
+      root.querySelectorAll('.maps h2')[0].textContent='Full mesh after reuse limit';
+      $('[data-stats="forward"]').textContent='Fixed patch retired: domain-policy limit. A full inverse mesh was rebuilt on the left.';
+    }
+    measurementRows={schemaVersion:1,engine:selectedEngine,policy:'explicit fixed-patch policy invalidation; full inverse rebuild on domain/coverage/texture limits; backend failures are not hidden',rows};
+    root.dataset.limits=JSON.stringify(rows);$('[data-measurements]').hidden=false;$('[data-measurements]').textContent=JSON.stringify(measurementRows,null,2);
+    status.textContent='Reuse-limit exercise complete. The last center left the qualified patch policy and rebuilt the full mesh. Change a selector to restore the comparison.';
+  }catch(error){if(!disposed&&current===generation&&!controller.signal.aborted)status.textContent=error.message;}
+  finally{benchmarking=false;displayComparing=false;if(!disposed){button.disabled=false;$('[data-export]').disabled=!measurementRows;}}
+}
+$('[data-limits]').addEventListener('click',()=>track(exerciseReuseLimits()));
 $('[data-reuse]').addEventListener('click',()=>track(compareReuse()));
 $('[data-benchmark]').addEventListener('click',()=>track(benchmark()));
 $('[data-export]').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(measurementRows,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='projection-lab-measurements.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),0);});
