@@ -44,3 +44,10 @@ test('rotated Fiji cells reuse the same nonlinear shared edge in both orientatio
   const boundary=m=>[...new Set(Array.from({length:m.uv.length/2},(_,i)=>i).filter(i=>Math.abs(m.uv[i*2+1]-.5)<1e-12).map(i=>JSON.stringify([m.positions[i*2],m.positions[i*2+1],m.uv[i*2]].map(v=>Number(v.toFixed(8))))))].sort();
   assert.deepEqual(boundary(meshes[0]),boundary(meshes[1]));assert(boundary(meshes[0]).length>20);
 });
+
+test('self-overlapping star boundaries cannot publish overlapping fans',()=>{
+  const vertices=Array.from({length:5},(_,i)=>[10*Math.cos(i*2*Math.PI/5),10*Math.sin(i*2*Math.PI/5)]);
+  const corners=[0,2,4,1,3].map(i=>vertices[i]);
+  const edges=createPeriodicEdgeCache({transform:p=>p,period:360,maxSourceStep:100});
+  assert.throws(()=>preparePeriodicCell(corners,{edges,period:360,regions,sourceBounds:[-10,-10,10,10]}),/Self-overlapping/);
+});

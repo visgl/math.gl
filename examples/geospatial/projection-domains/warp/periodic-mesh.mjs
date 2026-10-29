@@ -21,7 +21,7 @@ export function createPeriodicEdgeCache(options) {
   }};
 }
 
-/** Qualified convex lifted cells, not arbitrary polygon repair. A winding source
+/** Qualified star-shaped lifted cells, not arbitrary polygon repair. A winding source
  * boundary must use explicit inverse charts, whose topology is already declared.
  * Caller partitions large/nonconvex cells before invoking this recipe. */
 export function preparePeriodicCell(corners,{edges,period,minimum=-period/2,regions,sourceBounds,sourceRow=0,inverseCharts,inverseOptions}={}) {
@@ -48,6 +48,8 @@ export function preparePeriodicCell(corners,{edges,period,minimum=-period/2,regi
   const sourceCenter=[0,1].map(k=>source.reduce((n,p)=>n+p[k],0)/source.length);
   const signs=target.map((a,i)=>{const b=target[(i+1)%target.length];return (a[0]-center[0])*(b[1]-center[1])-(a[1]-center[1])*(b[0]-center[0]);});
   if(signs.some(v=>!Number.isFinite(v)||v===0)||!(signs.every(v=>v>0)||signs.every(v=>v<0)))throw new RangeError('Cell requires explicit chart decomposition');
+  const angle=target.reduce((sum,a,i)=>{const b=target[(i+1)%target.length],u=a.map((v,k)=>v-center[k]),v=b.map((x,k)=>x-center[k]);return sum+Math.atan2(u[0]*v[1]-u[1]*v[0],u[0]*v[0]+u[1]*v[1]);},0);
+  if(Math.abs(Math.abs(angle)-2*Math.PI)>1e-7)throw new RangeError('Self-overlapping cell requires explicit chart decomposition');
   const positions=new Float64Array([...target.flat(),...center]),pixels=new Float64Array([...source.flat(),...sourceCenter]),indices=[];
   for(let i=0;i<target.length;i++)indices.push(i,(i+1)%target.length,target.length);
   const clipped=clipTriangleMesh({positions,indices:new Uint32Array(indices)},{regions,periodic:{axis:0,minimum,period}});

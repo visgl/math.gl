@@ -15,7 +15,8 @@ boundary sample in a center fan. Periodic target clipping duplicates seam vertic
 math.gl provenance interpolates source pixels into UVs. `sourceBounds` defines the
 UV rectangle, so neighboring tiles may use different UV bounds while sharing
 geometry. Source-row identity and periodic-copy attribution survive clipping.
-Supported cells have a consistently oriented center fan; partition more complex
+Supported cells have a consistently oriented center fan with one full angular turn;
+self-overlapping multiple-turn fans are rejected. partition more complex
 cells into explicit charts. This sampled piecewise-linear mesh does not certify
 interior projection error: callers must qualify cell density separately.
 
