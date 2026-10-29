@@ -67,6 +67,11 @@
     "items": [
       {
         "type": "doc",
+        "label": "WKT and WKB workbench",
+        "id": "wkb-workbench"
+      },
+      {
+        "type": "doc",
         "label": "Tectonic time machine",
         "id": "tectonic-time-machine"
       },
