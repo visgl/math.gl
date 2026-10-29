@@ -181,13 +181,19 @@ async function compareDisplay(){
   benchmarking=true;const button=$('[data-display]');button.disabled=true;$('[data-export]').disabled=true;
   active?.abort();const controller=new AbortController(),current=++generation;active=controller;
   try{
-    const rows=[];
+    const rows=[],qualified={};
     for(const pixelsPerUnit of [[180,90],[360,180]])for(const mode of ['inverse','forward']){
       const displayPolicy={pixelsPerUnit,displayTolerance:Number(tolerance.value),textureTolerance:2};
       const result=await runTask(task,{...s,mode,displayPolicy},{execution:'worker',workerPool:pool,signal:controller.signal});
       if(disposed||current!==generation)return;
-      rows.push({mode,...result.diagnostics,charts:result.meshes.map(m=>m.diagnostics.qualification)});
+      rows.push({mode,...result.diagnostics,charts:result.meshes.map(m=>m.diagnostics.qualification)});qualified[mode]=result;
     }
+    const earthTexture=await getEarthTexture(s.source,controller.signal);
+    if(disposed||current!==generation)return;
+    reuseMode=false;
+    const titles=root.querySelectorAll('.maps h2');titles[0].textContent='Target grid → qualified inverse UVs';titles[1].textContent='Source grid → qualified positions';
+    for(const p of root.querySelectorAll('.maps article > p'))p.textContent='Same recorded display-pixel and source-texel gates.';
+    for(const mode of ['inverse','forward']){qualified[mode].sourceName=s.source;qualified[mode].earthTexture=earthTexture;results[mode]=qualified[mode];render(mode,qualified[mode]);}
     measurementRows={schemaVersion:1,engine:s.engine,policy:'shared independent affine display-pixel and source-texel probes; native chart reference; two anisotropic zoom scales; finite sampling, not a continuous error certificate',rows};
     $('[data-measurements]').hidden=false;$('[data-measurements]').textContent=JSON.stringify(measurementRows,null,2);
     status.textContent='Display comparison complete. Both strategies passed the same display-pixel and texture-error gates at both declared scales. Pan/zoom does not change these recorded scales.';

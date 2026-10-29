@@ -23,3 +23,12 @@ test('display residual responds to camera scaling and qualification rejects exha
   const controller=new AbortController();controller.abort(new Error('cancelled'));
   await assert.rejects(qualifyDisplayMesh(()=>mesh,chart,{signal:controller.signal}),/cancelled/);
 });
+
+import {prepareJob} from '../lab/job.mjs';
+test('common policy passes through native and external worker job specifications',async()=>{
+  for(const engine of ['native','proj4','d3'])for(const mode of ['inverse','forward']){
+    const result=await prepareJob({source:'antarctica',target:'orthographic',engine,mode,tolerance:1,displayPolicy:{pixelsPerUnit:[360,180],displayTolerance:1,textureTolerance:2}});
+    const q=result.meshes[0].diagnostics.qualification;
+    assert(q.maximumDisplayError<=1&&q.maximumTextureError<=2);
+  }
+});

@@ -30,6 +30,8 @@ try {
   await page.waitForFunction(()=>document.querySelector('[data-status]').textContent.startsWith('Display comparison complete'),null,{timeout:120000});
   const displayReport=JSON.parse(await page.locator('[data-measurements]').innerText());
   assert.equal(displayReport.rows.length,4);
+  assert(await page.evaluate(()=>window.projectionLab.results.inverse.meshes[0].diagnostics.qualification.maximumDisplayError<=2));
+  assert.match(await page.locator('.maps h2').first().innerText(),/qualified/);
   for(const row of displayReport.rows)for(const q of row.charts){assert(q.maximumDisplayError<=q.displayTolerance);assert(q.maximumTextureError<=q.textureTolerance);}
   await page.click('[data-reuse]');
   await page.waitForFunction(()=>document.querySelector('#lab').dataset.reuse,null,{timeout:120000});
@@ -74,10 +76,10 @@ try {
   // Cancellation retains the last completed report for both measurement modes.
   await page.selectOption('[data-source]','antarctica');await page.selectOption('[data-target]','orthographic');await ready('antarctica','native','orthographic');
   const previousReport=await page.locator('[data-measurements]').innerText();
-  for(const button of ['data-benchmark','data-reuse']) {
+  for(const button of ['data-benchmark','data-reuse','data-display']) {
     await page.evaluate(button=>{document.querySelector(`[${button}]`).click();document.querySelector('[data-lon]').dispatchEvent(new Event('change',{bubbles:true}));},button);
     await ready('antarctica','native','orthographic');
-    await page.waitForFunction(()=>!document.querySelector('[data-benchmark]').disabled&&!document.querySelector('[data-reuse]').disabled);
+    await page.waitForFunction(()=>['data-benchmark','data-reuse','data-display'].every(name=>!document.querySelector(`[${name}]`).disabled));
     assert.equal(await page.isDisabled('[data-export]'),false);assert.equal(await page.locator('[data-measurements]').innerText(),previousReport);
   }
   // An unavailable image fails comparison, then restores the full fixture and
