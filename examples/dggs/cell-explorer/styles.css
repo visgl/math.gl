@@ -11,6 +11,5 @@
 .dggs-explorer a {color:#75d9ff}
 .dggs-explorer [role=alert] {color:#ffad9d}
 @media(max-width:600px) {.dggs-explorer .example-panel {width:220px}}
-html,body,#root {height:100%}
 .dggs-explorer button,.dggs-explorer select,.dggs-explorer input:not([type=checkbox]) {background:#17384b;color:#e6f4ff;border:1px solid #52738a;border-radius:4px;padding:7px}
 .dggs-explorer button:disabled {opacity:.5}

@@ -68,6 +68,8 @@ try {
   assert(bottom.y>=0 && bottom.y+bottom.height<=401);
   await page.setViewportSize({width:1200,height:800});
   await page.locator('.example-panel').evaluate(element=>element.scrollTop=0);
+  const outsideLayout=await page.evaluate(()=>{const sibling=document.createElement('div');sibling.style.height='500px';document.body.append(sibling);const height=parseFloat(getComputedStyle(document.body).height);sibling.remove();return {height,expected:innerHeight+500};});
+  assert(outsideLayout.height>=outsideLayout.expected,'Example CSS must not constrain the surrounding page body');
   assert.deepEqual(errors,[]);
   if(process.env.SCREENSHOT_PATH) await page.screenshot({path:process.env.SCREENSHOT_PATH});
   console.log('DGGS: six fixtures, S2 hierarchy, invalid input, fit, comparison, and unwrap controls passed.');
