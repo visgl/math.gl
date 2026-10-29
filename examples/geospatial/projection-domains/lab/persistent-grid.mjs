@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+export class RebuildRequiredError extends RangeError {
+  constructor(reason,message){super(message);this.name='RebuildRequiredError';this.reason=reason;}
+}
+
 /** Fixed interior target patch for the qualified Antarctic orthographic demo.
  * Coverage/domain changes outside this policy require a fresh mesh. */
 export function createPersistentGrid() {
@@ -15,7 +19,7 @@ export function createPersistentGrid() {
  * coverage and independent midpoint/centroid interpolation checks pass. */
 export async function updatePersistentUV(grid,evaluate,{source='antarctica',target='orthographic',center=[0,-85],tolerance=2,signal}={}) {
   if(source!=='antarctica'||target!=='orthographic'||center.length!==2||!center.every(Number.isFinite)||center[1]<-90||center[1]>-85)
-    throw new RangeError('Persistent patch requires rebuild: unsupported source/domain/center');
+    throw new RebuildRequiredError('domain-policy','Persistent patch requires rebuild: unsupported source/domain/center');
   if(!Number.isFinite(tolerance)||tolerance<=0)throw new RangeError('Invalid texture tolerance');
   const started=performance.now(),points=Array.from(grid.positions),probes=[];
   for(let i=0;i<grid.indices.length;i+=3) {
@@ -28,11 +32,11 @@ export async function updatePersistentUV(grid,evaluate,{source='antarctica',targ
   const samples=new Float64Array(points.length);let batches=0;
   for(let start=0;start<points.length;start+=2048){if(signal?.aborted)throw signal.reason;const batch=new Float64Array(points.slice(start,start+2048)),length=batch.length,result=await evaluate(batch,{signal});
     if(signal?.aborted)throw signal.reason;if(!(result instanceof Float64Array)||result.length!==length||!result.every(Number.isFinite))throw new RangeError('Invalid persistent sample batch');samples.set(result,start);batches++;}
-  if(samples.some(v=>v<0||v>256))throw new RangeError('Persistent patch requires rebuild: source coverage changed');
+  if(samples.some(v=>v<0||v>256))throw new RebuildRequiredError('source-coverage','Persistent patch requires rebuild: source coverage changed');
   let maximumError=0;
   for(let j=0;j<probes.length;j++){const {ids,weights}=probes[j],offset=grid.positions.length+j*2;
     const error=Math.hypot(...[0,1].map(c=>samples[offset+c]-ids.reduce((sum,id,k)=>sum+samples[id*2+c]*weights[k],0)));maximumError=Math.max(maximumError,error);}
-  if(maximumError>tolerance)throw new RangeError('Persistent patch requires rebuild: texture error exceeded');
+  if(maximumError>tolerance)throw new RebuildRequiredError('texture-error','Persistent patch requires rebuild: texture error exceeded');
   const uv=Float32Array.from(samples.subarray(0,grid.positions.length),v=>v/256);
   return {uv,diagnostics:{preparationMs:performance.now()-started,uvBytes:uv.byteLength,maximumError,batches,vertices:uv.length/2}};
 }
