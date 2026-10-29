@@ -16,6 +16,8 @@
     "@deck.gl/core": "^9.4.0",
     "@deck.gl/layers": "^9.4.0",
     "@deck.gl/mesh-layers": "^9.4.0",
+    "@luma.gl/core": "^9.4.2",
+    "@luma.gl/engine": "^9.4.2",
     "@math.gl/core": "workspace:*",
     "@math.gl/geometry": "workspace:*",
     "@math.gl/geospatial": "workspace:*",
@@ -28,6 +30,7 @@
     "@types/d3-geo": "^3.1.0",
     "@types/node": "^22.20.1",
     "playwright": "^1.62.1",
+    "pngjs": "^7.0.0",
     "typescript": "^6.0.3",
     "vite": "^8.2.2"
   }
