@@ -9,6 +9,8 @@ import {
   getS2ChildIndex
 } from '@math.gl/dggs';
 
+import {isValidCell} from 'h3-js';
+
 export const SAMPLES = {
   a5: '1ae2988000000000',
   geohash: '9q8yy',
@@ -20,12 +22,24 @@ export const SAMPLES = {
 
 export function decodeCell(grid, token, unwrap = true) {
   if (!token.trim() || token.length > 128) throw new Error('Enter a cell ID of 1–128 characters.');
+  const trimmed = token.trim();
+  if (grid === 'h3' && !isValidCell(trimmed.replace(/^0x/i, '')))
+    throw new Error('Enter a valid H3 cell index.');
+  if (grid === 'geohash' && !/^[0123456789bcdefghjkmnpqrstuvwxyz]{1,12}$/.test(trimmed))
+    throw new Error('GeoHash IDs must contain 1–12 lowercase GeoHash base32 characters.');
+  if (grid === 'quadkey' && !/^[0-3]{1,30}$/.test(trimmed))
+    throw new Error('Quadkeys must contain 1–30 digits from 0 to 3.');
   const decoder = DGGS_DECODERS.find(item => item.name === grid);
   if (!decoder) throw new Error('Unknown grid');
   const center = decoder.cellToLngLat(token.trim());
   const boundary = decoder.cellToBoundary(token.trim(), {unwrap, referenceLongitude: center[0]});
   const bounds = decoder.cellToBounds(token.trim(), {unwrap, referenceLongitude: center[0]});
-  if (![...center, ...boundary.flat()].every(Number.isFinite))
+  if (
+    !(
+      boundary.length >= 4 &&
+      [...center, ...boundary.flat(), ...bounds.flat()].every(Number.isFinite)
+    )
+  )
     throw new Error('Invalid cell coordinates');
   return {center, boundary, bounds};
 }

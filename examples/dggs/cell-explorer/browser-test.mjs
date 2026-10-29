@@ -18,6 +18,10 @@ try {
   for (const name of ['a5','geohash','h3','plus-code','quadkey','s2']) {
     await page.getByRole('combobox').selectOption(name);
     assert.equal(await page.getByRole('alert').count(),0,name);
+    await page.getByLabel('Cell ID',{exact:true}).fill('invalid');
+    await page.getByRole('alert').waitFor();
+    assert(await page.getByRole('button',{name:'Fit cell'}).isDisabled());
+    await page.getByRole('button',{name:'Reset ID'}).click();
   }
   const hierarchy = await page.evaluate(async()=> {
     const {s2Hierarchy}=await import('/model.js');

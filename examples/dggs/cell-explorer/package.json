@@ -18,6 +18,7 @@
     "@luma.gl/engine": "~9.4.0",
     "@luma.gl/shadertools": "~9.4.0",
     "@math.gl/dggs": "workspace:*",
+    "h3-js": "^4.5.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
