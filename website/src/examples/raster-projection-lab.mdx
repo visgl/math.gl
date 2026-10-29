@@ -68,3 +68,9 @@ scales. It requires Antarctica, Orthographic and a backend supporting forward
 preparation. The report uses native chart conversions as its reference and bounded
 refinement retries; exhausted budgets reject. These are sampled qualifications at
 the recorded scales, not a continuous error bound or a guarantee after zooming.
+
+The optional **Native polar diagnostic** texture is generated directly on an
+EPSG:3031 grid, with two adjacent point-sampled tiles and transparent nodata near
+the pole. It is synthetic test data, not observed imagery or elevation. It is
+available for the Antarctic source and changes only texture data, preserving the
+prepared mesh and its error policy.
