@@ -1,5 +1,11 @@
 # Using external projection engines
 
+math.gl's general projection interface is **projection-engine agnostic**. The contract describes
+coordinate operations and their execution semantics; it does not require proj4js, native math.gl,
+or a particular projection catalogue. Adapters supply operations, while chart boundaries, validity
+domains and data/view cache policies remain explicit application or backend responsibilities.
+
+
 External libraries can provide CRS definitions, execute coordinate operations, or
 do both. Use the opt-in [`CRSResolver`](../../crs/api-reference/resolver.md) for
 definition lookup. Libraries with synchronous coordinate operations can also
