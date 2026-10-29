@@ -19,3 +19,13 @@ Only simple single-outline regions are accepted; more complex topology needs exp
 These recipes introduce no new public export paths or mandatory external projection engines.
 
 [Feedback section 2](https://github.com/mdsumner/sidebyside/blob/main/article/2026-10-13_custom-projections-deckgl.md#2-domain-is-geometry-not-a-lonlat-box).
+
+Perspective callers may supply `height` (in unit-sphere radii), `tilt` and `azimuth`
+(in degrees). Defaults remain 1, 20 and 0. Qualified heights are 0.1–10; absolute
+ tilt must stay at least one degree below `atan(sqrt(height * (height + 2)))`.
+At the limiting tilt the horizon crosses infinity, so this bounded-polygon recipe
+rejects it instead of returning a misleading closed domain. The spherical limb
+radius is `acos(1 / (1 + height))`; all parameters enter the operation definition
+and identity. Independent offline PROJ fixtures cover both exact poles, an oblique
+center, multiple heights, signed tilts and nonzero azimuths. Regenerate with
+`qualification/generate-horizons.py`; no Python or PROJ runtime dependency ships.
