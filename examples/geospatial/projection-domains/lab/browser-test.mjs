@@ -26,6 +26,13 @@ try {
   assert(await page.evaluate(()=>window.initialMesh===window.projectionLab.results.inverse.meshes));
   await page.check('[data-imagery]');
   if(process.env.CAPTURE_INITIAL)await page.screenshot({path:process.env.CAPTURE_INITIAL});
+  await page.click('[data-display]');
+  await page.waitForFunction(()=>document.querySelector('[data-status]').textContent.startsWith('Display comparison complete'),null,{timeout:120000});
+  const displayReport=JSON.parse(await page.locator('[data-measurements]').innerText());
+  assert.equal(displayReport.rows.length,4);
+  assert(await page.evaluate(()=>window.projectionLab.results.inverse.meshes[0].diagnostics.qualification.maximumDisplayError<=2));
+  assert.match(await page.locator('.maps h2').first().innerText(),/qualified/);
+  for(const row of displayReport.rows)for(const q of row.charts){assert(q.maximumDisplayError<=q.displayTolerance);assert(q.maximumTextureError<=q.textureTolerance);}
   await page.click('[data-reuse]');
   await page.waitForFunction(()=>document.querySelector('#lab').dataset.reuse,null,{timeout:120000});
   const reuse=JSON.parse(await page.locator('#lab').getAttribute('data-reuse'));
@@ -44,6 +51,12 @@ try {
   }
   assert(difference/countPixels<8,'UV-only rendering must match full mesh replacement');
   if(process.env.CAPTURE_REUSE)await page.screenshot({path:process.env.CAPTURE_REUSE});
+  await page.evaluate(()=>{document.querySelector('[data-display]').click();document.querySelector('[data-wire]').click();});
+  await page.waitForFunction(()=>document.querySelector('[data-status]').textContent.startsWith('Display comparison complete'),null,{timeout:120000});
+  assert(await page.isChecked('[data-wire]'));
+  assert(await page.evaluate(()=>window.projectionLab.results.inverse.meshes[0].diagnostics.qualification));
+  await page.uncheck('[data-wire]');
+
   for(const engine of ['proj4','d3','wasm','native']) {
     await page.selectOption('[data-engine]',engine);await ready('antarctica',engine,'orthographic');
     const count=await page.evaluate(()=>window.projectionLab.results.inverse.diagnostics.triangles);assert(count>100);
@@ -69,10 +82,10 @@ try {
   // Cancellation retains the last completed report for both measurement modes.
   await page.selectOption('[data-source]','antarctica');await page.selectOption('[data-target]','orthographic');await ready('antarctica','native','orthographic');
   const previousReport=await page.locator('[data-measurements]').innerText();
-  for(const button of ['data-benchmark','data-reuse']) {
+  for(const button of ['data-benchmark','data-reuse','data-display']) {
     await page.evaluate(button=>{document.querySelector(`[${button}]`).click();document.querySelector('[data-lon]').dispatchEvent(new Event('change',{bubbles:true}));},button);
     await ready('antarctica','native','orthographic');
-    await page.waitForFunction(()=>!document.querySelector('[data-benchmark]').disabled&&!document.querySelector('[data-reuse]').disabled);
+    await page.waitForFunction(()=>['data-benchmark','data-reuse','data-display'].every(name=>!document.querySelector(`[${name}]`).disabled));
     assert.equal(await page.isDisabled('[data-export]'),false);assert.equal(await page.locator('[data-measurements]').innerText(),previousReport);
   }
   // An unavailable image fails comparison, then restores the full fixture and
@@ -81,6 +94,10 @@ try {
   failurePage.on('pageerror',e=>errors.push(e.message));
   await failurePage.route('**/*.jpg',route=>route.abort());await failurePage.goto(url);
   await failurePage.waitForFunction(()=>document.querySelector('#lab').dataset.ready,null,{timeout:120000});
+  await failurePage.click('[data-display]');
+  await failurePage.waitForFunction(()=>document.querySelector('[data-status]').textContent.startsWith('Display comparison complete'),null,{timeout:120000});
+  assert(await failurePage.evaluate(()=>window.projectionLab.results.inverse.meshes[0].diagnostics.qualification&&!window.projectionLab.results.inverse.earthTexture));
+  assert.match(await failurePage.locator('[data-imagery-note]').innerText(),/checkerboard/);
   await failurePage.click('[data-reuse]');
   await failurePage.waitForFunction(()=>document.querySelector('[data-status]').textContent.includes('UV comparison failed'),null,{timeout:120000});
   assert.equal(await failurePage.locator('.maps h2').first().innerText(),'Target grid → inverse UVs');

@@ -24,7 +24,7 @@ root.innerHTML=`<section class="maps"><article><h2>Target grid → inverse UVs</
 <label>Engine<select data-engine>${Object.entries(engines).map(([id,label])=>`<option value="${id}">${label}</option>`).join('')}</select></label>
 <label>Error threshold<select data-tolerance><option value="2">2 pixels</option><option value="1">1 pixel</option><option value=".5">0.5 pixels</option><option value="4">4 pixels</option></select></label>
 <label>Center longitude <input data-lon type="range" min="-180" max="180" value="0" step="5"></label><label>Center latitude <input data-lat type="range" min="-90" max="-50" value="-90" step="5"></label><label><input data-imagery type="checkbox" checked> Earth imagery</label><label><input data-wire type="checkbox"> Mesh edges</label>
-<button data-reuse>Compare UV-only updates</button><button data-benchmark>Measure moving center</button><button data-export disabled>Export measurements</button>
+<button data-display>Compare display error</button><button data-reuse>Compare UV-only updates</button><button data-benchmark>Measure moving center</button><button data-export disabled>Export measurements</button>
 <p data-note></p><pre data-measurements hidden></pre><small><span data-imagery-note>NASA Blue Marble overview imagery, resampled into the source grid. Uncheck Earth imagery for the diagnostic checkerboard.</span> <a href="https://science.nasa.gov/earth/earth-observatory/blue-marble/" target="_blank" rel="noreferrer">NASA / GIBS credit</a>. Domains and error criteria are sampled. No COG loading or tile selection.</small></aside>
 <p class="lab-status" role="status" data-status>Preparing chart geometry…</p>`;
 const disposeInfo=mountInfoBox(root.querySelector('aside'),{title:'Antarctica & Fiji',theme:'sleek-dark',width:280});
@@ -32,7 +32,7 @@ const $=selector=>root.querySelector(selector),source=$('[data-source]'),target=
 const texture=document.createElement('canvas');texture.width=texture.height=256;const ctx=texture.getContext('2d');
 for(let y=0;y<8;y++)for(let x=0;x<8;x++){ctx.fillStyle=(x+y)%2?'#215f83':'#60aaa7';ctx.fillRect(x*32,y*32,32,32);ctx.fillStyle='#eaf8ff';ctx.font='10px monospace';ctx.fillText(`${x},${y}`,x*32+5,y*32+19);}
 ctx.strokeStyle='#ffd48b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(128,128,9,0,Math.PI*2);ctx.stroke();
-const decks={},results={};let generation=0,active,disposed=false,wasmPromise,wasmHandle,benchmarking=false,reuseMode=false,measurementRows=null;
+const decks={},results={};let generation=0,active,disposed=false,wasmPromise,wasmHandle,benchmarking=false,reuseMode=false,displayComparing=false,measurementRows=null;
 const pending=new Set(),imageCache=new Map();let imagePromise;
 async function getEarthTexture(name,signal) {
   if(imageCache.has(name))return imageCache.get(name);
@@ -108,7 +108,7 @@ function constrain() {
   schedule();
 }
 for(const el of [source,target,engine,tolerance,lon,lat])el.addEventListener('change',constrain);
-for(const control of [wire,imagery])control.addEventListener('change',()=>{if(reuseMode){active?.abort();schedule();return;}for(const mode of Object.keys(results))render(mode,results[mode]);});
+for(const control of [wire,imagery])control.addEventListener('change',()=>{if(displayComparing)return;if(reuseMode){active?.abort();schedule();return;}for(const mode of Object.keys(results))render(mode,results[mode]);});
 async function benchmark(){
   if(benchmarking||disposed)return;benchmarking=true;$('[data-export]').disabled=true;const button=$('[data-benchmark]');button.disabled=true;
   const controller=new AbortController();active?.abort();const current=++generation;active=controller;
@@ -173,6 +173,36 @@ async function compareReuse() {
   }
   finally{benchmarking=false;if(!disposed){button.disabled=false;$('[data-export]').disabled=!measurementRows;}}
 }
+
+async function compareDisplay(){
+  if(benchmarking||disposed)return;
+  const s=spec();
+  if(s.source!=='antarctica'||s.target!=='orthographic'||capability(s.engine,s.source,s.target,'forward')){status.textContent='Display comparison requires Antarctica, Orthographic and an engine with forward preparation.';return;}
+  benchmarking=true;displayComparing=true;const button=$('[data-display]');button.disabled=true;$('[data-export]').disabled=true;
+  active?.abort();const controller=new AbortController(),current=++generation;active=controller;
+  try{
+    const rows=[],qualified={};
+    for(const pixelsPerUnit of [[180,90],[360,180]])for(const mode of ['inverse','forward']){
+      const displayPolicy={pixelsPerUnit,displayTolerance:Number(tolerance.value),textureTolerance:2};
+      const result=await runTask(task,{...s,mode,displayPolicy},{execution:'worker',workerPool:pool,signal:controller.signal});
+      if(disposed||current!==generation)return;
+      rows.push({mode,...result.diagnostics,charts:result.meshes.map(m=>m.diagnostics.qualification)});qualified[mode]=result;
+    }
+    let earthTexture;
+    try{earthTexture=await getEarthTexture(s.source,controller.signal);}
+    catch(error){if(disposed||current!==generation||controller.signal.aborted)return;$('[data-imagery-note]').textContent=`Earth imagery unavailable: ${error.message}. Showing diagnostic checkerboard.`;}
+    if(disposed||current!==generation)return;
+    reuseMode=false;
+    const titles=root.querySelectorAll('.maps h2');titles[0].textContent='Target grid → qualified inverse UVs';titles[1].textContent='Source grid → qualified positions';
+    for(const p of root.querySelectorAll('.maps article > p'))p.textContent='Same recorded display-pixel and source-texel gates.';
+    for(const mode of ['inverse','forward']){qualified[mode].sourceName=s.source;qualified[mode].earthTexture=earthTexture;results[mode]=qualified[mode];render(mode,qualified[mode]);}
+    measurementRows={schemaVersion:1,engine:s.engine,policy:'shared independent affine display-pixel and source-texel probes; native chart reference; two anisotropic zoom scales; finite sampling, not a continuous error certificate',rows};
+    $('[data-measurements]').hidden=false;$('[data-measurements]').textContent=JSON.stringify(measurementRows,null,2);
+    status.textContent='Display comparison complete. Both strategies passed the same display-pixel and texture-error gates at both declared scales. Pan/zoom does not change these recorded scales.';
+  }catch(error){if(!disposed&&current===generation&&!controller.signal.aborted)status.textContent=error.message;}
+  finally{benchmarking=false;displayComparing=false;if(!disposed){button.disabled=false;$('[data-export]').disabled=!measurementRows;}}
+}
+$('[data-display]').addEventListener('click',()=>track(compareDisplay()));
 $('[data-reuse]').addEventListener('click',()=>track(compareReuse()));
 $('[data-benchmark]').addEventListener('click',()=>track(benchmark()));
 $('[data-export]').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(measurementRows,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='projection-lab-measurements.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),0);});
