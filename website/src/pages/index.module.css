@@ -1,3 +1,7 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
 .home { flex: 1; }
 .hero { min-height: 560px; display: flex; align-items: center; background-size: cover; background-position: center right; color: #f5f8fc; padding: 88px max(6vw, 24px); }
 .intro { max-width: 660px; }
