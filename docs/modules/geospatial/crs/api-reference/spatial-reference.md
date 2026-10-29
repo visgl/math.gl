@@ -91,14 +91,14 @@ validate syntax, resolve an identifier, or establish semantic equivalence.
 
 ## `normalizeCRSIdentifier()`
 
-Rewrites recognized spellings of one authority CRS identifier to `AUTHORITY:CODE`.
+Changes known spellings of one authority CRS identifier to the form `AUTHORITY:CODE`.
 
 ```ts
 normalizeCRSIdentifier(identifier: CRSIdentifier): CRSIdentifier
 ```
 
-Use it to compare identifiers that reach an application in different spellings, for example a
-tile matrix set's `http://www.opengis.net/def/crs/EPSG/0/32619` and a view's `EPSG:32619`.
+Use this function to compare identifiers that have different spellings. For example, a tile matrix
+set can give `http://www.opengis.net/def/crs/EPSG/0/32619`, and a view can give `EPSG:32619`.
 
 | Input | Result |
 | --- | --- |
@@ -111,18 +111,26 @@ tile matrix set's `http://www.opengis.net/def/crs/EPSG/0/32619` and a view's `EP
 
 Rules:
 
-- Authorities are upper-cased. OGC codes are upper-cased; other codes keep their spelling.
-- The WMS 1.3 codes `CRS:84`, `CRS:83` and `CRS:27` become `OGC:CRS84`, `OGC:CRS83` and
-  `OGC:CRS27`.
-- A URN or URI version is removed only when it is empty or `0`, or when it is `1.3` on those three
-  OGC codes, which the OGC register publishes only at that version. Any other versioned identifier
-  is returned unchanged, so it does not compare equal to an unversioned identifier.
-- Unrecognized strings are returned unchanged.
+- The function changes authorities to upper case. It changes OGC codes to upper case. It does not
+  change other codes.
+- The function changes the WMS 1.3 codes `CRS:84`, `CRS:83` and `CRS:27` to `OGC:CRS84`,
+  `OGC:CRS83` and `OGC:CRS27`.
+- The function removes a URN or URI version only in these cases:
+  - The version is empty.
+  - The version is `0`.
+  - The version is `1.3` and the code is OGC `CRS84`, `CRS83` or `CRS27`. The OGC register
+    publishes these three codes only at version 1.3.
+- The function returns all other versioned identifiers unchanged. Thus a versioned identifier does
+  not compare equal to an unversioned identifier.
+- The function returns unknown strings unchanged.
 
-It never equates different registry entries. `EPSG:4326` and `OGC:CRS84` stay distinct because
-their axis orders differ, and Web Mercator aliases such as `EPSG:900913` stay distinct from
-`EPSG:3857`. It does not resolve definitions, establish datum equivalence or change axis order.
-Keep the source's original identifier in metadata and use the result only for comparison.
+The function does not make different registry entries equal. `EPSG:4326` and `OGC:CRS84` stay
+different, because their axis orders are different. `EPSG:900913` stays different from
+`EPSG:3857`. The function does not resolve definitions. It does not make datums equal, and it does
+not change axis order.
+
+Keep the original identifier of the source in the metadata. Use the result only to compare
+identifiers.
 
 ## Representation values
 
