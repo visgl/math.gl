@@ -2,6 +2,18 @@
 
 ## Upgrading to v5.0[​](#upgrading-to-v50 "Direct link to Upgrading to v5.0")
 
+### Expression evaluation names[​](#expression-evaluation-names "Direct link to Expression evaluation names")
+
+The v5 prerelease expression exports `eval` and `evalAsync` are renamed to `evaluate` and `evaluateAsync`. Update named imports and namespace calls from `@math.gl/core`. The old names are removed: `eval` cannot be used as a local binding in strict-mode modules, including generated namespace wrappers.
+
+```
+import {evaluate, parse} from '@math.gl/core';
+
+
+
+const value = evaluate(parse('x * 2'), {x: 3});
+```
+
 ### Grouped package subpaths[​](#grouped-package-subpaths "Direct link to Grouped package subpaths")
 
 Use the grouped subpaths for new imports: `@math.gl/core`, `@math.gl/core`, `@math.gl/geometry`, `@math.gl/geometry`, `@math.gl/geometry`, `@math.gl/geometry/culling`, `@math.gl/geometry`, `@math.gl/geospatial`, `@math.gl/geospatial`, `@math.gl/geospatial`, `@math.gl/geospatial/crs`, `@math.gl/geospatial/projection`, `@math.gl/geospatial`, `@math.gl/geospatial`, `@math.gl/geospatial/geoarrow`, `@math.gl/geospatial`, and the `@math.gl/earth` geoid, sun, and timezone subpaths. The original standalone packages have been removed. Update both import specifiers and package dependencies. Install the grouped package root, such as `@math.gl/geometry`, even when importing from `@math.gl/geometry`. DGGS stays available as the separate `@math.gl/dggs` package. The unscoped `math.gl` package has been removed; replace imports from it with `@math.gl/core`.

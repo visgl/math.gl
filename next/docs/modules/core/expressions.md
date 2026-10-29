@@ -33,7 +33,7 @@ npm install @math.gl/core
 Evaluate a parsed expression against a data object:
 
 ```
-import {parse, eval as evaluate} from '@math.gl/core';
+import {parse, evaluate} from '@math.gl/core';
 
 
 
@@ -135,8 +135,8 @@ const fill = getFill({style: {fill: {color: '#08f'}}});
 | Export                        | Description                                                             |
 | ----------------------------- | ----------------------------------------------------------------------- |
 | `parse`                       | Parses an expression string into a JSEP AST.                            |
-| `eval`                        | Evaluates a parsed AST against a context object.                        |
-| `evalAsync`                   | Async evaluator for expressions containing async function calls.        |
+| `evaluate`                    | Evaluates a parsed AST against a context object.                        |
+| `evaluateAsync`               | Async evaluator for expressions containing async function calls.        |
 | `compile`                     | Compiles an expression string or AST into a reusable function.          |
 | `compileAsync`                | Async variant of `compile`.                                             |
 | `addUnaryOp`                  | Registers a custom unary operator with the parser and evaluator.        |
@@ -153,9 +153,9 @@ The WGS84 helper library is exported from `@math.gl/geospatial`; install `@math.
 ```
 compile(expression, {libraries: [BASIC_MATH_FUNCTION_LIBRARY]});
 
-eval(ast, row, {libraries: [GEOSPATIAL_FUNCTION_LIBRARY]});
+evaluate(ast, row, {libraries: [GEOSPATIAL_FUNCTION_LIBRARY]});
 
-evalAsync(ast, row, {libraries: [customLibrary]});
+evaluateAsync(ast, row, {libraries: [customLibrary]});
 ```
 
 Libraries are merged left-to-right and then overlaid with the input context object, so row values win if a field name collides with a library export.

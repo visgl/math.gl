@@ -8,13 +8,13 @@ The core evaluator API is useful when you want direct control over parsing, AST 
 
 Parses a string into a JSEP AST. Passing an AST returns it unchanged.
 
-## `eval(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): unknown`[​](#evalexpression-expression-context-expressioncontext-options-expressionevaluationoptions-unknown "Direct link to evalexpression-expression-context-expressioncontext-options-expressionevaluationoptions-unknown")
+## `evaluate(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): unknown`[​](#evaluateexpression-expression-context-expressioncontext-options-expressionevaluationoptions-unknown "Direct link to evaluateexpression-expression-context-expressioncontext-options-expressionevaluationoptions-unknown")
 
 Evaluates a parsed expression against the supplied context object.
 
-## `evalAsync(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): Promise<unknown>`[​](#evalasyncexpression-expression-context-expressioncontext-options-expressionevaluationoptions-promiseunknown "Direct link to evalasyncexpression-expression-context-expressioncontext-options-expressionevaluationoptions-promiseunknown")
+## `evaluateAsync(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): Promise<unknown>`[​](#evaluateasyncexpression-expression-context-expressioncontext-options-expressionevaluationoptions-promiseunknown "Direct link to evaluateasyncexpression-expression-context-expressioncontext-options-expressionevaluationoptions-promiseunknown")
 
-Async variant of `eval`. Useful when expressions may call async functions present on the context object.
+Async variant of `evaluate`. Useful when expressions may call async functions present on the context object.
 
 ## `compile(expression: string | Expression, options?: ExpressionEvaluationOptions): (context: ExpressionContext) => unknown`[​](#compileexpression-string--expression-options-expressionevaluationoptions-context-expressioncontext--unknown "Direct link to compileexpression-string--expression-options-expressionevaluationoptions-context-expressioncontext--unknown")
 
