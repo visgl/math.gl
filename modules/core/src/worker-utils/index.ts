@@ -78,7 +78,8 @@ export const NullWorker: WorkerObject = {
   name: 'null',
   module: 'core',
   packageName: '@math.gl/core',
-  worker: new URL('./workers/null-worker.js', moduleUrl).href,
+  // Drop the entire URL expression when classic bundles do not use this descriptor.
+  worker: /* @__PURE__ */ (() => new URL('./workers/null-worker.js', moduleUrl).href)(),
   loadWorker: () =>
     new Worker(new URL('./workers/null-worker.js', import.meta.url), {type: 'module'}),
   version: VERSION,
