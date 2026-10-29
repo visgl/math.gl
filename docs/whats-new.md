@@ -8,6 +8,10 @@
 
 ## v5.0
 
+- `@math.gl/core` renames expression evaluation to `evaluate` and `evaluateAsync`,
+  avoiding strict-mode binding conflicts with `eval` in generated module wrappers.
+  See the [upgrade guide](./upgrade-guide.md#expression-evaluation-names).
+
 - `@math.gl/geospatial` adds public complete-set and coverage validation, plus
   `resolveTileIndex` for canonical integer tile addresses. Coalesced requests use the same
   alias-aware coverage as row-range selection. See [Tile matrices](./modules/geospatial/api-reference/tile-matrix.md).

@@ -2,6 +2,19 @@
 
 ## Upgrading to v5.0
 
+### Expression evaluation names
+
+The v5 prerelease expression exports `eval` and `evalAsync` are renamed to
+`evaluate` and `evaluateAsync`. Update named imports and namespace calls from
+`@math.gl/core`. The old names are removed: `eval` cannot be used as a local
+binding in strict-mode modules, including generated namespace wrappers.
+
+```ts
+import {evaluate, parse} from '@math.gl/core';
+
+const value = evaluate(parse('x * 2'), {x: 3});
+```
+
 ### Grouped package subpaths
 
 Use the grouped subpaths for new imports: `@math.gl/core`, `@math.gl/core`,

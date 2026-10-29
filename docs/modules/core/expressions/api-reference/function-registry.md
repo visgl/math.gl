@@ -76,4 +76,4 @@ This allows row-specific values to take precedence while keeping the registry re
 
 ## Async Functions
 
-Use `evalAsync()` or `compileAsync()` when registered functions return promises. Arguments are evaluated before invocation and promise results are awaited before surrounding operations continue.
+Use `evaluateAsync()` or `compileAsync()` when registered functions return promises. Arguments are evaluated before invocation and promise results are awaited before surrounding operations continue.

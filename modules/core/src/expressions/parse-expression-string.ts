@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {Jsep as jsep} from './vendor/jsep/types';
-import {eval as evaluate, parse} from './expression-eval';
+import {evaluate, parse} from './expression-eval';
 import {get} from './get';
 
 /**

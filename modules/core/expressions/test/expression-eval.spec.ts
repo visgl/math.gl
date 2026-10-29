@@ -9,15 +9,15 @@ import {
   addUnaryOp,
   compile,
   compileAsync,
-  eval as evaluate,
-  evalAsync,
+  evaluate,
+  evaluateAsync,
   parse,
   parseExpressionString
 } from '@math.gl/core';
 import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial';
 import {get} from '../../src/expressions/get';
 
-test('@math.gl/core#eval', () => {
+test('@math.gl/core#evaluate', () => {
   expect(evaluate(parse('x * 2 + 1'), {x: 3}), 'evaluates arithmetic expressions').toBe(7);
   expect(evaluate(parse('foo.bar'), {foo: {bar: 5}}), 'resolves member expressions').toBe(5);
   expect(evaluate(parse('flag ? a : b'), {flag: false, a: 1, b: 2}), 'evaluates conditionals').toBe(
@@ -63,8 +63,8 @@ test('@math.gl/core#compileAsync', async () => {
   expect(result, 'supports async call evaluation').toBe(9);
 });
 
-test('@math.gl/core#evalAsync', async () => {
-  const result = await evalAsync(parse('fetcher(value) * 2'), {
+test('@math.gl/core#evaluateAsync', async () => {
+  const result = await evaluateAsync(parse('fetcher(value) * 2'), {
     value: 5,
     async fetcher(input: number) {
       return await Promise.resolve(input + 1);
@@ -73,7 +73,7 @@ test('@math.gl/core#evalAsync', async () => {
   expect(result, 'evaluates async call expressions').toBe(12);
 });
 
-test('@math.gl/core#eval with geospatial function library', () => {
+test('@math.gl/core#evaluate with geospatial function library', () => {
   const result = evaluate(
     parse('cartographicToCartesian(position)'),
     {position: [0, 0, 0]},
@@ -185,7 +185,7 @@ test('@math.gl/core supports custom unary and default-precedence binary operator
   expect(evaluate(parse('10 @@ 3'), {})).toBe(7);
 });
 
-test('@math.gl/core#evalAsync covers nested arrays, members and branches', async () => {
+test('@math.gl/core#evaluateAsync covers nested arrays, members and branches', async () => {
   const context = {
     value: 3,
     key: 'value',
@@ -199,15 +199,15 @@ test('@math.gl/core#evalAsync covers nested arrays, members and branches', async
       return value * 2;
     }
   };
-  expect(await evalAsync(parse('[double(value), object[key], object.add(2)]'), context)).toEqual([
-    6, 4, 6
-  ]);
-  expect(await evalAsync(parse('false && double(value)'), context)).toBe(false);
-  expect(await evalAsync(parse('true || double(value)'), context)).toBe(true);
-  expect(await evalAsync(parse('value > 0 ? -value : +value'), context)).toBe(-3);
-  expect(await evalAsync(parse('this'), context)).toBe(context);
-  expect(await evalAsync(parse('missingFunction(value)'), context)).toBeUndefined();
-  await expect(evalAsync(parse('object.constructor'), context)).rejects.toThrow(/disallowed/);
+  expect(
+    await evaluateAsync(parse('[double(value), object[key], object.add(2)]'), context)
+  ).toEqual([6, 4, 6]);
+  expect(await evaluateAsync(parse('false && double(value)'), context)).toBe(false);
+  expect(await evaluateAsync(parse('true || double(value)'), context)).toBe(true);
+  expect(await evaluateAsync(parse('value > 0 ? -value : +value'), context)).toBe(-3);
+  expect(await evaluateAsync(parse('this'), context)).toBe(context);
+  expect(await evaluateAsync(parse('missingFunction(value)'), context)).toBeUndefined();
+  await expect(evaluateAsync(parse('object.constructor'), context)).rejects.toThrow(/disallowed/);
 });
 
 test('Expression accessors cache prototype-named row fields as own entries', () => {
