@@ -26,3 +26,10 @@ proj-wasm may perform its own worker transport. Frame-rate guarantees and generi
 reuse remain downstream work.
 
 [Feedback sections 3–4](https://github.com/mdsumner/sidebyside/blob/main/article/2026-10-13_custom-projections-deckgl.md#4-name-the-dynamic-case-as-a-non-goal-or-own-it).
+
+
+Per-update byte counts cover geometry buffers and indices: replacement includes the normalized
+normal/color attributes generated for SimpleMeshLayer, while reuse records UV writes. They exclude
+initial persistent-geometry allocation, texture upload, instance attributes, uniforms and driver
+allocation overhead. For the 1,089-vertex patch, each replacement submits 72,492 geometry bytes
+versus an 8,712-byte UV update. CPU submission time is still not GPU completion time.

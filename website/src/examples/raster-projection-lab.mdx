@@ -58,5 +58,6 @@ rejects the update instead of displaying a partial mesh. This does not establish
 moving horizons, interrupted-chart changes or arbitrary source footprints.
 
 Exported measurements separate operation creation, UV preparation, full preparation, submitted
-buffer bytes and CPU-side upload submission. The demo orchestrates on the main thread (the
+geometry/index bytes (including generated normal/color attributes) and CPU-side upload submission.
+Per-update bytes exclude initial persistent geometry, textures, instance attributes and uniforms. The demo orchestrates on the main thread (the
 backend may use workers); submission time is not GPU completion time or an FPS guarantee.

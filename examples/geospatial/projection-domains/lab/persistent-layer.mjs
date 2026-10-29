@@ -39,5 +39,18 @@ export class PersistentUVLayer extends SimpleMeshLayer {
 export class ReplacementMeshLayer extends SimpleMeshLayer {
   static layerName='ReplacementMeshLayer';
   static defaultProps={...SimpleMeshLayer.defaultProps,onMeshUpload:{type:'function',value:null}};
-  updateState(params){const begin=performance.now();super.updateState(params);if(params.props.mesh!==params.oldProps.mesh&&this.state.model){const m=params.props.mesh;params.props.onMeshUpload?.({bytes:m.indices.value.byteLength+Object.values(m.attributes).reduce((n,a)=>n+a.value.byteLength,0),submitMs:performance.now()-begin,model:this.state.model});}}
+  getModel(mesh) {
+    // Materialize the same defaults SimpleMeshLayer would otherwise generate.
+    // Count this normalized input, including colors/normals, before interleaving.
+    const count=mesh.attributes.positions.value.length/3;
+    const normalized={...mesh,attributes:{
+      positions:mesh.attributes.positions,
+      texCoords:mesh.attributes.texCoords,
+      normals:mesh.attributes.normals??{value:new Float32Array(count*3),size:3},
+      colors:mesh.attributes.colors??{value:new Float32Array(count*3).fill(1),size:3}
+    }};
+    this.setState({geometryUploadBytes:normalized.indices.value.byteLength+Object.values(normalized.attributes).reduce((n,a)=>n+a.value.byteLength,0)});
+    return super.getModel(normalized);
+  }
+  updateState(params){const begin=performance.now();super.updateState(params);if(params.props.mesh!==params.oldProps.mesh&&this.state.model){params.props.onMeshUpload?.({bytes:this.state.geometryUploadBytes,submitMs:performance.now()-begin,model:this.state.model});}}
 }

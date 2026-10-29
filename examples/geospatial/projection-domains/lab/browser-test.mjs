@@ -30,6 +30,10 @@ try {
   await page.waitForFunction(()=>document.querySelector('#lab').dataset.reuse,null,{timeout:120000});
   const reuse=JSON.parse(await page.locator('#lab').getAttribute('data-reuse'));
   assert.equal(reuse.models,1);assert.equal(reuse.uvBuffers,1);assert.equal(reuse.replacementModels,12);assert.equal(reuse.updates,12);
+  const measurements=JSON.parse(await page.locator('[data-measurements]').innerText());
+  // 1089 vertices × (XYZ + UV + normal + RGB) float32 plus 6144 uint32 indices.
+  assert(measurements.replacements.every(r=>r.bytes===1089*44+6144*4));
+  assert(measurements.uploads.every(r=>r.bytes===1089*2*4));
   const left=PNG.sync.read(await page.locator('[data-map="inverse"] canvas').screenshot());
   const right=PNG.sync.read(await page.locator('[data-map="forward"] canvas').screenshot());
   let difference=0,countPixels=0;
