@@ -19,6 +19,13 @@ try {
   assert(await page.isChecked('[data-imagery]'));
   assert.equal(await page.evaluate(()=>window.projectionLab.results.inverse.earthTexture.width),256);
   await page.evaluate(()=>{window.initialMesh=window.projectionLab.results.inverse.meshes;});
+  const observedTexture=await page.locator('[data-map="inverse"]').screenshot();
+  await page.check('[data-native-polar]');
+  const nativeTexture=await page.locator('[data-map="inverse"]').screenshot();
+  assert(!observedTexture.equals(nativeTexture),'native polar fixture changes rendered texture');
+  assert(await page.evaluate(()=>window.initialMesh===window.projectionLab.results.inverse.meshes));
+  await page.uncheck('[data-native-polar]');
+
   const earthView=await page.locator('[data-map="inverse"]').screenshot();
   await page.uncheck('[data-imagery]');
   const checkerView=await page.locator('[data-map="inverse"]').screenshot();

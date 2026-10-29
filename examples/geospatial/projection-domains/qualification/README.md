@@ -28,3 +28,24 @@ independent proof of the image's positional accuracy. Do not treat the resampled
 as an oracle for the same projection implementation.
 
 [Feedback: fixture contributions and division of responsibility](https://github.com/mdsumner/sidebyside/blob/main/article/2026-10-13_custom-projections-deckgl.md#what-we-did-instead-and-why-it-matters-here).
+
+## Native polar diagnostic raster
+
+`native-polar.json` contains two adjacent, independently generated EPSG:3031
+point-sampled RGBA tiles (33×65 nodes each). The west tile's last column and east
+tile's first column share both native coordinates and samples. Affines map node
+indices, not pixel edges: the combined 65×65 nodes span ±4,000 km. The pole is
+inside the grid, with alpha-zero nodata within 500 km. Values are coordinate ramps
+and a checker pattern, not measured elevation or observed imagery.
+
+Regenerate with `python3 generate-native-polar.py` (standard library only). The
+fixture is MIT-licensed, carries per-tile SHA-256 hashes and has no remote fetch.
+`lab/native-polar.mjs` assembles the shared nodes and resamples at source-pixel
+centers using nearest-neighbor sampling, preserving nodata. The optional lab
+control displays it without changing mesh geometry. Tests check hashes, shared
+samples/coordinates, native-source alignment, UV sampling of valid and nodata
+regions and unchanged geometry when switching textures.
+
+This fixture complements independent PROJ coordinate references; synthetic raster
+values themselves are not a geodetic accuracy oracle. Real observational COG
+loading, overview selection and mask-aware filtering remain downstream concerns.
