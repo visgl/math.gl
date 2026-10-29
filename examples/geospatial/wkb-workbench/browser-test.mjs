@@ -35,6 +35,13 @@ try {
   await page.getByLabel('Input format',{exact:true}).selectOption('wkt');
   await page.getByLabel('Geometry input',{exact:true}).fill('POINT (broken)');await page.getByRole('alert').waitFor();
   await page.getByLabel('Geometry input',{exact:true}).fill('GEOMETRYCOLLECTION (POINT Z (1 2 3), POINT M (4 5 6))');await page.getByRole('alert').waitFor();
+  await page.getByLabel('Geometry input',{exact:true}).fill('POLYGON ((-122.42 37.77, -122.4198 37.77, -122.4198 37.7702, -122.42 37.7702, -122.42 37.77))');
+  const smallBounds=await page.locator('svg path').evaluate(element=>({width:element.getBBox().width,height:element.getBBox().height}));
+  assert(smallBounds.width>300 && smallBounds.height>300,'Small geographic polygons must fill the preview');
+  for(const [text,axis] of [['LINESTRING (0 1, 0.0001 1)','width'],['LINESTRING (1 0, 1 0.0001)','height']]) {
+    await page.getByLabel('Geometry input',{exact:true}).fill(text);
+    assert(await page.locator('svg polyline').evaluate((element,key)=>element.getBBox()[key],axis)>300);
+  }
   await page.getByLabel('Fixture',{exact:true}).selectOption('Polygon with hole');
   console.log('WKB: fixture round trips, dimensions, EWKB SRID, byte order, malformed input, truncation, trailing bytes, and mixed dimensions passed.');
   await page.setViewportSize({width:390,height:400});
@@ -44,6 +51,8 @@ try {
   assert(bottom.y>=0 && bottom.y+bottom.height<=401);
   await page.setViewportSize({width:1200,height:950});
   await page.locator('.wkb-workbench').evaluate(element=>element.scrollTop=0);
+  const outsideLayout=await page.evaluate(()=>{const sibling=document.createElement('div');sibling.style.height='500px';document.body.append(sibling);const height=parseFloat(getComputedStyle(document.body).height);sibling.remove();return {height,expected:innerHeight+500};});
+  assert(outsideLayout.height>=outsideLayout.expected,'Example CSS must not constrain the surrounding page body');
   assert.deepEqual(errors,[]);
   if(process.env.SCREENSHOT_PATH) await page.screenshot({path:process.env.SCREENSHOT_PATH});
 } finally {await browser.close();await server.close();}

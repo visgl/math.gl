@@ -10,12 +10,16 @@ import './styles.css';
 function Preview({result}) {
   const bounds = result.statistics.bounds;
   if (!bounds) return <p className="wkb-empty">Empty geometry · no finite XY bounds</p>;
-  const width = Math.max(bounds.xmax - bounds.xmin, 1),
-    height = Math.max(bounds.ymax - bounds.ymin, 1);
-  const scale = Math.min(520 / width, 320 / height);
+  const width = bounds.xmax - bounds.xmin,
+    height = bounds.ymax - bounds.ymin;
+  const fitScale = Math.min(
+    width > 0 ? 520 / width : Infinity,
+    height > 0 ? 320 / height : Infinity
+  );
+  const scale = Number.isFinite(fitScale) ? fitScale : 1;
   const point = ([x, y]) => [
-    300 + (x - (bounds.xmin + bounds.xmax) / 2) * scale,
-    190 - (y - (bounds.ymin + bounds.ymax) / 2) * scale
+    300 + (x - (bounds.xmin / 2 + bounds.xmax / 2)) * scale,
+    190 - (y - (bounds.ymin / 2 + bounds.ymax / 2)) * scale
   ];
   return (
     <svg viewBox="0 0 600 380" role="img" aria-label="Geometry preview in XY coordinates">
