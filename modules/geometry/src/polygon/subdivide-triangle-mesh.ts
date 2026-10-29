@@ -36,6 +36,15 @@ export type SubdivideTriangleMeshOptions = SubdivisionOptions &
         refinement?: 'transform-error';
         /** Positive, finite sampled error tolerance across target components, in target units. */
         tolerance: number;
+        /** Optional application metric in tolerance units. Receives fresh sample arrays.
+         * Must return a finite nonnegative value. Exceptions propagate.
+         * Does not change output coordinates or provide a continuous error guarantee.
+         */
+        errorMetric?: (sample: {
+          source: readonly number[];
+          exact: readonly number[];
+          interpolated: readonly number[];
+        }) => number;
         /** Positive maximum Euclidean source-edge length. Default Infinity. */
         maxEdgeLength?: number;
       }
@@ -44,6 +53,7 @@ export type SubdivideTriangleMeshOptions = SubdivisionOptions &
         refinement: 'source-edge';
         /** No target-space tolerance is evaluated in source-edge mode. */
         tolerance?: never;
+        errorMetric?: never;
         /** Positive, finite maximum Euclidean edge length across all source components. */
         maxEdgeLength: number;
       }
@@ -93,6 +103,7 @@ export function subdivideTriangleMesh(
   const {
     transform,
     tolerance,
+    errorMetric,
     refinement = 'transform-error',
     size = 2,
     targetSize = size,
@@ -148,11 +159,14 @@ export function subdivideTriangleMesh(
   function validateOptions(): void {
     if (
       typeof transform !== 'function' ||
+      (errorMetric !== undefined && typeof errorMetric !== 'function') ||
       (refinement !== 'transform-error' && refinement !== 'source-edge') ||
       (refinement === 'transform-error' &&
         (tolerance === undefined || !Number.isFinite(tolerance) || tolerance <= 0)) ||
       (refinement === 'source-edge' &&
-        (tolerance !== undefined || !Number.isFinite(maxEdgeLength))) ||
+        (tolerance !== undefined ||
+          errorMetric !== undefined ||
+          !Number.isFinite(maxEdgeLength))) ||
       (size !== 2 && size !== 3) ||
       (targetSize !== 2 && targetSize !== 3) ||
       !(maxEdgeLength > 0) ||
@@ -195,7 +209,13 @@ export function subdivideTriangleMesh(
       points.map(p => p.target),
       weights
     );
-    return Math.hypot(...project(source).map((value, i) => value - linearTarget[i]));
+    const exact = project(source);
+    if (!errorMetric) return Math.hypot(...exact.map((value, i) => value - linearTarget[i]));
+    const value = errorMetric({source, exact, interpolated: linearTarget});
+    if (!Number.isFinite(value) || value < 0) {
+      throw new RangeError('errorMetric must return a finite nonnegative value');
+    }
+    return value;
   }
 
   function needsRefinement(face: Face): boolean {

@@ -497,3 +497,58 @@ test('XYZ source positions and altitude attributes survive source-length refinem
     expect(result.positions[vertex * 3 + 2]).toBeCloseTo(altitude * 2);
   }
 });
+
+test('custom screen metrics refine without changing output units or provenance', () => {
+  const transform = ([x, y]: readonly number[]) => [x, y + x * x];
+  const coarse = subdivideTriangleMesh(quad, {transform, tolerance: 1});
+  const fine = subdivideTriangleMesh(quad, {
+    transform,
+    tolerance: 1,
+    errorMetric: ({exact, interpolated}) =>
+      Math.hypot(10 * (exact[0] - interpolated[0]), 100 * (exact[1] - interpolated[1]))
+  });
+  expect(fine.indices.length).toBeGreaterThan(coarse.indices.length);
+  for (let i = 0; i < fine.positions.length; i += 2) {
+    expect(Array.from(fine.positions.slice(i, i + 2))).toEqual(
+      transform(Array.from(fine.sourcePositions.slice(i, i + 2)))
+    );
+  }
+  checkQuadConformity(fine);
+});
+
+test('custom metrics reject invalid values, propagate errors and cannot mutate mesh inputs', () => {
+  for (const value of [-1, NaN, Infinity]) {
+    expect(() =>
+      subdivideTriangleMesh(quad, {transform: identity, tolerance: 1, errorMetric: () => value})
+    ).toThrow(/errorMetric/);
+  }
+  const failure = new Error('camera clip');
+  expect(() =>
+    subdivideTriangleMesh(quad, {
+      transform: identity,
+      tolerance: 1,
+      errorMetric: () => {
+        throw failure;
+      }
+    })
+  ).toThrow(failure);
+  const result = subdivideTriangleMesh(quad, {
+    transform: identity,
+    tolerance: 1,
+    errorMetric: sample => {
+      (sample.source as number[]).fill(100);
+      (sample.exact as number[]).fill(100);
+      (sample.interpolated as number[]).fill(100);
+      return 0;
+    }
+  });
+  expect(Array.from(result.positions)).toEqual(quad.positions);
+  expect(() =>
+    subdivideTriangleMesh(quad, {
+      transform: identity,
+      refinement: 'source-edge',
+      maxEdgeLength: 1,
+      errorMetric: () => 0
+    } as never)
+  ).toThrow(/Invalid/);
+});
