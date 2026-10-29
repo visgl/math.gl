@@ -14,6 +14,7 @@ import {mountInfoBox} from '../../../common/info-box.js';
 import {acquireWasm} from './wasm-runtime.mjs';
 import './style.css';
 import earthImageUrl from '../../../earth/sun-terminator/assets/day.jpg';
+import {nativePolarImage} from './native-polar.mjs';
 import {resampleImagery} from './imagery.mjs';
 export function mountProjectionLab(root,{wasmAssetBase=new URL('./',document.baseURI).href}={}) {
 root.classList.add('raster-projection-lab');
@@ -24,6 +25,7 @@ root.innerHTML=`<section class="maps"><article><h2>Target grid → inverse UVs</
 <label>Engine<select data-engine>${Object.entries(engines).map(([id,label])=>`<option value="${id}">${label}</option>`).join('')}</select></label>
 <label>Error threshold<select data-tolerance><option value="2">2 pixels</option><option value="1">1 pixel</option><option value=".5">0.5 pixels</option><option value="4">4 pixels</option></select></label>
 <label>Center longitude <input data-lon type="range" min="-180" max="180" value="0" step="5"></label><label>Center latitude <input data-lat type="range" min="-90" max="-50" value="-90" step="5"></label><label><input data-imagery type="checkbox" checked> Earth imagery</label><label><input data-wire type="checkbox"> Mesh edges</label>
+<label><input data-native-polar type="checkbox"> Native polar diagnostic (synthetic, with nodata)</label>
 <button data-display>Compare display error</button><button data-reuse>Compare UV-only updates</button><button data-benchmark>Measure moving center</button><button data-export disabled>Export measurements</button>
 <p data-note></p><pre data-measurements hidden></pre><small><span data-imagery-note>NASA Blue Marble overview imagery, resampled into the source grid. Uncheck Earth imagery for the diagnostic checkerboard.</span> <a href="https://science.nasa.gov/earth/earth-observatory/blue-marble/" target="_blank" rel="noreferrer">NASA / GIBS credit</a>. Domains and error criteria are sampled. No COG loading or tile selection.</small></aside>
 <p class="lab-status" role="status" data-status>Preparing chart geometry…</p>`;
@@ -33,6 +35,9 @@ const texture=document.createElement('canvas');texture.width=texture.height=256;
 for(let y=0;y<8;y++)for(let x=0;x<8;x++){ctx.fillStyle=(x+y)%2?'#215f83':'#60aaa7';ctx.fillRect(x*32,y*32,32,32);ctx.fillStyle='#eaf8ff';ctx.font='10px monospace';ctx.fillText(`${x},${y}`,x*32+5,y*32+19);}
 ctx.strokeStyle='#ffd48b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(128,128,9,0,Math.PI*2);ctx.stroke();
 const decks={},results={};let generation=0,active,disposed=false,wasmPromise,wasmHandle,benchmarking=false,reuseMode=false,displayComparing=false,measurementRows=null;
+const nativePolar=$('[data-native-polar]'),nativeCanvas=document.createElement('canvas'),nativeImage=nativePolarImage();
+nativeCanvas.width=nativeImage.width;nativeCanvas.height=nativeImage.height;nativeCanvas.getContext('2d').putImageData(new ImageData(nativeImage.data,nativeImage.width,nativeImage.height),0,0);
+const chooseTexture=(name,earth)=>nativePolar.checked&&name==='antarctica'?nativeCanvas:imagery.checked&&earth?earth:texture;
 const pending=new Set(),imageCache=new Map();let imagePromise;
 async function getEarthTexture(name,signal) {
   if(imageCache.has(name))return imageCache.get(name);
@@ -60,7 +65,7 @@ function render(mode,result) {
   const map=$(`[data-map="${mode}"]`),scale=Math.min((map.clientWidth-32)/Math.max(1e-8,extent[2]-extent[0]),(map.clientHeight-32)/Math.max(1e-8,extent[3]-extent[1]));
   const layers=meshes.map((m,i)=>new SimpleMeshLayer({id:`${mode}-raster-${i}`,data:[{row:m.sourceRows[0],chart:m.chart}],
     mesh:{attributes:{positions:{value:Float32Array.from({length:m.positions.length/2*3},(_,j)=>j%3===2?0:m.positions[Math.floor(j/3)*2+j%3]),size:3},texCoords:{value:new Float32Array(m.uv),size:2}},indices:{value:m.indices,size:1}},
-    texture:imagery.checked&&result.earthTexture?result.earthTexture:texture,material:false,getPosition:[0,0,0],getColor:[255,255,255],coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,pickable:true,parameters:{depthCompare:'always'}}));
+    texture:chooseTexture(result.sourceName,result.earthTexture),material:false,getPosition:[0,0,0],getColor:[255,255,255],coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,pickable:true,parameters:{depthCompare:'always'}}));
   layers.push(new PathLayer({id:`${mode}-charts`,data:domains,getPath:d=>d.ring,coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,getColor:[240,244,250],getWidth:1.4,widthUnits:'pixels',parameters:{depthCompare:'always'}}));
   if(wire.checked) {
     const edges=[];for(const m of meshes)for(let i=0;i<m.indices.length;i+=3){const p=Array.from(m.indices.slice(i,i+3),j=>Array.from(m.positions.slice(j*2,j*2+2)));edges.push([...p,p[0]]);}
@@ -101,6 +106,7 @@ async function update() {
 function track(p){pending.add(p);void p.then(()=>pending.delete(p),()=>pending.delete(p));}
 function schedule(){if(!disposed)track(update());}
 function constrain() {
+  nativePolar.disabled=source.value!=='antarctica';if(nativePolar.disabled)nativePolar.checked=false;
   const polar=['antarctica','rotated-polar'].includes(source.value);
   for(const option of target.options)option.disabled=!polar&&option.value!=='world';
   if(!polar)target.value='world';
@@ -108,7 +114,7 @@ function constrain() {
   schedule();
 }
 for(const el of [source,target,engine,tolerance,lon,lat])el.addEventListener('change',constrain);
-for(const control of [wire,imagery])control.addEventListener('change',()=>{if(displayComparing)return;if(reuseMode){active?.abort();schedule();return;}for(const mode of Object.keys(results))render(mode,results[mode]);});
+for(const control of [wire,imagery,nativePolar])control.addEventListener('change',()=>{if(displayComparing)return;if(reuseMode){active?.abort();schedule();return;}for(const mode of Object.keys(results))render(mode,results[mode]);});
 async function benchmark(){
   if(benchmarking||disposed)return;benchmarking=true;$('[data-export]').disabled=true;const button=$('[data-benchmark]');button.disabled=true;
   const controller=new AbortController();active?.abort();const current=++generation;active=controller;
@@ -147,7 +153,7 @@ async function compareReuse() {
       } finally{await backend.dispose();}
       if(disposed||current!==generation)return;
       const fullMesh={attributes:{positions:{value:new Float32Array(positions),size:3},texCoords:{value:replacement.uv,size:2}},indices:{value:replacementGrid.indices,size:1}};
-      const common={data:fixedData,texture:imagery.checked?earthTexture:texture,material:false,getPosition:zero,getColor:white,coordinateSystem:COORDINATE_SYSTEM.CARTESIAN};
+      const common={data:fixedData,texture:chooseTexture('antarctica',earthTexture),material:false,getPosition:zero,getColor:white,coordinateSystem:COORDINATE_SYSTEM.CARTESIAN};
       decks.inverse.setProps({initialViewState:{target:[0,0,0],zoom:Math.log2(Math.max(1,Math.min($('[data-map="inverse"]').clientWidth,$('[data-map="inverse"]').clientHeight)-40)/.5)},layers:[new PersistentUVLayer({...common,id:'persistent-raster',mesh,uvValues:reused.uv,onUVUpload:info=>{models.add(info.model);uvBuffers.add(info.buffer);uploads.push({bytes:info.bytes,submitMs:info.submitMs});}})]});
       decks.forward.setProps({initialViewState:{target:[0,0,0],zoom:Math.log2(Math.max(1,Math.min($('[data-map="forward"]').clientWidth,$('[data-map="forward"]').clientHeight)-40)/.5)},layers:[new ReplacementMeshLayer({...common,id:'replacement-raster',mesh:fullMesh,onMeshUpload:info=>{replacementModels.add(info.model);replacements.push({bytes:info.bytes,submitMs:info.submitMs});}})]});
       await new Promise(resolve=>{
