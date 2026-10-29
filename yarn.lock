@@ -5304,7 +5304,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@luma.gl/core@npm:^9.4.0, @luma.gl/core@npm:~9.4.0, @luma.gl/core@npm:~9.4.2":
+"@luma.gl/core@npm:^9.4.0, @luma.gl/core@npm:^9.4.2, @luma.gl/core@npm:~9.4.0, @luma.gl/core@npm:~9.4.2":
   version: 9.4.2
   resolution: "@luma.gl/core@npm:9.4.2"
   dependencies:
@@ -5317,7 +5317,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@luma.gl/engine@npm:^9.4.0, @luma.gl/engine@npm:~9.4.0, @luma.gl/engine@npm:~9.4.2":
+"@luma.gl/engine@npm:^9.4.0, @luma.gl/engine@npm:^9.4.2, @luma.gl/engine@npm:~9.4.0, @luma.gl/engine@npm:~9.4.2":
   version: 9.4.2
   resolution: "@luma.gl/engine@npm:9.4.2"
   dependencies:
@@ -16285,6 +16285,8 @@ __metadata:
     "@deck.gl/core": "npm:^9.4.0"
     "@deck.gl/layers": "npm:^9.4.0"
     "@deck.gl/mesh-layers": "npm:^9.4.0"
+    "@luma.gl/core": "npm:^9.4.2"
+    "@luma.gl/engine": "npm:^9.4.2"
     "@math.gl/core": "workspace:*"
     "@math.gl/geometry": "workspace:*"
     "@math.gl/geospatial": "workspace:*"
@@ -16293,6 +16295,7 @@ __metadata:
     d3-geo: "npm:^3.1.1"
     d3-geo-polygon: "npm:2.0.1"
     playwright: "npm:^1.62.1"
+    pngjs: "npm:^7.0.0"
     proj-wasm: "npm:0.1.0"
     proj4: "npm:2.22.0"
     typescript: "npm:^6.0.3"

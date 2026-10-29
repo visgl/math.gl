@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
+import {PNG} from 'pngjs';
 import {serveLab} from './server.mjs';
 const {server,url}=await serveLab();let browser;
 try {
@@ -25,9 +26,27 @@ try {
   assert(await page.evaluate(()=>window.initialMesh===window.projectionLab.results.inverse.meshes));
   await page.check('[data-imagery]');
   if(process.env.CAPTURE_INITIAL)await page.screenshot({path:process.env.CAPTURE_INITIAL});
+  await page.click('[data-reuse]');
+  await page.waitForFunction(()=>document.querySelector('#lab').dataset.reuse,null,{timeout:120000});
+  const reuse=JSON.parse(await page.locator('#lab').getAttribute('data-reuse'));
+  assert.equal(reuse.models,1);assert.equal(reuse.uvBuffers,1);assert.equal(reuse.replacementModels,12);assert.equal(reuse.updates,12);
+  const left=PNG.sync.read(await page.locator('[data-map="inverse"] canvas').screenshot());
+  const right=PNG.sync.read(await page.locator('[data-map="forward"] canvas').screenshot());
+  let difference=0,countPixels=0;
+  for(let y=10;y<90;y++)for(let x=10;x<90;x++)for(let c=0;c<3;c++) {
+    const a=(Math.floor(y/100*left.height)*left.width+Math.floor(x/100*left.width))*4+c;
+    const b=(Math.floor(y/100*right.height)*right.width+Math.floor(x/100*right.width))*4+c;
+    difference+=Math.abs(left.data[a]-right.data[b]);countPixels++;
+  }
+  assert(difference/countPixels<8,'UV-only rendering must match full mesh replacement');
+  if(process.env.CAPTURE_REUSE)await page.screenshot({path:process.env.CAPTURE_REUSE});
   for(const engine of ['proj4','d3','wasm','native']) {
     await page.selectOption('[data-engine]',engine);await ready('antarctica',engine,'orthographic');
     const count=await page.evaluate(()=>window.projectionLab.results.inverse.diagnostics.triangles);assert(count>100);
+    if(engine==='wasm'){
+      await page.click('[data-reuse]');await page.waitForFunction(()=>document.querySelector('#lab').dataset.reuse,null,{timeout:120000});
+      const result=JSON.parse(await page.locator('#lab').getAttribute('data-reuse'));assert.equal(result.models,1);assert.equal(result.uvBuffers,1);assert.equal(result.updates,12);
+    }
   }
   for(const engine of ['native','proj4','d3','wasm']) {
     await page.selectOption('[data-source]','fiji');await page.selectOption('[data-engine]',engine);await ready('fiji',engine,'world');
