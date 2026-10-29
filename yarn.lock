@@ -16384,6 +16384,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"math.gl-wkb-workbench@workspace:examples/geospatial/wkb-workbench":
+  version: 0.0.0-use.local
+  resolution: "math.gl-wkb-workbench@workspace:examples/geospatial/wkb-workbench"
+  dependencies:
+    "@deck.gl-community/panels": "npm:^9.4.8"
+    "@math.gl/geospatial": "workspace:*"
+    playwright: "npm:^1.62.1"
+    react: "npm:^19.2.8"
+    react-dom: "npm:^19.2.8"
+    vite: "npm:^8.2.2"
+  languageName: unknown
+  linkType: soft
+
 "math.gl-zoom-driven-map-morphing@workspace:examples/web-mercator/zoom-driven-map-morphing":
   version: 0.0.0-use.local
   resolution: "math.gl-zoom-driven-map-morphing@workspace:examples/web-mercator/zoom-driven-map-morphing"

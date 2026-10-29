@@ -314,6 +314,11 @@ jobs:
           path: /tmp/projection-scorecard-node
           if-no-files-found: error
 
+      - name: Test and build WKB workbench
+        run: |
+          yarn workspace math.gl-wkb-workbench build
+          yarn workspace math.gl-wkb-workbench test:browser
+
       - name: Run headless tests with coverage
         run: yarn test-coverage
 
