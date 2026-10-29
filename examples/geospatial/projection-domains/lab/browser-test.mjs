@@ -88,6 +88,10 @@ try {
   failurePage.on('pageerror',e=>errors.push(e.message));
   await failurePage.route('**/*.jpg',route=>route.abort());await failurePage.goto(url);
   await failurePage.waitForFunction(()=>document.querySelector('#lab').dataset.ready,null,{timeout:120000});
+  await failurePage.click('[data-display]');
+  await failurePage.waitForFunction(()=>document.querySelector('[data-status]').textContent.startsWith('Display comparison complete'),null,{timeout:120000});
+  assert(await failurePage.evaluate(()=>window.projectionLab.results.inverse.meshes[0].diagnostics.qualification&&!window.projectionLab.results.inverse.earthTexture));
+  assert.match(await failurePage.locator('[data-imagery-note]').innerText(),/checkerboard/);
   await failurePage.click('[data-reuse]');
   await failurePage.waitForFunction(()=>document.querySelector('[data-status]').textContent.includes('UV comparison failed'),null,{timeout:120000});
   assert.equal(await failurePage.locator('.maps h2').first().innerText(),'Target grid → inverse UVs');

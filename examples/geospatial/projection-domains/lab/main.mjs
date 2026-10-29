@@ -188,7 +188,9 @@ async function compareDisplay(){
       if(disposed||current!==generation)return;
       rows.push({mode,...result.diagnostics,charts:result.meshes.map(m=>m.diagnostics.qualification)});qualified[mode]=result;
     }
-    const earthTexture=await getEarthTexture(s.source,controller.signal);
+    let earthTexture;
+    try{earthTexture=await getEarthTexture(s.source,controller.signal);}
+    catch(error){if(disposed||current!==generation||controller.signal.aborted)return;$('[data-imagery-note]').textContent=`Earth imagery unavailable: ${error.message}. Showing diagnostic checkerboard.`;}
     if(disposed||current!==generation)return;
     reuseMode=false;
     const titles=root.querySelectorAll('.maps h2');titles[0].textContent='Target grid → qualified inverse UVs';titles[1].textContent='Source grid → qualified positions';
