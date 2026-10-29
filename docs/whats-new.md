@@ -18,7 +18,7 @@ The new [DGGS module](./modules/dggs/README.md) brings A5, GeoHash, H3, Plus Cod
 
 ### Move geometry from data to visualization
 
-Read and write WKB, EWKB, and WKT with [WKB](./modules/geospatial/wkb/README.md), or process columnar geometry with [GeoArrow](./modules/geospatial/geoarrow/README.md). [Geometry](./modules/geometry/README.md) and [geometry-utils](./modules/geometry/geometry-utils/README.md) tools provide renderer-independent building blocks, including prisms, solid rings, and optional parametric shapes. [Polygon](./modules/geometry/polygon/README.md) can adaptively subdivide meshes and lines, including meshes for globes, while preserving attributes through refinement.
+Read and write WKB, EWKB, and WKT with [WKB](./modules/geospatial/wkb/README.md), or process columnar geometry with [GeoArrow](./modules/geospatial/geoarrow/README.md). [Geometry](./modules/geometry/README.md) and [geometry-utils](./modules/geometry/README.md) tools provide renderer-independent building blocks, including prisms, solid rings, and optional parametric shapes. [Polygon](./modules/geometry/polygon/README.md) can adaptively subdivide meshes and lines, including meshes for globes, while preserving attributes through refinement.
 
 ### Bring globes to life
 
