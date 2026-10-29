@@ -44,6 +44,13 @@ try {
   await page.getByRole('combobox').selectOption('a5');
   await page.getByRole('button',{name:'Fit cell'}).click();
   await page.waitForTimeout(500);
+  await page.setViewportSize({width:390,height:400});
+  assert.equal(await page.locator('.dggs-explorer').evaluate(element=>element.clientHeight),400);
+  await page.getByRole('link',{name:'Inspired by the community global grid example'}).scrollIntoViewIfNeeded();
+  const bottom=await page.getByRole('link',{name:'Inspired by the community global grid example'}).boundingBox();
+  assert(bottom.y>=0 && bottom.y+bottom.height<=401);
+  await page.setViewportSize({width:1200,height:800});
+  await page.locator('.example-panel').evaluate(element=>element.scrollTop=0);
   assert.deepEqual(errors,[]);
   if(process.env.SCREENSHOT_PATH) await page.screenshot({path:process.env.SCREENSHOT_PATH});
   console.log('DGGS: six fixtures, S2 hierarchy, invalid input, fit, comparison, and unwrap controls passed.');

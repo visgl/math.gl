@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: MIT
  * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
  */
-.dggs-explorer {position:relative; height:100%; min-height:560px; background:#071724; color:#e6f4ff; font:14px system-ui; overflow:hidden}
+.dggs-explorer {position:relative; height:100%; min-height:0; background:#071724; color:#e6f4ff; font:14px system-ui; overflow:hidden}
 .dggs-globe {position:absolute; inset:0}
 .dggs-explorer .example-panel {position:absolute; top:16px; right:16px; width:290px; max-height:calc(100% - 32px); overflow:auto}
 .dggs-explorer label {display:block; margin:12px 0}
