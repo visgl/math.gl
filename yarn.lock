@@ -16082,6 +16082,7 @@ __metadata:
     "@math.gl/dggs": "workspace:*"
     h3-js: "npm:^4.5.0"
     playwright: "npm:^1.62.1"
+    pngjs: "npm:^7.0.0"
     react: "npm:^19.2.8"
     react-dom: "npm:^19.2.8"
     vite: "npm:^8.2.2"

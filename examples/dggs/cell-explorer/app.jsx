@@ -14,6 +14,7 @@ export default function CellExplorer() {
   const [token, setToken] = useState(SAMPLES.h3);
   const [unwrap, setUnwrap] = useState(true);
   const [compare, setCompare] = useState(false);
+  const [viewState, setViewState] = useState({longitude: -122.4, latitude: 37.78, zoom: 9});
   const root = useRef(null);
   const deck = useRef(null);
   const result = useMemo(() => {
@@ -30,7 +31,8 @@ export default function CellExplorer() {
     deck.current = new Deck({
       parent: root.current,
       views: new _GlobeView({controller: true}),
-      initialViewState: {longitude: -122.4, latitude: 37.78, zoom: 9},
+      viewState,
+      onViewStateChange: ({viewState: next}) => setViewState(next),
       getTooltip: info => info.object?.label || null
     });
     return () => {
@@ -38,6 +40,9 @@ export default function CellExplorer() {
       deck.current = null;
     };
   }, []);
+  useEffect(() => {
+    deck.current?.setProps({viewState});
+  }, [viewState]);
   useEffect(() => {
     const cells = result.error ? [] : [{...result, label: `${grid}: ${token}`}];
     if (compare)
@@ -75,15 +80,10 @@ export default function CellExplorer() {
     if (result.error) return;
     const [west, south] = result.bounds[0],
       [east, north] = result.bounds[1];
-    deck.current?.setProps({
-      initialViewState: {
-        longitude: result.center[0],
-        latitude: result.center[1],
-        zoom: Math.max(
-          0,
-          Math.min(16, Math.log2(180 / Math.max(east - west, north - south, 0.001)))
-        )
-      }
+    setViewState({
+      longitude: result.center[0],
+      latitude: result.center[1],
+      zoom: Math.max(0, Math.min(16, Math.log2(180 / Math.max(east - west, north - south, 0.001))))
     });
   };
   return (

@@ -2,9 +2,17 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
+import {PNG} from 'pngjs';
 import {fileURLToPath} from 'node:url';
 import {createServer} from 'vite';
 import {chromium} from 'playwright';
+
+function imageDifference(first, second) {
+  const a=PNG.sync.read(first),b=PNG.sync.read(second);
+  assert.equal(a.data.length,b.data.length);
+  let total=0;for(let i=0;i<a.data.length;i++) total+=Math.abs(a.data[i]-b.data[i]);
+  return total/a.data.length;
+}
 
 const server = await createServer({root: fileURLToPath(new URL('.', import.meta.url)), configLoader: 'runner', cacheDir: '/tmp/mathgl-dggs-vite', server: {host:'127.0.0.1',port:0}});
 await server.listen();
@@ -44,6 +52,15 @@ try {
   await page.getByRole('combobox').selectOption('a5');
   await page.getByRole('button',{name:'Fit cell'}).click();
   await page.waitForTimeout(500);
+  const canvas=page.locator('canvas').first();
+  const fitted=await canvas.screenshot();
+  await page.mouse.move(450,400);
+  await page.mouse.wheel(0,-300);
+  await page.waitForTimeout(500);
+  assert(imageDifference(fitted,await canvas.screenshot())>0.02,'Zoom gesture must move the rendered camera');
+  await page.getByRole('button',{name:'Fit cell'}).click();
+  await page.waitForTimeout(500);
+  assert(imageDifference(fitted,await canvas.screenshot())<0.02,'Repeated Fit cell must restore the rendered view (allowing subpixel rounding)');
   await page.setViewportSize({width:390,height:400});
   assert.equal(await page.locator('.dggs-explorer').evaluate(element=>element.clientHeight),400);
   await page.getByRole('link',{name:'Inspired by the community global grid example'}).scrollIntoViewIfNeeded();
