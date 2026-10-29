@@ -310,6 +310,6 @@ Upgrading to v5.0
 
 ### whats-new
 
-| Geoid heights | Timezones | Expression evaluation |
+v5.0
 
-- [What's New](https://visgl.github.io/math.gl/next/docs/whats-new.md): | Geoid heights | Timezones | Expression evaluation |
+- [What's New](https://visgl.github.io/math.gl/next/docs/whats-new.md): v5.0

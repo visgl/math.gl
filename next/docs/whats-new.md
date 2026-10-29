@@ -1,132 +1,47 @@
 # What's New
 
-| Geoid heights                                                                                                                                                                       | Timezones                                                                                                                                                                                        | Expression evaluation                                                                                                                                                                        |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![EGM96 geoid globe](/math.gl/next/assets/images/geoid-globe-c2920ccd27c3b833543e11425aec3011.jpg)](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md) | [![Timezone globe](/math.gl/next/assets/images/timezone-globe-4210e2813f5401f1d1154e5b6cab219d.jpg)](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone.md)           | [![Expression playground](/math.gl/next/assets/images/expressions-bd1b3c40ca01c623a47a92c4fc0cdaa7.jpg)](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md) |
-| Primitive geometry                                                                                                                                                                  | Polygon cutting                                                                                                                                                                                  | Vector and matrix transforms                                                                                                                                                                 |
-| [![Geometry viewer](/math.gl/next/assets/images/geometry-viewer-f71c50c1ddd355435bef2cbe254f93a2.jpg)](https://visgl.github.io/math.gl/next/docs/modules/geometry.md)  | [![Polygon playground](/math.gl/next/assets/images/polygon-playground-363b495cb2ebd809a24dc2894bf6e68b.jpg)](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md) | [![Core transforms](/math.gl/next/assets/images/core-transforms-1940d1af768a971b1ae0d18708f4cb25.jpg)](https://visgl.github.io/math.gl/next/docs/modules/core.md)               |
-
 ## v5.0[​](#v50 "Direct link to v5.0")
 
-* `@math.gl/core` renames expression evaluation to `evaluate` and `evaluateAsync`, avoiding strict-mode binding conflicts with `eval` in generated module wrappers. See the [upgrade guide](https://visgl.github.io/math.gl/next/docs/upgrade-guide.md#expression-evaluation-names).
+**Build richer maps, globes, and geospatial applications with one toolbox.** math.gl 5 brings coordinate systems, global grids, geometry formats, and sky and time calculations together alongside the vector and matrix math you already use.
 
-* `@math.gl/geospatial` adds public complete-set and coverage validation, plus `resolveTileIndex` for canonical integer tile addresses. Coalesced requests use the same alias-aware coverage as row-range selection. See [Tile matrices](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/tile-matrix.md).
+Version 5.0 is in prerelease development. See the [upgrade guide](https://visgl.github.io/math.gl/next/docs/upgrade-guide.md) for breaking changes and TypeScript requirements.
 
-* `@math.gl/geometry` adds flat-sided `PrismGeometry` and solid `RingGeometry`, including hexagonal prisms and capped annular segments. The optional parametric entry adds rotated, capped segments to `TorusGeometry` while preserving its full-torus defaults.
+**Highlights:** a new projection engine; six grid systems behind one decoder API; WKB and GeoArrow geometry processing; and new tools for timezones and sky.
 
-Status: prerelease development. TypeScript consumers require TypeScript 6.0 or later; JavaScript still targets ES2020.
+### Work across coordinate systems[​](#work-across-coordinate-systems "Direct link to Work across coordinate systems")
 
-**`@math.gl/dggs`** (NEW MODULE)
+[Projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) has grown from a proj4 wrapper into a pluggable math.gl engine. Transform coordinates using a broad [projection catalogue](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projections.md), with support for datum grids, coordinate operations, and in-place buffers. The new [CRS module](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs.md) gives applications a shared vocabulary for coordinate reference systems, WKT, PROJ definitions, and PROJJSON.
 
-* Adds [boundary unwrapping](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/dggs-decoder.md) for continuous longitudes across the antimeridian.
-* Consolidates all lightweight DGGS functionality into a single module and removes the individual DGGS packages.
-* Exports DGGS decoder objects with an interchangeable API for encoded data.
-* Aligns the core decoder shape with deck.gl-community's `GlobalGridLayer` contract.
-* Provides `/a5`, `/geohash`, `/h3`, `/plus-code`, `/quadkey`, and `/s2` subpath exports from `@math.gl/dggs`.
-* Detects conventional cell-column names for all bundled decoders to power data-driven visualization layers.
-* Adds validated S2 token/index conversion, exact polar and antimeridian bounds, and face-aware spatial descendant addressing.
+### Put the world on a grid[​](#put-the-world-on-a-grid "Direct link to Put the world on a grid")
 
-**`@math.gl/core`**
+The new [DGGS module](https://visgl.github.io/math.gl/next/docs/modules/dggs.md) brings A5, GeoHash, H3, Plus Codes, Quadkey, and S2 under a common decoder API. Switch between grid systems, find cell boundaries, and handle cells crossing the antimeridian without assembling a different toolkit for each grid.
 
-* Sized array types provide stronger guarantees for math class inputs and outputs.
+### Move geometry from data to visualization[​](#move-geometry-from-data-to-visualization "Direct link to Move geometry from data to visualization")
 
-**`@math.gl/core`**
+Read and write WKB, EWKB, and WKT with [WKB](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb.md), or process columnar geometry with [GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow.md). [Geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry.md) and [geometry-utils](https://visgl.github.io/math.gl/next/docs/modules/geometry.md) tools provide renderer-independent building blocks, including prisms, solid rings, and optional parametric shapes. [Polygon](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md) can adaptively subdivide meshes and lines, including meshes for globes, while preserving attributes through refinement.
 
-* Euler rotation orders now use descriptive string literal types.
-* Added destination-owned `Matrix4.fromMatrix3()`, `Matrix3.fromMatrix4()`, and `Quaternion.fromEuler()` conversion helpers.
-* `Euler.fromQuaternion()` now supports all six rotation orders and preserves the destination's current order by default.
-* Removed the redundant `Euler.getQuaternion()` and `Euler.toQuaternion()` allocation helpers; use `Quaternion.fromEuler()` instead.
-* Removed deprecated class aliases, compatibility methods, scalar helpers, Euler constants, and root-level low-level namespaces. See the upgrade guide for replacements.
-* Added focused `/mat3`, `/mat4`, `/quat`, `/vec2`, `/vec3`, and `/vec4` subpath exports for opt-in low-level functions.
-* `SphericalCoordinates` now uses the structural `Vector3Like` type and direct calculations, avoiding runtime dependencies on `Vector3` and `vec3`.
-* Core named-import gzip fixtures are 6–62% smaller than v4.1; the full public-entry fixture is 37% smaller. See the bundling guide for methodology and measurements.
+### Bring globes to life[​](#bring-globes-to-life "Direct link to Bring globes to life")
 
-**`@math.gl/core`** (NEW EXPERIMENTAL MODULE)
+Look up a location's timezone with [timezone](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone.md). Explore sunlight, Moon lighting, stars, and optional planetary positions with [sun](https://visgl.github.io/math.gl/next/docs/modules/earth/sun.md). New [geospatial](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md) and [culling](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling.md) tools help calculate globe horizons, occlusion, intersections, and bounds.
 
-* Promotes the expression parser previously embedded in `@deck.gl/json` to a documented experimental module.
-* Parses, evaluates, and compiles synchronous or asynchronous JavaScript-style expressions.
-* Provides configurable function libraries, including importable basic math and WGS84 geospatial libraries.
-* Adds isolated function registries and optional GeoHash, Quadkey, and S2 function tables.
-* Compiles restricted JSON-style accessor expressions with function calls disabled.
-* Includes an interactive expression playground with editable context and sample DGGS expressions.
+### Keep the math close and the bundle lean[​](#keep-the-math-close-and-the-bundle-lean "Direct link to Keep the math close and the bundle lean")
 
-**`@math.gl/geospatial/crs`** (NEW MODULE)
+[Core](https://visgl.github.io/math.gl/next/docs/modules/core.md) adds clearer matrix and rotation conversions, stronger array types, and tree-shakeable low-level namespaces. New [expressions](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md) tools make it possible to parse and evaluate configurable expressions; expression evaluation is experimental.
 
-* Adds lightweight, proj4-independent TypeScript definitions for coordinate reference systems with no runtime dependencies.
-* Uses strict PROJJSON v0.7 as its semantic CRS object model and exports types generated from the official schema.
-* Exposes the vendored official PROJJSON v0.7 schema for runtime validation by applications.
-* Represents authority codes, PROJ strings, and WKT definitions as serialized strings.
-* Adds value-preserving WKT1/WKT2 syntax parsing, profile validation, and compact or pretty encoding.
-* Adds ordered PROJ definition and pipeline syntax parsing and encoding.
-* Adds immutable, format-neutral spatial-reference descriptors that preserve definition representation, alternatives, provenance, coordinate epoch, frame, stored order, and explicit default/unknown/absent state.
-* Adds a comprehensive CRS developer guide covering standards, serialization versus semantics, axis order, dynamic and vertical CRS, transformation boundaries, and integration guidance.
+### Module structure[​](#module-structure "Direct link to Module structure")
 
-**`@math.gl/geospatial`** (NEW MODULE)
+Version 5 groups related tools into six packages. Install the package root and use its focused entry points where available. See the [migration table](https://visgl.github.io/math.gl/next/docs/upgrade-guide.md#removed-standalone-packages) for the former package names.
 
-* Adds dependency-free synchronous WKB, EWKB, and WKT codecs over plain geometry values.
-* Supports both endian orders, ISO and EWKB dimension headers, EWKB SRIDs, all geometry families, nested collections, dimension tokens, MultiPoint variants, and empty geometry.
-* Enforces strict input coverage plus configurable WKB nesting and element-count limits.
-* Supports header-only and count-only visitor traversal that skips coordinate decoding when scalar ordinate callbacks are not requested.
-* Provides the neutral format layer used by `@math.gl/geospatial/geoarrow` without depending on GeoArrow or Apache Arrow.
+| Package                                                                                        | Purpose                                                                          |
+| ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [core](https://visgl.github.io/math.gl/next/docs/modules/core.md)                 | Vectors, matrices, rotations, types, and expressions                             |
+| [geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry.md)         | Primitives, polygons, geometry utilities, and culling                            |
+| [geospatial](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md)     | Ellipsoids, coordinate systems, projections, geometry formats, and tile matrices |
+| [earth](https://visgl.github.io/math.gl/next/docs/modules/earth.md)               | Geoid models, sky calculations, and timezones                                    |
+| [dggs](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)                 | Six grid systems behind a common decoder API                                     |
+| [web-mercator](https://visgl.github.io/math.gl/next/docs/modules/web-mercator.md) | Map viewport and Web Mercator calculations                                       |
 
-**`@math.gl/geospatial/geoarrow`** (NEW MODULE)
-
-* Defines borrowed physical descriptors for native, mixed, box, WKB, and WKT geometry columns without requiring an Arrow runtime.
-* Traverses and validates interleaved or separated XY/XYZ/XYM/XYZM coordinates, Int32/Int64 list offsets, sliced validity bitmaps, chunks, dense unions, and geometry collections.
-* Adds synchronous bounds, vertex-count, coordinate-map, layout-conversion, winding, and resource limit kernels.
-* Adds a two-pass builder, WKB/WKT column adapters, Polygon/MultiPolygon tessellation, and an optional worker transfer subpath.
-* Adds direct WKB dimension/family classification, serialized vertex counting, exact per-chunk measure/write conversion, BinaryView access, stable mixed-union schemas, and Arrow-compatible child-null dispatch without materialized geometry rows.
-* Moves reusable GeoArrow math out of loaders.gl and luma.gl prototypes while leaving runtime adapters, worker scheduling, and GPU resources with their owning libraries.
-
-**`@math.gl/geospatial/projection`**
-
-* Renames `@math.gl/proj4` to `@math.gl/geospatial/projection`, with a pluggable math.gl projection engine, lazy algorithms, in-place buffers and explicit coordinate operations.
-* Removes the deprecated `Proj4Projection` alias and `/classic` wrapper. The package has no proj4js runtime dependency; comparisons and compatibility tests use a pinned development dependency.
-* Adds a [projection catalogue](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projections.md) and a [guide to ellipsoids, datums, heights and epochs](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/coordinate-systems.md).
-* Adds optional CRS axis-order enforcement and NTv2 datum-grid registration.
-* Defines aliases for WGS84 UTM and UPS EPSG coordinate systems automatically.
-
-**`@math.gl/geospatial`**
-
-* The `tile-matrix` subpath adds validated variable-width/coalesced row bands, canonical OGC column aliases, row-aware bounds and point lookup, and compact `getTileRanges` queries. Regular-grid behavior is unchanged.
-* Adds `EllipsoidOccluder` ray intervals, altitude-aware occlusion, and limb ellipses, plus conservative globe horizon bounds across poles and the antimeridian.
-* Improves 3D Tiles support in loaders.gl with ellipsoid and bounding-volume helpers.
-* `makeOBBFromRegion()` - New function that creates a Cartesian oriented bounding box from a geospatial region.
-* `EllipsoidTangentPlane` - New helper class for doing math on the ellipsoid surface.
-
-**`@math.gl/geometry`** (NEW MODULE)
-
-* Adds renderer-independent `Geometry` typed-array storage and indexed-geometry unpacking.
-* Adds tessellators for glTF 2.1 draft shapes and common luma.gl primitives.
-
-**`@math.gl/geometry/culling`**
-
-* Adds analytic glTF 2.1 box, capsule, cylinder, plane, and sphere queries for clipping/culling, rays, transforms, and enclosing bounds.
-* Culling results now use descriptive string literal types.
-
-**`@math.gl/geometry`** (NEW MODULE)
-
-* Promotes the renderer-independent geometry helpers previously maintained in `@loaders.gl/math`.
-* Adds typed geometry traversal, vertex-normal generation, component-type conversion, packed RGB565 colors, octahedral attribute compression, and typed-array utilities.
-
-**`@math.gl/geometry`**
-
-* Adds [`subdivideGlobeMesh`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/subdivide-globe-mesh.md) in `@math.gl/geospatial` for conforming globe subdivision with preserved attribute provenance.
-* Polygon winding directions now use descriptive string literal types.
-* Adds adaptive [triangle-mesh subdivision](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/subdivide-triangle-mesh.md) with shared-edge refinement and attribute interpolation.
-* Adds adaptive [polyline subdivision](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/subdivide-polyline.md) through application-supplied coordinate transforms.
-
-**`@math.gl/earth/timezone`** (NEW MODULE)
-
-* Adds geographic timezone lookup, local-calendar fields, and numeric UTC offsets using runtime timezone rules.
-* Provides an optional Temporal entry point for day boundaries, local-time conversion, and offset transitions.
-* Ships optional approximate timezone geometry for map and globe visualization.
-
-**`@math.gl/earth/sun`**
-
-* Adds Moon position and lighting, solar color and intensity, sky illumination, and approximate cloud lighting.
-* Provides optional planet ephemerides and shared sky snapshots through `astronomy-engine`.
-* Adds a bright-star catalogue, motion helpers, and globe rendering coordinates.
+For detailed changes, see the [changelog](https://github.com/visgl/math.gl/blob/master/CHANGELOG.md).
 
 ## v4.1[​](#v41 "Direct link to v4.1")
 

@@ -2,6 +2,8 @@
 
 ## Upgrading to v5.0[​](#upgrading-to-v50 "Direct link to Upgrading to v5.0")
 
+Start with the package mapping below, then check the API changes for the modules you use. See [What’s New](https://visgl.github.io/math.gl/next/docs/whats-new.md#v50) for the highlights.
+
 ### Expression evaluation names[​](#expression-evaluation-names "Direct link to Expression evaluation names")
 
 The v5 prerelease expression exports `eval` and `evalAsync` are renamed to `evaluate` and `evaluateAsync`. Update named imports and namespace calls from `@math.gl/core`. The old names are removed: `eval` cannot be used as a local binding in strict-mode modules, including generated namespace wrappers.
@@ -16,11 +18,9 @@ const value = evaluate(parse('x * 2'), {x: 3});
 
 ### Grouped package subpaths[​](#grouped-package-subpaths "Direct link to Grouped package subpaths")
 
-Use the grouped subpaths for new imports: `@math.gl/core`, `@math.gl/core`, `@math.gl/geometry`, `@math.gl/geometry`, `@math.gl/geometry`, `@math.gl/geometry/culling`, `@math.gl/geometry`, `@math.gl/geospatial`, `@math.gl/geospatial`, `@math.gl/geospatial`, `@math.gl/geospatial/crs`, `@math.gl/geospatial/projection`, `@math.gl/geospatial`, `@math.gl/geospatial`, `@math.gl/geospatial/geoarrow`, `@math.gl/geospatial`, and the `@math.gl/earth` geoid, sun, and timezone subpaths. The original standalone packages have been removed. Update both import specifiers and package dependencies. Install the grouped package root, such as `@math.gl/geometry`, even when importing from `@math.gl/geometry`. DGGS stays available as the separate `@math.gl/dggs` package. The unscoped `math.gl` package has been removed; replace imports from it with `@math.gl/core`.
+Install one of the six package roots listed below and update both dependencies and import specifiers. The unscoped `math.gl` package has been removed; use `@math.gl/core` instead.
 
-Version 5 removes deprecated APIs and moves low-level functions to focused subpath imports.
-
-Import `subdivideGlobeMesh` and `SubdivideGlobeMeshOptions` from `@math.gl/geospatial`; they are no longer exported by `@math.gl/polygon` or `@math.gl/geometry`.
+Import `subdivideGlobeMesh` and its options from `@math.gl/geospatial`; they are no longer exported by polygon or geometry.
 
 ### Removed standalone packages[​](#removed-standalone-packages "Direct link to Removed standalone packages")
 
@@ -42,7 +42,7 @@ Import `subdivideGlobeMesh` and `SubdivideGlobeMeshOptions` from `@math.gl/geosp
 | `@math.gl/timezone`       | `@math.gl/earth`        | `@math.gl/earth/timezone`        |
 | `@math.gl/proj`           | `@math.gl/web-mercator` | `@math.gl/web-mercator`          |
 
-Nested entrypoints keep their suffix, for example `@math.gl/crs/wkt` becomes `@math.gl/geospatial/crs`, and `@math.gl/timezone/lookup` becomes `@math.gl/earth/timezone`. DGGS expression helpers move from `@math.gl/expressions/dggs` to `@math.gl/dggs`.
+Some nested entrypoints are consolidated, for example `@math.gl/crs/wkt` becomes `@math.gl/geospatial/crs`, and `@math.gl/timezone/lookup` becomes `@math.gl/earth/timezone`. DGGS expression helpers move from `@math.gl/expressions/dggs` to `@math.gl/dggs`.
 
 ### Polygon, culling, and viewport APIs[​](#polygon-culling-and-viewport-apis "Direct link to Polygon, culling, and viewport APIs")
 
@@ -69,7 +69,7 @@ Frame functions preserve the original matrix conventions and return a new `Matri
 ### TypeScript and runtime support[​](#typescript-and-runtime-support "Direct link to TypeScript and runtime support")
 
 * Use TypeScript 6.0 or later for the `Float16Array` declarations.
-* `Float16Array` is optional at runtime, with a `Uint16Array` fallback. No polyfill is installed.
+* `Float16Array` is optional at runtime. `getFloat16ArrayConstructor()` falls back to `Uint16Array`, which does not encode or decode float16 values. No polyfill is installed.
 * JavaScript still targets ES2020; supported browsers and Node.js versions are unchanged.
 
 ### Rotation and coordinate conversions[​](#rotation-and-coordinate-conversions "Direct link to Rotation and coordinate conversions")
@@ -107,23 +107,11 @@ Euler rotation orders are now represented directly by the `EulerRotationOrder` s
 
 ### Low-level function imports[​](#low-level-function-imports "Direct link to Low-level function imports")
 
-The deprecated `mat3`, `mat4`, `quat`, `vec2`, `vec3`, and `vec4` namespaces are no longer exported from the package root. Import only the low-level module that is needed:
+Low-level `mat3`, `mat4`, `quat`, `vec2`, `vec3`, and `vec4` namespaces are named exports from `@math.gl/core`. The former individual low-level subpaths are no longer exported.
 
 ```
-// v5
-
-import {mat4} from '@math.gl/core';
-
-import {vec3} from '@math.gl/core';
-
-
-
-// v4
-
 import {mat4, vec3} from '@math.gl/core';
 ```
-
-Available subpaths: `@math.gl/core`, `/mat4`, `/quat`, `/vec2`, `/vec3`, and `/vec4`.
 
 ### CRS and proj4 definitions[​](#crs-and-proj4-definitions "Direct link to CRS and proj4 definitions")
 
