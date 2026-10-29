@@ -1,0 +1,15 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.dggs-explorer {position:relative; height:100%; min-height:0; background:#071724; color:#e6f4ff; font:14px system-ui; overflow:hidden}
+.dggs-globe {position:absolute; inset:0}
+.dggs-explorer .example-panel {position:absolute; top:16px; right:16px; width:290px; max-height:calc(100% - 32px); overflow:auto}
+.dggs-explorer label {display:block; margin:12px 0}
+.dggs-explorer select,.dggs-explorer input:not([type=checkbox]) {display:block; width:100%; box-sizing:border-box}
+.dggs-explorer button {margin:4px; padding:6px}
+.dggs-explorer a {color:#75d9ff}
+.dggs-explorer [role=alert] {color:#ffad9d}
+@media(max-width:600px) {.dggs-explorer .example-panel {width:220px}}
+.dggs-explorer button,.dggs-explorer select,.dggs-explorer input:not([type=checkbox]) {background:#17384b;color:#e6f4ff;border:1px solid #52738a;border-radius:4px;padding:7px}
+.dggs-explorer button:disabled {opacity:.5}

@@ -15,3 +15,5 @@ The website imports these sources using `website-examples`. Public website URLs 
 To refresh gallery thumbnails and existing documentation copies, start the website with `yarn start` in `website`, then run `yarn screenshots` there. Set `EXAMPLES_URL` for a different preview URL, or pass example IDs to refresh a subset: `yarn screenshots sun-terminator`. Install Chromium first with `yarn playwright:install` from the repository root.
 
 Simple demos use the shared collapsible panels InfoBox shell: React controls use `common/example-panel.jsx`, and DOM controls use `common/info-box.js`. Both keep controls live when collapsed and release their panel managers on unmount. Tectonics and ice age keep their specialized application layouts; the expression editor and benchmark result interfaces also retain their dedicated workspaces.
+
+- **@math.gl/dggs**: [DGGS cell explorer](dggs/cell-explorer)
