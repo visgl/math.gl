@@ -229,9 +229,11 @@ async function exerciseReuseLimits(){
       if(outcome.mode==='rebuild')rebuilt=outcome.result;
     }
     if(rebuilt){
-      rebuilt.sourceName='antarctica';rebuilt.earthTexture=await getEarthTexture('antarctica',controller.signal);
+      rebuilt.sourceName='antarctica';
+      try{rebuilt.earthTexture=await getEarthTexture('antarctica',controller.signal);}
+      catch(error){if(disposed||current!==generation||controller.signal.aborted)return;$('[data-imagery-note]').textContent=`Earth imagery unavailable: ${error.message}. Showing diagnostic checkerboard.`;}
       if(disposed||current!==generation)return;
-      reuseMode=true;results.inverse=rebuilt;delete results.forward;render('inverse',rebuilt);decks.forward.setProps({layers:[]});
+      reuseMode=false;results.inverse=rebuilt;delete results.forward;render('inverse',rebuilt);decks.forward.setProps({layers:[]});
       root.querySelectorAll('.maps h2')[0].textContent='Full mesh after reuse limit';
       $('[data-stats="forward"]').textContent='Fixed patch retired: domain-policy limit. A full inverse mesh was rebuilt on the left.';
     }

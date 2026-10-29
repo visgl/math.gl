@@ -45,6 +45,12 @@ try {
   const limits=JSON.parse(await page.locator('#lab').getAttribute('data-limits'));
   assert.deepEqual(limits.map(r=>r.mode),['reuse','reuse','rebuild']);assert.equal(limits[2].reason,'domain-policy');
   assert(await page.evaluate(()=>window.projectionLab.results.inverse.meshes[0].indices.length>0));
+  await page.evaluate(()=>{window.rebuiltMesh=window.projectionLab.results.inverse;});
+  await page.check('[data-wire]');await page.uncheck('[data-imagery]');
+  assert(await page.evaluate(()=>window.rebuiltMesh===window.projectionLab.results.inverse));
+  assert.match(await page.locator('.maps h2').first().innerText(),/Full mesh after reuse limit/);
+  await page.uncheck('[data-wire]');await page.check('[data-imagery]');
+
   await page.locator('[data-lon]').dispatchEvent('change');
   await ready('antarctica','native','orthographic');
   await page.click('[data-reuse]');
@@ -96,10 +102,10 @@ try {
   // Cancellation retains the last completed report for both measurement modes.
   await page.selectOption('[data-source]','antarctica');await page.selectOption('[data-target]','orthographic');await ready('antarctica','native','orthographic');
   const previousReport=await page.locator('[data-measurements]').innerText();
-  for(const button of ['data-benchmark','data-reuse','data-display']) {
+  for(const button of ['data-benchmark','data-reuse','data-display','data-limits']) {
     await page.evaluate(button=>{document.querySelector(`[${button}]`).click();document.querySelector('[data-lon]').dispatchEvent(new Event('change',{bubbles:true}));},button);
     await ready('antarctica','native','orthographic');
-    await page.waitForFunction(()=>['data-benchmark','data-reuse','data-display'].every(name=>!document.querySelector(`[${name}]`).disabled));
+    await page.waitForFunction(()=>['data-benchmark','data-reuse','data-display','data-limits'].every(name=>!document.querySelector(`[${name}]`).disabled));
     assert.equal(await page.isDisabled('[data-export]'),false);assert.equal(await page.locator('[data-measurements]').innerText(),previousReport);
   }
   // An unavailable image fails comparison, then restores the full fixture and
@@ -111,6 +117,9 @@ try {
   await failurePage.click('[data-display]');
   await failurePage.waitForFunction(()=>document.querySelector('[data-status]').textContent.startsWith('Display comparison complete'),null,{timeout:120000});
   assert(await failurePage.evaluate(()=>window.projectionLab.results.inverse.meshes[0].diagnostics.qualification&&!window.projectionLab.results.inverse.earthTexture));
+  await failurePage.click('[data-limits]');
+  await failurePage.waitForFunction(()=>document.querySelector('#lab').dataset.limits,null,{timeout:120000});
+  assert(await failurePage.evaluate(()=>window.projectionLab.results.inverse.meshes[0].indices.length>0&&!window.projectionLab.results.inverse.earthTexture));
   assert.match(await failurePage.locator('[data-imagery-note]').innerText(),/checkerboard/);
   await failurePage.click('[data-reuse]');
   await failurePage.waitForFunction(()=>document.querySelector('[data-status]').textContent.includes('UV comparison failed'),null,{timeout:120000});
