@@ -71,6 +71,12 @@ try {
   }
   assert(difference/countPixels<8,'UV-only rendering must match full mesh replacement');
   if(process.env.CAPTURE_REUSE)await page.screenshot({path:process.env.CAPTURE_REUSE});
+  await page.evaluate(()=>{document.querySelector('button[data-limits]').click();document.querySelector('[data-imagery]').click();});
+  await page.waitForFunction(()=>document.querySelector('#lab').dataset.limits,null,{timeout:120000});
+  assert.equal(await page.isChecked('[data-imagery]'),false);
+  assert.match(await page.locator('.maps h2').first().innerText(),/Full mesh after reuse limit/);
+  await page.check('[data-imagery]');
+  await page.click('[data-reuse]');await page.waitForFunction(()=>document.querySelector('#lab').dataset.reuse,null,{timeout:120000});
   await page.evaluate(()=>{document.querySelector('[data-display]').click();document.querySelector('[data-wire]').click();});
   await page.waitForFunction(()=>document.querySelector('[data-status]').textContent.startsWith('Display comparison complete'),null,{timeout:120000});
   assert(await page.isChecked('[data-wire]'));

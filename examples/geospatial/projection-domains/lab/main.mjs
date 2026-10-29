@@ -213,7 +213,7 @@ $('[data-display]').addEventListener('click',()=>track(compareDisplay()));
 async function exerciseReuseLimits(){
   if(benchmarking||disposed)return;
   if(source.value!=='antarctica'||target.value!=='orthographic'){status.textContent='Reuse-limit demonstration requires Antarctica and Orthographic.';return;}
-  benchmarking=true;const button=$('[data-limits]');button.disabled=true;$('[data-export]').disabled=true;
+  benchmarking=true;displayComparing=true;const button=$('[data-limits]');button.disabled=true;$('[data-export]').disabled=true;
   active?.abort();const controller=new AbortController(),current=++generation;active=controller;
   const selectedEngine=engine.value,grid=createPersistentGrid(),rows=[];delete root.dataset.limits;
   try{
@@ -241,7 +241,7 @@ async function exerciseReuseLimits(){
     root.dataset.limits=JSON.stringify(rows);$('[data-measurements]').hidden=false;$('[data-measurements]').textContent=JSON.stringify(measurementRows,null,2);
     status.textContent='Reuse-limit exercise complete. The last center left the qualified patch policy and rebuilt the full mesh. Change a selector to restore the comparison.';
   }catch(error){if(!disposed&&current===generation&&!controller.signal.aborted)status.textContent=error.message;}
-  finally{benchmarking=false;if(!disposed){button.disabled=false;$('[data-export]').disabled=!measurementRows;}}
+  finally{benchmarking=false;displayComparing=false;if(!disposed){button.disabled=false;$('[data-export]').disabled=!measurementRows;}}
 }
 $('[data-limits]').addEventListener('click',()=>track(exerciseReuseLimits()));
 $('[data-reuse]').addEventListener('click',()=>track(compareReuse()));
