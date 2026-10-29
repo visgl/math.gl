@@ -3,6 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
+import {runInNewContext} from 'node:vm';
+import {build} from 'esbuild';
 import * as tasks from '@math.gl/core/tasks';
 import * as workers from '@math.gl/core/worker-utils';
 const require = createRequire(import.meta.url);
@@ -20,3 +22,22 @@ for (const api of [tasks, cjsTasks]) {
   await api.WorkerFarm.getWorkerFarm().destroy();
 }
 console.log('Tasks ESM/CommonJS exports, compatibility identity, worker assets and local dispatch passed.');
+
+// Classic workers cannot provide import.meta.url. Unused task descriptors must not
+// evaluate their module-relative URLs when only the worker initializer is imported.
+const classicWorkerBundle = await build({
+  stdin: {
+    contents: "import {createWorker} from '@math.gl/core/tasks'; globalThis.createTaskWorker = createWorker;",
+    resolveDir: process.cwd(),
+    sourcefile: 'classic-task-worker.js'
+  },
+  bundle: true,
+  platform: 'browser',
+  format: 'iife',
+  write: false,
+  logLevel: 'silent'
+});
+const classicWorkerGlobal = {URL};
+runInNewContext(classicWorkerBundle.outputFiles[0].text, classicWorkerGlobal);
+assert.equal(typeof classicWorkerGlobal.createTaskWorker, 'function');
+console.log('Classic worker task imports initialize without unused module-relative URLs.');
