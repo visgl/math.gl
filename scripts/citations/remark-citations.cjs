@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-const {readBibliography, label} = require('./bibliography.cjs');
+const {readBibliography, label, authorName, sourceUrl} = require('./bibliography.cjs');
 
 function visitCitations(tree, callback) {
   const definitions = new Map();
@@ -30,9 +30,7 @@ function visitCitations(tree, callback) {
   visit(tree);
 }
 function referenceItem(entry) {
-  const authors = entry.author
-    .map(a => a.literal || [a.given, a.family].filter(Boolean).join(' '))
-    .join(', ');
+  const authors = entry.author.map(a => authorName(a)).join(', ');
   const venue = [
     entry['container-title'] || entry.publisher,
     entry.volume,
@@ -49,7 +47,7 @@ function referenceItem(entry) {
       url: `https://doi.org/${entry.DOI}`,
       children: [{type: 'text', value: `doi:${entry.DOI}`}]
     });
-  if (entry.URL && !/doi\.org\//.test(entry.URL))
+  if (sourceUrl(entry))
     children.push(
       {type: 'text', value: ' '},
       {type: 'link', url: entry.URL, children: [{type: 'text', value: 'Source'}]}
@@ -89,3 +87,5 @@ function remarkCitations({baseUrl = '/'} = {}) {
 }
 module.exports = remarkCitations;
 module.exports.visitCitations = visitCitations;
+
+module.exports.referenceItem = referenceItem;

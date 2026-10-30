@@ -71,3 +71,47 @@ test('reference-style Markdown citations also resolve and validate', () => {
     /unknown citation/
   );
 });
+
+test('author particles, suffixes and corporate names survive both reference renderers', () => {
+  const entry = bibliography
+    .parseBibliography(record.replace('Doe, Jane and Smith, John', 'van Wijk, Jarke J.'))
+    .get('example2020');
+  assert.equal(bibliography.label(entry), 'van Wijk (2020)');
+  assert.match(bibliography.reference(entry), /Jarke J. van Wijk/);
+  assert.match(plugin.referenceItem(entry).children[0].children[0].value, /Jarke J. van Wijk/);
+  assert.equal(
+    bibliography.authorName({given: 'John', family: 'Doe', suffix: 'Jr.'}),
+    'John Doe, Jr.'
+  );
+  assert.equal(bibliography.authorName({literal: 'Research Group'}, true), 'Research Group');
+  assert.equal(
+    bibliography.authorName({given: 'Jean', 'dropping-particle': 'de', family: 'Example'}),
+    'Jean de Example'
+  );
+});
+test('DOI resolver aliases are not presented as separate source copies', () => {
+  const entry = bibliography.parseBibliography(record).get('example2020');
+  for (const URL of [
+    'https://doi.org/10.1000/example',
+    'http://dx.doi.org/10.1000/example',
+    'https://DOI.ORG/10.1000/example'
+  ]) {
+    const citation = {...entry, URL};
+    assert.doesNotMatch(bibliography.reference(citation), /Source/);
+    assert.equal(
+      plugin.referenceItem(citation).children[0].children.filter(node => node.type === 'link')
+        .length,
+      1
+    );
+  }
+  const citation = {...entry, URL: 'https://example.org/paper'};
+  assert.match(bibliography.reference(citation), /Source/);
+  assert.equal(
+    plugin.referenceItem(citation).children[0].children.filter(node => node.type === 'link').length,
+    2
+  );
+  assert.equal(
+    bibliography.sourceUrl({URL: 'https://doi.org/10.1000/example'}),
+    'https://doi.org/10.1000/example'
+  );
+});
