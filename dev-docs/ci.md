@@ -35,7 +35,7 @@ coverage is not used as a substitute for cross-browser qualification.
 
 `scripts/ci-profile.mjs` also selects the full profile on PRs changing workflow/profile
 scripts, Node/Yarn versions, root dependencies, test configuration/shared setup,
-qualification scripts, reference fixtures or benchmark workloads. This validates the
+qualification scripts, projection test/reference helpers, reference fixtures or benchmark workloads. This validates the
 nightly wiring before its definitions land. The `plan` job logs the selected profile.
 Nightly and PR/master concurrency groups are separate so a new push does not cancel a
 scheduled full run. Full evidence remains available in the `projection-scorecard` and
@@ -60,3 +60,8 @@ browser versions to adopt it. Browser caches and bounded apt downloads remain in
 Further options, if measured runtimes justify them, are weighted Chromium coverage
 shards with merged coverage and a matching preinstalled-browser image. Test isolation,
 coverage scope and thresholds must be verified when changing either.
+
+The world-wide polygon-refinement regression registers one test per target projection,
+retaining the original complete target list, eight source polygons per target, area
+assertions and 60-second timeout. This avoids timing out a single umbrella test as the
+projection matrix grows; it neither removes targets nor increases individual deadlines.

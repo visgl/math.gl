@@ -15,6 +15,7 @@ export function selectProfile(event, paths = []) {
           path
         ) ||
         /^modules\/geospatial\/(projection\/)?scripts\//.test(path) ||
+      /^modules\/geospatial\/projection\/test\//.test(path) ||
         /^modules\/geospatial\/(projection\/)?test\/(fixtures\/|.*(?:benchmark|workload))/.test(
           path
         )

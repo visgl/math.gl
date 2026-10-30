@@ -179,26 +179,28 @@ test('direct polygons retain holes and immutable endpoint correspondence', () =>
   expect(geometry.evaluate(0)[0].coordinates[0][0][0]).not.toBe(999);
 });
 
-test('common polygon refinement covers the world once, including rotated target cuts', () => {
-  const targets = [
-    ...maps,
-    ...WORLD_PROJECTIONS.filter(projection => !globeOnlyWorlds.has(projection)).map(
-      projection =>
-        new MapEngine({
-          version: 1,
-          id: projection,
-          definition: {type: 'world', projection, centralMeridian: -120}
-        })
-    )
-  ];
-  const area = (ring: readonly (readonly [number, number])[]) =>
-    Math.abs(
-      ring.reduce((sum, p, i) => {
-        const q = ring[(i + 1) % ring.length];
-        return sum + p[0] * q[1] - q[0] * p[1];
-      }, 0) / 2
-    );
-  for (const target of targets) {
+// Keep the complete target/polygon matrix, with a separate timeout budget per target.
+const polygonRefinementTargets = [
+  ...maps,
+  ...WORLD_PROJECTIONS.filter(projection => !globeOnlyWorlds.has(projection)).map(
+    projection =>
+      new MapEngine({
+        version: 1,
+        id: projection,
+        definition: {type: 'world', projection, centralMeridian: -120}
+      })
+  )
+];
+for (const target of polygonRefinementTargets) {
+  test(`common polygon refinement covers the world once: ${target.description.id}`, () => {
+    const area = (ring: readonly (readonly [number, number])[]) =>
+      Math.abs(
+        ring.reduce((sum, p, i) => {
+          const q = ring[(i + 1) % ring.length];
+          return sum + p[0] * q[1] - q[0] * p[1];
+        }, 0) / 2
+      );
+
     const transition = maps[0].createTransitionTo(target);
     let sum = 0;
     for (let lon = -180; lon < 180; lon += 90)
@@ -219,8 +221,8 @@ test('common polygon refinement covers the world once, including rotated target 
             area(part.sourceCoordinates[0]) -
             part.sourceCoordinates.slice(1).reduce((s, r) => s + area(r), 0);
     expect(sum, target.description.id).toBeCloseTo(360 * 180, 5);
-  }
-});
+  });
+}
 
 test('same-engine direct transitions retain overlapping charts without moving copies', () => {
   const map = new MapEngine(

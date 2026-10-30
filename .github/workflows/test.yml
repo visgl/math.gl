@@ -423,6 +423,7 @@ jobs:
           yarn workspace math.gl-terrain-sampling build
           yarn workspace math.gl-terrain-sampling test:browser
   coverage:
+    name: Browser coverage
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     permissions:

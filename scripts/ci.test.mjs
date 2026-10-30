@@ -38,6 +38,7 @@ test('changes to qualification definitions and shared tooling validate the full 
     'modules/geospatial/projection/scripts/scorecard.mjs',
     'modules/geospatial/scripts/qualify-c8.mjs',
     'modules/geospatial/projection/test/benchmark-entry.ts',
+    'modules/geospatial/projection/test/native-forward-reference.ts',
     'modules/geospatial/projection/test/fixtures/accuracy-cases.json'
   ])
     assert.equal(selectProfile('pull_request', [path]).full, true, path);
