@@ -335,6 +335,8 @@ Notes:
 
 This class was ported from [Cesium](https://github.com/AnalyticalGraphicsInc/cesium) under the Apache 2 License.
 
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
 ## P0 numeric and output contracts[​](#p0-numeric-and-output-contracts "Direct link to P0 numeric and output contracts")
 
 The [P0 qualification profile](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/ellipsoid-p0-qualification.md) details the supported samples and all public ownership, unit and boundary contracts. Constructor axes must be finite and nonnegative; default/zero shapes remain constructible but do not define a valid conversion surface. Normals and radial surface projection now return `undefined` for zero/nonfinite rays without modifying a supplied result. Forward conversion and normal/Z-axis intersection also reject invalid numeric inputs before output writes.

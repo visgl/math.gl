@@ -92,3 +92,5 @@ The maps and data are by **Justin Kunimune**. Read his [Introducing the Elastic 
 Kunimune's earlier [Danseiji paper (free preprint)](https://kunimune.blog/wp-content/uploads/2019/11/danseiji-paper-preprint.pdf) provides background on optimizing mesh-defined projections. Danseiji's distinct unstructured mesh format is not supported by this importer. Coastlines in this example come from Natural Earth, in the public domain.
 
 See the [Elastic API reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/elastic.md), [MapEngine reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/map-engine.md), and [rendering guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/map-engine.md).
+
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.

@@ -169,3 +169,5 @@ Parquet subpaths resolve to binary assets, not JavaScript modules; a plain impor
 See the [deck.gl 9.4 globe example](https://visgl.github.io/math.gl/next/examples/timezone-globe) for a date slider, offset colors, and local-time hover details. Boundaries are approximate; IANA does not define geographic polygons. Individual identifiers may require a newer runtime timezone database.
 
 The geometry data is **ODbL 1.0**, separately from the package's MIT code. Attribute OpenStreetMap contributors and Timezone Boundary Builder and preserve applicable ODbL obligations. See `data/README.md`, `data/LICENSE-ODbL.txt`, and `data/manifest.json` in the package for provenance and regeneration details.
+
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.

@@ -252,3 +252,5 @@ All new code is independently written TypeScript under MIT, with SPDX provenance
 * The shared ambient sky and existing diffuse tint retain the references and licenses documented in [sky lighting](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sky.md) and [sunlight](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sun.md#getsunlight).
 
 After building the package, generate a standalone dawn/dusk palette demo with `node modules/earth/sun/scripts/create-cloud-demo.mjs /absolute/path/clouds.html`. It compares four cloud heights and three Sun-ray shadow depths through a shared Sun-altitude slider. The SVG shapes are original and illustrative; the generated page has no external runtime or artwork dependencies.
+
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.

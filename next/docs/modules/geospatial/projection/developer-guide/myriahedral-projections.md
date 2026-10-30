@@ -16,6 +16,8 @@ The article also describes geography-aligned meshes built from distance fields a
 
 math.gl's mesh generation, edge weights, panel charts, and unfolding are independently implemented. We have not copied Nico's source code, mesh tables, textures, animation frames, or optimized solid orientations. Credit identifies the conceptual and visual inspiration; it does not imply a license to his assets.
 
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
 ## What the cuts buy you[​](#what-the-cuts-buy-you "Direct link to What the cuts buy you")
 
 A rigid flat panel can rotate without stretching. A curved patch of Earth cannot be flattened with all distances, areas, and angles preserved. Those are different steps: our radial projection onto a finite panel has local distortion; unfolding that panel adds none. Smaller panels improve the approximation, at the cost of more boundaries and gaps. The implementation makes no exact conformal or equal-area guarantee.

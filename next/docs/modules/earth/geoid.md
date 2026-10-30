@@ -77,3 +77,5 @@ Use [createGeoidFromGrid](https://visgl.github.io/math.gl/next/docs/modules/eart
 NGA EGM96 model data are public domain. The grids come from [GeographicLib](https://geographiclib.sourceforge.io/C++/doc/geoid.html); the package includes provenance, generation instructions, and checksum metadata in `data/`.
 
 The JavaScript implementation is a port of selected GeographicLib 1.50.1 code, copyright Charles Karney, under the MIT license.
+
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.

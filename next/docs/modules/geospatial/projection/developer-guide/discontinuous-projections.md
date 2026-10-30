@@ -291,3 +291,5 @@ Complete redistribution notices ship in `@math.gl/geospatial` under `src/discont
 
 * **Matthew A. Petroff**, [A Square Equal-Area Map Projection with Low Angular Distortion, Minimal Cusps, and Closed-Form Solutions](https://arxiv.org/abs/2008.13670) (2021). The `petroff` equations are adapted from his [CC0 supplement](https://doi.org/10.5281/zenodo.4661351); see also his [introductory article](https://mpetroff.net/2021/08/square-equal-area-map-projection/).
 * **John P. Snyder**, *An Equal-Area Map Projection for Polyhedral Globes* (1992). `isea` and `dsea` use the [vector formulation explained by BRSR](https://brsr.github.io/2021/08/31/snyder-equal-area.html). Their mesh and net tables follow **Felix Palmer / PROJ**; [PROJ's polyhedral documentation](https://proj.org/en/stable/operations/projections/polyhedral.html) explains the face/subtriangle construction. math.gl implements the projection equations independently and retains PROJ's MIT-style notice for the tables.
+
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.

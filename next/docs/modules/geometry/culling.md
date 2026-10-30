@@ -75,3 +75,5 @@ Vector inputs can be numeric arrays, including core vectors; no renderer objects
 ## Attribution[​](#attribution "Direct link to Attribution")
 
 Bounding-volume and frustum code was ported from Cesium under Apache-2.0. See the source headers and distributed license notices for provenance.
+
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.

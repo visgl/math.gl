@@ -58,3 +58,5 @@ node modules/geospatial/projection/scripts/qualify-geodesics.mjs
 ```
 
 The generator verifies both source SHA-256 hashes before compiling a temporary C oracle. It adds no runtime or test dependency; ordinary CI reads the stored binary64 fixture and checks generator provenance. Test inputs and the driver are original math.gl work, not copied upstream test data. GeographicLib runtime SPDX credits and packaged MIT license remain intact. The oracle sources are used offline and are not included in the package.
+
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.

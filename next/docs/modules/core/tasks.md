@@ -184,3 +184,5 @@ For production queues, configure both task and input-byte budgets. Reserve queue
 Browser workers require a bundler-resolved factory or a usable worker URL. Node uses a compiled worker module URL. Shared memory additionally requires browser cross-origin isolation; ordinary workers do not. Capability detection falls back to message-based control when sharing is unavailable.
 
 Small jobs can be faster synchronously because worker startup, serialization, and dispatch have a cost. The runtime schedules CPU workers; automatic WASM/GPU backend selection is outside this API. See the [benchmark guide](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/benchmarks.md) to measure your workload.
+
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.

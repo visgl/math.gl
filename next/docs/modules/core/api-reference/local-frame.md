@@ -69,3 +69,5 @@ Geospatial retains its Cartesian pole threshold and canonical east = +Y, its his
 ## Attribution[​](#attribution "Direct link to Attribution")
 
 These helpers are original math.gl code. Existing CesiumJS-derived geometry and proj4js-derived geocentric conversions retain their source attribution in their respective files; no upstream implementation was copied into this entry.
+
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.

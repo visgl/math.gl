@@ -82,3 +82,5 @@ S2 cells are identified by a 64 bit index. The three most significant bits enco
 The A5 adapter uses [`a5-js`](https://github.com/felixpalmer/a5), the H3 adapter uses [`h3-js`](https://github.com/uber/h3-js), and the Plus Code adapter uses Google's [`open-location-code`](https://github.com/google/open-location-code). These libraries are distributed under the Apache 2.0 license.
 
 The `S2Encoder` object is based on a subset of the s2-geometry module under ISC License (ISC) Copyright (c) 2012-2016, Jon Atkins <github@jonatkins.com> Copyright (c) 2016, AJ ONeal <aj@daplie.com>
+
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.

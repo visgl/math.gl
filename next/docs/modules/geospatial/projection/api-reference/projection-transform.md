@@ -419,6 +419,8 @@ Mercator equations follow the [PROJ Mercator documentation](https://proj.org/en/
 
 For the built-in descriptor catalogue, use `LazyProjectionEngine` from `@math.gl/geospatial/projection/projections/lazy`. Create a transform with `createProjection()` or prepare a synchronous transform with `createProjectionAsync()`. Readers, aliases and grids remain explicit engine options. See the [engine reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md).
 
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
 ## Vertical height grids[​](#vertical-height-grids "Direct link to Vertical height grids")
 
 All math.gl projection engine variants accept `verticalGrids?: VerticalGridCollection`. A `VerticalGrid` implements `getOffset(longitudeRadians, latitudeRadians): number | undefined`: return geoid undulation in metres, or `undefined` outside coverage. Longitudes are Greenwich referenced in the associated CRS's horizontal datum. Register implementations per instance and reference their names with `+geoidgrids`; scalar and flat transforms then require Z.

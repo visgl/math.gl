@@ -57,3 +57,5 @@ The independent [interior qualification](https://visgl.github.io/math.gl/next/do
 ## Attribution[​](#attribution "Direct link to Attribution")
 
 The forward geocentric equations and Hannover inverse retain the existing proj4js 2.22.0-derived arithmetic, MIT terms and SPDX attribution. The core package includes its full `PROJ4-LICENSE.md`. The safeguarded exterior/interior inverses and compensated arithmetic, reusable scratch adapters and independent anchors are original math.gl work.
+
+See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
