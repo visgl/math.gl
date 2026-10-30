@@ -1,6 +1,12 @@
 name: release
 
 on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to resume (package sources must match)
+        required: true
+        type: string
   push:
     tags:
       - v*
@@ -16,6 +22,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
 
       - name: Fetch remote branches
         run: |
@@ -33,6 +41,10 @@ jobs:
           echo "result=${result}" >> "$GITHUB_OUTPUT"
 
   release:
+    timeout-minutes: 45
+    concurrency:
+      group: release-${{ inputs.tag || github.ref_name }}
+      cancel-in-progress: false
     runs-on: ubuntu-22.04
     needs: check_branch
     permissions:
@@ -43,9 +55,12 @@ jobs:
 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
@@ -53,8 +68,8 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           package-manager-cache: false
 
-      - name: Update npm
-        run: npm install --global npm@^11.15.0
+      - name: Validate release source before recovery
+        run: node scripts/publish-from-git.mjs --check --tag "$RELEASE_TAG"
 
       - name: Enable Corepack / Yarn 4
         run: |
@@ -73,6 +88,11 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Verify publishing stack and retry guards
+        run: |
+          node scripts/check-publishing-stack.mjs
+          node --test scripts/publish-from-git.test.mjs
+
       - name: Build packages
         run: npm run build
 
@@ -83,4 +103,4 @@ jobs:
         run: yarn test
 
       - name: Publish to NPM
-        run: npx ocular-publish from-git
+        run: node scripts/publish-from-git.mjs --tag "$RELEASE_TAG"
