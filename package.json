@@ -57,16 +57,17 @@
   "devDependencies": {
     "@turf/destination": "^7.4.0",
     "@types/node": "^22.20.1",
-    "@vis.gl/dev-tools": "^2.0.0-alpha.6",
-    "@vis.gl/ts-plugins": "^2.0.0-alpha.6",
-    "@vitest/coverage-v8": "4.1.10",
+    "@vis.gl/dev-tools": "^2.0.0-beta.2",
+    "@vis.gl/ts-plugins": "^2.0.0-beta.2",
+    "@vitest/coverage-v8": "5.0.5",
     "ajv": "^8.20.0",
     "geotiff": "3.0.5",
     "json-schema-to-typescript": "^16.0.0",
     "playwright": "^1.62.1",
     "pre-commit": "^2.0.0",
     "probe.gl": "^5.0.0",
-    "vitest": "4.1.11"
+    "vite": "^8.3.1",
+    "vitest": "5.0.5"
   },
   "pre-commit": [
     "test-pre-commit"
