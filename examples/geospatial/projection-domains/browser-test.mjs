@@ -60,5 +60,13 @@ try {
   assert.equal(await page.locator('#example').getAttribute('data-error'),null);
   if(process.env.CAPTURE_OMERC_SCREENSHOT)await page.screenshot({path:process.env.CAPTURE_OMERC_SCREENSHOT});
   await page.reload();await page.waitForFunction(()=>document.querySelector('#example').dataset.ready==='true');
+  await page.goto(`http://127.0.0.1:${server.address().port}/raster-frame.html`);
+  for(const id of ['north-up','point','rotated','axes']){
+    await page.selectOption('[data-frame]',id);
+    await page.waitForFunction(id=>document.querySelector('#example').dataset.ready===id,id);
+    assert.equal(await page.locator('#example').getAttribute('data-error'),null);
+    assert.match(await page.locator('[data-status]').innerText(),/12 samples/);
+  }
+  if(process.env.CAPTURE_RASTER_FRAME_SCREENSHOT)await page.screenshot({path:process.env.CAPTURE_RASTER_FRAME_SCREENSHOT});
   assert.deepEqual(errors, []);
 } finally {await browser?.close(); await new Promise(done => server.close(done));}
