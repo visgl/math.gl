@@ -99,6 +99,7 @@ export class CapMap extends DiscontinuousMap {
     let ring: Position[] = [],
       indices: number[] = [],
       activeSegment = 0;
+    let previousInput: GeographicPosition | undefined, currentInput: GeographicPosition | undefined;
     const precision =
       Math.min(
         options?.maxAngularStep ?? 2,
@@ -187,7 +188,49 @@ export class CapMap extends DiscontinuousMap {
       point: (x: number, y: number) => {
         if (++emitted > 1_000_000)
           throw new Error('Projection sampling limit exceeded; relax tolerance');
-        ring.push(originals.get(`${x},${y}`) ?? this.source([x / RAD, y / RAD]));
+        let source = originals.get(`${x},${y}`);
+        if (!source && !polygon && this.nonlinear && previousInput && currentInput) {
+          // The local nonlinear transform bends source arcs. A circle/chord
+          // intersection must be refined on its owning original source arc.
+          const a = geographic(previousInput),
+            b = geographic(currentInput),
+            length = angle(a, b);
+          const at = (t: number): Position =>
+            length < 1e-14
+              ? ([...currentInput!] as Position)
+              : coordinates(
+                  unit(
+                    a.map(
+                      (v, k) =>
+                        (Math.sin((1 - t) * length) * v + Math.sin(t * length) * b[k]) /
+                        Math.sin(length)
+                    ) as Vector
+                  )
+                );
+          const value = (t: number) => geographic(local(at(t)))[0] - Math.cos(this.cap);
+          const approximate = this.source([x / RAD, y / RAD]);
+          const reference = length ? Math.min(1, angle(a, geographic(approximate)) / length) : 0;
+          const roots: number[] = [];
+          for (let j = 0; j < 32; j++) {
+            let lo = j / 32,
+              hi = (j + 1) / 32,
+              f = value(lo),
+              g = value(hi);
+            if (Math.abs(f) < 1e-14) roots.push(lo);
+            if (f * g >= 0) continue;
+            for (let k = 0; k < 52; k++) {
+              const mid = (lo + hi) / 2;
+              if (value(mid) >= 0 === f >= 0) lo = mid;
+              else hi = mid;
+            }
+            roots.push((lo + hi) / 2);
+          }
+          if (Math.abs(value(1)) < 1e-14) roots.push(1);
+          if (!roots.length) throw new Error('Unresolved nonlinear cap source intersection');
+          roots.sort((a, b) => Math.abs(a - reference) - Math.abs(b - reference));
+          source = at(roots[0]);
+        }
+        ring.push(source ?? this.source([x / RAD, y / RAD]));
         if (segmentIndices) indices.push(activeSegment);
       },
       lineStart: () => {
@@ -215,7 +258,9 @@ export class CapMap extends DiscontinuousMap {
       const x = q[0] * RAD,
         y = q[1] * RAD;
       originals.set(`${x},${y}`, [...p]);
+      currentInput = p;
       stream.point(x, y);
+      previousInput = p;
     };
     const subdivide = (a: GeographicPosition, b: GeographicPosition, depth = 0) => {
       if (this.nonlinear && depth < 20) {
@@ -240,6 +285,7 @@ export class CapMap extends DiscontinuousMap {
       emit(b);
     };
     for (const points of rings) {
+      previousInput = undefined;
       stream.lineStart();
       if (points.length) emit(points[0]);
       for (let i = 1; i < points.length; i++) {
@@ -257,8 +303,6 @@ export class CapMap extends DiscontinuousMap {
     options?: MapSamplingOptions
   ): MapLine[] {
     if (this.cap === Math.PI / 2 && !this.nonlinear) return super.projectLine(line, options);
-    if (options?.pathProvenance && this.nonlinear)
-      throw new Error('Nonlinear cap-clipped paths do not support source provenance');
     // Attribute streaming intersections while the owning sampled edge is active.
     // Rigid spherical rotations preserve the original great-circle semantics.
     return super.projectLine(line, options).flatMap(part => {

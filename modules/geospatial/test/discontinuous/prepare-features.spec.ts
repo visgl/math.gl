@@ -520,24 +520,6 @@ test('rigid cap wrappers retain lineage through streamed coverage cuts', () => {
   }
 });
 
-test('reconstructing wrappers reject direct path lineage requests explicitly', () => {
-  const line: readonly [number, number][] = [
-    [-10, 0],
-    [10, 0]
-  ];
-  for (const map of [maps[3]]) {
-    expect(map.projectLine(line).length).toBeGreaterThan(0);
-    expect(() => map.projectLine(line, {pathProvenance: true})).toThrow(
-      /do not support source provenance/
-    );
-    expect(() =>
-      map.prepareFeatures([{geometry: {type: 'LineString', coordinates: line}}], {
-        provenance: {sourceSegments: true}
-      })
-    ).toThrow(/do not support source provenance/);
-  }
-});
-
 test('optional polygon edges preserve holes, source constraints and geometry', () => {
   for (const map of maps.slice(1, 3)) {
     const features: MapFeature[] = [{geometry: polygon}];
@@ -779,12 +761,107 @@ test('wrapper path parameters reconstruct original great-circle points', () => {
       expect(p.sourceDistances![i]).toBeCloseTo(cumulative[index] + t * arc, 10);
     }
   }
-  const nonlinear = new MapEngine({
+});
+
+test('nonlinear cap paths retain original lineage across coverage cuts', () => {
+  const map = new MapEngine({
     version: 1,
     id: 'armadillo',
     definition: {type: 'regional', projection: 'armadillo'}
   });
-  expect(() => nonlinear.projectLine(coordinates, {pathProvenance: true})).toThrow(
-    /Nonlinear cap-clipped/
-  );
+  const coordinates: [number, number][] = [
+    [-170, -60],
+    [-30, 30],
+    [120, -45],
+    [-30, 30],
+    [-170, -60]
+  ];
+  const input: MapFeature[] = [{geometry: {type: 'LineString', coordinates}}];
+  const plain = map.prepareFeatures(input),
+    rich = map.prepareFeatures(input, {
+      provenance: {
+        sourceSegments: true,
+        boundaries: true,
+        distances: {metric: 'spherical', radius: 1}
+      }
+    });
+  expect(rich.paths.positions).toEqual(plain.paths.positions);
+  expect(rich.paths.sourcePositions).toEqual(plain.paths.sourcePositions);
+  const p = rich.paths.provenance!;
+  expect(p.startReasons).toContain('coverage-boundary');
+  expect(p.endReasons).toContain('coverage-boundary');
+  const v = coordinates.map(geographic),
+    distance = [0];
+  for (let i = 1; i < v.length; i++) distance.push(distance[i - 1] + angle(v[i - 1], v[i]));
+  for (let i = 0; i < p.sourceSegmentIndices!.length; i++) {
+    const segment = p.sourceSegmentIndices![i],
+      t = p.sourceSegmentParameters![i],
+      a = v[segment],
+      b = v[segment + 1],
+      length = angle(a, b);
+    const expected = a.map(
+      (x, k) => (Math.sin((1 - t) * length) * x + Math.sin(t * length) * b[k]) / Math.sin(length)
+    );
+    const source = geographic([
+      rich.paths.sourcePositions[i * 2],
+      rich.paths.sourcePositions[i * 2 + 1]
+    ]);
+    expect(Math.hypot(...expected.map((x, k) => x - source[k]))).toBeLessThan(1e-9);
+    expect(p.sourceDistances![i]).toBeCloseTo(distance[segment] + t * length, 9);
+  }
+  expect(structuredClone(rich)).toEqual(rich);
+});
+
+test('Elastic source clipping and grid resampling retain minor-arc lineage', () => {
+  const map = maps[3],
+    coordinates: [number, number][] = [
+      [-110, 20],
+      [-20, 35],
+      [80, 20],
+      [-20, 35],
+      [-110, 20]
+    ],
+    features: MapFeature[] = [{geometry: {type: 'LineString', coordinates}}];
+  const plain = map.prepareFeatures(features),
+    rich = map.prepareFeatures(features, {
+      provenance: {
+        sourceSegments: true,
+        boundaries: true,
+        distances: {metric: 'spherical', radius: 1}
+      }
+    });
+  expect(rich.paths.parts.length).toBeGreaterThan(0);
+  expect(rich.paths.positions).toEqual(plain.paths.positions);
+  expect(rich.paths.sourcePositions).toEqual(plain.paths.sourcePositions);
+  expect(rich.paths.pathStarts).toEqual(plain.paths.pathStarts);
+  const p = rich.paths.provenance!,
+    v = coordinates.map(geographic),
+    distance = [0];
+  for (let i = 1; i < v.length; i++) distance.push(distance[i - 1] + angle(v[i - 1], v[i]));
+  for (let i = 0; i < p.sourceSegmentIndices!.length; i++) {
+    const s = p.sourceSegmentIndices![i],
+      t = p.sourceSegmentParameters![i],
+      a = v[s],
+      b = v[s + 1],
+      length = angle(a, b),
+      expected = a.map(
+        (x, k) => (Math.sin((1 - t) * length) * x + Math.sin(t * length) * b[k]) / Math.sin(length)
+      );
+    const actual = geographic([
+      rich.paths.sourcePositions[i * 2],
+      rich.paths.sourcePositions[i * 2 + 1]
+    ]);
+    expect(Math.hypot(...expected.map((x, k) => x - actual[k]))).toBeLessThan(1e-9);
+    expect(p.sourceDistances![i]).toBeCloseTo(distance[s] + t * length, 9);
+  }
+  for (let part = 0; part < rich.paths.parts.length; part++)
+    for (let i = rich.paths.pathStarts[part] + 1; i < rich.paths.pathStarts[part + 1]; i++)
+      expect(p.sourceDistances![i]).toBeGreaterThanOrEqual(p.sourceDistances![i - 1]);
+  for (const provenance of [
+    {sourceSegments: true},
+    {boundaries: true},
+    {distances: {metric: 'spherical' as const, radius: 1}}
+  ])
+    expect(map.prepareFeatures(features, {provenance}).paths.provenance).toBeDefined();
+  expect(structuredClone(rich)).toEqual(rich);
 });

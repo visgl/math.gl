@@ -16,7 +16,9 @@ import type {
 } from '../map-layout';
 import type {ElasticMapData} from './data';
 import {ElasticGrid} from './grid';
-import {indexDomain, rectangle, clipSegment, sample, sampling, type Polygons} from './geometry';
+import {indexDomain, rectangle, onSegment, sample, sampling, type Polygons} from './geometry';
+import {clipSourceArc} from './source-arc';
+import {sourceArc} from '../source-arc';
 
 // This chart splitter retains directional pole limits and antimeridian sides.
 const kernel = Object.assign((x: number, y: number) => [x, y], {
@@ -182,7 +184,7 @@ class ElasticMap implements MapSurface {
   }
   private sourceOptions(options: MapSamplingOptions) {
     const {step} = sampling(options);
-    return {maxAngularStep: Math.min(step, 1), tolerance: 1e-5};
+    return {...options, maxAngularStep: Math.min(step, 1), tolerance: 1e-5};
   }
   private sampled(c: Chart, line: Position[], options: MapSamplingOptions) {
     return sample(
@@ -193,39 +195,108 @@ class ElasticMap implements MapSurface {
     );
   }
   projectLine(line: readonly GeographicPosition[], options: MapSamplingOptions = {}): MapLine[] {
-    if (options.pathProvenance) throw new Error('Elastic paths do not support source provenance');
     const out: MapLine[] = [];
     for (const part of splitter.projectLine(line, this.sourceOptions(options)))
       for (const c of this.charts.filter(c => c.baseId === part.regionId)) {
-        let current: Position[] = [];
-        const flush = () => {
-          if (current.length > 1) {
-            const {source, xy} = this.sampled(c, current, options);
-            out.push({regionId: c.region.id, coordinates: xy, sourceCoordinates: source});
-          }
-          current = [];
+        let current: MapLine | undefined;
+        const boundary = (point: Position, vertex: number) => {
+          if (vertex === 0 || vertex === line.length - 1) return 'source-endpoint';
+          let edge = 0;
+          const kinds: string[] = [];
+          for (const polygon of c.domain)
+            for (const ring of polygon)
+              for (let i = 1; i < ring.length; i++, edge++)
+                if (onSegment(point, ring[i - 1], ring[i])) {
+                  const seam = this.seams.find(s =>
+                    s.regions.some((id, j) => id === c.region.id && s.edges[j] === edge)
+                  );
+                  kinds.push(seam?.kind ?? 'boundary');
+                }
+          return kinds.includes('boundary')
+            ? 'coverage-boundary'
+            : kinds.includes('cut')
+              ? 'chart-cut'
+              : kinds.includes('join')
+                ? 'continuous-chart-join'
+                : 'coverage-boundary';
         };
-        for (let i = 1; i < part.coordinates.length; i++)
-          for (const [a, b] of clipSegment(
-            part.coordinates[i - 1],
-            part.coordinates[i],
-            c.domain
-          )) {
-            if (
-              current.length &&
-              Math.hypot(
-                current[current.length - 1][0] - a[0],
-                current[current.length - 1][1] - a[1]
-              ) > 1e-8
-            )
-              flush();
-            if (!current.length) current.push(a);
-            current.push(b);
+        for (let i = 1; i < part.sourceCoordinates.length; i++) {
+          const a = part.coordinates[i - 1],
+            b = part.coordinates[i];
+          const intervals = clipSourceArc(a, b, c.domain);
+          if (!intervals.length) {
+            current = undefined;
+            continue;
           }
-        flush();
+          if (Math.hypot(intervals[0].a[0] - a[0], intervals[0].a[1] - a[1]) > 1e-8)
+            current = undefined;
+          for (const clipped of intervals) {
+            const arc = sourceArc(clipped.a, clipped.b);
+            const samples = sample(
+              [clipped.a, clipped.b],
+              p => c.grid.project(p),
+              options,
+              Math.min(180 / (c.grid.section.rows - 1), 360 / (c.grid.section.columns - 1)),
+              (_, t) => arc(t)
+            );
+            const first = samples.source[0],
+              last = samples.source[samples.source.length - 1];
+            const joined =
+              current &&
+              Math.hypot(
+                ...current.sourceCoordinates[current.sourceCoordinates.length - 1].map(
+                  (v, k) => v - first[k]
+                )
+              ) < 1e-8;
+            if (!joined) {
+              current = {regionId: c.region.id, coordinates: [], sourceCoordinates: []};
+              if (part.provenance)
+                current.provenance = {
+                  segments: [],
+                  parameters: [],
+                  vertices: [],
+                  angularDistances: []
+                };
+              out.push(current);
+            }
+            for (let j = joined ? 1 : 0; j < samples.source.length; j++) {
+              const p = samples.source[j];
+              current!.sourceCoordinates.push(p);
+              current!.coordinates.push(samples.xy[j]);
+              const parent = part.provenance,
+                target = current!.provenance;
+              if (parent && target) {
+                const length = angle(geographic(a), geographic(b)),
+                  t = length ? Math.min(1, angle(geographic(a), geographic(p)) / length) : 0;
+                const endpoint = t < 1e-12 ? i - 1 : t > 1 - 1e-12 ? i : -1,
+                  segment = parent.segments[i],
+                  from = parent.segments[i - 1] === segment ? parent.parameters[i - 1] : 0;
+                target.segments.push(endpoint >= 0 ? parent.segments[endpoint] : segment);
+                target.parameters.push(
+                  endpoint >= 0
+                    ? parent.parameters[endpoint]
+                    : from + t * (parent.parameters[i] - from)
+                );
+                target.vertices.push(endpoint >= 0 ? parent.vertices[endpoint] : 0xffffffff);
+                if (options.pathDistances)
+                  target.angularDistances.push(
+                    parent.angularDistances[i - 1] +
+                      t * (parent.angularDistances[i] - parent.angularDistances[i - 1])
+                  );
+                if (options.pathBoundaries) {
+                  if (target.vertices.length === 1)
+                    target.startReason = boundary(p, target.vertices[0]);
+                  target.endReason = boundary(p, target.vertices[target.vertices.length - 1]);
+                }
+              }
+            }
+            if (Math.hypot(last[0] - b[0], last[1] - b[1]) > 1e-8) current = undefined;
+          }
+        }
       }
     return out;
   }
+
   projectPolygon(
     rings: readonly (readonly GeographicPosition[])[],
     options: MapSamplingOptions = {}
