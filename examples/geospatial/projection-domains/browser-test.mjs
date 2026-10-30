@@ -44,6 +44,7 @@ try {
   await page.waitForFunction(()=>document.querySelector('#example').dataset.ready==='polygon-provenance');
   assert.match(await page.locator('[data-status]').innerText(),/preserve the hole/);
   await page.check('[data-generated]');await page.uncheck('[data-generated]');
+  for(const wrapper of ['mercator','satellite','armadillo','elastic','goode']){await page.selectOption('[data-polygon-wrapper]',wrapper);await page.check('[data-atlas]');await page.uncheck('[data-atlas]');}
   if (process.env.CAPTURE_SCREENSHOT) await page.screenshot({path:process.env.CAPTURE_SCREENSHOT});
   await page.goto(`http://127.0.0.1:${server.address().port}/centered-omerc.html`);
   await page.waitForFunction(()=>document.querySelector('#example').dataset.ready==='true');

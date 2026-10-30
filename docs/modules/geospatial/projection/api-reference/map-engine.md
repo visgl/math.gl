@@ -611,11 +611,14 @@ source identity. Sampling propagates that edge identity; output winding reversal
 reverses the edge records and swaps parameter endpoints. Geometry stays identical
 with this option enabled. No polygon-edge arrays are emitted by default.
 
-This option currently supports the native open-hemisphere polygon clipper. Global
-spherical atlas cuts and wrappers that rebuild geometry without propagating edge
-lineage reject explicitly. Ambiguous or unresolvable source constraints also reject
-instead of guessing. The result identifies edges; it does not establish surface
-normals, extrusion directions, or animated-mesh correspondence.
+This option supports the native open-hemisphere clipper, Mercator latitude clipping,
+rigid/nonlinear cap clipping, Elastic chart constraints and global spherical atlas
+composition. Wrapper clipping attributes its indexed input constraints before final
+projection/grid resampling and composes directed source fractions. Source intersections
+are refined on minor arcs; generated cap/domain edges keep their coverage/cut/join class.
+Ambiguous or unresolvable ancestry and exhausted work budgets reject instead of guessing.
+The result identifies edges; it does not establish surface normals, extrusion directions,
+or animated-mesh correspondence.
 
 The Projection domains example includes a polygon-with-hole mode showing original
 outlines and optional generated closures. It illustrates the boundary distinction
@@ -629,7 +632,6 @@ Source distances and endpoint reasons survive the additional cut. In the path
 provenance example, select **Mercator latitude cuts** or **Satellite coverage cuts** to inspect the coverage ends.
 Rigid spherical cap paths (including satellite coverage) also retain lineage by
 attributing streamed intersections to the active sampled edge before resampling.
-Polygon wrappers still reject edge-provenance requests unless explicitly supported.
 
 
 ### Nonlinear-cap and Elastic path lineage
@@ -647,3 +649,21 @@ Source-intersection and sampling work remain bounded and unresolved intersection
 reject. The [Projection domains example](https://visgl.github.io/math.gl/next/examples/projection-domains)
 adds **Nonlinear Armadillo cuts** and **Elastic source arcs** under its path provenance
 mode. These buffers do not define deck.gl cap/join rendering or extrusion behavior.
+
+### Wrapper and atlas polygon constraints
+
+The polygon provenance example now selects **Mercator latitude cuts**, **Satellite cap**,
+**Nonlinear Armadillo cap** or **Elastic chart constraints**, with an optional global
+atlas pass. Source rings and closing-segment identities survive clipping, holes and
+winding reversal. Atlas source edges compose their original directed fractions;
+artificial octant connectors become continuous computational joins unless they coincide
+with a real map cut or coverage boundary. Directional zero-length pole connectors never
+become original boundaries or extrusion walls.
+
+Constraint tracing restores source breakpoints removed by boolean collinear merging.
+Mercator/cap intersections and Elastic source-boundary samples follow the original
+minor arcs. Generated Elastic grid-domain boundaries remain linear in their declared
+source frame. These corrections also apply without provenance; enabling the option does
+not change geometry. Constraint tracing is bounded to 20 million comparisons per call;
+unresolved or ambiguous topology rejects. It does not validate arbitrary invalid input
+polygons, certify continuous sampling error, or supply triangulation-interior provenance.

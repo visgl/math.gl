@@ -19,6 +19,7 @@ import {ElasticGrid} from './grid';
 import {indexDomain, rectangle, onSegment, sample, sampling, type Polygons} from './geometry';
 import {clipSourceArc} from './source-arc';
 import {sourceArc} from '../source-arc';
+import {tracePolygonConstraints, composePolygonEdge} from '../polygon-constraints';
 
 // This chart splitter retains directional pole limits and antimeridian sides.
 const kernel = Object.assign((x: number, y: number) => [x, y], {
@@ -301,8 +302,6 @@ class ElasticMap implements MapSurface {
     rings: readonly (readonly GeographicPosition[])[],
     options: MapSamplingOptions = {}
   ): MapPolygon[] {
-    if (options.polygonEdgeProvenance)
-      throw new Error('Elastic polygons do not support edge provenance');
     const out: MapPolygon[] = [];
     for (const part of splitter.projectPolygon(rings, this.sourceOptions(options)))
       for (const c of this.charts.filter(c => c.baseId === part.regionId)) {
@@ -311,11 +310,126 @@ class ElasticMap implements MapSurface {
           c.domain.map(snapPolygon)
         ) as Polygons;
         for (const polygon of clipped) {
-          const samples = polygon.map(r => this.sampled(c, r, options));
+          const input = snapPolygon(part.coordinates),
+            traced = tracePolygonConstraints(input, polygon, 1e-9, part.edgeProvenance),
+            resolved = traced.rings.map(r => r.map(p => [...p] as Position));
+          traced.owners.forEach((owners, r) =>
+            owners.forEach((owner, i) => {
+              if (!owner) return;
+              const [pr, pe] = owner,
+                a = part.coordinates[pr][pe],
+                b = part.coordinates[pr][pe + 1],
+                length = angle(geographic(a), geographic(b)),
+                arc = sourceArc(a, b);
+              for (const j of [i, i + 1]) {
+                const q = traced.rings[r][j],
+                  start = input[pr][pe],
+                  end = input[pr][pe + 1];
+                if (Math.hypot(q[0] - start[0], q[1] - start[1]) < 1e-8) resolved[r][j] = [...a];
+                else if (Math.hypot(q[0] - end[0], q[1] - end[1]) < 1e-8) resolved[r][j] = [...b];
+                else {
+                  const candidates = clipSourceArc(a, b, c.domain).flatMap(interval => [
+                    interval.a,
+                    interval.b
+                  ]);
+                  if (!candidates.length)
+                    throw new Error('Unresolved Elastic polygon source intersection');
+                  const reference = length ? angle(geographic(a), geographic(q)) / length : 0;
+                  candidates.sort(
+                    (x, y) =>
+                      Math.abs(
+                        (length ? angle(geographic(a), geographic(x)) / length : 0) - reference
+                      ) -
+                      Math.abs(
+                        (length ? angle(geographic(a), geographic(y)) / length : 0) - reference
+                      )
+                  );
+                  const fraction = length
+                    ? angle(geographic(a), geographic(candidates[0])) / length
+                    : 0;
+                  resolved[r][j] = arc(Math.min(1, Math.max(0, fraction)));
+                }
+              }
+            })
+          );
+          for (const ring of resolved) ring[ring.length - 1] = [...ring[0]];
+          const generated = (a: Position, b: Position) => {
+            if (angle(geographic(a), geographic(b)) < 64 * Number.EPSILON)
+              return 'continuous-chart-join' as const;
+            let edge = 0;
+            const kinds: string[] = [];
+            for (const polygon of c.domain)
+              for (const ring of polygon)
+                for (let j = 1; j < ring.length; j++, edge++)
+                  if (onSegment(a, ring[j - 1], ring[j]) && onSegment(b, ring[j - 1], ring[j])) {
+                    const seam = this.seams.find(s =>
+                      s.regions.some((id, k) => id === c.region.id && s.edges[k] === edge)
+                    );
+                    kinds.push(seam?.kind ?? 'boundary');
+                  }
+            if (!kinds.length) throw new Error('Unknown Elastic polygon clipping constraint');
+            return kinds.includes('boundary')
+              ? ('coverage-boundary' as const)
+              : kinds.includes('cut')
+                ? ('chart-cut' as const)
+                : ('continuous-chart-join' as const);
+          };
+          const coordinates: Position[][] = [],
+            sourceCoordinates: Position[][] = [],
+            edgeProvenance: NonNullable<MapPolygon['edgeProvenance']> = [];
+          resolved.forEach((ring, r) => {
+            const source: Position[] = [],
+              xy: Position[] = [],
+              edges: NonNullable<MapPolygon['edgeProvenance']>[number] = [];
+            for (let i = 1; i < ring.length; i++) {
+              const owner = traced.owners[r][i - 1],
+                arc = owner ? sourceArc(ring[i - 1], ring[i]) : undefined;
+              const samples = sample(
+                [ring[i - 1], ring[i]],
+                p => c.grid.project(p),
+                options,
+                Math.min(180 / (c.grid.section.rows - 1), 360 / (c.grid.section.columns - 1)),
+                arc ? (_, t) => arc(t) : undefined
+              );
+              if (!source.length) {
+                source.push(samples.source[0]);
+                xy.push(samples.xy[0]);
+              }
+              for (let j = 1; j < samples.source.length; j++) {
+                if (options.polygonEdgeProvenance) {
+                  if (owner) {
+                    const [pr, pe] = owner;
+                    edges.push(
+                      composePolygonEdge(
+                        part.edgeProvenance![pr][pe],
+                        part.coordinates[pr][pe],
+                        part.coordinates[pr][pe + 1],
+                        source[source.length - 1],
+                        samples.source[j]
+                      )
+                    );
+                  } else
+                    edges.push({
+                      kind: generated(ring[i - 1], ring[i]),
+                      ring: 0xffffffff,
+                      segment: 0xffffffff,
+                      t0: 0,
+                      t1: 0
+                    });
+                }
+                source.push(samples.source[j]);
+                xy.push(samples.xy[j]);
+              }
+            }
+            coordinates.push(xy);
+            sourceCoordinates.push(source);
+            edgeProvenance.push(edges);
+          });
           out.push({
             regionId: c.region.id,
-            coordinates: samples.map(s => s.xy),
-            sourceCoordinates: samples.map(s => s.source)
+            coordinates,
+            sourceCoordinates,
+            ...(options.polygonEdgeProvenance ? {edgeProvenance} : {})
           });
         }
       }

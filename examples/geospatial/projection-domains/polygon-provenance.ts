@@ -4,12 +4,16 @@
 import {SolidPolygonLayer,PathLayer} from '@deck.gl/layers';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {MapEngine} from '@math.gl/geospatial/discontinuous';
-export function polygonProvenanceLayers(showGenerated=false){
-  const map=new MapEngine({version:1,id:'polygon-lineage-goode',definition:{type:'goode'}});
-  const prepared=map.prepareFeatures([{geometry:{type:'Polygon',coordinates:[
+import {elasticI} from '@math.gl/geospatial/elastic';
+export function polygonProvenanceLayers(showGenerated=false,wrapper='goode',atlas=false){
+  const map=new MapEngine({version:1,id:'polygon-lineage-goode',definition:wrapper==='mercator'?{type:'mercator',maxLatitude:45}:wrapper==='satellite'?{type:'regional',projection:'satellite'}:wrapper==='armadillo'?{type:'regional',projection:'armadillo'}:wrapper==='elastic'?{type:'elastic',data:elasticI}:{type:'goode'}});
+  const prepared=map.prepareFeatures([{geometry:{type:'Polygon',coordinates:wrapper!=='goode'?[
+    [[-30,-30],[80,-30],[80,60],[-30,60],[-30,-30]],
+    [[-5,5],[5,5],[5,15],[-5,15],[-5,5]]
+  ]:[
     [[-75,20],[-5,20],[-5,65],[-75,65],[-75,20]],
     [[-55,30],[-55,45],[-25,45],[-25,30],[-55,30]]
-  ]}}],{polygonOutlines:false,provenance:{polygonEdges:true}});
+  ]}}],{polygonOutlines:false,provenance:{polygonEdges:true},...(atlas?{sphericalCuts:{interior:'left' as const}}:{})});
   const {polygons}=prepared,edges=polygons.edgeProvenance!,fills:any[]=[],outlines:any[]=[];
   const point=(i:number)=>[polygons.positions[i*2]*100,polygons.positions[i*2+1]*100];
   for(let part=0;part<polygons.parts.length;part++){

@@ -23,7 +23,7 @@ export function mountProjectionDomains(root: HTMLElement) {
     <p data-pipeline>GeoArrow → math.gl worker → D3 stream → math.gl triangles → deck.gl.</p>
     <label>Projection<select data-projection><option value="equirectangular">Equirectangular / seam</option><option value="orthographic">Rotated hemisphere</option><option value="interrupted">Interrupted Mollweide</option><option value="path-provenance">Path provenance / continuous dashes</option><option value="polygon-provenance">Polygon boundary provenance / hole</option></select></label>
     <label>Raster<select data-raster><option value="world">360° image</option><option value="rotated">Rotated grid across 180°</option><option value="polar">South-pole-containing grid</option></select></label>
-    <label data-wrapper-label hidden>Path clipping<select data-wrapper><option value="goode">Goode chart cuts</option><option value="mercator">Mercator latitude cuts</option><option value="satellite">Satellite coverage cuts</option><option value="armadillo">Nonlinear Armadillo cuts</option><option value="elastic">Elastic source arcs</option></select></label><label><input type="checkbox" data-vertices checked> Show provenance vertices</label><label><input type="checkbox" data-generated> Show generated polygon boundaries</label><p>The white outline is the projected domain. Hover a polygon for its source row.</p></aside><output data-status aria-live="polite"></output></section>`;
+    <label data-wrapper-label hidden>Path clipping<select data-wrapper><option value="goode">Goode chart cuts</option><option value="mercator">Mercator latitude cuts</option><option value="satellite">Satellite coverage cuts</option><option value="armadillo">Nonlinear Armadillo cuts</option><option value="elastic">Elastic source arcs</option></select></label><label><input type="checkbox" data-vertices checked> Show provenance vertices</label><label data-polygon-wrapper-label hidden>Polygon clipping<select data-polygon-wrapper><option value="goode">Goode chart cuts</option><option value="mercator">Mercator latitude cuts</option><option value="satellite">Satellite cap</option><option value="armadillo">Nonlinear Armadillo cap</option><option value="elastic">Elastic chart constraints</option></select></label><label data-atlas-label hidden><input type="checkbox" data-atlas> Compose global atlas ancestry</label><label><input type="checkbox" data-generated> Show generated polygon boundaries</label><p>The white outline is the projected domain. Hover a polygon for its source row.</p></aside><output data-status aria-live="polite"></output></section>`;
   const status = root.querySelector<HTMLOutputElement>('output')!;
   const projectionSelect = root.querySelector<HTMLSelectElement>('[data-projection]')!;
   const rasterSelect = root.querySelector<HTMLSelectElement>('[data-raster]')!;
@@ -44,6 +44,8 @@ export function mountProjectionDomains(root: HTMLElement) {
     getTooltip: ({index, layer,object}) => polygonProvenanceTooltip(object) || provenanceTooltip(object) || (index >= 0 && layer?.id === 'features' ? names[featureIds[index]] : null)});
   async function update() {
     const request = ++generation; active?.abort(); active = new AbortController();
+    root.querySelector<HTMLElement>('[data-polygon-wrapper-label]')!.hidden=projectionSelect.value!=='polygon-provenance';
+    root.querySelector<HTMLElement>('[data-atlas-label]')!.hidden=projectionSelect.value!=='polygon-provenance';
     const provenanceMode=projectionSelect.value.endsWith('-provenance');
     rasterSelect.disabled=provenanceMode;
     root.querySelector<HTMLElement>('[data-wrapper-label]')!.hidden=projectionSelect.value!=='path-provenance';
@@ -52,7 +54,7 @@ export function mountProjectionDomains(root: HTMLElement) {
     root.querySelector('[data-pipeline]')!.textContent=provenanceMode?'Native math.gl preparation → optional provenance buffers → deck.gl.':'GeoArrow → math.gl worker → D3 stream → math.gl triangles → deck.gl.';
     const name = projectionSelect.value as ProjectionName, kind = rasterSelect.value as RasterKind;
     if(projectionSelect.value==='polygon-provenance'){
-      const demo=polygonProvenanceLayers(root.querySelector<HTMLInputElement>('[data-generated]')!.checked);
+      const demo=polygonProvenanceLayers(root.querySelector<HTMLInputElement>('[data-generated]')!.checked,root.querySelector<HTMLSelectElement>('[data-polygon-wrapper]')!.value,root.querySelector<HTMLInputElement>('[data-atlas]')!.checked);
       deck.setProps({layers:demo.layers});status.textContent='Native math.gl polygon provenance: white original boundaries preserve the hole. Optional orange edges show generated closures; hover for edge class and source ring/segment.';
       root.dataset.ready='polygon-provenance';return;
     }
@@ -90,6 +92,8 @@ export function mountProjectionDomains(root: HTMLElement) {
   projectionSelect.addEventListener('change', update); rasterSelect.addEventListener('change', update);
   root.querySelector('[data-wrapper]')!.addEventListener('change',update);
   root.querySelector('[data-generated]')!.addEventListener('change',update);
+  root.querySelector('[data-polygon-wrapper]')!.addEventListener('change',update);
+  root.querySelector('[data-atlas]')!.addEventListener('change',update);
   root.querySelector('[data-vertices]')!.addEventListener('change',update);
   void update();
   return async () => {

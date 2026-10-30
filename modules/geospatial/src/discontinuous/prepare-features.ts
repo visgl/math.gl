@@ -161,8 +161,6 @@ export function prepareMapFeatures(
           provenance.distances.radius <= 0)))
   )
     throw new Error('Unsupported provenance policy');
-  if (provenance?.polygonEdges && options.sphericalCuts)
-    throw new Error('Global spherical cuts do not support polygon edge provenance');
   const edgeKinds: number[] = [],
     edgeRings: number[] = [],
     edgeSegments: number[] = [],
@@ -248,7 +246,11 @@ export function prepareMapFeatures(
     if (!input.length) return;
     const rings = input.map(r => r.map(position));
     const parts = options.sphericalCuts
-      ? map.projectGlobalPolygon(rings, {...options.sampling, ...options.sphericalCuts})
+      ? map.projectGlobalPolygon(rings, {
+          ...options.sampling,
+          ...options.sphericalCuts,
+          polygonEdgeProvenance: provenance?.polygonEdges
+        })
       : map.projectPolygon(rings, {
           ...options.sampling,
           polygonEdgeProvenance: provenance?.polygonEdges
