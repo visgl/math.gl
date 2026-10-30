@@ -12,6 +12,8 @@ function parseBibliography(source) {
   if (!entries.length) throw new Error('Bibliography is empty');
   const result = new Map();
   for (const entry of entries) {
+    // Parser provenance repeats the whole input; export only CSL bibliographic fields.
+    delete entry._graph;
     if (!/^[a-z][a-z0-9-]*$/.test(entry.id)) throw new Error(`Invalid citation key: ${entry.id}`);
     if (result.has(entry.id)) throw new Error(`Duplicate citation key: ${entry.id}`);
     for (const field of ['title', 'author', 'issued']) {
