@@ -40,6 +40,50 @@ export function validateRecoveryFiles(files) {
   if (unsafe.length) throw new Error(`Recovery changes release sources: ${unsafe.join(', ')}`);
 }
 
+// Existing descriptors preserve every dependency used by the tagged build.
+export function validateRecoveryLockfile(previous, current) {
+  const entries = (text) => {
+    const result = new Map();
+    for (const block of text.split(/\n(?="[^\n]+":\n)/).slice(1)) {
+      const newline = block.indexOf('\n');
+      const names = JSON.parse(block.slice(0, newline - 1)).split(', ');
+      for (const name of names) result.set(name, block.slice(newline).trim());
+    }
+    if (!result.size) throw new Error('Unrecognized Yarn lockfile');
+    return result;
+  };
+  const oldEntries = entries(previous);
+  const newEntries = entries(current);
+  for (const [name, body] of oldEntries) {
+    const normalize = (value) =>
+      name === 'math.gl-monorepo@workspace:.'
+        ? value?.replace(/^ {4}lerna: "npm:10\.1\.1"\n/m, '')
+        : value;
+    assert.equal(
+      normalize(newEntries.get(name)),
+      normalize(body),
+      `Recovery changes existing locked dependency: ${name}`
+    );
+  }
+}
+
+export async function retryLookup(operation, {wait, attempts = 3}) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      const transient =
+        [429, 500, 502, 503, 504].includes(error.status) ||
+        /^(ECONNRESET|ETIMEDOUT|EAI_AGAIN|UND_ERR_CONNECT_TIMEOUT|UND_ERR_SOCKET)$/.test(
+          error.cause?.code || error.code || ''
+        ) ||
+        error.name === 'TimeoutError';
+      if (!transient || attempt >= attempts) throw error;
+      await wait(2000 * attempt);
+    }
+  }
+}
+
 export async function ensureRelease({request, repository, tag, notes}) {
   const path = `/repos/${repository}/releases/tags/${encodeURIComponent(tag)}`;
   const existing = await request(path);
@@ -103,6 +147,10 @@ function releaseContext(tag) {
   validateRelease({tag, version, versions: packages.map((p) => p.version), changelog});
   git('merge-base', '--is-ancestor', `${tag}^{commit}`, 'HEAD');
   validateRecoveryFiles(git('diff', '--name-only', tag, 'HEAD').split('\n').filter(Boolean));
+  validateRecoveryLockfile(
+    git('show', `${tag}:yarn.lock`),
+    readFileSync(resolve(root, 'yarn.lock'), 'utf8')
+  );
   const oldPackage = JSON.parse(git('show', `${tag}:package.json`));
   const currentPackage = JSON.parse(readFileSync(resolve(root, 'package.json')));
   // Root manifest differences must be limited to the dedicated publisher dependency/patch.
@@ -153,15 +201,28 @@ async function main() {
     });
   await ensureRelease({request, repository, tag, notes});
   const distTag = tag.includes('-') ? 'beta' : 'latest';
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const readState = async () =>
     Promise.all(
       packages.map(async (p) => {
         const url = `${registry}/${p.name}?release_verification=${Date.now()}`;
-        const response = await fetch(url, {headers: {'Cache-Control': 'no-cache'}});
-        if (response.status === 404)
+        const data = await retryLookup(
+          async () => {
+            const result = await fetch(url, {
+              headers: {'Cache-Control': 'no-cache'},
+              signal: AbortSignal.timeout(30000)
+            });
+            if (!result.ok && result.status !== 404) {
+              throw Object.assign(new Error(`npm lookup failed for ${p.name}: ${result.status}`), {
+                status: result.status
+              });
+            }
+            return result.status === 404 ? null : result.json();
+          },
+          {wait}
+        );
+        if (data === null)
           return {name: p.name, exists: false, tagged: false, provenance: false};
-        if (!response.ok) throw new Error(`npm lookup failed for ${p.name}: ${response.status}`);
-        const data = await response.json();
         return {
           name: p.name,
           exists: !!data.versions?.[p.version],
@@ -172,7 +233,7 @@ async function main() {
     );
   await publishRemaining({
     readState,
-    wait: (ms) => new Promise((r) => setTimeout(r, ms)),
+    wait,
     publish: () => {
       const result = spawnSync(
         process.execPath,
