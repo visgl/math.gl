@@ -30,6 +30,11 @@ try {
     assert.equal(await page.locator('#example').getAttribute('data-error'), null);
     console.log(projection, raster, await page.locator('[data-status]').innerText());
   }
+  await page.selectOption('[data-projection]','path-provenance');
+  await page.waitForFunction(()=>document.querySelector('#example').dataset.ready==='path-provenance');
+  assert.match(await page.locator('[data-status]').innerText(),/source meters/);
+  await page.uncheck('[data-vertices]');
+  await page.check('[data-vertices]');
   if (process.env.CAPTURE_SCREENSHOT) await page.screenshot({path:process.env.CAPTURE_SCREENSHOT});
   assert.deepEqual(errors, []);
 } finally {await browser?.close(); await new Promise(done => server.close(done));}

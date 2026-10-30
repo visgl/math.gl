@@ -54,7 +54,19 @@ export type MapSeam = {
   kind: 'join' | 'cut' | 'boundary';
 };
 export type MapPoint = {regionId: string; position: Position};
-export type MapLine = {regionId: string; coordinates: Position[]; sourceCoordinates: Position[]};
+export type MapLine = {
+  regionId: string;
+  coordinates: Position[];
+  sourceCoordinates: Position[];
+  provenance?: {
+    segments: number[];
+    parameters: number[];
+    vertices: number[];
+    angularDistances: number[];
+    startReason?: string;
+    endReason?: string;
+  };
+};
 export type MapPolygon = {
   regionId: string;
   coordinates: Position[][];
@@ -63,6 +75,10 @@ export type MapPolygon = {
 export type MapSamplingOptions = {
   /** Maximum angular sampling interval in degrees. Default 2, range (0, 90]. */
   maxAngularStep?: number;
+  /** Opt-in minor-great-circle source lineage, recorded during clipping/sampling. */
+  pathProvenance?: boolean;
+  pathDistances?: boolean;
+  pathBoundaries?: boolean;
   /** Midpoint chord-error target in placed output units. Default 1e-4. */
   tolerance?: number;
 };
@@ -243,6 +259,10 @@ export class DiscontinuousMap {
     const points = line.map(geographic);
     for (let i = 1; i < points.length; i++) validateArc(points[i - 1], points[i]);
     const results: MapLine[] = [];
+    const cumulative = options.pathDistances ? [0] : undefined;
+    if (cumulative)
+      for (let i = 1; i < points.length; i++)
+        cumulative.push(cumulative[i - 1] + angle(points[i - 1], points[i]));
     for (const r of this.compiled) {
       let current: MapLine | null = null;
       for (let i = 1; i < points.length; i++) {
@@ -251,6 +271,25 @@ export class DiscontinuousMap {
           current = null;
           continue;
         }
+        const reason = (p: Vector, endpoint: Vector, isEndpoint: boolean) => {
+          if (isEndpoint && angle(p, endpoint) < 1e-12) return 'source-endpoint';
+          const kinds = r.normals
+            .map((normal, edge) =>
+              Math.abs(dot(normal, p)) < 1e-9
+                ? this.seams.find(s =>
+                    s.regions.some((id, i) => id === r.definition.id && s.edges[i] === edge)
+                  )?.kind
+                : undefined
+            )
+            .filter(Boolean);
+          return kinds.includes('boundary')
+            ? 'coverage-boundary'
+            : kinds.includes('cut')
+              ? 'chart-cut'
+              : kinds.includes('join')
+                ? 'continuous-chart-join'
+                : 'coverage-boundary';
+        };
         const sampled = this.sample(r, clipped[0], clipped[1], settings);
         if (sampled.length < 2) continue;
         if (
@@ -265,12 +304,33 @@ export class DiscontinuousMap {
           )
         ) {
           current = {regionId: r.definition.id, coordinates: [], sourceCoordinates: []};
+          if (options.pathProvenance)
+            current.provenance = {segments: [], parameters: [], vertices: [], angularDistances: []};
+          if (current.provenance && options.pathBoundaries)
+            current.provenance.startReason = reason(clipped[0], points[0], i === 1);
           results.push(current);
         } else sampled.shift();
         for (const p of sampled) {
           current.coordinates.push(this.project(r, p));
           current.sourceCoordinates.push(coordinates(p));
+          if (current.provenance) {
+            const length = angle(points[i - 1], points[i]);
+            const t = length ? Math.min(1, Math.max(0, angle(points[i - 1], p) / length)) : 0;
+            current.provenance.segments.push(i - 1);
+            current.provenance.parameters.push(t);
+            current.provenance.vertices.push(
+              angle(points[i - 1], p) < 1e-12 ? i - 1 : angle(points[i], p) < 1e-12 ? i : 0xffffffff
+            );
+            if (cumulative)
+              current.provenance.angularDistances.push(cumulative[i - 1] + t * length);
+          }
         }
+        if (current.provenance && options.pathBoundaries)
+          current.provenance.endReason = reason(
+            clipped[1],
+            points[points.length - 1],
+            i === points.length - 1
+          );
         // Even an excursion returning to the same seam point starts a new part.
         if (!this.contains(r, points[i])) current = null;
       }

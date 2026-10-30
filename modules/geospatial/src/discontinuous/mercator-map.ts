@@ -99,6 +99,8 @@ export class MercatorMap extends DiscontinuousMap {
     line: readonly GeographicPosition[],
     options?: MapSamplingOptions
   ): MapLine[] {
+    if (options?.pathProvenance)
+      throw new Error('Mercator-clipped paths do not support source provenance');
     const result: MapLine[] = [];
     for (const part of super.projectLine(line, options)) {
       let current: MapLine | undefined;

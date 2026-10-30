@@ -394,3 +394,128 @@ test('collection depth counts collections rather than multipart expansion', () =
     maps[0].prepareFeatures([{geometry: nest({type: 'GeometryCollection', geometries: []}, 64)}])
   ).toThrow(/deeply/);
 });
+
+test('opt-in path lineage preserves geometry and distinguishes repeated source segments', () => {
+  const map = maps[1];
+  const features: MapFeature[] = [
+    {
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [-80, 30],
+          [20, 30],
+          [-80, 30],
+          [20, 30]
+        ]
+      }
+    }
+  ];
+  const ordinary = map.prepareFeatures(features);
+  const rich = map.prepareFeatures(features, {
+    provenance: {
+      sourceSegments: true,
+      boundaries: true,
+      distances: {metric: 'spherical', radius: 6371000}
+    }
+  });
+  expect(rich.paths.positions).toEqual(ordinary.paths.positions);
+  expect(rich.paths.sourcePositions).toEqual(ordinary.paths.sourcePositions);
+  expect(rich.paths.pathStarts).toEqual(ordinary.paths.pathStarts);
+  expect(ordinary.paths.provenance).toBeUndefined();
+  const p = rich.paths.provenance!;
+  expect(p.sourceSegmentIndices!.length).toBe(rich.paths.positions.length / 2);
+  expect(new Set(p.sourceSegmentIndices)).toEqual(new Set([0, 1, 2]));
+  expect(p.startReasons!.length).toBe(rich.paths.parts.length);
+  for (let part = 0; part < rich.paths.parts.length; part++) {
+    const a = rich.paths.pathStarts[part],
+      b = rich.paths.pathStarts[part + 1];
+    for (let i = a; i < b; i++) {
+      expect(p.sourceSegmentParameters![i]).toBeGreaterThanOrEqual(0);
+      expect(p.sourceSegmentParameters![i]).toBeLessThanOrEqual(1);
+      if (i > a)
+        expect(p.sourceDistances![i]).toBeGreaterThanOrEqual(p.sourceDistances![i - 1] - 1e-7);
+    }
+  }
+  expect(structuredClone(rich)).toEqual(rich);
+  const distances = map.prepareFeatures(features, {
+    provenance: {distances: {metric: 'spherical', radius: 1}}
+  }).paths.provenance!;
+  expect(distances.sourceSegmentIndices).toBeUndefined();
+  expect(distances.sourceDistances!.at(-1)).toBeLessThan(p.sourceDistances!.at(-1)!);
+  expect(() =>
+    map.prepareFeatures(features, {provenance: {distances: {metric: 'spherical', radius: 0}}})
+  ).toThrow();
+});
+
+test('retracing endpoint coordinates does not manufacture source endpoints', () => {
+  for (const line of [
+    [
+      [-40, 30],
+      [-60, 30],
+      [-40, 30],
+      [-20, 30]
+    ],
+    [
+      [-60, 30],
+      [-40, 30],
+      [-20, 30],
+      [-40, 30]
+    ]
+  ]) {
+    const r = maps[1].prepareFeatures([{geometry: {type: 'LineString', coordinates: line}}], {
+      provenance: {sourceSegments: true, boundaries: true}
+    });
+    const p = r.paths.provenance!;
+    for (let part = 0; part < r.paths.parts.length; part++) {
+      const start = r.paths.pathStarts[part],
+        end = r.paths.pathStarts[part + 1] - 1;
+      if (p.startReasons![part] === 'source-endpoint')
+        expect(p.sourceSegmentIndices![start]).toBe(0);
+      if (p.endReasons![part] === 'source-endpoint')
+        expect(p.sourceSegmentIndices![end]).toBe(line.length - 2);
+    }
+  }
+});
+test('cap wrappers reject provenance against intermediate sampled fragments', () => {
+  const map = new MapEngine({
+    version: 1,
+    id: 'satellite',
+    definition: {type: 'regional', projection: 'satellite'}
+  });
+  const features: MapFeature[] = [
+    {
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [-10, 0],
+          [10, 0]
+        ]
+      }
+    }
+  ];
+  expect(map.prepareFeatures(features).paths.parts.length).toBeGreaterThan(0);
+  for (const provenance of [
+    {sourceSegments: true},
+    {boundaries: true},
+    {distances: {metric: 'spherical' as const, radius: 1}}
+  ])
+    expect(() => map.prepareFeatures(features, {provenance})).toThrow(/Cap-clipped paths/);
+});
+
+test('reconstructing wrappers reject direct path lineage requests explicitly', () => {
+  const line: readonly [number, number][] = [
+    [-10, 0],
+    [10, 0]
+  ];
+  for (const map of [maps[0], maps[3]]) {
+    expect(map.projectLine(line).length).toBeGreaterThan(0);
+    expect(() => map.projectLine(line, {pathProvenance: true})).toThrow(
+      /do not support source provenance/
+    );
+    expect(() =>
+      map.prepareFeatures([{geometry: {type: 'LineString', coordinates: line}}], {
+        provenance: {sourceSegments: true}
+      })
+    ).toThrow(/do not support source provenance/);
+  }
+});
