@@ -29,3 +29,10 @@ test('coincident equator constraints and directional longitude sides remain boun
   expect(sourceArc([180, 30], [170, 35])(0.5)[0]).toBeGreaterThan(170);
   expect(sourceArc([-180, 30], [-170, 35])(0.5)[0]).toBeLessThan(-170);
 });
+
+test('source arc endpoints retain the directional meridian limit at exact poles', () => {
+  expect(sourceArc([-160, -89], [-163.3, -90])(1)).toEqual([-160, -90]);
+  expect(sourceArc([37, 90], [40, 89])(0)).toEqual([40, 90]);
+  expect(sourceArc([-180, -90], [-90, -90])(0.5)).toEqual([-135, -90]);
+  expect(sourceArc([170, 89], [-160, 90])(0.99)[0]).toBeCloseTo(170, 8);
+});
