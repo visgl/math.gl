@@ -12,6 +12,13 @@ const source = {
   positions: new Float64Array([-1, -1, 1, -1, 1, 1, -1, 1]),
   indices: new Uint32Array([0, 1, 2, 0, 2, 3])
 };
+// Patch extent semantics are authoritative metadata, separate from triangulation.
+const sourceBoundary = [
+  [0, 1, 'source'],
+  [1, 2, 'coverage'],
+  [2, 3, 'source'],
+  [3, 0, 'join']
+];
 const transform = ([u, v]) => {
   const lon = (u * Math.PI) / 9,
     lat = (v * Math.PI) / 9;
@@ -108,12 +115,16 @@ export function evaluateSurfacePatch(mesh, amount, height = 0) {
   const ids = mesh.qualification.boundary;
   for (let i = 0; i < ids.length; i++) {
     const a = ids[i],
-      b = ids[(i + 1) % ids.length],
-      u = (mesh.sourcePositions[2 * a] + mesh.sourcePositions[2 * b]) / 2,
-      v = (mesh.sourcePositions[2 * a + 1] + mesh.sourcePositions[2 * b + 1]) / 2;
-    // Authoritative patch boundary semantics, supplied before preparation. They are
-    // illustrative; real adapters consume prepared polygon-edge provenance.
-    const kind = Math.abs(u - 1) < 1e-10 ? 'coverage' : Math.abs(u + 1) < 1e-10 ? 'join' : 'source';
+      b = ids[(i + 1) % ids.length];
+    const belongs = (vertex, edge) =>
+      [0, 1, 2].every(
+        slot =>
+          !mesh.provenance.sourceVertexWeights[3 * vertex + slot] ||
+          edge.includes(mesh.provenance.sourceVertexIndices[3 * vertex + slot])
+      );
+    const owner = sourceBoundary.find(([x, y]) => belongs(a, [x, y]) && belongs(b, [x, y]));
+    if (!owner) throw new RangeError('Boundary lost original source-edge ancestry');
+    const kind = owner[2];
     boundary.push({a, b, kind});
     if (kind === 'source' && height)
       walls.push([point(positions, a), point(positions, b), point(top, b), point(top, a)]);

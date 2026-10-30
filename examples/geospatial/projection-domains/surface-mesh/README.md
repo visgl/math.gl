@@ -81,8 +81,9 @@ index and explicit ray-work limits for larger meshes.
 Walls are generated only for the two boundary chains declared as source boundaries. Coverage cuts
 and computational joins are suppressed. In a map adapter those decisions must come from prepared
 polygon-edge provenance, including the rule that a real boundary coincident with a cut stays real.
-The illustrative boundary declarations here are authoritative fixture metadata, not inferred
-classification of arbitrary geometry.
+The illustrative boundary declarations here are authoritative fixture metadata. Refined edge
+ownership follows original source-vertex support, rather than coordinate matching. They do not
+classify arbitrary geometry.
 
 The extrusion toggle offsets vertices along posed mesh normals. The transition qualification covers
 the **base mesh only**: it does not prove that an offset surface or walls stay embedded, that a height
