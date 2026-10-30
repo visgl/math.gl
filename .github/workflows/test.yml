@@ -369,6 +369,16 @@ jobs:
             const repo = context.repo.repo;
             const headSha = context.payload.pull_request?.head.sha || context.sha;
 
+            await core.summary.addHeading('Coverage')
+              .addRaw(`${percentage.toFixed(2)}% line coverage; minimum ${minimum}%.`)
+              .write();
+            // Fork pull_request tokens cannot publish check runs. Enforce the same
+            // threshold through this required job without requesting write access.
+            if (conclusion !== 'success') core.setFailed(`Coverage ${percentage.toFixed(2)}% is below ${minimum}%.`);
+            const forkPullRequest = context.eventName === 'pull_request' &&
+              context.payload.pull_request?.head.repo.full_name !== `${owner}/${repo}`;
+            if (forkPullRequest) return;
+
             await github.rest.checks.create({
               owner,
               repo,

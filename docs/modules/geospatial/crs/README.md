@@ -177,6 +177,8 @@ Resolution supplies definitions; execution support remains engine-specific.
   PROJJSON definition.
 - `createSpatialReference` — constructs and freezes a descriptor.
 - `inferCRSRepresentation` — conservatively classifies a definition's runtime syntax.
+- `normalizeCRSIdentifier` — changes the authority, OGC URN and OGC URI spellings of one
+  registry entry to `AUTHORITY:CODE`. Use the result to compare identifiers.
 
 The official MIT-licensed schema is vendored unchanged and can be imported or resolved through
 `@math.gl/geospatial/crs/projjson.schema.json`. It is the PROJJSON runtime validation source of truth. The
