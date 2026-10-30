@@ -5,11 +5,19 @@
 import type {CRSIdentifier} from './crs';
 
 /** WMS 1.3 `CRS:` codes and the OGC register entries they abbreviate. */
-const WMS_CRS_CODES: Readonly<Record<string, string>> = {
-  '84': 'CRS84',
-  '83': 'CRS83',
-  '27': 'CRS27'
-};
+const WMS_CRS_CODES = new Map<string, string>([
+  ['84', 'CRS84'],
+  ['83', 'CRS83'],
+  ['27', 'CRS27']
+]);
+/** Explicit input conveniences, not a case-insensitivity rule for all registry names. */
+const KNOWN_AUTHORITIES = new Set(['EPSG', 'OGC', 'ESRI', 'IAU']);
+const OGC_CRS_CODES = new Map<string, string>([
+  ['CRS84', 'CRS84'],
+  ['CRS83', 'CRS83'],
+  ['CRS27', 'CRS27'],
+  ['CRS84H', 'CRS84h']
+]);
 
 const AUTHORITY_CODE = /^([A-Z][A-Z0-9_-]*):([A-Z0-9_.-]+)$/i;
 const OGC_URN = /^urn:ogc:def:crs:([A-Z][A-Z0-9_-]*):([^:]*):([A-Z0-9_.-]+)$/i;
@@ -21,8 +29,8 @@ const OGC_URI =
  *
  * Recognized forms are `AUTHORITY:CODE`, the WMS 1.3 codes `CRS:84`, `CRS:83` and `CRS:27`,
  * OGC URNs (`urn:ogc:def:crs:EPSG::32619`) and OGC URIs
- * (`http://www.opengis.net/def/crs/EPSG/0/32619`). Authorities are upper-cased. OGC codes are
- * upper-cased; other codes keep their spelling.
+ * (`http://www.opengis.net/def/crs/EPSG/0/32619`). Known authority prefixes (EPSG, OGC, ESRI and IAU) and explicitly known OGC CRS codes
+ * accept case-insensitive input aliases. Other authority and code spellings are preserved.
  *
  * A version is removed only when it is empty or `0`, or when it is `1.3` on an OGC `CRS84`,
  * `CRS83` or `CRS27` code, which the OGC register publishes only at that version. Any other
@@ -43,7 +51,7 @@ export function normalizeCRSIdentifier(identifier: CRSIdentifier): CRSIdentifier
   if (authorityCode) {
     const [, authority, code] = authorityCode;
     if (authority.toUpperCase() === 'CRS') {
-      const ogcCode = WMS_CRS_CODES[code];
+      const ogcCode = WMS_CRS_CODES.get(code);
       return ogcCode ? `OGC:${ogcCode}` : identifier;
     }
     return formatIdentifier(authority, code);
@@ -65,11 +73,14 @@ function isUnversioned(authority: string, version: string, code: string): boolea
   return (
     authority.toUpperCase() === 'OGC' &&
     version === '1.3' &&
-    Object.values(WMS_CRS_CODES).includes(ogcCode)
+    Array.from(WMS_CRS_CODES.values()).includes(ogcCode)
   );
 }
 
 function formatIdentifier(authority: string, code: string): CRSIdentifier {
   const upperAuthority = authority.toUpperCase();
-  return `${upperAuthority}:${upperAuthority === 'OGC' ? code.toUpperCase() : code}`;
+  const canonicalAuthority = KNOWN_AUTHORITIES.has(upperAuthority) ? upperAuthority : authority;
+  const canonicalCode =
+    canonicalAuthority === 'OGC' ? OGC_CRS_CODES.get(code.toUpperCase()) || code : code;
+  return `${canonicalAuthority}:${canonicalCode}`;
 }

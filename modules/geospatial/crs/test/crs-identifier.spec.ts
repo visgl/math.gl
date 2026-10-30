@@ -69,3 +69,18 @@ describe('normalizeCRSIdentifier', () => {
     expect(normalizeCRSIdentifier(identifier)).toBe(identifier);
   });
 });
+
+test.each(['toString', 'constructor', '__proto__'])('preserves unknown WMS code %s', code => {
+  expect(normalizeCRSIdentifier(`CRS:${code}`)).toBe(`CRS:${code}`);
+});
+test.each([
+  ['http://www.opengis.net/def/crs/OGC/0/CRS84h', 'OGC:CRS84h'],
+  ['urn:ogc:def:crs:OGC::CRS84h', 'OGC:CRS84h'],
+  ['ogc:crs84h', 'OGC:CRS84h'],
+  ['OGC:CustomCase', 'OGC:CustomCase'],
+  ['urn:ogc:def:crs:OGC::AnsiDate', 'OGC:AnsiDate'],
+  ['urn:ogc:def:crs:CustomAuthority::MixedCase', 'CustomAuthority:MixedCase'],
+  ['custom:MiXeD', 'custom:MiXeD']
+])('preserves registered and unknown case: %s', (input, output) => {
+  expect(normalizeCRSIdentifier(input)).toBe(output);
+});

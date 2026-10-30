@@ -111,8 +111,10 @@ set can give `http://www.opengis.net/def/crs/EPSG/0/32619`, and a view can give 
 
 Rules:
 
-- The function changes authorities to upper case. It changes OGC codes to upper case. It does not
-  change other codes.
+- The known authority prefixes EPSG, OGC, ESRI and IAU accept case-insensitive input aliases.
+  Known OGC codes CRS84, CRS83, CRS27 and CRS84h use their registered spelling; other authority
+  and code spellings are preserved. This convenience does not imply that registry identifiers
+  are generally case-insensitive.
 - The function changes the WMS 1.3 codes `CRS:84`, `CRS:83` and `CRS:27` to `OGC:CRS84`,
   `OGC:CRS83` and `OGC:CRS27`.
 - The function removes a URN or URI version only in these cases:
@@ -128,6 +130,9 @@ The function does not make different registry entries equal. `EPSG:4326` and `OG
 different, because their axis orders are different. `EPSG:900913` stays different from
 `EPSG:3857`. The function does not resolve definitions. It does not make datums equal, and it does
 not change axis order.
+
+For example, `http://www.opengis.net/def/crs/OGC/0/CRS84h` becomes `OGC:CRS84h`,
+while `OGC:CustomCase` keeps its code spelling.
 
 Keep the original identifier of the source in the metadata. Use the result only to compare
 identifiers.
