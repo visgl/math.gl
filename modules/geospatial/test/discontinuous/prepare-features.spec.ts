@@ -593,3 +593,32 @@ test('polygon source edge ranges reconstruct source endpoints after winding reve
     maps[0].prepareFeatures([{geometry: polygon}], {provenance: {polygonEdges: true}})
   ).toThrow(/does not support/);
 });
+
+test('real polygon boundaries on chart cuts keep source identity', () => {
+  const features: MapFeature[] = [
+    {
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [-40, 20],
+            [-20, 20],
+            [-20, 50],
+            [-40, 50],
+            [-40, 20]
+          ]
+        ]
+      }
+    }
+  ];
+  const a = maps[1].prepareFeatures(features),
+    b = maps[1].prepareFeatures(features, {provenance: {polygonEdges: true}});
+  expect(b.polygons.positions).toEqual(a.polygons.positions);
+  expect(b.polygons.edgeProvenance!.kinds.every(k => k === 0 || k === 1)).toBe(true);
+  expect(() =>
+    maps[1].prepareFeatures(features, {
+      provenance: {polygonEdges: true},
+      sphericalCuts: {interior: 'left'}
+    })
+  ).toThrow(/Global spherical cuts/);
+});
