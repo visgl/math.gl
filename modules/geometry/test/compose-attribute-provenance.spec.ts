@@ -160,3 +160,20 @@ test('qualification is invariant to large independently moving world origins', (
   expect(translated.minimumProjectedDoubleArea).toEqual(baseline.minimumProjectedDoubleArea);
   expect(translated.boundary).toEqual(baseline.boundary);
 });
+
+test('rejects unrepresentable orientation coefficients even with an explicit area margin', () => {
+  const positions = [0, 0, 0, 1e154, 0, 0, 0, 1e154, 0];
+  expect(() =>
+    qualifySurfaceTransition({positions, indices: [0, 1, 2]}, positions, {minimumDoubleArea: 1})
+  ).toThrow('Nonfinite');
+});
+
+test('rejects the reviewed finite-endpoint morph that collapses halfway through', () => {
+  const positions = [0, 0, 0, 7e153, 0, 0, 0, 7e153, 0];
+  expect(() =>
+    qualifySurfaceTransition(
+      {positions, indices: [0, 1, 2]},
+      positions.map(v => -v)
+    )
+  ).toThrow('Nonfinite');
+});

@@ -28,6 +28,8 @@ Returns `{scope: 'convex-xy-disk-linear', minimumProjectedDoubleArea, boundary}`
 owned `Uint32Array` of boundary vertex indices without the repeated closing vertex. The report
 is structured-cloneable. Inputs remain unchanged.
 
+Arithmetic overflow in area samples or coefficients rejects, even when endpoint positions are finite.
+
 Malformed meshes, nonmanifold/disconnected inputs, holes, nonconvex boundaries, intermediate
 collapses/reversals and exhausted budgets throw `RangeError`. Valid surfaces outside this
 subset also reject. XYZ axes must be chosen such that the patch is a graph over XY; this is

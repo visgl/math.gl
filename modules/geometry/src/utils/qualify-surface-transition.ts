@@ -160,6 +160,8 @@ function quadraticMinimum(value: (t: number) => number): number {
     h = value(0.5),
     a = 2 * (f + g - 2 * h),
     b = g - f - a;
+  if (![f, g, h, a, b].every(Number.isFinite))
+    throw new RangeError('Nonfinite surface orientation polynomial');
   const t = a > 0 ? -b / (2 * a) : -1;
   const result = Math.min(f, g, t > 0 && t < 1 ? value(t) : Infinity);
   if (!Number.isFinite(result)) throw new RangeError('Nonfinite surface orientation');
