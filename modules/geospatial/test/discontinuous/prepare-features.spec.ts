@@ -591,7 +591,7 @@ test('polygon source edge ranges reconstruct source endpoints after winding reve
   }
   expect(() =>
     maps[0].prepareFeatures([{geometry: polygon}], {provenance: {polygonEdges: true}})
-  ).toThrow(/does not support/);
+  ).toThrow(/not support/);
 });
 
 test('real polygon boundaries on chart cuts keep source identity', () => {
@@ -647,4 +647,32 @@ test('source vertices on chart planes do not classify discarded zero-length pair
   expect(rich.polygons.sourcePositions).toEqual(plain.polygons.sourcePositions);
   expect(rich.polygons.ringStarts).toEqual(plain.polygons.ringStarts);
   expect(rich.polygons.edgeProvenance!.kinds.length).toBe(rich.polygons.positions.length / 2);
+});
+
+test('reconstructing polygon wrappers reject direct edge provenance requests', () => {
+  const rings: [number, number][][] = [
+    [
+      [-10, -10],
+      [10, -10],
+      [10, 10],
+      [-10, 10],
+      [-10, -10]
+    ]
+  ];
+  const cap = new MapEngine({
+    version: 1,
+    id: 'satellite-polygons',
+    definition: {type: 'regional', projection: 'satellite'}
+  });
+  for (const map of [maps[0], maps[3], cap]) {
+    expect(map.projectPolygon(rings).length).toBeGreaterThan(0);
+    expect(() => map.projectPolygon(rings, {polygonEdgeProvenance: true})).toThrow(
+      /not support edge provenance/
+    );
+    expect(() =>
+      map.prepareFeatures([{geometry: {type: 'Polygon', coordinates: rings}}], {
+        provenance: {polygonEdges: true}
+      })
+    ).toThrow(/not support edge provenance/);
+  }
 });
