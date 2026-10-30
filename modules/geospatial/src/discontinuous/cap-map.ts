@@ -246,6 +246,8 @@ export class CapMap extends DiscontinuousMap {
     options?: MapSamplingOptions
   ): MapLine[] {
     if (this.cap === Math.PI / 2 && !this.nonlinear) return super.projectLine(line, options);
+    if (options?.pathProvenance)
+      throw new Error('Cap-clipped paths do not support source provenance');
     // Super validates antipodal edges and sampling options even for invisible input.
     return super
       .projectLine(line, options)

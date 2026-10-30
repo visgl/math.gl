@@ -271,8 +271,8 @@ export class DiscontinuousMap {
           current = null;
           continue;
         }
-        const reason = (p: Vector, endpoint: Vector) => {
-          if (angle(p, endpoint) < 1e-12) return 'source-endpoint';
+        const reason = (p: Vector, endpoint: Vector, isEndpoint: boolean) => {
+          if (isEndpoint && angle(p, endpoint) < 1e-12) return 'source-endpoint';
           const kinds = r.normals
             .map((normal, edge) =>
               Math.abs(dot(normal, p)) < 1e-9
@@ -307,7 +307,7 @@ export class DiscontinuousMap {
           if (options.pathProvenance)
             current.provenance = {segments: [], parameters: [], vertices: [], angularDistances: []};
           if (current.provenance && options.pathBoundaries)
-            current.provenance.startReason = reason(clipped[0], points[0]);
+            current.provenance.startReason = reason(clipped[0], points[0], i === 1);
           results.push(current);
         } else sampled.shift();
         for (const p of sampled) {
@@ -326,7 +326,11 @@ export class DiscontinuousMap {
           }
         }
         if (current.provenance && options.pathBoundaries)
-          current.provenance.endReason = reason(clipped[1], points[points.length - 1]);
+          current.provenance.endReason = reason(
+            clipped[1],
+            points[points.length - 1],
+            i === points.length - 1
+          );
         // Even an excursion returning to the same seam point starts a new part.
         if (!this.contains(r, points[i])) current = null;
       }

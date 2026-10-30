@@ -446,3 +446,58 @@ test('opt-in path lineage preserves geometry and distinguishes repeated source s
     map.prepareFeatures(features, {provenance: {distances: {metric: 'spherical', radius: 0}}})
   ).toThrow();
 });
+
+test('retracing endpoint coordinates does not manufacture source endpoints', () => {
+  for (const line of [
+    [
+      [-40, 30],
+      [-60, 30],
+      [-40, 30],
+      [-20, 30]
+    ],
+    [
+      [-60, 30],
+      [-40, 30],
+      [-20, 30],
+      [-40, 30]
+    ]
+  ]) {
+    const r = maps[1].prepareFeatures([{geometry: {type: 'LineString', coordinates: line}}], {
+      provenance: {sourceSegments: true, boundaries: true}
+    });
+    const p = r.paths.provenance!;
+    for (let part = 0; part < r.paths.parts.length; part++) {
+      const start = r.paths.pathStarts[part],
+        end = r.paths.pathStarts[part + 1] - 1;
+      if (p.startReasons![part] === 'source-endpoint')
+        expect(p.sourceSegmentIndices![start]).toBe(0);
+      if (p.endReasons![part] === 'source-endpoint')
+        expect(p.sourceSegmentIndices![end]).toBe(line.length - 2);
+    }
+  }
+});
+test('cap wrappers reject provenance against intermediate sampled fragments', () => {
+  const map = new MapEngine({
+    version: 1,
+    id: 'satellite',
+    definition: {type: 'regional', projection: 'satellite'}
+  });
+  const features: MapFeature[] = [
+    {
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [-10, 0],
+          [10, 0]
+        ]
+      }
+    }
+  ];
+  expect(map.prepareFeatures(features).paths.parts.length).toBeGreaterThan(0);
+  for (const provenance of [
+    {sourceSegments: true},
+    {boundaries: true},
+    {distances: {metric: 'spherical' as const, radius: 1}}
+  ])
+    expect(() => map.prepareFeatures(features, {provenance})).toThrow(/Cap-clipped paths/);
+});
