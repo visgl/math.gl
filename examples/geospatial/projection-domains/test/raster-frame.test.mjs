@@ -29,3 +29,8 @@ test('multiscale geometry comes from each explicit level, not a shared scale or 
  near(coarse.sampleToCoordinate([0,0]),[500002,4649995.5]);
  assert.notDeepEqual(coarse.sampleBounds,fine.sampleBounds);
 });
+
+test('axis permutations are snapshotted and scale-normalized inversion avoids determinant overflow',()=>{
+ const order=[0,1],frame=createRasterFrame({...rasterFrameFixtures[0],axisOrder:order});order.reverse();near(frame.sampleToCoordinate([0,0]),[500001,4649998.5]);
+ for(const s of [1e-150,1e150]){const f=createRasterFrame({size:[4,3],affine:[2*s,s,.5*s,-3*s,0,0],registration:'area'});near(f.coordinateToSample(f.sampleToCoordinate([2,1])),[2,1]);}
+});

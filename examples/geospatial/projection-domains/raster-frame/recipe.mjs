@@ -15,15 +15,16 @@ export function createRasterFrame({size,affine,registration,axisOrder=[0,1],spat
     ![[0,1],[1,0]].some(order=>order.every((v,i)=>v===axisOrder[i])))throw new RangeError('Invalid raster frame');
   const [a,b,c,d,tx,ty]=affine,scale=Math.max(Math.abs(a),Math.abs(b),Math.abs(c),Math.abs(d));
   if(!scale||Math.abs(a/scale*d/scale-b/scale*c/scale)<1e-12)throw new RangeError('Singular or ill-conditioned raster frame');
-  const matrix=new Matrix3([a,b,0,c,d,0,tx,ty,1]),inverse=matrix.clone().invert();
+  const order=[...axisOrder],matrix=new Matrix3([a,b,0,c,d,0,tx,ty,1]);
+  const inverse=new Matrix3([a/scale,b/scale,0,c/scale,d/scale,0,0,0,1]).invert();
   const reference=createSpatialReference(spatialReference),offset=registration==='area'?.5:0;
   const pair=p=>{if(!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite))throw new RangeError('Expected finite pair');return p;};
   const gridToCoordinate=p=>{
     const q=matrix.transform([...pair(p),1]);
-    const result=axisOrder.map(i=>q[i]);if(!result.every(Number.isFinite))throw new RangeError('Raster frame overflow');return result;
+    const result=order.map(i=>q[i]);if(!result.every(Number.isFinite))throw new RangeError('Raster frame overflow');return result;
   };
   const coordinateToGrid=p=>{
-    pair(p);const q=[];axisOrder.forEach((axis,i)=>q[axis]=p[i]);const result=inverse.transform([...q,1]).slice(0,2);
+    pair(p);const q=[];order.forEach((axis,i)=>q[axis]=p[i]);const result=inverse.transform([(q[0]-tx)/scale,(q[1]-ty)/scale,1]).slice(0,2);
     if(!result.every(Number.isFinite))throw new RangeError('Raster frame inverse overflow');return result;
   };
   const rectangle=(w,s,e,n)=>[[w,s],[e,s],[e,n],[w,n],[w,s]].map(gridToCoordinate);
