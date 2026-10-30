@@ -13,11 +13,13 @@ test('ordinary PRs retain Chromium; nightly and manual runs exercise the full ma
   for (const event of ['pull_request', 'push'])
     assert.deepEqual(selectProfile(event, ['modules/core/src/vector3.ts']), {
       full: false,
+      performance: event === 'pull_request',
       browsers: ['chromium']
     });
   for (const event of ['schedule', 'workflow_dispatch'])
     assert.deepEqual(selectProfile(event), {
       full: true,
+      performance: false,
       browsers: ['chromium', 'firefox', 'webkit']
     });
 });
@@ -44,7 +46,7 @@ test('changes to qualification definitions and shared tooling validate the full 
     assert.equal(selectProfile('pull_request', [path]).full, true, path);
 });
 
-function results(event, full) {
+function results(event, full, performance = event === 'pull_request') {
   return Object.fromEntries(
     [
       'plan',
@@ -61,25 +63,27 @@ function results(event, full) {
       name,
       {
         result:
-          (name === 'scorecard' && !full) ||
-          (name === 'projection-performance' && event !== 'pull_request')
+          (name === 'scorecard' && !full) || (name === 'projection-performance' && !performance)
             ? 'skipped'
             : 'success',
-        ...(name === 'plan' ? {outputs: {full: String(full)}} : {})
+        ...(name === 'plan'
+          ? {outputs: {full: String(full), performance: String(performance)}}
+          : {})
       }
     ])
   );
 }
 
 test('aggregate gate rejects a failed, cancelled, missing or unexpectedly skipped worker', () => {
-  for (const [event, full] of [
+  for (const [event, full, performance = event === 'pull_request'] of [
+    ['pull_request', false, false],
     ['pull_request', false],
     ['pull_request', true],
     ['push', false],
     ['schedule', true],
     ['workflow_dispatch', true]
   ]) {
-    const needs = results(event, full);
+    const needs = results(event, full, performance);
     assert.deepEqual(checkResults(needs, event), []);
     for (const name of Object.keys(needs))
       for (const result of ['failure', 'cancelled', 'skipped', 'success', undefined]) {
@@ -124,4 +128,39 @@ test('one package build feeds current-run consumers; website stays source-only',
   assert.match(workflow, /cron: ['"]?17 7 \* \* \*/);
   assert.match(workflow, /run: node scripts\/ci-gate.mjs/);
   assert.match(workflow, /MINIMUM_LINES: 90/);
+});
+
+test('only documentation allowlisted PRs skip paired performance', () => {
+  for (const paths of [
+    ['docs/README.md'],
+    ['dev-docs/ci.md', 'docs/images/diagram.png'],
+    ['README.md', 'CHANGELOG.md', 'LICENSE']
+  ])
+    assert.equal(selectProfile('pull_request', paths).performance, false);
+  for (const paths of [
+    [],
+    ['docs/README.md', 'modules/core/src/vector3.ts'],
+    ['package.json'],
+    ['yarn.lock'],
+    ['.nvmrc'],
+    ['.github/workflows/test.yml'],
+    ['scripts/ci-profile.mjs'],
+    ['modules/geospatial/README.md'],
+    ['examples/geospatial/demo/main.ts']
+  ])
+    assert.equal(selectProfile('pull_request', paths).performance, true, JSON.stringify(paths));
+  for (const event of ['push', 'schedule', 'workflow_dispatch'])
+    assert.equal(selectProfile(event).performance, false);
+});
+
+test('a missing performance decision cannot silently skip comparisons', () => {
+  const needs = results('pull_request', false, false);
+  assert.deepEqual(checkResults(needs, 'pull_request'), []);
+  delete needs.plan.outputs.performance;
+  assert(checkResults(needs, 'pull_request').length);
+  assert(checkResults(results('schedule', true, true), 'schedule').length);
+  assert.match(
+    workflow,
+    /if: github.event_name == 'pull_request' && needs.plan.outputs.performance == 'true'/
+  );
 });

@@ -22,9 +22,13 @@ export function checkResults(needs, event) {
   if (!['true', 'false'].includes(full)) failures.push('Missing qualification profile');
   if (['schedule', 'workflow_dispatch'].includes(event) && full !== 'true')
     failures.push('Full qualification required');
+  const performance = needs.plan?.outputs?.performance;
+  if (!['true', 'false'].includes(performance)) failures.push('Missing performance profile');
+  if (event !== 'pull_request' && performance !== 'false')
+    failures.push('Unexpected paired performance profile');
   for (const [name, expected] of [
     ['scorecard', full === 'true' ? 'success' : 'skipped'],
-    ['projection-performance', event === 'pull_request' ? 'success' : 'skipped']
+    ['projection-performance', performance === 'true' ? 'success' : 'skipped']
   ]) {
     if (needs[name]?.result !== expected)
       failures.push(`${name}: expected ${expected}, got ${needs[name]?.result ?? 'missing'}`);

@@ -144,8 +144,9 @@ Chromium numerical qualification, the full Node/Chromium test suites and coverag
 Firefox/WebKit qualification and the full timing workload matrix run in the next full
 profile. CI gates correctness and bundle sizes, not noisy speed ratios. See the
 [CI execution guide](https://github.com/visgl/math.gl/blob/master/dev-docs/ci.md) for scheduling and trigger details.
-The separate paired Node performance comparison runs on every PR with 11 samples
-and a 4 ms calibration target; local runs retain the 12 ms default.
+The separate paired Node performance comparison uses 11 samples and a 4 ms calibration
+target on PRs; allowlisted documentation-only changes skip these comparisons. Local runs
+retain the 12 ms default.
 
 ### Compare a runtime change with its base
 
@@ -158,7 +159,7 @@ same bundler, package manifests and installed dependencies. It uses the current 
 workload for both versions, validates both against proj4js, and rotates baseline/candidate
 flat/scalar execution order. It covers XY and XYZM in both precisions and directions;
 constructor batches alternate separately. `--scenarios` accepts comma-separated scenario
-names to focus a run. On pull requests, CI measures nine representative scenarios against
+names to focus a run. On eligible pull requests, CI measures nine representative scenarios against
 the actual base commit. CI uploads two artifacts from parallel jobs:
 
 - `projection-performance-comparison-projection` contains the projection, grid preparation,
