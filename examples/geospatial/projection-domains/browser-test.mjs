@@ -33,6 +33,9 @@ try {
   await page.selectOption('[data-projection]','path-provenance');
   await page.waitForFunction(()=>document.querySelector('#example').dataset.ready==='path-provenance');
   assert.match(await page.locator('[data-status]').innerText(),/source meters/);
+  await page.selectOption('[data-wrapper]','mercator');
+  await page.selectOption('[data-wrapper]','satellite');
+  await page.selectOption('[data-wrapper]','goode');
   await page.uncheck('[data-vertices]');
   await page.check('[data-vertices]');
   await page.selectOption('[data-projection]','polygon-provenance');

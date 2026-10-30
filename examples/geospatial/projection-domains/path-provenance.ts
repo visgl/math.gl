@@ -6,9 +6,9 @@ import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {MapEngine} from '@math.gl/geospatial/discontinuous';
 
 /** Source distance drives dash phase across fragments; chart XY only draws it. */
-export function pathProvenanceLayers(showVertices=true){
-  const map=new MapEngine({version:1,id:'lineage-goode',definition:{type:'goode'}});
-  const prepared=map.prepareFeatures([{geometry:{type:'LineString',coordinates:[[-110,30],[-20,30],[60,20],[130,35]]}}],
+export function pathProvenanceLayers(showVertices=true, wrapper='goode'){
+  const map=new MapEngine({version:1,id:'lineage-goode',definition:wrapper==='mercator'?{type:'mercator',maxLatitude:75}:wrapper==='satellite'?{type:'regional',projection:'satellite'}:{type:'goode'}});
+  const prepared=map.prepareFeatures([{geometry:{type:'LineString',coordinates:wrapper==='satellite'?[[-80,10],[0,15],[80,10],[0,15]]:wrapper==='mercator'?[[-70,50],[-10,85],[50,50],[110,85]]:[[-110,30],[-20,30],[60,20],[130,35]]}}],
     {provenance:{sourceSegments:true,boundaries:true,distances:{metric:'spherical',radius:6371000}}});
   const hours=[0,2,5,9];
   const {paths}=prepared,p=paths.provenance!,lines:any[]=[],vertices:any[]=[];

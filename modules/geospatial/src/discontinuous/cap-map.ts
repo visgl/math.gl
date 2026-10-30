@@ -91,11 +91,14 @@ export class CapMap extends DiscontinuousMap {
     rings: readonly (readonly GeographicPosition[])[],
     polygon: boolean,
     options?: MapSamplingOptions,
-    regionId?: string
+    regionId?: string,
+    segmentIndices?: number[][]
   ): Position[][] {
     const output: Position[][] = [];
     const originals = new Map<string, Position>();
-    let ring: Position[] = [];
+    let ring: Position[] = [],
+      indices: number[] = [],
+      activeSegment = 0;
     const precision =
       Math.min(
         options?.maxAngularStep ?? 2,
@@ -185,12 +188,17 @@ export class CapMap extends DiscontinuousMap {
         if (++emitted > 1_000_000)
           throw new Error('Projection sampling limit exceeded; relax tolerance');
         ring.push(originals.get(`${x},${y}`) ?? this.source([x / RAD, y / RAD]));
+        if (segmentIndices) indices.push(activeSegment);
       },
       lineStart: () => {
         ring = [];
+        indices = [];
       },
       lineEnd: () => {
-        if (ring.length > 1) output.push(ring);
+        if (ring.length > 1) {
+          output.push(ring);
+          segmentIndices?.push(indices);
+        }
       },
       polygonStart: () => {},
       polygonEnd: () => {}
@@ -234,7 +242,10 @@ export class CapMap extends DiscontinuousMap {
     for (const points of rings) {
       stream.lineStart();
       if (points.length) emit(points[0]);
-      for (let i = 1; i < points.length; i++) subdivide(points[i - 1], points[i]);
+      for (let i = 1; i < points.length; i++) {
+        activeSegment = i - 1;
+        subdivide(points[i - 1], points[i]);
+      }
       if (polygon && points.length) subdivide(points[points.length - 1], points[0]);
       stream.lineEnd();
     }
@@ -246,17 +257,72 @@ export class CapMap extends DiscontinuousMap {
     options?: MapSamplingOptions
   ): MapLine[] {
     if (this.cap === Math.PI / 2 && !this.nonlinear) return super.projectLine(line, options);
-    if (options?.pathProvenance)
-      throw new Error('Cap-clipped paths do not support source provenance');
-    // Super validates antipodal edges and sampling options even for invisible input.
-    return super
-      .projectLine(line, options)
-      .flatMap(part =>
-        this.clip([part.sourceCoordinates], false, options, part.regionId).flatMap(line =>
-          super.projectLine(line, options).filter(q => q.regionId === part.regionId)
-        )
+    if (options?.pathProvenance && this.nonlinear)
+      throw new Error('Nonlinear cap-clipped paths do not support source provenance');
+    // Attribute streaming intersections while the owning sampled edge is active.
+    // Rigid spherical rotations preserve the original great-circle semantics.
+    return super.projectLine(line, options).flatMap(part => {
+      const indices: number[][] | undefined = part.provenance ? [] : undefined;
+      const clipped = this.clip([part.sourceCoordinates], false, options, part.regionId, indices);
+      return clipped.flatMap((points, piece) =>
+        super
+          .projectLine(points, options)
+          .filter(q => q.regionId === part.regionId)
+          .map(q => {
+            const parent = part.provenance,
+              child = q.provenance;
+            if (!parent || !child) return q;
+            const provenance: NonNullable<MapLine['provenance']> = {
+              segments: [],
+              parameters: [],
+              vertices: [],
+              angularDistances: []
+            };
+            for (let j = 0; j < q.sourceCoordinates.length; j++) {
+              const k = child.segments[j];
+              // The incoming endpoint owns the clipped edge, including a newly
+              // generated entry point followed by its original end vertex.
+              const edge = indices![piece][k + 1];
+              const a = geographic(part.sourceCoordinates[edge]),
+                b = geographic(part.sourceCoordinates[edge + 1]),
+                p = geographic(q.sourceCoordinates[j]);
+              const length = angle(a, b),
+                t = length ? Math.min(1, angle(a, p) / length) : 0;
+              const endpoint = t < 1e-12 ? edge : t > 1 - 1e-12 ? edge + 1 : -1;
+              const segment = parent.segments[edge + 1];
+              const from = parent.segments[edge] === segment ? parent.parameters[edge] : 0;
+              provenance.segments.push(endpoint >= 0 ? parent.segments[endpoint] : segment);
+              provenance.parameters.push(
+                endpoint >= 0
+                  ? parent.parameters[endpoint]
+                  : from + t * (parent.parameters[edge + 1] - from)
+              );
+              provenance.vertices.push(endpoint >= 0 ? parent.vertices[endpoint] : 0xffffffff);
+              if (options?.pathDistances)
+                provenance.angularDistances.push(
+                  parent.angularDistances[edge] +
+                    t * (parent.angularDistances[edge + 1] - parent.angularDistances[edge])
+                );
+            }
+            if (options?.pathBoundaries) {
+              const same = (a: GeographicPosition, b: GeographicPosition) =>
+                angle(geographic(a), geographic(b)) < 1e-12;
+              provenance.startReason = same(q.sourceCoordinates[0], part.sourceCoordinates[0])
+                ? parent.startReason
+                : 'coverage-boundary';
+              provenance.endReason = same(
+                q.sourceCoordinates[q.sourceCoordinates.length - 1],
+                part.sourceCoordinates[part.sourceCoordinates.length - 1]
+              )
+                ? parent.endReason
+                : 'coverage-boundary';
+            }
+            return {...q, provenance};
+          })
       );
+    });
   }
+
   override projectPolygon(
     rings: readonly (readonly GeographicPosition[])[],
     options?: MapSamplingOptions
