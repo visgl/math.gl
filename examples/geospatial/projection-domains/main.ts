@@ -23,7 +23,7 @@ export function mountProjectionDomains(root: HTMLElement) {
     <p data-pipeline>GeoArrow → math.gl worker → D3 stream → math.gl triangles → deck.gl.</p>
     <label>Projection<select data-projection><option value="equirectangular">Equirectangular / seam</option><option value="orthographic">Rotated hemisphere</option><option value="interrupted">Interrupted Mollweide</option><option value="path-provenance">Path provenance / continuous dashes</option><option value="polygon-provenance">Polygon boundary provenance / hole</option></select></label>
     <label>Raster<select data-raster><option value="world">360° image</option><option value="rotated">Rotated grid across 180°</option><option value="polar">South-pole-containing grid</option></select></label>
-    <label><input type="checkbox" data-vertices checked> Show provenance vertices</label><label><input type="checkbox" data-generated> Show generated polygon boundaries</label><p>The white outline is the projected domain. Hover a polygon for its source row.</p></aside><output data-status aria-live="polite"></output></section>`;
+    <label data-wrapper-label hidden>Path clipping<select data-wrapper><option value="goode">Goode chart cuts</option><option value="mercator">Mercator latitude cuts</option><option value="satellite">Satellite coverage cuts</option></select></label><label><input type="checkbox" data-vertices checked> Show provenance vertices</label><label><input type="checkbox" data-generated> Show generated polygon boundaries</label><p>The white outline is the projected domain. Hover a polygon for its source row.</p></aside><output data-status aria-live="polite"></output></section>`;
   const status = root.querySelector<HTMLOutputElement>('output')!;
   const projectionSelect = root.querySelector<HTMLSelectElement>('[data-projection]')!;
   const rasterSelect = root.querySelector<HTMLSelectElement>('[data-raster]')!;
@@ -46,6 +46,7 @@ export function mountProjectionDomains(root: HTMLElement) {
     const request = ++generation; active?.abort(); active = new AbortController();
     const provenanceMode=projectionSelect.value.endsWith('-provenance');
     rasterSelect.disabled=provenanceMode;
+    root.querySelector<HTMLElement>('[data-wrapper-label]')!.hidden=projectionSelect.value!=='path-provenance';
     root.querySelector('[data-vertices]')!.parentElement!.hidden=projectionSelect.value!=='path-provenance';
     root.querySelector('[data-generated]')!.parentElement!.hidden=projectionSelect.value!=='polygon-provenance';
     root.querySelector('[data-pipeline]')!.textContent=provenanceMode?'Native math.gl preparation → optional provenance buffers → deck.gl.':'GeoArrow → math.gl worker → D3 stream → math.gl triangles → deck.gl.';
@@ -56,7 +57,7 @@ export function mountProjectionDomains(root: HTMLElement) {
       root.dataset.ready='polygon-provenance';return;
     }
     if(projectionSelect.value==='path-provenance'){
-      const demo=pathProvenanceLayers(root.querySelector<HTMLInputElement>('[data-vertices]')!.checked);
+      const demo=pathProvenanceLayers(root.querySelector<HTMLInputElement>('[data-vertices]')!.checked,root.querySelector<HTMLSelectElement>('[data-wrapper]')!.value);
       deck.setProps({layers:demo.layers});status.textContent='Native math.gl provenance: dashes continue in source meters across cuts. Hover vertices for segment, t, distance and endpoint reason. White vertices are original; blue are generated. Color interpolates source timestamps at 0, 2, 5 and 9 hours.';
       root.dataset.ready='path-provenance';return;
     }
@@ -87,6 +88,7 @@ export function mountProjectionDomains(root: HTMLElement) {
     } catch (error) {if (request === generation) {status.textContent = `Failed: ${String(error)}`; root.dataset.error = String(error);}}
   }
   projectionSelect.addEventListener('change', update); rasterSelect.addEventListener('change', update);
+  root.querySelector('[data-wrapper]')!.addEventListener('change',update);
   root.querySelector('[data-generated]')!.addEventListener('change',update);
   root.querySelector('[data-vertices]')!.addEventListener('change',update);
   void update();

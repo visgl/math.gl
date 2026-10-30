@@ -9,6 +9,7 @@ import {
   type PreparedMapGeometry
 } from '../../src/discontinuous';
 import {elasticI} from '../../src/elastic';
+import {angle, geographic} from '../../src/discontinuous/math';
 
 const maps = [
   new MapEngine({version: 1, id: 'mercator', definition: {type: 'mercator'}}),
@@ -476,7 +477,7 @@ test('retracing endpoint coordinates does not manufacture source endpoints', () 
     }
   }
 });
-test('cap wrappers reject provenance against intermediate sampled fragments', () => {
+test('rigid cap wrappers retain lineage through streamed coverage cuts', () => {
   const map = new MapEngine({
     version: 1,
     id: 'satellite',
@@ -487,19 +488,36 @@ test('cap wrappers reject provenance against intermediate sampled fragments', ()
       geometry: {
         type: 'LineString',
         coordinates: [
-          [-10, 0],
-          [10, 0]
+          [-80, 10],
+          [0, 15],
+          [80, 10],
+          [0, 15],
+          [-80, 10]
         ]
       }
     }
   ];
-  expect(map.prepareFeatures(features).paths.parts.length).toBeGreaterThan(0);
-  for (const provenance of [
-    {sourceSegments: true},
-    {boundaries: true},
-    {distances: {metric: 'spherical' as const, radius: 1}}
-  ])
-    expect(() => map.prepareFeatures(features, {provenance})).toThrow(/Cap-clipped paths/);
+  const ordinary = map.prepareFeatures(features);
+  const rich = map.prepareFeatures(features, {
+    provenance: {
+      sourceSegments: true,
+      boundaries: true,
+      distances: {metric: 'spherical', radius: 1}
+    }
+  });
+  expect(rich.paths.positions).toEqual(ordinary.paths.positions);
+  expect(rich.paths.sourcePositions).toEqual(ordinary.paths.sourcePositions);
+  expect(rich.paths.pathStarts).toEqual(ordinary.paths.pathStarts);
+  const p = rich.paths.provenance!;
+  expect(p.startReasons).toContain('coverage-boundary');
+  expect(p.endReasons).toContain('coverage-boundary');
+  expect(new Set(p.sourceSegmentIndices!).size).toBe(4);
+  for (let part = 0; part < rich.paths.parts.length; part++) {
+    const start = rich.paths.pathStarts[part],
+      end = rich.paths.pathStarts[part + 1];
+    for (let i = start + 1; i < end; i++)
+      expect(p.sourceDistances![i]).toBeGreaterThanOrEqual(p.sourceDistances![i - 1]);
+  }
 });
 
 test('reconstructing wrappers reject direct path lineage requests explicitly', () => {
@@ -507,7 +525,7 @@ test('reconstructing wrappers reject direct path lineage requests explicitly', (
     [-10, 0],
     [10, 0]
   ];
-  for (const map of [maps[0], maps[3]]) {
+  for (const map of [maps[3]]) {
     expect(map.projectLine(line).length).toBeGreaterThan(0);
     expect(() => map.projectLine(line, {pathProvenance: true})).toThrow(
       /do not support source provenance/
@@ -675,4 +693,98 @@ test('reconstructing polygon wrappers reject direct edge provenance requests', (
       })
     ).toThrow(/not support edge provenance/);
   }
+});
+
+test('Mercator latitude clipping retains source segment lineage and distance', () => {
+  const features: MapFeature[] = [
+    {
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [-20, 70],
+          [20, 89],
+          [60, 70],
+          [20, 89],
+          [-20, 70]
+        ]
+      }
+    }
+  ];
+  const map = maps[0];
+  const ordinary = map.prepareFeatures(features);
+  const rich = map.prepareFeatures(features, {
+    provenance: {
+      sourceSegments: true,
+      boundaries: true,
+      distances: {metric: 'spherical', radius: 1}
+    }
+  });
+  expect(rich.paths.positions).toEqual(ordinary.paths.positions);
+  expect(rich.paths.sourcePositions).toEqual(ordinary.paths.sourcePositions);
+  expect(rich.paths.pathStarts).toEqual(ordinary.paths.pathStarts);
+  const p = rich.paths.provenance!;
+  expect(p.sourceDistances!.length).toBe(rich.paths.positions.length / 2);
+  expect(p.startReasons).toContain('coverage-boundary');
+  expect(p.endReasons).toContain('coverage-boundary');
+  expect(new Set(p.sourceSegmentIndices!).size).toBe(4);
+  for (let part = 0; part < rich.paths.parts.length; part++) {
+    const start = rich.paths.pathStarts[part],
+      end = rich.paths.pathStarts[part + 1];
+    for (let i = start + 1; i < end; i++)
+      expect(p.sourceDistances![i]).toBeGreaterThanOrEqual(p.sourceDistances![i - 1]);
+  }
+  expect(structuredClone(rich)).toEqual(rich);
+});
+
+test('wrapper path parameters reconstruct original great-circle points', () => {
+  const coordinates: [number, number][] = [
+    [-75, 20],
+    [0, 85],
+    [75, 20],
+    [0, 85],
+    [-75, 20]
+  ];
+  const sphere = coordinates.map(geographic);
+  const cumulative = [0];
+  for (let i = 1; i < sphere.length; i++)
+    cumulative.push(cumulative[i - 1] + angle(sphere[i - 1], sphere[i]));
+  for (const map of [
+    maps[0],
+    new MapEngine({
+      version: 1,
+      id: 'satellite',
+      definition: {type: 'regional', projection: 'satellite'}
+    })
+  ]) {
+    const result = map.prepareFeatures([{geometry: {type: 'LineString', coordinates}}], {
+      provenance: {
+        sourceSegments: true,
+        boundaries: true,
+        distances: {metric: 'spherical', radius: 1}
+      }
+    });
+    const paths = result.paths,
+      p = paths.provenance!;
+    for (let i = 0; i < p.sourceSegmentIndices!.length; i++) {
+      const index = p.sourceSegmentIndices![i],
+        t = p.sourceSegmentParameters![i],
+        a = sphere[index],
+        b = sphere[index + 1],
+        arc = angle(a, b);
+      const v = a.map(
+        (x, k) => (Math.sin((1 - t) * arc) * x + Math.sin(t * arc) * b[k]) / Math.sin(arc)
+      );
+      const point = geographic([paths.sourcePositions[i * 2], paths.sourcePositions[i * 2 + 1]]);
+      expect(Math.hypot(...v.map((x, k) => x - point[k]))).toBeLessThan(1e-10);
+      expect(p.sourceDistances![i]).toBeCloseTo(cumulative[index] + t * arc, 10);
+    }
+  }
+  const nonlinear = new MapEngine({
+    version: 1,
+    id: 'armadillo',
+    definition: {type: 'regional', projection: 'armadillo'}
+  });
+  expect(() => nonlinear.projectLine(coordinates, {pathProvenance: true})).toThrow(
+    /Nonlinear cap-clipped/
+  );
 });
