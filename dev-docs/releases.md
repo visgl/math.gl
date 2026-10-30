@@ -75,7 +75,7 @@ actual dependency chain, and offline tests exercise conflict recovery and errors
 Remove the patch only after that behavior is available through a tested upstream
 upgrade. See npm/cli#10078 and sigstore/sigstore-js#1708/#1709.
 
-Upstream dev-tools PR #71 covers idempotent GitHub releases and bounded partial
-publish retries but is not yet released. The latest published dev-tools beta.1
-does not contain it. This local publisher avoids requiring an unreleased dev-tools version and
-also handles the signing-stack bug; it can be revisited after upstream releases.
+Upstream dev-tools PR #71 adds idempotent GitHub releases and bounded partial
+publish retries. This local helper also verifies the signing stack, guards
+recovery sources and dependencies, and checks every npm version, dist-tag and
+provenance attestation before reporting success.
