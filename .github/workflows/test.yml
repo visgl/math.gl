@@ -1,26 +1,92 @@
 name: test
 
-# On every pull request, but only on push to master
+# PRs and master run core checks; nightly/manual runs add full cross-browser evidence.
 on:
   push:
     branches:
       - master
   pull_request:
 
+  schedule:
+    - cron: 17 7 * * *
+  workflow_dispatch: {}
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  plan:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    outputs:
+      full: ${{ steps.profile.outputs.full }}
+      browsers: ${{ steps.profile.outputs.browsers }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Node (with Corepack)
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: '.nvmrc'
+      - name: Fetch PR base
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: git fetch --no-tags --depth=1 origin "$BASE_SHA"
+      - name: Select qualification profile
+        id: profile
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node scripts/ci-profile.mjs
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Node (with Corepack)
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack / Yarn 4
+        run: |
+          corepack enable
+          corepack prepare yarn@4.18.0 --activate
+          yarn -v
+
+      - name: Cache Yarn Berry artifacts
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.yarn/berry/cache
+            .yarn/install-state.gz
+          key: ${{ runner.os }}-yarn4-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'package.json') }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build code
+        run: yarn build
+      - name: Archive package builds
+        run: find modules -mindepth 2 -maxdepth 2 -type d -name dist -print0 | tar --null -T - -cf /tmp/mathgl-build.tar
+      - name: Upload package build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: package-build
+          path: /tmp/mathgl-build.tar
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
   checks:
     runs-on: ubuntu-22.04
     timeout-minutes: 15
-    permissions:
-      checks: write
-      contents: read
 
     steps:
       - name: Checkout code
@@ -47,6 +113,17 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --immutable
+      - name: Download current-run package build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: package-build
+          path: /tmp/package-build
+      - name: Restore package build
+        run: tar -xf /tmp/package-build/mathgl-build.tar
+      - name: Test CI scheduling and required gate
+        run: node --test scripts/ci.test.mjs
+      - name: Check projection scorecard integrity
+        run: node --test modules/geospatial/projection/scripts/scorecard.test.mjs
 
       - name: Check source license and copyright headers
         run: |
@@ -84,24 +161,6 @@ jobs:
       - name: Test beta release preparation
         run: node --test scripts/publish-beta.test.mjs
 
-      - name: Build code
-        run: yarn build
-
-      - name: Test GeoArrow stream worker example
-        run: |
-          node --test examples/geospatial/geoarrow-stream-worker/worker.test.mjs
-          yarn workspace math.gl-geoarrow-stream-worker build
-
-      - name: Test raster mesh composition
-        run: |
-          yarn workspace math.gl-raster-mesh-preparation test
-          yarn workspace math.gl-raster-mesh-preparation build
-
-      - name: Test projection domains example
-        run: |
-          yarn workspace math.gl-projection-domains test
-          yarn workspace math.gl-projection-domains build
-
       - name: Check worker API types
         run: yarn check:worker-types
 
@@ -122,22 +181,6 @@ jobs:
 
       - name: Check consolidated packages, exports, and assets
         run: yarn check:packages
-
-      - name: Test and build solar terminator
-        run: |
-          yarn workspace math.gl-sun-terminator test
-          yarn workspace math.gl-sun-terminator build
-
-      - name: Test and build tectonic time machine
-        run: |
-          yarn workspace math.gl-tectonic-time-machine test
-          yarn workspace math.gl-tectonic-time-machine build
-
-      - name: Test expression preview seam handling
-        run: node --test examples/core/expressions/*.test.mjs
-
-      - name: Test Alpine Ice Age dataset and interpolation
-        run: yarn workspace math.gl-alpine-ice-age test
 
       - name: Check curves package exports, public types and tree shaking
         run: yarn check:curves-package
@@ -253,6 +296,48 @@ jobs:
       - name: Check CRS type boundaries
         run: yarn check:crs-types
 
+      - name: Run lint
+        run: yarn lint
+    needs:
+      - build
+  examples:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs:
+      - build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Node (with Corepack)
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack / Yarn 4
+        run: |
+          corepack enable
+          corepack prepare yarn@4.18.0 --activate
+          yarn -v
+
+      - name: Cache Yarn Berry artifacts
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.yarn/berry/cache
+            .yarn/install-state.gz
+          key: ${{ runner.os }}-yarn4-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'package.json') }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Download current-run package build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: package-build
+          path: /tmp/package-build
+      - name: Restore package build
+        run: tar -xf /tmp/package-build/mathgl-build.tar
+
       # Keep browser downloads across runs; --with-deps still installs OS libraries.
       - name: Cache Playwright browser
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
@@ -273,15 +358,41 @@ jobs:
       - name: Install Chromium for coverage
         run: yarn playwright install --with-deps chromium
 
+      - name: Test GeoArrow stream worker example
+        run: |
+          node --test examples/geospatial/geoarrow-stream-worker/worker.test.mjs
+          yarn workspace math.gl-geoarrow-stream-worker build
+
+      - name: Test raster mesh composition
+        run: |
+          yarn workspace math.gl-raster-mesh-preparation test
+          yarn workspace math.gl-raster-mesh-preparation build
+
+      - name: Test projection domains example
+        run: |
+          yarn workspace math.gl-projection-domains test
+          yarn workspace math.gl-projection-domains build
+
+      - name: Test and build solar terminator
+        run: |
+          yarn workspace math.gl-sun-terminator test
+          yarn workspace math.gl-sun-terminator build
+
+      - name: Test and build tectonic time machine
+        run: |
+          yarn workspace math.gl-tectonic-time-machine test
+          yarn workspace math.gl-tectonic-time-machine build
+
+      - name: Test expression preview seam handling
+        run: node --test examples/core/expressions/*.test.mjs
+
+      - name: Test Alpine Ice Age dataset and interpolation
+        run: yarn workspace math.gl-alpine-ice-age test
+
       - name: Test and build DGGS cell explorer
         run: |
           yarn workspace math.gl-dggs-cell-explorer build
           yarn workspace math.gl-dggs-cell-explorer test:browser
-
-      - name: Test isolated shared-memory worker state
-        env:
-          MATHGL_TEST_SHARED_MEMORY: '1'
-        run: yarn vitest run --project headless modules/core/test/worker-utils/browser.spec.ts
 
       - name: Test proj-wasm CRS integration in Node and Chromium
         timeout-minutes: 2
@@ -302,38 +413,84 @@ jobs:
         timeout-minutes: 2
         run: node scripts/check-landed-review-examples.mjs
 
-      - name: Check projection scorecard integrity and collect Node evidence
-        timeout-minutes: 5
-        env:
-          SCORECARD_POINTS: ${{ github.event_name == 'pull_request' && '2000' || '20000' }}
-          SCORECARD_SAMPLES: ${{ github.event_name == 'pull_request' && '3' || '7' }}
-          SCORECARD_WINDOW: ${{ github.event_name == 'pull_request' && '4' || '12' }}
-        run: |
-          node --test modules/geospatial/projection/scripts/scorecard.test.mjs
-          node modules/geospatial/projection/scripts/collect-scorecard-node.mjs --directory /tmp/projection-scorecard-node --points "$SCORECARD_POINTS" --samples "$SCORECARD_SAMPLES" --min-sample-ms "$SCORECARD_WINDOW"
-
-      - name: Upload Node scorecard evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: projection-scorecard-node
-          path: /tmp/projection-scorecard-node
-          if-no-files-found: error
-
       - name: Test and build WKB workbench
         run: |
           yarn workspace math.gl-wkb-workbench build
           yarn workspace math.gl-wkb-workbench test:browser
 
-      - name: Run headless tests with coverage
-        run: yarn test-coverage
-
       - name: Test and build terrain sampling example
         run: |
           yarn workspace math.gl-terrain-sampling build
           yarn workspace math.gl-terrain-sampling test:browser
+  coverage:
+    name: Browser coverage
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    permissions:
+      checks: write
+      contents: read
+    needs:
+      - build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: Run lint
-        run: yarn lint
+      - name: Setup Node (with Corepack)
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack / Yarn 4
+        run: |
+          corepack enable
+          corepack prepare yarn@4.18.0 --activate
+          yarn -v
+
+      - name: Cache Yarn Berry artifacts
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.yarn/berry/cache
+            .yarn/install-state.gz
+          key: ${{ runner.os }}-yarn4-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'package.json') }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Download current-run package build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: package-build
+          path: /tmp/package-build
+      - name: Restore package build
+        run: tar -xf /tmp/package-build/mathgl-build.tar
+
+      # Keep browser downloads across runs; --with-deps still installs OS libraries.
+      - name: Cache Playwright browser
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-ubuntu22-playwright-chromium-${{ hashFiles('node_modules/playwright-core/browsers.json') }}
+
+      # The Azure Ubuntu mirror has taken 6+ minutes to fetch browser fonts.
+      # Use Ubuntu's main archive and bound stalled network requests. OS libraries
+      # are still installed on every fresh runner; a browser cache cannot replace them.
+      # Hosted runners also use mirror+file entries backed by apt-mirrors.txt.
+      - name: Configure Ubuntu archive for browser dependencies
+        run: |
+          sudo find /etc/apt -maxdepth 2 -type f \( -name '*.list' -o -name '*.sources' -o -name '*mirrors*.txt' \) \
+            -exec sed -i 's|http[s]*://azure\.archive\.ubuntu\.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' {} +
+          printf 'Acquire::Retries "2";\nAcquire::http::Timeout "20";\nAcquire::https::Timeout "20";\n' | sudo tee /etc/apt/apt.conf.d/80-ci-network
+
+      - name: Install Chromium for coverage
+        run: yarn playwright install --with-deps chromium
+
+      - name: Test isolated shared-memory worker state
+        env:
+          MATHGL_TEST_SHARED_MEMORY: '1'
+        run: yarn vitest run --project headless modules/core/test/worker-utils/browser.spec.ts
+
+      - name: Run headless tests with coverage
+        run: yarn test-coverage
 
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
@@ -392,8 +549,6 @@ jobs:
                 text: `**${totals.hit.toLocaleString()} / ${totals.found.toLocaleString()}** instrumented lines are covered.\n\n[View the detailed Coveralls report](https://coveralls.io).`
               }
             });
-
-  # Website builds must run before package dist files exist, just as in deployment.
   website:
     runs-on: ubuntu-22.04
     timeout-minutes: 15
@@ -434,7 +589,6 @@ jobs:
         env:
           WEBSITE_BASE_URL: /math.gl/next/
         run: yarn workspace project-website build
-
   node-tests:
     runs-on: ubuntu-22.04
     timeout-minutes: 15
@@ -463,13 +617,18 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --immutable
-
-      - name: Build code
-        run: yarn build
+      - name: Download current-run package build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: package-build
+          path: /tmp/package-build
+      - name: Restore package build
+        run: tar -xf /tmp/package-build/mathgl-build.tar
 
       - name: Run Node tests
         run: yarn test-node
-
+    needs:
+      - build
   projection-browsers:
     name: Projection qualification (${{ matrix.browser }})
     runs-on: ubuntu-22.04
@@ -479,7 +638,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
+        browser: ${{ fromJSON(needs.plan.outputs.browsers) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -505,9 +664,13 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --immutable
-
-      - name: Build code
-        run: yarn build
+      - name: Download current-run package build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: package-build
+          path: /tmp/package-build
+      - name: Restore package build
+        run: tar -xf /tmp/package-build/mathgl-build.tar
 
       # Keep browser downloads across runs; --with-deps still installs OS libraries.
       - name: Cache Playwright browser
@@ -566,10 +729,12 @@ jobs:
           BROWSER_SAMPLES: ${{ github.event_name == 'pull_request' && '3' || '7' }}
           BROWSER_MIN_SAMPLE_MS: ${{ github.event_name == 'pull_request' && '4' || '12' }}
         run: node modules/geospatial/projection/scripts/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points 20000 --samples "$BROWSER_SAMPLES" --min-sample-ms "$BROWSER_MIN_SAMPLE_MS" --output /tmp/projection-browser-qualification.json
+        if: needs.plan.outputs.full == 'true'
 
       - name: Evaluate optional worker correctness and costs
         timeout-minutes: 2
         run: node modules/geospatial/projection/scripts/benchmark-workers.mjs --browser ${{ matrix.browser }} --points 1000,100000 --samples 3 --output /tmp/projection-worker-evaluation-${{ matrix.browser }}.json
+        if: needs.plan.outputs.full == 'true'
 
       - name: Upload browser qualification measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -593,14 +758,16 @@ jobs:
             /tmp/ellipsoid-p0-${{ matrix.browser }}.json
             /tmp/projection-worker-evaluation-${{ matrix.browser }}.json
           if-no-files-found: error
-
+    needs:
+      - plan
+      - build
   projection-performance:
     if: github.event_name == 'pull_request'
     # Keep paired measurements serial within each runner to avoid CPU contention.
     strategy:
       fail-fast: false
       matrix:
-        suite: [projection, pipeline]
+        suite: [ projection, pipeline ]
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
@@ -628,9 +795,13 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --immutable
-
-      - name: Build code
-        run: yarn build
+      - name: Download current-run package build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: package-build
+          path: /tmp/package-build
+      - name: Restore package build
+        run: tar -xf /tmp/package-build/mathgl-build.tar
 
       - name: Fetch PR base for paired measurements
         env:
@@ -704,38 +875,99 @@ jobs:
             /tmp/g7-comparison.json
             /tmp/frame-batch-comparison.json
           if-no-files-found: error
+    needs:
+      - build
+  scorecard:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    if: needs.plan.outputs.full == 'true'
+    needs:
+      - plan
+      - build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-  # Consolidate evidence and enforce the required check on one runner. This avoids
-  # queueing another job after the scorecard has already completed. Publish the
-  # diagnostic scorecard before enforcing the independent performance result.
+      - name: Setup Node (with Corepack)
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack / Yarn 4
+        run: |
+          corepack enable
+          corepack prepare yarn@4.18.0 --activate
+          yarn -v
+
+      - name: Cache Yarn Berry artifacts
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.yarn/berry/cache
+            .yarn/install-state.gz
+          key: ${{ runner.os }}-yarn4-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'package.json') }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Download current-run package build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: package-build
+          path: /tmp/package-build
+      - name: Restore package build
+        run: tar -xf /tmp/package-build/mathgl-build.tar
+
+      - name: Collect full Node scorecard evidence
+        timeout-minutes: 10
+        env:
+          SCORECARD_POINTS: ${{ github.event_name == 'pull_request' && '2000' || '20000' }}
+          SCORECARD_SAMPLES: ${{ github.event_name == 'pull_request' && '3' || '7' }}
+          SCORECARD_WINDOW: ${{ github.event_name == 'pull_request' && '4' || '12' }}
+        run: |-
+          node modules/geospatial/projection/scripts/collect-scorecard-node.mjs --directory /tmp/projection-scorecard-node --points "$SCORECARD_POINTS" --samples "$SCORECARD_SAMPLES" --min-sample-ms "$SCORECARD_WINDOW"
+
+      - name: Upload Node scorecard evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: projection-scorecard-node
+          path: /tmp/projection-scorecard-node
+          if-no-files-found: error
   test:
     if: always()
-    needs: [checks, website, node-tests, projection-browsers, projection-performance]
+    needs:
+      - plan
+      - build
+      - checks
+      - examples
+      - coverage
+      - website
+      - node-tests
+      - projection-browsers
+      - projection-performance
+      - scorecard
     runs-on: ubuntu-22.04
     timeout-minutes: 3
     steps:
       - name: Checkout code
-        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Setup Node
-        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version-file: '.nvmrc'
       - name: Download Node evidence
-        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
+        if: success() && needs.plan.outputs.full == 'true' && needs.scorecard.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: projection-scorecard-node
           path: /tmp/projection-scorecard-node
       - name: Download browser evidence
-        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
+        if: success() && needs.plan.outputs.full == 'true' && needs.scorecard.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: projection-browser-qualification-*
           path: /tmp/projection-scorecard-browsers
       - name: Consolidate matched evidence
-        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
+        if: success() && needs.plan.outputs.full == 'true' && needs.scorecard.result == 'success' && needs.projection-browsers.result == 'success'
         run: |
           node modules/geospatial/projection/scripts/scorecard.mjs --node /tmp/projection-scorecard-node \
             --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-chromium/projection-browser-qualification.json \
@@ -743,7 +975,7 @@ jobs:
             --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-webkit/projection-browser-qualification.json \
             --output /tmp/projection-scorecard.json --markdown /tmp/projection-scorecard.md
       - name: Upload scorecard and publication page
-        if: success() && needs.checks.result == 'success' && needs.projection-browsers.result == 'success'
+        if: success() && needs.plan.outputs.full == 'true' && needs.scorecard.result == 'success' && needs.projection-browsers.result == 'success'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: projection-scorecard
@@ -755,19 +987,6 @@ jobs:
       - name: Require all checks to pass
         if: always()
         env:
-          WEBSITE_RESULT: ${{ needs.website.result }}
-          NODE_TESTS_RESULT: ${{ needs.node-tests.result }}
-          CHECKS_RESULT: ${{ needs.checks.result }}
-          BROWSERS_RESULT: ${{ needs.projection-browsers.result }}
-          PERFORMANCE_RESULT: ${{ needs.projection-performance.result }}
+          NEEDS: ${{ toJSON(needs) }}
           EVENT_NAME: ${{ github.event_name }}
-        run: |
-          test "$WEBSITE_RESULT" = success
-          test "$NODE_TESTS_RESULT" = success
-          test "$CHECKS_RESULT" = success
-          test "$BROWSERS_RESULT" = success
-          if [ "$EVENT_NAME" = pull_request ]; then
-            test "$PERFORMANCE_RESULT" = success
-          else
-            test "$PERFORMANCE_RESULT" = skipped
-          fi
+        run: node scripts/ci-gate.mjs
