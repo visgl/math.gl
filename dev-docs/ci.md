@@ -23,8 +23,15 @@ both `/math.gl/` and `/math.gl/next/`.
 | Firefox and WebKit independent numerical qualification | Tooling-change PRs | Yes |
 | Complete browser timing/workload matrix and worker cost evaluation | Tooling-change PRs | Yes |
 | Node timing, allocations, memory, startup evidence and matched three-browser scorecard | Tooling-change PRs | Yes |
-| Paired projection/pipeline performance against the PR base | Every PR | Not on schedule/master |
+| Paired projection/pipeline performance against the PR base | Except allowlisted documentation-only PRs | Not on schedule/master |
 | Example correctness and rendering regressions | Yes | Yes |
+
+Paired timing comparisons are skipped only when every changed path is under `docs/` or
+`dev-docs/`, or is the root `README.md`, `CHANGELOG.md` or `LICENSE`. Any other path,
+a mixed change or an empty/unknown diff retains comparisons. Tests, coverage, package
+checks and example/browser regressions still run for documentation changes. The plan
+logs its performance decision; the required gate rejects a missing decision or an
+unexpectedly skipped comparison.
 
 The full profile runs daily at **07:17 UTC** and through **Actions → test → Run workflow**.
 Schedules become active after merge to the default branch. Full matrix assertions,

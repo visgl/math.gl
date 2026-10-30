@@ -24,6 +24,7 @@ jobs:
     outputs:
       full: ${{ steps.profile.outputs.full }}
       browsers: ${{ steps.profile.outputs.browsers }}
+      performance: ${{ steps.profile.outputs.performance }}
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -762,7 +763,7 @@ jobs:
       - plan
       - build
   projection-performance:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && needs.plan.outputs.performance == 'true'
     # Keep paired measurements serial within each runner to avoid CPU contention.
     strategy:
       fail-fast: false
@@ -876,6 +877,7 @@ jobs:
             /tmp/frame-batch-comparison.json
           if-no-files-found: error
     needs:
+      - plan
       - build
   scorecard:
     runs-on: ubuntu-22.04
