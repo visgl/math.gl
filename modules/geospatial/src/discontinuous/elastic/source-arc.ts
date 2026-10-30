@@ -25,9 +25,13 @@ export function clipSourceArc(
   const linear =
     omega < 1e-14 ||
     (Math.abs(a[1]) < 1e-12 && Math.abs(b[1]) < 1e-12) ||
-    Math.abs(a[0] - b[0]) < 1e-12;
+    Math.abs(at(0)[0] - at(1)[0]) < 1e-12;
   const tangent =
     omega > 1e-14 ? va.map((v, k) => (vb[k] - v * Math.cos(omega)) / Math.sin(omega)) : [0, 0, 0];
+  // Longitude angular momentum is conserved along a great circle. Using its
+  // actual magnitude keeps nearly meridional arcs from exhausting loose bounds.
+  const momentum =
+    Math.abs(omega * (va[0] * tangent[1] - va[1] * tangent[0])) + 64 * Number.EPSILON * omega;
   const vector = (t: number) =>
     va.map((v, k) => v * Math.cos(omega * t) + tangent[k] * Math.sin(omega * t));
   const derivative = (t: number) =>
@@ -98,16 +102,17 @@ export function clipSourceArc(
           }
           const r = Math.sqrt(Math.max(0, 1 - Math.min(1, z) ** 2));
           const second = r
-            ? (omega *
-                omega *
-                ((2 * Math.abs(dy)) / r ** 4 + Math.abs(dx) * (1 / r + 1 / r ** 3))) /
+            ? ((2 * momentum * omega * Math.abs(dy)) / r ** 4 +
+                omega ** 2 * Math.abs(dx) * (1 / r + 1 / r ** 3)) /
               (RAD * length)
             : Infinity;
           if (Number.isFinite(df) && Math.abs(df) > second * h + 1e-12) {
             if (f * g < 0) bisect(lo, hi, f);
             return;
           }
-          const speed = r ? (omega * (Math.abs(dy) / r + Math.abs(dx))) / (RAD * length) : Infinity;
+          const speed = r
+            ? ((momentum * Math.abs(dy)) / r ** 2 + omega * Math.abs(dx)) / (RAD * length)
+            : Infinity;
           if (Math.abs(value(mid)) > speed * h + 1e-12) return;
           if (depth >= 24) throw new Error('Unresolved Elastic source clipping tangent or pole');
           visit(lo, mid, depth + 1);

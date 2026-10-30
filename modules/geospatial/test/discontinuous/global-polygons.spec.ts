@@ -134,3 +134,52 @@ test('Mercator global hemisphere covers the exact finite-band rectangle', () => 
       expect(Math.abs(sum / (radius * radius) - 2 * Math.PI * Math.PI)).toBeLessThan(2e-9);
     }
 });
+
+test('atlas provenance composes source fractions and suppresses artificial source borders', () => {
+  for (const definition of [
+    {type: 'goode'},
+    {type: 'myriahedral', preset: 'polyconic', columns: 12}
+  ] as const) {
+    const map = new MapEngine({
+      version: 1,
+      id: 'atlas-provenance',
+      definition: definition as never
+    });
+    for (const interior of ['left', 'right'] as const) {
+      const plain = map.projectGlobalPolygon([north], {
+          interior,
+          maxAngularStep: 10,
+          tolerance: 0.01
+        }),
+        rich = map.projectGlobalPolygon([north], {
+          interior,
+          maxAngularStep: 10,
+          tolerance: 0.01,
+          polygonEdgeProvenance: true
+        });
+      expect(rich.map(p => p.coordinates)).toEqual(plain.map(p => p.coordinates));
+      const kinds = rich.flatMap(p => p.edgeProvenance!.flat().map(e => e.kind));
+      expect(kinds).toContain('source-boundary');
+      expect(kinds.some(k => k === 'chart-cut' || k === 'continuous-chart-join')).toBe(true);
+      for (const polygon of rich)
+        polygon.edgeProvenance!.forEach((edges, ring) =>
+          edges.forEach((e, i) => {
+            if (e.kind === 'source-boundary') {
+              expect(e.ring).toBe(0);
+              const a = geographic(north[e.segment]),
+                b = geographic(north[(e.segment + 1) % north.length]),
+                length = angle(a, b);
+              for (const endpoint of [0, 1]) {
+                const p = geographic(polygon.sourceCoordinates[ring][i + endpoint]);
+                expect(angle(a, p)).toBeCloseTo((endpoint ? e.t1 : e.t0) * length, 9);
+                expect(Math.abs(dot(cross(a, b), p))).toBeLessThan(1e-10);
+              }
+            } else {
+              expect(e.ring).toBe(0xffffffff);
+              expect(e.segment).toBe(0xffffffff);
+            }
+          })
+        );
+    }
+  }
+});

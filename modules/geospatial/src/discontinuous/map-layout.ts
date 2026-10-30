@@ -467,6 +467,17 @@ export class DiscontinuousMap {
           const points: Vector[] = [];
           const edges: MapPolygonEdge[] = [];
           const classify = (a: Vector, b: Vector): MapPolygonEdge => {
+            // Directional pole copies can differ in floating-point coordinates
+            // while describing the same source direction. Their zero-length
+            // connector is computational, never an original boundary.
+            if (angle(a, b) < 64 * Number.EPSILON)
+              return {
+                kind: 'continuous-chart-join',
+                ring: 0xffffffff,
+                segment: 0xffffffff,
+                t0: 0,
+                t1: 0
+              };
             // Attribute the boolean boundary in the source clipping chart, before
             // projection/resampling. Original constraints win on coincident cuts.
             const candidates: {ring: number; segment: number}[] = [];
