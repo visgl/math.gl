@@ -8,7 +8,7 @@ import {
   type MapFeatureGeometry,
   type PreparedMapGeometry
 } from '../../src/discontinuous';
-import {elasticI} from '../../src/elastic';
+import {elasticI, elasticIII} from '../../src/elastic';
 import {angle, geographic} from '../../src/discontinuous/math';
 
 const maps = [
@@ -927,4 +927,26 @@ test('Elastic polar cells retain directional limits and computational pole conne
     expect(rich.polygons.positions.every(Number.isFinite)).toBe(true);
     expect(rich.polygons.edgeProvenance!.kinds.length).toBe(rich.polygons.positions.length / 2);
   }
+});
+
+test('Elastic III polar chart crossings do not publish source vertices in another region', () => {
+  const map = new MapEngine({
+    version: 1,
+    id: 'elastic-III-polar-ownership',
+    definition: {type: 'elastic', data: elasticIII}
+  });
+  const rings: [number, number][][] = [
+    [
+      [10, 85],
+      [15, 85],
+      [15, 90],
+      [10, 90],
+      [10, 85]
+    ]
+  ];
+  for (const provenance of [false, true])
+    for (const part of map.projectPolygon(rings, {polygonEdgeProvenance: provenance}))
+      for (const ring of part.sourceCoordinates)
+        for (const p of ring)
+          expect(map.findRegions(p), `${p} in ${part.regionId}`).toContain(part.regionId);
 });

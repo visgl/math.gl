@@ -305,20 +305,101 @@ class ElasticMap implements MapSurface {
     const out: MapPolygon[] = [];
     for (const part of splitter.projectPolygon(rings, this.sourceOptions(options)))
       for (const c of this.charts.filter(c => c.baseId === part.regionId)) {
+        // Insert exact domain crossings and interval midpoints before the
+        // boolean operation. Otherwise an arc can bow outside a source chart
+        // while its sampled chord remains inside, silently bridging the cut.
+        const prepared: Position[][] = [],
+          preparedEdges: NonNullable<MapPolygon['edgeProvenance']> = [];
+        part.coordinates.forEach((ring, r) => {
+          const points: Position[] = [],
+            edges: NonNullable<MapPolygon['edgeProvenance']>[number] = [];
+          for (let i = 1; i < ring.length; i++) {
+            const a = ring[i - 1],
+              b = ring[i],
+              arc = sourceArc(a, b),
+              length = angle(geographic(a), geographic(b)),
+              fractions = [0, 1];
+            for (const interval of clipSourceArc(a, b, c.domain))
+              for (const p of [interval.a, interval.b]) {
+                const t =
+                  length > 1e-14
+                    ? angle(geographic(a), geographic(p)) / length
+                    : Math.abs(b[0] - a[0]) > 1e-14
+                      ? (p[0] - a[0]) / (b[0] - a[0])
+                      : 0;
+                if (t > 1e-12 && t < 1 - 1e-12) fractions.push(t);
+              }
+            fractions.sort((a, b) => a - b);
+            const split = fractions.filter((t, i) => !i || t - fractions[i - 1] > 1e-12);
+            const append = (point: Position) => {
+              if (points.length >= 100000)
+                throw new Error('Elastic polygon constraint vertex limit exceeded');
+              if (points.length) {
+                const previous = points[points.length - 1];
+                if (options.polygonEdgeProvenance)
+                  edges.push(
+                    composePolygonEdge(part.edgeProvenance![r][i - 1], a, b, previous, point)
+                  );
+              }
+              points.push(point);
+            };
+            const first = arc(0);
+            if (!points.length) points.push(first);
+            else if (points[points.length - 1].some((v, k) => v !== first[k])) {
+              if (angle(geographic(points[points.length - 1]), geographic(first)) > 1e-10)
+                throw new Error('Discontinuous Elastic input source constraint');
+              if (options.polygonEdgeProvenance)
+                edges.push({
+                  kind: 'continuous-chart-join',
+                  ring: 0xffffffff,
+                  segment: 0xffffffff,
+                  t0: 0,
+                  t1: 0
+                });
+              points.push(first);
+            }
+            for (let j = 1; j < split.length; j++) {
+              append(arc((split[j - 1] + split[j]) / 2));
+              append(arc(split[j]));
+            }
+          }
+          if (points[points.length - 1].some((v, k) => v !== points[0][k])) {
+            if (angle(geographic(points[points.length - 1]), geographic(points[0])) > 1e-10)
+              throw new Error('Unclosed Elastic input source constraint');
+            if (options.polygonEdgeProvenance)
+              edges.push({
+                kind: 'continuous-chart-join',
+                ring: 0xffffffff,
+                segment: 0xffffffff,
+                t0: 0,
+                t1: 0
+              });
+            points.push([...points[0]]);
+          }
+          prepared.push(points);
+          preparedEdges.push(edges);
+        });
         const clipped = polygonClipping.intersection(
-          snapPolygon(part.coordinates),
+          snapPolygon(prepared),
           c.domain.map(snapPolygon)
         ) as Polygons;
         for (const polygon of clipped) {
-          const input = snapPolygon(part.coordinates),
-            traced = tracePolygonConstraints(input, polygon, 1e-9, part.edgeProvenance),
+          const input = snapPolygon(prepared),
+            traced = tracePolygonConstraints(
+              input,
+              polygon,
+              1e-9,
+              options.polygonEdgeProvenance ? preparedEdges : undefined,
+              undefined,
+              (a, b) => angle(geographic(a), geographic(b)) < 64 * Number.EPSILON
+            ),
             resolved = traced.rings.map(r => r.map(p => [...p] as Position));
           traced.owners.forEach((owners, r) =>
             owners.forEach((owner, i) => {
               if (!owner) return;
               const [pr, pe] = owner,
-                a = part.coordinates[pr][pe],
-                b = part.coordinates[pr][pe + 1],
+                a = prepared[pr][pe],
+                b = prepared[pr][pe + 1],
                 length = angle(geographic(a), geographic(b)),
                 arc = sourceArc(a, b);
               for (const j of [i, i + 1]) {
@@ -419,9 +500,9 @@ class ElasticMap implements MapSurface {
                     const [pr, pe] = owner;
                     edges.push(
                       composePolygonEdge(
-                        part.edgeProvenance![pr][pe],
-                        part.coordinates[pr][pe],
-                        part.coordinates[pr][pe + 1],
+                        preparedEdges[pr][pe],
+                        prepared[pr][pe],
+                        prepared[pr][pe + 1],
                         source[source.length - 1],
                         samples.source[j]
                       )
@@ -532,6 +613,9 @@ function wrap(lon: number) {
 // Spherical chart clipping leaves sub-ulp variations along coincident chart
 // edges. Quantize only Boolean operands, far below source sampling tolerance,
 // so the sweep-line operation sees identical endpoints on shared boundaries.
+
+// Normalize sub-ulp differences only for the boolean operation. Exact source
+// constraints and ancestry remain in the unsnapped prepared arrays.
 function snapPolygon(rings: readonly (readonly GeographicPosition[])[]): Position[][] {
-  return rings.map(ring => ring.map(p => p.map(v => Math.round(v * 1e10) / 1e10) as Position));
+  return rings.map(r => r.map(p => p.map(v => Math.round(v * 1e10) / 1e10) as Position));
 }

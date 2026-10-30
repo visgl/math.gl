@@ -14,7 +14,8 @@ export function tracePolygonConstraints(
   output: Position[][],
   tolerance = 1e-10,
   priorities?: MapPolygonEdge[][],
-  accept?: (point: Position) => boolean
+  accept?: (point: Position) => boolean,
+  degenerate?: (a: Position, b: Position) => boolean
 ) {
   const constraints = input.flatMap((ring, r) =>
     ring.slice(0, -1).map((a, i) => ({a, b: ring[i + 1], r, i}))
@@ -124,6 +125,10 @@ export function tracePolygonConstraints(
     for (let i = 1; i < points.length; i++) {
       const a = points[i - 1],
         b = points[i];
+      if (degenerate?.(a, b)) {
+        tags.push(null);
+        continue;
+      }
       let candidates = query(a, b).filter(c => on(a, c.a, c.b) && on(b, c.a, c.b));
       const same = (p: Position, q: Position) =>
         Math.hypot(...p.map((v, k) => v - q[k])) <=
