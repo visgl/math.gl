@@ -122,6 +122,11 @@
       },
       {
         "type": "doc",
+        "label": "Prepared surface provenance",
+        "id": "surface-mesh"
+      },
+      {
+        "type": "doc",
         "label": "Raster coordinate frames",
         "id": "raster-frame"
       },
