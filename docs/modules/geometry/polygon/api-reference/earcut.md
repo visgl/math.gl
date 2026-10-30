@@ -34,3 +34,23 @@ Arguments:
 Returns:
 
 An array of indices into the `positions` array that describes the triangulation of the polygon
+
+## Implementation and performance
+
+The custom implementation incorporates the general-purpose optimizations from
+[loaders.gl's WKB triangulator](https://github.com/visgl/loaders.gl/blob/5cbc82c81c78e297cfdc5e04b3aefc97bc3d0ba5/modules/core/src/arrow-geometry/triangulate-wkb.ts):
+reusable vertex nodes and hole queues, direct vertex indices in the clipping loop,
+and a combined coordinate-reading and signed-area pass when areas are not supplied.
+WKB header parsing, binary ring layouts, and little-endian decoding remain specific
+to loaders.gl's binary-input API.
+
+Precomputed areas must use the same projection plane as triangulation. Polygons
+with more than 80 input vertices use spatial hashing on that plane. Output indices
+refer to vertices, so multiply by `size` to locate coordinates in `positions`.
+
+Scratch nodes are reused across calls, with all mutable node fields reset before
+reuse. Nested calls and exceptions restore scratch state. Calls requiring more
+than 65,536 scratch nodes release the node cache on completion; smaller calls keep
+it for reuse. Input arrays and returned triangle arrays are never retained in the
+cache. As with upstream Earcut, self-intersections and other invalid polygons are
+handled on a best-effort basis, without a guarantee of a correct triangulation.

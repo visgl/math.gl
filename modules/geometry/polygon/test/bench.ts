@@ -8,7 +8,12 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 // @ts-nocheck
-import {earcut, Polygon, modifyPolygonWindingDirection} from '@math.gl/geometry';
+import {
+  earcut,
+  getPolygonSignedArea,
+  Polygon,
+  modifyPolygonWindingDirection
+} from '@math.gl/geometry';
 import {toNested} from './utils';
 
 const polygonSmall = [0, 0, 1, 1, 0, 2, -1, 1, -1.25, 0.5, 0, 0];
@@ -69,6 +74,22 @@ export function polygonBench(suite, addReferenceBenchmarks) {
     .add('earcut', () => {
       earcut(polygonMedium, [], 2);
     });
+
+  // Cover the hashed path and repeated typed-array workloads used by loaders.gl.
+  for (const count of [256, 4096]) {
+    const positions = new Float64Array(count * 2);
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2;
+      const radius = i % 2 ? 1 : 2;
+      positions[i * 2] = Math.cos(angle) * radius;
+      positions[i * 2 + 1] = Math.sin(angle) * radius;
+    }
+    const areas = [getPolygonSignedArea(positions)];
+    suite.add(`earcut Float64Array ${count} vertices`, () => earcut(positions));
+    suite.add(`earcut Float64Array ${count} vertices, precomputed area`, () =>
+      earcut(positions, undefined, 2, areas)
+    );
+  }
 
   return suite;
 }
