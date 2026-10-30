@@ -68,7 +68,7 @@ const polygonParts = land.evaluate(progress);
 // Each part has 3D coordinates and opacity. Render each part separately.
 ```
 
-Automatic direct morphing supports the three Elastic presets, other Elastic data with complete, non-overlapping defined grid coverage, and a small set of finite global formulas: sinusoidal, Mollweide, and Robinson. Other pairs use the globe route. Explicit `strategy: 'direct'` rejects unsupported coverage; `strategy: 'via-globe'` always takes the globe route.
+Automatic direct morphing supports the three Elastic presets, other Elastic data with complete, non-overlapping defined grid coverage, and qualified full-world projections with default parameters, including Winkel Tripel, Natural Earth II, Hammer, and the Eckert family. See the [transition compatibility rules](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/map-engine.md#createtransitiontotarget-options) for exclusions and parameter restrictions. Other pairs use the globe route. Explicit `strategy: 'direct'` rejects unsupported coverage; `strategy: 'via-globe'` always takes the globe route.
 
 The globe route moves source geometry onto the sphere, crossfades source and destination coverage there, then flattens destination geometry. This allows a world map to transition to regional insets without inventing correspondence for areas absent from one endpoint. It uses the larger endpoint radius. It does not animate physical hinges; use the hinge pose API for that.
 
