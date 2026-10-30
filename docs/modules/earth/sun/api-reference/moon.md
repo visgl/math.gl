@@ -126,8 +126,8 @@ with an appearance predicate or a cached sky snapshot.
   ephemeris and illumination calculations. `moon.ts` and numeric reference fixtures carry
   **BSD-2-Clause** SPDX identifiers, Vladimir Agafonkin's original copyright, and source
   provenance. The full unchanged upstream notice is shipped in `LICENSE-SUNCALC`.
-- [Krisciunas and Schaefer (1991), A Model of the Brightness of Moonlight](https://doi.org/10.1086/132921).
-- [Kasten and Young (1989), Revised optical air mass tables and approximation formula](https://doi.org/10.1364/AO.28.004735).
+- [Krisciunas and Schaefer (1991), A Model of the Brightness of Moonlight](cite:krisciunas1991).
+- [Kasten and Young (1989), Revised optical air mass tables and approximation formula](cite:kasten1989).
 - [USNO approximate sidereal time](https://aa.usno.navy.mil/faq/GAST).
 
 The moonlight and star-field code independently implements published mathematical equations;

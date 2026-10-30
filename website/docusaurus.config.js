@@ -187,3 +187,16 @@ for (const name of ['core', 'geometry', 'geospatial', 'earth', 'dggs', 'web-merc
       resolve(__dirname, '../modules/' + name, source);
   }
 }
+
+// Resolve shared BibTeX citations for docs and example MDX, including /next/.
+const citations = [require('../scripts/citations/remark-citations.cjs'), {baseUrl: websiteBaseUrl, bibliographyDigest: require('node:crypto').createHash('sha256').update(require('node:fs').readFileSync(resolve(__dirname, '../docs/references.bib'))).digest('hex')}];
+for (const preset of config.presets || []) {
+  if (Array.isArray(preset) && preset[1]?.docs) {
+    preset[1].docs.remarkPlugins = [...(preset[1].docs.remarkPlugins || []), citations];
+  }
+}
+for (const plugin of config.plugins) {
+  if (Array.isArray(plugin) && plugin[0] === '@docusaurus/plugin-content-docs') {
+    plugin[1].remarkPlugins = [...(plugin[1].remarkPlugins || []), citations];
+  }
+}

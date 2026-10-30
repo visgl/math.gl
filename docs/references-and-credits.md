@@ -6,6 +6,8 @@ available. Removing an npm dependency does not remove the provenance of code
 retained in the repository. Mathematical ideas, compatible APIs, copied source,
 and redistributed data are credited separately below.
 
+Academic references are maintained in the shared [bibliography](./bibliography.md). Citation metadata and source links are generated from `references.bib`; code and data licenses below remain independent of those citations.
+
 ## Package source inventory
 
 Each published package includes `LICENSE`, `THIRD-PARTY-NOTICES.md`, and the
@@ -37,24 +39,24 @@ own licenses; the table is not a transitive dependency bill of materials.
   supplied the original culling and geospatial ports. The retained Apache-2.0
   notices apply to those adaptations even where their interfaces have changed.
 - **Stefan Gottschalk, Ming C. Lin and Dinesh Manocha**, *OBBTree: A Hierarchical
-  Structure for Rapid Interference Detection*: [author-hosted paper](http://gamma.cs.unc.edu/users/gottschalk/main.pdf),
+  Structure for Rapid Interference Detection*: [author-hosted paper](cite:gottschalk1996),
   cited by the oriented bounding-box construction.
 - [Mapbox earcut](https://github.com/mapbox/earcut) and
   [Mapbox lineclip](https://github.com/mapbox/lineclip) are the upstream
   triangulation and clipping implementations adapted for flat arrays.
   earcut also credits [Simon Tatham's linked-list merge sort](https://www.chiark.greenend.org.uk/~sgtatham/algorithms/listsort.html).
-- **Steven M. LaValle**, [Planning Algorithms: quaternion interpolation](https://planning.cs.uiuc.edu/node198.html),
+- **Steven M. LaValle**, [Planning Algorithms: quaternion interpolation](cite:lavalle2006),
   is a free mathematical reference cited in the quaternion kernel.
 
 ## Mathematics and geodesy
 
-- **Charles F. F. Karney**, [Algorithms for geodesics](https://arxiv.org/abs/1109.4448),
+- **Charles F. F. Karney**, [Algorithms for geodesics](cite:karney2013),
   with [GeographicLib documentation and source](https://geographiclib.sourceforge.io/).
   math.gl incorporates attributed GeographicLib code and documents numerical
   qualification separately from the mathematical model.
-- **John P. Snyder**, [Map Projections—A Working Manual, USGS PP 1395](https://pubs.usgs.gov/pp/1395/report.pdf),
+- **John P. Snyder**, [Map Projections—A Working Manual, USGS PP 1395](cite:snyder1987),
   and **John P. Snyder and Philip M. Voxland**,
-  [An Album of Map Projections, USGS PP 1453](https://pubs.usgs.gov/pp/1453/report.pdf).
+  [An Album of Map Projections, USGS PP 1453](cite:snyder1989).
   These freely available references explain projection properties and conventions.
 - [PROJ](https://proj.org/) and [proj4js](https://github.com/proj4js/proj4js)
   supply documented formulas, directly adapted kernels and independent test
@@ -69,7 +71,7 @@ own licenses; the table is not a transitive dependency bill of materials.
   [A5](https://a5geo.org/), and [Open Location Code](https://github.com/google/open-location-code)
   define the cell systems exposed by DGGS adapters.
 - **Jarke J. van Wijk and Wim A. A. Nuij**, *Smooth and efficient zooming and
-  panning* (2003): [author-hosted paper](https://www.win.tue.nl/~vanwijk/zoompan.pdf).
+  panning* (2003): [author-hosted paper](cite:vanwijk2003).
   This is the algorithm cited by `flyToViewport`.
 
 ## Segmented maps and unfolding
@@ -97,13 +99,13 @@ models are not full atmospheric or observatory-grade simulations.
   and **Louis Strous**, [solar-position equations](https://www.aa.quae.nl/en/reken/zonpositie.html).
 - **Lukas Hošek and Alexander Wilkie**, [Skylight Modelling](https://cgg.mff.cuni.cz/projects/SkylightModelling/):
   model data distributed with the retained BSD notice.
-- **Kevin Krisciunas and Bradley E. Schaefer**, [A model of the brightness of moonlight](https://doi.org/10.1086/132921),
-  and **Andrew Crumey**, [Human contrast threshold and astronomical visibility](https://arxiv.org/abs/1405.4209).
-- **Fritz Kasten and Andrew T. Young**, [Revised optical air mass tables and approximation formula](https://doi.org/10.1364/AO.28.004735).
-- **Ferdinando Patat and collaborators**, [UBVRI twilight sky brightness at ESO-Paranal](https://arxiv.org/abs/astro-ph/0604128).
-- **Francisco J. Ballesteros**, [New insights into black bodies](https://arxiv.org/abs/1201.1809),
+- **Kevin Krisciunas and Bradley E. Schaefer**, [A model of the brightness of moonlight](cite:krisciunas1991),
+  and **Andrew Crumey**, [Human contrast threshold and astronomical visibility](cite:crumey2014).
+- **Fritz Kasten and Andrew T. Young**, [Revised optical air mass tables and approximation formula](cite:kasten1989).
+- **Ferdinando Patat and collaborators**, [UBVRI twilight sky brightness at ESO-Paranal](cite:patat2006).
+- **Francisco J. Ballesteros**, [New insights into black bodies](cite:ballesteros2012),
   used for the documented stellar color-temperature approximation.
-- **Eric Bruneton and Fabrice Neyret**, [Precomputed Atmospheric Scattering](https://ebruneton.github.io/precomputed_atmospheric_scattering/),
+- **Eric Bruneton and Fabrice Neyret**, [Precomputed Atmospheric Scattering](cite:bruneton2008),
   a reference for the cloud/atmosphere model; see source comments for the approximations actually implemented.
 - **Don Cross**, [Astronomy Engine](https://github.com/cosinekitty/astronomy),
   the planetary ephemeris runtime dependency.
