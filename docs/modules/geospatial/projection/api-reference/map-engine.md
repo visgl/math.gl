@@ -419,10 +419,19 @@ for data imports, the text importer, and numerical limits.
 Returns a `MapTransition` referencing the two immutable engines. `options.strategy`
 is `'auto'` (default), `'direct'`, or `'via-globe'`. `strategy` and `reason` on the
 result report the selected route. Direct preparation is supported for the same
-engine, complete non-overlapping Elastic coverage, and the `world` formulas `sinusoidal`,
-`mollweide`, and `robinson`. Automatic selection
-falls back to the globe for other pairs, including regional coverage and custom
-charts. An explicitly requested unsupported direct route throws.
+engine, complete non-overlapping Elastic coverage, and qualified full-world
+projections with default parameters. These include Winkel Tripel, Natural Earth II,
+Hammer, Aitoff, Robinson, Mollweide, Sinusoidal, the Eckert and Ginzburg families,
+and other finite, uninterrupted world formulas.
+
+Automatic selection retains the globe route for cut and regional maps, custom
+charts, parameter overrides, and world formulas not yet qualified for direct
+preparation: `gringorten`, `bertin1953`, `eisenlohr`, `nicolosi`, `polyconic`,
+`sinu-mollweide`, and `rectangular-polyconic`. This conservative fallback includes
+both singular formulas and layouts whose seam handling needs further qualification.
+An explicitly requested unsupported direct route throws. `strategy: 'via-globe'`
+always forces the globe route. Changing the central meridian or radius does not
+by itself prevent direct preparation; geometry is split at both maps' chart boundaries.
 
 Unlike the conservative `planTransitionTo()` recommendation, this method opts
 into splitting geometry against both endpoint maps. It does not change the
