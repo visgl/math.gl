@@ -908,3 +908,23 @@ test('wrapper polygon constraints preserve holes, source fractions and clipping 
       expect(structuredClone(rich)).toEqual(rich);
     }
 });
+
+test('Elastic polar cells retain directional limits and computational pole connectors', () => {
+  for (const lon of [-160, -30, 0, 120]) {
+    const rings: [number, number][][] = [
+      [
+        [lon, -90],
+        [lon + 5, -90],
+        [lon + 5, -85],
+        [lon, -85],
+        [lon, -90]
+      ]
+    ];
+    const input: MapFeature[] = [{geometry: {type: 'Polygon', coordinates: rings}}];
+    const plain = maps[3].prepareFeatures(input),
+      rich = maps[3].prepareFeatures(input, {provenance: {polygonEdges: true}});
+    expect(rich.polygons.positions).toEqual(plain.polygons.positions);
+    expect(rich.polygons.positions.every(Number.isFinite)).toBe(true);
+    expect(rich.polygons.edgeProvenance!.kinds.length).toBe(rich.polygons.positions.length / 2);
+  }
+});

@@ -385,13 +385,31 @@ class ElasticMap implements MapSurface {
               const owner = traced.owners[r][i - 1],
                 arc = owner ? sourceArc(ring[i - 1], ring[i]) : undefined;
               const samples = sample(
-                [ring[i - 1], ring[i]],
+                arc ? [arc(0), arc(1)] : [ring[i - 1], ring[i]],
                 p => c.grid.project(p),
                 options,
                 Math.min(180 / (c.grid.section.rows - 1), 360 / (c.grid.section.columns - 1)),
                 arc ? (_, t) => arc(t) : undefined
               );
               if (!source.length) {
+                source.push(samples.source[0]);
+                xy.push(samples.xy[0]);
+              } else if (
+                source[source.length - 1].some((v, k) => Math.abs(v - samples.source[0][k]) > 1e-10)
+              ) {
+                if (
+                  angle(geographic(source[source.length - 1]), geographic(samples.source[0])) >
+                  1e-10
+                )
+                  throw new Error('Discontinuous Elastic polygon source constraint');
+                if (options.polygonEdgeProvenance)
+                  edges.push({
+                    kind: 'continuous-chart-join',
+                    ring: 0xffffffff,
+                    segment: 0xffffffff,
+                    t0: 0,
+                    t1: 0
+                  });
                 source.push(samples.source[0]);
                 xy.push(samples.xy[0]);
               }
@@ -420,6 +438,20 @@ class ElasticMap implements MapSurface {
                 source.push(samples.source[j]);
                 xy.push(samples.xy[j]);
               }
+            }
+            if (source.length && source[source.length - 1].some((v, k) => v !== source[0][k])) {
+              if (angle(geographic(source[source.length - 1]), geographic(source[0])) > 1e-10)
+                throw new Error('Unclosed Elastic polygon source constraint');
+              if (options.polygonEdgeProvenance)
+                edges.push({
+                  kind: 'continuous-chart-join',
+                  ring: 0xffffffff,
+                  segment: 0xffffffff,
+                  t0: 0,
+                  t1: 0
+                });
+              source.push([...source[0]]);
+              xy.push([...xy[0]]);
             }
             coordinates.push(xy);
             sourceCoordinates.push(source);
