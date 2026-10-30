@@ -46,7 +46,7 @@ export function mountProjectionDomains(root: HTMLElement) {
     const name = projectionSelect.value as ProjectionName, kind = rasterSelect.value as RasterKind;
     if(projectionSelect.value==='path-provenance'){
       const demo=pathProvenanceLayers(root.querySelector<HTMLInputElement>('[data-vertices]')!.checked);
-      deck.setProps({layers:demo.layers});status.textContent='Native math.gl provenance: dashes continue in source meters across cuts. Hover vertices for segment, t, distance and endpoint reason. White vertices are original; blue are generated. Color varies with source-segment time fraction.';
+      deck.setProps({layers:demo.layers});status.textContent='Native math.gl provenance: dashes continue in source meters across cuts. Hover vertices for segment, t, distance and endpoint reason. White vertices are original; blue are generated. Color interpolates source timestamps at 0, 2, 5 and 9 hours.';
       root.dataset.ready='path-provenance';return;
     }
     status.textContent = 'Streaming geometry in a worker…';

@@ -577,5 +577,6 @@ categorical attributes, meter widths, surface normals or extrusion.
 
 The [Projection domains example](https://visgl.github.io/math.gl/next/examples/projection-domains)
 includes a path-provenance mode with distance-continuous dashes and inspectable
-source lineage. This contract supports the requirements discussed in
+source lineage. Color interpolates declared source timestamps using segment/t;
+dash phase uses cumulative source meters. This contract supports the requirements discussed in
 [deck.gl#10922](https://github.com/visgl/deck.gl/issues/10922).
