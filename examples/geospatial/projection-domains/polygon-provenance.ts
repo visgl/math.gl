@@ -15,7 +15,7 @@ export function polygonProvenanceLayers(showGenerated=false,wrapper='goode',atla
     [[-55,30],[-55,45],[-25,45],[-25,30],[-55,30]]
   ]}}],{polygonOutlines:false,provenance:{polygonEdges:true},...(atlas?{sphericalCuts:{interior:'left' as const}}:{})});
   const {polygons}=prepared,edges=polygons.edgeProvenance!,fills:any[]=[],outlines:any[]=[];
-  const point=(i:number)=>[polygons.positions[i*2]*100,polygons.positions[i*2+1]*100];
+  const point=(i:number)=>[polygons.positions[i*2]*200,polygons.positions[i*2+1]*200];
   for(let part=0;part<polygons.parts.length;part++){
     const rings=[];
     for(let ring=polygons.polygonStarts[part];ring<polygons.polygonStarts[part+1];ring++){
