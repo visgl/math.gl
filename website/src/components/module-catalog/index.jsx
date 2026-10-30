@@ -187,7 +187,7 @@ function ModuleCard({module, baseUrl}) {
   const docsUrl = `${baseUrl}docs/modules/${module.packageName.replace('@math.gl/', '')}`;
   return (
     <a className={`${styles.card} ${styles[module.theme]}`} href={docsUrl}>
-      <div className={`${styles.cardImage} ${module.name === 'GeoArrow' ? styles.logoImage : ''}`}>
+      <div className={`${styles.cardImage} ${module.name === 'GeoArrow' ? styles.logoImage : ''} ${['GeoArrow', 'WKB'].includes(module.name) ? styles.fitImage : ''}`}>
         <img src={module.image.startsWith('https://') ? module.image : `${baseUrl}images/${module.image}`} alt={module.imageAlt} loading="lazy" />
         <span className={styles.packageName}>
           {module.packageName}

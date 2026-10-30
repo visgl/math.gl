@@ -441,7 +441,20 @@
 .cardImage.logoImage {
   background: #f4f8fc;
 }
-.cardImage.logoImage img {
+.cardImage.fitImage img {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
   object-fit: contain;
-  padding: 24px 48px 36px;
+  padding: 12px 12px 34px;
+  transform: none;
+}
+.cardImage.fitImage::after {
+  inset: auto 0 0;
+  height: 28px;
+  background: #101a2b;
 }
