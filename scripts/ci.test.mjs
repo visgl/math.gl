@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {test} from 'node:test';
 import {selectProfile} from './ci-profile.mjs';
 import {checkResults} from './ci-gate.mjs';
@@ -163,4 +167,41 @@ test('a missing performance decision cannot silently skip comparisons', () => {
     workflow,
     /if: github.event_name == 'pull_request' && needs.plan.outputs.performance == 'true'/
   );
+});
+
+test('renaming a qualification helper into docs retains both source-path gates', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'math-ci-rename-'));
+  const git = (...args) =>
+    execFileSync('git', args, {
+      cwd: directory,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe']
+    }).trim();
+  try {
+    git('init');
+    git('config', 'user.name', 'CI test fixture');
+    git('config', 'user.email', 'fixture@example.invalid');
+    git('config', 'diff.renames', 'true');
+    const source = 'modules/geospatial/projection/test/native-forward-reference.ts';
+    mkdirSync(join(directory, 'modules/geospatial/projection/test'), {recursive: true});
+    writeFileSync(join(directory, source), 'export const reference = 42;\n');
+    git('add', '.');
+    git('commit', '-m', 'reference');
+    const base = git('rev-parse', 'HEAD');
+    mkdirSync(join(directory, 'docs'));
+    git('mv', source, 'docs/reference.ts');
+    git('commit', '-m', 'move reference');
+    // Ensure this fixture really exercises Git's destination-only rename reporting.
+    assert.equal(git('diff', '--name-only', base, 'HEAD'), 'docs/reference.ts');
+    const output = join(directory, 'outputs');
+    execFileSync(process.execPath, [fileURLToPath(new URL('./ci-profile.mjs', import.meta.url))], {
+      cwd: directory,
+      env: {...process.env, EVENT_NAME: 'pull_request', BASE_SHA: base, GITHUB_OUTPUT: output}
+    });
+    const profile = readFileSync(output, 'utf8');
+    assert.match(profile, /^performance=true$/m);
+    assert.match(profile, /^full=true$/m);
+  } finally {
+    rmSync(directory, {recursive: true, force: true});
+  }
 });

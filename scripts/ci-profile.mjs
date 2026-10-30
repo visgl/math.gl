@@ -38,9 +38,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   }
   const paths =
     event === 'pull_request'
-      ? execFileSync('git', ['diff', '--name-only', '-z', process.env.BASE_SHA, 'HEAD'], {
-          encoding: 'utf8'
-        })
+      ? execFileSync(
+          'git',
+          ['diff', '--no-renames', '--name-only', '-z', process.env.BASE_SHA, 'HEAD'],
+          {
+            encoding: 'utf8'
+          }
+        )
           .split('\0')
           .filter(Boolean)
       : [];
