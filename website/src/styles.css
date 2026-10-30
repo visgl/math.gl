@@ -271,3 +271,234 @@ html[data-theme='dark'] .theme-doc-sidebar-container {
     backdrop-filter: none;
   }
 }
+
+.navbar-github-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.navbar-github-stars img {
+  height: 20px;
+  width: auto;
+  vertical-align: middle;
+}
+
+/* HTML navbar items need the same spacing as ordinary mobile menu links. */
+.navbar-sidebar .navbar-github-stars {
+  display: flex;
+  padding: var(--ifm-menu-link-padding-vertical) var(--ifm-menu-link-padding-horizontal);
+  color: var(--ifm-menu-color);
+  font-weight: var(--ifm-font-weight-semibold);
+  line-height: 1.5;
+  border-radius: 8px;
+}
+.navbar-sidebar .navbar-github-stars:hover {
+  background: var(--ifm-menu-color-background-hover);
+  color: var(--ifm-menu-color-active);
+  text-decoration: none;
+}
+.navbar-sidebar .navbar-github-stars img {
+  display: none;
+}
+
+/* Keep the desktop toolbar on tablets; only phones need the collapsed menu. */
+@media (min-width: 768px) and (max-width: 996px) {
+  .navbar__inner .navbar__toggle {
+    display: none;
+  }
+  .navbar__inner .navbar__item {
+    display: inline-flex;
+    align-items: center;
+  }
+  .navbar__inner [class*='navbarSearchContainer'] {
+    position: static;
+    padding-left: var(--ifm-navbar-item-padding-horizontal);
+  }
+  .navbar__inner [class*='colorModeToggle'] {
+    display: flex;
+  }
+  .navbar__inner {
+    --ifm-navbar-item-padding-horizontal: 0.5rem;
+  }
+}
+
+.navbar__inner .navbar-github-stars > span {
+  display: none;
+}
+
+.navbar-github-icon {
+  display: none;
+  flex-shrink: 0;
+}
+.navbar-sidebar .navbar-github-icon {
+  display: block;
+}
+
+.foundation-attribution {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 32px 0;
+}
+.foundation-attribution > a {
+  flex-shrink: 0;
+  padding: 12px;
+  border-radius: 8px;
+}
+.foundation-attribution img {
+  display: block;
+  height: auto;
+}
+.foundation-attribution p {
+  margin: 0;
+}
+@media (max-width: 480px) {
+  .foundation-attribution {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+
+.navbar-openjs {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 5px;
+}
+.navbar-openjs img {
+  display: block;
+  width: 86px;
+  height: auto;
+}
+.navbar-sidebar .navbar-openjs {
+  margin: var(--ifm-menu-link-padding-vertical) var(--ifm-menu-link-padding-horizontal);
+}
+
+html[data-theme='light'] .openjs-logo-dark,
+html[data-theme='dark'] .openjs-logo-light {
+  display: none;
+}
+
+.navbar-npm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.navbar-npm-downloads {
+  display: block;
+  height: 20px;
+  width: auto;
+}
+.navbar-npm-icon,
+.navbar-npm > span {
+  display: none;
+}
+.navbar-sidebar .navbar-npm {
+  display: flex;
+  padding: var(--ifm-menu-link-padding-vertical) var(--ifm-menu-link-padding-horizontal);
+  color: var(--ifm-menu-color);
+  font-weight: var(--ifm-font-weight-semibold);
+  line-height: 1.5;
+  border-radius: 8px;
+}
+.navbar-sidebar .navbar-npm:hover {
+  background: var(--ifm-menu-color-background-hover);
+  color: var(--ifm-menu-color-active);
+  text-decoration: none;
+}
+.navbar-sidebar .navbar-npm-downloads {
+  display: none;
+}
+.navbar-sidebar .navbar-npm-icon,
+.navbar-sidebar .navbar-npm > span {
+  display: block;
+}
+.navbar-npm-icon {
+  flex-shrink: 0;
+}
+
+.navbar__inner .navbar-github-stars {
+  vertical-align: middle;
+  line-height: 1;
+}
+
+@media (min-width: 768px) {
+  .navbar__inner .navbar-badge {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+  }
+  .navbar__inner .navbar-badge > a {
+    display: flex;
+    align-items: center;
+    height: 20px;
+    line-height: 1;
+  }
+  .navbar__inner .navbar-badge img {
+    display: block;
+    height: 20px;
+    width: auto;
+    margin: 0;
+  }
+}
+
+.theme-doc-markdown .badges {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.theme-doc-markdown .badges a,
+.theme-doc-markdown .badges img {
+  display: block;
+  margin: 0;
+}
+.theme-doc-markdown .badges img {
+  height: 20px;
+  width: auto;
+}
+
+/* Compact footer: inline link groups instead of tall navigation columns. */
+.footer {
+  padding: 20px 24px 16px;
+  font-size: 0.85rem;
+}
+.footer .footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  margin-bottom: 14px;
+}
+.footer .footer__col {
+  flex: 1 1 280px;
+  margin: 0;
+  padding: 0;
+}
+.footer .footer__title {
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+}
+.footer .footer__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+}
+.footer .footer__item {
+  margin: 0;
+}
+.footer .footer__link-item {
+  line-height: 1.6;
+}
+.footer .footer__copyright {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  opacity: 0.7;
+}
+@media (max-width: 520px) {
+  .footer {
+    padding: 16px 20px;
+  }
+}

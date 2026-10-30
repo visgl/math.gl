@@ -2,7 +2,14 @@
 sidebar_label: Introduction
 ---
 
-<p class="badges">
+import ModuleCatalog from '@site/src/components/module-catalog';
+
+<p className="badges">
+  <a href="https://github.com/visgl/math.gl/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT license" height="20" /></a>
+  <a href="https://www.npmjs.com/package/@math.gl/core"><img src="https://img.shields.io/npm/dm/@math.gl/core?style=flat-square" alt="Monthly npm downloads for @math.gl/core" height="20" /></a>
+  <a href="https://www.npmjs.com/package/@math.gl/core"><img src="https://img.shields.io/npm/v/@math.gl/core?style=flat-square" alt="npm version" height="20" /></a>
+  <a href="https://github.com/visgl/math.gl"><img src="https://img.shields.io/github/stars/visgl/math.gl?style=flat-square" alt="GitHub stars" height="20" /></a>
+  <a href="https://www.typescriptlang.org/" title="Built with TypeScript 6.0.3"><img src="https://img.shields.io/badge/6.0.3-3178c6?style=flat-square&amp;logo=typescript&amp;logoColor=white" alt="Built with TypeScript 6.0.3" height="20" /></a>
   <a href="https://coveralls.io/github/visgl/math.gl?branch=master">
     <img src="https://img.shields.io/coveralls/visgl/math.gl.svg?style=flat-square&label=coverage" alt="coverage" />
   </a>
@@ -16,18 +23,18 @@ math.gl is a modular TypeScript toolbox for **geospatial** and **3D** math. Star
 
 math.gl computes on the CPU and has no GPU dependencies. Its arrays and coordinate utilities can supply WebGL, WebGPU, or other rendering systems.
 
-## Features
-
-- **Core math** - Vectors, matrices, shared types, and expressions through **`@math.gl/core`**
-- **Geometry** - Primitives, curves, polygon processing, culling, and spatial indexes through **`@math.gl/geometry`**
-- **Geospatial** - CRS, projections, WKB, and GeoArrow through **`@math.gl/geospatial`**
-- **Earth utilities** - Geoid, sun, and timezone APIs through **`@math.gl/earth`**
-- **Discrete global grids** - Lightweight geometry decoders and cell-column detection for common grid encodings. **`@math.gl/dggs`**
-- **3D math** - 3D primitives, geometry processing and culling: **`@math.gl/geometry`**, **`@math.gl/geometry`**, **`@math.gl/geometry/culling`**
+<div className="foundation-attribution">
+  <a href="https://openvisualization.org">
+    <img className="openjs-logo-light" src="https://raw.githubusercontent.com/openjs-foundation/artwork/main/openjs_foundation/openjs_foundation-logo-horizontal-color.svg" alt="OpenJS Foundation" width="150" /><img className="openjs-logo-dark" src="https://raw.githubusercontent.com/openjs-foundation/artwork/main/openjs_foundation/openjs_foundation-logo-horizontal-color-dark_background.svg" alt="OpenJS Foundation" width="150" />
+  </a>
+  <p>math.gl is part of <a href="https://openvisualization.org">Open Visualization</a>, an OpenJS Foundation / Linux Foundation project.</p>
+</div>
 
 ## Modules
 
-math.gl is a toolbox that offers a suite of composable modules.
+<ModuleCatalog />
+
+## Package entry points
 
 The grouped package entry points are:
 
@@ -40,54 +47,6 @@ The grouped package entry points are:
 
 The implementations live in these grouped packages. The former standalone leaf packages have
 been removed. `@math.gl/dggs` remains separate; `@math.gl/web-mercator` is retained for compatibility.
-
-### Foundations
-
-Vectors, matrices and shared numeric types.
-
-| Module | Description |
-| --- | --- |
-| [`@math.gl/core`](./modules/core/README.md) | Vectors, matrices, quaternions and reusable math primitives. |
-| [`@math.gl/core`](./modules/core/types/README.md) | Shared TypeScript contracts for numeric and geospatial data. |
-| [`@math.gl/core`](./modules/core/expressions/README.md) | Parse and evaluate compact expressions (experimental). |
-
-### 3D
-
-Curves, meshes, geometry processing and visibility.
-
-| Module | Description |
-| --- | --- |
-| [`@math.gl/geometry`](./modules/geometry/curves/README.md) | Parametric curves, interpolation and arc-length sampling. |
-| [`@math.gl/geometry`](./modules/geometry/README.md) | Renderer-independent primitive meshes and tessellation. |
-| [`@math.gl/geometry`](./modules/geometry/utils/README.md) | Typed-array geometry processing utilities. |
-| [`@math.gl/geometry/culling`](./modules/geometry/culling/README.md) | Bounding volumes, intersection tests and visibility. |
-
-### Spatial
-
-Geometry operations, geographic indexing and columnar data.
-
-| Module | Description |
-| --- | --- |
-| [`@math.gl/geometry`](./modules/geometry/polygon/README.md) | Clipping, subdivision and polygon and line geometry operations. |
-| [`@math.gl/geometry`](./modules/geometry/spatial-index/README.md) | Static box, point and triangle indexes for range, ray and nearest queries (POC). |
-| [`@math.gl/dggs`](./modules/dggs/README.md) | Decode boundaries and columns for common global grid encodings. |
-| [`@math.gl/geospatial/geoarrow`](./modules/geospatial/geoarrow/README.md) | Columnar geospatial layouts and kernels over typed-array buffers. |
-| [`@math.gl/geospatial`](./modules/geospatial/wkb/README.md) | WKB, EWKB and WKT geometry codecs. |
-
-### Earth
-
-Coordinate reference systems, Earth models, maps and time.
-
-| Module | Description |
-| --- | --- |
-| [`@math.gl/geospatial/crs`](./modules/geospatial/crs/README.md) | Coordinate reference system definitions and syntax readers. |
-| [`@math.gl/geospatial/projection`](./modules/geospatial/projection/README.md) | Coordinate transformations, pluggable projections and explicit epochs. |
-| [`@math.gl/web-mercator`](./modules/web-mercator/README.md) | Web Mercator map and camera utilities. |
-| [`@math.gl/geospatial`](./modules/geospatial/README.md) | Ellipsoid geometry and geographic coordinate frames. |
-| [`@math.gl/earth`](./modules/earth/geoid/README.md) | Earth gravity models and geoid height conversion. |
-| [`@math.gl/earth/timezone`](./modules/earth/timezone/README.md) | Geographic timezone lookup and local calendar calculations. |
-| [`@math.gl/earth/sun`](./modules/earth/sun/README.md) | Sun position, daylight and atmospheric lighting. |
-| [`@math.gl/earth`](./modules/earth/README.md) | Grouped entry points for geoid, sun, and timezone utilities. |
 
 ## Legacy packages
 
@@ -106,25 +65,19 @@ math.gl is fully supported on:
 
 | Year  | Version | Description                                                                                                                                                            |
 | ----- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2015  | N/A     | `@math.gl/core` classes were created as part of luma.gl v4, as a set of class wrappers for `gl-matrix` for luma.gl and deck.gl frameworks.                             |
-| 2017  | v1.0    | `math.gl` was broken out into its own repository to manage luma.gl growth. The goal was an independently usable set of 3D and Geospatial math modules.                 |
-| 2018  | v2.0    | The math.gl API started to mature.                                                                                                                                     |
-| 2019  | v3.0    | A collaboration with the Cesium team around 3D Tiles led to ports of parts of the Cesium math library into the `math.gl/geospatial` and `@math.gl/geometry/culling` modules. |
-| 2020+ | v3.x    | Additional geospatial modules have gradually been added to support more advanced use cases for deck.gl.                                                                |
-| 2022  | v3.6    | Code base fully rewritten in TypeScript.                                                                                                                               |
+| 2026 | v5.0 (prerelease) | A new projection engine, global grid adapters, WKB and GeoArrow geometry processing, and Earth utilities, organized into focused package entry points. See [what’s new](./whats-new.md#v50). |
 | 2023  | v4.0    | ES module support. gl-matrix was removed as a runtime dependency; adapted numerical kernels remain in core.                                                                         |
+| 2022  | v3.6    | Code base fully rewritten in TypeScript.                                                                                                                               |
+| 2020+ | v3.x    | Additional geospatial modules have gradually been added to support more advanced use cases for deck.gl.                                                                |
+| 2019  | v3.0    | A collaboration with the Cesium team around 3D Tiles led to ports of parts of the Cesium math library into the `math.gl/geospatial` and `@math.gl/geometry/culling` modules. |
+| 2018  | v2.0    | The math.gl API started to mature.                                                                                                                                     |
+| 2017  | v1.0    | `math.gl` was broken out into its own repository to manage luma.gl growth. The goal was an independently usable set of 3D and Geospatial math modules.                 |
+| 2015  | N/A     | `@math.gl/core` classes were created as part of luma.gl v4, as a set of class wrappers for `gl-matrix` for luma.gl and deck.gl frameworks.                             |
 
-## Attributions
+## References and credits
 
-math.gl was inspired by and built upon some of the most proven open source JavaScript math libraries:
-
-- [`gl-matrix`](http://glmatrix.net/) - adapted vector and matrix kernels retained in core; no runtime dependency on the package
-- [`expression-eval`](https://www.npmjs.com/package/expression-eval) by [@donmccurdy](https://github.com/donmccurdy) - inspiration and source material for `@math.gl/core`
-- THREE.js math library - math.gl classes are API-compatible with a subset of the THREE.js classes and pass THREE.js test suites.
-- The CesiumJS math library (Apache2) - The geospatial and culling modules were ported from Cesium code base.
-
-See [References and credits](./references-and-credits.md) for the package-wide
-source inventory, scientific references, dataset credits, and redistribution notices.
+See [References and credits](./references-and-credits.md) for contributor acknowledgments,
+upstream libraries, scientific references, dataset credits, and third-party notices.
 
 ## License
 

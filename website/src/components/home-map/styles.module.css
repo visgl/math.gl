@@ -1,0 +1,110 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.scene {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.scene canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.caption {
+  position: absolute;
+  right: 28px;
+  bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #c4dde5;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  z-index: 3;
+}
+.name {
+  animation: reveal 5s ease both;
+}
+.caption button {
+  pointer-events: auto;
+  background: #08111f80;
+  border: 1px solid #a3bdc640;
+  border-radius: 50%;
+  color: inherit;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+@keyframes reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  20%,
+  70% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .name {
+    animation: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .caption {
+    right: 16px;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    left: 16px;
+    justify-content: flex-end;
+    gap: 10px;
+    color: #e7f3fa;
+    font-size: 14px;
+  }
+  .name {
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: rgba(8, 17, 31, 0.85);
+    animation: mobileReveal 0.6s ease both;
+  }
+  .caption button {
+    flex-shrink: 0;
+    background: rgba(8, 17, 31, 0.85);
+  }
+}
+@keyframes mobileReveal {
+  from {opacity: 0; transform: translateY(4px);}
+  to {opacity: 1; transform: none;}
+}
+@media (prefers-reduced-motion: reduce) {
+  .name {animation: none;}
+}
+
+.inlineCaption {display: none;}
+@media (max-width: 767px), (max-height: 500px) and (orientation: landscape) {
+  .overlayCaption {display: none;}
+  .inlineCaption {
+    position: static;
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 16px;
+    color: #e7f3fa;
+    font-size: 13px;
+  }
+  .inlineCaption .name {
+    animation: mobileReveal 0.6s ease both;
+    background: rgba(8, 17, 31, 0.85);
+    padding: 5px 8px;
+    border-radius: 5px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inlineCaption .name {animation: none;}
+}

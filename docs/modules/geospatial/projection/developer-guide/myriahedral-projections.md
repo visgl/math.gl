@@ -39,6 +39,8 @@ independently implemented. We have not copied Nico's source code, mesh tables,
 textures, animation frames, or optimized solid orientations. Credit identifies
 the conceptual and visual inspiration; it does not imply a license to his assets.
 
+See [References and credits](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
 ## What the cuts buy you
 
 A rigid flat panel can rotate without stretching. A curved patch of Earth cannot

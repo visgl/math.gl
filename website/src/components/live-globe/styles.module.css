@@ -97,3 +97,27 @@
     height: min(var(--doc-live-example-height), 56vh);
   }
 }
+
+/* Standalone examples need room for their controls and a usable drawing area.
+ * Keep the shorter preview sizing only for embeds inside documentation. */
+@media (max-width: 767px), (max-height: 500px) and (orientation: landscape) {
+  .frame:not([data-inline]):not([data-fullscreen]) {
+    height: max(520px, calc(100svh - var(--ifm-navbar-height) - 40px));
+  }
+}
+
+@media (max-width: 650px) {
+  .frame :global(.math-playground > aside),
+  .frame :global(.geometry-example > aside) {
+    max-height: 220px;
+    overflow: auto;
+  }
+  .frame :global(.core-transforms-view),
+  .frame :global(.polygon-editor-view),
+  .frame :global(.geometry-canvas) {
+    order: -1;
+    flex: none;
+    height: 300px;
+    min-height: 300px;
+  }
+}

@@ -185,3 +185,5 @@ on the workload; numerical improvements and supported features are qualified
 individually. This is not a claim of unrestricted proj4js or PROJ parity. See the
 [parity audit](./parity-audit.md), [independent validation](./independent-validation.md)
 and [support profile](./developer-guide/support.md) for the measured scope and current limits.
+
+See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

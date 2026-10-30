@@ -83,3 +83,5 @@ includes provenance, generation instructions, and checksum metadata in `data/`.
 
 The JavaScript implementation is a port of selected GeographicLib 1.50.1 code,
 copyright Charles Karney, under the MIT license.
+
+See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

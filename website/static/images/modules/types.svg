@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="480" viewBox="0 0 960 480" role="img" aria-labelledby="title desc">
+<title id="title">Numeric types and spatial bounds</title><desc id="desc">A three-component numeric array connects to a three-dimensional bounding box.</desc>
+<defs><linearGradient id="bg"><stop stop-color="#101d38"/><stop offset="1" stop-color="#182c40"/></linearGradient></defs>
+<rect width="960" height="480" fill="url(#bg)"/>
+<g font-family="monospace" fill="#cdddf1"><text x="70" y="100" font-size="26" fill="#85baff">NumberArray3</text><text x="590" y="100" font-size="26" fill="#73dfc8">Bounds3D</text></g>
+<g fill="#243b58" stroke="#7197cd" stroke-width="2"><rect x="70" y="162" width="100" height="86" rx="10"/><rect x="184" y="162" width="100" height="86" rx="10"/><rect x="298" y="162" width="100" height="86" rx="10"/></g>
+<g fill="#e5efff" font-family="monospace" font-size="32" text-anchor="middle"><text x="120" y="217">x</text><text x="234" y="217">y</text><text x="348" y="217">z</text></g>
+<path d="M430 206h85m-13-10 13 10-13 10" fill="none" stroke="#85baff" stroke-width="3"/>
+<g stroke="#73dfc8" stroke-width="3" fill="#73dfc812"><path d="M585 180 680 132 844 180 749 230Z"/><path d="M585 180v120l164 50V230Z"/><path d="M749 230 844 180v120l-95 50Z"/></g>
+<path d="M680 132v120l-95 48m95-48 164 48" fill="none" stroke="#73dfc8" stroke-width="2" stroke-dasharray="7 7"/>
+<circle cx="585" cy="300" r="6" fill="#ffcf88"/><circle cx="844" cy="180" r="6" fill="#ffcf88"/>
+<g font-family="monospace" font-size="20" fill="#9db4d3"><text x="70" y="302">NumericArray</text><text x="70" y="337">Float32Array · Float64Array</text><text x="560" y="380">min</text><text x="852" y="164">max</text></g>
+</svg>

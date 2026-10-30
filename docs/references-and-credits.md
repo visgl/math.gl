@@ -6,6 +6,14 @@ available. Removing an npm dependency does not remove the provenance of code
 retained in the repository. Mathematical ideas, compatible APIs, copied source,
 and redistributed data are credited separately below.
 
+## Acknowledgments
+
+We thank **[Michael Sumner](https://github.com/mdsumner)** for advice on projection correctness and completeness, and
+recognize **[Kyle Barron](https://github.com/kylebarron)** for his work on **deck.gl-raster**.
+
+These acknowledgments recognize advice and related work; they do not imply code
+ownership or a dependency relationship.
+
 ## Package source inventory
 
 Each published package includes `LICENSE`, `THIRD-PARTY-NOTICES.md`, and the
@@ -14,10 +22,10 @@ was adapted. Source headers identify upstream copyright holders and licenses.
 
 | Package | Sources and contributions |
 | --- | --- |
-| [core](https://github.com/visgl/math.gl/blob/master/modules/core/THIRD-PARTY-NOTICES.md) | Brandon Jones and Colin MacKenzie IV's gl-matrix kernels; three.js math methods; proj4js spheroid arithmetic; Stephen Oney's jsep and Don McCurdy's expression-eval; Apache Arrow's BigInt fallback structure. |
+| [core](https://github.com/visgl/math.gl/blob/master/modules/core/THIRD-PARTY-NOTICES.md) | Brandon Jones and Colin MacKenzie IV's gl-matrix kernels; three.js math methods; proj4js spheroid arithmetic; Stephen Oney's jsep and [Don McCurdy](https://github.com/donmccurdy)'s expression-eval; Apache Arrow's BigInt fallback structure. |
 | [geometry](https://github.com/visgl/math.gl/blob/master/modules/geometry/THIRD-PARTY-NOTICES.md) | CesiumJS culling and bounding volumes; Mapbox earcut and lineclip; luma.gl CPU tessellation lineage. |
 | [geospatial](https://github.com/visgl/math.gl/blob/master/modules/geospatial/THIRD-PARTY-NOTICES.md) | CesiumJS geometry; proj4js and PROJ projection work; Charles Karney's GeographicLib; Mike Bostock and D3 contributors' segmented projections. |
-| [earth](https://github.com/visgl/math.gl/blob/master/modules/earth/THIRD-PARTY-NOTICES.md) | GeographicLib geoid interpolation; Vladimir Agafonkin's SunCalc; Hošek–Wilkie model data; Bretton Wade's star catalogue conversion; Temporal/JSBI; PhotoStructure's tz-lookup; optional NGA and timezone boundary datasets. |
+| [earth](https://github.com/visgl/math.gl/blob/master/modules/earth/THIRD-PARTY-NOTICES.md) | GeographicLib geoid interpolation; [Volodymyr Agafonkin](https://github.com/mourner)'s SunCalc; Hošek–Wilkie model data; Bretton Wade's star catalogue conversion; Temporal/JSBI; PhotoStructure's tz-lookup; optional NGA and timezone boundary datasets. |
 | [dggs](https://github.com/visgl/math.gl/blob/master/modules/dggs/THIRD-PARTY-NOTICES.md) | Jon Atkins and AJ ONeal's s2-geometry; CesiumJS token code; separately installed A5, H3 and Open Location Code libraries. |
 | [web-mercator](https://github.com/visgl/math.gl/blob/master/modules/web-mercator/THIRD-PARTY-NOTICES.md) | Perspective viewport utilities; van Wijk and Nuij's zoom/pan algorithm; Mapbox/react-map-gl compatibility references. |
 
@@ -33,6 +41,10 @@ own licenses; the table is not a transitive dependency bill of materials.
   [three.js math sources](https://github.com/mrdoob/three.js/tree/dev/src/math)
   are both implementation foundations and useful algorithm documentation.
   The shipped package notices identify the retained copyright holders.
+- [Stephen Oney's jsep](https://github.com/EricSmekens/jsep) and
+  [Don McCurdy's expression-eval](https://github.com/donmccurdy/expression-eval)
+  supplied expression parsing and evaluation source material; retained source
+  and license details are recorded in the core package notices.
 - [CesiumJS core mathematics](https://github.com/CesiumGS/cesium/tree/main/packages/engine/Source/Core)
   supplied the original culling and geospatial ports. The retained Apache-2.0
   notices apply to those adaptations even where their interfaces have changed.
@@ -79,7 +91,7 @@ for Peirce, Guyou, Gringorten, Berghaus, Goode, Boggs, Collignon and Waterman,
 including free sources and the specific D3 code used here. Projection invention,
 numerical implementation and interactive visualization are distinct contributions.
 
-**Nicolas “Nico” Belmonte** inspired the myriahedral examples through his
+**[Nico Belmonte](https://github.com/philogb)** inspired the myriahedral examples through his
 [interactive demonstration](https://philogb.github.io/page/myriahedral/) and
 [2018 article](https://medium.com/vis-gl/unfolding-the-earth-myriahedral-projections-in-webgl-6b2bcfd00a30).
 Our [myriahedral background](./modules/geospatial/myriahedral-maps.md) records the
@@ -93,7 +105,7 @@ These references describe the models used by Earth utilities. Source comments
 identify which equations or data each implementation uses; simplified display
 models are not full atmospheric or observatory-grade simulations.
 
-- **Vladimir Agafonkin**, [SunCalc](https://github.com/mourner/suncalc/tree/v1.9.0),
+- **[Volodymyr Agafonkin](https://github.com/mourner)**, [SunCalc](https://github.com/mourner/suncalc/tree/v1.9.0),
   and **Louis Strous**, [solar-position equations](https://www.aa.quae.nl/en/reken/zonpositie.html).
 - **Lukas Hošek and Alexander Wilkie**, [Skylight Modelling](https://cgg.mff.cuni.cz/projects/SkylightModelling/):
   model data distributed with the retained BSD notice.

@@ -59,6 +59,7 @@ export default function TectonicTimeMachine() {
   const followPlace=journeyId==='custom'?customPlace:FOLLOW_PLACES.find(place=>place.id===journeyId)||null;
   const customValid=customLon.trim()!==''&&customLat.trim()!==''&&Number.isFinite(Number(customLon))&&Number.isFinite(Number(customLat))&&Math.abs(Number(customLon))<=180&&Math.abs(Number(customLat))<=90;
   const earlyEarth = isEarlyEarth(time, source.maxAge);
+  const formingEarth = time <= -4420;
   const focusEvent = playbackFocus(time);
   const terrainReady = historicalTerrain && !regionColors && paleoActive;
   const sceneReady = earlyEarth || terrainReady || ready;
@@ -154,13 +155,13 @@ export default function TectonicTimeMachine() {
     return () => abort.abort();
   }, [model]);
   useEffect(() => {
-    if (!cycleViews || !playing || !sceneReady) return;
+    if (!cycleViews || !playing || !sceneReady || formingEarth) return;
     const timer = setTimeout(() => {
       const views = Object.keys(VIEWS);
       setView(views[(views.indexOf(view) + 1) % views.length]);
     }, 8000);
     return () => clearTimeout(timer);
-  }, [cycleViews, playing, sceneReady, view]);
+  }, [cycleViews, playing, sceneReady, view, formingEarth]);
   useEffect(() => {
     scene.current?.setOptions({view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain, maxAge: source.maxAge, followPlace, followCamera, guidedCamera, compareFutures});
   }, [view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain, sourceId, attempt, followPlace, followCamera, guidedCamera, compareFutures]);
@@ -178,6 +179,7 @@ export default function TectonicTimeMachine() {
   const seek = value => {
     clock.current = clampTimelineTime(Number(value));
     playIntent.current = false;
+    if (clock.current <= -4420) setView('globe');
     setPlaying(false);
     setPaleoActive(false);
     scene.current?.render(clock.current, true);
@@ -193,6 +195,7 @@ export default function TectonicTimeMachine() {
     play(value) {
       playIntent.current = value;
       if (value && clock.current >= 300) clock.current = -EARTH_FORMATION_MA;
+      if (value && clock.current <= -4420) setView('globe');
       setTime(clock.current);
       setPlaying(value);
     }
