@@ -9,6 +9,8 @@ import {dirname, resolve} from 'node:path';
 import {checkPublishingStack} from './check-publishing-stack.mjs';
 import {
   validateRelease,
+  validateRecoveryLockfile,
+  retryLookup,
   validateRecoveryFiles,
   ensureRelease,
   publishRemaining
@@ -20,6 +22,59 @@ const state = (exists, tagged = exists, provenance = exists) => [
 ];
 const ok = () => ({status: 0, output: ''});
 const noWait = async () => {};
+
+test('recovery preserves existing locked dependencies and permits the root publisher addition', () => {
+  const old =
+    '\n"shared@npm:^1":\n  version: 1.0.0\n\n"math.gl-monorepo@workspace:.":\n  dependencies:\n    shared: "npm:^1"\n';
+  const updated =
+    old.replace('    shared:', '    lerna: "npm:10.1.1"\n    shared:') +
+    '\n"lerna@npm:10.1.1":\n  version: 10.1.1\n';
+  validateRecoveryLockfile(old, updated);
+  assert.throws(
+    () => validateRecoveryLockfile(old, updated.replace('version: 1.0.0', 'version: 1.0.1')),
+    /locked dependency/
+  );
+  assert.throws(
+    () => validateRecoveryLockfile(old, updated.replace('shared@npm:^1', 'other@npm:^1')),
+    /locked dependency/
+  );
+});
+
+test('registry lookups retry temporary failures within a budget and reject authorization errors immediately', async () => {
+  for (const error of [
+    Object.assign(new Error('503'), {status: 503}),
+    new TypeError('fetch failed', {cause: {code: 'ECONNRESET'}})
+  ]) {
+    let calls = 0;
+    assert.equal(
+      await retryLookup(
+        async () => {
+          if (++calls === 1) throw error;
+          return 'visible';
+        },
+        {wait: noWait}
+      ),
+      'visible'
+    );
+    assert.equal(calls, 2);
+  }
+  for (const [status, expected] of [
+    [503, 3],
+    [403, 1]
+  ]) {
+    let calls = 0;
+    await assert.rejects(
+      retryLookup(
+        async () => {
+          calls++;
+          throw Object.assign(new Error('lookup failed'), {status});
+        },
+        {wait: noWait}
+      )
+    );
+    assert.equal(calls, expected);
+  }
+});
 
 test('validates the exact release version and refuses changed release sources', () => {
   const valid = {tag, version: '5.0.0-beta.2', versions: ['5.0.0-beta.2'], changelog: `## ${tag}`};
