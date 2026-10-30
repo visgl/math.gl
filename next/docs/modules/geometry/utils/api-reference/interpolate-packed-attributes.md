@@ -99,3 +99,11 @@ Consequently this helper is not a bit-exact replacement for renderers that depen
 Values are interpolated in storage units. GPU-normalized formats are not decoded, packed bitfields such as RGB565 are not unpacked, and normals/tangents are not renormalized. Choose the proper application policy or preprocess/recompute such fields. Source attribute seams must already have distinct records and indices; the helper does not weld or clip geometry.
 
 Invalid layouts, overlapping fields, contributing indices, weights, nonfinite declared values, flat conflicts and exhausted allocation limits throw `RangeError`. No partial output is returned.
+
+## composeAttributeProvenance(parent, child, options?)[​](#composeattributeprovenanceparent-child-options "Direct link to composeAttributeProvenance(parent, child, options?)")
+
+Import from `@math.gl/geometry`. Compose the triplet provenance returned by clipping or subdivision: `parent` maps intermediate vertices to original records, and `child` maps final vertices to intermediate records. The result owns `Uint32Array sourceVertexIndices` and `Float64Array sourceVertexWeights`, with three slots per final vertex. Coincident contributor indices are combined and weights normalized to sum to one within floating-point arithmetic. Inputs remain unchanged and the result is structured-cloneable.
+
+`maxVertices` defaults to 65536 and bounds output allocation. Invalid indices, negative/nonfinite weights, triplets not summing to one within 1e-10, and more than three distinct original contributors reject. Zero-weight slots are ignored. The triplet restriction describes source triangles; it does not represent arbitrary interpolation across multiple source triangles. Compose triangle identities separately through `sourceTriangleIndices`.
+
+Compose first, then interpolate original attributes once to avoid repeated integer quantization. Duplicate source vertices at attribute seams; explicitly choose `linear` or `flat` per attribute. See the [prepared surface example](https://visgl.github.io/math.gl/next/examples/surface-mesh).
