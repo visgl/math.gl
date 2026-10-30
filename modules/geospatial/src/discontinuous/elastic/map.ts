@@ -193,6 +193,7 @@ class ElasticMap implements MapSurface {
     );
   }
   projectLine(line: readonly GeographicPosition[], options: MapSamplingOptions = {}): MapLine[] {
+    if (options.pathProvenance) throw new Error('Elastic paths do not support source provenance');
     const out: MapLine[] = [];
     for (const part of splitter.projectLine(line, this.sourceOptions(options)))
       for (const c of this.charts.filter(c => c.baseId === part.regionId)) {

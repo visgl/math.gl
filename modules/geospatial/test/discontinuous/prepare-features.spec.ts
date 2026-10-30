@@ -501,3 +501,21 @@ test('cap wrappers reject provenance against intermediate sampled fragments', ()
   ])
     expect(() => map.prepareFeatures(features, {provenance})).toThrow(/Cap-clipped paths/);
 });
+
+test('reconstructing wrappers reject direct path lineage requests explicitly', () => {
+  const line: readonly [number, number][] = [
+    [-10, 0],
+    [10, 0]
+  ];
+  for (const map of [maps[0], maps[3]]) {
+    expect(map.projectLine(line).length).toBeGreaterThan(0);
+    expect(() => map.projectLine(line, {pathProvenance: true})).toThrow(
+      /do not support source provenance/
+    );
+    expect(() =>
+      map.prepareFeatures([{geometry: {type: 'LineString', coordinates: line}}], {
+        provenance: {sourceSegments: true}
+      })
+    ).toThrow(/do not support source provenance/);
+  }
+});
