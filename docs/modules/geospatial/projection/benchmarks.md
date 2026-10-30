@@ -136,12 +136,14 @@ order rotates, and output contributes to a checksum.
 Schema-version-2 JSON reports retain individual aggregate samples, per-buffer medians
 and p10/p90, repetition counts, seed, workload/source fingerprints and runtime metadata.
 Warmed constructor measurements are separate. Browser qualification additionally measures
-module loading and first use in fresh contexts. CI uploads browser artifacts and gates
-correctness and bundle sizes; it does not gate noisy speed ratios. Pull requests use 20,000 points, three samples and
-`--min-sample-ms 0`: all 792 workloads and independent references still run, but
-adaptive timing repetitions are disabled. These PR browser measurements are marked
-`timingLimited` and serve as correctness checks, not performance evidence. Pushes to
-master retain seven samples and a 12 ms calibration target for full browser reports.
+module loading and first use in fresh contexts. Full browser timing and worker-cost
+reports run nightly and on manual workflow runs with seven samples and a 12 ms
+calibration target. PRs changing qualification tooling also exercise the complete matrix
+with 20,000 points, three samples and a 4 ms target. Ordinary PRs retain independent
+Chromium numerical qualification, the full Node/Chromium test suites and coverage;
+Firefox/WebKit qualification and the full timing workload matrix run in the next full
+profile. CI gates correctness and bundle sizes, not noisy speed ratios. See the
+[CI execution guide](https://github.com/visgl/math.gl/blob/master/dev-docs/ci.md) for scheduling and trigger details.
 The separate paired Node performance comparison runs on every PR with 11 samples
 and a 4 ms calibration target; local runs retain the 12 ms default.
 
