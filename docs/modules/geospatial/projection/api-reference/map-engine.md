@@ -549,3 +549,33 @@ This is a static geometry contract, not a deck.gl adapter or surface tessellator
 It does not yet provide original-edge interpolation weights, dash-distance
 continuity, artificial-edge masks for polygon extrusion, or interior mesh vertices
 for globe/hinge poses. See the [rendering guide](../developer-guide/map-engine.md#prepare-feature-buffers-for-a-renderer).
+
+### Optional source path provenance
+
+`prepareFeatures(features, {provenance: {sourceSegments: true, boundaries: true,
+distances: {metric: 'spherical', radius: 6371000}}})` emits optional
+`paths.provenance` alongside the usual packed geometry. Omitted options allocate no
+provenance output buffers. Geometry, ordering, and original feature/chart identity
+are unchanged.
+
+- `sourceSegmentIndices`, `sourceSegmentParameters`, and `sourceVertexIndices`
+  address the original line or original polygon ring identified by the path part.
+  Parameters are minor-great-circle arc fractions. Generated vertices use
+  `0xffffffff` as their source-vertex index. At a shared source vertex retained
+  once, lineage belongs to the incoming segment.
+- `sourceDistances` contains cumulative source distance in meters, measured before
+  chart fragmentation on the explicitly declared sphere (`distanceRadius`). It
+  does not restart at cuts. This policy does not claim ellipsoidal geodesic distance.
+- `startReasons` and `endReasons` identify source endpoints, coverage boundaries,
+  chart cuts, and continuous chart joins for each prepared path part. Source vertex
+  identity is independent of why clipping ends a fragment at that vertex.
+
+Flags are independent. Unrequested fields are absent. Unsupported policies/backends
+reject explicitly; provenance is recorded during segment clipping and sampling.
+The payload is structured-cloneable. It does not prescribe interpolation of
+categorical attributes, meter widths, surface normals or extrusion.
+
+The [Projection domains example](https://visgl.github.io/math.gl/next/examples/projection-domains)
+includes a path-provenance mode with distance-continuous dashes and inspectable
+source lineage. This contract supports the requirements discussed in
+[deck.gl#10922](https://github.com/visgl/deck.gl/issues/10922).

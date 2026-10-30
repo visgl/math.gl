@@ -48,7 +48,20 @@ export type PreparedMapGeometry = {
   regionIds: string[];
   /** One vertex per part. Point ownership follows MapEngine.projectPoint(). */
   points: PreparedMapVertices & {parts: PreparedMapPart[]};
-  paths: PreparedMapVertices & {parts: PreparedMapPathPart[]; pathStarts: Uint32Array};
+  paths: PreparedMapVertices & {
+    parts: PreparedMapPathPart[];
+    pathStarts: Uint32Array;
+    provenance?: {
+      sourceSegmentIndices?: Uint32Array;
+      sourceSegmentParameters?: Float64Array;
+      sourceVertexIndices?: Uint32Array;
+      sourceDistances?: Float64Array;
+      distanceRadius?: number;
+      /** Per part: source endpoint, coverage boundary, cut, or continuous join. */
+      startReasons?: string[];
+      endReasons?: string[];
+    };
+  };
   polygons: PreparedMapVertices & {
     parts: PreparedMapPart[];
     /** Vertex offsets for all rings, with a terminal sentinel. Rings repeat their first vertex. */
@@ -60,6 +73,12 @@ export type PreparedMapGeometry = {
 /** Static preparation controls. This does not triangulate, interpolate attributes or pose meshes. */
 export type MapPrepareFeaturesOptions = {
   sampling?: MapSamplingOptions;
+  provenance?: {
+    sourceSegments?: boolean;
+    boundaries?: boolean;
+    /** Source minor-great-circle distance in meters on the declared sphere. */
+    distances?: {metric: 'spherical'; radius: number};
+  };
   /** Project original polygon boundaries separately; default true. */
   polygonOutlines?: boolean;
   /** Directed global spherical polygons; original outlines never include atlas connectors. */
@@ -108,6 +127,41 @@ export function prepareMapFeatures(
   if (!Array.isArray(features)) throw new Error('Expected a feature array');
   if (options.polygonOutlines !== undefined && typeof options.polygonOutlines !== 'boolean')
     throw new Error('polygonOutlines must be boolean');
+  const provenance = options.provenance;
+  if (
+    provenance !== undefined &&
+    (!provenance || typeof provenance !== 'object' || Array.isArray(provenance))
+  )
+    throw new Error('Unsupported provenance policy');
+  if (
+    provenance?.distances !== undefined &&
+    (!provenance.distances || typeof provenance.distances !== 'object')
+  )
+    throw new Error('Unsupported provenance distance policy');
+  if (
+    provenance &&
+    (typeof provenance !== 'object' ||
+      Object.keys(provenance).some(
+        k => !['sourceSegments', 'boundaries', 'distances'].includes(k)
+      ) ||
+      [provenance.sourceSegments, provenance.boundaries].some(
+        v => v !== undefined && typeof v !== 'boolean'
+      ) ||
+      (provenance.distances &&
+        (provenance.distances.metric !== 'spherical' ||
+          !Number.isFinite(provenance.distances.radius) ||
+          provenance.distances.radius <= 0)))
+  )
+    throw new Error('Unsupported provenance policy');
+  const lineage = Boolean(
+    provenance?.sourceSegments || provenance?.boundaries || provenance?.distances
+  );
+  const segments: number[] = [],
+    parameters: number[] = [],
+    originalVertices: number[] = [],
+    distances: number[] = [],
+    startReasons: string[] = [],
+    endReasons: string[] = [];
   const regionIds = map.regions.map(r => r.id),
     regionIndices = new Map(regionIds.map((id, i) => [id, i]));
   const points = vertices(),
@@ -140,7 +194,28 @@ export function prepareMapFeatures(
     if (line.length < 2) throw new Error('A line needs at least two positions');
     const isRing = ringIndex !== undefined;
     if (isRing && !closed(line)) line.push([...line[0]]);
-    for (const p of map.projectLine(line, options.sampling)) {
+    for (const p of map.projectLine(line, {
+      ...options.sampling,
+      pathProvenance: lineage,
+      pathDistances: Boolean(provenance?.distances),
+      pathBoundaries: Boolean(provenance?.boundaries)
+    })) {
+      if (lineage) {
+        if (!p.provenance) throw new Error('Map backend does not support path provenance');
+        if (provenance?.sourceSegments) {
+          segments.push(...p.provenance.segments);
+          parameters.push(...p.provenance.parameters);
+          originalVertices.push(...p.provenance.vertices);
+        }
+        if (provenance?.distances)
+          distances.push(
+            ...p.provenance.angularDistances.map(d => d * provenance.distances!.radius)
+          );
+        if (provenance?.boundaries) {
+          startReasons.push(p.provenance.startReason!);
+          endReasons.push(p.provenance.endReason!);
+        }
+      }
       append(paths, p.coordinates, p.sourceCoordinates);
       pathParts.push({
         ...part(featureIndex, geometryPath, p.regionId),
@@ -234,7 +309,31 @@ export function prepareMapFeatures(
     featureIds,
     regionIds,
     points: {...pack(points), parts: pointParts},
-    paths: {...pack(paths), parts: pathParts, pathStarts: new Uint32Array(pathStarts)},
+    paths: {
+      ...pack(paths),
+      parts: pathParts,
+      pathStarts: new Uint32Array(pathStarts),
+      ...(lineage
+        ? {
+            provenance: {
+              ...(provenance?.sourceSegments
+                ? {
+                    sourceSegmentIndices: new Uint32Array(segments),
+                    sourceSegmentParameters: new Float64Array(parameters),
+                    sourceVertexIndices: new Uint32Array(originalVertices)
+                  }
+                : {}),
+              ...(provenance?.distances
+                ? {
+                    sourceDistances: new Float64Array(distances),
+                    distanceRadius: provenance.distances.radius
+                  }
+                : {}),
+              ...(provenance?.boundaries ? {startReasons, endReasons} : {})
+            }
+          }
+        : {})
+    },
     polygons: {
       ...pack(polygons),
       parts: polygonParts,
