@@ -1,0 +1,96 @@
+# Prepared surface provenance
+
+Applications can refine an explicitly triangulated geographic patch, retain its original source
+attributes, and render a posed surface using math.gl's projection-engine agnostic interfaces.
+This example uses a bounded native spherical patch; an external engine can supply target positions
+under the same recipe, provided its validity domain and seams have already been handled.
+
+import Example from '@site/src/components/surface-mesh';
+
+<Example />
+
+The slider uses a fixed topology between a flat patch and a spherical patch. The panel exposes
+source-boundary walls and posed normals. White edges are source boundaries; orange coverage edges
+and purple computational joins produce no walls. The red marker is a ray intersection with the
+actual current triangles, with its original source position reconstructed from barycentric weights.
+Hover triangles to inspect original triangle identity and interpolated temperature.
+
+## Source mesh and attribute contract
+
+The caller supplies an indexed triangulation in a continuous, unwrapped source chart. Source edges
+and interior interpolation are **affine in that chart**, which is distinct from the minor-great-circle
+path semantics of `MapEngine.prepareFeatures()`. Existing polygon-edge provenance does not uniquely
+specify a surface interior. Triangulate with an explicit policy, split seams, clip invalid domains,
+and duplicate vertices at attribute discontinuities before entering this pipeline.
+
+`subdivideTriangleMesh()` already supplies original vertex weights and original triangle indices.
+The example performs source-edge refinement followed by sampled nonlinear surface refinement.
+The new root export `composeAttributeProvenance(parent, child)` composes the two stages back to
+original records. More than three distinct source contributors rejects rather than inventing
+barycentric ancestry across unrelated triangles. Triangle identities compose separately through
+the two `sourceTriangleIndices` arrays.
+
+```js
+import {
+  composeAttributeProvenance,
+  interpolatePackedAttributes,
+  qualifySurfaceTransition
+} from '@math.gl/geometry';
+
+const provenance = composeAttributeProvenance(firstStage, refined);
+const attributes = interpolatePackedAttributes(originalRecords, provenance, {
+  byteStride: 16,
+  attributes: [
+    {type: 'float64', size: 1, byteOffset: 0, interpolation: 'linear'},
+    {type: 'uint32', size: 1, byteOffset: 8, interpolation: 'flat'},
+    {type: 'uint8', size: 1, byteOffset: 12, interpolation: 'linear'}
+  ]
+});
+```
+
+Temperature and encoded color interpolate numerically; integer quantization happens once, at final
+output. The category is flat and rejects differing contributors. The caller must choose semantics
+for timestamps, altitude, UVs, colors and categories. Normal vectors must be recomputed or explicitly
+normalized; interpolation of their encoded components does not establish a surface normal.
+The example recomputes area-weighted normals from the current triangles.
+
+## Qualified linear patch transitions
+
+`qualifySurfaceTransition({positions: flatXYZ, indices}, globeXYZ)` accepts an oriented, connected
+triangulated disk with a boundary that remains convex in XY. It checks the extrema of every signed
+projected triangle-area quadratic and every boundary support constraint throughout `[0, 1]`.
+Positive projected triangle areas and a convex boundary keep this fixed mesh a graph over XY.
+Both endpoints use the same indices and **each vertex follows a linear trajectory**.
+
+This is a conservative capability: nonconvex boundaries, holes, changed topology, hidden triangle
+reversals, degeneracy, nonmanifold input and exhausted work budgets reject. Valid morphs outside this
+subset may also reject. Floating-point margins are used; this is not formal interval certification.
+It does not qualify arbitrary global globe transitions, changing cut connectivity, nonlinear vertex
+trajectories, a camera's screen-space error, or equality with an underlying smooth surface.
+
+The static subdivision tolerance is sampled in unit-sphere coordinates. It is neither a certified
+continuous error nor a pixel-error policy. Applications must refine against their own display metric
+and requalify the resulting fixed topology after geometry or backend changes.
+
+## Posed picking and extrusion limits
+
+Ray tests intersect the current piecewise-linear triangles, then compose hit barycentrics with each
+vertex's original source weights. They return the original source triangle and source-chart position.
+This is surface picking during a pose, rather than inverse projection of an arbitrary display point.
+The example's ray helper is a bounded-fixture recipe; production applications should use a spatial
+index and explicit ray-work limits for larger meshes.
+
+Walls are generated only for the two boundary chains declared as source boundaries. Coverage cuts
+and computational joins are suppressed. In a map adapter those decisions must come from prepared
+polygon-edge provenance, including the rule that a real boundary coincident with a cut stays real.
+The illustrative boundary declarations here are authoritative fixture metadata. Refined edge
+ownership follows original source-vertex support, rather than coordinate matching. They do not
+classify arbitrary geometry.
+
+The extrusion toggle offsets vertices along posed mesh normals. The transition qualification covers
+the **base mesh only**: it does not prove that an offset surface or walls stay embedded, that a height
+has metric units on a distorted map, or that wall normals and seams meet a production extrusion
+contract. General extrusion, global surface animation and deck.gl provider integration remain open.
+
+This implements bounded upstream building blocks for [deck.gl#10922](https://github.com/visgl/deck.gl/issues/10922),
+with [source, tests and limits](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains/surface-mesh).
