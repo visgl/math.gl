@@ -106,6 +106,49 @@ inferCRSRepresentation(definition: ReadonlyCRSDefinition): SpatialReferenceRepre
 
 It recognizes PROJJSON objects, common WKT roots, PROJ strings with a `proj` parameter, authority-like identifiers, OGC URNs, and URLs. Other strings are returned as `opaque`. It does not validate syntax, resolve an identifier, or establish semantic equivalence.
 
+## `normalizeCRSIdentifier()`[​](#normalizecrsidentifier "Direct link to normalizecrsidentifier")
+
+Changes known spellings of one authority CRS identifier to the form `AUTHORITY:CODE`.
+
+```
+normalizeCRSIdentifier(identifier: CRSIdentifier): CRSIdentifier
+```
+
+Use this function to compare identifiers that have different spellings. For example, a tile matrix set can give `http://www.opengis.net/def/crs/EPSG/0/32619`, and a view can give `EPSG:32619`.
+
+| Input                                         | Result       |
+| --------------------------------------------- | ------------ |
+| `epsg:32619`                                  | `EPSG:32619` |
+| `urn:ogc:def:crs:EPSG::32619`                 | `EPSG:32619` |
+| `http://www.opengis.net/def/crs/EPSG/0/32619` | `EPSG:32619` |
+| `CRS:84`, `urn:ogc:def:crs:OGC:1.3:CRS84`     | `OGC:CRS84`  |
+| `urn:ogc:def:crs:EPSG:6.6:4326`               | unchanged    |
+| `WGS84`, WKT, PROJ strings                    | unchanged    |
+
+Rules:
+
+* The known authority prefixes EPSG, OGC, ESRI and IAU accept case-insensitive input aliases. Known OGC codes CRS84, CRS83, CRS27 and CRS84h use their registered spelling; other authority and code spellings are preserved. This convenience does not imply that registry identifiers are generally case-insensitive.
+
+* The function changes the WMS 1.3 codes `CRS:84`, `CRS:83` and `CRS:27` to `OGC:CRS84`, `OGC:CRS83` and `OGC:CRS27`.
+
+* The function removes a URN or URI version only in these cases:
+
+  <!-- -->
+
+  * The version is empty.
+  * The version is `0`.
+  * The version is `1.3` and the code is OGC `CRS84`, `CRS83` or `CRS27`. The OGC register publishes these three codes only at version 1.3.
+
+* The function returns all other versioned identifiers unchanged. Thus a versioned identifier does not compare equal to an unversioned identifier.
+
+* The function returns unknown strings unchanged.
+
+The function does not make different registry entries equal. `EPSG:4326` and `OGC:CRS84` stay different, because their axis orders are different. `EPSG:900913` stays different from `EPSG:3857`. The function does not resolve definitions. It does not make datums equal, and it does not change axis order.
+
+For example, `http://www.opengis.net/def/crs/OGC/0/CRS84h` becomes `OGC:CRS84h`, while `OGC:CustomCase` keeps its code spelling.
+
+Keep the original identifier of the source in the metadata. Use the result only to compare identifiers.
+
 ## Representation values[​](#representation-values "Direct link to Representation values")
 
 `SpatialReferenceRepresentation` is one of:

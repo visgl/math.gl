@@ -178,6 +178,7 @@ Optional [CRS resolution](https://visgl.github.io/math.gl/next/docs/modules/geos
 * `ReadonlyCRSDefinition`, `ReadonlyPROJJSONCRS` — serialized CRS text or a deeply readonly PROJJSON definition.
 * `createSpatialReference` — constructs and freezes a descriptor.
 * `inferCRSRepresentation` — conservatively classifies a definition's runtime syntax.
+* `normalizeCRSIdentifier` — changes the authority, OGC URN and OGC URI spellings of one registry entry to `AUTHORITY:CODE`. Use the result to compare identifiers.
 
 The official MIT-licensed schema is vendored unchanged and can be imported or resolved through `@math.gl/geospatial/crs/projjson.schema.json`. It is the PROJJSON runtime validation source of truth. The package does not add a second Zod schema. It also does not perform coordinate transformations, authority-registry lookup, semantic CRS comparison, or WKT/PROJ-to-PROJJSON conversion.
 
