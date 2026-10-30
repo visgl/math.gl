@@ -122,6 +122,11 @@
       },
       {
         "type": "doc",
+        "label": "Raster coordinate frames",
+        "id": "raster-frame"
+      },
+      {
+        "type": "doc",
         "label": "Antarctica and Fiji projection lab",
         "id": "raster-projection-lab"
       },
