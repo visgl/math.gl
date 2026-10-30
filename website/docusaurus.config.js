@@ -70,12 +70,15 @@ const config = getDocusaurusConfig({
 
   navbarItems: [
     {
-      label: isNext ? 'Next' : 'Stable',
+      className: 'navbar-badge',
+      type: 'html',
       position: 'right',
-      items: [
-        {label: 'Stable', href: `${stableSiteUrl}/docs`, target: '_self'},
-        {label: 'Next', href: `${stableSiteUrl}/next/docs`, target: '_self'}
-      ]
+      value: '<a class="navbar-npm" href="https://www.npmjs.com/package/@math.gl/core" aria-label="math.gl core on npm" target="_blank" rel="noopener noreferrer"><img class="navbar-npm-downloads" src="https://img.shields.io/npm/dm/@math.gl/core?label=downloads" alt="Monthly npm downloads for @math.gl/core" height="20" /><svg class="navbar-npm-icon" viewBox="0 0 18 7" width="24" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="M0 0v6h5v1h4V6h9V0H0zm5 5H4V1h1v4zm4 0H7V1h3v4H9zm8 0h-1V1h1v4zM8 2v2h1V2H8z" /></svg><span>npm</span></a>'
+    },
+    {
+      type: 'html',
+      position: 'right',
+      value: '<a class="navbar-openjs" href="https://openvisualization.org" aria-label="OpenJS Foundation — Open Visualization" target="_blank" rel="noopener noreferrer"><img class="openjs-logo-light" src="https://raw.githubusercontent.com/openjs-foundation/artwork/main/openjs_foundation/openjs_foundation-logo-horizontal-color.svg" alt="OpenJS Foundation" width="86" /><img class="openjs-logo-dark" src="https://raw.githubusercontent.com/openjs-foundation/artwork/main/openjs_foundation/openjs_foundation-logo-horizontal-color-dark_background.svg" alt="OpenJS Foundation" width="86" /></a>'
     }
   ],
 
@@ -87,6 +90,23 @@ const config = getDocusaurusConfig({
     }
   }
 });
+
+// Keep the repository link visible while showing the live, cached GitHub star count.
+const githubItem = config.themeConfig.navbar.items.find(
+  item => item.href === 'https://github.com/visgl/math.gl'
+);
+Object.assign(githubItem, {
+  className: 'navbar-badge',
+  position: 'right',
+  type: 'html',
+  value: '<a class="navbar__link navbar-github-stars" href="https://github.com/visgl/math.gl" target="_blank" rel="noopener noreferrer" aria-label="math.gl on GitHub — view repository and star count"><svg class="navbar-github-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297C5.37.297 0 5.67 0 12.297c0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.043-1.61-4.043-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.838 1.237 1.838 1.237 1.07 1.835 2.807 1.305 3.492.998.108-.776.418-1.305.762-1.605-2.665-.3-5.467-1.334-5.467-5.931 0-1.31.467-2.381 1.236-3.221-.124-.303-.536-1.524.118-3.176 0 0 1.008-.322 3.301 1.23a11.52 11.52 0 0 1 3.003-.404c1.018.005 2.042.138 3.003.404 2.291-1.552 3.297-1.23 3.297-1.23.656 1.652.244 2.873.12 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.628-5.479 5.925.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg><span>GitHub</span><img src="https://img.shields.io/github/stars/visgl/math.gl?style=social" alt="GitHub stars" width="90" height="20" /></a>'
+});
+delete githubItem.href;
+delete githubItem.label;
+const navbarItems = config.themeConfig.navbar.items;
+navbarItems.splice(navbarItems.indexOf(githubItem), 1);
+const npmIndex = navbarItems.findIndex(item => item.value?.includes('class="navbar-npm"'));
+navbarItems.splice(npmIndex + 1, 0, githubItem);
 
 // Resolve CRS entry points from source: website deployments do not build package dist files.
 // Keep the root alias exact so it does not shadow the public subpaths.

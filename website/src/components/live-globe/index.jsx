@@ -30,6 +30,7 @@ export default function LiveGlobe({
       aria-label={label}
       className={styles.frame}
       data-fullscreen={fullscreen || undefined}
+      data-inline={inline || undefined}
       style={{
         '--doc-live-example-height': typeof height === 'number' ? `${height}px` : height
       }}

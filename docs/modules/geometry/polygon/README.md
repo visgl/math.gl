@@ -64,3 +64,5 @@ The `earcut` implementation derives from Mapbox's earcut library under the ISC l
 periodic copies, and preserves original-vertex weights for UV and other attribute interpolation.
 Concave domains and holes can be supplied as triangulated regions. See the
 [clipping API reference](./api-reference/clip-triangle-mesh.md).
+
+See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

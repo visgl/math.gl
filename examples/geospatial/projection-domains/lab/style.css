@@ -22,3 +22,12 @@
 @media(max-width:800px){.raster-projection-lab .maps{grid-template-columns:1fr;right:292px}.raster-projection-lab .lab-info{width:260px}.raster-projection-lab .maps p{display:none}}
 
 .raster-projection-lab .lab-info a{color:#9fd4ee}
+
+@media (max-width: 600px) {
+  .raster-projection-lab,
+  .lab-standalone .raster-projection-lab {height:auto;min-height:0;padding:12px;overflow:visible;}
+  .raster-projection-lab .maps {position:relative;inset:auto;grid-template-columns:minmax(0,1fr);}
+  .raster-projection-lab .maps article {min-height:300px;}
+  .raster-projection-lab .lab-info {position:relative;inset:auto;width:100%;max-height:none;margin-top:12px;}
+  .raster-projection-lab .lab-status {position:relative;inset:auto;min-height:0;}
+}

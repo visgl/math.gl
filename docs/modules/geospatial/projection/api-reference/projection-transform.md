@@ -573,6 +573,8 @@ For the built-in descriptor catalogue, use `LazyProjectionEngine` from
 or prepare a synchronous transform with `createProjectionAsync()`. Readers, aliases
 and grids remain explicit engine options. See the [engine reference](./projection-engine.md).
 
+See [References and credits](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
 ## Vertical height grids
 
 All math.gl projection engine variants accept `verticalGrids?: VerticalGridCollection`.

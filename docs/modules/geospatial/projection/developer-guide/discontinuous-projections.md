@@ -437,3 +437,5 @@ numerical validation.
   [PROJ's polyhedral documentation](https://proj.org/en/stable/operations/projections/polyhedral.html)
   explains the face/subtriangle construction. math.gl implements the projection
   equations independently and retains PROJ's MIT-style notice for the tables.
+
+See [References and credits](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

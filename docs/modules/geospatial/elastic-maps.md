@@ -147,3 +147,5 @@ Coastlines in this example come from Natural Earth, in the public domain.
 See the [Elastic API reference](./projection/api-reference/elastic.md),
 [MapEngine reference](./projection/api-reference/map-engine.md), and
 [rendering guide](./projection/developer-guide/map-engine.md).
+
+See [References and credits](../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

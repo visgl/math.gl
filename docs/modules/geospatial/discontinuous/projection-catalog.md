@@ -229,3 +229,5 @@ For **Petroff, Snyder, and myriahedral maps**, see the additional
 and [myriahedral background](../projection/developer-guide/myriahedral-projections.md).
 Nico Belmonte is credited for his influential demonstration; his application code
 is not incorporated.
+
+See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

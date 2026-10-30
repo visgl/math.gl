@@ -140,4 +140,6 @@ Try the APIs in the [expression playground](https://math.gl/examples/expressions
 
 This module is adapted from the expression parser that ships in [`@deck.gl/json`](https://www.npmjs.com/package/@deck.gl/json).
 
-Its evaluator uses the vendored `jsep` 1.4.0 parser (MIT), with no external runtime dependency and derives from `expression-eval` by @donmccurdy. Source headers and distributed license notices retain the upstream attribution.
+Its evaluator uses the vendored `jsep` 1.4.0 parser (MIT), with no external runtime dependency and derives from `expression-eval` by [Don McCurdy](https://github.com/donmccurdy). Source headers and distributed license notices retain the upstream attribution.
+
+See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

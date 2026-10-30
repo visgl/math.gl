@@ -70,3 +70,5 @@ Vector inputs can be numeric arrays, including core vectors; no renderer objects
 ## Attribution
 
 Bounding-volume and frustum code was ported from Cesium under Apache-2.0. See the source headers and distributed license notices for provenance.
+
+See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
