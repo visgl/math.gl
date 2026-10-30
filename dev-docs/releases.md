@@ -45,19 +45,22 @@ Stable releases continue to use `yarn run publish-prod`.
 ## Resuming a partially published release
 
 Do not delete the GitHub release, move the tag, or bump the version. After a
-publishing fix lands, run the `release` workflow from master with the existing
-tag, for example:
+publishing fix lands, run the `release` workflow from `master` or a permitted
+release branch whose package sources and existing locked dependencies still match
+the tag. For example, beta.2 was recovered from `5.0-release`:
 
 ```sh
-gh workflow run release.yml --ref master -f tag=v5.0.0-beta.2
+gh workflow run release.yml --ref 5.0-release -f tag=v5.0.0-beta.2
 ```
 
 The workflow checks that the tag exists, is an ancestor of the build commit, and
 matches every workspace version and the changelog. Recovery refuses package-source
 changes since that tag; only the explicit publishing-tooling files may differ.
-The build and its provenance identify the actual workflow/build commit on master;
+The build and its provenance identify the actual workflow/build commit;
 the recovery tag is an input and is never moved. Do not override GitHub's OIDC or
 source-identity environment variables to pretend the recovery ran on the old tag.
+After unrelated dependency upgrades such as the Vitest 5 migration, recovering an
+older tag from master is deliberately rejected; use its unchanged release branch.
 
 The publisher reuses an existing GitHub release record, uses pinned Lerna 10.1.1
 and its libnpmpublish 12.0.1 dependency, serializes publication, and retries known
@@ -75,7 +78,7 @@ actual dependency chain, and offline tests exercise conflict recovery and errors
 Remove the patch only after that behavior is available through a tested upstream
 upgrade. See npm/cli#10078 and sigstore/sigstore-js#1708/#1709.
 
-Upstream dev-tools PR #71 covers idempotent GitHub releases and bounded partial
-publish retries but is not yet released. The latest published dev-tools beta.1
-does not contain it. This local publisher avoids requiring an unreleased dev-tools version and
-also handles the signing-stack bug; it can be revisited after upstream releases.
+Upstream dev-tools PR #71 adds idempotent GitHub releases and bounded partial
+publish retries. This local helper also verifies the signing stack, guards
+recovery sources and dependencies, and checks every npm version, dist-tag and
+provenance attestation before reporting success.
