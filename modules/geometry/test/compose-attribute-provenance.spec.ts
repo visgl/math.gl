@@ -148,3 +148,15 @@ test('rejects a locally positive double cover with repeated convex-boundary posi
     'Boundary vertices meet'
   );
 });
+
+test('qualification is invariant to large independently moving world origins', () => {
+  const target = [0, 0, 0, 2, 0, 1, 0, 2, -1];
+  const baseline = qualifySurfaceTransition(flat, target);
+  const shift = (p: number[], offset: number) => p.map((v, i) => v + (i % 3 < 2 ? offset : 0));
+  const translated = qualifySurfaceTransition(
+    {positions: shift(flat.positions, 1e12), indices: flat.indices},
+    shift(target, -1e12)
+  );
+  expect(translated.minimumProjectedDoubleArea).toEqual(baseline.minimumProjectedDoubleArea);
+  expect(translated.boundary).toEqual(baseline.boundary);
+});

@@ -64,8 +64,11 @@ export function qualifySurfaceTransition(
     used = new Set(indices);
   let minimum = Infinity;
   const orientation = (a: number, b: number, c: number, t: number) => {
-    const p = (v: number, k: number) => from[3 * v + k] * (1 - t) + to[3 * v + k] * t;
-    return (p(b, 0) - p(a, 0)) * (p(c, 1) - p(a, 1)) - (p(b, 1) - p(a, 1)) * (p(c, 0) - p(a, 0));
+    // Interpolate relative edges, avoiding cancellation from translating a patch
+    // across large world-coordinate origins before subtracting vertex positions.
+    const edge = (v: number, k: number) =>
+      (from[3 * v + k] - from[3 * a + k]) * (1 - t) + (to[3 * v + k] - to[3 * a + k]) * t;
+    return edge(b, 0) * edge(c, 1) - edge(b, 1) * edge(c, 0);
   };
   const minimumOrientation = (a: number, b: number, c: number) => {
     tick();
