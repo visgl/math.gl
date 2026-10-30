@@ -36,3 +36,13 @@ test('source arc endpoints retain the directional meridian limit at exact poles'
   expect(sourceArc([-180, -90], [-90, -90])(0.5)).toEqual([-135, -90]);
   expect(sourceArc([170, 89], [-160, 90])(0.99)[0]).toBeCloseTo(170, 8);
 });
+
+test('nearly coincident meridians use their conserved longitude speed bound', () => {
+  const a: [number, number] = [79.99999999999069, 52.50000000000001],
+    b: [number, number] = [79.99999999999172, 53.4375];
+  const parts = clipSourceArc(a, b, [rectangle(80, 0, 100, 90)]);
+  expect(parts.length).toBeGreaterThan(0);
+  for (const point of parts.flatMap(part => [part.a, part.b])) {
+    expect(Math.abs(point[0] - 80)).toBeLessThan(1e-8);
+  }
+});

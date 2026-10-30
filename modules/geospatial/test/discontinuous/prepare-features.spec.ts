@@ -8,7 +8,7 @@ import {
   type MapFeatureGeometry,
   type PreparedMapGeometry
 } from '../../src/discontinuous';
-import {elasticI} from '../../src/elastic';
+import {elasticI, elasticIII} from '../../src/elastic';
 import {angle, geographic} from '../../src/discontinuous/math';
 
 const maps = [
@@ -589,9 +589,6 @@ test('polygon source edge ranges reconstruct source endpoints after winding reve
         }
       }
   }
-  expect(() =>
-    maps[0].prepareFeatures([{geometry: polygon}], {provenance: {polygonEdges: true}})
-  ).toThrow(/not support/);
 });
 
 test('real polygon boundaries on chart cuts keep source identity', () => {
@@ -615,12 +612,11 @@ test('real polygon boundaries on chart cuts keep source identity', () => {
     b = maps[1].prepareFeatures(features, {provenance: {polygonEdges: true}});
   expect(b.polygons.positions).toEqual(a.polygons.positions);
   expect(b.polygons.edgeProvenance!.kinds.every(k => k === 0 || k === 1)).toBe(true);
-  expect(() =>
-    maps[1].prepareFeatures(features, {
-      provenance: {polygonEdges: true},
-      sphericalCuts: {interior: 'left'}
-    })
-  ).toThrow(/Global spherical cuts/);
+  const atlas = maps[1].prepareFeatures(features, {
+    provenance: {polygonEdges: true},
+    sphericalCuts: {interior: 'left'}
+  });
+  expect(atlas.polygons.edgeProvenance!.kinds.some(k => k === 1)).toBe(true);
 });
 
 test('source vertices on chart planes do not classify discarded zero-length pairs', () => {
@@ -647,34 +643,6 @@ test('source vertices on chart planes do not classify discarded zero-length pair
   expect(rich.polygons.sourcePositions).toEqual(plain.polygons.sourcePositions);
   expect(rich.polygons.ringStarts).toEqual(plain.polygons.ringStarts);
   expect(rich.polygons.edgeProvenance!.kinds.length).toBe(rich.polygons.positions.length / 2);
-});
-
-test('reconstructing polygon wrappers reject direct edge provenance requests', () => {
-  const rings: [number, number][][] = [
-    [
-      [-10, -10],
-      [10, -10],
-      [10, 10],
-      [-10, 10],
-      [-10, -10]
-    ]
-  ];
-  const cap = new MapEngine({
-    version: 1,
-    id: 'satellite-polygons',
-    definition: {type: 'regional', projection: 'satellite'}
-  });
-  for (const map of [maps[0], maps[3], cap]) {
-    expect(map.projectPolygon(rings).length).toBeGreaterThan(0);
-    expect(() => map.projectPolygon(rings, {polygonEdgeProvenance: true})).toThrow(
-      /not support edge provenance/
-    );
-    expect(() =>
-      map.prepareFeatures([{geometry: {type: 'Polygon', coordinates: rings}}], {
-        provenance: {polygonEdges: true}
-      })
-    ).toThrow(/not support edge provenance/);
-  }
 });
 
 test('Mercator latitude clipping retains source segment lineage and distance', () => {
@@ -864,4 +832,121 @@ test('Elastic source clipping and grid resampling retain minor-arc lineage', () 
   ])
     expect(map.prepareFeatures(features, {provenance}).paths.provenance).toBeDefined();
   expect(structuredClone(rich)).toEqual(rich);
+});
+
+test('wrapper polygon constraints preserve holes, source fractions and clipping classes', () => {
+  const rings: [number, number][][] = [
+    [
+      [-30, -30],
+      [80, -30],
+      [80, 60],
+      [-30, 60],
+      [-30, -30]
+    ],
+    [
+      [-5, 5],
+      [5, 5],
+      [5, 15],
+      [-5, 15],
+      [-5, 5]
+    ]
+  ];
+  const wrappers = [
+    new MapEngine({
+      version: 1,
+      id: 'mercator-poly',
+      definition: {type: 'mercator', maxLatitude: 45}
+    }),
+    maps[3],
+    new MapEngine({
+      version: 1,
+      id: 'satellite-poly',
+      definition: {type: 'regional', projection: 'satellite'}
+    }),
+    new MapEngine({
+      version: 1,
+      id: 'armadillo-poly',
+      definition: {type: 'regional', projection: 'armadillo'}
+    })
+  ];
+  for (const map of wrappers)
+    for (const reverse of [false, true]) {
+      const coordinates = rings.map(r => (reverse ? [...r].reverse() : r)),
+        features: MapFeature[] = [{geometry: {type: 'Polygon', coordinates}}];
+      const plain = map.prepareFeatures(features),
+        rich = map.prepareFeatures(features, {provenance: {polygonEdges: true}});
+      expect(rich.polygons.parts.length).toBeGreaterThan(0);
+      expect(rich.polygons.positions).toEqual(plain.polygons.positions);
+      expect(rich.polygons.sourcePositions).toEqual(plain.polygons.sourcePositions);
+      expect(rich.polygons.ringStarts).toEqual(plain.polygons.ringStarts);
+      const p = rich.polygons.edgeProvenance!;
+      expect(p.kinds).toContain(1);
+      expect(p.kinds.length).toBe(rich.polygons.positions.length / 2);
+      for (let i = 0; i < p.kinds.length; i++)
+        if (p.kinds[i] === 1) {
+          const ring = coordinates[p.sourceRingIndices[i]],
+            segment = p.sourceSegmentIndices[i],
+            a = geographic(ring[segment]),
+            b = geographic(ring[segment + 1]),
+            length = angle(a, b);
+          for (const endpoint of [0, 1]) {
+            const t = p.sourceParameterRanges[i * 2 + endpoint],
+              point = geographic([
+                rich.polygons.sourcePositions[(i + endpoint) * 2],
+                rich.polygons.sourcePositions[(i + endpoint) * 2 + 1]
+              ]),
+              expected = a.map(
+                (x, k) =>
+                  (Math.sin((1 - t) * length) * x + Math.sin(t * length) * b[k]) / Math.sin(length)
+              );
+            expect(Math.hypot(...expected.map((x, k) => x - point[k]))).toBeLessThan(1e-8);
+          }
+        } else {
+          expect(p.sourceRingIndices[i]).toBe(0xffffffff);
+          expect(p.sourceSegmentIndices[i]).toBe(0xffffffff);
+        }
+      expect(structuredClone(rich)).toEqual(rich);
+    }
+});
+
+test('Elastic polar cells retain directional limits and computational pole connectors', () => {
+  for (const lon of [-160, -30, 0, 120]) {
+    const rings: [number, number][][] = [
+      [
+        [lon, -90],
+        [lon + 5, -90],
+        [lon + 5, -85],
+        [lon, -85],
+        [lon, -90]
+      ]
+    ];
+    const input: MapFeature[] = [{geometry: {type: 'Polygon', coordinates: rings}}];
+    const plain = maps[3].prepareFeatures(input),
+      rich = maps[3].prepareFeatures(input, {provenance: {polygonEdges: true}});
+    expect(rich.polygons.positions).toEqual(plain.polygons.positions);
+    expect(rich.polygons.positions.every(Number.isFinite)).toBe(true);
+    expect(rich.polygons.edgeProvenance!.kinds.length).toBe(rich.polygons.positions.length / 2);
+  }
+});
+
+test('Elastic III polar chart crossings do not publish source vertices in another region', () => {
+  const map = new MapEngine({
+    version: 1,
+    id: 'elastic-III-polar-ownership',
+    definition: {type: 'elastic', data: elasticIII}
+  });
+  const rings: [number, number][][] = [
+    [
+      [10, 85],
+      [15, 85],
+      [15, 90],
+      [10, 90],
+      [10, 85]
+    ]
+  ];
+  for (const provenance of [false, true])
+    for (const part of map.projectPolygon(rings, {polygonEdgeProvenance: provenance}))
+      for (const ring of part.sourceCoordinates)
+        for (const p of ring)
+          expect(map.findRegions(p), `${p} in ${part.regionId}`).toContain(part.regionId);
 });

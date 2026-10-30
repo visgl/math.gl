@@ -3,6 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import polygonClipping from 'polygon-clipping';
+import {tracePolygonConstraints, composePolygonEdge} from './polygon-constraints';
+import {sourceArc} from './source-arc';
 import {
   DiscontinuousMap,
   type GeographicPosition,
@@ -203,8 +205,6 @@ export class MercatorMap extends DiscontinuousMap {
     rings: readonly (readonly GeographicPosition[])[],
     options?: MapSamplingOptions
   ) {
-    if (options?.polygonEdgeProvenance)
-      throw new Error('Mercator-clipped polygons do not support edge provenance');
     const x = Math.PI * this.radius,
       y = this.ymax;
     const box: [number, number][][] = [
@@ -217,11 +217,83 @@ export class MercatorMap extends DiscontinuousMap {
       ]
     ];
     return super.projectPolygon(rings, options).flatMap(part =>
-      polygonClipping.intersection(part.coordinates, box).map(coordinates => ({
-        regionId: part.regionId,
-        coordinates,
-        sourceCoordinates: coordinates.map(ring => ring.map(p => this.source(p)))
-      }))
+      polygonClipping.intersection(part.coordinates, box).map(polygon => {
+        const traced = tracePolygonConstraints(
+          part.coordinates,
+          polygon,
+          1e-10,
+          part.edgeProvenance
+        );
+        const sources = traced.rings.map(r => r.map(p => this.source(p)));
+        traced.owners.forEach((owners, r) =>
+          owners.forEach((owner, i) => {
+            if (!owner) return;
+            const [parentRing, parentEdge] = owner,
+              a = part.sourceCoordinates[parentRing][parentEdge],
+              b = part.sourceCoordinates[parentRing][parentEdge + 1],
+              at = sourceArc(a, b);
+            for (const j of [i, i + 1]) {
+              const q = traced.rings[r][j],
+                first = part.coordinates[parentRing][parentEdge],
+                last = part.coordinates[parentRing][parentEdge + 1];
+              if (Math.hypot(q[0] - first[0], q[1] - first[1]) < 1e-10 * this.radius)
+                sources[r][j] = [...a];
+              else if (Math.hypot(q[0] - last[0], q[1] - last[1]) < 1e-10 * this.radius)
+                sources[r][j] = [...b];
+              else {
+                const latitude = Math.sign(q[1]) * this.limit;
+                let lo = 0,
+                  hi = 1;
+                if (a[1] < latitude === b[1] < latitude)
+                  throw new Error('Unresolved Mercator source constraint intersection');
+                for (let k = 0; k < 52; k++) {
+                  const mid = (lo + hi) / 2;
+                  if (at(mid)[1] < latitude === a[1] < latitude) lo = mid;
+                  else hi = mid;
+                }
+                sources[r][j] = at((lo + hi) / 2);
+              }
+            }
+          })
+        );
+        for (const r of sources) r[r.length - 1] = [...r[0]];
+        return {
+          regionId: part.regionId,
+          sourceCoordinates: sources,
+          coordinates: sources.map(r => r.map(p => super.projectPoint(p, part.regionId)!.position)),
+          ...(options?.polygonEdgeProvenance
+            ? {
+                edgeProvenance: traced.owners.map((owners, r) =>
+                  owners.map((owner, i) => {
+                    if (owner) {
+                      const [pr, pe] = owner;
+                      return composePolygonEdge(
+                        part.edgeProvenance![pr][pe],
+                        part.sourceCoordinates[pr][pe],
+                        part.sourceCoordinates[pr][pe + 1],
+                        sources[r][i],
+                        sources[r][i + 1]
+                      );
+                    }
+                    if (
+                      !sources[r]
+                        .slice(i, i + 2)
+                        .every(p => Math.abs(Math.abs(p[1]) - this.limit) < 1e-7)
+                    )
+                      throw new Error('Unknown Mercator clipping constraint');
+                    return {
+                      kind: 'coverage-boundary' as const,
+                      ring: 0xffffffff,
+                      segment: 0xffffffff,
+                      t0: 0,
+                      t1: 0
+                    };
+                  })
+                )
+              }
+            : {})
+        };
+      })
     );
   }
 }

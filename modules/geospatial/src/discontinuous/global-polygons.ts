@@ -262,12 +262,66 @@ export function cutSphericalPolygon(
 
 /** Use existing map-specific lobe, face, cap and placement clipping after atlas partitioning. */
 export function projectSphericalPolygon(
-  map: Pick<MapSurface, 'projectPolygon'>,
+  map: Pick<MapSurface, 'projectPolygon'> & Partial<Pick<MapSurface, 'regions' | 'seams'>>,
   rings: readonly (readonly GeographicPosition[])[],
   options: SphericalCutOptions & MapSamplingOptions
 ): MapPolygon[] {
   const result: MapPolygon[] = [];
+  if (options.polygonEdgeProvenance && (!map.regions || !map.seams))
+    throw new Error('Atlas provenance requires map region and seam metadata');
   for (const part of cutSphericalPolygon(rings, options))
-    result.push(...map.projectPolygon(part.rings, options));
+    for (const polygon of map.projectPolygon(part.rings, options)) {
+      if (options.polygonEdgeProvenance) {
+        if (!polygon.edgeProvenance)
+          throw new Error('Map backend does not support polygon edge provenance');
+        const region = map.regions!.find(r => r.id === polygon.regionId)!;
+        polygon.edgeProvenance = polygon.edgeProvenance.map((edges, ring) =>
+          edges.map((edge, i) => {
+            if (edge.kind !== 'source-boundary') return edge;
+            const parent = part.edges[edge.ring][edge.segment];
+            if (parent.kind === 'source')
+              return {
+                ...edge,
+                ring: parent.ringIndex,
+                segment: parent.edgeIndex,
+                t0: parent.startFraction + edge.t0 * (parent.endFraction - parent.startFraction),
+                t1: parent.startFraction + edge.t1 * (parent.endFraction - parent.startFraction)
+              };
+            // Atlas edges are computational joins unless they coincide with an
+            // actual map cut/coverage constraint. Never promote an atlas connector
+            // to a real source boundary or an extrusion wall.
+            const a = geographic(polygon.sourceCoordinates[ring][i]),
+              b = geographic(polygon.sourceCoordinates[ring][i + 1]),
+              kinds: string[] = [];
+            region.boundary.forEach((p, j) => {
+              const normal = cross(
+                geographic(p),
+                geographic(region.boundary[(j + 1) % region.boundary.length])
+              );
+              const length = Math.hypot(...normal);
+              if (length < 1e-12) return;
+              if ([a, b].every(v => Math.abs(dot(normal, v)) / length < 1e-10)) {
+                const seam = map.seams!.find(s =>
+                  s.regions.some((id, k) => id === region.id && s.edges[k] === j)
+                );
+                if (seam) kinds.push(seam.kind);
+              }
+            });
+            return {
+              kind: kinds.includes('boundary')
+                ? ('coverage-boundary' as const)
+                : kinds.includes('cut')
+                  ? ('chart-cut' as const)
+                  : ('continuous-chart-join' as const),
+              ring: 0xffffffff,
+              segment: 0xffffffff,
+              t0: 0,
+              t1: 0
+            };
+          })
+        );
+      }
+      result.push(polygon);
+    }
   return result;
 }
