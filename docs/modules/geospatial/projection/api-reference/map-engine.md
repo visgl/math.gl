@@ -629,5 +629,21 @@ Source distances and endpoint reasons survive the additional cut. In the path
 provenance example, select **Mercator latitude cuts** or **Satellite coverage cuts** to inspect the coverage ends.
 Rigid spherical cap paths (including satellite coverage) also retain lineage by
 attributing streamed intersections to the active sampled edge before resampling.
-Mercator polygon edges, nonlinear cap paths and Elastic paths/edges still
-reject provenance requests; these stages require their own attributed clipping.
+Polygon wrappers still reject edge-provenance requests unless explicitly supported.
+
+
+### Nonlinear-cap and Elastic path lineage
+
+Nonlinear cap intersections are refined on their owning original source arc before
+resampling, preserving source segment parameters even when the local transform bends
+that arc. Elastic paths carry segment ancestry through source-domain clipping and
+sample the original minor great-circle arc through the grid. This corrects the old
+linear longitude/latitude interpolation between source samples; provenance on/off
+produce identical geometry under the corrected path algorithm. Per-part boundaries
+use the Elastic chart's own coverage/cut/join constraints. Distances retain the
+explicit spherical policy and do not restart at computational chart boundaries.
+
+Source-intersection and sampling work remain bounded and unresolved intersections
+reject. The [Projection domains example](https://visgl.github.io/math.gl/next/examples/projection-domains)
+adds **Nonlinear Armadillo cuts** and **Elastic source arcs** under its path provenance
+mode. These buffers do not define deck.gl cap/join rendering or extrusion behavior.

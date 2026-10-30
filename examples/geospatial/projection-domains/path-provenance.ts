@@ -4,11 +4,12 @@
 import {PathLayer,ScatterplotLayer} from '@deck.gl/layers';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {MapEngine} from '@math.gl/geospatial/discontinuous';
+import {elasticI} from '@math.gl/geospatial/elastic';
 
 /** Source distance drives dash phase across fragments; chart XY only draws it. */
 export function pathProvenanceLayers(showVertices=true, wrapper='goode'){
-  const map=new MapEngine({version:1,id:'lineage-goode',definition:wrapper==='mercator'?{type:'mercator',maxLatitude:75}:wrapper==='satellite'?{type:'regional',projection:'satellite'}:{type:'goode'}});
-  const prepared=map.prepareFeatures([{geometry:{type:'LineString',coordinates:wrapper==='satellite'?[[-80,10],[0,15],[80,10],[0,15]]:wrapper==='mercator'?[[-70,50],[-10,85],[50,50],[110,85]]:[[-110,30],[-20,30],[60,20],[130,35]]}}],
+  const map=new MapEngine({version:1,id:'lineage-goode',definition:wrapper==='elastic'?{type:'elastic',data:elasticI}:wrapper==='armadillo'?{type:'regional',projection:'armadillo'}:wrapper==='mercator'?{type:'mercator',maxLatitude:75}:wrapper==='satellite'?{type:'regional',projection:'satellite'}:{type:'goode'}});
+  const prepared=map.prepareFeatures([{geometry:{type:'LineString',coordinates:wrapper==='elastic'?[[-110,20],[-20,35],[80,20],[-20,35]]:wrapper==='armadillo'?[[-170,-60],[-30,30],[120,-45],[-30,30]]:wrapper==='satellite'?[[-80,10],[0,15],[80,10],[0,15]]:wrapper==='mercator'?[[-70,50],[-10,85],[50,50],[110,85]]:[[-110,30],[-20,30],[60,20],[130,35]]}}],
     {provenance:{sourceSegments:true,boundaries:true,distances:{metric:'spherical',radius:6371000}}});
   const hours=[0,2,5,9];
   const {paths}=prepared,p=paths.provenance!,lines:any[]=[],vertices:any[]=[];

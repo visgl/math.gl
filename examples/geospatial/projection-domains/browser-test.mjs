@@ -35,6 +35,8 @@ try {
   assert.match(await page.locator('[data-status]').innerText(),/source meters/);
   await page.selectOption('[data-wrapper]','mercator');
   await page.selectOption('[data-wrapper]','satellite');
+  await page.selectOption('[data-wrapper]','armadillo');
+  await page.selectOption('[data-wrapper]','elastic');
   await page.selectOption('[data-wrapper]','goode');
   await page.uncheck('[data-vertices]');
   await page.check('[data-vertices]');
