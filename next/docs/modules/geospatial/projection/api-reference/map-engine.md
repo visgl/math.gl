@@ -371,3 +371,15 @@ This is a static geometry contract, not a deck.gl adapter or surface tessellator
 Flags are independent. Unrequested fields are absent. Unsupported policies/backends reject explicitly; provenance is recorded during segment clipping and sampling. The payload is structured-cloneable. It does not prescribe interpolation of categorical attributes, meter widths, surface normals or extrusion.
 
 The [Projection domains example](https://visgl.github.io/math.gl/next/examples/projection-domains) includes a path-provenance mode with distance-continuous dashes and inspectable source lineage. Color interpolates declared source timestamps using segment/t; dash phase uses cumulative source meters. This contract supports the requirements discussed in [deck.gl#10922](https://github.com/visgl/deck.gl/issues/10922).
+
+### Optional polygon-edge provenance[​](#optional-polygon-edge-provenance "Direct link to Optional polygon-edge provenance")
+
+`prepareFeatures(features, {provenance: {polygonEdges: true}})` adds `polygons.edgeProvenance`. The arrays align with polygon vertices: record `i` describes the directed edge from vertex `i` to `i+1` within its ring. Repeated closing vertices have kind `0` and no outgoing edge. Ring and polygon offsets retain their ordinary meaning.
+
+`kinds` uses `0` for no edge, `1` for source boundary, `2` for coverage boundary, `3` for chart cut, and `4` for continuous chart join. `sourceRingIndices` and `sourceSegmentIndices` address original rings and their closing segments. `sourceParameterRanges` stores `[t0,t1]` minor-great-circle fractions for each edge; ranges reverse when ring winding reverses. Generated edges use `0xffffffff` for source indices and zero parameter placeholders. Consumers must check `kinds`.
+
+Attribution happens against source and region clipping constraints before map projection and resampling. A source boundary coincident with a cut retains its source identity. Sampling propagates that edge identity; output winding reversal reverses the edge records and swaps parameter endpoints. Geometry stays identical with this option enabled. No polygon-edge arrays are emitted by default.
+
+This option currently supports the native open-hemisphere polygon clipper. Global spherical atlas cuts and wrappers that rebuild geometry without propagating edge lineage reject explicitly. Ambiguous or unresolvable source constraints also reject instead of guessing. The result identifies edges; it does not establish surface normals, extrusion directions, or animated-mesh correspondence.
+
+The Projection domains example includes a polygon-with-hole mode showing original outlines and optional generated closures. It illustrates the boundary distinction required by [deck.gl#10922](https://github.com/visgl/deck.gl/issues/10922).
