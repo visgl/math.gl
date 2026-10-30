@@ -522,9 +522,11 @@ export class DiscontinuousMap {
             };
           };
           for (let i = 1; i < sphere.length; i++) {
-            const origin = options.polygonEdgeProvenance
-              ? classify(sphere[i - 1], sphere[i])
-              : undefined;
+            const origin =
+              options.polygonEdgeProvenance &&
+              !sphere[i - 1].every((value, k) => value === sphere[i][k])
+                ? classify(sphere[i - 1], sphere[i])
+                : undefined;
             const sampled = this.sample(r, sphere[i - 1], sphere[i], settings);
             for (const point of sampled) {
               const previous = points[points.length - 1];

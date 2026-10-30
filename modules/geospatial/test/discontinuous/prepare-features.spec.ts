@@ -622,3 +622,29 @@ test('real polygon boundaries on chart cuts keep source identity', () => {
     })
   ).toThrow(/Global spherical cuts/);
 });
+
+test('source vertices on chart planes do not classify discarded zero-length pairs', () => {
+  const features: MapFeature[] = [
+    {
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [-60, 20],
+            [-40, 30],
+            [-20, 20],
+            [-20, 50],
+            [-60, 50],
+            [-60, 20]
+          ]
+        ]
+      }
+    }
+  ];
+  const plain = maps[1].prepareFeatures(features),
+    rich = maps[1].prepareFeatures(features, {provenance: {polygonEdges: true}});
+  expect(rich.polygons.positions).toEqual(plain.polygons.positions);
+  expect(rich.polygons.sourcePositions).toEqual(plain.polygons.sourcePositions);
+  expect(rich.polygons.ringStarts).toEqual(plain.polygons.ringStarts);
+  expect(rich.polygons.edgeProvenance!.kinds.length).toBe(rich.polygons.positions.length / 2);
+});
