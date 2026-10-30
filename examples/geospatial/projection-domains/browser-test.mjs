@@ -72,4 +72,17 @@ try {
   }
   if(process.env.CAPTURE_RASTER_FRAME_SCREENSHOT)await page.screenshot({path:process.env.CAPTURE_RASTER_FRAME_SCREENSHOT});
   assert.deepEqual(errors, []);
+  await page.goto(`http://127.0.0.1:${server.address().port}/surface-mesh.html`);
+  await page.waitForFunction(()=>document.querySelector('#example').dataset.ready==='surface');
+  if(process.env.CAPTURE_SURFACE_SCREENSHOT)await page.screenshot({path:process.env.CAPTURE_SURFACE_SCREENSHOT});
+  for (const pose of ['0','0.37','1']) {
+    await page.locator('[data-pose]').fill(pose);
+    await page.locator('[data-pose]').dispatchEvent('input');
+    assert.equal(await page.locator('#example').getAttribute('data-error'),null);
+  }
+  await page.locator('[data-walls]').uncheck();
+  await page.locator('[data-normals]').check();
+  assert.match(await page.locator('[data-status]').innerText(),/0 source walls/);
+  assert.equal(await page.locator('#example').getAttribute('data-error'),null);
+  assert.deepEqual(errors,[]);
 } finally {await browser?.close(); await new Promise(done => server.close(done));}
