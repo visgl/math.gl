@@ -43,5 +43,22 @@ try {
   assert.match(await page.locator('[data-status]').innerText(),/preserve the hole/);
   await page.check('[data-generated]');await page.uncheck('[data-generated]');
   if (process.env.CAPTURE_SCREENSHOT) await page.screenshot({path:process.env.CAPTURE_SCREENSHOT});
+  await page.goto(`http://127.0.0.1:${server.address().port}/centered-omerc.html`);
+  await page.waitForFunction(()=>document.querySelector('#example').dataset.ready==='true');
+  assert.equal(await page.locator('#example').getAttribute('data-error'),null);
+  const revision=await page.locator('#example').getAttribute('data-revision');
+  await page.click('[data-repeat]');
+  assert.equal(await page.locator('#example').getAttribute('data-revision'),revision);
+  assert.match(await page.locator('[data-status]').innerText(),/Reused/);
+  await page.selectOption('[data-engine]','math.gl');
+  assert.notEqual(await page.locator('#example').getAttribute('data-revision'),revision);
+  await page.locator('[data-lon]').fill('170');
+  await page.locator('[data-alpha]').fill('-20');
+  assert.match(await page.locator('[data-status]').innerText(),/Rebuilt/);
+  await page.click('[data-fiji]');
+  assert.equal(await page.locator('[data-lon]').inputValue(),'180');
+  assert.equal(await page.locator('#example').getAttribute('data-error'),null);
+  if(process.env.CAPTURE_OMERC_SCREENSHOT)await page.screenshot({path:process.env.CAPTURE_OMERC_SCREENSHOT});
+  await page.reload();await page.waitForFunction(()=>document.querySelector('#example').dataset.ready==='true');
   assert.deepEqual(errors, []);
 } finally {await browser?.close(); await new Promise(done => server.close(done));}
