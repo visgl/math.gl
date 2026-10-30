@@ -102,3 +102,53 @@ Object.keys(expected.triangles).forEach(id => {
     ).toEqual(indices);
   });
 });
+
+for (const plane of ['xz', 'yz']) {
+  test(`hashed triangulation on ${plane}`, async () => {
+    const data = flatten(await openFile(`${FIXTURES_PATH}water.json`));
+    const reference = earcut(data.vertices, data.holes);
+    const positions = new Float64Array((data.vertices.length / 2) * 3);
+    for (let i = 0; i < data.vertices.length / 2; i++) {
+      const x = data.vertices[i * 2];
+      const y = data.vertices[i * 2 + 1];
+      positions.set(plane === 'xz' ? [x, 1e6, y] : [1e6, x, y], i * 3);
+    }
+    const areas = extractAreas(data.vertices, data.holes, 2);
+    expect(earcut(positions, data.holes, 3, undefined, plane)).toEqual(reference);
+    expect(earcut(positions, data.holes, 3, areas, plane)).toEqual(reference);
+    expect(deviation(data.vertices, data.holes, 2, reference)).toBeLessThanOrEqual(
+      expected.errors.water
+    );
+  });
+}
+
+test('scratch storage is reset across holes, steiner points, and empty calls', async () => {
+  const data = flatten(await openFile(`${FIXTURES_PATH}steiner.json`));
+  const reference = earcut(data.vertices, data.holes);
+  for (let i = 0; i < 3; i++) {
+    expect(earcut([])).toEqual([]);
+    expect(earcut([0, 0, 1, 0, 1, 1, 0, 1], [4, 4])).toEqual([2, 3, 0, 0, 1, 2]);
+    expect(earcut(data.vertices, data.holes)).toEqual(reference);
+    expect(deviation(data.vertices, data.holes, 2, reference)).toBe(0);
+  }
+});
+
+test('scratch storage survives nested calls and exceptions from input getters', () => {
+  const positions = [0, 0, 10, 0, 10, 10, 0, 10, 2, 2, 4, 2, 4, 4, 2, 4];
+  const reference = earcut(positions, [4]);
+  const nested = [...positions];
+  Object.defineProperty(nested, 10, {
+    get() {
+      expect(earcut(positions, [4])).toEqual(reference);
+      return positions[10];
+    }
+  });
+  expect(earcut(nested, [4])).toEqual(reference);
+  Object.defineProperty(nested, 8, {
+    get() {
+      throw new Error('input read failed');
+    }
+  });
+  expect(() => earcut(nested, [4])).toThrow('input read failed');
+  expect(earcut(positions, [4])).toEqual(reference);
+});
