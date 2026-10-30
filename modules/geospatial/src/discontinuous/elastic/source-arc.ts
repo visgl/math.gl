@@ -41,6 +41,17 @@ export function clipSourceArc(
           dy = d[1] - c[1],
           length = Math.hypot(dx, dy);
         if (!length) continue;
+        const angular = omega / RAD,
+          latitude = Math.min(90, Math.max(Math.abs(a[1]), Math.abs(b[1])) + angular),
+          cosine = Math.cos(latitude * RAD),
+          longitude = cosine > 1e-10 ? angular / cosine : 360;
+        if (
+          Math.max(c[1], d[1]) < Math.min(a[1], b[1]) - angular - 1e-10 ||
+          Math.min(c[1], d[1]) > Math.max(a[1], b[1]) + angular + 1e-10 ||
+          Math.max(c[0], d[0]) < Math.min(a[0], b[0]) - longitude - 1e-10 ||
+          Math.min(c[0], d[0]) > Math.max(a[0], b[0]) + longitude + 1e-10
+        )
+          continue;
         const value = (t: number) => {
           tick();
           const p = at(t);
