@@ -230,6 +230,8 @@ class ElasticMap implements MapSurface {
     rings: readonly (readonly GeographicPosition[])[],
     options: MapSamplingOptions = {}
   ): MapPolygon[] {
+    if (options.polygonEdgeProvenance)
+      throw new Error('Elastic polygons do not support edge provenance');
     const out: MapPolygon[] = [];
     for (const part of splitter.projectPolygon(rings, this.sourceOptions(options)))
       for (const c of this.charts.filter(c => c.baseId === part.regionId)) {

@@ -262,6 +262,8 @@ export class CapMap extends DiscontinuousMap {
     options?: MapSamplingOptions
   ): MapPolygon[] {
     if (this.cap === Math.PI / 2 && !this.nonlinear) return super.projectPolygon(rings, options);
+    if (options?.polygonEdgeProvenance)
+      throw new Error('Cap-clipped polygons do not support edge provenance');
     const result: MapPolygon[] = [];
     // Split into convex chart hemispheres first; this also validates source topology.
     for (const part of super.projectPolygon(rings, options)) {

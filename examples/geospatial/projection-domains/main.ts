@@ -13,16 +13,17 @@ import {projectGeometry} from './pipeline.ts';
 import {createRasterMesh} from './raster.ts';
 import type {RasterKind} from './raster.ts';
 import {mountInfoBox} from '../../common/info-box.js';
+import {polygonProvenanceLayers,polygonProvenanceTooltip} from './polygon-provenance.ts';
 import {pathProvenanceLayers,provenanceTooltip} from './path-provenance.ts';
 import './style.css';
 
 /** Each mount owns its worker pool, controls and renderer, including website navigation. */
 export function mountProjectionDomains(root: HTMLElement) {
   root.innerHTML = `<section class="projection-domains"><div class="projection-map"></div><aside>
-    <p>GeoArrow → math.gl worker → D3 stream → math.gl triangles → deck.gl.</p>
-    <label>Projection<select data-projection><option value="equirectangular">Equirectangular / seam</option><option value="orthographic">Rotated hemisphere</option><option value="interrupted">Interrupted Mollweide</option><option value="path-provenance">Path provenance / continuous dashes</option></select></label>
+    <p data-pipeline>GeoArrow → math.gl worker → D3 stream → math.gl triangles → deck.gl.</p>
+    <label>Projection<select data-projection><option value="equirectangular">Equirectangular / seam</option><option value="orthographic">Rotated hemisphere</option><option value="interrupted">Interrupted Mollweide</option><option value="path-provenance">Path provenance / continuous dashes</option><option value="polygon-provenance">Polygon boundary provenance / hole</option></select></label>
     <label>Raster<select data-raster><option value="world">360° image</option><option value="rotated">Rotated grid across 180°</option><option value="polar">South-pole-containing grid</option></select></label>
-    <label><input type="checkbox" data-vertices checked> Show provenance vertices</label><p>The white outline is the projected domain. Hover a polygon for its source row.</p></aside><output data-status aria-live="polite"></output></section>`;
+    <label><input type="checkbox" data-vertices checked> Show provenance vertices</label><label><input type="checkbox" data-generated> Show generated polygon boundaries</label><p>The white outline is the projected domain. Hover a polygon for its source row.</p></aside><output data-status aria-live="polite"></output></section>`;
   const status = root.querySelector<HTMLOutputElement>('output')!;
   const projectionSelect = root.querySelector<HTMLSelectElement>('[data-projection]')!;
   const rasterSelect = root.querySelector<HTMLSelectElement>('[data-raster]')!;
@@ -40,10 +41,20 @@ export function mountProjectionDomains(root: HTMLElement) {
   let featureIds: Uint32Array = new Uint32Array(), generation = 0, active: AbortController | undefined;
   const deck = new Deck({parent: root.querySelector<HTMLDivElement>('.projection-map')!,
     views: new OrthographicView({flipY: true}), initialViewState: {target: [0, 0, 0], zoom: 0}, controller: true,
-    getTooltip: ({index, layer,object}) => provenanceTooltip(object) || (index >= 0 && layer?.id === 'features' ? names[featureIds[index]] : null)});
+    getTooltip: ({index, layer,object}) => polygonProvenanceTooltip(object) || provenanceTooltip(object) || (index >= 0 && layer?.id === 'features' ? names[featureIds[index]] : null)});
   async function update() {
     const request = ++generation; active?.abort(); active = new AbortController();
+    const provenanceMode=projectionSelect.value.endsWith('-provenance');
+    rasterSelect.disabled=provenanceMode;
+    root.querySelector('[data-vertices]')!.parentElement!.hidden=projectionSelect.value!=='path-provenance';
+    root.querySelector('[data-generated]')!.parentElement!.hidden=projectionSelect.value!=='polygon-provenance';
+    root.querySelector('[data-pipeline]')!.textContent=provenanceMode?'Native math.gl preparation → optional provenance buffers → deck.gl.':'GeoArrow → math.gl worker → D3 stream → math.gl triangles → deck.gl.';
     const name = projectionSelect.value as ProjectionName, kind = rasterSelect.value as RasterKind;
+    if(projectionSelect.value==='polygon-provenance'){
+      const demo=polygonProvenanceLayers(root.querySelector<HTMLInputElement>('[data-generated]')!.checked);
+      deck.setProps({layers:demo.layers});status.textContent='Native math.gl polygon provenance: white original boundaries preserve the hole. Optional orange edges show generated closures; hover for edge class and source ring/segment.';
+      root.dataset.ready='polygon-provenance';return;
+    }
     if(projectionSelect.value==='path-provenance'){
       const demo=pathProvenanceLayers(root.querySelector<HTMLInputElement>('[data-vertices]')!.checked);
       deck.setProps({layers:demo.layers});status.textContent='Native math.gl provenance: dashes continue in source meters across cuts. Hover vertices for segment, t, distance and endpoint reason. White vertices are original; blue are generated. Color interpolates source timestamps at 0, 2, 5 and 9 hours.';
@@ -76,6 +87,7 @@ export function mountProjectionDomains(root: HTMLElement) {
     } catch (error) {if (request === generation) {status.textContent = `Failed: ${String(error)}`; root.dataset.error = String(error);}}
   }
   projectionSelect.addEventListener('change', update); rasterSelect.addEventListener('change', update);
+  root.querySelector('[data-generated]')!.addEventListener('change',update);
   root.querySelector('[data-vertices]')!.addEventListener('change',update);
   void update();
   return async () => {

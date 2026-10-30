@@ -67,10 +67,18 @@ export type MapLine = {
     endReason?: string;
   };
 };
+export type MapPolygonEdge = {
+  kind: 'source-boundary' | 'coverage-boundary' | 'chart-cut' | 'continuous-chart-join';
+  ring: number;
+  segment: number;
+  t0: number;
+  t1: number;
+};
 export type MapPolygon = {
   regionId: string;
   coordinates: Position[][];
   sourceCoordinates: Position[][];
+  edgeProvenance?: MapPolygonEdge[][];
 };
 export type MapSamplingOptions = {
   /** Maximum angular sampling interval in degrees. Default 2, range (0, 90]. */
@@ -79,6 +87,7 @@ export type MapSamplingOptions = {
   pathProvenance?: boolean;
   pathDistances?: boolean;
   pathBoundaries?: boolean;
+  polygonEdgeProvenance?: boolean;
   /** Midpoint chord-error target in placed output units. Default 1e-4. */
   tolerance?: number;
 };
@@ -452,24 +461,107 @@ export class DiscontinuousMap {
           coordinates: [],
           sourceCoordinates: []
         };
+        if (options.polygonEdgeProvenance) output.edgeProvenance = [];
         polygon.forEach((ring, index) => {
           const sphere = ring.map(p => unit(add(center, add(scale(x, p[0]), scale(y, p[1])))));
           const points: Vector[] = [];
+          const edges: MapPolygonEdge[] = [];
+          const classify = (a: Vector, b: Vector): MapPolygonEdge => {
+            // Attribute the boolean boundary in the source clipping chart, before
+            // projection/resampling. Original constraints win on coincident cuts.
+            const candidates: {ring: number; segment: number}[] = [];
+            vectors.forEach((source, ring) =>
+              source.forEach((u, segment) => {
+                const v = source[(segment + 1) % source.length],
+                  length = angle(u, v);
+                if (
+                  length > 1e-12 &&
+                  [a, b].every(
+                    p =>
+                      Math.abs(dot(unit(cross(u, v)), p)) < 1e-12 &&
+                      Math.abs(angle(u, p) + angle(p, v) - length) < 1e-10
+                  )
+                )
+                  candidates.push({ring, segment});
+              })
+            );
+            if (candidates.length > 1) throw new Error('Ambiguous polygon boundary provenance');
+            if (candidates.length) {
+              const {ring, segment} = candidates[0],
+                source = vectors[ring],
+                u = source[segment],
+                length = angle(u, source[(segment + 1) % source.length]);
+              return {
+                kind: 'source-boundary',
+                ring,
+                segment,
+                t0: Math.min(1, angle(u, a) / length),
+                t1: Math.min(1, angle(u, b) / length)
+              };
+            }
+            const kinds = r.normals
+              .map((n, edge) =>
+                [a, b].every(p => Math.abs(dot(n, p)) < 1e-9)
+                  ? this.seams.find(s =>
+                      s.regions.some((id, i) => id === r.definition.id && s.edges[i] === edge)
+                    )?.kind
+                  : undefined
+              )
+              .filter(Boolean);
+            if (!kinds.length) throw new Error('Unknown polygon clipping constraint');
+            return {
+              kind: kinds.includes('boundary')
+                ? 'coverage-boundary'
+                : kinds.includes('cut')
+                  ? 'chart-cut'
+                  : 'continuous-chart-join',
+              ring: 0xffffffff,
+              segment: 0xffffffff,
+              t0: 0,
+              t1: 0
+            };
+          };
           for (let i = 1; i < sphere.length; i++) {
+            const origin =
+              options.polygonEdgeProvenance &&
+              !sphere[i - 1].every((value, k) => value === sphere[i][k])
+                ? classify(sphere[i - 1], sphere[i])
+                : undefined;
             const sampled = this.sample(r, sphere[i - 1], sphere[i], settings);
             for (const point of sampled) {
               const previous = points[points.length - 1];
-              if (!previous || !point.every((value, k) => value === previous[k]))
+              if (!previous || !point.every((value, k) => value === previous[k])) {
+                if (previous && origin) {
+                  const edge = {...origin};
+                  if (edge.kind === 'source-boundary') {
+                    const source = vectors[edge.ring],
+                      u = source[edge.segment],
+                      length = angle(u, source[(edge.segment + 1) % source.length]);
+                    edge.t0 = Math.min(1, angle(u, previous) / length);
+                    edge.t1 = Math.min(1, angle(u, point) / length);
+                  }
+                  edges.push(edge);
+                }
                 points.push(point);
+              }
             }
           }
           if (points.length < 3) return;
           if (points[points.length - 1].every((value, k) => value === points[0][k])) points.pop();
+          if (options.polygonEdgeProvenance && edges.length < points.length)
+            edges.push(classify(points[points.length - 1], points[0]));
           points.push(points[0]);
           const xy = points.map(p => this.project(r, p));
           if (ringOrientation(xy) > 0 !== (index === 0)) {
             xy.reverse();
             points.reverse();
+            edges.reverse();
+            for (const e of edges) [e.t0, e.t1] = [e.t1, e.t0];
+          }
+          if (output.edgeProvenance) {
+            if (edges.length !== points.length - 1)
+              throw new Error('Mismatched polygon edge provenance');
+            output.edgeProvenance.push(edges);
           }
           output.coordinates.push(xy);
           output.sourceCoordinates.push(points.map(coordinates));

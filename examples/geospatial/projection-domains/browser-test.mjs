@@ -35,6 +35,10 @@ try {
   assert.match(await page.locator('[data-status]').innerText(),/source meters/);
   await page.uncheck('[data-vertices]');
   await page.check('[data-vertices]');
+  await page.selectOption('[data-projection]','polygon-provenance');
+  await page.waitForFunction(()=>document.querySelector('#example').dataset.ready==='polygon-provenance');
+  assert.match(await page.locator('[data-status]').innerText(),/preserve the hole/);
+  await page.check('[data-generated]');await page.uncheck('[data-generated]');
   if (process.env.CAPTURE_SCREENSHOT) await page.screenshot({path:process.env.CAPTURE_SCREENSHOT});
   assert.deepEqual(errors, []);
 } finally {await browser?.close(); await new Promise(done => server.close(done));}

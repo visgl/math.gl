@@ -140,6 +140,8 @@ export class MercatorMap extends DiscontinuousMap {
     rings: readonly (readonly GeographicPosition[])[],
     options?: MapSamplingOptions
   ) {
+    if (options?.polygonEdgeProvenance)
+      throw new Error('Mercator-clipped polygons do not support edge provenance');
     const x = Math.PI * this.radius,
       y = this.ymax;
     const box: [number, number][][] = [

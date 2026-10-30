@@ -68,6 +68,13 @@ export type PreparedMapGeometry = {
     ringStarts: Uint32Array;
     /** Ring offsets for polygon parts, with a terminal sentinel. Outer ring comes first. */
     polygonStarts: Uint32Array;
+    /** One edge from each vertex to the next; repeated closing vertices have kind 0. */
+    edgeProvenance?: {
+      kinds: Uint8Array;
+      sourceRingIndices: Uint32Array;
+      sourceSegmentIndices: Uint32Array;
+      sourceParameterRanges: Float64Array;
+    };
   };
 };
 /** Static preparation controls. This does not triangulate, interpolate attributes or pose meshes. */
@@ -76,6 +83,7 @@ export type MapPrepareFeaturesOptions = {
   provenance?: {
     sourceSegments?: boolean;
     boundaries?: boolean;
+    polygonEdges?: boolean;
     /** Source minor-great-circle distance in meters on the declared sphere. */
     distances?: {metric: 'spherical'; radius: number};
   };
@@ -142,9 +150,9 @@ export function prepareMapFeatures(
     provenance &&
     (typeof provenance !== 'object' ||
       Object.keys(provenance).some(
-        k => !['sourceSegments', 'boundaries', 'distances'].includes(k)
+        k => !['sourceSegments', 'boundaries', 'distances', 'polygonEdges'].includes(k)
       ) ||
-      [provenance.sourceSegments, provenance.boundaries].some(
+      [provenance.sourceSegments, provenance.boundaries, provenance.polygonEdges].some(
         v => v !== undefined && typeof v !== 'boolean'
       ) ||
       (provenance.distances &&
@@ -153,6 +161,12 @@ export function prepareMapFeatures(
           provenance.distances.radius <= 0)))
   )
     throw new Error('Unsupported provenance policy');
+  if (provenance?.polygonEdges && options.sphericalCuts)
+    throw new Error('Global spherical cuts do not support polygon edge provenance');
+  const edgeKinds: number[] = [],
+    edgeRings: number[] = [],
+    edgeSegments: number[] = [],
+    edgeParameters: number[] = [];
   const lineage = Boolean(
     provenance?.sourceSegments || provenance?.boundaries || provenance?.distances
   );
@@ -235,9 +249,32 @@ export function prepareMapFeatures(
     const rings = input.map(r => r.map(position));
     const parts = options.sphericalCuts
       ? map.projectGlobalPolygon(rings, {...options.sampling, ...options.sphericalCuts})
-      : map.projectPolygon(rings, options.sampling);
+      : map.projectPolygon(rings, {
+          ...options.sampling,
+          polygonEdgeProvenance: provenance?.polygonEdges
+        });
     for (const p of parts) {
       for (let i = 0; i < p.coordinates.length; i++) {
+        if (provenance?.polygonEdges) {
+          const edges = p.edgeProvenance?.[i];
+          if (!edges) throw new Error('Map backend does not support polygon edge provenance');
+          const kinds = [
+            'source-boundary',
+            'coverage-boundary',
+            'chart-cut',
+            'continuous-chart-join'
+          ];
+          for (const edge of edges) {
+            edgeKinds.push(kinds.indexOf(edge.kind) + 1);
+            edgeRings.push(edge.ring);
+            edgeSegments.push(edge.segment);
+            edgeParameters.push(edge.t0, edge.t1);
+          }
+          edgeKinds.push(0);
+          edgeRings.push(0xffffffff);
+          edgeSegments.push(0xffffffff);
+          edgeParameters.push(0, 0);
+        }
         append(polygons, p.coordinates[i], p.sourceCoordinates[i]);
         ringStarts.push(polygons.positions.length / 2);
       }
@@ -338,7 +375,17 @@ export function prepareMapFeatures(
       ...pack(polygons),
       parts: polygonParts,
       ringStarts: new Uint32Array(ringStarts),
-      polygonStarts: new Uint32Array(polygonStarts)
+      polygonStarts: new Uint32Array(polygonStarts),
+      ...(provenance?.polygonEdges
+        ? {
+            edgeProvenance: {
+              kinds: new Uint8Array(edgeKinds),
+              sourceRingIndices: new Uint32Array(edgeRings),
+              sourceSegmentIndices: new Uint32Array(edgeSegments),
+              sourceParameterRanges: new Float64Array(edgeParameters)
+            }
+          }
+        : {})
     }
   };
 }

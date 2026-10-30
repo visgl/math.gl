@@ -519,3 +519,160 @@ test('reconstructing wrappers reject direct path lineage requests explicitly', (
     ).toThrow(/do not support source provenance/);
   }
 });
+
+test('optional polygon edges preserve holes, source constraints and geometry', () => {
+  for (const map of maps.slice(1, 3)) {
+    const features: MapFeature[] = [{geometry: polygon}];
+    const a = map.prepareFeatures(features),
+      b = map.prepareFeatures(features, {provenance: {polygonEdges: true}});
+    expect(b.polygons.positions).toEqual(a.polygons.positions);
+    expect(b.polygons.sourcePositions).toEqual(a.polygons.sourcePositions);
+    expect(b.polygons.ringStarts).toEqual(a.polygons.ringStarts);
+    expect(a.polygons.edgeProvenance).toBeUndefined();
+    const e = b.polygons.edgeProvenance!;
+    expect(e.kinds.length).toBe(b.polygons.positions.length / 2);
+    expect(e.sourceParameterRanges.length).toBe(e.kinds.length * 2);
+    expect(e.kinds.some(k => k === 1)).toBe(true);
+    for (let ring = 0; ring < b.polygons.ringStarts.length - 1; ring++) {
+      const end = b.polygons.ringStarts[ring + 1];
+      expect(e.kinds[end - 1]).toBe(0);
+      for (let i = b.polygons.ringStarts[ring]; i < end - 1; i++) {
+        if (e.kinds[i] === 1) {
+          expect(e.sourceRingIndices[i]).toBeLessThan(2);
+          expect(e.sourceParameterRanges[i * 2]).toBeGreaterThanOrEqual(0);
+          expect(e.sourceParameterRanges[i * 2 + 1]).toBeLessThanOrEqual(1);
+        } else expect(e.sourceSegmentIndices[i]).toBe(0xffffffff);
+      }
+    }
+    expect(structuredClone(b)).toEqual(b);
+  }
+});
+
+test('polygon source edge ranges reconstruct source endpoints after winding reversal', () => {
+  const geometry = polygon as Extract<MapFeatureGeometry, {type: 'MultiLineString' | 'Polygon'}>;
+  for (const reverse of [false, true]) {
+    const rings = geometry.coordinates.map(r => (reverse ? [...r].reverse() : r));
+    const prepared = maps[1].prepareFeatures([{geometry: {type: 'Polygon', coordinates: rings}}], {
+      provenance: {polygonEdges: true}
+    });
+    const {polygons} = prepared,
+      e = polygons.edgeProvenance!;
+    const vector = (p: readonly number[]) => {
+      const lon = (p[0] * Math.PI) / 180,
+        lat = (p[1] * Math.PI) / 180;
+      return [Math.cos(lat) * Math.cos(lon), Math.cos(lat) * Math.sin(lon), Math.sin(lat)];
+    };
+    for (let i = 0; i < e.kinds.length; i++)
+      if (e.kinds[i] === 1) {
+        const ring = rings[e.sourceRingIndices[i]],
+          segment = e.sourceSegmentIndices[i],
+          a = vector(ring[segment]),
+          b = vector(ring[(segment + 1) % ring.length]);
+        const omega = Math.acos(
+          Math.max(
+            -1,
+            Math.min(
+              1,
+              a.reduce((sum, v, k) => sum + v * b[k], 0)
+            )
+          )
+        );
+        for (const endpoint of [0, 1]) {
+          const t = e.sourceParameterRanges[i * 2 + endpoint],
+            actual = vector(
+              Array.from(polygons.sourcePositions.slice((i + endpoint) * 2, (i + endpoint) * 2 + 2))
+            );
+          const expected = a.map(
+            (v, k) => (v * Math.sin((1 - t) * omega) + b[k] * Math.sin(t * omega)) / Math.sin(omega)
+          );
+          expect(Math.hypot(...expected.map((v, k) => v - actual[k]))).toBeLessThan(1e-9);
+        }
+      }
+  }
+  expect(() =>
+    maps[0].prepareFeatures([{geometry: polygon}], {provenance: {polygonEdges: true}})
+  ).toThrow(/not support/);
+});
+
+test('real polygon boundaries on chart cuts keep source identity', () => {
+  const features: MapFeature[] = [
+    {
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [-40, 20],
+            [-20, 20],
+            [-20, 50],
+            [-40, 50],
+            [-40, 20]
+          ]
+        ]
+      }
+    }
+  ];
+  const a = maps[1].prepareFeatures(features),
+    b = maps[1].prepareFeatures(features, {provenance: {polygonEdges: true}});
+  expect(b.polygons.positions).toEqual(a.polygons.positions);
+  expect(b.polygons.edgeProvenance!.kinds.every(k => k === 0 || k === 1)).toBe(true);
+  expect(() =>
+    maps[1].prepareFeatures(features, {
+      provenance: {polygonEdges: true},
+      sphericalCuts: {interior: 'left'}
+    })
+  ).toThrow(/Global spherical cuts/);
+});
+
+test('source vertices on chart planes do not classify discarded zero-length pairs', () => {
+  const features: MapFeature[] = [
+    {
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [-60, 20],
+            [-40, 30],
+            [-20, 20],
+            [-20, 50],
+            [-60, 50],
+            [-60, 20]
+          ]
+        ]
+      }
+    }
+  ];
+  const plain = maps[1].prepareFeatures(features),
+    rich = maps[1].prepareFeatures(features, {provenance: {polygonEdges: true}});
+  expect(rich.polygons.positions).toEqual(plain.polygons.positions);
+  expect(rich.polygons.sourcePositions).toEqual(plain.polygons.sourcePositions);
+  expect(rich.polygons.ringStarts).toEqual(plain.polygons.ringStarts);
+  expect(rich.polygons.edgeProvenance!.kinds.length).toBe(rich.polygons.positions.length / 2);
+});
+
+test('reconstructing polygon wrappers reject direct edge provenance requests', () => {
+  const rings: [number, number][][] = [
+    [
+      [-10, -10],
+      [10, -10],
+      [10, 10],
+      [-10, 10],
+      [-10, -10]
+    ]
+  ];
+  const cap = new MapEngine({
+    version: 1,
+    id: 'satellite-polygons',
+    definition: {type: 'regional', projection: 'satellite'}
+  });
+  for (const map of [maps[0], maps[3], cap]) {
+    expect(map.projectPolygon(rings).length).toBeGreaterThan(0);
+    expect(() => map.projectPolygon(rings, {polygonEdgeProvenance: true})).toThrow(
+      /not support edge provenance/
+    );
+    expect(() =>
+      map.prepareFeatures([{geometry: {type: 'Polygon', coordinates: rings}}], {
+        provenance: {polygonEdges: true}
+      })
+    ).toThrow(/not support edge provenance/);
+  }
+});
