@@ -63,6 +63,7 @@
     "ajv": "^8.20.0",
     "geotiff": "3.0.5",
     "json-schema-to-typescript": "^16.0.0",
+    "lerna": "10.1.1",
     "playwright": "^1.62.1",
     "pre-commit": "^2.0.0",
     "probe.gl": "^5.0.0",
@@ -72,5 +73,8 @@
   "pre-commit": [
     "test-pre-commit"
   ],
-  "packageManager": "yarn@4.18.0+sha512.fcb8716fe7cd0eece141ffc18b92193a9df9204c1ba83189c288835223fc0bbe64af473bab0d5e9927a7daeb5caf2bb07eb2787cc9338ca040ea125f2a1f2f7e"
+  "packageManager": "yarn@4.18.0+sha512.fcb8716fe7cd0eece141ffc18b92193a9df9204c1ba83189c288835223fc0bbe64af473bab0d5e9927a7daeb5caf2bb07eb2787cc9338ca040ea125f2a1f2f7e",
+  "resolutions": {
+    "sigstore@npm:^5.0.0": "patch:sigstore@npm%3A5.0.0#./.yarn/patches/sigstore-npm-5.0.0-conflict-recovery.patch"
+  }
 }

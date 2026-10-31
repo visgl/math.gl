@@ -160,7 +160,9 @@ jobs:
         run: node --test test/llm/*.test.mjs
 
       - name: Test beta release preparation
-        run: node --test scripts/publish-beta.test.mjs
+        run: |
+          node --test scripts/publish-beta.test.mjs scripts/publish-from-git.test.mjs
+          node scripts/check-publishing-stack.mjs
 
       - name: Check worker API types
         run: yarn check:worker-types
