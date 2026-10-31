@@ -1,0 +1,28 @@
+# Centered oblique Mercator
+
+Applications written against math.gl's projection interfaces can use external projection engines.
+This example keeps the same CRS descriptor and renderer while choosing native math.gl or proj4js
+conversion. Center and orientation changes create a new operation, execution key and prepared geometry.
+
+import Example from '@site/src/components/centered-oblique-mercator';
+
+<Example />
+
+Start with Fiji: the local source patch crosses geographic ±180°, while projected paths remain in
+a qualified continuous branch. Change longitude, latitude or orientation to rebuild; **Repeat same
+request** reuses geometry only when the complete execution and source/sampling keys match.
+The measured time covers synchronous preparation and CPU submission, not GPU completion or frame rate.
+
+The orange boundary is a declared local processing patch, **not** the mathematical validity domain.
+This example uses linear longitude/latitude source edges with bounded sampling, inverse round-trip
+checks and a maximum adjacent output step. It does not infer a global oblique-Mercator domain,
+repair arbitrary periodic topology, or support pole-containing polygons. Physical meter sizing is
+not supplied; line widths use screen pixels. Source data and sample policy must also enter cache keys.
+
+The example is deliberately rebuilt when the center changes. Persistent meshes, dynamic horizons,
+worker scheduling and automatic view-following remain separate application policies. Tests compare
+both engines with independent offline PROJ reference coordinates at several centers and orientations.
+Neither published math.gl modules nor their projection interfaces acquire a proj4js dependency.
+
+[Source and qualification](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains/centered-omerc)
+respond to [the detailed feedback, sections 2 and 4](https://github.com/mdsumner/sidebyside/blob/main/article/2026-10-13_custom-projections-deckgl.md).

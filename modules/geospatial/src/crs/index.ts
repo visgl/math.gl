@@ -32,6 +32,7 @@ export type {
   UnresolvedCRSReference
 } from './spatial-reference';
 export {createSpatialReference, inferCRSRepresentation} from './spatial-reference';
+export {normalizeCRSIdentifier} from './crs-identifier';
 export type {
   EncodeWKTCRSOptions,
   ParseWKTCRSOptions,

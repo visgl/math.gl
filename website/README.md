@@ -106,7 +106,7 @@ that camera; controls, models, buffers and devices are disposed on unmount.
 
 ## Academic citations
 
-Maintain academic source metadata in `docs/references.bib`. Use a stable lowercase key such as `karney2013`, and cite it with `[cite](cite:karney2013)` for a generated author–year label, or `[Algorithms for geodesics](cite:karney2013)` for contextual link text. Preserve equation, section, version, and model-limit explanations beside the citation.
+Maintain academic source metadata in `docs/references.bib`. Use a stable lowercase key such as `karney2013`, and cite it with `[cite](https://doi.org/10.1007/s00190-012-0578-z "cite:karney2013")` for a generated author–year label, or `[Algorithms for geodesics](https://doi.org/10.1007/s00190-012-0578-z "cite:karney2013")` for contextual link text. Use a real DOI or source URL as the link target so citations work in GitHub and other Markdown viewers; the link title identifies the bibliography key for the website. Preserve equation, section, version, and model-limit explanations beside the citation.
 
 Run `yarn citations:generate` after editing BibTeX, then `yarn check:citations`. Commit the generated `docs/bibliography.md` and `website/static/references.{bib,json}` alongside the source. Each citing page receives a deduplicated ordered References section; the shared bibliography also offers BibTeX and CSL-JSON downloads. Website builds and CI reject unknown citation keys, missing metadata, duplicate keys, malformed BibTeX, and stale generated output. Builds do not query external services.
 

@@ -150,3 +150,5 @@ The geometry data is **ODbL 1.0**, separately from the package's MIT code.
 Attribute OpenStreetMap contributors and Timezone Boundary Builder and preserve
 applicable ODbL obligations. See `data/README.md`, `data/LICENSE-ODbL.txt`, and
 `data/manifest.json` in the package for provenance and regeneration details.
+
+See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

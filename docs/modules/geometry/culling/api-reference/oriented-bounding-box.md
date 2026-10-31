@@ -53,7 +53,7 @@ const box = makeOrientedBoundingBoxFromPoints([
 ### `makeOrientedBoundingBoxFromPoints(positions : Array[3][], result? : OrientedBoundingBox) : OrientedBoundingBox`
 
 Computes an instance of an `OrientedBoundingBox` of the given positions.
-This is an implementation of Stefan Gottschalk's [Collision Queries using Oriented Bounding Boxes](cite:gottschalk1996) (PHD thesis).
+This is an implementation of Stefan Gottschalk's [Collision Queries using Oriented Bounding Boxes](http://gamma.cs.unc.edu/users/gottschalk/main.pdf "cite:gottschalk1996") (PHD thesis).
 
 - `positions` List of `Vector3` points that the bounding box will enclose.
 - `result` Optional object onto which to store the result.
@@ -159,3 +159,5 @@ Returns
 ## Attribution
 
 This class was ported from [Cesium](https://github.com/AnalyticalGraphicsInc/cesium) under the Apache 2 License.
+
+See [References and credits](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

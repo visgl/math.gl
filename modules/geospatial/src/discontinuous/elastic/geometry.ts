@@ -89,7 +89,8 @@ export function sample(
   line: Position[],
   project: (p: Position) => Position | null,
   options: MapSamplingOptions,
-  cellStep: number
+  cellStep: number,
+  interpolate?: (segment: number, t: number) => Position
 ) {
   const {step, tolerance} = sampling(options),
     source: Position[] = [],
@@ -101,11 +102,21 @@ export function sample(
   };
   const at = (p: Position) => {
     const q = project(p);
-    if (!q) throw new Error('Elastic grid is undefined inside its coverage');
+    if (!q) throw new Error(`Elastic grid is undefined inside its coverage at ${p}`);
     return q;
   };
-  const visit = (a: Position, b: Position, qa: Position, qb: Position, depth: number) => {
-    const mid = lerp(a, b, 0.5),
+  const visit = (
+    a: Position,
+    b: Position,
+    qa: Position,
+    qb: Position,
+    depth: number,
+    segment: number,
+    t0: number,
+    t1: number
+  ) => {
+    const tm = (t0 + t1) / 2,
+      mid = interpolate ? interpolate(segment, tm) : lerp(a, b, 0.5),
       qm = at(mid),
       chord = lerp(qa, qb, 0.5);
     if (
@@ -113,14 +124,14 @@ export function sample(
       Math.hypot(qm[0] - chord[0], qm[1] - chord[1]) > tolerance
     ) {
       if (depth >= 24) throw new Error('Elastic sampling limit exceeded');
-      visit(a, mid, qa, qm, depth + 1);
-      visit(mid, b, qm, qb, depth + 1);
+      visit(a, mid, qa, qm, depth + 1, segment, t0, tm);
+      visit(mid, b, qm, qb, depth + 1, segment, tm, t1);
     } else emit(b, qb);
   };
   if (line.length) {
     emit(line[0], at(line[0]));
     for (let i = 1; i < line.length; i++)
-      visit(line[i - 1], line[i], at(line[i - 1]), at(line[i]), 0);
+      visit(line[i - 1], line[i], at(line[i - 1]), at(line[i]), 0, i - 1, 0, 1);
   }
   return {source, xy};
 }

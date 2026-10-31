@@ -174,3 +174,5 @@ Small jobs can be faster synchronously because worker startup, serialization,
 and dispatch have a cost. The runtime schedules CPU workers; automatic WASM/GPU
 backend selection is outside this API. See the
 [benchmark guide](./developer-guide/benchmarks.md) to measure your workload.
+
+See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

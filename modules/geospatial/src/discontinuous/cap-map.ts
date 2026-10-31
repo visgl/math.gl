@@ -3,6 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import clipCircle from './spherical-clip/clip-circle.js';
+import {tracePolygonConstraints, composePolygonEdge} from './polygon-constraints';
+import {sourceArc} from './source-arc';
 import {circleStream} from './spherical-clip/circle.js';
 import {
   DiscontinuousMap,
@@ -91,11 +93,15 @@ export class CapMap extends DiscontinuousMap {
     rings: readonly (readonly GeographicPosition[])[],
     polygon: boolean,
     options?: MapSamplingOptions,
-    regionId?: string
+    regionId?: string,
+    segmentIndices?: number[][]
   ): Position[][] {
     const output: Position[][] = [];
     const originals = new Map<string, Position>();
-    let ring: Position[] = [];
+    let ring: Position[] = [],
+      indices: number[] = [],
+      activeSegment = 0;
+    let previousInput: GeographicPosition | undefined, currentInput: GeographicPosition | undefined;
     const precision =
       Math.min(
         options?.maxAngularStep ?? 2,
@@ -184,13 +190,60 @@ export class CapMap extends DiscontinuousMap {
       point: (x: number, y: number) => {
         if (++emitted > 1_000_000)
           throw new Error('Projection sampling limit exceeded; relax tolerance');
-        ring.push(originals.get(`${x},${y}`) ?? this.source([x / RAD, y / RAD]));
+        let source = originals.get(`${x},${y}`);
+        if (!source && !polygon && this.nonlinear && previousInput && currentInput) {
+          // The local nonlinear transform bends source arcs. A circle/chord
+          // intersection must be refined on its owning original source arc.
+          const a = geographic(previousInput),
+            b = geographic(currentInput),
+            length = angle(a, b);
+          const at = (t: number): Position =>
+            length < 1e-14
+              ? ([...currentInput!] as Position)
+              : coordinates(
+                  unit(
+                    a.map(
+                      (v, k) =>
+                        (Math.sin((1 - t) * length) * v + Math.sin(t * length) * b[k]) /
+                        Math.sin(length)
+                    ) as Vector
+                  )
+                );
+          const value = (t: number) => geographic(local(at(t)))[0] - Math.cos(this.cap);
+          const approximate = this.source([x / RAD, y / RAD]);
+          const reference = length ? Math.min(1, angle(a, geographic(approximate)) / length) : 0;
+          const roots: number[] = [];
+          for (let j = 0; j < 32; j++) {
+            let lo = j / 32,
+              hi = (j + 1) / 32,
+              f = value(lo),
+              g = value(hi);
+            if (Math.abs(f) < 1e-14) roots.push(lo);
+            if (f * g >= 0) continue;
+            for (let k = 0; k < 52; k++) {
+              const mid = (lo + hi) / 2;
+              if (value(mid) >= 0 === f >= 0) lo = mid;
+              else hi = mid;
+            }
+            roots.push((lo + hi) / 2);
+          }
+          if (Math.abs(value(1)) < 1e-14) roots.push(1);
+          if (!roots.length) throw new Error('Unresolved nonlinear cap source intersection');
+          roots.sort((a, b) => Math.abs(a - reference) - Math.abs(b - reference));
+          source = at(roots[0]);
+        }
+        ring.push(source ?? this.source([x / RAD, y / RAD]));
+        if (segmentIndices) indices.push(activeSegment);
       },
       lineStart: () => {
         ring = [];
+        indices = [];
       },
       lineEnd: () => {
-        if (ring.length > 1) output.push(ring);
+        if (ring.length > 1) {
+          output.push(ring);
+          segmentIndices?.push(indices);
+        }
       },
       polygonStart: () => {},
       polygonEnd: () => {}
@@ -207,7 +260,9 @@ export class CapMap extends DiscontinuousMap {
       const x = q[0] * RAD,
         y = q[1] * RAD;
       originals.set(`${x},${y}`, [...p]);
+      currentInput = p;
       stream.point(x, y);
+      previousInput = p;
     };
     const subdivide = (a: GeographicPosition, b: GeographicPosition, depth = 0) => {
       if (this.nonlinear && depth < 20) {
@@ -232,9 +287,13 @@ export class CapMap extends DiscontinuousMap {
       emit(b);
     };
     for (const points of rings) {
+      previousInput = undefined;
       stream.lineStart();
       if (points.length) emit(points[0]);
-      for (let i = 1; i < points.length; i++) subdivide(points[i - 1], points[i]);
+      for (let i = 1; i < points.length; i++) {
+        activeSegment = i - 1;
+        subdivide(points[i - 1], points[i]);
+      }
       if (polygon && points.length) subdivide(points[points.length - 1], points[0]);
       stream.lineEnd();
     }
@@ -246,15 +305,70 @@ export class CapMap extends DiscontinuousMap {
     options?: MapSamplingOptions
   ): MapLine[] {
     if (this.cap === Math.PI / 2 && !this.nonlinear) return super.projectLine(line, options);
-    // Super validates antipodal edges and sampling options even for invisible input.
-    return super
-      .projectLine(line, options)
-      .flatMap(part =>
-        this.clip([part.sourceCoordinates], false, options, part.regionId).flatMap(line =>
-          super.projectLine(line, options).filter(q => q.regionId === part.regionId)
-        )
+    // Attribute streaming intersections while the owning sampled edge is active.
+    // Rigid spherical rotations preserve the original great-circle semantics.
+    return super.projectLine(line, options).flatMap(part => {
+      const indices: number[][] | undefined = part.provenance ? [] : undefined;
+      const clipped = this.clip([part.sourceCoordinates], false, options, part.regionId, indices);
+      return clipped.flatMap((points, piece) =>
+        super
+          .projectLine(points, options)
+          .filter(q => q.regionId === part.regionId)
+          .map(q => {
+            const parent = part.provenance,
+              child = q.provenance;
+            if (!parent || !child) return q;
+            const provenance: NonNullable<MapLine['provenance']> = {
+              segments: [],
+              parameters: [],
+              vertices: [],
+              angularDistances: []
+            };
+            for (let j = 0; j < q.sourceCoordinates.length; j++) {
+              const k = child.segments[j];
+              // The incoming endpoint owns the clipped edge, including a newly
+              // generated entry point followed by its original end vertex.
+              const edge = indices![piece][k + 1];
+              const a = geographic(part.sourceCoordinates[edge]),
+                b = geographic(part.sourceCoordinates[edge + 1]),
+                p = geographic(q.sourceCoordinates[j]);
+              const length = angle(a, b),
+                t = length ? Math.min(1, angle(a, p) / length) : 0;
+              const endpoint = t < 1e-12 ? edge : t > 1 - 1e-12 ? edge + 1 : -1;
+              const segment = parent.segments[edge + 1];
+              const from = parent.segments[edge] === segment ? parent.parameters[edge] : 0;
+              provenance.segments.push(endpoint >= 0 ? parent.segments[endpoint] : segment);
+              provenance.parameters.push(
+                endpoint >= 0
+                  ? parent.parameters[endpoint]
+                  : from + t * (parent.parameters[edge + 1] - from)
+              );
+              provenance.vertices.push(endpoint >= 0 ? parent.vertices[endpoint] : 0xffffffff);
+              if (options?.pathDistances)
+                provenance.angularDistances.push(
+                  parent.angularDistances[edge] +
+                    t * (parent.angularDistances[edge + 1] - parent.angularDistances[edge])
+                );
+            }
+            if (options?.pathBoundaries) {
+              const same = (a: GeographicPosition, b: GeographicPosition) =>
+                angle(geographic(a), geographic(b)) < 1e-12;
+              provenance.startReason = same(q.sourceCoordinates[0], part.sourceCoordinates[0])
+                ? parent.startReason
+                : 'coverage-boundary';
+              provenance.endReason = same(
+                q.sourceCoordinates[q.sourceCoordinates.length - 1],
+                part.sourceCoordinates[part.sourceCoordinates.length - 1]
+              )
+                ? parent.endReason
+                : 'coverage-boundary';
+            }
+            return {...q, provenance};
+          })
       );
+    });
   }
+
   override projectPolygon(
     rings: readonly (readonly GeographicPosition[])[],
     options?: MapSamplingOptions
@@ -356,19 +470,134 @@ export class CapMap extends DiscontinuousMap {
       for (const ring of outer) {
         const plane = ring.map(planar),
           sources = [ring, ...holes.filter(h => contains(plane, planar(h[0])))];
+        const parentPlane = part.sourceCoordinates.map(r => r.map(planar));
+        const fromPlane = (p: Position): Position =>
+          coordinates(unit(center.map((v, k) => v + x[k] * p[0] + y[k] * p[1]) as Vector));
+        const traced = tracePolygonConstraints(
+          parentPlane,
+          sources.map(r => r.map(planar)),
+          this.nonlinear ? 2e-6 : 1e-10,
+          part.edgeProvenance,
+          p => this.visible(fromPlane(p))
+        );
+        const resolved = traced.rings.map(r => r.map(fromPlane));
+        traced.owners.forEach((owners, r) =>
+          owners.forEach((owner, i) => {
+            if (!owner) return;
+            const [pr, pe] = owner,
+              a = part.sourceCoordinates[pr][pe],
+              b = part.sourceCoordinates[pr][pe + 1],
+              at = sourceArc(a, b);
+            for (const j of [i, i + 1]) {
+              const point = resolved[r][j],
+                distance = angle(geographic(a), geographic(b)),
+                fraction = distance ? angle(geographic(a), geographic(point)) / distance : 0;
+              if (fraction < 1e-10) resolved[r][j] = [...a];
+              else if (fraction > 1 - 1e-10) resolved[r][j] = [...b];
+              else if (
+                Math.hypot(...cross(geographic(a), geographic(b))) > 1e-14 &&
+                Math.abs(dot(unit(cross(geographic(a), geographic(b))), geographic(point))) < 1e-12
+              ) {
+                resolved[r][j] = at(Math.min(1, Math.max(0, fraction)));
+              } else {
+                const value = (t: number) => geographic(this.local(at(t)))[0] - Math.cos(this.cap),
+                  roots: number[] = [];
+                for (let k = 0; k < 32; k++) {
+                  let lo = k / 32,
+                    hi = (k + 1) / 32,
+                    f = value(lo),
+                    g = value(hi);
+                  if (Math.abs(f) < 1e-13) roots.push(lo);
+                  if (f * g >= 0) continue;
+                  for (let n = 0; n < 52; n++) {
+                    const mid = (lo + hi) / 2;
+                    if (value(mid) >= 0 === f >= 0) lo = mid;
+                    else hi = mid;
+                  }
+                  roots.push((lo + hi) / 2);
+                }
+                if (Math.abs(value(1)) < 1e-13) roots.push(1);
+                if (!roots.length) throw new Error('Unresolved cap polygon source intersection');
+                roots.sort((a, b) => Math.abs(a - fraction) - Math.abs(b - fraction));
+                resolved[r][j] = at(roots[0]);
+              }
+            }
+          })
+        );
+        for (const ring of resolved) ring[ring.length - 1] = [...ring[0]];
         result.push({
           regionId: part.regionId,
-          sourceCoordinates: sources,
-          coordinates: sources.map(r =>
+          sourceCoordinates: resolved,
+          coordinates: resolved.map(r =>
             r.map(p => {
               const q = super.projectPoint(p, part.regionId);
-              if (!q)
-                throw new Error(
-                  `Cap point outside chart ${part.regionId}: ${p}, owner ${super.findRegions(p)}`
-                );
+              if (!q) throw new Error('Cap polygon source constraint left its owning chart');
               return q.position;
             })
-          )
+          ),
+          ...(options?.polygonEdgeProvenance
+            ? {
+                edgeProvenance: traced.owners.map((owners, r) =>
+                  owners.map((owner, i) => {
+                    const a = resolved[r][i],
+                      b = resolved[r][i + 1];
+                    if (owner) {
+                      const [pr, pe] = owner;
+                      return composePolygonEdge(
+                        part.edgeProvenance![pr][pe],
+                        part.sourceCoordinates[pr][pe],
+                        part.sourceCoordinates[pr][pe + 1],
+                        a,
+                        b
+                      );
+                    }
+                    if (angle(geographic(a), geographic(b)) < 64 * Number.EPSILON)
+                      return {
+                        kind: 'continuous-chart-join' as const,
+                        ring: 0xffffffff,
+                        segment: 0xffffffff,
+                        t0: 0,
+                        t1: 0
+                      };
+                    const kinds: string[] = [];
+                    region.boundary.forEach((p, j) => {
+                      const n = cross(
+                          geographic(p),
+                          geographic(region.boundary[(j + 1) % region.boundary.length])
+                        ),
+                        length = Math.hypot(...n);
+                      if (
+                        length &&
+                        [a, b].every(p => Math.abs(dot(n, geographic(p))) / length < 1e-9)
+                      ) {
+                        const seam = this.seams.find(s =>
+                          s.regions.some((id, k) => id === region.id && s.edges[k] === j)
+                        );
+                        if (seam) kinds.push(seam.kind);
+                      }
+                    });
+                    const horizon = [a, b].every(
+                      p => Math.abs(geographic(this.local(p))[0] - Math.cos(this.cap)) < 1e-7
+                    );
+                    if (!horizon && !kinds.length)
+                      throw new Error('Unknown cap polygon clipping constraint');
+                    return {
+                      kind: horizon
+                        ? ('coverage-boundary' as const)
+                        : kinds.includes('boundary')
+                          ? ('coverage-boundary' as const)
+                          : kinds.includes('cut')
+                            ? ('chart-cut' as const)
+                            : ('continuous-chart-join' as const),
+                      ring: 0xffffffff,
+                      segment: 0xffffffff,
+                      t0: 0,
+                      t1: 0
+                    };
+                  })
+                )
+              }
+            : {})
         });
       }
     }

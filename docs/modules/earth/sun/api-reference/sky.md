@@ -295,10 +295,10 @@ All new adapters and equations are independently written TypeScript under MIT;
 SPDX comments identify source papers and API provenance. No C code, external
 source code, paper figures or paper prose are incorporated.
 
-- [Patat, Ugolnikov & Postylyakov (2006)](cite:patat2006): V-band twilight fit, Table 1.
-- [Crumey (2014)](cite:crumey2014): photometric conversions and Blackwell point/extended-target contrast thresholds.
-- [Krisciunas & Schaefer (1991)](cite:krisciunas1991): lunar phase photometry and scattered moonlight.
-- [Kasten & Young (1989)](cite:kasten1989): direct optical air mass.
+- [Patat, Ugolnikov & Postylyakov (2006)](https://arxiv.org/abs/astro-ph/0604128 "cite:patat2006"): V-band twilight fit, Table 1.
+- [Crumey (2014)](https://arxiv.org/abs/1405.4209 "cite:crumey2014"): photometric conversions and Blackwell point/extended-target contrast thresholds.
+- [Krisciunas & Schaefer (1991)](http://dx.doi.org/10.1086/132921 "cite:krisciunas1991"): lunar phase photometry and scattered moonlight.
+- [Kasten & Young (1989)](http://dx.doi.org/10.1364/AO.28.004735 "cite:kasten1989"): direct optical air mass.
 - [Astronomy Engine 2.1.19, MIT](https://github.com/cosinekitty/astronomy/tree/v2.1.19/source/js): optional ephemerides, libration and IAU axes.
 - [NASA Galilean facts](https://nssdc.gsfc.nasa.gov/planetary/factsheet/joviansatfact.html) and [ring dimensions](https://nssdc.gsfc.nasa.gov/planetary/factsheet/satringfact.html): numeric physical facts.
 - [deck.gl GlobeViewport, MIT](https://github.com/visgl/deck.gl/blob/master/modules/core/src/viewports/globe-viewport.ts): axis/scale compatibility reference; coordinate equations independently implemented.

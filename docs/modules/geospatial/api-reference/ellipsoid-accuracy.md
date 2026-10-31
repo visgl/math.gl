@@ -124,3 +124,5 @@ binary64 fixture and checks generator provenance. Test inputs and the driver are
 original math.gl work, not copied upstream test data. GeographicLib runtime SPDX
 credits and packaged MIT license remain intact. The oracle sources are used
 offline and are not included in the package.
+
+See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

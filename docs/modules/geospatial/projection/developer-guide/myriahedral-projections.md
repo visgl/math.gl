@@ -20,7 +20,7 @@ Jarke J. van Wijk introduced this approach in **Unfolding the Earth: Myriahedral
 Projections**, *The Cartographic Journal* 45(1), 32–42 (2008).
 The paper studies graticule meshes, recursively subdivided polyhedra, and meshes
 derived from geography. See the [publication record and abstract](https://research.tue.nl/en/publications/unfolding-the-earth-myriahedral-projections/)
-and [paper DOI](cite:vanwijk2008).
+and [paper DOI](http://dx.doi.org/10.1179/000870408X276594 "cite:vanwijk2008").
 
 **Nicolas “Nico” Belmonte's interactive work is the inspiration for this example.**
 His February 2018 vis.gl article,
@@ -38,6 +38,8 @@ math.gl's mesh generation, edge weights, panel charts, and unfolding are
 independently implemented. We have not copied Nico's source code, mesh tables,
 textures, animation frames, or optimized solid orientations. Credit identifies
 the conceptual and visual inspiration; it does not imply a license to his assets.
+
+See [References and credits](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
 
 ## What the cuts buy you
 

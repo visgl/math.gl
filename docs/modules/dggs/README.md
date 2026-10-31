@@ -87,3 +87,5 @@ The A5 adapter uses [`a5-js`](https://github.com/felixpalmer/a5), the H3 adapter
 The `S2Encoder` object is based on a subset of the s2-geometry module under ISC License (ISC)
 Copyright (c) 2012-2016, Jon Atkins github@jonatkins.com
 Copyright (c) 2016, AJ ONeal aj@daplie.com
+
+See [References and credits](../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

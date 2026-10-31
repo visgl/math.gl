@@ -111,7 +111,7 @@ formulas are equal-area. For seam semantics and supported layouts, see
 The formulas above use radians and sphere radius R; the public API accepts
 longitude and latitude in degrees. For cartographic classification and further
 reading, see NASA GISS's [projection reference](https://www.giss.nasa.gov/tools/gprojector/help/projections/)
-and Snyder and Voxland's [An Album of Map Projections](cite:snyder1989).
+and Snyder and Voxland's [An Album of Map Projections](https://pubs.usgs.gov/pp/1453/report.pdf "cite:snyder1989").
 
 ## Catalog API
 
@@ -215,7 +215,7 @@ is separate from credit for the cartographers who developed the projections.
 | AirOcean topology and Gray–Fuller reference | [d3-geo-polygon](https://github.com/d3/d3-geo-polygon) contributors supply ISC-licensed AirOcean topology and orientation. Robert W. Gray's face equations, also published by Philippe Rivière in the [Gray–Fuller source](https://github.com/d3/d3-geo-polygon/blob/main/src/grayfuller.js), are implemented independently; d3-geo-polygon 2.0.1 supplies reference fixtures. |
 | Spherical cap clipping | Adapted from [d3-geo 3.1.1](https://github.com/d3/d3-geo/tree/v3.1.1/src/clip), by Mike Bostock and contributors, under ISC. math.gl adds bounded curve sampling, source correspondence, chart trimming, regional outlines, and inverse safeguards; see the [clipping inventory and modifications](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/discontinuous/spherical-clip/README.md). |
 | Hyperelliptical numerical integration | Ricky Reusser's [adaptive Simpson integration](https://github.com/scijs/integrate-adaptive-simpson), incorporated through d3-geo-projection, retains its MIT attribution and license. |
-| Independent HEALPix implementation | M. R. Calabretta's [HEALPix equations](cite:calabretta2004) are the mathematical source. [D3's HEALPix implementation](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/healpix.js) supplies independent numerical reference values. |
+| Independent HEALPix implementation | M. R. Calabretta's [HEALPix equations](https://arxiv.org/abs/astro-ph/0412607 "cite:calabretta2004") are the mathematical source. [D3's HEALPix implementation](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/healpix.js) supplies independent numerical reference values. |
 
 The packaged [third-party inventory](https://github.com/visgl/math.gl/blob/master/modules/geospatial/THIRD-PARTY-NOTICES.md)
 links the retained licenses, source headers, and modification records. There is no
@@ -229,3 +229,5 @@ For **Petroff, Snyder, and myriahedral maps**, see the additional
 and [myriahedral background](../projection/developer-guide/myriahedral-projections.md).
 Nico Belmonte is credited for his influential demonstration; his application code
 is not incorporated.
+
+See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v5.0.0-beta.2
+
+- **Breaking:** Rename expression evaluation exports to avoid collisions at the core package root (#373).
+- feat(geospatial): Preserve optional source provenance through prepared paths, polygons, nonlinear and rigid cap cuts, Mercator/Elastic paths, wrappers, spherical atlases and surface composition (#391, #392, #396, #399, #400, #401).
+- feat(geospatial): Add normalizeCRSIdentifier, native batched angle/vertex-mean/parallel predicates, parameterized projection-domain adapters, and qualified full-world direct map transitions (#365, #379, #382, #387, #395).
+- feat(geometry): Support application-defined subdivision error metrics; port earcut optimizations and correct projected hashing (#376, #403).
+- fix(core): Preserve runtime worker imports in webpack and tree-shake unused task worker URLs from classic bundles (#371, #394).
+- feat(examples): Expand chart-aware raster preparation and qualification, asynchronous proj-wasm batches, persistent UV grids and invalidation, display-space error gates, polar/nodata fixtures, periodic shared boundaries, and affine registration checks (#367, #368, #378, #380, #381, #383, #384, #385, #386, #398).
+- feat(examples): Add projection-domain, Antarctica/Fiji, centered oblique Mercator, DGGS, terrain sampling and WKT/WKB workbenches, with optional NASA imagery (#366, #369, #370, #372, #374, #375, #397).
+- docs: Refresh the homepage, animated maps, v5 highlights, migration guidance, and engine-agnostic execution contracts (#377, #388, #389, #393).
+- ci: Split overloaded checks, run full qualification nightly, and skip paired performance comparisons for documentation-only PRs (#402, #404).
+
 ## v5.0.0-beta.1
 
 - **Breaking:** Move tree-shakeable APIs to package and capability roots and remove superseded API subpaths. Projection catalogs and data paths remain. Earth now requires `astronomy-engine`; core exposes matrix/vector namespaces and prefixed individual operations. See the root-export migration guide.

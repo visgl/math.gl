@@ -26,19 +26,19 @@ test('citations resolve at both stable and next base paths; unknown keys fail', 
   for (const baseUrl of ['/math.gl/', '/math.gl/next/']) {
     const tree = unified()
       .use(remarkParse)
-      .parse('[cite](cite:karney2013) and [sections 3–7](cite:karney2024)');
+      .parse('[cite](https://example.org/paper "cite:karney2013") and [sections 3–7](https://example.org/paper "cite:karney2024")');
     plugin({baseUrl})(tree, {path: 'example.md'});
     assert.equal(tree.children[0].children[0].url, baseUrl + 'docs/bibliography#karney2013');
     assert.equal(tree.children[0].children[0].children[0].value, 'Karney (2013)');
     assert.equal(tree.children[0].children[2].children[0].value, 'sections 3–7');
   }
-  const tree = unified().use(remarkParse).parse('[cite](cite:missing)');
+  const tree = unified().use(remarkParse).parse('[cite](https://example.org/paper "cite:missing")');
   assert.throws(() => plugin()(tree, {path: 'example.md'}), /example.md: unknown citation missing/);
 });
 test('code examples do not create citations', () => {
   const tree = unified()
     .use(remarkParse)
-    .parse('`[cite](cite:missing)`\n\n```md\n[cite](cite:missing)\n```');
+    .parse('`[cite](https://example.org/paper "cite:missing")`\n\n```md\n[cite](https://example.org/paper "cite:missing")\n```');
   plugin()(tree, {});
 });
 test('bibliography output is deterministic and contains stable IDs and DOI links', () => {
@@ -51,7 +51,7 @@ test('bibliography output is deterministic and contains stable IDs and DOI links
 test('each citing page receives a deduplicated ordered References section', () => {
   const tree = unified()
     .use(remarkParse)
-    .parse('[cite](cite:karney2013) and [again](cite:karney2013)');
+    .parse('[cite](https://example.org/paper "cite:karney2013") and [again](https://example.org/paper "cite:karney2013")');
   plugin()(tree, {});
   assert.equal(tree.children.at(-2).children[0].value, 'References');
   assert.equal(tree.children.at(-1).type, 'list');
@@ -63,11 +63,11 @@ test('each citing page receives a deduplicated ordered References section', () =
   );
 });
 test('reference-style Markdown citations also resolve and validate', () => {
-  const tree = unified().use(remarkParse).parse('[cite][paper]\n\n[paper]: cite:karney2013');
+  const tree = unified().use(remarkParse).parse('[cite][paper]\n\n[paper]: https://example.org/paper "cite:karney2013"');
   plugin()(tree, {});
   assert.equal(tree.children[0].children[0].url, '/docs/bibliography#karney2013');
   assert.throws(
-    () => plugin()(unified().use(remarkParse).parse('[cite][paper]\n\n[paper]: cite:unknown'), {}),
+    () => plugin()(unified().use(remarkParse).parse('[cite][paper]\n\n[paper]: https://example.org/paper "cite:unknown"'), {}),
     /unknown citation/
   );
 });
@@ -114,4 +114,15 @@ test('DOI resolver aliases are not presented as separate source copies', () => {
     bibliography.sourceUrl({URL: 'https://doi.org/10.1000/example'}),
     'https://doi.org/10.1000/example'
   );
+});
+
+
+test('citation links retain a usable source URL in ordinary Markdown', () => {
+  const tree = unified().use(remarkParse).parse(
+    '[paper](https://doi.org/10.1007/s00190-012-0578-z "cite:karney2013")'
+  );
+  assert.equal(tree.children[0].children[0].url, 'https://doi.org/10.1007/s00190-012-0578-z');
+  plugin()(tree, {});
+  assert.equal(tree.children[0].children[0].url, '/docs/bibliography#karney2013');
+  assert.throws(() => plugin()(unified().use(remarkParse).parse('[paper](cite:karney2013)'), {}), /HTTP/);
 });

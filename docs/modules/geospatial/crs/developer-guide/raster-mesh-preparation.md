@@ -83,3 +83,19 @@ survive preparation. Independent PROJ reference points test coverage; different 
 probes test texture error. Invalid samples and exhausted budgets reject the operation rather than
 silently producing a partial mesh. This remains a qualified example recipe with explicit sampled
 coverage and boundary assumptions, not generic raster reprojection support.
+
+## Keep array and CRS frames separate
+
+A CRS descriptor does not locate array samples. Supply each raster level's explicit
+column/row-to-coordinate affine transform, stored component order, native units and
+sample registration. Area-registered sample centers occur at index + 0.5; point
+registration describes nodes and does not by itself establish cell coverage.
+Rotated/skewed affine grids must not be approximated as axis-aligned TileMatrix geometry.
+OME array transforms and CF/GDAL georeferencing can describe different frames; their
+interpretation and precedence belong to loaders.gl, not this meshing recipe.
+
+The [Raster coordinate frames example](https://visgl.github.io/math.gl/next/examples/raster-frame)
+composes existing math.gl Matrix3 and SpatialReference APIs, with hand-computed native
+coordinate fixtures, stored-axis permutations, unequal spacing, rotated grids and explicit
+per-level transforms. It preserves native units and leaves CRS conversion to a separately
+prepared projection-engine agnostic converter.

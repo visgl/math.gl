@@ -200,3 +200,7 @@ export type {
   ClipTriangleMeshOptions,
   ClippedTriangleMesh
 } from './polygon/clip-triangle-mesh';
+
+export {composeAttributeProvenance} from './utils/compose-attribute-provenance';
+export {qualifySurfaceTransition} from './utils/qualify-surface-transition';
+export type {SurfaceTransitionQualification} from './utils/qualify-surface-transition';

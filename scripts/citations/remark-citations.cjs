@@ -6,24 +6,24 @@ const {readBibliography, label, authorName, sourceUrl} = require('./bibliography
 function visitCitations(tree, callback) {
   const definitions = new Map();
   function collect(node) {
-    if (node.type === 'definition') definitions.set(node.identifier, node.url);
+    if (node.type === 'definition') definitions.set(node.identifier, {url: node.url, title: node.title});
     for (const child of node.children || []) collect(child);
   }
   collect(tree);
   function visit(node) {
-    const url =
-      node.type === 'linkReference'
-        ? definitions.get(node.identifier)
-        : node.type === 'link'
-          ? node.url
-          : undefined;
-    if (url?.startsWith('cite:')) {
+    const link = node.type === 'linkReference' ? definitions.get(node.identifier) : node;
+    const marker = link?.title;
+    if (link?.url?.startsWith('cite:')) {
+      throw new Error('Citation links must use an HTTP(S) source URL and a cite: title');
+    }
+    if ((node.type === 'link' || node.type === 'linkReference') && marker?.startsWith('cite:')) {
+      if (!/^https?:\/\//.test(link.url)) throw new Error('Citation source URL must use HTTP(S)');
       node.type = 'link';
-      node.url = url;
+      node.url = link.url;
       delete node.identifier;
       delete node.referenceType;
       delete node.label;
-      callback(node, url.slice(5));
+      callback(node, marker.slice(5));
     }
     for (const child of node.children || []) visit(child);
   }

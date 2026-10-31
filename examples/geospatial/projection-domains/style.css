@@ -8,3 +8,4 @@
 .projection-domains label {display:block;margin:12px 0}
 .projection-domains select {display:block;width:100%;padding:5px;margin-top:4px;background:#22364c;color:#eef3f7}
 .projection-domains output {position:absolute;bottom:0;padding:12px;min-height:40px;color:#b6cfdd;pointer-events:none}
+.projection-domains [hidden] {display:none!important}

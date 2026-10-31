@@ -158,7 +158,9 @@
         "items": [
           "modules/geometry/utils/README",
           "modules/geometry/utils/api-reference/geometry-utils",
-          "modules/geometry/utils/api-reference/mesh-processing"
+          "modules/geometry/utils/api-reference/mesh-processing",
+          "modules/geometry/utils/api-reference/interpolate-packed-attributes",
+          "modules/geometry/utils/api-reference/qualify-surface-transition"
         ]
       },
       {

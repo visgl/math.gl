@@ -33,7 +33,7 @@
 /* eslint-disable */
 
 import type {NumericArray} from '@math.gl/core';
-import {getPolygonSignedArea, DimIndex, Plane2D} from './polygon-utils';
+import {DimIndex, Plane2D} from './polygon-utils';
 
 /**
  * Computes a triangulation of a polygon
@@ -51,6 +51,25 @@ export function earcut(
   areas?: NumericArray,
   plane: Plane2D = 'xy'
 ): number[] {
+  // Keep nested calls from numeric array getters isolated.
+  const savedIndex = vertexPoolIndex;
+  const savedQueue = activeHoleQueue;
+  if (!holeQueues[callDepth]) holeQueues[callDepth] = [];
+  activeHoleQueue = holeQueues[callDepth];
+  callDepth++;
+  try {
+    return triangulate(positions, holeIndices, dim, areas, plane);
+  } finally {
+    activeHoleQueue.length = 0;
+    activeHoleQueue = savedQueue;
+    vertexPoolIndex = savedIndex;
+    callDepth--;
+    // Do not retain arbitrarily large object graphs after a one-off polygon.
+    if (callDepth === 0 && vertexPool.length > 65536) vertexPool.length = 0;
+  }
+}
+
+function triangulate(positions, holeIndices, dim, areas, plane): number[] {
   const hasHoles = holeIndices && holeIndices.length;
   const outerLen = hasHoles ? holeIndices[0] * dim : positions.length;
   let outerNode = linkedList(positions, 0, outerLen, dim, true, areas && areas[0], plane);
@@ -70,12 +89,14 @@ export function earcut(
 
   // if the shape is not too simple, we'll use z-order curve hash later; calculate polygon bbox
   if (positions.length > 80 * dim) {
-    minX = maxX = positions[0];
-    minY = maxY = positions[1];
+    const i0 = DimIndex[plane[0]];
+    const i1 = DimIndex[plane[1]];
+    minX = maxX = positions[i0];
+    minY = maxY = positions[i1];
 
     for (let i = dim; i < outerLen; i += dim) {
-      x = positions[i];
-      y = positions[i + 1];
+      x = positions[i + i0];
+      y = positions[i + i1];
       if (x < minX) minX = x;
       if (y < minY) minY = y;
       if (x > maxX) maxX = x;
@@ -87,7 +108,7 @@ export function earcut(
     invSize = invSize !== 0 ? 32767 / invSize : 0;
   }
 
-  earcutLinked(outerNode, triangles, dim, minX, minY, invSize, 0);
+  earcutLinked(outerNode, triangles, minX, minY, invSize, 0);
 
   return triangles;
 }
@@ -102,22 +123,40 @@ function linkedList(
   area: number | undefined,
   plane: Plane2D
 ): Vertex {
+  if (start >= end) return null;
   let i;
   let last;
+  const i0 = DimIndex[plane[0]];
+  const i1 = DimIndex[plane[1]];
   if (area === undefined) {
-    area = getPolygonSignedArea(data, {start, end, size: dim, plane});
-  }
-
-  let i0 = DimIndex[plane[0]];
-  let i1 = DimIndex[plane[1]];
-  // Note that the signed area calculation in math.gl
-  // has the opposite sign to that which was originally
-  // present in earcut, thus the `< 0` is reversed
-  if (clockwise === area < 0) {
-    for (i = start; i < end; i += dim) last = insertNode(i, data[i + i0], data[i + i1], last);
+    // Combine coordinate reads and area accumulation, as in loaders.gl.
+    let sum = 0;
+    let previousX = data[end - dim + i0];
+    let previousY = data[end - dim + i1];
+    for (i = start; i < end; i += dim) {
+      const x = data[i + i0];
+      const y = data[i + i1];
+      sum += (x - previousX) * (y + previousY);
+      last = insertNode(i / dim, x, y, last);
+      previousX = x;
+      previousY = y;
+    }
+    if (last && clockwise !== sum / 2 < 0) {
+      let node = last;
+      do {
+        const next = node.next;
+        node.next = node.prev;
+        node.prev = next;
+        node = next;
+      } while (node !== last);
+      // Preserve the starting vertex and triangle order of reverse insertion.
+      last = last.prev;
+    }
+  } else if (clockwise === area < 0) {
+    for (i = start; i < end; i += dim) last = insertNode(i / dim, data[i + i0], data[i + i1], last);
   } else {
     for (i = end - dim; i >= start; i -= dim)
-      last = insertNode(i, data[i + i0], data[i + i1], last);
+      last = insertNode(i / dim, data[i + i0], data[i + i1], last);
   }
 
   if (last && equals(last, last.next)) {
@@ -152,7 +191,7 @@ function filterPoints(start, end?) {
 }
 
 // main ear slicing loop which triangulates a polygon (given as a linked list)
-function earcutLinked(ear, triangles, dim, minX, minY, invSize, pass?) {
+function earcutLinked(ear, triangles, minX, minY, invSize, pass?) {
   if (!ear) return;
 
   // interlink polygon nodes in z-order
@@ -169,9 +208,9 @@ function earcutLinked(ear, triangles, dim, minX, minY, invSize, pass?) {
 
     if (invSize ? isEarHashed(ear, minX, minY, invSize) : isEar(ear)) {
       // cut off the triangle
-      triangles.push((prev.i / dim) | 0);
-      triangles.push((ear.i / dim) | 0);
-      triangles.push((next.i / dim) | 0);
+      triangles.push(prev.i);
+      triangles.push(ear.i);
+      triangles.push(next.i);
 
       removeNode(ear);
 
@@ -188,16 +227,16 @@ function earcutLinked(ear, triangles, dim, minX, minY, invSize, pass?) {
     if (ear === stop) {
       // try filtering points and slicing again
       if (!pass) {
-        earcutLinked(filterPoints(ear), triangles, dim, minX, minY, invSize, 1);
+        earcutLinked(filterPoints(ear), triangles, minX, minY, invSize, 1);
 
         // if this didn't work, try curing all small self-intersections locally
       } else if (pass === 1) {
-        ear = cureLocalIntersections(filterPoints(ear), triangles, dim);
-        earcutLinked(ear, triangles, dim, minX, minY, invSize, 2);
+        ear = cureLocalIntersections(filterPoints(ear), triangles);
+        earcutLinked(ear, triangles, minX, minY, invSize, 2);
 
         // as a last resort, try splitting the remaining polygon into two
       } else if (pass === 2) {
-        splitEarcut(ear, triangles, dim, minX, minY, invSize);
+        splitEarcut(ear, triangles, minX, minY, invSize);
       }
 
       break;
@@ -336,7 +375,7 @@ function isEarHashed(ear, minX, minY, invSize) {
 }
 
 // go through all polygon nodes and cure small local self-intersections
-function cureLocalIntersections(start, triangles, dim) {
+function cureLocalIntersections(start, triangles) {
   let p = start;
   do {
     const a = p.prev;
@@ -348,9 +387,9 @@ function cureLocalIntersections(start, triangles, dim) {
       locallyInside(a, b) &&
       locallyInside(b, a)
     ) {
-      triangles.push((a.i / dim) | 0);
-      triangles.push((p.i / dim) | 0);
-      triangles.push((b.i / dim) | 0);
+      triangles.push(a.i);
+      triangles.push(p.i);
+      triangles.push(b.i);
 
       // remove two nodes involved
       removeNode(p);
@@ -365,7 +404,7 @@ function cureLocalIntersections(start, triangles, dim) {
 }
 
 // try splitting polygon into two and triangulate them independently
-function splitEarcut(start, triangles, dim, minX, minY, invSize) {
+function splitEarcut(start, triangles, minX, minY, invSize) {
   // look for a valid diagonal that divides the polygon into two
   let a = start;
   do {
@@ -380,8 +419,8 @@ function splitEarcut(start, triangles, dim, minX, minY, invSize) {
         c = filterPoints(c, c.next);
 
         // run earcut on each half
-        earcutLinked(a, triangles, dim, minX, minY, invSize, 0);
-        earcutLinked(c, triangles, dim, minX, minY, invSize, 0);
+        earcutLinked(a, triangles, minX, minY, invSize, 0);
+        earcutLinked(c, triangles, minX, minY, invSize, 0);
         return;
       }
       b = b.next;
@@ -399,7 +438,8 @@ function eliminateHoles(
   areas: NumericArray | undefined,
   plane: Plane2D
 ): Vertex {
-  const queue = [];
+  const queue = activeHoleQueue;
+  queue.length = 0;
   let i;
   let len;
   let start;
@@ -410,6 +450,7 @@ function eliminateHoles(
     start = holeIndices[i] * dim;
     end = i < len - 1 ? holeIndices[i + 1] * dim : data.length;
     list = linkedList(data, start, end, dim, false, areas && areas[i + 1], plane);
+    if (!list) continue;
     if (list === list.next) list.steiner = true;
     queue.push(getLeftmost(list));
   }
@@ -724,8 +765,8 @@ function middleInside(a, b) {
 // link two polygon vertices with a bridge; if the vertices belong to the same ring, it splits polygon into two;
 // if one belongs to the outer ring and another to a hole, it merges it into a single ring
 function splitPolygon(a, b) {
-  const a2 = new Vertex(a.i, a.x, a.y);
-  const b2 = new Vertex(b.i, b.x, b.y);
+  const a2 = allocateVertex(a.i, a.x, a.y);
+  const b2 = allocateVertex(b.i, b.x, b.y);
   const an = a.next;
   const bp = b.prev;
 
@@ -746,7 +787,7 @@ function splitPolygon(a, b) {
 
 // create a node and optionally link it with previous one (in a circular doubly linked list)
 function insertNode(i, x, y, last) {
-  const p = new Vertex(i, x, y);
+  const p = allocateVertex(i, x, y);
 
   if (!last) {
     p.prev = p;
@@ -768,8 +809,28 @@ function removeNode(p) {
   if (p.nextZ) p.nextZ.prevZ = p.prevZ;
 }
 
+// Reuse scratch nodes and queues across calls; no input or output arrays are retained.
+const vertexPool: Vertex[] = [];
+let vertexPoolIndex = 0;
+const holeQueues: Vertex[][] = [];
+let activeHoleQueue: Vertex[] = [];
+let callDepth = 0;
+
+function allocateVertex(i: number, x: number, y: number): Vertex {
+  let vertex = vertexPool[vertexPoolIndex];
+  if (!vertex) vertexPool[vertexPoolIndex] = vertex = new Vertex(i, x, y);
+  vertexPoolIndex++;
+  vertex.i = i;
+  vertex.x = x;
+  vertex.y = y;
+  vertex.prev = vertex.next = vertex.prevZ = vertex.nextZ = null;
+  vertex.z = 0;
+  vertex.steiner = false;
+  return vertex;
+}
+
 class Vertex {
-  // vertex index in coordinates array
+  // vertex index, independent of coordinate stride
   i: number;
 
   // vertex coordinates

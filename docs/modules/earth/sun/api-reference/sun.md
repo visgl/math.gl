@@ -169,7 +169,7 @@ instantaneous cloud shadows or a forecast of measured irradiance.
 
 ### References and licensing
 
-The sky model is described by [cite](cite:hosek2012).
+The sky model is described by [cite](https://cgg.mff.cuni.cz/projects/SkylightModelling/ "cite:hosek2012").
 
 - [Hošek and Wilkie, Adding a Solar Radiance Function to the Hošek Skylight Model (2013),
   and the 1.4a reference implementation](https://cgg.mff.cuni.cz/projects/SkylightModelling/).
@@ -343,8 +343,8 @@ All new code is independently written TypeScript under MIT, with SPDX provenance
 Published equations are referenced; no external implementation, C/C++ source,
 coefficient table, texture or paper text is redistributed.
 
-- [Bruneton & Neyret (2008), Precomputed Atmospheric Scattering](cite:bruneton2008): spherical atmosphere and integrated transmittance. This API does not implement that paper's precomputed multiple-scattering solution.
-- [Preetham, Shirley & Smits (1999), A Practical Analytic Model for Daylight](cite:preetham1999): spectral Rayleigh and aerosol attenuation approximations.
+- [Bruneton & Neyret (2008), Precomputed Atmospheric Scattering](https://ebruneton.github.io/precomputed_atmospheric_scattering/ "cite:bruneton2008"): spherical atmosphere and integrated transmittance. This API does not implement that paper's precomputed multiple-scattering solution.
+- [Preetham, Shirley & Smits (1999), A Practical Analytic Model for Daylight](http://dx.doi.org/10.1145/311535.311545 "cite:preetham1999"): spectral Rayleigh and aerosol attenuation approximations.
 - [Wyman, Sloan & Shirley (2013), Simple Analytic Approximations to the CIE XYZ Color Matching Functions](https://jcgt.org/published/0002/02/01/): equation 4/table 1 fits, independently evaluated.
 - [PBRT, Phase Functions](https://www.pbr-book.org/3ed-2018/Volume_Scattering/Phase_Functions): Henyey–Greenstein angular scattering and direction conventions.
 - The shared ambient sky and existing diffuse tint retain the references and licenses documented in [sky lighting](./sky.md) and [sunlight](./sun.md#getsunlight).
@@ -354,3 +354,5 @@ After building the package, generate a standalone dawn/dusk palette demo with
 It compares four cloud heights and three Sun-ray shadow depths through a shared
 Sun-altitude slider. The SVG shapes are original and illustrative; the generated
 page has no external runtime or artwork dependencies.
+
+See [References and credits](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

@@ -3,8 +3,17 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
 import {inRing} from '../../src/discontinuous/elastic/geometry';
-import {MapEngine} from '../../src/discontinuous';
+import {MapEngine, WORLD_PROJECTIONS} from '../../src/discontinuous';
 import {elasticI, elasticII, elasticIII} from '../../src/elastic';
+const globeOnlyWorlds = new Set([
+  'gringorten',
+  'bertin1953',
+  'eisenlohr',
+  'nicolosi',
+  'polyconic',
+  'sinu-mollweide',
+  'rectangular-polyconic'
+]);
 const maps = [elasticI, elasticII, elasticIII].map(
   data => new MapEngine({version: 1, id: data.name, definition: {type: 'elastic', data}})
 );
@@ -170,26 +179,28 @@ test('direct polygons retain holes and immutable endpoint correspondence', () =>
   expect(geometry.evaluate(0)[0].coordinates[0][0][0]).not.toBe(999);
 });
 
-test('common polygon refinement covers the world once, including rotated target cuts', () => {
-  const targets = [
-    ...maps,
-    ...(['sinusoidal', 'mollweide', 'robinson'] as const).map(
-      projection =>
-        new MapEngine({
-          version: 1,
-          id: projection,
-          definition: {type: 'world', projection, centralMeridian: -120}
-        })
-    )
-  ];
-  const area = (ring: readonly (readonly [number, number])[]) =>
-    Math.abs(
-      ring.reduce((sum, p, i) => {
-        const q = ring[(i + 1) % ring.length];
-        return sum + p[0] * q[1] - q[0] * p[1];
-      }, 0) / 2
-    );
-  for (const target of targets) {
+// Keep the complete target/polygon matrix, with a separate timeout budget per target.
+const polygonRefinementTargets = [
+  ...maps,
+  ...WORLD_PROJECTIONS.filter(projection => !globeOnlyWorlds.has(projection)).map(
+    projection =>
+      new MapEngine({
+        version: 1,
+        id: projection,
+        definition: {type: 'world', projection, centralMeridian: -120}
+      })
+  )
+];
+for (const target of polygonRefinementTargets) {
+  test(`common polygon refinement covers the world once: ${target.description.id}`, () => {
+    const area = (ring: readonly (readonly [number, number])[]) =>
+      Math.abs(
+        ring.reduce((sum, p, i) => {
+          const q = ring[(i + 1) % ring.length];
+          return sum + p[0] * q[1] - q[0] * p[1];
+        }, 0) / 2
+      );
+
     const transition = maps[0].createTransitionTo(target);
     let sum = 0;
     for (let lon = -180; lon < 180; lon += 90)
@@ -210,8 +221,8 @@ test('common polygon refinement covers the world once, including rotated target 
             area(part.sourceCoordinates[0]) -
             part.sourceCoordinates.slice(1).reduce((s, r) => s + area(r), 0);
     expect(sum, target.description.id).toBeCloseTo(360 * 180, 5);
-  }
-});
+  });
+}
 
 test('same-engine direct transitions retain overlapping charts without moving copies', () => {
   const map = new MapEngine(
@@ -272,4 +283,128 @@ test('overlapping Elastic coverage requires a globe route between different engi
   expect(overlapping.createTransitionTo(world).strategy).toBe('via-globe');
   expect(() => overlapping.createTransitionTo(world, {strategy: 'direct'})).toThrow(/coverage/);
   expect(overlapping.createTransitionTo(overlapping).strategy).toBe('direct');
+});
+
+for (const projection of WORLD_PROJECTIONS) {
+  test(`world transition qualification: ${projection}`, () => {
+    const target = new MapEngine(
+      {version: 1, id: projection, definition: {type: 'world', projection}},
+      {sampling: {tolerance: 0.01}}
+    );
+    const transition = world.createTransitionTo(target);
+    if (globeOnlyWorlds.has(projection)) {
+      expect(transition.strategy).toBe('via-globe');
+      expect(() => world.createTransitionTo(target, {strategy: 'direct'})).toThrow(/coverage/);
+      return;
+    }
+    expect(transition.strategy).toBe('direct');
+    expect(target.createTransitionTo(world).strategy).toBe('direct');
+    // Include poles, both antimeridian limits, equator and internal chart boundaries.
+    for (let lon = -180; lon <= 180; lon += 10) {
+      for (let lat = -90; lat <= 90; lat += 10) {
+        const point: [number, number] = [lon, lat];
+        const a = world.projectPoint(point),
+          b = target.projectPoint(point);
+        expect(b, `${projection} ${point}`).not.toBeNull();
+        expect(b!.position.every(Number.isFinite), `${projection} ${point}`).toBe(true);
+        expect(Math.hypot(...b!.position), `${projection} ${point}`).toBeLessThan(100);
+        expect(transition.projectPoint(point, 0)).toEqual([...a!.position, 0]);
+        expect(transition.projectPoint(point, 1)).toEqual([...b!.position, 0]);
+        expect(transition.projectPoint(point, 0.5)).toEqual([
+          (a!.position[0] + b!.position[0]) / 2,
+          (a!.position[1] + b!.position[1]) / 2,
+          0
+        ]);
+      }
+    }
+    // Artificial octant boundaries must not introduce interior jumps.
+    for (const longitude of [-90, 0, 90])
+      for (const latitude of [-80, -30, 0, 30, 80]) {
+        const left = target.projectPoint([longitude - 1e-7, latitude])!.position;
+        const right = target.projectPoint([longitude + 1e-7, latitude])!.position;
+        expect(Math.hypot(left[0] - right[0], left[1] - right[1])).toBeLessThan(1e-4);
+      }
+    for (const geometry of [
+      transition.prepareLine([
+        [-170, 30],
+        [-90, 60],
+        [0, 0],
+        [90, -60],
+        [170, -30]
+      ]),
+      transition.preparePolygon([
+        [
+          [-20, -20],
+          [20, -20],
+          [20, 20],
+          [-20, 20]
+        ]
+      ])
+    ]) {
+      expect(geometry.parts.length).toBeGreaterThan(0);
+      for (const amount of [0, 0.25, 0.5, 0.75, 1]) {
+        for (const frame of geometry.evaluate(amount)) {
+          expect(frame.opacity).toBe(1);
+          for (const ring of frame.coordinates)
+            for (const point of ring) {
+              expect(point.every(Number.isFinite)).toBe(true);
+              expect(point[2]).toBe(0);
+            }
+        }
+      }
+    }
+  });
+}
+
+test('unqualified world parameters and cut maps retain the globe fallback', () => {
+  const parameterized = new MapEngine({
+    version: 1,
+    id: 'custom-hammer',
+    definition: {type: 'world', projection: 'hammer', parameters: {coefficient: 3}}
+  });
+  const cut = new MapEngine({version: 1, id: 'cut', definition: {type: 'gray-fuller'}});
+  const interrupted = new MapEngine({version: 1, id: 'goode', definition: {type: 'goode'}});
+  const clipped = new MapEngine({
+    version: 1,
+    id: 'mercator',
+    definition: {type: 'mercator', maxLatitude: 80}
+  });
+  for (const target of [parameterized, cut, interrupted, clipped]) {
+    expect(world.createTransitionTo(target).strategy).toBe('via-globe');
+    expect(target.createTransitionTo(world).strategy).toBe('via-globe');
+    expect(() => world.createTransitionTo(target, {strategy: 'direct'})).toThrow(/coverage/);
+  }
+  const hammer = new MapEngine({
+    version: 1,
+    id: 'hammer',
+    definition: {type: 'world', projection: 'hammer'}
+  });
+  expect(world.createTransitionTo(hammer, {strategy: 'via-globe'}).strategy).toBe('via-globe');
+});
+
+test('qualified world pairs interpolate geographic correspondence without a globe detour', () => {
+  const qualified = WORLD_PROJECTIONS.filter(projection => !globeOnlyWorlds.has(projection)).map(
+    projection =>
+      new MapEngine({version: 1, id: projection, definition: {type: 'world', projection}})
+  );
+  for (const source of qualified)
+    for (const target of qualified) {
+      const transition = source.createTransitionTo(target);
+      expect(transition.strategy).toBe('direct');
+      for (const point of [
+        [-179, 80],
+        [-90, -45],
+        [0, 0],
+        [90, 45],
+        [179, -80]
+      ] as [number, number][]) {
+        const a = source.projectPoint(point)!.position;
+        const b = target.projectPoint(point)!.position;
+        expect(transition.projectPoint(point, 0.25)).toEqual([
+          a[0] * 0.75 + b[0] * 0.25,
+          a[1] * 0.75 + b[1] * 0.25,
+          0
+        ]);
+      }
+    }
 });

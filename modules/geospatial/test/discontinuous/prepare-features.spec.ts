@@ -8,7 +8,8 @@ import {
   type MapFeatureGeometry,
   type PreparedMapGeometry
 } from '../../src/discontinuous';
-import {elasticI} from '../../src/elastic';
+import {elasticI, elasticIII} from '../../src/elastic';
+import {angle, geographic} from '../../src/discontinuous/math';
 
 const maps = [
   new MapEngine({version: 1, id: 'mercator', definition: {type: 'mercator'}}),
@@ -393,4 +394,559 @@ test('collection depth counts collections rather than multipart expansion', () =
   expect(() =>
     maps[0].prepareFeatures([{geometry: nest({type: 'GeometryCollection', geometries: []}, 64)}])
   ).toThrow(/deeply/);
+});
+
+test('opt-in path lineage preserves geometry and distinguishes repeated source segments', () => {
+  const map = maps[1];
+  const features: MapFeature[] = [
+    {
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [-80, 30],
+          [20, 30],
+          [-80, 30],
+          [20, 30]
+        ]
+      }
+    }
+  ];
+  const ordinary = map.prepareFeatures(features);
+  const rich = map.prepareFeatures(features, {
+    provenance: {
+      sourceSegments: true,
+      boundaries: true,
+      distances: {metric: 'spherical', radius: 6371000}
+    }
+  });
+  expect(rich.paths.positions).toEqual(ordinary.paths.positions);
+  expect(rich.paths.sourcePositions).toEqual(ordinary.paths.sourcePositions);
+  expect(rich.paths.pathStarts).toEqual(ordinary.paths.pathStarts);
+  expect(ordinary.paths.provenance).toBeUndefined();
+  const p = rich.paths.provenance!;
+  expect(p.sourceSegmentIndices!.length).toBe(rich.paths.positions.length / 2);
+  expect(new Set(p.sourceSegmentIndices)).toEqual(new Set([0, 1, 2]));
+  expect(p.startReasons!.length).toBe(rich.paths.parts.length);
+  for (let part = 0; part < rich.paths.parts.length; part++) {
+    const a = rich.paths.pathStarts[part],
+      b = rich.paths.pathStarts[part + 1];
+    for (let i = a; i < b; i++) {
+      expect(p.sourceSegmentParameters![i]).toBeGreaterThanOrEqual(0);
+      expect(p.sourceSegmentParameters![i]).toBeLessThanOrEqual(1);
+      if (i > a)
+        expect(p.sourceDistances![i]).toBeGreaterThanOrEqual(p.sourceDistances![i - 1] - 1e-7);
+    }
+  }
+  expect(structuredClone(rich)).toEqual(rich);
+  const distances = map.prepareFeatures(features, {
+    provenance: {distances: {metric: 'spherical', radius: 1}}
+  }).paths.provenance!;
+  expect(distances.sourceSegmentIndices).toBeUndefined();
+  expect(distances.sourceDistances!.at(-1)).toBeLessThan(p.sourceDistances!.at(-1)!);
+  expect(() =>
+    map.prepareFeatures(features, {provenance: {distances: {metric: 'spherical', radius: 0}}})
+  ).toThrow();
+});
+
+test('retracing endpoint coordinates does not manufacture source endpoints', () => {
+  for (const line of [
+    [
+      [-40, 30],
+      [-60, 30],
+      [-40, 30],
+      [-20, 30]
+    ],
+    [
+      [-60, 30],
+      [-40, 30],
+      [-20, 30],
+      [-40, 30]
+    ]
+  ]) {
+    const r = maps[1].prepareFeatures([{geometry: {type: 'LineString', coordinates: line}}], {
+      provenance: {sourceSegments: true, boundaries: true}
+    });
+    const p = r.paths.provenance!;
+    for (let part = 0; part < r.paths.parts.length; part++) {
+      const start = r.paths.pathStarts[part],
+        end = r.paths.pathStarts[part + 1] - 1;
+      if (p.startReasons![part] === 'source-endpoint')
+        expect(p.sourceSegmentIndices![start]).toBe(0);
+      if (p.endReasons![part] === 'source-endpoint')
+        expect(p.sourceSegmentIndices![end]).toBe(line.length - 2);
+    }
+  }
+});
+test('rigid cap wrappers retain lineage through streamed coverage cuts', () => {
+  const map = new MapEngine({
+    version: 1,
+    id: 'satellite',
+    definition: {type: 'regional', projection: 'satellite'}
+  });
+  const features: MapFeature[] = [
+    {
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [-80, 10],
+          [0, 15],
+          [80, 10],
+          [0, 15],
+          [-80, 10]
+        ]
+      }
+    }
+  ];
+  const ordinary = map.prepareFeatures(features);
+  const rich = map.prepareFeatures(features, {
+    provenance: {
+      sourceSegments: true,
+      boundaries: true,
+      distances: {metric: 'spherical', radius: 1}
+    }
+  });
+  expect(rich.paths.positions).toEqual(ordinary.paths.positions);
+  expect(rich.paths.sourcePositions).toEqual(ordinary.paths.sourcePositions);
+  expect(rich.paths.pathStarts).toEqual(ordinary.paths.pathStarts);
+  const p = rich.paths.provenance!;
+  expect(p.startReasons).toContain('coverage-boundary');
+  expect(p.endReasons).toContain('coverage-boundary');
+  expect(new Set(p.sourceSegmentIndices!).size).toBe(4);
+  for (let part = 0; part < rich.paths.parts.length; part++) {
+    const start = rich.paths.pathStarts[part],
+      end = rich.paths.pathStarts[part + 1];
+    for (let i = start + 1; i < end; i++)
+      expect(p.sourceDistances![i]).toBeGreaterThanOrEqual(p.sourceDistances![i - 1]);
+  }
+});
+
+test('optional polygon edges preserve holes, source constraints and geometry', () => {
+  for (const map of maps.slice(1, 3)) {
+    const features: MapFeature[] = [{geometry: polygon}];
+    const a = map.prepareFeatures(features),
+      b = map.prepareFeatures(features, {provenance: {polygonEdges: true}});
+    expect(b.polygons.positions).toEqual(a.polygons.positions);
+    expect(b.polygons.sourcePositions).toEqual(a.polygons.sourcePositions);
+    expect(b.polygons.ringStarts).toEqual(a.polygons.ringStarts);
+    expect(a.polygons.edgeProvenance).toBeUndefined();
+    const e = b.polygons.edgeProvenance!;
+    expect(e.kinds.length).toBe(b.polygons.positions.length / 2);
+    expect(e.sourceParameterRanges.length).toBe(e.kinds.length * 2);
+    expect(e.kinds.some(k => k === 1)).toBe(true);
+    for (let ring = 0; ring < b.polygons.ringStarts.length - 1; ring++) {
+      const end = b.polygons.ringStarts[ring + 1];
+      expect(e.kinds[end - 1]).toBe(0);
+      for (let i = b.polygons.ringStarts[ring]; i < end - 1; i++) {
+        if (e.kinds[i] === 1) {
+          expect(e.sourceRingIndices[i]).toBeLessThan(2);
+          expect(e.sourceParameterRanges[i * 2]).toBeGreaterThanOrEqual(0);
+          expect(e.sourceParameterRanges[i * 2 + 1]).toBeLessThanOrEqual(1);
+        } else expect(e.sourceSegmentIndices[i]).toBe(0xffffffff);
+      }
+    }
+    expect(structuredClone(b)).toEqual(b);
+  }
+});
+
+test('polygon source edge ranges reconstruct source endpoints after winding reversal', () => {
+  const geometry = polygon as Extract<MapFeatureGeometry, {type: 'MultiLineString' | 'Polygon'}>;
+  for (const reverse of [false, true]) {
+    const rings = geometry.coordinates.map(r => (reverse ? [...r].reverse() : r));
+    const prepared = maps[1].prepareFeatures([{geometry: {type: 'Polygon', coordinates: rings}}], {
+      provenance: {polygonEdges: true}
+    });
+    const {polygons} = prepared,
+      e = polygons.edgeProvenance!;
+    const vector = (p: readonly number[]) => {
+      const lon = (p[0] * Math.PI) / 180,
+        lat = (p[1] * Math.PI) / 180;
+      return [Math.cos(lat) * Math.cos(lon), Math.cos(lat) * Math.sin(lon), Math.sin(lat)];
+    };
+    for (let i = 0; i < e.kinds.length; i++)
+      if (e.kinds[i] === 1) {
+        const ring = rings[e.sourceRingIndices[i]],
+          segment = e.sourceSegmentIndices[i],
+          a = vector(ring[segment]),
+          b = vector(ring[(segment + 1) % ring.length]);
+        const omega = Math.acos(
+          Math.max(
+            -1,
+            Math.min(
+              1,
+              a.reduce((sum, v, k) => sum + v * b[k], 0)
+            )
+          )
+        );
+        for (const endpoint of [0, 1]) {
+          const t = e.sourceParameterRanges[i * 2 + endpoint],
+            actual = vector(
+              Array.from(polygons.sourcePositions.slice((i + endpoint) * 2, (i + endpoint) * 2 + 2))
+            );
+          const expected = a.map(
+            (v, k) => (v * Math.sin((1 - t) * omega) + b[k] * Math.sin(t * omega)) / Math.sin(omega)
+          );
+          expect(Math.hypot(...expected.map((v, k) => v - actual[k]))).toBeLessThan(1e-9);
+        }
+      }
+  }
+});
+
+test('real polygon boundaries on chart cuts keep source identity', () => {
+  const features: MapFeature[] = [
+    {
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [-40, 20],
+            [-20, 20],
+            [-20, 50],
+            [-40, 50],
+            [-40, 20]
+          ]
+        ]
+      }
+    }
+  ];
+  const a = maps[1].prepareFeatures(features),
+    b = maps[1].prepareFeatures(features, {provenance: {polygonEdges: true}});
+  expect(b.polygons.positions).toEqual(a.polygons.positions);
+  expect(b.polygons.edgeProvenance!.kinds.every(k => k === 0 || k === 1)).toBe(true);
+  const atlas = maps[1].prepareFeatures(features, {
+    provenance: {polygonEdges: true},
+    sphericalCuts: {interior: 'left'}
+  });
+  expect(atlas.polygons.edgeProvenance!.kinds.some(k => k === 1)).toBe(true);
+});
+
+test('source vertices on chart planes do not classify discarded zero-length pairs', () => {
+  const features: MapFeature[] = [
+    {
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [-60, 20],
+            [-40, 30],
+            [-20, 20],
+            [-20, 50],
+            [-60, 50],
+            [-60, 20]
+          ]
+        ]
+      }
+    }
+  ];
+  const plain = maps[1].prepareFeatures(features),
+    rich = maps[1].prepareFeatures(features, {provenance: {polygonEdges: true}});
+  expect(rich.polygons.positions).toEqual(plain.polygons.positions);
+  expect(rich.polygons.sourcePositions).toEqual(plain.polygons.sourcePositions);
+  expect(rich.polygons.ringStarts).toEqual(plain.polygons.ringStarts);
+  expect(rich.polygons.edgeProvenance!.kinds.length).toBe(rich.polygons.positions.length / 2);
+});
+
+test('Mercator latitude clipping retains source segment lineage and distance', () => {
+  const features: MapFeature[] = [
+    {
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [-20, 70],
+          [20, 89],
+          [60, 70],
+          [20, 89],
+          [-20, 70]
+        ]
+      }
+    }
+  ];
+  const map = maps[0];
+  const ordinary = map.prepareFeatures(features);
+  const rich = map.prepareFeatures(features, {
+    provenance: {
+      sourceSegments: true,
+      boundaries: true,
+      distances: {metric: 'spherical', radius: 1}
+    }
+  });
+  expect(rich.paths.positions).toEqual(ordinary.paths.positions);
+  expect(rich.paths.sourcePositions).toEqual(ordinary.paths.sourcePositions);
+  expect(rich.paths.pathStarts).toEqual(ordinary.paths.pathStarts);
+  const p = rich.paths.provenance!;
+  expect(p.sourceDistances!.length).toBe(rich.paths.positions.length / 2);
+  expect(p.startReasons).toContain('coverage-boundary');
+  expect(p.endReasons).toContain('coverage-boundary');
+  expect(new Set(p.sourceSegmentIndices!).size).toBe(4);
+  for (let part = 0; part < rich.paths.parts.length; part++) {
+    const start = rich.paths.pathStarts[part],
+      end = rich.paths.pathStarts[part + 1];
+    for (let i = start + 1; i < end; i++)
+      expect(p.sourceDistances![i]).toBeGreaterThanOrEqual(p.sourceDistances![i - 1]);
+  }
+  expect(structuredClone(rich)).toEqual(rich);
+});
+
+test('wrapper path parameters reconstruct original great-circle points', () => {
+  const coordinates: [number, number][] = [
+    [-75, 20],
+    [0, 85],
+    [75, 20],
+    [0, 85],
+    [-75, 20]
+  ];
+  const sphere = coordinates.map(geographic);
+  const cumulative = [0];
+  for (let i = 1; i < sphere.length; i++)
+    cumulative.push(cumulative[i - 1] + angle(sphere[i - 1], sphere[i]));
+  for (const map of [
+    maps[0],
+    new MapEngine({
+      version: 1,
+      id: 'satellite',
+      definition: {type: 'regional', projection: 'satellite'}
+    })
+  ]) {
+    const result = map.prepareFeatures([{geometry: {type: 'LineString', coordinates}}], {
+      provenance: {
+        sourceSegments: true,
+        boundaries: true,
+        distances: {metric: 'spherical', radius: 1}
+      }
+    });
+    const paths = result.paths,
+      p = paths.provenance!;
+    for (let i = 0; i < p.sourceSegmentIndices!.length; i++) {
+      const index = p.sourceSegmentIndices![i],
+        t = p.sourceSegmentParameters![i],
+        a = sphere[index],
+        b = sphere[index + 1],
+        arc = angle(a, b);
+      const v = a.map(
+        (x, k) => (Math.sin((1 - t) * arc) * x + Math.sin(t * arc) * b[k]) / Math.sin(arc)
+      );
+      const point = geographic([paths.sourcePositions[i * 2], paths.sourcePositions[i * 2 + 1]]);
+      expect(Math.hypot(...v.map((x, k) => x - point[k]))).toBeLessThan(1e-10);
+      expect(p.sourceDistances![i]).toBeCloseTo(cumulative[index] + t * arc, 10);
+    }
+  }
+});
+
+test('nonlinear cap paths retain original lineage across coverage cuts', () => {
+  const map = new MapEngine({
+    version: 1,
+    id: 'armadillo',
+    definition: {type: 'regional', projection: 'armadillo'}
+  });
+  const coordinates: [number, number][] = [
+    [-170, -60],
+    [-30, 30],
+    [120, -45],
+    [-30, 30],
+    [-170, -60]
+  ];
+  const input: MapFeature[] = [{geometry: {type: 'LineString', coordinates}}];
+  const plain = map.prepareFeatures(input),
+    rich = map.prepareFeatures(input, {
+      provenance: {
+        sourceSegments: true,
+        boundaries: true,
+        distances: {metric: 'spherical', radius: 1}
+      }
+    });
+  expect(rich.paths.positions).toEqual(plain.paths.positions);
+  expect(rich.paths.sourcePositions).toEqual(plain.paths.sourcePositions);
+  const p = rich.paths.provenance!;
+  expect(p.startReasons).toContain('coverage-boundary');
+  expect(p.endReasons).toContain('coverage-boundary');
+  const v = coordinates.map(geographic),
+    distance = [0];
+  for (let i = 1; i < v.length; i++) distance.push(distance[i - 1] + angle(v[i - 1], v[i]));
+  for (let i = 0; i < p.sourceSegmentIndices!.length; i++) {
+    const segment = p.sourceSegmentIndices![i],
+      t = p.sourceSegmentParameters![i],
+      a = v[segment],
+      b = v[segment + 1],
+      length = angle(a, b);
+    const expected = a.map(
+      (x, k) => (Math.sin((1 - t) * length) * x + Math.sin(t * length) * b[k]) / Math.sin(length)
+    );
+    const source = geographic([
+      rich.paths.sourcePositions[i * 2],
+      rich.paths.sourcePositions[i * 2 + 1]
+    ]);
+    expect(Math.hypot(...expected.map((x, k) => x - source[k]))).toBeLessThan(1e-9);
+    expect(p.sourceDistances![i]).toBeCloseTo(distance[segment] + t * length, 9);
+  }
+  expect(structuredClone(rich)).toEqual(rich);
+});
+
+test('Elastic source clipping and grid resampling retain minor-arc lineage', () => {
+  const map = maps[3],
+    coordinates: [number, number][] = [
+      [-110, 20],
+      [-20, 35],
+      [80, 20],
+      [-20, 35],
+      [-110, 20]
+    ],
+    features: MapFeature[] = [{geometry: {type: 'LineString', coordinates}}];
+  const plain = map.prepareFeatures(features),
+    rich = map.prepareFeatures(features, {
+      provenance: {
+        sourceSegments: true,
+        boundaries: true,
+        distances: {metric: 'spherical', radius: 1}
+      }
+    });
+  expect(rich.paths.parts.length).toBeGreaterThan(0);
+  expect(rich.paths.positions).toEqual(plain.paths.positions);
+  expect(rich.paths.sourcePositions).toEqual(plain.paths.sourcePositions);
+  expect(rich.paths.pathStarts).toEqual(plain.paths.pathStarts);
+  const p = rich.paths.provenance!,
+    v = coordinates.map(geographic),
+    distance = [0];
+  for (let i = 1; i < v.length; i++) distance.push(distance[i - 1] + angle(v[i - 1], v[i]));
+  for (let i = 0; i < p.sourceSegmentIndices!.length; i++) {
+    const s = p.sourceSegmentIndices![i],
+      t = p.sourceSegmentParameters![i],
+      a = v[s],
+      b = v[s + 1],
+      length = angle(a, b),
+      expected = a.map(
+        (x, k) => (Math.sin((1 - t) * length) * x + Math.sin(t * length) * b[k]) / Math.sin(length)
+      );
+    const actual = geographic([
+      rich.paths.sourcePositions[i * 2],
+      rich.paths.sourcePositions[i * 2 + 1]
+    ]);
+    expect(Math.hypot(...expected.map((x, k) => x - actual[k]))).toBeLessThan(1e-9);
+    expect(p.sourceDistances![i]).toBeCloseTo(distance[s] + t * length, 9);
+  }
+  for (let part = 0; part < rich.paths.parts.length; part++)
+    for (let i = rich.paths.pathStarts[part] + 1; i < rich.paths.pathStarts[part + 1]; i++)
+      expect(p.sourceDistances![i]).toBeGreaterThanOrEqual(p.sourceDistances![i - 1]);
+  for (const provenance of [
+    {sourceSegments: true},
+    {boundaries: true},
+    {distances: {metric: 'spherical' as const, radius: 1}}
+  ])
+    expect(map.prepareFeatures(features, {provenance}).paths.provenance).toBeDefined();
+  expect(structuredClone(rich)).toEqual(rich);
+});
+
+test('wrapper polygon constraints preserve holes, source fractions and clipping classes', () => {
+  const rings: [number, number][][] = [
+    [
+      [-30, -30],
+      [80, -30],
+      [80, 60],
+      [-30, 60],
+      [-30, -30]
+    ],
+    [
+      [-5, 5],
+      [5, 5],
+      [5, 15],
+      [-5, 15],
+      [-5, 5]
+    ]
+  ];
+  const wrappers = [
+    new MapEngine({
+      version: 1,
+      id: 'mercator-poly',
+      definition: {type: 'mercator', maxLatitude: 45}
+    }),
+    maps[3],
+    new MapEngine({
+      version: 1,
+      id: 'satellite-poly',
+      definition: {type: 'regional', projection: 'satellite'}
+    }),
+    new MapEngine({
+      version: 1,
+      id: 'armadillo-poly',
+      definition: {type: 'regional', projection: 'armadillo'}
+    })
+  ];
+  for (const map of wrappers)
+    for (const reverse of [false, true]) {
+      const coordinates = rings.map(r => (reverse ? [...r].reverse() : r)),
+        features: MapFeature[] = [{geometry: {type: 'Polygon', coordinates}}];
+      const plain = map.prepareFeatures(features),
+        rich = map.prepareFeatures(features, {provenance: {polygonEdges: true}});
+      expect(rich.polygons.parts.length).toBeGreaterThan(0);
+      expect(rich.polygons.positions).toEqual(plain.polygons.positions);
+      expect(rich.polygons.sourcePositions).toEqual(plain.polygons.sourcePositions);
+      expect(rich.polygons.ringStarts).toEqual(plain.polygons.ringStarts);
+      const p = rich.polygons.edgeProvenance!;
+      expect(p.kinds).toContain(1);
+      expect(p.kinds.length).toBe(rich.polygons.positions.length / 2);
+      for (let i = 0; i < p.kinds.length; i++)
+        if (p.kinds[i] === 1) {
+          const ring = coordinates[p.sourceRingIndices[i]],
+            segment = p.sourceSegmentIndices[i],
+            a = geographic(ring[segment]),
+            b = geographic(ring[segment + 1]),
+            length = angle(a, b);
+          for (const endpoint of [0, 1]) {
+            const t = p.sourceParameterRanges[i * 2 + endpoint],
+              point = geographic([
+                rich.polygons.sourcePositions[(i + endpoint) * 2],
+                rich.polygons.sourcePositions[(i + endpoint) * 2 + 1]
+              ]),
+              expected = a.map(
+                (x, k) =>
+                  (Math.sin((1 - t) * length) * x + Math.sin(t * length) * b[k]) / Math.sin(length)
+              );
+            expect(Math.hypot(...expected.map((x, k) => x - point[k]))).toBeLessThan(1e-8);
+          }
+        } else {
+          expect(p.sourceRingIndices[i]).toBe(0xffffffff);
+          expect(p.sourceSegmentIndices[i]).toBe(0xffffffff);
+        }
+      expect(structuredClone(rich)).toEqual(rich);
+    }
+});
+
+test('Elastic polar cells retain directional limits and computational pole connectors', () => {
+  for (const lon of [-160, -30, 0, 120]) {
+    const rings: [number, number][][] = [
+      [
+        [lon, -90],
+        [lon + 5, -90],
+        [lon + 5, -85],
+        [lon, -85],
+        [lon, -90]
+      ]
+    ];
+    const input: MapFeature[] = [{geometry: {type: 'Polygon', coordinates: rings}}];
+    const plain = maps[3].prepareFeatures(input),
+      rich = maps[3].prepareFeatures(input, {provenance: {polygonEdges: true}});
+    expect(rich.polygons.positions).toEqual(plain.polygons.positions);
+    expect(rich.polygons.positions.every(Number.isFinite)).toBe(true);
+    expect(rich.polygons.edgeProvenance!.kinds.length).toBe(rich.polygons.positions.length / 2);
+  }
+});
+
+test('Elastic III polar chart crossings do not publish source vertices in another region', () => {
+  const map = new MapEngine({
+    version: 1,
+    id: 'elastic-III-polar-ownership',
+    definition: {type: 'elastic', data: elasticIII}
+  });
+  const rings: [number, number][][] = [
+    [
+      [10, 85],
+      [15, 85],
+      [15, 90],
+      [10, 90],
+      [10, 85]
+    ]
+  ];
+  for (const provenance of [false, true])
+    for (const part of map.projectPolygon(rings, {polygonEdgeProvenance: provenance}))
+      for (const ring of part.sourceCoordinates)
+        for (const p of ring)
+          expect(map.findRegions(p), `${p} in ${part.regionId}`).toContain(part.regionId);
 });

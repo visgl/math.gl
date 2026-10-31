@@ -16,6 +16,7 @@ export {
   createCRSExecutionIdentity,
   getCRSExecutionKey,
   inferCRSRepresentation,
+  normalizeCRSIdentifier,
   encodeWKTCRS,
   parseWKTCRS,
   validateWKTCRS,

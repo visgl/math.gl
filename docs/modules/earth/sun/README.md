@@ -88,8 +88,10 @@ globe coordinates, reusable contexts and visibility searches.
 
 Sunlight lookup data is derived from the [Hošek–Wilkie 1.4a reference implementation](https://cgg.mff.cuni.cz/projects/SkylightModelling/) under BSD-3-Clause. The full notice is shipped in `LICENSE-HOSEK-WILKIE`; see the [API documentation](./api-reference/sun.md#getsunlight) for model provenance and limits.
 
-The solar position calculation is a fork of @mourner's [SunCalc](https://github.com/mourner/suncalc) under BSD 2-clause license.
+The solar position calculation is a fork of [Volodymyr Agafonkin](https://github.com/mourner)'s [SunCalc](https://github.com/mourner/suncalc) under BSD 2-clause license.
 
 The adapted lunar code and numeric reference samples use SunCalc 1.9.0 under BSD-2-Clause. The full notice is shipped in `LICENSE-SUNCALC`, and SPDX comments record the original owner and provenance. Original moonlight and star-field calculations use math.gl’s MIT license.
 
 The [star catalog](./api-reference/stars.md) contains 7,000 bright stars, projected proper motions, distance-aware motion and brightness where measurements exist, an illustrative Galactic orbit model, and a procedural Milky Way background. Numeric Julian epochs support long animations independently of the observer’s rendering date.
+
+See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

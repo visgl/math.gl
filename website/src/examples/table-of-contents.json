@@ -117,6 +117,21 @@
       },
       {
         "type": "doc",
+        "label": "Centered oblique Mercator",
+        "id": "centered-oblique-mercator"
+      },
+      {
+        "type": "doc",
+        "label": "Prepared surface provenance",
+        "id": "surface-mesh"
+      },
+      {
+        "type": "doc",
+        "label": "Raster coordinate frames",
+        "id": "raster-frame"
+      },
+      {
+        "type": "doc",
         "label": "Antarctica and Fiji projection lab",
         "id": "raster-projection-lab"
       },

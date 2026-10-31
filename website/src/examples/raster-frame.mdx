@@ -1,0 +1,30 @@
+# Raster coordinate frames
+
+A raster's array frame and CRS frame are separate. This recipe composes math.gl `Matrix3`
+transforms and `SpatialReference` metadata to place samples explicitly, without treating a CRS
+identifier, storage chunk, or OME scale as a complete georeference.
+
+import Example from '@site/src/components/raster-frame';
+
+<Example />
+
+Select north-up, point-sampled, rotated/skewed or stored-axis-permuted fixtures. White points show
+sample locations, blue outlines their sample envelope, and orange outlines declared cell coverage.
+Area registration maps sample index `i` to grid coordinate `i + 0.5`; point registration maps it to
+`i`. Point nodes alone do not establish cell coverage. Hover samples to inspect inverse errors.
+
+The six affine coefficients map columns/rows into stored CRS components. An explicit permutation
+then maps stored components into display XY. Units remain declared metadata: the recipe does not
+convert feet to meters, infer axis conventions from an EPSG name, or reproject coordinates.
+Use a separately prepared projection-engine agnostic converter when changing CRS. Display scaling
+is uniform and subtracts the fixture origin; the underlying source coordinates retain their units.
+
+This is an example-owned composition, with no new public API or projection-engine dependency.
+CF, OME-NGFF, GeoTIFF and GDAL metadata interpretation remains in loaders.gl. In particular, OME
+scale/translation can describe an array frame distinct from the CRS georeference, and every
+multiscale level needs its own authoritative transform. Rotated/skewed grids retain their affine
+frame; do not approximate them by an axis-aligned TileMatrix.
+
+[Source, fixtures and limitations](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains/raster-frame)
+address [loaders.gl#4344](https://github.com/visgl/loaders.gl/pull/4344) and the source-grid concerns in
+[the detailed projection feedback](https://github.com/mdsumner/sidebyside/blob/main/article/2026-10-13_custom-projections-deckgl.md).

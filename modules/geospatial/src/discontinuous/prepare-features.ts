@@ -48,18 +48,45 @@ export type PreparedMapGeometry = {
   regionIds: string[];
   /** One vertex per part. Point ownership follows MapEngine.projectPoint(). */
   points: PreparedMapVertices & {parts: PreparedMapPart[]};
-  paths: PreparedMapVertices & {parts: PreparedMapPathPart[]; pathStarts: Uint32Array};
+  paths: PreparedMapVertices & {
+    parts: PreparedMapPathPart[];
+    pathStarts: Uint32Array;
+    provenance?: {
+      sourceSegmentIndices?: Uint32Array;
+      sourceSegmentParameters?: Float64Array;
+      sourceVertexIndices?: Uint32Array;
+      sourceDistances?: Float64Array;
+      distanceRadius?: number;
+      /** Per part: source endpoint, coverage boundary, cut, or continuous join. */
+      startReasons?: string[];
+      endReasons?: string[];
+    };
+  };
   polygons: PreparedMapVertices & {
     parts: PreparedMapPart[];
     /** Vertex offsets for all rings, with a terminal sentinel. Rings repeat their first vertex. */
     ringStarts: Uint32Array;
     /** Ring offsets for polygon parts, with a terminal sentinel. Outer ring comes first. */
     polygonStarts: Uint32Array;
+    /** One edge from each vertex to the next; repeated closing vertices have kind 0. */
+    edgeProvenance?: {
+      kinds: Uint8Array;
+      sourceRingIndices: Uint32Array;
+      sourceSegmentIndices: Uint32Array;
+      sourceParameterRanges: Float64Array;
+    };
   };
 };
 /** Static preparation controls. This does not triangulate, interpolate attributes or pose meshes. */
 export type MapPrepareFeaturesOptions = {
   sampling?: MapSamplingOptions;
+  provenance?: {
+    sourceSegments?: boolean;
+    boundaries?: boolean;
+    polygonEdges?: boolean;
+    /** Source minor-great-circle distance in meters on the declared sphere. */
+    distances?: {metric: 'spherical'; radius: number};
+  };
   /** Project original polygon boundaries separately; default true. */
   polygonOutlines?: boolean;
   /** Directed global spherical polygons; original outlines never include atlas connectors. */
@@ -108,6 +135,45 @@ export function prepareMapFeatures(
   if (!Array.isArray(features)) throw new Error('Expected a feature array');
   if (options.polygonOutlines !== undefined && typeof options.polygonOutlines !== 'boolean')
     throw new Error('polygonOutlines must be boolean');
+  const provenance = options.provenance;
+  if (
+    provenance !== undefined &&
+    (!provenance || typeof provenance !== 'object' || Array.isArray(provenance))
+  )
+    throw new Error('Unsupported provenance policy');
+  if (
+    provenance?.distances !== undefined &&
+    (!provenance.distances || typeof provenance.distances !== 'object')
+  )
+    throw new Error('Unsupported provenance distance policy');
+  if (
+    provenance &&
+    (typeof provenance !== 'object' ||
+      Object.keys(provenance).some(
+        k => !['sourceSegments', 'boundaries', 'distances', 'polygonEdges'].includes(k)
+      ) ||
+      [provenance.sourceSegments, provenance.boundaries, provenance.polygonEdges].some(
+        v => v !== undefined && typeof v !== 'boolean'
+      ) ||
+      (provenance.distances &&
+        (provenance.distances.metric !== 'spherical' ||
+          !Number.isFinite(provenance.distances.radius) ||
+          provenance.distances.radius <= 0)))
+  )
+    throw new Error('Unsupported provenance policy');
+  const edgeKinds: number[] = [],
+    edgeRings: number[] = [],
+    edgeSegments: number[] = [],
+    edgeParameters: number[] = [];
+  const lineage = Boolean(
+    provenance?.sourceSegments || provenance?.boundaries || provenance?.distances
+  );
+  const segments: number[] = [],
+    parameters: number[] = [],
+    originalVertices: number[] = [],
+    distances: number[] = [],
+    startReasons: string[] = [],
+    endReasons: string[] = [];
   const regionIds = map.regions.map(r => r.id),
     regionIndices = new Map(regionIds.map((id, i) => [id, i]));
   const points = vertices(),
@@ -140,7 +206,28 @@ export function prepareMapFeatures(
     if (line.length < 2) throw new Error('A line needs at least two positions');
     const isRing = ringIndex !== undefined;
     if (isRing && !closed(line)) line.push([...line[0]]);
-    for (const p of map.projectLine(line, options.sampling)) {
+    for (const p of map.projectLine(line, {
+      ...options.sampling,
+      pathProvenance: lineage,
+      pathDistances: Boolean(provenance?.distances),
+      pathBoundaries: Boolean(provenance?.boundaries)
+    })) {
+      if (lineage) {
+        if (!p.provenance) throw new Error('Map backend does not support path provenance');
+        if (provenance?.sourceSegments) {
+          segments.push(...p.provenance.segments);
+          parameters.push(...p.provenance.parameters);
+          originalVertices.push(...p.provenance.vertices);
+        }
+        if (provenance?.distances)
+          distances.push(
+            ...p.provenance.angularDistances.map(d => d * provenance.distances!.radius)
+          );
+        if (provenance?.boundaries) {
+          startReasons.push(p.provenance.startReason!);
+          endReasons.push(p.provenance.endReason!);
+        }
+      }
       append(paths, p.coordinates, p.sourceCoordinates);
       pathParts.push({
         ...part(featureIndex, geometryPath, p.regionId),
@@ -159,10 +246,37 @@ export function prepareMapFeatures(
     if (!input.length) return;
     const rings = input.map(r => r.map(position));
     const parts = options.sphericalCuts
-      ? map.projectGlobalPolygon(rings, {...options.sampling, ...options.sphericalCuts})
-      : map.projectPolygon(rings, options.sampling);
+      ? map.projectGlobalPolygon(rings, {
+          ...options.sampling,
+          ...options.sphericalCuts,
+          polygonEdgeProvenance: provenance?.polygonEdges
+        })
+      : map.projectPolygon(rings, {
+          ...options.sampling,
+          polygonEdgeProvenance: provenance?.polygonEdges
+        });
     for (const p of parts) {
       for (let i = 0; i < p.coordinates.length; i++) {
+        if (provenance?.polygonEdges) {
+          const edges = p.edgeProvenance?.[i];
+          if (!edges) throw new Error('Map backend does not support polygon edge provenance');
+          const kinds = [
+            'source-boundary',
+            'coverage-boundary',
+            'chart-cut',
+            'continuous-chart-join'
+          ];
+          for (const edge of edges) {
+            edgeKinds.push(kinds.indexOf(edge.kind) + 1);
+            edgeRings.push(edge.ring);
+            edgeSegments.push(edge.segment);
+            edgeParameters.push(edge.t0, edge.t1);
+          }
+          edgeKinds.push(0);
+          edgeRings.push(0xffffffff);
+          edgeSegments.push(0xffffffff);
+          edgeParameters.push(0, 0);
+        }
         append(polygons, p.coordinates[i], p.sourceCoordinates[i]);
         ringStarts.push(polygons.positions.length / 2);
       }
@@ -234,12 +348,46 @@ export function prepareMapFeatures(
     featureIds,
     regionIds,
     points: {...pack(points), parts: pointParts},
-    paths: {...pack(paths), parts: pathParts, pathStarts: new Uint32Array(pathStarts)},
+    paths: {
+      ...pack(paths),
+      parts: pathParts,
+      pathStarts: new Uint32Array(pathStarts),
+      ...(lineage
+        ? {
+            provenance: {
+              ...(provenance?.sourceSegments
+                ? {
+                    sourceSegmentIndices: new Uint32Array(segments),
+                    sourceSegmentParameters: new Float64Array(parameters),
+                    sourceVertexIndices: new Uint32Array(originalVertices)
+                  }
+                : {}),
+              ...(provenance?.distances
+                ? {
+                    sourceDistances: new Float64Array(distances),
+                    distanceRadius: provenance.distances.radius
+                  }
+                : {}),
+              ...(provenance?.boundaries ? {startReasons, endReasons} : {})
+            }
+          }
+        : {})
+    },
     polygons: {
       ...pack(polygons),
       parts: polygonParts,
       ringStarts: new Uint32Array(ringStarts),
-      polygonStarts: new Uint32Array(polygonStarts)
+      polygonStarts: new Uint32Array(polygonStarts),
+      ...(provenance?.polygonEdges
+        ? {
+            edgeProvenance: {
+              kinds: new Uint8Array(edgeKinds),
+              sourceRingIndices: new Uint32Array(edgeRings),
+              sourceSegmentIndices: new Uint32Array(edgeSegments),
+              sourceParameterRanges: new Float64Array(edgeParameters)
+            }
+          }
+        : {})
     }
   };
 }

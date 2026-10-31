@@ -124,6 +124,8 @@ This library was initially created as part of a bigger collaboration between the
 
 Selected classes and three-radius ellipsoid kernels derive from Cesium under Apache-2.0. Shared spheroid conversion kernels also retain proj4js MIT provenance. Source headers and distributed notices identify the applicable credits and terms.
 
+See [References and credits](../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
 ## Globe queries
 
 [EllipsoidOccluder and globe horizon bounds](./api-reference/globe-queries.md) provide

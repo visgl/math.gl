@@ -7,6 +7,71 @@ import type {GeographicPosition, MapSamplingOptions, MapRegion} from './map-layo
 import {geographic, type Position} from './math';
 import {rectangle} from './elastic/geometry';
 
+// Qualified default world formulas with finite coverage and no interior cuts.
+// Keep this explicit: a newly registered kernel is not automatically qualified.
+// Bertin and Sinu-Mollweide need rotated-chart coverage fixes; Gringorten has
+// interior cuts. Singular or folded formulas and parameter overrides remain
+// conservative until their endpoint coverage and correspondence are qualified.
+const directWorldProjections = new Set([
+  'gilbert',
+  'aitoff',
+  'august',
+  'baker',
+  'boggs',
+  'bromley',
+  'collignon',
+  'craster',
+  'eckert1',
+  'eckert2',
+  'eckert3',
+  'eckert4',
+  'eckert5',
+  'eckert6',
+  'fahey',
+  'foucaut',
+  'ginzburg4',
+  'ginzburg5',
+  'ginzburg6',
+  'ginzburg8',
+  'ginzburg9',
+  'homolosine',
+  'kavrayskiy7',
+  'larrivee',
+  'laskowski',
+  'miller',
+  'mollweide',
+  'mt-flat-polar-parabolic',
+  'mt-flat-polar-quartic',
+  'mt-flat-polar-sinusoidal',
+  'natural-earth2',
+  'nell-hammer',
+  'patterson',
+  'robinson',
+  'sinusoidal',
+  'times',
+  'van-der-grinten',
+  'van-der-grinten2',
+  'van-der-grinten3',
+  'van-der-grinten4',
+  'wagner4',
+  'wagner6',
+  'winkel3',
+  'bonne',
+  'bottomley',
+  'cylindrical-equal-area',
+  'cylindrical-stereographic',
+  'foucaut-sinusoidal',
+  'hammer',
+  'hill',
+  'hufnagel',
+  'hyperelliptical',
+  'lagrange',
+  'loximuthal',
+  'wagner7',
+  'quartic-authalic',
+  'wagner'
+]);
+
 export type MapTransitionOptions = {strategy?: 'auto' | 'direct' | 'via-globe'};
 export type MapTransitionPart = Readonly<{
   kind: 'line' | 'polygon';
@@ -316,9 +381,8 @@ function fullCoverage(map: MapEngine): boolean {
     covered =
       completeSections && !overlaps && polygonClipping.difference(world, ...domains).length === 0;
   } else if (d.type === 'world') {
-    // Deliberately bounded to global formulas with finite poles. Other kernels,
-    // custom charts and regional maps retain the conservative globe route.
-    covered = ['sinusoidal', 'mollweide', 'robinson'].includes(d.projection);
+    covered =
+      directWorldProjections.has(d.projection) && Object.keys(d.parameters ?? {}).length === 0;
   }
   coverageCache.set(map, covered);
   return covered;

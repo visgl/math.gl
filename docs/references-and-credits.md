@@ -8,6 +8,14 @@ and redistributed data are credited separately below.
 
 Academic references are maintained in the shared [bibliography](./bibliography.md). Citation metadata and source links are generated from `references.bib`; code and data licenses below remain independent of those citations.
 
+## Acknowledgments
+
+We thank **[Michael Sumner](https://github.com/mdsumner)** for advice on projection correctness and completeness, and
+recognize **[Kyle Barron](https://github.com/kylebarron)** for his work on **deck.gl-raster**.
+
+These acknowledgments recognize advice and related work; they do not imply code
+ownership or a dependency relationship.
+
 ## Package source inventory
 
 Each published package includes `LICENSE`, `THIRD-PARTY-NOTICES.md`, and the
@@ -16,10 +24,10 @@ was adapted. Source headers identify upstream copyright holders and licenses.
 
 | Package | Sources and contributions |
 | --- | --- |
-| [core](https://github.com/visgl/math.gl/blob/master/modules/core/THIRD-PARTY-NOTICES.md) | Brandon Jones and Colin MacKenzie IV's gl-matrix kernels; three.js math methods; proj4js spheroid arithmetic; Stephen Oney's jsep and Don McCurdy's expression-eval; Apache Arrow's BigInt fallback structure. |
+| [core](https://github.com/visgl/math.gl/blob/master/modules/core/THIRD-PARTY-NOTICES.md) | Brandon Jones and Colin MacKenzie IV's gl-matrix kernels; three.js math methods; proj4js spheroid arithmetic; Stephen Oney's jsep and [Don McCurdy](https://github.com/donmccurdy)'s expression-eval; Apache Arrow's BigInt fallback structure. |
 | [geometry](https://github.com/visgl/math.gl/blob/master/modules/geometry/THIRD-PARTY-NOTICES.md) | CesiumJS culling and bounding volumes; Mapbox earcut and lineclip; luma.gl CPU tessellation lineage. |
 | [geospatial](https://github.com/visgl/math.gl/blob/master/modules/geospatial/THIRD-PARTY-NOTICES.md) | CesiumJS geometry; proj4js and PROJ projection work; Charles Karney's GeographicLib; Mike Bostock and D3 contributors' segmented projections. |
-| [earth](https://github.com/visgl/math.gl/blob/master/modules/earth/THIRD-PARTY-NOTICES.md) | GeographicLib geoid interpolation; Vladimir Agafonkin's SunCalc; Hošek–Wilkie model data; Bretton Wade's star catalogue conversion; Temporal/JSBI; PhotoStructure's tz-lookup; optional NGA and timezone boundary datasets. |
+| [earth](https://github.com/visgl/math.gl/blob/master/modules/earth/THIRD-PARTY-NOTICES.md) | GeographicLib geoid interpolation; [Volodymyr Agafonkin](https://github.com/mourner)'s SunCalc; Hošek–Wilkie model data; Bretton Wade's star catalogue conversion; Temporal/JSBI; PhotoStructure's tz-lookup; optional NGA and timezone boundary datasets. |
 | [dggs](https://github.com/visgl/math.gl/blob/master/modules/dggs/THIRD-PARTY-NOTICES.md) | Jon Atkins and AJ ONeal's s2-geometry; CesiumJS token code; separately installed A5, H3 and Open Location Code libraries. |
 | [web-mercator](https://github.com/visgl/math.gl/blob/master/modules/web-mercator/THIRD-PARTY-NOTICES.md) | Perspective viewport utilities; van Wijk and Nuij's zoom/pan algorithm; Mapbox/react-map-gl compatibility references. |
 
@@ -35,28 +43,32 @@ own licenses; the table is not a transitive dependency bill of materials.
   [three.js math sources](https://github.com/mrdoob/three.js/tree/dev/src/math)
   are both implementation foundations and useful algorithm documentation.
   The shipped package notices identify the retained copyright holders.
+- [Stephen Oney's jsep](https://github.com/EricSmekens/jsep) and
+  [Don McCurdy's expression-eval](https://github.com/donmccurdy/expression-eval)
+  supplied expression parsing and evaluation source material; retained source
+  and license details are recorded in the core package notices.
 - [CesiumJS core mathematics](https://github.com/CesiumGS/cesium/tree/main/packages/engine/Source/Core)
   supplied the original culling and geospatial ports. The retained Apache-2.0
   notices apply to those adaptations even where their interfaces have changed.
 - **Stefan Gottschalk, Ming C. Lin and Dinesh Manocha**, *OBBTree: A Hierarchical
-  Structure for Rapid Interference Detection*: [author-hosted paper](cite:gottschalk1996),
+  Structure for Rapid Interference Detection*: [author-hosted paper](http://gamma.cs.unc.edu/users/gottschalk/main.pdf "cite:gottschalk1996"),
   cited by the oriented bounding-box construction.
 - [Mapbox earcut](https://github.com/mapbox/earcut) and
   [Mapbox lineclip](https://github.com/mapbox/lineclip) are the upstream
   triangulation and clipping implementations adapted for flat arrays.
   earcut also credits [Simon Tatham's linked-list merge sort](https://www.chiark.greenend.org.uk/~sgtatham/algorithms/listsort.html).
-- **Steven M. LaValle**, [Planning Algorithms: quaternion interpolation](cite:lavalle2006),
+- **Steven M. LaValle**, [Planning Algorithms: quaternion interpolation](https://planning.cs.uiuc.edu/node198.html "cite:lavalle2006"),
   is a free mathematical reference cited in the quaternion kernel.
 
 ## Mathematics and geodesy
 
-- **Charles F. F. Karney**, [Algorithms for geodesics](cite:karney2013),
+- **Charles F. F. Karney**, [Algorithms for geodesics](https://arxiv.org/abs/1109.4448 "cite:karney2013"),
   with [GeographicLib documentation and source](https://geographiclib.sourceforge.io/).
   math.gl incorporates attributed GeographicLib code and documents numerical
   qualification separately from the mathematical model.
-- **John P. Snyder**, [Map Projections—A Working Manual, USGS PP 1395](cite:snyder1987),
+- **John P. Snyder**, [Map Projections—A Working Manual, USGS PP 1395](https://pubs.usgs.gov/pp/1395/report.pdf "cite:snyder1987"),
   and **John P. Snyder and Philip M. Voxland**,
-  [An Album of Map Projections, USGS PP 1453](cite:snyder1989).
+  [An Album of Map Projections, USGS PP 1453](https://pubs.usgs.gov/pp/1453/report.pdf "cite:snyder1989").
   These freely available references explain projection properties and conventions.
 - [PROJ](https://proj.org/) and [proj4js](https://github.com/proj4js/proj4js)
   supply documented formulas, directly adapted kernels and independent test
@@ -71,7 +83,7 @@ own licenses; the table is not a transitive dependency bill of materials.
   [A5](https://a5geo.org/), and [Open Location Code](https://github.com/google/open-location-code)
   define the cell systems exposed by DGGS adapters.
 - **Jarke J. van Wijk and Wim A. A. Nuij**, *Smooth and efficient zooming and
-  panning* (2003): [author-hosted paper](cite:vanwijk2003).
+  panning* (2003): [author-hosted paper](https://www.win.tue.nl/~vanwijk/zoompan.pdf "cite:vanwijk2003").
   This is the algorithm cited by `flyToViewport`.
 
 ## Segmented maps and unfolding
@@ -81,7 +93,7 @@ for Peirce, Guyou, Gringorten, Berghaus, Goode, Boggs, Collignon and Waterman,
 including free sources and the specific D3 code used here. Projection invention,
 numerical implementation and interactive visualization are distinct contributions.
 
-**Nicolas “Nico” Belmonte** inspired the myriahedral examples through his
+**[Nico Belmonte](https://github.com/philogb)** inspired the myriahedral examples through his
 [interactive demonstration](https://philogb.github.io/page/myriahedral/) and
 [2018 article](https://medium.com/vis-gl/unfolding-the-earth-myriahedral-projections-in-webgl-6b2bcfd00a30).
 Our [myriahedral background](./modules/geospatial/myriahedral-maps.md) records the
@@ -95,17 +107,17 @@ These references describe the models used by Earth utilities. Source comments
 identify which equations or data each implementation uses; simplified display
 models are not full atmospheric or observatory-grade simulations.
 
-- **Vladimir Agafonkin**, [SunCalc](https://github.com/mourner/suncalc/tree/v1.9.0),
+- **[Volodymyr Agafonkin](https://github.com/mourner)**, [SunCalc](https://github.com/mourner/suncalc/tree/v1.9.0),
   and **Louis Strous**, [solar-position equations](https://www.aa.quae.nl/en/reken/zonpositie.html).
 - **Lukas Hošek and Alexander Wilkie**, [Skylight Modelling](https://cgg.mff.cuni.cz/projects/SkylightModelling/):
   model data distributed with the retained BSD notice.
-- **Kevin Krisciunas and Bradley E. Schaefer**, [A model of the brightness of moonlight](cite:krisciunas1991),
-  and **Andrew Crumey**, [Human contrast threshold and astronomical visibility](cite:crumey2014).
-- **Fritz Kasten and Andrew T. Young**, [Revised optical air mass tables and approximation formula](cite:kasten1989).
-- **Ferdinando Patat and collaborators**, [UBVRI twilight sky brightness at ESO-Paranal](cite:patat2006).
-- **Francisco J. Ballesteros**, [New insights into black bodies](cite:ballesteros2012),
+- **Kevin Krisciunas and Bradley E. Schaefer**, [A model of the brightness of moonlight](http://dx.doi.org/10.1086/132921 "cite:krisciunas1991"),
+  and **Andrew Crumey**, [Human contrast threshold and astronomical visibility](https://arxiv.org/abs/1405.4209 "cite:crumey2014").
+- **Fritz Kasten and Andrew T. Young**, [Revised optical air mass tables and approximation formula](http://dx.doi.org/10.1364/AO.28.004735 "cite:kasten1989").
+- **Ferdinando Patat and collaborators**, [UBVRI twilight sky brightness at ESO-Paranal](https://arxiv.org/abs/astro-ph/0604128 "cite:patat2006").
+- **Francisco J. Ballesteros**, [New insights into black bodies](https://arxiv.org/abs/1201.1809 "cite:ballesteros2012"),
   used for the documented stellar color-temperature approximation.
-- **Eric Bruneton and Fabrice Neyret**, [Precomputed Atmospheric Scattering](cite:bruneton2008),
+- **Eric Bruneton and Fabrice Neyret**, [Precomputed Atmospheric Scattering](https://ebruneton.github.io/precomputed_atmospheric_scattering/ "cite:bruneton2008"),
   a reference for the cloud/atmosphere model; see source comments for the approximations actually implemented.
 - **Don Cross**, [Astronomy Engine](https://github.com/cosinekitty/astronomy),
   the planetary ephemeris runtime dependency.

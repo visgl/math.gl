@@ -80,9 +80,10 @@ const polygonParts = land.evaluate(progress);
 ```
 
 Automatic direct morphing supports the three Elastic presets, other Elastic data
-with complete, non-overlapping defined grid coverage, and a small set of finite global formulas:
-sinusoidal, Mollweide, and Robinson. Other pairs
-use the globe route. Explicit `strategy: 'direct'` rejects unsupported coverage;
+with complete, non-overlapping defined grid coverage, and qualified full-world
+projections with default parameters, including Winkel Tripel, Natural Earth II,
+Hammer, and the Eckert family. See the [transition compatibility rules](./projection/api-reference/map-engine.md#createtransitiontotarget-options)
+for exclusions and parameter restrictions. Other pairs use the globe route. Explicit `strategy: 'direct'` rejects unsupported coverage;
 `strategy: 'via-globe'` always takes the globe route.
 
 The globe route moves source geometry onto the sphere, crossfades source and
@@ -139,7 +140,7 @@ The bundled tables are pinned to upstream revision
 Their original precision and license notice are retained. The math.gl runtime is
 an independent implementation of the documented format.
 
-Kunimune's earlier [Danseiji paper (free preprint)](cite:kunimune2019)
+Kunimune's earlier [Danseiji paper (free preprint)](https://kunimune.blog/wp-content/uploads/2019/11/danseiji-paper-preprint.pdf "cite:kunimune2019")
 provides background on optimizing mesh-defined projections. Danseiji's distinct
 unstructured mesh format is not supported by this importer.
 Coastlines in this example come from Natural Earth, in the public domain.
@@ -147,3 +148,5 @@ Coastlines in this example come from Natural Earth, in the public domain.
 See the [Elastic API reference](./projection/api-reference/elastic.md),
 [MapEngine reference](./projection/api-reference/map-engine.md), and
 [rendering guide](./projection/developer-guide/map-engine.md).
+
+See [References and credits](../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

@@ -169,7 +169,7 @@ All three definitions support the usual seam-aware geometry, fitting, picking,
 and transitions through the globe; none supplies hinge motion. At a cut, use a
 region ID to choose a side. Seam endpoints identify where a join becomes a cut.
 
-References: [Calabretta's HEALPix equations](cite:calabretta2004),
+References: [Calabretta's HEALPix equations](https://arxiv.org/abs/astro-ph/0412607 "cite:calabretta2004"),
 [PROJ's HEALPix documentation](https://proj.org/en/stable/operations/projections/healpix.html),
 and [D3's Gingery implementation](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/gingery.js).
 Gingery's arc-length construction is adapted under ISC; chart assembly and
@@ -419,10 +419,19 @@ for data imports, the text importer, and numerical limits.
 Returns a `MapTransition` referencing the two immutable engines. `options.strategy`
 is `'auto'` (default), `'direct'`, or `'via-globe'`. `strategy` and `reason` on the
 result report the selected route. Direct preparation is supported for the same
-engine, complete non-overlapping Elastic coverage, and the `world` formulas `sinusoidal`,
-`mollweide`, and `robinson`. Automatic selection
-falls back to the globe for other pairs, including regional coverage and custom
-charts. An explicitly requested unsupported direct route throws.
+engine, complete non-overlapping Elastic coverage, and qualified full-world
+projections with default parameters. These include Winkel Tripel, Natural Earth II,
+Hammer, Aitoff, Robinson, Mollweide, Sinusoidal, the Eckert and Ginzburg families,
+and other finite, uninterrupted world formulas.
+
+Automatic selection retains the globe route for cut and regional maps, custom
+charts, parameter overrides, and world formulas not yet qualified for direct
+preparation: `gringorten`, `bertin1953`, `eisenlohr`, `nicolosi`, `polyconic`,
+`sinu-mollweide`, and `rectangular-polyconic`. This conservative fallback includes
+both singular formulas and layouts whose seam handling needs further qualification.
+An explicitly requested unsupported direct route throws. `strategy: 'via-globe'`
+always forces the globe route. Changing the central meridian or radius does not
+by itself prevent direct preparation; geometry is split at both maps' chart boundaries.
 
 Unlike the conservative `planTransitionTo()` recommendation, this method opts
 into splitting geometry against both endpoint maps. It does not change the
@@ -549,3 +558,112 @@ This is a static geometry contract, not a deck.gl adapter or surface tessellator
 It does not yet provide original-edge interpolation weights, dash-distance
 continuity, artificial-edge masks for polygon extrusion, or interior mesh vertices
 for globe/hinge poses. See the [rendering guide](../developer-guide/map-engine.md#prepare-feature-buffers-for-a-renderer).
+
+### Optional source path provenance
+
+`prepareFeatures(features, {provenance: {sourceSegments: true, boundaries: true,
+distances: {metric: 'spherical', radius: 6371000}}})` emits optional
+`paths.provenance` alongside the usual packed geometry. Omitted options allocate no
+provenance output buffers. Geometry, ordering, and original feature/chart identity
+are unchanged.
+
+- `sourceSegmentIndices`, `sourceSegmentParameters`, and `sourceVertexIndices`
+  address the original line or original polygon ring identified by the path part.
+  Parameters are minor-great-circle arc fractions. Generated vertices use
+  `0xffffffff` as their source-vertex index. At a shared source vertex retained
+  once, lineage belongs to the incoming segment.
+- `sourceDistances` contains cumulative source distance in meters, measured before
+  chart fragmentation on the explicitly declared sphere (`distanceRadius`). It
+  does not restart at cuts. This policy does not claim ellipsoidal geodesic distance.
+- `startReasons` and `endReasons` identify source endpoints, coverage boundaries,
+  chart cuts, and continuous chart joins for each prepared path part. Source vertex
+  identity is independent of why clipping ends a fragment at that vertex.
+
+Flags are independent. Unrequested fields are absent. Unsupported policies/backends
+reject explicitly; provenance is recorded during segment clipping and sampling.
+The payload is structured-cloneable. It does not prescribe interpolation of
+categorical attributes, meter widths, surface normals or extrusion.
+
+The [Projection domains example](https://visgl.github.io/math.gl/next/examples/projection-domains)
+includes a path-provenance mode with distance-continuous dashes and inspectable
+source lineage. Color interpolates declared source timestamps using segment/t;
+dash phase uses cumulative source meters. This contract supports the requirements discussed in
+[deck.gl#10922](https://github.com/visgl/deck.gl/issues/10922).
+
+### Optional polygon-edge provenance
+
+`prepareFeatures(features, {provenance: {polygonEdges: true}})` adds
+`polygons.edgeProvenance`. The arrays align with polygon vertices: record `i`
+describes the directed edge from vertex `i` to `i+1` within its ring. Repeated
+closing vertices have kind `0` and no outgoing edge. Ring and polygon offsets
+retain their ordinary meaning.
+
+`kinds` uses `0` for no edge, `1` for source boundary, `2` for coverage boundary,
+`3` for chart cut, and `4` for continuous chart join. `sourceRingIndices` and
+`sourceSegmentIndices` address original rings and their closing segments.
+`sourceParameterRanges` stores `[t0,t1]` minor-great-circle fractions for each edge;
+ranges reverse when ring winding reverses. Generated edges use `0xffffffff` for
+source indices and zero parameter placeholders. Consumers must check `kinds`.
+
+Attribution happens against source and region clipping constraints before map
+projection and resampling. A source boundary coincident with a cut retains its
+source identity. Sampling propagates that edge identity; output winding reversal
+reverses the edge records and swaps parameter endpoints. Geometry stays identical
+with this option enabled. No polygon-edge arrays are emitted by default.
+
+This option supports the native open-hemisphere clipper, Mercator latitude clipping,
+rigid/nonlinear cap clipping, Elastic chart constraints and global spherical atlas
+composition. Wrapper clipping attributes its indexed input constraints before final
+projection/grid resampling and composes directed source fractions. Source intersections
+are refined on minor arcs; generated cap/domain edges keep their coverage/cut/join class.
+Ambiguous or unresolvable ancestry and exhausted work budgets reject instead of guessing.
+The result identifies edges; it does not establish surface normals, extrusion directions,
+or animated-mesh correspondence.
+
+The Projection domains example includes a polygon-with-hole mode showing original
+outlines and optional generated closures. It illustrates the boundary distinction
+required by [deck.gl#10922](https://github.com/visgl/deck.gl/issues/10922).
+
+
+Mercator path preparation now carries source lineage through its latitude-band
+clipping stage. Latitude intersections are evaluated on the sampled source
+minor-great-circle arc, rather than inverse-projecting a straight projected chord.
+Source distances and endpoint reasons survive the additional cut. In the path
+provenance example, select **Mercator latitude cuts** or **Satellite coverage cuts** to inspect the coverage ends.
+Rigid spherical cap paths (including satellite coverage) also retain lineage by
+attributing streamed intersections to the active sampled edge before resampling.
+
+
+### Nonlinear-cap and Elastic path lineage
+
+Nonlinear cap intersections are refined on their owning original source arc before
+resampling, preserving source segment parameters even when the local transform bends
+that arc. Elastic paths carry segment ancestry through source-domain clipping and
+sample the original minor great-circle arc through the grid. This corrects the old
+linear longitude/latitude interpolation between source samples; provenance on/off
+produce identical geometry under the corrected path algorithm. Per-part boundaries
+use the Elastic chart's own coverage/cut/join constraints. Distances retain the
+explicit spherical policy and do not restart at computational chart boundaries.
+
+Source-intersection and sampling work remain bounded and unresolved intersections
+reject. The [Projection domains example](https://visgl.github.io/math.gl/next/examples/projection-domains)
+adds **Nonlinear Armadillo cuts** and **Elastic source arcs** under its path provenance
+mode. These buffers do not define deck.gl cap/join rendering or extrusion behavior.
+
+### Wrapper and atlas polygon constraints
+
+The polygon provenance example now selects **Mercator latitude cuts**, **Satellite cap**,
+**Nonlinear Armadillo cap** or **Elastic chart constraints**, with an optional global
+atlas pass. Source rings and closing-segment identities survive clipping, holes and
+winding reversal. Atlas source edges compose their original directed fractions;
+artificial octant connectors become continuous computational joins unless they coincide
+with a real map cut or coverage boundary. Directional zero-length pole connectors never
+become original boundaries or extrusion walls.
+
+Constraint tracing restores source breakpoints removed by boolean collinear merging.
+Mercator/cap intersections and Elastic source-boundary samples follow the original
+minor arcs. Generated Elastic grid-domain boundaries remain linear in their declared
+source frame. These corrections also apply without provenance; enabling the option does
+not change geometry. Constraint tracing is bounded to 20 million comparisons per call;
+unresolved or ambiguous topology rejects. It does not validate arbitrary invalid input
+polygons, certify continuous sampling error, or supply triangulation-interior provenance.

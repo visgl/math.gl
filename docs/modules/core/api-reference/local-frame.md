@@ -102,3 +102,5 @@ at exact poles. These conventions must be considered when comparing frames.
 These helpers are original math.gl code. Existing CesiumJS-derived geometry and
 proj4js-derived geocentric conversions retain their source attribution in their
 respective files; no upstream implementation was copied into this entry.
+
+See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
