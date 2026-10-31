@@ -189,10 +189,10 @@ The result is `{intervals, evaluations, sampleSeconds, transitionSeconds}`. Each
 
 All new adapters and equations are independently written TypeScript under MIT; SPDX comments identify source papers and API provenance. No C code, external source code, paper figures or paper prose are incorporated.
 
-* [Patat, Ugolnikov & Postylyakov (2006)](https://arxiv.org/abs/astro-ph/0604128): V-band twilight fit, Table 1.
-* [Crumey (2014)](https://arxiv.org/abs/1405.4209): photometric conversions and Blackwell point/extended-target contrast thresholds.
-* [Krisciunas & Schaefer (1991)](https://doi.org/10.1086/132921): lunar phase photometry and scattered moonlight.
-* [Kasten & Young (1989)](https://doi.org/10.1364/AO.28.004735): direct optical air mass.
+* [Patat, Ugolnikov & Postylyakov (2006)](https://visgl.github.io/math.gl/next/docs/bibliography.md#patat2006 "UBVRI twilight sky brightness at ESO-Paranal"): V-band twilight fit, Table 1.
+* [Crumey (2014)](https://visgl.github.io/math.gl/next/docs/bibliography.md#crumey2014 "Human contrast threshold and astronomical visibility"): photometric conversions and Blackwell point/extended-target contrast thresholds.
+* [Krisciunas & Schaefer (1991)](https://visgl.github.io/math.gl/next/docs/bibliography.md#krisciunas1991 "A model of the brightness of moonlight"): lunar phase photometry and scattered moonlight.
+* [Kasten & Young (1989)](https://visgl.github.io/math.gl/next/docs/bibliography.md#kasten1989 "Revised optical air mass tables and approximation formula"): direct optical air mass.
 * [Astronomy Engine 2.1.19, MIT](https://github.com/cosinekitty/astronomy/tree/v2.1.19/source/js): optional ephemerides, libration and IAU axes.
 * [NASA Galilean facts](https://nssdc.gsfc.nasa.gov/planetary/factsheet/joviansatfact.html) and [ring dimensions](https://nssdc.gsfc.nasa.gov/planetary/factsheet/satringfact.html): numeric physical facts.
 * [deck.gl GlobeViewport, MIT](https://github.com/visgl/deck.gl/blob/master/modules/core/src/viewports/globe-viewport.ts): axis/scale compatibility reference; coordinate equations independently implemented.
@@ -261,3 +261,12 @@ This is original MIT-licensed code, independently implemented from mathematical 
 * [USNO, Computing Approximate Sidereal Time](https://aa.usno.navy.mil/faq/GAST).
 * [University of Tokyo S2E, Celestial Rotation and IAU 1976 precession equations](https://www.space.t.u-tokyo.ac.jp/s2e-documents/Specifications/Environment/Spec_CelestialRotation.html).
 * [ESA Navipedia, ECEF and ENU coordinate transformations](https://gssc.esa.int/navipedia/index.php/Transformations_between_ECEF_and_ENU_coordinates).
+
+<!-- -->
+
+## References
+
+1. F. Patat, O. S. Ugolnikov, O. V. Postylyakov (2006). UBVRI twilight sky brightness at ESO-Paranal. Astronomy & Astrophysics, 455, (1), 385-393. [doi:10.1051/0004-6361:20064992](https://doi.org/10.1051/0004-6361:20064992) [Source](https://arxiv.org/abs/astro-ph/0604128)
+2. Andrew Crumey (2014). Human contrast threshold and astronomical visibility. Monthly Notices of the Royal Astronomical Society, 442, (3), 2600-2619. [doi:10.1093/mnras/stu992](https://doi.org/10.1093/mnras/stu992) [Source](https://arxiv.org/abs/1405.4209)
+3. Kevin Krisciunas, Bradley E. Schaefer (1991). A model of the brightness of moonlight. Publications of the Astronomical Society of the Pacific, 103, 1033. [doi:10.1086/132921](https://doi.org/10.1086/132921)
+4. Fritz Kasten, Andrew T. Young (1989). Revised optical air mass tables and approximation formula. Applied Optics, 28, (22), 4735. [doi:10.1364/ao.28.004735](https://doi.org/10.1364/ao.28.004735)

@@ -2,6 +2,8 @@
 
 math.gl combines original vis.gl work, adapted numerical algorithms, vendored libraries, and optional datasets. We thank the authors who made these foundations available. Removing an npm dependency does not remove the provenance of code retained in the repository. Mathematical ideas, compatible APIs, copied source, and redistributed data are credited separately below.
 
+Academic references are maintained in the shared [bibliography](https://visgl.github.io/math.gl/next/docs/bibliography.md). Citation metadata and source links are generated from `references.bib`; code and data licenses below remain independent of those citations.
+
 ## Acknowledgments[​](#acknowledgments "Direct link to Acknowledgments")
 
 We thank **[Michael Sumner](https://github.com/mdsumner)** for advice on projection correctness and completeness, and recognize **[Kyle Barron](https://github.com/kylebarron)** for his work on **deck.gl-raster**.
@@ -28,18 +30,18 @@ The [projection provenance inventory](https://github.com/visgl/math.gl/blob/mast
 * [gl-matrix](https://github.com/toji/gl-matrix) and [three.js math sources](https://github.com/mrdoob/three.js/tree/dev/src/math) are both implementation foundations and useful algorithm documentation. The shipped package notices identify the retained copyright holders.
 * [Stephen Oney's jsep](https://github.com/EricSmekens/jsep) and [Don McCurdy's expression-eval](https://github.com/donmccurdy/expression-eval) supplied expression parsing and evaluation source material; retained source and license details are recorded in the core package notices.
 * [CesiumJS core mathematics](https://github.com/CesiumGS/cesium/tree/main/packages/engine/Source/Core) supplied the original culling and geospatial ports. The retained Apache-2.0 notices apply to those adaptations even where their interfaces have changed.
-* **Stefan Gottschalk, Ming C. Lin and Dinesh Manocha**, *OBBTree: A Hierarchical Structure for Rapid Interference Detection*: [author-hosted paper](http://gamma.cs.unc.edu/users/gottschalk/main.pdf), cited by the oriented bounding-box construction.
+* **Stefan Gottschalk, Ming C. Lin and Dinesh Manocha**, *OBBTree: A Hierarchical Structure for Rapid Interference Detection*: [author-hosted paper](https://visgl.github.io/math.gl/next/docs/bibliography.md#gottschalk1996 "OBBTree: a hierarchical structure for rapid interference detection"), cited by the oriented bounding-box construction.
 * [Mapbox earcut](https://github.com/mapbox/earcut) and [Mapbox lineclip](https://github.com/mapbox/lineclip) are the upstream triangulation and clipping implementations adapted for flat arrays. earcut also credits [Simon Tatham's linked-list merge sort](https://www.chiark.greenend.org.uk/~sgtatham/algorithms/listsort.html).
-* **Steven M. LaValle**, [Planning Algorithms: quaternion interpolation](https://planning.cs.uiuc.edu/node198.html), is a free mathematical reference cited in the quaternion kernel.
+* **Steven M. LaValle**, [Planning Algorithms: quaternion interpolation](https://visgl.github.io/math.gl/next/docs/bibliography.md#lavalle2006 "Planning Algorithms"), is a free mathematical reference cited in the quaternion kernel.
 
 ## Mathematics and geodesy[​](#mathematics-and-geodesy "Direct link to Mathematics and geodesy")
 
-* **Charles F. F. Karney**, [Algorithms for geodesics](https://arxiv.org/abs/1109.4448), with [GeographicLib documentation and source](https://geographiclib.sourceforge.io/). math.gl incorporates attributed GeographicLib code and documents numerical qualification separately from the mathematical model.
-* **John P. Snyder**, [Map Projections—A Working Manual, USGS PP 1395](https://pubs.usgs.gov/pp/1395/report.pdf), and **John P. Snyder and Philip M. Voxland**, [An Album of Map Projections, USGS PP 1453](https://pubs.usgs.gov/pp/1453/report.pdf). These freely available references explain projection properties and conventions.
+* **Charles F. F. Karney**, [Algorithms for geodesics](https://visgl.github.io/math.gl/next/docs/bibliography.md#karney2013 "Algorithms for geodesics"), with [GeographicLib documentation and source](https://geographiclib.sourceforge.io/). math.gl incorporates attributed GeographicLib code and documents numerical qualification separately from the mathematical model.
+* **John P. Snyder**, [Map Projections—A Working Manual, USGS PP 1395](https://visgl.github.io/math.gl/next/docs/bibliography.md#snyder1987 "Map projections: A working manual"), and **John P. Snyder and Philip M. Voxland**, [An Album of Map Projections, USGS PP 1453](https://visgl.github.io/math.gl/next/docs/bibliography.md#snyder1989 "An album of map projections"). These freely available references explain projection properties and conventions.
 * [PROJ](https://proj.org/) and [proj4js](https://github.com/proj4js/proj4js) supply documented formulas, directly adapted kernels and independent test references. **Bernie Jenny**, **Bojan Šavrič**, **Tom Patterson**, and the implementation contributors named in the Equal Earth source receive credit for that projection and its implementation.
 * [EPSG Geodetic Parameter Dataset](https://epsg.org/) and [OGC standards](https://www.ogc.org/standards/) inform CRS definitions and serialization. Dataset terms and fixture provenance apply independently of math.gl's source-code license; support for a format is not certification.
 * [S2 geometry](https://s2geometry.io/), [H3](https://h3geo.org/), [A5](https://a5geo.org/), and [Open Location Code](https://github.com/google/open-location-code) define the cell systems exposed by DGGS adapters.
-* **Jarke J. van Wijk and Wim A. A. Nuij**, *Smooth and efficient zooming and panning* (2003): [author-hosted paper](https://www.win.tue.nl/~vanwijk/zoompan.pdf). This is the algorithm cited by `flyToViewport`.
+* **Jarke J. van Wijk and Wim A. A. Nuij**, *Smooth and efficient zooming and panning* (2003): [author-hosted paper](https://visgl.github.io/math.gl/next/docs/bibliography.md#vanwijk2003 "Smooth and efficient zooming and panning"). This is the algorithm cited by `flyToViewport`.
 
 ## Segmented maps and unfolding[​](#segmented-maps-and-unfolding "Direct link to Segmented maps and unfolding")
 
@@ -53,11 +55,11 @@ These references describe the models used by Earth utilities. Source comments id
 
 * **[Volodymyr Agafonkin](https://github.com/mourner)**, [SunCalc](https://github.com/mourner/suncalc/tree/v1.9.0), and **Louis Strous**, [solar-position equations](https://www.aa.quae.nl/en/reken/zonpositie.html).
 * **Lukas Hošek and Alexander Wilkie**, [Skylight Modelling](https://cgg.mff.cuni.cz/projects/SkylightModelling/): model data distributed with the retained BSD notice.
-* **Kevin Krisciunas and Bradley E. Schaefer**, [A model of the brightness of moonlight](https://doi.org/10.1086/132921), and **Andrew Crumey**, [Human contrast threshold and astronomical visibility](https://arxiv.org/abs/1405.4209).
-* **Fritz Kasten and Andrew T. Young**, [Revised optical air mass tables and approximation formula](https://doi.org/10.1364/AO.28.004735).
-* **Ferdinando Patat and collaborators**, [UBVRI twilight sky brightness at ESO-Paranal](https://arxiv.org/abs/astro-ph/0604128).
-* **Francisco J. Ballesteros**, [New insights into black bodies](https://arxiv.org/abs/1201.1809), used for the documented stellar color-temperature approximation.
-* **Eric Bruneton and Fabrice Neyret**, [Precomputed Atmospheric Scattering](https://ebruneton.github.io/precomputed_atmospheric_scattering/), a reference for the cloud/atmosphere model; see source comments for the approximations actually implemented.
+* **Kevin Krisciunas and Bradley E. Schaefer**, [A model of the brightness of moonlight](https://visgl.github.io/math.gl/next/docs/bibliography.md#krisciunas1991 "A model of the brightness of moonlight"), and **Andrew Crumey**, [Human contrast threshold and astronomical visibility](https://visgl.github.io/math.gl/next/docs/bibliography.md#crumey2014 "Human contrast threshold and astronomical visibility").
+* **Fritz Kasten and Andrew T. Young**, [Revised optical air mass tables and approximation formula](https://visgl.github.io/math.gl/next/docs/bibliography.md#kasten1989 "Revised optical air mass tables and approximation formula").
+* **Ferdinando Patat and collaborators**, [UBVRI twilight sky brightness at ESO-Paranal](https://visgl.github.io/math.gl/next/docs/bibliography.md#patat2006 "UBVRI twilight sky brightness at ESO-Paranal").
+* **Francisco J. Ballesteros**, [New insights into black bodies](https://visgl.github.io/math.gl/next/docs/bibliography.md#ballesteros2012 "New insights into black bodies"), used for the documented stellar color-temperature approximation.
+* **Eric Bruneton and Fabrice Neyret**, [Precomputed Atmospheric Scattering](https://visgl.github.io/math.gl/next/docs/bibliography.md#bruneton2008 "Precomputed Atmospheric Scattering"), a reference for the cloud/atmosphere model; see source comments for the approximations actually implemented.
 * **Don Cross**, [Astronomy Engine](https://github.com/cosinekitty/astronomy), the planetary ephemeris runtime dependency.
 * [JPL planetary physical parameters](https://ssd.jpl.nasa.gov/planets/phys_par.html) and [USNO sidereal time](https://aa.usno.navy.mil/faq/GAST) supply physical and frame references.
 
@@ -77,3 +79,24 @@ Data licenses can differ from the code license. Preserve the dataset-specific cr
 ## Maintaining provenance[​](#maintaining-provenance "Direct link to Maintaining provenance")
 
 For new adapted code, retain the upstream copyright and full license, record the source version or commit and material modifications, and include the notice in the published package. For datasets, record the upstream product, license, transformations and checksums. Scientific citations should identify the algorithm without claiming that a paper supplied source code. The repository's source-header check complements the package notice indexes; neither is a substitute for investigating the provenance of a new contribution.
+
+<!-- -->
+
+## References
+
+1. S. Gottschalk, M. C. Lin, D. Manocha (1996). OBBTree: a hierarchical structure for rapid interference detection. Proceedings of the 23rd annual conference on Computer graphics and interactive techniques, 171-180. [doi:10.1145/237170.237244](https://doi.org/10.1145/237170.237244) [Source](http://gamma.cs.unc.edu/users/gottschalk/main.pdf)
+2. Steven M. LaValle (2006). Planning Algorithms. Cambridge University Press.
+   <!-- -->
+   [Source](https://planning.cs.uiuc.edu/node198.html)
+3. Charles F. F. Karney (2013). Algorithms for geodesics. Journal of Geodesy, 87, (1), 43-55. [doi:10.1007/s00190-012-0578-z](https://doi.org/10.1007/s00190-012-0578-z) [Source](https://arxiv.org/abs/1109.4448)
+4. John P. Snyder (1987). Map projections: A working manual. Professional Paper. [doi:10.3133/pp1395](https://doi.org/10.3133/pp1395) [Source](https://pubs.usgs.gov/pp/1395/report.pdf)
+5. John P. Snyder, Philip M. Voxland (1989). An album of map projections. Professional Paper. [doi:10.3133/pp1453](https://doi.org/10.3133/pp1453) [Source](https://pubs.usgs.gov/pp/1453/report.pdf)
+6. Jarke J. van Wijk, Wim A. A. Nuij (2003). Smooth and efficient zooming and panning. IEEE Symposium on Information Visualization.
+   <!-- -->
+   [Source](https://www.win.tue.nl/~vanwijk/zoompan.pdf)
+7. Kevin Krisciunas, Bradley E. Schaefer (1991). A model of the brightness of moonlight. Publications of the Astronomical Society of the Pacific, 103, 1033. [doi:10.1086/132921](https://doi.org/10.1086/132921)
+8. Andrew Crumey (2014). Human contrast threshold and astronomical visibility. Monthly Notices of the Royal Astronomical Society, 442, (3), 2600-2619. [doi:10.1093/mnras/stu992](https://doi.org/10.1093/mnras/stu992) [Source](https://arxiv.org/abs/1405.4209)
+9. Fritz Kasten, Andrew T. Young (1989). Revised optical air mass tables and approximation formula. Applied Optics, 28, (22), 4735. [doi:10.1364/ao.28.004735](https://doi.org/10.1364/ao.28.004735)
+10. F. Patat, O. S. Ugolnikov, O. V. Postylyakov (2006). UBVRI twilight sky brightness at ESO-Paranal. Astronomy & Astrophysics, 455, (1), 385-393. [doi:10.1051/0004-6361:20064992](https://doi.org/10.1051/0004-6361:20064992) [Source](https://arxiv.org/abs/astro-ph/0604128)
+11. F. J. Ballesteros (2012). New insights into black bodies. EPL (Europhysics Letters), 97, (3), 34008. [doi:10.1209/0295-5075/97/34008](https://doi.org/10.1209/0295-5075/97/34008) [Source](https://arxiv.org/abs/1201.1809)
+12. Eric Bruneton, Fabrice Neyret (2008). Precomputed Atmospheric Scattering. Computer Graphics Forum, 27, (4), 1079-1086. [doi:10.1111/j.1467-8659.2008.01245.x](https://doi.org/10.1111/j.1467-8659.2008.01245.x) [Source](https://ebruneton.github.io/precomputed_atmospheric_scattering/)

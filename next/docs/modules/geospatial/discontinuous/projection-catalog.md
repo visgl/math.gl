@@ -52,7 +52,7 @@ Myriahedral maps use many small faces and a cut/hinge graph. Subdivision control
 
 A layout can belong to several rows. A polyhedral net is segmented and usually interrupted; a star can remain connected despite its cuts. Insets at different scales do not preserve a single global area scale, even when their regional formulas are equal-area. For seam semantics and supported layouts, see [discontinuous maps](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md).
 
-The formulas above use radians and sphere radius R; the public API accepts longitude and latitude in degrees. For cartographic classification and further reading, see NASA GISS's [projection reference](https://www.giss.nasa.gov/tools/gprojector/help/projections/) and Snyder and Voxland's [An Album of Map Projections](https://pubs.usgs.gov/pp/1453/report.pdf).
+The formulas above use radians and sphere radius R; the public API accepts longitude and latitude in degrees. For cartographic classification and further reading, see NASA GISS's [projection reference](https://www.giss.nasa.gov/tools/gprojector/help/projections/) and Snyder and Voxland's [An Album of Map Projections](https://visgl.github.io/math.gl/next/docs/bibliography.md#snyder1989 "An album of map projections").
 
 ## Catalog API[​](#catalog-api "Direct link to Catalog API")
 
@@ -124,10 +124,19 @@ Many of these implementations build on **Mike Bostock and the D3 contributors'**
 | AirOcean topology and Gray–Fuller reference       | [d3-geo-polygon](https://github.com/d3/d3-geo-polygon) contributors supply ISC-licensed AirOcean topology and orientation. Robert W. Gray's face equations, also published by Philippe Rivière in the [Gray–Fuller source](https://github.com/d3/d3-geo-polygon/blob/main/src/grayfuller.js), are implemented independently; d3-geo-polygon 2.0.1 supplies reference fixtures.                                                                                                                                                   |
 | Spherical cap clipping                            | Adapted from [d3-geo 3.1.1](https://github.com/d3/d3-geo/tree/v3.1.1/src/clip), by Mike Bostock and contributors, under ISC. math.gl adds bounded curve sampling, source correspondence, chart trimming, regional outlines, and inverse safeguards; see the [clipping inventory and modifications](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/discontinuous/spherical-clip/README.md).                                                                                                                  |
 | Hyperelliptical numerical integration             | Ricky Reusser's [adaptive Simpson integration](https://github.com/scijs/integrate-adaptive-simpson), incorporated through d3-geo-projection, retains its MIT attribution and license.                                                                                                                                                                                                                                                                                                                                            |
-| Independent HEALPix implementation                | M. R. Calabretta's [HEALPix equations](https://arxiv.org/abs/astro-ph/0412607) are the mathematical source. [D3's HEALPix implementation](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/healpix.js) supplies independent numerical reference values.                                                                                                                                                                                                                                                                   |
+| Independent HEALPix implementation                | M. R. Calabretta's [HEALPix equations](https://visgl.github.io/math.gl/next/docs/bibliography.md#calabretta2004 "Mapping on the HEALPix grid") are the mathematical source. [D3's HEALPix implementation](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/healpix.js) supplies independent numerical reference values.                                                                                                                                                                                      |
 
 The packaged [third-party inventory](https://github.com/visgl/math.gl/blob/master/modules/geospatial/THIRD-PARTY-NOTICES.md) links the retained licenses, source headers, and modification records. There is no D3 runtime dependency. Reference fixtures evaluate separate, version-pinned upstream installations; tests cover forward coordinates, geographic aspects, coverage, inverse residuals, cuts, poles, clipping, and renderer meshes. This is numerical validation, not a claim of interchangeable streaming or display APIs.
 
 For **Petroff, Snyder, and myriahedral maps**, see the additional [mathematical sources and implementation credits](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md#references-and-implementation-credits) and [myriahedral background](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/myriahedral-projections.md). Nico Belmonte is credited for his influential demonstration; his application code is not incorporated.
 
 See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
+<!-- -->
+
+## References
+
+1. John P. Snyder, Philip M. Voxland (1989). An album of map projections. Professional Paper. [doi:10.3133/pp1453](https://doi.org/10.3133/pp1453) [Source](https://pubs.usgs.gov/pp/1453/report.pdf)
+2. M. R. Calabretta (2004). Mapping on the HEALPix grid.
+   <!-- -->
+   [Source](https://arxiv.org/abs/astro-ph/0412607)

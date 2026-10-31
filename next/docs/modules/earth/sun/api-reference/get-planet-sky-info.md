@@ -92,9 +92,9 @@ The same options are accepted by `getPlanetVisibility`, `options.visibility` in 
 | `minimumAltitude`          | 5 degrees in radians  | Geometric planet altitude threshold; range 0–PI/2.                                                             |
 | `minimumSunSeparation`     | 10 degrees in radians | Planet/Sun angular-separation threshold; range 0–PI.                                                           |
 
-The twilight curve uses **original illustrative anchors**, not a published fitted visibility algorithm: Sun altitude 0/-6/-12 degrees corresponds to limiting magnitude -4/+1/+4.5. The curve interpolates to the configured dark-sky limit at -18 degrees and is capped by that limit throughout. Atmospheric extinction uses the independently implemented [Kasten–Young air mass equation](https://doi.org/10.1364/AO.28.004735).
+The twilight curve uses **original illustrative anchors**, not a published fitted visibility algorithm: Sun altitude 0/-6/-12 degrees corresponds to limiting magnitude -4/+1/+4.5. The curve interpolates to the configured dark-sky limit at -18 degrees and is capped by that limit throughout. Atmospheric extinction uses the independently implemented [Kasten–Young air mass equation](https://visgl.github.io/math.gl/next/docs/bibliography.md#kasten1989 "Revised optical air mass tables and approximation formula").
 
-This is an **uncalibrated rendering heuristic**, not a prediction of an individual's first sighting. The [Tousey–Koomen visibility study](https://doi.org/10.1364/JOSA.43.000177) provides context for the dependence on twilight, atmospheric transmission and eye sensitivity; its model and charts are not implemented or copied here. Sky brightness varies with direction, and haze, clouds, lunar glare, dark adaptation and eyesight are not modeled. Sun separation is a simple cutoff, rather than a glare model. Daylight detection is conservatively disabled even though Venus can sometimes be seen during the day. Select the optional [contrast model](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sky.md) for directional sky brightness, clouds, haze and daylight detection. Galilean moon visibility remains `null` because Jupiter's glare and viewing optics are not modeled. Neptune normally has no naked-eye visibility interval with the default dark-sky limit; telescope detection is not modeled.
+This is an **uncalibrated rendering heuristic**, not a prediction of an individual's first sighting. The [Tousey–Koomen visibility study](https://visgl.github.io/math.gl/next/docs/bibliography.md#tousey1953 "The Visibility of Stars and Planets During Twilight") provides context for the dependence on twilight, atmospheric transmission and eye sensitivity; its model and charts are not implemented or copied here. Sky brightness varies with direction, and haze, clouds, lunar glare, dark adaptation and eyesight are not modeled. Sun separation is a simple cutoff, rather than a glare model. Daylight detection is conservatively disabled even though Venus can sometimes be seen during the day. Select the optional [contrast model](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sky.md) for directional sky brightness, clouds, haze and daylight detection. Galilean moon visibility remains `null` because Jupiter's glare and viewing optics are not modeled. Neptune normally has no naked-eye visibility interval with the default dark-sky limit; telescope detection is not modeled.
 
 ### Rise/set and visibility windows[​](#riseset-and-visibility-windows "Direct link to Rise/set and visibility windows")
 
@@ -151,3 +151,10 @@ The function performs ephemeris calculations; reuse results across rendering fra
 * [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/): independently queried numeric reference positions. Fixture comments record the observer, coordinate frame and units.
 
 The adapter is original MIT-licensed TypeScript. SPDX comments identify its license, math.gl copyright and the referenced package/model. Selective bundles can exclude ephemeris code when it is not used.
+
+<!-- -->
+
+## References
+
+1. Fritz Kasten, Andrew T. Young (1989). Revised optical air mass tables and approximation formula. Applied Optics, 28, (22), 4735. [doi:10.1364/ao.28.004735](https://doi.org/10.1364/ao.28.004735)
+2. R. Tousey, M. J. Koomen (1953). The Visibility of Stars and Planets During Twilight. Journal of the Optical Society of America, 43, (3), 177. [doi:10.1364/josa.43.000177](https://doi.org/10.1364/josa.43.000177)

@@ -4,7 +4,7 @@ The G6 global search gate is delivered for the existing numerical profile: `0.99
 
 ## Coverage algorithm[​](#coverage-algorithm "Direct link to Coverage algorithm")
 
-The search uses the capture-distance construction in [Karney, Geodesic intersections (2024), sections 3, 6 and 7](https://arxiv.org/abs/2308.00495) and pinned GeographicLib C++ **2.7** `Intersect.cpp`. The oblate capture bound is `πb`; the prolate bound comes from minimizing polar semi-conjugate distance. The native safety margin is `δ = πR ε^(1/5)`.
+The search uses the capture-distance construction in [Karney, Geodesic intersections (2024), sections 3, 6 and 7](https://visgl.github.io/math.gl/next/docs/bibliography.md#karney2024 "Geodesic Intersections") and pinned GeographicLib C++ **2.7** `Intersect.cpp`. The oblate capture bound is `πb`; the prolate bound comes from minimizing polar semi-conjugate distance. The native safety margin is `δ = πR ε^(1/5)`.
 
 The requested L1 ball is expanded by `δ`, then covered with rotated square tiles of radius at most `capture - δ`. Every tile is refined; this implementation omits native seed-pruning optimizations. A failed tile is covered again by four half-radius tiles, for at most three subdivision levels. Completeness is withheld if any leaf remains unresolved. There are at most 2,125 attempts in the declared profile and at most 100 refinement iterations per attempt.
 
@@ -61,3 +61,9 @@ For offline native regeneration, link the original `geographiclib-g6-oracle.cpp`
 Shifted coincident paths now include 2.1, 3.2 and 5.7 axis-unit shifts in both directions. Near-dependent spherical plane normals use the geodesic refinement path rather than amplifying cross-product rounding. A 53-bit native Closest quirk classifies one rounded spherical continuum as isolated although native All reports the continuum. The fixture preserves that discrepancy explicitly; that case is gated against All and an independent analytic shift/period minimum. Physical residual and conditioned parameter budgets remain unchanged.
 
 Global default bounds and ranking arithmetic stay normalized by the semi-major axis, so accepted large axes do not overflow the radius or L1 ranking sums. Unrepresentable output parameters still withhold completeness; explicit infinite search radii remain invalid. Coincident closest/next ranking gates use the tight `5e-14 a` distance budget, without the isolated-crossing sine condition factor. Fault injection moves candidates along the same coincident paths and verifies that an incorrect ranking fails even when its physical residual remains valid.
+
+<!-- -->
+
+## References
+
+1. Charles F. F. Karney (2024). Geodesic Intersections. Journal of Surveying Engineering, 150, (3). [doi:10.1061/jsued2.sueng-1483](https://doi.org/10.1061/jsued2.sueng-1483) [Source](https://arxiv.org/abs/2308.00495)

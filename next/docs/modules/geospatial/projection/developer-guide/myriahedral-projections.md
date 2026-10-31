@@ -8,7 +8,7 @@ Try the [interactive example](https://visgl.github.io/math.gl/next/docs/modules/
 
 ## Origins and credits[​](#origins-and-credits "Direct link to Origins and credits")
 
-Jarke J. van Wijk introduced this approach in **Unfolding the Earth: Myriahedral Projections**, *The Cartographic Journal* 45(1), 32–42 (2008). The paper studies graticule meshes, recursively subdivided polyhedra, and meshes derived from geography. See the [publication record and abstract](https://research.tue.nl/en/publications/unfolding-the-earth-myriahedral-projections/) and [paper DOI](https://doi.org/10.1179/000870408X276594).
+Jarke J. van Wijk introduced this approach in **Unfolding the Earth: Myriahedral Projections**, *The Cartographic Journal* 45(1), 32–42 (2008). The paper studies graticule meshes, recursively subdivided polyhedra, and meshes derived from geography. See the [publication record and abstract](https://research.tue.nl/en/publications/unfolding-the-earth-myriahedral-projections/) and [paper DOI](https://visgl.github.io/math.gl/next/docs/bibliography.md#vanwijk2008 "Unfolding the Earth: Myriahedral Projections").
 
 **Nicolas “Nico” Belmonte's interactive work is the inspiration for this example.** His February 2018 vis.gl article, [Unfolding the Earth: Myriahedral Projections In WebGL](https://medium.com/vis-gl/unfolding-the-earth-myriahedral-projections-in-webgl-6b2bcfd00a30), celebrates the research's tenth anniversary. His [WebGL demonstration](https://philogb.github.io/page/myriahedral/) makes the relationship between a globe, cuts, and a planar map tangible.
 
@@ -50,3 +50,9 @@ A longitude/latitude can occur on several panel boundaries. A flat coordinate ca
 The static API returns all valid inverse candidates rather than choosing a potentially wrong continent. The animated example picks the visible face and uses its original spherical coordinates. Both views use the same panel order, so applications can transition between flat geometry and rigid unfolding.
 
 The example's land colors use public-domain Natural Earth data. NASA Blue Marble is an optional attributed texture. Those sources are independent of the projection algorithm and of Nico's demonstration; see the example's [imagery and data provenance](https://visgl.github.io/math.gl/next/docs/modules/geospatial/myriahedral-maps.md#limits-and-sources).
+
+<!-- -->
+
+## References
+
+1. Jarke J. van Wijk (2008). Unfolding the Earth: Myriahedral Projections. The Cartographic Journal, 45, (1), 32-42. [doi:10.1179/000870408x276594](https://doi.org/10.1179/000870408x276594)

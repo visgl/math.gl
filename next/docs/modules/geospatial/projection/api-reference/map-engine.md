@@ -130,7 +130,7 @@ Each lobe is `[west, center, east]` in degrees relative to `centralMeridian`. Ea
 
 All three definitions support the usual seam-aware geometry, fitting, picking, and transitions through the globe; none supplies hinge motion. At a cut, use a region ID to choose a side. Seam endpoints identify where a join becomes a cut.
 
-References: [Calabretta's HEALPix equations](https://arxiv.org/abs/astro-ph/0412607), [PROJ's HEALPix documentation](https://proj.org/en/stable/operations/projections/healpix.html), and [D3's Gingery implementation](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/gingery.js). Gingery's arc-length construction is adapted under ISC; chart assembly and bounded inverse handling use math.gl's existing pipeline. See the package's third-party notices.
+References: [Calabretta's HEALPix equations](https://visgl.github.io/math.gl/next/docs/bibliography.md#calabretta2004 "Mapping on the HEALPix grid"), [PROJ's HEALPix documentation](https://proj.org/en/stable/operations/projections/healpix.html), and [D3's Gingery implementation](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/gingery.js). Gingery's arc-length construction is adapted under ISC; chart assembly and bounded inverse handling use math.gl's existing pipeline. See the package's third-party notices.
 
 ### Quincuncial and star definitions[​](#quincuncial-and-star-definitions "Direct link to Quincuncial and star definitions")
 
@@ -399,3 +399,11 @@ Source-intersection and sampling work remain bounded and unresolved intersection
 The polygon provenance example now selects **Mercator latitude cuts**, **Satellite cap**, **Nonlinear Armadillo cap** or **Elastic chart constraints**, with an optional global atlas pass. Source rings and closing-segment identities survive clipping, holes and winding reversal. Atlas source edges compose their original directed fractions; artificial octant connectors become continuous computational joins unless they coincide with a real map cut or coverage boundary. Directional zero-length pole connectors never become original boundaries or extrusion walls.
 
 Constraint tracing restores source breakpoints removed by boolean collinear merging. Mercator/cap intersections and Elastic source-boundary samples follow the original minor arcs. Generated Elastic grid-domain boundaries remain linear in their declared source frame. These corrections also apply without provenance; enabling the option does not change geometry. Constraint tracing is bounded to 20 million comparisons per call; unresolved or ambiguous topology rejects. It does not validate arbitrary invalid input polygons, certify continuous sampling error, or supply triangulation-interior provenance.
+
+<!-- -->
+
+## References
+
+1. M. R. Calabretta (2004). Mapping on the HEALPix grid.
+   <!-- -->
+   [Source](https://arxiv.org/abs/astro-ph/0412607)

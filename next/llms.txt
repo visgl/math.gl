@@ -291,6 +291,12 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Web Mercator Coordinates](https://visgl.github.io/math.gl/next/docs/modules/web-mercator/developer-guide/web-mercator-coordinates.md): Use matching forward and inverse helpers for each coordinate space. Geographic positions, world coordinates, EPSG:3857 metres, and viewport pixels are different representations.
 - [Accuracy of Offset Projection](https://visgl.github.io/math.gl/next/docs/modules/web-mercator/developer-guide/web-mercator-offset-accuracy.md): getDistanceScales offers a cheap way to project lng/lat or meter offset to pixels. It is useful when using the GPU to project a cluster of coordinates near an origin point, without suffering the precision loss of WebGL.
 
+### bibliography
+
+{/ Generated from references.bib by yarn citations:generate. Do not edit. /}
+
+- [Bibliography](https://visgl.github.io/math.gl/next/docs/bibliography.md): {/ Generated from references.bib by yarn citations:generate. Do not edit. /}
+
 ### references-and-credits
 
 math.gl combines original vis.gl work, adapted numerical algorithms, vendored
