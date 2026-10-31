@@ -140,7 +140,7 @@ The bundled tables are pinned to upstream revision
 Their original precision and license notice are retained. The math.gl runtime is
 an independent implementation of the documented format.
 
-Kunimune's earlier [Danseiji paper (free preprint)](https://kunimune.blog/wp-content/uploads/2019/11/danseiji-paper-preprint.pdf)
+Kunimune's earlier [Danseiji paper (free preprint)](https://kunimune.blog/wp-content/uploads/2019/11/danseiji-paper-preprint.pdf "cite:kunimune2019")
 provides background on optimizing mesh-defined projections. Danseiji's distinct
 unstructured mesh format is not supported by this importer.
 Coastlines in this example come from Natural Earth, in the public domain.

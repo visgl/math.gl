@@ -387,14 +387,14 @@ record the implementations used for comparison or adaptation. Prefer the free
 primary sources below when a journal's landing page requires payment.
 
 - **Charles Sanders Peirce**, *A Quincuncial Projection of the Sphere* (1879):
-  [freely available scan](https://www.unav.es/gep/Quincuncial1879.pdf).
+  [freely available scan](https://www.unav.es/gep/Quincuncial1879.pdf "cite:peirce1879").
   Peirce's conformal construction underlies the square-world family.
 - **John P. Snyder and Philip M. Voxland**, *An Album of Map Projections*, USGS
-  Professional Paper 1453: [free USGS publication](https://pubs.usgs.gov/pp/1453/report.pdf).
+  Professional Paper 1453: [free USGS publication](https://pubs.usgs.gov/pp/1453/report.pdf "cite:snyder1989").
   A broader reference for Guyou, Gringorten, Berghaus, Boggs, Collignon and other
   projection families; historical names do not imply their authors wrote math.gl code.
 - **John Paul Goode**, *The Homolosine Projection: A New Device for Portraying
-  the Earth's Surface Entire* (1925), [publication record](https://doi.org/10.1080/00045602509356949).
+  the Earth's Surface Entire* (1925), [publication record](http://dx.doi.org/10.1080/00045602509356949 "cite:goode1925").
   Free implementation documentation is available from PROJ for
   [land-oriented Goode](https://proj.org/en/stable/operations/projections/igh.html)
   and [ocean-oriented Goode](https://proj.org/en/stable/operations/projections/igh_o.html).
@@ -427,11 +427,11 @@ an independently installed D3 source tree. A matching picture alone is not a
 numerical validation.
 
 - **Matthew A. Petroff**, [A Square Equal-Area Map Projection with Low Angular
-  Distortion, Minimal Cusps, and Closed-Form Solutions](https://arxiv.org/abs/2008.13670)
+  Distortion, Minimal Cusps, and Closed-Form Solutions](https://arxiv.org/abs/2008.13670 "cite:petroff2021")
   (2021). The `petroff` equations are adapted from his
   [CC0 supplement](https://doi.org/10.5281/zenodo.4661351); see also his
   [introductory article](https://mpetroff.net/2021/08/square-equal-area-map-projection/).
-- **John P. Snyder**, *An Equal-Area Map Projection for Polyhedral Globes* (1992).
+- **John P. Snyder**, [An Equal-Area Map Projection for Polyhedral Globes](http://dx.doi.org/10.3138/27H7-8K88-4882-1752 "cite:snyder1992") (1992).
   `isea` and `dsea` use the [vector formulation explained by BRSR](https://brsr.github.io/2021/08/31/snyder-equal-area.html).
   Their mesh and net tables follow **Felix Palmer / PROJ**;
   [PROJ's polyhedral documentation](https://proj.org/en/stable/operations/projections/polyhedral.html)

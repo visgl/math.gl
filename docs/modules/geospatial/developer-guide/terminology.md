@@ -237,5 +237,5 @@ any one implementation's function names.
 - **Charles F. F. Karney / GeographicLib**: [geodesic documentation](https://geographiclib.sourceforge.io/C++/doc/geodesic.html) and [rhumb-line documentation](https://geographiclib.sourceforge.io/C++/doc/rhumb.html), including the direct and inverse problems.
 - **PROJ contributors**: [coordinate-operation background](https://proj.org/en/stable/usage/index.html), [axis-order conventions](https://proj.org/en/stable/faq.html), and [projection glossary](https://proj.org/en/stable/glossary.html).
 - **NOAA National Geodetic Survey**: [geoid models and height systems](https://geodesy.noaa.gov/GEOID/).
-- **John P. Snyder and Philip M. Voxland**: [An Album of Map Projections](https://pubs.usgs.gov/pp/1453/report.pdf), for projection constructions, terminology, and distortion properties.
+- **John P. Snyder and Philip M. Voxland**: [An Album of Map Projections](https://pubs.usgs.gov/pp/1453/report.pdf "cite:snyder1989"), for projection constructions, terminology, and distortion properties.
 - **NASA GISS**: [G.Projector's projection reference](https://www.giss.nasa.gov/tools/gprojector/help/projections/), for named families and their properties.

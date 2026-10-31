@@ -169,7 +169,7 @@ All three definitions support the usual seam-aware geometry, fitting, picking,
 and transitions through the globe; none supplies hinge motion. At a cut, use a
 region ID to choose a side. Seam endpoints identify where a join becomes a cut.
 
-References: [Calabretta's HEALPix equations](https://arxiv.org/abs/astro-ph/0412607),
+References: [Calabretta's HEALPix equations](https://arxiv.org/abs/astro-ph/0412607 "cite:calabretta2004"),
 [PROJ's HEALPix documentation](https://proj.org/en/stable/operations/projections/healpix.html),
 and [D3's Gingery implementation](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/gingery.js).
 Gingery's arc-length construction is adapted under ISC; chart assembly and

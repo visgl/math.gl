@@ -131,6 +131,9 @@ jobs:
           yarn check:source-headers
           yarn check:attributions
 
+      - name: Validate documentation citations
+        run: yarn check:citations
+
       - name: Check independent interior references and qualification
         run: |
           python3 modules/geospatial/projection/scripts/generate-g6-reference.py --check

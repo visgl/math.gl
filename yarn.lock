@@ -1844,6 +1844,44 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@citation-js/core@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "@citation-js/core@npm:0.9.0"
+  dependencies:
+    "@citation-js/date": "npm:^0.5.0"
+    "@citation-js/name": "npm:^0.4.2"
+    sync-fetch-undici: "npm:^0.7.1"
+  checksum: 10c0/443ec59a598de9d4f3702c39eb555f47868e50ad9f554490cad8c2beb2bab0d1746e6862c424d47d478264bc2f2466f01841bc00bfcc29e54d52373bbd3906a7
+  languageName: node
+  linkType: hard
+
+"@citation-js/date@npm:^0.5.0":
+  version: 0.5.1
+  resolution: "@citation-js/date@npm:0.5.1"
+  checksum: 10c0/a2f9dd94f9ef01a0612fc688badb18914e75abf355fe39fb94beee6da4bceed4298dbdea4236dae3b87e9aa16d8d27455ca728a0f8a79337ecf9a6942ea691a5
+  languageName: node
+  linkType: hard
+
+"@citation-js/name@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "@citation-js/name@npm:0.4.2"
+  checksum: 10c0/2d55469ad7badaca8fe4b08456c23230ca54ca678640c18d60909bfb6c0b12d177a51a1acf5668e5fc5f2f46d02bff51ed77b10c592eb80bb2cdfa654db559e9
+  languageName: node
+  linkType: hard
+
+"@citation-js/plugin-bibtex@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "@citation-js/plugin-bibtex@npm:0.9.0"
+  dependencies:
+    "@citation-js/date": "npm:^0.5.0"
+    "@citation-js/name": "npm:^0.4.2"
+    moo: "npm:^0.5.1"
+  peerDependencies:
+    "@citation-js/core": ^0.9.0
+  checksum: 10c0/ff58b3a8eaca6cb3150d6a387bfaf3a1dc627eacf9e2178a215ad8ad58744ebdc5d605f83f9d0a61e80c153898f3ad2ba98d8ce13f1da8f80ef3b45e98d2b4b9
+  languageName: node
+  linkType: hard
+
 "@cmfcmf/docusaurus-search-local@npm:^2.0.0":
   version: 2.0.1
   resolution: "@cmfcmf/docusaurus-search-local@npm:2.0.1"
@@ -17382,6 +17420,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "math.gl-monorepo@workspace:."
   dependencies:
+    "@citation-js/core": "npm:^0.9.0"
+    "@citation-js/plugin-bibtex": "npm:^0.9.0"
     "@turf/destination": "npm:^7.4.0"
     "@types/node": "npm:^22.20.1"
     "@vis.gl/dev-tools": "npm:^2.0.0-beta.2"
@@ -17394,6 +17434,8 @@ __metadata:
     playwright: "npm:^1.62.1"
     pre-commit: "npm:^2.0.0"
     probe.gl: "npm:^5.0.0"
+    remark-parse: "npm:^11.0.0"
+    unified: "npm:^11.0.5"
     vite: "npm:^8.3.1"
     vitest: "npm:5.0.5"
   languageName: unknown
@@ -18922,6 +18964,13 @@ __metadata:
   dependencies:
     "@types/trusted-types": "npm:^1.0.6"
   checksum: 10c0/016495f0b869ea3a4151b660e5b8653999e54da9834001b4e7e88edae5c749aee2f1b56020bfece51cd08fc8e7125cd9732f414e373aea554e2f2812ee8245f1
+  languageName: node
+  linkType: hard
+
+"moo@npm:^0.5.1":
+  version: 0.5.3
+  resolution: "moo@npm:0.5.3"
+  checksum: 10c0/5c5e00d7c57a69ce1cc2f21a90655ff10556481cc10fa70528c01e91f00deff8a65fa8da6dc7b27d136d66085055aab238fd1b19a75070263e0028e8f07c8213
   languageName: node
   linkType: hard
 
@@ -23881,6 +23930,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sync-fetch-undici@npm:^0.7.1":
+  version: 0.7.1
+  resolution: "sync-fetch-undici@npm:0.7.1"
+  dependencies:
+    whatwg-mimetype: "npm:^5.0.0"
+  checksum: 10c0/525a80bd03a16b33ff92d279094394d9235d1b2c01c91e7d1fa8b7656f08ed8504987a89f2157d2daf1e14bc661cff751199fe41259c9a84d88c629d07000f24
+  languageName: node
+  linkType: hard
+
 "tapable@npm:^2.0.0, tapable@npm:^2.2.1, tapable@npm:^2.3.0, tapable@npm:^2.3.3":
   version: 2.3.3
   resolution: "tapable@npm:2.3.3"
@@ -25308,6 +25366,13 @@ __metadata:
   version: 4.0.0
   resolution: "whatwg-mimetype@npm:4.0.0"
   checksum: 10c0/a773cdc8126b514d790bdae7052e8bf242970cebd84af62fb2f35a33411e78e981f6c0ab9ed1fe6ec5071b09d5340ac9178e05b52d35a9c4bcf558ba1b1551df
+  languageName: node
+  linkType: hard
+
+"whatwg-mimetype@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "whatwg-mimetype@npm:5.0.0"
+  checksum: 10c0/eead164fe73a00dd82f817af6fc0bd22e9c273e1d55bf4bc6bdf2da7ad8127fca82ef00ea6a37892f5f5641f8e34128e09508f92126086baba126b9e0d57feb4
   languageName: node
   linkType: hard
 

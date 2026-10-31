@@ -117,10 +117,10 @@ The twilight curve uses **original illustrative anchors**, not a published fitte
 visibility algorithm: Sun altitude 0/-6/-12 degrees corresponds to limiting magnitude
 -4/+1/+4.5. The curve interpolates to the configured dark-sky limit at -18 degrees
 and is capped by that limit throughout. Atmospheric extinction uses the independently
-implemented [Kasten–Young air mass equation](https://doi.org/10.1364/AO.28.004735).
+implemented [Kasten–Young air mass equation](http://dx.doi.org/10.1364/AO.28.004735 "cite:kasten1989").
 
 This is an **uncalibrated rendering heuristic**, not a prediction of an individual's
-first sighting. The [Tousey–Koomen visibility study](https://doi.org/10.1364/JOSA.43.000177)
+first sighting. The [Tousey–Koomen visibility study](http://dx.doi.org/10.1364/JOSA.43.000177 "cite:tousey1953")
 provides context for the dependence on twilight, atmospheric transmission and eye
 sensitivity; its model and charts are not implemented or copied here. Sky brightness
 varies with direction, and haze, clouds, lunar glare, dark adaptation and eyesight

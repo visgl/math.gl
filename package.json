@@ -52,9 +52,13 @@
     "check:attributions": "node scripts/check-attributions.mjs",
     "check:terrain-dem": "node scripts/qualify-terrain-dem.mjs",
     "benchmark:workers": "node test/bench/workers/index.mjs",
-    "check:tasks": "node modules/core/scripts/check-tasks.mjs"
+    "check:tasks": "node modules/core/scripts/check-tasks.mjs",
+    "citations:generate": "node scripts/citations/check.mjs --write",
+    "check:citations": "node scripts/citations/check.mjs && node --test scripts/citations/*.test.mjs"
   },
   "devDependencies": {
+    "@citation-js/core": "^0.9.0",
+    "@citation-js/plugin-bibtex": "^0.9.0",
     "@turf/destination": "^7.4.0",
     "@types/node": "^22.20.1",
     "@vis.gl/dev-tools": "^2.0.0-beta.2",
@@ -67,6 +71,8 @@
     "playwright": "^1.62.1",
     "pre-commit": "^2.0.0",
     "probe.gl": "^5.0.0",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5",
     "vite": "^8.3.1",
     "vitest": "5.0.5"
   },

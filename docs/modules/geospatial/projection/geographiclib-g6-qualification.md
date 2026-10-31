@@ -11,7 +11,7 @@ arbitrary-flattening or exact-topology claim below floating-point resolution.
 ## Coverage algorithm
 
 The search uses the capture-distance construction in
-[Karney, Geodesic intersections (2024), sections 3, 6 and 7](https://arxiv.org/abs/2308.00495)
+[Karney, Geodesic intersections (2024), sections 3, 6 and 7](https://arxiv.org/abs/2308.00495 "cite:karney2024")
 and pinned GeographicLib C++ **2.7** `Intersect.cpp`. The oblate capture bound
 is `πb`; the prolate bound comes from minimizing polar semi-conjugate distance.
 The native safety margin is `δ = πR ε^(1/5)`.
