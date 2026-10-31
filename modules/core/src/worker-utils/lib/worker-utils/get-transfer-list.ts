@@ -6,7 +6,8 @@
 // core does not need all the utils in loader-utils, just this one.
 
 /**
- * Returns an array of Transferrable objects that can be used with postMessage
+ * Returns an array of transferable objects that can be used with postMessage.
+ * Recursive discovery includes both ports of a MessageChannel, but not the channel itself.
  * https://developer.mozilla.org/en-US/docs/Web/API/Worker/postMessage
  * @param object data to be sent via postMessage
  * @param recursive - not for application use
@@ -28,6 +29,14 @@ export function getTransferList(
     if (isTransferable(value)) transfersSet.add(value);
     else if (ArrayBuffer.isView(value)) {
       if (isTransferable(value.buffer)) transfersSet.add(value.buffer);
+    } else if (
+      recursive &&
+      typeof MessageChannel !== 'undefined' &&
+      value instanceof MessageChannel
+    ) {
+      // Browser channel ports are prototype accessors, not own enumerable properties.
+      visit(value.port1);
+      visit(value.port2);
     } else if (recursive && value instanceof Map) {
       for (const [key, item] of value) {
         visit(key);
