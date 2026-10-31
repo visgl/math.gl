@@ -242,3 +242,7 @@ Use one fresh control buffer per job. Synchronize application-owned shared state
 | Resource teardown timeout                    | Treat its worker as terminated; cleanup callbacks may not have completed                         |
 
 Copy means structured cloning. SharedArrayBuffer is shared under every ownership policy. Transfer detaches entire backing buffers, including all overlapping views; no failed-operation path promises to restore transferred input.
+
+`getTransferList(value)` discovers unique transferable objects recursively, including both ports of a `MessageChannel`. Channel ports are discovered even when browsers expose them as prototype accessors. Passing `false` as the second argument disables nested discovery, including channel ports; a directly supplied `MessagePort` is still included. Ordinary objects are traversed through their own enumerable properties.
+
+A channel itself is not a structured-clone payload. Send its ports explicitly, for example `structuredClone([channel.port1, channel.port2], {transfer: getTransferList(channel)})`.
