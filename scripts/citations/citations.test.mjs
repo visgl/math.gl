@@ -126,3 +126,9 @@ test('citation links retain a usable source URL in ordinary Markdown', () => {
   assert.equal(tree.children[0].children[0].url, '/docs/bibliography#karney2013');
   assert.throws(() => plugin()(unified().use(remarkParse).parse('[paper](cite:karney2013)'), {}), /HTTP/);
 });
+
+
+test('CSL publisher remains a string when its name contains and', () => {
+  const entry = bibliography.parseBibliography(record.replace('year={2020},', 'year={2020}, publisher={Springer Science and Business Media LLC},')).get('example2020');
+  assert.equal(entry.publisher, 'Springer Science and Business Media LLC');
+});
