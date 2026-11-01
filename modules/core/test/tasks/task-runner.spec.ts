@@ -994,3 +994,91 @@ test('worker preload failure and cancellation reject instead of hanging', async 
   setTimeout(() => controller.abort(new Error('stop preload')), 50);
   await expect(pending).rejects.toThrow('stop preload');
 });
+
+test('cancelled automatic code loading releases capacity while the shared load continues', async () => {
+  const runner = new TaskRunner();
+  let finish!: () => void;
+  let started!: () => void;
+  const loading = new Promise<void>(resolve => {
+    started = resolve;
+  });
+  let initialized = 0;
+  let loads = 0;
+  const task = {
+    id: 'abort-before-state',
+    preload() {
+      loads++;
+      started();
+      return new Promise<void>(resolve => {
+        finish = resolve;
+      });
+    },
+    initialize() {
+      initialized++;
+      return {};
+    },
+    process() {
+      return {value: 7};
+    }
+  };
+  const controller = new AbortController();
+  const operation = runner.runTask(task, {}, {signal: controller.signal});
+  await loading;
+  const shared = preloadTasks([task]);
+  controller.abort(new Error('cancel code wait'));
+  try {
+    await expect(operation).rejects.toThrow('cancel code wait');
+    expect(initialized).toBe(0);
+    expect(await runner.runTask({id: 'available-slot', process: () => ({value: 1})}, {})).toEqual({
+      value: 1
+    });
+    finish();
+    await shared;
+    expect(await runner.runTask(task, {})).toEqual({value: 7});
+    expect(loads).toBe(1);
+    expect(initialized).toBe(1);
+  } finally {
+    finish();
+    await runner.terminate();
+  }
+});
+
+test('terminate does not wait for a stalled code load that has not created state', async () => {
+  const runner = new TaskRunner();
+  let finish!: () => void;
+  let started!: () => void;
+  const loading = new Promise<void>(resolve => {
+    started = resolve;
+  });
+  let initialized = false;
+  const task = {
+    id: 'terminate-code-wait',
+    preload() {
+      started();
+      return new Promise<void>(resolve => {
+        finish = resolve;
+      });
+    },
+    initialize() {
+      initialized = true;
+      return {};
+    },
+    process() {
+      return {};
+    }
+  };
+  const operation = runner.runTask(task, {});
+  const rejected = expect(operation).rejects.toThrow('stop runner');
+  await loading;
+  try {
+    await runner.terminate(new Error('stop runner'));
+    await rejected;
+    expect(initialized).toBe(false);
+    finish();
+    await preloadTasks([task]);
+    expect(initialized).toBe(false);
+  } finally {
+    finish();
+    await runner.terminate();
+  }
+});

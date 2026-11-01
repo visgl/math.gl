@@ -52,7 +52,7 @@ export class TaskRuntime {
   async initialize(input: object, context: WorkerContext = {}): Promise<object> {
     if (this.initialized) throw new Error('Task is already initialized');
     assertPayload(input);
-    await preloadTaskCode(this.task);
+    await preloadTaskCode(this.task, context.signal);
     context.signal?.throwIfAborted();
     this.state = await this.task.initialize?.(input, taskContext(undefined, context));
     this.initialized = true;

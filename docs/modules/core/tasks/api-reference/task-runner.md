@@ -112,8 +112,10 @@ const task = {
 };
 ```
 
-Cancellation stops waiting and terminates temporary workers. Local dynamic imports
-cannot be forcibly cancelled; shared loading may finish after the caller aborts.
+Cancellation stops waiting and terminates temporary workers. While automatic local
+initialization is waiting for code, cancellation releases its execution slot without
+creating state; `terminate()` does not wait for that shared load. Local dynamic imports
+cannot be forcibly cancelled and may finish after the caller aborts.
 Hooks receive no task input or state: load modules here, allocate per-instance
 resources in `initialize`. Worker module bootstrap and preload hooks must not assume
 that a processing request will follow. No HTML preload elements are used.

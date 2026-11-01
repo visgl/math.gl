@@ -9,7 +9,7 @@ const pending = new WeakMap<AnyTask, Promise<void>>();
 const loaded = new WeakSet<AnyTask>();
 
 /** @internal One code-loading hook per definition in this JavaScript environment. */
-export function preloadTaskCode(task: AnyTask): Promise<void> {
+export function preloadTaskCode(task: AnyTask, signal?: AbortSignal): Promise<void> {
   if (!task.preload) return Promise.resolve();
   let promise = pending.get(task);
   if (!promise) {
@@ -21,7 +21,7 @@ export function preloadTaskCode(task: AnyTask): Promise<void> {
     pending.set(task, promise);
     void promise.catch(() => pending.delete(task));
   }
-  return promise;
+  return withSignal(promise, signal);
 }
 
 /** @internal Synchronous calls cannot start or await module loading. */
@@ -48,7 +48,7 @@ export async function preloadTasks(
     options.signal?.throwIfAborted();
     if (execution === 'worker' && !task.worker) throw new Error('Task has no worker');
     if (execution === 'main-thread' || !task.worker) {
-      await withSignal(preloadTaskCode(task), options.signal);
+      await preloadTaskCode(task, options.signal);
       continue;
     }
     const target = task.worker;
