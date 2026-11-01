@@ -169,7 +169,6 @@ jobs:
 
       - name: Check worker API types
         run: |
-          yarn check:worker-types
           yarn check:task-runner-types
 
       - name: Check task runtime exports and execution routes

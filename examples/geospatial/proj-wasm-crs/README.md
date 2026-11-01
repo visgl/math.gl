@@ -103,7 +103,7 @@ it cannot interrupt an already-running native operation. Disposal rejects new wo
 waits for accepted work to settle, then destroys normalized/original operations and the context.
 It is idempotent and does not shut down an application-owned PROJ pool.
 
-The completed buffers are transferred with math.gl `runTask(..., {execution: 'worker',
+The completed buffers are transferred with math.gl `runner.runTask(..., {execution: 'worker',
 inputOwnership: 'transfer'})` to `consume-worker.mjs`, which computes bounds and returns the same
 packed geometry. Tests assert sender detachment, source-row preservation, exact downstream parity
 and forward/inverse accuracy. This separates async projection preprocessing from rendering; the

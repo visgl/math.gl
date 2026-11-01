@@ -51,15 +51,28 @@ export async function prepareProjectionGrid(view, context) {
     context.reportProgress?.({phase: 'projection-grid', completed: 1, total: 1, unit: 'tasks'});
     return grids.get(view);
   }
-  const {projectBulk} = await import('@math.gl/geospatial/workers/operations');
+  const {TaskRunner} = await import('@math.gl/core/tasks');
+  const {ProjectCoordinatesTask} = await import('@math.gl/geospatial/tasks');
   const positions = sourcePositions(view);
-  if (view !== 'globe') await projectBulk({
-    projection: {
-      from: `+proj=longlat +R=${R}`,
-      to: `${REGIONAL_VIEWS[view]?.definition || `+proj=${view}`} +R=${R} +units=m`
-    },
-    coordinates: positions
-  }, context);
+  if (view !== 'globe') {
+    const runner = new TaskRunner();
+    try {
+      const result = await runner.runTask(
+        ProjectCoordinatesTask,
+        {
+          projection: {
+            from: `+proj=longlat +R=${R}`,
+            to: `${REGIONAL_VIEWS[view]?.definition || `+proj=${view}`} +R=${R} +units=m`
+          },
+          coordinates: positions
+        },
+        {execution: 'main-thread', signal: context.signal, onProgress: context.reportProgress}
+      );
+      positions.set(result.coordinates);
+    } finally {
+      await runner.close();
+    }
+  }
   context.reportProgress?.({phase: 'projection-grid', completed: 0, total: 1, unit: 'tasks'});
   const result = projectionGrid(view, positions);
   context.reportProgress?.({phase: 'projection-grid', completed: 1, total: 1, unit: 'tasks'});

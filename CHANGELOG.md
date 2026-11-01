@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+- **Breaking:** Replace the public worker/task API families with `TaskRunner`, typed task objects, and `initializeTaskWorker`. Remove top-level task functions, worker-utils exports, worker resource wrappers, and geospatial worker subpaths. Use `@math.gl/geospatial/tasks` for provided tasks. Input copying is the default; explicit handles retain worker state. Advanced pool controls are intentionally removed from the public API. See [task migration](docs/modules/core/tasks/developer-guide/migration.md).
+
 ## v5.0.0-beta.2
 
 - **Breaking:** Rename expression evaluation exports to avoid collisions at the core package root (#373).

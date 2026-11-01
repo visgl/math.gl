@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {isBrowser} from '@math.gl/core/worker-utils';
+const isBrowser = typeof process === 'undefined' || !process.versions?.node;
 import {TaskRunner} from '@math.gl/core/tasks';
 import {ProjectCoordinatesTask, PrepareMapTask} from '../../src/tasks';
 import {MapEngine} from '../../src/discontinuous/map-engine';

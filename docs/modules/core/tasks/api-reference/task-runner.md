@@ -1,7 +1,6 @@
 # TaskRunner prototype API
 
-Experimental additions to `@math.gl/core/tasks`. Existing exports remain available
-and unchanged. Start with the [get-started guide](../developer-guide/task-runner.md).
+The public execution API in `@math.gl/core/tasks`. Start with the [get-started guide](../developer-guide/task-runner.md).
 This reference lists implemented controls only; see the RFC for proposed extensions.
 
 ## Task type map
@@ -95,7 +94,7 @@ negotiation is deferred. Set `worker.url` to a compiled module URL or
 
 Not implemented: runner byte budgets, admission reservations, priority, metrics,
 shutdown deadlines, automatic worker reuse across calls, adaptive routing, and
-cooperative worker cancellation. Use the existing worker-utils APIs for those
-controls. Do not pass RFC-only fields to this prototype. See the
+cooperative worker cancellation. The old worker-utils entry is removed; see [migration](../developer-guide/migration.md)
+for application-level alternatives and intentional removals. Do not pass RFC-only fields to this prototype. See the
 [design RFC](https://github.com/visgl/math.gl/blob/master/dev-docs/RFCs/task-runner-rfc.md)
 for the complete distinction.

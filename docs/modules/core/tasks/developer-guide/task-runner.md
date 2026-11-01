@@ -382,6 +382,6 @@ alone cannot infer absent processor types from a URL.
 - [Design RFC](https://github.com/visgl/math.gl/blob/master/dev-docs/RFCs/task-runner-rfc.md):
   full proposal, migration, library comparisons, and deferred features.
 
-Existing top-level task functions keep their behavior. In particular, migrate the
-old `runTaskInBatches` to `runner.runTasks` for independent atomic calls;
-`runner.runTaskInBatches` invokes the streaming processor instead.
+The old top-level task functions and worker APIs have been removed. See the
+[migration guide](./migration.md) for replacements, including the difference
+between independent atomic calls and streaming.

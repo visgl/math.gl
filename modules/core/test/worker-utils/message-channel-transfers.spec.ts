@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {getTransferList} from '@math.gl/core/tasks';
+import {getTransferList} from '../../src/worker-utils/index';
 
 test('discovers channel ports while respecting nonrecursive discovery', () => {
   const channel = new MessageChannel();

@@ -57,7 +57,7 @@ limits. This is a synchronous operation and should run in a worker for expensive
 ## Reuse the task runtime
 
 The [runnable worker example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/geoarrow-stream-worker)
-uses `runTask` and `createWorker` from `@math.gl/core/tasks`. It sends a plain geometry column and a
+uses `TaskRunner` and `initializeTaskWorker` from `@math.gl/core/tasks`. It sends a plain geometry column and a
 projection factory name, creates the D3 stream inside the worker, and returns transferable typed
 arrays. It demonstrates antimeridian splitting, holes, null rows, source identity and hemisphere
 clipping. The same processor runs locally for parity tests.

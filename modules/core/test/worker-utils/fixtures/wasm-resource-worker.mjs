@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {createResourceWorker} from '@math.gl/core/worker-utils';
+import {createResourceWorker} from '../../../dist/worker-utils/index.js';
 
 await createResourceWorker({
   async initialize(bytes) {
@@ -19,5 +19,7 @@ await createResourceWorker({
     }
     return {valid: state.instance instanceof WebAssembly.Instance, calls: state.calls};
   },
-  dispose(state) { state.instance = null; }
+  dispose(state) {
+    state.instance = null;
+  }
 });

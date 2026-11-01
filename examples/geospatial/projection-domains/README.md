@@ -21,7 +21,7 @@ The website has a separate **Projection domains and external engines** example p
 
 - `GeoArrowBuilder` constructs native XY physical buffers. Fixtures already use D3 spherical winding;
   the stream API does not silently rewind arbitrary input or infer CRS/edge semantics.
-- `runTask` transfers a fresh column into an example-owned `WorkerPool`. Changing controls aborts the
+- `runner.runTask` transfers a fresh column through an example-owned `TaskRunner`. Changing controls aborts the
   previous request, and a generation guard prevents stale results from updating the renderer.
 - `tessellateGeoArrowStream` traverses those buffers through D3's clipping/resampling stream and
   triangulates the planar output with preserved source row IDs, holes and disconnected pieces.
@@ -30,7 +30,7 @@ The website has a separate **Projection domains and external engines** example p
 - `d3-geo-polygon` provides interrupted Mollweide stream clipping. A point projection alone cannot
   provide the interrupted polygon topology.
 - deck.gl renders binary polygon geometry, domain paths and the textured raster. Unmounting destroys
-  only this example's worker pool, finalizes the renderer, and removes listeners. Other website
+  only this example's runner, finalizes the renderer, and removes listeners. Other website
   examples' workers are unaffected. Standalone Back/Forward-cache restoration retains live resources.
 
 ## Bounded raster recipe
@@ -65,7 +65,7 @@ display-space error), with explicit unsupported cases. Native/proj4js/D3 work ru
 pool. proj-wasm owns separate WASM workers; its main-document orchestration uses bounded async
 frontiers. Parameter changes abort previous jobs and reject stale results. The website uses the same mount function and shared infobox as other examples. Optional WASM
 assets are local; mounted labs reference-count their shared WASM pool, while every lab owns its
-task pool and operation contexts. Unmount waits for accepted work before releasing resources.
+task runner and operation contexts. Unmount waits for accepted work before releasing resources.
 
 Run `yarn workspace math.gl-projection-domains benchmark` for reproducible sequential CPU rebuild
 measurements. The browser's moving-center button additionally includes worker transport and exports

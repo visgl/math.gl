@@ -3,7 +3,6 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {triangulateSourcePolygon, isConvexSourcePolygon} from './triangulate-source-polygon.js';
 import {MapEngine, MAP_PROJECTIONS} from '@math.gl/geospatial/discontinuous';
-import {setupMap} from '@math.gl/geospatial/workers/operations';
 import {elasticI, elasticII, elasticIII} from '@math.gl/geospatial/elastic';
 import {MYRIAHEDRAL_VIEWS} from './map-options.js';
 export {MYRIAHEDRAL_VIEWS, DISCONTINUOUS_VIEWS} from './map-options.js';
@@ -101,10 +100,14 @@ export function createMap(view, context) {
   if (!definition) throw new Error(`Unknown map: ${view}`);
   const description = {version: 1, id: view, definition};
   const bindings = {
-      isLand: ([lon, lat]) => isLand(lon, lat),
-      edgeWeight: panels ? (edge, weight) => dggsCellWeight(edge, weight, panels) : undefined
+    isLand: ([lon, lat]) => isLand(lon, lat),
+    edgeWeight: panels ? (edge, weight) => dggsCellWeight(edge, weight, panels) : undefined
   };
-  return context ? setupMap(description, context, bindings) : new MapEngine(description, bindings);
+  context?.reportProgress?.({phase: 'map-setup', completed: 0, total: 1});
+  const map = new MapEngine(description, bindings);
+  if (context) map.getLayout();
+  context?.reportProgress?.({phase: 'map-setup', completed: 1, total: 1});
+  return map;
 }
 const cache = new Map();
 
@@ -344,7 +347,11 @@ export function discontinuousGrid(view, step = 1) {
 export async function prepareDiscontinuousGrid(
   view,
   step = 1,
-  {signal, onProgress = () => {}, yieldTask = () => new Promise(resolve => setTimeout(resolve, 0))} = {}
+  {
+    signal,
+    onProgress = () => {},
+    yieldTask = () => new Promise(resolve => setTimeout(resolve, 0))
+  } = {}
 ) {
   const builder = buildGrid(view, step, {reportProgress: onProgress});
   try {
