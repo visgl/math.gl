@@ -34,6 +34,22 @@ terrain. Curvature, refraction and geodesic paths are not modeled.
 
 ## Feature support
 
+### Incremental vertex halos and filtered rasters
+
+`updateTerrainVertexTileHalos(previous, resident, changed, options)` rebuilds
+only affected halos from a complete post-update source snapshot and reuses other
+halo objects. Pass the previous snapshot's options as `options.previousOptions`;
+changes to the grid, height reference, or reconciliation tolerance require a full
+rebuild. Include every arrival, replacement and eviction in `changed`; treat
+shared result buffers as immutable. The function detects omitted arrivals and
+evictions but cannot detect an omitted replacement. It does not update derivatives,
+meshes or bounds on the caller's behalf.
+
+`createTerrainFilteredPyramid` builds box-filtered **cell raster** levels with
+valid-source and total-source counts. Odd edges are weighted by their actual
+source sample counts; missing samples do not contribute to the average. These
+filtered values are not conservative bounds and do not preserve ridges.
+
 ### Vertex-tile derivative halos
 
 `createTerrainVertexTileHalos(tiles, options)` reconciles a same-resolution
