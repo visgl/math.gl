@@ -78,6 +78,10 @@ export type {TerrainProfileHorizon, TerrainProfileHorizonOptions} from './profil
 export {getTerrainProfileViewshed, TerrainProfileViewStatus} from './profile-viewshed';
 export type {TerrainProfileMeasurements} from './profile-measure';
 export {reconcileTerrainVertexTiles} from './vertex-tiles';
+export {createTerrainVertexTileHalos, TerrainVertexHaloStatus} from './vertex-halos';
+export type {TerrainVertexHaloTile} from './vertex-halos';
+export {getTerrainVertexHaloAffectedTiles} from './vertex-halo-invalidation';
+export type {TerrainVertexTileAddress} from './vertex-halo-invalidation';
 export type {
   TerrainVertexTile,
   TerrainVertexTileOptions,
