@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {TaskRunner, type Task} from '../../src/tasks';
+import {TaskRunner, preloadTasks, type Task} from '../../src/tasks';
 
 type Types = {
   input: {value: number};
@@ -713,3 +713,372 @@ test.each([false, true])(
     await iterator.return?.();
   }
 );
+
+test('runTaskSync returns named output and destroys synchronous state before returning', async () => {
+  const {task, events} = fixture();
+  const runner = new TaskRunner();
+  expect(runner.runTaskSync(task, {value: 3}, request)).toEqual({value: 7});
+  expect(events).toEqual(['initialize', 'destroy:1']);
+  const workerDefined = {...task, ...workerTask};
+  expect(runner.runTaskSync(workerDefined, {value: 3}, request)).toEqual({value: 7});
+  const busy = await runner.initializeTask(task, {offset: 0});
+  expect(() => runner.runTaskSync(task, {value: 1}, request)).toThrow('capacity');
+  await busy.close();
+  expect(runner.runTaskSync(task, {value: 1}, request)).toEqual({value: 3});
+  await runner.close();
+  expect(() => runner.runTaskSync(task, {value: 1}, request)).toThrow('closed');
+});
+
+test('runTaskSync preserves ownership and cancellation contracts', async () => {
+  const task = {
+    id: 'sync',
+    process: ({values}: {values: Uint8Array}) => {
+      values[0]++;
+      return {values};
+    }
+  };
+  const runner = new TaskRunner();
+  const values = new Uint8Array([1]);
+  expect(runner.runTaskSync(task, {values})).toEqual({values: new Uint8Array([2])});
+  expect(values[0]).toBe(1);
+  const controller = new AbortController();
+  controller.abort(new Error('cancel sync'));
+  expect(() => runner.runTaskSync(task, {values}, {signal: controller.signal})).toThrow(
+    'cancel sync'
+  );
+  expect(runner.runTaskSync(task, {values}, {inputOwnership: 'transfer'}).values[0]).toBe(2);
+  expect(values.byteLength).toBe(0);
+  await runner.close();
+});
+
+test('runTaskSync rejects async hooks and aggregates processing and cleanup failures', async () => {
+  const runner = new TaskRunner();
+  const events: string[] = [];
+  const task = {
+    id: 'sync-failure',
+    initialize() {
+      events.push('initialize');
+      return {};
+    },
+    process() {
+      throw new Error('process');
+    },
+    destroy() {
+      events.push('destroy');
+      throw new Error('destroy');
+    }
+  };
+  expect(() => runner.runTaskSync(task, {})).toThrow(AggregateError);
+  expect(events).toEqual(['initialize', 'destroy']);
+  events.length = 0;
+  const asyncTask = {
+    ...task,
+    async process() {
+      return {};
+    }
+  };
+  // JavaScript callers receive a runtime error before any known async hook runs.
+  expect(() => runner.runTaskSync(asyncTask as any, {})).toThrow('synchronous');
+  expect(events).toEqual([]);
+  const hidden = {
+    id: 'hidden',
+    initialize() {
+      return Promise.resolve({});
+    },
+    process() {
+      return {};
+    },
+    destroy() {
+      events.push('late destroy');
+    }
+  };
+  expect(() => runner.runTaskSync(hidden as any, {})).toThrow('promise');
+  await new Promise(resolve => setTimeout(resolve, 0));
+  expect(events).toEqual(['late destroy']);
+  await runner.close();
+});
+
+const warmTask = {
+  id: 'warm-task',
+  worker: {
+    url: new URL('../worker-utils/fixtures/warm-task-worker.mjs', import.meta.url),
+    capabilities: {atomic: true, streaming: true}
+  },
+  process: (_input: {fail?: boolean; wait?: boolean}) =>
+    ({}) as {identity: number; initialized: number; destroyed: number; calls: number}
+};
+
+test('synchronous progress can cancel and cleanup waits for invalid hidden async work', async () => {
+  const runner = new TaskRunner();
+  const events: string[] = [];
+  const controller = new AbortController();
+  const task = {
+    id: 'sync-progress',
+    initialize() {
+      return {};
+    },
+    destroy() {
+      events.push('destroy');
+    },
+    process(_input: object, _options: object, context: any) {
+      context.reportProgress({completed: 1});
+      return {value: 1};
+    }
+  };
+  expect(() =>
+    runner.runTaskSync(
+      task,
+      {},
+      {
+        signal: controller.signal,
+        onProgress: () => controller.abort(new Error('progress abort'))
+      }
+    )
+  ).toThrow('progress abort');
+  expect(events).toEqual(['destroy']);
+  events.length = 0;
+  let finish!: () => void;
+  const hidden = {
+    ...task,
+    process() {
+      return new Promise<object>(resolve => {
+        finish = () => resolve({});
+      });
+    }
+  };
+  expect(() => runner.runTaskSync(hidden as any, {})).toThrow('promise');
+  expect(events).toEqual([]);
+  finish();
+  await new Promise(resolve => setTimeout(resolve, 0));
+  expect(events).toEqual(['destroy']);
+  const asyncCleanup = {
+    ...task,
+    destroy() {
+      return Promise.resolve();
+    }
+  };
+  expect(() => runner.runTaskSync(asyncCleanup as any, {})).toThrow('destroy returned a promise');
+  await runner.close();
+});
+
+test('global preloading deduplicates nested code loading without initializing state', async () => {
+  const events: string[] = [];
+  const dependency = {
+    id: 'dependency',
+    async preload() {
+      events.push('dependency');
+    }
+  };
+  const task = {
+    id: 'nested',
+    async preload() {
+      events.push('preload');
+      await preloadTasks([dependency]);
+    },
+    initialize() {
+      events.push('initialize');
+      return {};
+    },
+    destroy() {
+      events.push('destroy');
+    },
+    process() {
+      return {value: 7};
+    }
+  };
+  await Promise.all([preloadTasks([task, task]), preloadTasks([task])]);
+  expect(events).toEqual(['preload', 'dependency']);
+  const one = new TaskRunner();
+  const two = new TaskRunner();
+  try {
+    expect(one.runTaskSync(task, {})).toEqual({value: 7});
+    await two.runTask(task, {});
+    expect(events).toEqual([
+      'preload',
+      'dependency',
+      'initialize',
+      'destroy',
+      'initialize',
+      'destroy'
+    ]);
+  } finally {
+    await one.close();
+    await two.close();
+  }
+});
+
+test('automatic local execution awaits preload; failed preload can retry', async () => {
+  const runner = new TaskRunner();
+  let loads = 0;
+  let initialized = 0;
+  const task = {
+    id: 'retry-preload',
+    async preload() {
+      if (++loads === 1) throw new Error('load failed');
+    },
+    initialize() {
+      initialized++;
+      return {};
+    },
+    process() {
+      return {value: 1};
+    }
+  };
+  try {
+    expect(() => runner.runTaskSync(task, {})).toThrow('Preload task');
+    await expect(runner.runTask(task, {})).rejects.toThrow('load failed');
+    expect(initialized).toBe(0);
+    await runner.runTask(task, {});
+    expect(loads).toBe(2);
+    expect(runner.runTaskSync(task, {})).toEqual({value: 1});
+    expect(loads).toBe(2);
+  } finally {
+    await runner.close();
+  }
+});
+
+test('cancelling local preload stops waiting without cancelling shared imports', async () => {
+  let finish!: () => void;
+  let loads = 0;
+  const task = {
+    id: 'pending-code',
+    preload() {
+      loads++;
+      return new Promise<void>(resolve => {
+        finish = resolve;
+      });
+    }
+  };
+  const controller = new AbortController();
+  const pending = preloadTasks([task], {signal: controller.signal});
+  await Promise.resolve();
+  controller.abort(new Error('stop loading wait'));
+  await expect(pending).rejects.toThrow('stop loading wait');
+  const another = preloadTasks([task]);
+  finish();
+  await another;
+  expect(loads).toBe(1);
+  await expect(preloadTasks([task], {execution: 'worker'})).rejects.toThrow('no worker');
+  await expect(preloadTasks([task], {signal: controller.signal})).rejects.toThrow(
+    'stop loading wait'
+  );
+});
+
+test('worker preloading waits for nested imports without state or retained workers', async () => {
+  await preloadTasks([warmTask, warmTask]);
+  const runner = new TaskRunner();
+  try {
+    const first = await runner.runTask(warmTask, {});
+    expect(first).toMatchObject({initialized: 1, destroyed: 0, calls: 1, loaded: true});
+    const second = await runner.runTask(warmTask, {});
+    expect(second.identity).not.toBe(first.identity);
+    expect(second).toMatchObject({initialized: 1, destroyed: 0, calls: 1, loaded: true});
+  } finally {
+    await runner.close();
+  }
+});
+
+test('worker preload failure and cancellation reject instead of hanging', async () => {
+  const target = (name: string) => ({
+    id: name,
+    worker: {
+      url: new URL(`../worker-utils/fixtures/${name}.mjs`, import.meta.url),
+      capabilities: {atomic: true, streaming: false}
+    }
+  });
+  await expect(preloadTasks([target('failing-preload-worker')])).rejects.toThrow(
+    'nested preload failed'
+  );
+  const controller = new AbortController();
+  const pending = preloadTasks([target('blocked-preload-worker')], {signal: controller.signal});
+  setTimeout(() => controller.abort(new Error('stop preload')), 50);
+  await expect(pending).rejects.toThrow('stop preload');
+});
+
+test('cancelled automatic code loading releases capacity while the shared load continues', async () => {
+  const runner = new TaskRunner();
+  let finish!: () => void;
+  let started!: () => void;
+  const loading = new Promise<void>(resolve => {
+    started = resolve;
+  });
+  let initialized = 0;
+  let loads = 0;
+  const task = {
+    id: 'abort-before-state',
+    preload() {
+      loads++;
+      started();
+      return new Promise<void>(resolve => {
+        finish = resolve;
+      });
+    },
+    initialize() {
+      initialized++;
+      return {};
+    },
+    process() {
+      return {value: 7};
+    }
+  };
+  const controller = new AbortController();
+  const operation = runner.runTask(task, {}, {signal: controller.signal});
+  await loading;
+  const shared = preloadTasks([task]);
+  controller.abort(new Error('cancel code wait'));
+  try {
+    await expect(operation).rejects.toThrow('cancel code wait');
+    expect(initialized).toBe(0);
+    expect(await runner.runTask({id: 'available-slot', process: () => ({value: 1})}, {})).toEqual({
+      value: 1
+    });
+    finish();
+    await shared;
+    expect(await runner.runTask(task, {})).toEqual({value: 7});
+    expect(loads).toBe(1);
+    expect(initialized).toBe(1);
+  } finally {
+    finish();
+    await runner.terminate();
+  }
+});
+
+test('terminate does not wait for a stalled code load that has not created state', async () => {
+  const runner = new TaskRunner();
+  let finish!: () => void;
+  let started!: () => void;
+  const loading = new Promise<void>(resolve => {
+    started = resolve;
+  });
+  let initialized = false;
+  const task = {
+    id: 'terminate-code-wait',
+    preload() {
+      started();
+      return new Promise<void>(resolve => {
+        finish = resolve;
+      });
+    },
+    initialize() {
+      initialized = true;
+      return {};
+    },
+    process() {
+      return {};
+    }
+  };
+  const operation = runner.runTask(task, {});
+  const rejected = expect(operation).rejects.toThrow('stop runner');
+  await loading;
+  try {
+    await runner.terminate(new Error('stop runner'));
+    await rejected;
+    expect(initialized).toBe(false);
+    finish();
+    await preloadTasks([task]);
+    expect(initialized).toBe(false);
+  } finally {
+    finish();
+    await runner.terminate();
+  }
+});

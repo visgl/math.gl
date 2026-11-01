@@ -2,13 +2,19 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
-import {TaskRunner} from '@math.gl/core/tasks';
+import {TaskRunner, preloadTasks} from '@math.gl/core/tasks';
 import {transformTask} from './task.mjs';
 
 const runner = new TaskRunner({maxConcurrency: 2});
 const input = {values: new Float64Array([1, 2, 3])};
 const request = {initialization: {offset: 1}, options: {factor: 10}};
 try {
+  const immediate = runner.runTaskSync(transformTask, input, request);
+  assert.deepEqual([...immediate.values], [11, 21, 31]);
+  assert.equal(immediate.calls, 1);
+  console.log('Synchronous local result:', [...immediate.values]);
+
+  await preloadTasks([transformTask]);
   const single = await runner.runTask(transformTask, input, request);
   assert.deepEqual([...single.values], [11, 21, 31]);
   assert.equal(single.calls, 1);

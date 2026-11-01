@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
-import {TaskRunner} from '@math.gl/core/tasks';
+import {TaskRunner, preloadTasks} from '@math.gl/core/tasks';
 import {readFile, writeFile} from 'node:fs/promises';
 import {cpus} from 'node:os';
 import {Worker} from 'node:worker_threads';
@@ -102,6 +102,16 @@ await measure('math.gl/tiny-main-thread', count, async () => {
   assert.deepEqual(await runner.runTask(echoTask, {value: 42}, {execution: 'main-thread'}), {
     value: 42
   });
+});
+await measure('math.gl/tiny-main-thread-sync', count, () => {
+  assert.deepEqual(runner.runTaskSync(echoTask, {value: 42}), {value: 42});
+});
+await measure('math.gl/tiny-automatic-cold', quick ? 3 : 10, async () => {
+  assert.deepEqual(await runner.runTask(echoTask, {value: 42}), {value: 42});
+});
+await measure('math.gl/echo-preload', 1, () => preloadTasks([echoTask]));
+await measure('math.gl/tiny-automatic-after-code-preload', count, async () => {
+  assert.deepEqual(await runner.runTask(echoTask, {value: 42}), {value: 42});
 });
 await measure('math.gl/independent-batches', 1, async () => {
   let index = 0;

@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {TaskRunner, type Task} from '@math.gl/core/tasks';
+import {TaskRunner, preloadTasks, type Task} from '@math.gl/core/tasks';
 const runner = new TaskRunner();
 const scale = {
   id: 'scale',
@@ -252,3 +252,56 @@ void [
   processOnWorker,
   getTransferList
 ];
+
+const synchronousResult: {values: Float64Array} = runner.runTaskSync(
+  scale,
+  {values: new Float64Array()},
+  {options: {factor: 2}}
+);
+void synchronousResult;
+runner.runTaskSync(initialized, {value: 1}, {initialization: {offset: 2}});
+// @ts-expect-error synchronous processing still requires application options
+runner.runTaskSync(scale, {values: new Float64Array()});
+// @ts-expect-error synchronous initialization is required
+runner.runTaskSync(initialized, {value: 1});
+// @ts-expect-error synchronous calls cannot route to a worker
+runner.runTaskSync(plain, {value: 1}, {execution: 'worker'});
+runner.runTaskSync(
+  // @ts-expect-error an asynchronous processor cannot run synchronously
+  {
+    ...plain,
+    async process() {
+      return {value: 1};
+    }
+  },
+  {value: 1}
+);
+runner.runTaskSync(
+  // @ts-expect-error asynchronous initialization cannot run synchronously
+  {
+    ...plain,
+    async initialize() {
+      return {};
+    }
+  },
+  {value: 1}
+);
+// @ts-expect-error asynchronous destruction cannot run synchronously
+runner.runTaskSync({...plain, async destroy() {}}, {value: 1});
+runner.runTaskSync(
+  // @ts-expect-error promise-returning ordinary functions cannot run synchronously
+  {
+    ...plain,
+    process() {
+      return Promise.resolve({value: 1});
+    }
+  },
+  {value: 1}
+);
+// @ts-expect-error tasks with optional/potentially async hooks are not statically synchronous
+runner.runTaskSync(plain as Task<{input: {value: number}; output: {value: number}}>, {value: 1});
+const preload: Promise<void> = preloadTasks([scale], {signal: new AbortController().signal});
+void preload;
+
+// @ts-expect-error code preloading has no runner lifetime or pool controls
+runner.preloadTasks([plain]);

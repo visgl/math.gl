@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {createWorker, WorkerBody, getTransferList, type WorkerContext} from '../worker-utils/index';
+import {preloadTaskCode} from './task-preload';
 import type {AnyTask, TaskContext, TaskRunControls} from './task';
 
 /** Validate the record boundary for JavaScript callers as well as TypeScript. */
@@ -51,6 +52,8 @@ export class TaskRuntime {
   async initialize(input: object, context: WorkerContext = {}): Promise<object> {
     if (this.initialized) throw new Error('Task is already initialized');
     assertPayload(input);
+    await preloadTaskCode(this.task, context.signal);
+    context.signal?.throwIfAborted();
     this.state = await this.task.initialize?.(input, taskContext(undefined, context));
     this.initialized = true;
     return {};
@@ -132,7 +135,8 @@ export async function initializeTaskWorker(task: AnyTask): Promise<void> {
       } finally {
         streamOptions = {};
       }
-    }
+    },
+    () => preloadTaskCode(task)
   );
 }
 let installed = false;

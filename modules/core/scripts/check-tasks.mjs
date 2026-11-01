@@ -11,7 +11,7 @@ import {join, resolve} from 'node:path';
 import {build} from 'esbuild';
 import * as tasks from '@math.gl/core/tasks';
 const require = createRequire(import.meta.url);
-const expected = ['TaskRunner', 'initializeTaskWorker'];
+const expected = ['TaskRunner', 'initializeTaskWorker', 'preloadTasks'];
 for (const api of [tasks, require('@math.gl/core/tasks')]) {
   assert.deepEqual(Object.keys(api).sort(), expected);
   const runner = new api.TaskRunner();
@@ -87,6 +87,7 @@ for (const path of ['@math.gl/core/worker-utils', '@math.gl/core/tasks/run-task'
   assert.throws(() => require(path), {code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'});
 }
 for (const [api, provided] of [[tasks, geospatial], [require('@math.gl/core/tasks'), require('@math.gl/geospatial/tasks')]]) {
+  await api.preloadTasks([provided.ProjectCoordinatesTask, provided.PrepareMapTask]);
   const runner = new api.TaskRunner();
   try {
     const {coordinates} = await runner.runTask(provided.ProjectCoordinatesTask, {coordinates: new Float64Array([10, 20]), projection: {from: 'EPSG:4326', to: 'EPSG:3857'}});

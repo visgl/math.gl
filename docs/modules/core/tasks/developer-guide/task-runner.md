@@ -197,6 +197,39 @@ otherwise. Choose `main-thread` to run locally or `worker` to require a worker.
 Worker load errors are reported; there is no hidden local retry. Synchronous
 main-thread computation does not become CPU-parallel by raising concurrency.
 
+### Load task code before the first operation
+
+Move code-loading latency ahead of the first user interaction, independently of a runner:
+
+```ts
+import {preloadTasks, TaskRunner} from '@math.gl/core/tasks';
+import {ProjectCoordinatesTask, PrepareMapTask} from '@math.gl/geospatial/tasks';
+
+await preloadTasks([ProjectCoordinatesTask, PrepareMapTask]);
+
+const runner = new TaskRunner();
+try {
+  const {coordinates} = await runner.runTask(ProjectCoordinatesTask, {
+    coordinates: new Float64Array([10, 20]),
+    projection: {from: 'EPSG:4326', to: 'EPSG:3857'}
+  });
+  console.log(coordinates);
+} finally {
+  await runner.close();
+}
+```
+
+`preloadTasks` loads worker entry code and awaits optional `task.preload()` hooks
+for nested chunks. It uses temporary workers and terminates them after preloading;
+it never initializes application state or retains a worker pool. Later workers can
+reuse downloaded code according to browser cache policy. Worker startup and task
+initialization still happen at execution time. Use `initializeTask` when you also
+want to retain a live worker and its state.
+
+For local execution, use `preloadTasks([task], {execution: 'main-thread'})` to run
+its hook on the calling thread. Ordinary async execution awaits the hook automatically
+if you have not already preloaded. No HTML preload elements are needed.
+
 ### Set concurrency
 
 `new TaskRunner({maxConcurrency: 4})` gives the runner four execution slots.
@@ -286,6 +319,50 @@ const {values} = await runner.runTask(
 at the call site. Required application options remain required; they live under
 `options`, separate from runtime controls. Omit the `options` type for a task
 without application parameters.
+
+### Preload nested code chunks
+
+A task can move dynamic imports ahead of processing with an optional hook:
+
+```ts
+const task = {
+  id: 'transform',
+  async preload() {
+    const module = await import('./transform-implementation.js');
+    await module.preloadDependencies?.();
+  },
+  async process({values}) {
+    const {transform} = await import('./transform-implementation.js');
+    return {values: transform(values)};
+  }
+};
+```
+
+`preload` loads code only; it takes no input and returns no task state. The runtime
+waits for it before initializing a task, and deduplicates concurrent/repeated loads
+for the same definition in that environment. A failed load can be retried. Include
+imports that would otherwise wait until processing. Keep per-instance allocation
+in `initialize` and its cleanup in `destroy`.
+
+### Return a small result synchronously
+
+The `scaleTask` above has a synchronous processor, so it can also return directly:
+
+```ts
+const {values} = runner.runTaskSync(
+  scaleTask,
+  {values: new Float64Array([1, 2, 3])},
+  {options: {factor: 10}}
+);
+```
+
+`runTaskSync` always runs on the calling thread, with the same named payload and
+ownership rules. Initialization and destruction must also be synchronous. If your task has a
+`preload` hook, await `preloadTasks([task], {execution: 'main-thread'})` first. It throws when the
+runner has no free execution slot and blocks the UI until completion. Use it for
+small computations; use `runTask` with a worker for expensive work. The provided
+geospatial tasks load code asynchronously and therefore use `runTask` even when
+executing on the main thread.
 
 ### Add streaming and lifecycle hooks
 

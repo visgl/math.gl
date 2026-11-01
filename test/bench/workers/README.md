@@ -54,3 +54,11 @@ The echo worker startup and module loading are measured separately as
 on that retained handle. Its `coldMs` is the first timed call after initialization,
 not a cold worker startup measurement. Compare warm call timings across libraries
 and report initialization separately.
+
+Worker-code warmup is measured as `math.gl/echo-preload`. Compare
+`math.gl/tiny-automatic-cold` (fresh worker each call) with
+`math.gl/tiny-automatic-after-code-preload` (fresh worker and task state after global code warmup).
+`math.gl/tiny-main-thread-sync` uses `runTaskSync`; the timing harness still awaits
+each sample. Startup costs remain separate from warmed-call measurements.
+
+Global code preloading does not retain workers. Node results do not predict browser HTTP-cache savings.

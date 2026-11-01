@@ -12,6 +12,7 @@ import {
   type ProcessOnWorkerOptions
 } from '../worker-utils/index';
 import {TaskRuntime, assertPayload, clonePayload, localContext} from './task-runtime';
+import {runTaskSync} from './task-sync';
 import type {
   AnyTask,
   TaskInput,
@@ -26,7 +27,9 @@ import type {
   InitializedTaskOptions,
   InitializedTaskBatchOptions,
   RequestArgs,
-  TaskRunnerOptions
+  TaskRunnerOptions,
+  SynchronousTask,
+  TaskSyncRunOptions
 } from './task';
 
 /** A state instance bound to one execution location. Operations are serialized. */
@@ -332,6 +335,25 @@ export class TaskRunner {
     this.maxConcurrency = options.maxConcurrency ?? 1;
     if (!Number.isSafeInteger(this.maxConcurrency) || this.maxConcurrency < 1)
       throw new RangeError('maxConcurrency must be a positive safe integer');
+  }
+
+  /** Execute synchronous hooks immediately on the calling thread, without queueing. */
+  runTaskSync<D extends AnyTask>(
+    task: D & SynchronousTask<D>,
+    input: TaskInput<D>,
+    ...args: RequestArgs<TaskSyncRunOptions<D>>
+  ): TaskOutput<D> {
+    if (this.closed) throw new Error('Task runner is closed');
+    if (this.count >= this.maxConcurrency)
+      throw new Error('Task runner has no synchronous capacity');
+    this.count++;
+    try {
+      return runTaskSync(task, input, args[0]);
+    } finally {
+      const waiter = this.waiters.shift();
+      if (waiter) waiter.resolve();
+      else this.count--;
+    }
   }
 
   initializeTask<D extends AnyTask>(
