@@ -351,7 +351,10 @@ export class TaskRunner {
     ...args: RequestArgs<TaskRunOptions<D>>
   ): Promise<TaskOutput<D>> {
     const request = (args[0] as any) ?? {};
-    const handle = await this.initializeTask(task, request.initialization ?? {}, request);
+    const handle = await this.initializeTask(task, request.initialization ?? {}, {
+      ...request,
+      inputOwnership: 'copy'
+    });
     return finish(handle, () => handle.runTask(input, request));
   }
 
@@ -365,61 +368,81 @@ export class TaskRunner {
     if (!Number.isSafeInteger(concurrency) || concurrency < 1 || concurrency > this.maxConcurrency)
       throw new RangeError('concurrency must be between 1 and maxConcurrency');
     const handles: InitializedTask<D>[] = [];
-    const pending: Array<Promise<{value?: TaskOutput<D>; error?: unknown; failed?: boolean}>> = [];
+    const busy = new Set<InitializedTask<D>>();
+    const pending: Array<
+      Promise<{
+        kind: 'result';
+        handle: InitializedTask<D>;
+        value?: TaskOutput<D>;
+        error?: unknown;
+        failed?: boolean;
+      }>
+    > = [];
     const controller = new AbortController();
     const signal = request.signal
       ? AbortSignal.any([request.signal, controller.signal])
       : controller.signal;
     const iterator = asAsync(inputs, signal)[Symbol.asyncIterator]();
     let finished = false;
+    let reading: Promise<{kind: 'input'; next: IteratorResult<TaskInput<D>>}> | undefined;
     try {
-      // Acquire only one slot initially. Additional slots must not wait while this
-      // call holds capacity needed by another concurrent runTasks call.
-      for (let i = 0; i < concurrency; i++) {
-        if (i > 0 && this.count >= this.maxConcurrency) break;
+      while (!finished || pending.length) {
         signal.throwIfAborted();
-        const next = await iterator.next();
-        if (next.done) {
-          finished = true;
-          break;
+        if (!finished && !reading && pending.length < concurrency) {
+          reading = iterator.next().then(next => ({kind: 'input' as const, next}));
         }
-        const handle = await this.initializeTask(task, clonePayload(request.initialization ?? {}), {
-          ...request,
-          signal,
-          inputOwnership: 'copy'
-        });
-        handles.push(handle);
+        const event = await Promise.race([
+          ...(pending.length ? [pending[0]!] : []),
+          ...(reading ? [reading] : [])
+        ]);
+        if (event.kind === 'result') {
+          pending.shift();
+          busy.delete(event.handle);
+          if (event.failed) throw event.error;
+          yield event.value!;
+          continue;
+        }
+        reading = undefined;
+        if (event.next.done) {
+          finished = true;
+          continue;
+        }
+        let handle = handles.find(candidate => !busy.has(candidate));
+        // Check capacity immediately before opening: open reserves it synchronously.
+        // Never wait for an extra slot while already holding one.
+        if (!handle && (handles.length === 0 || this.count < this.maxConcurrency)) {
+          handle = await this.initializeTask(task, clonePayload(request.initialization ?? {}), {
+            ...request,
+            signal,
+            inputOwnership: 'copy'
+          });
+          handles.push(handle);
+        }
+        if (!handle) {
+          const result = await pending.shift()!;
+          busy.delete(result.handle);
+          if (result.failed) throw result.error;
+          yield result.value!;
+          handle = result.handle;
+        }
+        busy.add(handle);
+        const current = handle;
         pending.push(
-          handle.runTask(next.value, {...request, signal}).then(
-            value => ({value}),
-            error => ({failed: true, error})
+          handle.runTask(event.next.value, {...request, signal}).then(
+            value => ({kind: 'result' as const, handle: current, value}),
+            error => ({kind: 'result' as const, handle: current, failed: true, error})
           )
         );
       }
-      let slot = 0;
-      while (pending.length) {
-        const result = await pending.shift()!;
-        if (result.failed) throw result.error;
-        yield result.value!;
-        signal.throwIfAborted();
-        if (!finished) {
-          const next = await iterator.next();
-          if (next.done) finished = true;
-          else
-            pending.push(
-              handles[slot]!.runTask(next.value, {...request, signal}).then(
-                value => ({value}),
-                error => ({failed: true, error})
-              )
-            );
-        }
-        slot = (slot + 1) % handles.length;
-      }
     } finally {
       controller.abort(new Error('Task iteration closed'));
-      if (!finished) void iterator.return?.().catch(() => {});
-      await Promise.all(pending);
-      await Promise.all(handles.map(handle => handle.close()));
+      try {
+        if (reading) await reading.catch(() => {});
+        if (!finished) await iterator.return?.();
+      } finally {
+        await Promise.all(pending);
+        await Promise.all(handles.map(handle => handle.close()));
+      }
     }
   }
 
@@ -429,7 +452,10 @@ export class TaskRunner {
     ...args: RequestArgs<TaskRunOptions<D>>
   ): AsyncIterable<TaskBatchOutput<D>> {
     const request = (args[0] as any) ?? {};
-    const handle = await this.initializeTask(task, request.initialization ?? {}, request);
+    const handle = await this.initializeTask(task, request.initialization ?? {}, {
+      ...request,
+      inputOwnership: 'copy'
+    });
     try {
       yield* handle.runTaskInBatches(inputs, request);
     } finally {
@@ -534,6 +560,7 @@ async function* asAsync<T>(
   const iterator =
     Symbol.asyncIterator in inputs ? inputs[Symbol.asyncIterator]() : inputs[Symbol.iterator]();
   let done = false;
+  let blocked = false;
   try {
     while (true) {
       const next = await new Promise<IteratorResult<T>>((resolve, reject) => {
@@ -548,17 +575,21 @@ async function* asAsync<T>(
           return;
         }
         try {
+          blocked = true;
           Promise.resolve(iterator.next()).then(
             value => {
+              blocked = false;
               cleanup();
               resolve(value);
             },
             error => {
+              blocked = false;
               cleanup();
               reject(error);
             }
           );
         } catch (error) {
+          blocked = false;
           cleanup();
           reject(error);
         }
@@ -571,10 +602,14 @@ async function* asAsync<T>(
     }
   } finally {
     if (!done) {
-      try {
-        void Promise.resolve(iterator.return?.()).catch(() => {});
-      } catch {
-        /* Best effort producer cleanup. */
+      if (blocked) {
+        try {
+          void Promise.resolve(iterator.return?.()).catch(() => {});
+        } catch {
+          /* A blocked producer cannot be forced to settle. */
+        }
+      } else {
+        await iterator.return?.();
       }
     }
   }

@@ -61,8 +61,8 @@ blocked asynchronous producers.
 
 `initializeTask` controls contain only execution, signal, ownership, and progress;
 application initialization data is the named second argument. Its signal does not
-control future runs. Automatic multi-input initialization copies a template for
-each slot. Separate automatic calls currently create separate workers.
+control future runs. All automatic calls copy initialization data independently of process input
+ownership; multi-input calls copy a template for each slot. Separate automatic calls currently create separate workers.
 
 ## InitializedTask
 
@@ -95,5 +95,5 @@ Not implemented: runner byte budgets, admission reservations, priority, metrics,
 shutdown deadlines, automatic worker reuse across calls, adaptive routing, and
 cooperative worker cancellation. Use the existing worker-utils APIs for those
 controls. Do not pass RFC-only fields to this prototype. See the
-[guide's support table](../developer-guide/task-runner.md#what-this-prototype-supports)
+[design RFC](https://github.com/visgl/math.gl/blob/master/dev-docs/RFCs/task-runner-rfc.md)
 for the complete distinction.

@@ -1,20 +1,260 @@
-# Get started with TaskRunner
+# Get started with Tasks
 
-**Define the work once. Choose how long it lives.**
+Tasks keep your application responsive while processing large datasets.
+`TaskRunner` runs computations in background workers, processes incoming data
+incrementally, and reuses expensive state across repeated operations.
 
-A `Task` is a plain typed object. A `TaskRunner` executes it locally or in a worker,
-handles named input and output objects, and owns its cleanup. Start with one call;
-use the same definition for a sequence of calls, a stream, or reusable state.
+Start with tasks provided by math.gl modules. This guide uses geospatial tasks to
+reproject coordinates and prepare maps, then explains how to create your own tasks.
 
-> **Experimental prototype.** This guide describes the TaskRunner implementation
-> on this branch. It is not a promise that an already-published math.gl version
-> contains these exports. Existing task functions retain their behavior. The
-> [support boundary](#what-this-prototype-supports) identifies deferred RFC features.
+## Running a Task
 
-## Your first task
+As our first example, the `ProjectCoordinatesTask` (provided by
+`@math.gl/geospatial/tasks`) converts coordinates between coordinate reference
+systems. Our goal here is to convert longitude and latitude in degrees into
+Web Mercator coordinates in meters.
 
-The following TypeScript needs no worker or bundler configuration. It scales a
-buffer on the main thread and returns an independently owned result.
+```ts
+import {TaskRunner} from '@math.gl/core/tasks';
+import {ProjectCoordinatesTask} from '@math.gl/geospatial/tasks';
+
+const runner = new TaskRunner();
+try {
+  const {coordinates} = await runner.runTask(ProjectCoordinatesTask, {
+    coordinates: new Float64Array([0, 0, 10, 20]),
+    projection: {from: 'EPSG:4326', to: 'EPSG:3857'}
+  });
+
+  console.log([...coordinates]);
+  // Approximately [0, 0, 1113194.91, 2273030.93]
+} finally {
+  await runner.close();
+}
+```
+
+The task supplies its worker implementation. `TaskRunner` starts the worker,
+initializes the projection, runs the operation, and releases the temporary state.
+You receive a Promise of a result object. No worker message handling is required.
+
+Inputs and outputs have named fields: `{coordinates}`, not a bare typed array.
+The input specifies the coordinates and their projection. Input buffers are copied
+by default, so the caller can keep using them.
+
+The examples below use a runner owned by your application. Close it after its last
+operation, or in your component's teardown. Each complete runnable example uses
+`try`/`finally` to make that lifetime explicit.
+
+## Prepare a map
+
+`PrepareMapTask` builds a portable map snapshot in a worker. Restore it as a
+`MapEngine` when you need to use the map on the main thread:
+
+```ts
+import {TaskRunner} from '@math.gl/core/tasks';
+import {PrepareMapTask} from '@math.gl/geospatial/tasks';
+import {MapEngine} from '@math.gl/geospatial/discontinuous';
+
+const runner = new TaskRunner();
+try {
+  const {map} = await runner.runTask(PrepareMapTask, {
+    description: {
+      version: 1,
+      id: 'world',
+      definition: {type: 'mercator'}
+    }
+  });
+
+  const engine = MapEngine.fromPrepared(map);
+  console.log(engine.getLayout());
+} finally {
+  await runner.close();
+}
+```
+
+The task returns data that can cross the worker boundary. The restored engine is
+an ordinary local object. Prepared snapshots are for same-version transport,
+not a permanent storage format.
+
+## Process multiple inputs
+
+Use `runTasks` to apply a task to several independent input objects. Results arrive
+in input order, even when computation overlaps:
+
+```ts
+const runner = new TaskRunner({maxConcurrency: 2});
+const projection = {from: 'EPSG:4326', to: 'EPSG:3857'};
+
+try {
+  const inputs = [
+    {coordinates: new Float64Array([0, 0, 10, 20]), projection},
+    {coordinates: new Float64Array([-74, 40.7, 139.7, 35.7]), projection}
+  ];
+
+  for await (const {coordinates} of runner.runTasks(
+    ProjectCoordinatesTask,
+    inputs,
+    {concurrency: 2}
+  )) {
+    console.log(coordinates);
+  }
+} finally {
+  await runner.close();
+}
+```
+
+Inputs can be an `Iterable` or `AsyncIterable`. The runner pulls them lazily and
+bounds outstanding work and buffered results. `concurrency` is an upper bound;
+other calls on the same runner may leave fewer slots available.
+
+Each used slot initializes its own projection and reuses it within this operation.
+Separate `runTasks` calls do not share application state.
+
+## Process a stream
+
+Use `runTaskInBatches` when inputs arrive incrementally and should pass through one
+processing session. `ProjectCoordinatesTask` retains one projection for the stream:
+
+```ts
+async function* coordinateBatches() {
+  yield {coordinates: new Float64Array([0, 0, 10, 20]), projection};
+  yield {coordinates: new Float64Array([-74, 40.7]), projection};
+}
+
+for await (const {coordinates} of runner.runTaskInBatches(
+  ProjectCoordinatesTask,
+  coordinateBatches()
+)) {
+  // Upload or consume each result without collecting the entire dataset.
+  console.log(coordinates);
+}
+```
+
+`runTasks` calls the atomic processor separately for each input. In contrast,
+`runTaskInBatches` invokes the streaming processor once for the entire sequence.
+A streaming task may regroup input, retain intermediate state, or emit a different
+number of output batches. Each emitted batch still has named fields.
+
+Consumer demand applies backpressure: a slow consumer slows processing. Use
+`for await` so `break` closes the output iterator and requests input cleanup.
+
+## Reuse initialized state
+
+If you will project several datasets using the same CRS pair, initialize the task
+explicitly. This optional initialization supplies a default projection, so subsequent
+inputs only need coordinates. The returned handle retains the projection across calls:
+
+```ts
+const projectionTask = await runner.initializeTask(ProjectCoordinatesTask, {
+  projection: {from: 'EPSG:4326', to: 'EPSG:3857'}
+});
+
+try {
+  const first = await projectionTask.runTask({
+    coordinates: new Float64Array([0, 0, 10, 20])
+  });
+
+  const second = await projectionTask.runTask({
+    coordinates: new Float64Array([-74, 40.7])
+  });
+
+  // The same handle also supports runTasks and runTaskInBatches.
+  console.log(first.coordinates, second.coordinates);
+} finally {
+  await projectionTask.close();
+}
+```
+
+An input can override the default with its own `projection`. The task caches the
+most recently used projection within its lifetime.
+
+The handle's methods omit the task argument because it is already bound. All calls
+are serial and share state; the execution location stays fixed. An initialized
+handle occupies runner capacity even while idle. With capacity one, reuse or close
+that handle before awaiting another operation through the runner.
+
+![Automatic calls initialize, process, and destroy state; explicit handles retain state across calls until close.](/images/task-runner-lifetimes.svg)
+
+Automatic initialization belongs to the top-level runner operation. Explicit
+initialization lasts until `close()`. A task that does not need persistent state,
+such as `PrepareMapTask`, simply supplies a processor.
+
+## Controlling Task Execution
+
+You control concurrency, cancellation, and whether buffers are copied, transferred,
+or shared. These controls belong to the runner or request, separate from the task's
+application parameters.
+
+### Choose an execution location
+
+```ts
+await runner.runTask(ProjectCoordinatesTask, {coordinates, projection}, {
+  execution: 'worker'
+});
+```
+
+`auto`, the default, uses a declared worker target when present and local execution
+otherwise. Choose `main-thread` to run locally or `worker` to require a worker.
+Worker load errors are reported; there is no hidden local retry. Synchronous
+main-thread computation does not become CPU-parallel by raising concurrency.
+
+### Set concurrency
+
+`new TaskRunner({maxConcurrency: 4})` gives the runner four execution slots.
+`runTasks(..., {concurrency: 2})` uses at most two of those slots. Explicitly
+initialized handles each retain one slot. A stream occupies its slot until it ends.
+
+### Choose buffer ownership
+
+| Control | Meaning |
+| --- | --- |
+| `inputOwnership: 'copy'` (default) | Preserve the caller's buffers |
+| `inputOwnership: 'transfer'` | Move buffers; all caller views of those buffers detach |
+| `inputOwnership: 'share'` | Require shared storage rather than ordinary transferable buffers |
+| `outputOwnership: 'transfer'` (default) | Move returned buffers to the caller |
+| `outputOwnership: 'copy'` | Keep returned buffers usable inside task state |
+
+These boundaries also apply locally. `SharedArrayBuffer` stays shared under every
+policy; copy does not isolate shared memory. Individual tasks may impose tighter
+input requirements: `ProjectCoordinatesTask` currently accepts ordinary
+`Float32Array` or `Float64Array` storage, not shared buffers.
+
+Application options are copied separately. Transfer rejects input that aliases
+reusable option buffers; use copy mode for those inputs. Automatic calls
+copy initialization data for each slot. Explicit initialization can transfer
+ownership once. If a task returns cached storage, choose output copying to avoid
+detaching that storage inside its state.
+
+### Cancel work and observe progress
+
+```ts
+const controller = new AbortController();
+const result = runner.runTask(ProjectCoordinatesTask, {coordinates, projection}, {
+  signal: controller.signal,
+  onProgress({phase, completed, total}) {
+    console.log(phase, completed, total);
+  }
+});
+
+// A UI event can call controller.abort().
+await result;
+```
+
+Worker cancellation terminates the worker and invalidates any retained state.
+There is no automatic retry. Main-thread work must observe its signal and yield
+during long computation so abort events can run; it cannot be forcibly stopped.
+The supplied projection task checks cancellation between chunks.
+
+### Close the runner
+
+`close()` drains accepted work and destroys task state. Finish or close output
+iterators before awaiting graceful shutdown. `terminate(reason)` cancels work,
+stops workers, and unwinds paused output iterators. Forced termination cannot
+guarantee task cleanup. Local execution must settle before state is destroyed.
+
+## Create your own task
+
+Once the provided tasks are familiar, use the same API for your own computation.
+A `Task` is a plain object checked with `satisfies`; no factory or registry is needed:
 
 ```ts
 import {TaskRunner, type Task} from '@math.gl/core/tasks';
@@ -34,188 +274,23 @@ const scaleTask = {
   }
 } satisfies Task<ScaleTypes>;
 
-const runner = new TaskRunner();
-try {
-  const input = {values: new Float64Array([1, 2, 3])};
-  const output = await runner.runTask(scaleTask, input, {
-    options: {factor: 10}
-  });
-
-  console.log([...output.values]); // [10, 20, 30]
-  console.log([...input.values]);  // [1, 2, 3] — input is copied by default
-} finally {
-  await runner.close();
-}
+const {values} = await runner.runTask(
+  scaleTask,
+  {values: new Float64Array([1, 2, 3])},
+  {options: {factor: 10}}
+);
+// values: Float64Array [10, 20, 30]
 ```
 
-Three things to notice:
+`process` may return an object or a Promise. Input and output fields remain typed
+at the call site. Required application options remain required; they live under
+`options`, separate from runtime controls. Omit the `options` type for a task
+without application parameters.
 
-1. **Data has names.** Use `{values}`, not a bare array. Results follow the same
-   rule. Adding a field later does not change the argument order.
-2. **Application options are separate.** `factor` lives in `options`; execution,
-   signals, and ownership controls live beside it.
-3. **`satisfies` checks the contract.** It types processor arguments and preserves
-   the concrete return type. No factory, registration table, or string lookup is
-   involved. `id` labels diagnostics.
+### Add streaming and lifecycle hooks
 
-`process` may return an object or a Promise of an object. A task without
-application options can omit the `options` type and the request argument.
-
-## Choose the operation
-
-| You have… | Call | What runs |
-| --- | --- | --- |
-| One input object | `runTask(task, input, request)` | `process` once |
-| Independent input objects | `runTasks(task, inputs, request)` | `process` for each input |
-| An incremental computation | `runTaskInBatches(task, inputs, request)` | `processInBatches` once for the whole stream |
-| Expensive reusable state | `initializeTask(task, initialization)` | `initialize` once; use the returned handle repeatedly |
-
-Both multi-input methods return async iterables. Creating an iterable does not
-start work; consuming it does. Use `for await` so `break` closes the iterator.
-
-## Process several inputs
-
-Use `runTasks` for independent inputs. Results arrive in input order, even when
-execution overlaps. Set runner capacity and per-call concurrency explicitly:
-
-```ts
-const runner = new TaskRunner({maxConcurrency: 2});
-try {
-  const inputs = [
-    {values: new Float64Array([1, 2])},
-    {values: new Float64Array([3, 4])}
-  ];
-
-  for await (const {values} of runner.runTasks(scaleTask, inputs, {
-    options: {factor: 10},
-    concurrency: 2
-  })) {
-    console.log([...values]); // [10, 20], then [30, 40]
-  }
-} finally {
-  await runner.close();
-}
-```
-
-The runner pulls inputs lazily and bounds outstanding results. Concurrency is an
-upper bound: other calls using the same runner may leave fewer slots available.
-It does not turn synchronous main-thread work into parallel CPU execution. Add a
-worker target when you need that.
-
-## Move the same task into a worker
-
-Keep the task definition in `scale-task.ts`, export it, and add a worker target:
-
-```ts
-export const scaleTask = {
-  id: 'scale',
-  process({values}, {factor}, context) {
-    context.throwIfAborted();
-    return {values: values.map(value => value * factor)};
-  },
-  worker: {
-    url: new URL('./scale-worker.js', import.meta.url),
-    capabilities: {atomic: true, streaming: false}
-  }
-} satisfies Task<ScaleTypes>;
-```
-
-The worker entry point installs that definition:
-
-```ts
-// scale-worker.ts — compiled to scale-worker.js
-import {initializeTaskWorker} from '@math.gl/core/tasks';
-import {scaleTask} from './scale-task.js';
-
-await initializeTaskWorker(scaleTask);
-```
-
-Then call the task normally:
-
-```ts
-const output = await runner.runTask(scaleTask, {values}, {
-  options: {factor: 10},
-  execution: 'worker'
-});
-```
-
-`initializeTaskWorker` runs **inside an existing worker**. It installs the message
-protocol; it does not create a Worker or call your task's `initialize` hook.
-The runner creates the Worker. Functions are loaded from the worker module, never
-serialized from the caller.
-
-For a browser bundler, replace `url` with a factory whose literal URL the bundler
-can discover:
-
-```ts
-worker: {
-  create: () => new Worker(new URL('./scale-worker.ts', import.meta.url), {
-    type: 'module'
-  }),
-  capabilities: {atomic: true, streaming: false}
-}
-```
-
-Use exactly one of `url` or `create`. Node requires a compiled module URL;
-`create` is the browser factory form. Auto execution chooses a declared worker
-target when present and local execution otherwise. Choose `main-thread` explicitly
-to use the local processor of a task that also declares a worker. Worker load
-errors are reported; they do not trigger a hidden local retry.
-
-## Stream without collecting everything first
-
-`processInBatches` can retain session-local variables, change batch sizes, and
-produce a different number of outputs than inputs. This task groups values into
-pairs across input boundaries:
-
-```ts
-type GroupTypes = {
-  input: {values: number[]};
-  output: {values: number[]};
-};
-
-const groupTask = {
-  id: 'pairs',
-
-  async *processInBatches(inputs, _options, context) {
-    let pending: number[] = [];
-    for await (const {values} of inputs) {
-      context.throwIfAborted();
-      pending.push(...values);
-      while (pending.length >= 2) {
-        yield {values: pending.splice(0, 2)};
-      }
-    }
-    if (pending.length) yield {values: pending};
-  }
-} satisfies Task<GroupTypes>;
-
-for await (const output of runner.runTaskInBatches(groupTask, [
-  {values: [1, 2, 3]},
-  {values: [4, 5]}
-])) {
-  console.log(output);
-}
-// {values: [1, 2]}
-// {values: [3, 4]}
-// {values: [5]}
-```
-
-A task can implement both `process` and `processInBatches`. The method you call
-selects the processor; the runner never guesses a conversion between them.
-Use `batchInput` and `batchOutput` in the type map when streaming representations
-differ from atomic inputs and outputs.
-
-The worker protocol requests inputs on demand and acknowledges outputs as the
-consumer advances. A slow consumer therefore slows processing. Closing a worker
-stream early invalidates its initialized handle in this prototype; create a new
-handle before issuing more calls. A normally completed stream retains its state.
-
-## Initialize expensive state once
-
-Imagine a lookup table, decoded geometry, or a WASM instance. The state should
-stay where the computation runs. Add lifecycle hooks, with destruction directly
-below initialization:
+One task can implement atomic and streaming processors. Add `initialize` when it
+needs private state and `destroy` when that state needs explicit cleanup:
 
 ```ts
 type LookupTypes = {
@@ -251,157 +326,62 @@ const lookupTask = {
 } satisfies Task<LookupTypes>;
 ```
 
-For one operation, let the runner manage the lifetime automatically:
+State stays private to its execution location. The runner supplies it as
+`context.state` to both processors. Use `batchInput` and `batchOutput` type fields
+if streaming representations differ from atomic payloads; otherwise they default
+to `input` and `output`. A streaming processor can keep generator-local variables
+without defining an initializer.
+
+### Install your task in a worker
+
+Export the definition from `lookup-task.ts` and add a worker target to it:
 
 ```ts
-const output = await runner.runTask(lookupTask, {keys: ['a', 'missing']}, {
-  initialization: {entries: [['a', 10], ['b', 20]]},
-  options: {missingValue: -1}
-});
-// {values: [10, -1]}; destroy has completed before successful resolution.
-```
-
-For repeated operations, keep an explicit initialized handle:
-
-```ts
-const lookup = await runner.initializeTask(lookupTask, {
-  entries: [['a', 10], ['b', 20]]
-});
-try {
-  await lookup.runTask({keys: ['a']}, {options: {missingValue: -1}});
-  await lookup.runTask({keys: ['b']}, {options: {missingValue: -1}});
-
-  for await (const output of lookup.runTaskInBatches(
-    [{keys: ['a', 'b']}],
-    {options: {missingValue: -1}}
-  )) {
-    console.log(output); // {values: [10, 20]}
-  }
-} finally {
-  await lookup.close();
+worker: {
+  url: new URL('./lookup-worker.js', import.meta.url),
+  capabilities: {atomic: true, streaming: true}
 }
 ```
 
-The handle has the same three execution methods with the task argument removed.
-It serializes operations, fixes the execution location, and keeps the same state.
-A streaming iterator occupies the handle until it ends. Do not wait for another
-operation on that handle from inside an unfinished streaming loop.
-
-### See the lifetime
-
-![Automatic calls initialize, process, and destroy state; explicit handles retain state across calls until close.](/images/task-runner-lifetimes.svg)
-
-`runTasks` creates one state instance for each used slot and reuses it within that
-call. With concurrency two, there are two separate states. Use concurrency one or
-an explicit handle when mutations must follow one shared history. Empty input
-creates no state. Nothing is cached across separate automatic calls.
-
-An initialized handle occupies runner capacity, even while idle. With capacity
-one, close that handle before awaiting a separate runner call. Reuse the handle
-for related operations, or provision more capacity.
-
-## Keep ownership intentional
-
-| Control | Meaning |
-| --- | --- |
-| `inputOwnership: 'copy'` (default) | Preserve the caller's buffers |
-| `inputOwnership: 'transfer'` | Move buffers; all caller views of those buffers detach |
-| `inputOwnership: 'share'` | Require shared storage rather than ordinary transferable buffers |
-| `outputOwnership: 'transfer'` (default) | Move returned buffers to the caller |
-| `outputOwnership: 'copy'` | Keep buffers usable inside task state |
-
-These boundaries also apply to local execution. SharedArrayBuffer remains shared
-under every policy; copy does not isolate shared memory. Application options are
-copied separately. Transfer rejects inputs that alias reusable option buffers;
-use copy mode for those inputs.
-Automatic `runTasks` copies initialization data for each slot; explicit
-initialization can transfer ownership once.
-
-If a processor returns a cached typed array, choose `outputOwnership: 'copy'`.
-Otherwise the default transfer detaches that cached buffer inside the task.
-
-## Cancellation and cleanup
+Then create the worker entry point:
 
 ```ts
-const controller = new AbortController();
-const result = runner.runTask(scaleTask, {values}, {
-  options: {factor: 10},
-  execution: 'worker',
-  signal: controller.signal
-});
-// A UI event can call controller.abort().
-await result;
+// lookup-worker.ts — compiled to lookup-worker.js
+import {initializeTaskWorker} from '@math.gl/core/tasks';
+import {lookupTask} from './lookup-task.js';
+
+await initializeTaskWorker(lookupTask);
 ```
 
-Worker cancellation in this prototype terminates the worker and invalidates
-persistent state. There is no automatic retry. On the main thread, processors
-must observe `context.signal` or call `context.throwIfAborted()` and yield during
-long work so abort events can run. Main-thread JavaScript cannot be forcibly
-stopped; cleanup waits until execution settles.
+`initializeTaskWorker` installs the protocol inside an existing worker. The runner
+creates the worker; task initialization happens later. Functions load from the
+worker module and are never serialized from the caller.
 
-Always close runners and initialized handles in `finally`. `close()` drains work
-and invokes `destroy`; `terminate(reason)` cancels work and forcibly stops workers.
-Forced termination cannot guarantee `destroy`. Finish or close output iterators
-before awaiting graceful `close()`. Forced `terminate()` also unwinds paused
-output iterators without requiring the consumer to advance them. The prototype
-has no shutdown timeout.
+For a browser bundler, use a fresh worker factory instead of a URL:
 
-## Run the complete example
-
-From a source checkout after installing dependencies and building:
-
-```sh
-node examples/core/task-runner/main.mjs
+```ts
+worker: {
+  create: () => new Worker(new URL('./lookup-worker.ts', import.meta.url), {
+    type: 'module'
+  }),
+  capabilities: {atomic: true, streaming: true}
+}
 ```
 
-The [runnable example](https://github.com/visgl/math.gl/tree/master/examples/core/task-runner) uses real
-Node workers and verifies all four patterns:
+Use exactly one target form. Node needs a compiled module URL. Capabilities must
+match the worker's implemented processors. An explicitly annotated worker-only
+`Task<Types>` retains its input, output, option, and initialization types; `satisfies`
+alone cannot infer absent processor types from a URL.
 
-```text
-One call: [ 11, 21, 31 ]
-Independent slots: [ 1, 1, 2 ]
-One streaming session: [ 1, 2 ]
-Explicit lifetime: [ 1, 2 ]
-```
+## Further reading
 
-The counters are the useful part: each parallel slot starts at one, while streaming
-and explicit lifetimes reuse one counter. The example asserts that caller input
-buffers remain available.
+- [TaskRunner API reference](../api-reference/task-runner.md): implemented options,
+  errors, ownership, and current prototype boundaries.
+- [Runnable examples](https://github.com/visgl/math.gl/tree/master/examples/core/task-runner):
+  provided geospatial tasks and a custom transform task, with asserted results.
+- [Design RFC](https://github.com/visgl/math.gl/blob/master/dev-docs/RFCs/task-runner-rfc.md):
+  full proposal, migration, library comparisons, and deferred features.
 
-## What this prototype supports
-
-| Available now | Deferred from the RFC |
-| --- | --- |
-| Plain typed objects; inferred input/output/options; required initialization | Full compile-time capability discrimination for worker-only descriptors |
-| Browser/Node module workers and main-thread execution | Capability/version handshake for mismatched worker assets |
-| Atomic calls, ordered bounded multi-input calls, streaming sessions | Runner byte budgets, reservations, priority, metrics |
-| Automatic lifetimes and explicit initialized handles | Worker reuse across separate automatic lifetimes |
-| Copy/transfer/share input and copy/transfer output | Cooperative worker cancellation with escalation |
-| Signals, progress, graceful close, forced worker termination | Shutdown deadlines and adaptive routing |
-
-Worker-side errors conservatively invalidate the handle, including ordinary
-processor errors. Local processor errors leave an explicit handle usable after
-settlement. This is stricter than the RFC's eventual worker behavior. Capabilities
-are declared by the application, so keep worker assets and descriptors aligned.
-
-For JavaScript, payload records are validated at runtime. For TypeScript, required
-fields and output types are checked through the descriptor. An explicitly
-annotated worker-only `Task<Types>` preserves processor types and required
-initialization fields. Use an explicit `: Task<Types>`
-annotation for worker-only objects: `satisfies` alone cannot infer absent processor
-types from a URL. Compile-time capability discrimination is still deferred.
-Prefer a shared typed definition with both worker and local hooks when practical.
-
-## Coming from the existing tasks API
-
-- Keep existing top-level functions unchanged until you migrate a call site.
-- Old `runTaskInBatches` means independent atomic calls: migrate it to
-  `runner.runTasks`, not `runner.runTaskInBatches`.
-- Put application parameters under `options` and raw payloads in named fields.
-- Replace `createResourceWorker` with task lifecycle hooks and
-  `createWorkerResource` with `runner.initializeTask`.
-- Replace worker-side `createWorker` setup with `initializeTaskWorker(task)` for
-  these new descriptors. Old and new descriptors are different protocols.
-
-Continue with the [API reference](../api-reference/task-runner.md) or the
-[design RFC](https://github.com/visgl/math.gl/blob/master/dev-docs/RFCs/task-runner-rfc.md).
+Existing top-level task functions keep their behavior. In particular, migrate the
+old `runTaskInBatches` to `runner.runTasks` for independent atomic calls;
+`runner.runTaskInBatches` invokes the streaming processor instead.

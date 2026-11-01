@@ -24,3 +24,12 @@ streaming and explicit handles increment the same state instance.
 
 See the [get-started guide](../../../docs/modules/core/tasks/developer-guide/task-runner.md)
 for the TypeScript version, browser setup, ownership, and prototype limitations.
+
+Run the provided geospatial tasks used in the guide:
+
+```sh
+node examples/core/task-runner/geospatial.mjs
+```
+
+This verifies coordinate projection, ordered multiple inputs, streaming, retained
+projection state, and a portable map snapshot using the package's worker targets.

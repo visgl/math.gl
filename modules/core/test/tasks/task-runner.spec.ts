@@ -574,3 +574,102 @@ test('worker input sharing does not impose sharing on copied application options
     await runner.close();
   }
 });
+
+test('runTasks yields ready results while the producer waits for feedback', async () => {
+  const runner = new TaskRunner({maxConcurrency: 2});
+  let resume!: () => void;
+  const feedback = new Promise<void>(resolve => {
+    resume = resolve;
+  });
+  async function* inputs() {
+    yield {value: 1};
+    await feedback;
+    yield {value: 2};
+  }
+  const iterator = runner
+    .runTasks(fixture().task, inputs(), {...request, concurrency: 2})
+    [Symbol.asyncIterator]();
+  try {
+    expect((await iterator.next()).value).toEqual({value: 3});
+    resume();
+    expect((await iterator.next()).value).toEqual({value: 5});
+    expect((await iterator.next()).done).toBe(true);
+  } finally {
+    resume();
+    await iterator.return?.();
+    await runner.close();
+  }
+});
+
+test('runTasks does not wait for extra capacity taken while reading input', async () => {
+  const runner = new TaskRunner({maxConcurrency: 2});
+  const {task} = fixture();
+  let pinned: Awaited<ReturnType<typeof runner.initializeTask>> | undefined;
+  async function* inputs() {
+    yield {value: 1};
+    pinned = await runner.initializeTask(task, {offset: 0});
+    yield {value: 2};
+  }
+  try {
+    expect(await collect(runner.runTasks(task, inputs(), {...request, concurrency: 2}))).toEqual([
+      {value: 3},
+      {value: 5}
+    ]);
+  } finally {
+    await pinned?.close();
+    await runner.close();
+  }
+});
+
+test('normal early return awaits producer cleanup and propagates cleanup failure', async () => {
+  const runner = new TaskRunner();
+  const handle = await runner.initializeTask(fixture().task, {offset: 0});
+  let cleaned = false;
+  async function* inputs() {
+    try {
+      yield {value: 1};
+      yield {value: 2};
+    } finally {
+      await new Promise(resolve => setTimeout(resolve, 10));
+      cleaned = true;
+      throw new Error('producer cleanup');
+    }
+  }
+  try {
+    const iterator = handle.runTasks(inputs(), {options: {factor: 1}})[Symbol.asyncIterator]();
+    await iterator.next();
+    await expect(iterator.return?.()).rejects.toThrow('producer cleanup');
+    expect(cleaned).toBe(true);
+  } finally {
+    await runner.close();
+  }
+});
+
+test('automatic transfer leaves initialization buffers intact', async () => {
+  const task = {
+    id: 'buffers',
+    initialize({buffer}: {buffer: ArrayBuffer}) {
+      return {buffer};
+    },
+    process({buffer}: {buffer: ArrayBuffer}) {
+      return {buffer};
+    },
+    async *processInBatches(inputs: AsyncIterable<{buffer: ArrayBuffer}>) {
+      yield* inputs;
+    }
+  };
+  const runner = new TaskRunner();
+  try {
+    for (const streaming of [false, true]) {
+      const initialization = {buffer: new ArrayBuffer(8)};
+      const input = {buffer: new ArrayBuffer(8)};
+      const controls = {initialization, inputOwnership: 'transfer' as const};
+      if (streaming) await collect(runner.runTaskInBatches(task, [input], controls));
+      else await runner.runTask(task, input, controls);
+      expect(initialization.buffer.byteLength).toBe(8);
+      expect(input.buffer.byteLength).toBe(0);
+    }
+  } finally {
+    await runner.close();
+  }
+});

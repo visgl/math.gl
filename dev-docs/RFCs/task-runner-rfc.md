@@ -5,7 +5,7 @@
 - **Baseline**: math.gl `master`, commit `ad2a3917c`
 
 > An experimental implementation accompanies this RFC. Its
-> [get-started guide](../../docs/modules/core/tasks/developer-guide/task-runner.md#what-this-prototype-supports)
+> [API reference](../../docs/modules/core/tasks/api-reference/task-runner.md#prototype-boundaries)
 > distinguishes implemented behavior from the complete proposal below.
 
 ## Summary

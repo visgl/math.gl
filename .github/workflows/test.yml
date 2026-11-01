@@ -176,6 +176,7 @@ jobs:
         run: |
           yarn check:tasks
           node examples/core/task-runner/main.mjs
+          node examples/core/task-runner/geospatial.mjs
 
       - name: Qualify worker scheduling, ownership and lifecycle workloads
         run: node test/bench/workers/index.mjs --quick --output=/tmp/worker-qualification.json

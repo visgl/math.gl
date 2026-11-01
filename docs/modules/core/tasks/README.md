@@ -1,6 +1,6 @@
 # Tasks
 
-Try the experimental [TaskRunner get-started guide](./developer-guide/task-runner.md)
+Try the experimental [Get started with Tasks](./developer-guide/task-runner.md)
 for typed task objects, named payloads, and automatic or explicit state lifetimes.
 The existing runtime documented below remains compatible.
 

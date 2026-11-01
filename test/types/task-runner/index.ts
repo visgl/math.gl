@@ -136,3 +136,22 @@ const optionalOptions = {
 runner.runTask(optionalOptions, {value: 1});
 // @ts-expect-error optional application fields remain typed
 runner.runTask(optionalOptions, {value: 1}, {options: {factor: 'bad'}});
+
+// Provided tasks support the short form and optional explicit initialization.
+import {ProjectCoordinatesTask, PrepareMapTask} from '@math.gl/geospatial/tasks';
+const providedRunner = new TaskRunner();
+const projected = await providedRunner.runTask(ProjectCoordinatesTask, {
+  coordinates: new Float64Array([0, 0]),
+  projection: {from: 'EPSG:4326', to: 'EPSG:3857'}
+});
+const projectedCoordinates: Float32Array | Float64Array = projected.coordinates;
+void projectedCoordinates;
+const preparedProjection = await providedRunner.initializeTask(ProjectCoordinatesTask, {
+  projection: {from: 'EPSG:4326', to: 'EPSG:3857'}
+});
+await preparedProjection.runTask({coordinates: new Float64Array([0, 0])});
+await preparedProjection.close();
+await providedRunner.runTask(PrepareMapTask, {
+  description: {version: 1, id: 'world', definition: {type: 'mercator'}}
+});
+await providedRunner.close();
