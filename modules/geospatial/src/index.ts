@@ -379,6 +379,9 @@ export type {TerrainSimplifiedContourPaths} from './terrain/contour-simplify';
 export {measureTerrainProfile} from './terrain/profile-measure';
 export {getTerrainProfileVisibility} from './terrain/profile-visibility';
 export type {TerrainProfileVisibility} from './terrain/profile-visibility';
+export {getTerrainProfileHorizon} from './terrain/profile-horizon';
+export type {TerrainProfileHorizon, TerrainProfileHorizonOptions} from './terrain/profile-horizon';
+export {getTerrainProfileViewshed, TerrainProfileViewStatus} from './terrain/profile-viewshed';
 export type {TerrainProfileMeasurements} from './terrain/profile-measure';
 export {reconcileTerrainVertexTiles} from './terrain/vertex-tiles';
 export type {

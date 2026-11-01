@@ -98,6 +98,11 @@ const probes = [
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/profile\./, /\/profile-measure\./],
     budget: 3500
   },
+  ...['getTerrainProfileHorizon', 'getTerrainProfileViewshed'].map(symbol => ({
+    symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/profile\./, /\/profile-measure\./, /\/profile-visibility\./],
+    budget: 4000
+  })),
   ...[
     ['reconcileTerrainVertexTiles', 'vertex-tiles', 5500],
     ['stitchTerrainMeshEdges', 'mesh-stitch', 11000]
