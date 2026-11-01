@@ -12,7 +12,7 @@ import {
 import { Deck, OrthographicView, COORDINATE_SYSTEM } from "@deck.gl/core";
 import { SimpleMeshLayer } from "@deck.gl/mesh-layers";
 import { PathLayer, PolygonLayer, TextLayer } from "@deck.gl/layers";
-import { prepareMapGrid } from "./prepare-map-grid.js";
+import { createMapGridPreparer } from "./prepare-map-grid.js";
 import { createMapPreparationGate } from "./map-preparation-gate.js";
 import { fitMapLayout } from "@math.gl/geospatial/discontinuous";
 import { Geometry } from "@luma.gl/engine";
@@ -69,6 +69,7 @@ export function createGlobalScene(
   onLongitude = () => {},
   onProgress = () => {},
 ) {
+  const gridPreparer = createMapGridPreparer();
   let current,
     options,
     longitude = 0,
@@ -180,7 +181,7 @@ export function createGlobalScene(
       canvas.setAttribute("aria-busy", "true");
       onLoading(true);
       onProgress({phase: 'starting', completed: 0});
-      prepareMapGrid(opts.view, gridStep(opts.view), {
+      gridPreparer.prepare(opts.view, gridStep(opts.view), {
         signal: request.controller.signal,
         onProgress: (progress) => {
           if (!disposed && pending === request) onProgress(progress);
@@ -734,6 +735,7 @@ export function createGlobalScene(
       canvas.removeEventListener("pointerup", up);
       canvas.removeEventListener("pointercancel", up);
       deck.finalize();
+      return gridPreparer.terminate();
     },
   };
 }

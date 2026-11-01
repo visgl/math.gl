@@ -165,6 +165,7 @@ test('scene cancellation aborts repeated globe requests and ignores late complet
     errors = [];
   const attributes = new Map();
   const module = {exports: {}};
+  let terminated = false;
   class Stub {
     setProps() {}
     finalize() {}
@@ -180,10 +181,15 @@ test('scene cancellation aborts repeated globe requests and ignores late complet
     require: path =>
       path === './prepare-map-grid.js'
         ? {
-            prepareMapGrid: (view, step, options) =>
-              new Promise((resolve, reject) => {
-                requests.push({view, ...options, resolve, reject});
-              })
+            createMapGridPreparer: () => ({
+              prepare: (view, step, options) =>
+                new Promise((resolve, reject) => {
+                  requests.push({view, ...options, resolve, reject});
+                }),
+              terminate: async () => {
+                terminated = true;
+              }
+            })
           }
         : path === './map-preparation-gate.js'
           ? {createMapPreparationGate}
@@ -226,5 +232,39 @@ test('scene cancellation aborts repeated globe requests and ignores late complet
     scene.retryPreparation();
   }
   scene.cancelPreparation();
-  scene.finalize();
+  await scene.finalize();
+  assert.equal(terminated, true);
+});
+
+test('scene preparer retains its worker and replaces it after cancellation', async () => {
+  const {createMapGridPreparer} = await import('./prepare-map-grid.js');
+  class RecordingRunner extends TaskRunner {
+    initialized = 0;
+    initializeTask(...args) {
+      this.initialized++;
+      return super.initializeTask(...args);
+    }
+  }
+  const runner = new RecordingRunner();
+  const preparer = createMapGridPreparer({runner, task: gridTask, useWorker: true});
+  try {
+    assert((await preparer.prepare('butterfly', 20)).positions.length > 0);
+    assert((await preparer.prepare('waterman', 20)).positions.length > 0);
+    assert.equal(runner.initialized, 1, 'different preparations reuse the initialized worker');
+    const controller = new AbortController();
+    await assert.rejects(
+      preparer.prepare('guyou', 1, {
+        signal: controller.signal,
+        onProgress: () => controller.abort(new Error('stop retained grid'))
+      }),
+      /stop retained grid/
+    );
+    assert((await preparer.prepare('butterfly', 15)).positions.length > 0);
+    assert.equal(runner.initialized, 2, 'cancelled worker state is recreated');
+  } finally {
+    await preparer.terminate();
+  }
+  await assert.rejects(preparer.prepare('butterfly', 20), /closed/);
+  await preparer.terminate();
+  await assert.rejects(runner.initializeTask(gridTask, {}), /closed/);
 });

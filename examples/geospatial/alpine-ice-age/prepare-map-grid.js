@@ -17,21 +17,56 @@ const IceAgeGridTask = {
   id: 'ice-age-grid',
   worker: {create: loadWorker, capabilities: {atomic: true, streaming: false}}
 };
-async function executeTask(task, input, options) {
-  const runner = new TaskRunner();
-  try {
-    return await runner.runTask(task, input, options);
-  } finally {
-    await runner.close();
-  }
+/** One scene owns one warm worker session. Cancellation replaces invalid state. */
+export function createMapGridPreparer({
+  runner = new TaskRunner(),
+  task = IceAgeGridTask,
+  useWorker = typeof Worker !== 'undefined'
+} = {}) {
+  let handle;
+  let tail = Promise.resolve();
+  let closed = false;
+  let closing;
+  const runTask = (_task, input, options) => {
+    const pending = tail.then(async () => {
+      if (closed) throw new Error('Map grid preparer is closed');
+      options.signal?.throwIfAborted();
+      handle ??= await runner.initializeTask(
+        task,
+        {},
+        {execution: 'worker', signal: options.signal}
+      );
+      try {
+        return await handle.runTask(input, options);
+      } catch (error) {
+        const failed = handle;
+        handle = undefined;
+        await failed.close();
+        throw error;
+      }
+    });
+    tail = pending.catch(() => {});
+    return pending;
+  };
+  return {
+    async prepare(view, step, options = {}) {
+      if (closed) throw new Error('Map grid preparer is closed');
+      return prepareMapGrid(view, step, {...options, runTask: useWorker ? runTask : undefined});
+    },
+    terminate() {
+      closed = true;
+      closing ??= (async () => {
+        await runner.terminate();
+        await tail;
+        handle = undefined;
+      })();
+      return closing;
+    }
+  };
 }
 
 /** Cancel a queued or running job when its selection is superseded. */
-export async function prepareMapGrid(
-  view,
-  step,
-  {signal, onProgress = () => {}, runTask = executeTask} = {}
-) {
+export async function prepareMapGrid(view, step, {signal, onProgress = () => {}, runTask} = {}) {
   signal?.throwIfAborted();
   const key = `${view}:${step}`;
   if (cache.has(key)) return cache.get(key);
@@ -41,11 +76,11 @@ export async function prepareMapGrid(
     if (grid) return grid;
   }
   let result;
-  if (typeof Worker !== 'undefined') {
+  if (runTask) {
     const data = await runTask(
       IceAgeGridTask,
       {view, step, discontinuous},
-      {execution: 'worker', signal, onProgress, inputOwnership: 'copy'}
+      {signal, onProgress, inputOwnership: 'copy'}
     );
     signal?.throwIfAborted();
     if (discontinuous) {
