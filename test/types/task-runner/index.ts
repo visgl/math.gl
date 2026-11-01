@@ -1,0 +1,195 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {TaskRunner, type Task} from '@math.gl/core/tasks';
+const runner = new TaskRunner();
+const scale = {
+  id: 'scale',
+  process({values}, {factor}) {
+    return {values: values.map(value => value * factor)};
+  }
+} satisfies Task<{
+  input: {values: Float64Array};
+  output: {values: Float64Array};
+  options: {factor: number};
+}>;
+const result: Promise<{values: Float64Array}> = runner.runTask(
+  scale,
+  {values: new Float64Array()},
+  {options: {factor: 2}}
+);
+void result;
+// @ts-expect-error application options are required
+runner.runTask(scale, {values: new Float64Array()});
+runner.runTask(
+  scale,
+  {values: new Float64Array()},
+  // @ts-expect-error factor must be numeric
+  {options: {factor: 'two'}}
+);
+// @ts-expect-error payload must use named fields
+runner.runTask(scale, new Float64Array(), {options: {factor: 2}});
+// @ts-expect-error input fields remain checked
+runner.runTask(scale, {other: 1}, {options: {factor: 2}});
+const plain = {
+  id: 'plain',
+  process({value}: {value: number}) {
+    return {value};
+  }
+};
+runner.runTask(plain, {value: 1});
+const initialized = {
+  id: 'initialized',
+  initialize({offset}) {
+    return offset;
+  },
+  destroy(state) {
+    const number: number = state;
+    void number;
+  },
+  process({value}, _options, {state}) {
+    return {value: value + state};
+  }
+} satisfies Task<{
+  input: {value: number};
+  output: {value: number};
+  initialization: {offset: number};
+  state: number;
+}>;
+// @ts-expect-error initialization is required
+runner.runTask(initialized, {value: 1});
+runner.runTask(initialized, {value: 1}, {initialization: {offset: 2}});
+const handle = await runner.initializeTask(initialized, {offset: 2});
+const initializedResult: Promise<{value: number}> = handle.runTask({
+  value: 3
+});
+void initializedResult;
+// @ts-expect-error initialization fields remain checked
+runner.initializeTask(initialized, {wrong: 1});
+const streaming = {
+  id: 'streaming',
+  async *processInBatches(inputs, _options, context) {
+    for await (const {text} of inputs) {
+      context.throwIfAborted();
+      yield {length: text.length};
+    }
+  }
+} satisfies Task<{
+  input: {buffer: ArrayBuffer};
+  output: {count: number};
+  batchInput: {text: string};
+  batchOutput: {length: number};
+}>;
+const batches: AsyncIterable<{length: number}> = runner.runTaskInBatches(streaming, [
+  {text: 'hello'}
+]);
+void batches;
+// @ts-expect-error streaming batch input differs from atomic input
+runner.runTaskInBatches(streaming, [{buffer: new ArrayBuffer(1)}]);
+const invalid: Task<{input: number[]; output: {value: number}}> = {
+  id: 'invalid',
+  process(input) {
+    // @ts-expect-error direct array payload is not usable
+    return {value: input.length};
+  }
+};
+void invalid;
+
+const remote: Task<{
+  input: {value: number};
+  output: {value: number};
+  options: {factor: number};
+  initialization: {offset: number};
+  state: number;
+}> = {
+  id: 'remote',
+  worker: {url: 'worker.js', capabilities: {atomic: true, streaming: false}}
+};
+const remoteResult: Promise<{value: number}> = runner.runTask(
+  remote,
+  {value: 1},
+  {
+    initialization: {offset: 2},
+    options: {factor: 3}
+  }
+);
+void remoteResult;
+// @ts-expect-error annotated worker-only tasks retain required initialization
+runner.runTask(remote, {value: 1}, {options: {factor: 2}});
+const noInput = {
+  id: 'no-input',
+  initialize() {
+    return {};
+  },
+  process() {
+    return {value: 1};
+  }
+};
+runner.initializeTask(noInput, {});
+runner.runTask(noInput, {});
+const optionalOptions = {
+  id: 'optional',
+  process(input: {value: number}, options: {factor?: number} = {}) {
+    return {value: input.value * (options.factor ?? 1)};
+  }
+};
+runner.runTask(optionalOptions, {value: 1});
+// @ts-expect-error optional application fields remain typed
+runner.runTask(optionalOptions, {value: 1}, {options: {factor: 'bad'}});
+
+// Provided tasks support the short form and optional explicit initialization.
+import {ProjectCoordinatesTask, PrepareMapTask} from '@math.gl/geospatial/tasks';
+const providedRunner = new TaskRunner();
+const projected = await providedRunner.runTask(ProjectCoordinatesTask, {
+  coordinates: new Float64Array([0, 0]),
+  projection: {from: 'EPSG:4326', to: 'EPSG:3857'}
+});
+const projectedCoordinates: Float32Array | Float64Array = projected.coordinates;
+void projectedCoordinates;
+const preparedProjection = await providedRunner.initializeTask(ProjectCoordinatesTask, {
+  projection: {from: 'EPSG:4326', to: 'EPSG:3857'}
+});
+await preparedProjection.runTask({coordinates: new Float64Array([0, 0])});
+await preparedProjection.close();
+await providedRunner.runTask(PrepareMapTask, {
+  description: {version: 1, id: 'world', definition: {type: 'mercator'}}
+});
+await providedRunner.close();
+
+const mixedProcessors = {
+  id: 'mixed-processors',
+  process({value}) {
+    return {value};
+  },
+  async *processInBatches(inputs, {factor}) {
+    for await (const {value} of inputs) yield {value: value * factor};
+  }
+} satisfies Task<{input: {value: number}; output: {value: number}; options: {factor: number}}>;
+runner.runTask(mixedProcessors, {value: 1});
+runner.runTasks(mixedProcessors, [{value: 1}]);
+runner.runTaskInBatches(mixedProcessors, [{value: 1}], {options: {factor: 2}});
+// @ts-expect-error streaming options are inferred from the streaming hook
+runner.runTaskInBatches(mixedProcessors, [{value: 1}]);
+// @ts-expect-error streaming factor is required even though atomic calls need no options
+runner.runTaskInBatches(mixedProcessors, [{value: 1}], {});
+const mixedHandle = await runner.initializeTask(mixedProcessors, {});
+mixedHandle.runTask({value: 1});
+mixedHandle.runTaskInBatches([{value: 1}], {options: {factor: 2}});
+// @ts-expect-error retained streaming calls also require streaming options
+mixedHandle.runTaskInBatches([{value: 1}]);
+// @ts-expect-error retained streaming options retain their value types
+mixedHandle.runTaskInBatches([{value: 1}], {options: {factor: 'two'}});
+await mixedHandle.close();
+
+const atomicOptionsOnly = {
+  id: 'atomic-options-only',
+  process({value}, {factor}) {
+    return {value: value * factor};
+  },
+  async *processInBatches(inputs) {
+    yield* inputs;
+  }
+} satisfies Task<{input: {value: number}; output: {value: number}; options: {factor: number}}>;
+runner.runTaskInBatches(atomicOptionsOnly, [{value: 1}]);
+// @ts-expect-error atomic options remain required independently of streaming
+runner.runTask(atomicOptionsOnly, {value: 1});

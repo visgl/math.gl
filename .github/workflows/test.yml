@@ -168,10 +168,15 @@ jobs:
           node scripts/check-publishing-stack.mjs
 
       - name: Check worker API types
-        run: yarn check:worker-types
+        run: |
+          yarn check:worker-types
+          yarn check:task-runner-types
 
       - name: Check task runtime exports and execution routes
-        run: yarn check:tasks
+        run: |
+          yarn check:tasks
+          node examples/core/task-runner/main.mjs
+          node examples/core/task-runner/geospatial.mjs
 
       - name: Qualify worker scheduling, ownership and lifecycle workloads
         run: node test/bench/workers/index.mjs --quick --output=/tmp/worker-qualification.json
