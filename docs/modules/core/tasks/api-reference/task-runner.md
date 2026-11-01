@@ -39,7 +39,9 @@ handles. Waiting acquisitions honor `signal` and are rejected when the runner cl
 | `terminate(reason?)` | `Promise<void>` | Abort handles and force-stop workers; local execution must settle |
 
 `request` becomes required when the descriptor requires application options or
-initialization. Iterable methods accept synchronous or asynchronous inputs and
+initialization. Options are inferred from the invoked hook: `process` for atomic
+calls and `processInBatches` for streaming calls, including on initialized handles.
+Iterable methods accept synchronous or asynchronous inputs and
 start on first iteration. `runTasks` concurrency defaults to one, must not exceed
 runner capacity, and is an upper bound under contention. Buffered ordered results
 count toward that bound. Failure stops further consumption when observed in input

@@ -155,3 +155,41 @@ await providedRunner.runTask(PrepareMapTask, {
   description: {version: 1, id: 'world', definition: {type: 'mercator'}}
 });
 await providedRunner.close();
+
+const mixedProcessors = {
+  id: 'mixed-processors',
+  process({value}) {
+    return {value};
+  },
+  async *processInBatches(inputs, {factor}) {
+    for await (const {value} of inputs) yield {value: value * factor};
+  }
+} satisfies Task<{input: {value: number}; output: {value: number}; options: {factor: number}}>;
+runner.runTask(mixedProcessors, {value: 1});
+runner.runTasks(mixedProcessors, [{value: 1}]);
+runner.runTaskInBatches(mixedProcessors, [{value: 1}], {options: {factor: 2}});
+// @ts-expect-error streaming options are inferred from the streaming hook
+runner.runTaskInBatches(mixedProcessors, [{value: 1}]);
+// @ts-expect-error streaming factor is required even though atomic calls need no options
+runner.runTaskInBatches(mixedProcessors, [{value: 1}], {});
+const mixedHandle = await runner.initializeTask(mixedProcessors, {});
+mixedHandle.runTask({value: 1});
+mixedHandle.runTaskInBatches([{value: 1}], {options: {factor: 2}});
+// @ts-expect-error retained streaming calls also require streaming options
+mixedHandle.runTaskInBatches([{value: 1}]);
+// @ts-expect-error retained streaming options retain their value types
+mixedHandle.runTaskInBatches([{value: 1}], {options: {factor: 'two'}});
+await mixedHandle.close();
+
+const atomicOptionsOnly = {
+  id: 'atomic-options-only',
+  process({value}, {factor}) {
+    return {value: value * factor};
+  },
+  async *processInBatches(inputs) {
+    yield* inputs;
+  }
+} satisfies Task<{input: {value: number}; output: {value: number}; options: {factor: number}}>;
+runner.runTaskInBatches(atomicOptionsOnly, [{value: 1}]);
+// @ts-expect-error atomic options remain required independently of streaming
+runner.runTask(atomicOptionsOnly, {value: 1});

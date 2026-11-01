@@ -21,8 +21,10 @@ import type {
   Initialization,
   TaskRunControls,
   TaskRunOptions,
+  TaskBatchRunOptions,
   TaskRunsOptions,
   InitializedTaskOptions,
+  InitializedTaskBatchOptions,
   RequestArgs,
   TaskRunnerOptions
 } from './task';
@@ -112,7 +114,7 @@ export class InitializedTask<D extends AnyTask> {
   /** One processor invocation for the entire input iterable. */
   async *runTaskInBatches(
     inputs: Iterable<TaskBatchInput<D>> | AsyncIterable<TaskBatchInput<D>>,
-    ...args: RequestArgs<InitializedTaskOptions<D>>
+    ...args: RequestArgs<InitializedTaskBatchOptions<D>>
   ): AsyncIterable<TaskBatchOutput<D>> {
     yield* this.serialStream(async function* (self) {
       self.checkCapability('streaming');
@@ -453,7 +455,7 @@ export class TaskRunner {
   async *runTaskInBatches<D extends AnyTask>(
     task: D,
     inputs: Iterable<TaskBatchInput<D>> | AsyncIterable<TaskBatchInput<D>>,
-    ...args: RequestArgs<TaskRunOptions<D>>
+    ...args: RequestArgs<TaskBatchRunOptions<D>>
   ): AsyncIterable<TaskBatchOutput<D>> {
     const request = (args[0] as any) ?? {};
     const handle = await this.initializeTask(task, request.initialization ?? {}, {

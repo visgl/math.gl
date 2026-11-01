@@ -78,12 +78,8 @@ export type TaskBatchInput<D extends AnyTask> =
 export type TaskBatchOutput<D extends AnyTask> =
   ReturnType<StreamProcessor<D>> extends AsyncIterable<infer O> ? O : never;
 type ProcessorOptions<F extends (...args: any[]) => any> = Argument<F, 1>;
-type Options<D extends AnyTask> = D extends {process: (...args: any[]) => any}
-  ? ProcessorOptions<Processor<D>>
-  : ProcessorOptions<StreamProcessor<D>>;
 export type Initialization<D extends AnyTask> = Argument<NonNullable<D['initialize']>, 0>;
-type OptionsField<D extends AnyTask> =
-  {} extends Options<D> ? {options?: Options<D>} : {options: Options<D>};
+type OptionsField<O> = {} extends O ? {options?: O} : {options: O};
 type InitializationField<D extends AnyTask> = 'initialize' extends keyof D
   ? {} extends Initialization<D>
     ? {initialization?: Initialization<D>}
@@ -99,12 +95,17 @@ export type TaskRunControls = {
   onProgress?: (progress: TaskProgress) => void;
 };
 export type TaskRunOptions<D extends AnyTask> = TaskRunControls &
-  OptionsField<D> &
+  OptionsField<ProcessorOptions<Processor<D>>> &
+  InitializationField<D>;
+export type TaskBatchRunOptions<D extends AnyTask> = TaskRunControls &
+  OptionsField<ProcessorOptions<StreamProcessor<D>>> &
   InitializationField<D>;
 export type TaskRunsOptions<D extends AnyTask> = TaskRunOptions<D> & {
   concurrency?: number;
 };
 export type InitializedTaskOptions<D extends AnyTask> = Omit<TaskRunControls, 'execution'> &
-  OptionsField<D>;
+  OptionsField<ProcessorOptions<Processor<D>>>;
+export type InitializedTaskBatchOptions<D extends AnyTask> = Omit<TaskRunControls, 'execution'> &
+  OptionsField<ProcessorOptions<StreamProcessor<D>>>;
 export type RequestArgs<O> = {} extends O ? [options?: O] : [options: O];
 export type TaskRunnerOptions = {maxConcurrency?: number};

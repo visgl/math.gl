@@ -19,6 +19,7 @@ export type {
   TaskWorker,
   TaskRunControls,
   TaskRunOptions,
+  TaskBatchRunOptions,
   TaskRunsOptions,
   TaskRunnerOptions
 } from './task';
