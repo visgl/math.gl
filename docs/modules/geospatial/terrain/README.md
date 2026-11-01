@@ -34,6 +34,22 @@ terrain. Curvature, refraction and geodesic paths are not modeled.
 
 ## Feature support
 
+### Vertex-tile derivative halos
+
+`createTerrainVertexTileHalos(tiles, options)` reconciles a same-resolution
+vertex-tile snapshot and returns a copied grid with a one-vertex border around
+each tile. The padded `field` can be passed to `HeightField` and
+`createTerrainGradientGrid`; the original tile occupies columns `1..width` and
+rows `1..height`. Border values come from resident edge and diagonal neighbors,
+without extrapolation. `statuses` distinguishes `NOT_RESIDENT`, `NO_DATA`, and
+`VALID` for every padded sample; `field.validity` marks only valid samples.
+Rebuild halos after changing the resident snapshot. `getTerrainVertexHaloAffectedTiles`
+identifies a conservative set of resident tiles to rebuild for arrivals, replacements
+or evictions. Pass the tile width and height; two-vertex dimensions have a wider
+dependency neighborhood because halo samples can themselves be shared. `maxSamples` bounds the
+total padded sample count, and shared-height disagreement is checked by the
+same reconciliation policy. This does not establish mixed-resolution halos.
+
 Terrain-data, analysis, meshing, and query capabilities against the broader CPU/GPU terrain roadmap.
 
 Support describes the public API in the current repository. Notes identify limits and experimental features.

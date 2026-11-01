@@ -598,3 +598,13 @@ are local Cartesian operations over a piecewise-linear sampled profile; they do
 not model Earth curvature, atmospheric refraction, unsampled terrain or area
 viewsheds. Real-DEM qualification, geodesic horizons and two-dimensional
 visibility products remain open.
+
+## Same-level vertex-tile halos
+
+`createTerrainVertexTileHalos` reconciles a resident same-level snapshot and
+adds one actual lattice sample on each side, including diagonal neighbors.
+Explicit residency and validity statuses distinguish missing tiles from nodata.
+Existing raster gradient operators can then evaluate shared tile edges using
+the same stencil. A separate affected-tile helper identifies conservative
+same-level dependencies after arrivals, replacements and evictions. Mixed-level
+halos, persistent incremental updates and geographic boundary policies remain future work.

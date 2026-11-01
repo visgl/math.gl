@@ -384,6 +384,10 @@ export type {TerrainProfileHorizon, TerrainProfileHorizonOptions} from './terrai
 export {getTerrainProfileViewshed, TerrainProfileViewStatus} from './terrain/profile-viewshed';
 export type {TerrainProfileMeasurements} from './terrain/profile-measure';
 export {reconcileTerrainVertexTiles} from './terrain/vertex-tiles';
+export {createTerrainVertexTileHalos, TerrainVertexHaloStatus} from './terrain/vertex-halos';
+export type {TerrainVertexHaloTile} from './terrain/vertex-halos';
+export {getTerrainVertexHaloAffectedTiles} from './terrain/vertex-halo-invalidation';
+export type {TerrainVertexTileAddress} from './terrain/vertex-halo-invalidation';
 export type {
   TerrainVertexTile,
   TerrainVertexTileOptions,
