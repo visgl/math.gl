@@ -231,7 +231,11 @@ async function runLocally<Input, Output, Options extends object>(
       settled = true;
       cleanup();
       try {
-        resolve(structuredClone(value, {transfer: getTransferList(value)}));
+        resolve(
+          structuredClone(value, {
+            transfer: options.outputOwnership === 'copy' ? [] : getTransferList(value)
+          })
+        );
       } catch (error) {
         reject(error);
       }
