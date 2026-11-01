@@ -16,6 +16,7 @@ import {
   getTerrainProfileVisibility,
   getTerrainProfileHorizon,
   createTerrainVertexTileHalos,
+  createTerrainFilteredPyramid,
   createCRSResolver,
   parseWKB,
   type TerrainGridMesh
@@ -24,6 +25,8 @@ import {
   createTerrainMesh as terrainMesh,
   getTerrainProfileViewshed,
   getTerrainVertexHaloAffectedTiles,
+  updateTerrainVertexTileHalos,
+  type TerrainFilteredLevel,
   type TerrainVertexHaloTile,
   type TerrainProfileHorizonOptions,
   type TerrainProfileVisibility,
@@ -52,6 +55,8 @@ void [
   getTerrainProfileHorizon,
   getTerrainProfileViewshed,
   createTerrainVertexTileHalos,
+  createTerrainFilteredPyramid,
+  updateTerrainVertexTileHalos,
   getTerrainVertexHaloAffectedTiles,
   createCRSResolver,
   parseWKB,
@@ -69,6 +74,7 @@ const typeChecks: [
   TerrainMesh?,
   TerrainProfileVisibility?,
   TerrainProfileHorizonOptions?,
-  TerrainVertexHaloTile?
+  TerrainVertexHaloTile?,
+  TerrainFilteredLevel?
 ] = [];
 void typeChecks;

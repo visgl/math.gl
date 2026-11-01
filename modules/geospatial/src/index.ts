@@ -388,6 +388,9 @@ export {createTerrainVertexTileHalos, TerrainVertexHaloStatus} from './terrain/v
 export type {TerrainVertexHaloTile} from './terrain/vertex-halos';
 export {getTerrainVertexHaloAffectedTiles} from './terrain/vertex-halo-invalidation';
 export type {TerrainVertexTileAddress} from './terrain/vertex-halo-invalidation';
+export {updateTerrainVertexTileHalos} from './terrain/vertex-halo-update';
+export {createTerrainFilteredPyramid} from './terrain/filtered-pyramid';
+export type {TerrainFilteredLevel} from './terrain/filtered-pyramid';
 export type {
   TerrainVertexTile,
   TerrainVertexTileOptions,

@@ -124,6 +124,18 @@ const probes = [
     budget: 2500
   },
   {
+    symbol: 'updateTerrainVertexTileHalos',
+    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/derivatives\./],
+    budget: 10000
+  },
+  {
+    symbol: 'createTerrainFilteredPyramid',
+    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/bounds\./],
+    budget: 3500
+  },
+  {
     symbol: 'createMartiniTerrainMesh',
     packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/delatin/, /\/geometry\//, /\/core\//, /\/surface\./, /\/terrain\/mesh\./, /\/terrain\/mesh-edges\./],
