@@ -96,8 +96,8 @@ const roots = {
   '@math.gl/earth': ['Geoid','getPlanetSkyInfo','getSkySnapshot','getStartOfDay'],
   '@math.gl/earth/sun': ['getPlanetSkyInfo','getSkySnapshot','getStarPosition'],
   '@math.gl/earth/timezone': ['lookupTimezone','getStartOfDay'],
-  '@math.gl/geospatial': ['HeightField','createTerrainSkirt','createTerrainMesh','createCRSResolver','parseWKB','prepareGeoArrowTransfer','parseAngle'],
-  '@math.gl/geospatial/terrain': ['HeightField','createTerrainSkirt','createTerrainMesh','createMartiniTerrainMesh','stitchTerrainMeshEdges','simplifyTerrainContourPaths'],
+  '@math.gl/geospatial': ['HeightField','createTerrainSkirt','createTerrainMesh','getTerrainProfileVisibility','createCRSResolver','parseWKB','prepareGeoArrowTransfer','parseAngle'],
+  '@math.gl/geospatial/terrain': ['HeightField','createTerrainSkirt','createTerrainMesh','createMartiniTerrainMesh','stitchTerrainMeshEdges','simplifyTerrainContourPaths','getTerrainProfileVisibility'],
   '@math.gl/geospatial/crs': ['createSpatialReference','createCRSResolver'],
   '@math.gl/geospatial/geoarrow': ['GeoArrowBuilder','prepareGeoArrowTransfer']
 };
