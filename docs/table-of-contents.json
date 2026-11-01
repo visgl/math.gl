@@ -78,6 +78,8 @@
         "label": "@math.gl/core/tasks",
         "items": [
           "modules/core/tasks/README",
+          "modules/core/tasks/developer-guide/task-runner",
+          "modules/core/tasks/api-reference/task-runner",
           "modules/core/developer-guide/workers",
           "modules/core/tasks/developer-guide/execution",
           "modules/core/tasks/developer-guide/custom-workers",

@@ -1,5 +1,9 @@
 # Tasks
 
+Try the experimental [TaskRunner get-started guide](./developer-guide/task-runner.md)
+for typed task objects, named payloads, and automatic or explicit state lifetimes.
+The existing runtime documented below remains compatible.
+
 Move expensive numerical work off the main thread while keeping control of input
 ownership, queue capacity, cancellation, and resource lifetime. Small independent
 batches can run on the main thread to avoid worker round trips.
