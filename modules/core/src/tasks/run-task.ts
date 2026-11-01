@@ -15,6 +15,7 @@ import {
   type ProcessOnWorkerOptions
 } from '@math.gl/core/worker-utils';
 import {getInputByteLength} from '../worker-utils/lib/worker-utils/get-input-byte-length';
+import {validateOutputOwnership} from '../worker-utils/lib/worker-api/validate-output-ownership';
 
 export type TaskDescriptor<
   Input,
@@ -46,6 +47,7 @@ export async function runTask<Input, Output, Options extends object>(
 ): Promise<Output> {
   const {execution = 'auto', mainThread, onExecution, ...runtimeOptions} = options;
   const workerOptions = runtimeOptions as ProcessOnWorkerOptions & Partial<Options>;
+  validateOutputOwnership(workerOptions.outputOwnership);
   if (!['auto', 'main-thread', 'worker'].includes(execution))
     throw new Error('Invalid task execution mode');
   if (mainThread && (!Number.isFinite(mainThread.maxSize) || mainThread.maxSize < 0)) {
@@ -229,7 +231,11 @@ async function runLocally<Input, Output, Options extends object>(
       settled = true;
       cleanup();
       try {
-        resolve(structuredClone(value, {transfer: getTransferList(value)}));
+        resolve(
+          structuredClone(value, {
+            transfer: options.outputOwnership === 'copy' ? [] : getTransferList(value)
+          })
+        );
       } catch (error) {
         reject(error);
       }

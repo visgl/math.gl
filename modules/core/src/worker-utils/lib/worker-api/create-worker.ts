@@ -14,6 +14,7 @@ import type {
 import {SharedWorkerState} from './shared-state';
 import AsyncQueue from '../async-queue/async-queue';
 import WorkerBody from '../worker-farm/worker-body';
+import {validateOutputOwnership} from './validate-output-ownership';
 // import {validateWorkerVersion} from './validate-worker-version';
 
 /** Counter for jobs */
@@ -84,6 +85,7 @@ export async function createWorker(
 
         case 'process':
           throwIfAborted();
+          validateOutputOwnership(payload.options?.['outputOwnership']);
           if (!process) {
             throw new Error('Worker does not support atomic processing');
           }
@@ -95,14 +97,19 @@ export async function createWorker(
           );
           throwIfAborted();
           reporter?.finish();
-          await WorkerBody.postMessage('done', {
-            result,
-            executionMs: performance.now() - startedAt
-          });
+          await WorkerBody.postMessage(
+            'done',
+            {
+              result,
+              executionMs: performance.now() - startedAt
+            },
+            payload.options?.['outputOwnership'] === 'copy'
+          );
           break;
 
         case 'process-in-batches':
           throwIfAborted();
+          validateOutputOwnership(payload.options?.['outputOwnership']);
           if (!processInBatches) {
             throw new Error('Worker does not support batched processing');
           }
@@ -119,7 +126,11 @@ export async function createWorker(
             );
             for await (const batch of resultIterator) {
               throwIfAborted();
-              await WorkerBody.postMessage('output-batch', {result: batch});
+              await WorkerBody.postMessage(
+                'output-batch',
+                {result: batch},
+                payload.options?.['outputOwnership'] === 'copy'
+              );
               await outputAcknowledgements.next();
             }
             throwIfAborted();

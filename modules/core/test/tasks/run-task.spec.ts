@@ -49,6 +49,21 @@ test('local transfer detaches input and transfers cached result ownership', asyn
   expect(result).toEqual(new Float64Array([7, 8]));
 });
 
+test.each([{execution: 'main-thread' as const}, {mainThread: {maxSize: 16}}])(
+  'local copy output retains cached buffers under %o',
+  async route => {
+    const cached = new Float64Array([7, 8]);
+    const descriptor = {...task, process: () => cached};
+    const options = {...route, inputOwnership: 'copy' as const, outputOwnership: 'copy' as const};
+    const first = await runTask(descriptor, new Float64Array([1]), options);
+    const second = await runTask(descriptor, new Float64Array([2]), options);
+    expect(first).toEqual(new Float64Array([7, 8]));
+    expect(second).toEqual(first);
+    expect(cached).toEqual(first);
+    expect(first.buffer).not.toBe(cached.buffer);
+  }
+);
+
 test('routing uses an inclusive threshold and sends larger batches to actual workers', async () => {
   const routes = [];
   const output = [];

@@ -494,6 +494,62 @@ test('resource initialization persists, disposal is idempotent and crashes inval
   await crashed.destroy();
 });
 
+test('resource output ownership can preserve or transfer worker-owned buffers', async () => {
+  const descriptor = {
+    ...runtime,
+    id: 'resource-ownership',
+    name: 'resource-ownership',
+    worker: new URL('./fixtures/resource-worker.mjs', import.meta.url).href
+  };
+  const resource = await createWorkerResource(descriptor, {value: 0}, {outputOwnership: 'copy'});
+  try {
+    assert.deepEqual(await resource.run('buffer'), new Uint8Array([1, 2, 3]));
+    assert.deepEqual(await resource.run('buffer'), new Uint8Array([1, 2, 3]));
+    assert.deepEqual(
+      await resource.run('buffer', {outputOwnership: 'transfer'}),
+      new Uint8Array([1, 2, 3])
+    );
+    assert.equal(await resource.run('buffer-length'), 0);
+  } finally {
+    await resource.destroy();
+  }
+});
+
+test('batch output ownership controls retained worker buffers', async () => {
+  const output = [];
+  for await (const value of processOnWorkerInBatches(runtime, [1, 2], {
+    repeatRetainedOutput: true,
+    outputOwnership: 'copy'
+  }))
+    output.push(value);
+  assert.deepEqual(output, [new Uint8Array([7, 8, 9]), new Uint8Array([7, 8, 9])]);
+});
+
+test('atomic output ownership preserves retained worker buffers', async () => {
+  const pool = new WorkerPool({url: runtime.worker, maxConcurrency: 1, reuseWorkers: true});
+  try {
+    const options = {workerPool: pool, outputOwnership: 'copy' as const};
+    assert.deepEqual(
+      await processOnWorker(runtime, {mode: 'retained-output'}, options),
+      new Uint8Array([4, 5, 6])
+    );
+    assert.deepEqual(
+      await processOnWorker(runtime, {mode: 'retained-output'}, options),
+      new Uint8Array([4, 5, 6])
+    );
+    await assert.rejects(
+      processOnWorker(
+        runtime,
+        {mode: 'retained-output'},
+        {...options, outputOwnership: 'invalid' as 'copy'}
+      ),
+      /Invalid worker output ownership/
+    );
+  } finally {
+    await pool.destroy();
+  }
+});
+
 test('share ownership is explicit and rejects ordinary buffers before detachment', async () => {
   const pool = new WorkerPool({url: runtime.worker, maxConcurrency: 1});
   try {

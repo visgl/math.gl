@@ -11,6 +11,7 @@ import {getTransferListForWriter} from '../worker-utils/get-transfer-list';
 import {getInputByteLength} from '../worker-utils/get-input-byte-length';
 import {prepareSharedState, SharedWorkerState} from './shared-state';
 import {createWorker} from './create-worker';
+import {validateOutputOwnership} from './validate-output-ownership';
 
 export type ResourceRequest<Init, Input> =
   | {operation: 'initialize'; input: Init}
@@ -24,6 +25,7 @@ export type WorkerResourceObject<Init, Input, Output> = WorkerObject<
 export type WorkerResourceRunOptions = Pick<
   WorkerOptions,
   | 'inputOwnership'
+  | 'outputOwnership'
   | 'signal'
   | 'onProgress'
   | 'priority'
@@ -94,6 +96,7 @@ export async function createWorkerResource<Init, Input, Output>(
       ...callOptions
     });
     const {signal, onProgress, onMetrics, ...serializable} = prepared;
+    validateOutputOwnership(prepared.outputOwnership);
     validateSharedInput(serializable, [request, serializable]);
     const {sharedState: _controlBuffer, ...inputOptions} = serializable;
     const job = await pool.startJob(

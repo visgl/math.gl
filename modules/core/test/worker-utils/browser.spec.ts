@@ -180,6 +180,29 @@ test('browser resources initialize once and dispose deterministically', async ()
   await expect(resource.run(1)).rejects.toThrow('destroyed');
 });
 
+test('browser resource output can be copied without detaching retained worker data', async () => {
+  const {createWorkerResource} = await import('../../src/worker-utils');
+  const resource = await createWorkerResource(
+    {
+      ...worker,
+      loadWorker: () =>
+        new Worker(new URL('./fixtures/resource-worker.mjs', import.meta.url), {type: 'module'})
+    },
+    {value: 0},
+    {outputOwnership: 'copy'}
+  );
+  try {
+    await expect(resource.run('buffer')).resolves.toEqual(new Uint8Array([1, 2, 3]));
+    await expect(resource.run('buffer')).resolves.toEqual(new Uint8Array([1, 2, 3]));
+    await expect(resource.run('buffer', {outputOwnership: 'transfer'})).resolves.toEqual(
+      new Uint8Array([1, 2, 3])
+    );
+    await expect(resource.run('buffer-length')).resolves.toBe(0);
+  } finally {
+    await resource.destroy();
+  }
+});
+
 test('browser WASM resource retains its instance after cooperative cancellation', async () => {
   const {createWorkerResource} = await import('../../src/worker-utils');
   const resource = await createWorkerResource(

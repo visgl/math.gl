@@ -118,12 +118,16 @@ export default class WorkerBody {
    * @param type
    * @param payload
    */
-  static async postMessage(type: WorkerMessageType, payload: WorkerMessagePayload): Promise<void> {
+  static async postMessage(
+    type: WorkerMessageType,
+    payload: WorkerMessagePayload,
+    copy = false
+  ): Promise<void> {
     const data: WorkerMessageData = {source: 'loaders.gl', type, payload};
     // console.log('posting message', data);
 
     // Cast to Node compatible transfer list
-    const transferList = getTransferList(payload) as TransferListItem[];
+    const transferList = copy ? [] : (getTransferList(payload) as TransferListItem[]);
 
     const parentPort = await getParentPort();
     if (parentPort) {
