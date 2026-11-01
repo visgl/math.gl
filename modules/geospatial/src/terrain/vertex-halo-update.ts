@@ -28,6 +28,9 @@ export function updateTerrainVertexTileHalos(
 } {
   const prior = options.previousOptions;
   if (!prior) throw new Error('Previous vertex tile options are required');
+  const paddedCount = (options.width + 2) * (options.height + 2) * resident.length;
+  if (!Number.isSafeInteger(paddedCount) || paddedCount > (options.maxSamples ?? 4_000_000))
+    throw new Error('Vertex tile halo sample capacity exceeded');
   const equalPair = (a: readonly [number, number], b: readonly [number, number]): boolean =>
     a[0] === b[0] && a[1] === b[1];
   if (

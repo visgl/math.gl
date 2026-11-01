@@ -113,3 +113,23 @@ test('global semantic changes require a full rebuild, including distant reusable
   });
   expect(same.tiles[1]).toBe(previous[1]);
 });
+
+test('incremental arrivals cannot exceed the complete snapshot sample capacity', () => {
+  const options = {width: 3, height: 3, maxSamples: 25};
+  const tile = (column: number) => ({column, row: 0, heights: new Float64Array(9)});
+  const previous = createTerrainVertexTileHalos([tile(0)], options).tiles;
+  expect(() =>
+    updateTerrainVertexTileHalos(previous, [tile(0), tile(10)], [tile(10)], {
+      ...options,
+      previousOptions: options
+    })
+  ).toThrow(/capacity/);
+  const updated = updateTerrainVertexTileHalos(previous, [tile(0), tile(10)], [tile(10)], {
+    ...options,
+    maxSamples: 50,
+    previousOptions: options
+  });
+  expect(updated.tiles).toEqual(
+    createTerrainVertexTileHalos([tile(0), tile(10)], {...options, maxSamples: 50}).tiles
+  );
+});
