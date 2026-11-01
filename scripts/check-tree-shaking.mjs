@@ -92,6 +92,12 @@ const probes = [
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/contours\./, /\/profile\./,
       ...['contour-paths', 'contour-simplify', 'profile-measure'].filter(name => name !== entry).map(name => new RegExp(`/terrain/${name}\\.`))]
   })),
+  {
+    symbol: 'getTerrainProfileVisibility',
+    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/profile\./, /\/profile-measure\./],
+    budget: 3500
+  },
   ...[
     ['reconcileTerrainVertexTiles', 'vertex-tiles', 5500],
     ['stitchTerrainMeshEdges', 'mesh-stitch', 11000]
