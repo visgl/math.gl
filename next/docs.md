@@ -34,11 +34,11 @@ Vectors, matrices, task execution, shared numeric types and expression evaluatio
 
 [Explore module →](https://visgl.github.io/math.gl/next/docs/modules/core.md)
 
-[![Main thread connected through a bounded queue to reusable workers](/math.gl/next/images/tasks.svg)@math.gl/core/tasks](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
+[![Automatic task cleanup and explicitly retained task state](/math.gl/next/images/task-runner-lifetimes.svg)@math.gl/core/tasks](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
 
 ### [Tasks](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
 
-[Run small tasks locally and larger jobs in worker pools, with bounded queues and shared state.](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
+[Run typed tasks locally or in workers, stream batches, and reuse initialized state.](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
 
 [Explore module →](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
 

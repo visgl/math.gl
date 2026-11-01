@@ -40,7 +40,7 @@ The returned `positions` are Float64 XY, `indices` are Uint32, `polygonStarts` c
 
 ## Reuse the task runtime[​](#reuse-the-task-runtime "Direct link to Reuse the task runtime")
 
-The [runnable worker example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/geoarrow-stream-worker) uses `runTask` and `createWorker` from `@math.gl/core/tasks`. It sends a plain geometry column and a projection factory name, creates the D3 stream inside the worker, and returns transferable typed arrays. It demonstrates antimeridian splitting, holes, null rows, source identity and hemisphere clipping. The same processor runs locally for parity tests.
+The [runnable worker example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/geoarrow-stream-worker) uses `TaskRunner` and `initializeTaskWorker` from `@math.gl/core/tasks`. It sends a plain geometry column and a projection factory name, creates the D3 stream inside the worker, and returns transferable typed arrays. It demonstrates antimeridian splitting, holes, null rows, source identity and hemisphere clipping. The same processor runs locally for parity tests.
 
 ```
 const mesh = await runTask(geometryTask, {

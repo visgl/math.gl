@@ -1,6 +1,6 @@
 # TaskRunner prototype API
 
-Experimental additions to `@math.gl/core/tasks`. Existing exports remain available and unchanged. Start with the [get-started guide](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/task-runner.md). This reference lists implemented controls only; see the RFC for proposed extensions.
+The public execution API in `@math.gl/core/tasks`. Start with the [get-started guide](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/task-runner.md). This reference lists implemented controls only; see the RFC for proposed extensions.
 
 ## Task type map[​](#task-type-map "Direct link to Task type map")
 
@@ -57,4 +57,4 @@ Normal worker stream completion preserves state. Early stream return, worker can
 
 ## Prototype boundaries[​](#prototype-boundaries "Direct link to Prototype boundaries")
 
-Not implemented: runner byte budgets, admission reservations, priority, metrics, shutdown deadlines, automatic worker reuse across calls, adaptive routing, and cooperative worker cancellation. Use the existing worker-utils APIs for those controls. Do not pass RFC-only fields to this prototype. See the [design RFC](https://github.com/visgl/math.gl/blob/master/dev-docs/RFCs/task-runner-rfc.md) for the complete distinction.
+Not implemented: runner byte budgets, admission reservations, priority, metrics, shutdown deadlines, automatic worker reuse across calls, adaptive routing, and cooperative worker cancellation. The old worker-utils entry is removed; see [migration](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/migration.md) for application-level alternatives and intentional removals. Do not pass RFC-only fields to this prototype. See the [design RFC](https://github.com/visgl/math.gl/blob/master/dev-docs/RFCs/task-runner-rfc.md) for the complete distinction.

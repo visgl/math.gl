@@ -1,55 +1,45 @@
-# WebAssembly in workers
+# WebAssembly in tasks
 
-Use a persistent worker resource when compiling or initializing a WebAssembly module is expensive. Its `initialize` function runs in the worker; the instance and its imports stay in that worker and can be reused by `run` calls. Dispose of application-owned allocations in `dispose`. Hard cancellation or a crash destroys the worker and invalidates the resource; create a new resource before retrying.
-
-For a browser module worker, resolve the asset relative to the worker module:
+Compile or instantiate a WebAssembly module in a task's `initialize` hook, retain it as `context.state`, and release application-owned allocations in `destroy`. Use an explicit handle when several calls should reuse the instance.
 
 ```
-import {createResourceWorker} from '@math.gl/core/tasks';
+import {type Task} from '@math.gl/core/tasks';
 
+const kernelTask = {
 
+  id: 'kernel',
 
-const wasmURL = new URL('./kernel.wasm', import.meta.url);
+  async initialize({module}) {
 
-await createResourceWorker({
-
-  async initialize() {
-
-    const response = await fetch(wasmURL);
-
-    if (!response.ok) throw new Error(`WASM download failed: ${response.status}`);
-
-    // Streaming requires an application/wasm response. Otherwise use bytes.
-
-    const contentType = response.headers.get('content-type')?.split(';')[0].trim().toLowerCase();
-
-    const result = contentType === 'application/wasm'
-
-      ? await WebAssembly.instantiateStreaming(response, {})
-
-      : await WebAssembly.instantiate(await response.arrayBuffer(), {});
-
-    return result.instance;
+    return WebAssembly.instantiate(module, {});
 
   },
 
-  run(instance, input: number) {
+  destroy(instance) {
 
-    return (instance.exports.process as (value: number) => number)(input);
+    // Release application-owned allocations if the kernel exposes a cleanup API.
 
   },
 
-  dispose(instance) {
+  process({value}, _options, {state}) {
 
-    // Release any allocations or handles owned by the application here.
+    return {value: (state.exports.process as (value: number) => number)(value)};
 
   }
 
-});
+} satisfies Task<{
+
+  initialization: {module: WebAssembly.Module};
+
+  state: WebAssembly.Instance;
+
+  input: {value: number};
+
+  output: {value: number};
+
+}>;
 ```
 
-Replace `kernel.wasm`, its imports and `process` export with your own. Configure the bundler to emit the WASM asset and serve it with `application/wasm` for streaming. Worker and WASM execution are also subject to the site's CSP, origin and CORS rules. For Node, read a file URL with `node:fs/promises` and instantiate the resulting bytes; do not assume browser `fetch` supports `file:` URLs.
+Install the task with `initializeTaskWorker` in a worker module and attach the worker target to the application task, as in the [worker guide](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/custom-workers.md). A compiled module can be cloned to the worker; an instance remains worker-local. Alternatively load the WASM bytes inside initialization with `fetch` in browsers or `node:fs/promises` for a Node file URL. Serve streaming WASM with `application/wasm` and configure bundler asset handling.
 
-A compiled `WebAssembly.Module` can be structured-cloned as resource initialization input and instantiated once per worker. An instance and its mutable state are worker-local. Alternatively send bytes with `inputOwnership: 'copy'` when the caller must retain them; transfer detaches ordinary input buffers. Shared memory requires platform support and browser cross-origin isolation.
-
-Cooperative cancellation requires the operation to check the worker context and, without shared control state, yield to the event loop. A synchronous WASM export cannot process a cancellation message until it returns. Split work into bounded calls or poll shared state when your WASM integration supports it; otherwise use hard termination and recreate the resource. See [persistent resources](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/persistent-resources.md).
+Worker cancellation forcibly terminates the worker and cannot guarantee `destroy` runs. Reinitialize before retrying. Synchronous local WASM cannot be interrupted; use bounded calls and check cancellation between them.
