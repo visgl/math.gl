@@ -12,6 +12,12 @@ Terrain APIs are available from `@math.gl/geospatial/terrain` and `@math.gl/geos
 
 ## Feature support[​](#feature-support "Direct link to Feature support")
 
+### Incremental vertex halos and filtered rasters[​](#incremental-vertex-halos-and-filtered-rasters "Direct link to Incremental vertex halos and filtered rasters")
+
+`updateTerrainVertexTileHalos(previous, resident, changed, options)` rebuilds only affected halos from a complete post-update source snapshot and reuses other halo objects. Pass the previous snapshot's options as `options.previousOptions`; changes to the grid, height reference, or reconciliation tolerance require a full rebuild. Include every arrival, replacement and eviction in `changed`; treat shared result buffers as immutable. The function detects omitted arrivals and evictions but cannot detect an omitted replacement. It does not update derivatives, meshes or bounds on the caller's behalf.
+
+`createTerrainFilteredPyramid` builds box-filtered **cell raster** levels with valid-source and total-source counts. Odd edges are weighted by their actual source sample counts; missing samples do not contribute to the average. These filtered values are not conservative bounds and do not preserve ridges.
+
 ### Vertex-tile derivative halos[​](#vertex-tile-derivative-halos "Direct link to Vertex-tile derivative halos")
 
 `createTerrainVertexTileHalos(tiles, options)` reconciles a same-resolution vertex-tile snapshot and returns a copied grid with a one-vertex border around each tile. The padded `field` can be passed to `HeightField` and `createTerrainGradientGrid`; the original tile occupies columns `1..width` and rows `1..height`. Border values come from resident edge and diagonal neighbors, without extrapolation. `statuses` distinguishes `NOT_RESIDENT`, `NO_DATA`, and `VALID` for every padded sample; `field.validity` marks only valid samples. Rebuild halos after changing the resident snapshot. `getTerrainVertexHaloAffectedTiles` identifies a conservative set of resident tiles to rebuild for arrivals, replacements or evictions. Pass the tile width and height; two-vertex dimensions have a wider dependency neighborhood because halo samples can themselves be shared. `maxSamples` bounds the total padded sample count, and shared-height disagreement is checked by the same reconciliation policy. This does not establish mixed-resolution halos.
