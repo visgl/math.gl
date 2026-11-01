@@ -8,7 +8,6 @@ import {
   getTransferList,
   processOnWorker,
   processOnWorkerInBatches,
-  preloadWorker,
   type WorkerObject,
   type ProcessOnWorkerOptions
 } from '../worker-utils/index';
@@ -49,9 +48,7 @@ export class InitializedTask<D extends AnyTask> {
   constructor(
     private task: D,
     private release: () => void,
-    controls: TaskRunControls,
-    pool?: WorkerPool,
-    private recycle?: (pool: WorkerPool) => Promise<void>
+    controls: TaskRunControls
   ) {
     this.runtime = new TaskRuntime(task);
     const execution = controls.execution ?? 'auto';
@@ -62,16 +59,14 @@ export class InitializedTask<D extends AnyTask> {
       const target = task.worker;
       if (Boolean(target.url) === Boolean(target.create))
         throw new Error('Supply exactly one worker URL or factory');
-      this.pool =
-        pool ??
-        new WorkerPool({
-          name: task.id,
-          url: target.url?.toString(),
-          loadWorker: target.create,
-          workerType: 'module',
-          maxConcurrency: 1,
-          maxMobileConcurrency: 1
-        });
+      this.pool = new WorkerPool({
+        name: task.id,
+        url: target.url?.toString(),
+        loadWorker: target.create,
+        workerType: 'module',
+        maxConcurrency: 1,
+        maxMobileConcurrency: 1
+      });
       this.descriptor = {
         id: task.id,
         name: task.id,
@@ -85,24 +80,11 @@ export class InitializedTask<D extends AnyTask> {
     }
   }
 
-  /** @internal Load worker code without invoking task lifecycle hooks. */
-  private async preload(signal?: AbortSignal): Promise<void> {
-    if (!this.pool || !this.descriptor) throw new Error('Task has no worker');
-    try {
-      await preloadWorker(this.descriptor, this.workerOptions({signal}), {count: 1});
-    } catch (error) {
-      this.invalid = true;
-      await this.pool.destroy(error);
-      throw error;
-    }
-  }
-
   /** @internal */
-  async initialize(input: object, controls: TaskRunControls, preload = false): Promise<void> {
+  async initialize(input: object, controls: TaskRunControls): Promise<void> {
     try {
       assertPayload(input);
-      if (preload) await this.preload(controls.signal);
-      else await this.enqueue(() => this.invoke('initialize', input, {}, controls));
+      await this.enqueue(() => this.invoke('initialize', input, {}, controls));
     } catch (error) {
       await this.terminate(error);
       throw error;
@@ -190,11 +172,6 @@ export class InitializedTask<D extends AnyTask> {
         try {
           await this.tail;
           if (!this.invalid) await this.invoke('destroy', {}, {});
-          if (!this.invalid && this.pool && this.recycle) {
-            const pool = this.pool;
-            this.pool = undefined;
-            await this.recycle(pool);
-          }
         } finally {
           try {
             await this.pool?.destroy();
@@ -343,10 +320,6 @@ export class InitializedTask<D extends AnyTask> {
  */
 export class TaskRunner {
   private maxConcurrency: number;
-  private maxIdleWorkers: number;
-  private idleWorkers: Array<{task: AnyTask; pool: WorkerPool}> = [];
-  private warmTasks = new Set<AnyTask>();
-  private preloading = new Set<Promise<void>>();
   private active = new Set<InitializedTask<any>>();
   private count = 0;
   private waiters: Array<{
@@ -360,36 +333,8 @@ export class TaskRunner {
 
   constructor(options: TaskRunnerOptions = {}) {
     this.maxConcurrency = options.maxConcurrency ?? 1;
-    this.maxIdleWorkers = options.maxIdleWorkers ?? this.maxConcurrency;
-    if (!Number.isSafeInteger(this.maxIdleWorkers) || this.maxIdleWorkers < 0)
-      throw new RangeError('maxIdleWorkers must be a nonnegative safe integer');
     if (!Number.isSafeInteger(this.maxConcurrency) || this.maxConcurrency < 1)
       throw new RangeError('maxConcurrency must be a positive safe integer');
-  }
-
-  /** Warm worker modules only. Each invocation still owns fresh task state. */
-  preloadTasks(tasks: readonly AnyTask[], controls: {signal?: AbortSignal} = {}): Promise<void> {
-    const unique = [...new Set(tasks)];
-    const pending = (async () => {
-      if (this.closed) throw new Error('Task runner is closed');
-      controls.signal?.throwIfAborted();
-      if (unique.length > this.maxIdleWorkers)
-        throw new RangeError('preloadTasks exceeds maxIdleWorkers');
-      for (const task of unique) {
-        if (!task.worker) throw new Error(`Task ${task.id} has no worker`);
-      }
-      for (const task of unique) {
-        this.warmTasks.add(task);
-        const handle = await this.open(task, {}, {execution: 'worker', ...controls}, true);
-        await handle.close();
-      }
-    })();
-    this.preloading.add(pending);
-    void pending.then(
-      () => this.preloading.delete(pending),
-      () => this.preloading.delete(pending)
-    );
-    return pending;
   }
 
   /** Execute synchronous hooks immediately on the calling thread, without queueing. */
@@ -553,10 +498,8 @@ export class TaskRunner {
       for (const waiter of this.waiters.splice(0))
         waiter.reject(new Error('Task runner is closed'));
       this.closing = (async () => {
-        await Promise.allSettled([...this.initializing, ...this.preloading]);
+        await Promise.allSettled(this.initializing);
         const results = await Promise.allSettled([...this.active].map(handle => handle.close()));
-        await Promise.all(this.idleWorkers.splice(0).map(({pool}) => pool.destroy()));
-        this.warmTasks.clear();
         const failure = results.find(result => result.status === 'rejected');
         if (failure?.status === 'rejected') throw failure.reason;
       })();
@@ -574,8 +517,7 @@ export class TaskRunner {
   private async open<D extends AnyTask>(
     task: D,
     initialization: object,
-    controls: TaskRunControls,
-    preload = false
+    controls: TaskRunControls
   ): Promise<InitializedTask<D>> {
     if (this.closed) throw new Error('Task runner is closed');
     controls.signal?.throwIfAborted();
@@ -613,31 +555,11 @@ export class TaskRunner {
     };
     try {
       if (this.closed) throw new Error('Task runner is closed');
-      const index =
-        controls.execution === 'main-thread'
-          ? -1
-          : this.idleWorkers.findIndex(entry => entry.task === task);
-      const cached = index < 0 ? undefined : this.idleWorkers.splice(index, 1)[0]!.pool;
-      try {
-        handle = new InitializedTask(task, release, controls, cached, async pool => {
-          if (this.closed || !this.warmTasks.has(task) || !this.maxIdleWorkers) {
-            await pool.destroy();
-            return;
-          }
-          const evicted =
-            this.idleWorkers.length >= this.maxIdleWorkers ? this.idleWorkers.shift() : undefined;
-          this.idleWorkers.push({task, pool});
-          await evicted?.pool.destroy();
-        });
-      } catch (error) {
-        await cached?.destroy();
-        throw error;
-      }
+      handle = new InitializedTask(task, release, controls);
       this.active.add(handle);
-      await handle.initialize(initialization, controls, preload);
+      await handle.initialize(initialization, controls);
       return handle;
     } catch (error) {
-      await handle?.terminate(error);
       release();
       throw error;
     }

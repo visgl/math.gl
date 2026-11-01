@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
 const isBrowser = typeof process === 'undefined' || !process.versions?.node;
-import {TaskRunner} from '@math.gl/core/tasks';
+import {TaskRunner, preloadTasks} from '@math.gl/core/tasks';
 import {ProjectCoordinatesTask, PrepareMapTask} from '../../src/tasks';
 import {MapEngine} from '../../src/discontinuous/map-engine';
 
@@ -33,6 +33,7 @@ for (const execution of ['main-thread', 'worker'] as const) {
           }
         };
     try {
+      await preloadTasks([task], {execution});
       const original = input();
       const result = await runner.runTask(task, {...original, ...initialization}, {execution});
       expect([...original.coordinates]).toEqual([0, 0, 10, 20]);
@@ -80,6 +81,7 @@ for (const execution of ['main-thread', 'worker'] as const) {
           }
         };
     try {
+      await preloadTasks([task], {execution});
       const {map} = await runner.runTask(
         task,
         {description: {version: 1, id: 'world', definition: {type: 'mercator'}}},

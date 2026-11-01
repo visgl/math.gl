@@ -34,7 +34,8 @@ export type ProcessOnMainThread = (
  */
 export async function createWorker(
   process: Process,
-  processInBatches?: ProcessInBatches
+  processInBatches?: ProcessInBatches,
+  preload?: () => Promise<void>
 ): Promise<void> {
   if (!(await WorkerBody.inWorkerThread())) {
     return;
@@ -80,6 +81,7 @@ export async function createWorker(
       }
       switch (type) {
         case 'preload':
+          await preload?.();
           WorkerBody.postMessage('done', {});
           break;
 

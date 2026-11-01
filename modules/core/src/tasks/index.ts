@@ -4,6 +4,7 @@
 
 /** Public task execution API. Worker transport is an internal implementation detail. */
 export {TaskRunner} from './task-runner';
+export {preloadTasks} from './task-preload';
 export type {InitializedTask} from './task-runner';
 export {initializeTaskWorker} from './task-runtime';
 export type {
@@ -16,6 +17,7 @@ export type {
   TaskRunControls,
   TaskRunOptions,
   TaskSyncRunOptions,
+  TaskPreloadOptions,
   TaskBatchRunOptions,
   TaskRunsOptions,
   TaskRunnerOptions

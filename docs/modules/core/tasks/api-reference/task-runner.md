@@ -9,6 +9,7 @@ This reference lists implemented controls only; see the RFC for proposed extensi
 
 | Hook | Signature |
 | --- | --- |
+| `preload` | `() => void \| Promise<void>` |
 | `initialize` | `(initialization, context) => State \| Promise<State>` |
 | `destroy` | `(state) => void \| Promise<void>` |
 | `process` | `(input, options, context) => Output \| Promise<Output>` |
@@ -23,14 +24,13 @@ tasks. Both processor shapes may coexist on one task.
 
 ## `TaskRunner`
 
-`new TaskRunner({maxConcurrency?: number, maxIdleWorkers?: number})` owns independent execution capacity.
+`new TaskRunner({maxConcurrency?: number})` owns independent execution capacity.
 Default concurrency is one; values must be positive safe integers. No shared farm
 configuration is mutated. Capacity includes initializing and explicitly retained
 handles. Waiting acquisitions honor `signal` and are rejected when the runner closes.
 
 | Method | Result | Contract |
 | --- | --- | --- |
-| `preloadTasks(tasks, {signal}?)` | `Promise<void>` | Warm one worker per distinct task without task initialization |
 | `runTaskSync(task, input, request?)` | `Output` | Immediate main-thread execution of synchronous hooks |
 | `runTask(task, input, request?)` | `Promise<Output>` | Temporary state for one atomic call |
 | `runTasks(task, inputs, request?)` | `AsyncIterable<Output>` | Independent calls, ordered output, per-slot state |
@@ -65,44 +65,70 @@ blocked asynchronous producers.
 `initializeTask` controls contain only execution, signal, ownership, and progress;
 application initialization data is the named second argument. Its signal does not
 control future runs. All automatic calls copy initialization data independently of process input
-ownership; multi-input calls copy a template for each slot. Automatic calls create separate workers unless the task was explicitly preloaded.
+ownership; multi-input calls copy a template for each slot. Separate automatic calls create separate workers; explicit handles retain one worker.
 
-### Worker-code warmup
+## `preloadTasks`
 
-`await runner.preloadTasks([ProjectCoordinatesTask, PrepareMapTask])` starts one
-worker for each distinct task object and waits for its module/protocol readiness.
-It does not call task `initialize`, `process`, or `destroy`, prepare a projection,
-or allocate task state. Lazy imports inside hooks still load when those hooks run.
-Tasks without worker targets reject. Repeated references in one list are deduplicated.
+```ts
+import {preloadTasks} from '@math.gl/core/tasks';
+await preloadTasks([ProjectCoordinatesTask, PrepareMapTask]);
+```
 
-`maxIdleWorkers` defaults to `maxConcurrency`, accepts nonnegative safe integers,
-and bounds retained idle workers separately from active execution. The distinct
-task count in one preload request must not exceed this limit. For two tasks with
-serial processing, use `new TaskRunner({maxIdleWorkers: 2})`. Zero disables retention.
-Up to `maxConcurrency + maxIdleWorkers` workers may exist, plus workers undergoing
-asynchronous termination. Idle eviction is oldest-first; reuse makes a worker recent.
+This standalone operation loads task code ahead of execution, independently of any
+runner. It creates no task state and does not invoke `initialize`, `process`, or
+`destroy`. `task.preload()` is an optional code-loading hook for dynamic imports and
+nested preload functions. Normal async execution automatically waits for this hook
+before initialization. Calls within one runtime deduplicate loading by task object
+identity; a failed hook can be retried. Keep task definitions stable.
 
-Later `runTask`, `runTasks`, `runTaskInBatches`, and worker `initializeTask` calls
-borrow warm workers by task object identity, not `id`. Keep definitions stable;
-do not mutate worker targets. Each automatic operation still initializes and destroys
-its state. Module-level variables survive worker reuse, so instance state belongs in
-`initialize`'s return value. Failed/cancelled workers are never returned to the cache.
+`preloadTasks(tasks, {execution?, signal?})` follows the same routing rule as execution:
+`auto` uses a declared worker, otherwise the local hook. `main-thread` loads locally;
+`worker` requires a worker target. Repeated references within a list are deduplicated.
+Tasks are preloaded sequentially, bounding temporary workers to one per invocation.
 
-Preloading uses execution capacity and can wait behind initialized handles. Close
-those handles before awaiting warmup when they occupy all slots. A signal cancels
-warmup; earlier completed workers may remain cached if a later preload fails.
-Concurrent calls and eviction can consume a warmed worker before the next operation;
-preloading is a latency optimization, not a reservation. Both runner shutdown methods
-stop cached workers. Unpreloaded tasks retain the temporary-worker behavior.
+For a worker target, a temporary worker loads its actual bundled entry, executes its
+module bootstrap, and awaits its own `preload` hook before acknowledging completion.
+The temporary worker then terminates. This also works with opaque bundler worker
+factories. There is no global runner, retained worker pool, or shutdown API to manage.
+Later workers can reuse browser-cached code where response cache headers permit;
+they still pay startup, evaluation, and task initialization costs. Code preloading
+cannot guarantee zero network traffic or prefetch unknown runtime-selected assets.
+Node workers also start afresh and do not share a JavaScript module cache.
 
-### Synchronous execution
+The hook must explicitly load dependencies otherwise deferred until processing.
+Provided geospatial tasks preload their projection/operation modules. For custom tasks:
+
+```ts
+const task = {
+  id: 'transform',
+  async preload() {
+    const module = await import('./transform-implementation.js');
+    await module.preloadDependencies?.();
+  },
+  async process(input) {
+    const {transform} = await import('./transform-implementation.js');
+    return {values: transform(input.values)};
+  }
+};
+```
+
+Cancellation stops waiting and terminates temporary workers. Local dynamic imports
+cannot be forcibly cancelled; shared loading may finish after the caller aborts.
+Hooks receive no task input or state: load modules here, allocate per-instance
+resources in `initialize`. Worker module bootstrap and preload hooks must not assume
+that a processing request will follow. No HTML preload elements are used.
+
+## Synchronous execution
 
 `runner.runTaskSync(task, input, request?)` runs on the calling thread even when
 the task declares a worker. It returns `Output`, never a promise, and throws errors
 synchronously. The request uses the same typed options, initialization, ownership,
 signal, and progress controls as `runTask`, but has no `execution` field.
 
-The atomic processor and any lifecycle hooks must return synchronously. Define the
+The atomic processor and initialization/destruction hooks must return synchronously.
+If the task has a `preload` hook, first await
+`preloadTasks([task], {execution: 'main-thread'})`; an unloaded task rejects without
+starting async work. Worker preloading does not mark code loaded on the main thread. Define the
 task with `satisfies Task<Types>` so TypeScript retains its concrete return types;
 a broad `Task<Types>` annotation permits async hooks and is not accepted. A streaming
 hook may coexist, but is not invoked. Known async functions reject before lifecycle
@@ -144,7 +170,7 @@ negotiation is deferred. Set `worker.url` to a compiled module URL or
 ## Prototype boundaries
 
 Not implemented: runner byte budgets, admission reservations, priority, metrics,
-shutdown deadlines, implicit worker preloading, adaptive routing, and
+shutdown deadlines, retained worker pools across automatic calls, adaptive routing, and
 cooperative worker cancellation. The old worker-utils entry is removed; see [migration](../developer-guide/migration.md)
 for application-level alternatives and intentional removals. Do not pass RFC-only fields to this prototype. See the
 [design RFC](https://github.com/visgl/math.gl/blob/master/dev-docs/RFCs/task-runner-rfc.md)

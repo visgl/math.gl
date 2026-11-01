@@ -37,6 +37,9 @@ const processCoordinates: NonNullable<Task<ProjectCoordinatesTypes>['process']> 
 /** Reproject packed coordinates, retaining the prepared projection for each task lifetime. */
 export const ProjectCoordinatesTask = {
   id: 'project-coordinates',
+  async preload() {
+    await Promise.all([import('./operations'), import('../projection/lib/projection')]);
+  },
   async initialize({projection}) {
     const state: ProjectCoordinatesTypes['state'] = {defaultOptions: projection};
     if (projection) await prepareProjection(state, projection);
@@ -63,6 +66,9 @@ export type PrepareMapTypes = {
 /** Build a portable map snapshot for MapEngine.fromPrepared without blocking the UI. */
 export const PrepareMapTask = {
   id: 'prepare-map',
+  async preload() {
+    await import('./operations');
+  },
   async process({description}, _options, context) {
     const {setupMap} = await import('./operations');
     return {map: setupMap(description, context).toPrepared()};

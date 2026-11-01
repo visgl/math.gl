@@ -16,7 +16,7 @@ numerical parity and buffer ownership while measuring end-to-end latency.
 Reports contain environment information, cold latency, warm mean, percentiles,
 throughput, CPU time, and sampled process RSS. These are harness measurements,
 not runner metrics. RSS includes worker threads; sampling can miss peaks and
-is not proof of leak freedom. Automatic calls create temporary workers unless preloaded;
+is not proof of leak freedom. Automatic calls create temporary workers;
 explicit handles retain both the worker and task state. Compare the same lifetime and ownership policy.
 
 Optional pinned-library comparisons:
@@ -39,5 +39,6 @@ and report initialization separately.
 `math.gl/tiny-main-thread-sync` measures direct synchronous runner calls (the harness
 still awaits each sample). `math.gl/tiny-automatic-cold` includes fresh worker startup
 on every call. `math.gl/echo-preload` reports warmup separately, while
-`math.gl/tiny-automatic-preloaded` includes per-call initialization and destruction
-on retained workers. It does not retain application state like the initialized row.
+`math.gl/tiny-automatic-after-code-preload` still includes worker startup and task initialization/destruction. Global code
+preloading does not retain workers. Node workers do not share a JavaScript module
+cache, so this row does not predict browser network-cache savings.

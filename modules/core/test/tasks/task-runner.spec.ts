@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {TaskRunner, type Task} from '../../src/tasks';
+import {TaskRunner, preloadTasks, type Task} from '../../src/tasks';
 
 type Types = {
   input: {value: number};
@@ -808,62 +808,6 @@ const warmTask = {
     ({}) as {identity: number; initialized: number; destroyed: number; calls: number}
 };
 
-test('preloadTasks warms code without state, then reuses workers with fresh lifecycles', async () => {
-  const runner = new TaskRunner();
-  try {
-    await runner.preloadTasks([warmTask, warmTask]);
-    const first = await runner.runTask(warmTask, {});
-    expect(first).toMatchObject({initialized: 1, destroyed: 0, calls: 1});
-    await runner.preloadTasks([warmTask]);
-    const second = await runner.runTask(warmTask, {});
-    expect(second).toEqual({...first, initialized: 2, destroyed: 1});
-    const handle = await runner.initializeTask(warmTask, {});
-    const third = await handle.runTask({});
-    expect(third).toEqual({...first, initialized: 3, destroyed: 2});
-    expect((await handle.runTask({})).calls).toBe(2);
-    await handle.close();
-  } finally {
-    await runner.close();
-  }
-  await expect(runner.preloadTasks([warmTask])).rejects.toThrow('closed');
-});
-
-test('warm worker cache is bounded, keyed by task object, and discards failures', async () => {
-  const runner = new TaskRunner({maxIdleWorkers: 1});
-  const other = {...warmTask};
-  try {
-    await expect(runner.preloadTasks([warmTask, other])).rejects.toThrow('maxIdleWorkers');
-    await runner.preloadTasks([warmTask]);
-    const first = await runner.runTask(warmTask, {});
-    await runner.preloadTasks([other]);
-    const second = await runner.runTask(other, {});
-    expect(second.identity).not.toBe(first.identity);
-    const restarted = await runner.runTask(warmTask, {});
-    expect(restarted.identity).not.toBe(first.identity);
-    await expect(runner.runTask(warmTask, {fail: true})).rejects.toThrow('warm failure');
-    const recovered = await runner.runTask(warmTask, {});
-    expect(recovered.identity).not.toBe(restarted.identity);
-    expect(recovered.initialized).toBe(1);
-    const controller = new AbortController();
-    const pending = runner.runTask(warmTask, {wait: true}, {signal: controller.signal});
-    setTimeout(() => controller.abort(new Error('warm abort')), 20);
-    await expect(pending).rejects.toThrow('warm abort');
-    expect((await runner.runTask(warmTask, {})).identity).not.toBe(recovered.identity);
-  } finally {
-    await runner.terminate();
-  }
-});
-
-test('preload rejects local tasks and shutdown settles pending warmup', async () => {
-  const runner = new TaskRunner();
-  await expect(runner.preloadTasks([fixture().task])).rejects.toThrow('no worker');
-  const pending = runner.preloadTasks([warmTask]);
-  const settled = pending.catch(() => {});
-  await runner.terminate();
-  await settled;
-  await expect(runner.runTask(warmTask, {})).rejects.toThrow('closed');
-});
-
 test('synchronous progress can cancel and cleanup waits for invalid hidden async work', async () => {
   const runner = new TaskRunner();
   const events: string[] = [];
@@ -917,25 +861,136 @@ test('synchronous progress can cancel and cleanup waits for invalid hidden async
   await runner.close();
 });
 
-test('preloaded workers support streaming and discard early-ended stream state', async () => {
-  const runner = new TaskRunner();
+test('global preloading deduplicates nested code loading without initializing state', async () => {
+  const events: string[] = [];
+  const dependency = {
+    id: 'dependency',
+    async preload() {
+      events.push('dependency');
+    }
+  };
   const task = {
-    ...warmTask,
-    async *processInBatches(inputs: AsyncIterable<object>) {
-      for await (const _input of inputs)
-        yield {identity: 0, initialized: 0, destroyed: 0, calls: 0};
+    id: 'nested',
+    async preload() {
+      events.push('preload');
+      await preloadTasks([dependency]);
+    },
+    initialize() {
+      events.push('initialize');
+      return {};
+    },
+    destroy() {
+      events.push('destroy');
+    },
+    process() {
+      return {value: 7};
+    }
+  };
+  await Promise.all([preloadTasks([task, task]), preloadTasks([task])]);
+  expect(events).toEqual(['preload', 'dependency']);
+  const one = new TaskRunner();
+  const two = new TaskRunner();
+  try {
+    expect(one.runTaskSync(task, {})).toEqual({value: 7});
+    await two.runTask(task, {});
+    expect(events).toEqual([
+      'preload',
+      'dependency',
+      'initialize',
+      'destroy',
+      'initialize',
+      'destroy'
+    ]);
+  } finally {
+    await one.close();
+    await two.close();
+  }
+});
+
+test('automatic local execution awaits preload; failed preload can retry', async () => {
+  const runner = new TaskRunner();
+  let loads = 0;
+  let initialized = 0;
+  const task = {
+    id: 'retry-preload',
+    async preload() {
+      if (++loads === 1) throw new Error('load failed');
+    },
+    initialize() {
+      initialized++;
+      return {};
+    },
+    process() {
+      return {value: 1};
     }
   };
   try {
-    await runner.preloadTasks([task]);
-    const first = await runner.runTask(task, {});
-    const outputs = await collect(runner.runTaskInBatches(task, [{}, {}]));
-    expect(outputs.map(result => result.calls)).toEqual([1, 2]);
-    expect(outputs[0]).toEqual({...first, initialized: 2, destroyed: 1});
-    expect((await runner.runTask(task, {})).identity).toBe(first.identity);
-    for await (const _output of runner.runTaskInBatches(task, [{}, {}])) break;
-    expect((await runner.runTask(task, {})).identity).not.toBe(first.identity);
+    expect(() => runner.runTaskSync(task, {})).toThrow('Preload task');
+    await expect(runner.runTask(task, {})).rejects.toThrow('load failed');
+    expect(initialized).toBe(0);
+    await runner.runTask(task, {});
+    expect(loads).toBe(2);
+    expect(runner.runTaskSync(task, {})).toEqual({value: 1});
+    expect(loads).toBe(2);
   } finally {
     await runner.close();
   }
+});
+
+test('cancelling local preload stops waiting without cancelling shared imports', async () => {
+  let finish!: () => void;
+  let loads = 0;
+  const task = {
+    id: 'pending-code',
+    preload() {
+      loads++;
+      return new Promise<void>(resolve => {
+        finish = resolve;
+      });
+    }
+  };
+  const controller = new AbortController();
+  const pending = preloadTasks([task], {signal: controller.signal});
+  await Promise.resolve();
+  controller.abort(new Error('stop loading wait'));
+  await expect(pending).rejects.toThrow('stop loading wait');
+  const another = preloadTasks([task]);
+  finish();
+  await another;
+  expect(loads).toBe(1);
+  await expect(preloadTasks([task], {execution: 'worker'})).rejects.toThrow('no worker');
+  await expect(preloadTasks([task], {signal: controller.signal})).rejects.toThrow(
+    'stop loading wait'
+  );
+});
+
+test('worker preloading waits for nested imports without state or retained workers', async () => {
+  await preloadTasks([warmTask, warmTask]);
+  const runner = new TaskRunner();
+  try {
+    const first = await runner.runTask(warmTask, {});
+    expect(first).toMatchObject({initialized: 1, destroyed: 0, calls: 1, loaded: true});
+    const second = await runner.runTask(warmTask, {});
+    expect(second.identity).not.toBe(first.identity);
+    expect(second).toMatchObject({initialized: 1, destroyed: 0, calls: 1, loaded: true});
+  } finally {
+    await runner.close();
+  }
+});
+
+test('worker preload failure and cancellation reject instead of hanging', async () => {
+  const target = (name: string) => ({
+    id: name,
+    worker: {
+      url: new URL(`../worker-utils/fixtures/${name}.mjs`, import.meta.url),
+      capabilities: {atomic: true, streaming: false}
+    }
+  });
+  await expect(preloadTasks([target('failing-preload-worker')])).rejects.toThrow(
+    'nested preload failed'
+  );
+  const controller = new AbortController();
+  const pending = preloadTasks([target('blocked-preload-worker')], {signal: controller.signal});
+  setTimeout(() => controller.abort(new Error('stop preload')), 50);
+  await expect(pending).rejects.toThrow('stop preload');
 });

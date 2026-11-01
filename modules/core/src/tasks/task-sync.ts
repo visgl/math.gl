@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {isTaskCodeLoaded} from './task-preload';
 import {getTransferList} from '../worker-utils/index';
 import {assertPayload, clonePayload, taskContext, localContext} from './task-runtime';
 import type {AnyTask, TaskInput, TaskOutput, TaskSyncRunOptions} from './task';
@@ -12,6 +13,8 @@ export function runTaskSync<D extends AnyTask>(
   input: TaskInput<D>,
   request: TaskSyncRunOptions<D> = {} as TaskSyncRunOptions<D>
 ): TaskOutput<D> {
+  if (!isTaskCodeLoaded(task))
+    throw new Error('Preload task on the main thread before runTaskSync');
   if ('execution' in request) throw new TypeError('runTaskSync always runs on the calling thread');
   if (!task.process) throw new TypeError('Task has no atomic processor');
   for (const hook of [task.initialize, task.process, task.destroy]) {

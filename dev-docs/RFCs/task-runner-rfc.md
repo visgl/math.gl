@@ -19,7 +19,7 @@ fields. Application options are separate from runtime controls.
 Ordinary runner calls automatically initialize and destroy temporary task state.
 Applications may call `initializeTask` to keep state across multiple operations.
 Worker reuse and task-state reuse are separate concepts. The implementation now
-provides explicit `preloadTasks` for code-only warmup with bounded idle workers,
+provides global `preloadTasks` and optional nested `task.preload()` hooks for code-only warmup,
 and `runTaskSync` for immediate local execution of synchronous hooks. See the
 [implemented method reference](../../docs/modules/core/tasks/api-reference/task-runner.md)
 for their contracts; neither restores the removed pool API.
@@ -708,7 +708,7 @@ No silent fallback and no indefinitely deferred compatibility entry.
 - Byte budgets, admission/reservations, and queue backpressure: retain required
   resource bounds in the new runner model before removing their old controls.
 - Worker reuse and preloading: implemented through explicit `preloadTasks`,
-  per-runner bounded idle retention, and per-operation task-state destruction.
+  temporary worker bootstrap and nested imports, with no retained worker pool.
   The benchmark separates preload, cold automatic, and preloaded automatic calls.
 - Cooperative cancellation, shared-memory progress, and shutdown deadlines:
   provide required semantics or explicitly document hard termination and its

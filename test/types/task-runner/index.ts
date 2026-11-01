@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {TaskRunner, type Task} from '@math.gl/core/tasks';
+import {TaskRunner, preloadTasks, type Task} from '@math.gl/core/tasks';
 const runner = new TaskRunner();
 const scale = {
   id: 'scale',
@@ -300,5 +300,8 @@ runner.runTaskSync(
 );
 // @ts-expect-error tasks with optional/potentially async hooks are not statically synchronous
 runner.runTaskSync(plain as Task<{input: {value: number}; output: {value: number}}>, {value: 1});
-const preload: Promise<void> = runner.preloadTasks([scale], {signal: new AbortController().signal});
+const preload: Promise<void> = preloadTasks([scale], {signal: new AbortController().signal});
 void preload;
+
+// @ts-expect-error code preloading has no runner lifetime or pool controls
+runner.preloadTasks([plain]);

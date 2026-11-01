@@ -45,6 +45,8 @@ export type TaskWorker = {
  */
 export type Task<T extends TaskTypes> = {
   id: string;
+  /** Load code dependencies without creating instance state. Cached per definition/realm. */
+  preload?: () => void | Promise<void>;
   initialize?: (
     input: Payload<Field<T, 'initialization', object>>,
     context: TaskInitializationContext
@@ -121,8 +123,5 @@ type SyncHook<D, K extends PropertyKey> = K extends keyof D
 export type SynchronousTask<D extends AnyTask> = D extends {process: (...args: any[]) => any}
   ? SyncHook<D, 'process'> & SyncHook<D, 'initialize'> & SyncHook<D, 'destroy'>
   : never;
-export type TaskRunnerOptions = {
-  maxConcurrency?: number;
-  /** Idle workers retained after preload; defaults to maxConcurrency. */
-  maxIdleWorkers?: number;
-};
+export type TaskPreloadOptions = Pick<TaskRunControls, 'execution' | 'signal'>;
+export type TaskRunnerOptions = {maxConcurrency?: number};
