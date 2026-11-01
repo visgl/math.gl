@@ -673,3 +673,43 @@ test('automatic transfer leaves initialization buffers intact', async () => {
     await runner.close();
   }
 });
+
+test.each([false, true])(
+  'runner termination aborts blocked input reads (after output: %s)',
+  async afterOutput => {
+    const runner = new TaskRunner({maxConcurrency: 2});
+    let reading!: () => void;
+    const blocked = new Promise<void>(resolve => {
+      reading = resolve;
+    });
+    let returned = false;
+    let index = 0;
+    const inputs: AsyncIterable<{value: number}> = {
+      [Symbol.asyncIterator]() {
+        return {
+          next() {
+            if (afterOutput && index++ === 0)
+              return Promise.resolve({done: false as const, value: {value: 1}});
+            reading();
+            return new Promise<IteratorResult<{value: number}>>(() => {});
+          },
+          async return() {
+            returned = true;
+            return {done: true as const, value: undefined};
+          }
+        };
+      }
+    };
+    const iterator = runner
+      .runTasks(fixture().task, inputs, {...request, concurrency: 2})
+      [Symbol.asyncIterator]();
+    if (afterOutput) expect((await iterator.next()).value).toEqual({value: 3});
+    const next = iterator.next();
+    const rejected = expect(next).rejects.toThrow('stop input reads');
+    await blocked;
+    await runner.terminate(new Error('stop input reads'));
+    await rejected;
+    expect(returned).toBe(true);
+    await iterator.return?.();
+  }
+);

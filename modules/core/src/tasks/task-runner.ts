@@ -324,6 +324,7 @@ export class TaskRunner {
   private closed = false;
   private closing?: Promise<void>;
   private initializing = new Set<Promise<unknown>>();
+  private iterations = new Set<AbortController>();
 
   constructor(options: TaskRunnerOptions = {}) {
     this.maxConcurrency = options.maxConcurrency ?? 1;
@@ -364,6 +365,7 @@ export class TaskRunner {
     ...args: RequestArgs<TaskRunsOptions<D>>
   ): AsyncIterable<TaskOutput<D>> {
     const request = (args[0] as any) ?? {};
+    if (this.closed) throw new Error('Task runner is closed');
     const concurrency = request.concurrency ?? 1;
     if (!Number.isSafeInteger(concurrency) || concurrency < 1 || concurrency > this.maxConcurrency)
       throw new RangeError('concurrency must be between 1 and maxConcurrency');
@@ -379,6 +381,7 @@ export class TaskRunner {
       }>
     > = [];
     const controller = new AbortController();
+    this.iterations.add(controller);
     const signal = request.signal
       ? AbortSignal.any([request.signal, controller.signal])
       : controller.signal;
@@ -435,6 +438,7 @@ export class TaskRunner {
         );
       }
     } finally {
+      this.iterations.delete(controller);
       controller.abort(new Error('Task iteration closed'));
       try {
         if (reading) await reading.catch(() => {});
@@ -480,6 +484,7 @@ export class TaskRunner {
   }
 
   async terminate(reason: unknown = new Error('Task runner terminated')): Promise<void> {
+    for (const controller of this.iterations) controller.abort(reason);
     const closing = this.close();
     await Promise.allSettled([...this.active].map(handle => handle.terminate(reason)));
     await closing;
