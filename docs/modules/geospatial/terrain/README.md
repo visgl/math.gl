@@ -38,7 +38,9 @@ terrain. Curvature, refraction and geodesic paths are not modeled.
 
 `updateTerrainVertexTileHalos(previous, resident, changed, options)` rebuilds
 only affected halos from a complete post-update source snapshot and reuses other
-halo objects. Include every arrival, replacement and eviction in `changed`; treat
+halo objects. Pass the previous snapshot's options as `options.previousOptions`;
+changes to the grid, height reference, or reconciliation tolerance require a full
+rebuild. Include every arrival, replacement and eviction in `changed`; treat
 shared result buffers as immutable. The function detects omitted arrivals and
 evictions but cannot detect an omitted replacement. It does not update derivatives,
 meshes or bounds on the caller's behalf.

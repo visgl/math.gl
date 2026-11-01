@@ -13,17 +13,33 @@ import type {TerrainVertexTile, TerrainVertexTileOptions} from './vertex-tiles';
  * The caller must enumerate every arrival, replacement and eviction in `changed`.
  * Unaffected halo objects are shared with the previous snapshot and must be treated
  * as immutable. This function does not retain source buffers or mutate inputs.
+ * Pass the options used for the previous snapshot; changes to its grid transform,
+ * dimensions, height reference or reconciliation tolerance require a full rebuild.
  */
 export function updateTerrainVertexTileHalos(
   previous: readonly TerrainVertexHaloTile[],
   resident: readonly TerrainVertexTile[],
   changed: readonly TerrainVertexTileAddress[],
-  options: TerrainVertexTileOptions
+  options: TerrainVertexTileOptions & {previousOptions: TerrainVertexTileOptions}
 ): {
   tiles: TerrainVertexHaloTile[];
   rebuilt: TerrainVertexTileAddress[];
   removed: TerrainVertexTileAddress[];
 } {
+  const prior = options.previousOptions;
+  if (!prior) throw new Error('Previous vertex tile options are required');
+  const equalPair = (a: readonly [number, number], b: readonly [number, number]): boolean =>
+    a[0] === b[0] && a[1] === b[1];
+  if (
+    prior.width !== options.width ||
+    prior.height !== options.height ||
+    !equalPair(prior.origin ?? [0, 0], options.origin ?? [0, 0]) ||
+    !equalPair(prior.columnStep ?? [1, 0], options.columnStep ?? [1, 0]) ||
+    !equalPair(prior.rowStep ?? [0, 1], options.rowStep ?? [0, 1]) ||
+    (prior.heightReference ?? 'unknown') !== (options.heightReference ?? 'unknown') ||
+    (prior.maxHeightDifference ?? 0) !== (options.maxHeightDifference ?? 0)
+  )
+    throw new Error('Vertex tile options changed; rebuild the full snapshot');
   const key = (t: TerrainVertexTileAddress): string => `${t.column},${t.row}`;
   const affected = getTerrainVertexHaloAffectedTiles(resident, changed, options);
   // Validate previous addresses and obtain an ordered, duplicate-free snapshot.
