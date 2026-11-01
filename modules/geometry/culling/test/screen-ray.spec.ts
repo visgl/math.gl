@@ -58,5 +58,7 @@ describe('unprojectScreenRay', () => {
     const matrix = new Matrix4();
     matrix[11] = 1;
     expect(unprojectScreenRay(matrix, viewport, [200, 100])).toBeNull();
+    matrix[11] = 2;
+    expect(unprojectScreenRay(matrix, viewport, [200, 100])).toBeNull();
   });
 });

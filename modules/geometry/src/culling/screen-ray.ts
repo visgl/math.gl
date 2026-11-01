@@ -53,6 +53,8 @@ export function unprojectScreenRay(
   const vertical = 1 - (2 * (pixel[1] - y)) / viewport.height;
   const points = depthRange.map(depth => matrix.transform([horizontal, vertical, depth, 1]));
   if (points.some(point => point[3] === 0 || !point.every(Number.isFinite))) return null;
+  // A sign change crosses w=0 between endpoints, so the projected segment is unbounded.
+  if (points[0][3] < 0 !== points[1][3] < 0) return null;
   const origin: [number, number, number] = [
     points[0][0] / points[0][3],
     points[0][1] / points[0][3],
