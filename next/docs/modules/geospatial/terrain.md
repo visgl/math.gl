@@ -4,6 +4,10 @@ Experimental CPU terrain data and algorithms, usable in Node.js, browser workers
 
 Terrain APIs are available from `@math.gl/geospatial/terrain` and `@math.gl/geospatial`. Named imports are tree-shakable; unbundled module loaders evaluate the root entry and its declared dependencies.
 
+## Sampled line of sight[​](#sampled-line-of-sight "Direct link to Sampled line of sight")
+
+`getTerrainProfileVisibility(profile, {observerHeight, targetHeight})` compares absolute endpoint elevations against samples of a straight horizontal profile. It returns `blocked` when a valid sample touches or crosses the line, `unknown` when coverage is missing and no obstruction is known, and `clear` otherwise. The result also reports the first observed blocker, missing sample count and minimum sampled vertical clearance. Missing samples can hide an earlier blocker. A clear result applies to the sampled piecewise-linear profile, not unsampled terrain. Curvature, refraction and geodesic paths are not modeled.
+
 ## Feature support[​](#feature-support "Direct link to Feature support")
 
 Terrain-data, analysis, meshing, and query capabilities against the broader CPU/GPU terrain roadmap.
