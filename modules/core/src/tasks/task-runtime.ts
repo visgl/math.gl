@@ -103,6 +103,7 @@ export async function initializeTaskWorker(task: AnyTask): Promise<void> {
   if (installed) throw new Error('A task is already installed in this worker');
   installed = true;
   const runtime = new TaskRuntime(task);
+  let streamOptions: object = {};
   return createWorker(
     async (request, _options, context) => {
       switch (request.operation) {
@@ -110,20 +111,27 @@ export async function initializeTaskWorker(task: AnyTask): Promise<void> {
           return runtime.initialize(request.input, context);
         case 'destroy':
           return runtime.destroy();
+        case 'stream-options':
+          streamOptions = request.options;
+          return {};
         case 'process':
           return runtime.process(request.input, request.options, context);
         default:
           throw new Error('Unknown task operation');
       }
     },
-    async function* (inputs, options, context) {
+    async function* (inputs, _options, context) {
       async function* batches() {
         for await (const input of inputs) {
           assertPayload(input);
           yield input;
         }
       }
-      yield* runtime.stream(batches(), options?.['taskOptions'] ?? {}, context);
+      try {
+        yield* runtime.stream(batches(), streamOptions, context);
+      } finally {
+        streamOptions = {};
+      }
     }
   );
 }

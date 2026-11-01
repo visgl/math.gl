@@ -260,3 +260,317 @@ test('aborting a worker invocation invalidates its state', async () => {
   await expect(instance.runTask({value: 1}, {options: {factor: 1}})).rejects.toThrow('invalid');
   await runner.close();
 });
+
+test('local cancellation waits for settlement before destroying state', async () => {
+  const {task, events} = fixture();
+  const runner = new TaskRunner();
+  let resume!: () => void;
+  let entered!: () => void;
+  const started = new Promise<void>(resolve => {
+    entered = resolve;
+  });
+  const blocked = {
+    ...task,
+    async process(input, options, context) {
+      entered();
+      await new Promise<void>(resolve => {
+        resume = resolve;
+      });
+      events.push('settled');
+      return task.process(input, options, context);
+    }
+  };
+  const controller = new AbortController();
+  const result = runner.runTask(blocked, {value: 1}, {...request, signal: controller.signal});
+  const rejected = expect(result).rejects.toThrow('stop');
+  await started;
+  controller.abort(new Error('stop'));
+  expect(events).toEqual(['initialize']);
+  resume();
+  await rejected;
+  expect(events).toEqual(['initialize', 'settled', 'destroy:1']);
+  await runner.close();
+});
+
+test('close cannot destroy state while initialization is still executing', async () => {
+  const runner = new TaskRunner();
+  const events: string[] = [];
+  let resume!: () => void;
+  let entered!: () => void;
+  const started = new Promise<void>(resolve => {
+    entered = resolve;
+  });
+  const task = {
+    id: 'slow-init',
+    async initialize() {
+      entered();
+      await new Promise<void>(resolve => {
+        resume = resolve;
+      });
+      events.push('initialized');
+      return {};
+    },
+    destroy() {
+      events.push('destroyed');
+    },
+    process() {
+      return {};
+    }
+  };
+  const opening = runner.initializeTask(task, {});
+  await started;
+  const closing = runner.close();
+  expect(events).toEqual([]);
+  resume();
+  await opening;
+  await closing;
+  expect(events).toEqual(['initialized', 'destroyed']);
+});
+
+test('initializer rejection releases capacity and does not call destroy', async () => {
+  const {task, events} = fixture();
+  const runner = new TaskRunner();
+  const broken = {
+    ...task,
+    initialize() {
+      throw new Error('init failed');
+    }
+  };
+  await expect(runner.runTask(broken, {value: 1}, request)).rejects.toThrow('init failed');
+  expect(events).toEqual([]);
+  expect(await runner.runTask(task, {value: 1}, request)).toEqual({value: 3});
+  await runner.close();
+});
+
+test('early multi-input return closes the producer and destroys each slot', async () => {
+  const {task, events} = fixture();
+  const runner = new TaskRunner({maxConcurrency: 2});
+  let returned = false;
+  async function* inputs() {
+    try {
+      yield {value: 1};
+      yield {value: 2};
+      yield {value: 3};
+    } finally {
+      returned = true;
+    }
+  }
+  for await (const output of runner.runTasks(task, inputs(), {...request, concurrency: 2})) {
+    expect(output).toEqual({value: 3});
+    break;
+  }
+  expect(returned).toBe(true);
+  expect(events.filter(event => event.startsWith('destroy'))).toHaveLength(2);
+  await runner.close();
+});
+
+test('progress callbacks, share validation, output validation, and unknown routes', async () => {
+  const runner = new TaskRunner();
+  const task = {
+    id: 'progress',
+    process(_input, _options, context) {
+      context.reportProgress({completed: 1});
+      return {};
+    }
+  } satisfies Task<{input: object; output: object}>;
+  const progress: unknown[] = [];
+  await runner.runTask(task, {}, {onProgress: value => progress.push(value)});
+  expect(progress).toEqual([{completed: 1, phase: 'process', unit: 'items'}]);
+  await expect(
+    runner.runTask(
+      task,
+      {},
+      {
+        onProgress() {
+          throw new Error('callback');
+        }
+      }
+    )
+  ).rejects.toThrow('callback');
+  await expect(
+    runner.runTask(task, {values: new Float64Array(1)}, {inputOwnership: 'share'})
+  ).rejects.toThrow('shared storage');
+  await expect(runner.runTask(task, {}, {outputOwnership: 'bad' as any})).rejects.toThrow(
+    'output ownership'
+  );
+  await expect(runner.runTask(task, {}, {inputOwnership: 'bad' as any})).rejects.toThrow(
+    'input ownership'
+  );
+  await expect(runner.runTask(task, {}, {execution: 'bad' as any})).rejects.toThrow(
+    'execution mode'
+  );
+  await runner.close();
+});
+
+test('worker targets must have exactly one locator', async () => {
+  const runner = new TaskRunner();
+  const task = {
+    ...workerTask,
+    worker: {
+      ...workerTask.worker,
+      create: () => {
+        throw new Error('unused');
+      }
+    }
+  };
+  await expect(runner.initializeTask(task, {})).rejects.toThrow('exactly one');
+  await runner.close();
+});
+
+test('forced worker termination cancels active work and closes the runner', async () => {
+  const runner = new TaskRunner();
+  const instance = await runner.initializeTask({...fixture().task, ...workerTask}, {offset: 0});
+  const result = instance.runTask({delay: 1000} as any, {options: {factor: 1}});
+  const rejected = expect(result).rejects.toThrow('stop');
+  await new Promise(resolve => setTimeout(resolve, 10));
+  await runner.terminate(new Error('stop'));
+  await rejected;
+  await expect(runner.initializeTask(workerTask, {})).rejects.toThrow('closed');
+});
+
+test('cancellation interrupts a blocked asynchronous input producer', async () => {
+  const {task, events} = fixture();
+  const runner = new TaskRunner();
+  const controller = new AbortController();
+  let returned = false;
+  const inputs: AsyncIterable<{value: number}> = {
+    [Symbol.asyncIterator]() {
+      return {
+        next: () => new Promise(() => {}),
+        return: async () => {
+          returned = true;
+          return {done: true, value: undefined};
+        }
+      };
+    }
+  };
+  const result = collect(
+    runner.runTaskInBatches(task, inputs, {...request, signal: controller.signal})
+  );
+  const rejected = expect(result).rejects.toThrow('stop');
+  await new Promise(resolve => setTimeout(resolve, 10));
+  controller.abort(new Error('stop'));
+  await rejected;
+  expect(returned).toBe(true);
+  expect(events).toEqual(['initialize', 'destroy:0']);
+  await runner.close();
+});
+
+test('cancelled local initialization destroys late-returned state and rejects', async () => {
+  const runner = new TaskRunner();
+  const controller = new AbortController();
+  let destroyed = false;
+  let resume!: () => void;
+  let entered!: () => void;
+  const started = new Promise<void>(resolve => {
+    entered = resolve;
+  });
+  const task = {
+    id: 'late-init',
+    async initialize() {
+      entered();
+      await new Promise<void>(resolve => {
+        resume = resolve;
+      });
+      return {};
+    },
+    destroy() {
+      destroyed = true;
+    },
+    process() {
+      return {};
+    }
+  };
+  const opening = runner.initializeTask(task, {}, {signal: controller.signal});
+  const rejected = expect(opening).rejects.toThrow('stop');
+  await started;
+  controller.abort(new Error('stop'));
+  resume();
+  await rejected;
+  expect(destroyed).toBe(true);
+  await runner.close();
+});
+
+test('input transfer cannot detach reusable application-option buffers', async () => {
+  const runner = new TaskRunner();
+  const values = new Float64Array([1]);
+  const task = {
+    id: 'alias',
+    process(input: {values: Float64Array}, _options: {metadata: Float64Array}) {
+      return input;
+    }
+  };
+  await expect(
+    runner.runTask(task, {values}, {options: {metadata: values}, inputOwnership: 'transfer'})
+  ).rejects.toThrow('aliases');
+  expect(values.byteLength).toBe(8);
+  await runner.close();
+});
+
+test('worker streams preserve RegExp application options', async () => {
+  const runner = new TaskRunner();
+  try {
+    const outputs = await collect(
+      runner.runTaskInBatches({...fixture().task, ...workerTask}, [{value: 1}, {value: 2}], {
+        ...request,
+        options: {factor: 2, pattern: /^2$/} as any
+      })
+    );
+    expect(outputs).toEqual([{value: 5, calls: 1}]);
+  } finally {
+    await runner.close();
+  }
+});
+
+test.each(['main-thread', 'worker'] as const)(
+  'terminate unwinds paused output iterators on %s',
+  async execution => {
+    for (const method of ['runTasks', 'runTaskInBatches'] as const) {
+      const runner = new TaskRunner();
+      const handle = await runner.initializeTask(
+        {...fixture().task, ...workerTask},
+        {offset: 0},
+        {execution}
+      );
+      const iterator = handle[method]([{value: 1}, {value: 2}], {options: {factor: 1}})[
+        Symbol.asyncIterator
+      ]();
+      await iterator.next();
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        await Promise.race([
+          runner.terminate(new Error('stop')),
+          new Promise((_, reject) => {
+            timer = setTimeout(() => reject(new Error('termination hung')), 2000);
+          })
+        ]);
+      } finally {
+        clearTimeout(timer);
+        await iterator.return?.();
+        await runner.close();
+      }
+    }
+  }
+);
+
+test('worker input sharing does not impose sharing on copied application options', async () => {
+  const runner = new TaskRunner();
+  const task = {...fixture().task, ...workerTask};
+  const metadata = new Float64Array([42]);
+  try {
+    expect(
+      await runner.runTask(
+        task,
+        {value: 1},
+        {
+          ...request,
+          inputOwnership: 'share',
+          options: {factor: 2, metadata} as any
+        }
+      )
+    ).toEqual({value: 3, calls: 1});
+    expect(metadata.byteLength).toBe(8);
+  } finally {
+    await runner.close();
+  }
+});

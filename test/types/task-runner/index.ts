@@ -94,3 +94,45 @@ const invalid: Task<{input: number[]; output: {value: number}}> = {
   }
 };
 void invalid;
+
+const remote: Task<{
+  input: {value: number};
+  output: {value: number};
+  options: {factor: number};
+  initialization: {offset: number};
+  state: number;
+}> = {
+  id: 'remote',
+  worker: {url: 'worker.js', capabilities: {atomic: true, streaming: false}}
+};
+const remoteResult: Promise<{value: number}> = runner.runTask(
+  remote,
+  {value: 1},
+  {
+    initialization: {offset: 2},
+    options: {factor: 3}
+  }
+);
+void remoteResult;
+// @ts-expect-error annotated worker-only tasks retain required initialization
+runner.runTask(remote, {value: 1}, {options: {factor: 2}});
+const noInput = {
+  id: 'no-input',
+  initialize() {
+    return {};
+  },
+  process() {
+    return {value: 1};
+  }
+};
+runner.initializeTask(noInput, {});
+runner.runTask(noInput, {});
+const optionalOptions = {
+  id: 'optional',
+  process(input: {value: number}, options: {factor?: number} = {}) {
+    return {value: input.value * (options.factor ?? 1)};
+  }
+};
+runner.runTask(optionalOptions, {value: 1});
+// @ts-expect-error optional application fields remain typed
+runner.runTask(optionalOptions, {value: 1}, {options: {factor: 'bad'}});

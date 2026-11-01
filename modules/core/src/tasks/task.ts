@@ -67,23 +67,24 @@ export type Task<T extends TaskTypes> = {
 export type AnyTask = Task<any>;
 type Processor<D extends AnyTask> = NonNullable<D['process']>;
 type StreamProcessor<D extends AnyTask> = NonNullable<D['processInBatches']>;
-export type TaskInput<D extends AnyTask> = Parameters<Processor<D>>[0];
+type Argument<
+  F extends (...args: any[]) => any,
+  N extends number
+> = Parameters<F>[N] extends undefined ? object : NonNullable<Parameters<F>[N]>;
+export type TaskInput<D extends AnyTask> = Argument<Processor<D>, 0>;
 export type TaskOutput<D extends AnyTask> = Awaited<ReturnType<Processor<D>>>;
 export type TaskBatchInput<D extends AnyTask> =
   Parameters<StreamProcessor<D>>[0] extends AsyncIterable<infer I> ? I : never;
 export type TaskBatchOutput<D extends AnyTask> =
   ReturnType<StreamProcessor<D>> extends AsyncIterable<infer O> ? O : never;
-type ProcessorOptions<F extends (...args: any[]) => any> =
-  Parameters<F> extends [any, infer O, ...any[]] ? O : object;
+type ProcessorOptions<F extends (...args: any[]) => any> = Argument<F, 1>;
 type Options<D extends AnyTask> = D extends {process: (...args: any[]) => any}
   ? ProcessorOptions<Processor<D>>
   : ProcessorOptions<StreamProcessor<D>>;
-export type Initialization<D extends AnyTask> = Parameters<NonNullable<D['initialize']>>[0];
+export type Initialization<D extends AnyTask> = Argument<NonNullable<D['initialize']>, 0>;
 type OptionsField<D extends AnyTask> =
   {} extends Options<D> ? {options?: Options<D>} : {options: Options<D>};
-type InitializationField<D extends AnyTask> = D extends {
-  initialize: (...args: any[]) => any;
-}
+type InitializationField<D extends AnyTask> = 'initialize' extends keyof D
   ? {} extends Initialization<D>
     ? {initialization?: Initialization<D>}
     : {initialization: Initialization<D>}

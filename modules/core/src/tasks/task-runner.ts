@@ -5,6 +5,7 @@
 
 import {
   WorkerPool,
+  getTransferList,
   processOnWorker,
   processOnWorkerInBatches,
   type WorkerObject,
@@ -34,6 +35,7 @@ export class InitializedTask<D extends AnyTask> {
   private tail: Promise<unknown> = Promise.resolve();
   private closing?: Promise<void>;
   private closed = false;
+  private streams = new Set<() => Promise<void>>();
   private invalid = false;
   private controller = new AbortController();
 
@@ -77,10 +79,7 @@ export class InitializedTask<D extends AnyTask> {
   async initialize(input: object, controls: TaskRunControls): Promise<void> {
     try {
       assertPayload(input);
-      const copied = clonePayload(input, controls.inputOwnership);
-      await this.enqueue(() =>
-        this.invoke('initialize', copied, {}, {...controls, inputOwnership: 'transfer'})
-      );
+      await this.enqueue(() => this.invoke('initialize', input, {}, controls));
     } catch (error) {
       await this.terminate(error);
       throw error;
@@ -104,7 +103,7 @@ export class InitializedTask<D extends AnyTask> {
   ): AsyncIterable<TaskOutput<D>> {
     yield* this.serialStream(async function* (self) {
       self.checkCapability('atomic');
-      for await (const input of inputs) {
+      for await (const input of asAsync(inputs, self.controls(args[0]).signal)) {
         yield await self.invoke('process', input, (args[0] as any)?.options ?? {}, args[0]);
       }
     });
@@ -120,18 +119,19 @@ export class InitializedTask<D extends AnyTask> {
       const controls = self.controls(args[0]);
       const options = clonePayload((args[0] as any)?.options ?? {});
       async function* prepared() {
-        for await (const input of inputs) {
+        for await (const input of asAsync(inputs, controls.signal)) {
           controls.signal?.throwIfAborted();
+          assertNoTransferAlias(input, (args[0] as any)?.options ?? {}, controls.inputOwnership);
           yield clonePayload(input, controls.inputOwnership);
         }
       }
       let completed = false;
       try {
         if (self.pool) {
+          await self.invoke('stream-options', {}, options, controls);
           yield* processOnWorkerInBatches(self.descriptor!, prepared(), {
             ...self.workerOptions(controls),
             inputOwnership: 'transfer',
-            taskOptions: options,
             workerInBatches: true
           });
         } else {
@@ -186,6 +186,7 @@ export class InitializedTask<D extends AnyTask> {
       this.invalid = true;
       await this.pool.destroy(reason);
     }
+    await Promise.allSettled([...this.streams].map(stop => stop()));
     await this.close();
   }
 
@@ -232,13 +233,14 @@ export class InitializedTask<D extends AnyTask> {
     const prepared = operation === 'destroy' ? {} : this.controls(controls);
     prepared.signal?.throwIfAborted();
     assertPayload(input);
+    assertNoTransferAlias(input, options, prepared.inputOwnership);
     const copiedOptions = clonePayload(options);
     if (this.pool) {
       try {
         return await processOnWorker(
           this.descriptor!,
-          {operation, input, options: copiedOptions},
-          this.workerOptions(prepared)
+          {operation, input: clonePayload(input, prepared.inputOwnership), options: copiedOptions},
+          this.workerOptions({...prepared, inputOwnership: 'transfer'})
         );
       } catch (error) {
         // A transport error can indicate loss of pinned state. Conservatively
@@ -251,7 +253,11 @@ export class InitializedTask<D extends AnyTask> {
     if (operation === 'destroy') return this.runtime.destroy();
     const copied = clonePayload(input, prepared.inputOwnership);
     const context = localContext(prepared);
-    if (operation === 'initialize') return this.runtime.initialize(copied, context);
+    if (operation === 'initialize') {
+      const result = await this.runtime.initialize(copied, context);
+      prepared.signal?.throwIfAborted();
+      return result;
+    }
     const result = await this.runtime.process(copied, copiedOptions, context);
     prepared.signal?.throwIfAborted();
     return clonePayload(result, prepared.outputOwnership ?? 'transfer');
@@ -272,10 +278,33 @@ export class InitializedTask<D extends AnyTask> {
       release = resolve;
     });
     await before;
-    try {
-      yield* operation(this);
-    } finally {
+    if (this.controller.signal.aborted) {
       release();
+      throw this.controller.signal.reason;
+    }
+    const iterator = operation(this)[Symbol.asyncIterator]();
+    let stopping: Promise<void> | undefined;
+    const stop = () => {
+      stopping ??= (async () => {
+        try {
+          await iterator.return?.();
+        } finally {
+          this.streams.delete(stop);
+          release();
+        }
+      })();
+      return stopping;
+    };
+    this.streams.add(stop);
+    try {
+      while (true) {
+        this.controller.signal.throwIfAborted();
+        const next = await iterator.next();
+        if (next.done) return;
+        yield next.value;
+      }
+    } finally {
+      await stop();
     }
   }
 }
@@ -335,13 +364,13 @@ export class TaskRunner {
     const concurrency = request.concurrency ?? 1;
     if (!Number.isSafeInteger(concurrency) || concurrency < 1 || concurrency > this.maxConcurrency)
       throw new RangeError('concurrency must be between 1 and maxConcurrency');
-    const iterator = asAsync(inputs)[Symbol.asyncIterator]();
     const handles: InitializedTask<D>[] = [];
     const pending: Array<Promise<{value?: TaskOutput<D>; error?: unknown; failed?: boolean}>> = [];
     const controller = new AbortController();
     const signal = request.signal
       ? AbortSignal.any([request.signal, controller.signal])
       : controller.signal;
+    const iterator = asAsync(inputs, signal)[Symbol.asyncIterator]();
     let finished = false;
     try {
       // Acquire only one slot initially. Additional slots must not wait while this
@@ -498,6 +527,64 @@ async function finish<T>(handle: InitializedTask<any>, operation: () => Promise<
   return result;
 }
 
-async function* asAsync<T>(inputs: Iterable<T> | AsyncIterable<T>): AsyncIterable<T> {
-  yield* inputs;
+async function* asAsync<T>(
+  inputs: Iterable<T> | AsyncIterable<T>,
+  signal?: AbortSignal
+): AsyncIterable<T> {
+  const iterator =
+    Symbol.asyncIterator in inputs ? inputs[Symbol.asyncIterator]() : inputs[Symbol.iterator]();
+  let done = false;
+  try {
+    while (true) {
+      const next = await new Promise<IteratorResult<T>>((resolve, reject) => {
+        const cleanup = () => signal?.removeEventListener('abort', abort);
+        const abort = () => {
+          cleanup();
+          reject(signal?.reason);
+        };
+        signal?.addEventListener('abort', abort, {once: true});
+        if (signal?.aborted) {
+          abort();
+          return;
+        }
+        try {
+          Promise.resolve(iterator.next()).then(
+            value => {
+              cleanup();
+              resolve(value);
+            },
+            error => {
+              cleanup();
+              reject(error);
+            }
+          );
+        } catch (error) {
+          cleanup();
+          reject(error);
+        }
+      });
+      if (next.done) {
+        done = true;
+        return;
+      }
+      yield next.value;
+    }
+  } finally {
+    if (!done) {
+      try {
+        void Promise.resolve(iterator.return?.()).catch(() => {});
+      } catch {
+        /* Best effort producer cleanup. */
+      }
+    }
+  }
+}
+
+function assertNoTransferAlias(input: unknown, options: unknown, ownership?: string): void {
+  if (ownership === 'transfer') {
+    const metadata = new Set(getTransferList(options));
+    if (getTransferList(input).some(buffer => metadata.has(buffer))) {
+      throw new Error('Transferred input aliases reusable options; use inputOwnership: copy');
+    }
+  }
 }

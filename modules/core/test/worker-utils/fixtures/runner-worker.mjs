@@ -15,6 +15,7 @@ await initializeTaskWorker({
   },
   async *processInBatches(inputs, options, context) {
     for await (const {value} of inputs) {
+      if (options.pattern && !options.pattern.test(String(value))) continue;
       context.state.calls++;
       yield {value: value * options.factor + context.state.offset, calls: context.state.calls};
     }

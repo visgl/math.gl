@@ -289,11 +289,7 @@ operation on that handle from inside an unfinished streaming loop.
 
 ### See the lifetime
 
-```text
-runner.runTask             initialize → process → destroy
-runner.runTaskInBatches    initialize → stream ─────────→ destroy
-runner.initializeTask     initialize → call → call → stream → close → destroy
-```
+![Automatic calls initialize, process, and destroy state; explicit handles retain state across calls until close.](/images/task-runner-lifetimes.svg)
 
 `runTasks` creates one state instance for each used slot and reuses it within that
 call. With concurrency two, there are two separate states. Use concurrency one or
@@ -316,7 +312,8 @@ for related operations, or provision more capacity.
 
 These boundaries also apply to local execution. SharedArrayBuffer remains shared
 under every policy; copy does not isolate shared memory. Application options are
-copied separately. Do not depend on aliases between options and input payloads.
+copied separately. Transfer rejects inputs that alias reusable option buffers;
+use copy mode for those inputs.
 Automatic `runTasks` copies initialization data for each slot; explicit
 initialization can transfer ownership once.
 
@@ -345,7 +342,9 @@ stopped; cleanup waits until execution settles.
 Always close runners and initialized handles in `finally`. `close()` drains work
 and invokes `destroy`; `terminate(reason)` cancels work and forcibly stops workers.
 Forced termination cannot guarantee `destroy`. Finish or close output iterators
-before awaiting shutdown. The prototype has no shutdown timeout.
+before awaiting graceful `close()`. Forced `terminate()` also unwinds paused
+output iterators without requiring the consumer to advance them. The prototype
+has no shutdown timeout.
 
 ## Run the complete example
 
@@ -387,9 +386,11 @@ are declared by the application, so keep worker assets and descriptors aligned.
 
 For JavaScript, payload records are validated at runtime. For TypeScript, required
 fields and output types are checked through the descriptor. An explicitly
-annotated worker-only `Task<Types>` can preserve processor types, but the prototype
-does not yet provide complete compile-time initialization/capability checking for
-that shape. Prefer a shared typed definition with both worker and local hooks.
+annotated worker-only `Task<Types>` preserves processor types and required
+initialization fields. Use an explicit `: Task<Types>`
+annotation for worker-only objects: `satisfies` alone cannot infer absent processor
+types from a URL. Compile-time capability discrimination is still deferred.
+Prefer a shared typed definition with both worker and local hooks when practical.
 
 ## Coming from the existing tasks API
 
