@@ -38,6 +38,8 @@ export type {QueryPoint, TriangleRayHit} from './queries';
 
 export {intersectOrientedBoxes2D} from './oriented-box-2d';
 export type {OrientedBox2D} from './oriented-box-2d';
+export {unprojectScreenRay} from './screen-ray';
+export type {ScreenRay, ScreenRayViewport} from './screen-ray';
 
 export {
   getOrientedBoundingBoxQuaternion,
