@@ -15,6 +15,7 @@ export type {
   TaskWorker,
   TaskRunControls,
   TaskRunOptions,
+  TaskSyncRunOptions,
   TaskBatchRunOptions,
   TaskRunsOptions,
   TaskRunnerOptions

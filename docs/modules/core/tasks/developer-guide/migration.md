@@ -64,7 +64,8 @@ or `{create, capabilities}` in a browser; choose one target form.
 - **Ownership:** input copying is now the default. Select `inputOwnership:
   'transfer'` deliberately; all aliases detach. Options and automatic
   initialization data are copied separately. Shared buffers stay shared.
-- **Lifetime:** automatic operations release temporary state and workers.
+- **Lifetime:** automatic operations release temporary state. Workers close unless
+  the task was explicitly preloaded; preloading never retains task state.
   For warm workers or cached projections, explicitly initialize a handle and
   close it in `finally`. Handles are serial and occupy runner capacity when idle.
 - **Cancellation:** worker abort hard-terminates the worker and invalidates its
@@ -85,7 +86,7 @@ These are removals, not renamed settings. Passing old fields does not enable the
 | --- | --- |
 | Shared/global worker farm configuration | Own and share an explicit runner in the application |
 | Byte budgets, reservations, queue priorities, admission tokens | Bound production before calling the runner; use lazy `runTasks` inputs for count-bounded work. Implement byte accounting upstream when required |
-| Automatic worker reuse and `preloadWorker` | Explicitly initialize a handle; retain it for the desired warm lifetime |
+| `preloadWorker` and automatic worker reuse | `runner.preloadTasks([task])` warms code and enables bounded worker reuse; `initializeTask` retains application state |
 | Cooperative worker abort and shared progress counters | Use hard cancellation and `onProgress`; custom shared-data coordination belongs to the task |
 | Built-in job/pool metrics | Measure application timings around calls and use task progress events |
 | Shutdown timeouts | Set an application timer that calls `terminate`; forced stop cannot promise task cleanup |

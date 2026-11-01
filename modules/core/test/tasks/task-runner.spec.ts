@@ -713,3 +713,229 @@ test.each([false, true])(
     await iterator.return?.();
   }
 );
+
+test('runTaskSync returns named output and destroys synchronous state before returning', async () => {
+  const {task, events} = fixture();
+  const runner = new TaskRunner();
+  expect(runner.runTaskSync(task, {value: 3}, request)).toEqual({value: 7});
+  expect(events).toEqual(['initialize', 'destroy:1']);
+  const workerDefined = {...task, ...workerTask};
+  expect(runner.runTaskSync(workerDefined, {value: 3}, request)).toEqual({value: 7});
+  const busy = await runner.initializeTask(task, {offset: 0});
+  expect(() => runner.runTaskSync(task, {value: 1}, request)).toThrow('capacity');
+  await busy.close();
+  expect(runner.runTaskSync(task, {value: 1}, request)).toEqual({value: 3});
+  await runner.close();
+  expect(() => runner.runTaskSync(task, {value: 1}, request)).toThrow('closed');
+});
+
+test('runTaskSync preserves ownership and cancellation contracts', async () => {
+  const task = {
+    id: 'sync',
+    process: ({values}: {values: Uint8Array}) => {
+      values[0]++;
+      return {values};
+    }
+  };
+  const runner = new TaskRunner();
+  const values = new Uint8Array([1]);
+  expect(runner.runTaskSync(task, {values})).toEqual({values: new Uint8Array([2])});
+  expect(values[0]).toBe(1);
+  const controller = new AbortController();
+  controller.abort(new Error('cancel sync'));
+  expect(() => runner.runTaskSync(task, {values}, {signal: controller.signal})).toThrow(
+    'cancel sync'
+  );
+  expect(runner.runTaskSync(task, {values}, {inputOwnership: 'transfer'}).values[0]).toBe(2);
+  expect(values.byteLength).toBe(0);
+  await runner.close();
+});
+
+test('runTaskSync rejects async hooks and aggregates processing and cleanup failures', async () => {
+  const runner = new TaskRunner();
+  const events: string[] = [];
+  const task = {
+    id: 'sync-failure',
+    initialize() {
+      events.push('initialize');
+      return {};
+    },
+    process() {
+      throw new Error('process');
+    },
+    destroy() {
+      events.push('destroy');
+      throw new Error('destroy');
+    }
+  };
+  expect(() => runner.runTaskSync(task, {})).toThrow(AggregateError);
+  expect(events).toEqual(['initialize', 'destroy']);
+  events.length = 0;
+  const asyncTask = {
+    ...task,
+    async process() {
+      return {};
+    }
+  };
+  // JavaScript callers receive a runtime error before any known async hook runs.
+  expect(() => runner.runTaskSync(asyncTask as any, {})).toThrow('synchronous');
+  expect(events).toEqual([]);
+  const hidden = {
+    id: 'hidden',
+    initialize() {
+      return Promise.resolve({});
+    },
+    process() {
+      return {};
+    },
+    destroy() {
+      events.push('late destroy');
+    }
+  };
+  expect(() => runner.runTaskSync(hidden as any, {})).toThrow('promise');
+  await new Promise(resolve => setTimeout(resolve, 0));
+  expect(events).toEqual(['late destroy']);
+  await runner.close();
+});
+
+const warmTask = {
+  id: 'warm-task',
+  worker: {
+    url: new URL('../worker-utils/fixtures/warm-task-worker.mjs', import.meta.url),
+    capabilities: {atomic: true, streaming: true}
+  },
+  process: (_input: {fail?: boolean; wait?: boolean}) =>
+    ({}) as {identity: number; initialized: number; destroyed: number; calls: number}
+};
+
+test('preloadTasks warms code without state, then reuses workers with fresh lifecycles', async () => {
+  const runner = new TaskRunner();
+  try {
+    await runner.preloadTasks([warmTask, warmTask]);
+    const first = await runner.runTask(warmTask, {});
+    expect(first).toMatchObject({initialized: 1, destroyed: 0, calls: 1});
+    await runner.preloadTasks([warmTask]);
+    const second = await runner.runTask(warmTask, {});
+    expect(second).toEqual({...first, initialized: 2, destroyed: 1});
+    const handle = await runner.initializeTask(warmTask, {});
+    const third = await handle.runTask({});
+    expect(third).toEqual({...first, initialized: 3, destroyed: 2});
+    expect((await handle.runTask({})).calls).toBe(2);
+    await handle.close();
+  } finally {
+    await runner.close();
+  }
+  await expect(runner.preloadTasks([warmTask])).rejects.toThrow('closed');
+});
+
+test('warm worker cache is bounded, keyed by task object, and discards failures', async () => {
+  const runner = new TaskRunner({maxIdleWorkers: 1});
+  const other = {...warmTask};
+  try {
+    await expect(runner.preloadTasks([warmTask, other])).rejects.toThrow('maxIdleWorkers');
+    await runner.preloadTasks([warmTask]);
+    const first = await runner.runTask(warmTask, {});
+    await runner.preloadTasks([other]);
+    const second = await runner.runTask(other, {});
+    expect(second.identity).not.toBe(first.identity);
+    const restarted = await runner.runTask(warmTask, {});
+    expect(restarted.identity).not.toBe(first.identity);
+    await expect(runner.runTask(warmTask, {fail: true})).rejects.toThrow('warm failure');
+    const recovered = await runner.runTask(warmTask, {});
+    expect(recovered.identity).not.toBe(restarted.identity);
+    expect(recovered.initialized).toBe(1);
+    const controller = new AbortController();
+    const pending = runner.runTask(warmTask, {wait: true}, {signal: controller.signal});
+    setTimeout(() => controller.abort(new Error('warm abort')), 20);
+    await expect(pending).rejects.toThrow('warm abort');
+    expect((await runner.runTask(warmTask, {})).identity).not.toBe(recovered.identity);
+  } finally {
+    await runner.terminate();
+  }
+});
+
+test('preload rejects local tasks and shutdown settles pending warmup', async () => {
+  const runner = new TaskRunner();
+  await expect(runner.preloadTasks([fixture().task])).rejects.toThrow('no worker');
+  const pending = runner.preloadTasks([warmTask]);
+  const settled = pending.catch(() => {});
+  await runner.terminate();
+  await settled;
+  await expect(runner.runTask(warmTask, {})).rejects.toThrow('closed');
+});
+
+test('synchronous progress can cancel and cleanup waits for invalid hidden async work', async () => {
+  const runner = new TaskRunner();
+  const events: string[] = [];
+  const controller = new AbortController();
+  const task = {
+    id: 'sync-progress',
+    initialize() {
+      return {};
+    },
+    destroy() {
+      events.push('destroy');
+    },
+    process(_input: object, _options: object, context: any) {
+      context.reportProgress({completed: 1});
+      return {value: 1};
+    }
+  };
+  expect(() =>
+    runner.runTaskSync(
+      task,
+      {},
+      {
+        signal: controller.signal,
+        onProgress: () => controller.abort(new Error('progress abort'))
+      }
+    )
+  ).toThrow('progress abort');
+  expect(events).toEqual(['destroy']);
+  events.length = 0;
+  let finish!: () => void;
+  const hidden = {
+    ...task,
+    process() {
+      return new Promise<object>(resolve => {
+        finish = () => resolve({});
+      });
+    }
+  };
+  expect(() => runner.runTaskSync(hidden as any, {})).toThrow('promise');
+  expect(events).toEqual([]);
+  finish();
+  await new Promise(resolve => setTimeout(resolve, 0));
+  expect(events).toEqual(['destroy']);
+  const asyncCleanup = {
+    ...task,
+    destroy() {
+      return Promise.resolve();
+    }
+  };
+  expect(() => runner.runTaskSync(asyncCleanup as any, {})).toThrow('destroy returned a promise');
+  await runner.close();
+});
+
+test('preloaded workers support streaming and discard early-ended stream state', async () => {
+  const runner = new TaskRunner();
+  const task = {
+    ...warmTask,
+    async *processInBatches(inputs: AsyncIterable<object>) {
+      for await (const _input of inputs)
+        yield {identity: 0, initialized: 0, destroyed: 0, calls: 0};
+    }
+  };
+  try {
+    await runner.preloadTasks([task]);
+    const first = await runner.runTask(task, {});
+    const outputs = await collect(runner.runTaskInBatches(task, [{}, {}]));
+    expect(outputs.map(result => result.calls)).toEqual([1, 2]);
+    expect(outputs[0]).toEqual({...first, initialized: 2, destroyed: 1});
+    expect((await runner.runTask(task, {})).identity).toBe(first.identity);
+    for await (const _output of runner.runTaskInBatches(task, [{}, {}])) break;
+    expect((await runner.runTask(task, {})).identity).not.toBe(first.identity);
+  } finally {
+    await runner.close();
+  }
+});

@@ -197,6 +197,32 @@ otherwise. Choose `main-thread` to run locally or `worker` to require a worker.
 Worker load errors are reported; there is no hidden local retry. Synchronous
 main-thread computation does not become CPU-parallel by raising concurrency.
 
+### Warm workers before the first operation
+
+Preload worker code during application startup when first-use latency matters:
+
+```ts
+const runner = new TaskRunner({maxIdleWorkers: 2});
+try {
+  await runner.preloadTasks([ProjectCoordinatesTask, PrepareMapTask]);
+  const {coordinates} = await runner.runTask(ProjectCoordinatesTask, {
+    coordinates: new Float64Array([10, 20]),
+    projection: {from: 'EPSG:4326', to: 'EPSG:3857'}
+  });
+  console.log(coordinates);
+} finally {
+  await runner.close();
+}
+```
+
+This loads worker modules without initializing task state. Each later operation
+still owns its initialization and cleanup; use `initializeTask` to retain state.
+Imports deferred inside task hooks are not warmed. `maxIdleWorkers` bounds idle
+workers separately from active concurrency and defaults to `maxConcurrency`.
+Preload at most that many distinct tasks per call. Eviction or concurrent use can
+consume a warm worker; preloading does not reserve one. Both shutdown methods stop
+retained workers.
+
 ### Set concurrency
 
 `new TaskRunner({maxConcurrency: 4})` gives the runner four execution slots.
@@ -286,6 +312,25 @@ const {values} = await runner.runTask(
 at the call site. Required application options remain required; they live under
 `options`, separate from runtime controls. Omit the `options` type for a task
 without application parameters.
+
+### Return a small result synchronously
+
+The `scaleTask` above has a synchronous processor, so it can also return directly:
+
+```ts
+const {values} = runner.runTaskSync(
+  scaleTask,
+  {values: new Float64Array([1, 2, 3])},
+  {options: {factor: 10}}
+);
+```
+
+`runTaskSync` always runs on the calling thread, with the same named payload and
+ownership rules. All lifecycle hooks must also be synchronous. It throws when the
+runner has no free execution slot and blocks the UI until completion. Use it for
+small computations; use `runTask` with a worker for expensive work. The provided
+geospatial tasks load code asynchronously and therefore use `runTask` even when
+executing on the main thread.
 
 ### Add streaming and lifecycle hooks
 

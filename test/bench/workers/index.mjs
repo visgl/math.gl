@@ -103,6 +103,16 @@ await measure('math.gl/tiny-main-thread', count, async () => {
     value: 42
   });
 });
+await measure('math.gl/tiny-main-thread-sync', count, () => {
+  assert.deepEqual(runner.runTaskSync(echoTask, {value: 42}), {value: 42});
+});
+await measure('math.gl/tiny-automatic-cold', quick ? 3 : 10, async () => {
+  assert.deepEqual(await runner.runTask(echoTask, {value: 42}), {value: 42});
+});
+await measure('math.gl/echo-preload', 1, () => runner.preloadTasks([echoTask]));
+await measure('math.gl/tiny-automatic-preloaded', count, async () => {
+  assert.deepEqual(await runner.runTask(echoTask, {value: 42}), {value: 42});
+});
 await measure('math.gl/independent-batches', 1, async () => {
   let index = 0;
   for await (const {value} of runner.runTasks(echoTask, [{value: 1}, {value: 2}], {concurrency: 2}))
