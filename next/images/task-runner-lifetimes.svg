@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 350" role="img" aria-labelledby="title desc">
+  <title id="title">One task definition, two state lifetimes</title>
+  <desc id="desc">Automatic execution initializes state, processes one operation, and destroys state. An explicit initialized handle retains state across multiple calls and a stream until close invokes destruction.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#71879d" stroke-width="1.5"/></marker>
+  </defs>
+  <rect width="1040" height="350" rx="20" fill="#0b1726"/>
+  <g font-family="system-ui, sans-serif">
+    <text x="30" y="42" fill="#f3f7fc" font-size="23" font-weight="700">One definition. You choose the lifetime.</text>
+    <text x="30" y="70" fill="#a9bbce" font-size="15">Worker location and application state are separate decisions.</text>
+    <text x="30" y="129" fill="#f3f7fc" font-size="17" font-weight="650">Automatic</text>
+    <text x="30" y="153" fill="#a9bbce" font-size="14">One runner operation</text>
+    <text x="30" y="239" fill="#f3f7fc" font-size="17" font-weight="650">Explicit</text>
+    <text x="30" y="263" fill="#a9bbce" font-size="14">One initialized handle</text>
+    <g stroke="#71879d" stroke-width="2" marker-end="url(#arrow)">
+      <path d="M362 135H430"/><path d="M620 135H872"/>
+      <path d="M362 245H402"/><path d="M498 245H538"/><path d="M634 245H674"/><path d="M786 245H872"/>
+    </g>
+    <g fill="#122f40" stroke="#43ccdf" stroke-width="1.5">
+      <rect x="220" y="108" width="142" height="54" rx="10"/>
+      <rect x="220" y="218" width="142" height="54" rx="10"/>
+    </g>
+    <g fill="#17382f" stroke="#71d6ac" stroke-width="1.5">
+      <rect x="438" y="108" width="182" height="54" rx="10"/>
+      <rect x="410" y="218" width="88" height="54" rx="10"/>
+      <rect x="546" y="218" width="88" height="54" rx="10"/>
+      <rect x="682" y="218" width="104" height="54" rx="10"/>
+    </g>
+    <g fill="#3c2931" stroke="#e8a3b1" stroke-width="1.5">
+      <rect x="880" y="108" width="130" height="54" rx="10"/>
+      <rect x="880" y="218" width="130" height="54" rx="10"/>
+    </g>
+    <g fill="#f3f7fc" font-size="16" text-anchor="middle" dominant-baseline="middle">
+      <text x="291" y="136">initialize</text><text x="529" y="136">process / stream</text><text x="945" y="136">destroy</text>
+      <text x="291" y="246">initialize</text><text x="454" y="246">call</text><text x="590" y="246">call</text><text x="734" y="246">stream</text><text x="945" y="246">destroy</text>
+    </g>
+    <text x="828" y="207" fill="#e8a3b1" font-size="13" text-anchor="middle">close()</text>
+    <path d="M220 291V301H786V291" fill="none" stroke="#d4b576" stroke-width="1.5"/>
+    <text x="503" y="326" fill="#d4b576" font-size="14" text-anchor="middle">The same private state stays available across operations</text>
+  </g>
+</svg>
