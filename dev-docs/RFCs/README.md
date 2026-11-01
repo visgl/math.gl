@@ -11,6 +11,12 @@ Writeups of directions in major areas of interest
 | [Terrain math and GPU compute](../terrain-roadmap.md) | Shared CPU/GPU terrain surfaces, tiled sampling, meshing, deck.gl fitting, and simulation |
 | [TypeScript proj4 parity](../projection-roadmap.md) | Independent engine, pluggable projections, and staged parity with proj4js |
 
+## Current RFCs
+
+| RFC | Status | Description |
+| --- | --- | --- |
+| [TaskRunner API](./task-runner-rfc.md) | Draft / prototype | Typed tasks, atomic and streaming execution, and automatic or explicit state lifetimes |
+
 ## v3.0 RFCs
 
 | RFC                                                     | Author   | Status    | Description                                                                                     |

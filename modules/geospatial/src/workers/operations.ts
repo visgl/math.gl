@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {MapEngine, type MapDescription, type MapEngineOptions} from '../discontinuous/map-engine';
-import type {CreateProjectionOptions, ProjectionArray} from '../projection/types';
+import type {CreateProjectionOptions, ProjectionArray, Projection} from '../projection/types';
 import type {WorkerContext} from '@math.gl/core/worker-utils';
 
 export type BulkProjectionTask = {
@@ -29,7 +29,8 @@ export function setupMap(
 /** Process worker-owned storage in chunks. Failed jobs return no partial result. */
 export async function projectBulk(
   input: BulkProjectionTask,
-  context: WorkerContext
+  context: WorkerContext,
+  preparedProjection?: Projection
 ): Promise<ProjectionArray> {
   const {coordinates, dimension = 2, chunkSize = 4096} = input;
   if (
@@ -45,8 +46,11 @@ export async function projectBulk(
       'Expected ordinary floating-point buffers, complete records and positive chunk size'
     );
   context.reportProgress?.({phase: 'projection-setup', completed: 0, total: 1, unit: 'tasks'});
-  const {FullProjectionEngine} = await import('../projection/lib/projection');
-  const projection = new FullProjectionEngine().createProjection(input.projection);
+  const projection =
+    preparedProjection ??
+    new (await import('../projection/lib/projection')).FullProjectionEngine().createProjection(
+      input.projection
+    );
   context.reportProgress?.({phase: 'projection-setup', completed: 1, total: 1, unit: 'tasks'});
   const total = coordinates.length / dimension;
   context.reportProgress?.({phase: 'bulk-projection', completed: 0, total, unit: 'records'});
