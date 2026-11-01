@@ -26,6 +26,7 @@ import {getTransferList, getTransferListForWriter} from '../worker-utils/get-tra
 import {prepareSharedState, SharedWorkerState} from './shared-state';
 import {isBrowser} from '../env-utils/globals';
 import {getInputByteLength} from '../worker-utils/get-input-byte-length';
+import {validateOutputOwnership} from './validate-output-ownership';
 
 /** Options for worker processing */
 export type ProcessOnWorkerOptions = WorkerOptions & {
@@ -91,6 +92,7 @@ export async function processOnWorker<Input, Output, Options extends object>(
   context: WorkerContext = {},
   jobContext: WorkerJobContext = {}
 ): Promise<Output> {
+  validateOutputOwnership(options.outputOwnership);
   if (
     options.inputOwnership !== undefined &&
     !['copy', 'transfer', 'share'].includes(options.inputOwnership)
@@ -170,6 +172,7 @@ export function processOnWorkerInBatches<
   context: WorkerContext = {},
   jobContext: WorkerJobContext = {}
 ): AsyncIterable<OutputBatch> {
+  validateOutputOwnership(options.outputOwnership);
   if (
     options.inputOwnership !== undefined &&
     !['copy', 'transfer', 'share'].includes(options.inputOwnership)

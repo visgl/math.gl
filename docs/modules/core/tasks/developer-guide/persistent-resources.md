@@ -118,9 +118,9 @@ worker farm has a higher concurrency limit. The default waiting queue holds
 
 With `copy`, the worker receives independent ordinary input buffers. With
 `transfer`, the caller's buffers detach and the processor can return them as its
-result. Do not return a worker-cached ordinary buffer unless you intend to
-transfer and lose it. Return a slice or an independently allocated result when
-retaining the original inside the resource.
+result. Output buffers transfer by default. Set `outputOwnership: 'copy'` when
+creating the resource or on an individual `run()` call to return worker-cached
+buffers without detaching them. A call can override the creation-time default.
 
 Shared buffers remain shared and need application synchronization. See
 [application-owned atomic state](./shared-memory.md#share-application-state).

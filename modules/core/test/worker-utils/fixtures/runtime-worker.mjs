@@ -3,8 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {createWorker} from '@math.gl/core/worker-utils';
 let runs = 0;
+const retainedOutput = new Uint8Array([4, 5, 6]);
 await createWorker(async (input, options, context) => {
   runs++;
+  if (input?.mode === 'retained-output') return retainedOutput;
   if (input?.mode === 'shared-spin') {
     context.sharedState.setProgress(1, 2);
     const deadline = performance.now() + 3000;
@@ -24,7 +26,12 @@ await createWorker(async (input, options, context) => {
     await new Promise(resolve => setTimeout(resolve, 200));
   }
   return input?.mode ? runs : input;
-}, async function* (input, _options, context) {
+}, async function* (input, options, context) {
+  if (options.repeatRetainedOutput) {
+    const retained = new Uint8Array([7, 8, 9]);
+    for await (const _ of input) yield retained;
+    return;
+  }
   for await (const batch of input) {
     context.signal.throwIfAborted();
     yield batch;

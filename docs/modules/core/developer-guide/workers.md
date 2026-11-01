@@ -54,7 +54,9 @@ The geospatial operations copy input by default. The low-level runtime preserves
 loaders.gl's default of transferring input. Set `inputOwnership: 'copy'`, `'transfer'` or `'share'` explicitly.
 Share mode accepts shared storage and rejects ordinary transferable buffers before dispatch. Transferring an ArrayBuffer detaches every view sharing
 it; cancellation cannot restore it. Copy mode clones the entire request payload,
-including serializable options and context; runtime callbacks and control objects stay local. Results are transferred back. Typed-array
+including serializable options and context; runtime callbacks and control objects stay local. Results are transferred back by default. Set
+`outputOwnership: 'copy'` when a worker or persistent resource must retain returned buffers. This applies to atomic results and each output batch.
+Typed-array
 subviews transfer their entire backing buffer; shared buffers are not transferred.
 `processOnWorkerInBatches` applies the same input policy to each batch and uses
 backpressure while keeping a worker leased for the session.

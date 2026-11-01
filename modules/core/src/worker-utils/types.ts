@@ -51,6 +51,8 @@ export type WorkerPoolStats = {
 export type WorkerOptions = {
   /** Copy input or transfer its backing buffers; transfer preserves the loaders.gl default. */
   inputOwnership?: 'copy' | 'transfer' | 'share';
+  /** Copy worker output or transfer its backing buffers; transfer is the default. */
+  outputOwnership?: 'copy' | 'transfer';
   /** Shared control buffer, or false to disable automatic cooperative shared control. */
   sharedState?: SharedArrayBuffer | false;
   /** Hard termination is the compatibility default. Cooperative mode requires createWorker support. */
