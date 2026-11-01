@@ -1,9 +1,15 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {createResourceWorker} from '@math.gl/core/worker-utils';
+import {createResourceWorker} from '../../../dist/worker-utils/index.js';
 await createResourceWorker({
-  initialize: input => ({value: input.value, disposed: input.disposed, counter: input.counter, hangDisposer: input.hangDisposer, buffer: new Uint8Array([1, 2, 3])}),
+  initialize: input => ({
+    value: input.value,
+    disposed: input.disposed,
+    counter: input.counter,
+    hangDisposer: input.hangDisposer,
+    buffer: new Uint8Array([1, 2, 3])
+  }),
   run: (state, input) => {
     if (input === 'buffer') return state.buffer;
     if (input === 'buffer-length') return state.buffer.byteLength;

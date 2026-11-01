@@ -1,18 +1,37 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {processOnWorker} from '@math.gl/core/worker-utils';
+import {TaskRunner} from '@math.gl/core/tasks';
 import {MapEngine} from '@math.gl/geospatial/discontinuous';
 import {prepareDiscontinuousGrid, DISCONTINUOUS_VIEWS} from './discontinuous-views.js';
-import {cacheProjectionGrid, getCachedProjectionGrid, prepareProjectionGrid} from './projection-grid.js';
+import {
+  cacheProjectionGrid,
+  getCachedProjectionGrid,
+  prepareProjectionGrid
+} from './projection-grid.js';
 
 const cache = new Map();
-const loadWorker = () => new Worker(new URL('./discontinuous-grid-worker.js', import.meta.url), {type: 'module'});
-const IceAgeGridWorker = {id: 'ice-age-grid', name: 'Ice Age grid', module: 'geospatial',
-  version: 'latest', worker: true, loadWorker, options: {}};
+const loadWorker = () =>
+  new Worker(new URL('./discontinuous-grid-worker.js', import.meta.url), {type: 'module'});
+const IceAgeGridTask = {
+  id: 'ice-age-grid',
+  worker: {create: loadWorker, capabilities: {atomic: true, streaming: false}}
+};
+async function executeTask(task, input, options) {
+  const runner = new TaskRunner();
+  try {
+    return await runner.runTask(task, input, options);
+  } finally {
+    await runner.close();
+  }
+}
 
 /** Cancel a queued or running job when its selection is superseded. */
-export async function prepareMapGrid(view, step, {signal, onProgress = () => {}, runTask = processOnWorker} = {}) {
+export async function prepareMapGrid(
+  view,
+  step,
+  {signal, onProgress = () => {}, runTask = executeTask} = {}
+) {
   signal?.throwIfAborted();
   const key = `${view}:${step}`;
   if (cache.has(key)) return cache.get(key);
@@ -23,8 +42,11 @@ export async function prepareMapGrid(view, step, {signal, onProgress = () => {},
   }
   let result;
   if (typeof Worker !== 'undefined') {
-    const data = await runTask(IceAgeGridWorker, {view, step, discontinuous},
-      {worker: true, signal, onProgress, inputOwnership: 'copy'});
+    const data = await runTask(
+      IceAgeGridTask,
+      {view, step, discontinuous},
+      {execution: 'worker', signal, onProgress, inputOwnership: 'copy'}
+    );
     signal?.throwIfAborted();
     if (discontinuous) {
       const {preparedMap, ...grid} = data;

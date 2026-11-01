@@ -35,9 +35,9 @@ const modules = [
     name: 'Tasks',
     packageName: '@math.gl/core/tasks',
     description:
-      'Run small tasks locally and larger jobs in worker pools, with bounded queues and shared state.',
-    image: 'tasks.svg',
-    imageAlt: 'Main thread connected through a bounded queue to reusable workers',
+      'Run typed tasks locally or in workers, stream batches, and reuse initialized state.',
+    image: 'task-runner-lifetimes.svg',
+    imageAlt: 'Automatic task cleanup and explicitly retained task state',
     theme: 'teal'
   },
   {
@@ -187,11 +187,17 @@ function ModuleCard({module, baseUrl}) {
   const docsUrl = `${baseUrl}docs/modules/${module.packageName.replace('@math.gl/', '')}`;
   return (
     <a className={`${styles.card} ${styles[module.theme]}`} href={docsUrl}>
-      <div className={`${styles.cardImage} ${module.name === 'GeoArrow' ? styles.logoImage : ''} ${['GeoArrow', 'WKB'].includes(module.name) ? styles.fitImage : ''}`}>
-        <img src={module.image.startsWith('https://') ? module.image : `${baseUrl}images/${module.image}`} alt={module.imageAlt} loading="lazy" />
-        <span className={styles.packageName}>
-          {module.packageName}
-        </span>
+      <div
+        className={`${styles.cardImage} ${module.name === 'GeoArrow' ? styles.logoImage : ''} ${['GeoArrow', 'WKB'].includes(module.name) ? styles.fitImage : ''}`}
+      >
+        <img
+          src={
+            module.image.startsWith('https://') ? module.image : `${baseUrl}images/${module.image}`
+          }
+          alt={module.imageAlt}
+          loading="lazy"
+        />
+        <span className={styles.packageName}>{module.packageName}</span>
       </div>
       <div className={styles.cardBody}>
         <div className={styles.cardHeading}>
@@ -210,35 +216,35 @@ function ModuleCard({module, baseUrl}) {
 export default function ModuleCatalog() {
   const baseUrl = useBaseUrl('/');
   return (
-        <div className={styles.docCatalog}>
-          <div className={styles.intro}>
-            <p className={styles.eyebrow}>Modular geospatial &amp; 3D math</p>
-            <h2>Small tools. Big spatial ideas.</h2>
-            <p className={styles.lede}>
-              Pick the building blocks you need—from vectors and meshes to coordinate systems,
-              global grids, and time-aware geospatial analysis.
-            </p>
+    <div className={styles.docCatalog}>
+      <div className={styles.intro}>
+        <p className={styles.eyebrow}>Modular geospatial &amp; 3D math</p>
+        <h2>Small tools. Big spatial ideas.</h2>
+        <p className={styles.lede}>
+          Pick the building blocks you need—from vectors and meshes to coordinate systems, global
+          grids, and time-aware geospatial analysis.
+        </p>
+      </div>
+      <nav className={styles.categoryLinks} aria-label="Module categories">
+        {moduleGroups.map(group => (
+          <a key={group.id} href={`#${group.id}`}>
+            {group.label}
+          </a>
+        ))}
+      </nav>
+      {moduleGroups.map(group => (
+        <section className={styles.moduleGroup} key={group.id} aria-labelledby={group.id}>
+          <div className={styles.groupHeading}>
+            <h2 id={group.id}>{group.label}</h2>
+            <p>{group.description}</p>
           </div>
-          <nav className={styles.categoryLinks} aria-label="Module categories">
-            {moduleGroups.map(group => (
-              <a key={group.id} href={`#${group.id}`}>
-                {group.label}
-              </a>
+          <div className={styles.grid}>
+            {group.modules.map(moduleId => (
+              <ModuleCard key={moduleId} module={modulesById.get(moduleId)} baseUrl={baseUrl} />
             ))}
-          </nav>
-          {moduleGroups.map(group => (
-            <section className={styles.moduleGroup} key={group.id} aria-labelledby={group.id}>
-              <div className={styles.groupHeading}>
-                <h2 id={group.id}>{group.label}</h2>
-                <p>{group.description}</p>
-              </div>
-              <div className={styles.grid}>
-                {group.modules.map(moduleId => (
-                  <ModuleCard key={moduleId} module={modulesById.get(moduleId)} baseUrl={baseUrl} />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
+          </div>
+        </section>
+      ))}
+    </div>
   );
 }

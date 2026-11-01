@@ -4,7 +4,7 @@
 import {expect, test as baseTest} from 'vitest';
 import {isBrowser} from '../../src/worker-utils';
 const test = baseTest.runIf(!isBrowser);
-import {processOnWorkerInBatches} from '@math.gl/core/worker-utils';
+import {processOnWorkerInBatches} from '../../src/worker-utils/index';
 
 const StatefulBatchWorker = {
   id: 'stateful-batch-test',

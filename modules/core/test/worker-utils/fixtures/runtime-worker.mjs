@@ -1,39 +1,42 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {createWorker} from '@math.gl/core/worker-utils';
+import {createWorker} from '../../../dist/worker-utils/index.js';
 let runs = 0;
 const retainedOutput = new Uint8Array([4, 5, 6]);
-await createWorker(async (input, options, context) => {
-  runs++;
-  if (input?.mode === 'retained-output') return retainedOutput;
-  if (input?.mode === 'shared-spin') {
-    context.sharedState.setProgress(1, 2);
-    const deadline = performance.now() + 3000;
-    while (performance.now() < deadline) context.throwIfAborted();
-    throw new Error('Shared cancellation was not observed');
-  }
-  if (input?.mode === 'crash') process.exit(1);
-  if (input?.mode === 'cooperate') {
-    context.reportProgress({phase: 'running', completed: 0, unit: 'tasks'});
-    for (let i = 0; i < 100; i++) {
-      await new Promise(resolve => setTimeout(resolve, 5));
+await createWorker(
+  async (input, options, context) => {
+    runs++;
+    if (input?.mode === 'retained-output') return retainedOutput;
+    if (input?.mode === 'shared-spin') {
+      context.sharedState.setProgress(1, 2);
+      const deadline = performance.now() + 3000;
+      while (performance.now() < deadline) context.throwIfAborted();
+      throw new Error('Shared cancellation was not observed');
+    }
+    if (input?.mode === 'crash') process.exit(1);
+    if (input?.mode === 'cooperate') {
+      context.reportProgress({phase: 'running', completed: 0, unit: 'tasks'});
+      for (let i = 0; i < 100; i++) {
+        await new Promise(resolve => setTimeout(resolve, 5));
+        context.signal.throwIfAborted();
+      }
+    }
+    if (input?.mode === 'ignore') {
+      context.reportProgress({phase: 'running', completed: 0, unit: 'tasks'});
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    return input?.mode ? runs : input;
+  },
+  async function* (input, options, context) {
+    if (options.repeatRetainedOutput) {
+      const retained = new Uint8Array([7, 8, 9]);
+      for await (const _ of input) yield retained;
+      return;
+    }
+    for await (const batch of input) {
       context.signal.throwIfAborted();
+      yield batch;
     }
   }
-  if (input?.mode === 'ignore') {
-    context.reportProgress({phase: 'running', completed: 0, unit: 'tasks'});
-    await new Promise(resolve => setTimeout(resolve, 200));
-  }
-  return input?.mode ? runs : input;
-}, async function* (input, options, context) {
-  if (options.repeatRetainedOutput) {
-    const retained = new Uint8Array([7, 8, 9]);
-    for await (const _ of input) yield retained;
-    return;
-  }
-  for await (const batch of input) {
-    context.signal.throwIfAborted();
-    yield batch;
-  }
-});
+);

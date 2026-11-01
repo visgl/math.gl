@@ -58,8 +58,9 @@ Specific problems:
 This RFC defines the application-facing API and migration boundaries. It does not
 replace the underlying scheduler, introduce distributed execution, serialize
 arbitrary functions, provide a global task registry, or promise transparent RPC.
-Advanced reservations and custom transports remain available through
-`@math.gl/core/worker-utils` until a separate design incorporates them cleanly.
+The implementation removes the old public worker-utils entry. Advanced reservations
+and custom transports are intentional removals with application-level migration
+guidance; any future runner support must follow the design gates below.
 
 ## Design principles
 
@@ -72,8 +73,8 @@ Advanced reservations and custom transports remain available through
    cancellation and ownership on requests.
 6. No hidden task-state cache, automatic retry, or silent route fallback after a
    worker has failed to load.
-7. Keep legacy transport facilities available without re-exporting them from the
-   new task surface.
+7. Keep transport implementation internal. Do not expose a second compatibility
+   execution API.
 
 ## Public surface
 
@@ -233,7 +234,7 @@ type TaskWorker = {
 Exactly one target form is supplied. `create` is a browser bundler integration
 returning a fresh Worker; `url` identifies a compiled module worker in browser or
 Node. New workers use module semantics. Legacy classic-worker and CDN conventions
-remain in the compatibility layer, rather than introducing several competing
+are outside the new public surface, rather than introducing several competing
 location fields on `Task`.
 
 Capabilities describe the worker implementation and are checked against its
@@ -616,8 +617,8 @@ installing the protocol in an existing worker.
 | `WorkerPool`, shared `WorkerFarm` | Explicit `TaskRunner` | Configuration is runner-owned |
 | `pool.destroy(reason)` | `runner.terminate(reason)` | Forced shutdown |
 | `cancellationMode`, `cancellationTimeout` | `cancellation: {mode, timeoutMs}` | Explicit units and grouped controls |
-| `workerUrl`, `loadWorker`, package/CDN overrides | `task.worker` or legacy adapter | Resolve assets before dispatch |
-| Reservations, protocol helpers, shared-state internals | `worker-utils` | Remain advanced APIs pending focused design |
+| `workerUrl`, `loadWorker`, package/CDN overrides | `task.worker` | Resolve assets before dispatch |
+| Reservations, protocol helpers, shared-state internals | Capability migration decision | Port required controls to the new model or explicitly retire them before removing the old entry |
 
 Before:
 
@@ -654,18 +655,105 @@ Migration must call out behavior changes, not just renames:
 - New batch dispatch calls the streaming processor; old `runTaskInBatches` does not.
 - Tasks requiring initialization now declare and supply named initialization data.
 
-Rollout:
+## Breaking cleanup plan
 
-1. Add TaskRunner and its curated types alongside existing functions. Preserve
-   legacy top-level `runTaskInBatches` semantics; the new meaning is on the runner
-   method and must never silently replace the old function.
-2. Build adapters on the existing worker runtime, retaining old protocols where
-   needed. New worker handshake/version checks reject incompatible capabilities.
-3. Migrate internal callers, examples, and documentation. Publish explicit
-   ownership/cancellation/lifecycle release notes.
-4. Deprecate legacy task-entry exports; keep worker-utils available. Remove the
-   wildcard re-export and deprecated task surface only in an announced breaking
-   release. Do not rename a destructive method without adapting its behavior.
+Status: implemented public-surface cleanup in this PR. Legacy package entries and
+exports are removed, repository consumers use the new API, and packed-package
+checks enforce the boundary. The [migration guide](../../docs/modules/core/tasks/developer-guide/migration.md)
+records intentional capability removals; future features below remain proposals. The goal is one public task
+execution API, with import/type failures forcing applications to migrate when they
+upgrade to the breaking release. Applications pinned to an older release are
+unaffected.
+
+### Inventory and target
+
+The prototype currently exposes three overlapping execution layers, plus module
+wrappers. The wildcard in the tasks entry makes almost the entire worker layer
+available through two import paths.
+
+| Surface today | Breaking-release action | Replacement |
+| --- | --- | --- |
+| Top-level `runTask`, `runTaskInBatches` | Remove exports and wrapper implementation | `runner.runTask`, `runner.runTasks` |
+| `TaskDescriptor`, `TaskOptions`, `TaskExecution`, `MainThreadPolicy` | Remove old type family | `Task<Types>` and runner request types; explicit execution selection |
+| `export * from '@math.gl/core/worker-utils'` in tasks | Delete wildcard | Explicit curated task exports only |
+| `processOnWorker`, `processOnWorkerInBatches` | Remove public access | Runner methods with `execution: 'worker'` |
+| `createWorker`, `createResourceWorker` | Remove public access | `initializeTaskWorker` and lifecycle hooks |
+| `createWorkerResource`, `WorkerResource` | Remove public access | `runner.initializeTask` and its inferred handle |
+| `WorkerFarm`, `WorkerPool`, `WorkerThread`, `WorkerJob`, `WorkerBody`, protocol types | Make implementation details private | Runner ownership, controls, and task context |
+| `@math.gl/core/worker-utils` package subpath | Remove from package exports | `@math.gl/core/tasks` |
+| `MapSetupWorker`, `setupMapInWorker` | Remove | `PrepareMapTask`; result becomes `{map}` |
+| `BulkProjectionWorker`, `projectBulkInWorker` | Remove | `ProjectCoordinatesTask`; result becomes `{coordinates}` |
+| `@math.gl/geospatial/workers`, `/workers/operations` | Remove public subpaths | `@math.gl/geospatial/tasks` |
+
+Keep the transport implementation used by `TaskRunner`; removing a public API
+is not a reason to rewrite a working transport. Move shared geospatial operations
+to an internal location and migrate cross-package imports to curated public task
+contracts. Classify utility exports such as library loading, environment helpers,
+and queues separately: internalize unused ones, or give independently useful
+utilities an appropriate entry point. Do not retain the entire worker API merely
+because one utility still has a consumer.
+
+### Capability gates before deletion
+
+The current prototype is not a drop-in replacement for every worker facility.
+Inventory repository callers and documented consumer requirements, then record
+one disposition for each capability: implemented in the new API, explicitly
+replaced by application code, or deliberately removed in the breaking release.
+No silent fallback and no indefinitely deferred compatibility entry.
+
+- Byte budgets, admission/reservations, and queue backpressure: retain required
+  resource bounds in the new runner model before removing their old controls.
+- Worker reuse and preloading: decide the supported pool lifetime and startup
+  behavior; measure repeated-call overhead before removing `preloadWorker`.
+- Cooperative cancellation, shared-memory progress, and shutdown deadlines:
+  provide required semantics or explicitly document hard termination and its
+  cleanup limitations as a breaking change.
+- Metrics, diagnostics, worker capability checks, and custom transport use:
+  expose only the observability and extension points applications actually need.
+- Adaptive main-thread routing: applications can select execution explicitly;
+  do not silently reinterpret the old cost policy.
+- Worker-only typing, processor capabilities, and protocol/version validation:
+  close the relevant prototype gaps before declaring the replacement stable.
+
+These gates do not require implementing every speculative feature in this RFC.
+They prevent deleting existing capabilities without a conscious migration decision.
+
+### Delivery sequence
+
+1. **Curate the task entry.** Replace the wildcard with an explicit export list.
+   Keep only the new task definitions, runner, inferred handle, worker bootstrap,
+   and their relevant public types in the final surface.
+2. **Migrate this repository.** Convert all application-facing callers, examples,
+   workers, tests, and documentation. Keep transport-unit tests against internal
+   modules. Preserve the distinction between independent calls and streaming;
+   never rename old `runTaskInBatches` to the new streaming method mechanically.
+3. **Resolve capability gates.** Add required new controls with consistent names,
+   or document intentional removals and concrete application migrations.
+4. **Delete public compatibility.** Remove legacy functions, descriptor types,
+   resource wrappers, module wrappers, and package export paths together. No
+   permanent `/legacy` entry, forwarding aliases, or warning-only shims.
+5. **Enforce the boundary.** Test the packed ESM and CommonJS packages and public
+   TypeScript declarations. Assert that removed imports fail, including previous
+   deep-import paths; whitelist the intended exports. Run provided-task examples
+   in Node and a browser, and retain ownership/lifecycle/cancellation regressions.
+6. **Release with migration instructions.** Use the next major release, or an
+   explicitly announced breaking beta before that major becomes stable. The
+   repository currently identifies packages as `5.0.0-beta.2`; verify published
+   release state when scheduling this change. Release notes must include import,
+   payload, batch-semantics, ownership, cancellation, and lifecycle changes.
+
+A codemod can update imports and obvious method calls, but must flag ownership,
+resource lifetime, old adaptive routing, and batch-versus-stream decisions for
+manual review. Migration tooling does not ship a runtime compatibility layer.
+
+### Completion criteria
+
+- One documented application task entry per relevant package.
+- No old public execution functions, worker descriptors, resource APIs, aliases,
+  or exported transport internals remain accessible from the packed package.
+- Repository applications and examples use the new API exclusively.
+- Every removed capability has a documented replacement or intentional removal.
+- Old imports fail clearly; new examples, types, and runtime tests pass.
 
 ## Implementation gates and remaining design work
 

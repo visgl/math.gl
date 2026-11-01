@@ -193,3 +193,62 @@ const atomicOptionsOnly = {
 runner.runTaskInBatches(atomicOptionsOnly, [{value: 1}]);
 // @ts-expect-error atomic options remain required independently of streaming
 runner.runTask(atomicOptionsOnly, {value: 1});
+
+// Removed API families fail at the public package boundary.
+// @ts-expect-error removed public API
+import {runTask} from '@math.gl/core/tasks';
+// @ts-expect-error removed public API
+import {runTaskInBatches} from '@math.gl/core/tasks';
+// @ts-expect-error removed public API
+import {TaskDescriptor} from '@math.gl/core/tasks';
+// @ts-expect-error removed public API
+import {TaskOptions} from '@math.gl/core/tasks';
+// @ts-expect-error removed public API
+import {TaskExecution} from '@math.gl/core/tasks';
+// @ts-expect-error removed public API
+import {MainThreadPolicy} from '@math.gl/core/tasks';
+// @ts-expect-error removed public API
+import {WorkerPool} from '@math.gl/core/tasks';
+// @ts-expect-error removed public API
+import {WorkerFarm} from '@math.gl/core/tasks';
+// @ts-expect-error removed public API
+import {WorkerBody} from '@math.gl/core/tasks';
+// @ts-expect-error removed public API
+import {WorkerObject} from '@math.gl/core/tasks';
+// @ts-expect-error removed public API
+import {createWorker} from '@math.gl/core/tasks';
+// @ts-expect-error removed public API
+import {createWorkerResource} from '@math.gl/core/tasks';
+// @ts-expect-error removed public API
+import {processOnWorker} from '@math.gl/core/tasks';
+// @ts-expect-error removed public API
+import {getTransferList} from '@math.gl/core/tasks';
+// @ts-expect-error the old package entry is removed
+import * as removedWorkers from '@math.gl/core/worker-utils';
+void removedWorkers;
+// @ts-expect-error the old geospatial worker entry is removed
+import * as removedGeospatialWorkers from '@math.gl/geospatial/workers';
+void removedGeospatialWorkers;
+// @ts-expect-error operations are not a public package entry
+import * as removedOperations from '@math.gl/geospatial/workers/operations';
+void removedOperations;
+// @ts-expect-error package exports block deep imports to private transport
+import * as privateTransport from '@math.gl/core/dist/worker-utils/index.js';
+void privateTransport;
+
+void [
+  runTask,
+  runTaskInBatches,
+  TaskDescriptor,
+  TaskOptions,
+  TaskExecution,
+  MainThreadPolicy,
+  WorkerPool,
+  WorkerFarm,
+  WorkerBody,
+  WorkerObject,
+  createWorker,
+  createWorkerResource,
+  processOnWorker,
+  getTransferList
+];

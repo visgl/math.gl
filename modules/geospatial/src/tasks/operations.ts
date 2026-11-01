@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {MapEngine, type MapDescription, type MapEngineOptions} from '../discontinuous/map-engine';
 import type {CreateProjectionOptions, ProjectionArray, Projection} from '../projection/types';
-import type {WorkerContext} from '@math.gl/core/worker-utils';
+import type {TaskContext} from '@math.gl/core/tasks';
+type OperationContext = Partial<Omit<TaskContext<unknown>, 'state'>>;
 
 export type BulkProjectionTask = {
   projection: CreateProjectionOptions;
@@ -16,7 +17,7 @@ export type BulkProjectionTask = {
 /** Setup callbacks belong in the worker and cannot be sent in a request. */
 export function setupMap(
   description: MapDescription,
-  context: WorkerContext,
+  context: OperationContext,
   options?: MapEngineOptions
 ): MapEngine {
   context.reportProgress?.({phase: 'map-setup', completed: 0, total: 1, unit: 'tasks'});
@@ -29,7 +30,7 @@ export function setupMap(
 /** Process worker-owned storage in chunks. Failed jobs return no partial result. */
 export async function projectBulk(
   input: BulkProjectionTask,
-  context: WorkerContext,
+  context: OperationContext,
   preparedProjection?: Projection
 ): Promise<ProjectionArray> {
   const {coordinates, dimension = 2, chunkSize = 4096} = input;
@@ -61,7 +62,6 @@ export async function projectBulk(
     const chunk = coordinates.subarray(start * dimension, end * dimension);
     if (input.inverse) projection.unprojectFlatSync(chunk, dimension);
     else projection.projectFlatSync(chunk, dimension);
-    if (total <= 0x7fffffff) context.sharedState?.setProgress(end, total);
     context.reportProgress?.({phase: 'bulk-projection', completed: end, total, unit: 'records'});
     await new Promise(resolve => setTimeout(resolve, 0));
   }
