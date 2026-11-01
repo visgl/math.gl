@@ -6,6 +6,8 @@ Terrain APIs are available from `@math.gl/geospatial/terrain` and `@math.gl/geos
 
 ## Sampled line of sight[​](#sampled-line-of-sight "Direct link to Sampled line of sight")
 
+`getTerrainProfileHorizon(profile, {observerHeight})` returns the greatest known elevation angle and its first sample index. Missing samples make this a lower bound; `complete` reports whether all samples are present. The observer's absolute height must be above the ground at station zero when that sample is known. `getTerrainProfileViewshed` classifies each sample along the same straight radial profile using `TerrainProfileViewStatus`: observer, visible, blocked, unknown or missing. A known earlier obstruction blocks a target even if another earlier sample is missing; otherwise missing earlier terrain makes visibility unknown. A tangent to an earlier sample is blocked. These operations describe the sampled piecewise-linear surface, not an area viewshed or unsampled terrain. They do not model Earth curvature, refraction, or geodesic paths.
+
 `getTerrainProfileVisibility(profile, {observerHeight, targetHeight})` compares absolute endpoint elevations against samples of a straight horizontal profile. It returns `blocked` when a valid sample touches or crosses the line, `unknown` when coverage is missing and no obstruction is known, and `clear` otherwise. The result also reports the first observed blocker, missing sample count and minimum sampled vertical clearance. Missing samples can hide an earlier blocker. A clear result applies to the sampled piecewise-linear profile, not unsampled terrain. Curvature, refraction and geodesic paths are not modeled.
 
 ## Feature support[​](#feature-support "Direct link to Feature support")
