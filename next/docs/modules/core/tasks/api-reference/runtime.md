@@ -65,6 +65,7 @@ There is no automatic synchronous fallback or retry. Use `canProcessOnWorker` to
 | Option                | Default                                        | Behavior                                                                                        |
 | --------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `inputOwnership`      | `transfer`                                     | `copy`, `transfer`, or `share`; geospatial convenience APIs default to `copy`                   |
+| `outputOwnership`     | `transfer`                                     | `copy` retains worker-owned buffers; `transfer` moves them to the caller                        |
 | `signal`              | None                                           | Reject queued work; cancel active work according to its mode                                    |
 | `cancellationMode`    | `terminate`                                    | Hard termination, or `cooperative` for processors installed with `createWorker`                 |
 | `cancellationTimeout` | 1000 ms                                        | Cooperative grace period before hard termination                                                |

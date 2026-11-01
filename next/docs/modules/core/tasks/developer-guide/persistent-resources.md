@@ -162,7 +162,7 @@ Calls default to FIFO ordering; explicitly supplied priorities and aging can cha
 
 ## State and ownership[​](#state-and-ownership "Direct link to State and ownership")
 
-With `copy`, the worker receives independent ordinary input buffers. With `transfer`, the caller's buffers detach and the processor can return them as its result. Do not return a worker-cached ordinary buffer unless you intend to transfer and lose it. Return a slice or an independently allocated result when retaining the original inside the resource.
+With `copy`, the worker receives independent ordinary input buffers. With `transfer`, the caller's buffers detach and the processor can return them as its result. Output buffers transfer by default. Set `outputOwnership: 'copy'` when creating the resource or on an individual `run()` call to return worker-cached buffers without detaching them. A call can override the creation-time default.
 
 Shared buffers remain shared and need application synchronization. See [application-owned atomic state](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/shared-memory.md#share-application-state).
 
