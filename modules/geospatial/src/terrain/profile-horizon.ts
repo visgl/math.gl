@@ -4,6 +4,7 @@
 
 import type {TerrainProfile} from './profile';
 import {TerrainSampleStatus} from './types';
+import {compareTerrainSlopes} from './profile-slope';
 
 /** Horizon of known samples. Missing coverage means the true horizon may be higher. */
 export type TerrainProfileHorizon = {
@@ -44,7 +45,8 @@ export function getTerrainProfileHorizon(
     distances[count - 1] !== length
   )
     throw new Error('Invalid terrain horizon profile or options');
-  let angle = -Infinity;
+  let winningRise = 0;
+  let winningDistance = 1;
   let sampleIndex: number | undefined;
   let missingSampleCount = 0;
   for (let i = 0; i < count; i++) {
@@ -66,14 +68,17 @@ export function getTerrainProfileHorizon(
     }
     const delta = heights[i] - options.observerHeight;
     if (!Number.isFinite(delta)) throw new Error('Terrain horizon arithmetic overflow');
-    const sampleAngle = Math.atan2(delta, distance);
-    if (sampleAngle > angle) {
-      angle = sampleAngle;
+    if (
+      sampleIndex === undefined ||
+      compareTerrainSlopes(delta, distance, winningRise, winningDistance) > 0
+    ) {
+      winningRise = delta;
+      winningDistance = distance;
       sampleIndex = i;
     }
   }
   return {
-    angle: sampleIndex === undefined ? undefined : angle,
+    angle: sampleIndex === undefined ? undefined : Math.atan2(winningRise, winningDistance),
     sampleIndex,
     missingSampleCount,
     complete: missingSampleCount === 0

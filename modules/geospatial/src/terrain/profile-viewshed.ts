@@ -5,6 +5,7 @@
 import type {TerrainProfile} from './profile';
 import {TerrainSampleStatus} from './types';
 import {getTerrainProfileHorizon, type TerrainProfileHorizonOptions} from './profile-horizon';
+import {compareTerrainSlopes} from './profile-slope';
 
 /** Sample classification for a single radial profile; station zero is the observer. */
 export const TerrainProfileViewStatus = {
@@ -27,7 +28,9 @@ export function getTerrainProfileViewshed(
   // Validate the whole profile before writing any output.
   getTerrainProfileHorizon(profile, options);
   const result = new Uint8Array(profile.distances.length);
-  let maxAngle = -Infinity;
+  let maxRise = 0;
+  let maxDistance = 1;
+  let hasHorizon = false;
   let missingBefore = profile.statuses[0] !== TerrainSampleStatus.VALID;
   for (let i = 1; i < result.length; i++) {
     if (profile.statuses[i] !== TerrainSampleStatus.VALID) {
@@ -35,14 +38,20 @@ export function getTerrainProfileViewshed(
       missingBefore = true;
       continue;
     }
-    const angle = Math.atan2(profile.heights[i] - options.observerHeight, profile.distances[i]);
+    const rise = profile.heights[i] - options.observerHeight;
+    const distance = profile.distances[i];
+    const comparison = hasHorizon ? compareTerrainSlopes(rise, distance, maxRise, maxDistance) : 1;
     result[i] =
-      angle <= maxAngle
+      comparison <= 0
         ? TerrainProfileViewStatus.BLOCKED
         : missingBefore
           ? TerrainProfileViewStatus.UNKNOWN
           : TerrainProfileViewStatus.VISIBLE;
-    maxAngle = Math.max(maxAngle, angle);
+    if (comparison > 0) {
+      maxRise = rise;
+      maxDistance = distance;
+      hasHorizon = true;
+    }
   }
   return result;
 }

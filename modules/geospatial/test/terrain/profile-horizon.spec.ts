@@ -9,6 +9,25 @@ import {
   TerrainProfileViewStatus as V,
   type TerrainProfile
 } from '@math.gl/geospatial/terrain';
+import {compareTerrainSlopes} from '../../src/terrain/profile-slope';
+
+test('near-tangent rays select the higher slope before angle rounding', () => {
+  const p = profile([0, 101, 201.00000000000003]);
+  expect(getTerrainProfileHorizon(p, {observerHeight: 1}).sampleIndex).toBe(2);
+  expect(Array.from(getTerrainProfileViewshed(p, {observerHeight: 1}))).toEqual([
+    V.OBSERVER,
+    V.VISIBLE,
+    V.VISIBLE
+  ]);
+});
+
+test('slope comparisons preserve order through overflow, underflow and exact ties', () => {
+  expect(compareTerrainSlopes(1e308, 0.5, 1e308, 1)).toBeGreaterThan(0);
+  expect(compareTerrainSlopes(-1e308, 0.5, -1e308, 1)).toBeLessThan(0);
+  expect(compareTerrainSlopes(Number.MIN_VALUE, 4, Number.MIN_VALUE, 2)).toBeLessThan(0);
+  expect(compareTerrainSlopes(3, 6, 2, 4)).toBe(0);
+  expect(compareTerrainSlopes(0, 1, -Number.MIN_VALUE, Number.MAX_VALUE)).toBeGreaterThan(0);
+});
 
 function profile(heights: number[], statuses = heights.map(() => 0)): TerrainProfile {
   return {
