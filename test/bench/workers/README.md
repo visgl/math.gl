@@ -48,3 +48,9 @@ Browser correctness and lifecycle coverage is in
 `modules/core/test/tasks/task-runner.spec.ts`, including actual workers,
 cancellation, streaming, ownership, and retained state. Node throughput measurements
 must not be presented as browser performance results.
+
+The echo worker startup and module loading are measured separately as
+`math.gl/echo-initialize`. `math.gl/tiny-sequential-initialized` measures calls
+on that retained handle. Its `coldMs` is the first timed call after initialization,
+not a cold worker startup measurement. Compare warm call timings across libraries
+and report initialization separately.

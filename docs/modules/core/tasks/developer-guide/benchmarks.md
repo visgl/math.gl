@@ -29,3 +29,9 @@ node test/bench/workers/index.mjs --compare --output=/tmp/task-comparison.json
 The comparison is between useful primitives, not identical feature sets. Run on
 an idle machine and repeat measurements before drawing performance conclusions.
 Node results are not browser measurements. See the harness README for details.
+
+The echo worker startup and module loading are measured separately as
+`math.gl/echo-initialize`. `math.gl/tiny-sequential-initialized` measures calls
+on that retained handle. Its `coldMs` is the first timed call after initialization,
+not a cold worker startup measurement. Compare warm call timings across libraries
+and report initialization separately.

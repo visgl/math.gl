@@ -77,9 +77,12 @@ const echoTask = {
     capabilities: {atomic: true, streaming: false}
   }
 };
-const echo = await runner.initializeTask(echoTask, {}, {execution: 'worker'});
+let echo;
+await measure('math.gl/echo-initialize', 1, async () => {
+  echo = await runner.initializeTask(echoTask, {}, {execution: 'worker'});
+});
 try {
-  await measure('math.gl/tiny-sequential', count, async () => {
+  await measure('math.gl/tiny-sequential-initialized', count, async () => {
     assert.deepEqual(await echo.runTask({value: 42}), {value: 42});
   });
   for (const inputOwnership of ['copy', 'transfer']) {
