@@ -21,25 +21,25 @@ implemented behavior and the limits applications need to account for.
 
 | Feature | math.gl support | Contract and limits |
 | --- | --- | --- |
-| Typed task definitions | ✅ Implemented | Plain objects checked with `satisfies Task<Types>`; input, output, options, initialization, state, and batch types stay aligned. No global registration. |
-| Named input/output payloads | ✅ Implemented | Plain objects with named fields; typed arrays and buffers belong inside those fields. Runtime validation also protects JavaScript callers. |
-| Browser and Node workers | ✅ Implemented | Browser worker factories or Node module URLs. `initializeTaskWorker` installs one task in an existing worker; functions are loaded from modules, never serialized. |
-| Main-thread execution | ✅ Implemented | `execution: 'main-thread'` runs the local processor. `auto` selects a declared worker, otherwise local execution. No silent fallback after worker failure. |
-| Synchronous execution | ✅ Implemented | `runTaskSync` returns the output object directly. Requires synchronous initialization, processing, and destruction; blocks the calling thread and throws when capacity is occupied. |
-| Single atomic operation | ✅ Implemented | `runTask` returns a promise and automatically initializes and destroys temporary state. |
-| Multiple independent inputs | ✅ Implemented | `runTasks` accepts sync/async iterables, preserves output order, and bounds outstanding work and buffered results with `concurrency`. |
-| Stateful streaming | ✅ Implemented | `runTaskInBatches` invokes one async-iterable processor for the stream. Input/output batch types and batch counts may differ. Consumer demand applies backpressure. |
-| Reusable task state | ✅ Implemented | `initializeTask` returns a serial handle for repeated atomic or streaming operations. State stays at one execution location; an idle handle still occupies active capacity. |
-| Worker-code warmup | ✅ Implemented | `preloadTasks` loads worker modules without task initialization. Later calls reuse code with fresh task state. Idle workers are bounded by `maxIdleWorkers` and evicted oldest-first. |
-| Execution capacity | ✅ Implemented | `maxConcurrency` bounds active lifetimes, including initialization and retained handles. Idle preloaded workers have a separate bound; queued bytes are not bounded. |
-| Buffer ownership | ✅ Implemented | Inputs copy by default; explicit transfer detaches caller aliases. Shared storage remains shared. Output copying preserves buffers retained in task state. The same boundaries apply locally. |
-| Cancellation | ✅ Implemented | `AbortSignal` cancels queued acquisition. Worker abort terminates the worker and invalidates its handle. Local work must observe the signal and yield; synchronous calls cannot service timer/UI abort events mid-call. |
-| Progress | ✅ Implemented | Tasks report `{completed, total?, phase?, unit?}` through context; callers receive `onProgress` events. |
-| Graceful and forced cleanup | ✅ Implemented | `close` drains work and destroys state; `terminate` aborts owned work. Both stop retained idle workers. Finish/return output iterators before graceful shutdown. |
-| Failure isolation | ✅ Implemented | Failed/cancelled workers are discarded. No rollback or automatic retry. Atomic processing plus cleanup failures use `AggregateError`. |
-| Queue byte budgets, priorities, reservations | ❌ Not implemented | Applications must bound production and account for memory upstream. Active concurrency alone does not bound queued payloads. |
-| Adaptive routing, pool metrics, shutdown deadlines | ❌ Not implemented | Choose routes, measure timings, and enforce deadlines at the application layer. |
-| Cooperative worker cancellation | ❌ Not implemented | Worker cancellation uses termination; task cleanup cannot be guaranteed after a forced stop. |
+| Typed task definitions | ✅ | Plain objects checked with `satisfies Task<Types>`; input, output, options, initialization, state, and batch types stay aligned. No global registration. |
+| Named input/output payloads | ✅ | Plain objects with named fields; typed arrays and buffers belong inside those fields. Runtime validation also protects JavaScript callers. |
+| Browser and Node workers | ✅ | Browser worker factories or Node module URLs. `initializeTaskWorker` installs one task in an existing worker; functions are loaded from modules, never serialized. |
+| Main-thread execution | ✅ | `execution: 'main-thread'` runs the local processor. `auto` selects a declared worker, otherwise local execution. No silent fallback after worker failure. |
+| Synchronous execution | ✅ | `runTaskSync` returns the output object directly. Requires synchronous initialization, processing, and destruction; blocks the calling thread and throws when capacity is occupied. |
+| Single atomic operation | ✅ | `runTask` returns a promise and automatically initializes and destroys temporary state. |
+| Multiple independent inputs | ✅ | `runTasks` accepts sync/async iterables, preserves output order, and bounds outstanding work and buffered results with `concurrency`. |
+| Stateful streaming | ✅ | `runTaskInBatches` invokes one async-iterable processor for the stream. Input/output batch types and batch counts may differ. Consumer demand applies backpressure. |
+| Reusable task state | ✅ | `initializeTask` returns a serial handle for repeated atomic or streaming operations. State stays at one execution location; an idle handle still occupies active capacity. |
+| Worker-code warmup | ✅ | `preloadTasks` loads worker modules without task initialization. Later calls reuse code with fresh task state. Idle workers are bounded by `maxIdleWorkers` and evicted oldest-first. |
+| Execution capacity | ✅ | `maxConcurrency` bounds active lifetimes, including initialization and retained handles. Idle preloaded workers have a separate bound; queued bytes are not bounded. |
+| Buffer ownership | ✅ | Inputs copy by default; explicit transfer detaches caller aliases. Shared storage remains shared. Output copying preserves buffers retained in task state. The same boundaries apply locally. |
+| Cancellation | ✅ | `AbortSignal` cancels queued acquisition. Worker abort terminates the worker and invalidates its handle. Local work must observe the signal and yield; synchronous calls cannot service timer/UI abort events mid-call. |
+| Progress | ✅ | Tasks report `{completed, total?, phase?, unit?}` through context; callers receive `onProgress` events. |
+| Graceful and forced cleanup | ✅ | `close` drains work and destroys state; `terminate` aborts owned work. Both stop retained idle workers. Finish/return output iterators before graceful shutdown. |
+| Failure isolation | ✅ | Failed/cancelled workers are discarded. No rollback or automatic retry. Atomic processing plus cleanup failures use `AggregateError`. |
+| Queue byte budgets, priorities, reservations | ❌ | Applications must bound production and account for memory upstream. Active concurrency alone does not bound queued payloads. |
+| Adaptive routing, pool metrics, shutdown deadlines | ❌ | Choose routes, measure timings, and enforce deadlines at the application layer. |
+| Cooperative worker cancellation | ❌ | Worker cancellation uses termination; task cleanup cannot be guaranteed after a forced stop. |
 
 See the [method reference](./api-reference/task-runner.md) for exact signatures and
 [the guide](./developer-guide/task-runner.md) for complete examples.
