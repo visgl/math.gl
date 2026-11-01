@@ -377,6 +377,8 @@ export type {TerrainContourPaths, TerrainContourPathLimits} from './terrain/cont
 export {simplifyTerrainContourPaths} from './terrain/contour-simplify';
 export type {TerrainSimplifiedContourPaths} from './terrain/contour-simplify';
 export {measureTerrainProfile} from './terrain/profile-measure';
+export {getTerrainProfileVisibility} from './terrain/profile-visibility';
+export type {TerrainProfileVisibility} from './terrain/profile-visibility';
 export type {TerrainProfileMeasurements} from './terrain/profile-measure';
 export {reconcileTerrainVertexTiles} from './terrain/vertex-tiles';
 export type {

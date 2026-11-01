@@ -13,12 +13,14 @@ import {getSkySnapshot, getStartOfDay, type SkySnapshotOptions} from '@math.gl/e
 import {
   createTerrainMesh,
   createTerrainSkirt,
+  getTerrainProfileVisibility,
   createCRSResolver,
   parseWKB,
   type TerrainGridMesh
 } from '@math.gl/geospatial';
 import {
   createTerrainMesh as terrainMesh,
+  type TerrainProfileVisibility,
   type TerrainGridMesh as TerrainMesh
 } from '@math.gl/geospatial/terrain';
 import {prepareGeoArrowTransfer} from '@math.gl/geospatial/geoarrow';
@@ -40,6 +42,7 @@ void [
   getStartOfDay,
   createTerrainMesh,
   createTerrainSkirt,
+  getTerrainProfileVisibility,
   createCRSResolver,
   parseWKB,
   terrainMesh,
@@ -49,5 +52,11 @@ void [
   removedMesh,
   removedBVH
 ];
-const typeChecks: [UtilityGeometry?, SkySnapshotOptions?, TerrainGridMesh?, TerrainMesh?] = [];
+const typeChecks: [
+  UtilityGeometry?,
+  SkySnapshotOptions?,
+  TerrainGridMesh?,
+  TerrainMesh?,
+  TerrainProfileVisibility?
+] = [];
 void typeChecks;
