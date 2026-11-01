@@ -59,7 +59,7 @@ For custom tasks, wrap bare arrays/scalars in named input and output fields. App
 
 * **Batching:** old top-level `runTaskInBatches` ran independent atomic inputs. Migrate to `runner.runTasks`, not the similarly named streaming method.
 * **Ownership:** input copying is now the default. Select `inputOwnership: 'transfer'` deliberately; all aliases detach. Options and automatic initialization data are copied separately. Shared buffers stay shared.
-* **Lifetime:** automatic operations release temporary state and workers. For warm workers or cached projections, explicitly initialize a handle and close it in `finally`. Handles are serial and occupy runner capacity when idle.
+* **Lifetime:** automatic operations release temporary state and workers. Global code preloading does not retain workers or task state. For warm workers or cached projections, explicitly initialize a handle and close it in `finally`. Handles are serial and occupy runner capacity when idle.
 * **Cancellation:** worker abort hard-terminates the worker and invalidates its handle. Reinitialize before retrying. There is no rollback or automatic retry. Local code must observe its signal and yield; local cleanup waits for it to settle.
 * **Routing:** `auto` selects a declared worker, otherwise local processing. It does not inspect input size. Replace `mainThread.maxSize/getSize` with an explicit application decision between `'main-thread'` and `'worker'`.
 * **Cleanup:** `close()` drains accepted work; finish or return iterators first. `terminate()` cancels owned work, including blocked top-level input reads. There is no built-in shutdown deadline.
@@ -72,7 +72,7 @@ These are removals, not renamed settings. Passing old fields does not enable the
 | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | Shared/global worker farm configuration                        | Own and share an explicit runner in the application                                                                                             |
 | Byte budgets, reservations, queue priorities, admission tokens | Bound production before calling the runner; use lazy `runTasks` inputs for count-bounded work. Implement byte accounting upstream when required |
-| Automatic worker reuse and `preloadWorker`                     | Explicitly initialize a handle; retain it for the desired warm lifetime                                                                         |
+| `preloadWorker` and automatic worker reuse                     | Global `preloadTasks([task])` loads code only; `initializeTask` retains a live worker and application state                                     |
 | Cooperative worker abort and shared progress counters          | Use hard cancellation and `onProgress`; custom shared-data coordination belongs to the task                                                     |
 | Built-in job/pool metrics                                      | Measure application timings around calls and use task progress events                                                                           |
 | Shutdown timeouts                                              | Set an application timer that calls `terminate`; forced stop cannot promise task cleanup                                                        |

@@ -85,7 +85,7 @@ math.gl provides a documentation index, individually retrievable Markdown pages,
 - [Accessor Compiler](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/parse-expression-string.md): parseExpressionString(expression (row: Record) => unknown
 - [Tasks](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md): Tasks keep applications responsive while processing large datasets. Use
 - [Task runtime API](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/api-reference/runtime.md): The public runtime is TaskRunner, with typed task objects,
-- [TaskRunner prototype API](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/api-reference/task-runner.md): The public execution API in @math.gl/core/tasks. Start with the get-started guide.
+- [TaskRunner API](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/api-reference/task-runner.md): The public execution API in @math.gl/core/tasks. Start with the get-started guide.
 - [Measuring task execution](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/benchmarks.md): Build the packages, then run the correctness-checked benchmark:
 - [Creating tasks and workers](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/custom-workers.md): Define a plain object with process, optionally processInBatches, and lifecycle
 - [Choosing where tasks run](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/execution.md): TaskRunner accepts execution: 'auto' | 'main-thread' | 'worker'.
