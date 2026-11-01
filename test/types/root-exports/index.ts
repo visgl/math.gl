@@ -14,12 +14,15 @@ import {
   createTerrainMesh,
   createTerrainSkirt,
   getTerrainProfileVisibility,
+  getTerrainProfileHorizon,
   createCRSResolver,
   parseWKB,
   type TerrainGridMesh
 } from '@math.gl/geospatial';
 import {
   createTerrainMesh as terrainMesh,
+  getTerrainProfileViewshed,
+  type TerrainProfileHorizonOptions,
   type TerrainProfileVisibility,
   type TerrainGridMesh as TerrainMesh
 } from '@math.gl/geospatial/terrain';
@@ -43,6 +46,8 @@ void [
   createTerrainMesh,
   createTerrainSkirt,
   getTerrainProfileVisibility,
+  getTerrainProfileHorizon,
+  getTerrainProfileViewshed,
   createCRSResolver,
   parseWKB,
   terrainMesh,
@@ -57,6 +62,7 @@ const typeChecks: [
   SkySnapshotOptions?,
   TerrainGridMesh?,
   TerrainMesh?,
-  TerrainProfileVisibility?
+  TerrainProfileVisibility?,
+  TerrainProfileHorizonOptions?
 ] = [];
 void typeChecks;

@@ -587,3 +587,14 @@ performance, persistent update structures, vertex-tile derivative halos, global 
 coordination/corner policy, transition morphs and downstream loaders/luma/deck adoption.
 Seam conformance does not imply normal continuity or preserve source terrain away
 from the authoritative edge. GPU execution remains exclusively companion work.
+
+## Sampled radial visibility tranche
+
+`getTerrainProfileHorizon` reports the largest known elevation angle along a
+sampled straight profile, with explicit missing-coverage status. The companion
+`getTerrainProfileViewshed` classifies each sample using a linear-time running
+horizon and preserves unknown results when an earlier interval is missing. These
+are local Cartesian operations over a piecewise-linear sampled profile; they do
+not model Earth curvature, atmospheric refraction, unsampled terrain or area
+viewsheds. Real-DEM qualification, geodesic horizons and two-dimensional
+visibility products remain open.

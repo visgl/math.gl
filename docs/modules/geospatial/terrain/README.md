@@ -11,6 +11,18 @@ entry and its declared dependencies.
 
 ## Sampled line of sight
 
+`getTerrainProfileHorizon(profile, {observerHeight})` returns the greatest known
+elevation angle and its first sample index. Missing samples make this a lower
+bound; `complete` reports whether all samples are present. The observer's absolute
+height must be above the ground at station zero when that sample is known.
+`getTerrainProfileViewshed` classifies each sample along the same straight radial
+profile using `TerrainProfileViewStatus`: observer, visible, blocked, unknown or
+missing. A known earlier obstruction blocks a target even if another earlier sample
+is missing; otherwise missing earlier terrain makes visibility unknown. A tangent
+to an earlier sample is blocked. These operations describe the sampled
+piecewise-linear surface, not an area viewshed or unsampled terrain. They do not
+model Earth curvature, refraction, or geodesic paths.
+
 `getTerrainProfileVisibility(profile, {observerHeight, targetHeight})` compares
 absolute endpoint elevations against samples of a straight horizontal profile.
 It returns `blocked` when a valid sample touches or crosses the line, `unknown`
