@@ -89,6 +89,21 @@ test('errors release capacity and invalid configuration is rejected', async () =
   await queue.whenIdle();
 });
 
+test('termination rejects queued requests consistently without interrupting active cleanup', async () => {
+  const queue = new TaskOperationQueue(1);
+  const running = deferred();
+  const active = queue.run('exclusive', () => running.promise);
+  const invoked = vi.fn(async () => {});
+  const waiting = queue.run('parallel', invoked);
+  const reason = new Error('terminated');
+  queue.cancelPending(reason);
+  await expect(waiting).rejects.toBe(reason);
+  expect(invoked).not.toHaveBeenCalled();
+  running.resolve();
+  await active;
+  await queue.close();
+});
+
 test('initialized local tasks opt in to overlapping operations and exclusive barriers', async () => {
   const first = deferred();
   const events: string[] = [];

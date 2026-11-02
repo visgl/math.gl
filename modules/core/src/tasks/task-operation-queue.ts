@@ -71,6 +71,13 @@ export class TaskOperationQueue {
     });
   }
 
+  /** Reject queued calls with one cause while allowing active operations to settle. */
+  cancelPending(reason: unknown): void {
+    this.closed = true;
+    for (const entry of this.pending.splice(0)) entry.cancel(reason);
+    this.pump();
+  }
+
   /** Stop accepting new work; accepted operations continue to completion. */
   close(): Promise<void> {
     this.closed = true;

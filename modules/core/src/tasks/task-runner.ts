@@ -246,6 +246,7 @@ export class InitializedTask<D extends AnyTask> {
 
   /** Abort work. Local JavaScript must settle before its state can be destroyed. */
   async terminate(reason: unknown = new Error('Task terminated')): Promise<void> {
+    this.operationQueue.cancelPending(reason);
     this.controller.abort(reason);
     if (this.pool) {
       this.invalid = true;
