@@ -35,7 +35,7 @@ const modules = [
     name: 'Tasks',
     packageName: '@math.gl/core/tasks',
     description:
-      'Run typed tasks locally or in workers, stream batches, and reuse initialized state.',
+      'Run typed tasks locally or in workers, including cross-origin module URLs, stream batches, and reuse initialized state.',
     image: 'task-runner-lifetimes.svg',
     imageAlt: 'Automatic task cleanup and explicitly retained task state',
     theme: 'teal'

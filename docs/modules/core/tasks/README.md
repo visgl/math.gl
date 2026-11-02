@@ -24,6 +24,7 @@ implemented behavior and the limits applications need to account for.
 | Typed task definitions | ✅ | Plain objects checked with `satisfies Task<Types>`; input, output, options, initialization, state, and batch types stay aligned. No global registration. |
 | Named input/output payloads | ✅ | Plain objects with named fields; typed arrays and buffers belong inside those fields. Runtime validation also protects JavaScript callers. |
 | Browser and Node workers | ✅ | Browser worker factories or Node module URLs. `initializeTaskWorker` installs one task in an existing worker; functions are loaded from modules, never serialized. |
+| Cross-origin module workers | ✅ | HTTP(S) entrypoints use same-origin module shims. Remote imports require CORS and compatible CSP; runtime-owned shim URLs are released with the worker. |
 | Main-thread execution | ✅ | `execution: 'main-thread'` runs the local processor. `auto` selects a declared worker, otherwise local execution. No silent fallback after worker failure. |
 | Synchronous execution | ✅ | `runTaskSync` returns the output object directly. Requires preloaded code and synchronous initialization, processing, and destruction; blocks the calling thread and throws when capacity is occupied. |
 | Single atomic operation | ✅ | `runTask` returns a promise and automatically initializes and destroys temporary state. |

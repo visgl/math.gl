@@ -1,0 +1,80 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+import {expect, test as baseTest, vi} from 'vitest';
+import {isBrowser} from '../../src/worker-utils/lib/env-utils/globals';
+const test = baseTest.runIf(isBrowser);
+import WorkerThread from '../../src/worker-utils/lib/worker-farm/worker-thread';
+import {getLoadableWorkerURL} from '../../src/worker-utils/lib/worker-utils/get-loadable-worker-url';
+
+test('module worker URLs preserve local entrypoints and import remote modules through a shim', async () => {
+  for (const url of [
+    '/worker.js',
+    './worker.js',
+    new URL('/worker.js', location.href).href,
+    'data:text/javascript,export{}'
+  ]) {
+    expect(getLoadableWorkerURL({url, workerType: 'module'})).toBe(url);
+  }
+  const remote = 'https://worker.example.invalid/worker.js?name="quoted"';
+  const shim = getLoadableWorkerURL({url: remote, workerType: 'module'});
+  try {
+    expect(shim).toMatch(/^blob:/);
+    expect(await (await fetch(shim)).text()).toBe(
+      `import ${JSON.stringify(new URL(remote).href)};`
+    );
+  } finally {
+    URL.revokeObjectURL(shim);
+  }
+});
+
+test('module worker teardown revokes its shim and preserves caller-owned blob URLs', async () => {
+  const entrypoint = URL.createObjectURL(
+    new Blob(['export {};'], {type: 'application/javascript'})
+  );
+  let constructed = '';
+  const terminate = vi.fn();
+  const constructor = vi.spyOn(globalThis, 'Worker').mockImplementation(function (url) {
+    constructed = String(url);
+    return {terminate} as any;
+  } as any);
+  try {
+    const remote = new WorkerThread({
+      name: 'remote',
+      url: 'https://worker.example.invalid/worker.js',
+      workerType: 'module'
+    });
+    const shim = constructed;
+    expect((await fetch(shim)).ok).toBe(true);
+    await remote.destroy();
+    await expect(fetch(shim)).rejects.toThrow();
+    expect(terminate).toHaveBeenCalledOnce();
+    const local = new WorkerThread({name: 'local', url: entrypoint, workerType: 'module'});
+    expect(constructed).toBe(entrypoint);
+    await local.destroy();
+    expect((await fetch(entrypoint)).ok).toBe(true);
+  } finally {
+    constructor.mockRestore();
+    URL.revokeObjectURL(entrypoint);
+  }
+});
+
+test('failed module worker construction releases its shim', async () => {
+  let shim = '';
+  const constructor = vi.spyOn(globalThis, 'Worker').mockImplementation(function (url) {
+    shim = String(url);
+    throw new Error('blocked worker');
+  } as any);
+  try {
+    expect(
+      () =>
+        new WorkerThread({
+          name: 'remote',
+          url: 'https://worker.example.invalid/worker.js',
+          workerType: 'module'
+        })
+    ).toThrow('blocked worker');
+    await expect(fetch(shim)).rejects.toThrow();
+  } finally {
+    constructor.mockRestore();
+  }
+});

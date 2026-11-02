@@ -83,7 +83,9 @@ export default class WorkerThread {
     this.onError = NOOP;
     if (this.terminated) return this.termination ?? Promise.resolve();
     this.terminated = true;
-    this.termination = Promise.resolve(this.worker.terminate()).then(() => undefined);
+    this.termination = Promise.resolve(this.worker.terminate())
+      .then(() => undefined)
+      .finally(() => this.releaseModuleWorkerURL());
     void this.termination.catch(() => undefined);
     return this.termination;
   }
@@ -163,9 +165,26 @@ export default class WorkerThread {
       url,
       workerType: this.workerType
     });
-    const worker = new Worker(this._loadableURL, {name: this.name, type: this.workerType});
+    try {
+      const worker = new Worker(this._loadableURL, {name: this.name, type: this.workerType});
+      return this._initializeBrowserWorker(worker);
+    } catch (error) {
+      this.releaseModuleWorkerURL();
+      throw error;
+    }
+  }
 
-    return this._initializeBrowserWorker(worker);
+  /** Releases only the module shim owned by this worker, never caller-owned blob URLs. */
+  private releaseModuleWorkerURL(): void {
+    if (
+      this.workerType === 'module' &&
+      this.url &&
+      this._loadableURL !== this.url &&
+      this._loadableURL.startsWith('blob:')
+    ) {
+      URL.revokeObjectURL(this._loadableURL);
+      this._loadableURL = '';
+    }
   }
 
   /** Attaches protocol handlers to a browser worker. */
