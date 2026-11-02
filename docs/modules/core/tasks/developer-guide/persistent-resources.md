@@ -28,6 +28,31 @@ receive it as `context.state`. Worker failure, cancellation, or early worker-str
 return invalidates the handle; initialize a new one to continue. Successful stream
 completion preserves state. See [lifecycle semantics](../api-reference/task-runner.md).
 
+## Typed operation dispatch
+
+For a task accepting multiple operations, define the input and output of each
+operation and wrap its initialized handle. The task's `process` hook must return
+an object whose `value` corresponds to the request's operation.
+
+```ts
+import {createTypedTaskDispatcher, type TaskOperation} from '@math.gl/core/tasks';
+
+type Operations = {
+  count: TaskOperation<{source: string}, number>;
+  lookup: TaskOperation<{id: number}, {name: string} | null>;
+};
+// handle.runTask accepts the union of requests and returns {value: result}.
+const dispatch = createTypedTaskDispatcher<Operations>(async request =>
+  (await handle.runTask(request)).value
+);
+const count = await dispatch({operation: 'count', input: {source: 'roads'}}); // number
+const feature = await dispatch({operation: 'lookup', input: {id: 1}}); // {name: string} | null
+```
+
+The adapter does not validate results or change scheduling, cancellation or
+ownership. The task must return the right result for each operation. Initialized
+handles remain serialized.
+
 ## Separate setup and processing ownership
 
 For automatic atomic or streaming calls, use `initializationOwnership` when setup
