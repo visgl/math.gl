@@ -13,6 +13,7 @@ import {
 } from '../worker-utils/index';
 import {TaskRuntime, assertPayload, clonePayload, localContext} from './task-runtime';
 import {runTaskSync} from './task-sync';
+import {TaskOperationQueue} from './task-operation-queue';
 import type {
   AnyTask,
   TaskInput,
@@ -37,7 +38,7 @@ export class InitializedTask<D extends AnyTask> {
   private runtime: TaskRuntime;
   private pool?: WorkerPool;
   private descriptor?: WorkerObject;
-  private tail: Promise<unknown> = Promise.resolve();
+  private readonly operationQueue = new TaskOperationQueue(1);
   private closing?: Promise<void>;
   private closed = false;
   private streams = new Set<() => Promise<void>>();
@@ -170,7 +171,7 @@ export class InitializedTask<D extends AnyTask> {
       this.closed = true;
       this.closing = (async () => {
         try {
-          await this.tail;
+          await this.operationQueue.close();
           if (!this.invalid) await this.invoke('destroy', {}, {});
         } finally {
           try {
@@ -270,19 +271,24 @@ export class InitializedTask<D extends AnyTask> {
 
   private enqueue<T>(operation: () => Promise<T>): Promise<T> {
     if (this.closed) return Promise.reject(new Error('Initialized task is closed'));
-    const result = this.tail.then(operation);
-    this.tail = result.catch(() => {});
-    return result;
+    return this.operationQueue.run('exclusive', operation);
   }
 
   private async *serialStream<T>(operation: (self: this) => AsyncIterable<T>): AsyncIterable<T> {
     if (this.closed) throw new Error('Initialized task is closed');
-    const before = this.tail;
+    let acquire!: () => void;
+    const acquired = new Promise<void>(resolve => {
+      acquire = resolve;
+    });
     let release!: () => void;
-    this.tail = new Promise<void>(resolve => {
+    const held = new Promise<void>(resolve => {
       release = resolve;
     });
-    await before;
+    const lease = this.operationQueue.run('exclusive', async () => {
+      acquire();
+      await held;
+    });
+    await Promise.race([acquired, lease]);
     if (this.controller.signal.aborted) {
       release();
       throw this.controller.signal.reason;
