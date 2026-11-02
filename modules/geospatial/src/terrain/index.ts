@@ -67,6 +67,8 @@ export type {TerrainProfileSampler, TerrainProfile} from './profile';
 export {createTerrainContours} from './contours';
 export type {TerrainContours, TerrainContourOptions} from './contours';
 export {stitchTerrainContours} from './contour-paths';
+export {weldTerrainContourTiles} from './contour-tile-weld';
+export type {TerrainContourTile, TerrainContourTileWeldOptions} from './contour-tile-weld';
 export type {TerrainContourPaths, TerrainContourPathLimits} from './contour-paths';
 export {simplifyTerrainContourPaths} from './contour-simplify';
 export type {TerrainSimplifiedContourPaths} from './contour-simplify';
