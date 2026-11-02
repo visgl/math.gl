@@ -188,6 +188,7 @@ export class InitializedTask<D extends AnyTask> {
     return this.operationQueue.run(
       mode,
       async () => {
+        signal?.throwIfAborted();
         this.checkCapability('atomic');
         const invalidate = () => {
           if (this.concurrent) {
@@ -198,7 +199,6 @@ export class InitializedTask<D extends AnyTask> {
         };
         signal?.addEventListener('abort', invalidate, {once: true});
         try {
-          if (signal?.aborted) invalidate();
           return await this.invoke('process', input, (args[0] as any)?.options ?? {}, controls);
         } finally {
           signal?.removeEventListener('abort', invalidate);
@@ -209,24 +209,24 @@ export class InitializedTask<D extends AnyTask> {
   }
 
   /** Independent calls sharing this instance, always serial and in input order. */
-  async *runTasks(
+  runTasks(
     inputs: Iterable<TaskInput<D>> | AsyncIterable<TaskInput<D>>,
     ...args: RequestArgs<InitializedTaskOptions<D>>
   ): AsyncIterable<TaskOutput<D>> {
-    yield* this.serialStream(async function* (self) {
+    return this.serialStream(async function* (self) {
       self.checkCapability('atomic');
       for await (const input of asAsync(inputs, self.controls(args[0]).signal)) {
         yield await self.invoke('process', input, (args[0] as any)?.options ?? {}, args[0]);
       }
-    });
+    }, args[0]?.signal);
   }
 
   /** One processor invocation for the entire input iterable. */
-  async *runTaskInBatches(
+  runTaskInBatches(
     inputs: Iterable<TaskBatchInput<D>> | AsyncIterable<TaskBatchInput<D>>,
     ...args: RequestArgs<InitializedTaskBatchOptions<D>>
   ): AsyncIterable<TaskBatchOutput<D>> {
-    yield* this.serialStream(async function* (self) {
+    return this.serialStream(async function* (self) {
       self.checkCapability('streaming');
       const controls = self.controls(args[0]);
       const options = clonePayload((args[0] as any)?.options ?? {});
@@ -303,7 +303,7 @@ export class InitializedTask<D extends AnyTask> {
           await self.workerChannel.destroy(reason);
         }
       }
-    });
+    }, args[0]?.signal);
   }
 
   /** Lifecycle status of this initialized task. */
@@ -499,7 +499,44 @@ export class InitializedTask<D extends AnyTask> {
     return this.operationQueue.run('exclusive', operation);
   }
 
-  private async *serialStream<T>(operation: (self: this) => AsyncIterable<T>): AsyncIterable<T> {
+  private serialStream<T>(
+    operation: (self: this) => AsyncIterable<T>,
+    signal?: AbortSignal
+  ): AsyncIterableIterator<T> {
+    const waiting = new AbortController();
+    const queueSignal = AbortSignal.any(
+      [waiting.signal, this.controller.signal, signal].filter((value): value is AbortSignal =>
+        Boolean(value)
+      )
+    );
+    let started = false;
+    const iterator = this.acquireStream(operation, queueSignal, () => {
+      started = true;
+    });
+    const cancelWaiting = () => {
+      if (!started) waiting.abort(new Error('Stream returned before execution'));
+    };
+    return {
+      [Symbol.asyncIterator]() {
+        return this;
+      },
+      next: () => iterator.next(),
+      return: async () => {
+        cancelWaiting();
+        return iterator.return(undefined);
+      },
+      throw: async reason => {
+        cancelWaiting();
+        return iterator.throw(reason);
+      }
+    };
+  }
+
+  private async *acquireStream<T>(
+    operation: (self: this) => AsyncIterable<T>,
+    signal: AbortSignal,
+    onStart: () => void
+  ): AsyncGenerator<T, void, unknown> {
     if (this.closed) throw new Error('Initialized task is closed');
     let acquire!: () => void;
     const acquired = new Promise<void>(resolve => {
@@ -509,15 +546,20 @@ export class InitializedTask<D extends AnyTask> {
     const held = new Promise<void>(resolve => {
       release = resolve;
     });
-    const lease = this.operationQueue.run('exclusive', async () => {
-      acquire();
-      await held;
-    });
+    const lease = this.operationQueue.run(
+      'exclusive',
+      async () => {
+        acquire();
+        await held;
+      },
+      signal
+    );
     await Promise.race([acquired, lease]);
-    if (this.controller.signal.aborted) {
+    if (signal.aborted) {
       release();
-      throw this.controller.signal.reason;
+      throw signal.reason;
     }
+    onStart();
     const iterator = operation(this)[Symbol.asyncIterator]();
     let stopping: Promise<void> | undefined;
     const stop = () => {

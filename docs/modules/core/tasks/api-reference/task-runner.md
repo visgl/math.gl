@@ -179,7 +179,9 @@ an exclusive operation on the same instance: it is queued behind the current cal
 Streams retain exclusive ownership and pull inputs on demand, including on the
 multiplexed worker transport.
 
-Normal worker stream completion preserves state. Early stream return, worker
+Cancelling or returning a stream before execution removes its queued barrier without
+invalidating shared state. Normal worker stream completion preserves state. Early
+return after worker stream execution starts, worker
 cancellation, transport failure, or worker stream failure invalidates it. Local
 processor errors leave state available. On the multiplexed route, atomic processor
 errors and host callback exceptions reject only their reporting call; siblings and

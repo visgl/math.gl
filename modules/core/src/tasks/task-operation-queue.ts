@@ -55,7 +55,10 @@ export class TaskOperationQueue {
           this.active++;
           if (mode === 'exclusive') this.exclusive = true;
           void Promise.resolve()
-            .then(operation)
+            .then(() => {
+              signal?.throwIfAborted();
+              return operation();
+            })
             .then(resolve, reject)
             .finally(() => {
               this.active--;

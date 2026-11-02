@@ -14,6 +14,106 @@ function deferred() {
   return {promise, resolve};
 }
 
+test('abort between queue promotion and execution does not start the operation', async () => {
+  const queue = new TaskOperationQueue(2);
+  const controller = new AbortController();
+  const operation = vi.fn(async () => {});
+  const result = queue.run('parallel', operation, controller.signal);
+  controller.abort(new Error('before execution'));
+  await expect(result).rejects.toThrow('before execution');
+  expect(operation).not.toHaveBeenCalled();
+  await queue.close();
+});
+
+test('cancelling a promoted call preserves running siblings and initialized state', async () => {
+  const release = deferred();
+  const started = deferred();
+  const process = vi.fn(async () => {
+    started.resolve();
+    await release.promise;
+    return {};
+  });
+  const task = {
+    id: 'promotion-cancellation',
+    concurrency: {maxConcurrency: 2, getSchedulingMode: () => 'parallel' as const},
+    initialize: () => ({}),
+    process
+  } satisfies Task<{input: object; output: object; state: object}>;
+  const runner = new TaskRunner();
+  const handle = await runner.initializeTask(
+    task,
+    {},
+    {
+      execution: 'main-thread',
+      operationConcurrency: 2
+    }
+  );
+  try {
+    const sibling = handle.runTask({});
+    await started.promise;
+    const controller = new AbortController();
+    const cancelled = handle.runTask({}, {signal: controller.signal});
+    controller.abort(new Error('before execution'));
+    await expect(cancelled).rejects.toThrow('before execution');
+    expect(handle.state).toBe('ready');
+    expect(process).toHaveBeenCalledTimes(1);
+    release.resolve();
+    await sibling;
+    await handle.runTask({});
+  } finally {
+    release.resolve();
+    await runner.close();
+  }
+});
+
+test.each(['abort', 'return'] as const)(
+  'queued stream %s removes its barrier without invalidating shared state',
+  async cancellation => {
+    const release = deferred();
+    const started = deferred();
+    const task = {
+      id: 'stream-queue-cancellation',
+      concurrency: {maxConcurrency: 2, getSchedulingMode: () => 'parallel' as const},
+      initialize: () => ({}),
+      async process(input: {wait?: boolean}) {
+        if (input.wait) {
+          started.resolve();
+          await release.promise;
+        }
+        return {};
+      }
+    } satisfies Task<{input: {wait?: boolean}; output: object; state: object}>;
+    const runner = new TaskRunner();
+    const handle = await runner.initializeTask(
+      task,
+      {},
+      {
+        execution: 'main-thread',
+        operationConcurrency: 2
+      }
+    );
+    try {
+      const sibling = handle.runTask({wait: true});
+      await started.promise;
+      const controller = new AbortController();
+      const stream = handle.runTasks([{}], {signal: controller.signal})[Symbol.asyncIterator]();
+      const next = stream.next();
+      const rejected = expect(next).rejects.toThrow();
+      const following = handle.runTask({});
+      if (cancellation === 'abort') controller.abort(new Error('cancel stream'));
+      else await stream.return?.();
+      await rejected;
+      await following;
+      expect(handle.state).toBe('ready');
+      release.resolve();
+      await sibling;
+    } finally {
+      release.resolve();
+      await runner.close();
+    }
+  }
+);
+
 test('parallel operations overlap and exclusive operations form FIFO barriers', async () => {
   const queue = new TaskOperationQueue(2);
   const first = deferred();
