@@ -34,18 +34,19 @@ Type fields are `input`, `output`, optional `options`, `initialization`, `state`
 
 ### Request fields[​](#request-fields "Direct link to Request fields")
 
-| Field             | Default                      | Meaning                                                                     |
-| ----------------- | ---------------------------- | --------------------------------------------------------------------------- |
-| `options`         | `{}` when no required fields | Typed application parameters, copied per invocation                         |
-| `initialization`  | `{}` when no required fields | Temporary instance initialization data                                      |
-| `execution`       | `auto`                       | Worker when a target exists; otherwise local                                |
-| `inputOwnership`  | `copy`                       | `copy`, `transfer`, or `share`                                              |
-| `outputOwnership` | `transfer`                   | `copy` or `transfer`                                                        |
-| `signal`          | None                         | Cancel acquisition or execution                                             |
-| `onProgress`      | None                         | Receives `{completed, total?, phase?, unit?}`; throwing fails the operation |
-| `concurrency`     | 1                            | Only on runner `runTasks`                                                   |
+| Field                     | Default                      | Meaning                                                                                                                                                       |
+| ------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`                 | `{}` when no required fields | Typed application parameters, copied per invocation                                                                                                           |
+| `initialization`          | `{}` when no required fields | Temporary instance initialization data                                                                                                                        |
+| `execution`               | `auto`                       | Worker when a target exists; otherwise local                                                                                                                  |
+| `initializationOwnership` | `copy`                       | Ownership of automatic initialization data, independently of processing payloads; `copy`, `transfer`, or `share`. `runTasks` templates allow only copy/share. |
+| `inputOwnership`          | `copy`                       | `copy`, `transfer`, or `share`                                                                                                                                |
+| `outputOwnership`         | `transfer`                   | `copy` or `transfer`                                                                                                                                          |
+| `signal`                  | None                         | Cancel acquisition or execution                                                                                                                               |
+| `onProgress`              | None                         | Receives `{completed, total?, phase?, unit?}`; throwing fails the operation                                                                                   |
+| `concurrency`             | 1                            | Only on runner `runTasks`                                                                                                                                     |
 
-`initializeTask` controls contain only execution, signal, ownership, and progress; application initialization data is the named second argument. Its signal does not control future runs. All automatic calls copy initialization data independently of process input ownership; multi-input calls copy a template for each slot. Separate automatic calls create separate workers; explicit handles retain one worker.
+`initializeTask` controls contain only execution, signal, ownership, and progress; application initialization data is the named second argument. Its signal does not control future runs. Automatic calls copy initialization data by default, independently of process input ownership. Set `initializationOwnership` to transfer setup resources such as MessagePorts or to validate shared storage. `runTasks` reuses an initialization template per slot, so it accepts only copy/share and rejects transfer before consuming input. Explicit `initializeTask` calls continue to use their own `inputOwnership` control for setup. Separate automatic calls create separate workers; explicit handles retain one worker.
 
 ## `preloadTasks`[​](#preloadtasks "Direct link to preloadtasks")
 

@@ -286,17 +286,18 @@ For local execution, use `preloadTasks([task], {execution: 'main-thread'})` to r
 
 ### Choose buffer ownership[​](#choose-buffer-ownership "Direct link to Choose buffer ownership")
 
-| Control                                 | Meaning                                                          |
-| --------------------------------------- | ---------------------------------------------------------------- |
-| `inputOwnership: 'copy'` (default)      | Preserve the caller's buffers                                    |
-| `inputOwnership: 'transfer'`            | Move buffers; all caller views of those buffers detach           |
-| `inputOwnership: 'share'`               | Require shared storage rather than ordinary transferable buffers |
-| `outputOwnership: 'transfer'` (default) | Move returned buffers to the caller                              |
-| `outputOwnership: 'copy'`               | Keep returned buffers usable inside task state                   |
+| Control                                                                 | Meaning                                                                                     |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `initializationOwnership: 'copy'` (default), `'transfer'`, or `'share'` | Control automatic setup resources independently; `runTasks` templates allow only copy/share |
+| `inputOwnership: 'copy'` (default)                                      | Preserve the caller's buffers                                                               |
+| `inputOwnership: 'transfer'`                                            | Move buffers; all caller views of those buffers detach                                      |
+| `inputOwnership: 'share'`                                               | Require shared storage rather than ordinary transferable buffers                            |
+| `outputOwnership: 'transfer'` (default)                                 | Move returned buffers to the caller                                                         |
+| `outputOwnership: 'copy'`                                               | Keep returned buffers usable inside task state                                              |
 
 These boundaries also apply locally. `SharedArrayBuffer` stays shared under every policy; copy does not isolate shared memory. Individual tasks may impose tighter input requirements: `ProjectCoordinatesTask` currently accepts ordinary `Float32Array` or `Float64Array` storage, not shared buffers.
 
-Application options are copied separately. Transfer rejects input that aliases reusable option buffers; use copy mode for those inputs. Automatic calls copy initialization data for each slot. Explicit initialization can transfer ownership once. If a task returns cached storage, choose output copying to avoid detaching that storage inside its state.
+Application options are copied separately. Transfer rejects input that aliases reusable option buffers; use copy mode for those inputs. Automatic calls copy initialization by default; `initializationOwnership` can instead transfer or share setup independently of processing inputs. Multi-input `runTasks` copies or shares a template for each slot and rejects transfer. Explicit initialization can transfer ownership once through its own `inputOwnership` control. If a task returns cached storage, choose output copying to avoid detaching that storage inside its state.
 
 ### Cancel work and observe progress[​](#cancel-work-and-observe-progress "Direct link to Cancel work and observe progress")
 
