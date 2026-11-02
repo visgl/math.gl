@@ -24,6 +24,12 @@ const contours = weldTerrainContourTiles(tiles, {width: 257, height: 257});
 const paths = stitchTerrainContours(contours);
 ```
 
+`stitchTerrainContourTiles(tiles, options)` composes these two operations for a single snapshot, with the same weld and path capacity limits.
+
+### Gradient pyramids[​](#gradient-pyramids "Direct link to Gradient pyramids")
+
+`createTerrainGradientPyramid(createTerrainGradientGrid(field))` builds weighted block averages of valid world-frame gradient vectors. Every level reports valid and total source-sample counts, including smaller blocks at odd edges. `blockSize` describes coverage on the original grid; the returned origin and steps describe that source grid rather than uniformly spaced centers of the coarser blocks. Taking the slope of an averaged gradient is not the same as averaging slopes or differentiating filtered elevation. These averages are not conservative bounds.
+
 ### Incremental vertex halos and filtered rasters[​](#incremental-vertex-halos-and-filtered-rasters "Direct link to Incremental vertex halos and filtered rasters")
 
 `updateTerrainVertexTileHalos(previous, resident, changed, options)` rebuilds only affected halos from a complete post-update source snapshot and reuses other halo objects. Pass the previous snapshot's options as `options.previousOptions`; changes to the grid, height reference, or reconciliation tolerance require a full rebuild. Include every arrival, replacement and eviction in `changed`; treat shared result buffers as immutable. The function detects omitted arrivals and evictions but cannot detect an omitted replacement. It does not update derivatives, meshes or bounds on the caller's behalf.
