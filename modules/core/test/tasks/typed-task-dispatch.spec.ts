@@ -3,7 +3,14 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {describe, expect, expectTypeOf, test, vi} from 'vitest';
-import {createTypedTaskDispatcher, type TaskOperation} from '../../src/tasks';
+import {
+  createTypedTaskDispatcher,
+  TaskRunner,
+  type Task,
+  type TaskOperation,
+  type TaskOperationRequest,
+  type TaskOperationResult
+} from '../../src/tasks';
 
 type Operations = {
   count: TaskOperation<{source: string}, number>;
@@ -11,6 +18,37 @@ type Operations = {
 };
 
 describe('typed task dispatcher', () => {
+  test('works with an initialized TaskRunner handle', async () => {
+    const task = {
+      id: 'dispatch-test',
+      initialize: () => ({calls: 0}),
+      process(request, _options, {state}) {
+        state.calls++;
+        return {
+          value:
+            request.operation === 'count'
+              ? request.input.source.length
+              : {name: String(request.input.id)}
+        };
+      }
+    } satisfies Task<{
+      input: TaskOperationRequest<Operations>;
+      output: {value: TaskOperationResult<Operations>};
+      state: {calls: number};
+    }>;
+    const runner = new TaskRunner();
+    const handle = await runner.initializeTask(task, {}, {execution: 'main-thread'});
+    try {
+      const dispatch = createTypedTaskDispatcher<Operations>(
+        async request => (await handle.runTask(request)).value
+      );
+      expect(await dispatch({operation: 'count', input: {source: 'road'}})).toBe(4);
+      expect(await dispatch({operation: 'lookup', input: {id: 42}})).toEqual({name: '42'});
+    } finally {
+      await handle.close();
+      await runner.close();
+    }
+  });
   test('preserves requests, options, result values and errors', async () => {
     const error = new Error('failed');
     const transport = vi.fn(
