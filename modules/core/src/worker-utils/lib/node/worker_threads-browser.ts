@@ -41,4 +41,4 @@ export const parentPort =
         };
       };
     }
-  ).process?.getBuiltinModule?.('node:worker_threads').parentPort ?? null;
+  ).process?.getBuiltinModule?.('node:worker_threads')?.parentPort ?? null;

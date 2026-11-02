@@ -24,4 +24,4 @@ A Node worker may use `require('@math.gl/core/tasks')` and install its task with
 `TaskRunner`; use a `.cjs` worker entry point when the containing package uses ESM.
 The CommonJS bundle resolves the native Node parent port at runtime, while browser
 bundles keep Node built-ins optional. This requires Node's `process.getBuiltinModule`
-(Node 22.1 or newer).
+(Node 22.3 or newer).
