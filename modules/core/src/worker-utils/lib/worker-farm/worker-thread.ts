@@ -47,6 +47,8 @@ export default class WorkerThread {
   onError: (error: Error) => void;
 
   private _loadableURL: string = '';
+  /** Per-thread module shim, including URLs resolved through lazy factory fallbacks. */
+  private ownedModuleWorkerURL?: string;
 
   /** Checks if workers are supported on this platform */
   static isSupported(): boolean {
@@ -83,7 +85,9 @@ export default class WorkerThread {
     this.onError = NOOP;
     if (this.terminated) return this.termination ?? Promise.resolve();
     this.terminated = true;
-    this.termination = Promise.resolve(this.worker.terminate()).then(() => undefined);
+    this.termination = Promise.resolve(this.worker.terminate())
+      .then(() => undefined)
+      .finally(() => this.releaseModuleWorkerURL());
     void this.termination.catch(() => undefined);
     return this.termination;
   }
@@ -163,9 +167,28 @@ export default class WorkerThread {
       url,
       workerType: this.workerType
     });
-    const worker = new Worker(this._loadableURL, {name: this.name, type: this.workerType});
+    if (
+      this.workerType === 'module' &&
+      url &&
+      this._loadableURL !== url &&
+      this._loadableURL.startsWith('blob:')
+    )
+      this.ownedModuleWorkerURL = this._loadableURL;
+    try {
+      const worker = new Worker(this._loadableURL, {name: this.name, type: this.workerType});
+      return this._initializeBrowserWorker(worker);
+    } catch (error) {
+      this.releaseModuleWorkerURL();
+      throw error;
+    }
+  }
 
-    return this._initializeBrowserWorker(worker);
+  /** Releases only the module shim owned by this worker, never caller-owned blob URLs. */
+  private releaseModuleWorkerURL(): void {
+    if (this.ownedModuleWorkerURL) {
+      URL.revokeObjectURL(this.ownedModuleWorkerURL);
+      this.ownedModuleWorkerURL = undefined;
+    }
   }
 
   /** Attaches protocol handlers to a browser worker. */

@@ -102,8 +102,8 @@ test('close settles when the last queued job is aborted and destroy is idempoten
   await Promise.all([closing, pool.destroy()]);
 });
 
-test('module URLs remain direct and worker types use separate pools', async () => {
-  const url = 'https://example.test/worker.mjs';
+test('local module URLs remain direct and worker types use separate pools', async () => {
+  const url = './worker.mjs';
   assert.equal(getLoadableWorkerURL({url, workerType: 'module'}), url);
   const farm = WorkerFarm.getWorkerFarm();
   try {
