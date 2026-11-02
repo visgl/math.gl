@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v5.0.0-beta.4
+
+- feat(tasks): Separate initialization ownership from per-call processing payloads and add typed dispatch for multi-operation tasks, with persistent-resource and migration guidance (#420, #421).
+- fix(tasks): Correct CommonJS task initialization in Node workers and support cross-origin module worker task URLs (#418, #419).
+- feat(terrain): Weld contour paths across vertex tiles, qualify cross-tile contour behavior, and expose boundary diagnostics (#422, #425).
+- feat(terrain): Add gradient pyramids and an interactive terrain analysis view (#424).
+
 ## v5.0.0-beta.3
 
 - **Breaking:** Replace the legacy public worker/task API families with `TaskRunner`, typed task objects, and `initializeTaskWorker`. Remove top-level task functions, worker-utils exports, worker resource wrappers, and geospatial worker subpaths; use `@math.gl/geospatial/tasks` for provided tasks. Input copying is the default, explicit handles retain worker state, and advanced pool controls are no longer public. See [task migration](docs/modules/core/tasks/developer-guide/migration.md) (#411, #414).
