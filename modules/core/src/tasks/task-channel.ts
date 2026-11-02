@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+/** A peer processor rejected its request without losing the transport. @internal */
+export class TaskRequestError extends Error {}
+
 /** Messages on a dedicated, multiplexed task transport. */
 export type TaskChannelMessage = {
   source: 'math.gl/tasks';
@@ -90,7 +93,7 @@ export class TaskChannel {
       pending.cleanup();
       if (message.kind === 'result') pending.resolve(message.value);
       else {
-        const error = new Error(message.error?.message ?? 'Task request failed');
+        const error = new TaskRequestError(message.error?.message ?? 'Task request failed');
         error.name = message.error?.name ?? 'Error';
         pending.reject(error);
       }

@@ -457,6 +457,52 @@ test('early multiplexed stream return invalidates the handle consistently', asyn
   }
 });
 
+test.each(['processor', 'progress', 'event'] as const)(
+  'multiplexed %s errors reject only their reporting atomic call',
+  async failureKind => {
+    const runner = new TaskRunner();
+    const failure = new Error(`${failureKind} callback failure`);
+    const task = {
+      ...workerTask,
+      process: (_input: {value?: number; fail?: boolean; callback?: boolean; delay?: number}) => ({
+        value: 0
+      }),
+      concurrency: {maxConcurrency: 2, getSchedulingMode: () => 'parallel' as const}
+    };
+    const instance = await runner.initializeTask(
+      task,
+      {},
+      {
+        execution: 'worker',
+        operationConcurrency: 2,
+        onRequest: async (_operation, payload) => payload,
+        onEvent: () => {
+          if (failureKind === 'event') throw failure;
+        }
+      }
+    );
+    try {
+      const failing = instance.runTask(
+        {value: 1, fail: failureKind === 'processor', callback: failureKind === 'event'},
+        {
+          onProgress: () => {
+            if (failureKind === 'progress') throw failure;
+          }
+        }
+      );
+      const sibling = instance.runTask({value: 2, delay: 10});
+      await expect(failing).rejects.toThrow(
+        failureKind === 'processor' ? 'worker failure' : failure.message
+      );
+      await expect(sibling).resolves.toMatchObject({value: 2});
+      expect(instance.state).toBe('ready');
+      await expect(instance.runTask({value: 3})).resolves.toMatchObject({value: 3});
+    } finally {
+      await runner.close();
+    }
+  }
+);
+
 test('real worker retains state across atomic and streaming calls', async () => {
   const runner = new TaskRunner();
   const task = {...fixture().task, ...workerTask};

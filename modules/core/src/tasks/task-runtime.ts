@@ -154,7 +154,8 @@ export async function initializeTaskWorker(task: AnyTask): Promise<void> {
           };
           return channel.request('task:host-request', request, signal, getTransferList(request));
         },
-        emitHost: (operation, payload) => channel.emit('task:host-event', {operation, payload})
+        emitHost: (operation, payload) =>
+          channel.emit('task:host-event', {operation, payload, id: request.progressId})
       };
       switch (operation) {
         case 'initialize':

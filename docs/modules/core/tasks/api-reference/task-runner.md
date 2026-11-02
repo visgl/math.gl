@@ -180,8 +180,13 @@ Streams retain exclusive ownership and pull inputs on demand, including on the
 multiplexed worker transport.
 
 Normal worker stream completion preserves state. Early stream return, worker
-cancellation, or worker invocation failure invalidates it. Local processor errors
-leave state available. There is no rollback or retry. On automatic atomic calls,
+cancellation, transport failure, or worker stream failure invalidates it. Local
+processor errors leave state available. On the multiplexed route, atomic processor
+errors and host callback exceptions reject only their reporting call; siblings and
+retained state remain available. Host notification exceptions are reported after
+the remote atomic operation settles, not by interrupting shared state. The legacy
+serialized worker transport cannot distinguish processor and transport failures
+and conservatively invalidates on either. There is no rollback or retry. On automatic atomic calls,
 processing plus destruction failures are reported together via `AggregateError`.
 Initialization failure cleans a returned state where possible; an initializer
 that throws must release its own partial allocations.

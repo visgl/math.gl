@@ -15,6 +15,7 @@ import {TaskRuntime, assertPayload, clonePayload, localContext} from './task-run
 import {runTaskSync} from './task-sync';
 import {TaskOperationQueue} from './task-operation-queue';
 import {TaskWorkerChannel} from './task-worker-channel';
+import {TaskRequestError} from './task-channel';
 import type {
   AnyTask,
   TaskInput,
@@ -45,6 +46,8 @@ export class InitializedTask<D extends AnyTask> {
   private nextProgressId = 1;
   private progressCallbacks = new Map<number, TaskRunControls['onProgress']>();
   private streamProgress?: TaskRunControls['onProgress'];
+  private streamProgressId?: number;
+  private callbackFailures = new Map<number, {reason: unknown}>();
   private descriptor?: WorkerObject;
   private readonly operationQueue: TaskOperationQueue;
   private closing?: Promise<void>;
@@ -101,15 +104,24 @@ export class InitializedTask<D extends AnyTask> {
               ? getTransferList(value)
               : [],
           handleEvent: (operation, payload) => {
-            if (operation === 'task:progress') {
-              const event = payload as {
-                id: number;
-                progress: Parameters<NonNullable<TaskRunControls['onProgress']>>[0];
-              };
-              (this.progressCallbacks.get(event.id) ?? this.streamProgress)?.(event.progress);
-            } else if (operation === 'task:host-event') {
-              const event = payload as {operation: string; payload: unknown};
-              controls.onEvent?.(event.operation, event.payload);
+            const {id} = payload as {id: number};
+            try {
+              if (operation === 'task:progress') {
+                const event = payload as {
+                  id: number;
+                  progress: Parameters<NonNullable<TaskRunControls['onProgress']>>[0];
+                };
+                (this.progressCallbacks.get(event.id) ?? this.streamProgress)?.(event.progress);
+              } else if (operation === 'task:host-event') {
+                const event = payload as {operation: string; payload: unknown};
+                controls.onEvent?.(event.operation, event.payload);
+              }
+            } catch (reason) {
+              // Let remote work settle: a host notification failure must not
+              // interrupt shared state or unrelated concurrent operations.
+              if (this.progressCallbacks.has(id) || this.streamProgressId === id) {
+                if (!this.callbackFailures.has(id)) this.callbackFailures.set(id, {reason});
+              }
             }
           },
           onFailure: reason => {
@@ -244,6 +256,9 @@ export class InitializedTask<D extends AnyTask> {
               await self.channelInputs.return?.();
               self.channelInputs = undefined;
               self.streamProgress = undefined;
+              if (self.streamProgressId !== undefined)
+                self.callbackFailures.delete(self.streamProgressId);
+              self.streamProgressId = undefined;
             }
           }
         } else if (self.pool) {
@@ -384,6 +399,7 @@ export class InitializedTask<D extends AnyTask> {
     const copiedOptions = clonePayload(options);
     if (this.workerChannel) {
       const progressId = this.nextProgressId++;
+      if (operation === 'stream-open') this.streamProgressId = progressId;
       this.progressCallbacks.set(progressId, prepared.onProgress);
       const request = {
         input: clonePayload(input, prepared.inputOwnership),
@@ -391,14 +407,28 @@ export class InitializedTask<D extends AnyTask> {
         outputOwnership: prepared.outputOwnership ?? 'transfer',
         progressId
       };
+      let callbackFailure: {reason: unknown} | undefined;
       try {
-        return await this.workerChannel.channel.request(
+        const result = await this.workerChannel.channel.request(
           operation,
           request,
           prepared.signal,
           getTransferList(request)
         );
+        callbackFailure =
+          this.callbackFailures.get(progressId) ??
+          (operation.startsWith('stream-') && this.streamProgressId !== undefined
+            ? this.callbackFailures.get(this.streamProgressId)
+            : undefined);
+        if (callbackFailure) throw callbackFailure.reason;
+        return result;
       } catch (reason) {
+        if (
+          operation === 'process' &&
+          !prepared.signal?.aborted &&
+          (reason instanceof TaskRequestError || callbackFailure)
+        )
+          throw reason;
         this.invalid = true;
         this.operationQueue.cancelPending(reason);
         this.controller.abort(reason);
@@ -406,6 +436,7 @@ export class InitializedTask<D extends AnyTask> {
         throw reason;
       } finally {
         this.progressCallbacks.delete(progressId);
+        if (this.streamProgressId !== progressId) this.callbackFailures.delete(progressId);
       }
     }
     if (this.pool) {
