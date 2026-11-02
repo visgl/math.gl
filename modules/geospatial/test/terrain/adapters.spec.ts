@@ -418,3 +418,13 @@ test('endpoint uncertainty arithmetic does not overflow for finite extreme coord
   });
   expect(field.sample(1.1e308, 1e150).status).toBe(Status.OUTSIDE_DOMAIN);
 });
+
+test('tiled sampling rejects HeightField-only raster policies', () => {
+  const field = snapshot();
+  expect(() => field.sample(11, 18.5, {matrixId: 'fine', domain: 'footprint' as never})).toThrow(
+    /HeightField/
+  );
+  expect(() => field.sample(11, 18.5, {matrixId: 'fine', noData: 'support' as never})).toThrow(
+    /HeightField/
+  );
+});
