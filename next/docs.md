@@ -38,7 +38,7 @@ Vectors, matrices, task execution, shared numeric types and expression evaluatio
 
 ### [Tasks](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
 
-[Run typed tasks locally or in workers, stream batches, and reuse initialized state.](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
+[Run typed tasks locally or in browser and Node workers, including CommonJS entrypoints, stream batches, and reuse initialized state.](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
 
 [Explore module →](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
 
