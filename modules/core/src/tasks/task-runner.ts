@@ -399,14 +399,14 @@ export class InitializedTask<D extends AnyTask> {
     const copiedOptions = clonePayload(options);
     if (this.workerChannel) {
       const progressId = this.nextProgressId++;
-      if (operation === 'stream-open') this.streamProgressId = progressId;
-      this.progressCallbacks.set(progressId, prepared.onProgress);
       const request = {
         input: clonePayload(input, prepared.inputOwnership),
         options: copiedOptions,
         outputOwnership: prepared.outputOwnership ?? 'transfer',
         progressId
       };
+      if (operation === 'stream-open') this.streamProgressId = progressId;
+      this.progressCallbacks.set(progressId, prepared.onProgress);
       let callbackFailure: {reason: unknown} | undefined;
       try {
         const result = await this.workerChannel.channel.request(

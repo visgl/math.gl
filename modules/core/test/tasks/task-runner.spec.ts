@@ -503,6 +503,28 @@ test.each(['processor', 'progress', 'event'] as const)(
   }
 );
 
+test('multiplexed input clone failures do not retain progress registrations', async () => {
+  const runner = new TaskRunner();
+  const task = {
+    ...workerTask,
+    process: (_input: {value: number; unsupported?: () => void}) => ({value: 0}),
+    concurrency: {maxConcurrency: 2}
+  };
+  const instance = await runner.initializeTask(
+    task,
+    {},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  try {
+    await expect(instance.runTask({value: 1, unsupported: () => {}})).rejects.toThrow();
+    expect(Reflect.get(instance, 'progressCallbacks').size).toBe(0);
+    expect(instance.state).toBe('ready');
+    await expect(instance.runTask({value: 2})).resolves.toMatchObject({value: 2});
+  } finally {
+    await runner.close();
+  }
+});
+
 test('real worker retains state across atomic and streaming calls', async () => {
   const runner = new TaskRunner();
   const task = {...fixture().task, ...workerTask};
