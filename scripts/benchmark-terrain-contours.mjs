@@ -43,4 +43,4 @@ const results = [17, 9, 5].map(size => {
   }));
   return {tileSize: size, tiles: fields.length, segments, paths, graphBytes: bytes, timings};
 });
-console.log(JSON.stringify({fixture: reference.source, sampleGrid: '33x33', levels, warmup: 5, iterations: 20, results}, null, 2));
+console.log(JSON.stringify({fixture: reference.source, interpretation: 'Raster samples treated as vertices for shared-grid topology', sampleGrid: '33x33', runtime: process.version, platform: process.platform, architecture: process.arch, levels, warmup: 5, iterations: 20, results}, null, 2));

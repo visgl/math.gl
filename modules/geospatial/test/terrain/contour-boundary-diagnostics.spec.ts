@@ -60,3 +60,18 @@ test('rejects malformed graph indices, duplicate edges and work limits', () => {
   };
   expect(() => diagnoseTerrainContourBoundaries(invalid, {width: 3, height: 3})).toThrow(/index/);
 });
+
+test('keeps level identity separate for coincident endpoints at different heights', () => {
+  const contours: TerrainContours = {
+    positions: Float64Array.from([0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1]),
+    gridCoordinates: Float64Array.from([0, 1, 1, 1, 0, 1, 1, 1]),
+    segments: Uint32Array.from([0, 1, 2, 3]),
+    levelIndices: Uint32Array.from([0, 1]),
+    levels: Float64Array.from([0, 1]),
+    origin: [0, 0, 0],
+    heightReference: 'unknown'
+  };
+  const result = diagnoseTerrainContourBoundaries(contours, {width: 3, height: 3});
+  expect([...result.vertexIndices]).toEqual([0, 2]);
+  expect([...result.levelIndices]).toEqual([0, 1]);
+});
