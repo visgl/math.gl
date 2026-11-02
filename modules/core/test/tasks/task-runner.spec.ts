@@ -1082,3 +1082,131 @@ test('terminate does not wait for a stalled code load that has not created state
     await runner.terminate();
   }
 });
+
+test.each(['main-thread', 'worker'] as const)(
+  'automatic setup ownership is independent of payload ownership (%s)',
+  async execution => {
+    const runner = new TaskRunner();
+    const task = {
+      id: 'initialization-ownership',
+      initialize: ({port}: {port: MessagePort}) => ({port}),
+      destroy: (state: {port: MessagePort}) => state.port.close(),
+      process: ({value}: {value: number}, _options: {}, context: any) => {
+        context.state.port.postMessage(value);
+        return {value};
+      },
+      async *processInBatches(inputs: AsyncIterable<{value: number}>, _options: {}, context: any) {
+        for await (const {value} of inputs) {
+          context.state.port.postMessage(value);
+          yield {value};
+        }
+      },
+      worker: {
+        url: new URL('../worker-utils/fixtures/initialization-worker.mjs', import.meta.url),
+        capabilities: {atomic: true, streaming: true}
+      }
+    };
+    try {
+      for (const streaming of [false, true]) {
+        for (const inputOwnership of ['copy', 'share'] as const) {
+          const channel = new MessageChannel();
+          try {
+            const message = new Promise(resolve => {
+              channel.port1.onmessage = event => resolve(event.data);
+            });
+            const request = {
+              execution,
+              initialization: {port: channel.port2},
+              initializationOwnership: 'transfer' as const,
+              inputOwnership
+            };
+            if (streaming) {
+              expect(await collect(runner.runTaskInBatches(task, [{value: 7}], request))).toEqual([
+                {value: 7}
+              ]);
+            } else {
+              expect(await runner.runTask(task, {value: 7}, request)).toEqual({value: 7});
+            }
+            expect(await message).toBe(7);
+          } finally {
+            channel.port1.close();
+            channel.port2.close();
+          }
+        }
+      }
+      let consumed = false;
+      const inputs = {
+        *[Symbol.iterator]() {
+          consumed = true;
+          yield {value: 1};
+        }
+      };
+      await expect(
+        collect(
+          runner.runTasks(task, inputs, {
+            initialization: {port: null as any},
+            initializationOwnership: 'transfer'
+          } as any)
+        )
+      ).rejects.toThrow('reusable template');
+      expect(consumed).toBe(false);
+    } finally {
+      await runner.close();
+    }
+  }
+);
+
+test('synchronous setup ownership preserves copied processing input', () => {
+  const runner = new TaskRunner();
+  const setup = new Uint8Array([3]);
+  const input = new Uint8Array([4]);
+  const task = {
+    id: 'sync-setup-ownership',
+    initialize: ({values}: {values: Uint8Array}) => values,
+    process: ({values}: {values: Uint8Array}, _options: {}, {state}: {state: Uint8Array}) => ({
+      value: state[0] + values[0]
+    })
+  };
+  expect(
+    runner.runTaskSync(
+      task,
+      {values: input},
+      {
+        initialization: {values: setup},
+        initializationOwnership: 'transfer',
+        inputOwnership: 'copy'
+      }
+    )
+  ).toEqual({value: 7});
+  expect(setup.byteLength).toBe(0);
+  expect(input.byteLength).toBe(1);
+});
+
+test.runIf(typeof SharedArrayBuffer !== 'undefined')(
+  'multi-input setup can share a reusable template',
+  async () => {
+    const runner = new TaskRunner({maxConcurrency: 2});
+    const values = new Int32Array(new SharedArrayBuffer(4));
+    const task = {
+      id: 'shared-setup-template',
+      initialize: ({values}: {values: Int32Array}) => values,
+      process: ({value}: {value: number}, _options: {}, {state}: {state: Int32Array}) => ({
+        value: Atomics.add(state, 0, value)
+      })
+    };
+    try {
+      expect(
+        await collect(
+          runner.runTasks(task, [{value: 1}, {value: 2}], {
+            initialization: {values},
+            initializationOwnership: 'share',
+            concurrency: 2
+          })
+        )
+      ).toEqual([{value: 0}, {value: 1}]);
+      expect(values[0]).toBe(3);
+    } finally {
+      await runner.close();
+    }
+  }
+);

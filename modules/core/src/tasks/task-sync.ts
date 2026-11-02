@@ -32,7 +32,10 @@ export function runTaskSync<D extends AnyTask>(
       throw new Error('Transferred input aliases reusable options; use inputOwnership: copy');
   }
   const copiedOptions = clonePayload(options);
-  const initialization = clonePayload(request.initialization ?? {});
+  const initialization = clonePayload(
+    request.initialization ?? {},
+    request.initializationOwnership
+  );
   let initialized = false;
   let failure: unknown;
   let failed = false;

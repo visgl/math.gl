@@ -33,6 +33,7 @@ implemented behavior and the limits applications need to account for.
 | Worker-code warmup | ✅ | Global `preloadTasks` loads code ahead of execution. Optional `task.preload()` hooks await nested imports. Temporary preload workers terminate when ready; no task state or worker pool is retained. Browser cache policy controls reuse. |
 | Execution capacity | ✅ | `maxConcurrency` bounds active lifetimes, including initialization and retained handles. Code preloading is independent of runner capacity; queued bytes are not bounded. |
 | Buffer ownership | ✅ | Inputs copy by default; explicit transfer detaches caller aliases. Shared storage remains shared. Output copying preserves buffers retained in task state. The same boundaries apply locally. |
+| Initialization ownership | ✅ | Automatic atomic/streaming calls can copy, transfer, or share setup data independently of processing inputs. Multi-input templates allow copy/share only; explicit handles choose setup ownership at initialization. |
 | Cancellation | ✅ | `AbortSignal` cancels queued acquisition. Worker abort terminates the worker and invalidates its handle. Local work must observe the signal and yield; synchronous calls cannot service timer/UI abort events mid-call. |
 | Progress | ✅ | Tasks report `{completed, total?, phase?, unit?}` through context; callers receive `onProgress` events. |
 | Graceful and forced cleanup | ✅ | `close` drains work and destroys state; `terminate` aborts owned work. Finish/return output iterators before graceful shutdown. |
