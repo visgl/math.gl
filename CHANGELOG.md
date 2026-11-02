@@ -1,10 +1,14 @@
 # CHANGELOG
 
-## Unreleased
+## v5.0.0-beta.3
 
-- feat(tasks): Add global code-only `preloadTasks` with optional nested task preload hooks and `runTaskSync` for synchronous local lifecycles. Document task capabilities in a detailed feature card.
-
-- **Breaking:** Replace the public worker/task API families with `TaskRunner`, typed task objects, and `initializeTaskWorker`. Remove top-level task functions, worker-utils exports, worker resource wrappers, and geospatial worker subpaths. Use `@math.gl/geospatial/tasks` for provided tasks. Input copying is the default; explicit handles retain worker state. Advanced pool controls are intentionally removed from the public API. See [task migration](docs/modules/core/tasks/developer-guide/migration.md).
+- **Breaking:** Replace the legacy public worker/task API families with `TaskRunner`, typed task objects, and `initializeTaskWorker`. Remove top-level task functions, worker-utils exports, worker resource wrappers, and geospatial worker subpaths; use `@math.gl/geospatial/tasks` for provided tasks. Input copying is the default, explicit handles retain worker state, and advanced pool controls are no longer public. See [task migration](docs/modules/core/tasks/developer-guide/migration.md) (#411, #414).
+- feat(tasks): Add global code-only `preloadTasks`, nested preload hooks, synchronous `runTaskSync` execution, and detailed task capability guidance (#417).
+- fix(core): Discover MessageChannel ports in transfer lists and support copying worker output (#407, #409).
+- feat(terrain): Add sampled profile and horizon visibility, radial visibility, vertex tile halos and invalidation, incremental halos, and filtered raster pyramids (#412, #413, #415, #416).
+- feat(geospatial): Add reusable screen-ray unprojection (#410).
+- docs: Add shared BibTeX citations and bibliography validation (#390).
+- build: Upgrade to Vitest 5 and dev-tools beta.2, retain provenance while making trusted-publishing recovery and retries safe, and update joi (#405, #406, #408).
 
 ## v5.0.0-beta.2
 
