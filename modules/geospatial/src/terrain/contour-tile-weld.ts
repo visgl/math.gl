@@ -140,7 +140,9 @@ export function weldTerrainContourTiles(
       if (positions.length / 3 >= limits.maxVertices)
         throw new Error('Terrain contour vertex capacity exceeded');
       const output = positions.length / 3;
-      positions.push(px, py, levels[level] - origin[2]);
+      const pz = levels[level] - origin[2];
+      if (!Number.isFinite(pz)) throw new Error('Terrain contour frame overflow');
+      positions.push(px, py, pz);
       grid.push(gx, gy);
       if (boundary) vertices.set(vertexKey, {id: output, tile: tileIndex});
       remap[source] = output;

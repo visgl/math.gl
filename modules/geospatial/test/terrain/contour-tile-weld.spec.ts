@@ -221,3 +221,22 @@ test('rejects segments whose distinct endpoints collapse when rebased to a dista
     /Degenerate.*rebasing/
   );
 });
+
+test('rejects overflow when a tile height is rebased to an extreme Z origin', () => {
+  const empty = new HeightField({
+    width: 2,
+    height: 2,
+    heights: new Float64Array([1e308, 1e308, 1e308, 1e308])
+  });
+  const populated = new HeightField({
+    width: 2,
+    height: 2,
+    origin: [1, 0],
+    heights: new Float64Array([0, 0, 1.5e308, 1.5e308])
+  });
+  const tiles = [
+    {column: 0, row: 0, contours: createTerrainContours(empty, [1e308], {origin: [0, 0, -1e308]})},
+    {column: 1, row: 0, contours: createTerrainContours(populated, [1e308])}
+  ];
+  expect(() => weldTerrainContourTiles(tiles, {width: 2, height: 2})).toThrow(/frame overflow/);
+});
