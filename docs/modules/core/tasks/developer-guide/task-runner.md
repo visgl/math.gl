@@ -240,6 +240,7 @@ initialized handles each retain one slot. A stream occupies its slot until it en
 
 | Control | Meaning |
 | --- | --- |
+| `initializationOwnership: 'copy'` (default), `'transfer'`, or `'share'` | Control automatic setup resources independently; `runTasks` templates allow only copy/share |
 | `inputOwnership: 'copy'` (default) | Preserve the caller's buffers |
 | `inputOwnership: 'transfer'` | Move buffers; all caller views of those buffers detach |
 | `inputOwnership: 'share'` | Require shared storage rather than ordinary transferable buffers |
@@ -253,8 +254,10 @@ input requirements: `ProjectCoordinatesTask` currently accepts ordinary
 
 Application options are copied separately. Transfer rejects input that aliases
 reusable option buffers; use copy mode for those inputs. Automatic calls
-copy initialization data for each slot. Explicit initialization can transfer
-ownership once. If a task returns cached storage, choose output copying to avoid
+copy initialization by default; `initializationOwnership` can instead transfer or
+share setup independently of processing inputs. Multi-input `runTasks` copies or
+shares a template for each slot and rejects transfer. Explicit initialization can
+transfer ownership once through its own `inputOwnership` control. If a task returns cached storage, choose output copying to avoid
 detaching that storage inside its state.
 
 ### Cancel work and observe progress

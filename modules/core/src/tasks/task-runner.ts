@@ -378,7 +378,7 @@ export class TaskRunner {
     const request = (args[0] as any) ?? {};
     const handle = await this.initializeTask(task, request.initialization ?? {}, {
       ...request,
-      inputOwnership: 'copy'
+      inputOwnership: request.initializationOwnership ?? 'copy'
     });
     return finish(handle, () => handle.runTask(input, request));
   }
@@ -390,6 +390,8 @@ export class TaskRunner {
   ): AsyncIterable<TaskOutput<D>> {
     const request = (args[0] as any) ?? {};
     if (this.closed) throw new Error('Task runner is closed');
+    if (request.initializationOwnership === 'transfer')
+      throw new TypeError('runTasks initialization is a reusable template; use copy or share');
     const concurrency = request.concurrency ?? 1;
     if (!Number.isSafeInteger(concurrency) || concurrency < 1 || concurrency > this.maxConcurrency)
       throw new RangeError('concurrency must be between 1 and maxConcurrency');
@@ -438,11 +440,15 @@ export class TaskRunner {
         // Check capacity immediately before opening: open reserves it synchronously.
         // Never wait for an extra slot while already holding one.
         if (!handle && (handles.length === 0 || this.count < this.maxConcurrency)) {
-          handle = await this.initializeTask(task, clonePayload(request.initialization ?? {}), {
-            ...request,
-            signal,
-            inputOwnership: 'copy'
-          });
+          handle = await this.initializeTask(
+            task,
+            clonePayload(request.initialization ?? {}, request.initializationOwnership),
+            {
+              ...request,
+              signal,
+              inputOwnership: request.initializationOwnership ?? 'copy'
+            }
+          );
           handles.push(handle);
         }
         if (!handle) {
@@ -482,7 +488,7 @@ export class TaskRunner {
     const request = (args[0] as any) ?? {};
     const handle = await this.initializeTask(task, request.initialization ?? {}, {
       ...request,
-      inputOwnership: 'copy'
+      inputOwnership: request.initializationOwnership ?? 'copy'
     });
     try {
       yield* handle.runTaskInBatches(inputs, request);

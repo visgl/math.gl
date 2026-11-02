@@ -15,6 +15,7 @@ export type {
   TaskProgress,
   TaskWorker,
   TaskRunControls,
+  TaskInitializationControls,
   TaskRunOptions,
   TaskSyncRunOptions,
   TaskPreloadOptions,
