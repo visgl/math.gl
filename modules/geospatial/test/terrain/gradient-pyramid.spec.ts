@@ -81,3 +81,17 @@ test('gradient pyramid rejects invalid valid samples and capacity without mutati
   expect(createTerrainGradientPyramid(grid).levels.at(-1)!.validCounts[0]).toBe(0);
   expect(Number.isNaN(grid.gradients[8])).toBe(true);
 });
+
+test('gradient pyramid handles opposing extreme vectors and owns its metadata and buffers', () => {
+  const field = new HeightField({width: 2, height: 2, heights: new Float64Array(4)});
+  const grid = createTerrainGradientGrid(field);
+  grid.statuses.set([0, 0, 2, 2]);
+  grid.gradients.set([1e308, -1e308, -1e308, 1e308, 0, 0, 0, 0]);
+  const pyramid = createTerrainGradientPyramid(grid);
+  expect([...pyramid.levels[1].gradients]).toEqual([0, 0]);
+  expect(pyramid.levels[1].validCounts[0]).toBe(2);
+  expect(pyramid.levels[1].sampleCounts[0]).toBe(4);
+  grid.gradients[0] = 123;
+  expect(pyramid.levels[0].gradients[0]).toBe(1e308);
+  expect(pyramid.origin).not.toBe(grid.origin);
+});
