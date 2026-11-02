@@ -45,6 +45,13 @@ export type TaskWorker = {
  */
 export type Task<T extends TaskTypes> = {
   id: string;
+  /** Opt-in scheduling for atomic calls sharing one initialized state. */
+  concurrency?: {
+    /** Maximum simultaneous calls allowed by this task. */
+    maxConcurrency: number;
+    /** Exclusive calls run as barriers; omitted means exclusive. */
+    getSchedulingMode?: (input: Payload<T['input']>) => 'parallel' | 'exclusive';
+  };
   /** Load code dependencies without creating instance state. Cached per definition/realm. */
   preload?: () => void | Promise<void>;
   initialize?: (
@@ -95,6 +102,11 @@ export type TaskRunControls = {
   inputOwnership?: 'copy' | 'transfer' | 'share';
   outputOwnership?: 'copy' | 'transfer';
   onProgress?: (progress: TaskProgress) => void;
+};
+/** Controls for initializing a retained task instance. */
+export type TaskInitializeControls = TaskRunControls & {
+  /** Opt in to overlapping calls, capped by the task's declared capability. */
+  operationConcurrency?: number;
 };
 /** Controls setup resources independently from per-operation payload ownership. */
 export type TaskInitializationControls = {

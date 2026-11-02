@@ -28,6 +28,37 @@ receive it as `context.state`. Worker failure, cancellation, or early worker-str
 return invalidates the handle; initialize a new one to continue. Successful stream
 completion preserves state. See [lifecycle semantics](../api-reference/task-runner.md).
 
+## Overlapping local operations
+
+Initialized tasks remain serialized unless both the task declares a concurrency
+limit and the caller opts in with `operationConcurrency`. A task may classify
+atomic inputs as `parallel` or `exclusive`; exclusive operations are barriers.
+Omitted classifications are exclusive. This currently supports main-thread
+execution only: worker execution rejects a concurrency limit greater than one.
+Cancellation of active overlapping work invalidates the instance and aborts its
+other operations because shared state may have been partially changed. Queued
+calls can be cancelled without invalidating state.
+
+```ts
+const task = {
+  id: 'shared-index',
+  concurrency: {
+    maxConcurrency: 4,
+    getSchedulingMode: (input: {operation: string}) =>
+      input.operation === 'query' ? 'parallel' as const : 'exclusive' as const
+  },
+  initialize: () => createIndex(),
+  process: processIndexOperation
+};
+const handle = await runner.initializeTask(task, {}, {
+  execution: 'main-thread',
+  operationConcurrency: 2
+});
+```
+
+Concurrency overlaps asynchronous work; it does not make CPU-bound JavaScript
+parallel in a single thread. Streaming calls remain exclusive.
+
 ## Separate setup and processing ownership
 
 For automatic atomic or streaming calls, use `initializationOwnership` when setup

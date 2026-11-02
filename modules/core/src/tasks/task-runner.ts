@@ -22,6 +22,7 @@ import type {
   TaskBatchOutput,
   Initialization,
   TaskRunControls,
+  TaskInitializeControls,
   TaskRunOptions,
   TaskBatchRunOptions,
   TaskRunsOptions,
@@ -38,20 +39,37 @@ export class InitializedTask<D extends AnyTask> {
   private runtime: TaskRuntime;
   private pool?: WorkerPool;
   private descriptor?: WorkerObject;
-  private readonly operationQueue = new TaskOperationQueue(1);
+  private readonly operationQueue: TaskOperationQueue;
   private closing?: Promise<void>;
   private closed = false;
   private streams = new Set<() => Promise<void>>();
   private invalid = false;
+  private readonly concurrent: boolean;
   private controller = new AbortController();
 
   /** @internal Use TaskRunner.initializeTask. */
   constructor(
     private task: D,
     private release: () => void,
-    controls: TaskRunControls
+    controls: TaskInitializeControls
   ) {
     this.runtime = new TaskRuntime(task);
+    const concurrency = controls.operationConcurrency ?? 1;
+    const maximum = task.concurrency?.maxConcurrency ?? 1;
+    if (
+      !Number.isSafeInteger(maximum) ||
+      maximum < 1 ||
+      !Number.isSafeInteger(concurrency) ||
+      concurrency < 1 ||
+      concurrency > maximum
+    ) {
+      throw new RangeError('Task concurrency must be between 1 and the task maximum');
+    }
+    if (concurrency > 1 && (controls.execution ?? 'auto') !== 'main-thread' && task.worker) {
+      throw new Error('Concurrent initialized worker tasks are not supported');
+    }
+    this.operationQueue = new TaskOperationQueue(concurrency);
+    this.concurrent = concurrency > 1;
     const execution = controls.execution ?? 'auto';
     if (!['auto', 'main-thread', 'worker'].includes(execution))
       throw new TypeError('Invalid execution mode');
@@ -96,10 +114,29 @@ export class InitializedTask<D extends AnyTask> {
     input: TaskInput<D>,
     ...args: RequestArgs<InitializedTaskOptions<D>>
   ): Promise<TaskOutput<D>> {
-    return this.enqueue(async () => {
-      this.checkCapability('atomic');
-      return this.invoke('process', input, (args[0] as any)?.options ?? {}, args[0]);
-    }) as Promise<TaskOutput<D>>;
+    if (this.closed) return Promise.reject(new Error('Initialized task is closed'));
+    const mode = this.task.concurrency?.getSchedulingMode?.(input) ?? 'exclusive';
+    return this.operationQueue.run(
+      mode,
+      async () => {
+        this.checkCapability('atomic');
+        const signal = args[0]?.signal;
+        const invalidate = () => {
+          if (this.concurrent) {
+            this.invalid = true;
+            this.controller.abort(signal?.reason);
+          }
+        };
+        signal?.addEventListener('abort', invalidate, {once: true});
+        try {
+          if (signal?.aborted) invalidate();
+          return await this.invoke('process', input, (args[0] as any)?.options ?? {}, args[0]);
+        } finally {
+          signal?.removeEventListener('abort', invalidate);
+        }
+      },
+      args[0]?.signal
+    ) as Promise<TaskOutput<D>>;
   }
 
   /** Independent calls sharing this instance, always serial and in input order. */
@@ -365,7 +402,7 @@ export class TaskRunner {
   initializeTask<D extends AnyTask>(
     task: D,
     initialization: Initialization<D>,
-    controls: TaskRunControls = {}
+    controls: TaskInitializeControls = {}
   ): Promise<InitializedTask<D>> {
     const pending = this.open(task, initialization, controls);
     this.initializing.add(pending);
@@ -529,7 +566,7 @@ export class TaskRunner {
   private async open<D extends AnyTask>(
     task: D,
     initialization: object,
-    controls: TaskRunControls
+    controls: TaskInitializeControls
   ): Promise<InitializedTask<D>> {
     if (this.closed) throw new Error('Task runner is closed');
     controls.signal?.throwIfAborted();
