@@ -144,6 +144,11 @@ export class HeightField {
     ) {
       throw new Error('Unknown terrain interpolation');
     }
+    const domain = options?.domain ?? 'samples';
+    const noData = options?.noData ?? 'cell';
+    if (domain !== 'samples' && domain !== 'footprint')
+      throw new Error('Unknown terrain sample domain');
+    if (noData !== 'cell' && noData !== 'support') throw new Error('Unknown terrain nodata policy');
     if (!Number.isFinite(x) || !Number.isFinite(y)) return result;
     const dx = x - this.origin[0];
     const dy = y - this.origin[1];
@@ -162,16 +167,24 @@ export class HeightField {
       tolerance + Math.abs(this.inverse[0]) * errorX + Math.abs(this.inverse[1]) * errorY;
     const toleranceV =
       tolerance + Math.abs(this.inverse[2]) * errorX + Math.abs(this.inverse[3]) * errorY;
+    const margin = domain === 'footprint' && this.registration === 'cell' ? 0.5 : 0;
     if (
-      u < -toleranceU ||
-      v < -toleranceV ||
-      u > this.width - 1 + toleranceU ||
-      v > this.height - 1 + toleranceV
+      u < -margin - toleranceU ||
+      v < -margin - toleranceV ||
+      u > this.width - 1 + margin + toleranceU ||
+      v > this.height - 1 + margin + toleranceV
     ) {
       return resetSample(result, Status.OUTSIDE_DOMAIN);
     }
     u = Math.max(0, Math.min(this.width - 1, u));
     v = Math.max(0, Math.min(this.height - 1, v));
+    if (noData === 'support' && interpolation === 'bilinear') {
+      // Do not let world-coordinate roundoff give an adjacent missing sample a tiny weight.
+      const column = Math.round(u),
+        row = Math.round(v);
+      if (Math.abs(u - column) <= Math.min(1e-6, toleranceU)) u = column;
+      if (Math.abs(v - row) <= Math.min(1e-6, toleranceV)) v = row;
+    }
     if (interpolation === 'nearest') {
       const value = this.getHeight(Math.floor(u + 0.5), Math.floor(v + 0.5));
       if (value === undefined) return resetSample(result, Status.NO_DATA);
@@ -197,7 +210,20 @@ export class HeightField {
     let dv: number;
     if (interpolation === 'bilinear') {
       if (!this.validity[a] || !this.validity[b] || !this.validity[c] || !this.validity[d]) {
-        return resetSample(result, Status.NO_DATA);
+        if (noData === 'cell') return resetSample(result, Status.NO_DATA);
+        const samples = [a, b, c, d];
+        const weights = [(1 - u) * (1 - v), u * (1 - v), (1 - u) * v, u * v];
+        let height = 0;
+        for (let index = 0; index < 4; index++) {
+          if (weights[index] === 0) continue;
+          if (!this.validity[samples[index]]) return resetSample(result, Status.NO_DATA);
+          height += weights[index] * this.heights[samples[index]];
+        }
+        if (!Number.isFinite(height)) return resetSample(result, Status.NUMERIC_ERROR);
+        result.status = Status.VALID;
+        result.height = height;
+        result.gradientStatus = Status.NO_DATA;
+        return result;
       }
       result.height = (1 - v) * ((1 - u) * za + u * zb) + v * ((1 - u) * zc + u * zd);
       du = (1 - v) * (zb - za) + v * (zd - zc);

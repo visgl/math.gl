@@ -119,7 +119,7 @@ Support describes the public API in the current repository. Notes identify limit
 
 | Feature | math.gl support | Notes |
 | --- | --- | --- |
-| Affine and geographic height fields | ✅ Implemented | Vertex/cell registration, nodata masks, explicit metric/geographic frames, and nearest/bilinear/triangle sampling. |
+| Affine and geographic height fields | ✅ Implemented | Vertex/cell registration, optional raster-footprint clamping, masked bilinear support, explicit metric/geographic frames, and nearest/bilinear/triangle sampling. |
 | Batch heights, gradients and normals | ✅ Implemented | Caller-owned buffers and separate value/gradient statuses retain interpolation and coverage semantics. |
 | Resident tiled snapshots and incremental updates | ✅ Implemented | Insertion/replacement/eviction, neighbor halos and whole-footprint fallback are explicit; no implicit tile fetching. |
 | Regular and adaptive CPU meshing | ✅ Implemented | Regular geometry and optional tessellators produce mesh data with source registration and nodata contracts. |
@@ -206,7 +206,7 @@ Jacobian. Normals are `normalize([-gradientX, -gradientY, 1])`.
 | Interpolation | Height surface | Missing-data rule | Derivatives |
 | --- | --- | --- | --- |
 | `'nearest'` | Closest grid node; half-way ties select the larger grid index | Selected node must be valid | `UNAVAILABLE` |
-| `'bilinear'` | Bilinear patch through four cell samples | All four must be valid, even at an edge/node | Analytic patch derivatives |
+| `'bilinear'` | Bilinear patch through four cell samples | All four must be valid by default; opt into nonzero-weight support with `noData: 'support'` | Analytic patch derivatives |
 | `'triangle'` | Two planar triangles using the field's diagonal | All three selected triangle vertices must be valid | Selected triangle/contact normal |
 
 Bilinear and triangle interpolation generally describe different surfaces. Use
@@ -1209,3 +1209,22 @@ both input and output are checked before a result is returned.
 
 A selective named-import bundle retains no HeightField, tessellator, renderer or query index. Skirts hide visual gaps; they do not reconcile mismatched
 heights or provide a collision surface.
+
+### Sampling raster footprints and masked support
+
+Sampling defaults to the sample-center domain and requires a complete interpolation
+cell. Raster adapters can opt into two independent policies:
+
+- `domain: 'footprint'` includes the outer half-cell margins of cell-registered
+  fields and clamps them to the nearest sample. It does not extend the raster footprint.
+  Vertex-registered fields keep their existing domain.
+- `noData: 'support'` lets bilinear heights ignore missing neighbors with exactly
+  zero weight. Missing positive-weight support still returns `NO_DATA`; weights
+  are never renormalized. Roundoff-sized grid-coordinate excursions snap to sample
+  nodes, capped at one millionth of a pixel. Gradients still require a complete cell,
+  so a valid height can have `gradientStatus: NO_DATA`.
+
+Both options work with `sampleBatch`. For example,
+`field.sample(x, y, {domain: 'footprint', noData: 'support'})` lets a loader
+adapter sample pixel-centered physical grids without reimplementing interpolation.
+These policies do not fill holes, change vertical datums, or extrapolate slopes.
