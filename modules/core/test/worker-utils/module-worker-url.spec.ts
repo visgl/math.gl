@@ -105,3 +105,36 @@ test('relative module entrypoints honor the document base URL', async () => {
     URL.revokeObjectURL(shim);
   }
 });
+
+test.each([false, true])(
+  'source-only module workers retain their cached source URL (constructor failure: %s)',
+  async failFirst => {
+    let constructed = '';
+    const constructor = vi.spyOn(globalThis, 'Worker').mockImplementation(function (url) {
+      constructed = String(url);
+      if (failFirst) {
+        failFirst = false;
+        throw new Error('blocked source worker');
+      }
+      return {terminate() {}} as any;
+    } as any);
+    const source = 'export const cachedSourceWorker = true;';
+    try {
+      let initial: WorkerThread | undefined;
+      try {
+        initial = new WorkerThread({name: 'source', source, workerType: 'module'});
+      } catch (error) {
+        expect((error as Error).message).toBe('blocked source worker');
+      }
+      const cached = constructed;
+      await initial?.destroy();
+      expect(await (await fetch(cached)).text()).toBe(source);
+      const next = new WorkerThread({name: 'source', source, workerType: 'module'});
+      expect(constructed).toBe(cached);
+      await next.destroy();
+      expect(await (await fetch(cached)).text()).toBe(source);
+    } finally {
+      constructor.mockRestore();
+    }
+  }
+);

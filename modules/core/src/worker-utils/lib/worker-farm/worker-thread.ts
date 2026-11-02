@@ -169,6 +169,7 @@ export default class WorkerThread {
     });
     if (
       this.workerType === 'module' &&
+      url &&
       this._loadableURL !== url &&
       this._loadableURL.startsWith('blob:')
     )
