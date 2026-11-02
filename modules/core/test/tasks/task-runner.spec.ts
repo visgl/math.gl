@@ -375,6 +375,30 @@ test('multiplexed worker crash rejects outstanding work and invalidates state', 
   }
 });
 
+test('aborting a paused multiplexed stream invalidates its worker before releasing the barrier', async () => {
+  const runner = new TaskRunner();
+  const task = {...fixture().task, ...workerTask, concurrency: {maxConcurrency: 2}};
+  const instance = await runner.initializeTask(
+    task,
+    {offset: 0},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  const controller = new AbortController();
+  const iterator = instance.runTaskInBatches([{value: 1}, {value: 2}], {
+    options: {factor: 1},
+    signal: controller.signal
+  });
+  try {
+    expect((await iterator.next()).value).toEqual({value: 1, calls: 1});
+    controller.abort(new Error('stop paused stream'));
+    await expect(iterator.return()).rejects.toThrow('stop paused stream');
+    expect(instance.state).toBe('invalid');
+    await expect(instance.runTask({value: 3}, {options: {factor: 1}})).rejects.toThrow('invalid');
+  } finally {
+    await runner.close();
+  }
+});
+
 test('real worker retains state across atomic and streaming calls', async () => {
   const runner = new TaskRunner();
   const task = {...fixture().task, ...workerTask};

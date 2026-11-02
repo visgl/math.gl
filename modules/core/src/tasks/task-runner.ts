@@ -265,6 +265,12 @@ export class InitializedTask<D extends AnyTask> {
         }
         completed = true;
       } catch (error) {
+        if (self.workerChannel) {
+          self.invalid = true;
+          self.operationQueue.cancelPending(error);
+          self.controller.abort(error);
+          await self.workerChannel.destroy(error);
+        }
         if (self.pool) {
           self.invalid = true;
           await self.pool.destroy(error);
