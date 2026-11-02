@@ -172,3 +172,35 @@ test('distinct fractional boundary coordinates do not weld after global-coordina
   expect(welded.positions.length / 3).toBe(4);
   expect(stitchTerrainContours(welded).levelIndices).toHaveLength(2);
 });
+
+test('welds negative tile addresses in a rotated affine frame', () => {
+  const make = (column: number) => {
+    const x0 = column * 2;
+    const field = new HeightField({
+      width: 3,
+      height: 3,
+      origin: [2 * x0, x0],
+      columnStep: [2, 1],
+      rowStep: [-1, 2],
+      heights: Float64Array.from({length: 9}, (_, i) => Math.floor(i / 3))
+    });
+    return {column, row: 0, contours: createTerrainContours(field, [0.5, 1.5])};
+  };
+  const result = weldTerrainContourTiles([make(0), make(-1)], {width: 3, height: 3});
+  const paths = stitchTerrainContours(result);
+  expect([...paths.levelIndices]).toEqual([0, 1]);
+  expect([...paths.closed]).toEqual([0, 0]);
+  for (const level of [0, 1]) {
+    let length = 0;
+    for (let i = 0; i < result.levelIndices.length; i++)
+      if (result.levelIndices[i] === level) {
+        const a = result.segments[2 * i],
+          b = result.segments[2 * i + 1];
+        length += Math.hypot(
+          result.positions[3 * a] - result.positions[3 * b],
+          result.positions[3 * a + 1] - result.positions[3 * b + 1]
+        );
+      }
+    expect(length).toBeCloseTo(4 * Math.sqrt(5), 12);
+  }
+});
