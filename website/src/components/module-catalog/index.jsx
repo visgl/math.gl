@@ -35,7 +35,7 @@ const modules = [
     name: 'Tasks',
     packageName: '@math.gl/core/tasks',
     description:
-      'Run typed tasks locally or in workers, stream batches, and control initialization ownership independently from processing payloads.',
+      'Run typed tasks locally or in browser and Node workers, with CommonJS and cross-origin module entrypoints, streaming batches, and independent setup ownership.',
     image: 'task-runner-lifetimes.svg',
     imageAlt: 'Automatic task cleanup and explicitly retained task state',
     theme: 'teal'

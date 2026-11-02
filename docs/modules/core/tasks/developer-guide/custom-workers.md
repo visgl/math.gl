@@ -16,3 +16,23 @@ invokes `processInBatches` once for an input sequence. A stream may retain
 intermediate state, regroup inputs, and emit a different number of output batches.
 Both inputs and outputs use named fields. Consume with `for await` so an early
 `break` closes the iterator. See [streaming examples](./task-runner.md#process-a-stream).
+
+## CommonJS Node workers
+
+A Node worker may use `require('@math.gl/core/tasks')` and install its task with
+`initializeTaskWorker`. Both ESM and CommonJS callers can execute this worker through
+`TaskRunner`; use a `.cjs` worker entry point when the containing package uses ESM.
+The CommonJS bundle resolves the native Node parent port at runtime, while browser
+bundles keep Node built-ins optional. This requires Node's `process.getBuiltinModule`
+(Node 22.3 or newer).
+
+## Cross-origin module workers
+
+`worker.url` may reference an HTTP(S) module on another origin. The runtime creates
+a same-origin blob entrypoint that statically imports that URL; relative imports
+inside the remote module continue to resolve against its original URL. The remote
+server must allow CORS, and your CSP must permit `blob:` worker entrypoints and the
+remote module import. Same-origin, relative, data, and caller-owned blob URLs keep
+their original entrypoint. Runtime-created shims are revoked when their worker is
+terminated or its constructor fails; caller-owned blob URLs remain yours to revoke.
+A `worker.create` factory still controls its own worker construction and cleanup.
