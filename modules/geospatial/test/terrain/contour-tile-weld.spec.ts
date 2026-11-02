@@ -89,6 +89,48 @@ test('a contour lying on a shared edge is emitted once even when both tiles prod
   expect(paths.levelIndices).toHaveLength(1);
 });
 
+test('welded tiled contours match an untiled triangle-grid oracle', () => {
+  const fn = (x: number, y: number) => Math.sin(x * 0.7) + Math.cos(y * 0.9);
+  const levels = [-0.5, 0, 0.5, 1];
+  const makeField = (width: number, height: number, x0: number, y0: number) =>
+    new HeightField({
+      width,
+      height,
+      origin: [x0, y0],
+      heights: Float64Array.from({length: width * height}, (_, i) =>
+        fn(x0 + (i % width), y0 + Math.floor(i / width))
+      )
+    });
+  const untiled = createTerrainContours(makeField(5, 5, 0, 0), levels);
+  const tiles = [0, 1].flatMap(column =>
+    [0, 1].map(row => ({
+      column,
+      row,
+      contours: createTerrainContours(makeField(3, 3, 2 * column, 2 * row), levels)
+    }))
+  );
+  const welded = weldTerrainContourTiles(tiles, {width: 3, height: 3});
+  const lengths = (contours: typeof untiled) => {
+    const result = new Float64Array(levels.length);
+    for (let i = 0; i < contours.levelIndices.length; i++) {
+      const a = contours.segments[2 * i],
+        b = contours.segments[2 * i + 1];
+      result[contours.levelIndices[i]] += Math.hypot(
+        contours.positions[3 * a] - contours.positions[3 * b],
+        contours.positions[3 * a + 1] - contours.positions[3 * b + 1]
+      );
+    }
+    return result;
+  };
+  expect(welded.segments.length).toBe(untiled.segments.length);
+  expect(stitchTerrainContours(welded).levelIndices.length).toBe(
+    stitchTerrainContours(untiled).levelIndices.length
+  );
+  const a = lengths(untiled),
+    b = lengths(welded);
+  for (let i = 0; i < levels.length; i++) expect(b[i]).toBeCloseTo(a[i], 12);
+});
+
 test('rejects inconsistent frames, levels, duplicate addresses and capacities', () => {
   const a = tile(0, 0),
     b = tile(1, 0);
