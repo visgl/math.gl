@@ -26,10 +26,7 @@ export function getLoadableWorkerURL(props: {
     const baseUrl = globalThis.document?.baseURI ?? globalThis.location?.href;
     if (!baseUrl) return props.url;
     const resolved = new URL(props.url, baseUrl);
-    const origin =
-      globalThis.location?.origin === 'null'
-        ? new URL(baseUrl).origin
-        : globalThis.location?.origin;
+    const origin = globalThis.location?.origin;
     if (/^https?:$/.test(resolved.protocol) && resolved.origin !== origin) {
       // Module imports preserve the remote module's own relative import resolution.
       return getLoadableWorkerURLFromSource(`import ${JSON.stringify(resolved.href)};`);

@@ -138,3 +138,24 @@ test.each([false, true])(
     }
   }
 );
+
+baseTest.runIf(!isBrowser)(
+  'opaque document origins retain a module shim even when the base URL matches',
+  async () => {
+    const {Blob} = await import('node:buffer');
+    vi.stubGlobal('Blob', Blob);
+    vi.stubGlobal('location', {href: 'about:blank', origin: 'null'});
+    vi.stubGlobal('document', {baseURI: 'https://base.example.invalid/nested/'});
+    let shim = '';
+    try {
+      shim = getLoadableWorkerURL({url: './worker.js', workerType: 'module'});
+      expect(shim).toMatch(/^blob:/);
+      expect(await (await fetch(shim)).text()).toBe(
+        'import "https://base.example.invalid/nested/worker.js";'
+      );
+    } finally {
+      vi.unstubAllGlobals();
+      URL.revokeObjectURL(shim);
+    }
+  }
+);
