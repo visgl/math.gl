@@ -31,4 +31,14 @@ export class NodeWorker {
 
 export type {NodeWorker as NodeWorkerType};
 
-export const parentPort = null;
+/** Restores the native parent port when a browser-targeted CJS bundle runs in Node. */
+export const parentPort =
+  (
+    globalThis as {
+      process?: {
+        getBuiltinModule?: (specifier: string) => {
+          parentPort?: import('./worker_threads').ParentPort | null;
+        };
+      };
+    }
+  ).process?.getBuiltinModule?.('node:worker_threads')?.parentPort ?? null;

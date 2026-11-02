@@ -12,7 +12,7 @@ export type NodeWorkerType = {
   ref(): unknown;
   unref(): unknown;
 };
-type ParentPort = {
+export type ParentPort = {
   postMessage(value: unknown, transferList?: any[]): void;
   on(event: string, listener: (...args: any[]) => void): unknown;
   off(event: string, listener: (...args: any[]) => void): unknown;
