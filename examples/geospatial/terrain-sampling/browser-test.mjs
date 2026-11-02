@@ -28,11 +28,16 @@ try {
   await page.getByLabel('Interpolation').selectOption('triangle');
   await page.getByLabel('Cell diagonal').selectOption('10-01');
   await page.getByLabel('Analysis view').selectOption('slope');
+  const slopeBlocks = page.getByRole('img', {name: 'slope terrain analysis'}).locator('rect');
+  assert.equal(await slopeBlocks.count(), 81);
   await page.getByLabel('Gradient level').selectOption('2');
-  assert.equal(await page.getByRole('img', {name: 'slope terrain analysis'}).count(), 1);
+  assert.equal(await slopeBlocks.count(), 9);
+  const coverageBefore = await slopeBlocks.evaluateAll(blocks => blocks.map(block => block.getAttribute('opacity')));
+  await page.getByLabel('Missing center vertex').check();
+  const coverageAfter = await slopeBlocks.evaluateAll(blocks => blocks.map(block => block.getAttribute('opacity')));
+  assert.notDeepEqual(coverageAfter, coverageBefore);
   await page.getByLabel('Analysis view').selectOption('contours');
   assert(await page.getByRole('img', {name: 'contours terrain analysis'}).locator('line').count() > 0);
-  await page.getByLabel('Missing center vertex').check();
   for(const axis of ['X','Y']) await page.getByLabel(`Probe ${axis}`,{exact:true}).fill('40');
   assert.match(await page.getByTestId('sample-status').innerText(),/NO_DATA/);
   await page.getByLabel('Probe X',{exact:true}).fill('-10');
