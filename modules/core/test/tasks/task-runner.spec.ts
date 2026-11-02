@@ -208,7 +208,9 @@ test.each(['main-thread', 'worker'] as const)(
         context: import('../../src/tasks').TaskContext
       ) {
         const result = await context.requestHost('double', {value: input.value});
-        context.emitHost('complete', result as object);
+        const event = {...(result as {value: number})};
+        context.emitHost('complete', event);
+        event.value = -1;
         return result as {value: number};
       }
     };
@@ -320,6 +322,57 @@ test('multiplexed worker termination rejects callbacks and queued calls without 
   expect(instance.state).toBe('invalid');
   await expect(instance.runTask({value: 4})).rejects.toThrow();
   await runner.close();
+});
+
+test('multiplexed worker copy output preserves retained buffers', async () => {
+  const runner = new TaskRunner();
+  const task = {
+    ...workerTask,
+    process: (_input: {cached: boolean}) => ({values: new Float64Array()}),
+    concurrency: {maxConcurrency: 2}
+  };
+  const instance = await runner.initializeTask(
+    task,
+    {},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  try {
+    const first = await instance.runTask({cached: true}, {outputOwnership: 'copy'});
+    first.values[0] = 99;
+    const second = await instance.runTask({cached: true}, {outputOwnership: 'copy'});
+    expect(Array.from(second.values)).toEqual([7, 8]);
+    const transferred = await instance.runTask({cached: true}, {outputOwnership: 'transfer'});
+    expect(Array.from(transferred.values)).toEqual([7, 8]);
+    await expect(instance.runTask({cached: true}, {outputOwnership: 'copy'})).rejects.toThrow();
+    expect(instance.state).toBe('invalid');
+  } finally {
+    await runner.close();
+  }
+});
+
+test('multiplexed worker crash rejects outstanding work and invalidates state', async () => {
+  const runner = new TaskRunner();
+  const task = {
+    ...workerTask,
+    process: (_input: {crash?: boolean; delay?: number}) => ({}),
+    concurrency: {maxConcurrency: 2, getSchedulingMode: () => 'parallel' as const}
+  };
+  const instance = await runner.initializeTask(
+    task,
+    {},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  try {
+    const results = await Promise.allSettled([
+      instance.runTask({crash: true}),
+      instance.runTask({delay: 1000}),
+      instance.runTask({})
+    ]);
+    expect(results.map(result => result.status)).toEqual(['rejected', 'rejected', 'rejected']);
+    expect(instance.state).toBe('invalid');
+  } finally {
+    await runner.close();
+  }
 });
 
 test('real worker retains state across atomic and streaming calls', async () => {

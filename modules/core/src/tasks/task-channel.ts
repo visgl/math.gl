@@ -5,7 +5,7 @@
 /** Messages on a dedicated, multiplexed task transport. */
 export type TaskChannelMessage = {
   source: 'math.gl/tasks';
-  kind: 'request' | 'result' | 'error' | 'cancel' | 'event';
+  kind: 'request' | 'result' | 'error' | 'cancel' | 'event' | 'failure';
   id: number;
   operation?: string;
   value?: unknown;
@@ -79,7 +79,11 @@ export class TaskChannel {
   /** Dispatch a transport message; unrelated protocols are ignored. */
   receive(message: TaskChannelMessage): void {
     if (this.failure || message?.source !== 'math.gl/tasks') return;
-    if (message.kind === 'result' || message.kind === 'error') {
+    if (message.kind === 'failure') {
+      const reason = new Error(message.error?.message ?? 'Task channel failed');
+      this.close(reason);
+      this.options.onFailure?.(reason);
+    } else if (message.kind === 'result' || message.kind === 'error') {
       const pending = this.pending.get(message.id);
       if (!pending) return;
       this.pending.delete(message.id);
@@ -159,9 +163,26 @@ export class TaskChannel {
     }
   }
 
-  private fail(reason: unknown): void {
+  /** Invalidate the channel and notify the peer when the transport still works. */
+  fail(reason: unknown): void {
     if (this.failure) return;
     this.close(reason);
+    try {
+      this.options.send(
+        {
+          source: 'math.gl/tasks',
+          kind: 'failure',
+          id: 0,
+          error: {
+            name: reason instanceof Error ? reason.name : 'Error',
+            message: reason instanceof Error ? reason.message : String(reason)
+          }
+        },
+        []
+      );
+    } catch {
+      // A dead physical transport must also report its error through onFailure.
+    }
     this.options.onFailure?.(reason);
   }
 }

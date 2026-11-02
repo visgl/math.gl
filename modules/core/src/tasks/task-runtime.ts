@@ -128,12 +128,12 @@ export async function initializeTaskWorker(task: AnyTask): Promise<void> {
         ? getTransferList(value)
         : [],
     send: (message, transfer) => {
-      // WorkerBody applies its own transfer discovery to this envelope.
-      void WorkerBody.postMessage(
-        'task-channel' as never,
-        message as never,
-        transfer.length === 0
-      ).catch(reason => channel.close(reason));
+      // Snapshot before WorkerBody awaits its platform port. This both preserves
+      // notification values and detaches only the explicitly owned buffers.
+      const snapshot = structuredClone(message, {transfer});
+      void WorkerBody.postMessage('task-channel' as never, snapshot as never).catch(reason =>
+        channel.fail(reason)
+      );
     },
     handleRequest: async (operation, value, signal) => {
       const request = value as {

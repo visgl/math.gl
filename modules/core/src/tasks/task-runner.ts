@@ -153,6 +153,8 @@ export class InitializedTask<D extends AnyTask> {
     input: TaskInput<D>,
     ...args: RequestArgs<InitializedTaskCallOptions<D>>
   ): Promise<TaskOutput<D>> {
+    if (this.invalid)
+      return Promise.reject(new Error('Initialized task is invalid; initialize a new instance'));
     if (this.closed) return Promise.reject(new Error('Initialized task is closed'));
     const timeout = args[0]?.timeout;
     if (
@@ -175,6 +177,7 @@ export class InitializedTask<D extends AnyTask> {
         const invalidate = () => {
           if (this.concurrent) {
             this.invalid = true;
+            this.operationQueue.cancelPending(signal?.reason);
             this.controller.abort(signal?.reason);
           }
         };
