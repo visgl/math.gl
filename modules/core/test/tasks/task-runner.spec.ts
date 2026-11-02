@@ -194,6 +194,337 @@ const workerTask = {
   }
 };
 
+test.each(['main-thread', 'worker'] as const)(
+  'host callbacks and events are copied in %s',
+  async execution => {
+    const runner = new TaskRunner();
+    const events: unknown[] = [];
+    const retained = {value: 12};
+    const task = {
+      ...workerTask,
+      async process(
+        input: {value: number; callback: boolean},
+        _options: object,
+        context: import('../../src/tasks').TaskContext
+      ) {
+        const result = await context.requestHost('double', {value: input.value});
+        const event = {...(result as {value: number})};
+        context.emitHost('complete', event);
+        event.value = -1;
+        return result as {value: number};
+      }
+    };
+    const instance = await runner.initializeTask(
+      task,
+      {},
+      {
+        execution,
+        onRequest: async (operation, payload, signal) => {
+          expect(operation).toBe('double');
+          expect(payload).toEqual({value: 6});
+          expect(signal.aborted).toBe(false);
+          return retained;
+        },
+        onEvent: (operation, payload) => {
+          expect(operation).toBe('complete');
+          events.push(payload);
+        }
+      }
+    );
+    try {
+      const result = await instance.runTask({value: 6, callback: true});
+      expect(result).toEqual(retained);
+      result.value = 99;
+      expect(retained.value).toBe(12);
+      expect(events).toEqual([{value: 12}]);
+    } finally {
+      await runner.close();
+    }
+  }
+);
+
+test('multiplexed worker channel preserves one initialized state', async () => {
+  const runner = new TaskRunner();
+  const task = {
+    ...fixture().task,
+    ...workerTask,
+    concurrency: {
+      maxConcurrency: 2,
+      getSchedulingMode: () => 'parallel' as const
+    }
+  };
+  const instance = await runner.initializeTask(
+    task,
+    {offset: 10},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  try {
+    const progress: number[] = [];
+    const results = await Promise.all([
+      instance.runTask({value: 2}, {options: {factor: 3}, onProgress: () => progress.push(1)}),
+      instance.runTask({value: 4}, {options: {factor: 2}, onProgress: () => progress.push(2)})
+    ]);
+    expect(results.map(result => result.value)).toEqual([16, 18]);
+    expect(progress.sort()).toEqual([1, 2]);
+    expect(
+      await collect(instance.runTaskInBatches([{value: 5}, {value: 6}], {options: {factor: 2}}))
+    ).toEqual([
+      {value: 20, calls: 3},
+      {value: 22, calls: 4}
+    ]);
+    expect(await instance.runTask({value: 1}, {options: {factor: 1}})).toEqual({
+      value: 11,
+      calls: 5
+    });
+  } finally {
+    await runner.close();
+  }
+});
+
+test('multiplexed worker termination rejects callbacks and queued calls without recreating state', async () => {
+  const runner = new TaskRunner();
+  let started!: () => void;
+  const callbackStarted = new Promise<void>(resolve => {
+    started = resolve;
+  });
+  let callbackCount = 0;
+  let callbackSignal: AbortSignal | undefined;
+  const task = {
+    ...workerTask,
+    process: (_input: {value: number; callback?: boolean}) => ({value: 0}),
+    concurrency: {maxConcurrency: 2, getSchedulingMode: () => 'parallel' as const}
+  };
+  const instance = await runner.initializeTask(
+    task,
+    {},
+    {
+      execution: 'worker',
+      operationConcurrency: 2,
+      onRequest: async (_operation, _payload, signal) => {
+        callbackSignal = signal;
+        if (++callbackCount === 2) started();
+        await new Promise<void>(resolve =>
+          signal.addEventListener('abort', () => resolve(), {once: true})
+        );
+        return {};
+      }
+    }
+  );
+  const first = instance.runTask({value: 1, callback: true});
+  const second = instance.runTask({value: 2, callback: true});
+  const queued = instance.runTask({value: 3});
+  const cause = new Error('stop shared state');
+  const assertions = [first, second, queued].map(promise => expect(promise).rejects.toBe(cause));
+  await callbackStarted;
+  await instance.terminate(cause);
+  await Promise.all(assertions);
+  expect(callbackSignal?.aborted).toBe(true);
+  expect(instance.state).toBe('invalid');
+  await expect(instance.runTask({value: 4})).rejects.toThrow();
+  await runner.close();
+});
+
+test('multiplexed worker copy output preserves retained buffers', async () => {
+  const runner = new TaskRunner();
+  const task = {
+    ...workerTask,
+    process: (_input: {cached: boolean}) => ({values: new Float64Array()}),
+    concurrency: {maxConcurrency: 2}
+  };
+  const instance = await runner.initializeTask(
+    task,
+    {},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  try {
+    const first = await instance.runTask({cached: true}, {outputOwnership: 'copy'});
+    first.values[0] = 99;
+    const second = await instance.runTask({cached: true}, {outputOwnership: 'copy'});
+    expect(Array.from(second.values)).toEqual([7, 8]);
+    const transferred = await instance.runTask({cached: true}, {outputOwnership: 'transfer'});
+    expect(Array.from(transferred.values)).toEqual([7, 8]);
+    await expect(instance.runTask({cached: true}, {outputOwnership: 'copy'})).rejects.toThrow();
+    expect(instance.state).toBe('invalid');
+  } finally {
+    await runner.close();
+  }
+});
+
+test('multiplexed worker crash rejects outstanding work and invalidates state', async () => {
+  const runner = new TaskRunner();
+  const task = {
+    ...workerTask,
+    process: (_input: {crash?: boolean; delay?: number}) => ({}),
+    concurrency: {maxConcurrency: 2, getSchedulingMode: () => 'parallel' as const}
+  };
+  const instance = await runner.initializeTask(
+    task,
+    {},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  try {
+    const results = await Promise.allSettled([
+      instance.runTask({crash: true}),
+      instance.runTask({delay: 1000}),
+      instance.runTask({})
+    ]);
+    expect(results.map(result => result.status)).toEqual(['rejected', 'rejected', 'rejected']);
+    expect(instance.state).toBe('invalid');
+  } finally {
+    await runner.close();
+  }
+});
+
+test('aborting a paused multiplexed stream invalidates its worker before releasing the barrier', async () => {
+  const runner = new TaskRunner();
+  const task = {...fixture().task, ...workerTask, concurrency: {maxConcurrency: 2}};
+  const instance = await runner.initializeTask(
+    task,
+    {offset: 0},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  const controller = new AbortController();
+  const iterator = instance.runTaskInBatches([{value: 1}, {value: 2}], {
+    options: {factor: 1},
+    signal: controller.signal
+  });
+  try {
+    expect((await iterator.next()).value).toEqual({value: 1, calls: 1});
+    controller.abort(new Error('stop paused stream'));
+    await expect(iterator.return()).rejects.toThrow('stop paused stream');
+    expect(instance.state).toBe('invalid');
+    await expect(instance.runTask({value: 3}, {options: {factor: 1}})).rejects.toThrow('invalid');
+  } finally {
+    await runner.close();
+  }
+});
+
+test('multiplexed streams transfer input ports through reverse pulls', async () => {
+  const runner = new TaskRunner();
+  const ports = new MessageChannel();
+  const message = new Promise(resolve => {
+    ports.port2.onmessage = event => resolve(event.data);
+  });
+  const task = {
+    ...workerTask,
+    concurrency: {maxConcurrency: 2},
+    async *processInBatches(
+      _inputs: AsyncIterable<{value: number; port: MessagePort}>,
+      _options: {factor: number}
+    ) {
+      yield {value: 0};
+    }
+  };
+  const instance = await runner.initializeTask(
+    task,
+    {},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  try {
+    expect(
+      await collect(
+        instance.runTaskInBatches([{value: 7, port: ports.port1}], {
+          options: {factor: 2},
+          inputOwnership: 'transfer'
+        })
+      )
+    ).toEqual([{value: 14, calls: 1}]);
+    expect(await message).toEqual({value: 7});
+    expect(instance.state).toBe('ready');
+  } finally {
+    ports.port1.close();
+    ports.port2.close();
+    await runner.close();
+  }
+});
+
+test('early multiplexed stream return invalidates the handle consistently', async () => {
+  const runner = new TaskRunner();
+  const task = {...fixture().task, ...workerTask, concurrency: {maxConcurrency: 2}};
+  const instance = await runner.initializeTask(
+    task,
+    {offset: 0},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  try {
+    const iterator = instance.runTaskInBatches([{value: 1}, {value: 2}], {options: {factor: 1}});
+    await iterator.next();
+    await iterator.return();
+    expect(instance.state).toBe('invalid');
+    await expect(instance.runTask({value: 3}, {options: {factor: 1}})).rejects.toThrow('invalid');
+  } finally {
+    await runner.close();
+  }
+});
+
+test.each(['processor', 'progress', 'event'] as const)(
+  'multiplexed %s errors reject only their reporting atomic call',
+  async failureKind => {
+    const runner = new TaskRunner();
+    const failure = new Error(`${failureKind} callback failure`);
+    const task = {
+      ...workerTask,
+      process: (_input: {value?: number; fail?: boolean; callback?: boolean; delay?: number}) => ({
+        value: 0
+      }),
+      concurrency: {maxConcurrency: 2, getSchedulingMode: () => 'parallel' as const}
+    };
+    const instance = await runner.initializeTask(
+      task,
+      {},
+      {
+        execution: 'worker',
+        operationConcurrency: 2,
+        onRequest: async (_operation, payload) => payload,
+        onEvent: () => {
+          if (failureKind === 'event') throw failure;
+        }
+      }
+    );
+    try {
+      const failing = instance.runTask(
+        {value: 1, fail: failureKind === 'processor', callback: failureKind === 'event'},
+        {
+          onProgress: () => {
+            if (failureKind === 'progress') throw failure;
+          }
+        }
+      );
+      const sibling = instance.runTask({value: 2, delay: 10});
+      await expect(failing).rejects.toThrow(
+        failureKind === 'processor' ? 'worker failure' : failure.message
+      );
+      await expect(sibling).resolves.toMatchObject({value: 2});
+      expect(instance.state).toBe('ready');
+      await expect(instance.runTask({value: 3})).resolves.toMatchObject({value: 3});
+    } finally {
+      await runner.close();
+    }
+  }
+);
+
+test('multiplexed input clone failures do not retain progress registrations', async () => {
+  const runner = new TaskRunner();
+  const task = {
+    ...workerTask,
+    process: (_input: {value: number; unsupported?: () => void}) => ({value: 0}),
+    concurrency: {maxConcurrency: 2}
+  };
+  const instance = await runner.initializeTask(
+    task,
+    {},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  try {
+    await expect(instance.runTask({value: 1, unsupported: () => {}})).rejects.toThrow();
+    expect(Reflect.get(instance, 'progressCallbacks').size).toBe(0);
+    expect(instance.state).toBe('ready');
+    await expect(instance.runTask({value: 2})).resolves.toMatchObject({value: 2});
+  } finally {
+    await runner.close();
+  }
+});
+
 test('real worker retains state across atomic and streaming calls', async () => {
   const runner = new TaskRunner();
   const task = {...fixture().task, ...workerTask};
