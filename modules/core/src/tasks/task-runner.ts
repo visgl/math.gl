@@ -27,6 +27,7 @@ import type {
   TaskBatchRunOptions,
   TaskRunsOptions,
   InitializedTaskOptions,
+  InitializedTaskCallOptions,
   InitializedTaskBatchOptions,
   RequestArgs,
   TaskRunnerOptions,
@@ -42,6 +43,7 @@ export class InitializedTask<D extends AnyTask> {
   private readonly operationQueue: TaskOperationQueue;
   private closing?: Promise<void>;
   private closed = false;
+  private finalized = false;
   private streams = new Set<() => Promise<void>>();
   private invalid = false;
   private readonly concurrent: boolean;
@@ -112,15 +114,27 @@ export class InitializedTask<D extends AnyTask> {
 
   runTask(
     input: TaskInput<D>,
-    ...args: RequestArgs<InitializedTaskOptions<D>>
+    ...args: RequestArgs<InitializedTaskCallOptions<D>>
   ): Promise<TaskOutput<D>> {
     if (this.closed) return Promise.reject(new Error('Initialized task is closed'));
+    const timeout = args[0]?.timeout;
+    if (
+      timeout !== undefined &&
+      (!Number.isSafeInteger(timeout) || timeout < 0 || timeout > 4294967295)
+    ) {
+      return Promise.reject(new RangeError('Invalid task timeout'));
+    }
+    const deadline = timeout === undefined ? undefined : AbortSignal.timeout(timeout);
+    const signal =
+      deadline && args[0]?.signal
+        ? AbortSignal.any([deadline, args[0].signal])
+        : (deadline ?? args[0]?.signal);
+    const controls = {...args[0], signal};
     const mode = this.task.concurrency?.getSchedulingMode?.(input) ?? 'exclusive';
     return this.operationQueue.run(
       mode,
       async () => {
         this.checkCapability('atomic');
-        const signal = args[0]?.signal;
         const invalidate = () => {
           if (this.concurrent) {
             this.invalid = true;
@@ -130,12 +144,12 @@ export class InitializedTask<D extends AnyTask> {
         signal?.addEventListener('abort', invalidate, {once: true});
         try {
           if (signal?.aborted) invalidate();
-          return await this.invoke('process', input, (args[0] as any)?.options ?? {}, args[0]);
+          return await this.invoke('process', input, (args[0] as any)?.options ?? {}, controls);
         } finally {
           signal?.removeEventListener('abort', invalidate);
         }
       },
-      args[0]?.signal
+      signal
     ) as Promise<TaskOutput<D>>;
   }
 
@@ -202,6 +216,13 @@ export class InitializedTask<D extends AnyTask> {
     });
   }
 
+  /** Lifecycle status of this initialized task. */
+  get state(): 'ready' | 'closing' | 'closed' | 'invalid' {
+    if (this.invalid) return 'invalid';
+    if (this.finalized) return 'closed';
+    return this.closed ? 'closing' : 'ready';
+  }
+
   /** Drain accepted work, invoke destroy, and release execution capacity. */
   close(): Promise<void> {
     if (!this.closing) {
@@ -214,6 +235,7 @@ export class InitializedTask<D extends AnyTask> {
           try {
             await this.pool?.destroy();
           } finally {
+            this.finalized = true;
             this.release();
           }
         }

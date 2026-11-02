@@ -39,6 +39,11 @@ Cancellation of active overlapping work invalidates the instance and aborts its
 other operations because shared state may have been partially changed. Queued
 calls can be cancelled without invalidating state.
 
+`handle.runTask(input, {timeout: milliseconds})` sets a deadline including time
+in the queue. The handle's `state` reports `ready`, `closing`, `closed`, or
+`invalid`; an invalid handle cannot be reused. Cancellation is cooperative on
+the main thread and cannot interrupt synchronous JavaScript.
+
 ```ts
 const task = {
   id: 'shared-index',

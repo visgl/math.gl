@@ -131,6 +131,11 @@ export type TaskRunsOptions<D extends AnyTask> = Omit<
 };
 export type InitializedTaskOptions<D extends AnyTask> = Omit<TaskRunControls, 'execution'> &
   OptionsField<ProcessorOptions<Processor<D>>>;
+/** Atomic call controls, including time spent waiting for an execution slot. */
+export type InitializedTaskCallOptions<D extends AnyTask> = InitializedTaskOptions<D> & {
+  /** Deadline in milliseconds. */
+  timeout?: number;
+};
 export type InitializedTaskBatchOptions<D extends AnyTask> = Omit<TaskRunControls, 'execution'> &
   OptionsField<ProcessorOptions<StreamProcessor<D>>>;
 export type RequestArgs<O> = {} extends O ? [options?: O] : [options: O];

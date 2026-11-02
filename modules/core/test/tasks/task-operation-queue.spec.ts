@@ -152,9 +152,37 @@ test('cancelling active concurrent work invalidates shared local state', async (
   const request = handle.runTask({}, {signal: controller.signal});
   await started.promise;
   controller.abort(new Error('stop'));
+  expect(handle.state).toBe('invalid');
   release.resolve();
   await expect(request).rejects.toThrow('stop');
   await expect(handle.runTask({})).rejects.toThrow('invalid');
   await handle.close();
+  await runner.close();
+});
+
+test('a queued deadline rejects without invalidating the task', async () => {
+  const started = deferred();
+  const release = deferred();
+  const task = {
+    id: 'queued-timeout',
+    initialize: () => ({}),
+    async process() {
+      started.resolve();
+      await release.promise;
+      return {};
+    }
+  } satisfies Task<{input: object; output: object; state: object}>;
+  const runner = new TaskRunner();
+  const handle = await runner.initializeTask(task, {}, {execution: 'main-thread'});
+  const running = handle.runTask({});
+  await started.promise;
+  await expect(handle.runTask({}, {timeout: 5})).rejects.toMatchObject({name: 'TimeoutError'});
+  expect(handle.state).toBe('ready');
+  release.resolve();
+  await running;
+  const closing = handle.close();
+  expect(handle.state).toBe('closing');
+  await closing;
+  expect(handle.state).toBe('closed');
   await runner.close();
 });
