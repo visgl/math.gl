@@ -18,7 +18,7 @@ try {
 }
 ```
 
-The handle is bound to its task and execution location. Its calls are serial;
+The handle is bound to its task and execution location. Its calls are serial by default;
 atomic, multiple-input, and streaming methods share state. Each handle retains
 one runner slot, including while idle. Close it before awaiting another operation
 on a runner with capacity one.
@@ -28,13 +28,13 @@ receive it as `context.state`. Worker failure, cancellation, or early worker-str
 return invalidates the handle; initialize a new one to continue. Successful stream
 completion preserves state. See [lifecycle semantics](../api-reference/task-runner.md).
 
-## Overlapping local operations
+## Overlapping operations
 
 Initialized tasks remain serialized unless both the task declares a concurrency
 limit and the caller opts in with `operationConcurrency`. A task may classify
 atomic inputs as `parallel` or `exclusive`; exclusive operations are barriers.
-Omitted classifications are exclusive. This currently supports main-thread
-execution only: worker execution rejects a concurrency limit greater than one.
+Omitted classifications are exclusive. Both main-thread and worker execution
+support concurrency; worker operations share one physical worker and state.
 Cancellation of active overlapping work invalidates the instance and aborts its
 other operations because shared state may have been partially changed. Queued
 calls can be cancelled without invalidating state.
@@ -63,6 +63,31 @@ const handle = await runner.initializeTask(task, {}, {
 
 Concurrency overlaps asynchronous work; it does not make CPU-bound JavaScript
 parallel in a single thread. Streaming calls remain exclusive.
+
+## Typed operation dispatch
+
+For a task accepting multiple operations, define the input and output of each
+operation and wrap its initialized handle. The task's `process` hook must return
+an object whose `value` corresponds to the request's operation.
+
+```ts
+import {createTypedTaskDispatcher, type TaskOperation} from '@math.gl/core/tasks';
+
+type Operations = {
+  count: TaskOperation<{source: string}, number>;
+  lookup: TaskOperation<{id: number}, {name: string} | null>;
+};
+// handle.runTask accepts the union of requests and returns {value: result}.
+const dispatch = createTypedTaskDispatcher<Operations>(async request =>
+  (await handle.runTask(request)).value
+);
+const count = await dispatch({operation: 'count', input: {source: 'roads'}}); // number
+const feature = await dispatch({operation: 'lookup', input: {id: 1}}); // {name: string} | null
+```
+
+The adapter does not validate results or change scheduling, cancellation or
+ownership. The task must return the right result for each operation. Initialized
+handles remain serialized unless explicitly configured for concurrency.
 
 ## Separate setup and processing ownership
 

@@ -11,7 +11,7 @@ import {join, resolve} from 'node:path';
 import {build} from 'esbuild';
 import * as tasks from '@math.gl/core/tasks';
 const require = createRequire(import.meta.url);
-const expected = ['TaskRunner', 'initializeTaskWorker', 'preloadTasks'];
+const expected = ['TaskRunner', 'createTypedTaskDispatcher', 'initializeTaskWorker', 'preloadTasks'];
 for (const api of [tasks, require('@math.gl/core/tasks')]) {
   assert.deepEqual(Object.keys(api).sort(), expected);
   const runner = new api.TaskRunner();

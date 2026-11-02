@@ -34,6 +34,42 @@ terrain. Curvature, refraction and geodesic paths are not modeled.
 
 ## Feature support
 
+### Cross-tile contours
+
+`weldTerrainContourTiles(tiles, {width, height})` combines contour segment
+graphs from same-resolution vertex-registered tiles. Each tile supplies integer
+`column` and `row` addresses and its `createTerrainContours` result. The output
+is a `TerrainContours` graph that can be passed to `stitchTerrainContours`.
+Grid coordinates are expressed in the shared global tile lattice; positions use
+the first tile's local origin. All tiles must use the same affine grid, contour
+levels, and height reference. Matching boundary coordinates are compared exactly
+in the lattice; `maxPositionDifference` bounds any world-frame XY mismatch at
+a matching point and defaults to zero. The function never welds merely nearby
+points, interpolates missing terrain, or closes a gap for a missing tile.
+Identical shared-boundary segments are emitted once. The input vertex and segment
+budgets apply across the full set of tiles, before welding.
+The weld key keeps integer and fractional lattice components separate; output
+`gridCoordinates` are Float64 values and can round at large lattice offsets.
+
+```ts
+import {weldTerrainContourTiles, stitchTerrainContours} from '@math.gl/geospatial/terrain';
+const contours = weldTerrainContourTiles(tiles, {width: 257, height: 257});
+const paths = stitchTerrainContours(contours);
+```
+
+`stitchTerrainContourTiles(tiles, options)` composes these two operations for a
+single snapshot, with the same weld and path capacity limits.
+
+### Gradient pyramids
+
+`createTerrainGradientPyramid(createTerrainGradientGrid(field))` builds weighted
+block averages of valid world-frame gradient vectors. Every level reports valid
+and total source-sample counts, including smaller blocks at odd edges. `blockSize`
+describes coverage on the original grid; the returned origin and steps describe
+that source grid rather than uniformly spaced centers of the coarser blocks.
+Taking the slope of an averaged gradient is not the same as averaging slopes or
+differentiating filtered elevation. These averages are not conservative bounds.
+
 ### Incremental vertex halos and filtered rasters
 
 `updateTerrainVertexTileHalos(previous, resident, changed, options)` rebuilds

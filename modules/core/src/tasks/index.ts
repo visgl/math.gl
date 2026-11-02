@@ -24,3 +24,10 @@ export type {
   TaskRunsOptions,
   TaskRunnerOptions
 } from './task';
+export {createTypedTaskDispatcher} from './typed-task-dispatch';
+export type {
+  TaskOperation,
+  TaskOperationRequest,
+  TaskOperationResult,
+  TypedTaskDispatcher
+} from './typed-task-dispatch';
