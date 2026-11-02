@@ -26,6 +26,8 @@ const paths = stitchTerrainContours(contours);
 
 `stitchTerrainContourTiles(tiles, options)` composes these two operations for a single snapshot, with the same weld and path capacity limits.
 
+`diagnoseTerrainContourBoundaries(contours, {width, height})` reports graph vertices on tile lattice lines that have degree one or degree greater than two. Its arrays provide vertex IDs, graph degrees, contour-level indices and a column/row boundary bitmask. It classifies the supplied Float64 grid coordinates, which can round at very large offsets. An endpoint is evidence of an open path, not proof of a seam defect: dataset edges, absent tiles and nodata can also produce one. The function does not alter or close the graph. Run `node scripts/benchmark-terrain-contours.mjs` after building to measure contour generation, welding and tracing separately on the pinned DTED fixture. The report includes warmup, percentile timings, graph size, segment and path counts.
+
 ### Gradient pyramids[​](#gradient-pyramids "Direct link to Gradient pyramids")
 
 `createTerrainGradientPyramid(createTerrainGradientGrid(field))` builds weighted block averages of valid world-frame gradient vectors. Every level reports valid and total source-sample counts, including smaller blocks at odd edges. `blockSize` describes coverage on the original grid; the returned origin and steps describe that source grid rather than uniformly spaced centers of the coarser blocks. Taking the slope of an averaged gradient is not the same as averaging slopes or differentiating filtered elevation. These averages are not conservative bounds.
