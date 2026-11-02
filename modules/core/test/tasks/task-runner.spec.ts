@@ -257,11 +257,13 @@ test('multiplexed worker channel preserves one initialized state', async () => {
     {execution: 'worker', operationConcurrency: 2}
   );
   try {
+    const progress: number[] = [];
     const results = await Promise.all([
-      instance.runTask({value: 2}, {options: {factor: 3}}),
-      instance.runTask({value: 4}, {options: {factor: 2}})
+      instance.runTask({value: 2}, {options: {factor: 3}, onProgress: () => progress.push(1)}),
+      instance.runTask({value: 4}, {options: {factor: 2}, onProgress: () => progress.push(2)})
     ]);
     expect(results.map(result => result.value)).toEqual([16, 18]);
+    expect(progress.sort()).toEqual([1, 2]);
     expect(
       await collect(instance.runTaskInBatches([{value: 5}, {value: 6}], {options: {factor: 2}}))
     ).toEqual([
@@ -283,6 +285,7 @@ test('multiplexed worker termination rejects callbacks and queued calls without 
   const callbackStarted = new Promise<void>(resolve => {
     started = resolve;
   });
+  let callbackCount = 0;
   let callbackSignal: AbortSignal | undefined;
   const task = {
     ...workerTask,
@@ -297,7 +300,7 @@ test('multiplexed worker termination rejects callbacks and queued calls without 
       operationConcurrency: 2,
       onRequest: async (_operation, _payload, signal) => {
         callbackSignal = signal;
-        started();
+        if (++callbackCount === 2) started();
         await new Promise<void>(resolve =>
           signal.addEventListener('abort', () => resolve(), {once: true})
         );
