@@ -2,6 +2,28 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {TaskRunner, preloadTasks, type Task} from '@math.gl/core/tasks';
+import {
+  createTypedTaskDispatcher,
+  type TaskOperation
+} from '../../../modules/core/src/tasks/typed-task-dispatch.js';
+type SceneOperations = {
+  count: TaskOperation<{source: string}, number>;
+  find: TaskOperation<{id: number}, {name: string} | null>;
+};
+const dispatch = createTypedTaskDispatcher<SceneOperations>(async request =>
+  request.operation === 'count' ? request.input.source.length : {name: String(request.input.id)}
+);
+const countResult: Promise<number> = dispatch({operation: 'count', input: {source: 'roads'}});
+const findResult: Promise<{name: string} | null> = dispatch({operation: 'find', input: {id: 1}});
+// @ts-expect-error Each operation requires its own input.
+dispatch({operation: 'count', input: {id: 1}});
+// @ts-expect-error Unknown operations are rejected.
+dispatch({operation: 'missing', input: {}});
+// @ts-expect-error The result is specific to the operation.
+const wrongResult: Promise<string> = dispatch({operation: 'count', input: {source: 'roads'}});
+void countResult;
+void findResult;
+void wrongResult;
 const runner = new TaskRunner();
 const scale = {
   id: 'scale',
