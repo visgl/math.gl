@@ -7,7 +7,8 @@ import {
   HeightField,
   createTerrainContours,
   weldTerrainContourTiles,
-  stitchTerrainContours
+  stitchTerrainContours,
+  stitchTerrainContourTiles
 } from '@math.gl/geospatial/terrain';
 
 function tile(column: number, row: number, missing = false) {
@@ -33,6 +34,7 @@ test('welds same-level boundaries and four-way corners deterministically', () =>
   const welded = weldTerrainContourTiles(tiles, {width: 3, height: 3});
   expect(weldTerrainContourTiles([...tiles].reverse(), {width: 3, height: 3})).toEqual(welded);
   const paths = stitchTerrainContours(welded);
+  expect(stitchTerrainContourTiles(tiles, {width: 3, height: 3})).toEqual(paths);
   expect([...paths.levelIndices]).toEqual([0, 1, 2, 3, 4, 5]);
   const lengths = new Float64Array(6);
   for (let i = 0; i < welded.levelIndices.length; i++) {
