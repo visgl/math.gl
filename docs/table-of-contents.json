@@ -23,7 +23,8 @@
       "developer-guide/performance",
       "developer-guide/bundling",
       "developer-guide/working-with-ai",
-      "developer-guide/root-exports-migration"
+      "developer-guide/root-exports-migration",
+      "developer-guide/security"
     ]
   },
   {
