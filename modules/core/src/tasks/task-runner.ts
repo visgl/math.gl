@@ -36,7 +36,7 @@ import type {
   TaskSyncRunOptions
 } from './task';
 
-/** A state instance bound to one execution location. Operations are serialized. */
+/** A state instance bound to one execution location, serialized unless explicitly opted in. */
 export class InitializedTask<D extends AnyTask> {
   private runtime: TaskRuntime;
   private pool?: WorkerPool;
@@ -107,7 +107,10 @@ export class InitializedTask<D extends AnyTask> {
                 progress: Parameters<NonNullable<TaskRunControls['onProgress']>>[0];
               };
               (this.progressCallbacks.get(event.id) ?? this.streamProgress)?.(event.progress);
-            } else controls.onEvent?.(operation, payload);
+            } else if (operation === 'task:host-event') {
+              const event = payload as {operation: string; payload: unknown};
+              controls.onEvent?.(event.operation, event.payload);
+            }
           },
           onFailure: reason => {
             this.invalid = true;
