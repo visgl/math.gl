@@ -117,7 +117,12 @@ export function weldTerrainContourTiles(
       if (!Number.isFinite(px) || !Number.isFinite(py))
         throw new Error('Terrain contour frame overflow');
       const boundary = x === 0 || y === 0 || x === width - 1 || y === height - 1;
-      const vertexKey = `${level}/${gx}/${gy}`;
+      // Keep the integer lattice coordinate and local fractional remainder separate.
+      // Adding a small fraction to a large tile offset can round distinct points
+      // to the same binary64 global coordinate and must not weld them together.
+      const xi = Math.floor(x),
+        yi = Math.floor(y);
+      const vertexKey = `${level}/${x0 + xi}/${x - xi}/${y0 + yi}/${y - yi}`;
       if (boundary) {
         if (localBoundary.has(vertexKey))
           throw new Error('Duplicate terrain contour boundary vertex');

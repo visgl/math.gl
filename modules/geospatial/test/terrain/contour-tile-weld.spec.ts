@@ -149,3 +149,26 @@ test('rejects inconsistent frames, levels, duplicate addresses and capacities', 
     weldTerrainContourTiles([a, wrongFrame], {width: 3, height: 3, maxPositionDifference: 1})
   ).not.toThrow();
 });
+
+test('distinct fractional boundary coordinates do not weld after global-coordinate rounding', () => {
+  const make = (column: number, y: number) => ({
+    column,
+    row: 2 ** 50,
+    contours: {
+      positions: Float64Array.from(column === 0 ? [2, y, 0, 1, y, 0] : [0, y, 0, 1, y, 0]),
+      gridCoordinates: Float64Array.from(column === 0 ? [2, y, 1, y] : [0, y, 1, y]),
+      segments: Uint32Array.from([0, 1]),
+      levelIndices: Uint32Array.from([0]),
+      levels: Float64Array.from([0]),
+      origin: [column * 2, 0, 0] as const,
+      heightReference: 'unknown'
+    }
+  });
+  const welded = weldTerrainContourTiles([make(0, 0.26), make(1, 0.49)], {
+    width: 3,
+    height: 3,
+    maxPositionDifference: 1
+  });
+  expect(welded.positions.length / 3).toBe(4);
+  expect(stitchTerrainContours(welded).levelIndices).toHaveLength(2);
+});
