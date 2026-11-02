@@ -1217,14 +1217,17 @@ cell. Raster adapters can opt into two independent policies:
 
 - `domain: 'footprint'` includes the outer half-cell margins of cell-registered
   fields and clamps them to the nearest sample. It does not extend the raster footprint.
-  Vertex-registered fields keep their existing domain.
+  Vertex-registered fields keep their existing domain. Derivatives along a clamped
+  grid axis are zero before transformation into world coordinates; normals describe
+  that extended surface. At the clamp transition, the interior one-sided derivative is used.
 - `noData: 'support'` lets bilinear heights ignore missing neighbors with exactly
   zero weight. Missing positive-weight support still returns `NO_DATA`; weights
   are never renormalized. Roundoff-sized grid-coordinate excursions snap to sample
   nodes, capped at one millionth of a pixel. Gradients still require a complete cell,
   so a valid height can have `gradientStatus: NO_DATA`.
 
-Both options work with `sampleBatch`. For example,
+Both options work with `HeightField.sampleBatch` and `GeographicHeightField.sample`.
+`TiledHeightField` retains its halo/residency rules and rejects these policies. For example,
 `field.sample(x, y, {domain: 'footprint', noData: 'support'})` lets a loader
 adapter sample pixel-centered physical grids without reimplementing interpolation.
 These policies do not fill holes, change vertical datums, or extrapolate slopes.

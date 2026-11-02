@@ -339,3 +339,43 @@ test('sampling rejects unknown policy names', () => {
   expect(() => field.sample(0, 0, {domain: 'invalid' as never})).toThrow(/domain/);
   expect(() => field.sample(0, 0, {noData: 'invalid' as never})).toThrow(/nodata/);
 });
+
+test.each(['bilinear', 'triangle'] as const)(
+  '%s footprint derivatives include the clamp Jacobian in rotated frames',
+  interpolation => {
+    const field = new HeightField({
+      width: 2,
+      height: 2,
+      heights: new Float64Array([0, 10, 20, 30]),
+      registration: 'cell',
+      origin: [10, 20],
+      columnStep: [2, 1],
+      rowStep: [-1, 2]
+    });
+    const options = {domain: 'footprint' as const, interpolation};
+    const edge = field.sample(9.5, 22.25, options);
+    expect(edge.height).toBe(10);
+    expect(edge.gradientStatus).toBe(Status.VALID);
+    expect(edge.gradientX).toBeCloseTo(-4);
+    expect(edge.gradientY).toBeCloseTo(8);
+    const corner = field.sample(10.25, 20.75, options);
+    expect(corner.height).toBe(0);
+    expect(corner.gradientX).toBe(0);
+    expect(corner.gradientY).toBe(0);
+    expect(corner.normalX).toBeCloseTo(0);
+    expect(corner.normalY).toBeCloseTo(0);
+    expect(corner.normalZ).toBe(1);
+  }
+);
+
+test('support snapping is capped even when world-coordinate uncertainty is larger', () => {
+  const field = new HeightField({
+    width: 3,
+    height: 2,
+    heights: new Float64Array([NaN, 7, NaN, NaN, NaN, NaN]),
+    origin: [1e12, 1e12]
+  });
+  expect(field.sample(1e12 + 1, 1e12, {noData: 'support'}).status).toBe(Status.VALID);
+  // One representable ULP here is 1/8192 pixels: above the cap, below the uncertainty bound.
+  expect(field.sample(1e12 + 1 + 1 / 8192, 1e12, {noData: 'support'}).status).toBe(Status.NO_DATA);
+});

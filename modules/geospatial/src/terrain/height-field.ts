@@ -176,6 +176,8 @@ export class HeightField {
     ) {
       return resetSample(result, Status.OUTSIDE_DOMAIN);
     }
+    const clampedColumn = domain === 'footprint' && (u < 0 || u > this.width - 1);
+    const clampedRow = domain === 'footprint' && (v < 0 || v > this.height - 1);
     u = Math.max(0, Math.min(this.width - 1, u));
     v = Math.max(0, Math.min(this.height - 1, v));
     if (noData === 'support' && interpolation === 'bilinear') {
@@ -211,14 +213,19 @@ export class HeightField {
     if (interpolation === 'bilinear') {
       if (!this.validity[a] || !this.validity[b] || !this.validity[c] || !this.validity[d]) {
         if (noData === 'cell') return resetSample(result, Status.NO_DATA);
-        const samples = [a, b, c, d];
-        const weights = [(1 - u) * (1 - v), u * (1 - v), (1 - u) * v, u * v];
-        let height = 0;
-        for (let index = 0; index < 4; index++) {
-          if (weights[index] === 0) continue;
-          if (!this.validity[samples[index]]) return resetSample(result, Status.NO_DATA);
-          height += weights[index] * this.heights[samples[index]];
-        }
+        const weightA = (1 - u) * (1 - v);
+        const weightB = u * (1 - v);
+        const weightC = (1 - u) * v;
+        const weightD = u * v;
+        if (
+          (weightA > 0 && !this.validity[a]) ||
+          (weightB > 0 && !this.validity[b]) ||
+          (weightC > 0 && !this.validity[c]) ||
+          (weightD > 0 && !this.validity[d])
+        )
+          return resetSample(result, Status.NO_DATA);
+        // Invalid samples are normalized to zero by construction; no temporary arrays are needed.
+        const height = weightA * za + weightB * zb + weightC * zc + weightD * zd;
         if (!Number.isFinite(height)) return resetSample(result, Status.NUMERIC_ERROR);
         result.status = Status.VALID;
         result.height = height;
@@ -253,6 +260,9 @@ export class HeightField {
     }
     if (!Number.isFinite(result.height)) return resetSample(result, Status.NUMERIC_ERROR);
     result.status = Status.VALID;
+    // Compose interpolation with the footprint clamp before mapping to world derivatives.
+    if (clampedColumn) du = 0;
+    if (clampedRow) dv = 0;
     const gx = du * this.inverse[0] + dv * this.inverse[2];
     const gy = du * this.inverse[1] + dv * this.inverse[3];
     if (!Number.isFinite(gx) || !Number.isFinite(gy)) {
