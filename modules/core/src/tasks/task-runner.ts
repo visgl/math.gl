@@ -299,6 +299,7 @@ export class InitializedTask<D extends AnyTask> {
         try {
           await this.operationQueue.close();
           if (!this.invalid) await this.invoke('destroy', {}, {});
+          else if (!this.pool && !this.workerChannel) await this.runtime.destroy();
         } finally {
           try {
             await this.pool?.destroy();

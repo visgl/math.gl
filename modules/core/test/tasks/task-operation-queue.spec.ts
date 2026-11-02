@@ -146,10 +146,14 @@ test('initialized local tasks opt in to overlapping operations and exclusive bar
 test('cancelling active concurrent work invalidates shared local state', async () => {
   const started = deferred();
   const release = deferred();
+  let destroyed = 0;
   const task = {
     id: 'concurrent-cancel',
     concurrency: {maxConcurrency: 2, getSchedulingMode: () => 'parallel' as const},
     initialize: () => ({}),
+    destroy: () => {
+      destroyed++;
+    },
     async process(_input, _options, context) {
       started.resolve();
       await release.promise;
@@ -168,11 +172,15 @@ test('cancelling active concurrent work invalidates shared local state', async (
   await started.promise;
   controller.abort(new Error('stop'));
   expect(handle.state).toBe('invalid');
+  const closing = handle.close();
+  expect(destroyed).toBe(0);
   release.resolve();
   await expect(request).rejects.toThrow('stop');
   await expect(handle.runTask({})).rejects.toThrow('invalid');
-  await handle.close();
+  await closing;
+  expect(destroyed).toBe(1);
   await runner.close();
+  expect(destroyed).toBe(1);
 });
 
 test('a queued deadline rejects without invalidating the task', async () => {

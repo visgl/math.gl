@@ -166,6 +166,8 @@ state and closes the handle.
 disturb active work. Cancelling active concurrent work invalidates the shared
 instance; worker transport failures do not silently recreate state. Local code must
 cooperate with its signal before destruction can finish.
+Invalidated local instances still run their destruction hook after active work
+has drained; invalidation prevents reuse, not resource cleanup.
 
 Initialize with `onRequest(operation, payload, signal)` and/or
 `onEvent(operation, payload)` to expose host services. Task hooks call
