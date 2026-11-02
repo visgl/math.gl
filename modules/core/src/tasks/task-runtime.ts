@@ -5,6 +5,7 @@
 import {createWorker, WorkerBody, getTransferList, type WorkerContext} from '../worker-utils/index';
 import {preloadTaskCode} from './task-preload';
 import type {AnyTask, TaskContext, TaskRunControls} from './task';
+import {TaskChannel, type TaskChannelMessage} from './task-channel';
 
 /** Validate the record boundary for JavaScript callers as well as TypeScript. */
 export function assertPayload(value: unknown): asserts value is Record<string, unknown> {
@@ -106,6 +107,40 @@ export async function initializeTaskWorker(task: AnyTask): Promise<void> {
   if (installed) throw new Error('A task is already installed in this worker');
   installed = true;
   const runtime = new TaskRuntime(task);
+  // The dedicated channel shares this runtime with the legacy serialized path.
+  // An initialized task chooses one transport for its entire lifetime.
+  const channel = new TaskChannel({
+    send: (message, transfer) => {
+      // WorkerBody applies its own transfer discovery to this envelope.
+      void WorkerBody.postMessage(
+        'task-channel' as never,
+        message as never,
+        transfer.length === 0
+      ).catch(reason => channel.close(reason));
+    },
+    handleRequest: async (operation, value, signal) => {
+      const request = value as {
+        input: object;
+        options: object;
+        outputOwnership?: 'copy' | 'transfer';
+      };
+      const context = {signal};
+      switch (operation) {
+        case 'initialize':
+          return runtime.initialize(request.input, context);
+        case 'process':
+          return runtime.process(request.input, request.options, context);
+        case 'destroy':
+          return runtime.destroy();
+        default:
+          throw new Error('Unknown task channel operation');
+      }
+    }
+  });
+  await WorkerBody.addEventListener((type, payload) => {
+    if (type === ('task-channel' as never))
+      channel.receive(payload as unknown as TaskChannelMessage);
+  });
   let streamOptions: object = {};
   return createWorker(
     async (request, _options, context) => {

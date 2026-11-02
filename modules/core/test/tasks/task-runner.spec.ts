@@ -194,6 +194,32 @@ const workerTask = {
   }
 };
 
+test('multiplexed worker channel preserves one initialized state', async () => {
+  const runner = new TaskRunner();
+  const task = {
+    ...fixture().task,
+    ...workerTask,
+    concurrency: {
+      maxConcurrency: 2,
+      getSchedulingMode: () => 'parallel' as const
+    }
+  };
+  const instance = await runner.initializeTask(
+    task,
+    {offset: 10},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  try {
+    const results = await Promise.all([
+      instance.runTask({value: 2}, {options: {factor: 3}}),
+      instance.runTask({value: 4}, {options: {factor: 2}})
+    ]);
+    expect(results.map(result => result.value)).toEqual([16, 18]);
+  } finally {
+    await runner.close();
+  }
+});
+
 test('real worker retains state across atomic and streaming calls', async () => {
   const runner = new TaskRunner();
   const task = {...fixture().task, ...workerTask};

@@ -14,6 +14,7 @@ import {
 import {TaskRuntime, assertPayload, clonePayload, localContext} from './task-runtime';
 import {runTaskSync} from './task-sync';
 import {TaskOperationQueue} from './task-operation-queue';
+import {TaskWorkerChannel} from './task-worker-channel';
 import type {
   AnyTask,
   TaskInput,
@@ -39,6 +40,7 @@ import type {
 export class InitializedTask<D extends AnyTask> {
   private runtime: TaskRuntime;
   private pool?: WorkerPool;
+  private workerChannel?: TaskWorkerChannel;
   private descriptor?: WorkerObject;
   private readonly operationQueue: TaskOperationQueue;
   private closing?: Promise<void>;
@@ -67,9 +69,6 @@ export class InitializedTask<D extends AnyTask> {
     ) {
       throw new RangeError('Task concurrency must be between 1 and the task maximum');
     }
-    if (concurrency > 1 && (controls.execution ?? 'auto') !== 'main-thread' && task.worker) {
-      throw new Error('Concurrent initialized worker tasks are not supported');
-    }
     this.operationQueue = new TaskOperationQueue(concurrency);
     this.concurrent = concurrency > 1;
     const execution = controls.execution ?? 'auto';
@@ -80,6 +79,19 @@ export class InitializedTask<D extends AnyTask> {
       const target = task.worker;
       if (Boolean(target.url) === Boolean(target.create))
         throw new Error('Supply exactly one worker URL or factory');
+      if (this.concurrent) {
+        this.workerChannel = new TaskWorkerChannel(task.id, target, {
+          handleRequest: async () => {
+            throw new Error('No host request handler configured');
+          },
+          onFailure: reason => {
+            this.invalid = true;
+            this.operationQueue.cancelPending(reason);
+            this.controller.abort(reason);
+          }
+        });
+        return;
+      }
       this.pool = new WorkerPool({
         name: task.id,
         url: target.url?.toString(),
@@ -234,6 +246,7 @@ export class InitializedTask<D extends AnyTask> {
         } finally {
           try {
             await this.pool?.destroy();
+            await this.workerChannel?.destroy();
           } finally {
             this.finalized = true;
             this.release();
@@ -248,6 +261,10 @@ export class InitializedTask<D extends AnyTask> {
   async terminate(reason: unknown = new Error('Task terminated')): Promise<void> {
     this.operationQueue.cancelPending(reason);
     this.controller.abort(reason);
+    if (this.workerChannel) {
+      this.invalid = true;
+      await this.workerChannel.destroy(reason);
+    }
     if (this.pool) {
       this.invalid = true;
       await this.pool.destroy(reason);
@@ -257,8 +274,10 @@ export class InitializedTask<D extends AnyTask> {
   }
 
   private checkCapability(kind: 'atomic' | 'streaming'): void {
+    if (this.workerChannel && kind === 'streaming')
+      throw new Error('Concurrent task channel streaming is not implemented');
     if (
-      this.pool
+      this.pool || this.workerChannel
         ? !this.task.worker?.capabilities[kind]
         : !(kind === 'atomic' ? this.task.process : this.task.processInBatches)
     ) {
@@ -301,6 +320,27 @@ export class InitializedTask<D extends AnyTask> {
     assertPayload(input);
     assertNoTransferAlias(input, options, prepared.inputOwnership);
     const copiedOptions = clonePayload(options);
+    if (this.workerChannel) {
+      const request = {
+        input: clonePayload(input, prepared.inputOwnership),
+        options: copiedOptions,
+        outputOwnership: prepared.outputOwnership
+      };
+      try {
+        return await this.workerChannel.channel.request(
+          operation,
+          request,
+          prepared.signal,
+          getTransferList(request)
+        );
+      } catch (reason) {
+        this.invalid = true;
+        this.operationQueue.cancelPending(reason);
+        this.controller.abort(reason);
+        await this.workerChannel.destroy(reason);
+        throw reason;
+      }
+    }
     if (this.pool) {
       try {
         return await processOnWorker(
