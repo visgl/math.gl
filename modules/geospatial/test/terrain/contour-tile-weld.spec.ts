@@ -204,3 +204,20 @@ test('welds negative tile addresses in a rotated affine frame', () => {
     expect(length).toBeCloseTo(4 * Math.sqrt(5), 12);
   }
 });
+
+test('rejects segments whose distinct endpoints collapse when rebased to a distant origin', () => {
+  const empty = new HeightField({width: 2, height: 2, heights: new Float64Array([1, 1, 1, 1])});
+  const populated = new HeightField({
+    width: 2,
+    height: 2,
+    origin: [1, 0],
+    heights: new Float64Array([0, 0, 1, 1])
+  });
+  const tiles = [
+    {column: 0, row: 0, contours: createTerrainContours(empty, [0.5], {origin: [1e16, 0, 0]})},
+    {column: 1, row: 0, contours: createTerrainContours(populated, [0.5])}
+  ];
+  expect(() => weldTerrainContourTiles(tiles, {width: 2, height: 2})).toThrow(
+    /Degenerate.*rebasing/
+  );
+});

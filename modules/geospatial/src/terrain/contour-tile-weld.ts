@@ -150,7 +150,11 @@ export function weldTerrainContourTiles(
       const level = data.levelIndices[i],
         a = mapVertex(data.segments[2 * i], level),
         b = mapVertex(data.segments[2 * i + 1], level);
-      if (a === b) throw new Error('Degenerate terrain contour segment');
+      if (
+        a === b ||
+        (positions[3 * a] === positions[3 * b] && positions[3 * a + 1] === positions[3 * b + 1])
+      )
+        throw new Error('Degenerate terrain contour segment after rebasing');
       const edge = a < b ? `${a}/${b}` : `${b}/${a}`;
       const previous = edges.get(edge);
       if (previous !== undefined) {
