@@ -12,6 +12,18 @@ Terrain APIs are available from `@math.gl/geospatial/terrain` and `@math.gl/geos
 
 ## Feature support[​](#feature-support "Direct link to Feature support")
 
+### Cross-tile contours[​](#cross-tile-contours "Direct link to Cross-tile contours")
+
+`weldTerrainContourTiles(tiles, {width, height})` combines contour segment graphs from same-resolution vertex-registered tiles. Each tile supplies integer `column` and `row` addresses and its `createTerrainContours` result. The output is a `TerrainContours` graph that can be passed to `stitchTerrainContours`. Grid coordinates are expressed in the shared global tile lattice; positions use the first tile's local origin. All tiles must use the same affine grid, contour levels, and height reference. Matching boundary coordinates are compared exactly in the lattice; `maxPositionDifference` bounds any world-frame XY mismatch at a matching point and defaults to zero. The function never welds merely nearby points, interpolates missing terrain, or closes a gap for a missing tile. Identical shared-boundary segments are emitted once. The input vertex and segment budgets apply across the full set of tiles, before welding. The weld key keeps integer and fractional lattice components separate; output `gridCoordinates` are Float64 values and can round at large lattice offsets.
+
+```
+import {weldTerrainContourTiles, stitchTerrainContours} from '@math.gl/geospatial/terrain';
+
+const contours = weldTerrainContourTiles(tiles, {width: 257, height: 257});
+
+const paths = stitchTerrainContours(contours);
+```
+
 ### Incremental vertex halos and filtered rasters[​](#incremental-vertex-halos-and-filtered-rasters "Direct link to Incremental vertex halos and filtered rasters")
 
 `updateTerrainVertexTileHalos(previous, resident, changed, options)` rebuilds only affected halos from a complete post-update source snapshot and reuses other halo objects. Pass the previous snapshot's options as `options.previousOptions`; changes to the grid, height reference, or reconciliation tolerance require a full rebuild. Include every arrival, replacement and eviction in `changed`; treat shared result buffers as immutable. The function detects omitted arrivals and evictions but cannot detect an omitted replacement. It does not update derivatives, meshes or bounds on the caller's behalf.
