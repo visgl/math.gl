@@ -6,7 +6,12 @@ await initializeTaskWorker({
   id: 'runner-fixture',
   initialize({offset = 0}) { return {offset, calls: 0, values: new Float64Array([7, 8])}; },
   destroy(state) { state.values = null; },
-  async process({value = 0, cached = false, fail = false, delay = 0}, {factor = 1}, context) {
+  async process({value = 0, cached = false, fail = false, delay = 0, callback = false}, {factor = 1}, context) {
+    if (callback) {
+      const result = await context.requestHost('double', {value});
+      context.emitHost('complete', result);
+      return result;
+    }
     if (fail) throw new Error('worker failure');
     if (delay) await new Promise(resolve => setTimeout(resolve, delay));
     context.reportProgress({completed: 1, total: 1});

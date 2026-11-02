@@ -17,7 +17,7 @@ export type TaskChannelOptions = {
   send(message: TaskChannelMessage, transfer: Transferable[]): void;
   handleRequest(operation: string, value: unknown, signal: AbortSignal): Promise<unknown>;
   handleEvent?(operation: string, value: unknown): void;
-  getResultTransferList?(value: unknown): Transferable[];
+  getResultTransferList?(value: unknown, request: unknown): Transferable[];
   onFailure?(reason: unknown): void;
 };
 
@@ -116,7 +116,7 @@ export class TaskChannel {
           if (!controller.signal.aborted && !this.failure) {
             this.send(
               {source: 'math.gl/tasks', kind: 'result', id: message.id, value},
-              this.options.getResultTransferList?.(value)
+              this.options.getResultTransferList?.(value, message.value)
             );
           }
         })
@@ -151,6 +151,7 @@ export class TaskChannel {
   }
 
   private send(message: TaskChannelMessage, transfer: Transferable[] = []): void {
+    if (this.failure) return;
     try {
       this.options.send(message, transfer);
     } catch (error) {

@@ -23,6 +23,14 @@ export type TaskContext<State = undefined> = {
   signal: AbortSignal;
   throwIfAborted(): void;
   reportProgress(progress: TaskProgress): void;
+  /** Request host services; payloads and responses cross a copy boundary. */
+  requestHost(
+    operation: string,
+    payload: object,
+    controls?: Pick<TaskRunControls, 'inputOwnership' | 'outputOwnership'>
+  ): Promise<unknown>;
+  /** Send a copied notification to the host. */
+  emitHost(operation: string, payload: object): void;
 };
 export type TaskProgress = {
   completed: number;
@@ -107,6 +115,10 @@ export type TaskRunControls = {
 export type TaskInitializeControls = TaskRunControls & {
   /** Opt in to overlapping calls, capped by the task's declared capability. */
   operationConcurrency?: number;
+  /** Handle requests from the task, with cancellation scoped to that request. */
+  onRequest?: (operation: string, payload: unknown, signal: AbortSignal) => Promise<unknown>;
+  /** Handle one-way task notifications. */
+  onEvent?: (operation: string, payload: unknown) => void;
 };
 /** Controls setup resources independently from per-operation payload ownership. */
 export type TaskInitializationControls = {

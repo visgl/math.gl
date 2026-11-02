@@ -152,10 +152,30 @@ async imports and are not eligible for `runTaskSync`.
 
 Inferred as `InitializedTask<typeof task>`. Provides `runTask(input, request?)`,
 `runTasks(inputs, request?)`, and `runTaskInBatches(inputs, request?)` with the same
-output types. Requests omit initialization, execution, and concurrency. All calls
-are serial and share state. A multi-input operation owns the handle until its
+output types. Requests omit initialization and execution. Calls are serial by default
+and share state. A task may declare `concurrency.maxConcurrency` and
+`concurrency.getSchedulingMode(input)` (`'parallel'` or `'exclusive'`). Initialize
+with `operationConcurrency` to opt in, up to that maximum. This applies to local
+and worker execution; a worker instance always retains one physical worker and one
+state. Exclusive operations are FIFO barriers. A multi-input operation owns the handle until its
 iterator finishes. `close()` is idempotent; `terminate(reason?)` invalidates worker
 state and closes the handle.
+
+`state` reports `ready`, `closing`, `closed`, or `invalid`. Atomic calls accept a
+`timeout` in milliseconds, including queue wait. Cancelling a queued call does not
+disturb active work. Cancelling active concurrent work invalidates the shared
+instance; worker transport failures do not silently recreate state. Local code must
+cooperate with its signal before destruction can finish.
+
+Initialize with `onRequest(operation, payload, signal)` and/or
+`onEvent(operation, payload)` to expose host services. Task hooks call
+`context.requestHost(operation, payload, controls?)` or
+`context.emitHost(operation, payload)`. Requests and responses copy by default;
+request controls may explicitly set `inputOwnership` and `outputOwnership` to
+transfer buffers. Notifications copy their payload. Host callbacks must not await
+an exclusive operation on the same instance: it is queued behind the current call.
+Streams retain exclusive ownership and pull inputs on demand, including on the
+multiplexed worker transport.
 
 Normal worker stream completion preserves state. Early stream return, worker
 cancellation, or worker invocation failure invalidates it. Local processor errors

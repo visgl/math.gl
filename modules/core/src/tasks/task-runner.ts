@@ -41,6 +41,10 @@ export class InitializedTask<D extends AnyTask> {
   private runtime: TaskRuntime;
   private pool?: WorkerPool;
   private workerChannel?: TaskWorkerChannel;
+  private channelInputs?: AsyncIterator<object>;
+  private nextProgressId = 1;
+  private progressCallbacks = new Map<number, TaskRunControls['onProgress']>();
+  private streamProgress?: TaskRunControls['onProgress'];
   private descriptor?: WorkerObject;
   private readonly operationQueue: TaskOperationQueue;
   private closing?: Promise<void>;
@@ -55,8 +59,9 @@ export class InitializedTask<D extends AnyTask> {
   constructor(
     private task: D,
     private release: () => void,
-    controls: TaskInitializeControls
+    private readonly initializationControls: TaskInitializeControls
   ) {
+    const controls = initializationControls;
     this.runtime = new TaskRuntime(task);
     const concurrency = controls.operationConcurrency ?? 1;
     const maximum = task.concurrency?.maxConcurrency ?? 1;
@@ -79,10 +84,30 @@ export class InitializedTask<D extends AnyTask> {
       const target = task.worker;
       if (Boolean(target.url) === Boolean(target.create))
         throw new Error('Supply exactly one worker URL or factory');
-      if (this.concurrent) {
+      if (this.concurrent || controls.onRequest || controls.onEvent) {
         this.workerChannel = new TaskWorkerChannel(task.id, target, {
-          handleRequest: async () => {
-            throw new Error('No host request handler configured');
+          handleRequest: async (operation, payload, signal) => {
+            if (operation === 'task:next-input') {
+              if (!this.channelInputs) throw new Error('No active task stream');
+              return this.channelInputs.next();
+            }
+            if (!controls.onRequest) throw new Error('No host request handler configured');
+            const request = payload as {operation: string; payload: unknown};
+            if (operation !== 'task:host-request') throw new Error('Unknown host request');
+            return controls.onRequest(request.operation, request.payload, signal);
+          },
+          getResultTransferList: (value, request) =>
+            (request as {outputOwnership?: string}).outputOwnership === 'transfer'
+              ? getTransferList(value)
+              : [],
+          handleEvent: (operation, payload) => {
+            if (operation === 'task:progress') {
+              const event = payload as {
+                id: number;
+                progress: Parameters<NonNullable<TaskRunControls['onProgress']>>[0];
+              };
+              (this.progressCallbacks.get(event.id) ?? this.streamProgress)?.(event.progress);
+            } else controls.onEvent?.(operation, payload);
           },
           onFailure: reason => {
             this.invalid = true;
@@ -196,7 +221,26 @@ export class InitializedTask<D extends AnyTask> {
       }
       let completed = false;
       try {
-        if (self.pool) {
+        if (self.workerChannel) {
+          self.channelInputs = prepared()[Symbol.asyncIterator]();
+          self.streamProgress = controls.onProgress;
+          try {
+            await self.invoke('stream-open', {}, options, controls);
+            while (true) {
+              const result = await self.invoke('stream-next', {}, {}, controls);
+              if (result.done) break;
+              yield result.value;
+            }
+          } finally {
+            try {
+              if (!self.invalid) await self.invoke('stream-close', {}, {}, controls);
+            } finally {
+              await self.channelInputs.return?.();
+              self.channelInputs = undefined;
+              self.streamProgress = undefined;
+            }
+          }
+        } else if (self.pool) {
           await self.invoke('stream-options', {}, options, controls);
           yield* processOnWorkerInBatches(self.descriptor!, prepared(), {
             ...self.workerOptions(controls),
@@ -207,7 +251,7 @@ export class InitializedTask<D extends AnyTask> {
           for await (const output of self.runtime.stream(
             prepared(),
             options,
-            localContext(controls)
+            self.runtimeContext(controls)
           )) {
             controls.signal?.throwIfAborted();
             yield clonePayload(output, controls.outputOwnership ?? 'transfer');
@@ -274,8 +318,6 @@ export class InitializedTask<D extends AnyTask> {
   }
 
   private checkCapability(kind: 'atomic' | 'streaming'): void {
-    if (this.workerChannel && kind === 'streaming')
-      throw new Error('Concurrent task channel streaming is not implemented');
     if (
       this.pool || this.workerChannel
         ? !this.task.worker?.capabilities[kind]
@@ -321,10 +363,13 @@ export class InitializedTask<D extends AnyTask> {
     assertNoTransferAlias(input, options, prepared.inputOwnership);
     const copiedOptions = clonePayload(options);
     if (this.workerChannel) {
+      const progressId = this.nextProgressId++;
+      this.progressCallbacks.set(progressId, prepared.onProgress);
       const request = {
         input: clonePayload(input, prepared.inputOwnership),
         options: copiedOptions,
-        outputOwnership: prepared.outputOwnership
+        outputOwnership: prepared.outputOwnership ?? 'transfer',
+        progressId
       };
       try {
         return await this.workerChannel.channel.request(
@@ -339,6 +384,8 @@ export class InitializedTask<D extends AnyTask> {
         this.controller.abort(reason);
         await this.workerChannel.destroy(reason);
         throw reason;
+      } finally {
+        this.progressCallbacks.delete(progressId);
       }
     }
     if (this.pool) {
@@ -358,7 +405,7 @@ export class InitializedTask<D extends AnyTask> {
     }
     if (operation === 'destroy') return this.runtime.destroy();
     const copied = clonePayload(input, prepared.inputOwnership);
-    const context = localContext(prepared);
+    const context = this.runtimeContext(prepared);
     if (operation === 'initialize') {
       const result = await this.runtime.initialize(copied, context);
       prepared.signal?.throwIfAborted();
@@ -367,6 +414,33 @@ export class InitializedTask<D extends AnyTask> {
     const result = await this.runtime.process(copied, copiedOptions, context);
     prepared.signal?.throwIfAborted();
     return clonePayload(result, prepared.outputOwnership ?? 'transfer');
+  }
+
+  private runtimeContext(prepared: TaskRunControls) {
+    return {
+      ...localContext(prepared),
+      requestHost: async (
+        operation: string,
+        payload: object,
+        controls: Pick<TaskRunControls, 'inputOwnership' | 'outputOwnership'> = {}
+      ) => {
+        const signal = prepared.signal ?? this.controller.signal;
+        signal.throwIfAborted();
+        const handler = this.initializationControls.onRequest;
+        if (!handler) throw new Error('No host request handler configured');
+        const result = await handler(
+          operation,
+          clonePayload(payload, controls.inputOwnership),
+          signal
+        );
+        signal.throwIfAborted();
+        return structuredClone(result, {
+          transfer: controls.outputOwnership === 'transfer' ? getTransferList(result) : []
+        });
+      },
+      emitHost: (operation: string, payload: object) =>
+        this.initializationControls.onEvent?.(operation, structuredClone(payload))
+    };
   }
 
   private enqueue<T>(operation: () => Promise<T>): Promise<T> {
