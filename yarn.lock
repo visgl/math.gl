@@ -5761,7 +5761,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/core@npm:5.0.0-beta.3, @math.gl/core@workspace:*, @math.gl/core@workspace:modules/core":
+"@math.gl/core@npm:5.0.0-beta.4, @math.gl/core@workspace:*, @math.gl/core@workspace:modules/core":
   version: 0.0.0-use.local
   resolution: "@math.gl/core@workspace:modules/core"
   languageName: unknown
@@ -5788,7 +5788,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs@workspace:modules/dggs"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-beta.3"
+    "@math.gl/core": "npm:5.0.0-beta.4"
     a5-js: "npm:^0.10.0"
     h3-js: "npm:^4.5.0"
     open-location-code: "npm:^1.0.3"
@@ -5800,7 +5800,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/earth@workspace:modules/earth"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-beta.3"
+    "@math.gl/core": "npm:5.0.0-beta.4"
     astronomy-engine: "npm:2.1.19"
   languageName: unknown
   linkType: soft
@@ -5827,11 +5827,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/geometry@npm:5.0.0-beta.3, @math.gl/geometry@workspace:*, @math.gl/geometry@workspace:modules/geometry":
+"@math.gl/geometry@npm:5.0.0-beta.4, @math.gl/geometry@workspace:*, @math.gl/geometry@workspace:modules/geometry":
   version: 0.0.0-use.local
   resolution: "@math.gl/geometry@workspace:modules/geometry"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-beta.3"
+    "@math.gl/core": "npm:5.0.0-beta.4"
   languageName: unknown
   linkType: soft
 
@@ -5850,9 +5850,9 @@ __metadata:
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:
     "@mapbox/martini": "npm:0.2.0"
-    "@math.gl/core": "npm:5.0.0-beta.3"
-    "@math.gl/geometry": "npm:5.0.0-beta.3"
-    "@math.gl/web-mercator": "npm:5.0.0-beta.3"
+    "@math.gl/core": "npm:5.0.0-beta.4"
+    "@math.gl/geometry": "npm:5.0.0-beta.4"
+    "@math.gl/web-mercator": "npm:5.0.0-beta.4"
     "@turf/area": "npm:^7.2.0"
     "@turf/bearing": "npm:^7.2.0"
     "@turf/boolean-point-in-polygon": "npm:^7.2.0"
@@ -5913,11 +5913,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/web-mercator@npm:5.0.0-beta.3, @math.gl/web-mercator@workspace:*, @math.gl/web-mercator@workspace:modules/web-mercator":
+"@math.gl/web-mercator@npm:5.0.0-beta.4, @math.gl/web-mercator@workspace:*, @math.gl/web-mercator@workspace:modules/web-mercator":
   version: 0.0.0-use.local
   resolution: "@math.gl/web-mercator@workspace:modules/web-mercator"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-beta.3"
+    "@math.gl/core": "npm:5.0.0-beta.4"
     mock-browser: "npm:^0.92.14"
   languageName: unknown
   linkType: soft
