@@ -13,6 +13,7 @@ import {getSkySnapshot, getStartOfDay, type SkySnapshotOptions} from '@math.gl/e
 import {
   createTerrainMesh,
   weldTerrainContourTiles,
+  diagnoseTerrainContourBoundaries,
   createTerrainGradientPyramid,
   createTerrainSkirt,
   getTerrainProfileVisibility,
@@ -28,6 +29,7 @@ import {
   stitchTerrainContourTiles,
   type TerrainGradientPyramid,
   type TerrainContourTileWeldOptions,
+  type TerrainContourBoundaryDiagnostics,
   getTerrainProfileViewshed,
   getTerrainVertexHaloAffectedTiles,
   updateTerrainVertexTileHalos,
@@ -56,6 +58,7 @@ void [
   getStartOfDay,
   createTerrainMesh,
   weldTerrainContourTiles,
+  diagnoseTerrainContourBoundaries,
   createTerrainGradientPyramid,
   stitchTerrainContourTiles,
   createTerrainSkirt,
@@ -85,6 +88,7 @@ const typeChecks: [
   TerrainVertexHaloTile?,
   TerrainFilteredLevel?,
   TerrainContourTileWeldOptions?,
-  TerrainGradientPyramid?
+  TerrainGradientPyramid?,
+  TerrainContourBoundaryDiagnostics?
 ] = [];
 void typeChecks;

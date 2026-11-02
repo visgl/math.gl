@@ -374,6 +374,11 @@ export {createTerrainContours} from './terrain/contours';
 export type {TerrainContours, TerrainContourOptions} from './terrain/contours';
 export {stitchTerrainContours} from './terrain/contour-paths';
 export {weldTerrainContourTiles} from './terrain/contour-tile-weld';
+export {
+  diagnoseTerrainContourBoundaries,
+  TerrainContourBoundaryAxis
+} from './terrain/contour-boundary-diagnostics';
+export type {TerrainContourBoundaryDiagnostics} from './terrain/contour-boundary-diagnostics';
 export {stitchTerrainContourTiles} from './terrain/contour-tile-paths';
 export {createTerrainGradientPyramid} from './terrain/gradient-pyramid';
 export type {TerrainGradientPyramid, TerrainGradientPyramidLevel} from './terrain/gradient-pyramid';
