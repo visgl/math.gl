@@ -1,5 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test as baseTest, vi} from 'vitest';
 import {isBrowser} from '../../src/worker-utils/lib/env-utils/globals';
 const test = baseTest.runIf(isBrowser);
@@ -27,54 +28,80 @@ test('module worker URLs preserve local entrypoints and import remote modules th
   }
 });
 
-test('module worker teardown revokes its shim and preserves caller-owned blob URLs', async () => {
-  const entrypoint = URL.createObjectURL(
-    new Blob(['export {};'], {type: 'application/javascript'})
-  );
-  let constructed = '';
-  const terminate = vi.fn();
-  const constructor = vi.spyOn(globalThis, 'Worker').mockImplementation(function (url) {
-    constructed = String(url);
-    return {terminate} as any;
-  } as any);
-  try {
-    const remote = new WorkerThread({
-      name: 'remote',
-      url: 'https://worker.example.invalid/worker.js',
-      workerType: 'module'
-    });
-    const shim = constructed;
-    expect((await fetch(shim)).ok).toBe(true);
-    await remote.destroy();
-    await expect(fetch(shim)).rejects.toThrow();
-    expect(terminate).toHaveBeenCalledOnce();
-    const local = new WorkerThread({name: 'local', url: entrypoint, workerType: 'module'});
-    expect(constructed).toBe(entrypoint);
-    await local.destroy();
-    expect((await fetch(entrypoint)).ok).toBe(true);
-  } finally {
-    constructor.mockRestore();
-    URL.revokeObjectURL(entrypoint);
+test.each([false, true])(
+  'module worker teardown revokes its shim and preserves caller-owned blob URLs (lazy URL: %s)',
+  async lazy => {
+    const entrypoint = URL.createObjectURL(
+      new Blob(['export {};'], {type: 'application/javascript'})
+    );
+    let constructed = '';
+    const terminate = vi.fn();
+    const constructor = vi.spyOn(globalThis, 'Worker').mockImplementation(function (url) {
+      constructed = String(url);
+      return {terminate} as any;
+    } as any);
+    try {
+      const remote = new WorkerThread({
+        name: 'remote',
+        ...(lazy
+          ? {getUrl: () => 'https://worker.example.invalid/worker.js'}
+          : {url: 'https://worker.example.invalid/worker.js'}),
+        workerType: 'module'
+      });
+      const shim = constructed;
+      expect((await fetch(shim)).ok).toBe(true);
+      await remote.destroy();
+      await expect(fetch(shim)).rejects.toThrow();
+      expect(terminate).toHaveBeenCalledOnce();
+      const local = new WorkerThread({name: 'local', url: entrypoint, workerType: 'module'});
+      expect(constructed).toBe(entrypoint);
+      await local.destroy();
+      expect((await fetch(entrypoint)).ok).toBe(true);
+    } finally {
+      constructor.mockRestore();
+      URL.revokeObjectURL(entrypoint);
+    }
   }
-});
+);
 
-test('failed module worker construction releases its shim', async () => {
+test.each([false, true])(
+  'failed module worker construction releases its shim (lazy URL: %s)',
+  async lazy => {
+    let shim = '';
+    const constructor = vi.spyOn(globalThis, 'Worker').mockImplementation(function (url) {
+      shim = String(url);
+      throw new Error('blocked worker');
+    } as any);
+    try {
+      expect(
+        () =>
+          new WorkerThread({
+            name: 'remote',
+            ...(lazy
+              ? {getUrl: () => 'https://worker.example.invalid/worker.js'}
+              : {url: 'https://worker.example.invalid/worker.js'}),
+            workerType: 'module'
+          })
+      ).toThrow('blocked worker');
+      await expect(fetch(shim)).rejects.toThrow();
+    } finally {
+      constructor.mockRestore();
+    }
+  }
+);
+
+test('relative module entrypoints honor the document base URL', async () => {
+  const base = vi
+    .spyOn(document, 'baseURI', 'get')
+    .mockReturnValue('https://base.example.invalid/nested/');
   let shim = '';
-  const constructor = vi.spyOn(globalThis, 'Worker').mockImplementation(function (url) {
-    shim = String(url);
-    throw new Error('blocked worker');
-  } as any);
   try {
-    expect(
-      () =>
-        new WorkerThread({
-          name: 'remote',
-          url: 'https://worker.example.invalid/worker.js',
-          workerType: 'module'
-        })
-    ).toThrow('blocked worker');
-    await expect(fetch(shim)).rejects.toThrow();
+    shim = getLoadableWorkerURL({url: './worker.js', workerType: 'module'});
+    expect(await (await fetch(shim)).text()).toBe(
+      'import "https://base.example.invalid/nested/worker.js";'
+    );
   } finally {
-    constructor.mockRestore();
+    base.mockRestore();
+    URL.revokeObjectURL(shim);
   }
 });
