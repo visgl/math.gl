@@ -52,3 +52,25 @@ const feature = await dispatch({operation: 'lookup', input: {id: 1}}); // {name:
 The adapter does not validate results or change scheduling, cancellation or
 ownership. The task must return the right result for each operation. Initialized
 handles remain serialized.
+
+## Separate setup and processing ownership
+
+For automatic atomic or streaming calls, use `initializationOwnership` when setup
+resources need different ownership from processing data. For example, transfer a
+callback `MessagePort` while copying input buffers:
+
+```ts
+await runner.runTask(task, {values}, {
+  initialization: {port: channel.port2},
+  initializationOwnership: 'transfer',
+  inputOwnership: 'copy'
+});
+```
+
+Transferring initialization detaches its caller-owned resources; do not reuse them
+in processing payloads or another task. Shared initialization may contain shared
+storage but cannot contain transferable ports. For `runTasks`, initialization is
+a reusable template: use copy or share; transfer is rejected before input consumption.
+For an explicit retained handle, `initializeTask` already has independent setup
+controls: pass `inputOwnership: 'transfer'` there, then choose input ownership again
+for each `handle.runTask` or `handle.runTaskInBatches` call.

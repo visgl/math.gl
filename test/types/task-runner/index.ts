@@ -332,3 +332,8 @@ void preload;
 
 // @ts-expect-error code preloading has no runner lifetime or pool controls
 runner.preloadTasks([plain]);
+
+runner.runTask(plain, {value: 1}, {initializationOwnership: 'transfer', inputOwnership: 'copy'});
+runner.runTasks(plain, [{value: 1}], {initializationOwnership: 'share'});
+// @ts-expect-error repeated initialization templates cannot transfer their resources
+runner.runTasks(plain, [{value: 1}], {initializationOwnership: 'transfer'});

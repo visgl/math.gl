@@ -96,13 +96,25 @@ export type TaskRunControls = {
   outputOwnership?: 'copy' | 'transfer';
   onProgress?: (progress: TaskProgress) => void;
 };
+/** Controls setup resources independently from per-operation payload ownership. */
+export type TaskInitializationControls = {
+  /** Ownership of automatic initialization data; defaults to copying. */
+  initializationOwnership?: 'copy' | 'transfer' | 'share';
+};
 export type TaskRunOptions<D extends AnyTask> = TaskRunControls &
+  TaskInitializationControls &
   OptionsField<ProcessorOptions<Processor<D>>> &
   InitializationField<D>;
 export type TaskBatchRunOptions<D extends AnyTask> = TaskRunControls &
+  TaskInitializationControls &
   OptionsField<ProcessorOptions<StreamProcessor<D>>> &
   InitializationField<D>;
-export type TaskRunsOptions<D extends AnyTask> = TaskRunOptions<D> & {
+export type TaskRunsOptions<D extends AnyTask> = Omit<
+  TaskRunOptions<D>,
+  'initializationOwnership'
+> & {
+  /** Reusable initialization templates may copy or share, but cannot transfer into multiple slots. */
+  initializationOwnership?: 'copy' | 'share';
   concurrency?: number;
 };
 export type InitializedTaskOptions<D extends AnyTask> = Omit<TaskRunControls, 'execution'> &
