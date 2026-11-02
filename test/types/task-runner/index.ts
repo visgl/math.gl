@@ -1,11 +1,13 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {TaskRunner, preloadTasks, type Task} from '@math.gl/core/tasks';
 import {
+  TaskRunner,
+  preloadTasks,
   createTypedTaskDispatcher,
+  type Task,
   type TaskOperation
-} from '../../../modules/core/src/tasks/typed-task-dispatch.js';
+} from '@math.gl/core/tasks';
 type SceneOperations = {
   count: TaskOperation<{source: string}, number>;
   find: TaskOperation<{id: number}, {name: string} | null>;
