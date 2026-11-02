@@ -21,9 +21,11 @@ export type TaskOperationResult<Operations> = {
 
 /** Dispatch requests with the result type associated with each operation. */
 export type TypedTaskDispatcher<Operations, Options = undefined> = <Name extends keyof Operations>(
-  request: Operations[Name] extends TaskOperation<infer Input, unknown>
-    ? {operation: Name; input: Input}
-    : never,
+  request: {
+    [Key in Name]: Operations[Key] extends TaskOperation<infer Input, unknown>
+      ? {operation: Key; input: Input}
+      : never;
+  }[Name],
   options?: Options
 ) => Promise<Operations[Name] extends TaskOperation<unknown, infer Output> ? Output : never>;
 

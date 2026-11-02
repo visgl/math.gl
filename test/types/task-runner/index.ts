@@ -21,6 +21,9 @@ const findResult: Promise<{name: string} | null> = dispatch({operation: 'find', 
 dispatch({operation: 'count', input: {id: 1}});
 // @ts-expect-error Unknown operations are rejected.
 dispatch({operation: 'missing', input: {}});
+declare const operation: keyof SceneOperations;
+// @ts-expect-error A union-valued operation cannot be paired with just one operation's payload.
+dispatch({operation, input: {source: 'roads'}});
 // @ts-expect-error The result is specific to the operation.
 const wrongResult: Promise<string> = dispatch({operation: 'count', input: {source: 'roads'}});
 void countResult;
