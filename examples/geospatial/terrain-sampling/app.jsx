@@ -5,6 +5,7 @@
 import React, {useMemo, useState} from 'react';
 import ExamplePanel from '../../common/example-panel';
 import {createTerrain, project, sampleLabel, TerrainSampleStatus} from './model';
+import TerrainAnalysis from './analysis';
 import './styles.css';
 
 export default function TerrainSampling() {
@@ -123,6 +124,7 @@ export default function TerrainSampling() {
           {missing && <circle cx="80" cy="80" r="10" fill="#fa7869" />}
           <circle cx={x * 2} cy={160 - y * 2} r="5" fill="#ffcb70" />
         </svg>
+        <TerrainAnalysis field={terrain.field} />
       </div>
       <ExamplePanel title="Terrain sampling">
         <label>

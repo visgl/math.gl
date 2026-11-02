@@ -25,8 +25,13 @@ try {
   assert.equal(values.triangles,128);assert(values.missing<128);assert.notEqual(values.outside,values.valid);assert.notEqual(values.noData,values.valid);
   assert.notEqual(values.heights[0],values.heights[1]);assert.notEqual(values.heights[1],values.heights[2]);
   await page.getByLabel('Show mesh normals').check();
-  await page.getByRole('combobox').first().selectOption('triangle');
-  await page.getByRole('combobox').nth(1).selectOption('10-01');
+  await page.getByLabel('Interpolation').selectOption('triangle');
+  await page.getByLabel('Cell diagonal').selectOption('10-01');
+  await page.getByLabel('Analysis view').selectOption('slope');
+  await page.getByLabel('Gradient level').selectOption('2');
+  assert.equal(await page.getByRole('img', {name: 'slope terrain analysis'}).count(), 1);
+  await page.getByLabel('Analysis view').selectOption('contours');
+  assert(await page.getByRole('img', {name: 'contours terrain analysis'}).locator('line').count() > 0);
   await page.getByLabel('Missing center vertex').check();
   for(const axis of ['X','Y']) await page.getByLabel(`Probe ${axis}`,{exact:true}).fill('40');
   assert.match(await page.getByTestId('sample-status').innerText(),/NO_DATA/);

@@ -99,6 +99,18 @@ const probes = [
     budget: 8000
   },
   {
+    symbol: 'stitchTerrainContourTiles',
+    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/contours\./],
+    budget: 12000
+  },
+  {
+    symbol: 'createTerrainGradientPyramid',
+    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/derivatives\./, /\/filtered-pyramid\./],
+    budget: 4000
+  },
+  {
     symbol: 'getTerrainProfileVisibility',
     packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/profile\./, /\/profile-measure\./],
