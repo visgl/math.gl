@@ -379,3 +379,29 @@ test('support snapping is capped even when world-coordinate uncertainty is large
   // One representable ULP here is 1/8192 pixels: above the cap, below the uncertainty bound.
   expect(field.sample(1e12 + 1 + 1 / 8192, 1e12, {noData: 'support'}).status).toBe(Status.NO_DATA);
 });
+
+test.each(['cell', 'vertex'] as const)(
+  'footprint queries preserve endpoint slopes under roundoff for %s registration',
+  registration => {
+    const step = registration === 'cell' ? 0.1 : 0.3;
+    const field = new HeightField({
+      width: 2,
+      height: 2,
+      heights: new Float64Array([0, 10, 20, 30]),
+      origin: [1000000, 1000000],
+      columnStep: [step, 0],
+      rowStep: [0, step],
+      registration
+    });
+    const offset = step * (registration === 'cell' ? 1.5 : 1);
+    const sample = field.sample(1000000 + offset, 1000000 + offset, {domain: 'footprint'});
+    expect(sample.gradientStatus).toBe(Status.VALID);
+    expect(sample.gradientX).toBeCloseTo(10 / step);
+    expect(sample.gradientY).toBeCloseTo(20 / step);
+    if (registration === 'cell') {
+      const margin = field.sample(1000000.175, 1000000.175, {domain: 'footprint'});
+      expect(margin.gradientX).toBe(0);
+      expect(margin.gradientY).toBe(0);
+    }
+  }
+);

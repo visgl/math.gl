@@ -176,8 +176,12 @@ export class HeightField {
     ) {
       return resetSample(result, Status.OUTSIDE_DOMAIN);
     }
-    const clampedColumn = domain === 'footprint' && (u < 0 || u > this.width - 1);
-    const clampedRow = domain === 'footprint' && (v < 0 || v > this.height - 1);
+    // Preserve endpoint one-sided derivatives within bounded coordinate roundoff.
+    const edgeToleranceU = Math.min(1e-6, toleranceU);
+    const edgeToleranceV = Math.min(1e-6, toleranceV);
+    const clampedColumn =
+      margin > 0 && (u < -edgeToleranceU || u > this.width - 1 + edgeToleranceU);
+    const clampedRow = margin > 0 && (v < -edgeToleranceV || v > this.height - 1 + edgeToleranceV);
     u = Math.max(0, Math.min(this.width - 1, u));
     v = Math.max(0, Math.min(this.height - 1, v));
     if (noData === 'support' && interpolation === 'bilinear') {
