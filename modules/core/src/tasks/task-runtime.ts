@@ -167,7 +167,7 @@ export async function initializeTaskWorker(task: AnyTask): Promise<void> {
             while (true) {
               const result = (await channel.request(
                 'task:next-input',
-                {},
+                {outputOwnership: 'transfer'},
                 signal
               )) as IteratorResult<object>;
               if (result.done) return;

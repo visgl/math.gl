@@ -25,7 +25,11 @@ await initializeTaskWorker({
     return cached ? {values: context.state.values} : {value: value * factor + context.state.offset, calls: context.state.calls};
   },
   async *processInBatches(inputs, options, context) {
-    for await (const {value} of inputs) {
+    for await (const {value, port} of inputs) {
+      if (port) {
+        port.postMessage({value});
+        port.close();
+      }
       if (options.pattern && !options.pattern.test(String(value))) continue;
       context.state.calls++;
       yield {value: value * options.factor + context.state.offset, calls: context.state.calls};

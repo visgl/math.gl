@@ -399,6 +399,64 @@ test('aborting a paused multiplexed stream invalidates its worker before releasi
   }
 });
 
+test('multiplexed streams transfer input ports through reverse pulls', async () => {
+  const runner = new TaskRunner();
+  const ports = new MessageChannel();
+  const message = new Promise(resolve => {
+    ports.port2.onmessage = event => resolve(event.data);
+  });
+  const task = {
+    ...workerTask,
+    concurrency: {maxConcurrency: 2},
+    async *processInBatches(
+      _inputs: AsyncIterable<{value: number; port: MessagePort}>,
+      _options: {factor: number}
+    ) {
+      yield {value: 0};
+    }
+  };
+  const instance = await runner.initializeTask(
+    task,
+    {},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  try {
+    expect(
+      await collect(
+        instance.runTaskInBatches([{value: 7, port: ports.port1}], {
+          options: {factor: 2},
+          inputOwnership: 'transfer'
+        })
+      )
+    ).toEqual([{value: 14, calls: 1}]);
+    expect(await message).toEqual({value: 7});
+    expect(instance.state).toBe('ready');
+  } finally {
+    ports.port1.close();
+    ports.port2.close();
+    await runner.close();
+  }
+});
+
+test('early multiplexed stream return invalidates the handle consistently', async () => {
+  const runner = new TaskRunner();
+  const task = {...fixture().task, ...workerTask, concurrency: {maxConcurrency: 2}};
+  const instance = await runner.initializeTask(
+    task,
+    {offset: 0},
+    {execution: 'worker', operationConcurrency: 2}
+  );
+  try {
+    const iterator = instance.runTaskInBatches([{value: 1}, {value: 2}], {options: {factor: 1}});
+    await iterator.next();
+    await iterator.return();
+    expect(instance.state).toBe('invalid');
+    await expect(instance.runTask({value: 3}, {options: {factor: 1}})).rejects.toThrow('invalid');
+  } finally {
+    await runner.close();
+  }
+});
+
 test('real worker retains state across atomic and streaming calls', async () => {
   const runner = new TaskRunner();
   const task = {...fixture().task, ...workerTask};

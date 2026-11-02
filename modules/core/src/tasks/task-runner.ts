@@ -280,6 +280,13 @@ export class InitializedTask<D extends AnyTask> {
         // Legacy stream cancellation may terminate the pinned worker. Never reuse
         // an incarnation after ending a worker stream without a success handshake.
         if (self.pool && !completed) self.invalid = true;
+        if (self.workerChannel && !completed && !self.invalid) {
+          const reason = new Error('Worker stream ended before completion');
+          self.invalid = true;
+          self.operationQueue.cancelPending(reason);
+          self.controller.abort(reason);
+          await self.workerChannel.destroy(reason);
+        }
       }
     });
   }
