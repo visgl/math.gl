@@ -48,6 +48,8 @@ a matching point and defaults to zero. The function never welds merely nearby
 points, interpolates missing terrain, or closes a gap for a missing tile.
 Identical shared-boundary segments are emitted once. The input vertex and segment
 budgets apply across the full set of tiles, before welding.
+The weld key keeps integer and fractional lattice components separate; output
+`gridCoordinates` are Float64 values and can round at large lattice offsets.
 
 ```ts
 import {weldTerrainContourTiles, stitchTerrainContours} from '@math.gl/geospatial/terrain';
