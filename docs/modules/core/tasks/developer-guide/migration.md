@@ -63,7 +63,9 @@ or `{create, capabilities}` in a browser; choose one target form.
   Migrate to `runner.runTasks`, not the similarly named streaming method.
 - **Ownership:** input copying is now the default. Select `inputOwnership:
   'transfer'` deliberately; all aliases detach. Options and automatic
-  initialization data are copied separately. Shared buffers stay shared.
+  initialization data are copied separately by default. Automatic calls can choose
+  initialization ownership independently with `initializationOwnership`; reusable
+  `runTasks` templates allow copy/share only. Shared buffers stay shared.
 - **Lifetime:** automatic operations release temporary state and workers.
   Global code preloading does not retain workers or task state.
   For warm workers or cached projections, explicitly initialize a handle and
