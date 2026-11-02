@@ -71,6 +71,17 @@ try {
       '--strip-components=1'
     ]);
   }
+  const worker = join(temporary, 'task-worker.cjs');
+  writeFileSync(worker, `
+const {initializeTaskWorker} = require('@math.gl/core/tasks');
+initializeTaskWorker({
+  id: 'packed-cjs-worker',
+  process: ({values}) => ({values: values.map(value => value * 2)}),
+  async *processInBatches(inputs) {
+    for await (const {values} of inputs) yield {values: values.map(value => value * 3)};
+  }
+});
+`);
   const probe = join(temporary, 'probe.mjs');
   writeFileSync(
     probe,
@@ -82,6 +93,21 @@ import * as geospatial from '@math.gl/geospatial/tasks';
 const require = createRequire(import.meta.url);
 for (const api of [tasks, require('@math.gl/core/tasks')]) assert.deepEqual(Object.keys(api).sort(), ${JSON.stringify(expected)});
 for (const api of [geospatial, require('@math.gl/geospatial/tasks')]) assert.deepEqual(Object.keys(api).sort(), ['PrepareMapTask', 'ProjectCoordinatesTask']);
+for (const api of [tasks, require('@math.gl/core/tasks')]) {
+  const runner = new api.TaskRunner();
+  const task = {
+    id: 'packed-cjs-worker',
+    process: input => input,
+    async *processInBatches(inputs) {yield* inputs;},
+    worker: {url: new URL('./task-worker.cjs', import.meta.url), capabilities: {atomic: true, streaming: true}}
+  };
+  try {
+    assert.deepEqual(await runner.runTask(task, {values: [1, 2]}, {execution: 'worker'}), {values: [2, 4]});
+    const batches = [];
+    for await (const batch of runner.runTaskInBatches(task, [{values: [3]}], {execution: 'worker'})) batches.push(batch);
+    assert.deepEqual(batches, [{values: [9]}]);
+  } finally {await runner.close();}
+}
 for (const path of ['@math.gl/core/worker-utils', '@math.gl/core/tasks/run-task', '@math.gl/core/dist/worker-utils/index.js', '@math.gl/core/src/worker-utils/index.ts', '@math.gl/geospatial/workers', '@math.gl/geospatial/workers/operations', '@math.gl/geospatial/dist/workers/index.js']) {
   await assert.rejects(import(path), {code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'});
   assert.throws(() => require(path), {code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'});
