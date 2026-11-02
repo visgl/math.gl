@@ -53,6 +53,29 @@ test('real DEM tiled contours agree with an untiled triangle-surface reference',
     maxPositionDifference: 1e-8
   });
   expect(welded.segments.length).toBe(untiled.segments.length);
+  // Match every undirected segment by level and source-grid endpoints, allowing
+  // only rounding differences in the separately prepared tile coordinates.
+  const matched = new Set<number>();
+  const samePoint = (a: number, b: number) =>
+    Math.abs(welded.gridCoordinates[2 * a] - untiled.gridCoordinates[2 * b]) <= 1e-9 &&
+    Math.abs(welded.gridCoordinates[2 * a + 1] - untiled.gridCoordinates[2 * b + 1]) <= 1e-9;
+  for (let i = 0; i < welded.levelIndices.length; i++) {
+    const a = welded.segments[2 * i],
+      b = welded.segments[2 * i + 1];
+    let match = -1;
+    for (let j = 0; j < untiled.levelIndices.length; j++) {
+      if (matched.has(j) || welded.levelIndices[i] !== untiled.levelIndices[j]) continue;
+      const c = untiled.segments[2 * j],
+        d = untiled.segments[2 * j + 1];
+      if ((samePoint(a, c) && samePoint(b, d)) || (samePoint(a, d) && samePoint(b, c))) {
+        match = j;
+        break;
+      }
+    }
+    expect(match, `unmatched welded segment ${i}`).toBeGreaterThanOrEqual(0);
+    matched.add(match);
+  }
+  expect(matched.size).toBe(untiled.levelIndices.length);
   expect(stitchTerrainContours(welded).levelIndices.length).toBe(
     stitchTerrainContours(untiled).levelIndices.length
   );
