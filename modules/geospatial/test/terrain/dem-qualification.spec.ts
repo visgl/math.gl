@@ -11,9 +11,90 @@ import {createDelatinTerrainMesh} from '@math.gl/geospatial/terrain';
 import {createTerrainMesh} from '@math.gl/geospatial/terrain';
 import {reconcileTerrainVertexTiles} from '@math.gl/geospatial/terrain';
 import {stitchTerrainMeshEdges} from '@math.gl/geospatial/terrain';
+import {
+  createTerrainContours,
+  weldTerrainContourTiles,
+  stitchTerrainContours
+} from '@math.gl/geospatial/terrain';
 import reference from './fixtures/n43-reference.json';
 
 const heights = Float64Array.from(reference.heights, h => h ?? NaN);
+
+test('real DEM tiled contours agree with an untiled triangle-surface reference', () => {
+  // Treat the pinned raster samples as vertices so the four 17x17 tiles overlap.
+  const levels = [200, 300, 400, 500];
+  const full = new HeightField({
+    width: 33,
+    height: 33,
+    heights,
+    columnStep: reference.columnStep as [number, number],
+    rowStep: reference.rowStep as [number, number]
+  });
+  const untiled = createTerrainContours(full, levels);
+  const tiles = [0, 1].flatMap(column =>
+    [0, 1].map(row => {
+      const field = new HeightField({
+        width: 17,
+        height: 17,
+        heights: Float64Array.from(
+          {length: 17 * 17},
+          (_, i) => heights[(row * 16 + Math.floor(i / 17)) * 33 + column * 16 + (i % 17)]
+        ),
+        origin: [column * 16 * reference.columnStep[0], row * 16 * reference.rowStep[1]],
+        columnStep: reference.columnStep as [number, number],
+        rowStep: reference.rowStep as [number, number]
+      });
+      return {column, row, contours: createTerrainContours(field, levels)};
+    })
+  );
+  const welded = weldTerrainContourTiles(tiles, {
+    width: 17,
+    height: 17,
+    maxPositionDifference: 1e-8
+  });
+  expect(welded.segments.length).toBe(untiled.segments.length);
+  // Match every undirected segment by level and source-grid endpoints, allowing
+  // only rounding differences in the separately prepared tile coordinates.
+  const matched = new Set<number>();
+  const samePoint = (a: number, b: number) =>
+    Math.abs(welded.gridCoordinates[2 * a] - untiled.gridCoordinates[2 * b]) <= 1e-9 &&
+    Math.abs(welded.gridCoordinates[2 * a + 1] - untiled.gridCoordinates[2 * b + 1]) <= 1e-9;
+  for (let i = 0; i < welded.levelIndices.length; i++) {
+    const a = welded.segments[2 * i],
+      b = welded.segments[2 * i + 1];
+    let match = -1;
+    for (let j = 0; j < untiled.levelIndices.length; j++) {
+      if (matched.has(j) || welded.levelIndices[i] !== untiled.levelIndices[j]) continue;
+      const c = untiled.segments[2 * j],
+        d = untiled.segments[2 * j + 1];
+      if ((samePoint(a, c) && samePoint(b, d)) || (samePoint(a, d) && samePoint(b, c))) {
+        match = j;
+        break;
+      }
+    }
+    expect(match, `unmatched welded segment ${i}`).toBeGreaterThanOrEqual(0);
+    matched.add(match);
+  }
+  expect(matched.size).toBe(untiled.levelIndices.length);
+  expect(stitchTerrainContours(welded).levelIndices.length).toBe(
+    stitchTerrainContours(untiled).levelIndices.length
+  );
+  const lengths = (contours: typeof untiled) => {
+    const result = new Float64Array(levels.length);
+    for (let i = 0; i < contours.levelIndices.length; i++) {
+      const a = contours.segments[2 * i],
+        b = contours.segments[2 * i + 1];
+      result[contours.levelIndices[i]] += Math.hypot(
+        contours.positions[3 * a] - contours.positions[3 * b],
+        contours.positions[3 * a + 1] - contours.positions[3 * b + 1]
+      );
+    }
+    return result;
+  };
+  const a = lengths(untiled),
+    b = lengths(welded);
+  for (let i = 0; i < levels.length; i++) expect(b[i]).toBeCloseTo(a[i], 5);
+});
 function field() {
   return new HeightField({
     width: reference.width,

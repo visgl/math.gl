@@ -99,6 +99,12 @@ const probes = [
     budget: 8000
   },
   {
+    symbol: 'diagnoseTerrainContourBoundaries',
+    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/contours\./, /\/contour-tile-weld\./, /\/contour-paths\./],
+    budget: 6000
+  },
+  {
     symbol: 'stitchTerrainContourTiles',
     packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/contours\./],
