@@ -204,3 +204,9 @@ export type {
 export {composeAttributeProvenance} from './utils/compose-attribute-provenance';
 export {qualifySurfaceTransition} from './utils/qualify-surface-transition';
 export type {SurfaceTransitionQualification} from './utils/qualify-surface-transition';
+
+export {
+  analyzeTriangleTopology,
+  applyTriangleIndexReplacements
+} from './manifold/triangle-topology';
+export type {IndexedTriangleTopology, TriangleTopologyAnalysis} from './manifold/triangle-topology';
