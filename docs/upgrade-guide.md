@@ -30,7 +30,7 @@ Import `subdivideGlobeMesh` and its options from `@math.gl/geospatial`; they are
 | Removed package | Install | Import from |
 | --- | --- | --- |
 | `@math.gl/types` | `@math.gl/core` | `@math.gl/core` |
-| `@math.gl/expressions` | `@math.gl/core` | `@math.gl/core` |
+| `@math.gl/expressions` | `@math.gl/core` | `@math.gl/core/expressions` |
 | `@math.gl/geometry-utils` | `@math.gl/geometry` | `@math.gl/geometry` |
 | `@math.gl/curves` | `@math.gl/geometry` | `@math.gl/geometry` |
 | `@math.gl/polygon` | `@math.gl/geometry` | `@math.gl/geometry` |
