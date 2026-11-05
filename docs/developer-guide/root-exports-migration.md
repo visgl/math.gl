@@ -14,7 +14,7 @@ collisions below. Projection catalogs and data assets retain their paths.
 
 | Previous import | New import |
 | --- | --- |
-| `@math.gl/core/expressions` | `@math.gl/core` |
+| `@math.gl/core` (expression APIs in earlier v5 prereleases) | `@math.gl/core/expressions` |
 | `@math.gl/core/local-frame` | `@math.gl/core` |
 | `@math.gl/core/mat3` | `@math.gl/core` |
 | `@math.gl/core/mat4` | `@math.gl/core` |
