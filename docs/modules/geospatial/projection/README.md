@@ -169,7 +169,7 @@ The plugin architecture, execution and loading system, bulk coordinate APIs and
 much of the newer pipeline and epoch functionality are original math.gl work.
 Source headers distinguish direct ports, adaptations and implementations inspired
 by upstream work. Distributed license files and
-[third-party notices](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/THIRD-PARTY-NOTICES.md)
+[third-party notices](https://github.com/visgl/math.gl/blob/master/modules/geospatial/THIRD-PARTY-NOTICES.md)
 retain the applicable upstream credits and terms. Engine source headers use
 `SPDX-License-Identifier` for licenses, `SPDX-FileCopyrightText` for copyright
 holders and `SPDX-FileComment` for provenance and modifications. Equal Earth

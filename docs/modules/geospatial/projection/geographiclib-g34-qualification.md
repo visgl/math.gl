@@ -95,9 +95,9 @@ area budget remains visible. A sampled result is not an all-input proof.
 
 ```bash
 # Ordinary CI: no native library, compiler, download or extra Python package.
-python3 modules/geospatial/projection/scripts/generate-g34-reference.py --check
-node modules/geospatial/projection/scripts/qualify-g34.mjs --output /tmp/g34.json
-node modules/geospatial/projection/scripts/qualify-g34.mjs --browser chromium --output /tmp/g34-chromium.json
+python3 modules/geospatial/scripts/projection/generate-g34-reference.py --check
+node modules/geospatial/scripts/projection/qualify-g34.mjs --output /tmp/g34.json
+node modules/geospatial/scripts/projection/qualify-g34.mjs --browser chromium --output /tmp/g34-chromium.json
 ```
 
 To regenerate native values, verify the pinned archive hash, extract r2.7 and
@@ -107,10 +107,10 @@ build its static C++ library with `GEOGRAPHICLIB_PRECISION=3` (for example CMake
 and that static library, using the same precision configuration. Then run:
 
 ```bash
-python3 modules/geospatial/projection/scripts/generate-g34-reference.py \
+python3 modules/geospatial/scripts/projection/generate-g34-reference.py \
   --archive /path/to/geographiclib-r2.7.tar.gz --oracle /path/to/g34-oracle
 # Same compiler/precision environment can check exact regeneration:
-python3 modules/geospatial/projection/scripts/generate-g34-reference.py \
+python3 modules/geospatial/scripts/projection/generate-g34-reference.py \
   --archive /path/to/geographiclib-r2.7.tar.gz --oracle /path/to/g34-oracle --check
 ```
 

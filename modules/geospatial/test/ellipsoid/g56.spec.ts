@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {qualifyG56} from '../../projection/test/g56-entry';
+import {qualifyG56} from '../projection/g56-entry';
 import {EllipsoidRhumb, RhumbDomainError} from '../../src/ellipsoid-rhumb';
 import {RhumbPolygon} from '../../src/rhumb-polygon';
 import {GeodesicIntersections} from '../../src/geodesic-intersections';

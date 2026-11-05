@@ -191,10 +191,10 @@ is changed. No JPL kernel/provider is included.
 `clearCache` and `getStatistics`. The observer/configuration are copied and an LRU
 cache holds at most `cacheSize` snapshots (default 32, 0 disables caching).
 Results are independent copies, so mutations cannot poison later calls.
-Run `node modules/earth/sun/scripts/benchmark-sky.mjs` after building to measure cold
+Run `node modules/earth/scripts/sun/benchmark-sky.mjs` after building to measure cold
 and cached throughput on your own hardware.
 Generate the local-sky/globe comparison demo with
-`node modules/earth/sun/scripts/create-sky-demo.mjs /absolute/path/sky.html`.
+`node modules/earth/scripts/sun/create-sky-demo.mjs /absolute/path/sky.html`.
 The standalone page uses the MIT deck.gl 9.1.9 CDN bundle; all ephemerides are
 precomputed locally and require no service at runtime.
 

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test, vi} from 'vitest';
 import reference from './g6-reference.json';
-import {qualifyG6} from '../../projection/test/g6-entry';
+import {qualifyG6} from '../projection/g6-entry';
 import {EllipsoidGeodesic} from '../../src/ellipsoid-geodesic';
 import {GeodesicIntersections} from '../../src/geodesic-intersections';
 for (const row of qualifyG6())

@@ -36,7 +36,7 @@
         "./modules/geospatial/src/geoarrow/index.ts"
       ],
       "@math.gl/geospatial/crs/projjson.schema.json": [
-        "./modules/geospatial/crs/schemas/projjson.schema.json"
+        "./modules/geospatial/src/crs/projjson.schema.json"
       ],
       "@math.gl/geospatial/projection/datums": [
         "./modules/geospatial/src/projection/datums.ts"
@@ -600,25 +600,25 @@
         "./modules/earth/src/timezone/index.ts"
       ],
       "@math.gl/earth/geoid/geoid-egm96-low.pgm": [
-        "./modules/earth/geoid/data/geoid-egm96-low.pgm"
+        "./modules/earth/data/geoid/geoid-egm96-low.pgm"
       ],
       "@math.gl/earth/geoid/geoid-egm96-hi.pgm": [
-        "./modules/earth/geoid/data/geoid-egm96-hi.pgm"
+        "./modules/earth/data/geoid/geoid-egm96-hi.pgm"
       ],
       "@math.gl/earth/sun/stars": [
         "./modules/earth/src/sun/stars.ts"
       ],
       "@math.gl/earth/timezone/timezone-geometry-low.json": [
-        "./modules/earth/timezone/data/timezone-geometry-low.json"
+        "./modules/earth/data/timezone/timezone-geometry-low.json"
       ],
       "@math.gl/earth/timezone/timezone-geometry-low.parquet": [
-        "./modules/earth/timezone/data/timezone-geometry-low.parquet"
+        "./modules/earth/data/timezone/timezone-geometry-low.parquet"
       ],
       "@math.gl/earth/timezone/timezone-geometry-hi.json": [
-        "./modules/earth/timezone/data/timezone-geometry-hi.json"
+        "./modules/earth/data/timezone/timezone-geometry-hi.json"
       ],
       "@math.gl/earth/timezone/timezone-geometry-hi.parquet": [
-        "./modules/earth/timezone/data/timezone-geometry-hi.parquet"
+        "./modules/earth/data/timezone/timezone-geometry-hi.parquet"
       ],
       "@math.gl/earth/test/*": [
         "./modules/earth/test/*"
@@ -636,85 +636,85 @@
         "./modules/web-mercator/test/*"
       ],
       "@math.gl/core/types/test/*": [
-        "./modules/core/types/test/*"
+        "./modules/core/test/types/*"
       ],
       "@math.gl/core/types/*": [
         "./modules/core/src/types/*"
       ],
       "@math.gl/core/expressions/test/*": [
-        "./modules/core/expressions/test/*"
+        "./modules/core/test/expressions/*"
       ],
       "@math.gl/core/expressions/*": [
         "./modules/core/src/expressions/*"
       ],
       "@math.gl/geometry/utils/test/*": [
-        "./modules/geometry/utils/test/*"
+        "./modules/geometry/test/utils/*"
       ],
       "@math.gl/geometry/utils/*": [
         "./modules/geometry/src/utils/*"
       ],
       "@math.gl/geometry/curves/test/*": [
-        "./modules/geometry/curves/test/*"
+        "./modules/geometry/test/curves/*"
       ],
       "@math.gl/geometry/curves/*": [
         "./modules/geometry/src/curves/*"
       ],
       "@math.gl/geometry/polygon/test/*": [
-        "./modules/geometry/polygon/test/*"
+        "./modules/geometry/test/polygon/*"
       ],
       "@math.gl/geometry/polygon/*": [
         "./modules/geometry/src/polygon/*"
       ],
       "@math.gl/geometry/culling/test/*": [
-        "./modules/geometry/culling/test/*"
+        "./modules/geometry/test/culling/*"
       ],
       "@math.gl/geometry/culling/*": [
         "./modules/geometry/src/culling/*"
       ],
       "@math.gl/geometry/spatial-index/test/*": [
-        "./modules/geometry/spatial-index/test/*"
+        "./modules/geometry/test/spatial-index/*"
       ],
       "@math.gl/geometry/spatial-index/*": [
         "./modules/geometry/src/spatial-index/*"
       ],
       "@math.gl/geospatial/crs/test/*": [
-        "./modules/geospatial/crs/test/*"
+        "./modules/geospatial/test/crs/*"
       ],
       "@math.gl/geospatial/crs/*": [
         "./modules/geospatial/src/crs/*"
       ],
       "@math.gl/geospatial/projection/test/*": [
-        "./modules/geospatial/projection/test/*"
+        "./modules/geospatial/test/projection/*"
       ],
       "@math.gl/geospatial/projection/*": [
         "./modules/geospatial/src/projection/*"
       ],
       "@math.gl/geospatial/wkb/test/*": [
-        "./modules/geospatial/wkb/test/*"
+        "./modules/geospatial/test/wkb/*"
       ],
       "@math.gl/geospatial/wkb/*": [
         "./modules/geospatial/src/wkb/*"
       ],
       "@math.gl/geospatial/geoarrow/test/*": [
-        "./modules/geospatial/geoarrow/test/*"
+        "./modules/geospatial/test/geoarrow/*"
       ],
       "@math.gl/geospatial/geoarrow/*": [
         "./modules/geospatial/src/geoarrow/*"
       ],
       "@math.gl/earth/geoid/test/*": [
-        "./modules/earth/geoid/test/*"
+        "./modules/earth/test/geoid/*"
       ],
       "@math.gl/earth/geoid/*": [
         "./modules/earth/src/geoid/*"
       ],
       "@math.gl/earth/sun/test/*": [
-        "./modules/earth/sun/test/*"
+        "./modules/earth/test/sun/*"
       ],
       "@math.gl/earth/sun/*": [
         "./modules/earth/src/sun/*"
       ],
       "@math.gl/earth/timezone/test/*": [
-        "./modules/earth/timezone/test/*"
+        "./modules/earth/test/timezone/*"
       ],
       "@math.gl/earth/timezone/*": [
         "./modules/earth/src/timezone/*"

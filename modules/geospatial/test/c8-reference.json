@@ -1,8 +1,8 @@
 {
   "provenance": {
     "generatorSHA256": "dc816f872e6c028902c93d37108fccfa93524a0e75e2719db02c2953a6c6f625",
-    "decimalOracleSHA256": "9a72ff7b2c909aeff44304833468363c7e87ea95b58d29fdb70c6aff84f907b0",
-    "nativeReferenceSHA256": "abdc71c5948198f7ccec689240ea87381fbc4980e0a514db80796464e42a7b02",
+    "decimalOracleSHA256": "cfff8e3ec5572e4755099cf2e2a0c792ea21880209d7a2f5544b6f235ce44e35",
+    "nativeReferenceSHA256": "71bc8bd71bdbfd2da3d18ddd2cf9547f033f0f585da9b185403fb72cc4222e6a",
     "method": "180-digit Decimal nearest normals and linear algebra; rational normal directions and Taylor sin/cos; stored binary64 inputs",
     "nativeVersion": "GeographicLib C++ 2.7",
     "precisionBits": 53

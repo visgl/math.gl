@@ -128,18 +128,18 @@ The object exposes J2000 `centerDirection` and `northDirection`. Its Galactic ce
 
 ## Provenance, license and regeneration
 
-Data: Hoffleit & Warren's **Yale Bright Star Catalog, fifth revised edition (1991)**, through [Bretton Wade's MIT-licensed export](https://github.com/brettonw/YaleBrightStarCatalog/tree/abffb3b7223ae37e879b0a3ff5b49ad06aed5576). The export's Copyright (c) 2016 Bretton Wade notice and full MIT permission text are redistributed in `modules/earth/sun/LICENSE-BRIGHT-STARS`, included in the npm package. Generated data carries both that copyright and SPDX MIT comments. [NASA HEASARC's catalog description](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html) and the upstream [format description](https://github.com/brettonw/YaleBrightStarCatalog/blob/abffb3b7223ae37e879b0a3ff5b49ad06aed5576/bsc5.readme.txt) describe the measurements, including projected RA motion.
+Data: Hoffleit & Warren's **Yale Bright Star Catalog, fifth revised edition (1991)**, through [Bretton Wade's MIT-licensed export](https://github.com/brettonw/YaleBrightStarCatalog/tree/abffb3b7223ae37e879b0a3ff5b49ad06aed5576). The export's Copyright (c) 2016 Bretton Wade notice and full MIT permission text are redistributed in `modules/earth/LICENSE-BRIGHT-STARS`, included in the npm package. Generated data carries both that copyright and SPDX MIT comments. [NASA HEASARC's catalog description](https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html) and the upstream [format description](https://github.com/brettonw/YaleBrightStarCatalog/blob/abffb3b7223ae37e879b0a3ff5b49ad06aed5576/bsc5.readme.txt) describe the measurements, including projected RA motion.
 
 Algorithms are original TypeScript implementations of the cited mathematical equations. No third-party implementation, C source, paper text, texture, or noncommercial/share-alike dataset is redistributed. Published equation references appear in source SPDX comments as well as this documentation. The procedural background is original MIT code.
 
 To reproduce the exact catalog, download the pinned `bsc5-orig.json` from that source revision, then run:
 
 ```sh
-node modules/earth/sun/scripts/generate-stars.mjs /absolute/path/bsc5-orig.json
+node modules/earth/scripts/sun/generate-stars.mjs /absolute/path/bsc5-orig.json
 # Verify an existing generated file without rewriting it:
-node modules/earth/sun/scripts/generate-stars.mjs /absolute/path/bsc5-orig.json --check
+node modules/earth/scripts/sun/generate-stars.mjs /absolute/path/bsc5-orig.json --check
 ```
 
 The generator verifies input SHA-256 `28cb835cbd2d72ced9ef9d20d9b5d92f05f649dfd39a509b1cf82dbd3c5f2fb9`, selects and sorts the 7,000 sources deterministically, and converts source arcseconds/year to milliarcseconds/year. No network request is part of building or using the module. Angles are rounded to 10 decimal places in radians, finer than the source coordinate precision.
 
-For a standalone comparison demo after building the package, run `node modules/earth/sun/scripts/create-stars-demo.mjs /absolute/path/stars.html`. It shows the full equatorial sky beside a deck.gl GlobeView and includes a ±1 million-year slider. The catalog is bundled; the globe panel loads MIT-licensed deck.gl 9.1.9 from a CDN. Increase GlobeView’s `farZMultiplier` if the chosen star shell lies beyond the camera’s far clipping plane. `node modules/earth/sun/scripts/benchmark-stars.mjs` measures 7,000-source propagation and GlobeView data conversion.
+For a standalone comparison demo after building the package, run `node modules/earth/scripts/sun/create-stars-demo.mjs /absolute/path/stars.html`. It shows the full equatorial sky beside a deck.gl GlobeView and includes a ±1 million-year slider. The catalog is bundled; the globe panel loads MIT-licensed deck.gl 9.1.9 from a CDN. Increase GlobeView’s `farZMultiplier` if the chosen star shell lies beyond the camera’s far clipping plane. `node modules/earth/scripts/sun/benchmark-stars.mjs` measures 7,000-source propagation and GlobeView data conversion.

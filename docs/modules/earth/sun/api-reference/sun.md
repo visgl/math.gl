@@ -176,7 +176,7 @@ The sky model is described by [cite](https://cgg.mff.cuni.cz/projects/SkylightMo
   The upstream source and datasets are **BSD-3-Clause**, copyright © 2012–2013 Lukas Hosek
   and Alexander Wilkie. Derived tables and reference fixtures carry
   `SPDX-License-Identifier: BSD-3-Clause` and `SPDX-FileCopyrightText` comments plus the
-  full original notice. [LICENSE-HOSEK-WILKIE](https://github.com/visgl/math.gl/blob/master/modules/earth/sun/LICENSE-HOSEK-WILKIE)
+  full original notice. [LICENSE-HOSEK-WILKIE](https://github.com/visgl/math.gl/blob/master/modules/earth/LICENSE-HOSEK-WILKIE)
   is included in the npm package for source and binary redistribution.
 - [Wyman, Sloan and Shirley, Simple Analytic Approximations to the CIE XYZ Color Matching
   Functions (2013)](https://jcgt.org/published/0002/02/01/). The integration tool independently
@@ -195,7 +195,7 @@ Download the published `HosekWilkie_SkylightModel_C_Source.1.4a.zip` from the re
 then run with Node.js and `unzip`:
 
 ```bash
-node modules/earth/sun/scripts/generate-sunlight.mjs /path/to/HosekWilkie_SkylightModel_C_Source.1.4a.zip
+node modules/earth/scripts/sun/generate-sunlight.mjs /path/to/HosekWilkie_SkylightModel_C_Source.1.4a.zip
 ```
 
 The generator verifies the archive SHA-256 and parses its numeric coefficient arrays.
@@ -350,7 +350,7 @@ coefficient table, texture or paper text is redistributed.
 - The shared ambient sky and existing diffuse tint retain the references and licenses documented in [sky lighting](./sky.md) and [sunlight](./sun.md#getsunlight).
 
 After building the package, generate a standalone dawn/dusk palette demo with
-`node modules/earth/sun/scripts/create-cloud-demo.mjs /absolute/path/clouds.html`.
+`node modules/earth/scripts/sun/create-cloud-demo.mjs /absolute/path/clouds.html`.
 It compares four cloud heights and three Sun-ray shadow depths through a shared
 Sun-altitude slider. The SVG shapes are original and illustrative; the generated
 page has no external runtime or artwork dependencies.

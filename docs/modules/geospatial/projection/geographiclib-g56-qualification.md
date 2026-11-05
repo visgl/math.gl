@@ -63,9 +63,9 @@ from a local iteration alone.
 ## Reproduction
 
 ```sh
-python3 modules/geospatial/projection/scripts/generate-g56-reference.py --check
-node modules/geospatial/projection/scripts/qualify-g56.mjs --output /tmp/g56.json
-node modules/geospatial/projection/scripts/qualify-g56.mjs --browser chromium --output /tmp/g56-chromium.json
+python3 modules/geospatial/scripts/projection/generate-g56-reference.py --check
+node modules/geospatial/scripts/projection/qualify-g56.mjs --output /tmp/g56.json
+node modules/geospatial/scripts/projection/qualify-g56.mjs --browser chromium --output /tmp/g56-chromium.json
 ```
 
 CI uses stored native controls and recomputes independent Decimal controls. It
@@ -79,7 +79,7 @@ and link the companion `geographiclib-g56-oracle.cpp` with `PolygonArea.cpp`,
 `Rhumb.cpp`, `Intersect.cpp` and the static GeographicLib library. Then run:
 
 ```sh
-python3 modules/geospatial/projection/scripts/generate-g56-reference.py \
+python3 modules/geospatial/scripts/projection/generate-g56-reference.py \
   --archive /path/to/geographiclib-r2.7.tar.gz --oracle /path/to/g56-oracle
 ```
 
