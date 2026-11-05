@@ -4,15 +4,17 @@
 
 Start with the package mapping below, then check the API changes for the modules you use. See [What’s New](./whats-new.md#v50) for the highlights.
 
-### Expression evaluation names
+### Expression imports and evaluation names
+
+Import expression APIs and types from `@math.gl/core/expressions`. If you used
+the package root in an earlier v5 prerelease, update the import specifier.
 
 The v5 prerelease expression exports `eval` and `evalAsync` are renamed to
-`evaluate` and `evaluateAsync`. Update named imports and namespace calls from
-`@math.gl/core`. The old names are removed: `eval` cannot be used as a local
+`evaluate` and `evaluateAsync`. Update named imports and namespace calls. The old names are removed: `eval` cannot be used as a local
 binding in strict-mode modules, including generated namespace wrappers.
 
 ```ts
-import {evaluate, parse} from '@math.gl/core';
+import {evaluate, parse} from '@math.gl/core/expressions';
 
 const value = evaluate(parse('x * 2'), {x: 3});
 ```

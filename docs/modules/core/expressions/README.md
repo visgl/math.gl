@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
 </p>
 
-The experimental expression parser and evaluator are available from `@math.gl/core`.
+The experimental expression parser and evaluator are available from `@math.gl/core/expressions`.
 Geospatial function libraries are exported from `@math.gl/geospatial`; DGGS function
 libraries are exported from `@math.gl/dggs`.
 
@@ -38,7 +38,7 @@ npm install @math.gl/core
 Evaluate a parsed expression against a data object:
 
 ```js
-import {parse, evaluate} from '@math.gl/core';
+import {parse, evaluate} from '@math.gl/core/expressions';
 
 const expression = parse('value * scale + 1');
 const result = evaluate(expression, {value: 3, scale: 2});
@@ -48,7 +48,7 @@ const result = evaluate(expression, {value: 3, scale: 2});
 Compile an expression once and reuse it:
 
 ```js
-import {compile} from '@math.gl/core';
+import {compile} from '@math.gl/core/expressions';
 
 const accessor = compile('points[1].value');
 const result = accessor({points: [{value: 1}, {value: 4}]});
@@ -61,7 +61,7 @@ Supply function libraries through parser options:
 import {
   BASIC_MATH_FUNCTION_LIBRARY,
   compile
-} from '@math.gl/core';
+} from '@math.gl/core/expressions';
 import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial';
 
 const fn = compile('cartographicToCartesian([toRadians(longitude), toRadians(latitude), 0])', {
@@ -79,7 +79,7 @@ import {
   BASIC_MATH_FUNCTION_LIBRARY,
   ExpressionFunctionRegistry,
   compile
-} from '@math.gl/core';
+} from '@math.gl/core/expressions';
 
 const registry = new ExpressionFunctionRegistry()
   .registerFunctions(BASIC_MATH_FUNCTION_LIBRARY)
@@ -93,7 +93,7 @@ fn({value: 2.4});
 Compile a JSON-style accessor expression that disallows function calls:
 
 ```js
-import {parseExpressionString} from '@math.gl/core';
+import {parseExpressionString} from '@math.gl/core/expressions';
 
 const getFill = parseExpressionString('style.fill.color');
 const fill = getFill({style: {fill: {color: '#08f'}}});
