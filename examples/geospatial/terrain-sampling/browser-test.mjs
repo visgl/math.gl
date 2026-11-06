@@ -24,6 +24,15 @@ try {
   });
   assert.equal(values.triangles,128);assert(values.missing<128);assert.notEqual(values.outside,values.valid);assert.notEqual(values.noData,values.valid);
   assert.notEqual(values.heights[0],values.heights[1]);assert.notEqual(values.heights[1],values.heights[2]);
+  const labStats = page.getByTestId('mesh-lab-stats');
+  const martiniStats = await labStats.innerText();
+  await page.getByLabel('Mesh algorithm').selectOption('regular');
+  assert.match(await labStats.innerText(), /2048 triangles/);
+  await page.getByLabel('Mesh algorithm').selectOption('martini');
+  await page.getByLabel('Mesh error tolerance').fill('10');
+  assert.notEqual(await labStats.innerText(), martiniStats);
+  await page.getByLabel('Mesh algorithm').selectOption('delatin');
+  assert((await page.getByRole('img', {name: 'Mesh lab wireframe'}).locator('[data-mesh-triangle]').count()) > 0);
   await page.getByLabel('Show mesh normals').check();
   await page.getByLabel('Interpolation').selectOption('triangle');
   await page.getByLabel('Cell diagonal').selectOption('10-01');

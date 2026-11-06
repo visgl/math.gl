@@ -137,13 +137,17 @@ test('real DTED DEM slopes and aspects agree with independent GDAL 3.9.3 output'
   }
 });
 
-test('adaptive meshes of a real DEM crop satisfy an independent exhaustive nodal oracle', () => {
+test('regular and adaptive meshes of a real DEM crop satisfy an independent exhaustive nodal oracle', () => {
   const crop = Float64Array.from(
     {length: 81},
     (_, i) => heights[(5 + Math.floor(i / 9)) * 33 + 5 + (i % 9)]
   );
   const source = new HeightField({width: 9, height: 9, heights: crop});
-  for (const create of [createMartiniTerrainMesh, createDelatinTerrainMesh])
+  for (const create of [
+    (source: HeightField, _options: {maxError: number}) => createTerrainMesh(source),
+    createMartiniTerrainMesh,
+    createDelatinTerrainMesh
+  ])
     for (const maxError of [0, 1, 5]) {
       const mesh = create(source, {maxError});
       for (let y = 0; y < 9; y++)
