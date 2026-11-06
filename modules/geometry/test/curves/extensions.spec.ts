@@ -129,3 +129,12 @@ it('transport rejects diagonal parallel normals and handles long equal-point run
     expect(t.reduce((sum, x, i) => sum + x * n[i], 0)).toBeCloseTo(0, 12);
   }
 });
+
+it('adaptive sampling measures large finite curves without false convergence', () => {
+  const curve = new QuadraticBezierCurve([0, 0], [5e199, 1e200], [1e200, 0]);
+  const result = sampleCurveAdaptive(curve, {tolerance: 1e198, maxPoints: 1024});
+  expect(result.parameters.length).toBeGreaterThan(2);
+  expect(Number.isFinite(result.maxSampledError)).toBe(true);
+  expect(result.converged).toBe(true);
+  expect(result.maxSampledError).toBeLessThanOrEqual(1e198);
+});

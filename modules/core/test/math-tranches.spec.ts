@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, it} from 'vitest';
 import {
+  SampleTrack,
   Matrix4,
   Quaternion,
   mat4,
@@ -195,4 +196,15 @@ it('normalization helpers preserve finite directions even when their magnitude e
     quatRotateTowards(new Array(4), [1e308, 1e308, 1e308, 1e308], [0, 0, 0, 1], 0),
     [0.5, 0.5, 0.5, 0.5]
   );
+});
+
+it('large finite reflection and projection preserve finite representable results', () => {
+  expect(vectorReflect([0, 0], [1e308, 0], [1, 0])).toEqual([-1e308, 0]);
+  const projected = vectorProjectOnVector([0, 0], [1e308, 1e308], [1, 1]);
+  for (const value of projected) expect(value / 1e308).toBeCloseTo(1, 12);
+});
+it('cubic tracks support subnormal time intervals', () => {
+  expect(
+    new SampleTrack([0, 1e-310], [0, 1], {interpolation: 'cubic'}).evaluate(5e-311)[0]
+  ).toBeCloseTo(0.5, 12);
 });

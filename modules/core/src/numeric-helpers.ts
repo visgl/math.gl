@@ -28,10 +28,11 @@ export function vectorProjectOnVector<T extends NumericArray>(
   const unit = Array.from(target, x => (scale ? x / scale : 0));
   const length = Math.hypot(...unit);
   for (let i = 0; i < unit.length; i++) unit[i] = length ? unit[i] / length : 0;
-  const d = unit.reduce((sum, x, i) => sum + x * value[i], 0);
+  const valueScale = Math.max(...Array.from(value, Math.abs));
+  const d = unit.reduce((sum, x, i) => sum + x * (valueScale ? value[i] / valueScale : 0), 0);
   return write(
     out,
-    unit.map(x => x * d)
+    unit.map(x => x * d * valueScale)
   );
 }
 /** A zero plane normal leaves the input unchanged. */
@@ -40,18 +41,22 @@ export function vectorProjectOnPlane<T extends NumericArray>(
   value: Input,
   normal: Input
 ): T {
-  const projection = vectorProjectOnVector(new Array(value.length), value, normal);
+  const scale = Math.max(...Array.from(value, Math.abs));
+  const scaled = Array.from(value, x => (scale ? x / scale : 0));
+  const projection = vectorProjectOnVector(new Array(value.length), scaled, normal);
   return write(
     out,
-    Array.from(value, (x, i) => x - projection[i])
+    scaled.map((x, i) => (x - projection[i]) * scale)
   );
 }
 /** Reflect across a plane with a possibly non-unit normal; zero normal is identity. */
 export function vectorReflect<T extends NumericArray>(out: T, value: Input, normal: Input): T {
-  const projection = vectorProjectOnVector(new Array(value.length), value, normal);
+  const scale = Math.max(...Array.from(value, Math.abs));
+  const scaled = Array.from(value, x => (scale ? x / scale : 0));
+  const projection = vectorProjectOnVector(new Array(value.length), scaled, normal);
   return write(
     out,
-    Array.from(value, (x, i) => x - 2 * projection[i])
+    scaled.map((x, i) => (x - 2 * projection[i]) * scale)
   );
 }
 /** Zero vectors stay zero, since they have no direction. */

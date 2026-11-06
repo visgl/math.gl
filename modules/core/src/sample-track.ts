@@ -134,19 +134,19 @@ export class SampleTrack {
       if (this.mode === 'discrete') out[j] = a;
       else if (this.mode === 'linear') out[j] = a + t * (b - a);
       else if (this.mode === 'cubic') {
-        const slope = (key: number) => {
+        const weightedSlope = (key: number) => {
           const left = Math.max(0, key - 1),
             right = Math.min(last, key + 1);
           return (
-            (this.values[right * this.size + j] - this.values[left * this.size + j]) /
-            (this.times[right] - this.times[left])
+            (this.values[right * this.size + j] - this.values[left * this.size + j]) *
+            (dt / (this.times[right] - this.times[left]))
           );
         };
         out[j] =
           (2 * t ** 3 - 3 * t ** 2 + 1) * a +
-          (t ** 3 - 2 * t ** 2 + t) * dt * slope(i) +
+          (t ** 3 - 2 * t ** 2 + t) * weightedSlope(i) +
           (-2 * t ** 3 + 3 * t ** 2) * b +
-          (t ** 3 - t ** 2) * dt * slope(i + 1);
+          (t ** 3 - t ** 2) * weightedSlope(i + 1);
       } else {
         const outIndex = (i * this.size + j) * 2,
           inIndex = ((i + 1) * this.size + j) * 2;

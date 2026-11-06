@@ -40,20 +40,25 @@ export function sampleCurveAdaptive(
   while (stack.length) {
     const segment = stack.pop()!;
     const {t0, t1, a, b, depth} = segment;
-    const edge = b.map((x, i) => x - a[i]),
+    const scale = Math.max(...a.map(Math.abs), ...b.map(Math.abs), 1);
+    const edge = b.map((x, i) => x / scale - a[i] / scale),
       squared = edge.reduce((sum, x) => sum + x * x, 0);
     const samples = [0.25, 0.5, 0.75].map(f => curve.getPoint(t0 + (t1 - t0) * f));
-    const error = Math.max(
+    const measuredError = Math.max(
       ...samples.map(p => {
         const t = squared
           ? Math.max(
               0,
-              Math.min(1, edge.reduce((sum, x, i) => sum + x * (p[i] - a[i]), 0) / squared)
+              Math.min(
+                1,
+                edge.reduce((sum, x, i) => sum + x * (p[i] / scale - a[i] / scale), 0) / squared
+              )
             )
           : 0;
-        return Math.hypot(...p.map((x, i) => x - a[i] - t * edge[i]));
+        return Math.hypot(...p.map((x, i) => x / scale - a[i] / scale - t * edge[i])) * scale;
       })
     );
+    const error = Number.isFinite(measuredError) ? measuredError : Infinity;
     if (
       error > tolerance &&
       depth < maxDepth &&
