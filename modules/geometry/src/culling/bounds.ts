@@ -67,7 +67,9 @@ export function boundsIntersect(a: ReadonlyBounds, b: ReadonlyBounds): boolean {
   );
 }
 function store(values: Bounds, out: Bounds = createEmptyBounds(values[0].length as 2 | 3)): Bounds {
-  pair(values, out);
+  if (out[0].length !== values[0].length || out[1].length !== values[0].length) {
+    throw new RangeError('Output bounds dimensions must match');
+  }
   for (let j = 0; j < 2; j++) for (let i = 0; i < values[j].length; i++) out[j][i] = values[j][i];
   return out;
 }

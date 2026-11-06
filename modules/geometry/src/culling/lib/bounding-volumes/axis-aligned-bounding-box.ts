@@ -84,7 +84,7 @@ export class AxisAlignedBoundingBox implements BoundingVolume {
 
   /**
    * Transforms an AABB by a finite affine matrix, rebuilding all bounds and extents.
-   * @param transform The transformation matrix to apply to the bounding sphere.
+   * @param transform The affine transformation matrix.
    * @returns itself, i.e. the modified bounding box.
    */
   transform(transform: readonly number[]): this {

@@ -268,3 +268,45 @@ it('plane/segment and triangle/box queries include boundaries and degenerate tri
   expect(triangleIntersectsBounds([-2, 0, 0], [2, 0, 0], [0, 0, 0], min, max)).toBe(true);
   expect(triangleIntersectsBounds([2, 2, 0], [3, 3, 0], [4, 4, 0], min, max)).toBe(false);
 });
+
+it('ray distance queries are invariant to very small and large direction scales', () => {
+  for (const scale of [1e-200, 1, 1e200]) {
+    close(getClosestPointOnRay([2, 3, 0], [0, 0, 0], [scale, 0, 0]), [2, 0, 0]);
+    expect(distanceToRay([2, 3, 0], [0, 0, 0], [scale, 0, 0])).toBe(3);
+    const hit = getClosestPointsRaySegment([0, 0, 0], [scale, 0, 0], [2, -1, 0], [2, 1, 0]);
+    expect(hit.distance).toBeCloseTo(0, 12);
+    expect(hit.rayParameter * scale).toBeCloseTo(2, 12);
+    expect(hit.segmentFraction).toBeCloseTo(0.5, 12);
+  }
+});
+
+it('bounds outputs need capacity but do not require initialized values', () => {
+  const out: Bounds2D = [
+    [NaN, NaN],
+    [NaN, NaN]
+  ];
+  expect(
+    unionBounds(
+      [
+        [0, 0],
+        [1, 1]
+      ],
+      [
+        [1, 1],
+        [2, 2]
+      ],
+      out
+    )
+  ).toBe(out);
+  expect(out).toEqual([
+    [0, 0],
+    [2, 2]
+  ]);
+  expect(() => unionBounds(out, out, createEmptyBounds(3))).toThrow();
+  expect(() =>
+    isEmptyBounds([
+      [Infinity, Infinity],
+      [Infinity, Infinity]
+    ])
+  ).toThrow();
+});

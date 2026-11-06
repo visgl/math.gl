@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {NumericArray} from '@math.gl/core';
-import {validateQueryPoint, type QueryPoint} from './queries';
+import {validateQueryPoint, normalizeQueryDirection, type QueryPoint} from './queries';
 
 type V = [number, number, number];
 const sub = (a: QueryPoint, b: QueryPoint): V => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
@@ -45,7 +45,12 @@ export function getClosestPointOnRay(
 ): NumericArray {
   check(point, origin);
   direction(dir);
-  return getRayPoint(origin, dir, Math.max(0, dot(sub(point, origin), dir) / dot(dir, dir)), out);
+  const unit = normalizeQueryDirection(dir, 3);
+  const distance = Math.max(0, dot(sub(point, origin), unit));
+  return output(
+    out,
+    [0, 1, 2].map(i => origin[i] + distance * unit[i])
+  );
 }
 export function distanceToRay(point: QueryPoint, origin: QueryPoint, dir: QueryPoint): number {
   const p = getClosestPointOnRay(point, origin, dir);
@@ -66,32 +71,47 @@ export function getClosestPointsRaySegment(
 ): RaySegmentClosestPoints {
   check(origin, a, b);
   direction(dir);
+  const unit = normalizeQueryDirection(dir, 3);
+  const directionLength = Math.hypot(dir[0], dir[1], dir[2]);
   const edge = sub(b, a),
     offset = sub(origin, a);
-  const aa = dot(dir, dir),
-    bb = dot(dir, edge),
-    cc = dot(edge, edge),
-    dd = dot(dir, offset),
-    ee = dot(edge, offset);
-  const clamp = (x: number) => Math.max(0, Math.min(1, x));
+  const segmentLength = Math.hypot(...edge);
+  const segmentUnit = edge.map(x => (segmentLength ? x / segmentLength : 0));
+  const bb = dot(unit, segmentUnit),
+    dd = dot(unit, offset),
+    ee = dot(segmentUnit, offset);
   const candidates: [number, number][] = [
-    [0, cc ? clamp(ee / cc) : 0],
-    [Math.max(0, -dd / aa), 0],
-    [Math.max(0, (bb - dd) / aa), 1]
+    [0, Math.max(0, Math.min(segmentLength, ee))],
+    [Math.max(0, -dd), 0],
+    [Math.max(0, bb * segmentLength - dd), segmentLength]
   ];
-  const determinant = aa * cc - bb * bb;
-  if (determinant > 0) {
-    const t = (bb * ee - cc * dd) / determinant,
-      u = (aa * ee - bb * dd) / determinant;
-    if (t >= 0 && u >= 0 && u <= 1) candidates.push([t, u]);
+  const determinant = 1 - bb * bb;
+  if (segmentLength > 0 && determinant > 0) {
+    const t = (bb * ee - dd) / determinant,
+      u = (ee - bb * dd) / determinant;
+    if (t >= 0 && u >= 0 && u <= segmentLength) candidates.push([t, u]);
   }
   let best: RaySegmentClosestPoints | undefined;
   for (const [t, u] of candidates) {
-    const rayPoint = [origin[0] + t * dir[0], origin[1] + t * dir[1], origin[2] + t * dir[2]] as V;
-    const segmentPoint = [a[0] + u * edge[0], a[1] + u * edge[1], a[2] + u * edge[2]] as V;
+    const rayPoint = [
+      origin[0] + t * unit[0],
+      origin[1] + t * unit[1],
+      origin[2] + t * unit[2]
+    ] as V;
+    const segmentPoint = [
+      a[0] + u * segmentUnit[0],
+      a[1] + u * segmentUnit[1],
+      a[2] + u * segmentUnit[2]
+    ] as V;
     const distance = Math.hypot(...sub(rayPoint, segmentPoint));
     if (!best || distance < best.distance)
-      best = {rayPoint, segmentPoint, rayParameter: t, segmentFraction: u, distance};
+      best = {
+        rayPoint,
+        segmentPoint,
+        rayParameter: t / directionLength,
+        segmentFraction: segmentLength ? u / segmentLength : 0,
+        distance
+      };
   }
   return best!;
 }
