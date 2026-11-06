@@ -1,4 +1,4 @@
-# Tasks
+# @math.gl/core/tasks
 
 Tasks keep applications responsive while processing large datasets. Use
 `TaskRunner` to execute named input/output objects locally or in a worker,

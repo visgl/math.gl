@@ -557,3 +557,19 @@ article:nth-child(3n) > .theme-doc-card-container { --card-accent: #62c8ae; }
   justify-content: center;
   max-width: none;
 }
+
+/* Compact category previews: readable summaries, without file/folder decoration. */
+.theme-doc-card-container { min-height: 130px; padding: 22px 24px; border-radius: 12px; box-shadow: none; }
+.theme-doc-card-icon { display: none; }
+.theme-doc-card-heading { font-size: 1.15rem; white-space: normal; }
+.theme-doc-card-description { white-space: normal; overflow: visible; text-overflow: clip; font-size: 0.95rem; }
+main:has(.theme-doc-card-container) > .container { max-width: none; }
+@media (max-width: 767px) { .theme-doc-card-container { min-height: 110px; padding: 20px; } }
+
+/* Pages without a right-hand table of contents use the full content area. */
+@media (min-width: 997px) {
+  main > .container > .row:not(:has(.theme-doc-toc-desktop)) > .col:first-child {
+    max-width: 100% !important;
+    flex-basis: 100%;
+  }
+}
