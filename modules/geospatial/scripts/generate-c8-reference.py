@@ -11,8 +11,8 @@ import importlib.util
 import json
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
-ORACLE = ROOT / 'modules/geospatial/projection/scripts/generate-interior-reference.py'
-P0 = ROOT / 'modules/geospatial/projection/test/fixtures/ellipsoid-p0-reference.json'
+ORACLE = ROOT / 'modules/geospatial/scripts/projection/generate-interior-reference.py'
+P0 = ROOT / 'modules/geospatial/test/projection/fixtures/ellipsoid-p0-reference.json'
 DEST = ROOT / 'modules/geospatial/test/c8-reference.json'
 spec = importlib.util.spec_from_file_location('decimal_nearest', ORACLE)
 oracle = importlib.util.module_from_spec(spec)

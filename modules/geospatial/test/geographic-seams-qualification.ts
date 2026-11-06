@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original native/independent C5-C6 matrix shared by Node and browser qualification.
-import {EllipsoidRhumb} from '../src/ellipsoid-rhumb';
-import {EllipsoidGeodesic} from '../src/ellipsoid-geodesic';
-import {RhumbPath} from '../src/rhumb-path';
-import {splitGeographicPolyline, splitGeographicPolygon} from '../src/geographic-seams';
-import {subdivideRhumbPolyline} from '../src/subdivide-rhumb-polyline';
+import {EllipsoidRhumb} from '@math.gl/geospatial/ellipsoid-rhumb';
+import {EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid-geodesic';
+import {RhumbPath} from '@math.gl/geospatial/rhumb-path';
+import {
+  splitGeographicPolyline,
+  splitGeographicPolygon
+} from '@math.gl/geospatial/geographic-seams';
+import {subdivideRhumbPolyline} from '@math.gl/geospatial/subdivide-rhumb-polyline';
 import reference from './ellipsoid/geographic-seam-reference.json';
 export const provenance = reference.provenance;
 export type SeamQualificationRow = {

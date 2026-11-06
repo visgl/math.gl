@@ -41,11 +41,11 @@ test('changes to qualification definitions and shared tooling validate the full 
     'vitest.config.ts',
     '.ocularrc.js',
     'test/utils/test-setup.ts',
-    'modules/geospatial/projection/scripts/scorecard.mjs',
+    'modules/geospatial/scripts/projection/scorecard.mjs',
     'modules/geospatial/scripts/qualify-c8.mjs',
-    'modules/geospatial/projection/test/benchmark-entry.ts',
-    'modules/geospatial/projection/test/native-forward-reference.ts',
-    'modules/geospatial/projection/test/fixtures/accuracy-cases.json'
+    'modules/geospatial/test/projection/benchmark-entry.ts',
+    'modules/geospatial/test/projection/native-forward-reference.ts',
+    'modules/geospatial/test/projection/fixtures/accuracy-cases.json'
   ])
     assert.equal(selectProfile('pull_request', [path]).full, true, path);
 });
@@ -182,8 +182,8 @@ test('renaming a qualification helper into docs retains both source-path gates',
     git('config', 'user.name', 'CI test fixture');
     git('config', 'user.email', 'fixture@example.invalid');
     git('config', 'diff.renames', 'true');
-    const source = 'modules/geospatial/projection/test/native-forward-reference.ts';
-    mkdirSync(join(directory, 'modules/geospatial/projection/test'), {recursive: true});
+    const source = 'modules/geospatial/test/projection/native-forward-reference.ts';
+    mkdirSync(join(directory, 'modules/geospatial/test/projection'), {recursive: true});
     writeFileSync(join(directory, source), 'export const reference = 42;\n');
     git('add', '.');
     git('commit', '-m', 'reference');

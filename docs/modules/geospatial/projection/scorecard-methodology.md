@@ -28,12 +28,12 @@ development pin; reports record its version and installed main-entry content has
 
 ```sh
 yarn exec ocular-build projection
-node modules/geospatial/projection/scripts/collect-scorecard-node.mjs \
+node modules/geospatial/scripts/projection/collect-scorecard-node.mjs \
   --directory /tmp/projection-scorecard-node --points 20000 --samples 7 --min-sample-ms 12
-node modules/geospatial/projection/scripts/benchmark-browser.mjs \
+node modules/geospatial/scripts/projection/benchmark-browser.mjs \
   --browsers chromium,firefox,webkit --points 20000 --samples 7 --min-sample-ms 12 \
   --output /tmp/projection-scorecard-browsers.json
-node modules/geospatial/projection/scripts/scorecard.mjs \
+node modules/geospatial/scripts/projection/scorecard.mjs \
   --node /tmp/projection-scorecard-node \
   --browser-report /tmp/projection-scorecard-browsers.json \
   --output /tmp/projection-scorecard.json --markdown /tmp/projection-scorecard.md
@@ -68,19 +68,19 @@ and browser evidence, retains JSON/Markdown artifacts and is a required check.
 
 The checked-in snapshot retains raw throughput samples, independent errors, memory
 checkpoints and allocation estimates in
-[`scorecard.json`](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/scorecard.json).
+[`scorecard.json`](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/qualification/scorecard.json).
 It is a dated baseline, not a promise that later source changes preserve its timings.
 Regenerate a snapshot from one explicitly identified source/workload and review its
 limits before replacing it. CI artifacts provide subsequent source-matched runs.
 
 ```sh
-node --test modules/geospatial/projection/scripts/scorecard.test.mjs
-node modules/geospatial/projection/scripts/benchmark-memory.mjs --points 20000 --samples 3 --output /tmp/memory.json
+node --test modules/geospatial/scripts/projection/scorecard.test.mjs
+node modules/geospatial/scripts/projection/benchmark-memory.mjs --points 20000 --samples 3 --output /tmp/memory.json
 ```
 
 To regenerate the documentation from the checked-in scorecard without rerunning
 measurements:
 
 ```sh
-node --input-type=module -e "import {readFileSync,writeFileSync} from 'node:fs'; import {renderScorecard} from './modules/geospatial/projection/scripts/scorecard.mjs'; writeFileSync('docs/modules/geospatial/projection/scorecard.md', renderScorecard(JSON.parse(readFileSync('modules/geospatial/projection/test/fixtures/qualification/scorecard.json','utf8'))));"
+node --input-type=module -e "import {readFileSync,writeFileSync} from 'node:fs'; import {renderScorecard} from './modules/geospatial/scripts/projection/scorecard.mjs'; writeFileSync('docs/modules/geospatial/projection/scorecard.md', renderScorecard(JSON.parse(readFileSync('modules/geospatial/test/projection/fixtures/qualification/scorecard.json','utf8'))));"
 ```

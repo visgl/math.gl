@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {PrismGeometry, RingGeometry, type Geometry} from '../../src';
+import {PrismGeometry, RingGeometry, type Geometry} from '@math.gl/geometry';
 
 export function validateMesh(geometry: Geometry): void {
   const positions = geometry.attributes.POSITION.value;

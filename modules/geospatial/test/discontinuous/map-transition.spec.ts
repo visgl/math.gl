@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {inRing} from '../../src/discontinuous/elastic/geometry';
-import {MapEngine, WORLD_PROJECTIONS} from '../../src/discontinuous';
-import {elasticI, elasticII, elasticIII} from '../../src/elastic';
+import {inRing} from '@math.gl/geospatial/discontinuous/elastic/geometry';
+import {MapEngine, WORLD_PROJECTIONS} from '@math.gl/geospatial/discontinuous';
+import {elasticI, elasticII, elasticIII} from '@math.gl/geospatial/elastic';
 const globeOnlyWorlds = new Set([
   'gringorten',
   'bertin1953',

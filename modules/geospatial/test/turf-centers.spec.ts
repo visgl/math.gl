@@ -2,8 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {makeGeoArrowColumnFromGeometryRows, materializeGeoArrowRows} from '../src/geoarrow/index';
-import {angle, centerMean, booleanParallel} from '../src/turf';
+import {
+  makeGeoArrowColumnFromGeometryRows,
+  materializeGeoArrowRows
+} from '@math.gl/geospatial/geoarrow/index';
+import {angle, centerMean, booleanParallel} from '@math.gl/geospatial/turf';
 const point = (x: number, y: number) =>
   makeGeoArrowColumnFromGeometryRows([{type: 'Point', coordinates: [x, y]}]);
 test('angle supports broadcasting, rhumb and explementary modes', () => {

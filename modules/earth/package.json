@@ -37,12 +37,12 @@
       "import": "./dist/timezone/index.js",
       "require": "./dist/timezone/index.cjs"
     },
-    "./geoid/geoid-egm96-low.pgm": "./geoid/data/geoid-egm96-low.pgm",
-    "./geoid/geoid-egm96-hi.pgm": "./geoid/data/geoid-egm96-hi.pgm",
-    "./timezone/timezone-geometry-low.json": "./timezone/data/timezone-geometry-low.json",
-    "./timezone/timezone-geometry-low.parquet": "./timezone/data/timezone-geometry-low.parquet",
-    "./timezone/timezone-geometry-hi.json": "./timezone/data/timezone-geometry-hi.json",
-    "./timezone/timezone-geometry-hi.parquet": "./timezone/data/timezone-geometry-hi.parquet",
+    "./geoid/geoid-egm96-low.pgm": "./data/geoid/geoid-egm96-low.pgm",
+    "./geoid/geoid-egm96-hi.pgm": "./data/geoid/geoid-egm96-hi.pgm",
+    "./timezone/timezone-geometry-low.json": "./data/timezone/timezone-geometry-low.json",
+    "./timezone/timezone-geometry-low.parquet": "./data/timezone/timezone-geometry-low.parquet",
+    "./timezone/timezone-geometry-hi.json": "./data/timezone/timezone-geometry-hi.json",
+    "./timezone/timezone-geometry-hi.parquet": "./data/timezone/timezone-geometry-hi.parquet",
     "./sun/stars": {
       "types": "./dist/sun/stars.d.ts",
       "import": "./dist/sun/stars.js",
@@ -52,20 +52,18 @@
   "files": [
     "dist",
     "src",
-    "geoid/data",
-    "sun/LICENSE-HOSEK-WILKIE",
-    "sun/LICENSE-SUNCALC",
-    "sun/LICENSE-BRIGHT-STARS",
-    "timezone/data",
+    "!src/**/README.md",
+    "./README.md",
+    "data",
+    "LICENSE-HOSEK-WILKIE",
+    "LICENSE-SUNCALC",
+    "LICENSE-BRIGHT-STARS",
     "LICENSE",
     "THIRD-PARTY-NOTICES.md"
   ],
   "sideEffects": false,
   "dependencies": {
     "@math.gl/core": "5.0.0-beta.4",
-    "astronomy-engine": "2.1.19"
-  },
-  "devDependencies": {
     "astronomy-engine": "2.1.19"
   }
 }

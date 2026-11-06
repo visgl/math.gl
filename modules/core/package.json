@@ -45,6 +45,8 @@
   "files": [
     "dist",
     "src",
+    "!src/**/README.md",
+    "./README.md",
     "PROJ4-LICENSE.md",
     "LICENSE",
     "THIRD-PARTY-NOTICES.md",

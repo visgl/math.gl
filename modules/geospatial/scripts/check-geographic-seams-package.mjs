@@ -17,8 +17,8 @@ const root=fileURLToPath(new URL('../../../',import.meta.url));
 const hash=async path=>createHash('sha256').update(await readFile(join(root,path))).digest('hex');
 const reference=JSON.parse(await readFile(join(root,'modules/geospatial/test/ellipsoid/geographic-seam-reference.json'),'utf8'));
 assert.equal(reference.provenance.generatorSHA256,await hash('modules/geospatial/scripts/generate-geographic-seam-reference.py'));
-assert.equal(reference.provenance.driverSHA256,await hash('modules/geospatial/projection/scripts/geographiclib-g56-oracle.cpp'));
-assert.equal(reference.provenance.geodesicDriverSHA256,await hash('modules/geospatial/projection/scripts/geographiclib-p0-oracle.cpp'));
+assert.equal(reference.provenance.driverSHA256,await hash('modules/geospatial/scripts/projection/geographiclib-g56-oracle.cpp'));
+assert.equal(reference.provenance.geodesicDriverSHA256,await hash('modules/geospatial/scripts/projection/geographiclib-p0-oracle.cpp'));
 assert.equal(reference.provenance.projReferenceSHA256,await hash('modules/geospatial/test/ellipsoid/geodesic-path-reference.json'));
 assert.equal(reference.rhumb.length,100);assert.equal(reference.geodesic.length,180);
 for(const format of ['esm','cjs']) {

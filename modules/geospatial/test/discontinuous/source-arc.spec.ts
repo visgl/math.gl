@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {clipSourceArc} from '../../src/discontinuous/elastic/source-arc';
-import {rectangle} from '../../src/discontinuous/elastic/geometry';
-import {sourceArc} from '../../src/discontinuous/source-arc';
+import {clipSourceArc} from '@math.gl/geospatial/discontinuous/elastic/source-arc';
+import {rectangle} from '@math.gl/geospatial/discontinuous/elastic/geometry';
+import {sourceArc} from '@math.gl/geospatial/discontinuous/source-arc';
 
 test('derivative isolation finds a narrow double crossing between fixed source probes', () => {
   const a: [number, number] = [-1.3, 30],

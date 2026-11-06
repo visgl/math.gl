@@ -4,8 +4,8 @@
 import {test, expect} from 'vitest';
 const isBrowser = typeof process === 'undefined' || !process.versions?.node;
 import {TaskRunner, preloadTasks} from '@math.gl/core/tasks';
-import {ProjectCoordinatesTask, PrepareMapTask} from '../../src/tasks';
-import {MapEngine} from '../../src/discontinuous/map-engine';
+import {ProjectCoordinatesTask, PrepareMapTask} from '@math.gl/geospatial/tasks';
+import {MapEngine} from '@math.gl/geospatial/discontinuous/map-engine';
 
 const initialization = {projection: {from: 'EPSG:4326', to: 'EPSG:3857'}};
 const input = () => ({coordinates: new Float64Array([0, 0, 10, 20])});

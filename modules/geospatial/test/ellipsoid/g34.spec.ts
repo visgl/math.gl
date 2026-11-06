@@ -3,9 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original independent integral/sphere and pinned full GeographicLib C++ controls. No upstream test data copied.
 import {expect, test} from 'vitest';
-import {EllipsoidMetrics, type AuxiliaryLatitude} from '../../src/ellipsoid-metrics';
-import {EllipsoidGeodesic} from '../../src/ellipsoid-geodesic';
-import {GeodesicPolygon} from '../../src/geodesic-polygon';
+import {EllipsoidMetrics, type AuxiliaryLatitude} from '@math.gl/geospatial/ellipsoid-metrics';
+import {EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid-geodesic';
+import {GeodesicPolygon} from '@math.gl/geospatial/geodesic-polygon';
 import reference from './g34-reference.json';
 
 const kinds: AuxiliaryLatitude[] = [

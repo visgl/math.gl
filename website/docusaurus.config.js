@@ -164,7 +164,7 @@ config.plugins.push([
 ]);
 config.favicon = 'images/visgl-favicon.png';
 // Serve the optional geometry independently of the JavaScript bundle.
-config.staticDirectories = [...config.staticDirectories, '../modules/earth/timezone/data'];
+config.staticDirectories = [...config.staticDirectories, '../modules/earth/data/timezone'];
 config.plugins.push(require('./projection-redirects.cjs'));
 config.plugins.push(require('./docs-redirects.cjs'));
 

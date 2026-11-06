@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {TaskChannel} from '../../src/tasks/task-channel';
+import {TaskChannel} from '@math.gl/core/tasks/task-channel';
 
 test('multiplexes bidirectional requests and transfers buffers through real ports', async () => {
   const ports = new MessageChannel();

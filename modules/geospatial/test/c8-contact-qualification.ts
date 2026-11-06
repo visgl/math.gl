@@ -4,7 +4,7 @@
 // SPDX-FileComment: Independent Decimal line/quadric controls over exact stored binary64 geometry.
 import {Vector3} from '@math.gl/core';
 import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial';
-import {exactNormalIntersection} from '../src/ellipsoid-helpers/tangent-plane-numerics';
+import {exactNormalIntersection} from '@math.gl/geospatial/ellipsoid-helpers/tangent-plane-numerics';
 import type {C8Row} from './c8-qualification';
 import reference from './c8-contact-reference.json';
 export const contactProvenance = reference.provenance;

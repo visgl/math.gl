@@ -3,7 +3,14 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {clamp, createMat4, lerp, log2, mod, transformVector} from '../src/math-utils';
+import {
+  clamp,
+  createMat4,
+  lerp,
+  log2,
+  mod,
+  transformVector
+} from '@math.gl/web-mercator/math-utils';
 
 test('web mercator math helpers cover matrix, modular, and scalar paths', () => {
   const identity = createMat4();

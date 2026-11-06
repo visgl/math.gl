@@ -44,8 +44,8 @@ on a sphere and WGS84. Identity, geocentric conversion and the composed oblique
 wrapper remain covered by their existing suites.
 
 Every oracle result or rejection is stored in
-[`pole-audit-reference.json`](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/pole-audit-reference.json).
-The [findings](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/pole-audit-findings.json)
+[`pole-audit-reference.json`](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/pole-audit-reference.json).
+The [findings](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/pole-audit-findings.json)
 retain numerical differences and both kinds of rejection disagreement, including
 coordinates where PROJ fails but math.gl succeeds. Definitions are unchanged;
 documented aliases and unsupported syntax/default combinations use the same
@@ -98,10 +98,10 @@ methods; it is not an exhaustive review of all PROJ issues or PRs.
 Use an isolated environment with `pyproj==3.7.2`, then run:
 
 ```sh
-python modules/geospatial/projection/scripts/generate-pole-audit.py
-node modules/geospatial/projection/scripts/audit-pole-boundaries.mjs /tmp/pole-audit-findings.json
-node modules/geospatial/projection/scripts/check-native-reference.mjs
-node node_modules/vitest/vitest.mjs run --project node modules/geospatial/projection/test
+python modules/geospatial/scripts/projection/generate-pole-audit.py
+node modules/geospatial/scripts/projection/audit-pole-boundaries.mjs /tmp/pole-audit-findings.json
+node modules/geospatial/scripts/projection/check-native-reference.mjs
+node node_modules/vitest/vitest.mjs run --project node modules/geospatial/test/projection
 ```
 
 Review the fresh findings before replacing the checked-in report. Fixture hashes

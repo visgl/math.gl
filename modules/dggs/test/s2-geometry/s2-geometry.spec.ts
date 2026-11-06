@@ -16,7 +16,7 @@ import {
   getS2IndexFromToken,
   getS2Level,
   getS2TokenFromIndex
-} from '../../src/s2-geometry/s2-token';
+} from '@math.gl/dggs/s2-geometry/s2-token';
 
 test('S2 Hilbert quadkey conversion', () => {
   const TEST_COORDINATES = [

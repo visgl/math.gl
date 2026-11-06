@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {TaskRunner, preloadTasks, type Task} from '../../src/tasks';
+import {TaskRunner, preloadTasks, type Task} from '@math.gl/core/tasks';
 
 type Types = {
   input: {value: number};
@@ -205,7 +205,7 @@ test.each(['main-thread', 'worker'] as const)(
       async process(
         input: {value: number; callback: boolean},
         _options: object,
-        context: import('../../src/tasks').TaskContext
+        context: import('@math.gl/core/tasks').TaskContext
       ) {
         const result = await context.requestHost('double', {value: input.value});
         const event = {...(result as {value: number})};

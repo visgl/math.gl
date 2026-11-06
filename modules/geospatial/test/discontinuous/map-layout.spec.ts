@@ -9,7 +9,7 @@ import {
   type GeographicPosition,
   type MapRegion,
   type MapPolygon
-} from '../../src/discontinuous';
+} from '@math.gl/geospatial/discontinuous';
 
 type XY = [number, number];
 const RAD = Math.PI / 180;

@@ -6,7 +6,7 @@ import {
   createAlbersUsaMap,
   createInterruptedMollweideMap,
   createInterruptedHomolosineMap
-} from '../../src/discontinuous';
+} from '@math.gl/geospatial/discontinuous';
 
 test('Albers USA selects all three regions in a compact conventional inset layout', () => {
   const map = createAlbersUsaMap();
@@ -180,7 +180,7 @@ test('local formulas preserve spherical area with the documented inset scales', 
 });
 
 test('convex grid cells tangent to a regional edge do not create boolean-kernel failures', async () => {
-  const {DiscontinuousMap} = await import('../../src/discontinuous');
+  const {DiscontinuousMap} = await import('@math.gl/geospatial/discontinuous');
   const map = new DiscontinuousMap([
     {
       id: 'alaska-domain',
