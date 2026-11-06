@@ -24,7 +24,7 @@ The annual Open Visualization Collaborator Summit brings contributors together t
 
 ## Contributor resources
 
-- [Repository setup](./developer-guide/get-started.md)
-- [AI Agents](./developer-guide/working-with-ai.md)
+- [Repository setup](./developer-guide/README.md#install-and-make-a-calculation)
+- [AI Agents](./developer-guide/README.md#work-with-an-ai-coding-agent)
 - [Report an issue](https://github.com/visgl/math.gl/issues)
 - [Release workflow](https://github.com/visgl/math.gl/blob/master/.github/workflows/release.yml)
