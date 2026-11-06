@@ -116,7 +116,7 @@
               },
               {
                 "type": "category",
-                "label": "@math.gl/core/types",
+                "label": "@math.gl/core — types",
                 "items": [
                   "modules/core/types/api-reference/array-types",
                   "modules/core/types/api-reference/bounds"
@@ -140,7 +140,7 @@
               },
               {
                 "type": "category",
-                "label": "@math.gl/core/expressions",
+                "label": "@math.gl/core — expressions",
                 "items": [
                   "modules/core/expressions/api-reference/expression-eval",
                   "modules/core/expressions/api-reference/function-registry",
@@ -239,7 +239,7 @@
               },
               {
                 "type": "category",
-                "label": "@math.gl/geometry/curves",
+                "label": "@math.gl/geometry — curves",
                 "items": [
                   "modules/geometry/curves/api-reference/curves",
                   "modules/geometry/curves/api-reference/curve-arc-length"
@@ -251,7 +251,7 @@
               },
               {
                 "type": "category",
-                "label": "@math.gl/geometry/polygon",
+                "label": "@math.gl/geometry — polygon",
                 "items": [
                   "modules/geometry/polygon/api-reference/clip-polygon",
                   "modules/geometry/polygon/api-reference/clip-polyline",
@@ -271,7 +271,7 @@
               },
               {
                 "type": "category",
-                "label": "@math.gl/geometry/utils",
+                "label": "@math.gl/geometry — utils",
                 "items": [
                   "modules/geometry/utils/api-reference/geometry-utils",
                   "modules/geometry/utils/api-reference/mesh-processing",
@@ -463,7 +463,7 @@
               },
               {
                 "type": "category",
-                "label": "@math.gl/geospatial/wkb",
+                "label": "@math.gl/geospatial — wkb",
                 "items": [
                   "modules/geospatial/wkb/api-reference/wkb"
                 ],
@@ -515,7 +515,7 @@
             "items": [
               {
                 "type": "category",
-                "label": "@math.gl/earth/geoid",
+                "label": "@math.gl/earth — geoid",
                 "items": [
                   "modules/earth/geoid/api-reference/geoid",
                   "modules/earth/geoid/api-reference/parse-pgm",
