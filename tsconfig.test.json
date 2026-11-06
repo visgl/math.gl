@@ -647,6 +647,9 @@
       "@math.gl/core/types/*": [
         "./modules/core/src/types/*"
       ],
+      "@math.gl/core/expressions": [
+        "./modules/core/src/expressions/index.ts"
+      ],
       "@math.gl/core/expressions/test/*": [
         "./modules/core/test/expressions/*"
       ],

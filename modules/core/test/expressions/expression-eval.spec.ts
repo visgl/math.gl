@@ -13,7 +13,7 @@ import {
   evaluateAsync,
   parse,
   parseExpressionString
-} from '@math.gl/core';
+} from '@math.gl/core/expressions';
 import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial';
 import {get} from '@math.gl/core/expressions/get';
 

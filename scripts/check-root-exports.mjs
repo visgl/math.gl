@@ -19,7 +19,6 @@ const removed = [
   "@math.gl/core/local-frame",
   "@math.gl/core/spheroid",
   "@math.gl/core/types",
-  "@math.gl/core/expressions",
   "@math.gl/dggs/a5",
   "@math.gl/dggs/geohash",
   "@math.gl/dggs/h3",
@@ -90,6 +89,7 @@ for (const path of removed) {
 
 const roots = {
   '@math.gl/core': ['spheroidToCartesian','createLocalFrameBasis','mat4GetScaling','vec3Normalize','mat4'],
+  '@math.gl/core/expressions': ['parse','evaluate','compile','parseExpressionString','ExpressionFunctionRegistry'],
   '@math.gl/dggs': ['getGeohashBounds','DGGS_FUNCTION_LIBRARY'],
   '@math.gl/geometry': ['ParametricGeometry','Curve','clipPolygon','TriangleBVH','getClosestPointsSegmentTriangle'],
   '@math.gl/geometry/culling': ['getClosestPointsOnSegments','getClosestPointsSegmentTriangle'],

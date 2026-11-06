@@ -107,30 +107,6 @@ export type {
   Bounds2D,
   Bounds3D
 } from './types';
-export {
-  ExpressionFunctionRegistry,
-  addBinaryOp,
-  addUnaryOp,
-  compile,
-  compileAsync,
-  evaluate,
-  evaluateAsync,
-  parse,
-  BASIC_MATH_FUNCTION_LIBRARY,
-  mergeFunctionLibraries,
-  parseExpressionString
-} from './expressions/index';
-export type {
-  ExpressionEvaluationOptions,
-  ExpressionFunction,
-  ExpressionFunctionLibrary,
-  FunctionRegistrationOptions,
-  BinaryOperator,
-  Expression,
-  ExpressionContext,
-  UnaryOperator,
-  AccessorFunction
-} from './expressions/index';
 
 export * as mat3 from './mat3';
 export * as mat4 from './mat4';

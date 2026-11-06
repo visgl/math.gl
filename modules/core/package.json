@@ -36,6 +36,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./expressions": {
+      "types": "./dist/expressions/index.d.ts",
+      "import": "./dist/expressions/index.js",
+      "require": "./dist/expressions/index.cjs"
+    },
     "./tasks": {
       "types": "./dist/tasks/index.d.ts",
       "import": "./dist/tasks/index.js",
