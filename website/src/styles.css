@@ -115,6 +115,11 @@ html[data-theme='dark'] .theme-doc-sidebar-container {
 .menu__list {
   padding-bottom: 0.5rem;
 }
+/* Let documentation use the space beside the navigation sidebar. */
+main:has(.theme-doc-markdown) > .container {
+  max-width: none;
+}
+
 .theme-doc-markdown {
   font-size: 1.075rem;
   line-height: 1.72;
@@ -343,7 +348,7 @@ html[data-theme='dark'] .theme-doc-sidebar-container {
 .foundation-attribution > a {
   flex-shrink: 0;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 0;
 }
 .foundation-attribution img {
   display: block;
@@ -445,7 +450,7 @@ html[data-theme='dark'] .openjs-logo-light {
 
 .theme-doc-markdown .badges {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
@@ -501,4 +506,54 @@ html[data-theme='dark'] .openjs-logo-light {
   .footer {
     padding: 16px 20px;
   }
+}
+
+/* Keep foundation artwork square, including inside documentation image styles. */
+img.openjs-logo-light,
+img.openjs-logo-dark {
+  border-radius: 0;
+}
+
+/* Overview links should read as inviting destinations rather than file listings. */
+.theme-doc-card-container {
+  --card-accent: #65bde8;
+  position: relative;
+  min-height: 170px;
+  padding: 28px 30px;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 32%, var(--ifm-background-color));
+  border-radius: 20px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--card-accent) 12%, var(--ifm-background-color)), var(--ifm-background-surface-color));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+article:nth-child(3n + 2) > .theme-doc-card-container { --card-accent: #ae91e8; }
+article:nth-child(3n) > .theme-doc-card-container { --card-accent: #62c8ae; }
+.theme-doc-card-container:hover,
+.theme-doc-card-container:focus-visible {
+  border-color: var(--card-accent);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--card-accent) 14%, transparent);
+  transform: translateY(-3px);
+}
+.theme-doc-card-heading {
+  color: var(--ifm-heading-color);
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+.theme-doc-card-description {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.theme-doc-card-icon { margin-right: 0.65rem; }
+@media (max-width: 767px) {
+  .theme-doc-card-container { min-height: 140px; padding: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-doc-card-container { transition: none; }
+  .theme-doc-card-container:hover { transform: none; }
+}
+
+.theme-doc-markdown .badges.introduction-badges {
+  justify-content: center;
+  max-width: none;
 }

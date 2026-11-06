@@ -11,22 +11,18 @@ import CullingExample from '@site/src/components/culling-playground';
 
 <CullingExample inline />
 
-## Feature support
+## Feature Card
 
-Analytic visibility and geometric-query capabilities, distinct from a physics simulation.
-
-Support describes the public API in the current repository. Notes identify limits and experimental features.
-
-| Feature | math.gl support | Notes |
+| Feature | Support | Notes |
 | --- | --- | --- |
-| Bounding spheres, AABBs and OBBs | ✅ Implemented | [Bounding volumes](./api-reference/bounding-volume.md), point-cloud bounds, planes, and ray representations. |
-| Frustum classification and plane masks | ✅ Implemented | [CullingVolume](./api-reference/culling-volume.md) reports inside/intersecting/outside and supports hierarchical plane-mask reuse. |
-| Analytic shape ray and closest-point queries | ✅ Implemented | [Box, capsule, cylinder, plane and sphere](./api-reference/shapes.md) queries avoid tessellating the shapes. |
-| Triangle and segment kernels | ✅ Implemented | [Ray/triangle and closest-point kernels](./api-reference/queries.md) include segment/triangle closest pairs. |
-| Rotated 2D rectangle overlap | ✅ Implemented | [intersectOrientedBoxes2D](./api-reference/intersect-oriented-boxes-2d.md) provides allocation-free oriented rectangle queries. |
-| Large-scene acceleration structures | ◐ Partial | [Static indexes](../spatial-index/README.md) are separate APIs; individual culling kernels do not build or maintain an index. |
-| Continuous collision dynamics | ❌ Not implemented | No time integration, friction, restitution, constraint/contact solver, or general first-impact engine. |
-| Universal exact-predicate certification | ❌ Not implemented | Floating-point kernels retain documented degeneracy and scale limits; no general watertight/exact-arithmetic guarantee. |
+| Bounding spheres, AABBs and OBBs | ✅ | [Bounding volumes](./api-reference/bounding-volume.md), point-cloud bounds, planes, and ray representations. |
+| Frustum classification and plane masks | ✅ | [CullingVolume](./api-reference/culling-volume.md) reports inside/intersecting/outside and supports hierarchical plane-mask reuse. |
+| Analytic shape ray and closest-point queries | ✅ | [Box, capsule, cylinder, plane and sphere](./api-reference/shapes.md) queries avoid tessellating the shapes. |
+| Triangle and segment kernels | ✅ | [Ray/triangle and closest-point kernels](./api-reference/queries.md) include segment/triangle closest pairs. |
+| Rotated 2D rectangle overlap | ✅ | [intersectOrientedBoxes2D](./api-reference/intersect-oriented-boxes-2d.md) provides allocation-free oriented rectangle queries. |
+| Large-scene acceleration structures | ◐ | [Static indexes](../spatial-index/README.md) are separate APIs; individual culling kernels do not build or maintain an index. |
+| Continuous collision dynamics | ❌ | No time integration, friction, restitution, constraint/contact solver, or general first-impact engine. |
+| Universal exact-predicate certification | ❌ | Floating-point kernels retain documented degeneracy and scale limits; no general watertight/exact-arithmetic guarantee. |
 
 ## Installation
 
@@ -71,7 +67,7 @@ Vector inputs can be numeric arrays, including core vectors; no renderer objects
 
 Bounding-volume and frustum code was ported from Cesium under Apache-2.0. See the source headers and distributed license notices for provenance.
 
-See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
 
 ## Bounds and query extensions
 

@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {useEffect, useRef, useState} from 'react';
-import {createPortal} from 'react-dom';
-import {MapEngine, WORLD_PROJECTIONS} from '@math.gl/geospatial/discontinuous';
+import {MapEngine} from '@math.gl/geospatial/discontinuous';
 import {getSunTerminator} from '@math.gl/earth/sun';
 import land from 'website-examples/geometry/unfolding-polyhedron/data/land.json';
 import styles from './styles.module.css';
@@ -13,7 +12,27 @@ const displayNames = {
   winkel3: 'Winkel Tripel',
   'natural-earth2': 'Natural Earth II'
 };
-const presets = ['robinson', ...WORLD_PROJECTIONS.filter(name => name !== 'robinson')].map(name => [
+// Alternate oval, angular, circular, rectangular, and asymmetric silhouettes.
+// Keep related variants apart, including across the end of the loop.
+const projectionOrder = [
+  'robinson',
+  'collignon',
+  'mollweide',
+  'bonne',
+  'cylindrical-equal-area',
+  'nicolosi',
+  'sinusoidal',
+  'gringorten',
+  'aitoff',
+  'august',
+  'miller',
+  'lagrange',
+  'eckert1',
+  'hammer',
+  'polyconic',
+  'van-der-grinten'
+];
+const presets = projectionOrder.map(name => [
   name,
   displayNames[name] ||
     name
@@ -56,12 +75,8 @@ for (let lon = -180; lon < 180; lon += 5) {
 
 export default function HomeMap() {
   const canvas = useRef(null);
-  const [captionHost, setCaptionHost] = useState(null);
-  const paused = useRef(false);
-  const [isPaused, setPaused] = useState(false);
   const [label, setLabel] = useState({name: presets[0][1], key: 0});
   useEffect(() => {
-    setCaptionHost(document.getElementById('home-map-caption'));
     const element = canvas.current;
     const ctx = element.getContext('2d');
     if (!ctx) return undefined;
@@ -81,11 +96,8 @@ export default function HomeMap() {
       target = 0,
       started = -2000;
     let transition, coast, lines, mesh;
-    let remaining = [];
     function pickNext() {
-      if (!remaining.length) remaining = maps.map((_, i) => i).filter(i => i !== target);
-      const index = Math.floor(Math.random() * remaining.length);
-      return remaining.splice(index, 1)[0];
+      return (target + 1) % maps.length;
     }
     function prepare() {
       transition = maps[source].createTransitionTo(maps[target], {strategy: 'auto'});
@@ -112,7 +124,7 @@ export default function HomeMap() {
     function draw(now) {
       const delta = last ? Math.min(now - last, 100) : 0;
       last = now;
-      if (!document.hidden && !paused.current && !reduced.matches) time += delta;
+      if (!document.hidden && !reduced.matches) time += delta;
       if (
         document.hidden ||
         (time === paintedTime && width === paintedWidth && height === paintedHeight) ||
@@ -137,12 +149,8 @@ export default function HomeMap() {
       const t = phase * phase * (3 - 2 * phase);
       ctx.setTransform(element.width / width, 0, 0, element.height / height, 0, 0);
       ctx.clearRect(0, 0, width, height);
-      const scale = Math.min(width / 7, height / 3.8);
-      ctx.translate(width * 0.58, height * 0.5);
-      ctx.scale(scale, scale);
-      ctx.lineWidth = 0.6 / scale;
-      const sun = getSunTerminator(epoch + time * 8640, {resolution: 120});
       for (const cell of mesh) {
+        cell.current = null;
         if (cell.from.some(p => !p) || cell.to.some(p => !p)) continue;
         cell.current =
           transition.strategy === 'direct'
@@ -157,6 +165,33 @@ export default function HomeMap() {
           cell.current = null;
           continue;
         }
+      }
+      // Projection extents differ: fit and center the geometry actually being drawn.
+      let minimumX = Infinity, maximumX = -Infinity;
+      let minimumY = Infinity, maximumY = -Infinity;
+      for (const cell of mesh) {
+        for (const point of cell.current || []) {
+          if (!point.every(Number.isFinite)) continue;
+          minimumX = Math.min(minimumX, point[0]);
+          maximumX = Math.max(maximumX, point[0]);
+          minimumY = Math.min(minimumY, point[1]);
+          maximumY = Math.max(maximumY, point[1]);
+        }
+      }
+      const extentWidth = maximumX - minimumX;
+      const extentHeight = maximumY - minimumY;
+      if (!(extentWidth > 0 && extentHeight > 0)) {
+        frame = requestAnimationFrame(draw);
+        return;
+      }
+      const scale = Math.min(width * 0.94 / extentWidth, height * 0.94 / extentHeight);
+      ctx.translate(width / 2, height / 2);
+      ctx.scale(scale, scale);
+      ctx.translate(-(minimumX + maximumX) / 2, (minimumY + maximumY) / 2);
+      ctx.lineWidth = 0.6 / scale;
+      const sun = getSunTerminator(epoch + time * 8640, {resolution: 120});
+      for (const cell of mesh) {
+        if (!cell.current) continue;
         path([cell.current], true);
         ctx.fillStyle = '#173c50';
         ctx.fill();
@@ -216,21 +251,12 @@ export default function HomeMap() {
       resize.disconnect();
     };
   }, []);
-  const caption = inline => (
-    <div className={`${styles.caption} ${inline ? styles.inlineCaption : styles.overlayCaption}`}>
-      <span key={label.key} className={styles.name}>{label.name}</span>
-      <button type="button" onClick={() => {paused.current = !paused.current; setPaused(paused.current);}}
-        aria-label={isPaused ? 'Play map animation' : 'Pause map animation'}
-        title="Animated solar day: 10 seconds. Map data: Natural Earth (public domain).">
-        {isPaused ? '▶' : 'Ⅱ'}
-      </button>
-    </div>
-  );
   return <>
     <div className={styles.scene}>
       <canvas ref={canvas} aria-hidden="true" />
-      {caption(false)}
     </div>
-    {captionHost && createPortal(caption(true), captionHost)}
+    <div className={styles.caption}>
+      <span key={label.key} className={styles.name}>{label.name}</span>
+    </div>
   </>;
 }

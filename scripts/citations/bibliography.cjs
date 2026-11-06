@@ -74,10 +74,10 @@ function reference(entry) {
 }
 function renderBibliography(entries) {
   return (
-    '# Bibliography\n\n{/* Generated from references.bib by yarn citations:generate. Do not edit. */}\n\nDownload the shared [BibTeX bibliography](/references.bib) or [CSL-JSON metadata](/references.json).\n\nAcademic sources cited throughout the documentation. Software and dataset attribution remains in [References and credits](./references-and-credits.md).\n\n' +
+    '## Bibliography\n\n{/* Generated from references.bib by yarn citations:generate. Do not edit. */}\n\nDownload the shared [BibTeX bibliography](/references.bib) or [CSL-JSON metadata](/references.json).\n\nAcademic sources cited throughout the documentation.\n\n' +
     [...entries.values()]
       .sort((a, b) => a.id.localeCompare(b.id, 'en'))
-      .map(entry => `## ${escape(label(entry))} {/* #${entry.id} */}\n\n${reference(entry)}\n`)
+      .map(entry => `### ${escape(label(entry))} {/* #${entry.id} */}\n\n${reference(entry)}\n`)
       .join('\n')
   );
 }

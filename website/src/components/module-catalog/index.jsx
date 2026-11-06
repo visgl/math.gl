@@ -202,7 +202,7 @@ function ModuleCard({module, baseUrl}) {
       <div className={styles.cardBody}>
         <div className={styles.cardHeading}>
           <h3>{module.name}</h3>
-          {module.experimental && <span className={styles.experimental}>Experimental</span>}
+          {module.experimental && <span className={styles.experimental} title="Experimental" aria-label="Experimental">🧪</span>}
         </div>
         <p>{module.description}</p>
         <span className={styles.cardLink}>

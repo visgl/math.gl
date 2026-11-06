@@ -28,7 +28,7 @@ test('citations resolve at both stable and next base paths; unknown keys fail', 
       .use(remarkParse)
       .parse('[cite](https://example.org/paper "cite:karney2013") and [sections 3–7](https://example.org/paper "cite:karney2024")');
     plugin({baseUrl})(tree, {path: 'example.md'});
-    assert.equal(tree.children[0].children[0].url, baseUrl + 'docs/bibliography#karney2013');
+    assert.equal(tree.children[0].children[0].url, baseUrl + 'docs/references-and-credits#karney2013');
     assert.equal(tree.children[0].children[0].children[0].value, 'Karney (2013)');
     assert.equal(tree.children[0].children[2].children[0].value, 'sections 3–7');
   }
@@ -65,7 +65,7 @@ test('each citing page receives a deduplicated ordered References section', () =
 test('reference-style Markdown citations also resolve and validate', () => {
   const tree = unified().use(remarkParse).parse('[cite][paper]\n\n[paper]: https://example.org/paper "cite:karney2013"');
   plugin()(tree, {});
-  assert.equal(tree.children[0].children[0].url, '/docs/bibliography#karney2013');
+  assert.equal(tree.children[0].children[0].url, '/docs/references-and-credits#karney2013');
   assert.throws(
     () => plugin()(unified().use(remarkParse).parse('[cite][paper]\n\n[paper]: https://example.org/paper "cite:unknown"'), {}),
     /unknown citation/
@@ -123,7 +123,7 @@ test('citation links retain a usable source URL in ordinary Markdown', () => {
   );
   assert.equal(tree.children[0].children[0].url, 'https://doi.org/10.1007/s00190-012-0578-z');
   plugin()(tree, {});
-  assert.equal(tree.children[0].children[0].url, '/docs/bibliography#karney2013');
+  assert.equal(tree.children[0].children[0].url, '/docs/references-and-credits#karney2013');
   assert.throws(() => plugin()(unified().use(remarkParse).parse('[paper](cite:karney2013)'), {}), /HTTP/);
 });
 

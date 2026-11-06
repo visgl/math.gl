@@ -1,4 +1,4 @@
-# Discontinuous maps
+# Discontinuous maps 🧪
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -438,4 +438,4 @@ numerical validation.
   explains the face/subtriangle construction. math.gl implements the projection
   equations independently and retains PROJ's MIT-style notice for the tables.
 
-See [References and credits](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

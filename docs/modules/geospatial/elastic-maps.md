@@ -1,4 +1,4 @@
-# Elastic maps
+# Elastic maps 🧪
 
 <p class="badges"><img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" /> <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" /></p>
 
@@ -149,4 +149,4 @@ See the [Elastic API reference](./projection/api-reference/elastic.md),
 [MapEngine reference](./projection/api-reference/map-engine.md), and
 [rendering guide](./projection/developer-guide/map-engine.md).
 
-See [References and credits](../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

@@ -6,22 +6,18 @@
 
 `@math.gl/earth/timezone` supplies geographic timezone lookup and numeric local-calendar computations. Use it for map labels, daily aggregation, and scheduling. It uses the runtime's timezone rules; use `Intl.DateTimeFormat` for localized presentation.
 
-## Feature support
+## Feature Card
 
-Geographic timezone identification and DST-aware calendar computation capabilities.
-
-Support describes the public API in the current repository. Notes identify limits and experimental features.
-
-| Feature | math.gl support | Notes |
+| Feature | Support | Notes |
 | --- | --- | --- |
-| Numeric offsets and local calendar fields | ✅ Implemented | [Timezone utilities](./api-reference/timezone.md) use runtime Intl rules and return numeric values suitable for computation. |
-| Synchronous and lazy geographic lookup | ✅ Implemented | Approximate compact boundary lookup supplies IANA identifiers; async lookup defers loading that data. |
-| Ambiguous/nonexistent local-time handling | ✅ Implemented | Local-time conversion rejects by default and offers explicit earlier/later/compatible policies. |
-| Local-day boundaries and offset transitions | ✅ Implemented | DST and political offset changes are handled using the runtime timezone database. |
-| Optional GeoJSON/GeoParquet boundary assets | ✅ Implemented | Separately licensed, approximate geometry is independent of date-specific timezone rules. |
-| Authoritative border/political ambiguity resolution | ❌ Not implemented | Lookup returns one approximate identifier and does not adjudicate disputed, historical or date-dependent geographic usage. |
-| Bundled independent timezone-rule database | ❌ Not implemented | Native Intl/runtime rules remain required; the vendored Temporal compatibility code does not ship a separate tzdb. |
-| Recurrence and general scheduling engine | ❌ Not implemented | RRULE calendars, business calendars and job scheduling are application responsibilities; this module supplies calendar primitives. |
+| Numeric offsets and local calendar fields | ✅ | [Timezone utilities](./api-reference/timezone.md) use runtime Intl rules and return numeric values suitable for computation. |
+| Synchronous and lazy geographic lookup | ✅ | Approximate compact boundary lookup supplies IANA identifiers; async lookup defers loading that data. |
+| Ambiguous/nonexistent local-time handling | ✅ | Local-time conversion rejects by default and offers explicit earlier/later/compatible policies. |
+| Local-day boundaries and offset transitions | ✅ | DST and political offset changes are handled using the runtime timezone database. |
+| Optional GeoJSON/GeoParquet boundary assets | ✅ | Separately licensed, approximate geometry is independent of date-specific timezone rules. |
+| Authoritative border/political ambiguity resolution | ❌ | Lookup returns one approximate identifier and does not adjudicate disputed, historical or date-dependent geographic usage. |
+| Bundled independent timezone-rule database | ❌ | Native Intl/runtime rules remain required; the vendored Temporal compatibility code does not ship a separate tzdb. |
+| Recurrence and general scheduling engine | ❌ | RRULE calendars, business calendars and job scheduling are application responsibilities; this module supplies calendar primitives. |
 
 ## Timezone globe
 
@@ -151,4 +147,4 @@ Attribute OpenStreetMap contributors and Timezone Boundary Builder and preserve
 applicable ODbL obligations. See `data/README.md`, `data/LICENSE-ODbL.txt`, and
 `data/manifest.json` in the package for provenance and regeneration details.
 
-See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

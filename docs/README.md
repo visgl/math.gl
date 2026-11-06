@@ -2,20 +2,23 @@
 sidebar_label: Introduction
 ---
 
-import ModuleCatalog from '@site/src/components/module-catalog';
+# Introduction
 
-<p className="badges">
+<p className="badges introduction-badges">
   <a href="https://github.com/visgl/math.gl/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT license" height="20" /></a>
-  <a href="https://www.npmjs.com/package/@math.gl/core"><img src="https://img.shields.io/npm/dm/@math.gl/core?style=flat-square" alt="Monthly npm downloads for @math.gl/core" height="20" /></a>
-  <a href="https://www.npmjs.com/package/@math.gl/core"><img src="https://img.shields.io/npm/v/@math.gl/core?style=flat-square" alt="npm version" height="20" /></a>
-  <a href="https://github.com/visgl/math.gl"><img src="https://img.shields.io/github/stars/visgl/math.gl?style=flat-square" alt="GitHub stars" height="20" /></a>
   <a href="https://www.typescriptlang.org/" title="Built with TypeScript 6.0.3"><img src="https://img.shields.io/badge/6.0.3-3178c6?style=flat-square&amp;logo=typescript&amp;logoColor=white" alt="Built with TypeScript 6.0.3" height="20" /></a>
   <a href="https://coveralls.io/github/visgl/math.gl?branch=master">
     <img src="https://img.shields.io/coveralls/visgl/math.gl.svg?style=flat-square&label=coverage" alt="coverage" />
   </a>
+  <a href="https://www.npmjs.com/package/@math.gl/core"><img src="https://img.shields.io/npm/v/@math.gl/core?style=flat-square&amp;color=8064a2" alt="npm version" height="20" /></a>
+  <a href="https://www.npmjs.com/package/@math.gl/core"><img src="https://img.shields.io/npm/dm/@math.gl/core?style=flat-square&amp;color=8064a2" alt="Monthly npm downloads for @math.gl/core" height="20" /></a>
 </p>
 
-# Introduction
+<p className="badges introduction-badges">
+  <a href="https://github.com/visgl/math.gl"><img src="https://img.shields.io/github/stars/visgl/math.gl?style=social" alt="GitHub stars" height="20" /></a>
+  <a href="https://github.com/visgl/math.gl/graphs/contributors"><img src="https://img.shields.io/github/contributors/visgl/math.gl?style=social&amp;logo=github" alt="GitHub contributors" height="20" /></a>
+  <a href="https://github.com/visgl/math.gl/pulls?q=is%3Apr+is%3Amerged"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fsearch%2Fissues%3Fq%3Drepo%3Avisgl%2Fmath.gl%2Bis%3Apr%2Bis%3Amerged&amp;query=%24.total_count&amp;label=PRs&amp;style=social&amp;logo=github" alt="Merged pull requests" height="20" /></a>
+</p>
 
 Welcome to math.gl!
 
@@ -27,12 +30,8 @@ math.gl computes on the CPU and has no GPU dependencies. Its arrays and coordina
   <a href="https://openvisualization.org">
     <img className="openjs-logo-light" src="https://raw.githubusercontent.com/openjs-foundation/artwork/main/openjs_foundation/openjs_foundation-logo-horizontal-color.svg" alt="OpenJS Foundation" width="150" /><img className="openjs-logo-dark" src="https://raw.githubusercontent.com/openjs-foundation/artwork/main/openjs_foundation/openjs_foundation-logo-horizontal-color-dark_background.svg" alt="OpenJS Foundation" width="150" />
   </a>
-  <p>math.gl is part of <a href="https://openvisualization.org">Open Visualization</a>, an OpenJS Foundation / Linux Foundation project.</p>
+  <p>math.gl is an <a href="https://openvisualization.org/">Open Visualization</a>, OpenJS Foundation and Linux Foundation project.</p>
 </div>
-
-## Modules
-
-<ModuleCatalog />
 
 ## Package entry points
 
@@ -74,9 +73,9 @@ math.gl is fully supported on:
 | 2017  | v1.0    | `math.gl` was broken out into its own repository to manage luma.gl growth. The goal was an independently usable set of 3D and Geospatial math modules.                 |
 | 2015  | N/A     | `@math.gl/core` classes were created as part of luma.gl v4, as a set of class wrappers for `gl-matrix` for luma.gl and deck.gl frameworks.                             |
 
-## References and credits
+## Attributions
 
-See [References and credits](./references-and-credits.md) for contributor acknowledgments,
+See [Attributions](./references-and-credits.md) for contributor acknowledgments,
 upstream libraries, scientific references, dataset credits, and third-party notices.
 
 ## License

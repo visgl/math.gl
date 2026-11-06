@@ -10,8 +10,12 @@ import bibliography from './bibliography.cjs';
 import plugin from './remark-citations.cjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const entries = bibliography.readBibliography();
-const generated = bibliography.renderBibliography(entries);
-const output = path.join(root, 'docs/bibliography.md');
+const marker = '{/* generated-bibliography */}';
+const section = bibliography.renderBibliography(entries);
+const attributionPath = path.join(root, 'docs/references-and-credits.md');
+const introduction = fs.readFileSync(attributionPath, 'utf8').split(marker)[0].trimEnd();
+const generated = introduction + '\n\n' + marker + '\n\n' + section;
+const output = path.join(root, 'docs/references-and-credits.md');
 const exports = {
   'references.bib': fs.readFileSync(bibliography.bibliographyPath, 'utf8'),
   'references.json': JSON.stringify([...entries.values()], null, 2) + '\n'
