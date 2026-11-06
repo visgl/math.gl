@@ -416,3 +416,8 @@ export type {
   TessellateGeoArrowStreamOptions,
   GeoArrowStreamMesh
 } from './geoarrow/index';
+export {weldTerrainMixedContourTiles} from './terrain/contour-mixed-weld';
+export type {
+  TerrainMixedContourTile,
+  TerrainMixedContourWeldOptions
+} from './terrain/contour-mixed-weld';
