@@ -40,22 +40,24 @@ export function sampleCurveAdaptive(
   while (stack.length) {
     const segment = stack.pop()!;
     const {t0, t1, a, b, depth} = segment;
-    const scale = Math.max(...a.map(Math.abs), ...b.map(Math.abs), 1);
-    const edge = b.map((x, i) => x / scale - a[i] / scale),
-      squared = edge.reduce((sum, x) => sum + x * x, 0);
+    const localEdge = b.map((x, i) => x - a[i]);
     const samples = [0.25, 0.5, 0.75].map(f => curve.getPoint(t0 + (t1 - t0) * f));
+    const localSamples = samples.map(point => point.map((x, i) => x - a[i]));
+    const local = [...localEdge, ...localSamples.flat()].every(Number.isFinite);
+    const scale = local
+      ? Math.max(...localEdge.map(Math.abs), ...localSamples.flat().map(Math.abs), Number.MIN_VALUE)
+      : Math.max(...a.map(Math.abs), ...b.map(Math.abs), ...samples.flat().map(Math.abs));
+    const edge = local ? localEdge.map(x => x / scale) : b.map((x, i) => x / scale - a[i] / scale);
+    const squared = edge.reduce((sum, x) => sum + x * x, 0);
     const measuredError = Math.max(
-      ...samples.map(p => {
+      ...samples.map((p, sampleIndex) => {
+        const offset = local
+          ? localSamples[sampleIndex].map(x => x / scale)
+          : p.map((x, i) => x / scale - a[i] / scale);
         const t = squared
-          ? Math.max(
-              0,
-              Math.min(
-                1,
-                edge.reduce((sum, x, i) => sum + x * (p[i] / scale - a[i] / scale), 0) / squared
-              )
-            )
+          ? Math.max(0, Math.min(1, edge.reduce((sum, x, i) => sum + x * offset[i], 0) / squared))
           : 0;
-        return Math.hypot(...p.map((x, i) => x / scale - a[i] / scale - t * edge[i])) * scale;
+        return Math.hypot(...offset.map((x, i) => x - t * edge[i])) * scale;
       })
     );
     const error = Number.isFinite(measuredError) ? measuredError : Infinity;

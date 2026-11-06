@@ -137,10 +137,10 @@ export class SampleTrack {
         const weightedSlope = (key: number) => {
           const left = Math.max(0, key - 1),
             right = Math.min(last, key + 1);
-          return (
-            (this.values[right * this.size + j] - this.values[left * this.size + j]) *
-            (dt / (this.times[right] - this.times[left]))
-          );
+          const difference = this.values[right * this.size + j] - this.values[left * this.size + j];
+          const span = this.times[right] - this.times[left];
+          const derivative = difference / span;
+          return Number.isFinite(derivative) ? derivative * dt : difference * (dt / span);
         };
         out[j] =
           (2 * t ** 3 - 3 * t ** 2 + 1) * a +

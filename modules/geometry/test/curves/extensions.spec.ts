@@ -138,3 +138,12 @@ it('adaptive sampling measures large finite curves without false convergence', (
   expect(result.converged).toBe(true);
   expect(result.maxSampledError).toBeLessThanOrEqual(1e198);
 });
+
+it('adaptive sampling measures local bends beside large constant coordinates', () => {
+  const x = 2 ** 1000;
+  const curve = new QuadraticBezierCurve([x, 0], [x, 1e-100], [x, 0]);
+  const result = sampleCurveAdaptive(curve, {tolerance: 1e-102});
+  expect(result.parameters.length).toBeGreaterThan(2);
+  expect(result.converged).toBe(true);
+  expect(result.maxSampledError).toBeLessThanOrEqual(1e-102);
+});

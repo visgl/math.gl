@@ -208,3 +208,15 @@ it('cubic tracks support subnormal time intervals', () => {
     new SampleTrack([0, 1e-310], [0, 1], {interpolation: 'cubic'}).evaluate(5e-311)[0]
   ).toBeCloseTo(0.5, 12);
 });
+
+it('projection and reflection preserve small components beside large ones', () => {
+  expect(vectorProjectOnVector([0, 0], [1e308, 1e-100], [0, 1])).toEqual([0, 1e-100]);
+  expect(vectorReflect([0, 0], [1e308, 1e-100], [0, 0])).toEqual([1e308, 1e-100]);
+  expect(vectorProjectOnPlane([0, 0], [1e308, 1e-100], [0, 0])).toEqual([1e308, 1e-100]);
+});
+it('cubic tracks preserve weighted slopes across disparate intervals', () => {
+  const value = new SampleTrack([0, 1e-300, 1e100], [0, 0, 1e300], {
+    interpolation: 'cubic'
+  }).evaluate(5e-301)[0];
+  expect(value / -1.25e-101).toBeCloseTo(1, 12);
+});
