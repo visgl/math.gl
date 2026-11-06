@@ -13,7 +13,7 @@ The baseline below records what already existed before that change.
 | --- | --- |
 | 1 | Shared validated affine decomposition, signed reflection scale, correct column normalization and enclosing AABB transforms. Singular/sheared/projective decomposition is rejected. |
 | 2 | Bounds set operations and sphere overlap; explicit NO/ZO and reversed-depth projections; inward frustum extraction with infinite far planes. |
-| 3 | Shared vector helpers and class wrappers, scalar helpers reused by sun code, and quaternion rotate-towards. |
+| 3 | Tree-shakable vector functions, scalar helpers reused by sun code, and quaternion rotate-towards. Vector class wrappers are omitted to preserve existing selective bundle limits. |
 | 4 | Ray convenience queries, barycentric/attribute helpers, triangle area/normal/facing/containment, triangle–box overlap and plane–segment intersection. |
 | 5 | SampleTrack with discrete/linear/cubic/Bézier modes, adaptive curve sampling and closed-path parallel-transport frames. |
 

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {NumericArray} from './types';
-import {slerp} from './gl-matrix/quat';
 
 type Input = ArrayLike<number>;
 function finite(...values: number[]): void {
@@ -122,25 +121,4 @@ export function pingpong(value: number, length = 1): number {
   const period = 2 * length;
   return length - Math.abs((((value % period) + period) % period) - length);
 }
-/** Normalize inputs and take the shortest arc, without overshooting; step is radians. */
-export function quatRotateTowards<T extends NumericArray>(
-  out: T,
-  a: Input,
-  b: Input,
-  step: number
-): T {
-  vector(a, b);
-  finite(step);
-  if (a.length !== 4 || step < 0)
-    throw new RangeError('Expected quaternions and a nonnegative step');
-  const al = Math.hypot(...Array.from(a)),
-    bl = Math.hypot(...Array.from(b));
-  if (!al || !bl) throw new RangeError('Zero quaternion');
-  const an = Array.from(a, x => x / al),
-    bn = Array.from(b, x => x / bl);
-  const dot = an.reduce((sum, x, i) => sum + x * bn[i], 0);
-  const angle = 2 * Math.acos(Math.min(1, Math.abs(dot)));
-  if (out.length < 4) throw new RangeError('Result buffer is too short');
-  slerp(out, an, bn, angle === 0 ? 0 : Math.min(1, step / angle));
-  return out;
-}
+export {rotateTowards as quatRotateTowards} from './gl-matrix/quat';

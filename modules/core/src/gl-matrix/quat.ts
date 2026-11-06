@@ -7,6 +7,7 @@
 // @ts-nocheck
 
 import * as glMatrix from './common.js';
+import type {NumericArray} from '../types';
 import * as mat3 from './mat3.js';
 import * as vec3 from './vec3.js';
 import * as vec4 from './vec4.js';
@@ -792,3 +793,31 @@ export const setAxes = /* @__PURE__ */ (function () {
     return normalize(out, fromMat3(out, matr));
   };
 })();
+
+/** Normalize inputs and take the shortest arc, without overshooting; step is radians. */
+export function rotateTowards<T extends NumericArray>(
+  out: T,
+  a: ArrayLike<number>,
+  b: ArrayLike<number>,
+  step: number
+): T {
+  if (
+    a.length !== 4 ||
+    b.length !== 4 ||
+    [...Array.from(a), ...Array.from(b), step].some(x => !Number.isFinite(x))
+  ) {
+    throw new RangeError('Expected finite quaternions and step');
+  }
+  if (a.length !== 4 || step < 0)
+    throw new RangeError('Expected quaternions and a nonnegative step');
+  const al = Math.hypot(...Array.from(a)),
+    bl = Math.hypot(...Array.from(b));
+  if (!al || !bl) throw new RangeError('Zero quaternion');
+  const an = Array.from(a, x => x / al),
+    bn = Array.from(b, x => x / bl);
+  const dot = an.reduce((sum, x, i) => sum + x * bn[i], 0);
+  const angle = 2 * Math.acos(Math.min(1, Math.abs(dot)));
+  if (out.length < 4) throw new RangeError('Result buffer is too short');
+  slerp(out, an, bn, angle === 0 ? 0 : Math.min(1, step / angle));
+  return out;
+}

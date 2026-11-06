@@ -8,6 +8,7 @@
 // See ../../../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
 import {Vector3} from '@math.gl/core';
+import {normalizeQueryDirection} from '../queries';
 import {getRayPoint, getClosestPointOnRay, distanceToRay, transformRay} from '../geometric-queries';
 
 /* Represents a ray that extends infinitely from the provided origin in the provided direction. */
@@ -45,8 +46,9 @@ export class Ray {
   /** Transform and renormalize: subsequent parameters are distances in the new space. */
   transform(matrix: readonly number[]): this {
     const ray = transformRay(this.origin, this.direction, matrix);
+    const normalized = normalizeQueryDirection(ray.direction, 3);
     this.origin.copy(ray.origin);
-    this.direction.copy(ray.direction).normalize();
+    this.direction.copy(normalized);
     return this;
   }
 }

@@ -15,17 +15,16 @@ array or typed array first, return it, and support aliasing an input.
 | `vectorClampLength(out, value, minimum, maximum)` | Clamp length to a finite, ordered, nonnegative interval. |
 | `vectorManhattanDistance(a, b)` | Sum absolute component differences. |
 
-Vector classes expose the same operations as `projectOnVector`, `projectOnPlane`,
-`reflect`, `setLength`, `clampLength`, and `manhattanDistanceTo`. The first five
-mutate the receiver; the last returns a number.
+These helpers are separate functions so importing a vector class alone does not
+retain their code. Pass a vector instance as the output to mutate it explicitly.
 
 ```js
-import {Vector3, vectorReflect} from '@math.gl/core';
+import {Vector3, vectorReflect, vectorClampLength} from '@math.gl/core';
 
 const reflected = vectorReflect(new Float64Array(3), [1, -2, 0], [0, 3, 0]);
 // [1, 2, 0]; a non-unit normal is accepted.
-const velocity = new Vector3(3, 4, 0).clampLength(0, 2.5);
-// [1.5, 2, 0]
+const velocity = new Vector3(3, 4, 0);
+vectorClampLength(velocity, velocity, 0, 2.5); // [1.5, 2, 0]
 ```
 
 ## Scalar operations

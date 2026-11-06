@@ -39,25 +39,20 @@ export function computeParallelTransportFrames(
     closed = options.closed ?? false;
   if (closed && (n < 4 || Math.hypot(...sub(data[0], data[n - 1])) !== 0))
     throw new RangeError('A closed path must repeat its first point');
-  const tangent: V[] = [];
-  for (let i = 0; i < n; i++) {
-    let d: V | undefined;
-    for (let j = i + 1; j < n; j++) {
-      const candidate = sub(data[j], data[i]);
-      if (Math.hypot(...candidate)) {
-        d = candidate;
-        break;
-      }
-    }
-    if (!d)
-      for (let j = i - 1; j >= 0; j--) {
-        const candidate = sub(data[i], data[j]);
-        if (Math.hypot(...candidate)) {
-          d = candidate;
-          break;
-        }
-      }
-    tangent.push(unit(d ?? [0, 0, 0]));
+  // Cache adjacent nonzero directions, then propagate backwards across equal runs.
+  // This keeps repeated-point paths linear rather than rescanning each suffix.
+  const tangent: V[] = new Array(n);
+  const edges: (V | undefined)[] = new Array(n - 1);
+  let last: V | undefined;
+  for (let i = 0; i < n - 1; i++) {
+    const edge = sub(data[i + 1], data[i]);
+    if (Math.hypot(...edge) > 0) last = edges[i] = unit(edge);
+  }
+  if (!last) throw new RangeError('Cannot construct a frame for a stationary path');
+  tangent[n - 1] = last;
+  for (let i = n - 2; i >= 0; i--) {
+    last = edges[i] ?? last;
+    tangent[i] = last;
   }
   if (closed) tangent[n - 1] = [...tangent[0]];
   const t = tangent[0];
@@ -69,7 +64,13 @@ export function computeParallelTransportFrames(
     initial = [0, 0, 0];
     initial[t.map(Math.abs).indexOf(Math.min(...t.map(Math.abs)))] = 1;
   }
-  const normals: V[] = [unit(initial.map((x, i) => x - dot(initial, t) * t[i]))];
+  initial = unit(initial);
+  const perpendicular = cross(t, initial);
+  if (Math.hypot(...perpendicular) <= 1e-12) {
+    throw new RangeError('Initial normal must not be parallel to the tangent');
+  }
+  // A double cross product avoids normalizing a cancellation residual along t.
+  const normals: V[] = [unit(cross(perpendicular, t))];
   for (let i = 1; i < n; i++) {
     const axis = cross(tangent[i - 1], tangent[i]),
       length = Math.hypot(...axis),

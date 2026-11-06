@@ -8,15 +8,6 @@ import {MathArray} from './math-array';
 import {checkNumber} from '../../lib/validators';
 import {assert} from '../../lib/assert';
 
-import {
-  vectorProjectOnVector,
-  vectorProjectOnPlane,
-  vectorReflect,
-  vectorSetLength,
-  vectorClampLength,
-  vectorManhattanDistance
-} from '../../numeric-helpers';
-
 /** Base class for vectors with at least 2 elements */
 export abstract class Vector extends MathArray {
   // ACCESSORS
@@ -163,23 +154,5 @@ export abstract class Vector extends MathArray {
       this[i] += a[i] * b;
     }
     return this.check();
-  }
-  projectOnVector(target: Readonly<NumericArray>): this {
-    return vectorProjectOnVector(this, this, target);
-  }
-  projectOnPlane(normal: Readonly<NumericArray>): this {
-    return vectorProjectOnPlane(this, this, normal);
-  }
-  reflect(normal: Readonly<NumericArray>): this {
-    return vectorReflect(this, this, normal);
-  }
-  setLength(length: number): this {
-    return vectorSetLength(this, this, length);
-  }
-  clampLength(minimum: number, maximum: number): this {
-    return vectorClampLength(this, this, minimum, maximum);
-  }
-  manhattanDistanceTo(other: Readonly<NumericArray>): number {
-    return vectorManhattanDistance(this, other);
   }
 }

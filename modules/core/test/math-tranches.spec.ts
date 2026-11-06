@@ -4,7 +4,6 @@
 import {expect, it} from 'vitest';
 import {
   Matrix4,
-  Vector3,
   Quaternion,
   mat4,
   quat,
@@ -142,8 +141,6 @@ it('vector helpers accept non-unit normals and aliases with defined zero handlin
   close(vectorClampLength([0, 0], [3, 4], 0, 2.5), [1.5, 2]);
   close(vectorClampLength([0, 0], [0, 0], 2, 3), [0, 0]);
   expect(vectorManhattanDistance([1, 2, 3], [-1, 1, 3])).toBe(3);
-  close(new Vector3(2, 3, 4).reflect([0, 2, 0]), [2, -3, 4]);
-  close(new Vector3(3, 4, 0).setLength(10).clampLength(0, 5), [3, 4, 0]);
   expect(() => vectorSetLength([0, 0], [1, 1], -1)).toThrow();
   expect(() => vectorClampLength([0, 0], [1, 1], 3, 2)).toThrow();
   expect(() => vectorReflect([], [1, 2], [1, 0])).toThrow();

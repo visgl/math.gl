@@ -310,3 +310,12 @@ it('bounds outputs need capacity but do not require initialized values', () => {
     ])
   ).toThrow();
 });
+
+it('Ray.transform keeps normalized distance semantics at extreme finite scales', () => {
+  for (const scale of [1e-200, 1e200]) {
+    const ray = new Ray(new Vector3(), new Vector3(1, 1, 1));
+    ray.transform(new Matrix4().scale(scale));
+    expect(Math.hypot(...ray.direction)).toBeCloseTo(1, 12);
+    expect(Math.hypot(...ray.at(2))).toBeCloseTo(2, 12);
+  }
+});

@@ -37,11 +37,11 @@ if (!samples.converged) {
 
 Accepts at least two finite 3D polyline points and returns flat `tangents`, `normals`,
 and `binormals`, with three components per input point. Tangents use the next distinct
-point, or the preceding distinct point at the end. Repeated points are retained;
+point, or the preceding distinct point at the end. Repeated points are retained with linear-time direction propagation;
 an entirely stationary path is rejected.
 
 The optional initial normal is projected perpendicular to the first tangent and
-normalized. A parallel or zero initial normal is rejected. When omitted, a coordinate
+normalized. A zero initial normal or one whose normalized cross-product magnitude with the tangent is at most `1e-12` is rejected. When omitted, a coordinate
 axis with the least alignment to the first tangent is selected deterministically.
 
 Frames use minimal rotation between successive tangent directions. At an exact

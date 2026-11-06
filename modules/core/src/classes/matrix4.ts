@@ -5,7 +5,7 @@
 
 import {NumericArray, NumericArray16} from '../types';
 import {Matrix} from './base/matrix';
-import {affineComponents} from '../lib/affine-components';
+import {affineComponents} from '../gl-matrix/mat4';
 import type {Matrix3Like} from './matrix3';
 import {checkVector} from '../lib/validators';
 

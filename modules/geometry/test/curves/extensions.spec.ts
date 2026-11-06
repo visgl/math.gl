@@ -97,3 +97,35 @@ it('transport frames remain orthonormal through repeated points, reversals and c
     )
   ).toThrow();
 });
+
+it('transport rejects diagonal parallel normals and handles long equal-point runs', () => {
+  expect(() =>
+    computeParallelTransportFrames(
+      [
+        [0, 0, 0],
+        [1, 1, 1]
+      ],
+      {initialNormal: [1, 1, 1]}
+    )
+  ).toThrow(RangeError);
+  expect(() =>
+    computeParallelTransportFrames(
+      [
+        [0, 0, 0],
+        [1, 1, 1]
+      ],
+      {initialNormal: [-2, -2, -2]}
+    )
+  ).toThrow(RangeError);
+  const points = Array.from({length: 20000}, () => [0, 0, 0]);
+  points.push([1, 1, 1]);
+  const frames = computeParallelTransportFrames(points);
+  expect(frames.tangents.length).toBe(points.length * 3);
+  for (const index of [0, 10000, points.length - 1]) {
+    const t = frames.tangents.slice(index * 3, index * 3 + 3),
+      n = frames.normals.slice(index * 3, index * 3 + 3),
+      b = frames.binormals.slice(index * 3, index * 3 + 3);
+    expect(Math.hypot(...b)).toBeCloseTo(1, 12);
+    expect(t.reduce((sum, x, i) => sum + x * n[i], 0)).toBeCloseTo(0, 12);
+  }
+});
