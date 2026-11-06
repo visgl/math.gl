@@ -131,7 +131,7 @@
           },
           {
             "type": "category",
-            "label": "@math.gl/core \u2014 expressions",
+            "label": "@math.gl/core/expressions",
             "items": [
               "modules/core/expressions/api-reference/expression-eval",
               "modules/core/expressions/api-reference/function-registry",

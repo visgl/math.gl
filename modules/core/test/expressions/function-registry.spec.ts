@@ -3,7 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {ExpressionFunctionRegistry, compile, compileAsync, evaluate, parse} from '@math.gl/core';
+import {
+  ExpressionFunctionRegistry,
+  compile,
+  compileAsync,
+  evaluate,
+  parse
+} from '@math.gl/core/expressions';
 
 test('@math.gl/core#ExpressionFunctionRegistry', () => {
   const registry = new ExpressionFunctionRegistry()

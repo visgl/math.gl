@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {ExpressionFunctionRegistry, compile} from '@math.gl/core';
+import {ExpressionFunctionRegistry, compile} from '@math.gl/core/expressions';
 import {
   DGGS_FUNCTION_LIBRARY,
   GEOHASH_FUNCTION_LIBRARY,
