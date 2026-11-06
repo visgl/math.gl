@@ -321,7 +321,7 @@ interpolation adds no new reconstruction data.
 
 This integration uses Cartesian rendering of preprojected geometry. It does not
 add general discontinuous-projection support to existing deck.gl geographic
-layers. The [unfolding Earth example](../../../geometry/unfolding-earth.md)
+layers. The [unfolding Earth example](../../../geometry/api-reference/hinge-tree.md#unfolding-earth)
 explores a separate animated hinge-and-texture pipeline.
 
 ## What remains unsupported

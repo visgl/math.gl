@@ -11,13 +11,13 @@
       "community",
       "references-and-credits",
       "whats-new",
+      {
+        "type": "doc",
+        "id": "developer-guide/README",
+        "label": "Developer Guide"
+      },
       "upgrade-guide"
     ]
-  },
-  {
-    "type": "doc",
-    "id": "developer-guide/README",
-    "label": "Developer Guide"
   },
   {
     "type": "category",
@@ -29,7 +29,7 @@
         "items": [
           {
             "type": "category",
-            "label": "Guide",
+            "label": "Guides",
             "items": [
               {
                 "type": "category",
@@ -107,7 +107,7 @@
           },
           {
             "type": "category",
-            "label": "@math.gl/core \u2014 types",
+            "label": "@math.gl/core/types",
             "items": [
               "modules/core/types/api-reference/array-types",
               "modules/core/types/api-reference/bounds"
@@ -155,7 +155,7 @@
         "items": [
           {
             "type": "category",
-            "label": "Guide",
+            "label": "Guides",
             "items": [
               {
                 "type": "category",
@@ -169,8 +169,7 @@
                   "description": "Guides and background for Geometry: Spatial Index.",
                   "slug": "/modules/geometry/guide/spatial-index"
                 }
-              },
-              "modules/geometry/unfolding-earth"
+              }
             ],
             "link": {
               "type": "generated-index",
@@ -225,7 +224,7 @@
           },
           {
             "type": "category",
-            "label": "@math.gl/geometry \u2014 curves",
+            "label": "@math.gl/geometry/curves",
             "items": [
               "modules/geometry/curves/api-reference/curves",
               "modules/geometry/curves/api-reference/curve-arc-length",
@@ -238,7 +237,7 @@
           },
           {
             "type": "category",
-            "label": "@math.gl/geometry \u2014 polygon",
+            "label": "@math.gl/geometry/polygon",
             "items": [
               "modules/geometry/polygon/api-reference/clip-polygon",
               "modules/geometry/polygon/api-reference/clip-polyline",
@@ -258,7 +257,7 @@
           },
           {
             "type": "category",
-            "label": "@math.gl/geometry \u2014 utils",
+            "label": "@math.gl/geometry/utils",
             "items": [
               "modules/geometry/utils/api-reference/geometry-utils",
               "modules/geometry/utils/api-reference/mesh-processing",
@@ -282,22 +281,12 @@
         "items": [
           {
             "type": "category",
-            "label": "Guide",
+            "label": "Guides",
             "items": [
               {
-                "type": "category",
-                "label": "GeoArrow",
-                "items": [
-                  "modules/geospatial/geoarrow/physical-layouts",
-                  "modules/geospatial/geoarrow/geometry-streams",
-                  "modules/geospatial/geoarrow/migration-guide"
-                ],
-                "link": {
-                  "type": "generated-index",
-                  "title": "Geospatial GeoArrow Guide",
-                  "description": "Guides and background for Geospatial: GeoArrow.",
-                  "slug": "/modules/geospatial/guide/geoarrow"
-                }
+                "type": "doc",
+                "id": "modules/geospatial/developer-guide/geoarrow",
+                "label": "GeoArrow"
               },
               "modules/geospatial/terrain/README",
               "modules/geospatial/developer-guide/terminology",
@@ -319,38 +308,48 @@
                 "type": "category",
                 "label": "Projection",
                 "items": [
+                  "modules/geospatial/projection/developer-guide/api-guide",
+                  "modules/geospatial/projection/developer-guide/coordinate-systems",
+                  "modules/geospatial/projection/developer-guide/projections",
+                  "modules/geospatial/projection/developer-guide/projection-engine",
+                  "modules/geospatial/projection/developer-guide/external-projection-engines",
+                  "modules/geospatial/projection/developer-guide/deformation-models",
+                  "modules/geospatial/projection/developer-guide/support",
+                  "modules/geospatial/projection/developer-guide/map-engine",
                   "modules/geospatial/projection/developer-guide/discontinuous-projections",
+                  "modules/geospatial/projection/developer-guide/myriahedral-projections",
                   "modules/geospatial/myriahedral-maps",
                   "modules/geospatial/elastic-maps",
                   "modules/geospatial/discontinuous/projection-catalog",
                   "modules/geospatial/discontinuous/README",
                   "modules/geospatial/discontinuous/myriahedral",
-                  "modules/geospatial/projection/developer-guide/api-guide",
-                  "modules/geospatial/projection/developer-guide/map-engine",
-                  "modules/geospatial/projection/developer-guide/coordinate-systems",
-                  "modules/geospatial/projection/developer-guide/projections",
-                  "modules/geospatial/projection/developer-guide/myriahedral-projections",
-                  "modules/geospatial/projection/developer-guide/projection-engine",
-                  "modules/geospatial/projection/developer-guide/external-projection-engines",
-                  "modules/geospatial/projection/developer-guide/deformation-models",
-                  "modules/geospatial/projection/developer-guide/support",
-                  "modules/geospatial/projection/ellipsoid-qualification",
-                  "modules/geospatial/projection/ellipsoid-p0-qualification",
-                  "modules/geospatial/projection/deformation-qualification",
-                  "modules/geospatial/projection/benchmarks",
-                  "modules/geospatial/projection/scorecard",
-                  "modules/geospatial/projection/scorecard-methodology",
-                  "modules/geospatial/projection/acceleration",
-                  "modules/geospatial/projection/parity-audit",
-                  "modules/geospatial/projection/independent-validation",
-                  "modules/geospatial/projection/modern-proj-audit",
-                  "modules/geospatial/projection/accuracy-domains"
+                  {
+                    "type": "category",
+                    "label": "Validation",
+                    "link": {
+                      "type": "generated-index",
+                      "title": "Validation",
+                      "description": "Supported accuracy domains, independent references, qualification results, audits, and performance measurements.",
+                      "slug": "/modules/geospatial/guide/projection/validation"
+                    },
+                    "items": [
+                      "modules/geospatial/projection/accuracy-domains",
+                      "modules/geospatial/projection/modern-proj-audit",
+                      "modules/geospatial/projection/independent-validation",
+                      "modules/geospatial/projection/parity-audit",
+                      "modules/geospatial/projection/ellipsoid-qualification",
+                      "modules/geospatial/projection/ellipsoid-p0-qualification",
+                      "modules/geospatial/projection/deformation-qualification",
+                      "modules/geospatial/projection/benchmarks",
+                      "modules/geospatial/projection/acceleration",
+                      "modules/geospatial/projection/scorecard",
+                      "modules/geospatial/projection/scorecard-methodology"
+                    ]
+                  }
                 ],
                 "link": {
-                  "type": "generated-index",
-                  "title": "Geospatial Projection Guide",
-                  "description": "Guides and background for Geospatial: Projection.",
-                  "slug": "/modules/geospatial/guide/projection"
+                  "type": "doc",
+                  "id": "modules/geospatial/projection/developer-guide/README"
                 }
               }
             ],
@@ -444,7 +443,7 @@
           },
           {
             "type": "category",
-            "label": "@math.gl/geospatial \u2014 wkb",
+            "label": "@math.gl/geospatial/wkb",
             "items": [
               "modules/geospatial/wkb/api-reference/wkb"
             ],
@@ -465,7 +464,7 @@
         "items": [
           {
             "type": "category",
-            "label": "Guide",
+            "label": "Guides",
             "items": [
               {
                 "type": "category",
@@ -490,7 +489,7 @@
           },
           {
             "type": "category",
-            "label": "@math.gl/earth \u2014 geoid",
+            "label": "@math.gl/earth/geoid",
             "items": [
               "modules/earth/geoid/api-reference/geoid",
               "modules/earth/geoid/api-reference/parse-pgm",
@@ -540,7 +539,7 @@
         "items": [
           {
             "type": "category",
-            "label": "Guide",
+            "label": "Guides",
             "items": [
               "modules/dggs/developer-guide/dggs"
             ],
@@ -580,7 +579,7 @@
         "items": [
           {
             "type": "category",
-            "label": "Guide",
+            "label": "Guides",
             "items": [
               "modules/web-mercator/developer-guide/web-mercator-coordinates",
               "modules/web-mercator/developer-guide/web-mercator-offset-accuracy"

@@ -1,0 +1,74 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  list-style: none;
+  padding: 0;
+  margin: 32px 0;
+}
+.grid li {
+  margin: 0;
+  min-width: 0;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 28px;
+  border: 1px solid #8064a2;
+  border-radius: 18px;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+  text-decoration: none;
+  transition: border-color 0.2s;
+}
+.card:hover,
+.card:focus-visible {
+  border-color: #725094;
+  color: inherit;
+  text-decoration: none;
+}
+.card code {
+  align-self: flex-start;
+  font-size: 0.8rem;
+  color: #725094;
+  margin-bottom: 20px;
+  background: transparent;
+  padding: 0;
+  border: 0;
+}
+.card h2 {
+  font-size: 1.6rem;
+  margin: 0 0 6px;
+}
+.card p {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+.capabilities {
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-600);
+  margin-top: auto;
+}
+.action {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 24px;
+  color: var(--ifm-color-primary);
+}
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .card {
+    padding: 24px;
+  }
+}
+
+:global([data-theme="dark"]) .card code { color: #b798dc; }

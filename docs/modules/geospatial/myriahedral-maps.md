@@ -66,7 +66,7 @@ Our graticule, tree, root, framing, land texture, and animation are independentl
 generated. No mesh tables, imagery, presets, source code, or animation frames were
 copied from that demonstration. The layout follows the same broad arrangement,
 not its exact coastline cuts or every projection mode. It shares math.gl's
-[unfolding utilities](../geometry/unfolding-earth.md).
+[unfolding utilities](../geometry/api-reference/hinge-tree.md#unfolding-earth).
 
 Land preference does not guarantee intact continents or an overlap-free net.
 The example reports positive-area face overlaps in the final net; it does not

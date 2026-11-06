@@ -1,4 +1,4 @@
-# Overview
+# @math.gl/core/types
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v3.6-blue.svg?style=flat-square" alt="From v3.6" />

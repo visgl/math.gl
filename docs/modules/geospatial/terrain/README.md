@@ -1,4 +1,4 @@
-# @math.gl/geospatial/terrain
+# Terrain
 
 Experimental CPU terrain data and algorithms, usable in Node.js, browser workers,
 and rendering applications. The initial implementation provides affine height

@@ -12,14 +12,14 @@ geometry kernels directly over that ABI.
 
 | Feature | Support | Notes |
 | --- | --- | --- |
-| Native and mixed geometry layouts | ✅ | [Physical layouts](./physical-layouts.md) cover homogeneous geometries, dense unions and collections with explicit XY/XYZ/XYM/XYZM semantics. |
+| Native and mixed geometry layouts | ✅ | [Physical layouts](../developer-guide/geoarrow.md#understand-the-physical-layout) cover homogeneous geometries, dense unions and collections with explicit XY/XYZ/XYM/XYZM semantics. |
 | Null, empty, sliced and chunked arrays | ✅ | Logical offsets, validity bitmaps and safe Int64 offsets preserve ownership and null/empty distinctions. |
 | Validation, traversal and bounds | ✅ | [Inspection and kernels](./api-reference/geoarrow.md) operate on column descriptors without requiring per-row geometry materialization. |
 | Builders and physical-layout conversion | ✅ | Two-pass builders, interleave/separate conversion, union normalization and rewinding have explicit allocation/identity rules. |
 | Coordinate mapping and reusable destinations | ✅ | Coordinate transforms can write caller-owned targets with validated layouts. |
 | WKB/WKT column codecs | ✅ | Serialized columns retain offsets, validity, chunks and metadata through the documented codecs. |
 | Polygon tessellation and transfer preparation | ✅ | Flat positions/indices include row attribution; explicit resource limits and transfer helpers bound supported operations. |
-| XY geometry streaming and streamed tessellation | ✅ | [Geometry streams](./geometry-streams.md) accept external geometry engines and retain source-row attribution, with a task-worker recipe. Z/M and serialized input are outside this stream profile. |
+| XY geometry streaming and streamed tessellation | ✅ | [Geometry streams](../developer-guide/geoarrow.md#stream-clip-and-tessellate) accept external geometry engines and retain source-row attribution, with a task-worker recipe. Z/M and serialized input are outside this stream profile. |
 | Direct Arrow Table/RecordBatch integration | ◐ | The descriptor ABI is runtime-neutral. Applications or loaders adapt their Arrow runtime at the boundary. |
 | Complete GIS topology/overlay engine | ❌ | No general GEOS-style union, overlay, topology-repair or spatial-database engine is provided by these column kernels. |
 | GPU-resident column execution | ❌ | The kernels are synchronous CPU operations; GPU upload/compute and device memory ownership belong to consumers. |
@@ -65,15 +65,15 @@ getGeoArrowBounds(points);
 
 ## Where to go next
 
-- [Physical layouts](./physical-layouts.md) explains every descriptor, nesting, offset, slice,
+- [Physical layouts](../developer-guide/geoarrow.md#understand-the-physical-layout) explains every descriptor, nesting, offset, slice,
   validity, union, and ownership rule.
 - [API reference](./api-reference/geoarrow.md) groups the public functions by task and documents
   allocation and identity behavior.
-- [Migration guide](./migration-guide.md) maps the loaders.gl and luma.gl prototypes onto the
+- [Migration guide](../developer-guide/geoarrow.md#replace-an-existing-runtime-integration) maps the loaders.gl and luma.gl prototypes onto the
   runtime-neutral API.
 
 The package README also contains complete examples for two-pass building, codecs, tessellation,
 resource limits, worker transfers, and runtime adapters.
 
-See [Geometry streams and task workers](./geometry-streams.md) for external-engine clipping,
+See [Geometry streams and task workers](../developer-guide/geoarrow.md#stream-clip-and-tessellate) for external-engine clipping,
 polygon tessellation and source-row attribution without materializing GeoJSON.

@@ -1,0 +1,18 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.hub { margin: 2.5rem 0; }
+.section { display: grid; grid-template-columns: minmax(180px, 0.7fr) minmax(0, 2fr); gap: 2rem; padding: 2rem 0; border-top: 1px solid var(--docs-border-subtle); }
+.intro .number { display: block; margin-bottom: 0.75rem; color: var(--ifm-color-primary); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; }
+.intro h2 { margin: 0 0 0.7rem; font-size: 1.55rem; letter-spacing: -0.035em; }
+.intro p { margin: 0; color: var(--ifm-color-emphasis-700); font-size: 1rem; line-height: 1.6; }
+.links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem; }
+.link { display: flex; justify-content: space-between; gap: 1rem; padding: 1.25rem; border: 1px solid var(--docs-border-subtle); border-radius: 12px; background: var(--ifm-background-surface-color); color: var(--ifm-font-color-base); transition: border-color 160ms ease, background 160ms ease; }
+.link:hover, .link:focus-visible { border-color: var(--ifm-color-primary); background: color-mix(in srgb, var(--ifm-color-primary) 7%, var(--ifm-background-surface-color)); text-decoration: none; color: var(--ifm-font-color-base); }
+.link h3 { margin: 0 0 0.45rem; font-size: 1.05rem; font-weight: 600; line-height: 1.4; }
+.link p { margin: 0; font-size: 0.95rem; line-height: 1.55; color: var(--ifm-color-emphasis-700); }
+.arrow { color: var(--ifm-color-primary); font-size: 1.2rem; }
+@media (max-width: 1100px) { .section { grid-template-columns: 1fr; gap: 1rem; } .intro p { max-width: 60ch; } }
+@media (max-width: 600px) { .links { grid-template-columns: 1fr; } .section { padding: 1.5rem 0; } }
+@media (prefers-reduced-motion: reduce) { .link { transition: none; } }

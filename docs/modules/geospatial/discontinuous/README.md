@@ -394,7 +394,7 @@ certified maximum error for arbitrary user projections. Recursion is limited to
 limits throws. Choose a suitable distance tolerance for large radii, for example
 `tolerance: 10` when output units are meters. The default targets unit-sphere maps.
 
-See the [unfolding Earth example](../../geometry/unfolding-earth.md) for the related
+See the [unfolding Earth example](../../geometry/api-reference/hinge-tree.md#unfolding-earth) for the related
 hinge and texture demonstration. Static vector projection and animated panel
 rendering currently use separate pipelines.
 
