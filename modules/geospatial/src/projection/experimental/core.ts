@@ -75,3 +75,11 @@ export type {
   Projection,
   PreparedProjection
 } from '../types';
+
+export type {
+  ProjectionAlgorithmIdentity,
+  ProjectionCRSDescription,
+  ProjectionTransformStage,
+  ProjectionDirectionDescription,
+  ProjectionTransformDescription
+} from '../transform-description';
