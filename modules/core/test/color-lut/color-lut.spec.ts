@@ -122,3 +122,19 @@ test.each([Float64Array.of(0, 0, 1), Float64Array.of(0, NaN, 1)])(
     expect(() => createColorLUTSampler(lut)).toThrow(/input grid/);
   }
 );
+
+test('bulk 3D application resets scratch state and rounds once per output component', () => {
+  const lut = createAffineLUT(3);
+  const sample = createColorLUTSampler(lut);
+  const input = Float64Array.of(0.123, 0.456, 0.789, 1, 0, 0.25, 0, 0, 0);
+  const expected = Float32Array.from([
+    ...sample(0.123, 0.456, 0.789),
+    ...sample(1, 0, 0.25),
+    ...sample(0, 0, 0)
+  ]);
+  expect(applyColorLUT(lut, input)).toEqual(expected);
+  const first = sample(0.123, 0.456, 0.789);
+  const preserved = first.slice();
+  sample(1, 1, 1);
+  expect(first).toEqual(preserved);
+});

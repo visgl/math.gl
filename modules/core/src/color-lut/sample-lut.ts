@@ -18,6 +18,16 @@ export type ApplyColorLUTOptions = {
 
 /** Creates a snapshot sampler with per-channel 1D linear or red-fastest 3D trilinear interpolation. */
 export function createColorLUTSampler(lut: ColorLUT): ColorLUTSampler {
+  const writeSample = createColorLUTWriter(lut);
+  return (red, green, blue) => {
+    const result: [number, number, number] = [0, 0, 0];
+    writeSample(red, green, blue, result, 0);
+    return result;
+  };
+}
+
+/** Creates a validated snapshot writer with reusable per-sampler scratch storage. */
+function createColorLUTWriter(lut: ColorLUT) {
   const {dimension, size} = lut;
   if (
     ![1, 3].includes(dimension) ||
@@ -55,10 +65,20 @@ export function createColorLUTSampler(lut: ColorLUT): ColorLUTSampler {
   ) {
     throw new Error('LUT: invalid nonuniform input grid');
   }
-  return (red, green, blue) => {
-    const coordinates = [red, green, blue];
-    const indices: number[] = [];
-    const weights: number[] = [];
+  const coordinates = [0, 0, 0];
+  const indices = [0, 0, 0];
+  const weights = [0, 0, 0];
+  const accumulated = [0, 0, 0];
+  return (
+    red: number,
+    green: number,
+    blue: number,
+    result: [number, number, number] | Float32Array,
+    resultOffset: number
+  ): void => {
+    coordinates[0] = red;
+    coordinates[1] = green;
+    coordinates[2] = blue;
     for (let channel = 0; channel < 3; channel++) {
       const value = coordinates[channel];
       if (!Number.isFinite(value)) throw new Error('LUT: input colors must be finite');
@@ -68,15 +88,15 @@ export function createColorLUTSampler(lut: ColorLUT): ColorLUTSampler {
           : value >= maximum[channel]
             ? 1
             : (value - minimum[channel]) / (maximum[channel] - minimum[channel]);
-      const [index, weight] = findLUTInterval(normalized, size, grid);
-      indices.push(index);
-      weights.push(weight);
+      writeLUTInterval(normalized, size, grid, indices, weights, channel);
     }
-    const result: [number, number, number] = [0, 0, 0];
+    accumulated[0] = 0;
+    accumulated[1] = 0;
+    accumulated[2] = 0;
     if (dimension === 1) {
       for (let channel = 0; channel < 3; channel++) {
         const offset = indices[channel] * 3 + channel;
-        result[channel] =
+        accumulated[channel] =
           data[offset] * (1 - weights[channel]) + data[offset + 3] * weights[channel];
       }
     } else {
@@ -93,12 +113,13 @@ export function createColorLUTSampler(lut: ColorLUT): ColorLUTSampler {
                 redCorner) *
               3;
             for (let channel = 0; channel < 3; channel++)
-              result[channel] += data[offset + channel] * weight;
+              accumulated[channel] += data[offset + channel] * weight;
           }
         }
       }
     }
-    return result;
+    for (let channel = 0; channel < 3; channel++)
+      result[resultOffset + channel] = accumulated[channel];
   };
 }
 
@@ -111,10 +132,10 @@ export function applyColorLUT(
   const {components = 3} = options;
   if (![3, 4].includes(components) || colors.length % components !== 0)
     throw new Error('LUT: invalid pixel component count');
-  const sample = createColorLUTSampler(lut);
+  const writeSample = createColorLUTWriter(lut);
   const result = new Float32Array(colors.length);
   for (let offset = 0; offset < colors.length; offset += components) {
-    result.set(sample(colors[offset], colors[offset + 1], colors[offset + 2]), offset);
+    writeSample(colors[offset], colors[offset + 1], colors[offset + 2], result, offset);
     if (components === 4) {
       const alpha = colors[offset + 3];
       result[offset + 3] = alpha;
@@ -126,11 +147,20 @@ export function applyColorLUT(
 }
 
 /** Finds normalized uniform/nonuniform knots, retaining the final endpoint in the last interval. */
-function findLUTInterval(value: number, size: number, grid?: Float64Array): [number, number] {
+function writeLUTInterval(
+  value: number,
+  size: number,
+  grid: Float64Array | undefined,
+  indices: number[],
+  weights: number[],
+  channel: number
+): void {
   if (!grid) {
     const coordinate = value * (size - 1);
     const lower = Math.min(Math.floor(coordinate), size - 2);
-    return [lower, coordinate - lower];
+    indices[channel] = lower;
+    weights[channel] = coordinate - lower;
+    return;
   }
   let lower = 0;
   let upper = size - 1;
@@ -140,5 +170,6 @@ function findLUTInterval(value: number, size: number, grid?: Float64Array): [num
     else lower = midpoint;
   }
   lower = Math.min(lower, size - 2);
-  return [lower, (value - grid[lower]) / (grid[lower + 1] - grid[lower])];
+  indices[channel] = lower;
+  weights[channel] = (value - grid[lower]) / (grid[lower + 1] - grid[lower]);
 }
