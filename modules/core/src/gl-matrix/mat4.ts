@@ -1212,53 +1212,7 @@ export function getScaling(out, mat) {
  * @return {quat} out
  */
 export function getRotation(out, mat) {
-  const scaling = new glMatrix.ARRAY_TYPE(3);
-  getScaling(scaling, mat);
-
-  const is1 = 1 / scaling[0];
-  const is2 = 1 / scaling[1];
-  const is3 = 1 / scaling[2];
-
-  const sm11 = mat[0] * is1;
-  const sm12 = mat[1] * is2;
-  const sm13 = mat[2] * is3;
-  const sm21 = mat[4] * is1;
-  const sm22 = mat[5] * is2;
-  const sm23 = mat[6] * is3;
-  const sm31 = mat[8] * is1;
-  const sm32 = mat[9] * is2;
-  const sm33 = mat[10] * is3;
-
-  const trace = sm11 + sm22 + sm33;
-  let S = 0;
-
-  if (trace > 0) {
-    S = Math.sqrt(trace + 1.0) * 2;
-    out[3] = 0.25 * S;
-    out[0] = (sm23 - sm32) / S;
-    out[1] = (sm31 - sm13) / S;
-    out[2] = (sm12 - sm21) / S;
-  } else if (sm11 > sm22 && sm11 > sm33) {
-    S = Math.sqrt(1.0 + sm11 - sm22 - sm33) * 2;
-    out[3] = (sm23 - sm32) / S;
-    out[0] = 0.25 * S;
-    out[1] = (sm12 + sm21) / S;
-    out[2] = (sm31 + sm13) / S;
-  } else if (sm22 > sm33) {
-    S = Math.sqrt(1.0 + sm22 - sm11 - sm33) * 2;
-    out[3] = (sm31 - sm13) / S;
-    out[0] = (sm12 + sm21) / S;
-    out[1] = 0.25 * S;
-    out[2] = (sm23 + sm32) / S;
-  } else {
-    S = Math.sqrt(1.0 + sm33 - sm11 - sm22) * 2;
-    out[3] = (sm12 - sm21) / S;
-    out[0] = (sm31 + sm13) / S;
-    out[1] = (sm23 + sm32) / S;
-    out[2] = 0.25 * S;
-  }
-
-  return out;
+  return decompose(out, [], [], mat);
 }
 
 /**
@@ -1271,37 +1225,12 @@ export function getRotation(out, mat) {
  * @returns {quat} out_r
  */
 export function decompose(out_r, out_t, out_s, mat) {
-  out_t[0] = mat[12];
-  out_t[1] = mat[13];
-  out_t[2] = mat[14];
-
-  const m11 = mat[0];
-  const m12 = mat[1];
-  const m13 = mat[2];
-  const m21 = mat[4];
-  const m22 = mat[5];
-  const m23 = mat[6];
-  const m31 = mat[8];
-  const m32 = mat[9];
-  const m33 = mat[10];
-
-  out_s[0] = Math.sqrt(m11 * m11 + m12 * m12 + m13 * m13);
-  out_s[1] = Math.sqrt(m21 * m21 + m22 * m22 + m23 * m23);
-  out_s[2] = Math.sqrt(m31 * m31 + m32 * m32 + m33 * m33);
-
-  const is1 = 1 / out_s[0];
-  const is2 = 1 / out_s[1];
-  const is3 = 1 / out_s[2];
-
-  const sm11 = m11 * is1;
-  const sm12 = m12 * is2;
-  const sm13 = m13 * is3;
-  const sm21 = m21 * is1;
-  const sm22 = m22 * is2;
-  const sm23 = m23 * is3;
-  const sm31 = m31 * is1;
-  const sm32 = m32 * is2;
-  const sm33 = m33 * is3;
+  const {rotation, scale, translation} = affineComponents(mat);
+  const [sm11, sm12, sm13, sm21, sm22, sm23, sm31, sm32, sm33] = rotation;
+  for (let i = 0; i < 3; i++) {
+    out_t[i] = translation[i];
+    out_s[i] = scale[i];
+  }
 
   const trace = sm11 + sm22 + sm33;
   let S = 0;
@@ -2172,3 +2101,51 @@ export const mul = multiply;
  * @function
  */
 export const sub = subtract;
+
+/** Extract a proper rotation and signed scale from finite, nonsingular, shear-free TRS. */
+export function affineComponents(matrix: ArrayLike<number>) {
+  if (
+    matrix.length !== 16 ||
+    Array.from(matrix).some(x => !Number.isFinite(x)) ||
+    matrix[3] !== 0 ||
+    matrix[7] !== 0 ||
+    matrix[11] !== 0 ||
+    matrix[15] !== 1
+  ) {
+    throw new RangeError('Expected a finite affine matrix');
+  }
+  const scale = [
+    Math.hypot(matrix[0], matrix[1], matrix[2]),
+    Math.hypot(matrix[4], matrix[5], matrix[6]),
+    Math.hypot(matrix[8], matrix[9], matrix[10])
+  ];
+  if (scale.some(x => x === 0 || !Number.isFinite(x))) throw new RangeError('Singular transform');
+  const rotation = Array.from(
+    {length: 9},
+    (_, i) => matrix[Math.floor(i / 3) * 4 + (i % 3)] / scale[Math.floor(i / 3)]
+  );
+  for (const [a, b] of [
+    [0, 3],
+    [0, 6],
+    [3, 6]
+  ]) {
+    if (
+      Math.abs(
+        rotation[a] * rotation[b] +
+          rotation[a + 1] * rotation[b + 1] +
+          rotation[a + 2] * rotation[b + 2]
+      ) > 1e-7
+    ) {
+      throw new RangeError('Sheared transforms do not have a TRS decomposition');
+    }
+  }
+  const determinant =
+    rotation[0] * (rotation[4] * rotation[8] - rotation[5] * rotation[7]) -
+    rotation[3] * (rotation[1] * rotation[8] - rotation[2] * rotation[7]) +
+    rotation[6] * (rotation[1] * rotation[5] - rotation[2] * rotation[4]);
+  if (determinant < 0) {
+    scale[0] = -scale[0];
+    for (let i = 0; i < 3; i++) rotation[i] = -rotation[i];
+  }
+  return {rotation, scale, translation: [matrix[12], matrix[13], matrix[14]]};
+}

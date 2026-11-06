@@ -105,6 +105,8 @@
                   "modules/core/api-reference/spheroid",
                   "modules/core/api-reference/local-frame",
                   "modules/core/api-reference/utilities",
+                  "modules/core/api-reference/numeric-helpers",
+                  "modules/core/api-reference/sample-track",
                   "modules/core/api-reference/vector",
                   "modules/core/api-reference/vector2",
                   "modules/core/api-reference/vector3",
@@ -117,7 +119,7 @@
               },
               {
                 "type": "category",
-                "label": "@math.gl/core — types",
+                "label": "@math.gl/core \u2014 types",
                 "items": [
                   "modules/core/types/api-reference/array-types",
                   "modules/core/types/api-reference/bounds"
@@ -141,7 +143,7 @@
               },
               {
                 "type": "category",
-                "label": "@math.gl/core — expressions",
+                "label": "@math.gl/core \u2014 expressions",
                 "items": [
                   "modules/core/expressions/api-reference/expression-eval",
                   "modules/core/expressions/api-reference/function-registry",
@@ -224,6 +226,7 @@
                 "label": "@math.gl/geometry/culling",
                 "items": [
                   "modules/geometry/culling/api-reference/queries",
+                  "modules/geometry/culling/api-reference/extended-queries",
                   "modules/geometry/culling/api-reference/axis-aligned-bounding-box",
                   "modules/geometry/culling/api-reference/bounding-sphere",
                   "modules/geometry/culling/api-reference/bounding-volume",
@@ -240,10 +243,11 @@
               },
               {
                 "type": "category",
-                "label": "@math.gl/geometry — curves",
+                "label": "@math.gl/geometry \u2014 curves",
                 "items": [
                   "modules/geometry/curves/api-reference/curves",
-                  "modules/geometry/curves/api-reference/curve-arc-length"
+                  "modules/geometry/curves/api-reference/curve-arc-length",
+                  "modules/geometry/curves/api-reference/sampling-and-frames"
                 ],
                 "link": {
                   "type": "doc",
@@ -252,7 +256,7 @@
               },
               {
                 "type": "category",
-                "label": "@math.gl/geometry — polygon",
+                "label": "@math.gl/geometry \u2014 polygon",
                 "items": [
                   "modules/geometry/polygon/api-reference/clip-polygon",
                   "modules/geometry/polygon/api-reference/clip-polyline",
@@ -272,7 +276,7 @@
               },
               {
                 "type": "category",
-                "label": "@math.gl/geometry — utils",
+                "label": "@math.gl/geometry \u2014 utils",
                 "items": [
                   "modules/geometry/utils/api-reference/geometry-utils",
                   "modules/geometry/utils/api-reference/mesh-processing",
@@ -464,7 +468,7 @@
               },
               {
                 "type": "category",
-                "label": "@math.gl/geospatial — wkb",
+                "label": "@math.gl/geospatial \u2014 wkb",
                 "items": [
                   "modules/geospatial/wkb/api-reference/wkb"
                 ],
@@ -516,7 +520,7 @@
             "items": [
               {
                 "type": "category",
-                "label": "@math.gl/earth — geoid",
+                "label": "@math.gl/earth \u2014 geoid",
                 "items": [
                   "modules/earth/geoid/api-reference/geoid",
                   "modules/earth/geoid/api-reference/parse-pgm",

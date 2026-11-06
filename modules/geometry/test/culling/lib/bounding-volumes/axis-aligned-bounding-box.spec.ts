@@ -122,14 +122,14 @@ it('AxisAlignedBoundingBox#applies transform: translation, rotation, scale', () 
     .rotateZ(Math.PI / 2)
     .scale(2);
   const center = new Vector3(-2.9999999999999996, 6, 7);
-  const halfDiagonal = new Vector3(-0.9999999999999998, 4, 5);
-  const minimum = new Vector3(-0.9999999999999998, 4, 5);
-  const maximum = new Vector3(-5, 8, 9);
+  const halfDiagonal = new Vector3(2, 2, 2);
+  const minimum = new Vector3(-5, 4, 5);
+  const maximum = new Vector3(-1, 8, 9);
   const result = abb.transform(transform);
-  expect(center).toEqual(result.center);
-  expect(halfDiagonal).toEqual(result.halfDiagonal);
-  expect(minimum).toEqual(result.minimum);
-  expect(maximum).toEqual(result.maximum);
+  expect(center.equals(result.center)).toBe(true);
+  expect(halfDiagonal.equals(result.halfDiagonal)).toBe(true);
+  expect(minimum.equals(result.minimum)).toBe(true);
+  expect(maximum.equals(result.maximum)).toBe(true);
 });
 
 it('AxisAlignedBoundingBox#intersectPlane works with box on the positive side of a plane', () => {

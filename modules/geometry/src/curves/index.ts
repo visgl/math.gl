@@ -13,3 +13,7 @@ export {HermiteCurve} from './hermite-curve';
 export {CatmullRomCurve} from './catmull-rom-curve';
 export type {CatmullRomCurveOptions} from './catmull-rom-curve';
 export {CurveArcLength} from './curve-arc-length';
+export {sampleCurveAdaptive} from './adaptive-sampling';
+export type {AdaptiveCurveOptions, AdaptiveCurveSamples} from './adaptive-sampling';
+export {computeParallelTransportFrames} from './parallel-transport';
+export type {CurveFrames} from './parallel-transport';

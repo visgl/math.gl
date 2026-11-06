@@ -330,4 +330,7 @@ Transforms a two- or three-element vector interpreted as a direction (i.e. all v
 
 ## Related functional operations
 
-The functional API also provides quaternion/translation/scale composition and [0, 1] depth projections. Its decomposition functions have documented scale limitations. See [functional math](../developer-guide/functional-math.md) for imports, output ownership, and limitations.
+The functional API also provides quaternion/translation/scale composition and [0, 1] depth projections. Decomposition supports nonsingular affine TRS, including nonuniform scale and reflection. See [functional math](../developer-guide/functional-math.md) for imports, output ownership, and limitations.
+## Affine rotation extraction
+
+`getRotation()` and `getRotationMatrix3()` remove scale by columns and return a proper rotation. Their optional scale output assigns a reflection sign to X; individual original scale signs are not uniquely recoverable. They share the functional `mat4Decompose`/`mat4GetRotation` contract: finite, nonsingular, affine TRS input, with normalized-column orthogonality tolerance `1e-7`. Singular, sheared and projective inputs throw `RangeError` before writing outputs. `getScale()` still returns unsigned column lengths.

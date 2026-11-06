@@ -4,6 +4,26 @@ Baseline: master at `f5eebb26f`, reviewed November 6, 2026. This is a proposed
 implementation sequence, not a release commitment. Existing functionality is counted
 across classes, functional exports, and geometry query kernels.
 
+## Implementation status
+
+Tranches 1–5 are implemented in the current change, pending PR review and merge.
+The baseline below records what already existed before that change.
+
+| Tranche | Implementation |
+| --- | --- |
+| 1 | Shared validated affine decomposition, signed reflection scale, correct column normalization and enclosing AABB transforms. Singular/sheared/projective decomposition is rejected. |
+| 2 | Bounds set operations and sphere overlap; explicit NO/ZO and reversed-depth projections; inward frustum extraction with infinite far planes. |
+| 3 | Tree-shakable vector functions, scalar helpers reused by sun code, and quaternion rotate-towards. Vector class wrappers are omitted to preserve existing selective bundle limits. |
+| 4 | Ray convenience queries, barycentric/attribute helpers, triangle area/normal/facing/containment, triangle–box overlap and plane–segment intersection. |
+| 5 | SampleTrack with discrete/linear/cubic/Bézier modes, adaptive curve sampling and closed-path parallel-transport frames. |
+
+Deliberate contracts: quaternion cubic interpolation is normalized component Hermite,
+not squad; adaptive sampling reports sampled chord error, not a certified global
+bound. Array-based triangle/segment kernels remain the public representation rather
+than adding duplicate wrapper classes. Proper-Euler/cylindrical conveniences and
+seeded random remain optional consumer-driven follow-ups, as scoped in tranche 3.
+Tranche 6 remains unimplemented.
+
 ## Already available
 
 - Core root exports include `mat3`, `mat4`, `quat`, `vec2`, `vec3`, `vec4`

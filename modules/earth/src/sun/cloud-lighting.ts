@@ -7,6 +7,7 @@
 // Spectral Rayleigh/Angstrom approximation: Preetham et al. (1999),
 // https://doi.org/10.1145/311535.311545
 // Henyey-Greenstein phase function: https://www.pbr-book.org/3ed-2018/Volume_Scattering/Phase_Functions
+import {smoothstep as coreSmoothstep} from '@math.gl/core';
 import {getCloudSunSpectrum} from './cloud-spectral';
 import {validateRange} from './celestial';
 import {createSkyAtmosphere, getSkyLuminance} from './sky-brightness';
@@ -193,6 +194,5 @@ function normalize(rgb: [number, number, number]): LightColor {
   };
 }
 function smoothstep(lower: number, upper: number, value: number): number {
-  const t = Math.max(0, Math.min(1, (value - lower) / (upper - lower)));
-  return t * t * (3 - 2 * t);
+  return coreSmoothstep(value, lower, upper);
 }

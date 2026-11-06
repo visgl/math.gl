@@ -116,3 +116,7 @@ Computes the estimated distance squared from the closest point on a bounding box
 Returns
 
 - The estimated distance squared from the bounding sphere to the point.
+
+## Affine transform domain
+
+`transform(matrix)` accepts finite affine matrices, including rotation, reflection, nonuniform scale and shear. It recomputes the axis-aligned bounds enclosing all transformed corners and updates center and half extents consistently. Translation does not affect half extents. Projective matrices and inverted input bounds are rejected before mutation.

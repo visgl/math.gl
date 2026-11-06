@@ -408,3 +408,33 @@ export {
   sqrLen as vec4SqrLen,
   forEach as vec4ForEach
 } from './vec4';
+
+export {
+  mat4FrustumProjection,
+  mat4PerspectiveProjection,
+  mat4OrthographicProjection,
+  getProjectionDepthRange
+} from './projections';
+export type {
+  ProjectionDepthOptions,
+  FrustumProjectionOptions,
+  PerspectiveProjectionOptions
+} from './projections';
+
+export {
+  vectorProjectOnVector,
+  vectorProjectOnPlane,
+  vectorReflect,
+  vectorSetLength,
+  vectorClampLength,
+  vectorManhattanDistance,
+  inverseLerp,
+  mapLinear,
+  damp,
+  smoothstep,
+  smootherstep,
+  pingpong,
+  quatRotateTowards
+} from './numeric-helpers';
+export {SampleTrack} from './sample-track';
+export type {SampleTrackOptions} from './sample-track';

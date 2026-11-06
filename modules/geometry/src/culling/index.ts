@@ -55,3 +55,35 @@ export {
   getClosestPointsSegmentTriangle
 } from './queries';
 export type {SegmentClosestPoints, SegmentTriangleClosestPoints} from './queries';
+
+export {extractFrustumPlanes} from './frustum-planes';
+export {
+  createEmptyBounds,
+  isEmptyBounds,
+  boundsContainsPoint,
+  boundsContainsBounds,
+  boundsIntersect,
+  unionBounds,
+  intersectBounds,
+  expandBoundsByPoint,
+  expandBounds,
+  clampPointToBounds,
+  spheresIntersect,
+  boundsIntersectSphere
+} from './bounds';
+export {
+  getRayPoint,
+  getClosestPointOnRay,
+  distanceToRay,
+  getClosestPointsRaySegment,
+  transformRay,
+  getTriangleBarycentric,
+  getTriangleArea,
+  getTriangleNormal,
+  isTriangleFrontFacing,
+  triangleContainsPoint,
+  interpolateTriangleAttribute,
+  intersectPlaneSegment,
+  triangleIntersectsBounds
+} from './geometric-queries';
+export type {RaySegmentClosestPoints} from './geometric-queries';

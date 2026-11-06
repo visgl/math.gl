@@ -55,3 +55,7 @@ or handle antimeridian crossings. Arithmetic remains subject to floating-point o
 
 This first version focuses on curve evaluation and traversal. Moving frames, swept meshes, NURBS,
 and geodesic interpolation are outside its current API.
+
+## Adaptive sampling and frames
+
+[Adaptive sampling and transport frames](./api-reference/sampling-and-frames.md) add bounded-work chord-error sampling and polyline frames, including repeated-point and closed-loop conventions.
