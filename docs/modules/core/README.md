@@ -1,4 +1,4 @@
-# Overview
+# Core
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v1.0-blue.svg?style=flat-square" alt="From v1.0" />
@@ -16,23 +16,19 @@ DGGS expression functions live at `@math.gl/geospatial` and
 
 import Example from '@site/src/components/core-transforms';
 
-## Feature support
+## Feature Card
 
-Core numerical capabilities for graphics, transforms, and reusable coordinate objects.
-
-Support describes the public API in the current repository. Notes identify limits and experimental features.
-
-| Feature | math.gl support | Notes |
+| Feature | Support | Notes |
 | --- | --- | --- |
-| Vectors and small dense matrices | ✅ Implemented | [Vector2/3/4](./api-reference/vector.md) and [Matrix3/4](./api-reference/matrix.md), with mutable array-compatible storage. |
-| Quaternion and Euler rotations | ✅ Implemented | [Quaternions](./api-reference/quaternion.md), [Euler angles](./api-reference/euler.md), interpolation, and rotation-order conventions. |
-| Rigid poses and local frames | ✅ Implemented | [Pose](./api-reference/pose.md) and [local frames](./api-reference/local-frame.md); units and coordinate conventions remain explicit. |
-| Spherical and spheroid coordinates | ✅ Implemented | [SphericalCoordinates](./api-reference/spherical-coordinates.md) and [spheroid conversions](./api-reference/spheroid.md) within their documented shape domains. |
-| Reusable outputs and numeric interoperability | ✅ Implemented | [MathArray](./api-reference/math-array.md) operations interoperate with arrays and typed arrays; individual methods document ownership. |
-| Expressions and worker execution | ✅ Implemented | Optional [expression](./expressions/README.md) and [task](./tasks/README.md) capabilities have their own contracts and feature cards. |
-| General dense/sparse linear algebra | ❌ Not implemented | No public general-size QR/SVD, sparse factorization, or tensor engine. The matrix classes target graphics-sized transforms. |
-| Arbitrary-precision arithmetic and autodifferentiation | ❌ Not implemented | Numerical classes use JavaScript numbers; no arbitrary-precision scalar or gradient-tape backend. |
-| Built-in SIMD, WASM, or GPU numeric backend | ❌ Not implemented | CPU JavaScript math is implemented; accelerated numerical backends remain [roadmap research](https://github.com/visgl/math.gl/blob/master/dev-docs/ROADMAP.md). Worker scheduling is a separate capability. |
+| Vectors and small dense matrices | ✅ | [Vector2/3/4](./api-reference/vector.md) and [Matrix3/4](./api-reference/matrix.md), with mutable array-compatible storage. |
+| Quaternion and Euler rotations | ✅ | [Quaternions](./api-reference/quaternion.md), [Euler angles](./api-reference/euler.md), interpolation, and rotation-order conventions. |
+| Rigid poses and local frames | ✅ | [Pose](./api-reference/pose.md) and [local frames](./api-reference/local-frame.md); units and coordinate conventions remain explicit. |
+| Spherical and spheroid coordinates | ✅ | [SphericalCoordinates](./api-reference/spherical-coordinates.md) and [spheroid conversions](./api-reference/spheroid.md) within their documented shape domains. |
+| Reusable outputs and numeric interoperability | ✅ | [MathArray](./api-reference/math-array.md) operations interoperate with arrays and typed arrays; individual methods document ownership. |
+| Expressions and worker execution | ✅ | Optional [expression](./expressions/README.md) and [task](./tasks/README.md) capabilities have their own contracts and feature cards. |
+| General dense/sparse linear algebra | ❌ | No public general-size QR/SVD, sparse factorization, or tensor engine. The matrix classes target graphics-sized transforms. |
+| Arbitrary-precision arithmetic and autodifferentiation | ❌ | Numerical classes use JavaScript numbers; no arbitrary-precision scalar or gradient-tape backend. |
+| Built-in SIMD, WASM, or GPU numeric backend | ❌ | CPU JavaScript math is implemented; accelerated numerical backends remain [roadmap research](https://github.com/visgl/math.gl/blob/master/dev-docs/ROADMAP.md). Worker scheduling is a separate capability. |
 
 ## Core transforms
 
@@ -77,23 +73,26 @@ const y = vector[1];
 - Matrix transform methods allocate a result array unless an output is supplied. See [performance](../../developer-guide/performance.md) for reuse patterns.
 - Enable optional validation with `configure({debug: true})`. See [debugging](../../developer-guide/debugging.md) for checks and formatting.
 
+## Numeric helpers and sample tracks
+
+[Numeric helpers](./api-reference/numeric-helpers.md) cover vector projection/reflection, length controls, scalar damping and quaternion stepping. [SampleTrack](./api-reference/sample-track.md) evaluates timestamped scalar, vector and quaternion samples with reusable outputs.
+
 ## Learn core math
 
 Start with [transformations](./developer-guide/transformations.md) and [3D rotations](./developer-guide/rotations.md). The guides also cover [coordinate systems](./developer-guide/coordinate-systems.md), [homogeneous coordinates](./developer-guide/homogeneous-coordinates.md), [view and projection matrices](./developer-guide/view-and-projection.md), and [floating point](./developer-guide/floating-point.md).
 
 ## Numeric local frames
 
-The optional [`@math.gl/core`](./api-reference/local-frame.md) entry
-provides ENU/XYZ rotations and ENU/NED matrices with reusable outputs. Angles are
-explicit radians, distances retain their units, and the leaf has no runtime
-imports. It is not reexported from the core root.
+The [local-frame functions](./api-reference/local-frame.md) are named exports from
+`@math.gl/core`. They provide ENU/XYZ rotations and ENU/NED matrices with reusable
+outputs. Angles are explicit radians and distances retain their units.
 
 ## Interoperability
 
-math.gl classes extend `Array`, so their components can be passed directly to array-based math APIs such as gl-matrix. Reuse vectors and matrices in hot loops to avoid repeated allocations. Low-level functions are also available through [core subpath imports](../../upgrade-guide.md#low-level-function-imports).
+math.gl classes extend `Array`, so their components can be passed directly to array-based math APIs such as gl-matrix. Reuse vectors and matrices in hot loops to avoid repeated allocations. Low-level namespaces and individual functions are named exports from the package root. See [functional math](./developer-guide/functional-math.md) for normal matrices, transform composition, depth conventions, and interpolation.
 
-The vector and matrix APIs share many conventions with THREE.js, with a few differences:
+When interoperating with other numeric APIs:
 
 - Use `vector.len()` for magnitude; `vector.length` is the array's element count.
 - Matrix elements use column-major storage. Check the argument order when copying values through another library's setters.
-- Methods that depend on THREE.js objects such as geometries or buffer attributes are outside the core API. Copy their numeric components into math.gl vectors or matrices instead.
+- Methods that depend on renderer-owned geometries or buffer attributes are outside the core API. Copy their numeric components into math.gl vectors or matrices instead.

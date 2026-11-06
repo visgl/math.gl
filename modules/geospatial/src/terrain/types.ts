@@ -40,7 +40,15 @@ export type HeightFieldProps = {
   heightReference?: string;
 };
 
-export type TerrainSampleOptions = {interpolation?: TerrainInterpolation};
+/** Sampling policies; defaults retain strict sample-domain and complete-cell behavior. */
+export type TerrainSampleOptions = {
+  /** Interpolation between grid samples; defaults to bilinear. */
+  interpolation?: TerrainInterpolation;
+  /** Cell fields may clamp the outer half-cell footprint to the nearest sample. */
+  domain?: 'samples' | 'footprint';
+  /** Bilinear height may use only nonzero-weight support; gradients still require a complete cell. */
+  noData?: 'cell' | 'support';
+};
 
 /** Numeric values are zero when their associated status is not VALID. */
 export type TerrainSample = {

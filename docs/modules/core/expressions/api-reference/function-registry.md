@@ -1,8 +1,8 @@
-# Function Registry
+# Function Registry 🧪
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From-v4.2" />
-  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" />
 </p>
 
 `ExpressionFunctionRegistry` maintains an isolated table of JavaScript functions that expression evaluators can call with evaluated arguments.

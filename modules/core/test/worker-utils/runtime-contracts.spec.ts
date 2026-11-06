@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, vi, test as baseTest} from 'vitest';
-import {isBrowser} from '../../src/worker-utils/lib/env-utils/globals';
+import {isBrowser} from '@math.gl/core/worker-utils/lib/env-utils/globals';
 const test = baseTest.runIf(!isBrowser);
 const assert = Object.assign((value: unknown) => expect(Boolean(value)).toBe(true), {
   equal: (actual: unknown, expected: unknown) => expect(actual).toBe(expected),
@@ -12,19 +12,19 @@ const assert = Object.assign((value: unknown) => expect(Boolean(value)).toBe(tru
   doesNotThrow: (fn: () => unknown) => expect(fn).not.toThrow(),
   rejects: (promise: Promise<unknown>, error: any) => expect(promise).rejects.toThrow(error)
 });
-import WorkerPool from '../../src/worker-utils/lib/worker-farm/worker-pool';
-import {getInputByteLength} from '../../src/worker-utils/lib/worker-utils/get-input-byte-length';
+import WorkerPool from '@math.gl/core/worker-utils/lib/worker-farm/worker-pool';
+import {getInputByteLength} from '@math.gl/core/worker-utils/lib/worker-utils/get-input-byte-length';
 import {
   getTransferListForWriter,
   getTransferList
-} from '../../src/worker-utils/lib/worker-utils/get-transfer-list';
+} from '@math.gl/core/worker-utils/lib/worker-utils/get-transfer-list';
 import {
   processOnWorker,
   processOnWorkerInBatches
-} from '../../src/worker-utils/lib/worker-api/process-on-worker';
-import WorkerFarm from '../../src/worker-utils/lib/worker-farm/worker-farm';
-import {createWorkerResource} from '../../src/worker-utils/lib/worker-api/worker-resource';
-import {getLoadableWorkerURL} from '../../src/worker-utils/lib/worker-utils/get-loadable-worker-url';
+} from '@math.gl/core/worker-utils/lib/worker-api/process-on-worker';
+import WorkerFarm from '@math.gl/core/worker-utils/lib/worker-farm/worker-farm';
+import {createWorkerResource} from '@math.gl/core/worker-utils/lib/worker-api/worker-resource';
+import {getLoadableWorkerURL} from '@math.gl/core/worker-utils/lib/worker-utils/get-loadable-worker-url';
 
 const source = "require('worker_threads').parentPort.on('message', () => {});";
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -637,7 +637,7 @@ import {
   getWorkerCapabilities,
   createSharedWorkerState,
   SharedWorkerState
-} from '../../src/worker-utils/lib/worker-api/shared-state';
+} from '@math.gl/core/worker-utils/lib/worker-api/shared-state';
 
 test('shared-memory capabilities probe actual atomic storage and shared cloning', () => {
   assert.equal(getWorkerCapabilities().sharedMemory, true);

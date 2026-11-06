@@ -11,7 +11,7 @@ import {cpus,tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {parseArgs} from 'node:util';
-import {bundleRuntime} from '../projection/scripts/benchmark-runtime.mjs';
+import {bundleRuntime} from './projection/benchmark-runtime.mjs';
 const {values}=parseArgs({options:{'baseline-ref':{type:'string',default:'origin/master'},points:{type:'string',default:'1000'},samples:{type:'string',default:'7'},'min-sample-ms':{type:'string',default:'4'},allocations:{type:'boolean',default:false},native:{type:'string'},output:{type:'string'}}});
 const points=Number(values.points),samples=Number(values.samples),minimum=Number(values['min-sample-ms']);
 assert(Number.isSafeInteger(points)&&points>=10&&points<=1000000,'Invalid points');

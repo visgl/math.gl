@@ -6,38 +6,7 @@ const {resolve} = require('path');
 const {themes} = require('prism-react-renderer');
 const {NormalModuleReplacementPlugin} = require('webpack');
 const resolveMathGlDependency = require('./resolve-math-gl-dependency.cjs');
-const moduleGroups = require('./module-groups.json');
-const docsTableOfContents = structuredClone(require('../docs/table-of-contents.json'));
-const apiReference = docsTableOfContents.find(section => section.label === 'API Reference');
-const moduleReferences = new Map(apiReference.items.map(item => [item.label.split(' ')[0], item]));
-const migratedEntries = {
-  "@math.gl/core/types": "@math.gl/core",
-  "@math.gl/core/expressions": "@math.gl/core",
-  "@math.gl/geometry/curves": "@math.gl/geometry",
-  "@math.gl/geometry/spatial-index": "@math.gl/geometry",
-  "@math.gl/geometry/utils": "@math.gl/geometry",
-  "@math.gl/geospatial/wkb": "@math.gl/geospatial",
-  "@math.gl/earth/geoid": "@math.gl/earth",
-  "@math.gl/geometry/polygon": "@math.gl/geometry"
-};
-apiReference.items = moduleGroups.map(group => ({
-  type: 'category',
-  label: group.label,
-  items: group.modules.map(moduleId => {
-    const reference = moduleReferences.get('@math.gl/' + moduleId);
-    if (!reference) throw new Error('Missing API reference for module: ' + moduleId);
-    moduleReferences.delete('@math.gl/' + moduleId);
-    const previous = '@math.gl/' + moduleId;
-    return migratedEntries[previous]
-      ? {...reference, label: migratedEntries[previous] + ' — ' + moduleId.split('/').slice(1).join('/')}
-      : reference;
-  })
-}));
-if (moduleReferences.size) {
-  throw new Error(
-    'Assign modules to website/module-groups.json: ' + [...moduleReferences.keys()].join(', ')
-  );
-}
+const docsTableOfContents = require('../docs/table-of-contents.json');
 
 const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/math.gl/';
 const isNext = websiteBaseUrl.endsWith('/next/');
@@ -69,6 +38,7 @@ const config = getDocusaurusConfig({
   },
 
   navbarItems: [
+    {label: 'Community', to: '/docs/community', position: 'left'},
     {
       className: 'navbar-badge',
       type: 'html',
@@ -164,7 +134,7 @@ config.plugins.push([
 ]);
 config.favicon = 'images/visgl-favicon.png';
 // Serve the optional geometry independently of the JavaScript bundle.
-config.staticDirectories = [...config.staticDirectories, '../modules/earth/timezone/data'];
+config.staticDirectories = [...config.staticDirectories, '../modules/earth/data/timezone'];
 config.plugins.push(require('./projection-redirects.cjs'));
 config.plugins.push(require('./docs-redirects.cjs'));
 

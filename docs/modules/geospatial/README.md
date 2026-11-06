@@ -1,4 +1,4 @@
-# Overview
+# Geospatial
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v3.0-blue.svg?style=flat-square" alt="From-v3.0" />
@@ -15,26 +15,22 @@ imports. DGGS remains a separate package.
 New to these concepts? Start with [Geospatial terminology](./developer-guide/terminology.md)
 for geodesics, rhumb lines, chords, ellipsoids, reference systems, and projection properties.
 
-## Feature support
+## Feature Card
 
-A geospatial mathematics checklist spanning surfaces, reference frames, and global paths.
-
-Support describes the public API in the current repository. Notes identify limits and experimental features.
-
-| Feature | math.gl support | Notes |
+| Feature | Support | Notes |
 | --- | --- | --- |
-| Ellipsoid coordinates and surface geometry | ✅ Implemented | [Ellipsoid](./api-reference/ellipsoid.md), metric/auxiliary-latitude helpers, and [qualified surface inversion](./api-reference/ellipsoid-accuracy.md). |
-| Local frames, poses and packed transforms | ✅ Implemented | [LocalReferenceFrame](./api-reference/local-reference-frame.md) with explicit ENU/NED conventions and documented ownership. |
-| Series and elliptic-integral geodesics | ✅ Implemented | [Series](./api-reference/ellipsoid-geodesic.md) and [Exact](./api-reference/ellipsoid-geodesic-exact.md) solvers have distinct oblate/prolate support profiles. |
-| Geodesic area, rhumbs and intersections | ✅ Implemented | [Polygon accumulation](./api-reference/geodesic-polygon.md), [rhumb geometry](./api-reference/ellipsoid-rhumb.md), and [bounded intersection searches](./api-reference/geodesic-intersections.md). |
-| Surface paths, seams and clipping | ✅ Implemented | [Geodesic/rhumb paths](./api-reference/geodesic-path.md), geographic seams and global/latitude cut APIs preserve declared edge semantics. |
-| Triaxial coordinates, direct paths and sampling | ✅ Implemented | [TriaxialEllipsoid](./api-reference/triaxial-geometry.md) supplies surface conversions, initial-value geodesics and surface sampling within documented domains. |
-| Globe visibility and tile-matrix geometry | ✅ Implemented | [Globe queries](./api-reference/globe-queries.md) and [tile matrices](./api-reference/tile-matrix.md) remain independent of tile loading/rendering. |
-| UTM/UPS, MGRS and angle utilities | ✅ Implemented | [Coordinate utilities](./api-reference/coordinate-utilities.md) implement explicit WGS84 grid, envelope and formatting conventions. |
-| Batched columnar GIS operations | ✅ Implemented | The optional [Turf-compatible entry](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/turf.ts) operates on GeoArrow columns with nullable row-aligned results; its supported operation set is explicit. |
-| Full global triaxial inverse geodesics | ❌ Not implemented | Direct triaxial trajectories do not provide a global inverse/closest-route or route-uniqueness solver. |
-| Precision encoding with a renderer contract | ◐ Partial | Local frames are implemented; the [C7 roadmap](https://github.com/visgl/math.gl/blob/master/dev-docs/geospatial-roadmap.md) retains shared high/low encoding and consumer qualification work. |
-| Qualified inertial/terrestrial state-vector frames | ❌ Not implemented | Versioned Earth-orientation providers and full position/velocity frame transformations remain [C9 work](https://github.com/visgl/math.gl/blob/master/dev-docs/geospatial-roadmap.md). |
+| Ellipsoid coordinates and surface geometry | ✅ | [Ellipsoid](./api-reference/ellipsoid.md), metric/auxiliary-latitude helpers, and [qualified surface inversion](./api-reference/ellipsoid-accuracy.md). |
+| Local frames, poses and packed transforms | ✅ | [LocalReferenceFrame](./api-reference/local-reference-frame.md) with explicit ENU/NED conventions and documented ownership. |
+| Series and elliptic-integral geodesics | ✅ | [Series](./api-reference/ellipsoid-geodesic.md) and [Exact](./api-reference/ellipsoid-geodesic-exact.md) solvers have distinct oblate/prolate support profiles. |
+| Geodesic area, rhumbs and intersections | ✅ | [Polygon accumulation](./api-reference/geodesic-polygon.md), [rhumb geometry](./api-reference/ellipsoid-rhumb.md), and [bounded intersection searches](./api-reference/geodesic-intersections.md). |
+| Surface paths, seams and clipping | ✅ | [Geodesic/rhumb paths](./api-reference/geodesic-path.md), geographic seams and global/latitude cut APIs preserve declared edge semantics. |
+| Triaxial coordinates, direct paths and sampling | ✅ | [TriaxialEllipsoid](./api-reference/triaxial-geometry.md) supplies surface conversions, initial-value geodesics and surface sampling within documented domains. |
+| Globe visibility and tile-matrix geometry | ✅ | [Globe queries](./api-reference/globe-queries.md) and [tile matrices](./api-reference/tile-matrix.md) remain independent of tile loading/rendering. |
+| UTM/UPS, MGRS and angle utilities | ✅ | [Coordinate utilities](./api-reference/coordinate-utilities.md) implement explicit WGS84 grid, envelope and formatting conventions. |
+| Batched columnar GIS operations | ✅ | The optional [Turf-compatible entry](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/turf.ts) operates on GeoArrow columns with nullable row-aligned results; its supported operation set is explicit. |
+| Full global triaxial inverse geodesics | ❌ | Direct triaxial trajectories do not provide a global inverse/closest-route or route-uniqueness solver. |
+| Precision encoding with a renderer contract | ◐ | Local frames are implemented; the [C7 roadmap](https://github.com/visgl/math.gl/blob/master/dev-docs/geospatial-roadmap.md) retains shared high/low encoding and consumer qualification work. |
+| Qualified inertial/terrestrial state-vector frames | ❌ | Versioned Earth-orientation providers and full position/velocity frame transformations remain [C9 work](https://github.com/visgl/math.gl/blob/master/dev-docs/geospatial-roadmap.md). |
 
 ## Installation
 
@@ -124,7 +120,7 @@ This library was initially created as part of a bigger collaboration between the
 
 Selected classes and three-radius ellipsoid kernels derive from Cesium under Apache-2.0. Shared spheroid conversion kernels also retain proj4js MIT provenance. Source headers and distributed notices identify the applicable credits and terms.
 
-See [References and credits](../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
 
 ## Globe queries
 

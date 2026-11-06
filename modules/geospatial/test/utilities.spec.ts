@@ -14,12 +14,12 @@ import {
   transferGrid,
   parseMGRSZone,
   formatMGRSZone
-} from '../src/coordinates';
-import {TriaxialEllipsoid} from '../src/triaxial';
-import {EllipsoidGeodesic} from '../src/ellipsoid-geodesic';
-import {EllipsoidGeodesicExact} from '../src/geodesic-exact';
-import {EllipsoidRhumb} from '../src/ellipsoid-rhumb';
-import {GeodesicLineBuffer, RhumbLineBuffer} from '../src/geodesic-buffer';
+} from '@math.gl/geospatial/coordinates';
+import {TriaxialEllipsoid} from '@math.gl/geospatial/triaxial';
+import {EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid-geodesic';
+import {EllipsoidGeodesicExact} from '@math.gl/geospatial/geodesic-exact';
+import {EllipsoidRhumb} from '@math.gl/geospatial/ellipsoid-rhumb';
+import {GeodesicLineBuffer, RhumbLineBuffer} from '@math.gl/geospatial/geodesic-buffer';
 import {qualifyUtilities} from './utilities-qualification';
 for (const row of qualifyUtilities())
   test(`${row.mode} ${row.id}`, () => expect(row.passed, JSON.stringify(row)).toBe(true));

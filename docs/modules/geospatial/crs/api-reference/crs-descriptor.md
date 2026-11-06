@@ -52,7 +52,7 @@ cross-engine transformed-buffer cache key.
 
 ## Tested proj4js example
 
-The [complete example](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/examples/proj4-crs-descriptor.ts)
+The [complete example](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/proj4-crs-descriptor.ts)
 prepares a real proj4js converter for spherical equidistant cylindrical coordinates:
 
 ```typescript
@@ -76,7 +76,7 @@ descriptor: independent coordinate anchors, inverses, XY/XYZ/XYZM, typed outputs
 in-place conversion, input ownership and failures before writes. Run them with:
 
 ```sh
-yarn exec vitest run --project node modules/geospatial/projection/test/lib/external-crs-descriptor.spec.ts
+yarn exec vitest run --project node modules/geospatial/test/projection/lib/external-crs-descriptor.spec.ts
 ```
 
 proj-wasm's asynchronous public API cannot directly supply these synchronous

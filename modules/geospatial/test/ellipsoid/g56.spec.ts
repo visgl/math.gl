@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {qualifyG56} from '../../projection/test/g56-entry';
-import {EllipsoidRhumb, RhumbDomainError} from '../../src/ellipsoid-rhumb';
-import {RhumbPolygon} from '../../src/rhumb-polygon';
-import {GeodesicIntersections} from '../../src/geodesic-intersections';
+import {qualifyG56} from '../projection/g56-entry';
+import {EllipsoidRhumb, RhumbDomainError} from '@math.gl/geospatial/ellipsoid-rhumb';
+import {RhumbPolygon} from '@math.gl/geospatial/rhumb-polygon';
+import {GeodesicIntersections} from '@math.gl/geospatial/geodesic-intersections';
 const axes = {semiMajorAxis: 1, semiMinorAxis: 1};
 for (const row of qualifyG56())
   test(`G5/G6 ${row.family} ${row.id}`, () => expect(row, row.error).toMatchObject({passed: true}));

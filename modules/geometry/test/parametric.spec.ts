@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {ParametricGeometry, TorusGeometry, LatheGeometry} from '../src/parametric';
+import {ParametricGeometry, TorusGeometry, LatheGeometry} from '@math.gl/geometry/parametric';
 
 test('sampled plane normals and triangle winding agree with analytic surface', () => {
   const mesh = new ParametricGeometry({

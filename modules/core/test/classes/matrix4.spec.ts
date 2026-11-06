@@ -139,27 +139,31 @@ test('Matrix4#getScale', () => {
 });
 
 test('Matrix4#getRotation', () => {
-  const INPUT = INDICES_MATRIX;
-  const RESULT = [
-    0.2672612419124244, 0.19069251784911848, 0.17263060129453078, 0, 1.3363062095621219,
-    0.5720775535473555, 0.4028047363539052, 0, 2.4053511772118195, 0.9534625892455924,
-    0.6329788714132796, 0, 0, 0, 0, 1
-  ];
-
-  const m = new Matrix4(INPUT).getRotation([...INDICES_MATRIX]);
-  expect(equals(m, RESULT), 'getRotation gave the right result').toBe(true);
+  const input = new Matrix4().rotateZ(0.7).scale([2, 3, 4]);
+  const expected = new Matrix4().rotateZ(0.7);
+  const result = input.getRotation();
+  expect(equals(result, expected)).toBe(true);
+  expect(() => new Matrix4(INDICES_MATRIX).getRotation()).toThrow(RangeError);
 });
 
 test('Matrix4#getRotationMatrix3', () => {
-  const INPUT = INDICES_MATRIX;
-  const RESULT = [
-    0.2672612419124244, 0.19069251784911848, 0.17263060129453078, 1.3363062095621219,
-    0.5720775535473555, 0.4028047363539052, 2.4053511772118195, 0.9534625892455924,
-    0.6329788714132796
-  ];
-
-  const m = new Matrix4(INPUT).getRotationMatrix3([...INDICES_MATRIX.slice(0, 9)]);
-  expect(equals(m, RESULT), 'getRotationMatrix3 gave the right result').toBe(true);
+  const input = new Matrix4().rotateZ(0.7).scale([2, 3, 4]);
+  const expected = new Matrix4().rotateZ(0.7);
+  const result = input.getRotationMatrix3();
+  expect(
+    equals(result, [
+      expected[0],
+      expected[1],
+      expected[2],
+      expected[4],
+      expected[5],
+      expected[6],
+      expected[8],
+      expected[9],
+      expected[10]
+    ])
+  ).toBe(true);
+  expect(() => new Matrix4(INDICES_MATRIX).getRotationMatrix3()).toThrow(RangeError);
 });
 
 test('Matrix4#getTranslation', () => {

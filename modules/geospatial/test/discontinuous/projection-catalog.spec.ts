@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {MapEngine, MAP_PROJECTIONS, type MapProjection} from '../../src/discontinuous';
+import {MapEngine, MAP_PROJECTIONS, type MapProjection} from '@math.gl/geospatial/discontinuous';
 import reference from './catalog-reference.json';
-import type {Position} from '../../src/discontinuous/math';
+import type {Position} from '@math.gl/geospatial/discontinuous/math';
 test('catalog covers every named default constructor in d3-geo-projection 4.0.0', () => {
   expect(new Set(MAP_PROJECTIONS).size).toBe(MAP_PROJECTIONS.length);
   for (const entry of reference.cases) expect(MAP_PROJECTIONS).toContain(entry.projection);

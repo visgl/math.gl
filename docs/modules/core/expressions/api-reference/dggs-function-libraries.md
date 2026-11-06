@@ -1,8 +1,8 @@
-# DGGS Function Libraries
+# DGGS Function Libraries 🧪
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From-v4.2" />
-  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" />
 </p>
 
 Import optional Discrete Global Grid System function tables from `@math.gl/dggs`.

@@ -1,26 +1,22 @@
-# Overview
+# Web Mercator
 
 `@math.gl/web-mercator` provides a map camera and coordinate utilities for spherical Web Mercator. Use `WebMercatorViewport` to convert longitude/latitude positions to screen pixels and back with zoom, pitch, and bearing.
 
 Geographic inputs use `[longitude, latitude]` in degrees, with optional altitude in metres. For CRS conversions beyond Web Mercator, use [projection](../geospatial/projection/README.md).
 
-## Feature support
+## Feature Card
 
-Map-camera and coordinate capabilities for spherical Web Mercator.
-
-Support describes the public API in the current repository. Notes identify limits and experimental features.
-
-| Feature | math.gl support | Notes |
+| Feature | Support | Notes |
 | --- | --- | --- |
-| Longitude/latitude and world-coordinate conversion | ✅ Implemented | [Coordinate utilities](./api-reference/web-mercator-utils.md) define spherical Mercator, zoom scales and projection/view matrices. |
-| EPSG:3857 metre-coordinate conversion | ✅ Implemented | Explicit forward/inverse helpers distinguish metre coordinates from pixel-scaled world coordinates. |
-| Zoom, pitch and bearing camera projection | ✅ Implemented | [WebMercatorViewport](./api-reference/web-mercator-viewport.md) projects/unprojects geographic and screen positions. |
-| Bounds fitting and viewport normalization | ✅ Implemented | fitBounds, getBounds and normalized camera properties support explicit viewport/padding contracts. |
-| Distance scales and metre offsets | ✅ Implemented | Latitude-dependent scale helpers and addMetersToLngLat support local approximations within documented limits. |
-| Fly-to interpolation | ✅ Implemented | flyToViewport and getFlyToDuration provide camera-path interpolation helpers. |
-| Ellipsoidal Mercator and arbitrary CRS cameras | ❌ Not implemented | This camera model is spherical Web Mercator; use the [projection module](../geospatial/projection/README.md) for other CRS transforms. |
-| Terrain-depth and mesh intersection picking | ❌ Not implemented | Screen/plane unprojection is not a terrain/depth-buffer intersection engine. |
-| General globe/flat rendering and GPU ownership | ❌ Not implemented | The public viewport API does not supply a complete globe renderer, shared render-state transition, or GPU resource lifecycle. |
+| Longitude/latitude and world-coordinate conversion | ✅ | [Coordinate utilities](./api-reference/web-mercator-utils.md) define spherical Mercator, zoom scales and projection/view matrices. |
+| EPSG:3857 metre-coordinate conversion | ✅ | Explicit forward/inverse helpers distinguish metre coordinates from pixel-scaled world coordinates. |
+| Zoom, pitch and bearing camera projection | ✅ | [WebMercatorViewport](./api-reference/web-mercator-viewport.md) projects/unprojects geographic and screen positions. |
+| Bounds fitting and viewport normalization | ✅ | fitBounds, getBounds and normalized camera properties support explicit viewport/padding contracts. |
+| Distance scales and metre offsets | ✅ | Latitude-dependent scale helpers and addMetersToLngLat support local approximations within documented limits. |
+| Fly-to interpolation | ✅ | flyToViewport and getFlyToDuration provide camera-path interpolation helpers. |
+| Ellipsoidal Mercator and arbitrary CRS cameras | ❌ | This camera model is spherical Web Mercator; use the [projection module](../geospatial/projection/README.md) for other CRS transforms. |
+| Terrain-depth and mesh intersection picking | ❌ | Screen/plane unprojection is not a terrain/depth-buffer intersection engine. |
+| General globe/flat rendering and GPU ownership | ❌ | The public viewport API does not supply a complete globe renderer, shared render-state transition, or GPU resource lifecycle. |
 
 ## Example Usage
 

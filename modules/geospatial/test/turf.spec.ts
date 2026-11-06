@@ -8,8 +8,19 @@ import turfDistance from '@turf/distance';
 import turfBearing from '@turf/bearing';
 import turfCentroid from '@turf/centroid';
 import turfPointInPolygon from '@turf/boolean-point-in-polygon';
-import {makeGeoArrowColumnFromGeometryRows, sliceGeoArrowColumn} from '../src/geoarrow';
-import {area, bbox, bearing, booleanPointInPolygon, centroid, distance, length} from '../src/turf';
+import {
+  makeGeoArrowColumnFromGeometryRows,
+  sliceGeoArrowColumn
+} from '@math.gl/geospatial/geoarrow';
+import {
+  area,
+  bbox,
+  bearing,
+  booleanPointInPolygon,
+  centroid,
+  distance,
+  length
+} from '@math.gl/geospatial/turf';
 
 const point = (x: number, y: number) => ({type: 'Point' as const, coordinates: [x, y]});
 const polygon = {
@@ -164,7 +175,7 @@ test('null coordinate components and exterior rings do not produce false results
 });
 
 test('coordinate transforms preserve rows and round-trip Web Mercator', async () => {
-  const {truncate, toMercator, toWgs84} = await import('../src/turf');
+  const {truncate, toMercator, toWgs84} = await import('@math.gl/geospatial/turf');
   const input = column([point(12.3456789, 45.1234567), null]);
   const rounded = truncate(input, {precision: 3});
   expect([...bbox(rounded).values].slice(0, 2)).toEqual([12.346, 45.123]);
@@ -177,7 +188,7 @@ test('coordinate transforms preserve rows and round-trip Web Mercator', async ()
 });
 
 test('batched destination, midpoint and bounds center', async () => {
-  const {destination, midpoint, center} = await import('../src/turf');
+  const {destination, midpoint, center} = await import('@math.gl/geospatial/turf');
   const {default: turfDestination} = await import('@turf/destination');
   const source = {...column([point(10, 20), null]), metadata: {label: 'test'}};
   expect(destination(source, 100, 45).metadata).toEqual(source.metadata);
@@ -193,7 +204,7 @@ test('batched destination, midpoint and bounds center', async () => {
 });
 
 test('native rhumb operations match Turf across the antimeridian', async () => {
-  const api = await import('../src/turf');
+  const api = await import('@math.gl/geospatial/turf');
   const {default: oracleDistance} = await import('@turf/rhumb-distance');
   const {default: oracleBearing} = await import('@turf/rhumb-bearing');
   const {default: oracleDestination} = await import('@turf/rhumb-destination');
@@ -215,8 +226,8 @@ test('native rhumb operations match Turf across the antimeridian', async () => {
 });
 
 test('native generated circles, bounds polygons, arcs, and line sampling', async () => {
-  const api = await import('../src/turf');
-  const {materializeGeoArrowRows} = await import('../src/geoarrow/index');
+  const api = await import('@math.gl/geospatial/turf');
+  const {materializeGeoArrowRows} = await import('@math.gl/geospatial/geoarrow/index');
   const {default: oracleCircle} = await import('@turf/circle');
   const input = column([point(10, 20), null]);
   const generated = api.circle(input, 10, {steps: 8});
@@ -245,7 +256,7 @@ test('native generated circles, bounds polygons, arcs, and line sampling', async
 });
 
 test('line predicates, ring orientation and explicit-origin scale', async () => {
-  const api = await import('../src/turf');
+  const api = await import('@math.gl/geospatial/turf');
   const line = column([
     {
       type: 'LineString',
@@ -271,9 +282,9 @@ test('line predicates, ring orientation and explicit-origin scale', async () => 
 });
 
 test('native geometry conversion and decomposition preserve topology', async () => {
-  const api = await import('../src/turf');
+  const api = await import('@math.gl/geospatial/turf');
   const {materializeGeoArrowRows, getGeoArrowRowCount, validateGeoArrowColumn} = await import(
-    '../src/geoarrow/index'
+    '@math.gl/geospatial/geoarrow/index'
   );
   const input = column([polygon, null]);
   const lines = api.polygonToLine(input);
@@ -324,7 +335,7 @@ test('native geometry conversion and decomposition preserve topology', async () 
 });
 
 test('point-on-line tolerance works perpendicular to axis-aligned segments', async () => {
-  const {booleanPointOnLine} = await import('../src/turf');
+  const {booleanPointOnLine} = await import('@math.gl/geospatial/turf');
   const horizontal = column([
     {
       type: 'LineString',
@@ -355,8 +366,10 @@ test('point-on-line tolerance works perpendicular to axis-aligned segments', asy
 });
 
 test('native boundary intersections and kinks preserve row alignment', async () => {
-  const api = await import('../src/turf');
-  const {materializeGeoArrowRows, validateGeoArrowColumn} = await import('../src/geoarrow/index');
+  const api = await import('@math.gl/geospatial/turf');
+  const {materializeGeoArrowRows, validateGeoArrowColumn} = await import(
+    '@math.gl/geospatial/geoarrow/index'
+  );
   const {lineIntersect: oracle} = await import('@turf/line-intersect');
   const a = {
     type: 'LineString' as const,
@@ -421,8 +434,8 @@ test('native boundary intersections and kinks preserve row alignment', async () 
 });
 
 test('intersections handle separated chunks, duplicate joins and collinear overlaps', async () => {
-  const {lineIntersect, kinks} = await import('../src/turf');
-  const {materializeGeoArrowRows} = await import('../src/geoarrow/index');
+  const {lineIntersect, kinks} = await import('@math.gl/geospatial/turf');
+  const {materializeGeoArrowRows} = await import('@math.gl/geospatial/geoarrow/index');
   const geometry = {
     type: 'LineString' as const,
     coordinates: [
@@ -481,8 +494,8 @@ test('intersections handle separated chunks, duplicate joins and collinear overl
 });
 
 test('isolated collinear contacts and shared floating-point endpoints', async () => {
-  const {lineIntersect} = await import('../src/turf');
-  const {materializeGeoArrowRows} = await import('../src/geoarrow/index');
+  const {lineIntersect} = await import('@math.gl/geospatial/turf');
+  const {materializeGeoArrowRows} = await import('@math.gl/geospatial/geoarrow/index');
   const line = (coordinates: number[][]) => column([{type: 'LineString', coordinates}]);
   expect(
     materializeGeoArrowRows(

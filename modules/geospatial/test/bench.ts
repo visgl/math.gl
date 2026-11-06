@@ -15,7 +15,7 @@ import {
   fromCartographic,
   fromCartographicToRadians,
   toCartographicFromRadians
-} from '../src/type-utils';
+} from '@math.gl/geospatial/type-utils';
 
 import {ellipsoidBench} from './ellipsoid/ellipsoid.bench';
 

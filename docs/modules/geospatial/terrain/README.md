@@ -32,7 +32,7 @@ minimum sampled vertical clearance. Missing samples can hide an earlier blocker.
 A clear result applies to the sampled piecewise-linear profile, not unsampled
 terrain. Curvature, refraction and geodesic paths are not modeled.
 
-## Feature support
+## Feature Card
 
 ### Cross-tile contours
 
@@ -115,22 +115,20 @@ same reconciliation policy. This does not establish mixed-resolution halos.
 
 Terrain-data, analysis, meshing, and query capabilities against the broader CPU/GPU terrain roadmap.
 
-Support describes the public API in the current repository. Notes identify limits and experimental features.
-
-| Feature | math.gl support | Notes |
+| Feature | Support | Notes |
 | --- | --- | --- |
-| Affine and geographic height fields | ✅ Implemented | Vertex/cell registration, nodata masks, explicit metric/geographic frames, and nearest/bilinear/triangle sampling. |
-| Batch heights, gradients and normals | ✅ Implemented | Caller-owned buffers and separate value/gradient statuses retain interpolation and coverage semantics. |
-| Resident tiled snapshots and incremental updates | ✅ Implemented | Insertion/replacement/eviction, neighbor halos and whole-footprint fallback are explicit; no implicit tile fetching. |
-| Regular and adaptive CPU meshing | ✅ Implemented | Regular geometry and optional tessellators produce mesh data with source registration and nodata contracts. |
-| Terrain analysis and contour paths | ✅ Implemented | Raster gradients, slope/aspect, profiles, contours, stitching, bounded simplification and profile measurements. |
-| Indexed ray, nearest and contact queries | ✅ Implemented | Bounded triangle-surface queries include sphere/capsule contacts and segment clearance with explicit completion status. |
-| Tile reconciliation and conforming mesh seams | ✅ Implemented | Same-level vertex reconciliation, supported mixed-resolution boundary stitching and visual skirts have separate physical/visual contracts. |
-| Packed GPU-upload substrate | ✅ Implemented | Experimental versioned packed buffers provide a CPU-validated data layout; they do not execute shaders. |
-| Real-DEM and numerical qualification | ◐ Partial | Analytic controls and an independent regional GDAL fixture are implemented; broader terrain distributions and CPU/GPU conformance remain open. |
-| Device-callable WGSL/GLSL terrain execution | ❌ Not implemented | Shader/device implementation and [GPU qualification](https://github.com/visgl/math.gl/blob/master/dev-docs/terrain-roadmap.md) belong to companion luma.gl work. |
-| Continuous first-impact and physics solver integration | ❌ Not implemented | Overlap/clearance queries do not provide time-of-impact, rotating/curved sweeps, reduced contact manifolds, or a dynamics solver. |
-| Automatic renderer LOD/drape/picking integration | ❌ Not implemented | The module supplies data and queries; complete deck.gl rendering/LOD and shared displayed-surface integration remain separate roadmap work. |
+| Affine and geographic height fields | ✅ | Vertex/cell registration, optional raster-footprint clamping, masked bilinear support, explicit metric/geographic frames, and nearest/bilinear/triangle sampling. |
+| Batch heights, gradients and normals | ✅ | Caller-owned buffers and separate value/gradient statuses retain interpolation and coverage semantics. |
+| Resident tiled snapshots and incremental updates | ✅ | Insertion/replacement/eviction, neighbor halos and whole-footprint fallback are explicit; no implicit tile fetching. |
+| Regular and adaptive CPU meshing | ✅ | Regular geometry and optional tessellators produce mesh data with source registration and nodata contracts. |
+| Terrain analysis and contour paths | ✅ | Raster gradients, slope/aspect, profiles, contours, stitching, bounded simplification and profile measurements. |
+| Indexed ray, nearest and contact queries | ✅ | Bounded triangle-surface queries include sphere/capsule contacts and segment clearance with explicit completion status. |
+| Tile reconciliation and conforming mesh seams | ✅ | Same-level vertex reconciliation, supported mixed-resolution boundary stitching and visual skirts have separate physical/visual contracts. |
+| Packed GPU-upload substrate | ✅ | Experimental versioned packed buffers provide a CPU-validated data layout; they do not execute shaders. |
+| Real-DEM and numerical qualification | ◐ | Analytic controls and an independent regional GDAL fixture are implemented; broader terrain distributions and CPU/GPU conformance remain open. |
+| Device-callable WGSL/GLSL terrain execution | ❌ | Shader/device implementation and [GPU qualification](https://github.com/visgl/math.gl/blob/master/dev-docs/terrain-roadmap.md) belong to companion luma.gl work. |
+| Continuous first-impact and physics solver integration | ❌ | Overlap/clearance queries do not provide time-of-impact, rotating/curved sweeps, reduced contact manifolds, or a dynamics solver. |
+| Automatic renderer LOD/drape/picking integration | ❌ | The module supplies data and queries; complete deck.gl rendering/LOD and shared displayed-surface integration remain separate roadmap work. |
 
 ## HeightField
 
@@ -206,7 +204,7 @@ Jacobian. Normals are `normalize([-gradientX, -gradientY, 1])`.
 | Interpolation | Height surface | Missing-data rule | Derivatives |
 | --- | --- | --- | --- |
 | `'nearest'` | Closest grid node; half-way ties select the larger grid index | Selected node must be valid | `UNAVAILABLE` |
-| `'bilinear'` | Bilinear patch through four cell samples | All four must be valid, even at an edge/node | Analytic patch derivatives |
+| `'bilinear'` | Bilinear patch through four cell samples | All four must be valid by default; opt into nonzero-weight support with `noData: 'support'` | Analytic patch derivatives |
 | `'triangle'` | Two planar triangles using the field's diagonal | All three selected triangle vertices must be valid | Selected triangle/contact normal |
 
 Bilinear and triangle interpolation generally describe different surfaces. Use
@@ -1209,3 +1207,25 @@ both input and output are checked before a result is returned.
 
 A selective named-import bundle retains no HeightField, tessellator, renderer or query index. Skirts hide visual gaps; they do not reconcile mismatched
 heights or provide a collision surface.
+
+### Sampling raster footprints and masked support
+
+Sampling defaults to the sample-center domain and requires a complete interpolation
+cell. Raster adapters can opt into two independent policies:
+
+- `domain: 'footprint'` includes the outer half-cell margins of cell-registered
+  fields and clamps them to the nearest sample. It does not extend the raster footprint.
+  Vertex-registered fields keep their existing domain. Derivatives along a clamped
+  grid axis are zero before transformation into world coordinates; normals describe
+  that extended surface. At the clamp transition, the interior one-sided derivative is used.
+- `noData: 'support'` lets bilinear heights ignore missing neighbors with exactly
+  zero weight. Missing positive-weight support still returns `NO_DATA`; weights
+  are never renormalized. Roundoff-sized grid-coordinate excursions snap to sample
+  nodes, capped at one millionth of a pixel. Gradients still require a complete cell,
+  so a valid height can have `gradientStatus: NO_DATA`.
+
+Both options work with `HeightField.sampleBatch` and `GeographicHeightField.sample`.
+`TiledHeightField` retains its halo/residency rules and rejects these policies. For example,
+`field.sample(x, y, {domain: 'footprint', noData: 'support'})` lets a loader
+adapter sample pixel-centered physical grids without reimplementing interpolation.
+These policies do not fill holes, change vertical datums, or extrapolate slopes.

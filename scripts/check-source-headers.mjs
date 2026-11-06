@@ -22,15 +22,15 @@ const cesiumDerived = new Set([
   'modules/geometry/src/culling/lib/perspective-off-center-frustum.ts',
   'modules/geometry/src/culling/lib/plane.ts',
   'modules/geometry/src/culling/lib/ray.ts',
-  'modules/geometry/culling/test/bench.ts',
-  'modules/geometry/culling/test/lib/algorithms/bounding-sphere-from-points.spec.ts',
-  'modules/geometry/culling/test/lib/bounding-volumes/bounding-sphere.spec.ts',
-  'modules/geometry/culling/test/lib/bounding-volumes/oriented-bounding-box.spec.ts',
-  'modules/geometry/culling/test/lib/culling-volume.spec.ts',
-  'modules/geometry/culling/test/lib/perspective-frustum.spec.ts',
-  'modules/geometry/culling/test/lib/perspective-off-center-frustum.spec.ts',
-  'modules/geometry/culling/test/lib/plane.spec.ts',
-  'modules/geometry/culling/test/lib/ray.spec.ts',
+  'modules/geometry/test/culling/bench.ts',
+  'modules/geometry/test/culling/lib/algorithms/bounding-sphere-from-points.spec.ts',
+  'modules/geometry/test/culling/lib/bounding-volumes/bounding-sphere.spec.ts',
+  'modules/geometry/test/culling/lib/bounding-volumes/oriented-bounding-box.spec.ts',
+  'modules/geometry/test/culling/lib/culling-volume.spec.ts',
+  'modules/geometry/test/culling/lib/perspective-frustum.spec.ts',
+  'modules/geometry/test/culling/lib/perspective-off-center-frustum.spec.ts',
+  'modules/geometry/test/culling/lib/plane.spec.ts',
+  'modules/geometry/test/culling/lib/ray.spec.ts',
   'modules/dggs/src/s2-geometry/s2-token.ts',
   'modules/geometry/src/utils/attribute-compression.ts',
   'modules/geospatial/src/constants.ts',
@@ -48,7 +48,7 @@ const cesiumDerived = new Set([
   'modules/geospatial/test/ellipsoid/ellipsoid.spec.ts',
   'modules/geospatial/test/make-obb-from-region.spec.ts',
   'modules/geospatial/test/type-utils.spec.ts',
-  'modules/geometry/polygon/test/bench.ts'
+  'modules/geometry/test/polygon/bench.ts'
 ]);
 const extensions = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.py', '.css', '.html']);
 const files = execFileSync('git', ['ls-files', '-z'], {cwd: root, encoding: 'utf8'})

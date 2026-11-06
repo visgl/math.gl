@@ -168,3 +168,7 @@ Performs a spherical linear interpolation between two quaternions
 `quaternion.slerp(target, ratio)`
 
 `quaternion.slerp(start, target, ratio)`
+
+## Related functional operations
+
+The functional API also provides `quatGetAngle` and `quatRotationTo` for unit inputs. See [functional math](../developer-guide/functional-math.md) for imports, output ownership, and limitations.

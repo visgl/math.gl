@@ -8,7 +8,7 @@ import {tmpdir} from 'node:os';
 import {join, relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {build} from 'esbuild';
-import {bundleRuntime} from '../modules/geospatial/projection/scripts/benchmark-runtime.mjs';
+import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-runtime.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));

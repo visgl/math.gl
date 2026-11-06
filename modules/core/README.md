@@ -19,3 +19,18 @@ separately by `@math.gl/geospatial` and `@math.gl/dggs`.
 
 See [the packaged source and license index](./THIRD-PARTY-NOTICES.md) and
 [math.gl references and credits](https://math.gl/docs/references-and-credits).
+
+## Expressions
+
+[![From v4.2](https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square)](https://math.gl/docs)
+[![Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)](https://math.gl/docs)
+
+[math.gl](https://math.gl/docs) expression parsing and evaluation helpers.
+
+The parser, evaluator, registry, and basic math library are implemented in this core subpath.
+Import the WGS84 function library from `@math.gl/geospatial` and DGGS function
+libraries from `@math.gl/dggs`.
+
+## Types
+
+This module contains basic typescript types for math.gl.

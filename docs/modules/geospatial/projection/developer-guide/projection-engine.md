@@ -467,7 +467,7 @@ when you want the bundler to discard unused algorithms.
 To reproduce the byte counts after building the repository:
 
 ```sh
-node modules/geospatial/projection/scripts/check-bundle-budget.mjs --measure
+node modules/geospatial/scripts/projection/check-bundle-budget.mjs --measure
 ```
 
 Omit `--measure` to enforce the checked-in size limits. Package checks also verify
@@ -640,7 +640,7 @@ subpaths select APIs but do not provide this browser download guarantee.
 Reproduce and enforce the split-bundle budgets after building:
 
 ```sh
-node modules/geospatial/projection/scripts/check-lazy-package.mjs
+node modules/geospatial/scripts/projection/check-lazy-package.mjs
 ```
 
 Keep imports on the isolated subpaths throughout the eager and lazy features.

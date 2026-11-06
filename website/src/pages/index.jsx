@@ -29,8 +29,8 @@ export default function IndexPage() {
               of the world.
             </h1>
             <p className={styles.heroLead}>
-              Composable tools for coordinates, geometry, and time—built for maps and 3D
-              applications.
+              From vectors and matrices to coordinate systems and planetary geometry. Composable
+              TypeScript tools for the world you’re building.
             </p>
             <div className={styles.heroActions}>
               <a className={styles.primaryAction} href={`${baseUrl}docs`}>
@@ -40,7 +40,6 @@ export default function IndexPage() {
                 Examples
               </a>
             </div>
-            <div id="home-map-caption" />
           </div>
         </header>
 

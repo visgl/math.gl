@@ -42,7 +42,25 @@ const ndc = [clip[0] / clip[3], clip[1] / clip[3], clip[2] / clip[3]];
 
 ## Clip coordinates and depth
 
-The core projection matrices use the OpenGL/WebGL depth convention: normalized device coordinates span -1 to 1 in X, Y, and Z. A renderer using a different depth range needs an appropriate conversion. On the CPU, divide XYZ by W only when W is nonzero; `Matrix4.transform()` preserves the homogeneous result.
+The `Matrix4` projection methods use the OpenGL/WebGL depth convention:
+normalized device coordinates span -1 to 1 in X, Y, and Z. The functional API also
+provides projections with Z in [0, 1], as used by WebGPU:
+
+```js
+import {mat4PerspectiveZO} from '@math.gl/core';
+
+const webgpuProjection = new Float64Array(16);
+mat4PerspectiveZO(webgpuProjection, Math.PI / 3, 800 / 600, 0.1, 1000);
+```
+
+Use `mat4OrthoZO` for orthographic [0, 1] depth, or the `NO` variants for [-1, 1].
+These low-level choices set the depth range. For explicit reversed depth, use
+`mat4PerspectiveProjection`, `mat4FrustumProjection` or `mat4OrthographicProjection`
+with matching [frustum extraction options](../../geometry/culling/api-reference/extended-queries.md).
+Configure the renderer's depth test and clear value separately. See [functional math](./functional-math.md).
+
+On the CPU, divide XYZ by W only when W is nonzero; `Matrix4.transform()` preserves
+the homogeneous result.
 
 Keep the near and far planes close to the visible range when possible to improve depth-buffer precision. Matrix storage is column-major; multiplication order and coordinate conventions matter independently of how a matrix is printed.
 

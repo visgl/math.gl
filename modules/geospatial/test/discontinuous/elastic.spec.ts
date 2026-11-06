@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {ElasticGrid} from '../../src/discontinuous/elastic/grid';
-import {MapEngine, createElasticMap} from '../../src/discontinuous';
-import {elasticI, elasticII, elasticIII} from '../../src/elastic';
+import {ElasticGrid} from '@math.gl/geospatial/discontinuous/elastic/grid';
+import {MapEngine, createElasticMap} from '@math.gl/geospatial/discontinuous';
+import {elasticI, elasticII, elasticIII} from '@math.gl/geospatial/elastic';
 for (const data of [elasticI, elasticII, elasticIII]) {
   test(`${data.name}: global coverage, picking and geometry`, () => {
     const map = new MapEngine({version: 1, id: data.name, definition: {type: 'elastic', data}});
@@ -57,7 +57,7 @@ for (const data of [elasticI, elasticII, elasticIII]) {
   });
 }
 
-import {parseElasticMap, type ElasticMapData} from '../../src/discontinuous';
+import {parseElasticMap, type ElasticMapData} from '@math.gl/geospatial/discontinuous';
 const rectangle: [number, number][] = [
   [-180, -90],
   [180, -90],
@@ -481,7 +481,11 @@ test('published forward coordinates match an independent reference calculation',
   }
 });
 
-import {contains, indexDomain, type Polygons} from '../../src/discontinuous/elastic/geometry';
+import {
+  contains,
+  indexDomain,
+  type Polygons
+} from '@math.gl/geospatial/discontinuous/elastic/geometry';
 test('indexed coverage agrees with direct polygon tests at edges and latitude bucket boundaries', () => {
   const domain: Polygons = [
     [

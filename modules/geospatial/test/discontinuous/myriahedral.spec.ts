@@ -8,8 +8,8 @@ import {
   createMyriahedralLayout,
   MYRIAHEDRAL_PRESETS,
   type MyriahedralSolid
-} from '../../src/discontinuous';
-import {angle, geographic} from '../../src/discontinuous/math';
+} from '@math.gl/geospatial/discontinuous';
+import {angle, geographic} from '@math.gl/geospatial/discontinuous/math';
 
 const isLand = ([longitude, latitude]: readonly [number, number]) =>
   longitude > -40 && longitude < 70 && latitude > -30;

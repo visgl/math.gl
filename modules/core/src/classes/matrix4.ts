@@ -5,6 +5,7 @@
 
 import {NumericArray, NumericArray16} from '../types';
 import {Matrix} from './base/matrix';
+import {affineComponents} from '../gl-matrix/mat4';
 import type {Matrix3Like} from './matrix3';
 import {checkVector} from '../lib/validators';
 
@@ -434,27 +435,11 @@ export class Matrix4 extends Matrix {
    * @returns self
    */
   getRotation(result?: NumericArray, scaleResult?: NumericArray): NumericArray {
-    result = result || [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0];
-    scaleResult = scaleResult || [-0, -0, -0];
-    const scale = this.getScale(scaleResult);
-    const inverseScale0 = 1 / scale[0];
-    const inverseScale1 = 1 / scale[1];
-    const inverseScale2 = 1 / scale[2];
-    result[0] = this[0] * inverseScale0;
-    result[1] = this[1] * inverseScale1;
-    result[2] = this[2] * inverseScale2;
-    result[3] = 0;
-    result[4] = this[4] * inverseScale0;
-    result[5] = this[5] * inverseScale1;
-    result[6] = this[6] * inverseScale2;
-    result[7] = 0;
-    result[8] = this[8] * inverseScale0;
-    result[9] = this[9] * inverseScale1;
-    result[10] = this[10] * inverseScale2;
-    result[11] = 0;
-    result[12] = 0;
-    result[13] = 0;
-    result[14] = 0;
+    const {rotation, scale} = affineComponents(this);
+    result = result || new Array(16);
+    if (scaleResult) for (let i = 0; i < 3; i++) scaleResult[i] = scale[i];
+    for (let i = 0; i < 16; i++) result[i] = 0;
+    for (let i = 0; i < 9; i++) result[Math.floor(i / 3) * 4 + (i % 3)] = rotation[i];
     result[15] = 1;
     return result;
   }
@@ -466,21 +451,10 @@ export class Matrix4 extends Matrix {
    * @returns self
    */
   getRotationMatrix3(result?: NumericArray, scaleResult?: NumericArray): NumericArray {
-    result = result || [-0, -0, -0, -0, -0, -0, -0, -0, -0];
-    scaleResult = scaleResult || [-0, -0, -0];
-    const scale = this.getScale(scaleResult);
-    const inverseScale0 = 1 / scale[0];
-    const inverseScale1 = 1 / scale[1];
-    const inverseScale2 = 1 / scale[2];
-    result[0] = this[0] * inverseScale0;
-    result[1] = this[1] * inverseScale1;
-    result[2] = this[2] * inverseScale2;
-    result[3] = this[4] * inverseScale0;
-    result[4] = this[5] * inverseScale1;
-    result[5] = this[6] * inverseScale2;
-    result[6] = this[8] * inverseScale0;
-    result[7] = this[9] * inverseScale1;
-    result[8] = this[10] * inverseScale2;
+    const {rotation, scale} = affineComponents(this);
+    result = result || new Array(9);
+    if (scaleResult) for (let i = 0; i < 3; i++) scaleResult[i] = scale[i];
+    for (let i = 0; i < 9; i++) result[i] = rotation[i];
     return result;
   }
 

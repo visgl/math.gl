@@ -5,7 +5,7 @@ import {
   clipGeographicPolyline,
   clipGeographicPolygon,
   subdivideGeographicCutRing
-} from '../src/geographic-cuts';
+} from '@math.gl/geospatial/geographic-cuts';
 import reference from './geographic-cuts-reference.json';
 export const provenance = reference.provenance;
 export function qualifyLatitudeCuts() {

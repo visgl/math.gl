@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) PROJ contributors
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Ellipsoidal gnomonic dispatch and inverse Newton equations adapted from PROJ 9.5.1 src/projections/gnom.cpp (Karney geodesic formulation). See ../../../projection/PROJ-LICENSE.txt. Geodesic evaluation uses the shared ellipsoid engine; public optional polygon/line facade code stays out of projection bundles.
+// SPDX-FileComment: Ellipsoidal gnomonic dispatch and inverse Newton equations adapted from PROJ 9.5.1 src/projections/gnom.cpp (Karney geodesic formulation). See ../../../PROJ-LICENSE.txt. Geodesic evaluation uses the shared ellipsoid engine; public optional polygon/line facade code stays out of projection bundles.
 import {createGeodesicEngine, nonAreaGeodesicMask} from '../../ellipsoid-geodesic';
 import type {KernelParameters, Point} from './kernel';
 import adjust_lon from './common/adjust_lon';

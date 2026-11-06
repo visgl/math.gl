@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {afterEach, expect, test, vi} from 'vitest';
-import {loadLibrary} from '../../src/worker-utils/lib/library-utils/library-utils';
+import {loadLibrary} from '@math.gl/core/worker-utils/lib/library-utils/library-utils';
 
 afterEach(() => vi.unstubAllGlobals());
 

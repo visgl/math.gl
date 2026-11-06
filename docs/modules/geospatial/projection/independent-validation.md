@@ -87,8 +87,8 @@ The latter is an additional consistency check, never the independent accuracy or
 | `moll-sphere` | [-169.99, 179.99] / [-89, 89] | 1.79e-05 | 3.04e-10 | 4.95e-12 |
 
 All definitions and regression ceilings are explicit in
-[`accuracy-cases.json`](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/accuracy-cases.json).
-The [raw report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/accuracy-node.json)
+[`accuracy-cases.json`](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/accuracy-cases.json).
+The [raw report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/qualification/accuracy-node.json)
 records each worst input separately for scalar and batch paths, with source and
 reference hashes. Most ceilings are 1e-5 m forward and 1e-8° inverse/roundtrip.
 Mollweide retains 2e-5 m forward; CEA uses 2e-8° inverse/roundtrip; Equal Earth's
@@ -126,12 +126,12 @@ for the inverse-series comparison used here.
 ```bash
 # Only needed when intentionally regenerating independent coordinates:
 # use a separate environment with pyproj==3.7.2 / PROJ 9.5.1 / EPSG v11.022
-python modules/geospatial/projection/scripts/generate-accuracy-reference.py
+python modules/geospatial/scripts/projection/generate-accuracy-reference.py
 
 # Ordinary offline verification; build the packages first.
 yarn build
-node modules/geospatial/projection/scripts/check-native-reference.mjs
-node modules/geospatial/projection/scripts/measure-accuracy.mjs --output /tmp/proj4-accuracy.json
+node modules/geospatial/scripts/projection/check-native-reference.mjs
+node modules/geospatial/scripts/projection/measure-accuracy.mjs --output /tmp/proj4-accuracy.json
 ```
 
 CI checks fixture/generator hashes and all numeric budgets, uploads a fresh Node
@@ -258,22 +258,22 @@ selection remain outside the supported native profile.
 Normal checks are offline and consume checked-in reference data:
 
 ```sh
-node modules/geospatial/projection/scripts/check-native-reference.mjs
-yarn exec vitest run --project node --project headless modules/geospatial/projection/test
+node modules/geospatial/scripts/projection/check-native-reference.mjs
+yarn exec vitest run --project node --project headless modules/geospatial/test/projection
 ```
 
 To regenerate, install `pyproj==3.7.2` in a separate Python virtual environment whose
 wheel reports **PROJ 9.5.1**, then run:
 
 ```sh
-python modules/geospatial/projection/scripts/generate-native-reference.py
-node modules/geospatial/projection/scripts/check-native-reference.mjs
+python modules/geospatial/scripts/projection/generate-native-reference.py
+node modules/geospatial/scripts/projection/check-native-reference.mjs
 ```
 
 The generator validates both versions and grid hashes, disables PROJ networking,
 and uses explicit operation pipelines. Unexpected oracle failures abort generation.
 Source-manifest and generator hashes detect stale references in CI. The input fixtures,
-reference coordinates and grid provenance live in `modules/geospatial/projection/test/fixtures`.
+reference coordinates and grid provenance live in `modules/geospatial/test/projection/fixtures`.
 Do not regenerate expectations from math.gl or proj4js, and review definition
 translations and accuracy budgets whenever changing the oracle version.
 
@@ -287,7 +287,7 @@ Vertical-grid validation includes 10 authored configurations / 28 XYZM points ge
 and PROJ 9.5.1 with networking disabled. The GTX bytes, input definitions and generator
 are hashed. Explicit oracle pipelines check source and destination geoid heights,
 Helmert ordering, vertical feet, Mercator, axis signs/order, and prime-meridian sampling.
-The [fixture provenance](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/README.md#vertical-height-reference)
+The [fixture provenance](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/README.md#vertical-height-reference)
 explains regeneration. Scalar forward/inverse and Float64 paths use a 1e-5 tolerance;
 Float32 paths also account for input/output rounding. Browser qualification repeats
 these references in Chromium, Firefox and WebKit.
@@ -314,9 +314,9 @@ qualification runner decodes the same files after benchmark timing completes, so
 optional test decoder is excluded from measured projection bundles. Strict metadata,
 ownership, fallback and rejection cases supplement those numerical references.
 
-Regenerate with `modules/geospatial/projection/scripts/generate-vertical-geotiff-reference.py` using
+Regenerate with `modules/geospatial/scripts/projection/generate-vertical-geotiff-reference.py` using
 the pinned oracle environment; verify offline with
-`node modules/geospatial/projection/scripts/check-vertical-geotiff-reference.mjs`.
+`node modules/geospatial/scripts/projection/check-vertical-geotiff-reference.mjs`.
 The adapter does not claim general raster or arbitrary PROJ grid support: other grid
 operation types, projected/rotated rasters, overviews, non-metre units, non-bilinear
 interpolation and ambiguous overlapping image layouts remain unsupported.

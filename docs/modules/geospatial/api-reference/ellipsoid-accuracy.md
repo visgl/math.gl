@@ -114,8 +114,8 @@ Download `src/geodesic.c` and `src/geodesic.h` from PROJ tag `9.9.0` into a loca
 source directory, then run:
 
 ```sh
-python3 modules/geospatial/projection/scripts/generate-geodesic-qualification.py --source-dir /path/to/PROJ/src --check
-node modules/geospatial/projection/scripts/qualify-geodesics.mjs
+python3 modules/geospatial/scripts/projection/generate-geodesic-qualification.py --source-dir /path/to/PROJ/src --check
+node modules/geospatial/scripts/projection/qualify-geodesics.mjs
 ```
 
 The generator verifies both source SHA-256 hashes before compiling a temporary C
@@ -125,4 +125,4 @@ original math.gl work, not copied upstream test data. GeographicLib runtime SPDX
 credits and packaged MIT license remain intact. The oracle sources are used
 offline and are not included in the package.
 
-See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

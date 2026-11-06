@@ -41,7 +41,7 @@ not reliable inverse expectations after thin-surface coordinate rounding. Their
 existing `1e-9` degree/`1e-5` height ceilings are unchanged.
 Every qualified row must pass its original budget in Node and Chromium/Firefox/WebKit.
 Worst budget usage and every diagnostic discrepancy are stored in the
-[Node report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/ellipsoid-p0-node.json).
+[Node report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/qualification/ellipsoid-p0-node.json).
 The existing Earth-radius interior-height ceiling of approximately **13 µm**
 remains visible; these controls do not turn it into a universal nanometre claim.
 
@@ -114,10 +114,10 @@ remains G7. No mandatory data/model loading or new package dependency is added.
 Download the pinned `r2.7` archive separately, then:
 
 ```sh
-python3 modules/geospatial/projection/scripts/generate-ellipsoid-p0-reference.py --archive /path/to/r2.7.tar.gz
-python3 modules/geospatial/projection/scripts/generate-ellipsoid-p0-reference.py --verify-fixture
-node modules/geospatial/projection/scripts/qualify-ellipsoid-p0.mjs --output /tmp/p0-node.json
-node modules/geospatial/projection/scripts/qualify-ellipsoid-p0.mjs --browser chromium --output /tmp/p0-chromium.json
+python3 modules/geospatial/scripts/projection/generate-ellipsoid-p0-reference.py --archive /path/to/r2.7.tar.gz
+python3 modules/geospatial/scripts/projection/generate-ellipsoid-p0-reference.py --verify-fixture
+node modules/geospatial/scripts/projection/qualify-ellipsoid-p0.mjs --output /tmp/p0-node.json
+node modules/geospatial/scripts/projection/qualify-ellipsoid-p0.mjs --browser chromium --output /tmp/p0-chromium.json
 ```
 
 The generator verifies the archive hash before extracting/compiling selected

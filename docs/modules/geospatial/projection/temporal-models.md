@@ -114,8 +114,8 @@ Float32 scalar/bulk agreement qualifies rounding, not this Float64 allowance.
 The same reference qualification runs in Node tests and three browser CI jobs.
 
 ```sh
-python3 modules/geospatial/projection/scripts/generate-temporal-reference.py --check
-yarn exec vitest run --project node modules/geospatial/projection/test/lib/temporal.spec.ts
+python3 modules/geospatial/scripts/projection/generate-temporal-reference.py --check
+yarn exec vitest run --project node modules/geospatial/test/projection/lib/temporal.spec.ts
 ```
 
 These are original synthetic fields and references, with no new third-party

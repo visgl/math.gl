@@ -10,7 +10,7 @@ import {
   type TaskOperation,
   type TaskOperationRequest,
   type TaskOperationResult
-} from '../../src/tasks';
+} from '@math.gl/core/tasks';
 
 type Operations = {
   count: TaskOperation<{source: string}, number>;

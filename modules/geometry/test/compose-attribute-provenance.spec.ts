@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {composeAttributeProvenance} from '../src/utils/compose-attribute-provenance';
-import {qualifySurfaceTransition} from '../src/utils/qualify-surface-transition';
-import {clipTriangleMesh} from '../src/polygon/clip-triangle-mesh';
-import {subdivideTriangleMesh} from '../src/polygon/subdivide-triangle-mesh';
+import {composeAttributeProvenance} from '@math.gl/geometry/utils/compose-attribute-provenance';
+import {qualifySurfaceTransition} from '@math.gl/geometry/utils/qualify-surface-transition';
+import {clipTriangleMesh} from '@math.gl/geometry/polygon/clip-triangle-mesh';
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon/subdivide-triangle-mesh';
 const mesh = {positions: [0, 0, 2, 0, 0, 2], indices: [0, 1, 2]};
 test('composes clipping and refinement back to original triangle attributes', () => {
   const clipped = clipTriangleMesh(mesh, {

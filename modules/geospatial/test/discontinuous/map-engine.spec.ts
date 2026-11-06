@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {MapEngine, type MapDescription, type GeographicPosition} from '../../src/discontinuous';
+import {
+  MapEngine,
+  type MapDescription,
+  type GeographicPosition
+} from '@math.gl/geospatial/discontinuous';
 
 test('Mercator has finite coverage, analytic coordinates and explicit antimeridian sides', () => {
   const map = new MapEngine({

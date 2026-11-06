@@ -144,6 +144,11 @@ export class HeightField {
     ) {
       throw new Error('Unknown terrain interpolation');
     }
+    const domain = options?.domain ?? 'samples';
+    const noData = options?.noData ?? 'cell';
+    if (domain !== 'samples' && domain !== 'footprint')
+      throw new Error('Unknown terrain sample domain');
+    if (noData !== 'cell' && noData !== 'support') throw new Error('Unknown terrain nodata policy');
     if (!Number.isFinite(x) || !Number.isFinite(y)) return result;
     const dx = x - this.origin[0];
     const dy = y - this.origin[1];
@@ -162,16 +167,30 @@ export class HeightField {
       tolerance + Math.abs(this.inverse[0]) * errorX + Math.abs(this.inverse[1]) * errorY;
     const toleranceV =
       tolerance + Math.abs(this.inverse[2]) * errorX + Math.abs(this.inverse[3]) * errorY;
+    const margin = domain === 'footprint' && this.registration === 'cell' ? 0.5 : 0;
     if (
-      u < -toleranceU ||
-      v < -toleranceV ||
-      u > this.width - 1 + toleranceU ||
-      v > this.height - 1 + toleranceV
+      u < -margin - toleranceU ||
+      v < -margin - toleranceV ||
+      u > this.width - 1 + margin + toleranceU ||
+      v > this.height - 1 + margin + toleranceV
     ) {
       return resetSample(result, Status.OUTSIDE_DOMAIN);
     }
+    // Preserve endpoint one-sided derivatives within bounded coordinate roundoff.
+    const edgeToleranceU = Math.min(1e-6, toleranceU);
+    const edgeToleranceV = Math.min(1e-6, toleranceV);
+    const clampedColumn =
+      margin > 0 && (u < -edgeToleranceU || u > this.width - 1 + edgeToleranceU);
+    const clampedRow = margin > 0 && (v < -edgeToleranceV || v > this.height - 1 + edgeToleranceV);
     u = Math.max(0, Math.min(this.width - 1, u));
     v = Math.max(0, Math.min(this.height - 1, v));
+    if (noData === 'support' && interpolation === 'bilinear') {
+      // Do not let world-coordinate roundoff give an adjacent missing sample a tiny weight.
+      const column = Math.round(u),
+        row = Math.round(v);
+      if (Math.abs(u - column) <= Math.min(1e-6, toleranceU)) u = column;
+      if (Math.abs(v - row) <= Math.min(1e-6, toleranceV)) v = row;
+    }
     if (interpolation === 'nearest') {
       const value = this.getHeight(Math.floor(u + 0.5), Math.floor(v + 0.5));
       if (value === undefined) return resetSample(result, Status.NO_DATA);
@@ -197,7 +216,25 @@ export class HeightField {
     let dv: number;
     if (interpolation === 'bilinear') {
       if (!this.validity[a] || !this.validity[b] || !this.validity[c] || !this.validity[d]) {
-        return resetSample(result, Status.NO_DATA);
+        if (noData === 'cell') return resetSample(result, Status.NO_DATA);
+        const weightA = (1 - u) * (1 - v);
+        const weightB = u * (1 - v);
+        const weightC = (1 - u) * v;
+        const weightD = u * v;
+        if (
+          (weightA > 0 && !this.validity[a]) ||
+          (weightB > 0 && !this.validity[b]) ||
+          (weightC > 0 && !this.validity[c]) ||
+          (weightD > 0 && !this.validity[d])
+        )
+          return resetSample(result, Status.NO_DATA);
+        // Invalid samples are normalized to zero by construction; no temporary arrays are needed.
+        const height = weightA * za + weightB * zb + weightC * zc + weightD * zd;
+        if (!Number.isFinite(height)) return resetSample(result, Status.NUMERIC_ERROR);
+        result.status = Status.VALID;
+        result.height = height;
+        result.gradientStatus = Status.NO_DATA;
+        return result;
       }
       result.height = (1 - v) * ((1 - u) * za + u * zb) + v * ((1 - u) * zc + u * zd);
       du = (1 - v) * (zb - za) + v * (zd - zc);
@@ -227,6 +264,9 @@ export class HeightField {
     }
     if (!Number.isFinite(result.height)) return resetSample(result, Status.NUMERIC_ERROR);
     result.status = Status.VALID;
+    // Compose interpolation with the footprint clamp before mapping to world derivatives.
+    if (clampedColumn) du = 0;
+    if (clampedRow) dv = 0;
     const gx = du * this.inverse[0] + dv * this.inverse[2];
     const gy = du * this.inverse[1] + dv * this.inverse[3];
     if (!Number.isFinite(gx) || !Number.isFinite(gy)) {

@@ -1,9 +1,9 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {EllipsoidGeodesic} from '../src/ellipsoid-geodesic';
-import {EllipsoidRhumb} from '../src/ellipsoid-rhumb';
-import {GeodesicLineBuffer, RhumbLineBuffer} from '../src/geodesic-buffer';
+import {EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid-geodesic';
+import {EllipsoidRhumb} from '@math.gl/geospatial/ellipsoid-rhumb';
+import {GeodesicLineBuffer, RhumbLineBuffer} from '@math.gl/geospatial/geodesic-buffer';
 export function prepare(count: number) {
   const axes = {semiMajorAxis: 6378137, semiMinorAxis: 6356752.314245179};
   const geodesic = new EllipsoidGeodesic(axes).line(30, 20, 40),
