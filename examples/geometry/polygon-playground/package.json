@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "start": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "start-local": "vite --config ../../vite.config.local.mjs"
   },
   "dependencies": {
     "@deck.gl-community/editable-layers": "^9.4.8",

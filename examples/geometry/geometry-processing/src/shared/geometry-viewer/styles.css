@@ -1,0 +1,113 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.geometry-example {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  color: #eef5ff;
+  background: #07121e;
+  font: 14px system-ui;
+}
+.geometry-panel {
+  overflow: auto;
+  padding: 18px;
+  background: #132538;
+}
+.geometry-panel h2 {
+  font-size: 19px;
+  margin: 0 0 18px;
+  color: inherit;
+}
+.geometry-panel label {
+  display: block;
+  margin-bottom: 16px;
+}
+.geometry-panel select {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+  padding: 7px;
+  color: #eef5ff;
+  background: #07121e;
+  border: 1px solid #526b84;
+  border-radius: 4px;
+}
+.geometry-panel .geometry-check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.geometry-panel dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.geometry-panel dd {
+  margin: 0;
+  text-align: right;
+}
+.geometry-panel pre {
+  white-space: pre-wrap;
+  font-size: 12px;
+  padding: 10px;
+  background: #07121e;
+  color: #c3e6ff;
+}
+.geometry-panel p {
+  color: #a7bcd0;
+}
+.geometry-canvas {
+  position: relative;
+  min-width: 0;
+  min-height: 240px;
+}
+.geometry-canvas canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.geometry-canvas canvas:focus-visible {
+  outline: 2px solid #70c7ff;
+  outline-offset: -2px;
+}
+.geometry-reset {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #132538;
+  color: #eef5ff;
+  border: 1px solid #526b84;
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.geometry-error {
+  position: absolute;
+  top: 50px;
+  left: 12px;
+  right: 12px;
+  color: #ffb3b3;
+}
+@media (max-width: 650px) {
+  .geometry-example {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+  }
+  .geometry-panel {
+    flex: none;
+    overflow: visible;
+    padding: 12px;
+  }
+  .geometry-panel pre {
+    display: none;
+  }
+  .geometry-canvas {
+    flex: 1;
+    min-height: 300px;
+  }
+}

@@ -13,8 +13,14 @@
   },
   "dependencies": {
     "@math.gl/core": "workspace:*",
+    "@math.gl/geometry": "workspace:*",
     "@math.gl/geospatial": "workspace:*",
-    "proj-wasm": "0.1.0"
+    "comlink": "^4.4.2",
+    "ffi-wasm": "0.0.3",
+    "proj-wasm": "0.1.0",
+    "resource-tracker": "^0.0.1",
+    "squint-cljs": "^0.14.210",
+    "worker-router": "npm:@wcohen/worker-router@^0.0.2"
   },
   "devDependencies": {
     "esbuild": "^0.28.1",

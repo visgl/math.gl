@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {TaskRunner} from '@math.gl/core/tasks';
-import {createCharts} from '../projection-domains/warp/fixtures.mjs';
-import {inspectWarp} from '../projection-domains/warp/prepare.mjs';
-import {prepareInverseAsync} from '../projection-domains/warp/async.mjs';
+import {createCharts} from './shared/geospatial/projection-domains/warp/fixtures.mjs';
+import {inspectWarp} from './shared/geospatial/projection-domains/warp/prepare.mjs';
+import {prepareInverseAsync} from './shared/geospatial/projection-domains/warp/async.mjs';
 import {createRasterBatchEvaluator} from './raster.mjs';
 /** Same real WASM path is exercised in Node and the browser build. */
 export async function runRasterExample() {

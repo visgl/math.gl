@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {PROJ_VENDOR_IMPORTS} from '../../proj-wasm-crs/vendor-imports.mjs';
+import {PROJ_VENDOR_IMPORTS} from '../shared/geospatial/proj-wasm-crs/vendor-imports.mjs';
 // Share only the optional WASM pool between mounted labs, never their job contexts.
 // Serialize acquisition/shutdown so a remount cannot race the last release.
 let queue=Promise.resolve(),runtime,references=0;

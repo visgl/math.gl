@@ -21,14 +21,20 @@
     "@math.gl/core": "workspace:*",
     "@math.gl/geometry": "workspace:*",
     "@math.gl/geospatial": "workspace:*",
+    "comlink": "^4.4.2",
     "d3-geo": "^3.1.1",
     "d3-geo-polygon": "2.0.1",
+    "ffi-wasm": "0.0.3",
     "proj-wasm": "0.1.0",
-    "proj4": "2.22.0"
+    "proj4": "2.22.0",
+    "resource-tracker": "^0.0.1",
+    "squint-cljs": "^0.14.210",
+    "worker-router": "npm:@wcohen/worker-router@^0.0.2"
   },
   "devDependencies": {
     "@types/d3-geo": "^3.1.0",
     "@types/node": "^22.20.1",
+    "esbuild": "^0.28.1",
     "playwright": "^1.62.1",
     "pngjs": "^7.0.0",
     "typescript": "^6.0.3",

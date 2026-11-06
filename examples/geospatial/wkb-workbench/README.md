@@ -12,3 +12,6 @@ big-endian bytes, and truncation errors. No server or external data is needed.
 WKT writing uses a uniform dimension per collection; mixed dimensions are
 rejected explicitly. Pasted mixed-dimension WKB can be inspected but is not
 advertised as a lossless WKT conversion. SRIDs are metadata, not reprojection.
+
+Run `yarn start-local` inside the math.gl repository to use workspace source.
+Run `yarn start` to use package exports or `yarn build` for a production bundle.

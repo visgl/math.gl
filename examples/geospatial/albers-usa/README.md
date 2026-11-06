@@ -9,13 +9,13 @@ coordinate inspection. Run with
 
 ## Read the source
 
-Start with `map.js`: it constructs the `MapEngine`, projects the state polygons,
+Start with `src/map.js`: it constructs the `MapEngine`, projects the state polygons,
 and samples the optional graticule. It has no browser UI dependencies.
 
-- `main.js` wires the map, scene, and controls together and returns cleanup.
-- `scene.js` fits and draws SVG geometry, maps screen coordinates, and picks locations.
-- `controls.js` handles buttons, sliders, pointer gestures, and animation timing.
-- `view.js` contains the page markup; `style.css` controls presentation.
+- `src/main.js` wires the map, scene, and controls together and returns cleanup.
+- `src/scene.js` fits and draws SVG geometry, maps screen coordinates, and picks locations.
+- `src/controls.js` handles buttons, sliders, pointer gestures, and animation timing.
+- `src/view.js` contains the page markup; `src/style.css` controls presentation.
 
 The scene consumes plain layer and unfolding state. It never reads form controls.
 To reuse the rendering with a different UI, call its methods directly. Each mount
@@ -40,3 +40,6 @@ plus Puerto Rico, the U.S. Virgin Islands, Guam, the Northern Mariana Islands,
 and American Samoa from the matching [admin-0 country
 GeoJSON](https://github.com/nvkelso/natural-earth-vector/blob/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_10m_admin_0_countries.geojson).
 Natural Earth data is [public domain](https://www.naturalearthdata.com/about/terms-of-use/).
+
+Run `yarn start-local` inside the math.gl repository to use workspace source.
+Run `yarn start` to use package exports or `yarn build` for a production bundle.
