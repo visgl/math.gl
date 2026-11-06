@@ -13,25 +13,21 @@ sidebar_label: Overview
 
 `@math.gl/earth/sun` provides solar and lunar lighting, planetary sky information, bright-star data and shared sky/rendering coordinates.
 
-## Feature support
+## Feature Card
 
-A modern observational-sky checklist; delivered models and remaining scientific qualification are separate.
-
-Support describes the public API in the current repository. Notes identify limits and experimental features.
-
-| Feature | math.gl support | Notes |
+| Feature | Support | Notes |
 | --- | --- | --- |
-| Sun/Moon positions and Earth-fixed directions | ✅ Implemented | [Solar](./api-reference/sun.md), [lunar](./api-reference/moon.md) and [terminator geometry](./api-reference/get-sun-terminator.md) use explicit coordinate conventions. |
-| Solar/lunar lighting and sky atmosphere | ✅ Implemented | Relative RGB lighting, lux-based sky lighting, atmospheric transmission and published-model approximations. |
-| Cloud illumination | ✅ Implemented | [Cloud lighting](./api-reference/cloud-lighting.md) includes spherical Earth shadow, spectral dawn/dusk and explicit ray-depth approximations. |
-| Planetary positions and appearance | ✅ Implemented | [Planet sky information](./api-reference/get-planet-sky-info.md), disk/phase/magnitude and lunar/Galilean orientation/event helpers. |
-| Shared observer, horizon and visibility search | ✅ Implemented | [Sky APIs](./api-reference/sky.md) accept terrain horizons and explicit atmosphere settings; searches retain sampling/refinement limits. |
-| UT1/TT, reusable contexts and snapshots | ✅ Implemented | Explicit time scales and bounded reusable contexts support batch sky evaluation. |
-| Bright-star catalog and motion | ✅ Implemented | [Stars](./api-reference/stars.md) include optional catalog data, proper motion, distance-aware motion and explicitly illustrative Galactic backgrounds/orbits. |
-| Shared atmospheric visibility for stars | ◐ Partial | Catalog/rendering data exist; the shared contrast/daylight/atmosphere integration remains [tranche 5 work](https://github.com/visgl/math.gl/blob/master/dev-docs/sun-roadmap.md). |
-| Observationally calibrated visibility and event guarantees | ◐ Partial | Models and bounded searches exist; grazing/short events and observational uncertainty require broader independent qualification. |
-| Published accuracy/performance tier budgets | ❌ Not implemented | Timing controls and benchmarks exist; formal tier-wide numerical/date/performance budgets remain [tranche 6 work](https://github.com/visgl/math.gl/blob/master/dev-docs/sun-roadmap.md). |
-| Full physical radiative-transfer or surface rendering engine | ❌ Not implemented | The API supplies approximate lighting/appearance data, not resolved planetary surface/ring rendering or a general spectral transport solver. |
+| Sun/Moon positions and Earth-fixed directions | ✅ | [Solar](./api-reference/sun.md), [lunar](./api-reference/moon.md) and [terminator geometry](./api-reference/get-sun-terminator.md) use explicit coordinate conventions. |
+| Solar/lunar lighting and sky atmosphere | ✅ | Relative RGB lighting, lux-based sky lighting, atmospheric transmission and published-model approximations. |
+| Cloud illumination | ✅ | [Cloud lighting](./api-reference/cloud-lighting.md) includes spherical Earth shadow, spectral dawn/dusk and explicit ray-depth approximations. |
+| Planetary positions and appearance | ✅ | [Planet sky information](./api-reference/get-planet-sky-info.md), disk/phase/magnitude and lunar/Galilean orientation/event helpers. |
+| Shared observer, horizon and visibility search | ✅ | [Sky APIs](./api-reference/sky.md) accept terrain horizons and explicit atmosphere settings; searches retain sampling/refinement limits. |
+| UT1/TT, reusable contexts and snapshots | ✅ | Explicit time scales and bounded reusable contexts support batch sky evaluation. |
+| Bright-star catalog and motion | ✅ | [Stars](./api-reference/stars.md) include optional catalog data, proper motion, distance-aware motion and explicitly illustrative Galactic backgrounds/orbits. |
+| Shared atmospheric visibility for stars | ◐ | Catalog/rendering data exist; the shared contrast/daylight/atmosphere integration remains [tranche 5 work](https://github.com/visgl/math.gl/blob/master/dev-docs/sun-roadmap.md). |
+| Observationally calibrated visibility and event guarantees | ◐ | Models and bounded searches exist; grazing/short events and observational uncertainty require broader independent qualification. |
+| Published accuracy/performance tier budgets | ❌ | Timing controls and benchmarks exist; formal tier-wide numerical/date/performance budgets remain [tranche 6 work](https://github.com/visgl/math.gl/blob/master/dev-docs/sun-roadmap.md). |
+| Full physical radiative-transfer or surface rendering engine | ❌ | The API supplies approximate lighting/appearance data, not resolved planetary surface/ring rendering or a general spectral transport solver. |
 
 ## Installation
 
@@ -94,4 +90,4 @@ The adapted lunar code and numeric reference samples use SunCalc 1.9.0 under BSD
 
 The [star catalog](./api-reference/stars.md) contains 7,000 bright stars, projected proper motions, distance-aware motion and brightness where measurements exist, an illustrative Galactic orbit model, and a procedural Milky Way background. Numeric Julian epochs support long animations independently of the observer’s rendering date.
 
-See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

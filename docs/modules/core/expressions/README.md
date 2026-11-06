@@ -1,8 +1,8 @@
-# Overview
+# Overview 🧪
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From-v4.2" />
-  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" />
 </p>
 
 The experimental expression parser and evaluator are available from `@math.gl/core`.
@@ -11,21 +11,17 @@ libraries are exported from `@math.gl/dggs`.
 
 It extracts the expression machinery that has shipped inside `@deck.gl/json` and provides it as a core subpath. Its API remains experimental.
 
-## Feature support
+## Feature Card
 
-Expression-language features for reusable data accessors and application-provided function libraries.
-
-Support describes the public API in the current repository. Notes identify limits and experimental features.
-
-| Feature | math.gl support | Notes |
+| Feature | Support | Notes |
 | --- | --- | --- |
-| Expression parsing and evaluation | ✅ Implemented | [Parse and evaluate](./api-reference/expression-eval.md) JSEP expressions against an explicit context. |
-| Reusable compiled accessors | ✅ Implemented | Synchronous and asynchronous compile/evaluate APIs reuse parsed expressions. |
-| Custom operators and function libraries | ✅ Implemented | Isolated [function registries](./api-reference/function-registry.md), custom operators, basic math, and optional geospatial/DGGS libraries. |
-| Restricted property-access expressions | ✅ Implemented | [parseExpressionString](./api-reference/parse-expression-string.md) builds accessors with function calls disabled. |
-| Full JavaScript programs and process isolation | ❌ Not implemented | This is an expression evaluator, not a separate JavaScript runtime or security sandbox; registered functions run application code. |
-| Reactive dependency tracking | ❌ Not implemented | No incremental dependency graph, automatic invalidation, or reactive recomputation engine. |
-| Shader compilation and automatic differentiation | ❌ Not implemented | Compilation produces reusable JavaScript evaluators, without a GPU code generator or differentiation backend. |
+| Expression parsing and evaluation | ✅ | [Parse and evaluate](./api-reference/expression-eval.md) JSEP expressions against an explicit context. |
+| Reusable compiled accessors | ✅ | Synchronous and asynchronous compile/evaluate APIs reuse parsed expressions. |
+| Custom operators and function libraries | ✅ | Isolated [function registries](./api-reference/function-registry.md), custom operators, basic math, and optional geospatial/DGGS libraries. |
+| Restricted property-access expressions | ✅ | [parseExpressionString](./api-reference/parse-expression-string.md) builds accessors with function calls disabled. |
+| Full JavaScript programs and process isolation | ❌ | This is an expression evaluator, not a separate JavaScript runtime or security sandbox; registered functions run application code. |
+| Reactive dependency tracking | ❌ | No incremental dependency graph, automatic invalidation, or reactive recomputation engine. |
+| Shader compilation and automatic differentiation | ❌ | Compilation produces reusable JavaScript evaluators, without a GPU code generator or differentiation backend. |
 
 ## Installation
 
@@ -142,4 +138,4 @@ This module is adapted from the expression parser that ships in [`@deck.gl/json`
 
 Its evaluator uses the vendored `jsep` 1.4.0 parser (MIT), with no external runtime dependency and derives from `expression-eval` by [Don McCurdy](https://github.com/donmccurdy). Source headers and distributed license notices retain the upstream attribution.
 
-See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

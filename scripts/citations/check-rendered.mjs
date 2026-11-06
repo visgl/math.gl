@@ -11,7 +11,7 @@ import remarkParse from 'remark-parse';
 import plugin from './remark-citations.cjs';
 const root = fileURLToPath(new URL('../../website/build/', import.meta.url));
 const baseUrl = process.env.WEBSITE_BASE_URL || '/math.gl/';
-const html = fs.readFileSync(path.join(root, 'docs/bibliography.html'), 'utf8');
+const html = fs.readFileSync(path.join(root, 'docs/references-and-credits.html'), 'utf8');
 const entries = bibliography.readBibliography();
 const ids = new Set([...html.matchAll(/\bid=(?:"([^"]*)"|([^\s>]+))/g)].map(m => m[1] || m[2]));
 for (const key of entries.keys())
@@ -40,13 +40,15 @@ function walk(directory) {
       for (const match of text.matchAll(/href=(?:"([^"]*)"|([^\s>]+))/g)) {
         const href = match[1] || match[2];
         assert(!href.startsWith('cite:'), `Unresolved citation in ${file}`);
-        if (href.includes('/docs/bibliography#')) {
+        if (href.includes('/docs/references-and-credits#')) {
           assert(
-            href.startsWith(baseUrl + 'docs/bibliography#'),
+            href.startsWith(baseUrl + 'docs/references-and-credits#'),
             `Wrong citation base URL: ${href}`
           );
           assert(ids.has(href.split('#')[1]), `Broken citation anchor: ${href}`);
           const key = href.split('#')[1];
+          // The bibliography section link is navigation, not an academic citation.
+          if (key === 'bibliography') continue;
           actual.set(key, (actual.get(key) || 0) + 1);
           citations++;
         }

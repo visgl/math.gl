@@ -1,8 +1,8 @@
-# Understanding myriahedral projections
+# Understanding myriahedral projections 🧪
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
-  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" />
 </p>
 
 A myriahedral map replaces one continuous world map with many small, connected
@@ -39,7 +39,7 @@ independently implemented. We have not copied Nico's source code, mesh tables,
 textures, animation frames, or optimized solid orientations. Credit identifies
 the conceptual and visual inspiration; it does not imply a license to his assets.
 
-See [References and credits](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
 
 ## What the cuts buy you
 
@@ -71,7 +71,7 @@ for a globally valid, single-valued flat map.
 
 ## Choosing a family
 
-| Family | What changes | math.gl support |
+| Family | What changes | Support |
 | --- | --- | --- |
 | Graticule | Direction and location of joins on a longitude/latitude mesh | Polyconic, cylindric, azimuthal, hemispheres, sealine, coastline |
 | Polyhedral | Base solid and refinement level | All five Platonic solids, including recursive triangle refinement |
