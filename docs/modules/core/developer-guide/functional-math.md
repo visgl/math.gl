@@ -50,9 +50,10 @@ provide the class API's optional debug validation.
 | Cubic Hermite evaluation | `vec3.hermite(out, start, startTangent, endTangent, end, t)` | `vec3Hermite` |
 
 Quaternion angles are radians. `quatGetAngle` and `quatRotationTo` require unit
-inputs. Treat vector spherical interpolation separately from quaternion
-interpolation; do not assume identical edge-case handling for coincident or opposite
-inputs.
+inputs. Use unit directions for `vec3Slerp`; it does not normalize its inputs.
+Its current formula has no special branch for coincident or opposite directions,
+so callers must handle those cases before interpolation. Quaternion interpolation
+has different edge-case handling.
 
 ## Transform normals
 
