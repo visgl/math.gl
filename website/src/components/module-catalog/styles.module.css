@@ -29,14 +29,14 @@
 }
 .card:hover,
 .card:focus-visible {
-  border-color: #b798dc;
+  border-color: #725094;
   color: inherit;
   text-decoration: none;
 }
 .card code {
   align-self: flex-start;
   font-size: 0.8rem;
-  color: #b798dc;
+  color: #725094;
   margin-bottom: 20px;
   background: transparent;
   padding: 0;
@@ -70,3 +70,5 @@
     padding: 24px;
   }
 }
+
+:global([data-theme="dark"]) .card code { color: #b798dc; }
