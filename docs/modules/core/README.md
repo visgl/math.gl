@@ -83,17 +83,16 @@ Start with [transformations](./developer-guide/transformations.md) and [3D rotat
 
 ## Numeric local frames
 
-The optional [`@math.gl/core`](./api-reference/local-frame.md) entry
-provides ENU/XYZ rotations and ENU/NED matrices with reusable outputs. Angles are
-explicit radians, distances retain their units, and the leaf has no runtime
-imports. It is not reexported from the core root.
+The [local-frame functions](./api-reference/local-frame.md) are named exports from
+`@math.gl/core`. They provide ENU/XYZ rotations and ENU/NED matrices with reusable
+outputs. Angles are explicit radians and distances retain their units.
 
 ## Interoperability
 
-math.gl classes extend `Array`, so their components can be passed directly to array-based math APIs such as gl-matrix. Reuse vectors and matrices in hot loops to avoid repeated allocations. Low-level functions are also available through [core subpath imports](../../upgrade-guide.md#low-level-function-imports).
+math.gl classes extend `Array`, so their components can be passed directly to array-based math APIs such as gl-matrix. Reuse vectors and matrices in hot loops to avoid repeated allocations. Low-level namespaces and individual functions are named exports from the package root. See [functional math](./developer-guide/functional-math.md) for normal matrices, transform composition, depth conventions, and interpolation.
 
-The vector and matrix APIs share many conventions with THREE.js, with a few differences:
+When interoperating with other numeric APIs:
 
 - Use `vector.len()` for magnitude; `vector.length` is the array's element count.
 - Matrix elements use column-major storage. Check the argument order when copying values through another library's setters.
-- Methods that depend on THREE.js objects such as geometries or buffer attributes are outside the core API. Copy their numeric components into math.gl vectors or matrices instead.
+- Methods that depend on renderer-owned geometries or buffer attributes are outside the core API. Copy their numeric components into math.gl vectors or matrices instead.

@@ -175,3 +175,7 @@ Transform a two-, three-, or four-component input. For four components, transfor
 
 - All transforms are effectively "right multiplied" onto the matrix (meaning that during transform they will be applied in opposite order).
 - `Matrix3` is stored internally in column major format (per WebGL conventions). This only matters when you read out the matrix to use it with other software.
+
+## Related functional operations
+
+For inverse-transpose normal matrices, use `mat3NormalFromMat4` from `@math.gl/core`. See [functional math](../developer-guide/functional-math.md) for imports, output ownership, and limitations.

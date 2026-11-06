@@ -1,5 +1,11 @@
 # Roadmap
 
+## Core math and geometry
+
+The [core math and geometry roadmap](./math-roadmap.md) separates existing APIs
+from six remaining tranches: transform correctness, bounds/camera math, numeric
+conveniences, geometric queries, interpolation/curves, and optional domains.
+
 ## 3D Primitives
 
 - Add a submodule with the geometry primitives from luma.gl.
