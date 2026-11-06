@@ -220,3 +220,15 @@ it('cubic tracks preserve weighted slopes across disparate intervals', () => {
   }).evaluate(5e-301)[0];
   expect(value / -1.25e-101).toBeCloseTo(1, 12);
 });
+
+it('plane projection keeps finite results when its intermediate projection overflows', () => {
+  const value = vectorProjectOnPlane([0, 0], [1.7e308, 1.7e308], [2, 1]);
+  expect(value[0] / -3.4e307).toBeCloseTo(1, 12);
+  expect(value[1] / 6.8e307).toBeCloseTo(1, 12);
+});
+it('cubic tracks retain precision when unweighted derivatives are subnormal', () => {
+  const result = new SampleTrack([0, 1e100], [0, 7e-224], {interpolation: 'cubic'}).evaluate(
+    2.5e99
+  );
+  expect(result[0] / 1.75e-224).toBeCloseTo(1, 12);
+});

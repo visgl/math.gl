@@ -139,10 +139,9 @@ export class SampleTrack {
             right = Math.min(last, key + 1);
           const difference = this.values[right * this.size + j] - this.values[left * this.size + j];
           const span = this.times[right] - this.times[left];
-          const derivative = difference / span;
-          return Number.isFinite(derivative) && derivative !== 0
-            ? derivative * dt
-            : difference * (dt / span);
+          const ratio = dt / span;
+          // Prefer the duration ratio unless it underflows and erases a representable tangent.
+          return ratio >= 2 ** -1022 ? difference * ratio : (difference / span) * dt;
         };
         out[j] =
           (2 * t ** 3 - 3 * t ** 2 + 1) * a +

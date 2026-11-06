@@ -48,20 +48,32 @@ export function vectorProjectOnPlane<T extends NumericArray>(
   value: Input,
   normal: Input
 ): T {
-  const projection = vectorProjectOnVector(new Array(value.length), value, normal);
-  return write(
-    out,
-    Array.from(value, (x, i) => x - projection[i])
-  );
+  return subtractProjection(out, value, normal, 1);
 }
 /** Reflect across a plane with a possibly non-unit normal; zero normal is identity. */
 export function vectorReflect<T extends NumericArray>(out: T, value: Input, normal: Input): T {
+  return subtractProjection(out, value, normal, 2);
+}
+function subtractProjection<T extends NumericArray>(
+  out: T,
+  value: Input,
+  normal: Input,
+  factor: number
+): T {
   const projection = vectorProjectOnVector(new Array(value.length), value, normal);
+  const scale = Math.max(...Array.from(value, Math.abs));
+  let scaledProjection: number[] | undefined;
   return write(
     out,
     Array.from(value, (x, i) => {
-      const direct = x - projection[i] - projection[i];
-      return Number.isFinite(direct) ? direct : (x / 2 - projection[i]) * 2;
+      const direct = factor === 1 ? x - projection[i] : x - projection[i] - projection[i];
+      if (Number.isFinite(direct)) return direct;
+      scaledProjection ??= vectorProjectOnVector(
+        new Array(value.length),
+        Array.from(value, v => (scale ? v / scale : 0)),
+        normal
+      );
+      return (x / scale - factor * scaledProjection[i]) * scale;
     })
   );
 }
