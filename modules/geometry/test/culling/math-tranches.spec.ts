@@ -319,3 +319,17 @@ it('Ray.transform keeps normalized distance semantics at extreme finite scales',
     expect(Math.hypot(...ray.at(2))).toBeCloseTo(2, 12);
   }
 });
+
+it('nearly parallel ray and segment crossings retain the interior closest pair', () => {
+  for (const scale of [1e-9, 1, 1e9]) {
+    const hit = getClosestPointsRaySegment(
+      [0, 0, 0],
+      [2, 0, 0],
+      [scale, scale, 0],
+      [1e9 * scale, -scale, 0]
+    );
+    expect(hit.distance / scale).toBeLessThan(1e-6);
+    expect(hit.segmentFraction).toBeCloseTo(0.5, 12);
+    expect(hit.rayParameter / scale).toBeCloseTo(250000000.25, 5);
+  }
+});

@@ -85,10 +85,14 @@ export function getClosestPointsRaySegment(
     [Math.max(0, -dd), 0],
     [Math.max(0, bb * segmentLength - dd), segmentLength]
   ];
-  const determinant = 1 - bb * bb;
-  if (segmentLength > 0 && determinant > 0) {
-    const t = (bb * ee - dd) / determinant,
-      u = (ee - bb * dd) / determinant;
+  // Cross products retain the angle when nearly parallel dot products round to one.
+  const normal = cross(unit, segmentUnit);
+  const sine = Math.hypot(...normal);
+  if (segmentLength > 0 && sine > 0) {
+    const normalUnit = normal.map(value => value / sine);
+    const separation = sub(a, origin);
+    const t = dot(cross(separation, segmentUnit), normalUnit) / sine;
+    const u = dot(cross(separation, unit), normalUnit) / sine;
     if (t >= 0 && u >= 0 && u <= segmentLength) candidates.push([t, u]);
   }
   let best: RaySegmentClosestPoints | undefined;
