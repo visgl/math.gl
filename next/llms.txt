@@ -42,6 +42,12 @@ Reuse math objects and output buffers in repeated calculations. Core methods use
 
 - [Migrating to root exports](https://visgl.github.io/math.gl/next/docs/developer-guide/root-exports-migration.md): {/ SPDX-License-Identifier: MIT /}
 
+#### security
+
+math.gl provides building blocks for numerical and geospatial applications. This guide helps you choose trusted code and data, manage dependencies, and set appropriate limits for your application.
+
+- [Security](https://visgl.github.io/math.gl/next/docs/developer-guide/security.md): math.gl provides building blocks for numerical and geospatial applications. This guide helps you choose trusted code and data, manage dependencies, and set appropriate limits for your application.
+
 #### working-with-ai
 
 math.gl provides a documentation index, individually retrievable Markdown pages, and an installable agent skill for developers using AI coding tools.
