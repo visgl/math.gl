@@ -68,7 +68,7 @@ const webgpuProjection = new Float64Array(16);
 mat4PerspectiveZO(webgpuProjection, Math.PI / 3, 800 / 600, 0.1, 1000);
 ```
 
-Use `mat4OrthoZO` for orthographic \[0, 1] depth, or the `NO` variants for \[-1, 1]. These choices set the depth range; they do not configure the renderer's depth test or provide a reversed-depth option. See [functional math](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/functional-math.md).
+Use `mat4OrthoZO` for orthographic \[0, 1] depth, or the `NO` variants for \[-1, 1]. These low-level choices set the depth range. For explicit reversed depth, use `mat4PerspectiveProjection`, `mat4FrustumProjection` or `mat4OrthographicProjection` with matching [frustum extraction options](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/extended-queries.md). Configure the renderer's depth test and clear value separately. See [functional math](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/functional-math.md).
 
 On the CPU, divide XYZ by W only when W is nonzero; `Matrix4.transform()` preserves the homogeneous result.
 

@@ -58,3 +58,7 @@ Control points may be arrays, math.gl vectors, or numeric typed arrays. Every po
 Coordinates are Euclidean and lengths use the input units. Project geographic positions into an appropriate Cartesian frame first; interpolating raw longitude/latitude does not produce a geodesic or handle antimeridian crossings. Arithmetic remains subject to floating-point overflow and rounding.
 
 This first version focuses on curve evaluation and traversal. Moving frames, swept meshes, NURBS, and geodesic interpolation are outside its current API.
+
+## Adaptive sampling and frames[​](#adaptive-sampling-and-frames "Direct link to Adaptive sampling and frames")
+
+[Adaptive sampling and transport frames](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/sampling-and-frames.md) add bounded-work chord-error sampling and polyline frames, including repeated-point and closed-loop conventions.

@@ -72,6 +72,10 @@ const y = vector[1];
 * Matrix transform methods allocate a result array unless an output is supplied. See [performance](https://visgl.github.io/math.gl/next/docs/developer-guide/performance.md) for reuse patterns.
 * Enable optional validation with `configure({debug: true})`. See [debugging](https://visgl.github.io/math.gl/next/docs/developer-guide/debugging.md) for checks and formatting.
 
+## Numeric helpers and sample tracks[​](#numeric-helpers-and-sample-tracks "Direct link to Numeric helpers and sample tracks")
+
+[Numeric helpers](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/numeric-helpers.md) cover vector projection/reflection, length controls, scalar damping and quaternion stepping. [SampleTrack](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/sample-track.md) evaluates timestamped scalar, vector and quaternion samples with reusable outputs.
+
 ## Learn core math[​](#learn-core-math "Direct link to Learn core math")
 
 Start with [transformations](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/transformations.md) and [3D rotations](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/rotations.md). The guides also cover [coordinate systems](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/coordinate-systems.md), [homogeneous coordinates](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/homogeneous-coordinates.md), [view and projection matrices](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/view-and-projection.md), and [floating point](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/floating-point.md).

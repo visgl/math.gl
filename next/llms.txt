@@ -69,8 +69,10 @@ math.gl provides a documentation index, individually retrievable Markdown pages,
 - [Matrix](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/matrix.md): Matrix is the shared base for Matrix3 and Matrix4. It extends MathArray and stores elements in column-major order.
 - [Matrix3](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/matrix3.md): A 3x3 matrix. Any arguments can be plain JavaScript arrays or other math.gl objects.
 - [Matrix4](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/matrix4.md): A 4x4 matrix. Any arguments to Matrix4 methods can be plain JavaScript arrays or other math.gl objects.
+- [Numeric helpers](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/numeric-helpers.md): Import these functions from @math.gl/core. Vector functions accept finite 2D, 3D
 - [Pose](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/pose.md): A 6-degree-freedom pose (3D position and 3D rotation).
 - [Quaternion](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/quaternion.md): Quaternion extends JavaScript Array through its core base classes.
+- [SampleTrack](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/sample-track.md): Evaluate timestamped scalar, vector, or quaternion samples with reusable outputs.
 - [SphericalCoordinates](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/spherical-coordinates.md): Stores radius, phi, and theta, with angle and geographic convenience accessors. Angles in the primary fields are radians. This class retains legacy conversion conventions; see the conversion limitation below before using it for coordinate exchange.
 - [Spheroid conversions](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/spheroid.md): The optional @math.gl/core entry provides low-level conversions between
 - [Math Utility Functions](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/utilities.md): Configuration, numeric comparisons, angle conversions, and array helpers for core math.
@@ -175,6 +177,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [BoundingSphere](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/bounding-sphere.md): A bounding sphere with a center and a radius.
 - [BoundingVolume (Interface)](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/bounding-volume.md): An interface defining common operations for bounding volumes (i.e. BoundingSphere, AxisAlignedBoundingBox, OrientedBoundingBox).
 - [CullingVolume](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/culling-volume.md): A culling volume defined by planes.
+- [Bounds, frusta and geometric queries](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/extended-queries.md): These functions are exported from both @math.gl/geometry and
 - [intersectOrientedBoxes2D](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/intersect-oriented-boxes-2d.md): Test two oriented rectangles in a shared two-dimensional Euclidean coordinate space. This
 - [OrientedBoundingBox](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/oriented-bounding-box.md): An OrientedBoundingBox is a closed and convex cuboid. It can provide a tighter bounding volume than a bounding sphere or an axis aligned bounding box in many cases.
 - [Plane](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/plane.md): A plane in Hessian Normal Form defined by ax + by + cz + d = 0 where [a, b, c] is the plane's normal, d is the signed distance to the plane (from the origin along the normal), and [x, y, z] is any point on the plane.
@@ -184,6 +187,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [@math.gl/geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves.md): The curves module provides renderer-independent parametric curves for 2D and 3D Cartesian
 - [CurveArcLength](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/curve-arc-length.md): Constructor
 - [Curve classes](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/curves.md): Constructors
+- [Adaptive sampling and transport frames](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/sampling-and-frames.md): Import these helpers from @math.gl/geometry. Existing parametric curves and
 - [Geometry Guide](https://visgl.github.io/math.gl/next/docs/modules/geometry/guide.md): Guides and background for Geometry.
 - [Geometry Spatial Index Guide](https://visgl.github.io/math.gl/next/docs/modules/geometry/guide/spatial-index.md): Guides and background for Geometry: Spatial Index.
 - [Overview](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md): @math.gl/geometry clips and splits polygons and polylines, computes winding and area, and adaptively subdivides geometry through coordinate transforms. Use it to prepare geometry before triangulation or rendering.

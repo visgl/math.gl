@@ -73,3 +73,7 @@ Vector inputs can be numeric arrays, including core vectors; no renderer objects
 Bounding-volume and frustum code was ported from Cesium under Apache-2.0. See the source headers and distributed license notices for provenance.
 
 See [Attributions](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
+## Bounds and query extensions[​](#bounds-and-query-extensions "Direct link to Bounds and query extensions")
+
+See [bounds, frusta and geometric queries](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/extended-queries.md) for closed-boundary bounds operations, depth-aware frustum extraction, ray conveniences, barycentric interpolation, triangle–box overlap and plane–segment intersections.
