@@ -11,33 +11,51 @@ import {
   measureTerrainMeshError
 } from '@math.gl/geospatial/terrain';
 
-const SIZE = 33;
-const field = new HeightField({
-  width: SIZE,
-  height: SIZE,
-  heights: Float64Array.from({length: SIZE * SIZE}, (_, i) => {
-    const x = ((i % SIZE) - 16) / 8,
-      y = (Math.floor(i / SIZE) - 16) / 8;
-    return 40 * Math.exp(-(x * x + y * y)) + 8 * Math.sin(x * 3) * Math.cos(y * 2);
-  })
-});
+import {getMeshLabData, getMeshLabErrors} from './mesh-lab-data';
 
-/** An inspectable synthetic surface, not an independent accuracy benchmark. */
 export default function MeshLab() {
+  const [heatmap, setHeatmap] = useState(false);
+  const [dataset, setDataset] = useState('mountain');
   const [algorithm, setAlgorithm] = useState('martini');
   const [tolerance, setTolerance] = useState(2);
-  const {mesh, error} = useMemo(() => {
+  const {mesh, error, errors, milliseconds, description, unsupported} = useMemo(() => {
+    const data = getMeshLabData(dataset);
+    const field = new HeightField(data);
+    if (dataset === 'holes' && algorithm !== 'regular')
+      return {unsupported: true, description: data.description};
+    const start = performance.now();
     const mesh =
       algorithm === 'regular'
         ? createTerrainMesh(field)
         : algorithm === 'martini'
           ? createMartiniTerrainMesh(field, {maxError: tolerance})
           : createDelatinTerrainMesh(field, {maxError: tolerance});
-    return {mesh, error: measureTerrainMeshError(field, mesh)};
-  }, [algorithm, tolerance]);
+    const milliseconds = performance.now() - start;
+    return {
+      mesh,
+      error: measureTerrainMeshError(field, mesh),
+      errors: getMeshLabErrors(field, mesh),
+      milliseconds,
+      description: data.description
+    };
+  }, [algorithm, tolerance, dataset]);
   return (
     <section className="terrain-analysis">
       <h3>Mesh lab</h3>
+      <label>
+        Dataset{' '}
+        <select
+          aria-label="Mesh dataset"
+          value={dataset}
+          onChange={e => setDataset(e.target.value)}
+        >
+          <option value="mountain">Analytical mountain</option>
+          <option value="coast">Analytical coast</option>
+          <option value="holes">Analytical nodata</option>
+          <option value="dem">Pinned DTED crop</option>
+        </select>
+      </label>
+      <p>{description}</p>
       <label>
         Mesh algorithm{' '}
         <select
@@ -62,34 +80,70 @@ export default function MeshLab() {
           onChange={e => setTolerance(Number(e.target.value))}
         />
       </label>
-      <svg viewBox="0 0 320 320" role="img" aria-label="Mesh lab wireframe">
-        <rect width="320" height="320" fill="#173849" />
-        {Array.from({length: mesh.indices.length / 3}, (_, i) => {
-          const ids = [...mesh.indices.slice(i * 3, i * 3 + 3)];
-          return (
-            <polygon
-              key={i}
-              data-mesh-triangle=""
-              points={ids
-                .map(
-                  id =>
-                    `${mesh.gridCoordinates[2 * id] * 10},${320 - mesh.gridCoordinates[2 * id + 1] * 10}`
-                )
-                .join(' ')}
-              fill="none"
-              stroke="#b7ecff"
-              strokeWidth="0.7"
-            />
-          );
-        })}
-      </svg>
-      <p data-testid="mesh-lab-stats">
-        {mesh.indices.length / 3} triangles; maximum nodal error {error.maxSampleError.toFixed(3)}{' '}
-        m; RMS nodal error {error.rmsSampleError.toFixed(3)} m.
-      </p>
+      <label>
+        <input
+          type="checkbox"
+          aria-label="Mesh nodal error heatmap"
+          checked={heatmap}
+          onChange={e => setHeatmap(e.target.checked)}
+        />
+        Nodal error heatmap (blue: zero; red: tolerance; gray: uncovered)
+      </label>
+      {unsupported ? (
+        <p role="status">
+          Adaptive builders require complete data. Select Regular to inspect missing-data holes.
+        </p>
+      ) : (
+        <>
+          <svg viewBox="0 0 320 320" role="img" aria-label="Mesh lab wireframe">
+            <rect width="320" height="320" fill="#173849" />
+            {Array.from({length: mesh.indices.length / 3}, (_, i) => {
+              const ids = [...mesh.indices.slice(i * 3, i * 3 + 3)];
+              return (
+                <polygon
+                  key={i}
+                  data-mesh-triangle=""
+                  points={ids
+                    .map(
+                      id =>
+                        `${(mesh.gridCoordinates[2 * id] * 320) / (mesh.width - 1)},${320 - (mesh.gridCoordinates[2 * id + 1] * 320) / (mesh.height - 1)}`
+                    )
+                    .join(' ')}
+                  fill="none"
+                  stroke="#b7ecff"
+                  strokeWidth="0.7"
+                />
+              );
+            })}
+            {heatmap &&
+              errors.map(({x, y, error}) => (
+                <circle
+                  key={y * mesh.width + x}
+                  data-mesh-error=""
+                  cx={(x * 320) / (mesh.width - 1)}
+                  cy={320 - (y * 320) / (mesh.height - 1)}
+                  r="2.5"
+                  fill={
+                    error === undefined
+                      ? '#aaa'
+                      : `hsl(${240 * (1 - Math.min(1, error / Math.max(tolerance, 1e-9)))},90%,60%)`
+                  }
+                />
+              ))}
+          </svg>
+          <p data-testid="mesh-lab-stats">
+            {mesh.indices.length / 3} triangles; maximum nodal error{' '}
+            {error.maxSampleError.toFixed(3)} m; RMS nodal error {error.rmsSampleError.toFixed(3)}{' '}
+            m.{' '}
+            {mesh.positions.byteLength + mesh.indices.byteLength + mesh.gridCoordinates.byteLength}{' '}
+            output bytes; {milliseconds.toFixed(2)} ms build time (single run).{' '}
+            {error.uncoveredSampleCount} uncovered valid nodes.
+          </p>
+        </>
+      )}
       <p>
-        Errors are measured at source grid nodes, not a continuous-surface error bound. This
-        synthetic terrain has complete data.
+        Errors are measured at source grid nodes, not a continuous-surface error bound. Output bytes
+        exclude temporary allocations.
       </p>
     </section>
   );

@@ -26,6 +26,8 @@ try {
   assert.notEqual(values.heights[0],values.heights[1]);assert.notEqual(values.heights[1],values.heights[2]);
   const labStats = page.getByTestId('mesh-lab-stats');
   const martiniStats = await labStats.innerText();
+  await page.getByLabel('Mesh nodal error heatmap').check();
+  assert.equal(await page.locator('[data-mesh-error]').count(), 1089);
   await page.getByLabel('Mesh algorithm').selectOption('regular');
   assert.match(await labStats.innerText(), /2048 triangles/);
   await page.getByLabel('Mesh algorithm').selectOption('martini');
@@ -33,6 +35,14 @@ try {
   assert.notEqual(await labStats.innerText(), martiniStats);
   await page.getByLabel('Mesh algorithm').selectOption('delatin');
   assert((await page.getByRole('img', {name: 'Mesh lab wireframe'}).locator('[data-mesh-triangle]').count()) > 0);
+  await page.getByLabel('Mesh dataset').selectOption('dem');
+  assert.match(await labStats.innerText(), /output bytes/);
+  await page.getByLabel('Mesh dataset').selectOption('holes');
+  assert.match(await page.getByRole('status').innerText(), /require complete data/);
+  await page.getByLabel('Mesh algorithm').selectOption('regular');
+  assert((await page.getByRole('img', {name: 'Mesh lab wireframe'}).locator('[data-mesh-triangle]').count()) < 2048);
+  await page.getByLabel('Mesh dataset').selectOption('coast');
+  assert.match(await labStats.innerText(), /2048 triangles/);
   await page.getByLabel('Show mesh normals').check();
   await page.getByLabel('Interpolation').selectOption('triangle');
   await page.getByLabel('Cell diagonal').selectOption('10-01');
