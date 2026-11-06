@@ -140,8 +140,12 @@ export class SampleTrack {
           const difference = this.values[right * this.size + j] - this.values[left * this.size + j];
           const span = this.times[right] - this.times[left];
           const ratio = dt / span;
-          // Prefer the duration ratio unless it underflows and erases a representable tangent.
-          return ratio >= 2 ** -1022 ? difference * ratio : (difference / span) * dt;
+          // Avoid losing precision in a subnormal ratio or overflowing the derivative.
+          if (ratio >= 2 ** -1022) return difference * ratio;
+          const product = difference * dt;
+          return Number.isFinite(product) && product !== 0
+            ? product / span
+            : (difference / span) * dt;
         };
         out[j] =
           (2 * t ** 3 - 3 * t ** 2 + 1) * a +

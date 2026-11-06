@@ -96,3 +96,10 @@ it('cubic interpolation preserves weighted slopes when a derivative underflows',
   const track = new SampleTrack([0, 1e100], [0, 1e-300], {interpolation: 'cubic'});
   expect(track.evaluate(2.5e99)[0] / 1e-300).toBeCloseTo(0.25, 12);
 });
+
+it('cubic tangent fallback does not overflow an otherwise finite weighted slope', () => {
+  const track = new SampleTrack([0, 1e-323, 1e-15], [0, 0, 1e308], {interpolation: 'cubic'});
+  const result = track.evaluate(5e-324)[0];
+  expect(Number.isFinite(result)).toBe(true);
+  expect(result).toBeLessThan(0);
+});
