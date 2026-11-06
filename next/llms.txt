@@ -11,48 +11,9 @@ Welcome to math.gl!
 
 ### developer-guide
 
+Start with a small calculation, then choose the modules your application needs. math.gl runs on the CPU; its arrays and coordinate utilities can feed a map, a renderer, or an analysis pipeline.
 
-#### bundling
-
-math.gl is published as tree-shakeable ES modules. Application bundle size depends on the APIs imported, the methods used, the bundler configuration, and the compression applied by the server.
-
-- [Bundling](https://visgl.github.io/math.gl/next/docs/developer-guide/bundling.md): math.gl is published as tree-shakeable ES modules. Application bundle size depends on the APIs imported, the methods used, the bundler configuration, and the compression applied by the server.
-
-#### debugging
-
-Enable core validation during development to catch invalid numeric values close to the operation that produced them.
-
-- [Debugging](https://visgl.github.io/math.gl/next/docs/developer-guide/debugging.md): Enable core validation during development to catch invalid numeric values close to the operation that produced them.
-
-#### get-started
-
-Install the modules your application needs. Start with core for vectors, matrices, and rotations:
-
-- [Get Started](https://visgl.github.io/math.gl/next/docs/developer-guide/get-started.md): Install the modules your application needs. Start with core for vectors, matrices, and rotations:
-
-#### performance
-
-Reuse math objects and output buffers in repeated calculations. Core methods use standalone numeric kernels; allocation, validation, and application data layout can affect the cost of a loop.
-
-- [Performance](https://visgl.github.io/math.gl/next/docs/developer-guide/performance.md): Reuse math objects and output buffers in repeated calculations. Core methods use standalone numeric kernels; allocation, validation, and application data layout can affect the cost of a loop.
-
-#### root-exports-migration
-
-{/ SPDX-License-Identifier: MIT /}
-
-- [Migrating to root exports](https://visgl.github.io/math.gl/next/docs/developer-guide/root-exports-migration.md): {/ SPDX-License-Identifier: MIT /}
-
-#### security
-
-math.gl provides building blocks for numerical and geospatial applications. This guide helps you choose trusted code and data, manage dependencies, and set appropriate limits for your application.
-
-- [Security](https://visgl.github.io/math.gl/next/docs/developer-guide/security.md): math.gl provides building blocks for numerical and geospatial applications. This guide helps you choose trusted code and data, manage dependencies, and set appropriate limits for your application.
-
-#### working-with-ai
-
-math.gl provides a documentation index, individually retrievable Markdown pages, and an installable agent skill for developers using AI coding tools.
-
-- [Working with AI Coding Agents](https://visgl.github.io/math.gl/next/docs/developer-guide/working-with-ai.md): math.gl provides a documentation index, individually retrievable Markdown pages, and an installable agent skill for developers using AI coding tools.
+- [Developer Guide](https://visgl.github.io/math.gl/next/docs/developer-guide.md): Start with a small calculation, then choose the modules your application needs. math.gl runs on the CPU; its arrays and coordinate utilities can feed a map, a renderer, or an analysis pipeline.
 
 ### modules
 

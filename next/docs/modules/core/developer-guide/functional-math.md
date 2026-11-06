@@ -98,4 +98,4 @@ Use the geometry package for operations beyond vector and matrix arithmetic:
 * [Curves](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/curves.md): line, quadratic/cubic Bézier, Hermite and Catmull–Rom curves are exported from `@math.gl/geometry`.
 * [CurveArcLength](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/curve-arc-length.md) maps distance fractions to parameters using a sampled length approximation. It is different from evaluating a timestamped animation track.
 
-See [view and projection](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/view-and-projection.md) for depth conventions and [performance](https://visgl.github.io/math.gl/next/docs/developer-guide/performance.md) for output reuse.
+See [view and projection](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/view-and-projection.md) for depth conventions and [performance](https://visgl.github.io/math.gl/next/docs/developer-guide.md#reuse-results-in-repeated-work) for output reuse.

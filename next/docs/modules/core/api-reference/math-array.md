@@ -43,4 +43,4 @@ See [floating point](https://visgl.github.io/math.gl/next/docs/modules/core/deve
 
 `toString()` formats the object using global configuration. `formatString(options)` accepts formatting options for one call. Concrete classes may customize their output; matrix `toString()` uses `printRowMajor` to choose display order.
 
-See [debugging](https://visgl.github.io/math.gl/next/docs/developer-guide/debugging.md) for examples and configuration defaults.
+See [debugging](https://visgl.github.io/math.gl/next/docs/developer-guide.md#catch-mistakes-during-development) for examples and configuration defaults.

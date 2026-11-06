@@ -69,8 +69,8 @@ const y = vector[1];
 * Arithmetic methods usually mutate the receiver and return it. Clone an object before modifying it when the original is needed.
 * Vector components are accessible by index and by name, such as `vector[0]` and `vector.x`.
 * Matrices store elements in column-major order. Rotations use radians; Euler orders are lowercase strings.
-* Matrix transform methods allocate a result array unless an output is supplied. See [performance](https://visgl.github.io/math.gl/next/docs/developer-guide/performance.md) for reuse patterns.
-* Enable optional validation with `configure({debug: true})`. See [debugging](https://visgl.github.io/math.gl/next/docs/developer-guide/debugging.md) for checks and formatting.
+* Matrix transform methods allocate a result array unless an output is supplied. See [performance](https://visgl.github.io/math.gl/next/docs/developer-guide.md#reuse-results-in-repeated-work) for reuse patterns.
+* Enable optional validation with `configure({debug: true})`. See [debugging](https://visgl.github.io/math.gl/next/docs/developer-guide.md#catch-mistakes-during-development) for checks and formatting.
 
 ## Numeric helpers and sample tracks[​](#numeric-helpers-and-sample-tracks "Direct link to Numeric helpers and sample tracks")
 
