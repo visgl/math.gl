@@ -77,6 +77,10 @@ const y = vector[1];
 - Matrix transform methods allocate a result array unless an output is supplied. See [performance](../../developer-guide/performance.md) for reuse patterns.
 - Enable optional validation with `configure({debug: true})`. See [debugging](../../developer-guide/debugging.md) for checks and formatting.
 
+## Numeric helpers and sample tracks
+
+[Numeric helpers](./api-reference/numeric-helpers.md) cover vector projection/reflection, length controls, scalar damping and quaternion stepping. [SampleTrack](./api-reference/sample-track.md) evaluates timestamped scalar, vector and quaternion samples with reusable outputs.
+
 ## Learn core math
 
 Start with [transformations](./developer-guide/transformations.md) and [3D rotations](./developer-guide/rotations.md). The guides also cover [coordinate systems](./developer-guide/coordinate-systems.md), [homogeneous coordinates](./developer-guide/homogeneous-coordinates.md), [view and projection matrices](./developer-guide/view-and-projection.md), and [floating point](./developer-guide/floating-point.md).

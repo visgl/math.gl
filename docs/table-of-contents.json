@@ -68,6 +68,8 @@
           "modules/core/api-reference/spheroid",
           "modules/core/api-reference/local-frame",
           "modules/core/api-reference/utilities",
+          "modules/core/api-reference/numeric-helpers",
+          "modules/core/api-reference/sample-track",
           "modules/core/api-reference/vector",
           "modules/core/api-reference/vector2",
           "modules/core/api-reference/vector3",
@@ -108,7 +110,8 @@
         "items": [
           "modules/geometry/curves/README",
           "modules/geometry/curves/api-reference/curves",
-          "modules/geometry/curves/api-reference/curve-arc-length"
+          "modules/geometry/curves/api-reference/curve-arc-length",
+          "modules/geometry/curves/api-reference/sampling-and-frames"
         ]
       },
       {
@@ -146,6 +149,7 @@
         "items": [
           "modules/geometry/culling/README",
           "modules/geometry/culling/api-reference/queries",
+          "modules/geometry/culling/api-reference/extended-queries",
           "modules/geometry/culling/api-reference/axis-aligned-bounding-box",
           "modules/geometry/culling/api-reference/bounding-sphere",
           "modules/geometry/culling/api-reference/bounding-volume",

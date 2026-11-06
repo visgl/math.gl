@@ -8,7 +8,8 @@
 // See ../../../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
 /* eslint-disable */
-import {Vector3, assert} from '@math.gl/core';
+import {Vector3, assert, type ProjectionDepthOptions} from '@math.gl/core';
+import {extractFrustumPlanes} from '../frustum-planes';
 import type {CullingResult} from '../constants';
 import {Plane} from './plane';
 import type {BoundingVolume} from './bounding-volumes/bounding-volume';
@@ -91,6 +92,13 @@ export class CullingVolume {
       planeIndex += 2;
     }
 
+    return this;
+  }
+
+  /** Replace planes from a view-projection matrix; validates before mutating. */
+  fromViewProjection(matrix: ArrayLike<number>, options: ProjectionDepthOptions = {}): this {
+    const planes = extractFrustumPlanes(matrix, options);
+    this.planes.splice(0, this.planes.length, ...planes);
     return this;
   }
 

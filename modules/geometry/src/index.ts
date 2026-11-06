@@ -204,3 +204,37 @@ export type {
 export {composeAttributeProvenance} from './utils/compose-attribute-provenance';
 export {qualifySurfaceTransition} from './utils/qualify-surface-transition';
 export type {SurfaceTransitionQualification} from './utils/qualify-surface-transition';
+
+export {
+  extractFrustumPlanes,
+  createEmptyBounds,
+  isEmptyBounds,
+  boundsContainsPoint,
+  boundsContainsBounds,
+  boundsIntersect,
+  unionBounds,
+  intersectBounds,
+  expandBoundsByPoint,
+  expandBounds,
+  clampPointToBounds,
+  spheresIntersect,
+  boundsIntersectSphere
+} from './culling/index';
+export {
+  getRayPoint,
+  getClosestPointOnRay,
+  distanceToRay,
+  getClosestPointsRaySegment,
+  transformRay,
+  getTriangleBarycentric,
+  getTriangleArea,
+  getTriangleNormal,
+  isTriangleFrontFacing,
+  triangleContainsPoint,
+  interpolateTriangleAttribute,
+  intersectPlaneSegment,
+  triangleIntersectsBounds
+} from './culling/geometric-queries';
+export type {RaySegmentClosestPoints} from './culling/geometric-queries';
+export {sampleCurveAdaptive, computeParallelTransportFrames} from './curves/index';
+export type {AdaptiveCurveOptions, AdaptiveCurveSamples, CurveFrames} from './curves/index';

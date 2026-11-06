@@ -83,16 +83,34 @@ export class AxisAlignedBoundingBox implements BoundingVolume {
   }
 
   /**
-   * Applies a 4x4 affine transformation matrix to a bounding sphere.
+   * Transforms an AABB by a finite affine matrix, rebuilding all bounds and extents.
    * @param transform The transformation matrix to apply to the bounding sphere.
-   * @returns itself, i.e. the modified BoundingVolume.
+   * @returns itself, i.e. the modified bounding box.
    */
   transform(transform: readonly number[]): this {
-    this.center.transformAsPoint(transform);
-    // TODO - this.halfDiagonal.transformAsVector(transform);
-    this.halfDiagonal.transform(transform);
-    this.minimum.transform(transform);
-    this.maximum.transform(transform);
+    if (
+      transform.length !== 16 ||
+      transform.some(x => !Number.isFinite(x)) ||
+      transform[3] !== 0 ||
+      transform[7] !== 0 ||
+      transform[11] !== 0 ||
+      transform[15] !== 1
+    ) {
+      throw new RangeError('Expected a finite affine matrix');
+    }
+    const center = this.minimum.clone().add(this.maximum).scale(0.5);
+    const extent = this.maximum.clone().subtract(this.minimum).scale(0.5);
+    if (extent.some(x => x < 0)) throw new RangeError('Bounds must be ordered');
+    center.transformAsPoint(transform);
+    for (let row = 0; row < 3; row++) {
+      this.halfDiagonal[row] =
+        Math.abs(transform[row]) * extent[0] +
+        Math.abs(transform[row + 4]) * extent[1] +
+        Math.abs(transform[row + 8]) * extent[2];
+    }
+    this.center.copy(center);
+    this.minimum.copy(center).subtract(this.halfDiagonal);
+    this.maximum.copy(center).add(this.halfDiagonal);
     return this;
   }
 
