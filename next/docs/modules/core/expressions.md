@@ -2,7 +2,7 @@
 
 ![From-v4.2](https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
-The experimental expression parser and evaluator are available from `@math.gl/core`. Geospatial function libraries are exported from `@math.gl/geospatial`; DGGS function libraries are exported from `@math.gl/dggs`.
+The experimental expression parser and evaluator are available from `@math.gl/core/expressions`. Geospatial function libraries are exported from `@math.gl/geospatial`; DGGS function libraries are exported from `@math.gl/dggs`.
 
 It extracts the expression machinery that has shipped inside `@deck.gl/json` and provides it as a core subpath. Its API remains experimental.
 
@@ -29,7 +29,7 @@ npm install @math.gl/core
 Evaluate a parsed expression against a data object:
 
 ```
-import {parse, evaluate} from '@math.gl/core';
+import {parse, evaluate} from '@math.gl/core/expressions';
 
 
 
@@ -43,7 +43,7 @@ const result = evaluate(expression, {value: 3, scale: 2});
 Compile an expression once and reuse it:
 
 ```
-import {compile} from '@math.gl/core';
+import {compile} from '@math.gl/core/expressions';
 
 
 
@@ -63,7 +63,7 @@ import {
 
   compile
 
-} from '@math.gl/core';
+} from '@math.gl/core/expressions';
 
 import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial';
 
@@ -93,7 +93,7 @@ import {
 
   compile
 
-} from '@math.gl/core';
+} from '@math.gl/core/expressions';
 
 
 
@@ -115,7 +115,7 @@ fn({value: 2.4});
 Compile a JSON-style accessor expression that disallows function calls:
 
 ```
-import {parseExpressionString} from '@math.gl/core';
+import {parseExpressionString} from '@math.gl/core/expressions';
 
 
 

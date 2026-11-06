@@ -10,7 +10,6 @@ The APIs below moved to package or capability roots. The old API subpaths are no
 
 | Previous import                                         | New import                     |
 | ------------------------------------------------------- | ------------------------------ |
-| `@math.gl/core/expressions`                             | `@math.gl/core`                |
 | `@math.gl/core/local-frame`                             | `@math.gl/core`                |
 | `@math.gl/core/mat3`                                    | `@math.gl/core`                |
 | `@math.gl/core/mat4`                                    | `@math.gl/core`                |
@@ -90,12 +89,14 @@ Matrix, quaternion and vector modules share names such as `create` and `multiply
 
 Named imports can be eliminated by ESM bundlers. Native Node ESM and CommonJS load static root dependencies even when a single name is used. In particular, `astronomy-engine` is now an Earth runtime dependency because astronomy functions are synchronous root exports. No shader code is introduced.
 
-### Expression evaluation names[​](#expression-evaluation-names "Direct link to Expression evaluation names")
+### Expression imports and evaluation names[​](#expression-imports-and-evaluation-names "Direct link to Expression imports and evaluation names")
 
-The v5 prerelease expression exports `eval` and `evalAsync` are renamed to `evaluate` and `evaluateAsync`. Update named imports and namespace calls from `@math.gl/core`. The old names are removed: `eval` cannot be used as a local binding in strict-mode modules, including generated namespace wrappers.
+Import expression APIs and types from `@math.gl/core/expressions`. If you used the package root in an earlier v5 prerelease, update the import specifier.
+
+The v5 prerelease expression exports `eval` and `evalAsync` are renamed to `evaluate` and `evaluateAsync`. Update named imports and namespace calls. The old names are removed: `eval` cannot be used as a local binding in strict-mode modules, including generated namespace wrappers.
 
 ```
-import {evaluate, parse} from '@math.gl/core';
+import {evaluate, parse} from '@math.gl/core/expressions';
 
 
 
@@ -113,7 +114,7 @@ Import `subdivideGlobeMesh` and its options from `@math.gl/geospatial`; they are
 | Removed package           | Install                 | Import from                      |
 | ------------------------- | ----------------------- | -------------------------------- |
 | `@math.gl/types`          | `@math.gl/core`         | `@math.gl/core`                  |
-| `@math.gl/expressions`    | `@math.gl/core`         | `@math.gl/core`                  |
+| `@math.gl/expressions`    | `@math.gl/core`         | `@math.gl/core/expressions`      |
 | `@math.gl/geometry-utils` | `@math.gl/geometry`     | `@math.gl/geometry`              |
 | `@math.gl/curves`         | `@math.gl/geometry`     | `@math.gl/geometry`              |
 | `@math.gl/polygon`        | `@math.gl/geometry`     | `@math.gl/geometry`              |

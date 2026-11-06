@@ -13,7 +13,7 @@ import {
 
   type ExpressionFunctionLibrary
 
-} from '@math.gl/core';
+} from '@math.gl/core/expressions';
 
 
 

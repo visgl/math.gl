@@ -5,7 +5,7 @@
 Import optional Discrete Global Grid System function tables from `@math.gl/dggs`.
 
 ```
-import {ExpressionFunctionRegistry, compile} from '@math.gl/core';
+import {ExpressionFunctionRegistry, compile} from '@math.gl/core/expressions';
 
 import {DGGS_FUNCTION_LIBRARY} from '@math.gl/dggs';
 
