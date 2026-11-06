@@ -49,6 +49,7 @@
             "label": "Developer Guide",
             "items": [
               "modules/core/developer-guide/transformations",
+              "modules/core/developer-guide/functional-math",
               "modules/core/developer-guide/view-and-projection",
               "modules/core/developer-guide/homogeneous-coordinates",
               "modules/core/developer-guide/coordinate-systems",
