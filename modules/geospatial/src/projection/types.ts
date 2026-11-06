@@ -35,6 +35,8 @@ export interface ProjectionEngine {
 /** A CRS-pair transform. Sync methods never load algorithms; preload deferred transforms first. */
 export interface Projection {
   readonly lossy?: boolean;
+  /** Available after preparation when the backend can describe its resolved execution. */
+  readonly description?: import('./transform-description').ProjectionTransformDescription;
   preload(): Promise<unknown>;
   project(coordinate: readonly number[]): number[] | Promise<number[]>;
   unproject(coordinate: readonly number[]): number[] | Promise<number[]>;
@@ -81,3 +83,11 @@ export type {
   CRSRenderingScaleCallback,
   GetCRSOptions
 } from './experimental/types';
+
+export type {
+  ProjectionAlgorithmIdentity,
+  ProjectionCRSDescription,
+  ProjectionTransformStage,
+  ProjectionDirectionDescription,
+  ProjectionTransformDescription
+} from './transform-description';

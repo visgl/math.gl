@@ -95,6 +95,10 @@ export type ProjectionContext = {
 
 /** Explicit registration avoids global state and imports of unused projections. */
 export type ProjectionPlugin = {
+  /** Optional promise of stable coordinate semantics. Omit for opaque/custom algorithms.
+   * Copying this identity onto a replacement create() asserts semantic equivalence.
+   */
+  readonly semantics?: import('../transform-description').ProjectionAlgorithmIdentity;
   readonly name: string;
   readonly aliases?: readonly string[];
   /** Projection-specific PROJ parameters accepted in addition to the core parameters. */

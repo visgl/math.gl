@@ -603,3 +603,11 @@ The accepted metadata, geometry, nesting, coverage and units are specified in th
 [vertical GeoTIFF guide](../developer-guide/projection-engine.md#vertical-geotiff-geoid-models). The
 result plugs into `verticalGrids` on all math.gl projection engine variants. This function
 neither loads files nor selects a vertical datum operation automatically.
+
+## Transform metadata
+
+`description` exposes the optional backend-independent
+[resolved transform description](./projection.md#resolved-transform-description).
+Eager instances expose it immediately; deferred instances expose it only after preparation.
+Metadata is immutable and includes both execution directions. Algorithm names alone do
+not establish equivalence with a GPU or other backend.
