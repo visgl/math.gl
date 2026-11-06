@@ -112,4 +112,4 @@ Use the geometry package for operations beyond vector and matrix arithmetic:
   different from evaluating a timestamped animation track.
 
 See [view and projection](./view-and-projection.md) for depth conventions and
-[performance](../../../developer-guide/performance.md) for output reuse.
+[performance](../../../developer-guide/README.md#reuse-results-in-repeated-work) for output reuse.

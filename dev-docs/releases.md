@@ -11,7 +11,7 @@ incrementing the alpha series. Later runs increment the beta number, provided
 `CHANGELOG.md` contains a heading and release notes for that version.
 
 Before upgrading applications, review the breaking changes in
-[the root-export migration guide](../docs/developer-guide/root-exports-migration.md)
+[the root-export migration guide](../docs/upgrade-guide.md#migrating-to-root-exports)
 and [the v5 upgrade guide](../docs/upgrade-guide.md). Package and capability roots
 replace superseded API subpaths, Earth requires `astronomy-engine`, and core
 exposes matrix/vector namespaces and prefixed individual operations. Catalog and

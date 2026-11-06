@@ -10,4 +10,4 @@ Please report suspected vulnerabilities privately through a [GitHub security adv
 
 The project is maintained by volunteers on a reasonable-effort basis. Please allow at least 90 days to work on a fix before public disclosure, and coordinate disclosure with the maintainers.
 
-For guidance on using math.gl with untrusted inputs, see the [security guide](../docs/developer-guide/security.md).
+For guidance on using math.gl with untrusted inputs, see the [security guide](../docs/developer-guide/README.md#process-external-data-and-code-safely).
