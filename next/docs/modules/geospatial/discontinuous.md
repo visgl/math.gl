@@ -260,7 +260,7 @@ Both geometry methods accept:
 
 Sampling happens after clipping. The criterion is an approximation target, not a certified maximum error for arbitrary user projections. Recursion is limited to 20 levels and approximately one million samples per clipped edge; exceeding limits throws. Choose a suitable distance tolerance for large radii, for example `tolerance: 10` when output units are meters. The default targets unit-sphere maps.
 
-See the [unfolding Earth example](https://visgl.github.io/math.gl/next/docs/modules/geometry/unfolding-earth.md) for the related hinge and texture demonstration. Static vector projection and animated panel rendering currently use separate pipelines.
+See the [unfolding Earth example](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/hinge-tree.md#unfolding-earth) for the related hinge and texture demonstration. Static vector projection and animated panel rendering currently use separate pipelines.
 
 ## Quincuncial and star factories[​](#quincuncial-and-star-factories "Direct link to Quincuncial and star factories")
 

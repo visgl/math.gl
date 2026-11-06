@@ -237,7 +237,7 @@ The [Glaciation Explorer](https://visgl.github.io/math.gl/next/examples/alpine-i
 
 Static segmented layouts transition through the globe, rebuilding destination geometry with its own cuts. Myriahedral views use hinge motion through the globe. The continuous world projections retain their animated transitions. U.S. inset selection changes the displayed coverage; statistics remain global. Geographic masks are not political borders, and the display interpolation adds no new reconstruction data.
 
-This integration uses Cartesian rendering of preprojected geometry. It does not add general discontinuous-projection support to existing deck.gl geographic layers. The [unfolding Earth example](https://visgl.github.io/math.gl/next/docs/modules/geometry/unfolding-earth.md) explores a separate animated hinge-and-texture pipeline.
+This integration uses Cartesian rendering of preprojected geometry. It does not add general discontinuous-projection support to existing deck.gl geographic layers. The [unfolding Earth example](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/hinge-tree.md#unfolding-earth) explores a separate animated hinge-and-texture pipeline.
 
 ## What remains unsupported[​](#what-remains-unsupported "Direct link to What remains unsupported")
 

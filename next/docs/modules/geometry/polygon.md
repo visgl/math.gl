@@ -1,4 +1,4 @@
-# Overview
+# @math.gl/geometry/polygon
 
 ![From v3.2](https://img.shields.io/badge/From-v3.2-blue.svg?style=flat-square)
 

@@ -1,4 +1,4 @@
-# @math.gl/geospatial
+# @math.gl/geospatial/wkb
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 

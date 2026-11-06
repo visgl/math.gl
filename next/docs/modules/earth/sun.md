@@ -1,4 +1,4 @@
-# Overview
+# @math.gl/earth/sun
 
 ![From v3.1](https://img.shields.io/badge/From-v3.1-blue.svg?style=flat-square)
 

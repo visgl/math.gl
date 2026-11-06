@@ -1,4 +1,4 @@
-# Overview
+# @math.gl/core/types
 
 ![From v3.6](https://img.shields.io/badge/From-v3.6-blue.svg?style=flat-square)
 

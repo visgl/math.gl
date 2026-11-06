@@ -1,5 +1,7 @@
 # HingeTree 🧪
 
+<!-- -->
+
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
 Evaluates rigid panels connected by hinges, independently of mesh generation and rendering. A panel can be a polygon, a collection of triangles, or any other rigid object. A forest can contain multiple roots. Loops, collisions, physical forces, and bending are not modeled.
@@ -35,6 +37,24 @@ tree.evaluate([0, Math.PI / 2], matrices);
 
 // The second panel's local-to-world matrix occupies matrices[16..31].
 ```
+
+## Unfolding Earth[​](#unfolding-earth "Direct link to Unfolding Earth")
+
+Explore rigid-panel unfolding with all five Platonic solids, subdivided icosahedra, and an Earth texture that stays attached as each panel moves.
+
+Loading <!-- -->Unfolding Earth<!-- -->…
+
+⛶
+
+Use **Cuts** to compare the original geometric tree with **Ocean-preferred** cuts on the same mesh and seed, or choose the **Dymaxion · AirOcean** 24-panel preset. Drag to orbit, use **Play** to animate, or choose **Flat view** to inspect the net. Back faces are darkened; **Show edges** distinguishes hinges from cuts.
+
+Ocean preference minimizes sampled land crossings using Natural Earth land polygons. It cannot guarantee unbroken continents or an overlap-free net. The fixed AirOcean net has no panel overlaps; it reproduces the cut arrangement, not the Gray-Fuller projection. Its subdivision controls are disabled.
+
+Topology selection and rendering remain example-local. NASA Blue Marble imagery requires internet access; the bundled land mask and geometry work offline.
+
+[Source and instructions](https://github.com/visgl/math.gl/tree/master/examples/geometry/unfolding-polyhedron) · [Imagery terms](https://github.com/visgl/math.gl/blob/master/examples/geometry/unfolding-polyhedron/IMAGERY.md) · [Geography and AirOcean licenses](https://github.com/visgl/math.gl/blob/master/examples/geometry/unfolding-polyhedron/data/README.md)
+
+Hover over a panel to see its original longitude and latitude, including after unfolding. Picking follows the visible surface on either side of a cut and hides the tooltip over gaps. The coordinates use the same spherical mapping as the Earth texture; overlapping panels are resolved by depth.
 
 ## Constructor[​](#constructor "Direct link to Constructor")
 
@@ -72,7 +92,3 @@ worldRoot  = rootTransform × restTransform
 The hinge axis and pivot are expressed in the parent's local rest coordinates, so they move with the parent. A child rest transform may already contain a rotation. Angles are offsets from that rest pose, not absolute dihedral angles. A complete turn is permitted.
 
 Evaluation takes linear time and uses internal scratch storage. Reusing the output avoids per-panel matrix allocation. Angles and root placement are read before output is written, so they may alias the output. Later evaluations do not alter previously returned buffers unless the same buffer is supplied again. Invalid inputs throw before output writes; overflow during composition throws and may leave partial output. Floating-point error accumulates in deep trees.
-
-See the [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/geometry/unfolding-polyhedron) for all five Platonic solids, subdivided icosahedra, automatic maximum-spanning-tree cut selection, and a WebGL 2 renderer. The mesh/layout builder is experimental example code, separate from this API.
-
-Try the [interactive Unfolding Earth example](https://visgl.github.io/math.gl/next/docs/modules/geometry/unfolding-earth.md) inline in the docs.
