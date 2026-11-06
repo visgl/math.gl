@@ -28,7 +28,7 @@ The ray origin.
 
 ### direction : Vector3[​](#direction--vector3 "Direct link to direction : Vector3")
 
-The normalized ray direction.
+The constructor normalizes a supplied nonzero direction. An omitted or zero direction remains zero and is not a valid direction for the standalone ray query kernels.
 
 ## Methods[​](#methods "Direct link to Methods")
 
@@ -38,3 +38,25 @@ Creates a ray. The constructor clones both inputs and normalizes `direction`. Om
 
 * `origin` - Optional ray origin.
 * `direction` - Optional ray direction.
+
+## Query functions[​](#query-functions "Direct link to Query functions")
+
+The class stores the ray; triangle and bounds intersections are separate functions:
+
+```
+import {intersectRayTriangle} from '@math.gl/geometry/culling';
+
+
+
+const hit = intersectRayTriangle(
+
+  [0.25, 0.25, 1], [0, 0, -1],
+
+  [0, 0, 0], [1, 0, 0], [0, 1, 0]
+
+);
+
+// hit: {t: 1, barycentric: [0.5, 0.25, 0.25]}
+```
+
+The kernel accepts numeric arrays directly and does not normalize the direction. Its `t` parameter is a distance only for a unit direction; no hit returns `null`. See [query functions](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/queries.md) for bounds, closest-point and segment queries, and [analytic shapes](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/shapes.md) for shape-specific intersections.

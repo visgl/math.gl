@@ -332,3 +332,7 @@ Transforms a two- or three-element vector interpreted as a direction (i.e. all v
 
 * All transforms are effectively "right multiplied" onto the matrix (meaning that during transform they will be applied in opposite order).
 * `Matrix4` is stored internally in column major format (per WebGL conventions). This only matters when you read out the matrix to use it with other software.
+
+## Related functional operations[​](#related-functional-operations "Direct link to Related functional operations")
+
+The functional API also provides quaternion/translation/scale composition and \[0, 1] depth projections. Its decomposition functions have documented scale limitations. See [functional math](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/functional-math.md) for imports, output ownership, and limitations.

@@ -163,3 +163,7 @@ Performs a spherical linear interpolation between two quaternions
 `quaternion.slerp(target, ratio)`
 
 `quaternion.slerp(start, target, ratio)`
+
+## Related functional operations[​](#related-functional-operations "Direct link to Related functional operations")
+
+The functional API also provides `quatGetAngle` and `quatRotationTo` for unit inputs. See [functional math](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/functional-math.md) for imports, output ownership, and limitations.

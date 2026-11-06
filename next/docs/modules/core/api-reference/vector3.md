@@ -166,3 +166,7 @@ Transform the vector's `x` and `y` values by the provided 2x2 matrix.
 ### transformByQuaternion(quaternion : Number\[4]) : this[​](#transformbyquaternionquaternion--number4--this "Direct link to transformByQuaternion(quaternion : Number\[4]) : this")
 
 Transform the vector by the provided `quaternion`.
+
+## Related functional operations[​](#related-functional-operations "Direct link to Related functional operations")
+
+The functional API also provides `vec3Slerp`, `vec3Bezier`, and `vec3Hermite`. See [functional math](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/functional-math.md) for imports, output ownership, and limitations.
