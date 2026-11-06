@@ -28,6 +28,13 @@ Look up a location's timezone with [timezone](./modules/earth/timezone/README.md
 
 [Core](./modules/core/README.md) adds clearer matrix and rotation conversions, stronger array types, and tree-shakeable low-level namespaces. New [expressions](./modules/core/expressions/README.md) tools make it possible to parse and evaluate configurable expressions; expression evaluation is experimental.
 
+### Lighting and color calculations
+
+Opt-in [photometric and color LUT utilities](./modules/core/lighting/README.md) add
+angular sampling, solid-angle flux integration, peak-normalized grids and CPU LUT
+application. Inputs and outputs are format-independent arrays; parsing remains in
+loaders.gl or other readers, and no dependencies are added.
+
 ### Module structure
 
 Version 5 groups related tools into six packages. Install the package root and use its focused entry points where available. See the [migration table](./upgrade-guide.md#removed-standalone-packages) for the former package names.

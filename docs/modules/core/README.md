@@ -26,9 +26,14 @@ import Example from '@site/src/components/core-transforms';
 | Spherical and spheroid coordinates | ✅ | [SphericalCoordinates](./api-reference/spherical-coordinates.md) and [spheroid conversions](./api-reference/spheroid.md) within their documented shape domains. |
 | Reusable outputs and numeric interoperability | ✅ | [MathArray](./api-reference/math-array.md) operations interoperate with arrays and typed arrays; individual methods document ownership. |
 | Expressions and worker execution | ✅ | Optional [expression](./expressions/README.md) and [task](./tasks/README.md) capabilities have their own contracts and feature cards. |
+| Photometry and color LUTs | ✅ | Optional [lighting and color calculations](./lighting/README.md), with numerical buffers and no file parsing or GPU objects. |
 | General dense/sparse linear algebra | ❌ | No public general-size QR/SVD, sparse factorization, or tensor engine. The matrix classes target graphics-sized transforms. |
 | Arbitrary-precision arithmetic and autodifferentiation | ❌ | Numerical classes use JavaScript numbers; no arbitrary-precision scalar or gradient-tape backend. |
 | Built-in SIMD, WASM, or GPU numeric backend | ❌ | CPU JavaScript math is implemented; accelerated numerical backends remain [roadmap research](https://github.com/visgl/math.gl/blob/master/dev-docs/ROADMAP.md). Worker scheduling is a separate capability. |
+
+Optional [lighting and color calculations](./lighting/README.md) provide angular sampling,
+luminous-flux integration, resampled grids and LUT application through
+`@math.gl/core/lighting` and `@math.gl/core/color-lut`.
 
 ## Core transforms
 

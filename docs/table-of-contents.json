@@ -142,7 +142,8 @@
               "type": "doc",
               "id": "modules/core/expressions/README"
             }
-          }
+          },
+          "modules/core/lighting/README"
         ],
         "link": {
           "type": "doc",

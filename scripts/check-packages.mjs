@@ -35,8 +35,24 @@ for (const name of expected) {
     }
     if (typeof entry === 'string') continue;
     const specifier = manifest.name + (subpath === '.' ? '' : subpath.slice(1));
-    await import(specifier);
-    require(specifier);
+    const imported = await import(specifier);
+    const required = require(specifier);
+    if (specifier === '@math.gl/core/lighting') {
+      for (const lighting of [imported, required]) {
+        const profile = {verticalAngles: [0, 180], horizontalAngles: [0], intensities: [2, 2], intensityScale: 3, symmetry: 'rotational'};
+        assert.equal(lighting.createPhotometricSampler(profile)(90, 45), 6);
+        assert.ok(Math.abs(lighting.integrateLuminousFlux(profile) - 24 * Math.PI) < 1e-10);
+        const grid = lighting.resamplePhotometricProfile(profile, {verticalCount: 2, horizontalCount: 1});
+        assert.deepEqual([...grid.data], [6, 6]);
+      }
+    }
+    if (specifier === '@math.gl/core/color-lut') {
+      for (const colors of [imported, required]) {
+        const lut = {dimension: 1, size: 2, data: Float32Array.of(0, 0, 0, 1, 1, 1), domainMinimum: [0, 0, 0], domainMaximum: [1, 1, 1]};
+        assert.deepEqual(colors.createColorLUTSampler(lut)(0.25, 0.5, 0.75), [0.25, 0.5, 0.75]);
+        assert.deepEqual([...colors.applyColorLUT(lut, Float32Array.of(0, 0.5, 1))], [0, 0.5, 1]);
+      }
+    }
     entrypoints++;
   }
 }
