@@ -91,3 +91,8 @@ it('quaternion tracks normalize large finite samples without collapsing them', (
   );
   expect(track.evaluate(0.5)).toEqual([0.5, 0.5, 0.5, 0.5]);
 });
+
+it('cubic interpolation preserves weighted slopes when a derivative underflows', () => {
+  const track = new SampleTrack([0, 1e100], [0, 1e-300], {interpolation: 'cubic'});
+  expect(track.evaluate(2.5e99)[0] / 1e-300).toBeCloseTo(0.25, 12);
+});
