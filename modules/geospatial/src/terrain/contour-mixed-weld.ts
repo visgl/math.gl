@@ -91,6 +91,7 @@ export function weldTerrainMixedContourTiles(
   const positions: number[] = [],
     grid: number[] = [],
     vertexLevels: number[] = [];
+  const roundedBoundary = new Map<string, string>();
   const boundary = new Set<number>(),
     shared = new Map<string, number>();
   const edges: {a: number; b: number; level: number; tile: number; seam: boolean}[] = [];
@@ -135,7 +136,10 @@ export function weldTerrainMixedContourTiles(
       const gx = tile.column + sx,
         gy = tile.row + sy;
       // Reject coordinates whose local fraction cannot survive common-frame rebasing.
-      if (gx - tile.column !== sx || gy - tile.row !== sy)
+      if (
+        Math.abs(gx - tile.column - sx) > 8 * Number.EPSILON * Math.max(1, Math.abs(sx)) ||
+        Math.abs(gy - tile.row - sy) > 8 * Number.EPSILON * Math.max(1, Math.abs(sy))
+      )
         throw new Error('Mixed contour lattice loses precision');
       const px = data.positions[3 * v] + (data.origin[0] - origin[0]),
         py = data.positions[3 * v + 1] + (data.origin[1] - origin[1]);
@@ -143,7 +147,16 @@ export function weldTerrainMixedContourTiles(
       if (![gx, gy, px, py, pz].every(Number.isFinite))
         throw new Error('Mixed contour frame overflow');
       const onEdge = x === 0 || y === 0 || x === tile.width - 1 || y === tile.height - 1;
-      const key = `${level}/${gx}/${gy}`;
+      const xi = Math.floor(sx),
+        yi = Math.floor(sy);
+      const key = `${level}/${tile.column + xi}/${sx - xi}/${tile.row + yi}/${sy - yi}`;
+      if (onEdge) {
+        const rounded = `${level}/${gx}/${gy}`;
+        const identity = roundedBoundary.get(rounded);
+        if (identity !== undefined && identity !== key)
+          throw new Error('Mixed contour lattice loses precision');
+        roundedBoundary.set(rounded, key);
+      }
       if (onEdge && local.has(key)) throw new Error('Duplicate mixed contour boundary vertex');
       if (onEdge) local.add(key);
       let id = onEdge ? shared.get(key) : undefined;

@@ -162,3 +162,28 @@ test('supports negative addresses, rectangular tiles, rotated frames and separat
   expect(stitchTerrainContours(result).levelIndices.length).toBe(2);
   expect(result.levels).toEqual(Float64Array.of(0.5, 1.5));
 });
+
+test('ordinary decimal intersections survive translated lattice coordinates', () => {
+  const make = (column: number, spacing: number) => {
+    const field = new HeightField({
+      width: 3,
+      height: 3,
+      origin: [column, 4],
+      columnStep: [spacing, 0],
+      rowStep: [0, spacing],
+      heights: Float64Array.from({length: 9}, (_, i) => Math.floor(i / 3) * spacing)
+    });
+    return {
+      column,
+      row: 4,
+      width: 3,
+      height: 3,
+      spacing,
+      contours: createTerrainContours(field, [0.3])
+    };
+  };
+  const result = weldTerrainMixedContourTiles([make(0, 2), make(4, 1)], {
+    maxPositionDifference: 1e-12
+  });
+  expect(stitchTerrainContours(result).levelIndices.length).toBe(1);
+});
