@@ -124,7 +124,7 @@ jobs:
       - name: Test CI scheduling and required gate
         run: node --test scripts/ci.test.mjs
       - name: Check projection scorecard integrity
-        run: node --test modules/geospatial/projection/scripts/scorecard.test.mjs
+        run: node --test modules/geospatial/scripts/projection/scorecard.test.mjs
 
       - name: Check source license and copyright headers
         run: |
@@ -136,25 +136,25 @@ jobs:
 
       - name: Check independent interior references and qualification
         run: |
-          python3 modules/geospatial/projection/scripts/generate-g6-reference.py --check
-          node modules/geospatial/projection/scripts/qualify-g6.mjs --output /tmp/g6-qualification.json
-          python3 modules/geospatial/projection/scripts/generate-g56-reference.py --check
-          node modules/geospatial/projection/scripts/qualify-g56.mjs --output /tmp/g56-qualification.json
-          python3 modules/geospatial/projection/scripts/generate-g34-reference.py --check
-          node modules/geospatial/projection/scripts/qualify-g34.mjs --output /tmp/g34-qualification.json
-          python3 modules/geospatial/projection/scripts/generate-interior-reference.py --check
-          python3 modules/geospatial/projection/scripts/generate-nearest-cusp-reference.py --check
-          node modules/geospatial/projection/scripts/qualify-interiors.mjs --output /tmp/interior-qualification.json
-          node modules/geospatial/projection/scripts/generate-spheroid-anchor-inputs.mjs --check
-          python3 modules/geospatial/projection/scripts/generate-ellipsoid-p0-reference.py --verify-fixture
-          node modules/geospatial/projection/scripts/qualify-ellipsoid-p0.mjs --output /tmp/ellipsoid-p0-node.json
+          python3 modules/geospatial/scripts/projection/generate-g6-reference.py --check
+          node modules/geospatial/scripts/projection/qualify-g6.mjs --output /tmp/g6-qualification.json
+          python3 modules/geospatial/scripts/projection/generate-g56-reference.py --check
+          node modules/geospatial/scripts/projection/qualify-g56.mjs --output /tmp/g56-qualification.json
+          python3 modules/geospatial/scripts/projection/generate-g34-reference.py --check
+          node modules/geospatial/scripts/projection/qualify-g34.mjs --output /tmp/g34-qualification.json
+          python3 modules/geospatial/scripts/projection/generate-interior-reference.py --check
+          python3 modules/geospatial/scripts/projection/generate-nearest-cusp-reference.py --check
+          node modules/geospatial/scripts/projection/qualify-interiors.mjs --output /tmp/interior-qualification.json
+          node modules/geospatial/scripts/projection/generate-spheroid-anchor-inputs.mjs --check
+          python3 modules/geospatial/scripts/projection/generate-ellipsoid-p0-reference.py --verify-fixture
+          node modules/geospatial/scripts/projection/qualify-ellipsoid-p0.mjs --output /tmp/ellipsoid-p0-node.json
 
       - name: Check independent deformation stress references and qualification
         run: |
-          python3 modules/geospatial/projection/scripts/generate-deformation-stress-reference.py --check
-          python3 modules/geospatial/projection/scripts/generate-temporal-reference.py --check
-          node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs --output /tmp/deformation-stress-qualification.json
-          node modules/geospatial/projection/scripts/check-application-deformation-qualification.mjs
+          python3 modules/geospatial/scripts/projection/generate-deformation-stress-reference.py --check
+          python3 modules/geospatial/scripts/projection/generate-temporal-reference.py --check
+          node modules/geospatial/scripts/projection/qualify-deformation-stress.mjs --output /tmp/deformation-stress-qualification.json
+          node modules/geospatial/scripts/projection/check-application-deformation-qualification.mjs
 
       - name: Check generated CRS declarations
         run: yarn check:projjson-types
@@ -262,29 +262,29 @@ jobs:
 
       - name: Check projection parity inventory and package boundaries
         run: |
-          node modules/geospatial/projection/scripts/check-attribution.mjs
-          node modules/geospatial/projection/scripts/audit-allocations.mjs --check
-          node --test modules/geospatial/projection/scripts/check-spheroid-allocations.test.mjs
-          node modules/geospatial/projection/scripts/check-spheroid-allocations.mjs
-          node modules/geospatial/projection/scripts/check-spheroid-boundary.mjs
-          node modules/geospatial/projection/scripts/check-local-frame-allocations.mjs
-          node modules/geospatial/projection/scripts/check-local-frame-boundary.mjs
-          node modules/geospatial/projection/scripts/check-parity-inventory.mjs
-          node modules/geospatial/projection/scripts/check-native-reference.mjs
-          node modules/geospatial/projection/scripts/check-vertical-reference.mjs
-          node modules/geospatial/projection/scripts/check-vertical-geotiff-reference.mjs
-          node modules/geospatial/projection/scripts/check-pipeline-reference.mjs
-          node modules/geospatial/projection/scripts/check-kinematic-reference.mjs
-          node modules/geospatial/projection/scripts/check-deformation-reference.mjs
-          node modules/geospatial/projection/scripts/measure-accuracy.mjs --output /tmp/projection-accuracy.json
-          node modules/geospatial/projection/scripts/check-experimental-package.mjs
-          node modules/geospatial/projection/scripts/check-packed-package.mjs
-          node modules/geospatial/projection/scripts/check-g6-package.mjs
-          node modules/geospatial/projection/scripts/check-g56-package.mjs
-          node modules/geospatial/projection/scripts/check-g34-package.mjs
-          node modules/geospatial/projection/scripts/check-bundle-budget.mjs
-          node modules/geospatial/projection/scripts/check-lazy-package.mjs
-          node modules/geospatial/projection/scripts/benchmark.mjs --points 100 --samples 3 --min-sample-ms 0
+          node modules/geospatial/scripts/projection/check-attribution.mjs
+          node modules/geospatial/scripts/projection/audit-allocations.mjs --check
+          node --test modules/geospatial/scripts/projection/check-spheroid-allocations.test.mjs
+          node modules/geospatial/scripts/projection/check-spheroid-allocations.mjs
+          node modules/geospatial/scripts/projection/check-spheroid-boundary.mjs
+          node modules/geospatial/scripts/projection/check-local-frame-allocations.mjs
+          node modules/geospatial/scripts/projection/check-local-frame-boundary.mjs
+          node modules/geospatial/scripts/projection/check-parity-inventory.mjs
+          node modules/geospatial/scripts/projection/check-native-reference.mjs
+          node modules/geospatial/scripts/projection/check-vertical-reference.mjs
+          node modules/geospatial/scripts/projection/check-vertical-geotiff-reference.mjs
+          node modules/geospatial/scripts/projection/check-pipeline-reference.mjs
+          node modules/geospatial/scripts/projection/check-kinematic-reference.mjs
+          node modules/geospatial/scripts/projection/check-deformation-reference.mjs
+          node modules/geospatial/scripts/projection/measure-accuracy.mjs --output /tmp/projection-accuracy.json
+          node modules/geospatial/scripts/projection/check-experimental-package.mjs
+          node modules/geospatial/scripts/projection/check-packed-package.mjs
+          node modules/geospatial/scripts/projection/check-g6-package.mjs
+          node modules/geospatial/scripts/projection/check-g56-package.mjs
+          node modules/geospatial/scripts/projection/check-g34-package.mjs
+          node modules/geospatial/scripts/projection/check-bundle-budget.mjs
+          node modules/geospatial/scripts/projection/check-lazy-package.mjs
+          node modules/geospatial/scripts/projection/benchmark.mjs --points 100 --samples 3 --min-sample-ms 0
 
       - name: Upload projection accuracy measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -705,12 +705,12 @@ jobs:
       - name: Qualify independent interior and deformation references
         timeout-minutes: 2
         run: |
-          node modules/geospatial/projection/scripts/qualify-g6.mjs --browser ${{ matrix.browser }} --output /tmp/g6-qualification-${{ matrix.browser }}.json
-          node modules/geospatial/projection/scripts/qualify-g56.mjs --browser ${{ matrix.browser }} --output /tmp/g56-qualification-${{ matrix.browser }}.json
-          node modules/geospatial/projection/scripts/qualify-g34.mjs --browser ${{ matrix.browser }} --output /tmp/g34-qualification-${{ matrix.browser }}.json
-          node modules/geospatial/projection/scripts/qualify-interiors.mjs --browser ${{ matrix.browser }} --output /tmp/interior-qualification-${{ matrix.browser }}.json
-          node modules/geospatial/projection/scripts/qualify-ellipsoid-p0.mjs --browser ${{ matrix.browser }} --output /tmp/ellipsoid-p0-${{ matrix.browser }}.json
-          node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs --browser ${{ matrix.browser }} --output /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
+          node modules/geospatial/scripts/projection/qualify-g6.mjs --browser ${{ matrix.browser }} --output /tmp/g6-qualification-${{ matrix.browser }}.json
+          node modules/geospatial/scripts/projection/qualify-g56.mjs --browser ${{ matrix.browser }} --output /tmp/g56-qualification-${{ matrix.browser }}.json
+          node modules/geospatial/scripts/projection/qualify-g34.mjs --browser ${{ matrix.browser }} --output /tmp/g34-qualification-${{ matrix.browser }}.json
+          node modules/geospatial/scripts/projection/qualify-interiors.mjs --browser ${{ matrix.browser }} --output /tmp/interior-qualification-${{ matrix.browser }}.json
+          node modules/geospatial/scripts/projection/qualify-ellipsoid-p0.mjs --browser ${{ matrix.browser }} --output /tmp/ellipsoid-p0-${{ matrix.browser }}.json
+          node modules/geospatial/scripts/projection/qualify-deformation-stress.mjs --browser ${{ matrix.browser }} --output /tmp/deformation-stress-qualification-${{ matrix.browser }}.json
 
       - name: Qualify C8 frames, poses and G7 baseline controls
         timeout-minutes: 2
@@ -738,12 +738,12 @@ jobs:
         env:
           BROWSER_SAMPLES: ${{ github.event_name == 'pull_request' && '3' || '7' }}
           BROWSER_MIN_SAMPLE_MS: ${{ github.event_name == 'pull_request' && '4' || '12' }}
-        run: node modules/geospatial/projection/scripts/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points 20000 --samples "$BROWSER_SAMPLES" --min-sample-ms "$BROWSER_MIN_SAMPLE_MS" --output /tmp/projection-browser-qualification.json
+        run: node modules/geospatial/scripts/projection/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points 20000 --samples "$BROWSER_SAMPLES" --min-sample-ms "$BROWSER_MIN_SAMPLE_MS" --output /tmp/projection-browser-qualification.json
         if: needs.plan.outputs.full == 'true'
 
       - name: Evaluate optional worker correctness and costs
         timeout-minutes: 2
-        run: node modules/geospatial/projection/scripts/benchmark-workers.mjs --browser ${{ matrix.browser }} --points 1000,100000 --samples 3 --output /tmp/projection-worker-evaluation-${{ matrix.browser }}.json
+        run: node modules/geospatial/scripts/projection/benchmark-workers.mjs --browser ${{ matrix.browser }} --points 1000,100000 --samples 3 --output /tmp/projection-worker-evaluation-${{ matrix.browser }}.json
         if: needs.plan.outputs.full == 'true'
 
       - name: Upload browser qualification measurements
@@ -825,8 +825,8 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          node --test modules/geospatial/projection/scripts/benchmark-runtime.test.mjs
-          node modules/geospatial/projection/scripts/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --min-sample-ms 4 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
+          node --test modules/geospatial/scripts/projection/benchmark-runtime.test.mjs
+          node modules/geospatial/scripts/projection/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --min-sample-ms 4 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
 
       # Keep every scenario/layout/direction and seven samples; bound aggregate windows
       # as reusable-output modes add implementations. Longer local runs keep the 12 ms default.
@@ -835,21 +835,21 @@ jobs:
         timeout-minutes: 5
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: node modules/geospatial/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --min-sample-ms 4 --allocations --reusable-results --output /tmp/projection-pipeline-comparison.json
+        run: node modules/geospatial/scripts/projection/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --min-sample-ms 4 --allocations --reusable-results --output /tmp/projection-pipeline-comparison.json
 
       - name: Check paired grid preparation benchmark
         if: matrix.suite == 'projection'
         timeout-minutes: 2
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: node modules/geospatial/projection/scripts/benchmark-grid-compare.mjs --baseline-ref "$BASE_SHA" --sizes 17,65 --samples 3 --coordinates --allocations --points 1000 --output /tmp/projection-grid-comparison.json
+        run: node modules/geospatial/scripts/projection/benchmark-grid-compare.mjs --baseline-ref "$BASE_SHA" --sizes 17,65 --samples 3 --coordinates --allocations --points 1000 --output /tmp/projection-grid-comparison.json
 
       - name: Compare spheroid conversion correctness and costs
         if: matrix.suite == 'projection'
         timeout-minutes: 2
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: node modules/geospatial/projection/scripts/benchmark-spheroid-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-spheroid-comparison.json
+        run: node modules/geospatial/scripts/projection/benchmark-spheroid-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-spheroid-comparison.json
 
       - name: Collect equal-accuracy G7 and C8 benchmark baseline
         if: matrix.suite == 'pipeline'
@@ -870,7 +870,7 @@ jobs:
         timeout-minutes: 2
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: node modules/geospatial/projection/scripts/benchmark-local-frame-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-local-frame-comparison.json
+        run: node modules/geospatial/scripts/projection/benchmark-local-frame-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-local-frame-comparison.json
 
       - name: Upload paired performance measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -935,7 +935,7 @@ jobs:
           SCORECARD_SAMPLES: ${{ github.event_name == 'pull_request' && '3' || '7' }}
           SCORECARD_WINDOW: ${{ github.event_name == 'pull_request' && '4' || '12' }}
         run: |-
-          node modules/geospatial/projection/scripts/collect-scorecard-node.mjs --directory /tmp/projection-scorecard-node --points "$SCORECARD_POINTS" --samples "$SCORECARD_SAMPLES" --min-sample-ms "$SCORECARD_WINDOW"
+          node modules/geospatial/scripts/projection/collect-scorecard-node.mjs --directory /tmp/projection-scorecard-node --points "$SCORECARD_POINTS" --samples "$SCORECARD_SAMPLES" --min-sample-ms "$SCORECARD_WINDOW"
 
       - name: Upload Node scorecard evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -980,7 +980,7 @@ jobs:
       - name: Consolidate matched evidence
         if: success() && needs.plan.outputs.full == 'true' && needs.scorecard.result == 'success' && needs.projection-browsers.result == 'success'
         run: |
-          node modules/geospatial/projection/scripts/scorecard.mjs --node /tmp/projection-scorecard-node \
+          node modules/geospatial/scripts/projection/scorecard.mjs --node /tmp/projection-scorecard-node \
             --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-chromium/projection-browser-qualification.json \
             --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-firefox/projection-browser-qualification.json \
             --browser-report /tmp/projection-scorecard-browsers/projection-browser-qualification-webkit/projection-browser-qualification.json \

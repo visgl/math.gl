@@ -285,3 +285,123 @@ test('numeric status prevents overflow from becoming a valid GPU sample', () => 
   expect(Array.from(output.gradients)).toEqual([0, 0]);
   expect(Array.from(output.normals)).toEqual([0, 0, 0]);
 });
+
+test('cell footprint sampling clamps half-cell margins without extending the footprint', () => {
+  const field = new HeightField({
+    width: 2,
+    height: 2,
+    heights: new Float64Array([1, 2, 3, 4]),
+    registration: 'cell',
+    origin: [10, 20],
+    columnStep: [2, 0],
+    rowStep: [0, -2]
+  });
+  expect(field.sample(10, 20).status).toBe(Status.OUTSIDE_DOMAIN);
+  expect(field.sample(10, 20, {domain: 'footprint'}).height).toBe(1);
+  expect(field.sample(14, 16, {domain: 'footprint'}).height).toBe(4);
+  expect(field.sample(10 - 1e-5, 20, {domain: 'footprint'}).status).toBe(Status.OUTSIDE_DOMAIN);
+  expect(field.sample(14 + 1e-5, 16, {domain: 'footprint'}).status).toBe(Status.OUTSIDE_DOMAIN);
+});
+
+test('support-only bilinear heights do not require zero-weight nodata neighbors', () => {
+  const field = new HeightField({
+    width: 2,
+    height: 2,
+    heights: new Float64Array([10, 20, NaN, NaN])
+  });
+  expect(field.sample(0.5, 0).status).toBe(Status.NO_DATA);
+  const sample = field.sample(0.5, 0, {noData: 'support'});
+  expect(sample.status).toBe(Status.VALID);
+  expect(sample.height).toBe(15);
+  expect(sample.gradientStatus).toBe(Status.NO_DATA);
+  expect(field.sample(0.5, 0.01, {noData: 'support'}).status).toBe(Status.NO_DATA);
+  const output = {heights: new Float64Array(1), statuses: new Uint8Array(1)};
+  field.sampleBatch(new Float64Array([0, 0]), output, {noData: 'support'});
+  expect(output.heights[0]).toBe(10);
+  expect(output.statuses[0]).toBe(Status.VALID);
+});
+
+test('support-only sampling snaps only roundoff-sized node excursions in absolute metric frames', () => {
+  const field = new HeightField({
+    width: 3,
+    height: 2,
+    heights: new Float64Array([NaN, 7, NaN, NaN, NaN, NaN]),
+    origin: [20000000, 10000000],
+    columnStep: [0.1, 0],
+    rowStep: [0, -0.1]
+  });
+  expect(field.sample(20000000.1, 10000000, {noData: 'support'}).height).toBe(7);
+  expect(field.sample(20000000.10001, 10000000, {noData: 'support'}).status).toBe(Status.NO_DATA);
+});
+
+test('sampling rejects unknown policy names', () => {
+  const field = new HeightField({width: 2, height: 2, heights: new Float64Array(4)});
+  expect(() => field.sample(0, 0, {domain: 'invalid' as never})).toThrow(/domain/);
+  expect(() => field.sample(0, 0, {noData: 'invalid' as never})).toThrow(/nodata/);
+});
+
+test.each(['bilinear', 'triangle'] as const)(
+  '%s footprint derivatives include the clamp Jacobian in rotated frames',
+  interpolation => {
+    const field = new HeightField({
+      width: 2,
+      height: 2,
+      heights: new Float64Array([0, 10, 20, 30]),
+      registration: 'cell',
+      origin: [10, 20],
+      columnStep: [2, 1],
+      rowStep: [-1, 2]
+    });
+    const options = {domain: 'footprint' as const, interpolation};
+    const edge = field.sample(9.5, 22.25, options);
+    expect(edge.height).toBe(10);
+    expect(edge.gradientStatus).toBe(Status.VALID);
+    expect(edge.gradientX).toBeCloseTo(-4);
+    expect(edge.gradientY).toBeCloseTo(8);
+    const corner = field.sample(10.25, 20.75, options);
+    expect(corner.height).toBe(0);
+    expect(corner.gradientX).toBe(0);
+    expect(corner.gradientY).toBe(0);
+    expect(corner.normalX).toBeCloseTo(0);
+    expect(corner.normalY).toBeCloseTo(0);
+    expect(corner.normalZ).toBe(1);
+  }
+);
+
+test('support snapping is capped even when world-coordinate uncertainty is larger', () => {
+  const field = new HeightField({
+    width: 3,
+    height: 2,
+    heights: new Float64Array([NaN, 7, NaN, NaN, NaN, NaN]),
+    origin: [1e12, 1e12]
+  });
+  expect(field.sample(1e12 + 1, 1e12, {noData: 'support'}).status).toBe(Status.VALID);
+  // One representable ULP here is 1/8192 pixels: above the cap, below the uncertainty bound.
+  expect(field.sample(1e12 + 1 + 1 / 8192, 1e12, {noData: 'support'}).status).toBe(Status.NO_DATA);
+});
+
+test.each(['cell', 'vertex'] as const)(
+  'footprint queries preserve endpoint slopes under roundoff for %s registration',
+  registration => {
+    const step = registration === 'cell' ? 0.1 : 0.3;
+    const field = new HeightField({
+      width: 2,
+      height: 2,
+      heights: new Float64Array([0, 10, 20, 30]),
+      origin: [1000000, 1000000],
+      columnStep: [step, 0],
+      rowStep: [0, step],
+      registration
+    });
+    const offset = step * (registration === 'cell' ? 1.5 : 1);
+    const sample = field.sample(1000000 + offset, 1000000 + offset, {domain: 'footprint'});
+    expect(sample.gradientStatus).toBe(Status.VALID);
+    expect(sample.gradientX).toBeCloseTo(10 / step);
+    expect(sample.gradientY).toBeCloseTo(20 / step);
+    if (registration === 'cell') {
+      const margin = field.sample(1000000.175, 1000000.175, {domain: 'footprint'});
+      expect(margin.gradientX).toBe(0);
+      expect(margin.gradientY).toBe(0);
+    }
+  }
+);

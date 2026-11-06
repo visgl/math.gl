@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {initializeTaskWorker} from '../../../dist/tasks/index.js';
+import {initializeTaskWorker} from '@math.gl/core/tasks';
 const identity = Math.random();
 let loaded = false;
 let initialized = 0;

@@ -14,12 +14,9 @@ process streams, and retain expensive state across calls.
 geospatial tasks from `@math.gl/geospatial/tasks`. The ordinary math entry does
 not import the task runtime.
 
-## Feature support
+## Feature Card
 
-A task-execution feature card for browser and Node applications. Each row describes
-implemented behavior and the limits applications need to account for.
-
-| Feature | math.gl support | Contract and limits |
+| Feature | Support | Contract and limits |
 | --- | --- | --- |
 | Typed task definitions | ✅ | Plain objects checked with `satisfies Task<Types>`; input, output, options, initialization, state, and batch types stay aligned. No global registration. |
 | Named input/output payloads | ✅ | Plain objects with named fields; typed arrays and buffers belong inside those fields. Runtime validation also protects JavaScript callers. |

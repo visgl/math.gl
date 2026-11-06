@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original independent native PROJ and analytic sphere tests; no upstream test data copied.
 import {expect, test} from 'vitest';
-import {EllipsoidGeodesic} from '../../src/ellipsoid-geodesic';
+import {EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid-geodesic';
 import reference from './geodesic-reference.json';
 
 test('shared ellipsoid geodesics match native PROJ including poles and antipodes', () => {

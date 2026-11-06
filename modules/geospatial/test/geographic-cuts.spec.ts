@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {clipGeographicPolygon, clipGeographicPolyline} from '../src/geographic-cuts';
-import {GeodesicPath} from '../src/geodesic-path';
-import {RhumbPath} from '../src/rhumb-path';
+import {clipGeographicPolygon, clipGeographicPolyline} from '@math.gl/geospatial/geographic-cuts';
+import {GeodesicPath} from '@math.gl/geospatial/geodesic-path';
+import {RhumbPath} from '@math.gl/geospatial/rhumb-path';
 const area = (p: ReturnType<typeof clipGeographicPolygon>) =>
   p.reduce(
     (a, p) =>
@@ -125,7 +125,7 @@ test('Invalid bands and exhausted work fail without mutating inputs', () => {
   expect(input).toEqual(before);
 });
 
-import {subdivideGeographicCutRing} from '../src/geographic-cuts';
+import {subdivideGeographicCutRing} from '@math.gl/geospatial/geographic-cuts';
 for (const edgeModel of ['geodesic', 'rhumb'] as const)
   test(`${edgeModel} polar projection retains small-circle closures and source intervals`, () => {
     const a = 6378137,

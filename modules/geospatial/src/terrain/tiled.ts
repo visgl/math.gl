@@ -218,12 +218,25 @@ export class TiledHeightField {
     };
   }
 
-  /** Queries never mix resolutions. Only absent residency permits coarser fallback. */
+  /** Queries never mix resolutions. Only absent residency permits coarser fallback.
+   * Raster footprint/masked-support policies are specific to HeightField, not tiled halos.
+   */
   sample(
     x: number,
     y: number,
-    options: TerrainSampleOptions & {matrixId: string; fallback?: 'none' | 'coarser'}
+    options: Pick<TerrainSampleOptions, 'interpolation'> & {
+      /** Requested tile-matrix level. */
+      matrixId: string;
+      /** Only absent residency permits a coarser level. */
+      fallback?: 'none' | 'coarser';
+      /** Raster domains are not supported by the tiled halo sampler. */
+      domain?: never;
+      /** Masked raster support is not supported by the tiled halo sampler. */
+      noData?: never;
+    }
   ): TiledTerrainSample {
+    if ('domain' in options || 'noData' in options)
+      throw new Error('Raster sampling policies require a HeightField');
     const requested = this.getMatrix(options.matrixId);
     if (
       options.fallback !== undefined &&
@@ -269,7 +282,7 @@ export class TiledHeightField {
     matrix: TileMatrix,
     x: number,
     y: number,
-    options: TerrainSampleOptions
+    options: Pick<TerrainSampleOptions, 'interpolation'>
   ): TerrainSample & {matrixId: string} {
     const invalid = (status: TerrainSample['status']) => ({
       status,

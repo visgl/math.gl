@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {MapEngine, REGIONAL_PROJECTIONS} from '../../src/discontinuous';
+import {MapEngine, REGIONAL_PROJECTIONS} from '@math.gl/geospatial/discontinuous';
 for (const projection of REGIONAL_PROJECTIONS)
   test(`regional ${projection}: clipped geometry`, () => {
     const map = new MapEngine({
@@ -91,8 +91,8 @@ test('regional clipping excludes remote polygons', () => {
 });
 
 import reference from './regional-reference.json';
-import type {RegionalProjection} from '../../src/discontinuous';
-import type {Position} from '../../src/discontinuous/math';
+import type {RegionalProjection} from '@math.gl/geospatial/discontinuous';
+import type {Position} from '@math.gl/geospatial/discontinuous/math';
 for (const [name, samples] of Object.entries(reference.samples))
   test(`regional ${name}: D3 native aspect and cap`, () => {
     const map = new MapEngine({

@@ -62,7 +62,7 @@ function remarkCitations({baseUrl = '/'} = {}) {
     visitCitations(tree, (node, key) => {
       const entry = entries.get(key);
       if (!entry) throw new Error(`${file.path || 'Markdown'}: unknown citation ${key}`);
-      node.url = `${baseUrl.replace(/\/$/, '')}/docs/bibliography#${key}`;
+      node.url = `${baseUrl.replace(/\/$/, '')}/docs/references-and-credits#${key}`;
       if (node.children.length === 1 && node.children[0].value === 'cite') {
         node.children = [{type: 'text', value: label(entry)}];
       }

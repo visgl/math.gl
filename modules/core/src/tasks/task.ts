@@ -23,6 +23,14 @@ export type TaskContext<State = undefined> = {
   signal: AbortSignal;
   throwIfAborted(): void;
   reportProgress(progress: TaskProgress): void;
+  /** Request host services; payloads and responses cross a copy boundary. */
+  requestHost(
+    operation: string,
+    payload: object,
+    controls?: Pick<TaskRunControls, 'inputOwnership' | 'outputOwnership'>
+  ): Promise<unknown>;
+  /** Send a copied notification to the host. */
+  emitHost(operation: string, payload: object): void;
 };
 export type TaskProgress = {
   completed: number;
@@ -45,6 +53,13 @@ export type TaskWorker = {
  */
 export type Task<T extends TaskTypes> = {
   id: string;
+  /** Opt-in scheduling for atomic calls sharing one initialized state. */
+  concurrency?: {
+    /** Maximum simultaneous calls allowed by this task. */
+    maxConcurrency: number;
+    /** Exclusive calls run as barriers; omitted means exclusive. */
+    getSchedulingMode?: (input: Payload<T['input']>) => 'parallel' | 'exclusive';
+  };
   /** Load code dependencies without creating instance state. Cached per definition/realm. */
   preload?: () => void | Promise<void>;
   initialize?: (
@@ -96,6 +111,15 @@ export type TaskRunControls = {
   outputOwnership?: 'copy' | 'transfer';
   onProgress?: (progress: TaskProgress) => void;
 };
+/** Controls for initializing a retained task instance. */
+export type TaskInitializeControls = TaskRunControls & {
+  /** Opt in to overlapping calls, capped by the task's declared capability. */
+  operationConcurrency?: number;
+  /** Handle requests from the task, with cancellation scoped to that request. */
+  onRequest?: (operation: string, payload: unknown, signal: AbortSignal) => Promise<unknown>;
+  /** Handle one-way task notifications. */
+  onEvent?: (operation: string, payload: unknown) => void;
+};
 /** Controls setup resources independently from per-operation payload ownership. */
 export type TaskInitializationControls = {
   /** Ownership of automatic initialization data; defaults to copying. */
@@ -119,6 +143,11 @@ export type TaskRunsOptions<D extends AnyTask> = Omit<
 };
 export type InitializedTaskOptions<D extends AnyTask> = Omit<TaskRunControls, 'execution'> &
   OptionsField<ProcessorOptions<Processor<D>>>;
+/** Atomic call controls, including time spent waiting for an execution slot. */
+export type InitializedTaskCallOptions<D extends AnyTask> = InitializedTaskOptions<D> & {
+  /** Deadline in milliseconds. */
+  timeout?: number;
+};
 export type InitializedTaskBatchOptions<D extends AnyTask> = Omit<TaskRunControls, 'execution'> &
   OptionsField<ProcessorOptions<StreamProcessor<D>>>;
 export type RequestArgs<O> = {} extends O ? [options?: O] : [options: O];

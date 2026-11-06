@@ -9,8 +9,8 @@ import {
   createGrayFullerMap,
   createIcosahedralSnyderMap,
   createDodecahedralSnyderMap
-} from '../../src/discontinuous';
-import {geographic, RAD, type Position} from '../../src/discontinuous/math';
+} from '@math.gl/geospatial/discontinuous';
+import {geographic, RAD, type Position} from '@math.gl/geospatial/discontinuous/math';
 import petroff from './petroff-reference.json';
 import fuller from './gray-fuller-reference.json';
 const make = (type: MapDefinition['type']) =>

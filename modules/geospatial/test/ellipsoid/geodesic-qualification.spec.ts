@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original all-output qualification against independently compiled native PROJ 9.9.0, with analytic winding and contract checks.
 import {expect, test} from 'vitest';
-import {EllipsoidGeodesic, type GeodesicResult} from '../../src/ellipsoid-geodesic';
+import {EllipsoidGeodesic, type GeodesicResult} from '@math.gl/geospatial/ellipsoid-geodesic';
 import reference from './geodesic-qualification.json';
 
 function check(

@@ -99,10 +99,10 @@ CI recomputes independent controls and checks native input/output digests and
 source provenance. It does not install or download native PROJ or GeographicLib.
 
 ```sh
-python3 modules/geospatial/projection/scripts/generate-g6-reference.py --check
-node modules/geospatial/projection/scripts/qualify-g6.mjs --output /tmp/g6.json
-node modules/geospatial/projection/scripts/qualify-g6.mjs --browser chromium --output /tmp/g6-chromium.json
-node modules/geospatial/projection/scripts/check-g6-package.mjs
+python3 modules/geospatial/scripts/projection/generate-g6-reference.py --check
+node modules/geospatial/scripts/projection/qualify-g6.mjs --output /tmp/g6.json
+node modules/geospatial/scripts/projection/qualify-g6.mjs --browser chromium --output /tmp/g6-chromium.json
+node modules/geospatial/scripts/projection/check-g6-package.mjs
 ```
 
 For offline native regeneration, link the original `geographiclib-g6-oracle.cpp`

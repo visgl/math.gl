@@ -11,7 +11,7 @@ import {join} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {parseArgs} from 'node:util';
 import {chromium,firefox,webkit} from 'playwright';
-import {bundleRuntime} from '../projection/scripts/benchmark-runtime.mjs';
+import {bundleRuntime} from './projection/benchmark-runtime.mjs';
 const {values}=parseArgs({options:{output:{type:'string'},browser:{type:'string'},'baseline-ref':{type:'string'},profile:{type:'string',default:'complete'}}});
 const browsers={chromium,firefox,webkit};
 assert(['complete','ordinary'].includes(values.profile),'Unknown C8 profile');

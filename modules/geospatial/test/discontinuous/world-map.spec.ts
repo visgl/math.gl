@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {MapEngine} from '../../src/discontinuous';
-import {worldKernels, type WorldProjection} from '../../src/discontinuous/world-kernels';
-import {geographic, type Position} from '../../src/discontinuous/math';
+import {MapEngine} from '@math.gl/geospatial/discontinuous';
+import {worldKernels, type WorldProjection} from '@math.gl/geospatial/discontinuous/world-kernels';
+import {geographic, type Position} from '@math.gl/geospatial/discontinuous/math';
 for (const projection of Object.keys(worldKernels) as WorldProjection[])
   test(`world ${projection}: globe coverage and chart-local inverse`, () => {
     const map = new MapEngine({
@@ -30,7 +30,7 @@ for (const projection of Object.keys(worldKernels) as WorldProjection[])
   });
 
 import reference from './world-reference.json';
-import {createWorldKernel} from '../../src/discontinuous/world-kernels';
+import {createWorldKernel} from '@math.gl/geospatial/discontinuous/world-kernels';
 for (const [name, samples] of Object.entries(reference.samples))
   test(`world ${name}: independent D3 4.0.0 reference`, () => {
     const kernel = createWorldKernel(name as WorldProjection);

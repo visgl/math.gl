@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test as baseTest, vi} from 'vitest';
-import {isBrowser} from '../../src/worker-utils/lib/env-utils/globals';
+import {isBrowser} from '@math.gl/core/worker-utils/lib/env-utils/globals';
 const test = baseTest.runIf(isBrowser);
-import WorkerThread from '../../src/worker-utils/lib/worker-farm/worker-thread';
-import {getLoadableWorkerURL} from '../../src/worker-utils/lib/worker-utils/get-loadable-worker-url';
+import WorkerThread from '@math.gl/core/worker-utils/lib/worker-farm/worker-thread';
+import {getLoadableWorkerURL} from '@math.gl/core/worker-utils/lib/worker-utils/get-loadable-worker-url';
 
 test('module worker URLs preserve local entrypoints and import remote modules through a shim', async () => {
   for (const url of [

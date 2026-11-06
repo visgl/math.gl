@@ -14,8 +14,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 DEST = ROOT / 'modules/geospatial/test/ellipsoid/geographic-seam-reference.json'
-DRIVER = ROOT / 'modules/geospatial/projection/scripts/geographiclib-g56-oracle.cpp'
-GEO_DRIVER = ROOT / 'modules/geospatial/projection/scripts/geographiclib-p0-oracle.cpp'
+DRIVER = ROOT / 'modules/geospatial/scripts/projection/geographiclib-g56-oracle.cpp'
+GEO_DRIVER = ROOT / 'modules/geospatial/scripts/projection/geographiclib-p0-oracle.cpp'
 PROJ = ROOT / 'modules/geospatial/test/ellipsoid/geodesic-path-reference.json'
 ARCHIVE = '5aaca14cd75f13aa2690273d76e88e8ddf4aeb267d6be2c3e0ba948deb9ceea5'
 

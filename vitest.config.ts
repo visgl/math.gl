@@ -25,6 +25,8 @@ export default getVitestConfig({
   projects: {
     node: {
       test: {
+        // Native workers inherit startup preloads, so private aliases also resolve outside Vite.
+        execArgv: ['--import', new URL('./test/utils/register-worker-aliases.mjs', import.meta.url).href],
         include: includePatterns,
         setupFiles: ['./test/utils/node-test-setup.ts']
       }

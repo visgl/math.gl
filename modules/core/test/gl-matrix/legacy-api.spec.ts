@@ -4,13 +4,13 @@
 
 import {describe, expect, test} from 'vitest';
 
-import * as glMatrix from '../../src/gl-matrix/common';
-import * as mat3 from '../../src/gl-matrix/mat3';
-import * as mat4 from '../../src/gl-matrix/mat4';
-import * as quat from '../../src/gl-matrix/quat';
-import * as vec2 from '../../src/gl-matrix/vec2';
-import * as vec3 from '../../src/gl-matrix/vec3';
-import * as vec4 from '../../src/gl-matrix/vec4';
+import * as glMatrix from '@math.gl/core/gl-matrix/common';
+import * as mat3 from '@math.gl/core/gl-matrix/mat3';
+import * as mat4 from '@math.gl/core/gl-matrix/mat4';
+import * as quat from '@math.gl/core/gl-matrix/quat';
+import * as vec2 from '@math.gl/core/gl-matrix/vec2';
+import * as vec3 from '@math.gl/core/gl-matrix/vec3';
+import * as vec4 from '@math.gl/core/gl-matrix/vec4';
 
 function expectArray(actual: ArrayLike<number>, expected: number[], precision = 5): void {
   expect(actual.length).toBe(expected.length);

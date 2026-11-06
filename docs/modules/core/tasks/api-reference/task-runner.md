@@ -152,14 +152,43 @@ async imports and are not eligible for `runTaskSync`.
 
 Inferred as `InitializedTask<typeof task>`. Provides `runTask(input, request?)`,
 `runTasks(inputs, request?)`, and `runTaskInBatches(inputs, request?)` with the same
-output types. Requests omit initialization, execution, and concurrency. All calls
-are serial and share state. A multi-input operation owns the handle until its
+output types. Requests omit initialization and execution. Calls are serial by default
+and share state. A task may declare `concurrency.maxConcurrency` and
+`concurrency.getSchedulingMode(input)` (`'parallel'` or `'exclusive'`). Initialize
+with `operationConcurrency` to opt in, up to that maximum. This applies to local
+and worker execution; a worker instance always retains one physical worker and one
+state. Exclusive operations are FIFO barriers. A multi-input operation owns the handle until its
 iterator finishes. `close()` is idempotent; `terminate(reason?)` invalidates worker
 state and closes the handle.
 
-Normal worker stream completion preserves state. Early stream return, worker
-cancellation, or worker invocation failure invalidates it. Local processor errors
-leave state available. There is no rollback or retry. On automatic atomic calls,
+`state` reports `ready`, `closing`, `closed`, or `invalid`. Atomic calls accept a
+`timeout` in milliseconds, including queue wait. Cancelling a queued call does not
+disturb active work. Cancelling active concurrent work invalidates the shared
+instance; worker transport failures do not silently recreate state. Local code must
+cooperate with its signal before destruction can finish.
+Invalidated local instances still run their destruction hook after active work
+has drained; invalidation prevents reuse, not resource cleanup.
+
+Initialize with `onRequest(operation, payload, signal)` and/or
+`onEvent(operation, payload)` to expose host services. Task hooks call
+`context.requestHost(operation, payload, controls?)` or
+`context.emitHost(operation, payload)`. Requests and responses copy by default;
+request controls may explicitly set `inputOwnership` and `outputOwnership` to
+transfer buffers. Notifications copy their payload. Host callbacks must not await
+an exclusive operation on the same instance: it is queued behind the current call.
+Streams retain exclusive ownership and pull inputs on demand, including on the
+multiplexed worker transport.
+
+Cancelling or returning a stream before execution removes its queued barrier without
+invalidating shared state. Normal worker stream completion preserves state. Early
+return after worker stream execution starts, worker
+cancellation, transport failure, or worker stream failure invalidates it. Local
+processor errors leave state available. On the multiplexed route, atomic processor
+errors and host callback exceptions reject only their reporting call; siblings and
+retained state remain available. Host notification exceptions are reported after
+the remote atomic operation settles, not by interrupting shared state. The legacy
+serialized worker transport cannot distinguish processor and transport failures
+and conservatively invalidates on either. There is no rollback or retry. On automatic atomic calls,
 processing plus destruction failures are reported together via `AggregateError`.
 Initialization failure cleans a returned state where possible; an initializer
 that throws must release its own partial allocations.

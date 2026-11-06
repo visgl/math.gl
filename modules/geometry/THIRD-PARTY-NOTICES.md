@@ -13,6 +13,6 @@ latest available upstream releases.
 | Mapbox / lineclip | Adapted flat-array clipping; ISC notice retained in `src/polygon/lineclip.ts` and [LICENSE](./LICENSE). |
 | luma.gl / vis.gl contributors | CPU geometry tessellation lineage, including truncated cones; MIT, [LICENSE](./LICENSE). |
 
-Hinge evaluation and the myriahedral example were developed independently of
+Hinge evaluation and myriahedral geometry were developed independently of
 Nico Belmonte's application source. His work is credited as inspiration, not as
 licensed source incorporated into this package.

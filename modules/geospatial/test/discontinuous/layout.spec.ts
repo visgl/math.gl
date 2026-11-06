@@ -10,7 +10,7 @@ import {
   pickMapLayout,
   getMapLayout,
   type MapRegion
-} from '../../src/discontinuous';
+} from '@math.gl/geospatial/discontinuous';
 
 const base = (): MapRegion => ({
   id: 'main',

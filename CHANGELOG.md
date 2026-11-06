@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+- feat(terrain): Add opt-in raster-footprint clamping and support-only bilinear nodata sampling, with bounded grid-node roundoff handling.
+
 ## v5.0.0-beta.4
 
 - feat(tasks): Separate initialization ownership from per-call processing payloads and add typed dispatch for multi-operation tasks, with persistent-resource and migration guidance (#420, #421).

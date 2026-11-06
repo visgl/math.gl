@@ -34,14 +34,14 @@ submillisecond samples. Worker startup ranged from 10 to 267 ms in these local r
 and can outweigh the warm gain. Raw samples,
 p10/p90, timing-limit/variation flags, source/workload hashes, engine/bootstrap
 sizes and startup costs are retained in
-[Chromium](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/worker-evaluation-chromium.json)
-and [WebKit](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/worker-evaluation-webkit.json)
+[Chromium](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/qualification/worker-evaluation-chromium.json)
+and [WebKit](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/qualification/worker-evaluation-webkit.json)
 reports. These observations qualify this workload, not universal hardware/browser
 performance. CI executes correctness and records measurements in Chromium,
 Firefox and WebKit without a speed threshold.
 
 ```sh
-node modules/geospatial/projection/scripts/benchmark-workers.mjs \
+node modules/geospatial/scripts/projection/benchmark-workers.mjs \
   --browser chromium --points 1000,10000,100000 --samples 7 \
   --output /tmp/projection-workers.json
 ```

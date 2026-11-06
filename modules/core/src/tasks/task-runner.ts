@@ -13,6 +13,9 @@ import {
 } from '../worker-utils/index';
 import {TaskRuntime, assertPayload, clonePayload, localContext} from './task-runtime';
 import {runTaskSync} from './task-sync';
+import {TaskOperationQueue} from './task-operation-queue';
+import {TaskWorkerChannel} from './task-worker-channel';
+import {TaskRequestError} from './task-channel';
 import type {
   AnyTask,
   TaskInput,
@@ -21,10 +24,12 @@ import type {
   TaskBatchOutput,
   Initialization,
   TaskRunControls,
+  TaskInitializeControls,
   TaskRunOptions,
   TaskBatchRunOptions,
   TaskRunsOptions,
   InitializedTaskOptions,
+  InitializedTaskCallOptions,
   InitializedTaskBatchOptions,
   RequestArgs,
   TaskRunnerOptions,
@@ -32,25 +37,48 @@ import type {
   TaskSyncRunOptions
 } from './task';
 
-/** A state instance bound to one execution location. Operations are serialized. */
+/** A state instance bound to one execution location, serialized unless explicitly opted in. */
 export class InitializedTask<D extends AnyTask> {
   private runtime: TaskRuntime;
   private pool?: WorkerPool;
+  private workerChannel?: TaskWorkerChannel;
+  private channelInputs?: AsyncIterator<object>;
+  private nextProgressId = 1;
+  private progressCallbacks = new Map<number, TaskRunControls['onProgress']>();
+  private streamProgress?: TaskRunControls['onProgress'];
+  private streamProgressId?: number;
+  private callbackFailures = new Map<number, {reason: unknown}>();
   private descriptor?: WorkerObject;
-  private tail: Promise<unknown> = Promise.resolve();
+  private readonly operationQueue: TaskOperationQueue;
   private closing?: Promise<void>;
   private closed = false;
+  private finalized = false;
   private streams = new Set<() => Promise<void>>();
   private invalid = false;
+  private readonly concurrent: boolean;
   private controller = new AbortController();
 
   /** @internal Use TaskRunner.initializeTask. */
   constructor(
     private task: D,
     private release: () => void,
-    controls: TaskRunControls
+    private readonly initializationControls: TaskInitializeControls
   ) {
+    const controls = initializationControls;
     this.runtime = new TaskRuntime(task);
+    const concurrency = controls.operationConcurrency ?? 1;
+    const maximum = task.concurrency?.maxConcurrency ?? 1;
+    if (
+      !Number.isSafeInteger(maximum) ||
+      maximum < 1 ||
+      !Number.isSafeInteger(concurrency) ||
+      concurrency < 1 ||
+      concurrency > maximum
+    ) {
+      throw new RangeError('Task concurrency must be between 1 and the task maximum');
+    }
+    this.operationQueue = new TaskOperationQueue(concurrency);
+    this.concurrent = concurrency > 1;
     const execution = controls.execution ?? 'auto';
     if (!['auto', 'main-thread', 'worker'].includes(execution))
       throw new TypeError('Invalid execution mode');
@@ -59,6 +87,51 @@ export class InitializedTask<D extends AnyTask> {
       const target = task.worker;
       if (Boolean(target.url) === Boolean(target.create))
         throw new Error('Supply exactly one worker URL or factory');
+      if (this.concurrent || controls.onRequest || controls.onEvent) {
+        this.workerChannel = new TaskWorkerChannel(task.id, target, {
+          handleRequest: async (operation, payload, signal) => {
+            if (operation === 'task:next-input') {
+              if (!this.channelInputs) throw new Error('No active task stream');
+              return this.channelInputs.next();
+            }
+            if (!controls.onRequest) throw new Error('No host request handler configured');
+            const request = payload as {operation: string; payload: unknown};
+            if (operation !== 'task:host-request') throw new Error('Unknown host request');
+            return controls.onRequest(request.operation, request.payload, signal);
+          },
+          getResultTransferList: (value, request) =>
+            (request as {outputOwnership?: string}).outputOwnership === 'transfer'
+              ? getTransferList(value)
+              : [],
+          handleEvent: (operation, payload) => {
+            const {id} = payload as {id: number};
+            try {
+              if (operation === 'task:progress') {
+                const event = payload as {
+                  id: number;
+                  progress: Parameters<NonNullable<TaskRunControls['onProgress']>>[0];
+                };
+                (this.progressCallbacks.get(event.id) ?? this.streamProgress)?.(event.progress);
+              } else if (operation === 'task:host-event') {
+                const event = payload as {operation: string; payload: unknown};
+                controls.onEvent?.(event.operation, event.payload);
+              }
+            } catch (reason) {
+              // Let remote work settle: a host notification failure must not
+              // interrupt shared state or unrelated concurrent operations.
+              if (this.progressCallbacks.has(id) || this.streamProgressId === id) {
+                if (!this.callbackFailures.has(id)) this.callbackFailures.set(id, {reason});
+              }
+            }
+          },
+          onFailure: reason => {
+            this.invalid = true;
+            this.operationQueue.cancelPending(reason);
+            this.controller.abort(reason);
+          }
+        });
+        return;
+      }
       this.pool = new WorkerPool({
         name: task.id,
         url: target.url?.toString(),
@@ -93,33 +166,67 @@ export class InitializedTask<D extends AnyTask> {
 
   runTask(
     input: TaskInput<D>,
-    ...args: RequestArgs<InitializedTaskOptions<D>>
+    ...args: RequestArgs<InitializedTaskCallOptions<D>>
   ): Promise<TaskOutput<D>> {
-    return this.enqueue(async () => {
-      this.checkCapability('atomic');
-      return this.invoke('process', input, (args[0] as any)?.options ?? {}, args[0]);
-    }) as Promise<TaskOutput<D>>;
+    if (this.invalid)
+      return Promise.reject(new Error('Initialized task is invalid; initialize a new instance'));
+    if (this.closed) return Promise.reject(new Error('Initialized task is closed'));
+    const timeout = args[0]?.timeout;
+    if (
+      timeout !== undefined &&
+      (!Number.isSafeInteger(timeout) || timeout < 0 || timeout > 4294967295)
+    ) {
+      return Promise.reject(new RangeError('Invalid task timeout'));
+    }
+    const deadline = timeout === undefined ? undefined : AbortSignal.timeout(timeout);
+    const signal =
+      deadline && args[0]?.signal
+        ? AbortSignal.any([deadline, args[0].signal])
+        : (deadline ?? args[0]?.signal);
+    const controls = {...args[0], signal};
+    const mode = this.task.concurrency?.getSchedulingMode?.(input) ?? 'exclusive';
+    return this.operationQueue.run(
+      mode,
+      async () => {
+        signal?.throwIfAborted();
+        this.checkCapability('atomic');
+        const invalidate = () => {
+          if (this.concurrent) {
+            this.invalid = true;
+            this.operationQueue.cancelPending(signal?.reason);
+            this.controller.abort(signal?.reason);
+          }
+        };
+        signal?.addEventListener('abort', invalidate, {once: true});
+        try {
+          return await this.invoke('process', input, (args[0] as any)?.options ?? {}, controls);
+        } finally {
+          signal?.removeEventListener('abort', invalidate);
+        }
+      },
+      signal
+    ) as Promise<TaskOutput<D>>;
   }
 
   /** Independent calls sharing this instance, always serial and in input order. */
-  async *runTasks(
+  runTasks(
     inputs: Iterable<TaskInput<D>> | AsyncIterable<TaskInput<D>>,
     ...args: RequestArgs<InitializedTaskOptions<D>>
   ): AsyncIterable<TaskOutput<D>> {
-    yield* this.serialStream(async function* (self) {
+    return this.serialStream(async function* (self) {
       self.checkCapability('atomic');
       for await (const input of asAsync(inputs, self.controls(args[0]).signal)) {
         yield await self.invoke('process', input, (args[0] as any)?.options ?? {}, args[0]);
       }
-    });
+    }, args[0]?.signal);
   }
 
   /** One processor invocation for the entire input iterable. */
-  async *runTaskInBatches(
+  runTaskInBatches(
     inputs: Iterable<TaskBatchInput<D>> | AsyncIterable<TaskBatchInput<D>>,
     ...args: RequestArgs<InitializedTaskBatchOptions<D>>
   ): AsyncIterable<TaskBatchOutput<D>> {
-    yield* this.serialStream(async function* (self) {
+    return this.serialStream(async function* (self) {
       self.checkCapability('streaming');
       const controls = self.controls(args[0]);
       const options = clonePayload((args[0] as any)?.options ?? {});
@@ -132,7 +239,29 @@ export class InitializedTask<D extends AnyTask> {
       }
       let completed = false;
       try {
-        if (self.pool) {
+        if (self.workerChannel) {
+          self.channelInputs = prepared()[Symbol.asyncIterator]();
+          self.streamProgress = controls.onProgress;
+          try {
+            await self.invoke('stream-open', {}, options, controls);
+            while (true) {
+              const result = await self.invoke('stream-next', {}, {}, controls);
+              if (result.done) break;
+              yield result.value;
+            }
+          } finally {
+            try {
+              if (!self.invalid) await self.invoke('stream-close', {}, {}, controls);
+            } finally {
+              await self.channelInputs.return?.();
+              self.channelInputs = undefined;
+              self.streamProgress = undefined;
+              if (self.streamProgressId !== undefined)
+                self.callbackFailures.delete(self.streamProgressId);
+              self.streamProgressId = undefined;
+            }
+          }
+        } else if (self.pool) {
           await self.invoke('stream-options', {}, options, controls);
           yield* processOnWorkerInBatches(self.descriptor!, prepared(), {
             ...self.workerOptions(controls),
@@ -143,7 +272,7 @@ export class InitializedTask<D extends AnyTask> {
           for await (const output of self.runtime.stream(
             prepared(),
             options,
-            localContext(controls)
+            self.runtimeContext(controls)
           )) {
             controls.signal?.throwIfAborted();
             yield clonePayload(output, controls.outputOwnership ?? 'transfer');
@@ -151,6 +280,12 @@ export class InitializedTask<D extends AnyTask> {
         }
         completed = true;
       } catch (error) {
+        if (self.workerChannel) {
+          self.invalid = true;
+          self.operationQueue.cancelPending(error);
+          self.controller.abort(error);
+          await self.workerChannel.destroy(error);
+        }
         if (self.pool) {
           self.invalid = true;
           await self.pool.destroy(error);
@@ -160,8 +295,22 @@ export class InitializedTask<D extends AnyTask> {
         // Legacy stream cancellation may terminate the pinned worker. Never reuse
         // an incarnation after ending a worker stream without a success handshake.
         if (self.pool && !completed) self.invalid = true;
+        if (self.workerChannel && !completed && !self.invalid) {
+          const reason = new Error('Worker stream ended before completion');
+          self.invalid = true;
+          self.operationQueue.cancelPending(reason);
+          self.controller.abort(reason);
+          await self.workerChannel.destroy(reason);
+        }
       }
-    });
+    }, args[0]?.signal);
+  }
+
+  /** Lifecycle status of this initialized task. */
+  get state(): 'ready' | 'closing' | 'closed' | 'invalid' {
+    if (this.invalid) return 'invalid';
+    if (this.finalized) return 'closed';
+    return this.closed ? 'closing' : 'ready';
   }
 
   /** Drain accepted work, invoke destroy, and release execution capacity. */
@@ -170,12 +319,15 @@ export class InitializedTask<D extends AnyTask> {
       this.closed = true;
       this.closing = (async () => {
         try {
-          await this.tail;
+          await this.operationQueue.close();
           if (!this.invalid) await this.invoke('destroy', {}, {});
+          else if (!this.pool && !this.workerChannel) await this.runtime.destroy();
         } finally {
           try {
             await this.pool?.destroy();
+            await this.workerChannel?.destroy();
           } finally {
+            this.finalized = true;
             this.release();
           }
         }
@@ -186,7 +338,12 @@ export class InitializedTask<D extends AnyTask> {
 
   /** Abort work. Local JavaScript must settle before its state can be destroyed. */
   async terminate(reason: unknown = new Error('Task terminated')): Promise<void> {
+    this.operationQueue.cancelPending(reason);
     this.controller.abort(reason);
+    if (this.workerChannel) {
+      this.invalid = true;
+      await this.workerChannel.destroy(reason);
+    }
     if (this.pool) {
       this.invalid = true;
       await this.pool.destroy(reason);
@@ -197,7 +354,7 @@ export class InitializedTask<D extends AnyTask> {
 
   private checkCapability(kind: 'atomic' | 'streaming'): void {
     if (
-      this.pool
+      this.pool || this.workerChannel
         ? !this.task.worker?.capabilities[kind]
         : !(kind === 'atomic' ? this.task.process : this.task.processInBatches)
     ) {
@@ -240,6 +397,48 @@ export class InitializedTask<D extends AnyTask> {
     assertPayload(input);
     assertNoTransferAlias(input, options, prepared.inputOwnership);
     const copiedOptions = clonePayload(options);
+    if (this.workerChannel) {
+      const progressId = this.nextProgressId++;
+      const request = {
+        input: clonePayload(input, prepared.inputOwnership),
+        options: copiedOptions,
+        outputOwnership: prepared.outputOwnership ?? 'transfer',
+        progressId
+      };
+      if (operation === 'stream-open') this.streamProgressId = progressId;
+      this.progressCallbacks.set(progressId, prepared.onProgress);
+      let callbackFailure: {reason: unknown} | undefined;
+      try {
+        const result = await this.workerChannel.channel.request(
+          operation,
+          request,
+          prepared.signal,
+          getTransferList(request)
+        );
+        callbackFailure =
+          this.callbackFailures.get(progressId) ??
+          (operation.startsWith('stream-') && this.streamProgressId !== undefined
+            ? this.callbackFailures.get(this.streamProgressId)
+            : undefined);
+        if (callbackFailure) throw callbackFailure.reason;
+        return result;
+      } catch (reason) {
+        if (
+          operation === 'process' &&
+          !prepared.signal?.aborted &&
+          (reason instanceof TaskRequestError || callbackFailure)
+        )
+          throw reason;
+        this.invalid = true;
+        this.operationQueue.cancelPending(reason);
+        this.controller.abort(reason);
+        await this.workerChannel.destroy(reason);
+        throw reason;
+      } finally {
+        this.progressCallbacks.delete(progressId);
+        if (this.streamProgressId !== progressId) this.callbackFailures.delete(progressId);
+      }
+    }
     if (this.pool) {
       try {
         return await processOnWorker(
@@ -257,7 +456,7 @@ export class InitializedTask<D extends AnyTask> {
     }
     if (operation === 'destroy') return this.runtime.destroy();
     const copied = clonePayload(input, prepared.inputOwnership);
-    const context = localContext(prepared);
+    const context = this.runtimeContext(prepared);
     if (operation === 'initialize') {
       const result = await this.runtime.initialize(copied, context);
       prepared.signal?.throwIfAborted();
@@ -268,25 +467,99 @@ export class InitializedTask<D extends AnyTask> {
     return clonePayload(result, prepared.outputOwnership ?? 'transfer');
   }
 
-  private enqueue<T>(operation: () => Promise<T>): Promise<T> {
-    if (this.closed) return Promise.reject(new Error('Initialized task is closed'));
-    const result = this.tail.then(operation);
-    this.tail = result.catch(() => {});
-    return result;
+  private runtimeContext(prepared: TaskRunControls) {
+    return {
+      ...localContext(prepared),
+      requestHost: async (
+        operation: string,
+        payload: object,
+        controls: Pick<TaskRunControls, 'inputOwnership' | 'outputOwnership'> = {}
+      ) => {
+        const signal = prepared.signal ?? this.controller.signal;
+        signal.throwIfAborted();
+        const handler = this.initializationControls.onRequest;
+        if (!handler) throw new Error('No host request handler configured');
+        const result = await handler(
+          operation,
+          clonePayload(payload, controls.inputOwnership),
+          signal
+        );
+        signal.throwIfAborted();
+        return structuredClone(result, {
+          transfer: controls.outputOwnership === 'transfer' ? getTransferList(result) : []
+        });
+      },
+      emitHost: (operation: string, payload: object) =>
+        this.initializationControls.onEvent?.(operation, structuredClone(payload))
+    };
   }
 
-  private async *serialStream<T>(operation: (self: this) => AsyncIterable<T>): AsyncIterable<T> {
+  private enqueue<T>(operation: () => Promise<T>): Promise<T> {
+    if (this.closed) return Promise.reject(new Error('Initialized task is closed'));
+    return this.operationQueue.run('exclusive', operation);
+  }
+
+  private serialStream<T>(
+    operation: (self: this) => AsyncIterable<T>,
+    signal?: AbortSignal
+  ): AsyncIterableIterator<T> {
+    const waiting = new AbortController();
+    const queueSignal = AbortSignal.any(
+      [waiting.signal, this.controller.signal, signal].filter((value): value is AbortSignal =>
+        Boolean(value)
+      )
+    );
+    let started = false;
+    const iterator = this.acquireStream(operation, queueSignal, () => {
+      started = true;
+    });
+    const cancelWaiting = () => {
+      if (!started) waiting.abort(new Error('Stream returned before execution'));
+    };
+    return {
+      [Symbol.asyncIterator]() {
+        return this;
+      },
+      next: () => iterator.next(),
+      return: async () => {
+        cancelWaiting();
+        return iterator.return(undefined);
+      },
+      throw: async reason => {
+        cancelWaiting();
+        return iterator.throw(reason);
+      }
+    };
+  }
+
+  private async *acquireStream<T>(
+    operation: (self: this) => AsyncIterable<T>,
+    signal: AbortSignal,
+    onStart: () => void
+  ): AsyncGenerator<T, void, unknown> {
     if (this.closed) throw new Error('Initialized task is closed');
-    const before = this.tail;
+    let acquire!: () => void;
+    const acquired = new Promise<void>(resolve => {
+      acquire = resolve;
+    });
     let release!: () => void;
-    this.tail = new Promise<void>(resolve => {
+    const held = new Promise<void>(resolve => {
       release = resolve;
     });
-    await before;
-    if (this.controller.signal.aborted) {
+    const lease = this.operationQueue.run(
+      'exclusive',
+      async () => {
+        acquire();
+        await held;
+      },
+      signal
+    );
+    await Promise.race([acquired, lease]);
+    if (signal.aborted) {
       release();
-      throw this.controller.signal.reason;
+      throw signal.reason;
     }
+    onStart();
     const iterator = operation(this)[Symbol.asyncIterator]();
     let stopping: Promise<void> | undefined;
     const stop = () => {
@@ -359,7 +632,7 @@ export class TaskRunner {
   initializeTask<D extends AnyTask>(
     task: D,
     initialization: Initialization<D>,
-    controls: TaskRunControls = {}
+    controls: TaskInitializeControls = {}
   ): Promise<InitializedTask<D>> {
     const pending = this.open(task, initialization, controls);
     this.initializing.add(pending);
@@ -523,7 +796,7 @@ export class TaskRunner {
   private async open<D extends AnyTask>(
     task: D,
     initialization: object,
-    controls: TaskRunControls
+    controls: TaskInitializeControls
   ): Promise<InitializedTask<D>> {
     if (this.closed) throw new Error('Task runner is closed');
     controls.signal?.throwIfAborted();

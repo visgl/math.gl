@@ -53,7 +53,7 @@
       "import": "./dist/geoarrow/index.js",
       "require": "./dist/geoarrow/index.cjs"
     },
-    "./crs/projjson.schema.json": "./crs/schemas/projjson.schema.json",
+    "./crs/projjson.schema.json": "./src/crs/projjson.schema.json",
     "./projection/datums": {
       "types": "./dist/projection/datums.d.ts",
       "import": "./dist/projection/datums.js",
@@ -1029,15 +1029,14 @@
   "files": [
     "dist",
     "src",
-    "crs/schemas",
-    "crs/README.md",
-    "projection/PROJ4-LICENSE.md",
-    "projection/APACHE-2.0-LICENSE.txt",
-    "projection/THIRD-PARTY-NOTICES.md",
-    "projection/PROJ-LICENSE.txt",
+    "!src/**/README.md",
+    "./README.md",
+    "PROJ4-LICENSE.md",
+    "APACHE-2.0-LICENSE.txt",
+    "THIRD-PARTY-NOTICES.md",
+    "PROJ-LICENSE.txt",
     "GEOGRAPHICLIB-LICENSE.txt",
-    "LICENSE",
-    "THIRD-PARTY-NOTICES.md"
+    "LICENSE"
   ],
   "dependencies": {
     "@mapbox/martini": "0.2.0",

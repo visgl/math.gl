@@ -9,7 +9,7 @@ import {tmpdir,cpus} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {parseArgs} from 'node:util';
-import {bundleRuntime} from '../projection/scripts/benchmark-runtime.mjs';
+import {bundleRuntime} from './projection/benchmark-runtime.mjs';
 const {values}=parseArgs({options:{output:{type:'string'},allocations:{type:'boolean',default:false},points:{type:'string',default:'512'},samples:{type:'string',default:'9'}}});
 const points=Number(values.points),samples=Number(values.samples);
 assert(Number.isInteger(points)&&points>=16&&points<=100000);

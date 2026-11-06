@@ -32,6 +32,8 @@
   "files": [
     "dist",
     "src",
+    "!src/**/README.md",
+    "./README.md",
     "LICENSE",
     "THIRD-PARTY-NOTICES.md"
   ],

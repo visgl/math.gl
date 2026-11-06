@@ -3,9 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test, vi} from 'vitest';
 import reference from './g6-reference.json';
-import {qualifyG6} from '../../projection/test/g6-entry';
-import {EllipsoidGeodesic} from '../../src/ellipsoid-geodesic';
-import {GeodesicIntersections} from '../../src/geodesic-intersections';
+import {qualifyG6} from '../projection/g6-entry';
+import {EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid-geodesic';
+import {GeodesicIntersections} from '@math.gl/geospatial/geodesic-intersections';
 for (const row of qualifyG6())
   test(`G6 ${row.family} ${row.id}`, () => expect(row, row.error).toMatchObject({passed: true}));
 test('Default closest and next searches cover the global profile', () => {

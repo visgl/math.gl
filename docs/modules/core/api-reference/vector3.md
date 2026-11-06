@@ -164,3 +164,7 @@ Transform the vector's `x` and `y` values by the provided 2x2 matrix.
 ### transformByQuaternion(quaternion : Number[4]) : this
 
 Transform the vector by the provided `quaternion`.
+
+## Related functional operations
+
+The functional API also provides `vec3Slerp`, `vec3Bezier`, and `vec3Hermite`. See [functional math](../developer-guide/functional-math.md) for imports, output ownership, and limitations.

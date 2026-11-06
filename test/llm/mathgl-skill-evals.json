@@ -69,6 +69,6 @@
       "Check geoid model and units",
       "Verify sign against a known point"
     ],
-    "sources": ["docs/modules/earth/geoid/README.md"]
+    "sources": ["docs/modules/earth/README.md"]
   }
 ]

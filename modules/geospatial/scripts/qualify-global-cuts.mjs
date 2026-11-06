@@ -10,7 +10,7 @@ import {join} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {parseArgs} from 'node:util';
 import {chromium,firefox,webkit} from 'playwright';
-import {bundleRuntime} from '../projection/scripts/benchmark-runtime.mjs';
+import {bundleRuntime} from './projection/benchmark-runtime.mjs';
 const {values}=parseArgs({options:{output:{type:'string'},browser:{type:'string'}}});
 const browsers={chromium,firefox,webkit};assert(!values.browser||Object.hasOwn(browsers,values.browser));
 const root=fileURLToPath(new URL('../../../',import.meta.url)),directory=mkdtempSync(join(tmpdir(),'mathgl-global-cuts-'));

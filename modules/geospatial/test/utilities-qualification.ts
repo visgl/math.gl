@@ -9,11 +9,11 @@ import {
   parseAngle,
   transferGrid,
   parseMGRSZone
-} from '../src/coordinates';
-import {TriaxialEllipsoid} from '../src/triaxial';
-import {EllipsoidGeodesic} from '../src/ellipsoid-geodesic';
-import {EllipsoidRhumb} from '../src/ellipsoid-rhumb';
-import {GeodesicLineBuffer, RhumbLineBuffer} from '../src/geodesic-buffer';
+} from '@math.gl/geospatial/coordinates';
+import {TriaxialEllipsoid} from '@math.gl/geospatial/triaxial';
+import {EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid-geodesic';
+import {EllipsoidRhumb} from '@math.gl/geospatial/ellipsoid-rhumb';
+import {GeodesicLineBuffer, RhumbLineBuffer} from '@math.gl/geospatial/geodesic-buffer';
 import native from './utilities-reference.json';
 import sampling from './sampling-reference.json';
 import g7 from './g7-reference.json';

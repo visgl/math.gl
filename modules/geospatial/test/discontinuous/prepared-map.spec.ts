@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {MapEngine, type MapDefinition} from '../../src/discontinuous';
+import {MapEngine, type MapDefinition} from '@math.gl/geospatial/discontinuous';
 
 test('prepared maps retain sampled layouts, coordinates, inverse and hinge poses', () => {
   for (const definition of [

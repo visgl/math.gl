@@ -7,7 +7,7 @@ import {createRequire} from 'node:module';
 import {mkdtempSync,mkdirSync,readFileSync,writeFileSync,symlinkSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';import {join,relative} from 'node:path';
 import {fileURLToPath} from 'node:url';import {gzipSync} from 'node:zlib';import {transform} from 'esbuild';
-import {bundleRuntime} from '../projection/scripts/benchmark-runtime.mjs';
+import {bundleRuntime} from './projection/benchmark-runtime.mjs';
 const root=fileURLToPath(new URL('../../../',import.meta.url)),require=createRequire(import.meta.url);
 for(const load of [p=>import(p),p=>require(p)]){
  const {EllipsoidGeodesicExact:E,GeodesicPolygonExact:P}=await load('@math.gl/geospatial');

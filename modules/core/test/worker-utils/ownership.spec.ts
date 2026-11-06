@@ -8,7 +8,7 @@ import {
   processOnWorker,
   processOnWorkerInBatches,
   type WorkerObject
-} from '../../src/worker-utils';
+} from '@math.gl/core/worker-utils';
 
 const test = baseTest.runIf(!isBrowser);
 const source = `const {parentPort} = require('worker_threads');

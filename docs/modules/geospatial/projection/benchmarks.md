@@ -117,7 +117,7 @@ Build the packages before measuring their published entry points:
 
 ```sh
 yarn build
-node modules/geospatial/projection/scripts/benchmark.mjs --points 50000 --samples 7 --allocations --output /tmp/proj4-benchmark.json
+node modules/geospatial/scripts/projection/benchmark.mjs --points 50000 --samples 7 --allocations --output /tmp/proj4-benchmark.json
 ```
 
 The standalone Node runner and browser qualification runner use the same workload as
@@ -151,7 +151,7 @@ retain the 12 ms default.
 ### Compare a runtime change with its base
 
 ```sh
-node modules/geospatial/projection/scripts/benchmark-compare.mjs --baseline-ref origin/master --points 20000 --samples 11 --output /tmp/proj4-comparison.json
+node modules/geospatial/scripts/projection/benchmark-compare.mjs --baseline-ref origin/master --points 20000 --samples 11 --output /tmp/proj4-comparison.json
 ```
 
 The comparison compiles baseline runtime sources from Git and current sources with the
@@ -194,8 +194,8 @@ For explicit operation chains, measure the actual units, axes, grids and epoch
 behavior rather than an isolated projection kernel:
 
 ```sh
-node modules/geospatial/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --output /tmp/projection-pipelines.json
-node --expose-gc modules/geospatial/projection/scripts/benchmark-grid-compare.mjs --baseline-ref origin/master --memory --output /tmp/projection-grids.json
+node modules/geospatial/scripts/projection/benchmark-pipeline-compare.mjs --baseline-ref origin/master --output /tmp/projection-pipelines.json
+node --expose-gc modules/geospatial/scripts/projection/benchmark-grid-compare.mjs --baseline-ref origin/master --memory --output /tmp/projection-grids.json
 ```
 
 Prepare grid readers and models outside warm coordinate timing, and measure that

@@ -7,7 +7,7 @@ import {
   MapEngine,
   type GeographicPosition,
   type MapDefinition
-} from '../src/discontinuous';
+} from '@math.gl/geospatial/discontinuous';
 export const provenance = {
   oracle: 'Analytic hemisphere/solid-angle/complement identities; original rotated inputs',
   version: 1

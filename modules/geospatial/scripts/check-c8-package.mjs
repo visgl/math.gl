@@ -11,7 +11,7 @@ import {tmpdir} from 'node:os';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {gzipSync} from 'node:zlib';
 import {transform} from 'esbuild';
-import {bundleRuntime} from '../projection/scripts/benchmark-runtime.mjs';
+import {bundleRuntime} from './projection/benchmark-runtime.mjs';
 const root=fileURLToPath(new URL('../../../',import.meta.url)),require=createRequire(import.meta.url);
 const base='b9db6472e72b22ffb52b1c37c97745e68478728a';
 for(const format of ['esm','cjs']){

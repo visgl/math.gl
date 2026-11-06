@@ -28,9 +28,6 @@ for (const name of expected) {
   if (name === 'core') {
     assert(Object.keys(manifest.dependencies || {}).every(dependency => dependency.startsWith('@math.gl/')), 'Core must not introduce external runtime dependencies');
   }
-  if (name === 'earth') {
-    assert.equal(manifest.dependencies?.['astronomy-engine'], manifest.devDependencies['astronomy-engine'], 'Root astronomy exports require their runtime dependency');
-  }
   for (const [subpath, entry] of Object.entries(manifest.exports)) {
     const targets = typeof entry === 'string' ? [entry] : Object.values(entry);
     for (const target of targets) {

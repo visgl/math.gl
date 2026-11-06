@@ -6,7 +6,7 @@ import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospati
 import {expect, test} from 'vitest';
 import {config, Vector3} from '@math.gl/core';
 import {Ellipsoid} from '@math.gl/geospatial';
-import {qualifyP0} from '../../projection/test/ellipsoid-p0-entry';
+import {qualifyP0} from '../projection/ellipsoid-p0-entry';
 
 for (const row of qualifyP0()) {
   test(`P0 ${row.family}: ${row.id}`, () => {

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test as baseTest} from 'vitest';
-import {isBrowser} from '../../src/worker-utils';
+import {isBrowser} from '@math.gl/core/worker-utils';
 const test = baseTest.runIf(!isBrowser);
-import {processOnWorker} from '../../src/worker-utils/index';
+import {processOnWorker} from '@math.gl/core/worker-utils/index';
 const TestWorker = {
   id: 'context-test',
   name: 'context-test',
