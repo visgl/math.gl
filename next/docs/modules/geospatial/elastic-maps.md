@@ -1,4 +1,4 @@
-# Elastic maps
+# Elastic maps 🧪
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
@@ -89,11 +89,11 @@ See [MapEngine transition methods](https://visgl.github.io/math.gl/next/docs/mod
 
 The maps and data are by **Justin Kunimune**. Read his [Introducing the Elastic projections](https://kunimune.blog/2023/12/29/introducing-the-elastic-projections/) and the [data format and reference implementations](https://github.com/jkunimune/elastik). The bundled tables are pinned to upstream revision `88808a7c0fe92b42d6e5f903549cd7cfcbd26f3b`, released under the [Unlicense](https://github.com/jkunimune/elastik/blob/88808a7c0fe92b42d6e5f903549cd7cfcbd26f3b/license.md). Their original precision and license notice are retained. The math.gl runtime is an independent implementation of the documented format.
 
-Kunimune's earlier [Danseiji paper (free preprint)](https://visgl.github.io/math.gl/next/docs/bibliography.md#kunimune2019 "Minimum-error world map projections defined by polydimensional meshes") provides background on optimizing mesh-defined projections. Danseiji's distinct unstructured mesh format is not supported by this importer. Coastlines in this example come from Natural Earth, in the public domain.
+Kunimune's earlier [Danseiji paper (free preprint)](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#kunimune2019 "Minimum-error world map projections defined by polydimensional meshes") provides background on optimizing mesh-defined projections. Danseiji's distinct unstructured mesh format is not supported by this importer. Coastlines in this example come from Natural Earth, in the public domain.
 
 See the [Elastic API reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/elastic.md), [MapEngine reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/map-engine.md), and [rendering guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/map-engine.md).
 
-See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
 
 <!-- -->
 

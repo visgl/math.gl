@@ -1,6 +1,6 @@
-# Discontinuous map API
+# Discontinuous map API 🧪
 
-![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
 The discontinuous map API, presets, and layout helpers are experimental and may change.
 
@@ -8,24 +8,20 @@ For a shared rendering pipeline across ordinary, interrupted, inset, and hinged 
 
 Project geographic points, lines, and polygons into a map with cuts. Import this API separately from scalar CRS transforms:
 
-## Feature support[​](#feature-support "Direct link to Feature support")
+## Feature Card[​](#feature-card "Direct link to Feature Card")
 
-A map-engine checklist for interrupted, inset, polyhedral and other multi-chart projections.
-
-Support describes the public API in the current repository. Notes identify limits and experimental features.
-
-| Feature                                               | math.gl support    | Notes                                                                                                                                                                                                                     |
-| ----------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Point projection and inverse candidates               | ✅ Implemented     | Region-aware forward/inverse results retain chart identity; overlaps can produce multiple inverse candidates.                                                                                                             |
-| Seam-aware lines and polygons                         | ✅ Implemented     | Supported clipping/sampling preserves region IDs and source-coordinate provenance; render each returned part separately.                                                                                                  |
-| Interrupted, inset and polyhedral presets             | ✅ Implemented     | [Projection families](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/projection-catalog.md) include interrupted maps, Albers USA, polyhedral nets, quincuncial and star layouts. |
-| Continuous spherical world-map formulas               | ✅ Implemented     | The catalogue exposes ordinary world projections through the same MapEngine contracts and documented parameter limits.                                                                                                    |
-| Custom regions, layout and viewport fitting           | ✅ Implemented     | Explicit regions, fitted chart layouts and region-aware picking remain independent of a renderer.                                                                                                                         |
-| Global spherical filled-side topology                 | ✅ Implemented     | [Global polygon adapters](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/global-geographic-cuts.md) support explicit directed fills within their chart/profile constraints.      |
-| Reusable preparation and worker transport             | ✅ Implemented     | MapEngine preparation can be transported using the [task runtime](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md); same-version snapshots are not a durable file format.                    |
-| Arbitrary invalid-polygon repair                      | ❌ Not implemented | Malformed topology and unsupported chart/edge configurations are rejected; this is not a universal geometry repair engine.                                                                                                |
-| Ellipsoidal datum/epoch transformations               | ❌ Not implemented | These are spherical map/layout operations; use the separate [CRS projection engine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) for datum and epoch operations.              |
-| Certified continuous error and arbitrary cut networks | ◐ Partial          | Sampling and cut adapters have explicit supported profiles; approximation targets do not certify every callback, seam network or singular boundary.                                                                       |
+| Feature                                               | Support | Notes                                                                                                                                                                                                                     |
+| ----------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Point projection and inverse candidates               | ✅      | Region-aware forward/inverse results retain chart identity; overlaps can produce multiple inverse candidates.                                                                                                             |
+| Seam-aware lines and polygons                         | ✅      | Supported clipping/sampling preserves region IDs and source-coordinate provenance; render each returned part separately.                                                                                                  |
+| Interrupted, inset and polyhedral presets             | ✅      | [Projection families](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/projection-catalog.md) include interrupted maps, Albers USA, polyhedral nets, quincuncial and star layouts. |
+| Continuous spherical world-map formulas               | ✅      | The catalogue exposes ordinary world projections through the same MapEngine contracts and documented parameter limits.                                                                                                    |
+| Custom regions, layout and viewport fitting           | ✅      | Explicit regions, fitted chart layouts and region-aware picking remain independent of a renderer.                                                                                                                         |
+| Global spherical filled-side topology                 | ✅      | [Global polygon adapters](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/global-geographic-cuts.md) support explicit directed fills within their chart/profile constraints.      |
+| Reusable preparation and worker transport             | ✅      | MapEngine preparation can be transported using the [task runtime](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md); same-version snapshots are not a durable file format.                    |
+| Arbitrary invalid-polygon repair                      | ❌      | Malformed topology and unsupported chart/edge configurations are rejected; this is not a universal geometry repair engine.                                                                                                |
+| Ellipsoidal datum/epoch transformations               | ❌      | These are spherical map/layout operations; use the separate [CRS projection engine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) for datum and epoch operations.              |
+| Certified continuous error and arbitrary cut networks | ◐       | Sampling and cut adapters have explicit supported profiles; approximation targets do not certify every callback, seam network or singular boundary.                                                                       |
 
 ```
 import {

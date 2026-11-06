@@ -125,7 +125,7 @@ Coverage and thickness are independent because a small thick cloud and a widespr
 
 ### References and licensing[​](#references-and-licensing "Direct link to References and licensing")
 
-The sky model is described by [Hosek & Wilkie (2012)](https://visgl.github.io/math.gl/next/docs/bibliography.md#hosek2012 "An analytic model for full spectral sky-dome radiance").
+The sky model is described by [Hosek & Wilkie (2012)](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#hosek2012 "An analytic model for full spectral sky-dome radiance").
 
 * [Hošek and Wilkie, Adding a Solar Radiance Function to the Hošek Skylight Model (2013), and the 1.4a reference implementation](https://cgg.mff.cuni.cz/projects/SkylightModelling/). The upstream source and datasets are **BSD-3-Clause**, copyright © 2012–2013 Lukas Hosek and Alexander Wilkie. Derived tables and reference fixtures carry `SPDX-License-Identifier: BSD-3-Clause` and `SPDX-FileCopyrightText` comments plus the full original notice. [LICENSE-HOSEK-WILKIE](https://github.com/visgl/math.gl/blob/master/modules/earth/LICENSE-HOSEK-WILKIE) is included in the npm package for source and binary redistribution.
 * [Wyman, Sloan and Shirley, Simple Analytic Approximations to the CIE XYZ Color Matching Functions (2013)](https://jcgt.org/published/0002/02/01/). The integration tool independently implements the mathematical equations; no sample code or color-matching dataset was copied.
@@ -247,15 +247,15 @@ The scattered estimate is `albedo × opacity × exp(-viewDepth) × (directRGB ×
 
 All new code is independently written TypeScript under MIT, with SPDX provenance. Published equations are referenced; no external implementation, C/C++ source, coefficient table, texture or paper text is redistributed.
 
-* [Bruneton & Neyret (2008), Precomputed Atmospheric Scattering](https://visgl.github.io/math.gl/next/docs/bibliography.md#bruneton2008 "Precomputed Atmospheric Scattering"): spherical atmosphere and integrated transmittance. This API does not implement that paper's precomputed multiple-scattering solution.
-* [Preetham, Shirley & Smits (1999), A Practical Analytic Model for Daylight](https://visgl.github.io/math.gl/next/docs/bibliography.md#preetham1999 "A practical analytic model for daylight"): spectral Rayleigh and aerosol attenuation approximations.
+* [Bruneton & Neyret (2008), Precomputed Atmospheric Scattering](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#bruneton2008 "Precomputed Atmospheric Scattering"): spherical atmosphere and integrated transmittance. This API does not implement that paper's precomputed multiple-scattering solution.
+* [Preetham, Shirley & Smits (1999), A Practical Analytic Model for Daylight](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#preetham1999 "A practical analytic model for daylight"): spectral Rayleigh and aerosol attenuation approximations.
 * [Wyman, Sloan & Shirley (2013), Simple Analytic Approximations to the CIE XYZ Color Matching Functions](https://jcgt.org/published/0002/02/01/): equation 4/table 1 fits, independently evaluated.
 * [PBRT, Phase Functions](https://www.pbr-book.org/3ed-2018/Volume_Scattering/Phase_Functions): Henyey–Greenstein angular scattering and direction conventions.
 * The shared ambient sky and existing diffuse tint retain the references and licenses documented in [sky lighting](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sky.md) and [sunlight](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sun.md#getsunlight).
 
 After building the package, generate a standalone dawn/dusk palette demo with `node modules/earth/scripts/sun/create-cloud-demo.mjs /absolute/path/clouds.html`. It compares four cloud heights and three Sun-ray shadow depths through a shared Sun-altitude slider. The SVG shapes are original and illustrative; the generated page has no external runtime or artwork dependencies.
 
-See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
 
 <!-- -->
 

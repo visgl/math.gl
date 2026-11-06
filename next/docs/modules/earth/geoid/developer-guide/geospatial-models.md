@@ -2,7 +2,7 @@
 
 Use a sphere or ellipsoid for coordinate geometry, and a geoid model when converting between ellipsoidal and orthometric heights.
 
-| Model     | Represents                                            | math.gl support                                          |
+| Model     | Represents                                            | Support                                                  |
 | --------- | ----------------------------------------------------- | -------------------------------------------------------- |
 | Sphere    | A surface with one radius                             | Spherical coordinates and spherical map projections      |
 | Ellipsoid | A surface defined by its axes                         | `Ellipsoid` and the shared `SpheroidParameters` contract |

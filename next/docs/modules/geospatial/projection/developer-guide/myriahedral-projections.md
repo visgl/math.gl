@@ -1,6 +1,6 @@
-# Understanding myriahedral projections
+# Understanding myriahedral projections 🧪
 
-![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
 A myriahedral map replaces one continuous world map with many small, connected panels. Approximate the globe with a fine polyhedron, decide which edges remain hinged, cut the others, and unfold the panels into a plane. The gaps are part of the projection rather than rendering errors.
 
@@ -8,7 +8,7 @@ Try the [interactive example](https://visgl.github.io/math.gl/next/docs/modules/
 
 ## Origins and credits[​](#origins-and-credits "Direct link to Origins and credits")
 
-Jarke J. van Wijk introduced this approach in **Unfolding the Earth: Myriahedral Projections**, *The Cartographic Journal* 45(1), 32–42 (2008). The paper studies graticule meshes, recursively subdivided polyhedra, and meshes derived from geography. See the [publication record and abstract](https://research.tue.nl/en/publications/unfolding-the-earth-myriahedral-projections/) and [paper DOI](https://visgl.github.io/math.gl/next/docs/bibliography.md#vanwijk2008 "Unfolding the Earth: Myriahedral Projections").
+Jarke J. van Wijk introduced this approach in **Unfolding the Earth: Myriahedral Projections**, *The Cartographic Journal* 45(1), 32–42 (2008). The paper studies graticule meshes, recursively subdivided polyhedra, and meshes derived from geography. See the [publication record and abstract](https://research.tue.nl/en/publications/unfolding-the-earth-myriahedral-projections/) and [paper DOI](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#vanwijk2008 "Unfolding the Earth: Myriahedral Projections").
 
 **Nicolas “Nico” Belmonte's interactive work is the inspiration for this example.** His February 2018 vis.gl article, [Unfolding the Earth: Myriahedral Projections In WebGL](https://medium.com/vis-gl/unfolding-the-earth-myriahedral-projections-in-webgl-6b2bcfd00a30), celebrates the research's tenth anniversary. His [WebGL demonstration](https://philogb.github.io/page/myriahedral/) makes the relationship between a globe, cuts, and a planar map tangible.
 
@@ -16,7 +16,7 @@ The article also describes geography-aligned meshes built from distance fields a
 
 math.gl's mesh generation, edge weights, panel charts, and unfolding are independently implemented. We have not copied Nico's source code, mesh tables, textures, animation frames, or optimized solid orientations. Credit identifies the conceptual and visual inspiration; it does not imply a license to his assets.
 
-See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
 
 ## What the cuts buy you[​](#what-the-cuts-buy-you "Direct link to What the cuts buy you")
 
@@ -32,7 +32,7 @@ For a fixed mesh and weights, the spanning-tree step maximizes the total retaine
 
 ## Choosing a family[​](#choosing-a-family "Direct link to Choosing a family")
 
-| Family             | What changes                                                 | math.gl support                                                    |
+| Family             | What changes                                                 | Support                                                            |
 | ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------ |
 | Graticule          | Direction and location of joins on a longitude/latitude mesh | Polyconic, cylindric, azimuthal, hemispheres, sealine, coastline   |
 | Polyhedral         | Base solid and refinement level                              | All five Platonic solids, including recursive triangle refinement  |

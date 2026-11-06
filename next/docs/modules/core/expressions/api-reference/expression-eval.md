@@ -1,6 +1,6 @@
-# Expression Evaluator
+# Expression Evaluator 🧪
 
-![From-v4.2](https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square)![Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
+![From-v4.2](https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
 The core evaluator API is useful when you want direct control over parsing, AST reuse, or custom operator registration.
 

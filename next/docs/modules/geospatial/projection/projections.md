@@ -1,4 +1,4 @@
-# Projection catalogue
+# Projection catalogue 🧪
 
 A projection chooses how a curved Earth becomes a flat map. The choice affects shape, area, distance and direction; no global flat map preserves all four. `@math.gl/geospatial/projection` supplies a catalogue of algorithms, while a CRS supplies their parameters, ellipsoid, datum, axes and units.
 
@@ -160,7 +160,7 @@ worldAreas.project([12, 55]);
 
 ### Discontinuous map layouts (experimental)[​](#discontinuous-map-layouts-experimental "Direct link to Discontinuous map layouts (experimental)")
 
-![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
 The separate [`@math.gl/geospatial/discontinuous` API](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous.md) provides static region-aware point projection, inverse candidates, and seam-aware line and polygon projection. Presets include AirOcean, land-oriented Goode, independent interrupted sinusoidal, Mollweide and homolosine layouts, Albers USA with optional territories, Peirce quincuncial, Berghaus star, and myriahedral layouts.
 

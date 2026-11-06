@@ -1,10 +1,6 @@
-# S2Decoder
+# S2Decoder 🧪
 
-![From-v4.0](https://img.shields.io/badge/From-v4.0-blue.svg?style=flat-square)
-
-caution
-
-This module is still experimental. It may have issues and functionality may change in minor releases.
+![From-v4.0](https://img.shields.io/badge/From-v4.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
 ## Overview[​](#overview "Direct link to Overview")
 
@@ -23,7 +19,7 @@ S2 cells have multiple representations, and can be represented as:
 
 The 64 bit index layout allocates 3 bits for the face id and 60 bits for the Hilbert curve position. The least significant bit is always set and trailing zero bits encode the level. When expressed as hexadecimal strings these trailing zeros are omitted; such a string is known as the S2 token. An empty cell is represented by the token `X`.
 
-### `S2Decoder`[​](#s2decoder-1 "Direct link to s2decoder-1")
+### `S2Decoder`[​](#s2decoder "Direct link to s2decoder")
 
 `S2Decoder` implements the [DGGSDecoder](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/dggs-decoder.md) API:
 

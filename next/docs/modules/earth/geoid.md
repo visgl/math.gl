@@ -6,22 +6,18 @@ The `@math.gl/earth` module evaluates geoid heights from Earth gravity model gri
 
 <!-- -->
 
-## Feature support[​](#feature-support "Direct link to Feature support")
+## Feature Card[​](#feature-card "Direct link to Feature Card")
 
-Grid-based geoid-model support and the boundaries of height-datum conversion.
-
-Support describes the public API in the current repository. Notes identify limits and experimental features.
-
-| Feature                                             | math.gl support    | Notes                                                                                                                                                                                               |
-| --------------------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GeographicLib PGM grid parsing                      | ✅ Implemented     | [parsePGM](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/parse-pgm.md) decodes supported geoid grids without a renderer or Arrow runtime.                |
-| Bilinear and cubic interpolation                    | ✅ Implemented     | [Geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/geoid.md) samples grid heights with the documented units, wrapping and interpolation behavior.     |
-| Explicit ellipsoidal/orthometric height relation    | ✅ Implemented     | Geoid undulation N supports the model-specific relation h = H + N; applications select the correct datum/model.                                                                                     |
-| Decoded-grid construction                           | ✅ Implemented     | [createGeoidFromGrid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/create-geoid-from-grid.md) accepts raw Uint16 samples, dimensions, offset and scale. |
-| Optional EGM96 assets and other supplied grids      | ✅ Implemented     | Bundled low/high EGM96 grids are separate assets; other supported PGM grids can be supplied by the application.                                                                                     |
-| Automatic vertical-datum/epoch operation selection  | ❌ Not implemented | A grid sampler does not choose a valid vertical transformation, authority operation, epoch or source dataset.                                                                                       |
-| Gravity potential, acceleration and magnetic fields | ❌ Not implemented | Grid undulation is implemented; coefficient-backed field synthesis remains separate [Earth-model scope](https://github.com/visgl/math.gl/blob/master/dev-docs/geographiclib-roadmap.md).            |
-| Global uncertainty or tide-system propagation       | ❌ Not implemented | No general uncertainty propagation, tidal synthesis, or automatic tide-system reconciliation is provided by the grid API.                                                                           |
+| Feature                                             | Support | Notes                                                                                                                                                                                               |
+| --------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GeographicLib PGM grid parsing                      | ✅      | [parsePGM](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/parse-pgm.md) decodes supported geoid grids without a renderer or Arrow runtime.                |
+| Bilinear and cubic interpolation                    | ✅      | [Geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/geoid.md) samples grid heights with the documented units, wrapping and interpolation behavior.     |
+| Explicit ellipsoidal/orthometric height relation    | ✅      | Geoid undulation N supports the model-specific relation h = H + N; applications select the correct datum/model.                                                                                     |
+| Decoded-grid construction                           | ✅      | [createGeoidFromGrid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/create-geoid-from-grid.md) accepts raw Uint16 samples, dimensions, offset and scale. |
+| Optional EGM96 assets and other supplied grids      | ✅      | Bundled low/high EGM96 grids are separate assets; other supported PGM grids can be supplied by the application.                                                                                     |
+| Automatic vertical-datum/epoch operation selection  | ❌      | A grid sampler does not choose a valid vertical transformation, authority operation, epoch or source dataset.                                                                                       |
+| Gravity potential, acceleration and magnetic fields | ❌      | Grid undulation is implemented; coefficient-backed field synthesis remains separate [Earth-model scope](https://github.com/visgl/math.gl/blob/master/dev-docs/geographiclib-roadmap.md).            |
+| Global uncertainty or tide-system propagation       | ❌      | No general uncertainty propagation, tidal synthesis, or automatic tide-system reconciliation is provided by the grid API.                                                                           |
 
 ## Geoid globe[​](#geoid-globe "Direct link to Geoid globe")
 
@@ -78,4 +74,4 @@ NGA EGM96 model data are public domain. The grids come from [GeographicLib](http
 
 The JavaScript implementation is a port of selected GeographicLib 1.50.1 code, copyright Charles Karney, under the MIT license.
 
-See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.

@@ -166,7 +166,7 @@ These definitions describe mathematical and geodetic concepts, independently of 
 * **Charles F. F. Karney / GeographicLib**: [geodesic documentation](https://geographiclib.sourceforge.io/C++/doc/geodesic.html) and [rhumb-line documentation](https://geographiclib.sourceforge.io/C++/doc/rhumb.html), including the direct and inverse problems.
 * **PROJ contributors**: [coordinate-operation background](https://proj.org/en/stable/usage/index.html), [axis-order conventions](https://proj.org/en/stable/faq.html), and [projection glossary](https://proj.org/en/stable/glossary.html).
 * **NOAA National Geodetic Survey**: [geoid models and height systems](https://geodesy.noaa.gov/GEOID/).
-* **John P. Snyder and Philip M. Voxland**: [An Album of Map Projections](https://visgl.github.io/math.gl/next/docs/bibliography.md#snyder1989 "An album of map projections"), for projection constructions, terminology, and distortion properties.
+* **John P. Snyder and Philip M. Voxland**: [An Album of Map Projections](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#snyder1989 "An album of map projections"), for projection constructions, terminology, and distortion properties.
 * **NASA GISS**: [G.Projector's projection reference](https://www.giss.nasa.gov/tools/gprojector/help/projections/), for named families and their properties.
 
 <!-- -->

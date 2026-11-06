@@ -1,4 +1,4 @@
-# MapEngine
+# MapEngine 🧪
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
@@ -130,7 +130,7 @@ Each lobe is `[west, center, east]` in degrees relative to `centralMeridian`. Ea
 
 All three definitions support the usual seam-aware geometry, fitting, picking, and transitions through the globe; none supplies hinge motion. At a cut, use a region ID to choose a side. Seam endpoints identify where a join becomes a cut.
 
-References: [Calabretta's HEALPix equations](https://visgl.github.io/math.gl/next/docs/bibliography.md#calabretta2004 "Mapping on the HEALPix grid"), [PROJ's HEALPix documentation](https://proj.org/en/stable/operations/projections/healpix.html), and [D3's Gingery implementation](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/gingery.js). Gingery's arc-length construction is adapted under ISC; chart assembly and bounded inverse handling use math.gl's existing pipeline. See the package's third-party notices.
+References: [Calabretta's HEALPix equations](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#calabretta2004 "Mapping on the HEALPix grid"), [PROJ's HEALPix documentation](https://proj.org/en/stable/operations/projections/healpix.html), and [D3's Gingery implementation](https://github.com/d3/d3-geo-projection/blob/v4.0.0/src/gingery.js). Gingery's arc-length construction is adapted under ISC; chart assembly and bounded inverse handling use math.gl's existing pipeline. See the package's third-party notices.
 
 ### Quincuncial and star definitions[​](#quincuncial-and-star-definitions "Direct link to Quincuncial and star definitions")
 

@@ -4,7 +4,7 @@ The G6 global search gate is delivered for the existing numerical profile: `0.99
 
 ## Coverage algorithm[​](#coverage-algorithm "Direct link to Coverage algorithm")
 
-The search uses the capture-distance construction in [Karney, Geodesic intersections (2024), sections 3, 6 and 7](https://visgl.github.io/math.gl/next/docs/bibliography.md#karney2024 "Geodesic Intersections") and pinned GeographicLib C++ **2.7** `Intersect.cpp`. The oblate capture bound is `πb`; the prolate bound comes from minimizing polar semi-conjugate distance. The native safety margin is `δ = πR ε^(1/5)`.
+The search uses the capture-distance construction in [Karney, Geodesic intersections (2024), sections 3, 6 and 7](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#karney2024 "Geodesic Intersections") and pinned GeographicLib C++ **2.7** `Intersect.cpp`. The oblate capture bound is `πb`; the prolate bound comes from minimizing polar semi-conjugate distance. The native safety margin is `δ = πR ε^(1/5)`.
 
 The requested L1 ball is expanded by `δ`, then covered with rotated square tiles of radius at most `capture - δ`. Every tile is refined; this implementation omits native seed-pruning optimizations. A failed tile is covered again by four half-radius tiles, for at most three subdivision levels. Completeness is withheld if any leaf remains unresolved. There are at most 2,125 attempts in the declared profile and at most 100 refinement iterations per attempt.
 

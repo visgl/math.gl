@@ -10,7 +10,7 @@ Terrain APIs are available from `@math.gl/geospatial/terrain` and `@math.gl/geos
 
 `getTerrainProfileVisibility(profile, {observerHeight, targetHeight})` compares absolute endpoint elevations against samples of a straight horizontal profile. It returns `blocked` when a valid sample touches or crosses the line, `unknown` when coverage is missing and no obstruction is known, and `clear` otherwise. The result also reports the first observed blocker, missing sample count and minimum sampled vertical clearance. Missing samples can hide an earlier blocker. A clear result applies to the sampled piecewise-linear profile, not unsampled terrain. Curvature, refraction and geodesic paths are not modeled.
 
-## Feature support[​](#feature-support "Direct link to Feature support")
+## Feature Card[​](#feature-card "Direct link to Feature Card")
 
 ### Cross-tile contours[​](#cross-tile-contours "Direct link to Cross-tile contours")
 
@@ -44,22 +44,20 @@ const paths = stitchTerrainContours(contours);
 
 Terrain-data, analysis, meshing, and query capabilities against the broader CPU/GPU terrain roadmap.
 
-Support describes the public API in the current repository. Notes identify limits and experimental features.
-
-| Feature                                                | math.gl support    | Notes                                                                                                                                                             |
-| ------------------------------------------------------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Affine and geographic height fields                    | ✅ Implemented     | Vertex/cell registration, optional raster-footprint clamping, masked bilinear support, explicit metric/geographic frames, and nearest/bilinear/triangle sampling. |
-| Batch heights, gradients and normals                   | ✅ Implemented     | Caller-owned buffers and separate value/gradient statuses retain interpolation and coverage semantics.                                                            |
-| Resident tiled snapshots and incremental updates       | ✅ Implemented     | Insertion/replacement/eviction, neighbor halos and whole-footprint fallback are explicit; no implicit tile fetching.                                              |
-| Regular and adaptive CPU meshing                       | ✅ Implemented     | Regular geometry and optional tessellators produce mesh data with source registration and nodata contracts.                                                       |
-| Terrain analysis and contour paths                     | ✅ Implemented     | Raster gradients, slope/aspect, profiles, contours, stitching, bounded simplification and profile measurements.                                                   |
-| Indexed ray, nearest and contact queries               | ✅ Implemented     | Bounded triangle-surface queries include sphere/capsule contacts and segment clearance with explicit completion status.                                           |
-| Tile reconciliation and conforming mesh seams          | ✅ Implemented     | Same-level vertex reconciliation, supported mixed-resolution boundary stitching and visual skirts have separate physical/visual contracts.                        |
-| Packed GPU-upload substrate                            | ✅ Implemented     | Experimental versioned packed buffers provide a CPU-validated data layout; they do not execute shaders.                                                           |
-| Real-DEM and numerical qualification                   | ◐ Partial          | Analytic controls and an independent regional GDAL fixture are implemented; broader terrain distributions and CPU/GPU conformance remain open.                    |
-| Device-callable WGSL/GLSL terrain execution            | ❌ Not implemented | Shader/device implementation and [GPU qualification](https://github.com/visgl/math.gl/blob/master/dev-docs/terrain-roadmap.md) belong to companion luma.gl work.  |
-| Continuous first-impact and physics solver integration | ❌ Not implemented | Overlap/clearance queries do not provide time-of-impact, rotating/curved sweeps, reduced contact manifolds, or a dynamics solver.                                 |
-| Automatic renderer LOD/drape/picking integration       | ❌ Not implemented | The module supplies data and queries; complete deck.gl rendering/LOD and shared displayed-surface integration remain separate roadmap work.                       |
+| Feature                                                | Support | Notes                                                                                                                                                             |
+| ------------------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Affine and geographic height fields                    | ✅      | Vertex/cell registration, optional raster-footprint clamping, masked bilinear support, explicit metric/geographic frames, and nearest/bilinear/triangle sampling. |
+| Batch heights, gradients and normals                   | ✅      | Caller-owned buffers and separate value/gradient statuses retain interpolation and coverage semantics.                                                            |
+| Resident tiled snapshots and incremental updates       | ✅      | Insertion/replacement/eviction, neighbor halos and whole-footprint fallback are explicit; no implicit tile fetching.                                              |
+| Regular and adaptive CPU meshing                       | ✅      | Regular geometry and optional tessellators produce mesh data with source registration and nodata contracts.                                                       |
+| Terrain analysis and contour paths                     | ✅      | Raster gradients, slope/aspect, profiles, contours, stitching, bounded simplification and profile measurements.                                                   |
+| Indexed ray, nearest and contact queries               | ✅      | Bounded triangle-surface queries include sphere/capsule contacts and segment clearance with explicit completion status.                                           |
+| Tile reconciliation and conforming mesh seams          | ✅      | Same-level vertex reconciliation, supported mixed-resolution boundary stitching and visual skirts have separate physical/visual contracts.                        |
+| Packed GPU-upload substrate                            | ✅      | Experimental versioned packed buffers provide a CPU-validated data layout; they do not execute shaders.                                                           |
+| Real-DEM and numerical qualification                   | ◐       | Analytic controls and an independent regional GDAL fixture are implemented; broader terrain distributions and CPU/GPU conformance remain open.                    |
+| Device-callable WGSL/GLSL terrain execution            | ❌      | Shader/device implementation and [GPU qualification](https://github.com/visgl/math.gl/blob/master/dev-docs/terrain-roadmap.md) belong to companion luma.gl work.  |
+| Continuous first-impact and physics solver integration | ❌      | Overlap/clearance queries do not provide time-of-impact, rotating/curved sweeps, reduced contact manifolds, or a dynamics solver.                                 |
+| Automatic renderer LOD/drape/picking integration       | ❌      | The module supplies data and queries; complete deck.gl rendering/LOD and shared displayed-surface integration remain separate roadmap work.                       |
 
 ## HeightField[​](#heightfield "Direct link to HeightField")
 

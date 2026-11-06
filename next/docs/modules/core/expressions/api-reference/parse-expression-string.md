@@ -1,6 +1,6 @@
-# Accessor Compiler
+# Accessor Compiler 🧪
 
-![From-v4.2](https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square)![Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
+![From-v4.2](https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
 `parseExpressionString(expression: string): (row: Record<string, unknown>) => unknown`
 

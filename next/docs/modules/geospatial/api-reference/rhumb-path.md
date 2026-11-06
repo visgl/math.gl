@@ -54,4 +54,4 @@ The original offline driver produces 100 stored GeographicLib C++ 2.7 path sampl
 
 The adapter is original MIT math.gl code. Existing GeographicLib acknowledgements and packaged licenses remain with the underlying solver. No dependency is added.
 
-See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.

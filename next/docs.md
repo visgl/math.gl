@@ -1,6 +1,8 @@
-[![MIT license](https://img.shields.io/badge/license-MIT-green?style=flat-square)](https://github.com/visgl/math.gl/blob/master/LICENSE)[![Monthly npm downloads for @math.gl/core](https://img.shields.io/npm/dm/@math.gl/core?style=flat-square)](https://www.npmjs.com/package/@math.gl/core)[![npm version](https://img.shields.io/npm/v/@math.gl/core?style=flat-square)](https://www.npmjs.com/package/@math.gl/core)[![GitHub stars](https://img.shields.io/github/stars/visgl/math.gl?style=flat-square)](https://github.com/visgl/math.gl)[![Built with TypeScript 6.0.3](https://img.shields.io/badge/6.0.3-3178c6?style=flat-square\&logo=typescript\&logoColor=white)](https://www.typescriptlang.org/ "Built with TypeScript 6.0.3")[![coverage](https://img.shields.io/coveralls/visgl/math.gl.svg?style=flat-square\&label=coverage)](https://coveralls.io/github/visgl/math.gl?branch=master)
-
 # Introduction
+
+[![MIT license](https://img.shields.io/badge/license-MIT-green?style=flat-square)](https://github.com/visgl/math.gl/blob/master/LICENSE)[![Built with TypeScript 6.0.3](https://img.shields.io/badge/6.0.3-3178c6?style=flat-square\&logo=typescript\&logoColor=white)](https://www.typescriptlang.org/ "Built with TypeScript 6.0.3")[![coverage](https://img.shields.io/coveralls/visgl/math.gl.svg?style=flat-square\&label=coverage)](https://coveralls.io/github/visgl/math.gl?branch=master)[![npm version](https://img.shields.io/npm/v/@math.gl/core?style=flat-square\&color=8064a2)](https://www.npmjs.com/package/@math.gl/core)[![Monthly npm downloads for @math.gl/core](https://img.shields.io/npm/dm/@math.gl/core?style=flat-square\&color=8064a2)](https://www.npmjs.com/package/@math.gl/core)
+
+[![GitHub stars](https://img.shields.io/github/stars/visgl/math.gl?style=social)](https://github.com/visgl/math.gl)[![GitHub contributors](https://img.shields.io/github/contributors/visgl/math.gl?style=social\&logo=github)](https://github.com/visgl/math.gl/graphs/contributors)[![Merged pull requests](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fsearch%2Fissues%3Fq%3Drepo%3Avisgl%2Fmath.gl%2Bis%3Apr%2Bis%3Amerged\&query=%24.total_count\&label=PRs\&style=social\&logo=github)](https://github.com/visgl/math.gl/pulls?q=is%3Apr+is%3Amerged)
 
 Welcome to math.gl!
 
@@ -10,207 +12,7 @@ math.gl computes on the CPU and has no GPU dependencies. Its arrays and coordina
 
 [![OpenJS Foundation](https://raw.githubusercontent.com/openjs-foundation/artwork/main/openjs_foundation/openjs_foundation-logo-horizontal-color.svg)![OpenJS Foundation](https://raw.githubusercontent.com/openjs-foundation/artwork/main/openjs_foundation/openjs_foundation-logo-horizontal-color-dark_background.svg)](https://openvisualization.org)
 
-math.gl is part of [Open Visualization](https://openvisualization.org), an OpenJS Foundation / Linux Foundation project.
-
-## Modules[​](#modules "Direct link to Modules")
-
-Modular geospatial & 3D math
-
-## Small tools. Big spatial ideas.
-
-Pick the building blocks you need—from vectors and meshes to coordinate systems, global grids, and time-aware geospatial analysis.
-
-[Foundations](#foundations)[3D](#3d)[Geospatial](#spatial)[Earth](#earth)[DGGS](#dggs)
-
-## Foundations
-
-Vectors, matrices, task execution, shared numeric types and expression evaluation.
-
-[![Interactive 3D transform example](/math.gl/next/images/examples/core-transforms.jpg)@math.gl/core](https://visgl.github.io/math.gl/next/docs/modules/core.md)
-
-### [Core](https://visgl.github.io/math.gl/next/docs/modules/core.md)
-
-[Vectors, matrices, shared types, and expression evaluation.](https://visgl.github.io/math.gl/next/docs/modules/core.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/core.md)
-
-[![Automatic task cleanup and explicitly retained task state](/math.gl/next/images/task-runner-lifetimes.svg)@math.gl/core/tasks](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
-
-### [Tasks](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
-
-[Run typed tasks locally or in browser and Node workers, with CommonJS and cross-origin module entrypoints, streaming batches, and independent setup ownership.](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md)
-
-[![Numeric array components and three-dimensional bounds](/math.gl/next/images/modules/types.svg)@math.gl/core/types](https://visgl.github.io/math.gl/next/docs/modules/core/types.md)
-
-### [Types](https://visgl.github.io/math.gl/next/docs/modules/core/types.md)
-
-[Small, reusable TypeScript contracts for math and geospatial data.](https://visgl.github.io/math.gl/next/docs/modules/core/types.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/core/types.md)
-
-[![Expression playground example](/math.gl/next/images/examples/expressions.jpg)@math.gl/core/expressions](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md)
-
-### [Expressions](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md)
-
-[Experimental](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md)
-
-[Parse and evaluate compact expressions with optional geospatial functions.](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md)
-
-## 3D
-
-Curves, meshes, geometry processing and visibility.
-
-[![Interactive parametric curve example](/math.gl/next/images/examples/curves.jpg)@math.gl/geometry/curves](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves.md)
-
-### [Curves](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves.md)
-
-[Parametric curves, interpolation, and arc-length sampling in 2D and 3D.](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves.md)
-
-[![3D geometry viewer example](/math.gl/next/images/examples/geometry-viewer.jpg)@math.gl/geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry.md)
-
-### [Geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry.md)
-
-[Meshes, curves, polygon processing, culling, and spatial indexes.](https://visgl.github.io/math.gl/next/docs/modules/geometry.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/geometry.md)
-
-[![Renderer-independent mesh example](/math.gl/next/images/examples/geometry-viewer.jpg)@math.gl/geometry/utils](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils.md)
-
-### [Geometry Utils](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils.md)
-
-[Inspect, normalize, and process geometry stored in typed arrays.](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils.md)
-
-[![Frustum culling playground example](/math.gl/next/images/examples/culling-playground.jpg)@math.gl/geometry/culling](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling.md)
-
-### [Culling](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling.md)
-
-[Bounding volumes, intersection tests, and visibility culling.](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling.md)
-
-[![Polygon playground example](/math.gl/next/images/examples/polygon-playground.jpg)@math.gl/geometry/polygon](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md)
-
-### [Polygon](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md)
-
-[Clip, subdivide, triangulate, and transform polygon and line geometry.](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md)
-
-[![Interactive spatial query explorer](/math.gl/next/images/examples/spatial-index.png)@math.gl/geometry/spatial-index](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md)
-
-### [Spatial index](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md)
-
-[Static box, point and triangle indexes for range, ray and nearest queries (POC).](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md)
-
-## Geospatial
-
-Coordinate systems, projections, and geospatial data formats.
-
-[![Albers USA map example with geographic insets](/math.gl/next/images/examples/albers-usa.jpg)@math.gl/geospatial](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md)
-
-### [Geospatial](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md)
-
-[Ellipsoids, CRS, projections, WKB, and GeoArrow entry points.](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md)
-
-[![Coordinate reference system transformation example](/math.gl/next/images/examples/external-projection-engines.jpg)@math.gl/geospatial/crs](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs.md)
-
-### [CRS](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs.md)
-
-[Lightweight coordinate reference system definitions and syntax codecs.](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs.md)
-
-[![Elastic map projection example with coastlines and graticules](/math.gl/next/images/examples/elastic-maps.jpg)@math.gl/geospatial/projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md)
-
-### [Projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md)
-
-[Project coordinates, transform reference systems, and work across epochs.](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md)
-
-[![Raster projection lab map example](/math.gl/next/images/examples/raster-projection-lab.jpg)@math.gl/web-mercator](https://visgl.github.io/math.gl/next/docs/modules/web-mercator.md)
-
-### [Web Mercator](https://visgl.github.io/math.gl/next/docs/modules/web-mercator.md)
-
-[Map projection and camera utilities for interactive web maps.](https://visgl.github.io/math.gl/next/docs/modules/web-mercator.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/web-mercator.md)
-
-[![GeoArrow logo](https://raw.githubusercontent.com/geoarrow/geoarrow/main/logo/geoarrow_logo.svg)@math.gl/geospatial/geoarrow](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow.md)
-
-### [GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow.md)
-
-[Columnar geospatial layouts and kernels over typed-array buffers.](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow.md)
-
-[![WKT and WKB workbench displaying polygon geometry](/math.gl/next/images/examples/wkb-workbench.jpg)@math.gl/geospatial/wkb](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb.md)
-
-### [WKB](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb.md)
-
-[Dependency-free WKB, EWKB, and WKT geometry codecs.](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb.md)
-
-## Earth
-
-Coordinate reference systems, Earth models, maps and time.
-
-[![Tectonic time machine Earth example](/math.gl/next/images/examples/tectonic-time-machine.jpg)@math.gl/earth](https://visgl.github.io/math.gl/next/docs/modules/earth.md)
-
-### [Earth](https://visgl.github.io/math.gl/next/docs/modules/earth.md)
-
-[Grouped paths for geoid, sun, and timezone utilities.](https://visgl.github.io/math.gl/next/docs/modules/earth.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/earth.md)
-
-[![Interactive geoid globe example](/math.gl/next/images/examples/geoid-globe.jpg)@math.gl/earth/geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md)
-
-### [Geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md)
-
-[Sample Earth gravity models and convert ellipsoidal and geoid heights.](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md)
-
-[![Interactive timezone globe example](/math.gl/next/images/examples/timezone-globe.jpg)@math.gl/earth/timezone](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone.md)
-
-### [Timezone](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone.md)
-
-[Geographic timezone lookup and local calendar calculations.](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone.md)
-
-[![Solar terminator example showing daylight and city lights](/math.gl/next/images/examples/sun-terminator.jpg)@math.gl/earth/sun](https://visgl.github.io/math.gl/next/docs/modules/earth/sun.md)
-
-### [Sun](https://visgl.github.io/math.gl/next/docs/modules/earth/sun.md)
-
-[Calculate sun position, daylight, and atmospheric lighting.](https://visgl.github.io/math.gl/next/docs/modules/earth/sun.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/earth/sun.md)
-
-## DGGS
-
-A separate module for discrete global grid systems.
-
-[![DGGS cell explorer displaying a geographic cell boundary](/math.gl/next/images/examples/dggs-cell-explorer.jpg)@math.gl/dggs](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)
-
-### [DGGS](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)
-
-[Decode cell boundaries for H3, S2, GeoHash, A5, and other global grids.](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)
-
-[Explore module →](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)
+math.gl is an [Open Visualization](https://openvisualization.org/), OpenJS Foundation and Linux Foundation project.
 
 ## Package entry points[​](#package-entry-points "Direct link to Package entry points")
 
@@ -249,9 +51,9 @@ math.gl is fully supported on:
 | 2017  | v1.0              | `math.gl` was broken out into its own repository to manage luma.gl growth. The goal was an independently usable set of 3D and Geospatial math modules.                                                                                            |
 | 2015  | N/A               | `@math.gl/core` classes were created as part of luma.gl v4, as a set of class wrappers for `gl-matrix` for luma.gl and deck.gl frameworks.                                                                                                        |
 
-## References and credits[​](#references-and-credits "Direct link to References and credits")
+## Attributions[​](#attributions "Direct link to Attributions")
 
-See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for contributor acknowledgments, upstream libraries, scientific references, dataset credits, and third-party notices.
+See [Attributions](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for contributor acknowledgments, upstream libraries, scientific references, dataset credits, and third-party notices.
 
 ## License[​](#license "Direct link to License")
 

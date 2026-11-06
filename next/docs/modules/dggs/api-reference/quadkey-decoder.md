@@ -1,10 +1,6 @@
-# QuadkeyDecoder
+# QuadkeyDecoder 🧪
 
-![From-v4.0](https://img.shields.io/badge/From-v4.0-blue.svg?style=flat-square)
-
-caution
-
-This module is still experimental. It may have issues and functionality may change in minor releases.
+![From-v4.0](https://img.shields.io/badge/From-v4.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
 `QuadkeyDecoder` is focused on decoding quadkeys.
 

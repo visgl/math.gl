@@ -1,6 +1,6 @@
-# Myriahedral projection API
+# Myriahedral projection API 🧪
 
-![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
 Build a spherical panel mesh, select its retained hinges, and project geographic geometry into the resulting flat net. The same layout drives optional unfolding. There is no renderer, image download, DOM dependency, or bundled land dataset in this API. See [background and credits](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/myriahedral-projections.md) and the [interactive example](https://visgl.github.io/math.gl/next/docs/modules/geospatial/myriahedral-maps.md).
 

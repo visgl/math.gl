@@ -10,22 +10,18 @@ Loading <!-- -->Frustum culling<!-- -->…
 
 ⛶⛶ Explore fullscreen
 
-## Feature support[​](#feature-support "Direct link to Feature support")
+## Feature Card[​](#feature-card "Direct link to Feature Card")
 
-Analytic visibility and geometric-query capabilities, distinct from a physics simulation.
-
-Support describes the public API in the current repository. Notes identify limits and experimental features.
-
-| Feature                                      | math.gl support    | Notes                                                                                                                                                                                                            |
-| -------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bounding spheres, AABBs and OBBs             | ✅ Implemented     | [Bounding volumes](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/bounding-volume.md), point-cloud bounds, planes, and ray representations.                       |
-| Frustum classification and plane masks       | ✅ Implemented     | [CullingVolume](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/culling-volume.md) reports inside/intersecting/outside and supports hierarchical plane-mask reuse. |
-| Analytic shape ray and closest-point queries | ✅ Implemented     | [Box, capsule, cylinder, plane and sphere](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/shapes.md) queries avoid tessellating the shapes.                       |
-| Triangle and segment kernels                 | ✅ Implemented     | [Ray/triangle and closest-point kernels](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/queries.md) include segment/triangle closest pairs.                       |
-| Rotated 2D rectangle overlap                 | ✅ Implemented     | [intersectOrientedBoxes2D](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/intersect-oriented-boxes-2d.md) provides allocation-free oriented rectangle queries.    |
-| Large-scene acceleration structures          | ◐ Partial          | [Static indexes](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md) are separate APIs; individual culling kernels do not build or maintain an index.                      |
-| Continuous collision dynamics                | ❌ Not implemented | No time integration, friction, restitution, constraint/contact solver, or general first-impact engine.                                                                                                           |
-| Universal exact-predicate certification      | ❌ Not implemented | Floating-point kernels retain documented degeneracy and scale limits; no general watertight/exact-arithmetic guarantee.                                                                                          |
+| Feature                                      | Support | Notes                                                                                                                                                                                                            |
+| -------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bounding spheres, AABBs and OBBs             | ✅      | [Bounding volumes](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/bounding-volume.md), point-cloud bounds, planes, and ray representations.                       |
+| Frustum classification and plane masks       | ✅      | [CullingVolume](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/culling-volume.md) reports inside/intersecting/outside and supports hierarchical plane-mask reuse. |
+| Analytic shape ray and closest-point queries | ✅      | [Box, capsule, cylinder, plane and sphere](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/shapes.md) queries avoid tessellating the shapes.                       |
+| Triangle and segment kernels                 | ✅      | [Ray/triangle and closest-point kernels](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/queries.md) include segment/triangle closest pairs.                       |
+| Rotated 2D rectangle overlap                 | ✅      | [intersectOrientedBoxes2D](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling/api-reference/intersect-oriented-boxes-2d.md) provides allocation-free oriented rectangle queries.    |
+| Large-scene acceleration structures          | ◐       | [Static indexes](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md) are separate APIs; individual culling kernels do not build or maintain an index.                      |
+| Continuous collision dynamics                | ❌      | No time integration, friction, restitution, constraint/contact solver, or general first-impact engine.                                                                                                           |
+| Universal exact-predicate certification      | ❌      | Floating-point kernels retain documented degeneracy and scale limits; no general watertight/exact-arithmetic guarantee.                                                                                          |
 
 ## Installation[​](#installation "Direct link to Installation")
 
@@ -76,4 +72,4 @@ Vector inputs can be numeric arrays, including core vectors; no renderer objects
 
 Bounding-volume and frustum code was ported from Cesium under Apache-2.0. See the source headers and distributed license notices for provenance.
 
-See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.

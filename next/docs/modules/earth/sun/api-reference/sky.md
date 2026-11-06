@@ -189,10 +189,10 @@ The result is `{intervals, evaluations, sampleSeconds, transitionSeconds}`. Each
 
 All new adapters and equations are independently written TypeScript under MIT; SPDX comments identify source papers and API provenance. No C code, external source code, paper figures or paper prose are incorporated.
 
-* [Patat, Ugolnikov & Postylyakov (2006)](https://visgl.github.io/math.gl/next/docs/bibliography.md#patat2006 "UBVRI twilight sky brightness at ESO-Paranal"): V-band twilight fit, Table 1.
-* [Crumey (2014)](https://visgl.github.io/math.gl/next/docs/bibliography.md#crumey2014 "Human contrast threshold and astronomical visibility"): photometric conversions and Blackwell point/extended-target contrast thresholds.
-* [Krisciunas & Schaefer (1991)](https://visgl.github.io/math.gl/next/docs/bibliography.md#krisciunas1991 "A model of the brightness of moonlight"): lunar phase photometry and scattered moonlight.
-* [Kasten & Young (1989)](https://visgl.github.io/math.gl/next/docs/bibliography.md#kasten1989 "Revised optical air mass tables and approximation formula"): direct optical air mass.
+* [Patat, Ugolnikov & Postylyakov (2006)](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#patat2006 "UBVRI twilight sky brightness at ESO-Paranal"): V-band twilight fit, Table 1.
+* [Crumey (2014)](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#crumey2014 "Human contrast threshold and astronomical visibility"): photometric conversions and Blackwell point/extended-target contrast thresholds.
+* [Krisciunas & Schaefer (1991)](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#krisciunas1991 "A model of the brightness of moonlight"): lunar phase photometry and scattered moonlight.
+* [Kasten & Young (1989)](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#kasten1989 "Revised optical air mass tables and approximation formula"): direct optical air mass.
 * [Astronomy Engine 2.1.19, MIT](https://github.com/cosinekitty/astronomy/tree/v2.1.19/source/js): optional ephemerides, libration and IAU axes.
 * [NASA Galilean facts](https://nssdc.gsfc.nasa.gov/planetary/factsheet/joviansatfact.html) and [ring dimensions](https://nssdc.gsfc.nasa.gov/planetary/factsheet/satringfact.html): numeric physical facts.
 * [deck.gl GlobeViewport, MIT](https://github.com/visgl/deck.gl/blob/master/modules/core/src/viewports/globe-viewport.ts): axis/scale compatibility reference; coordinate equations independently implemented.

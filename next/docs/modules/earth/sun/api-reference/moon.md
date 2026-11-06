@@ -91,8 +91,8 @@ For the Moon's contribution to the surrounding sky, use [`getScatteredMoonLumina
 ## References and licenses[​](#references-and-licenses "Direct link to References and licenses")
 
 * [SunCalc 1.9.0](https://github.com/mourner/suncalc/tree/v1.9.0) provides the adapted lunar ephemeris and illumination calculations. `moon.ts` and numeric reference fixtures carry **BSD-2-Clause** SPDX identifiers, Vladimir Agafonkin's original copyright, and source provenance. The full unchanged upstream notice is shipped in `LICENSE-SUNCALC`.
-* [Krisciunas and Schaefer (1991), A Model of the Brightness of Moonlight](https://visgl.github.io/math.gl/next/docs/bibliography.md#krisciunas1991 "A model of the brightness of moonlight").
-* [Kasten and Young (1989), Revised optical air mass tables and approximation formula](https://visgl.github.io/math.gl/next/docs/bibliography.md#kasten1989 "Revised optical air mass tables and approximation formula").
+* [Krisciunas and Schaefer (1991), A Model of the Brightness of Moonlight](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#krisciunas1991 "A model of the brightness of moonlight").
+* [Kasten and Young (1989), Revised optical air mass tables and approximation formula](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#kasten1989 "Revised optical air mass tables and approximation formula").
 * [USNO approximate sidereal time](https://aa.usno.navy.mil/faq/GAST).
 
 The moonlight and star-field code independently implements published mathematical equations; no code from those papers or from SOFA is copied. These original files retain math.gl's MIT SPDX/copyright headers. The MIT package declaration does not relicense the BSD lunar code.
