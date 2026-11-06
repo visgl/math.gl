@@ -76,15 +76,26 @@ if (mat3NormalFromMat4(normalMatrix, model) !== null) {
 A singular input returns `null`; do not consume the output as a newly computed normal
 matrix in that case. See [Matrix3](../api-reference/matrix3.md).
 
-## Decomposition limits
+## Affine decomposition
 
-`mat4Decompose(rotationOut, translationOut, scaleOut, matrix)` exists, as does
-`mat4.decompose`. Their current implementation is not a reliable general inverse of
-composition: reflected transforms lose the scale sign, rotated nonuniform scales
-can produce an incorrect rotation, and zero scale can produce non-finite values.
-`mat4GetRotation` also needs qualification for scaled transforms. Keep the original
-rotation and scale when those cases matter rather than reconstructing them with
-these functions. Sheared matrices need an explicit decomposition contract as well.
+`mat4Decompose(rotationOut, translationOut, scaleOut, matrix)` and
+`mat4.decompose` support finite, nonsingular affine translation/rotation/scale
+matrices, including nonuniform scale and reflections. They return the quaternion
+output. Reflections are represented with a negative X scale; the original individual
+axis sign assignments are not uniquely recoverable.
+
+`mat4GetRotation`, `Matrix4.getRotation()` and `getRotationMatrix3()` use the same
+validated decomposition. Sheared, singular, non-finite and projective inputs throw
+`RangeError` before writing outputs. Normalized columns must be orthogonal within
+`1e-7`. Supply distinct output buffers for rotation, translation and scale.
+
+## Additional helpers
+
+[Numeric helpers](../api-reference/numeric-helpers.md) add projection, reflection,
+length controls, damping and quaternion stepping. [SampleTrack](../api-reference/sample-track.md)
+evaluates timestamped scalar, vector and quaternion samples. The depth-aware
+projection functions and [frustum extraction](../../geometry/culling/api-reference/extended-queries.md)
+also support explicit reversed depth.
 
 ## Geometry queries and curves
 

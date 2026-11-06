@@ -3,7 +3,7 @@
 ## Core math and geometry
 
 The [core math and geometry roadmap](./math-roadmap.md) separates existing APIs
-from six remaining tranches: transform correctness, bounds/camera math, numeric
+from the implementation status and follow-ups across six tranches: transform correctness, bounds/camera math, numeric
 conveniences, geometric queries, interpolation/curves, and optional domains.
 
 ## 3D Primitives
