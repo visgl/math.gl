@@ -1,4 +1,4 @@
-# Map projection families
+# Map projection families 🧪
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -230,4 +230,4 @@ and [myriahedral background](../projection/developer-guide/myriahedral-projectio
 Nico Belmonte is credited for his influential demonstration; his application code
 is not incorporated.
 
-See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

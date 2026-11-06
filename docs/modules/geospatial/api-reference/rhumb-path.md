@@ -82,4 +82,4 @@ WebKit. Native generation remains offline; ordinary CI verifies stored provenanc
 The adapter is original MIT math.gl code. Existing GeographicLib acknowledgements
 and packaged licenses remain with the underlying solver. No dependency is added.
 
-See [References and credits](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

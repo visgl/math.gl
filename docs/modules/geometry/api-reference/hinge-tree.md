@@ -1,8 +1,8 @@
-# HingeTree (experimental)
+# HingeTree 🧪
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
-  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" />
 </p>
 
 Evaluates rigid panels connected by hinges, independently of mesh generation and rendering.

@@ -8,10 +8,10 @@
         "id": "README",
         "label": "Introduction"
       },
-      "whats-new",
-      "upgrade-guide",
+      "community",
       "references-and-credits",
-      "bibliography"
+      "whats-new",
+      "upgrade-guide"
     ]
   },
   {
@@ -28,378 +28,631 @@
   },
   {
     "type": "category",
-    "label": "API Reference",
+    "label": "Modules",
     "items": [
       {
         "type": "category",
-        "label": "@math.gl/core/types",
+        "label": "Core",
         "items": [
-          "modules/core/types/README",
-          "modules/core/types/api-reference/array-types",
-          "modules/core/types/api-reference/bounds"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/core",
-        "items": [
-          "modules/core/README",
           {
             "type": "category",
-            "label": "Developer Guide",
+            "label": "Guide",
             "items": [
-              "modules/core/developer-guide/transformations",
-              "modules/core/developer-guide/functional-math",
-              "modules/core/developer-guide/view-and-projection",
-              "modules/core/developer-guide/homogeneous-coordinates",
-              "modules/core/developer-guide/coordinate-systems",
-              "modules/core/developer-guide/rotations",
-              "modules/core/developer-guide/floating-point"
-            ]
-          },
-          "modules/core/api-reference/euler",
-          "modules/core/api-reference/math-array",
-          "modules/core/api-reference/matrix",
-          "modules/core/api-reference/matrix3",
-          "modules/core/api-reference/matrix4",
-          "modules/core/api-reference/pose",
-          "modules/core/api-reference/quaternion",
-          "modules/core/api-reference/spherical-coordinates",
-          "modules/core/api-reference/spheroid",
-          "modules/core/api-reference/local-frame",
-          "modules/core/api-reference/utilities",
-          "modules/core/api-reference/vector",
-          "modules/core/api-reference/vector2",
-          "modules/core/api-reference/vector3",
-          "modules/core/api-reference/vector4"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/core/tasks",
-        "items": [
-          "modules/core/tasks/README",
-          "modules/core/tasks/developer-guide/task-runner",
-          "modules/core/tasks/api-reference/task-runner",
-          "modules/core/tasks/developer-guide/migration",
-          "modules/core/developer-guide/workers",
-          "modules/core/tasks/developer-guide/execution",
-          "modules/core/tasks/developer-guide/custom-workers",
-          "modules/core/tasks/developer-guide/persistent-resources",
-          "modules/core/tasks/developer-guide/shared-memory",
-          "modules/core/tasks/developer-guide/benchmarks",
-          "modules/core/tasks/api-reference/runtime"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/core/expressions (experimental)",
-        "items": [
-          "modules/core/expressions/README",
-          "modules/core/expressions/api-reference/expression-eval",
-          "modules/core/expressions/api-reference/function-registry",
-          "modules/core/expressions/api-reference/dggs-function-libraries",
-          "modules/core/expressions/api-reference/parse-expression-string"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/geometry/curves",
-        "items": [
-          "modules/geometry/curves/README",
-          "modules/geometry/curves/api-reference/curves",
-          "modules/geometry/curves/api-reference/curve-arc-length"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/geometry/spatial-index (POC)",
-        "items": [
-          "modules/geometry/spatial-index/README"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/geometry",
-        "items": [
-          "modules/geometry/README",
-          "modules/geometry/unfolding-earth",
-          "modules/geometry/api-reference/geometry",
-          "modules/geometry/api-reference/hinge-tree",
-          "modules/geometry/api-reference/box-geometry",
-          "modules/geometry/api-reference/cube-geometry",
-          "modules/geometry/api-reference/capsule-geometry",
-          "modules/geometry/api-reference/cylinder-geometry",
-          "modules/geometry/api-reference/cone-geometry",
-          "modules/geometry/api-reference/truncated-cone-geometry",
-          "modules/geometry/api-reference/plane-geometry",
-          "modules/geometry/api-reference/sphere-geometry",
-          "modules/geometry/api-reference/ico-sphere-geometry",
-          "modules/geometry/api-reference/prism-geometry",
-          "modules/geometry/api-reference/ring-geometry",
-          "modules/geometry/api-reference/parametric"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/geometry/culling",
-        "items": [
-          "modules/geometry/culling/README",
-          "modules/geometry/culling/api-reference/queries",
-          "modules/geometry/culling/api-reference/axis-aligned-bounding-box",
-          "modules/geometry/culling/api-reference/bounding-sphere",
-          "modules/geometry/culling/api-reference/bounding-volume",
-          "modules/geometry/culling/api-reference/culling-volume",
-          "modules/geometry/culling/api-reference/oriented-bounding-box",
-          "modules/geometry/culling/api-reference/plane",
-          "modules/geometry/culling/api-reference/ray",
-          "modules/geometry/culling/api-reference/shapes"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/geometry/utils",
-        "items": [
-          "modules/geometry/utils/README",
-          "modules/geometry/utils/api-reference/geometry-utils",
-          "modules/geometry/utils/api-reference/mesh-processing",
-          "modules/geometry/utils/api-reference/interpolate-packed-attributes",
-          "modules/geometry/utils/api-reference/qualify-surface-transition"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/geospatial/wkb",
-        "items": [
-          "modules/geospatial/wkb/README",
-          "modules/geospatial/wkb/api-reference/wkb"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/geospatial/geoarrow",
-        "items": [
-          "modules/geospatial/geoarrow/README",
-          "modules/geospatial/geoarrow/physical-layouts",
-          "modules/geospatial/geoarrow/geometry-streams",
-          "modules/geospatial/geoarrow/api-reference/geoarrow",
-          "modules/geospatial/geoarrow/migration-guide"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/earth",
-        "items": [
-          "modules/earth/README"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/earth/geoid",
-        "items": [
-          "modules/earth/geoid/README",
-          {
-            "type": "category",
-            "label": "Developer Guide",
-            "items": [
-              "modules/earth/geoid/developer-guide/geospatial-models"
-            ]
-          },
-          "modules/earth/geoid/api-reference/geoid",
-          "modules/earth/geoid/api-reference/parse-pgm",
-          "modules/earth/geoid/api-reference/create-geoid-from-grid"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/geospatial",
-        "items": [
-          "modules/geospatial/README",
-          "modules/geospatial/terrain/README",
-          "modules/geospatial/developer-guide/terminology",
-          "modules/geospatial/api-reference/ellipsoid",
-          "modules/geospatial/api-reference/ellipsoid-metrics",
-          "modules/geospatial/api-reference/geodesic-polygon",
-          "modules/geospatial/api-reference/ellipsoid-rhumb",
-          "modules/geospatial/api-reference/geodesic-intersections",
-          "modules/geospatial/api-reference/globe-queries",
-          "modules/geospatial/api-reference/subdivide-globe-mesh",
-          "modules/geospatial/api-reference/geodesic-path",
-          "modules/geospatial/api-reference/subdivide-geodesic-polyline",
-          "modules/geospatial/api-reference/rhumb-path",
-          "modules/geospatial/api-reference/geographic-seams",
-          "modules/geospatial/api-reference/latitude-geographic-cuts",
-          "modules/geospatial/api-reference/geographic-atlas",
-          "modules/geospatial/api-reference/global-geographic-cuts",
-          "modules/geospatial/api-reference/geographic-tiles",
-          "modules/geospatial/api-reference/tile-matrix",
-          "modules/geospatial/api-reference/ellipsoid-tangent-plane",
-          "modules/geospatial/api-reference/local-reference-frame",
-          "modules/geospatial/api-reference/local-frame-qualification",
-          "modules/geospatial/api-reference/ellipsoid-geodesic-exact",
-          "modules/geospatial/api-reference/geodesic-exact-area-qualification",
-          "modules/geospatial/api-reference/triaxial-geometry",
-          "modules/geospatial/api-reference/coordinate-utilities",
-          "modules/geospatial/api-reference/geodesic-line-buffer",
-          "modules/geospatial/api-reference/geodesic-g89-qualification",
-          "modules/geospatial/api-reference/lng-lat-rectangle",
-          "modules/geospatial/api-reference/make-obb-from-region",
-          "modules/geospatial/api-reference/helpers"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/geometry/polygon",
-        "items": [
-          "modules/geometry/polygon/api-reference/clip-polygon",
-          "modules/geometry/polygon/api-reference/clip-polyline",
-          "modules/geometry/polygon/api-reference/subdivide-polyline",
-          "modules/geometry/polygon/api-reference/subdivide-triangle-mesh",
-          "modules/geometry/polygon/api-reference/clip-triangle-mesh",
-          "modules/geometry/polygon/api-reference/cut-polygon-by-grid",
-          "modules/geometry/polygon/api-reference/cut-polyline-by-grid",
-          "modules/geometry/polygon/api-reference/cut-polygon-by-mercator-bounds",
-          "modules/geometry/polygon/api-reference/cut-polyline-by-mercator-bounds",
-          "modules/geometry/polygon/api-reference/polygon"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/geospatial/crs",
-        "items": [
-          "modules/geospatial/crs/README",
-          {
-            "type": "category",
-            "label": "Developer Guide",
-            "items": [
-              "modules/geospatial/crs/developer-guide/coordinate-reference-systems",
-              "modules/geospatial/crs/developer-guide/raster-mesh-preparation"
-            ]
-          },
-          "modules/geospatial/crs/api-reference/spatial-reference",
-          "modules/geospatial/crs/api-reference/resolver",
-          "modules/geospatial/crs/api-reference/crs-descriptor"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/geospatial/projection",
-        "items": [
-          "modules/geospatial/projection/README",
-          "modules/geospatial/projection/developer-guide/discontinuous-projections",
-          "modules/geospatial/myriahedral-maps",
-          "modules/geospatial/elastic-maps",
-          "modules/geospatial/discontinuous/projection-catalog",
-          "modules/geospatial/discontinuous/README",
-          "modules/geospatial/discontinuous/myriahedral",
-          {
-            "type": "category",
-            "label": "Developer Guide",
-            "items": [
-              "modules/geospatial/projection/developer-guide/api-guide",
-              "modules/geospatial/projection/developer-guide/map-engine",
-              "modules/geospatial/projection/developer-guide/coordinate-systems",
-              "modules/geospatial/projection/developer-guide/projections",
-              "modules/geospatial/projection/developer-guide/myriahedral-projections",
-              "modules/geospatial/projection/developer-guide/projection-engine",
-              "modules/geospatial/projection/developer-guide/external-projection-engines",
-              "modules/geospatial/projection/developer-guide/deformation-models",
-              "modules/geospatial/projection/developer-guide/support"
-            ]
+              {
+                "type": "category",
+                "label": "Preliminaries",
+                "link": {
+                  "type": "generated-index",
+                  "title": "Preliminaries",
+                  "description": "Mathematical foundations for working with transformations and 3D coordinates.",
+                  "slug": "/modules/core/guide/preliminaries"
+                },
+                "items": [
+                  "modules/core/developer-guide/transformations",
+                  "modules/core/developer-guide/functional-math",
+                  "modules/core/developer-guide/view-and-projection",
+                  "modules/core/developer-guide/homogeneous-coordinates",
+                  "modules/core/developer-guide/coordinate-systems",
+                  "modules/core/developer-guide/rotations",
+                  "modules/core/developer-guide/floating-point"
+                ]
+              },
+              {
+                "type": "category",
+                "label": "Tasks",
+                "items": [
+                  "modules/core/tasks/developer-guide/task-runner",
+                  "modules/core/tasks/developer-guide/migration",
+                  "modules/core/developer-guide/workers",
+                  "modules/core/tasks/developer-guide/execution",
+                  "modules/core/tasks/developer-guide/custom-workers",
+                  "modules/core/tasks/developer-guide/persistent-resources",
+                  "modules/core/tasks/developer-guide/shared-memory",
+                  "modules/core/tasks/developer-guide/benchmarks"
+                ],
+                "link": {
+                  "type": "generated-index",
+                  "title": "Core Tasks Guide",
+                  "description": "Guides and background for Core: Tasks.",
+                  "slug": "/modules/core/guide/tasks"
+                }
+              }
+            ],
+            "link": {
+              "type": "generated-index",
+              "title": "Core Guide",
+              "description": "Guides and background for Core.",
+              "slug": "/modules/core/guide"
+            }
           },
           {
             "type": "category",
-            "label": "API Reference",
+            "label": "API",
             "items": [
-              "modules/geospatial/projection/api-reference/projection",
-              "modules/geospatial/projection/api-reference/map-engine",
-              "modules/geospatial/projection/api-reference/elastic",
-              "modules/geospatial/projection/api-reference/projection-engine",
-              "modules/geospatial/projection/api-reference/projection-transform",
-              "modules/geospatial/projection/api-reference/projection-pipeline",
-              "modules/geospatial/projection/api-reference/operation-catalog",
-              "modules/geospatial/projection/api-reference/projection-analysis",
-              "modules/geospatial/projection/api-reference/projection-buffer"
-            ]
-          },
-          {
-            "type": "category",
-            "label": "Validation and Measurements",
-            "items": [
-              "modules/geospatial/projection/ellipsoid-qualification",
-              "modules/geospatial/projection/ellipsoid-p0-qualification",
-              "modules/geospatial/projection/deformation-qualification",
-              "modules/geospatial/projection/benchmarks",
-              "modules/geospatial/projection/scorecard",
-              "modules/geospatial/projection/scorecard-methodology",
-              "modules/geospatial/projection/acceleration",
-              "modules/geospatial/projection/parity-audit",
-              "modules/geospatial/projection/independent-validation",
-              "modules/geospatial/projection/modern-proj-audit",
-              "modules/geospatial/projection/accuracy-domains"
+              {
+                "type": "category",
+                "label": "@math.gl/core",
+                "items": [
+                  "modules/core/api-reference/euler",
+                  "modules/core/api-reference/math-array",
+                  "modules/core/api-reference/matrix",
+                  "modules/core/api-reference/matrix3",
+                  "modules/core/api-reference/matrix4",
+                  "modules/core/api-reference/pose",
+                  "modules/core/api-reference/quaternion",
+                  "modules/core/api-reference/spherical-coordinates",
+                  "modules/core/api-reference/spheroid",
+                  "modules/core/api-reference/local-frame",
+                  "modules/core/api-reference/utilities",
+                  "modules/core/api-reference/vector",
+                  "modules/core/api-reference/vector2",
+                  "modules/core/api-reference/vector3",
+                  "modules/core/api-reference/vector4"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/core/README"
+                }
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/core/types",
+                "items": [
+                  "modules/core/types/api-reference/array-types",
+                  "modules/core/types/api-reference/bounds"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/core/types/README"
+                }
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/core/tasks",
+                "items": [
+                  "modules/core/tasks/api-reference/task-runner",
+                  "modules/core/tasks/api-reference/runtime"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/core/tasks/README"
+                }
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/core/expressions",
+                "items": [
+                  "modules/core/expressions/api-reference/expression-eval",
+                  "modules/core/expressions/api-reference/function-registry",
+                  "modules/core/expressions/api-reference/dggs-function-libraries",
+                  "modules/core/expressions/api-reference/parse-expression-string"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/core/expressions/README"
+                }
+              }
             ]
           }
-        ]
+        ],
+        "link": {
+          "type": "doc",
+          "id": "modules/core/README"
+        }
       },
       {
         "type": "category",
-        "label": "@math.gl/earth/sun",
+        "label": "Geometry",
         "items": [
-          "modules/earth/sun/README",
-          "modules/earth/sun/api-reference/sun",
-          "modules/earth/sun/api-reference/get-sun-terminator",
-          "modules/earth/sun/api-reference/moon",
-          "modules/earth/sun/api-reference/get-planet-sky-info",
-          "modules/earth/sun/api-reference/stars",
-          "modules/earth/sun/api-reference/sky"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/earth/timezone",
-        "items": [
-          "modules/earth/timezone/README",
-          "modules/earth/timezone/api-reference/timezone"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/web-mercator",
-        "items": [
-          "modules/web-mercator/README",
           {
             "type": "category",
-            "label": "Developer Guide",
+            "label": "Guide",
+            "items": [
+              {
+                "type": "category",
+                "label": "Spatial Index",
+                "items": [
+                  "modules/geometry/spatial-index/README"
+                ],
+                "link": {
+                  "type": "generated-index",
+                  "title": "Geometry Spatial Index Guide",
+                  "description": "Guides and background for Geometry: Spatial Index.",
+                  "slug": "/modules/geometry/guide/spatial-index"
+                }
+              },
+              "modules/geometry/unfolding-earth"
+            ],
+            "link": {
+              "type": "generated-index",
+              "title": "Geometry Guide",
+              "description": "Guides and background for Geometry.",
+              "slug": "/modules/geometry/guide"
+            }
+          },
+          {
+            "type": "category",
+            "label": "API",
+            "items": [
+              {
+                "type": "category",
+                "label": "@math.gl/geometry",
+                "items": [
+                  "modules/geometry/api-reference/geometry",
+                  "modules/geometry/api-reference/hinge-tree",
+                  "modules/geometry/api-reference/box-geometry",
+                  "modules/geometry/api-reference/cube-geometry",
+                  "modules/geometry/api-reference/capsule-geometry",
+                  "modules/geometry/api-reference/cylinder-geometry",
+                  "modules/geometry/api-reference/cone-geometry",
+                  "modules/geometry/api-reference/truncated-cone-geometry",
+                  "modules/geometry/api-reference/plane-geometry",
+                  "modules/geometry/api-reference/sphere-geometry",
+                  "modules/geometry/api-reference/ico-sphere-geometry",
+                  "modules/geometry/api-reference/prism-geometry",
+                  "modules/geometry/api-reference/ring-geometry",
+                  "modules/geometry/api-reference/parametric"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/geometry/README"
+                }
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/geometry/culling",
+                "items": [
+                  "modules/geometry/culling/api-reference/queries",
+                  "modules/geometry/culling/api-reference/axis-aligned-bounding-box",
+                  "modules/geometry/culling/api-reference/bounding-sphere",
+                  "modules/geometry/culling/api-reference/bounding-volume",
+                  "modules/geometry/culling/api-reference/culling-volume",
+                  "modules/geometry/culling/api-reference/oriented-bounding-box",
+                  "modules/geometry/culling/api-reference/plane",
+                  "modules/geometry/culling/api-reference/ray",
+                  "modules/geometry/culling/api-reference/shapes"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/geometry/culling/README"
+                }
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/geometry/curves",
+                "items": [
+                  "modules/geometry/curves/api-reference/curves",
+                  "modules/geometry/curves/api-reference/curve-arc-length"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/geometry/curves/README"
+                }
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/geometry/polygon",
+                "items": [
+                  "modules/geometry/polygon/api-reference/clip-polygon",
+                  "modules/geometry/polygon/api-reference/clip-polyline",
+                  "modules/geometry/polygon/api-reference/subdivide-polyline",
+                  "modules/geometry/polygon/api-reference/subdivide-triangle-mesh",
+                  "modules/geometry/polygon/api-reference/clip-triangle-mesh",
+                  "modules/geometry/polygon/api-reference/cut-polygon-by-grid",
+                  "modules/geometry/polygon/api-reference/cut-polyline-by-grid",
+                  "modules/geometry/polygon/api-reference/cut-polygon-by-mercator-bounds",
+                  "modules/geometry/polygon/api-reference/cut-polyline-by-mercator-bounds",
+                  "modules/geometry/polygon/api-reference/polygon"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/geometry/polygon/README"
+                }
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/geometry/utils",
+                "items": [
+                  "modules/geometry/utils/api-reference/geometry-utils",
+                  "modules/geometry/utils/api-reference/mesh-processing",
+                  "modules/geometry/utils/api-reference/interpolate-packed-attributes",
+                  "modules/geometry/utils/api-reference/qualify-surface-transition"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/geometry/utils/README"
+                }
+              }
+            ]
+          }
+        ],
+        "link": {
+          "type": "doc",
+          "id": "modules/geometry/README"
+        }
+      },
+      {
+        "type": "category",
+        "label": "Geospatial",
+        "items": [
+          {
+            "type": "category",
+            "label": "Guide",
+            "items": [
+              {
+                "type": "category",
+                "label": "GeoArrow",
+                "items": [
+                  "modules/geospatial/geoarrow/physical-layouts",
+                  "modules/geospatial/geoarrow/geometry-streams",
+                  "modules/geospatial/geoarrow/migration-guide"
+                ],
+                "link": {
+                  "type": "generated-index",
+                  "title": "Geospatial GeoArrow Guide",
+                  "description": "Guides and background for Geospatial: GeoArrow.",
+                  "slug": "/modules/geospatial/guide/geoarrow"
+                }
+              },
+              "modules/geospatial/terrain/README",
+              "modules/geospatial/developer-guide/terminology",
+              {
+                "type": "category",
+                "label": "CRS",
+                "items": [
+                  "modules/geospatial/crs/developer-guide/coordinate-reference-systems",
+                  "modules/geospatial/crs/developer-guide/raster-mesh-preparation"
+                ],
+                "link": {
+                  "type": "generated-index",
+                  "title": "Geospatial CRS Guide",
+                  "description": "Guides and background for Geospatial: CRS.",
+                  "slug": "/modules/geospatial/guide/crs"
+                }
+              },
+              {
+                "type": "category",
+                "label": "Projection",
+                "items": [
+                  "modules/geospatial/projection/developer-guide/discontinuous-projections",
+                  "modules/geospatial/myriahedral-maps",
+                  "modules/geospatial/elastic-maps",
+                  "modules/geospatial/discontinuous/projection-catalog",
+                  "modules/geospatial/discontinuous/README",
+                  "modules/geospatial/discontinuous/myriahedral",
+                  "modules/geospatial/projection/developer-guide/api-guide",
+                  "modules/geospatial/projection/developer-guide/map-engine",
+                  "modules/geospatial/projection/developer-guide/coordinate-systems",
+                  "modules/geospatial/projection/developer-guide/projections",
+                  "modules/geospatial/projection/developer-guide/myriahedral-projections",
+                  "modules/geospatial/projection/developer-guide/projection-engine",
+                  "modules/geospatial/projection/developer-guide/external-projection-engines",
+                  "modules/geospatial/projection/developer-guide/deformation-models",
+                  "modules/geospatial/projection/developer-guide/support",
+                  "modules/geospatial/projection/ellipsoid-qualification",
+                  "modules/geospatial/projection/ellipsoid-p0-qualification",
+                  "modules/geospatial/projection/deformation-qualification",
+                  "modules/geospatial/projection/benchmarks",
+                  "modules/geospatial/projection/scorecard",
+                  "modules/geospatial/projection/scorecard-methodology",
+                  "modules/geospatial/projection/acceleration",
+                  "modules/geospatial/projection/parity-audit",
+                  "modules/geospatial/projection/independent-validation",
+                  "modules/geospatial/projection/modern-proj-audit",
+                  "modules/geospatial/projection/accuracy-domains"
+                ],
+                "link": {
+                  "type": "generated-index",
+                  "title": "Geospatial Projection Guide",
+                  "description": "Guides and background for Geospatial: Projection.",
+                  "slug": "/modules/geospatial/guide/projection"
+                }
+              }
+            ],
+            "link": {
+              "type": "generated-index",
+              "title": "Geospatial Guide",
+              "description": "Guides and background for Geospatial.",
+              "slug": "/modules/geospatial/guide"
+            }
+          },
+          {
+            "type": "category",
+            "label": "API",
+            "items": [
+              {
+                "type": "category",
+                "label": "@math.gl/geospatial",
+                "items": [
+                  "modules/geospatial/api-reference/ellipsoid",
+                  "modules/geospatial/api-reference/ellipsoid-metrics",
+                  "modules/geospatial/api-reference/geodesic-polygon",
+                  "modules/geospatial/api-reference/ellipsoid-rhumb",
+                  "modules/geospatial/api-reference/geodesic-intersections",
+                  "modules/geospatial/api-reference/globe-queries",
+                  "modules/geospatial/api-reference/subdivide-globe-mesh",
+                  "modules/geospatial/api-reference/geodesic-path",
+                  "modules/geospatial/api-reference/subdivide-geodesic-polyline",
+                  "modules/geospatial/api-reference/rhumb-path",
+                  "modules/geospatial/api-reference/geographic-seams",
+                  "modules/geospatial/api-reference/latitude-geographic-cuts",
+                  "modules/geospatial/api-reference/geographic-atlas",
+                  "modules/geospatial/api-reference/global-geographic-cuts",
+                  "modules/geospatial/api-reference/geographic-tiles",
+                  "modules/geospatial/api-reference/tile-matrix",
+                  "modules/geospatial/api-reference/ellipsoid-tangent-plane",
+                  "modules/geospatial/api-reference/local-reference-frame",
+                  "modules/geospatial/api-reference/local-frame-qualification",
+                  "modules/geospatial/api-reference/ellipsoid-geodesic-exact",
+                  "modules/geospatial/api-reference/geodesic-exact-area-qualification",
+                  "modules/geospatial/api-reference/triaxial-geometry",
+                  "modules/geospatial/api-reference/coordinate-utilities",
+                  "modules/geospatial/api-reference/geodesic-line-buffer",
+                  "modules/geospatial/api-reference/geodesic-g89-qualification",
+                  "modules/geospatial/api-reference/lng-lat-rectangle",
+                  "modules/geospatial/api-reference/make-obb-from-region",
+                  "modules/geospatial/api-reference/helpers"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/geospatial/README"
+                }
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/geospatial/crs",
+                "items": [
+                  "modules/geospatial/crs/api-reference/spatial-reference",
+                  "modules/geospatial/crs/api-reference/resolver",
+                  "modules/geospatial/crs/api-reference/crs-descriptor"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/geospatial/crs/README"
+                }
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/geospatial/geoarrow",
+                "items": [
+                  "modules/geospatial/geoarrow/api-reference/geoarrow"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/geospatial/geoarrow/README"
+                }
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/geospatial/projection",
+                "items": [
+                  "modules/geospatial/projection/api-reference/projection",
+                  "modules/geospatial/projection/api-reference/map-engine",
+                  "modules/geospatial/projection/api-reference/elastic",
+                  "modules/geospatial/projection/api-reference/projection-engine",
+                  "modules/geospatial/projection/api-reference/projection-transform",
+                  "modules/geospatial/projection/api-reference/projection-pipeline",
+                  "modules/geospatial/projection/api-reference/operation-catalog",
+                  "modules/geospatial/projection/api-reference/projection-analysis",
+                  "modules/geospatial/projection/api-reference/projection-buffer"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/geospatial/projection/README"
+                }
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/geospatial/wkb",
+                "items": [
+                  "modules/geospatial/wkb/api-reference/wkb"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/geospatial/wkb/README"
+                }
+              }
+            ]
+          }
+        ],
+        "link": {
+          "type": "doc",
+          "id": "modules/geospatial/README"
+        }
+      },
+      {
+        "type": "category",
+        "label": "Earth",
+        "items": [
+          {
+            "type": "category",
+            "label": "Guide",
+            "items": [
+              {
+                "type": "category",
+                "label": "Geoid",
+                "items": [
+                  "modules/earth/geoid/developer-guide/geospatial-models"
+                ],
+                "link": {
+                  "type": "generated-index",
+                  "title": "Earth Geoid Guide",
+                  "description": "Guides and background for Earth: Geoid.",
+                  "slug": "/modules/earth/guide/geoid"
+                }
+              }
+            ],
+            "link": {
+              "type": "generated-index",
+              "title": "Earth Guide",
+              "description": "Guides and background for Earth.",
+              "slug": "/modules/earth/guide"
+            }
+          },
+          {
+            "type": "category",
+            "label": "API",
+            "items": [
+              {
+                "type": "category",
+                "label": "@math.gl/earth/geoid",
+                "items": [
+                  "modules/earth/geoid/api-reference/geoid",
+                  "modules/earth/geoid/api-reference/parse-pgm",
+                  "modules/earth/geoid/api-reference/create-geoid-from-grid"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/earth/geoid/README"
+                }
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/earth/sun",
+                "items": [
+                  "modules/earth/sun/api-reference/sun",
+                  "modules/earth/sun/api-reference/get-sun-terminator",
+                  "modules/earth/sun/api-reference/moon",
+                  "modules/earth/sun/api-reference/get-planet-sky-info",
+                  "modules/earth/sun/api-reference/stars",
+                  "modules/earth/sun/api-reference/sky"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/earth/sun/README"
+                }
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/earth/timezone",
+                "items": [
+                  "modules/earth/timezone/api-reference/timezone"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/earth/timezone/README"
+                }
+              }
+            ]
+          }
+        ],
+        "link": {
+          "type": "doc",
+          "id": "modules/earth/README"
+        }
+      },
+      {
+        "type": "category",
+        "label": "DGGS",
+        "items": [
+          {
+            "type": "category",
+            "label": "Guide",
+            "items": [
+              "modules/dggs/developer-guide/dggs"
+            ],
+            "link": {
+              "type": "generated-index",
+              "title": "DGGS Guide",
+              "description": "Guides and background for DGGS.",
+              "slug": "/modules/dggs/guide"
+            }
+          },
+          {
+            "type": "category",
+            "label": "API",
+            "items": [
+              {
+                "type": "category",
+                "label": "@math.gl/dggs",
+                "items": [
+                  "modules/dggs/api-reference/dggs-decoder",
+                  "modules/dggs/api-reference/a5-decoder",
+                  "modules/dggs/api-reference/geohash-decoder",
+                  "modules/dggs/api-reference/h3-decoder",
+                  "modules/dggs/api-reference/plus-code-decoder",
+                  "modules/dggs/api-reference/quadkey-decoder",
+                  "modules/dggs/api-reference/s2-decoder"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/dggs/README"
+                }
+              }
+            ]
+          }
+        ],
+        "link": {
+          "type": "doc",
+          "id": "modules/dggs/README"
+        }
+      },
+      {
+        "type": "category",
+        "label": "Web Mercator",
+        "items": [
+          {
+            "type": "category",
+            "label": "Guide",
             "items": [
               "modules/web-mercator/developer-guide/web-mercator-coordinates",
               "modules/web-mercator/developer-guide/web-mercator-offset-accuracy"
-            ]
+            ],
+            "link": {
+              "type": "generated-index",
+              "title": "Web Mercator Guide",
+              "description": "Guides and background for Web Mercator.",
+              "slug": "/modules/web-mercator/guide"
+            }
           },
-          "modules/web-mercator/api-reference/web-mercator-utils",
-          "modules/web-mercator/api-reference/web-mercator-viewport"
-        ]
-      },
-      {
-        "type": "category",
-        "label": "@math.gl/dggs",
-        "items": [
-          "modules/dggs/README",
           {
             "type": "category",
-            "label": "Developer Guide",
+            "label": "API",
             "items": [
-              "modules/dggs/developer-guide/dggs"
+              {
+                "type": "category",
+                "label": "@math.gl/web-mercator",
+                "items": [
+                  "modules/web-mercator/api-reference/web-mercator-utils",
+                  "modules/web-mercator/api-reference/web-mercator-viewport"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/web-mercator/README"
+                }
+              }
             ]
-          },
-          "modules/dggs/api-reference/dggs-decoder",
-          "modules/dggs/api-reference/a5-decoder",
-          "modules/dggs/api-reference/geohash-decoder",
-          "modules/dggs/api-reference/h3-decoder",
-          "modules/dggs/api-reference/plus-code-decoder",
-          "modules/dggs/api-reference/quadkey-decoder",
-          "modules/dggs/api-reference/s2-decoder"
-        ]
+          }
+        ],
+        "link": {
+          "type": "doc",
+          "id": "modules/web-mercator/README"
+        }
       }
-    ]
+    ],
+    "link": {
+      "type": "doc",
+      "id": "modules/README"
+    }
   }
 ]

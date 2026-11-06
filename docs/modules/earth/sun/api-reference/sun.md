@@ -355,4 +355,4 @@ It compares four cloud heights and three Sun-ray shadow depths through a shared
 Sun-altitude slider. The SVG shapes are original and illustrative; the generated
 page has no external runtime or artwork dependencies.
 
-See [References and credits](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+See [Attributions](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
