@@ -38,7 +38,7 @@ Malformed metadata/policy, missing methods, asynchronous results and replacement
 
 ## Tested proj4js example[​](#tested-proj4js-example "Direct link to Tested proj4js example")
 
-The [complete example](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/examples/proj4-crs-descriptor.ts) prepares a real proj4js converter for spherical equidistant cylindrical coordinates:
+The [complete example](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/proj4-crs-descriptor.ts) prepares a real proj4js converter for spherical equidistant cylindrical coordinates:
 
 ```
 import {createProj4CRSDescriptor} from './proj4-crs-descriptor';
@@ -61,7 +61,7 @@ This bounded example projects XY and preserves height and measures. It supplies 
 The shared conformance tests exercise both a native descriptor and this proj4js descriptor: independent coordinate anchors, inverses, XY/XYZ/XYZM, typed outputs, in-place conversion, input ownership and failures before writes. Run them with:
 
 ```
-yarn exec vitest run --project node modules/geospatial/projection/test/lib/external-crs-descriptor.spec.ts
+yarn exec vitest run --project node modules/geospatial/test/projection/lib/external-crs-descriptor.spec.ts
 ```
 
 proj-wasm's asynchronous public API cannot directly supply these synchronous converters. Use it for definition resolution followed by native preparation, or for separate asynchronous preprocessing. See [external engines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/external-projection-engines.md).

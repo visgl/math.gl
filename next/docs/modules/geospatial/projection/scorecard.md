@@ -8,7 +8,7 @@ This snapshot includes three-sample diagnostic timings. Use the full measurement
 
 Source fingerprint: `b701953e7365f8fe9352784b1a44685b30bcc6ef3a7addab55408564008e5bf2`. Workload fingerprint: `431578e2deba15f5c55c55f37ec772a40dd889dbb371b5da72a0821eb52efde5`.
 
-Full measurements and raw samples: [machine-readable snapshot](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/scorecard.json). Collection commit: `2b7b741581f6a3eeddc3d2636089a1239f454bd1`. See [publication provenance](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/README.md) for the generating CI run and raw artifacts.
+Full measurements and raw samples: [machine-readable snapshot](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/qualification/scorecard.json). Collection commit: `2b7b741581f6a3eeddc3d2636089a1239f454bd1`. See [publication provenance](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/qualification/README.md) for the generating CI run and raw artifacts.
 
 ## Accuracy[​](#accuracy "Direct link to Accuracy")
 

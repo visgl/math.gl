@@ -42,23 +42,23 @@ No relative-area guarantee is claimed for arbitrary nearly cancelling, non-equat
 ```
 # Ordinary CI: no native library, compiler, download or extra Python package.
 
-python3 modules/geospatial/projection/scripts/generate-g34-reference.py --check
+python3 modules/geospatial/scripts/projection/generate-g34-reference.py --check
 
-node modules/geospatial/projection/scripts/qualify-g34.mjs --output /tmp/g34.json
+node modules/geospatial/scripts/projection/qualify-g34.mjs --output /tmp/g34.json
 
-node modules/geospatial/projection/scripts/qualify-g34.mjs --browser chromium --output /tmp/g34-chromium.json
+node modules/geospatial/scripts/projection/qualify-g34.mjs --browser chromium --output /tmp/g34-chromium.json
 ```
 
 To regenerate native values, verify the pinned archive hash, extract r2.7 and build its static C++ library with `GEOGRAPHICLIB_PRECISION=3` (for example CMake `-DGEOGRAPHICLIB_PRECISION=3 -DBUILD_SHARED_LIBS=OFF`). Compile the original `geographiclib-g34-oracle.cpp` driver with those generated/source include paths and that static library, using the same precision configuration. Then run:
 
 ```
-python3 modules/geospatial/projection/scripts/generate-g34-reference.py \
+python3 modules/geospatial/scripts/projection/generate-g34-reference.py \
 
   --archive /path/to/geographiclib-r2.7.tar.gz --oracle /path/to/g34-oracle
 
 # Same compiler/precision environment can check exact regeneration:
 
-python3 modules/geospatial/projection/scripts/generate-g34-reference.py \
+python3 modules/geospatial/scripts/projection/generate-g34-reference.py \
 
   --archive /path/to/geographiclib-r2.7.tar.gz --oracle /path/to/g34-oracle --check
 ```

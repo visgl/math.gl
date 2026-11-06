@@ -100,9 +100,9 @@ Both epochs must lie within the inclusive `epochRange`; neither comes from M or 
 An original standard-library Python oracle uses 90-digit Decimal arithmetic and a coupled root solve. **96 cases** combine all four laws on WGS84, a sphere and a flattened spheroid, with forward and separately perturbed inverse targets, event endpoints, fractional/positive/negative/zero intervals and polar positions. The sampled allowance is **5e-8 metres in fixed XYZ**. Tests additionally check both float precisions, mixed epoch buffers, preserved M, recursion and failure recovery. Float32 scalar/bulk agreement qualifies rounding, not this Float64 allowance. The same reference qualification runs in Node tests and three browser CI jobs.
 
 ```
-python3 modules/geospatial/projection/scripts/generate-temporal-reference.py --check
+python3 modules/geospatial/scripts/projection/generate-temporal-reference.py --check
 
-yarn exec vitest run --project node modules/geospatial/projection/test/lib/temporal.spec.ts
+yarn exec vitest run --project node modules/geospatial/test/projection/lib/temporal.spec.ts
 ```
 
 These are original synthetic fields and references, with no new third-party implementation or model data. Qualify real fields separately using the [application model harness](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/deformation-qualification.md). The vocabulary of rates and event functions also appears in [OGC deformation model guidance](https://docs.ogc.org/as/22-010r4/22-010r4.html); this API does not parse or claim conformance with that format.

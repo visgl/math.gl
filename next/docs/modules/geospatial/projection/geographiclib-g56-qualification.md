@@ -33,11 +33,11 @@ Parameter sensitivity grows without bound for parallel lines. Conditioning the p
 ## Reproduction[​](#reproduction "Direct link to Reproduction")
 
 ```
-python3 modules/geospatial/projection/scripts/generate-g56-reference.py --check
+python3 modules/geospatial/scripts/projection/generate-g56-reference.py --check
 
-node modules/geospatial/projection/scripts/qualify-g56.mjs --output /tmp/g56.json
+node modules/geospatial/scripts/projection/qualify-g56.mjs --output /tmp/g56.json
 
-node modules/geospatial/projection/scripts/qualify-g56.mjs --browser chromium --output /tmp/g56-chromium.json
+node modules/geospatial/scripts/projection/qualify-g56.mjs --browser chromium --output /tmp/g56-chromium.json
 ```
 
 CI uses stored native controls and recomputes independent Decimal controls. It never downloads or builds GeographicLib or PROJ. Node and Chromium/Firefox/WebKit run the same source workload; reports include source fingerprints and comparator provenance. Existing package/type/license and projection bundle gates still run.
@@ -45,7 +45,7 @@ CI uses stored native controls and recomputes independent Decimal controls. It n
 For native regeneration, use the same pinned archive/build instructions as [G3–G4](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/geographiclib-g34-qualification.md), additionally compile `Intersect.cpp`, and link the companion `geographiclib-g56-oracle.cpp` with `PolygonArea.cpp`, `Rhumb.cpp`, `Intersect.cpp` and the static GeographicLib library. Then run:
 
 ```
-python3 modules/geospatial/projection/scripts/generate-g56-reference.py \
+python3 modules/geospatial/scripts/projection/generate-g56-reference.py \
 
   --archive /path/to/geographiclib-r2.7.tar.gz --oracle /path/to/g56-oracle
 ```

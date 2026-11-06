@@ -52,9 +52,9 @@ The next accuracy work should close these measured/domain gaps and use independe
 Download `src/geodesic.c` and `src/geodesic.h` from PROJ tag `9.9.0` into a local source directory, then run:
 
 ```
-python3 modules/geospatial/projection/scripts/generate-geodesic-qualification.py --source-dir /path/to/PROJ/src --check
+python3 modules/geospatial/scripts/projection/generate-geodesic-qualification.py --source-dir /path/to/PROJ/src --check
 
-node modules/geospatial/projection/scripts/qualify-geodesics.mjs
+node modules/geospatial/scripts/projection/qualify-geodesics.mjs
 ```
 
 The generator verifies both source SHA-256 hashes before compiling a temporary C oracle. It adds no runtime or test dependency; ordinary CI reads the stored binary64 fixture and checks generator provenance. Test inputs and the driver are original math.gl work, not copied upstream test data. GeographicLib runtime SPDX credits and packaged MIT license remain intact. The oracle sources are used offline and are not included in the package.

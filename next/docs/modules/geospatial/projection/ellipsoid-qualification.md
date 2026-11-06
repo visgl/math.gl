@@ -57,14 +57,14 @@ Positive finite axes alone do not guarantee representable squared ratios or geom
 Check both independent reference generators, then run qualification:
 
 ```
-python3 modules/geospatial/projection/scripts/generate-interior-reference.py --check
+python3 modules/geospatial/scripts/projection/generate-interior-reference.py --check
 
-python3 modules/geospatial/projection/scripts/generate-nearest-cusp-reference.py --check
+python3 modules/geospatial/scripts/projection/generate-nearest-cusp-reference.py --check
 
-node modules/geospatial/projection/scripts/qualify-interiors.mjs
+node modules/geospatial/scripts/projection/qualify-interiors.mjs
 ```
 
-Add `--browser chromium`, `--browser firefox` or `--browser webkit` to run the same rows in each browser. See the stored [qualification report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/interior-normal-node.json).
+Add `--browser chromium`, `--browser firefox` or `--browser webkit` to run the same rows in each browser. See the stored [qualification report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/qualification/interior-normal-node.json).
 
 ## P0 completion follow-up[​](#p0-completion-follow-up "Direct link to P0 completion follow-up")
 

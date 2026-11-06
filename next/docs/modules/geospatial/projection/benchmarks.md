@@ -65,7 +65,7 @@ Build the packages before measuring their published entry points:
 ```
 yarn build
 
-node modules/geospatial/projection/scripts/benchmark.mjs --points 50000 --samples 7 --allocations --output /tmp/proj4-benchmark.json
+node modules/geospatial/scripts/projection/benchmark.mjs --points 50000 --samples 7 --allocations --output /tmp/proj4-benchmark.json
 ```
 
 The standalone Node runner and browser qualification runner use the same workload as the live page: twenty-two scenarios, Float32/Float64, XY/XYZ/XYZM and both directions (264 rows, with three implementations per row). Select regional or clustered inputs with `--distribution regional|clustered`; set `--min-sample-ms` between 0 and 100 to control adaptive sampling. Zero disables calibration for correctness smoke checks and marks timings as limited. Buffer sizes range from 10 to 1,000,000 points.
@@ -77,7 +77,7 @@ Schema-version-2 JSON reports retain individual aggregate samples, per-buffer me
 ### Compare a runtime change with its base[​](#compare-a-runtime-change-with-its-base "Direct link to Compare a runtime change with its base")
 
 ```
-node modules/geospatial/projection/scripts/benchmark-compare.mjs --baseline-ref origin/master --points 20000 --samples 11 --output /tmp/proj4-comparison.json
+node modules/geospatial/scripts/projection/benchmark-compare.mjs --baseline-ref origin/master --points 20000 --samples 11 --output /tmp/proj4-comparison.json
 ```
 
 The comparison compiles baseline runtime sources from Git and current sources with the same bundler, package manifests and installed dependencies. It uses the current shared workload for both versions, validates both against proj4js, and rotates baseline/candidate flat/scalar execution order. It covers XY and XYZM in both precisions and directions; constructor batches alternate separately. `--scenarios` accepts comma-separated scenario names to focus a run. On eligible pull requests, CI measures nine representative scenarios against the actual base commit. CI uploads two artifacts from parallel jobs:
@@ -98,9 +98,9 @@ The standard Node/browser benchmark suites also include proj4 comparisons for bo
 For explicit operation chains, measure the actual units, axes, grids and epoch behavior rather than an isolated projection kernel:
 
 ```
-node modules/geospatial/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --output /tmp/projection-pipelines.json
+node modules/geospatial/scripts/projection/benchmark-pipeline-compare.mjs --baseline-ref origin/master --output /tmp/projection-pipelines.json
 
-node --expose-gc modules/geospatial/projection/scripts/benchmark-grid-compare.mjs --baseline-ref origin/master --memory --output /tmp/projection-grids.json
+node --expose-gc modules/geospatial/scripts/projection/benchmark-grid-compare.mjs --baseline-ref origin/master --memory --output /tmp/projection-grids.json
 ```
 
 Prepare grid readers and models outside warm coordinate timing, and measure that preparation separately when it affects startup. Reuse scalar outputs, scratch and layouts for repeated calls; include output copies and worker transfers when those are part of the application workload.

@@ -15,10 +15,10 @@ Local Apple M2 / macOS arm64 measurements on October 4, 2026, for **100,000 Floa
 | Web Mercator | WebKit 26.5            | 3 ms           | 4 ms       | 5 ms        |
 | UTM 31N      | WebKit 26.5            | 27 ms          | 31 ms      | 11 ms       |
 
-Two workers give approximately 1.5–2.5× throughput for the measured UTM case. Results vary by browser, buffer size, precision and direction. Many small cases are below the timer's useful resolution; no speed ratios should be inferred from zeros or submillisecond samples. Worker startup ranged from 10 to 267 ms in these local runs and can outweigh the warm gain. Raw samples, p10/p90, timing-limit/variation flags, source/workload hashes, engine/bootstrap sizes and startup costs are retained in [Chromium](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/worker-evaluation-chromium.json) and [WebKit](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/worker-evaluation-webkit.json) reports. These observations qualify this workload, not universal hardware/browser performance. CI executes correctness and records measurements in Chromium, Firefox and WebKit without a speed threshold.
+Two workers give approximately 1.5–2.5× throughput for the measured UTM case. Results vary by browser, buffer size, precision and direction. Many small cases are below the timer's useful resolution; no speed ratios should be inferred from zeros or submillisecond samples. Worker startup ranged from 10 to 267 ms in these local runs and can outweigh the warm gain. Raw samples, p10/p90, timing-limit/variation flags, source/workload hashes, engine/bootstrap sizes and startup costs are retained in [Chromium](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/qualification/worker-evaluation-chromium.json) and [WebKit](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/qualification/worker-evaluation-webkit.json) reports. These observations qualify this workload, not universal hardware/browser performance. CI executes correctness and records measurements in Chromium, Firefox and WebKit without a speed threshold.
 
 ```
-node modules/geospatial/projection/scripts/benchmark-workers.mjs \
+node modules/geospatial/scripts/projection/benchmark-workers.mjs \
 
   --browser chromium --points 1000,10000,100000 --samples 7 \
 

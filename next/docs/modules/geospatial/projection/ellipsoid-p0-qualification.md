@@ -17,7 +17,7 @@ Independent standard-library Decimal mathematics remains authoritative for Carte
 | ENU rotations                                                                                    | GeographicLib LocalCartesian at surface/interior/offset origins, poles, both hemispheres and scaled units                                                                                                                                                                       | `5e-14*a` displacement; Ellipsoid frame ownership/directions additionally have analytic checks                                                                                      |
 | Gnomonic                                                                                         | Sphere and Earth-like oblate shapes, several origins, forward points within the sampled horizon, inverse offsets through about `11*a`                                                                                                                                           | Existing `1e-5` Earth-unit forward ceiling scaled with radius; `1e-8` degrees inverse                                                                                               |
 
-The matrix contains **3,480 rows**: 930 Decimal geometry rows (720 wider-domain cases and 210 exact-input anchor cases) and 2,550 native C++ rows. Of these, **3,478 are gates** (including 21 intentional prolate-CRS rejection controls); two Exact many-circuit comparisons are explicitly diagnostic. The 210 legacy normal-support anchors now use independently computed inverse expectations for their actual stored XYZ values: ideal generating normals are not reliable inverse expectations after thin-surface coordinate rounding. Their existing `1e-9` degree/`1e-5` height ceilings are unchanged. Every qualified row must pass its original budget in Node and Chromium/Firefox/WebKit. Worst budget usage and every diagnostic discrepancy are stored in the [Node report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/ellipsoid-p0-node.json). The existing Earth-radius interior-height ceiling of approximately **13 µm** remains visible; these controls do not turn it into a universal nanometre claim.
+The matrix contains **3,480 rows**: 930 Decimal geometry rows (720 wider-domain cases and 210 exact-input anchor cases) and 2,550 native C++ rows. Of these, **3,478 are gates** (including 21 intentional prolate-CRS rejection controls); two Exact many-circuit comparisons are explicitly diagnostic. The 210 legacy normal-support anchors now use independently computed inverse expectations for their actual stored XYZ values: ideal generating normals are not reliable inverse expectations after thin-surface coordinate rounding. Their existing `1e-9` degree/`1e-5` height ceilings are unchanged. Every qualified row must pass its original budget in Node and Chromium/Firefox/WebKit. Worst budget usage and every diagnostic discrepancy are stored in the [Node report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/qualification/ellipsoid-p0-node.json). The existing Earth-radius interior-height ceiling of approximately **13 µm** remains visible; these controls do not turn it into a universal nanometre claim.
 
 ## Findings and intentional differences[​](#findings-and-intentional-differences "Direct link to Findings and intentional differences")
 
@@ -52,13 +52,13 @@ Existing signatures are retained. Legacy number-array-only declarations are not 
 Download the pinned `r2.7` archive separately, then:
 
 ```
-python3 modules/geospatial/projection/scripts/generate-ellipsoid-p0-reference.py --archive /path/to/r2.7.tar.gz
+python3 modules/geospatial/scripts/projection/generate-ellipsoid-p0-reference.py --archive /path/to/r2.7.tar.gz
 
-python3 modules/geospatial/projection/scripts/generate-ellipsoid-p0-reference.py --verify-fixture
+python3 modules/geospatial/scripts/projection/generate-ellipsoid-p0-reference.py --verify-fixture
 
-node modules/geospatial/projection/scripts/qualify-ellipsoid-p0.mjs --output /tmp/p0-node.json
+node modules/geospatial/scripts/projection/qualify-ellipsoid-p0.mjs --output /tmp/p0-node.json
 
-node modules/geospatial/projection/scripts/qualify-ellipsoid-p0.mjs --browser chromium --output /tmp/p0-chromium.json
+node modules/geospatial/scripts/projection/qualify-ellipsoid-p0.mjs --browser chromium --output /tmp/p0-chromium.json
 ```
 
 The generator verifies the archive hash before extracting/compiling selected components in a temporary directory. It installs nothing. `--check` reproduces stored native values with the recorded precision/compiler environment; platform floating-point differences are not a mathematical proof. Ordinary CI verifies workload/generator/driver provenance and independently regenerates Decimal controls; it does not download or compile GeographicLib/PROJ.

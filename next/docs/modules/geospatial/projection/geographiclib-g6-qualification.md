@@ -47,13 +47,13 @@ Original G3–G6 controls remain gates. Node and Chromium/Firefox/WebKit evaluat
 Native source is tag `r2.7`, archive SHA256 `5aaca14cd75f13aa2690273d76e88e8ddf4aeb267d6be2c3e0ba948deb9ceea5`. The stored comparator has 53 significant bits; it is not a higher-precision oracle. CI recomputes independent controls and checks native input/output digests and source provenance. It does not install or download native PROJ or GeographicLib.
 
 ```
-python3 modules/geospatial/projection/scripts/generate-g6-reference.py --check
+python3 modules/geospatial/scripts/projection/generate-g6-reference.py --check
 
-node modules/geospatial/projection/scripts/qualify-g6.mjs --output /tmp/g6.json
+node modules/geospatial/scripts/projection/qualify-g6.mjs --output /tmp/g6.json
 
-node modules/geospatial/projection/scripts/qualify-g6.mjs --browser chromium --output /tmp/g6-chromium.json
+node modules/geospatial/scripts/projection/qualify-g6.mjs --browser chromium --output /tmp/g6-chromium.json
 
-node modules/geospatial/projection/scripts/check-g6-package.mjs
+node modules/geospatial/scripts/projection/check-g6-package.mjs
 ```
 
 For offline native regeneration, link the original `geographiclib-g6-oracle.cpp` API driver and `Intersect.cpp` with the pinned static GeographicLib library, using the source/generated include directories and a 53-bit `Math::real` build. Then run the generator with `--archive /path/to/r2.7.tar.gz --oracle /path/to/oracle`. The adapted capture/conjugate algorithms retain Charles Karney MIT SPDX credits and the full module license notices.

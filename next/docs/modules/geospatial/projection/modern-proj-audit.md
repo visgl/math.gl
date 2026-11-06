@@ -31,7 +31,7 @@ Regression tests cover independent PROJ coordinates, exact and nearby poles, bot
 
 The audit includes **144 configurations, 5,579 probes and 34 projected algorithms**. It retains regional controls, both exact poles, ±89.99° and ±89.999999° on multiple meridians, plus wider orthographic samples at five origins on a sphere and WGS84. Identity, geocentric conversion and the composed oblique wrapper remain covered by their existing suites.
 
-Every oracle result or rejection is stored in [`pole-audit-reference.json`](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/pole-audit-reference.json). The [findings](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/pole-audit-findings.json) retain numerical differences and both kinds of rejection disagreement, including coordinates where PROJ fails but math.gl succeeds. Definitions are unchanged; documented aliases and unsupported syntax/default combinations use the same explicit translations as the existing corpus. Ellipsoids are never replaced with spheres in this audit.
+Every oracle result or rejection is stored in [`pole-audit-reference.json`](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/pole-audit-reference.json). The [findings](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/pole-audit-findings.json) retain numerical differences and both kinds of rejection disagreement, including coordinates where PROJ fails but math.gl succeeds. Definitions are unchanged; documented aliases and unsupported syntax/default combinations use the same explicit translations as the existing corpus. Ellipsoids are never replaced with spheres in this audit.
 
 Screening uses 1 mm plus 1e-12 relative forward error and 1e-6 degree inverse error. Longitude is weighted by cos(latitude) at collapsed poles, where longitude is indeterminate; maps with a pole line retain unweighted longitude. These are triage thresholds, not application accuracy guarantees. **44 configurations retain findings; they are not counted as successful modern PROJ qualifications.**
 
@@ -67,13 +67,13 @@ SPDX provenance comments and the third-party notices acknowledge the upstream fi
 Use an isolated environment with `pyproj==3.7.2`, then run:
 
 ```
-python modules/geospatial/projection/scripts/generate-pole-audit.py
+python modules/geospatial/scripts/projection/generate-pole-audit.py
 
-node modules/geospatial/projection/scripts/audit-pole-boundaries.mjs /tmp/pole-audit-findings.json
+node modules/geospatial/scripts/projection/audit-pole-boundaries.mjs /tmp/pole-audit-findings.json
 
-node modules/geospatial/projection/scripts/check-native-reference.mjs
+node modules/geospatial/scripts/projection/check-native-reference.mjs
 
-node node_modules/vitest/vitest.mjs run --project node modules/geospatial/projection/test
+node node_modules/vitest/vitest.mjs run --project node modules/geospatial/test/projection
 ```
 
 Review the fresh findings before replacing the checked-in report. Fixture hashes are verified with the existing native-reference gate. Python and PROJ are needed only for regeneration; CI consumes the offline references. See [independent validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/independent-validation.md) for the established qualified domains, budgets and real-grid tests.

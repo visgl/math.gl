@@ -30,21 +30,5 @@ longitude/latitude degrees and exactly one property, `tzid`. GeoParquet 1.1 uses
 compression, and standard `geo` metadata. Omitted CRS means OGC:CRS84.
 No offset or DST fields are stored; join `tzid` with date-specific timezone APIs.
 
-## Regeneration
-
-Use Python 3.10+ and Node.js, installing build tools outside the package:
-
-```sh
-python3 -m venv /tmp/timezone-tools
-/tmp/timezone-tools/bin/pip install -r modules/earth/timezone/scripts/geometry-requirements.txt
-npm install --prefix /tmp/timezone-node mapshaper@0.6.113
-/tmp/timezone-tools/bin/python modules/earth/timezone/scripts/generate-geometry.py \
-  --mapshaper /tmp/timezone-node/node_modules/.bin/mapshaper
-/tmp/timezone-tools/bin/python modules/earth/timezone/scripts/check-geometry.py
-```
-
-The generator checks the pinned upstream ZIP checksum before extracting data.
-Use `--archive /path/to/timezones-with-oceans.geojson.zip` for offline generation.
-The manifest records provenance, simplification settings, sizes, repairs, and asset
-checksums. Build tools are not runtime dependencies. Update the pinned release and
-checksum deliberately when refreshing the data; review the regenerated geometry.
+The [manifest](./manifest.json) records provenance, simplification settings, sizes,
+repairs, and asset checksums.

@@ -23,11 +23,11 @@ All velocities are metres/year. The test sampler expresses this field in ENU; th
 Bulk tests additionally cover mixed source epochs, XYZ/XYZM/later ordinates, Float32/64 views, exact preservation of M/epoch buffers/tails, output reuse and application sampler exceptions. Float64 outputs are checked against the independent references. Float32's rounded input is a different point: scalar/bulk comparisons qualify rounding and ownership without claiming the Float64 accuracy allowance.
 
 ```
-python3 modules/geospatial/projection/scripts/generate-deformation-stress-reference.py --check
+python3 modules/geospatial/scripts/projection/generate-deformation-stress-reference.py --check
 
-node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs --output /tmp/deformation.json
+node modules/geospatial/scripts/projection/qualify-deformation-stress.mjs --output /tmp/deformation.json
 
-node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs --browser chromium --output /tmp/deformation-chromium.json
+node modules/geospatial/scripts/projection/qualify-deformation-stress.mjs --browser chromium --output /tmp/deformation-chromium.json
 ```
 
 The report records maximum errors, every case, reference/engine source hashes, provenance, numerical allowances and environment. CI qualifies the authored corpus in Node, Chromium, Firefox and WebKit and retains the reports as artifacts.
@@ -37,7 +37,7 @@ The report records maximum errors, every case, reference/engine source hashes, p
 Run the development script against a **local** module exporting synchronous `createModel(referenceCase)`, returning a prepared `DeformationModel`. The factory can use `createDeformationModel` and a reviewed grid, or an application model with the same forward/inverse contract. References and models remain outside math.gl's package. The script is available from a repository checkout, not an npm subpath.
 
 ```
-node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs \
+node modules/geospatial/scripts/projection/qualify-deformation-stress.mjs \
 
   --model /absolute/path/reviewed-model.mjs \
 

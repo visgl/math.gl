@@ -127,7 +127,7 @@ Coverage and thickness are independent because a small thick cloud and a widespr
 
 The sky model is described by [Hosek & Wilkie (2012)](https://visgl.github.io/math.gl/next/docs/bibliography.md#hosek2012 "An analytic model for full spectral sky-dome radiance").
 
-* [Hošek and Wilkie, Adding a Solar Radiance Function to the Hošek Skylight Model (2013), and the 1.4a reference implementation](https://cgg.mff.cuni.cz/projects/SkylightModelling/). The upstream source and datasets are **BSD-3-Clause**, copyright © 2012–2013 Lukas Hosek and Alexander Wilkie. Derived tables and reference fixtures carry `SPDX-License-Identifier: BSD-3-Clause` and `SPDX-FileCopyrightText` comments plus the full original notice. [LICENSE-HOSEK-WILKIE](https://github.com/visgl/math.gl/blob/master/modules/earth/sun/LICENSE-HOSEK-WILKIE) is included in the npm package for source and binary redistribution.
+* [Hošek and Wilkie, Adding a Solar Radiance Function to the Hošek Skylight Model (2013), and the 1.4a reference implementation](https://cgg.mff.cuni.cz/projects/SkylightModelling/). The upstream source and datasets are **BSD-3-Clause**, copyright © 2012–2013 Lukas Hosek and Alexander Wilkie. Derived tables and reference fixtures carry `SPDX-License-Identifier: BSD-3-Clause` and `SPDX-FileCopyrightText` comments plus the full original notice. [LICENSE-HOSEK-WILKIE](https://github.com/visgl/math.gl/blob/master/modules/earth/LICENSE-HOSEK-WILKIE) is included in the npm package for source and binary redistribution.
 * [Wyman, Sloan and Shirley, Simple Analytic Approximations to the CIE XYZ Color Matching Functions (2013)](https://jcgt.org/published/0002/02/01/). The integration tool independently implements the mathematical equations; no sample code or color-matching dataset was copied.
 * [NOAA, The Color of Clouds](https://www.noaa.gov/jetstream/clouds/color-of-clouds): cloud scattering and preservation of incoming sunlight color.
 
@@ -138,7 +138,7 @@ The original TypeScript API and generator wrapper use math.gl's MIT license and 
 Download the published `HosekWilkie_SkylightModel_C_Source.1.4a.zip` from the reference page, then run with Node.js and `unzip`:
 
 ```
-node modules/earth/sun/scripts/generate-sunlight.mjs /path/to/HosekWilkie_SkylightModel_C_Source.1.4a.zip
+node modules/earth/scripts/sun/generate-sunlight.mjs /path/to/HosekWilkie_SkylightModel_C_Source.1.4a.zip
 ```
 
 The generator verifies the archive SHA-256 and parses its numeric coefficient arrays. The model evaluation and spectral integration run entirely in JavaScript; no native code is compiled or executed. Generated fixtures use twice the tables' angular quadrature resolution and include off-grid altitude/turbidity cases. Runtime use requires no downloads or dependencies.
@@ -253,7 +253,7 @@ All new code is independently written TypeScript under MIT, with SPDX provenance
 * [PBRT, Phase Functions](https://www.pbr-book.org/3ed-2018/Volume_Scattering/Phase_Functions): Henyey–Greenstein angular scattering and direction conventions.
 * The shared ambient sky and existing diffuse tint retain the references and licenses documented in [sky lighting](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sky.md) and [sunlight](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sun.md#getsunlight).
 
-After building the package, generate a standalone dawn/dusk palette demo with `node modules/earth/sun/scripts/create-cloud-demo.mjs /absolute/path/clouds.html`. It compares four cloud heights and three Sun-ray shadow depths through a shared Sun-altitude slider. The SVG shapes are original and illustrative; the generated page has no external runtime or artwork dependencies.
+After building the package, generate a standalone dawn/dusk palette demo with `node modules/earth/scripts/sun/create-cloud-demo.mjs /absolute/path/clouds.html`. It compares four cloud heights and three Sun-ray shadow depths through a shared Sun-altitude slider. The SVG shapes are original and illustrative; the generated page has no external runtime or artwork dependencies.
 
 See [References and credits](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
 

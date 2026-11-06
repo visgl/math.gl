@@ -319,7 +319,7 @@ All GeoTIFF rows exclude an external TIFF decoder, workers, and grid files. No r
 To reproduce the byte counts after building the repository:
 
 ```
-node modules/geospatial/projection/scripts/check-bundle-budget.mjs --measure
+node modules/geospatial/scripts/projection/check-bundle-budget.mjs --measure
 ```
 
 Omit `--measure` to enforce the checked-in size limits. Package checks also verify that selected bundles exclude unrelated kernels and the upstream runtime. See [benchmarks and packaging checks](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/benchmarks.md) for methodology and performance data.
@@ -483,7 +483,7 @@ These are esbuild browser/ES2020 measurements, not universal chunk sizes. Bundle
 Reproduce and enforce the split-bundle budgets after building:
 
 ```
-node modules/geospatial/projection/scripts/check-lazy-package.mjs
+node modules/geospatial/scripts/projection/check-lazy-package.mjs
 ```
 
 Keep imports on the isolated subpaths throughout the eager and lazy features. Mixing in eager imports from the full `@math.gl/geospatial/projection` or `@math.gl/geospatial/crs` barrels can cause a bundler to hoist otherwise lazy code. A direct `await import('@math.gl/geospatial/projection')` can retain the entire catalogue; it does not mean “only UTM.” Inspect the application's chunk graph, not just the presence of an `import()` expression. Tree shaking and deferred loading remain distinct: the former removes unused code, while the latter postpones code that is used.

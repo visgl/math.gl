@@ -57,7 +57,7 @@ The following are **observed maximum absolute component errors**, rounded upward
 | `eqearth-ellipsoid` | \[-169.99, 179.99] / \[-85, 85]       | 2.80e-08    | 6.23e-09    | 1.99e-08      |
 | `moll-sphere`       | \[-169.99, 179.99] / \[-89, 89]       | 1.79e-05    | 3.04e-10    | 4.95e-12      |
 
-All definitions and regression ceilings are explicit in [`accuracy-cases.json`](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/accuracy-cases.json). The [raw report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/accuracy-node.json) records each worst input separately for scalar and batch paths, with source and reference hashes. Most ceilings are 1e-5 m forward and 1e-8° inverse/roundtrip. Mollweide retains 2e-5 m forward; CEA uses 2e-8° inverse/roundtrip; Equal Earth's truncated authalic inverse uses a 3e-8° roundtrip ceiling. The broader suite continues to test exact Robinson knots separately from these mostly off-knot probes.
+All definitions and regression ceilings are explicit in [`accuracy-cases.json`](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/accuracy-cases.json). The [raw report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/qualification/accuracy-node.json) records each worst input separately for scalar and batch paths, with source and reference hashes. Most ceilings are 1e-5 m forward and 1e-8° inverse/roundtrip. Mollweide retains 2e-5 m forward; CEA uses 2e-8° inverse/roundtrip; Equal Earth's truncated authalic inverse uses a 3e-8° roundtrip ceiling. The broader suite continues to test exact Robinson knots separately from these mostly off-knot probes.
 
 These rectangles describe tested inputs for the exact fixture parameters, not an algorithm's mathematical validity domain or an EPSG area of use. PROJ itself may use approximate series, especially Cassini away from its central meridian. Sampling does not prove a global maximum. Float32 quantization, extreme ellipsoids, singular poles/horizons and arbitrary parameters need their own error budgets. CEA samples stop at ±89.99° because latitude recovery becomes ill-conditioned closer to the poles; explicit pole regressions are separate.
 
@@ -75,7 +75,7 @@ The kernels retain their proj4js attribution; the cutoff correction and shared-s
 
 # use a separate environment with pyproj==3.7.2 / PROJ 9.5.1 / EPSG v11.022
 
-python modules/geospatial/projection/scripts/generate-accuracy-reference.py
+python modules/geospatial/scripts/projection/generate-accuracy-reference.py
 
 
 
@@ -83,9 +83,9 @@ python modules/geospatial/projection/scripts/generate-accuracy-reference.py
 
 yarn build
 
-node modules/geospatial/projection/scripts/check-native-reference.mjs
+node modules/geospatial/scripts/projection/check-native-reference.mjs
 
-node modules/geospatial/projection/scripts/measure-accuracy.mjs --output /tmp/proj4-accuracy.json
+node modules/geospatial/scripts/projection/measure-accuracy.mjs --output /tmp/proj4-accuracy.json
 ```
 
 CI checks fixture/generator hashes and all numeric budgets, uploads a fresh Node report, and repeats the same corpus in Chromium, Firefox and WebKit. Python and PROJ are only regeneration tools and are not package or CI runtime dependencies.
@@ -145,26 +145,26 @@ The three grid files occupy about 1.5 MB in the repository and are excluded from
 Normal checks are offline and consume checked-in reference data:
 
 ```
-node modules/geospatial/projection/scripts/check-native-reference.mjs
+node modules/geospatial/scripts/projection/check-native-reference.mjs
 
-yarn exec vitest run --project node --project headless modules/geospatial/projection/test
+yarn exec vitest run --project node --project headless modules/geospatial/test/projection
 ```
 
 To regenerate, install `pyproj==3.7.2` in a separate Python virtual environment whose wheel reports **PROJ 9.5.1**, then run:
 
 ```
-python modules/geospatial/projection/scripts/generate-native-reference.py
+python modules/geospatial/scripts/projection/generate-native-reference.py
 
-node modules/geospatial/projection/scripts/check-native-reference.mjs
+node modules/geospatial/scripts/projection/check-native-reference.mjs
 ```
 
-The generator validates both versions and grid hashes, disables PROJ networking, and uses explicit operation pipelines. Unexpected oracle failures abort generation. Source-manifest and generator hashes detect stale references in CI. The input fixtures, reference coordinates and grid provenance live in `modules/geospatial/projection/test/fixtures`. Do not regenerate expectations from math.gl or proj4js, and review definition translations and accuracy budgets whenever changing the oracle version.
+The generator validates both versions and grid hashes, disables PROJ networking, and uses explicit operation pipelines. Unexpected oracle failures abort generation. Source-manifest and generator hashes detect stale references in CI. The input fixtures, reference coordinates and grid provenance live in `modules/geospatial/test/projection/fixtures`. Do not regenerate expectations from math.gl or proj4js, and review definition translations and accuracy budgets whenever changing the oracle version.
 
 The completed qualification profile and promotion decision are described in the [native support and migration contract](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md). Unlisted parameter/domain combinations and additional CRS/grid operations remain possible future extensions.
 
 ## Explicit vertical grids[​](#explicit-vertical-grids "Direct link to Explicit vertical grids")
 
-Vertical-grid validation includes 10 authored configurations / 28 XYZM points generated by pyproj 3.7.2 and PROJ 9.5.1 with networking disabled. The GTX bytes, input definitions and generator are hashed. Explicit oracle pipelines check source and destination geoid heights, Helmert ordering, vertical feet, Mercator, axis signs/order, and prime-meridian sampling. The [fixture provenance](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/README.md#vertical-height-reference) explains regeneration. Scalar forward/inverse and Float64 paths use a 1e-5 tolerance; Float32 paths also account for input/output rounding. Browser qualification repeats these references in Chromium, Firefox and WebKit.
+Vertical-grid validation includes 10 authored configurations / 28 XYZM points generated by pyproj 3.7.2 and PROJ 9.5.1 with networking disabled. The GTX bytes, input definitions and generator are hashed. Explicit oracle pipelines check source and destination geoid heights, Helmert ordering, vertical feet, Mercator, axis signs/order, and prime-meridian sampling. The [fixture provenance](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/README.md#vertical-height-reference) explains regeneration. Scalar forward/inverse and Float64 paths use a 1e-5 tolerance; Float32 paths also account for input/output rounding. Browser qualification repeats these references in Chromium, Firefox and WebKit.
 
 These are synthetic grids for checking operation semantics, not a claim of geoid-model accuracy. Additional tests cover the prepared `@math.gl/earth` adapter, horizontal-grid ordering, nodata/coverage, optional/null fallbacks, buffer ownership, missing Z and partial flat-array writes. Compound/vertical CRS execution, epochs and general pipeline parsing remain outside this subset.
 
@@ -174,7 +174,7 @@ Seven small authored MIT TIFF files / 30 XYZM points cover PixelIsPoint, PixelIs
 
 Node/Chromium tests decode them with geotiff.js and check scalar/Float64 XYZM results at 1e-5, preserve M, and separately exercise Float32 rounding. The three-browser qualification runner decodes the same files after benchmark timing completes, so the optional test decoder is excluded from measured projection bundles. Strict metadata, ownership, fallback and rejection cases supplement those numerical references.
 
-Regenerate with `modules/geospatial/projection/scripts/generate-vertical-geotiff-reference.py` using the pinned oracle environment; verify offline with `node modules/geospatial/projection/scripts/check-vertical-geotiff-reference.mjs`. The adapter does not claim general raster or arbitrary PROJ grid support: other grid operation types, projected/rotated rasters, overviews, non-metre units, non-bilinear interpolation and ambiguous overlapping image layouts remain unsupported.
+Regenerate with `modules/geospatial/scripts/projection/generate-vertical-geotiff-reference.py` using the pinned oracle environment; verify offline with `node modules/geospatial/scripts/projection/check-vertical-geotiff-reference.mjs`. The adapter does not claim general raster or arbitrary PROJ grid support: other grid operation types, projected/rotated rasters, overviews, non-metre units, non-bilinear interpolation and ambiguous overlapping image layouts remain unsupported.
 
 ## Independent review of pole conditioning[​](#independent-review-of-pole-conditioning "Direct link to Independent review of pole conditioning")
 
