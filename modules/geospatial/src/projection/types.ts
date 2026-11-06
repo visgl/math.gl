@@ -8,6 +8,7 @@ import type {ProjectionDescriptor} from './experimental/projection-descriptor';
 import type {ProjectionCoordinate, ProjectionOutput} from './experimental/scalar-output';
 import type {ProjectionArray} from './experimental/typescript-projection';
 import type {CRSResolver} from '../crs/resolver';
+import type {ProjectionTransformDescription} from './transform-description';
 
 type Registration = ProjectionPlugin | ProjectionDescriptor;
 
@@ -36,7 +37,7 @@ export interface ProjectionEngine {
 export interface Projection {
   readonly lossy?: boolean;
   /** Available after preparation when the backend can describe its resolved execution. */
-  readonly description?: import('./transform-description').ProjectionTransformDescription;
+  readonly description?: ProjectionTransformDescription;
   preload(): Promise<unknown>;
   project(coordinate: readonly number[]): number[] | Promise<number[]>;
   unproject(coordinate: readonly number[]): number[] | Promise<number[]>;

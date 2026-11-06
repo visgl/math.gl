@@ -13,6 +13,7 @@ export type {
 } from '../../crs/crs-descriptor-types';
 import type {TypeScriptCRSInput} from './crs/spatial-reference';
 import type {CreateProjectionOptions, ProjectionEngine} from '../types';
+import type {ProjectionAlgorithmIdentity} from '../transform-description';
 
 /** Raw PROJ parameters. Angles are decimal degrees and lengths are meters. */
 export type ProjectionParameters = Readonly<Record<string, string | undefined>>;
@@ -98,7 +99,7 @@ export type ProjectionPlugin = {
   /** Optional promise of stable coordinate semantics. Omit for opaque/custom algorithms.
    * Copying this identity onto a replacement create() asserts semantic equivalence.
    */
-  readonly semantics?: import('../transform-description').ProjectionAlgorithmIdentity;
+  readonly semantics?: ProjectionAlgorithmIdentity;
   readonly name: string;
   readonly aliases?: readonly string[];
   /** Projection-specific PROJ parameters accepted in addition to the core parameters. */
