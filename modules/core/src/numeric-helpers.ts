@@ -24,8 +24,10 @@ export function vectorProjectOnVector<T extends NumericArray>(
   target: Input
 ): T {
   vector(value, target);
-  const length = Math.hypot(...Array.from(target));
-  const unit = Array.from(target, x => (length ? x / length : 0));
+  const scale = Math.max(...Array.from(target, Math.abs));
+  const unit = Array.from(target, x => (scale ? x / scale : 0));
+  const length = Math.hypot(...unit);
+  for (let i = 0; i < unit.length; i++) unit[i] = length ? unit[i] / length : 0;
   const d = unit.reduce((sum, x, i) => sum + x * value[i], 0);
   return write(
     out,
@@ -57,10 +59,12 @@ export function vectorSetLength<T extends NumericArray>(out: T, value: Input, le
   vector(value);
   finite(length);
   if (length < 0) throw new RangeError('Length must be nonnegative');
-  const original = Math.hypot(...Array.from(value));
+  const scale = Math.max(...Array.from(value, Math.abs));
+  const scaled = Array.from(value, x => (scale ? x / scale : 0));
+  const original = Math.hypot(...scaled);
   return write(
     out,
-    Array.from(value, x => (original ? (x / original) * length : 0))
+    scaled.map(x => (original ? (x / original) * length : 0))
   );
 }
 export function vectorClampLength<T extends NumericArray>(

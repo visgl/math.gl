@@ -55,9 +55,11 @@ export class SampleTrack {
           'Quaternion tracks require size 4 and discrete, linear or cubic interpolation'
         );
       for (let k = 0; k < this.times.length; k++) {
-        const offset = k * 4,
-          length = Math.hypot(...this.values.slice(offset, offset + 4));
-        if (!length) throw new RangeError('Zero quaternion sample');
+        const offset = k * 4;
+        const scale = Math.max(...this.values.slice(offset, offset + 4).map(Math.abs));
+        if (!scale) throw new RangeError('Zero quaternion sample');
+        for (let j = 0; j < 4; j++) this.values[offset + j] /= scale;
+        const length = Math.hypot(...this.values.slice(offset, offset + 4));
         for (let j = 0; j < 4; j++) this.values[offset + j] /= length;
         if (
           k &&

@@ -187,3 +187,12 @@ it('rotateTowards normalizes, takes shortest arcs and never overshoots', () => {
   expect(() => quatRotateTowards(out, [0, 0, 0, 0], b, 1)).toThrow();
   expect(() => quatRotateTowards(out, a, b, -1)).toThrow();
 });
+
+it('normalization helpers preserve finite directions even when their magnitude exceeds Number.MAX_VALUE', () => {
+  close(vectorProjectOnVector([0, 0], [1, 2], [1.5e308, 1.5e308]), [1.5, 1.5]);
+  close(vectorSetLength([0, 0], [1.5e308, 1.5e308], 2), [Math.SQRT2, Math.SQRT2]);
+  close(
+    quatRotateTowards(new Array(4), [1e308, 1e308, 1e308, 1e308], [0, 0, 0, 1], 0),
+    [0.5, 0.5, 0.5, 0.5]
+  );
+});

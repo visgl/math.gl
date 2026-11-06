@@ -810,11 +810,17 @@ export function rotateTowards<T extends NumericArray>(
   }
   if (a.length !== 4 || step < 0)
     throw new RangeError('Expected quaternions and a nonnegative step');
-  const al = Math.hypot(...Array.from(a)),
-    bl = Math.hypot(...Array.from(b));
-  if (!al || !bl) throw new RangeError('Zero quaternion');
-  const an = Array.from(a, x => x / al),
-    bn = Array.from(b, x => x / bl);
+  const aScale = Math.max(...Array.from(a, Math.abs)),
+    bScale = Math.max(...Array.from(b, Math.abs));
+  if (!aScale || !bScale) throw new RangeError('Zero quaternion');
+  const an = Array.from(a, x => x / aScale),
+    bn = Array.from(b, x => x / bScale);
+  const al = Math.hypot(...an),
+    bl = Math.hypot(...bn);
+  for (let i = 0; i < 4; i++) {
+    an[i] /= al;
+    bn[i] /= bl;
+  }
   const dot = an.reduce((sum, x, i) => sum + x * bn[i], 0);
   const angle = 2 * Math.acos(Math.min(1, Math.abs(dot)));
   if (out.length < 4) throw new RangeError('Result buffer is too short');

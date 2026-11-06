@@ -82,3 +82,12 @@ it('invalid sample tracks fail during construction', () => {
   expect(() => new SampleTrack([0], [0, 0, 0, 0], {quaternion: true})).toThrow();
   expect(() => new SampleTrack([0], [1], {quaternion: true, size: 1})).toThrow();
 });
+
+it('quaternion tracks normalize large finite samples without collapsing them', () => {
+  const track = new SampleTrack(
+    [0, 1],
+    [1e308, 1e308, 1e308, 1e308, -1e308, -1e308, -1e308, -1e308],
+    {quaternion: true}
+  );
+  expect(track.evaluate(0.5)).toEqual([0.5, 0.5, 0.5, 0.5]);
+});
