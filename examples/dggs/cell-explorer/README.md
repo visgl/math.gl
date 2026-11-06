@@ -10,3 +10,6 @@ Use Fit cell after changing an ID to move the globe to its decoded bounds.
 Inspired by the MIT-licensed [deck.gl-community global grid example](https://github.com/visgl/deck.gl-community/tree/master/examples/geo-layers/global-grid-layer).
 This implementation uses math.gl decoders and deck.gl primitive layers directly;
 it does not require the community GlobalGridLayer or its grid encoders.
+
+Run `yarn start-local` inside the math.gl repository to use workspace source.
+Run `yarn start` to use package exports or `yarn build` for a production bundle.

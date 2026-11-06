@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {Deck, OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {PolygonLayer, PathLayer, ScatterplotLayer} from '@deck.gl/layers';
-import {mountInfoBox} from '../../../common/info-box.js';
+import {mountInfoBox} from '../shared/common/info-box.js';
 import {prepareSurfacePatch, evaluateSurfacePatch, pickSurfacePatch} from './recipe.mjs';
 import '../style.css';
 export function mountSurfaceMesh(root) {

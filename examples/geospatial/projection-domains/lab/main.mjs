@@ -11,10 +11,10 @@ import {createPersistentGrid, updatePersistentUV} from './persistent-grid.mjs';
 import {updateOrRebuild} from './reuse-policy.mjs';
 import {PersistentUVLayer, ReplacementMeshLayer} from './persistent-layer.mjs';
 import {engines, capability, createBackend} from './backends.mjs';
-import {mountInfoBox} from '../../../common/info-box.js';
+import {mountInfoBox} from '../shared/common/info-box.js';
 import {acquireWasm} from './wasm-runtime.mjs';
 import './style.css';
-import earthImageUrl from '../../../earth/sun-terminator/assets/day.jpg';
+import earthImageUrl from '../shared/earth/sun-terminator/assets/day.jpg';
 import {nativePolarImage} from './native-polar.mjs';
 import {resampleImagery} from './imagery.mjs';
 export function mountProjectionLab(

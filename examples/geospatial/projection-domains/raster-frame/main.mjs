@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {Deck,OrthographicView,COORDINATE_SYSTEM} from '@deck.gl/core';
 import {PathLayer,ScatterplotLayer} from '@deck.gl/layers';
-import {mountInfoBox} from '../../../common/info-box.js';
+import {mountInfoBox} from '../shared/common/info-box.js';
 import {createRasterFrame,rasterFrameFixtures} from './recipe.mjs';
 import '../style.css';
 export function mountRasterFrame(root){

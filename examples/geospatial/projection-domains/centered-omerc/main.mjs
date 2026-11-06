@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {Deck,OrthographicView,COORDINATE_SYSTEM} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
-import {mountInfoBox} from '../../../common/info-box.js';
+import {mountInfoBox} from '../shared/common/info-box.js';
 import {prepareCenteredFrame} from './recipe.mjs';
 import '../style.css';
 export function mountCenteredObliqueMercator(root){

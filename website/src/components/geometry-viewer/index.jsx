@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {lazy} from 'react';
 import LiveExample from '../live-globe';
-const Example = lazy(() => import('website-examples/geometry/geometry-viewer/app'));
+const Example = lazy(() => import('website-examples/geometry/geometry-viewer/src/app.jsx'));
 export default function GeometryViewer({geometry, geometryType, geometryProps, ...props}) {
   return (
     <LiveExample

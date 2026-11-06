@@ -10,3 +10,6 @@ vertex to finish. Numeric vertex inputs provide keyboard editing. Toggle a hole,
 reverse winding, and inspect math.gl triangulation and area readouts. Crossing or
 collapsed edges and holes outside the outline are rejected before accepting edits.
 The component finalizes Deck and disconnects its resize observer on unmount.
+
+Run `yarn start-local` inside the math.gl repository to use workspace source.
+Run `yarn start` to use package exports or `yarn build` for a production bundle.

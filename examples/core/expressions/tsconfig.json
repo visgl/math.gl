@@ -1,11 +1,25 @@
 {
-  "extends": "../../../tsconfig.json",
-  "include": ["*.ts", "*.tsx", "*.d.ts"],
   "compilerOptions": {
-    "allowJs": false,
-    "composite": false,
+    "target": "ES2022",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "jsx": "react-jsx",
-    "lib": ["DOM", "ES2020"],
-    "noEmit": true
-  }
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": [
+      "vite/client"
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ]
 }

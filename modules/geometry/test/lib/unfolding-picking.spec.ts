@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {pickSurface} from '../../../../examples/geometry/unfolding-polyhedron/picking';
+import {pickSurface} from '../../../../examples/geometry/unfolding-polyhedron/src/picking';
 import {
   createSolid,
   type Polyhedron
-} from '../../../../examples/geometry/unfolding-polyhedron/polyhedra';
-import {createLayout} from '../../../../examples/geometry/unfolding-polyhedron/layout';
+} from '../../../../examples/geometry/unfolding-polyhedron/src/polyhedra';
+import {createLayout} from '../../../../examples/geometry/unfolding-polyhedron/src/layout';
 
 test('hover follows original geographic coordinates throughout unfolding', () => {
   const mesh = createSolid('icosahedron'),

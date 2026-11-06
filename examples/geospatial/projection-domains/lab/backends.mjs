@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import proj4 from 'proj4';
 import {geoEquirectangular,geoOrthographic} from 'd3-geo';
-import {createRasterBatchEvaluator} from '../../proj-wasm-crs/raster.mjs';
+import {createRasterBatchEvaluator} from '../shared/geospatial/proj-wasm-crs/raster.mjs';
 export const engines={
   native:'Native math.gl',proj4:'proj4js source transform',d3:'D3 target projection',wasm:'proj-wasm source transform'
 };

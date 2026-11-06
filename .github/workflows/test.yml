@@ -370,12 +370,12 @@ jobs:
 
       - name: Test GeoArrow stream worker example
         run: |
-          node --test examples/geospatial/geoarrow-stream-worker/worker.test.mjs
+          node --test test/examples/geospatial/geoarrow-stream-worker/worker.test.mjs
           yarn workspace math.gl-geoarrow-stream-worker build
 
       - name: Test raster mesh composition
         run: |
-          yarn workspace math.gl-raster-mesh-preparation test
+          node --test test/examples/geospatial/raster-mesh-preparation/*.test.mjs
           yarn workspace math.gl-raster-mesh-preparation build
 
       - name: Test projection domains example
@@ -385,24 +385,24 @@ jobs:
 
       - name: Test and build solar terminator
         run: |
-          yarn workspace math.gl-sun-terminator test
+          node --test test/examples/earth/sun-terminator/*.test.js
           yarn workspace math.gl-sun-terminator build
 
       - name: Test and build tectonic time machine
         run: |
-          yarn workspace math.gl-tectonic-time-machine test
+          node --test test/examples/geospatial/tectonic-time-machine/*.test.mjs
           yarn workspace math.gl-tectonic-time-machine build
 
       - name: Test expression preview seam handling
-        run: node --test examples/core/expressions/*.test.mjs
+        run: node --test test/examples/core/expressions/*.test.mjs
 
       - name: Test Alpine Ice Age dataset and interpolation
-        run: yarn workspace math.gl-alpine-ice-age test
+        run: node --test test/examples/geospatial/alpine-ice-age/*.test.mjs
 
       - name: Test and build DGGS cell explorer
         run: |
           yarn workspace math.gl-dggs-cell-explorer build
-          yarn workspace math.gl-dggs-cell-explorer test:browser
+          node test/examples/dggs/cell-explorer/browser-test.mjs
 
       - name: Test proj-wasm CRS integration in Node and Chromium
         timeout-minutes: 2
@@ -417,7 +417,7 @@ jobs:
 
       - name: Test solar terminator rendering and cut-map detail
         timeout-minutes: 5
-        run: yarn workspace math.gl-sun-terminator test:browser:ci
+        run: node test/examples/earth/sun-terminator/run-browser.mjs
 
       - name: Check regressions from landed example reviews
         timeout-minutes: 2
@@ -426,12 +426,12 @@ jobs:
       - name: Test and build WKB workbench
         run: |
           yarn workspace math.gl-wkb-workbench build
-          yarn workspace math.gl-wkb-workbench test:browser
+          node test/examples/geospatial/wkb-workbench/browser-test.mjs
 
       - name: Test and build terrain sampling example
         run: |
           yarn workspace math.gl-terrain-sampling build
-          yarn workspace math.gl-terrain-sampling test:browser
+          node test/examples/geospatial/terrain-sampling/browser-test.mjs
   coverage:
     name: Browser coverage
     runs-on: ubuntu-22.04
