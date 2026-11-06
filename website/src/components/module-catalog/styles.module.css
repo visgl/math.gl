@@ -1,3 +1,8 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
