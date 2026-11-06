@@ -22,6 +22,8 @@ The geometry group also provides `@math.gl/geometry`, `/curves`, `/polygon`, `/c
 `/spatial-index` subpaths. The polygon module combines general tessellation and mesh refinement with
 geographic helpers such as Mercator clipping and globe subdivision.
 
+Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](./lighting/README.md). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
+
 ## Feature Card
 
 | Feature | Support | Notes |
@@ -34,6 +36,7 @@ geographic helpers such as Mercator clipping and globe subdivision.
 | Analytic queries and spatial indexes | ✅ | [Culling](./culling/README.md), [polygon operations](./polygon/README.md), and [static BVHs](./spatial-index/README.md); each has separate numerical limits. |
 | General solid modeling and manifold repair | ❌ | No public 3D Boolean solid, arbitrary remeshing, or general manifold-repair engine. |
 | Deformable or constrained rigid-body simulation | ❌ | HingeTree has no closed-loop constraints, collisions, forces, or bending solver. |
+| Photometry and color LUTs | ✅ | Optional [lighting and color utilities](./lighting/README.md) sample angular intensity, integrate luminous flux and transform RGB/RGBA buffers. |
 | GPU resource allocation and rendering | ❌ | The module supplies CPU data; GPU buffers, materials, draw calls, and device lifetime belong to rendering libraries. |
 
 ## Installation

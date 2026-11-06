@@ -45,16 +45,6 @@
       "types": "./dist/tasks/index.d.ts",
       "import": "./dist/tasks/index.js",
       "require": "./dist/tasks/index.cjs"
-    },
-    "./lighting": {
-      "types": "./dist/lighting/index.d.ts",
-      "import": "./dist/lighting/index.js",
-      "require": "./dist/lighting/index.cjs"
-    },
-    "./color-lut": {
-      "types": "./dist/color-lut/index.d.ts",
-      "import": "./dist/color-lut/index.js",
-      "require": "./dist/color-lut/index.cjs"
     }
   },
   "files": [

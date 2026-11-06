@@ -34,6 +34,3 @@ libraries from `@math.gl/dggs`.
 ## Types
 
 This module contains basic typescript types for math.gl.
-
-Lighting and color calculations use the opt-in `@math.gl/core/lighting` and
-`@math.gl/core/color-lut` subpaths. See the [consolidated guide](https://math.gl/docs/modules/core/lighting).

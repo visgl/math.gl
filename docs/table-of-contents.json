@@ -142,8 +142,7 @@
               "type": "doc",
               "id": "modules/core/expressions/README"
             }
-          },
-          "modules/core/lighting/README"
+          }
         ],
         "link": {
           "type": "doc",
@@ -269,7 +268,8 @@
               "type": "doc",
               "id": "modules/geometry/utils/README"
             }
-          }
+          },
+          "modules/geometry/lighting/README"
         ],
         "link": {
           "type": "doc",

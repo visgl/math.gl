@@ -1,6 +1,6 @@
 # Lighting and color calculations
 
-`@math.gl/core/lighting` and `@math.gl/core/color-lut` provide opt-in CPU calculations
+`@math.gl/geometry/lighting` and `@math.gl/geometry/color` provide opt-in CPU calculations
 on numerical tables. They have no parser, image codec, renderer or new dependency.
 The core root does not re-export them. Applications can use measurements from any
 source that conforms to the models below.
@@ -56,8 +56,8 @@ import {
   createPhotometricSampler,
   integrateLuminousFlux,
   resamplePhotometricProfile
-} from '@math.gl/core/lighting';
-import type {PhotometricProfile} from '@math.gl/core/lighting';
+} from '@math.gl/geometry/lighting';
+import type {PhotometricProfile} from '@math.gl/geometry/lighting';
 
 const profile: PhotometricProfile = {
   verticalAngles: [0, 90, 180],
@@ -119,8 +119,8 @@ Three-dimensional storage is red-fastest: `3 * (red + size * (green + size * blu
 Knots must increase strictly from 0 through 1; domain spans must be finite and positive.
 
 ```typescript
-import {createColorLUTSampler, applyColorLUT} from '@math.gl/core/color-lut';
-import type {ColorLUT} from '@math.gl/core/color-lut';
+import {createColorLUTSampler, applyColorLUT} from '@math.gl/geometry/color';
+import type {ColorLUT} from '@math.gl/geometry/color';
 
 const lut: ColorLUT = {
   dimension: 1,
@@ -154,7 +154,7 @@ to that source. For a rotational profile:
 ```typescript
 import {load} from '@loaders.gl/core';
 import {IESLoader} from '@loaders.gl/images';
-import {createPhotometricSampler} from '@math.gl/core/lighting';
+import {createPhotometricSampler} from '@math.gl/geometry/lighting';
 
 const measured = await load('rotational.ies', IESLoader);
 const sample = createPhotometricSampler({

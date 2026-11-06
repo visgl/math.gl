@@ -30,7 +30,7 @@ Look up a location's timezone with [timezone](./modules/earth/timezone/README.md
 
 ### Lighting and color calculations
 
-Opt-in [photometric and color LUT utilities](./modules/core/lighting/README.md) add
+Opt-in [photometric and color LUT utilities](./modules/geometry/lighting/README.md) add
 angular sampling, solid-angle flux integration, peak-normalized grids and CPU LUT
 application. Inputs and outputs are format-independent arrays; parsing remains in
 loaders.gl or other readers, and no dependencies are added.
