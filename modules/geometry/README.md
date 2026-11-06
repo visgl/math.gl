@@ -24,6 +24,8 @@ The experimental `HingeTree` evaluates rigid panels connected by hinges. See the
 [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and
 [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/geometry/unfolding-polyhedron).
 
+Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](https://math.gl/docs/modules/geometry/lighting). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
+
 ## Sources and credits
 
 See [the packaged source and license index](./THIRD-PARTY-NOTICES.md) and

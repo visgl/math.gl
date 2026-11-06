@@ -32,6 +32,16 @@
       "types": "./dist/culling/index.d.ts",
       "import": "./dist/culling/index.js",
       "require": "./dist/culling/index.cjs"
+    },
+    "./lighting": {
+      "types": "./dist/lighting/index.d.ts",
+      "import": "./dist/lighting/index.js",
+      "require": "./dist/lighting/index.cjs"
+    },
+    "./color": {
+      "types": "./dist/color/index.d.ts",
+      "import": "./dist/color/index.js",
+      "require": "./dist/color/index.cjs"
     }
   },
   "files": [
