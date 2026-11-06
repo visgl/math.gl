@@ -6,6 +6,14 @@ const {dirname, join} = require('node:path');
 
 // Preserve bookmarks when guides move into their owning modules.
 const movedGuides = {
+  "developer-guide/security": "developer-guide#process-external-data-and-code-safely",
+  "developer-guide/get-started": "developer-guide#install-and-make-a-calculation",
+  "developer-guide/debugging": "developer-guide#catch-mistakes-during-development",
+  "developer-guide/performance": "developer-guide#reuse-results-in-repeated-work",
+  "developer-guide/bundling": "developer-guide#keep-application-bundles-small",
+  "developer-guide/working-with-ai": "developer-guide#work-with-an-ai-coding-agent",
+  "developer-guide/root-exports-migration": "upgrade-guide#migrating-to-root-exports",
+
   "bibliography": "references-and-credits",
   "modules/geospatial/discontinuous/map-engine": "modules/geospatial/projection/api-reference/map-engine",
   "developer-guide/external-frameworks": "modules/core#interoperability",

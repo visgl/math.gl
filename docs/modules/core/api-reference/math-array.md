@@ -43,4 +43,4 @@ See [floating point](../developer-guide/floating-point.md) for comparison tolera
 
 `toString()` formats the object using global configuration. `formatString(options)` accepts formatting options for one call. Concrete classes may customize their output; matrix `toString()` uses `printRowMajor` to choose display order.
 
-See [debugging](../../../developer-guide/debugging.md) for examples and configuration defaults.
+See [debugging](../../../developer-guide/README.md#catch-mistakes-during-development) for examples and configuration defaults.
