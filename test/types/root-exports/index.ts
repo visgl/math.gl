@@ -13,6 +13,7 @@ import {getSkySnapshot, getStartOfDay, type SkySnapshotOptions} from '@math.gl/e
 import {
   createTerrainMesh,
   weldTerrainContourTiles,
+  weldTerrainMixedContourTiles,
   diagnoseTerrainContourBoundaries,
   createTerrainGradientPyramid,
   createTerrainSkirt,
@@ -58,6 +59,7 @@ void [
   getStartOfDay,
   createTerrainMesh,
   weldTerrainContourTiles,
+  weldTerrainMixedContourTiles,
   diagnoseTerrainContourBoundaries,
   createTerrainGradientPyramid,
   stitchTerrainContourTiles,

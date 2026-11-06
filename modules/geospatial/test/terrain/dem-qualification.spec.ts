@@ -137,13 +137,17 @@ test('real DTED DEM slopes and aspects agree with independent GDAL 3.9.3 output'
   }
 });
 
-test('adaptive meshes of a real DEM crop satisfy an independent exhaustive nodal oracle', () => {
+test('regular and adaptive meshes of a real DEM crop satisfy an independent exhaustive nodal oracle', () => {
   const crop = Float64Array.from(
     {length: 81},
     (_, i) => heights[(5 + Math.floor(i / 9)) * 33 + 5 + (i % 9)]
   );
   const source = new HeightField({width: 9, height: 9, heights: crop});
-  for (const create of [createMartiniTerrainMesh, createDelatinTerrainMesh])
+  for (const create of [
+    (source: HeightField, _options: {maxError: number}) => createTerrainMesh(source),
+    createMartiniTerrainMesh,
+    createDelatinTerrainMesh
+  ])
     for (const maxError of [0, 1, 5]) {
       const mesh = create(source, {maxError});
       for (let y = 0; y < 9; y++)
@@ -200,4 +204,84 @@ test('real DEM vertex-tile seams match the untiled sample reference', () => {
   );
   expect(stitched.maxHeightAdjustment).toBe(0);
   expect(stitched.seamA).toHaveLength(9);
+});
+
+for (const [name, x0, y0] of [
+  ['western relief', 1, 2],
+  ['eastern shelf', 22, 4]
+] as const) {
+  test(`DTED ${name}: mesh nodes agree with an independent exhaustive triangle oracle`, () => {
+    const crop = Float64Array.from(
+      {length: 81},
+      (_, i) => reference.heights[(y0 + Math.floor(i / 9)) * 33 + x0 + (i % 9)] ?? NaN
+    );
+    expect(crop.every(Number.isFinite)).toBe(true);
+    const source = new HeightField({
+      width: 9,
+      height: 9,
+      heights: crop,
+      columnStep: [2, 1],
+      rowStep: [-1, 3]
+    });
+    for (const build of [
+      (f: HeightField, _o: {maxError: number}) => createTerrainMesh(f),
+      createMartiniTerrainMesh,
+      createDelatinTerrainMesh
+    ]) {
+      for (const maxError of [0, 2, 10]) {
+        const mesh = build(source, {maxError});
+        let maximum = 0;
+        for (let y = 0; y < 9; y++)
+          for (let x = 0; x < 9; x++) {
+            const interpolated: number[] = [];
+            for (let t = 0; t < mesh.indices.length; t += 3) {
+              const ids = [...mesh.indices.slice(t, t + 3)];
+              const [a, b, c] = ids.map(i => [
+                mesh.gridCoordinates[2 * i],
+                mesh.gridCoordinates[2 * i + 1]
+              ]);
+              const det = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1]);
+              const u = ((b[1] - c[1]) * (x - c[0]) + (c[0] - b[0]) * (y - c[1])) / det;
+              const v = ((c[1] - a[1]) * (x - c[0]) + (a[0] - c[0]) * (y - c[1])) / det;
+              if (Math.min(u, v, 1 - u - v) >= -1e-12)
+                interpolated.push(
+                  u * mesh.positions[3 * ids[0] + 2] +
+                    v * mesh.positions[3 * ids[1] + 2] +
+                    (1 - u - v) * mesh.positions[3 * ids[2] + 2] +
+                    mesh.origin[2]
+                );
+            }
+            expect(interpolated.length).toBeGreaterThan(0);
+            for (const z of interpolated)
+              maximum = Math.max(maximum, Math.abs(z - crop[y * 9 + x]));
+          }
+        expect(maximum).toBeLessThanOrEqual(maxError + 1e-9);
+      }
+    }
+  });
+}
+
+test('full pinned nodata DEM regular mesh contains exactly the valid source triangles', () => {
+  const source = field(),
+    mesh = createTerrainMesh(source);
+  const expected = new Set<string>();
+  for (let y = 0; y < 32; y++)
+    for (let x = 0; x < 32; x++) {
+      const a = y * 33 + x,
+        b = a + 1,
+        c = a + 33,
+        d = c + 1;
+      for (const triangle of [
+        [a, b, d],
+        [a, d, c]
+      ])
+        if (triangle.every(i => Number.isFinite(heights[i])))
+          expected.add(triangle.sort((u, v) => u - v).join('/'));
+    }
+  const actual = new Set<string>();
+  for (let i = 0; i < mesh.indices.length; i += 3)
+    actual.add([...mesh.indices.slice(i, i + 3)].sort((a, b) => a - b).join('/'));
+  expect(actual).toEqual(expected);
+  expect(() => createMartiniTerrainMesh(source, {maxError: 1})).toThrow(/complete/);
+  expect(() => createDelatinTerrainMesh(source, {maxError: 1})).toThrow(/complete/);
 });

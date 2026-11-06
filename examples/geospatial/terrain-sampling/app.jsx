@@ -6,6 +6,7 @@ import React, {useMemo, useState} from 'react';
 import ExamplePanel from '../../common/example-panel';
 import {createTerrain, project, sampleLabel, TerrainSampleStatus} from './model';
 import TerrainAnalysis from './analysis';
+import MeshLab from './mesh-lab';
 import './styles.css';
 
 export default function TerrainSampling() {
@@ -125,6 +126,7 @@ export default function TerrainSampling() {
           <circle cx={x * 2} cy={160 - y * 2} r="5" fill="#ffcb70" />
         </svg>
         <TerrainAnalysis field={terrain.field} />
+        <MeshLab />
       </div>
       <ExamplePanel title="Terrain sampling">
         <label>

@@ -12,6 +12,13 @@ The analysis view shows elevation, triangle contours, and slope from a selectabl
 gradient-pyramid level. Faded blocks indicate incomplete gradient coverage.
 In the contour view, toggle tiles to inspect boundary endpoints and junctions;
 the markers do not distinguish dataset edges, missing tiles, and nodata.
+The mesh lab compares regular, MARTINI, and Delatin wireframes on analytical
+mountain, coast and nodata stress surfaces and a pinned real DTED crop. It includes
+a nodal error heatmap, adaptive tolerance slider, build time and output byte count.
+Adaptive builders require complete data; select Regular to inspect nodata holes.
+Errors are measured at source nodes and are not continuous-surface bounds.
+The DTED data and attribution come from the pinned qualification fixture in
+`modules/geospatial/test/terrain/fixtures`; analytical surfaces are labeled.
 
 Coordinates are local Cartesian meters, Z up. The mesh uses triangle interpolation;
 bilinear sampling need not lie on it. Missing and outside samples are displayed as

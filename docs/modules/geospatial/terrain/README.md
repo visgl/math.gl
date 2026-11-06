@@ -1229,3 +1229,35 @@ Both options work with `HeightField.sampleBatch` and `GeographicHeightField.samp
 `field.sample(x, y, {domain: 'footprint', noData: 'support'})` lets a loader
 adapter sample pixel-centered physical grids without reimplementing interpolation.
 These policies do not fill holes, change vertical datums, or extrapolate slopes.
+
+## Mixed-resolution contour graphs
+
+`weldTerrainMixedContourTiles(tiles, options)` accepts vertex-registered contour
+graphs with individual `width`, `height`, `spacing`, and minimum `column`, `row`.
+Addresses are minimum coordinates in a common finest lattice, rather than tile
+indices. Spacing is a positive power of two. Tile interiors must not overlap;
+rectangular tiles and coarse tiles meeting multiple fine neighbors are supported.
+All tiles must use the same affine world grid, height reference and contour levels.
+
+The operation joins exact lattice intersections at the same contour level and
+splits boundary-aligned segments at finer vertices before deduplicating shared
+subsegments. `maxPositionDifference` bounds world XY disagreement at shared
+vertices and subdivision points; it does not enable spatial-nearness matching.
+Missing coverage and differing coarse/fine boundary intersections remain open.
+Reconcile the source surfaces first when continuity is required. This graph
+operation does not resample or modify terrain elevations.
+
+`maxTiles`, inherited contour graph capacity limits, and `maxBoundaryTests`
+(default 10 million, including tile-overlap admission checks) bound work and
+output. Coordinates that lose fractional precision during lattice rebasing are
+rejected. Output origin follows lexicographic tile order; output grid coordinates
+use the common lattice. Compose the result with `stitchTerrainContours`.
+
+The terrain sampling example includes a mesh lab with regular, MARTINI and
+Delatin wireframes, an error slider, pinned DTED and analytical stress surfaces,
+output buffer bytes, single-run build time and nodal error. Nodata is preserved
+by the regular builder; adaptive builders require complete samples. The
+`scripts/benchmark-terrain-meshes.mjs` benchmark reports warmed p50/p95 build
+times separately from error measurement. Nodal measurements and these small
+fixture timings provide neither continuous-surface certificates nor regional
+throughput estimates.
