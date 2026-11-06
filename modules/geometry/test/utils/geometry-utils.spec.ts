@@ -28,7 +28,11 @@ import {
   zigZagDeltaDecode
 } from '@math.gl/geometry';
 import {expect, test} from 'vitest';
-import {getAttributeValues, getPositionAttribute, isGeometry} from '../../src/utils/geometry';
+import {
+  getAttributeValues,
+  getPositionAttribute,
+  isGeometry
+} from '@math.gl/geometry/utils/geometry';
 
 test('GLType converts component types and preserves view offsets', () => {
   expect(GLType.fromTypedArray(new Uint16Array(1))).toBe(GL.UNSIGNED_SHORT);

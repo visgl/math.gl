@@ -18,7 +18,7 @@ import {
   _PerspectiveFrustum as PerspectiveFrustum
 } from '@math.gl/geometry/culling';
 import type {CullingResult} from '@math.gl/geometry/culling';
-import {BoundingVolume} from '../../../culling/dist/lib/bounding-volumes/bounding-volume';
+import type {BoundingVolume} from '@math.gl/geometry/culling/lib/bounding-volumes/bounding-volume';
 
 const VECTOR3_UNIT_Z = Object.freeze(new Vector3(0, 0, 1));
 

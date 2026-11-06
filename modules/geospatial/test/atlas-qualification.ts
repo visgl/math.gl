@@ -5,7 +5,7 @@ import {
   GeographicCutAtlas,
   createOrthographicCutAtlas,
   type GeographicCutGraph
-} from '../src/geographic-atlas';
+} from '@math.gl/geospatial/geographic-atlas';
 import reference from './geographic-atlas-reference.json';
 export const provenance = reference.provenance;
 export function octantGraph(): GeographicCutGraph {

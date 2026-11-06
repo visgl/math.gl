@@ -10,13 +10,13 @@ import {
   getSkyLuminance,
   getMoonAppearance,
   SKY_GLOBE_EARTH_RADIUS
-} from '../../src/sun';
-import {getSkySnapshot, createSkyContext} from '../../src/sun/astronomy';
-import {createSkyTime} from '../../src/sun/sky-time';
-import {searchSkyVisibility, getSkyLighting} from '../../src/sun';
-import {getScatteredMoonLuminance} from '../../src/sun';
-import {getSkyHorizonAltitude} from '../../src/sun';
-import {getPlanetVisibility} from '../../src/sun/planet-visibility';
+} from '@math.gl/earth/sun';
+import {getSkySnapshot, createSkyContext} from '@math.gl/earth/sun/astronomy';
+import {createSkyTime} from '@math.gl/earth/sun/sky-time';
+import {searchSkyVisibility, getSkyLighting} from '@math.gl/earth/sun';
+import {getScatteredMoonLuminance} from '@math.gl/earth/sun';
+import {getSkyHorizonAltitude} from '@math.gl/earth/sun';
+import {getPlanetVisibility} from '@math.gl/earth/sun/planet-visibility';
 
 const rad = (degrees: number) => (degrees * Math.PI) / 180;
 const project = ([longitude, latitude, altitude]: number[]) => {

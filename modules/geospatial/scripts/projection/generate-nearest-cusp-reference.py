@@ -11,7 +11,8 @@ import math
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-DESTINATION = HERE.parent / 'test/fixtures/nearest-cusp-reference.json'
+# Fixtures belong to the module test tree, independently of the scripts directory.
+DESTINATION = HERE.parents[1] / 'test/projection/fixtures/nearest-cusp-reference.json'
 spec = importlib.util.spec_from_file_location('interior_oracle', HERE / 'generate-interior-reference.py')
 oracle = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(oracle)

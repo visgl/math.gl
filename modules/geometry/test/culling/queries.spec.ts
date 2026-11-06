@@ -6,7 +6,7 @@ import {
   intersectRayBounds,
   intersectRayTriangle,
   getClosestPointOnTriangle
-} from '../../src/culling/queries';
+} from '@math.gl/geometry/culling/queries';
 
 test('closed slab intersections handle inside, parallel, boundary and backward rays', () => {
   expect(intersectRayBounds([-2, 0, 0], [2, 0, 0], [-1, -1, -1], [1, 1, 1])).toBe(0.5);

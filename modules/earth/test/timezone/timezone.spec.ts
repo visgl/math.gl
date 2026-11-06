@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {getTimezoneOffset, lookupTimezoneAsync} from '../../src/timezone';
-import {lookupTimezone} from '../../src/timezone/lookup';
+import {getTimezoneOffset, lookupTimezoneAsync} from '@math.gl/earth/timezone';
+import {lookupTimezone} from '@math.gl/earth/timezone/lookup';
 
 test('timezone offsets at explicit instants', () => {
   const winter = Date.parse('2024-01-15T12:00:00Z');

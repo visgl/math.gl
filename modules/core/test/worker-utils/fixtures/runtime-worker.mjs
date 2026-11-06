@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {createWorker} from '../../../dist/worker-utils/index.js';
+import {createWorker} from '@math.gl/core/worker-utils';
 let runs = 0;
 const retainedOutput = new Uint8Array([4, 5, 6]);
 await createWorker(

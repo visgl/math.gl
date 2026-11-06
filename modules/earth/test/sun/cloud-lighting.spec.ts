@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {getCloudLighting, getSunPosition} from '../../src/sun';
-import {getCloudSunSpectrum} from '../../src/sun/cloud-spectral';
+import {getCloudLighting, getSunPosition} from '@math.gl/earth/sun';
+import {getCloudSunSpectrum} from '@math.gl/earth/sun/cloud-spectral';
 const radians = (degrees: number): number => (degrees * Math.PI) / 180;
 const rgb = (light: {color: number[]; intensity: number}): number[] =>
   light.color.map(v => v * light.intensity);

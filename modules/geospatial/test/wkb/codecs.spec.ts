@@ -12,7 +12,7 @@ import {
   writeWKB,
   type WellKnownDimension,
   type WellKnownGeometry
-} from '../../src/wkb/index';
+} from '@math.gl/geospatial/wkb/index';
 
 const geometries: WellKnownGeometry[] = [
   {type: 'Point', coordinates: [1, 2]},

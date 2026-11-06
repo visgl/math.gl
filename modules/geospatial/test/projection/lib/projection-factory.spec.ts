@@ -11,7 +11,7 @@ import {
   universalTransverseMercator,
   projectionEngine
 } from '@math.gl/geospatial/projection';
-import type {ProjectionEngine} from '../../../src/projection/types';
+import type {ProjectionEngine} from '@math.gl/geospatial/projection/types';
 
 test('one engine creates independent CRS pairs and has no coordinate methods', async () => {
   const engine: ProjectionEngine = projectionEngine;

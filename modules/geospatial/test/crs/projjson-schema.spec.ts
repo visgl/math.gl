@@ -5,7 +5,7 @@
 import Ajv from 'ajv';
 import {expect, test} from 'vitest';
 
-import schema from '../../src/crs/projjson.schema.json';
+import schema from '@math.gl/geospatial/crs/projjson.schema.json';
 import {officialPROJJSONCRSExamples} from './projjson-fixtures';
 
 const ajv = new Ajv({strict: false});

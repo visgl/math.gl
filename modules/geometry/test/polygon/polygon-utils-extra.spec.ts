@@ -12,8 +12,8 @@ import {
   getPolygonWindingDirectionPoints,
   modifyPolygonWindingDirection,
   modifyPolygonWindingDirectionPoints
-} from '../../src/polygon/polygon-utils';
-import {Polygon} from '../../src/polygon/polygon';
+} from '@math.gl/geometry/polygon/polygon-utils';
+import {Polygon} from '@math.gl/geometry/polygon/polygon';
 
 const triangle = [0, 0, 1, 0, 0, 1];
 const trianglePoints = [

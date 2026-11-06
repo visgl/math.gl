@@ -4,7 +4,7 @@
 
 import {describe, expect, test} from 'vitest';
 import {Matrix4} from '@math.gl/core';
-import {unprojectScreenRay} from '../../src/culling';
+import {unprojectScreenRay} from '@math.gl/geometry/culling';
 
 describe('unprojectScreenRay', () => {
   const viewport = {x: 100, y: 50, width: 200, height: 100};

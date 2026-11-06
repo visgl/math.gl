@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original bounded qualification workload; not a universal accuracy proof.
-import {EllipsoidMetrics, type AuxiliaryLatitude} from '../../src/ellipsoid-metrics';
-import {EllipsoidGeodesic} from '../../src/ellipsoid-geodesic';
-import {GeodesicPolygon} from '../../src/geodesic-polygon';
+import {EllipsoidMetrics, type AuxiliaryLatitude} from '@math.gl/geospatial/ellipsoid-metrics';
+import {EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid-geodesic';
+import {GeodesicPolygon} from '@math.gl/geospatial/geodesic-polygon';
 import reference from '../ellipsoid/g34-reference.json';
 const kinds: AuxiliaryLatitude[] = [
   'geocentric',

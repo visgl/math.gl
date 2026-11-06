@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
 import {projectionEngine} from '@math.gl/geospatial/projection';
-import {WebMercatorProjectionEngine} from '../../../src/projection/web-mercator';
-import type {ProjectionEngine} from '../../../src/projection/types';
+import {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection/web-mercator';
+import type {ProjectionEngine} from '@math.gl/geospatial/projection/types';
 
 const engine = new WebMercatorProjectionEngine();
 for (const from of ['WGS84', 'EPSG:4326', 'EPSG:3857']) {

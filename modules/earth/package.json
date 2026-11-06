@@ -65,8 +65,5 @@
   "dependencies": {
     "@math.gl/core": "5.0.0-beta.4",
     "astronomy-engine": "2.1.19"
-  },
-  "devDependencies": {
-    "astronomy-engine": "2.1.19"
   }
 }

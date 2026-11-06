@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {getSunTerminator} from '../../src/sun/terminator';
-import {getSunPosition} from '../../src/sun/suncalc';
+import {getSunTerminator} from '@math.gl/earth/sun/terminator';
+import {getSunPosition} from '@math.gl/earth/sun/suncalc';
 
 const RAD = Math.PI / 180;
 for (const date of [

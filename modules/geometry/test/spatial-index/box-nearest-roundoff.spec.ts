@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {BoxIndex} from '../../src/spatial-index';
+import {BoxIndex} from '@math.gl/geometry/spatial-index';
 
 test.each([1e-200, 1, 1e100])(
   'nearest refinement preserves inclusive distance and ties despite bound roundoff at scale %s',

@@ -12,7 +12,7 @@ import {
   writeWKB,
   type WKBBuilderBaseOptions,
   type WKBGeometryWriter
-} from '../../src/wkb/index';
+} from '@math.gl/geospatial/wkb/index';
 
 test('inspectWKBHeader reads only ISO WKB and EWKB headers', () => {
   const isoHeader = writeWKB({type: 'Point', coordinates: [1, 2, 3, 4]}, 'xyzm').subarray(0, 5);

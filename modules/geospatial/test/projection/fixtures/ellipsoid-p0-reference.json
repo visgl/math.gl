@@ -7,10 +7,10 @@
     "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
     "compilerFlags": "-std=c++17 -O2; GEOGRAPHICLIB_PRECISION=3; actual significand bits recorded",
     "driverSHA256": "268ecff064b9bbb7209197ab550f58279665e7415515fbb72358e8cc6b0dd7a5",
-    "generatorSHA256": "01b83d2c65c6981159ddd16ffb5e7481e758d15a12ddc18b194be39f26703e53",
+    "generatorSHA256": "9ac3855cf62e9e6d558c3153faba9f7e1a8d654c3d044d47160409dc8f36ee53",
     "decimalOracleSHA256": "cfff8e3ec5572e4755099cf2e2a0c792ea21880209d7a2f5544b6f235ce44e35",
     "anchorInputSHA256": "676028d4c466a91b4f457d0a7a8a92d8adb8b9c9ba138016f89ccf0f5563c1d0",
-    "anchorGeneratorSHA256": "ca65a893367e37153a0b8b7df04fc6a239ddff35c57c393e3755a477412b6724",
+    "anchorGeneratorSHA256": "318522ed1fb5d4f49a390e5cb40fb8b4c626b6cc0a0ce308a62376487594a926",
     "method": "Original inputs; C++ series and elliptic-integral Exact; independent exact-binary64-input Decimal 180 digits/600 bisections.",
     "license": "MIT",
     "scope": "Bounded P0 support profile; no universal finite-input claim."

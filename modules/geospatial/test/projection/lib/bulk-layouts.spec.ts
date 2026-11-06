@@ -9,10 +9,10 @@ import {
   ProjectionPipeline,
   mercator
 } from '@math.gl/geospatial/projection';
-import {ProjectionBuffer} from '../../../src/projection/bulk';
-import type {BulkProjection} from '../../../src/projection/bulk';
+import {ProjectionBuffer} from '@math.gl/geospatial/projection/bulk';
+import type {BulkProjection} from '@math.gl/geospatial/projection/bulk';
 import {lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
-import {ProjectionScratch} from '../../../src/projection/experimental/projection-scratch';
+import {ProjectionScratch} from '@math.gl/geospatial/projection/experimental/projection-scratch';
 import {qualifyBulkLayouts} from '../bulk-workload';
 import {
   PIPELINE_SCENARIOS,

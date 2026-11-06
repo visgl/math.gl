@@ -67,7 +67,7 @@ for (const [name, contents] of Object.entries({
     "import proj4 from 'proj4'; export const create = () => {const converter = proj4('WGS84', 'EPSG:3857'); return {project: point => converter.forward(point)};};"
 })) {
   const result = await build({
-    stdin: {contents, resolveDir: fileURLToPath(new URL('../../projection/', import.meta.url))},
+    stdin: {contents, resolveDir: fileURLToPath(new URL('../../', import.meta.url))},
     bundle: true,
     format: 'esm',
     platform: 'browser',

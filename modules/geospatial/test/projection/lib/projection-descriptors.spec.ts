@@ -7,9 +7,9 @@ import {
   createProjectionDescriptor,
   mercator
 } from '@math.gl/geospatial/projection';
-import {lazyUniversalTransverseMercator} from '../../../src/projection/experimental/lazy-projections/utm';
-import {lazyMollweide} from '../../../src/projection/experimental/lazy-projections/moll';
-import {lazyObliqueTransformation} from '../../../src/projection/experimental/lazy-projections/ob_tran';
+import {lazyUniversalTransverseMercator} from '@math.gl/geospatial/projection/experimental/lazy-projections/utm';
+import {lazyMollweide} from '@math.gl/geospatial/projection/experimental/lazy-projections/moll';
+import {lazyObliqueTransformation} from '@math.gl/geospatial/projection/experimental/lazy-projections/ob_tran';
 
 test('descriptors load only the algorithms requested by either CRS', async () => {
   const load = vi.fn(async () => mercator);

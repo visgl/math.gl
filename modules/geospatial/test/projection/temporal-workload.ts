@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original temporal qualification using independent Decimal/Newton expectations.
-import {createTemporalDeformationModel} from '../../src/projection/temporal';
-import type {TemporalDeformationOptions} from '../../src/projection/temporal';
+import {createTemporalDeformationModel} from '@math.gl/geospatial/projection/temporal';
+import type {TemporalDeformationOptions} from '@math.gl/geospatial/projection/temporal';
 import {authoredVelocityGrid, qualifyDeformationModel} from './deformation-stress-workload';
 import reference from './fixtures/temporal-reference.json';
 export {reference};

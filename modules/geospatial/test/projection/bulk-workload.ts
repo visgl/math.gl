@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original cross-runtime buffer qualification using existing independent references.
 import {projectionEngine, ProjectionPipeline} from '@math.gl/geospatial/projection';
-import {ProjectionBuffer} from '../../src/projection/bulk';
+import {ProjectionBuffer} from '@math.gl/geospatial/projection/bulk';
 import cases from './fixtures/accuracy-cases.json';
 import reference from './fixtures/accuracy-reference.json';
 import kinematicCases from './fixtures/kinematic-pipeline-cases.json';

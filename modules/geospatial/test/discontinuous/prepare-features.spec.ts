@@ -7,9 +7,9 @@ import {
   type MapFeature,
   type MapFeatureGeometry,
   type PreparedMapGeometry
-} from '../../src/discontinuous';
-import {elasticI, elasticIII} from '../../src/elastic';
-import {angle, geographic} from '../../src/discontinuous/math';
+} from '@math.gl/geospatial/discontinuous';
+import {elasticI, elasticIII} from '@math.gl/geospatial/elastic';
+import {angle, geographic} from '@math.gl/geospatial/discontinuous/math';
 
 const maps = [
   new MapEngine({version: 1, id: 'mercator', definition: {type: 'mercator'}}),

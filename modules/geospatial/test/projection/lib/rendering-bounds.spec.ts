@@ -6,16 +6,16 @@ import {projectionEngine, projJSONCRSParser} from '@math.gl/geospatial/projectio
 import {lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
 import {geographicJSON, projectedJSON, projectedWKT2} from '../fixtures/crs-datums';
 import inputs from '../fixtures/native-proj-cases.json';
-import {sphericalExtremum} from '../../../src/projection/experimental/rendering-profile/spherical-rendering-domain';
+import {sphericalExtremum} from '@math.gl/geospatial/projection/experimental/rendering-profile/spherical-rendering-domain';
 import {createProjectionEngine} from '@math.gl/geospatial/projection/core';
 import {mercator} from '@math.gl/geospatial/projection/projections/merc';
-import {equalAreaAzimuthalBounds} from '../../../src/projection/experimental/rendering-profile/azimuthal-rendering-bounds';
-import {kernelParameters} from '../../../src/projection/experimental/kernel';
+import {equalAreaAzimuthalBounds} from '@math.gl/geospatial/projection/experimental/rendering-profile/azimuthal-rendering-bounds';
+import {kernelParameters} from '@math.gl/geospatial/projection/experimental/kernel';
 import {
   createAngularRanges,
   getAngularRanges
-} from '../../../src/projection/experimental/rendering-profile/geographic-bounds';
-import {longitudeRange} from '../../../src/projection/experimental/rendering-profile/rendering-bounds';
+} from '@math.gl/geospatial/projection/experimental/rendering-profile/geographic-bounds';
+import {longitudeRange} from '@math.gl/geospatial/projection/experimental/rendering-profile/rendering-bounds';
 
 for (const fixture of inputs.cases) {
   test('finite rendering bounds and normalized containment: ' + fixture.id, async () => {

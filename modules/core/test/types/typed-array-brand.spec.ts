@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {isUint16Array, isFloat16Array} from '../../src/types/index';
-import {createForeignTypedArray} from '../../../../test/utils/foreign-typed-array';
+import {isUint16Array, isFloat16Array} from '@math.gl/core/types/index';
+import {createForeignTypedArray} from 'test/utils/foreign-typed-array';
 
 test('Uint16Array detection accepts foreign arrays and sliced columns', async () => {
   const foreign = (await createForeignTypedArray('Uint16Array', 16))!;

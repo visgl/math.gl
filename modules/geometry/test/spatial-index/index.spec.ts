@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {BoxIndex, PointIndex, TriangleBVH} from '../../src/spatial-index';
-import {intersectRayTriangle, getClosestPointOnTriangle} from '../../src/culling/queries';
+import {BoxIndex, PointIndex, TriangleBVH} from '@math.gl/geometry/spatial-index';
+import {intersectRayTriangle, getClosestPointOnTriangle} from '@math.gl/geometry/culling/queries';
 
 function random() {
   let seed = 12345;

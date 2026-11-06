@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {GeoArrowBuilder} from '../../src/geoarrow/builder-entry';
+import {GeoArrowBuilder} from '@math.gl/geospatial/geoarrow/builder-entry';
 import {
   getGeoArrowRowBounds,
   makeGeoArrowColumnFromGeometryRows,
   mapGeoArrowCoordinates,
   validateGeoArrowColumn
-} from '../../src/geoarrow/index';
-import type {GeoArrowColumn} from '../../src/geoarrow/types';
-import {materializeGeoArrowRows} from '../../src/geoarrow/layout';
+} from '@math.gl/geospatial/geoarrow/index';
+import type {GeoArrowColumn} from '@math.gl/geospatial/geoarrow/types';
+import {materializeGeoArrowRows} from '@math.gl/geospatial/geoarrow/layout';
 
 test('subpath builder emits a plain descriptor and row bounds are direct', () => {
   const measure = new GeoArrowBuilder({

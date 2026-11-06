@@ -10,8 +10,8 @@ import {
   BigInt64ArrayAvailable,
   BigUint64Array,
   BigUint64ArrayAvailable
-} from '../../src/types/bigint';
-import {getBounds2D, isBounds2D} from '../../src/types/bounds-types';
+} from '@math.gl/core/types/bigint';
+import {getBounds2D, isBounds2D} from '@math.gl/core/types/bounds-types';
 
 test('@math.gl/core bounds helpers preserve and truncate dimensions', () => {
   const bounds2d = [

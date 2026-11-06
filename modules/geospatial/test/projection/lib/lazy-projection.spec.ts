@@ -6,7 +6,7 @@ import {projectionEngine, getLoadedProjection} from '@math.gl/geospatial/project
 import {
   lazyUniversalTransverseMercator,
   lazyCassiniSoldner
-} from '../../../src/projection/experimental/lazy-projections';
+} from '@math.gl/geospatial/projection/experimental/lazy-projections';
 import {lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
 import cases from '../fixtures/native-proj-cases.json';
 

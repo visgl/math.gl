@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {wrapLongitude} from '../../../src/projection/experimental/parameters';
+import {wrapLongitude} from '@math.gl/geospatial/projection/experimental/parameters';
 
 test.each([-900, -540, -190, -180, -170, 0, 170, 180, 190, 540, 900])(
   'longitude wrapping honors +over at %s degrees',

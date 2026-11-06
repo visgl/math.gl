@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {isTypedArray, isNumericArray} from '../../src/types/index';
-import type {TypedArray, TypedArrayConstructor} from '../../src/types/index';
+import {isTypedArray, isNumericArray} from '@math.gl/core/types/index';
+import type {TypedArray, TypedArrayConstructor} from '@math.gl/core/types/index';
 
 const TEST_CASES: {value: unknown; isTypedArray: boolean; isNumericArray: boolean}[] = [
   {value: new Float32Array(1), isTypedArray: true, isNumericArray: true},

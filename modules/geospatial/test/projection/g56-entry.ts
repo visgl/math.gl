@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original independent and pinned-native bounded accuracy workloads.
-import {EllipsoidRhumb} from '../../src/ellipsoid-rhumb';
-import {RhumbPolygon} from '../../src/rhumb-polygon';
-import {GeodesicIntersections} from '../../src/geodesic-intersections';
-import {EllipsoidGeodesic} from '../../src/ellipsoid-geodesic';
+import {EllipsoidRhumb} from '@math.gl/geospatial/ellipsoid-rhumb';
+import {RhumbPolygon} from '@math.gl/geospatial/rhumb-polygon';
+import {GeodesicIntersections} from '@math.gl/geospatial/geodesic-intersections';
+import {EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid-geodesic';
 import reference from '../ellipsoid/g56-reference.json';
 export const provenance = reference.provenance;
 export function qualifyG56() {

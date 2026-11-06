@@ -15,7 +15,7 @@ import {
   parseExpressionString
 } from '@math.gl/core';
 import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial';
-import {get} from '../../src/expressions/get';
+import {get} from '@math.gl/core/expressions/get';
 
 test('@math.gl/core#evaluate', () => {
   expect(evaluate(parse('x * 2 + 1'), {x: 3}), 'evaluates arithmetic expressions').toBe(7);

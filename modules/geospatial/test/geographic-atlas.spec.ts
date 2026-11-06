@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {createOrthographicCutAtlas, GeographicCutAtlas} from '../src/geographic-atlas';
+import {createOrthographicCutAtlas, GeographicCutAtlas} from '@math.gl/geospatial/geographic-atlas';
 test('Oblique ellipsoidal horizon clips and projects a polygon', () => {
   const {atlas, project} = createOrthographicCutAtlas({
     viewDirection: [1, 1, 1],
@@ -153,7 +153,7 @@ import {
   createOctahedralCutAtlas,
   createOctahedralCutGraph,
   GeographicSeamError
-} from '../src/geographic-atlas';
+} from '@math.gl/geospatial/geographic-atlas';
 test('Faceted consumer projects all retained curves and shares every internal boundary', () => {
   const {atlas, project} = createOctahedralCutAtlas({edgeModel: 'geodesic'}),
     input = [{positions: [-60, -40, 60, -40, 60, 40, -60, 40]}];
@@ -417,9 +417,9 @@ for (const edgeModel of ['linear', 'geodesic', 'rhumb'] as const)
     expect(Math.abs(area)).toBeGreaterThan(6378137 ** 2 * 1e-8);
   });
 
-import {circle} from '../src/geographic-atlas/math';
-import {circleCurve, roots} from '../src/geographic-atlas/curves';
-import {Context} from '../src/geographic-seams/edge';
+import {circle} from '@math.gl/geospatial/geographic-atlas/math';
+import {circleCurve, roots} from '@math.gl/geospatial/geographic-atlas/curves';
+import {Context} from '@math.gl/geospatial/geographic-seams/edge';
 test('Uncertain circle discriminants reject on either side of grazing contact', () => {
   const curve = circleCurve(circle('latitude', [0, 0, 1], 0.5), -0.2, 0.2, [], []);
   // These binary64 coefficients straddle an exact Pythagorean tangency.

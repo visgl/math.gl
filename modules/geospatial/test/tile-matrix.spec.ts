@@ -14,8 +14,8 @@ import {
   validateTileMatrixSet,
   validateTileMatrixLimits,
   resolveTileIndex
-} from '../src/tile-matrix';
-import type {TileMatrix} from '../src/tile-matrix';
+} from '@math.gl/geospatial/tile-matrix';
+import type {TileMatrix} from '@math.gl/geospatial/tile-matrix';
 
 const matrix: TileMatrix = {
   id: 'national-grid:coarse',

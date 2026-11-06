@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {TaskOperationQueue} from '../../src/tasks/task-operation-queue';
-import {TaskRunner, type Task} from '../../src/tasks';
+import {TaskOperationQueue} from '@math.gl/core/tasks/task-operation-queue';
+import {TaskRunner, type Task} from '@math.gl/core/tasks';
 
 function deferred() {
   let resolve!: () => void;

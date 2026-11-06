@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {createResourceWorker} from '../../../dist/worker-utils/index.js';
+import {createResourceWorker} from '@math.gl/core/worker-utils';
 await createResourceWorker({
   initialize: input => ({
     value: input.value,

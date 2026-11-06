@@ -9,7 +9,7 @@ import {
   mercator,
   universalTransverseMercator,
   lambertConformalConic
-} from '../../src/projection/experimental';
+} from '@math.gl/geospatial/projection/experimental';
 
 /** Both browser and Node suites. Timings include the identical buffer reset in every case. */
 export function projectionBench(suite: Bench): Bench {

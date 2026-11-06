@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {lookupTimezoneAsync} from '../../src/timezone/lookup-async';
+import {lookupTimezoneAsync} from '@math.gl/earth/timezone/lookup-async';
 
 const state = vi.hoisted(() => ({loads: 0, calls: 0}));
 vi.mock('../../src/timezone/lookup', () => {

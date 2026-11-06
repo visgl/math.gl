@@ -52,7 +52,7 @@ for (const [name, contents] of Object.entries(fixtures)) {
   const result = await build({
     stdin: {
       contents,
-      resolveDir: fileURLToPath(new URL('../../projection/', import.meta.url))
+      resolveDir: fileURLToPath(new URL('../../', import.meta.url))
     },
     bundle: true,
     tsconfigRaw: {},

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {getSunPosition, getSunDirection} from '../../src/sun/suncalc';
+import {getSunPosition, getSunDirection} from '@math.gl/earth/sun/suncalc';
 import {equals, config} from '@math.gl/core';
 import {vec3} from '@math.gl/core';
 

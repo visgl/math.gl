@@ -2,8 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {cutSphericalPolygon, projectSphericalPolygon, MapEngine} from '../../src/discontinuous';
-import {geographic, dot, cross, angle} from '../../src/discontinuous/math';
+import {
+  cutSphericalPolygon,
+  projectSphericalPolygon,
+  MapEngine
+} from '@math.gl/geospatial/discontinuous';
+import {geographic, dot, cross, angle} from '@math.gl/geospatial/discontinuous/math';
 const area = (r: readonly (readonly [number, number])[]) => {
   const v = r.map(geographic),
     o = v[0];

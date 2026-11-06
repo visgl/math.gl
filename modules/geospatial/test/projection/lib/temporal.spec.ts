@@ -3,10 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original independent temporal, bulk, event boundary and failure/reentry tests.
 import {expect, test} from 'vitest';
-import {createTemporalDeformationModel} from '../../../src/projection/temporal';
-import type {TemporalDeformationComponent} from '../../../src/projection/temporal';
+import {createTemporalDeformationModel} from '@math.gl/geospatial/projection/temporal';
+import type {TemporalDeformationComponent} from '@math.gl/geospatial/projection/temporal';
 import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import {ProjectionBuffer} from '../../../src/projection/bulk';
+import {ProjectionBuffer} from '@math.gl/geospatial/projection/bulk';
 import {reference, temporalOptions, qualifyTemporalModels} from '../temporal-workload';
 const field = (up: number) => ({
   sample(_longitude: number, _latitude: number, p: {x: number; y: number; z: number}) {

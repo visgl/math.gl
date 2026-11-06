@@ -21,7 +21,9 @@ import tempfile
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
-DEST = HERE.parent / 'test/fixtures/ellipsoid-p0-reference.json'
+# Share one fixture directory for output and anchor inputs after module consolidation.
+FIXTURES = HERE.parents[1] / 'test/projection/fixtures'
+DEST = FIXTURES / 'ellipsoid-p0-reference.json'
 ARCHIVE_SHA = '5aaca14cd75f13aa2690273d76e88e8ddf4aeb267d6be2c3e0ba948deb9ceea5'
 spec = importlib.util.spec_from_file_location('independent', HERE / 'generate-interior-reference.py')
 independent = importlib.util.module_from_spec(spec)
@@ -55,7 +57,7 @@ def surface_cases():
                                 ref[key] = [reference[key][i] for i in permutation]
                             rows.append(dict(radii=[radii[i] for i in permutation],
                                              xyz=[xyz[i] for i in permutation], reference=ref))
-        anchors=json.loads((HERE.parent/'test/fixtures/spheroid-anchor-inputs.json').read_text())
+        anchors=json.loads((FIXTURES/'spheroid-anchor-inputs.json').read_text())
         for anchor in anchors:
             radii=[anchor['a'],anchor['a'],anchor['b']]
             rows.append(dict(radii=radii,xyz=anchor['xyz'],anchor=anchor,
@@ -210,7 +212,7 @@ def generate(oracle):
         compilerFlags='-std=c++17 -O2; GEOGRAPHICLIB_PRECISION=3; actual significand bits recorded',
         driverSHA256=digest(HERE/'geographiclib-p0-oracle.cpp'),generatorSHA256=digest(Path(__file__)),
         decimalOracleSHA256=digest(HERE/'generate-interior-reference.py'),
-        anchorInputSHA256=digest(HERE.parent/'test/fixtures/spheroid-anchor-inputs.json'),
+        anchorInputSHA256=digest(FIXTURES/'spheroid-anchor-inputs.json'),
         anchorGeneratorSHA256=digest(HERE/'generate-spheroid-anchor-inputs.mjs'),
         method='Original inputs; C++ series and elliptic-integral Exact; independent exact-binary64-input Decimal 180 digits/600 bisections.',
         license='MIT',scope='Bounded P0 support profile; no universal finite-input claim.'),
@@ -231,7 +233,7 @@ if __name__=='__main__':
         assert provenance['driverSHA256']==digest(HERE/'geographiclib-p0-oracle.cpp')
         assert provenance['generatorSHA256']==digest(Path(__file__))
         assert provenance['decimalOracleSHA256']==digest(HERE/'generate-interior-reference.py')
-        assert provenance['anchorInputSHA256']==digest(HERE.parent/'test/fixtures/spheroid-anchor-inputs.json')
+        assert provenance['anchorInputSHA256']==digest(FIXTURES/'spheroid-anchor-inputs.json')
         assert provenance['anchorGeneratorSHA256']==digest(HERE/'generate-spheroid-anchor-inputs.mjs')
         assert provenance['archiveSHA256']==ARCHIVE_SHA and provenance['version']=='2.7'
         assert fixture['surfaces']==surface_cases(), 'Independent Decimal references differ'

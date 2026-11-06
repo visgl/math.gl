@@ -3,7 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {inferGeoArrowGeometryDimension, mergeGeoArrowDimensions} from '../../src/geoarrow/index';
+import {
+  inferGeoArrowGeometryDimension,
+  mergeGeoArrowDimensions
+} from '@math.gl/geospatial/geoarrow/index';
 
 test('merges elevation and measure dimensions independently', () => {
   expect(mergeGeoArrowDimensions('xy', 'xym')).toBe('xym');

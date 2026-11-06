@@ -9,8 +9,8 @@ import {
   mergeGeometries,
   weldGeometry,
   getDegenerateTriangles
-} from '../../src/utils';
-import type {Geometry} from '../../src/utils';
+} from '@math.gl/geometry/utils';
+import type {Geometry} from '@math.gl/geometry/utils';
 const triangle = (): Geometry => ({
   mode: GL.TRIANGLES,
   attributes: {POSITION: {size: 3, value: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])}}

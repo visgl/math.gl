@@ -9,7 +9,7 @@ import {
   TerrainProfileViewStatus as V,
   type TerrainProfile
 } from '@math.gl/geospatial/terrain';
-import {compareTerrainSlopes} from '../../src/terrain/profile-slope';
+import {compareTerrainSlopes} from '@math.gl/geospatial/terrain/profile-slope';
 
 test('near-tangent rays select the higher slope before angle rounding', () => {
   const p = profile([0, 101, 201.00000000000003]);

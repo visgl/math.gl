@@ -10,7 +10,7 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 import {gzipSync} from 'node:zlib';
 import {build} from 'esbuild';
 
-const packageRoot = fileURLToPath(new URL('../../projection/', import.meta.url));
+const packageRoot = fileURLToPath(new URL('../../', import.meta.url));
 const temporary = mkdtempSync(join(tmpdir(), 'math-gl-proj4-lazy-'));
 const budgets = JSON.parse(
   readFileSync(new URL('../../test/projection/fixtures/bundle-budgets.json', import.meta.url), 'utf8')

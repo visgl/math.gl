@@ -8,11 +8,11 @@ import {transverseMercator} from '@math.gl/geospatial/projection/projections/tme
 import {
   resolveRenderingProfile,
   combineRenderingProfiles
-} from '../../../src/projection/experimental/rendering-profile/rendering-profile';
+} from '@math.gl/geospatial/projection/experimental/rendering-profile/rendering-profile';
 import type {
   ProjectionImplementation,
   ProjectionRenderingProfile
-} from '../../../src/projection/experimental/types';
+} from '@math.gl/geospatial/projection/experimental/types';
 import {projectedJSON} from '../fixtures/crs-datums';
 
 const defaultProfile: ProjectionRenderingProfile = {

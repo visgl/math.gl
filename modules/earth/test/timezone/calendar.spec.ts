@@ -3,12 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {getLocalDateTime, getTimezoneLabel, isTimezoneSupported} from '../../src/timezone';
+import {getLocalDateTime, getTimezoneLabel, isTimezoneSupported} from '@math.gl/earth/timezone';
 import {
   getStartOfDay,
   getTimezoneTransitions,
   localDateTimeToInstant
-} from '../../src/timezone/temporal';
+} from '@math.gl/earth/timezone/temporal';
 
 const timestamp = (date: string): number => Date.parse(date);
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {getStarfieldRotation} from '../../src/sun';
+import {getStarfieldRotation} from '@math.gl/earth/sun';
 
 const transform = (m: number[], v: number[]): number[] =>
   [0, 1, 2].map(row => m[row] * v[0] + m[row + 3] * v[1] + m[row + 6] * v[2]);

@@ -8,7 +8,7 @@ import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import {build} from 'esbuild';
 
-const packageRoot = fileURLToPath(new URL('../../projection/', import.meta.url));
+const packageRoot = fileURLToPath(new URL('../../', import.meta.url));
 const require = createRequire(import.meta.url);
 const esm = await import('@math.gl/geospatial/projection');
 const cjs = require('@math.gl/geospatial/projection');

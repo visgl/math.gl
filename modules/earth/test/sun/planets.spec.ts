@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {getPlanetSkyInfo} from '../../src/sun/planets';
+import {getPlanetSkyInfo} from '@math.gl/earth/sun/planets';
 import {PLANET_REFERENCE} from './data/planet-reference';
 
 const radians = (degrees: number) => (degrees * Math.PI) / 180;

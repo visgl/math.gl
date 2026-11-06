@@ -6,7 +6,7 @@ import {
   getPlanetSkyInfo,
   getPlanetVisibility,
   getPlanetVisibilityTimes
-} from '../../src/sun/planets';
+} from '@math.gl/earth/sun/planets';
 
 const degrees = (angle: number) => (angle * Math.PI) / 180;
 

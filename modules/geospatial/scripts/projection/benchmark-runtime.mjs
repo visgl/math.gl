@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {build} from 'esbuild';
 import {execFileSync} from 'node:child_process';
-import {readFileSync} from 'node:fs';
+import {readFileSync, statSync} from 'node:fs';
 import {dirname, join, relative, resolve} from 'node:path';
 
 // Historical measurements keep using that revision's source tree and export map.
@@ -86,12 +86,16 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
       ...(sideEffects === false ? {sideEffects: false} : {})
     };
   };
-  function historicalSource(base) {
+  function resolveSource(base) {
     for (const file of [base, base.replace(/\.js$/, '.ts'), base + '.ts', base + '.js', base + '.json', base + '/index.ts']) {
-      try {git(historicalPath(relative(root, file))); return sourceResult(file);}
+      try {
+        if (baselineCommit) git(historicalPath(relative(root, file)));
+        else if (!statSync(file).isFile()) continue;
+        return sourceResult(file);
+      }
       catch { /* Try the next supported source extension. */ }
     }
-    throw new Error('Cannot resolve historical source: ' + base);
+    throw new Error('Cannot resolve runtime source: ' + base);
   }
   return build({
     entryPoints: [join(root, entry)], outfile, bundle: true, metafile: true,
@@ -116,18 +120,19 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
           const metadata = JSON.parse(baselineCommit
             ? git(historicalPath(manifestPath)) : readFileSync(join(root, manifestPath), 'utf8'));
           const exported = metadata.exports[parts.length > 2 ? './' + parts.slice(2).join('/') : '.'];
-          if (!exported) throw new Error('Cannot resolve runtime export: ' + args.path);
+          // Private test aliases name source files without widening published package exports.
+          if (!exported) return resolveSource(join(root, 'modules', module, 'src', ...parts.slice(2)));
           const target = typeof exported === 'string' ? exported : exported.import;
           return sourceResult(join(root, 'modules', module, target.replace('./dist/', 'src/').replace(/\.js$/, '.ts')));
         });
         if (!baselineCommit) return;
         builder.onResolve({filter: /^\.\.?\//, namespace: 'historical'}, args =>
-          historicalSource(resolve(dirname(args.importer), args.path)));
-        builder.onResolve({filter: /\/modules\/.*\/src\/.*\.ts$/}, args => historicalSource(args.path));
+          resolveSource(resolve(dirname(args.importer), args.path)));
+        builder.onResolve({filter: /\/modules\/.*\/src\/.*\.ts$/}, args => resolveSource(args.path));
         builder.onResolve({filter: /^\.\.?\//, namespace: 'file'}, args => {
           const base = resolve(args.resolveDir, args.path);
           if (!/\/modules\/.*\/src\//.test(base)) return;
-          return historicalSource(base);
+          return resolveSource(base);
         });
         builder.onLoad({filter: /\.(ts|js|json)$/, namespace: 'historical'}, args => ({
           contents: git(historicalPath(relative(root, args.path))).replace(

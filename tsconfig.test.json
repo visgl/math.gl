@@ -29,6 +29,9 @@
       "@math.gl/geospatial/discontinuous": [
         "./modules/geospatial/src/discontinuous.ts"
       ],
+      "@math.gl/geospatial/discontinuous/*": [
+        "./modules/geospatial/src/discontinuous/*"
+      ],
       "@math.gl/geospatial/projection": [
         "./modules/geospatial/src/projection/index.ts"
       ],
@@ -166,6 +169,9 @@
       ],
       "@math.gl/geospatial/projection/experimental": [
         "./modules/geospatial/src/projection/experimental/index.ts"
+      ],
+      "@math.gl/geospatial/projection/experimental/*": [
+        "./modules/geospatial/src/projection/experimental/*"
       ],
       "@math.gl/geospatial/projection/experimental/core": [
         "./modules/geospatial/src/projection/experimental/core.ts"
@@ -739,6 +745,9 @@
       ],
       "@math.gl/geospatial/terrain": [
         "./modules/geospatial/src/terrain/index.ts"
+      ],
+      "@math.gl/geospatial/terrain/*": [
+        "./modules/geospatial/src/terrain/*"
       ]
     }
   }

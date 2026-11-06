@@ -4,7 +4,7 @@
 // Oracle: BSD-3-Clause Hošek-Wilkie 1.4a, integrated at twice the table's angular resolution.
 // https://cgg.mff.cuni.cz/projects/SkylightModelling/
 import {test, expect} from 'vitest';
-import {getSunLight, getSunPosition} from '../../src/sun';
+import {getSunLight, getSunPosition} from '@math.gl/earth/sun';
 import {SUNLIGHT_REFERENCE} from './data/sunlight-reference';
 
 const radians = (degrees: number): number => (degrees * Math.PI) / 180;

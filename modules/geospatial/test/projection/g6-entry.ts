@@ -6,8 +6,8 @@ import {
   GeodesicIntersections,
   type GeodesicPath,
   type IntersectionPoint
-} from '../../src/geodesic-intersections';
-import {EllipsoidGeodesic} from '../../src/ellipsoid-geodesic';
+} from '@math.gl/geospatial/geodesic-intersections';
+import {EllipsoidGeodesic} from '@math.gl/geospatial/ellipsoid-geodesic';
 import reference from '../ellipsoid/g6-reference.json';
 export const provenance = reference.provenance;
 type Axes = {a: number; b: number};

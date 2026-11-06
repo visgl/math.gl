@@ -5,7 +5,7 @@ import {expect, test} from 'vitest';
 import {createGeoidFromGrid, parsePGM} from '@math.gl/earth';
 import type {GeoidGridProps} from '@math.gl/earth';
 import {openFile} from './utils/file-utils';
-import {createForeignTypedArray} from '../../../../test/utils/foreign-typed-array';
+import {createForeignTypedArray} from 'test/utils/foreign-typed-array';
 
 test('decoded geoid accepts foreign-realm Uint16Array values for both interpolation modes', async () => {
   const foreign = (await createForeignTypedArray('Uint16Array', 16)) as Uint16Array;

@@ -9,8 +9,8 @@ import {
   createInterruptedMap,
   type MapDefinition,
   type InterruptedProjection
-} from '../../src/discontinuous';
-import {geographic} from '../../src/discontinuous/math';
+} from '@math.gl/geospatial/discontinuous';
+import {geographic} from '@math.gl/geospatial/discontinuous/math';
 
 const make = (definition: MapDefinition) => new MapEngine({version: 1, id: 'test', definition});
 const roundTrip = (map: MapEngine, p: [number, number]) => {

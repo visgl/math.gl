@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {BoxIndex} from '../../src/spatial-index';
+import {BoxIndex} from '@math.gl/geometry/spatial-index';
 
 test.each([2, 3] as const)(
   'nearest %iD box rays agree with ordered broad-phase candidates',

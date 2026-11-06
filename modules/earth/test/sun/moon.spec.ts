@@ -8,8 +8,8 @@ import {
   getMoonIllumination,
   getMoonLight,
   getStarfieldRotation
-} from '../../src/sun';
-import {getLocalSiderealTime} from '../../src/sun/starfield';
+} from '@math.gl/earth/sun';
+import {getLocalSiderealTime} from '@math.gl/earth/sun/starfield';
 import {MOON_REFERENCE} from './data/moon-reference';
 
 const radians = (degrees: number): number => (degrees * Math.PI) / 180;

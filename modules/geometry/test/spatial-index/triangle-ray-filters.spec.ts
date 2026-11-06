@@ -7,8 +7,8 @@ import {
   TriangleBVH,
   type TriangleRayOptions,
   type TriangleRayResult
-} from '../../src/spatial-index';
-import {intersectRayTriangle, normalizeQueryDirection} from '../../src/culling/queries';
+} from '@math.gl/geometry/spatial-index';
+import {intersectRayTriangle, normalizeQueryDirection} from '@math.gl/geometry/culling/queries';
 
 /** Indexed stacked triangles, including coincident surfaces and one degenerate face. */
 function createFixture(leafSize: number) {

@@ -13,7 +13,7 @@ import {
   materializeGeoArrowRows,
   sliceGeoArrowColumn,
   type GeoArrowColumn
-} from '../../src/geoarrow/index';
+} from '@math.gl/geospatial/geoarrow/index';
 
 test.each(['interleaved', 'separated'] as const)(
   'materialization preserves sliced chunked null and empty rows (%s)',

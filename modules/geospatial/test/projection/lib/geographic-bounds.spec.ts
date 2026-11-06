@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import type {GeographicBounds} from '../../../src/projection/experimental/types';
+import type {GeographicBounds} from '@math.gl/geospatial/projection/experimental/types';
 import {
   createAngularRanges,
   createGeographicBounds,
@@ -14,7 +14,7 @@ import {
   getLongitudeSpan,
   getAngularRanges,
   getGeographicBounds
-} from '../../../src/projection/experimental/rendering-profile/geographic-bounds';
+} from '@math.gl/geospatial/projection/experimental/rendering-profile/geographic-bounds';
 
 const world: GeographicBounds = [-180, -90, 180, 90];
 

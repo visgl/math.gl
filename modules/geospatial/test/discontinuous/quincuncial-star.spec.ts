@@ -2,9 +2,16 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {MapEngine, type MapDefinition} from '../../src/discontinuous';
+import {MapEngine, type MapDefinition} from '@math.gl/geospatial/discontinuous';
 import reference from './quincuncial-star-reference.json';
-import {add, scale, unit, cross, coordinates, geographic} from '../../src/discontinuous/math';
+import {
+  add,
+  scale,
+  unit,
+  cross,
+  coordinates,
+  geographic
+} from '@math.gl/geospatial/discontinuous/math';
 
 const make = (definition: MapDefinition, radius = 1) =>
   new MapEngine({version: 1, id: 'test', definition, radius});

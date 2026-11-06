@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test, vi} from 'vitest';
-import {MapEngine, type MapDefinition} from '../../src/discontinuous';
-import {geographic, coordinates, add, unit} from '../../src/discontinuous/math';
+import {MapEngine, type MapDefinition} from '@math.gl/geospatial/discontinuous';
+import {geographic, coordinates, add, unit} from '@math.gl/geospatial/discontinuous/math';
 const types = [
   'gray-fuller',
   'petroff',

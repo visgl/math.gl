@@ -11,7 +11,7 @@ import {
   createSharedWorkerState,
   createWorker,
   type WorkerObject
-} from '../../src/worker-utils';
+} from '@math.gl/core/worker-utils';
 
 const test = baseTest.runIf(isBrowser);
 const worker: WorkerObject = {
@@ -133,7 +133,7 @@ test('throwing progress callbacks abort the browser worker', async () => {
 });
 
 test('module workers cooperate with cancellation and retain their incarnation', async () => {
-  const {WorkerPool} = await import('../../src/worker-utils');
+  const {WorkerPool} = await import('@math.gl/core/worker-utils');
   const pool = new WorkerPool({
     maxConcurrency: 1,
     loadWorker: () =>
@@ -162,7 +162,7 @@ test('module workers cooperate with cancellation and retain their incarnation', 
 });
 
 test('browser resources initialize once and dispose deterministically', async () => {
-  const {createWorkerResource} = await import('../../src/worker-utils');
+  const {createWorkerResource} = await import('@math.gl/core/worker-utils');
   const resource = await createWorkerResource(
     {
       ...worker,
@@ -181,7 +181,7 @@ test('browser resources initialize once and dispose deterministically', async ()
 });
 
 test('browser resource output can be copied without detaching retained worker data', async () => {
-  const {createWorkerResource} = await import('../../src/worker-utils');
+  const {createWorkerResource} = await import('@math.gl/core/worker-utils');
   const resource = await createWorkerResource(
     {
       ...worker,
@@ -204,7 +204,7 @@ test('browser resource output can be copied without detaching retained worker da
 });
 
 test('browser WASM resource retains its instance after cooperative cancellation', async () => {
-  const {createWorkerResource} = await import('../../src/worker-utils');
+  const {createWorkerResource} = await import('@math.gl/core/worker-utils');
   const resource = await createWorkerResource(
     {
       ...worker,
@@ -248,7 +248,7 @@ test('browser capability detection follows isolation and retains the message fal
 baseTest.runIf(isBrowser && getWorkerCapabilities().sharedMemory)(
   'isolated browser workers observe shared cancellation inside a synchronous polling loop',
   async () => {
-    const {WorkerPool} = await import('../../src/worker-utils');
+    const {WorkerPool} = await import('@math.gl/core/worker-utils');
     const pool = new WorkerPool({
       maxConcurrency: 1,
       loadWorker: () =>
@@ -282,7 +282,7 @@ baseTest.runIf(isBrowser && getWorkerCapabilities().sharedMemory)(
 );
 
 test('browser cooperative cancellation before dispatch preserves the warm worker', async () => {
-  const {WorkerPool} = await import('../../src/worker-utils');
+  const {WorkerPool} = await import('@math.gl/core/worker-utils');
   const pool = new WorkerPool({
     maxConcurrency: 1,
     loadWorker: () =>
