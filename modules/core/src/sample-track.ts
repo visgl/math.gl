@@ -139,13 +139,7 @@ export class SampleTrack {
             right = Math.min(last, key + 1);
           const difference = this.values[right * this.size + j] - this.values[left * this.size + j];
           const span = this.times[right] - this.times[left];
-          const ratio = dt / span;
-          // Avoid losing precision in a subnormal ratio or overflowing the derivative.
-          if (ratio >= 2 ** -1022) return difference * ratio;
-          const product = difference * dt;
-          return Number.isFinite(product) && product !== 0
-            ? product / span
-            : (difference / span) * dt;
+          return multiplyDivide(difference, dt, span);
         };
         out[j] =
           (2 * t ** 3 - 3 * t ** 2 + 1) * a +
@@ -185,4 +179,19 @@ export class SampleTrack {
 function bezier(t: number, a: number, b: number, c: number, d: number): number {
   const u = 1 - t;
   return u ** 3 * a + 3 * u * u * t * b + 3 * u * t * t * c + t ** 3 * d;
+}
+
+/** Keep all intermediate mantissas normal until the final result is rounded. */
+function multiplyDivide(value: number, numerator: number, denominator: number): number {
+  if (value === 0) return value;
+  const valueExponent = Math.min(1023, Math.floor(Math.log2(Math.abs(value))));
+  const numeratorExponent = Math.min(1023, Math.floor(Math.log2(numerator)));
+  const denominatorExponent = Math.min(1023, Math.floor(Math.log2(denominator)));
+  const mantissa =
+    ((value / 2 ** valueExponent) * (numerator / 2 ** numeratorExponent)) /
+    (denominator / 2 ** denominatorExponent);
+  const exponent = valueExponent + numeratorExponent - denominatorExponent;
+  if (exponent > 1023) return mantissa * 2 ** (exponent - 1023) * 2 ** 1023;
+  if (exponent < -1022) return mantissa * 2 ** (exponent + 1022) * 2 ** -1022;
+  return mantissa * 2 ** exponent;
 }

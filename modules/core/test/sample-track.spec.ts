@@ -103,3 +103,12 @@ it('cubic tangent fallback does not overflow an otherwise finite weighted slope'
   expect(Number.isFinite(result)).toBe(true);
   expect(result).toBeLessThan(0);
 });
+
+it('cubic weighted slopes avoid subnormal intermediate rounding', () => {
+  const track = new SampleTrack([0, 2 ** -1070, 2 ** -40], [0, 0, 3 / 32], {
+    interpolation: 'cubic'
+  });
+  const result = track.evaluate(2 ** -1071)[0];
+  const expected = (-(3 / 32) * 2 ** -1030) / 8;
+  expect(result / expected).toBeCloseTo(1, 12);
+});
