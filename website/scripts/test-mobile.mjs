@@ -97,6 +97,34 @@ try {
       assert.ok(rect.height <= size.height, `${route}: frame fits ${size.width}`);
       await header.tap();
       assert.equal(await header.getAttribute('aria-expanded'), 'true', route);
+      const ranges = page.locator('.example-panel input[type="range"]');
+      const selects = page.locator('.example-panel select');
+      const numbers = page.locator('.example-panel input[type="number"]');
+      let control;
+      if (await ranges.count()) {
+        control = ranges.first();
+        const before = await control.inputValue();
+        await control.focus();
+        await control.press('ArrowRight');
+        assert.notEqual(await control.inputValue(), before, `${route}: range changed`);
+      } else if (await selects.count()) {
+        control = selects.first();
+        const before = await control.inputValue();
+        const next = await control.locator('option').evaluateAll((options, current) =>
+          options.find(option => !option.disabled && option.value && option.value !== current)?.value,
+          before
+        );
+        assert.ok(next, `${route}: alternate option exists`);
+        await control.selectOption(next);
+      } else {
+        assert.ok(await numbers.count(), `${route}: editable control exists`);
+        control = numbers.first();
+        await control.fill(String(Number(await control.inputValue()) + 1));
+      }
+      const value = await control.inputValue();
+      await header.tap();
+      await header.tap();
+      assert.equal(await control.inputValue(), value, `${route}: control value survives collapse`);
       await header.tap();
       assert.equal(
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
