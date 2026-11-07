@@ -17295,7 +17295,7 @@ __metadata:
   dependencies:
     "@deck.gl-community/panels": "npm:^9.4.8"
     "@math.gl/geospatial": "workspace:*"
-    vite: "npm:^8.2.2"
+    vite: "npm:^8.3.6"
   languageName: unknown
   linkType: soft
 
@@ -17339,7 +17339,7 @@ __metadata:
     "@math.gl/core": "workspace:*"
     "@math.gl/geometry": "workspace:*"
     "@math.gl/geospatial": "workspace:*"
-    vite: "npm:^8.2.2"
+    vite: "npm:^8.3.6"
   languageName: unknown
   linkType: soft
 
@@ -17408,7 +17408,7 @@ __metadata:
     proj-wasm: "npm:0.1.0"
     resource-tracker: "npm:^0.0.1"
     squint-cljs: "npm:^0.14.210"
-    vite: "npm:^8.2.2"
+    vite: "npm:^8.3.6"
     worker-router: "npm:@wcohen/worker-router@^0.0.2"
   languageName: unknown
   linkType: soft
@@ -17579,14 +17579,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-zoom-driven-map-morphing@workspace:examples/web-mercator/zoom-driven-map-morphing":
+"math.gl-zoom-driven-map-morphing@workspace:examples/geospatial/zoom-driven-map-morphing":
   version: 0.0.0-use.local
-  resolution: "math.gl-zoom-driven-map-morphing@workspace:examples/web-mercator/zoom-driven-map-morphing"
+  resolution: "math.gl-zoom-driven-map-morphing@workspace:examples/geospatial/zoom-driven-map-morphing"
   dependencies:
     "@deck.gl-community/panels": "npm:^9.4.8"
     "@deck.gl/core": "npm:~9.4.0"
     "@deck.gl/layers": "npm:~9.4.0"
+    "@loaders.gl/core": "npm:^4.5.1"
     "@luma.gl/core": "npm:~9.4.0"
+    "@luma.gl/engine": "npm:~9.4.0"
     "@math.gl/geospatial": "workspace:*"
     vite: "npm:^8.3.6"
   languageName: unknown
