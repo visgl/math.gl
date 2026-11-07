@@ -148,3 +148,6 @@
   top: 8px;
   left: 8px;
 }
+
+.core-matrix-readout { flex: none; padding: 8px 16px; max-height: 40%; overflow: auto; }
+.core-matrix-readout summary { min-height: 44px; display: list-item; align-content: center; cursor: pointer; }

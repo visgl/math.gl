@@ -561,7 +561,7 @@ jobs:
             });
   website:
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -594,6 +594,29 @@ jobs:
       # Match website deployment: build from source before any package dist files exist.
       - name: Build website
         run: yarn workspace project-website build
+
+      # Keep browser downloads across runs; --with-deps still installs OS libraries.
+      - name: Cache Playwright browser
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-ubuntu22-playwright-chromium-${{ hashFiles('node_modules/playwright-core/browsers.json') }}
+
+      # The Azure Ubuntu mirror has taken 6+ minutes to fetch browser fonts.
+      # Use Ubuntu's main archive and bound stalled network requests. OS libraries
+      # are still installed on every fresh runner; a browser cache cannot replace them.
+      # Hosted runners also use mirror+file entries backed by apt-mirrors.txt.
+      - name: Configure Ubuntu archive for browser dependencies
+        run: |
+          sudo find /etc/apt -maxdepth 2 -type f \( -name '*.list' -o -name '*.sources' -o -name '*mirrors*.txt' \) \
+            -exec sed -i 's|http[s]*://azure\.archive\.ubuntu\.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' {} +
+          printf 'Acquire::Retries "2";\nAcquire::http::Timeout "20";\nAcquire::https::Timeout "20";\n' | sudo tee /etc/apt/apt.conf.d/80-ci-network
+
+      - name: Install browser for mobile website checks
+        run: yarn playwright install --with-deps chromium
+
+      - name: Check mobile navigation and fullscreen
+        run: node website/scripts/test-mobile.mjs
 
       - name: Build next website
         env:
