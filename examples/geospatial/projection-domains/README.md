@@ -10,9 +10,9 @@ Run from the repository root:
 ```sh
 yarn && yarn build
 yarn workspace math.gl-projection-domains start
-yarn workspace math.gl-projection-domains test
+yarn test-projection-domains
 yarn workspace math.gl-projection-domains build
-yarn workspace math.gl-projection-domains test:browser
+yarn test-projection-domains:browser
 ```
 
 The website has a separate **Projection domains and external engines** example page.
@@ -55,10 +55,14 @@ a new deck.gl projection engine integration or a replacement for generic layer c
 ## Antarctica and Fiji lab
 
 The standalone `lab.html` and website **Antarctica and Fiji projection lab** page use the qualified
-`warp/` preparation recipe. Build with `yarn workspace math.gl-projection-domains build`, then serve
-`dist/` over HTTP (the website build does this automatically). The production build copies pinned
-proj-wasm assets locally and injects their import map; the original Vite development entry remains
-the smaller streaming demo. No CDN or access token is needed.
+`warp/` preparation recipe. Run `yarn workspace math.gl-projection-domains start` and open
+`/lab.html` to use the lab in development. Build with
+`yarn workspace math.gl-projection-domains build`, then preview with
+`yarn workspace math.gl-projection-domains serve`.
+
+Vite serves the pinned PROJ runtime packages through its public directory and copies them
+into `dist/vendor` during production builds. The lab's import map preserves their worker,
+WASM and database paths. The main `/` entry serves the streaming demo. No CDN or access token is needed.
 
 The lab compares inverse meshes (source-texel error) and continuous source-grid meshes (declared
 display-space error), with explicit unsupported cases. Native/proj4js/D3 work runs in an owned task

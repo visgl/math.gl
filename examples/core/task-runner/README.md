@@ -1,9 +1,9 @@
 # TaskRunner: one task, four execution patterns
 
-From the repository root, after `yarn install` and `yarn build`:
+After `yarn install` and `yarn build` from the repository root, run from this directory:
 
 ```sh
-node examples/core/task-runner/main.mjs
+yarn start
 ```
 
 The example runs real Node workers and checks its results with assertions:
@@ -28,7 +28,7 @@ for the TypeScript version, browser setup, ownership, and prototype limitations.
 Run the provided geospatial tasks used in the guide:
 
 ```sh
-node examples/core/task-runner/geospatial.mjs
+yarn geospatial
 ```
 
 This verifies coordinate projection, ordered multiple inputs, streaming, retained

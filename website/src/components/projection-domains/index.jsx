@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {useEffect, useRef} from 'react';
-import {mountProjectionDomains} from 'website-examples/geospatial/projection-domains/main';
+import {mountProjectionDomains} from 'website-examples/geospatial/projection-domains/src/main';
 export default function ProjectionDomainsExample() {
   const root = useRef(null);
   useEffect(() => {

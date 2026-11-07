@@ -5,11 +5,10 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "test": "node --test provider.test.mjs batch.test.mjs integration.test.mjs raster.test.mjs",
-    "build": "node build-browser.mjs",
-    "start": "node server.mjs",
-    "test:browser": "node browser-test.mjs",
-    "example": "node node.mjs"
+    "build": "vite build",
+    "start": "vite",
+    "example": "node src/node.mjs",
+    "serve": "vite preview"
   },
   "dependencies": {
     "@math.gl/core": "workspace:*",
@@ -23,7 +22,6 @@
     "worker-router": "npm:@wcohen/worker-router@^0.0.2"
   },
   "devDependencies": {
-    "esbuild": "^0.28.1",
-    "playwright": "^1.62.1"
+    "vite": "^8.2.2"
   }
 }

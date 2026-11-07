@@ -6,10 +6,9 @@
   "license": "MIT",
   "scripts": {
     "start": "vite",
-    "build": "tsc --noEmit && vite build && node build-lab.mjs",
-    "test": "node --experimental-strip-types --test test/*.test.ts test/*.test.mjs",
-    "test:browser": "node browser-test.mjs && node lab/browser-test.mjs",
-    "benchmark": "node lab/benchmark.mjs"
+    "build": "tsc --noEmit && vite build",
+    "benchmark": "node src/lab/benchmark.mjs",
+    "serve": "vite preview"
   },
   "dependencies": {
     "@deck.gl-community/panels": "^9.4.8",
@@ -34,9 +33,6 @@
   "devDependencies": {
     "@types/d3-geo": "^3.1.0",
     "@types/node": "^22.20.1",
-    "esbuild": "^0.28.1",
-    "playwright": "^1.62.1",
-    "pngjs": "^7.0.0",
     "typescript": "^6.0.3",
     "vite": "^8.3.6"
   }
