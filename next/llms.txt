@@ -71,6 +71,7 @@ Start with a small calculation, then choose the modules your application needs. 
 - [@math.gl/core/types](https://visgl.github.io/math.gl/next/docs/modules/core/types.md): @math.gl/core provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
 - [Array Types](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/array-types.md): math.gl provides a number of numeric array types.
 - [Bounds](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds.md): A common need for geospatial and 3D applications is to be able to express bounds
+- [UTF-8 utilities](https://visgl.github.io/math.gl/next/docs/modules/core/utf8.md): @math.gl/core/utf8 compares UTF-8 byte ranges and parses ASCII scalar values without
 
 #### dggs
 
