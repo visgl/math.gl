@@ -45,6 +45,11 @@
       "types": "./dist/tasks/index.d.ts",
       "import": "./dist/tasks/index.js",
       "require": "./dist/tasks/index.cjs"
+    },
+    "./utf8": {
+      "types": "./dist/utf8/index.d.ts",
+      "import": "./dist/utf8/index.js",
+      "require": "./dist/utf8/index.cjs"
     }
   },
   "files": [
