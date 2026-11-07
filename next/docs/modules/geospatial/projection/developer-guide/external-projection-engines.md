@@ -10,7 +10,7 @@ External libraries can provide CRS definitions, execute coordinate operations, o
 
 ### Resolve definitions for native math.gl execution[​](#resolve-definitions-for-native-mathgl-execution "Direct link to Resolve definitions for native math.gl execution")
 
-The example's `createProjWasmProvider` owns a PROJ context, disables network access, uses `projCreateFromDatabase` and `projAsProjjson`, and destroys each temporary PJ object. It records the package and EPSG database revision in lookup provenance. Its source is in `examples/geospatial/proj-wasm-crs/provider.mjs`:
+The example's `createProjWasmProvider` owns a PROJ context, disables network access, uses `projCreateFromDatabase` and `projAsProjjson`, and destroys each temporary PJ object. It records the package and EPSG database revision in lookup provenance. Its source is in `examples/geospatial/proj-wasm-crs/src/crs-resolution/provider.mjs`:
 
 ```
 import * as proj from 'proj-wasm';
@@ -430,6 +430,6 @@ The [Projection domains example](https://visgl.github.io/math.gl/next/examples/p
 
 ### Adaptive raster batches[​](#adaptive-raster-batches "Direct link to Adaptive raster batches")
 
-The [proj-wasm raster recipe](https://github.com/visgl/math.gl/blob/master/examples/geospatial/proj-wasm-crs/raster-example.mjs) drives adaptive raster refinement with real asynchronous PROJ sample batches. It reuses a normalized operation, bounds each frontier batch, checks cancellation around awaited calls, and transfers the completed mesh into an owned math.gl task worker. Node and Chromium validate coordinate agreement, texture error and buffer ownership. Native charts still supply target inverse branches and domain geometry; proj-wasm converts geographic samples into the ellipsoidal source raster CRS. This division is explicit: asynchronous point conversion alone does not provide chart clipping or topology repair.
+The [proj-wasm raster recipe](https://github.com/visgl/math.gl/blob/master/examples/geospatial/proj-wasm-crs/src/raster-preparation/index.mjs) drives adaptive raster refinement with real asynchronous PROJ sample batches. It reuses a normalized operation, bounds each frontier batch, checks cancellation around awaited calls, and transfers the completed mesh into an owned math.gl task worker. Node and Chromium validate coordinate agreement, texture error and buffer ownership. Native charts still supply target inverse branches and domain geometry; proj-wasm converts geographic samples into the ellipsoidal source raster CRS. This division is explicit: asynchronous point conversion alone does not provide chart clipping or topology repair.
 
 The separate [Antarctica and Fiji projection lab](https://visgl.github.io/math.gl/next/examples/raster-projection-lab) lets applications compare native math.gl with proj4js, D3 and real proj-wasm stages. It names each backend's role, preserves chart/source identity, demonstrates source-grid versus target-grid preparation where supported, and exports moving-center rebuild measurements. External engines and their WASM assets remain private example dependencies. Published math.gl packages acquire no hard engine dependency.
