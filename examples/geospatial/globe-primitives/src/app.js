@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {mountInfoBox} from './shared/info-box.js';
+import {mountInfoBox} from '../../../common/info-box.js';
 import {
   EllipsoidOccluder,
   getGlobeHorizonBounds,
@@ -9,10 +9,12 @@ import {
   subdivideGlobeMesh
 } from '@math.gl/geospatial';
 
-import {BLUE_MARBLE_WORLD_URL} from './shared/blue-marble.js';
+import {BLUE_MARBLE_WORLD_URL} from '../../../common/blue-marble.js';
 
 const disposeInfo = mountInfoBox(document.querySelector('aside'), {title: 'Globe primitives'});
-window.addEventListener('pagehide', event => { if (!event.persisted) disposeInfo(); });
+window.addEventListener('pagehide', event => {
+  if (!event.persisted) disposeInfo();
+});
 
 let earthPixels;
 const earthImage = new Image();

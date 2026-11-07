@@ -1,19 +1,19 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import React from "react";
-import "./attribution-widget.css";
+import React from 'react';
+import './attribution-widget.css';
 
 /** Compact source credits shared by standalone examples and website embeds. */
-export default function AttributionWidget({ sources }) {
+export default function AttributionWidget({sources}) {
   return (
     <details className="attribution-widget">
       <summary>
         <span>Data attribution</span>
-        <small>{sources.map((source) => source.credit).join(" · ")}</small>
+        <small>{sources.map(source => source.credit).join(' · ')}</small>
       </summary>
       <ul>
-        {sources.map((source) => (
+        {sources.map(source => (
           <li key={source.id}>
             <strong>{source.title}</strong>
             <p>{source.creators || source.credit}</p>

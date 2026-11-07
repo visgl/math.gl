@@ -3,9 +3,16 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {projectCutMap, unprojectCutMap, buildCutMesh} from '../../../../examples/earth/sun-terminator/src/cut-maps.js';
+import {
+  projectCutMap,
+  unprojectCutMap,
+  buildCutMesh
+} from '../../../../examples/earth/sun-terminator/src/cut-maps.js';
 import {_GlobeView as GlobeView, OrthographicView} from '@deck.gl/core';
-import {transferCamera, geographicCenter} from '../../../../examples/earth/sun-terminator/src/camera.js';
+import {
+  transferCamera,
+  geographicCenter
+} from '../../../../examples/earth/sun-terminator/src/camera.js';
 
 test('Albers USA places the contiguous states, Alaska and Hawaii in distinct insets', () => {
   for (const [point, part] of [

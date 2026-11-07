@@ -5,7 +5,7 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Deck, _GlobeView} from '@deck.gl/core';
 import {PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
-import ExamplePanel from './shared/example-panel';
+import ExamplePanel from '../../../common/example-panel';
 import {SAMPLES, decodeCell, s2Hierarchy} from './model';
 import './styles.css';
 

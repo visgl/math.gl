@@ -7,7 +7,7 @@ import {elasticI, elasticII, elasticIII} from '@math.gl/geospatial/elastic';
 import {MYRIAHEDRAL_VIEWS} from './map-options.js';
 export {MYRIAHEDRAL_VIEWS, DISCONTINUOUS_VIEWS} from './map-options.js';
 
-import {isLand} from './shared/common/land-mask.js';
+import {isLand} from '../../../common/land.js';
 import {myriahedralGridSteps} from './myriahedral-grid.js';
 import {
   createH3MyriahedralMesh,

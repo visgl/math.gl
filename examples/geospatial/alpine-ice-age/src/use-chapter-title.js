@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import { useEffect, useState } from "react";
+import {useEffect, useState} from 'react';
 // Introduce each chapter briefly, then leave the map unobstructed.
 export function useChapterTitle(chapter, enabled, ready) {
   const [visible, setVisible] = useState(false);

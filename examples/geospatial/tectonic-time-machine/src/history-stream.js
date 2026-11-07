@@ -4,16 +4,27 @@
 export function waitForRetry(milliseconds, signal) {
   signal.throwIfAborted();
   return new Promise((resolve, reject) => {
-    function cleanup() {clearTimeout(timer); signal.removeEventListener('abort', cancel);}
-    function cancel() {cleanup(); reject(signal.reason);}
-    const timer = setTimeout(() => {cleanup(); resolve();}, milliseconds);
+    function cleanup() {
+      clearTimeout(timer);
+      signal.removeEventListener('abort', cancel);
+    }
+    function cancel() {
+      cleanup();
+      reject(signal.reason);
+    }
+    const timer = setTimeout(() => {
+      cleanup();
+      resolve();
+    }, milliseconds);
     signal.addEventListener('abort', cancel, {once: true});
   });
 }
 /** Continue preloading while idle, preserving playable samples during service interruptions. */
-export async function maintainHistory(model, getTime, {
-  signal, onStatus, retryDelay = 30000, wait = waitForRetry
-}) {
+export async function maintainHistory(
+  model,
+  getTime,
+  {signal, onStatus, retryDelay = 30000, wait = waitForRetry}
+) {
   function progress() {
     onStatus(`Streaming history · ${model.loadedSamples}/${model.totalSamples} samples`);
   }

@@ -19,7 +19,7 @@ import {
 } from '@math.gl/dggs';
 /* eslint-enable import/no-unresolved */
 import {EXPRESSION_SAMPLES, type ExpressionSample, type LibraryId} from './samples';
-import {BLUE_MARBLE_WORLD_URL, BLUE_MARBLE_CREDIT_URL} from './shared/blue-marble.js';
+import {BLUE_MARBLE_WORLD_URL, BLUE_MARBLE_CREDIT_URL} from '../../../common/blue-marble.js';
 import './styles.css';
 
 const LIBRARIES: Record<

@@ -12,7 +12,7 @@ import type {ProjectionName} from './projections.ts';
 import {projectGeometry} from './pipeline.ts';
 import {createRasterMesh} from './raster.ts';
 import type {RasterKind} from './raster.ts';
-import {mountInfoBox} from './shared/common/info-box.js';
+import {mountInfoBox} from '../../../common/info-box.js';
 import {polygonProvenanceLayers, polygonProvenanceTooltip} from './polygon-provenance.ts';
 import {pathProvenanceLayers, provenanceTooltip} from './path-provenance.ts';
 import './style.css';

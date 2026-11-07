@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {MapEngine} from '@math.gl/geospatial/discontinuous';
 import {elasticI, elasticII, elasticIII} from '@math.gl/geospatial/elastic';
-import land from '../data/land.json' with {type: 'json'};
+import land from '../../../common/land.json' with {type: 'json'};
 const datasets = {I: elasticI, II: elasticII, III: elasticIII};
 const cache = new Map();
 export const coastlines = land.flatMap(p => p);

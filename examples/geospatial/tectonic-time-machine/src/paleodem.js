@@ -26,35 +26,53 @@ export function terrainBracket(time, result = {}) {
 
 export function validateTerrainManifest(manifest) {
   const file = manifest.files?.find(entry => entry.path === 'paleodem.parquet');
-  if (manifest.license !== 'CC-BY-4.0' || manifest.version !== 'v2' ||
-      manifest.sourceSha256 !== 'db43e6261411ff468c9030ca240778a73f224bf34bf8186c735477e41454c873' ||
-      file?.bytes !== 3111980 || file.rowGroups !== 109 || manifest.rowGroups?.length !== 109)
+  if (
+    manifest.license !== 'CC-BY-4.0' ||
+    manifest.version !== 'v2' ||
+    manifest.sourceSha256 !== 'db43e6261411ff468c9030ca240778a73f224bf34bf8186c735477e41454c873' ||
+    file?.bytes !== 3111980 ||
+    file.rowGroups !== 109 ||
+    manifest.rowGroups?.length !== 109
+  )
     throw new Error('Unexpected PaleoDEM snapshot provenance');
   for (let index = 0; index < 109; index++) {
     const group = manifest.rowGroups[index];
-    if (group.index !== index || group.ageMa !== index * 5 ||
-        !((group.width === 361 && group.height === 181) ||
-          (group.width === 360 && group.height === 180)) ||
-        group.rows !== group.width * group.height ||
-        JSON.stringify(group.bbox) !== JSON.stringify([-180, 91 - group.height, group.width - 181, 90]))
+    if (
+      group.index !== index ||
+      group.ageMa !== index * 5 ||
+      !(
+        (group.width === 361 && group.height === 181) ||
+        (group.width === 360 && group.height === 180)
+      ) ||
+      group.rows !== group.width * group.height ||
+      JSON.stringify(group.bbox) !==
+        JSON.stringify([-180, 91 - group.height, group.width - 181, 90])
+    )
       throw new Error('Unexpected PaleoDEM source grid');
   }
   return manifest;
 }
 
 /** Decode elevation only. Dimensions/order come from the pinned source manifest. */
-export async function loadPaleoTerrain({signal, workerUrl, fetchFile = fetch, readBatches,
-  onUpdate = () => {}}) {
-  const manifest = validateTerrainManifest(await snapshotRequest(PALEODEM.manifest,
-    {signal, fetchFile}, async response => {
+export async function loadPaleoTerrain({
+  signal,
+  workerUrl,
+  fetchFile = fetch,
+  readBatches,
+  onUpdate = () => {}
+}) {
+  const manifest = validateTerrainManifest(
+    await snapshotRequest(PALEODEM.manifest, {signal, fetchFile}, async response => {
       if (!response.ok) throw new Error(`PaleoDEM manifest returned HTTP ${response.status}`);
       return response.json();
-    }));
+    })
+  );
   const read = readBatches || createParquetReader(fetchFile, {workerUrl});
   const frames = new Map();
   const pending = new Map();
   let desired = null;
-  const bracketScratch = {}, pose = {};
+  const bracketScratch = {},
+    pose = {};
   const oldest = {younger: 540, older: 540};
   let running = false;
   let failed = false;
@@ -66,7 +84,10 @@ export async function loadPaleoTerrain({signal, workerUrl, fetchFile = fetch, re
       const elevation = new Float32Array(group.rows);
       let offset = 0;
       for await (const batch of read(PALEODEM.data, {
-        signal, columns: ['elevation_m'], rowGroups: [group.index], byteLength: manifest.files[0].bytes
+        signal,
+        columns: ['elevation_m'],
+        rowGroups: [group.index],
+        byteLength: manifest.files[0].bytes
       })) {
         const values = batch.data.getChild('elevation_m');
         if (!values || offset + values.length > elevation.length)
@@ -79,14 +100,23 @@ export async function loadPaleoTerrain({signal, workerUrl, fetchFile = fetch, re
       }
       signal.throwIfAborted();
       if (offset !== elevation.length) throw new Error('Incomplete PaleoDEM grid');
-      const result = {age, width: group.width, height: group.height,
-        size: new Float32Array([group.width, group.height]), elevation};
+      const result = {
+        age,
+        width: group.width,
+        height: group.height,
+        size: new Float32Array([group.width, group.height]),
+        elevation
+      };
       frames.set(age, result);
       onUpdate();
       return result;
     })();
     pending.set(age, operation);
-    try {return await operation;} finally {pending.delete(age);}
+    try {
+      return await operation;
+    } finally {
+      pending.delete(age);
+    }
   }
   // One decode at a time. Re-evaluate the requested age after each grid, so seeks
   // take priority over lookahead. The cache holds 28 MB of elevation, not JS rows.
@@ -104,8 +134,13 @@ export async function loadPaleoTerrain({signal, workerUrl, fetchFile = fetch, re
         await frame(next);
       }
     } catch (error) {
-      if (!signal.aborted) {failed = true; onUpdate(error);}
-    } finally {running = false;}
+      if (!signal.aborted) {
+        failed = true;
+        onUpdate(error);
+      }
+    } finally {
+      running = false;
+    }
   }
   return {
     get(time) {
@@ -113,11 +148,16 @@ export async function loadPaleoTerrain({signal, workerUrl, fetchFile = fetch, re
       desired = bracket || (time < -540 ? oldest : null);
       void fill();
       if (!bracket) return null;
-      const a = frames.get(bracket.younger), b = frames.get(bracket.older);
+      const a = frames.get(bracket.younger),
+        b = frames.get(bracket.older);
       if (!a || !b) return null;
-      pose.a = a; pose.b = b; pose.blend = bracket.blend;
+      pose.a = a;
+      pose.b = b;
+      pose.blend = bracket.blend;
       return pose;
     },
-    get failed() {return failed;}
+    get failed() {
+      return failed;
+    }
   };
 }

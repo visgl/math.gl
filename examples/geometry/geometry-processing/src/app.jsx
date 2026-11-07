@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import ExamplePanel from './shared/example-panel';
+import ExamplePanel from '../../../common/example-panel';
 import React, {useMemo, useState} from 'react';
 import {Matrix4} from '@math.gl/core';
 import {Geometry, SphereGeometry, unpackIndexedGeometry} from '@math.gl/geometry';
@@ -12,8 +12,7 @@ import {
   weldGeometry,
   getDegenerateTriangles
 } from '@math.gl/geometry';
-import Mesh from './shared/geometry-viewer/mesh';
-import './shared/geometry-viewer/styles.css';
+import Mesh from '../../../common/geometry-viewer';
 import './styles.css';
 
 export default function Example() {

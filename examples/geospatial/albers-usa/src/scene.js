@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import globalLand from '../data/land.json' with {type: 'json'};
+import globalLand from '../../../common/land.json' with {type: 'json'};
 import {geoOrthographic, geoPath} from 'd3-geo';
 
 let nextSceneId = 0;

@@ -4,8 +4,16 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {latLngToCell, getIcosahedronFaces} from 'h3-js';
-import centers from '../../../../examples/earth/sun-terminator/assets/h3-face-centers.json' with {type: 'json'};
-import {H3_FACES, h3Face, projectH3, unprojectH3, buildH3Mesh} from '../../../../examples/earth/sun-terminator/src/h3-net.js';
+import centers from '../../../../examples/earth/sun-terminator/assets/h3-face-centers.json' with {
+  type: 'json'
+};
+import {
+  H3_FACES,
+  h3Face,
+  projectH3,
+  unprojectH3,
+  buildH3Mesh
+} from '../../../../examples/earth/sun-terminator/src/h3-net.js';
 import {getH3GridPaths} from '../../../../examples/earth/sun-terminator/src/h3-grid.js';
 import {getCutViewports} from '../../../../examples/earth/sun-terminator/src/cut-maps.js';
 import {OrthographicView} from '@deck.gl/core';

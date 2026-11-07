@@ -27,13 +27,24 @@ import {
 import {snowballCoverage, snowballDynamics, timelinePlaybackSpeed} from './timeline.js';
 import {vegetationCoverage, microbialCoverage} from './earth-events.js';
 import {createJourneyTrail} from './journey-trail.js';
-import {createPlaceTracker,easeCamera,cinematicShot} from './journeys.js';
+import {createPlaceTracker, easeCamera, cinematicShot} from './journeys.js';
 import {createFutureComparison} from './future-comparison.js';
 import {createFormationEffects} from './formation-effects.js';
 import {SurfaceLayer} from './surface-layer.js';
-import {EARTH_FORMATION_MA, isEarlyEarth, earlyEarthBlend, earlyEarthMaterial, planetaryStage} from './planetary-history.js';
+import {
+  EARTH_FORMATION_MA,
+  isEarlyEarth,
+  earlyEarthBlend,
+  earlyEarthMaterial,
+  planetaryStage
+} from './planetary-history.js';
 import {loadPaleoTerrain, terrainBracket} from './paleodem.js';
-import {DEFAULT_TERRAIN_PALETTE, paletteFromImage, textureReveal, terrainImageryWeight} from './terrain-material.js';
+import {
+  DEFAULT_TERRAIN_PALETTE,
+  paletteFromImage,
+  textureReveal,
+  terrainImageryWeight
+} from './terrain-material.js';
 import {loadTerrain} from './terrain.js';
 import {makeMesh, blendWeights, transformMesh, binaryMesh, worldToGeographic} from './geometry.js';
 const RADIUS = 6371008.8,
@@ -109,11 +120,24 @@ export function mountScene(
     plateMaxAge = 1000,
     appearanceStatus = null,
     impactGlow = -1;
-  let followPlace=null,followCamera=false,guidedCamera=false,compareFutures=false,cameraMoving=false,lastCameraTime=0,journeyMessage='',viewportRevision=0;
-  const camera={longitude:0,latitude:15},tracker=createPlaceTracker(),comparison=createFutureComparison();
-  const markerMesh={coordinates:new Float64Array(2),projected:new Float64Array(2),positions:new Float64Array(3)};
-  const journeyTrail=createJourneyTrail();
-  const markerData=[markerMesh];
+  let followPlace = null,
+    followCamera = false,
+    guidedCamera = false,
+    compareFutures = false,
+    cameraMoving = false,
+    lastCameraTime = 0,
+    journeyMessage = '',
+    viewportRevision = 0;
+  const camera = {longitude: 0, latitude: 15},
+    tracker = createPlaceTracker(),
+    comparison = createFutureComparison();
+  const markerMesh = {
+    coordinates: new Float64Array(2),
+    projected: new Float64Array(2),
+    positions: new Float64Array(3)
+  };
+  const journeyTrail = createJourneyTrail();
+  const markerData = [markerMesh];
   let targets = futureRotations(scenario),
     lastTime = -300,
     lastRender = 0;
@@ -127,10 +151,12 @@ export function mountScene(
     geometrySeamLongitude = NaN,
     counts = {active: 0, unresolved: 0};
   const earlyMaterial = {};
-  let terrainLoadedAt=Infinity;
-  const terrainPalette=new Float32Array(DEFAULT_TERRAIN_PALETTE);
-  const displayedPalette=new Float32Array(DEFAULT_TERRAIN_PALETTE);
-  const lowColor=displayedPalette.subarray(0,3), midColor=displayedPalette.subarray(3,6), highColor=displayedPalette.subarray(6,9);
+  let terrainLoadedAt = Infinity;
+  const terrainPalette = new Float32Array(DEFAULT_TERRAIN_PALETTE);
+  const displayedPalette = new Float32Array(DEFAULT_TERRAIN_PALETTE);
+  const lowColor = displayedPalette.subarray(0, 3),
+    midColor = displayedPalette.subarray(3, 6),
+    highColor = displayedPalette.subarray(6, 9);
   const iceDynamics = {};
   const formationEffects = createFormationEffects();
   const rotations = new Map(),
@@ -272,59 +298,91 @@ export function mountScene(
     if (!force && now - lastRender < 50) return;
     lastRender = now;
     currentWeights(now);
-    const journey=tracker.update(time,scenario);
-    const shot=guidedCamera&&mode==='globe'?cinematicShot(time):null;
-    camera.longitude=longitude;camera.latitude=latitude;
-    cameraMoving=false;
-    if(mode==='globe'&&(weights.globe||0)>.999999&&((followCamera&&journey.available)||shot)) {
-      const targetLon=followCamera&&journey.available?journey.lon:shot.longitude;
-      const targetLat=followCamera&&journey.available?journey.lat-12:shot.latitude;
-      cameraMoving=easeCamera(camera,targetLon,targetLat,lastCameraTime?now-lastCameraTime:16);
-      longitude=camera.longitude;latitude=camera.latitude;
-      if(cameraMoving&&!animation)animation=requestAnimationFrame(animate);
+    const journey = tracker.update(time, scenario);
+    const shot = guidedCamera && mode === 'globe' ? cinematicShot(time) : null;
+    camera.longitude = longitude;
+    camera.latitude = latitude;
+    cameraMoving = false;
+    if (
+      mode === 'globe' &&
+      (weights.globe || 0) > 0.999999 &&
+      ((followCamera && journey.available) || shot)
+    ) {
+      const targetLon = followCamera && journey.available ? journey.lon : shot.longitude;
+      const targetLat = followCamera && journey.available ? journey.lat - 12 : shot.latitude;
+      cameraMoving = easeCamera(
+        camera,
+        targetLon,
+        targetLat,
+        lastCameraTime ? now - lastCameraTime : 16
+      );
+      longitude = camera.longitude;
+      latitude = camera.latitude;
+      if (cameraMoving && !animation) animation = requestAnimationFrame(animate);
     }
-    lastCameraTime=now;
-    const message=followPlace?journey.message:shot?`Guided camera · ${shot.name}`:'';
-    if(message!==journeyMessage){journeyMessage=message;onJourneyStatus(message);}
-    const imageReveal=textureReveal(now,terrainLoadedAt);
-    for(let i=0;i<9;i++) displayedPalette[i]=DEFAULT_TERRAIN_PALETTE[i]+(terrainPalette[i]-DEFAULT_TERRAIN_PALETTE[i])*imageReveal;
+    lastCameraTime = now;
+    const message = followPlace ? journey.message : shot ? `Guided camera · ${shot.name}` : '';
+    if (message !== journeyMessage) {
+      journeyMessage = message;
+      onJourneyStatus(message);
+    }
+    const imageReveal = textureReveal(now, terrainLoadedAt);
+    for (let i = 0; i < 9; i++)
+      displayedPalette[i] =
+        DEFAULT_TERRAIN_PALETTE[i] + (terrainPalette[i] - DEFAULT_TERRAIN_PALETTE[i]) * imageReveal;
     const pose = paleoTerrain?.get(time);
     const usePaleo = !early && historicalTerrain && !regionColors && Boolean(pose);
     if (!early && !usePaleo && model && !model.hasTime(time)) return counts;
     if (earlyMix > 0) earlyEarthMaterial(time, earlyMaterial);
-    const glow = early ? Math.round(Math.sqrt(earlyMaterial.theia)*100)/100 : 0;
+    const glow = early ? Math.round(Math.sqrt(earlyMaterial.theia) * 100) / 100 : 0;
     if (glow !== impactGlow) {
       impactGlow = glow;
-      canvas.style.filter = glow > 0 ? `drop-shadow(0 0 ${12+glow*20}px rgba(255,${Math.round(210+45*glow)},${Math.round(50+205*glow)},${glow*.8})) drop-shadow(0 0 ${25+glow*35}px rgba(255,${Math.round(190+65*glow)},${Math.round(25+230*glow)},${glow*.6}))` : '';
+      canvas.style.filter =
+        glow > 0
+          ? `drop-shadow(0 0 ${12 + glow * 20}px rgba(255,${Math.round(210 + 45 * glow)},${Math.round(50 + 205 * glow)},${glow * 0.8})) drop-shadow(0 0 ${25 + glow * 35}px rgba(255,${Math.round(190 + 65 * glow)},${Math.round(25 + 230 * glow)},${glow * 0.6}))`
+          : '';
     }
     let status;
-    if (early) status = `${planetaryStage(-time)?.label} · procedural rock, lava and impacts; no reconstructed geography`;
-    else if (earlyMix > 0) status = `Blending illustrative early Earth into ${model?.source.id || 'plate'} reconstruction`;
-    else if (regionColors) status = `${model?.source.id || 'Plate model'} · categorical region colors`;
-    else if (usePaleo) status = `PALEOMAP PaleoDEM · ${pose.a.age === pose.b.age ? pose.a.age : `${pose.a.age}–${pose.b.age}`} Ma · source elevation with calibrated colors${terrainImage && terrainImageryWeight(time)>0 ? "; blending toward NASA imagery/lighting" : " and 8× hill shading"}`;
+    if (early)
+      status = `${planetaryStage(-time)?.label} · procedural rock, lava and impacts; no reconstructed geography`;
+    else if (earlyMix > 0)
+      status = `Blending illustrative early Earth into ${model?.source.id || 'plate'} reconstruction`;
+    else if (regionColors)
+      status = `${model?.source.id || 'Plate model'} · categorical region colors`;
+    else if (usePaleo)
+      status = `PALEOMAP PaleoDEM · ${pose.a.age === pose.b.age ? pose.a.age : `${pose.a.age}–${pose.b.age}`} Ma · source elevation with calibrated colors${terrainImage && terrainImageryWeight(time) > 0 ? '; blending toward NASA imagery/lighting' : ' and 8× hill shading'}`;
     else if (historicalTerrain && !regionColors && terrainBracket(time))
       status = `${paleoError || paleoTerrain?.failed ? 'PaleoDEM unavailable' : 'Loading PaleoDEM'} · showing illustrative plate terrain`;
-    else status = `${terrainImage ? 'Modern NASA imagery' : modernTerrainError ? 'Shaded land' : 'Loading NASA imagery'} on ${model?.source.id || 'moving'} plates · illustrative${historicalTerrain && !regionColors ? ' (PaleoDEM covers 0–540 Ma)' : ''}`;
+    else
+      status = `${terrainImage ? 'Modern NASA imagery' : modernTerrainError ? 'Shaded land' : 'Loading NASA imagery'} on ${model?.source.id || 'moving'} plates · illustrative${historicalTerrain && !regionColors ? ' (PaleoDEM covers 0–540 Ma)' : ''}`;
     if (status !== appearanceStatus) {
       appearanceStatus = status;
     }
     onAppearanceStatus?.(status, usePaleo);
     if (!early && !usePaleo) {
-      if(time!==geometryTime||!land||!Number.isFinite(geometryLongitude)||((weights.globe||0)<.999999&&geometrySeamLongitude!==longitude)) counts=rebuild(time);
-      else if(longitude!==geometryLongitude) {
-        const delta=geometryLongitude-longitude;
-        for(let i=0;i<land.coordinates.length;i+=2)land.coordinates[i]+=delta;
-        geometryLongitude=longitude;
+      if (
+        time !== geometryTime ||
+        !land ||
+        !Number.isFinite(geometryLongitude) ||
+        ((weights.globe || 0) < 0.999999 && geometrySeamLongitude !== longitude)
+      )
+        counts = rebuild(time);
+      else if (longitude !== geometryLongitude) {
+        const delta = geometryLongitude - longitude;
+        for (let i = 0; i < land.coordinates.length; i += 2) land.coordinates[i] += delta;
+        geometryLongitude = longitude;
       }
     }
     transformMesh(ocean, weights, engines, scales, latitude, true, longitude);
     if (earlyMix > 0 || usePaleo) {
       transformMesh(paleoMesh, weights, engines, scales, latitude, false, longitude, true);
-      if (!early && earlyMix > 0) for (let i=0;i<paleoMesh.positions.length;i+=3) {
-        paleoMesh.positions[i]*=1.004;
-        paleoMesh.positions[i+1]*=1.004;
-        paleoMesh.positions[i+2]=paleoMesh.positions[i+2]*1.004+.01*(1-(weights.globe || 0));
-      }
+      if (!early && earlyMix > 0)
+        for (let i = 0; i < paleoMesh.positions.length; i += 3) {
+          paleoMesh.positions[i] *= 1.004;
+          paleoMesh.positions[i + 1] *= 1.004;
+          paleoMesh.positions[i + 2] =
+            paleoMesh.positions[i + 2] * 1.004 + 0.01 * (1 - (weights.globe || 0));
+        }
     }
     if (!early && !usePaleo) transformMesh(land, weights, engines, scales, latitude);
     paths = [];
@@ -350,79 +408,178 @@ export function mountScene(
       pickable: false,
       material: false
     };
-    const showJourney=journey.available&&!usePaleo&&!early;
-    if(showJourney) {
-      markerMesh.coordinates[0]=((journey.lon-longitude+180)%360+360)%360-180;markerMesh.coordinates[1]=journey.lat;
-      transformMesh(markerMesh,weights,engines,scales,latitude);
-      for(let i=0;i<3;i++)markerMesh.positions[i]*=1.012;
-      markerMesh.positions[2]+=.01*(1-(weights.globe||0));
+    const showJourney = journey.available && !usePaleo && !early;
+    if (showJourney) {
+      markerMesh.coordinates[0] = ((((journey.lon - longitude + 180) % 360) + 360) % 360) - 180;
+      markerMesh.coordinates[1] = journey.lat;
+      transformMesh(markerMesh, weights, engines, scales, latitude);
+      for (let i = 0; i < 3; i++) markerMesh.positions[i] *= 1.012;
+      markerMesh.positions[2] += 0.01 * (1 - (weights.globe || 0));
     }
-    const trailPaths=showJourney?journeyTrail(journey,longitude,latitude,weights,engines,scales):null;
-    const alternativePaths=compareFutures?comparison.update(time,scenario,longitude,latitude,weights,engines,scales,now,force):null;
-    snowballDynamics(time,iceDynamics);
+    const trailPaths = showJourney
+      ? journeyTrail(journey, longitude, latitude, weights, engines, scales)
+      : null;
+    const alternativePaths = compareFutures
+      ? comparison.update(time, scenario, longitude, latitude, weights, engines, scales, now, force)
+      : null;
+    snowballDynamics(time, iceDynamics);
     deck.setProps({
       layers: [
-        !early && new SurfaceLayer({
-          ...common,
-          id: 'tectonic-ocean',
-          iceCoverage: glaciations ? snowballCoverage(time) : 0,
-          iceRetreat: glaciations ? iceDynamics.retreat : 0,
-          iceVolcanism: glaciations ? iceDynamics.volcanism : 0,
-          data: binaryMesh(ocean),
-          surfaceType: 'ocean',
-          globeWeight: weights.globe || 0
-        }),
-        !early && new SurfaceLayer({
-          ...common,
-          id: 'tectonic-land',
-          vegetation: vegetationCoverage(time),
-          iceCoverage: glaciations ? snowballCoverage(time) : 0,
-          iceRetreat: glaciations ? iceDynamics.retreat : 0,
-          iceVolcanism: glaciations ? iceDynamics.volcanism : 0,
-          data: binaryMesh(usePaleo ? paleoMesh : land),
-          image: terrainImage,
-          textureWeight: imageReveal,
-          imageryBlend: usePaleo ? terrainImageryWeight(time)*imageReveal : 0,
-          terrainLowColor: lowColor, terrainMidColor: midColor, terrainHighColor: highColor,
-          paleoFrameA: usePaleo ? pose.a : null,
-          paleoFrameB: usePaleo ? pose.b : null,
-          paleoBlend: usePaleo ? pose.blend : 0,
-          regionColors,
-          globeWeight: weights.globe || 0
-        }),
-        earlyMix > 0 && new SurfaceLayer({
-          ...common,
-          id: 'tectonic-early-earth',
-          data: binaryMesh(paleoMesh),
-          globeWeight: weights.globe || 0,
-          earlyEarth: true,
-          earlyOpacity: earlyMix,
-          earlyLava: earlyMaterial.lava,
-          earlyBombardment: earlyMaterial.bombardment,
-          earlyWater: earlyMaterial.water,
-          microbialLife: microbialCoverage(time),
-          earlySteam: earlyMaterial.steam,
-          earlyRain: earlyMaterial.rain,
-          earlyImpactTime: earlyMaterial.impactTime,
-          earlyTheia: earlyMaterial.theia,
-          parameters: {depthWriteEnabled: early}
-        }),
+        !early &&
+          new SurfaceLayer({
+            ...common,
+            id: 'tectonic-ocean',
+            iceCoverage: glaciations ? snowballCoverage(time) : 0,
+            iceRetreat: glaciations ? iceDynamics.retreat : 0,
+            iceVolcanism: glaciations ? iceDynamics.volcanism : 0,
+            data: binaryMesh(ocean),
+            surfaceType: 'ocean',
+            globeWeight: weights.globe || 0
+          }),
+        !early &&
+          new SurfaceLayer({
+            ...common,
+            id: 'tectonic-land',
+            vegetation: vegetationCoverage(time),
+            iceCoverage: glaciations ? snowballCoverage(time) : 0,
+            iceRetreat: glaciations ? iceDynamics.retreat : 0,
+            iceVolcanism: glaciations ? iceDynamics.volcanism : 0,
+            data: binaryMesh(usePaleo ? paleoMesh : land),
+            image: terrainImage,
+            textureWeight: imageReveal,
+            imageryBlend: usePaleo ? terrainImageryWeight(time) * imageReveal : 0,
+            terrainLowColor: lowColor,
+            terrainMidColor: midColor,
+            terrainHighColor: highColor,
+            paleoFrameA: usePaleo ? pose.a : null,
+            paleoFrameB: usePaleo ? pose.b : null,
+            paleoBlend: usePaleo ? pose.blend : 0,
+            regionColors,
+            globeWeight: weights.globe || 0
+          }),
+        earlyMix > 0 &&
+          new SurfaceLayer({
+            ...common,
+            id: 'tectonic-early-earth',
+            data: binaryMesh(paleoMesh),
+            globeWeight: weights.globe || 0,
+            earlyEarth: true,
+            earlyOpacity: earlyMix,
+            earlyLava: earlyMaterial.lava,
+            earlyBombardment: earlyMaterial.bombardment,
+            earlyWater: earlyMaterial.water,
+            microbialLife: microbialCoverage(time),
+            earlySteam: earlyMaterial.steam,
+            earlyRain: earlyMaterial.rain,
+            earlyImpactTime: earlyMaterial.impactTime,
+            earlyTheia: earlyMaterial.theia,
+            parameters: {depthWriteEnabled: early}
+          }),
         ...formationEffects(time, weights.globe || 0),
-        trailPaths?.length>0 && new PathLayer({id:'journey-trail',data:trailPaths,getPath:d=>d.positions,
-          coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,getColor:[255,214,120,180],getWidth:2,widthUnits:'pixels',
-          parameters:{depthWriteEnabled:false},updateTriggers:{getPath:[time,journey.count,trailPaths?.length,longitude,latitude,mode,weights,scenario,followPlace,viewportRevision]}}),
-        showJourney && new ScatterplotLayer({id:'journey-place',data:markerData,getPosition:d=>d.positions,
-          coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,radiusUnits:'pixels',getRadius:6,
-          getFillColor:[255,211,104],stroked:true,getLineColor:[255,255,255],getLineWidth:2,lineWidthUnits:'pixels',
-          parameters:{depthWriteEnabled:false},updateTriggers:{getPosition:[time,longitude,latitude,mode,weights,scenario,followPlace,viewportRevision]}}),
-        showJourney && new TextLayer({id:'journey-label',data:markerData,getPosition:d=>d.positions,
-          getText:()=>followPlace.name,coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,
-          getSize:12,sizeUnits:'pixels',getColor:[255,235,190],getPixelOffset:[12,-12],getTextAnchor:'start',
-          background:true,getBackgroundColor:[5,22,35,200],backgroundPadding:[4,3],
-          parameters:{depthWriteEnabled:false},updateTriggers:{getPosition:[time,longitude,latitude,mode,weights,scenario,followPlace,viewportRevision],getText:followPlace.name}}),
-        alternativePaths && new PathLayer({id:'future-alternative',data:alternativePaths,getPath:d=>d.positions,
-          coordinateSystem:COORDINATE_SYSTEM.CARTESIAN,getColor:[197,160,255,150],getWidth:1.5,widthUnits:'pixels',
-          parameters:{depthWriteEnabled:false},updateTriggers:{getPath:[(weights.globe||0)>.999999?time:alternativePaths,longitude,latitude,mode,weights,scenario,viewportRevision]}}),
+        trailPaths?.length > 0 &&
+          new PathLayer({
+            id: 'journey-trail',
+            data: trailPaths,
+            getPath: d => d.positions,
+            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            getColor: [255, 214, 120, 180],
+            getWidth: 2,
+            widthUnits: 'pixels',
+            parameters: {depthWriteEnabled: false},
+            updateTriggers: {
+              getPath: [
+                time,
+                journey.count,
+                trailPaths?.length,
+                longitude,
+                latitude,
+                mode,
+                weights,
+                scenario,
+                followPlace,
+                viewportRevision
+              ]
+            }
+          }),
+        showJourney &&
+          new ScatterplotLayer({
+            id: 'journey-place',
+            data: markerData,
+            getPosition: d => d.positions,
+            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            radiusUnits: 'pixels',
+            getRadius: 6,
+            getFillColor: [255, 211, 104],
+            stroked: true,
+            getLineColor: [255, 255, 255],
+            getLineWidth: 2,
+            lineWidthUnits: 'pixels',
+            parameters: {depthWriteEnabled: false},
+            updateTriggers: {
+              getPosition: [
+                time,
+                longitude,
+                latitude,
+                mode,
+                weights,
+                scenario,
+                followPlace,
+                viewportRevision
+              ]
+            }
+          }),
+        showJourney &&
+          new TextLayer({
+            id: 'journey-label',
+            data: markerData,
+            getPosition: d => d.positions,
+            getText: () => followPlace.name,
+            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            getSize: 12,
+            sizeUnits: 'pixels',
+            getColor: [255, 235, 190],
+            getPixelOffset: [12, -12],
+            getTextAnchor: 'start',
+            background: true,
+            getBackgroundColor: [5, 22, 35, 200],
+            backgroundPadding: [4, 3],
+            parameters: {depthWriteEnabled: false},
+            updateTriggers: {
+              getPosition: [
+                time,
+                longitude,
+                latitude,
+                mode,
+                weights,
+                scenario,
+                followPlace,
+                viewportRevision
+              ],
+              getText: followPlace.name
+            }
+          }),
+        alternativePaths &&
+          new PathLayer({
+            id: 'future-alternative',
+            data: alternativePaths,
+            getPath: d => d.positions,
+            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            getColor: [197, 160, 255, 150],
+            getWidth: 1.5,
+            widthUnits: 'pixels',
+            parameters: {depthWriteEnabled: false},
+            updateTriggers: {
+              getPath: [
+                (weights.globe || 0) > 0.999999 ? time : alternativePaths,
+                longitude,
+                latitude,
+                mode,
+                weights,
+                scenario,
+                viewportRevision
+              ]
+            }
+          }),
         new PathLayer({
           id: 'tectonic-grid',
           data: paths,
@@ -440,7 +597,12 @@ export function mountScene(
   }
   function animate() {
     render(lastTime, true);
-    animation = transition || cameraMoving || (terrainImage && textureReveal(performance.now(),terrainLoadedAt)<1) ? requestAnimationFrame(animate) : 0;
+    animation =
+      transition ||
+      cameraMoving ||
+      (terrainImage && textureReveal(performance.now(), terrainLoadedAt) < 1)
+        ? requestAnimationFrame(animate)
+        : 0;
   }
   const tooltip = document.createElement('div');
   tooltip.className = 'tectonic-coordinate-tooltip';
@@ -484,7 +646,10 @@ export function mountScene(
   const down = e => {
     hideTooltip();
     if (mode === 'globe') {
-      followCamera=false;guidedCamera=false;cameraMoving=false;onManualCamera();
+      followCamera = false;
+      guidedCamera = false;
+      cameraMoving = false;
+      onManualCamera();
       dragging = [e.clientX, e.clientY];
       canvas.setPointerCapture(e.pointerId);
     }
@@ -516,44 +681,64 @@ export function mountScene(
         return;
       }
       terrainImage = image;
-      terrainLoadedAt=performance.now();
-      if(!animation) animation=requestAnimationFrame(animate);
-      try {paletteFromImage(image,terrainPalette);} catch(error) {
-        console.warn('Terrain palette calibration unavailable; using default palette',error);
+      terrainLoadedAt = performance.now();
+      if (!animation) animation = requestAnimationFrame(animate);
+      try {
+        paletteFromImage(image, terrainPalette);
+      } catch (error) {
+        // biome-ignore lint/suspicious/noConsole: Preserve failure details when the demo falls back or cleans up a data source.
+        console.warn('Terrain palette calibration unavailable; using default palette', error);
       }
       appearanceStatus = null;
       render(lastTime, true);
     })
     .catch(error => {
       modernTerrainError = true;
+      // biome-ignore lint/suspicious/noConsole: Preserve failure details when the demo falls back or cleans up a data source.
       console.warn('Terrain load failed', error);
-      if (!appearanceAbort.signal.aborted)
-        {appearanceStatus = null; render(lastTime, true);}
+      if (!appearanceAbort.signal.aborted) {
+        appearanceStatus = null;
+        render(lastTime, true);
+      }
     });
-  loadPaleoTerrain({signal: appearanceAbort.signal, workerUrl,
+  loadPaleoTerrain({
+    signal: appearanceAbort.signal,
+    workerUrl,
     onUpdate(error) {
       if (error) paleoError = true;
       if (!appearanceAbort.signal.aborted) render(lastTime, true);
     }
-  }).then(value => {
-    if (!appearanceAbort.signal.aborted) {paleoTerrain = value; render(lastTime, true);}
-  }).catch(error => {
-    if (!appearanceAbort.signal.aborted) {
-      paleoError = true;
-      console.warn('PaleoDEM load failed', error);
-      render(lastTime, true);
-    }
-  });
+  })
+    .then(value => {
+      if (!appearanceAbort.signal.aborted) {
+        paleoTerrain = value;
+        render(lastTime, true);
+      }
+    })
+    .catch(error => {
+      if (!appearanceAbort.signal.aborted) {
+        paleoError = true;
+        // biome-ignore lint/suspicious/noConsole: Preserve failure details when the demo falls back or cleans up a data source.
+        console.warn('PaleoDEM load failed', error);
+        render(lastTime, true);
+      }
+    });
   return {
     setModel(value) {
       model = value;
-      tracker.setModel(value);comparison.setModel(value);
+      tracker.setModel(value);
+      comparison.setModel(value);
       rotations.clear();
       geometryTime = NaN;
       render(lastTime, true);
     },
     setPlayback({time, playing, ready, speed}) {
-      widget.setProps({time, playing, step: timelinePlaybackSpeed(time, speed, plateMaxAge, glaciations) / 20, timeRange: [-EARTH_FORMATION_MA, 300]});
+      widget.setProps({
+        time,
+        playing,
+        step: timelinePlaybackSpeed(time, speed, plateMaxAge, glaciations) / 20,
+        timeRange: [-EARTH_FORMATION_MA, 300]
+      });
       timelineContainer.inert = !ready;
       timelineContainer.setAttribute('aria-busy', String(!ready));
     },
@@ -578,8 +763,13 @@ export function mountScene(
         targets = futureRotations(scenario);
         geometryTime = NaN;
       }
-      if(followPlace!==options.followPlace){followPlace=options.followPlace;tracker.setPlace(followPlace);}
-      followCamera=Boolean(options.followCamera);guidedCamera=Boolean(options.guidedCamera);compareFutures=Boolean(options.compareFutures);
+      if (followPlace !== options.followPlace) {
+        followPlace = options.followPlace;
+        tracker.setPlace(followPlace);
+      }
+      followCamera = Boolean(options.followCamera);
+      guidedCamera = Boolean(options.guidedCamera);
+      compareFutures = Boolean(options.compareFutures);
       grid = options.grid;
       glaciations = options.glaciations ?? true;
       regionColors = options.regionColors;
@@ -587,8 +777,12 @@ export function mountScene(
       historicalTerrain = options.historicalTerrain ?? true;
       return render(lastTime, true);
     },
-    refreshHistory() {if(followPlace)return render(lastTime,true);},
-    hasTerrain(time) {return historicalTerrain && !regionColors && Boolean(paleoTerrain?.get(time));},
+    refreshHistory() {
+      if (followPlace) return render(lastTime, true);
+    },
+    hasTerrain(time) {
+      return historicalTerrain && !regionColors && Boolean(paleoTerrain?.get(time));
+    },
     render,
     resize() {
       configure();

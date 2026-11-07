@@ -7,7 +7,7 @@ import {loadGlobalSimulation, sampleAt, clampAge} from './data.js';
 import {createGlobalScene} from './global-scene.js';
 import {GLOBAL_VIEWS} from './map-options.js';
 import './style.css';
-import AttributionWidget from './shared/shared/attribution-widget.jsx';
+import AttributionWidget from '../../../common/attribution-widget.jsx';
 import {GLOBAL_SOURCES, INSET_REFERENCE_SOURCES} from './attribution.js';
 import {climateAt, loadClimate} from './climate.js';
 import {loadKrappSimulation, krappPhase, KRAPP_CHAPTERS} from './krapp-data.js';
@@ -207,30 +207,42 @@ export default function GlobalIceAge({onMode, onOlderReady, olderModel, earlier 
           <div className="alpine-loading" role="status">
             {mapProgress?.phase === 'bulk-projection' ? 'Projecting coordinates' : 'Preparing map'}
             {mapProgress?.total > 1
-              ? `… ${Math.round(100 * mapProgress.completed / mapProgress.total)}%`
+              ? `… ${Math.round((100 * mapProgress.completed) / mapProgress.total)}%`
               : '…'}
             <progress
               aria-label="Map preparation progress"
               max={mapProgress?.total || 1}
               value={mapProgress?.total ? mapProgress.completed : undefined}
             />
-            <button onClick={() => {
-              setCycleViews(false);
-              setPlaying(false);
-              const {cancelledView, displayedView} = scene.current?.cancelPreparation() || {};
-              setCancelledMap(cancelledView && (!displayedView || displayedView === cancelledView) ? cancelledView : null);
-              setView(displayedView || 'globe');
-            }}>Cancel</button>
+            <button
+              onClick={() => {
+                setCycleViews(false);
+                setPlaying(false);
+                const {cancelledView, displayedView} = scene.current?.cancelPreparation() || {};
+                setCancelledMap(
+                  cancelledView && (!displayedView || displayedView === cancelledView)
+                    ? cancelledView
+                    : null
+                );
+                setView(displayedView || 'globe');
+              }}
+            >
+              Cancel
+            </button>
           </div>
         )}
         {cancelledMap === view && !preparingMap && (
           <div className="alpine-loading" role="status">
             Map preparation cancelled.{' '}
-            <button onClick={() => {
-              scene.current?.retryPreparation();
-              setCancelledMap(null);
-              setMapRetry(value => value + 1);
-            }}>Retry</button>
+            <button
+              onClick={() => {
+                scene.current?.retryPreparation();
+                setCancelledMap(null);
+                setMapRetry(value => value + 1);
+              }}
+            >
+              Retry
+            </button>
           </div>
         )}
         {model && error && (

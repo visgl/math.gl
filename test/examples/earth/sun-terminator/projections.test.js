@@ -3,7 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {PROJECTIONS, getProjectionMesh} from '../../../../examples/earth/sun-terminator/src/projections.js';
+import {
+  PROJECTIONS,
+  getProjectionMesh
+} from '../../../../examples/earth/sun-terminator/src/projections.js';
 
 test('every cartographic preset produces a finite textured surface without seam-spanning triangles', () => {
   assert.equal(new Set(PROJECTIONS.map(p => p.id)).size, 41);

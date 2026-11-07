@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {useEffect, useRef, useState} from 'react';
+import './geometry-viewer.css';
 import {luma} from '@luma.gl/core';
 import {webgl2Adapter} from '@luma.gl/webgl';
 import {Geometry as LumaGeometry, Model, OrbitControls} from '@luma.gl/engine';

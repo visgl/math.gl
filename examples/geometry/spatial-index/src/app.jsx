@@ -1,10 +1,10 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import ExamplePanel from './shared/example-panel';
+import ExamplePanel from '../../../common/example-panel';
 import React, {useEffect, useMemo, useRef} from 'react';
 import {BoxIndex, PointIndex} from '@math.gl/geometry';
-import './shared/query-example.css';
+import './app.css';
 const records = Array.from({length: 1200}, (_, i) => {
   const x = (((i * 7919) % 997) / 997) * 180 - 90,
     y = (((i * 3571) % 991) / 991) * 180 - 90;
@@ -93,7 +93,7 @@ export default function SpatialIndexExample() {
     return () => resize.disconnect();
   }, []);
   return (
-    <div className="query-example">
+    <div className="app">
       <canvas
         ref={canvas}
         aria-label="Spatial query field"

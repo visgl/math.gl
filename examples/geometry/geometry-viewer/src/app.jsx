@@ -1,11 +1,10 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import ExamplePanel from './shared/example-panel';
+import ExamplePanel from '../../../common/example-panel';
 import React, {useMemo, useState} from 'react';
 import * as primitives from '@math.gl/geometry';
-import Mesh from './mesh';
-import './styles.css';
+import Mesh from '../../../common/geometry-viewer';
 
 export const presets = {
   BoxGeometry: {size: [1.5, 1, 0.75]},

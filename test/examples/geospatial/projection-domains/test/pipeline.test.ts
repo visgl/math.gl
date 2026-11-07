@@ -6,8 +6,15 @@ import assert from 'node:assert/strict';
 import {fixtureColumn} from '../../../../../examples/geospatial/projection-domains/src/fixtures.ts';
 import {createProjection} from '../../../../../examples/geospatial/projection-domains/src/projections.ts';
 import type {ProjectionName} from '../../../../../examples/geospatial/projection-domains/src/projections.ts';
-import {createDomain, projectGeometry} from '../../../../../examples/geospatial/projection-domains/src/pipeline.ts';
-import {clipToImage, createRasterMesh, sourceUV} from '../../../../../examples/geospatial/projection-domains/src/raster.ts';
+import {
+  createDomain,
+  projectGeometry
+} from '../../../../../examples/geospatial/projection-domains/src/pipeline.ts';
+import {
+  clipToImage,
+  createRasterMesh,
+  sourceUV
+} from '../../../../../examples/geospatial/projection-domains/src/raster.ts';
 import type {RasterKind} from '../../../../../examples/geospatial/projection-domains/src/raster.ts';
 import {getGeoArrowTransferList} from '@math.gl/geospatial/geoarrow';
 

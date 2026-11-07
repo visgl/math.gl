@@ -4,7 +4,10 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {OrthographicView, WebMercatorViewport} from '@deck.gl/core';
-import {getCutViewports, projectCutMap} from '../../../../examples/earth/sun-terminator/src/cut-maps.js';
+import {
+  getCutViewports,
+  projectCutMap
+} from '../../../../examples/earth/sun-terminator/src/cut-maps.js';
 import {createCutTileAdapter} from '../../../../examples/earth/sun-terminator/src/cut-tile-layer.js';
 import {US_STATES} from '../../../../examples/earth/sun-terminator/src/us-state-mask.js';
 const viewport = (target = [0, 0, 0], zoom = 3.2) =>

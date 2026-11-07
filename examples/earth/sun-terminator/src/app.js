@@ -30,7 +30,7 @@ import {MorphBitmapLayer} from './morph-bitmap-layer.js';
 import {ProjectedBitmapLayer} from './projected-bitmap-layer.js';
 import {DayNightBitmapLayer} from './day-night-bitmap-layer.js';
 import {loadImageryTile, releaseImageryTile} from './imagery.js';
-import DAY_OVERVIEW from '../assets/day.jpg';
+import {BLUE_MARBLE_OVERVIEW_URL as DAY_OVERVIEW} from '../../../common/blue-marble.js';
 import NIGHT_OVERVIEW from '../assets/night.jpg';
 
 /** Mount the shared standalone/website example; return cleanup. */
@@ -151,6 +151,8 @@ export function mountSunTerminator(root) {
   // Layer finalization must not destroy textures still used by the next projection.
   const dayOverview = new Image();
   const nightOverview = new Image();
+  // Remote overview pixels must remain usable as WebGL textures.
+  dayOverview.crossOrigin = 'anonymous';
   dayOverview.src = DAY_OVERVIEW;
   nightOverview.src = NIGHT_OVERVIEW;
   let overviewDecoded = false;

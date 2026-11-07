@@ -72,23 +72,37 @@ export function rotateToLonLat(q, xyz, offset, out, target) {
 export function historicalRotation(table, pid, age, out, maxAge = 500) {
   const low = Math.floor(age / 10) * 10,
     high = age === low ? low : Math.min(maxAge, low + 10);
-  const lower = table[String(low)], upper = table[String(high)];
+  const lower = table[String(low)],
+    upper = table[String(high)];
   // Packed samples share one plate index and one Float64Array per time slice.
   // Legacy row fixtures remain useful for the scalar math tests.
-  const a = lower?.values || lower?.[pid], b = upper?.values || upper?.[pid];
+  const a = lower?.values || lower?.[pid],
+    b = upper?.values || upper?.[pid];
   const aOffset = lower?.values ? lower.indices.get(pid) * 4 : 0;
   const bOffset = upper?.values ? upper.indices.get(pid) * 4 : 0;
   if (!a || !b || !Number.isFinite(aOffset) || !Number.isFinite(bOffset)) return false;
-  if ((lower?.available && !lower.available[aOffset / 4]) ||
-      (upper?.available && !upper.available[bOffset / 4])) return false;
+  if (
+    (lower?.available && !lower.available[aOffset / 4]) ||
+    (upper?.available && !upper.available[bOffset / 4])
+  )
+    return false;
   // GWS returns identity for absent reconstruction-tree IDs. Do not depict those as measured stationary blocks.
-  if (!lower?.available && !upper?.available && age > 0 && pid !== 0 && ((low > 0 && isIdentity(a, aOffset)) || (high > 0 && isIdentity(b, bOffset))))
+  if (
+    !lower?.available &&
+    !upper?.available &&
+    age > 0 &&
+    pid !== 0 &&
+    ((low > 0 && isIdentity(a, aOffset)) || (high > 0 && isIdentity(b, bOffset)))
+  )
     return false;
   slerp(a, b, (age - low) / 10, out, aOffset, bOffset);
   return true;
 }
 function isIdentity(q, offset) {
-  return Math.abs(q[offset]) > 0.999999999 && Math.hypot(q[offset + 1], q[offset + 2], q[offset + 3]) < 1e-10;
+  return (
+    Math.abs(q[offset]) > 0.999999999 &&
+    Math.hypot(q[offset + 1], q[offset + 2], q[offset + 3]) < 1e-10
+  );
 }
 export const REGIONS = {
   'North America': {

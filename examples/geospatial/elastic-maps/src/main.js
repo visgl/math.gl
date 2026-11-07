@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {mountInfoBox} from './shared/info-box.js';
+import {mountInfoBox} from '../../../common/info-box.js';
 import {createMapData} from './map.js';
 import {createScene} from './scene.js';
 import './style.css';
@@ -14,7 +14,10 @@ export function mountElasticMaps(root) {
     <p data-status role="status">Move over the map to inspect coordinates.</p>
     <footer>Elastic maps: <a href="https://kunimune.blog/2023/12/29/introducing-the-elastic-projections/">Justin Kunimune</a> (public domain). Coastlines: Natural Earth (public domain). Orange: a polygon crossing cuts.</footer>
   </section>`;
-  const disposeInfo = mountInfoBox(root.querySelector('.elastic-controls'), {title: "Elastic maps", theme: 'sleek-light'});
+  const disposeInfo = mountInfoBox(root.querySelector('.elastic-controls'), {
+    title: 'Elastic maps',
+    theme: 'sleek-light'
+  });
   const find = s => root.querySelector(s),
     scene = createScene(find('canvas')),
     abort = new AbortController();

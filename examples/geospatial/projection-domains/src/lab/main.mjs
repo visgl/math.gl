@@ -11,10 +11,10 @@ import {createPersistentGrid, updatePersistentUV} from './persistent-grid.mjs';
 import {updateOrRebuild} from './reuse-policy.mjs';
 import {PersistentUVLayer, ReplacementMeshLayer} from './persistent-layer.mjs';
 import {engines, capability, createBackend} from './backends.mjs';
-import {mountInfoBox} from '../shared/common/info-box.js';
+import {mountInfoBox} from '../../../../common/info-box.js';
 import {acquireWasm} from './wasm-runtime.mjs';
 import './style.css';
-import earthImageUrl from '../shared/earth/sun-terminator/assets/day.jpg';
+import {BLUE_MARBLE_OVERVIEW_URL as earthImageUrl} from '../../../../common/blue-marble.js';
 import {nativePolarImage} from './native-polar.mjs';
 import {resampleImagery} from './imagery.mjs';
 export function mountProjectionLab(
@@ -98,6 +98,8 @@ export function mountProjectionLab(
     if (imageCache.has(name)) return imageCache.get(name);
     imagePromise ??= new Promise((resolve, reject) => {
       const image = new Image();
+      // Canvas readback requires the hosted overview's CORS response.
+      image.crossOrigin = 'anonymous';
       image.onload = () => {
         const canvas = document.createElement('canvas');
         canvas.width = image.naturalWidth;
@@ -106,7 +108,7 @@ export function mountProjectionLab(
         context.drawImage(image, 0, 0);
         resolve(context.getImageData(0, 0, canvas.width, canvas.height));
       };
-      image.onerror = () => reject(new Error('Bundled Earth imagery could not load'));
+      image.onerror = () => reject(new Error('Earth overview imagery could not load'));
       image.src = earthImageUrl;
     });
     const raster = await resampleImagery(await imagePromise, name, {

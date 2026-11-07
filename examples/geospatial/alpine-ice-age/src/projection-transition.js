@@ -12,38 +12,34 @@ export function projectionWeights(from, target, fraction) {
   return result;
 }
 
-import { DISCONTINUOUS_VIEWS } from "./map-options.js";
+import {DISCONTINUOUS_VIEWS} from './map-options.js';
 
-export const isMyriahedral = (view) => view?.startsWith("myriahedral:");
+export const isMyriahedral = view => view?.startsWith('myriahedral:');
 
 /** Route incompatible panel nets through their common spherical endpoint. */
 export function projectionRoute(fromView, toView, amount = 1) {
   const stages = [];
   if (DISCONTINUOUS_VIEWS[fromView])
     stages.push({
-      kind: isMyriahedral(fromView) ? "hinge" : "segmented",
+      kind: isMyriahedral(fromView) ? 'hinge' : 'segmented',
       view: fromView,
       from: amount,
-      to: 0,
+      to: 0
     });
-  else if (fromView !== "globe") stages.push({ kind: "map", view: "globe" });
+  else if (fromView !== 'globe') stages.push({kind: 'map', view: 'globe'});
   if (DISCONTINUOUS_VIEWS[toView])
     stages.push({
-      kind: isMyriahedral(toView) ? "hinge" : "segmented",
+      kind: isMyriahedral(toView) ? 'hinge' : 'segmented',
       view: toView,
       from: 0,
-      to: 1,
+      to: 1
     });
-  else if (toView !== "globe") stages.push({ kind: "map", view: toView });
+  else if (toView !== 'globe') stages.push({kind: 'map', view: toView});
   return stages;
 }
 
 /** Same geographic endpoint for every chart copy, including both sides of a cut. */
-export function globePosition(
-  [lon, lat],
-  { width, height, longitude, latitude },
-  lift = 0,
-) {
+export function globePosition([lon, lat], {width, height, longitude, latitude}, lift = 0) {
   const rad = Math.PI / 180;
   const a = (lon - longitude) * rad,
     b = lat * rad,
@@ -54,33 +50,24 @@ export function globePosition(
   return [
     Math.cos(b) * Math.sin(a) * scale,
     (y * Math.cos(tilt) - z * Math.sin(tilt)) * scale,
-    (y * Math.sin(tilt) + z * Math.cos(tilt)) * scale,
+    (y * Math.sin(tilt) + z * Math.cos(tilt)) * scale
   ];
 }
 
 export function segmentedPosition(flat, source, amount, viewport, lift = 0) {
   if (amount === 1) return flat;
   const globe = globePosition(source, viewport, lift);
-  return flat.map(
-    (value, axis) => globe[axis] + (value - globe[axis]) * amount,
-  );
+  return flat.map((value, axis) => globe[axis] + (value - globe[axis]) * amount);
 }
 
 /** Keep every mesh that sampleTransition can display before a new route replaces it. */
-export function prunePreparedMaps(
-  cache,
-  displayed,
-  selected,
-  transition,
-  route,
-  limit = 3,
-) {
+export function prunePreparedMaps(cache, displayed, selected, transition, route, limit = 3) {
   const retained = new Set([
     displayed,
     selected,
     transition?.view,
     transition?.target,
-    ...route.map((stage) => stage.view),
+    ...route.map(stage => stage.view)
   ]);
   for (const key of cache.keys()) {
     if (cache.size <= limit) break;

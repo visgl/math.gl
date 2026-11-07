@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {type Polyhedron, edgeKey} from './polyhedra';
-import {BLUE_MARBLE_WORLD_URL} from './shared/common/blue-marble';
+import {BLUE_MARBLE_WORLD_URL} from '../../../common/blue-marble';
 
 /** Positions move with the hinges; source positions always stay on the original sphere. */
 export function surfaceVertices(mesh: Polyhedron, positions: number[][][]): Float32Array {

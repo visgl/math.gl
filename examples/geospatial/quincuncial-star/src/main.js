@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {mountInfoBox} from './shared/info-box.js';
+import {mountInfoBox} from '../../../common/info-box.js';
 import {createMapData} from './map.js';
 import {createScene} from './scene.js';
 import './style.css';
@@ -19,7 +19,10 @@ export function mountQuincuncialStar(root) {
     <p data-status role="status">Move over the map to inspect coordinates.</p>
     <small>Orange: a polygon split at chart boundaries. Coastlines: Natural Earth, public domain. Equatorial aspect; no hinged animation.</small>
   </section>`;
-  const disposeInfo = mountInfoBox(root.querySelector('.qs-controls'), {title: "Quincuncial and star maps", theme: 'sleek-light'});
+  const disposeInfo = mountInfoBox(root.querySelector('.qs-controls'), {
+    title: 'Quincuncial and star maps',
+    theme: 'sleek-light'
+  });
   const find = selector => root.querySelector(selector);
   const scene = createScene(find('canvas'));
   const abort = new AbortController();

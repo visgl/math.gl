@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import { DATASETS } from './sources.js';
+import {DATASETS} from './sources.js';
 export function clampAge(ages, age) {
   return Math.max(ages.at(-1), Math.min(ages[0], age));
 }
@@ -9,10 +9,10 @@ export function sampleAt(ages, age) {
   const value = clampAge(ages, age);
   let index = 0;
   while (index < ages.length - 2 && ages[index + 1] > value) index++;
-  return { index, fraction: (ages[index] - value) / (ages[index] - ages[index + 1]) };
+  return {index, fraction: (ages[index] - value) / (ages[index] - ages[index + 1])};
 }
 export function interpolateField(values, count, ages, age, output = new Float32Array(count)) {
-  const { index, fraction } = sampleAt(ages, age);
+  const {index, fraction} = sampleAt(ages, age);
   for (let i = 0; i < count; i++)
     output[i] =
       values[index * count + i] * (1 - fraction) + values[(index + 1) * count + i] * fraction;
@@ -24,7 +24,7 @@ export async function loadSimulation(signal) {
   });
   if (!manifestResponse.ok) throw new Error(`Dataset manifest: HTTP ${manifestResponse.status}`);
   const manifest = await manifestResponse.json();
-  const response = await fetch(DATASETS.alpine, { signal });
+  const response = await fetch(DATASETS.alpine, {signal});
   if (!response.ok) throw new Error(`Glacier data: HTTP ${response.status}`);
   const raw = await new Response(
     response.body.pipeThrough(new DecompressionStream('gzip'))
@@ -40,10 +40,10 @@ export async function loadSimulation(signal) {
   };
 }
 export async function loadGlobalSimulation(signal) {
-  const response = await fetch(DATASETS.globalManifest, { signal });
+  const response = await fetch(DATASETS.globalManifest, {signal});
   if (!response.ok) throw new Error(`Global manifest: HTTP ${response.status}`);
   const manifest = await response.json();
-  const asset = await fetch(DATASETS.global, { signal });
+  const asset = await fetch(DATASETS.global, {signal});
   if (!asset.ok) throw new Error(`Global ice data: HTTP ${asset.status}`);
   const raw = await new Response(
     asset.body.pipeThrough(new DecompressionStream('gzip'))

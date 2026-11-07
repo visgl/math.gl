@@ -1,10 +1,9 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import ExamplePanel from './shared/example-panel';
+import ExamplePanel from '../../../common/example-panel';
 import React, {useMemo, useState} from 'react';
-import Mesh from './shared/geometry-viewer/mesh';
-import './shared/geometry-viewer/styles.css';
+import Mesh from '../../../common/geometry-viewer';
 import {initial, makeScene} from './scene';
 import './styles.css';
 
