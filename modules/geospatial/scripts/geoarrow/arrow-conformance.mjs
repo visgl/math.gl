@@ -42,6 +42,13 @@ export function checkGeoArrowConformance() {
     const adapted = makeGeoArrowColumnFromArrowVector(list, options);
     assert.deepEqual(getGeoArrowBounds(makeArrowVectorFromGeoArrowColumn(adapted), options), [1, 2, 3, 4]);
   }
+  if (optionalTypes.BinaryView) {
+    const values = [Uint8Array.from({length: 32}, (_, index) => index), null, new Uint8Array([1, 2, 3])];
+    const view = arrow.vectorFromArray(values, new optionalTypes.BinaryView());
+    const column = makeGeoArrowColumnFromArrowVector(view);
+    assert.deepEqual(makeArrowVectorFromGeoArrowColumn(sliceGeoArrowColumn(column, 1, 3)).toArray(), values.slice(1));
+    assert.deepEqual(makeArrowVectorFromGeoArrowColumn(makeGeoArrowColumnFromArrowVector(view.slice(1, 3))).toArray(), values.slice(1));
+  }
   if (optionalTypes.Utf8View) {
     const values = ['LINESTRING (0 0, 1 1, 2 2)', null, 'POINT (3 4)'];
     const view = arrow.vectorFromArray(values, new optionalTypes.Utf8View());
