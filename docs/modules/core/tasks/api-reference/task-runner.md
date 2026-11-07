@@ -31,31 +31,31 @@ handles. Waiting acquisitions honor `signal` and are rejected when the runner cl
 
 #### `runTaskSync(task, input, request?)`
 
-`Output` | Immediate main-thread execution of synchronous hooks
+Returns `Output`. Immediate main-thread execution of synchronous hooks.
 
 #### `runTask(task, input, request?)`
 
-`Promise<Output>` | Temporary state for one atomic call
+Returns `Promise<Output>`. Temporary state for one atomic call.
 
 #### `runTasks(task, inputs, request?)`
 
-`AsyncIterable<Output>` | Independent calls, ordered output, per-slot state
+Returns `AsyncIterable<Output>`. Independent calls, ordered output, per-slot state.
 
 #### `runTaskInBatches(task, inputs, request?)`
 
-`AsyncIterable<BatchOutput>` | One streaming processor session
+Returns `AsyncIterable<BatchOutput>`. One streaming processor session.
 
 #### `initializeTask(task, initialization, controls?)`
 
-`Promise<InitializedTask>` | State retained until close/termination
+Returns `Promise<InitializedTask>`. State retained until close/termination.
 
 #### `close()`
 
-`Promise<void>` | Reject waiting acquisitions, drain owned handles, destroy state, stop workers
+Returns `Promise<void>`. Reject waiting acquisitions, drain owned handles, destroy state, stop workers.
 
 #### `terminate(reason?)`
 
-`Promise<void>` | Abort handles and force-stop workers; local execution must settle
+Returns `Promise<void>`. Abort handles and force-stop workers; local execution must settle.
 
 
 `request` becomes required when the descriptor requires application options or
