@@ -4,6 +4,16 @@ SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 -->
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Antarctica & Fiji projection lab</title>
-<!-- The build copies the lockfile-pinned WASM packages and injects their import map. -->
-<!-- PROJ_IMPORT_MAP -->
-</head><body class="lab-standalone" style="margin:0"><main id="lab"></main><script type="module" src="./lab/standalone.mjs"></script></body></html>
+<script id="math-gl-proj-imports" type="importmap">{
+  "imports": {
+    "proj-wasm": "./vendor/proj-wasm/dist/proj.mjs",
+    "ffi-wasm": "./vendor/ffi-wasm/dist/ffi-wasm.mjs",
+    "resource-tracker": "./vendor/resource-tracker/resource.mjs",
+    "squint-cljs/core.js": "./vendor/squint-cljs/core.js",
+    "squint-cljs/src/squint/string.js": "./vendor/squint-cljs/src/squint/string.js",
+    "worker-router": "./vendor/worker-router/dist/index.mjs",
+    "worker-router/worker-bootstrap": "./vendor/worker-router/dist/worker-bootstrap.mjs",
+    "comlink": "./vendor/comlink/dist/esm/comlink.mjs"
+  }
+}</script>
+</head><body class="lab-standalone" style="margin:0"><main id="lab"></main><script type="module" src="./src/lab/standalone.mjs"></script></body></html>

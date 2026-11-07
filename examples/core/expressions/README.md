@@ -13,3 +13,6 @@ yarn workspace math.gl-expression-playground start
 
 Basemap imagery uses NASA Blue Marble via the public GIBS EPSG:4326 WMS service,
 configured in `examples/common/blue-marble.js`. No access token is required.
+
+Run `yarn start-local` inside the math.gl repository to use workspace source.
+Run `yarn start` to use package exports or `yarn build` for a production bundle.

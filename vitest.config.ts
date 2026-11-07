@@ -15,7 +15,7 @@ const excludePatterns = [
   'modules/core/test/threejs-tests/euler-three.spec.ts',
   'modules/core/test/threejs-tests/matrix3-three.spec.ts',
   'modules/web-mercator/test/spec/versus-mapbox/**',
-  'test/bench/**',
+  'test/bench/**/*.bench.*',
   'test/size/**'
 ];
 
@@ -53,7 +53,10 @@ export default getVitestConfig({
       },
       optimizeDeps: {include: ['proj4/lib/datum_transform', 'geotiff']},
       test: {
-        include: includePatterns,
+        // Benchmarks use the same browser harness but run only when explicitly requested.
+        include: process.env.MATHGL_BROWSER_BENCHMARKS === '1'
+          ? ['test/bench/browser.spec.ts']
+          : includePatterns,
         setupFiles: ['./test/utils/test-setup.ts']
       }
     }

@@ -10,7 +10,7 @@ import Example from '@site/src/components/raster-projection-lab';
 <Example />
 
 The Antarctic raster uses a pixel grid in **ellipsoidal EPSG:3031** and contains the South
-Pole. **Earth imagery** is enabled by default: the bundled NASA Blue Marble overview is resampled
+Pole. **Earth imagery** is enabled by default: the NASA Blue Marble overview hosted in [deck.gl-data](https://github.com/visgl/deck.gl-data/tree/master/earth/nasa-blue-marble) is resampled
 into each source grid, including the rotated Antarctic and Fiji grids. Switch it off in the infobox
 to show the diagnostic checkerboard. Fiji uses a rotated geographic grid crossing 180°. UTM 60 and a complete world image provide
 additional seam fixtures. The Fiji and UTM views place the already-cut Pacific charts side by side
@@ -37,7 +37,7 @@ frame-rate claim. Changing engine, source grid, target, center or tolerance rebu
 superseded results cannot update the display. The example uses the shared collapsible infobox, owns its task workers, and releases its share of
 the optional WASM pool on unmount.
 
-The [source, qualification and limitations](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains/warp)
+The [source, qualification and limitations](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains/src/warp)
 explain sampled domain boundaries, sampled image exclusion, error probes and bounded failure behavior.
 The fixed fixtures have independent PROJ coordinate and coverage checks. This is not generic domain
 clipping in deck.gl layers, a universal accuracy certificate, or a COG tile-selection implementation.

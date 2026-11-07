@@ -1,0 +1,55 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.culling-queries-example {
+  position: relative;
+  height: 100%;
+  min-height: 360px;
+  background: #071321;
+  color: #e5f3ff;
+  font:
+    13px/1.5 system-ui,
+    sans-serif;
+  overflow: hidden;
+}
+.culling-queries-example .query-controls {
+  padding: 16px;
+}
+.culling-queries-example label {
+  display: block;
+  margin: 12px 0;
+}
+.culling-queries-example input[type='range'],
+.culling-queries-example select {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  accent-color: #5de8fa;
+}
+.culling-queries-example select,
+.culling-queries-example button {
+  background: #172d44;
+  color: #eaf6ff;
+  border: 1px solid #35546f;
+  border-radius: 7px;
+  padding: 7px;
+  font: inherit;
+}
+.culling-queries-example p {
+  color: #b4cbdf;
+}
+.culling-queries-example .query-caption {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  background: #0b1e30dc;
+  border-radius: 10px;
+  padding: 10px 14px;
+  pointer-events: none;
+  color: #cfeaff;
+}
+
+/* Position the controls over this app's canvas or map. */
+.culling-queries-example .example-panel { position: absolute; left: 16px; top: 16px; z-index: 2; width: min(290px, calc(100% - 76px)); max-height: calc(100% - 78px); overflow: auto; }

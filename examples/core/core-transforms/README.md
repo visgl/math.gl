@@ -12,3 +12,6 @@ model control. Compare T × R × S with S × R × T: operations apply right to l
 
 The wireframe uses Canvas 2D with math.gl view/projection matrices. Cleanup stops
 the render loop, destroys OrbitControls, and disconnects the resize observer.
+
+Run `yarn start-local` inside the math.gl repository to use workspace source.
+Run `yarn start` to use package exports or `yarn build` for a production bundle.
