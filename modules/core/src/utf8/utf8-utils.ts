@@ -93,7 +93,7 @@ export function parseUTF8Number(
   let digitCount = 0;
   let fractionDigitCount = 0;
   while (start < end && isDigit(bytes[start]!)) {
-    value = value * 10 + bytes[start]! - 0x30;
+    value = value * 10 + (bytes[start]! - 0x30);
     start++;
     digitCount++;
   }
@@ -101,7 +101,7 @@ export function parseUTF8Number(
   if (start < end && bytes[start]! === 0x2e) {
     start++;
     while (start < end && isDigit(bytes[start]!)) {
-      value = value * 10 + bytes[start]! - 0x30;
+      value = value * 10 + (bytes[start]! - 0x30);
       start++;
       digitCount++;
       fractionDigitCount++;
@@ -123,7 +123,7 @@ export function parseUTF8Number(
 
     let exponentDigitCount = 0;
     while (start < end && isDigit(bytes[start]!)) {
-      exponent = exponent * 10 + bytes[start]! - 0x30;
+      exponent = exponent * 10 + (bytes[start]! - 0x30);
       start++;
       exponentDigitCount++;
     }
@@ -302,9 +302,17 @@ function isDigit(byte: number): boolean {
  * @returns Scaled numeric value.
  */
 function applyDecimalScale(value: number, decimalScale: number): number {
-  return decimalScale >= 0
-    ? value * Math.pow(10, decimalScale)
-    : value / Math.pow(10, -decimalScale);
+  if (value === 0 || decimalScale === 0) {
+    return value;
+  }
+  if (decimalScale >= 0) {
+    return value * Math.pow(10, decimalScale);
+  }
+  if (decimalScale < -308) {
+    // Split the scale so a representable subnormal result does not require 10 ** 309.
+    return (value / 1e308) * Math.pow(10, decimalScale + 308);
+  }
+  return value / Math.pow(10, -decimalScale);
 }
 
 /**

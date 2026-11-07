@@ -164,3 +164,21 @@ test('UTF8Utils preserves negative zero and accepts ASCII whitespace', () => {
   expect(parseUTF8Number(bytes, 0, bytes.length)).toBe(-0);
   expect(parseUTF8BigInt(bytes, 0, bytes.length)).toBe(0n);
 });
+
+test.each([
+  ['9007199254740991', Number.MAX_SAFE_INTEGER],
+  ['-9007199254740991', Number.MIN_SAFE_INTEGER],
+  ['9007199254740990', 9007199254740990],
+  ['900719925474099.1', 900719925474099.1],
+  ['0.9007199254740991', 0.9007199254740991],
+  ['1e-309', 1e-309],
+  ['5e-324', Number.MIN_VALUE],
+  ['0e309', 0],
+  ['-0e309', -0],
+  ['1e309', Infinity],
+  ['1e-9999', 0],
+  ['-1e-9999', -0]
+])('UTF8Utils parses numeric boundary %s', (text, expected) => {
+  const bytes = new TextEncoder().encode(text);
+  expect(parseUTF8Number(bytes, 0, bytes.length)).toBe(expected);
+});
