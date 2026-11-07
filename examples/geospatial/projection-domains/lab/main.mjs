@@ -190,7 +190,7 @@ export function mountProjectionLab(
             indices: {value: m.indices, size: 1}
           },
           texture: chooseTexture(result.sourceName, result.earthTexture),
-          material: false,
+          material: {unlit: true},
           getPosition: [0, 0, 0],
           getColor: [255, 255, 255],
           coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
@@ -495,7 +495,7 @@ export function mountProjectionLab(
         const common = {
           data: fixedData,
           texture: chooseTexture('antarctica', earthTexture),
-          material: false,
+          material: {unlit: true},
           getPosition: zero,
           getColor: white,
           coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
