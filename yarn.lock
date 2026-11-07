@@ -5865,6 +5865,11 @@ __metadata:
     "@turf/distance": "npm:^7.2.0"
     polygon-clipping: "npm:0.15.7"
     proj4: "npm:2.22.0"
+  peerDependencies:
+    apache-arrow: ">=17.0.0"
+  peerDependenciesMeta:
+    apache-arrow:
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -17451,6 +17456,15 @@ __metadata:
     "@math.gl/geospatial": "workspace:*"
     d3-geo: "npm:^2.0.2"
     vite: "npm:^8.3.6"
+  languageName: unknown
+  linkType: soft
+
+"math.gl-geoarrow-table@workspace:examples/geospatial/geoarrow-table":
+  version: 0.0.0-use.local
+  resolution: "math.gl-geoarrow-table@workspace:examples/geospatial/geoarrow-table"
+  dependencies:
+    "@math.gl/geospatial": "workspace:*"
+    apache-arrow: "npm:17.0.0"
   languageName: unknown
   linkType: soft
 

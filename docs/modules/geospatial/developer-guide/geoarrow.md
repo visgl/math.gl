@@ -2,7 +2,7 @@
 
 GeoArrow stores geometry in typed-array buffers rather than one JavaScript object per row. math.gl describes those buffers with plain TypeScript objects, so the same geometry kernels can work with Apache Arrow, a loader, or application-owned storage without depending on a table runtime.
 
-Import the APIs from `@math.gl/geospatial/geoarrow`. The [API reference](../geoarrow/api-reference/geoarrow.md) lists the descriptor types and operations.
+Import the APIs from `@math.gl/geospatial/geoarrow-utils`. The [API reference](../geoarrow-utils/api-reference/geoarrow.md) lists the descriptor types and operations.
 
 ## Adapt buffers once
 
@@ -94,7 +94,7 @@ Loaders.gl owns file/network loading, schema interpretation, GeoParquet metadata
 Decode serialized inputs and convert Z/M dimensions or boxes explicitly. Streaming preserves winding, CRS units, and planar/spherical edge semantics. D3 expects longitude/latitude degrees and its spherical ring convention; projecting individual points does not replace clipping a geometry stream.
 
 ```typescript
-import {tessellateGeoArrowStream} from '@math.gl/geospatial/geoarrow';
+import {tessellateGeoArrowStream} from '@math.gl/geospatial/geoarrow-utils';
 import {geoOrthographic} from 'd3-geo'; // An optional application dependency.
 
 const projection = geoOrthographic().rotate([-20, 30]);

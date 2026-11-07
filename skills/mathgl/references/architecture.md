@@ -8,7 +8,7 @@
 - `@math.gl/earth`: geoid grid parsing and height offsets; distinguish ellipsoidal from orthometric height.
 - `@math.gl/geometry`: geometry construction; `@math.gl/geometry`: geometry processing; `@math.gl/geometry/culling`: bounding volumes and spatial queries; `@math.gl/geometry`: documented polygon/polyline operations.
 - `@math.gl/dggs`: cell decoding across grid systems. Specify the grid and resolution; cell identifiers are not interchangeable.
-- `@math.gl/geospatial` and `@math.gl/geospatial/geoarrow`: binary geometry and columnar geometry layouts. Preserve offsets, dimensionality and buffer ownership.
+- `@math.gl/geospatial` and `@math.gl/geospatial/geoarrow-utils`: binary geometry and columnar geometry layouts. Preserve offsets, dimensionality and buffer ownership.
 - `@math.gl/earth/sun` and `@math.gl/earth/timezone`: astronomical and timezone calculations. Verify time units, timezone handling and optional data requirements.
 
 Consult each module's `package.json`, `src/index.ts`, tests, and `docs/modules/<module>` pages for exact APIs and maturity. Internal helpers and experimental APIs are not guarantees of stable application support.

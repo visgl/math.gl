@@ -19,14 +19,14 @@ import {
   type GeoArrowColumn,
   type GeoArrowDimension,
   type GeoArrowGeometryValue
-} from '@math.gl/geospatial/geoarrow/index';
-import {prepareGeoArrowTransfer} from '@math.gl/geospatial/geoarrow/worker';
+} from '@math.gl/geospatial/geoarrow-utils/index';
+import {prepareGeoArrowTransfer} from '@math.gl/geospatial/geoarrow-utils/worker';
 import {
   getEncodingForGeometryValue,
   isGeoArrowValueValid,
   materializeGeoArrowRows,
   sliceGeoArrowArray
-} from '@math.gl/geospatial/geoarrow/layout';
+} from '@math.gl/geospatial/geoarrow-utils/layout';
 
 const concreteFixtures: GeoArrowGeometryValue[] = [
   {type: 'Point', coordinates: [1, 2]},

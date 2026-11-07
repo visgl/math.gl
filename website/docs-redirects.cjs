@@ -6,9 +6,13 @@ const {dirname, join} = require('node:path');
 
 // Preserve bookmarks when guides move into their owning modules.
 const movedGuides = {
+  "modules/geospatial/geoarrow/api-reference/geoarrow": "modules/geospatial/geoarrow-utils/api-reference/geoarrow",
   "modules/geospatial/geoarrow/physical-layouts": "modules/geospatial/developer-guide/geoarrow#understand-the-physical-layout",
   "modules/geospatial/geoarrow/geometry-streams": "modules/geospatial/developer-guide/geoarrow#stream-clip-and-tessellate",
   "modules/geospatial/geoarrow/migration-guide": "modules/geospatial/developer-guide/geoarrow#replace-an-existing-runtime-integration",
+  "modules/geospatial/geoarrow-utils/physical-layouts": "modules/geospatial/developer-guide/geoarrow#understand-the-physical-layout",
+  "modules/geospatial/geoarrow-utils/geometry-streams": "modules/geospatial/developer-guide/geoarrow#stream-clip-and-tessellate",
+  "modules/geospatial/geoarrow-utils/migration-guide": "modules/geospatial/developer-guide/geoarrow#replace-an-existing-runtime-integration",
   "modules/geospatial/guide/geoarrow": "modules/geospatial/developer-guide/geoarrow",
 
   "modules/geometry/unfolding-earth": "modules/geometry/api-reference/hinge-tree#unfolding-earth",

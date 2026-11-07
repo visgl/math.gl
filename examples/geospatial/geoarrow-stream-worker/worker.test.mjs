@@ -4,7 +4,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {TaskRunner} from '@math.gl/core/tasks';
-import {getGeoArrowTransferList} from '@math.gl/geospatial/geoarrow';
+import {getGeoArrowTransferList} from '@math.gl/geospatial/geoarrow-utils';
 import {geometryTask} from './task.mjs';
 import {fixture} from './fixture.mjs';
 const runner = new TaskRunner();

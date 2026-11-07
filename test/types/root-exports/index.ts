@@ -40,7 +40,7 @@ import {
   type TerrainProfileVisibility,
   type TerrainGridMesh as TerrainMesh
 } from '@math.gl/geospatial/terrain';
-import {prepareGeoArrowTransfer} from '@math.gl/geospatial/geoarrow';
+import {prepareGeoArrowTransfer} from '@math.gl/geospatial/geoarrow-utils';
 import {createCRSResolver as crsResolver} from '@math.gl/geospatial/crs';
 import {STAR_CATALOG} from '@math.gl/earth/sun/stars';
 // @ts-expect-error The old terrain leaf is not a published API.

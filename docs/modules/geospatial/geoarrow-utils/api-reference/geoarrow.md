@@ -90,7 +90,7 @@ Null or omitted child layout metadata inherits the parent layout, matching descr
 The returned column can be passed directly to existing bounds and traversal kernels.
 
 ```typescript
-import {getGeoArrowRowView, getGeoArrowBounds} from '@math.gl/geospatial/geoarrow';
+import {getGeoArrowRowView, getGeoArrowBounds} from '@math.gl/geospatial/geoarrow-utils';
 
 const view = getGeoArrowRowView(column, 10);
 const bounds = getGeoArrowBounds(view.column);
@@ -207,7 +207,7 @@ values. Set `encoding: 'geoarrow.geometry'` to force a dense union for homogeneo
 
 ### `decodeGeoArrowWKB(column, options?)` / `decodeGeoArrowWKT(column)`
 
-Import these functions from `@math.gl/geospatial/geoarrow`. They decode serialized chunks into native
+Import these functions from `@math.gl/geospatial/geoarrow-utils`. They decode serialized chunks into native
 descriptors while preserving nulls, metadata, CRS, edge semantics, and source chunking. WKB accepts
 mixed endianness, WKB/EWKB/ISO dimensions, mixed families and dimensions, recursive collections,
 regular binary storage, and Arrow BinaryView-style storage.
@@ -240,7 +240,7 @@ optional traversal limits are the same as `decodeGeoArrowWKB`.
 
 ### `encodeGeoArrowWKB(column)` / `encodeGeoArrowWKT(column)`
 
-Import these functions from `@math.gl/geospatial/geoarrow`. They encode native descriptors into
+Import these functions from `@math.gl/geospatial/geoarrow-utils`. They encode native descriptors into
 variable-width serialized descriptors using an exact measure/write pass per source chunk. WKB
 encoding traverses physical descriptors directly, retains chunk boundaries, and represents
 dense-union child nulls in the serialized validity bitmap. A column already in the requested
@@ -254,7 +254,7 @@ metadata.
 
 ### `tessellateGeoArrowPolygons(column, options?)`
 
-Import this optional function from `@math.gl/geospatial/geoarrow`. It returns `GeoArrowTessellation`:
+Import this optional function from `@math.gl/geospatial/geoarrow-utils`. It returns `GeoArrowTessellation`:
 
 | Field | Meaning |
 | --- | --- |
@@ -284,5 +284,5 @@ omitted and no buffer is detached.
 
 ### `prepareGeoArrowTransfer(column)`
 
-Available from `@math.gl/geospatial/geoarrow`. Returns `{column, transferList}` for explicit use with
+Available from `@math.gl/geospatial/geoarrow-utils`. Returns `{column, transferList}` for explicit use with
 `postMessage` or another structured-clone transport.

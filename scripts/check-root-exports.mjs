@@ -53,10 +53,10 @@ const removed = [
   "@math.gl/geospatial/crs/spatial-reference",
   "@math.gl/geospatial/crs/resolver",
   "@math.gl/geospatial/crs/metadata",
-  "@math.gl/geospatial/geoarrow/worker",
-  "@math.gl/geospatial/geoarrow/builder",
-  "@math.gl/geospatial/geoarrow/wkb",
-  "@math.gl/geospatial/geoarrow/tessellation",
+  "@math.gl/geospatial/geoarrow-utils/worker",
+  "@math.gl/geospatial/geoarrow-utils/builder",
+  "@math.gl/geospatial/geoarrow-utils/wkb",
+  "@math.gl/geospatial/geoarrow-utils/tessellation",
   "@math.gl/geospatial/geodesic-exact",
   "@math.gl/geospatial/triaxial",
   "@math.gl/geospatial/coordinates",
@@ -99,7 +99,7 @@ const roots = {
   '@math.gl/geospatial': ['HeightField','createTerrainSkirt','createTerrainMesh','weldTerrainContourTiles','weldTerrainMixedContourTiles','diagnoseTerrainContourBoundaries','TerrainContourBoundaryAxis','stitchTerrainContourTiles','createTerrainGradientPyramid','getTerrainProfileVisibility','getTerrainProfileHorizon','getTerrainProfileViewshed','TerrainProfileViewStatus','createTerrainVertexTileHalos','TerrainVertexHaloStatus','getTerrainVertexHaloAffectedTiles','updateTerrainVertexTileHalos','createTerrainFilteredPyramid','createCRSResolver','parseWKB','prepareGeoArrowTransfer','parseAngle'],
   '@math.gl/geospatial/terrain': ['HeightField','createTerrainSkirt','createTerrainMesh','createMartiniTerrainMesh','stitchTerrainMeshEdges','simplifyTerrainContourPaths','weldTerrainContourTiles','weldTerrainMixedContourTiles','diagnoseTerrainContourBoundaries','TerrainContourBoundaryAxis','stitchTerrainContourTiles','createTerrainGradientPyramid','getTerrainProfileVisibility','getTerrainProfileHorizon','getTerrainProfileViewshed','TerrainProfileViewStatus','createTerrainVertexTileHalos','TerrainVertexHaloStatus','getTerrainVertexHaloAffectedTiles','updateTerrainVertexTileHalos','createTerrainFilteredPyramid'],
   '@math.gl/geospatial/crs': ['createSpatialReference','createCRSResolver'],
-  '@math.gl/geospatial/geoarrow': ['GeoArrowBuilder','prepareGeoArrowTransfer']
+  '@math.gl/geospatial/geoarrow-utils': ['GeoArrowBuilder','prepareGeoArrowTransfer']
 };
 for (const [path, symbols] of Object.entries(roots)) {
   const esm = await import(path), cjs = require(path);

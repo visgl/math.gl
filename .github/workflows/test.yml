@@ -253,7 +253,9 @@ jobs:
         run: yarn check:geodesic-path-package
 
       - name: Check GeoArrow package boundary
-        run: yarn check:geoarrow-boundary
+        run: |
+          yarn check:geoarrow-boundary
+          yarn check:geoarrow-api
 
       - name: Check timezone package boundaries and public types
         run: |

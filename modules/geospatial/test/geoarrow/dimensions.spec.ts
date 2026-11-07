@@ -6,7 +6,7 @@ import {expect, test} from 'vitest';
 import {
   inferGeoArrowGeometryDimension,
   mergeGeoArrowDimensions
-} from '@math.gl/geospatial/geoarrow/index';
+} from '@math.gl/geospatial/geoarrow-utils/index';
 
 test('merges elevation and measure dimensions independently', () => {
   expect(mergeGeoArrowDimensions('xy', 'xym')).toBe('xym');

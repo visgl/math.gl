@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {geoEquirectangular, geoOrthographic} from 'd3-geo';
-import {tessellateGeoArrowStream} from '@math.gl/geospatial/geoarrow';
+import {tessellateGeoArrowStream} from '@math.gl/geospatial/geoarrow-utils';
 
 export function processGeometry({column, projection: name}, _options, context) {
   const factory = {equirectangular: geoEquirectangular, orthographic: geoOrthographic}[name];

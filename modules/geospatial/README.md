@@ -29,7 +29,7 @@ Use `@math.gl/geospatial` for [oblique ellipsoidal visibility and shared cut gra
 
 ## Batched GeoArrow operations
 
-Import `@math.gl/geospatial/turf` for Turf-style operations on native GeoArrow columns from `@math.gl/geospatial/geoarrow`.
+Import `@math.gl/geospatial/turf` for Turf-style operations on native GeoArrow columns from `@math.gl/geospatial/geoarrow-utils`.
 The entry point processes physical coordinate buffers without materializing GeoJSON rows.
 `bbox`, `distance`, `bearing`, `length`, `area`, and `booleanPointInPolygon` return
 `{values, validity}`: values are typed arrays in row order and validity is an Arrow bitmap
@@ -147,7 +147,7 @@ WKT/PROJ syntax readers out of the initial graph of code-split applications.
 Arrow-independent columnar geometry descriptors and synchronous buffer algorithms for
 GeoArrow-compatible memory layouts.
 
-`@math.gl/geospatial/geoarrow` works directly over borrowed typed arrays. It deliberately does not require an
+`@math.gl/geospatial/geoarrow-utils` works directly over borrowed typed arrays. It deliberately does not require an
 Arrow runtime: a loader, dataframe, database client, or application can adapt its buffers to the
 small descriptor ABI and use the same validation, conversion, and coordinate algorithms. Optional
 format and mesh capabilities are isolated behind subpaths so consumers only bundle what they use.
@@ -184,8 +184,8 @@ import {
   getGeoArrowBounds,
   getGeoArrowVertexCount,
   mapGeoArrowCoordinates
-} from '@math.gl/geospatial/geoarrow';
-import {GeoArrowBuilder} from '@math.gl/geospatial/geoarrow';
+} from '@math.gl/geospatial/geoarrow-utils';
+import {GeoArrowBuilder} from '@math.gl/geospatial/geoarrow-utils';
 
 const column = GeoArrowBuilder.build(
   [
@@ -227,7 +227,7 @@ const shifted = mapGeoArrowCoordinates(column, ([x, y]) => [x + 360, y]);
 This example describes two XY points without copying the source coordinates:
 
 ```typescript
-import type {GeoArrowColumn} from '@math.gl/geospatial/geoarrow';
+import type {GeoArrowColumn} from '@math.gl/geospatial/geoarrow-utils';
 
 const values = new Float64Array([10, 20, 30, 40]);
 const points: GeoArrowColumn = {
@@ -356,7 +356,7 @@ import {
   convertGeoArrowColumn,
   interleaveGeoArrowCoordinates,
   rewindGeoArrow
-} from '@math.gl/geospatial/geoarrow';
+} from '@math.gl/geospatial/geoarrow-utils';
 
 const interleaved = interleaveGeoArrowCoordinates(separatedPoints);
 const xyz = convertGeoArrowColumn(interleaved, {dimension: 'xyz'});
@@ -377,7 +377,7 @@ import {
   encodeGeoArrowWKB,
   decodeGeoArrowWKT,
   encodeGeoArrowWKT
-} from '@math.gl/geospatial/geoarrow';
+} from '@math.gl/geospatial/geoarrow-utils';
 
 const wkb = encodeGeoArrowWKB(polygons);
 const decoded = decodeGeoArrowWKB(wkb, {
@@ -438,7 +438,7 @@ functions.
 ### Polygon tessellation
 
 ```typescript
-import {tessellateGeoArrowPolygons} from '@math.gl/geospatial/geoarrow';
+import {tessellateGeoArrowPolygons} from '@math.gl/geospatial/geoarrow-utils';
 
 const mesh = tessellateGeoArrowPolygons(polygons, {
   positionSize: 3,
@@ -459,7 +459,7 @@ vertex retains its top-level source row. Tessellation uses `@math.gl/geometry` a
 Potentially allocating operations accept limits, and limits can also be checked directly:
 
 ```typescript
-import {assertGeoArrowResourceLimits} from '@math.gl/geospatial/geoarrow';
+import {assertGeoArrowResourceLimits} from '@math.gl/geospatial/geoarrow-utils';
 
 assertGeoArrowResourceLimits(column, {
   maximumRows: 1_000_000,
@@ -475,7 +475,7 @@ assertGeoArrowResourceLimits(column, {
 Root APIs are synchronous. Worker-specific payload preparation is isolated in the optional subpath:
 
 ```typescript
-import {prepareGeoArrowTransfer} from '@math.gl/geospatial/geoarrow';
+import {prepareGeoArrowTransfer} from '@math.gl/geospatial/geoarrow-utils';
 
 const payload = prepareGeoArrowTransfer(column);
 worker.postMessage(payload.column, {transfer: payload.transferList});
@@ -493,7 +493,7 @@ The intended loaders.gl architecture keeps Apache Arrow at the boundary:
 Arrow Data / Vector / Table
         │  loaders.gl adapter
         ▼
-GeoArrowColumn descriptors  ──►  @math.gl/geospatial/geoarrow buffer algorithms
+GeoArrowColumn descriptors  ──►  @math.gl/geospatial/geoarrow-utils buffer algorithms
         │
         └── loaders.gl Arrow field + extension metadata
 ```
@@ -529,15 +529,15 @@ the producer runtime.
 - Layout: `inspectGeoArrowColumn`, `validateGeoArrowColumn`, slicing and traversal
 - Buffer algorithms: count, bounds, row bounds, map, interleave, convert, rewind, union
   normalization, resource limits
-- Construction: `@math.gl/geospatial/geoarrow`
-- Column codecs: `@math.gl/geospatial/geoarrow` (individual parsing/formatting is provided by
+- Construction: `@math.gl/geospatial/geoarrow-utils`
+- Column codecs: `@math.gl/geospatial/geoarrow-utils` (individual parsing/formatting is provided by
   `@math.gl/geospatial`)
-- Meshes: `@math.gl/geospatial/geoarrow`
-- Transfer: `getGeoArrowTransferList`, plus `@math.gl/geospatial/geoarrow`
+- Meshes: `@math.gl/geospatial/geoarrow-utils`
+- Transfer: `getGeoArrowTransferList`, plus `@math.gl/geospatial/geoarrow-utils`
 
-See the math.gl documentation for the full [physical-layout guide](https://github.com/visgl/math.gl/blob/master/docs/modules/geospatial/geoarrow/physical-layouts.md),
-[API reference](https://github.com/visgl/math.gl/blob/master/docs/modules/geospatial/geoarrow/api-reference/geoarrow.md), and
-[migration guide](https://github.com/visgl/math.gl/blob/master/docs/modules/geospatial/geoarrow/migration-guide.md).
+See the math.gl documentation for the full [physical-layout guide](https://github.com/visgl/math.gl/blob/master/docs/modules/geospatial/geoarrow-utils/physical-layouts.md),
+[API reference](https://github.com/visgl/math.gl/blob/master/docs/modules/geospatial/geoarrow-utils/api-reference/geoarrow.md), and
+[migration guide](https://github.com/visgl/math.gl/blob/master/docs/modules/geospatial/geoarrow-utils/migration-guide.md).
 
 ## Projection
 
@@ -643,7 +643,7 @@ These are CPU/data APIs; shader and device execution stay in luma.gl.
 Dependency-free, synchronous codecs for Well-Known Binary (WKB), Extended WKB (EWKB), and
 Well-Known Text (WKT) geometry.
 
-`@math.gl/geospatial` is the format layer beneath `@math.gl/geospatial/geoarrow`. It parses and writes individual
+`@math.gl/geospatial` is the format layer beneath `@math.gl/geospatial/geoarrow-utils`. It parses and writes individual
 geometry values without importing Arrow, GeoArrow, loaders.gl, or a geometry class hierarchy.
 Applications can therefore use the codecs for row-oriented data, database values, network
 messages, or as a building block for their own columnar adapters.
@@ -840,13 +840,13 @@ with the declared dimension. Formatting treats an all-non-finite coordinate tupl
 
 ### GeoArrow integration
 
-`@math.gl/geospatial/geoarrow` owns column descriptors, validity, offsets, chunks, and column metadata. Its
+`@math.gl/geospatial/geoarrow-utils` owns column descriptors, validity, offsets, chunks, and column metadata. Its
 `decodeGeoArrowWKB`, `encodeGeoArrowWKB`, `decodeGeoArrowWKT`, and `encodeGeoArrowWKT` functions
 delegate individual values to this package:
 
 ```typescript
 import {parseWKB} from '@math.gl/geospatial';
-import {decodeGeoArrowWKB} from '@math.gl/geospatial/geoarrow';
+import {decodeGeoArrowWKB} from '@math.gl/geospatial/geoarrow-utils';
 
 const oneGeometry = parseWKB(bytes);
 const nativeColumn = decodeGeoArrowWKB(serializedColumn);

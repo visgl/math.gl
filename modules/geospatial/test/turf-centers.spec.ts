@@ -5,7 +5,7 @@ import {test, expect} from 'vitest';
 import {
   makeGeoArrowColumnFromGeometryRows,
   materializeGeoArrowRows
-} from '@math.gl/geospatial/geoarrow/index';
+} from '@math.gl/geospatial/geoarrow-utils/index';
 import {angle, centerMean, booleanParallel} from '@math.gl/geospatial/turf';
 const point = (x: number, y: number) =>
   makeGeoArrowColumnFromGeometryRows([{type: 'Point', coordinates: [x, y]}]);

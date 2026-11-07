@@ -8,21 +8,20 @@ import {join} from 'node:path';
 const packageRoot = new URL('../../', import.meta.url);
 const forbiddenPackage = ['apache', 'arrow'].join('-');
 const manifest = JSON.parse(await readFile(new URL('package.json', packageRoot), 'utf8'));
-const dependencySections = ['dependencies', 'peerDependencies', 'optionalDependencies'];
-
-for (const section of dependencySections) {
-  if (manifest[section]?.[forbiddenPackage]) {
-    throw new Error(`${section} must not reference ${forbiddenPackage}`);
-  }
+if (manifest.dependencies?.[forbiddenPackage] || manifest.optionalDependencies?.[forbiddenPackage]) {
+  throw new Error('Arrow must remain an optional peer, never an installed runtime dependency.');
+}
+if (manifest.peerDependencies?.[forbiddenPackage] !== '>=17.0.0' || !manifest.peerDependenciesMeta?.[forbiddenPackage]?.optional) {
+  throw new Error('The Arrow-aware GeoArrow subpath requires an optional Arrow >=17 peer.');
 }
 
-for (const directory of ['src/geoarrow', 'dist/geoarrow']) {
+for (const directory of ['src/geoarrow-utils', 'dist/geoarrow-utils']) {
   const root = new URL(`${directory}/`, packageRoot);
   let files = [];
   try {
     files = await collectFiles(root.pathname);
   } catch (error) {
-    if (error?.code === 'ENOENT' && directory === 'dist/geoarrow') continue;
+    if (error?.code === 'ENOENT' && directory === 'dist/geoarrow-utils') continue;
     throw error;
   }
   for (const file of files) {

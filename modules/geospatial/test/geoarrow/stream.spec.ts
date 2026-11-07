@@ -10,11 +10,11 @@ import {
   streamGeoArrow,
   tessellateGeoArrowStream,
   sliceGeoArrowColumn
-} from '@math.gl/geospatial/geoarrow/index';
+} from '@math.gl/geospatial/geoarrow-utils/index';
 import type {
   GeoArrowGeometryValue,
   GeoArrowGeometryStream
-} from '@math.gl/geospatial/geoarrow/index';
+} from '@math.gl/geospatial/geoarrow-utils/index';
 const polygon: GeoArrowGeometryValue = {
   type: 'Polygon',
   coordinates: [

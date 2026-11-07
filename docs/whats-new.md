@@ -8,6 +8,14 @@ Version 5.0 is in prerelease development. See the [upgrade guide](./upgrade-guid
 
 **Highlights:** a new projection engine; six grid systems behind one decoder API; WKB and GeoArrow geometry processing; and new tools for timezones and sky.
 
+### Arrow-backed GeoArrow adapters
+
+The optional [`@math.gl/geospatial/geoarrow`](./modules/geospatial/geoarrow/README.md)
+entry adapts Arrow 17+ fields/vectors to the existing geometry kernels without a loaders.gl
+schema dependency. Physical descriptors remain Arrow-independent at
+[`@math.gl/geospatial/geoarrow-utils`](./modules/geospatial/geoarrow-utils/README.md).
+The new runnable Arrow-table example complements the updated descriptor/task-worker example.
+
 ### Work across coordinate systems
 
 [Projection](./modules/geospatial/projection/README.md) has grown from a proj4 wrapper into a pluggable math.gl engine. Transform coordinates using a broad [projection catalogue](./modules/geospatial/projection/developer-guide/projections.md), with support for datum grids, coordinate operations, and in-place buffers. The new [CRS module](./modules/geospatial/crs/README.md) gives applications a shared vocabulary for coordinate reference systems, WKT, PROJ definitions, and PROJJSON.
@@ -18,7 +26,7 @@ The new [DGGS module](./modules/dggs/README.md) brings A5, GeoHash, H3, Plus Cod
 
 ### Move geometry from data to visualization
 
-Read and write WKB, EWKB, and WKT with [WKB](./modules/geospatial/wkb/README.md), or process columnar geometry with [GeoArrow](./modules/geospatial/geoarrow/README.md). [Geometry](./modules/geometry/README.md) and [geometry-utils](./modules/geometry/README.md) tools provide renderer-independent building blocks, including prisms, solid rings, and optional parametric shapes. [Polygon](./modules/geometry/polygon/README.md) can adaptively subdivide meshes and lines, including meshes for globes, while preserving attributes through refinement.
+Read and write WKB, EWKB, and WKT with [WKB](./modules/geospatial/wkb/README.md), or process columnar geometry with [GeoArrow](./modules/geospatial/geoarrow-utils/README.md). [Geometry](./modules/geometry/README.md) and [geometry-utils](./modules/geometry/README.md) tools provide renderer-independent building blocks, including prisms, solid rings, and optional parametric shapes. [Polygon](./modules/geometry/polygon/README.md) can adaptively subdivide meshes and lines, including meshes for globes, while preserving attributes through refinement.
 
 ### Bring globes to life
 

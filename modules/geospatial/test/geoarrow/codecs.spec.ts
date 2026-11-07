@@ -14,8 +14,8 @@ import {
   type GeoArrowColumn,
   type GeoArrowDimension,
   type GeoArrowGeometryValue
-} from '@math.gl/geospatial/geoarrow/index';
-import {materializeGeoArrowRows} from '@math.gl/geospatial/geoarrow/layout';
+} from '@math.gl/geospatial/geoarrow-utils/index';
+import {materializeGeoArrowRows} from '@math.gl/geospatial/geoarrow-utils/layout';
 
 test('column codecs preserve nulls, declared dimensions and metadata', () => {
   for (const dimension of ['xy', 'xyz', 'xym', 'xyzm'] as GeoArrowDimension[]) {

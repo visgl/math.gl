@@ -4,6 +4,13 @@
 
 Start with the package mapping below, then check the API changes for the modules you use. See [What’s New](./whats-new.md#v50) for the highlights.
 
+### GeoArrow physical-descriptor imports
+
+The Arrow-independent descriptor APIs previously under `@math.gl/geospatial/geoarrow`
+now live at `@math.gl/geospatial/geoarrow-utils`. Update those imports, including worker
+examples. The `geoarrow` subpath is now reserved for real Apache Arrow fields and vectors
+and requires the optional Arrow 17+ peer. Existing descriptor root exports retain their behavior.
+
 ### Migrating to root exports
 
 The APIs below moved to package or capability roots. The old API subpaths are no
@@ -51,10 +58,10 @@ collisions below. Projection catalogs and data assets retain their paths.
 | `@math.gl/geospatial/crs/wkt` | `@math.gl/geospatial/crs` |
 | `@math.gl/geospatial/ellipsoid` | `@math.gl/geospatial` |
 | `@math.gl/geospatial/expressions` | `@math.gl/geospatial` |
-| `@math.gl/geospatial/geoarrow/builder` | `@math.gl/geospatial/geoarrow` |
-| `@math.gl/geospatial/geoarrow/tessellation` | `@math.gl/geospatial/geoarrow` |
-| `@math.gl/geospatial/geoarrow/wkb` | `@math.gl/geospatial/geoarrow` |
-| `@math.gl/geospatial/geoarrow/worker` | `@math.gl/geospatial/geoarrow` |
+| `@math.gl/geospatial/geoarrow-utils/builder` | `@math.gl/geospatial/geoarrow-utils` |
+| `@math.gl/geospatial/geoarrow-utils/tessellation` | `@math.gl/geospatial/geoarrow-utils` |
+| `@math.gl/geospatial/geoarrow-utils/wkb` | `@math.gl/geospatial/geoarrow-utils` |
+| `@math.gl/geospatial/geoarrow-utils/worker` | `@math.gl/geospatial/geoarrow-utils` |
 | `@math.gl/geospatial/geodesic-buffer` | `@math.gl/geospatial` |
 | `@math.gl/geospatial/geodesic-exact` | `@math.gl/geospatial` |
 | `@math.gl/geospatial/geographic-atlas` | `@math.gl/geospatial` |
@@ -87,7 +94,7 @@ collisions below. Projection catalogs and data assets retain their paths.
 | `@math.gl/geospatial/wkb` | `@math.gl/geospatial` |
 
 `@math.gl/geospatial/terrain`, `@math.gl/geospatial/crs`,
-`@math.gl/geospatial/geoarrow`, `@math.gl/geometry/culling`,
+`@math.gl/geospatial/geoarrow-utils`, `@math.gl/geometry/culling`,
 `@math.gl/earth/sun`, and `@math.gl/earth/timezone` remain capability roots.
 Their public APIs are also available as named exports from the package root.
 The `@math.gl/earth/sun/stars` catalog entry and data asset paths remain.
@@ -140,7 +147,7 @@ Import `subdivideGlobeMesh` and its options from `@math.gl/geospatial`; they are
 | `@math.gl/crs` | `@math.gl/geospatial` | `@math.gl/geospatial/crs` |
 | `@math.gl/projection` | `@math.gl/geospatial` | `@math.gl/geospatial/projection` |
 | `@math.gl/wkb` | `@math.gl/geospatial` | `@math.gl/geospatial` |
-| `@math.gl/geoarrow` | `@math.gl/geospatial` | `@math.gl/geospatial/geoarrow` |
+| `@math.gl/geoarrow` | `@math.gl/geospatial` | `@math.gl/geospatial/geoarrow-utils` |
 | `@math.gl/geoid` | `@math.gl/earth` | `@math.gl/earth` |
 | `@math.gl/sun` | `@math.gl/earth` | `@math.gl/earth/sun` |
 | `@math.gl/timezone` | `@math.gl/earth` | `@math.gl/earth/timezone` |

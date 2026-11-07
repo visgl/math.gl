@@ -55,7 +55,8 @@
     "check:tasks": "node modules/core/scripts/check-tasks.mjs",
     "citations:generate": "node scripts/citations/check.mjs --write",
     "check:citations": "node scripts/citations/check.mjs && node --test scripts/citations/*.test.mjs",
-    "check:arrow": "node modules/core/scripts/check-arrow.mjs"
+    "check:arrow": "node modules/core/scripts/check-arrow.mjs",
+    "check:geoarrow-api": "node modules/geospatial/scripts/geoarrow/check-arrow-api.mjs"
   },
   "devDependencies": {
     "@citation-js/core": "^0.9.0",

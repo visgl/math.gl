@@ -17,8 +17,8 @@ import {
   sliceGeoArrowColumn,
   tessellateGeoArrowPolygons,
   type GeoArrowGeometryValue
-} from '@math.gl/geospatial/geoarrow/index';
-import {materializeGeoArrowRows} from '@math.gl/geospatial/geoarrow/layout';
+} from '@math.gl/geospatial/geoarrow-utils/index';
+import {materializeGeoArrowRows} from '@math.gl/geospatial/geoarrow-utils/layout';
 
 test('coordinate mapping, into mapping and layout conversion are deterministic', () => {
   const source = makeGeoArrowColumnFromGeometryRows(
@@ -518,7 +518,7 @@ test('bounds, mappings and limits cover sparse physical descriptors', () => {
     values: new Float64Array(values),
     validity: validity ? {values: validity} : undefined
   });
-  const box: import('@math.gl/geospatial/geoarrow/types').GeoArrowColumn = {
+  const box: import('@math.gl/geospatial/geoarrow-utils/types').GeoArrowColumn = {
     encoding: 'geoarrow.box',
     dimension: 'xy',
     coordinateLayout: 'separated',

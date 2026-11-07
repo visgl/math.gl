@@ -6,7 +6,7 @@ import {readdir, readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 
 const packageRoot = new URL('../../', import.meta.url);
-const forbiddenReferences = ['@math.gl/geospatial/geoarrow', ['apache', 'arrow'].join('-')];
+const forbiddenReferences = ['@math.gl/geospatial/geoarrow-utils', ['apache', 'arrow'].join('-')];
 const manifest = JSON.parse(await readFile(new URL('package.json', packageRoot), 'utf8'));
 
 for (const section of ['dependencies', 'peerDependencies', 'optionalDependencies']) {

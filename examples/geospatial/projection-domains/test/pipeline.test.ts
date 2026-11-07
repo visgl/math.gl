@@ -9,7 +9,7 @@ import type {ProjectionName} from '../projections.ts';
 import {createDomain, projectGeometry} from '../pipeline.ts';
 import {clipToImage, createRasterMesh, sourceUV} from '../raster.ts';
 import type {RasterKind} from '../raster.ts';
-import {getGeoArrowTransferList} from '@math.gl/geospatial/geoarrow';
+import {getGeoArrowTransferList} from '@math.gl/geospatial/geoarrow-utils';
 
 test('clipping interpolates target positions at texture boundaries', () => {
   const clipped = clipToImage([

@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {GeoArrowBuilder} from '@math.gl/geospatial/geoarrow';
+import {GeoArrowBuilder} from '@math.gl/geospatial/geoarrow-utils';
 export function fixture() {
   // Clockwise spherical exterior rings for D3; no implicit winding conversion.
   return GeoArrowBuilder.build([

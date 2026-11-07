@@ -1,0 +1,111 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+
+export type {
+  GeoArrowArray,
+  GeoArrowArrayBase,
+  GeoArrowBox,
+  GeoArrowBounds,
+  GeoArrowColumn,
+  GeoArrowCoordinateLayout,
+  GeoArrowCoordinateMapper,
+  GeoArrowDenseUnion,
+  GeoArrowDenseUnionChild,
+  GeoArrowDimension,
+  GeoArrowEncoding,
+  GeoArrowFixedSizeList,
+  GeoArrowGeometryValue,
+  GeoArrowList,
+  GeoArrowNumericArray,
+  GeoArrowOffsets,
+  GeoArrowPrimitive,
+  GeoArrowSerialized,
+  GeoArrowStruct,
+  GeoArrowValidity
+} from './types';
+export {
+  getGeoArrowDimensionSize,
+  getGeoArrowEncodingForGeometry,
+  getGeoArrowGeometryType,
+  inferGeoArrowGeometryDimension,
+  mergeGeoArrowDimensions
+} from './types';
+
+export type {GeoArrowBatchView, GeoArrowRowView} from './views';
+export {iterateGeoArrowBatches, getGeoArrowRowView, concatenateGeoArrowColumns} from './views';
+
+export type {
+  GeoArrowColumnInspection,
+  GeoArrowValidationIssue,
+  GeoArrowValidationResult
+} from './layout';
+export {
+  getGeoArrowRowCount,
+  getGeoArrowTransferList,
+  getGeoArrowVertexCount,
+  inspectGeoArrowColumn,
+  isGeoArrowValueValid,
+  materializeGeoArrowRows,
+  sliceGeoArrowArray,
+  sliceGeoArrowColumn,
+  validateGeoArrowColumn,
+  visitGeoArrowCoordinates
+} from './layout';
+
+export type {
+  GeoArrowBuilderEncoding,
+  GeoArrowBuilderMeasurement,
+  GeoArrowBuilderModeOptions,
+  GeoArrowBuilderOptions,
+  GeoArrowColumnFromRowsOptions,
+  GeoArrowBuilderTarget
+} from './builder';
+export {
+  allocateGeoArrowBuilderTarget,
+  GeoArrowBuilder,
+  makeGeoArrowColumnFromGeometryRows
+} from './builder';
+
+export type {
+  ConvertGeoArrowColumnOptions,
+  GeoArrowResourceLimitOptions,
+  GeoArrowRingOrientation,
+  MapGeoArrowCoordinatesOptions,
+  RewindGeoArrowOptions
+} from './kernels';
+export {
+  assertGeoArrowResourceLimits,
+  convertGeoArrowColumn,
+  getGeoArrowBounds,
+  getGeoArrowRowBounds,
+  interleaveGeoArrowCoordinates,
+  mapGeoArrowCoordinates,
+  mapGeoArrowCoordinatesInto,
+  normalizeGeoArrowUnion,
+  rewindGeoArrow
+} from './kernels';
+
+export {
+  decodeGeoArrowWKB,
+  decodeGeoArrowWKT,
+  encodeGeoArrowWKB,
+  encodeGeoArrowWKT,
+  getGeoArrowWKBVertexCount
+} from './codecs';
+export type {DecodeGeoArrowWKBOptions} from './codecs';
+
+export type {
+  GeoArrowTessellation,
+  TessellateGeoArrowPolygonsOptions
+} from './tessellate';
+export {tessellateGeoArrowPolygons} from './tessellate';
+
+// Public named exports. Implementations remain in independently tree-shakable files.
+export {prepareGeoArrowTransfer} from './worker';
+export type {GeoArrowTransfer} from './worker';
+
+export {streamGeoArrow} from './stream';
+export type {GeoArrowGeometryStream, StreamGeoArrowOptions} from './stream';
+export {tessellateGeoArrowStream} from './stream-tessellate';
+export type {TessellateGeoArrowStreamOptions, GeoArrowStreamMesh} from './stream-tessellate';

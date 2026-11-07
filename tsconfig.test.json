@@ -35,8 +35,8 @@
       "@math.gl/geospatial/projection": [
         "./modules/geospatial/src/projection/index.ts"
       ],
-      "@math.gl/geospatial/geoarrow": [
-        "./modules/geospatial/src/geoarrow/index.ts"
+      "@math.gl/geospatial/geoarrow-utils": [
+        "./modules/geospatial/src/geoarrow-utils/index.ts"
       ],
       "@math.gl/geospatial/crs/projjson.schema.json": [
         "./modules/geospatial/src/crs/projjson.schema.json"
@@ -704,11 +704,11 @@
       "@math.gl/geospatial/wkb/*": [
         "./modules/geospatial/src/wkb/*"
       ],
-      "@math.gl/geospatial/geoarrow/test/*": [
+      "@math.gl/geospatial/geoarrow-utils/test/*": [
         "./modules/geospatial/test/geoarrow/*"
       ],
-      "@math.gl/geospatial/geoarrow/*": [
-        "./modules/geospatial/src/geoarrow/*"
+      "@math.gl/geospatial/geoarrow-utils/*": [
+        "./modules/geospatial/src/geoarrow-utils/*"
       ],
       "@math.gl/earth/geoid/test/*": [
         "./modules/earth/test/geoid/*"

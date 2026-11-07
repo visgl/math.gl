@@ -28,7 +28,18 @@
         "label": "Core",
         "items": [
           "modules/core/utf8/README",
-          {"type": "category", "label": "Arrow utilities", "items": ["modules/core/arrow/README", "modules/core/arrow/indexed-arrow-table", "modules/core/arrow/mapped-arrow-table", "modules/core/arrow/arrow-schema-utils", "modules/core/arrow/split-arrow-buffers", "modules/core/arrow/arrow-table-transport"]},
+          {
+            "type": "category",
+            "label": "Arrow utilities",
+            "items": [
+              "modules/core/arrow/README",
+              "modules/core/arrow/indexed-arrow-table",
+              "modules/core/arrow/mapped-arrow-table",
+              "modules/core/arrow/arrow-schema-utils",
+              "modules/core/arrow/split-arrow-buffers",
+              "modules/core/arrow/arrow-table-transport"
+            ]
+          },
           {
             "type": "category",
             "label": "Guides",
@@ -415,14 +426,19 @@
           },
           {
             "type": "category",
-            "label": "@math.gl/geospatial/geoarrow",
+            "label": "@math.gl/geospatial/geoarrow-utils",
             "items": [
-              "modules/geospatial/geoarrow/api-reference/geoarrow"
+              "modules/geospatial/geoarrow-utils/api-reference/geoarrow"
             ],
             "link": {
               "type": "doc",
-              "id": "modules/geospatial/geoarrow/README"
+              "id": "modules/geospatial/geoarrow-utils/README"
             }
+          },
+          {
+            "type": "doc",
+            "id": "modules/geospatial/geoarrow/README",
+            "label": "@math.gl/geospatial/geoarrow"
           },
           {
             "type": "category",

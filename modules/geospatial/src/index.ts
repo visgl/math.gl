@@ -198,7 +198,7 @@ export {
   encodeGeoArrowWKT,
   getGeoArrowWKBVertexCount,
   tessellateGeoArrowPolygons
-} from './geoarrow/index';
+} from './geoarrow-utils/index';
 export type {
   GeoArrowArray,
   GeoArrowArrayBase,
@@ -239,9 +239,9 @@ export type {
   DecodeGeoArrowWKBOptions,
   GeoArrowTessellation,
   TessellateGeoArrowPolygonsOptions
-} from './geoarrow/index';
-export {prepareGeoArrowTransfer} from './geoarrow/worker';
-export type {GeoArrowTransfer} from './geoarrow/worker';
+} from './geoarrow-utils/index';
+export {prepareGeoArrowTransfer} from './geoarrow-utils/worker';
+export type {GeoArrowTransfer} from './geoarrow-utils/worker';
 export {GEOSPATIAL_FUNCTION_LIBRARY} from './expressions';
 export {
   createOrthographicCutAtlas,
@@ -409,13 +409,13 @@ export type {
 export {stitchTerrainMeshEdges} from './terrain/mesh-stitch';
 export type {TerrainSeamMesh, TerrainMeshStitchOptions} from './terrain/mesh-stitch';
 
-export {streamGeoArrow, tessellateGeoArrowStream} from './geoarrow/index';
+export {streamGeoArrow, tessellateGeoArrowStream} from './geoarrow-utils/index';
 export type {
   GeoArrowGeometryStream,
   StreamGeoArrowOptions,
   TessellateGeoArrowStreamOptions,
   GeoArrowStreamMesh
-} from './geoarrow/index';
+} from './geoarrow-utils/index';
 export {weldTerrainMixedContourTiles} from './terrain/contour-mixed-weld';
 export type {
   TerrainMixedContourTile,

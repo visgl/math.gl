@@ -1024,6 +1024,11 @@
       "types": "./dist/turf.d.ts",
       "import": "./dist/turf.js",
       "require": "./dist/turf.cjs"
+    },
+    "./geoarrow-utils": {
+      "types": "./dist/geoarrow-utils/index.d.ts",
+      "import": "./dist/geoarrow-utils/index.js",
+      "require": "./dist/geoarrow-utils/index.cjs"
     }
   },
   "files": [
@@ -1053,5 +1058,13 @@
     "@turf/distance": "^7.2.0",
     "proj4": "2.22.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "peerDependencies": {
+    "apache-arrow": ">=17.0.0"
+  },
+  "peerDependenciesMeta": {
+    "apache-arrow": {
+      "optional": true
+    }
+  }
 }
