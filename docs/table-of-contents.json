@@ -27,6 +27,7 @@
         "type": "category",
         "label": "Core",
         "items": [
+          "modules/core/utf8/README",
           {
             "type": "category",
             "label": "Guides",
