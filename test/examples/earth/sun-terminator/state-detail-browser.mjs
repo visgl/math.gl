@@ -13,6 +13,7 @@ for (let i = 0; i < png.data.length; i += 4) {
 }
 const payload = PNG.sync.write(png);
 const browser = await chromium.launch({
+  executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH,
   headless: true,
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
 });

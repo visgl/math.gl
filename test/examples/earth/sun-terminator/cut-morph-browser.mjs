@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 const browser = await chromium.launch({
+  executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH,
   headless: true,
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
 });
