@@ -1,0 +1,64 @@
+/* SPDX-License-Identifier: MIT */
+/* SPDX-FileCopyrightText: Copyright (c) vis.gl contributors */
+.card {
+  background:
+    radial-gradient(circle at 95% 0, rgb(0 192 230 / 15%), transparent 24rem),
+    linear-gradient(145deg, #101e31, #0a1626);
+  border: 1px solid rgb(81 226 244 / 30%);
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 12%);
+  color: #f6f9fc;
+  margin: 1.5rem 0;
+  overflow: hidden;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.card .eyebrow {
+  color: #71d5e3;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+}
+
+.card h2 {
+  color: inherit;
+  font-size: clamp(1.8rem, 3.5vw, 2.7rem);
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+  margin: 0 0 1rem;
+}
+
+.card .description {
+  font-size: 1.15rem;
+  line-height: 1.55;
+  max-width: 48rem;
+}
+
+.card .detail {
+  color: #bac9d8;
+  max-width: 48rem;
+}
+
+.links {
+  border-top: 1px solid rgb(81 226 244 / 18%);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+}
+
+.links a {
+  align-items: center;
+  color: #91deeb;
+  display: inline-flex;
+  gap: 0.5rem;
+  min-height: 44px;
+}
+
+.links a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
