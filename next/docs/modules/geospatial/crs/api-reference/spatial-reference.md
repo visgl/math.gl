@@ -62,7 +62,7 @@ type UnresolvedCRSReference = Readonly<{
 }>;
 ```
 
-## `createSpatialReference()`[​](#createspatialreference "Direct link to createspatialreference")
+#### `createSpatialReference()`[​](#createspatialreference "Direct link to createspatialreference")
 
 Creates an immutable descriptor, supplying normalized defaults for omitted fields.
 
@@ -96,7 +96,7 @@ const spatialReference = createSpatialReference({
 });
 ```
 
-## `inferCRSRepresentation()`[​](#infercrsrepresentation "Direct link to infercrsrepresentation")
+#### `inferCRSRepresentation()`[​](#infercrsrepresentation "Direct link to infercrsrepresentation")
 
 Classifies a `CRSDefinition` using conservative syntax checks.
 
@@ -106,7 +106,7 @@ inferCRSRepresentation(definition: ReadonlyCRSDefinition): SpatialReferenceRepre
 
 It recognizes PROJJSON objects, common WKT roots, PROJ strings with a `proj` parameter, authority-like identifiers, OGC URNs, and URLs. Other strings are returned as `opaque`. It does not validate syntax, resolve an identifier, or establish semantic equivalence.
 
-## `normalizeCRSIdentifier()`[​](#normalizecrsidentifier "Direct link to normalizecrsidentifier")
+#### `normalizeCRSIdentifier()`[​](#normalizecrsidentifier "Direct link to normalizecrsidentifier")
 
 Changes known spellings of one authority CRS identifier to the form `AUTHORITY:CODE`.
 

@@ -1,4 +1,10 @@
-# Web Mercator
+# @math.gl/web-mercator
+
+:::caution Deprecated
+
+`@math.gl/web-mercator` is considered deprecated. Prefer [`@math.gl/geospatial/projection`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) for new work.
+
+:::
 
 `@math.gl/web-mercator` provides a map camera and coordinate utilities for spherical Web Mercator. Use `WebMercatorViewport` to convert longitude/latitude positions to screen pixels and back with zoom, pitch, and bearing.
 

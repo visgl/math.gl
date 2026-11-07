@@ -1,3 +1,3 @@
-## [📄️Transformations](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/transformations.md)
+## [📄️3D Coordinate Systems](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/coordinate-systems.md)
 
-[Use Matrix4 to combine translation, rotation, and scale. Use a quaternion when only rotation is needed. Core vector methods mutate their receiver; matrix transform methods write to a supplied result or allocate a new array.](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/transformations.md)
+[Choose coordinates that fit the operation you need. Core provides Cartesian vectors, spherical coordinates, and homogeneous coordinates for matrix transforms.](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/coordinate-systems.md)

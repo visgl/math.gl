@@ -18,6 +18,8 @@
 
 ## Mutating operations[​](#mutating-operations "Direct link to Mutating operations")
 
-`normalize()` scales a nonzero vector to unit magnitude and leaves a zero vector unchanged. `multiply(...vectors)` and `divide(...vectors)` operate component by component.
+#### `normalize()`[​](#normalize "Direct link to normalize")
+
+Scales a nonzero vector to unit magnitude and leaves a zero vector unchanged. `multiply(...vectors)` and `divide(...vectors)` operate component by component.
 
 Copying, addition, subtraction, scaling, interpolation, comparisons, and validation are documented on [MathArray](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/math-array.md). Mutating methods return the receiver.

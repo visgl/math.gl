@@ -100,7 +100,9 @@ The eight octants cover the entire normal sphere. Each face uses dimensionless n
 
 Constructor options follow the [latitude-cut profile](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/latitude-geographic-cuts.md), without `latitudeRange` or `seamLongitude`. WGS84 is the default; geodesics use `0.99 <= b/a <= 1.01`, rhumbs `0.5 <= b/a <= 2`, and axes are in `[1e-60, 1e60]`. `linearLongitude` retains supplied/shortest semantics. Input longitude limits, explicit polar-cap selection, simple outer-plus-contained-hole rings, winding, closure and work limits retain the [seam contracts](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geographic-seams.md). Global caps are explicit; arbitrary complements and polygon repair are not inferred.
 
-`clipPolygon(inputs)` returns `{chart, rings}` components. Rings have:
+#### `clipPolygon(inputs)`[​](#clippolygoninputs "Direct link to clippolygoninputs")
+
+Returns `{chart, rings}` components. Rings have:
 
 * `positions`: explicitly closed packed longitude/latitude/attribute coordinates.
 * `normals`: canonical unit normals, stride three, including closure.
@@ -111,7 +113,9 @@ Descriptors are either `source` with original ring/edge indices and distance fra
 
 Shared intersections are computed once for the whole operation. Matching IDs have identical normal coordinates across charts, and shared generated arcs retain the same circle parameterization with opposite orientation. This is per-feature atlas consistency, not persistent IDs or dataset-wide shared-border reconciliation across separate calls. Outer orientation follows the original input; holes have opposite orientation. Holes meeting a cut become notches; concave inputs can split into multiple components. Nested retained islands become separate components, with holes assigned to their immediate containing component. A chart completely covered by the input receives a generated closed boundary even when no original edge enters it.
 
-`clipPolyline(positions, {longitudeTurns?})` retains source order and intervals, including repeated wound crossings. A coincident line is owned by the first eligible chart in declaration order; polygon boundaries retain their filled side. Isolated contacts emit no segment. A retained single point has no edges.
+#### `clipPolyline(positions, {longitudeTurns?})`[​](#clippolylinepositions-longitudeturns "Direct link to clippolylinepositions-longitudeturns")
+
+Retains source order and intervals, including repeated wound crossings. A coincident line is owned by the first eligible chart in declaration order; polygon boundaries retain their filled side. Isolated contacts emit no segment. A retained single point has no edges.
 
 For `size > 2`, supply `boundaryAttributes` with exactly `size - 2` finite values. Original source attributes follow their original parameterization. Generated junction/auxiliary vertices use the declared boundary values, and generated arcs interpolate between their endpoints. These values do not model terrain heights.
 

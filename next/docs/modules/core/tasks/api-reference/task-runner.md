@@ -20,15 +20,33 @@ Type fields are `input`, `output`, optional `options`, `initialization`, `state`
 
 `new TaskRunner({maxConcurrency?: number})` owns independent execution capacity. Default concurrency is one; values must be positive safe integers. No shared farm configuration is mutated. Capacity includes initializing and explicitly retained handles. Waiting acquisitions honor `signal` and are rejected when the runner closes.
 
-| Method                                            | Result                       | Contract                                                                      |
-| ------------------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------- |
-| `runTaskSync(task, input, request?)`              | `Output`                     | Immediate main-thread execution of synchronous hooks                          |
-| `runTask(task, input, request?)`                  | `Promise<Output>`            | Temporary state for one atomic call                                           |
-| `runTasks(task, inputs, request?)`                | `AsyncIterable<Output>`      | Independent calls, ordered output, per-slot state                             |
-| `runTaskInBatches(task, inputs, request?)`        | `AsyncIterable<BatchOutput>` | One streaming processor session                                               |
-| `initializeTask(task, initialization, controls?)` | `Promise<InitializedTask>`   | State retained until close/termination                                        |
-| `close()`                                         | `Promise<void>`              | Reject waiting acquisitions, drain owned handles, destroy state, stop workers |
-| `terminate(reason?)`                              | `Promise<void>`              | Abort handles and force-stop workers; local execution must settle             |
+#### `runTaskSync(task, input, request?)`[​](#runtasksynctask-input-request "Direct link to runtasksynctask-input-request")
+
+Returns `Output`. Immediate main-thread execution of synchronous hooks.
+
+#### `runTask(task, input, request?)`[​](#runtasktask-input-request "Direct link to runtasktask-input-request")
+
+Returns `Promise<Output>`. Temporary state for one atomic call.
+
+#### `runTasks(task, inputs, request?)`[​](#runtaskstask-inputs-request "Direct link to runtaskstask-inputs-request")
+
+Returns `AsyncIterable<Output>`. Independent calls, ordered output, per-slot state.
+
+#### `runTaskInBatches(task, inputs, request?)`[​](#runtaskinbatchestask-inputs-request "Direct link to runtaskinbatchestask-inputs-request")
+
+Returns `AsyncIterable<BatchOutput>`. One streaming processor session.
+
+#### `initializeTask(task, initialization, controls?)`[​](#initializetasktask-initialization-controls "Direct link to initializetasktask-initialization-controls")
+
+Returns `Promise<InitializedTask>`. State retained until close/termination.
+
+#### `close()`[​](#close "Direct link to close")
+
+Returns `Promise<void>`. Reject waiting acquisitions, drain owned handles, destroy state, stop workers.
+
+#### `terminate(reason?)`[​](#terminatereason "Direct link to terminatereason")
+
+Returns `Promise<void>`. Abort handles and force-stop workers; local execution must settle.
 
 `request` becomes required when the descriptor requires application options or initialization. Options are inferred from the invoked hook: `process` for atomic calls and `processInBatches` for streaming calls, including on initialized handles. Iterable methods accept synchronous or asynchronous inputs and start on first iteration. `runTasks` concurrency defaults to one, must not exceed runner capacity, and is an upper bound under contention. Buffered ordered results count toward that bound. Failure stops further consumption when observed in input order; already-yielded results remain delivered. Input cleanup is best effort for blocked asynchronous producers.
 

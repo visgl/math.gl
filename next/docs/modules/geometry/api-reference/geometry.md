@@ -42,4 +42,10 @@ const geometry = new Geometry({
 
 ## Mesh data[​](#mesh-data "Direct link to Mesh data")
 
-`getVertexCount()` returns the draw count (the index count for indexed meshes). `getAttributes()` returns named attributes and the optional indices record. The same data is available through `attributes`, `indices`, `topology` and `vertexCount` properties. `userData` stores application metadata. `unpackIndexedGeometry()` expands indexed attributes into non-indexed arrays.
+#### `getVertexCount()`[​](#getvertexcount "Direct link to getvertexcount")
+
+Returns the draw count (the index count for indexed meshes).
+
+#### `getAttributes()`[​](#getattributes "Direct link to getattributes")
+
+Returns named attributes and the optional indices record. The same data is available through `attributes`, `indices`, `topology` and `vertexCount` properties. `userData` stores application metadata. `unpackIndexedGeometry()` expands indexed attributes into non-indexed arrays.

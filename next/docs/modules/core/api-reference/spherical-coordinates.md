@@ -27,11 +27,15 @@ The constructor accepts `phi`, `theta`, `radius`, `bearing`, `pitch`, `altitude`
 | `makeSafe()`              | Clamp phi away from 0 and π                                                     |
 | `check()`                 | Require finite angles and a positive radius; throws independently of debug mode |
 
-`clone()` and `copy()` do not copy `radiusScale`. Set it explicitly when preserving a custom geographic scale.
+#### `clone()`[​](#clone "Direct link to clone")
+
+And `copy()` do not copy `radiusScale`. Set it explicitly when preserving a custom geographic scale.
 
 ## Vector conversions[​](#vector-conversions "Direct link to Vector conversions")
 
-`fromVector3(vector)` reads a structural `Vector3Like` value:
+#### `fromVector3(vector)`[​](#fromvector3vector "Direct link to fromvector3vector")
+
+Reads a structural `Vector3Like` value:
 
 ```
 radius = hypot(x, y, z)
@@ -57,6 +61,8 @@ These legacy formulas are not a general inverse pair. For example, `[0, 1, 0]` c
 
 `bearing` reads `180 - degrees(phi)` and `pitch` reads `degrees(theta)`; both are writable. Read-only `longitude`/`lng` return `degrees(phi)`, while `latitude`/`lat` return `degrees(theta)`.
 
-`fromLngLatZ([longitude, latitude, height])` sets `phi` from latitude, `theta` from longitude, and `radius = 1 + height / radiusScale`. The read-only `z` accessor returns `(radius - 1) * radiusScale`; the default scale is 6,371,000. These geographic aliases also use legacy conventions and are not inverse longitude/latitude accessors.
+#### `fromLngLatZ([longitude, latitude, height])`[​](#fromlnglatzlongitude-latitude-height "Direct link to fromlnglatzlongitude-latitude-height")
+
+Sets `phi` from latitude, `theta` from longitude, and `radius = 1 + height / radiusScale`. The read-only `z` accessor returns `(radius - 1) * radiusScale`; the default scale is 6,371,000. These geographic aliases also use legacy conventions and are not inverse longitude/latitude accessors.
 
 Use [geospatial](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md) for ellipsoidal coordinates and [projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) for CRS conversion.

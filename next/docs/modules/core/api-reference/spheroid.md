@@ -32,11 +32,11 @@ cartesianToSpheroid(point, shape);
 
 ## Functions[​](#functions "Direct link to Functions")
 
-### spheroidToCartesian(point, geometry, result = point)[​](#spheroidtocartesianpoint-geometry-result--point "Direct link to spheroidToCartesian(point, geometry, result = point)")
+#### `spheroidToCartesian(point, geometry, result = point)`[​](#spheroidtocartesianpoint-geometry-result--point "Direct link to spheroidtocartesianpoint-geometry-result--point")
 
 Reads longitude/latitude/height from `point.x/y/z` and writes Cartesian XYZ into `result.x/y/z`. Angles are in radians; axes, height and Cartesian coordinates use the same distance unit. Latitude is not wrapped or restricted by this low-level function; the CRS adapter enforces its own domain.
 
-### cartesianToSpheroid(point, geometry, result = point)[​](#cartesiantospheroidpoint-geometry-result--point "Direct link to cartesianToSpheroid(point, geometry, result = point)")
+#### `cartesianToSpheroid(point, geometry, result = point)`[​](#cartesiantospheroidpoint-geometry-result--point "Direct link to cartesiantospheroidpoint-geometry-result--point")
 
 Reads Cartesian XYZ from `point.x/y/z` and writes longitude radians, latitude radians and ellipsoidal height into `result.x/y/z`. The sphere inverse is analytic. The ordinary oblate path retains 30 Hannover updates; a surface/exterior fallback uses at most 96 safeguarded updates. Very flat spheroids use the exterior fallback directly. An ordinary failed iteration followed by fallback therefore has a maximum of 126 updates. Exact poles use longitude zero.
 

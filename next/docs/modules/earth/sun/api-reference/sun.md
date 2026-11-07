@@ -151,7 +151,9 @@ The generator verifies the archive SHA-256 and parses its numeric coefficient ar
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
-`getCloudLighting(sunAltitude, options?)` estimates incident sunlight, ambient skylight, and a cloud sample's single-scattered color. A spherical Earth lets elevated clouds remain sunlit after sunset at ground level and become sunlit before ground sunrise. Atmospheric extinction warms the incident sunlight; neutral cloud scattering preserves that tint rather than forcing every cloud white.
+#### `getCloudLighting(sunAltitude, options?)`[​](#getcloudlightingsunaltitude-options "Direct link to getcloudlightingsunaltitude-options")
+
+Estimates incident sunlight, ambient skylight, and a cloud sample's single-scattered color. A spherical Earth lets elevated clouds remain sunlit after sunset at ground level and become sunlit before ground sunrise. Atmospheric extinction warms the incident sunlight; neutral cloud scattering preserves that tint rather than forcing every cloud white.
 
 ```
 import {getSunPosition, getCloudLighting} from '@math.gl/earth/sun';

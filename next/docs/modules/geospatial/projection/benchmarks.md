@@ -56,7 +56,7 @@ Synchronous coordinate batches occupy the calling thread. Partition large jobs o
 
 Compare the same projection, direction, coordinate distribution, precision and record width. Keep browser and Node measurements separate, and rerun noisy cases. A faster median does not imply greater accuracy or a wider valid coordinate domain.
 
-The [projection scorecard](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/scorecard.md) records a dated snapshot of accuracy, throughput, cold startup, allocation and memory evidence. Its [measurement methodology](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/scorecard-methodology.md) explains source fingerprints, raw samples and the limits of each metric. Check [independent validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/independent-validation.md) when selecting an algorithm for a region or datum transformation.
+The [projection scorecard](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/scorecard.md) records a dated snapshot of accuracy, throughput, cold startup, allocation and memory evidence. Its [measurement methodology](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/scorecard.md) explains source fingerprints, raw samples and the limits of each metric. Check [independent validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/independent-validation.md) when selecting an algorithm for a region or datum transformation.
 
 ## Reproduce[​](#reproduce "Direct link to Reproduce")
 

@@ -22,15 +22,15 @@ getGeographicTileRanges([170, -10, -170, 10], 3);
 
 The helpers define an equal-angle geographic quadtree: one world tile at level zero, with `2 ** level` columns and rows. X increases eastward from longitude -180; Y increases southward from latitude 90. Levels are integers from 0 through 30. Coordinates and bounds are in degrees. This grid is not Web Mercator XYZ and does not claim compatibility with a particular tile protocol's root layout.
 
-## getGeographicTile(longitude, latitude, level)[​](#getgeographictilelongitude-latitude-level "Direct link to getGeographicTile(longitude, latitude, level)")
+#### `getGeographicTile(longitude, latitude, level)`[​](#getgeographictilelongitude-latitude-level "Direct link to getgeographictilelongitude-latitude-level")
 
 Returns `{x, y, level}` for a finite longitude in \[-180, 180] and latitude in \[-90, 90]. Interior grid edges belong to the tile east or south of the edge. The outer east and south edges belong to the last column and row. Longitude -180 addresses the first column; +180 addresses the last. Longitudes are not implicitly normalized.
 
-## getGeographicTileBounds(tile)[​](#getgeographictileboundstile "Direct link to getGeographicTileBounds(tile)")
+#### `getGeographicTileBounds(tile)`[​](#getgeographictileboundstile "Direct link to getgeographictileboundstile")
 
 Returns `[west, south, east, north]`. Tile coordinates must be integers inside the level's grid. Bounds never cross the antimeridian and can feed geographic requests or conversion to Cartesian bounds using `makeOBBFromRegion`.
 
-## getGeographicTileRanges(bounds, level)[​](#getgeographictilerangesbounds-level "Direct link to getGeographicTileRanges(bounds, level)")
+#### `getGeographicTileRanges(bounds, level)`[​](#getgeographictilerangesbounds-level "Direct link to getgeographictilerangesbounds-level")
 
 Returns at most two disjoint, inclusive integer ranges `{minX, maxX, minY, maxY}` sorted by minX. Input `[west, south, east, north]` uses the same degree bounds contract as `splitGlobeBounds`: west > east indicates an antimeridian crossing; \[-180, south, 180, north] covers all longitudes. Wrapped ranges that overlap or are adjacent on coarse grids are merged. Empty seam fragments are omitted when the query has positive longitude extent.
 

@@ -18,7 +18,13 @@ const midpoint = geodesic.line(40, -75, route.azi1).position(route.s12 / 2);
 
 Coordinates are **latitude, longitude**, in degrees. Azimuths are degrees clockwise from north. Distances and reduced lengths use the axes' units (metres for WGS84). The constructor snapshots finite positive axes. For compatibility, `semiMajorAxis` means equatorial radius and `semiMinorAxis` polar radius, including prolate geodesics where the polar radius is larger. Triaxial geometry is unsupported; no CRS or datum transformation is inferred.
 
-`inverse(lat1, lon1, lat2, lon2)` returns the shortest geodesic. `direct(latitude, longitude, azimuth, distance)` evaluates a geodesic endpoint. `line(latitude, longitude, azimuth)` prepares a reusable line whose `position(distance)` accepts signed finite distances. `arcDirect(latitude, longitude, azimuth, arc)` and `line(...).arcPosition(arc)` use signed auxiliary-sphere arc degrees instead of distance. Multi-circuit direct routes are not necessarily shortest paths.
+#### `inverse(lat1, lon1, lat2, lon2)`[​](#inverselat1-lon1-lat2-lon2 "Direct link to inverselat1-lon1-lat2-lon2")
+
+Returns the shortest geodesic.
+
+#### `direct(latitude, longitude, azimuth, distance)`[​](#directlatitude-longitude-azimuth-distance "Direct link to directlatitude-longitude-azimuth-distance")
+
+Evaluates a geodesic endpoint. `line(latitude, longitude, azimuth)` prepares a reusable line whose `position(distance)` accepts signed finite distances. `arcDirect(latitude, longitude, azimuth, arc)` and `line(...).arcPosition(arc)` use signed auxiliary-sphere arc degrees instead of distance. Multi-circuit direct routes are not necessarily shortest paths.
 
 `inverse`, `direct`, `arcDirect`, and `line` accept a final options argument (on `line`, options are snapshotted when creating the line). Set `{unrollLongitude: true}` to preserve longitude winding; the default normalizes longitude to \[-180, 180]. For example:
 

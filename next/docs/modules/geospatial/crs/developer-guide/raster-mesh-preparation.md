@@ -1,4 +1,4 @@
-# Preparing raster meshes for projection
+# Projecting Raster Meshes
 
 Applications can compose math.gl's existing geometry and projection interfaces to prepare raster meshes with UVs and feature identity. The [runnable example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/raster-mesh-preparation) uses native projections; the same preparation function accepts an external engine's **synchronous** transform after its asynchronous initialization. No projection engine is imported by the recipe's geometry helper. The general projection interface is **projection-engine agnostic**. For an async-only engine, use the [adaptive asynchronous inverse recipe](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains/warp#asynchronous-frontiers-and-proj-wasm): refinement requests new sample batches as needed. A one-time preprocessing pass is insufficient when refinement introduces new vertices. The [real proj-wasm integration](https://github.com/visgl/math.gl/tree/master/examples/geospatial/proj-wasm-crs) reuses an operation across those frontiers without changing synchronous converter semantics.
 

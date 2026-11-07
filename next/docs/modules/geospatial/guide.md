@@ -1,3 +1,3 @@
-## [📄️GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/geoarrow.md)
+## [📄️Geospatial terminology](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/terminology.md)
 
-[GeoArrow stores geometry in typed-array buffers rather than one JavaScript object per row. math.gl describes those buffers with plain TypeScript objects, so the same geometry kernels can work with Apache Arrow, a loader, or application-owned storage without depending on a table runtime.](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/geoarrow.md)
+[Geospatial code combines several kinds of geometry: coordinates in a reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/terminology.md)

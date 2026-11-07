@@ -75,9 +75,13 @@ const normal = tangentPlane.projectPointToNearestOnPlane(position);
 const nearestFacingSurface = tangentPlane.projectPointOntoEllipsoid(normal, 'normal');
 ```
 
-`projectPointRadiallyOntoPlane(cartesian, result?: Vector2)` intersects the outward ray from the ellipsoid center with the tangent plane. It differs from orthogonal projection along the plane normal. Scaling a source vector by a positive factor does not change its radial projection. The zero vector, back-facing rays and near-horizon rays (normalized direction dot normal ≤ `1e-14`) return `undefined` without changing the result. Unrepresentable projected coordinates also fail.
+#### `projectPointRadiallyOntoPlane(cartesian, result?: Vector2)`[​](#projectpointradiallyontoplanecartesian-result-vector2 "Direct link to projectpointradiallyontoplanecartesian-result-vector2")
 
-`projectPointOntoEllipsoid(point, mode = 'radial', result?: Vector3)` lifts a two-component local point onto the snapshotted ellipsoid:
+Intersects the outward ray from the ellipsoid center with the tangent plane. It differs from orthogonal projection along the plane normal. Scaling a source vector by a positive factor does not change its radial projection. The zero vector, back-facing rays and near-horizon rays (normalized direction dot normal ≤ `1e-14`) return `undefined` without changing the result. Unrepresentable projected coordinates also fail.
+
+#### `projectPointOntoEllipsoid(point, mode = 'radial', result?: Vector3)`[​](#projectpointontoellipsoidpoint-mode--radial-result-vector3 "Direct link to projectpointontoellipsoidpoint-mode--radial-result-vector3")
+
+Lifts a two-component local point onto the snapshotted ellipsoid:
 
 | Mode       | Surface mapping                                                                                                                                                                |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -90,7 +94,9 @@ All scalar inputs must have the exact component count and finite values; malform
 
 ## Packed projection[​](#packed-projection "Direct link to Packed projection")
 
-`projectPointsFlat(input, mode = 'normal', output?: Float64Array)` maps packed XYZ positions to packed east/north positions and returns `{positions, valid}`:
+#### `projectPointsFlat(input, mode = 'normal', output?: Float64Array)`[​](#projectpointsflatinput-mode--normal-output-float64array "Direct link to projectpointsflatinput-mode--normal-output-float64array")
+
+Maps packed XYZ positions to packed east/north positions and returns `{positions, valid}`:
 
 * `positions` is the supplied output or a new `Float64Array`, with exactly two components per point.
 * `valid` is a new `Uint8Array`, with one byte per input point. A successful point has value 1.

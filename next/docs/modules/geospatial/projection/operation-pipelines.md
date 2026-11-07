@@ -266,7 +266,9 @@ Eager plugin lists provide synchronous `project`, `unproject`, `projectFlat` and
 
 ## Reusable scalar outputs[​](#reusable-scalar-outputs "Direct link to Reusable scalar outputs")
 
-`projectTo(coordinate, output, epoch?)` and `unprojectTo(coordinate, output, epoch?)` reuse a preallocated number array, `Float32Array` or `Float64Array` and return that exact output. Their bound `*Sync` counterparts never import and require preloaded implementations. Epochs stay explicit; M is never used as time:
+#### `projectTo(coordinate, output, epoch?)`[​](#projecttocoordinate-output-epoch "Direct link to projecttocoordinate-output-epoch")
+
+And `unprojectTo(coordinate, output, epoch?)` reuse a preallocated number array, `Float32Array` or `Float64Array` and return that exact output. Their bound `*Sync` counterparts never import and require preloaded implementations. Epochs stay explicit; M is never used as time:
 
 ```
 const output = new Float64Array(4);

@@ -75,11 +75,11 @@ getTileBounds(anisotropic, 1, 0); // [200512, 4599232, 201024, 4600000]
 
 Both values are positive magnitudes. `cornerOfOrigin` determines row direction. This supports axis-aligned rectangular pixels, without rotation or skew. Optional coalescence bands multiply the horizontal footprint independently. Bounds, inverse indexing, range queries, and floating-point extent validation all use each axis's own resolution.
 
-## validateTileMatrix(matrix)[​](#validatetilematrixmatrix "Direct link to validateTileMatrix(matrix)")
+#### `validateTileMatrix(matrix)`[​](#validatetilematrixmatrix "Direct link to validatetilematrixmatrix")
 
 Throws `RangeError` for malformed geometry, nonfinite extents or tile spans too small to distinguish at the origin or far edge in floating-point coordinates. All geometry utilities validate the matrix.
 
-## validateTileMatrixSet(matrixSet, limits?)[​](#validatetilematrixsetmatrixset-limits "Direct link to validateTileMatrixSet(matrixSet, limits?)")
+#### `validateTileMatrixSet(matrixSet, limits?)`[​](#validatetilematrixsetmatrixset-limits "Direct link to validatetilematrixsetmatrixset-limits")
 
 Validates a complete set: a nonempty CRS string, an array of valid matrices and unique native IDs. The CRS is opaque; this does not establish that a projection engine supports it. Unordered levels and an empty matrix array are valid. Inputs are not sorted or mutated.
 
@@ -97,11 +97,11 @@ validateTileMatrixSet(matrixSet, [{
 
 Malformed sets or coverage throw `RangeError`. Partial service metadata belongs in the adapter's own metadata representation until complete geometry is available.
 
-## validateTileMatrixLimits(matrix, limits)[​](#validatetilematrixlimitsmatrix-limits "Direct link to validateTileMatrixLimits(matrix, limits)")
+#### `validateTileMatrixLimits(matrix, limits)`[​](#validatetilematrixlimitsmatrix-limits "Direct link to validatetilematrixlimitsmatrix-limits")
 
 Validates the matrix geometry and one inclusive base-grid coverage rectangle. Bounds must be nonnegative safe integers, minima must not exceed maxima, and maxima must fit matrix dimensions. An alias-only column interval is valid for a coalesced row; limits need not start on a canonical column. Malformed geometry or limits throw `RangeError`. Inputs are not mutated.
 
-## resolveTileIndex(matrix, column, row, limits?)[​](#resolvetileindexmatrix-column-row-limits "Direct link to resolveTileIndex(matrix, column, row, limits?)")
+#### `resolveTileIndex(matrix, column, row, limits?)`[​](#resolvetileindexmatrix-column-row-limits "Direct link to resolvetileindexmatrix-column-row-limits")
 
 Resolves integer base-grid indices to `[canonicalColumn, row]`. Returns `null` for noninteger, nonfinite, outside-matrix or unavailable indices. Geometry and supplied limits are validated first, even when the queried indices are invalid. Rows retain their native numbering for both origin corners.
 
@@ -123,17 +123,17 @@ resolveTileIndex(coalesced, 1, 0, limits); // [0, 0]
 
 The function accepts tile indices; `getTileIndex` instead maps a coordinate to a containing tile. It does not wrap indices, interpret CRS identifiers, infer parents or fetch content.
 
-## getTileBounds(matrix, column, row)[​](#gettileboundsmatrix-column-row "Direct link to getTileBounds(matrix, column, row)")
+#### `getTileBounds(matrix, column, row)`[​](#gettileboundsmatrix-column-row "Direct link to gettileboundsmatrix-column-row")
 
 Returns `TileMatrixBounds`, a readonly `[minX, minY, maxX, maxY]` tuple in matrix coordinates. Indices must be integers inside the matrix; out-of-range indices throw `RangeError`.
 
-## getTileIndex(matrix, coordinate)[​](#gettileindexmatrix-coordinate "Direct link to getTileIndex(matrix, coordinate)")
+#### `getTileIndex(matrix, coordinate)`[​](#gettileindexmatrix-coordinate "Direct link to gettileindexmatrix-coordinate")
 
 Returns `[column, row]`, or `null` for nonfinite coordinates or a point outside the matrix. Intervals are half-open in the direction of increasing column/row: the origin edge is included and the opposite outer edge is excluded. A shared edge belongs to the following column or row. Indices never wrap or clamp.
 
 Lookup compares the same computed edges as `getTileBounds()`, preserving edge ownership with fractional resolutions. After validation, lookup takes logarithmic time in matrix dimensions plus a scan of declared row bands. Validation sorts a copy of the bands, using space proportional to their count.
 
-## getTileRange(matrix, bounds, limits?)[​](#gettilerangematrix-bounds-limits "Direct link to getTileRange(matrix, bounds, limits?)")
+#### `getTileRange(matrix, bounds, limits?)`[​](#gettilerangematrix-bounds-limits "Direct link to gettilerangematrix-bounds-limits")
 
 For regular matrices, returns one compact, inclusive `TileMatrixLimits` rectangle, or `null` for no intersection. Matrices declaring coalescence require `getTileRanges` instead. The result has `minTileColumn`, `maxTileColumn`, `minTileRow` and `maxTileRow` fields. Queries are clipped to the matrix and, when supplied, the coverage limits. Tiles are not enumerated.
 
@@ -143,11 +143,11 @@ Positive-width/height queries include tiles with positive overlap on that axis a
 
 Query time is logarithmic in matrix dimensions, with constant space. Applications decide how to enumerate the returned rectangle; even a compact range can describe many tiles.
 
-## isTileIndexInRange(matrix, column, row, limits?)[​](#istileindexinrangematrix-column-row-limits "Direct link to isTileIndexInRange(matrix, column, row, limits?)")
+#### `isTileIndexInRange(matrix, column, row, limits?)`[​](#istileindexinrangematrix-column-row-limits "Direct link to istileindexinrangematrix-column-row-limits")
 
 Checks integer indices and optional inclusive `TileMatrixLimits`. Malformed limits throw `RangeError`. Limits must fit inside matrix dimensions and describe a rectangular coverage subset. They do not guarantee that a tile exists on a server. This predicate checks the supplied base index against limits literally. Use `resolveTileIndex` for alias-aware logical tile availability.
 
-## selectTileMatrix(matrixSet, targetResolution)[​](#selecttilematrixmatrixset-targetresolution "Direct link to selectTileMatrix(matrixSet, targetResolution)")
+#### `selectTileMatrix(matrixSet, targetResolution)`[​](#selecttilematrixmatrixset-targetresolution "Direct link to selecttilematrixmatrixset-targetresolution")
 
 Selects the **coarsest matrix whose resolution is at or below the target**. If all matrices are coarser than the target, returns the finest available matrix. Returns `null` for an empty set. Sets are checked with `validateTileMatrixSet`, including their CRS identifier. Equal-resolution ties retain the first matrix in the supplied array. The returned matrix is the original object, and the set is not sorted or mutated.
 
@@ -183,7 +183,7 @@ Following [OGC TMS 2.0 section 6.1.5](https://docs.ogc.org/is/17-083r4/17-083r4.
 
 Bands may be supplied in any order, but must not overlap. Factors must be safe integers greater than one and divide matrix width exactly. Row endpoints must be safe integers within matrix height. Invalid declarations throw `RangeError`; inputs are never sorted in place. `selectTileMatrix` continues to compare nominal uncoalesced resolution, independently of row.
 
-### getTileRanges(matrix, bounds, limits?)[​](#gettilerangesmatrix-bounds-limits "Direct link to getTileRanges(matrix, bounds, limits?)")
+#### `getTileRanges(matrix, bounds, limits?)`[​](#gettilerangesmatrix-bounds-limits "Direct link to gettilerangesmatrix-bounds-limits")
 
 Returns `TileMatrixRowRange[]`: exact inclusive bands with `columnStep`. Enumerate columns from `minTileColumn` to `maxTileColumn` using that step, and rows using step one. This avoids requesting the same coalesced tile once for every alias. Query edges retain the half-open rules of `getTileRange`, including point queries, clipping and both origin corners.
 

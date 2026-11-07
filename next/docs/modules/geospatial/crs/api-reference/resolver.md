@@ -30,7 +30,9 @@ Pass the resolver to `FullProjectionEngine`, `ConfigurableProjectionEngine` or `
 
 A `CRSDefinitionProvider` has an `id`, optional catalogue `version`, and `resolve(identifier)` returning a definition, an alias, or `null`, synchronously or as a Promise. Providers are tried in order. Only `null` advances to the next provider; an exception propagates. Provider IDs must be unique within a resolver. Identifier keys are exact and case-sensitive. A provider owns any authority-specific normalization.
 
-`resolve(input)` accepts the shared `CRSInput`: a definition, `CRSReference`, or `SpatialReference`. It returns an immutable `{input, lookups}`. Each lookup records the identifier, provider ID and optional version. WKT, PROJ strings, PROJJSON objects and opaque definitions pass through without syntax or execution validation. References honor their declared `representation`; only bare definitions use inference.
+#### `resolve(input)`[​](#resolveinput "Direct link to resolveinput")
+
+Accepts the shared `CRSInput`: a definition, `CRSReference`, or `SpatialReference`. It returns an immutable `{input, lookups}`. Each lookup records the identifier, provider ID and optional version. WKT, PROJ strings, PROJJSON objects and opaque definitions pass through without syntax or execution validation. References honor their declared `representation`; only bare definitions use inference.
 
 For source metadata, the resolved definition becomes primary and the original is retained in `alternatives`. Existing alternatives, declaration state, provenance, stored coordinate order, units, coordinate epoch and separate vertical reference are retained. Known horizontal and vertical identifiers are resolved independently. Unknown and absent references stay unknown and absent. Resolving a vertical CRS or epoch does not make a selected transformation engine support it.
 

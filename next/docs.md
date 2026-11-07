@@ -1,14 +1,20 @@
-# Introduction
+# Overview
+
+<!-- -->
 
 [![MIT license](https://img.shields.io/badge/license-MIT-green?style=flat-square)](https://github.com/visgl/math.gl/blob/master/LICENSE)[![Built with TypeScript 6.0.3](https://img.shields.io/badge/6.0.3-3178c6?style=flat-square\&logo=typescript\&logoColor=white)](https://www.typescriptlang.org/ "Built with TypeScript 6.0.3")[![coverage](https://img.shields.io/coveralls/visgl/math.gl.svg?style=flat-square\&label=coverage)](https://coveralls.io/github/visgl/math.gl?branch=master)[![npm version](https://img.shields.io/npm/v/@math.gl/core?style=flat-square\&color=8064a2)](https://www.npmjs.com/package/@math.gl/core)[![Monthly npm downloads for @math.gl/core](https://img.shields.io/npm/dm/@math.gl/core?style=flat-square\&color=8064a2)](https://www.npmjs.com/package/@math.gl/core)
 
-[![GitHub stars](https://img.shields.io/github/stars/visgl/math.gl?style=social)](https://github.com/visgl/math.gl)[![GitHub contributors](https://img.shields.io/github/contributors/visgl/math.gl?style=social\&logo=github)](https://github.com/visgl/math.gl/graphs/contributors)[![Merged pull requests](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fsearch%2Fissues%3Fq%3Drepo%3Avisgl%2Fmath.gl%2Bis%3Apr%2Bis%3Amerged\&query=%24.total_count\&label=PRs\&style=social\&logo=github)](https://github.com/visgl/math.gl/pulls?q=is%3Apr+is%3Amerged)
+[![GitHub stars](https://img.shields.io/github/stars/visgl/math.gl?style=flat-square\&label=%E2%98%85\&logo=github\&logoColor=white\&color=24292f\&labelColor=24292f)](https://github.com/visgl/math.gl)[![GitHub contributors](https://img.shields.io/github/contributors/visgl/math.gl?style=flat-square\&logo=github\&logoColor=white\&color=24292f\&labelColor=24292f)](https://github.com/visgl/math.gl/graphs/contributors)[![Merged pull requests](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fsearch%2Fissues%3Fq%3Drepo%3Avisgl%2Fmath.gl%2Bis%3Apr%2Bis%3Amerged\&query=%24.total_count\&label=PRs\&style=flat-square\&logo=github\&logoColor=white\&color=24292f\&labelColor=24292f)](https://github.com/visgl/math.gl/pulls?q=is%3Apr+is%3Amerged)
 
-Welcome to math.gl!
+Library overview
 
-math.gl is a modular TypeScript toolbox for **geospatial** and **3D** math. Start with vectors and matrices in core, then add modules for coordinate conversion, geometry, global grids, and other application needs.
+## Math for the shape of the world.
 
-math.gl computes on the CPU and has no GPU dependencies. Its arrays and coordinate utilities can supply WebGL, WebGPU, or other rendering systems.
+From vectors and matrices to coordinate systems and planetary geometry. Composable TypeScript tools for the world you’re building.
+
+math.gl computes on the CPU with no GPU dependencies. Use its arrays and coordinate utilities with WebGL, WebGPU, or your own analysis pipeline.
+
+[Get started ↗](https://visgl.github.io/math.gl/next/docs/developer-guide.md)[Modules ↗](https://visgl.github.io/math.gl/next/docs/modules.md)[Upgrading ↗](https://visgl.github.io/math.gl/next/docs/upgrade-guide.md)
 
 [![OpenJS Foundation](https://raw.githubusercontent.com/openjs-foundation/artwork/main/openjs_foundation/openjs_foundation-logo-horizontal-color.svg)![OpenJS Foundation](https://raw.githubusercontent.com/openjs-foundation/artwork/main/openjs_foundation/openjs_foundation-logo-horizontal-color-dark_background.svg)](https://openvisualization.org)
 

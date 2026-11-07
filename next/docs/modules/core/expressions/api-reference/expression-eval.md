@@ -4,33 +4,33 @@
 
 The core evaluator API is useful when you want direct control over parsing, AST reuse, or custom operator registration.
 
-## `parse(expression: string | Expression): Expression`[​](#parseexpression-string--expression-expression "Direct link to parseexpression-string--expression-expression")
+#### `parse(expression: string | Expression): Expression`[​](#parseexpression-string--expression-expression "Direct link to parseexpression-string--expression-expression")
 
 Parses a string into a JSEP AST. Passing an AST returns it unchanged.
 
-## `evaluate(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): unknown`[​](#evaluateexpression-expression-context-expressioncontext-options-expressionevaluationoptions-unknown "Direct link to evaluateexpression-expression-context-expressioncontext-options-expressionevaluationoptions-unknown")
+#### `evaluate(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): unknown`[​](#evaluateexpression-expression-context-expressioncontext-options-expressionevaluationoptions-unknown "Direct link to evaluateexpression-expression-context-expressioncontext-options-expressionevaluationoptions-unknown")
 
 Evaluates a parsed expression against the supplied context object.
 
-## `evaluateAsync(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): Promise<unknown>`[​](#evaluateasyncexpression-expression-context-expressioncontext-options-expressionevaluationoptions-promiseunknown "Direct link to evaluateasyncexpression-expression-context-expressioncontext-options-expressionevaluationoptions-promiseunknown")
+#### `evaluateAsync(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): Promise<unknown>`[​](#evaluateasyncexpression-expression-context-expressioncontext-options-expressionevaluationoptions-promiseunknown "Direct link to evaluateasyncexpression-expression-context-expressioncontext-options-expressionevaluationoptions-promiseunknown")
 
 Async variant of `evaluate`. Useful when expressions may call async functions present on the context object.
 
-## `compile(expression: string | Expression, options?: ExpressionEvaluationOptions): (context: ExpressionContext) => unknown`[​](#compileexpression-string--expression-options-expressionevaluationoptions-context-expressioncontext--unknown "Direct link to compileexpression-string--expression-options-expressionevaluationoptions-context-expressioncontext--unknown")
+#### `compile(expression: string | Expression, options?: ExpressionEvaluationOptions): (context: ExpressionContext) => unknown`[​](#compileexpression-string--expression-options-expressionevaluationoptions-context-expressioncontext--unknown "Direct link to compileexpression-string--expression-options-expressionevaluationoptions-context-expressioncontext--unknown")
 
 Compiles an expression into a reusable function.
 
-## `compileAsync(expression: string | Expression, options?: ExpressionEvaluationOptions): (context: ExpressionContext) => Promise<unknown>`[​](#compileasyncexpression-string--expression-options-expressionevaluationoptions-context-expressioncontext--promiseunknown "Direct link to compileasyncexpression-string--expression-options-expressionevaluationoptions-context-expressioncontext--promiseunknown")
+#### `compileAsync(expression: string | Expression, options?: ExpressionEvaluationOptions): (context: ExpressionContext) => Promise<unknown>`[​](#compileasyncexpression-string--expression-options-expressionevaluationoptions-context-expressioncontext--promiseunknown "Direct link to compileasyncexpression-string--expression-options-expressionevaluationoptions-context-expressioncontext--promiseunknown")
 
 Async variant of `compile`.
 
-## `addUnaryOp(operator: string, callback: UnaryOperator): void`[​](#addunaryopoperator-string-callback-unaryoperator-void "Direct link to addunaryopoperator-string-callback-unaryoperator-void")
+#### `addUnaryOp(operator: string, callback: UnaryOperator): void`[​](#addunaryopoperator-string-callback-unaryoperator-void "Direct link to addunaryopoperator-string-callback-unaryoperator-void")
 
 Registers a unary operator with both JSEP and the evaluator.
 
 `UnaryOperator` receives the evaluated operand and returns the operator result.
 
-## `addBinaryOp(operator: string, precedenceOrCallback: number | BinaryOperator, callback?: BinaryOperator): void`[​](#addbinaryopoperator-string-precedenceorcallback-number--binaryoperator-callback-binaryoperator-void "Direct link to addbinaryopoperator-string-precedenceorcallback-number--binaryoperator-callback-binaryoperator-void")
+#### `addBinaryOp(operator: string, precedenceOrCallback: number | BinaryOperator, callback?: BinaryOperator): void`[​](#addbinaryopoperator-string-precedenceorcallback-number--binaryoperator-callback-binaryoperator-void "Direct link to addbinaryopoperator-string-precedenceorcallback-number--binaryoperator-callback-binaryoperator-void")
 
 Registers a binary operator with both JSEP and the evaluator.
 

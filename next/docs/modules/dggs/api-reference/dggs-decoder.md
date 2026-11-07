@@ -40,7 +40,7 @@ Decodes a token string into a 64-bit cell index when the grid has a numeric repr
 
 Returns the string representation of a cell when the grid has a numeric representation.
 
-### `findDGGSCellColumn(columnNames, decoders?)`[​](#finddggscellcolumncolumnnames-decoders "Direct link to finddggscellcolumncolumnnames-decoders")
+#### `findDGGSCellColumn(columnNames, decoders?)`[​](#finddggscellcolumncolumnnames-decoders "Direct link to finddggscellcolumncolumnnames-decoders")
 
 Finds a conventional cell column for the bundled decoders, or for a supplied list of compatible decoders. The function returns the original column name and decoder when exactly one match is available. It returns `null` for missing or ambiguous matches so callers can request an explicit selection.
 
@@ -68,7 +68,7 @@ const bounds = H3Decoder.cellToBounds(cell, options);
 
 `unwrap` defaults to `false`, preserving existing geometry. With `unwrap: true`, longitudes follow the preceding vertex continuously: an edge from 179° to -179° becomes 179° to 181°. The optional `referenceLongitude` places the first vertex near the supplied longitude; it is ignored unless `unwrap` is enabled. Returned longitudes and bounds may lie outside \[-180, 180]. Bounds use the unwrapped longitude extent and preserve decoder-specific latitude extrema, including poles inside cells. Full-longitude bounds remain unchanged. The result is not a wrapped geographic interval.
 
-### `unwrapDGGSBoundary(boundary, referenceLongitude?)`[​](#unwrapdggsboundaryboundary-referencelongitude "Direct link to unwrapdggsboundaryboundary-referencelongitude")
+#### `unwrapDGGSBoundary(boundary, referenceLongitude?)`[​](#unwrapdggsboundaryboundary-referencelongitude "Direct link to unwrapdggsboundaryboundary-referencelongitude")
 
 This standalone export applies the same policy to readonly longitude/latitude pairs from any decoder. It returns fresh pairs without mutating the input.
 

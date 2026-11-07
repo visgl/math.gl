@@ -24,7 +24,9 @@ Axes, points and distances share units. Latitude, longitude and azimuth use **de
 
 ## Surface coordinate systems[​](#surface-coordinate-systems "Direct link to Surface coordinate systems")
 
-`toCartesian(latitude, longitude, system?)` and `fromCartesian(position, system?)` support three explicitly different systems:
+#### `toCartesian(latitude, longitude, system?)`[​](#tocartesianlatitude-longitude-system "Direct link to tocartesianlatitude-longitude-system")
+
+And `fromCartesian(position, system?)` support three explicitly different systems:
 
 | System               | What latitude/longitude describe                                                           |
 | -------------------- | ------------------------------------------------------------------------------------------ |
@@ -34,11 +36,15 @@ Axes, points and distances share units. Latitude, longitude and azimuth use **de
 
 For a triaxial ellipsoid, even the longitudes can differ between these systems. These conversions operate on the surface; they do not infer a height, datum or CRS. The existing `Ellipsoid` APIs retain their separate nearest-point/height contracts. Exact-pole longitude is canonicalized to zero. Jacobi ellipsoidal charts, conformal coordinates and uniform surface sampling are separate work.
 
-`directionToCartesian(position, azimuth)` maps a bearing to a unit tangent. `directionFromCartesian(position, direction)` performs the inverse. Bearings turn clockwise from coordinate north, the tangent along the constant-longitude meridian toward increasing latitude. The three supported coordinate systems share that geometric north. At a pole the Cartesian-only convention uses the zero-longitude meridian. A supplied direction must be finite, nonzero and tangent; its magnitude is normalized, including very large or subnormal inputs.
+#### `directionToCartesian(position, azimuth)`[​](#directiontocartesianposition-azimuth "Direct link to directiontocartesianposition-azimuth")
+
+Maps a bearing to a unit tangent. `directionFromCartesian(position, direction)` performs the inverse. Bearings turn clockwise from coordinate north, the tangent along the constant-longitude meridian toward increasing latitude. The three supported coordinate systems share that geometric north. At a pole the Cartesian-only convention uses the zero-longitude meridian. A supplied direction must be finite, nonzero and tangent; its magnitude is normalized, including very large or subnormal inputs.
 
 ## Direct geodesics[​](#direct-geodesics "Direct link to Direct geodesics")
 
-`line(position, direction).position(distance)` integrates the constrained Cartesian geodesic equation with adaptive, bounded Dormand–Prince steps. It returns `{position, direction, distance}`. The direction is forward along the original geodesic even when sampling a negative distance. `direct(position, direction, distance)` is the equivalent one-shot operation.
+#### `line(position, direction).position(distance)`[​](#lineposition-directionpositiondistance "Direct link to lineposition-directionpositiondistance")
+
+Integrates the constrained Cartesian geodesic equation with adaptive, bounded Dormand–Prince steps. It returns `{position, direction, distance}`. The direction is forward along the original geodesic even when sampling a negative distance. `direct(position, direction, distance)` is the equivalent one-shot operation.
 
 The Cartesian formulation avoids a latitude/longitude chart singularity during pole or umbilic crossings. Surface/tangency and unit-speed constraints are restored at accepted steps. Independent checks additionally test the Joachimsthal integral, which is **not** enforced by the integrator.
 

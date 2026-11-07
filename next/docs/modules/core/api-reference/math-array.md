@@ -18,7 +18,11 @@
 
 ## Arithmetic[​](#arithmetic "Direct link to Arithmetic")
 
-`add()`, `subtract()`, `min()`, `max()`, `clamp()`, `negate()`, `scale()`, and `lerp()` update the receiver. `scale(value)` accepts a scalar or component factors. Concrete classes can override arithmetic semantics; for example, matrix scaling composes a geometric scale transform.
+`add()`, `subtract()`, `min()`, `max()`, `clamp()`, `negate()`, `scale()`, and `lerp()` update the receiver.
+
+#### `scale(value)`[​](#scalevalue "Direct link to scalevalue")
+
+Accepts a scalar or component factors. Concrete classes can override arithmetic semantics; for example, matrix scaling composes a geometric scale transform.
 
 ```
 import {Vector3} from '@math.gl/core';
@@ -32,15 +36,32 @@ const scaled = original.clone().scale([1, 1, 0]); // [1, 2, 0]
 
 ## Compare and validate[​](#compare-and-validate "Direct link to Compare and validate")
 
-* `equals(array)` compares components with the configured epsilon.
-* `exactEquals(array)` compares components directly.
-* `validate()` returns whether the element count is correct and every component is finite.
-* `check()` returns the receiver, and throws on invalid values when `config.debug` is enabled.
+#### `equals(array)`[​](#equalsarray "Direct link to equalsarray")
+
+Compares components with the configured epsilon.
+
+#### `exactEquals(array)`[​](#exactequalsarray "Direct link to exactequalsarray")
+
+Compares components directly.
+
+#### `validate()`[​](#validate "Direct link to validate")
+
+Returns whether the element count is correct and every component is finite.
+
+#### `check()`[​](#check "Direct link to check")
+
+Returns the receiver, and throws on invalid values when `config.debug` is enabled.
 
 See [floating point](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/floating-point.md) for comparison tolerance.
 
 ## Format values[​](#format-values "Direct link to Format values")
 
-`toString()` formats the object using global configuration. `formatString(options)` accepts formatting options for one call. Concrete classes may customize their output; matrix `toString()` uses `printRowMajor` to choose display order.
+#### `toString()`[​](#tostring "Direct link to tostring")
+
+Formats the object using global configuration.
+
+#### `formatString(options)`[​](#formatstringoptions "Direct link to formatstringoptions")
+
+Accepts formatting options for one call. Concrete classes may customize their output; matrix `toString()` uses `printRowMajor` to choose display order.
 
 See [debugging](https://visgl.github.io/math.gl/next/docs/developer-guide.md#catch-mistakes-during-development) for examples and configuration defaults.

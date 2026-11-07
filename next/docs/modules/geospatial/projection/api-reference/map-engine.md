@@ -220,13 +220,25 @@ Segmentation and disconnection are different properties. Peirce's joined charts 
 
 From v5.0 · Experimental
 
-| Method                             | Returns                                                            |
-| ---------------------------------- | ------------------------------------------------------------------ |
-| `findRegions(lonLat)`              | Boundary-inclusive region IDs in definition order                  |
-| `projectPoint(lonLat, regionId?)`  | `{regionId, position: [x, y]}` or `null` outside coverage          |
-| `unprojectPoint(xy, regionId?)`    | All valid `{regionId, position: [longitude, latitude]}` candidates |
-| `projectLine(points, sampling?)`   | Chart-local `MapLine[]`                                            |
-| `projectPolygon(rings, sampling?)` | Chart-local `MapPolygon[]`, with holes retained                    |
+#### `findRegions(lonLat)`[​](#findregionslonlat "Direct link to findregionslonlat")
+
+Boundary-inclusive region IDs in definition order
+
+#### `projectPoint(lonLat, regionId?)`[​](#projectpointlonlat-regionid "Direct link to projectpointlonlat-regionid")
+
+`{regionId, position: [x, y]}` or `null` outside coverage
+
+#### `unprojectPoint(xy, regionId?)`[​](#unprojectpointxy-regionid "Direct link to unprojectpointxy-regionid")
+
+All valid `{regionId, position: [longitude, latitude]}` candidates
+
+#### `projectLine(points, sampling?)`[​](#projectlinepoints-sampling "Direct link to projectlinepoints-sampling")
+
+Chart-local `MapLine[]`
+
+#### `projectPolygon(rings, sampling?)`[​](#projectpolygonrings-sampling "Direct link to projectpolygonrings-sampling")
+
+Chart-local `MapPolygon[]`, with holes retained
 
 These use the [static map geometry contract](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous.md): degrees in, placed map units out, source coordinates preserved, minor great-circle input edges, and hemisphere-bounded polygon inputs. The first containing chart owns a point unless a region is specified. Unknown region IDs throw in these methods. Inverse gaps return `[]`, not a sentinel coordinate. Map geometry is Y-up.
 
@@ -236,7 +248,9 @@ From v5.0 · Experimental
 
 `getLayout(): MapLayout` lazily caches boundary sampling, approximate bounds, outlines, labels, frames, placements and stable draw order. `fit(options)` takes `MapViewportOptions` (`width`, `height`, optional `padding`, `flipY`) and returns the [fitted layout](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous.md), including pixel-space `project`/`unproject` functions and region metadata. Default `flipY: true` gives top-left screen coordinates. Fitting is uniform and preserves inset scale ratios.
 
-`pick(viewport, pixel)` returns inverse candidates with `layer`, topmost first. Pass a viewport fitted by this engine and undo any extra camera transform on the pixel first. Picking applies geographic coverage, not renderer depth/occlusion. It is for the static map; use ray intersections and retained source coordinates for a posed 3D surface.
+#### `pick(viewport, pixel)`[​](#pickviewport-pixel "Direct link to pickviewport-pixel")
+
+Returns inverse candidates with `layer`, topmost first. Pass a viewport fitted by this engine and undo any extra camera transform on the pixel first. Picking applies geographic coverage, not renderer depth/occlusion. It is for the static map; use ray intersections and retained source coordinates for a posed 3D surface.
 
 ## getSamplingRegions(viewport)[​](#getsamplingregionsviewport "Direct link to getSamplingRegions(viewport)")
 

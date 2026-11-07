@@ -1,4 +1,4 @@
-# Geometry
+# @math.gl/geometry
 
 ![From v4.2](https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square)
 
@@ -12,21 +12,24 @@ The `@math.gl/geometry` module provides renderer-independent CPU mesh data and p
 
 All generated meshes use `triangle-list` topology and expose `POSITION`, `NORMAL` and `TEXCOORD_0` typed-array attributes. Index buffers automatically use 32-bit values when a mesh has more than 65,535 vertices.
 
-The geometry group also provides `@math.gl/geometry`, `/curves`, `/polygon`, `/culling`, and `/spatial-index` subpaths. The polygon module combines general tessellation and mesh refinement with geographic helpers such as Mercator clipping and globe subdivision.
+The root entry point also exports mesh utilities, curves, polygon operations, analytic queries, and spatial indexes. Their reference pages are grouped by topic in the sidebar. `@math.gl/geometry/culling` is also available as a dedicated entry point for bounding volumes and queries.
 
 ## Feature Card[​](#feature-card "Direct link to Feature Card")
 
-| Feature                                         | Support | Notes                                                                                                                                                                                                                                                                                                                                                     |
-| ----------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Primitive mesh tessellation                     | ✅      | [Boxes, capsules, cylinders, planes, spheres and convenience shapes](#api) produce renderer-independent indexed buffers.                                                                                                                                                                                                                                  |
-| Parametric surfaces, lathes and tori            | ✅      | [ParametricGeometry, TorusGeometry and LatheGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/parametric.md) sample explicit surface functions.                                                                                                                                                             |
-| Normals, UVs and index-width selection          | ✅      | Primitive POSITION/NORMAL/TEXCOORD\_0 attributes and automatic Uint32 promotion for large meshes.                                                                                                                                                                                                                                                         |
-| Mesh processing and curve evaluation            | ✅      | [Transform/merge/weld utilities](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils.md) and [Cartesian curves](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves.md) are exposed by the geometry group.                                                                                           |
-| Rigid articulated panel forests                 | ✅      | Experimental [HingeTree](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/hinge-tree.md) evaluates hinge transforms with reusable matrix output.                                                                                                                                                                     |
-| Analytic queries and spatial indexes            | ✅      | [Culling](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling.md), [polygon operations](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md), and [static BVHs](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md); each has separate numerical limits. |
-| General solid modeling and manifold repair      | ❌      | No public 3D Boolean solid, arbitrary remeshing, or general manifold-repair engine.                                                                                                                                                                                                                                                                       |
-| Deformable or constrained rigid-body simulation | ❌      | HingeTree has no closed-loop constraints, collisions, forces, or bending solver.                                                                                                                                                                                                                                                                          |
-| GPU resource allocation and rendering           | ❌      | The module supplies CPU data; GPU buffers, materials, draw calls, and device lifetime belong to rendering libraries.                                                                                                                                                                                                                                      |
+| Feature                                         | Support | Notes                                                                                                                                                                                         |
+| ----------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primitive mesh tessellation                     | ✅      | [Boxes, capsules, cylinders, planes, spheres and convenience shapes](#api) produce renderer-independent indexed buffers.                                                                      |
+| Parametric surfaces, lathes and tori            | ✅      | [ParametricGeometry, TorusGeometry and LatheGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/parametric.md) sample explicit surface functions. |
+| Normals, UVs and index-width selection          | ✅      | Primitive POSITION/NORMAL/TEXCOORD\_0 attributes and automatic Uint32 promotion for large meshes.                                                                                             |
+| Mesh processing                                 | ✅      | [Transform, merge, and weld indexed meshes](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils.md).                                                                |
+| Curve evaluation                                | ✅      | [Sample Cartesian curves and compute transport frames](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves.md).                                                    |
+| Rigid articulated panel forests                 | ✅      | Experimental [HingeTree](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/hinge-tree.md) evaluates hinge transforms with reusable matrix output.         |
+| Analytic queries                                | ✅      | [Bounding volumes, rays, and shapes](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling.md) for Euclidean containment and intersection.                          |
+| Polygon processing                              | ✅      | [Clip, triangulate, and subdivide polygons](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md).                                                              |
+| Spatial indexing                                | ✅      | [BoxIndex, PointIndex, and TriangleBVH](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md) accelerate repeated queries.                                |
+| General solid modeling and manifold repair      | ❌      | No public 3D Boolean solid, arbitrary remeshing, or general manifold-repair engine.                                                                                                           |
+| Deformable or constrained rigid-body simulation | ❌      | HingeTree has no closed-loop constraints, collisions, forces, or bending solver.                                                                                                              |
+| GPU resource allocation and rendering           | ❌      | The module supplies CPU data; GPU buffers, materials, draw calls, and device lifetime belong to rendering libraries.                                                                          |
 
 ## Installation[​](#installation "Direct link to Installation")
 
@@ -77,6 +80,6 @@ An infinite glTF plane cannot be tessellated, so `PlaneGeometry` requires finite
 
 ## Parametric surfaces[​](#parametric-surfaces "Direct link to Parametric surfaces")
 
-The optional [`@math.gl/geometry`](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/parametric.md) subpath provides torus, lathe and sampled surface generators, with an interactive gallery.
+[ParametricGeometry, TorusGeometry, and LatheGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/parametric.md) provide sampled surface generators from the root entry point, with an interactive gallery.
 
 The experimental `HingeTree` evaluates rigid panels connected by hinges. See the [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/geometry/unfolding-polyhedron).

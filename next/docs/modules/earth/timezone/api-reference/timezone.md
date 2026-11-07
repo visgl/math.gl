@@ -2,7 +2,7 @@
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
-## getTimezoneOffset(timezone, date?)[​](#gettimezoneoffsettimezone-date "Direct link to getTimezoneOffset(timezone, date?)")
+#### `getTimezoneOffset(timezone, date?)`[​](#gettimezoneoffsettimezone-date "Direct link to gettimezoneoffsettimezone-date")
 
 Returns the UTC offset in **minutes east of UTC**, including daylight saving at the supplied instant. New York returns `-300` in winter and `-240` in summer. This sign is opposite to `Date.getTimezoneOffset()`.
 
@@ -11,39 +11,39 @@ Returns the UTC offset in **minutes east of UTC**, including daylight saving at 
 
 Invalid dates and unsupported timezone identifiers throw `RangeError`. Results use native `Intl.DateTimeFormat` and depend on the runtime's timezone data and `longOffset` support. Historical offsets with seconds can return fractional minutes. Supplying an instant avoids ambiguous local times during daylight saving transitions.
 
-## lookupTimezoneAsync(coordinates)[​](#lookuptimezoneasynccoordinates "Direct link to lookupTimezoneAsync(coordinates)")
+#### `lookupTimezoneAsync(coordinates)`[​](#lookuptimezoneasynccoordinates "Direct link to lookuptimezoneasynccoordinates")
 
 Root export returning `Promise<string>`. Lazily imports `@math.gl/earth/timezone`; concurrent and later calls share the import. If loading fails, the promise rejects and a later call retries.
 
-## lookupTimezone(coordinates)[​](#lookuptimezonecoordinates "Direct link to lookupTimezone(coordinates)")
+#### `lookupTimezone(coordinates)`[​](#lookuptimezonecoordinates "Direct link to lookuptimezonecoordinates")
 
 Synchronous export from `@math.gl/earth/timezone`, returning one approximate IANA timezone identifier. Importing this entry point brings in the geographic table.
 
 Both lookup APIs accept a readonly `[longitude, latitude]` tuple in degrees. Longitude must be finite and within `[-180, 180]`; latitude must be finite and within `[-90, 90]`. Invalid values throw `RangeError` (or reject asynchronously). Coordinates are not wrapped or clamped. Ocean and boundary behavior follow the upstream lookup data.
 
-## getLocalDateTime(timezone, date?)[​](#getlocaldatetimetimezone-date "Direct link to getLocalDateTime(timezone, date?)")
+#### `getLocalDateTime(timezone, date?)`[​](#getlocaldatetimetimezone-date "Direct link to getlocaldatetimetimezone-date")
 
 Root export returning a `LocalDateTime` object with numeric `year`, `month`, `day`, `hour`, `minute`, `second`, and `millisecond`. Fields use the proleptic Gregorian calendar, 1-based months, and hours 0–23. Year zero represents 1 BCE. The result describes a local clock reading, not an instant, and does not contain a timezone identifier.
 
 `date` is a `Date` or epoch milliseconds and defaults to now. Results are independent of the host timezone and display locale. Invalid dates or unsupported timezone identifiers throw `RangeError`.
 
-## getTimezoneLabel(timezone, date?, locale?)[​](#gettimezonelabeltimezone-date-locale "Direct link to getTimezoneLabel(timezone, date?, locale?)")
+#### `getTimezoneLabel(timezone, date?, locale?)`[​](#gettimezonelabeltimezone-date-locale "Direct link to gettimezonelabeltimezone-date-locale")
 
 Root export returning a localized long timezone label for the instant, such as “Eastern Standard Time” or “Eastern Daylight Time”. The date defaults to now; locale is a string or string array and defaults to `en`. Labels can fall back to an offset or other localized text according to `Intl` and can vary with runtime locale data. Use labels for display, and identifiers for calculations.
 
 Invalid dates, timezone identifiers, and malformed locale identifiers follow native `Intl` errors. This helper complements direct use of `Intl.DateTimeFormat` for general localized date/time formatting.
 
-## isTimezoneSupported(timezone)[​](#istimezonesupportedtimezone "Direct link to isTimezoneSupported(timezone)")
+#### `isTimezoneSupported(timezone)`[​](#istimezonesupportedtimezone "Direct link to istimezonesupportedtimezone")
 
 Root export returning whether the current runtime's `Intl.DateTimeFormat` accepts an identifier. Supported aliases are accepted. Empty, invalid, and non-string values return `false`. Support is runtime-specific and does not establish geographic accuracy or canonicalize identifiers.
 
-## getStartOfDay(timezone, date?)[​](#getstartofdaytimezone-date "Direct link to getStartOfDay(timezone, date?)")
+#### `getStartOfDay(timezone, date?)`[​](#getstartofdaytimezone-date "Direct link to getstartofdaytimezone-date")
 
 Export from `@math.gl/earth/timezone`, returning epoch milliseconds for the first valid instant of the date's local calendar day. The date is a `Date` or epoch milliseconds and defaults to now.
 
 If midnight is skipped, returns the first valid time later in that day. If the day starts twice, chooses the earlier start. Consecutive local days need not be 24 hours apart. The supplied instant always identifies an existing local day; use `localDateTimeToInstant` to resolve an explicitly supplied local date.
 
-## localDateTimeToInstant(timezone, fields, options?)[​](#localdatetimetoinstanttimezone-fields-options "Direct link to localDateTimeToInstant(timezone, fields, options?)")
+#### `localDateTimeToInstant(timezone, fields, options?)`[​](#localdatetimetoinstanttimezone-fields-options "Direct link to localdatetimetoinstanttimezone-fields-options")
 
 Export from `@math.gl/earth/timezone`, returning epoch milliseconds. `fields` is a `LocalDateTimeInput`: required integer `year`, `month`, and `day`, plus optional integer `hour`, `minute`, `second`, and `millisecond` that default to zero. Uses the proleptic Gregorian calendar. Invalid dates and out-of-range fields throw `RangeError` rather than being normalized. Leap-second input is not supported.
 
@@ -58,7 +58,7 @@ Export from `@math.gl/earth/timezone`, returning epoch milliseconds. `fields` is
 
 The return value is an instant; format it with `Intl` or inspect it with `getLocalDateTime`. Invalid timezone identifiers and disambiguation values throw `RangeError`.
 
-## getTimezoneTransitions(timezone, start, end)[​](#gettimezonetransitionstimezone-start-end "Direct link to getTimezoneTransitions(timezone, start, end)")
+#### `getTimezoneTransitions(timezone, start, end)`[​](#gettimezonetransitionstimezone-start-end "Direct link to gettimezonetransitionstimezone-start-end")
 
 Export from `@math.gl/earth/timezone`, returning a chronologically ordered `TimezoneTransition[]`. Each record contains `instant` (epoch milliseconds), `offsetBefore`, and `offsetAfter` (minutes east of UTC).
 

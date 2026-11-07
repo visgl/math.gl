@@ -1,4 +1,4 @@
-# Core
+# @math.gl/core
 
 ![From v1.0](https://img.shields.io/badge/From-v1.0-blue.svg?style=flat-square)
 

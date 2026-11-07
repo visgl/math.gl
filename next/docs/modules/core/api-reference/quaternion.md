@@ -62,7 +62,9 @@ Set the identity rotation `[0, 0, 0, 1]`.
 
 ### len(): number[​](#len-number "Direct link to len(): number")
 
-Return the quaternion magnitude. `length` is the array component count.
+Return the quaternion magnitude.
+
+`length` is the array component count.
 
 ### lengthSquared(): number[​](#lengthsquared-number "Direct link to lengthSquared(): number")
 
@@ -110,7 +112,11 @@ Linearly interpolate components. Use `slerp()` for rotation interpolation.
 
 ### multiplyRight(other): this[​](#multiplyrightother-this "Direct link to multiplyRight(other): this")
 
-Set the receiver to `this * other`. `multiply(other)` is an alias.
+Set the receiver to `this * other`.
+
+#### `multiply(other)`[​](#multiplyother "Direct link to multiplyother")
+
+Is an alias.
 
 ### multiplyLeft(other): this[​](#multiplyleftother-this "Direct link to multiplyLeft(other): this")
 

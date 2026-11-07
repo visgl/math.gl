@@ -42,7 +42,9 @@ Caller outputs must be number arrays, `Float32Array`, or `Float64Array`, with th
 
 ## Adaptive subdivision[​](#adaptive-subdivision "Direct link to Adaptive subdivision")
 
-`subdivideRhumbPolyline` accepts the existing generic subdivision options, including `transform`, `tolerance`, `size`, `targetSize`, `maxDepth` and `maxVertices`. `maxSurfaceDistance` bounds each emitted edge's surface distance. `longitudeTurns`, when supplied, contains one integer per original input edge; `longitudeMode: 'unrolled'` instead preserves each supplied interval.
+#### subdivideRhumbPolyline[​](#subdividerhumbpolyline "Direct link to subdivideRhumbPolyline")
+
+Accepts the existing generic subdivision options, including `transform`, `tolerance`, `size`, `targetSize`, `maxDepth` and `maxVertices`. `maxSurfaceDistance` bounds each emitted edge's surface distance. `longitudeTurns`, when supplied, contains one integer per original input edge; `longitudeMode: 'unrolled'` instead preserves each supplied interval.
 
 The result has `sourcePositions`, transformed `positions`, `segmentIndices` and `segmentFractions`, just like the geodesic adapter. Longitudes remain unrolled across successive edges, and fractions refer to original edges. The tolerance is checked at quarter/mid/three-quarter samples; it is not a certified maximum error for arbitrary transforms. Discontinuities and exhausted limits throw atomically.
 

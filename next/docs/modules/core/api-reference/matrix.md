@@ -17,4 +17,6 @@ Array storage uses `column * rank + row` as the element index. Row/column access
 
 ## Formatting[​](#formatting "Direct link to Formatting")
 
-`toString()` displays values by row when `config.printRowMajor` is true, or in storage order otherwise. Display order does not change matrix storage or multiplication semantics.
+#### `toString()`[​](#tostring "Direct link to tostring")
+
+Displays values by row when `config.printRowMajor` is true, or in storage order otherwise. Display order does not change matrix storage or multiplication semantics.

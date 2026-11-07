@@ -124,4 +124,6 @@ Returns
 
 ## Affine transform domain[​](#affine-transform-domain "Direct link to Affine transform domain")
 
-`transform(matrix)` accepts finite affine matrices, including rotation, reflection, nonuniform scale and shear. It recomputes the axis-aligned bounds enclosing all transformed corners and updates center and half extents consistently. Translation does not affect half extents. Projective matrices and inverted input bounds are rejected before mutation.
+#### `transform(matrix)`[​](#transformmatrix "Direct link to transformmatrix")
+
+Accepts finite affine matrices, including rotation, reflection, nonuniform scale and shear. It recomputes the axis-aligned bounds enclosing all transformed corners and updates center and half extents consistently. Translation does not affect half extents. Projective matrices and inverted input bounds are rejected before mutation.

@@ -53,7 +53,9 @@ All 7,000 selected sources have projected proper motions. **2,797** have positiv
 
 ## Motion and brightness[​](#motion-and-brightness "Direct link to Motion and brightness")
 
-`getStarPosition(star, epochYear, options?)` propagates one source. `getStarPositions(epochYear, options?, catalog = STAR_CATALOG)` propagates a batch and shares the Solar orbit integration. Both accept numeric Julian years within ±10 million years of J2000. Custom records must be within the same interval of their reference epoch. Galactic motion requires J2000 input records.
+#### `getStarPosition(star, epochYear, options?)`[​](#getstarpositionstar-epochyear-options "Direct link to getstarpositionstar-epochyear-options")
+
+Propagates one source. `getStarPositions(epochYear, options?, catalog = STAR_CATALOG)` propagates a batch and shares the Solar orbit integration. Both accept numeric Julian years within ±10 million years of J2000. Custom records must be within the same interval of their reference epoch. Galactic motion requires J2000 input records.
 
 `options.model` defaults to `'rectilinear'`:
 
@@ -63,11 +65,19 @@ All 7,000 selected sources have projected proper motions. **2,797** have positiv
 
 The Galactic model uses the potential equations and parameter values in the [Johnston, Spergel & Hernquist 1995 arXiv draft](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#johnston1995 "The Disruption of the Sagittarius Dwarf Galaxy"): disk mass 10¹¹ solar masses, bulge mass 3.4 × 10¹⁰, disk scales 6.5/0.26 kpc, bulge scale 0.7 kpc, halo scale 12 kpc, and **halo parameter 212 km/s as printed in that draft**. This is a historical illustrative potential, not a fitted modern Milky Way model. The halo parameter is not the local circular speed. Solar initial position is \[-8000, 0, 20] pc; velocity combines the model's circular speed with [Schönrich, Binney & Dehnen 2010](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#schoenrich2010 "Local kinematics and the local standard of rest") peculiar motion \[11.1, 12.24, 7.25] km/s. Galactic axes use the J2000 pole/node angles described by [Liu, Zhu & Zhang 2011](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#liu2011 "Reconsidering the Galactic coordinate system").
 
-`integrateGalacticOrbit(position, velocity, elapsedYears, maximumStepYears?)` is also available for custom experiments: position is pc, velocity pc/Myr. `getGalacticAcceleration(position)` returns pc/Myr²; `getGalacticPotential(position)` returns specific potential in pc²/Myr². The potential has a cusped bulge; acceleration at the exact origin is assigned zero, so orbits through the cusp are not physically resolved.
+#### `integrateGalacticOrbit(position, velocity, elapsedYears, maximumStepYears?)`[​](#integrategalacticorbitposition-velocity-elapsedyears-maximumstepyears "Direct link to integrategalacticorbitposition-velocity-elapsedyears-maximumstepyears")
+
+Is also available for custom experiments: position is pc, velocity pc/Myr.
+
+#### `getGalacticAcceleration(position)`[​](#getgalacticaccelerationposition "Direct link to getgalacticaccelerationposition")
+
+Returns pc/Myr²; `getGalacticPotential(position)` returns specific potential in pc²/Myr². The potential has a cusped bulge; acceleration at the exact origin is assigned zero, so orbits through the cusp are not physically resolved.
 
 Each result has `star`, `equatorialDirection`, rotated `direction`, equatorial angles, `distanceParsecs`, `magnitude`, `relativeFlux`, `color`, `motionModel`, and `radialVelocityAssumed`. With known distance, magnitude changes by `5 × log10(newDistance / initialDistance)` while intrinsic luminosity stays fixed. `relativeFlux = 10^(-0.4 × magnitude)` is relative to magnitude zero, not lux. Binary orbits, stellar evolution, variable luminosity, changing extinction, uncertainty propagation, and light travel time are omitted. Long animations illustrate model assumptions; they are **not accurate predictions millions of years into the future or past**.
 
-`getStarColor(colorIndex)` returns an immutable approximate linear RGB tint with peak channel one. It uses [Ballesteros 2012](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#ballesteros2012 "New insights into black bodies") B-V temperature estimation (clamped to B-V \[-0.4, 2]) and three Planck spectral samples at 680/550/440 nm. Missing B-V uses white. These samples provide a qualitative warm/cool tint, not calibrated sRGB or temperature estimates corrected for reddening.
+#### `getStarColor(colorIndex)`[​](#getstarcolorcolorindex "Direct link to getstarcolorcolorindex")
+
+Returns an immutable approximate linear RGB tint with peak channel one. It uses [Ballesteros 2012](https://visgl.github.io/math.gl/next/docs/references-and-credits.md#ballesteros2012 "New insights into black bodies") B-V temperature estimation (clamped to B-V \[-0.4, 2]) and three Planck spectral samples at 680/550/440 nm. Missing B-V uses white. These samples provide a qualitative warm/cool tint, not calibrated sRGB or temperature estimates corrected for reddening.
 
 ## Rendering and deck.gl GlobeView[​](#rendering-and-deckgl-globeview "Direct link to Rendering and deck.gl GlobeView")
 
@@ -101,9 +111,13 @@ const data = stars.map(star => ({
 
 ### Ready-to-use ScatterplotLayer data[​](#ready-to-use-scatterplotlayer-data "Direct link to Ready-to-use ScatterplotLayer data")
 
-`getStarLayerData(stars, options)` converts propagated stars into `StarLayerDatum[]`: `id`, `position`, byte RGBA `color`, `radiusPixels`, local `altitude`, `magnitude` and the original `source`. It reads `equatorialDirection` so an existing rotation on `stars.direction` cannot accidentally be applied twice. It has no deck.gl dependency.
+#### `getStarLayerData(stars, options)`[​](#getstarlayerdatastars-options "Direct link to getstarlayerdatastars-options")
 
-`coordinates` defaults to `'globe'` (LNGLAT). `'local'` returns ENU Cartesian shell points, and `'equatorial'` returns J2000 Cartesian shell points. Globe/local require `observer`; their rotation uses a separate modern `timestamp` (default now), or an explicit J2000-to-ENU `rotation` such as a shared sky snapshot's matrix. The latter overrides timestamp. `distance` defaults to 10 million meters, or arbitrary units for equatorial views. `maximumMagnitude` optionally filters current apparent magnitude. `clipHorizon` optionally removes negative local geometric elevations; its default is false so a full star sphere is available. Terrain, atmospheric refraction, daylight visibility, camera clipping and picking are renderer concerns.
+Converts propagated stars into `StarLayerDatum[]`: `id`, `position`, byte RGBA `color`, `radiusPixels`, local `altitude`, `magnitude` and the original `source`. It reads `equatorialDirection` so an existing rotation on `stars.direction` cannot accidentally be applied twice. It has no deck.gl dependency.
+
+`coordinates` defaults to `'globe'` (LNGLAT). `'local'` returns ENU Cartesian shell points, and `'equatorial'` returns J2000 Cartesian shell points. Globe/local require `observer`; their rotation uses a separate modern `timestamp` (default now), or an explicit J2000-to-ENU `rotation` such as a shared sky snapshot's matrix. The latter overrides timestamp.
+
+`distance` defaults to 10 million meters, or arbitrary units for equatorial views. `maximumMagnitude` optionally filters current apparent magnitude. `clipHorizon` optionally removes negative local geometric elevations; its default is false so a full star sphere is available. Terrain, atmospheric refraction, daylight visibility, camera clipping and picking are renderer concerns.
 
 `radiusScale` (default 4) is the pixel radius of a magnitude-zero source. Radius scales with square root of relative flux, clamped by `minimumRadiusPixels`/`maximumRadiusPixels` (default 0.5/6). Alpha preserves faint-source flux below the minimum radius; bright sources saturate at the maximum. Color tints are converted from approximate linear RGB to gamma-encoded byte RGB. This provides practical display styling rather than calibrated pixel photometry.
 
@@ -151,7 +165,11 @@ The shell distance is a rendering choice, independent of physical stellar distan
 
 ## Milky Way background[​](#milky-way-background "Direct link to Milky Way background")
 
-7,000 bright sources can trace parts of the Galactic plane but do not reproduce its faint diffuse glow. `createMilkyWayBackground(epochYear = 2000, maximumStepYears = 10000)` provides an **original procedural rendering approximation**, separate from the observed catalog. Its `sample(equatorialDirection)` returns relative `intensity` and a warm linear `color`; neither is calibrated luminance. A broad Gaussian band, central bulge and narrow dust lane make the plane recognizable. It has no observed texture, spiral arms, resolved faint stars or changing dust distribution.
+7,000 bright sources can trace parts of the Galactic plane but do not reproduce its faint diffuse glow.
+
+#### `createMilkyWayBackground(epochYear = 2000, maximumStepYears = 10000)`[​](#createmilkywaybackgroundepochyear--2000-maximumstepyears--10000 "Direct link to createmilkywaybackgroundepochyear--2000-maximumstepyears--10000")
+
+Provides an **original procedural rendering approximation**, separate from the observed catalog. Its `sample(equatorialDirection)` returns relative `intensity` and a warm linear `color`; neither is calibrated luminance. A broad Gaussian band, central bulge and narrow dust lane make the plane recognizable. It has no observed texture, spiral arms, resolved faint stars or changing dust distribution.
 
 The object exposes J2000 `centerDirection` and `northDirection`. Its Galactic center follows the model's Solar orbit; the plane normal stays fixed. Sample the background in equatorial space, then rotate the foreground and background together. The background uses Galactic Solar motion even when foreground propagation is rectilinear; choose `'galactic'` for a consistent observer-orbit animation.
 

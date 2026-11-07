@@ -120,7 +120,9 @@ const firstWindow = venus?.visibleIntervals[0];
 if (firstWindow) console.log(new Date(firstWindow.start));
 ```
 
-`getPlanetVisibilityTimes(timestamp, latitude, longitude, options?)` returns seven planet records. It searches **forward from the supplied instant**, rather than assuming local midnight. `durationHours` defaults to 24, must be greater than zero and cannot exceed 72. `elevation` uses the same meters and range as `getPlanetSkyInfo`. Both ends of the window must remain within the supported observation years.
+#### `getPlanetVisibilityTimes(timestamp, latitude, longitude, options?)`[​](#getplanetvisibilitytimestimestamp-latitude-longitude-options "Direct link to getplanetvisibilitytimestimestamp-latitude-longitude-options")
+
+Returns seven planet records. It searches **forward from the supplied instant**, rather than assuming local midnight. `durationHours` defaults to 24, must be greater than zero and cannot exceed 72. `elevation` uses the same meters and range as `getPlanetSkyInfo`. Both ends of the window must remain within the supported observation years.
 
 | Field                 | Meaning                                                                                                          |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------- |

@@ -39,6 +39,22 @@ Creates a ray. The constructor clones both inputs and normalizes `direction`. Om
 * `origin` - Optional ray origin.
 * `direction` - Optional ray direction.
 
+#### `at(t, result?)`[​](#att-result "Direct link to att-result")
+
+Evaluates the ray at a nonnegative distance. Writes into the optional result vector.
+
+#### `closestPointTo(point, result?)`[​](#closestpointtopoint-result "Direct link to closestpointtopoint-result")
+
+Returns the closest point on the ray, clamping projections behind its origin.
+
+#### `distanceTo(point)`[​](#distancetopoint "Direct link to distancetopoint")
+
+Returns Euclidean distance from a point to the ray.
+
+#### `transform(matrix)`[​](#transformmatrix "Direct link to transformmatrix")
+
+Transforms the ray in place and renormalizes its direction. Subsequent class parameters are distances in the new space. Use standalone `transformRay()` to preserve the original parameterization instead.
+
 ## Query functions[​](#query-functions "Direct link to Query functions")
 
 The class stores the ray; triangle and bounds intersections are separate functions:

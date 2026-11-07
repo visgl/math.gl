@@ -28,19 +28,19 @@ const rectangles = splitGlobeBounds(getGlobeHorizonBounds(camera, 6371000));
 
 `new EllipsoidOccluder(radii, center = [0, 0, 0])` accepts three positive finite Cartesian axis radii and an optional center. Arrays and typed arrays are accepted. The constructor owns frozen snapshots; changing the inputs does not change queries. Axes align with the input Cartesian frame. A sphere works in any matching frame; a non-spherical body must use its principal axes. The class does not infer a CRS.
 
-### intersectRay(origin, direction, result?)[​](#intersectrayorigin-direction-result "Direct link to intersectRay(origin, direction, result?)")
+#### `intersectRay(origin, direction, result?)`[​](#intersectrayorigin-direction-result "Direct link to intersectrayorigin-direction-result")
 
 Returns the nonnegative parameter interval `[entry, exit]` where `origin + t * direction` intersects the solid. Parameters are distances only when the direction is unit length. An inside origin has entry zero; a tangent has equal entry/exit. A surface origin looking outward returns `[0, 0]`.
 
 A true miss, intersections wholly behind the ray, or zero direction returns `undefined`. A provided mutable result array is reused and is untouched on miss. Inputs must have three finite components. The calculation normalizes direction in scaled ellipsoid space and avoids subtractive cancellation for the smaller root. It never substitutes the nearest limb point for a miss.
 
-### isPointOccluded(camera, point, tolerance = 1e-12)[​](#ispointoccludedcamera-point-tolerance--1e-12 "Direct link to isPointOccluded(camera, point, tolerance = 1e-12)")
+#### `isPointOccluded(camera, point, tolerance = 1e-12)`[​](#ispointoccludedcamera-point-tolerance--1e-12 "Direct link to ispointoccludedcamera-point-tolerance--1e-12")
 
 Returns whether the finite camera-to-point segment enters the ellipsoid interior. It includes altitude: a point beyond the surface horizon can be visible above the limb. A surface-facing normal test is insufficient for such objects.
 
 Contact with the surface or a tangent segment alone does not count as occlusion. Inside points/cameras are occluded; coincident exterior points are not. Tolerance is a nonnegative margin in **scaled squared-radius units**, less than one; the interior test uses `distanceSquared < 1 - tolerance`. This is numerical tolerance, not terrain height. Terrain/building occlusion requires a separate data-aware test.
 
-### getHorizon(camera)[​](#gethorizoncamera "Direct link to getHorizon(camera)")
+#### `getHorizon(camera)`[​](#gethorizoncamera "Direct link to gethorizoncamera")
 
 Returns an exact limb ellipse `{center, axis1, axis2}` for an exterior camera:
 
@@ -54,13 +54,13 @@ const point = limb.center.map((value, i) =>
 
 All three vectors use the input Cartesian units. Each sampled point is on the body and tangent to the viewing line. Polar views need no special axis rotation. On/inside the body, there is no exterior apparent limb and the result is undefined. The limb is geometry, not a renderer-specific depth disk or screen mask.
 
-## getGlobeHorizonBounds(camera, radius)[​](#getglobehorizonboundscamera-radius "Direct link to getGlobeHorizonBounds(camera, radius)")
+#### `getGlobeHorizonBounds(camera, radius)`[​](#getglobehorizonboundscamera-radius "Direct link to getglobehorizonboundscamera-radius")
 
 Returns conservative surface bounds `[west, south, east, north]` in degrees for a sphere centered at zero. X points to longitude 0, Y to longitude 90 and Z north. `west > east` means an antimeridian crossing. A cap containing either pole covers all longitudes (`[-180, ..., 180, ...]`). On/inside the sphere returns undefined.
 
 The analytic extent covers **the entire visible surface cap**, including limb and poles, with a small outward rounding margin. It can overfetch a zoomed/cropped screen; it is not a viewport-tight bound, an ellipsoid bound, or an elevated-terrain bound. Clip/refine coverage in the viewport owner if tighter imagery requests are needed.
 
-## splitGlobeBounds(bounds)[​](#splitglobeboundsbounds "Direct link to splitGlobeBounds(bounds)")
+#### `splitGlobeBounds(bounds)`[​](#splitglobeboundsbounds "Direct link to splitglobeboundsbounds")
 
 Returns one ordinary degree rectangle or two at the antimeridian. Valid latitude and longitude ranges are checked. This avoids replacing a wrapped narrow extent with a full-world request. Protocol axis order, CRS conversion, image stitching, request cancellation and cache/resolution policy belong to loaders/layers.
 

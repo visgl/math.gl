@@ -136,11 +136,19 @@ projection.project([40.7, -74, 100]);
 
 Use `parsers: [wktCRSParser, projJSONCRSParser]` for WKT1, WKT2, ESRI WKT, and GeographicCRS/GeodeticCRS/ProjectedCRS objects. Projection methods must map to supported plugins; unknown methods and conversion parameters fail explicitly. BoundCRS supports three-parameter translations and seven-parameter position-vector/coordinate-frame operations to WGS84. WKT1 TOWGS84 is also supported. Polar stereographic axis meridians that align with signed cardinal axes relative to the central meridian are supported, including WKT2 angular units, PROJJSON meridians and legacy WKT direction spellings. WKT UNKNOWN directions are inferred only from explicit Easting/Northing/Westing/Southing axis names. Other UNKNOWN directions reject. Non-cardinal or non-polar axis-meridian operations, vertical-first structured axes, derived CRSs, and time-dependent operations remain outside this subset. PROJ axis permutations support vertical-first ordering.
 
-`normalizeCRS(input, options)` produces an immutable execution model with distinct projection and datum ellipsoids, units, prime meridian, axes, and datum parameters. Normalization alone does not verify a projection plugin's parameter support. `checkProjectionCompatibility(input, options)` checks construction with the selected readers/plugins and reports `supported`, `unsupported`, or `unknown`, with reasons `unknown-syntax`, `missing-parser`, `missing-plugin`, `missing-transform-stage`, or `invalid-definition`. It does not assess accuracy or a particular coordinate's domain.
+#### `normalizeCRS(input, options)`[​](#normalizecrsinput-options "Direct link to normalizecrsinput-options")
+
+Produces an immutable execution model with distinct projection and datum ellipsoids, units, prime meridian, axes, and datum parameters. Normalization alone does not verify a projection plugin's parameter support.
+
+#### `checkProjectionCompatibility(input, options)`[​](#checkprojectioncompatibilityinput-options "Direct link to checkprojectioncompatibilityinput-options")
+
+Checks construction with the selected readers/plugins and reports `supported`, `unsupported`, or `unknown`, with reasons `unknown-syntax`, `missing-parser`, `missing-plugin`, `missing-transform-stage`, or `invalid-definition`. It does not assess accuracy or a particular coordinate's domain.
 
 ## Methods and dimensions[​](#methods-and-dimensions "Direct link to Methods and dimensions")
 
-`project(coordinate)` transforms source to target; `unproject(coordinate)` reverses it. Both are bound methods accepting readonly arrays and returning new arrays.
+#### `project(coordinate)`[​](#projectcoordinate "Direct link to projectcoordinate")
+
+Transforms source to target; `unproject(coordinate)` reverses it. Both are bound methods accepting readonly arrays and returning new arrays.
 
 Geographic x/y use degrees for PROJ definitions, or the angular units declared by structured CRSs. Projected x/y use the CRS's linear units. A third ordinate is height (ellipsoidal by default, gravity-related with `+geoidgrids`; meters unless vertical units are specified); datum operations transform it. Fourth and later ordinates are copied unchanged.
 
@@ -150,7 +158,9 @@ This deliberately differs from proj4js's default array API, which restores the i
 
 ## Reusable scalar outputs[​](#reusable-scalar-outputs "Direct link to Reusable scalar outputs")
 
-`projectTo(coordinate, output)` and `unprojectTo(coordinate, output)` write a single coordinate into caller-owned storage and return that exact output object. Transforms created by the full, configurable and lazy engines expose these bound methods. Use them when a scalar loop should reuse its result instead of creating an array on each call:
+#### `projectTo(coordinate, output)`[​](#projecttocoordinate-output "Direct link to projecttocoordinate-output")
+
+And `unprojectTo(coordinate, output)` write a single coordinate into caller-owned storage and return that exact output object. Transforms created by the full, configurable and lazy engines expose these bound methods. Use them when a scalar loop should reuse its result instead of creating an array on each call:
 
 ```
 const input = new Float64Array([-74, 40.7, 120, 8]);
@@ -172,7 +182,9 @@ Successful synchronous calls reuse the engine's working point and create no publ
 
 ## Flat typed arrays (in place)[​](#flat-typed-arrays-in-place "Direct link to Flat typed arrays (in place)")
 
-`projectFlat(coordinates, dimension = 2)` and `unprojectFlat(coordinates, dimension = 2)` transform a `Float64Array` or `Float32Array` and return that same typed-array view. Records are interleaved:
+#### `projectFlat(coordinates, dimension = 2)`[​](#projectflatcoordinates-dimension--2 "Direct link to projectflatcoordinates-dimension--2")
+
+And `unprojectFlat(coordinates, dimension = 2)` transform a `Float64Array` or `Float32Array` and return that same typed-array view. Records are interleaved:
 
 ```
 const coordinates = new Float64Array([-74, 40.7, -122.4, 37.8]);
@@ -281,7 +293,9 @@ Each export is an opt-in plugin. All accept `lon_0`, `x_0`, and `y_0`, with addi
 
 Structured readers map Hotine variants A/B and legacy aliases, Krovak/North Orientated, QSC, Cassini, and spherical equidistant cylindrical methods to these plugins. Hotine variant A sets `no_uoff`; variant B uses the projection-centre offset. Angular and linear parameter units are converted before kernel construction. The legacy `Stereographic_North_Pole` method uses `sterea` away from a pole and `stere` at a pole. Krovak accepts only its fixed pseudo standard parallel (`lat_ts=78.5`) and the legacy PROJ/EPSG spellings of its fixed cone-axis co-latitude (`alpha=30.28813972222222` or `30.28813975277778`, with 1e-10-degree rounding tolerance). Custom values reject instead of being silently ignored by the fixed kernel.
 
-`obliqueTransformation` is a factory with an explicit dependency:
+#### obliqueTransformation[​](#obliquetransformation "Direct link to obliqueTransformation")
+
+Is a factory with an explicit dependency:
 
 ```
 import {
@@ -331,9 +345,13 @@ const projection = new ProjectionTransform({
 });
 ```
 
-`parseNTv2Grid(buffer, {includeErrorFields})` supports both byte orders and NTv2 SECONDS grids. The default reads 16-byte node records, including unused accuracy fields. Set `includeErrorFields: false` only for compact files with 8-byte records; it does not simply discard accuracy fields from a standard file. Invalid headers, dimensions, unsupported units and truncated data throw at preparation time.
+#### `parseNTv2Grid(buffer, {includeErrorFields})`[​](#parsentv2gridbuffer-includeerrorfields "Direct link to parsentv2gridbuffer-includeerrorfields")
 
-`loadGeoTIFFGrid(decodedTIFF)` asynchronously prepares a decoded geotiff.js v2/v3 object. Callers load the file or URL with their chosen GeoTIFF library and await the result before construction:
+Supports both byte orders and NTv2 SECONDS grids. The default reads 16-byte node records, including unused accuracy fields. Set `includeErrorFields: false` only for compact files with 8-byte records; it does not simply discard accuracy fields from a standard file. Invalid headers, dimensions, unsupported units and truncated data throw at preparation time.
+
+#### `loadGeoTIFFGrid(decodedTIFF)`[​](#loadgeotiffgriddecodedtiff "Direct link to loadgeotiffgriddecodedtiff")
+
+Asynchronously prepares a decoded geotiff.js v2/v3 object. Callers load the file or URL with their chosen GeoTIFF library and await the result before construction:
 
 ```
 import { loadGeoTIFFGrid, ProjectionTransform } from "@math.gl/geospatial/projection";
@@ -425,7 +443,9 @@ See [Attributions](https://visgl.github.io/math.gl/next/docs/references-and-cred
 
 All math.gl projection engine variants accept `verticalGrids?: VerticalGridCollection`. A `VerticalGrid` implements `getOffset(longitudeRadians, latitudeRadians): number | undefined`: return geoid undulation in metres, or `undefined` outside coverage. Longitudes are Greenwich referenced in the associated CRS's horizontal datum. Register implementations per instance and reference their names with `+geoidgrids`; scalar and flat transforms then require Z.
 
-`parseGTXGrid` is exported from `@math.gl/geospatial/projection/grids/gtx`. `createVerticalGrid`, `createGeoidGrid` and `VerticalGridOptions` are exported from `@math.gl/geospatial/projection/grids/vertical`. The public root and compatibility experimental/native entry points also export these helpers; `/core` exports only the contract and engine. See [height conversion](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#convert-geoid-heights) for loading, units, axes, fallback, coverage, datum ordering and the limits of this explicit subset.
+#### parseGTXGrid[​](#parsegtxgrid "Direct link to parseGTXGrid")
+
+Is exported from `@math.gl/geospatial/projection/grids/gtx`. `createVerticalGrid`, `createGeoidGrid` and `VerticalGridOptions` are exported from `@math.gl/geospatial/projection/grids/vertical`. The public root and compatibility experimental/native entry points also export these helpers; `/core` exports only the contract and engine. See [height conversion](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#convert-geoid-heights) for loading, units, axes, fallback, coverage, datum ordering and the limits of this explicit subset.
 
 ### loadVerticalGeoTIFFGrid[​](#loadverticalgeotiffgrid "Direct link to loadVerticalGeoTIFFGrid")
 

@@ -1,4 +1,4 @@
-# DGGS 🧪
+# @math.gl/dggs 🧪
 
 ![From-v4.0](https://img.shields.io/badge/From-v4.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 

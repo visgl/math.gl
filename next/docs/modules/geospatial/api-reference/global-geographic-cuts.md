@@ -36,14 +36,18 @@ Existing `projectPolygon` and `prepareFeatures` defaults keep their local, windi
 
 ## Reusable atlas cuts and source provenance[​](#reusable-atlas-cuts-and-source-provenance "Direct link to Reusable atlas cuts and source provenance")
 
-`cutSphericalPolygon(rings, options)` returns polygons in an eight-octant atlas, with stable signed-axis `cellId`s. Each polygon has explicitly closed `rings` (exterior first, then holes) and one `edges` record per ring edge:
+#### `cutSphericalPolygon(rings, options)`[​](#cutsphericalpolygonrings-options "Direct link to cutsphericalpolygonrings-options")
+
+Returns polygons in an eight-octant atlas, with stable signed-axis `cellId`s. Each polygon has explicitly closed `rings` (exterior first, then holes) and one `edges` record per ring edge:
 
 * `{kind: 'source', ringIndex, edgeIndex, startFraction, endFraction}` identifies an interval of one original great-circle edge; fractions use angular distance.
 * `{kind: 'cut', axis}` identifies a generated boundary on Cartesian coordinate plane 0, 1 or 2. It does not invent source attributes or an original edge.
 
 Returned arrays and records belong to the caller. Inputs are read and copied before processing. Adjacent atlas cells share their boundary; do not treat atlas connectors as original feature outlines. No implicit interpolation of heights or other attributes is provided. The cut-only source intervals let an application interpolate its own scalar data deliberately. Map-specific projected results keep the existing source-coordinate correspondence; they do not claim that generated horizon arcs belong to original input edges.
 
-`projectSphericalPolygon(map, rings, options)` is the standalone adapter for any existing `MapSurface` polygon projector. `MapEngine.projectGlobalPolygon` uses this same implementation. A map's coverage gaps, overlaps, caps, projection equations and placements remain authoritative. Atlas fragments may remain separate even inside one chart; filled geometry should not stroke every fragment boundary.
+#### `projectSphericalPolygon(map, rings, options)`[​](#projectsphericalpolygonmap-rings-options "Direct link to projectsphericalpolygonmap-rings-options")
+
+Is the standalone adapter for any existing `MapSurface` polygon projector. `MapEngine.projectGlobalPolygon` uses this same implementation. A map's coverage gaps, overlaps, caps, projection equations and placements remain authoritative. Atlas fragments may remain separate even inside one chart; filled geometry should not stroke every fragment boundary.
 
 ## Numerical profile and limits[​](#numerical-profile-and-limits "Direct link to Numerical profile and limits")
 

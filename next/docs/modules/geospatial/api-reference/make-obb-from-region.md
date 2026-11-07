@@ -38,7 +38,7 @@ const box = makeOBBFromRegion(region);
 
 ## Function[​](#function "Direct link to Function")
 
-### `makeOBBFromRegion(region, ellipsoid?, options?) : OrientedBoundingBox`[​](#makeobbfromregionregion-ellipsoid-options--orientedboundingbox "Direct link to makeobbfromregionregion-ellipsoid-options--orientedboundingbox")
+#### `makeOBBFromRegion(region, ellipsoid?, options?) : OrientedBoundingBox`[​](#makeobbfromregionregion-ellipsoid-options--orientedboundingbox "Direct link to makeobbfromregionregion-ellipsoid-options--orientedboundingbox")
 
 `region` is `[west, south, east, north, minimumHeight, maximumHeight]`. Longitudes and latitudes are in radians by default, matching the OGC 3D Tiles region definition. Heights use the ellipsoid's linear unit, normally meters. Use `options.units: 'degrees'` for degree input.
 

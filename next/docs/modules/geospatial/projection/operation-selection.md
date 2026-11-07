@@ -108,7 +108,9 @@ The catalogue snapshots and freezes all selection metadata, including nested are
 
 ## Request full coverage[​](#request-full-coverage "Direct link to Request full coverage")
 
-`select(request)` returns the best eligible `CoordinateOperation<T>` or `undefined`. An empty catalogue also returns `undefined`. A malformed request throws rather than being interpreted as a broad or approximate request.
+#### `select(request)`[​](#selectrequest "Direct link to selectrequest")
+
+Returns the best eligible `CoordinateOperation<T>` or `undefined`. An empty catalogue also returns `undefined`. A malformed request throws rather than being interpreted as a broad or approximate request.
 
 A candidate must satisfy every gate:
 

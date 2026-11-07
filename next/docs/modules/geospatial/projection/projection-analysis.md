@@ -42,20 +42,26 @@ For the distinction between mathematical projection factors and CRS rendering sc
 
 `domain` is required: a closed rectangle with increasing west/east and south/north bounds. It is captured at construction. Rectangles do not cross the antimeridian; split such applications into separate regions. The [accuracy scorecard](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/accuracy-domains.md) supplies tested configurations and regions, not automatic global validity declarations.
 
-`contains(longitude, latitude)` checks the declared rectangle and finite input. `projectTo(longitude, latitude, result)` and `unprojectTo(x, y, result)` also execute the plugin and validate the result. Both return `false` for a domain violation, plugin rejection or nonfinite coordinate. Forward and inverse write only `result.x` and `result.y`; existing Z remains untouched. An inverse result must lie inside the geographic rectangle. Failure leaves the reusable result untouched.
+#### `contains(longitude, latitude)`[​](#containslongitude-latitude "Direct link to containslongitude-latitude")
+
+Checks the declared rectangle and finite input. `projectTo(longitude, latitude, result)` and `unprojectTo(x, y, result)` also execute the plugin and validate the result. Both return `false` for a domain violation, plugin rejection or nonfinite coordinate. Forward and inverse write only `result.x` and `result.y`; existing Z remains untouched. An inverse result must lie inside the geographic rectangle. Failure leaves the reusable result untouched.
 
 This is a single-projection mathematical interface; normal CRS transformations continue to use `Projection` or `ProjectionTransform`. Plugins must implement both mutable horizontal hooks. Pass a loaded plugin when using lazy descriptors.
 
 ## Jacobians and factors[​](#jacobians-and-factors "Direct link to Jacobians and factors")
 
-`jacobian(longitude, latitude, result)` fills a caller-owned `ProjectionJacobian`, created with `createProjectionJacobian()`:
+#### `jacobian(longitude, latitude, result)`[​](#jacobianlongitude-latitude-result "Direct link to jacobianlongitude-latitude-result")
+
+Fills a caller-owned `ProjectionJacobian`, created with `createProjectionJacobian()`:
 
 | Field                          | Meaning                             |
 | ------------------------------ | ----------------------------------- |
 | `dxDLongitude`, `dyDLongitude` | Partial derivatives along longitude |
 | `dxDLatitude`, `dyDLatitude`   | Partial derivatives along latitude  |
 
-`factors(longitude, latitude, result)` fills a caller-owned `ProjectionFactors`, created with `createProjectionFactors()`. It includes the Jacobian and:
+#### `factors(longitude, latitude, result)`[​](#factorslongitude-latitude-result "Direct link to factorslongitude-latitude-result")
+
+Fills a caller-owned `ProjectionFactors`, created with `createProjectionFactors()`. It includes the Jacobian and:
 
 | Field                              | Meaning                                                                                              |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------- |

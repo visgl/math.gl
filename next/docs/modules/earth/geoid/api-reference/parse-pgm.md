@@ -6,7 +6,7 @@ Parse header of "Earth Gravity Model" \*.pgm file.
 
 ## Functions[​](#functions "Direct link to Functions")
 
-### parsePGM(data, options)[​](#parsepgmdata-options "Direct link to parsePGM(data, options)")
+#### `parsePGM(data, options)`[​](#parsepgmdata-options "Direct link to parsepgmdata-options")
 
 Parse "Earth Gravity Model" loaded from a \*.pgm file, e.g. <https://geographiclib.sourceforge.io/html/geoid.html>
 

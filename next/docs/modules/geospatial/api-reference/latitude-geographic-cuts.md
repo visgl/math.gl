@@ -74,9 +74,13 @@ Polygon inputs are one simple outer ring followed by contained, disjoint holes, 
 
 ## Output and provenance[​](#output-and-provenance "Direct link to Output and provenance")
 
-`clipGeographicPolyline(positions, options)` returns the existing `GeographicSeamPolyline[]`: packed positions, original `world` index, and source edge intervals. Positive-length arcs on the band boundary are retained. An isolated endpoint/tangent contact emits no line segment. A single point is retained when it lies inside the closed band.
+#### `clipGeographicPolyline(positions, options)`[​](#clipgeographicpolylinepositions-options "Direct link to clipgeographicpolylinepositions-options")
 
-`clipGeographicPolygon(rings, options)` returns `GeographicCutPolygon[]`. Each polygon has explicitly closed `rings`; each ring has packed `positions` and one `edges[i]` descriptor for the edge from vertex i to i+1:
+Returns the existing `GeographicSeamPolyline[]`: packed positions, original `world` index, and source edge intervals. Positive-length arcs on the band boundary are retained. An isolated endpoint/tangent contact emits no line segment. A single point is retained when it lies inside the closed band.
+
+#### `clipGeographicPolygon(rings, options)`[​](#clipgeographicpolygonrings-options "Direct link to clipgeographicpolygonrings-options")
+
+Returns `GeographicCutPolygon[]`. Each polygon has explicitly closed `rings`; each ring has packed `positions` and one `edges[i]` descriptor for the edge from vertex i to i+1:
 
 | Kind       | Meaning                                                                                                                                     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------- |

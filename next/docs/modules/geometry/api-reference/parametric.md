@@ -44,7 +44,9 @@ There are no automatic caps. Profiles touching the axis can produce collapsed tr
 
 ## ParametricGeometry[​](#parametricgeometry "Direct link to ParametricGeometry")
 
-`sample(u, v)` returns a finite triple over normalized \[0,1]². `uSegments` and `vSegments` default to 32 and must be positive integers. Optional `normal(u, v)` returns an analytic normal, which is normalized. Otherwise finite differences estimate smooth-surface normals with a parameter step of 1e-5 and one-sided sampling at open boundaries. Winding follows ∂P/∂u × ∂P/∂v.
+#### `sample(u, v)`[​](#sampleu-v "Direct link to sampleu-v")
+
+Returns a finite triple over normalized \[0,1]². `uSegments` and `vSegments` default to 32 and must be positive integers. Optional `normal(u, v)` returns an analytic normal, which is normalized. Otherwise finite differences estimate smooth-surface normals with a parameter step of 1e-5 and one-sided sampling at open boundaries. Winding follows ∂P/∂u × ∂P/∂v.
 
 `periodicU` and `periodicV` default to false. A periodic axis wraps sampling and copies its first position/normal to the UV-1 seam. The sampler must define a smooth periodic surface on that axis. Singular derivatives yield zero normals; discontinuous samples need an explicit normal callback or separate meshes. Positions must be representable as finite Float32 values. Generators do not validate manifoldness or repair self-intersections.
 

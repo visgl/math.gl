@@ -42,19 +42,33 @@ localFrameToMatrix(basis, origin, 'north', 'east', 'down', matrix); // NED.
 
 `LocalFramePoint` is `{x: number, y: number, z: number}`. A local point's x/y/z mean east/north/up for rotations. A fixed point's x/y/z mean Cartesian XYZ. `LocalFrameBasis` stores six numeric factors: `eastX`, `eastY`, `northZ`, `upX`, `upY`, `upZ`. East's Z component is zero; north is up × east. Treat these factors as one basis, rather than independent configurable matrix entries.
 
-`createLocalFrameBasis()` returns setup storage initially oriented at zero longitude and latitude. All other functions require caller-owned storage, return `true` on a successful finite result, and create no coordinate arrays or objects.
+#### `createLocalFrameBasis()`[​](#createlocalframebasis "Direct link to createlocalframebasis")
 
-`eastNorthUpBasis(longitude, latitude, result)` takes **radians**, independent of `config._cartographicRadians`. Longitude is periodic, latitude must lie within ±π/2, and neither angle may be non-finite. At a pole, the supplied longitude chooses the east/north orientation. The basis contains no translation or height.
+Returns setup storage initially oriented at zero longitude and latitude. All other functions require caller-owned storage, return `true` on a successful finite result, and create no coordinate arrays or objects.
 
-`eastNorthUpBasisFromDirections(east, up, result)` retains the supplied directions. The caller must supply unit, mutually perpendicular east/up vectors, with `east.z === 0` and up's horizontal component pointing radially outward. Finiteness is checked; these geometric preconditions are not certified by the function. This lets an adapter preserve its normal convention without inferring a different geodetic position.
+#### `eastNorthUpBasis(longitude, latitude, result)`[​](#eastnorthupbasislongitude-latitude-result "Direct link to eastnorthupbasislongitude-latitude-result")
+
+Takes **radians**, independent of `config._cartographicRadians`. Longitude is periodic, latitude must lie within ±π/2, and neither angle may be non-finite. At a pole, the supplied longitude chooses the east/north orientation. The basis contains no translation or height.
+
+#### `eastNorthUpBasisFromDirections(east, up, result)`[​](#eastnorthupbasisfromdirectionseast-up-result "Direct link to eastnorthupbasisfromdirectionseast-up-result")
+
+Retains the supplied directions. The caller must supply unit, mutually perpendicular east/up vectors, with `east.z === 0` and up's horizontal component pointing radially outward. Finiteness is checked; these geometric preconditions are not certified by the function. This lets an adapter preserve its normal convention without inferring a different geodetic position.
 
 ## Rotations and units[​](#rotations-and-units "Direct link to Rotations and units")
 
-`localToFixed(point, basis, result = point)` rotates ENU to XYZ without translating. `fixedToLocal(point, basis, result = point)` uses the transpose rotation, which is an inverse only when the basis satisfies the orthonormal preconditions. Both capture numeric inputs before writing, support in-place use or separate point output, and retain the input units. An offset in metres remains metres; a velocity in metres/year remains metres/year. A coordinate position needs an origin added separately.
+#### `localToFixed(point, basis, result = point)`[​](#localtofixedpoint-basis-result--point "Direct link to localtofixedpoint-basis-result--point")
+
+Rotates ENU to XYZ without translating.
+
+#### `fixedToLocal(point, basis, result = point)`[​](#fixedtolocalpoint-basis-result--point "Direct link to fixedtolocalpoint-basis-result--point")
+
+Uses the transpose rotation, which is an inverse only when the basis satisfies the orthonormal preconditions. Both capture numeric inputs before writing, support in-place use or separate point output, and retain the input units. An offset in metres remains metres; a velocity in metres/year remains metres/year. A coordinate position needs an origin added separately.
 
 ## Matrices and ownership[​](#matrices-and-ownership "Direct link to Matrices and ownership")
 
-`localFrameToMatrix(basis, origin, firstAxis, secondAxis, thirdAxis, result)` writes a column-major affine 4×4 matrix. The first three columns are the selected signed local axes; the last column is the fixed-space origin in its distance units. `LocalFrameAxis` is `east | north | up | west | south | down`. Triples must use three distinct dimensions and be right handed, such as ENU or north/east/down. All 24 right-handed signed permutations are supported.
+#### `localFrameToMatrix(basis, origin, firstAxis, secondAxis, thirdAxis, result)`[​](#localframetomatrixbasis-origin-firstaxis-secondaxis-thirdaxis-result "Direct link to localframetomatrixbasis-origin-firstaxis-secondaxis-thirdaxis-result")
+
+Writes a column-major affine 4×4 matrix. The first three columns are the selected signed local axes; the last column is the fixed-space origin in its distance units. `LocalFrameAxis` is `east | north | up | west | south | down`. Triples must use three distinct dimensions and be right handed, such as ENU or north/east/down. All 24 right-handed signed permutations are supported.
 
 Use a growable `number[]`, `Matrix4`, or floating typed array with at least 16 elements. Only indices 0–15 are written; view boundaries and later elements remain untouched. Float32 matrix overflow is checked before writing. Floating storage is recommended; other numeric arrays apply their ordinary element conversions.
 

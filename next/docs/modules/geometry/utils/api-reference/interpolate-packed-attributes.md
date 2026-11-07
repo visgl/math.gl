@@ -100,7 +100,7 @@ Values are interpolated in storage units. GPU-normalized formats are not decoded
 
 Invalid layouts, overlapping fields, contributing indices, weights, nonfinite declared values, flat conflicts and exhausted allocation limits throw `RangeError`. No partial output is returned.
 
-## composeAttributeProvenance(parent, child, options?)[​](#composeattributeprovenanceparent-child-options "Direct link to composeAttributeProvenance(parent, child, options?)")
+#### `composeAttributeProvenance(parent, child, options?)`[​](#composeattributeprovenanceparent-child-options "Direct link to composeattributeprovenanceparent-child-options")
 
 Import from `@math.gl/geometry`. Compose the triplet provenance returned by clipping or subdivision: `parent` maps intermediate vertices to original records, and `child` maps final vertices to intermediate records. The result owns `Uint32Array sourceVertexIndices` and `Float64Array sourceVertexWeights`, with three slots per final vertex. Coincident contributor indices are combined and weights normalized to sum to one within floating-point arithmetic. Inputs remain unchanged and the result is structured-cloneable.
 

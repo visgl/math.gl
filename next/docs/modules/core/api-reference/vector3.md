@@ -78,7 +78,9 @@ Note that `Vector3` is a subclass of the built in JavaScript `Array` and can thu
 
 ### len()[​](#len "Direct link to len()")
 
-Returns the magnitude. `length` is the array component count.
+Returns the magnitude.
+
+`length` is the array component count.
 
 ### distance(vector)[​](#distancevector "Direct link to distance(vector)")
 
