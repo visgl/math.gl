@@ -97,9 +97,11 @@ try {
   for (const width of [1200, 600, 375]) {
     await page.setViewportSize({width, height:1000});
     const info = page.locator('.example-info-box');
+    const toggle = info.getByRole('button', {name: 'Albers USA', exact:true});
+    await page.waitForFunction(() => document.querySelector('.example-info-box')?.dataset.compactPanel === String(matchMedia('(max-width: 767px), (max-width: 996px) and (max-height: 500px)').matches));
+    if (await toggle.getAttribute('aria-expanded') === 'false') await toggle.click();
     await info.scrollIntoViewIfNeeded();
     assert((await info.boundingBox()).height > 100, 'Inline panel must retain its natural content height');
-    const toggle = info.getByRole('button', {name: 'Albers USA', exact:true});
     await toggle.click();
     await page.locator('.view-toggle').waitFor({state:'hidden'});
     await toggle.click();
