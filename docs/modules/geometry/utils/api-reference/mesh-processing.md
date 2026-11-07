@@ -16,7 +16,7 @@ vertex count. Both `value` and legacy `values` storage are accepted. Interleaved
 constant attributes are not supported. Values must be finite and indices valid.
 Outputs have fresh buffers and Uint32 indices; inputs are never modified.
 
-## transformGeometry(geometry, matrix)
+#### `transformGeometry(geometry, matrix)`
 
 Accepts a finite affine column-major 4×4 matrix. Positions become Float64 values.
 `NORMAL` or `normals` uses the inverse transpose and normalization. Size-4 `TANGENT`
@@ -25,13 +25,13 @@ present, and normalization. Reflection flips tangent handedness and triangle win
 Normals and tangents require an invertible transform. Auxiliary attributes retain
 their storage types. Projective matrices are rejected.
 
-## mergeGeometries(geometries)
+#### `mergeGeometries(geometries)`
 
 Concatenates one or more triangle meshes and offsets their indices. Attribute names,
 sizes and typed-array constructors must match. Nonindexed meshes receive sequential
 indices. The merged output retains all attributes.
 
-## weldGeometry(geometry, options?)
+#### `weldGeometry(geometry, options?)`
 
 Returns `{geometry, vertexMap, removedVertices}`. `vertexMap` maps each original
 vertex row to its output row. The default compares complete attribute tuples exactly,
@@ -44,7 +44,7 @@ radius search: nearby points across grid boundaries can remain separate. Origina
 coordinates of the first row are retained. Welding can create degenerate triangles;
 it does not remove them or unused vertices.
 
-## getDegenerateTriangles(geometry, areaEpsilon = 0)
+#### `getDegenerateTriangles(geometry, areaEpsilon = 0)`
 
 Returns a Uint32Array of triangle numbers in draw order whose area is at most the
 finite, nonnegative threshold. The default detects zero-area triangles, including

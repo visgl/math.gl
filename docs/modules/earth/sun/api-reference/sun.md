@@ -44,7 +44,6 @@ const light = getSunLight(position.altitude);
 // position.altitude and position.azimuth are radians; light.color is linear RGB.
 ```
 
-
 ## getSunDirection
 
 <p class="badges">
@@ -67,7 +66,6 @@ import {getSunDirection, reverseSkyDirection} from '@math.gl/earth/sun';
 const incomingDirection = getSunDirection(Date.now(), 37.7749, -122.4194);
 const diskDirection = reverseSkyDirection(incomingDirection);
 ```
-
 
 {/* SPDX-License-Identifier: MIT */}
 
@@ -204,7 +202,6 @@ is compiled or executed. Generated fixtures use twice the tables' angular quadra
 resolution and include off-grid altitude/turbidity cases. Runtime use requires no
 downloads or dependencies.
 
-
 {/* SPDX-License-Identifier: MIT */}
 {/* SPDX-FileCopyrightText: Copyright (c) vis.gl contributors */}
 
@@ -214,7 +211,9 @@ downloads or dependencies.
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>
 
-`getCloudLighting(sunAltitude, options?)` estimates incident sunlight, ambient skylight,
+#### `getCloudLighting(sunAltitude, options?)`
+
+Estimates incident sunlight, ambient skylight,
 and a cloud sample's single-scattered color. A spherical Earth lets elevated clouds
 remain sunlit after sunset at ground level and become sunlit before ground sunrise.
 Atmospheric extinction warms the incident sunlight; neutral cloud scattering preserves

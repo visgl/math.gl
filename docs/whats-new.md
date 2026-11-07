@@ -20,6 +20,8 @@ The new runnable Arrow-table example complements the updated descriptor/task-wor
 
 [Projection](./modules/geospatial/projection/README.md) has grown from a proj4 wrapper into a pluggable math.gl engine. Transform coordinates using a broad [projection catalogue](./modules/geospatial/projection/developer-guide/projections.md), with support for datum grids, coordinate operations, and in-place buffers. The new [CRS module](./modules/geospatial/crs/README.md) gives applications a shared vocabulary for coordinate reference systems, WKT, PROJ definitions, and PROJJSON.
 
+Prepared projections now expose an optional immutable [transform description](./modules/geospatial/projection/api-reference/projection.md#resolved-transform-description), including resolved CRS metadata, versioned algorithm identities and ordered execution stages. Graph executors can use it to assess native backend support while retaining a CPU fallback for opaque algorithms and grid resources.
+
 ### Put the world on a grid
 
 The new [DGGS module](./modules/dggs/README.md) brings A5, GeoHash, H3, Plus Codes, Quadkey, and S2 under a common decoder API. Switch between grid systems, find cell boundaries, and handle cells crossing the antimeridian without assembling a different toolkit for each grid.
@@ -35,6 +37,13 @@ Look up a location's timezone with [timezone](./modules/earth/timezone/README.md
 ### Keep the math close and the bundle lean
 
 [Core](./modules/core/README.md) adds clearer matrix and rotation conversions, stronger array types, and tree-shakeable low-level namespaces. New [expressions](./modules/core/expressions/README.md) tools make it possible to parse and evaluate configurable expressions; expression evaluation is experimental.
+
+### Lighting and color calculations
+
+Opt-in [photometric and color LUT utilities](./modules/geometry/lighting/README.md) add
+angular sampling, solid-angle flux integration, peak-normalized grids and CPU LUT
+application. Inputs and outputs are format-independent arrays; parsing remains in
+loaders.gl or other readers, and no dependencies are added.
 
 ### Module structure
 

@@ -5,19 +5,34 @@
     "items": [
       {
         "type": "doc",
-        "id": "README",
-        "label": "Introduction"
+        "id": "developer-guide/README",
+        "label": "Guide"
       },
-      "community",
-      "references-and-credits",
-      "whats-new",
       {
         "type": "doc",
-        "id": "developer-guide/README",
-        "label": "Developer Guide"
+        "id": "community",
+        "label": "Community"
       },
-      "upgrade-guide"
-    ]
+      {
+        "type": "doc",
+        "id": "references-and-credits",
+        "label": "Attribution"
+      },
+      {
+        "type": "doc",
+        "id": "whats-new",
+        "label": "News"
+      },
+      {
+        "type": "doc",
+        "id": "upgrade-guide",
+        "label": "Upgrading"
+      }
+    ],
+    "link": {
+      "type": "doc",
+      "id": "README"
+    }
   },
   {
     "type": "category",
@@ -42,7 +57,7 @@
           },
           {
             "type": "category",
-            "label": "Guides",
+            "label": "Guide",
             "items": [
               {
                 "type": "category",
@@ -54,13 +69,13 @@
                   "slug": "/modules/core/guide/preliminaries"
                 },
                 "items": [
-                  "modules/core/developer-guide/transformations",
-                  "modules/core/developer-guide/functional-math",
-                  "modules/core/developer-guide/view-and-projection",
-                  "modules/core/developer-guide/homogeneous-coordinates",
                   "modules/core/developer-guide/coordinate-systems",
+                  "modules/core/developer-guide/floating-point",
+                  "modules/core/developer-guide/transformations",
+                  "modules/core/developer-guide/homogeneous-coordinates",
+                  "modules/core/developer-guide/view-and-projection",
                   "modules/core/developer-guide/rotations",
-                  "modules/core/developer-guide/floating-point"
+                  "modules/core/developer-guide/functional-math"
                 ]
               },
               {
@@ -68,13 +83,13 @@
                 "label": "Tasks",
                 "items": [
                   "modules/core/tasks/developer-guide/task-runner",
-                  "modules/core/tasks/developer-guide/migration",
-                  "modules/core/developer-guide/workers",
                   "modules/core/tasks/developer-guide/execution",
+                  "modules/core/developer-guide/workers",
                   "modules/core/tasks/developer-guide/custom-workers",
                   "modules/core/tasks/developer-guide/persistent-resources",
                   "modules/core/tasks/developer-guide/shared-memory",
-                  "modules/core/tasks/developer-guide/benchmarks"
+                  "modules/core/tasks/developer-guide/benchmarks",
+                  "modules/core/tasks/developer-guide/migration"
                 ],
                 "link": {
                   "type": "generated-index",
@@ -123,7 +138,9 @@
             "label": "@math.gl/core/types",
             "items": [
               "modules/core/types/api-reference/array-types",
-              "modules/core/types/api-reference/bounds"
+              "modules/core/types/api-reference/bounds",
+              "modules/core/types/api-reference/bounds2d",
+              "modules/core/types/api-reference/bounds3d"
             ],
             "link": {
               "type": "doc",
@@ -167,29 +184,9 @@
         "label": "Geometry",
         "items": [
           {
-            "type": "category",
-            "label": "Guides",
-            "items": [
-              {
-                "type": "category",
-                "label": "Spatial Index",
-                "items": [
-                  "modules/geometry/spatial-index/README"
-                ],
-                "link": {
-                  "type": "generated-index",
-                  "title": "Geometry Spatial Index Guide",
-                  "description": "Guides and background for Geometry: Spatial Index.",
-                  "slug": "/modules/geometry/guide/spatial-index"
-                }
-              }
-            ],
-            "link": {
-              "type": "generated-index",
-              "title": "Geometry Guide",
-              "description": "Guides and background for Geometry.",
-              "slug": "/modules/geometry/guide"
-            }
+            "type": "doc",
+            "id": "modules/geometry/spatial-index/README",
+            "label": "Guide"
           },
           {
             "type": "category",
@@ -228,7 +225,12 @@
               "modules/geometry/culling/api-reference/oriented-bounding-box",
               "modules/geometry/culling/api-reference/plane",
               "modules/geometry/culling/api-reference/ray",
-              "modules/geometry/culling/api-reference/shapes"
+              "modules/geometry/culling/api-reference/shapes",
+              "modules/geometry/culling/api-reference/box-shape",
+              "modules/geometry/culling/api-reference/capsule-shape",
+              "modules/geometry/culling/api-reference/cylinder-shape",
+              "modules/geometry/culling/api-reference/plane-shape",
+              "modules/geometry/culling/api-reference/sphere-shape"
             ],
             "link": {
               "type": "doc",
@@ -281,7 +283,8 @@
               "type": "doc",
               "id": "modules/geometry/utils/README"
             }
-          }
+          },
+          "modules/geometry/lighting/README"
         ],
         "link": {
           "type": "doc",
@@ -294,28 +297,13 @@
         "items": [
           {
             "type": "category",
-            "label": "Guides",
+            "label": "Guide",
             "items": [
-              {
-                "type": "doc",
-                "id": "modules/geospatial/developer-guide/geoarrow",
-                "label": "GeoArrow"
-              },
-              "modules/geospatial/terrain/README",
               "modules/geospatial/developer-guide/terminology",
               {
-                "type": "category",
-                "label": "CRS",
-                "items": [
-                  "modules/geospatial/crs/developer-guide/coordinate-reference-systems",
-                  "modules/geospatial/crs/developer-guide/raster-mesh-preparation"
-                ],
-                "link": {
-                  "type": "generated-index",
-                  "title": "Geospatial CRS Guide",
-                  "description": "Guides and background for Geospatial: CRS.",
-                  "slug": "/modules/geospatial/guide/crs"
-                }
+                "type": "doc",
+                "id": "modules/geospatial/crs/developer-guide/coordinate-reference-systems",
+                "label": "Coordinate Reference Systems"
               },
               {
                 "type": "category",
@@ -324,18 +312,18 @@
                   "modules/geospatial/projection/developer-guide/api-guide",
                   "modules/geospatial/projection/developer-guide/coordinate-systems",
                   "modules/geospatial/projection/developer-guide/projections",
+                  "modules/geospatial/projection/developer-guide/support",
                   "modules/geospatial/projection/developer-guide/projection-engine",
                   "modules/geospatial/projection/developer-guide/external-projection-engines",
                   "modules/geospatial/projection/developer-guide/deformation-models",
-                  "modules/geospatial/projection/developer-guide/support",
                   "modules/geospatial/projection/developer-guide/map-engine",
                   "modules/geospatial/projection/developer-guide/discontinuous-projections",
-                  "modules/geospatial/projection/developer-guide/myriahedral-projections",
-                  "modules/geospatial/myriahedral-maps",
-                  "modules/geospatial/elastic-maps",
                   "modules/geospatial/discontinuous/projection-catalog",
                   "modules/geospatial/discontinuous/README",
+                  "modules/geospatial/myriahedral-maps",
+                  "modules/geospatial/projection/developer-guide/myriahedral-projections",
                   "modules/geospatial/discontinuous/myriahedral",
+                  "modules/geospatial/elastic-maps",
                   {
                     "type": "category",
                     "label": "Validation",
@@ -347,16 +335,15 @@
                     },
                     "items": [
                       "modules/geospatial/projection/accuracy-domains",
-                      "modules/geospatial/projection/modern-proj-audit",
                       "modules/geospatial/projection/independent-validation",
-                      "modules/geospatial/projection/parity-audit",
-                      "modules/geospatial/projection/ellipsoid-qualification",
-                      "modules/geospatial/projection/ellipsoid-p0-qualification",
                       "modules/geospatial/projection/deformation-qualification",
                       "modules/geospatial/projection/benchmarks",
                       "modules/geospatial/projection/acceleration",
                       "modules/geospatial/projection/scorecard",
-                      "modules/geospatial/projection/scorecard-methodology"
+                      "modules/geospatial/projection/ellipsoid-qualification",
+                      "modules/geospatial/projection/ellipsoid-p0-qualification",
+                      "modules/geospatial/projection/modern-proj-audit",
+                      "modules/geospatial/projection/parity-audit"
                     ]
                   }
                 ],
@@ -364,6 +351,17 @@
                   "type": "doc",
                   "id": "modules/geospatial/projection/developer-guide/README"
                 }
+              },
+              {
+                "type": "doc",
+                "id": "modules/geospatial/crs/developer-guide/raster-mesh-preparation",
+                "label": "Projecting Raster Meshes"
+              },
+              "modules/geospatial/terrain/README",
+              {
+                "type": "doc",
+                "id": "modules/geospatial/developer-guide/geoarrow",
+                "label": "GeoArrow"
               }
             ],
             "link": {
@@ -481,29 +479,14 @@
         "label": "Earth",
         "items": [
           {
-            "type": "category",
-            "label": "Guides",
-            "items": [
-              {
-                "type": "category",
-                "label": "Geoid",
-                "items": [
-                  "modules/earth/geoid/developer-guide/geospatial-models"
-                ],
-                "link": {
-                  "type": "generated-index",
-                  "title": "Earth Geoid Guide",
-                  "description": "Guides and background for Earth: Geoid.",
-                  "slug": "/modules/earth/guide/geoid"
-                }
-              }
-            ],
-            "link": {
-              "type": "generated-index",
-              "title": "Earth Guide",
-              "description": "Guides and background for Earth.",
-              "slug": "/modules/earth/guide"
-            }
+            "type": "doc",
+            "id": "modules/earth/geoid/developer-guide/geospatial-models",
+            "label": "Guide"
+          },
+          {
+            "type": "doc",
+            "id": "modules/earth/README",
+            "label": "@math.gl/earth"
           },
           {
             "type": "category",
@@ -556,17 +539,9 @@
         "label": "DGGS",
         "items": [
           {
-            "type": "category",
-            "label": "Guides",
-            "items": [
-              "modules/dggs/developer-guide/dggs"
-            ],
-            "link": {
-              "type": "generated-index",
-              "title": "DGGS Guide",
-              "description": "Guides and background for DGGS.",
-              "slug": "/modules/dggs/guide"
-            }
+            "type": "doc",
+            "id": "modules/dggs/developer-guide/dggs",
+            "label": "Guide"
           },
           {
             "type": "category",
@@ -596,18 +571,9 @@
         "label": "Web Mercator",
         "items": [
           {
-            "type": "category",
-            "label": "Guides",
-            "items": [
-              "modules/web-mercator/developer-guide/web-mercator-coordinates",
-              "modules/web-mercator/developer-guide/web-mercator-offset-accuracy"
-            ],
-            "link": {
-              "type": "generated-index",
-              "title": "Web Mercator Guide",
-              "description": "Guides and background for Web Mercator.",
-              "slug": "/modules/web-mercator/guide"
-            }
+            "type": "doc",
+            "id": "modules/web-mercator/developer-guide/web-mercator-coordinates",
+            "label": "Guide"
           },
           {
             "type": "category",

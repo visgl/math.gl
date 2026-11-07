@@ -9,18 +9,29 @@ import Example from '@site/src/components/culling-queries';
 <Example inline interactive height={520} />
 
 Import `unprojectScreenRay`, `intersectRayBounds`, `intersectRayTriangle`, and `getClosestPointOnTriangle` from
-`@math.gl/geometry/culling` or the lightweight `@math.gl/geometry/culling` entry point.
+`@math.gl/geometry` or the dedicated `@math.gl/geometry/culling` entry point.
 
-- `intersectRayBounds(origin, direction, minimum, maximum, maxT = Infinity)` supports 2D/3D
+#### `intersectRayBounds(origin, direction, minimum, maximum, maxT = Infinity)`
+
+Supports 2D/3D
   closed bounds. Returns entry t, zero for an origin inside, or null. Parallel components and
   boundary contact are supported. Bounds must be ordered and dimensions must match.
-- `intersectRayTriangle(origin, direction, a, b, c, options?)` accepts 3D arrays and returns
+
+#### `intersectRayTriangle(origin, direction, a, b, c, options?)`
+
+Accepts 3D arrays and returns
   `{t, barycentric: [aWeight, bWeight, cWeight]}` or null. Options are `maxT` and
   `backfaceCulling` (default false, counterclockwise fronts). Degenerate triangles and coplanar
   rays have no hit. The triangle is filled, including its edges and vertices.
-- `getClosestPointOnTriangle(point, a, b, c)` returns a new xyz array. Degenerate triangles
+
+#### `getClosestPointOnTriangle(point, a, b, c)`
+
+Returns a new xyz array. Degenerate triangles
   reduce to segments or points. It measures against the filled triangle, not just its edges.
-- `unprojectScreenRay(inverseClipMatrix, viewport, pixel, depthRange?)` returns the finite
+
+#### `unprojectScreenRay(inverseClipMatrix, viewport, pixel, depthRange?)`
+
+Returns the finite
   near-to-far segment as `{origin, direction}`, or `null` for invalid or degenerate input.
   The column-major inverse matrix maps clip coordinates into the caller's output space.
   `viewport` has `width`, `height`, and optional `x`/`y`; the pixel and viewport use the

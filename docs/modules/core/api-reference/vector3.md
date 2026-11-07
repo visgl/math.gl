@@ -6,7 +6,6 @@
 
 `Vector3` extends JavaScript `Array` through its core base classes.
 
-
 ## Usage
 
 ```js
@@ -76,7 +75,9 @@ Note that `Vector3` is a subclass of the built in JavaScript `Array` and can thu
 
 ### len()
 
-Returns the magnitude. `length` is the array component count.
+Returns the magnitude.
+
+`length` is the array component count.
 
 ### distance(vector)
 

@@ -98,6 +98,7 @@ export function checkArrowConformance() {
     const viewTable = new arrow.Table({value: view});
     const copied = splitArrowBuffers(viewTable, {copy: 'all'});
     assert.deepEqual(copied.getChild('value').toArray(), values);
+    assert.deepEqual(new IndexedArrowTable(viewTable, [2, 0, 1]).materializeArrowTable().getChild('value').toArray(), [values[2], values[0], values[1]]);
     assert.notEqual(copied.getChild('value').data[0].variadicBuffers[0].buffer, view.data[0].variadicBuffers[0].buffer);
     assert.deepEqual(hydrateArrowTable(structuredClone(dehydrateArrowTable(viewTable))).getChild('value').toArray(), values);
   }
@@ -105,6 +106,7 @@ export function checkArrowConformance() {
     const vector = arrow.vectorFromArray([[1, 2], null], new optionalTypes.LargeList(new arrow.Field('value', new arrow.Int32())));
     const large = new arrow.Table({value: vector});
     assert.deepEqual(readRows(hydrateArrowTable(structuredClone(dehydrateArrowTable(large)))), readRows(large));
+    assert.deepEqual(readRows(new IndexedArrowTable(large, [1, 0]).materializeArrowTable()), readRows(large).reverse());
   }
   return serializeArrowTableToIPC(table).data;
 }

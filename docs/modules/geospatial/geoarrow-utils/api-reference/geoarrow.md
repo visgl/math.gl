@@ -23,38 +23,46 @@ descriptor types:
 Related semantic types include `GeoArrowEncoding`, `GeoArrowDimension`,
 `GeoArrowCoordinateLayout`, `GeoArrowGeometryValue`, and `GeoArrowBounds`.
 
-`mergeGeoArrowDimensions(left, right)` combines XYZ and XYM semantics without treating M as Z.
+#### `mergeGeoArrowDimensions(left, right)`
+
+Combines XYZ and XYM semantics without treating M as Z.
 `inferGeoArrowGeometryDimension(geometry)` inspects tagged geometry coordinate arrays, including
 nested collections, and returns their combined dimension. Three ordinates imply XYZ; callers with
 XYM data should use their declared semantic dimension instead of inferring it from tuple length.
 
 ## Inspection, validation, traversal, and slicing
 
-### `inspectGeoArrowColumn(column)`
+#### `inspectGeoArrowColumn(column)`
 
 Returns encoding, row/chunk/null/coordinate counts, storage kinds, and validation diagnostics. It
 does not decode WKB/WKT or construct per-row geometry objects.
 
-### `validateGeoArrowColumn(column)`
+#### `validateGeoArrowColumn(column)`
 
 Returns `{valid, issues}`. Each issue has a stable `code`, physical `path`, and human-readable
 `message`.
 
-### `visitGeoArrowCoordinates(column, visitor)`
+#### `visitGeoArrowCoordinates(column, visitor)`
 
 Visits native coordinate tuples in logical row order. The callback receives `(coordinate,
 rowIndex)`. The returned callback value is ignored; use `mapGeoArrowCoordinates` to allocate mapped
 output.
 
-### `sliceGeoArrowColumn(column, begin?, end?)`
+#### `sliceGeoArrowColumn(column, begin?, end?)`
 
 Returns a zero-copy logical slice while preserving chunk boundaries. A full slice returns `column`.
 
-### `sliceGeoArrowArray(array, begin, end)`
+#### `sliceGeoArrowArray(array, begin, end)`
 
 Creates a zero-copy physical view by advancing logical offsets and bitmap bit offsets.
 
-### `getGeoArrowRowCount(column)` / `getGeoArrowVertexCount(column)`
+#### `getGeoArrowRowCount(column)`
+
+Returns the number of logical rows in the column.
+
+#### `getGeoArrowVertexCount(column)`
+
+Returns the number of native coordinate tuples.
 
 Count logical rows or native coordinate tuples directly over descriptors. Serialized columns report
 zero native vertices until decoded with the `/wkb` bridge.
@@ -71,14 +79,14 @@ while any view is in use. Retained streaming batches must keep their original bu
 Small slices may retain large buffers. Cloning, decoding WKB/WKT, filtering/compaction, interleaving,
 reprojection, and renderer preparation are separate operations outside this allocation guarantee.
 
-### `iterateGeoArrowBatches(column)`
+#### `iterateGeoArrowBatches(column)`
 
 Lazily yields `GeoArrowBatchView` objects containing `column` (a single-chunk envelope), `chunkIndex`,
 and `rowOffset` relative to the input column. Empty chunks are retained; no chunks means no views.
 This iterates physical chunks, not a loader streaming protocol. One loader batch may contain several
 chunks. Row offsets are not feature IDs, byte cursors, or batch sequence numbers.
 
-### `getGeoArrowRowView(column, rowIndex)`
+#### `getGeoArrowRowView(column, rowIndex)`
 
 Returns a `GeoArrowRowView` with a one-row `column`, the input `rowIndex`, `chunkIndex`, and
 `chunkRowIndex` before union dispatch. The index must be an in-range nonnegative integer.
@@ -96,7 +104,7 @@ const view = getGeoArrowRowView(column, 10);
 const bounds = getGeoArrowBounds(view.column);
 ```
 
-### `concatenateGeoArrowColumns(columns)`
+#### `concatenateGeoArrowColumns(columns)`
 
 Assembles a nonempty iterable of native columns into one envelope and chunk-reference list, without
 concatenating buffers. Encoding, dimension, and coordinate layout must match. Missing `edges` means
@@ -112,7 +120,7 @@ All three helpers reject WKB/WKT and box columns; decode serialized geometry exp
 
 ## Geometry materialization
 
-### `materializeGeoArrowRows(column)`
+#### `materializeGeoArrowRows(column)`
 
 Returns newly allocated geometry values in logical chunk and row order, with one value per row.
 Null rows remain `null`; empty points have `coordinates: []`, and empty list geometries retain
@@ -130,33 +138,33 @@ value representation and materialize as null rows. Input buffers remain borrowed
 
 ## Bounds and coordinate transforms
 
-### `getGeoArrowBounds(column)`
+#### `getGeoArrowBounds(column)`
 
 Returns `[minX, minY, maxX, maxY]`, or `null` when no finite native coordinate exists.
 
-### `getGeoArrowRowBounds(column)`
+#### `getGeoArrowRowBounds(column)`
 
 Returns one XY bound (or `null`) per logical row in a single descriptor traversal. This is the
 preferred primitive for loaders and query engines that need conservative row pruning.
 
-### `mapGeoArrowCoordinates(column, mapper, options?)`
+#### `mapGeoArrowCoordinates(column, mapper, options?)`
 
 Allocates a new native column and applies `mapper(coordinate, rowIndex)` to each coordinate. Options
 select output dimension/layout and resource limits.
 
-### `mapGeoArrowCoordinatesInto(target, source, mapper, options?)`
+#### `mapGeoArrowCoordinatesInto(target, source, mapper, options?)`
 
 Maps into caller-owned coordinate buffers. Source and target must have compatible physical
 topology. The function returns `target` and never replaces its descriptors.
 
 ## Physical conversion
 
-### `interleaveGeoArrowCoordinates(column)`
+#### `interleaveGeoArrowCoordinates(column)`
 
 Converts separated coordinates to fixed-size interleaved tuples. Already interleaved and
 non-coordinate columns are returned unchanged.
 
-### `convertGeoArrowColumn(column, options?)`
+#### `convertGeoArrowColumn(column, options?)`
 
 Converts native geometry family, semantic dimension, coordinate layout, coordinate type, or offset
 width. Options are `encoding`, `dimension`, `coordinateLayout` (`preserve`, `interleaved`, or
@@ -164,12 +172,12 @@ width. Options are `encoding`, `dimension`, `coordinateLayout` (`preserve`, `int
 (`preserve`, `int32`, or `int64`). Use `/wkb` for serialized targets. Semantic ordinates map by
 name, so M is not reinterpreted as Z.
 
-### `normalizeGeoArrowUnion(column)`
+#### `normalizeGeoArrowUnion(column)`
 
 Sorts dense-union child descriptors by type ID. Dispatch and child buffers are retained. Non-union
 columns and already normalized unions are identity operations.
 
-### `rewindGeoArrow(column, options?)`
+#### `rewindGeoArrow(column, options?)`
 
 Normalizes Polygon and MultiPolygon winding. `outer` is `counter-clockwise` by default; holes use
 the opposite orientation. If no ring changes, the original column is returned.
@@ -186,7 +194,7 @@ passes. Measure mode exposes exact `GeoArrowBuilderMeasurement` counts and can a
 
 Convenience two-pass build with internal allocation.
 
-### `allocateGeoArrowBuilderTarget(measurement, options)`
+#### `allocateGeoArrowBuilderTarget(measurement, options)`
 
 Allocates exact validity, coordinate, and offset buffers independently of a builder instance.
 
@@ -198,14 +206,20 @@ compatibility, a MultiPolygon with no `beginPolygon()` calls is treated as one p
 `writeCoordinateFromDimension(x, y, z, m, sourceDimension)` is the scalar fast path when source and
 target dimensions differ; it maps Z and M by name and does not allocate a coordinate tuple.
 
-### `makeGeoArrowColumnFromGeometryRows(rows, options?)`
+#### `makeGeoArrowColumnFromGeometryRows(rows, options?)`
 
 Builds homogeneous, geometry-collection, or mixed dense-union storage from materialized geometry
 values. Set `encoding: 'geoarrow.geometry'` to force a dense union for homogeneous values.
 
 ## WKB and WKT
 
-### `decodeGeoArrowWKB(column, options?)` / `decodeGeoArrowWKT(column)`
+#### `decodeGeoArrowWKB(column, options?)`
+
+Decodes serialized WKB chunks into native GeoArrow descriptors.
+
+#### `decodeGeoArrowWKT(column)`
+
+Decodes serialized WKT chunks into native GeoArrow descriptors.
 
 Import these functions from `@math.gl/geospatial/geoarrow-utils`. They decode serialized chunks into native
 descriptors while preserving nulls, metadata, CRS, edge semantics, and source chunking. WKB accepts
@@ -231,14 +245,20 @@ single-to-multi promotions and rejects incompatible families.
 
 WKT accepts explicit Z/M/ZM tokens and the established three/four-ordinate compatibility form.
 
-### `getGeoArrowWKBVertexCount(column, traversal?)`
+#### `getGeoArrowWKBVertexCount(column, traversal?)`
 
 Counts vertices across WKB chunks without materializing rows or decoding coordinate ordinates.
 Geometry and ring count fields are sufficient for Point, LineString, Polygon, all multi-geometries,
 and recursive GeometryCollections. Regular binary and BinaryView storage are supported. The
 optional traversal limits are the same as `decodeGeoArrowWKB`.
 
-### `encodeGeoArrowWKB(column)` / `encodeGeoArrowWKT(column)`
+#### `encodeGeoArrowWKB(column)`
+
+Encodes native GeoArrow descriptors into WKB chunks.
+
+#### `encodeGeoArrowWKT(column)`
+
+Encodes native GeoArrow descriptors into WKT chunks.
 
 Import these functions from `@math.gl/geospatial/geoarrow-utils`. They encode native descriptors into
 variable-width serialized descriptors using an exact measure/write pass per source chunk. WKB
@@ -252,7 +272,7 @@ metadata.
 
 ## Polygon tessellation
 
-### `tessellateGeoArrowPolygons(column, options?)`
+#### `tessellateGeoArrowPolygons(column, options?)`
 
 Import this optional function from `@math.gl/geospatial/geoarrow-utils`. It returns `GeoArrowTessellation`:
 
@@ -273,16 +293,16 @@ MultiPolygon row attribution are preserved.
 
 ## Limits and transfer
 
-### `assertGeoArrowResourceLimits(column, options?)`
+#### `assertGeoArrowResourceLimits(column, options?)`
 
 Checks optional maximum rows, coordinates, chunks, nesting depth, and estimated output bytes.
 
-### `getGeoArrowTransferList(column)`
+#### `getGeoArrowTransferList(column)`
 
 Returns unique `ArrayBuffer` instances reachable from the descriptor tree. Shared buffers are
 omitted and no buffer is detached.
 
-### `prepareGeoArrowTransfer(column)`
+#### `prepareGeoArrowTransfer(column)`
 
 Available from `@math.gl/geospatial/geoarrow-utils`. Returns `{column, transferList}` for explicit use with
 `postMessage` or another structured-clone transport.

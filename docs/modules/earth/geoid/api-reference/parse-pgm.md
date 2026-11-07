@@ -8,7 +8,7 @@ Parse header of "Earth Gravity Model" \*.pgm file.
 
 ## Functions
 
-### parsePGM(data, options)
+#### `parsePGM(data, options)`
 
 Parse "Earth Gravity Model" loaded from a \*.pgm file, e.g. https://geographiclib.sourceforge.io/html/geoid.html
 

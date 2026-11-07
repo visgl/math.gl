@@ -1,4 +1,4 @@
-# Geometry
+# @math.gl/geometry
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From v4.2" />
@@ -18,9 +18,11 @@ All generated meshes use `triangle-list` topology and expose `POSITION`, `NORMAL
 `TEXCOORD_0` typed-array attributes. Index buffers automatically use 32-bit values when a mesh has
 more than 65,535 vertices.
 
-The geometry group also provides `@math.gl/geometry`, `/curves`, `/polygon`, `/culling`, and
-`/spatial-index` subpaths. The polygon module combines general tessellation and mesh refinement with
-geographic helpers such as Mercator clipping and globe subdivision.
+The root entry point also exports mesh utilities, curves, polygon operations, analytic queries,
+and spatial indexes. Their reference pages are grouped by topic in the sidebar.
+`@math.gl/geometry/culling` is also available as a dedicated entry point for bounding volumes and queries.
+
+Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](./lighting/README.md). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
 
 ## Feature Card
 
@@ -29,11 +31,15 @@ geographic helpers such as Mercator clipping and globe subdivision.
 | Primitive mesh tessellation | ✅ | [Boxes, capsules, cylinders, planes, spheres and convenience shapes](#api) produce renderer-independent indexed buffers. |
 | Parametric surfaces, lathes and tori | ✅ | [ParametricGeometry, TorusGeometry and LatheGeometry](./api-reference/parametric.md) sample explicit surface functions. |
 | Normals, UVs and index-width selection | ✅ | Primitive POSITION/NORMAL/TEXCOORD_0 attributes and automatic Uint32 promotion for large meshes. |
-| Mesh processing and curve evaluation | ✅ | [Transform/merge/weld utilities](./utils/README.md) and [Cartesian curves](./curves/README.md) are exposed by the geometry group. |
+| Mesh processing | ✅ | [Transform, merge, and weld indexed meshes](./utils/README.md). |
+| Curve evaluation | ✅ | [Sample Cartesian curves and compute transport frames](./curves/README.md). |
 | Rigid articulated panel forests | ✅ | Experimental [HingeTree](./api-reference/hinge-tree.md) evaluates hinge transforms with reusable matrix output. |
-| Analytic queries and spatial indexes | ✅ | [Culling](./culling/README.md), [polygon operations](./polygon/README.md), and [static BVHs](./spatial-index/README.md); each has separate numerical limits. |
+| Analytic queries | ✅ | [Bounding volumes, rays, and shapes](./culling/README.md) for Euclidean containment and intersection. |
+| Polygon processing | ✅ | [Clip, triangulate, and subdivide polygons](./polygon/README.md). |
+| Spatial indexing | ✅ | [BoxIndex, PointIndex, and TriangleBVH](./spatial-index/README.md) accelerate repeated queries. |
 | General solid modeling and manifold repair | ❌ | No public 3D Boolean solid, arbitrary remeshing, or general manifold-repair engine. |
 | Deformable or constrained rigid-body simulation | ❌ | HingeTree has no closed-loop constraints, collisions, forces, or bending solver. |
+| Photometry and color LUTs | ✅ | Optional [lighting and color utilities](./lighting/README.md) sample angular intensity, integrate luminous flux and transform RGB/RGBA buffers. |
 | GPU resource allocation and rendering | ❌ | The module supplies CPU data; GPU buffers, materials, draw calls, and device lifetime belong to rendering libraries. |
 
 ## Installation
@@ -86,8 +92,8 @@ planes are required.
 
 ## Parametric surfaces
 
-The optional [`@math.gl/geometry`](./api-reference/parametric.md) subpath
-provides torus, lathe and sampled surface generators, with an interactive gallery.
+[ParametricGeometry, TorusGeometry, and LatheGeometry](./api-reference/parametric.md)
+provide sampled surface generators from the root entry point, with an interactive gallery.
 
 The experimental `HingeTree` evaluates rigid panels connected by hinges. See the
 [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and

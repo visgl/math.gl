@@ -705,4 +705,4 @@ temporal laws with independent references. See
 and [optional acceleration](../docs/modules/geospatial/projection/acceleration.md).
 S6–S8 add original code/reference generation only, with no new runtime dependencies
 or third-party datasets. S9 consolidates these results in the [published scorecard](../docs/modules/geospatial/projection/scorecard.md);
-[measurement limits and commands](../docs/modules/geospatial/projection/scorecard-methodology.md) preserve the bounded scope.
+[measurement limits and commands](../docs/modules/geospatial/projection/scorecard.md#reproduction) preserve the bounded scope.

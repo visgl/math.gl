@@ -42,7 +42,7 @@ Decodes a token string into a 64-bit cell index when the grid has a numeric repr
 
 Returns the string representation of a cell when the grid has a numeric representation.
 
-### `findDGGSCellColumn(columnNames, decoders?)`
+#### `findDGGSCellColumn(columnNames, decoders?)`
 
 Finds a conventional cell column for the bundled decoders, or for a supplied list of compatible decoders. The function returns the original column name and decoder when exactly one match is available. It returns `null` for missing or ambiguous matches so callers can request an explicit selection.
 
@@ -75,7 +75,7 @@ longitudes and bounds may lie outside [-180, 180]. Bounds use the unwrapped long
 extrema, including poles inside cells. Full-longitude bounds remain unchanged.
 The result is not a wrapped geographic interval.
 
-### `unwrapDGGSBoundary(boundary, referenceLongitude?)`
+#### `unwrapDGGSBoundary(boundary, referenceLongitude?)`
 
 This standalone export applies the same policy to readonly longitude/latitude
 pairs from any decoder. It returns fresh pairs without mutating the input.

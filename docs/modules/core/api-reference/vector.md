@@ -6,7 +6,6 @@
 
 `Vector` is the base class for [Vector2](./vector2.md), [Vector3](./vector3.md), and [Vector4](./vector4.md). It extends [MathArray](./math-array.md) and JavaScript `Array`; use a concrete vector class.
 
-
 ## Magnitude and distance
 
 | Method | Result |
@@ -21,6 +20,8 @@
 
 ## Mutating operations
 
-`normalize()` scales a nonzero vector to unit magnitude and leaves a zero vector unchanged. `multiply(...vectors)` and `divide(...vectors)` operate component by component.
+#### `normalize()`
+
+Scales a nonzero vector to unit magnitude and leaves a zero vector unchanged. `multiply(...vectors)` and `divide(...vectors)` operate component by component.
 
 Copying, addition, subtraction, scaling, interpolation, comparisons, and validation are documented on [MathArray](./math-array.md). Mutating methods return the receiver.

@@ -104,7 +104,7 @@ must already have distinct records and indices; the helper does not weld or clip
 Invalid layouts, overlapping fields, contributing indices, weights, nonfinite declared values,
 flat conflicts and exhausted allocation limits throw `RangeError`. No partial output is returned.
 
-## composeAttributeProvenance(parent, child, options?)
+#### `composeAttributeProvenance(parent, child, options?)`
 
 Import from `@math.gl/geometry`. Compose the triplet provenance returned by clipping or
 subdivision: `parent` maps intermediate vertices to original records, and `child` maps final

@@ -1,28 +1,19 @@
-# Earth
+# @math.gl/earth
 
-The earth group collects Earth model, solar, and timezone utilities. Specific utilities are available
-from their subpaths.
+Earth models, sunlight, astronomy, and timezones, available as named exports from the package root.
 
-## Feature Card
-
-| Feature | Support | Notes |
-| --- | --- | --- |
-| Geoid height grids and interpolation | ✅ | [Geoid APIs](./geoid/README.md) parse/query optional GeographicLib-style grid data. |
-| Sun, Moon and planetary sky state | ✅ | [Sun/sky APIs](./sun/README.md) provide observer coordinates, lighting approximations and celestial appearance helpers. |
-| Bright-star catalogs and rendering data | ✅ | Optional catalog data, proper-motion helpers and star-layer records keep data and rendering integration explicit. |
-| Timezone lookup and civil-calendar arithmetic | ✅ | [Timezone APIs](./timezone/README.md) combine approximate geography with runtime timezone rules and explicit local-time disambiguation. |
-| Explicit UT1/TT sky contexts | ✅ | Reusable sky contexts and snapshots accept explicit time-scale inputs within their documented ephemeris/model scope. |
-| Globally calibrated visibility/lighting tiers | ◐ | Shared sky models are implemented; observational calibration, star visibility integration and tier budgets remain in the [sun roadmap](https://github.com/visgl/math.gl/blob/master/dev-docs/sun-roadmap.md). |
-| Gravity/magnetic spherical-harmonic models | ❌ | No general coefficient-backed gravity or geomagnetic field engine; optional Earth models are [G11 scope/design work](https://github.com/visgl/math.gl/blob/master/dev-docs/geographiclib-roadmap.md). |
-| Qualified ICRF/ITRF/TEME state transformations | ❌ | Full versioned Earth-orientation/time providers and state-vector frame derivatives remain [celestial-frame roadmap work](https://github.com/visgl/math.gl/blob/master/dev-docs/geospatial-roadmap.md). |
-
-## Usage
-
-```ts
-import {Geoid} from '@math.gl/earth';
-import {getSunDirection} from '@math.gl/earth/sun';
-import {lookupTimezoneAsync} from '@math.gl/earth/timezone';
+```typescript
+import {Geoid, getSunPosition, getMoonPosition} from '@math.gl/earth';
 ```
 
-The group root exports `geoid`, `sun`, and `timezone` namespaces. The existing
-`@math.gl/earth`, `@math.gl/earth/sun`, and `@math.gl/earth/timezone` package imports remain available.
+## API
+
+| Topic | Root exports |
+| --- | --- |
+| [Geoid](./geoid/README.md) | `Geoid`, `parsePGM`, `createGeoidFromGrid` |
+| [Sun](./sun/README.md) | Solar and lunar positions, daylight, sky lighting, and observer utilities |
+| [Timezone](./timezone/README.md) | Geographic timezone lookup and local calendar calculations |
+
+The root also exports `geoid`, `sun`, and `timezone` namespaces. The `/sun` and `/timezone` entry points provide focused imports. Star-catalog data is available separately from [`@math.gl/earth/sun/stars`](./sun/api-reference/stars.md).
+
+Load optional geoid grids and timezone geometry explicitly; importing the root does not automatically fetch these datasets.

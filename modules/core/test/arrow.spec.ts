@@ -876,6 +876,7 @@ test.each(['dense', 'sparse'] as const)(
     const table = new arrow.Table({mixed: vector});
     const indexed = new IndexedArrowTable(table, [2, 1, 0, 1]);
     const snapshot = indexed.materializeArrowTable();
+    expect(snapshot.batches).toHaveLength(1);
     expect(Array.from(snapshot.getChild('mixed')!)).toEqual([null, 'hello', 7, 'hello']);
     expect(
       snapshot
@@ -883,5 +884,101 @@ test.each(['dense', 'sparse'] as const)(
         .data.flatMap(data => Array.from(data.typeIds.subarray(0, data.length)))
     ).toEqual([9, 9, 4, 9]);
     expect(new IndexedArrowTable(table, []).materializeArrowTable().numRows).toBe(0);
+    const structType = new arrow.Struct([new arrow.Field('choice', type)]);
+    const nestedType = new arrow.List(new arrow.Field('item', structType));
+    const nestedData = new arrow.Data(
+      nestedType,
+      0,
+      2,
+      0,
+      {[arrow.BufferType.OFFSET]: new Int32Array([0, 2, 3])},
+      [new arrow.Data(structType, 0, 3, 0, undefined, [vector.data[0]!])]
+    );
+    const nested = new arrow.Table({nested: new arrow.Vector([nestedData])});
+    const nestedSnapshot = new IndexedArrowTable(nested, [1, 0, 1]).materializeArrowTable();
+    expect(JSON.parse(JSON.stringify(nestedSnapshot.toArray()))).toEqual([
+      {nested: [{choice: null}]},
+      {nested: [{choice: 7}, {choice: 'hello'}]},
+      {nested: [{choice: null}]}
+    ]);
   }
 );
+
+test('Indexed Arrow materialization preserves raw nanosecond precision and compacts union children', () => {
+  const timestamp = new arrow.Vector([
+    new arrow.Data(new arrow.TimestampNanosecond('UTC'), 0, 2, 0, {
+      [arrow.BufferType.DATA]: new BigInt64Array([1000000001n, 2000000002n])
+    })
+  ]);
+  const table = new arrow.Table({timestamp});
+  const snapshot = new IndexedArrowTable(table, [1, 0, 1]).materializeArrowTable();
+  expect(Array.from(snapshot.getChild('timestamp')!.data[0]!.values)).toEqual([
+    2000000002n,
+    1000000001n,
+    2000000002n
+  ]);
+  const text = arrow.vectorFromArray(['x'.repeat(4096), 'small'], new arrow.Utf8());
+  const type = new arrow.DenseUnion([9], [new arrow.Field('text', text.type)]);
+  const union = new arrow.Vector([
+    new arrow.Data(
+      type,
+      0,
+      2,
+      0,
+      {
+        [arrow.BufferType.TYPE]: new Int8Array([9, 9]),
+        [arrow.BufferType.OFFSET]: new Int32Array([0, 1])
+      },
+      [text.data[0]!]
+    )
+  ]);
+  const selected = new IndexedArrowTable(
+    new arrow.Table({union}),
+    [1, 1, 1]
+  ).materializeArrowTable();
+  expect(selected.batches).toHaveLength(1);
+  expect(selected.getChild('union')!.data[0]!.children[0]!.values.byteLength).toBe(15);
+  expect(Array.from(selected.getChild('union')!)).toEqual(['small', 'small', 'small']);
+});
+
+test('Indexed Arrow gathering preserves sliced bitmaps, maps, lists, nulls and shared dictionaries', () => {
+  const dictionary = arrow.vectorFromArray(
+    ['first', null, 'third'],
+    new arrow.Dictionary(new arrow.Utf8(), new arrow.Int8(), 17)
+  );
+  const pairs = arrow.vectorFromArray(
+    [[1, 2], null, [3, 4]],
+    new arrow.FixedSizeList(2, new arrow.Field('xy', new arrow.Float64()))
+  );
+  const mapType = new arrow.Map_(
+    new arrow.Field(
+      'entries',
+      new arrow.Struct([
+        new arrow.Field('key', new arrow.Utf8(), false),
+        new arrow.Field('value', new arrow.Int32())
+      ]),
+      false
+    )
+  );
+  const maps = arrow.vectorFromArray([new Map([['a', 1]]), null, new Map([['b', 2]])], mapType);
+  const table = new arrow.Table({
+    dictionary,
+    pairs,
+    maps,
+    empty: arrow.vectorFromArray([null, null, null], new arrow.Null()),
+    enabled: arrow.vectorFromArray([false, null, true], new arrow.Bool())
+  });
+  const sliced = table.slice(1).concat(table);
+  const snapshot = new IndexedArrowTable(sliced, [0, 1, 2, 4]).materializeArrowTable();
+  expect(Array.from(snapshot.getChild('dictionary')!)).toEqual([null, 'third', 'first', 'third']);
+  expect(Array.from(snapshot.getChild('enabled')!)).toEqual([null, true, false, true]);
+  expect(Array.from(snapshot.getChild('empty')!)).toEqual([null, null, null, null]);
+  expect(snapshot.getChild('pairs')!.get(0)).toBeNull();
+  expect(Array.from(snapshot.getChild('pairs')!.get(1) as arrow.Vector)).toEqual([3, 4]);
+  expect(JSON.parse(JSON.stringify(snapshot.getChild('maps')!.get(1)))).toEqual({b: 2});
+  const dictionaryData = snapshot.getChild('dictionary')!.data;
+  expect(dictionaryData[0]!.dictionary).toBe(dictionaryData[1]!.dictionary);
+  expect(dictionaryData[0]!.dictionary!.data[0]!.values.buffer).not.toBe(
+    dictionary.data[0]!.dictionary!.data[0]!.values.buffer
+  );
+});
