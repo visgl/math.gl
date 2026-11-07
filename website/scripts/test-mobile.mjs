@@ -103,9 +103,12 @@ try {
       let control;
       if (await ranges.count()) {
         control = ranges.first();
-        const before = await control.inputValue();
         await control.focus();
-        await control.press('ArrowRight');
+        // Exercise the date slider at its year-end limit as well as ordinary values.
+        if (route === 'timezone-globe') await control.press('End');
+        const before = await control.inputValue();
+        const max = Number((await control.getAttribute('max')) ?? 100);
+        await control.press(Number(before) >= max ? 'ArrowLeft' : 'ArrowRight');
         assert.notEqual(await control.inputValue(), before, `${route}: range changed`);
       } else if (await selects.count()) {
         control = selects.first();
