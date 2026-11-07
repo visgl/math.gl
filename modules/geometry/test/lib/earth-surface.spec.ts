@@ -3,9 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {describe, it, expect} from 'vitest';
-import {createSolid} from '../../../../examples/geometry/unfolding-polyhedron/polyhedra';
-import {createLayout} from '../../../../examples/geometry/unfolding-polyhedron/layout';
-import {surfaceVertices} from '../../../../examples/geometry/unfolding-polyhedron/renderer';
+import {createSolid} from '../../../../examples/geometry/unfolding-polyhedron/src/polyhedra';
+import {createLayout} from '../../../../examples/geometry/unfolding-polyhedron/src/layout';
+import {surfaceVertices} from '../../../../examples/geometry/unfolding-polyhedron/src/renderer';
 
 describe('unfolding Earth surface attributes', () => {
   it('keeps the spherical texture attached to every vertex throughout unfolding', () => {

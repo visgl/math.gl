@@ -1,0 +1,94 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import assert from 'node:assert/strict';
+import {fileURLToPath} from 'node:url';
+import {createServer} from 'vite';
+import {chromium} from 'playwright';
+const server = await createServer({root:fileURLToPath(new URL('../../../../examples/geospatial/terrain-sampling/', import.meta.url)),configLoader:'runner',cacheDir:'/tmp/mathgl-terrain-sampling-vite',server:{host:'127.0.0.1',port:0}});
+await server.listen();
+const browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH});
+try {
+  const page=await browser.newPage({viewport:{width:1200,height:950}});
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.goto(server.resolvedUrls.local[0]);
+  await page.getByTestId('sample-status').waitFor();
+  assert.match(await page.getByTestId('sample-status').innerText(),/VALID/);
+  const values = await page.evaluate(async()=> {
+    const {createTerrain,TerrainSampleStatus}=await import('/src/model.js');
+    const a=createTerrain('00-11',false),b=createTerrain('10-01',false);
+    return {triangles:a.triangles.length, missing:createTerrain('00-11',true).triangles.length,
+      outside:a.field.sample(-1,35).status, valid:TerrainSampleStatus.VALID,
+      noData:createTerrain('00-11',true).field.sample(40,40).status,
+      heights:[a.field.sample(35,35,{interpolation:'bilinear'}).height,a.field.sample(35,35,{interpolation:'triangle'}).height,b.field.sample(35,35,{interpolation:'triangle'}).height]};
+  });
+  assert.equal(values.triangles,128);assert(values.missing<128);assert.notEqual(values.outside,values.valid);assert.notEqual(values.noData,values.valid);
+  assert.notEqual(values.heights[0],values.heights[1]);assert.notEqual(values.heights[1],values.heights[2]);
+  const labStats = page.getByTestId('mesh-lab-stats');
+  const martiniStats = await labStats.innerText();
+  await page.getByLabel('Mesh nodal error heatmap').check();
+  assert.equal(await page.locator('[data-mesh-error]').count(), 1089);
+  await page.getByLabel('Mesh algorithm').selectOption('regular');
+  assert.match(await labStats.innerText(), /2048 triangles/);
+  await page.getByLabel('Mesh algorithm').selectOption('martini');
+  await page.getByLabel('Mesh error tolerance').fill('10');
+  assert.notEqual(await labStats.innerText(), martiniStats);
+  await page.getByLabel('Mesh algorithm').selectOption('delatin');
+  assert((await page.getByRole('img', {name: 'Mesh lab wireframe'}).locator('[data-mesh-triangle]').count()) > 0);
+  await page.getByLabel('Mesh dataset').selectOption('dem');
+  assert.match(await labStats.innerText(), /output bytes/);
+  await page.getByLabel('Mesh dataset').selectOption('holes');
+  assert.match(await page.getByRole('status').innerText(), /require complete data/);
+  await page.getByLabel('Mesh algorithm').selectOption('regular');
+  assert((await page.getByRole('img', {name: 'Mesh lab wireframe'}).locator('[data-mesh-triangle]').count()) < 2048);
+  await page.getByLabel('Mesh dataset').selectOption('coast');
+  assert.match(await labStats.innerText(), /2048 triangles/);
+  await page.getByLabel('Show mesh normals').check();
+  await page.getByLabel('Interpolation').selectOption('triangle');
+  await page.getByLabel('Cell diagonal').selectOption('10-01');
+  await page.getByLabel('Analysis view').selectOption('slope');
+  const slopeBlocks = page.getByRole('img', {name: 'slope terrain analysis'}).locator('rect');
+  assert.equal(await slopeBlocks.count(), 81);
+  await page.getByLabel('Gradient level').selectOption('2');
+  assert.equal(await slopeBlocks.count(), 9);
+  const coverageBefore = await slopeBlocks.evaluateAll(blocks => blocks.map(block => block.getAttribute('opacity')));
+  await page.getByLabel('Missing center vertex').check();
+  const coverageAfter = await slopeBlocks.evaluateAll(blocks => blocks.map(block => block.getAttribute('opacity')));
+  assert.notDeepEqual(coverageAfter, coverageBefore);
+  await page.getByLabel('Analysis view').selectOption('contours');
+  const contourSegments = page.getByRole('img', {name: 'contours terrain analysis'}).locator('[data-contour-segment]');
+  const fullSegments = await contourSegments.count();
+  const fullDiagnostics = await page.getByTestId('analysis-description').innerText();
+  assert(fullSegments > 0);
+  await page.getByLabel('Contour tile 1').uncheck();
+  assert((await contourSegments.count()) < fullSegments);
+  const reducedDiagnostics = await page.getByTestId('analysis-description').innerText();
+  assert.match(reducedDiagnostics, /open endpoints or junctions/);
+  assert.notEqual(reducedDiagnostics, fullDiagnostics);
+  await page.getByLabel('Contour tile 1').check();
+  for (const tile of [1, 2, 3, 4]) await page.getByLabel(`Contour tile ${tile}`).uncheck();
+  assert.equal(await contourSegments.count(), 0);
+  assert.match(await page.getByTestId('analysis-description').innerText(), /0 open endpoints or junctions/);
+  for (const tile of [1, 2, 3, 4]) await page.getByLabel(`Contour tile ${tile}`).check();
+  for(const axis of ['X','Y']) await page.getByLabel(`Probe ${axis}`,{exact:true}).fill('40');
+  assert.match(await page.getByTestId('sample-status').innerText(),/NO_DATA/);
+  await page.getByLabel('Probe X',{exact:true}).fill('-10');
+  assert.match(await page.getByTestId('sample-status').innerText(),/OUTSIDE_DOMAIN/);
+  await page.getByLabel('Missing center vertex').uncheck();
+  await page.getByLabel('Probe X',{exact:true}).fill('35');
+  await page.getByLabel('Probe Y',{exact:true}).fill('35');
+  await page.getByLabel('Plan view:',{exact:false}).click({position:{x:50,y:50}});
+  assert.match(await page.getByTestId('sample-status').innerText(),/VALID/);
+  console.log('Terrain: mesh, interpolation differences, diagonals, missing samples, outside domain, normals, and pointer controls passed.');
+  await page.setViewportSize({width:390,height:400});
+  assert.equal(await page.locator('.terrain-sampling').evaluate(element=>element.clientHeight),400);
+  await page.getByText('Triangle interpolation matches').scrollIntoViewIfNeeded();
+  const bottom=await page.getByText('Triangle interpolation matches').boundingBox();
+  assert(bottom.y>=0 && bottom.y+bottom.height<=401);
+  await page.setViewportSize({width:1200,height:950});
+  await page.locator('.terrain-sampling').evaluate(element=>element.scrollTop=0);
+  const outsideLayout=await page.evaluate(()=>{const sibling=document.createElement('div');sibling.style.height='500px';document.body.append(sibling);const height=parseFloat(getComputedStyle(document.body).height);sibling.remove();return {height,expected:innerHeight+500};});
+  assert(outsideLayout.height>=outsideLayout.expected,'Example CSS must not constrain the surrounding page body');
+  assert.deepEqual(errors,[]);
+  if(process.env.SCREENSHOT_PATH) await page.screenshot({path:process.env.SCREENSHOT_PATH});
+} finally {await browser.close();await server.close();}

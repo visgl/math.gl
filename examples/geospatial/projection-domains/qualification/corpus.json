@@ -1220,7 +1220,7 @@
     }
   ],
   "raster": {
-    "path": "../../../earth/sun-terminator/assets/day.jpg",
+    "url": "https://raw.githubusercontent.com/visgl/deck.gl-data/refs/heads/master/earth/nasa-blue-marble/blue-marble-2048x1024.jpg",
     "sha256": "b7c2ee592bae14fc1a60f4a2c75475693156cbbe093e057a1646d938df706d6a",
     "width": 2048,
     "height": 1024,

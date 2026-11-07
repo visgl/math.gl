@@ -5,7 +5,7 @@ meshes with UVs and feature identity. The [runnable example](https://github.com/
 uses native projections; the same preparation function accepts an external engine's **synchronous**
 transform after its asynchronous initialization. No projection engine is imported by the recipe's
 geometry helper. The general projection interface is **projection-engine agnostic**. For an async-only engine,
-use the [adaptive asynchronous inverse recipe](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains/warp#asynchronous-frontiers-and-proj-wasm):
+use the [adaptive asynchronous inverse recipe](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains/src/warp#asynchronous-frontiers-and-proj-wasm):
 refinement requests new sample batches as needed. A one-time preprocessing pass is insufficient
 when refinement introduces new vertices. The [real proj-wasm integration](https://github.com/visgl/math.gl/tree/master/examples/geospatial/proj-wasm-crs)
 reuses an operation across those frontiers without changing synchronous converter semantics.
@@ -75,7 +75,7 @@ execution key alone is insufficient to identify a derived raster mesh.
 
 ## Qualified inverse-mesh recipe
 
-The [projection-domain preparation recipe](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains/warp)
+The [projection-domain preparation recipe](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains/src/warp)
 adds actual EPSG:3031 pole-containing and rotated source grids, Fiji/UTM seam crossings, native
 interrupted charts, and orthographic/tilted-perspective horizons. Target triangles refine against
 source-texel interpolation error before image-footprint clipping. Source IDs and chart ownership

@@ -20,6 +20,7 @@
       "test/**/*.ts",
       "test/**/*.tsx",
       "examples/**/*.js",
+      "examples/**/*.mjs",
       "examples/**/*.jsx",
       "examples/**/*.ts",
       "examples/**/*.tsx",
@@ -68,6 +69,10 @@
     }
   },
   "overrides": [
+    {
+      "includes": ["examples/**/*.jsx", "examples/**/*.tsx"],
+      "javascript": {"jsxRuntime": "reactClassic"}
+    },
     {
       "includes": ["modules/geospatial/src/discontinuous/world-kernels/*.js", "modules/geospatial/src/discontinuous/spherical-clip/*.js"],
       "linter": {"rules": {"suspicious": {"noAssignInExpressions": "off"}}}
