@@ -6,7 +6,6 @@
 
 Configuration, numeric comparisons, angle conversions, and array helpers for core math.
 
-
 ## Usage
 
 ```js

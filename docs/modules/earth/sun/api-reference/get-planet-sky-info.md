@@ -147,7 +147,9 @@ const firstWindow = venus?.visibleIntervals[0];
 if (firstWindow) console.log(new Date(firstWindow.start));
 ```
 
-`getPlanetVisibilityTimes(timestamp, latitude, longitude, options?)` returns seven
+#### `getPlanetVisibilityTimes(timestamp, latitude, longitude, options?)`
+
+Returns seven
 planet records. It searches **forward from the supplied instant**, rather than
 assuming local midnight. `durationHours` defaults to 24, must be greater than zero
 and cannot exceed 72. `elevation` uses the same meters and range as `getPlanetSkyInfo`.

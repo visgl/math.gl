@@ -19,8 +19,13 @@ means equatorial radius and `semiMinorAxis` polar radius, including prolate
 geodesics where the polar radius is larger.
 Triaxial geometry is unsupported; no CRS or datum transformation is inferred.
 
-`inverse(lat1, lon1, lat2, lon2)` returns the shortest geodesic.
-`direct(latitude, longitude, azimuth, distance)` evaluates a geodesic endpoint.
+#### `inverse(lat1, lon1, lat2, lon2)`
+
+Returns the shortest geodesic.
+
+#### `direct(latitude, longitude, azimuth, distance)`
+
+Evaluates a geodesic endpoint.
 `line(latitude, longitude, azimuth)` prepares a reusable line whose
 `position(distance)` accepts signed finite distances.
 `arcDirect(latitude, longitude, azimuth, arc)` and `line(...).arcPosition(arc)`

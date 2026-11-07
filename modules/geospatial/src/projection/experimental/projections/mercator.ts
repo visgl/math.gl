@@ -18,6 +18,7 @@ import {
 /** Spherical and ellipsoidal Mercator, using the PROJ Mercator equations. */
 export const mercator: ProjectionPlugin = {
   name: 'merc',
+  semantics: {id: '@math.gl/geospatial/merc', version: 1},
   aliases: [
     'Mercator',
     'Popular Visualisation Pseudo Mercator',

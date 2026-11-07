@@ -613,7 +613,8 @@ export function renderScorecard(report) {
   out +=
     '\n## Interpret and reproduce\n\n' +
     report.limitations.map(s => '- ' + s).join('\n') +
-    '\n\nSee [measurement commands and provenance](./scorecard-methodology.md), [live browser benchmarks](./benchmarks.md#live-benchmarks) and [worker crossover measurements](./acceleration.md).\n';
+    '\n\nSee [measurement commands and provenance](#reproduction), [live browser benchmarks](./benchmarks.md#live-benchmarks) and [worker crossover measurements](./acceleration.md).\n';
+  out += '\n' + readFileSync(new URL('./scorecard-reproduction.md', import.meta.url), 'utf8');
   return out;
 }
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {

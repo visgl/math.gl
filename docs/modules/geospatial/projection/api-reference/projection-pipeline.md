@@ -276,7 +276,9 @@ are rejected when the implementation is available.
 
 ## Reusable scalar outputs
 
-`projectTo(coordinate, output, epoch?)` and `unprojectTo(coordinate, output, epoch?)`
+#### `projectTo(coordinate, output, epoch?)`
+
+And `unprojectTo(coordinate, output, epoch?)`
 reuse a preallocated number array, `Float32Array` or `Float64Array` and return that exact
 output. Their bound `*Sync` counterparts never import and require preloaded implementations.
 Epochs stay explicit; M is never used as time:
@@ -344,7 +346,6 @@ EPSG operation lookup and dynamic CRS inference remain outside this profile.
 Use the optional [operation catalogue](./operation-catalog.md) to choose among
 application-reviewed pipelines before execution.
 
-
 ## Static Helmert batches
 
 For a direction with exactly one active static `helmert` step, `projectFlat` and
@@ -358,7 +359,6 @@ Mixed pipelines keep general execution. Single-stage time-dependent rates are al
 optimized as described below. See the
 [measurement guidance](../benchmarks.md#operation-pipelines-and-grids)
 to compare your operation chain in both directions.
-
 
 ## Kinematic Helmert batches
 

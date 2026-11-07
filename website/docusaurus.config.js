@@ -26,6 +26,7 @@ const config = getDocusaurusConfig({
   search: 'local',
   customCss: [resolve(__dirname, 'src/styles.css')],
   themeConfig: {
+    tableOfContents: {maxHeadingLevel: 4},
     colorMode: {defaultMode: 'dark', disableSwitch: false, respectPrefersColorScheme: false},
     prism: {theme: themes.github, darkTheme: themes.dracula},
     navbar: {

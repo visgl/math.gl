@@ -154,6 +154,7 @@ export {
 export type {
   CullingResult,
   ImplicitShape,
+  Shape,
   RayIntersection,
   BoxShapeProps,
   CapsuleShapeProps,

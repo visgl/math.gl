@@ -60,7 +60,6 @@ coordinates.
 
 Returns the supplied `result` or a new `Vector2`.
 
-
 ## Radial projection and surface inversion
 
 ```typescript
@@ -72,13 +71,17 @@ const normal = tangentPlane.projectPointToNearestOnPlane(position);
 const nearestFacingSurface = tangentPlane.projectPointOntoEllipsoid(normal, 'normal');
 ```
 
-`projectPointRadiallyOntoPlane(cartesian, result?: Vector2)` intersects the outward ray from the
+#### `projectPointRadiallyOntoPlane(cartesian, result?: Vector2)`
+
+Intersects the outward ray from the
 ellipsoid center with the tangent plane. It differs from orthogonal projection along the plane
 normal. Scaling a source vector by a positive factor does not change its radial projection.
 The zero vector, back-facing rays and near-horizon rays (normalized direction dot normal ≤ `1e-14`)
 return `undefined` without changing the result. Unrepresentable projected coordinates also fail.
 
-`projectPointOntoEllipsoid(point, mode = 'radial', result?: Vector3)` lifts a two-component local
+#### `projectPointOntoEllipsoid(point, mode = 'radial', result?: Vector3)`
+
+Lifts a two-component local
 point onto the snapshotted ellipsoid:
 
 | Mode | Surface mapping |
@@ -99,7 +102,9 @@ The legacy vector getters remain mutable; callers should treat the plane and its
 
 ## Packed projection
 
-`projectPointsFlat(input, mode = 'normal', output?: Float64Array)` maps packed XYZ positions to
+#### `projectPointsFlat(input, mode = 'normal', output?: Float64Array)`
+
+Maps packed XYZ positions to
 packed east/north positions and returns `{positions, valid}`:
 
 - `positions` is the supplied output or a new `Float64Array`, with exactly two components per point.

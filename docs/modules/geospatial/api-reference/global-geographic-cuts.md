@@ -49,7 +49,9 @@ projected separately, so generated chart/atlas edges are not accidentally stroke
 
 ## Reusable atlas cuts and source provenance
 
-`cutSphericalPolygon(rings, options)` returns polygons in an eight-octant atlas,
+#### `cutSphericalPolygon(rings, options)`
+
+Returns polygons in an eight-octant atlas,
 with stable signed-axis `cellId`s. Each polygon has explicitly closed `rings`
 (exterior first, then holes) and one `edges` record per ring edge:
 
@@ -66,7 +68,9 @@ interpolate its own scalar data deliberately. Map-specific projected results kee
 the existing source-coordinate correspondence; they do not claim that generated
 horizon arcs belong to original input edges.
 
-`projectSphericalPolygon(map, rings, options)` is the standalone adapter for any
+#### `projectSphericalPolygon(map, rings, options)`
+
+Is the standalone adapter for any
 existing `MapSurface` polygon projector. `MapEngine.projectGlobalPolygon` uses this
 same implementation. A map's coverage gaps, overlaps, caps, projection equations
 and placements remain authoritative. Atlas fragments may remain separate even
