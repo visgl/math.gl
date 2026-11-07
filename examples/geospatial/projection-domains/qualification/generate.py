@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 """Run with pyproj 3.6.1 / PROJ 9.3.0, offline; no Python dependency ships."""
-import json, math
+import hashlib, json, math
 from pathlib import Path
 import pyproj
 assert pyproj.__version__ == '3.6.1' and pyproj.proj_version_str == '9.3.0'
@@ -29,12 +29,13 @@ add('pacific-mercator','EPSG:3832','+proj=merc +lon_0=150 +datum=WGS84 +units=m'
 add('utm60-left','EPSG:32660',utm,[400000,0,650000,1000000])
 add('utm60-right','EPSG:32660',utm,[650000,0,900000,1000000])
 add('fiji','EPSG:4326','WGS84',[-35,-20,35,20],math.pi/6,(180,-15))
-# Pin the hosted overview without introducing networking into the PROJ oracle.
-image_url = 'https://raw.githubusercontent.com/visgl/deck.gl-data/refs/heads/master/earth/nasa-blue-marble/blue-marble-2048x1024.jpg'
-image_sha256 = 'b7c2ee592bae14fc1a60f4a2c75475693156cbbe093e057a1646d938df706d6a'
+# Verify the bundled overview without introducing networking into the PROJ oracle.
+image_path = '../../../common/assets/blue-marble.jpg'
+image_sha256 = hashlib.sha256((root / image_path).read_bytes()).hexdigest()
+assert image_sha256 == 'b7c2ee592bae14fc1a60f4a2c75475693156cbbe093e057a1646d938df706d6a'
 result = dict(schemaVersion=1,oracle=dict(pyproj='3.6.1',proj='9.3.0',alwaysXY=True,network=False),
               cases=cases,adjacency=[dict(left='utm60-left',right='utm60-right',leftX=256,rightX=0,y=[0,64,192,256])],
-              raster=dict(url=image_url,sha256=image_sha256,
+              raster=dict(path=image_path,sha256=image_sha256,
                           width=2048,height=1024,definition='EPSG:4326',affine=[-180,360/2048,0,90,0,-180/1024],
                           credit='NASA Earth Observatory / GIBS/ESDIS',provenance='../../../earth/sun-terminator/assets/README.md'))
 (root / 'corpus.json').write_text(json.dumps(result,indent=2)+'\n')

@@ -21,8 +21,8 @@ Regenerate with `pyproj==3.6.1` and PROJ 9.3.0 by running `generate.py`. Network
 The generator uses authority definitions independently of math.gl's implementation. Python and
 PROJ are offline development oracles, not published runtime dependencies.
 
-The `raster` entry references the hosted NASA Blue Marble JPEG by URL, with a checksum,
-georeferencing and provenance path. The corpus test downloads the image and verifies its checksum.
+The `raster` entry references the bundled NASA Blue Marble JPEG by local path, with a checksum,
+georeferencing and provenance path. The corpus test reads the bundled image and verifies its checksum.
 Retain the image credit when extracting this corpus. It is a small real geographic overview, not native polar satellite imagery, a COG, or
 independent proof of the image's positional accuracy. Do not treat the resampled lab visualization
 as an oracle for the same projection implementation.
