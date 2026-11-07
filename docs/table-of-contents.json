@@ -271,7 +271,8 @@
               "type": "doc",
               "id": "modules/geometry/utils/README"
             }
-          }
+          },
+          "modules/geometry/lighting/README"
         ],
         "link": {
           "type": "doc",

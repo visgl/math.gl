@@ -22,6 +22,8 @@ The root entry point also exports mesh utilities, curves, polygon operations, an
 and spatial indexes. Their reference pages are grouped by topic in the sidebar.
 `@math.gl/geometry/culling` is also available as a dedicated entry point for bounding volumes and queries.
 
+Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](./lighting/README.md). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
+
 ## Feature Card
 
 | Feature | Support | Notes |
@@ -37,6 +39,7 @@ and spatial indexes. Their reference pages are grouped by topic in the sidebar.
 | Spatial indexing | ✅ | [BoxIndex, PointIndex, and TriangleBVH](./spatial-index/README.md) accelerate repeated queries. |
 | General solid modeling and manifold repair | ❌ | No public 3D Boolean solid, arbitrary remeshing, or general manifold-repair engine. |
 | Deformable or constrained rigid-body simulation | ❌ | HingeTree has no closed-loop constraints, collisions, forces, or bending solver. |
+| Photometry and color LUTs | ✅ | Optional [lighting and color utilities](./lighting/README.md) sample angular intensity, integrate luminous flux and transform RGB/RGBA buffers. |
 | GPU resource allocation and rendering | ❌ | The module supplies CPU data; GPU buffers, materials, draw calls, and device lifetime belong to rendering libraries. |
 
 ## Installation
