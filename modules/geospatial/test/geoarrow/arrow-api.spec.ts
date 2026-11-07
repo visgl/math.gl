@@ -320,3 +320,130 @@ test('GeoArrow mixed coordinate layouts stay distinct through mapping', () => {
   expect(getGeoArrowBounds(moved, {field})).toEqual([11, 22, 15, 26]);
   expect(arrow.DataType.isStruct(moved.type.children[1]!.type.children[0]!.type)).toBe(true);
 });
+
+test('GeoArrow mapping and rewinding restore noncanonical union tags together with the source type', () => {
+  const point = arrow.vectorFromArray(
+    [[1, 2]],
+    new arrow.FixedSizeList(2, new arrow.Field('xy', new arrow.Float64()))
+  );
+  const type = new arrow.DenseUnion([42], [new arrow.Field('point', point.type)]);
+  const vector = new arrow.Vector([
+    new arrow.Data(
+      type,
+      0,
+      1,
+      0,
+      {
+        [arrow.BufferType.TYPE]: new Int8Array([42]),
+        [arrow.BufferType.OFFSET]: new Int32Array([0])
+      },
+      [point.data[0]!]
+    )
+  ]);
+  const field = makeField(type, 'geoarrow.geometry');
+  const mapped = mapGeoArrowCoordinates(vector, ([x, y]) => [x! + 10, y! + 20], {field});
+  expect(mapped.data[0]!.typeIds[0]).toBe(42);
+  expect(Array.from(mapped.get(0) as arrow.Vector)).toEqual([11, 22]);
+  const rewound = rewindGeoArrow(vector, {field});
+  expect(rewound.data[0]!.typeIds[0]).toBe(42);
+  expect(Array.from(rewound.get(0) as arrow.Vector)).toEqual([1, 2]);
+});
+
+test('GeoArrow rejects mixed per-axis precision before transforming buffers', () => {
+  const type = new arrow.Struct([
+    new arrow.Field('x', new arrow.Float32()),
+    new arrow.Field('y', new arrow.Float64())
+  ]);
+  const vector = arrow.vectorFromArray([{x: 1, y: 2}], type);
+  expect(() => makeGeoArrowColumnFromArrowVector(vector)).toThrow(/same floating-point precision/);
+});
+
+test('GeoArrow box bounds remain readable without treating boxes as coordinate tuples', () => {
+  const type = new arrow.Struct(
+    ['xmin', 'ymin', 'xmax', 'ymax'].map(name => new arrow.Field(name, new arrow.Float64()))
+  );
+  const vector = arrow.vectorFromArray([{xmin: 1, ymin: 2, xmax: 3, ymax: 4}], type);
+  const field = makeField(type, 'geoarrow.box');
+  expect(getGeoArrowBounds(vector, {field})).toEqual([1, 2, 3, 4]);
+  expect(rewindGeoArrow(vector, {field})).toBe(vector);
+  expect(() => mapGeoArrowCoordinates(vector, coordinate => coordinate, {field})).toThrow(
+    /box storage/
+  );
+});
+
+test.each([
+  [
+    'geoarrow.point',
+    [{type: 'Point', coordinates: [-5, -6]}, null, {type: 'Point', coordinates: [3, 4]}]
+  ],
+  [
+    'geoarrow.linestring',
+    [
+      {
+        type: 'LineString',
+        coordinates: [
+          [-5, -6],
+          [-7, -8]
+        ]
+      },
+      null,
+      {
+        type: 'LineString',
+        coordinates: [
+          [3, 4],
+          [7, 8]
+        ]
+      }
+    ]
+  ],
+  [
+    'geoarrow.polygon',
+    [
+      {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [-5, -6],
+            [-7, -6],
+            [-7, -8],
+            [-5, -6]
+          ]
+        ]
+      },
+      null,
+      {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [3, 4],
+            [7, 4],
+            [7, 8],
+            [3, 4]
+          ]
+        ]
+      }
+    ]
+  ],
+  [
+    'geoarrow.geometry',
+    [
+      {type: 'Point', coordinates: [-5, -6]},
+      null,
+      {
+        type: 'LineString',
+        coordinates: [
+          [3, 4],
+          [7, 8]
+        ]
+      }
+    ]
+  ]
+] as const)(
+  'GeoArrow imports physical Arrow slices without applying offsets twice: %s',
+  (encoding, rows) => {
+    const column = makeGeoArrowColumnFromGeometryRows(rows as never, {encoding, dimension: 'xy'});
+    const vector = makeArrowVectorFromGeoArrowColumn(column).slice(1, 3);
+    const adapted = makeGeoArrowColumnFromArrowVector(vector, {encoding});
+    expect(materializeGeoArrowRows(adapted)).toEqual(rows.slice(1));
+  }
+);

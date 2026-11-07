@@ -162,6 +162,9 @@ export function inferGeoArrowDimensionFromArrowType(type: arrow.DataType): GeoAr
     ) {
       throw new Error('GeoArrow coordinate leaves require Float32 or Float64 storage.');
     }
+    if (new Set(type.children.map(field => (field.type as arrow.Float).precision)).size > 1) {
+      throw new Error('GeoArrow coordinate axes must use the same floating-point precision.');
+    }
     const names = type.children.map(field => field.name.toLowerCase());
     if (names[0] === 'xmin' && names[1] === 'ymin') {
       return names.includes('zmin')
@@ -388,8 +391,8 @@ function makeArrowDataFromGeoArrowArray(
             : createOptionalArrowType('Utf8View');
         const viewBytes = new Uint8Array(
           array.views.buffer,
-          array.views.byteOffset,
-          array.views.byteLength
+          array.views.byteOffset + (array.offset ?? 0) * 4 * Uint32Array.BYTES_PER_ELEMENT,
+          array.length * 4 * Uint32Array.BYTES_PER_ELEMENT
         );
         return Reflect.construct(arrow.Data, [
           type,
@@ -678,7 +681,6 @@ function mergeGeoArrowDimensions(
 }
 
 /** Tests an Arrow type introduced after the minimum supported runtime. */
-/** Processes Arrow geometry data. */
 function isOptionalArrowType(type: arrow.DataType, name: string): boolean {
   const Constructor = (
     arrow as unknown as Record<string, new (...args: unknown[]) => arrow.DataType>
@@ -687,7 +689,6 @@ function isOptionalArrowType(type: arrow.DataType, name: string): boolean {
 }
 
 /** Constructs an optional Arrow type, failing clearly when the installed runtime lacks it. */
-/** Processes Arrow geometry data. */
 function createOptionalArrowType(name: string, ...arguments_: unknown[]): arrow.DataType {
   const Constructor = (
     arrow as unknown as Record<string, new (...args: unknown[]) => arrow.DataType>
@@ -713,6 +714,8 @@ export function assertArrowGeoArrowType(
   if (encoding === 'geoarrow.geometry') {
     if (!arrow.DataType.isDenseUnion(type))
       throw new Error('GeoArrow geometry requires dense-union storage.');
+    if (type.typeIds.some(typeId => typeId < 0 || typeId > 127))
+      throw new Error('Arrow union tags must be in the range 0 through 127.');
     type.children.forEach((field, index) =>
       assertArrowGeoArrowType(
         field.type,

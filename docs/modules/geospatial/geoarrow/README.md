@@ -88,7 +88,7 @@ a named `xyz`/`xym` child or an explicit `dimension`; width alone cannot disting
   reading coordinates. Ambiguous family inference requires explicit metadata.
 
 Canonical GeoArrow native coordinates use Float64; this adapter also accepts Float32
-for interoperability. See the [GeoArrow memory layout specification](https://geoarrow.org/format.html). Interleaved and separated
+for interoperability. Coordinate axes in a separated tuple must use the same precision. See the [GeoArrow memory layout specification](https://geoarrow.org/format.html). Interleaved and separated
 layouts, XY/XYZ/XYM/XYZM, chunks, sliced validity bitmaps, nested lists, boxes,
 dense unions, and serialized binary/string arrays share the descriptor ABI. Canonical
 union type IDs carry geometry-family and Z/M meaning even when child names differ.
@@ -109,10 +109,12 @@ geometry vectors must be decoded to their physical geometry storage before adapt
 - `mapGeoArrowCoordinates(vector, mapper, options?)` returns a transformed vector
   with new coordinate buffers and preserves null rows. The mapper receives the
   coordinate and logical row index. The source is unchanged. Update CRS/extent metadata yourself if the transformation changes
-  its meaning; metadata is not reprojected by the mapper.
+  its meaning; metadata is not reprojected by the mapper. Boxes are bounds, not coordinate
+  tuples; map the source geometries and recompute their bounds instead.
 - `rewindGeoArrow(vector, options?)` accepts `outer: 'clockwise' |
   'counter-clockwise'` and the existing resource-limit options. It returns the
-  rewound vector; unchanged geometry may retain borrowed buffers.
+  rewound vector; unchanged geometry may retain borrowed buffers. Boxes have no rings
+  and are returned unchanged.
 
 Borrowing is not an immutable snapshot. Mutating or transferring shared buffers
 can affect the source Arrow vector. For worker ownership, use the generic

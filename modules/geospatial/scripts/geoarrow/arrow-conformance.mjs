@@ -8,7 +8,7 @@ import {
   getGeometryColumnsFromSchema, makeGeoArrowColumnFromArrowVector,
   makeArrowVectorFromGeoArrowColumn, getGeoArrowBounds, mapGeoArrowCoordinates
 } from '../../src/geoarrow/index.ts';
-import {materializeGeoArrowRows} from '../../src/geoarrow-utils/index.ts';
+import {materializeGeoArrowRows, makeGeoArrowColumnFromGeometryRows, sliceGeoArrowColumn} from '../../src/geoarrow-utils/index.ts';
 
 /** Checks borrowing, nulls, slices, semantic metadata, mapping, and newer runtime storage. */
 export function checkGeoArrowConformance() {
@@ -26,6 +26,15 @@ export function checkGeoArrowConformance() {
   const moved = mapGeoArrowCoordinates(vector, ([x, y, measure]) => [x + 10, y + 20, measure], {field});
   assert.deepEqual(Array.from(moved.get(0)), [11, 22, 9]);
   assert.deepEqual(Array.from(vector.get(0)), [1, 2, 9]);
+  for (const [encoding, rows] of [
+    ['geoarrow.point', [{type:'Point',coordinates:[-5,-6]},null,{type:'Point',coordinates:[3,4]}]],
+    ['geoarrow.linestring', [{type:'LineString',coordinates:[[-5,-6],[-7,-8]]},null,{type:'LineString',coordinates:[[3,4],[7,8]]}]],
+    ['geoarrow.polygon', [{type:'Polygon',coordinates:[[[-5,-6],[-7,-6],[-7,-8],[-5,-6]]]},null,{type:'Polygon',coordinates:[[[3,4],[7,4],[7,8],[3,4]]]}]],
+    ['geoarrow.geometry', [{type:'Point',coordinates:[-5,-6]},null,{type:'LineString',coordinates:[[3,4],[7,8]]}]]
+  ]) {
+    const original = makeArrowVectorFromGeoArrowColumn(makeGeoArrowColumnFromGeometryRows(rows, {encoding,dimension:'xy'}));
+    assert.deepEqual(materializeGeoArrowRows(makeGeoArrowColumnFromArrowVector(original.slice(1,3), {encoding})), rows.slice(1));
+  }
   const optionalTypes = {...arrow};
   if (optionalTypes.LargeList) {
     const list = arrow.vectorFromArray([[[1, 2, 9], [3, 4, 10]], null], new optionalTypes.LargeList(new arrow.Field('vertices', type)));
@@ -36,6 +45,9 @@ export function checkGeoArrowConformance() {
   if (optionalTypes.Utf8View) {
     const values = ['LINESTRING (0 0, 1 1, 2 2)', null, 'POINT (3 4)'];
     const view = arrow.vectorFromArray(values, new optionalTypes.Utf8View());
-    assert.deepEqual(makeArrowVectorFromGeoArrowColumn(makeGeoArrowColumnFromArrowVector(view)).toArray(), values);
+    const viewColumn = makeGeoArrowColumnFromArrowVector(view);
+    assert.deepEqual(makeArrowVectorFromGeoArrowColumn(viewColumn).toArray(), values);
+    assert.deepEqual(makeArrowVectorFromGeoArrowColumn(sliceGeoArrowColumn(viewColumn, 1, 3)).toArray(), values.slice(1));
+    assert.deepEqual(makeArrowVectorFromGeoArrowColumn(makeGeoArrowColumnFromArrowVector(view.slice(1,3))).toArray(), values.slice(1));
   }
 }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Vector, type Data, type DataType, type Field, type Schema} from 'apache-arrow';
+import {Vector, DataType, BufferType, type Data, type Field, type Schema} from 'apache-arrow';
 import {
   getGeoArrowBounds as getColumnBounds,
   getGeoArrowRowBounds as getColumnRowBounds,
@@ -99,10 +99,13 @@ export function mapGeoArrowCoordinates(
   mapper: GeoArrowCoordinateMapper,
   options?: MakeGeoArrowColumnFromArrowVectorOptions
 ): Vector {
+  const column = makeGeoArrowColumnFromArrowVector(vector, options);
+  if (column.encoding === 'geoarrow.box')
+    throw new Error(
+      'Coordinate mapping does not accept box storage; map geometry coordinates and recompute bounds instead.'
+    );
   return preserveArrowType(
-    makeArrowVectorFromGeoArrowColumn(
-      mapColumnCoordinates(makeGeoArrowColumnFromArrowVector(vector, options), mapper)
-    ),
+    makeArrowVectorFromGeoArrowColumn(mapColumnCoordinates(column, mapper)),
     vector.type
   );
 }
@@ -112,10 +115,10 @@ export function rewindGeoArrow(
   vector: Vector,
   options?: MakeGeoArrowColumnFromArrowVectorOptions & RewindGeoArrowOptions
 ): Vector {
+  const column = makeGeoArrowColumnFromArrowVector(vector, options);
+  if (column.encoding === 'geoarrow.box') return vector;
   return preserveArrowType(
-    makeArrowVectorFromGeoArrowColumn(
-      rewindColumn(makeGeoArrowColumnFromArrowVector(vector, options), options)
-    ),
+    makeArrowVectorFromGeoArrowColumn(rewindColumn(column, options)),
     vector.type
   );
 }
@@ -130,5 +133,20 @@ function preserveArrowDataType(data: Data, type: DataType): Data {
   const children = data.children.map((child, index) =>
     preserveArrowDataType(child, type.children[index]!.type)
   );
-  return data.clone(type, data.offset, data.length, data.nullCount, data.buffers, children);
+  let buffers = data.buffers;
+  const rebuiltType = data.type;
+  if (
+    DataType.isDenseUnion(type) &&
+    DataType.isDenseUnion(rebuiltType) &&
+    type.typeIds.some((typeId, index) => typeId !== rebuiltType.typeIds[index])
+  ) {
+    const typeIds = Int8Array.from((data.typeIds as Int8Array).subarray(0, data.length), typeId => {
+      const childIndex = rebuiltType.typeIdToChildIndex[typeId];
+      if (childIndex === undefined)
+        throw new Error('Rebuilt GeoArrow union tag has no source child.');
+      return type.typeIds[childIndex]!;
+    });
+    buffers = {...data.buffers, [BufferType.TYPE]: typeIds};
+  }
+  return data.clone(type, data.offset, data.length, data.nullCount, buffers, children);
 }
