@@ -1,0 +1,27 @@
+<!doctype html>
+<!-- math.gl
+SPDX-License-Identifier: MIT
+SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+-->
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>math.gl + proj-wasm CRS resolution</title>
+<script id="math-gl-proj-imports" type="importmap">{
+  "imports": {
+    "proj-wasm": "./vendor/proj-wasm/dist/proj.mjs",
+    "ffi-wasm": "./vendor/ffi-wasm/dist/ffi-wasm.mjs",
+    "resource-tracker": "./vendor/resource-tracker/resource.mjs",
+    "squint-cljs/core.js": "./vendor/squint-cljs/core.js",
+    "squint-cljs/src/squint/string.js": "./vendor/squint-cljs/src/squint/string.js",
+    "worker-router": "./vendor/worker-router/dist/index.mjs",
+    "worker-router/worker-bootstrap": "./vendor/worker-router/dist/worker-bootstrap.mjs",
+    "comlink": "./vendor/comlink/dist/esm/comlink.mjs"
+  }
+}</script>
+</head>
+<body>
+<h1>Resolve with proj-wasm, transform with math.gl</h1>
+<p>EPSG:8857 (Equal Earth), with an asynchronous packed-batch PROJ comparison and transferred worker buffers.</p>
+<pre id="result" aria-live="polite" aria-busy="true">Preparing local WASM and CRS database…</pre>
+<script type="module" src="./src/browser.mjs"></script>
+</body></html>

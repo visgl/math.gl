@@ -380,7 +380,7 @@ jobs:
 
       - name: Test projection domains example
         run: |
-          yarn workspace math.gl-projection-domains test
+          yarn test-projection-domains
           yarn workspace math.gl-projection-domains build
 
       - name: Test and build solar terminator
@@ -407,13 +407,13 @@ jobs:
       - name: Test proj-wasm CRS integration in Node and Chromium
         timeout-minutes: 2
         run: |
-          yarn workspace math.gl-proj-wasm-crs test
+          yarn test-proj-wasm-crs
           yarn workspace math.gl-proj-wasm-crs build
-          yarn workspace math.gl-proj-wasm-crs test:browser
+          yarn test-proj-wasm-crs:browser
 
       - name: Test projection domains in Chromium
         timeout-minutes: 3
-        run: yarn workspace math.gl-projection-domains test:browser
+        run: yarn test-projection-domains:browser
 
       - name: Test solar terminator rendering and cut-map detail
         timeout-minutes: 5

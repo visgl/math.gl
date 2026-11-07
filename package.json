@@ -57,7 +57,11 @@
     "check:citations": "node scripts/citations/check.mjs && node --test scripts/citations/*.test.mjs",
     "test-examples:node": "node --test test/examples/*.test.mjs test/examples/*/*/*.test.js test/examples/*/*/*.test.mjs",
     "test-examples:browser": "node test/examples/dggs/cell-explorer/browser-test.mjs && node test/examples/geospatial/terrain-sampling/browser-test.mjs && node test/examples/geospatial/wkb-workbench/browser-test.mjs && node test/examples/earth/sun-terminator/run-browser.mjs",
-    "benchmark:browser": "MATHGL_BROWSER_BENCHMARKS=1 ocular-test headless"
+    "benchmark:browser": "MATHGL_BROWSER_BENCHMARKS=1 ocular-test headless",
+    "test-projection-domains:browser": "node test/examples/geospatial/projection-domains/browser-test.mjs && node test/examples/geospatial/projection-domains/lab/browser-test.mjs",
+    "test-projection-domains": "tsc --project test/examples/geospatial/projection-domains/tsconfig.json && node --experimental-strip-types --test test/examples/geospatial/projection-domains/test/*.test.ts test/examples/geospatial/projection-domains/test/*.test.mjs",
+    "test-proj-wasm-crs": "node --test test/examples/proj-assets.test.mjs test/examples/geospatial/proj-wasm-crs/*.test.mjs",
+    "test-proj-wasm-crs:browser": "node test/examples/geospatial/proj-wasm-crs/browser-test.mjs"
   },
   "devDependencies": {
     "@citation-js/core": "^0.9.0",
@@ -81,6 +85,7 @@
     "pre-commit": "^2.0.0",
     "probe.gl": "^5.0.0",
     "remark-parse": "^11.0.0",
+    "typescript": "^6.0.3",
     "unified": "^11.0.5",
     "vite": "^8.3.6",
     "vitest": "5.0.5"
