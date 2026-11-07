@@ -7,7 +7,7 @@ import {createServer} from 'vite';
 import {chromium} from 'playwright';
 const server = await createServer({root:fileURLToPath(new URL('../../../../examples/geospatial/terrain-sampling/', import.meta.url)),configLoader:'runner',cacheDir:'/tmp/mathgl-terrain-sampling-vite',server:{host:'127.0.0.1',port:0}});
 await server.listen();
-const browser = await chromium.launch();
+const browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH});
 try {
   const page=await browser.newPage({viewport:{width:1200,height:950}});
   const errors=[];page.on('pageerror',error=>errors.push(error.message));

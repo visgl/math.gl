@@ -16,7 +16,10 @@ function imageDifference(first, second) {
 
 const server = await createServer({root: fileURLToPath(new URL('../../../../examples/dggs/cell-explorer/', import.meta.url)), configLoader: 'runner', cacheDir: '/tmp/mathgl-dggs-vite', server: {host:'127.0.0.1',port:0}});
 await server.listen();
-const browser = await chromium.launch({args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']});
+const browser = await chromium.launch({
+  executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH,
+  args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
+});
 try {
   const page = await browser.newPage({viewport:{width:1200,height:800}});
   const errors=[];

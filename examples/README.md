@@ -11,7 +11,7 @@ After installing dependencies and building packages from the repository root, ru
 
 `yarn start` and `yarn build` use package exports. Within the repository, `yarn start-local` uses the shared [local Vite config](vite.config.local.mjs) to alias math.gl imports to workspace source while preserving the example's own Vite options. For a copy outside this repository, preserve the relative layout of any imported `examples/common` sources, replace `workspace:*` dependency versions with published versions, and run `yarn start`.
 
-Run example checks from the repository root with `yarn test-examples:node` and `yarn test-examples:browser`. Run the library benchmark suite in the dev-tools browser harness with `yarn benchmark:browser`.
+Run all example checks from the repository root with `yarn test-examples`. Use `yarn test-examples:node` or `yarn test-examples:browser` for one environment, and append an example name to filter the checks. Run the library benchmark suite in the dev-tools browser harness with `yarn benchmark:browser`.
 
 The website imports these sources using `website-examples`. Public website URLs stay independent of source locations.
 

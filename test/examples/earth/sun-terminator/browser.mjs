@@ -8,6 +8,7 @@ import {chromium} from 'playwright';
 const url = process.env.SUN_TERMINATOR_URL || 'http://127.0.0.1:5187';
 const testUrl = process.env.SUN_TERMINATOR_TEST_URL || `${url}/test`;
 const browser = await chromium.launch({
+  executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH,
   headless: true,
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
 });

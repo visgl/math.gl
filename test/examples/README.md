@@ -1,26 +1,26 @@
 # Example checks
 
-Run these commands from the repository root after installing dependencies and building packages:
+After installing dependencies and building library packages, run all example checks from the repository root:
 
 ```sh
-yarn test-examples:node
-yarn test-examples:browser
+yarn test-examples
 ```
 
-Node checks cover local Vite source resolution, expression previews, elastic maps, raster preparation, GeoArrow workers, solar geometry, glacial data and tectonic history.
-Browser checks cover the DGGS cell explorer, terrain sampling, WKB workbench and solar rendering, using the root Playwright installation.
-Browser checks load each example's project configuration. The solar harness builds the app alongside its root-level test fixtures.
-
-For the CRS and projection-domain examples, run the dedicated checks from the repository root:
+Use `yarn test-examples:node` or `yarn test-examples:browser` to run one environment.
+Append a path fragment or example name to filter the checks:
 
 ```sh
-yarn test-proj-wasm-crs
-yarn test-projection-domains
-yarn workspace math.gl-proj-wasm-crs build
-yarn workspace math.gl-projection-domains build
-yarn test-proj-wasm-crs:browser
-yarn test-projection-domains:browser
+yarn test-examples:node projection-domains
+yarn test-examples:browser proj-wasm-crs
 ```
 
-These browser checks use Vite preview. Prefix either command with
-`EXAMPLE_SERVER_MODE=development` to exercise Vite's development server instead.
+Node checks discover every `*.test.js`, `*.test.mjs`, and `*.test.ts` under this directory,
+including nested projection-domain suites. They build the selected applications and run matching test TypeScript configurations first.
+Browser checks discover `browser-test.mjs` and `run-browser.mjs` entry points and use the root
+Playwright installation. They build each selected example before checking it; the solar harness
+builds its own application and test pages. Each subprocess reports its example or test path.
+
+Add `--list` to inspect the selected checks without running them. Set
+`PLAYWRIGHT_EXECUTABLE_PATH` to use an existing browser executable.
+The CRS and projection-domain browser checks use Vite preview by default; set
+`EXAMPLE_SERVER_MODE=development` to exercise their development servers instead.

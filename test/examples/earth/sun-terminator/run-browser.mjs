@@ -33,6 +33,7 @@ try {
   for (const script of [
     'browser.mjs',
     'camera-browser.mjs',
+    'projections-browser.mjs',
     'cut-morph-browser.mjs',
     'state-detail-browser.mjs'
   ]) {

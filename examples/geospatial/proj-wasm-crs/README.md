@@ -42,8 +42,8 @@ Run the Node workflow and root regression checks:
 
 ```sh
 yarn workspace math.gl-proj-wasm-crs example
-yarn test-proj-wasm-crs
-yarn test-proj-wasm-crs:browser
+yarn test-examples:node proj-wasm-crs
+yarn test-examples:browser proj-wasm-crs
 ```
 
 The browser check uses the production build and the repository's Playwright installation.

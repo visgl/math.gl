@@ -10,9 +10,9 @@ Run from the repository root:
 ```sh
 yarn && yarn build
 yarn workspace math.gl-projection-domains start
-yarn test-projection-domains
+yarn test-examples:node projection-domains
 yarn workspace math.gl-projection-domains build
-yarn test-projection-domains:browser
+yarn test-examples:browser projection-domains
 ```
 
 The website has a separate **Projection domains and external engines** example page.

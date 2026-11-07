@@ -28,7 +28,7 @@ Invalid samples also reject; there is no successful partially omitted mesh.
 
 ## Qualification and limits
 
-Run `yarn test-projection-domains`. The tests use independent, pinned
+Run `yarn test-examples:node projection-domains`. The tests use independent, pinned
 pyproj 3.6.1 / PROJ 9.3.0 reference samples, with networking disabled. Regenerate `reference.json`
 using `generate-reference.py` in that environment. References record source pixels, affine source
 coordinates, geographic results, and CRS identity. No oracle dependency ships with math.gl.
