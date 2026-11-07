@@ -16,19 +16,19 @@ also cancels the obsolete job.
 
 From the repository root, run `yarn workspace math.gl-alpine-ice-age start`.
 Use `yarn workspace math.gl-alpine-ice-age build` for a standalone build and
-`yarn workspace math.gl-alpine-ice-age test` for dataset/interpolation checks.
+`node --test test/examples/geospatial/alpine-ice-age/*.test.mjs` for dataset/interpolation checks.
 
 ## Read the map code
 
 This is a full data application. For a short introduction to `MapEngine`, start
 with `../albers-usa/map.js` or `../myriahedral-maps/layout.ts`.
 
-- `global-app.jsx` owns the React controls, data loading, and playback state.
-- `map-options.js` lists the available maps without importing a renderer.
-- `projection-grid.js` constructs and caches ordinary projection grids.
-- `discontinuous-views.js` constructs `MapEngine` instances and clips field geometry.
-- `global-scene.js` owns deck.gl layers and camera rendering.
-- `myriahedral-animation.js` adapts engine frames to the scene's camera.
+- `src/global-app.jsx` owns the React controls, data loading, and playback state.
+- `src/map-options.js` lists the available maps without importing a renderer.
+- `src/projection-grid.js` constructs and caches ordinary projection grids.
+- `src/discontinuous-views.js` constructs `MapEngine` instances and clips field geometry.
+- `src/global-scene.js` owns deck.gl layers and camera rendering.
+- `src/myriahedral-animation.js` adapts engine frames to the scene's camera.
 
 The UI passes state to the scene. Geometry modules can be exercised without
 mounting React or allocating GPU resources. Data loading and scientific field
@@ -176,15 +176,15 @@ These climate series are independent of PaleoMIST, not calculated from its ice m
 
 The example fetches all ice-grid previews, preview manifests and climate JSON from
 [deck.gl-data/earth/glaciations/v1](https://github.com/visgl/deck.gl-data/tree/2de3d08585770105e1b84a6c0308c934fcce4878/earth/glaciations/v1).
-`sources.js` pins the merged repository commit; LFS gzip data uses GitHub media URLs,
+`src/sources.js` pins the merged repository commit; LFS gzip data uses GitHub media URLs,
 and ordinary JSON uses raw URLs. No scientific data is bundled into this example.
 Preparation scripts remain available for reproducing display assets locally.
-`yarn workspace math.gl-alpine-ice-age test` verifies the pinned public downloads,
+`node --test test/examples/geospatial/alpine-ice-age/*.test.mjs` verifies the pinned public downloads,
 checksums, source provenance, dimensions and scientific reference locations.
 
 ### Attribution widget
 
-The shared `examples/shared/attribution-widget.jsx` component keeps source credits
+The shared [attribution widget](../../common/attribution-widget.jsx) component keeps source credits
 visible in both views. Expand **Data attribution** for the original dataset, paper,
 license, pinned hosted copy and display modifications. Scientific limits are
 listed separately. The tectonic example uses the same component and updates the
@@ -322,10 +322,13 @@ The global map selector includes Peirce and Gringorten quincuncial, Guyou,
 Berghaus star, octahedral Butterfly, Collignon butterfly, Waterman W5, and
 additional interrupted Boggs, Sinu-Mollweide, quartic-authalic, hemispheric
 Mollweide and ocean Goode presets. All use `MapEngine` through
-`discontinuous-views.js`, including seam splitting and transitions through the globe.
+`src/discontinuous-views.js`, including seam splitting and transitions through the globe.
 
 Sinu-Mollweide currently uses equatorial six-lobe cuts, not D3's oblique five-lobe
 arrangement. See the [supported families and projection credits](../../../docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md)
 for aspects, limitations, primary references, and D3/PROJ provenance.
 
 The longitude slider sets the globe longitude or the central meridian of global maps. Drag the globe to rotate; Shift-drag a global flat map to change its central meridian, or drag normally to pan. These controls stay synchronized. Regional/inset maps and geography-aware myriahedral layouts retain their fixed geographic orientation.
+
+Run `yarn start-local` within the math.gl repository to use workspace source,
+or `yarn start` to use package exports. `yarn build` produces a production bundle.

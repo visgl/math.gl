@@ -1,0 +1,55 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.spatial-index-example {
+  position: relative;
+  height: 100%;
+  min-height: 360px;
+  background: #071321;
+  color: #e5f3ff;
+  font:
+    13px/1.5 system-ui,
+    sans-serif;
+  overflow: hidden;
+}
+.spatial-index-example .query-controls {
+  padding: 16px;
+}
+.spatial-index-example label {
+  display: block;
+  margin: 12px 0;
+}
+.spatial-index-example input[type='range'],
+.spatial-index-example select {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  accent-color: #5de8fa;
+}
+.spatial-index-example select,
+.spatial-index-example button {
+  background: #172d44;
+  color: #eaf6ff;
+  border: 1px solid #35546f;
+  border-radius: 7px;
+  padding: 7px;
+  font: inherit;
+}
+.spatial-index-example p {
+  color: #b4cbdf;
+}
+.spatial-index-example .query-caption {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  background: #0b1e30dc;
+  border-radius: 10px;
+  padding: 10px 14px;
+  pointer-events: none;
+  color: #cfeaff;
+}
+
+/* Position the controls over this app's canvas or map. */
+.spatial-index-example .example-panel { position: absolute; left: 16px; top: 16px; z-index: 2; width: min(290px, calc(100% - 76px)); max-height: calc(100% - 78px); overflow: auto; }

@@ -11,8 +11,8 @@ import {
   getGeoArrowBounds,
   getGeoArrowWKBVertexCount,
   getGeoArrowVertexCount
-} from '@math.gl/geospatial/geoarrow/index';
-import type {GeoArrowColumn} from '@math.gl/geospatial/geoarrow/types';
+} from '@math.gl/geospatial/geoarrow';
+import type {GeoArrowColumn} from '@math.gl/geospatial/geoarrow';
 
 const POINT_COUNT = 1_000_000;
 const pointWKB = writeWKB({type: 'Point', coordinates: [1, 2]}, 'xy');

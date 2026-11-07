@@ -1,0 +1,14 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.panel {
+  --probe-bench-group-background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 12px;
+  margin: 1.5rem 0;
+  padding: 1rem;
+}
+.controls { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; }
+.controls label { display: flex; align-items: center; gap: 0.5rem; }
+.controls button, .controls select { min-height: 44px; font: inherit; padding: 0.4rem 0.7rem; }

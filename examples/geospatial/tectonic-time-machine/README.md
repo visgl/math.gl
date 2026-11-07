@@ -7,7 +7,7 @@ timeline landmarks, central meridian, hover coordinate tooltips, graticule and c
 ```sh
 yarn workspace math.gl-tectonic-time-machine start
 yarn workspace math.gl-tectonic-time-machine build
-yarn workspace math.gl-tectonic-time-machine test
+node --test test/examples/geospatial/tectonic-time-machine/*.test.mjs
 ```
 
 ## Data and scope
@@ -199,7 +199,7 @@ and impact state. A subtle cosmetic thermal pulse continues while paused.
 The source-linked event browser and overview rail remain navigation shortcuts
 to the same geological time, with clearly marked illustrative older dates.
 
-`planetary-history.js` also defines a provenance-gated contract for
+`src/planetary-history.js` also defines a provenance-gated contract for
 future impact-flux and biodiversity time series. Each series must identify
 source, license, model, units and method, and provide strictly ordered,
 finite, nonnegative observations. No numerical series has been published
@@ -211,7 +211,7 @@ rather than drawing invented extinction rates or impact frequencies.
 The expandable **Ancient geographic features** panel offers a small curated, searchable
 index of mountain belts, oceans, seas and paleocontinents. Entries are filtered by
 the current geological age; a checkbox shows all entries regardless of time.
-The index lives in `paleo-features.js` and has focused tests.
+The index lives in `src/paleo-features.js` and has focused tests.
 
 **Scientific scope:** these are approximate educational intervals, not precise
 formation/extinction dates. Features may change shape and identity over time.
@@ -227,7 +227,7 @@ geological validation before drawing features on the globe.
 
 ### Sourced geometry contract (follow-up)
 
-`paleo-geometry.js` validates prospective epoch-specific GeoJSON feature records.
+`src/paleo-geometry.js` validates prospective epoch-specific GeoJSON feature records.
 A record requires a feature identifier and name, category, older/younger age bounds,
 a specific reconstruction epoch (`epochMa`), source citation, data license and
 reconstruction model ID. A nonnegative plate ID is optional. Coordinates are
@@ -398,3 +398,6 @@ Globe outlines reuse per-ring coordinate buffers during playback. Map outlines
 are seam-clipped and cached for short intervals, and forced seeks rebuild them
 immediately. Place/trail buffers are reused. Paused globe-camera movement reuses
 land topology instead of retriangulating it for each camera frame.
+
+Run `yarn start-local` within the math.gl repository to use workspace source,
+or `yarn start` to use package exports. `yarn build` produces a production bundle.

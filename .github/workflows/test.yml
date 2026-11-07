@@ -371,70 +371,16 @@ jobs:
       - name: Install Chromium for coverage
         run: yarn playwright install --with-deps chromium
 
-      - name: Test GeoArrow stream worker example
-        run: |
-          node --test examples/geospatial/geoarrow-stream-worker/worker.test.mjs
-          yarn workspace math.gl-geoarrow-stream-worker build
+      - name: Test example Node workflows
+        run: yarn test-examples:node
 
-      - name: Test raster mesh composition
-        run: |
-          yarn workspace math.gl-raster-mesh-preparation test
-          yarn workspace math.gl-raster-mesh-preparation build
-
-      - name: Test projection domains example
-        run: |
-          yarn workspace math.gl-projection-domains test
-          yarn workspace math.gl-projection-domains build
-
-      - name: Test and build solar terminator
-        run: |
-          yarn workspace math.gl-sun-terminator test
-          yarn workspace math.gl-sun-terminator build
-
-      - name: Test and build tectonic time machine
-        run: |
-          yarn workspace math.gl-tectonic-time-machine test
-          yarn workspace math.gl-tectonic-time-machine build
-
-      - name: Test expression preview seam handling
-        run: node --test examples/core/expressions/*.test.mjs
-
-      - name: Test Alpine Ice Age dataset and interpolation
-        run: yarn workspace math.gl-alpine-ice-age test
-
-      - name: Test and build DGGS cell explorer
-        run: |
-          yarn workspace math.gl-dggs-cell-explorer build
-          yarn workspace math.gl-dggs-cell-explorer test:browser
-
-      - name: Test proj-wasm CRS integration in Node and Chromium
-        timeout-minutes: 2
-        run: |
-          yarn workspace math.gl-proj-wasm-crs test
-          yarn workspace math.gl-proj-wasm-crs build
-          yarn workspace math.gl-proj-wasm-crs test:browser
-
-      - name: Test projection domains in Chromium
-        timeout-minutes: 3
-        run: yarn workspace math.gl-projection-domains test:browser
-
-      - name: Test solar terminator rendering and cut-map detail
-        timeout-minutes: 5
-        run: yarn workspace math.gl-sun-terminator test:browser:ci
+      - name: Test example browser workflows
+        timeout-minutes: 10
+        run: yarn test-examples:browser
 
       - name: Check regressions from landed example reviews
         timeout-minutes: 2
         run: node scripts/check-landed-review-examples.mjs
-
-      - name: Test and build WKB workbench
-        run: |
-          yarn workspace math.gl-wkb-workbench build
-          yarn workspace math.gl-wkb-workbench test:browser
-
-      - name: Test and build terrain sampling example
-        run: |
-          yarn workspace math.gl-terrain-sampling build
-          yarn workspace math.gl-terrain-sampling test:browser
   coverage:
     name: Browser coverage
     runs-on: ubuntu-22.04
@@ -564,7 +510,7 @@ jobs:
             });
   website:
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -597,6 +543,29 @@ jobs:
       # Match website deployment: build from source before any package dist files exist.
       - name: Build website
         run: yarn workspace project-website build
+
+      # Keep browser downloads across runs; --with-deps still installs OS libraries.
+      - name: Cache Playwright browser
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-ubuntu22-playwright-chromium-${{ hashFiles('node_modules/playwright-core/browsers.json') }}
+
+      # The Azure Ubuntu mirror has taken 6+ minutes to fetch browser fonts.
+      # Use Ubuntu's main archive and bound stalled network requests. OS libraries
+      # are still installed on every fresh runner; a browser cache cannot replace them.
+      # Hosted runners also use mirror+file entries backed by apt-mirrors.txt.
+      - name: Configure Ubuntu archive for browser dependencies
+        run: |
+          sudo find /etc/apt -maxdepth 2 -type f \( -name '*.list' -o -name '*.sources' -o -name '*mirrors*.txt' \) \
+            -exec sed -i 's|http[s]*://azure\.archive\.ubuntu\.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' {} +
+          printf 'Acquire::Retries "2";\nAcquire::http::Timeout "20";\nAcquire::https::Timeout "20";\n' | sudo tee /etc/apt/apt.conf.d/80-ci-network
+
+      - name: Install browser for mobile website checks
+        run: yarn playwright install --with-deps chromium
+
+      - name: Check mobile navigation and fullscreen
+        run: node website/scripts/test-mobile.mjs
 
       - name: Build next website
         env:

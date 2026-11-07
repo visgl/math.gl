@@ -14,3 +14,6 @@ attributes are unchanged. It preserves indices, draw count, and primitive topolo
 the CPU mesh to luma.gl. Depth-tested shading and triangle edges expose the generated tessellation.
 Pointer orbit, wheel/pinch zoom, keyboard arrows/+/- and camera reset are available.
 Models, GPU buffers, device, controls, and the animation frame are released on unmount or geometry change.
+
+Run `yarn start-local` inside the math.gl repository to use workspace source.
+Run `yarn start` to use package exports or `yarn build` for a production bundle.

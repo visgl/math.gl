@@ -6,13 +6,13 @@ Natural Earth land/ocean colors, optional NASA textures, dark back faces, coordi
 
 ## Read the source
 
-Start with `layout.ts` for the `MapDescription` and `MapEngine` construction.
-`app.ts` connects that layout builder and the land texture to the shared example
-controller. `view.ts` contains only the controls' markup.
+Start with `src/layout.ts` for the `MapDescription` and `MapEngine` construction.
+`src/app.ts` connects that layout builder and the land texture to the shared example
+controller. `src/view.ts` contains only the controls' markup.
 
 The shared files in `../../geometry/unfolding-polyhedron` have separate responsibilities:
 
-- `app.ts`: control events, playback, orbit gestures, and tooltip presentation.
+- `src/app.ts`: control events, playback, orbit gestures, and tooltip presentation.
 - `scene.ts`: evaluates poses, fits the camera, and passes positions to the renderer.
 - `renderer.ts`: WebGL resources, shaders, textures, and drawing. Imagery status
   is reported through a callback rather than written into the UI.
@@ -50,3 +50,6 @@ Visual target: the graticule Sealine view in
 [Nico Belmonte's demonstration](https://philogb.github.io/page/myriahedral/), inspected
 October 22, 2026 at closed, intermediate and flat poses. No source code or static
 assets from that demo are used. This does not reproduce its exact cuts or all modes.
+
+Run `yarn start-local` within the math.gl repository to use workspace source,
+or `yarn start` to use package exports. `yarn build` produces a production bundle.

@@ -1220,7 +1220,7 @@
     }
   ],
   "raster": {
-    "path": "../../../earth/sun-terminator/assets/day.jpg",
+    "path": "../../../common/assets/blue-marble.jpg",
     "sha256": "b7c2ee592bae14fc1a60f4a2c75475693156cbbe093e057a1646d938df706d6a",
     "width": 2048,
     "height": 1024,

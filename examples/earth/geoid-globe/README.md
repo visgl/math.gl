@@ -10,9 +10,12 @@ Hover values use the selected grid and interpolation directly. Cleanup cancels
 requests and finalizes the Deck instance when navigating away.
 
 The standalone and website examples fetch pinned EGM96 PGM assets from
-`deck.gl-data/earth/geoid/v1` through `sources.js`. The geoid package retains its
+`deck.gl-data/earth/geoid/v1` through `src/sources.js`. The geoid package retains its
 published asset exports for library consumers. These grids measure geoid
 undulation above WGS84, not terrain elevation.
 
 Basemap imagery uses NASA Blue Marble via the public GIBS EPSG:4326 WMS service,
 configured in `examples/common/blue-marble.js`. No access token is required.
+
+Run `yarn start-local` inside the math.gl repository to use workspace source.
+Run `yarn start` to use package exports or `yarn build` for a production bundle.

@@ -7,7 +7,8 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "start-local": "vite --config ../../vite.config.local.mjs"
   },
   "dependencies": {
     "@deck.gl-community/panels": "^9.4.8",

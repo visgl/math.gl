@@ -3,5 +3,5 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {lazy} from 'react';
 import LiveExample from '../live-globe';
-const Example = lazy(() => import('website-examples/geospatial/terrain-sampling/app'));
+const Example = lazy(() => import('website-examples/geospatial/terrain-sampling/src/app.jsx'));
 export default function Component(props) {return <LiveExample {...props} Globe={Example} label="Terrain sampling" />;}

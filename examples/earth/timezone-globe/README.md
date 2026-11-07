@@ -20,10 +20,13 @@ High geometry loads only when selected. Both datasets are emitted by the product
 `GlobeView` is experimental in deck.gl. Approximate boundaries are for visualization,
 not authoritative timezone lookup. Attribution is displayed on the globe.
 
-The website reuses `mountTimezoneGlobe` from `app.js` in a browser-only React
-wrapper. `main.js` supplies Vite asset URLs for this standalone version. The
+The website reuses `mountTimezoneGlobe` from `src/app.js` in a browser-only React
+wrapper. `src/main.js` supplies Vite asset URLs for this standalone version. The
 mount function accepts an isolated container and returns cleanup that finalizes
 Deck, removes event listeners, and aborts outstanding geometry fetches.
 
 Basemap imagery uses NASA Blue Marble via the public GIBS EPSG:4326 WMS service,
 configured in `examples/common/blue-marble.js`. No access token is required.
+
+Run `yarn start-local` inside the math.gl repository to use workspace source.
+Run `yarn start` to use package exports or `yarn build` for a production bundle.

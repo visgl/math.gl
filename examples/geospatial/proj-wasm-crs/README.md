@@ -10,34 +10,49 @@ an opt-in `@math.gl/geospatial/crs` provider. The runnable workflow:
 4. Resolves compound `EPSG:7405` successfully and verifies native strict execution rejects it.
 5. Destroys owned PROJ objects/contexts and shuts down the example's worker pool.
 
-From the repository root, after installing dependencies:
+## Source layout
+
+- `src/node.mjs` runs the CRS workflow from Node.
+- `src/browser.mjs` runs both workflows and displays their results.
+- `src/crs-resolution/` contains database lookup, native/PROJ comparisons and packed-batch processing.
+- `src/raster-preparation/` contains adaptive raster preparation, its evaluator and worker.
+- `scripts/` prepares the prebuilt runtime assets for Vite.
+
+After installing dependencies from the repository root, build math.gl and start Vite:
 
 ```sh
 yarn build
-yarn workspace math.gl-proj-wasm-crs test
-yarn workspace math.gl-proj-wasm-crs example
-yarn workspace math.gl-proj-wasm-crs build
 yarn workspace math.gl-proj-wasm-crs start
-# Open http://127.0.0.1:8080
 ```
 
-The browser build copies installed packages and their adjacent worker, WASM,
-database and notice files into `dist/vendor`. It uses an import map and requires
-no CDN or runtime network service. Serve it over HTTP; opening a file URL does not
-provide the worker/module environment. Keep these asset paths together when deploying.
-
-Run the real browser smoke test after building:
+To build and preview the production example:
 
 ```sh
-yarn playwright install chromium
-yarn workspace math.gl-proj-wasm-crs test:browser
+yarn workspace math.gl-proj-wasm-crs build
+yarn workspace math.gl-proj-wasm-crs serve
 ```
+
+Vite bundles the application and its task workers. Its public directory serves the
+installed PROJ runtime packages during development and copies their worker, WASM,
+database and notice files into `dist/vendor` for production. The page's import map
+preserves those packages' relative asset paths. Keep the vendor tree with the app
+when deploying; the example loads all runtime assets locally.
+
+Run the Node workflow and root regression checks:
+
+```sh
+yarn workspace math.gl-proj-wasm-crs example
+yarn test-examples:node proj-wasm-crs
+yarn test-examples:browser proj-wasm-crs
+```
+
+The browser check uses the production build and the repository's Playwright installation.
 
 Both Node and Chromium compare native math.gl results with real proj-wasm results,
 check the inverse and unsupported compound case. Provider unit tests cover resource
 cleanup, pending requests and error propagation. The browser test rejects external requests.
 
-`provider.mjs` is application example code, not an automatically registered math.gl
+`src/crs-resolution/provider.mjs` is application example code, not an automatically registered math.gl
 backend. An embedding application owns `proj.init`/`proj.shutdown`; the provider
 owns a context and waits for pending lookups on disposal. Use a fresh resolver for
 a changed database/configuration. Provenance records the pinned package and EPSG
@@ -51,7 +66,7 @@ no claims about grid or epoch transformations. The fourth PROJ ordinate is fixed
 to zero for this static comparison; it is not a convention for mapping XYZM to XYZT.
 
 The public proj-wasm API remains asynchronous after initialization. Direct PROJ
-execution in `example.mjs` is therefore a separate asynchronous workflow, not an
+execution in `src/crs-resolution/index.mjs` is therefore a separate asynchronous workflow, not an
 implementation of math.gl's synchronous `PreparedProjection` interface. Use it
 to preprocess buffers before passing them to a synchronous rendering consumer.
 
@@ -59,7 +74,7 @@ See the [external projection engines guide](../../../docs/modules/geospatial/pro
 
 ## Packed-buffer preprocessing
 
-The example also runs `batch-example.mjs` in Node and Chromium. `batch.mjs` is a reusable
+The example also runs `src/crs-resolution/batch-example.mjs` in Node and Chromium. `src/crs-resolution/batch.mjs` is a reusable
 **application recipe**, not a registered projection backend or a synchronous CRS converter:
 
 ```js
@@ -104,7 +119,7 @@ waits for accepted work to settle, then destroys normalized/original operations 
 It is idempotent and does not shut down an application-owned PROJ pool.
 
 The completed buffers are transferred with math.gl `runner.runTask(..., {execution: 'worker',
-inputOwnership: 'transfer'})` to `consume-worker.mjs`, which computes bounds and returns the same
+inputOwnership: 'transfer'})` to `src/crs-resolution/consume-worker.mjs`, which computes bounds and returns the same
 packed geometry. Tests assert sender detachment, source-row preservation, exact downstream parity
 and forward/inverse accuracy. This separates async projection preprocessing from rendering; the
 consumer can replace bounds computation with triangulation or other geometry work. The demo owns

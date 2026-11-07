@@ -42,12 +42,15 @@ const array = [0, 0, 0];
 // const arrayVector = new CesiumMatrix4();
 // const objectVector = new THREEMatrix4();
 const matrix4 = new Matrix4();
+// Keep inputs immutable so repeated timings do not accumulate scale or shear.
+const inputMatrix = new Matrix4().rotateZ(0.3).translate([1, 2, 3]);
+const otherMatrix = new Matrix4().rotateX(0.2);
 
-const IDENTITY = [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
-const classicArray = [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-const float32Array = new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
-const float64Array = new Float64Array([1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+const classicArray = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+const float32Array = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+const float64Array = new Float64Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
 
 const mathglVector4 = new Vector4();
 const dirVector4 = new Vector4(0, 0, 0, 0);
@@ -60,34 +63,30 @@ export function matrix4Bench(suite, addReferenceBenchmarks) {
     .group('@math.gl/core: Matrix4 constructors')
     .add(
       'Matrix4#new Matrix4()',
-      () => configure({debug: false}),
+      {initialize: () => configure({debug: false})},
       () => new Matrix4()
     )
     .add(
       'Matrix4#new Matrix4(debug)',
-      () => configure({debug: true}),
+      {initialize: () => configure({debug: true})},
       () => new Matrix4()
     )
-    .add(
-      'Matrix4#copy()',
-      () => configure({debug: false}),
-      () => matrix4.copy(IDENTITY)
+    .add('Matrix4#copy()', {initialize: () => configure({debug: false})}, () =>
+      matrix4.copy(IDENTITY)
     )
-    .add(
-      'Matrix4#copy(debug)',
-      () => configure({debug: true}),
-      () => matrix4.copy(IDENTITY)
+    .add('Matrix4#copy(debug)', {initialize: () => configure({debug: true})}, () =>
+      matrix4.copy(IDENTITY)
     )
-    .add(
-      'Matrix4#set()',
-      () => configure({debug: false}),
-      () => matrix4.set(1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+    .add('Matrix4#set()', {initialize: () => configure({debug: false})}, () =>
+      matrix4.set(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
     )
     .add('Matrix4#setRowMajor()', () =>
-      matrix4.setRowMajor(1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+      matrix4.setRowMajor(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
     )
     .add('Matrix4#identity', () => matrix4.identity())
-    .add('Matrix4#fromQuaternion', () => matrix4.fromQuaternion([1, 1, 1, 1]));
+    .add('Matrix4#fromQuaternion', () =>
+      matrix4.fromQuaternion([0, 0, Math.sin(0.15), Math.cos(0.15)])
+    );
   // .add('Matrix4#from(Matrix4)', () => matrix4.from(arrayVector))
   // .add('Matrix4#from(Object)', () => matrix4.from(objectVector))
   // .add('Matrix4#to(Matrix4)', () => matrix4.to(arrayVector))
@@ -96,7 +95,7 @@ export function matrix4Bench(suite, addReferenceBenchmarks) {
   if (addReferenceBenchmarks) {
     suite
       .add('Array(16)', () => new Array(16))
-      .add('[1, 0, 0, 0, ...]', () => [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1])
+      .add('[1, 0, 0, 0, ...]', () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
       .add('new Float32Array(16)', () => new Float32Array(16))
       .add('new Float32Array(IDENTITY)', () => new Float32Array(IDENTITY))
       .add('new Float64Array(16)', () => new Float64Array(16))
@@ -110,34 +109,36 @@ export function matrix4Bench(suite, addReferenceBenchmarks) {
       .add('Matrix4#to(Array)', () => matrix4.to(array))
       .add('Matrix4#to(Float32Array)', () => matrix4.to(float32Array));
     // .group('debug validation cost')
-    // .add('Matrix4#validate (debug)', () => configure({debug: true}), () => matrix4.check())
-    // .add('Matrix4#validate ', () => configure({debug: false}), () => matrix4.check())
+    // .add('Matrix4#validate (debug)', {initialize: () => configure({debug: true})}, () => matrix4.check())
+    // .add('Matrix4#validate ', {initialize: () => configure({debug: false})}, () => matrix4.check())
   }
 
   suite
     .group('@math.gl/core: Matrix4 Multiplication')
-    .add('Matrix4#multiplyRight(Matrix4)', () => matrix4.multiplyRight(matrix4))
-    .add('mat4#multiply(Matrix4)', () => mat4.multiply(matrix4, matrix4, matrix4))
-    .add('Matrix4#transform(dir4)', () => matrix4.transform(dirVector4, mathglVector4))
-    .add('Matrix4#transform(point4)', () => matrix4.transform(pointVector4, mathglVector4))
-    .add('Matrix4#transformAsVector(v3)', () => matrix4.transformAsVector(vector3, vector3))
-    .add('Matrix4#transformAsPoint(v3)', () => matrix4.transformAsVector(vector3, vector3));
+    .add('Matrix4#copy + multiplyRight(Matrix4)', () =>
+      matrix4.copy(inputMatrix).multiplyRight(otherMatrix)
+    )
+    .add('mat4#multiply(Matrix4)', () => mat4.multiply(matrix4, inputMatrix, otherMatrix))
+    .add('Matrix4#transform(dir4)', () => inputMatrix.transform(dirVector4, mathglVector4))
+    .add('Matrix4#transform(point4)', () => inputMatrix.transform(pointVector4, mathglVector4))
+    .add('Matrix4#transformAsVector(v3)', () => inputMatrix.transformAsVector(vector3, array))
+    .add('Matrix4#transformAsPoint(v3)', () => inputMatrix.transformAsPoint(vector3, array));
 
   suite
     .group('@math.gl/core: Matrix4 accessors')
-    .add('Matrix4#determinant()', () => matrix4.determinant())
-    .add('Matrix4#getScale()', () => matrix4.getScale())
-    .add('Matrix4#getTranslation()', () => matrix4.getTranslation())
-    .add('Matrix4#getRotation()', () => matrix4.getRotation())
-    .add('Matrix4#getRotationMatrix3()', () => matrix4.getRotationMatrix3());
+    .add('Matrix4#determinant()', () => inputMatrix.determinant())
+    .add('Matrix4#getScale()', () => inputMatrix.getScale())
+    .add('Matrix4#getTranslation()', () => inputMatrix.getTranslation())
+    .add('Matrix4#getRotation()', () => inputMatrix.getRotation())
+    .add('Matrix4#getRotationMatrix3()', () => inputMatrix.getRotationMatrix3());
 
   suite
     .group('@math.gl/core: Matrix4 operations')
-    .add('Matrix4#transpose()', () => matrix4.transpose())
-    .add('Matrix4#invert()', () => matrix4.invert())
+    .add('Matrix4#copy + transpose()', () => matrix4.copy(inputMatrix).transpose())
+    .add('Matrix4#copy + invert()', () => matrix4.copy(inputMatrix).invert())
 
-    .add('Matrix4#scale()', () => matrix4.scale(2))
-    .add('Matrix4#translate()', () => matrix4.translate([1, 1, 1]));
+    .add('Matrix4#copy + scale()', () => matrix4.copy(inputMatrix).scale(2))
+    .add('Matrix4#copy + translate()', () => matrix4.copy(inputMatrix).translate([1, 1, 1]));
 
   if (addReferenceBenchmarks) {
     suite
