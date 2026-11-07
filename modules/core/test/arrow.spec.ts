@@ -840,3 +840,48 @@ test('Indexed Arrow views reject indexes that would wrap an Int32Array', () => {
   const vector = {length: 0x80000002} as arrow.Vector<arrow.Int32>;
   expect(() => new IndexedArrowVector(vector, [0x80000000])).toThrow(RangeError);
 });
+
+test.each(['dense', 'sparse'] as const)(
+  'Indexed Arrow materialization preserves %s union type IDs and nulls',
+  mode => {
+    const fields = [
+      new arrow.Field('integer', new arrow.Int32()),
+      new arrow.Field('text', new arrow.Utf8())
+    ];
+    const type =
+      mode === 'dense'
+        ? new arrow.DenseUnion([4, 9], fields)
+        : new arrow.SparseUnion([4, 9], fields);
+    const integer = arrow.vectorFromArray(
+      mode === 'dense' ? [7] : [7, null, null],
+      new arrow.Int32()
+    );
+    const text = arrow.vectorFromArray(
+      mode === 'dense' ? ['hello', null] : [null, 'hello', null],
+      new arrow.Utf8()
+    );
+    const vector = new arrow.Vector([
+      new arrow.Data(
+        type,
+        0,
+        3,
+        0,
+        {
+          [arrow.BufferType.TYPE]: new Int8Array([4, 9, 9]),
+          [arrow.BufferType.OFFSET]: mode === 'dense' ? new Int32Array([0, 0, 1]) : undefined
+        },
+        [integer.data[0]!, text.data[0]!]
+      )
+    ]);
+    const table = new arrow.Table({mixed: vector});
+    const indexed = new IndexedArrowTable(table, [2, 1, 0, 1]);
+    const snapshot = indexed.materializeArrowTable();
+    expect(Array.from(snapshot.getChild('mixed')!)).toEqual([null, 'hello', 7, 'hello']);
+    expect(
+      snapshot
+        .getChild('mixed')!
+        .data.flatMap(data => Array.from(data.typeIds.subarray(0, data.length)))
+    ).toEqual([9, 9, 4, 9]);
+    expect(new IndexedArrowTable(table, []).materializeArrowTable().numRows).toBe(0);
+  }
+);

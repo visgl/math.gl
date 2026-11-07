@@ -4,6 +4,7 @@
 
 import * as arrow from 'apache-arrow';
 import type {Buffers} from 'apache-arrow/data';
+import {createArrowData, getArrowVariadicBuffers} from './arrow-data';
 import {splitArrowBuffers, type SplitArrowBuffersOptions} from './split-arrow-buffers';
 
 /** Structured-cloneable Arrow data buffers; types are supplied by the IPC schema. */
@@ -18,6 +19,8 @@ export type DehydratedArrowData = {
   buffers: Partial<Buffers<arrow.DataType>>;
   /** Nested child data in schema order. */
   children: DehydratedArrowData[];
+  /** Extra value buffers used by variable-width view types in newer Arrow runtimes. */
+  variadicBuffers: readonly Uint8Array[];
   /** Dictionary value chunks, when this data uses dictionary encoding. */
   dictionary?: DehydratedArrowData[];
 };
@@ -121,6 +124,7 @@ function dehydrateArrowData(data: arrow.Data): DehydratedArrowData {
       [arrow.BufferType.TYPE]: data.buffers[arrow.BufferType.TYPE]
     },
     children: data.children.map(child => dehydrateArrowData(child)),
+    variadicBuffers: getArrowVariadicBuffers(data),
     dictionary: data.dictionary?.data.map(chunk => dehydrateArrowData(chunk))
   };
 }
@@ -137,13 +141,14 @@ function hydrateArrowData<T extends arrow.DataType>(
     data.dictionary && arrow.DataType.isDictionary(type)
       ? new arrow.Vector(data.dictionary.map(chunk => hydrateArrowData(chunk, type.dictionary)))
       : undefined;
-  return new arrow.Data(
+  return createArrowData(
     type,
     data.offset,
     data.length,
     data.nullCount,
     data.buffers as Partial<Buffers<T>>,
     children,
-    dictionary
+    dictionary,
+    data.variadicBuffers
   );
 }

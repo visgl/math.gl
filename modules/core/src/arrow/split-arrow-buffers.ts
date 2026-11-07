@@ -4,6 +4,7 @@
 
 import * as arrow from 'apache-arrow';
 import type {Buffers} from 'apache-arrow/data';
+import {createArrowData, getArrowVariadicBuffers} from './arrow-data';
 
 /** Arrow JS typed array used in Arrow internal buffer slots. */
 type ArrowTypedArray =
@@ -181,7 +182,7 @@ function splitArrowDataBuffers<T extends arrow.DataType>(
     [arrow.BufferType.TYPE]: splitArrowBuffer(data.buffers[arrow.BufferType.TYPE], options)
   };
 
-  return new arrow.Data(
+  return createArrowData(
     data.type,
     data.offset,
     data.length,
@@ -189,7 +190,8 @@ function splitArrowDataBuffers<T extends arrow.DataType>(
     data._nullCount,
     buffers,
     children,
-    dictionary
+    dictionary,
+    getArrowVariadicBuffers(data).map(buffer => splitArrowBuffer(buffer, options))
   );
 }
 
@@ -231,7 +233,7 @@ function splitArrowBuffer<T>(array: T, options: SplitArrowBuffersContext): T {
 
   let copy = options.copies.get(array);
   if (!copy) {
-    copy = array.slice();
+    copy = array instanceof Uint8Array ? new Uint8Array(array) : array.slice();
     options.copies.set(array, copy);
   }
   return copy as T;

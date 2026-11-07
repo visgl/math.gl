@@ -63,6 +63,49 @@ export function checkArrowConformance() {
   assert.equal(values.byteLength, 0);
   assert.deepEqual(Array.from(hydrateArrowTable(transferred).getChild('score').toArray()), [10, 20, 30]);
   assert.deepEqual(Array.from(table.getChild('score').toArray()), [10, 20, 30]);
+  for (const mode of ['dense', 'sparse']) {
+    const fields = [new arrow.Field('integer', new arrow.Int32()), new arrow.Field('text', new arrow.Utf8())];
+    const type = mode === 'dense' ? new arrow.DenseUnion([4, 9], fields) : new arrow.SparseUnion([4, 9], fields);
+    const integer = arrow.vectorFromArray(mode === 'dense' ? [7] : [7, null, null], new arrow.Int32());
+    const text = arrow.vectorFromArray(mode === 'dense' ? ['hello', null] : [null, 'hello', null], new arrow.Utf8());
+    const vector = new arrow.Vector([new arrow.Data(type, 0, 3, 0, {
+      [arrow.BufferType.TYPE]: new Int8Array([4, 9, 9]),
+      [arrow.BufferType.OFFSET]: mode === 'dense' ? new Int32Array([0, 0, 1]) : undefined
+    }, [integer.data[0], text.data[0]])]);
+    const unionTable = new arrow.Table({mixed: vector});
+    const snapshot = new IndexedArrowTable(unionTable, [2, 1, 0, 1]).materializeArrowTable();
+    assert.deepEqual(Array.from(snapshot.getChild('mixed')), [null, 'hello', 7, 'hello']);
+    assert.deepEqual(Array.from(hydrateArrowTable(structuredClone(dehydrateArrowTable(unionTable))).getChild('mixed')), [7, 'hello', null]);
+  }
+  const buffer = Buffer.from([1, 2, 3]);
+  const bufferData = new arrow.Data(new arrow.Uint8(), 0, 3, 0, {[arrow.BufferType.DATA]: buffer});
+  const bufferVector = new arrow.Vector([bufferData]);
+  const bufferCopy = splitArrowBuffers(bufferVector, {copy: 'all'});
+  bufferCopy.data[0].values[0] = 99;
+  assert.equal(buffer[0], 1);
+  assert.notEqual(bufferCopy.data[0].values.buffer, buffer.buffer);
+  assert.equal(bufferCopy.data[0].values.buffer.byteLength, 3);
+  const bufferTable = new arrow.Table({value: bufferVector});
+  const bufferPayload = dehydrateArrowTable(bufferTable, {copy: 'all'});
+  const bufferValues = bufferPayload.batches[0].children[0].buffers[arrow.BufferType.DATA];
+  const bufferClone = structuredClone(bufferPayload, {transfer: [bufferValues.buffer]});
+  assert.deepEqual(Array.from(hydrateArrowTable(bufferClone).getChild('value').toArray()), [1, 2, 3]);
+  assert.equal(buffer.byteLength, 3);
+  const optionalTypes = {...arrow};
+  if (optionalTypes.Utf8View) {
+    const values = ['long value '.repeat(8), null, 'short'];
+    const view = arrow.vectorFromArray(values, new optionalTypes.Utf8View());
+    const viewTable = new arrow.Table({value: view});
+    const copied = splitArrowBuffers(viewTable, {copy: 'all'});
+    assert.deepEqual(copied.getChild('value').toArray(), values);
+    assert.notEqual(copied.getChild('value').data[0].variadicBuffers[0].buffer, view.data[0].variadicBuffers[0].buffer);
+    assert.deepEqual(hydrateArrowTable(structuredClone(dehydrateArrowTable(viewTable))).getChild('value').toArray(), values);
+  }
+  if (optionalTypes.LargeList) {
+    const vector = arrow.vectorFromArray([[1, 2], null], new optionalTypes.LargeList(new arrow.Field('value', new arrow.Int32())));
+    const large = new arrow.Table({value: vector});
+    assert.deepEqual(readRows(hydrateArrowTable(structuredClone(dehydrateArrowTable(large)))), readRows(large));
+  }
   return serializeArrowTableToIPC(table).data;
 }
 

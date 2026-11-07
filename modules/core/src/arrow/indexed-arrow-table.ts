@@ -373,6 +373,17 @@ export class IndexedArrowTable<T extends arrow.TypeMap> {
    * rows when duplicate indexes are present.
    */
   materializeArrowTable(): arrow.Table<T> {
+    // Union builders cannot infer child IDs from decoded values, including nested unions.
+    // Let Arrow's physical slicing and IPC writer retain those IDs and isolate the snapshot.
+    if (this.schema.fields.some(field => containsArrowUnion(field.type))) {
+      const batches = Array.from(
+        this.indexes,
+        index => this.table.slice(index, index + 1).batches
+      ).flat();
+      const selected = new arrow.Table(this.schema, batches);
+      const copied = arrow.tableFromIPC(arrow.tableToIPC(selected));
+      return copied as arrow.Table<T>;
+    }
     const materializedColumns = Object.fromEntries(
       this.schema.fields.map(field => {
         const columnName = field.name as keyof T & string;
@@ -489,4 +500,11 @@ function getCachedRawChildVector<T extends arrow.TypeMap, P extends keyof T & st
   }
 
   return (tableCache.get(columnName) as arrow.Vector<T[P]> | null | undefined) ?? null;
+}
+
+/** Detects unions at any nesting level before a builder-based materialization. */
+function containsArrowUnion(type: arrow.DataType): boolean {
+  if (arrow.DataType.isUnion(type)) return true;
+  if (arrow.DataType.isDictionary(type)) return containsArrowUnion(type.dictionary);
+  return (type.children ?? []).some(field => containsArrowUnion(field.type));
 }

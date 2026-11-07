@@ -131,7 +131,9 @@ Array-like search helpers over visible rows.
 
 #### `materializeArrowTable()`
 
-Copies the visible rows into a new concrete Arrow table. Visible row order and duplicate indexes are
+Copies the visible rows into a new concrete Arrow table. Union-containing schemas use an
+Arrow IPC snapshot so child type IDs survive materialization; this path costs additional
+encoding work. Visible row order and duplicate indexes are
 preserved.
 
 #### `toArray()` and `[Symbol.iterator]()`
