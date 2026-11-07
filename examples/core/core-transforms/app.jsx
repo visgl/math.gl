@@ -56,8 +56,9 @@ export default function CoreTransforms() {
       </ExamplePanel>
       <div className="core-transforms-view">
         <Cube matrix={matrix} />
-        <div style={{padding: '12px 24px'}}>
-          <strong>Model matrix · rows displayed, storage is column-major</strong>
+        <details className="core-matrix-readout">
+          <summary>Model matrix</summary>
+          <p>Rows displayed; storage is column-major.</p>
           <pre data-role="matrix">
             {[0, 1, 2, 3]
               .map(row =>
@@ -75,7 +76,7 @@ export default function CoreTransforms() {
               .join(', ')}
             )
           </p>
-        </div>
+        </details>
       </div>
     </div>
   );

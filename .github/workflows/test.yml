@@ -595,6 +595,12 @@ jobs:
       - name: Build website
         run: yarn workspace project-website build
 
+      - name: Install browser for mobile website checks
+        run: yarn playwright install --with-deps chromium
+
+      - name: Check mobile navigation and fullscreen
+        run: node website/scripts/test-mobile.mjs
+
       - name: Build next website
         env:
           WEBSITE_BASE_URL: /math.gl/next/

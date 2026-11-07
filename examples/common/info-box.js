@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {BoxPanelContainer, CustomPanel, PanelManager, applyPanelTheme} from '@deck.gl-community/panels';
 import './example-panel.css';
+import {configureCompactPanel} from './compact-panel.js';
 
 /** Mount existing DOM controls in the shared collapsible panel without replacing their state. */
 export function mountInfoBox(host, {title, theme = 'sleek-dark', width = 280} = {}) {
@@ -19,5 +20,6 @@ export function mountInfoBox(host, {title, theme = 'sleek-dark', width = 280} = 
     collapsible: true, defaultOpen: true, style: {width: '100%'}
   });
   manager.setProps({components: [box]});
-  return () => manager.finalize();
+  const cleanupCompact = configureCompactPanel(host, box);
+  return () => { cleanupCompact(); manager.finalize(); };
 }
