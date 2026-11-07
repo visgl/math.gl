@@ -38,6 +38,22 @@ to zero vectors.
 - `origin` - Optional ray origin.
 - `direction` - Optional ray direction.
 
+#### `at(t, result?)`
+
+Evaluates the ray at a nonnegative distance. Writes into the optional result vector.
+
+#### `closestPointTo(point, result?)`
+
+Returns the closest point on the ray, clamping projections behind its origin.
+
+#### `distanceTo(point)`
+
+Returns Euclidean distance from a point to the ray.
+
+#### `transform(matrix)`
+
+Transforms the ray in place and renormalizes its direction. Subsequent class parameters are distances in the new space. Use standalone `transformRay()` to preserve the original parameterization instead.
+
 ## Query functions
 
 The class stores the ray; triangle and bounds intersections are separate functions:

@@ -49,7 +49,9 @@ scalar solver's pole policy.
 
 ## Adaptive subdivision
 
-`subdivideRhumbPolyline` accepts the existing generic subdivision options,
+#### subdivideRhumbPolyline
+
+Accepts the existing generic subdivision options,
 including `transform`, `tolerance`, `size`, `targetSize`, `maxDepth` and
 `maxVertices`. `maxSurfaceDistance` bounds each emitted edge's surface distance.
 `longitudeTurns`, when supplied, contains one integer per original input edge;

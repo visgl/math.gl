@@ -36,20 +36,26 @@ see the [CRS and projection API guide](../developer-guide/api-guide.md#choose-re
 
 `domain` is required: a closed rectangle with increasing west/east and south/north bounds. It is captured at construction. Rectangles do not cross the antimeridian; split such applications into separate regions. The [accuracy scorecard](../accuracy-domains.md) supplies tested configurations and regions, not automatic global validity declarations.
 
-`contains(longitude, latitude)` checks the declared rectangle and finite input. `projectTo(longitude, latitude, result)` and `unprojectTo(x, y, result)` also execute the plugin and validate the result. Both return `false` for a domain violation, plugin rejection or nonfinite coordinate. Forward and inverse write only `result.x` and `result.y`; existing Z remains untouched. An inverse result must lie inside the geographic rectangle. Failure leaves the reusable result untouched.
+#### `contains(longitude, latitude)`
+
+Checks the declared rectangle and finite input. `projectTo(longitude, latitude, result)` and `unprojectTo(x, y, result)` also execute the plugin and validate the result. Both return `false` for a domain violation, plugin rejection or nonfinite coordinate. Forward and inverse write only `result.x` and `result.y`; existing Z remains untouched. An inverse result must lie inside the geographic rectangle. Failure leaves the reusable result untouched.
 
 This is a single-projection mathematical interface; normal CRS transformations continue to use `Projection` or `ProjectionTransform`. Plugins must implement both mutable horizontal hooks. Pass a loaded plugin when using lazy descriptors.
 
 ## Jacobians and factors
 
-`jacobian(longitude, latitude, result)` fills a caller-owned `ProjectionJacobian`, created with `createProjectionJacobian()`:
+#### `jacobian(longitude, latitude, result)`
+
+Fills a caller-owned `ProjectionJacobian`, created with `createProjectionJacobian()`:
 
 | Field | Meaning |
 | --- | --- |
 | `dxDLongitude`, `dyDLongitude` | Partial derivatives along longitude |
 | `dxDLatitude`, `dyDLatitude` | Partial derivatives along latitude |
 
-`factors(longitude, latitude, result)` fills a caller-owned `ProjectionFactors`, created with `createProjectionFactors()`. It includes the Jacobian and:
+#### `factors(longitude, latitude, result)`
+
+Fills a caller-owned `ProjectionFactors`, created with `createProjectionFactors()`. It includes the Jacobian and:
 
 | Field | Meaning |
 | --- | --- |

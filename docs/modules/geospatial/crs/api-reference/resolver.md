@@ -35,7 +35,9 @@ as a Promise. Providers are tried in order. Only `null` advances to the next pro
 an exception propagates. Provider IDs must be unique within a resolver. Identifier
 keys are exact and case-sensitive. A provider owns any authority-specific normalization.
 
-`resolve(input)` accepts the shared `CRSInput`: a definition, `CRSReference`, or
+#### `resolve(input)`
+
+Accepts the shared `CRSInput`: a definition, `CRSReference`, or
 `SpatialReference`. It returns an immutable `{input, lookups}`. Each lookup records
 the identifier, provider ID and optional version. WKT, PROJ strings, PROJJSON objects
 and opaque definitions pass through without syntax or execution validation. References

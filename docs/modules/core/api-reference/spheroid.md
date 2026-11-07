@@ -30,14 +30,14 @@ cartesianToSpheroid(point, shape);
 
 ## Functions
 
-### spheroidToCartesian(point, geometry, result = point)
+#### `spheroidToCartesian(point, geometry, result = point)`
 
 Reads longitude/latitude/height from `point.x/y/z` and writes Cartesian XYZ into
 `result.x/y/z`. Angles are in radians; axes, height and
 Cartesian coordinates use the same distance unit. Latitude is not wrapped or
 restricted by this low-level function; the CRS adapter enforces its own domain.
 
-### cartesianToSpheroid(point, geometry, result = point)
+#### `cartesianToSpheroid(point, geometry, result = point)`
 
 Reads Cartesian XYZ from `point.x/y/z` and writes longitude radians, latitude
 radians and ellipsoidal height into `result.x/y/z`. The sphere inverse is analytic. The ordinary oblate path retains

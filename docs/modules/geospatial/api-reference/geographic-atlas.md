@@ -114,7 +114,9 @@ explicit polar-cap selection, simple outer-plus-contained-hole rings, winding,
 closure and work limits retain the [seam contracts](./geographic-seams.md).
 Global caps are explicit; arbitrary complements and polygon repair are not inferred.
 
-`clipPolygon(inputs)` returns `{chart, rings}` components. Rings have:
+#### `clipPolygon(inputs)`
+
+Returns `{chart, rings}` components. Rings have:
 
 - `positions`: explicitly closed packed longitude/latitude/attribute coordinates.
 - `normals`: canonical unit normals, stride three, including closure.
@@ -137,7 +139,9 @@ multiple components. Nested retained islands become separate components, with
 holes assigned to their immediate containing component. A chart completely covered by the input receives a generated
 closed boundary even when no original edge enters it.
 
-`clipPolyline(positions, {longitudeTurns?})` retains source order and intervals,
+#### `clipPolyline(positions, {longitudeTurns?})`
+
+Retains source order and intervals,
 including repeated wound crossings. A coincident line is owned by the first
 eligible chart in declaration order; polygon boundaries retain their filled side.
 Isolated contacts emit no segment. A retained single point has no edges.

@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/From-v3.1-blue.svg?style=flat-square" alt="From-v3.1" />
 </p>
 
-### `lngLatToWorld(lngLat)`
+#### `lngLatToWorld(lngLat)`
 
 Project a coordinate on sphere onto the 512x512 Web Mercator plane.
 
@@ -16,7 +16,7 @@ Returns:
 
 - `[x, y]`
 
-### `worldToLngLat(xy, scale)`
+#### `worldToLngLat(xy, scale)`
 
 Unproject a coordinate from the 512x512 Web Mercator plane back to the sphere.
 
@@ -28,7 +28,7 @@ Returns:
 
 - `[lng, lat]`
 
-### `worldToPixels(xyz, projectionMatrix)`
+#### `worldToPixels(xyz, projectionMatrix)`
 
 Project a coordinate from the Web Mercator coordinate system to screen.
 
@@ -41,7 +41,7 @@ Returns:
 
 - `[x, y, z]` - coordinates on screen, `z` is the pixel depth.
 
-### `pixelsToWorld(xyz, unprojectionMatrix, targetZ)`
+#### `pixelsToWorld(xyz, unprojectionMatrix, targetZ)`
 
 Project a coordinate from screen to the Web Mercator coordinate system.
 
@@ -55,7 +55,7 @@ Returns:
 
 - `[x, y, z]` - coordinates on the Web Mercator tile, `z` is the elevation.
 
-### `getMeterZoom(viewport)`
+#### `getMeterZoom(viewport)`
 
 Returns the zoom level that gives a 1 meter pixel at a certain latitude.
 
@@ -64,7 +64,7 @@ Parameters:
 - `viewport` (Object) - viewport props
 - `viewport.latitude` (Number, required)
 
-### `getDistanceScales(viewport)`
+#### `getDistanceScales(viewport)`
 
 Calculate linear scales for quick conversion between meters/degrees/pixels distances around the given lat/lon.
 
@@ -87,7 +87,7 @@ Returns:
 - `distanceScales.unitsPerMeter2` (Array) - if `highPrecision` is `true`, returns world units per meter adjustment in `[x2, y2, z2]`. It offers a cheap way to compensate for the precision loss with latitude. Amends `unitsPerMeter` by y offset (in meters): `[x + x2 * dy, y + y2 * dy, z + z2 * dy]`.
 - `distanceScales.unitsPerDegree2` (Array) - if `highPrecision` is `true`, returns world units per degree adjustment in `[x2, y2, z2]`. It offers a cheap way to compensate for the precision loss with latitude. Amends `unitsPerDegree` by y offset (in degrees): `[x + x2 * dy, y + y2 * dy, z + z2 * dy]`.
 
-### `addMetersToLngLat(lngLatZ, xyz)`
+#### `addMetersToLngLat(lngLatZ, xyz)`
 
 Offset a spherical position by meters.
 
@@ -101,7 +101,7 @@ Returns:
 - `[lng, lat]` if the third component in neither argument is specified, or
 - `[lng, lat, alt]` otherwise.
 
-### `getViewMatrix(viewport)`
+#### `getViewMatrix(viewport)`
 
 Get a transform matrix that projects from the mercator (pixel) space into the camera (view) space. Centers the map at the given coordinates.
 
@@ -119,7 +119,7 @@ Returns:
 
 - `viewMatrix` (Array) 4x4 matrix.
 
-### `getProjectionMatrix(viewport)`
+#### `getProjectionMatrix(viewport)`
 
 Get a transform matrix that projects from camera (view) space to clipspace.
 
@@ -151,7 +151,7 @@ To match Mapbox's z-buffer, use these parameters:
 
 - `fovy`: `altitudeToFovy(1.5)`
 
-### `getProjectionParameters({width, height, altitude, fovy, pitch, farZMultiplier}})`
+#### `getProjectionParameters({width, height, altitude, fovy, pitch, farZMultiplier}})`
 
 Parameters:
 
@@ -170,7 +170,7 @@ Returns
 
 - Object with `{fov, aspect, focalDistance, near, far}` fields. Note that returned `fov` is in radians
 
-### `altitudeToFovy(altitude)`
+#### `altitudeToFovy(altitude)`
 
 Convert an altitude to field of view such that the focal distance is equal to the altitude.
 
@@ -182,7 +182,7 @@ Returns:
 
 - `fovy` field of view in degrees
 
-### `fovyToAltitude(fovy)`
+#### `fovyToAltitude(fovy)`
 
 Convert a field of view to an altitude equal to the focal distance
 
@@ -194,7 +194,7 @@ Returns:
 
 - `altitude` altitude of camera in screen units
 
-### `fitBounds(opts)`
+#### `fitBounds(opts)`
 
 Returns map settings (longitude, latitude and zoom) that will contain the provided corners within the provided dimensions. Only supports non-perspective mode.
 
@@ -217,7 +217,7 @@ Notes:
 
 - `minExtent` - Note that this value represents delta latitude/longitudes and value of `0.01` would roughly represent 1km.
 
-### `normalizeViewportProps(viewport)`
+#### `normalizeViewportProps(viewport)`
 
 This will adjust the map center and zoom so that the projected map fits into the target viewport size without white gaps.
 
@@ -235,7 +235,7 @@ Returns:
 
 - `viewport` - normalized `{width, height, longitude, latitude, zoom, pitch, bearing}`
 
-### `flyToViewport(startProps, endProps, t, opts)`
+#### `flyToViewport(startProps, endProps, t, opts)`
 
 While flying from one viewport to another, returns in-transition viewport props at a given time. This util function implements the algorithm described in “Smooth and efficient zooming and panning.” by Jarke J. van Wijk and Wim A.A. Nuij.
 
@@ -259,7 +259,7 @@ Returns:
 
 - `{longitude, latitude, zoom}`
 
-### `getFlyToDuration(startProps, endProps, opts)`
+#### `getFlyToDuration(startProps, endProps, opts)`
 
 Returns time in milliseconds, that is required perform transition from one viewport to another. Time returned is proportional to the distance we are transitioning to. This util function implements mapbox-gl-js (https://docs.mapbox.com/mapbox-gl-js/api/#map#flyto) duration calculation.
 

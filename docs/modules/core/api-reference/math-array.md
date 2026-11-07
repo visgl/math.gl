@@ -6,7 +6,6 @@
 
 `MathArray` is the shared array base for core vectors, matrices, quaternions, and Euler angles. Use a concrete class rather than constructing it directly. Mutating methods return the receiver.
 
-
 ## Copy and access
 
 | Method | Behavior |
@@ -21,7 +20,11 @@
 
 ## Arithmetic
 
-`add()`, `subtract()`, `min()`, `max()`, `clamp()`, `negate()`, `scale()`, and `lerp()` update the receiver. `scale(value)` accepts a scalar or component factors. Concrete classes can override arithmetic semantics; for example, matrix scaling composes a geometric scale transform.
+`add()`, `subtract()`, `min()`, `max()`, `clamp()`, `negate()`, `scale()`, and `lerp()` update the receiver.
+
+#### `scale(value)`
+
+Accepts a scalar or component factors. Concrete classes can override arithmetic semantics; for example, matrix scaling composes a geometric scale transform.
 
 ```js
 import {Vector3} from '@math.gl/core';
@@ -32,15 +35,32 @@ const scaled = original.clone().scale([1, 1, 0]); // [1, 2, 0]
 
 ## Compare and validate
 
-- `equals(array)` compares components with the configured epsilon.
-- `exactEquals(array)` compares components directly.
-- `validate()` returns whether the element count is correct and every component is finite.
-- `check()` returns the receiver, and throws on invalid values when `config.debug` is enabled.
+#### `equals(array)`
+
+Compares components with the configured epsilon.
+
+#### `exactEquals(array)`
+
+Compares components directly.
+
+#### `validate()`
+
+Returns whether the element count is correct and every component is finite.
+
+#### `check()`
+
+Returns the receiver, and throws on invalid values when `config.debug` is enabled.
 
 See [floating point](../developer-guide/floating-point.md) for comparison tolerance.
 
 ## Format values
 
-`toString()` formats the object using global configuration. `formatString(options)` accepts formatting options for one call. Concrete classes may customize their output; matrix `toString()` uses `printRowMajor` to choose display order.
+#### `toString()`
+
+Formats the object using global configuration.
+
+#### `formatString(options)`
+
+Accepts formatting options for one call. Concrete classes may customize their output; matrix `toString()` uses `printRowMajor` to choose display order.
 
 See [debugging](../../../developer-guide/README.md#catch-mistakes-during-development) for examples and configuration defaults.
