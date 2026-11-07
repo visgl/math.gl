@@ -6,6 +6,8 @@
 
 `@math.gl/core` provides array-based vectors, matrices, quaternions, and coordinate helpers. Use it to compose transforms, rotate geometry, and work with reusable numeric objects.
 
+The optional [`@math.gl/core/arrow`](./arrow/README.md) entry provides Arrow table views, schema utilities, and buffer ownership helpers. Install Apache Arrow 17 or newer to use it.
+
 The optional [`@math.gl/core/utf8`](./utf8/README.md) entry provides byte-range comparison and scalar parsing without decoding strings.
 
 The optional [`@math.gl/core/tasks`](./tasks/README.md) entry provides typed worker processing, bounded scheduling, persistent resources, cancellation, and shared state.
