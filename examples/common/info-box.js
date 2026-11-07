@@ -37,5 +37,8 @@ export function mountInfoBox(host, {title, theme = 'sleek-dark', width = 280} = 
   });
   manager.setProps({components: [box]});
   const cleanupCompact = configureCompactPanel(host, box);
-  return () => { cleanupCompact(); manager.finalize(); };
+  return () => {
+    cleanupCompact();
+    manager.finalize();
+  };
 }

@@ -9,9 +9,9 @@ export function configureCompactPanel(host, box) {
   );
   const update = () => {
     host.dataset.compactPanel = String(compact.matches);
-    box.setProps({ open: !compact.matches });
+    box.setProps({open: !compact.matches});
   };
-  box.setProps({ onOpenChange: (open) => box.setProps({ open }) });
+  box.setProps({onOpenChange: open => box.setProps({open})});
   update();
   compact.addEventListener('change', update);
   return () => compact.removeEventListener('change', update);
