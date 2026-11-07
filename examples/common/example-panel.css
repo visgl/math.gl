@@ -52,3 +52,40 @@ aside.example-panel.deck-widget-container {
 .example-info-box > .deck-widget-box > section {
   max-height: min(80vh, 720px) !important;
 }
+
+/* Panel headers and controls remain easy to hit with a finger. */
+@media (pointer: coarse), (max-width: 996px) {
+  .example-panel button,
+  .example-panel select,
+  .example-panel input:not([type='checkbox']):not([type='radio']) {
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+  .example-panel > .deck-widget-box > section > header > button {
+    min-height: 44px !important;
+    padding: 8px 12px !important;
+    line-height: 1.3 !important;
+  }
+  .example-panel input:not([type='range']), .example-panel select { font-size: 16px; }
+  .example-panel input[type='range'] { margin-top: 0; margin-bottom: 0; }
+}
+aside.example-panel[data-compact-panel='true'] {
+  max-height: min(45svh, 360px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+aside.example-panel[data-compact-panel='true'] > .deck-widget-box > section > header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #08111f;
+}
+/* Hosts already choose the panel placement. Keep its box in normal flow so
+ * collapsed controls reserve their own space beside or below the canvas. */
+.example-panel > .deck-widget-box {
+  position: relative !important;
+  inset: auto !important;
+}
+aside.example-panel[data-compact-panel='true'] > .deck-widget-box > section {
+  max-height: none !important;
+}

@@ -9,4 +9,4 @@
 .contour-tiles {display:flex;flex-wrap:wrap;gap:12px}.contour-tiles label {margin:4px 0}
 .terrain-sampling label {display:block;margin:14px 0}.terrain-sampling select,.terrain-sampling input[type=range] {display:block;width:100%}
 .terrain-sampling table {width:100%;border-collapse:collapse}.terrain-sampling td,.terrain-sampling th {padding:5px;text-align:left;border-bottom:1px solid #426277}
-@media(max-width:700px) {.terrain-sampling {grid-template-columns:1fr}.terrain-sampling .example-panel {width:100%}}
+@media(max-width:700px) {.terrain-sampling {grid-template-columns:1fr;grid-auto-rows:max-content}.terrain-sampling .example-panel {width:100%}}

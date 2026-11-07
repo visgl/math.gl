@@ -45,6 +45,9 @@ try {
   await page.getByLabel('Fixture',{exact:true}).selectOption('Polygon with hole');
   console.log('WKB: fixture round trips, dimensions, EWKB SRID, byte order, malformed input, truncation, trailing bytes, and mixed dimensions passed.');
   await page.setViewportSize({width:390,height:400});
+  await page.waitForFunction(()=>document.querySelector('.example-panel')?.dataset.compactPanel==='true');
+  const compactHeader=page.locator('.example-panel header button').first();
+  if(await compactHeader.getAttribute('aria-expanded')==='false') await compactHeader.click();
   assert.equal(await page.locator('.wkb-workbench').evaluate(element=>element.clientHeight),400);
   await page.getByText('Input is limited to').scrollIntoViewIfNeeded();
   const bottom=await page.getByText('Input is limited to').boundingBox();

@@ -63,6 +63,9 @@ try {
   assert(imageDifference(fitted,await canvas.screenshot())<0.02,'Repeated Fit cell must restore the rendered view (allowing subpixel rounding)');
   await page.setViewportSize({width:390,height:400});
   assert.equal(await page.locator('.dggs-explorer').evaluate(element=>element.clientHeight),400);
+  await page.waitForFunction(() => document.querySelector('.example-panel')?.dataset.compactPanel === 'true');
+  const compactHeader = page.locator('.example-panel header button');
+  if (await compactHeader.getAttribute('aria-expanded') === 'false') await compactHeader.click();
   await page.getByRole('link',{name:'Inspired by the community global grid example'}).scrollIntoViewIfNeeded();
   const bottom=await page.getByRole('link',{name:'Inspired by the community global grid example'}).boundingBox();
   assert(bottom.y>=0 && bottom.y+bottom.height<=401);

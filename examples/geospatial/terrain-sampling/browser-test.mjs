@@ -81,6 +81,9 @@ try {
   assert.match(await page.getByTestId('sample-status').innerText(),/VALID/);
   console.log('Terrain: mesh, interpolation differences, diagonals, missing samples, outside domain, normals, and pointer controls passed.');
   await page.setViewportSize({width:390,height:400});
+  await page.waitForFunction(()=>document.querySelector('.example-panel')?.dataset.compactPanel==='true');
+  const compactHeader=page.locator('.example-panel header button').first();
+  if(await compactHeader.getAttribute('aria-expanded')==='false') await compactHeader.click();
   assert.equal(await page.locator('.terrain-sampling').evaluate(element=>element.clientHeight),400);
   await page.getByText('Triangle interpolation matches').scrollIntoViewIfNeeded();
   const bottom=await page.getByText('Triangle interpolation matches').boundingBox();
