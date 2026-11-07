@@ -57,7 +57,7 @@ export default function CullingQueries() {
     };
   }, [x, y]);
   return (
-    <div className="app">
+    <div className="culling-queries-example">
       <SceneCanvas scene={scene} />
       <ExamplePanel title="Ray & closest-point lab">
         <div className="query-controls">

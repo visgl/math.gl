@@ -93,7 +93,7 @@ export default function SpatialIndexExample() {
     return () => resize.disconnect();
   }, []);
   return (
-    <div className="app">
+    <div className="spatial-index-example">
       <canvas
         ref={canvas}
         aria-label="Spatial query field"

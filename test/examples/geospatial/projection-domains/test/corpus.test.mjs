@@ -28,10 +28,8 @@ test('adjacent tile edge samples agree without independent edge drift',()=>{
       const a=left.points.find(p=>p.pixel[0]===edge.leftX&&p.pixel[1]===y),b=right.points.find(p=>p.pixel[0]===edge.rightX&&p.pixel[1]===y);assert.deepEqual(a.geographic,b.geographic);}
   }
 });
-test('hosted overview raster has stable bytes and explicit north-up georeferencing',async()=>{
-  const r=corpus.raster,response=await fetch(r.url,{signal:AbortSignal.timeout(30000)});
-  assert.equal(response.ok,true);
-  const bytes=new Uint8Array(await response.arrayBuffer());
+test('bundled overview raster has stable bytes and explicit north-up georeferencing',()=>{
+  const r=corpus.raster,bytes=readFileSync(new URL(r.path,url));
   assert.equal(createHash('sha256').update(bytes).digest('hex'),r.sha256);
   assert.deepEqual(coordinate(r,[0,0]),[-180,90]);assert.deepEqual(coordinate(r,[r.width,r.height]),[180,-90]);
   assert.match(readFileSync(new URL(r.provenance,url),'utf8'),/NASA/);

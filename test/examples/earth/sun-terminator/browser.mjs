@@ -19,7 +19,7 @@ try {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   let tileRequests = 0;
-  await page.route('https://gibs.earthdata.nasa.gov/**', (route) => {
+  await page.route('https://**/*', (route) => {
     tileRequests++;
     return route.abort();
   });

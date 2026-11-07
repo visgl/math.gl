@@ -34,7 +34,7 @@ export default function Example() {
   }, [level]);
   const count = ranges.reduce((sum, r) => sum + (r.maxX - r.minX + 1) * (r.maxY - r.minY + 1), 0);
   return (
-    <div className="app geographic-example">
+    <div className="geographic-example">
       <svg
         viewBox="-190 -105 380 210"
         role="img"

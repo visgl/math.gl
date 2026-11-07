@@ -45,14 +45,15 @@ export function projectionBench(suite: Bench): Bench {
         }
         return buffer;
       };
+      const caseId = `${to.startsWith('+') ? 'LCC' : to} ${ArrayType.name}`;
       suite
         .group(`Projection ${to} ${ArrayType.name} (${points} points, reset included)`)
-        .add('math.gl flat', () => {
+        .add(`${caseId}: math.gl flat`, () => {
           buffer.set(source);
           return native.projectFlat(buffer);
         })
-        .add('math.gl scalar', scalar(native.project))
-        .add('proj4 import', scalar(reference.forward));
+        .add(`${caseId}: math.gl scalar`, scalar(native.project))
+        .add(`${caseId}: proj4 import`, scalar(reference.forward));
     }
   }
   return suite;

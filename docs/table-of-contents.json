@@ -47,6 +47,7 @@
             "type": "category",
             "label": "Guide",
             "items": [
+              "modules/core/developer-guide/benchmarks",
               {
                 "type": "category",
                 "label": "Preliminaries",

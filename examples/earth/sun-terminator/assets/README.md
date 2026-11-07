@@ -1,8 +1,8 @@
 # NASA overview imagery
 
-The day overview is the [2048 × 1024 NASA Blue Marble JPEG](https://raw.githubusercontent.com/visgl/deck.gl-data/refs/heads/master/earth/nasa-blue-marble/blue-marble-2048x1024.jpg)
-hosted in deck.gl-data with its [attribution](https://github.com/visgl/deck.gl-data/tree/master/earth/nasa-blue-marble).
-It is an unmodified NASA GIBS response for `BlueMarble_ShadedRelief_Bathymetry`.
+The bundled day overview lives in `examples/common/assets/blue-marble.jpg` so the
+solar, raster projection, and zoom-morph demos share the same offline image. It is an
+unmodified 2048 × 1024 NASA GIBS response for `BlueMarble_ShadedRelief_Bathymetry`.
 
 The bundled `night.jpg` is a 2048 × 1024 NASA Black Marble overview from
 `VIIRS_Black_Marble`, `TIME=2016-01-01`. Both overviews provide complete day/night

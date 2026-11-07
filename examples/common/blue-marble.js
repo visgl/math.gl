@@ -5,9 +5,8 @@
 export const BLUE_MARBLE_CREDIT_URL =
   'https://science.nasa.gov/earth/earth-observatory/blue-marble/';
 
-/** Fixed-resolution geographic overview hosted with its NASA attribution. */
-export const BLUE_MARBLE_OVERVIEW_URL =
-  'https://raw.githubusercontent.com/visgl/deck.gl-data/refs/heads/master/earth/nasa-blue-marble/blue-marble-2048x1024.jpg';
+/** Bundled NASA overview; available before remote detail tiles or while offline. */
+export const BLUE_MARBLE_OVERVIEW_URL = new URL('./assets/blue-marble.jpg', import.meta.url).href;
 
 /** Geographic images preserve latitude spacing, including the poles. */
 export function blueMarbleUrl(bounds, width = 512, height = 512) {
