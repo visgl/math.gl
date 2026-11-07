@@ -205,10 +205,12 @@ export function inferGeoArrowCoordinateLayoutFromArrowType(
     return inferGeoArrowCoordinateLayoutFromArrowType(type.children[0].type);
   }
   if (arrow.DataType.isDenseUnion(type)) {
-    for (const field of type.children) {
-      const layout = inferGeoArrowCoordinateLayoutFromArrowType(field.type);
-      if (layout) return layout;
-    }
+    const layouts = new Set(
+      type.children
+        .map(field => inferGeoArrowCoordinateLayoutFromArrowType(field.type))
+        .filter(layout => layout !== null)
+    );
+    return layouts.size === 1 ? [...layouts][0]! : null;
   }
   return null;
 }

@@ -278,3 +278,45 @@ test('GeoArrow rejects metadata/storage mismatches before native processing', ()
   ).toThrow(/list levels/);
   expect(() => makeGeoArrowColumnFromArrowVector(point, {dimension: 'xym'})).toThrow(/dimension/);
 });
+
+test('GeoArrow mixed coordinate layouts stay distinct through mapping', () => {
+  const point = arrow.vectorFromArray(
+    [[1, 2]],
+    new arrow.FixedSizeList(2, new arrow.Field('xy', new arrow.Float64()))
+  );
+  const separated = new arrow.Struct([
+    new arrow.Field('x', new arrow.Float64()),
+    new arrow.Field('y', new arrow.Float64())
+  ]);
+  const line = arrow.vectorFromArray(
+    [
+      [
+        {x: 3, y: 4},
+        {x: 5, y: 6}
+      ]
+    ],
+    new arrow.List(new arrow.Field('vertices', separated))
+  );
+  const type = new arrow.DenseUnion(
+    [1, 2],
+    [new arrow.Field('custom point', point.type), new arrow.Field('custom line', line.type)]
+  );
+  const vector = new arrow.Vector([
+    new arrow.Data(
+      type,
+      0,
+      2,
+      0,
+      {
+        [arrow.BufferType.TYPE]: new Int8Array([1, 2]),
+        [arrow.BufferType.OFFSET]: new Int32Array([0, 0])
+      },
+      [point.data[0]!, line.data[0]!]
+    )
+  ]);
+  const field = makeField(type, 'geoarrow.geometry');
+  expect(getGeoArrowFieldInfo(field)!.coordinateLayout).toBeNull();
+  const moved = mapGeoArrowCoordinates(vector, ([x, y]) => [x! + 10, y! + 20], {field});
+  expect(getGeoArrowBounds(moved, {field})).toEqual([11, 22, 15, 26]);
+  expect(arrow.DataType.isStruct(moved.type.children[1]!.type.children[0]!.type)).toBe(true);
+});
