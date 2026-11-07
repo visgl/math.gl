@@ -1,5 +1,7 @@
-/* SPDX-License-Identifier: MIT */
-/* SPDX-FileCopyrightText: Copyright (c) vis.gl contributors */
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
 .card {
   background:
     radial-gradient(circle at 95% 0, rgb(0 192 230 / 15%), transparent 24rem),
