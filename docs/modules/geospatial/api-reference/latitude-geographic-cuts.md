@@ -77,13 +77,17 @@ complements and arbitrary ellipsoidal global topology are not supported.
 
 ## Output and provenance
 
-`clipGeographicPolyline(positions, options)` returns the existing
+#### `clipGeographicPolyline(positions, options)`
+
+Returns the existing
 `GeographicSeamPolyline[]`: packed positions, original `world` index, and source
 edge intervals. Positive-length arcs on the band boundary are retained. An
 isolated endpoint/tangent contact emits no line segment. A single point is retained
 when it lies inside the closed band.
 
-`clipGeographicPolygon(rings, options)` returns `GeographicCutPolygon[]`. Each
+#### `clipGeographicPolygon(rings, options)`
+
+Returns `GeographicCutPolygon[]`. Each
 polygon has explicitly closed `rings`; each ring has packed `positions` and one
 `edges[i]` descriptor for the edge from vertex i to i+1:
 

@@ -29,15 +29,34 @@ Default concurrency is one; values must be positive safe integers. No shared far
 configuration is mutated. Capacity includes initializing and explicitly retained
 handles. Waiting acquisitions honor `signal` and are rejected when the runner closes.
 
-| Method | Result | Contract |
-| --- | --- | --- |
-| `runTaskSync(task, input, request?)` | `Output` | Immediate main-thread execution of synchronous hooks |
-| `runTask(task, input, request?)` | `Promise<Output>` | Temporary state for one atomic call |
-| `runTasks(task, inputs, request?)` | `AsyncIterable<Output>` | Independent calls, ordered output, per-slot state |
-| `runTaskInBatches(task, inputs, request?)` | `AsyncIterable<BatchOutput>` | One streaming processor session |
-| `initializeTask(task, initialization, controls?)` | `Promise<InitializedTask>` | State retained until close/termination |
-| `close()` | `Promise<void>` | Reject waiting acquisitions, drain owned handles, destroy state, stop workers |
-| `terminate(reason?)` | `Promise<void>` | Abort handles and force-stop workers; local execution must settle |
+#### `runTaskSync(task, input, request?)`
+
+`Output` | Immediate main-thread execution of synchronous hooks
+
+#### `runTask(task, input, request?)`
+
+`Promise<Output>` | Temporary state for one atomic call
+
+#### `runTasks(task, inputs, request?)`
+
+`AsyncIterable<Output>` | Independent calls, ordered output, per-slot state
+
+#### `runTaskInBatches(task, inputs, request?)`
+
+`AsyncIterable<BatchOutput>` | One streaming processor session
+
+#### `initializeTask(task, initialization, controls?)`
+
+`Promise<InitializedTask>` | State retained until close/termination
+
+#### `close()`
+
+`Promise<void>` | Reject waiting acquisitions, drain owned handles, destroy state, stop workers
+
+#### `terminate(reason?)`
+
+`Promise<void>` | Abort handles and force-stop workers; local execution must settle
+
 
 `request` becomes required when the descriptor requires application options or
 initialization. Options are inferred from the invoked hook: `process` for atomic

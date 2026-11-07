@@ -1,8 +1,8 @@
 ---
-sidebar_label: Introduction
+sidebar_label: Overview
 ---
 
-# Introduction
+# Overview
 
 <p className="badges introduction-badges">
   <a href="https://github.com/visgl/math.gl/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT license" height="20" /></a>

@@ -33,13 +33,20 @@ The solver's existing series/domain accuracy qualifications apply; accepting pos
 is not an arbitrary-flattening accuracy guarantee. Triaxial geodesics are unsupported.
 
 Endpoints are copied at construction. `start` and `end` getters return independent arrays.
-`size` is 2 or 3. `length` is the shortest surface distance, excluding height.
+`size` is 2 or 3.
+
+`length` is the shortest surface distance, excluding height.
 
 ## Sampling and ownership
 
-- `sample(fraction, result?)` accepts a finite fraction in [0, 1]. Halfway means half the
+#### `sample(fraction, result?)`
+
+Accepts a finite fraction in [0, 1]. Halfway means half the
   surface distance, not half the longitude change or half the 3D chord.
-- `sampleByDistance(distance, result?)` accepts a finite distance in [0, `length`].
+
+#### `sampleByDistance(distance, result?)`
+
+Accepts a finite distance in [0, `length`].
 - Without `result`, either method returns a new number array. A supplied writable numeric
   array or typed array must have exactly `size` components; the same object is returned.
 - Invalid parameters, unresolved/nonfinite solver output and float32 overflow throw

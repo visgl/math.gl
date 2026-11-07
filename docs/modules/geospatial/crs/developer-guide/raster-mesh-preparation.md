@@ -1,4 +1,4 @@
-# Preparing raster meshes for projection
+# Projecting Raster Meshes
 
 Applications can compose math.gl's existing geometry and projection interfaces to prepare raster
 meshes with UVs and feature identity. The [runnable example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/raster-mesh-preparation)

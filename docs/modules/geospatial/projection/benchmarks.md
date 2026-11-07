@@ -107,7 +107,7 @@ median does not imply greater accuracy or a wider valid coordinate domain.
 
 The [projection scorecard](./scorecard.md) records a dated snapshot of accuracy,
 throughput, cold startup, allocation and memory evidence. Its
-[measurement methodology](./scorecard-methodology.md) explains source fingerprints,
+[measurement methodology](./scorecard.md) explains source fingerprints,
 raw samples and the limits of each metric. Check [independent validation](./independent-validation.md)
 when selecting an algorithm for a region or datum transformation.
 

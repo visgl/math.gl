@@ -27,7 +27,7 @@ const {color, intensity} = getMoonLight(position.altitude, {
 });
 ```
 
-## getMoonPosition(timestamp, latitude, longitude)
+#### `getMoonPosition(timestamp, latitude, longitude)`
 
 `timestamp` is a `Date` or milliseconds since Unix epoch. Latitude and longitude are in
 degrees, north and east positive. Latitude must be in `[-90, 90]`; finite longitudes wrap.
@@ -50,13 +50,13 @@ visualization, not eclipse prediction or precision navigation. It omits higher-o
 lunar perturbations, observer height, Earth flattening, atmospheric refraction, and
 nutation. Use near modern dates (approximately 1900–2100); no precision guarantee is made.
 
-## getMoonDirection(timestamp, latitude, longitude)
+#### `getMoonDirection(timestamp, latitude, longitude)`
 
 Returns a unit **incoming light** direction in local east/north/up coordinates, using
 exactly the convention of `getSunDirection`: an overhead Moon gives `[0, 0, -1]`.
 Negate it to get the outward sky direction used to draw the Moon.
 
-## getMoonIllumination(timestamp)
+#### `getMoonIllumination(timestamp)`
 
 Returns geocentric lunar illumination geometry:
 
@@ -67,7 +67,7 @@ Returns geocentric lunar illumination geometry:
 
 `phase` and `phaseAngle` use different conventions. Pass **phaseAngle** to `getMoonLight`.
 
-## getMoonLight(altitude, options)
+#### `getMoonLight(altitude, options)`
 
 `altitude` is geometric elevation in radians, in `[-Math.PI / 2, Math.PI / 2]`.
 

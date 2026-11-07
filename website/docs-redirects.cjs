@@ -6,6 +6,16 @@ const {dirname, join} = require('node:path');
 
 // Preserve bookmarks when guides move into their owning modules.
 const movedGuides = {
+  "modules/geospatial/projection/scorecard-methodology": "modules/geospatial/projection/scorecard#reproduction",
+  "modules/geospatial/guide/crs": "modules/geospatial/crs/developer-guide/coordinate-reference-systems",
+  "modules/web-mercator/developer-guide/web-mercator-offset-accuracy": "modules/web-mercator/developer-guide/web-mercator-coordinates#accuracy",
+  "modules/web-mercator/guide": "modules/web-mercator/developer-guide/web-mercator-coordinates",
+  "modules/geometry/guide": "modules/geometry/spatial-index",
+  "modules/geometry/guide/spatial-index": "modules/geometry/spatial-index",
+  "modules/earth/guide": "modules/earth/geoid/developer-guide/geospatial-models",
+  "modules/earth/guide/geoid": "modules/earth/geoid/developer-guide/geospatial-models",
+  "modules/dggs/guide": "modules/dggs/developer-guide/dggs",
+
   "modules/geospatial/geoarrow/physical-layouts": "modules/geospatial/developer-guide/geoarrow#understand-the-physical-layout",
   "modules/geospatial/geoarrow/geometry-streams": "modules/geospatial/developer-guide/geoarrow#stream-clip-and-tessellate",
   "modules/geospatial/geoarrow/migration-guide": "modules/geospatial/developer-guide/geoarrow#replace-an-existing-runtime-integration",
@@ -33,7 +43,7 @@ const movedGuides = {
   "developer-guide/geospatial/coordinate-reference-systems": "modules/geospatial/crs/developer-guide/coordinate-reference-systems",
   "developer-guide/geospatial/geospatial-models": "modules/earth/geoid/developer-guide/geospatial-models",
   "developer-guide/geospatial/web-mercator-coordinates": "modules/web-mercator/developer-guide/web-mercator-coordinates",
-  "developer-guide/geospatial/web-mercator-offset-accuracy": "modules/web-mercator/developer-guide/web-mercator-offset-accuracy"
+  "developer-guide/geospatial/web-mercator-offset-accuracy": "modules/web-mercator/developer-guide/web-mercator-coordinates#accuracy"
 };
 
 module.exports = function docsRedirects(context) {

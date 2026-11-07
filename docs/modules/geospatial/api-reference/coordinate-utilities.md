@@ -21,7 +21,9 @@ const text = formatGeographicCoordinates(cell.latitude, cell.longitude);
 
 ## Angles
 
-`parseAngle(text, axis = 'angle')` accepts decimal degrees, colon-separated
+#### `parseAngle(text, axis = 'angle')`
+
+Accepts decimal degrees, colon-separated
 DMS/decimal minutes, or marked DMS using `d`/`°`, `'`/`′` and `"`/`″`.
 Standalone minute/second components such as `30′` and `30″` are also accepted,
 with the component still below 60. One N/S/E/W prefix or suffix is allowed. Use an explicit sign **or** a hemisphere;
@@ -32,23 +34,38 @@ accepted. Whitespace around markers is allowed. Input length is bounded.
 
 The optional axis is `latitude` (±90), `longitude` (±180), or `angle` (±1e6).
 Hemisphere letters must match an explicit axis. Negative zero retains S/W meaning.
-`formatAngle(value, {axis?, format?, precision?})` defaults to marked DMS with
+
+#### `formatAngle(value, {axis?, format?, precision?})`
+
+Defaults to marked DMS with
 three fractional second digits. `format: 'degrees'` emits decimal degrees; `format: 'dm'` emits degrees and
 decimal minutes (e.g. `12°30.000′`).
 Precision is 0–6 decimal places in the final component; rounded carries propagate
-through seconds/minutes. `parseGeographicCoordinates` requires an explicit comma
+through seconds/minutes.
+
+#### parseGeographicCoordinates
+
+Requires an explicit comma
 between latitude and longitude; `{longitudeFirst: true}` explicitly reverses the
 order for both parse and format. The parser never guesses order from magnitudes.
 
 ## Grid coordinates
 
-`standardGridZone(latitude, longitude)` returns UTM zone 1–60 or UPS zone 0.
+#### `standardGridZone(latitude, longitude)`
+
+Returns UTM zone 1–60 or UPS zone 0.
 UTM covers `-80 ≤ latitude < 84`; polar latitudes use UPS. Norway and Svalbard
 exceptions follow GeographicLib's standard-zone convention. Both dateline labels
-±180 select zone 1. `projectGrid` returns `{zone, north, easting, northing}`;
+±180 select zone 1.
+
+#### projectGrid
+
+Returns `{zone, north, easting, northing}`;
 negative-zero latitude retains the southern-hemisphere convention.
 
-`unprojectGrid(grid)` defaults to the MGRS-compatible envelopes: UTM easting
+#### `unprojectGrid(grid)`
+
+Defaults to the MGRS-compatible envelopes: UTM easting
 100–900 km, northing 0–9500 km north or 1000–10000 km south; UPS easting/northing
 1300–2700 km north or 800–3200 km south. Envelope membership is not proof of
 standard-zone membership. Decoded cells may overlap a standard-zone/band boundary.
@@ -71,7 +88,9 @@ selected hemisphere. Pass the same option to `unprojectGrid` for these coordinat
 The default envelope remains unchanged. Extended grid membership does not imply a
 valid standard-zone or MGRS cell.
 
-`transferGrid(grid, {zone?, north?, extended?})` re-expresses an existing grid point.
+#### `transferGrid(grid, {zone?, north?, extended?})`
+
+Re-expresses an existing grid point.
 The input zone/hemisphere are retained unless explicitly changed. Same-zone
 transfers copy easting exactly and shift northing by exactly 10,000,000 metres
 when changing UTM hemisphere; same-hemisphere copies avoid a geographic round trip.
@@ -91,20 +110,31 @@ APIs. A grid-zone transfer is not a datum or height transformation.
 
 ## MGRS
 
-`formatMGRS(latitude, longitude, precision = 5)` selects the standard grid zone
+#### `formatMGRS(latitude, longitude, precision = 5)`
+
+Selects the standard grid zone
 and truncates to a cell. Precision 0–11 means 100 km through 1 µm cells:
 5 is one metre, 8 is one millimetre, and 11 is one micrometre. The default remains 5.
 An optional fourth argument `{zone}` forces the grid zone; the point must remain
 in the MGRS envelope. Extra textual digits describe projected binary64 coordinates;
 they do not establish micrometre physical accuracy. Projection roundoff can change
 a trailing sub-metre digit near a cell boundary.
-`parseMGRS(text, {center = true})` returns the zone, hemisphere, grid coordinates,
+
+#### `parseMGRS(text, {center = true})`
+
+Returns the zone, hemisphere, grid coordinates,
 latitude/longitude, precision and cell resolution. Whitespace and case are
 normalized. The default is the cell centre; `{center: false}` returns its southwest
 grid corner. These are grid cells, not geodesic uncertainty circles.
 
-`formatMGRSZone(latitude, longitude, {zone?})` emits a grid-zone designation
-such as `31U` or `Z`. `parseMGRSZone(text)` returns `{zone, north, band}`. These
+#### `formatMGRSZone(latitude, longitude, {zone?})`
+
+Emits a grid-zone designation
+such as `31U` or `Z`.
+
+#### `parseMGRSZone(text)`
+
+Returns `{zone, north, band}`. These
 are regions, not cells: the parser deliberately does not fabricate a representative
 point or an uncertainty radius. `parseMGRS` still requires a complete cell, so its
 existing result type never acquires missing/NaN positions. Forced-zone descriptors

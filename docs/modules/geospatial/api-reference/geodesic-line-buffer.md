@@ -17,7 +17,9 @@ const sampler = new GeodesicLineBuffer(line, 3);
 const output = sampler.positions([0, 1000, 2000], new Float64Array(24));
 ```
 
-`positions(distances, output)` writes the first `distances.length × stride`
+#### `positions(distances, output)`
+
+Writes the first `distances.length × stride`
 values and returns `output`; remaining output values are untouched. Input/output
 aliasing is supported because all inputs are consumed before committing. Shared
 storage is rejected. Samplers snapshot the line methods and layout, are

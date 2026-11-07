@@ -7,33 +7,33 @@
 
 The core evaluator API is useful when you want direct control over parsing, AST reuse, or custom operator registration.
 
-## `parse(expression: string | Expression): Expression`
+#### `parse(expression: string | Expression): Expression`
 
 Parses a string into a JSEP AST. Passing an AST returns it unchanged.
 
-## `evaluate(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): unknown`
+#### `evaluate(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): unknown`
 
 Evaluates a parsed expression against the supplied context object.
 
-## `evaluateAsync(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): Promise<unknown>`
+#### `evaluateAsync(expression: Expression, context: ExpressionContext, options?: ExpressionEvaluationOptions): Promise<unknown>`
 
 Async variant of `evaluate`. Useful when expressions may call async functions present on the context object.
 
-## `compile(expression: string | Expression, options?: ExpressionEvaluationOptions): (context: ExpressionContext) => unknown`
+#### `compile(expression: string | Expression, options?: ExpressionEvaluationOptions): (context: ExpressionContext) => unknown`
 
 Compiles an expression into a reusable function.
 
-## `compileAsync(expression: string | Expression, options?: ExpressionEvaluationOptions): (context: ExpressionContext) => Promise<unknown>`
+#### `compileAsync(expression: string | Expression, options?: ExpressionEvaluationOptions): (context: ExpressionContext) => Promise<unknown>`
 
 Async variant of `compile`.
 
-## `addUnaryOp(operator: string, callback: UnaryOperator): void`
+#### `addUnaryOp(operator: string, callback: UnaryOperator): void`
 
 Registers a unary operator with both JSEP and the evaluator.
 
 `UnaryOperator` receives the evaluated operand and returns the operator result.
 
-## `addBinaryOp(operator: string, precedenceOrCallback: number | BinaryOperator, callback?: BinaryOperator): void`
+#### `addBinaryOp(operator: string, precedenceOrCallback: number | BinaryOperator, callback?: BinaryOperator): void`
 
 Registers a binary operator with both JSEP and the evaluator.
 

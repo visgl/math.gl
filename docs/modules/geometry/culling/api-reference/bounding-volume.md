@@ -57,7 +57,6 @@ var modelMatrix = Transforms.eastNorthUpToFixedFrame(positionOnEllipsoid);
 var boundingSphere = new BoundingSphere();
 var newBoundingSphere = BoundingSphere.transformWithoutScale(boundingSphere, modelMatrix);
 
-
 ### computePlaneDistances (sphere, position, direction, result)
 
 The distances calculated by the vector from the center of the bounding sphere to position projected onto direction plus/minus the radius of the bounding sphere.
