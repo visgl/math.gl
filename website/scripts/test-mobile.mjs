@@ -60,7 +60,11 @@ try {
   const page = await context.newPage();
   page.setDefaultTimeout(30000);
   page.setDefaultNavigationTimeout(45000);
-  page.on('pageerror', (error) => console.error('Example page error:', error.message));
+  const pageErrors = [];
+  page.on('pageerror', (error) => {
+    pageErrors.push(`${page.url()}: ${error.message}`);
+    console.error('Example page error:', error.message);
+  });
   for (const size of sizes) {
     await page.setViewportSize(size);
     for (const route of ['docs', 'docs/modules', 'examples']) {
@@ -138,6 +142,7 @@ try {
       );
     }
   }
+  assert.deepEqual(pageErrors, [], 'Navigation and panel examples must not throw');
   await context.close();
   // Exercise both missing APIs (iPhone) and exposed APIs that reject the request.
   for (const mode of ['missing', 'rejected', 'native']) {
