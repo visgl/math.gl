@@ -5,8 +5,8 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "start": "node main.mjs",
-    "build": "node main.mjs"
+    "start": "node src/main.mjs",
+    "build": "node src/main.mjs"
   },
   "dependencies": {
     "@math.gl/geospatial": "workspace:*",

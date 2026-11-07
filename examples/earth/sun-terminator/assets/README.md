@@ -1,11 +1,12 @@
 # NASA overview imagery
 
-These 2048 × 1024 geographic JPEGs provide complete day/night coverage before
-remote detail tiles arrive, including the poles. Together they are about 386 KiB.
-They are unmodified NASA GIBS WMS responses downloaded on 2026-10-26.
+The bundled day overview lives in `examples/common/assets/blue-marble.jpg` so the
+solar, raster projection, and zoom-morph demos share the same offline image. It is an
+unmodified 2048 × 1024 NASA GIBS response for `BlueMarble_ShadedRelief_Bathymetry`.
 
-- `day.jpg`: NASA Blue Marble, `BlueMarble_ShadedRelief_Bathymetry`.
-- `night.jpg`: NASA Black Marble, `VIIRS_Black_Marble`, `TIME=2016-01-01`.
+The bundled `night.jpg` is a 2048 × 1024 NASA Black Marble overview from
+`VIIRS_Black_Marble`, `TIME=2016-01-01`. Both overviews provide complete day/night
+coverage before remote detail tiles arrive, including the poles.
 
 Source endpoint: `https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi`.
 Both requests use `SERVICE=WMS`, `REQUEST=GetMap`, `VERSION=1.1.1`, `STYLES=`,

@@ -23,3 +23,6 @@ The DTED data and attribution come from the pinned qualification fixture in
 Coordinates are local Cartesian meters, Z up. The mesh uses triangle interpolation;
 bilinear sampling need not lie on it. Missing and outside samples are displayed as
 statuses, never zero elevations. Derivatives are displayed only when valid.
+
+Run `yarn start-local` inside the math.gl repository to use workspace source.
+Run `yarn start` to use package exports or `yarn build` for a production bundle.

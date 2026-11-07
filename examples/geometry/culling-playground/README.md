@@ -12,3 +12,6 @@ observer so changing the view never changes classification.
 
 Run `yarn start` or `yarn build`. The viewer reuses the geometry example's luma.gl renderer
 with per-vertex colors and live mesh updates that preserve the orbit camera.
+
+Run `yarn start-local` inside the math.gl repository to use workspace source.
+Run `yarn start` to use package exports or `yarn build` for a production bundle.

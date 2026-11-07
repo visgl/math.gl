@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// biome-ignore-all lint/suspicious/noConsole: Print each task result so the command-line demo shows execution and lifetime behavior.
 import assert from 'node:assert/strict';
 import {TaskRunner, preloadTasks} from '@math.gl/core/tasks';
 import {transformTask} from './task.mjs';
@@ -21,7 +22,10 @@ try {
   console.log('One call:', [...single.values]);
 
   const calls = [];
-  for await (const output of runner.runTasks(transformTask, [input, input, input], {...request, concurrency: 2})) {
+  for await (const output of runner.runTasks(transformTask, [input, input, input], {
+    ...request,
+    concurrency: 2
+  })) {
     calls.push(output.calls);
   }
   assert.deepEqual(calls, [1, 1, 2]);

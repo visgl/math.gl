@@ -33,9 +33,8 @@ composite, not observations at the selected time. See [overview provenance](./as
 
 ## Regression checks
 
-Run `yarn workspace math.gl-sun-terminator test` for paired-image loading and cleanup.
-With the standalone server running on port 5187, run
-`yarn workspace math.gl-sun-terminator test:browser` (or set `SUN_TERMINATOR_URL`).
+From the repository root, run `yarn test-examples:node` for paired-image loading and cleanup,
+or `yarn test-examples:browser` for browser rendering checks.
 The browser suite blocks external imagery to verify offline overview coverage and
 failure fallback, checks the community-panel rows, and samples GPU output across
 rotations, poles, map/globe projections, and the interior of the feather.
@@ -71,9 +70,8 @@ switching from outside its coverage fits the complete composite.
 Additional projections use a geographic image mesh and the same per-fragment
 solar shading as the globe. Cut maps expose geographic sampling viewports through `getCutViewports`. The community shared Tile2D layer combines these viewports into one cache, selecting detail independently for Hawaii, Alaska, interrupted lobes, and H3 faces. Continuous cartographic views retain the overview. H3 uses the actual H3 icosahedron orientation with a resolution-zero cell grid.
 
-Run `yarn workspace math.gl-sun-terminator test:projections:browser` to check every
-projection for visible map coverage, disabled rotation, ordinary panning,
-queued morphs with cuts, and reduced-motion behaviour.
+The projection browser fixture checks visible map coverage, disabled rotation,
+ordinary panning, queued morphs with cuts and reduced-motion behaviour.
 
 The +0–24 h slider scrubs relative to the time at load, or the last manually entered
 UTC date/time. Playback loops over this 24-hour interval. Editing date/time resets
@@ -81,4 +79,7 @@ the slider anchor. Playback and morph animation frames are cancelled on unmount.
 
 Overview GPU textures remain owned by the renderer and are reused across projection and morph layers, avoiding a blank frame while a new layer uploads imagery. They are destroyed after deck finalization.
 
-Run `yarn workspace math.gl-sun-terminator test:cuts:browser` to check high-zoom GPU morphs, constant buffers, inset layouts, and cleanup.
+The root browser harness checks high-zoom GPU morphs, constant buffers, inset layouts and cleanup.
+
+Run `yarn start-local` within the math.gl repository to use workspace source,
+or `yarn start` to use package exports. `yarn build` produces a production bundle.

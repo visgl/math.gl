@@ -78,6 +78,7 @@
                   "modules/core/developer-guide/functional-math"
                 ]
               },
+              "modules/core/developer-guide/benchmarks",
               {
                 "type": "category",
                 "label": "Tasks",

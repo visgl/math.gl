@@ -18,10 +18,10 @@ Subdivision is available only for the icosahedron.
 
 ## Source structure
 
-`app.ts` connects the UI to the layout and scene. `view.ts` contains markup;
-`scene.ts` evaluates poses and frames the camera; `renderer.ts` owns WebGL drawing
+`src/app.ts` connects the UI to the layout and scene. `src/view.ts` contains markup;
+`src/scene.ts` evaluates poses and frames the camera; `src/renderer.ts` owns WebGL drawing
 and textures. The scene takes plain view state rather than reading controls.
-`cut-layout.ts` builds the hinge layout and `picking.ts` handles geographic hits.
+`src/cut-layout.ts` builds the hinge layout and `src/picking.ts` handles geographic hits.
 The myriahedral example reuses the controller, scene, renderer, and picking with
 its own layout builder.
 
@@ -54,13 +54,13 @@ See [data provenance and licenses](data/README.md).
 
 ## Construction
 
-- `polyhedra.ts` generates symmetric coordinates and finds convex polygon faces.
+- `src/polyhedra.ts` generates symmetric coordinates and finds convex polygon faces.
   The dodecahedron is constructed as the dual of the icosahedron. Spherical
   subdivision caches edge midpoints by vertex ID and normalizes them to unit radius.
-- `layout.ts` builds the dual adjacency graph from shared indexed edges. Kruskal's
+- `src/layout.ts` builds the dual adjacency graph from shared indexed edges. Kruskal's
   algorithm finds a maximum spanning tree using scores that favor short edges
   with deterministic seeded variation. Every non-tree edge is cut. This heuristic
-  is the original strategy; `cut-layout.ts` adds land weights or fixed AirOcean joins.
+  is the original strategy; `src/cut-layout.ts` adds land weights or fixed AirOcean joins.
 - Each child hinge uses the original shared edge as its axis. A signed angle
   between face normals determines the flattening rotation. Panel coordinates
   remain in the original solid frame with identity rest transforms. `HingeTree`
@@ -71,7 +71,7 @@ See [data provenance and licenses](data/README.md).
 
 Mesh generation and layout selection remain example-local experiments; the public
 `@math.gl/geometry` API is still `HingeTree`. The original hand-built cube in
-`cube.ts` remains a regression fixture for its known cross-shaped net.
+`src/cube.ts` remains a regression fixture for its known cross-shaped net.
 
 The example uses WebGL 2 with orthographic projection and a depth buffer.
 Back-facing panels are shaded at 28% brightness so front/back surfaces are easy
@@ -99,3 +99,6 @@ The docs and standalone page share `mountUnfolding` and the same markup and styl
 The docs lazy-load the browser-only renderer; unmounting cancels animation, removes
 listeners and frees WebGL resources. Find **Unfolding Earth** in the Geometry docs
 and Examples sidebars.
+
+Run `yarn start-local` within the math.gl repository to use workspace source,
+or `yarn start` to use package exports. `yarn build` produces a production bundle.

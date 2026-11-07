@@ -7,7 +7,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "test": "node --test worker.test.mjs"
+    "start-local": "vite --config ../../vite.config.local.mjs"
   },
   "dependencies": {
     "@math.gl/core": "workspace:*",

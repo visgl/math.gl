@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// biome-ignore-all lint/suspicious/noConsole: Report successful completion of this command-line task demo.
 import assert from 'node:assert/strict';
 import {TaskRunner} from '@math.gl/core/tasks';
 import {ProjectCoordinatesTask, PrepareMapTask} from '@math.gl/geospatial/tasks';

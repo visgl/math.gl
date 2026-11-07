@@ -4,7 +4,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {MapEngine} from '@math.gl/geospatial/discontinuous';
 import {getSunTerminator} from '@math.gl/earth/sun';
-import land from 'website-examples/geometry/unfolding-polyhedron/data/land.json';
+import land from 'website-examples/common/land.json';
 import styles from './styles.module.css';
 
 const displayNames = {

@@ -25,7 +25,7 @@ pins **0.1.0** and demonstrates two distinct uses of its public API.
 The example's `createProjWasmProvider` owns a PROJ context, disables network access,
 uses `projCreateFromDatabase` and `projAsProjjson`, and destroys each temporary PJ
 object. It records the package and EPSG database revision in lookup provenance.
-Its source is in `examples/geospatial/proj-wasm-crs/provider.mjs`:
+Its source is in `examples/geospatial/proj-wasm-crs/src/crs-resolution/provider.mjs`:
 
 ```javascript
 import * as proj from 'proj-wasm';
@@ -356,7 +356,7 @@ geometry topology are separate concerns. See its source for the explicit samplin
 
 ### Adaptive raster batches
 
-The [proj-wasm raster recipe](https://github.com/visgl/math.gl/blob/master/examples/geospatial/proj-wasm-crs/raster-example.mjs)
+The [proj-wasm raster recipe](https://github.com/visgl/math.gl/blob/master/examples/geospatial/proj-wasm-crs/src/raster-preparation/index.mjs)
 drives adaptive raster refinement with real asynchronous PROJ sample batches. It reuses a normalized
 operation, bounds each frontier batch, checks cancellation around awaited calls, and transfers the
 completed mesh into an owned math.gl task worker. Node and Chromium validate coordinate agreement,

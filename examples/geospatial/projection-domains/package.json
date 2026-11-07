@@ -6,10 +6,9 @@
   "license": "MIT",
   "scripts": {
     "start": "vite",
-    "build": "tsc --noEmit && vite build && node build-lab.mjs",
-    "test": "node --experimental-strip-types --test test/*.test.ts test/*.test.mjs",
-    "test:browser": "node browser-test.mjs && node lab/browser-test.mjs",
-    "benchmark": "node lab/benchmark.mjs"
+    "build": "tsc --noEmit && vite build",
+    "benchmark": "node src/lab/benchmark.mjs",
+    "serve": "vite preview"
   },
   "dependencies": {
     "@deck.gl-community/panels": "^9.4.8",
@@ -21,16 +20,19 @@
     "@math.gl/core": "workspace:*",
     "@math.gl/geometry": "workspace:*",
     "@math.gl/geospatial": "workspace:*",
+    "comlink": "^4.4.2",
     "d3-geo": "^3.1.1",
     "d3-geo-polygon": "2.0.1",
+    "ffi-wasm": "0.0.3",
     "proj-wasm": "0.1.0",
-    "proj4": "2.22.0"
+    "proj4": "2.22.0",
+    "resource-tracker": "^0.0.1",
+    "squint-cljs": "^0.14.210",
+    "worker-router": "npm:@wcohen/worker-router@^0.0.2"
   },
   "devDependencies": {
     "@types/d3-geo": "^3.1.0",
     "@types/node": "^22.20.1",
-    "playwright": "^1.62.1",
-    "pngjs": "^7.0.0",
     "typescript": "^6.0.3",
     "vite": "^8.3.6"
   }
