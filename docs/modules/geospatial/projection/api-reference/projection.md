@@ -23,14 +23,30 @@ The `/types` entry point exports only types and adds no runtime code when used w
 
 ## Coordinate methods
 
-| Method                                      | Behavior                                                 |
-| ------------------------------------------- | -------------------------------------------------------- |
-| `project(coordinate)`                       | Convert from source to target; return a new number array |
-| `unproject(coordinate)`                     | Convert from target to source; return a new number array |
-| `projectTo(coordinate, output)`             | Convert into caller-owned storage and return that output |
-| `unprojectTo(coordinate, output)`           | Inverse conversion into caller-owned storage             |
-| `projectFlat(coordinates, dimension = 2)`   | Convert a Float32Array or Float64Array in place          |
-| `unprojectFlat(coordinates, dimension = 2)` | Inverse conversion of the same flat buffer               |
+#### `project(coordinate)`
+
+Convert from source to target; return a new number array
+
+#### `unproject(coordinate)`
+
+Convert from target to source; return a new number array
+
+#### `projectTo(coordinate, output)`
+
+Convert into caller-owned storage and return that output
+
+#### `unprojectTo(coordinate, output)`
+
+Inverse conversion into caller-owned storage
+
+#### `projectFlat(coordinates, dimension = 2)`
+
+Convert a Float32Array or Float64Array in place
+
+#### `unprojectFlat(coordinates, dimension = 2)`
+
+Inverse conversion of the same flat buffer
+
 
 Each method also has a `Sync` variant, for example `projectSync` and `projectFlatSync`.
 Those variants never initiate loading. Call `await projection.preload()` first when using

@@ -11,7 +11,11 @@ export {CullingVolume} from './lib/culling-volume';
 export {Plane} from './lib/plane';
 export {Ray} from './lib/ray';
 
-export type {ImplicitShape, RayIntersection} from './lib/shapes/implicit-shape';
+export type {
+  ImplicitShape,
+  ImplicitShape as Shape,
+  RayIntersection
+} from './lib/shapes/implicit-shape';
 export {BoxShape} from './lib/shapes/box-shape';
 export type {BoxShapeProps} from './lib/shapes/box-shape';
 export {CapsuleShape} from './lib/shapes/capsule-shape';

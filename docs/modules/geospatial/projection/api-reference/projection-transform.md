@@ -155,17 +155,24 @@ axis names. Other UNKNOWN directions reject. Non-cardinal or non-polar axis-meri
 operations, vertical-first structured axes, derived CRSs, and time-dependent operations remain
 outside this subset. PROJ axis permutations support vertical-first ordering.
 
-`normalizeCRS(input, options)` produces an immutable execution model with distinct
+#### `normalizeCRS(input, options)`
+
+Produces an immutable execution model with distinct
 projection and datum ellipsoids, units, prime meridian, axes, and datum parameters.
 Normalization alone does not verify a projection plugin's parameter support.
-`checkProjectionCompatibility(input, options)` checks construction with the selected
+
+#### `checkProjectionCompatibility(input, options)`
+
+Checks construction with the selected
 readers/plugins and reports `supported`, `unsupported`, or `unknown`, with reasons
 `unknown-syntax`, `missing-parser`, `missing-plugin`, `missing-transform-stage`, or
 `invalid-definition`. It does not assess accuracy or a particular coordinate's domain.
 
 ## Methods and dimensions
 
-`project(coordinate)` transforms source to target; `unproject(coordinate)` reverses it.
+#### `project(coordinate)`
+
+Transforms source to target; `unproject(coordinate)` reverses it.
 Both are bound methods accepting readonly arrays and returning new arrays.
 
 Geographic x/y use degrees for PROJ definitions, or the angular units declared by
@@ -185,7 +192,9 @@ mode to compare the computed values. Geocentric units also apply consistently to
 
 ## Reusable scalar outputs
 
-`projectTo(coordinate, output)` and `unprojectTo(coordinate, output)` write a single
+#### `projectTo(coordinate, output)`
+
+And `unprojectTo(coordinate, output)` write a single
 coordinate into caller-owned storage and return that exact output object. Transforms created by the full, configurable and lazy engines expose these bound methods. Use them when a scalar
 loop should reuse its result instead of creating an array on each call:
 
@@ -227,7 +236,9 @@ avoid repeated scalar dispatch and validation.
 
 ## Flat typed arrays (in place)
 
-`projectFlat(coordinates, dimension = 2)` and
+#### `projectFlat(coordinates, dimension = 2)`
+
+And
 `unprojectFlat(coordinates, dimension = 2)` transform a `Float64Array` or
 `Float32Array` and return that same typed-array view. Records are interleaved:
 
@@ -380,7 +391,9 @@ PROJ/EPSG spellings of its fixed cone-axis co-latitude (`alpha=30.28813972222222
 or `30.28813975277778`, with 1e-10-degree rounding tolerance). Custom values reject
 instead of being silently ignored by the fixed kernel.
 
-`obliqueTransformation` is a factory with an explicit dependency:
+#### obliqueTransformation
+
+Is a factory with an explicit dependency:
 
 ```typescript
 import {
@@ -424,13 +437,17 @@ const projection = new ProjectionTransform({
 });
 ```
 
-`parseNTv2Grid(buffer, {includeErrorFields})` supports both byte orders and
+#### `parseNTv2Grid(buffer, {includeErrorFields})`
+
+Supports both byte orders and
 NTv2 SECONDS grids. The default reads 16-byte node records, including unused accuracy
 fields. Set `includeErrorFields: false` only for compact files with 8-byte records;
 it does not simply discard accuracy fields from a standard file. Invalid headers,
 dimensions, unsupported units and truncated data throw at preparation time.
 
-`loadGeoTIFFGrid(decodedTIFF)` asynchronously prepares a decoded geotiff.js v2/v3
+#### `loadGeoTIFFGrid(decodedTIFF)`
+
+Asynchronously prepares a decoded geotiff.js v2/v3
 object. Callers load the file or URL with their chosen GeoTIFF library and await the
 result before construction:
 
@@ -583,7 +600,9 @@ return geoid undulation in metres, or `undefined` outside coverage. Longitudes a
 referenced in the associated CRS's horizontal datum. Register implementations per instance
 and reference their names with `+geoidgrids`; scalar and flat transforms then require Z.
 
-`parseGTXGrid` is exported from `@math.gl/geospatial/projection/grids/gtx`.
+#### parseGTXGrid
+
+Is exported from `@math.gl/geospatial/projection/grids/gtx`.
 `createVerticalGrid`, `createGeoidGrid` and `VerticalGridOptions` are exported from
 `@math.gl/geospatial/projection/grids/vertical`. The public root and compatibility experimental/native
 entry points also export these helpers; `/core` exports only the contract and engine.

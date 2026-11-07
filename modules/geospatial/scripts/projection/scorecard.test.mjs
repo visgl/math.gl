@@ -310,3 +310,16 @@ test('escapes report labels and has no inferred browser heap measurement', () =>
   assert(!markdown.includes('<script>'));
   assert.equal(card.environments[1].allocation.available, false);
 });
+
+
+test('regenerated scorecards retain the reproduction guide and its redirect anchor', () => {
+  const f = fixture();
+  const card = buildScorecard(f.manifest, f.node, f.browserReports);
+  const markdown = renderScorecard(card);
+  assert.match(markdown, /\[measurement commands and provenance\]\(#reproduction\)/);
+  assert.match(markdown, /^## Reproduction$/m);
+  assert.match(markdown, /^### Collect a full profile$/m);
+  assert.match(markdown, /^### Publication gates$/m);
+  assert.doesNotMatch(markdown, /scorecard-methodology\.md/);
+  assert.equal(markdown.split('## Reproduction').length, 2);
+});

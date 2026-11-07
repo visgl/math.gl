@@ -14,12 +14,22 @@ revolution shape profile is `0.99 <= b/a <= 1.01`. A descriptor defines an orien
 infinite line, with signed distance from its start. It is distinct from the
 `GeodesicPath` endpoint sampling class.
 
-| Method | Result |
-| --- | --- |
-| `all(a, b, {maxDistance, origin?: [s0, t0]})` | Every isolated crossing and canonical coincident continuum inside `abs(s-s0)+abs(t-t0) <= maxDistance`, subject to `complete` |
-| `closest(a, b, {maxDistance?, origin?}?)` | Same report plus the closest intersection; defaults to the global profile |
-| `next(lat, lon, aziA, aziB, maxDistance?)` | Next crossing excluding the shared origin; defaults to the global profile |
-| `segments(a0, a1, b0, b1)` | `intersection`, `overlap`, `disjoint`, `not-found`, or `ambiguous` |
+#### `all(a, b, {maxDistance, origin?: [s0, t0]})`
+
+Every isolated crossing and canonical coincident continuum inside `abs(s-s0)+abs(t-t0) <= maxDistance`, subject to `complete`
+
+#### `closest(a, b, {maxDistance?, origin?}?)`
+
+Same report plus the closest intersection; defaults to the global profile
+
+#### `next(lat, lon, aziA, aziB, maxDistance?)`
+
+Next crossing excluding the shared origin; defaults to the global profile
+
+#### `segments(a0, a1, b0, b1)`
+
+`intersection`, `overlap`, `disjoint`, `not-found`, or `ambiguous`
+
 
 Search radius is positive and at most `4πR`; each origin parameter has magnitude
 at most `4πR`, where `R` is the authalic radius. Global defaults search the full

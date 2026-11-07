@@ -113,7 +113,9 @@ Duplicate identifiers and malformed metadata throw during construction.
 
 ## Request full coverage
 
-`select(request)` returns the best eligible `CoordinateOperation<T>` or `undefined`.
+#### `select(request)`
+
+Returns the best eligible `CoordinateOperation<T>` or `undefined`.
 An empty catalogue also returns `undefined`. A malformed request throws rather than
 being interpreted as a broad or approximate request.
 

@@ -1,10 +1,10 @@
-# Reproduce the projection scorecard
+## Reproduction
 
 The [published scorecard](./scorecard.md) consolidates source-matched measurements
 for Node, Chromium, Firefox and WebKit. Each environment remains separate. It does
 not produce an overall ranking or claim unrestricted PROJ parity.
 
-## What is measured
+### What is measured
 
 | Category | Evidence and limits |
 | --- | --- |
@@ -20,7 +20,7 @@ portable profile. Every throughput row includes exact input-buffer bytes, a stor
 lower bound that excludes adaptive copies, result objects, library memory and other
 application costs. It must not be interpreted as the browser's working set.
 
-## Collect a full profile
+### Collect a full profile
 
 Build the package first. Measurement scripts do not fetch models or dependencies.
 The comparator is the actual installed **proj4js 2.22.0**, matching the exact reviewed
@@ -46,7 +46,7 @@ machines, browsers or workload layouts. PR CI uses three samples and a bounded
 4 ms aggregate window; master keeps the seven-sample/12 ms profile. PR observations
 are validation diagnostics and can show more variation than a dedicated full run.
 
-## Publication gates
+### Publication gates
 
 The Node input manifest hashes every raw report and snapshots the reviewed accuracy
 profile. Consolidation requires matching source/workload fingerprints, comparator

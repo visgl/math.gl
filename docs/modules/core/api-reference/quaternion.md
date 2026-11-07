@@ -6,7 +6,6 @@
 
 `Quaternion` extends JavaScript `Array` through its core base classes.
 
-
 Stores quaternion components as `[x, y, z, w]`. Use unit quaternions for rotations, composition, and interpolation. Methods mutate the receiver unless stated otherwise; angles are radians.
 
 ## Usage
@@ -67,7 +66,9 @@ Set the identity rotation `[0, 0, 0, 1]`.
 
 ### len(): number
 
-Return the quaternion magnitude. `length` is the array component count.
+Return the quaternion magnitude.
+
+`length` is the array component count.
 
 ### lengthSquared(): number
 
@@ -115,7 +116,11 @@ Linearly interpolate components. Use `slerp()` for rotation interpolation.
 
 ### multiplyRight(other): this
 
-Set the receiver to `this * other`. `multiply(other)` is an alias.
+Set the receiver to `this * other`.
+
+#### `multiply(other)`
+
+Is an alias.
 
 ### multiplyLeft(other): this
 

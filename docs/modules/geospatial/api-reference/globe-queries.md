@@ -31,7 +31,7 @@ The constructor owns frozen snapshots; changing the inputs does not change queri
 Axes align with the input Cartesian frame. A sphere works in any matching frame;
 a non-spherical body must use its principal axes. The class does not infer a CRS.
 
-### intersectRay(origin, direction, result?)
+#### `intersectRay(origin, direction, result?)`
 
 Returns the nonnegative parameter interval `[entry, exit]` where
 `origin + t * direction` intersects the solid. Parameters are distances only when
@@ -44,7 +44,7 @@ Inputs must have three finite components. The calculation normalizes direction i
 scaled ellipsoid space and avoids subtractive cancellation for the smaller root.
 It never substitutes the nearest limb point for a miss.
 
-### isPointOccluded(camera, point, tolerance = 1e-12)
+#### `isPointOccluded(camera, point, tolerance = 1e-12)`
 
 Returns whether the finite camera-to-point segment enters the ellipsoid interior.
 It includes altitude: a point beyond the surface horizon can be visible above the
@@ -56,7 +56,7 @@ is a nonnegative margin in **scaled squared-radius units**, less than one; the
 interior test uses `distanceSquared < 1 - tolerance`. This is numerical tolerance,
 not terrain height. Terrain/building occlusion requires a separate data-aware test.
 
-### getHorizon(camera)
+#### `getHorizon(camera)`
 
 Returns an exact limb ellipse `{center, axis1, axis2}` for an exterior camera:
 
@@ -71,7 +71,7 @@ and tangent to the viewing line. Polar views need no special axis rotation.
 On/inside the body, there is no exterior apparent limb and the result is undefined.
 The limb is geometry, not a renderer-specific depth disk or screen mask.
 
-## getGlobeHorizonBounds(camera, radius)
+#### `getGlobeHorizonBounds(camera, radius)`
 
 Returns conservative surface bounds `[west, south, east, north]` in degrees for a
 sphere centered at zero. X points to longitude 0, Y to longitude 90 and Z north.
@@ -83,7 +83,7 @@ poles, with a small outward rounding margin. It can overfetch a zoomed/cropped s
 it is not a viewport-tight bound, an ellipsoid bound, or an elevated-terrain bound.
 Clip/refine coverage in the viewport owner if tighter imagery requests are needed.
 
-## splitGlobeBounds(bounds)
+#### `splitGlobeBounds(bounds)`
 
 Returns one ordinary degree rectangle or two at the antimeridian. Valid latitude
 and longitude ranges are checked. This avoids replacing a wrapped narrow extent
