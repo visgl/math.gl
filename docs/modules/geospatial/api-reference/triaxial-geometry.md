@@ -24,7 +24,9 @@ original start, so sampling order does not accumulate trajectory state.
 
 ## Surface coordinate systems
 
-`toCartesian(latitude, longitude, system?)` and `fromCartesian(position, system?)`
+#### `toCartesian(latitude, longitude, system?)`
+
+And `fromCartesian(position, system?)`
 support three explicitly different systems:
 
 | System | What latitude/longitude describe |
@@ -39,7 +41,9 @@ CRS. The existing `Ellipsoid` APIs retain their separate nearest-point/height
 contracts. Exact-pole longitude is canonicalized to zero. Jacobi ellipsoidal
 charts, conformal coordinates and uniform surface sampling are separate work.
 
-`directionToCartesian(position, azimuth)` maps a bearing to a unit tangent.
+#### `directionToCartesian(position, azimuth)`
+
+Maps a bearing to a unit tangent.
 `directionFromCartesian(position, direction)` performs the inverse. Bearings turn
 clockwise from coordinate north, the tangent along the constant-longitude
 meridian toward increasing latitude. The three supported coordinate systems
@@ -49,7 +53,9 @@ its magnitude is normalized, including very large or subnormal inputs.
 
 ## Direct geodesics
 
-`line(position, direction).position(distance)` integrates the constrained
+#### `line(position, direction).position(distance)`
+
+Integrates the constrained
 Cartesian geodesic equation with adaptive, bounded Dormand–Prince steps. It
 returns `{position, direction, distance}`. The direction is forward along the
 original geodesic even when sampling a negative distance. `direct(position,

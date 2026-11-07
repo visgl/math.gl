@@ -1,8 +1,10 @@
 ---
-sidebar_label: Introduction
+sidebar_label: Overview
 ---
 
-# Introduction
+# Overview
+
+import LibraryOverview from '@site/src/components/library-overview';
 
 <p className="badges introduction-badges">
   <a href="https://github.com/visgl/math.gl/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT license" height="20" /></a>
@@ -15,16 +17,12 @@ sidebar_label: Introduction
 </p>
 
 <p className="badges introduction-badges">
-  <a href="https://github.com/visgl/math.gl"><img src="https://img.shields.io/github/stars/visgl/math.gl?style=social" alt="GitHub stars" height="20" /></a>
-  <a href="https://github.com/visgl/math.gl/graphs/contributors"><img src="https://img.shields.io/github/contributors/visgl/math.gl?style=social&amp;logo=github" alt="GitHub contributors" height="20" /></a>
-  <a href="https://github.com/visgl/math.gl/pulls?q=is%3Apr+is%3Amerged"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fsearch%2Fissues%3Fq%3Drepo%3Avisgl%2Fmath.gl%2Bis%3Apr%2Bis%3Amerged&amp;query=%24.total_count&amp;label=PRs&amp;style=social&amp;logo=github" alt="Merged pull requests" height="20" /></a>
+  <a href="https://github.com/visgl/math.gl"><img src="https://img.shields.io/github/stars/visgl/math.gl?style=flat-square&amp;label=%E2%98%85&amp;logo=github&amp;logoColor=white&amp;color=24292f&amp;labelColor=24292f" alt="GitHub stars" height="20" /></a>
+  <a href="https://github.com/visgl/math.gl/graphs/contributors"><img src="https://img.shields.io/github/contributors/visgl/math.gl?style=flat-square&amp;logo=github&amp;logoColor=white&amp;color=24292f&amp;labelColor=24292f" alt="GitHub contributors" height="20" /></a>
+  <a href="https://github.com/visgl/math.gl/pulls?q=is%3Apr+is%3Amerged"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Fsearch%2Fissues%3Fq%3Drepo%3Avisgl%2Fmath.gl%2Bis%3Apr%2Bis%3Amerged&amp;query=%24.total_count&amp;label=PRs&amp;style=flat-square&amp;logo=github&amp;logoColor=white&amp;color=24292f&amp;labelColor=24292f" alt="Merged pull requests" height="20" /></a>
 </p>
 
-Welcome to math.gl!
-
-math.gl is a modular TypeScript toolbox for **geospatial** and **3D** math. Start with vectors and matrices in core, then add modules for coordinate conversion, geometry, global grids, and other application needs.
-
-math.gl computes on the CPU and has no GPU dependencies. Its arrays and coordinate utilities can supply WebGL, WebGPU, or other rendering systems.
+<LibraryOverview />
 
 <div className="foundation-attribution">
   <a href="https://openvisualization.org">

@@ -19,7 +19,7 @@ Optional datasets imported from `@math.gl/geospatial/elastic`. These are the thr
 published coordinate tables, not names that cause implicit network loading.
 Their `radius: 6371` normalizes kilometer coordinates to approximately unit-globe scale.
 
-## `parseElasticMap(text, options?)`
+#### `parseElasticMap(text, options?)`
 
 Imported from `@math.gl/geospatial/discontinuous`. Parses the author's published
 text representation into JSON-safe `ElasticMapData`. Converts latitude/longitude
@@ -32,7 +32,7 @@ trailing outline and inverse-table syntax; those inverse hints are not used.
 unbounded dimensions, and unexpected trailing data throw. Input is limited to
 32 million characters, 64 sections, and one million nodes per section.
 
-## `createElasticMap(data, {radius = 1}?)`
+#### `createElasticMap(data, {radius = 1}?)`
 
 Compiles a lower-level `MapSurface` with the same projection methods used by
 MapEngine. It copies the grid values and compiled domains. `radius` must be positive

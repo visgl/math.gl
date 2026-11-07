@@ -126,7 +126,6 @@ After building the repository, run `node test/bench/subdivision.mjs` for a deter
 
 See [subdividePolyline](./subdivide-polyline.md) for strokes and boundary-only processing. Boundary subdivision alone is insufficient when a filled polygon or image also needs its triangle interiors to deform.
 
-
 ## Application error metrics
 
 The projection interface is **projection-engine agnostic**: synchronous transforms may come from

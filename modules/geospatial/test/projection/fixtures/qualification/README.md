@@ -17,7 +17,7 @@ This is the bounded **three-sample / 4 ms PR diagnostic profile**: Node uses 2,0
 points and browsers use 20,000. It is a dated baseline, not a high-confidence
 performance ranking or an assertion that later revisions preserve these timings.
 The full seven-sample / 12 ms profile is documented in the
-[scorecard methodology](../../../../../../docs/modules/geospatial/projection/scorecard-methodology.md).
+[scorecard methodology](../../../../../../docs/modules/geospatial/projection/scorecard.md#reproduction).
 
 Raw input reports are retained in that run's `projection-scorecard-node` and three
 `projection-browser-qualification-*` artifacts. Their exact content hashes accompany

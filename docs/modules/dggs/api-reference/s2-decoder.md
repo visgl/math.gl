@@ -57,6 +57,8 @@ The `@math.gl/dggs` subpath also exports lightweight hierarchy helpers:
 - `getS2IndexFromCell(cell: S2Cell): bigint`
 - `getS2DescendantIndex(root: bigint, relativeLevel: number, x: number, y: number): bigint`
 
-`getS2ChildIndex` uses Hilbert child order. `getS2DescendantIndex` instead accepts spatial `(x, y)`
+#### `getS2ChildIndex()`
+
+Uses Hilbert child order. `getS2DescendantIndex` instead accepts spatial `(x, y)`
 coordinates along the root cell's face-local axes and accounts for Hilbert orientation changes.
 This makes it suitable for implicit quadtree addressing.

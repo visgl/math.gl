@@ -5,7 +5,6 @@ math.gl's general projection interface is **projection-engine agnostic**. Applic
 backend. Native math.gl, proj4js, D3 and other engines can participate through adapters with explicit
 coordinate, dimensional and execution semantics. See [external projection engines](../developer-guide/external-projection-engines.md).
 
-
 Native engine constructors optionally accept `resolver: CRSResolver` from
 `@math.gl/geospatial/crs`. `createProjectionAsync()` and `getCRS()` prepare
 external identifiers; `createProjection()` remains synchronous and never looks them up.

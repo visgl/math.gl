@@ -6,7 +6,6 @@
 
 Stores four numeric components `[x, y, z, w]`. For homogeneous coordinates, W = 1 represents a point and W = 0 represents a direction under an affine transform.
 
-
 Use `Matrix4.transform(vector4, result)` for a full homogeneous transform. `Vector4.transform(matrix4)` has legacy point-transform behavior: it transforms XYZ with implicit W = 1 and leaves the stored W unchanged. See [homogeneous coordinates](../developer-guide/homogeneous-coordinates.md) for points, directions, and perspective division.
 
 ## Usage

@@ -868,7 +868,7 @@ capability probes do not benchmark projection implementations.
 The [projection scorecard](../docs/modules/geospatial/projection/scorecard.md) combines these measurements with
 independent accuracy, allocation sampling, isolated memory checkpoints, startup
 and bundle costs. Environments stay separate and missing browser heap evidence
-is explicit. See [the publication gates and commands](../docs/modules/geospatial/projection/scorecard-methodology.md).
+is explicit. See [the publication gates and commands](../docs/modules/geospatial/projection/scorecard.md#reproduction).
 
 ### CI runner usage
 

@@ -56,7 +56,9 @@ triangles at that axis; self-crossing or reversing profiles are not repaired.
 
 ## ParametricGeometry
 
-`sample(u, v)` returns a finite triple over normalized [0,1]². `uSegments` and
+#### `sample(u, v)`
+
+Returns a finite triple over normalized [0,1]². `uSegments` and
 `vSegments` default to 32 and must be positive integers. Optional `normal(u, v)`
 returns an analytic normal, which is normalized. Otherwise finite differences
 estimate smooth-surface normals with a parameter step of 1e-5 and one-sided

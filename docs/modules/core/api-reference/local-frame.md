@@ -37,16 +37,22 @@ mean east/north/up for rotations. A fixed point's x/y/z mean Cartesian XYZ.
 `upY`, `upZ`. East's Z component is zero; north is up × east. Treat these factors
 as one basis, rather than independent configurable matrix entries.
 
-`createLocalFrameBasis()` returns setup storage initially oriented at zero
+#### `createLocalFrameBasis()`
+
+Returns setup storage initially oriented at zero
 longitude and latitude. All other functions require caller-owned storage, return
 `true` on a successful finite result, and create no coordinate arrays or objects.
 
-`eastNorthUpBasis(longitude, latitude, result)` takes **radians**, independent of
+#### `eastNorthUpBasis(longitude, latitude, result)`
+
+Takes **radians**, independent of
 `config._cartographicRadians`. Longitude is periodic, latitude must lie within
 ±π/2, and neither angle may be non-finite. At a pole, the supplied longitude
 chooses the east/north orientation. The basis contains no translation or height.
 
-`eastNorthUpBasisFromDirections(east, up, result)` retains the supplied directions.
+#### `eastNorthUpBasisFromDirections(east, up, result)`
+
+Retains the supplied directions.
 The caller must supply unit, mutually perpendicular east/up vectors, with
 `east.z === 0` and up's horizontal component pointing radially outward.
 Finiteness is checked; these geometric preconditions are not certified by the
@@ -55,8 +61,13 @@ a different geodetic position.
 
 ## Rotations and units
 
-`localToFixed(point, basis, result = point)` rotates ENU to XYZ without translating.
-`fixedToLocal(point, basis, result = point)` uses the transpose rotation, which is
+#### `localToFixed(point, basis, result = point)`
+
+Rotates ENU to XYZ without translating.
+
+#### `fixedToLocal(point, basis, result = point)`
+
+Uses the transpose rotation, which is
 an inverse only when the basis satisfies the orthonormal preconditions.
 Both capture numeric inputs before writing, support in-place use or separate
 point output, and retain the input units. An offset in metres remains metres; a
@@ -65,7 +76,9 @@ origin added separately.
 
 ## Matrices and ownership
 
-`localFrameToMatrix(basis, origin, firstAxis, secondAxis, thirdAxis, result)` writes
+#### `localFrameToMatrix(basis, origin, firstAxis, secondAxis, thirdAxis, result)`
+
+Writes
 a column-major affine 4×4 matrix. The first three columns are the selected signed
 local axes; the last column is the fixed-space origin in its distance units.
 `LocalFrameAxis` is `east | north | up | west | south | down`. Triples must use

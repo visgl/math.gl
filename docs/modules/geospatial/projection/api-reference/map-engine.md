@@ -296,13 +296,26 @@ being disjoint or hinged. Albers USA has detached components. See
 
 <span class="badge">From v5.0 · Experimental</span>
 
-| Method | Returns |
-| --- | --- |
-| `findRegions(lonLat)` | Boundary-inclusive region IDs in definition order |
-| `projectPoint(lonLat, regionId?)` | `{regionId, position: [x, y]}` or `null` outside coverage |
-| `unprojectPoint(xy, regionId?)` | All valid `{regionId, position: [longitude, latitude]}` candidates |
-| `projectLine(points, sampling?)` | Chart-local `MapLine[]` |
-| `projectPolygon(rings, sampling?)` | Chart-local `MapPolygon[]`, with holes retained |
+#### `findRegions(lonLat)`
+
+Boundary-inclusive region IDs in definition order
+
+#### `projectPoint(lonLat, regionId?)`
+
+`{regionId, position: [x, y]}` or `null` outside coverage
+
+#### `unprojectPoint(xy, regionId?)`
+
+All valid `{regionId, position: [longitude, latitude]}` candidates
+
+#### `projectLine(points, sampling?)`
+
+Chart-local `MapLine[]`
+
+#### `projectPolygon(rings, sampling?)`
+
+Chart-local `MapPolygon[]`, with holes retained
+
 
 These use the [static map geometry contract](../../discontinuous/README.md): degrees in, placed
 map units out, source coordinates preserved, minor great-circle input edges,
@@ -321,7 +334,9 @@ the [fitted layout](../../discontinuous/README.md), including pixel-space `proje
 functions and region metadata. Default `flipY: true` gives top-left screen
 coordinates. Fitting is uniform and preserves inset scale ratios.
 
-`pick(viewport, pixel)` returns inverse candidates with `layer`, topmost first.
+#### `pick(viewport, pixel)`
+
+Returns inverse candidates with `layer`, topmost first.
 Pass a viewport fitted by this engine and undo any extra camera transform on the
 pixel first. Picking applies geographic coverage, not renderer depth/occlusion.
 It is for the static map; use ray intersections and retained source coordinates
@@ -624,7 +639,6 @@ The Projection domains example includes a polygon-with-hole mode showing origina
 outlines and optional generated closures. It illustrates the boundary distinction
 required by [deck.gl#10922](https://github.com/visgl/deck.gl/issues/10922).
 
-
 Mercator path preparation now carries source lineage through its latitude-band
 clipping stage. Latitude intersections are evaluated on the sampled source
 minor-great-circle arc, rather than inverse-projecting a straight projected chord.
@@ -632,7 +646,6 @@ Source distances and endpoint reasons survive the additional cut. In the path
 provenance example, select **Mercator latitude cuts** or **Satellite coverage cuts** to inspect the coverage ends.
 Rigid spherical cap paths (including satellite coverage) also retain lineage by
 attributing streamed intersections to the active sampled edge before resampling.
-
 
 ### Nonlinear-cap and Elastic path lineage
 

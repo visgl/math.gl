@@ -64,7 +64,7 @@ Types matching number arrays of specific lengths or typed arrays.
 
 ## Utilities
 
-### `isUint16Array(value: unknown): value is Uint16Array`
+#### `isUint16Array(value: unknown): value is Uint16Array`
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -75,7 +75,7 @@ JavaScript realms, including iframe and Node VM arrays, and supports subviews.
 Rejects signed integers, floats, DataViews, and objects with forged constructors
 or `Symbol.toStringTag` properties.
 
-### `isFloat16Array(value: unknown): value is Float16Array`
+#### `isFloat16Array(value: unknown): value is Float16Array`
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -86,7 +86,7 @@ check. Does not require a Float16Array constructor in the caller's realm and doe
 not install a polyfill. A Uint16Array containing encoded IEEE 754 binary16 bits
 returns false: those bits need decoding before they represent numeric floats.
 
-### `isTypedArray(value: unknown): value as TypedArray`
+#### `isTypedArray(value: unknown): value as TypedArray`
 
 Checks if a value is a typed array.
 
@@ -94,7 +94,7 @@ Remarks:
 
 - Avoids type narrowing problems with `ArrayBuffer.isView()` (which accepts `DataViews` that do not support array methods).
 
-### `isNumberArray(value: unknown): value as NumberArray`
+#### `isNumberArray(value: unknown): value as NumberArray`
 
 Checks if a value is a classic JavaScript array of numbers.
 
@@ -102,7 +102,7 @@ Remarks:
 
 - Only the type of the first element in a standard array is checked to be a `number`.
 
-### `isNumericArray(value: unknown): value as NumericArray`
+#### `isNumericArray(value: unknown): value as NumericArray`
 
 Checks if a value is either a classic JavaScript array of numbers or a typed array.
 
@@ -116,13 +116,13 @@ Remarks:
 The native `Float16Array` constructor, or `undefined` when the current JavaScript runtime does not
 provide it. The value is captured when `@math.gl/core` is evaluated.
 
-### `getFloat16ArrayConstructor(): TypedArrayConstructor`
+#### `getFloat16ArrayConstructor(): TypedArrayConstructor`
 
 Returns the native `Float16Array` constructor when available and `Uint16Array` otherwise. The
 fallback stores encoded IEEE 754 binary16 bit patterns and does not provide native float16 numeric
 semantics.
 
-### `isFloat16ArrayConstructor(value: unknown): boolean`
+#### `isFloat16ArrayConstructor(value: unknown): boolean`
 
 Returns `true` when the value matches `NativeFloat16ArrayConstructor`. Returns `false` for the
 `Uint16Array` fallback.

@@ -34,12 +34,22 @@ continuous geographic heading at a pole. Triaxial/prolate ellipsoids are deliber
 
 ## Points, vectors and matrices
 
-| Method | Operation |
-| --- | --- |
-| `localToFixedPoint(point, result?)` | Rotate local XYZ and add fixed origin. |
-| `fixedToLocalPoint(point, result?)` | Subtract fixed origin, then apply inverse rotation. |
-| `localToFixedVector(vector, result?)` | Rotate without translation. |
-| `fixedToLocalVector(vector, result?)` | Apply inverse rotation without translation. |
+#### `localToFixedPoint(point, result?)`
+
+Rotate local XYZ and add fixed origin.
+
+#### `fixedToLocalPoint(point, result?)`
+
+Subtract fixed origin, then apply inverse rotation.
+
+#### `localToFixedVector(vector, result?)`
+
+Rotate without translation.
+
+#### `fixedToLocalVector(vector, result?)`
+
+Apply inverse rotation without translation.
+
 
 Inputs accept numeric arrays and typed arrays of length three. Optional results are `Vector3`
 instances; input and output may be the same vector. Successful methods return the supplied result
@@ -71,10 +81,18 @@ model +Y toward local +Z. This convention follows Cesium-style local XYZ composi
 a compass convention where heading zero necessarily means model-forward points north. Adapt a
 model's forward/up axes explicitly, or select NED axes as appropriate.
 
-- `headingPitchRollToFixedFrame(attitude, result?: Matrix4)` returns an affine pose with unit scale.
-- `headingPitchRollQuaternion(attitude, result?: Quaternion)` returns a normalized fixed-frame
+#### `headingPitchRollToFixedFrame(attitude, result?: Matrix4)`
+
+Returns an affine pose with unit scale.
+
+#### `headingPitchRollQuaternion(attitude, result?: Quaternion)`
+
+Returns a normalized fixed-frame
   orientation in `[x, y, z, w]` order; it contains no translation.
-- `fixedFrameToHeadingPitchRoll(pose)` accepts a finite 16-component affine matrix whose rotation
+
+#### `fixedFrameToHeadingPitchRoll(pose)`
+
+Accepts a finite 16-component affine matrix whose rotation
   is right-handed and orthonormal within `1e-6`. Translation is ignored. Scale, reflection and shear
   outside that tolerance are rejected.
 
@@ -85,7 +103,9 @@ continuous angles over time.
 
 ## Velocity-aligned orientation
 
-`velocityQuaternion(fixedVelocity, result?: Quaternion)` returns an orientation with model +X along
+#### `velocityQuaternion(fixedVelocity, result?: Quaternion)`
+
+Returns an orientation with model +X along
 normalized fixed-space velocity. Model +Z is the normalized projection of geodetic up perpendicular
 to velocity. The remaining axis completes a right-handed basis. Geographic up is used even when
 this frame's selected axes are NED.
