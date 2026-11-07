@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
 import {serveExample} from '../../../vite-server.mjs';
+import {BLUE_MARBLE_OVERVIEW_URL} from '../../../../../examples/common/blue-marble.js';
 const {url, close}=await serveExample('geospatial/projection-domains');let browser;
 try {
   browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH,args:['--enable-unsafe-swiftshader']});
@@ -135,6 +136,6 @@ try {
   assert(await failurePage.evaluate(()=>window.restoredMesh===window.projectionLab.results.inverse));
   await failurePage.evaluate(()=>window.projectionLab.dispose());await failurePage.close();
   await page.evaluate(()=>window.projectionLab.dispose());
-  assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
+  assert.deepEqual(errors,[]);assert(external.includes(BLUE_MARBLE_OVERVIEW_URL));assert(external.every(request=>request===BLUE_MARBLE_OVERVIEW_URL));
   console.log('Projection lab: four real engines, polar/Fiji/interrupted/horizon fixtures, supersession, measurements and disposal passed');
 }finally{await browser?.close();await close();}

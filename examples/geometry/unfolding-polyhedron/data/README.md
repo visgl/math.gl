@@ -2,7 +2,7 @@
 
 ## Land polygons (public domain)
 
-`land.json` contains Polygon coordinate arrays from Natural Earth 1:110m land,
+[`land.json`](../../../common/land.json) contains Polygon coordinate arrays from Natural Earth 1:110m land,
 version 5.1.2. Feature properties were removed and JSON compacted; all coordinate
 rings, including holes, are retained without simplification or rounding.
 

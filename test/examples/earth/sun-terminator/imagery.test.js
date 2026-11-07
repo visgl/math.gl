@@ -3,7 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {loadImageryTile, releaseImageryTile} from '../../../../examples/earth/sun-terminator/src/imagery.js';
+import {
+  loadImageryTile,
+  releaseImageryTile
+} from '../../../../examples/earth/sun-terminator/src/imagery.js';
 
 function mockImages(t, fail = false) {
   const requests = [];

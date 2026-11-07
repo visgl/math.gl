@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {MapEngine} from '@math.gl/geospatial/discontinuous';
-import land from '../data/land.json' with {type: 'json'};
+import land from '../../../common/land.json' with {type: 'json'};
 
 /** Geographic preparation only: the renderer receives ordinary XY paths. */
 export function createMapData(type, lobes, centralMeridian) {

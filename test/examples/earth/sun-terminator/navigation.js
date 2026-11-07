@@ -1,7 +1,10 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {projectCutMap, getCutViewports} from '../../../../examples/earth/sun-terminator/src/cut-maps.js';
+import {
+  projectCutMap,
+  getCutViewports
+} from '../../../../examples/earth/sun-terminator/src/cut-maps.js';
 import {geographicCenter} from '../../../../examples/earth/sun-terminator/src/camera.js';
 import {Deck} from '@deck.gl/core';
 import {mountSunTerminator} from '../../../../examples/earth/sun-terminator/src/app.js';

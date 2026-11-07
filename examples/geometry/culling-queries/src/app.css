@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: MIT
  * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
  */
-.query-example {
+.app {
   position: relative;
   height: 100%;
   min-height: 360px;
@@ -13,43 +13,22 @@
     sans-serif;
   overflow: hidden;
 }
-.query-example details {
-  position: absolute;
-  left: 16px;
-  top: 16px;
-  z-index: 2;
-  width: min(290px, calc(100% - 76px));
-  max-height: calc(100% - 78px);
-  overflow: auto;
-  border: 1px solid #35546f;
-  border-radius: 12px;
-  background: #0b1e30ed;
-  backdrop-filter: blur(12px);
-}
-.query-example summary {
-  padding: 12px 16px;
-  cursor: pointer;
-  font-weight: 650;
-  background: #142b40;
-  position: sticky;
-  top: 0;
-}
-.query-example .query-controls {
+.query-controls {
   padding: 16px;
 }
-.query-example label {
+label {
   display: block;
   margin: 12px 0;
 }
-.query-example input[type='range'],
-.query-example select {
+input[type='range'],
+select {
   display: block;
   width: 100%;
   margin-top: 5px;
   accent-color: #5de8fa;
 }
-.query-example select,
-.query-example button {
+select,
+button {
   background: #172d44;
   color: #eaf6ff;
   border: 1px solid #35546f;
@@ -57,10 +36,10 @@
   padding: 7px;
   font: inherit;
 }
-.query-example p {
+p {
   color: #b4cbdf;
 }
-.query-example .query-caption {
+.query-caption {
   position: absolute;
   bottom: 16px;
   left: 16px;
@@ -71,3 +50,6 @@
   pointer-events: none;
   color: #cfeaff;
 }
+
+/* Position the controls over this app's canvas or map. */
+.example-panel { position: absolute; left: 16px; top: 16px; z-index: 2; width: min(290px, calc(100% - 76px)); max-height: calc(100% - 78px); overflow: auto; }

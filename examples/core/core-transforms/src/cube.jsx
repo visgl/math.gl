@@ -56,7 +56,7 @@ export default function Cube({matrix}) {
       previous = '';
     });
     resize.observe(element);
-    const render = (time) => {
+    const render = time => {
       controls.update(time);
       const eye = controls.getEyePosition();
       const key = [width, height, ...eye, ...model.current].join(',');
@@ -76,7 +76,7 @@ export default function Cube({matrix}) {
         const projection = new Matrix4()
           .perspective({fovy: toRadians(45), aspect: width / height, near: 0.1, far: 100})
           .multiplyRight(view);
-        const project = (p) => {
+        const project = p => {
           if (view.transformAsPoint(p)[2] >= -0.1) return null;
           const q = projection.transformAsPoint(p);
           return [((q[0] + 1) * width) / 2, ((1 - q[1]) * height) / 2];
@@ -107,9 +107,9 @@ export default function Cube({matrix}) {
           }
         });
         edges.forEach(([a, b]) => line(vertices[a], vertices[b], '#698098', true));
-        const transformed = vertices.map((p) => model.current.transformAsPoint(p));
+        const transformed = vertices.map(p => model.current.transformAsPoint(p));
         edges.forEach(([a, b]) => line(transformed[a], transformed[b], '#ffd875'));
-        transformed.forEach((p) => {
+        transformed.forEach(p => {
           const q = project(p);
           if (q) {
             context.beginPath();
@@ -136,7 +136,7 @@ export default function Cube({matrix}) {
         ref={canvas}
         tabIndex="0"
         aria-label="Orbit camera around the transformed cube"
-        onKeyDown={(event) => {
+        onKeyDown={event => {
           const controls = orbit.current;
           if (!controls) return;
           const moves = {

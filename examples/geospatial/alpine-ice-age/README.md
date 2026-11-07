@@ -184,7 +184,7 @@ checksums, source provenance, dimensions and scientific reference locations.
 
 ### Attribution widget
 
-The shared `src/shared/shared/attribution-widget.jsx` component keeps source credits
+The shared [attribution widget](../../common/attribution-widget.jsx) component keeps source credits
 visible in both views. Expand **Data attribution** for the original dataset, paper,
 license, pinned hosted copy and display modifications. Scientific limits are
 listed separately. The tectonic example uses the same component and updates the

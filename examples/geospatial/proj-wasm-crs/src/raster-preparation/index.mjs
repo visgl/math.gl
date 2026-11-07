@@ -14,8 +14,7 @@ export async function runRasterExample() {
   await proj.init({workers: 1});
   let backend;
   const worker = new URL('./worker.mjs', import.meta.url).href;
-  const loadWorker = () =>
-    new Worker(new URL('./worker.mjs', import.meta.url), {type: 'module'});
+  const loadWorker = () => new Worker(new URL('./worker.mjs', import.meta.url), {type: 'module'});
   const runner = new TaskRunner();
   try {
     const chart = createCharts('antarctica', 'world')[0];

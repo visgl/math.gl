@@ -1,13 +1,13 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {mountInfoBox} from './shared/info-box.js';
+import {mountInfoBox} from '../../../common/info-box.js';
 
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
 import {GeoJsonLayer, BitmapLayer} from '@deck.gl/layers';
 import {getTimezoneOffset, getTimezoneLabel, isTimezoneSupported} from '@math.gl/earth/timezone';
 
-import {BLUE_MARBLE_TILES, BLUE_MARBLE_CREDIT_URL} from './shared/blue-marble.js';
+import {BLUE_MARBLE_TILES, BLUE_MARBLE_CREDIT_URL} from '../../../common/blue-marble.js';
 
 let nextInstance = 0;
 
@@ -41,7 +41,10 @@ export function mountTimezoneGlobe(root, {lowUrl, hiUrl}) {
       </p>
     </aside>
 `;
-  const disposeInfo = mountInfoBox(root.querySelector('aside'), {title: "One globe, many clocks", theme: 'sleek-dark'});
+  const disposeInfo = mountInfoBox(root.querySelector('aside'), {
+    title: 'One globe, many clocks',
+    theme: 'sleek-dark'
+  });
   const day = root.querySelector('[data-role="day"]');
   const resolution = root.querySelector('[data-role="resolution"]');
   const status = root.querySelector('[data-role="status"]');

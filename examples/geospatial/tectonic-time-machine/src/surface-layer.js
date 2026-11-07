@@ -37,8 +37,38 @@ const block = `layout(std140) uniform tectonicSurfaceUniforms {
 const surface = {
   name: 'tectonicSurface',
   vs: block,
-  fs: block + '\nuniform sampler2D terrainTexture; uniform sampler2D paleoElevationA; uniform sampler2D paleoElevationB;',
-  uniformTypes: {isWater: 'f32', globeWeight: 'f32', useTexture: 'f32', imageryBlend: 'f32', terrainLowColor: 'vec3<f32>', terrainMidColor: 'vec3<f32>', terrainHighColor: 'vec3<f32>', regionColors: 'f32', iceCoverage: 'f32', iceRetreat: 'f32', iceVolcanism: 'f32', microbialLife: 'f32', vegetation: 'f32', paleoBlend: 'f32', paleoTerrain: 'f32', paleoSizeA: 'vec2<f32>', paleoSizeB: 'vec2<f32>', earlyEarth: 'f32', earlyLava: 'f32', earlyBombardment: 'f32', earlyWater: 'f32', earlySteam: 'f32', earlyRain: 'f32', earlyImpactTime: 'f32', earlyTheia: 'f32', earlyOpacity: 'f32', earlyPulse: 'f32'}
+  fs:
+    block +
+    '\nuniform sampler2D terrainTexture; uniform sampler2D paleoElevationA; uniform sampler2D paleoElevationB;',
+  uniformTypes: {
+    isWater: 'f32',
+    globeWeight: 'f32',
+    useTexture: 'f32',
+    imageryBlend: 'f32',
+    terrainLowColor: 'vec3<f32>',
+    terrainMidColor: 'vec3<f32>',
+    terrainHighColor: 'vec3<f32>',
+    regionColors: 'f32',
+    iceCoverage: 'f32',
+    iceRetreat: 'f32',
+    iceVolcanism: 'f32',
+    microbialLife: 'f32',
+    vegetation: 'f32',
+    paleoBlend: 'f32',
+    paleoTerrain: 'f32',
+    paleoSizeA: 'vec2<f32>',
+    paleoSizeB: 'vec2<f32>',
+    earlyEarth: 'f32',
+    earlyLava: 'f32',
+    earlyBombardment: 'f32',
+    earlyWater: 'f32',
+    earlySteam: 'f32',
+    earlyRain: 'f32',
+    earlyImpactTime: 'f32',
+    earlyTheia: 'f32',
+    earlyOpacity: 'f32',
+    earlyPulse: 'f32'
+  }
 };
 const UNIT_SIZE = new Float32Array([1, 1]);
 const LIGHTS = [
@@ -67,9 +97,9 @@ export class SurfaceLayer extends SolidPolygonLayer {
     earlyOpacity: 1,
     textureWeight: 1,
     imageryBlend: 0,
-    terrainLowColor: [.28,.38,.19],
-    terrainMidColor: [.59,.48,.32],
-    terrainHighColor: [.73,.70,.63],
+    terrainLowColor: [0.28, 0.38, 0.19],
+    terrainMidColor: [0.59, 0.48, 0.32],
+    terrainHighColor: [0.73, 0.7, 0.63],
     surfaceType: 'land',
     globeWeight: 1,
     regionColors: false,
@@ -90,9 +120,13 @@ export class SurfaceLayer extends SolidPolygonLayer {
     this.setState({
       elevationTextures: new Map(),
       elevationFrames: [null, null],
-      elevationFallback: context.device.createTexture({width: 1, height: 1,
-        data: new Float32Array(1), format: 'r32float',
-        sampler: {minFilter: 'nearest', magFilter: 'nearest'}}),
+      elevationFallback: context.device.createTexture({
+        width: 1,
+        height: 1,
+        data: new Float32Array(1),
+        format: 'r32float',
+        sampler: {minFilter: 'nearest', magFilter: 'nearest'}
+      }),
       fallbackTexture: context.device.createTexture({
         width: 1,
         height: 1,
@@ -305,37 +339,87 @@ export class SurfaceLayer extends SolidPolygonLayer {
     };
   }
   draw(params) {
-    const {image, textureWeight, imageryBlend, terrainLowColor, terrainMidColor, terrainHighColor, surfaceType, globeWeight, regionColors, iceCoverage, iceRetreat, iceVolcanism, microbialLife, vegetation, paleoFrameA, paleoFrameB, paleoBlend, earlyEarth, earlyLava, earlyBombardment, earlyWater, earlySteam, earlyRain, earlyImpactTime, earlyTheia, earlyOpacity} = this.props;
+    const {
+      image,
+      textureWeight,
+      imageryBlend,
+      terrainLowColor,
+      terrainMidColor,
+      terrainHighColor,
+      surfaceType,
+      globeWeight,
+      regionColors,
+      iceCoverage,
+      iceRetreat,
+      iceVolcanism,
+      microbialLife,
+      vegetation,
+      paleoFrameA,
+      paleoFrameB,
+      paleoBlend,
+      earlyEarth,
+      earlyLava,
+      earlyBombardment,
+      earlyWater,
+      earlySteam,
+      earlyRain,
+      earlyImpactTime,
+      earlyTheia,
+      earlyOpacity
+    } = this.props;
     const textures = this.state.elevationTextures;
     const frames = this.state.elevationFrames;
-    frames[0] = paleoFrameA; frames[1] = paleoFrameB;
+    frames[0] = paleoFrameA;
+    frames[1] = paleoFrameB;
     for (const frame of frames) {
-      if (frame && !textures.has(frame)) textures.set(frame, this.context.device.createTexture({
-        width: frame.width, height: frame.height, data: frame.elevation, format: 'r32float',
-        sampler: {minFilter: 'nearest', magFilter: 'nearest'}
-      }));
+      if (frame && !textures.has(frame))
+        textures.set(
+          frame,
+          this.context.device.createTexture({
+            width: frame.width,
+            height: frame.height,
+            data: frame.elevation,
+            format: 'r32float',
+            sampler: {minFilter: 'nearest', magFilter: 'nearest'}
+          })
+        );
     }
     for (const [frame, texture] of textures) {
-      if (frame !== paleoFrameA && frame !== paleoFrameB) {texture.destroy(); textures.delete(frame);}
+      if (frame !== paleoFrameA && frame !== paleoFrameB) {
+        texture.destroy();
+        textures.delete(frame);
+      }
     }
     this.setShaderModuleProps({
       tectonicSurface: {
         isWater: surfaceType === 'ocean' ? 1 : 0,
         globeWeight,
-        iceCoverage, iceRetreat, iceVolcanism, microbialLife,
+        iceCoverage,
+        iceRetreat,
+        iceVolcanism,
+        microbialLife,
         vegetation,
         paleoTerrain: paleoFrameA && paleoFrameB ? 1 : 0,
         paleoBlend,
         earlyEarth: earlyEarth ? 1 : 0,
-        earlyPulse: earlyEarth && earlyLava > .01 ? thermalPulse(performance.now()/1000) : 1,
-        earlyLava, earlyBombardment, earlyWater, earlySteam, earlyRain, earlyImpactTime, earlyTheia, earlyOpacity,
+        earlyPulse: earlyEarth && earlyLava > 0.01 ? thermalPulse(performance.now() / 1000) : 1,
+        earlyLava,
+        earlyBombardment,
+        earlyWater,
+        earlySteam,
+        earlyRain,
+        earlyImpactTime,
+        earlyTheia,
+        earlyOpacity,
         paleoSizeA: paleoFrameA?.size || UNIT_SIZE,
         paleoSizeB: paleoFrameB?.size || UNIT_SIZE,
         paleoElevationA: textures.get(paleoFrameA) || this.state.elevationFallback,
         paleoElevationB: textures.get(paleoFrameB) || this.state.elevationFallback,
         useTexture: image ? textureWeight : 0,
         imageryBlend: image ? imageryBlend : 0,
-        terrainLowColor, terrainMidColor, terrainHighColor,
+        terrainLowColor,
+        terrainMidColor,
+        terrainHighColor,
         regionColors: regionColors ? 1 : 0,
         terrainTexture: image || this.state.fallbackTexture
       },

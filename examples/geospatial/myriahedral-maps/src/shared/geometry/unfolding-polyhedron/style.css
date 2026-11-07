@@ -223,3 +223,9 @@
 }
 
 [data-fullscreen] .unfolding-polyhedron[data-compact] canvas {height: min(52vh, 540px); min-height: 220px;}
+
+/* Arrange this example's selector and control content inside the common panel. */
+.unfolding-polyhedron .selectors > .deck-widget-box,
+.unfolding-polyhedron .controls > .deck-widget-box { width: 100%; }
+.unfolding-polyhedron .selectors .example-info-content,
+.unfolding-polyhedron .controls .example-info-content { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }

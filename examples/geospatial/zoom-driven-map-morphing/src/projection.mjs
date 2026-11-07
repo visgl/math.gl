@@ -37,7 +37,9 @@ export function getMorphScale({zoom, latitude, progress}) {
 export function createMorphProjection({longitude, latitude, progress}) {
   if (
     ![longitude, latitude, progress].every(Number.isFinite) ||
-    Math.abs(latitude) > 90 || progress < 0 || progress > 1 ||
+    Math.abs(latitude) > 90 ||
+    progress < 0 ||
+    progress > 1 ||
     (progress > 0 && Math.abs(latitude) > MAX_LATITUDE)
   ) {
     throw new RangeError('Invalid globe Mercator projection parameters');
@@ -78,14 +80,12 @@ export function createMorphProjection({longitude, latitude, progress}) {
   };
 }
 
-
 /** Tessellate each texture bank separately, sharing positions along its seam. */
 export function createSurfaceMesh({longitude, project, columns = 180, rows = 86}) {
   const start = longitude - 179.999;
   const end = longitude + 179.999;
   const boundaries = [start];
-  for (let seam = (Math.floor((start + 180) / 360) + 1) * 360 - 180;
-    seam < end; seam += 360) {
+  for (let seam = (Math.floor((start + 180) / 360) + 1) * 360 - 180; seam < end; seam += 360) {
     boundaries.push(seam);
   }
   boundaries.push(end);
@@ -95,14 +95,14 @@ export function createSurfaceMesh({longitude, project, columns = 180, rows = 86}
   for (let bank = 0; bank < boundaries.length - 1; bank++) {
     const west = boundaries[bank];
     const east = boundaries[bank + 1];
-    const bankColumns = Math.max(1, Math.ceil(columns * (east - west) / (end - start)));
+    const bankColumns = Math.max(1, Math.ceil((columns * (east - west)) / (end - start)));
     const textureWest = Math.floor(((west + east) / 2 + 180) / 360) * 360 - 180;
     const offset = positions.length / 3;
     for (let y = 0; y <= rows; y++) {
-      const latitude = -85 + 170 * y / rows;
+      const latitude = -85 + (170 * y) / rows;
       for (let x = 0; x <= bankColumns; x++) {
         // Use exact endpoints so both banks project identical seam positions.
-        const pointLongitude = x === bankColumns ? east : west + (east - west) * x / bankColumns;
+        const pointLongitude = x === bankColumns ? east : west + ((east - west) * x) / bankColumns;
         positions.push(...project([pointLongitude, latitude]));
         // Duplicate seam vertices with u=1 on the west bank and u=0 on the east bank.
         texCoords.push((pointLongitude - textureWest) / 360, (90 - latitude) / 180);

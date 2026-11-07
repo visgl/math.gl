@@ -11,7 +11,10 @@ import {
 import {createDymaxion} from '../../../../examples/geometry/unfolding-polyhedron/src/dymaxion';
 import {createCutLayout} from '../../../../examples/geometry/unfolding-polyhedron/src/cut-layout';
 import {createLayout} from '../../../../examples/geometry/unfolding-polyhedron/src/layout';
-import {createSolid, type Vec3} from '../../../../examples/geometry/unfolding-polyhedron/src/polyhedra';
+import {
+  createSolid,
+  type Vec3
+} from '../../../../examples/geometry/unfolding-polyhedron/src/polyhedra';
 
 const point = (lon: number, lat: number): Vec3 => {
   lon *= Math.PI / 180;

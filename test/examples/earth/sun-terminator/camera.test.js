@@ -4,7 +4,10 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {MapView, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
-import {transferCamera, geographicCenter} from '../../../../examples/earth/sun-terminator/src/camera.js';
+import {
+  transferCamera,
+  geographicCenter
+} from '../../../../examples/earth/sun-terminator/src/camera.js';
 import {createEndpoint} from '../../../../examples/earth/sun-terminator/src/morph.js';
 
 test('geographic center and apparent zoom survive projection/globe round trips', () => {

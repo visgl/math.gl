@@ -1,12 +1,12 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import { Deck, OrbitView, COORDINATE_SYSTEM } from '@deck.gl/core';
-import { SimpleMeshLayer } from '@deck.gl/mesh-layers';
-import { TextLayer } from '@deck.gl/layers';
-import { Geometry } from '@luma.gl/engine';
-import { Vector3 } from '@math.gl/core';
-import { interpolateField } from './data.js';
+import {Deck, OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {TextLayer} from '@deck.gl/layers';
+import {Geometry} from '@luma.gl/engine';
+import {Vector3} from '@math.gl/core';
+import {interpolateField} from './data.js';
 const a = new Vector3(),
   b = new Vector3(),
   n = new Vector3();
@@ -17,7 +17,7 @@ export function terrainColor(elevation) {
   return low.map((c, i) => c * (1 - t) + high[i] * t);
 }
 export function makeSurface(model, age, exaggeration, showIce, ghost) {
-  const { manifest: m, bed, ice, count } = model;
+  const {manifest: m, bed, ice, count} = model;
   const thickness = interpolateField(ice, count, m.ages, age);
   const positions = new Float32Array(count * 3),
     colors = new Float32Array(count * 3),
@@ -61,9 +61,9 @@ export function makeSurface(model, age, exaggeration, showIce, ghost) {
     }
   return new Geometry({
     attributes: {
-      positions: { size: 3, value: positions },
-      normals: { size: 3, value: normals },
-      colors: { size: 3, value: colors }
+      positions: {size: 3, value: positions},
+      normals: {size: 3, value: normals},
+      colors: {size: 3, value: colors}
     },
     indices
   });
@@ -71,7 +71,7 @@ export function makeSurface(model, age, exaggeration, showIce, ghost) {
 export function createScene(canvas, onError) {
   const deck = new Deck({
     canvas,
-    views: new OrbitView({ orbitAxis: 'Z' }),
+    views: new OrbitView({orbitAxis: 'Z'}),
     controller: true,
     initialViewState: {
       target: [0, 0, 10],
@@ -93,7 +93,7 @@ export function createScene(canvas, onError) {
         options.showIce,
         options.ghost
       );
-      const labels = model.manifest.places.map((place) => ({
+      const labels = model.manifest.places.map(place => ({
         ...place,
         position: [place.x, place.y, (place.elevation / 1000) * options.exaggeration + 4]
       }));
@@ -106,21 +106,21 @@ export function createScene(canvas, onError) {
             mesh,
             getPosition: [0, 0, 0],
             getColor: [255, 255, 255],
-            material: { ambient: 0.45, diffuse: 0.8, shininess: 25, specularColor: [40, 55, 65] }
+            material: {ambient: 0.45, diffuse: 0.8, shininess: 25, specularColor: [40, 55, 65]}
           }),
           options.labels &&
             new TextLayer({
               id: 'alpine-places',
               coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
               data: labels,
-              getPosition: (d) => d.position,
-              getText: (d) => d.name,
+              getPosition: d => d.position,
+              getText: d => d.name,
               getSize: 12,
               getColor: [243, 247, 248],
               fontFamily: 'system-ui',
               characterSet: 'auto',
-              fontSettings: { sdf: true },
-              parameters: { depthCompare: 'always', depthWriteEnabled: false },
+              fontSettings: {sdf: true},
+              parameters: {depthCompare: 'always', depthWriteEnabled: false},
               outlineWidth: 0.15,
               outlineColor: [10, 21, 30, 230],
               billboard: true
@@ -130,7 +130,7 @@ export function createScene(canvas, onError) {
     },
     view(map) {
       deck.setProps({
-        controller: { dragRotate: !map, dragPan: true },
+        controller: {dragRotate: !map, dragPan: true},
         initialViewState: {
           target: [0, 0, 10],
           rotationX: map ? 90 : 35,

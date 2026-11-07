@@ -53,40 +53,89 @@ export const LANDMASS_CHAPTERS = [
 // Approximate Cryogenian intervals, not reconstructed ice boundaries.
 // Hoffman et al. (2017), https://doi.org/10.1126/sciadv.1600983
 export const SNOWBALL_CHAPTERS = [
-  {time: -700, name: 'Snowball Earth · Sturtian',
+  {
+    time: -700,
+    name: 'Snowball Earth · Sturtian',
     detail: 'Approx. 717–660 Ma · illustrative global ice cover',
-    fade: [-717, -714, -663, -660]},
-  {time: -640, name: 'Snowball Earth · Marinoan',
+    fade: [-717, -714, -663, -660]
+  },
+  {
+    time: -640,
+    name: 'Snowball Earth · Marinoan',
     detail: 'Approx. 650–635 Ma · illustrative global ice cover',
-    fade: [-650, -648, -637, -635]}
+    fade: [-650, -648, -637, -635]
+  }
 ];
 export const EARLY_EARTH_CHAPTERS = [
-  {time: -4500, name: 'Earth–Theia impact', detail: 'Moon-forming hypothesis · illustrative global flash',
-    illustrative: true, fade: [-4501, -4500, -4495, -4488]},
-  {time: -4475, name: 'A young Moon', detail: 'Debris gathers and cools · illustrative orbital vignette',
-    illustrative: true, fade: [-4490, -4480, -4455, -4445]},
-  {time: -4430, name: 'The first seas', detail: 'Steam condenses into rain · illustrative, ocean onset uncertain',
-    illustrative: true, fade: [-4445, -4440, -4425, -4415]},
-  {time: -4400, name: 'Hadean Earth', detail: 'Rocky crust, lava lakes and emerging seas · illustrative',
-    illustrative: true, fade: [-4415, -4410, -4250, -4100]},
-  {time: -3900, name: 'Late heavy bombardment', detail: 'Hypothetical impacts and cooling lava pools · illustrative',
-    illustrative: true, fade: [-4100, -3980, -3830, -3700]}
+  {
+    time: -4500,
+    name: 'Earth–Theia impact',
+    detail: 'Moon-forming hypothesis · illustrative global flash',
+    illustrative: true,
+    fade: [-4501, -4500, -4495, -4488]
+  },
+  {
+    time: -4475,
+    name: 'A young Moon',
+    detail: 'Debris gathers and cools · illustrative orbital vignette',
+    illustrative: true,
+    fade: [-4490, -4480, -4455, -4445]
+  },
+  {
+    time: -4430,
+    name: 'The first seas',
+    detail: 'Steam condenses into rain · illustrative, ocean onset uncertain',
+    illustrative: true,
+    fade: [-4445, -4440, -4425, -4415]
+  },
+  {
+    time: -4400,
+    name: 'Hadean Earth',
+    detail: 'Rocky crust, lava lakes and emerging seas · illustrative',
+    illustrative: true,
+    fade: [-4415, -4410, -4250, -4100]
+  },
+  {
+    time: -3900,
+    name: 'Late heavy bombardment',
+    detail: 'Hypothetical impacts and cooling lava pools · illustrative',
+    illustrative: true,
+    fade: [-4100, -3980, -3830, -3700]
+  }
 ];
 export const LIFE_CHAPTERS = [
-  {time:-3300,name:'Microbial worlds',detail:'Ancient microbial communities · illustrative shoreline colors',
-    illustrative:true,fade:[-3430,-3350,-3250,-3150]},
-  {time:-430,name:'Life reaches the land',detail:'Gradual greening after early land plants · illustrative vegetation',
-    fade:[-470,-450,-410,-390]}
+  {
+    time: -3300,
+    name: 'Microbial worlds',
+    detail: 'Ancient microbial communities · illustrative shoreline colors',
+    illustrative: true,
+    fade: [-3430, -3350, -3250, -3150]
+  },
+  {
+    time: -430,
+    name: 'Life reaches the land',
+    detail: 'Gradual greening after early land plants · illustrative vegetation',
+    fade: [-470, -450, -410, -390]
+  }
 ];
-export const TIMELINE_CHAPTERS = [...EARLY_EARTH_CHAPTERS, ...LANDMASS_CHAPTERS, ...SNOWBALL_CHAPTERS, ...LIFE_CHAPTERS];
+export const TIMELINE_CHAPTERS = [
+  ...EARLY_EARTH_CHAPTERS,
+  ...LANDMASS_CHAPTERS,
+  ...SNOWBALL_CHAPTERS,
+  ...LIFE_CHAPTERS
+];
 // Competing narratives share one caption slot; never draw titles on top of each other.
-export function activeChapter(time,scenario,maxAge,glaciations=true) {
-  let selected=null, strongest=0;
-  for(const chapter of TIMELINE_CHAPTERS) {
-    if(!chapter.illustrative && -chapter.time>maxAge) continue;
-    if(!glaciations && SNOWBALL_CHAPTERS.includes(chapter)) continue;
-    const opacity=chapterOpacity(chapter,time,scenario);
-    if(opacity>strongest){selected=chapter;strongest=opacity;}
+export function activeChapter(time, scenario, maxAge, glaciations = true) {
+  let selected = null,
+    strongest = 0;
+  for (const chapter of TIMELINE_CHAPTERS) {
+    if (!chapter.illustrative && -chapter.time > maxAge) continue;
+    if (!glaciations && SNOWBALL_CHAPTERS.includes(chapter)) continue;
+    const opacity = chapterOpacity(chapter, time, scenario);
+    if (opacity > strongest) {
+      selected = chapter;
+      strongest = opacity;
+    }
   }
   return selected;
 }
@@ -95,22 +144,25 @@ export function snowballCoverage(time) {
   return Math.max(...SNOWBALL_CHAPTERS.map(chapter => chapterOpacity(chapter, time)));
 }
 // Visual deglaciation/volcanism controls, not observed eruption sites or rates.
-export function snowballDynamics(time,result={}) {
-  result.retreat=0;result.volcanism=0;
-  for(const chapter of SNOWBALL_CHAPTERS) {
-    const [,start,end,finish]=chapter.fade;
-    const retreat=Math.max(0,Math.min(1,(time-end)/(finish-end)));
-    const coverage=chapterOpacity(chapter,time);
-    result.retreat=Math.max(result.retreat,retreat*coverage);
-    const progress=Math.max(0,Math.min(1,(time-start)/(end-start)));
-    result.volcanism=Math.max(result.volcanism,progress*coverage);
+export function snowballDynamics(time, result = {}) {
+  result.retreat = 0;
+  result.volcanism = 0;
+  for (const chapter of SNOWBALL_CHAPTERS) {
+    const [, start, end, finish] = chapter.fade;
+    const retreat = Math.max(0, Math.min(1, (time - end) / (finish - end)));
+    const coverage = chapterOpacity(chapter, time);
+    result.retreat = Math.max(result.retreat, retreat * coverage);
+    const progress = Math.max(0, Math.min(1, (time - start) / (end - start)));
+    result.volcanism = Math.max(result.volcanism, progress * coverage);
   }
   return result;
 }
 const present = {time: 0, name: 'Present'};
 export function timelineMilestones(scenario, maxAge = 500) {
   return [
-    ...TIMELINE_CHAPTERS.filter(c => c.time < 0 && (c.illustrative || -c.time <= maxAge)).sort((a, b) => a.time - b.time),
+    ...TIMELINE_CHAPTERS.filter(c => c.time < 0 && (c.illustrative || -c.time <= maxAge)).sort(
+      (a, b) => a.time - b.time
+    ),
     present,
     LANDMASS_CHAPTERS.find(c => c.scenario === scenario) ||
       LANDMASS_CHAPTERS.find(c => c.scenario === 'atlantic')
@@ -132,16 +184,17 @@ export function chapterOpacity(chapter, time, scenario) {
 /** Keep each ice-edge transition readable without changing its geological dates. */
 export function glaciationPlaybackSpeed(time, requestedSpeed, enabled = true) {
   if (!enabled) return requestedSpeed;
-  const nearEdge = SNOWBALL_CHAPTERS.some(({fade: [start, formed, held, end]}) =>
-    (time >= start - 2 && time <= formed + 1) || (time >= held - 1 && time <= end + 2)
+  const nearEdge = SNOWBALL_CHAPTERS.some(
+    ({fade: [start, formed, held, end]}) =>
+      (time >= start - 2 && time <= formed + 1) || (time >= held - 1 && time <= end + 2)
   );
   return nearEdge ? Math.min(requestedSpeed, 0.75) : requestedSpeed;
 }
 
 // Readable event windows are art/playback choices, not geological durations.
 export const PLAYBACK_FOCUS = [
-  {name:'Ancient microbial worlds',fade:[-3430,-3380,-3200,-3150],speed:20},
-  {name:'Land plant colonization',fade:[-470,-450,-410,-390],speed:8},
+  {name: 'Ancient microbial worlds', fade: [-3430, -3380, -3200, -3150], speed: 20},
+  {name: 'Land plant colonization', fade: [-470, -450, -410, -390], speed: 8},
   {name: 'Theia impact and cooling', fade: [-4520, -4510, -4430, -4420], speed: 4},
   {name: 'Emerging oceans', fade: [-4470, -4435, -4320, -4250], speed: 12},
   {name: 'Late heavy bombardment', fade: [-4100, -4000, -3800, -3700], speed: 12}
@@ -152,10 +205,12 @@ export function playbackFocus(time) {
 /** Accelerate quiet deep time, linger at events, and land exactly on data coverage. */
 export function timelinePlaybackSpeed(time, requestedSpeed, maxAge, glaciations = true) {
   const early = isEarlyEarth(time, maxAge);
-  let speed = early ? requestedSpeed * 5 : glaciationPlaybackSpeed(time, requestedSpeed, glaciations);
+  let speed = early
+    ? requestedSpeed * 5
+    : glaciationPlaybackSpeed(time, requestedSpeed, glaciations);
   for (const event of PLAYBACK_FOCUS) {
     const weight = chapterOpacity(event, time);
-    speed += (Math.min(speed, event.speed)-speed)*weight;
+    speed += (Math.min(speed, event.speed) - speed) * weight;
   }
-  return early ? Math.min(speed, (-maxAge-time)*20) : speed;
+  return early ? Math.min(speed, (-maxAge - time) * 20) : speed;
 }

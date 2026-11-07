@@ -1,14 +1,14 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import ExamplePanel from './shared/example-panel';
+import ExamplePanel from '../../../common/example-panel';
 import React, {useMemo, useState} from 'react';
 import {
   getGeographicTileRanges,
   getGeographicTileBounds,
   splitGlobeBounds
 } from '@math.gl/geospatial';
-import './shared/query-example.css';
+import './app.css';
 import './styles.css';
 
 export default function Example() {
@@ -34,7 +34,7 @@ export default function Example() {
   }, [level]);
   const count = ranges.reduce((sum, r) => sum + (r.maxX - r.minX + 1) * (r.maxY - r.minY + 1), 0);
   return (
-    <div className="query-example geographic-example">
+    <div className="app geographic-example">
       <svg
         viewBox="-190 -105 380 210"
         role="img"

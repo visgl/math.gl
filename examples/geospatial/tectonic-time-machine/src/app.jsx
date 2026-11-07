@@ -9,13 +9,29 @@ import parquetWorkerUrl from 'math.gl-parquet-loader/worker';
 import {maintainHistory} from './history-stream.js';
 import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime} from './sources.js';
 import {REGIONS, timeLabel} from './math.js';
-import {EARTH_EVENTS, EVENT_CATEGORIES, filterEarthEvents, eventIsReconstructable} from './earth-events.js';
-import {EARTH_FORMATION_MA, clampTimelineTime, isEarlyEarth, planetaryStage} from './planetary-history.js';
+import {
+  EARTH_EVENTS,
+  EVENT_CATEGORIES,
+  filterEarthEvents,
+  eventIsReconstructable
+} from './earth-events.js';
+import {
+  EARTH_FORMATION_MA,
+  clampTimelineTime,
+  isEarlyEarth,
+  planetaryStage
+} from './planetary-history.js';
 import {PALEO_FEATURES, featuresAtAge, searchPaleoFeatures} from './paleo-features.js';
-import {activeChapter, playbackFocus, chapterOpacity, timelineMilestones, glaciationPlaybackSpeed} from './timeline.js';
+import {
+  activeChapter,
+  playbackFocus,
+  chapterOpacity,
+  timelineMilestones,
+  glaciationPlaybackSpeed
+} from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
-import AttributionWidget from './shared/shared/attribution-widget.jsx';
+import AttributionWidget from '../../../common/attribution-widget.jsx';
 import {tectonicSources} from './attribution.js';
 export default function TectonicTimeMachine() {
   const canvas = useRef(null),
@@ -52,12 +68,25 @@ export default function TectonicTimeMachine() {
     [eventQuery, setEventQuery] = useState(''),
     [featureQuery, setFeatureQuery] = useState(''),
     [showAllFeatures, setShowAllFeatures] = useState(false);
-  const [journeyId,setJourneyId]=useState('none'),[customPlace,setCustomPlace]=useState(null),
-    [customLon,setCustomLon]=useState('-104.99'),[customLat,setCustomLat]=useState('39.74'),
-    [followCamera,setFollowCamera]=useState(false),[guidedCamera,setGuidedCamera]=useState(false),
-    [compareFutures,setCompareFutures]=useState(false),[journeyStatus,setJourneyStatus]=useState('');
-  const followPlace=journeyId==='custom'?customPlace:FOLLOW_PLACES.find(place=>place.id===journeyId)||null;
-  const customValid=customLon.trim()!==''&&customLat.trim()!==''&&Number.isFinite(Number(customLon))&&Number.isFinite(Number(customLat))&&Math.abs(Number(customLon))<=180&&Math.abs(Number(customLat))<=90;
+  const [journeyId, setJourneyId] = useState('none'),
+    [customPlace, setCustomPlace] = useState(null),
+    [customLon, setCustomLon] = useState('-104.99'),
+    [customLat, setCustomLat] = useState('39.74'),
+    [followCamera, setFollowCamera] = useState(false),
+    [guidedCamera, setGuidedCamera] = useState(false),
+    [compareFutures, setCompareFutures] = useState(false),
+    [journeyStatus, setJourneyStatus] = useState('');
+  const followPlace =
+    journeyId === 'custom'
+      ? customPlace
+      : FOLLOW_PLACES.find(place => place.id === journeyId) || null;
+  const customValid =
+    customLon.trim() !== '' &&
+    customLat.trim() !== '' &&
+    Number.isFinite(Number(customLon)) &&
+    Number.isFinite(Number(customLat)) &&
+    Math.abs(Number(customLon)) <= 180 &&
+    Math.abs(Number(customLat)) <= 90;
   const earlyEarth = isEarlyEarth(time, source.maxAge);
   const formingEarth = time <= -4420;
   const focusEvent = playbackFocus(time);
@@ -72,10 +101,17 @@ export default function TectonicTimeMachine() {
       e => setRenderError(e.message),
       value => playback.current.advance(value),
       value => playback.current.play(value),
-      (status, active) => {setAppearanceStatus(status); setPaleoActive(active); if (active && playIntent.current) setPlaying(true);},
+      (status, active) => {
+        setAppearanceStatus(status);
+        setPaleoActive(active);
+        if (active && playIntent.current) setPlaying(true);
+      },
       parquetWorkerUrl,
       setJourneyStatus,
-      () => {setFollowCamera(false);setGuidedCamera(false);}
+      () => {
+        setFollowCamera(false);
+        setGuidedCamera(false);
+      }
     );
     scene.current = renderer;
     const observer = new ResizeObserver(() => renderer.resize());
@@ -97,7 +133,13 @@ export default function TectonicTimeMachine() {
     scene.current?.setModel(null);
     clock.current = clampTimelineTime(clock.current);
     setTime(clock.current);
-    loadModel({sourceId, time: clampTime(clock.current, source.maxAge), signal: abort.signal, onStatus: setStatus, workerUrl: parquetWorkerUrl})
+    loadModel({
+      sourceId,
+      time: clampTime(clock.current, source.maxAge),
+      signal: abort.signal,
+      onStatus: setStatus,
+      workerUrl: parquetWorkerUrl
+    })
       .then(loaded => {
         if (abort.signal.aborted) return;
         setModel(loaded);
@@ -120,14 +162,23 @@ export default function TectonicTimeMachine() {
   }, [attempt, sourceId]);
   useEffect(() => {
     if (earlyEarth || !model || model.source.id !== sourceId) return;
-    if ((historicalTerrain && !regionColors && scene.current?.hasTerrain(time)) || model.hasTime(time)) {setReady(true); return;}
+    if (
+      (historicalTerrain && !regionColors && scene.current?.hasTerrain(time)) ||
+      model.hasTime(time)
+    ) {
+      setReady(true);
+      return;
+    }
     const abort = new AbortController();
     setReady(false);
     setPlaying(false);
     model
       .waitForTime(time, {
-        signal: abort.signal, lifetimeSignal: model.signal,
-        onStatus: value => {if (!abort.signal.aborted) setStatus(value);}
+        signal: abort.signal,
+        lifetimeSignal: model.signal,
+        onStatus: value => {
+          if (!abort.signal.aborted) setStatus(value);
+        }
       })
       .then(() => {
         if (abort.signal.aborted) return;
@@ -148,7 +199,13 @@ export default function TectonicTimeMachine() {
     const abort = new AbortController();
     const signal = AbortSignal.any([model.signal, abort.signal]);
     maintainHistory(model, () => clampTime(clock.current, model.source.maxAge), {
-      signal, onStatus: value => {if (!signal.aborted) {setHistoryStatus(value);scene.current?.refreshHistory();}}
+      signal,
+      onStatus: value => {
+        if (!signal.aborted) {
+          setHistoryStatus(value);
+          scene.current?.refreshHistory();
+        }
+      }
     }).catch(error => {
       if (!signal.aborted) setHistoryStatus(error.message);
     });
@@ -163,8 +220,35 @@ export default function TectonicTimeMachine() {
     return () => clearTimeout(timer);
   }, [cycleViews, playing, sceneReady, view, formingEarth]);
   useEffect(() => {
-    scene.current?.setOptions({view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain, maxAge: source.maxAge, followPlace, followCamera, guidedCamera, compareFutures});
-  }, [view, longitude, scenario, grid, regionColors, glaciations, historicalTerrain, sourceId, attempt, followPlace, followCamera, guidedCamera, compareFutures]);
+    scene.current?.setOptions({
+      view,
+      longitude,
+      scenario,
+      grid,
+      regionColors,
+      glaciations,
+      historicalTerrain,
+      maxAge: source.maxAge,
+      followPlace,
+      followCamera,
+      guidedCamera,
+      compareFutures
+    });
+  }, [
+    view,
+    longitude,
+    scenario,
+    grid,
+    regionColors,
+    glaciations,
+    historicalTerrain,
+    sourceId,
+    attempt,
+    followPlace,
+    followCamera,
+    guidedCamera,
+    compareFutures
+  ]);
   useEffect(() => {
     if (!playing) {
       clock.current = time;
@@ -173,8 +257,13 @@ export default function TectonicTimeMachine() {
     }
   }, [time, ready, playing]);
   useEffect(() => {
-    scene.current?.setPlayback({time, playing: playing && sceneReady && !sceneError,
-      ready: sceneReady && !sceneError, speed, maxAge: EARTH_FORMATION_MA});
+    scene.current?.setPlayback({
+      time,
+      playing: playing && sceneReady && !sceneError,
+      ready: sceneReady && !sceneError,
+      speed,
+      maxAge: EARTH_FORMATION_MA
+    });
   }, [time, playing, sceneReady, sceneError, speed, glaciations]);
   const seek = value => {
     clock.current = clampTimelineTime(Number(value));
@@ -200,7 +289,7 @@ export default function TectonicTimeMachine() {
       setPlaying(value);
     }
   };
-  const caption=activeChapter(time,scenario,source.maxAge,glaciations);
+  const caption = activeChapter(time, scenario, source.maxAge, glaciations);
   return (
     <div className="tectonic-example">
       <div className="tectonic-stage" ref={stage}>
@@ -212,9 +301,13 @@ export default function TectonicTimeMachine() {
           <span>DEEP TIME / math.gl</span>
           <h2>{timeLabel(time)}</h2>
           <p>
-            {earlyEarth ? `${planetaryStage(-time)?.label} · illustrative surface` : time > 0
-              ? 'Illustrative future · not a prediction'
-              : paleoActive ? 'PALEOMAP · reconstructed paleotopography' : `${source.id} · rigid-block reconstruction`}
+            {earlyEarth
+              ? `${planetaryStage(-time)?.label} · illustrative surface`
+              : time > 0
+                ? 'Illustrative future · not a prediction'
+                : paleoActive
+                  ? 'PALEOMAP · reconstructed paleotopography'
+                  : `${source.id} · rigid-block reconstruction`}
           </p>
           <button
             className="tectonic-primary-play"
@@ -229,12 +322,9 @@ export default function TectonicTimeMachine() {
           {caption && (
             <div
               key={caption.name}
-              className={`tectonic-chapter${(caption.name.includes('&') || caption.name.includes('(')) ? ' tectonic-chapter-pair' : ''}${caption.illustrative ? ' tectonic-chapter-planetary' : ''}`}
+              className={`tectonic-chapter${caption.name.includes('&') || caption.name.includes('(') ? ' tectonic-chapter-pair' : ''}${caption.illustrative ? ' tectonic-chapter-planetary' : ''}`}
               style={{
-                opacity:
-                  sceneReady && !sceneError 
-                    ? chapterOpacity(caption, time, scenario)
-                    : 0
+                opacity: sceneReady && !sceneError ? chapterOpacity(caption, time, scenario) : 0
               }}
             >
               <strong>{caption.name}</strong>
@@ -274,31 +364,35 @@ export default function TectonicTimeMachine() {
           </select>
         </label>
         <div className="tectonic-control-row">
-        <label>
-          View
-          <select aria-label="View" value={view} onChange={e => setView(e.target.value)}>
-            {Object.entries(VIEWS).map(([id, label]) => (
-              <option key={id} value={id}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Playback speed
-          <select
-            aria-label="Playback speed"
-            value={speed}
-            onChange={e => setSpeed(Number(e.target.value))}
-          >
-            <option value="10">10 million years / second</option>
-            <option value="20">20 million years / second</option>
-            <option value="40">40 million years / second</option>
-          </select>
-        </label>
+          <label>
+            View
+            <select aria-label="View" value={view} onChange={e => setView(e.target.value)}>
+              {Object.entries(VIEWS).map(([id, label]) => (
+                <option key={id} value={id}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Playback speed
+            <select
+              aria-label="Playback speed"
+              value={speed}
+              onChange={e => setSpeed(Number(e.target.value))}
+            >
+              <option value="10">10 million years / second</option>
+              <option value="20">20 million years / second</option>
+              <option value="40">40 million years / second</option>
+            </select>
+          </label>
         </div>
         <label className="tectonic-check">
-          <input type="checkbox" checked={cycleViews} onChange={e => setCycleViews(e.target.checked)} />{' '}
+          <input
+            type="checkbox"
+            checked={cycleViews}
+            onChange={e => setCycleViews(e.target.checked)}
+          />{' '}
           Cycle views every 8 seconds
         </label>
         <label>
@@ -306,70 +400,173 @@ export default function TectonicTimeMachine() {
           <select
             aria-label="Land appearance"
             value={regionColors ? 'regions' : historicalTerrain ? 'paleodem' : 'terrain'}
-            onChange={e => {setRegionColors(e.target.value === 'regions'); setHistoricalTerrain(e.target.value === 'paleodem');}}
+            onChange={e => {
+              setRegionColors(e.target.value === 'regions');
+              setHistoricalTerrain(e.target.value === 'paleodem');
+            }}
           >
-            <option value="paleodem" disabled={Boolean(followPlace)}>Historical terrain · PaleoDEM (0–540 Ma)</option>
+            <option value="paleodem" disabled={Boolean(followPlace)}>
+              Historical terrain · PaleoDEM (0–540 Ma)
+            </option>
             <option value="terrain">Modern NASA imagery on plates</option>
             <option value="regions">Region colors</option>
           </select>
         </label>
         <details className="tectonic-info tectonic-journey-controls">
           <summary>Journeys &amp; guided camera</summary>
-          <label>Follow a present-day place
-            <select aria-label="Follow a place" value={journeyId} onChange={e=>{
-              setJourneyId(e.target.value);
-              if(e.target.value==='none')setFollowCamera(false);
-              if(e.target.value!=='none'){setHistoricalTerrain(false);setRegionColors(false);setFollowCamera(true);setGuidedCamera(false);setCycleViews(false);setView('globe');}
-            }}>
+          <label>
+            Follow a present-day place
+            <select
+              aria-label="Follow a place"
+              value={journeyId}
+              onChange={e => {
+                setJourneyId(e.target.value);
+                if (e.target.value === 'none') setFollowCamera(false);
+                if (e.target.value !== 'none') {
+                  setHistoricalTerrain(false);
+                  setRegionColors(false);
+                  setFollowCamera(true);
+                  setGuidedCamera(false);
+                  setCycleViews(false);
+                  setView('globe');
+                }
+              }}
+            >
               <option value="none">None</option>
-              {FOLLOW_PLACES.map(place=><option key={place.id} value={place.id}>{place.name}</option>)}
+              {FOLLOW_PLACES.map(place => (
+                <option key={place.id} value={place.id}>
+                  {place.name}
+                </option>
+              ))}
               <option value="custom">Custom coordinates</option>
             </select>
           </label>
-          {journeyId==='custom'&&<>
-            <div className="tectonic-control-pair">
-              <label>Longitude<input aria-label="Place longitude" type="number" min="-180" max="180" step="any" value={customLon} onChange={e=>setCustomLon(e.target.value)}/></label>
-              <label>Latitude<input aria-label="Place latitude" type="number" min="-90" max="90" step="any" value={customLat} onChange={e=>setCustomLat(e.target.value)}/></label>
-            </div>
-            <button disabled={!customValid} onClick={()=>{setCustomPlace({name:'Custom place',lon:Number(customLon),lat:Number(customLat)});setHistoricalTerrain(false);setFollowCamera(true);setGuidedCamera(false);setView('globe');}}>Follow coordinates</button>
-          </>}
-          <label className="tectonic-check"><input type="checkbox" checked={followCamera} disabled={!followPlace} onChange={e=>{setFollowCamera(e.target.checked);if(e.target.checked){setGuidedCamera(false);setView('globe');}}}/>Follow on globe</label>
-          <label className="tectonic-check"><input type="checkbox" checked={guidedCamera} onChange={e=>{setGuidedCamera(e.target.checked);if(e.target.checked){setFollowCamera(false);setCycleViews(false);setView('globe');}}}/>Guided event camera</label>
-          <label className="tectonic-check"><input type="checkbox" checked={compareFutures} onChange={e=>setCompareFutures(e.target.checked)}/>Compare future alternatives</label>
+          {journeyId === 'custom' && (
+            <>
+              <div className="tectonic-control-pair">
+                <label>
+                  Longitude
+                  <input
+                    aria-label="Place longitude"
+                    type="number"
+                    min="-180"
+                    max="180"
+                    step="any"
+                    value={customLon}
+                    onChange={e => setCustomLon(e.target.value)}
+                  />
+                </label>
+                <label>
+                  Latitude
+                  <input
+                    aria-label="Place latitude"
+                    type="number"
+                    min="-90"
+                    max="90"
+                    step="any"
+                    value={customLat}
+                    onChange={e => setCustomLat(e.target.value)}
+                  />
+                </label>
+              </div>
+              <button
+                disabled={!customValid}
+                onClick={() => {
+                  setCustomPlace({
+                    name: 'Custom place',
+                    lon: Number(customLon),
+                    lat: Number(customLat)
+                  });
+                  setHistoricalTerrain(false);
+                  setFollowCamera(true);
+                  setGuidedCamera(false);
+                  setView('globe');
+                }}
+              >
+                Follow coordinates
+              </button>
+            </>
+          )}
+          <label className="tectonic-check">
+            <input
+              type="checkbox"
+              checked={followCamera}
+              disabled={!followPlace}
+              onChange={e => {
+                setFollowCamera(e.target.checked);
+                if (e.target.checked) {
+                  setGuidedCamera(false);
+                  setView('globe');
+                }
+              }}
+            />
+            Follow on globe
+          </label>
+          <label className="tectonic-check">
+            <input
+              type="checkbox"
+              checked={guidedCamera}
+              onChange={e => {
+                setGuidedCamera(e.target.checked);
+                if (e.target.checked) {
+                  setFollowCamera(false);
+                  setCycleViews(false);
+                  setView('globe');
+                }
+              }}
+            />
+            Guided event camera
+          </label>
+          <label className="tectonic-check">
+            <input
+              type="checkbox"
+              checked={compareFutures}
+              onChange={e => setCompareFutures(e.target.checked)}
+            />
+            Compare future alternatives
+          </label>
         </details>
         <details className="tectonic-info tectonic-display-options">
           <summary>Display &amp; future options</summary>
-        <label>
-          {view === 'globe' ? 'Globe starting longitude' : 'Map central meridian'}
-          <input
-            type="range"
-            min="-180"
-            max="180"
-            step="5"
-            value={longitude}
-            onChange={e => {setLongitude(e.target.value);setFollowCamera(false);setGuidedCamera(false);}}
-          />
-          <output>{longitude}°</output>
-        </label>
-        <label>
-          Future scenario
-          <select
-            aria-label="Future scenario"
-            value={scenario}
-            onChange={e => setScenario(e.target.value)}
-          >
-            <option value="atlantic">Atlantic assembly · illustrative</option>
-            <option value="polar">Polar assembly · illustrative</option>
-          </select>
-        </label>
-        <label className="tectonic-check">
-          <input type="checkbox" checked={grid} onChange={e => setGrid(e.target.checked)} />{' '}
-          Graticule
-        </label>
-        <label className="tectonic-check">
-          <input type="checkbox" checked={glaciations} onChange={e => setGlaciations(e.target.checked)} />{' '}
-          Glaciations
-        </label>
+          <label>
+            {view === 'globe' ? 'Globe starting longitude' : 'Map central meridian'}
+            <input
+              type="range"
+              min="-180"
+              max="180"
+              step="5"
+              value={longitude}
+              onChange={e => {
+                setLongitude(e.target.value);
+                setFollowCamera(false);
+                setGuidedCamera(false);
+              }}
+            />
+            <output>{longitude}°</output>
+          </label>
+          <label>
+            Future scenario
+            <select
+              aria-label="Future scenario"
+              value={scenario}
+              onChange={e => setScenario(e.target.value)}
+            >
+              <option value="atlantic">Atlantic assembly · illustrative</option>
+              <option value="polar">Polar assembly · illustrative</option>
+            </select>
+          </label>
+          <label className="tectonic-check">
+            <input type="checkbox" checked={grid} onChange={e => setGrid(e.target.checked)} />{' '}
+            Graticule
+          </label>
+          <label className="tectonic-check">
+            <input
+              type="checkbox"
+              checked={glaciations}
+              onChange={e => setGlaciations(e.target.checked)}
+            />{' '}
+            Glaciations
+          </label>
         </details>
         {regionColors && (
           <div className="tectonic-legend">
@@ -384,9 +581,9 @@ export default function TectonicTimeMachine() {
         <details className="tectonic-info">
           <summary>Earth history · impacts, climate and extinctions</summary>
           <p className="tectonic-note">
-            Events extend to 4,567 Ma. Older surfaces are illustrative,
-            not rendered plate reconstructions. Theia and the late bombardment
-            are hypotheses with model-dependent details.
+            Events extend to 4,567 Ma. Older surfaces are illustrative, not rendered plate
+            reconstructions. Theia and the late bombardment are hypotheses with model-dependent
+            details.
           </p>
           <label>
             Event category
@@ -416,9 +613,14 @@ export default function TectonicTimeMachine() {
             {filterEarthEvents(EARTH_EVENTS, eventCategory, eventQuery).map(event => (
               <li key={event.id}>
                 <strong>{event.name}</strong>
-                <small> · {event.ageMa.toLocaleString()} Ma · {event.confidence}</small>
+                <small>
+                  {' '}
+                  · {event.ageMa.toLocaleString()} Ma · {event.confidence}
+                </small>
                 <p className="tectonic-note">{event.description}</p>
-                <a href={event.url} target="_blank" rel="noreferrer">{event.source}</a>
+                <a href={event.url} target="_blank" rel="noreferrer">
+                  {event.source}
+                </a>
                 <button disabled={Boolean(renderError)} onClick={() => seek(-event.ageMa)}>
                   View at this age
                 </button>
@@ -429,22 +631,21 @@ export default function TectonicTimeMachine() {
         <details className="tectonic-info">
           <summary>Bombardment and biodiversity data</summary>
           <p className="tectonic-note">
-            Numerical impact-flux and fossil-diversity series are not yet bundled.
-            The chart will only appear when a licensed, provenance-checked
-            source provides measured or modelled values. No synthetic rates
-            or extinction percentages are substituted for missing data.
+            Numerical impact-flux and fossil-diversity series are not yet bundled. The chart will
+            only appear when a licensed, provenance-checked source provides measured or modelled
+            values. No synthetic rates or extinction percentages are substituted for missing data.
           </p>
           <p className="tectonic-note">
-            Planned sources: published impact chronology models and the
-            Paleobiology Database. Impact models must retain their scenario
-            and uncertainty; biodiversity curves must retain sampling methods.
+            Planned sources: published impact chronology models and the Paleobiology Database.
+            Impact models must retain their scenario and uncertainty; biodiversity curves must
+            retain sampling methods.
           </p>
         </details>
         <details className="tectonic-info">
           <summary>Ancient geographic features</summary>
           <p className="tectonic-note">
-            Curated names and approximate age ranges only. These are not reconstructed
-            locations, outlines, or elevations, and are not plotted on the map.
+            Curated names and approximate age ranges only. These are not reconstructed locations,
+            outlines, or elevations, and are not plotted on the map.
           </p>
           <label>
             Find a feature
@@ -471,7 +672,10 @@ export default function TectonicTimeMachine() {
             ).map(feature => (
               <li key={feature.id}>
                 <strong>{feature.name}</strong> · {feature.type}
-                <small> · approximately {feature.olderMa}–{feature.youngerMa} Ma</small>
+                <small>
+                  {' '}
+                  · approximately {feature.olderMa}–{feature.youngerMa} Ma
+                </small>
                 <p className="tectonic-note">{feature.note}</p>
               </li>
             ))}
@@ -495,8 +699,8 @@ export default function TectonicTimeMachine() {
           </p>
           <p className="tectonic-note">
             Landmass names mark approximate geological chapters, not exact assembly dates or labels
-            for individual templates. Gondwana, Laurussia and Pangaea precede the Laurasia
-            / Gondwana breakup. Rodinia is included in both sources; Nuna (Columbia) is included in
+            for individual templates. Gondwana, Laurussia and Pangaea precede the Laurasia /
+            Gondwana breakup. Rodinia is included in both sources; Nuna (Columbia) is included in
             Cao et al. (2024). Pannotia’s existence and configuration are debated, so no separate
             assembly is labeled here.
           </p>
@@ -514,20 +718,52 @@ export default function TectonicTimeMachine() {
           </p>
         </details>
         <section className="tectonic-explanations" aria-label="View notes">
-        <p className="tectonic-source-summary">
-          {source.frame} · {source.geometry}
-        </p>
-        {historyStatus && <p className="tectonic-stream-status" role="status">{historyStatus}</p>}
-        {focusEvent ? <p className="tectonic-data-note">Event focus · {focusEvent.name}</p> : earlyEarth && <p className="tectonic-data-note">Deep time · 5× playback until tectonic data begins</p>}
-        {glaciations && playing && glaciationPlaybackSpeed(time, speed) < speed && (
-          <p className="tectonic-data-note">Slower playback · ice edge transition</p>
-        )}
-        <p className="tectonic-note">PaleoDEM uses its own PALEOMAP reconstruction. The plate model applies to region colors and earlier/future terrain.</p>
-        <p className="tectonic-appearance-status">{appearanceStatus}</p>
-        {journeyStatus&&<p className="tectonic-note">{journeyStatus}</p>}
-        {followPlace&&<p className="tectonic-note">Marker and up-to-100 Myr trail use {source.id} rotations in published history and original illustrative paths after the present. Template lifetimes and missing rotations are respected. Tracking uses plate imagery to keep reference frames aligned.</p>}
-        {(guidedCamera||followPlace)&&<p className="tectonic-note">Drag the globe to take over the camera. Re-enable following or the guided camera to resume.</p>}
-        {compareFutures&&<p className="tectonic-note tectonic-future-legend">{time>0?`Purple major-block outlines: ${scenario==='atlantic'?'polar':'Atlantic'} alternative. Solid land: selected scenario. Both are illustrative.`:'Future outlines appear after the present; playback and age are unchanged.'}</p>}
+          <p className="tectonic-source-summary">
+            {source.frame} · {source.geometry}
+          </p>
+          {historyStatus && (
+            <p className="tectonic-stream-status" role="status">
+              {historyStatus}
+            </p>
+          )}
+          {focusEvent ? (
+            <p className="tectonic-data-note">Event focus · {focusEvent.name}</p>
+          ) : (
+            earlyEarth && (
+              <p className="tectonic-data-note">
+                Deep time · 5× playback until tectonic data begins
+              </p>
+            )
+          )}
+          {glaciations && playing && glaciationPlaybackSpeed(time, speed) < speed && (
+            <p className="tectonic-data-note">Slower playback · ice edge transition</p>
+          )}
+          <p className="tectonic-note">
+            PaleoDEM uses its own PALEOMAP reconstruction. The plate model applies to region colors
+            and earlier/future terrain.
+          </p>
+          <p className="tectonic-appearance-status">{appearanceStatus}</p>
+          {journeyStatus && <p className="tectonic-note">{journeyStatus}</p>}
+          {followPlace && (
+            <p className="tectonic-note">
+              Marker and up-to-100 Myr trail use {source.id} rotations in published history and
+              original illustrative paths after the present. Template lifetimes and missing
+              rotations are respected. Tracking uses plate imagery to keep reference frames aligned.
+            </p>
+          )}
+          {(guidedCamera || followPlace) && (
+            <p className="tectonic-note">
+              Drag the globe to take over the camera. Re-enable following or the guided camera to
+              resume.
+            </p>
+          )}
+          {compareFutures && (
+            <p className="tectonic-note tectonic-future-legend">
+              {time > 0
+                ? `Purple major-block outlines: ${scenario === 'atlantic' ? 'polar' : 'Atlantic'} alternative. Solid land: selected scenario. Both are illustrative.`
+                : 'Future outlines appear after the present; playback and age are unchanged.'}
+            </p>
+          )}
         </section>
       </aside>
       <footer className="tectonic-timeline">
@@ -551,21 +787,38 @@ export default function TectonicTimeMachine() {
                   disabled={Boolean(renderError)}
                   onClick={() => seek(-event.ageMa)}
                 >
-                  <span id={`timeline-tip-${event.id}`} role="tooltip" className={`tectonic-event-tooltip ${event.ageMa > 3800 ? 'align-start' : event.ageMa < 750 ? 'align-end' : ''}`}>
+                  <span
+                    id={`timeline-tip-${event.id}`}
+                    role="tooltip"
+                    className={`tectonic-event-tooltip ${event.ageMa > 3800 ? 'align-start' : event.ageMa < 750 ? 'align-end' : ''}`}
+                  >
                     <strong>{event.name}</strong>
-                    <span>{event.ageMa.toLocaleString()} Ma · {available ? 'Seek to geological age' : 'Illustrative early Earth'}</span>
+                    <span>
+                      {event.ageMa.toLocaleString()} Ma ·{' '}
+                      {available ? 'Seek to geological age' : 'Illustrative early Earth'}
+                    </span>
                   </span>
                 </button>
               );
             })}
           </div>
           <div className="tectonic-deep-time-axis">
-            <span>4,567 Ma</span><span>3,000</span><span>1,500</span><span>0 Ma</span>
+            <span>4,567 Ma</span>
+            <span>3,000</span>
+            <span>1,500</span>
+            <span>0 Ma</span>
           </div>
         </div>
         <div className="tectonic-milestones">
           {timelineMilestones(scenario, source.maxAge).map(({time: value, name: label}) => (
-            <button key={value} disabled={Boolean(renderError) || (!isEarlyEarth(value, source.maxAge) && (!sceneReady || Boolean(sceneError)))} onClick={() => seek(value)}>
+            <button
+              key={value}
+              disabled={
+                Boolean(renderError) ||
+                (!isEarlyEarth(value, source.maxAge) && (!sceneReady || Boolean(sceneError)))
+              }
+              onClick={() => seek(value)}
+            >
               {label}
               <small>
                 {value < 0 ? `${-value} Ma ago` : value === 0 ? '0 Ma' : `+${value} Ma`}

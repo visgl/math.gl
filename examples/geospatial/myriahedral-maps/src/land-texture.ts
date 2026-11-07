@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import land from '../shared/geometry/unfolding-polyhedron/data/land.json';
+import land from '../../../common/land.json';
 
 /** Rasterize the repository's public-domain Natural Earth polygons, not demo imagery. */
 export function createLandTexture(): HTMLCanvasElement {

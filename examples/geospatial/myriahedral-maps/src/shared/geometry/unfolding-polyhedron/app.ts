@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {mountInfoBox} from './shared/common/info-box.js';
+import {mountInfoBox} from '../../../../../../common/info-box.js';
 
 import {createSolid, edgeKey, type Solid} from './polyhedra';
 import {createCutLayout, type CutMode} from './cut-layout';
@@ -31,7 +31,10 @@ export function mountUnfolding(
   root.innerHTML = view;
   const selectors = root.querySelector<HTMLElement>('.selectors')!;
   const playback = root.querySelector<HTMLElement>('footer .controls')!;
-  const disposeSelectors = mountInfoBox(selectors, {title: 'Geometry and cuts', theme: 'sleek-dark'});
+  const disposeSelectors = mountInfoBox(selectors, {
+    title: 'Geometry and cuts',
+    theme: 'sleek-dark'
+  });
   const disposePlayback = mountInfoBox(playback, {title: 'Unfolding', theme: 'sleek-dark'});
   const abort = new AbortController();
   let frame = 0;

@@ -1,11 +1,11 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import ExamplePanel from './shared/example-panel';
+import ExamplePanel from '../../../common/example-panel';
 import React, {useMemo} from 'react';
 import {intersectRayTriangle, getClosestPointOnTriangle} from '@math.gl/geometry/culling';
-import SceneCanvas from './shared/scene-canvas';
-import './shared/query-example.css';
+import SceneCanvas from './scene-canvas';
+import './app.css';
 const triangles = [
   [
     [-4, -2, 0],
@@ -57,9 +57,9 @@ export default function CullingQueries() {
     };
   }, [x, y]);
   return (
-    <div className="query-example">
+    <div className="app">
       <SceneCanvas scene={scene} />
-      <ExamplePanel title="Ray & closest-point lab" >
+      <ExamplePanel title="Ray & closest-point lab">
         <div className="query-controls">
           <p>
             Move the pink ray across three 3D triangles. Cyan marks the first hit; gold connects the

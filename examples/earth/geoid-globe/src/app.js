@@ -1,12 +1,12 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {mountInfoBox} from './shared/info-box.js';
+import {mountInfoBox} from '../../../common/info-box.js';
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import {parsePGM} from '@math.gl/earth';
 
-import {BLUE_MARBLE_TILES, BLUE_MARBLE_CREDIT_URL} from './shared/blue-marble.js';
+import {BLUE_MARBLE_TILES, BLUE_MARBLE_CREDIT_URL} from '../../../common/blue-marble.js';
 
 let nextInstance = 0;
 /** Mounts an EGM96 height field and returns its cleanup function. */
@@ -22,7 +22,10 @@ export function mountGeoidGlobe(root, {lowUrl, hiUrl}) {
     <div class="legend-labels"><span>−110 m</span><span>0 m</span><span>+110 m</span></div>
     <p>Geoid height N above the WGS84 ellipsoid. Ellipsoidal height h = orthometric height H + N.</p>
     <p class="credits"><a href="${BLUE_MARBLE_CREDIT_URL}">NASA Blue Marble</a>. NGA EGM96 data, via <a href="https://geographiclib.sourceforge.io/C++/doc/geoid.html">GeographicLib</a>. Colors show geoid undulation, not terrain elevation.</p></aside>`;
-  const disposeInfo = mountInfoBox(root.querySelector('aside'), {title: "Earth’s geoid", theme: 'sleek-dark'});
+  const disposeInfo = mountInfoBox(root.querySelector('aside'), {
+    title: 'Earth’s geoid',
+    theme: 'sleek-dark'
+  });
   const resolution = root.querySelector('[data-role="resolution"]');
   const interpolation = root.querySelector('[data-role="interpolation"]');
   const status = root.querySelector('[data-role="status"]');

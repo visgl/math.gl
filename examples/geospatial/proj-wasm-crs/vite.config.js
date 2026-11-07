@@ -6,7 +6,7 @@ import {prepareProjAssets} from './scripts/prepare-proj-assets.mjs';
 export default async () => {
   return {
     base: './',
-    ...await prepareProjAssets(),
+    ...(await prepareProjAssets()),
     worker: {format: 'es'},
     build: {
       rollupOptions: {

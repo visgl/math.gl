@@ -51,7 +51,9 @@ export function makeMesh(parts) {
     coordinates: new Float64Array(coordinates),
     reference: new Float32Array(reference),
     geographic: new Float32Array(geographic),
-    iceLatitudes: new Float32Array(coordinates.filter((_, i) => i % 2).map(lat => Math.sin(lat * Math.PI / 180))),
+    iceLatitudes: new Float32Array(
+      coordinates.filter((_, i) => i % 2).map(lat => Math.sin((lat * Math.PI) / 180))
+    ),
     normals: new Float32Array((coordinates.length / 2) * 3),
     positions: new Float64Array((coordinates.length / 2) * 3),
     projected: new Float64Array(coordinates.length),
@@ -72,7 +74,16 @@ export function blendWeights(from, target, progress) {
 }
 // Every endpoint reads the same current geological coordinates. Interrupted transitions
 // begin from the current mixture, so neither time nor the displayed shape jumps backwards.
-export function transformMesh(mesh, weights, engines, scales, latitude = 15, ocean = false, longitude = 0, geographic = false) {
+export function transformMesh(
+  mesh,
+  weights,
+  engines,
+  scales,
+  latitude = 15,
+  ocean = false,
+  longitude = 0,
+  geographic = false
+) {
   const {coordinates, projected, positions} = mesh;
   const tilt = (latitude * Math.PI) / 180,
     sinTilt = Math.sin(tilt),
@@ -80,10 +91,10 @@ export function transformMesh(mesh, weights, engines, scales, latitude = 15, oce
   // Ocean geometry covers the whole view, so only its material coordinates need the
   // camera longitude. Land coordinates already contain this shift during rebuilding.
   if ((ocean || geographic) && mesh.materialLongitude !== longitude) {
-    const angle = longitude * Math.PI / 180;
+    const angle = (longitude * Math.PI) / 180;
     for (let i = 0, j = 0; i < coordinates.length; i += 2, j += 3) {
-      const lon = coordinates[i] * Math.PI / 180 + angle;
-      const lat = coordinates[i + 1] * Math.PI / 180;
+      const lon = (coordinates[i] * Math.PI) / 180 + angle;
+      const lat = (coordinates[i + 1] * Math.PI) / 180;
       mesh.geographic[j] = Math.cos(lat) * Math.cos(lon);
       mesh.geographic[j + 1] = Math.cos(lat) * Math.sin(lon);
       mesh.geographic[j + 2] = Math.sin(lat);

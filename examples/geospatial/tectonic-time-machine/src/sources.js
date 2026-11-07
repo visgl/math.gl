@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Immutable CC-BY-4.0 snapshots, with matching geometry and finite rotations.
-const SNAPSHOT = 'https://media.githubusercontent.com/media/visgl/deck.gl-data/6b82e2df927725dc54ba729267204498d4ac6c74/earth/tectonic-movements/v1';
+const SNAPSHOT =
+  'https://media.githubusercontent.com/media/visgl/deck.gl-data/6b82e2df927725dc54ba729267204498d4ac6c74/earth/tectonic-movements/v1';
 export const DEFAULT_SOURCE = 'MULLER2022';
 export const FUTURE_END = 300;
 export const DATA_SOURCES = {

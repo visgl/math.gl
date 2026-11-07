@@ -1,24 +1,24 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { loadSimulation, sampleAt } from './data.js';
-import { createScene } from './scene.js';
+import React, {useEffect, useRef, useState, useCallback} from 'react';
+import {loadSimulation, sampleAt} from './data.js';
+import {createScene} from './scene.js';
 import './style.css';
-import AttributionWidget from './shared/shared/attribution-widget.jsx';
+import AttributionWidget from '../../../common/attribution-widget.jsx';
 import {ALPINE_SOURCES} from './attribution.js';
-import { glacialPhase } from './glacial-phase.js';
+import {glacialPhase} from './glacial-phase.js';
 import GlobalIceAge from './global-app.jsx';
 import {useChapterTitle} from './use-chapter-title.js';
 const CHAPTERS = [
-  { age: 119, name: 'Cycle begins' },
-  { age: 70, name: 'Early advances' },
-  { age: 24, name: 'Last glacial maximum' },
-  { age: 14, name: 'Retreat' },
-  { age: 0, name: 'Present' }
+  {age: 119, name: 'Cycle begins'},
+  {age: 70, name: 'Early advances'},
+  {age: 24, name: 'Last glacial maximum'},
+  {age: 14, name: 'Retreat'},
+  {age: 0, name: 'Present'}
 ];
-const number = (value) => Math.round(value).toLocaleString('en');
-function AlpineView({ onMode, earlierAvailable }) {
+const number = value => Math.round(value).toLocaleString('en');
+function AlpineView({onMode, earlierAvailable}) {
   const canvas = useRef(null),
     scene = useRef(null);
   const [model, setModel] = useState(null),
@@ -36,23 +36,23 @@ function AlpineView({ onMode, earlierAvailable }) {
   useEffect(() => {
     const controller = new AbortController();
     loadSimulation(controller.signal)
-      .then((value) => {
+      .then(value => {
         if (!controller.signal.aborted) setModel(value);
       })
-      .catch((e) => {
+      .catch(e => {
         if (!controller.signal.aborted) setError(e.message);
       });
     return () => controller.abort();
   }, []);
   useEffect(() => {
-    scene.current = createScene(canvas.current, (e) => setError(e.message));
+    scene.current = createScene(canvas.current, e => setError(e.message));
     return () => {
       scene.current?.finalize();
       scene.current = null;
     };
   }, []);
   useEffect(() => {
-    if (model) scene.current?.render(model, { age, exaggeration, showIce, ghost, labels });
+    if (model) scene.current?.render(model, {age, exaggeration, showIce, ghost, labels});
   }, [model, age, exaggeration, showIce, ghost, labels]);
   useEffect(() => {
     scene.current?.view(map);
@@ -64,7 +64,7 @@ function AlpineView({ onMode, earlierAvailable }) {
       const now = performance.now(),
         step = Math.min(0.15, (now - previous) / 1000) * speed;
       previous = now;
-      setAge((value) => (repeat && value === 0 ? 119 : Math.max(0, value - step)));
+      setAge(value => (repeat && value === 0 ? 119 : Math.max(0, value - step)));
     }, 75);
     return () => clearInterval(timer);
   }, [playing, model, speed, repeat]);
@@ -73,8 +73,8 @@ function AlpineView({ onMode, earlierAvailable }) {
   }, [age, repeat]);
   const titleVisible = useChapterTitle(glacialPhase(age), iceNames, Boolean(model));
   const m = model?.manifest;
-  const { index, fraction } = m ? sampleAt(m.ages, age) : { index: 0, fraction: 0 };
-  const statistic = (field) =>
+  const {index, fraction} = m ? sampleAt(m.ages, age) : {index: 0, fraction: 0};
+  const statistic = field =>
     m ? m[field][index] * (1 - fraction) + m[field][index + 1] * fraction : 0;
   const area = statistic('areaKm2'),
     volume = statistic('volumeKm3');
@@ -86,7 +86,7 @@ function AlpineView({ onMode, earlierAvailable }) {
         )
         .join(' ')
     : '';
-  const seek = (value) => {
+  const seek = value => {
     setPlaying(false);
     setAge(value);
   };
@@ -103,7 +103,10 @@ function AlpineView({ onMode, earlierAvailable }) {
           <p>{age < 0.05 ? 'Present day' : `${age.toFixed(1)} thousand years ago`}</p>
         </div>
         {iceNames && (
-          <div className={`alpine-phase ${titleVisible ? "" : "alpine-phase-hidden"}`} aria-hidden={!titleVisible}>
+          <div
+            className={`alpine-phase ${titleVisible ? '' : 'alpine-phase-hidden'}`}
+            aria-hidden={!titleVisible}
+          >
             <strong>{age >= 11.7 && age <= 115 ? 'Würm' : glacialPhase(age)}</strong>
             {age >= 11.7 && age <= 115 && <span>{glacialPhase(age)}</span>}
           </div>
@@ -126,10 +129,12 @@ function AlpineView({ onMode, earlierAvailable }) {
       <aside className="alpine-controls">
         <label>
           Explore
-          <select aria-label="Explore" value="alpine" onChange={(e) => onMode(e.target.value)}>
+          <select aria-label="Explore" value="alpine" onChange={e => onMode(e.target.value)}>
             <option value="global">Global ice sheets</option>
             <option value="alpine">Alpine glaciers</option>
-            <option value="quaternary" disabled={!earlierAvailable}>Earlier ice ages</option>
+            <option value="quaternary" disabled={!earlierAvailable}>
+              Earlier ice ages
+            </option>
           </select>
         </label>
 
@@ -153,7 +158,7 @@ function AlpineView({ onMode, earlierAvailable }) {
           <select
             aria-label="View"
             value={map ? 'map' : 'relief'}
-            onChange={(e) => setMap(e.target.value === 'map')}
+            onChange={e => setMap(e.target.value === 'map')}
           >
             <option value="relief">Oblique terrain</option>
             <option value="map">Map from above</option>
@@ -164,7 +169,7 @@ function AlpineView({ onMode, earlierAvailable }) {
           <select
             aria-label="Playback speed"
             value={speed}
-            onChange={(e) => setSpeed(Number(e.target.value))}
+            onChange={e => setSpeed(Number(e.target.value))}
           >
             <option value={1}>1,000 years / second</option>
             <option value={2}>2,000 years / second</option>
@@ -179,31 +184,27 @@ function AlpineView({ onMode, earlierAvailable }) {
             min="1"
             max="15"
             value={exaggeration}
-            onChange={(e) => setExaggeration(Number(e.target.value))}
+            onChange={e => setExaggeration(Number(e.target.value))}
           />
         </label>
         <label className="alpine-check">
-          <input type="checkbox" checked={showIce} onChange={(e) => setShowIce(e.target.checked)} />
+          <input type="checkbox" checked={showIce} onChange={e => setShowIce(e.target.checked)} />
           Glacier ice
         </label>
         <label className="alpine-check">
-          <input type="checkbox" checked={ghost} onChange={(e) => setGhost(e.target.checked)} />
+          <input type="checkbox" checked={ghost} onChange={e => setGhost(e.target.checked)} />
           Reveal terrain beneath ice
         </label>
         <label className="alpine-check">
-          <input type="checkbox" checked={labels} onChange={(e) => setLabels(e.target.checked)} />
+          <input type="checkbox" checked={labels} onChange={e => setLabels(e.target.checked)} />
           Place labels
         </label>
         <label className="alpine-check">
-          <input type="checkbox" checked={repeat} onChange={(e) => setRepeat(e.target.checked)} />
+          <input type="checkbox" checked={repeat} onChange={e => setRepeat(e.target.checked)} />
           Repeat animation
         </label>
         <label className="alpine-check">
-          <input
-            type="checkbox"
-            checked={iceNames}
-            onChange={(e) => setIceNames(e.target.checked)}
-          />
+          <input type="checkbox" checked={iceNames} onChange={e => setIceNames(e.target.checked)} />
           Ice age names
         </label>
         <div className="alpine-legend">
@@ -262,14 +263,14 @@ function AlpineView({ onMode, earlierAvailable }) {
             min="0"
             max="119"
             step=".05"
-            style={{ direction: 'rtl' }}
+            style={{direction: 'rtl'}}
             value={age}
             disabled={!model}
-            onChange={(e) => seek(Number(e.target.value))}
+            onChange={e => seek(Number(e.target.value))}
           />
         </div>
         <div className="alpine-chapters">
-          {CHAPTERS.map((chapter) => (
+          {CHAPTERS.map(chapter => (
             <button key={chapter.age} disabled={!model} onClick={() => seek(chapter.age)}>
               <strong>{chapter.name}</strong>
               <span>{chapter.age ? `${chapter.age} ka` : '0 ka'}</span>
@@ -294,7 +295,14 @@ export default function IceAge() {
     setOlderModel(value);
     if (!userSelected.current) setMode('quaternary');
   }, []);
-  return mode !== 'alpine'
-    ? <GlobalIceAge onMode={chooseMode} onOlderReady={olderReady} olderModel={olderModel} earlier={mode === 'quaternary'} />
-    : <AlpineView onMode={chooseMode} earlierAvailable={earlierAvailable} />;
+  return mode !== 'alpine' ? (
+    <GlobalIceAge
+      onMode={chooseMode}
+      onOlderReady={olderReady}
+      olderModel={olderModel}
+      earlier={mode === 'quaternary'}
+    />
+  ) : (
+    <AlpineView onMode={chooseMode} earlierAvailable={earlierAvailable} />
+  );
 }

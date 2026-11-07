@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {dot, normalize, type Vec3} from './polyhedra';
-import {isLand} from './shared/common/land-mask.js';
+import {isLand} from '../../../common/land.js';
 export {isLand};
 
 /** Approximate radians of land crossed by the minor great-circle arc.

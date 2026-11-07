@@ -3,7 +3,11 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {createMorphMesh, getMorphProgress, createEndpoint} from '../../../../examples/earth/sun-terminator/src/morph.js';
+import {
+  createMorphMesh,
+  getMorphProgress,
+  createEndpoint
+} from '../../../../examples/earth/sun-terminator/src/morph.js';
 import {interruptedPoint} from '../../../../examples/earth/sun-terminator/src/cuts.js';
 import {cutPart} from '../../../../examples/earth/sun-terminator/src/cut-maps.js';
 import {MapView} from '@deck.gl/core';

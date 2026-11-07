@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import ExamplePanel from './shared/example-panel';
+import ExamplePanel from '../../../common/example-panel';
 import React, {useEffect, useMemo, useRef} from 'react';
 import {Matrix4, toRadians} from '@math.gl/core';
 import {OrbitControls} from '@luma.gl/engine';

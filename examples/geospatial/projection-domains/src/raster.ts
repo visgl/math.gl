@@ -95,9 +95,15 @@ export function createRasterMesh(
     for (const p of points) {
       const sample: Point = [p[0] + (center[0] - p[0]) * 1e-6, p[1] + (center[1] - p[1]) * 1e-6];
       const lngLat = projection.invert?.(sample);
-      if (!lngLat || !lngLat.every(Number.isFinite)) {unresolvedTriangles++; return;}
+      if (!lngLat || !lngLat.every(Number.isFinite)) {
+        unresolvedTriangles++;
+        return;
+      }
       const roundTrip = projection(lngLat);
-      if (!roundTrip || distance(sample, roundTrip) > 0.01) {unresolvedTriangles++; return;}
+      if (!roundTrip || distance(sample, roundTrip) > 0.01) {
+        unresolvedTriangles++;
+        return;
+      }
       vertices.push([p[0], p[1], ...sourceUV(kind, ...lngLat)]);
     }
     // A full-world texture is periodic. Split the local unwrapped triangle at u=0/1
@@ -130,7 +136,8 @@ export function createRasterMesh(
     }
     for (const shift of kind === 'world' ? [-1, 0, 1] : [0]) {
       const clipped = clipToImage(vertices.map(v => [v[0], v[1], v[2] + shift, v[3]]));
-      if (positions.length / 3 + clipped.length > 1000000) throw new RangeError('Raster output limit exceeded');
+      if (positions.length / 3 + clipped.length > 1000000)
+        throw new RangeError('Raster output limit exceeded');
       const start = positions.length / 3;
       for (const v of clipped) {
         positions.push(v[0], v[1], 0);

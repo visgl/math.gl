@@ -5,16 +5,53 @@
 import {GeoArrowBuilder} from '@math.gl/geospatial/geoarrow';
 export const names = ['Antimeridian', 'Polygon with hole', 'South pole'];
 export function fixtureColumn() {
-  return GeoArrowBuilder.build([
-    {type: 'Polygon', coordinates: [[
-      [170, -15], [170, 15], [-170, 15], [-170, -15], [170, -15]
-    ]]},
-    {type: 'Polygon', coordinates: [
-      [[-30, -25], [-30, 25], [30, 25], [30, -25], [-30, -25]],
-      [[-10, -10], [10, -10], [10, 10], [-10, 10], [-10, -10]]
-    ]},
-    {type: 'Polygon', coordinates: [[
-      [-180, -70], [-90, -70], [0, -70], [90, -70], [180, -70], [-180, -70]
-    ]]}
-  ], {encoding: 'geoarrow.polygon', dimension: 'xy'});
+  return GeoArrowBuilder.build(
+    [
+      {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [170, -15],
+            [170, 15],
+            [-170, 15],
+            [-170, -15],
+            [170, -15]
+          ]
+        ]
+      },
+      {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [-30, -25],
+            [-30, 25],
+            [30, 25],
+            [30, -25],
+            [-30, -25]
+          ],
+          [
+            [-10, -10],
+            [10, -10],
+            [10, 10],
+            [-10, 10],
+            [-10, -10]
+          ]
+        ]
+      },
+      {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [-180, -70],
+            [-90, -70],
+            [0, -70],
+            [90, -70],
+            [180, -70],
+            [-180, -70]
+          ]
+        ]
+      }
+    ],
+    {encoding: 'geoarrow.polygon', dimension: 'xy'}
+  );
 }
