@@ -9,7 +9,7 @@ import {
   createSurfaceMesh,
   getGlobeToMercatorTransition,
   getMorphScale
-} from '../../examples/web-mercator/zoom-driven-map-morphing/projection.mjs';
+} from '../../../../examples/geospatial/zoom-driven-map-morphing/src/projection.mjs';
 
 // Fixed outputs from the retired prototype guard the visual behavior during the port.
 const fixtures = JSON.parse(readFileSync(new URL('./zoom-driven-map-morphing.json', import.meta.url)));

@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import reference from '../../../modules/geospatial/test/terrain/fixtures/n43-reference.json';
+import reference from './assets/n43-reference.json';
 
 /** Pinned GDAL DTED samples and labeled analytical stress surfaces. */
 export function getMeshLabData(name) {
