@@ -1,8 +1,20 @@
 # CHANGELOG
 
-## Unreleased
+## v5.0.0-beta.5
 
-- feat(terrain): Add opt-in raster-footprint clamping and support-only bilinear nodata sampling, with bounded grid-node roundoff handling.
+- **Breaking:** Extract `@math.gl/arrow` and `@math.gl/tasks` as standalone packages. Move Arrow/GeoArrow utilities, UTF-8, and WKB/WKT from core and geospatial to the Arrow package and its capability subpaths; move task execution from `@math.gl/core/tasks` to `@math.gl/tasks`. The former packages no longer forward these exports. See the [upgrade guide](docs/upgrade-guide.md) (#447, #448).
+- feat(arrow): Add optional Apache Arrow 17+ utilities and Arrow-backed GeoArrow operations, with layout, null, union, slice, buffer-ownership, and browser-bundle qualification (#447, #448).
+- feat(core, geometry): Add numeric helpers, projection helpers, sample tracks, extended bounds and geometric queries, adaptive curve sampling, and parallel-transport frames. Improve numerical stability for extreme scales, vector/quaternion normalization, and cubic tangents (#432).
+- feat(tasks): Support concurrent operations on initialized tasks and bidirectional worker services (#423).
+- feat(terrain): Add opt-in raster-footprint clamping and support-only bilinear nodata sampling with bounded grid-node roundoff handling; add mixed-resolution contour welding and a qualified terrain mesh lab (#426, #436).
+- feat(core): Restore the dedicated expressions entry point; add dependency-free UTF-8 utilities, now available at `@math.gl/arrow/utf8` (#429, #446, #448).
+- feat(geometry): Add photometric and color lookup-table calculations (#439).
+- feat(geospatial): Expose resolved projection metadata for matching external backends (#438).
+- chore(web-mercator): Remove the unpublished GlobeMercatorProjection class (#440).
+- fix(examples): Render the raster projection lab without lighting; correct mobile navigation, example fullscreen behavior, and compact controls (#442, #443).
+- chore(examples): Standardize example packages and restore the benchmark guide (#441).
+- docs: Reorganize module documentation, navigation, API references, and the developer guide; add security policy and usage guidance (#427, #430, #431, #433, #435, #437, #445).
+- build: Update all Vite dependencies to 8.3.6 (#434).
 
 ## v5.0.0-beta.4
 
