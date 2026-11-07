@@ -940,3 +940,45 @@ test('Indexed Arrow materialization preserves raw nanosecond precision and compa
   expect(selected.getChild('union')!.data[0]!.children[0]!.values.byteLength).toBe(15);
   expect(Array.from(selected.getChild('union')!)).toEqual(['small', 'small', 'small']);
 });
+
+test('Indexed Arrow gathering preserves sliced bitmaps, maps, lists, nulls and shared dictionaries', () => {
+  const dictionary = arrow.vectorFromArray(
+    ['first', null, 'third'],
+    new arrow.Dictionary(new arrow.Utf8(), new arrow.Int8(), 17)
+  );
+  const pairs = arrow.vectorFromArray(
+    [[1, 2], null, [3, 4]],
+    new arrow.FixedSizeList(2, new arrow.Field('xy', new arrow.Float64()))
+  );
+  const mapType = new arrow.Map_(
+    new arrow.Field(
+      'entries',
+      new arrow.Struct([
+        new arrow.Field('key', new arrow.Utf8(), false),
+        new arrow.Field('value', new arrow.Int32())
+      ]),
+      false
+    )
+  );
+  const maps = arrow.vectorFromArray([new Map([['a', 1]]), null, new Map([['b', 2]])], mapType);
+  const table = new arrow.Table({
+    dictionary,
+    pairs,
+    maps,
+    empty: arrow.vectorFromArray([null, null, null], new arrow.Null()),
+    enabled: arrow.vectorFromArray([false, null, true], new arrow.Bool())
+  });
+  const sliced = table.slice(1).concat(table);
+  const snapshot = new IndexedArrowTable(sliced, [0, 1, 2, 4]).materializeArrowTable();
+  expect(Array.from(snapshot.getChild('dictionary')!)).toEqual([null, 'third', 'first', 'third']);
+  expect(Array.from(snapshot.getChild('enabled')!)).toEqual([null, true, false, true]);
+  expect(Array.from(snapshot.getChild('empty')!)).toEqual([null, null, null, null]);
+  expect(snapshot.getChild('pairs')!.get(0)).toBeNull();
+  expect(Array.from(snapshot.getChild('pairs')!.get(1) as arrow.Vector)).toEqual([3, 4]);
+  expect(JSON.parse(JSON.stringify(snapshot.getChild('maps')!.get(1)))).toEqual({b: 2});
+  const dictionaryData = snapshot.getChild('dictionary')!.data;
+  expect(dictionaryData[0]!.dictionary).toBe(dictionaryData[1]!.dictionary);
+  expect(dictionaryData[0]!.dictionary!.data[0]!.values.buffer).not.toBe(
+    dictionary.data[0]!.dictionary!.data[0]!.values.buffer
+  );
+});
