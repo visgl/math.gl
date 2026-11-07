@@ -12,6 +12,8 @@ Version 5.0 is in prerelease development. See the [upgrade guide](https://visgl.
 
 [Projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) has grown from a proj4 wrapper into a pluggable math.gl engine. Transform coordinates using a broad [projection catalogue](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projections.md), with support for datum grids, coordinate operations, and in-place buffers. The new [CRS module](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs.md) gives applications a shared vocabulary for coordinate reference systems, WKT, PROJ definitions, and PROJJSON.
 
+Prepared projections now expose an optional immutable [transform description](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection.md#resolved-transform-description), including resolved CRS metadata, versioned algorithm identities and ordered execution stages. Graph executors can use it to assess native backend support while retaining a CPU fallback for opaque algorithms and grid resources.
+
 ### Put the world on a grid[​](#put-the-world-on-a-grid "Direct link to Put the world on a grid")
 
 The new [DGGS module](https://visgl.github.io/math.gl/next/docs/modules/dggs.md) brings A5, GeoHash, H3, Plus Codes, Quadkey, and S2 under a common decoder API. Switch between grid systems, find cell boundaries, and handle cells crossing the antimeridian without assembling a different toolkit for each grid.
@@ -27,6 +29,10 @@ Look up a location's timezone with [timezone](https://visgl.github.io/math.gl/ne
 ### Keep the math close and the bundle lean[​](#keep-the-math-close-and-the-bundle-lean "Direct link to Keep the math close and the bundle lean")
 
 [Core](https://visgl.github.io/math.gl/next/docs/modules/core.md) adds clearer matrix and rotation conversions, stronger array types, and tree-shakeable low-level namespaces. New [expressions](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md) tools make it possible to parse and evaluate configurable expressions; expression evaluation is experimental.
+
+### Lighting and color calculations[​](#lighting-and-color-calculations "Direct link to Lighting and color calculations")
+
+Opt-in [photometric and color LUT utilities](https://visgl.github.io/math.gl/next/docs/modules/geometry/lighting.md) add angular sampling, solid-angle flux integration, peak-normalized grids and CPU LUT application. Inputs and outputs are format-independent arrays; parsing remains in loaders.gl or other readers, and no dependencies are added.
 
 ### Module structure[​](#module-structure "Direct link to Module structure")
 

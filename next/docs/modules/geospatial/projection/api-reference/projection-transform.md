@@ -452,3 +452,7 @@ Is exported from `@math.gl/geospatial/projection/grids/gtx`. `createVerticalGrid
 `loadVerticalGeoTIFFGrid(tiff: VerticalGridGeoTIFF): Promise<VerticalGrid>` prepares an owned geoid snapshot from a caller-decoded TIFF. Import it and its structural types `VerticalGridGeoTIFF` / `VerticalGridGeoTIFFImage` from `@math.gl/geospatial/projection/grids/vertical-geotiff`. The root and experimental/native compatibility entry points also export it. Metadata may be synchronous (geotiff.js v2) or asynchronous (v3); numeric sample arrays must be raw, without decoder-applied scale/offset.
 
 The accepted metadata, geometry, nesting, coverage and units are specified in the [vertical GeoTIFF guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#vertical-geotiff-geoid-models). The result plugs into `verticalGrids` on all math.gl projection engine variants. This function neither loads files nor selects a vertical datum operation automatically.
+
+## Transform metadata[​](#transform-metadata "Direct link to Transform metadata")
+
+`description` exposes the optional backend-independent [resolved transform description](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection.md#resolved-transform-description). Eager instances expose it immediately; deferred instances expose it only after preparation. Metadata is immutable and includes both execution directions. Algorithm names alone do not establish equivalence with a GPU or other backend.

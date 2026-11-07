@@ -154,6 +154,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [CurveArcLength](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/curve-arc-length.md): Constructor
 - [Curve classes](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/curves.md): Constructors
 - [Adaptive sampling and transport frames](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/sampling-and-frames.md): Import these helpers from @math.gl/geometry. Existing parametric curves and
+- [Lighting and color calculations](https://visgl.github.io/math.gl/next/docs/modules/geometry/lighting.md): @math.gl/geometry/lighting and @math.gl/geometry/color provide opt-in CPU calculations
 - [@math.gl/geometry/polygon](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md): @math.gl/geometry clips and splits polygons and polylines, computes winding and area, and adaptively subdivides geometry through coordinate transforms. Use it to prepare geometry before triangulation or rendering.
 - [clipPolygon](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/clip-polygon.md): Clips a polygon with a bounding box.
 - [clipPolyline](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/clip-polyline.md): Clips a polyline with a bounding box.
