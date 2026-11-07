@@ -11,10 +11,13 @@ import {
   PANEL_THEME_SLEEK_DARK,
 } from "@deck.gl-community/panels";
 import {
-  GlobeMercatorProjection,
+  createMorphProjection,
+  createSurfaceMesh,
+  RADIUS as radius,
   getGlobeToMercatorTransition,
-} from "../../../modules/web-mercator/src/globe-mercator-projection";
-import image from "../../earth/sun-terminator/assets/day.jpg";
+  getMorphScale,
+} from "./projection.mjs";
+import image from "./assets/day.jpg";
 import "./style.css";
 
 const root = document.querySelector("#app");
@@ -54,7 +57,6 @@ const cities = [
 let longitude = -30,
   latitude = 25,
   zoom = 2;
-const radius = 6378137;
 class SurfaceLayer extends BitmapLayer {
   static layerName = "ZoomMorphSurface";
   _createMesh() {
@@ -78,47 +80,15 @@ function render() {
     startZoom: midpoint - span / 2,
     endZoom: midpoint + span / 2,
   });
-  const projection = new GlobeMercatorProjection({
+  const projection = createMorphProjection({
     longitude,
     latitude,
     progress,
   });
-  const scale =
-    (512 * 2 ** zoom) /
-    (2 * Math.PI * radius * Math.cos((latitude * Math.PI) / 180));
+  const scale = getMorphScale({zoom, latitude, progress});
   const point = (coordinates) =>
     projection.project(coordinates).map((v) => v * scale);
-  // Rebuild the center-relative grid as the camera changes. Each longitude bank
-  // is separate so triangles never cross the opposite-meridian seam.
-  const columns = 180,
-    rows = 86,
-    positions = [],
-    texCoords = [],
-    indices = [];
-  for (let y = 0; y <= rows; y++) {
-    const lat = -85 + (170 * y) / rows;
-    for (let x = 0; x <= columns; x++) {
-      const lon = longitude - 179.999 + (359.998 * x) / columns;
-      positions.push(...point([lon, lat]));
-      texCoords.push(((((lon + 180) / 360) % 1) + 1) % 1, (90 - lat) / 180);
-    }
-  }
-  for (let y = 0; y < rows; y++)
-    for (let x = 0; x < columns; x++) {
-      const a = y * (columns + 1) + x,
-        b = a + 1,
-        c = a + columns + 1,
-        d = c + 1;
-      // Skip texture seams; adjacent vertices otherwise sample opposite ends of the image.
-      if (Math.abs(texCoords[2 * a] - texCoords[2 * b]) > 0.5) continue;
-      indices.push(a, b, c, b, d, c);
-    }
-  const mesh = {
-    positions: new Float64Array(positions),
-    texCoords: new Float32Array(texCoords),
-    indices: new Uint32Array(indices),
-    vertexCount: indices.length,
-  };
+  const mesh = createSurfaceMesh({longitude, project: point});
   const visibleCities = cities.filter((city) => {
     const p = projection.project(city.coordinates);
     return progress > 0.99 || p[2] > -radius * 0.8;
