@@ -66,6 +66,8 @@ try {
     for (const route of ['docs', 'docs/modules', 'examples']) {
       console.log('Navigation', size.width, route);
       await page.goto(base + route, { waitUntil: 'domcontentloaded' });
+      // The SSR button is visible before its React handlers have been attached.
+      await page.locator('html[data-has-hydrated="true"]').waitFor();
       const toggle = page.getByRole('button', { name: 'Toggle navigation bar' });
       await toggle.waitFor({ state: 'visible' });
       await toggle.tap();
