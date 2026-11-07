@@ -876,6 +876,7 @@ test.each(['dense', 'sparse'] as const)(
     const table = new arrow.Table({mixed: vector});
     const indexed = new IndexedArrowTable(table, [2, 1, 0, 1]);
     const snapshot = indexed.materializeArrowTable();
+    expect(snapshot.batches).toHaveLength(1);
     expect(Array.from(snapshot.getChild('mixed')!)).toEqual([null, 'hello', 7, 'hello']);
     expect(
       snapshot
@@ -883,5 +884,59 @@ test.each(['dense', 'sparse'] as const)(
         .data.flatMap(data => Array.from(data.typeIds.subarray(0, data.length)))
     ).toEqual([9, 9, 4, 9]);
     expect(new IndexedArrowTable(table, []).materializeArrowTable().numRows).toBe(0);
+    const structType = new arrow.Struct([new arrow.Field('choice', type)]);
+    const nestedType = new arrow.List(new arrow.Field('item', structType));
+    const nestedData = new arrow.Data(
+      nestedType,
+      0,
+      2,
+      0,
+      {[arrow.BufferType.OFFSET]: new Int32Array([0, 2, 3])},
+      [new arrow.Data(structType, 0, 3, 0, undefined, [vector.data[0]!])]
+    );
+    const nested = new arrow.Table({nested: new arrow.Vector([nestedData])});
+    const nestedSnapshot = new IndexedArrowTable(nested, [1, 0, 1]).materializeArrowTable();
+    expect(JSON.parse(JSON.stringify(nestedSnapshot.toArray()))).toEqual([
+      {nested: [{choice: null}]},
+      {nested: [{choice: 7}, {choice: 'hello'}]},
+      {nested: [{choice: null}]}
+    ]);
   }
 );
+
+test('Indexed Arrow materialization preserves raw nanosecond precision and compacts union children', () => {
+  const timestamp = new arrow.Vector([
+    new arrow.Data(new arrow.TimestampNanosecond('UTC'), 0, 2, 0, {
+      [arrow.BufferType.DATA]: new BigInt64Array([1000000001n, 2000000002n])
+    })
+  ]);
+  const table = new arrow.Table({timestamp});
+  const snapshot = new IndexedArrowTable(table, [1, 0, 1]).materializeArrowTable();
+  expect(Array.from(snapshot.getChild('timestamp')!.data[0]!.values)).toEqual([
+    2000000002n,
+    1000000001n,
+    2000000002n
+  ]);
+  const text = arrow.vectorFromArray(['x'.repeat(4096), 'small'], new arrow.Utf8());
+  const type = new arrow.DenseUnion([9], [new arrow.Field('text', text.type)]);
+  const union = new arrow.Vector([
+    new arrow.Data(
+      type,
+      0,
+      2,
+      0,
+      {
+        [arrow.BufferType.TYPE]: new Int8Array([9, 9]),
+        [arrow.BufferType.OFFSET]: new Int32Array([0, 1])
+      },
+      [text.data[0]!]
+    )
+  ]);
+  const selected = new IndexedArrowTable(
+    new arrow.Table({union}),
+    [1, 1, 1]
+  ).materializeArrowTable();
+  expect(selected.batches).toHaveLength(1);
+  expect(selected.getChild('union')!.data[0]!.children[0]!.values.byteLength).toBe(15);
+  expect(Array.from(selected.getChild('union')!)).toEqual(['small', 'small', 'small']);
+});
