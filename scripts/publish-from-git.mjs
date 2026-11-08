@@ -14,6 +14,23 @@ const registry = 'https://registry.npmjs.org';
 export const retryablePublishError = (text) =>
   /TLOG_CREATE_ENTRY_ERROR|ECONNRESET|ETIMEDOUT|EAI_AGAIN|E50[0234]/.test(text);
 
+// These first publications created the packages before OIDC could be configured.
+// Their immutable beta.5 tarballs cannot acquire CI provenance retroactively.
+const bootstrapIntegrity = {
+  '@math.gl/arrow@5.0.0-beta.5':
+    'sha512-2Q8LahH2pWpTnmMQOVZ5X424l9Y9J6rhWLcgcMLw8uhjgm0Pk8uNEgrogMBMPoECsRdTsO9/Mw1Xrl7Z2VZSww==',
+  '@math.gl/tasks@5.0.0-beta.5':
+    'sha512-JmsQMUtyBWp+eysANnpaQQttNpJY0Ff7Xu3LvRRjiqkxQ6ZXJd7Z8XJW62pa0yWwickvSkiygVPtlr0Sbz8B3Q=='
+};
+
+export function verifiedPublication(name, version, dist) {
+  return (
+    !!dist?.attestations?.provenance ||
+    (!!bootstrapIntegrity[`${name}@${version}`] &&
+      bootstrapIntegrity[`${name}@${version}`] === dist?.integrity)
+  );
+}
+
 export function validateRelease({tag, version, versions, changelog}) {
   if (!/^v\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)\.\d+)?$/.test(tag))
     throw new Error('Expected an explicit release tag');
@@ -221,13 +238,12 @@ async function main() {
           },
           {wait}
         );
-        if (data === null)
-          return {name: p.name, exists: false, tagged: false, provenance: false};
+        if (data === null) return {name: p.name, exists: false, tagged: false, provenance: false};
         return {
           name: p.name,
           exists: !!data.versions?.[p.version],
           tagged: data['dist-tags']?.[distTag] === p.version,
-          provenance: !!data.versions?.[p.version]?.dist?.attestations?.provenance
+          provenance: verifiedPublication(p.name, p.version, data.versions?.[p.version]?.dist)
         };
       })
     );

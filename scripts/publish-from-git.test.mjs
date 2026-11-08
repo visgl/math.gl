@@ -8,6 +8,7 @@ import {createRequire} from 'node:module';
 import {dirname, resolve} from 'node:path';
 import {checkPublishingStack} from './check-publishing-stack.mjs';
 import {
+  verifiedPublication,
   validateRelease,
   validateRecoveryLockfile,
   retryLookup,
@@ -22,6 +23,30 @@ const state = (exists, tagged = exists, provenance = exists) => [
 ];
 const ok = () => ({status: 0, output: ''});
 const noWait = async () => {};
+
+test('only the exact two beta.5 bootstrap tarballs may lack provenance', () => {
+  const cases = [
+    [
+      '@math.gl/arrow',
+      'sha512-2Q8LahH2pWpTnmMQOVZ5X424l9Y9J6rhWLcgcMLw8uhjgm0Pk8uNEgrogMBMPoECsRdTsO9/Mw1Xrl7Z2VZSww=='
+    ],
+    [
+      '@math.gl/tasks',
+      'sha512-JmsQMUtyBWp+eysANnpaQQttNpJY0Ff7Xu3LvRRjiqkxQ6ZXJd7Z8XJW62pa0yWwickvSkiygVPtlr0Sbz8B3Q=='
+    ]
+  ];
+  for (const [name, integrity] of cases) {
+    assert.equal(verifiedPublication(name, '5.0.0-beta.5', {integrity}), true);
+    assert.equal(verifiedPublication(name, '5.0.0-beta.6', {integrity}), false);
+    assert.equal(verifiedPublication(name, '5.0.0-beta.5', {integrity: 'wrong'}), false);
+    assert.equal(verifiedPublication(name, '5.0.0-beta.5', undefined), false);
+  }
+  assert.equal(verifiedPublication('@math.gl/core', '5.0.0-beta.5', {}), false);
+  assert.equal(
+    verifiedPublication('@math.gl/core', '5.0.0-beta.5', {attestations: {provenance: {}}}),
+    true
+  );
+});
 
 test('recovery preserves existing locked dependencies and permits the root publisher addition', () => {
   const old =
