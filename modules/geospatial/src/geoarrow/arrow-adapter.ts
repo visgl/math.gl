@@ -25,7 +25,7 @@ export type MakeGeoArrowColumnFromArrowVectorOptions = {
   encoding?: GeoArrowEncoding;
   /** Semantic coordinate dimension. Inferred from native coordinate fields when omitted. */
   dimension?: GeoArrowDimension;
-  /** Coordinate organization. Inferred from the physical type when omitted. */
+  /** Optional assertion of the physical coordinate organization; does not convert storage. */
   coordinateLayout?: GeoArrowCoordinateLayout | null;
   /** Opaque extension metadata retained on the descriptor envelope. */
   metadata?: Readonly<Record<string, unknown>>;
@@ -57,10 +57,12 @@ export function makeGeoArrowColumnFromArrowVector(
   const dimension =
     options.dimension ??
     (isSerializedArrowType(vector.type) ? 'xy' : inferGeoArrowDimensionFromArrowType(vector.type));
-  const coordinateLayout =
-    options.coordinateLayout === undefined
-      ? inferGeoArrowCoordinateLayoutFromArrowType(vector.type)
-      : options.coordinateLayout;
+  const coordinateLayout = inferGeoArrowCoordinateLayoutFromArrowType(vector.type);
+  if (options.coordinateLayout !== undefined && options.coordinateLayout !== coordinateLayout) {
+    throw new Error(
+      'Coordinate layout must match the Arrow physical type; convert the descriptor layout explicitly instead.'
+    );
+  }
 
   return {
     encoding,

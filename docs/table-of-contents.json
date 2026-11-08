@@ -43,7 +43,6 @@
         "label": "Core",
         "items": [
           "modules/core/utf8/README",
-          {"type": "category", "label": "Arrow utilities", "items": ["modules/core/arrow/README", "modules/core/arrow/indexed-arrow-table", "modules/core/arrow/mapped-arrow-table", "modules/core/arrow/arrow-schema-utils", "modules/core/arrow/split-arrow-buffers", "modules/core/arrow/arrow-table-transport"]},
           {
             "type": "category",
             "label": "Arrow utilities",

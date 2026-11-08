@@ -51,6 +51,10 @@ getGeoArrowBounds(vector, {field}); // [1, 2, 3, 4]
 const column = makeGeoArrowColumnFromArrowVector(vector, {field});
 ```
 
+The optional `coordinateLayout` hint must match the Arrow physical type; it does
+not convert storage. For layout conversion, adapt to a descriptor and use the
+`geoarrow-utils` conversion APIs before exporting a new Arrow vector.
+
 Use the actual field from `table.schema` when adapting a table column. A vector
 alone has no extension metadata: LineString and MultiPoint share the same physical
 list nesting, as do Polygon and MultiLineString. Those ambiguous layouts require

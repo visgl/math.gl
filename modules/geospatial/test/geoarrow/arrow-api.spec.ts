@@ -448,3 +448,19 @@ test.each([
     expect(materializeGeoArrowRows(adapted)).toEqual(rows.slice(1));
   }
 );
+
+test('GeoArrow coordinate layout hints validate physical storage before processing', () => {
+  const vector = arrow.vectorFromArray(
+    [[1, 2]],
+    new arrow.FixedSizeList(2, new arrow.Field('xy', new arrow.Float64()))
+  );
+  expect(getGeoArrowBounds(vector, {coordinateLayout: 'interleaved'})).toEqual([1, 2, 1, 2]);
+  for (const coordinateLayout of ['separated', null] as const) {
+    const options = {coordinateLayout};
+    expect(() => makeGeoArrowColumnFromArrowVector(vector, options)).toThrow(/must match/);
+    expect(() => mapGeoArrowCoordinates(vector, coordinate => coordinate, options)).toThrow(
+      /must match/
+    );
+    expect(() => rewindGeoArrow(vector, options)).toThrow(/must match/);
+  }
+});
