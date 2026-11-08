@@ -21,7 +21,9 @@ import {
 import {
   GeoArrowBuilder,
   makeGeoArrowColumnFromGeometryRows,
-  materializeGeoArrowRows
+  materializeGeoArrowRows,
+  concatenateGeoArrowColumns,
+  encodeGeoArrowWKB
 } from '@math.gl/geospatial/geoarrow-utils';
 
 /** Adds canonical GeoArrow extension metadata to an Arrow field. */
@@ -463,4 +465,23 @@ test('GeoArrow coordinate layout hints validate physical storage before processi
     );
     expect(() => rewindGeoArrow(vector, options)).toThrow(/must match/);
   }
+});
+
+test('GeoArrow adapters preserve edge semantics through descriptor operations', () => {
+  const vector = makePoints();
+  const field = makeField(vector.type);
+  field.metadata.set('ARROW:extension:metadata', JSON.stringify({edges: 'spherical'}));
+  const column = makeGeoArrowColumnFromArrowVector(vector, {field});
+  expect(column.edges).toBe('spherical');
+  expect(encodeGeoArrowWKB(column).edges).toBe('spherical');
+  expect(() => concatenateGeoArrowColumns([column, {...column, edges: 'planar'}])).toThrow(
+    /semantic envelopes/
+  );
+  expect(
+    makeGeoArrowColumnFromArrowVector(vector, {field, metadata: {edges: 'planar'}}).edges
+  ).toBe('planar');
+  expect(makeGeoArrowColumnFromArrowVector(vector).edges).toBeUndefined();
+  expect(() => makeGeoArrowColumnFromArrowVector(vector, {metadata: {edges: 'unknown'}})).toThrow(
+    /edge semantics/
+  );
 });

@@ -64,12 +64,21 @@ export function makeGeoArrowColumnFromArrowVector(
     );
   }
 
+  const metadata = options.metadata ?? extension?.metadata;
+  const edgeMetadata = metadata?.['edges'];
+  const edges =
+    edgeMetadata === 'spherical' ? 'spherical' : edgeMetadata === 'planar' ? 'planar' : undefined;
+  if (edgeMetadata !== undefined && edges === undefined) {
+    throw new Error('Unsupported GeoArrow edge semantics: expected planar or spherical.');
+  }
+
   return {
     encoding,
     dimension,
     coordinateLayout,
+    edges,
     chunks: vector.data.map(data => makeGeoArrowArrayFromArrowData(data)),
-    metadata: options.metadata ?? extension?.metadata
+    metadata
   };
 }
 

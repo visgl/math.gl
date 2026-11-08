@@ -51,6 +51,10 @@ getGeoArrowBounds(vector, {field}); // [1, 2, 3, 4]
 const column = makeGeoArrowColumnFromArrowVector(vector, {field});
 ```
 
+GeoArrow `edges: 'planar' | 'spherical'` metadata is preserved on the descriptor's
+semantic envelope as well as in its metadata. Other declared edge modes are rejected;
+missing edges retain the GeoArrow planar default. Bounds remain coordinate-space extents.
+
 The optional `coordinateLayout` hint must match the Arrow physical type; it does
 not convert storage. For layout conversion, adapt to a descriptor and use the
 `geoarrow-utils` conversion APIs before exporting a new Arrow vector.
