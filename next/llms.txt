@@ -270,20 +270,20 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 
 #### tasks
 
-Tasks keep applications responsive while processing large datasets. Use
+Tasks lets you move heavy operations, such as computations on large datasets, to
 
-- [@math.gl/tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks.md): Tasks keep applications responsive while processing large datasets. Use
-- [Task runtime API](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/runtime.md): The public runtime is TaskRunner, with typed task objects,
-- [TaskRunner API](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/task-runner.md): The public execution API in @math.gl/tasks. Start with the get-started guide.
-- [Measuring task execution](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/benchmarks.md): Build the packages, then run the correctness-checked benchmark:
-- [Creating tasks and workers](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/custom-workers.md): Define a plain object with process, optionally processInBatches, and lifecycle
-- [Choosing where tasks run](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/execution.md): TaskRunner accepts execution: 'auto' | 'main-thread' | 'worker'.
-- [Migrating to TaskRunner](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/migration.md): This is a breaking API change. @math.gl/core/worker-utils,
-- [Reusing initialized state](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/persistent-resources.md): Use runner.initializeTask(task, initialization) when multiple operations should
-- [Shared memory and ownership](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/shared-memory.md): Inputs copy by default. Use inputOwnership: 'transfer' to move ordinary buffers
-- [Get started with Tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/task-runner.md): Tasks keep your application responsive while processing large datasets.
-- [WebAssembly in tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/wasm.md): Compile or instantiate a WebAssembly module in a task's initialize hook, retain
-- [Task execution and workers](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/workers.md): Use TaskRunner to execute work in
+- [@math.gl/tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks.md): Tasks lets you move heavy operations, such as computations on large datasets, to
+- [Task runtime API](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/runtime.md): TaskRunner runs tasks in workers or locally and manages their
+- [TaskRunner API](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/task-runner.md): Use TaskRunner to run a task, await its result, and manage its workers and setup.
+- [Measuring task execution](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/benchmarks.md): Measure the whole operation before tuning worker count or buffer ownership.
+- [Creating tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/custom-workers.md): A task is an ordinary object describing a calculation. Start with its input,
+- [Choosing where tasks run](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/execution.md): Use a worker for calculations that would otherwise block your application. For a
+- [Migrating to TaskRunner](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/migration.md): If your application uses an earlier worker API, start by updating its imports,
+- [Reusing initialized state](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/persistent-resources.md): If repeated calls use the same projection, dataset, or spatial index, prepare it
+- [Buffers and shared memory](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/shared-memory.md): Start with the default copying behavior. It lets your application keep using its
+- [Get started with Tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/task-runner.md): When a calculation takes long enough to interrupt scrolling, interaction, or
+- [WebAssembly in tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/wasm.md): A worker task can run a WebAssembly calculation while the application stays
+- [Worker basics](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/workers.md): In a browser, the main thread handles input and draws the page. A long calculation
 
 #### web-mercator
 

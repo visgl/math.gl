@@ -1,17 +1,17 @@
 # @math.gl/tasks
 
-Tasks keep applications responsive while processing large datasets. Use `TaskRunner` to execute named input/output objects locally or in a worker, process streams, and retain expensive state across calls.
+Tasks lets you move heavy operations, such as computations on large datasets, to worker threads. The main thread can keep responding to input and drawing your application while the computation runs in the background.
 
-* [Get started with Tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/task-runner.md): run provided tasks, then create your own.
-* [API reference](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/task-runner.md): methods, controls, and lifecycle.
-* [Migration](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/migration.md): upgrade from the removed worker and top-level task APIs.
+A **task** describes a calculation. A **TaskRunner** runs it and returns the result. The runner handles worker startup, messages, and cleanup, so you do not have to write that plumbing yourself. It works in browsers and Node.js.
 
-`@math.gl/tasks` is the only public task execution entry. Import provided geospatial tasks from `@math.gl/geospatial/tasks`. The package is standalone, has no runtime dependencies, and does not require core, Arrow, or geospatial.
+## Run a task[​](#run-a-task "Direct link to Run a task")
 
-## Usage[​](#usage "Direct link to Usage")
+For example, project a set of coordinates in a worker:
 
 ```
 import {TaskRunner} from '@math.gl/tasks';
+
+import {ProjectCoordinatesTask} from '@math.gl/geospatial/tasks';
 
 
 
@@ -19,15 +19,15 @@ const runner = new TaskRunner();
 
 try {
 
-  const result = await runner.runTask(
+  const {coordinates} = await runner.runTask(ProjectCoordinatesTask, {
 
-    {id: 'double', process: ({value}: {value: number}) => ({value: value * 2})},
+    coordinates: new Float64Array([0, 0, 10, 20]),
 
-    {value: 3}
+    projection: {from: 'EPSG:4326', to: 'EPSG:3857'}
 
-  );
+  });
 
-  console.log(result.value); // 6
+  console.log(coordinates);
 
 } finally {
 
@@ -36,48 +36,28 @@ try {
 }
 ```
 
-See the [method reference](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/task-runner.md) for exact signatures and [the guide](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/task-runner.md) for complete examples.
+`ProjectCoordinatesTask` includes a worker implementation. You send coordinates and a projection, then await the converted coordinates. Inputs are copied by default, so your application can keep using the original arrays.
+
+Start with the [getting-started guide](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/task-runner.md) for setup and examples. You can use tasks provided by a math.gl module or [write a task](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/custom-workers.md) for your own computation. `@math.gl/tasks` itself has no runtime dependencies and can be used without the other math.gl packages.
 
 ## Features[​](#features "Direct link to Features")
 
-| Feature                                            | Support | Contract and limits                                                                                                                                                                                                                       |
-| -------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Typed task definitions                             | ✅      | Plain objects checked with `satisfies Task<Types>`; input, output, options, initialization, state, and batch types stay aligned. No global registration.                                                                                  |
-| Named input/output payloads                        | ✅      | Plain objects with named fields; typed arrays and buffers belong inside those fields. Runtime validation also protects JavaScript callers.                                                                                                |
-| Browser and Node workers                           | ✅      | Browser worker factories or Node module URLs, including CommonJS worker entrypoints on Node 22.3+. `initializeTaskWorker` installs one task in an existing worker; functions are loaded from modules, never serialized.                   |
-| Cross-origin module workers                        | ✅      | HTTP(S) entrypoints use same-origin module shims. Remote imports require CORS and compatible CSP; runtime-owned shim URLs are released with the worker.                                                                                   |
-| Main-thread execution                              | ✅      | `execution: 'main-thread'` runs the local processor. `auto` selects a declared worker, otherwise local execution. No silent fallback after worker failure.                                                                                |
-| Synchronous execution                              | ✅      | `runTaskSync` returns the output object directly. Requires preloaded code and synchronous initialization, processing, and destruction; blocks the calling thread and throws when capacity is occupied.                                    |
-| Single atomic operation                            | ✅      | `runTask` returns a promise and automatically initializes and destroys temporary state.                                                                                                                                                   |
-| Multiple independent inputs                        | ✅      | `runTasks` accepts sync/async iterables, preserves output order, and bounds outstanding work and buffered results with `concurrency`.                                                                                                     |
-| Stateful streaming                                 | ✅      | `runTaskInBatches` invokes one async-iterable processor for the stream. Input/output batch types and batch counts may differ. Consumer demand applies backpressure.                                                                       |
-| Reusable task state                                | ✅      | `initializeTask` returns a serial handle for repeated atomic or streaming operations. State stays at one execution location; an idle handle still occupies active capacity.                                                               |
-| Worker-code warmup                                 | ✅      | Global `preloadTasks` loads code ahead of execution. Optional `task.preload()` hooks await nested imports. Temporary preload workers terminate when ready; no task state or worker pool is retained. Browser cache policy controls reuse. |
-| Execution capacity                                 | ✅      | `maxConcurrency` bounds active lifetimes, including initialization and retained handles. Code preloading is independent of runner capacity; queued bytes are not bounded.                                                                 |
-| Buffer ownership                                   | ✅      | Inputs copy by default; explicit transfer detaches caller aliases. Shared storage remains shared. Output copying preserves buffers retained in task state. The same boundaries apply locally.                                             |
-| Initialization ownership                           | ✅      | Automatic atomic/streaming calls can copy, transfer, or share setup data independently of processing inputs. Multi-input templates allow copy/share only; explicit handles choose setup ownership at initialization.                      |
-| Cancellation                                       | ✅      | `AbortSignal` cancels queued acquisition. Worker abort terminates the worker and invalidates its handle. Local work must observe the signal and yield; synchronous calls cannot service timer/UI abort events mid-call.                   |
-| Progress                                           | ✅      | Tasks report `{completed, total?, phase?, unit?}` through context; callers receive `onProgress` events.                                                                                                                                   |
-| Graceful and forced cleanup                        | ✅      | `close` drains work and destroys state; `terminate` aborts owned work. Finish/return output iterators before graceful shutdown.                                                                                                           |
-| Failure isolation                                  | ✅      | Failed/cancelled workers are discarded. No rollback or automatic retry. Atomic processing plus cleanup failures use `AggregateError`.                                                                                                     |
-| Queue byte budgets, priorities, reservations       | ❌      | Applications must bound production and account for memory upstream. Active concurrency alone does not bound queued payloads.                                                                                                              |
-| Adaptive routing, pool metrics, shutdown deadlines | ❌      | Choose routes, measure timings, and enforce deadlines at the application layer.                                                                                                                                                           |
-| Cooperative worker cancellation                    | ❌      | Worker cancellation uses termination; task cleanup cannot be guaranteed after a forced stop.                                                                                                                                              |
+| Feature                           | Support | Description                                                                 |
+| --------------------------------- | ------- | --------------------------------------------------------------------------- |
+| Browser and Node.js workers       | ✅      | Move computations off the main thread                                       |
+| Typed inputs and results          | ✅      | Describe a task with ordinary TypeScript objects                            |
+| Multiple inputs and streams       | ✅      | Process a dataset in manageable pieces                                      |
+| Reusable setup                    | ✅      | Keep a prepared projection, index, or other state for later calls           |
+| Cancellation and progress         | ✅      | Stop worker work and report progress to your application                    |
+| Buffer transfer and shared memory | ✅      | Choose how large arrays move between threads                                |
+| Local execution                   | ✅      | Run small operations on the calling thread when a worker would add overhead |
 
-## Choose an operation[​](#choose-an-operation "Direct link to Choose an operation")
+Workers are useful when computation would otherwise block your application. Small operations may run faster locally because starting a worker and sending its data takes time. See [choosing where tasks run](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/execution.md).
 
-| Need                                | API                                               |
-| ----------------------------------- | ------------------------------------------------- |
-| Immediate local result              | `runner.runTaskSync(task, input, request?)`       |
-| Warm worker modules                 | `preloadTasks([task], {signal}?)`                 |
-| One result                          | `runner.runTask(task, input, request?)`           |
-| Independent inputs, ordered results | `runner.runTasks(task, inputs, request?)`         |
-| A stateful streaming operation      | `runner.runTaskInBatches(task, inputs, request?)` |
-| Reuse expensive state across calls  | `runner.initializeTask(task, initialization)`     |
-| Install a task in a worker module   | `initializeTaskWorker(task)`                      |
+## Learn more[​](#learn-more "Direct link to Learn more")
 
-## Execution controls[​](#execution-controls "Direct link to Execution controls")
-
-The runner bounds active execution with `maxConcurrency`. Inputs copy by default; choose transfer explicitly when ownership moves to the task. Progress and cancellation are per-call controls. Explicit handles retain a worker and its state until closed. Worker cancellation terminates the worker and invalidates its state.
-
-Queue byte budgets, admission reservations, priorities, built-in metrics, adaptive routing, cooperative worker cancellation, and shutdown deadlines are not public controls in this implementation. See [migration](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/migration.md) for application-level alternatives and intentional removals. Active concurrency is not a bound on memory consumed by arbitrarily many queued calls.
+* [Worker basics](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/workers.md): what runs where and how data moves.
+* [Creating tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/custom-workers.md): add your own calculation and worker.
+* [Reusing setup](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/persistent-resources.md): avoid rebuilding expensive state.
+* [API reference](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/task-runner.md): methods, options, and detailed behavior.
+* [Migration](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/migration.md): update applications using earlier worker APIs.
