@@ -13,8 +13,8 @@ usable after transfer.
 ```ts
 import {splitArrowBuffers} from '@math.gl/arrow';
 
-const transferSafeTable = splitArrowBuffers(table);
-// Use the rebuilt table locally, or dehydrate it before posting across a worker boundary.
+const transferSafeTable = splitArrowBuffers(arrowTable);
+// Use the rebuilt arrowTable locally, or dehydrate it before posting across a worker boundary.
 ```
 
 ## API
@@ -36,7 +36,7 @@ value is a new real Arrow object of the same kind.
 
 ## Compatibility Alias
 
-`splitArrowTableBuffers(table, options)` is available as a table-only alias.
+`splitArrowTableBuffers(arrowTable, options)` is available as a table-only alias.
 
 ## Notes
 

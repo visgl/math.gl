@@ -25,9 +25,9 @@ const field = new arrow.Field('geometry', vector.type, true, new Map([
   ['ARROW:extension:name', 'geoarrow.point'],
   ['ARROW:extension:metadata', JSON.stringify({edges: 'planar'})]
 ]));
-const table = new arrow.Table(new arrow.Schema([field]), {geometry: vector});
+const arrowTable = new arrow.Table(new arrow.Schema([field]), {geometry: vector});
 
-getGeometryColumnsFromSchema(table.schema).get('geometry')?.encoding; // 'geoarrow.point'
+getGeometryColumnsFromSchema(arrowTable.schema).get('geometry')?.encoding; // 'geoarrow.point'
 getGeoArrowBounds(vector, {field}); // [1, 2, 3, 4]
 const column = makeGeoArrowColumnFromArrowVector(vector, {field});
 ```

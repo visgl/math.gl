@@ -62,25 +62,25 @@ export class MappedArrowTable<T extends arrow.TypeMap> extends IndexedArrowTable
   /**
    * Builds one string-keyed mapped Arrow table view.
    *
-   * @param table - Backing Arrow table in raw row order.
+   * @param arrowTable - Backing Arrow table in raw row order.
    * @param rowIndexMap - Stable string-key-to-raw-row mapping to expose through this mapped view.
    * @param init - Internal marker preserving duplicate mapped entries when creating derived views.
    */
   constructor(
-    table: arrow.Table<T>,
+    arrowTable: arrow.Table<T>,
     rowIndexMap: ReadonlyMap<string, number>,
     init?: MappedArrowTableInit
   ) {
     const normalizedEntries = normalizeMappedArrowEntries(
       init?.[mappedArrowTableInitSymbol] ?? Array.from(rowIndexMap.entries()),
-      table.numRows
+      arrowTable.numRows
     );
 
     super(
-      table,
+      arrowTable,
       normalizeIndexedArrowIndexes(
         normalizedEntries.map(([, rowIndex]) => rowIndex),
-        table.numRows
+        arrowTable.numRows
       )
     );
 
@@ -192,11 +192,11 @@ export class MappedArrowTable<T extends arrow.TypeMap> extends IndexedArrowTable
  * Builds one mapped Arrow table from visible mapped-row entries without collapsing duplicate keys.
  */
 function createMappedArrowTableFromEntries<T extends arrow.TypeMap>(
-  table: arrow.Table<T>,
+  arrowTable: arrow.Table<T>,
   entries: ReadonlyArray<MappedArrowTableEntry>
 ): MappedArrowTable<T> {
   const rowIndexMap = buildMappedArrowRowIndexMap(entries);
-  return new MappedArrowTable(table, rowIndexMap, {
+  return new MappedArrowTable(arrowTable, rowIndexMap, {
     [mappedArrowTableInitSymbol]: entries
   });
 }

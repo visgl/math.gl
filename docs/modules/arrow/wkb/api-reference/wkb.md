@@ -72,6 +72,54 @@ to a token.
 Formats deterministic WKT. Dimension defaults to tuple inference. Empty non-point coordinates emit
 `EMPTY`; an all-non-finite point tuple emits `POINT ... EMPTY`.
 
+## WKBBuilder
+
+`WKBBuilder` writes geometry events in two passes: measure the byte count, then replay
+the same events into caller-owned storage. It constructs no Arrow objects.
+
+### Properties
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `mode` | `'measure'` or `'write'` | Current pass. Readonly. |
+| `dimension` | `WellKnownDimension` | Active XY/XYZ/XYM/XYZM tuple semantics. |
+| `littleEndian` | `boolean` | Selected byte order. Readonly. |
+| `srid` | `number` or `undefined` | Optional EWKB SRID. Readonly. |
+| `transform` | `WKBCoordinateTransform` or `undefined` | Optional coordinate transform. Readonly. |
+
+### Constructor
+
+```typescript
+new WKBBuilder(options);
+```
+
+Options select `mode`, dimension, byte order, SRID, and an optional transform.
+Write mode also requires `target` and accepts a starting `byteOffset`.
+
+### Static methods
+
+| Method | Description |
+| --- | --- |
+| `measureGeometryArray(writers, options?)` | Measure callback-written geometries and return Int32 offsets. |
+| `writeGeometryArray(writers, offsets, values, options?)` | Replay callbacks into an existing values buffer; validate measured lengths. |
+| `buildGeometryArray(writers, options?)` | Allocate offsets, values, and null validity through both passes. |
+
+### Methods
+
+| Method | Description |
+| --- | --- |
+| `beginGeometry(type, count?)` | Begin a geometry and write its count when required. |
+| `beginPoint()` | Begin a Point. |
+| `beginLineString(count)` | Begin a LineString with the declared coordinate count. |
+| `beginPolygon(count)` | Begin a Polygon with the declared ring count. |
+| `beginLinearRing(count)` | Write a ring's coordinate count. |
+| `beginMultiPoint(count)` | Begin a MultiPoint. |
+| `beginMultiLineString(count)` | Begin a MultiLineString. |
+| `beginMultiPolygon(count)` | Begin a MultiPolygon. |
+| `writeCoordinate(x, y, z?, m?)` | Measure or write one transformed coordinate. |
+| `withDimension(dimension, callback)` | Temporarily change dimension while invoking a writer callback. |
+| `finishGeometry()` | Return the measured or written geometry byte length. |
+
 ## Helpers
 
 #### `getWellKnownDimensionSize(dimension)`

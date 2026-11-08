@@ -3,31 +3,26 @@
 The public execution API in `@math.gl/tasks`. Start with the [get-started guide](../developer-guide/task-runner.md).
 This reference lists implemented controls only; see the RFC for proposed extensions.
 
-## Task type map
-
-`Task<Types>` describes a plain object with `id`, optional `worker`, and hooks:
-
-| Hook | Signature |
-| --- | --- |
-| `preload` | `() => void \| Promise<void>` |
-| `initialize` | `(initialization, context) => State \| Promise<State>` |
-| `destroy` | `(state) => void \| Promise<void>` |
-| `process` | `(input, options, context) => Output \| Promise<Output>` |
-| `processInBatches` | `(inputs, options, context) => AsyncIterable<BatchOutput>` |
-
-Type fields are `input`, `output`, optional `options`, `initialization`, `state`,
-`batchInput`, and `batchOutput`. Batch types default to atomic types. Context has
-`state`, `signal`, `throwIfAborted()`, and `reportProgress(progress)`; initialization
-context omits state. Input/output payloads are plain objects containing named
-fields; state may be any local value. Lifecycle hooks are optional for stateless
-tasks. Both processor shapes may coexist on one task.
-
 ## `TaskRunner`
+
+`TaskRunner` owns execution capacity and the lifetimes of its initialized task handles.
+
+### Properties
+
+Execution capacity is configured through constructor options; scheduler state is private.
+
+### Constructor
 
 `new TaskRunner({maxConcurrency?: number})` owns independent execution capacity.
 Default concurrency is one; values must be positive safe integers. No shared farm
 configuration is mutated. Capacity includes initializing and explicitly retained
 handles. Waiting acquisitions honor `signal` and are rejected when the runner closes.
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `options.maxConcurrency` | `number` | Positive safe integer; defaults to one. |
+
+### Methods
 
 #### `runTaskSync(task, input, request?)`
 
@@ -169,6 +164,31 @@ async imports and are not eligible for `runTaskSync`.
 
 ## `InitializedTask`
 
+A retained task instance created by `runner.initializeTask`, bound to one execution
+location and shared state. The handle type is `InitializedTask<typeof task>`.
+
+### Properties
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `state` | `'ready'`, `'closing'`, `'closed'`, or `'invalid'` | Current handle lifecycle state. Readonly. |
+
+### Construction
+
+```typescript
+const handle = await runner.initializeTask(task, initialization, controls);
+```
+
+### Methods
+
+| Method | Description |
+| --- | --- |
+| `runTask(input, request?)` | Run one atomic operation on retained state. |
+| `runTasks(inputs, request?)` | Run independent inputs in order using the retained handle. |
+| `runTaskInBatches(inputs, request?)` | Run a stateful streaming operation. |
+| `close()` | Drain operations and destroy retained state. Idempotent. |
+| `terminate(reason?)` | Invalidate the handle and force-stop its worker. |
+
 Inferred as `InitializedTask<typeof task>`. Provides `runTask(input, request?)`,
 `runTasks(inputs, request?)`, and `runTaskInBatches(inputs, request?)` with the same
 output types. Requests omit initialization and execution. Calls are serial by default
@@ -211,6 +231,25 @@ and conservatively invalidates on either. There is no rollback or retry. On auto
 processing plus destruction failures are reported together via `AggregateError`.
 Initialization failure cleans a returned state where possible; an initializer
 that throws must release its own partial allocations.
+
+## Task type map
+
+`Task<Types>` describes a plain object with `id`, optional `worker`, and hooks:
+
+| Hook | Signature |
+| --- | --- |
+| `preload` | `() => void \| Promise<void>` |
+| `initialize` | `(initialization, context) => State \| Promise<State>` |
+| `destroy` | `(state) => void \| Promise<void>` |
+| `process` | `(input, options, context) => Output \| Promise<Output>` |
+| `processInBatches` | `(inputs, options, context) => AsyncIterable<BatchOutput>` |
+
+Type fields are `input`, `output`, optional `options`, `initialization`, `state`,
+`batchInput`, and `batchOutput`. Batch types default to atomic types. Context has
+`state`, `signal`, `throwIfAborted()`, and `reportProgress(progress)`; initialization
+context omits state. Input/output payloads are plain objects containing named
+fields; state may be any local value. Lifecycle hooks are optional for stateless
+tasks. Both processor shapes may coexist on one task.
 
 ## `initializeTaskWorker`
 

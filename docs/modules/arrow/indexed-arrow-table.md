@@ -1,82 +1,52 @@
 # Indexed Arrow views
 
-`IndexedArrowTable` and `IndexedArrowVector` provide readonly indexed views over Apache Arrow JS
-tables and vectors.
+`IndexedArrowTable` provides a cheap sorted view of an `arrow.Table` without
+copying column data. Sorting reorders row indexes; filtering and slicing also
+retain the backing column buffers. `IndexedArrowVector` provides the corresponding
+column view. Treat backing data and indexes as immutable while a view uses them.
 
-Use these classes when you want to filter, sort, slice, or reorder an Arrow table without copying
-column data immediately. The view stores row indexes and only copies values when you call
-`materializeArrowTable()`, `toArray()`, or iterate rows.
+## IndexedArrowTable
 
-## Concepts
+`IndexedArrowTable<T>` pairs an `arrow.Table<T>` with raw row indexes in visible
+order. `T` is the Arrow column type map. Indexes may repeat, so one backing row can
+appear more than once in a view.
 
-- A **raw row index** is the row position in the backing `arrow.Table`.
-- A **visible row index** is the row position in the indexed view.
-- Duplicate raw row indexes are preserved. This lets one backing Arrow row appear multiple times in
-  a view.
+### Properties
 
-## Usage
-
-```typescript
-import * as arrow from 'apache-arrow';
-import {IndexedArrowTable} from '@math.gl/arrow';
-
-const table = new arrow.Table({
-  name: arrow.vectorFromArray(['alpha', 'beta', 'gamma'], new arrow.Utf8()),
-  score: arrow.vectorFromArray([10, 20, 30], new arrow.Float64())
-});
-
-const indexedTable = new IndexedArrowTable(table, [2, 0]);
-
-indexedTable.get(0)?.name; // 'gamma'
-indexedTable.getValue(1, 'score'); // 10
-indexedTable.getChild('name')?.toArray(); // ['gamma', 'alpha']
-```
-
-## Filtering and Sorting
-
-Predicates and comparators receive visible row indexes. Use `getValue()` to read column values
-without materializing row objects.
-
-```typescript
-const filteredTable = new IndexedArrowTable(table).filter(
-  (currentTable, rowIndex) => (currentTable.getValue(rowIndex, 'score') ?? 0) >= 20
-);
-
-const sortedTable = filteredTable.sort(
-  (currentTable, leftRowIndex, rightRowIndex) =>
-    (currentTable.getValue(rightRowIndex, 'score') ?? 0) -
-    (currentTable.getValue(leftRowIndex, 'score') ?? 0)
-);
-```
-
-## `IndexedArrowTable`
+| Property | Type | Description |
+| --- | --- | --- |
+| `table` | `arrow.Table<T>` | Backing table in raw row order. Readonly reference. |
+| `schema` | `arrow.Schema<T>` | Schema of the backing table. Readonly reference. |
+| `indexes` | `Int32Array` | Raw row indexes in visible order. Treat as immutable. |
+| `numRows` | `number` | Number of visible rows. Readonly. |
+| `numCols` | `number` | Number of backing-table columns. Readonly. |
 
 ### Constructor
 
 ```typescript
-new IndexedArrowTable(table, indexes);
+new IndexedArrowTable(arrowTable, indexes);
 ```
 
-Parameters:
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `arrowTable` | `arrow.Table<T>` | Backing table in raw row order. |
+| `indexes` | `readonly number[]` or `Int32Array` | Optional raw row indexes. Omit to expose all rows in raw order. The constructor copies supplied indexes. |
 
-- `table`: backing `arrow.Table` in raw row order.
-- `indexes`: optional raw row indexes to expose. When omitted, the view exposes all rows in raw
-  order.
+### Static methods
 
-### Static Methods
+#### fromOwnedIndexes(arrowTable, indexes)
 
-#### `IndexedArrowTable.fromOwnedIndexes(table, indexes)`
+```typescript
+IndexedArrowTable.fromOwnedIndexes(arrowTable, indexes);
+```
 
-Builds an indexed table from an owned `Int32Array` without copying it. Do not mutate the index
-array after passing ownership to the table.
+Builds a view from an owned `Int32Array` without copying it. Do not mutate the
+array after transferring ownership to the view.
 
-### Properties
-
-- `table`: backing `arrow.Table`.
-- `schema`: backing `arrow.Schema`.
-- `indexes`: `Int32Array` of raw row indexes in visible order.
-- `numRows`: number of visible rows.
-- `numCols`: number of columns in the backing table.
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `arrowTable` | `arrow.Table<T>` | Backing table. |
+| `indexes` | `Int32Array` | Valid raw row indexes whose ownership passes to the view. |
 
 ### Methods
 
@@ -141,10 +111,97 @@ preserved.
 
 Materialize or iterate visible rows in indexed order.
 
-## `IndexedArrowVector`
+## IndexedArrowVector
 
-`IndexedArrowVector` is the column-vector equivalent of `IndexedArrowTable`. It wraps one
-`arrow.Vector` and an index array.
+`IndexedArrowVector<T>` is the column equivalent of an indexed table. It pairs an
+`arrow.Vector<T>` with raw row indexes; `T` is the Arrow data type.
+
+### Properties
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `vector` | `arrow.Vector<T>` | Backing vector. Readonly reference. |
+| `indexes` | `Int32Array` | Raw row indexes in visible order. Treat as immutable. |
+| `length` | `number` | Number of visible values. Readonly. |
+
+### Constructor
+
+```typescript
+new IndexedArrowVector(vector, indexes);
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `vector` | `arrow.Vector<T>` | Backing vector in raw row order. |
+| `indexes` | `readonly number[]` or `Int32Array` | Raw row indexes to expose; copied by the constructor. |
+
+### Methods
+
+#### get(rowIndex)
+
+Returns the value at a visible index, or `null` for an invalid index. Nullable
+Arrow values remain `null`; dictionary values are resolved by Arrow.
+
+#### at(rowIndex)
+
+Reads a visible value with `Array.prototype.at` semantics. Negative indexes count
+backward from the end; invalid indexes return `null`.
+
+#### slice(begin?, end?)
+
+Returns a sliced indexed view over the same backing vector.
+
+#### toArray()
+
+Materializes visible values in indexed order, preserving duplicates and nulls.
+
+#### [Symbol.iterator]()
+
+Iterates visible values in indexed order.
+
+## Indexing concepts
+
+- A **raw row index** identifies a row in the backing table or vector.
+- A **visible row index** identifies a position in the indexed view.
+- Duplicate raw indexes are preserved.
+- Predicates and comparators receive visible indexes; read through the supplied view.
+
+## Usage
+
+```typescript
+import * as arrow from 'apache-arrow';
+import {IndexedArrowTable} from '@math.gl/arrow';
+
+const arrowTable = new arrow.Table({
+  name: arrow.vectorFromArray(['alpha', 'beta', 'gamma'], new arrow.Utf8()),
+  score: arrow.vectorFromArray([10, 20, 30], new arrow.Float64())
+});
+
+const indexedTable = new IndexedArrowTable(arrowTable, [2, 0]);
+
+indexedTable.get(0)?.name; // 'gamma'
+indexedTable.getValue(1, 'score'); // 10
+indexedTable.getChild('name')?.toArray(); // ['gamma', 'alpha']
+```
+
+## Filtering and Sorting
+
+Predicates and comparators receive visible row indexes. Use `getValue()` to read column values
+without materializing row objects.
+
+```typescript
+const filteredTable = new IndexedArrowTable(arrowTable).filter(
+  (currentTable, rowIndex) => (currentTable.getValue(rowIndex, 'score') ?? 0) >= 20
+);
+
+const sortedTable = filteredTable.sort(
+  (currentTable, leftRowIndex, rightRowIndex) =>
+    (currentTable.getValue(rightRowIndex, 'score') ?? 0) -
+    (currentTable.getValue(leftRowIndex, 'score') ?? 0)
+);
+```
+
+## Column views
 
 ```typescript
 const nameColumn = indexedTable.getChild('name');
@@ -153,17 +210,3 @@ nameColumn?.get(0); // 'gamma'
 nameColumn?.at(-1); // 'alpha'
 nameColumn?.slice(1).toArray(); // ['alpha']
 ```
-
-Properties:
-
-- `vector`: backing `arrow.Vector`.
-- `indexes`: `Int32Array` of raw row indexes.
-- `length`: number of visible values.
-
-Methods:
-
-- `get(rowIndex)`
-- `at(rowIndex)`
-- `slice(begin, end)`
-- `toArray()`
-- `[Symbol.iterator]()`

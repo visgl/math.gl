@@ -11,8 +11,8 @@ data in the Apache Arrow format.
 import * as arrow from 'apache-arrow';
 import {IndexedArrowTable, dehydrateArrowTable, hydrateArrowTable} from '@math.gl/arrow';
 
-const table = arrow.tableFromArrays({name: ['alpha', 'beta'], score: [10, 20]});
-const selected = new IndexedArrowTable(table, [1, 0, 1]);
+const arrowTable = arrow.tableFromArrays({name: ['alpha', 'beta'], score: [10, 20]});
+const selected = new IndexedArrowTable(arrowTable, [1, 0, 1]);
 selected.getValue(0, 'name'); // 'beta'
 
 const payload = dehydrateArrowTable(selected.materializeArrowTable(), {copy: 'all'});

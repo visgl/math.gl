@@ -29,13 +29,13 @@ function formatSchemaFieldNames(fields: arrow.Field[]): string {
  * Set `rejectExtraFields` to require an exact field count.
  *
  * @typeParam T - Expected Arrow schema type map.
- * @param table - Arrow table to validate.
+ * @param arrowTable - Arrow table to validate.
  * @param expectedSchema - Expected Arrow schema.
  * @param options - Validation behavior and error-message options.
  * @returns The input table narrowed to `arrow.Table<T>` when validation passes.
  */
 export function validateArrowTableSchema<T extends arrow.TypeMap>(
-  table: arrow.Table,
+  arrowTable: arrow.Table,
   expectedSchema: arrow.Schema<T>,
   options: ValidateArrowTableSchemaOptions = {}
 ): arrow.Table<T> {
@@ -44,7 +44,7 @@ export function validateArrowTableSchema<T extends arrow.TypeMap>(
     ? `Unexpected Arrow schema for ${schemaName}: `
     : 'Unexpected Arrow schema: ';
   const fieldCountError = getFieldCountValidationError(
-    table.schema.fields,
+    arrowTable.schema.fields,
     expectedSchema.fields,
     rejectExtraFields,
     schemaPrefix
@@ -56,7 +56,7 @@ export function validateArrowTableSchema<T extends arrow.TypeMap>(
 
   for (let fieldIndex = 0; fieldIndex < expectedSchema.fields.length; fieldIndex++) {
     const expected = expectedSchema.fields[fieldIndex];
-    const actual = table.schema.fields[fieldIndex];
+    const actual = arrowTable.schema.fields[fieldIndex];
     if (!expected || !actual) {
       throw new Error(`${schemaPrefix}missing field at index ${fieldIndex}`);
     }
@@ -78,7 +78,7 @@ export function validateArrowTableSchema<T extends arrow.TypeMap>(
     }
   }
 
-  return table as arrow.Table<T>;
+  return arrowTable as arrow.Table<T>;
 }
 
 /**

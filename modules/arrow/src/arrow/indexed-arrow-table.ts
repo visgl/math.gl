@@ -91,40 +91,44 @@ export class IndexedArrowTable<T extends arrow.TypeMap> {
    * Callers must not mutate `indexes` after handing ownership to the indexed table.
    *
    * @typeParam T - Backing Arrow column map shared with the source table.
-   * @param table - Backing Arrow table in raw row order.
+   * @param arrowTable - Backing Arrow table in raw row order.
    * @param indexes - Owned typed raw-row indexes to expose through this view.
    * @returns Indexed view adopting the provided typed index buffer.
    */
   static fromOwnedIndexes<T extends arrow.TypeMap>(
-    table: arrow.Table<T>,
+    arrowTable: arrow.Table<T>,
     indexes: Int32Array
   ): IndexedArrowTable<T> {
-    return new IndexedArrowTable(table, indexes, indexedArrowTableInitSymbol);
+    return new IndexedArrowTable(arrowTable, indexes, indexedArrowTableInitSymbol);
   }
 
   /**
    * Builds one indexed Arrow table view.
    *
-   * @param table - Backing Arrow table in raw row order.
+   * @param arrowTable - Backing Arrow table in raw row order.
    * @param indexes - Optional raw-row indexes to expose through this view. When omitted, the view
    * acts as a full passthrough over every raw row.
    * @param init - Internal marker enabling adoption of owned typed indexes without copying them.
    */
-  constructor(table: arrow.Table<T>, indexes?: readonly number[] | Int32Array);
-  constructor(table: arrow.Table<T>, indexes: Int32Array, init: typeof indexedArrowTableInitSymbol);
+  constructor(arrowTable: arrow.Table<T>, indexes?: readonly number[] | Int32Array);
   constructor(
-    table: arrow.Table<T>,
+    arrowTable: arrow.Table<T>,
+    indexes: Int32Array,
+    init: typeof indexedArrowTableInitSymbol
+  );
+  constructor(
+    arrowTable: arrow.Table<T>,
     indexes?: readonly number[] | Int32Array,
     init?: typeof indexedArrowTableInitSymbol
   ) {
-    this.table = table;
-    this.schema = table.schema;
+    this.table = arrowTable;
+    this.schema = arrowTable.schema;
     this.indexes =
       indexes === undefined
-        ? Int32Array.from({length: table.numRows}, (_, rowIndex) => rowIndex)
+        ? Int32Array.from({length: arrowTable.numRows}, (_, rowIndex) => rowIndex)
         : normalizeIndexedArrowIndexes(
             indexes,
-            table.numRows,
+            arrowTable.numRows,
             init !== indexedArrowTableInitSymbol
           );
   }
@@ -459,19 +463,19 @@ const indexedChildVectorCache = new WeakMap<
  * Resolves and caches one raw Arrow child vector by column name.
  */
 function getCachedRawChildVector<T extends arrow.TypeMap, P extends keyof T & string>(
-  table: arrow.Table<T>,
+  arrowTable: arrow.Table<T>,
   columnName: P
 ): arrow.Vector<T[P]> | null {
-  let tableCache = rawChildVectorCache.get(table);
+  let tableCache = rawChildVectorCache.get(arrowTable);
   if (!tableCache) {
     tableCache = new Map();
-    rawChildVectorCache.set(table, tableCache);
+    rawChildVectorCache.set(arrowTable, tableCache);
   }
 
   if (!tableCache.has(columnName)) {
     tableCache.set(
       columnName,
-      (table.getChild(columnName) as arrow.Vector<arrow.DataType> | null) ?? null
+      (arrowTable.getChild(columnName) as arrow.Vector<arrow.DataType> | null) ?? null
     );
   }
 

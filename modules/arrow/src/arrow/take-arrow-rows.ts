@@ -25,15 +25,16 @@ type ArrowRowRun = {
 
 /** Materializes selected physical rows without decoding union tags or scalar values. */
 export function takeArrowTableRows<T extends arrow.TypeMap>(
-  table: arrow.Table<T>,
+  arrowTable: arrow.Table<T>,
   indexes: Int32Array
 ): arrow.Table<T> {
   const offsets = [0];
-  for (const batch of table.batches) offsets.push(offsets[offsets.length - 1]! + batch.numRows);
+  for (const batch of arrowTable.batches)
+    offsets.push(offsets[offsets.length - 1]! + batch.numRows);
   const runs: ArrowRowRun[] = [];
   for (const index of indexes) {
     let lower = 0;
-    let upper = table.batches.length - 1;
+    let upper = arrowTable.batches.length - 1;
     while (lower < upper) {
       const middle = Math.floor((lower + upper) / 2);
       if (index >= offsets[middle + 1]!) lower = middle + 1;
@@ -48,21 +49,21 @@ export function takeArrowTableRows<T extends arrow.TypeMap>(
   }
   const context: TakeArrowContext = {dictionaries: new WeakMap(), variadicBuffers: new WeakMap()};
   const batches = runs.map(run => {
-    const source = table.batches[run.batchIndex]!;
+    const source = arrowTable.batches[run.batchIndex]!;
     const children = source.data.children.map(child =>
       takeArrowDataRows(child, run.indexes, context)
     );
     const data = new arrow.Data(
-      new arrow.Struct(table.schema.fields),
+      new arrow.Struct(arrowTable.schema.fields),
       0,
       run.indexes.length,
       0,
       undefined,
       children
     );
-    return new arrow.RecordBatch(table.schema, data);
+    return new arrow.RecordBatch(arrowTable.schema, data);
   });
-  return new arrow.Table(table.schema, batches);
+  return new arrow.Table(arrowTable.schema, batches);
 }
 
 /** Gathers one physical data node; child indexes are recursively compacted. */

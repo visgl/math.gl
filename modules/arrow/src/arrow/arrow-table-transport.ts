@@ -50,15 +50,15 @@ export type SerializedArrowTableIPC = {
 /**
  * Dehydrates a table without converting column values to IPC or JavaScript rows.
  * Use matching Arrow JS versions at each end; use full IPC for cross-version transport.
- * @param table Table to dehydrate.
+ * @param arrowTable Table to dehydrate.
  * @param options Buffer ownership policy; sliced buffers are copied by default.
  * @returns Structured-cloneable payload. Whole buffers may still alias the input.
  */
 export function dehydrateArrowTable(
-  table: arrow.Table,
+  arrowTable: arrow.Table,
   options?: SplitArrowBuffersOptions
 ): DehydratedArrowTable {
-  const splitTable = splitArrowBuffers(table, options);
+  const splitTable = splitArrowBuffers(arrowTable, options);
   return {
     transport: 'arrow-js',
     version: 1,
@@ -93,11 +93,11 @@ export function hydrateArrowTable(table: DehydratedArrowTable): arrow.Table {
 
 /**
  * Serializes a complete table to interoperable Arrow IPC stream bytes.
- * @param table Table to serialize.
+ * @param arrowTable Table to serialize.
  * @returns Structured-cloneable IPC envelope.
  */
-export function serializeArrowTableToIPC(table: arrow.Table): SerializedArrowTableIPC {
-  return {transport: 'arrow-ipc', data: arrow.tableToIPC(table)};
+export function serializeArrowTableToIPC(arrowTable: arrow.Table): SerializedArrowTableIPC {
+  return {transport: 'arrow-ipc', data: arrow.tableToIPC(arrowTable)};
 }
 
 /**

@@ -1,67 +1,30 @@
 # MappedArrowTable
 
-`MappedArrowTable` is a readonly string-keyed row lookup view over an `IndexedArrowTable`.
+`MappedArrowTable` provides a cheap key-value map view of an `arrow.Table` without
+copying column data. `MappedArrowTable<T>` extends
+[`IndexedArrowTable<T>`](./indexed-arrow-table.md), where `T` is the Arrow column type map.
+Mapped transforms preserve visible keys and duplicate entries; keyed lookup resolves
+the last visible occurrence of a key.
 
-Use it when an Arrow table has a stable application-level key, such as an id column, and you want
-fast keyed row lookup while still preserving indexed-table operations such as filtering, sorting,
-slicing, and concatenation.
+## Properties
 
-## Key Semantics
-
-- `rowKeys` stores keys in visible row order.
-- Duplicate keys are preserved in visible row order.
-- Keyed lookups are **last-wins**. If the same key appears multiple times, `getRowIndex(key)` and
-  `getByKey(key)` resolve to the last visible occurrence.
-
-## Usage
-
-```typescript
-import {MappedArrowTable} from '@math.gl/arrow';
-
-const rowIndexMap = new Map([
-  ['gamma', 2],
-  ['alpha', 0]
-]);
-
-const mappedTable = new MappedArrowTable(table, rowIndexMap);
-
-mappedTable.getByKey('gamma')?.name; // 'gamma'
-mappedTable.getRowIndex('alpha'); // 0
-mappedTable.getRowKey(1); // 'alpha'
-```
-
-## Filtering and Sorting
-
-Mapped transforms preserve key entries instead of collapsing them into a plain indexed table.
-
-```typescript
-const filteredTable = mappedTable.filter(
-  (currentTable, rowIndex) => (currentTable.getValue(rowIndex, 'score') ?? 0) >= 20
-);
-
-const sortedTable = filteredTable.sort(
-  (currentTable, leftRowIndex, rightRowIndex) =>
-    (currentTable.getValue(rightRowIndex, 'score') ?? 0) -
-    (currentTable.getValue(leftRowIndex, 'score') ?? 0)
-);
-```
+| Property | Type | Description |
+| --- | --- | --- |
+| `rowIndexMap` | `Map<string, number>` | Key-to-raw-row map owned by the view; duplicate keys use last-wins lookup. Treat as immutable. |
+| `rowKeys` | `string[]` | Keys in visible row order, including duplicates. Treat as immutable. |
+| `table`, `schema`, `indexes` | Inherited | Backing Arrow data, schema, and visible-to-raw index mapping. |
+| `numRows`, `numCols` | `number` | Visible row count and backing column count. Readonly. |
 
 ## Constructor
 
 ```typescript
-new MappedArrowTable(table, rowIndexMap);
+new MappedArrowTable(arrowTable, rowIndexMap);
 ```
 
-Parameters:
-
-- `table`: backing `arrow.Table` in raw row order.
-- `rowIndexMap`: string-key-to-raw-row mapping to expose through this mapped view.
-
-## Properties
-
-- `rowIndexMap`: string-key-to-raw-row lookup map. Duplicate keys use last-wins semantics.
-- `rowKeys`: string keys in visible mapped-row order. Duplicate keys are preserved.
-- All `IndexedArrowTable` properties are also available.
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `arrowTable` | `arrow.Table<T>` | Backing table in raw row order. |
+| `rowIndexMap` | `ReadonlyMap<string, number>` | String-key-to-raw-row mapping; copied into the view. |
 
 ## Methods
 
@@ -102,3 +65,43 @@ keeps last-wins keyed lookup behavior.
 
 All other `IndexedArrowTable` methods, including `getValue()`, `getChild()`,
 `materializeArrowTable()`, `toArray()`, and iteration, are inherited.
+
+## Key Semantics
+
+- `rowKeys` stores keys in visible row order.
+- Duplicate keys are preserved in visible row order.
+- Keyed lookups are **last-wins**. If the same key appears multiple times, `getRowIndex(key)` and
+  `getByKey(key)` resolve to the last visible occurrence.
+
+## Usage
+
+```typescript
+import {MappedArrowTable} from '@math.gl/arrow';
+
+const rowIndexMap = new Map([
+  ['gamma', 2],
+  ['alpha', 0]
+]);
+
+const mappedTable = new MappedArrowTable(arrowTable, rowIndexMap);
+
+mappedTable.getByKey('gamma')?.name; // 'gamma'
+mappedTable.getRowIndex('alpha'); // 0
+mappedTable.getRowKey(1); // 'alpha'
+```
+
+## Filtering and Sorting
+
+Mapped transforms preserve key entries instead of collapsing them into a plain indexed table.
+
+```typescript
+const filteredTable = mappedTable.filter(
+  (currentTable, rowIndex) => (currentTable.getValue(rowIndex, 'score') ?? 0) >= 20
+);
+
+const sortedTable = filteredTable.sort(
+  (currentTable, leftRowIndex, rightRowIndex) =>
+    (currentTable.getValue(rightRowIndex, 'score') ?? 0) -
+    (currentTable.getValue(leftRowIndex, 'score') ?? 0)
+);
+```

@@ -20,8 +20,8 @@ const expectedSchema = new arrow.Schema([
   new arrow.Field('score', new arrow.Float64(), true)
 ]);
 
-const typedTable = validateArrowTableSchema(table, expectedSchema, {
-  schemaName: 'records table'
+const typedTable = validateArrowTableSchema(arrowTable, expectedSchema, {
+  schemaName: 'records arrowTable'
 });
 ```
 
@@ -46,9 +46,9 @@ const typedTable = validateArrowTableSchema(table, expectedSchema, {
 Use strict validation when an exact field set matters:
 
 ```typescript
-validateArrowTableSchema(table, expectedSchema, {
+validateArrowTableSchema(arrowTable, expectedSchema, {
   rejectExtraFields: true,
-  schemaName: 'strict records table'
+  schemaName: 'strict records arrowTable'
 });
 ```
 
@@ -75,7 +75,7 @@ const targetSchema = new arrow.Schema([
   new arrow.Field('itemCount', new arrow.Float64(), true)
 ]);
 
-const renamedTable = renameArrowColumns(table, sourceSchema, targetSchema, {
+const renamedTable = renameArrowColumns(arrowTable, sourceSchema, targetSchema, {
   record_id: 'recordId',
   item_count: 'itemCount'
 });

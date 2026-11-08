@@ -182,34 +182,65 @@ columns and already normalized unions are identity operations.
 Normalizes Polygon and MultiPolygon winding. `outer` is `counter-clockwise` by default; holes use
 the opposite orientation. If no ring changes, the original column is returned.
 
-## Builder
+## GeoArrowBuilder
 
-### `new GeoArrowBuilder(options)`
+`GeoArrowBuilder` constructs homogeneous native columns through matching measure and
+write passes. Results borrow the supplied target buffers.
 
-Creates a homogeneous native builder in `measure` or `write` mode. Append the same rows to both
-passes. Measure mode exposes exact `GeoArrowBuilderMeasurement` counts and can allocate a matching
-`GeoArrowBuilderTarget`. Write mode fills its target and `finish()` returns a borrowed column.
+### Properties
 
-### `GeoArrowBuilder.build(rows, options)`
+| Property | Type | Description |
+| --- | --- | --- |
+| `encoding` | `GeoArrowBuilderEncoding` | Homogeneous geometry family. Readonly. |
+| `dimension` | `GeoArrowDimension` | XY, XYZ, XYM, or XYZM semantics. Readonly. |
+| `coordinateLayout` | `GeoArrowCoordinateLayout` | Interleaved or separated coordinates. Readonly. |
+| `offsetType` | `'int32'` or `'int64'` | Offset buffer width. Readonly. |
+| `coordinateType` | `'float32'` or `'float64'` | Coordinate storage precision. Readonly. |
 
-Convenience two-pass build with internal allocation.
+### Constructor
 
-#### `allocateGeoArrowBuilderTarget(measurement, options)`
+```typescript
+new GeoArrowBuilder(options);
+```
 
-Allocates exact validity, coordinate, and offset buffers independently of a builder instance.
+`options` selects the geometry encoding, dimension, coordinate layout/storage, and
+`mode: 'measure' | 'write'`. Write mode receives a previously allocated target.
+Append the same geometry sequence in both passes.
 
-The builder also accepts an incremental event stream. Call `beginGeometry(type, dimension, count?)`,
-`beginPolygon()` for each MultiPolygon part, `beginRing(count?)`,
-`writeCoordinate(x, y, z?, m?)`, and `endGeometry()`. Events are useful for loaders that already
-have a streaming parser and avoid constructing intermediate geometry rows. For backward
-compatibility, a MultiPolygon with no `beginPolygon()` calls is treated as one polygon.
-`writeCoordinateFromDimension(x, y, z, m, sourceDimension)` is the scalar fast path when source and
-target dimensions differ; it maps Z and M by name and does not allocate a coordinate tuple.
+### Static methods
 
-#### `makeGeoArrowColumnFromGeometryRows(rows, options?)`
+#### build(rows, options)
 
-Builds homogeneous, geometry-collection, or mixed dense-union storage from materialized geometry
-values. Set `encoding: 'geoarrow.geometry'` to force a dense union for homogeneous values.
+`GeoArrowBuilder.build(rows, options)` performs both passes with internal allocation.
+
+### Methods
+
+| Method | Description |
+| --- | --- |
+| `append(geometry)` | Append one geometry value or null. Returns the builder. |
+| `getMeasurement()` | Return exact row, null, coordinate, part, and ring counts from the measure pass. |
+| `allocateTarget()` | Allocate matching validity, coordinate, and offset buffers from measured counts. |
+| `finish()` | Return the completed borrowed column from a write pass. |
+| `beginGeometry(type, dimension, count?)` | Begin one geometry in the incremental event API. |
+| `beginPolygon()` | Begin a polygon part of a MultiPolygon. |
+| `beginRing(count?)` | Begin a linear ring. |
+| `writeCoordinate(x, y, z?, m?)` | Append a coordinate; the overload also accepts a coordinate tuple. |
+| `writeCoordinateFromDimension(x, y, z, m, sourceDimension)` | Map Z/M by semantic name without creating an intermediate tuple. |
+| `endGeometry()` | Complete the current event-stream geometry. |
+
+Events let streaming parsers avoid intermediate geometry objects. A MultiPolygon
+without `beginPolygon()` calls is treated as one polygon for compatibility.
+
+## Construction functions
+
+#### allocateGeoArrowBuilderTarget(measurement, options)
+
+Allocates exact validity, coordinate, and offset buffers without a builder instance.
+
+#### makeGeoArrowColumnFromGeometryRows(rows, options?)
+
+Builds homogeneous, geometry-collection, or mixed dense-union storage from materialized
+values. Set `encoding: 'geoarrow.geometry'` to force a dense union for homogeneous rows.
 
 ## WKB and WKT
 

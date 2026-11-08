@@ -10,11 +10,11 @@ Neither path uses a loaders.gl schema or table wrapper.
 ```typescript
 import {dehydrateArrowTable, hydrateArrowTable} from '@math.gl/arrow';
 
-const payload = dehydrateArrowTable(table, {copy: 'all'});
+const payload = dehydrateArrowTable(arrowTable, {copy: 'all'});
 const restored = hydrateArrowTable(structuredClone(payload));
 ```
 
-`dehydrateArrowTable(table, options?)` returns a plain `DehydratedArrowTable`:
+`dehydrateArrowTable(arrowTable, options?)` returns a plain `DehydratedArrowTable`:
 
 - `transport: 'arrow-js'` and `version: 1` identify this math.gl protocol.
 - `schema` is a **schema-only Arrow IPC stream**. Arrow itself encodes field types,
@@ -55,7 +55,7 @@ that the sender still needs. SharedArrayBuffers are not transferable.
 ```typescript
 import {serializeArrowTableToIPC, deserializeArrowTableFromIPC} from '@math.gl/arrow';
 
-const payload = serializeArrowTableToIPC(table);
+const payload = serializeArrowTableToIPC(arrowTable);
 const restored = deserializeArrowTableFromIPC(payload);
 // Raw Uint8Array or ArrayBuffer IPC bytes are also accepted.
 ```

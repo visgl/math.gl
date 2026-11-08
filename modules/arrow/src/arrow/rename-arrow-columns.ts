@@ -50,7 +50,7 @@ export type RenamedArrowColumns<
  * @typeParam TSource - Source Arrow type map.
  * @typeParam TTarget - Target Arrow type map containing renamed fields.
  * @typeParam TFieldNameMap - Source-to-target field name mapping.
- * @param table - Arrow table to validate and rename.
+ * @param arrowTable - Arrow table to validate and rename.
  * @param sourceSchema - Expected schema for the input table.
  * @param targetSchema - Schema that defines renamed field names and their expected types.
  * @param fieldNameMap - Source-to-target field name mapping.
@@ -61,12 +61,12 @@ export function renameArrowColumns<
   TTarget extends arrow.TypeMap,
   TFieldNameMap extends ArrowFieldNameMap<TSource, TTarget>
 >(
-  table: arrow.Table,
+  arrowTable: arrow.Table,
   sourceSchema: arrow.Schema<TSource>,
   targetSchema: arrow.Schema<TTarget>,
   fieldNameMap: TFieldNameMap
 ): arrow.Table<RenamedArrowColumns<TSource, TTarget, TFieldNameMap>> {
-  const validatedTable = validateArrowTableSchema(table, sourceSchema, {
+  const validatedTable = validateArrowTableSchema(arrowTable, sourceSchema, {
     schemaName: 'source Arrow schema before column rename'
   });
   const targetFieldsByName = new Map(targetSchema.fields.map(field => [field.name, field]));

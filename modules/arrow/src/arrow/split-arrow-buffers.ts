@@ -90,15 +90,15 @@ export function splitArrowBuffers<T extends SplitArrowBuffersInput>(
 /**
  * Rebuilds an Arrow table so sliced internal typed-array buffers are split into standalone
  * ArrayBuffers, while whole-buffer typed arrays are reused by default.
- * @param table Arrow table to rebuild without mutating the original table.
+ * @param arrowTable Arrow table to rebuild without mutating the original table.
  * @param options Buffer splitting options.
  * @returns A real Arrow table with transfer-safe internal buffers.
  */
 export function splitArrowTableBuffers<T extends arrow.TypeMap>(
-  table: arrow.Table<T>,
+  arrowTable: arrow.Table<T>,
   options?: SplitArrowBuffersOptions
 ): arrow.Table<T> {
-  return splitArrowBuffers(table, options);
+  return splitArrowBuffers(arrowTable, options);
 }
 
 /**
@@ -130,18 +130,18 @@ function isArrowVector(input: SplitArrowBuffersInput): input is arrow.Vector {
 
 /**
  * Rebuilds an Arrow table by rebuilding each record batch.
- * @param table Arrow table to rebuild.
+ * @param arrowTable Arrow table to rebuild.
  * @param options Buffer splitting options.
  * @returns Rebuilt Arrow table.
  */
 function splitArrowTableBuffersInternal<T extends arrow.TypeMap>(
-  table: arrow.Table<T>,
+  arrowTable: arrow.Table<T>,
   options: SplitArrowBuffersContext
 ): arrow.Table<T> {
-  const recordBatches = table.batches.map(recordBatch =>
+  const recordBatches = arrowTable.batches.map(recordBatch =>
     splitArrowRecordBatchBuffers(recordBatch, options)
   );
-  return new arrow.Table(table.schema, recordBatches);
+  return new arrow.Table(arrowTable.schema, recordBatches);
 }
 
 /**
