@@ -20,7 +20,7 @@ const moved = position.clone().add([4, 0, 0]);
 
 Core classes extend JavaScript `Array`. Most arithmetic methods change the receiver and return it for chaining. Clone an object when you need to preserve its value; otherwise, reuse it. Plain arrays and typed arrays work with APIs that accept numeric array inputs.
 
-Browse [Modules](../modules/README.md) to choose the next building block. Use [Geometry](../modules/geometry/README.md) for meshes and Cartesian queries, [Geospatial](../modules/geospatial/README.md) for ellipsoids and coordinate transformations, [Earth](../modules/earth/README.md) for geoid, sky, and timezone calculations, and [Web Mercator](../modules/web-mercator/README.md) for map cameras. Each module has its own Guide and API sections.
+Browse [Modules](../modules/README.md) to choose the next building block. Use [Geometry](../modules/geometry/README.md) for meshes and Cartesian queries, [Geospatial](../modules/geospatial/README.md) for ellipsoids and coordinate transformations, [Earth](../modules/earth/README.md) for geoid, sky, and timezone calculations, and [Web Mercator](../modules/web-mercator/README.md) for map cameras. For binary data, use [Arrow](../modules/arrow/README.md); for worker execution, use [Tasks](../modules/tasks/README.md). Each module has its own Guide and API sections.
 
 Packages include ES module and CommonJS entry points and their TypeScript declarations. No separate types package is needed. Version 5 declarations require TypeScript 6.0 or later; runtime `Float16Array` support is optional. See [array types](../modules/core/types/api-reference/array-types.md) for detection and fallback helpers. If you are updating an existing application, follow the [v5 upgrade guide](../upgrade-guide.md#upgrading-to-v50).
 
@@ -81,7 +81,7 @@ Measure a minified production build of your application. Installed package size 
 
 Bound input size, nesting, geometry complexity, queue size, and execution time at your application boundary. Numeric validation catches malformed values; it does not make an expensive workload safe to run. Expressions can call registered functions and access their supplied context, so expose only appropriate capabilities. Expression evaluation is not a security sandbox.
 
-Use trusted task implementations, worker scripts, and module URLs. Workers improve responsiveness but run with their environment's privileges; isolate untrusted code in a restricted process or service. Validate messages on both sides, account for transferred or shared buffers, and remember that terminating a worker cannot guarantee cleanup. A timeout cannot interrupt synchronous local work. The [Tasks guide](../modules/core/tasks/README.md) explains execution and ownership.
+Use trusted task implementations, worker scripts, and module URLs. Workers improve responsiveness but run with their environment's privileges; isolate untrusted code in a restricted process or service. Validate messages on both sides, account for transferred or shared buffers, and remember that terminating a worker cannot guarantee cleanup. A timeout cannot interrupt synchronous local work. The [Tasks guide](../modules/tasks/README.md) explains execution and ownership.
 
 Keep dependencies and lockfiles current, review advisories and build changes, and control the origins of downloaded assets. Package manifests and your application's lockfile are the source of truth for runtime and transitive dependencies. Report suspected vulnerabilities privately through the [security policy](https://github.com/visgl/math.gl/security/policy).
 

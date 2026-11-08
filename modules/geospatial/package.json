@@ -48,11 +48,6 @@
       "import": "./dist/projection/index.js",
       "require": "./dist/projection/index.cjs"
     },
-    "./geoarrow": {
-      "types": "./dist/geoarrow/index.d.ts",
-      "import": "./dist/geoarrow/index.js",
-      "require": "./dist/geoarrow/index.cjs"
-    },
     "./crs/projjson.schema.json": "./src/crs/projjson.schema.json",
     "./projection/datums": {
       "types": "./dist/projection/datums.d.ts",
@@ -1024,11 +1019,6 @@
       "types": "./dist/turf.d.ts",
       "import": "./dist/turf.js",
       "require": "./dist/turf.cjs"
-    },
-    "./geoarrow-utils": {
-      "types": "./dist/geoarrow-utils/index.d.ts",
-      "import": "./dist/geoarrow-utils/index.js",
-      "require": "./dist/geoarrow-utils/index.cjs"
     }
   },
   "files": [
@@ -1045,8 +1035,10 @@
   ],
   "dependencies": {
     "@mapbox/martini": "0.2.0",
+    "@math.gl/arrow": "5.0.0-beta.4",
     "@math.gl/core": "5.0.0-beta.4",
     "@math.gl/geometry": "5.0.0-beta.4",
+    "@math.gl/tasks": "5.0.0-beta.4",
     "@math.gl/web-mercator": "5.0.0-beta.4",
     "polygon-clipping": "0.15.7"
   },
@@ -1058,13 +1050,5 @@
     "@turf/distance": "^7.2.0",
     "proj4": "2.22.0"
   },
-  "sideEffects": false,
-  "peerDependencies": {
-    "apache-arrow": ">=17.0.0"
-  },
-  "peerDependenciesMeta": {
-    "apache-arrow": {
-      "optional": true
-    }
-  }
+  "sideEffects": false
 }

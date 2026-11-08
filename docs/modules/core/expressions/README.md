@@ -11,26 +11,7 @@ libraries are exported from `@math.gl/dggs`.
 
 It extracts the expression machinery that has shipped inside `@deck.gl/json` and provides it as a core subpath. Its API remains experimental.
 
-## Feature Card
-
-| Feature | Support | Notes |
-| --- | --- | --- |
-| Expression parsing and evaluation | ✅ | [Parse and evaluate](./api-reference/expression-eval.md) JSEP expressions against an explicit context. |
-| Reusable compiled accessors | ✅ | Synchronous and asynchronous compile/evaluate APIs reuse parsed expressions. |
-| Custom operators and function libraries | ✅ | Isolated [function registries](./api-reference/function-registry.md), custom operators, basic math, and optional geospatial/DGGS libraries. |
-| Restricted property-access expressions | ✅ | [parseExpressionString](./api-reference/parse-expression-string.md) builds accessors with function calls disabled. |
-| Full JavaScript programs and process isolation | ❌ | This is an expression evaluator, not a separate JavaScript runtime or security sandbox; registered functions run application code. |
-| Reactive dependency tracking | ❌ | No incremental dependency graph, automatic invalidation, or reactive recomputation engine. |
-| Shader compilation and automatic differentiation | ❌ | Compilation produces reusable JavaScript evaluators, without a GPU code generator or differentiation backend. |
-
-## Installation
-
-```bash
-npm install @math.gl/core
-```
-
 ## Usage
-
 Evaluate a parsed expression against a data object:
 
 ```js
@@ -94,6 +75,24 @@ import {parseExpressionString} from '@math.gl/core/expressions';
 const getFill = parseExpressionString('style.fill.color');
 const fill = getFill({style: {fill: {color: '#08f'}}});
 // '#08f'
+```
+
+## Features
+
+| Feature | Support | Notes |
+| --- | --- | --- |
+| Expression parsing and evaluation | ✅ | [Parse and evaluate](./api-reference/expression-eval.md) JSEP expressions against an explicit context. |
+| Reusable compiled accessors | ✅ | Synchronous and asynchronous compile/evaluate APIs reuse parsed expressions. |
+| Custom operators and function libraries | ✅ | Isolated [function registries](./api-reference/function-registry.md), custom operators, basic math, and optional geospatial/DGGS libraries. |
+| Restricted property-access expressions | ✅ | [parseExpressionString](./api-reference/parse-expression-string.md) builds accessors with function calls disabled. |
+| Full JavaScript programs and process isolation | ❌ | This is an expression evaluator, not a separate JavaScript runtime or security sandbox; registered functions run application code. |
+| Reactive dependency tracking | ❌ | No incremental dependency graph, automatic invalidation, or reactive recomputation engine. |
+| Shader compilation and automatic differentiation | ❌ | Compilation produces reusable JavaScript evaluators, without a GPU code generator or differentiation backend. |
+
+## Installation
+
+```bash
+npm install @math.gl/core
 ```
 
 ## API Surface

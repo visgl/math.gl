@@ -217,7 +217,7 @@ frozen, allowing it to be shared safely between loaders, caches, renderers, and 
 
 `SpatialReference.crs` is a discriminated union:
 
-| State | Meaning | Has a definition? |
+| State | Description | Has a definition? |
 | --- | --- | --- |
 | `explicit` | A usable definition was supplied directly | Yes |
 | `default` | A format or protocol specification establishes the definition | Yes |

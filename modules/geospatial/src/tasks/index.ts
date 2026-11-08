@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import type {TaskWorker} from '@math.gl/core/tasks';
+import type {TaskWorker} from '@math.gl/tasks';
 import {ProjectCoordinatesTask as projectionTask, PrepareMapTask as mapTask} from './definitions';
 export type {ProjectCoordinatesTypes, PrepareMapTypes} from './definitions';
 declare const __filename: string;

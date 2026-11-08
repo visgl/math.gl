@@ -22,7 +22,23 @@ and the [modern PROJ audit](modern-proj-audit.md) for coverage and remaining gap
 For definitions of surface models, paths, reference systems, and distortion properties,
 see [Geospatial terminology](../developer-guide/terminology.md).
 
-## Feature Card
+## Usage
+
+```typescript
+import { projectionEngine } from "@math.gl/geospatial/projection";
+
+const projection = projectionEngine.createProjection({
+  from: "EPSG:4326",
+  to: "EPSG:3857",
+});
+const meters = projection.project([12, 55]);
+const longitudeLatitude = projection.unproject(meters);
+
+const positions = new Float64Array([12, 55, 13, 56]);
+projection.projectFlat(positions, 2); // transforms the same buffer
+```
+
+## Features
 
 | Feature | Support | Notes |
 | --- | --- | --- |
@@ -54,22 +70,6 @@ Choose a data source to visit Nuna (Columbia), Rodinia and Pangaea.
 
 See [external projection engines](./developer-guide/external-projection-engines.md)
 for proj4js and D3 adapter examples.
-
-## Quick start
-
-```typescript
-import { projectionEngine } from "@math.gl/geospatial/projection";
-
-const projection = projectionEngine.createProjection({
-  from: "EPSG:4326",
-  to: "EPSG:3857",
-});
-const meters = projection.project([12, 55]);
-const longitudeLatitude = projection.unproject(meters);
-
-const positions = new Float64Array([12, 55, 13, 56]);
-projection.projectFlat(positions, 2); // transforms the same buffer
-```
 
 ## Learn about projections
 

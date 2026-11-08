@@ -21,7 +21,7 @@ Solar position, direction, direct/diffuse sunlight and altitude-aware cloud illu
 
 Returns the approximate geometric solar position at an observer's location.
 
-| Parameter | Meaning |
+| Parameter | Description |
 | --- | --- |
 | `timestamp` | Unix milliseconds or a JavaScript `Date`. |
 | `latitude` | Geographic latitude in degrees, north positive. |
@@ -250,7 +250,7 @@ not height above an elevated observer. For geographically distributed clouds,
 compute the Sun altitude separately at each sample's latitude/longitude. Solar
 parallax is neglected. Dawn and dusk use the same geometry; weather can differ.
 
-| Option | Default | Meaning |
+| Option | Default | Description |
 | --- | --- | --- |
 | `cloudAltitude` | 2000 | Meters MSL, [0, 50000] |
 | `pressure` | 1013.25 | Sea-level reference pressure in hPa, [0, 1100]; exponential density already accounts for height |
@@ -271,7 +271,7 @@ Invalid values throw `RangeError`, including when the cloud is Earth-shadowed.
 
 ### Results and renderer integration
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `direct` | Incident beam `{color, intensity}`, before scattering through the rendered segment; includes atmospheric extinction, solar disk visibility and `sunOpticalDepth` |
 | `diffuse` | Approximate hemispherical ambient irradiance `{color, intensity}`; independent of directional Sun occlusion |

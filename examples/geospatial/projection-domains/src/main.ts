@@ -5,7 +5,7 @@
 import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SolidPolygonLayer, PathLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {TaskRunner} from '@math.gl/core/tasks';
+import {TaskRunner} from '@math.gl/tasks';
 import {fixtureColumn, names} from './fixtures.ts';
 import {createProjection} from './projections.ts';
 import type {ProjectionName} from './projections.ts';

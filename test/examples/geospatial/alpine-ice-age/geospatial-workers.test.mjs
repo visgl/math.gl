@@ -5,7 +5,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {MapEngine} from '@math.gl/geospatial/discontinuous';
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
-import {TaskRunner} from '@math.gl/core/tasks';
+import {TaskRunner} from '@math.gl/tasks';
 import {ProjectCoordinatesTask, PrepareMapTask} from '@math.gl/geospatial/tasks';
 const gridTask = {
   id: 'ice-age-grid',

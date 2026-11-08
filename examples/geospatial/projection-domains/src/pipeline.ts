@@ -1,8 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {GeoArrowBuilder, tessellateGeoArrowStream} from '@math.gl/geospatial/geoarrow-utils';
-import type {GeoArrowColumn} from '@math.gl/geospatial/geoarrow-utils';
+import {GeoArrowBuilder, tessellateGeoArrowStream} from '@math.gl/arrow/geoarrow-utils';
+import type {GeoArrowColumn} from '@math.gl/arrow/geoarrow-utils';
 import {createProjection} from './projections.ts';
 import type {ProjectionName} from './projections.ts';
 

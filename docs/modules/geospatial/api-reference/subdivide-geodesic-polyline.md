@@ -24,7 +24,7 @@ is required. The transform may instead call a projection or map to application c
 
 `subdivideGeodesicPolyline(input, options)` accepts packed longitude/latitude(/height) positions.
 
-| Option | Default | Meaning |
+| Option | Default | Description |
 | --- | --- | --- |
 | `transform` | Required | Deterministic source-to-target function returning exactly `targetSize` finite components. Receives a fresh coordinate array. |
 | `tolerance` | Required | Positive finite sampled Euclidean target error, including every target component, in the transform's output units. |

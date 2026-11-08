@@ -21,7 +21,7 @@ The constructor copies caller data. Times must be finite and strictly increasing
 duplicate timestamps are rejected. Values are flat, sample-major, finite numbers
 with exactly `times.length * size` entries. At least one sample is required.
 
-| Option | Default | Meaning |
+| Option | Default | Description |
 | --- | --- | --- |
 | `size` | `1`, or `4` for quaternion tracks | Positive number of components per sample. |
 | `interpolation` | `'linear'` | `'discrete'`, `'linear'`, `'cubic'`, or `'bezier'`. |

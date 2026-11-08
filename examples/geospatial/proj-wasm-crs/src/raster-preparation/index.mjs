@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {TaskRunner} from '@math.gl/core/tasks';
+import {TaskRunner} from '@math.gl/tasks';
 import {createCharts} from './warp/fixtures.mjs';
 import {inspectWarp} from './warp/prepare.mjs';
 import {prepareInverseAsync} from './warp/async.mjs';

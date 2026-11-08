@@ -51,7 +51,7 @@ export async function prepareProjectionGrid(view, context) {
     context.reportProgress?.({phase: 'projection-grid', completed: 1, total: 1, unit: 'tasks'});
     return grids.get(view);
   }
-  const {TaskRunner} = await import('@math.gl/core/tasks');
+  const {TaskRunner} = await import('@math.gl/tasks');
   const {ProjectCoordinatesTask} = await import('@math.gl/geospatial/tasks');
   const positions = sourcePositions(view);
   if (view !== 'globe') {

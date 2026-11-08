@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {TaskRunner} from '@math.gl/core/tasks';
+import {TaskRunner} from '@math.gl/tasks';
 import {MapEngine} from '@math.gl/geospatial/discontinuous';
 import {prepareDiscontinuousGrid, DISCONTINUOUS_VIEWS} from './discontinuous-views.js';
 import {

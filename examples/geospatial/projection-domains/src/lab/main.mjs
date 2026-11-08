@@ -4,7 +4,7 @@
 import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {TaskRunner} from '@math.gl/core/tasks';
+import {TaskRunner} from '@math.gl/tasks';
 import {prepareJob} from './job.mjs';
 import {createCharts} from '../warp/fixtures.mjs';
 import {createPersistentGrid, updatePersistentUV} from './persistent-grid.mjs';

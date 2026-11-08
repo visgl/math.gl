@@ -35,8 +35,8 @@
       "@math.gl/geospatial/projection": [
         "./modules/geospatial/src/projection/index.ts"
       ],
-      "@math.gl/geospatial/geoarrow-utils": [
-        "./modules/geospatial/src/geoarrow-utils/index.ts"
+      "@math.gl/arrow/geoarrow-utils": [
+        "./modules/arrow/src/geoarrow-utils/index.ts"
       ],
       "@math.gl/geospatial/crs/projjson.schema.json": [
         "./modules/geospatial/src/crs/projjson.schema.json"
@@ -698,17 +698,17 @@
       "@math.gl/geospatial/projection/*": [
         "./modules/geospatial/src/projection/*"
       ],
-      "@math.gl/geospatial/wkb/test/*": [
-        "./modules/geospatial/test/wkb/*"
+      "@math.gl/arrow/wkb/test/*": [
+        "./modules/arrow/test/wkb/*"
       ],
-      "@math.gl/geospatial/wkb/*": [
-        "./modules/geospatial/src/wkb/*"
+      "@math.gl/arrow/wkb/*": [
+        "./modules/arrow/src/wkb/*"
       ],
-      "@math.gl/geospatial/geoarrow-utils/test/*": [
-        "./modules/geospatial/test/geoarrow/*"
+      "@math.gl/arrow/geoarrow-utils/test/*": [
+        "./modules/arrow/test/geoarrow/*"
       ],
-      "@math.gl/geospatial/geoarrow-utils/*": [
-        "./modules/geospatial/src/geoarrow-utils/*"
+      "@math.gl/arrow/geoarrow-utils/*": [
+        "./modules/arrow/src/geoarrow-utils/*"
       ],
       "@math.gl/earth/geoid/test/*": [
         "./modules/earth/test/geoid/*"
@@ -751,6 +751,21 @@
       ],
       "@math.gl/geospatial/terrain/*": [
         "./modules/geospatial/src/terrain/*"
+      ],
+      "@math.gl/arrow": [
+        "./modules/arrow/src/index.ts"
+      ],
+      "@math.gl/arrow/*": [
+        "./modules/arrow/src/*"
+      ],
+      "@math.gl/tasks": [
+        "./modules/tasks/src/index.ts"
+      ],
+      "@math.gl/tasks/*": [
+        "./modules/tasks/src/*"
+      ],
+      "@math.gl/tasks/test/*": [
+        "./modules/tasks/test/*"
       ]
     }
   }

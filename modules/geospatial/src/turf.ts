@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {GeoArrowArray, GeoArrowColumn} from './geoarrow-utils/types';
-import {isGeoArrowValueValid} from './geoarrow-utils/layout';
+import type {GeoArrowArray, GeoArrowColumn} from '@math.gl/arrow/geoarrow-utils';
+import {isGeoArrowValueValid} from '@math.gl/arrow/geoarrow-utils';
 import {
   getGeoArrowRowBounds,
   mapGeoArrowCoordinates,
   rewindGeoArrow
-} from './geoarrow-utils/kernels';
+} from '@math.gl/arrow/geoarrow-utils';
 
 /** A nullable, row-aligned numeric or boolean result. Validity is an Arrow bitmap. */
 export type TurfBatchResult<T extends Float64Array | Uint8Array> = {

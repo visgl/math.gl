@@ -66,7 +66,7 @@ Panel indices refer to their positions in the supplied array. Parents may appear
 children. Construction snapshots all supplied vectors and matrices, validates the graph, and
 prepares an iterative traversal. Empty forests are valid.
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `parent` | Parent panel index, or `-1` for a root |
 | `restTransform` | Column-major 4×4 child-local to parent-local transform at angle zero; identity by default |

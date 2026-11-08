@@ -9,9 +9,7 @@ rectangular tile grids, including coalesced row bands, in any coordinate system.
 its types and functions are also exported from `@math.gl/geospatial`, alongside geographic tile queries.
 
 ```typescript
-import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix,
-  validateTileMatrixSet, resolveTileIndex}
-  from '@math.gl/geospatial';
+import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix, validateTileMatrixSet, resolveTileIndex} from '@math.gl/geospatial';
 import type {TileMatrix, TileMatrixSet} from '@math.gl/geospatial';
 
 const matrix: TileMatrix = {
@@ -34,7 +32,7 @@ selectTileMatrix(matrixSet, 3)?.id; // '2m'
 
 `TileMatrix` and `TileMatrixSet` have readonly fields; inputs are never mutated.
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `id` | Opaque string identifier, independent of numeric zoom or array index. |
 | `resolution` | Positive finite X coordinate units per pixel. Also used for Y unless overridden. |

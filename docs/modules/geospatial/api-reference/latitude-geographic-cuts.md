@@ -14,10 +14,7 @@ It adds no runtime dependencies. For oblique ellipsoidal horizons and finite sha
 this latitude-band API.
 
 ```ts
-import {
-  clipGeographicPolygon,
-  subdivideGeographicCutRing
-} from '@math.gl/geospatial';
+import {clipGeographicPolygon, subdivideGeographicCutRing} from '@math.gl/geospatial';
 
 const inputs = [{positions: [-60, -20, 60, -20, 60, 60, -60, 60]}];
 const options = {
@@ -91,7 +88,7 @@ Returns `GeographicCutPolygon[]`. Each
 polygon has explicitly closed `rings`; each ring has packed `positions` and one
 `edges[i]` descriptor for the edge from vertex i to i+1:
 
-| Kind | Meaning |
+| Kind | Description |
 | --- | --- |
 | `source` | Original `source: {ringIndex, edgeIndex, startFraction, endFraction, longitudeShift}`; decreasing fractions represent reversed orientation. |
 | `parallel` | Generated constant `latitude` boundary, not an endpoint geodesic. |

@@ -1,0 +1,65 @@
+{
+  "name": "@math.gl/arrow",
+  "version": "5.0.0-beta.4",
+  "description": "Arrow and GeoArrow binary data utilities",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./utf8": {
+      "types": "./dist/utf8/index.d.ts",
+      "import": "./dist/utf8/index.js",
+      "require": "./dist/utf8/index.cjs"
+    },
+    "./geoarrow": {
+      "types": "./dist/geoarrow/index.d.ts",
+      "import": "./dist/geoarrow/index.js",
+      "require": "./dist/geoarrow/index.cjs"
+    },
+    "./geoarrow-utils": {
+      "types": "./dist/geoarrow-utils/index.d.ts",
+      "import": "./dist/geoarrow-utils/index.js",
+      "require": "./dist/geoarrow-utils/index.cjs"
+    },
+    "./wkb": {
+      "types": "./dist/wkb/index.d.ts",
+      "import": "./dist/wkb/index.js",
+      "require": "./dist/wkb/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "!src/**/README.md",
+    "README.md",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@math.gl/core": "5.0.0-beta.4",
+    "@math.gl/geometry": "5.0.0-beta.4"
+  },
+  "peerDependencies": {
+    "apache-arrow": ">=17.0.0"
+  },
+  "peerDependenciesMeta": {
+    "apache-arrow": {
+      "optional": true
+    }
+  }
+}

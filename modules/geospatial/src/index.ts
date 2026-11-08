@@ -125,123 +125,7 @@ export {
   EPSG3857ToEPSG4326
 } from './web-mercator';
 export type {EPSG3857Options, FitBoundsOptions, DistanceScales} from './web-mercator';
-export {
-  getWellKnownDimensionSize,
-  inferWellKnownGeometryDimension,
-  parseWKB,
-  writeWKB,
-  inspectWKBHeader,
-  scanWKB,
-  visitWKB,
-  WKBBuilder,
-  formatWKT,
-  parseWKT,
-  parseWKTWithMetadata
-} from './wkb/index';
-export type {
-  WellKnownDimension,
-  WellKnownGeometry,
-  WKBParseOptions,
-  WKBParseResult,
-  WKBBounds,
-  WKBDialect,
-  WKBGeometryCounts,
-  WKBGeometryType,
-  WKBHeader,
-  WKBScanResult,
-  WKBTraversalOptions,
-  WKBVisitor,
-  WKBBuilderBaseOptions,
-  WKBBuilderMeasureOptions,
-  WKBBuilderOptions,
-  WKBBuilderWriteOptions,
-  WKBCoordinateTransform,
-  WKBGeometryArray,
-  WKBGeometryWriter,
-  WKTParseOptions,
-  WKTParseResult
-} from './wkb/index';
-export {
-  getGeoArrowDimensionSize,
-  getGeoArrowEncodingForGeometry,
-  getGeoArrowGeometryType,
-  inferGeoArrowGeometryDimension,
-  mergeGeoArrowDimensions,
-  iterateGeoArrowBatches,
-  getGeoArrowRowView,
-  concatenateGeoArrowColumns,
-  getGeoArrowRowCount,
-  getGeoArrowTransferList,
-  getGeoArrowVertexCount,
-  inspectGeoArrowColumn,
-  isGeoArrowValueValid,
-  materializeGeoArrowRows,
-  sliceGeoArrowArray,
-  sliceGeoArrowColumn,
-  validateGeoArrowColumn,
-  visitGeoArrowCoordinates,
-  allocateGeoArrowBuilderTarget,
-  GeoArrowBuilder,
-  makeGeoArrowColumnFromGeometryRows,
-  assertGeoArrowResourceLimits,
-  convertGeoArrowColumn,
-  getGeoArrowBounds,
-  getGeoArrowRowBounds,
-  interleaveGeoArrowCoordinates,
-  mapGeoArrowCoordinates,
-  mapGeoArrowCoordinatesInto,
-  normalizeGeoArrowUnion,
-  rewindGeoArrow,
-  decodeGeoArrowWKB,
-  decodeGeoArrowWKT,
-  encodeGeoArrowWKB,
-  encodeGeoArrowWKT,
-  getGeoArrowWKBVertexCount,
-  tessellateGeoArrowPolygons
-} from './geoarrow-utils/index';
-export type {
-  GeoArrowArray,
-  GeoArrowArrayBase,
-  GeoArrowBox,
-  GeoArrowBounds,
-  GeoArrowColumn,
-  GeoArrowCoordinateLayout,
-  GeoArrowCoordinateMapper,
-  GeoArrowDenseUnion,
-  GeoArrowDenseUnionChild,
-  GeoArrowDimension,
-  GeoArrowEncoding,
-  GeoArrowFixedSizeList,
-  GeoArrowGeometryValue,
-  GeoArrowList,
-  GeoArrowNumericArray,
-  GeoArrowOffsets,
-  GeoArrowPrimitive,
-  GeoArrowSerialized,
-  GeoArrowStruct,
-  GeoArrowValidity,
-  GeoArrowBatchView,
-  GeoArrowRowView,
-  GeoArrowColumnInspection,
-  GeoArrowValidationIssue,
-  GeoArrowValidationResult,
-  GeoArrowBuilderEncoding,
-  GeoArrowBuilderMeasurement,
-  GeoArrowBuilderModeOptions,
-  GeoArrowBuilderOptions,
-  GeoArrowColumnFromRowsOptions,
-  GeoArrowBuilderTarget,
-  ConvertGeoArrowColumnOptions,
-  GeoArrowResourceLimitOptions,
-  GeoArrowRingOrientation,
-  MapGeoArrowCoordinatesOptions,
-  RewindGeoArrowOptions,
-  DecodeGeoArrowWKBOptions,
-  GeoArrowTessellation,
-  TessellateGeoArrowPolygonsOptions
-} from './geoarrow-utils/index';
-export {prepareGeoArrowTransfer} from './geoarrow-utils/worker';
-export type {GeoArrowTransfer} from './geoarrow-utils/worker';
+
 export {GEOSPATIAL_FUNCTION_LIBRARY} from './expressions';
 export {
   createOrthographicCutAtlas,
@@ -409,13 +293,6 @@ export type {
 export {stitchTerrainMeshEdges} from './terrain/mesh-stitch';
 export type {TerrainSeamMesh, TerrainMeshStitchOptions} from './terrain/mesh-stitch';
 
-export {streamGeoArrow, tessellateGeoArrowStream} from './geoarrow-utils/index';
-export type {
-  GeoArrowGeometryStream,
-  StreamGeoArrowOptions,
-  TessellateGeoArrowStreamOptions,
-  GeoArrowStreamMesh
-} from './geoarrow-utils/index';
 export {weldTerrainMixedContourTiles} from './terrain/contour-mixed-weld';
 export type {
   TerrainMixedContourTile,

@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {TaskRunner} from '@math.gl/core/tasks';
+import {TaskRunner} from '@math.gl/tasks';
 import {createProjWasmBatchProcessor, createLatestBatchRunner} from './batch.mjs';
 const consumeTask = {
   id: 'consume-proj-batch',

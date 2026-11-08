@@ -20,6 +20,12 @@
     },
     {
       "path": "../web-mercator"
+    },
+    {
+      "path": "../arrow"
+    },
+    {
+      "path": "../tasks"
     }
   ]
 }

@@ -90,7 +90,7 @@ and the qualified sphere/oblate surface/exterior inverse. Geospatial retains its
 three-radius and interior geometry paths.
 
 ```ts
-import { Ellipsoid } from "@math.gl/geospatial";
+import {Ellipsoid} from '@math.gl/geospatial';
 import { normalizeCRS, ProjectionTransform } from "@math.gl/geospatial/projection/core";
 import { geocentric } from "@math.gl/geospatial/projection/projections/geocent";
 

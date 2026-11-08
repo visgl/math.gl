@@ -22,9 +22,9 @@ import {
   createTerrainVertexTileHalos,
   createTerrainFilteredPyramid,
   createCRSResolver,
-  parseWKB,
   type TerrainGridMesh
 } from '@math.gl/geospatial';
+import {parseWKB} from '@math.gl/arrow/wkb';
 import {
   createTerrainMesh as terrainMesh,
   stitchTerrainContourTiles,
@@ -40,7 +40,7 @@ import {
   type TerrainProfileVisibility,
   type TerrainGridMesh as TerrainMesh
 } from '@math.gl/geospatial/terrain';
-import {prepareGeoArrowTransfer} from '@math.gl/geospatial/geoarrow-utils';
+import {prepareGeoArrowTransfer} from '@math.gl/arrow/geoarrow-utils';
 import {createCRSResolver as crsResolver} from '@math.gl/geospatial/crs';
 import {STAR_CATALOG} from '@math.gl/earth/sun/stars';
 // @ts-expect-error The old terrain leaf is not a published API.

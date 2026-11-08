@@ -42,19 +42,6 @@
         "type": "category",
         "label": "Core",
         "items": [
-          "modules/core/utf8/README",
-          {
-            "type": "category",
-            "label": "Arrow utilities",
-            "items": [
-              "modules/core/arrow/README",
-              "modules/core/arrow/indexed-arrow-table",
-              "modules/core/arrow/mapped-arrow-table",
-              "modules/core/arrow/arrow-schema-utils",
-              "modules/core/arrow/split-arrow-buffers",
-              "modules/core/arrow/arrow-table-transport"
-            ]
-          },
           {
             "type": "category",
             "label": "Guide",
@@ -78,27 +65,7 @@
                   "modules/core/developer-guide/functional-math"
                 ]
               },
-              "modules/core/developer-guide/benchmarks",
-              {
-                "type": "category",
-                "label": "Tasks",
-                "items": [
-                  "modules/core/tasks/developer-guide/task-runner",
-                  "modules/core/tasks/developer-guide/execution",
-                  "modules/core/developer-guide/workers",
-                  "modules/core/tasks/developer-guide/custom-workers",
-                  "modules/core/tasks/developer-guide/persistent-resources",
-                  "modules/core/tasks/developer-guide/shared-memory",
-                  "modules/core/tasks/developer-guide/benchmarks",
-                  "modules/core/tasks/developer-guide/migration"
-                ],
-                "link": {
-                  "type": "generated-index",
-                  "title": "Core Tasks Guide",
-                  "description": "Guides and background for Core: Tasks.",
-                  "slug": "/modules/core/guide/tasks"
-                }
-              }
+              "modules/core/developer-guide/benchmarks"
             ],
             "link": {
               "type": "generated-index",
@@ -146,18 +113,6 @@
             "link": {
               "type": "doc",
               "id": "modules/core/types/README"
-            }
-          },
-          {
-            "type": "category",
-            "label": "@math.gl/core/tasks",
-            "items": [
-              "modules/core/tasks/api-reference/task-runner",
-              "modules/core/tasks/api-reference/runtime"
-            ],
-            "link": {
-              "type": "doc",
-              "id": "modules/core/tasks/README"
             }
           },
           {
@@ -358,12 +313,7 @@
                 "id": "modules/geospatial/crs/developer-guide/raster-mesh-preparation",
                 "label": "Projecting Raster Meshes"
               },
-              "modules/geospatial/terrain/README",
-              {
-                "type": "doc",
-                "id": "modules/geospatial/developer-guide/geoarrow",
-                "label": "GeoArrow"
-              }
+              "modules/geospatial/terrain/README"
             ],
             "link": {
               "type": "generated-index",
@@ -425,22 +375,6 @@
           },
           {
             "type": "category",
-            "label": "@math.gl/geospatial/geoarrow-utils",
-            "items": [
-              "modules/geospatial/geoarrow-utils/api-reference/geoarrow"
-            ],
-            "link": {
-              "type": "doc",
-              "id": "modules/geospatial/geoarrow-utils/README"
-            }
-          },
-          {
-            "type": "doc",
-            "id": "modules/geospatial/geoarrow/README",
-            "label": "@math.gl/geospatial/geoarrow"
-          },
-          {
-            "type": "category",
             "label": "@math.gl/geospatial/projection",
             "items": [
               "modules/geospatial/projection/api-reference/projection",
@@ -456,17 +390,6 @@
             "link": {
               "type": "doc",
               "id": "modules/geospatial/projection/README"
-            }
-          },
-          {
-            "type": "category",
-            "label": "@math.gl/geospatial/wkb",
-            "items": [
-              "modules/geospatial/wkb/api-reference/wkb"
-            ],
-            "link": {
-              "type": "doc",
-              "id": "modules/geospatial/wkb/README"
             }
           }
         ],
@@ -593,6 +516,85 @@
           "type": "doc",
           "id": "modules/web-mercator/README"
         }
+      },
+      {
+        "type": "category",
+        "label": "Arrow",
+        "link": {
+          "type": "doc",
+          "id": "modules/arrow/README"
+        },
+        "items": [
+          "modules/arrow/utf8/README",
+          {
+            "type": "category",
+            "label": "Arrow utilities",
+            "items": [
+              "modules/arrow/indexed-arrow-table",
+              "modules/arrow/mapped-arrow-table",
+              "modules/arrow/arrow-schema-utils",
+              "modules/arrow/split-arrow-buffers",
+              "modules/arrow/arrow-table-transport"
+            ]
+          },
+          "modules/arrow/geoarrow/README",
+          {
+            "type": "category",
+            "label": "GeoArrow utilities",
+            "link": {
+              "type": "doc",
+              "id": "modules/arrow/geoarrow-utils/README"
+            },
+            "items": [
+              "modules/arrow/geoarrow-utils/api-reference/geoarrow",
+              "modules/arrow/developer-guide/geoarrow"
+            ]
+          },
+          {
+            "type": "category",
+            "label": "WKB and WKT",
+            "link": {
+              "type": "doc",
+              "id": "modules/arrow/wkb/README"
+            },
+            "items": [
+              "modules/arrow/wkb/api-reference/wkb"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Tasks",
+        "link": {
+          "type": "doc",
+          "id": "modules/tasks/README"
+        },
+        "items": [
+          {
+            "type": "category",
+            "label": "Guide",
+            "items": [
+              "modules/tasks/developer-guide/task-runner",
+              "modules/tasks/developer-guide/execution",
+              "modules/tasks/developer-guide/workers",
+              "modules/tasks/developer-guide/custom-workers",
+              "modules/tasks/developer-guide/persistent-resources",
+              "modules/tasks/developer-guide/shared-memory",
+              "modules/tasks/developer-guide/wasm",
+              "modules/tasks/developer-guide/benchmarks",
+              "modules/tasks/developer-guide/migration"
+            ]
+          },
+          {
+            "type": "category",
+            "label": "API reference",
+            "items": [
+              "modules/tasks/api-reference/task-runner",
+              "modules/tasks/api-reference/runtime"
+            ]
+          }
+        ]
       }
     ],
     "link": {

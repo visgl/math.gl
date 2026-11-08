@@ -40,21 +40,6 @@
       "types": "./dist/expressions/index.d.ts",
       "import": "./dist/expressions/index.js",
       "require": "./dist/expressions/index.cjs"
-    },
-    "./tasks": {
-      "types": "./dist/tasks/index.d.ts",
-      "import": "./dist/tasks/index.js",
-      "require": "./dist/tasks/index.cjs"
-    },
-    "./utf8": {
-      "types": "./dist/utf8/index.d.ts",
-      "import": "./dist/utf8/index.js",
-      "require": "./dist/utf8/index.cjs"
-    },
-    "./arrow": {
-      "types": "./dist/arrow/index.d.ts",
-      "import": "./dist/arrow/index.js",
-      "require": "./dist/arrow/index.cjs"
     }
   },
   "files": [
@@ -66,28 +51,9 @@
     "LICENSE",
     "THIRD-PARTY-NOTICES.md",
     "ARROW-NOTICE.txt",
-    "APACHE-2.0-LICENSE.txt",
-    "LOADERS-GL-LICENSE.txt"
+    "APACHE-2.0-LICENSE.txt"
   ],
   "sideEffects": [
     "./src/lib/common.js"
-  ],
-  "browser": {
-    "./dist/worker-utils/lib/node/worker_threads.js": "./dist/worker-utils/lib/node/worker_threads-browser.js",
-    "./dist/worker-utils/lib/process-utils/child-process-proxy.js": "./dist/worker-utils/lib/process-utils/child-process-proxy.browser.js",
-    "./src/worker-utils/lib/node/worker_threads.ts": "./src/worker-utils/lib/node/worker_threads-browser.ts",
-    "./src/worker-utils/lib/process-utils/child-process-proxy.ts": "./src/worker-utils/lib/process-utils/child-process-proxy.browser.ts",
-    "child_process": false,
-    "fs": false,
-    "module": false,
-    "path": false
-  },
-  "peerDependencies": {
-    "apache-arrow": ">=17.0.0"
-  },
-  "peerDependenciesMeta": {
-    "apache-arrow": {
-      "optional": true
-    }
-  }
+  ]
 }

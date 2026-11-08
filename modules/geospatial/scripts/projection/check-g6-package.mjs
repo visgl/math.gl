@@ -52,7 +52,7 @@ try {
   const file = join(temp, 'types.ts');
   writeFileSync(
     file,
-    `import {GeodesicIntersections,GeodesicPath,type GeodesicIntersectionPath,type IntersectionPoint} from '@math.gl/geospatial';
+    `import {GeodesicIntersections, GeodesicPath, type GeodesicIntersectionPath, type IntersectionPoint} from '@math.gl/geospatial';
 const axes={semiMajorAxis:1,semiMinorAxis:1.01};
 const g=new GeodesicIntersections(axes);
 const a:GeodesicIntersectionPath={latitude:0,longitude:0,azimuth:90};

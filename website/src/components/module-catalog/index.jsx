@@ -10,7 +10,7 @@ const modules = [
     "Core",
     "core",
     "Vectors, matrices, quaternions, and the foundations of 3D math.",
-    "Transforms · Types · Expressions · Tasks",
+    "Transforms · Types · Expressions",
   ],
   [
     "Geometry",
@@ -22,7 +22,7 @@ const modules = [
     "Geospatial",
     "geospatial",
     "Work with geographic coordinates, reference systems, and map projections.",
-    "CRS · Projections · GeoArrow · WKB · Terrain",
+    "CRS · Projections · Terrain",
   ],
   [
     "Earth",
@@ -42,6 +42,8 @@ const modules = [
     "Project geographic coordinates and control cameras for interactive web maps.",
     "Projection · Viewports · Camera fitting",
   ],
+  ["Arrow", "arrow", "Process binary data and exchange Arrow and GeoArrow representations.", "UTF-8 · Arrow · GeoArrow · WKB/WKT"],
+  ["Tasks", "tasks", "Schedule typed work locally and in browser or Node workers.", "Scheduling · Workers · Streams · State"],
 ];
 
 export default function ModuleCatalog() {

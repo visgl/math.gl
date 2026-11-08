@@ -6,7 +6,16 @@
 
 `@math.gl/core` provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
 
-## Feature Card
+## Usage
+Use `import type` for declarations that add no runtime code:
+
+```typescript
+import type {NumericArray, NumberArray3, Bounds3D} from '@math.gl/core';
+```
+
+`NumberArray` covers JavaScript number arrays; `NumericArray` also includes numeric typed arrays. Sized variants describe fixed component counts. See [array types](./api-reference/array-types.md) and [bounds](./api-reference/bounds.md) for the contracts and runtime helpers.
+
+## Features
 
 | Feature | Support | Notes |
 | --- | --- | --- |
@@ -17,17 +26,6 @@
 | Bounds and spheroid contracts | ✅ | [Bounds2D/3D](./api-reference/bounds.md) and SpheroidParameters describe geometry independently of renderers and CRS engines. |
 | Runtime enforcement of sized declarations | ❌ | Type declarations do not validate buffer length, coordinate units, or physical meaning at runtime. |
 | Bundled Float16 arithmetic polyfill | ❌ | The helpers select/detect storage. They do not supply numeric half-float array semantics when the runtime lacks them. |
-
-## Usage
-
-Use `import type` for declarations that add no runtime code:
-
-```typescript
-import type {NumericArray, NumberArray3, Bounds3D} from '@math.gl/core';
-```
-
-`NumberArray` covers JavaScript number arrays; `NumericArray` also includes numeric typed arrays. Sized variants describe fixed component counts. See [array types](./api-reference/array-types.md) and [bounds](./api-reference/bounds.md) for the contracts and runtime helpers.
-
 
 ## Installation
 

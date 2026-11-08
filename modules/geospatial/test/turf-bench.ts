@@ -4,7 +4,7 @@
 
 // @ts-expect-error probe.gl bench types are not exposed by the package
 import type {Bench} from 'probe.gl/bench';
-import type {GeoArrowColumn} from '@math.gl/geospatial/geoarrow-utils';
+import type {GeoArrowColumn} from '@math.gl/arrow/geoarrow-utils';
 import {bbox, centroid, distance} from '@math.gl/geospatial/turf';
 
 const count = 100_000;

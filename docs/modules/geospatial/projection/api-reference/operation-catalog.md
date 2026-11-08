@@ -78,7 +78,7 @@ registration and execution continue to follow the chosen engine's contracts.
 
 Every candidate requires these fields:
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `id` | Unique operation identifier within this catalogue |
 | `sourceCRS`, `targetCRS` | Exact directed CRS identities agreed by the application |

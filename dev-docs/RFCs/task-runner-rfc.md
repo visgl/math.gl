@@ -5,12 +5,12 @@
 - **Baseline**: math.gl `master`, commit `ad2a3917c`
 
 > An experimental implementation accompanies this RFC. Its
-> [API reference](../../docs/modules/core/tasks/api-reference/task-runner.md#prototype-boundaries)
+> [API reference](../../docs/modules/tasks/api-reference/task-runner.md#prototype-boundaries)
 > distinguishes implemented behavior from the complete proposal below.
 
 ## Summary
 
-Introduce a curated `@math.gl/core/tasks` API built around plain typed `Task`
+Introduce a curated `@math.gl/tasks` API built around plain typed `Task`
 objects and an explicitly owned `TaskRunner`. A task can implement atomic
 processing, streaming processing, and optional initialization and destruction.
 Inputs, outputs, initialization data, and individual stream batches have named
@@ -21,7 +21,7 @@ Applications may call `initializeTask` to keep state across multiple operations.
 Worker reuse and task-state reuse are separate concepts. The implementation now
 provides global `preloadTasks` and optional nested `task.preload()` hooks for code-only warmup,
 and `runTaskSync` for immediate local execution of synchronous hooks. See the
-[implemented method reference](../../docs/modules/core/tasks/api-reference/task-runner.md)
+[implemented method reference](../../docs/modules/tasks/api-reference/task-runner.md)
 for their contracts; neither restores the removed pool API.
 
 ```ts
@@ -249,7 +249,7 @@ before consuming inputs. There is no implicit atomic-to-streaming conversion.
 
 ```ts
 // lookup-worker.ts
-import {initializeTaskWorker} from '@math.gl/core/tasks';
+import {initializeTaskWorker} from '@math.gl/tasks';
 import {lookupTask} from './lookup-task';
 
 await initializeTaskWorker(lookupTask);
@@ -663,7 +663,7 @@ Migration must call out behavior changes, not just renames:
 
 Status: implemented public-surface cleanup in this PR. Legacy package entries and
 exports are removed, repository consumers use the new API, and packed-package
-checks enforce the boundary. The [migration guide](../../docs/modules/core/tasks/developer-guide/migration.md)
+checks enforce the boundary. The [migration guide](../../docs/modules/tasks/developer-guide/migration.md)
 records intentional capability removals; future features below remain proposals. The goal is one public task
 execution API, with import/type failures forcing applications to migrate when they
 upgrade to the breaking release. Applications pinned to an older release are
@@ -679,12 +679,12 @@ available through two import paths.
 | --- | --- | --- |
 | Top-level `runTask`, `runTaskInBatches` | Remove exports and wrapper implementation | `runner.runTask`, `runner.runTasks` |
 | `TaskDescriptor`, `TaskOptions`, `TaskExecution`, `MainThreadPolicy` | Remove old type family | `Task<Types>` and runner request types; explicit execution selection |
-| `export * from '@math.gl/core/worker-utils'` in tasks | Delete wildcard | Explicit curated task exports only |
+| `export * from '@math.gl/tasks/worker-utils'` in tasks | Delete wildcard | Explicit curated task exports only |
 | `processOnWorker`, `processOnWorkerInBatches` | Remove public access | Runner methods with `execution: 'worker'` |
 | `createWorker`, `createResourceWorker` | Remove public access | `initializeTaskWorker` and lifecycle hooks |
 | `createWorkerResource`, `WorkerResource` | Remove public access | `runner.initializeTask` and its inferred handle |
 | `WorkerFarm`, `WorkerPool`, `WorkerThread`, `WorkerJob`, `WorkerBody`, protocol types | Make implementation details private | Runner ownership, controls, and task context |
-| `@math.gl/core/worker-utils` package subpath | Remove from package exports | `@math.gl/core/tasks` |
+| `@math.gl/tasks/worker-utils` package subpath | Remove from package exports | `@math.gl/tasks` |
 | `MapSetupWorker`, `setupMapInWorker` | Remove | `PrepareMapTask`; result becomes `{map}` |
 | `BulkProjectionWorker`, `projectBulkInWorker` | Remove | `ProjectCoordinatesTask`; result becomes `{coordinates}` |
 | `@math.gl/geospatial/workers`, `/workers/operations` | Remove public subpaths | `@math.gl/geospatial/tasks` |

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Adapted from visgl/deck.gl PR #10966 (MIT); rings use D3 spherical winding here.
-import {GeoArrowBuilder} from '@math.gl/geospatial/geoarrow-utils';
+import {GeoArrowBuilder} from '@math.gl/arrow/geoarrow-utils';
 export const names = ['Antimeridian', 'Polygon with hole', 'South pole'];
 export function fixtureColumn() {
   return GeoArrowBuilder.build(

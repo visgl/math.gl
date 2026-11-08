@@ -48,7 +48,7 @@ This is a single-projection mathematical interface; normal CRS transformations c
 
 Fills a caller-owned `ProjectionJacobian`, created with `createProjectionJacobian()`:
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `dxDLongitude`, `dyDLongitude` | Partial derivatives along longitude |
 | `dxDLatitude`, `dyDLatitude` | Partial derivatives along latitude |
@@ -57,7 +57,7 @@ Fills a caller-owned `ProjectionJacobian`, created with `createProjectionJacobia
 
 Fills a caller-owned `ProjectionFactors`, created with `createProjectionFactors()`. It includes the Jacobian and:
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `meridionalScale`, `parallelScale` | Projected length divided by the ellipsoid's local north/east distance |
 | `arealScale` | Signed local area determinant; a negative value indicates reflected orientation |

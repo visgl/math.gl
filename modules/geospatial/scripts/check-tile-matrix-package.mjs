@@ -60,10 +60,8 @@ ${assertions}`
   await writeFile(
     join(temporaryDirectory, 'consumer.ts'),
     `
-import {getTileBounds, getTileIndex, getTileRange, getTileRanges, selectTileMatrix, validateTileMatrixSet, validateTileMatrixLimits, resolveTileIndex}
-  from '@math.gl/geospatial';
-import type {TileMatrix, TileMatrixSet, TileMatrixBounds, TileMatrixLimits, VariableMatrixWidth, TileMatrixRowRange, TileMatrixSetLimits}
-  from '@math.gl/geospatial';
+import {getTileBounds, getTileIndex, getTileRange, getTileRanges, selectTileMatrix, validateTileMatrixSet, validateTileMatrixLimits, resolveTileIndex} from '@math.gl/geospatial';
+import type {TileMatrix, TileMatrixSet, TileMatrixBounds, TileMatrixLimits, VariableMatrixWidth, TileMatrixRowRange, TileMatrixSetLimits} from '@math.gl/geospatial';
 const matrix: TileMatrix = {id: '0', resolution: 1, resolutionY: 2, origin: [0, 0],
   cornerOfOrigin: 'topLeft', tileSize: [256, 256], matrixSize: [2, 2]};
 const matrixSet: TileMatrixSet = {crs: 'local', matrices: [matrix]};

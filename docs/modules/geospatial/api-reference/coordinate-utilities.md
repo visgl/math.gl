@@ -7,10 +7,7 @@ vertical transformation. Angles are degrees, latitude precedes longitude, and
 projected distances are metres.
 
 ```ts
-import {
-  projectGrid, unprojectGrid, transferGrid, formatMGRS, parseMGRS,
-  parseGeographicCoordinates, formatGeographicCoordinates
-} from '@math.gl/geospatial';
+import {projectGrid, unprojectGrid, transferGrid, formatMGRS, parseMGRS, parseGeographicCoordinates, formatGeographicCoordinates} from '@math.gl/geospatial';
 
 const point = parseGeographicCoordinates('48°51′29.52″N, 2°17′40.20″E');
 const grid = projectGrid(point.latitude, point.longitude);

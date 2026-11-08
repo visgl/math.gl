@@ -18,7 +18,7 @@ import {PrismGeometry} from '@math.gl/geometry';
 const hexagon = new PrismGeometry({radius: 0.6, height: 1.5, sides: 6});
 ```
 
-| Property | Default | Meaning |
+| Property | Default | Description |
 | --- | --- | --- |
 | `radius` | `1` | Positive distance from the axis to a polygon corner. |
 | `height` | `1` | Positive total height; caps lie at ±height/2. |

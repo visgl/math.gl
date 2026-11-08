@@ -13,7 +13,19 @@ median-split BVH with typed-array storage, retaining original row/triangle indic
 construction reorders leaves. Inputs are copied. Empty indexes are supported. Bounding contact
 counts as overlap, distances are Euclidean input-coordinate units, and ties select the lowest row.
 
-## Feature Card
+## Usage
+
+```ts
+import {BoxIndex, PointIndex, TriangleBVH} from '@math.gl/geometry';
+
+const boxes = new BoxIndex({dimension: 2, bounds: [0, 0, 1, 1, 4, 4, 5, 5]});
+boxes.search([0, 0], [2, 2]); // [0]
+boxes.nearest([3, 3]); // {index: 1, distance: Math.sqrt(2)}
+const points = new PointIndex({dimension: 3, positions: [0, 0, 0, 1, 2, 3]});
+points.nearest([1, 2, 4]); // {index: 1, distance: 1}
+```
+
+## Features
 
 | Feature | Support | Notes |
 | --- | --- | --- |
@@ -26,18 +38,6 @@ counts as overlap, distances are Euclidean input-coordinate units, and ties sele
 | SAH construction and k-nearest search | ❌ | The [POC limits](#poc-limits) retain median-split construction and defer SAH/k-nearest APIs. |
 | Packed index persistence and continuation cursors | ❌ | No public serialized-index restoration or resumable query cursor. Work budgets are not memory/time guarantees. |
 | Geodesic/ellipsoidal nearest-neighbor indexing | ❌ | Queries use Cartesian Euclidean geometry, not geographic surface distance. |
-
-## Usage
-
-```ts
-import {BoxIndex, PointIndex, TriangleBVH} from '@math.gl/geometry';
-
-const boxes = new BoxIndex({dimension: 2, bounds: [0, 0, 1, 1, 4, 4, 5, 5]});
-boxes.search([0, 0], [2, 2]); // [0]
-boxes.nearest([3, 3]); // {index: 1, distance: Math.sqrt(2)}
-const points = new PointIndex({dimension: 3, positions: [0, 0, 0, 1, 2, 3]});
-points.nearest([1, 2, 4]); // {index: 1, distance: 1}
-```
 
 ## BoxIndex and PointIndex
 

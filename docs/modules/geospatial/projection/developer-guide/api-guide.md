@@ -396,7 +396,7 @@ or numerically unresolved; invalid nonpositive computed scales raise an error.
 
 ## Keep coverage, rendering bounds and analysis domains distinct
 
-| Concept | Coordinates | Meaning |
+| Concept | Coordinates | Description |
 | --- | --- | --- |
 | `CRSMetadata.areaOfUse` | Greenwich longitude/latitude degrees | Geographic coverage declared by the CRS definition. |
 | `CRSDescriptor.renderingBounds` | Effective target coordinates | A finite XYZ envelope enclosing the selected rendering reference surface; consumers select axes from the effective axis order. It is neither an altitude range nor a conversion-validity test. |

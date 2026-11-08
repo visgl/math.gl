@@ -16,7 +16,7 @@ import {
   sourceUV
 } from '../../../../../examples/geospatial/projection-domains/src/raster.ts';
 import type {RasterKind} from '../../../../../examples/geospatial/projection-domains/src/raster.ts';
-import {getGeoArrowTransferList} from '@math.gl/geospatial/geoarrow-utils';
+import {getGeoArrowTransferList} from '@math.gl/arrow/geoarrow-utils';
 
 test('clipping interpolates target positions at texture boundaries', () => {
   const clipped = clipToImage([

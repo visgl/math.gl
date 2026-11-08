@@ -168,7 +168,7 @@ delete config.onBrokenMarkdownLinks;
 module.exports = config;
 
 // Exact aliases cover every consolidated public entrypoint, including nested subpaths.
-for (const name of ['core', 'geometry', 'geospatial', 'earth', 'dggs', 'web-mercator']) {
+for (const name of ['arrow', 'core', 'geometry', 'geospatial', 'earth', 'dggs', 'web-mercator', 'tasks']) {
   const pkg = require('../modules/' + name + '/package.json');
   delete aliases[pkg.name];
   for (const [subpath, entry] of Object.entries(pkg.exports)) {

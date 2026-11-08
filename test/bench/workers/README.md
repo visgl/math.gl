@@ -45,7 +45,7 @@ ownership; all transfer tests transfer input and output buffers. These workloads
 compare useful primitives, not feature-equivalent schedulers or production tuning.
 
 Browser correctness and lifecycle coverage is in
-`modules/core/test/tasks/task-runner.spec.ts`, including actual workers,
+`modules/tasks/test/tasks/task-runner.spec.ts`, including actual workers,
 cancellation, streaming, ownership, and retained state. Node throughput measurements
 must not be presented as browser performance results.
 

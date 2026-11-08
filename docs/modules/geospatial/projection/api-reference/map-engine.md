@@ -268,7 +268,7 @@ Construction does not perform network requests or allocate a renderer.
 
 <span class="badge">From v5.0 · Experimental</span>
 
-| Property | Meaning |
+| Property | Description |
 | --- | --- |
 | `description` | Frozen input snapshot |
 | `regions` | Compiled `MapRegion` array with explicit placements |
@@ -517,7 +517,7 @@ is synchronous; callers may batch features or run an engine in a worker.
 
 Returns `PreparedMapGeometry`, a versioned, structured-cloneable object:
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `version` | Buffer contract version, currently 1 |
 | `mapId` | Description ID for diagnostics; not a cache key or equivalence guarantee |
