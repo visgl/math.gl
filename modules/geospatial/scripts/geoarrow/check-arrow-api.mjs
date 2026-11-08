@@ -27,6 +27,21 @@ try {
       logLevel: 'silent'
     });
     assert.ok(Object.keys(result.metafile.inputs).every(path => !path.includes('@loaders.gl')));
+    // Browser resolution must remain usable without Node globals or polyfills.
+    const browserBundle = await build({
+      entryPoints: [join(root, 'modules/geospatial/src/geoarrow/index.ts')],
+      bundle: true,
+      platform: 'browser',
+      format: 'esm',
+      write: false,
+      metafile: true,
+      alias: {'apache-arrow': name},
+      logLevel: 'silent'
+    });
+    assert.doesNotMatch(browserBundle.outputFiles[0].text, /\bBuffer\b/, 'Browser output must not use Node Buffer');
+    assert.ok(Object.keys(browserBundle.metafile.inputs).every(path =>
+      !/(?:^|\/)node_modules\/(?:buffer|process|stream-browserify|path-browserify|util)\//.test(path)
+    ), 'Browser output must not include Node polyfill packages');
     require(output).checkGeoArrowConformance();
     console.log(`GeoArrow adapter: Arrow ${version} passed`);
   }

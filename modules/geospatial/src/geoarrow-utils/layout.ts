@@ -715,7 +715,11 @@ function validateColumnLayout(column: GeoArrowColumn, issues: GeoArrowValidation
     }
     return;
   }
-  if (!column.coordinateLayout) {
+  if (
+    !column.coordinateLayout &&
+    column.encoding !== 'geoarrow.geometry' &&
+    column.encoding !== 'geoarrow.geometrycollection'
+  ) {
     addInvalidLayout('coordinateLayout', 'Native geometry requires a coordinate layout.', issues);
     return;
   }
@@ -791,6 +795,10 @@ function validateCoordinateLayout(
   path: string,
   issues: GeoArrowValidationIssue[]
 ): void {
+  if (!column.coordinateLayout) {
+    addInvalidLayout(path, 'Native geometry requires a coordinate layout.', issues);
+    return;
+  }
   const dimensionSize = getGeoArrowDimensionSize(column.dimension);
   if (column.coordinateLayout === 'interleaved') {
     if (

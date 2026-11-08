@@ -316,6 +316,7 @@ test('GeoArrow mixed coordinate layouts stay distinct through mapping', () => {
   ]);
   const field = makeField(type, 'geoarrow.geometry');
   expect(getGeoArrowFieldInfo(field)!.coordinateLayout).toBeNull();
+  expect(inspectGeoArrowVector(vector, {field}).valid).toBe(true);
   const moved = mapGeoArrowCoordinates(vector, ([x, y]) => [x! + 10, y! + 20], {field});
   expect(getGeoArrowBounds(moved, {field})).toEqual([11, 22, 15, 26]);
   expect(arrow.DataType.isStruct(moved.type.children[1]!.type.children[0]!.type)).toBe(true);

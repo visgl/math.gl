@@ -194,9 +194,7 @@ export class IndexedArrowTable<T extends arrow.TypeMap> {
     for (const field of this.schema.fields) {
       const columnName = field.name as keyof T & string;
       const childVector = getCachedRawChildVector(this.table, columnName);
-      mutableTemporaryRow[columnName] = childVector
-        ? (childVector.get(rawIndex) ?? undefined)
-        : undefined;
+      mutableTemporaryRow[columnName] = childVector ? childVector.get(rawIndex) : undefined;
     }
 
     return temporaryRow;
