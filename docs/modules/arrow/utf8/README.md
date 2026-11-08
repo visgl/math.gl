@@ -57,6 +57,11 @@ both the index vector and its dictionary.
 
 ## Functions
 
+Scalar parsers trim surrounding ASCII space, tab, line feed, vertical tab, form feed, and
+carriage return. Unicode whitespace is not trimmed. Parsing consumes the entire
+trimmed range: empty ranges, trailing junk, and invalid syntax return `undefined`.
+Their accepted grammars are ASCII-only; they do not validate UTF-8 well-formedness.
+
 ### compareUTF8
 
 ```typescript
@@ -83,26 +88,17 @@ Comparison does not decode or validate UTF-8, normalize Unicode, or apply locale
 collation. Byte order for well-formed UTF-8 follows Unicode scalar-value order,
 which can differ from JavaScript UTF-16 string ordering.
 
-**Scalar parser parameters**
+### parseUTF8Number
 
-All three parsers accept the same parameters:
+```typescript
+parseUTF8Number(bytes, firstByte, endByte): number | undefined
+```
 
 | Parameter | Type | Description |
 | --- | --- | --- |
 | `bytes` | `Uint8Array` | Buffer containing the value. |
 | `firstByte` | `number` | Inclusive start byte offset. |
 | `endByte` | `number` | Exclusive end byte offset. |
-
-They trim surrounding ASCII space, tab, line feed, vertical tab, form feed, and
-carriage return. Unicode whitespace is not trimmed. Parsing consumes the entire
-trimmed range: empty ranges, trailing junk, and invalid syntax return `undefined`.
-Their accepted grammars are ASCII-only; they do not validate UTF-8 well-formedness.
-
-### parseUTF8Number
-
-```typescript
-parseUTF8Number(bytes, firstByte, endByte): number | undefined
-```
 
 Parses decimal numbers with an optional `+` or `-` sign, an optional decimal point,
 and an optional `e` or `E` exponent with its own optional sign. At least one digit
@@ -124,6 +120,12 @@ Use `parseUTF8BigInt` for exact base-10 integers.
 parseUTF8BigInt(bytes, firstByte, endByte): bigint | undefined
 ```
 
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `bytes` | `Uint8Array` | Buffer containing the value. |
+| `firstByte` | `number` | Inclusive start byte offset. |
+| `endByte` | `number` | Exclusive end byte offset. |
+
 Parses base-10 integers with an optional `+` or `-` sign. Digits are accumulated as
 `bigint`, preserving integers beyond the safe JavaScript number range. Decimal
 points, exponents, hexadecimal prefixes, and separators are not accepted.
@@ -133,6 +135,12 @@ points, exponents, hexadecimal prefixes, and separators are not accepted.
 ```typescript
 parseUTF8Boolean(bytes, firstByte, endByte): boolean | undefined
 ```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `bytes` | `Uint8Array` | Buffer containing the value. |
+| `firstByte` | `number` | Inclusive start byte offset. |
+| `endByte` | `number` | Exclusive end byte offset. |
 
 Parses case-insensitive `true` and `false`. Other values, including `0`, `1`,
 `yes`, and prefixes such as `trues`, return `undefined`.
