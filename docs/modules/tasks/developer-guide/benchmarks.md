@@ -1,6 +1,10 @@
 # Measuring task execution
 
-Build the packages, then run the correctness-checked benchmark:
+Measure the whole operation before tuning worker count or buffer ownership.
+Startup and copying can dominate small calls; reusing setup can matter more for
+repeated work. Compare the same input and lifetime on the same device.
+
+To measure the repository's task examples, build the packages and run the harness:
 
 ```sh
 yarn build

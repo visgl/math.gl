@@ -574,11 +574,14 @@
           {
             "type": "category",
             "label": "Guide",
+            "link": {
+              "type": "doc",
+              "id": "modules/tasks/developer-guide/task-runner"
+            },
             "items": [
-              "modules/tasks/developer-guide/task-runner",
-              "modules/tasks/developer-guide/execution",
               "modules/tasks/developer-guide/workers",
               "modules/tasks/developer-guide/custom-workers",
+              "modules/tasks/developer-guide/execution",
               "modules/tasks/developer-guide/persistent-resources",
               "modules/tasks/developer-guide/shared-memory",
               "modules/tasks/developer-guide/wasm",

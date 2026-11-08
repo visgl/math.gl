@@ -1,7 +1,8 @@
 # `TaskRunner` API
 
-The public execution API in `@math.gl/tasks`. Start with the [get-started guide](../developer-guide/task-runner.md).
-This reference lists implemented controls only; see the RFC for proposed extensions.
+Use `TaskRunner` to run a task, await its result, and manage its workers and setup.
+Start with the [getting-started guide](../developer-guide/task-runner.md) for examples;
+this page provides exact signatures, defaults, and lifecycle rules.
 
 ## `TaskRunner`
 
@@ -30,19 +31,19 @@ Returns `Output`. Immediate main-thread execution of synchronous hooks.
 
 #### `runTask(task, input, request?)`
 
-Returns `Promise<Output>`. Temporary state for one atomic call.
+Returns `Promise<Output>`. Run one input and return one result, with automatic setup and cleanup.
 
 #### `runTasks(task, inputs, request?)`
 
-Returns `AsyncIterable<Output>`. Independent calls, ordered output, per-slot state.
+Returns `AsyncIterable<Output>`. Process independent inputs and yield results in input order. Each used slot reuses its own setup.
 
 #### `runTaskInBatches(task, inputs, request?)`
 
-Returns `AsyncIterable<BatchOutput>`. One streaming processor session.
+Returns `AsyncIterable<BatchOutput>`. Process a stream of inputs in one session and yield result batches.
 
 #### `initializeTask(task, initialization, controls?)`
 
-Returns `Promise<InitializedTask>`. State retained until close/termination.
+Returns `Promise<InitializedTask>`. Prepare a task once and return a handle that reuses its state until closed or terminated.
 
 #### `close()`
 
@@ -51,7 +52,6 @@ Returns `Promise<void>`. Reject waiting acquisitions, drain owned handles, destr
 #### `terminate(reason?)`
 
 Returns `Promise<void>`. Abort handles and force-stop workers; local execution must settle.
-
 
 `request` becomes required when the descriptor requires application options or
 initialization. Options are inferred from the invoked hook: `process` for atomic
@@ -260,11 +260,16 @@ Worker capability declarations must match the supplied implementation; protocol
 negotiation is deferred. Set `worker.url` to a compiled module URL or
 `worker.create` to a fresh browser Worker factory, but not both.
 
-## Prototype boundaries
+## Limits
 
-Not implemented: runner byte budgets, admission reservations, priority, metrics,
-shutdown deadlines, retained worker pools across automatic calls, adaptive routing, and
-cooperative worker cancellation. The old worker-utils entry is removed; see [migration](../developer-guide/migration.md)
-for application-level alternatives and intentional removals. Do not pass RFC-only fields to this prototype. See the
-[design RFC](https://github.com/visgl/math.gl/blob/master/dev-docs/RFCs/task-runner-rfc.md)
-for the complete distinction.
+Concurrency limits active work, not the bytes retained by queued inputs. Applications
+manage queue byte budgets, admission rules, priorities, timing metrics, and shutdown
+deadlines. The runner does not choose execution based on input size.
+
+Automatic calls do not retain a worker pool. Use initialized handles to keep workers
+and setup alive. Worker cancellation terminates the worker rather than asking it to
+stop cooperatively.
+
+The [migration guide](../developer-guide/migration.md) covers replacements for older
+controls. The [design RFC](https://github.com/visgl/math.gl/blob/master/dev-docs/RFCs/task-runner-rfc.md)
+provides background and proposals beyond the current API.
