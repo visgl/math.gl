@@ -6,7 +6,19 @@
 
 <!-- -->
 
-## Feature Card[​](#feature-card "Direct link to Feature Card")
+## Usage[​](#usage "Direct link to Usage")
+
+```
+import {earcut} from '@math.gl/geometry';
+
+
+
+const positions = [0, 0, 1, 0, 1, 1, 0, 1];
+
+const indices = earcut(positions, [], 2); // Two triangles
+```
+
+## Features[​](#features "Direct link to Features")
 
 | Feature                                          | Support | Notes                                                                                                                                                                                                                                                                       |
 | ------------------------------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -32,18 +44,6 @@ Loading <!-- -->Polygon playground<!-- -->…
 
 ```
 npm install @math.gl/geometry
-```
-
-## Usage[​](#usage "Direct link to Usage")
-
-```
-import {earcut} from '@math.gl/geometry';
-
-
-
-const positions = [0, 0, 1, 0, 1, 1, 0, 1];
-
-const indices = earcut(positions, [], 2); // Two triangles
 ```
 
 ## Projection-aware subdivision[​](#projection-aware-subdivision "Direct link to Projection-aware subdivision")

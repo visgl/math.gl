@@ -8,33 +8,7 @@ The [Coordinate Reference Systems developer guide](https://visgl.github.io/math.
 
 For definitions of surface models, paths, reference systems, and distortion properties, see [Geospatial terminology](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/terminology.md).
 
-## Feature Card[​](#feature-card "Direct link to Feature Card")
-
-| Feature                                              | Support | Notes                                                                                                                                                                                                                        |
-| ---------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Typed PROJJSON CRS definitions                       | ✅      | Strict PROJJSON v0.7 types describe geographic, projected, compound and other supported CRS object shapes.                                                                                                                   |
-| WKT1/WKT2 syntax round trips                         | ✅      | Ordered syntax ASTs preserve unknown nodes, delimiters, duplicates and numeric lexemes; optional profile validation is separate.                                                                                             |
-| PROJ strings and pipeline syntax                     | ✅      | Ordered syntax parsing/encoding retains steps and duplicate parameters; successful parsing does not execute an operation.                                                                                                    |
-| Spatial-reference provenance and epochs              | ✅      | [SpatialReference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/spatial-reference.md) distinguishes explicit/default/unknown/missing CRS state and retains coordinate epochs. |
-| Prepared converter descriptors and target domains    | ✅      | [createCRSDescriptor](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/crs-descriptor.md) assembles external converters and explicit rendering/domain policy.                     |
-| Asynchronous CRS resolution                          | ✅      | [Application-owned catalogues/providers](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/resolver.md) resolve definitions without a mandatory projection backend.                |
-| Universal semantic conversion between serializations | ◐       | WKT/PROJ syntax models preserve syntax; they do not promise lossless universal conversion into canonical PROJJSON semantics.                                                                                                 |
-| Bundled comprehensive authority database             | ❌      | No complete built-in EPSG database or implicit catalogue/grid downloads. Applications supply resolution resources.                                                                                                           |
-| Coordinate transformation execution                  | ❌      | Use a [projection engine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) or an external converter; metadata/codec acceptance does not establish executable support.                |
-
-## Prepared descriptors[​](#prepared-descriptors "Direct link to Prepared descriptors")
-
-Use [`createCRSDescriptor`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/crs-descriptor.md) from `@math.gl/geospatial/crs` to assemble metadata, prepared external converters and rendering policy without importing a projection engine. Descriptor and converter types are exported from the same entry point. The builder is also available from `@math.gl/geospatial`.
-
-## Installation[​](#installation "Direct link to Installation")
-
-```
-npm install @math.gl/geospatial
-```
-
-## Definition model[​](#definition-model "Direct link to Definition model")
-
-`CRSDefinition` accepts either a string serialization or a strict PROJJSON CRS object:
+## Usage[​](#usage "Direct link to Usage")
 
 ```
 import type {CRSDefinition, PROJJSONCRS} from '@math.gl/geospatial/crs';
@@ -73,6 +47,34 @@ const projjson: PROJJSONCRS = {
 
 };
 ```
+
+## Features[​](#features "Direct link to Features")
+
+| Feature                                              | Support | Notes                                                                                                                                                                                                                        |
+| ---------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Typed PROJJSON CRS definitions                       | ✅      | Strict PROJJSON v0.7 types describe geographic, projected, compound and other supported CRS object shapes.                                                                                                                   |
+| WKT1/WKT2 syntax round trips                         | ✅      | Ordered syntax ASTs preserve unknown nodes, delimiters, duplicates and numeric lexemes; optional profile validation is separate.                                                                                             |
+| PROJ strings and pipeline syntax                     | ✅      | Ordered syntax parsing/encoding retains steps and duplicate parameters; successful parsing does not execute an operation.                                                                                                    |
+| Spatial-reference provenance and epochs              | ✅      | [SpatialReference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/spatial-reference.md) distinguishes explicit/default/unknown/missing CRS state and retains coordinate epochs. |
+| Prepared converter descriptors and target domains    | ✅      | [createCRSDescriptor](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/crs-descriptor.md) assembles external converters and explicit rendering/domain policy.                     |
+| Asynchronous CRS resolution                          | ✅      | [Application-owned catalogues/providers](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/resolver.md) resolve definitions without a mandatory projection backend.                |
+| Universal semantic conversion between serializations | ◐       | WKT/PROJ syntax models preserve syntax; they do not promise lossless universal conversion into canonical PROJJSON semantics.                                                                                                 |
+| Bundled comprehensive authority database             | ❌      | No complete built-in EPSG database or implicit catalogue/grid downloads. Applications supply resolution resources.                                                                                                           |
+| Coordinate transformation execution                  | ❌      | Use a [projection engine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) or an external converter; metadata/codec acceptance does not establish executable support.                |
+
+## Prepared descriptors[​](#prepared-descriptors "Direct link to Prepared descriptors")
+
+Use [`createCRSDescriptor`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/crs-descriptor.md) from `@math.gl/geospatial/crs` to assemble metadata, prepared external converters and rendering policy without importing a projection engine. Descriptor and converter types are exported from the same entry point. The builder is also available from `@math.gl/geospatial`.
+
+## Installation[​](#installation "Direct link to Installation")
+
+```
+npm install @math.gl/geospatial
+```
+
+## Definition model[​](#definition-model "Direct link to Definition model")
+
+`CRSDefinition` accepts either a string serialization or a strict PROJJSON CRS object:
 
 The string aliases (`CRSIdentifier`, `WKTCRSDefinition`, and `PROJStringDefinition`) document intent but are all structurally `string`. Call the appropriate parser when syntax needs to be inspected or validated.
 

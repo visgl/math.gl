@@ -358,7 +358,7 @@ Both APIs share fourth-order numerical differentiation and step/half-step agreem
 
 ## Keep coverage, rendering bounds and analysis domains distinct[​](#keep-coverage-rendering-bounds-and-analysis-domains-distinct "Direct link to Keep coverage, rendering bounds and analysis domains distinct")
 
-| Concept                         | Coordinates                                              | Meaning                                                                                                                                                                                        |
+| Concept                         | Coordinates                                              | Description                                                                                                                                                                                    |
 | ------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `CRSMetadata.areaOfUse`         | Greenwich longitude/latitude degrees                     | Geographic coverage declared by the CRS definition.                                                                                                                                            |
 | `CRSDescriptor.renderingBounds` | Effective target coordinates                             | A finite XYZ envelope enclosing the selected rendering reference surface; consumers select axes from the effective axis order. It is neither an altitude range nor a conversion-validity test. |

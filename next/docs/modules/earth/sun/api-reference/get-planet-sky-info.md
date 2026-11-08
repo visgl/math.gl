@@ -45,7 +45,7 @@ The result lists seven planets in order from Mercury to Neptune, followed by the
 
 ## Rendering data[​](#rendering-data "Direct link to Rendering data")
 
-| Field                                   | Meaning                                                                                                                               |
+| Field                                   | Description                                                                                                                           |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`, `parent`                        | Body name; `parent` is `'Jupiter'` for the moons and `null` for planets.                                                              |
 | `direction`                             | Outward observer-to-body unit vector in local east/north/up (ENU).                                                                    |
@@ -85,7 +85,7 @@ The standalone `getPlanetVisibility(magnitude, altitude, sunAltitude, sunSeparat
 
 The same options are accepted by `getPlanetVisibility`, `options.visibility` in `getPlanetSkyInfo`, and `getPlanetVisibilityTimes`:
 
-| Option                     | Default               | Meaning                                                                                                        |
+| Option                     | Default               | Description                                                                                                    |
 | -------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `darkSkyLimitingMagnitude` | 6                     | Faintest extincted magnitude at a fully dark sky; lower it for light pollution or poorer observing conditions. |
 | `extinction`               | 0.2                   | Visual magnitudes lost per air mass; range 0–5.                                                                |
@@ -124,7 +124,7 @@ if (firstWindow) console.log(new Date(firstWindow.start));
 
 Returns seven planet records. It searches **forward from the supplied instant**, rather than assuming local midnight. `durationHours` defaults to 24, must be greater than zero and cannot exceed 72. `elevation` uses the same meters and range as `getPlanetSkyInfo`. Both ends of the window must remain within the supported observation years.
 
-| Field                 | Meaning                                                                                                          |
+| Field                 | Description                                                                                                      |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `name`                | Planet name. Galilean moons are not included in this naked-eye event search.                                     |
 | `riseTime`, `setTime` | Next conventional rise and set within the window, in Unix milliseconds; `null` if no corresponding event occurs. |

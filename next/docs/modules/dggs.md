@@ -6,25 +6,6 @@
 
 It is not a general abstraction over the full API surface of DGGS implementations. Applications that need parent/child traversal, neighbors, fills, compaction, metrics, or OGC API - DGGS support should use a full implementation or an abstraction such as [DGGAL](https://dggal.org/).
 
-## Feature Card[​](#feature-card "Direct link to Feature Card")
-
-| Feature                                         | Support | Notes                                                                                                                                                                                           |
-| ----------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Multi-grid cell centers and boundaries          | ✅      | [A5](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/a5-decoder.md), GeoHash, H3, Quadkey, S2 and full Plus Code decoders share a compact geometry interface. |
-| String and supported numeric identifiers        | ✅      | Decoder-specific contracts distinguish strings, tokens and BigInt identifiers; numeric support is not uniform across grids.                                                                     |
-| Column-name discovery and decoder registry      | ✅      | Conventional column detection and [DGGSDecoder](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/dggs-decoder.md) integrate with visualization adapters.       |
-| Parent/child and neighbor traversal             | ❌      | The common decoder API does not expose the native grids’ full hierarchy or neighborhood operations.                                                                                             |
-| Polygon fills, covering and compaction          | ❌      | Use full H3/S2/A5 or other native grid APIs for covering, compaction and grid-specific topology.                                                                                                |
-| Uniform cell metrics and analytical aggregation | ❌      | No shared area/distance/aggregation engine is provided across all grid systems.                                                                                                                 |
-| Short Plus Code recovery                        | ❌      | Short codes require a reference location; only full codes are decoded.                                                                                                                          |
-| OGC API - DGGS services                         | ❌      | This is a geometry-decoding library, not a service/protocol implementation or a full DGGS abstraction.                                                                                          |
-
-## Installation[​](#installation "Direct link to Installation")
-
-```
-npm install @math.gl/dggs
-```
-
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
@@ -68,6 +49,25 @@ Each decoder's `name`, `hasNumericRepresentation`, `cellToLngLat`, and `cellToBo
 ### S2 Cell Format[​](#s2-cell-format "Direct link to S2 Cell Format")
 
 S2 cells are identified by a 64 bit index. The three most significant bits encode the cube face, followed by 60 bits that encode the cell's position on the Hilbert curve. The least significant bit is always set and trailing zero bits indicate the level of the cell. When written in hexadecimal the trailing zeros are stripped; this representation is commonly referred to as the **S2 token**.
+
+## Features[​](#features "Direct link to Features")
+
+| Feature                                         | Support | Notes                                                                                                                                                                                           |
+| ----------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Multi-grid cell centers and boundaries          | ✅      | [A5](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/a5-decoder.md), GeoHash, H3, Quadkey, S2 and full Plus Code decoders share a compact geometry interface. |
+| String and supported numeric identifiers        | ✅      | Decoder-specific contracts distinguish strings, tokens and BigInt identifiers; numeric support is not uniform across grids.                                                                     |
+| Column-name discovery and decoder registry      | ✅      | Conventional column detection and [DGGSDecoder](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/dggs-decoder.md) integrate with visualization adapters.       |
+| Parent/child and neighbor traversal             | ❌      | The common decoder API does not expose the native grids’ full hierarchy or neighborhood operations.                                                                                             |
+| Polygon fills, covering and compaction          | ❌      | Use full H3/S2/A5 or other native grid APIs for covering, compaction and grid-specific topology.                                                                                                |
+| Uniform cell metrics and analytical aggregation | ❌      | No shared area/distance/aggregation engine is provided across all grid systems.                                                                                                                 |
+| Short Plus Code recovery                        | ❌      | Short codes require a reference location; only full codes are decoded.                                                                                                                          |
+| OGC API - DGGS services                         | ❌      | This is a geometry-decoding library, not a service/protocol implementation or a full DGGS abstraction.                                                                                          |
+
+## Installation[​](#installation "Direct link to Installation")
+
+```
+npm install @math.gl/dggs
+```
 
 ## Attribution[​](#attribution "Direct link to Attribution")
 

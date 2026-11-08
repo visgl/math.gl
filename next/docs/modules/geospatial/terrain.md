@@ -4,15 +4,46 @@ Experimental CPU terrain data and algorithms, usable in Node.js, browser workers
 
 Terrain APIs are available from `@math.gl/geospatial/terrain` and `@math.gl/geospatial`. Named imports are tree-shakable; unbundled module loaders evaluate the root entry and its declared dependencies.
 
+## Usage[​](#usage "Direct link to Usage")
+
+```
+import {HeightField} from '@math.gl/geospatial/terrain';
+
+
+
+const field = new HeightField({
+
+  width: 2, height: 2, heights: new Float64Array([0, 1, 2, 3])
+
+});
+
+const height = field.sample(0.5, 0.5);
+```
+
+## Features[​](#features "Direct link to Features")
+
+| Feature                                                | Support | Notes                                                                                                                                                             |
+| ------------------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Affine and geographic height fields                    | ✅      | Vertex/cell registration, optional raster-footprint clamping, masked bilinear support, explicit metric/geographic frames, and nearest/bilinear/triangle sampling. |
+| Batch heights, gradients and normals                   | ✅      | Caller-owned buffers and separate value/gradient statuses retain interpolation and coverage semantics.                                                            |
+| Resident tiled snapshots and incremental updates       | ✅      | Insertion/replacement/eviction, neighbor halos and whole-footprint fallback are explicit; no implicit tile fetching.                                              |
+| Regular and adaptive CPU meshing                       | ✅      | Regular geometry and optional tessellators produce mesh data with source registration and nodata contracts.                                                       |
+| Terrain analysis and contour paths                     | ✅      | Raster gradients, slope/aspect, profiles, contours, stitching, bounded simplification and profile measurements.                                                   |
+| Indexed ray, nearest and contact queries               | ✅      | Bounded triangle-surface queries include sphere/capsule contacts and segment clearance with explicit completion status.                                           |
+| Tile reconciliation and conforming mesh seams          | ✅      | Same-level vertex reconciliation, supported mixed-resolution boundary stitching and visual skirts have separate physical/visual contracts.                        |
+| Packed GPU-upload substrate                            | ✅      | Experimental versioned packed buffers provide a CPU-validated data layout; they do not execute shaders.                                                           |
+| Real-DEM and numerical qualification                   | ◐       | Analytic controls and an independent regional GDAL fixture are implemented; broader terrain distributions and CPU/GPU conformance remain open.                    |
+| Device-callable WGSL/GLSL terrain execution            | ❌      | Shader/device implementation and [GPU qualification](https://github.com/visgl/math.gl/blob/master/dev-docs/terrain-roadmap.md) belong to companion luma.gl work.  |
+| Continuous first-impact and physics solver integration | ❌      | Overlap/clearance queries do not provide time-of-impact, rotating/curved sweeps, reduced contact manifolds, or a dynamics solver.                                 |
+| Automatic renderer LOD/drape/picking integration       | ❌      | The module supplies data and queries; complete deck.gl rendering/LOD and shared displayed-surface integration remain separate roadmap work.                       |
+
 ## Sampled line of sight[​](#sampled-line-of-sight "Direct link to Sampled line of sight")
 
 `getTerrainProfileHorizon(profile, {observerHeight})` returns the greatest known elevation angle and its first sample index. Missing samples make this a lower bound; `complete` reports whether all samples are present. The observer's absolute height must be above the ground at station zero when that sample is known. `getTerrainProfileViewshed` classifies each sample along the same straight radial profile using `TerrainProfileViewStatus`: observer, visible, blocked, unknown or missing. A known earlier obstruction blocks a target even if another earlier sample is missing; otherwise missing earlier terrain makes visibility unknown. A tangent to an earlier sample is blocked. These operations describe the sampled piecewise-linear surface, not an area viewshed or unsampled terrain. They do not model Earth curvature, refraction, or geodesic paths.
 
 `getTerrainProfileVisibility(profile, {observerHeight, targetHeight})` compares absolute endpoint elevations against samples of a straight horizontal profile. It returns `blocked` when a valid sample touches or crosses the line, `unknown` when coverage is missing and no obstruction is known, and `clear` otherwise. The result also reports the first observed blocker, missing sample count and minimum sampled vertical clearance. Missing samples can hide an earlier blocker. A clear result applies to the sampled piecewise-linear profile, not unsampled terrain. Curvature, refraction and geodesic paths are not modeled.
 
-## Feature Card[​](#feature-card "Direct link to Feature Card")
-
-### Cross-tile contours[​](#cross-tile-contours "Direct link to Cross-tile contours")
+## Cross-tile contours[​](#cross-tile-contours "Direct link to Cross-tile contours")
 
 `weldTerrainContourTiles(tiles, {width, height})` combines contour segment graphs from same-resolution vertex-registered tiles. Each tile supplies integer `column` and `row` addresses and its `createTerrainContours` result. The output is a `TerrainContours` graph that can be passed to `stitchTerrainContours`. Grid coordinates are expressed in the shared global tile lattice; positions use the first tile's local origin. All tiles must use the same affine grid, contour levels, and height reference. Matching boundary coordinates are compared exactly in the lattice; `maxPositionDifference` bounds any world-frame XY mismatch at a matching point and defaults to zero. The function never welds merely nearby points, interpolates missing terrain, or closes a gap for a missing tile. Identical shared-boundary segments are emitted once. The input vertex and segment budgets apply across the full set of tiles, before welding. The weld key keeps integer and fractional lattice components separate; output `gridCoordinates` are Float64 values and can round at large lattice offsets.
 
@@ -43,21 +74,6 @@ const paths = stitchTerrainContours(contours);
 `createTerrainVertexTileHalos(tiles, options)` reconciles a same-resolution vertex-tile snapshot and returns a copied grid with a one-vertex border around each tile. The padded `field` can be passed to `HeightField` and `createTerrainGradientGrid`; the original tile occupies columns `1..width` and rows `1..height`. Border values come from resident edge and diagonal neighbors, without extrapolation. `statuses` distinguishes `NOT_RESIDENT`, `NO_DATA`, and `VALID` for every padded sample; `field.validity` marks only valid samples. Rebuild halos after changing the resident snapshot. `getTerrainVertexHaloAffectedTiles` identifies a conservative set of resident tiles to rebuild for arrivals, replacements or evictions. Pass the tile width and height; two-vertex dimensions have a wider dependency neighborhood because halo samples can themselves be shared. `maxSamples` bounds the total padded sample count, and shared-height disagreement is checked by the same reconciliation policy. This does not establish mixed-resolution halos.
 
 Terrain-data, analysis, meshing, and query capabilities against the broader CPU/GPU terrain roadmap.
-
-| Feature                                                | Support | Notes                                                                                                                                                             |
-| ------------------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Affine and geographic height fields                    | ✅      | Vertex/cell registration, optional raster-footprint clamping, masked bilinear support, explicit metric/geographic frames, and nearest/bilinear/triangle sampling. |
-| Batch heights, gradients and normals                   | ✅      | Caller-owned buffers and separate value/gradient statuses retain interpolation and coverage semantics.                                                            |
-| Resident tiled snapshots and incremental updates       | ✅      | Insertion/replacement/eviction, neighbor halos and whole-footprint fallback are explicit; no implicit tile fetching.                                              |
-| Regular and adaptive CPU meshing                       | ✅      | Regular geometry and optional tessellators produce mesh data with source registration and nodata contracts.                                                       |
-| Terrain analysis and contour paths                     | ✅      | Raster gradients, slope/aspect, profiles, contours, stitching, bounded simplification and profile measurements.                                                   |
-| Indexed ray, nearest and contact queries               | ✅      | Bounded triangle-surface queries include sphere/capsule contacts and segment clearance with explicit completion status.                                           |
-| Tile reconciliation and conforming mesh seams          | ✅      | Same-level vertex reconciliation, supported mixed-resolution boundary stitching and visual skirts have separate physical/visual contracts.                        |
-| Packed GPU-upload substrate                            | ✅      | Experimental versioned packed buffers provide a CPU-validated data layout; they do not execute shaders.                                                           |
-| Real-DEM and numerical qualification                   | ◐       | Analytic controls and an independent regional GDAL fixture are implemented; broader terrain distributions and CPU/GPU conformance remain open.                    |
-| Device-callable WGSL/GLSL terrain execution            | ❌      | Shader/device implementation and [GPU qualification](https://github.com/visgl/math.gl/blob/master/dev-docs/terrain-roadmap.md) belong to companion luma.gl work.  |
-| Continuous first-impact and physics solver integration | ❌      | Overlap/clearance queries do not provide time-of-impact, rotating/curved sweeps, reduced contact manifolds, or a dynamics solver.                                 |
-| Automatic renderer LOD/drape/picking integration       | ❌      | The module supplies data and queries; complete deck.gl rendering/LOD and shared displayed-surface integration remain separate roadmap work.                       |
 
 ## HeightField[​](#heightfield "Direct link to HeightField")
 
@@ -101,7 +117,7 @@ terrain.sample(108, 202, {interpolation: 'triangle'}, result);
 
 ### Construction and ownership[​](#construction-and-ownership "Direct link to Construction and ownership")
 
-| Property                | Meaning                                                                                    | Default                  |
+| Property                | Description                                                                                | Default                  |
 | ----------------------- | ------------------------------------------------------------------------------------------ | ------------------------ |
 | `width`, `height`       | Integer sample counts, each at least 2                                                     | Required                 |
 | `heights`               | `Float32Array` or `Float64Array`                                                           | Required                 |
@@ -141,7 +157,7 @@ Bilinear and triangle interpolation generally describe different surfaces. Use t
 
 Outer endpoint excursions are clamped within a roundoff bound: a base `8 * Number.EPSILON * max(width, height)` in grid coordinates plus world-coordinate rounding propagated through the inverse frame (four epsilon times the absolute query and origin magnitudes per axis). This does not recover precision already lost in large absolute query coordinates; use local frames when fine spatial resolution is required.
 
-| Status           | Value | Meaning                                               |
+| Status           | Value | Description                                           |
 | ---------------- | ----- | ----------------------------------------------------- |
 | `VALID`          | 0     | Associated numeric values are available               |
 | `OUTSIDE_DOMAIN` | 1     | Beyond the sample domain                              |

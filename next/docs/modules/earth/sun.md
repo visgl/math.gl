@@ -4,7 +4,19 @@
 
 `@math.gl/earth/sun` provides solar and lunar lighting, planetary sky information, bright-star data and shared sky/rendering coordinates.
 
-## Feature Card[​](#feature-card "Direct link to Feature Card")
+## Usage[​](#usage "Direct link to Usage")
+
+```
+import {getSunDirection} from '@math.gl/earth/sun';
+
+const latitude = 37.7749;
+
+const longitude = -122.4194;
+
+const sunDir = getSunDirection(Date.now(), latitude, longitude);
+```
+
+## Features[​](#features "Direct link to Features")
 
 | Feature                                                      | Support | Notes                                                                                                                                                                                                                                                                                                                                                                                        |
 | ------------------------------------------------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -33,18 +45,6 @@ The named Sun, Moon, sky, planet and star functions are exported from `@math.gl/
 ## Coordinates and units[​](#coordinates-and-units "Direct link to Coordinates and units")
 
 Observer latitude/longitude are degrees; solar/lunar altitude and azimuth are radians. Local vectors use east/north/up axes. Solar and lunar light directions point inward; sky-body directions point outward. Light colors are linear RGB. `getSunLight` and `getMoonLight` return relative intensity, while `getSkyLighting` returns illuminance in lux. Globe positions are `[longitudeDegrees, latitudeDegrees, altitudeMeters]`.
-
-## Usage[​](#usage "Direct link to Usage")
-
-```
-import {getSunDirection} from '@math.gl/earth/sun';
-
-const latitude = 37.7749;
-
-const longitude = -122.4194;
-
-const sunDir = getSunDirection(Date.now(), latitude, longitude);
-```
 
 ## Sunlight[​](#sunlight "Direct link to Sunlight")
 

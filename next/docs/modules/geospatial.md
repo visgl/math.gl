@@ -6,11 +6,45 @@
 
 Geographic arrays use `[longitude, latitude, height]`, with angles in degrees and ellipsoidal height in metres by default. Cartesian arrays use Earth-centered coordinates in metres. Geoid heights and general CRS conversion are handled by [geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md) and [projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md).
 
-The geospatial group includes `@math.gl/geospatial`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`, `/wkb`, `/geoarrow`, and `/expressions`. `@math.gl/web-mercator` remains available for existing imports. DGGS remains a separate package.
+The geospatial group includes `@math.gl/geospatial`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`, `/expressions`, and `/terrain`. `@math.gl/web-mercator` remains available for existing imports. DGGS remains a separate package.
+
+Arrow, GeoArrow, and WKB/WKT representations live in [`@math.gl/arrow`](https://visgl.github.io/math.gl/next/docs/modules/arrow.md).
 
 New to these concepts? Start with [Geospatial terminology](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/terminology.md) for geodesics, rhumb lines, chords, ellipsoids, reference systems, and projection properties.
 
-## Feature Card[​](#feature-card "Direct link to Feature Card")
+## Usage[​](#usage "Direct link to Usage")
+
+Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
+
+```
+import {Ellipsoid} from '@math.gl/geospatial';
+
+const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
+
+const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPosition);
+```
+
+Determine the Cartographic representation of a Cartesian position on a WGS84 ellipsoid.
+
+```
+import {Ellipsoid} from '@math.gl/geospatial';
+
+const cartesianPosition = [17832.12, 83234.52, 952313.73];
+
+const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPosition);
+```
+
+Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
+
+```
+import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial';
+
+const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
+
+const transformMatrix = eastNorthUpToFixedFrame(Ellipsoid.WGS84, cartesianOrigin);
+```
+
+## Features[​](#features "Direct link to Features")
 
 | Feature                                            | Support | Notes                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | -------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -50,7 +84,7 @@ Attribution: From [wikipedia](https://en.wikipedia.org/wiki/World_Geodetic_Syste
 | `@math.gl/geospatial`       | [Oblique ellipsoidal visibility and shared cut graphs](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geographic-atlas.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `@math.gl/geospatial`       | [Ellipsoidal/rhumb latitude-domain clipping and adaptive projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/latitude-geographic-cuts.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `@math.gl/geospatial`       | [Geographic tile queries](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geographic-tiles.md) and [tile-matrix utilities](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/tile-matrix.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `@math.gl/geospatial/tasks` | [Map preparation and coordinate projection tasks](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/task-runner.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `@math.gl/geospatial/tasks` | [Map preparation and coordinate projection tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/task-runner.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 ## Classes[​](#classes "Direct link to Classes")
 
@@ -77,38 +111,6 @@ Loading <!-- -->Geographic tile explorer<!-- -->…
 | Function            | Description                                                                                                                    |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `makeOBBFromRegion` | Creates a conservative oriented bounding box for a longitude–latitude–height region, including antimeridian and polar regions. |
-
-## Usage[​](#usage "Direct link to Usage")
-
-Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
-
-```
-import {Ellipsoid} from '@math.gl/geospatial';
-
-const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
-
-const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPosition);
-```
-
-Determine the Cartographic representation of a Cartesian position on a WGS84 ellipsoid.
-
-```
-import {Ellipsoid} from '@math.gl/geospatial';
-
-const cartesianPosition = [17832.12, 83234.52, 952313.73];
-
-const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPosition);
-```
-
-Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
-
-```
-import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial';
-
-const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
-
-const transformMatrix = eastNorthUpToFixedFrame(Ellipsoid.WGS84, cartesianOrigin);
-```
 
 ## Framework Independence[​](#framework-independence "Direct link to Framework Independence")
 

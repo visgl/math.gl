@@ -200,7 +200,7 @@ const map = new MapEngine(description, {
 
 From v5.0 · Experimental
 
-| Property                 | Meaning                                                                        |
+| Property                 | Description                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------ |
 | `description`            | Frozen input snapshot                                                          |
 | `regions`                | Compiled `MapRegion` array with explicit placements                            |
@@ -348,7 +348,7 @@ Positions must be finite **longitude/latitude pairs**, with latitude in \[-90, 9
 
 Returns `PreparedMapGeometry`, a versioned, structured-cloneable object:
 
-| Field        | Meaning                                                                  |
+| Field        | Description                                                              |
 | ------------ | ------------------------------------------------------------------------ |
 | `version`    | Buffer contract version, currently 1                                     |
 | `mapId`      | Description ID for diagnostics; not a cache key or equivalence guarantee |

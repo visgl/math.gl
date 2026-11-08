@@ -16,7 +16,23 @@ The root entry point also exports mesh utilities, curves, polygon operations, an
 
 Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](https://visgl.github.io/math.gl/next/docs/modules/geometry/lighting.md). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
 
-## Feature Card[​](#feature-card "Direct link to Feature Card")
+## Usage[​](#usage "Direct link to Usage")
+
+```
+import {SphereGeometry} from '@math.gl/geometry';
+
+
+
+const geometry = new SphereGeometry({radius: 1});
+
+const positions = geometry.attributes.POSITION.value;
+
+const indices = geometry.indices?.value;
+```
+
+Pass these CPU buffers to the renderer of your choice. The module does not create GPU resources.
+
+## Features[​](#features "Direct link to Features")
 
 | Feature                                         | Support | Notes                                                                                                                                                                                                          |
 | ----------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -39,22 +55,6 @@ Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths pro
 ```
 npm install @math.gl/geometry
 ```
-
-## Usage[​](#usage "Direct link to Usage")
-
-```
-import {SphereGeometry} from '@math.gl/geometry';
-
-
-
-const geometry = new SphereGeometry({radius: 1});
-
-const positions = geometry.attributes.POSITION.value;
-
-const indices = geometry.indices?.value;
-```
-
-Pass these CPU buffers to the renderer of your choice. The module does not create GPU resources.
 
 ## API[​](#api "Direct link to API")
 

@@ -34,7 +34,7 @@ From v5.0 · Experimental
 
 Returns a `MyriahedralMap`, a subclass of [DiscontinuousMap](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous.md). It supports the same point, line, polygon, seam, layout-fitting, and inverse APIs, and exposes its `layout`. `new MyriahedralMap(options)` is equivalent.
 
-| Option            | Default         | Meaning                                                                               |
+| Option            | Default         | Description                                                                           |
 | ----------------- | --------------- | ------------------------------------------------------------------------------------- |
 | `preset`          | `'cylindric'`   | Cut strategy listed below                                                             |
 | `columns`         | `48`            | Graticule resolution: multiple of four from 12 through 96; half as many latitude rows |

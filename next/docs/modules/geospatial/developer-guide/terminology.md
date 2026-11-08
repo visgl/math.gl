@@ -28,7 +28,7 @@ A **surface normal** is perpendicular to the surface at a point. On a sphere it 
 
 ## Coordinates and reference systems[​](#coordinates-and-reference-systems "Direct link to Coordinates and reference systems")
 
-| Term                                    | Meaning                                                                                                                                                                                                    |
+| Term                                    | Description                                                                                                                                                                                                |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Longitude                               | Angular position around the polar axis, measured from a prime meridian. It becomes indeterminate at a pole.                                                                                                |
 | Geodetic latitude                       | Angle between the ellipsoid's outward normal and the equatorial plane. Geographic ellipsoid coordinates normally use this latitude.                                                                        |
@@ -50,7 +50,7 @@ math.gl's geographic convenience APIs generally use longitude first, angles in d
 
 ## Heights and vertical references[​](#heights-and-vertical-references "Direct link to Heights and vertical references")
 
-| Term                         | Meaning                                                                                                                                        |
+| Term                         | Description                                                                                                                                    |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | Ellipsoidal height, h        | Height relative to a reference ellipsoid, measured along its normal. It is not automatically height above sea level.                           |
 | Orthometric height, H        | A gravity-based height referenced to the geoid, associated with distance along the plumb line. Commonly used for physical elevations.          |
@@ -104,7 +104,7 @@ The **direct geodesic problem** finds an endpoint from a starting point, initial
 
 A **map projection** assigns planar coordinates to locations on a curved reference surface. A **forward projection** maps geographic to planar coordinates; an **inverse projection** attempts the reverse. Inverses can be undefined, non-unique, or restricted to a particular chart.
 
-| Term                           | Meaning                                                                                                                                                    |
+| Term                           | Description                                                                                                                                                |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Conformal                      | Preserves local angles and infinitesimal shape at regular points. It does not preserve general areas or finite shapes.                                     |
 | Equal-area / equivalent        | Preserves areas up to a constant scale factor. It does not imply preservation of angles or lengths.                                                        |
@@ -147,7 +147,7 @@ Longitude **wrapping** changes a coordinate's numeric representative, for exampl
 
 ## Sampling, meshes, and tiles[​](#sampling-meshes-and-tiles "Direct link to Sampling, meshes, and tiles")
 
-| Term                               | Meaning                                                                                                                                                                              |
+| Term                               | Description                                                                                                                                                                          |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Tessellation / triangulation       | Replacing a surface or polygon with simpler pieces, often triangles. Triangles must respect cuts and holes.                                                                          |
 | Subdivision / densification        | Adding vertices to approximate a curved path or surface more closely. The interpolation model determines where those vertices lie.                                                   |

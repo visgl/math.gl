@@ -4,7 +4,17 @@
 
 `@math.gl/core` provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
 
-## Feature Card[​](#feature-card "Direct link to Feature Card")
+## Usage[​](#usage "Direct link to Usage")
+
+Use `import type` for declarations that add no runtime code:
+
+```
+import type {NumericArray, NumberArray3, Bounds3D} from '@math.gl/core';
+```
+
+`NumberArray` covers JavaScript number arrays; `NumericArray` also includes numeric typed arrays. Sized variants describe fixed component counts. See [array types](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/array-types.md) and [bounds](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds.md) for the contracts and runtime helpers.
+
+## Features[​](#features "Direct link to Features")
 
 | Feature                                   | Support | Notes                                                                                                                                                                                                      |
 | ----------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -15,16 +25,6 @@
 | Bounds and spheroid contracts             | ✅      | [Bounds2D/3D](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds.md) and SpheroidParameters describe geometry independently of renderers and CRS engines.      |
 | Runtime enforcement of sized declarations | ❌      | Type declarations do not validate buffer length, coordinate units, or physical meaning at runtime.                                                                                                         |
 | Bundled Float16 arithmetic polyfill       | ❌      | The helpers select/detect storage. They do not supply numeric half-float array semantics when the runtime lacks them.                                                                                      |
-
-## Usage[​](#usage "Direct link to Usage")
-
-Use `import type` for declarations that add no runtime code:
-
-```
-import type {NumericArray, NumberArray3, Bounds3D} from '@math.gl/core';
-```
-
-`NumberArray` covers JavaScript number arrays; `NumericArray` also includes numeric typed arrays. Sized variants describe fixed component counts. See [array types](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/array-types.md) and [bounds](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds.md) for the contracts and runtime helpers.
 
 ## Installation[​](#installation "Direct link to Installation")
 

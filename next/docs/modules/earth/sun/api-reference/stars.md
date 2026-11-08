@@ -36,7 +36,7 @@ A catalog source can represent a multiple system. Some are variables. These are 
 
 Each `StarRecord` includes:
 
-| Field                           | Meaning                                                                    |
+| Field                           | Description                                                                |
 | ------------------------------- | -------------------------------------------------------------------------- |
 | `id`, `designation`             | HR identifier and original Bayer/Flamsteed designation, which may be empty |
 | `epochYear`                     | Julian reference epoch, 2000.0 for bundled records                         |

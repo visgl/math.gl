@@ -4,7 +4,39 @@
 
 `@math.gl/earth/timezone` supplies geographic timezone lookup and numeric local-calendar computations. Use it for map labels, daily aggregation, and scheduling. It uses the runtime's timezone rules; use `Intl.DateTimeFormat` for localized presentation.
 
-## Feature Card[​](#feature-card "Direct link to Feature Card")
+## Usage[​](#usage "Direct link to Usage")
+
+```
+import {getTimezoneOffset, getLocalDateTime, lookupTimezoneAsync} from '@math.gl/earth/timezone';
+
+
+
+const timezone = await lookupTimezoneAsync([-74.006, 40.7128]);
+
+const instant = new Date('2024-07-15T12:00:00Z');
+
+const offset = getTimezoneOffset(timezone, instant); // -240
+
+const local = getLocalDateTime(timezone, instant); // year/month/day and clock fields
+
+const label = new Intl.DateTimeFormat('en', {timeZone: timezone, dateStyle: 'full'}).format(instant);
+```
+
+The offset utility uses native `Intl.DateTimeFormat`; a tree-shaken named import excludes the geographic table. Unbundled root imports evaluate their statically exported modules. The asynchronous lookup loads that table on first use and reuses the loaded module. Bundlers with dynamic-import code splitting can put lookup data in a separate chunk; downloading it is deferred, not eliminated. Importing only the offset utility allows tree shaking to remove lookup entirely.
+
+For synchronous lookup, import the dedicated entry point:
+
+```
+import {lookupTimezone} from '@math.gl/earth/timezone';
+
+
+
+const timezone = lookupTimezone([-74.006, 40.7128]); // America/New_York
+```
+
+Coordinates are `[longitude, latitude]` in degrees. Geographic lookup uses the compact [@photostructure/tz-lookup](https://github.com/photostructure/tz-lookup) implementation, vendored at version 11.7.0. Its compressed boundaries are approximate and can produce incorrect results, including near borders. It returns one identifier and does not resolve ambiguous political timezone usage. Updating the vendored upstream snapshot refreshes geographic data; date-specific offsets depend separately on the runtime's timezone database.
+
+## Features[​](#features "Direct link to Features")
 
 | Feature                                             | Support | Notes                                                                                                                                                                                                    |
 | --------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -44,38 +76,6 @@ The package does not ship an `Intl` polyfill or a separate date-specific timezon
 ```
 npm install @math.gl/earth
 ```
-
-## Usage[​](#usage "Direct link to Usage")
-
-```
-import {getTimezoneOffset, getLocalDateTime, lookupTimezoneAsync} from '@math.gl/earth/timezone';
-
-
-
-const timezone = await lookupTimezoneAsync([-74.006, 40.7128]);
-
-const instant = new Date('2024-07-15T12:00:00Z');
-
-const offset = getTimezoneOffset(timezone, instant); // -240
-
-const local = getLocalDateTime(timezone, instant); // year/month/day and clock fields
-
-const label = new Intl.DateTimeFormat('en', {timeZone: timezone, dateStyle: 'full'}).format(instant);
-```
-
-The offset utility uses native `Intl.DateTimeFormat`; a tree-shaken named import excludes the geographic table. Unbundled root imports evaluate their statically exported modules. The asynchronous lookup loads that table on first use and reuses the loaded module. Bundlers with dynamic-import code splitting can put lookup data in a separate chunk; downloading it is deferred, not eliminated. Importing only the offset utility allows tree shaking to remove lookup entirely.
-
-For synchronous lookup, import the dedicated entry point:
-
-```
-import {lookupTimezone} from '@math.gl/earth/timezone';
-
-
-
-const timezone = lookupTimezone([-74.006, 40.7128]); // America/New_York
-```
-
-Coordinates are `[longitude, latitude]` in degrees. Geographic lookup uses the compact [@photostructure/tz-lookup](https://github.com/photostructure/tz-lookup) implementation, vendored at version 11.7.0. Its compressed boundaries are approximate and can produce incorrect results, including near borders. It returns one identifier and does not resolve ambiguous political timezone usage. Updating the vendored upstream snapshot refreshes geographic data; date-specific offsets depend separately on the runtime's timezone database.
 
 ## Local calendar computations[​](#local-calendar-computations "Direct link to Local calendar computations")
 

@@ -137,7 +137,7 @@ Both count limits must be positive integers no greater than `2^32 - 1`. A render
 
 The result contains:
 
-| Field                   | Type           | Meaning                                                                                                     |
+| Field                   | Type           | Description                                                                                                 |
 | ----------------------- | -------------- | ----------------------------------------------------------------------------------------------------------- |
 | `sourcePositions`       | `Float64Array` | Refined source positions.                                                                                   |
 | `positions`             | `Float64Array` | Corresponding transformed positions.                                                                        |

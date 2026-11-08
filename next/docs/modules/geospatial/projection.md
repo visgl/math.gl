@@ -12,7 +12,33 @@ Numerical accuracy is evaluated against **native PROJ**. The pinned proj4js refe
 
 For definitions of surface models, paths, reference systems, and distortion properties, see [Geospatial terminology](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/terminology.md).
 
-## Feature Card[​](#feature-card "Direct link to Feature Card")
+## Usage[​](#usage "Direct link to Usage")
+
+```
+import { projectionEngine } from "@math.gl/geospatial/projection";
+
+
+
+const projection = projectionEngine.createProjection({
+
+  from: "EPSG:4326",
+
+  to: "EPSG:3857",
+
+});
+
+const meters = projection.project([12, 55]);
+
+const longitudeLatitude = projection.unproject(meters);
+
+
+
+const positions = new Float64Array([12, 55, 13, 56]);
+
+projection.projectFlat(positions, 2); // transforms the same buffer
+```
+
+## Features[​](#features "Direct link to Features")
 
 | Feature                                         | Support | Notes                                                                                                                                                                                                                                                                                                                               |
 | ----------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -41,32 +67,6 @@ Play continental motion from **1.8 billion years ago** to **300 Ma into the futu
 [Open the full example](https://visgl.github.io/math.gl/next/examples/tectonic-time-machine) for data credits and limits.
 
 See [external projection engines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/external-projection-engines.md) for proj4js and D3 adapter examples.
-
-## Quick start[​](#quick-start "Direct link to Quick start")
-
-```
-import { projectionEngine } from "@math.gl/geospatial/projection";
-
-
-
-const projection = projectionEngine.createProjection({
-
-  from: "EPSG:4326",
-
-  to: "EPSG:3857",
-
-});
-
-const meters = projection.project([12, 55]);
-
-const longitudeLatitude = projection.unproject(meters);
-
-
-
-const positions = new Float64Array([12, 55, 13, 56]);
-
-projection.projectFlat(positions, 2); // transforms the same buffer
-```
 
 ## Learn about projections[​](#learn-about-projections "Direct link to Learn about projections")
 

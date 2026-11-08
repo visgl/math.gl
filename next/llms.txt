@@ -19,6 +19,24 @@ Start with a small calculation, then choose the modules your application needs. 
 
 - [Modules](https://visgl.github.io/math.gl/next/docs/modules.md)
 
+#### arrow
+
+Apache Arrow
+
+- [@math.gl/arrow](https://visgl.github.io/math.gl/next/docs/modules/arrow.md): Apache Arrow
+- [Arrow schema utilities](https://visgl.github.io/math.gl/next/docs/modules/arrow/arrow-schema-utils.md): The Arrow schema utilities help validate Apache Arrow JS tables at runtime and rename columns while
+- [Arrow table transport](https://visgl.github.io/math.gl/next/docs/modules/arrow/arrow-table-transport.md): Use column-buffer transport for worker hops between matching Apache Arrow JS
+- [GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/arrow/developer-guide/geoarrow.md): GeoArrow stores geometry in typed-array buffers rather than one JavaScript object per row. math.gl describes those buffers with plain TypeScript objects, so the same geometry kernels can work with Apache Arrow, a loader, or application-owned storage without depending on a table runtime.
+- [Arrow-backed GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow.md): @math.gl/arrow/geoarrow connects real Apache Arrow JS fields and vectors to
+- [@math.gl/arrow/geoarrow-utils](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow-utils.md): @math.gl/arrow/geoarrow-utils is the Arrow-runtime-independent home for columnar geospatial math in math.gl.
+- [GeoArrow API reference](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow-utils/api-reference/geoarrow.md): All root functions are synchronous. Unless a function explicitly returns a new column or fills a
+- [Indexed Arrow views](https://visgl.github.io/math.gl/next/docs/modules/arrow/indexed-arrow-table.md): IndexedArrowTable provides a cheap sorted view of an arrow.Table without
+- [MappedArrowTable](https://visgl.github.io/math.gl/next/docs/modules/arrow/mapped-arrow-table.md): MappedArrowTable provides a cheap key-value map view of an arrow.Table without
+- [splitArrowBuffers](https://visgl.github.io/math.gl/next/docs/modules/arrow/split-arrow-buffers.md): splitArrowBuffers rebuilds Apache Arrow JS objects so sliced internal typed-array buffers are
+- [UTF-8 utilities](https://visgl.github.io/math.gl/next/docs/modules/arrow/utf8.md): @math.gl/arrow/utf8 helps applications work efficiently with binary UTF-8 strings
+- [@math.gl/arrow/wkb](https://visgl.github.io/math.gl/next/docs/modules/arrow/wkb.md): @math.gl/arrow/wkb provides dependency-free, synchronous codecs for individual WKB, EWKB, and WKT
+- [WKB and WKT API reference](https://visgl.github.io/math.gl/next/docs/modules/arrow/wkb/api-reference/wkb.md): All APIs are synchronous. Inputs are borrowed and never detached or mutated.
+
 #### core
 
 @math.gl/core provides array-based vectors, matrices, quaternions, and coordinate helpers. Use it to compose transforms, rotate geometry, and work with reusable numeric objects.
@@ -41,12 +59,6 @@ Start with a small calculation, then choose the modules your application needs. 
 - [Vector2](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/vector2.md): A two dimensional vector
 - [Vector3](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/vector3.md): Vector3 extends JavaScript Array through its core base classes.
 - [Vector4](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/vector4.md): Stores four numeric components [x, y, z, w]. For homogeneous coordinates, W = 1 represents a point and W = 0 represents a direction under an affine transform.
-- [Arrow utilities](https://visgl.github.io/math.gl/next/docs/modules/core/arrow.md): @math.gl/core/arrow provides schema validation, column renaming, indexed table
-- [Arrow schema utilities](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/arrow-schema-utils.md): The Arrow schema utilities help validate Apache Arrow JS tables at runtime and rename columns while
-- [Arrow table transport](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/arrow-table-transport.md): Use column-buffer transport for worker hops between matching Apache Arrow JS
-- [Indexed Arrow views](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/indexed-arrow-table.md): IndexedArrowTable and IndexedArrowVector provide readonly indexed views over Apache Arrow JS
-- [MappedArrowTable](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/mapped-arrow-table.md): MappedArrowTable is a readonly string-keyed row lookup view over an IndexedArrowTable.
-- [splitArrowBuffers](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/split-arrow-buffers.md): splitArrowBuffers rebuilds Apache Arrow JS objects so sliced internal typed-array buffers are
 - [Benchmarks](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/benchmarks.md): Run the general math.gl benchmark suite in your browser. Start with Core math for vectors,
 - [3D Coordinate Systems](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/coordinate-systems.md): Choose coordinates that fit the operation you need. Core provides Cartesian vectors, spherical coordinates, and homogeneous coordinates for matrix transforms.
 - [Floating Point](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/floating-point.md): Rounding can make mathematically equivalent calculations produce slightly different numeric results. Use approximate comparisons for computed coordinates, and exact comparisons when identical stored values are required.
@@ -55,7 +67,6 @@ Start with a small calculation, then choose the modules your application needs. 
 - [3D Rotations](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/rotations.md): Use Euler angles to specify an orientation, Quaternion to compose or interpolate rotations, and Matrix4 to combine rotation with translation and scale. All rotation angles in math.gl are in radians.
 - [Transformations](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/transformations.md): Use Matrix4 to combine translation, rotation, and scale. Use a quaternion when only rotation is needed. Core vector methods mutate their receiver; matrix transform methods write to a supplied result or allocate a new array.
 - [View and Projection Matrices](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/view-and-projection.md): A view matrix expresses world coordinates relative to a camera. A projection matrix maps those camera coordinates to homogeneous clip coordinates. Compose them as projection * view to transform a world-space point.
-- [Task execution and workers](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/workers.md): Use TaskRunner to execute work in
 - [@math.gl/core/expressions 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md): The experimental expression parser and evaluator are available from @math.gl/core/expressions.
 - [DGGS Function Libraries 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/dggs-function-libraries.md): Import optional Discrete Global Grid System function tables from @math.gl/dggs.
 - [Expression Evaluator 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/expression-eval.md): The core evaluator API is useful when you want direct control over parsing, AST reuse, or custom operator registration.
@@ -63,24 +74,11 @@ Start with a small calculation, then choose the modules your application needs. 
 - [Accessor Compiler 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/parse-expression-string.md): parseExpressionString(expression (row: Record) => unknown
 - [Core Guide](https://visgl.github.io/math.gl/next/docs/modules/core/guide.md): Guides and background for Core.
 - [Preliminaries](https://visgl.github.io/math.gl/next/docs/modules/core/guide/preliminaries.md): Mathematical foundations for working with transformations and 3D coordinates.
-- [Core Tasks Guide](https://visgl.github.io/math.gl/next/docs/modules/core/guide/tasks.md): Guides and background for Core: Tasks.
-- [@math.gl/core/tasks](https://visgl.github.io/math.gl/next/docs/modules/core/tasks.md): Tasks keep applications responsive while processing large datasets. Use
-- [Task runtime API](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/api-reference/runtime.md): The public runtime is TaskRunner, with typed task objects,
-- [TaskRunner API](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/api-reference/task-runner.md): The public execution API in @math.gl/core/tasks. Start with the get-started guide.
-- [Measuring task execution](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/benchmarks.md): Build the packages, then run the correctness-checked benchmark:
-- [Creating tasks and workers](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/custom-workers.md): Define a plain object with process, optionally processInBatches, and lifecycle
-- [Choosing where tasks run](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/execution.md): TaskRunner accepts execution: 'auto' | 'main-thread' | 'worker'.
-- [Migrating to TaskRunner](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/migration.md): This is a breaking API change. @math.gl/core/worker-utils,
-- [Reusing initialized state](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/persistent-resources.md): Use runner.initializeTask(task, initialization) when multiple operations should
-- [Shared memory and ownership](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/shared-memory.md): Inputs copy by default. Use inputOwnership: 'transfer' to move ordinary buffers
-- [Get started with Tasks](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/task-runner.md): Tasks keep your application responsive while processing large datasets.
-- [WebAssembly in tasks](https://visgl.github.io/math.gl/next/docs/modules/core/tasks/developer-guide/wasm.md): Compile or instantiate a WebAssembly module in a task's initialize hook, retain
 - [@math.gl/core/types](https://visgl.github.io/math.gl/next/docs/modules/core/types.md): @math.gl/core provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
 - [Array Types](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/array-types.md): math.gl provides a number of numeric array types.
 - [Bounds](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds.md): Bounds is a type-only union of Bounds2D and Bounds3D. Each uses [minimum, maximum] coordinates.
 - [Bounds2D](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds2d.md): Bounds2D describes an axis-aligned 2D extent as [[minX, minY], [maxX, maxY]].
 - [Bounds3D](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds3d.md): Bounds3D describes an axis-aligned 3D extent as [[minX, minY, minZ], [maxX, maxY, maxZ]].
-- [UTF-8 utilities](https://visgl.github.io/math.gl/next/docs/modules/core/utf8.md): @math.gl/core/utf8 compares UTF-8 byte ranges and parses ASCII scalar values without
 
 #### dggs
 
@@ -223,14 +221,11 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Spatial Reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/spatial-reference.md): @math.gl/geospatial/crs provides a format-neutral descriptor for reporting how a dataset's coordinates are
 - [Coordinate Reference Systems](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/developer-guide/coordinate-reference-systems.md): A coordinate tuple such as [12.49, 41.89] is not a location by itself. Software also needs to
 - [Projecting Raster Meshes](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/developer-guide/raster-mesh-preparation.md): Applications can compose math.gl's existing geometry and projection interfaces to prepare raster
-- [GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/geoarrow.md): GeoArrow stores geometry in typed-array buffers rather than one JavaScript object per row. math.gl describes those buffers with plain TypeScript objects, so the same geometry kernels can work with Apache Arrow, a loader, or application-owned storage without depending on a table runtime.
 - [Geospatial terminology](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/terminology.md): Geospatial code combines several kinds of geometry: coordinates in a reference
 - [Discontinuous map API 🧪](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous.md): The discontinuous map API, presets, and layout helpers are experimental and may change.
 - [Myriahedral projection API 🧪](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/myriahedral.md): Build a spherical panel mesh, select its retained hinges, and project geographic
 - [Map projection families 🧪](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/projection-catalog.md): Map projections differ in how they construct coordinates, what geometric
 - [Elastic maps 🧪](https://visgl.github.io/math.gl/next/docs/modules/geospatial/elastic-maps.md): In this module, Elastic refers to Justin Kunimune's named family of numerical
-- [@math.gl/geospatial/geoarrow](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow.md): @math.gl/geospatial/geoarrow is the Arrow-runtime-independent home for columnar geospatial math in math.gl.
-- [GeoArrow API reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow/api-reference/geoarrow.md): All root functions are synchronous. Unless a function explicitly returns a new column or fills a
 - [Geospatial Guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/guide.md): Guides and background for Geospatial.
 - [Projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/guide/projection.md): Choose a coordinate system, build a transformation, and explore how the world can be mapped. Start with the foundations or jump into the topic you need.
 - [Validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/guide/projection/validation.md): Supported accuracy domains, independent references, qualification results, audits, and performance measurements.
@@ -272,8 +267,23 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Projection API support and migration](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md): @math.gl/geospatial/projection uses the math.gl projection engine by default. projectionEngine supplies
 - [Temporal deformation models](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/temporal-models.md): A coordinate can move between observation epochs because of a steady velocity,
 - [Terrain](https://visgl.github.io/math.gl/next/docs/modules/geospatial/terrain.md): Experimental CPU terrain data and algorithms, usable in Node.js, browser workers,
-- [@math.gl/geospatial/wkb](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb.md): @math.gl/geospatial provides dependency-free, synchronous codecs for individual WKB, EWKB, and WKT
-- [WKB and WKT API reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb/api-reference/wkb.md): All APIs are synchronous. Inputs are borrowed and never detached or mutated.
+
+#### tasks
+
+Tasks keep applications responsive while processing large datasets. Use
+
+- [@math.gl/tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks.md): Tasks keep applications responsive while processing large datasets. Use
+- [Task runtime API](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/runtime.md): The public runtime is TaskRunner, with typed task objects,
+- [TaskRunner API](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/task-runner.md): The public execution API in @math.gl/tasks. Start with the get-started guide.
+- [Measuring task execution](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/benchmarks.md): Build the packages, then run the correctness-checked benchmark:
+- [Creating tasks and workers](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/custom-workers.md): Define a plain object with process, optionally processInBatches, and lifecycle
+- [Choosing where tasks run](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/execution.md): TaskRunner accepts execution: 'auto' | 'main-thread' | 'worker'.
+- [Migrating to TaskRunner](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/migration.md): This is a breaking API change. @math.gl/core/worker-utils,
+- [Reusing initialized state](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/persistent-resources.md): Use runner.initializeTask(task, initialization) when multiple operations should
+- [Shared memory and ownership](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/shared-memory.md): Inputs copy by default. Use inputOwnership: 'transfer' to move ordinary buffers
+- [Get started with Tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/task-runner.md): Tasks keep your application responsive while processing large datasets.
+- [WebAssembly in tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/wasm.md): Compile or instantiate a WebAssembly module in a task's initialize hook, retain
+- [Task execution and workers](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/workers.md): Use TaskRunner to execute work in
 
 #### web-mercator
 

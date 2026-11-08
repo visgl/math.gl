@@ -24,7 +24,7 @@ const segment = new RingGeometry({
 });
 ```
 
-| Property      | Default | Meaning                                                |
+| Property      | Default | Description                                            |
 | ------------- | ------- | ------------------------------------------------------ |
 | `innerRadius` | `0.5`   | Positive inner radius, smaller than the outer radius.  |
 | `outerRadius` | `1`     | Positive outer radius.                                 |

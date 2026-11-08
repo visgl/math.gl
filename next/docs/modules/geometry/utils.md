@@ -10,25 +10,6 @@ Loading <!-- -->Geometry processing workshop<!-- -->…
 
 Utilities for processing renderer-independent geometry stored in typed arrays. The module is designed for loaders and applications that need to inspect, normalize, or decode geometry without depending on a WebGL or WebGPU runtime.
 
-## Feature Card[​](#feature-card "Direct link to Feature Card")
-
-| Feature                                       | Support | Notes                                                                                                                                                                                                                                        |
-| --------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Attribute and primitive traversal             | ✅      | [Geometry utilities](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/geometry-utils.md) inspect layouts and iterate attributes/primitives.                                                       |
-| Vertex normals                                | ✅      | CPU normal generation for the documented primitive modes.                                                                                                                                                                                    |
-| Transform, merge and weld meshes              | ✅      | [Mesh processing](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/mesh-processing.md) preserves explicit attribute and index contracts.                                                          |
-| Degenerate-triangle inspection                | ✅      | Inspection reports degenerate triangles; callers choose how to handle the result.                                                                                                                                                            |
-| Packed attribute interpolation                | ✅      | [Mixed linear/flat interpolation policies](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/interpolate-packed-attributes.md) consume subdivision provenance without per-vertex object unpacking. |
-| Compact attribute encodings                   | ✅      | RGB565, octahedral normals, texture-coordinate compression and ZigZag delta decoding.                                                                                                                                                        |
-| Automatic topology repair or Boolean modeling | ❌      | Welding and degeneracy inspection do not provide a manifold-repair or solid Boolean engine.                                                                                                                                                  |
-| General mesh simplification and UV unwrapping | ❌      | No public quadric-error simplifier, arbitrary UV atlas generator, or tangent-space generation pipeline.                                                                                                                                      |
-
-## Installation[​](#installation "Direct link to Installation")
-
-```
-npm install @math.gl/geometry
-```
-
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
@@ -53,6 +34,25 @@ const normals = computeVertexNormals({
 
 
 const decodedNormal = octDecode(128, 128, new Vector3());
+```
+
+## Features[​](#features "Direct link to Features")
+
+| Feature                                       | Support | Notes                                                                                                                                                                                                                                        |
+| --------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Attribute and primitive traversal             | ✅      | [Geometry utilities](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/geometry-utils.md) inspect layouts and iterate attributes/primitives.                                                       |
+| Vertex normals                                | ✅      | CPU normal generation for the documented primitive modes.                                                                                                                                                                                    |
+| Transform, merge and weld meshes              | ✅      | [Mesh processing](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/mesh-processing.md) preserves explicit attribute and index contracts.                                                          |
+| Degenerate-triangle inspection                | ✅      | Inspection reports degenerate triangles; callers choose how to handle the result.                                                                                                                                                            |
+| Packed attribute interpolation                | ✅      | [Mixed linear/flat interpolation policies](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/interpolate-packed-attributes.md) consume subdivision provenance without per-vertex object unpacking. |
+| Compact attribute encodings                   | ✅      | RGB565, octahedral normals, texture-coordinate compression and ZigZag delta decoding.                                                                                                                                                        |
+| Automatic topology repair or Boolean modeling | ❌      | Welding and degeneracy inspection do not provide a manifold-repair or solid Boolean engine.                                                                                                                                                  |
+| General mesh simplification and UV unwrapping | ❌      | No public quadric-error simplifier, arbitrary UV atlas generator, or tangent-space generation pipeline.                                                                                                                                      |
+
+## Installation[​](#installation "Direct link to Installation")
+
+```
+npm install @math.gl/geometry
 ```
 
 ## Mesh processing[​](#mesh-processing "Direct link to Mesh processing")

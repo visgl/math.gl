@@ -8,6 +8,10 @@ Version 5.0 is in prerelease development. See the [upgrade guide](https://visgl.
 
 **Highlights:** a new projection engine; six grid systems behind one decoder API; WKB and GeoArrow geometry processing; and new tools for timezones and sky.
 
+### A separate Arrow package[​](#a-separate-arrow-package "Direct link to A separate Arrow package")
+
+The optional [`@math.gl/arrow/geoarrow`](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow.md) entry adapts Arrow 17+ fields/vectors to the existing geometry kernels without a loaders.gl schema dependency. Physical descriptors remain Arrow-independent at [`@math.gl/arrow/geoarrow-utils`](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow-utils.md). The new runnable Arrow-table example complements the updated descriptor/task-worker example.
+
 ### Work across coordinate systems[​](#work-across-coordinate-systems "Direct link to Work across coordinate systems")
 
 [Projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) has grown from a proj4 wrapper into a pluggable math.gl engine. Transform coordinates using a broad [projection catalogue](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projections.md), with support for datum grids, coordinate operations, and in-place buffers. The new [CRS module](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs.md) gives applications a shared vocabulary for coordinate reference systems, WKT, PROJ definitions, and PROJJSON.
@@ -20,7 +24,7 @@ The new [DGGS module](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)
 
 ### Move geometry from data to visualization[​](#move-geometry-from-data-to-visualization "Direct link to Move geometry from data to visualization")
 
-Read and write WKB, EWKB, and WKT with [WKB](https://visgl.github.io/math.gl/next/docs/modules/geospatial/wkb.md), or process columnar geometry with [GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/geospatial/geoarrow.md). [Geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry.md) and [geometry-utils](https://visgl.github.io/math.gl/next/docs/modules/geometry.md) tools provide renderer-independent building blocks, including prisms, solid rings, and optional parametric shapes. [Polygon](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md) can adaptively subdivide meshes and lines, including meshes for globes, while preserving attributes through refinement.
+Read and write WKB, EWKB, and WKT with [WKB](https://visgl.github.io/math.gl/next/docs/modules/arrow/wkb.md), or process columnar geometry with [GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow-utils.md). [Geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry.md) and [geometry-utils](https://visgl.github.io/math.gl/next/docs/modules/geometry.md) tools provide renderer-independent building blocks, including prisms, solid rings, and optional parametric shapes. [Polygon](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md) can adaptively subdivide meshes and lines, including meshes for globes, while preserving attributes through refinement.
 
 ### Bring globes to life[​](#bring-globes-to-life "Direct link to Bring globes to life")
 
@@ -36,16 +40,18 @@ Opt-in [photometric and color LUT utilities](https://visgl.github.io/math.gl/nex
 
 ### Module structure[​](#module-structure "Direct link to Module structure")
 
-Version 5 groups related tools into six packages. Install the package root and use its focused entry points where available. See the [migration table](https://visgl.github.io/math.gl/next/docs/upgrade-guide.md#removed-standalone-packages) for the former package names.
+Version 5 groups related tools into eight packages. Install the package root and use its focused entry points where available. See the [migration table](https://visgl.github.io/math.gl/next/docs/upgrade-guide.md#removed-standalone-packages) for the former package names.
 
-| Package                                                                                        | Purpose                                                                          |
-| ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| [core](https://visgl.github.io/math.gl/next/docs/modules/core.md)                 | Vectors, matrices, rotations, types, and expressions                             |
-| [geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry.md)         | Primitives, polygons, geometry utilities, and culling                            |
-| [geospatial](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md)     | Ellipsoids, coordinate systems, projections, geometry formats, and tile matrices |
-| [earth](https://visgl.github.io/math.gl/next/docs/modules/earth.md)               | Geoid models, sky calculations, and timezones                                    |
-| [dggs](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)                 | Six grid systems behind a common decoder API                                     |
-| [web-mercator](https://visgl.github.io/math.gl/next/docs/modules/web-mercator.md) | Map viewport and Web Mercator calculations                                       |
+| Package                                                                                        | Purpose                                                        |
+| ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [core](https://visgl.github.io/math.gl/next/docs/modules/core.md)                 | Vectors, matrices, rotations, types, and expressions           |
+| [geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry.md)         | Primitives, polygons, geometry utilities, and culling          |
+| [geospatial](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md)     | Ellipsoids, coordinate systems, projections, and tile matrices |
+| [earth](https://visgl.github.io/math.gl/next/docs/modules/earth.md)               | Geoid models, sky calculations, and timezones                  |
+| [dggs](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)                 | Six grid systems behind a common decoder API                   |
+| [web-mercator](https://visgl.github.io/math.gl/next/docs/modules/web-mercator.md) | Map viewport and Web Mercator calculations                     |
+| [arrow](https://visgl.github.io/math.gl/next/docs/modules/arrow.md)               | Arrow views and transport, UTF-8, GeoArrow, and WKB/WKT        |
+| [tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks.md)               | Task scheduling, typed operations, and worker execution        |
 
 For detailed changes, see the [changelog](https://github.com/visgl/math.gl/blob/master/CHANGELOG.md).
 

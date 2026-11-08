@@ -10,7 +10,27 @@ Loading <!-- -->Frustum culling<!-- -->…
 
 ⛶⛶ Explore fullscreen
 
-## Feature Card[​](#feature-card "Direct link to Feature Card")
+## Usage[​](#usage "Direct link to Usage")
+
+```
+import {BoundingSphere, CullingVolume, Plane} from '@math.gl/geometry/culling';
+
+
+
+const volume = new CullingVolume([
+
+  new Plane([1, 0, 0], 1),  // x >= -1
+
+  new Plane([-1, 0, 0], 1)  // x <= 1
+
+]);
+
+const visibility = volume.computeVisibility(new BoundingSphere([0, 0, 0], 0.5));
+
+// 'inside'
+```
+
+## Features[​](#features "Direct link to Features")
 
 | Feature                                      | Support | Notes                                                                                                                                                                                                            |
 | -------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -45,24 +65,6 @@ npm install @math.gl/geometry
 ## Test visibility[​](#test-visibility "Direct link to Test visibility")
 
 Supply planes in the same coordinate space as the bounding volume. Plane normals face inward:
-
-```
-import {BoundingSphere, CullingVolume, Plane} from '@math.gl/geometry/culling';
-
-
-
-const volume = new CullingVolume([
-
-  new Plane([1, 0, 0], 1),  // x >= -1
-
-  new Plane([-1, 0, 0], 1)  // x <= 1
-
-]);
-
-const visibility = volume.computeVisibility(new BoundingSphere([0, 0, 0], 0.5));
-
-// 'inside'
-```
 
 A camera frustum can be represented by six planes. `computeVisibility()` returns `'outside'`, `'intersecting'`, or `'inside'`; render or refine intersecting objects as appropriate for the application. Plane masks allow children to skip tests already resolved by a parent's bounds.
 

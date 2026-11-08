@@ -88,7 +88,7 @@ Select once for a batch, then use the existing [pipeline](https://visgl.github.i
 
 Every candidate requires these fields:
 
-| Field                    | Meaning                                                                      |
+| Field                    | Description                                                                  |
 | ------------------------ | ---------------------------------------------------------------------------- |
 | `id`                     | Unique operation identifier within this catalogue                            |
 | `sourceCRS`, `targetCRS` | Exact directed CRS identities agreed by the application                      |

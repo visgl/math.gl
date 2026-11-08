@@ -3,13 +3,7 @@
 `@math.gl/geospatial` supplies strict angle text, standard/forced WGS84 UTM/UPS grid selection and MGRS cells. It reuses math.gl's existing transverse Mercator and polar stereographic kernels; it does not select a datum, epoch or vertical transformation. Angles are degrees, latitude precedes longitude, and projected distances are metres.
 
 ```
-import {
-
-  projectGrid, unprojectGrid, transferGrid, formatMGRS, parseMGRS,
-
-  parseGeographicCoordinates, formatGeographicCoordinates
-
-} from '@math.gl/geospatial';
+import {projectGrid, unprojectGrid, transferGrid, formatMGRS, parseMGRS, parseGeographicCoordinates, formatGeographicCoordinates} from '@math.gl/geospatial';
 
 
 

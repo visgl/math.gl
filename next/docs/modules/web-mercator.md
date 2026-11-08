@@ -10,21 +10,7 @@
 
 Geographic inputs use `[longitude, latitude]` in degrees, with optional altitude in metres. For CRS conversions beyond Web Mercator, use [projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md).
 
-## Feature Card[​](#feature-card "Direct link to Feature Card")
-
-| Feature                                            | Support | Notes                                                                                                                                                                                                        |
-| -------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Longitude/latitude and world-coordinate conversion | ✅      | [Coordinate utilities](https://visgl.github.io/math.gl/next/docs/modules/web-mercator/api-reference/web-mercator-utils.md) define spherical Mercator, zoom scales and projection/view matrices. |
-| EPSG:3857 metre-coordinate conversion              | ✅      | Explicit forward/inverse helpers distinguish metre coordinates from pixel-scaled world coordinates.                                                                                                          |
-| Zoom, pitch and bearing camera projection          | ✅      | [WebMercatorViewport](https://visgl.github.io/math.gl/next/docs/modules/web-mercator/api-reference/web-mercator-viewport.md) projects/unprojects geographic and screen positions.               |
-| Bounds fitting and viewport normalization          | ✅      | fitBounds, getBounds and normalized camera properties support explicit viewport/padding contracts.                                                                                                           |
-| Distance scales and metre offsets                  | ✅      | Latitude-dependent scale helpers and addMetersToLngLat support local approximations within documented limits.                                                                                                |
-| Fly-to interpolation                               | ✅      | flyToViewport and getFlyToDuration provide camera-path interpolation helpers.                                                                                                                                |
-| Ellipsoidal Mercator and arbitrary CRS cameras     | ❌      | This camera model is spherical Web Mercator; use the [projection module](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) for other CRS transforms.                  |
-| Terrain-depth and mesh intersection picking        | ❌      | Screen/plane unprojection is not a terrain/depth-buffer intersection engine.                                                                                                                                 |
-| General globe/flat rendering and GPU ownership     | ❌      | The public viewport API does not supply a complete globe renderer, shared render-state transition, or GPU resource lifecycle.                                                                                |
-
-## Example Usage[​](#example-usage "Direct link to Example Usage")
+## Usage[​](#usage "Direct link to Usage")
 
 ```
 npm install @math.gl/web-mercator
@@ -65,6 +51,20 @@ viewport.unproject([400, 300]);
 
 // returns map coordinates [-122.45, 37.78]
 ```
+
+## Features[​](#features "Direct link to Features")
+
+| Feature                                            | Support | Notes                                                                                                                                                                                                        |
+| -------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Longitude/latitude and world-coordinate conversion | ✅      | [Coordinate utilities](https://visgl.github.io/math.gl/next/docs/modules/web-mercator/api-reference/web-mercator-utils.md) define spherical Mercator, zoom scales and projection/view matrices. |
+| EPSG:3857 metre-coordinate conversion              | ✅      | Explicit forward/inverse helpers distinguish metre coordinates from pixel-scaled world coordinates.                                                                                                          |
+| Zoom, pitch and bearing camera projection          | ✅      | [WebMercatorViewport](https://visgl.github.io/math.gl/next/docs/modules/web-mercator/api-reference/web-mercator-viewport.md) projects/unprojects geographic and screen positions.               |
+| Bounds fitting and viewport normalization          | ✅      | fitBounds, getBounds and normalized camera properties support explicit viewport/padding contracts.                                                                                                           |
+| Distance scales and metre offsets                  | ✅      | Latitude-dependent scale helpers and addMetersToLngLat support local approximations within documented limits.                                                                                                |
+| Fly-to interpolation                               | ✅      | flyToViewport and getFlyToDuration provide camera-path interpolation helpers.                                                                                                                                |
+| Ellipsoidal Mercator and arbitrary CRS cameras     | ❌      | This camera model is spherical Web Mercator; use the [projection module](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md) for other CRS transforms.                  |
+| Terrain-depth and mesh intersection picking        | ❌      | Screen/plane unprojection is not a terrain/depth-buffer intersection engine.                                                                                                                                 |
+| General globe/flat rendering and GPU ownership     | ❌      | The public viewport API does not supply a complete globe renderer, shared render-state transition, or GPU resource lifecycle.                                                                                |
 
 ## Coordinate utilities[​](#coordinate-utilities "Direct link to Coordinate utilities")
 
