@@ -155,7 +155,7 @@ Returns a sliced indexed view over the same backing vector.
 
 Materializes visible values in indexed order, preserving duplicates and nulls.
 
-#### [Symbol.iterator]()
+#### `[Symbol.iterator]()`
 
 Iterates visible values in indexed order.
 
