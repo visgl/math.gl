@@ -12,7 +12,7 @@ import {turfBench} from '../../modules/geospatial/test/turf-bench';
 import {cullingBench} from '../../modules/geometry/test/culling/bench';
 import {polygonBench} from '../../modules/geometry/test/polygon/bench';
 import {projectionBench} from '../../modules/geospatial/test/projection/bench';
-import {geoarrowBench} from '../../modules/geospatial/test/geoarrow/bench';
+import {geoarrowBench} from '../../modules/arrow/test/geoarrow/bench';
 
 export default function addBenchmarks(suite: Bench, addReferenceBenchmarks: boolean): Bench {
   coreBench(suite, addReferenceBenchmarks);

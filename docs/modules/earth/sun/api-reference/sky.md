@@ -45,7 +45,7 @@ entry point. Required options are `phaseAngle` (0 full, PI new) and
 Atmosphere options below, `observerFactor` (default 2), and `horizonAltitude`
 (default 0) configure conditions.
 
-| Result | Meaning |
+| Result | Description |
 | --- | --- |
 | `illuminance` | Direct lunar illuminance in lux, on a surface facing the Moon. |
 | `horizontalIlluminance` | Direct lux on a horizontal surface. |

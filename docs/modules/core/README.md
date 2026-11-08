@@ -6,21 +6,29 @@
 
 `@math.gl/core` provides array-based vectors, matrices, quaternions, and coordinate helpers. Use it to compose transforms, rotate geometry, and work with reusable numeric objects.
 
-The optional [`@math.gl/core/arrow`](./arrow/README.md) entry provides Arrow table views, schema utilities, and buffer ownership helpers. Install Apache Arrow 17 or newer to use it.
+The separate [`@math.gl/arrow`](../arrow/README.md) entry provides Arrow table views, schema utilities, and buffer ownership helpers. Install Apache Arrow 17 or newer to use it.
 
-The optional [`@math.gl/core/utf8`](./utf8/README.md) entry provides byte-range comparison and scalar parsing without decoding strings.
+Its Arrow-independent [`@math.gl/arrow/utf8`](../arrow/utf8/README.md) entry provides byte-range comparison and scalar parsing without decoding strings.
 
-The optional [`@math.gl/core/tasks`](./tasks/README.md) entry provides typed worker processing, bounded scheduling, persistent resources, cancellation, and shared state.
+The optional [`@math.gl/tasks`](../tasks/README.md) entry provides typed worker processing, bounded scheduling, persistent resources, cancellation, and shared state.
 
 Shared types and expression parsing are available at `@math.gl/core` and
 `@math.gl/core`. The basic math expression library is included there; geospatial and
 DGGS expression functions live at `@math.gl/geospatial` and
 `@math.gl/dggs`.
 
-
 import Example from '@site/src/components/core-transforms';
 
-## Feature Card
+## Usage
+
+```js
+import {Vector2} from '@math.gl/core';
+const vector = new Vector2(1, 2);
+const x = vector[0];
+const y = vector[1];
+```
+
+## Features
 
 | Feature | Support | Notes |
 | --- | --- | --- |
@@ -29,7 +37,7 @@ import Example from '@site/src/components/core-transforms';
 | Rigid poses and local frames | ✅ | [Pose](./api-reference/pose.md) and [local frames](./api-reference/local-frame.md); units and coordinate conventions remain explicit. |
 | Spherical and spheroid coordinates | ✅ | [SphericalCoordinates](./api-reference/spherical-coordinates.md) and [spheroid conversions](./api-reference/spheroid.md) within their documented shape domains. |
 | Reusable outputs and numeric interoperability | ✅ | [MathArray](./api-reference/math-array.md) operations interoperate with arrays and typed arrays; individual methods document ownership. |
-| Expressions and worker execution | ✅ | Optional [expression](./expressions/README.md) and [task](./tasks/README.md) capabilities have their own contracts and feature cards. |
+| Expressions and worker execution | ✅ | Optional [expression](./expressions/README.md) and [task](../tasks/README.md) capabilities have their own contracts and feature cards. |
 | General dense/sparse linear algebra | ❌ | No public general-size QR/SVD, sparse factorization, or tensor engine. The matrix classes target graphics-sized transforms. |
 | Arbitrary-precision arithmetic and autodifferentiation | ❌ | Numerical classes use JavaScript numbers; no arbitrary-precision scalar or gradient-tape backend. |
 | Built-in SIMD, WASM, or GPU numeric backend | ❌ | CPU JavaScript math is implemented; accelerated numerical backends remain [roadmap research](https://github.com/visgl/math.gl/blob/master/dev-docs/ROADMAP.md). Worker scheduling is a separate capability. |
@@ -59,15 +67,6 @@ npm install @math.gl/core
 | `Pose` | Position and orientation with transformation matrices |
 | `Euler`                | 3 Euler angles and rotation order                     |
 | `SphericalCoordinates` | 2 rotations and a radius                              |
-
-## Usage
-
-```js
-import {Vector2} from '@math.gl/core';
-const vector = new Vector2(1, 2);
-const x = vector[0];
-const y = vector[1];
-```
 
 ## Conventions
 

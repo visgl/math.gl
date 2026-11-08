@@ -1,0 +1,44 @@
+{
+  "name": "@math.gl/tasks",
+  "description": "Typed task scheduling and worker execution",
+  "version": "5.0.0-beta.4",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "!src/**/README.md",
+    "README.md",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md",
+    "LOADERS-GL-LICENSE.txt"
+  ],
+  "sideEffects": false,
+  "browser": {
+    "./dist/worker-utils/lib/node/worker_threads.js": "./dist/worker-utils/lib/node/worker_threads-browser.js",
+    "./dist/worker-utils/lib/process-utils/child-process-proxy.js": "./dist/worker-utils/lib/process-utils/child-process-proxy.browser.js",
+    "./src/worker-utils/lib/node/worker_threads.ts": "./src/worker-utils/lib/node/worker_threads-browser.ts",
+    "./src/worker-utils/lib/process-utils/child-process-proxy.ts": "./src/worker-utils/lib/process-utils/child-process-proxy.browser.ts",
+    "child_process": false,
+    "fs": false,
+    "module": false,
+    "path": false
+  }
+}

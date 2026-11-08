@@ -73,7 +73,7 @@ Returns geocentric lunar illumination geometry:
 
 Options:
 
-| Option | Default | Meaning |
+| Option | Default | Description |
 | --- | --- | --- |
 | `phaseAngle` | `0` | Sun–Moon–Earth angle in `[0, Math.PI]`; default is full moon. |
 | `distance` | `384400` | Observer-to-Moon distance in km, at least 1737.4 km (lunar radius). |

@@ -562,3 +562,19 @@ main:has(.theme-doc-card-container) > .container { max-width: none; }
     flex-basis: 100%;
   }
 }
+
+/* Keep feature, parameter, and reference tables compact and readable. */
+.markdown table {
+  font-size: 0.875rem;
+  line-height: 1.35;
+  margin-bottom: 1rem;
+}
+
+.markdown table :is(th, td) {
+  padding: 0.3rem 0.55rem;
+  vertical-align: top;
+}
+
+.markdown h2[id^='features'] + table :is(th, td):nth-child(2) {
+  white-space: nowrap;
+}

@@ -2,9 +2,20 @@
 
 Earth models, sunlight, astronomy, and timezones, available as named exports from the package root.
 
+## Usage
+
 ```typescript
 import {Geoid, getSunPosition, getMoonPosition} from '@math.gl/earth';
 ```
+
+## Features
+
+| Feature | Support | Notes |
+| --- | --- | --- |
+| Geoid models | ✅ | Parse grids and compute height offsets; load optional datasets explicitly. |
+| Sun, Moon, and sky | ✅ | Observer-based positions, illumination, and lighting calculations. |
+| Timezone calculations | ✅ | Geographic lookup and local calendar operations. |
+| Automatic dataset fetching | ❌ | Applications control data loading and ownership. |
 
 ## API
 

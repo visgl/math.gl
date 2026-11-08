@@ -37,10 +37,14 @@ The grouped package entry points are:
 
 | Package | Subpaths |
 | --- | --- |
-| `@math.gl/core` | `/types`, `/expressions` |
-| `@math.gl/geometry` | `/utils`, `/curves`, `/polygon`, `/culling`, `/spatial-index` |
-| `@math.gl/geospatial` | `/ellipsoid`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`, `/wkb`, `/geoarrow`, `/expressions` |
-| `@math.gl/earth` | `/geoid`, `/sun`, `/timezone` |
+| `@math.gl/core` | `/expressions` |
+| `@math.gl/geometry` | `/culling`, `/lighting`, `/color` |
+| `@math.gl/geospatial` | `/crs`, `/projection`, `/terrain`, `/turf`, `/tasks` |
+| `@math.gl/earth` | `/sun`, `/timezone`, `/sun/stars`; optional geoid and timezone datasets |
+| `@math.gl/dggs` | Grid decoding and indexing at the package root |
+| `@math.gl/web-mercator` | Map viewport and camera calculations at the package root |
+| `@math.gl/arrow` | `/utf8`, `/geoarrow`, `/geoarrow-utils`, `/wkb` |
+| `@math.gl/tasks` | Task execution at the package root |
 
 The implementations live in these grouped packages. The former standalone leaf packages have
 been removed. `@math.gl/dggs` remains separate; `@math.gl/web-mercator` is retained for compatibility.

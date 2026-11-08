@@ -43,7 +43,7 @@ interrupted at every chart boundary. **Segmentation** describes how the map is
 constructed; **continuity** describes what happens across each seam; and
 **connectivity** describes whether the placed pieces remain joined together.
 
-| Arrangement | Example | Meaning |
+| Arrangement | Example | Description |
 | --- | --- | --- |
 | Joined charts forming one filled map | Peirce quincuncial | The hemisphere pieces meet at continuous joins to form a square. Cuts between the outer pieces lie on the square's perimeter; a line crossing one resumes at another edge. |
 | Connected map with open cuts | Berghaus star | The lobes join the central hemisphere, while cuts open between their outer edges. The map is connected despite those interruptions. |

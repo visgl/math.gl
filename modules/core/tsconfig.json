@@ -9,10 +9,7 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "dist",
-    "types": [
-      "node"
-    ]
+    "outDir": "dist"
   },
   "references": []
 }

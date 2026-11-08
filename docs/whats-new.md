@@ -8,6 +8,14 @@ Version 5.0 is in prerelease development. See the [upgrade guide](./upgrade-guid
 
 **Highlights:** a new projection engine; six grid systems behind one decoder API; WKB and GeoArrow geometry processing; and new tools for timezones and sky.
 
+### A separate Arrow package
+
+The optional [`@math.gl/arrow/geoarrow`](./modules/arrow/geoarrow/README.md)
+entry adapts Arrow 17+ fields/vectors to the existing geometry kernels without a loaders.gl
+schema dependency. Physical descriptors remain Arrow-independent at
+[`@math.gl/arrow/geoarrow-utils`](./modules/arrow/geoarrow-utils/README.md).
+The new runnable Arrow-table example complements the updated descriptor/task-worker example.
+
 ### Work across coordinate systems
 
 [Projection](./modules/geospatial/projection/README.md) has grown from a proj4 wrapper into a pluggable math.gl engine. Transform coordinates using a broad [projection catalogue](./modules/geospatial/projection/developer-guide/projections.md), with support for datum grids, coordinate operations, and in-place buffers. The new [CRS module](./modules/geospatial/crs/README.md) gives applications a shared vocabulary for coordinate reference systems, WKT, PROJ definitions, and PROJJSON.
@@ -20,7 +28,7 @@ The new [DGGS module](./modules/dggs/README.md) brings A5, GeoHash, H3, Plus Cod
 
 ### Move geometry from data to visualization
 
-Read and write WKB, EWKB, and WKT with [WKB](./modules/geospatial/wkb/README.md), or process columnar geometry with [GeoArrow](./modules/geospatial/geoarrow/README.md). [Geometry](./modules/geometry/README.md) and [geometry-utils](./modules/geometry/README.md) tools provide renderer-independent building blocks, including prisms, solid rings, and optional parametric shapes. [Polygon](./modules/geometry/polygon/README.md) can adaptively subdivide meshes and lines, including meshes for globes, while preserving attributes through refinement.
+Read and write WKB, EWKB, and WKT with [WKB](./modules/arrow/wkb/README.md), or process columnar geometry with [GeoArrow](./modules/arrow/geoarrow-utils/README.md). [Geometry](./modules/geometry/README.md) and [geometry-utils](./modules/geometry/README.md) tools provide renderer-independent building blocks, including prisms, solid rings, and optional parametric shapes. [Polygon](./modules/geometry/polygon/README.md) can adaptively subdivide meshes and lines, including meshes for globes, while preserving attributes through refinement.
 
 ### Bring globes to life
 
@@ -39,16 +47,18 @@ loaders.gl or other readers, and no dependencies are added.
 
 ### Module structure
 
-Version 5 groups related tools into six packages. Install the package root and use its focused entry points where available. See the [migration table](./upgrade-guide.md#removed-standalone-packages) for the former package names.
+Version 5 groups related tools into eight packages. Install the package root and use its focused entry points where available. See the [migration table](./upgrade-guide.md#removed-standalone-packages) for the former package names.
 
 | Package | Purpose |
 | --- | --- |
 | [core](./modules/core/README.md) | Vectors, matrices, rotations, types, and expressions |
 | [geometry](./modules/geometry/README.md) | Primitives, polygons, geometry utilities, and culling |
-| [geospatial](./modules/geospatial/README.md) | Ellipsoids, coordinate systems, projections, geometry formats, and tile matrices |
+| [geospatial](./modules/geospatial/README.md) | Ellipsoids, coordinate systems, projections, and tile matrices |
 | [earth](./modules/earth/README.md) | Geoid models, sky calculations, and timezones |
 | [dggs](./modules/dggs/README.md) | Six grid systems behind a common decoder API |
 | [web-mercator](./modules/web-mercator/README.md) | Map viewport and Web Mercator calculations |
+| [arrow](./modules/arrow/README.md) | Arrow views and transport, UTF-8, GeoArrow, and WKB/WKT |
+| [tasks](./modules/tasks/README.md) | Task scheduling, typed operations, and worker execution |
 
 For detailed changes, see the [changelog](https://github.com/visgl/math.gl/blob/master/CHANGELOG.md).
 

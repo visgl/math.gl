@@ -100,7 +100,7 @@ transforms after `preload()` or a successful coordinate call. Reading the proper
 never loads an algorithm. `createProjectionAsync()` returns it already prepared.
 The same snapshot object is reused. Grid callbacks and projection objects are excluded.
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `version` | Version of math.gl's pipeline semantics and this description schema; currently `1`. Reject unknown versions. |
 | `source`, `target` | Resolved CRS kind, projection parameters, algorithm identity, ellipsoid, datum, units, axes, prime meridian, longitude wrap, optional area of use, and lossy status. |

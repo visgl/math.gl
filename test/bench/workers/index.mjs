@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
-import {TaskRunner, preloadTasks} from '@math.gl/core/tasks';
+import {TaskRunner, preloadTasks} from '@math.gl/tasks';
 import {readFile, writeFile} from 'node:fs/promises';
 import {cpus} from 'node:os';
 import {Worker} from 'node:worker_threads';

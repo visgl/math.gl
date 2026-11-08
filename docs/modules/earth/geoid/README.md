@@ -8,7 +8,21 @@ The `@math.gl/earth` module evaluates geoid heights from Earth gravity model gri
 
 import GeoidGlobe from '@site/src/components/geoid-globe';
 
-## Feature Card
+## Usage
+
+```js
+import { parsePGM } from "@math.gl/earth";
+import gridUrl from "@math.gl/earth/geoid/geoid-egm96-hi.pgm?url";
+
+const response = await fetch(gridUrl);
+if (!response.ok) throw new Error(`Grid request failed: ${response.status}`);
+const geoid = parsePGM(new Uint8Array(await response.arrayBuffer()), {
+  cubic: true,
+});
+const N = geoid.getHeight(51.5, 0); // latitude, longitude; meters
+```
+
+## Features
 
 | Feature | Support | Notes |
 | --- | --- | --- |
@@ -47,18 +61,6 @@ for visualization; use the high grid for height conversion. The original grid's
 interpolation error estimates do not apply to the preview.
 
 With a bundler supporting asset URL imports (such as Vite):
-
-```js
-import { parsePGM } from "@math.gl/earth";
-import gridUrl from "@math.gl/earth/geoid/geoid-egm96-hi.pgm?url";
-
-const response = await fetch(gridUrl);
-if (!response.ok) throw new Error(`Grid request failed: ${response.status}`);
-const geoid = parsePGM(new Uint8Array(await response.arrayBuffer()), {
-  cubic: true,
-});
-const N = geoid.getHeight(51.5, 0); // latitude, longitude; meters
-```
 
 In Node.js, resolve the asset with
 `import.meta.resolve('@math.gl/earth/geoid/geoid-egm96-hi.pgm')` and read it using

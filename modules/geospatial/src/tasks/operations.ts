@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {MapEngine, type MapDescription, type MapEngineOptions} from '../discontinuous/map-engine';
 import type {CreateProjectionOptions, ProjectionArray, Projection} from '../projection/types';
-import type {TaskContext} from '@math.gl/core/tasks';
+import type {TaskContext} from '@math.gl/tasks';
 type OperationContext = Partial<Omit<TaskContext<unknown>, 'state'>>;
 
 export type BulkProjectionTask = {

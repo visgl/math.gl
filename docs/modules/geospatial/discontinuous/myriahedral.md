@@ -38,7 +38,7 @@ Returns a `MyriahedralMap`, a subclass of [DiscontinuousMap](./README.md).
 It supports the same point, line, polygon, seam, layout-fitting, and inverse APIs,
 and exposes its `layout`. `new MyriahedralMap(options)` is equivalent.
 
-| Option | Default | Meaning |
+| Option | Default | Description |
 | --- | --- | --- |
 | `preset` | `'cylindric'` | Cut strategy listed below |
 | `columns` | `48` | Graticule resolution: multiple of four from 12 through 96; half as many latitude rows |

@@ -4,6 +4,26 @@
 
 Start with the package mapping below, then check the API changes for the modules you use. See [What’s New](./whats-new.md#v50) for the highlights.
 
+### Binary data and geometry utilities moved to @math.gl/arrow
+
+These utilities are now owned by a separate package. Install `@math.gl/arrow` and
+update the imports below; core and geospatial no longer forward these exports.
+
+| Previous import | New import |
+| --- | --- |
+| `@math.gl/core/arrow` | `@math.gl/arrow` |
+| `@math.gl/core/utf8` | `@math.gl/arrow/utf8` |
+| `@math.gl/geospatial/geoarrow` physical descriptors | `@math.gl/arrow/geoarrow-utils` |
+| `@math.gl/geospatial/geoarrow-utils` | `@math.gl/arrow/geoarrow-utils` |
+| `@math.gl/geospatial` WKB/WKT exports | `@math.gl/arrow/wkb` |
+| `@math.gl/geospatial` GeoArrow descriptor exports | `@math.gl/arrow/geoarrow-utils` |
+
+Use `@math.gl/arrow/geoarrow` for real Arrow fields and vectors. Only the package
+root and `/geoarrow` require the optional Apache Arrow 17+ peer; `/utf8`, `/wkb`,
+and `/geoarrow-utils` work without it. Descriptor `spatialReference` values are now
+opaque; use geospatial CRS APIs when interpreting them. Task execution also moves from `@math.gl/core/tasks` to `@math.gl/tasks`.
+See the [task migration guide](./modules/tasks/developer-guide/migration.md).
+
 ### Migrating to root exports
 
 The APIs below moved to package or capability roots. The old API subpaths are no
@@ -51,10 +71,10 @@ collisions below. Projection catalogs and data assets retain their paths.
 | `@math.gl/geospatial/crs/wkt` | `@math.gl/geospatial/crs` |
 | `@math.gl/geospatial/ellipsoid` | `@math.gl/geospatial` |
 | `@math.gl/geospatial/expressions` | `@math.gl/geospatial` |
-| `@math.gl/geospatial/geoarrow/builder` | `@math.gl/geospatial/geoarrow` |
-| `@math.gl/geospatial/geoarrow/tessellation` | `@math.gl/geospatial/geoarrow` |
-| `@math.gl/geospatial/geoarrow/wkb` | `@math.gl/geospatial/geoarrow` |
-| `@math.gl/geospatial/geoarrow/worker` | `@math.gl/geospatial/geoarrow` |
+| `@math.gl/geospatial/geoarrow/builder` | `@math.gl/arrow/geoarrow-utils` |
+| `@math.gl/geospatial/geoarrow/tessellation` | `@math.gl/arrow/geoarrow-utils` |
+| `@math.gl/geospatial/geoarrow/wkb` | `@math.gl/arrow/geoarrow-utils` |
+| `@math.gl/geospatial/geoarrow/worker` | `@math.gl/arrow/geoarrow-utils` |
 | `@math.gl/geospatial/geodesic-buffer` | `@math.gl/geospatial` |
 | `@math.gl/geospatial/geodesic-exact` | `@math.gl/geospatial` |
 | `@math.gl/geospatial/geographic-atlas` | `@math.gl/geospatial` |
@@ -84,12 +104,13 @@ collisions below. Projection catalogs and data assets retain their paths.
 | `@math.gl/geospatial/tiles` | `@math.gl/geospatial` |
 | `@math.gl/geospatial/triaxial` | `@math.gl/geospatial` |
 | `@math.gl/geospatial/web-mercator` | `@math.gl/geospatial` |
-| `@math.gl/geospatial/wkb` | `@math.gl/geospatial` |
+| `@math.gl/geospatial/wkb` | `@math.gl/arrow/wkb` |
 
 `@math.gl/geospatial/terrain`, `@math.gl/geospatial/crs`,
-`@math.gl/geospatial/geoarrow`, `@math.gl/geometry/culling`,
+`@math.gl/arrow/geoarrow-utils`, `@math.gl/geometry/culling`,
 `@math.gl/earth/sun`, and `@math.gl/earth/timezone` remain capability roots.
-Their public APIs are also available as named exports from the package root.
+Geospatial capability roots retain their documented root exports. Arrow utility
+subpaths are independent entries; their symbols are not collected in the Arrow root.
 The `@math.gl/earth/sun/stars` catalog entry and data asset paths remain.
 
 Matrix, quaternion and vector modules share names such as `create` and
@@ -140,7 +161,7 @@ Import `subdivideGlobeMesh` and its options from `@math.gl/geospatial`; they are
 | `@math.gl/crs` | `@math.gl/geospatial` | `@math.gl/geospatial/crs` |
 | `@math.gl/projection` | `@math.gl/geospatial` | `@math.gl/geospatial/projection` |
 | `@math.gl/wkb` | `@math.gl/geospatial` | `@math.gl/geospatial` |
-| `@math.gl/geoarrow` | `@math.gl/geospatial` | `@math.gl/geospatial/geoarrow` |
+| `@math.gl/geoarrow` | `@math.gl/geospatial` | `@math.gl/arrow/geoarrow-utils` |
 | `@math.gl/geoid` | `@math.gl/earth` | `@math.gl/earth` |
 | `@math.gl/sun` | `@math.gl/earth` | `@math.gl/earth/sun` |
 | `@math.gl/timezone` | `@math.gl/earth` | `@math.gl/earth/timezone` |

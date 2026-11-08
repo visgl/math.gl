@@ -38,7 +38,7 @@ An array of indices into the `positions` array that describes the triangulation 
 ## Implementation and performance
 
 The custom implementation incorporates the general-purpose optimizations from
-[loaders.gl's WKB triangulator](https://github.com/visgl/loaders.gl/blob/5cbc82c81c78e297cfdc5e04b3aefc97bc3d0ba5/modules/core/src/arrow-geometry/triangulate-wkb.ts):
+[loaders.gl's WKB triangulator](https://github.com/visgl/loaders.gl/blob/5cbc82c81c78e297cfdc5e04b3aefc97bc3d0ba5/modules/arrow/src/arrow-geometry/triangulate-wkb.ts):
 reusable vertex nodes and hole queues, direct vertex indices in the clipping loop,
 and a combined coordinate-reading and signed-area pass when areas are not supplied.
 WKB header parsing, binary ring layouts, and little-endian decoding remain specific

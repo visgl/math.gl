@@ -13,7 +13,7 @@
 
 ## v5.0.0-beta.3
 
-- **Breaking:** Replace the legacy public worker/task API families with `TaskRunner`, typed task objects, and `initializeTaskWorker`. Remove top-level task functions, worker-utils exports, worker resource wrappers, and geospatial worker subpaths; use `@math.gl/geospatial/tasks` for provided tasks. Input copying is the default, explicit handles retain worker state, and advanced pool controls are no longer public. See [task migration](docs/modules/core/tasks/developer-guide/migration.md) (#411, #414).
+- **Breaking:** Replace the legacy public worker/task API families with `TaskRunner`, typed task objects, and `initializeTaskWorker`. Remove top-level task functions, worker-utils exports, worker resource wrappers, and geospatial worker subpaths; use `@math.gl/geospatial/tasks` for provided tasks. Input copying is the default, explicit handles retain worker state, and advanced pool controls are no longer public. See [task migration](docs/modules/tasks/developer-guide/migration.md) (#411, #414).
 - feat(tasks): Add global code-only `preloadTasks`, nested preload hooks, synchronous `runTaskSync` execution, and detailed task capability guidance (#417).
 - fix(core): Discover MessageChannel ports in transfer lists and support copying worker output (#407, #409).
 - feat(terrain): Add sampled profile and horizon visibility, radial visibility, vertex tile halos and invalidation, incremental halos, and filtered raster pyramids (#412, #413, #415, #416).

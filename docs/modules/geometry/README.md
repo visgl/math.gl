@@ -24,7 +24,19 @@ and spatial indexes. Their reference pages are grouped by topic in the sidebar.
 
 Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](./lighting/README.md). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
 
-## Feature Card
+## Usage
+
+```js
+import {SphereGeometry} from '@math.gl/geometry';
+
+const geometry = new SphereGeometry({radius: 1});
+const positions = geometry.attributes.POSITION.value;
+const indices = geometry.indices?.value;
+```
+
+Pass these CPU buffers to the renderer of your choice. The module does not create GPU resources.
+
+## Features
 
 | Feature | Support | Notes |
 | --- | --- | --- |
@@ -47,18 +59,6 @@ Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths pro
 ```bash
 npm install @math.gl/geometry
 ```
-
-## Usage
-
-```js
-import {SphereGeometry} from '@math.gl/geometry';
-
-const geometry = new SphereGeometry({radius: 1});
-const positions = geometry.attributes.POSITION.value;
-const indices = geometry.indices?.value;
-```
-
-Pass these CPU buffers to the renderer of your choice. The module does not create GPU resources.
 
 ## API
 

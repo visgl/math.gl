@@ -51,7 +51,7 @@ Earth, the Sun, Earth's Moon, dwarf planets and other satellites are not include
 
 ## Rendering data
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `name`, `parent` | Body name; `parent` is `'Jupiter'` for the moons and `null` for planets. |
 | `direction` | Outward observer-to-body unit vector in local east/north/up (ENU). |
@@ -106,7 +106,7 @@ threshold while a magnitude +1 planet does not.
 The same options are accepted by `getPlanetVisibility`, `options.visibility` in
 `getPlanetSkyInfo`, and `getPlanetVisibilityTimes`:
 
-| Option | Default | Meaning |
+| Option | Default | Description |
 | --- | --- | --- |
 | `darkSkyLimitingMagnitude` | 6 | Faintest extincted magnitude at a fully dark sky; lower it for light pollution or poorer observing conditions. |
 | `extinction` | 0.2 | Visual magnitudes lost per air mass; range 0–5. |
@@ -155,7 +155,7 @@ assuming local midnight. `durationHours` defaults to 24, must be greater than ze
 and cannot exceed 72. `elevation` uses the same meters and range as `getPlanetSkyInfo`.
 Both ends of the window must remain within the supported observation years.
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `name` | Planet name. Galilean moons are not included in this naked-eye event search. |
 | `riseTime`, `setTime` | Next conventional rise and set within the window, in Unix milliseconds; `null` if no corresponding event occurs. |

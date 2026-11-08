@@ -14,7 +14,30 @@ transformation boundaries, and cross-library integration in depth.
 For definitions of surface models, paths, reference systems, and distortion properties,
 see [Geospatial terminology](../developer-guide/terminology.md).
 
-## Feature Card
+## Usage
+
+```ts
+import type {CRSDefinition, PROJJSONCRS} from '@math.gl/geospatial/crs';
+
+const authorityCode: CRSDefinition = 'EPSG:4326';
+const projString: CRSDefinition = '+proj=longlat +datum=WGS84 +no_defs';
+const wkt2: CRSDefinition = 'GEOGCRS["WGS 84", /* ... */]';
+
+const projjson: PROJJSONCRS = {
+  type: 'GeographicCRS',
+  name: 'WGS 84',
+  datum: {
+    name: 'World Geodetic System 1984',
+    ellipsoid: {
+      name: 'WGS 84',
+      semi_major_axis: 6378137,
+      inverse_flattening: 298.257223563
+    }
+  }
+};
+```
+
+## Features
 
 | Feature | Support | Notes |
 | --- | --- | --- |
@@ -45,27 +68,6 @@ npm install @math.gl/geospatial
 ## Definition model
 
 `CRSDefinition` accepts either a string serialization or a strict PROJJSON CRS object:
-
-```ts
-import type {CRSDefinition, PROJJSONCRS} from '@math.gl/geospatial/crs';
-
-const authorityCode: CRSDefinition = 'EPSG:4326';
-const projString: CRSDefinition = '+proj=longlat +datum=WGS84 +no_defs';
-const wkt2: CRSDefinition = 'GEOGCRS["WGS 84", /* ... */]';
-
-const projjson: PROJJSONCRS = {
-  type: 'GeographicCRS',
-  name: 'WGS 84',
-  datum: {
-    name: 'World Geodetic System 1984',
-    ellipsoid: {
-      name: 'WGS 84',
-      semi_major_axis: 6378137,
-      inverse_flattening: 298.257223563
-    }
-  }
-};
-```
 
 The string aliases (`CRSIdentifier`, `WKTCRSDefinition`, and `PROJStringDefinition`) document
 intent but are all structurally `string`. Call the appropriate parser when syntax needs to be

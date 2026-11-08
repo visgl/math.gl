@@ -12,7 +12,23 @@ Utilities for processing renderer-independent geometry stored in typed arrays. T
 designed for loaders and applications that need to inspect, normalize, or decode geometry without
 depending on a WebGL or WebGPU runtime.
 
-## Feature Card
+## Usage
+
+```typescript
+import {GL, computeVertexNormals, octDecode} from '@math.gl/geometry';
+import {Vector3} from '@math.gl/core';
+
+const normals = computeVertexNormals({
+  mode: GL.TRIANGLES,
+  attributes: {
+    POSITION: {value: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]), size: 3}
+  }
+});
+
+const decodedNormal = octDecode(128, 128, new Vector3());
+```
+
+## Features
 
 | Feature | Support | Notes |
 | --- | --- | --- |
@@ -29,22 +45,6 @@ depending on a WebGL or WebGPU runtime.
 
 ```bash
 npm install @math.gl/geometry
-```
-
-## Usage
-
-```typescript
-import {GL, computeVertexNormals, octDecode} from '@math.gl/geometry';
-import {Vector3} from '@math.gl/core';
-
-const normals = computeVertexNormals({
-  mode: GL.TRIANGLES,
-  attributes: {
-    POSITION: {value: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]), size: 3}
-  }
-});
-
-const decodedNormal = octDecode(128, 128, new Vector3());
 ```
 
 ## Mesh processing

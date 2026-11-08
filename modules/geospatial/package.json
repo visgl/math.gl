@@ -48,11 +48,6 @@
       "import": "./dist/projection/index.js",
       "require": "./dist/projection/index.cjs"
     },
-    "./geoarrow": {
-      "types": "./dist/geoarrow/index.d.ts",
-      "import": "./dist/geoarrow/index.js",
-      "require": "./dist/geoarrow/index.cjs"
-    },
     "./crs/projjson.schema.json": "./src/crs/projjson.schema.json",
     "./projection/datums": {
       "types": "./dist/projection/datums.d.ts",
@@ -1040,8 +1035,10 @@
   ],
   "dependencies": {
     "@mapbox/martini": "0.2.0",
+    "@math.gl/arrow": "5.0.0-beta.4",
     "@math.gl/core": "5.0.0-beta.4",
     "@math.gl/geometry": "5.0.0-beta.4",
+    "@math.gl/tasks": "5.0.0-beta.4",
     "@math.gl/web-mercator": "5.0.0-beta.4",
     "polygon-clipping": "0.15.7"
   },

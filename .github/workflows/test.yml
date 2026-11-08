@@ -174,8 +174,8 @@ jobs:
       - name: Check task runtime exports and execution routes
         run: |
           yarn check:tasks
-          node examples/core/task-runner/main.mjs
-          node examples/core/task-runner/geospatial.mjs
+          yarn workspace math.gl-task-runner start
+          yarn workspace math.gl-task-runner geospatial
 
       - name: Qualify worker scheduling, ownership and lifecycle workloads
         run: node test/bench/workers/index.mjs --quick --output=/tmp/worker-qualification.json
@@ -253,7 +253,9 @@ jobs:
         run: yarn check:geodesic-path-package
 
       - name: Check GeoArrow package boundary
-        run: yarn check:geoarrow-boundary
+        run: |
+          yarn check:geoarrow-boundary
+          yarn check:geoarrow-api
 
       - name: Check timezone package boundaries and public types
         run: |
@@ -446,7 +448,7 @@ jobs:
       - name: Test isolated shared-memory worker state
         env:
           MATHGL_TEST_SHARED_MEMORY: '1'
-        run: yarn vitest run --project headless modules/core/test/worker-utils/browser.spec.ts
+        run: yarn vitest run --project headless modules/tasks/test/worker-utils/browser.spec.ts
 
       - name: Run headless tests with coverage
         run: yarn test-coverage

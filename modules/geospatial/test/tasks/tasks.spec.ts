@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
 const isBrowser = typeof process === 'undefined' || !process.versions?.node;
-import {TaskRunner, preloadTasks} from '@math.gl/core/tasks';
+import {TaskRunner, preloadTasks} from '@math.gl/tasks';
 import {ProjectCoordinatesTask, PrepareMapTask} from '@math.gl/geospatial/tasks';
 import {MapEngine} from '@math.gl/geospatial/discontinuous/map-engine';
 

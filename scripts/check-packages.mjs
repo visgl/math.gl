@@ -8,11 +8,11 @@ import {createRequire} from 'node:module';
 
 const root = new URL('../', import.meta.url);
 const require = createRequire(import.meta.url);
-const expected = ['core', 'dggs', 'earth', 'geometry', 'geospatial', 'web-mercator'];
+const expected = ['arrow', 'core', 'dggs', 'earth', 'geometry', 'geospatial', 'tasks', 'web-mercator'];
 const modules = readdirSync(new URL('modules/', root)).filter(name =>
   existsSync(new URL(`modules/${name}/package.json`, root))
 );
-assert.deepEqual(modules.sort(), expected, 'Only the six consolidated workspace packages may remain');
+assert.deepEqual(modules.sort(), expected, 'Published workspace packages must match the supported package set');
 const packageNames = new Set(expected.map(name => '@math.gl/' + name));
 let entrypoints = 0;
 for (const name of expected) {
@@ -61,7 +61,7 @@ for (const packageName of ['@math.gl/core', '@math.gl/geometry', '@math.gl/geosp
 }
 assert.equal('subdivideGlobeMesh' in await import('@math.gl/geometry'), false);
 assert.equal(typeof (await import('@math.gl/geospatial')).subdivideGlobeMesh, 'function');
-console.log(`${entrypoints} ESM/CommonJS entrypoints and all published assets/declarations passed across the six packages.`);
+console.log(`${entrypoints} ESM/CommonJS entrypoints and all published assets/declarations passed across the eight packages.`);
 
 await import('./check-terrain-package.mjs');
 await import('./check-root-exports.mjs');

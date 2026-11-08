@@ -2,10 +2,12 @@
 
 Sources live in `examples/<module>/<example-name>`, grouped by the published math.gl package. Projects declare their dependencies and keep application code local. Reusable UI components and helpers may be imported from [`examples/common`](common/); this is the exception to the example-local source rule.
 
-- **@math.gl/core**: [core-transforms](core/core-transforms), [expressions](core/expressions), [task-runner](core/task-runner)
+- **@math.gl/core**: [core-transforms](core/core-transforms), [expressions](core/expressions)
 - **@math.gl/geometry**: [culling-playground](geometry/culling-playground), [culling-queries](geometry/culling-queries), [curves](geometry/curves), [geometry-processing](geometry/geometry-processing), [geometry-viewer](geometry/geometry-viewer), [parametric-geometry](geometry/parametric-geometry), [polygon-playground](geometry/polygon-playground), [spatial-index](geometry/spatial-index), [unfolding-polyhedron](geometry/unfolding-polyhedron)
-- **@math.gl/geospatial**: [albers-usa](geospatial/albers-usa), [alpine-ice-age](geospatial/alpine-ice-age), [elastic-maps](geospatial/elastic-maps), [geoarrow-stream-worker](geospatial/geoarrow-stream-worker), [geographic-tiles](geospatial/geographic-tiles), [globe-primitives](geospatial/globe-primitives), [myriahedral-maps](geospatial/myriahedral-maps), [proj-wasm-crs](geospatial/proj-wasm-crs), [projection-domains](geospatial/projection-domains), [raster-mesh-preparation](geospatial/raster-mesh-preparation), [wkb-workbench](geospatial/wkb-workbench), [quincuncial-star](geospatial/quincuncial-star), [tectonic-time-machine](geospatial/tectonic-time-machine), [terrain-sampling](geospatial/terrain-sampling), [zoom-driven-map-morphing](geospatial/zoom-driven-map-morphing)
+- **@math.gl/geospatial**: [albers-usa](geospatial/albers-usa), [alpine-ice-age](geospatial/alpine-ice-age), [elastic-maps](geospatial/elastic-maps), [geographic-tiles](geospatial/geographic-tiles), [globe-primitives](geospatial/globe-primitives), [myriahedral-maps](geospatial/myriahedral-maps), [proj-wasm-crs](geospatial/proj-wasm-crs), [projection-domains](geospatial/projection-domains), [raster-mesh-preparation](geospatial/raster-mesh-preparation), [quincuncial-star](geospatial/quincuncial-star), [tectonic-time-machine](geospatial/tectonic-time-machine), [terrain-sampling](geospatial/terrain-sampling), [zoom-driven-map-morphing](geospatial/zoom-driven-map-morphing)
 - **@math.gl/earth**: [geoid-globe](earth/geoid-globe), [sun-terminator](earth/sun-terminator), [timezone-globe](earth/timezone-globe)
+- **@math.gl/arrow**: [geoarrow-table](arrow/geoarrow-table), [geoarrow-stream-worker](arrow/geoarrow-stream-worker), [wkb-workbench](arrow/wkb-workbench)
+- **@math.gl/tasks**: [task-runner](tasks/task-runner)
 
 After installing dependencies and building packages from the repository root, run `yarn start` from an example directory, or use its workspace name from the repository root, for example `yarn workspace math.gl-core-transforms start`.
 
@@ -20,3 +22,5 @@ To refresh gallery thumbnails and existing documentation copies, start the websi
 Simple demos include the collapsible panels InfoBox shell within their own source directories. Controls stay live when collapsed and release their panel managers on unmount. Tectonics and ice age keep their specialized application layouts; the expression editor retains its dedicated workspace.
 
 - **@math.gl/dggs**: [DGGS cell explorer](dggs/cell-explorer)
+- **@math.gl/arrow**: [geoarrow-table](arrow/geoarrow-table), [geoarrow-stream-worker](arrow/geoarrow-stream-worker), [wkb-workbench](arrow/wkb-workbench)
+- **@math.gl/tasks**: [task-runner](tasks/task-runner)

@@ -5,7 +5,33 @@ on numerical tables. They have no parser, image codec, renderer or new dependenc
 The core root does not re-export them. Applications can use measurements from any
 source that conforms to the models below.
 
-## Feature Card
+## Usage
+
+```typescript
+import {
+  createPhotometricSampler,
+  integrateLuminousFlux,
+  resamplePhotometricProfile
+} from '@math.gl/geometry/lighting';
+import type {PhotometricProfile} from '@math.gl/geometry/lighting';
+
+const profile: PhotometricProfile = {
+  verticalAngles: [0, 90, 180],
+  horizontalAngles: [0],
+  intensities: [0, 100, 0],
+  symmetry: 'rotational'
+};
+const sample = createPhotometricSampler(profile);
+const candela = sample(45, 120); // vertical, horizontal, in degrees
+const lumens = integrateLuminousFlux(profile);
+const grid = resamplePhotometricProfile(profile, {
+  verticalCount: 181,
+  horizontalCount: 360,
+  normalization: 'peak'
+});
+```
+
+## Features
 
 | Feature | Support | Contract |
 | --- | --- | --- |
@@ -23,7 +49,7 @@ source that conforms to the models below.
 file encoding. Angles are degrees, and scaled intensities are candela. There is no
 world-axis convention: the application chooses the pole and azimuth origin.
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `verticalAngles` | Ordered polar coordinates within `[0, 180]` |
 | `horizontalAngles` | Ordered azimuth coordinates within `[0, 360]` |
@@ -51,30 +77,6 @@ the angular coverage rejects.
 
 ## Sampling and integration
 
-```typescript
-import {
-  createPhotometricSampler,
-  integrateLuminousFlux,
-  resamplePhotometricProfile
-} from '@math.gl/geometry/lighting';
-import type {PhotometricProfile} from '@math.gl/geometry/lighting';
-
-const profile: PhotometricProfile = {
-  verticalAngles: [0, 90, 180],
-  horizontalAngles: [0],
-  intensities: [0, 100, 0],
-  symmetry: 'rotational'
-};
-const sample = createPhotometricSampler(profile);
-const candela = sample(45, 120); // vertical, horizontal, in degrees
-const lumens = integrateLuminousFlux(profile);
-const grid = resamplePhotometricProfile(profile, {
-  verticalCount: 181,
-  horizontalCount: 360,
-  normalization: 'peak'
-});
-```
-
 `createPhotometricSampler` snapshots the input arrays and applies `intensityScale`
 once. Later source mutations do not affect the sampler. It interpolates bilinearly
 between measured knots. Vertical queries must be finite and within `[0, 180]`;
@@ -93,7 +95,7 @@ adjustments. Invalid inputs and numeric overflow reject.
 
 `resamplePhotometricProfile(profile, options)` returns `PhotometricGrid`:
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `width`, `height` | Vertical samples per row and horizontal rows |
 | `data` | Float64 samples, indexed as `horizontalIndex * width + verticalIndex` |

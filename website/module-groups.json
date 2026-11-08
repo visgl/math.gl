@@ -2,10 +2,9 @@
   {
     "id": "foundations",
     "label": "Foundations",
-    "description": "Vectors, matrices, task execution, shared numeric types and expression evaluation.",
+    "description": "Vectors, matrices, shared numeric types, and expression evaluation.",
     "modules": [
       "core",
-      "core/tasks",
       "core/types",
       "core/expressions"
     ]
@@ -31,9 +30,7 @@
       "geospatial",
       "geospatial/crs",
       "geospatial/projection",
-      "web-mercator",
-      "geospatial/geoarrow",
-      "geospatial/wkb"
+      "web-mercator"
     ]
   },
   {
@@ -53,6 +50,26 @@
     "description": "A separate module for discrete global grid systems.",
     "modules": [
       "dggs"
+    ]
+  },
+  {
+    "id": "arrow",
+    "label": "Arrow",
+    "description": "Binary data, Arrow interoperability, and GeoArrow geometry representations.",
+    "modules": [
+      "arrow",
+      "arrow/utf8",
+      "arrow/geoarrow",
+      "arrow/geoarrow-utils",
+      "arrow/wkb"
+    ]
+  },
+  {
+    "id": "tasks",
+    "label": "Tasks",
+    "description": "Scheduling, typed operations, and worker execution.",
+    "modules": [
+      "tasks"
     ]
   }
 ]

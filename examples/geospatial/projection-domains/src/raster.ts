@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {GeoProjection} from 'd3-geo';
-import type {GeoArrowStreamMesh} from '@math.gl/geospatial/geoarrow';
+import type {GeoArrowStreamMesh} from '@math.gl/arrow/geoarrow-utils';
 
 export type Vertex = [number, number, number, number]; // target x/y, source u/v
 export type RasterKind = 'world' | 'rotated' | 'polar';

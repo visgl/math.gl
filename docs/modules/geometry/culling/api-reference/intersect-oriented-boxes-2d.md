@@ -32,7 +32,7 @@ and type for convenience; existing root-package dependencies are unchanged.
 `OrientedBox2D` is structural, not a class. Each field accepts a numeric array, typed array or
 math.gl vector with exactly two finite components:
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `center` | Rectangle center in a shared coordinate system. |
 | `halfSize` | Nonnegative half-width and half-height in that system's units. |

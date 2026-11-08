@@ -7,7 +7,7 @@ import {
   createTypedTaskDispatcher,
   type Task,
   type TaskOperation
-} from '@math.gl/core/tasks';
+} from '@math.gl/tasks';
 type SceneOperations = {
   count: TaskOperation<{source: string}, number>;
   find: TaskOperation<{id: number}, {name: string} | null>;
@@ -223,35 +223,35 @@ runner.runTask(atomicOptionsOnly, {value: 1});
 
 // Removed API families fail at the public package boundary.
 // @ts-expect-error removed public API
-import {runTask} from '@math.gl/core/tasks';
+import {runTask} from '@math.gl/tasks';
 // @ts-expect-error removed public API
-import {runTaskInBatches} from '@math.gl/core/tasks';
+import {runTaskInBatches} from '@math.gl/tasks';
 // @ts-expect-error removed public API
-import {TaskDescriptor} from '@math.gl/core/tasks';
+import {TaskDescriptor} from '@math.gl/tasks';
 // @ts-expect-error removed public API
-import {TaskOptions} from '@math.gl/core/tasks';
+import {TaskOptions} from '@math.gl/tasks';
 // @ts-expect-error removed public API
-import {TaskExecution} from '@math.gl/core/tasks';
+import {TaskExecution} from '@math.gl/tasks';
 // @ts-expect-error removed public API
-import {MainThreadPolicy} from '@math.gl/core/tasks';
+import {MainThreadPolicy} from '@math.gl/tasks';
 // @ts-expect-error removed public API
-import {WorkerPool} from '@math.gl/core/tasks';
+import {WorkerPool} from '@math.gl/tasks';
 // @ts-expect-error removed public API
-import {WorkerFarm} from '@math.gl/core/tasks';
+import {WorkerFarm} from '@math.gl/tasks';
 // @ts-expect-error removed public API
-import {WorkerBody} from '@math.gl/core/tasks';
+import {WorkerBody} from '@math.gl/tasks';
 // @ts-expect-error removed public API
-import {WorkerObject} from '@math.gl/core/tasks';
+import {WorkerObject} from '@math.gl/tasks';
 // @ts-expect-error removed public API
-import {createWorker} from '@math.gl/core/tasks';
+import {createWorker} from '@math.gl/tasks';
 // @ts-expect-error removed public API
-import {createWorkerResource} from '@math.gl/core/tasks';
+import {createWorkerResource} from '@math.gl/tasks';
 // @ts-expect-error removed public API
-import {processOnWorker} from '@math.gl/core/tasks';
+import {processOnWorker} from '@math.gl/tasks';
 // @ts-expect-error removed public API
-import {getTransferList} from '@math.gl/core/tasks';
+import {getTransferList} from '@math.gl/tasks';
 // @ts-expect-error the old package entry is removed
-import * as removedWorkers from '@math.gl/core/worker-utils';
+import * as removedWorkers from '@math.gl/tasks/worker-utils';
 void removedWorkers;
 // @ts-expect-error the old geospatial worker entry is removed
 import * as removedGeospatialWorkers from '@math.gl/geospatial/workers';
