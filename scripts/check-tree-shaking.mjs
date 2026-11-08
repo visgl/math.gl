@@ -20,7 +20,7 @@ const probes = [
   {symbol:'getStarColor', packages:['@math.gl/earth'], forbidden:[/astronomy-engine/, /bright-stars/], budget:700},
   {symbol:'getGalacticAcceleration', packages:['@math.gl/earth'], forbidden:[/astronomy-engine/, /bright-stars/], budget:1200},
   {symbol:'getTimezoneOffset', packages:['@math.gl/earth'], forbidden:[/astronomy-engine/, /tz-lookup/, /bright-stars/], budget:1500},
-  {symbol:'parseWKB', packages:['@math.gl/geospatial'], forbidden:[/martini/, /delatin/, /surface\./, /geometry\//], budget:4500},
+  {symbol:'parseWKB', packages:['@math.gl/arrow/wkb'], forbidden:[/martini/, /delatin/, /surface\./, /geometry\//, /geospatial\//, /tasks\//, /apache-arrow/], budget:4500},
   {
     symbol: 'createCRSDescriptor',
     packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial'],
