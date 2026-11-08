@@ -1,9 +1,18 @@
 # Arrow utilities
 
-`@math.gl/core/arrow` provides schema validation, column renaming, indexed table
-views, and table transport for Apache Arrow JS. It is independent of loaders.gl
-and its schema model. Geometry and GeoArrow processing belong in the geospatial
-module.
+![Apache Arrow](./images/apache-arrow-logo.png)
+
+`@math.gl/core/arrow` provides utilities for working with binary columnar tabular
+data in the Apache Arrow format.
+
+## Why Arrow in math.gl?
+
+The vis.gl frameworks are designed to seamlessly produce, interchange, and process
+binary data in Arrow format. These shared utilities provide schema validation,
+column renaming, indexed table views, and table transport across those frameworks.
+
+Geometry and GeoArrow processing are available in
+[`@math.gl/geospatial/geoarrow`](../../geospatial/geoarrow/README.md).
 
 ## Installation
 

@@ -1,9 +1,14 @@
 # UTF-8 utilities
 
-`@math.gl/core/utf8` compares UTF-8 byte ranges and parses ASCII scalar values without
-materializing JavaScript strings. Use it with typed arrays, Arrow string buffers,
-or other UTF-8 storage. The subpath has no runtime dependencies; Apache Arrow and
-loaders.gl are not required.
+`@math.gl/core/utf8` helps applications work efficiently with binary UTF-8 strings
+without materializing JavaScript strings.
+
+- **String comparison:** Compares UTF-8 strings as byte ranges.
+- **Scalar parsing:** Parses ASCII scalar values.
+
+Use it with typed arrays, Arrow Utf8 buffers, or other UTF-8 storage.
+
+The `@math.gl/core/utf8` subpath has no runtime dependencies; Apache Arrow is not required.
 
 ## Usage
 

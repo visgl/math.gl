@@ -1,5 +1,7 @@
 # Arrow-backed GeoArrow
 
+<img src={require('./images/geoarrow-logo.png').default} alt="GeoArrow" width="128" />
+
 `@math.gl/geospatial/geoarrow` connects real Apache Arrow JS fields and vectors to
 math.gl's columnar geometry operations. It reads GeoArrow extension metadata and
 adapts physical buffers to the Arrow-independent kernels in
