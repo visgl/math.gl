@@ -1,27 +1,36 @@
 # Reusing initialized state
 
-Use `runner.initializeTask(task, initialization)` when multiple operations should
-share a projection, dataset, spatial index, or WebAssembly instance. Ordinary
-runner calls initialize automatically and release their state after the operation.
+If repeated calls use the same projection, dataset, or spatial index, prepare it
+once and keep it ready. `initializeTask` returns a **handle**: an object you use to
+call that task again with the same setup and execution location.
+
+Ordinary runner calls manage setup and cleanup automatically. Use an explicit
+handle when reusing that setup is worth keeping its worker or local state alive.
+Using the imports from the [getting-started guide](./task-runner.md):
 
 ```ts
-const projectionTask = await runner.initializeTask(ProjectCoordinatesTask, {
-  projection: {from: 'EPSG:4326', to: 'EPSG:3857'}
-});
+const runner = new TaskRunner();
 try {
-  const {coordinates} = await projectionTask.runTask({
-    coordinates: new Float64Array([10, 20])
+  const projectionTask = await runner.initializeTask(ProjectCoordinatesTask, {
+    projection: {from: 'EPSG:4326', to: 'EPSG:3857'}
   });
-  console.log(coordinates);
+  try {
+    const {coordinates} = await projectionTask.runTask({
+      coordinates: new Float64Array([10, 20])
+    });
+    console.log(coordinates);
+  } finally {
+    await projectionTask.close();
+  }
 } finally {
-  await projectionTask.close();
+  await runner.close();
 }
 ```
 
-The handle is bound to its task and execution location. Its calls are serial by default;
-atomic, multiple-input, and streaming methods share state. Each handle retains
-one runner slot, including while idle. Close it before awaiting another operation
-on a runner with capacity one.
+Call the handle without passing the task again: it is already bound to that task.
+Calls run one at a time by default and reuse its state. Each handle occupies one
+runner slot, even between calls. With the default capacity of one, close or reuse
+the handle before awaiting another operation through the runner.
 
 Tasks construct state in `initialize` and release it in `destroy`. Processors
 receive it as `context.state`. Worker failure, cancellation, or early worker-stream
@@ -30,9 +39,10 @@ completion preserves state. See [lifecycle semantics](../api-reference/task-runn
 
 ## Overlapping operations
 
-Initialized tasks remain serialized unless both the task declares a concurrency
-limit and the caller opts in with `operationConcurrency`. A task may classify
-atomic inputs as `parallel` or `exclusive`; exclusive operations are barriers.
+Most applications can keep the default, one-call-at-a-time behavior. To overlap
+asynchronous operations on shared state, both the task and the caller must opt in:
+the task declares a concurrency limit and the caller sets `operationConcurrency`. A task may classify
+atomic inputs as `parallel` or `exclusive`; exclusive operations wait for earlier calls and hold later calls until they finish.
 Omitted classifications are exclusive. Both main-thread and worker execution
 support concurrency; worker operations share one physical worker and state.
 Cancellation of active overlapping work invalidates the instance and aborts its

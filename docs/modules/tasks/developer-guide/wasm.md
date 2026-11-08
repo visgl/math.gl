@@ -1,8 +1,11 @@
 # WebAssembly in tasks
 
-Compile or instantiate a WebAssembly module in a task's `initialize` hook, retain
-it as `context.state`, and release application-owned allocations in `destroy`.
-Use an explicit handle when several calls should reuse the instance.
+A worker task can run a WebAssembly calculation while the application stays
+responsive. Create the WASM instance in `initialize`, use it through `context.state`
+in the processor, and release any application-owned allocations in `destroy`.
+An [initialized handle](./persistent-resources.md) lets several calls reuse it.
+
+The following task assumes a compiled module with an exported `process` function:
 
 ```ts
 import {type Task} from '@math.gl/tasks';

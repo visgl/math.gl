@@ -1,16 +1,21 @@
 # Migrating to TaskRunner
 
-This is a breaking API change. `@math.gl/core/worker-utils`,
-`@math.gl/geospatial/workers`, and `@math.gl/geospatial/workers/operations`
-are no longer exported. The task entry no longer re-exports transport internals.
-There is no compatibility entry or forwarding shim. Applications pinned to an
-older package version are unaffected; upgrading requires migrating imports and calls.
+If your application uses an earlier worker API, start by updating its imports,
+then choose the runner method that matches how it processes data. New applications
+can go straight to [getting started](./task-runner.md).
+
+The previous worker entries and top-level task functions have been removed in this
+breaking update. Applications staying on an older package version are unaffected.
 
 ## Update the package import
 
 Install `@math.gl/tasks` and replace `@math.gl/core/tasks` imports with
 `@math.gl/tasks`. Core no longer exports the task entry. Provided task catalogs
 retain their domain imports, such as `@math.gl/geospatial/tasks`.
+
+Imports from `@math.gl/core/worker-utils`, `@math.gl/geospatial/workers`, and
+`@math.gl/geospatial/workers/operations` have been removed. Use the replacements
+below rather than importing private implementation files.
 
 ## Replace calls and definitions
 
@@ -88,7 +93,7 @@ or `{create, capabilities}` in a browser; choose one target form.
 
 ## Intentionally removed advanced controls
 
-These are removals, not renamed settings. Passing old fields does not enable them.
+These features need application-level replacements; they are not enabled by renaming old options.
 
 | Old capability | Migration |
 | --- | --- |
