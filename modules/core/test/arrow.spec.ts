@@ -97,6 +97,14 @@ test('ArrowUtils#IndexedArrowTable validates and adopts indexes', () => {
     RangeError
   );
 });
+test('ArrowUtils#IndexedArrowTable preserves nulls when serializing temporary rows', () => {
+  const table = new arrow.Table({name: arrow.vectorFromArray(['alpha', null], new arrow.Utf8())});
+  const indexedTable = new IndexedArrowTable(table, [1, 0]);
+  expect(indexedTable.getTemporaryRow(0)?.name).toBeNull();
+  expect(JSON.parse(JSON.stringify(indexedTable.getTemporaryRow(0)))).toEqual({name: null});
+  expect(indexedTable.getTemporaryRow(1)?.name).toBe('alpha');
+});
+
 test('ArrowUtils#IndexedArrowTable supports temporary rows and array-like transforms', () => {
   const table = createTestTable();
   const indexedTable = new IndexedArrowTable(table);
