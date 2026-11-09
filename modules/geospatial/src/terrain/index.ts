@@ -104,3 +104,6 @@ export {stitchTerrainMeshEdges} from './mesh-stitch';
 export type {TerrainSeamMesh, TerrainMeshStitchOptions} from './mesh-stitch';
 export {weldTerrainMixedContourTiles} from './contour-mixed-weld';
 export type {TerrainMixedContourTile, TerrainMixedContourWeldOptions} from './contour-mixed-weld';
+
+export {createTerrainMixedVertexTileHalos} from './mixed-vertex-halos';
+export type {TerrainMixedVertexTile} from './mixed-vertex-halos';

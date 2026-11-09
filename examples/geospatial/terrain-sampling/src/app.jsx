@@ -7,6 +7,7 @@ import ExamplePanel from '../../../common/example-panel';
 import {createTerrain, project, sampleLabel, TerrainSampleStatus} from './model';
 import TerrainAnalysis from './analysis';
 import MeshLab from './mesh-lab';
+import SeamExplorer from './seam-explorer';
 import './styles.css';
 
 export default function TerrainSampling() {
@@ -127,6 +128,7 @@ export default function TerrainSampling() {
         </svg>
         <TerrainAnalysis field={terrain.field} />
         <MeshLab />
+        <SeamExplorer />
       </div>
       <ExamplePanel title="Terrain sampling">
         <label>

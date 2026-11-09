@@ -142,6 +142,12 @@ const probes = [
       ...['vertex-tiles', 'mesh-stitch', 'tiled', 'mesh'].filter(name => name !== entry).map(name => new RegExp(`/terrain/${name}\\.`))]
   })),
   {
+    symbol: 'createTerrainMixedVertexTileHalos',
+    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/derivatives\./, /\/vertex-halos\./],
+    budget: 16000
+  },
+  {
     symbol: 'createTerrainVertexTileHalos',
     packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/derivatives\./],

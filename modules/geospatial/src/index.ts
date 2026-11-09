@@ -298,3 +298,6 @@ export type {
   TerrainMixedContourTile,
   TerrainMixedContourWeldOptions
 } from './terrain/contour-mixed-weld';
+
+export {createTerrainMixedVertexTileHalos} from './terrain/mixed-vertex-halos';
+export type {TerrainMixedVertexTile} from './terrain/mixed-vertex-halos';

@@ -1273,3 +1273,39 @@ by the regular builder; adaptive builders require complete samples. The
 times separately from error measurement. Nodal measurements and these small
 fixture timings provide neither continuous-surface certificates nor regional
 throughput estimates.
+
+### Mixed-resolution derivative halos
+
+`createTerrainMixedVertexTileHalos(tiles, {maxSamples, maxTileTests})` prepares detached,
+vertex-registered fields with a one-node border for `createTerrainGradientGrid` (Horn
+or Zevenbergen–Thorne). Import it from `@math.gl/geospatial/terrain` or
+`@math.gl/geospatial`; it does not bundle derivative, mesh or rendering code.
+
+Each tile supplies `{column, row, spacing, field}`. Addresses are integer coordinates
+in a common finest-level lattice, **not tile indices**; spacing is a positive
+power of two in lattice units. All fields must describe the same affine metric
+frame and height reference. Tile dimensions may differ. Results are sorted by
+spacing, column, then row. Duplicate addresses at the same spacing are rejected.
+
+The finest resident tile owns each requested point, including shared boundaries
+and overlapping interiors. Equal resolutions use column/row order. Samples use
+that owner's piecewise-linear triangle surface, including its diagonal. Exact nodes
+are read directly; interpolated heights require only nonzero-weight support, so
+neighboring nodata does not unnecessarily invalidate a valid node or edge. Nodata in
+an owner never falls back to a coarser source. Status bytes use
+`TerrainVertexHaloStatus`: 0 not resident, 1 nodata, 2 valid. No extrapolation or
+hole filling occurs. Source buffers are unchanged. Missing stencils remain invalid.
+
+Output fields have width/height increased by two, tightly packed Float64 heights,
+validity masks and shifted origins. Original tile nodes occupy rows/columns 1
+through the original dimensions. Compose with `new HeightField(tile.field)` and
+`createTerrainGradientGrid`; crop to those nodes when consuming derivative grids.
+Rebuild from the current tile snapshot after arrivals, evictions or edits.
+
+The default limits are four million padded samples and ten million source-tile
+containment tests. Exceeding either throws. These are bounded snapshot operations,
+not a spatial index or incremental mixed-level cache. Plane gradients are exact
+up to roundoff; curved surfaces can retain derivative differences across different
+stencil resolutions. This API does not certify normal continuity or repair source
+height discontinuities. The terrain sampling example includes an interactive seam
+explorer for ratios, residency, nodata and derivative methods.

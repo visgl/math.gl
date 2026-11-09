@@ -26,3 +26,8 @@ statuses, never zero elevations. Derivatives are displayed only when valid.
 
 Run `yarn start-local` inside the math.gl repository to use workspace source.
 Run `yarn start` to use package exports or `yarn build` for a production bundle.
+
+The mixed-resolution seam explorer shows a fine tile's resampled halo and derivative
+vectors. Switch between 2:1 and 4:1 neighbors, Horn and Zevenbergen–Thorne methods,
+plane/curved surfaces, nodata and residency. Missing stencils stay unavailable;
+curved surfaces expose the limits of derivative agreement across resolution changes.
