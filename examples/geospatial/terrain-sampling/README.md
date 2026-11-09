@@ -49,3 +49,9 @@ A slider replays real-DEM patch arrivals, a local edit, eviction and restoration
 The edit explorer reports persistent hierarchy block/byte copies alongside the
 existing dirty-region diagnostics. Streaming qualification uses full projected
 metadata; the small browser replay intentionally uses unit sample spacing.
+
+The coordinated transition/band explorer combines a coarse patch with two fine
+neighbors. Adjust independent morph factors at 2:1/4:1 resolution, inspect the shared
+corner delta, and toggle missing coarse support. Bands use the reconciled displayed
+surface. The example explicitly reports expanded transition samples because the CPU
+reference uses a bounded common-lattice tessellation.

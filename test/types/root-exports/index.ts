@@ -37,11 +37,14 @@ import {
   createTerrainLodMorph,
   evaluateTerrainLodMorph,
   TerrainMorphStatus,
+  coordinateTerrainLodMorphs,
+  createTerrainMixedIsobands,
   createTerrainMixedVertexTileHalos,
   createTerrainVertexTileHalos,
   createTerrainFilteredPyramid,
   createCRSResolver,
-  type TerrainGridMesh
+  type TerrainGridMesh,
+  type TerrainMixedSurface
 } from '@math.gl/geospatial';
 import {parseWKB} from '@math.gl/arrow/wkb';
 import {
@@ -57,7 +60,8 @@ import {
   type TerrainVertexHaloTile,
   type TerrainProfileHorizonOptions,
   type TerrainProfileVisibility,
-  type TerrainGridMesh as TerrainMesh
+  type TerrainGridMesh as TerrainMesh,
+  type TerrainMixedSurface as TerrainSurface
 } from '@math.gl/geospatial/terrain';
 import {prepareGeoArrowTransfer} from '@math.gl/arrow/geoarrow-utils';
 import {createCRSResolver as crsResolver} from '@math.gl/geospatial/crs';
@@ -104,6 +108,8 @@ void [
   createTerrainLodMorph,
   evaluateTerrainLodMorph,
   TerrainMorphStatus,
+  coordinateTerrainLodMorphs,
+  createTerrainMixedIsobands,
   createTerrainMixedVertexTileHalos,
   createTerrainVertexTileHalos,
   createTerrainFilteredPyramid,
@@ -120,6 +126,8 @@ void [
 ];
 const typeChecks: [
   UtilityGeometry?,
+  TerrainMixedSurface?,
+  TerrainSurface?,
   SkySnapshotOptions?,
   TerrainGridMesh?,
   TerrainMesh?,

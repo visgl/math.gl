@@ -56,3 +56,11 @@ These are exact data-copy counters for this workload, not measured total allocat
 traffic or a claim of the same RSS reduction. Shared block directories still copy
 references, and initialization still constructs temporary flat levels. Provider
 metadata and source checksums are retained in each case record.
+
+`node scripts/qualify-terrain-coordination.mjs` evaluates 24 real-DEM transition/band
+cases: three height fixtures, 2:1/4:1 layouts and four independent factor schedules.
+It verifies every duplicated shared knot and compares total interval-band area with
+coordinated regular-triangle coverage, including nodata. XY intentionally uses unit
+sample spacing; source provenance is in the fixture documentation. Expanded sample
+counts expose the cost of the bounded common-lattice reference. Single-run timings
+are diagnostic, not sparse-LOD or regional-throughput claims.
