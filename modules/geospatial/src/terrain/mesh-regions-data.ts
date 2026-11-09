@@ -50,7 +50,7 @@ export function updateMeshRegions<T extends TerrainGridMesh | null>(
       if (!Number.isSafeInteger(count) || count > limit)
         throw new Error('Terrain mesh region sample capacity exceeded');
       let affected = !reusable;
-      for (const w of dirty) {
+      for (const w of reusable ? dirty : []) {
         if (++tests > budget) throw new Error('Terrain mesh region work budget exceeded');
         if (
           w.minColumn <= column + width - 1 &&

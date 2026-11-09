@@ -221,3 +221,16 @@ test('hierarchy work budgets include selection and recomputation together', () =
     /budget/
   );
 });
+
+test('mesh initialization and configuration resets do not charge unused dirty comparisons', () => {
+  const f = field(),
+    dirty = [{minColumn: 2, maxColumn: 2, minRow: 2, maxRow: 2}];
+  const initial = updateTerrainMeshRegions(null, f, dirty, {cellsPerRegion: 4, maxTests: 0});
+  expect(initial.rebuilt.length).toBe(4);
+  expect(
+    updateTerrainMeshRegions(initial, f, dirty, {cellsPerRegion: 2, maxTests: 0}).rebuilt.length
+  ).toBe(16);
+  expect(() =>
+    updateTerrainMeshRegions(null, f, [{...dirty[0], minColumn: -1}], {maxTests: 0})
+  ).toThrow(/window/);
+});
