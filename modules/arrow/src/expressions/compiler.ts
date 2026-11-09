@@ -408,7 +408,7 @@ function bindBinary(ast: any, options: ArrowExpressionOptions): Node {
             y = b.get(row) as any;
           if (x === null || y === null) return null;
           if (comparison) return compare(op, x, y);
-          if ((op === '/' || op === '%') && (y === 0 || y === 0n))
+          if (integer && (op === '/' || op === '%') && (y === 0 || y === 0n))
             throw new RangeError('Division by zero');
           const result =
             op === '+'

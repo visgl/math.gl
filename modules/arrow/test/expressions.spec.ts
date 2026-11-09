@@ -371,3 +371,15 @@ test('signed literals bind to the operand or function argument type', () => {
     )
   ]).toEqual([-128, -128]);
 });
+
+test('floating-point zero divisors retain IEEE results while integer division is checked', () => {
+  const input = batch({x: vectorFromArray([1, -1, 0, null], new Float64())});
+  expect(values('x / 0', input)).toEqual([Infinity, -Infinity, NaN, null]);
+  expect(values('x / -0', input)).toEqual([-Infinity, Infinity, NaN, null]);
+  expect(values('x % 0', input)).toEqual([NaN, NaN, NaN, null]);
+  const narrow = batch({x: vectorFromArray([1, 0], new Float32())});
+  expect(values('x / 0', narrow)).toEqual([Infinity, NaN]);
+  const integer = batch({x: vectorFromArray([1], new Int32())});
+  expect(values('toFloat64(x) / 0', integer)).toEqual([Infinity]);
+  expect(() => values('x % 0', integer)).toThrow('Division by zero');
+});

@@ -99,7 +99,7 @@ Referenced inputs support signed/unsigned integers, Float32/Float64, Bool and Ut
 Computed outputs use ordinary vectors. Int64 and Uint64 values use bigint. Integer arithmetic checks
 bounds rather than wrapping; integer division truncates toward zero and division/remainder by zero
 throws. Checked integer conversions reject fractional or out-of-range results. Explicit conversion
-from bigint to Float64 can round. Float32 intermediates round to Float32 at each operation. Floating comparisons retain IEEE NaN behavior.
+from bigint to Float64 can round. Float32 intermediates round to Float32 at each operation. Floating arithmetic and comparisons retain IEEE behavior, including Infinity and NaN for zero divisors.
 
 UTF-8 comparison uses unsigned byte order without locale collation. String parsing operates on Arrow
 byte ranges and uses the existing UTF-8 helpers' decimal/Boolean grammar. Invalid text becomes null;
