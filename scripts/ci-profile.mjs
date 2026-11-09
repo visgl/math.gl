@@ -26,28 +26,27 @@ export function selectProfile(event, paths = []) {
     paths.every(path => /^(docs\/|dev-docs\/|README\.md$|CHANGELOG\.md$|LICENSE$)/.test(path));
   return {
     full,
-    performance: event === 'pull_request' && !docsOnly,
+    performance: ['pull_request', 'merge_group'].includes(event) && !docsOnly,
     browsers: full ? ['chromium', 'firefox', 'webkit'] : ['chromium']
   };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const event = process.env.EVENT_NAME;
-  if (!['pull_request', 'push', 'schedule', 'workflow_dispatch'].includes(event)) {
+  if (!['pull_request', 'merge_group', 'push', 'schedule', 'workflow_dispatch'].includes(event)) {
     throw new Error(`Unsupported CI event: ${event}`);
   }
-  const paths =
-    event === 'pull_request'
-      ? execFileSync(
-          'git',
-          ['diff', '--no-renames', '--name-only', '-z', process.env.BASE_SHA, 'HEAD'],
-          {
-            encoding: 'utf8'
-          }
-        )
-          .split('\0')
-          .filter(Boolean)
-      : [];
+  const paths = ['pull_request', 'merge_group'].includes(event)
+    ? execFileSync(
+        'git',
+        ['diff', '--no-renames', '--name-only', '-z', process.env.BASE_SHA, 'HEAD'],
+        {
+          encoding: 'utf8'
+        }
+      )
+        .split('\0')
+        .filter(Boolean)
+    : [];
   const profile = selectProfile(event, paths);
   appendFileSync(
     process.env.GITHUB_OUTPUT,

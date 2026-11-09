@@ -14,10 +14,10 @@ import {checkResults} from './ci-gate.mjs';
 const workflow = readFileSync(new URL('../.github/workflows/test.yml', import.meta.url), 'utf8');
 
 test('ordinary PRs retain Chromium; nightly and manual runs exercise the full matrix', () => {
-  for (const event of ['pull_request', 'push'])
+  for (const event of ['pull_request', 'merge_group', 'push'])
     assert.deepEqual(selectProfile(event, ['modules/core/src/vector3.ts']), {
       full: false,
-      performance: event === 'pull_request',
+      performance: ['pull_request', 'merge_group'].includes(event),
       browsers: ['chromium']
     });
   for (const event of ['schedule', 'workflow_dispatch'])
@@ -50,7 +50,7 @@ test('changes to qualification definitions and shared tooling validate the full 
     assert.equal(selectProfile('pull_request', [path]).full, true, path);
 });
 
-function results(event, full, performance = event === 'pull_request') {
+function results(event, full, performance = ['pull_request', 'merge_group'].includes(event)) {
   return Object.fromEntries(
     [
       'plan',
@@ -71,7 +71,9 @@ function results(event, full, performance = event === 'pull_request') {
             ? 'skipped'
             : 'success',
         ...(name === 'plan'
-          ? {outputs: {full: String(full), performance: String(performance)}}
+          ? {
+              outputs: {full: String(full), performance: String(performance)}
+            }
           : {})
       }
     ])
@@ -79,10 +81,12 @@ function results(event, full, performance = event === 'pull_request') {
 }
 
 test('aggregate gate rejects a failed, cancelled, missing or unexpectedly skipped worker', () => {
-  for (const [event, full, performance = event === 'pull_request'] of [
+  for (const [event, full, performance = ['pull_request', 'merge_group'].includes(event)] of [
     ['pull_request', false, false],
     ['pull_request', false],
     ['pull_request', true],
+    ['merge_group', false],
+    ['merge_group', true],
     ['push', false],
     ['schedule', true],
     ['workflow_dispatch', true]
@@ -165,7 +169,7 @@ test('a missing performance decision cannot silently skip comparisons', () => {
   assert(checkResults(results('schedule', true, true), 'schedule').length);
   assert.match(
     workflow,
-    /if: github.event_name == 'pull_request' && needs.plan.outputs.performance == 'true'/
+    /if: \(github.event_name == 'pull_request' \|\| github.event_name == 'merge_group'\) && needs.plan.outputs.performance == 'true'/
   );
 });
 
@@ -183,7 +187,9 @@ test('renaming a qualification helper into docs retains both source-path gates',
     git('config', 'user.email', 'fixture@example.invalid');
     git('config', 'diff.renames', 'true');
     const source = 'modules/geospatial/test/projection/native-forward-reference.ts';
-    mkdirSync(join(directory, 'modules/geospatial/test/projection'), {recursive: true});
+    mkdirSync(join(directory, 'modules/geospatial/test/projection'), {
+      recursive: true
+    });
     writeFileSync(join(directory, source), 'export const reference = 42;\n');
     git('add', '.');
     git('commit', '-m', 'reference');
@@ -196,7 +202,12 @@ test('renaming a qualification helper into docs retains both source-path gates',
     const output = join(directory, 'outputs');
     execFileSync(process.execPath, [fileURLToPath(new URL('./ci-profile.mjs', import.meta.url))], {
       cwd: directory,
-      env: {...process.env, EVENT_NAME: 'pull_request', BASE_SHA: base, GITHUB_OUTPUT: output}
+      env: {
+        ...process.env,
+        EVENT_NAME: 'pull_request',
+        BASE_SHA: base,
+        GITHUB_OUTPUT: output
+      }
     });
     const profile = readFileSync(output, 'utf8');
     assert.match(profile, /^performance=true$/m);
@@ -204,4 +215,16 @@ test('renaming a qualification helper into docs retains both source-path gates',
   } finally {
     rmSync(directory, {recursive: true, force: true});
   }
+});
+
+test('merge groups use the combined diff base and keep independent concurrency', () => {
+  assert.match(workflow, /merge_group:\n    types: \[checks_requested\]/);
+  assert.match(
+    workflow,
+    /github.event.pull_request.base.sha \|\| github.event.merge_group.base_sha/
+  );
+  assert.match(workflow, /github.event_name.*github.event.pull_request.number \|\| github.ref/);
+  assert.equal(selectProfile('merge_group', ['.github/workflows/test.yml']).full, true);
+  assert.equal(selectProfile('merge_group', ['docs/README.md']).performance, false);
+  assert.equal(selectProfile('merge_group', []).performance, true);
 });
