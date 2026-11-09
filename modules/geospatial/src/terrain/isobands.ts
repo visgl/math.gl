@@ -73,10 +73,29 @@ export function createTerrainIsobands(
       dy = f.origin[1] - frame.origin[1];
     const determinant =
       frame.columnStep[0] * frame.rowStep[1] - frame.columnStep[1] * frame.rowStep[0];
-    const x = (dx * frame.rowStep[1] - dy * frame.rowStep[0]) / determinant,
-      y = (dy * frame.columnStep[0] - dx * frame.columnStep[1]) / determinant;
+    const x = Math.round((dx * frame.rowStep[1] - dy * frame.rowStep[0]) / determinant),
+      y = Math.round((dy * frame.columnStep[0] - dx * frame.columnStep[1]) / determinant);
     if (!Number.isSafeInteger(x) || !Number.isSafeInteger(y))
       throw new Error('Isoband tiles require integral lattice origins');
+    for (let axis = 0; axis < 2; axis++) {
+      const a = x * frame.columnStep[axis],
+        b = y * frame.rowStep[axis];
+      const expected = frame.origin[axis] + a + b;
+      const tolerance = Math.min(
+        16 *
+          Number.EPSILON *
+          Math.max(
+            1,
+            Math.abs(f.origin[axis]),
+            Math.abs(frame.origin[axis]),
+            Math.abs(a),
+            Math.abs(b)
+          ),
+        1e-9 * Math.max(Math.abs(frame.columnStep[axis]), Math.abs(frame.rowStep[axis]))
+      );
+      if (!Number.isFinite(expected) || Math.abs(f.origin[axis] - expected) > tolerance)
+        throw new Error('Isoband tiles require integral lattice origins');
+    }
     return {x, y, right: x + f.width - 1, top: y + f.height - 1};
   });
   for (let i = 0; i < rectangles.length; i++)

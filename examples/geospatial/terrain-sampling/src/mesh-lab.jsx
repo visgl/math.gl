@@ -21,7 +21,7 @@ export default function MeshLab() {
   const {mesh, error, errors, milliseconds, description, unsupported} = useMemo(() => {
     const data = getMeshLabData(dataset);
     const field = new HeightField(data);
-    if (dataset === 'holes' && algorithm !== 'regular')
+    if (field.validCount !== field.width * field.height && algorithm !== 'regular')
       return {unsupported: true, description: data.description};
     const start = performance.now();
     const mesh =

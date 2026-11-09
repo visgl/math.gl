@@ -125,3 +125,32 @@ test('all 3x3 nodata masks conserve the area of the surviving triangle surface',
     }
   }
 });
+
+test('conforming decimal-resolution tiles tolerate inverse-transform roundoff', () => {
+  const make = (x: number) =>
+    new HeightField({
+      width: 6,
+      height: 2,
+      origin: [x, 0],
+      columnStep: [0.1, 0],
+      rowStep: [0, 0.1],
+      heights: new Float64Array(12).fill(1)
+    });
+  const bands = createTerrainIsobands([make(0), make(0.5)], [0, 2]);
+  expect(bands.parents.length).toBe(1);
+  expect(area(bands)).toBeCloseTo(0.1, 12);
+  expect(() => createTerrainIsobands([make(0), make(0.500001)], [0, 2])).toThrow(/lattice/);
+});
+
+test('large translated decimal frames recover a forward-verified lattice address', () => {
+  const make = (x: number) =>
+    new HeightField({
+      width: 2,
+      height: 2,
+      origin: [x, 500000],
+      columnStep: [0.1, 0],
+      rowStep: [0, 0.1],
+      heights: new Float64Array(4).fill(1)
+    });
+  expect(createTerrainIsobands([make(500000), make(500000.1)], [0, 2]).parents.length).toBe(1);
+});
