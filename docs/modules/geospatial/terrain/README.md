@@ -1346,3 +1346,51 @@ infer holes from contour direction. Every level participates in XY topology.
 validation is quadratic in edge count and intended for bounded batches. Existing
 `maxDistanceTests` and contour capacities still apply. `topologyTests` and `rejected`
 provide diagnostics. The simpler approximate API remains available independently.
+
+### Elevation isobands
+
+`createTerrainIsobands(fields, levels, options)` clips each valid regular-grid triangle
+to successive elevation intervals and assembles footprint polygons. Inputs are
+`HeightField` instances in a common affine metric frame; multiple fields must be
+non-overlapping, conforming same-resolution patches with integral lattice origins.
+Canonical shared edges cancel across tile boundaries. Mixed-resolution fields must
+be reconciled before polygonization. Conflicting shared heights are rejected.
+
+Output `positions` contains world XY pairs; `indices` and `offsets` delimit closed
+rings, `bandIndices` identifies each ring's interval, and `parents` is -1 for an outer
+ring or the containing outer ring's index for a hole. Outer rings are counterclockwise
+and holes clockwise in world XY. Boundary edges follow domain limits and omitted
+nodata triangles. This is the declared triangle surface, not bilinear interpolation.
+Constant-height triangles at internal thresholds belong to the upper interval; the
+last upper endpoint is included. Adjacent bands share their boundary geometry.
+
+Options bound levels (default 256), input triangles (default two million), generated vertices (two million),
+processed polygon edges (six times the triangle cap; twelve million by default)
+and work tests (32 times the triangle cap; 64 million by default); exhausted budgets
+throw. Budgets accumulate across bands, including cancelled internal edges; the
+triangle cap is input admission, not a promise that every multi-band output fits the
+other independent limits. Raise explicit limits for denser/more numerous bands.
+Ring assembly uses deterministic angular routing at point contacts. Exact
+conforming coordinates are required; no tolerance-based welding or extrapolation is
+performed. Geographic wrapping, geodesic area and mixed-LOD stitching are separate work.
+
+### Incremental mesh and hierarchy patches
+
+`updateTerrainMeshes(previous, resident, options)` and
+`updateTerrainBounds(previous, resident, options)` accept immutable
+`{id, field: HeightField}` patches. Pass null to initialize, then the complete current
+resident set. Replacing a field rebuilds that patch; unchanged fields retain their
+mesh buffers or conservative `HeightFieldMinMax`. Evicted IDs disappear. Bounds retain
+source-corner extrema and missing-coverage counts. Regular meshes retain nodata holes.
+
+`updateTerrainGradientPyramids(previous, gradients, options)` composes with the mixed
+halo/gradient snapshots, reusing pyramids by immutable gradient-grid identity. Both
+methods and halo-neighbor changes therefore invalidate the appropriate pyramids.
+
+Each function is independently tree-shakable through both geospatial entry points.
+The default `maxSamples` is four million aggregate base samples, including reused
+patches. Updates are **patch-granular**, rebuilding an edited patch internally; choose
+patch dimensions to control dirty-region granularity. These functions do not perform
+in-place sub-buffer updates or incremental adaptive tessellation. Keep snapshots and
+buffers immutable while sharing them. The elevation-band/terrain-edit example shows
+an editable patch, nodata holes, conservative extrema and a reused distant mesh.

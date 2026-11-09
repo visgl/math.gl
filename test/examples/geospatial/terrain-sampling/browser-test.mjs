@@ -41,6 +41,12 @@ try {
   assert.match(await page.getByTestId('topology-result').innerText(), /Unsafe shortcut/);
   await page.getByLabel('Preserve neighboring component').uncheck();
   assert.match(await page.getByTestId('topology-result').innerText(), /Safe simplification/);
+  await page.getByLabel('Terrain brush peak').fill('9');
+  assert.match(await page.getByTestId('terrain-edit-result').innerText(), /9.00/);
+  assert.match(await page.getByTestId('terrain-edit-result').innerText(), /distant mesh reused/);
+  await page.getByLabel('Missing brush center').check();
+  await page.getByLabel('Isoband boundary').fill('3');
+  assert.ok(await page.getByRole('img', {name: 'Elevation bands with nodata holes'}).locator('path').count());
   const labStats = page.getByTestId('mesh-lab-stats');
   const martiniStats = await labStats.innerText();
   await page.getByLabel('Mesh nodal error heatmap').check();
@@ -58,6 +64,15 @@ try {
   assert.match(await page.getByRole('status').innerText(), /require complete data/);
   await page.getByLabel('Mesh algorithm').selectOption('regular');
   assert((await page.getByRole('img', {name: 'Mesh lab wireframe'}).locator('[data-mesh-triangle]').count()) < 2048);
+  for (const dataset of ['sierra', 'pacific']) {
+    await page.getByLabel('Mesh dataset').selectOption(dataset);
+    for (const algorithm of ['martini', 'delatin']) {
+      await page.getByLabel('Mesh algorithm').selectOption(algorithm);
+      assert.match(await page.getByRole('status').innerText(), /require complete data/);
+    }
+    await page.getByLabel('Mesh algorithm').selectOption('regular');
+    assert.match(await labStats.innerText(), /output bytes/);
+  }
   await page.getByLabel('Mesh dataset').selectOption('coast');
   assert.match(await labStats.innerText(), /2048 triangles/);
   await page.getByLabel('Show mesh normals').check();

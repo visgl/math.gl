@@ -2,9 +2,20 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import reference from './assets/n43-reference.json';
+import sierra from './assets/sierra-reference.json';
+import pacific from './assets/pacific-reference.json';
 
 /** Pinned GDAL DTED samples and labeled analytical stress surfaces. */
 export function getMeshLabData(name) {
+  if (name === 'sierra' || name === 'pacific') {
+    const data = name === 'sierra' ? sierra : pacific;
+    return {
+      width: 33,
+      height: 33,
+      heights: Float64Array.from(data.heights, h => h ?? NaN),
+      description: `Mapzen / AWS Terrain Tiles: ${data.source}. 3DEP, SRTM and GMTED2010 courtesy USGS; ETOPO1 courtesy DOC/NOAA/NESDIS/NCEI. Samples interpreted as vertices with unit spacing for mesh comparisons.`
+    };
+  }
   if (name === 'dem')
     return {
       width: 9,

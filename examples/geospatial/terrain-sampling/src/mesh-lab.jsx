@@ -21,7 +21,7 @@ export default function MeshLab() {
   const {mesh, error, errors, milliseconds, description, unsupported} = useMemo(() => {
     const data = getMeshLabData(dataset);
     const field = new HeightField(data);
-    if (dataset === 'holes' && algorithm !== 'regular')
+    if (field.validCount !== field.width * field.height && algorithm !== 'regular')
       return {unsupported: true, description: data.description};
     const start = performance.now();
     const mesh =
@@ -53,6 +53,8 @@ export default function MeshLab() {
           <option value="coast">Analytical coast</option>
           <option value="holes">Analytical nodata</option>
           <option value="dem">Pinned DTED crop</option>
+          <option value="sierra">Sierra Nevada DEM</option>
+          <option value="pacific">Pacific coast DEM</option>
         </select>
       </label>
       <p>{description}</p>
