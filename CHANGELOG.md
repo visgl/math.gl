@@ -1,9 +1,12 @@
 # CHANGELOG
 
-## Unreleased
+## v5.0.0-beta.6
 
-- feat(geometry): Add bounded nonlinear box projection with explicit sampled results and conservative inflation under a supplied global Lipschitz contract.
-- feat(geometry): Add engine-independent projected texture coordinates for packed CPU vertices with explicit image bounds and texture origin.
+- feat(geometry): Add bounded nonlinear box projection with explicit sampled enclosures and conservative inflation under a supplied global Lipschitz contract (#456).
+- feat(geometry): Add engine-independent projected bitmap texture coordinates for packed CPU vertices, with explicit image bounds and texture origin (#455).
+- feat(terrain): Add mixed-resolution derivative halos, incremental mixed-tile updates, topology-safe contours and isobands, dirty-window mesh and hierarchy updates, and scalable topology queries (#450, #451, #452, #453).
+- feat(terrain): Add persistent terrain hierarchies, regional DEM and streaming qualification, and LOD morphs, with seam, contour, bands/update, and streaming explorer examples (#454).
+- docs(tasks): Reorganize TaskRunner guidance, worker and shared-memory documentation, and migration examples (#449).
 
 ## v5.0.0-beta.5
 
