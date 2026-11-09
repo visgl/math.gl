@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+- feat(geometry): Add bounded nonlinear box projection with explicit sampled results and conservative inflation under a supplied global Lipschitz contract.
+
 ## v5.0.0-beta.5
 
 - **Breaking:** Extract `@math.gl/arrow` and `@math.gl/tasks` as standalone packages. Move Arrow/GeoArrow utilities, UTF-8, and WKB/WKT from core and geospatial to the Arrow package and its capability subpaths; move task execution from `@math.gl/core/tasks` to `@math.gl/tasks`. The former packages no longer forward these exports. See the [upgrade guide](docs/upgrade-guide.md) (#447, #448).

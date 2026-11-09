@@ -43,6 +43,7 @@ Pass these CPU buffers to the renderer of your choice. The module does not creat
 | Primitive mesh tessellation | ✅ | [Boxes, capsules, cylinders, planes, spheres and convenience shapes](#api) produce renderer-independent indexed buffers. |
 | Parametric surfaces, lathes and tori | ✅ | [ParametricGeometry, TorusGeometry and LatheGeometry](./api-reference/parametric.md) sample explicit surface functions. |
 | Normals, UVs and index-width selection | ✅ | Primitive POSITION/NORMAL/TEXCOORD_0 attributes and automatic Uint32 promotion for large meshes. |
+| Projected bounds | ✅ | [Sample edges and interiors](./utils/api-reference/project-bounds.md) with an explicit approximate/conservative qualification. |
 | Mesh processing | ✅ | [Transform, merge, and weld indexed meshes](./utils/README.md). |
 | Curve evaluation | ✅ | [Sample Cartesian curves and compute transport frames](./curves/README.md). |
 | Rigid articulated panel forests | ✅ | Experimental [HingeTree](./api-reference/hinge-tree.md) evaluates hinge transforms with reusable matrix output. |

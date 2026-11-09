@@ -26,6 +26,8 @@ The experimental `HingeTree` evaluates rigid panels connected by hinges. See the
 
 Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](https://math.gl/docs/modules/geometry/lighting). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
 
+`projectBounds` samples a prepared nonlinear transform over a finite box. Its result distinguishes approximate fitting from an enclosure conditional on caller-qualified Lipschitz bounds. See the [API reference](https://math.gl/docs/modules/geometry/utils/api-reference/project-bounds).
+
 ## Sources and credits
 
 See [the packaged source and license index](./THIRD-PARTY-NOTICES.md) and

@@ -239,3 +239,10 @@ export {
 export type {RaySegmentClosestPoints} from './culling/geometric-queries';
 export {sampleCurveAdaptive, computeParallelTransportFrames} from './curves/index';
 export type {AdaptiveCurveOptions, AdaptiveCurveSamples, CurveFrames} from './curves/index';
+
+export {projectBounds} from './utils/project-bounds';
+export type {
+  ProjectionSourceBounds,
+  ProjectBoundsOptions,
+  ProjectedBoundsResult
+} from './utils/project-bounds';
