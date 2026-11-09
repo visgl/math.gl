@@ -37,6 +37,7 @@ const decodedNormal = octDecode(128, 128, new Vector3());
 | Transform, merge and weld meshes | ✅ | [Mesh processing](./api-reference/mesh-processing.md) preserves explicit attribute and index contracts. |
 | Degenerate-triangle inspection | ✅ | Inspection reports degenerate triangles; callers choose how to handle the result. |
 | Projected bounds | ✅ | [Sample nonlinear boxes](./api-reference/project-bounds.md); conservative inflation requires a qualified global Lipschitz contract. |
+| Projected texture coordinates | ✅ | [Generate float64 UVs](./api-reference/project-texture-coordinates.md) with a prepared source-to-image transform and explicit image bounds. |
 | Packed attribute interpolation | ✅ | [Mixed linear/flat interpolation policies](./api-reference/interpolate-packed-attributes.md) consume subdivision provenance without per-vertex object unpacking. |
 | Compact attribute encodings | ✅ | RGB565, octahedral normals, texture-coordinate compression and ZigZag delta decoding. |
 | Automatic topology repair or Boolean modeling | ❌ | Welding and degeneracy inspection do not provide a manifold-repair or solid Boolean engine. |
