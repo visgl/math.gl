@@ -24,7 +24,7 @@ export function checkResults(needs, event) {
     failures.push('Full qualification required');
   const performance = needs.plan?.outputs?.performance;
   if (!['true', 'false'].includes(performance)) failures.push('Missing performance profile');
-  if (event !== 'pull_request' && performance !== 'false')
+  if (!['pull_request', 'merge_group'].includes(event) && performance !== 'false')
     failures.push('Unexpected paired performance profile');
   for (const [name, expected] of [
     ['scorecard', full === 'true' ? 'success' : 'skipped'],

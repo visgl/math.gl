@@ -6,6 +6,8 @@ on:
     branches:
       - master
   pull_request:
+  merge_group:
+    types: [checks_requested]
 
   schedule:
     - cron: 17 7 * * *
@@ -33,16 +35,16 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version-file: '.nvmrc'
-      - name: Fetch PR base
-        if: github.event_name == 'pull_request'
+      - name: Fetch comparison base
+        if: (github.event_name == 'pull_request' || github.event_name == 'merge_group')
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: git fetch --no-tags --depth=1 origin "$BASE_SHA"
       - name: Select qualification profile
         id: profile
         env:
           EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: node scripts/ci-profile.mjs
   build:
     runs-on: ubuntu-22.04
@@ -710,8 +712,8 @@ jobs:
       - name: Check browser projection correctness and performance
         timeout-minutes: 6
         env:
-          BROWSER_SAMPLES: ${{ github.event_name == 'pull_request' && '3' || '7' }}
-          BROWSER_MIN_SAMPLE_MS: ${{ github.event_name == 'pull_request' && '4' || '12' }}
+          BROWSER_SAMPLES: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && '3' || '7' }}
+          BROWSER_MIN_SAMPLE_MS: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && '4' || '12' }}
         run: node modules/geospatial/scripts/projection/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points 20000 --samples "$BROWSER_SAMPLES" --min-sample-ms "$BROWSER_MIN_SAMPLE_MS" --output /tmp/projection-browser-qualification.json
         if: needs.plan.outputs.full == 'true'
 
@@ -746,7 +748,7 @@ jobs:
       - plan
       - build
   projection-performance:
-    if: github.event_name == 'pull_request' && needs.plan.outputs.performance == 'true'
+    if: (github.event_name == 'pull_request' || github.event_name == 'merge_group') && needs.plan.outputs.performance == 'true'
     # Keep paired measurements serial within each runner to avoid CPU contention.
     strategy:
       fail-fast: false
@@ -787,9 +789,9 @@ jobs:
       - name: Restore package build
         run: tar -xf /tmp/package-build/mathgl-build.tar
 
-      - name: Fetch PR base for paired measurements
+      - name: Fetch comparison base for paired measurements
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: git fetch --no-tags --depth=1 origin "$BASE_SHA"
 
       # Retain all coordinates, layouts and 11 samples; bound adaptive timing windows.
@@ -797,7 +799,7 @@ jobs:
         if: matrix.suite == 'projection'
         timeout-minutes: 10
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: |
           node --test modules/geospatial/scripts/projection/benchmark-runtime.test.mjs
           node modules/geospatial/scripts/projection/benchmark-compare.mjs --baseline-ref "$BASE_SHA" --points 20000 --samples 11 --min-sample-ms 4 --scenarios 'Web Mercator,Ellipsoidal Mercator,UTM 31N,Lambert conformal conic,Albers equal area,Equidistant conic,Seven-parameter datum shift,NTv2 horizontal grid,North/east axis order' --output /tmp/projection-performance-comparison.json
@@ -808,42 +810,42 @@ jobs:
         if: matrix.suite == 'pipeline'
         timeout-minutes: 5
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: node modules/geospatial/scripts/projection/benchmark-pipeline-compare.mjs --baseline-ref "$BASE_SHA" --points 10000 --samples 7 --min-sample-ms 4 --allocations --reusable-results --output /tmp/projection-pipeline-comparison.json
 
       - name: Check paired grid preparation benchmark
         if: matrix.suite == 'projection'
         timeout-minutes: 2
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: node modules/geospatial/scripts/projection/benchmark-grid-compare.mjs --baseline-ref "$BASE_SHA" --sizes 17,65 --samples 3 --coordinates --allocations --points 1000 --output /tmp/projection-grid-comparison.json
 
       - name: Compare spheroid conversion correctness and costs
         if: matrix.suite == 'projection'
         timeout-minutes: 2
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: node modules/geospatial/scripts/projection/benchmark-spheroid-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-spheroid-comparison.json
 
       - name: Collect equal-accuracy G7 and C8 benchmark baseline
         if: matrix.suite == 'pipeline'
         timeout-minutes: 2
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: node modules/geospatial/scripts/benchmark-g7.mjs --baseline-ref "$BASE_SHA" --points 100 --samples 3 --min-sample-ms 0 --output /tmp/g7-comparison.json
 
       - name: Measure qualified packed frame transforms
         if: matrix.suite == 'pipeline'
         timeout-minutes: 2
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: node modules/geospatial/scripts/benchmark-frame-batches.mjs --baseline-ref "$BASE_SHA" --points 1024 --samples 5 --min-cpu-ms 2 --allocations --output /tmp/frame-batch-comparison.json
 
       - name: Compare shared local-frame correctness and costs
         if: matrix.suite == 'projection'
         timeout-minutes: 2
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
         run: node modules/geospatial/scripts/projection/benchmark-local-frame-compare.mjs --baseline-ref "$BASE_SHA" --points 1000 --samples 3 --min-sample-ms 0 --allocations --output /tmp/projection-local-frame-comparison.json
 
       - name: Upload paired performance measurements
@@ -905,9 +907,9 @@ jobs:
       - name: Collect full Node scorecard evidence
         timeout-minutes: 10
         env:
-          SCORECARD_POINTS: ${{ github.event_name == 'pull_request' && '2000' || '20000' }}
-          SCORECARD_SAMPLES: ${{ github.event_name == 'pull_request' && '3' || '7' }}
-          SCORECARD_WINDOW: ${{ github.event_name == 'pull_request' && '4' || '12' }}
+          SCORECARD_POINTS: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && '2000' || '20000' }}
+          SCORECARD_SAMPLES: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && '3' || '7' }}
+          SCORECARD_WINDOW: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && '4' || '12' }}
         run: |-
           node modules/geospatial/scripts/projection/collect-scorecard-node.mjs --directory /tmp/projection-scorecard-node --points "$SCORECARD_POINTS" --samples "$SCORECARD_SAMPLES" --min-sample-ms "$SCORECARD_WINDOW"
 
