@@ -138,3 +138,13 @@ test('unused vertex pools do not participate in exact topology conversion', () =
     new Uint32Array([0, 2])
   );
 });
+
+test('monotone straight runs simplify without cancelling unrelated reductions', () => {
+  const p = paths(
+    [0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 3, 0, 1, 3.1, 0, 2, 3, 0],
+    [0, 1, 1, 2, 3, 4, 4, 5]
+  );
+  const out = simplifyTerrainContourPathsTopology(p, {maxError: 1});
+  expect(out.rejected).toBe(false);
+  expect(out.indices.length).toBe(4);
+});

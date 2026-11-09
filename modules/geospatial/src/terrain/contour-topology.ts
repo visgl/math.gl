@@ -87,9 +87,21 @@ export function simplifyTerrainContourPathsTopology(
       if (end > start + 1) {
         const a = paths.indices[start],
           b = paths.indices[end];
+        const pa = points[a],
+          pb = points[b];
+        const axis = pa.x !== pb.x ? 'x' : 'y';
+        const direction = sign(pb[axis] - pa[axis]);
+        let straight = true;
+        for (let i = start + 1; i <= end; i++) {
+          charge();
+          const q = points[paths.indices[i]],
+            prior = points[paths.indices[i - 1]];
+          if (!on(pa, pb, q) || sign(q[axis] - prior[axis]) !== direction) straight = false;
+        }
         const interior = new Set(Array.from(paths.indices.subarray(start + 1, end)));
         for (const edge of edges) {
           if (edge.p === p && edge.i >= start && edge.i < end) {
+            if (straight) continue;
             charge();
             // The swept chain plus chord must be simple. Endpoint edges may meet
             // the chord only at their endpoint; interior edges must not touch it.
