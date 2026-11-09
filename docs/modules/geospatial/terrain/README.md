@@ -1394,3 +1394,60 @@ patch dimensions to control dirty-region granularity. These functions do not per
 in-place sub-buffer updates or incremental adaptive tessellation. Keep snapshots and
 buffers immutable while sharing them. The elevation-band/terrain-edit example shows
 an editable patch, nodata holes, conservative extrema and a reused distant mesh.
+
+### Indexed topology and path-local rejection
+
+Contour topology validation now uses a static bounding-box hierarchy to narrow exact
+edge predicates and swept-region vertex tests. Isobands use independent indexes for
+patch overlap, height-range selection and ring-parent lookup. Broad-phase traversal
+is charged to the existing work budgets; exact predicates and clipping still decide
+geometry. Dense overlapping candidates can retain quadratic worst-case work.
+
+`simplifyTerrainContourPathsTopology(paths, {maxError, rejection: 'path'})` restores
+only unsafe paths, retaining safe reductions in other paths. The default `'batch'`
+policy remains conservative whole-result fallback. Path-local fallback retains the
+input vertex pool and identity source mapping so restored and simplified paths share
+anchors. `maxDeviation` remains a conservative accepted-error bound. `rejected` means
+at least one path was restored, not that all paths were restored.
+
+### Dirty-window mesh regions and hierarchy updates
+
+`TerrainDirtyWindow` uses inclusive **source sample** coordinates. Report every
+height/validity change between immutable inputs; unreported edits cannot be detected
+without a full scan. Changed dimensions/frame/diagonal/reference rebuild the state.
+
+- `updateTerrainMeshRegions(previous, field, dirty, options)` divides a field into
+  cell regions (`cellsPerRegion`, default 32). Edits rebuild only regions touching the
+  dirty sample windows, including both sides of a shared boundary. Unaffected region
+  objects and buffers retain identity. The snapshot records a common world `origin`. Region fields and mesh buffers use
+  its local affine frame, with each mesh origin fixed at zero and sample positions
+  computed directly from parent grid indices. Keep the common world reference
+  separate when rendering/computing to avoid rounding region offsets into large
+  absolute origins. Stream the region buffers as separate draw/compute regions.
+- `updateTerrainMartiniMeshRegions` adds complete square power-of-two regions with
+  fully refined boundaries. Dimensions must divide the configured cell size exactly.
+- `updateTerrainDelatinMeshRegions` supports rectangular/partial edge regions.
+  Independent adaptive boundaries require `stitchTerrainMeshEdges` for conformance.
+  Both adaptive variants return null data for incomplete regions, without filling
+  nodata, and rebuild all regions when `maxError` changes. They remain separate imports
+  so regular updates do not load either adaptive backend.
+- `updateTerrainBoundsRegions(previous, field, dirty, options)` updates source-corner
+  extrema/counts near dirty samples and recomputes only affected ancestors. No averaging
+  substitutes for conservative bounds.
+- `updateTerrainGradientPyramidRegions(previous, grid, dirty, options)` updates derivative
+  leaves and affected ancestors. Its dirty windows refer to **gradient-grid samples**;
+  expand source-height edits by the stencil radius before calling it.
+
+Pass null to initialize. Defaults bound samples at four million and dirty work at ten
+million tests, with at most 100,000 windows. Region sample limits include duplicated
+boundary vertices. Hierarchy arrays use copy-on-write per touched level; immutable
+snapshots therefore still incur full copies of those arrays even though recomputation
+is local. Unchanged levels are shared. Work limits cover dependency/stencil selection
+and incremental recomputation; initialization is bounded by sample admission. Reuse
+returned snapshots directly and treat all shared buffers as immutable. Returned
+`rebuilt` indices and `updatedCounts` support upload/recomputation diagnostics.
+
+Mesh error qualification admits only bounded affine construction roundoff (a few
+ulps, capped at one billionth of a cell-axis step) when matching XY to the declared
+grid. This permits equivalent parent-grid and region-offset coordinate calculations;
+meaningful displaced/forged coordinates and insufficient-precision frames still throw.

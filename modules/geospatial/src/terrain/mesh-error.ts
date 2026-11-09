@@ -42,7 +42,20 @@ export function measureTerrainMeshError(
         mesh.origin[axis] +
         x * field.columnStep[axis] +
         y * field.rowStep[axis];
-      if (!Number.isFinite(expected) || mesh.positions[i * 3 + axis] !== expected)
+      // Equivalent affine constructions (parent grid versus region offset) may
+      // differ by a few ulps. Admit only arithmetic roundoff, capped far below a cell.
+      const tolerance = Math.min(
+        16 *
+          Number.EPSILON *
+          (Math.abs(field.origin[axis] - mesh.origin[axis]) +
+            Math.abs(x * field.columnStep[axis]) +
+            Math.abs(y * field.rowStep[axis])),
+        1e-9 * Math.max(Math.abs(field.columnStep[axis]), Math.abs(field.rowStep[axis]))
+      );
+      if (
+        !Number.isFinite(expected) ||
+        Math.abs(mesh.positions[i * 3 + axis] - expected) > tolerance
+      )
         throw new Error('Terrain mesh XY does not match the source grid frame');
     }
   }

@@ -5,6 +5,10 @@
 import React, {useMemo, useRef, useState} from 'react';
 import {
   HeightField,
+  createTerrainGradientGrid,
+  updateTerrainMeshRegions,
+  updateTerrainBoundsRegions,
+  updateTerrainGradientPyramidRegions,
   createTerrainIsobands,
   updateTerrainMeshes,
   updateTerrainBounds,
@@ -16,6 +20,7 @@ export default function BandsUpdates() {
   const [peak, setPeak] = useState(4),
     [hole, setHole] = useState(false),
     [band, setBand] = useState(2);
+  const fineCache = useRef({mesh: null, bounds: null, gradients: null});
   const cache = useRef({meshes: null, bounds: null, pyramids: null, halos: null, gradients: null});
   const distant = useMemo(
     () => ({
@@ -27,12 +32,23 @@ export default function BandsUpdates() {
   const result = useMemo(() => {
     const heights = Float64Array.from(
       {length: 81},
-      (_, i) => peak * Math.exp(-(((i % 9) - 4) ** 2 + (Math.floor(i / 9) - 4) ** 2) / 6)
+      (_, i) => 4 * Math.exp(-(((i % 9) - 4) ** 2 + (Math.floor(i / 9) - 4) ** 2) / 6)
     );
-    if (hole) heights[40] = NaN;
+    heights[40] = hole ? NaN : peak;
     const props = {width: 9, height: 9, heights},
       field = new HeightField(props),
       sources = [{id: 'brush', field}, distant];
+    const dirty = [{minColumn: 4, minRow: 4, maxColumn: 4, maxRow: 4}];
+    const fineMesh = updateTerrainMeshRegions(fineCache.current.mesh, field, dirty, {
+      cellsPerRegion: 2
+    });
+    const fineBounds = updateTerrainBoundsRegions(fineCache.current.bounds, field, dirty);
+    const fineGradients = updateTerrainGradientPyramidRegions(
+      fineCache.current.gradients,
+      createTerrainGradientGrid(field),
+      [{minColumn: 3, minRow: 3, maxColumn: 5, maxRow: 5}]
+    );
+    fineCache.current = {mesh: fineMesh, bounds: fineBounds, gradients: fineGradients};
     const prior = cache.current;
     const meshes = updateTerrainMeshes(prior.meshes, sources),
       bounds = updateTerrainBounds(prior.bounds, sources);
@@ -51,6 +67,9 @@ export default function BandsUpdates() {
     cache.current = {meshes, bounds, halos, gradients, pyramids};
     return {
       field,
+      fineMesh,
+      fineBounds,
+      fineGradients,
       reused,
       range: bounds[0].data.query().heightRange,
       triangles: meshes[0].data.indices.length / 3,
@@ -72,6 +91,11 @@ export default function BandsUpdates() {
       aria-label="Isobands and terrain edits"
     >
       <h2>Elevation bands and terrain edits</h2>
+      <p data-testid="dirty-region-result">
+        Rebuilt {result.fineMesh.rebuilt.length}/{result.fineMesh.regions.length} mesh regions;
+        recomputed {result.fineBounds.updatedCounts[0]} bounds cells and{' '}
+        {result.fineGradients.updatedCounts[0]} gradient leaves.
+      </p>
       <label>
         Brush peak
         <input

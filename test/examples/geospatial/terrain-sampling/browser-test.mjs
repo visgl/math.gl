@@ -43,6 +43,7 @@ try {
   assert.match(await page.getByTestId('topology-result').innerText(), /Safe simplification/);
   await page.getByLabel('Terrain brush peak').fill('9');
   assert.match(await page.getByTestId('terrain-edit-result').innerText(), /9.00/);
+  assert.match(await page.getByTestId('dirty-region-result').innerText(), /Rebuilt 4\/16/);
   assert.match(await page.getByTestId('terrain-edit-result').innerText(), /distant mesh reused/);
   await page.getByLabel('Missing brush center').check();
   await page.getByLabel('Isoband boundary').fill('3');

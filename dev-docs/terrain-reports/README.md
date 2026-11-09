@@ -21,3 +21,12 @@ nodal error does not certify between-node surface error. Fixtures qualify declar
 EPSG:3857 projected metric operations, not ground-distance slopes or vertical datums.
 Source provenance, public-domain provider credits, hashes and regeneration are in
 `modules/geospatial/test/terrain/fixtures/README.md`.
+
+`node scripts/benchmark-terrain-regions.mjs` measures a declared one-sample edit in a
+129×129 field plus 2,000 separated contour components and 2,000 isoband patches.
+`regions-2026-11-09.json` records one diagnostic run: 1/64 mesh regions rebuilt,
+9 bounds leaves and 9 gradient leaves recomputed, and 286,816 topology tests for
+2,000 simplified paths. These counts are regression evidence for the selected
+workloads, not worst-case complexity claims. Dirty-update timing includes hierarchy
+array copies and full derivative-grid generation. Dense intersecting candidate boxes
+can still exhaust the bounded topology budget.

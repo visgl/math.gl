@@ -322,3 +322,19 @@ export type {TerrainBoundsSnapshot} from './terrain/bounds-update';
 export {updateTerrainGradientPyramids} from './terrain/gradient-pyramid-update';
 export type {TerrainGradientPyramidSnapshot} from './terrain/gradient-pyramid-update';
 export type {TerrainFieldTile} from './terrain/tile-update-data';
+
+export {updateTerrainMeshRegions} from './terrain/mesh-regions';
+export type {TerrainRegularMeshRegions} from './terrain/mesh-regions';
+
+export {updateTerrainMartiniMeshRegions} from './terrain/martini-regions';
+export type {TerrainMartiniMeshRegions} from './terrain/martini-regions';
+
+export {updateTerrainDelatinMeshRegions} from './terrain/delatin-regions';
+export type {TerrainDelatinMeshRegions} from './terrain/delatin-regions';
+
+export {updateTerrainBoundsRegions} from './terrain/bounds-regions';
+export type {TerrainBoundsRegions} from './terrain/bounds-regions';
+
+export {updateTerrainGradientPyramidRegions} from './terrain/gradient-pyramid-regions';
+export type {TerrainGradientPyramidRegions} from './terrain/gradient-pyramid-regions';
+export type {TerrainDirtyWindow} from './terrain/dirty-regions';
