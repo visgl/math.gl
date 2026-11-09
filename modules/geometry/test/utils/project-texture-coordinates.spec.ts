@@ -124,7 +124,7 @@ test('projectTextureCoordinates composes with a real geospatial converter', () =
   const uv = projectTextureCoordinates([0, 0, 0, 60, 180, 0], {
     size: 2,
     bounds: [0, 0, 512, 512],
-    transform: position => lngLatToWorld(position)
+    transform: position => lngLatToWorld([...position])
   });
   expect(uv[0]).toBeCloseTo(0.5, 12);
   expect(uv[1]).toBeCloseTo(0.5, 12);
