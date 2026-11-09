@@ -1289,7 +1289,9 @@ spacing, column, then row. Duplicate addresses at the same spacing are rejected.
 
 The finest resident tile owns each requested point, including shared boundaries
 and overlapping interiors. Equal resolutions use column/row order. Samples use
-that owner's piecewise-linear triangle surface, including its diagonal. Nodata in
+that owner's piecewise-linear triangle surface, including its diagonal. Exact nodes
+are read directly; interpolated heights require only nonzero-weight support, so
+neighboring nodata does not unnecessarily invalidate a valid node or edge. Nodata in
 an owner never falls back to a coarser source. Status bytes use
 `TerrainVertexHaloStatus`: 0 not resident, 1 nodata, 2 valid. No extrapolation or
 hole filling occurs. Source buffers are unchanged. Missing stencils remain invalid.

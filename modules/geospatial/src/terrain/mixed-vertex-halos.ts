@@ -36,7 +36,9 @@ export function createTerrainMixedVertexTileHalos(
     throw new Error('Invalid mixed halo capacity');
   let count = 0;
   const addresses = new Set<string>();
-  let frame: {origin: number[]; column: number[]; row: number[]; reference: string} | undefined;
+  let frame:
+    | {origin: number[]; column: number[]; row: number[]; reference: string; scale: number[]}
+    | undefined;
   const sources = [...tiles]
     .sort((a, b) => a.spacing - b.spacing || a.column - b.column || a.row - b.row)
     .map(tile => {
@@ -60,6 +62,9 @@ export function createTerrainMixedVertexTileHalos(
       const origin = field.origin.map(
         (v, axis) => v - tile.column * column[axis] - tile.row * row[axis]
       );
+      const scale = field.origin.map((v, i) =>
+        Math.max(1, Math.abs(v), Math.abs(tile.column * column[i]), Math.abs(tile.row * row[i]))
+      );
       if (!origin.every(Number.isFinite)) throw new Error('Mixed halo coordinate overflow');
       if (
         frame &&
@@ -70,21 +75,14 @@ export function createTerrainMixedVertexTileHalos(
             (v, i) =>
               Math.abs(v - frame!.origin[i]) >
               Math.min(
-                16 * Number.EPSILON * Math.max(1, Math.abs(v), Math.abs(frame!.origin[i])),
+                16 * Number.EPSILON * Math.max(scale[i], frame!.scale[i]),
                 1e-9 * Math.max(Math.abs(column[i]), Math.abs(row[i]))
               )
           ))
       )
         throw new Error('Mixed halo frames or height references differ');
-      frame ??= {origin, column, row, reference: field.heightReference};
-      // Sample in lattice coordinates, avoiding world-coordinate roundoff.
-      const sampler = new HeightField({
-        ...tile.field,
-        origin: [0, 0],
-        columnStep: [1, 0],
-        rowStep: [0, 1]
-      });
-      return {...tile, source: field, sampler};
+      frame ??= {origin, column, row, reference: field.heightReference, scale};
+      return {...tile, source: field};
     });
   // Bound the full lattice span so relative coordinates remain exact integers.
   for (const axis of ['column', 'row'] as const) {
@@ -121,13 +119,11 @@ export function createTerrainMixedVertexTileHalos(
               cy = (gy - candidate.row) / candidate.spacing;
             const f = candidate.source;
             if (cx < 0 || cy < 0 || cx > f.width - 1 || cy > f.height - 1) continue;
-            const value = candidate.sampler.sample(cx, cy, {interpolation: 'triangle'});
-            if (value.status !== 0 && value.status !== 2)
-              throw new Error('Mixed halo numeric sampling failure');
+            const value = sampleHeight(f, cx, cy);
             const i = y * width + x;
-            statuses[i] = value.status === 0 ? 2 : 1;
-            if (value.status === 0) {
-              heights[i] = value.height;
+            statuses[i] = value === undefined ? 1 : 2;
+            if (value !== undefined) {
+              heights[i] = value;
               validity[i] = 1;
             }
             break;
@@ -158,4 +154,46 @@ export function createTerrainMixedVertexTileHalos(
       };
     })
   };
+}
+
+/** Height-only triangle interpolation: zero-weight vertices are not support. */
+function sampleHeight(field: HeightField, x: number, y: number): number | undefined {
+  if (Number.isInteger(x) && Number.isInteger(y)) return field.getHeight(x, y);
+  const column = Math.min(Math.floor(x), field.width - 2);
+  const row = Math.min(Math.floor(y), field.height - 2);
+  const u = x - column,
+    v = y - row;
+  let a: number, b: number, c: number, d: number;
+  if (field.diagonal === '00-11') {
+    if (v <= u) {
+      a = 1 - u;
+      b = u - v;
+      c = 0;
+      d = v;
+    } else {
+      a = 1 - v;
+      b = 0;
+      c = v - u;
+      d = u;
+    }
+  } else if (u + v <= 1) {
+    a = 1 - u - v;
+    b = u;
+    c = v;
+    d = 0;
+  } else {
+    a = 0;
+    b = 1 - v;
+    c = 1 - u;
+    d = u + v - 1;
+  }
+  const za = a ? field.getHeight(column, row) : 0;
+  const zb = b ? field.getHeight(column + 1, row) : 0;
+  const zc = c ? field.getHeight(column, row + 1) : 0;
+  const zd = d ? field.getHeight(column + 1, row + 1) : 0;
+  if (za === undefined || zb === undefined || zc === undefined || zd === undefined)
+    return undefined;
+  const height = a * za + b * zb + c * zc + d * zd;
+  if (!Number.isFinite(height)) throw new Error('Mixed halo numeric sampling failure');
+  return height;
 }

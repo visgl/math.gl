@@ -168,3 +168,48 @@ test('curved surfaces retain documented stencil-scale differences', () => {
   expect(fine.gradients[2 * (3 * 7 + 1)]).toBeCloseTo(2.5);
   expect(coarse.gradients[2 * (2 * 7 + 5)]).toBeCloseTo(4);
 });
+
+test('halo preparation never expands nodata to valid exact nodes', () => {
+  for (const diagonal of ['00-11', '10-01'] as const) {
+    const a = tile(0, 0, 1);
+    a.field.diagonal = diagonal;
+    a.field.validity = new Uint8Array(25).fill(1);
+    a.field.validity[12] = 0;
+    const padded = createTerrainMixedVertexTileHalos([a]).tiles[0];
+    for (let y = 0; y < 5; y++)
+      for (let x = 0; x < 5; x++) {
+        const i = (y + 1) * 7 + x + 1;
+        expect(padded.statuses[i]).toBe(x === 2 && y === 2 ? 1 : 2);
+      }
+  }
+});
+
+test('triangle edge interpolation ignores zero-weight nodata for both diagonals', () => {
+  for (const diagonal of ['00-11', '10-01'] as const) {
+    const coarse = tile(-8, 0, 2),
+      fine = tile(0, 0, 1);
+    coarse.field.diagonal = diagonal;
+    coarse.field.validity = new Uint8Array(25).fill(1);
+    // (-1,2) is halfway along the coarse horizontal edge between (3,1) and (4,1).
+    coarse.field.validity[14] = 0;
+    coarse.field.validity[13] = 0;
+    const padded = createTerrainMixedVertexTileHalos([coarse, fine]).tiles[0];
+    expect(padded.statuses[3 * 7]).toBe(2);
+    expect(padded.field.heights[3 * 7]).toBeCloseTo(4);
+  }
+});
+
+test('decimal skew-frame cancellation is admitted without allowing subcell shifts', () => {
+  const input = [tile(1000, 1000, 1), tile(1004, 1000, 1), tile(1008, 1000, 2)];
+  for (const t of input) {
+    t.field.columnStep = [0.1 * t.spacing, 0.2 * t.spacing];
+    t.field.rowStep = [0.2 * t.spacing, -0.1 * t.spacing];
+    t.field.origin = [t.column * 0.1 + t.row * 0.2, t.column * 0.2 - t.row * 0.1];
+  }
+  expect(createTerrainMixedVertexTileHalos(input).tiles).toHaveLength(3);
+  expect(createTerrainMixedVertexTileHalos([...input].reverse())).toEqual(
+    createTerrainMixedVertexTileHalos(input)
+  );
+  input[1].field.origin = [input[1].field.origin![0] + 1e-5, input[1].field.origin![1]];
+  expect(() => createTerrainMixedVertexTileHalos(input)).toThrow(/frames/);
+});
