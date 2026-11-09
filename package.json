@@ -21,6 +21,7 @@
     "check:source-headers": "node scripts/check-source-headers.mjs",
     "check:curves-package": "node modules/geometry/scripts/curves/check-package.mjs",
     "check:crs-types": "npx tsc --project test/types/crs/tsconfig.json",
+    "check:arrow-expression-types": "tsc --project test/types/arrow-expressions/tsconfig.json",
     "check:task-runner-types": "tsc --project test/types/task-runner/tsconfig.json",
     "check:geoarrow-boundary": "node modules/arrow/scripts/geoarrow/check-package-boundary.mjs",
     "check:timezone-types": "npx tsc --project test/types/timezone/tsconfig.json",

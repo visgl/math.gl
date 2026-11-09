@@ -4,6 +4,7 @@
 
 import assert from 'node:assert/strict';
 import * as arrow from 'apache-arrow';
+import {compileArrowExpression, compileArrowPredicate} from '../src/expressions/index.ts';
 import {parseUTF8Number, compareUTF8} from '../src/utf8/index.ts';
 import {
   IndexedArrowTable,
@@ -36,6 +37,10 @@ function readRows(table) {
 
 /** Exercises the generic Arrow APIs against one independently bundled runtime. */
 export function checkArrowConformance() {
+  const expressionBatch = makeTable().batches[0].slice(1, 3);
+  assert.deepEqual([...compileArrowExpression('score + 1', {inputSchema: expressionBatch.schema}).evaluate(expressionBatch)], [21, 31]);
+  assert.deepEqual([...compileArrowPredicate({op: '=', args: [{property: 'name'}, 'gamma']}, {inputSchema: expressionBatch.schema}).evaluate(expressionBatch)], [null, true]);
+
   // The documented Dictionary<Utf8> usage works on each supported Arrow runtime.
   const encodedNumbers = arrow.vectorFromArray(['12.5', '7', '12.5', null], new arrow.Dictionary(new arrow.Utf8(), new arrow.Int8()));
   const numberData = encodedNumbers.slice(1).data[0];
