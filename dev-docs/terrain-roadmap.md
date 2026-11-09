@@ -633,3 +633,18 @@ exact XY crossing/touch tests, protected seam anchors and swept-region checks, f
 back to original geometry when a shortcut is unsafe. Large-scale spatial indexing,
 maximally simplifying valid alternatives, isobands and geographic topology remain
 future work. These APIs remain independently available through both geospatial roots.
+
+## Broader qualification, elevation bands and incremental hierarchy patches
+
+Pinned Sierra Nevada and Pacific coast/bathymetric DEMs, plus a declared nodata-heavy
+variant, extend independent GDAL derivative qualification. A reproducible isolated
+report separates timing, sampled allocations, buffer bytes and process peak RSS.
+The mesh lab now includes real mountain/coast inputs with provider attribution.
+
+`createTerrainIsobands` adds bounded regular-triangle clipping and footprint ring/hole
+assembly, including conforming tile seams and nodata/domain boundaries. Independent
+mesh, conservative-bound and gradient-pyramid snapshot updaters reuse unaffected
+patches. The edit/band explorer exercises these operations together. Further work:
+regional-scale qualification, continuous error certificates, spatial indexing,
+sub-patch updates, adaptive incremental topology, mixed-resolution/geographic bands,
+LOD morphs, collision sweeps and area/geographic visibility.

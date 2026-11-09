@@ -31,3 +31,10 @@ The mixed-resolution seam explorer shows a fine tile's resampled halo and deriva
 vectors. Switch between 2:1 and 4:1 neighbors, Horn and Zevenbergen–Thorne methods,
 plane/curved surfaces, nodata and residency. Missing stencils stay unavailable;
 curved surfaces expose the limits of derivative agreement across resolution changes.
+
+The mesh lab includes pinned Sierra Nevada and Pacific coast/bathymetry inputs from
+Mapzen / AWS Terrain Tiles, with provider attribution shown beside the dataset.
+The elevation-band/edit explorer clips the regular triangle surface into footprint
+polygons, preserves nodata holes and shows conservative bounds, derivative hierarchy
+levels and distant mesh reuse after patch edits. These are patch-granular updates;
+changing a band threshold reuses the underlying field.

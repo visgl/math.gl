@@ -115,3 +115,16 @@ export {updateTerrainMixedGradientGrids} from './mixed-gradient-update';
 export {simplifyTerrainContourPathsTopology} from './contour-topology';
 export type {TerrainMixedHaloSnapshot} from './mixed-halo-update';
 export type {TerrainMixedGradientSnapshot} from './mixed-gradient-update';
+
+export {createTerrainIsobands} from './isobands';
+export type {TerrainIsobands} from './isobands';
+
+export {updateTerrainMeshes} from './mesh-update';
+export type {TerrainMeshSnapshot} from './mesh-update';
+
+export {updateTerrainBounds} from './bounds-update';
+export type {TerrainBoundsSnapshot} from './bounds-update';
+
+export {updateTerrainGradientPyramids} from './gradient-pyramid-update';
+export type {TerrainGradientPyramidSnapshot} from './gradient-pyramid-update';
+export type {TerrainFieldTile} from './tile-update-data';

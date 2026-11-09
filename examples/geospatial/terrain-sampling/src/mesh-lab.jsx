@@ -53,6 +53,8 @@ export default function MeshLab() {
           <option value="coast">Analytical coast</option>
           <option value="holes">Analytical nodata</option>
           <option value="dem">Pinned DTED crop</option>
+          <option value="sierra">Sierra Nevada DEM</option>
+          <option value="pacific">Pacific coast DEM</option>
         </select>
       </label>
       <p>{description}</p>
