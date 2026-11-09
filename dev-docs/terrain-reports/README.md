@@ -30,3 +30,29 @@ Source provenance, public-domain provider credits, hashes and regeneration are i
 workloads, not worst-case complexity claims. Dirty-update timing includes hierarchy
 array copies and full derivative-grid generation. Dense intersecting candidate boxes
 can still exhaust the bounded topology budget.
+
+`node scripts/qualify-terrain-streaming.mjs` runs six isolated regional cases:
+Sierra/Pacific/nodata-heavy inputs and both raster derivative methods. Each case
+streams sixteen 65×65 overlapping patches over a 257×257 source through 32 deterministic
+arrival/edit/eviction/restoration steps. Regular mesh regions, persistent extrema and
+weighted gradient hierarchies are compared with full rebuilds. Four retained snapshots'
+mesh/hierarchy buffers are hashed after later steps to detect mutation.
+
+Pipeline timing includes source/halo copies, regular mesh-region rebuilding and full
+derivative grid computation; full-rebuild oracles and retained-snapshot hashing are
+outside timing. Those checks still contribute to whole-process RSS and sampled memory
+observations. Buffer-copy counters compare persistent block data copies with the
+flat dirty-level copy baseline on replacement updates, excluding initialization, input
+copies, JS directories and allocation traffic. Results expose arrival-heavy versus
+local-edit costs rather than claiming all streaming operations are proportional to
+changed samples. The 33×33 GDAL fixtures remain the independent derivative-accuracy
+oracle; these regional cases qualify streaming equivalence and memory behavior.
+
+`streaming-2026-11-09.json` records one six-case darwin/arm64 Node run. Each case
+verified 4,656,028 hierarchy nodes, retained four immutable snapshots and rebuilt
+82 mesh regions across the deterministic stream. Persistent block-buffer copies
+were approximately 31.6–33.0% of the computed flat dirty-level buffer-copy baseline.
+These are exact data-copy counters for this workload, not measured total allocation
+traffic or a claim of the same RSS reduction. Shared block directories still copy
+references, and initialization still constructs temporary flat levels. Provider
+metadata and source checksums are retained in each case record.

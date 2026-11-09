@@ -1451,3 +1451,63 @@ Mesh error qualification admits only bounded affine construction roundoff (a few
 ulps, capped at one billionth of a cell-axis step) when matching XY to the declared
 grid. This permits equivalent parent-grid and region-offset coordinate calculations;
 meaningful displaced/forged coordinates and insufficient-precision frames still throw.
+
+### Persistent block hierarchies
+
+`updateTerrainPersistentBounds(previous, field, dirty, options)` and
+`updateTerrainPersistentGradients(previous, grid, dirty, options)` provide block-based
+immutable hierarchies. Pass null to initialize. Dirty windows identify source-height
+samples for bounds and gradient-grid samples for gradients; include stencil dependencies.
+Report every height/validity/status change. Unreported edits are not discovered by
+scanning the input. Metadata or block-size changes rebuild the hierarchy.
+
+Each level stores width, height, blockSize, nodesPerBlock and plain blocks. A block has
+its linear node offset/count, interleaved Float64 `values` and Uint32 `counts`. Bounds
+values are minimum/maximum, with populated/complete source-cell counts. Gradient values
+are weighted mean dz/dx,dz/dy, with valid/total original sample counts. Missing nodes
+have zero value placeholders. `getTerrainHierarchyNode(level, column, row)` reads an
+independent value/count pair; consumers can read individual block buffers directly.
+Clone shared buffers before transferring/detaching them: direct transfer would invalidate
+every snapshot sharing that block.
+
+Updates copy each touched block once and share all untouched blocks. Level block
+directories are shallow-copied when edited; this still has a directory-copy cost.
+`stats.copiedBlocks`, `stats.copiedBytes` and `stats.updatedNodes` describe data-buffer
+copies and recomputation. Initialization stats describe allocated output blocks, not
+transient construction allocations. Metadata/input arrays and JS directories are not
+included in copiedBytes. Keep every shared snapshot and buffer immutable.
+
+Defaults admit four million base samples, 256 nodes per block and ten million
+incremental work tests; dirty-window selection and ancestor updates share one budget.
+Initialization is sample-bounded and may allocate flat temporary hierarchies. Block-size
+changes and frame changes require full initialization. Block size trades copy locality
+against directory overhead. This is separate from GPU resource management or uploads.
+
+### LOD correspondence and morph preparation
+
+`createTerrainLodMorph(fine, coarse, {ratio, coarseOrigin, maxSamples})` prepares
+fine-node correspondence to the coarse regular triangle surface. Both fields must be
+vertex-registered with matching height references and diagonals, and share an affine
+frame. Ratio is a power of two >=2. `coarseOrigin` is an integer offset in fine-grid
+sample units (default [0,0]), forward-validated against the coarse world origin.
+
+Results include detached fine/coarse heights, vertical deltas, coarse fractional grid
+coordinates and per-node `TerrainMorphStatus`: VALID, FINE_NO_DATA, COARSE_NO_DATA or
+OUTSIDE_COARSE. The output retains a separate world origin and affine steps; it does
+not bake world coordinates into vertex buffers. Default capacity is four million fine
+samples. Coarse sampling uses only nonzero-weight triangle support, without extrapolation
+or fallback through missing data. Displacement overflow throws.
+
+`evaluateTerrainLodMorph(morph, factor)` is an independent CPU reference returning
+heights and validity for a uniform factor in [0,1]. Invalid correspondence stays
+unavailable even at factor zero; select source-only fallback explicitly in the consumer.
+At factor one, a regular fine grid with the matching diagonal represents the coarse
+triangle surface wherever correspondence is complete. Existing mesh builders can
+consume the evaluated heights with the returned frame metadata.
+
+`maxNodalDisplacement` measures valid vertical differences only; it is not a certified
+continuous error or screen-space LOD bound. These APIs prepare a transition, not a
+camera-driven LOD scheduler. Neighbor morph factors, pinned simulation domains,
+normal recomputation and coordinated seam schedules remain consumer responsibilities.
+No shaders or device resources are created in math.gl. The LOD/streaming explorer
+shows ratios, morph endpoints, missing coarse support and a real-DEM tile replay.

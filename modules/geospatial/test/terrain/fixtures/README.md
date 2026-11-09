@@ -88,3 +88,27 @@ warm timing, exact output buffer bytes, sampled JS allocations and OS peak RSS.
 It distinguishes full regular meshes from complete 9×9 adaptive crops. Nodal error
 and process-level memory observations are not continuous error certificates or
 regional-scale throughput guarantees.
+
+## Regional streaming inputs
+
+The `sierra-streaming.json`, `pacific-streaming.json` and `sierra-nodata-streaming.json`
+inputs retain 257×257 nearest-neighbor samples from the same hash-pinned raw TIFFs.
+Regenerate with rasterio 1.4.3 / GDAL 3.9.3:
+
+```sh
+python scripts/generate-terrain-streaming-reference.py
+```
+
+The transform is scaled to the sampled raster extent, using EPSG:3857 projected
+metric units and cell registration. The nodata-heavy variant declares a manufactured
+65×65 central hole and periodic missing points (every 16th row/8th column); the two
+unmasked variants retain raw-source validity. Provider credits and public-domain
+source notes above apply. These larger inputs are streaming workload data; independent
+GDAL derivative accuracy oracles remain the separate 33×33 reference fixtures.
+
+`node scripts/qualify-terrain-streaming.mjs` exercises both derivative methods through
+32 deterministic arrivals, edits, eviction and restoration steps over sixteen 65×65
+patches. Samples are interpreted as vertices at their original cell-center coordinates.
+Every persistent node/count is compared to a fresh flat hierarchy, and four retained
+snapshots are hashed to detect mutation. Timings exclude the full-rebuild oracles and
+snapshot hashing; memory reports include their process cost. No missing data is filled.

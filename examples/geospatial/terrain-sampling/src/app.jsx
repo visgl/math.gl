@@ -10,6 +10,7 @@ import MeshLab from './mesh-lab';
 import SeamExplorer from './seam-explorer';
 import ContourTopology from './contour-topology';
 import BandsUpdates from './bands-updates';
+import LodStreaming from './lod-streaming';
 import './styles.css';
 
 export default function TerrainSampling() {
@@ -133,6 +134,7 @@ export default function TerrainSampling() {
         <SeamExplorer />
         <ContourTopology />
         <BandsUpdates />
+        <LodStreaming />
       </div>
       <ExamplePanel title="Terrain sampling">
         <label>
