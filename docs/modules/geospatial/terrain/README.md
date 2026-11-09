@@ -1446,3 +1446,8 @@ is local. Unchanged levels are shared. Work limits cover dependency/stencil sele
 and incremental recomputation; initialization is bounded by sample admission. Reuse
 returned snapshots directly and treat all shared buffers as immutable. Returned
 `rebuilt` indices and `updatedCounts` support upload/recomputation diagnostics.
+
+Mesh error qualification admits only bounded affine construction roundoff (a few
+ulps, capped at one billionth of a cell-axis step) when matching XY to the declared
+grid. This permits equivalent parent-grid and region-offset coordinate calculations;
+meaningful displaced/forged coordinates and insufficient-precision frames still throw.

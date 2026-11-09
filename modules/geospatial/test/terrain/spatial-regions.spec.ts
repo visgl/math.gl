@@ -234,3 +234,26 @@ test('mesh initialization and configuration resets do not charge unused dirty co
     updateTerrainMeshRegions(null, f, [{...dirty[0], minColumn: -1}], {maxTests: 0})
   ).toThrow(/window/);
 });
+
+test('returned decimal mesh regions remain qualified by the public error measurer', async () => {
+  const {measureTerrainMeshError} = await import('@math.gl/geospatial');
+  const f = new HeightField({
+    width: 17,
+    height: 5,
+    origin: [1e12, 0],
+    columnStep: [0.1, 0],
+    heights: new Float64Array(85)
+  });
+  const regular = updateTerrainMeshRegions(null, f, [], {cellsPerRegion: 4});
+  const adaptive = updateTerrainMartiniMeshRegions(null, f, [], {cellsPerRegion: 4, maxError: 1});
+  for (const region of [...regular.regions, ...adaptive.regions])
+    if (region.data) {
+      const error = measureTerrainMeshError(region.field, region.data);
+      expect(error.uncoveredSampleCount).toBe(0);
+      expect(error.maxSampleError).toBe(0);
+    }
+  const r = regular.regions[3],
+    forged = {...r.data, positions: r.data.positions.slice()};
+  forged.positions[0] += 1e-6;
+  expect(() => measureTerrainMeshError(r.field, forged)).toThrow(/frame/);
+});
