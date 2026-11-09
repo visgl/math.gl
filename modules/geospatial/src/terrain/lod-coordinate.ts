@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {evaluateTerrainLodMorph} from './lod-morph-evaluate';
-import {reconcileMixedSurface, type TerrainMixedSurfaceOptions} from './mixed-surface';
+import {
+  reconcileMixedSurface,
+  type TerrainMixedSurfaceOptions,
+  type TerrainMixedSurface
+} from './mixed-surface';
 import type {TerrainLodMorph} from './lod-morph';
 export type TerrainLodTile = {
   column: number;
@@ -13,12 +17,12 @@ export type TerrainLodTile = {
 };
 /** Coordinate independent tile morph factors on a conforming finest-lattice
  * transition tessellation. Coarsest incident tile owns shared edges/corners at its
- * requested factor. Interior factors remain independent. Missing owner support
+ * requested factor. Interior factors remain independent. Missing incident support
  * masks the seam. This bounded CPU reference intentionally densifies coarse tiles. */
 export function coordinateTerrainLodMorphs(
   tiles: readonly TerrainLodTile[],
   options: TerrainMixedSurfaceOptions = {}
-) {
+): TerrainMixedSurface {
   const limit = options.maxSamples ?? 4_000_000;
   if (!Number.isSafeInteger(limit) || limit < 0)
     throw new Error('Invalid coordinated morph sample capacity');

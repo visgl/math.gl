@@ -11,13 +11,28 @@ export type TerrainMixedSurfaceOptions = {
   maxTests?: number;
   maxHeightAdjustment?: number;
 };
+export type TerrainMixedSurface = {
+  origin: [number, number];
+  columnStep: [number, number];
+  rowStep: [number, number];
+  tiles: {
+    column: number;
+    row: number;
+    spacing: 1;
+    sourceSpacing: number;
+    field: HeightFieldProps;
+  }[];
+  maxHeightAdjustment: number;
+  sharedSamples: number;
+  tests: number;
+};
 /** Internal bounded common-lattice tessellation. Coarsest incident coverage owns
  * shared boundary heights; address order breaks ties. Shared validity is the
  * intersection of incident support, with no nodata fallback. */
 export function reconcileMixedSurface(
   tiles: readonly TerrainMixedVertexTile[],
   options: TerrainMixedSurfaceOptions = {}
-) {
+): TerrainMixedSurface {
   const limit = options.maxSamples ?? 4_000_000,
     budget = options.maxTests ?? 20_000_000,
     adjustment = options.maxHeightAdjustment ?? 0;
