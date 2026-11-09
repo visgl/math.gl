@@ -1511,3 +1511,49 @@ camera-driven LOD scheduler. Neighbor morph factors, pinned simulation domains,
 normal recomputation and coordinated seam schedules remain consumer responsibilities.
 No shaders or device resources are created in math.gl. The LOD/streaming explorer
 shows ratios, morph endpoints, missing coarse support and a real-DEM tile replay.
+
+### Coordinated tile transitions and mixed-resolution bands
+
+`coordinateTerrainLodMorphs(tiles, options)` accepts `{column, row, spacing, morph,
+factor}` tiles. Addresses are integer finest-lattice sample coordinates; spacing is
+a positive power of two. Each morph has its own factor. All frames, height references
+and diagonals must agree, and tile interiors must not overlap. Partial shared edges,
+T junctions and multi-tile corners participate in a deterministic global policy:
+the coarsest incident tile owns shared heights; column/row order breaks equal-level
+ties. Shared validity is the intersection of incident triangle support. Missing
+support is masked conservatively and never filled from a different source.
+
+Output `tiles` contain detached vertex fields on the common unit lattice, with
+`spacing: 1` and `sourceSpacing` recording input resolution. Interiors preserve their
+sampled triangle surface except for the cells adjacent to reconciled boundaries.
+`maxHeightAdjustment` reports the largest valid nodal change; `sharedSamples` counts
+shared output incidences, including duplicate representations at incident tiles.
+`origin`, `columnStep` and `rowStep` describe the common frame. Construct local vertex
+XY from `(column+x)*columnStep + (row+y)*rowStep` and retain the world origin separately
+when rendering, avoiding large-origin cancellation. Existing regular mesh builders can
+consume the returned fields for a bounded reference transition surface.
+
+This reference **densifies coarse tiles** to the declared finest lattice. It is intended
+for bounded transition patches, qualification and preparation, not a sparse production
+LOD scheduler. Default `maxSamples` admits four million expanded samples and `maxTests`
+twenty million tests. Source metadata, output expansion, overlap discovery and per-node
+work are bounded; excess throws before an output is returned. Uniform or independent
+morph schedules are allowed. Shared heights agree at common knots; no normal-continuity,
+camera-selection, continuous-error or cross-frame motion certificate is implied.
+
+`createTerrainMixedIsobands(tiles, levels, options)` accepts the existing
+`TerrainMixedVertexTile` inputs, constructs the same conforming reference surface, then
+assembles elevation-band rings and holes with domain/nodata boundaries. Output matches
+`TerrainIsobands`, with reconciliation diagnostics. `maxHeightAdjustment` defaults to
+zero so source disagreements are rejected; explicitly budget desired seam adjustment
+(or pass Infinity to acknowledge unbounded finite adjustment). Coordinated transitions
+allow finite adjustments by default and report their measured maximum. The two APIs
+therefore distinguish source analysis from intentional displayed-surface reconciliation.
+
+Expanded triangle admission uses the polygonizer's `maxTriangles`; level/vertex/edge
+limits also apply. Reconciliation and polygonization share one `maxTests` budget.
+Matching diagonals ensure subdivision preserves complete coarse triangle interiors.
+The reported bands describe the reconciled displayed surface, which can differ near
+adjusted seams from each raw input DEM. Geographic wrapping and datum conversion remain
+outside these local affine operations. The coordinated transition/band example shows
+2:1/4:1 factors, shared corners and missing coarse support.

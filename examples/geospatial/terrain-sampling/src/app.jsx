@@ -11,6 +11,7 @@ import SeamExplorer from './seam-explorer';
 import ContourTopology from './contour-topology';
 import BandsUpdates from './bands-updates';
 import LodStreaming from './lod-streaming';
+import CoordinatedTransitions from './coordinated-transitions';
 import './styles.css';
 
 export default function TerrainSampling() {
@@ -135,6 +136,7 @@ export default function TerrainSampling() {
         <ContourTopology />
         <BandsUpdates />
         <LodStreaming />
+        <CoordinatedTransitions />
       </div>
       <ExamplePanel title="Terrain sampling">
         <label>

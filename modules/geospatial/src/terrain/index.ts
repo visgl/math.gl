@@ -160,3 +160,9 @@ export type {TerrainLodMorph} from './lod-morph';
 export {evaluateTerrainLodMorph} from './lod-morph-evaluate';
 export {TerrainMorphStatus} from './lod-morph';
 export type {TerrainHierarchyBlock, TerrainHierarchyUpdateStats} from './persistent-hierarchy-data';
+
+export {coordinateTerrainLodMorphs} from './lod-coordinate';
+
+export {createTerrainMixedIsobands} from './isobands-mixed';
+export type {TerrainLodTile} from './lod-coordinate';
+export type {TerrainMixedSurfaceOptions} from './mixed-surface';

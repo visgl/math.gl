@@ -63,6 +63,13 @@ try {
   await page.getByLabel('Terrain streaming step').fill('19');
   assert.match(await page.getByTestId('streaming-result').innerText(), /16 resident tiles/);
   assert.match(await page.getByTestId('persistent-copy-result').innerText(), /data bytes/);
+  await page.getByLabel('Mixed seam ratio').selectOption('4');
+  await page.getByLabel('Coarse morph factor').fill('0.75');
+  await page.getByLabel('Fine morph factor').fill('0.2');
+  assert.match(await page.getByTestId('coordinated-result').innerText(), /Shared corner delta: 0.000000/);
+  await page.getByLabel('Missing shared coarse support').check();
+  assert.match(await page.getByTestId('coordinated-result').innerText(), /unavailable/);
+  await page.getByLabel('Missing shared coarse support').uncheck();
   const labStats = page.getByTestId('mesh-lab-stats');
   const martiniStats = await labStats.innerText();
   await page.getByLabel('Mesh nodal error heatmap').check();

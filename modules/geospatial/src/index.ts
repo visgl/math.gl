@@ -357,3 +357,9 @@ export type {
   TerrainHierarchyBlock,
   TerrainHierarchyUpdateStats
 } from './terrain/persistent-hierarchy-data';
+
+export {coordinateTerrainLodMorphs} from './terrain/lod-coordinate';
+
+export {createTerrainMixedIsobands} from './terrain/isobands-mixed';
+export type {TerrainLodTile} from './terrain/lod-coordinate';
+export type {TerrainMixedSurfaceOptions} from './terrain/mixed-surface';

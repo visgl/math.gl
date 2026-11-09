@@ -676,3 +676,15 @@ fine nodes. Examples expose missing coarse support, morph factors, streaming res
 and copied hierarchy bytes. Camera-driven selection, coordinated cross-tile morphs,
 normal continuity, screen-space error certificates and device execution remain follow-on
 consumer/qualification work; math.gl contains no shaders.
+
+## Coordinated transitions and mixed-resolution isobands
+
+Bounded common-lattice transition preparation now reconciles independent tile morph
+factors across partial edges, T junctions and multi-tile corners. Coarsest incident
+height ownership and intersected validity provide deterministic shared knots without
+filling missing support. Mixed-resolution isobands use the same conforming subdivision,
+with explicit adjustment budgets and shared work admission. Examples and a 24-case
+real-DEM qualification report compare shared nodes and total band area against regular
+triangle coverage. The reference densifies coarse patches; sparse transition topology,
+normal continuity, camera selection and geographic/mixed-datum policies remain future
+work. These remain plain independently exported CPU functions, without shader code.
