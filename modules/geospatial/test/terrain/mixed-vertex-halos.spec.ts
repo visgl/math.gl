@@ -152,3 +152,19 @@ test('frame validation rejects subcell displacement at large world origins and u
   const right = tile(Number.MAX_SAFE_INTEGER - 8, 0, 1);
   expect(() => createTerrainMixedVertexTileHalos([left, right])).toThrow(/span/);
 });
+
+test('curved surfaces retain documented stencil-scale differences', () => {
+  const input = [tile(-8, 0, 2), tile(0, 0, 1), tile(0, 4, 1)];
+  for (const t of input)
+    t.field.heights = Float64Array.from(
+      {length: 25},
+      (_, i) => (t.column + (i % 5) * t.spacing) ** 3
+    );
+  const result = createTerrainMixedVertexTileHalos(input);
+  const fine = createTerrainGradientGrid(new HeightField(result.tiles[0].field));
+  const coarse = createTerrainGradientGrid(new HeightField(result.tiles[2].field));
+  expect(fine.statuses[3 * 7 + 1]).toBe(0);
+  expect(coarse.statuses[2 * 7 + 5]).toBe(0);
+  expect(fine.gradients[2 * (3 * 7 + 1)]).toBeCloseTo(2.5);
+  expect(coarse.gradients[2 * (2 * 7 + 5)]).toBeCloseTo(4);
+});

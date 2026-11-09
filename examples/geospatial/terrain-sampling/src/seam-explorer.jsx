@@ -48,7 +48,10 @@ export default function SeamExplorer() {
     : null;
   const colors = ['#687587', '#e97574', '#67d5b5'];
   return (
-    <section className="terrain-analysis" aria-label="Mixed-resolution seam explorer">
+    <section
+      className="terrain-analysis terrain-seam-explorer"
+      aria-label="Mixed-resolution seam explorer"
+    >
       <h2>Mixed-resolution seam explorer</h2>
       <p>
         Fine tile at right; coarse neighbor at left. Dots show the fine tile’s one-node halo. Green:
