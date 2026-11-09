@@ -74,7 +74,7 @@ export function projectBounds(
   if (
     lipschitz &&
     (lipschitz.length !== targetSize ||
-      !lipschitz.every(value => Number.isFinite(value) && value >= 0))
+      !Array.from(lipschitz).every(value => Number.isFinite(value) && value >= 0))
   ) {
     throw new RangeError('Lipschitz constants must be finite, nonnegative and match target size');
   }

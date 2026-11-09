@@ -205,7 +205,9 @@ test('projectBounds validates dimensions, source extents and budgets before tran
     {targetSize: 4 as 3},
     {lipschitz: [1]},
     {lipschitz: [1, -1]},
-    {lipschitz: [1, NaN]}
+    {lipschitz: [1, NaN]},
+    {lipschitz: new Array<number>(2)},
+    {lipschitz: [1, ,] as number[]}
   ])
     expect(() =>
       projectBounds(
