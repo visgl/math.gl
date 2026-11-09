@@ -38,3 +38,7 @@ The elevation-band/edit explorer clips the regular triangle surface into footpri
 polygons, preserves nodata holes and shows conservative bounds, derivative hierarchy
 levels and distant mesh reuse after patch edits. These are patch-granular updates;
 changing a band threshold reuses the underlying field.
+
+The brush example now reports sub-patch mesh rebuilds and bounds/gradient ancestor
+counts. The contour topology explorer includes path-local rejection, letting an
+unsafe component remain unchanged while a separated safe component simplifies.

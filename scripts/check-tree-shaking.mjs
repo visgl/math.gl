@@ -151,6 +151,13 @@ const probes = [
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/contour-topology\./],
     budget: 16000
   })),
+  ...['updateTerrainMeshRegions','updateTerrainMartiniMeshRegions','updateTerrainDelatinMeshRegions','updateTerrainBoundsRegions','updateTerrainGradientPyramidRegions'].map(symbol => ({
+    symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./,
+      ...(symbol === 'updateTerrainMartiniMeshRegions' ? [] : [/martini/]),
+      ...(symbol === 'updateTerrainDelatinMeshRegions' ? [] : [/delatin/])],
+    budget: 32000
+  })),
   {
     symbol: 'createTerrainMixedVertexTileHalos',
     packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],

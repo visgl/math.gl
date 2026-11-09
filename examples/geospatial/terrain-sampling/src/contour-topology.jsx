@@ -5,20 +5,31 @@
 import React, {useMemo, useState} from 'react';
 import {stitchTerrainContours, simplifyTerrainContourPathsTopology} from '@math.gl/geospatial';
 export default function ContourTopology() {
+  const [local, setLocal] = useState(false);
   const [error, setError] = useState(0),
     [obstacle, setObstacle] = useState(true);
   const {input, output} = useMemo(() => {
     const input = stitchTerrainContours({
-      positions: new Float64Array([0, 0, 0, 2, 3, 0, 4, 0, 0, 1.8, 1, 0, 2.2, 1, 0]),
-      gridCoordinates: new Float64Array(10),
-      segments: Uint32Array.from(obstacle ? [0, 1, 1, 2, 3, 4] : [0, 1, 1, 2]),
+      positions: new Float64Array([
+        0, 0, 0, 2, 3, 0, 4, 0, 0, 1.8, 1, 0, 2.2, 1, 0, 5, 0, 0, 6, 0.1, 0, 7, 0, 0
+      ]),
+      gridCoordinates: new Float64Array(16),
+      segments: Uint32Array.from(
+        obstacle ? [0, 1, 1, 2, 3, 4, 5, 6, 6, 7] : [0, 1, 1, 2, 5, 6, 6, 7]
+      ),
       levels: new Float64Array([0]),
-      levelIndices: new Uint32Array(obstacle ? 3 : 2),
+      levelIndices: new Uint32Array(obstacle ? 5 : 4),
       origin: [0, 0, 0],
       heightReference: 'local'
     });
-    return {input, output: simplifyTerrainContourPathsTopology(input, {maxError: error})};
-  }, [error, obstacle]);
+    return {
+      input,
+      output: simplifyTerrainContourPathsTopology(input, {
+        maxError: error,
+        rejection: local ? 'path' : 'batch'
+      })
+    };
+  }, [error, obstacle, local]);
   const draw = (data, color) =>
     Array.from({length: data.closed.length}, (_, p) => (
       <polyline
@@ -39,6 +50,10 @@ export default function ContourTopology() {
     >
       <h2>Contour topology explorer</h2>
       <label>
+        <input type="checkbox" checked={local} onChange={e => setLocal(e.target.checked)} />
+        Reject unsafe paths locally
+      </label>
+      <label>
         Contour tolerance: {error}
         <input
           aria-label="Contour topology tolerance"
@@ -54,7 +69,7 @@ export default function ContourTopology() {
         <input type="checkbox" checked={obstacle} onChange={e => setObstacle(e.target.checked)} />
         Preserve neighboring component
       </label>
-      <svg viewBox="0 0 360 300" role="img" aria-label="Original and topology-preserved contours">
+      <svg viewBox="0 0 600 300" role="img" aria-label="Original and topology-preserved contours">
         {draw(input, '#687587')}
         {draw(output, '#67d5b5')}
       </svg>

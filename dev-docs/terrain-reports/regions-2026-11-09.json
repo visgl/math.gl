@@ -1,0 +1,43 @@
+{
+  "runtime": "v24.5.0",
+  "platform": "darwin/arm64",
+  "scope": "One diagnostic run, not a universal complexity or latency guarantee. Hierarchy array copies and full derivative grid creation are included in update timing.",
+  "dirtyUpdate": {
+    "width": 129,
+    "milliseconds": 1.5939170000000047,
+    "rebuiltMeshRegions": 1,
+    "totalMeshRegions": 64,
+    "boundsUpdatedCounts": [
+      9,
+      4,
+      4,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "gradientUpdatedCounts": [
+      9,
+      4,
+      4,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  "contours": {
+    "paths": 2000,
+    "milliseconds": 48.89075000000001,
+    "topologyTests": 286816,
+    "retainedIndices": 4000
+  },
+  "isobands": {
+    "patches": 2000,
+    "milliseconds": 38.1345,
+    "rings": 2000
+  }
+}

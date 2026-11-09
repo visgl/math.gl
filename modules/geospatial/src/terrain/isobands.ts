@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {createTerrainBoxIndex} from './box-index';
 import type {HeightField} from './height-field';
 
 export type TerrainIsobands = {
@@ -98,8 +99,19 @@ export function createTerrainIsobands(
     }
     return {x, y, right: x + f.width - 1, top: y + f.height - 1};
   });
+  const rectangleBoxes = rectangles.map(r => ({minX: r.x, minY: r.y, maxX: r.right, maxY: r.top})),
+    rectangleIndex = createTerrainBoxIndex(rectangleBoxes);
+  const rangeIndex = createTerrainBoxIndex(
+    fields.map(f => ({
+      minX: f.heightRange?.[0] ?? Infinity,
+      maxX: f.heightRange?.[1] ?? -Infinity,
+      minY: 0,
+      maxY: 0
+    }))
+  );
   for (let i = 0; i < rectangles.length; i++)
-    for (let j = i + 1; j < rectangles.length; j++) {
+    for (const j of rectangleIndex(rectangleBoxes[i], charge)) {
+      if (j <= i) continue;
       charge();
       const a = rectangles[i],
         b = rectangles[j];
@@ -155,9 +167,13 @@ export function createTerrainIsobands(
   };
   for (let band = 0; band + 1 < levels.length; band++) {
     const edges = new Map<string, {a: Vertex; b: Vertex}>();
-    for (const f of fields)
-      for (let y = 0; y < f.height - 1; y++)
-        for (let x = 0; x < f.width - 1; x++) {
+    for (const fieldId of rangeIndex(
+      {minX: levels[band], maxX: levels[band + 1], minY: 0, maxY: 0},
+      charge
+    ))
+      for (let y = 0; y < fields[fieldId].height - 1; y++)
+        for (let x = 0; x < fields[fieldId].width - 1; x++) {
+          const f = fields[fieldId];
           const nodes = [
             [x, y],
             [x + 1, y],
@@ -169,12 +185,12 @@ export function createTerrainIsobands(
             const shift = f.registration === 'cell' ? 0.5 : 0;
             const px =
                 frame.origin[0] +
-                (rectangles[fields.indexOf(f)].x + c + shift) * frame.columnStep[0] +
-                (rectangles[fields.indexOf(f)].y + r + shift) * frame.rowStep[0],
+                (rectangles[fieldId].x + c + shift) * frame.columnStep[0] +
+                (rectangles[fieldId].y + r + shift) * frame.rowStep[0],
               py =
                 frame.origin[1] +
-                (rectangles[fields.indexOf(f)].x + c + shift) * frame.columnStep[1] +
-                (rectangles[fields.indexOf(f)].y + r + shift) * frame.rowStep[1];
+                (rectangles[fieldId].x + c + shift) * frame.columnStep[1] +
+                (rectangles[fieldId].y + r + shift) * frame.rowStep[1];
             if (![px, py].every(Number.isFinite)) throw new Error('Isoband coordinate overflow');
             const key = `v:${px},${py}`,
               v = {x: px, y: py, z, key, support: [key]};
@@ -263,11 +279,23 @@ export function createTerrainIsobands(
     }, 0);
   const areas = rings.map(area),
     parents = new Int32Array(rings.length).fill(-1);
+  const ringBoxes = rings.map(r =>
+    r.reduce(
+      (b, v) => ({
+        minX: Math.min(b.minX, v.x),
+        minY: Math.min(b.minY, v.y),
+        maxX: Math.max(b.maxX, v.x),
+        maxY: Math.max(b.maxY, v.y)
+      }),
+      {minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity}
+    )
+  );
+  const ringIndex = createTerrainBoxIndex(ringBoxes);
   for (let i = 0; i < rings.length; i++)
     if (areas[i] < 0) {
       let best = Infinity;
       const q = rings[i][0];
-      for (let j = 0; j < rings.length; j++)
+      for (const j of ringIndex({minX: q.x, maxX: q.x, minY: q.y, maxY: q.y}, charge))
         if (bands[j] === bands[i] && areas[j] > 0) {
           let inside = false;
           const ring = rings[j];

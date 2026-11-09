@@ -648,3 +648,15 @@ patches. The edit/band explorer exercises these operations together. Further wor
 regional-scale qualification, continuous error certificates, spatial indexing,
 sub-patch updates, adaptive incremental topology, mixed-resolution/geographic bands,
 LOD morphs, collision sweeps and area/geographic visibility.
+
+## Indexed batches and finer dirty updates
+
+Static broad-phase indexes now narrow contour edge/vertex predicates, isoband patch
+overlap, height ranges and ring parent candidates. Optional path-local contour rejection
+retains unrelated safe reductions. Thousands-of-component tests enforce bounded work.
+Dirty sample windows drive regular/MARTINI/Delatin mesh region reuse and local bounds/
+gradient-hierarchy ancestor recomputation. Adaptive backends remain isolated; nodata
+and independent Delatin seam limitations are explicit. Hierarchy snapshots copy touched
+level arrays for immutability. These advance scaling and dirty updates without claiming
+linear worst-case topology work, in-place hierarchy buffers, dynamic global TIN edits,
+LOD morphs, continuous error certificates or geographic/mixed-LOD polygonization.
