@@ -207,6 +207,10 @@ function bytes(value: Prepared, row: number): Range | null {
 
 /** Binds supported syntax to fused per-row operations and explicit vector boundaries. */
 function bind(ast: any, options: ArrowExpressionOptions, expected?: DataType): Node {
+  if (isSignedLiteral(ast)) {
+    const value = ast.operator === '-' ? -ast.argument.value : ast.argument.value;
+    return bind({type: 'Literal', value}, options, expected);
+  }
   if (ast.type === 'Identifier') {
     const index = options.inputSchema.fields.findIndex(field => field.name === ast.name);
     if (index < 0) throw new Error(`Unknown Arrow expression field: ${ast.name}`);
@@ -251,9 +255,9 @@ function bind(ast: any, options: ArrowExpressionOptions, expected?: DataType): N
     requireType(condition, 'bool');
     let yes = bind(ast.consequent, options),
       no = bind(ast.alternate, options);
-    if (ast.consequent.type === 'Literal' && !DataType.isNull(no.field.type))
+    if (isContextualLiteral(ast.consequent) && !DataType.isNull(no.field.type))
       yes = bind(ast.consequent, options, no.field.type);
-    if (ast.alternate.type === 'Literal') no = bind(ast.alternate, options, yes.field.type);
+    if (isContextualLiteral(ast.alternate)) no = bind(ast.alternate, options, yes.field.type);
     sameType(yes, no);
     const field = new Field('conditional', yes.field.type, yes.field.nullable || no.field.nullable);
     return {
@@ -336,9 +340,9 @@ function bindBinary(ast: any, options: ArrowExpressionOptions): Node {
   let left = bind(ast.left, options, logical ? bool : undefined),
     right = bind(ast.right, options, logical ? bool : undefined);
   if (!logical) {
-    if (ast.left.type === 'Literal' && !DataType.isNull(right.field.type))
+    if (isContextualLiteral(ast.left) && !DataType.isNull(right.field.type))
       left = bind(ast.left, options, right.field.type);
-    if (ast.right.type === 'Literal') right = bind(ast.right, options, left.field.type);
+    if (isContextualLiteral(ast.right)) right = bind(ast.right, options, left.field.type);
   }
   sameType(left, right);
   const comparison = ['==', '===', '!=', '!==', '<', '<=', '>', '>='].includes(op);
@@ -584,4 +588,17 @@ function roundToType(type: DataType): (value: ArrowExpressionValue) => ArrowExpr
   return typeKey(type) === 'f1'
     ? value => (value === null ? null : Math.fround(value as number))
     : value => value;
+}
+
+/** A signed number is one literal, including the negative limit of a signed integer. */
+function isSignedLiteral(ast: any): boolean {
+  return (
+    ast.type === 'UnaryExpression' &&
+    (ast.operator === '+' || ast.operator === '-') &&
+    ast.argument.type === 'Literal' &&
+    typeof ast.argument.value === 'number'
+  );
+}
+function isContextualLiteral(ast: any): boolean {
+  return ast.type === 'Literal' || isSignedLiteral(ast);
 }

@@ -352,3 +352,22 @@ test('literal nulls use Boolean context and comparison null semantics', () => {
   expect(values('true ? 1 : null', input)).toEqual([1]);
   expect(values('false ? null : 1', input)).toEqual([1]);
 });
+
+test('signed literals bind to the operand or function argument type', () => {
+  const input = batch({x: vectorFromArray([-128, 1], new Int8())});
+  expect(values('x == -128', input)).toEqual([true, false]);
+  expect(values('x < -1', input)).toEqual([true, false]);
+  expect(values('x < 0 ? -128 : x', input)).toEqual([-128, 1]);
+  expect(() => values('x == -129', input)).toThrow('overflow');
+  expect(values('toInt32(-1)', input)).toEqual([-1, -1]);
+  const registry = new ArrowFunctionRegistry().registerFunction('identity', {
+    arguments: [new Field('value', new Int8())],
+    result: new Field('result', new Int8()),
+    scalar: (value: number) => value
+  });
+  expect([
+    ...compileArrowFunction('identity', ['-128'], {inputSchema: input.schema, registry}).evaluate(
+      input
+    )
+  ]).toEqual([-128, -128]);
+});
