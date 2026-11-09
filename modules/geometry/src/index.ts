@@ -246,3 +246,5 @@ export type {
   ProjectBoundsOptions,
   ProjectedBoundsResult
 } from './utils/project-bounds';
+export {projectTextureCoordinates} from './utils/project-texture-coordinates';
+export type {ProjectTextureCoordinatesOptions} from './utils/project-texture-coordinates';

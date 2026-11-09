@@ -3,6 +3,7 @@
 ## Unreleased
 
 - feat(geometry): Add bounded nonlinear box projection with explicit sampled results and conservative inflation under a supplied global Lipschitz contract.
+- feat(geometry): Add engine-independent projected texture coordinates for packed CPU vertices with explicit image bounds and texture origin.
 
 ## v5.0.0-beta.5
 
