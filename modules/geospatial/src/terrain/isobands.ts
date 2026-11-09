@@ -41,8 +41,8 @@ export function createTerrainIsobands(
     throw new Error('Invalid isoband levels');
   const maxTriangles = options.maxTriangles ?? 2_000_000,
     maxVertices = options.maxVertices ?? 2_000_000,
-    maxEdges = options.maxEdges ?? 4_000_000,
-    maxTests = options.maxTests ?? 10_000_000;
+    maxEdges = options.maxEdges ?? 6 * maxTriangles,
+    maxTests = options.maxTests ?? 32 * maxTriangles;
   if (
     ![maxTriangles, maxVertices, maxEdges, maxTests].every(n => Number.isSafeInteger(n) && n >= 0)
   )

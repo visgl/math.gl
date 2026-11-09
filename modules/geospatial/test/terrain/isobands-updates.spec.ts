@@ -154,3 +154,19 @@ test('large translated decimal frames recover a forward-verified lattice address
     });
   expect(createTerrainIsobands([make(500000), make(500000.1)], [0, 2]).parents.length).toBe(1);
 });
+
+test('default edge and work budgets scale with an admitted triangle cap', () => {
+  const n = 65,
+    f = new HeightField({
+      width: n,
+      height: n,
+      heights: Float64Array.from({length: n * n}, (_, i) => i % n)
+    });
+  const bands = createTerrainIsobands([f], [0, 16, 32, 48, 64], {
+    maxTriangles: 2 * (n - 1) * (n - 1)
+  });
+  expect(new Set(bands.bandIndices).size).toBe(4);
+  expect(area(bands)).toBeCloseTo(4096);
+  expect(() => createTerrainIsobands([f], [0, 64], {maxEdges: 1})).toThrow(/edge capacity/);
+  expect(() => createTerrainIsobands([f], [0, 64], {maxTests: 1})).toThrow(/budget/);
+});

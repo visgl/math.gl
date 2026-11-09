@@ -1365,8 +1365,12 @@ Constant-height triangles at internal thresholds belong to the upper interval; t
 last upper endpoint is included. Adjacent bands share their boundary geometry.
 
 Options bound levels (default 256), input triangles (default two million), generated vertices (two million),
-processed polygon edges (four million) and work tests (ten million); exhausted budgets
-throw. Ring assembly uses deterministic angular routing at point contacts. Exact
+processed polygon edges (six times the triangle cap; twelve million by default)
+and work tests (32 times the triangle cap; 64 million by default); exhausted budgets
+throw. Budgets accumulate across bands, including cancelled internal edges; the
+triangle cap is input admission, not a promise that every multi-band output fits the
+other independent limits. Raise explicit limits for denser/more numerous bands.
+Ring assembly uses deterministic angular routing at point contacts. Exact
 conforming coordinates are required; no tolerance-based welding or extrapolation is
 performed. Geographic wrapping, geodesic area and mixed-LOD stitching are separate work.
 
