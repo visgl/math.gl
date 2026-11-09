@@ -301,3 +301,11 @@ export type {
 
 export {createTerrainMixedVertexTileHalos} from './terrain/mixed-vertex-halos';
 export type {TerrainMixedVertexTile} from './terrain/mixed-vertex-halos';
+
+export {updateTerrainMixedVertexTileHalos} from './terrain/mixed-halo-update';
+
+export {updateTerrainMixedGradientGrids} from './terrain/mixed-gradient-update';
+
+export {simplifyTerrainContourPathsTopology} from './terrain/contour-topology';
+export type {TerrainMixedHaloSnapshot} from './terrain/mixed-halo-update';
+export type {TerrainMixedGradientSnapshot} from './terrain/mixed-gradient-update';

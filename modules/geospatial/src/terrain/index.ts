@@ -107,3 +107,11 @@ export type {TerrainMixedContourTile, TerrainMixedContourWeldOptions} from './co
 
 export {createTerrainMixedVertexTileHalos} from './mixed-vertex-halos';
 export type {TerrainMixedVertexTile} from './mixed-vertex-halos';
+
+export {updateTerrainMixedVertexTileHalos} from './mixed-halo-update';
+
+export {updateTerrainMixedGradientGrids} from './mixed-gradient-update';
+
+export {simplifyTerrainContourPathsTopology} from './contour-topology';
+export type {TerrainMixedHaloSnapshot} from './mixed-halo-update';
+export type {TerrainMixedGradientSnapshot} from './mixed-gradient-update';

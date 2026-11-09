@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // biome-ignore lint/correctness/noUnusedImports: Standalone examples use the classic JSX transform.
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useState, useRef} from 'react';
 import {
   HeightField,
-  createTerrainMixedVertexTileHalos,
+  updateTerrainMixedVertexTileHalos,
   createTerrainGradientGrid
 } from '@math.gl/geospatial';
 
@@ -15,6 +15,7 @@ export default function SeamExplorer() {
   const [missing, setMissing] = useState(false);
   const [surface, setSurface] = useState('plane');
   const [method, setMethod] = useState('horn');
+  const snapshot = useRef(null);
   const tiles = useMemo(() => {
     const make = (column, spacing) => ({
       column,
@@ -36,10 +37,11 @@ export default function SeamExplorer() {
         )
       }
     });
-    return createTerrainMixedVertexTileHalos([
+    snapshot.current = updateTerrainMixedVertexTileHalos(snapshot.current, [
       make(0, 1),
       ...(resident ? [make(-8 * ratio, ratio)] : [])
-    ]).tiles;
+    ]);
+    return snapshot.current.tiles;
   }, [ratio, resident, missing, surface]);
   const fine = tiles[0],
     grid = createTerrainGradientGrid(new HeightField(fine.field), {method});
@@ -53,6 +55,10 @@ export default function SeamExplorer() {
       aria-label="Mixed-resolution seam explorer"
     >
       <h2>Mixed-resolution seam explorer</h2>
+      <p>
+        Last update rebuilt {snapshot.current.rebuilt.length} halos; removed{' '}
+        {snapshot.current.removed.length}.
+      </p>
       <p>
         Fine tile at right; coarse neighbor at left. Dots show the fine tile’s one-node halo. Green:
         valid · red: nodata · gray: not resident.

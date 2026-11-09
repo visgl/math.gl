@@ -24,7 +24,11 @@ export type TerrainSimplifiedContourPaths = TerrainContourPaths & {
  */
 export function simplifyTerrainContourPaths(
   paths: TerrainContourPaths,
-  options: TerrainContourPathLimits & {maxError: number; maxDistanceTests?: number}
+  options: TerrainContourPathLimits & {
+    maxError: number;
+    maxDistanceTests?: number;
+    protectedVertexIndices?: Uint32Array;
+  }
 ): TerrainSimplifiedContourPaths {
   const limits = contourPathLimits(options),
     count = validateContourData(paths, limits);
@@ -87,6 +91,9 @@ export function simplifyTerrainContourPaths(
       uses[vertex]++;
     }
   }
+  const protectedIds = new Set(options.protectedVertexIndices);
+  for (const id of protectedIds)
+    if (id >= count) throw new Error('Invalid protected contour vertex');
   const keep = new Uint8Array(paths.indices.length);
   let distanceTests = 0,
     maxDeviation = 0;
@@ -98,7 +105,8 @@ export function simplifyTerrainContourPaths(
       keep[start + Math.floor((end - start) / 3)] = 1;
       keep[start + Math.floor((2 * (end - start)) / 3)] = 1;
     }
-    for (let i = start; i <= end; i++) if (uses[paths.indices[i]] > 1) keep[i] = 1;
+    for (let i = start; i <= end; i++)
+      if (uses[paths.indices[i]] > 1 || protectedIds.has(paths.indices[i])) keep[i] = 1;
     const stack: number[] = [];
     let previous = start;
     for (let i = start + 1; i <= end; i++)

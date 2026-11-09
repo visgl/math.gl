@@ -30,6 +30,15 @@ export function createTerrainMixedVertexTileHalos(
     statuses: Uint8Array;
   }[];
 } {
+  return buildMixedVertexTileHalos(tiles, options);
+}
+
+/** Internal selective builder; all source metadata and total capacity are validated. */
+export function buildMixedVertexTileHalos(
+  tiles: readonly TerrainMixedVertexTile[],
+  options: {maxSamples?: number; maxTileTests?: number} = {},
+  targets?: ReadonlySet<string>
+): ReturnType<typeof createTerrainMixedVertexTileHalos> {
   const maxSamples = options.maxSamples ?? 4_000_000,
     maxTests = options.maxTileTests ?? 10_000_000;
   if (![maxSamples, maxTests].every(v => Number.isSafeInteger(v) && v >= 0))
@@ -101,58 +110,61 @@ export function createTerrainMixedVertexTileHalos(
   }
   let tests = 0;
   return {
-    tiles: sources.map(tile => {
-      const source = tile.source,
-        width = source.width + 2,
-        height = source.height + 2;
-      const heights = new Float64Array(width * height),
-        validity = new Uint8Array(heights.length),
-        statuses = new Uint8Array(heights.length);
-      for (let y = 0; y < height; y++)
-        for (let x = 0; x < width; x++) {
-          const gx = tile.column + (x - 1) * tile.spacing,
-            gy = tile.row + (y - 1) * tile.spacing;
-          if (![gx, gy].every(Number.isSafeInteger)) throw new Error('Mixed halo lattice overflow');
-          for (const candidate of sources) {
-            if (++tests > maxTests) throw new Error('Mixed halo tile-test budget exceeded');
-            const cx = (gx - candidate.column) / candidate.spacing,
-              cy = (gy - candidate.row) / candidate.spacing;
-            const f = candidate.source;
-            if (cx < 0 || cy < 0 || cx > f.width - 1 || cy > f.height - 1) continue;
-            const value = sampleHeight(f, cx, cy);
-            const i = y * width + x;
-            statuses[i] = value === undefined ? 1 : 2;
-            if (value !== undefined) {
-              heights[i] = value;
-              validity[i] = 1;
+    tiles: sources
+      .filter(tile => !targets || targets.has(`${tile.spacing}/${tile.column}/${tile.row}`))
+      .map(tile => {
+        const source = tile.source,
+          width = source.width + 2,
+          height = source.height + 2;
+        const heights = new Float64Array(width * height),
+          validity = new Uint8Array(heights.length),
+          statuses = new Uint8Array(heights.length);
+        for (let y = 0; y < height; y++)
+          for (let x = 0; x < width; x++) {
+            const gx = tile.column + (x - 1) * tile.spacing,
+              gy = tile.row + (y - 1) * tile.spacing;
+            if (![gx, gy].every(Number.isSafeInteger))
+              throw new Error('Mixed halo lattice overflow');
+            for (const candidate of sources) {
+              if (++tests > maxTests) throw new Error('Mixed halo tile-test budget exceeded');
+              const cx = (gx - candidate.column) / candidate.spacing,
+                cy = (gy - candidate.row) / candidate.spacing;
+              const f = candidate.source;
+              if (cx < 0 || cy < 0 || cx > f.width - 1 || cy > f.height - 1) continue;
+              const value = sampleHeight(f, cx, cy);
+              const i = y * width + x;
+              statuses[i] = value === undefined ? 1 : 2;
+              if (value !== undefined) {
+                heights[i] = value;
+                validity[i] = 1;
+              }
+              break;
             }
-            break;
           }
-        }
-      const origin: [number, number] = [
-        source.origin[0] - source.columnStep[0] - source.rowStep[0],
-        source.origin[1] - source.columnStep[1] - source.rowStep[1]
-      ];
-      if (!origin.every(Number.isFinite)) throw new Error('Mixed halo coordinate overflow');
-      return {
-        column: tile.column,
-        row: tile.row,
-        spacing: tile.spacing,
-        statuses,
-        field: {
-          ...tile.field,
-          width,
-          height,
-          heights,
-          validity,
-          offset: 0,
-          stride: width,
-          origin,
-          columnStep: [...source.columnStep],
-          rowStep: [...source.rowStep]
-        }
-      };
-    })
+        const origin: [number, number] = [
+          source.origin[0] - source.columnStep[0] - source.rowStep[0],
+          source.origin[1] - source.columnStep[1] - source.rowStep[1]
+        ];
+        if (!origin.every(Number.isFinite)) throw new Error('Mixed halo coordinate overflow');
+        return {
+          column: tile.column,
+          row: tile.row,
+          spacing: tile.spacing,
+          statuses,
+          field: {
+            ...tile.field,
+            width,
+            height,
+            heights,
+            validity,
+            offset: 0,
+            stride: width,
+            origin,
+            columnStep: [...source.columnStep],
+            rowStep: [...source.rowStep]
+          }
+        };
+      })
   };
 }
 

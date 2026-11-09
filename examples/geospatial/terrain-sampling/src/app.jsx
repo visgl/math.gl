@@ -8,6 +8,7 @@ import {createTerrain, project, sampleLabel, TerrainSampleStatus} from './model'
 import TerrainAnalysis from './analysis';
 import MeshLab from './mesh-lab';
 import SeamExplorer from './seam-explorer';
+import ContourTopology from './contour-topology';
 import './styles.css';
 
 export default function TerrainSampling() {
@@ -129,6 +130,7 @@ export default function TerrainSampling() {
         <TerrainAnalysis field={terrain.field} />
         <MeshLab />
         <SeamExplorer />
+        <ContourTopology />
       </div>
       <ExamplePanel title="Terrain sampling">
         <label>

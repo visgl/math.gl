@@ -1309,3 +1309,40 @@ up to roundoff; curved surfaces can retain derivative differences across differe
 stencil resolutions. This API does not certify normal continuity or repair source
 height discontinuities. The terrain sampling example includes an interactive seam
 explorer for ratios, residency, nodata and derivative methods.
+
+### Incremental mixed-resolution snapshots
+
+`updateTerrainMixedVertexTileHalos(previous, resident, options)` creates a snapshot
+when `previous` is null, then rebuilds only targets whose padded sample rectangle
+intersects an edited, arrived or evicted source's old or new coverage. Results include
+`rebuilt` and `removed` keys (`spacing/column/row`). Unchanged halo objects are shared.
+Treat source descriptors, source buffers and returned snapshots as immutable; replace
+the source descriptor after every edit, including validity or metadata edits. Supply
+the complete current resident set. Ownership changes and diagonal neighbors are
+included conservatively. All source frames and aggregate output capacities remain
+validated, including when nothing is rebuilt. `maxDependencyTests` (default ten
+million) bounds dependency comparisons separately from halo sampling work.
+
+`updateTerrainMixedGradientGrids(previous, halos, options)` reuses derivative entries
+by halo identity. Changing `method` rebuilds all entries. `maxSamples` bounds the
+entire derivative snapshot (default four million), including reused grids. These
+operations retain plain immutable snapshots; they do not mutate buffers or maintain
+a persistent spatial index. Both are available through the two public terrain roots.
+
+### Topology-preserving contour simplification
+
+`simplifyTerrainContourPathsTopology(paths, options)` applies bounded RDP followed
+by conservative exact-dyadic XY topology checks. Input crossings, overlaps and touches
+without shared vertex IDs are rejected. Shared vertices and optional
+`protectedVertexIndices` stay anchored; use those IDs for tile seam vertices.
+Shortcuts must avoid other edges and must not sweep other vertices, preserving
+component relationships and ring nesting. Proposed output edges are also checked
+against each other. If any shortcut is unsafe, the whole result falls back to a
+detached copy of the input (`rejected: true`, `maxDeviation: 0`). This conservative
+policy favors correctness over maximal reduction. It does not construct polygons or
+infer holes from contour direction. Every level participates in XY topology.
+
+`maxTopologyTests` defaults to one million and throws on exhaustion; topology
+validation is quadratic in edge count and intended for bounded batches. Existing
+`maxDistanceTests` and contour capacities still apply. `topologyTests` and `rejected`
+provide diagnostics. The simpler approximate API remains available independently.
