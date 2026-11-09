@@ -608,3 +608,18 @@ Existing raster gradient operators can then evaluate shared tile edges using
 the same stencil. A separate affected-tile helper identifies conservative
 same-level dependencies after arrivals, replacements and evictions. Mixed-level
 halos, persistent incremental updates and geographic boundary policies remain future work.
+
+## Mixed-resolution derivative halos and seam explorer
+
+`createTerrainMixedVertexTileHalos` adds bounded snapshot preparation of one-node
+halos across power-of-two sample spacings. It uses a shared affine lattice, finest
+resident ownership and triangle interpolation, including at overlapping interiors
+and corners. Explicit nodata never falls back to coarse coverage. It composes with
+the existing Horn and Zevenbergen–Thorne derivative functions through either public
+geospatial entry point. No classes gained methods or shader dependencies.
+
+The terrain sampling seam explorer exercises 2:1/4:1 adjacency, resident/evicted
+neighbors, nodata and plane/curved surfaces. Affine gradient and skew-frame tests
+qualify the basic seam contract. This advances tile continuity; it does not complete
+transition morphs, incremental mixed-level caches, globally equal normals, geographic
+boundary policies or broad independent DEM qualification.
