@@ -1419,8 +1419,11 @@ without a full scan. Changed dimensions/frame/diagonal/reference rebuild the sta
 - `updateTerrainMeshRegions(previous, field, dirty, options)` divides a field into
   cell regions (`cellsPerRegion`, default 32). Edits rebuild only regions touching the
   dirty sample windows, including both sides of a shared boundary. Unaffected region
-  objects and buffers retain identity. Each region records its source column/row and
-  independent field/mesh origin. Stream these buffers as separate draw/compute regions.
+  objects and buffers retain identity. The snapshot records a common world `origin`. Region fields and mesh buffers use
+  its local affine frame, with each mesh origin fixed at zero and sample positions
+  computed directly from parent grid indices. Keep the common world reference
+  separate when rendering/computing to avoid rounding region offsets into large
+  absolute origins. Stream the region buffers as separate draw/compute regions.
 - `updateTerrainMartiniMeshRegions` adds complete square power-of-two regions with
   fully refined boundaries. Dimensions must divide the configured cell size exactly.
 - `updateTerrainDelatinMeshRegions` supports rectangular/partial edge regions.

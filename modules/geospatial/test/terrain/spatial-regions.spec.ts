@@ -170,3 +170,54 @@ test('odd hierarchy edges, metadata resets and work admission remain correct', (
     )
   ).toThrow(/budget/);
 });
+
+test('range pruning never hides conflicting shared heights', async () => {
+  const {createTerrainIsobands} = await import('@math.gl/geospatial');
+  const make = (x: number, h: number) =>
+    new HeightField({width: 2, height: 2, origin: [x, 0], heights: new Float64Array(4).fill(h)});
+  expect(() => createTerrainIsobands([make(0, 1), make(1, 10)], [0, 2])).toThrow(/shared heights/);
+  expect(() => createTerrainIsobands([make(0, 1), make(1, 10)], [100, 200])).toThrow(
+    /shared heights/
+  );
+});
+
+test('mesh regions share parent-relative coordinates at large world origins', () => {
+  const f = new HeightField({
+    width: 5,
+    height: 3,
+    origin: [1e12, 0],
+    columnStep: [0.1, 0],
+    heights: new Float64Array(15)
+  });
+  const state = updateTerrainMeshRegions(null, f, [], {cellsPerRegion: 2});
+  expect(state.origin).toEqual([1e12, 0, 0]);
+  const left = state.regions[0].data,
+    right = state.regions[1].data;
+  expect(left.origin).toEqual([0, 0, 0]);
+  expect(right.origin).toEqual([0, 0, 0]);
+  expect(left.positions[6]).toBe(0.2);
+  expect(right.positions[0]).toBe(left.positions[6]);
+});
+
+test('hierarchy work budgets include selection and recomputation together', () => {
+  const f = new HeightField({width: 2, height: 2, heights: new Float64Array(4)}),
+    w = [{minColumn: 0, maxColumn: 0, minRow: 0, maxRow: 0}];
+  const bounds = updateTerrainBoundsRegions(null, f, []);
+  expect(() => updateTerrainBoundsRegions(bounds, f, w, {maxTests: 1})).toThrow(/budget/);
+  const grid = {
+    width: 1,
+    height: 1,
+    gradients: new Float64Array([1, 2]),
+    statuses: new Uint8Array([0]),
+    method: 'horn' as const,
+    origin: [0, 0] as const,
+    columnStep: [1, 0] as const,
+    rowStep: [0, 1] as const,
+    registration: 'vertex' as const,
+    heightReference: 'local'
+  };
+  const initial = updateTerrainGradientPyramidRegions(null, grid, []);
+  expect(() => updateTerrainGradientPyramidRegions(initial, grid, w, {maxTests: 1})).toThrow(
+    /budget/
+  );
+});

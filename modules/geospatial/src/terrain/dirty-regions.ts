@@ -44,10 +44,9 @@ export function terrainDirtyIndices(
   width: number,
   height: number,
   expand: number,
-  maxTests: number
+  charge: () => void
 ): Set<number> {
   const ids = new Set<number>();
-  let tests = 0;
   for (const w of windows)
     for (let y = Math.max(0, w.minRow - expand); y <= Math.min(height - 1, w.maxRow + expand); y++)
       for (
@@ -55,7 +54,7 @@ export function terrainDirtyIndices(
         x <= Math.min(width - 1, w.maxColumn + expand);
         x++
       ) {
-        if (++tests > maxTests) throw new Error('Terrain dirty work budget exceeded');
+        charge();
         ids.add(y * width + x);
       }
   return ids;

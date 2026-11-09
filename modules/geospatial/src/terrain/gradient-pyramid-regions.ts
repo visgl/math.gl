@@ -71,8 +71,11 @@ export function updateTerrainGradientPyramidRegions(
   )
     throw new Error('Invalid gradient region buffers');
   const levels = previous!.pyramid.levels.slice();
-  let ids = terrainDirtyIndices(dirty, grid.width, grid.height, 0, budget),
-    tests = 0;
+  let tests = 0;
+  const charge = () => {
+    if (++tests > budget) throw new Error('Gradient region work budget exceeded');
+  };
+  let ids = terrainDirtyIndices(dirty, grid.width, grid.height, 0, charge);
   const counts: number[] = [];
   for (let l = 0; l < levels.length; l++) {
     counts.push(ids.size);
@@ -86,7 +89,7 @@ export function updateTerrainGradientPyramidRegions(
       };
     const parents = new Set<number>();
     for (const id of ids) {
-      if (++tests > budget) throw new Error('Gradient region work budget exceeded');
+      charge();
       const x = id % next.width,
         y = Math.floor(id / next.width);
       next.validCounts[id] = 0;

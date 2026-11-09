@@ -37,8 +37,11 @@ export function updateTerrainBoundsRegions(
       levels = Array.from({length: bounds.levelCount}, (_, i) => bounds.copyLevel(i));
     return {field, levels, updatedCounts: Uint32Array.from(levels, l => l.width * l.height)};
   }
-  let ids = terrainDirtyIndices(dirty, field.width - 1, field.height - 1, 1, budget),
-    tests = 0;
+  let tests = 0;
+  const charge = () => {
+    if (++tests > budget) throw new Error('Bounds region work budget exceeded');
+  };
+  let ids = terrainDirtyIndices(dirty, field.width - 1, field.height - 1, 1, charge);
   const counts: number[] = [],
     levels = previous.levels.slice();
   for (let l = 0; l < levels.length; l++) {
@@ -54,7 +57,7 @@ export function updateTerrainBoundsRegions(
       };
     const parents = new Set<number>();
     for (const id of ids) {
-      if (++tests > budget) throw new Error('Bounds region work budget exceeded');
+      charge();
       const x = id % next.width,
         y = Math.floor(id / next.width);
       let min = Infinity,

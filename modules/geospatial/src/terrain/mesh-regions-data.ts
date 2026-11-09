@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import type {TerrainGridMesh} from './mesh-data';
 import {HeightField} from './height-field';
 import {
   validateTerrainDirtyWindows,
@@ -9,13 +10,15 @@ import {
 } from './dirty-regions';
 export type TerrainMeshRegions<T> = {
   field: HeightField;
+  /** Common world reference; region fields and mesh buffers use this local frame. */
+  origin: readonly [number, number, number];
   cellsPerRegion: number;
   configuration: string;
   regions: {column: number; row: number; field: HeightField; data: T}[];
   rebuilt: Uint32Array;
 };
 /** Internal independent chunk updater. Buffers in untouched regions remain shared. */
-export function updateMeshRegions<T>(
+export function updateMeshRegions<T extends TerrainGridMesh | null>(
   previous: TerrainMeshRegions<T> | null,
   field: HeightField,
   dirty: readonly TerrainDirtyWindow[],
@@ -71,8 +74,8 @@ export function updateMeshRegions<T>(
         height,
         heights,
         origin: [
-          field.origin[0] + column * field.columnStep[0] + row * field.rowStep[0],
-          field.origin[1] + column * field.columnStep[1] + row * field.rowStep[1]
+          column * field.columnStep[0] + row * field.rowStep[0],
+          column * field.columnStep[1] + row * field.rowStep[1]
         ],
         columnStep: field.columnStep,
         rowStep: field.rowStep,
@@ -81,7 +84,30 @@ export function updateMeshRegions<T>(
         heightReference: field.heightReference
       });
       rebuilt.push(regions.length);
-      regions.push({column, row, field: source, data: create(source)});
+      let data = create(source);
+      if (data) {
+        const mesh = data;
+        const positions = mesh.positions.map((value, i) => {
+          const axis = i % 3;
+          if (axis === 2) return value;
+          const vertex = Math.floor(i / 3),
+            shift = field.registration === 'cell' ? 0.5 : 0;
+          const c = column + mesh.gridCoordinates[2 * vertex] + shift,
+            r = row + mesh.gridCoordinates[2 * vertex + 1] + shift;
+          const coordinate = c * field.columnStep[axis] + r * field.rowStep[axis];
+          if (!Number.isFinite(coordinate)) throw new Error('Terrain region coordinate overflow');
+          return coordinate;
+        });
+        data = {...mesh, origin: [0, 0, 0] as const, positions} as T;
+      }
+      regions.push({column, row, field: source, data});
     }
-  return {field, cellsPerRegion: cells, configuration, regions, rebuilt: Uint32Array.from(rebuilt)};
+  return {
+    field,
+    origin: [field.origin[0], field.origin[1], 0],
+    cellsPerRegion: cells,
+    configuration,
+    regions,
+    rebuilt: Uint32Array.from(rebuilt)
+  };
 }

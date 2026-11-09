@@ -117,6 +117,15 @@ export function createTerrainIsobands(
         b = rectangles[j];
       if (a.x < b.right && b.x < a.right && a.y < b.top && b.y < a.top)
         throw new Error('Overlapping isoband tiles');
+      // Validate every shared sample even if a field is later excluded by range.
+      for (let y = Math.max(a.y, b.y); y <= Math.min(a.top, b.top); y++)
+        for (let x = Math.max(a.x, b.x); x <= Math.min(a.right, b.right); x++) {
+          charge();
+          const u = fields[i].getHeight(x - a.x, y - a.y),
+            v = fields[j].getHeight(x - b.x, y - b.y);
+          if (u !== undefined && v !== undefined && u !== v)
+            throw new Error('Isoband shared heights differ');
+        }
     }
   const rings: Vertex[][] = [],
     bands: number[] = [];
