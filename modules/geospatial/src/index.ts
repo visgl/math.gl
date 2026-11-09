@@ -338,3 +338,22 @@ export type {TerrainBoundsRegions} from './terrain/bounds-regions';
 export {updateTerrainGradientPyramidRegions} from './terrain/gradient-pyramid-regions';
 export type {TerrainGradientPyramidRegions} from './terrain/gradient-pyramid-regions';
 export type {TerrainDirtyWindow} from './terrain/dirty-regions';
+
+export {updateTerrainPersistentBounds} from './terrain/persistent-bounds';
+export type {TerrainPersistentBounds} from './terrain/persistent-bounds';
+
+export {updateTerrainPersistentGradients} from './terrain/persistent-gradients';
+export type {TerrainPersistentGradients} from './terrain/persistent-gradients';
+
+export {getTerrainHierarchyNode} from './terrain/persistent-hierarchy-data';
+export type {TerrainPersistentLevel} from './terrain/persistent-hierarchy-data';
+
+export {createTerrainLodMorph} from './terrain/lod-morph';
+export type {TerrainLodMorph} from './terrain/lod-morph';
+
+export {evaluateTerrainLodMorph} from './terrain/lod-morph-evaluate';
+export {TerrainMorphStatus} from './terrain/lod-morph';
+export type {
+  TerrainHierarchyBlock,
+  TerrainHierarchyUpdateStats
+} from './terrain/persistent-hierarchy-data';

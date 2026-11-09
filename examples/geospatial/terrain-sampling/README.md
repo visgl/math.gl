@@ -42,3 +42,10 @@ changing a band threshold reuses the underlying field.
 The brush example now reports sub-patch mesh rebuilds and bounds/gradient ancestor
 counts. The contour topology explorer includes path-local rejection, letting an
 unsafe component remain unchanged while a separated safe component simplifies.
+
+The LOD/streaming explorer prepares fine-to-coarse correspondence at 2:1 or 4:1,
+shows a CPU-evaluated morph profile and preserves gaps from missing coarse support.
+A slider replays real-DEM patch arrivals, a local edit, eviction and restoration.
+The edit explorer reports persistent hierarchy block/byte copies alongside the
+existing dirty-region diagnostics. Streaming qualification uses full projected
+metadata; the small browser replay intentionally uses unit sample spacing.

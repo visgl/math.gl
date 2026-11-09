@@ -158,6 +158,12 @@ const probes = [
       ...(symbol === 'updateTerrainDelatinMeshRegions' ? [] : [/delatin/])],
     budget: 32000
   })),
+  ...['updateTerrainPersistentBounds','updateTerrainPersistentGradients','getTerrainHierarchyNode','createTerrainLodMorph','evaluateTerrainLodMorph'].map(symbol => ({
+    symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/mesh\./,
+      ...(symbol==='evaluateTerrainLodMorph'||symbol==='getTerrainHierarchyNode' ? [/\/height-field\./, /\/bounds\./, /\/gradient-pyramid\./] : [])],
+    budget: symbol==='evaluateTerrainLodMorph'||symbol==='getTerrainHierarchyNode'?4000:16000
+  })),
   {
     symbol: 'createTerrainMixedVertexTileHalos',
     packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],

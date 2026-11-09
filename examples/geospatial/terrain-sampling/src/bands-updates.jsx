@@ -5,6 +5,8 @@
 import React, {useMemo, useRef, useState} from 'react';
 import {
   HeightField,
+  updateTerrainPersistentBounds,
+  updateTerrainPersistentGradients,
   createTerrainGradientGrid,
   updateTerrainMeshRegions,
   updateTerrainBoundsRegions,
@@ -20,6 +22,7 @@ export default function BandsUpdates() {
   const [peak, setPeak] = useState(4),
     [hole, setHole] = useState(false),
     [band, setBand] = useState(2);
+  const persistentCache = useRef({bounds: null, gradients: null});
   const fineCache = useRef({mesh: null, bounds: null, gradients: null});
   const cache = useRef({meshes: null, bounds: null, pyramids: null, halos: null, gradients: null});
   const distant = useMemo(
@@ -39,6 +42,19 @@ export default function BandsUpdates() {
       field = new HeightField(props),
       sources = [{id: 'brush', field}, distant];
     const dirty = [{minColumn: 4, minRow: 4, maxColumn: 4, maxRow: 4}];
+    const persistentBounds = updateTerrainPersistentBounds(
+      persistentCache.current.bounds,
+      field,
+      dirty,
+      {nodesPerBlock: 16}
+    );
+    const persistentGradients = updateTerrainPersistentGradients(
+      persistentCache.current.gradients,
+      createTerrainGradientGrid(field),
+      [{minColumn: 3, minRow: 3, maxColumn: 5, maxRow: 5}],
+      {nodesPerBlock: 16}
+    );
+    persistentCache.current = {bounds: persistentBounds, gradients: persistentGradients};
     const fineMesh = updateTerrainMeshRegions(fineCache.current.mesh, field, dirty, {
       cellsPerRegion: 2
     });
@@ -67,6 +83,8 @@ export default function BandsUpdates() {
     cache.current = {meshes, bounds, halos, gradients, pyramids};
     return {
       field,
+      persistentBounds,
+      persistentGradients,
       fineMesh,
       fineBounds,
       fineGradients,
@@ -91,6 +109,13 @@ export default function BandsUpdates() {
       aria-label="Isobands and terrain edits"
     >
       <h2>Elevation bands and terrain edits</h2>
+      <p data-testid="persistent-copy-result">
+        Persistent hierarchy:{' '}
+        {result.persistentBounds.stats.copiedBlocks + result.persistentGradients.stats.copiedBlocks}{' '}
+        blocks copied,{' '}
+        {result.persistentBounds.stats.copiedBytes + result.persistentGradients.stats.copiedBytes}{' '}
+        data bytes.
+      </p>
       <p data-testid="dirty-region-result">
         Rebuilt {result.fineMesh.rebuilt.length}/{result.fineMesh.regions.length} mesh regions;
         recomputed {result.fineBounds.updatedCounts[0]} bounds cells and{' '}

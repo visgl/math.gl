@@ -660,3 +660,19 @@ and independent Delatin seam limitations are explicit. Hierarchy snapshots copy 
 level arrays for immutability. These advance scaling and dirty updates without claiming
 linear worst-case topology work, in-place hierarchy buffers, dynamic global TIN edits,
 LOD morphs, continuous error certificates or geographic/mixed-LOD polygonization.
+
+## Regional streaming, persistent blocks and LOD morph substrate
+
+257×257 mountain/coastal/nodata-heavy inputs now drive deterministic tile streaming
+qualification for both derivative methods. Full-rebuild comparisons, retained-snapshot
+mutation checks and process memory observations accompany arrival/eviction/edit timing.
+Persistent bounds and gradient hierarchies copy touched data blocks instead of full
+level arrays; shallow block-directory copies and flat initialization costs remain.
+
+LOD correspondence/morph functions prepare dyadic fine-to-coarse triangle targets,
+explicit coverage statuses and vertical displacement metadata, with a separate CPU
+factor evaluator. Matching-diagonal endpoint tests qualify the target surface between
+fine nodes. Examples expose missing coarse support, morph factors, streaming residency
+and copied hierarchy bytes. Camera-driven selection, coordinated cross-tile morphs,
+normal continuity, screen-space error certificates and device execution remain follow-on
+consumer/qualification work; math.gl contains no shaders.
