@@ -110,3 +110,31 @@ test('nested rings and shared junctions survive conservative topology simplifica
     1
   );
 });
+
+test('source coverage shrink and movement invalidate old and new neighbors', () => {
+  const wide = tile(0);
+  wide.field.width = 9;
+  wide.field.heights = new Float64Array(45);
+  const neighbors = [tile(-4), tile(8), tile(12), tile(100)];
+  const initial = updateTerrainMixedVertexTileHalos(null, [wide, ...neighbors]);
+  for (const replacement of [tile(0), tile(12)]) {
+    const sources = [replacement, ...neighbors.filter(t => t.column !== replacement.column)];
+    const next = updateTerrainMixedVertexTileHalos(initial, sources);
+    expect(next.tiles).toEqual(createTerrainMixedVertexTileHalos(sources).tiles);
+    expect(next.tiles.find(t => t.column === 100)).toBe(initial.tiles.find(t => t.column === 100));
+  }
+});
+
+test('a shortcut crossing its own replaced chain is rejected', () => {
+  const p = paths([0, 0, 0, 1, 2, 0, 2, -1, 0, 3, 2, 0, 4, 0, 0], [0, 1, 1, 2, 2, 3, 3, 4]);
+  const out = simplifyTerrainContourPathsTopology(p, {maxError: 10});
+  expect(out.rejected).toBe(true);
+  expect(out.indices).toEqual(p.indices);
+});
+
+test('unused vertex pools do not participate in exact topology conversion', () => {
+  const p = paths([0, 0, 0, 1, 0.1, 0, 2, 0, 0, 99, 99, 0], [0, 1, 1, 2]);
+  expect(simplifyTerrainContourPathsTopology(p, {maxError: 1}).sourceVertexIndices).toEqual(
+    new Uint32Array([0, 2])
+  );
+});

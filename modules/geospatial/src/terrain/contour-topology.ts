@@ -55,10 +55,9 @@ export function simplifyTerrainContourPathsTopology(
   const charge = () => {
     if (++topologyTests > budget) throw new Error('Contour topology work budget exceeded');
   };
-  const points: Point[] = Array.from({length: paths.positions.length / 3}, (_, i) => ({
-    x: integer(paths.positions[3 * i]),
-    y: integer(paths.positions[3 * i + 1])
-  }));
+  const points: Point[] = new Array(paths.positions.length / 3);
+  for (const i of new Set(paths.indices))
+    points[i] = {x: integer(paths.positions[3 * i]), y: integer(paths.positions[3 * i + 1])};
   const edges: {a: number; b: number; p: number; i: number}[] = [];
   for (let p = 0; p < paths.closed.length; p++)
     for (let i = paths.offsets[p]; i + 1 < paths.offsets[p + 1]; i++)
@@ -90,7 +89,19 @@ export function simplifyTerrainContourPathsTopology(
           b = paths.indices[end];
         const interior = new Set(Array.from(paths.indices.subarray(start + 1, end)));
         for (const edge of edges) {
-          if (edge.p === p && edge.i >= start && edge.i < end) continue;
+          if (edge.p === p && edge.i >= start && edge.i < end) {
+            charge();
+            // The swept chain plus chord must be simple. Endpoint edges may meet
+            // the chord only at their endpoint; interior edges must not touch it.
+            const others = [edge.a, edge.b].filter(v => v !== a && v !== b);
+            if (
+              others.some(v => on(points[a], points[b], points[v])) ||
+              (others.length === 2 &&
+                intersects(points[a], points[b], points[edge.a], points[edge.b]))
+            )
+              rejected = true;
+            continue;
+          }
           charge();
           // Endpoint contacts at existing shared IDs are allowed; any extra contact is not.
           const others = [edge.a, edge.b].filter(v => v !== a && v !== b);
@@ -154,7 +165,7 @@ export function simplifyTerrainContourPathsTopology(
     closed: paths.closed.slice(),
     levels: paths.levels.slice(),
     origin: Object.freeze([...paths.origin] as [number, number, number]),
-    sourceVertexIndices: Uint32Array.from(points, (_, i) => i),
+    sourceVertexIndices: Uint32Array.from({length: points.length}, (_, i) => i),
     maxDeviation: 0,
     requestedMaxError: options.maxError,
     distanceTests: candidate.distanceTests,
