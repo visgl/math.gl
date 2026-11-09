@@ -178,6 +178,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Geometry utilities](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/geometry-utils.md): Geometry types
 - [interpolatePackedAttributes](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/interpolate-packed-attributes.md): Reconstruct attributes in interleaved vertex buffers from original-vertex provenance, such as
 - [Triangle mesh processing](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/mesh-processing.md): These operations accept the module's minimal Geometry shape GL.TRIANGLES,
+- [projectBounds](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/project-bounds.md): Project a finite 2D/3D box through a prepared synchronous transform. Unlike projecting only
 - [qualifySurfaceTransition](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/qualify-surface-transition.md): Qualify a fixed indexed 3D triangulated patch throughout linear vertex interpolation.
 
 #### geospatial
