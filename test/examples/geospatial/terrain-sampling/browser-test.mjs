@@ -37,6 +37,10 @@ try {
   assert.ok((await seams.locator('tbody').textContent()).includes('Unavailable'));
   await seams.getByLabel('Coarse neighbor nodata').uncheck();
   await seams.getByLabel('Seam surface').selectOption('plane');
+  await page.getByLabel('Contour topology tolerance').fill('4');
+  assert.match(await page.getByTestId('topology-result').innerText(), /Unsafe shortcut/);
+  await page.getByLabel('Preserve neighboring component').uncheck();
+  assert.match(await page.getByTestId('topology-result').innerText(), /Safe simplification/);
   const labStats = page.getByTestId('mesh-lab-stats');
   const martiniStats = await labStats.innerText();
   await page.getByLabel('Mesh nodal error heatmap').check();

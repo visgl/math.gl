@@ -623,3 +623,13 @@ neighbors, nodata and plane/curved surfaces. Affine gradient and skew-frame test
 qualify the basic seam contract. This advances tile continuity; it does not complete
 transition morphs, incremental mixed-level caches, globally equal normals, geographic
 boundary policies or broad independent DEM qualification.
+
+## Incremental mixed halos and topology-preserving contour paths
+
+Immutable mixed-resolution snapshots now reuse unaffected halos and derivative grids
+across source edits, arrivals and evictions, with old/new coverage dependencies and
+separate work budgets. Conservative topology-preserving contour simplification adds
+exact XY crossing/touch tests, protected seam anchors and swept-region checks, falling
+back to original geometry when a shortcut is unsafe. Large-scale spatial indexing,
+maximally simplifying valid alternatives, isobands and geographic topology remain
+future work. These APIs remain independently available through both geospatial roots.

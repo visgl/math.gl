@@ -141,6 +141,11 @@ const probes = [
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./,
       ...['vertex-tiles', 'mesh-stitch', 'tiled', 'mesh'].filter(name => name !== entry).map(name => new RegExp(`/terrain/${name}\\.`))]
   })),
+  ...['updateTerrainMixedVertexTileHalos', 'updateTerrainMixedGradientGrids', 'simplifyTerrainContourPathsTopology'].map(symbol => ({
+    symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/mesh\./],
+    budget: 22000
+  })),
   {
     symbol: 'createTerrainMixedVertexTileHalos',
     packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
