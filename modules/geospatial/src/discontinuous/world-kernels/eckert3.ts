@@ -6,12 +6,12 @@
 
 import {pi, sqrt} from './math.js';
 
-export function eckert3Raw(lambda, phi) {
+export function eckert3Raw(lambda: number, phi: number) {
   var k = sqrt(pi * (4 + pi));
   return [(2 / k) * lambda * (1 + sqrt(1 - (4 * phi * phi) / (pi * pi))), (4 / k) * phi];
 }
 
-eckert3Raw.invert = function (x, y) {
+eckert3Raw.invert = function (x: number, y: number) {
   var k = sqrt(pi * (4 + pi)) / 2;
   return [(x * k) / (1 + sqrt(1 - (y * y * (4 + pi)) / (4 * pi))), (y * k) / 2];
 };

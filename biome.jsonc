@@ -74,7 +74,7 @@
       "javascript": {"jsxRuntime": "reactClassic"}
     },
     {
-      "includes": ["modules/geospatial/src/discontinuous/world-kernels/*.js", "modules/geospatial/src/discontinuous/spherical-clip/*.js"],
+      "includes": ["modules/geospatial/src/discontinuous/world-kernels/*.js", "modules/geospatial/src/discontinuous/world-kernels/*.ts", "modules/geospatial/src/discontinuous/spherical-clip/*.js", "modules/geospatial/src/discontinuous/spherical-clip/*.ts"],
       "linter": {"rules": {"suspicious": {"noAssignInExpressions": "off"}}}
     },
     {

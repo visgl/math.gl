@@ -6,7 +6,7 @@
 
 import {abs, asin, cos, epsilon, halfPi, pi, sin, sqrt} from './math.js';
 
-export function eckert4Raw(lambda, phi) {
+export function eckert4Raw(lambda: number, phi: number) {
   var k = (2 + halfPi) * sin(phi);
   phi /= 2;
   for (var i = 0, delta = Infinity; i < 10 && abs(delta) > epsilon; i++) {
@@ -16,7 +16,7 @@ export function eckert4Raw(lambda, phi) {
   return [(2 / sqrt(pi * (4 + pi))) * lambda * (1 + cos(phi)), 2 * sqrt(pi / (4 + pi)) * sin(phi)];
 }
 
-eckert4Raw.invert = function (x, y) {
+eckert4Raw.invert = function (x: number, y: number) {
   var A = (y * sqrt((4 + pi) / pi)) / 2,
     k = asin(A),
     c = cos(k);

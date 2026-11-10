@@ -30,7 +30,7 @@ export var round = Math.round;
 
 export var sign =
   Math.sign ||
-  function (x) {
+  function (x: number) {
     return x > 0 ? 1 : x < 0 ? -1 : 0;
   };
 
@@ -64,11 +64,11 @@ export function sinci(x) {
   return x ? x / Math.sin(x) : 1;
 }
 
-export function asin(x) {
+export function asin(x: number) {
   return x > 1 ? halfPi : x < -1 ? -halfPi : Math.asin(x);
 }
 
-export function acos(x) {
+export function acos(x: number) {
   return x > 1 ? 0 : x < -1 ? pi : Math.acos(x);
 }
 
