@@ -403,23 +403,23 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
   if (ast.type === 'ConditionalExpression') {
     const condition = bind(ast.test, options, bool);
     requireType(condition, 'bool');
-    // Bind non-literal branches first so tuple literals inherit an exact declared type.
+    // A computed conditional produces logical values, even when passed to a vector kernel.
+    // Raw dictionary encodings are retained only for direct source arguments.
     let yes: Node, no: Node;
     if (isContextualLiteral(ast.consequent) && !isContextualLiteral(ast.alternate)) {
-      no = bind(ast.alternate, options, expected, vectorInput);
-      yes = bind(ast.consequent, options, no.field.type, vectorInput);
+      no = bind(ast.alternate, options, expected);
+      yes = bind(ast.consequent, options, no.field.type);
     } else {
-      yes = bind(ast.consequent, options, expected, vectorInput);
+      yes = bind(ast.consequent, options, expected);
       no = bind(
         ast.alternate,
         options,
         isContextualLiteral(ast.alternate) && !DataType.isNull(yes.field.type)
           ? yes.field.type
-          : expected,
-        vectorInput
+          : expected
       );
       if (isContextualLiteral(ast.consequent) && !DataType.isNull(no.field.type))
-        yes = bind(ast.consequent, options, no.field.type, vectorInput);
+        yes = bind(ast.consequent, options, no.field.type);
     }
     const tuple = isTupleType(yes.field.type);
     const list = DataType.isList(yes.field.type);

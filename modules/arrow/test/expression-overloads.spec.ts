@@ -2,7 +2,17 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {Field, Bool, Float32, Float64, Int32, Table, vectorFromArray} from 'apache-arrow';
+import {
+  Field,
+  Bool,
+  Dictionary,
+  Float32,
+  Float64,
+  Int8,
+  Int32,
+  Table,
+  vectorFromArray
+} from 'apache-arrow';
 import {
   compileArrowExpression,
   compileArrowFunction,
@@ -205,4 +215,32 @@ test('nullable numeric literal conditionals keep the full Float64 default', () =
   });
   expect(compiled.outputField.type).toEqual(new Float64());
   expect([...compiled.evaluateTable(table)]).toEqual([null, null, 1]);
+});
+
+test('dictionary conditionals bind logical types for scalar and vector prototypes', () => {
+  const dictionary = new Dictionary(new Int32(), new Int8());
+  const table = new Table({
+    d: vectorFromArray([1, null, 3], dictionary),
+    flag: vectorFromArray([true, false, true], new Bool())
+  });
+  const exact = prototype([new Int32()]);
+  for (const selected of [exact, {...exact, evaluateScalar: undefined}]) {
+    const compiled = compileArrowExpression('F(flag ? d : 0)', {
+      inputSchema: table.schema,
+      functions: [{name: 'F', prototypes: [selected]}]
+    });
+    expect(compiled.outputField.type).toEqual(new Int32());
+    expect([...compiled.evaluateTable(table)]).toEqual([1, 0, 3]);
+  }
+  const encoded = {
+    ...exact,
+    arguments: [new Field('d', dictionary, true)],
+    evaluateScalar: undefined
+  };
+  expect(() =>
+    compileArrowExpression('F(flag ? d : 0)', {
+      inputSchema: table.schema,
+      functions: [{name: 'F', prototypes: [encoded]}]
+    })
+  ).toThrow('type mismatch');
 });
