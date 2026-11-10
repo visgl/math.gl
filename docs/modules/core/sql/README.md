@@ -32,16 +32,16 @@ An injected WHERE parser can define a different predicate language.
 | Source and table references           | ✅      | `FROM cities` or `FROM warehouse.cities`; FROM is optional.                                                                                       |
 | Quoted identifiers                    | ✅      | Double quotes, including doubled quote escapes: `"city""name"`. Identifier case is preserved.                                                     |
 | Keywords and statement terminator     | ✅      | Case-insensitive keywords and one optional trailing semicolon.                                                                                    |
-| Comparisons                           | ⚠️      | A source column compared with a scalar: `=`, `!=`, `<>`, `<`, `<=`, `>`, `>=`. No column-to-column comparisons.                                   |
+| Comparisons                           | ⚠️      | Scalar expressions compared with `=`, `!=`, `<>`, `<`, `<=`, `>`, `>=`; includes column-to-column comparisons.                                   |
 | Boolean predicates                    | ✅      | `AND`, `OR`, `NOT`, and parentheses.                                                                                                              |
 | Membership                            | ✅      | `IN (...)` and `NOT IN (...)` with a nonempty list of scalar values.                                                                              |
-| Null tests                            | ✅      | `IS NULL` and `IS NOT NULL`; comparisons such as `= NULL` are rejected.                                                                           |
+| Null tests                            | ✅      | `IS NULL` and `IS NOT NULL`; expression comparisons with NULL evaluate to unknown.                                                                           |
 | Scalar literals                       | ✅      | Numbers, single-quoted strings with doubled quote escapes, and Boolean values. Use null tests rather than NULL literals.                          |
 | Named parameters                      | ⚠️      | `:name` in `parseSQLPredicate()`, with supplied values or preserved references. Use an injected WHERE parser for parameterized SELECT statements. |
 | Row limit                             | ✅      | `LIMIT` followed by a nonnegative safe integer, including zero.                                                                                   |
 | Catalog commands                      | ✅      | `SHOW SOURCES`, `SHOW TABLES [FROM source]`, and `DESCRIBE source[.table]`. `SHOW SOURCES` is a parser-specific command.                          |
 | Qualified column names                | ❌      | `SELECT table.column` and qualified WHERE columns in `parseSQLQuery()` are rejected. Quote literal column names containing dots.                  |
-| Computed columns and function calls   | ⚠️      | CAST, postfix :: conversions and packed ARRAY projections; no arithmetic, other SQL functions, or CASE.                                                                      |
+| Computed columns and function calls   | ⚠️      | CAST, postfix :: conversions, arithmetic + - * /, named functions, searched CASE, and fixed-size ARRAY expressions. Execution supplies registered functions.                                                                      |
 | Additional predicate operators        | ❌      | No `LIKE`, `ILIKE`, `BETWEEN`, regular expressions, or `EXISTS`.                                                                                  |
 | Sorting and pagination                | ❌      | No `ORDER BY`, `OFFSET`, or `FETCH`.                                                                                                              |
 | Aggregation and distinct rows         | ❌      | No aggregate functions, `GROUP BY`, `HAVING`, or `DISTINCT`.                                                                                      |
@@ -79,6 +79,23 @@ const query = parseSQLSelect("SELECT city WHERE population >= :minimum", {
 
 Importing only `parseSQLSelect` lets a tree-shaking bundler omit the built-in predicate parser.
 Without `parseWhere`, this function rejects statements containing WHERE.
+
+## Expressions
+
+`parseSQLExpression()` returns the shared expression AST. Computed selections use
+`{expression, as?}`; computed WHERE clauses use `{expression}`. Existing portable predicate
+shapes remain unchanged for predicates accepted by `parseSQLPredicate()`.
+
+`CASE WHEN condition THEN value ELSE fallback END` evaluates only the selected branch.
+Unquoted function names resolve case-insensitively; quoted function names and column names
+retain their exact case. Use `POWER(x, y)` and `MOD(x, y)`; SQL does not accept JavaScript
+`**`, `^`, or `%`. JavaScript expression parsing remains available separately.
+
+`ARRAY[x + 1, SIN(angle), 0]` has a fixed width known at compilation. Arrow evaluation
+infers the widest floating component type; integer-only arrays use Float64. Explicit casts
+such as `ARRAY[x, y]::REAL[2]` select Float16/32/64 precision and check finite overflow.
+Any null component produces a null tuple with zero-filled numeric padding. Variable-length
+result lists are deferred. SQL parsing and Arrow evaluation remain separate optional imports.
 
 ## Parameters and validation
 
@@ -137,30 +154,26 @@ Arrow dependency. `SELECT CAST(value AS INTEGER) AS count` returns a selection w
 AST and `as` alias. Existing plain-column selections retain their shapes.
 
 Supported SQL targets: SMALLINT, INTEGER/INT, BIGINT, REAL, DOUBLE PRECISION, BOOLEAN,
-VARCHAR and CHARACTER VARYING. CAST accepts columns, scalar literals and nested casts.
+VARCHAR, CHARACTER VARYING and FLOAT16. CAST accepts columns, scalar literals and nested expressions.
 `WHERE CAST(value AS INTEGER) >= :minimum` records ordered `casts` on the source property;
 executors must apply those conversions before testing the predicate. Binding, validation, copying
 and column discovery preserve this information. Arrow's predicate evaluator executes these casts.
 
 Unsupported targets/modifiers fail explicitly. This subset does not accept DECIMAL, date/time,
-length/precision modifiers, arbitrary arithmetic inside CAST, or casts on predicate scalar
-values. See [Arrow expression conversion rules](../../arrow/expressions/README.md#sql-cast).
+length/precision modifiers, or casts on scalar values in the portable predicate representation. See [Arrow expression conversion rules](../../arrow/expressions/README.md#sql-cast).
 
 Postfix `value::TYPE` and chained casts are also supported with the same conversion rules.
 
 ## Packed floating-point arrays
 
 `SELECT ARRAY[x, y, z] AS position` returns `{array: ['x', 'y', 'z'], as: 'position'}`.
-Operands must be existing floating-point columns; literals and arbitrary expressions are unsupported.
-An alias is required. `::FLOAT32[3]` or `::REAL[3]` adds `type: 'float32'`;
-`::FLOAT64[3]` or `::DOUBLE PRECISION[3]` adds `type: 'float64'`. The declared width must match.
-Omitting a type preserves Float64 if any component is Float64, otherwise it preserves Float32 or Float16.
+Source-only selections retain this shape and require an alias. Computed arrays such as
+`ARRAY[x + 1, SIN(angle), 0] AS position` return `{expression, as}`.
+Use `compileArrowArray(selection.array, {inputSchema, type: selection.type})` for the former,
+and `compileArrowExpression(selection.expression, {inputSchema, functions})` for the latter.
 
-Use `compileArrowArray(selection.array, {inputSchema, type: selection.type})` from
-`@math.gl/arrow/expressions` to evaluate the projection. This only constructs a column; it does not
-filter or compact rows. Null components make the whole tuple null with zero numeric padding.
-GPU consumers must respect parent validity or those invalid positions will appear at the origin.
-`FLOAT16` is an additional explicit scalar cast target: both `value::FLOAT16` and
-`CAST(value AS FLOAT16)` map to portable `float16`. Arrow execution requires native Float16Array.
-
-Packed arrays also accept `ARRAY[x,y,z]::FLOAT16[3]` or `compileArrowArray(columns, {inputSchema, type: "float16"})`. Native Float16Array is required for half-precision execution.
+The component type is the widest floating input, or Float64 for integer-only arrays.
+`::FLOAT16[3]`, `::REAL[3]`, and `::DOUBLE PRECISION[3]` explicitly choose precision and require
+matching width. `FLOAT32` and `FLOAT64` are also accepted for fixed-array casts. Float16
+execution requires native Float16Array. Null components make the whole tuple null, with zero
+numeric padding. GPU consumers must respect parent validity or invalid positions appear at the origin.

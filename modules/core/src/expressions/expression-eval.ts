@@ -29,7 +29,9 @@ export type ExpressionContext = Record<string, unknown>;
 export type Expression =
   | JsepTypes.ArrayExpression
   | JsepTypes.BinaryExpression
-  | JsepTypes.CallExpression
+  | (JsepTypes.CallExpression & {
+      /** SQL unquoted function names resolve case-insensitively. */ sqlFunction?: true;
+    })
   | JsepTypes.ConditionalExpression
   | JsepTypes.Identifier
   | JsepTypes.Literal

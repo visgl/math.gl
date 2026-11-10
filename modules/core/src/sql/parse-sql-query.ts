@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {TableQuery} from './query-types';
+import {parseSQLExpression} from './parse-sql-expression';
 import {parseSQLPredicate} from './parse-sql-predicate';
 import type {BoundSQLPredicate, SQLPredicateProperty} from './sql-predicate-types';
 import type {SQLCatalogQuery} from './query-types';
@@ -31,7 +32,12 @@ export function parseSQLQuery(sql: string): TableQuery | SQLCatalogQuery {
   }
   return parseSQLSelect(sql, {
     parseWhere: expression => {
-      const predicate = parseSQLPredicate(expression);
+      let predicate: BoundSQLPredicate;
+      try {
+        predicate = parseSQLPredicate(expression);
+      } catch {
+        return {expression: parseSQLExpression(expression)};
+      }
       validateColumnReferences(predicate);
       return predicate;
     }

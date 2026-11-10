@@ -53,12 +53,13 @@ test.each([
   'SELECT ARRAY[x,] AS p',
   'SELECT ARRAY[x]',
   'SELECT ARRAY[x]::FLOAT32[2] AS p',
-  'SELECT ARRAY[x]::INTEGER[1] AS p',
-  'SELECT ARRAY[1] AS p'
+  'SELECT ARRAY[x]::INTEGER[1] AS p'
 ])('invalid ARRAY syntax fails: %s', sql => expect(() => parseSQLQuery(sql)).toThrow());
-test('ARRAY binding rejects non-floating columns and invalid width', () => {
+test('ARRAY binding infers Float64 for integers and rejects invalid width', () => {
   const table = new Table({x: vectorFromArray([1], new Int32())});
-  expect(() => compileArrowArray(['x'], {inputSchema: table.schema})).toThrow('floating');
+  expect(
+    compileArrowArray(['x'], {inputSchema: table.schema}).outputField.type.children[0]!.type
+  ).toEqual(new Float64());
   expect(() => compileArrowArray([], {inputSchema: table.schema})).toThrow('1 to 4096');
   expect(() => compileArrowArray(['missing'], {inputSchema: table.schema})).toThrow('Unknown');
 });

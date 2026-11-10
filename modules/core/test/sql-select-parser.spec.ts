@@ -71,10 +71,6 @@ test.each([
   'DELETE FROM cities',
   'SELECT',
   'SELECT DISTINCT name',
-  'SELECT NULL',
-  'SELECT 1',
-  'SELECT count(value)',
-  'SELECT a + b',
   'SELECT a b',
   'SELECT a FROM cities c',
   'SELECT a FROM a.b.c',
@@ -97,7 +93,6 @@ test.each([
   'SELECT a WHERE a = 1 /* comment */',
   'SELECT "unterminated',
   `SELECT a WHERE a = 'unterminated`,
-  'SELECT a WHERE a = "TRUE"',
   'SELECT a WHERE a IS "NULL"',
   'SELECT a WHERE table.a = 1'
 ])('unsupported or malformed SELECT is rejected: %s', sql => {

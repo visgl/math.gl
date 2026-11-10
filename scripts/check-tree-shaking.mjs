@@ -17,8 +17,8 @@ const probes = [
   {symbol:'COLOR_RGB',packages:['@math.gl/arrow/color'],forbidden:[/expressions\/(compiler|predicate)/,/loaders.gl/],budget:250000},
   {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /expressions\/(compiler|predicate)/], budget: 240000},
 
-  {symbol: 'parseSQLSelect', packages: ['@math.gl/core/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 9000},
-  {symbol: 'parseSQLQuery', packages: ['@math.gl/core/sql'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 21000},
+  {symbol: 'parseSQLSelect', packages: ['@math.gl/core/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 11500},
+  {symbol: 'parseSQLQuery', packages: ['@math.gl/core/sql'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 24000},
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/core/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
   {symbol:'spheroidToCartesian', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
   {symbol:'vec3Normalize', packages:['@math.gl/core'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},

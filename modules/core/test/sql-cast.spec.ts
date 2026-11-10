@@ -86,8 +86,7 @@ test.each([
   'CAST(x AS "INTEGER")',
   'CAST(x AS INTEGER',
   'CAST(x AS INTEGER); SELECT x',
-  "CAST('unfinished AS VARCHAR)",
-  'CAST(x + 1 AS INTEGER)'
+  "CAST('unfinished AS VARCHAR)"
 ])('rejects unsupported or malformed SQL CAST: %s', sql => {
   expect(() => parseSQLExpression(sql)).toThrow();
   expect(() => parseSQLQuery(`SELECT ${sql}`)).toThrow();
