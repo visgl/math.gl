@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {DefaultProps, TextureSource} from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
-import {BitmapLayer} from '@deck.gl/layers';
+import {MeshBitmapLayer} from '@deck.gl/map-layers';
 import {STATE_MASK_SHADER} from './us-state-mask.ts';
 
 export type DayNightProps = {
@@ -39,7 +39,7 @@ const solar = {
 };
 
 /** Blend paired day/night imagery once, without overlapping translucent tile masks. */
-export class DayNightBitmapLayer<ExtraPropsT extends {} = {}> extends BitmapLayer<
+export class DayNightBitmapLayer<ExtraPropsT extends {} = {}> extends MeshBitmapLayer<
   DayNightProps & ExtraPropsT
 > {
   static layerName = 'DayNightBitmapLayer';

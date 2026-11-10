@@ -9,7 +9,7 @@ export class ProjectedBitmapLayer<ExtraPropsT extends {} = {}> extends DayNightB
   {mesh?: SurfaceMesh; wrapLongitude?: boolean} & ExtraPropsT
 > {
   static layerName = 'ProjectedBitmapLayer';
-  static defaultProps: DefaultProps = {mesh: null, wrapLongitude: true};
+  static defaultProps: DefaultProps = {wrapLongitude: true};
   getShaders() {
     const shaders = super.getShaders();
     return {
@@ -21,9 +21,6 @@ export class ProjectedBitmapLayer<ExtraPropsT extends {} = {}> extends DayNightB
           )
         : shaders.fs
     };
-  }
-  _createMesh() {
-    return this.props.mesh as ReturnType<import('@deck.gl/layers').BitmapLayer['_createMesh']>;
   }
   _getCoordinateUniforms() {
     // The mesh already carries geographic texture coordinates.
