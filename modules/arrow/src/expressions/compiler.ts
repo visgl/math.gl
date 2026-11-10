@@ -147,7 +147,7 @@ function physicalKey(type: DataType): string {
         field.name,
         physicalKey(field.type),
         field.nullable,
-        [...field.metadata]
+        extensionKey(field)
       ])
     )}`;
   }

@@ -3,7 +3,17 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Table, Int32, Int8, Dictionary, Utf8, Schema, Field, vectorFromArray} from 'apache-arrow';
+import {
+  Table,
+  Int32,
+  Int8,
+  Dictionary,
+  Struct,
+  Utf8,
+  Schema,
+  Field,
+  vectorFromArray
+} from 'apache-arrow';
 import {
   compileArrowExpression,
   compileArrowPredicate,
@@ -133,4 +143,20 @@ test('vector-only functions accept matching dictionary encodings', () => {
       registry
     })
   ).toThrow('Argument type mismatch');
+});
+
+test('nested schema validation ignores descriptive metadata but checks extensions', () => {
+  const schema = (metadata: Map<string, string>) =>
+    new Schema([
+      new Field('unused', new Struct([new Field('child', new Int32(), true, metadata)]))
+    ]);
+  const compiled = compileArrowExpression('1', {
+    inputSchema: schema(new Map([['description', 'original']]))
+  });
+  expect(
+    compiled.evaluateTable(new Table(schema(new Map([['description', 'updated']])), [])).length
+  ).toBe(0);
+  expect(() =>
+    compiled.evaluateTable(new Table(schema(new Map([['ARROW:extension:name', 'different']])), []))
+  ).toThrow('schema mismatch');
 });
