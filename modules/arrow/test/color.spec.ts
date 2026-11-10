@@ -194,3 +194,19 @@ test('an invalid unselected palette entry invalidates bins and categories', () =
   ])
     expect(rows(run(expression))).toEqual([null, null, null, null]);
 });
+
+test('null list configurations propagate through direct and conditional arguments', () => {
+  for (const expression of [
+    'COLOR_BINS(x, null, ["#fff"])',
+    'COLOR_BINS(x, [], null)',
+    'COLOR_CATEGORY("a", null, ["#fff"])',
+    'COLOR_CATEGORY("a", ["a"], null)'
+  ])
+    expect(rows(run(expression))).toEqual([null, null, null, null]);
+  expect([...run('COLOR_TO_HEX(COLOR_BINS(x, x > 0 ? null : [], ["#fff"]))')]).toEqual([
+    '#ffffffff',
+    null,
+    null,
+    null
+  ]);
+});
