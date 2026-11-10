@@ -687,6 +687,11 @@ polygons, certify continuous sampling error, or supply triangulation-interior pr
 Call `map.prepareSurface(options)` to produce chart-local indexed positions,
 geographic or Mercator UVs, and chart IDs for raster rendering. The same shared
 sampler supports ordinary CRS projections through `prepareProjectionSurface`.
+`map.projectSurfacePoint(position, regionId?)` projects one sample with the same
+inset-frame exclusion used by raster preparation. It returns `null` when a parent
+chart sample falls inside a child's placed frame. Use it for rendering endpoints;
+`projectPoint` continues to report geographic coverage without presentation holes.
+
 See [Prepared surfaces and transitions](./surfaces.md) for options, units, budgets,
 coverage behavior, and the separate transition-buffer API.
 

@@ -137,3 +137,17 @@ test('cancellation is checked inside a deeply refined cell', async () => {
   ).rejects.toHaveProperty('name', 'AbortError');
   expect(calls).toBeLessThan(100);
 });
+
+test('seam identities prevent triangles crossing a wrap cut within one part', () => {
+  const cut: MapTransitionEndpoint = (x, y) => ({
+    position: [x < 0 ? x - 500 : x + 500, y, 0],
+    inside: true,
+    part: 0,
+    seam: x < 0 ? 'west' : 'east'
+  });
+  const mesh = prepareMapTransitionMesh(cut, cut, {maxDepth: 1});
+  for (let i = 0; i < mesh.indices.length; i += 3) {
+    const xs = Array.from(mesh.indices.subarray(i, i + 3), index => mesh.positions[index * 3]);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeLessThan(10);
+  }
+});

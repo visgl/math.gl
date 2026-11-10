@@ -446,14 +446,28 @@ export function mountSunTerminator(root: HTMLDivElement) {
     if (!animated) {
       finish();
     } else {
-      morph = {surface, progress: 0, started: null, source: sourceView, target: next};
+      morph = {
+        surface,
+        progress: 0,
+        elapsed: 0,
+        previousFrame: null,
+        started: null,
+        source: sourceView,
+        target: next
+      };
       deck.setProps({
         views: new OrthographicView({id: 'earth-morph', controller: false, flipY: false}),
         initialViewState: {target: [0, 0, 0], zoom: 0}
       });
       const tick = now => {
         if (disposed || !morph) return;
-        morph.progress = morph.started === null ? 0 : getMorphProgress(now - morph.started);
+        if (morph.started !== null) {
+          // Bound dropped-frame advances so a slow GPU or host task cannot
+          // consume the entire visible transition between two draws.
+          morph.elapsed += Math.min(100, Math.max(0, now - (morph.previousFrame ?? morph.started)));
+          morph.previousFrame = now;
+        }
+        morph.progress = getMorphProgress(morph.elapsed);
         render();
         if (morph.progress < 1) morphFrame = requestAnimationFrame(tick);
         else finish();

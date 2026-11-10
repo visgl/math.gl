@@ -118,3 +118,37 @@ test('explicit whole-world rasters and shifted banks preserve chart coverage', (
     expect(Math.max(...xs) - Math.min(...xs)).toBeLessThanOrEqual(2);
   }
 });
+
+test('surface samples reserve inset frames without changing geographic point projection', () => {
+  const map = usa();
+  const frames = map.regions
+    .filter(r => r.layout?.parentId === 'lower48')
+    .map(r => r.layout!.frame!);
+  const mesh = map.prepareSurface({maxAngularStep: 1});
+  let reserved = 0;
+  for (let lon = -127; lon <= -65; lon++)
+    for (let lat = 20; lat <= 51; lat++) {
+      const point = map.projectPoint([lon, lat], 'lower48');
+      if (!point) continue;
+      const [x, y] = point.position;
+      if (
+        frames.some(
+          ([left, bottom, right, top]) => x >= left && x <= right && y >= bottom && y <= top
+        )
+      ) {
+        reserved++;
+        expect(map.projectSurfacePoint([lon, lat], 'lower48')).toBeNull();
+      }
+    }
+  expect(reserved).toBeGreaterThan(0);
+  for (let i = 0; i < mesh.partIds.length; i++) {
+    if (mesh.partIds[i] !== 0) continue;
+    const x = mesh.positions[i * 3],
+      y = mesh.positions[i * 3 + 1];
+    expect(
+      frames.some(
+        ([left, bottom, right, top]) => x >= left && x <= right && y >= bottom && y <= top
+      )
+    ).toBe(false);
+  }
+});

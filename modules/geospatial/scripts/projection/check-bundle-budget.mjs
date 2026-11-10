@@ -8,6 +8,9 @@ import {gzipSync} from 'node:zlib';
 import {build} from 'esbuild';
 
 const fixtures = {
+  projectionSurface: "export {prepareProjectionSurface} from '@math.gl/geospatial/projection';",
+  transitionSurface: "export {prepareMapTransitionMesh, prepareMapTransitionMeshAsync} from '@math.gl/geospatial/projection';",
+  mapEngine: "export {MapEngine} from '@math.gl/geospatial/projection';",
   webMercatorEngine: "export {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection/web-mercator';",
   temporalModel: "export * from '@math.gl/geospatial/projection/temporal';",
   projectionBulk: "export * from '@math.gl/geospatial/projection/bulk';",
@@ -83,6 +86,10 @@ for (const [name, contents] of Object.entries(fixtures)) {
   }
   if (name === 'core')
     assert(!Object.keys(result.metafile.inputs).some(path => path.endsWith('/crs/datum-table.js')));
+  if (name === 'projectionSurface' || name === 'transitionSurface') {
+    assert(!retained.some(path => /\/(map-engine|h3-face-map)\.js$|\/world-kernels\//.test(path)),
+      name + ' must not retain chart catalogues or MapEngine');
+  }
   const bytes = result.outputFiles[0].contents;
   measurements[name] = {
     minified: bytes.length,

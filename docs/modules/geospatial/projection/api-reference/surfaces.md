@@ -15,6 +15,11 @@ They have no DOM, deck.gl, texture-loading, or animation-clock dependency.
 `map.prepareSurface(options?)` samples each chart separately through the map's
 existing geographic coverage and projection. Triangles never join vertices from
 different charts. Continuous vertices share indices within one chart and UV bank.
+Child inset frames reserve their parent chart's placed rectangle. The sampler
+omits parent samples inside those frames so mainland imagery cannot cover insets.
+`map.projectSurfacePoint(position, regionId?)` exposes the same presentation rule
+for renderer-supplied transition endpoints. It returns the ordinary projected
+point or `null`; `projectPoint` retains its geographic coverage behavior.
 
 `options` accepts:
 
@@ -92,7 +97,9 @@ bank so an adapter can distinguish opposite sides of a wrap seam. Return
   viewport center, with depth in `z`.
 - `inside: false` or `null` excludes a sample from that endpoint's coverage.
 - `part` identifies an independently placed cut piece; `seam` distinguishes
-  duplicated banks within one piece. Different pieces never share triangles.
+  duplicated banks within one piece. IDs are opaque strings or numbers; types and
+  tuple boundaries remain distinct even when IDs contain separators. Different
+  pieces and seam banks never share triangles.
 - `front: false` excludes a sample from visible-curvature refinement and rigid
   motion fitting. The renderer still owns back-face and depth handling.
 - `cutPosition` optionally supplies coordinates for discontinuity checks. Set
@@ -126,8 +133,8 @@ and Z as `mix(from.z, to.z, t)`. The rotation uses the ordinary 2D rotation
 matrix; callers choose their screen frame consistently at both endpoints.
 
 The asynchronous form returns identical buffers, yielding to host tasks during
-preparation. It accepts `options.signal` for cancellation and rejects with the
-signal's abort reason instead of returning a partial mesh. Prepare once and
+recursive refinement, motion fitting, and buffer packing. It accepts
+`options.signal` for cancellation and rejects with the signal's abort reason instead of returning a partial mesh. Prepare once and
 update a GPU progress uniform during animation. Start the renderer's clock after
 the first actual draw so initial shader compilation and buffer uploads do not
 consume the visible transition.

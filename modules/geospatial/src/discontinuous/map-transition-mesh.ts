@@ -85,7 +85,7 @@ function* createSurfaceMesh(
     points.every(p => p?.inside) &&
     points.every((p, i) => {
       const q = points[(i + 1) % 3];
-      if ((p.part ?? 0) !== (q.part ?? 0)) return false;
+      if ((p.part ?? 0) !== (q.part ?? 0) || (p.seam ?? 0) !== (q.seam ?? 0)) return false;
       const a = p.cutPosition || p.position,
         b = q.cutPosition || q.position;
       return Math.hypot(a[0] - b[0], a[1] - b[1]) < (endpoint.maxEdgeLength ?? Infinity);
@@ -169,7 +169,10 @@ function* createSurfaceMesh(
           Math.abs(v.position[1]) < height * 0.7
       );
       if (!visible) continue;
-      if (p.some(v => !v?.inside) || p.some(v => v?.part !== p[0]?.part)) {
+      if (
+        p.some(v => !v?.inside) ||
+        p.some(v => (v?.part ?? 0) !== (p[0]?.part ?? 0) || (v?.seam ?? 0) !== (p[0]?.seam ?? 0))
+      ) {
         // A cut has no continuous midpoint, so curvature error cannot converge.
         // Stop once each bank fits within a pixel instead of always exhausting
         // maxDepth along every inset border and projection coverage edge.

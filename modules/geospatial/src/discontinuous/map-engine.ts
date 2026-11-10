@@ -422,6 +422,19 @@ export class MapEngine {
   projectPoint(position: GeographicPosition, regionId?: string) {
     return this.map.projectPoint(position, regionId);
   }
+  /** Project raster/transition samples, reserving child inset frames in their parent chart. */
+  projectSurfacePoint(position: GeographicPosition, regionId?: string) {
+    const point = this.projectPoint(position, regionId);
+    if (!point) return null;
+    const [x, y] = point.position;
+    for (const region of this.regions) {
+      const layout = region.layout;
+      if (layout?.parentId !== point.regionId || !layout.frame) continue;
+      const [left, bottom, right, top] = layout.frame;
+      if (x >= left && x <= right && y >= bottom && y <= top) return null;
+    }
+    return point;
+  }
   unprojectPoint(position: GeographicPosition, regionId?: string) {
     return this.map.unprojectPoint(position, regionId);
   }
@@ -448,7 +461,14 @@ export class MapEngine {
   }
   /** Prepare a chart-clipped geographic or Mercator raster surface. */
   prepareSurface(options: MapSurfaceMeshOptions = {}): MapSurfaceMesh {
-    return prepareMapSurfaceMesh(this, options);
+    return prepareMapSurfaceMesh(
+      {
+        regions: this.regions,
+        projectPoint: (p, id) => this.projectSurfacePoint(p, id),
+        projectLine: (p, opts) => this.projectLine(p, opts)
+      },
+      options
+    );
   }
   getLayout() {
     this.cachedLayout ??= getMapLayout(this.map, this.sampling);

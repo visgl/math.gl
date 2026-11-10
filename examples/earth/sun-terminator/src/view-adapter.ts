@@ -47,7 +47,7 @@ export function projectCutMap(id: string, lon: number, lat: number, sector = lon
   const preferred = onBank
     ? map.findRegions([sector, Math.max(-89.99999, Math.min(89.99999, lat))])[0]
     : undefined;
-  const point = map.projectPoint([lon, lat], preferred);
+  const point = map.projectSurfacePoint([lon, lat], preferred);
   return point
     ? Object.assign([...point.position, 0], {
         part: ['isinu', 'imoll'].includes(id)

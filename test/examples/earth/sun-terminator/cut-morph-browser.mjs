@@ -30,7 +30,7 @@ try {
   await page.evaluate(() => {
     const deck = window.navigationDeck;
     deck.setProps({initialViewState: {longitude: -96, latitude: 38, zoom: 5}});
-    window.morphChecks = {progress: [], stable: true, mesh: null, uniqueVertices: 0, indices: 0, drawn: [], warmed: false};
+    window.morphChecks = {progress: [], stable: true, mesh: null, uniqueVertices: 0, indices: 0, drawn: [], warmed: false, slowFrames: true};
     const afterRender = deck.props.onAfterRender;
     deck.setProps({
       onBeforeRender: () => {
@@ -48,6 +48,11 @@ try {
         if (layer?.id === 'earth-morph') check.drawn.push({progress: layer.props.progress, time: performance.now()});
         else if (check.drawn.length) check.completedAt = performance.now();
         afterRender();
+        if (layer?.id === 'earth-morph' && check.slowFrames) {
+          // Model slow software-GPU frames after the initial upload as well.
+          const until = performance.now() + 180;
+          while (performance.now() < until) { /* delayed frame */ }
+        }
       }
     });
     const setProps = deck.setProps;
@@ -70,6 +75,7 @@ try {
   );
   const check = await page.evaluate(() => ({...window.morphChecks, mesh: undefined}));
   assert.equal(check.stable, true, 'GPU morph must retain the same position buffers');
+  assert.ok(check.drawn.length >= 12, 'slow frames must still draw intermediate animation states');
   assert.ok(new Set(check.progress).size > 3, 'must render intermediate GPU progress');
   assert.ok(check.uniqueVertices < check.indices / 2, 'continuous pieces should share vertices');
   await page.waitForFunction(() => window.morphChecks.completedAt);
