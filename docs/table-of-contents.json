@@ -380,6 +380,7 @@
             "items": [
               "modules/geospatial/projection/api-reference/projection",
               "modules/geospatial/projection/api-reference/map-engine",
+              "modules/geospatial/projection/api-reference/surfaces",
               "modules/geospatial/projection/api-reference/elastic",
               "modules/geospatial/projection/api-reference/projection-engine",
               "modules/geospatial/projection/api-reference/projection-transform",

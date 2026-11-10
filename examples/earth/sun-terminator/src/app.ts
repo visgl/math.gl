@@ -9,86 +9,35 @@ import {
   _GlobeView as GlobeView
 } from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
-import {h3FacePaths} from './h3-net.js';
 import {SharedTileset2D} from '@deck.gl-community/geo-layers';
-import {CutTileLayer, createCutTileAdapter, getCutTileMesh} from './cut-tile-layer.js';
-import {CutBitmapLayer} from './cut-bitmap-layer.js';
-import {isCutMap} from './cut-maps.js';
-import {createStateMask} from './us-state-mask.js';
-import {
-  BoxPanelContainer,
-  CustomPanel,
-  PanelManager,
-  applyPanelTheme,
-  PANEL_THEME_SLEEK_DARK
-} from '@deck.gl-community/panels';
+import {CutTileLayer, createCutTileAdapter, getCutTileMesh} from './cut-tile-layer.ts';
+import {CutBitmapLayer} from './layers.ts';
+import {isCutMap, getMap} from './view-adapter.ts';
+import {createStateMask} from './us-state-mask.ts';
+import {createControlPanel} from './control-panel.ts';
 import {getSunTerminator} from '@math.gl/earth/sun';
-import {transferCamera} from './camera.js';
-import {createEndpoint, createMorphMesh, getMorphProgress} from './morph.js';
-import {PROJECTIONS, getProjectionMesh} from './projections.js';
-import {MorphBitmapLayer} from './morph-bitmap-layer.js';
-import {ProjectedBitmapLayer} from './projected-bitmap-layer.js';
-import {DayNightBitmapLayer} from './day-night-bitmap-layer.js';
-import {loadImageryTile, releaseImageryTile} from './imagery.js';
+import {transferCamera} from './view-adapter.ts';
+import {createEndpoint, getMorphProgress} from './view-adapter.ts';
+import {prepareMapTransitionMeshAsync} from '@math.gl/geospatial/discontinuous';
+import {getProjectionMesh} from './view-adapter.ts';
+import {MorphBitmapLayer} from './layers.ts';
+import {ProjectedBitmapLayer} from './layers.ts';
+import {DayNightBitmapLayer} from './layers.ts';
+import {loadImageryTile, releaseImageryTile} from './imagery.ts';
 import {BLUE_MARBLE_OVERVIEW_URL as DAY_OVERVIEW} from '../../../common/blue-marble.js';
 import NIGHT_OVERVIEW from '../assets/night.jpg';
+import {NIGHT_DATE} from './constants.ts';
 
 /** Mount the shared standalone/website example; return cleanup. */
-export function mountSunTerminator(root) {
+export function mountSunTerminator(root: HTMLDivElement) {
   root.innerHTML = `
     <canvas aria-label="Interactive solar terminator map"></canvas>
     <aside class="sun-panel" aria-label="Solar terminator controls"></aside>`;
-  const controls = document.createElement('div');
-  controls.className = 'sun-controls';
-  controls.innerHTML = `
-      <p class="intro">Drag to explore. Scroll to zoom.</p>
-      <label><span>View</span><select data-role="view">${PROJECTIONS.map(p => `<option value="${p.id}">${p.label}</option>`).join('')}</select></label>
-      <label><span>Date · UTC</span><input data-role="date" type="date" /></label>
-      <div class="time-row"><label><span>Time · UTC</span><input data-role="time" type="time" step="60" /></label>
-        <button data-role="play" type="button" aria-pressed="false">Play</button></div>
-      <label><span>Offset</span><input data-role="offset" type="range" min="0" max="24" step="0.05" value="0" aria-label="Time offset in hours" /><output data-role="offset-label">+0 h</output></label>
-      <label><span>Speed</span><select data-role="speed"><option value="1">1 hour / second</option><option value="3" selected>3 hours / second</option><option value="6">6 hours / second</option></select></label>
-      <label><span>Darkness</span><select data-role="altitude">
-        <option value="0">Sunset · 0°</option><option value="-6">Civil · −6°</option>
-        <option value="-12">Nautical · −12°</option><option value="-18">Astronomical · −18°</option>
-      </select></label>
-      <label><span>Feather</span><select data-role="feather">
-        <option value="3">Narrow · 3°</option><option value="6" selected>Soft · 6°</option><option value="12">Wide · 12°</option>
-      </select></label>
-      <p data-role="status" role="status">Loading world overview…</p>
-      <details class="credits"><summary>Imagery &amp; time</summary>
-        <p><a href="https://science.nasa.gov/earth/earth-observatory/blue-marble/">NASA Blue Marble</a> and
-        <a href="https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/">Black Marble</a>, via
-        <a href="https://nasa-gibs.github.io/gibs-api-docs/">GIBS</a>.
-        Night lights are a fixed 2016 composite. Time moves the soft day/night boundary, not the imagery.
-        Cut maps load detail independently for each visible piece. Detail follows zoom; the overview covers the poles and remains visible if a tile fails.
-        State clipping uses <a href="https://github.com/topojson/us-atlas">US Atlas / Census 2017 boundaries</a>.
-        H3 shows its twenty icosahedron faces and base-cell grid.</p>
-      </details>`;
-  const host = root.querySelector('.sun-panel');
-  applyPanelTheme(host, PANEL_THEME_SLEEK_DARK);
-  const manager = new PanelManager({parentElement: host});
-  manager.setProps({
-    components: [
-      new BoxPanelContainer({
-        id: 'sun-infobox',
-        _container: host,
-        title: 'Earth after dark',
-        widthPx: 300,
-        resizable: false,
-        collapsible: true,
-        panel: new CustomPanel({
-          id: 'sun-controls',
-          title: 'Earth after dark',
-          theme: 'sleek-dark',
-          onRenderHTML: element => {
-            element.append(controls);
-          }
-        })
-      })
-    ]
-  });
-  const control = role => controls.querySelector(`[data-role="${role}"]`);
+  const {
+    element: controls,
+    getControl: control,
+    finalize: finalizeControls
+  } = createControlPanel(root.querySelector('.sun-panel'));
   const date = control('date');
   const time = control('time');
   const view = control('view');
@@ -110,6 +59,8 @@ export function mountSunTerminator(root) {
   let activeView = 'globe';
   let mesh = null;
   let morph = null;
+  let preparing = false;
+  const transitionAbort = new AbortController();
   let morphFrame = 0;
   let queuedView = null;
   let usaMask = null;
@@ -133,7 +84,7 @@ export function mountSunTerminator(root) {
   function ensureUsaMask() {
     if (usaMask) return;
     const {width, height, data} = createStateMask();
-    usaMask = deck.device.createTexture({
+    usaMask = device.createTexture({
       id: 'us-state-coverage',
       width,
       height,
@@ -159,7 +110,7 @@ export function mountSunTerminator(root) {
   let dayTexture = null;
   let nightTexture = null;
   const panController = {
-    dragMode: 'pan',
+    dragMode: 'pan' as const,
     dragRotate: false,
     touchRotate: false,
     keyboard: {rotateSpeedX: 0, rotateSpeedY: 0}
@@ -182,19 +133,23 @@ export function mountSunTerminator(root) {
   const initialSun = getSunTerminator(timestamp).sunDirection;
   const initialLongitude =
     (((Math.atan2(initialSun[1], initialSun[0]) * 180) / Math.PI + 85 + 540) % 360) - 180;
-  const deck = new Deck({
+  let device: import('@luma.gl/core').Device;
+  const deck = new Deck<GlobeView | MapView | OrthographicView>({
+    onDeviceInitialized: value => {
+      device = value;
+    },
     canvas: root.querySelector('canvas'),
     parent: root,
     views: new GlobeView({id: 'earth-globe', controller: panController, resolution: 2}),
     initialViewState: {longitude: initialLongitude, latitude: 25, zoom: 2, minZoom: -1, maxZoom: 7},
-    onViewStateChange: ({viewState}) => {
-      return {...viewState, bearing: 0, pitch: 0};
+    onViewStateChange: ({viewState, oldViewState}) => {
+      return {...(preparing ? oldViewState : viewState), bearing: 0, pitch: 0};
     },
     onLoad: () => {
       if (overviewDecoded) render();
     },
     onAfterRender: () => {
-      if (!overviewReady && deck.props.layers[0]?.isLoaded) {
+      if (!overviewReady && (deck.props.layers[0] as import('@deck.gl/core').Layer)?.isLoaded) {
         overviewReady = true;
         if (!disposed && !failedTiles)
           status.textContent = 'World overview ready · zoom for detail';
@@ -213,12 +168,14 @@ export function mountSunTerminator(root) {
     })
     .catch(() => {});
   function render() {
-    if (overviewDecoded && deck.device && !dayTexture) {
-      const createOverviewTexture = (image, id) => {
-        const texture = deck.device.createTexture({
+    if (overviewDecoded && device && !dayTexture) {
+      const createOverviewTexture = (image: HTMLImageElement, id: string) => {
+        const texture = device.createTexture({
           id,
           data: image,
-          mipLevels: deck.device.getMipLevelCount(image.width, image.height),
+          width: image.naturalWidth,
+          height: image.naturalHeight,
+          mipLevels: device.getMipLevelCount(image.width, image.height),
           sampler: {
             minFilter: 'linear',
             magFilter: 'linear',
@@ -242,7 +199,7 @@ export function mountSunTerminator(root) {
       usaMask,
       usaClip: activeView === 'albers-usa' ? 1 : 0,
       // Opaque, front-facing paired images avoid holes and depth interference between meshes.
-      parameters: {cullMode: 'back', depthCompare: 'always', depthWriteEnabled: false}
+      parameters: {cullMode: 'back', depthCompare: 'always', depthWriteEnabled: false} as const
     };
     if (morph) {
       deck.setProps({
@@ -251,6 +208,10 @@ export function mountSunTerminator(root) {
             id: 'earth-morph',
             mesh: morph.surface,
             progress: morph.progress,
+            // Start time after the first actual draw, including shader warmup.
+            onDraw: () => {
+              if (morph && morph.started === null) morph.started = performance.now();
+            },
             coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
             image: dayTexture || DAY_OVERVIEW,
             nightImage: nightTexture || NIGHT_OVERVIEW,
@@ -313,7 +274,7 @@ export function mountSunTerminator(root) {
             onViewportLoad: tiles => {
               if (!disposed && overviewReady && !failedTiles) {
                 status.textContent = tiles.length
-                  ? 'Detail ready · NASA 2016 night lights'
+                  ? `Detail ready · NASA ${NIGHT_DATE.slice(0, 4)} night lights`
                   : 'World overview ready · zoom for detail';
               }
             },
@@ -322,13 +283,18 @@ export function mountSunTerminator(root) {
             },
             renderSubLayers: props => {
               if (!props.data) return null;
-              const {west, south, east, north} = props.tile.bbox;
+              const {west, south, east, north} = props.tile.bbox as {
+                west: number;
+                south: number;
+                east: number;
+                north: number;
+              };
+              const {data: _tileData, ...layerProps} = props;
               if (isCutMap(activeView)) {
                 const tileMesh = getCutTileMesh(activeView, props.tile, props.data);
                 if (!tileMesh.vertexCount) return null;
-                return new CutBitmapLayer(props, {
+                return new CutBitmapLayer(layerProps, {
                   id: `${props.id}-${activeView}`,
-                  data: null,
                   mesh: tileMesh,
                   coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
                   image: props.data.day,
@@ -340,9 +306,8 @@ export function mountSunTerminator(root) {
                   parameters: {depthCompare: 'always', depthWriteEnabled: false, cullMode: 'none'}
                 });
               }
-              return new DayNightBitmapLayer(props, {
+              return new DayNightBitmapLayer(layerProps, {
                 id: `${props.id}-${activeView}`,
-                data: null,
                 image: props.data.day,
                 nightImage: props.data.night,
                 bounds: [west, south, east, north],
@@ -354,7 +319,9 @@ export function mountSunTerminator(root) {
         activeView === 'h3' &&
           new PathLayer({
             id: 'h3-face-outline',
-            data: h3FacePaths,
+            data: getMap('h3')
+              .getLayout()
+              .regions.flatMap(r => r.outlines.map(ring => ring.map(p => [...p, 0]))),
             getPath: path => path,
             coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
             getColor: [180, 210, 230, 160],
@@ -388,16 +355,16 @@ export function mountSunTerminator(root) {
       render();
     }
   }
-  function changeView() {
+  async function changeView() {
     const next = view.value;
-    if (morph) {
+    if (morph || preparing) {
       queuedView = next;
       return;
     }
     if (next === activeView) return;
     if (next === 'h3' && !h3GridLoading) {
       h3GridLoading = true;
-      import('./h3-grid.js')
+      import('./h3-grid.ts')
         .then(({getH3GridPaths}) => {
           if (!disposed) {
             h3GridPaths = getH3GridPaths();
@@ -433,9 +400,38 @@ export function mountSunTerminator(root) {
       status.textContent = error.message;
       return;
     }
+    const targetCamera = {...transfer.camera, bearing: 0, pitch: 0};
+    const animated =
+      dayTexture && nightTexture && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let surface;
+    if (animated) {
+      preparing = true;
+      status.textContent = 'Preparing projection transition…';
+      try {
+        const targetViewport = targetView.makeViewport({
+          width: root.clientWidth,
+          height: root.clientHeight,
+          viewState: targetCamera
+        });
+        surface = await prepareMapTransitionMeshAsync(
+          createEndpoint(sourceView, sourceViewport),
+          createEndpoint(next, targetViewport),
+          {signal: transitionAbort.signal}
+        );
+      } catch (error) {
+        queuedView = null;
+        if (!disposed) {
+          view.value = activeView;
+          status.textContent = error.message;
+        }
+        return;
+      } finally {
+        preparing = false;
+      }
+      if (disposed) return;
+    }
     activeView = next;
     mesh = nextMesh;
-    const targetCamera = {...transfer.camera, bearing: 0, pitch: 0};
     const finish = () => {
       morph = null;
       deck.setProps({views: targetView, initialViewState: targetCamera});
@@ -447,27 +443,31 @@ export function mountSunTerminator(root) {
         changeView();
       }
     };
-    if (!dayTexture || !nightTexture || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (!animated) {
       finish();
     } else {
-      const targetViewport = targetView.makeViewport({
-        width: root.clientWidth,
-        height: root.clientHeight,
-        viewState: targetCamera
-      });
-      const surface = createMorphMesh(
-        createEndpoint(sourceView, sourceViewport),
-        createEndpoint(next, targetViewport)
-      );
-      morph = {surface, progress: 0, source: sourceView, target: next};
+      morph = {
+        surface,
+        progress: 0,
+        elapsed: 0,
+        previousFrame: null,
+        started: null,
+        source: sourceView,
+        target: next
+      };
       deck.setProps({
         views: new OrthographicView({id: 'earth-morph', controller: false, flipY: false}),
         initialViewState: {target: [0, 0, 0], zoom: 0}
       });
-      const started = performance.now();
       const tick = now => {
         if (disposed || !morph) return;
-        morph.progress = getMorphProgress(now - started);
+        if (morph.started !== null) {
+          // Bound dropped-frame advances so a slow GPU or host task cannot
+          // consume the entire visible transition between two draws.
+          morph.elapsed += Math.min(100, Math.max(0, now - (morph.previousFrame ?? morph.started)));
+          morph.previousFrame = now;
+        }
+        morph.progress = getMorphProgress(morph.elapsed);
         render();
         if (morph.progress < 1) morphFrame = requestAnimationFrame(tick);
         else finish();
@@ -519,6 +519,7 @@ export function mountSunTerminator(root) {
   render();
   return () => {
     disposed = true;
+    transitionAbort.abort();
     finishTransition();
     cancelAnimationFrame(frame);
     offset.removeEventListener('input', scrubTime);
@@ -533,7 +534,7 @@ export function mountSunTerminator(root) {
     usaMask?.destroy();
     dayTexture?.destroy();
     nightTexture?.destroy();
-    manager.finalize();
+    finalizeControls();
     root.replaceChildren();
   };
 }

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {Deck, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {getSunTerminator} from '@math.gl/earth/sun';
-import {DayNightBitmapLayer} from '../../../../examples/earth/sun-terminator/src/day-night-bitmap-layer.js';
+import {DayNightBitmapLayer} from '../../../../examples/earth/sun-terminator/src/layers.ts';
 
 // Deterministic GPU fixture: identify missing coverage and measure the feather's RGB blend.
 const args = new URLSearchParams(location.search);

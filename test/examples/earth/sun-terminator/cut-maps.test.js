@@ -7,12 +7,12 @@ import {
   projectCutMap,
   unprojectCutMap,
   buildCutMesh
-} from '../../../../examples/earth/sun-terminator/src/cut-maps.js';
+} from '../../../../examples/earth/sun-terminator/src/view-adapter.ts';
 import {_GlobeView as GlobeView, OrthographicView} from '@deck.gl/core';
 import {
   transferCamera,
   geographicCenter
-} from '../../../../examples/earth/sun-terminator/src/camera.js';
+} from '../../../../examples/earth/sun-terminator/src/view-adapter.ts';
 
 test('Albers USA places the contiguous states, Alaska and Hawaii in distinct insets', () => {
   for (const [point, part] of [
@@ -48,10 +48,10 @@ test('Albers USA mesh has no geographic texture bridges across inset boundaries'
       lon = 0,
       lat = 0;
     for (let j = 0; j < 3; j++) {
-      x += mesh.positions[(i + j) * 3] / 3;
-      y += mesh.positions[(i + j) * 3 + 1] / 3;
-      lon += (mesh.texCoords[(i + j) * 2] * 360 - 180) / 3;
-      lat += (90 - mesh.texCoords[(i + j) * 2 + 1] * 180) / 3;
+      x += mesh.positions[mesh.indices[i + j] * 3] / 3;
+      y += mesh.positions[mesh.indices[i + j] * 3 + 1] / 3;
+      lon += (mesh.texCoords[mesh.indices[i + j] * 2] * 360 - 180) / 3;
+      lat += (90 - mesh.texCoords[mesh.indices[i + j] * 2 + 1] * 180) / 3;
     }
     const p = projectCutMap('albers-usa', lon, lat);
     assert.ok(p && Math.hypot(p[0] - x, p[1] - y) < 0.05, 'a triangle must stay within one region');

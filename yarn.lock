@@ -15772,7 +15772,6 @@ __metadata:
     "@luma.gl/engine": "npm:~9.4.0"
     "@math.gl/earth": "workspace:*"
     "@math.gl/geospatial": "workspace:*"
-    d3-geo: "npm:^2.0.2"
     h3-js: "npm:^4.5.0"
     vite: "npm:^8.3.6"
   languageName: unknown

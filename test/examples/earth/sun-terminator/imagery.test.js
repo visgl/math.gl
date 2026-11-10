@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import {
   loadImageryTile,
   releaseImageryTile
-} from '../../../../examples/earth/sun-terminator/src/imagery.js';
+} from '../../../../examples/earth/sun-terminator/src/imagery.ts';
 
 function mockImages(t, fail = false) {
   const requests = [];

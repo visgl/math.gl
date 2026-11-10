@@ -30,7 +30,31 @@ try {
   await page.evaluate(() => {
     const deck = window.navigationDeck;
     deck.setProps({initialViewState: {longitude: -96, latitude: 38, zoom: 5}});
-    window.morphChecks = {progress: [], stable: true, mesh: null, uniqueVertices: 0, indices: 0};
+    window.morphChecks = {progress: [], stable: true, mesh: null, uniqueVertices: 0, indices: 0, drawn: [], warmed: false, slowFrames: true};
+    const afterRender = deck.props.onAfterRender;
+    deck.setProps({
+      onBeforeRender: () => {
+        if (deck.props.layers[0]?.id === 'earth-morph' && !window.morphChecks.warmed) {
+          window.morphChecks.warmed = true;
+          // Model a slow initial shader compilation/buffer upload. It must not
+          // consume the visible animation's duration.
+          const until = performance.now() + 650;
+          while (performance.now() < until) { /* shader warmup */ }
+        }
+      },
+      onAfterRender: () => {
+        const layer = deck.props.layers[0];
+        const check = window.morphChecks;
+        if (layer?.id === 'earth-morph') check.drawn.push({progress: layer.props.progress, time: performance.now()});
+        else if (check.drawn.length) check.completedAt = performance.now();
+        afterRender();
+        if (layer?.id === 'earth-morph' && check.slowFrames) {
+          // Model slow software-GPU frames after the initial upload as well.
+          const until = performance.now() + 180;
+          while (performance.now() < until) { /* delayed frame */ }
+        }
+      }
+    });
     const setProps = deck.setProps;
     deck.setProps = function (props) {
       const layer = props.layers?.[0];
@@ -51,8 +75,12 @@ try {
   );
   const check = await page.evaluate(() => ({...window.morphChecks, mesh: undefined}));
   assert.equal(check.stable, true, 'GPU morph must retain the same position buffers');
+  assert.ok(check.drawn.length >= 12, 'slow frames must still draw intermediate animation states');
   assert.ok(new Set(check.progress).size > 3, 'must render intermediate GPU progress');
   assert.ok(check.uniqueVertices < check.indices / 2, 'continuous pieces should share vertices');
+  await page.waitForFunction(() => window.morphChecks.completedAt);
+  const duration = await page.evaluate(() => window.morphChecks.completedAt - window.morphChecks.drawn[0].time);
+  assert.ok(duration >= 1400, `shader warmup must not shorten the visible animation: ${duration} ms`);
   const focus = await page.evaluate(() => window.geographicCenter('albers-usa'));
   assert.ok(Math.abs(focus[0] + 96) < 0.001 && Math.abs(focus[1] - 38) < 0.001);
   await page.evaluate(() =>
@@ -60,12 +88,44 @@ try {
   );
   await page.screenshot({path: '/tmp/sun-albers-usa.png'});
   await page.evaluate(() => {
+    window.morphChecks = {progress: [], stable: true, mesh: null, uniqueVertices: 0, indices: 0, drawn: [], warmed: true};
+  });
+  await page.locator('[data-role=view]').selectOption('globe');
+  await page.waitForFunction(() => window.navigationDeck.getViewports()[0].id === 'earth-globe');
+  const reverse = await page.evaluate(() => ({...window.morphChecks, mesh: undefined}));
+  assert.equal(reverse.stable, true);
+  assert.ok(new Set(reverse.progress).size > 3, 'Albers USA must also animate back to globe');
+  await page.evaluate(() => {
     window.morphChecks.mesh = null;
   });
   await page.locator('[data-role=view]').selectOption('imoll');
   await page.waitForFunction(() => window.navigationDeck.getViewports()[0].id === 'earth-imoll');
   await page.locator('[data-role=view]').selectOption('isinu');
   await page.waitForFunction(() => window.navigationDeck.getViewports()[0].id === 'earth-isinu');
+  // A failed preparation must discard choices queued during that attempt.
+  await page.evaluate(() => {
+    const viewport = window.navigationDeck.getViewports()[0];
+    const width = viewport.width;
+    Object.defineProperty(viewport, 'width', {
+      configurable: true,
+      get() {
+        if (document.querySelector('[role=status]').textContent.startsWith('Preparing projection')) {
+          Object.defineProperty(viewport, 'width', {value: width, configurable: true, writable: true});
+          const select = document.querySelector('[data-role=view]');
+          select.value = 'robin';
+          select.dispatchEvent(new Event('change'));
+          throw new Error('Injected transition preparation failure');
+        }
+        return width;
+      }
+    });
+  });
+  await page.locator('[data-role=view]').selectOption('globe');
+  await page.locator('[role=status]').filter({hasText: 'Injected transition preparation failure'}).waitFor();
+  assert.equal(await page.locator('[data-role=view]').inputValue(), 'isinu');
+  await page.locator('[data-role=view]').selectOption('map');
+  await page.waitForFunction(() => window.navigationDeck.getViewports()[0].id === 'earth-map');
+  assert.equal(await page.locator('[data-role=view]').inputValue(), 'map');
   assert.deepEqual(errors, []);
   await page.evaluate(() => window.disposeExample());
   assert.equal(await page.locator('canvas').count(), 0);

@@ -7,8 +7,8 @@ import {MapView, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core'
 import {
   transferCamera,
   geographicCenter
-} from '../../../../examples/earth/sun-terminator/src/camera.js';
-import {createEndpoint} from '../../../../examples/earth/sun-terminator/src/morph.js';
+} from '../../../../examples/earth/sun-terminator/src/view-adapter.ts';
+import {createEndpoint} from '../../../../examples/earth/sun-terminator/src/view-adapter.ts';
 
 test('geographic center and apparent zoom survive projection/globe round trips', () => {
   for (const focus of [
@@ -52,7 +52,9 @@ test('geographic center and apparent zoom survive projection/globe round trips',
 });
 
 test('zoomed-in morphs retain triangles instead of treating screen size as a cut', async () => {
-  const {createMorphMesh} = await import('../../../../examples/earth/sun-terminator/src/morph.js');
+  const {prepareMapTransitionMesh: createMorphMesh} = await import(
+    '@math.gl/geospatial/discontinuous'
+  );
   const viewport = new MapView().makeViewport({
     width: 1000,
     height: 800,

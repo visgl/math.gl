@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {projectSphericalPolygon, type SphericalCutOptions} from './global-polygons';
+import {createH3FaceMap} from './h3-face-map';
+import {
+  prepareMapSurfaceMesh,
+  type MapSurfaceMeshOptions,
+  type MapSurfaceMesh
+} from './map-surface-mesh';
 import {MapTransition, type MapTransitionOptions} from './map-transition';
 import {
   prepareMapFeatures,
@@ -77,7 +83,7 @@ export type MapDefinition =
   | ({type: 'projection'} & Omit<ProjectionMapOptions, 'radius'>)
   | ({type: 'regional'} & Omit<RegionalMapOptions, 'radius'>)
   | ({type: 'world'} & Omit<WorldMapOptions, 'radius'>)
-  | {type: 'gray-fuller' | 'isea' | 'dsea'}
+  | {type: 'gray-fuller' | 'isea' | 'dsea' | 'h3'}
   | {type: 'petroff'; centralMeridian?: number}
   | {type: 'healpix'; centralMeridian?: number}
   | {
@@ -262,6 +268,9 @@ export class MapEngine {
       case 'world':
         this.map = createWorldMap({...d, radius});
         break;
+      case 'h3':
+        this.map = createH3FaceMap({radius});
+        break;
       case 'gray-fuller':
         this.map = createGrayFullerMap({radius});
         break;
@@ -413,6 +422,19 @@ export class MapEngine {
   projectPoint(position: GeographicPosition, regionId?: string) {
     return this.map.projectPoint(position, regionId);
   }
+  /** Project raster/transition samples, reserving child inset frames in their parent chart. */
+  projectSurfacePoint(position: GeographicPosition, regionId?: string) {
+    const point = this.projectPoint(position, regionId);
+    if (!point) return null;
+    const [x, y] = point.position;
+    for (const region of this.regions) {
+      const layout = region.layout;
+      if (layout?.parentId !== point.regionId || !layout.frame) continue;
+      const [left, bottom, right, top] = layout.frame;
+      if (x >= left && x <= right && y >= bottom && y <= top) return null;
+    }
+    return point;
+  }
   unprojectPoint(position: GeographicPosition, regionId?: string) {
     return this.map.unprojectPoint(position, regionId);
   }
@@ -436,6 +458,17 @@ export class MapEngine {
     options: MapPrepareFeaturesOptions = {}
   ): PreparedMapGeometry {
     return prepareMapFeatures(this, features, options);
+  }
+  /** Prepare a chart-clipped geographic or Mercator raster surface. */
+  prepareSurface(options: MapSurfaceMeshOptions = {}): MapSurfaceMesh {
+    return prepareMapSurfaceMesh(
+      {
+        regions: this.regions,
+        projectPoint: (p, id) => this.projectSurfacePoint(p, id),
+        projectLine: (p, opts) => this.projectLine(p, opts)
+      },
+      options
+    );
   }
   getLayout() {
     this.cachedLayout ??= getMapLayout(this.map, this.sampling);

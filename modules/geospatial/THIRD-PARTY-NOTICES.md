@@ -286,3 +286,8 @@ spherical AEQD, QSC, Mollweide and polyconic retain their existing attributed po
 new half-angle identities, stable complements, polar inverse limits and quadrature
 reuse are original math.gl corrections, not copied upstream implementations.
 Source SPDX comments preserve existing proj4js/PROJ credits and identify the changes.
+
+### H3 face orientations
+
+The H3-oriented face net uses H3 v4.3.0 face-center constants (Apache-2.0).
+See the [H3 license](./H3-LICENSE.TXT) and [notice](./H3-NOTICE.TXT). Net assembly and inverse are original math.gl code.

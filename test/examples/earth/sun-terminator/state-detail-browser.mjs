@@ -53,7 +53,7 @@ try {
   assert.equal(await page.evaluate(() => window.getCutViewports('albers-usa').length), 3);
   const cases = [
     {name: 'Denver', geo: [-104.99, 39.74], inside: true},
-    {name: 'Anchorage', geo: [-149.9, 61.2], inside: true},
+    {name: 'Anchorage', geo: [-149.9, 61.2], inside: true, radius: 1},
     {name: 'Honolulu', geo: [-157.82, 21.32], inside: true},
     {name: 'Canada', geo: [-123.12, 49.28], inside: false},
     {name: 'Pacific', geo: [-120, 33], inside: false},
@@ -80,7 +80,15 @@ try {
             gl.UNSIGNED_BYTE,
             pixel
           );
-          return {...item, pixel: Array.from(pixel)};
+          const pixels = [Array.from(pixel)];
+          // Coastal cities can project between land and water pixel centers.
+          // Check their one-pixel footprint rather than an arbitrary rounded texel.
+          if (item.radius) for (let dy = -item.radius; dy <= item.radius; dy++) for (let dx = -item.radius; dx <= item.radius; dx++) {
+            const nearby = new Uint8Array(4);
+            gl.readPixels(Math.floor(screen[0]) + dx, gl.drawingBufferHeight - 1 - Math.floor(screen[1]) + dy, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, nearby);
+            pixels.push(Array.from(nearby));
+          }
+          return {...item, pixel: Array.from(pixel), pixels};
         });
       }
     });
@@ -90,7 +98,7 @@ try {
   for (const sample of pixels) {
     if (sample.inside)
       assert.ok(
-        sample.pixel[1] > 150 && sample.pixel[3] > 200,
+        sample.pixels.some(pixel => pixel[1] > 150 && pixel[3] > 200),
         sample.name + ' must show detailed imagery'
       );
     else assert.equal(sample.pixel[3], 0, sample.name + ' must be clipped');
