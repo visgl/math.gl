@@ -18,7 +18,7 @@ export function mountUnfolding(
       level: number,
       seed: number,
       mode: string
-    ) => Omit<ReturnType<typeof createCutLayout>, 'cutLandKm' | 'baselineLandKm'> & {
+    ) => Pick<ReturnType<typeof createCutLayout>, 'mesh' | 'edges' | 'evaluate' | 'overlaps'> & {
       cutLandKm?: number;
       baselineLandKm?: number;
       description?: string;

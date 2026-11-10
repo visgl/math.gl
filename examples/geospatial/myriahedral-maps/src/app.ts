@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {mountUnfolding} from './shared/geometry/unfolding-polyhedron/app';
+import {mountUnfolding} from '../../../geometry/unfolding-polyhedron/src/app';
 import {markup} from './view';
 import {createMyriahedralLayout} from './layout';
 import {createLandTexture} from './land-texture';

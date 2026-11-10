@@ -20,8 +20,7 @@ Subdivision is available only for the icosahedron.
 ## Source structure
 
 `src/app.ts` connects the UI to the layout and scene. `src/view.ts` contains markup;
-`src/scene.ts` evaluates poses and frames the camera; `src/renderer.ts` owns WebGL drawing
-and textures. The scene takes plain view state rather than reading controls.
+`src/scene.ts` evaluates poses and frames the camera; `src/renderer.ts` draws the panels and hinge edges with deck.gl. The scene takes plain view state rather than reading controls.
 `src/cut-layout.ts` builds the hinge layout and `src/picking.ts` handles geographic hits.
 The myriahedral example reuses the controller, scene, renderer, and picking with
 its own layout builder.
