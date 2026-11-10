@@ -126,3 +126,6 @@ compileArrowFunction('color', ['[0, 1, 2]'], {
   inputSchema: batch.schema,
   functions: [color]
 }).evaluateTable(table);
+
+import {compileArrowArray} from '@math.gl/arrow/expressions';
+compileArrowArray(['x', 'y'], {inputSchema: batch.schema, type: 'float32'}).evaluateTable(table);
