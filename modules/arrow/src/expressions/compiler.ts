@@ -671,9 +671,22 @@ function bindCall(ast: any, options: BindingOptions): Node {
     throw new Error('Only registered named function calls are supported');
   let name = ast.callee.name;
   if (ast.sqlFunction) {
-    const matches = [...options.functionLookup.keys()].filter(
-      key => key.toUpperCase() === name.toUpperCase()
-    );
+    const matches = [
+      ...options.functionLookup.keys(),
+      'array',
+      'array_float16',
+      'array_float32',
+      'array_float64',
+      'cast',
+      'isNull',
+      'isNotNull',
+      'parseNumber',
+      'parseBigInt',
+      'parseBoolean',
+      'toFloat64',
+      'toInt32',
+      'toInt64'
+    ].filter(key => key.toUpperCase() === name.toUpperCase());
     if (matches.length > 1) throw new Error(`Ambiguous SQL function: ${name}`);
     name = matches[0] ?? name;
   }

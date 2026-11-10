@@ -74,3 +74,10 @@ test('query parsing preserves portable predicates and exposes computed SELECT an
     [false, true, true]
   );
 });
+
+test('SQL builtin function names fold case while quoted calls remain exact', () => {
+  for (const expression of ['TOFLOAT64(i)', 'tofloat64(i)', 'ToFlOaT64(i)'])
+    expect([...evaluate(expression)]).toEqual([1, 2, 3]);
+  expect([...evaluate('ISNULL(x)')]).toEqual([false, true, false]);
+  expect(() => evaluate('"TOFLOAT64"(i)')).toThrow('Unknown');
+});
