@@ -181,3 +181,24 @@ test('earlier scalar failures suppress later vector arguments and fixed-array ca
   expect(Array.from(result)).toEqual([null, null, null, null]);
   expect(Array.from(result.data[0]!.children[0]!.values)).toEqual([0, 0, 0, 0]);
 });
+
+test('TRY masks failed condition and branch rows before validating tuple outputs', () => {
+  const condition = evaluate(
+    'TRY(CASE WHEN SQRT(x) > 0 THEN ARRAY[1] ELSE ARRAY[2] END, ARRAY[7])'
+  );
+  expect(Array.from(condition, row => (row === null ? null : Array.from(row)))).toEqual([
+    [1],
+    [7],
+    [2],
+    [1]
+  ]);
+  const branch = evaluate(
+    'TRY(CASE WHEN x < 0 THEN ARRAY[1e39]::REAL[1] ELSE ARRAY[2]::REAL[1] END, ARRAY[7]::REAL[1])'
+  );
+  expect(Array.from(branch, row => (row === null ? null : Array.from(row)))).toEqual([
+    [2],
+    [7],
+    [2],
+    [2]
+  ]);
+});

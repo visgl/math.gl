@@ -542,14 +542,15 @@ function bindNode(
           );
         }
         if (isTupleType(field.type)) {
-          validateTupleVector(a.vector!, yes.field, selected!);
-          validateTupleVector(
-            b.vector!,
-            no.field,
-            active.map((value, row) => (value && !selected![row] ? 1 : 0))
-          );
+          const validActive = context.failed
+            ? active.map((value, row) => (value && !context.failed![row] ? 1 : 0))
+            : active;
+          const yesMask = validActive.map((value, row) => (value && selected![row] ? 1 : 0));
+          const noMask = validActive.map((value, row) => (value && !selected![row] ? 1 : 0));
+          validateTupleVector(a.vector!, yes.field, yesMask);
+          validateTupleVector(b.vector!, no.field, noMask);
           return vectorReader(
-            selectTupleVectors(field.type, a.vector!, b.vector!, selected!, active)
+            selectTupleVectors(field.type, a.vector!, b.vector!, yesMask, validActive)
           );
         }
         const choose = (row: number) =>
