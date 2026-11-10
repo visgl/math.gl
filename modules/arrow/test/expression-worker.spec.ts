@@ -232,3 +232,24 @@ test.runIf(typeof globalThis.Float16Array === 'function')(
     }
   }
 );
+test('worker-local color declarations produce Uint8 RGBA', async () => {
+  const runner = new TaskRunner();
+  try {
+    const input = table();
+    const result = hydrateArrowExpressionResult(
+      await runner.runTask(task, prepareArrowExpressionInput(input), {
+        execution: 'worker',
+        initialization: {expression: 'COLOR_TO_RGBA8(COLOR_RGB(toFloat64(x) / 5, 0, 0))'}
+      })
+    );
+    expect(Array.from(result.vector, row => (row === null ? null : Array.from(row)))).toEqual([
+      [51, 0, 0, 255],
+      null,
+      [153, 0, 0, 255],
+      [204, 0, 0, 255],
+      [255, 0, 0, 255]
+    ]);
+  } finally {
+    await runner.close();
+  }
+});

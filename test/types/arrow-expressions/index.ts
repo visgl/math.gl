@@ -137,3 +137,8 @@ const halfFunction: ArrowTableFunction = {
   evaluate: ([value]) => value!
 };
 void halfFunction;
+import {COLOR_RGB, COLOR_TO_RGBA8} from '@math.gl/arrow/color';
+compileArrowExpression('COLOR_TO_RGBA8(COLOR_RGB(1, 0, 0))', {
+  inputSchema: batch.schema,
+  functions: [COLOR_RGB, COLOR_TO_RGBA8]
+}).evaluate(batch);

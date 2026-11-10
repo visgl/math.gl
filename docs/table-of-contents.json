@@ -528,6 +528,7 @@
         "items": [
           "modules/arrow/utf8/README",
           "modules/arrow/expressions/README",
+          "modules/arrow/color/README",
           {
             "type": "category",
             "label": "Arrow utilities",

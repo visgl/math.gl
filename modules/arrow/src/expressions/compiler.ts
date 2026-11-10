@@ -402,6 +402,24 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
         hasKernel: false,
         prepare: (_batch, active) => vectorReader(nullTupleVector(type, active.length))
       };
+    if (value === null && DataType.isList(type)) {
+      const dictionary = vectorFromArray([null], type);
+      return {
+        field: new Field('literal', type, true),
+        hasKernel: false,
+        prepare: (_batch, active) =>
+          vectorReader(
+            makeVector(
+              makeData({
+                type: new Dictionary(type, new Int32()),
+                length: active.length,
+                data: new Int32Array(active.length),
+                dictionary
+              })
+            )
+          )
+      };
+    }
     validateValue(value, type);
     const rounded = roundToType(type)(value);
     const encoded = typeof value === 'string' ? encoder.encode(value) : undefined;
