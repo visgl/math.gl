@@ -113,6 +113,7 @@ export function createRenderer(
   onStatus: (message: string) => void,
   landSource?: HTMLCanvasElement
 ) {
+  let contextRelease: WEBGL_lose_context | null = null;
   const deck = new Deck({
     canvas,
     width: null,
@@ -120,6 +121,9 @@ export function createRenderer(
     views: new OrthographicView({flipY: false, near: 0.1, far: 3}),
     viewState: {target: [0, 0, 0], zoom: 0},
     controller: false,
+    onDeviceInitialized: () => {
+      contextRelease = canvas.getContext('webgl2')?.getExtension('WEBGL_lose_context') ?? null;
+    },
     useDevicePixels: Math.min(devicePixelRatio, 2)
   });
   const fallback = new ImageData(new Uint8ClampedArray([255, 255, 255, 255]), 1, 1);
@@ -142,6 +146,8 @@ export function createRenderer(
       image.onerror = null;
       image.src = '';
       deck.finalize();
+      contextRelease?.loseContext();
+      contextRelease = null;
     },
     get ready() {
       return ready;
