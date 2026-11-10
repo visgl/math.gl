@@ -422,3 +422,5 @@ Vector implementations can call `context.reportError?.(row, error)` with a class
 skip the rest of that row. Outside TRY the reporter throws. Inside TRY it records the row failure
 and clears that row in the kernel's active mask. A kernel without a reporter must throw the error.
 A thrown batch exception cannot be associated with a row and remains fatal, even inside TRY.
+
+See [SQL expression conformance](./sql-conformance.md) for syntax, numeric rules, worker registration, and the benchmark.
