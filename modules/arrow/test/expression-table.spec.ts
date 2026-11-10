@@ -124,17 +124,21 @@ test('vector-only functions accept matching dictionary encodings', () => {
   const type = input.schema.fields[0]!.type;
   const functions = [
     {
-      arguments: [new Field('text', type, true)],
-      result: new Field('size', new Int32(), true),
       name: 'size',
-      evaluateScalar: undefined,
-      evaluate: ([text], {activeRows}) => {
-        expect(text!.type).toBe(type);
-        return vectorFromArray(
-          Array.from(activeRows, (active, row) => (active ? text!.get(row).length : null)),
-          new Int32()
-        );
-      }
+      prototypes: [
+        {
+          arguments: [new Field('text', type, true)],
+          result: new Field('size', new Int32(), true),
+          evaluateScalar: undefined,
+          evaluate: ([text], {activeRows}) => {
+            expect(text!.type).toBe(type);
+            return vectorFromArray(
+              Array.from(activeRows, (active, row) => (active ? text!.get(row).length : null)),
+              new Int32()
+            );
+          }
+        }
+      ]
     }
   ];
   expect([
@@ -144,9 +148,10 @@ test('vector-only functions accept matching dictionary encodings', () => {
     }).evaluateTable(input)
   ]).toEqual([1, null, 3]);
   functions.push({
-    ...functions[0]!,
     name: 'logicalSize',
-    arguments: [new Field('text', new Utf8(), true)]
+    prototypes: [
+      {...functions[0]!.prototypes[0]!, arguments: [new Field('text', new Utf8(), true)]}
+    ]
   });
   expect([
     ...compileArrowExpression('logicalSize(text)', {
@@ -155,11 +160,15 @@ test('vector-only functions accept matching dictionary encodings', () => {
     }).evaluateTable(input)
   ]).toEqual([1, null, 3]);
   functions.push({
-    arguments: [new Field('text', new Dictionary(new Utf8(), new Int8()), true)],
-    result: new Field('size', new Int32(), true),
     name: 'wrongEncoding',
-    evaluateScalar: undefined,
-    evaluate: () => vectorFromArray([], new Int32())
+    prototypes: [
+      {
+        arguments: [new Field('text', new Dictionary(new Utf8(), new Int8()), true)],
+        result: new Field('size', new Int32(), true),
+        evaluateScalar: undefined,
+        evaluate: () => vectorFromArray([], new Int32())
+      }
+    ]
   });
   expect(() =>
     compileArrowExpression('wrongEncoding(text)', {
@@ -188,13 +197,17 @@ test('nested schema validation ignores descriptive metadata but checks extension
 test('dictionary declarations reject literals before invoking a vector kernel', () => {
   const functions = [
     {
-      arguments: [new Field('text', new Dictionary(new Utf8(), new Int8()), true)],
-      result: new Field('result', new Int32()),
       name: 'encoded',
-      evaluateScalar: undefined,
-      evaluate: () => {
-        throw new Error('must not execute');
-      }
+      prototypes: [
+        {
+          arguments: [new Field('text', new Dictionary(new Utf8(), new Int8()), true)],
+          result: new Field('result', new Int32()),
+          evaluateScalar: undefined,
+          evaluate: () => {
+            throw new Error('must not execute');
+          }
+        }
+      ]
     }
   ];
   for (const argument of ['"a"', 'null']) {
@@ -211,11 +224,15 @@ test('dictionary declarations reject signed numeric literals before vector evalu
   const functions = [
     {
       name: 'encodedNumber',
-      arguments: [new Field('number', new Dictionary(new Int32(), new Int8()), true)],
-      result: new Field('number', new Int32()),
-      evaluate: () => {
-        throw new Error('must not execute');
-      }
+      prototypes: [
+        {
+          arguments: [new Field('number', new Dictionary(new Int32(), new Int8()), true)],
+          result: new Field('number', new Int32()),
+          evaluate: () => {
+            throw new Error('must not execute');
+          }
+        }
+      ]
     }
   ];
   expect(() =>
@@ -237,11 +254,15 @@ test('nested list sizes match structurally even when type strings are uninformat
   expect(() => compiled.evaluateTable(new Table(new Schema([xyz]), []))).toThrow('schema mismatch');
   const functions = [
     {
-      arguments: [xyz],
-      result: new Field('value', new Int32()),
       name: 'pointValue',
-      evaluateScalar: undefined,
-      evaluate: () => vectorFromArray([], new Int32())
+      prototypes: [
+        {
+          arguments: [xyz],
+          result: new Field('value', new Int32()),
+          evaluateScalar: undefined,
+          evaluate: () => vectorFromArray([], new Int32())
+        }
+      ]
     }
   ];
   expect(() =>

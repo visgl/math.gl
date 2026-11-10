@@ -17,7 +17,7 @@ const colors = expression.evaluateTable(arrowTable);
 Numeric arguments use Float64; use explicit conversions for other source types. Working colors are
 `FixedSizeList<Float32, 4>` normalized gamma-encoded sRGB with straight alpha and non-nullable
 channels. Null parent validity means missing color; alpha zero is a valid transparent color.
-`COLOR_TO_RGBA8` produces `FixedSizeList<Uint8, 4>` for rendering. Each declaration's `evaluate`
+`COLOR_TO_RGBA8` produces `FixedSizeList<Uint8, 4>` for rendering. Each declaration's prototype `evaluate`
 method can also be called directly with its declared Arrow vectors and an active-row mask.
 
 ## Functions

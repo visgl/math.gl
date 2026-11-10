@@ -101,9 +101,13 @@ test.runIf(supported)(
     const tuple = new FixedSizeList(2, new Field('channel', new Float16(), false));
     const fn: ArrowTableFunction = {
       name: 'identity',
-      arguments: [new Field('value', tuple)],
-      result: new Field('value', tuple),
-      evaluate: ([v]) => v!
+      prototypes: [
+        {
+          arguments: [new Field('value', tuple)],
+          result: new Field('value', tuple),
+          evaluate: ([v]) => v!
+        }
+      ]
     };
     const expression = compileArrowExpression('x > 1 ? identity([1.0005, 2]) : identity([0, 1])', {
       inputSchema: table.schema,

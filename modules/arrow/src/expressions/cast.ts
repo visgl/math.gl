@@ -5,6 +5,7 @@
 import {Bool, DataType, Float16, Float32, Float64, Int16, Int32, Int64, Utf8} from 'apache-arrow';
 import {isColumnarScalarType} from '@math.gl/core/expressions';
 import {parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '../utf8/index';
+import {ArrowEvaluationError} from './errors';
 import {roundFloat16} from './float16';
 import {typeKey, createValueValidator} from './buffers';
 import type {ArrowExpressionValue} from './types';
@@ -65,12 +66,13 @@ export function bindCast(source: DataType, target: unknown) {
             : target.startsWith('int')
               ? (parseUTF8BigInt(bytes, start, end) ?? null)
               : (parseUTF8Number(bytes, start, end) ?? null);
-        if (result === null) throw new Error(`Invalid text for CAST to ${target}`);
+        if (result === null)
+          throw new ArrowEvaluationError('conversion', `Invalid text for CAST to ${target}`);
         if (target === 'int16' || target === 'int32') result = Number(result);
       } else if (target === 'bool') result = value;
       else if (target === 'int64') {
         if (typeof value === 'number' && !Number.isFinite(value))
-          throw new RangeError('Non-finite integer CAST');
+          throw new ArrowEvaluationError('conversion', 'Non-finite integer CAST');
         result = typeof value === 'bigint' ? value : BigInt(Math.trunc(value as number));
       } else if (target === 'int16' || target === 'int32') result = Math.trunc(Number(value));
       else result = Number(value);
@@ -80,7 +82,7 @@ export function bindCast(source: DataType, target: unknown) {
         (target === 'float16' || target === 'float32' || target === 'float64') &&
         !Number.isFinite(result)
       )
-        throw new RangeError('Floating CAST overflow or non-finite value');
+        throw new ArrowEvaluationError('overflow', 'Floating CAST overflow or non-finite value');
       validate(result);
       return result;
     }

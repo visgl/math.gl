@@ -151,7 +151,10 @@ test('scalar and vector functions share typing, masks, null propagation and dire
   };
   const scalarFunctions = [scalarFunction({name: 'double', ...declaration})];
   const vectorFunctions = [
-    {...declaration, name: 'double', evaluateScalar: undefined, evaluate: kernel}
+    {
+      name: 'double',
+      prototypes: [{...declaration, evaluateScalar: undefined, evaluate: kernel}]
+    }
   ];
   const a = compileArrowFunction('double', ['x'], {
     inputSchema: input.schema,
@@ -243,11 +246,15 @@ test('kernel contracts reject wrong results and skip inactive invocations', () =
   const kernel = vi.fn(() => vectorFromArray([1], new Int32()));
   const functions = [
     {
-      arguments: [new Field('x', new Int32(), true)],
-      result: new Field('out', new Int32(), false),
       name: 'custom',
-      evaluateScalar: undefined,
-      evaluate: kernel
+      prototypes: [
+        {
+          arguments: [new Field('x', new Int32(), true)],
+          result: new Field('out', new Int32(), false),
+          evaluateScalar: undefined,
+          evaluate: kernel
+        }
+      ]
     }
   ];
   const compiled = compileArrowExpression('custom(x)', {inputSchema: input.schema, functions});
@@ -324,11 +331,15 @@ test('fused expressions call condition functions once and mask vector kernel bra
       }
     }),
     {
-      arguments: [new Field('x', new Int32(), false)],
-      result: new Field('twice', new Int32(), false),
       name: 'twice',
-      evaluateScalar: undefined,
-      evaluate: kernel
+      prototypes: [
+        {
+          arguments: [new Field('x', new Int32(), false)],
+          result: new Field('twice', new Int32(), false),
+          evaluateScalar: undefined,
+          evaluate: kernel
+        }
+      ]
     }
   ];
   const compiled = compileArrowExpression('positive(x) ? twice(x * 2 + 1) : 0', {
@@ -415,16 +426,12 @@ test('signed literals bind to the operand or function argument type', () => {
   ]).toEqual([-128, -128]);
 });
 
-test('floating-point zero divisors retain IEEE results while integer division is checked', () => {
-  const input = batch({x: vectorFromArray([1, -1, 0, null], new Float64())});
-  expect(values('x / 0', input)).toEqual([Infinity, -Infinity, NaN, null]);
-  expect(values('x / -0', input)).toEqual([-Infinity, Infinity, NaN, null]);
-  expect(values('x % 0', input)).toEqual([NaN, NaN, NaN, null]);
-  const narrow = batch({x: vectorFromArray([1, 0], new Float32())});
-  expect(values('x / 0', narrow)).toEqual([Infinity, NaN]);
-  const integer = batch({x: vectorFromArray([1], new Int32())});
-  expect(values('toFloat64(x) / 0', integer)).toEqual([Infinity]);
-  expect(() => values('x % 0', integer)).toThrow('Division by zero');
+test('zero divisors raise classified errors for floating and integer arithmetic', () => {
+  for (const type of [new Float64(), new Float32(), new Int32()]) {
+    const input = batch({x: vectorFromArray([1, 0, null], type)});
+    expect(() => values('x / 0', input)).toThrow('Division by zero');
+    expect(() => values('x % 0', input)).toThrow('Division by zero');
+  }
 });
 
 test('named declarations support standalone vectors, scalar fusion and compilation snapshots', () => {
@@ -438,12 +445,12 @@ test('named declarations support standalone vectors, scalar fusion and compilati
       evaluateScalar: scalar
     })
   };
-  const vector = vi.fn(declaration.evaluate);
-  declaration.evaluate = vector;
+  const vector = vi.fn(declaration.prototypes[0]!.evaluate);
+  declaration.prototypes = [{...declaration.prototypes[0]!, evaluate: vector}];
   const functions = [declaration];
   const compiled = compileArrowExpression('double(x) + 1', {inputSchema: input.schema, functions});
   expect([
-    ...declaration.evaluate([input.getChild('x')!], {
+    ...declaration.prototypes[0]!.evaluate([input.getChild('x')!], {
       length: 3,
       activeRows: new Uint8Array([1, 1, 0])
     })
@@ -451,9 +458,14 @@ test('named declarations support standalone vectors, scalar fusion and compilati
   scalar.mockClear();
   vector.mockClear();
   functions.length = 0;
-  declaration.evaluateScalar = () => {
-    throw new Error('must not use changed declaration');
-  };
+  declaration.prototypes = [
+    {
+      ...declaration.prototypes[0]!,
+      evaluateScalar: () => {
+        throw new Error('must not use changed declaration');
+      }
+    }
+  ];
   expect([...compiled.evaluate(input)]).toEqual([3, null, 7]);
   expect(scalar).toHaveBeenCalledTimes(2);
   expect(vector).not.toHaveBeenCalled();
@@ -471,12 +483,12 @@ test('function declarations validate names, implementation contracts and null po
     {...valid, name: ''},
     {...valid, name: 'invalid.name'},
     {...valid, name: undefined},
-    {...valid, arguments: null},
-    {...valid, result: null},
-    {...valid, evaluate: undefined},
-    {...valid, evaluate: 1},
-    {...valid, evaluateScalar: 1},
-    {...valid, nullHandling: 'invalid'}
+    {name: valid.name, prototypes: [{...valid.prototypes[0]!, arguments: null}]},
+    {name: valid.name, prototypes: [{...valid.prototypes[0]!, result: null}]},
+    {name: valid.name, prototypes: [{...valid.prototypes[0]!, evaluate: undefined}]},
+    {name: valid.name, prototypes: [{...valid.prototypes[0]!, evaluate: 1}]},
+    {name: valid.name, prototypes: [{...valid.prototypes[0]!, evaluateScalar: 1}]},
+    {name: valid.name, prototypes: [{...valid.prototypes[0]!, nullHandling: 'invalid'}]}
   ]) {
     expect(() =>
       compileArrowExpression('x', {inputSchema: input.schema, functions: [invalid as never]})

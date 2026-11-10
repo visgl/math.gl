@@ -29,6 +29,8 @@ import {parse, type Expression} from '@math.gl/core/expressions';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
 import {bindCast} from './cast';
 import {float16Values, roundFloat16} from './float16';
+import {physicalKey, extensionKey} from './signature';
+import {ArrowEvaluationError} from './errors';
 import {createFunctionLookup} from './registry';
 import {
   isTupleType,
@@ -40,6 +42,7 @@ import {
 } from './list-values';
 import type {
   ArrowTableFunction,
+  ArrowTableFunctionPrototype,
   ArrowExpression,
   ArrowExpressionOptions,
   ArrowExpressionEvaluationOptions,
@@ -185,44 +188,6 @@ export function compileArrowArray(
     } as Expression,
     options
   );
-}
-
-/** Compares physical encoding as well as logical type when reusing a bound evaluator. */
-function physicalKey(type: DataType): string {
-  try {
-    return DataType.isDictionary(type)
-      ? `dictionary:${typeKey(type.indices)}:${typeKey(type.dictionary)}:${type.isOrdered}`
-      : typeKey(type);
-  } catch {
-    // Unreferenced columns may have nested or extension layouts outside this evaluator's subset.
-    const properties = [
-      'bitWidth',
-      'isSigned',
-      'precision',
-      'scale',
-      'unit',
-      'timezone',
-      'byteWidth',
-      'listSize',
-      'keysSorted',
-      'isOrdered',
-      'mode'
-    ].map(key => (type as unknown as Record<string, unknown>)[key]);
-    return JSON.stringify([
-      type.typeId,
-      properties,
-      DataType.isUnion(type) ? Array.from(type.typeIds) : null,
-      DataType.isDictionary(type)
-        ? [physicalKey(type.indices), physicalKey(type.dictionary), type.isOrdered]
-        : null,
-      type.children?.map(field => [
-        field.name,
-        physicalKey(field.type),
-        field.nullable,
-        extensionKey(field)
-      ])
-    ]);
-  }
 }
 
 /** Builds one vector while validating output values before Arrow can truncate them. */
@@ -656,8 +621,8 @@ function bindBinary(ast: any, options: BindingOptions): Node {
             y = b.get(row) as any;
           if (x === null || y === null) return null;
           if (comparison) return compare(op, x, y);
-          if (integer && (op === '/' || op === '%') && (y === 0 || y === 0n))
-            throw new RangeError('Division by zero');
+          if ((op === '/' || op === '%') && (y === 0 || y === 0n))
+            throw new ArrowEvaluationError('divisionByZero', 'Division by zero');
           const result =
             op === '+'
               ? x + y
@@ -827,29 +792,96 @@ function bindCall(ast: any, options: BindingOptions): Node {
       }
     };
   }
-  const declaration = options.functionLookup.get(name);
-  if (!declaration) throw new Error(`Unknown Arrow function: ${name}`);
-  if (ast.arguments.length !== declaration.arguments.length)
-    throw new Error(`Wrong argument count for ${name}`);
+  const group = options.functionLookup.get(name);
+  if (!group) throw new Error(`Unknown Arrow function: ${name}`);
+  const inferred = ast.arguments.map((argument: any) =>
+    needsArgumentContext(argument) ? undefined : bind(argument, options, undefined, true)
+  ) as (Node | undefined)[];
+  const candidates: {prototype: ArrowTableFunctionPrototype; arguments: Node[]; cost: number}[] =
+    [];
+  let contextualError: unknown;
+  for (const prototype of group.prototypes) {
+    if (ast.arguments.length !== prototype.arguments.length) continue;
+    let cost = 0;
+    const arguments_: Node[] = [];
+    let compatible = true;
+    for (let index = 0; index < ast.arguments.length; index++) {
+      const argument = ast.arguments[index],
+        field = prototype.arguments[index]!,
+        source = inferred[index];
+      let bound: Node;
+      if (isContextualLiteral(argument) || !source) {
+        try {
+          bound = bind(argument, options, field.type, !prototype.evaluateScalar);
+        } catch (error) {
+          contextualError = error;
+          compatible = false;
+          break;
+        }
+        if (
+          source &&
+          !ast.arguments.some(
+            (value: any) => !isContextualLiteral(value) && !needsArgumentContext(value)
+          ) &&
+          physicalKey(valueType(source.field.type)) !== physicalKey(field.type)
+        )
+          cost += 4;
+      } else {
+        bound = source!;
+        const sourceType = valueType(bound.field.type);
+        if (DataType.isDictionary(bound.field.type) && !DataType.isDictionary(field.type))
+          cost += 1;
+        if (
+          physicalKey(DataType.isDictionary(field.type) ? bound.field.type : sourceType) !==
+          physicalKey(field.type)
+        ) {
+          if (
+            DataType.isFloat(sourceType) &&
+            DataType.isFloat(field.type) &&
+            sourceType.precision < field.type.precision
+          ) {
+            cost += field.type.precision - sourceType.precision;
+            const child = bound,
+              round = roundToType(field.type);
+            bound = {
+              field: new Field(
+                child.field.name,
+                field.type,
+                child.field.nullable,
+                child.field.metadata
+              ),
+              hasKernel: child.hasKernel,
+              prepare(batch, active) {
+                const prepared = child.prepare(batch, active);
+                return {get: row => round(prepared.get(row))};
+              }
+            };
+          } else {
+            compatible = false;
+            break;
+          }
+        }
+      }
+      if (
+        [...field.metadata].some(([key, value]) => bound.field.metadata.get(key) !== value) ||
+        (prototype.nullHandling === 'call' && bound.field.nullable && !field.nullable)
+      ) {
+        compatible = false;
+        break;
+      }
+      arguments_.push(bound);
+    }
+    if (compatible) candidates.push({prototype, arguments: arguments_, cost});
+  }
+  candidates.sort((a, b) => a.cost - b.cost);
+  if (!candidates.length && group.prototypes.length === 1 && contextualError) throw contextualError;
+  if (!candidates.length)
+    throw new Error(`Argument type mismatch or wrong argument count for ${name}`);
+  if (candidates[1]?.cost === candidates[0]!.cost)
+    throw new Error(`Ambiguous Arrow function call: ${name}`);
+  const declaration = candidates[0]!.prototype;
+  const arguments_ = candidates[0]!.arguments;
   const evaluateVector = declaration.evaluateScalar ? undefined : declaration.evaluate;
-  const arguments_ = ast.arguments.map((argument: any, index: number) => {
-    const field = declaration.arguments[index]!;
-    const vectorInput = !declaration.evaluateScalar;
-    const bound = bind(argument, options, field.type, vectorInput);
-    if (
-      (vectorInput
-        ? physicalKey(
-            DataType.isDictionary(field.type) ? bound.field.type : valueType(bound.field.type)
-          ) !== physicalKey(field.type)
-        : typeKey(bound.field.type) !== typeKey(field.type)) ||
-      (vectorInput &&
-        [...field.metadata].some(([key, value]) => bound.field.metadata.get(key) !== value))
-    )
-      throw new Error(`Argument type mismatch for ${name}`);
-    if (declaration.nullHandling === 'call' && bound.field.nullable && !field.nullable)
-      throw new Error(`Nullable argument not accepted by ${name}`);
-    return bound;
-  }) as Node[];
   const result = declaration.result;
   const tuple = isTupleType(result.type);
   if (tuple && declaration.evaluateScalar)
@@ -949,10 +981,12 @@ function isContextualLiteral(ast: any): boolean {
   return ast.type === 'Literal' || ast.type === 'ArrayExpression' || isSignedLiteral(ast);
 }
 
-/** Geometry encoding/CRS metadata is part of a schema-bound vector function contract. */
-function extensionKey(field: Field): string {
-  return JSON.stringify([
-    field.metadata.get('ARROW:extension:name'),
-    field.metadata.get('ARROW:extension:metadata')
-  ]);
+/** Array and null branches receive their list/tuple type from the selected prototype. */
+function needsArgumentContext(ast: any): boolean {
+  return (
+    ast.type === 'ArrayExpression' ||
+    (ast.type === 'Literal' && ast.value === null) ||
+    (ast.type === 'ConditionalExpression' &&
+      (needsArgumentContext(ast.consequent) || needsArgumentContext(ast.alternate)))
+  );
 }

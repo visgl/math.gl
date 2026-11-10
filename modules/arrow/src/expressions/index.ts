@@ -10,6 +10,13 @@ export type {
   ArrowExpressionEvaluationOptions,
   ArrowExpressionValue,
   ArrowTableFunction,
+  ArrowTableFunctionPrototype,
   ArrowTableFunctionType,
   CompiledArrowExpression
 } from './types';
+
+export {
+  ArrowEvaluationError,
+  isArrowEvaluationError,
+  type ArrowEvaluationErrorCode
+} from './errors';
