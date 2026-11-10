@@ -3,16 +3,16 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /** Keeps a cancelled selection from restarting on unrelated render updates. */
-export function createMapPreparationGate() {
-  let cancelledView = null;
+export function createMapPreparationGate<View = string>() {
+  let cancelledView: View | null = null;
   return {
-    cancel(request) {
+    cancel(request?: {opts: {view: View}; controller: AbortController} | null) {
       if (!request) return null;
       cancelledView = request.opts.view;
       request.controller.abort();
       return cancelledView;
     },
-    allows(view) {
+    allows(view: View) {
       if (cancelledView === view) return false;
       cancelledView = null;
       return true;

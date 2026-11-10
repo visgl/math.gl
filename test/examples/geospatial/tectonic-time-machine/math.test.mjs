@@ -13,7 +13,7 @@ import {
   futureRotation,
   futureRotations,
   timeLabel
-} from '../../../../examples/geospatial/tectonic-time-machine/src/math.js';
+} from '../../../../examples/geospatial/tectonic-time-machine/src/math.ts';
 const near = (a, b, epsilon = 1e-9) => assert(Math.abs(a - b) < epsilon, `${a} != ${b}`);
 test('rigid spherical rotations preserve known axis fixtures and distances', () => {
   const out = new Float64Array(6);
@@ -258,7 +258,7 @@ test('landmass titles fade with geological time, and future names follow the sel
   }
 });
 
-import {DATA_SOURCES, rotationBracket, clampTime, sourceFor} from '../../../../examples/geospatial/tectonic-time-machine/src/sources.js';
+import {DATA_SOURCES, rotationBracket, clampTime, sourceFor} from '../../../../examples/geospatial/tectonic-time-machine/src/sources.ts';
 import {createRotationCache, polygonFeature, loadModel} from '../../../../examples/geospatial/tectonic-time-machine/src/data.js';
 import {rotationGroups} from '../../../../examples/geospatial/tectonic-time-machine/src/parquet-stream.js';
 import {maintainHistory, waitForRetry} from '../../../../examples/geospatial/tectonic-time-machine/src/history-stream.js';
@@ -529,7 +529,7 @@ test('snapshot byte ranges reject truncated or incorrectly addressed responses',
   }
 });
 
-import {snapshotRequest} from '../../../../examples/geospatial/tectonic-time-machine/src/snapshot-request.js';
+import {snapshotRequest} from '../../../../examples/geospatial/tectonic-time-machine/src/snapshot-request.ts';
 test('snapshot deadlines cover stalled headers and bodies without aborting the model lifetime',async()=>{
   for (const phase of ['headers','body']) {
     const model=new AbortController();let requestSignal;

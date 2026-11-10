@@ -1,8 +1,20 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-export function tectonicSources(source) {
-  const entries = [
+import type {sourceFor} from './sources.ts';
+export function tectonicSources(source: ReturnType<typeof sourceFor>) {
+  const entries: {
+    id: string;
+    title: string;
+    credit: string;
+    creators?: string;
+    dataset: string;
+    paper?: string;
+    license: string;
+    licenseUrl: string;
+    hosted?: string;
+    changes: string;
+  }[] = [
     {
       id: source.id,
       title: 'Plate geometry and finite rotations',

@@ -8,7 +8,7 @@ import {
   futureRotation,
   futureRotations,
   rotateToLonLat
-} from './math.js';
+} from './math.ts';
 export const FOLLOW_PLACES = [
   {id: 'denver', name: 'Denver · North America', lon: -104.99, lat: 39.74},
   {id: 'brasilia', name: 'Brasília · South America', lon: -47.88, lat: -15.79},

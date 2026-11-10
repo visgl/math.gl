@@ -3,16 +3,21 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /** Bound both response arrival and body consumption without aborting the model lifetime. */
-export async function snapshotRequest(
-  url,
-  {signal, fetchFile = fetch, headers, timeoutMs = 45000},
-  readResponse
-) {
+export async function snapshotRequest<Result>(
+  url: RequestInfo | URL,
+  {
+    signal,
+    fetchFile = fetch,
+    headers,
+    timeoutMs = 45000
+  }: {signal: AbortSignal; fetchFile?: typeof fetch; headers?: HeadersInit; timeoutMs?: number},
+  readResponse: (response: Response) => Result | Promise<Result>
+): Promise<Result> {
   signal.throwIfAborted();
   const request = new AbortController();
   const cancel = () => request.abort(signal.reason);
-  let rejectAbort;
-  const aborted = new Promise((_, reject) => {
+  let rejectAbort!: (reason?: unknown) => void;
+  const aborted = new Promise<never>((_, reject) => {
     rejectAbort = reject;
   });
   const rejectRequest = () => rejectAbort(request.signal.reason);

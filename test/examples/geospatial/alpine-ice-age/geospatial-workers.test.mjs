@@ -157,7 +157,7 @@ test('scene cancellation aborts repeated globe requests and ignores late complet
   const {readFile} = await import('node:fs/promises');
   const {runInNewContext} = await import('node:vm');
   const {transformSync} = await import('esbuild');
-  const {createMapPreparationGate} = await import('../../../../examples/geospatial/alpine-ice-age/src/map-preparation-gate.js');
+  const {createMapPreparationGate} = await import('../../../../examples/geospatial/alpine-ice-age/src/map-preparation-gate.ts');
   const source = await readFile(new URL('../../../../examples/geospatial/alpine-ice-age/src/global-scene.js', import.meta.url), 'utf8');
   const requests = [];
   const loading = [],
@@ -191,7 +191,7 @@ test('scene cancellation aborts repeated globe requests and ignores late complet
               }
             })
           }
-        : path === './map-preparation-gate.js'
+        : path === './map-preparation-gate.ts'
           ? {createMapPreparationGate}
           : {Deck: Stub, OrthographicView: Stub}
   });

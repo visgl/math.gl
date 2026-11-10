@@ -12,7 +12,7 @@ export function projectionWeights(from, target, fraction) {
   return result;
 }
 
-import {DISCONTINUOUS_VIEWS} from './map-options.js';
+import {DISCONTINUOUS_VIEWS} from './map-options.ts';
 
 export const isMyriahedral = view => view?.startsWith('myriahedral:');
 

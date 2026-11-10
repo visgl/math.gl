@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {DATASETS} from './sources.js';
+import {DATASETS} from './sources.ts';
 export function clampAge(ages, age) {
   return Math.max(ages.at(-1), Math.min(ages[0], age));
 }

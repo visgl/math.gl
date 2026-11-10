@@ -4,8 +4,8 @@
 import {triangulateSourcePolygon, isConvexSourcePolygon} from './triangulate-source-polygon.js';
 import {MapEngine, MAP_PROJECTIONS} from '@math.gl/geospatial/discontinuous';
 import {elasticI, elasticII, elasticIII} from '@math.gl/geospatial/elastic';
-import {MYRIAHEDRAL_VIEWS} from './map-options.js';
-export {MYRIAHEDRAL_VIEWS, DISCONTINUOUS_VIEWS} from './map-options.js';
+import {MYRIAHEDRAL_VIEWS} from './map-options.ts';
+export {MYRIAHEDRAL_VIEWS, DISCONTINUOUS_VIEWS} from './map-options.ts';
 
 import {isLand} from '../../../common/land.js';
 import {myriahedralGridSteps} from './myriahedral-grid.js';

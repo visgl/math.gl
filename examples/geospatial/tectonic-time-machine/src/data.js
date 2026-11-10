@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original adapter. Scientific snapshots retain their CC-BY-4.0 attribution.
-import {regionFor} from './math.js';
-import {sourceFor, rotationBracket} from './sources.js';
+import {regionFor} from './math.ts';
+import {sourceFor, rotationBracket} from './sources.ts';
 import {createParquetReader, rotationGroups} from './parquet-stream.js';
-import {snapshotRequest} from './snapshot-request.js';
+import {snapshotRequest} from './snapshot-request.ts';
 
 const GEOMETRY_COLUMNS = ['featureId', 'plateId', 'name', 'beginAge', 'endAge', 'geometry'];
 const ROTATION_COLUMNS = ['age', 'plateId', 'available', 'w', 'x', 'y', 'z'];

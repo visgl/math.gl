@@ -8,12 +8,12 @@ import {
   mapLongitudeOffset,
   geographicSource,
   sampleLongitudeRow
-} from './map-center.js';
+} from './map-center.ts';
 import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {PathLayer, PolygonLayer, TextLayer} from '@deck.gl/layers';
 import {createMapGridPreparer} from './prepare-map-grid.js';
-import {createMapPreparationGate} from './map-preparation-gate.js';
+import {createMapPreparationGate} from './map-preparation-gate.ts';
 import {fitMapLayout} from '@math.gl/geospatial/discontinuous';
 import {Geometry} from '@luma.gl/engine';
 import {projectionGrid, projectCoordinate} from './projection-grid.js';
@@ -27,7 +27,7 @@ import {
   segmentedPosition,
   globePosition
 } from './projection-transition.js';
-import {REGIONAL_VIEWS} from './regional-views.js';
+import {REGIONAL_VIEWS} from './regional-views.ts';
 import {DISCONTINUOUS_VIEWS, sourceSample, sampleField} from './discontinuous-views.js';
 const RAD = Math.PI / 180;
 function color(bed, ice, showIce, ghost) {
