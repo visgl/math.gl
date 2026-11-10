@@ -26,9 +26,15 @@ test('CAST evaluates parsed SELECT projections and WHERE predicates across slice
   const compiled = compileArrowExpression(selection.expression, {inputSchema: table.schema});
   expect([...compiled.evaluateTable(table)]).toEqual([12, null, -4, 9]);
   expect(compiled.outputField.type).toEqual(new Int32());
-  expect([
-    ...compileArrowPredicate(query.where!, {inputSchema: table.schema}).evaluateTable(table)
-  ]).toEqual([true, null, false, true]);
+  const computed = parseSQLQuery('SELECT x WHERE CAST(x AS INTEGER) + 0 >= 0');
+  for (const result of [query, computed]) {
+    if (!('where' in result) || !result.where) throw new Error('Expected WHERE');
+    const predicate =
+      'expression' in result.where
+        ? compileArrowExpression(result.where.expression, {inputSchema: table.schema})
+        : compileArrowPredicate(result.where, {inputSchema: table.schema});
+    expect([...predicate.evaluateTable(table)]).toEqual([true, null, false, true]);
+  }
 });
 
 test('explicit numeric casts truncate toward zero, check bounds, round Float32 and preserve bigint', () => {

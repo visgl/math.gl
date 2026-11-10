@@ -154,30 +154,26 @@ Arrow dependency. `SELECT CAST(value AS INTEGER) AS count` returns a selection w
 AST and `as` alias. Existing plain-column selections retain their shapes.
 
 Supported SQL targets: SMALLINT, INTEGER/INT, BIGINT, REAL, DOUBLE PRECISION, BOOLEAN,
-VARCHAR and CHARACTER VARYING. CAST accepts columns, scalar literals and nested casts.
+VARCHAR, CHARACTER VARYING and FLOAT16. CAST accepts columns, scalar literals and nested expressions.
 `WHERE CAST(value AS INTEGER) >= :minimum` records ordered `casts` on the source property;
 executors must apply those conversions before testing the predicate. Binding, validation, copying
 and column discovery preserve this information. Arrow's predicate evaluator executes these casts.
 
 Unsupported targets/modifiers fail explicitly. This subset does not accept DECIMAL, date/time,
-length/precision modifiers, arbitrary arithmetic inside CAST, or casts on predicate scalar
-values. See [Arrow expression conversion rules](../../arrow/expressions/README.md#sql-cast).
+length/precision modifiers, or casts on scalar values in the portable predicate representation. See [Arrow expression conversion rules](../../arrow/expressions/README.md#sql-cast).
 
 Postfix `value::TYPE` and chained casts are also supported with the same conversion rules.
 
 ## Packed floating-point arrays
 
 `SELECT ARRAY[x, y, z] AS position` returns `{array: ['x', 'y', 'z'], as: 'position'}`.
-Operands must be existing floating-point columns; literals and arbitrary expressions are unsupported.
-An alias is required. `::FLOAT32[3]` or `::REAL[3]` adds `type: 'float32'`;
-`::FLOAT64[3]` or `::DOUBLE PRECISION[3]` adds `type: 'float64'`. The declared width must match.
-Omitting a type preserves Float64 if any component is Float64, otherwise it preserves Float32 or Float16.
+Source-only selections retain this shape and require an alias. Computed arrays such as
+`ARRAY[x + 1, SIN(angle), 0] AS position` return `{expression, as}`.
+Use `compileArrowArray(selection.array, {inputSchema, type: selection.type})` for the former,
+and `compileArrowExpression(selection.expression, {inputSchema, functions})` for the latter.
 
-Use `compileArrowArray(selection.array, {inputSchema, type: selection.type})` from
-`@math.gl/arrow/expressions` to evaluate the projection. This only constructs a column; it does not
-filter or compact rows. Null components make the whole tuple null with zero numeric padding.
-GPU consumers must respect parent validity or those invalid positions will appear at the origin.
-`FLOAT16` is an additional explicit scalar cast target: both `value::FLOAT16` and
-`CAST(value AS FLOAT16)` map to portable `float16`. Arrow execution requires native Float16Array.
-
-Packed arrays also accept `ARRAY[x,y,z]::FLOAT16[3]` or `compileArrowArray(columns, {inputSchema, type: "float16"})`. Native Float16Array is required for half-precision execution.
+The component type is the widest floating input, or Float64 for integer-only arrays.
+`::FLOAT16[3]`, `::REAL[3]`, and `::DOUBLE PRECISION[3]` explicitly choose precision and require
+matching width. `FLOAT32` and `FLOAT64` are also accepted for fixed-array casts. Float16
+execution requires native Float16Array. Null components make the whole tuple null, with zero
+numeric padding. GPU consumers must respect parent validity or invalid positions appear at the origin.

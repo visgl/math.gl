@@ -5,6 +5,8 @@ import {expect, test} from 'vitest';
 import {parseSQLExpression, parseSQLQuery, parseSQLSelect} from '../src/sql';
 test.each([
   'x ** 2',
+  'x--y',
+  'x/* comment */ + y',
   'x ^ 2',
   'x % 2',
   'CASE x WHEN 1 THEN 2 END',
@@ -38,4 +40,11 @@ test('partial SELECT parser supports injected expression WHERE without importing
     select: ['x y', {expression: parseSQLExpression('ARRAY[1, 2]'), as: 'p'}],
     limit: 0
   });
+});
+
+test('SELECT rejects comments outside quotes while retaining literal markers', () => {
+  expect(() => parseSQLQuery('SELECT x--y')).toThrow('comments');
+  expect(() => parseSQLQuery('SELECT x /* comment */')).toThrow('comments');
+  expect(parseSQLExpression("'--'")).toMatchObject({type: 'Literal', value: '--'});
+  expect(() => parseSQLExpression('x - -y')).not.toThrow();
 });

@@ -52,6 +52,8 @@ export class SQLExpressionReader {
   space(): void {
     while (this.position < this.source.length && /\s/.test(this.source[this.position]!))
       this.position++;
+    if (this.source.startsWith('--', this.position) || this.source.startsWith('/*', this.position))
+      throw new Error('SQL comments are not supported.');
   }
   word(word: string): boolean {
     this.space();
