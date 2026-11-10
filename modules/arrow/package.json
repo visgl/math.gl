@@ -55,6 +55,11 @@
       "types": "./dist/color/index.d.ts",
       "import": "./dist/color/index.js",
       "require": "./dist/color/index.cjs"
+    },
+    "./math": {
+      "types": "./dist/math/index.d.ts",
+      "import": "./dist/math/index.js",
+      "require": "./dist/math/index.cjs"
     }
   },
   "files": [
