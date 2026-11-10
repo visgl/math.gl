@@ -2,7 +2,7 @@
 
 Geospatial code combines several kinds of geometry: coordinates in a reference system, paths on a curved surface, straight lines in three-dimensional space, and projected shapes on a map. This guide defines the terms used throughout math.gl and distinguishes concepts that can look similar in a rendering.
 
-Start with [geodesic](#geodesic), [rhumb line](#rhumb-line-loxodrome), [chord](#chord), and [ellipsoid](#ellipsoid-and-spheroid). For the mathematical construction of map families, see [map projection families](https://visgl.github.io/math.gl/next/docs/modules/geospatial/discontinuous/projection-catalog.md).
+Start with [geodesic](#geodesic), [rhumb line](#rhumb-line-loxodrome), [chord](#chord), and [ellipsoid](#ellipsoid-and-spheroid). For the mathematical construction of map families, see [map projection families](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/projection-catalog.md).
 
 ## Earth and surface models[​](#earth-and-surface-models "Direct link to Earth and surface models")
 
@@ -143,7 +143,7 @@ A CRS **conversion** changes coordinate representations without changing the und
 | Hinge                | An edge and rotation axis relating adjacent faces during rigid unfolding. A continuous chart join does not automatically define a hinge.                                |
 | Myriahedral map      | A map built from many small faces, with cuts and retained adjacencies determining the unfolding layout.                                                                 |
 
-Longitude **wrapping** changes a coordinate's numeric representative, for example 181° to −179°. It does not split a line or polygon at a cut. **Unwrapping** chooses continuous longitude representatives along a sequence; it also does not remove geometric seams. See [discontinuous maps](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md) and the [MapEngine reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/map-engine.md).
+Longitude **wrapping** changes a coordinate's numeric representative, for example 181° to −179°. It does not split a line or polygon at a cut. **Unwrapping** chooses continuous longitude representatives along a sequence; it also does not remove geometric seams. See [discontinuous maps](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/developer-guide/discontinuous-projections.md) and the [MapEngine reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/api-reference/map-engine.md).
 
 ## Sampling, meshes, and tiles[​](#sampling-meshes-and-tiles "Direct link to Sampling, meshes, and tiles")
 

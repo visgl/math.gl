@@ -225,11 +225,13 @@ See [reusing initialized state](https://visgl.github.io/math.gl/next/docs/module
 Tasks can return prepared data as well as arrays. `PrepareMapTask` does the map preparation in a worker; `MapEngine.fromPrepared` turns its result into a local engine:
 
 ```
+import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';
+
 import {TaskRunner} from '@math.gl/tasks';
 
 import {PrepareMapTask} from '@math.gl/geospatial/tasks';
 
-import {MapEngine} from '@math.gl/geospatial/discontinuous';
+import {MapEngine} from '@math.gl/geospatial/maps';
 
 
 
@@ -253,7 +255,7 @@ try {
 
 
 
-  const engine = MapEngine.fromPrepared(map);
+  const engine = MapEngine.fromPrepared(map, {presets: mapPresets, geometry: mapGeometry, transitions: mapTransitions});
 
   console.log(engine.getLayout());
 

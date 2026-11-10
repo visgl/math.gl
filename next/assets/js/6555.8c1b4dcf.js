@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkproject_website=self.webpackChunkproject_website||[]).push([["6555"],{51222(e,t,n){n.d(t,{getH3GridPaths:()=>s});var i=n(62287),r=n(3073);function s(){let e=(0,r.ZB)("h3");return(0,i.yn)().flatMap(t=>e.projectLine((0,i.u$)(t,!0))).map(t=>t.coordinates.map(n=>Object.assign([...n,0],{part:e.regions.findIndex(e=>e.id===t.regionId)})))}}}]);
