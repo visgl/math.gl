@@ -11,6 +11,7 @@ const MAXIMUM_SQL_LENGTH = 65536;
 const MAXIMUM_SELECT_TOKENS = 4096;
 const RESERVED_WORDS = new Set([
   'SELECT',
+  'ARRAY',
   'FROM',
   'WHERE',
   'LIMIT',
@@ -47,6 +48,30 @@ export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}
   if (!reader.takeSymbol('*')) {
     select = [];
     do {
+      if (reader.takeKeyword('ARRAY')) {
+        reader.arraySymbol('[');
+        const array = [reader.identifier()];
+        while (reader.takeSymbol(',')) array.push(reader.identifier());
+        reader.arraySymbol(']');
+        let type: 'float32' | 'float64' | undefined;
+        if (reader.takeSymbol(':')) {
+          reader.arraySymbol(':');
+          if (reader.takeKeyword('FLOAT32') || reader.takeKeyword('REAL')) type = 'float32';
+          else if (reader.takeKeyword('FLOAT64')) type = 'float64';
+          else if (reader.takeKeyword('DOUBLE')) {
+            reader.expectKeyword('PRECISION');
+            type = 'float64';
+          } else throw new Error('Unsupported ARRAY cast type');
+          reader.arraySymbol('[');
+          const length = reader.limit();
+          reader.arraySymbol(']');
+          if (length !== array.length)
+            throw new Error('ARRAY cast length must match the number of components');
+        }
+        reader.expectKeyword('AS');
+        select.push({array, as: reader.identifier(), ...(type ? {type} : {})});
+        continue;
+      }
       const expression = reader.castExpression();
       if (expression)
         select.push(
@@ -100,6 +125,11 @@ export class SQLQueryReader {
     if (typeof sql !== 'string' || !sql.trim() || sql.length > MAXIMUM_SQL_LENGTH)
       throw new Error('SQL query requires a non-empty statement of at most 65536 characters.');
     this.sql = sql;
+  }
+
+  /** Consumes punctuation in a bounded ARRAY constructor. */
+  arraySymbol(symbol: string): void {
+    if (!this.takeSymbol(symbol)) throw new Error(`SQL ARRAY expected ${symbol}`);
   }
 
   /** Parses only CAST projections; ordinary selections retain their existing shape. */

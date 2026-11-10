@@ -7,6 +7,8 @@ import {
   DataType,
   Field,
   Float64,
+  Float32,
+  FixedSizeList,
   Dictionary,
   Int64,
   Int32,
@@ -153,6 +155,30 @@ export function compileArrowFunction(
       type: 'CallExpression',
       callee: {type: 'Identifier', name},
       arguments: arguments_.map(argument => parse(argument))
+    } as Expression,
+    options
+  );
+}
+
+/** Compiles a packed floating-point source-column projection, preserving Float64 unless explicitly narrowed. */
+export function compileArrowArray(
+  columns: readonly string[],
+  options: ArrowExpressionOptions & {type?: 'float32' | 'float64'}
+): CompiledArrowExpression {
+  if (
+    !Array.isArray(columns) ||
+    !columns.length ||
+    columns.length > 4096 ||
+    Array.from(columns).some(name => typeof name !== 'string' || !name.length)
+  )
+    throw new Error('ARRAY requires 1 to 4096 source column names');
+  if (options.type !== undefined && options.type !== 'float32' && options.type !== 'float64')
+    throw new Error('Unsupported ARRAY precision');
+  return compileArrowExpression(
+    {
+      type: 'CallExpression',
+      callee: {type: 'Identifier', name: options.type ? `array_${options.type}` : 'array'},
+      arguments: columns.map(name => ({type: 'Identifier', name}))
     } as Expression,
     options
   );
@@ -650,6 +676,46 @@ function bindCall(ast: any, options: BindingOptions): Node {
   if (ast.callee.type !== 'Identifier')
     throw new Error('Only registered named function calls are supported');
   const name = ast.callee.name;
+  if (['array', 'array_float32', 'array_float64'].includes(name)) {
+    if (
+      !ast.arguments.length ||
+      ast.arguments.length > 4096 ||
+      ast.arguments.some((value: any) => value.type !== 'Identifier')
+    )
+      throw new Error('ARRAY requires 1 to 4096 floating-point source columns');
+    const arguments_ = ast.arguments.map((value: any) => bind(value, options)) as Node[];
+    if (arguments_.some(value => !DataType.isFloat(value.field.type)))
+      throw new Error('ARRAY requires floating-point source columns');
+    const component =
+      name === 'array_float32'
+        ? new Float32()
+        : name === 'array_float64' || arguments_.some(value => typeKey(value.field.type) === 'f2')
+          ? new Float64()
+          : new Float32();
+    const type = new FixedSizeList(arguments_.length, new Field('value', component, false));
+    const field = new Field(
+      'array',
+      type,
+      arguments_.some(value => value.field.nullable)
+    );
+    return {
+      field,
+      hasKernel: true,
+      prepare(batch, active) {
+        const values = arguments_.map(value => value.prepare(batch, active));
+        const vector = nullTupleVector(type, active.length),
+          data = vector.data[0]!,
+          output = data.children[0]!.values;
+        for (let row = 0; row < active.length; row++) {
+          if (!active[row] || values.some(value => value.isNull!(row))) continue;
+          data.setValid(row, true);
+          for (let column = 0; column < values.length; column++)
+            output[row * values.length + column] = values[column]!.get(row) as number;
+        }
+        return vectorReader(vector);
+      }
+    };
+  }
   if (name === 'cast') {
     if (ast.arguments.length !== 2 || ast.arguments[1]?.type !== 'Literal')
       throw new Error('cast requires a value and a literal scalar target');

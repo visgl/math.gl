@@ -15,7 +15,7 @@ const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
   {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /expressions\/(compiler|predicate)/], budget: 240000},
 
-  {symbol: 'parseSQLSelect', packages: ['@math.gl/core/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 8500},
+  {symbol: 'parseSQLSelect', packages: ['@math.gl/core/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 9000},
   {symbol: 'parseSQLQuery', packages: ['@math.gl/core/sql'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 21000},
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/core/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
   {symbol:'spheroidToCartesian', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
