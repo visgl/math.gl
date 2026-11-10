@@ -312,7 +312,7 @@ function bytes(value: Prepared, row: number): Range | null {
   return [encoded, 0, encoded.length];
 }
 
-/** Wraps scalar reads only inside a recovery scope; normal fused paths remain allocation-free per row. */
+/** Wraps scalar reads only inside a recovery scope; normal fused paths avoid these guards. */
 function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInput = false): Node {
   const node = bindNode(ast, options, expected, vectorInput);
   return {

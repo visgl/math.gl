@@ -4,6 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {Table, Int32, Float64, FixedSizeList, Field, Schema, vectorFromArray} from 'apache-arrow';
+import {parseSQLExpression} from '@math.gl/core/sql';
 import {TaskRunner} from '@math.gl/tasks';
 import {
   createArrowExpressionTask,
@@ -249,6 +250,25 @@ test('worker-local color declarations produce Uint8 RGBA', async () => {
       [204, 0, 0, 255],
       [255, 0, 0, 255]
     ]);
+  } finally {
+    await runner.close();
+  }
+});
+
+test('SQL AST and worker-local math preserve TRY fallbacks and genuine nulls across batches', async () => {
+  const runner = new TaskRunner();
+  const input = new Table({x: vectorFromArray([4, -1, null], new Float64())}).concat(
+    new Table({x: vectorFromArray([9, -4], new Float64())})
+  );
+  try {
+    const result = hydrateArrowExpressionResult(
+      await runner.runTask(task, prepareArrowExpressionInput(input), {
+        execution: 'worker',
+        initialization: {expression: parseSQLExpression('TRY(SQRT(x), 0)')}
+      })
+    );
+    expect([...result.vector]).toEqual([2, 0, null, 3, 0]);
+    expect(result.vector.data.map(data => data.length)).toEqual([3, 2]);
   } finally {
     await runner.close();
   }

@@ -53,6 +53,7 @@
     "check:packages": "node scripts/check-packages.mjs",
     "check:attributions": "node scripts/check-attributions.mjs",
     "check:terrain-dem": "node scripts/qualify-terrain-dem.mjs",
+    "benchmark:arrow-expressions": "node test/bench/arrow-sql-expressions.mjs",
     "benchmark:workers": "node test/bench/workers/index.mjs",
     "check:tasks": "node modules/tasks/scripts/check-tasks.mjs",
     "citations:generate": "node scripts/citations/check.mjs --write",
