@@ -33,7 +33,7 @@ clipping, and motion collision handling remain future work.
 ## Recommendation
 
 Provide an experimental, renderer-independent `DiscontinuousMap` in the optional
-`@math.gl/geospatial/discontinuous` entry point. Its pipeline is:
+`@math.gl/geospatial/maps` entry point. Its pipeline is:
 
 **geographic geometry → spherical region clipping → local projection → placement → region-tagged parts**.
 
@@ -231,7 +231,7 @@ contract distinct from exact rigid-pose evaluation.
 | Area | Available | Remaining work |
 | --- | --- | --- |
 | `@math.gl/geospatial/projection` | Scalar forward/inverse kernels and CRS pipelines | Optional adapters with explicit inverse policy |
-| `@math.gl/geospatial/discontinuous` | Convex spherical regions, point/inverse lookup, seam-aware lines and polygons, AirOcean and interrupted sinusoidal | Global/complement polygons, curved seams, spatial acceleration, packed attribute provenance |
+| `@math.gl/geospatial/maps` | Convex spherical regions, point/inverse lookup, seam-aware lines and polygons, AirOcean and interrupted sinusoidal | Global/complement polygons, curved seams, spatial acceleration, packed attribute provenance |
 | `@math.gl/geometry/polygon` | Planar clipping, triangulation, adaptive subdivision | Integration with region-tagged projected geometry |
 | `@math.gl/geometry` | `HingeTree`, generated geometry | Reusable mesh topology and constrained cut selection |
 | Examples | Geographic cut weights, unfolding, original-surface texture sampling, coordinate hover picking | Renderer integration for projected vector data |

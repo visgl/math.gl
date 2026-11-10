@@ -198,13 +198,13 @@ operations. Cube-face selection and tiling likewise belong to the application.
   <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" />
 </p>
 
-The separate [`@math.gl/geospatial/discontinuous` API](../../discontinuous/README.md)
+The separate [`@math.gl/geospatial/maps` API](../../maps/README.md)
 provides static region-aware point projection, inverse candidates, and seam-aware
 line and polygon projection. Presets include AirOcean, land-oriented Goode, independent interrupted sinusoidal,
 Mollweide and homolosine layouts, Albers USA with optional territories, Peirce
 quincuncial, Berghaus star, and myriahedral layouts.
 
-See the [support table](./discontinuous-projections.md#supported-map-families)
+See the [support table](../../maps/developer-guide/discontinuous-projections.md#supported-map-families)
 for implemented families, exact preset names, and remaining gaps. Historical
 cut arrangements and clipping semantics are not interchangeable: `goode` uses
 land-oriented lobes, while `interrupted-homolosine` uses independent cuts.

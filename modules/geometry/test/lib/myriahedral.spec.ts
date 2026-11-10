@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {createGraticule} from '@math.gl/geospatial/discontinuous/myriahedral/graticule';
+import {createGraticule} from '@math.gl/geospatial/maps/myriahedral/graticule';
 import {createMyriahedralLayout} from '../../../../examples/geospatial/myriahedral-maps/src/layout';
 import {
   dot,

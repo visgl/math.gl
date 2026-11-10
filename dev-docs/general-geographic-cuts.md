@@ -10,7 +10,7 @@ lobe that was never part of the input polygon.
 
 Two existing APIs have distinct scopes. The geographic-seam API handles explicit
 linear/ellipsoidal-geodesic/rhumb edges at one longitude seam, with source fractions,
-attributes, components and polar caps. Separately, `@math.gl/geospatial/discontinuous`
+attributes, components and polar caps. Separately, `@math.gl/geospatial/maps`
 already clips spherical minor-great-circle lines and local polygons against
 interrupted lobes, polyhedral faces and visible caps. Its polygon input profile
 requires one open hemisphere. Point-only projection is not its only capability.

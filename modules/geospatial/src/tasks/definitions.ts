@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {Task} from '@math.gl/tasks';
 import type {CreateProjectionOptions, Projection, ProjectionArray} from '../projection/types';
-import type {MapDescription, PreparedMap} from '../discontinuous/map-engine';
+import type {MapDescription, PreparedMap} from '../maps/map-engine';
 export type ProjectCoordinatesTypes = {
   initialization: {projection?: CreateProjectionOptions};
   state: {projection?: Projection; key?: string; defaultOptions?: CreateProjectionOptions};

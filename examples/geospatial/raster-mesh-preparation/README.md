@@ -2,7 +2,7 @@
 
 From the repository root run `yarn && yarn build`, then
 `yarn workspace math.gl-raster-mesh-preparation start`.
-`node --test test/examples/geospatial/raster-mesh-preparation/*.test.mjs` checks all six fixture families;
+`node --test modules/geospatial/test/examples/raster-mesh-preparation/*.test.mjs` checks all six fixture families;
 `yarn workspace math.gl-raster-mesh-preparation build` produces the browser example.
 
 See the [composition recipe](../../../docs/modules/geospatial/crs/developer-guide/raster-mesh-preparation.md)

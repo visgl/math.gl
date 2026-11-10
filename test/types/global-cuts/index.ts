@@ -6,13 +6,16 @@ import {
   projectSphericalPolygon,
   MapEngine,
   type SphericalCutEdge
-} from '@math.gl/geospatial/discontinuous';
+} from '@math.gl/geospatial/maps';
 const ring = [
   [0, 0],
   [30, 0],
   [0, 30]
 ] as const;
-const map = new MapEngine({version: 1, id: 'map', definition: {type: 'air-ocean'}});
+const map = new MapEngine(
+  {version: 1, id: 'map', definition: {type: 'air-ocean'}},
+  {presets: mapPresets, geometry: mapGeometry, transitions: mapTransitions}
+);
 const parts = cutSphericalPolygon([ring], {interior: 'left'});
 const edge: SphericalCutEdge = parts[0].edges[0][0];
 if (edge.kind === 'source') edge.startFraction;
@@ -23,3 +26,5 @@ map.prepareFeatures([{geometry: {type: 'Polygon', coordinates: [ring]}}], {
 });
 // @ts-expect-error Global complements require an explicit side.
 cutSphericalPolygon([ring], {});
+
+import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';

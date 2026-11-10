@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {triangulateSourcePolygon, isConvexSourcePolygon} from './triangulate-source-polygon.js';
-import {MapEngine, MAP_PROJECTIONS} from '@math.gl/geospatial/discontinuous';
+import {MapEngine, MAP_PROJECTIONS} from '@math.gl/geospatial/maps';
 import {elasticI, elasticII, elasticIII} from '@math.gl/geospatial/elastic';
 import {MYRIAHEDRAL_VIEWS} from './map-options.ts';
 export {MYRIAHEDRAL_VIEWS, DISCONTINUOUS_VIEWS} from './map-options.ts';
@@ -104,7 +104,12 @@ export function createMap(view, context) {
     edgeWeight: panels ? (edge, weight) => dggsCellWeight(edge, weight, panels) : undefined
   };
   context?.reportProgress?.({phase: 'map-setup', completed: 0, total: 1});
-  const map = new MapEngine(description, bindings);
+  const map = new MapEngine(description, {
+    presets: mapPresets,
+    geometry: mapGeometry,
+    transitions: mapTransitions,
+    ...bindings
+  });
   if (context) map.getLayout();
   context?.reportProgress?.({phase: 'map-setup', completed: 1, total: 1});
   return map;
@@ -377,3 +382,5 @@ export async function prepareDiscontinuousGrid(
     builder.return();
   }
 }
+
+import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';

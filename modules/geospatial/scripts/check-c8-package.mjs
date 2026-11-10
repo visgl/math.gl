@@ -49,7 +49,7 @@ try {
     return match?[match[0].replace(/^\//,'')]:[];
    }).filter(path=>!path.endsWith('/ellipsoid-helpers/tangent-plane-numerics.ts')).sort());
    if(index===1) {
-    assert(sources.every(p=>!p.includes('/src/projection/')&&!p.includes('/src/discontinuous/')&&!p.includes('polygon-clipping')),symbol+': unrelated engine');
+    assert(sources.every(p=>!p.includes('/src/projection/')&&!p.includes('/src/maps/')&&!p.includes('polygon-clipping')),symbol+': unrelated engine');
     if(['LocalReferenceFrame','EllipsoidTangentPlane','Ellipsoid'].includes(symbol))assert(sources.every(p=>!p.includes('/vendor/')),'Unexpected vendor solver');
    }
   }

@@ -7,7 +7,7 @@ timeline landmarks, central meridian, hover coordinate tooltips, graticule and c
 ```sh
 yarn workspace math.gl-tectonic-time-machine start
 yarn workspace math.gl-tectonic-time-machine build
-node --test test/examples/geospatial/tectonic-time-machine/*.test.mjs
+node --test modules/geospatial/test/examples/tectonic-time-machine/*.test.mjs
 ```
 
 ## Data and scope

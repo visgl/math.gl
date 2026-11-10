@@ -32,7 +32,7 @@ try{
   const result=await bundleRuntime(root,relative(root,source),out);const{code}=await transform(readFileSync(out,'utf8'),{minify:true,target:'es2020',legalComments:'none'});
   const size={minified:Buffer.byteLength(code),gzip:gzipSync(code,{level:9}).length};assert(size.minified<=minified&&size.gzip<=gzip,entry+' feature budget exceeded');
   const inputs=Object.entries(Object.values(result.metafile.outputs)[0].inputs).filter(([,v])=>v.bytesInOutput>0).map(([p])=>p);
-  assert(inputs.every(p=>!p.includes('/src/projection/')&&!p.includes('/src/discontinuous/')&&!p.includes('polygon-clipping')));
+  assert(inputs.every(p=>!p.includes('/src/projection/')&&!p.includes('/src/maps/')&&!p.includes('polygon-clipping')));
   if(entry==='triaxial')assert(inputs.every(p=>!p.includes('/vendor/')),'Triaxial import unexpectedly retains the series solver');
   rows.push({entry,...size,ceilings:{minified,gzip}});
  }

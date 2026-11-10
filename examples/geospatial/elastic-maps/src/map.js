@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {MapEngine} from '@math.gl/geospatial/discontinuous';
+import {MapEngine} from '@math.gl/geospatial/maps';
 import {elasticI, elasticII, elasticIII} from '@math.gl/geospatial/elastic';
 import land from '../../../common/land.json' with {type: 'json'};
 const datasets = {I: elasticI, II: elasticII, III: elasticIII};
@@ -50,7 +50,12 @@ export function createMapData(preset) {
       attribution: ['Justin Kunimune — Elastic projections (Unlicense)'],
       definition: data ? {type: 'elastic', data} : {type: 'world', projection: 'sinusoidal'}
     },
-    {sampling: {tolerance: 0.001}}
+    {
+      presets: [elasticMapPreset, worldMapPreset],
+      geometry: mapGeometry,
+      transitions: mapTransitions,
+      ...{sampling: {tolerance: 0.001}}
+    }
   );
   const coast = coastlines.flatMap(r => map.projectLine(r));
   const grid = graticule.flatMap(r => map.projectLine(r));
@@ -94,3 +99,10 @@ export function createMapData(preset) {
   cache.set(preset, result);
   return result;
 }
+
+import {
+  elasticMapPreset,
+  worldMapPreset,
+  mapGeometry,
+  mapTransitions
+} from '@math.gl/geospatial/maps';

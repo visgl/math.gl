@@ -1,6 +1,0 @@
-{
-  "extends": "../../../../examples/geospatial/tectonic-time-machine/tsconfig.json",
-  "include": [
-    "../../../../examples/geospatial/tectonic-time-machine/src/**/*"
-  ]
-}

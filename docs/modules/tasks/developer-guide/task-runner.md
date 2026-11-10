@@ -196,9 +196,10 @@ preparation in a worker; `MapEngine.fromPrepared` turns its result into a local
 engine:
 
 ```ts
+import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';
 import {TaskRunner} from '@math.gl/tasks';
 import {PrepareMapTask} from '@math.gl/geospatial/tasks';
-import {MapEngine} from '@math.gl/geospatial/discontinuous';
+import {MapEngine} from '@math.gl/geospatial/maps';
 
 const runner = new TaskRunner();
 try {
@@ -210,7 +211,7 @@ try {
     }
   });
 
-  const engine = MapEngine.fromPrepared(map);
+  const engine = MapEngine.fromPrepared(map, {presets: mapPresets, geometry: mapGeometry, transitions: mapTransitions});
   console.log(engine.getLayout());
 } finally {
   await runner.close();

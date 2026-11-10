@@ -51,7 +51,7 @@ Global map projections cycle automatically every eight seconds, with smooth tran
 Disable **Cycle projections** to keep the selected view. The **Ice age names** toggle
 controls the centered phase title and regional-name subtitle.
 
-Climate readouts use the independent [Köhler et al. (2015) dataset](https://doi.pangaea.de/10.1594/PANGAEA.855449), licensed **CC-BY-3.0**. Temperature is model variant 1 rebased to its 0 ka value. Ice-albedo forcing is land-ice radiative forcing in W/m², not total planetary reflectivity. Values interpolate 2,000-year samples; albedo is unavailable below 2 ka. Regional Albers views and the U.S. inset map focus the display while statistics retain global totals. See the [discontinuous projections guide](/docs/modules/geospatial/projection/developer-guide/discontinuous-projections) for layout semantics and limitations.
+Climate readouts use the independent [Köhler et al. (2015) dataset](https://doi.pangaea.de/10.1594/PANGAEA.855449), licensed **CC-BY-3.0**. Temperature is model variant 1 rebased to its 0 ka value. Ice-albedo forcing is land-ice radiative forcing in W/m², not total planetary reflectivity. Values interpolate 2,000-year samples; albedo is unavailable below 2 ka. Regional Albers views and the U.S. inset map focus the display while statistics retain global totals. See the [discontinuous projections guide](/docs/modules/geospatial/maps/developer-guide/discontinuous-projections) for layout semantics and limitations.
 
 Display grids and climate records are loaded from a pinned merged deck.gl-data commit, with full source datasets and Parquet counterparts available alongside them.
 
@@ -64,7 +64,7 @@ Display grids and climate records are loaded from a pinned merged deck.gl-data c
 </p>
 
 Inset bounds, viewport fitting, draw order, outlines, and labels come from
-`@math.gl/geospatial/discontinuous` layout metadata. Alaska and Hawaii have visible
+`@math.gl/geospatial/maps` layout metadata. Alaska and Hawaii have visible
 frames. Hawaiian island shapes use a bundled, pinned Natural Earth 1:10m modern
 reference (public domain); the 1° reconstruction grid does not resolve their terrain.
 This overlay does not change ice values, global totals, or reconstruct past shorelines.

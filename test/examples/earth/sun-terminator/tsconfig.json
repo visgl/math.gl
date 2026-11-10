@@ -1,6 +1,0 @@
-{
-  "extends": "../../../../examples/earth/sun-terminator/tsconfig.json",
-  "include": [
-    "../../../../examples/earth/sun-terminator/src/**/*"
-  ]
-}

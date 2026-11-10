@@ -26,11 +26,11 @@
       "@math.gl/geospatial/crs": [
         "./modules/geospatial/src/crs/index.ts"
       ],
-      "@math.gl/geospatial/discontinuous": [
-        "./modules/geospatial/src/discontinuous.ts"
+      "@math.gl/geospatial/maps": [
+        "./modules/geospatial/src/maps.ts"
       ],
-      "@math.gl/geospatial/discontinuous/*": [
-        "./modules/geospatial/src/discontinuous/*"
+      "@math.gl/geospatial/maps/*": [
+        "./modules/geospatial/src/maps/*"
       ],
       "@math.gl/geospatial/projection": [
         "./modules/geospatial/src/projection/index.ts"

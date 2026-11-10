@@ -30,7 +30,7 @@ node node_modules/vite/bin/vite.js build examples/geospatial/myriahedral-maps --
 ```
 
 Mesh generation, cutting, static projection, and animation use
-`@math.gl/geospatial/discontinuous`. The controller, camera scene, picking, and
+`@math.gl/geospatial/maps`. The controller, camera scene, picking, and
 WebGL renderer are shared with `../../geometry/unfolding-polyhedron`.
 No code or imagery from Nico Belmonte's demonstration is used. This is a rigid
 polyhedral unfolding, not an implementation of a specific published cartographic

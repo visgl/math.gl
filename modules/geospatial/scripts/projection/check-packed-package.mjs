@@ -75,6 +75,7 @@ try {
   );
   assert(!('proj4' in packageManifest.dependencies));
   assert(!('./classic' in packageManifest.exports));
+  assert(!('./discontinuous' in packageManifest.exports));
   assert(!('./projection/crs-descriptor' in packageManifest.exports));
   const subpaths = Object.keys(packageManifest.exports)
     .filter(path => path.startsWith('./projection/'))
@@ -96,6 +97,23 @@ try {
     assert(!cjs.includes('function clenshaw'), path + ' must not inline a projection kernel');
   }
   const entrySmoke = `
+    const maps = await load('@math.gl/geospatial/maps');
+    const presets = await load('@math.gl/geospatial/maps/presets');
+    const geometry = await load('@math.gl/geospatial/maps/geometry');
+    const surfaces = await load('@math.gl/geospatial/maps/surfaces');
+    const transitions = await load('@math.gl/geospatial/maps/transitions');
+    assert.equal(typeof transitions.prepareMapTransitionMeshAsync, 'function');
+    const description = {version:1,id:'usa',definition:{type:'albers-usa'}};
+    const map = new maps.MapEngine(description,{presets:[presets.albersUsaMapPreset]});
+    assert(map.projectPoint([-122,47]));
+    assert(surfaces.prepareMapSurface(map,{maxAngularStep:5}).vertexCount > 0);
+    assert.throws(() => map.projectPolygon([[[-120,30],[-110,30],[-115,40]]]), /geometry/);
+    const withGeometry = new maps.MapEngine(description,{presets:[presets.albersUsaMapPreset],geometry:geometry.mapGeometry});
+    assert(withGeometry.projectPolygon([[[-120,30],[-110,30],[-115,40]]]).length > 0);
+    const projectionRoot = await load('@math.gl/geospatial/projection');
+    for (const name of ['MapEngine','prepareProjectionSurface','prepareMapTransitionMesh']) assert(!(name in projectionRoot));
+    await assert.rejects(async () => load('@math.gl/geospatial/discontinuous'), error => error.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED');
+
     const crs = await load('@math.gl/geospatial/crs');
     assert.equal(typeof crs.createCRSDescriptor, 'function');
     const stable = await load('@math.gl/geospatial/projection');
@@ -461,6 +479,13 @@ try {
     join(temporary, 'consumer.ts'),
     `
     ${subpaths.map((path, index) => 'import * as entry' + index + " from '@math.gl/geospatial/projection" + path.slice(1) + "';\nvoid entry" + index + ';').join('\n')}
+    import {MapEngine as TypedMapEngine} from '@math.gl/geospatial/maps';
+    import {albersUsaMapPreset as typedPreset} from '@math.gl/geospatial/maps/presets';
+    import {mapGeometry as typedGeometry} from '@math.gl/geospatial/maps/geometry';
+    import {prepareMapSurface as typedSurface} from '@math.gl/geospatial/maps/surfaces';
+    import {mapTransitions as typedTransitions} from '@math.gl/geospatial/maps/transitions';
+    const typedMap = new TypedMapEngine({version:1,id:'usa',definition:{type:'albers-usa'}},{presets:[typedPreset],geometry:typedGeometry,transitions:typedTransitions});
+    typedSurface(typedMap);
     import {createLocalFrameBasis, eastNorthUpBasis, eastNorthUpBasisFromDirections, localToFixed, fixedToLocal, localFrameToMatrix, type LocalFrameBasis, type LocalFramePoint, type LocalFrameAxis} from '@math.gl/core';
     const basis: LocalFrameBasis = createLocalFrameBasis();
     const framePoint: LocalFramePoint = {x:1,y:2,z:3};

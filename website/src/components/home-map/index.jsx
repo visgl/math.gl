@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {useEffect, useRef, useState} from 'react';
-import {MapEngine} from '@math.gl/geospatial/discontinuous';
+import {MapEngine} from '@math.gl/geospatial/maps';
 import {getSunTerminator} from '@math.gl/earth/sun';
 import land from 'website-examples/common/land.json';
 import styles from './styles.module.css';
@@ -53,7 +53,7 @@ const maps = presets.map(
         id: projection,
         definition: {type: 'world', projection}
       },
-      {sampling: {tolerance: 0.008}}
+      {presets: [worldMapPreset], geometry: mapGeometry, transitions: mapTransitions, ...({sampling: {tolerance: 0.008}})}
     )
 );
 const cells = [];
@@ -260,3 +260,5 @@ export default function HomeMap() {
     </div>
   </>;
 }
+
+import {worldMapPreset, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';

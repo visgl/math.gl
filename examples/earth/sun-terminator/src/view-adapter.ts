@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {WebMercatorViewport} from '@deck.gl/core';
-import {
-  MapEngine,
-  projectionEngine,
-  prepareProjectionSurface
-} from '@math.gl/geospatial/projection';
+import {projectionEngine} from '@math.gl/geospatial/projection';
+import {MapEngine, prepareProjectionSurface} from '@math.gl/geospatial/maps';
 import {PROJECTIONS} from './constants.ts';
 const maps = new Map<string, MapEngine>();
 const lobes = [-180, -100, -20, 80, 180];
@@ -19,20 +16,26 @@ export function getMap(id: string): MapEngine {
     maps.set(
       id,
       id === 'h3'
-        ? new MapEngine({version: 1, id, radius: 63.78137, definition: {type: 'h3'}})
-        : new MapEngine({
-            version: 1,
-            id,
-            radius: id === 'albers-usa' ? 100 : 63.78137,
-            definition:
-              id === 'albers-usa'
-                ? {type: 'albers-usa'}
-                : {
-                    type: 'interrupted',
-                    projection: id === 'isinu' ? 'sinusoidal' : 'mollweide',
-                    lobes: {north: pieces, south: pieces}
-                  }
-          })
+        ? new MapEngine(
+            {version: 1, id, radius: 63.78137, definition: {type: 'h3'}},
+            {presets: [h3MapPreset, albersUsaMapPreset, interruptedMapPreset]}
+          )
+        : new MapEngine(
+            {
+              version: 1,
+              id,
+              radius: id === 'albers-usa' ? 100 : 63.78137,
+              definition:
+                id === 'albers-usa'
+                  ? {type: 'albers-usa'}
+                  : {
+                      type: 'interrupted',
+                      projection: id === 'isinu' ? 'sinusoidal' : 'mollweide',
+                      lobes: {north: pieces, south: pieces}
+                    }
+            },
+            {presets: [h3MapPreset, albersUsaMapPreset, interruptedMapPreset]}
+          )
     );
   }
   return maps.get(id)!;
@@ -63,7 +66,7 @@ export const cutPart = (id: string, lon: number, lat: number, sector = lon) =>
   projectCutMap(id, lon, lat, sector)?.part ?? -1;
 export const unprojectCutMap = (id: string, p: number[]) =>
   getMap(id).unprojectPoint([p[0], p[1]]).at(-1)?.position ?? null;
-export const buildCutMesh = (id: string) => getMap(id).prepareSurface();
+export const buildCutMesh = (id: string) => prepareMapSurface(getMap(id));
 export function getCutRegions(id: string) {
   const map = getMap(id);
   return map.getLayout().regions.map(region => ({
@@ -368,7 +371,7 @@ export function getProjectionMesh(id: string) {
     const preset = PROJECTIONS.find(p => p.id === id)!;
     const projection = isCutMap(id) ? null : transform(id);
     const mesh = isCutMap(id)
-      ? getMap(id).prepareSurface()
+      ? prepareMapSurface(getMap(id))
       : prepareProjectionSurface(projection, {
           extent: preset.extent as [number, number, number, number],
           scale: 1 / 100000,
@@ -384,3 +387,7 @@ export function getProjectionMesh(id: string) {
   }
   return meshes.get(id);
 }
+
+import {h3MapPreset, albersUsaMapPreset, interruptedMapPreset} from '@math.gl/geospatial/maps';
+
+import {prepareMapSurface} from '@math.gl/geospatial/maps';

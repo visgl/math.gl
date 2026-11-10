@@ -245,7 +245,7 @@ void projectionOutput;
 void rootDescriptor;
 
 // Shared rendering preparation must remain consumable with only ES libraries.
-import type {MapTransitionMeshAsyncOptions} from '@math.gl/geospatial/projection';
+import type {MapTransitionMeshAsyncOptions} from '@math.gl/geospatial/maps';
 const transitionOptions: MapTransitionMeshAsyncOptions = {
   signal: {throwIfAborted() {}}
 };

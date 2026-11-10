@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
-import {createInterruptedSinusoidalMap, getMapLayout} from '@math.gl/geospatial/discontinuous';
+import {createInterruptedSinusoidalMap, getMapLayout} from '@math.gl/geospatial/maps';
 import {grid, rectangle} from './prepare.mjs';
 const engine = new FullProjectionEngine();
 const worldDomain = {

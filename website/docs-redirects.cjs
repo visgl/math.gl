@@ -32,7 +32,6 @@ const movedGuides = {
   "developer-guide/working-with-ai": "developer-guide#work-with-an-ai-coding-agent",
   "developer-guide/root-exports-migration": "upgrade-guide#migrating-to-root-exports",
   "bibliography": "references-and-credits",
-  "modules/geospatial/discontinuous/map-engine": "modules/geospatial/projection/api-reference/map-engine",
   "developer-guide/external-frameworks": "modules/core#interoperability",
   "developer-guide/math/transformations": "modules/core/developer-guide/transformations",
   "developer-guide/math/view-and-projection": "modules/core/developer-guide/view-and-projection",

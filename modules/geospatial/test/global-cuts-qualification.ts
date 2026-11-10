@@ -7,7 +7,7 @@ import {
   MapEngine,
   type GeographicPosition,
   type MapDefinition
-} from '@math.gl/geospatial/discontinuous';
+} from '@math.gl/geospatial/maps';
 export const provenance = {
   oracle: 'Analytic hemisphere/solid-angle/complement identities; original rotated inputs',
   version: 1
@@ -203,7 +203,10 @@ export function qualifyGlobalCuts() {
     run(
       'map family ' + ('projection' in definition ? definition.projection : definition.type),
       () => {
-        const map = new MapEngine({version: 1, id: 'qualification', definition});
+        const map = new MapEngine(
+          {version: 1, id: 'qualification', definition},
+          {presets: mapPresets, geometry: mapGeometry, transitions: mapTransitions}
+        );
         const parts = projectSphericalPolygon(map, [north], {
           interior: 'left',
           maxAngularStep: 10,
@@ -232,3 +235,5 @@ export function qualifyGlobalCuts() {
     );
   return rows;
 }
+
+import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';
