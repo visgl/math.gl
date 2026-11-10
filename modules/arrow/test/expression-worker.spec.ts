@@ -212,3 +212,23 @@ test('worker transports RGBA results, typed array arguments, metadata and sliced
     await runner.close();
   }
 });
+
+test.runIf(typeof globalThis.Float16Array === 'function')(
+  'worker transports Float16 SQL cast output as Arrow Uint16 bits',
+  async () => {
+    const runner = new TaskRunner();
+    try {
+      const result = hydrateArrowExpressionResult(
+        await runner.runTask(task, prepareArrowExpressionInput(table()), {
+          execution: 'worker',
+          initialization: {expression: 'cast(x, "float16")'}
+        })
+      );
+      expect([...result.vector]).toEqual([1, null, 3, 4, 5]);
+      expect(result.vector.type.toString()).toBe('Float16');
+      expect(result.vector.data[0]!.values).toBeInstanceOf(Uint16Array);
+    } finally {
+      await runner.close();
+    }
+  }
+);

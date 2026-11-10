@@ -129,3 +129,11 @@ compileArrowFunction('color', ['[0, 1, 2]'], {
 
 import {compileArrowArray} from '@math.gl/arrow/expressions';
 compileArrowArray(['x', 'y'], {inputSchema: batch.schema, type: 'float32'}).evaluateTable(table);
+import {Float16} from 'apache-arrow';
+const halfFunction: ArrowTableFunction = {
+  name: 'half',
+  arguments: [new Field('x', new Float16())],
+  result: new Field('x', new Float16()),
+  evaluate: ([value]) => value!
+};
+void halfFunction;

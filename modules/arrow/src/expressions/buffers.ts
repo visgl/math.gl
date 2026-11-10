@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {DataType, Precision, type Vector, type Data} from 'apache-arrow';
+import {float16Values, requireFloat16} from './float16';
 import type {ArrowExpressionValue} from './types';
 
 /** Dictionary encodings do not change expression value types. */
@@ -14,7 +15,10 @@ export function valueType(type: DataType): DataType {
 export function typeKey(type: DataType): string {
   type = valueType(type);
   if (DataType.isInt(type)) return `${type.isSigned ? 'i' : 'u'}${type.bitWidth}`;
-  if (DataType.isFloat(type) && type.precision !== Precision.HALF) return `f${type.precision}`;
+  if (DataType.isFloat(type)) {
+    if (type.precision === Precision.HALF) requireFloat16();
+    return `f${type.precision}`;
+  }
   if (DataType.isBool(type)) return 'bool';
   if (DataType.isUtf8(type)) return 'utf8';
   if (DataType.isNull(type)) return 'null';
@@ -26,6 +30,7 @@ export class ColumnReader {
   private readonly ends: number[] = [];
   private readonly location: [Data, number] = [null!, 0];
   private readonly range: [Uint8Array, number, number] = [null!, 0, 0];
+  private readonly half = new Map<Data, Float16Array>();
   private readonly dictionaries = new Map<Data, ColumnReader>();
   private readonly decoder = new TextDecoder();
   constructor(readonly vector: Vector) {
@@ -33,6 +38,8 @@ export class ColumnReader {
     for (const data of vector.data) {
       end += data.length;
       this.ends.push(end);
+      if (DataType.isFloat(data.type) && data.type.precision === Precision.HALF)
+        this.half.set(data, float16Values(data.values as Uint16Array));
       if (DataType.isDictionary(data.type))
         this.dictionaries.set(data, new ColumnReader(data.dictionary!));
     }
@@ -70,7 +77,9 @@ export class ColumnReader {
       const bit = data.offset + index;
       return Boolean(data.values[bit >> 3]! & (1 << (bit & 7)));
     }
-    return data.values[index] as number | bigint;
+    return this.half.has(data)
+      ? this.half.get(data)![index]!
+      : (data.values[index] as number | bigint);
   }
   /** Resolves UTF-8 buffers, including dictionary values, without decoding. */
   utf8(row: number): [Uint8Array, number, number] {

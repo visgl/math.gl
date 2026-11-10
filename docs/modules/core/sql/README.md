@@ -160,3 +160,5 @@ Use `compileArrowArray(selection.array, {inputSchema, type: selection.type})` fr
 `@math.gl/arrow/expressions` to evaluate the projection. This only constructs a column; it does not
 filter or compact rows. Null components make the whole tuple null with zero numeric padding.
 GPU consumers must respect parent validity or those invalid positions will appear at the origin.
+`FLOAT16` is an additional explicit scalar cast target: both `value::FLOAT16` and
+`CAST(value AS FLOAT16)` map to portable `float16`. Arrow execution requires native Float16Array.

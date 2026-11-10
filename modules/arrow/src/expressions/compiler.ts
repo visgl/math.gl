@@ -4,6 +4,7 @@
 
 import {
   Bool,
+  Precision,
   DataType,
   Field,
   Float64,
@@ -26,6 +27,7 @@ import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '.
 import {parse, type Expression} from '@math.gl/core/expressions';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
 import {bindCast} from './cast';
+import {float16Values, roundFloat16} from './float16';
 import {createFunctionLookup} from './registry';
 import {
   isTupleType,
@@ -250,6 +252,10 @@ function output(
   const data = isBoolean
     ? new Uint8Array(Math.ceil(active.length / 8))
     : new type.ArrayType(active.length);
+  const numericData =
+    DataType.isFloat(type) && type.precision === Precision.HALF
+      ? float16Values(data as Uint16Array)
+      : data;
   const validity = new Uint8Array(Math.ceil(active.length / 8));
   let nullCount = 0;
   for (let row = 0; row < active.length; row++) {
@@ -267,7 +273,7 @@ function output(
     validity[row >> 3] |= 1 << (row & 7);
     if (isBoolean) {
       if (value) data[row >> 3] |= 1 << (row & 7);
-    } else data[row] = value as any;
+    } else numericData[row] = value as any;
   }
   return makeVector(
     makeData({
@@ -283,7 +289,11 @@ function output(
 /** Wraps a source vector without materializing rows or decoding string operands. */
 function sourceReader(vector: Vector): Prepared {
   const data = vector.data[0];
-  if (vector.data.length === 1 && (DataType.isInt(data.type) || DataType.isFloat(data.type))) {
+  if (
+    vector.data.length === 1 &&
+    (DataType.isInt(data.type) ||
+      (DataType.isFloat(data.type) && data.type.precision !== Precision.HALF))
+  ) {
     const values = data.values,
       bitmap = data.nullBitmap,
       offset = data.offset;
@@ -887,6 +897,10 @@ function bindCall(ast: any, options: BindingOptions): Node {
 
 /** Preserve declared Float32 precision at fused operation boundaries. */
 function roundToType(type: DataType): (value: ArrowExpressionValue) => ArrowExpressionValue {
+  if (typeKey(type) === 'f0') {
+    const round = roundFloat16();
+    return value => (value === null ? null : round(value as number));
+  }
   return typeKey(type) === 'f1'
     ? value => (value === null ? null : Math.fround(value as number))
     : value => value;

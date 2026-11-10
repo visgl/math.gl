@@ -358,3 +358,18 @@ batch without row filtering, retaining source order and chunk boundaries. Any nu
 the parent list null; its numeric slots remain zeros. Masked rows follow the same rule. Consumers
 reading numeric buffers directly must honor parent validity. Empty results retain their fixed-size
 schema. Explicit Float32 conversion can lose precision, following Arrow floating-point conversion.
+
+## Float16
+
+Arrow `Float16` inputs, scalar results and fixed-size numeric tuple results use native
+`Float16Array` views over Arrow's Uint16 binary16 storage. Expressions decode logical numbers,
+respect slice offsets and nulls, and round at every half-precision operation boundary. Output
+buffers remain Arrow-compatible Uint16 bit patterns; buffer transport and worker evaluation retain
+that representation. Numeric projections can reuse input storage.
+
+`parseSQLExpression('value::FLOAT16')` and `CAST(value AS FLOAT16)` bind explicit half-precision
+casts. Values round using the runtime's binary16 conversion; finite values that overflow on explicit
+casts throw, while arithmetic retains IEEE infinity/NaN behavior. Subnormals and signed zero are
+preserved. Runtime native `Float16Array` support is required in every executing worker or thread;
+without it, Float16 operations fail with a capability error. Other expression types remain usable.
+The capability checks reuse the existing core Float16 helpers.
