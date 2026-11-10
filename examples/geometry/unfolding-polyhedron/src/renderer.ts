@@ -84,7 +84,7 @@ class UnfoldingSurfaceLayer extends MeshBitmapLayer<PanelProps> {
         'vs:#main-end': `
           spherePosition = directions;
           panelColor = colors;
-          renderPosition = vec3(gl_Position.xy / gl_Position.w, -positions.z);
+          renderPosition = vec3(gl_Position.xy / gl_Position.w, -2.0 * positions.z);
         `,
         'fs:#decl': `
           in vec3 spherePosition;
@@ -156,10 +156,11 @@ export function createRenderer(
     ) {
       const {width, height} = canvas.getBoundingClientRect();
       if (!width || !height) return;
+      // The orthographic camera is at z=1. Keep clip-space depths away from its near plane.
       const toWorld = ([x, y, z]: number[]): [number, number, number] => [
         (x * width) / 2,
         (y * height) / 2,
-        -z
+        -z / 2
       ];
       const vertices = surfaceVertices(mesh, positions);
       const count = vertices.length / 9;
