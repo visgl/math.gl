@@ -4,7 +4,7 @@
 import {createCoordinateTooltip} from '../../../common/coordinate-tooltip.js';
 import {mountInfoBox} from '../../../common/info-box.js';
 import {createMapData} from './map.js';
-import {createScene} from './scene.js';
+import {createProjectedMapScene as createScene} from '../../../common/projected-map-scene.js';
 import './style.css';
 
 /** UI and lifecycle. Projection and rendering live in separate modules. */

@@ -10,8 +10,7 @@ the description and credits. Hover over a mapped location for a coordinate toolt
 Preparation progress appears at the top center of the map until animation starts; errors appear in the panel.
 
 Run `yarn start` or `yarn build` in this directory. `src/main.js` owns the controls and
-lifecycle, `src/map.js` prepares MapEngine geometry, and `src/scene.js` owns transition preparation and animation, reusing the quincuncial
-canvas renderer for stationary maps. Preparation yields between features and
+lifecycle, `src/map.js` prepares MapEngine geometry, and `src/scene.js` owns transition preparation and animation, using the shared deck.gl scene for stationary maps and transitions. Preparation yields between features and
 rapid selection changes cancel obsolete work. No map data is fetched at runtime.
 
 The static sample polygon uses `MapEngine.prepareFeatures()`. Its packed fill

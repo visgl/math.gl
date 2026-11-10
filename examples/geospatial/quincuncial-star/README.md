@@ -6,7 +6,7 @@ Hover over the map to inspect geographic coordinates in a tooltip. Color and
 source descriptions appear in the info panel beside the controls.
 
 - `src/map.js`: construct `MapEngine`, split coastlines/graticules and a polygon, project city points.
-- `src/scene.js`: fit, draw and pick the resulting map; no control selectors.
+- The shared deck.gl scene fits, draws and picks the resulting map.
 - `src/main.js`: controls and mount/unmount lifecycle.
 
 Peirce uses a central hemisphere and four corner pieces. Berghaus keeps an
