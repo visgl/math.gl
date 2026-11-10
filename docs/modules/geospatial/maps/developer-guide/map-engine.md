@@ -19,7 +19,9 @@ and does not convert datums or model ellipsoidal Earth geometry.
 ## Start with a description
 
 ```typescript
-import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';
+import {albersUsaMapPreset} from '@math.gl/geospatial/maps/presets';
+import {mapGeometry} from '@math.gl/geospatial/maps/geometry';
+import {mapTransitions} from '@math.gl/geospatial/maps/transitions';
 import {MapEngine, type MapDescription} from '@math.gl/geospatial/maps';
 
 const description: MapDescription = {
@@ -28,7 +30,7 @@ const description: MapDescription = {
   title: 'United States and territories',
   definition: {type: 'albers-usa', includeTerritories: true}
 };
-const map = new MapEngine(description, {presets: mapPresets, geometry: mapGeometry, transitions: mapTransitions});
+const map = new MapEngine(description, {presets: [albersUsaMapPreset], geometry: mapGeometry, transitions: mapTransitions});
 const viewport = map.fit({width: 960, height: 600, padding: 24});
 
 const honolulu = map.projectPoint([-157.86, 21.31]);
@@ -44,7 +46,8 @@ them at construction; construct another engine to change the map. Keep an engine
 while the user pans or resizes. `fit()` reuses its cached static layout and
 preserves relative inset sizes and spacing.
 
-The same code can use these definitions:
+Other definitions use the same workflow, with their matching preset supplied in
+`presets`. Selecting a definition does not load or register its implementation:
 
 | Map | `definition` | What the renderer receives |
 | --- | --- | --- |
@@ -117,12 +120,14 @@ reveal Hawaii if the source data never resolved it.
 ## Use the same geometry on a globe or hinged surface
 
 ```typescript
-import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';
+import {myriahedralMapPreset} from '@math.gl/geospatial/maps/presets';
+import {mapGeometry} from '@math.gl/geospatial/maps/geometry';
+import {mapTransitions} from '@math.gl/geospatial/maps/transitions';
 const panels = new MapEngine({
   version: 1,
   id: 'polyconic',
   definition: {type: 'myriahedral', preset: 'polyconic', columns: 24}
-}, {presets: mapPresets, geometry: mapGeometry, transitions: mapTransitions});
+}, {presets: [myriahedralMapPreset], geometry: mapGeometry, transitions: mapTransitions});
 const frame = panels.evaluate({type: 'hinge', amount: 0.5});
 const point = frame.projectPoint([10, 30]); // {regionId, position: [x, y, z]}
 
@@ -170,13 +175,15 @@ interpolation is free of folds or overlaps.
 Land masks and projection functions are runtime dependencies, not JSON:
 
 ```typescript
-import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';
+import {myriahedralMapPreset} from '@math.gl/geospatial/maps/presets';
+import {mapGeometry} from '@math.gl/geospatial/maps/geometry';
+import {mapTransitions} from '@math.gl/geospatial/maps/transitions';
 const oceanCuts = new MapEngine({
   version: 1,
   id: 'ocean-cuts',
   definition: {type: 'myriahedral', preset: 'sealine', columns: 24}
 }, {
-  presets: mapPresets,
+  presets: [myriahedralMapPreset],
   geometry: mapGeometry,
   transitions: mapTransitions,
   isLand: ([longitude, latitude]) => landMaskContains(longitude, latitude)

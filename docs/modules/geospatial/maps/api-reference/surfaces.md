@@ -1,6 +1,8 @@
 # Prepared surfaces and transitions 🧪
 
-These experimental APIs are available from `@math.gl/geospatial/maps`.
+Import raster builders from `@math.gl/geospatial/maps/surfaces` and transition
+builders from `@math.gl/geospatial/maps/transitions`. These experimental APIs are
+also named exports of `/maps`.
 They have no DOM, deck.gl, texture-loading, or animation-clock dependency.
 
 | Operation | Responsibility |
@@ -9,6 +11,13 @@ They have no DOM, deck.gl, texture-loading, or animation-clock dependency.
 | `prepareMapSurface` | Sample chart-clipped geographic rasters and retain chart IDs |
 | `prepareProjectionSurface` | Sample an ordinary CRS projection inside an explicit geographic rectangle |
 | `prepareMapTransitionMesh[Async]` | Prepare screen-space correspondence for renderer-supplied endpoints |
+
+Vector preparation uses `geometry: mapGeometry` on the engine. Raster builders
+and standalone surface-transition builders do not require that capability.
+`MapEngine.createTransitionTo` is a separate feature-transition API: enable it
+with `transitions: mapTransitions`; polygon features also need geometry on the
+endpoints. A surface transition prepares mesh buffers for renderer-provided
+screen-space endpoints, rather than owning a camera or running an animation.
 
 ## Chart-clipped raster surfaces
 

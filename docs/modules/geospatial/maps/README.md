@@ -4,6 +4,49 @@
 insets and rendering preparation. CRS conversion remains in
 `@math.gl/geospatial/projection`.
 
+## Projection and maps: choosing the right API
+
+A **coordinate transformation** answers “what are this location's coordinates in
+another reference system?” A **map layout** answers “where should this location
+appear in this arrangement of charts?”
+
+| Need | Use |
+| --- | --- |
+| Convert longitude/latitude to a projected CRS, or convert between CRSs | [Projection](../projection/README.md) |
+| Apply supported datum, height or epoch operations to coordinates | [Projection pipelines](../projection/api-reference/projection-pipeline.md) |
+| Arrange interrupted lobes, regional insets or unfolded panels | [MapEngine](./api-reference/map-engine.md) |
+| Split geographic lines/polygons at chart boundaries and retain their identities | MapEngine, with optional geometry support for polygons |
+| Build a textured mesh from either a chart layout or an ordinary CRS projection | [Surface builders](./api-reference/surfaces.md) |
+| Draw, load imagery, manage a camera or advance an animation clock | Your renderer/application |
+
+Both subpaths contain projection mathematics, but their contracts differ.
+Projection transforms coordinates between declared reference systems. Maps takes
+spherical `[longitude, latitude]` in degrees and produces chart-local, placed map
+coordinates. Map `radius` sets output scale; it does not select an ellipsoid or
+perform a datum transformation. A named Albers map preset is therefore not a
+replacement for a configured Albers CRS transformation.
+
+The APIs can be used independently. For data in another CRS, first transform it
+to the geographic coordinate convention expected by your map, then pass the
+result to MapEngine. Choose the required datum/height operations explicitly;
+MapEngine does not infer them. When rendering an ordinary CRS projection as a
+raster, pass its `project` method to `prepareProjectionSurface` instead of
+constructing a chart layout. That adapter expects geographic input in degrees
+and an explicit geographic extent.
+
+### From coordinates to a rendered map
+
+1. Establish the input CRS, axis order, units and any required datum operation.
+2. Use projection APIs if the coordinates need conversion.
+3. Select map presets and optional geometry support for the desired chart layout.
+4. Prepare vector pieces or a raster mesh. Draw each returned chart/piece separately.
+5. Let the renderer manage cameras, textures, GPU resources and animation timing.
+
+Start with the [rendering guide](./developer-guide/map-engine.md), then consult
+[MapEngine contracts](./api-reference/map-engine.md), the
+[preset catalogue](./projection-catalog.md) and
+[surface/transition contracts](./api-reference/surfaces.md).
+
 ## Explicit presets
 
 The engine has no built-in catalogue. Supply the presets that your application
