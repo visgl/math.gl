@@ -43,6 +43,13 @@ for (const name of expected) {
       assert.equal('ArrowFunctionRegistry' in imported, false);
       assert.equal('ArrowFunctionRegistry' in required, false);
     }
+    if (specifier === '@math.gl/arrow/math') {
+      for (const math of [imported, required]) {
+        assert.equal(Object.keys(math).length, 21);
+        assert.equal(math.SIN.name, 'SIN');
+        assert.equal(math.ROUND.prototypes.find(p => p.arguments[0].type.toString() === 'Float64').evaluateScalar(-1.5), -2);
+      }
+    }
     if (specifier === '@math.gl/core') {
       assert.equal('parseSQLQuery' in imported, false);
       assert.equal('parseSQLQuery' in required, false);

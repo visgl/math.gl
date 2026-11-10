@@ -154,3 +154,7 @@ compileArrowExpression('COLOR_TO_RGBA8(COLOR_RGB(1, 0, 0))', {
   inputSchema: batch.schema,
   functions: [COLOR_RGB, COLOR_TO_RGBA8]
 }).evaluate(batch);
+
+import {SIN, POWER, ROUND} from '@math.gl/arrow/math';
+const mathFunctions: readonly ArrowTableFunction[] = [SIN, POWER, ROUND];
+void mathFunctions;

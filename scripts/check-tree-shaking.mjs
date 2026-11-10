@@ -13,6 +13,7 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  {symbol:'SIN',packages:['@math.gl/arrow/math'],forbidden:[/expressions\/(compiler|predicate)/,/loaders.gl/],budget:210000},
   {symbol:'COLOR_RGB',packages:['@math.gl/arrow/color'],forbidden:[/expressions\/(compiler|predicate)/,/loaders.gl/],budget:250000},
   {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /expressions\/(compiler|predicate)/], budget: 240000},
 
