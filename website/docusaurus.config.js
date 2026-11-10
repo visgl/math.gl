@@ -91,6 +91,8 @@ webpackPlugin[1].resolve.modules.unshift('node_modules');
 // Preserve the published Parquet worker as a bundled asset, shared with Vite's ?url import.
 webpackPlugin[1].module = {rules: [{resourceQuery: /\?url$/, type: 'asset/resource'}]};
 const aliases = webpackPlugin[1].resolve.alias;
+// Compile the private workspace source rather than its node_modules symlink.
+aliases['@deck.gl/map-layers$'] = resolve(__dirname, '../dev-modules/map-layers/src/index.ts');
 // Dependencies such as deck.gl 9.4 require math.gl 4.x. Keep their imports on
 // their installed dependency versions rather than the website's 5.x source aliases.
 webpackPlugin[1].plugins = [
