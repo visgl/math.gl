@@ -15,7 +15,7 @@ import {
 } from 'apache-arrow';
 import * as math from '../src/math';
 import {compileArrowExpression, ArrowEvaluationError} from '../src/expressions';
-import {getFloat16ArrayConstructor} from '@math.gl/core';
+import {NativeFloat16ArrayConstructor} from '@math.gl/core';
 
 const functions = Object.values(math);
 function evaluate(expression: string, values: (number | bigint | null)[], type = new Float64()) {
@@ -178,12 +178,12 @@ test('math functions compose and select the widest float without integer coercio
     compileArrowExpression('POWER(x, i)', {inputSchema: table.schema, functions})
   ).toThrow('type mismatch');
 });
-test.skipIf(!getFloat16ArrayConstructor())(
+test.skipIf(!NativeFloat16ArrayConstructor)(
   'Float16 math rounds results and rejects finite overflow',
   () => {
     const {result, compiled} = evaluate('SIN(x)', [1], new Float16());
     expect(compiled.outputField.type).toEqual(new Float16());
-    const Half = getFloat16ArrayConstructor()!;
+    const Half = NativeFloat16ArrayConstructor!;
     expect([...result]).toEqual([...new Half([Math.sin(1)])]);
     expect(() => evaluate('EXP(x)', [12], new Float16())).toThrow(ArrowEvaluationError);
   }
