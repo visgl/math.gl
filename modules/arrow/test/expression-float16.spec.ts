@@ -62,9 +62,9 @@ test.runIf(supported)(
     expect(view[3]).toBe(0);
     expect(view[4]).toBe(1);
     const table = new Table({x: half([65504])});
-    expect([
-      ...compileArrowExpression('x * 2', {inputSchema: table.schema}).evaluateTable(table)
-    ]).toEqual([Infinity]);
+    expect(() =>
+      compileArrowExpression('x * 2', {inputSchema: table.schema}).evaluateTable(table)
+    ).toThrow(ArrowEvaluationError);
   }
 );
 test.runIf(supported)(

@@ -16,6 +16,8 @@ export type ArrowTableFunctionType = (
     activeRows: Uint8Array;
     /** Number of rows in every argument and the returned vector. */
     length: number;
+    /** Report a row failure; TRY recovers classified errors, otherwise the call throws. */
+    reportError?(row: number, error: unknown): void;
   }
 ) => Vector;
 
