@@ -5,6 +5,6 @@
 
 import {abs, epsilon} from './math.js';
 
-export default function (a, b) {
+export default function (a: readonly number[], b: readonly number[]) {
   return abs(a[0] - b[0]) < epsilon && abs(a[1] - b[1]) < epsilon;
 }

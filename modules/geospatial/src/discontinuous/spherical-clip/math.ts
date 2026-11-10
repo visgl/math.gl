@@ -26,20 +26,20 @@ export var pow = Math.pow;
 export var sin = Math.sin;
 export var sign =
   Math.sign ||
-  function (x) {
+  function (x: number) {
     return x > 0 ? 1 : x < 0 ? -1 : 0;
   };
 export var sqrt = Math.sqrt;
 export var tan = Math.tan;
 
-export function acos(x) {
+export function acos(x: number) {
   return x > 1 ? 0 : x < -1 ? pi : Math.acos(x);
 }
 
-export function asin(x) {
+export function asin(x: number) {
   return x > 1 ? halfPi : x < -1 ? -halfPi : Math.asin(x);
 }
 
-export function haversin(x) {
+export function haversin(x: number) {
   return (x = sin(x / 2)) * x;
 }

@@ -6,10 +6,10 @@
 
 import {pi, sqrt, tau} from './math.js';
 
-export function kavrayskiy7Raw(lambda, phi) {
+export function kavrayskiy7Raw(lambda: number, phi: number) {
   return [(3 / tau) * lambda * sqrt((pi * pi) / 3 - phi * phi), phi];
 }
 
-kavrayskiy7Raw.invert = function (x, y) {
+kavrayskiy7Raw.invert = function (x: number, y: number) {
   return [((tau / 3) * x) / sqrt((pi * pi) / 3 - y * y), y];
 };

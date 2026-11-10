@@ -6,13 +6,13 @@
 
 import {atan, cos, sqrtPi, tan} from './math.js';
 
-export function foucautRaw(lambda, phi) {
+export function foucautRaw(lambda: number, phi: number) {
   var k = phi / 2,
     cosk = cos(k);
   return [((2 * lambda) / sqrtPi) * cos(phi) * cosk * cosk, sqrtPi * tan(k)];
 }
 
-foucautRaw.invert = function (x, y) {
+foucautRaw.invert = function (x: number, y: number) {
   var k = atan(y / sqrtPi),
     cosk = cos(k),
     phi = 2 * k;

@@ -6,11 +6,11 @@
 
 import {cos, pi, sqrt} from './math.js';
 
-export function eckert5Raw(lambda, phi) {
+export function eckert5Raw(lambda: number, phi: number) {
   return [(lambda * (1 + cos(phi))) / sqrt(2 + pi), (2 * phi) / sqrt(2 + pi)];
 }
 
-eckert5Raw.invert = function (x, y) {
+eckert5Raw.invert = function (x: number, y: number) {
   var k = sqrt(2 + pi),
     phi = (y * k) / 2;
   return [(k * x) / (1 + cos(phi)), phi];

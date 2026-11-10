@@ -8,11 +8,11 @@ import {asin, cos, sin, sqrt, sqrtPi} from './math.js';
 
 var sqrt3 = sqrt(3);
 
-export function crasterRaw(lambda, phi) {
+export function crasterRaw(lambda: number, phi: number) {
   return [(sqrt3 * lambda * (2 * cos((2 * phi) / 3) - 1)) / sqrtPi, sqrt3 * sqrtPi * sin(phi / 3)];
 }
 
-crasterRaw.invert = function (x, y) {
+crasterRaw.invert = function (x: number, y: number) {
   var phi = 3 * asin(y / (sqrt3 * sqrtPi));
   return [(sqrtPi * x) / (sqrt3 * (2 * cos((2 * phi) / 3) - 1)), phi];
 };

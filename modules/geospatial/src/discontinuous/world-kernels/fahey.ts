@@ -8,12 +8,12 @@ import {atan, cos, radians, sqrt, tan} from './math.js';
 
 var faheyK = cos(35 * radians);
 
-export function faheyRaw(lambda, phi) {
+export function faheyRaw(lambda: number, phi: number) {
   var t = tan(phi / 2);
   return [lambda * faheyK * sqrt(1 - t * t), (1 + faheyK) * t];
 }
 
-faheyRaw.invert = function (x, y) {
+faheyRaw.invert = function (x: number, y: number) {
   var t = y / (1 + faheyK);
   return [x && x / (faheyK * sqrt(1 - t * t)), 2 * atan(t)];
 };

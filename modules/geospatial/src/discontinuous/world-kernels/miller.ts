@@ -6,10 +6,10 @@
 
 import {atan, exp, log, quarterPi, pi, tan} from './math.js';
 
-export function millerRaw(lambda, phi) {
+export function millerRaw(lambda: number, phi: number) {
   return [lambda, 1.25 * log(tan(quarterPi + 0.4 * phi))];
 }
 
-millerRaw.invert = function (x, y) {
+millerRaw.invert = function (x: number, y: number) {
   return [x, 2.5 * atan(exp(0.8 * y)) - 0.625 * pi];
 };
