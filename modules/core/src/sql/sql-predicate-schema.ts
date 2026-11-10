@@ -188,9 +188,9 @@ function validatePredicateNode(
         throw new Error(`SQL predicate ${path}.in requires a property and non-empty value list`);
       }
       validatePredicateProperty(value['args'][0], `${path}.args[0]`);
-      value['args'][1].forEach((item, index) =>
-        validatePredicateValue(item, `${path}.args[1][${index}]`)
-      );
+      for (let index = 0; index < value['args'][1].length; index++) {
+        validatePredicateValue(value['args'][1][index], `${path}.args[1][${index}]`);
+      }
       return;
     case '=':
     case '<>':

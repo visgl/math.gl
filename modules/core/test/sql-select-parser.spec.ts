@@ -147,3 +147,9 @@ test.each([
 ])('rejects unsupported catalog syntax %s', sql => {
   expect(() => parseSQLQuery(sql)).toThrow();
 });
+
+test('SELECT and predicate parsing agree on the supported parenthesis boundary', () => {
+  expect(
+    parseSQLQuery('SELECT value WHERE ' + '('.repeat(64) + 'value = 1' + ')'.repeat(64))
+  ).toEqual({select: ['value'], where: {op: '=', args: [{property: 'value'}, 1]}});
+});

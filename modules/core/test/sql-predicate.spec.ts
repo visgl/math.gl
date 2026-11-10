@@ -181,3 +181,26 @@ test('runtime parameter values must be concrete scalars in comparisons and membe
     }
   }
 });
+
+test('predicate nesting counts parentheses and negation rather than precedence methods', () => {
+  const leaf = parseSQLPredicate('value = 1');
+  expect(parseSQLPredicate('('.repeat(64) + 'value = 1' + ')'.repeat(64))).toEqual(leaf);
+  expect(() => parseSQLPredicate('('.repeat(65) + 'value = 1' + ')'.repeat(65))).toThrow(
+    'safe limit'
+  );
+  expect(() => parseSQLPredicate('NOT '.repeat(64) + 'value = 1')).not.toThrow();
+  expect(() => parseSQLPredicate('NOT '.repeat(65) + 'value = 1')).toThrow('safe limit');
+  expect(() => parseSQLPredicate('NOT ('.repeat(32) + 'value = 1' + ')'.repeat(32))).not.toThrow();
+  expect(() => parseSQLPredicate('NOT ('.repeat(33) + 'value = 1' + ')'.repeat(33))).toThrow(
+    'safe limit'
+  );
+});
+
+test('predicate validation and binding reject sparse membership lists', () => {
+  for (const values of [Array(1), [1, , 3], [1, undefined]]) {
+    const predicate = {op: 'in', args: [{property: 'value'}, values]} as const;
+    expect(isSQLPredicate(predicate)).toBe(false);
+    expect(() => validateSQLPredicate(predicate)).toThrow('unsupported scalar');
+    expect(() => bindSQLPredicate(predicate as never, {})).toThrow('unsupported scalar');
+  }
+});

@@ -85,18 +85,18 @@ class SQLPredicateParser {
 
   /** Parses left-associative disjunction. */
   private parseOr(depth: number): SQLPredicate {
-    let predicate = this.parseAnd(depth + 1);
+    let predicate = this.parseAnd(depth);
     while (this.takeKeyword('OR')) {
-      predicate = combineLogicalPredicate('or', predicate, this.parseAnd(depth + 1));
+      predicate = combineLogicalPredicate('or', predicate, this.parseAnd(depth));
     }
     return predicate;
   }
 
   /** Parses left-associative conjunction. */
   private parseAnd(depth: number): SQLPredicate {
-    let predicate = this.parseNot(depth + 1);
+    let predicate = this.parseNot(depth);
     while (this.takeKeyword('AND')) {
-      predicate = combineLogicalPredicate('and', predicate, this.parseNot(depth + 1));
+      predicate = combineLogicalPredicate('and', predicate, this.parseNot(depth));
     }
     return predicate;
   }
