@@ -102,6 +102,14 @@ test('integer math preserves exact bigint values and detects overflow', () => {
       minimum
     )
   ).toThrow(ArrowEvaluationError);
+  try {
+    compileArrowExpression('ABS(x)', {inputSchema: minimum.schema, functions}).evaluateTable(
+      minimum
+    );
+    throw new Error('expected overflow');
+  } catch (error) {
+    expect((error as ArrowEvaluationError).code).toBe('overflow');
+  }
 });
 test('math throws classified domain, division and finite-input overflow errors', () => {
   for (const expression of [
@@ -115,9 +123,27 @@ test('math throws classified domain, division and finite-input overflow errors',
     'MOD(1, 0)',
     'EXP(1000)'
   ]) {
-    expect(() => evaluate(expression, [1]), expression).toThrow(ArrowEvaluationError);
+    let caught: unknown;
+    try {
+      evaluate(expression, [1]);
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught, expression).toBeInstanceOf(ArrowEvaluationError);
+    expect((caught as ArrowEvaluationError).code, expression).toBe(
+      expression.startsWith('MOD')
+        ? 'divisionByZero'
+        : expression.startsWith('EXP')
+          ? 'overflow'
+          : 'domain'
+    );
   }
-  expect(() => evaluate('EXP(x)', [100], new Float32())).toThrow(ArrowEvaluationError);
+  try {
+    evaluate('EXP(x)', [100], new Float32());
+    throw new Error('expected overflow');
+  } catch (error) {
+    expect((error as ArrowEvaluationError).code).toBe('overflow');
+  }
   expect([...evaluate('EXP(x)', [-1000]).result]).toEqual([0]);
   expect([...evaluate('ABS(x)', [Number.MIN_VALUE]).result]).toEqual([Number.MIN_VALUE]);
   expect([...evaluate('SIN(x)', [NaN]).result][0]).toBeNaN();
