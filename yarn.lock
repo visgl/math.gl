@@ -2778,6 +2778,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@deck.gl/map-layers@workspace:*, @deck.gl/map-layers@workspace:dev-modules/map-layers":
+  version: 0.0.0-use.local
+  resolution: "@deck.gl/map-layers@workspace:dev-modules/map-layers"
+  dependencies:
+    typescript: "npm:^6.0.3"
+  peerDependencies:
+    "@deck.gl/core": ~9.4.0
+    "@deck.gl/layers": ~9.4.0
+  languageName: unknown
+  linkType: soft
+
 "@deck.gl/mesh-layers@npm:^9.4.0, @deck.gl/mesh-layers@npm:~9.4.0":
   version: 9.4.0
   resolution: "@deck.gl/mesh-layers@npm:9.4.0"
@@ -15864,6 +15875,7 @@ __metadata:
     "@deck.gl-community/panels": "npm:^9.4.8"
     "@deck.gl/core": "npm:~9.4.0"
     "@deck.gl/layers": "npm:~9.4.0"
+    "@deck.gl/map-layers": "workspace:*"
     "@loaders.gl/core": "npm:^4.5.1"
     "@luma.gl/core": "npm:~9.4.0"
     "@luma.gl/engine": "npm:~9.4.0"

@@ -11,3 +11,7 @@ The example is an early integration prototype. It uses a fixed geographic mesh r
 The overview JPEG is hosted in [deck.gl-data](https://github.com/visgl/deck.gl-data/tree/master/earth/nasa-blue-marble).
 
 Imagery: [NASA Blue Marble](https://science.nasa.gov/earth/earth-observatory/blue-marble/).
+
+The mesh bitmap adapter comes from the private `@deck.gl/map-layers` workspace,
+a staging area for reusable deck.gl rendering code. Projection and mesh-generation
+logic remain in this example; the layer owns only deck.gl geometry updates.
