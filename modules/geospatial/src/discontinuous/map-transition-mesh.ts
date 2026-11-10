@@ -299,6 +299,17 @@ function* buildMorphMesh(
     throw new RangeError('Invalid transition mesh refinement budget');
   }
   const copies = [...new Set([...(source.wrapCopies || [0]), ...(target.wrapCopies || [0])])];
+  if (!copies.length)
+    return {
+      positions: new Float64Array(),
+      destination: new Float32Array(),
+      texCoords: new Float32Array(),
+      lifetime: new Float32Array(),
+      pieceCenters: new Float32Array(),
+      pieceAngles: new Float32Array(),
+      indices: new Uint32Array(),
+      vertexCount: 0
+    };
   const endpointForCopy = (
     endpoint: MapTransitionEndpoint,
     copy: number

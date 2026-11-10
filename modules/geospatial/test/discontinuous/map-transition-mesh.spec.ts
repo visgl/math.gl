@@ -151,3 +151,17 @@ test('seam identities prevent triangles crossing a wrap cut within one part', ()
     expect(Math.max(...xs) - Math.min(...xs)).toBeLessThan(10);
   }
 });
+
+test('empty visible-world lists produce empty buffers without sampling endpoints', async () => {
+  const hidden: MapTransitionEndpoint = Object.assign(
+    () => {
+      throw new Error('No visible worlds');
+    },
+    {wrapCopies: []}
+  );
+  const mesh = prepareMapTransitionMesh(hidden, hidden);
+  expect(mesh.vertexCount).toBe(0);
+  for (const [key, value] of Object.entries(mesh))
+    if (key !== 'vertexCount') expect(value.length).toBe(0);
+  expect(await prepareMapTransitionMeshAsync(hidden, hidden)).toEqual(mesh);
+});

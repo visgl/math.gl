@@ -108,6 +108,8 @@ bank so an adapter can distinguish opposite sides of a wrap seam. Return
 Endpoint functions can also carry `width` and `height` (defaults 1000 × 800).
 A repeated-world adapter supplies `worldWidth` in pixels and `wrapCopies`
 (integer world offsets); repeated cut coordinates use 360-degree offsets.
+If both endpoints supply an empty list, the builders return empty typed buffers
+without sampling the endpoints. Omitted lists default to world zero.
 
 `options.error` is a positive pixel tolerance (default `0.6`). It bounds
 curvature probes and stops further subdivision once each visible cut bank is

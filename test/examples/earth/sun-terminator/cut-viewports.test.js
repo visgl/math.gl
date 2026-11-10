@@ -8,7 +8,10 @@ import {
   getCutViewports,
   projectCutMap
 } from '../../../../examples/earth/sun-terminator/src/view-adapter.ts';
-import {createCutTileAdapter} from '../../../../examples/earth/sun-terminator/src/cut-tile-layer.ts';
+import {
+  createCutTileAdapter,
+  getCutTileMesh
+} from '../../../../examples/earth/sun-terminator/src/cut-tile-layer.ts';
 import {US_STATES} from '../../../../examples/earth/sun-terminator/src/us-state-mask.ts';
 const viewport = (target = [0, 0, 0], zoom = 3.2) =>
   new OrthographicView({flipY: false}).makeViewport({
@@ -56,4 +59,15 @@ test('Census boundary data includes fifty states and DC with separate Alaska and
         assert.ok(ring.every(([lon, lat]) => Math.abs(lon) <= 180 && Math.abs(lat) <= 90));
         assert.deepEqual(ring[0], ring.at(-1));
       }
+});
+
+test('low-zoom cut tiles have a bounded grid and reuse cached meshes', () => {
+  const tile = {bbox: {west: -135, south: 0, east: -90, north: 40}};
+  for (const id of ['albers-usa', 'h3', 'isinu', 'imoll']) {
+    const content = {};
+    const mesh = getCutTileMesh(id, tile, content);
+    assert.ok(mesh.indices.length > 0);
+    assert.ok(mesh.positions.length / 3 <= 20 * 17 * 17);
+    assert.equal(getCutTileMesh(id, tile, content), mesh);
+  }
 });

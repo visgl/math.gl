@@ -152,3 +152,24 @@ test('surface samples reserve inset frames without changing geographic point pro
     ).toBe(false);
   }
 });
+
+test('explicit polar rectangles retain longitude bounds at coarse and fine resolutions', () => {
+  for (const extent of [
+    [0, 80, 10, 90],
+    [0, -90, 10, -80],
+    [-180, 80, 180, 90]
+  ] as const) {
+    for (const step of [10, 1]) {
+      const mesh = prepareProjectionSurface(
+        {project: p => p},
+        {
+          extent,
+          maxAngularStep: step,
+          maxVertices: (Math.ceil((extent[2] - extent[0]) / step) + 1) * (10 / step + 1)
+        }
+      );
+      expect(mesh.vertexCount).toBeGreaterThan(0);
+      expect(mesh.bounds).toEqual([...extent]);
+    }
+  }
+});

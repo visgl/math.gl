@@ -37,6 +37,7 @@ export function prepareProjectionSurface(
       regions: [
         {
           id: 'projection',
+          geographicBounds: options.extent,
           interior: [(west + east) / 2, (south + north) / 2],
           boundary: [
             [west, south],

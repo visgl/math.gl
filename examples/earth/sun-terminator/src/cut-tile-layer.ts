@@ -104,7 +104,8 @@ export function getCutTileMesh(id, tile, content) {
   const mesh = getMap(id).prepareSurface({
     textureBounds: [west, south, east, north],
     textureProjection: 'mercator',
-    maxAngularStep: Math.min(0.125, Math.max(0.005, Math.min(east - west, north - south) / 16))
+    // Keep a fixed tessellation budget per tile at every zoom.
+    maxAngularStep: [(east - west) / 16, (north - south) / 16]
   });
   cache.set(id, mesh);
   return mesh;

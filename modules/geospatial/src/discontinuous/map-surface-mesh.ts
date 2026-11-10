@@ -31,6 +31,8 @@ export function prepareMapSurfaceMesh(
       id: string;
       interior: GeographicPosition;
       boundary: readonly GeographicPosition[];
+      /** Explicit rectangular domain, without spherical pole expansion. */
+      geographicBounds?: MapBounds;
     }[];
     projectPoint: (
       position: GeographicPosition,
@@ -99,8 +101,12 @@ export function prepareMapSurfaceMesh(
     const southPole =
       Boolean(map.projectPoint([origin, -90], region.id)) &&
       map.regions.filter(r => map.projectPoint([origin, -90], r.id)).length === 1;
-    const regionWest = northPole || southPole ? origin - 180 : Math.min(...boundary.map(p => p[0]));
-    const regionEast = northPole || southPole ? origin + 180 : Math.max(...boundary.map(p => p[0]));
+    const regionWest =
+      region.geographicBounds?.[0] ??
+      (northPole || southPole ? origin - 180 : Math.min(...boundary.map(p => p[0])));
+    const regionEast =
+      region.geographicBounds?.[2] ??
+      (northPole || southPole ? origin + 180 : Math.max(...boundary.map(p => p[0])));
     const intervals: {west: number; east: number; shift: number}[] = [];
     if (options.textureBounds) {
       const first = Math.ceil((regionWest - raster[2]) / 360);
