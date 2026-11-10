@@ -29,7 +29,7 @@ export type NumericFunctionDefinition = Readonly<{
   overloadResolution: 'exactThenFloatingWidening';
   nanHandling: 'propagate';
   errors: readonly ExpressionEvaluationErrorCode[];
-  domain?: 'nonNegative' | 'positive' | 'unitInterval' | 'power';
+  domain?: 'nonNegative' | 'positive' | 'signedUnitInterval' | 'power';
   angleUnit?: 'radians';
   rounding?: 'tiesAwayFromZero';
   remainderSign?: 'dividend';
@@ -89,8 +89,8 @@ export const NUMERIC_FUNCTION_DEFINITIONS = Object.freeze({
   SIN: definition('SIN', 1, false, {angleUnit: 'radians'}),
   COS: definition('COS', 1, false, {angleUnit: 'radians'}),
   TAN: definition('TAN', 1, false, {angleUnit: 'radians'}),
-  ASIN: definition('ASIN', 1, false, {domain: 'unitInterval', angleUnit: 'radians'}),
-  ACOS: definition('ACOS', 1, false, {domain: 'unitInterval', angleUnit: 'radians'}),
+  ASIN: definition('ASIN', 1, false, {domain: 'signedUnitInterval', angleUnit: 'radians'}),
+  ACOS: definition('ACOS', 1, false, {domain: 'signedUnitInterval', angleUnit: 'radians'}),
   ATAN: definition('ATAN', 1, false, {angleUnit: 'radians'}),
   ATAN2: definition('ATAN2', 2, false, {angleUnit: 'radians'}),
   DEGREES: definition('DEGREES'),

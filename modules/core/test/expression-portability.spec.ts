@@ -98,6 +98,8 @@ test('portable numeric declarations expose exact signatures, nulls, precision an
   expect(definitions.ROUND.rounding).toBe('tiesAwayFromZero');
   expect(definitions.MOD.remainderSign).toBe('dividend');
   expect(definitions.SIN.angleUnit).toBe('radians');
+  expect(definitions.ASIN.domain).toBe('signedUnitInterval');
+  expect(definitions.ACOS.domain).toBe('signedUnitInterval');
   expect(definitions.SQRT.prototypes.find(p => p.arguments[0] === 'int64')!.result).toBe('float64');
   expect(definitions.ABS.prototypes.find(p => p.arguments[0] === 'int64')!.result).toBe('int64');
   for (const definition of Object.values(definitions)) {

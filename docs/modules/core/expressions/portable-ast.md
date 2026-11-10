@@ -99,3 +99,5 @@ implement CASE or TRY where inactive expressions may fail. GPUs can record per-r
 for the execution layer to interpret; accepting an AST alone does not establish conformance.
 GPU buffer layout, shader generation, capability checks, submission, and fallback policy belong
 to the consuming library. This package introduces no luma.gl backend or dependency.
+
+The `signedUnitInterval` domain used by `ASIN` and `ACOS` includes both endpoints `-1` and `1`.
