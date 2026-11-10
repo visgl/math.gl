@@ -1,22 +1,33 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {Bool, Field, Float64, type RecordBatch, type Vector} from 'apache-arrow';
+import {Bool, Field, Float64, type RecordBatch, type Vector, vectorFromArray} from 'apache-arrow';
 import {type ParameterizedColumnarPredicate} from '@math.gl/core/expressions';
 import {
-  ArrowFunctionRegistry,
+  type ArrowTableFunction,
+  type ArrowTableFunctionType,
   compileArrowExpression,
   compileArrowFunction,
   compileArrowPredicate
 } from '@math.gl/arrow/expressions';
 
 declare const batch: RecordBatch;
-const registry = new ArrowFunctionRegistry().registerFunction('discount', {
+const evaluate: ArrowTableFunctionType = ([prices], {length, activeRows}) =>
+  vectorFromArray(
+    Array.from({length}, (_, row) =>
+      activeRows[row] && prices!.isValid(row) ? prices!.get(row) * 0.9 : null
+    ),
+    new Float64()
+  );
+const discount: ArrowTableFunction = {
+  name: 'discount',
   arguments: [new Field('price', new Float64(), false)],
   result: new Field('discounted', new Float64(), false),
-  scalar: (price: number) => price * 0.9
-});
-const options = {inputSchema: batch.schema, registry};
+  evaluate,
+  evaluateScalar: (price: number) => price * 0.9
+};
+const functions = [discount];
+const options = {inputSchema: batch.schema, functions};
 const predicate: ParameterizedColumnarPredicate = {
   op: '>',
   args: [{property: 'price'}, {parameter: 'minimum'}]
@@ -30,7 +41,7 @@ compileArrowFunction('discount', ['price'], options).evaluate(batch, {
 });
 compileArrowExpression('discount(price) > 10', options).evaluate(batch);
 // @ts-expect-error An input schema is required.
-compileArrowExpression('price', {registry});
+compileArrowExpression('price', {functions});
 // @ts-expect-error The active mask is an explicit byte array.
 compileArrowExpression('price', options).evaluate(batch, {activeRows: [true]});
 void output;
@@ -64,17 +75,32 @@ import {createTurfArrowFunction} from '@math.gl/geospatial/turf/expressions';
 import {distance, booleanPointInPolygon} from '@math.gl/geospatial/turf';
 declare const geometryField: Field;
 createTurfArrowFunction({
+  name: 'geometryFunction',
   arguments: [geometryField, geometryField],
   result: new Field('distance', new Float64(), true),
   evaluate: distance
 });
 createTurfArrowFunction({
+  name: 'geometryFunction',
   arguments: [geometryField, geometryField],
   result: new Field('distance', new Float64(), true),
   evaluate: (a, b) => distance(a, b, {units: 'meters'})
 });
 createTurfArrowFunction({
+  name: 'geometryFunction',
   arguments: [geometryField, geometryField],
   result: new Field('inside', new Bool(), true),
   evaluate: booleanPointInPolygon
 });
+
+// @ts-expect-error evaluate is required even when a fused callback is supplied.
+const missingVector: ArrowTableFunction = {
+  name: 'invalid',
+  arguments: [],
+  result: new Field('x', new Float64()),
+  evaluateScalar: () => 1
+};
+// @ts-expect-error Public registration uses declarations, not a registry option.
+compileArrowExpression('price', {inputSchema: batch.schema, registry: {}});
+void missingVector;
+createArrowExpressionTask({functions});

@@ -6,5 +6,5 @@ import {initializeTaskWorker} from '@math.gl/tasks';
 import {createArrowExpressionTask} from './worker';
 
 // Default worker for primitive expressions. Applications can provide their own module worker
-// with a local registry by initializing createArrowExpressionTask({registry}) instead.
+// with local declarations by initializing createArrowExpressionTask({functions}) instead.
 void initializeTaskWorker(createArrowExpressionTask());

@@ -4,7 +4,7 @@
 
 import {expect, test, vi} from 'vitest';
 import {Bool, Field, Float64, Schema, Table, Int32, vectorFromArray} from 'apache-arrow';
-import {ArrowFunctionRegistry, compileArrowExpression} from '@math.gl/arrow/expressions';
+import {compileArrowExpression} from '@math.gl/arrow/expressions';
 import {makeArrowVectorFromGeoArrowColumn} from '@math.gl/arrow/geoarrow';
 import {makeGeoArrowColumnFromGeometryRows} from '@math.gl/arrow/geoarrow-utils';
 import {createTurfArrowFunction} from '../src/turf/expressions';
@@ -49,27 +49,24 @@ function input() {
 test('Turf scalar adapters compose in expressions and mask inactive geometry rows', () => {
   const table = input();
   const evaluate = vi.fn(area);
-  const registry = new ArrowFunctionRegistry()
-    .registerFunction(
-      'area',
-      createTurfArrowFunction({
-        arguments: [table.schema.fields[0]!],
-        result: new Field('area', new Float64(), true),
-        evaluate
-      })
-    )
-    .registerFunction(
-      'inside',
-      createTurfArrowFunction({
-        arguments: [table.schema.fields[1]!, table.schema.fields[0]!],
-        result: new Field('inside', new Bool(), true),
-        evaluate: booleanPointInPolygon
-      })
-    );
+  const functions = [
+    createTurfArrowFunction({
+      name: 'area',
+      arguments: [table.schema.fields[0]!],
+      result: new Field('area', new Float64(), true),
+      evaluate
+    }),
+    createTurfArrowFunction({
+      name: 'inside',
+      arguments: [table.schema.fields[1]!, table.schema.fields[0]!],
+      result: new Field('inside', new Bool(), true),
+      evaluate: booleanPointInPolygon
+    })
+  ];
   const values = [
     ...compileArrowExpression('index == 0 ? area(geometry) : 0', {
       inputSchema: table.schema,
-      registry
+      functions
     }).evaluateTable(table)
   ];
   expect(values[0]).toBeGreaterThan(0);
@@ -79,14 +76,14 @@ test('Turf scalar adapters compose in expressions and mask inactive geometry row
   expect([
     ...compileArrowExpression('inside(point, geometry)', {
       inputSchema: table.schema,
-      registry
+      functions
     }).evaluateTable(table)
   ]).toEqual([true, null, true]);
   const sliced = table.slice(1, 3);
   expect([
     ...compileArrowExpression('area(geometry) > 0', {
       inputSchema: sliced.schema,
-      registry
+      functions
     }).evaluateTable(sliced)
   ]).toEqual([null, true]);
 });
@@ -94,41 +91,42 @@ test('Turf scalar adapters compose in expressions and mask inactive geometry row
 test('Turf adapters support bound options and reject non-scalar or incompatible results', () => {
   const table = input();
   const field = table.schema.fields[1]!;
-  const registry = new ArrowFunctionRegistry().registerFunction(
-    'meters',
+  const functions = [
     createTurfArrowFunction({
+      name: 'meters',
       arguments: [field, field],
       result: new Field('distance', new Float64(), true),
       evaluate: (a, b) => distance(a, b, {units: 'meters'})
     })
-  );
+  ];
   expect([
     ...compileArrowExpression('meters(point, point)', {
       inputSchema: table.schema,
-      registry
+      functions
     }).evaluateTable(table)
   ]).toEqual([0, 0, 0]);
-  registry.registerFunction(
-    'bbox',
+  functions.push(
     createTurfArrowFunction({
+      name: 'bbox',
       arguments: [field],
       result: new Field('bbox', new Float64(), true),
       evaluate: bbox
     })
   );
   expect(() =>
-    compileArrowExpression('bbox(point)', {inputSchema: table.schema, registry}).evaluateTable(
+    compileArrowExpression('bbox(point)', {inputSchema: table.schema, functions}).evaluateTable(
       table
     )
   ).toThrow('one declared scalar');
   expect(() =>
-    compileArrowExpression('meters(geometry, point)', {inputSchema: table.schema, registry})
+    compileArrowExpression('meters(geometry, point)', {inputSchema: table.schema, functions})
   ).toThrow('type mismatch');
   expect(() =>
-    compileArrowExpression('geometry + 1', {inputSchema: table.schema, registry})
+    compileArrowExpression('geometry + 1', {inputSchema: table.schema, functions})
   ).toThrow('Unsupported');
   expect(() =>
     createTurfArrowFunction({
+      name: 'invalid',
       arguments: [field],
       result: new Field('x', new Int32(), true),
       evaluate: area
@@ -139,15 +137,15 @@ test('Turf adapters support bound options and reject non-scalar or incompatible 
 test('geometry extension metadata is validated when reusing a compiled evaluator', () => {
   const table = input();
   const field = table.schema.fields[0]!;
-  const registry = new ArrowFunctionRegistry().registerFunction(
-    'area',
+  const functions = [
     createTurfArrowFunction({
+      name: 'area',
       arguments: [field],
       result: new Field('a', new Float64(), true),
       evaluate: area
     })
-  );
-  const compiled = compileArrowExpression('area(geometry)', {inputSchema: table.schema, registry});
+  ];
+  const compiled = compileArrowExpression('area(geometry)', {inputSchema: table.schema, functions});
   const changed = field.clone({
     metadata: new Map([['ARROW:extension:name', 'geoarrow.multilinestring']])
   });

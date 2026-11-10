@@ -9,5 +9,5 @@ usable. Close the initialized task and runner to release workers.
 
 For a browser bundler, replace the task's `worker.url` with
 `worker.create: () => new Worker(new URL('./worker.mjs', import.meta.url), {type: 'module'})`.
-The worker implementation and table transport are identical. Register custom functions, including
-Turf wrappers, inside `worker.mjs` and pass the registry to `createArrowExpressionTask({registry})`.
+The worker implementation and table transport are identical. Declare custom functions, including
+Turf wrappers, inside `worker.mjs` and pass `functions` to `createArrowExpressionTask({functions})`.

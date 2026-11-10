@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {scalarFunction} from './utils/scalar-function';
+
 import {expect, test} from 'vitest';
 import {
   Table,
@@ -18,8 +20,7 @@ import {
 import {
   compileArrowExpression,
   compileArrowFunction,
-  compileArrowPredicate,
-  ArrowFunctionRegistry
+  compileArrowPredicate
 } from '../src/expressions';
 
 function table() {
@@ -96,18 +97,23 @@ test('predicates, dictionaries and direct scalar functions work over all batches
   ).toBe('Utf8');
   const data = table();
   let calls = 0;
-  const registry = new ArrowFunctionRegistry().registerFunction('increment', {
-    arguments: [new Field('x', new Int32())],
-    result: new Field('y', new Int32()),
-    scalar: (x: number) => {
-      calls++;
-      return x + 1;
-    }
-  });
+  const functions = [
+    scalarFunction({
+      name: 'increment',
+      ...{
+        arguments: [new Field('x', new Int32())],
+        result: new Field('y', new Int32()),
+        evaluateScalar: (x: number) => {
+          calls++;
+          return x + 1;
+        }
+      }
+    })
+  ];
   expect([
     ...compileArrowExpression('x > 3 ? increment(x) : 0', {
       inputSchema: data.schema,
-      registry
+      functions
     }).evaluateTable(data)
   ]).toEqual([0, 0, 0, 5, 6]);
   expect(calls).toBe(2);
@@ -116,42 +122,49 @@ test('predicates, dictionaries and direct scalar functions work over all batches
 test('vector-only functions accept matching dictionary encodings', () => {
   const input = new Table({text: vectorFromArray(['a', null, 'bbb'])});
   const type = input.schema.fields[0]!.type;
-  const registry = new ArrowFunctionRegistry().registerFunction('size', {
-    arguments: [new Field('text', type, true)],
-    result: new Field('size', new Int32(), true),
-    kernel: ([text], {activeRows}) => {
-      expect(text!.type).toBe(type);
-      return vectorFromArray(
-        Array.from(activeRows, (active, row) => (active ? text!.get(row).length : null)),
-        new Int32()
-      );
+  const functions = [
+    {
+      arguments: [new Field('text', type, true)],
+      result: new Field('size', new Int32(), true),
+      name: 'size',
+      evaluateScalar: undefined,
+      evaluate: ([text], {activeRows}) => {
+        expect(text!.type).toBe(type);
+        return vectorFromArray(
+          Array.from(activeRows, (active, row) => (active ? text!.get(row).length : null)),
+          new Int32()
+        );
+      }
     }
-  });
+  ];
   expect([
     ...compileArrowExpression('size(text)', {
       inputSchema: input.schema,
-      registry
+      functions
     }).evaluateTable(input)
   ]).toEqual([1, null, 3]);
-  registry.registerFunction('logicalSize', {
-    ...registry.getFunction('size')!,
+  functions.push({
+    ...functions[0]!,
+    name: 'logicalSize',
     arguments: [new Field('text', new Utf8(), true)]
   });
   expect([
     ...compileArrowExpression('logicalSize(text)', {
       inputSchema: input.schema,
-      registry
+      functions
     }).evaluateTable(input)
   ]).toEqual([1, null, 3]);
-  registry.registerFunction('wrongEncoding', {
+  functions.push({
     arguments: [new Field('text', new Dictionary(new Utf8(), new Int8()), true)],
     result: new Field('size', new Int32(), true),
-    kernel: () => vectorFromArray([], new Int32())
+    name: 'wrongEncoding',
+    evaluateScalar: undefined,
+    evaluate: () => vectorFromArray([], new Int32())
   });
   expect(() =>
     compileArrowExpression('wrongEncoding(text)', {
       inputSchema: input.schema,
-      registry
+      functions
     })
   ).toThrow('Argument type mismatch');
 });
@@ -173,21 +186,41 @@ test('nested schema validation ignores descriptive metadata but checks extension
 });
 
 test('dictionary declarations reject literals before invoking a vector kernel', () => {
-  const registry = new ArrowFunctionRegistry().registerFunction('encoded', {
-    arguments: [new Field('text', new Dictionary(new Utf8(), new Int8()), true)],
-    result: new Field('result', new Int32()),
-    kernel: () => {
-      throw new Error('must not execute');
+  const functions = [
+    {
+      arguments: [new Field('text', new Dictionary(new Utf8(), new Int8()), true)],
+      result: new Field('result', new Int32()),
+      name: 'encoded',
+      evaluateScalar: undefined,
+      evaluate: () => {
+        throw new Error('must not execute');
+      }
     }
-  });
+  ];
   for (const argument of ['"a"', 'null']) {
     expect(() =>
       compileArrowFunction('encoded', [argument], {
         inputSchema: new Schema([]),
-        registry
+        functions
       })
     ).toThrow('dictionary-encoded source column');
   }
+});
+
+test('dictionary declarations reject signed numeric literals before vector evaluation', () => {
+  const functions = [
+    {
+      name: 'encodedNumber',
+      arguments: [new Field('number', new Dictionary(new Int32(), new Int8()), true)],
+      result: new Field('number', new Int32()),
+      evaluate: () => {
+        throw new Error('must not execute');
+      }
+    }
+  ];
+  expect(() =>
+    compileArrowFunction('encodedNumber', ['-1'], {inputSchema: new Schema([]), functions})
+  ).toThrow('dictionary-encoded source column');
 });
 
 test('nested list sizes match structurally even when type strings are uninformative', () => {
@@ -202,15 +235,19 @@ test('nested list sizes match structurally even when type strings are uninformat
   const compiled = compileArrowExpression('1', {inputSchema: schema});
   expect(compiled.evaluateTable(new Table(new Schema([field(2)]), [])).length).toBe(0);
   expect(() => compiled.evaluateTable(new Table(new Schema([xyz]), []))).toThrow('schema mismatch');
-  const registry = new ArrowFunctionRegistry().registerFunction('pointValue', {
-    arguments: [xyz],
-    result: new Field('value', new Int32()),
-    kernel: () => vectorFromArray([], new Int32())
-  });
+  const functions = [
+    {
+      arguments: [xyz],
+      result: new Field('value', new Int32()),
+      name: 'pointValue',
+      evaluateScalar: undefined,
+      evaluate: () => vectorFromArray([], new Int32())
+    }
+  ];
   expect(() =>
     compileArrowFunction('pointValue', ['point'], {
       inputSchema: schema,
-      registry
+      functions
     })
   ).toThrow('Argument type mismatch');
 });

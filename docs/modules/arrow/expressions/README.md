@@ -34,7 +34,7 @@ Returns a reusable evaluator with `outputField: Field` and
 | --- | --- |
 | `expression` | Expression text or the AST accepted by core expressions. |
 | `options.inputSchema` | Required Arrow schema used to bind field names and types. |
-| `options.registry` | Optional instance of `ArrowFunctionRegistry`. |
+| `options.functions` | Optional array of named `ArrowTableFunction` declarations. |
 | `activeRows` | Optional `Uint8Array`, one 0 or 1 per input row. Zero skips evaluation. |
 
 ### compileArrowFunction(name, arguments, options)
@@ -48,43 +48,67 @@ Compiles a portable `ParameterizedColumnarPredicate`. Options additionally accep
 map of parameter names to scalar values. Missing parameters and unknown columns fail at compilation.
 The returned evaluator produces a Bool vector using the null semantics described below.
 
-### ArrowFunctionRegistry
+## Named table functions
 
-Create an isolated registry with `new ArrowFunctionRegistry()`. `registerFunction(name, declaration)`
-returns the registry for chaining; `getFunction(name)` returns its declaration or `undefined`.
-Treat declared fields and their types as immutable after registration. Compilation captures the
-registered implementations; registering additional functions does not change existing evaluators.
-
-## Typed functions
+Pass declarations through `functions`; the compiler builds a private name lookup once per compilation.
+Names must be valid identifiers and unique; built-in names are reserved. No global registry is modified.
+Treat declared fields and their types as immutable. Compilation snapshots the declarations and their
+argument arrays, so later changes to the supplied function list do not change existing evaluators.
 
 ```ts
-import {Field, Float64} from 'apache-arrow';
-import {ArrowFunctionRegistry, compileArrowFunction} from '@math.gl/arrow/expressions';
+import {Field, Float64, vectorFromArray} from 'apache-arrow';
+import {compileArrowFunction, type ArrowTableFunction} from '@math.gl/arrow/expressions';
 
-const registry = new ArrowFunctionRegistry().registerFunction('discount', {
-  arguments: [new Field('price', new Float64(), false)],
-  result: new Field('discounted_price', new Float64(), false),
+const discount: ArrowTableFunction = {
+  name: 'discount',
+  arguments: [new Field('price', new Float64(), true)],
+  result: new Field('discounted_price', new Float64(), true),
   nullHandling: 'propagate',
-  scalar: price => Number(price) * 0.9
-});
+  evaluate([prices], {length, activeRows}) {
+    return vectorFromArray(Array.from({length}, (_, row) =>
+      activeRows[row] && prices!.isValid(row) ? prices!.get(row) * 0.9 : null
+    ), new Float64());
+  },
+  evaluateScalar: price => Number(price) * 0.9
+};
 
-const discount = compileArrowFunction('discount', ['price'], {inputSchema: batch.schema, registry});
-const prices = discount.evaluate(batch);
-// The same declaration can be called inside 'discount(price) > 100'.
+const compiled = compileArrowFunction('discount', ['price'], {
+  inputSchema: batch.schema,
+  functions: [discount]
+});
+const prices = compiled.evaluate(batch);
+// The same declaration can be used inside 'discount(price) > 100'.
 ```
 
-Registries are instance-scoped. Names must be valid identifiers and unique; built-in names are
-reserved. Arguments use exact declared logical types. Numeric literals are checked against their
-operand's type; other conversions must be explicit. `nullHandling: 'propagate'` skips invocation when
-any argument is null and makes the expression result nullable. With `nullHandling: 'call'`, nullable
-arguments must be declared nullable and the implementation receives null values. Returning null for
-a non-nullable declared result is an error.
+`ArrowTableFunctionType` is the type of `evaluate`: it accepts an ordered `readonly Vector[]`
+and `{activeRows: Uint8Array, length: number}`, and returns a `Vector` of the same length.
+`evaluate` is required and can also be called directly with those arguments. Direct callers must
+supply correctly typed vectors and a mask, and honor the declaration's null policy; compilation
+provides these checks and null propagation when invoking functions inside expressions.
 
-An optional `kernel(arguments, {activeRows, length})` supplies vector execution. It receives full-length
-Arrow vectors, potentially dictionary encoded, and a byte mask containing 0 or 1 for each row. It must
-only evaluate active rows, preserve row count and return the declared logical result type. Inactive
-output values are ignored. Inputs belong to the caller and must not be mutated. A kernel is never
-called when there are no active rows. A vector-only declaration may omit `scalar`; this also permits exact nested argument fields without row decoding. Results remain primitive scalars. Nested inputs are accepted only at these declared function boundaries. The library does not retry a failing kernel through a scalar implementation.
+Arguments use exact declared logical types. Numeric literals are checked against their operand's
+type; other conversions must be explicit. `nullHandling: 'propagate'` skips rows with null arguments
+and makes the expression result nullable. With `nullHandling: 'call'`, nullable arguments must be
+declared nullable and the implementation receives null values. Returning null for a non-nullable
+declared result is an error.
+
+### Vector evaluation and scalar fusion
+
+The vector implementation receives full-length Arrow vectors, potentially dictionary encoded, and a
+byte mask containing 0 or 1 per row. It must evaluate only active rows, preserve row count, and return
+the declared logical result type. Inactive output values are ignored. Inputs belong to the caller
+and must not be mutated. The evaluator never calls a function when no rows are active.
+
+An optional `evaluateScalar(...values)` provides equivalent primitive row semantics. When present,
+the expression compiler uses it to fuse the function into its output loop, avoiding intermediate
+vectors. Without it, the compiler calls `evaluate` at the vector boundary. It never runs both
+implementations or retries a failure through the other implementation. Both implementations must
+agree on values and errors. Conditional branches and null propagation skip scalar callbacks too.
+
+The example uses `vectorFromArray` for readability; vector kernels can write Arrow buffers directly.
+Geometry functions can supply only `evaluate`, with exact nested argument fields and GeoArrow
+extension metadata. Geometry layouts require schema-bound declarations; there is no overload
+resolution yet. Results remain primitive scalars, so geometry-valued output is not supported.
 
 ## Supported expressions
 
@@ -134,8 +158,8 @@ Run `node modules/arrow/scripts/benchmark-expressions.mjs` after building to com
 workloads with the existing expression evaluator. The report separates throughput, row objects,
 string decodes and output buffer bytes; it does not claim to measure total allocator traffic.
 
-This optional subpath does not add Arrow to core imports. Importing the function registry alone does
-not include the compiler or Arrow runtime. Unregistered application function libraries are not loaded.
+This optional subpath does not add Arrow to core imports. Function declaration types are erased
+from runtime bundles. Application function libraries are included only when imported.
 
 
 ## Whole-table evaluation
@@ -216,7 +240,7 @@ more overall for small workloads while keeping evaluation off the UI thread.
 
 ## Turf functions
 
-`@math.gl/geospatial/turf/expressions` exports `createTurfArrowFunction({arguments, result, evaluate})`.
+`@math.gl/geospatial/turf/expressions` exports `createTurfArrowFunction({name, arguments, result, evaluate})`.
 Pass the exact GeoArrow argument fields and a nullable Float64 or Bool result. Import only the Turf
 functions you use; the adapter itself imports no Turf implementations.
 
@@ -224,18 +248,22 @@ functions you use; the adapter itself imports no Turf implementations.
 import {Field, Float64} from 'apache-arrow';
 import {area, distance} from '@math.gl/geospatial/turf';
 import {createTurfArrowFunction} from '@math.gl/geospatial/turf/expressions';
-import {ArrowFunctionRegistry} from '@math.gl/arrow/expressions';
-
-const registry = new ArrowFunctionRegistry().registerFunction('area', createTurfArrowFunction({
-  arguments: [polygonField],
-  result: new Field('area', new Float64(), true),
-  evaluate: area
-})).registerFunction('distanceMeters', createTurfArrowFunction({
-  arguments: [pointField, pointField],
-  result: new Field('distance', new Float64(), true),
-  evaluate: (a, b) => distance(a, b, {units: 'meters'})
-}));
-// Compile 'area(geometry) > 1000' with this registry, or create it inside the worker module.
+const functions = [
+  createTurfArrowFunction({
+    name: 'area',
+    arguments: [polygonField],
+    result: new Field('area', new Float64(), true),
+    evaluate: area
+  }),
+  createTurfArrowFunction({
+    name: 'distanceMeters',
+    arguments: [pointField, pointField],
+    result: new Field('distance', new Float64(), true),
+    evaluate: (a, b) => distance(a, b, {units: 'meters'})
+  })
+];
+// Compile 'area(geometry) > 1000' with {inputSchema, functions},
+// or construct the same declarations inside the worker module.
 ```
 
 The adapter combines active-row masks with GeoArrow validity without changing coordinate buffers.

@@ -3,13 +3,15 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {DataType, Precision, makeData, makeVector, type Field} from 'apache-arrow';
-import type {ArrowFunction} from '@math.gl/arrow/expressions';
+import type {ArrowTableFunction} from '@math.gl/arrow/expressions';
 import {makeGeoArrowColumnFromArrowVector} from '@math.gl/arrow/geoarrow';
 import {isGeoArrowValueValid, type GeoArrowColumn} from '@math.gl/arrow/geoarrow-utils';
 import type {TurfBatchResult} from '../turf';
 
 /** Adapter for row-preserving numeric/Boolean functions from @math.gl/geospatial/turf. */
 export type TurfArrowFunctionOptions<Fields extends readonly Field[] = readonly Field[]> = {
+  /** Name used in expressions. */
+  name: string;
   /** Exact GeoArrow fields, including extension metadata, in function argument order. */
   arguments: Fields;
   /** Nullable Float64 or Bool output field. */
@@ -27,7 +29,7 @@ export type TurfArrowFunctionOptions<Fields extends readonly Field[] = readonly 
  */
 export function createTurfArrowFunction<const Fields extends readonly Field[]>(
   options: TurfArrowFunctionOptions<Fields>
-): ArrowFunction {
+): ArrowTableFunction {
   const {result, evaluate} = options;
   const fields = [...options.arguments];
   const boolean = DataType.isBool(result.type);
@@ -35,10 +37,11 @@ export function createTurfArrowFunction<const Fields extends readonly Field[]>(
     throw new Error('Turf expressions require a Float64 or Bool result');
   if (!result.nullable) throw new Error('Turf expression results must be nullable');
   return {
+    name: options.name,
     arguments: fields,
     result,
     nullHandling: 'propagate',
-    kernel(vectors, {activeRows, length}) {
+    evaluate(vectors, {activeRows, length}) {
       const columns = vectors.map((vector, index) => {
         const column = makeGeoArrowColumnFromArrowVector(vector, {field: fields[index]});
         let offset = 0;

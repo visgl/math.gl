@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {scalarFunction} from './utils/scalar-function';
+
 import {expect, test, vi} from 'vitest';
 import {
   Bool,
@@ -20,8 +22,7 @@ import {
 import {
   compileArrowExpression,
   compileArrowFunction,
-  compileArrowPredicate,
-  ArrowFunctionRegistry
+  compileArrowPredicate
 } from '../src/expressions';
 
 function batch(columns: Record<string, Vector>) {
@@ -108,13 +109,18 @@ test('inactive branches never call registered scalar functions', () => {
     if (x === 0) throw new Error('inactive');
     return 10 / x;
   });
-  const registry = new ArrowFunctionRegistry().registerFunction('inverse', {
-    arguments: [new Field('x', new Float64(), false)],
-    result: new Field('inverse', new Float64(), false),
-    scalar
-  });
+  const functions = [
+    scalarFunction({
+      name: 'inverse',
+      ...{
+        arguments: [new Field('x', new Float64(), false)],
+        result: new Field('inverse', new Float64(), false),
+        evaluateScalar: scalar
+      }
+    })
+  ];
   const input = batch({x: vectorFromArray([0, 2, null], new Float64())});
-  const options = {inputSchema: input.schema, registry};
+  const options = {inputSchema: input.schema, functions};
   expect([...compileArrowExpression('x != 0 ? inverse(x) : 0', options).evaluate(input)]).toEqual([
     0, 5, 0
   ]);
@@ -141,20 +147,19 @@ test('scalar and vector functions share typing, masks, null propagation and dire
   const declaration = {
     arguments: [new Field('x', new Int32(), false)],
     result: new Field('double', new Int32(), false),
-    scalar
+    evaluateScalar: scalar
   };
-  const scalarRegistry = new ArrowFunctionRegistry().registerFunction('double', declaration);
-  const vectorRegistry = new ArrowFunctionRegistry().registerFunction('double', {
-    ...declaration,
-    kernel
-  });
+  const scalarFunctions = [scalarFunction({name: 'double', ...declaration})];
+  const vectorFunctions = [
+    {...declaration, name: 'double', evaluateScalar: undefined, evaluate: kernel}
+  ];
   const a = compileArrowFunction('double', ['x'], {
     inputSchema: input.schema,
-    registry: scalarRegistry
+    functions: scalarFunctions
   });
   const b = compileArrowExpression('double(x)', {
     inputSchema: input.schema,
-    registry: vectorRegistry
+    functions: vectorFunctions
   });
   expect([...a.evaluate(input)]).toEqual([2, null, 6]);
   expect([...b.evaluate(input)]).toEqual([2, null, 6]);
@@ -164,15 +169,20 @@ test('scalar and vector functions share typing, masks, null propagation and dire
 });
 
 test('null-aware functions receive null values explicitly', () => {
-  const registry = new ArrowFunctionRegistry().registerFunction('fill', {
-    arguments: [new Field('x', new Int32(), true)],
-    result: new Field('filled', new Int32(), false),
-    nullHandling: 'call',
-    scalar: x => (x === null ? 0 : x)
-  });
+  const functions = [
+    scalarFunction({
+      name: 'fill',
+      ...{
+        arguments: [new Field('x', new Int32(), true)],
+        result: new Field('filled', new Int32(), false),
+        nullHandling: 'call',
+        evaluateScalar: x => (x === null ? 0 : x)
+      }
+    })
+  ];
   const input = batch({x: vectorFromArray([1, null], new Int32())});
   expect([
-    ...compileArrowExpression('fill(x)', {inputSchema: input.schema, registry}).evaluate(input)
+    ...compileArrowExpression('fill(x)', {inputSchema: input.schema, functions}).evaluate(input)
   ]).toEqual([1, 0]);
 });
 
@@ -231,13 +241,16 @@ test('empty batches, masks, schema mismatch and unsupported syntax fail predicta
 test('kernel contracts reject wrong results and skip inactive invocations', () => {
   const input = batch({x: vectorFromArray([1, 2], new Int32())});
   const kernel = vi.fn(() => vectorFromArray([1], new Int32()));
-  const registry = new ArrowFunctionRegistry().registerFunction('custom', {
-    arguments: [new Field('x', new Int32(), true)],
-    result: new Field('out', new Int32(), false),
-    scalar: x => x,
-    kernel
-  });
-  const compiled = compileArrowExpression('custom(x)', {inputSchema: input.schema, registry});
+  const functions = [
+    {
+      arguments: [new Field('x', new Int32(), true)],
+      result: new Field('out', new Int32(), false),
+      name: 'custom',
+      evaluateScalar: undefined,
+      evaluate: kernel
+    }
+  ];
+  const compiled = compileArrowExpression('custom(x)', {inputSchema: input.schema, functions});
   expect([...compiled.evaluate(input, {activeRows: new Uint8Array(2)})]).toEqual([null, null]);
   expect(kernel).not.toHaveBeenCalled();
   expect(() => compiled.evaluate(input)).toThrow('Invalid kernel result');
@@ -249,18 +262,28 @@ test('typed function registries reject reserved names, duplicates and incompatib
   const declaration = {
     arguments: [new Field('x', new Float64(), false)],
     result: new Field('out', new Float64(), false),
-    scalar: (x: number) => x
+    evaluateScalar: (x: number) => x
   };
-  const registry = new ArrowFunctionRegistry().registerFunction('identity', declaration);
-  expect(() => registry.registerFunction('identity', declaration)).toThrow('Duplicate');
-  expect(() => registry.registerFunction('isNull', declaration)).toThrow('Reserved');
+  const functions = [scalarFunction({name: 'identity', ...declaration})];
   const input = batch({x: vectorFromArray([1], new Int32())});
   expect(() =>
-    compileArrowFunction('identity', ['x'], {inputSchema: input.schema, registry})
+    compileArrowExpression('x', {
+      inputSchema: input.schema,
+      functions: [...functions, functions[0]!]
+    })
+  ).toThrow('Duplicate');
+  expect(() =>
+    compileArrowExpression('x', {
+      inputSchema: input.schema,
+      functions: [{...functions[0]!, name: 'isNull'}]
+    })
+  ).toThrow('Reserved');
+  expect(() =>
+    compileArrowFunction('identity', ['x'], {inputSchema: input.schema, functions})
   ).toThrow('type mismatch');
-  expect(() => compileArrowFunction('identity', [], {inputSchema: input.schema, registry})).toThrow(
-    'argument count'
-  );
+  expect(() =>
+    compileArrowFunction('identity', [], {inputSchema: input.schema, functions})
+  ).toThrow('argument count');
 });
 
 test('UTF8 bigint and Boolean conversions, Unicode ordering and floating NaNs', () => {
@@ -290,22 +313,27 @@ test('fused expressions call condition functions once and mask vector kernel bra
     expect(args[0].get(1)).toBe(5);
     return vectorFromArray([null, 10, null], new Int32());
   });
-  const registry = new ArrowFunctionRegistry()
-    .registerFunction('positive', {
-      arguments: [new Field('x', new Int32(), true)],
-      result: new Field('positive', new Bool(), false),
-      nullHandling: 'call',
-      scalar: condition
-    })
-    .registerFunction('twice', {
+  const functions = [
+    scalarFunction({
+      name: 'positive',
+      ...{
+        arguments: [new Field('x', new Int32(), true)],
+        result: new Field('positive', new Bool(), false),
+        nullHandling: 'call',
+        evaluateScalar: condition
+      }
+    }),
+    {
       arguments: [new Field('x', new Int32(), false)],
       result: new Field('twice', new Int32(), false),
-      scalar: (x: number) => x * 2,
-      kernel
-    });
+      name: 'twice',
+      evaluateScalar: undefined,
+      evaluate: kernel
+    }
+  ];
   const compiled = compileArrowExpression('positive(x) ? twice(x * 2 + 1) : 0', {
     inputSchema: input.schema,
-    registry
+    functions
   });
   expect([...compiled.evaluate(input)]).toEqual([0, 10, 0]);
   expect(condition).toHaveBeenCalledTimes(3);
@@ -316,13 +344,18 @@ test('fused expressions call condition functions once and mask vector kernel bra
 test('fused Float32 intermediates retain declared precision', () => {
   const input = batch({x: vectorFromArray([16777216], new Float32())});
   expect(values('(x + 1) - x', input)).toEqual([0]);
-  const registry = new ArrowFunctionRegistry().registerFunction('increment', {
-    arguments: [new Field('x', new Float32())],
-    result: new Field('result', new Float32()),
-    scalar: (x: number) => x + 1
-  });
+  const functions = [
+    scalarFunction({
+      name: 'increment',
+      ...{
+        arguments: [new Field('x', new Float32())],
+        result: new Field('result', new Float32()),
+        evaluateScalar: (x: number) => x + 1
+      }
+    })
+  ];
   expect([
-    ...compileArrowExpression('increment(x) - x', {inputSchema: input.schema, registry}).evaluate(
+    ...compileArrowExpression('increment(x) - x', {inputSchema: input.schema, functions}).evaluate(
       input
     )
   ]).toEqual([0]);
@@ -331,13 +364,18 @@ test('fused Float32 intermediates retain declared precision', () => {
 test('Null result functions still execute on active rows', () => {
   const input = batch({x: vectorFromArray([1, 2], new Int32())});
   const scalar = vi.fn(() => null);
-  const registry = new ArrowFunctionRegistry().registerFunction('observe', {
-    arguments: [new Field('x', new Int32())],
-    result: new Field('result', new Null(), true),
-    scalar
-  });
+  const functions = [
+    scalarFunction({
+      name: 'observe',
+      ...{
+        arguments: [new Field('x', new Int32())],
+        result: new Field('result', new Null(), true),
+        evaluateScalar: scalar
+      }
+    })
+  ];
   expect([
-    ...compileArrowExpression('observe(x)', {inputSchema: input.schema, registry}).evaluate(input)
+    ...compileArrowExpression('observe(x)', {inputSchema: input.schema, functions}).evaluate(input)
   ]).toEqual([null, null]);
   expect(scalar).toHaveBeenCalledTimes(2);
 });
@@ -360,13 +398,18 @@ test('signed literals bind to the operand or function argument type', () => {
   expect(values('x < 0 ? -128 : x', input)).toEqual([-128, 1]);
   expect(() => values('x == -129', input)).toThrow('overflow');
   expect(values('toInt32(-1)', input)).toEqual([-1, -1]);
-  const registry = new ArrowFunctionRegistry().registerFunction('identity', {
-    arguments: [new Field('value', new Int8())],
-    result: new Field('result', new Int8()),
-    scalar: (value: number) => value
-  });
+  const functions = [
+    scalarFunction({
+      name: 'identity',
+      ...{
+        arguments: [new Field('value', new Int8())],
+        result: new Field('result', new Int8()),
+        evaluateScalar: (value: number) => value
+      }
+    })
+  ];
   expect([
-    ...compileArrowFunction('identity', ['-128'], {inputSchema: input.schema, registry}).evaluate(
+    ...compileArrowFunction('identity', ['-128'], {inputSchema: input.schema, functions}).evaluate(
       input
     )
   ]).toEqual([-128, -128]);
@@ -382,4 +425,61 @@ test('floating-point zero divisors retain IEEE results while integer division is
   const integer = batch({x: vectorFromArray([1], new Int32())});
   expect(values('toFloat64(x) / 0', integer)).toEqual([Infinity]);
   expect(() => values('x % 0', integer)).toThrow('Division by zero');
+});
+
+test('named declarations support standalone vectors, scalar fusion and compilation snapshots', () => {
+  const input = batch({x: vectorFromArray([1, null, 3], new Int32())});
+  const scalar = vi.fn((x: number) => x * 2);
+  const declaration = {
+    ...scalarFunction({
+      name: 'double',
+      arguments: [new Field('x', new Int32(), true)],
+      result: new Field('doubled', new Int32(), true),
+      evaluateScalar: scalar
+    })
+  };
+  const vector = vi.fn(declaration.evaluate);
+  declaration.evaluate = vector;
+  const functions = [declaration];
+  const compiled = compileArrowExpression('double(x) + 1', {inputSchema: input.schema, functions});
+  expect([
+    ...declaration.evaluate([input.getChild('x')!], {
+      length: 3,
+      activeRows: new Uint8Array([1, 1, 0])
+    })
+  ]).toEqual([2, null, null]);
+  scalar.mockClear();
+  vector.mockClear();
+  functions.length = 0;
+  declaration.evaluateScalar = () => {
+    throw new Error('must not use changed declaration');
+  };
+  expect([...compiled.evaluate(input)]).toEqual([3, null, 7]);
+  expect(scalar).toHaveBeenCalledTimes(2);
+  expect(vector).not.toHaveBeenCalled();
+});
+
+test('function declarations validate names, implementation contracts and null policies', () => {
+  const input = batch({x: vectorFromArray([1], new Int32())});
+  const valid = scalarFunction({
+    name: 'f',
+    arguments: [new Field('x', new Int32())],
+    result: new Field('out', new Int32()),
+    evaluateScalar: (x: number) => x
+  });
+  for (const invalid of [
+    {...valid, name: ''},
+    {...valid, name: 'invalid.name'},
+    {...valid, name: undefined},
+    {...valid, arguments: null},
+    {...valid, result: null},
+    {...valid, evaluate: undefined},
+    {...valid, evaluate: 1},
+    {...valid, evaluateScalar: 1},
+    {...valid, nullHandling: 'invalid'}
+  ]) {
+    expect(() =>
+      compileArrowExpression('x', {inputSchema: input.schema, functions: [invalid as never]})
+    ).toThrow();
+  }
 });

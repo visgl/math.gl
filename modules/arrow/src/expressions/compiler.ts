@@ -22,13 +22,19 @@ import {
 import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '../utf8/index';
 import {parse, type Expression} from '@math.gl/core/expressions';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
+import {createFunctionLookup} from './registry';
 import type {
+  ArrowTableFunction,
   ArrowExpression,
   ArrowExpressionOptions,
   ArrowExpressionEvaluationOptions,
   ArrowExpressionValue,
   CompiledArrowExpression
 } from './types';
+
+type BindingOptions = ArrowExpressionOptions & {
+  functionLookup: ReadonlyMap<string, ArrowTableFunction>;
+};
 
 type Mask = Uint8Array;
 type Range = [Uint8Array, number, number];
@@ -54,7 +60,10 @@ export function compileArrowExpression(
   const fields = [...options.inputSchema.fields];
   if (new Set(fields.map(field => field.name)).size !== fields.length)
     throw new Error('Expression input field names must be unique');
-  const root = bind(parse(expression), options);
+  const root = bind(parse(expression), {
+    ...options,
+    functionLookup: createFunctionLookup(options.functions)
+  });
   const keys = fields.map(field => ({
     name: field.name,
     type: physicalKey(field.type),
@@ -268,15 +277,10 @@ function bytes(value: Prepared, row: number): Range | null {
 }
 
 /** Binds supported syntax to fused per-row operations and explicit vector boundaries. */
-function bind(
-  ast: any,
-  options: ArrowExpressionOptions,
-  expected?: DataType,
-  vectorInput = false
-): Node {
+function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInput = false): Node {
   if (isSignedLiteral(ast)) {
     const value = ast.operator === '-' ? -ast.argument.value : ast.argument.value;
-    return bind({type: 'Literal', value}, options, expected);
+    return bind({type: 'Literal', value}, options, expected, vectorInput);
   }
   if (ast.type === 'Identifier') {
     const index = options.inputSchema.fields.findIndex(field => field.name === ast.name);
@@ -416,7 +420,7 @@ function requireNumeric(node: Node): void {
 }
 
 /** Fuses primitive operations; only kernel boundaries require a mask prepass. */
-function bindBinary(ast: any, options: ArrowExpressionOptions): Node {
+function bindBinary(ast: any, options: BindingOptions): Node {
   const op = ast.operator,
     logical = op === '&&' || op === '||';
   let left = bind(ast.left, options, logical ? bool : undefined),
@@ -535,7 +539,7 @@ function compare(op: string, a: any, b: any): boolean {
 }
 
 /** Binds built-ins and custom functions, materializing arguments only for vector kernels. */
-function bindCall(ast: any, options: ArrowExpressionOptions): Node {
+function bindCall(ast: any, options: BindingOptions): Node {
   if (ast.callee.type !== 'Identifier')
     throw new Error('Only registered named function calls are supported');
   const name = ast.callee.name;
@@ -591,13 +595,14 @@ function bindCall(ast: any, options: ArrowExpressionOptions): Node {
       }
     };
   }
-  const declaration = options.registry?.getFunction(name);
+  const declaration = options.functionLookup.get(name);
   if (!declaration) throw new Error(`Unknown Arrow function: ${name}`);
   if (ast.arguments.length !== declaration.arguments.length)
     throw new Error(`Wrong argument count for ${name}`);
+  const evaluateVector = declaration.evaluateScalar ? undefined : declaration.evaluate;
   const arguments_ = ast.arguments.map((argument: any, index: number) => {
     const field = declaration.arguments[index]!;
-    const vectorInput = !declaration.scalar;
+    const vectorInput = !declaration.evaluateScalar;
     const bound = bind(argument, options, field.type, vectorInput);
     if (
       (vectorInput
@@ -626,12 +631,12 @@ function bindCall(ast: any, options: ArrowExpressionOptions): Node {
   );
   return {
     field,
-    hasKernel: Boolean(declaration.kernel) || arguments_.some(argument => argument.hasKernel),
+    hasKernel: Boolean(evaluateVector) || arguments_.some(argument => argument.hasKernel),
     prepare(batch, active) {
       const children = arguments_.map(argument => argument.prepare(batch, active));
       let kernel: Prepared | undefined;
       let mask = active;
-      if (declaration.kernel && active.some(Boolean)) {
+      if (evaluateVector && active.some(Boolean)) {
         const vectors = children.map(
           (child, index) => child.vector ?? output(arguments_[index]!.field, active, child.get)
         );
@@ -643,7 +648,7 @@ function bindCall(ast: any, options: ArrowExpressionOptions): Node {
             : 0
         );
         if (mask.some(Boolean)) {
-          const vector = declaration.kernel(vectors, {
+          const vector = evaluateVector(vectors, {
             activeRows: mask.slice(),
             length: active.length
           });
@@ -655,14 +660,14 @@ function bindCall(ast: any, options: ArrowExpressionOptions): Node {
       return {
         get: row => {
           let value: ArrowExpressionValue;
-          if (declaration.kernel) {
+          if (evaluateVector) {
             if (!mask[row] || !kernel) return null;
             value = kernel.get(row);
           } else {
             const args = children.map(child => child.get(row));
             if (declaration.nullHandling !== 'call' && args.some(value => value === null))
               return null;
-            value = declaration.scalar!(...args);
+            value = declaration.evaluateScalar!(...args);
           }
           if (value === null && !result.nullable)
             throw new Error(`Function ${name} returned null for a non-nullable result`);

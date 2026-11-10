@@ -4,13 +4,12 @@
 
 export {compileArrowExpression, compileArrowFunction} from './compiler';
 export {compileArrowPredicate} from './predicate';
-export {ArrowFunctionRegistry} from './registry';
 export type {
   ArrowExpression,
   ArrowExpressionOptions,
   ArrowExpressionEvaluationOptions,
   ArrowExpressionValue,
-  ArrowFunction,
-  ArrowFunctionKernel,
+  ArrowTableFunction,
+  ArrowTableFunctionType,
   CompiledArrowExpression
 } from './types';

@@ -16,7 +16,7 @@ import {
 import {compileArrowExpression} from './compiler';
 import {compileArrowPredicate} from './predicate';
 import type {ArrowExpression, CompiledArrowExpression} from './types';
-import type {ArrowFunctionRegistry} from './registry';
+import type {ArrowTableFunction} from './types';
 
 /** Serializable program, compiled once in each initialized task instance. */
 export type ArrowExpressionProgram =
@@ -40,12 +40,12 @@ type ExpressionTaskTypes = {
 };
 
 /**
- * Creates a reusable task. Construct custom registries inside the worker; callbacks never cross
+ * Creates a reusable task. Construct custom function arrays inside the worker; callbacks never cross
  * the transport. Supply a module-worker URL or factory on the host and initialize the same task
  * with initializeTaskWorker in the worker. A retained task accepts one bound input schema.
  */
 export function createArrowExpressionTask(
-  options: {registry?: ArrowFunctionRegistry; worker?: TaskWorker} = {}
+  options: {functions?: readonly ArrowTableFunction[]; worker?: TaskWorker} = {}
 ): Task<ExpressionTaskTypes> {
   return {
     id: 'math.gl-arrow-expression',
@@ -61,11 +61,11 @@ export function createArrowExpressionTask(
         state.program.expression !== undefined
           ? compileArrowExpression(state.program.expression, {
               inputSchema: table.schema,
-              registry: options.registry
+              functions: options.functions
             })
           : compileArrowPredicate(state.program.predicate!, {
               inputSchema: table.schema,
-              registry: options.registry,
+              functions: options.functions,
               parameters: state.program.parameters
             });
       const compiled = state.compiled;

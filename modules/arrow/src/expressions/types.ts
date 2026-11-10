@@ -4,13 +4,12 @@
 
 import type {Field, Schema, RecordBatch, Vector, Table} from 'apache-arrow';
 import type {Expression} from '@math.gl/core/expressions';
-import type {ArrowFunctionRegistry} from './registry';
 
 /** Scalar values exposed to user callbacks. */
 export type ArrowExpressionValue = number | bigint | boolean | string | null;
 
 /** A vector kernel receives full-length inputs and must evaluate only active rows. */
-export type ArrowFunctionKernel = (
+export type ArrowTableFunctionType = (
   arguments_: readonly Vector[],
   context: {
     /** One byte per row; zero means the row must not be evaluated. */
@@ -20,35 +19,28 @@ export type ArrowFunctionKernel = (
   }
 ) => Vector;
 
-/** Schema-declared, row-preserving function usable directly and inside expressions. */
-export type ArrowFunction = Readonly<{
-  /** Ordered argument fields, with exact types and nullability. */
+/** Named, schema-declared function with one result value per input row. */
+export type ArrowTableFunction = Readonly<{
+  /** Unique expression identifier; built-in names are reserved. */
+  name: string;
+  /** Ordered argument fields, with exact types, nullability and extension metadata. */
   arguments: readonly Field[];
   /** Declared result field; its name is retained for direct calls. */
   result: Field;
   /** Propagate null arguments, or pass them to the implementation. Defaults to propagate. */
   nullHandling?: 'propagate' | 'call';
-}> &
-  (
-    | {
-        /** Scalar fallback for primitive arguments and results. */
-        scalar(...arguments_: ArrowExpressionValue[]): ArrowExpressionValue;
-        /** Optional vector implementation with the same semantics. */
-        kernel?: ArrowFunctionKernel;
-      }
-    | {
-        /** Vector-only functions may accept nested fields without decoding rows. */
-        kernel: ArrowFunctionKernel;
-        scalar?: never;
-      }
-  );
+  /** Batch implementation, also independently callable with the declared arguments and mask. */
+  evaluate: ArrowTableFunctionType;
+  /** Optional equivalent primitive implementation used for fused expression execution. */
+  evaluateScalar?(...arguments_: ArrowExpressionValue[]): ArrowExpressionValue;
+}>;
 
 /** Schema binding shared by predicate and expression compilation. */
 export type ArrowExpressionOptions = Readonly<{
   /** Expected batch schema, validated before evaluation. */
   inputSchema: Schema;
-  /** Instance-scoped function declarations, snapshotted during compilation. */
-  registry?: ArrowFunctionRegistry;
+  /** Named function declarations, snapshotted into a private lookup during compilation. */
+  functions?: readonly ArrowTableFunction[];
 }>;
 
 /** Controls shared by batch and whole-table evaluation. */
