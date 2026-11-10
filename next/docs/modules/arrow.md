@@ -57,6 +57,7 @@ Apache Arrow is an **optional peer dependency**, supporting version 17 and newer
 
 | Import                                                                                                                    | Purpose                                                                   | Apache Arrow required |
 | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | --------------------- |
+| [`@math.gl/arrow/math`](https://visgl.github.io/math.gl/next/docs/modules/arrow/math.md)                     | Typed SQL numeric functions, null propagation, classified errors          | Yes, 17+              |
 | [`@math.gl/arrow/color`](https://visgl.github.io/math.gl/next/docs/modules/arrow/color.md)                   | Typed RGBA, color ramps, bins, and categories                             | Yes, 17+              |
 | `@math.gl/arrow`                                                                                                          | Arrow table/vector views, schemas, copying, and transport                 | Yes, 17+              |
 | [`@math.gl/arrow/utf8`](https://visgl.github.io/math.gl/next/docs/modules/arrow/utf8.md)                     | Byte-oriented string comparison and scalar parsing                        | No                    |

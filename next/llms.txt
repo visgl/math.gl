@@ -34,6 +34,7 @@ Apache Arrow
 - [GeoArrow API reference](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow-utils/api-reference/geoarrow.md): All root functions are synchronous. Unless a function explicitly returns a new column or fills a
 - [Indexed Arrow views](https://visgl.github.io/math.gl/next/docs/modules/arrow/indexed-arrow-table.md): IndexedArrowTable provides a cheap sorted view of an arrow.Table without
 - [MappedArrowTable](https://visgl.github.io/math.gl/next/docs/modules/arrow/mapped-arrow-table.md): MappedArrowTable provides a cheap key-value map view of an arrow.Table without
+- [@math.gl/arrow/math](https://visgl.github.io/math.gl/next/docs/modules/arrow/math.md): Optional SQL-style numeric function declarations for Arrow expressions.
 - [splitArrowBuffers](https://visgl.github.io/math.gl/next/docs/modules/arrow/split-arrow-buffers.md): splitArrowBuffers rebuilds Apache Arrow JS objects so sliced internal typed-array buffers are
 - [UTF-8 utilities](https://visgl.github.io/math.gl/next/docs/modules/arrow/utf8.md): @math.gl/arrow/utf8 helps applications work efficiently with binary UTF-8 strings
 - [@math.gl/arrow/wkb](https://visgl.github.io/math.gl/next/docs/modules/arrow/wkb.md): @math.gl/arrow/wkb provides dependency-free, synchronous codecs for individual WKB, EWKB, and WKT
