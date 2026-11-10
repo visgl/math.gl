@@ -170,3 +170,19 @@ test('dictionary colors and row-dependent list configurations resolve logical va
     '#ff0000ff'
   ]);
 });
+
+test('large finite domains preserve endpoints and midpoint without overflow', () => {
+  const table = new Table({x: vectorFromArray([-1e308, 0, 1e308], new Float64())});
+  for (const expression of [
+    'COLOR_SCALE(x, -1e308, 1e308, "grayscale")',
+    'COLOR_RAMP(x, -1e308, 1e308, COLOR_FROM_HEX("#000"), COLOR_FROM_HEX("#fff"))'
+  ])
+    expect([...run(`COLOR_TO_HEX(${expression})`, table)]).toEqual([
+      '#000000ff',
+      '#808080ff',
+      '#ffffffff'
+    ]);
+  expect([
+    ...run('COLOR_TO_HEX(COLOR_DIVERGING(x, -1e308, 0, 1e308, "grayscale"))', table)
+  ]).toEqual(['#000000ff', '#808080ff', '#ffffffff']);
+});

@@ -26,6 +26,15 @@ const rgba8 = new FixedSizeList(4, new Field('channel', new Uint8(), false));
 const numbers = new List(new Field('item', number, false));
 const strings = new List(new Field('item', text, false));
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
+/** Normalizes finite ordered bounds without overflowing their span or an out-of-domain difference. */
+function normalize(value: number, minimum: number, maximum: number): number {
+  if (value <= minimum) return 0;
+  if (value >= maximum) return 1;
+  const width = maximum - minimum;
+  return Number.isFinite(width)
+    ? (value - minimum) / width
+    : (value / 2 - minimum / 2) / (maximum / 2 - minimum / 2);
+}
 type Color = readonly [number, number, number, number];
 type Reader = (row: number) => unknown;
 type Write = (row: number, channels: Float32Array | Uint8Array, offset: number) => boolean;
@@ -231,7 +240,7 @@ export const COLOR_RAMP: ArrowTableFunction = /* @__PURE__ */ colorFunction(
         x = colorAt(a, row),
         y = colorAt(b, row);
       if (!value || !x || !y || value[2]! <= value[1]!) return false;
-      return mix(x, y, (value[0]! - value[1]!) / (value[2]! - value[1]!), out, offset);
+      return mix(x, y, normalize(value[0]!, value[1]!, value[2]!), out, offset);
     };
   }
 );
@@ -274,7 +283,7 @@ export const COLOR_SCALE: ArrowTableFunction = /* @__PURE__ */ colorFunction(
       const value = numeric(read.slice(0, 3), row),
         colors = palette(row);
       return value && colors && value[2]! > value[1]!
-        ? paletteColor(colors, (value[0]! - value[1]!) / (value[2]! - value[1]!), out, offset)
+        ? paletteColor(colors, normalize(value[0]!, value[1]!, value[2]!), out, offset)
         : false;
     };
   }
@@ -291,8 +300,8 @@ export const COLOR_DIVERGING: ArrowTableFunction = /* @__PURE__ */ colorFunction
       if (!value || !colors || value[1]! >= value[2]! || value[2]! >= value[3]!) return false;
       const t =
         value[0]! <= value[2]!
-          ? (0.5 * (value[0]! - value[1]!)) / (value[2]! - value[1]!)
-          : 0.5 + (0.5 * (value[0]! - value[2]!)) / (value[3]! - value[2]!);
+          ? 0.5 * normalize(value[0]!, value[1]!, value[2]!)
+          : 0.5 + 0.5 * normalize(value[0]!, value[2]!, value[3]!);
       return paletteColor(colors, t, out, offset);
     };
   }
