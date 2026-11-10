@@ -148,3 +148,22 @@ test('numeric built-in conversions classify fractional and nonfinite Int64 error
     }
   }
 });
+
+test('untyped null-only numeric overloads default to Float64 without widening typed calls', () => {
+  const table = input();
+  const functions = [
+    {
+      name: 'F',
+      prototypes: [
+        prototype([new Float32(), new Float32()]),
+        prototype([new Float64(), new Float64()])
+      ]
+    }
+  ];
+  expect(
+    compileArrowExpression('F(null, null)', {inputSchema: table.schema, functions}).outputField.type
+  ).toEqual(new Float64());
+  expect(
+    compileArrowExpression('F(x, null)', {inputSchema: table.schema, functions}).outputField.type
+  ).toEqual(new Float32());
+});

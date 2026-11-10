@@ -836,6 +836,13 @@ function bindCall(ast: any, options: BindingOptions): Node {
           physicalKey(valueType(source.field.type)) !== physicalKey(field.type)
         )
           cost += 4;
+        if (
+          !source &&
+          !ast.arguments.some((value: any) => !isContextualLiteral(value)) &&
+          (DataType.isInt(field.type) || DataType.isFloat(field.type)) &&
+          !(DataType.isFloat(field.type) && field.type.precision === Precision.DOUBLE)
+        )
+          cost += 4;
       } else {
         bound = source!;
       }
