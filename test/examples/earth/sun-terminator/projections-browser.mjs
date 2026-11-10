@@ -113,8 +113,10 @@ try {
     el.dispatchEvent(new Event('input', {bubbles: true}));
   });
   assert.equal(await page.locator('[data-role=date]').inputValue(), '2026-03-20');
+  // Advance animation time deterministically; loaded CI runners may deliver fewer frames.
+  await page.clock.install();
   await page.locator('[data-role=play]').click();
-  await page.waitForTimeout(500);
+  await page.clock.runFor(500);
   await page.locator('[data-role=play]').click();
   assert.ok(
     Number(await page.locator('[data-role=offset]').inputValue()) > 1,

@@ -15,17 +15,26 @@ import {
   makeData,
   makeVector,
   type RecordBatch,
-  type Vector
+  Vector,
+  type Table,
+  type Schema
 } from 'apache-arrow';
 import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '../utf8/index';
 import {parse, type Expression} from '@math.gl/core/expressions';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
+import {createFunctionLookup} from './registry';
 import type {
+  ArrowTableFunction,
   ArrowExpression,
   ArrowExpressionOptions,
+  ArrowExpressionEvaluationOptions,
   ArrowExpressionValue,
   CompiledArrowExpression
 } from './types';
+
+type BindingOptions = ArrowExpressionOptions & {
+  functionLookup: ReadonlyMap<string, ArrowTableFunction>;
+};
 
 type Mask = Uint8Array;
 type Range = [Uint8Array, number, number];
@@ -51,39 +60,69 @@ export function compileArrowExpression(
   const fields = [...options.inputSchema.fields];
   if (new Set(fields.map(field => field.name)).size !== fields.length)
     throw new Error('Expression input field names must be unique');
-  const root = bind(parse(expression), options);
+  const root = bind(parse(expression), {
+    ...options,
+    functionLookup: createFunctionLookup(options.functions)
+  });
   const keys = fields.map(field => ({
     name: field.name,
     type: physicalKey(field.type),
-    nullable: field.nullable
+    nullable: field.nullable,
+    extension: extensionKey(field)
   }));
+  const validateSchema = (schema: Schema) => {
+    if (
+      schema.fields.length !== keys.length ||
+      schema.fields.some((field, index) => {
+        const expected = keys[index]!;
+        return (
+          field.name !== expected.name ||
+          physicalKey(field.type) !== expected.type ||
+          field.nullable !== expected.nullable ||
+          extensionKey(field) !== expected.extension
+        );
+      })
+    )
+      throw new Error('Arrow expression input schema mismatch');
+  };
+  const validateMask = (mask: Uint8Array | undefined, length: number) => {
+    if (mask && (mask.length !== length || mask.some(value => value !== 0 && value !== 1)))
+      throw new Error('activeRows must contain one 0 or 1 per input row');
+  };
+  const evaluate = (
+    batch: RecordBatch,
+    evaluation: ArrowExpressionEvaluationOptions = {}
+  ): Vector => {
+    evaluation.signal?.throwIfAborted();
+    validateSchema(batch.schema);
+    validateMask(evaluation.activeRows, batch.numRows);
+    const active = evaluation.activeRows
+      ? evaluation.activeRows.slice()
+      : new Uint8Array(batch.numRows).fill(1);
+    const prepared = root.prepare(batch, active);
+    const result =
+      prepared.vector &&
+      !DataType.isDictionary(prepared.vector.type) &&
+      !active.some(value => !value)
+        ? prepared.vector
+        : output(root.field, active, prepared.get);
+    evaluation.signal?.throwIfAborted();
+    return result;
+  };
   return Object.freeze({
     outputField: root.field,
-    evaluate(batch: RecordBatch, evaluation: {activeRows?: Uint8Array} = {}): Vector {
-      if (
-        batch.schema.fields.length !== keys.length ||
-        batch.schema.fields.some((field, index) => {
-          const expected = keys[index]!;
-          return (
-            field.name !== expected.name ||
-            physicalKey(field.type) !== expected.type ||
-            field.nullable !== expected.nullable
-          );
-        })
-      )
-        throw new Error('Arrow expression input schema mismatch');
-      const mask = evaluation.activeRows;
-      if (mask && (mask.length !== batch.numRows || mask.some(value => value !== 0 && value !== 1)))
-        throw new Error('activeRows must contain one 0 or 1 per input row');
-      const active = mask ? mask.slice() : new Uint8Array(batch.numRows).fill(1);
-      const prepared = root.prepare(batch, active);
-      if (
-        prepared.vector &&
-        !DataType.isDictionary(prepared.vector.type) &&
-        !active.some(value => !value)
-      )
-        return prepared.vector;
-      return output(root.field, active, prepared.get);
+    evaluate,
+    evaluateTable(arrowTable: Table, evaluation: ArrowExpressionEvaluationOptions = {}): Vector {
+      evaluation.signal?.throwIfAborted();
+      validateSchema(arrowTable.schema);
+      validateMask(evaluation.activeRows, arrowTable.numRows);
+      let offset = 0;
+      const chunks = arrowTable.batches.flatMap(batch => {
+        const activeRows = evaluation.activeRows?.subarray(offset, offset + batch.numRows);
+        offset += batch.numRows;
+        return evaluate(batch, {...evaluation, activeRows}).data;
+      });
+      return chunks.length ? new Vector(chunks) : output(root.field, new Uint8Array(0), () => null);
     }
   });
 }
@@ -112,7 +151,33 @@ function physicalKey(type: DataType): string {
       : typeKey(type);
   } catch {
     // Unreferenced columns may have nested or extension layouts outside this evaluator's subset.
-    return `${type.typeId}:${type.toString()}`;
+    const properties = [
+      'bitWidth',
+      'isSigned',
+      'precision',
+      'scale',
+      'unit',
+      'timezone',
+      'byteWidth',
+      'listSize',
+      'keysSorted',
+      'isOrdered',
+      'mode'
+    ].map(key => (type as unknown as Record<string, unknown>)[key]);
+    return JSON.stringify([
+      type.typeId,
+      properties,
+      DataType.isUnion(type) ? Array.from(type.typeIds) : null,
+      DataType.isDictionary(type)
+        ? [physicalKey(type.indices), physicalKey(type.dictionary), type.isOrdered]
+        : null,
+      type.children?.map(field => [
+        field.name,
+        physicalKey(field.type),
+        field.nullable,
+        extensionKey(field)
+      ])
+    ]);
   }
 }
 
@@ -164,7 +229,13 @@ function output(
     } else data[row] = value as any;
   }
   return makeVector(
-    makeData({type, data, length: active.length, nullBitmap: validity, nullCount} as any)
+    makeData({
+      type,
+      data,
+      length: active.length,
+      nullBitmap: validity,
+      nullCount
+    } as any)
   );
 }
 
@@ -206,23 +277,38 @@ function bytes(value: Prepared, row: number): Range | null {
 }
 
 /** Binds supported syntax to fused per-row operations and explicit vector boundaries. */
-function bind(ast: any, options: ArrowExpressionOptions, expected?: DataType): Node {
+function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInput = false): Node {
   if (isSignedLiteral(ast)) {
     const value = ast.operator === '-' ? -ast.argument.value : ast.argument.value;
-    return bind({type: 'Literal', value}, options, expected);
+    return bind({type: 'Literal', value}, options, expected, vectorInput);
   }
   if (ast.type === 'Identifier') {
     const index = options.inputSchema.fields.findIndex(field => field.name === ast.name);
     if (index < 0) throw new Error(`Unknown Arrow expression field: ${ast.name}`);
     const source = options.inputSchema.fields[index]!;
-    typeKey(source.type);
+    if (!vectorInput) typeKey(source.type);
     return {
-      field: new Field(source.name, valueType(source.type), source.nullable, source.metadata),
+      field: new Field(
+        source.name,
+        vectorInput ? source.type : valueType(source.type),
+        source.nullable,
+        source.metadata
+      ),
       hasKernel: false,
-      prepare: batch => sourceReader(batch.getChildAt(index)!)
+      prepare: batch =>
+        vectorInput
+          ? {
+              vector: batch.getChildAt(index)!,
+              get: () => {
+                throw new Error('Nested function arguments require a vector kernel');
+              }
+            }
+          : sourceReader(batch.getChildAt(index)!)
     };
   }
   if (ast.type === 'Literal') {
+    if (vectorInput && expected && DataType.isDictionary(expected))
+      throw new Error('Dictionary function arguments require a dictionary-encoded source column');
     const value = ast.value as ArrowExpressionValue;
     const type =
       expected ??
@@ -334,7 +420,7 @@ function requireNumeric(node: Node): void {
 }
 
 /** Fuses primitive operations; only kernel boundaries require a mask prepass. */
-function bindBinary(ast: any, options: ArrowExpressionOptions): Node {
+function bindBinary(ast: any, options: BindingOptions): Node {
   const op = ast.operator,
     logical = op === '&&' || op === '||';
   let left = bind(ast.left, options, logical ? bool : undefined),
@@ -453,7 +539,7 @@ function compare(op: string, a: any, b: any): boolean {
 }
 
 /** Binds built-ins and custom functions, materializing arguments only for vector kernels. */
-function bindCall(ast: any, options: ArrowExpressionOptions): Node {
+function bindCall(ast: any, options: BindingOptions): Node {
   if (ast.callee.type !== 'Identifier')
     throw new Error('Only registered named function calls are supported');
   const name = ast.callee.name;
@@ -509,14 +595,24 @@ function bindCall(ast: any, options: ArrowExpressionOptions): Node {
       }
     };
   }
-  const declaration = options.registry?.getFunction(name);
+  const declaration = options.functionLookup.get(name);
   if (!declaration) throw new Error(`Unknown Arrow function: ${name}`);
   if (ast.arguments.length !== declaration.arguments.length)
     throw new Error(`Wrong argument count for ${name}`);
+  const evaluateVector = declaration.evaluateScalar ? undefined : declaration.evaluate;
   const arguments_ = ast.arguments.map((argument: any, index: number) => {
     const field = declaration.arguments[index]!;
-    const bound = bind(argument, options, field.type);
-    if (typeKey(bound.field.type) !== typeKey(field.type))
+    const vectorInput = !declaration.evaluateScalar;
+    const bound = bind(argument, options, field.type, vectorInput);
+    if (
+      (vectorInput
+        ? physicalKey(
+            DataType.isDictionary(field.type) ? bound.field.type : valueType(bound.field.type)
+          ) !== physicalKey(field.type)
+        : typeKey(bound.field.type) !== typeKey(field.type)) ||
+      (vectorInput &&
+        [...field.metadata].some(([key, value]) => bound.field.metadata.get(key) !== value))
+    )
       throw new Error(`Argument type mismatch for ${name}`);
     if (declaration.nullHandling === 'call' && bound.field.nullable && !field.nullable)
       throw new Error(`Nullable argument not accepted by ${name}`);
@@ -535,12 +631,12 @@ function bindCall(ast: any, options: ArrowExpressionOptions): Node {
   );
   return {
     field,
-    hasKernel: Boolean(declaration.kernel) || arguments_.some(argument => argument.hasKernel),
+    hasKernel: Boolean(evaluateVector) || arguments_.some(argument => argument.hasKernel),
     prepare(batch, active) {
       const children = arguments_.map(argument => argument.prepare(batch, active));
       let kernel: Prepared | undefined;
       let mask = active;
-      if (declaration.kernel && active.some(Boolean)) {
+      if (evaluateVector && active.some(Boolean)) {
         const vectors = children.map(
           (child, index) => child.vector ?? output(arguments_[index]!.field, active, child.get)
         );
@@ -552,7 +648,7 @@ function bindCall(ast: any, options: ArrowExpressionOptions): Node {
             : 0
         );
         if (mask.some(Boolean)) {
-          const vector = declaration.kernel(vectors, {
+          const vector = evaluateVector(vectors, {
             activeRows: mask.slice(),
             length: active.length
           });
@@ -564,14 +660,14 @@ function bindCall(ast: any, options: ArrowExpressionOptions): Node {
       return {
         get: row => {
           let value: ArrowExpressionValue;
-          if (declaration.kernel) {
+          if (evaluateVector) {
             if (!mask[row] || !kernel) return null;
             value = kernel.get(row);
           } else {
             const args = children.map(child => child.get(row));
             if (declaration.nullHandling !== 'call' && args.some(value => value === null))
               return null;
-            value = declaration.scalar(...args);
+            value = declaration.evaluateScalar!(...args);
           }
           if (value === null && !result.nullable)
             throw new Error(`Function ${name} returned null for a non-nullable result`);
@@ -601,4 +697,12 @@ function isSignedLiteral(ast: any): boolean {
 }
 function isContextualLiteral(ast: any): boolean {
   return ast.type === 'Literal' || isSignedLiteral(ast);
+}
+
+/** Geometry encoding/CRS metadata is part of a schema-bound vector function contract. */
+function extensionKey(field: Field): string {
+  return JSON.stringify([
+    field.metadata.get('ARROW:extension:name'),
+    field.metadata.get('ARROW:extension:metadata')
+  ]);
 }

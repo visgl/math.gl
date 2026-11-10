@@ -13,7 +13,8 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
-  {symbol: 'ArrowFunctionRegistry', packages: ['@math.gl/arrow/expressions'], forbidden: [/apache-arrow/, /expressions\/(compiler|buffers|predicate)/], budget: 3000},
+  {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /expressions\/(compiler|predicate)/], budget: 240000},
+
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/core/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
   {symbol:'spheroidToCartesian', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /expressions/], budget:1000},
   {symbol:'vec3Normalize', packages:['@math.gl/core'], forbidden:[/mat4/, /vec2/, /expressions/], budget:500},

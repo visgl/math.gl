@@ -44,7 +44,13 @@
       "types": "./dist/expressions/index.d.ts",
       "import": "./dist/expressions/index.js",
       "require": "./dist/expressions/index.cjs"
-    }
+    },
+    "./expressions/worker": {
+      "types": "./dist/expressions/worker.d.ts",
+      "import": "./dist/expressions/worker.js",
+      "require": "./dist/expressions/worker.cjs"
+    },
+    "./expressions/worker-entry.js": "./dist/expressions/worker-entry.js"
   },
   "files": [
     "dist",
@@ -54,10 +60,14 @@
     "LICENSE",
     "THIRD-PARTY-NOTICES.md"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/expressions/worker-entry.js",
+    "./src/expressions/worker-entry.ts"
+  ],
   "dependencies": {
     "@math.gl/core": "5.0.0-beta.6",
-    "@math.gl/geometry": "5.0.0-beta.6"
+    "@math.gl/geometry": "5.0.0-beta.6",
+    "@math.gl/tasks": "5.0.0-beta.6"
   },
   "peerDependencies": {
     "apache-arrow": ">=17.0.0"
