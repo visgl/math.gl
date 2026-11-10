@@ -4,7 +4,7 @@
 import type {Expression} from './expression-eval';
 
 // Includes the call and literal nodes around supported 4096-element arguments.
-const MAXIMUM_EXPRESSION_NODES = 16384;
+export const MAXIMUM_EXPRESSION_NODES = 16384;
 const MAXIMUM_EXPRESSION_DEPTH = 192;
 
 /** Structural limits apply to external ASTs as well as parser output. */

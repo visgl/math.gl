@@ -129,3 +129,15 @@ test('external logical nodes retain their shared Boolean semantics', () => {
   expect(compile(expression)({a: true, b: false})).toBe(false);
   expect(() => validateExpressionAST({...expression, operator: '??'})).toThrow('logical operator');
 });
+
+test('multiple full-width membership lists share the AST budget rather than a per-list cap', () => {
+  const values = Array.from({length: 4096}, (_, value) => value);
+  const left = {op: 'in', args: [{property: 'x'}, values]} as const;
+  const right = {op: 'in', args: [{property: 'y'}, values]} as const;
+  expect(
+    getExpressionColumns(columnarPredicateToExpression({op: 'and', args: [left, right]}))
+  ).toEqual(['x', 'y']);
+  expect(() =>
+    columnarPredicateToExpression({op: 'and', args: [left, right, left, right]})
+  ).toThrow('normalized AST node limit');
+});

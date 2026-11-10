@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {Expression} from './expression-eval';
-import {validateExpressionAST} from './ast';
+import {MAXIMUM_EXPRESSION_NODES, validateExpressionAST} from './ast';
 import {
   bindColumnarPredicateParameters,
   getColumnarPredicateColumns,
@@ -21,7 +21,7 @@ export function columnarPredicateToExpression(
   // Bound the input before the recursive predicate utilities inspect it.
   const stack: {node: any; depth: number}[] = [{node: predicate, depth: 0}];
   let count = 0;
-  let membershipValues = 0;
+  let expressionNodes = 0;
   while (stack.length) {
     const {node, depth} = stack.pop()!;
     if (++count > 4096 || depth > 64) throw new Error('Predicate exceeds node or depth limit');
@@ -37,6 +37,7 @@ export function columnarPredicateToExpression(
         throw new Error('NOT requires one predicate');
       if (node.args.length + count + stack.length > 4096)
         throw new Error('Predicate exceeds node limit');
+      expressionNodes += node.op === 'not' ? 1 : Math.max(0, node.args.length - 1);
       for (const child of node.args) stack.push({node: child, depth: depth + 1});
     } else if (
       node.args.length !== (node.op === 'isNull' ? 1 : 2) ||
@@ -45,10 +46,23 @@ export function columnarPredicateToExpression(
       (node.op === 'in' && !Array.isArray(node.args[1]))
     )
       throw new Error('Invalid predicate arguments');
-    if (node.op === 'in') {
-      membershipValues += node.args[1].length;
-      if (membershipValues > 4096) throw new Error('Predicate membership exceeds node limit');
+    if (node.op !== 'and' && node.op !== 'or' && node.op !== 'not') {
+      const property = node.args[0];
+      if (
+        typeof property.property !== 'string' &&
+        (!Array.isArray(property.property) || property.property.length !== 1)
+      )
+        throw new Error('Expression normalization requires top-level columns');
+      const casts = property.casts;
+      if (casts !== undefined && (!Array.isArray(casts) || casts.length > 64))
+        throw new Error('Invalid columnar predicate casts');
+      const literals = node.op === 'in' ? node.args[1].length : node.op === 'isNull' ? 0 : 1;
+      if (literals > 4096) throw new Error('Predicate membership exceeds node limit');
+      // The test and column contribute two nodes; each cast adds a call and a target literal.
+      expressionNodes += 2 + 2 * (casts?.length ?? 0) + literals;
     }
+    if (expressionNodes > MAXIMUM_EXPRESSION_NODES)
+      throw new Error('Predicate exceeds normalized AST node limit');
   }
   const bound = bindColumnarPredicateParameters(predicate, options.parameters ?? {});
   validateColumnarPredicate(bound, new Set(getColumnarPredicateColumns(bound)));
