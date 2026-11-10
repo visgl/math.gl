@@ -186,3 +186,11 @@ test('large finite domains preserve endpoints and midpoint without overflow', ()
     ...run('COLOR_TO_HEX(COLOR_DIVERGING(x, -1e308, 0, 1e308, "grayscale"))', table)
   ]).toEqual(['#000000ff', '#808080ff', '#ffffffff']);
 });
+
+test('an invalid unselected palette entry invalidates bins and categories', () => {
+  for (const expression of [
+    'COLOR_BINS(0, [1], ["#fff", "bad"])',
+    'COLOR_CATEGORY("a", ["a","b"], ["#fff","bad"])'
+  ])
+    expect(rows(run(expression))).toEqual([null, null, null, null]);
+});

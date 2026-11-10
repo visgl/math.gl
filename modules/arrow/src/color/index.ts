@@ -321,26 +321,40 @@ function listReader(vector: Vector) {
     return Array.from(vector.get(row) as Iterable<unknown>);
   };
 }
+/** Parses and validates the complete palette once for shared list payloads. */
+function colorListReader(vector: Vector) {
+  const read = listReader(vector),
+    cache = new WeakMap<readonly unknown[], readonly Color[] | null>();
+  return (row: number) => {
+    const values = read(row);
+    if (cache.has(values)) return cache.get(values)!;
+    const parsed = values.map(value => (typeof value === 'string' ? hex(value) : null));
+    const colors = parsed.every(value => value !== null) ? (parsed as Color[]) : null;
+    cache.set(values, colors);
+    return colors;
+  };
+}
 /** Threshold bins use [lower, upper): equality belongs to the next bin. Colors = breaks + 1. */
 export const COLOR_BINS: ArrowTableFunction = /* @__PURE__ */ colorFunction(
   'COLOR_BINS',
   [number, numbers, strings],
   (read, vectors) => {
     const breaks = listReader(vectors[1]!),
-      colors = listReader(vectors[2]!);
+      colors = colorListReader(vectors[2]!);
     return (row, out, offset) => {
       const value = read[0]!(row) as number,
         bins = breaks(row) as readonly number[],
-        palette = colors(row) as readonly string[];
+        palette = colors(row);
       if (
         !Number.isFinite(value) ||
+        !palette ||
         palette.length !== bins.length + 1 ||
         bins.some((x, i) => !Number.isFinite(x) || (i > 0 && x <= bins[i - 1]!))
       )
         return false;
       let index = 0;
       while (index < bins.length && value >= bins[index]!) index++;
-      const color = hex(palette[index]!);
+      const color = palette[index]!;
       return color ? writeColor(out, offset, color) : false;
     };
   }
@@ -351,14 +365,28 @@ export const COLOR_CATEGORY: ArrowTableFunction = /* @__PURE__ */ colorFunction(
   [text, strings, strings],
   (read, vectors) => {
     const categories = listReader(vectors[1]!),
-      colors = listReader(vectors[2]!);
+      colors = colorListReader(vectors[2]!);
+    const cache = new WeakMap<
+      readonly string[],
+      WeakMap<readonly Color[], ReadonlyMap<string, Color> | null>
+    >();
     return (row, out, offset) => {
       const keys = categories(row) as readonly string[],
-        palette = colors(row) as readonly string[];
-      if (keys.length !== palette.length || new Set(keys).size !== keys.length) return false;
-      const index = keys.indexOf(read[0]!(row) as string);
-      if (index < 0) return false;
-      const color = hex(palette[index]!);
+        palette = colors(row);
+      if (!palette || keys.length !== palette.length) return false;
+      let palettes = cache.get(keys);
+      if (!palettes) {
+        palettes = new WeakMap();
+        cache.set(keys, palettes);
+      }
+      let mapping = palettes.get(palette);
+      if (mapping === undefined) {
+        const entries = new Map<string, Color>();
+        for (let i = 0; i < keys.length; i++) entries.set(keys[i]!, palette[i]!);
+        mapping = entries.size === keys.length ? entries : null;
+        palettes.set(palette, mapping);
+      }
+      const color = mapping?.get(read[0]!(row) as string);
       return color ? writeColor(out, offset, color) : false;
     };
   }
