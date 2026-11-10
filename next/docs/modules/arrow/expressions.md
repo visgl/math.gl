@@ -51,7 +51,7 @@ Compiles a portable `ParameterizedColumnarPredicate`. Options additionally accep
 
 ## Named table functions[​](#named-table-functions "Direct link to Named table functions")
 
-Pass declarations through `functions`; the compiler builds a private name lookup once per compilation. Names must be valid identifiers and unique; built-in names are reserved. No global registry is modified. Treat declared fields and their types as immutable. Compilation snapshots the declarations and their argument arrays, so later changes to the supplied function list do not change existing evaluators.
+Pass declarations through `functions`; the compiler builds a private name lookup once per compilation. Names must be valid identifiers; built-in names are reserved. Argument signatures within each name must be unique. No global registry is modified. Treat declared fields and their types as immutable. Compilation snapshots the declarations and their argument arrays, so later changes to the supplied function list do not change existing evaluators.
 
 ```
 import {Field, Float64, vectorFromArray} from 'apache-arrow';
@@ -64,7 +64,7 @@ const discount: ArrowTableFunction = {
 
   name: 'discount',
 
-  arguments: [new Field('price', new Float64(), true)],
+  prototypes: [{arguments: [new Field('price', new Float64(), true)],
 
   result: new Field('discounted_price', new Float64(), true),
 
@@ -81,6 +81,8 @@ const discount: ArrowTableFunction = {
   },
 
   evaluateScalar: price => Number(price) * 0.9
+
+  }]
 
 };
 
@@ -99,7 +101,7 @@ const prices = compiled.evaluate(batch);
 // The same declaration can be used inside 'discount(price) > 100'.
 ```
 
-`ArrowTableFunctionType` is the type of `evaluate`: it accepts an ordered `readonly Vector[]` and `{activeRows: Uint8Array, length: number}`, and returns a `Vector` of the same length. `evaluate` is required and can also be called directly with those arguments. Direct callers must supply correctly typed vectors and a mask, and honor the declaration's null policy; compilation provides these checks and null propagation when invoking functions inside expressions.
+`ArrowTableFunctionType` is the type of `evaluate`: it accepts an ordered `readonly Vector[]` and `{activeRows: Uint8Array, length: number}`, and returns a `Vector` of the same length. `evaluate` is required on every prototype and can be called directly as `function.prototypes[index].evaluate(...)`. Direct callers must supply correctly typed vectors and a mask, and honor the declaration's null policy; compilation provides these checks and null propagation when invoking functions inside expressions.
 
 Arguments use exact declared logical types. Numeric literals are checked against their operand's type; other conversions must be explicit. `nullHandling: 'propagate'` skips rows with null arguments and makes the expression result nullable. With `nullHandling: 'call'`, nullable arguments must be declared nullable and the implementation receives null values. Returning null for a non-nullable declared result is an error.
 
@@ -328,3 +330,11 @@ Arrow `Float16` inputs, scalar results and fixed-size numeric tuple results use 
 `parseSQLExpression('value::FLOAT16')` and `CAST(value AS FLOAT16)` bind explicit half-precision casts. Values round using the runtime's binary16 conversion; finite values that overflow on explicit casts throw, while arithmetic retains IEEE infinity/NaN behavior. Subnormals and signed zero are preserved. Runtime native `Float16Array` support is required in every executing worker or thread; without it, Float16 operations fail with a capability error. Other expression types remain usable. The capability checks reuse the existing core Float16 helpers.
 
 Packed arrays also accept `ARRAY[x,y,z]::FLOAT16[3]` or `compileArrowArray(columns, {inputSchema, type: "float16"})`. Native Float16Array is required for half-precision execution.
+
+## Function prototypes and numeric overloads[​](#function-prototypes-and-numeric-overloads "Direct link to Function prototypes and numeric overloads")
+
+Each named `ArrowTableFunction` owns a non-empty `prototypes` array. A prototype declares its argument fields, result field, null policy, vector implementation and optional fused scalar implementation. Multiple objects with the same name may contribute distinct prototypes. Duplicate argument-type/metadata signatures are rejected; changing only return type or nullability does not create an overload. There are no legacy single-signature aliases.
+
+Compilation selects one prototype: exact signatures win, otherwise Float16 can widen to Float32 or Float64 and Float32 can widen to Float64. The least total widening wins; ties are ambiguous and fail binding. Integer/float and mixed integer-width conversions require explicit casts. Literals follow typed arguments; calls containing only numeric literals prefer their default Float64 type. Use typed null casts to disambiguate otherwise ambiguous null arguments. Kernels receive the chosen prototype's declared input types. No per-batch overload lookup or callback probing occurs.
+
+`ArrowEvaluationError` exposes `code` values `domain`, `conversion`, `overflow` and `divisionByZero`. Numeric data errors use this class; unknown names, incompatible signatures, schema mismatches and implementation failures remain ordinary fatal errors. Division and modulo by zero throw for integer and floating Arrow arithmetic. Error recovery is added separately.
