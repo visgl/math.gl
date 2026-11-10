@@ -809,6 +809,7 @@ function bindCall(ast: any, options: BindingOptions): Node {
   ) as (Node | undefined)[];
   const candidates: {prototype: ArrowTableFunctionPrototype; arguments: Node[]; cost: number}[] =
     [];
+  const allLiteralArguments = ast.arguments.every(isContextualLiteral);
   let contextualError: unknown;
   for (const prototype of group.prototypes) {
     if (ast.arguments.length !== prototype.arguments.length) continue;
@@ -830,9 +831,7 @@ function bindCall(ast: any, options: BindingOptions): Node {
         }
         if (
           source &&
-          !ast.arguments.some(
-            (value: any) => !isContextualLiteral(value) && !needsArgumentContext(value)
-          ) &&
+          allLiteralArguments &&
           physicalKey(valueType(source.field.type)) !== physicalKey(field.type)
         )
           cost += 4;

@@ -244,3 +244,22 @@ test('dictionary conditionals bind logical types for scalar and vector prototype
     })
   ).toThrow('type mismatch');
 });
+
+test('typed nullable conditionals still determine the type of sibling literals', () => {
+  const table = input();
+  const functions = [
+    {
+      name: 'F',
+      prototypes: [
+        prototype([new Float32(), new Float32()]),
+        prototype([new Float64(), new Float64()])
+      ]
+    }
+  ];
+  const compiled = compileArrowExpression('F(true ? x : null, 1)', {
+    inputSchema: table.schema,
+    functions
+  });
+  expect(compiled.outputField.type).toEqual(new Float32());
+  expect([...compiled.evaluateTable(table)]).toEqual([1, null, 3]);
+});
