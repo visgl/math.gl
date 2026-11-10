@@ -185,3 +185,30 @@ test('worker transport preserves sliced dictionaries and rejects invalid masks',
     await runner.close();
   }
 });
+
+test('worker transports RGBA results, typed array arguments, metadata and sliced chunks', async () => {
+  const runner = new TaskRunner();
+  try {
+    const input = table().slice(1, 5);
+    const result = hydrateArrowExpressionResult(
+      await runner.runTask(
+        task,
+        prepareArrowExpressionInput(input, {activeRows: new Uint8Array([1, 1, 0, 1])}),
+        {
+          execution: 'worker',
+          initialization: {expression: 'color(x, [7, 9])'}
+        }
+      )
+    );
+    expect(Array.from(result.vector, row => (row === null ? null : Array.from(row)))).toEqual([
+      null,
+      [3, 7, 0, 1],
+      null,
+      [5, 7, 0, 1]
+    ]);
+    expect(result.vector.data.map(data => data.length)).toEqual([2, 2]);
+    expect(result.field.metadata.get('color-space')).toBe('srgb');
+  } finally {
+    await runner.close();
+  }
+});

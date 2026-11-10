@@ -1,7 +1,17 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {Bool, Field, Float64, type RecordBatch, type Vector, vectorFromArray} from 'apache-arrow';
+import {
+  Bool,
+  Field,
+  Float64,
+  Float32,
+  FixedSizeList,
+  List,
+  type RecordBatch,
+  type Vector,
+  vectorFromArray
+} from 'apache-arrow';
 import {type ParameterizedColumnarPredicate} from '@math.gl/core/expressions';
 import {
   type ArrowTableFunction,
@@ -104,3 +114,15 @@ const missingVector: ArrowTableFunction = {
 compileArrowExpression('price', {inputSchema: batch.schema, registry: {}});
 void missingVector;
 createArrowExpressionTask({functions});
+
+const rgbaType = new FixedSizeList(4, new Field('channel', new Float32(), false));
+const color: ArrowTableFunction = {
+  name: 'color',
+  arguments: [new Field('bins', new List(new Field('item', new Float64(), false)), false)],
+  result: new Field('rgba', rgbaType, true),
+  evaluate: (_arguments, {length}) => vectorFromArray(new Array(length).fill(null), rgbaType)
+};
+compileArrowFunction('color', ['[0, 1, 2]'], {
+  inputSchema: batch.schema,
+  functions: [color]
+}).evaluateTable(table);
