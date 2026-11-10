@@ -94,3 +94,25 @@ test('numeric data errors are classified while binding and unexpected callback e
     ArrowEvaluationError
   );
 });
+
+test('contextual conditional arguments retain type checks and widening costs', () => {
+  const table = input();
+  const f64 = {name: 'F', prototypes: [prototype([new Float64()])]};
+  expect(() =>
+    compileArrowExpression('F(true ? i : null)', {inputSchema: table.schema, functions: [f64]})
+  ).toThrow('type mismatch');
+  const overloaded = {
+    name: 'F',
+    prototypes: [prototype([new Float64()]), prototype([new Float32()])]
+  };
+  const compiled = compileArrowExpression('F(true ? x : null)', {
+    inputSchema: table.schema,
+    functions: [overloaded]
+  });
+  expect(compiled.outputField.type).toEqual(new Float32());
+  expect([...compiled.evaluateTable(table)]).toEqual([1, null, 3]);
+  expect(
+    compileArrowExpression('F(true ? x : null)', {inputSchema: table.schema, functions: [f64]})
+      .outputField.type
+  ).toEqual(new Float64());
+});

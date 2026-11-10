@@ -828,38 +828,39 @@ function bindCall(ast: any, options: BindingOptions): Node {
           cost += 4;
       } else {
         bound = source!;
-        const sourceType = valueType(bound.field.type);
-        if (DataType.isDictionary(bound.field.type) && !DataType.isDictionary(field.type))
-          cost += 1;
+      }
+      // Contextual binding can retain a column's physical type (for example
+      // flag ? intColumn : null). Validate it just like an inferred argument.
+      const sourceType = valueType(bound.field.type);
+      if (DataType.isDictionary(bound.field.type) && !DataType.isDictionary(field.type)) cost += 1;
+      if (
+        physicalKey(DataType.isDictionary(field.type) ? bound.field.type : sourceType) !==
+        physicalKey(field.type)
+      ) {
         if (
-          physicalKey(DataType.isDictionary(field.type) ? bound.field.type : sourceType) !==
-          physicalKey(field.type)
+          DataType.isFloat(sourceType) &&
+          DataType.isFloat(field.type) &&
+          sourceType.precision < field.type.precision
         ) {
-          if (
-            DataType.isFloat(sourceType) &&
-            DataType.isFloat(field.type) &&
-            sourceType.precision < field.type.precision
-          ) {
-            cost += field.type.precision - sourceType.precision;
-            const child = bound,
-              round = roundToType(field.type);
-            bound = {
-              field: new Field(
-                child.field.name,
-                field.type,
-                child.field.nullable,
-                child.field.metadata
-              ),
-              hasKernel: child.hasKernel,
-              prepare(batch, active) {
-                const prepared = child.prepare(batch, active);
-                return {get: row => round(prepared.get(row))};
-              }
-            };
-          } else {
-            compatible = false;
-            break;
-          }
+          cost += field.type.precision - sourceType.precision;
+          const child = bound,
+            round = roundToType(field.type);
+          bound = {
+            field: new Field(
+              child.field.name,
+              field.type,
+              child.field.nullable,
+              child.field.metadata
+            ),
+            hasKernel: child.hasKernel,
+            prepare(batch, active) {
+              const prepared = child.prepare(batch, active);
+              return {get: row => round(prepared.get(row))};
+            }
+          };
+        } else {
+          compatible = false;
+          break;
         }
       }
       if (
