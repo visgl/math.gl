@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {PathLayer, ScatterplotLayer, SolidPolygonLayer, TextLayer} from '@deck.gl/layers';
+import {groupChartOutlines} from './group-chart-outlines.js';
 
 const styles = {
   ocean: [230, 242, 247],
@@ -87,7 +88,7 @@ export function createProjectedMapScene(canvas) {
         polygon(
           'ocean',
           fitted.regions.flatMap(region =>
-            region.outlines.map(outline => ({coordinates: [outline]}))
+            groupChartOutlines(region.outlines).map(coordinates => ({coordinates}))
           )
         )
       );
