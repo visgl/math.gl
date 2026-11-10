@@ -109,7 +109,37 @@ The vector implementation receives full-length Arrow vectors, potentially dictio
 
 An optional `evaluateScalar(...values)` provides equivalent primitive row semantics. When present, the expression compiler uses it to fuse the function into its output loop, avoiding intermediate vectors. Without it, the compiler calls `evaluate` at the vector boundary. It never runs both implementations or retries a failure through the other implementation. Both implementations must agree on values and errors. Conditional branches and null propagation skip scalar callbacks too.
 
-The example uses `vectorFromArray` for readability; vector kernels can write Arrow buffers directly. Geometry functions can supply only `evaluate`, with exact nested argument fields and GeoArrow extension metadata. Geometry layouts require schema-bound declarations; there is no overload resolution yet. Results remain primitive scalars, so geometry-valued output is not supported.
+The example uses `vectorFromArray` for readability; vector kernels can write Arrow buffers directly. Geometry functions can supply only `evaluate`, with exact nested argument fields and GeoArrow extension metadata. Geometry layouts require schema-bound declarations; there is no overload resolution yet. Results support primitives and fixed-size numeric tuples. Other nested results, including variable-length geometry output, are not supported.
+
+### RGBA and other numeric tuple results[​](#rgba-and-other-numeric-tuple-results "Direct link to RGBA and other numeric tuple results")
+
+A vector-only function can return a `FixedSizeList` with a positive fixed width and a non-nullable numeric child. For RGBA, declare four `Float32` channels or four `Uint8` channels:
+
+```
+const rgba = new FixedSizeList(4, new Field('channel', new Float32(), false));
+
+const result = new Field('color', rgba, true);
+```
+
+The parent validity bitmap represents a missing color; transparent RGBA is a valid value. The evaluator preserves the declared field metadata and child buffers, validates active result rows, and masks inactive or null-propagated rows through parent validity. Tuple functions cannot supply `evaluateScalar`. Tuple values can be projected, passed to another vector function, tested with `isNull`, or selected with `condition ? color(value) : [0, 0, 0, 1]`. Arithmetic and comparisons on whole tuples are unsupported. Conditional selection allocates one numeric child buffer and copies selected components, without per-row JavaScript arrays.
+
+### Typed array arguments[​](#typed-array-arguments "Direct link to Typed array arguments")
+
+Array literals take their type from a function's declared `List` or `FixedSizeList` argument. For example, `List<Float64>` accepts numeric bins and `List<Utf8>` accepts category names:
+
+```
+// Application-supplied functions declare these arguments:
+
+const bins = new Field('bins', new List(new Field('item', new Float64(), false)), false);
+
+const categories = new Field('categories', new List(new Field('item', new Utf8(), false)), false);
+
+// Expressions: bucket(value, [10, 20, 50]) and category(kind, ["road", "rail", "water"])
+```
+
+The compiler validates every element against the exact declared type. Empty variable-length lists are supported; fixed-size literals must match their width. Null elements require a nullable child. Literals are flat and limited to 4096 elements: dynamic values, nested arrays, holes and spreads are rejected. Standalone arrays have no inferred type. A conditional array branch can inherit its type from the other tuple branch or a declared function argument.
+
+Variable-length constants are broadcast as dictionary-encoded vectors containing one list value, so a large bin/category list is not copied for every row. Kernels must handle dictionary inputs (as Arrow `Vector.get` does) and treat inputs as read-only. Fixed tuples use ordinary child buffers. The same declarations and literals work with `evaluateTable` and worker-local functions. These are evaluator primitives; palette and color-scale functions are supplied separately.
 
 ## Supported expressions[​](#supported-expressions "Direct link to Supported expressions")
 
@@ -133,7 +163,7 @@ SQL parsing, source pushdown and result-row selection remain the query engine's 
 
 ## Performance and boundaries[​](#performance-and-boundaries "Direct link to Performance and boundaries")
 
-Input readers use Arrow buffers without allocating JavaScript row objects. Primitive string kernels avoid decoding input strings. Built-in operations and scalar callbacks are fused into the output pass, and constants remain scalar. Temporary vectors are materialized only as arguments to registered vector kernels. Kernel branches may require a mask prepass; working memory remains bounded by the current batch. Direct field projections can reuse input buffers; retain those outputs only as long as needed.
+Input readers use Arrow buffers without allocating JavaScript row objects. Primitive string kernels avoid decoding input strings. Built-in operations and scalar callbacks are fused into the output pass, and constants remain scalar. Temporary vectors are materialized at registered vector boundaries and for tuple conditionals. List constants retain one shared payload plus row indices. Kernel branches may require a mask prepass; working memory remains bounded by the current batch. Direct field projections can reuse input buffers; retain those outputs only as long as needed.
 
 Run `node modules/arrow/scripts/benchmark-expressions.mjs` after building to compare numeric and UTF-8 workloads with the existing expression evaluator. The report separates throughput, row objects, string decodes and output buffer bytes; it does not claim to measure total allocator traffic.
 
