@@ -31,7 +31,10 @@ export type MapTransitionMeshOptions = {
   /** Maximum prepared triangles across all world copies. Default 2000000. */
   maxTriangles?: number;
 };
-export type MapTransitionMeshAsyncOptions = MapTransitionMeshOptions & {signal?: AbortSignal};
+export type MapTransitionMeshAsyncOptions = MapTransitionMeshOptions & {
+  /** Native AbortSignal or an equivalent cancellation guard; no DOM typings required. */
+  signal?: {throwIfAborted(): void};
+};
 /** Static GPU-ready buffers. Animation changes only a renderer's progress uniform. */
 export type MapTransitionMesh = {
   positions: Float64Array;

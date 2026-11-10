@@ -134,7 +134,8 @@ matrix; callers choose their screen frame consistently at both endpoints.
 
 The asynchronous form returns identical buffers, yielding to host tasks during
 recursive refinement, motion fitting, and buffer packing. It accepts
-`options.signal` for cancellation and rejects with the signal's abort reason instead of returning a partial mesh. Prepare once and
+`options.signal` (a native AbortSignal or structural `throwIfAborted()` guard)
+for cancellation and rejects with the signal's abort reason instead of returning a partial mesh. Prepare once and
 update a GPU progress uniform during animation. Start the renderer's clock after
 the first actual draw so initial shader compilation and buffer uploads do not
 consume the visible transition.

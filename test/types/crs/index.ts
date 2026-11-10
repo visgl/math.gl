@@ -243,3 +243,10 @@ void crsDescriptor;
 void projectionCoordinate;
 void projectionOutput;
 void rootDescriptor;
+
+// Shared rendering preparation must remain consumable with only ES libraries.
+import type {MapTransitionMeshAsyncOptions} from '@math.gl/geospatial/projection';
+const transitionOptions: MapTransitionMeshAsyncOptions = {
+  signal: {throwIfAborted() {}}
+};
+void transitionOptions;
