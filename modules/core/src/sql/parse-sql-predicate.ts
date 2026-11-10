@@ -192,6 +192,8 @@ class SQLPredicateParser {
       }
       const value = this.parameters[token.value];
       validateParameterValue(value, token.value);
+      if (value instanceof Uint8Array) return value.slice();
+      if (value instanceof Date) return new Date(value.getTime());
       return value;
     }
     if (token.kind === 'identifier' && !token.quoted && /^(TRUE|FALSE)$/i.test(token.value)) {

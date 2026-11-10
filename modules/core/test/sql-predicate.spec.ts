@@ -204,3 +204,22 @@ test('predicate validation and binding reject sparse membership lists', () => {
     expect(() => bindSQLPredicate(predicate as never, {})).toThrow('unsupported scalar');
   }
 });
+
+test.each(['value = :input', 'value IN (:input)'])(
+  'parse-time binding snapshots mutable scalars for %s',
+  sql => {
+    for (const value of [new Date('2024-01-01T00:00:00Z'), new Uint8Array([1, 2, 3])]) {
+      const parameters = {input: value};
+      const parsed = parseSQLPredicate(sql, {parameters});
+      const bound = bindSQLPredicate(
+        parseSQLPredicate(sql, {preserveParameters: true}),
+        parameters
+      );
+      expect(parsed).toEqual(bound);
+      if (value instanceof Date) value.setUTCFullYear(2030);
+      else value.fill(9);
+      expect(parsed).toEqual(bound);
+      expect(parseSQLPredicate(sql, {parameters})).not.toEqual(parsed);
+    }
+  }
+);
