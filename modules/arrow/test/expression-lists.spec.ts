@@ -316,3 +316,45 @@ test('array type contracts reject non-list arguments, nullable tuple channels an
     })
   ).toThrow('scalar literals');
 });
+
+test('conditional variable-list literals retain dictionary broadcast semantics', () => {
+  const table = input();
+  const list = new List(new Field('item', new Int32(), false));
+  const fn: ArrowTableFunction = {
+    name: 'bins',
+    arguments: [new Field('bins', list, false)],
+    result: new Field('first', new Int32(), false),
+    evaluate: ([values], {length, activeRows}) =>
+      vectorFromArray(
+        Array.from({length}, (_, row) => (activeRows[row] ? values!.get(row).get(0) : null)),
+        new Int32()
+      )
+  };
+  expect([
+    ...compileArrowExpression('bins(x > 2 ? [10,20] : [30,40])', {
+      inputSchema: table.schema,
+      functions: [fn]
+    }).evaluateTable(table)
+  ]).toEqual([30, 30, 10, 10]);
+});
+
+test('nested list conditionals retain their chosen dictionary indices', () => {
+  const table = input();
+  const list = new List(new Field('item', new Int32(), false));
+  const fn: ArrowTableFunction = {
+    name: 'bins',
+    arguments: [new Field('bins', list, false)],
+    result: new Field('first', new Int32(), false),
+    evaluate: ([v], {length}) =>
+      vectorFromArray(
+        Array.from({length}, (_, i) => v!.get(i).get(0)),
+        new Int32()
+      )
+  };
+  expect([
+    ...compileArrowExpression('bins(x > 2 ? (x > 3 ? [1] : [2]) : [3])', {
+      inputSchema: table.schema,
+      functions: [fn]
+    }).evaluateTable(table)
+  ]).toEqual([3, 3, 2, 1]);
+});

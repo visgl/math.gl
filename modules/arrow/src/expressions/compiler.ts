@@ -7,6 +7,7 @@ import {
   DataType,
   Field,
   Float64,
+  Dictionary,
   Int64,
   Int32,
   Null,
@@ -400,7 +401,8 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
         yes = bind(ast.consequent, options, no.field.type, vectorInput);
     }
     const tuple = isTupleType(yes.field.type);
-    if (tuple) {
+    const list = DataType.isList(yes.field.type);
+    if (tuple || list) {
       if (physicalKey(yes.field.type) !== physicalKey(no.field.type))
         throw new Error('Arrow expression operand types must match');
       if (
@@ -424,7 +426,7 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
         const test = condition.prepare(batch, active);
         // A vector kernel must receive its branch mask before it executes. Pure scalar paths stay lazy.
         const selected =
-          tuple || yes.hasKernel || no.hasKernel
+          tuple || list || yes.hasKernel || no.hasKernel
             ? active.map((value, row) => (value && test.get(row) === true ? 1 : 0))
             : undefined;
         const a = yes.prepare(batch, selected ?? active);
@@ -432,6 +434,28 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
           batch,
           selected ? active.map((value, row) => (value && !selected[row] ? 1 : 0)) : active
         );
+        if (list) {
+          const av = a.vector!,
+            bv = b.vector!;
+          if (!DataType.isDictionary(av.type) || !DataType.isDictionary(bv.type))
+            throw new Error('Conditional List values currently require array literal branches');
+          const left = av.data[0]!.dictionary!,
+            right = bv.data[0]!.dictionary!;
+          const dictionary = left.concat(right);
+          const indices = Int32Array.from(selected!, (value, row) =>
+            value ? Number(av.data[0]!.values[row]) : left.length + Number(bv.data[0]!.values[row])
+          );
+          return vectorReader(
+            makeVector(
+              makeData({
+                type: new Dictionary(field.type, new Int32()),
+                length: active.length,
+                data: indices,
+                dictionary
+              })
+            )
+          );
+        }
         if (isTupleType(field.type)) {
           validateTupleVector(a.vector!, yes.field, selected!);
           validateTupleVector(
