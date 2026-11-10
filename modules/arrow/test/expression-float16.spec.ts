@@ -15,8 +15,9 @@ import {
   vectorFromArray
 } from 'apache-arrow';
 import {isFloat16Array, NativeFloat16ArrayConstructor} from '@math.gl/core';
-import {parseSQLExpression, parseSQLPredicate} from '@math.gl/core/sql';
+import {parseSQLExpression, parseSQLPredicate, parseSQLQuery} from '@math.gl/core/sql';
 import {
+  compileArrowArray,
   compileArrowExpression,
   compileArrowPredicate,
   type ArrowTableFunction
@@ -38,6 +39,11 @@ test.runIf(supported)(
     expect(identity.data[0]!.values.buffer).toBe(table.getChild('x')!.data[0]!.values.buffer);
     const result = compileArrowExpression('x + 0.00048828125', options).evaluateTable(table);
     expect([...result]).toEqual([1, 1.001953125, 65504]);
+    expect([
+      ...compileArrowExpression('(x + 0.00048828125) - x', options).evaluateTable(
+        new Table({x: half([1])})
+      )
+    ]).toEqual([0]);
     expect(result.type).toEqual(new Float16());
     expect(result.data[0]!.values).toBeInstanceOf(Uint16Array);
   }
@@ -114,5 +120,29 @@ test.skipIf(supported)(
   'Float16 requires a decoded native array rather than Uint16 numeric assignments',
   () => {
     expect(() => float16Values(new Uint16Array(1))).toThrow('native Float16Array');
+  }
+);
+
+test.runIf(supported)(
+  'packed ARRAY projections infer and explicitly cast Float16 components',
+  () => {
+    expect(parseSQLQuery('SELECT ARRAY[x,y]::FLOAT16[2] AS position')).toEqual({
+      select: [{array: ['x', 'y'], type: 'float16', as: 'position'}]
+    });
+    const table = new Table({x: half([1, 2]), y: half([3, 4])});
+    const compiled = compileArrowArray(['x', 'y'], {inputSchema: table.schema});
+    expect(compiled.outputField.type.children[0]!.type).toEqual(new Float16());
+    expect(Array.from(compiled.evaluateTable(table), row => Array.from(row))).toEqual([
+      [1, 3],
+      [2, 4]
+    ]);
+    const wide = new Table({x: vectorFromArray([1.0005, 70000], new Float64())});
+    const narrowed = compileArrowArray(['x'], {inputSchema: wide.schema, type: 'float16'});
+    expect(
+      Array.from(narrowed.evaluateTable(wide, {activeRows: new Uint8Array([1, 0])}), row =>
+        row === null ? null : Array.from(row)
+      )
+    ).toEqual([[1.0009765625], null]);
+    expect(() => narrowed.evaluateTable(wide)).toThrow('overflow');
   }
 );

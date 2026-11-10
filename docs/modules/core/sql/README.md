@@ -154,7 +154,7 @@ Postfix `value::TYPE` and chained casts are also supported with the same convers
 Operands must be existing floating-point columns; literals and arbitrary expressions are unsupported.
 An alias is required. `::FLOAT32[3]` or `::REAL[3]` adds `type: 'float32'`;
 `::FLOAT64[3]` or `::DOUBLE PRECISION[3]` adds `type: 'float64'`. The declared width must match.
-Omitting a type preserves Float64 if any component is Float64, otherwise it uses Float32.
+Omitting a type preserves Float64 if any component is Float64, otherwise it preserves Float32 or Float16.
 
 Use `compileArrowArray(selection.array, {inputSchema, type: selection.type})` from
 `@math.gl/arrow/expressions` to evaluate the projection. This only constructs a column; it does not
@@ -162,3 +162,5 @@ filter or compact rows. Null components make the whole tuple null with zero nume
 GPU consumers must respect parent validity or those invalid positions will appear at the origin.
 `FLOAT16` is an additional explicit scalar cast target: both `value::FLOAT16` and
 `CAST(value AS FLOAT16)` map to portable `float16`. Arrow execution requires native Float16Array.
+
+Packed arrays also accept `ARRAY[x,y,z]::FLOAT16[3]` or `compileArrowArray(columns, {inputSchema, type: "float16"})`. Native Float16Array is required for half-precision execution.

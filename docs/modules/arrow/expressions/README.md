@@ -343,8 +343,8 @@ Postfix `value::TYPE` and chained casts are also supported with the same convers
 ## Packed source columns
 
 `compileArrowArray(columns, {inputSchema, type?})` packs existing floating-point columns into one
-fixed-size list vector. `type` may be `float32` or `float64`; omission preserves Float64 if present
-in any source component, otherwise Float32. Unknown and non-floating columns are rejected at binding.
+fixed-size list vector. `type` may be `float16`, `float32` or `float64`; omission preserves Float64 if present
+in any source component, otherwise Float32 or Float16, preserving the widest input precision. Unknown and non-floating columns are rejected at binding.
 
 ```ts
 import {compileArrowArray} from '@math.gl/arrow/expressions';
@@ -373,3 +373,5 @@ casts throw, while arithmetic retains IEEE infinity/NaN behavior. Subnormals and
 preserved. Runtime native `Float16Array` support is required in every executing worker or thread;
 without it, Float16 operations fail with a capability error. Other expression types remain usable.
 The capability checks reuse the existing core Float16 helpers.
+
+Packed arrays also accept `ARRAY[x,y,z]::FLOAT16[3]` or `compileArrowArray(columns, {inputSchema, type: "float16"})`. Native Float16Array is required for half-precision execution.
