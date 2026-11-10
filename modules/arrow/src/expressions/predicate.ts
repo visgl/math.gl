@@ -47,7 +47,20 @@ function toExpression(predicate: ColumnarPredicate): Expression {
   const path = (predicate.args[0] as ColumnarPredicateProperty).property;
   if (Array.isArray(path) && path.length !== 1)
     throw new Error('Nested Arrow predicate paths are not supported yet');
-  const left = {type: 'Identifier', name: typeof path === 'string' ? path : path[0]} as Expression;
+  let left = {type: 'Identifier', name: typeof path === 'string' ? path : path[0]} as Expression;
+  for (const target of (predicate.args[0] as ColumnarPredicateProperty).casts ?? [])
+    left = {
+      type: 'CallExpression',
+      callee: {type: 'Identifier', name: 'cast'},
+      arguments: [left, {type: 'Literal', value: target}]
+    } as Expression;
+  const casts = (predicate.args[0] as ColumnarPredicateProperty).casts;
+  const scalar = (value: unknown) =>
+    casts?.[casts.length - 1] === 'int64' &&
+    typeof value === 'number' &&
+    Number.isSafeInteger(value)
+      ? BigInt(value)
+      : value;
   if (predicate.op === 'isNull')
     return {
       type: 'CallExpression',
@@ -64,7 +77,7 @@ function toExpression(predicate: ColumnarPredicate): Expression {
             type: 'BinaryExpression',
             operator: '==',
             left,
-            right: {type: 'Literal', value}
+            right: {type: 'Literal', value: scalar(value)}
           }) as Expression
       )
       .reduce(
@@ -75,6 +88,6 @@ function toExpression(predicate: ColumnarPredicate): Expression {
     type: 'BinaryExpression',
     operator: predicate.op === '=' ? '==' : predicate.op === '<>' ? '!=' : predicate.op,
     left,
-    right: {type: 'Literal', value: predicate.args[1]}
+    right: {type: 'Literal', value: scalar(predicate.args[1])}
   } as Expression;
 }

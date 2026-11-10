@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import type {Expression} from '../expressions/index';
 import type {ColumnarPredicate, ColumnarPredicateProperty} from '../expressions/columnar-predicate';
 
 /** One source column selected for logical output, optionally under a new name. */
 export type TableSelection =
+  | Readonly<{expression: Expression; as?: string}>
   | string
   | Readonly<{
       /** Source column name, resolved before aliases are applied. */

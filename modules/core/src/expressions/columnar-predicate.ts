@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {isColumnarScalarType, type ColumnarScalarType} from './scalar-type';
+
 /** Scalar values supported by format-neutral columnar predicates. */
 export type ColumnarPredicateValue = boolean | number | bigint | string | Date | Uint8Array;
 
@@ -20,6 +22,8 @@ export type ColumnarPredicateParameterValues = Readonly<Record<string, ColumnarP
 /** Reference to a top-level or nested column. */
 export type ColumnarPredicateProperty = {
   property: string | readonly string[];
+  /** Explicit scalar conversions in innermost-to-outermost order. */
+  casts?: readonly ColumnarScalarType[];
 };
 
 export type ColumnarComparisonPredicate<
@@ -130,7 +134,10 @@ export function copyColumnarPredicate(predicate: ColumnarPredicate): ColumnarPre
     | ColumnarComparisonPredicate
     | ColumnarInPredicate
     | ColumnarNullPredicate;
-  const property = {property: [...getColumnarPredicatePath(leaf.args[0])]};
+  const property = copyColumnarPredicateProperty({
+    ...leaf.args[0],
+    property: [...getColumnarPredicatePath(leaf.args[0])]
+  });
   if (leaf.op === 'isNull') return {op: 'isNull', args: [property]};
   if (leaf.op === 'in') {
     return {op: 'in', args: [property, leaf.args[1].map(copyColumnarPredicateValue)]};
@@ -150,6 +157,15 @@ export function validateColumnarPredicate(
     }
     if (child.op === 'not') return;
     const leaf = child as ColumnarComparisonPredicate | ColumnarInPredicate | ColumnarNullPredicate;
+    const casts = leaf.args[0].casts;
+    if (
+      casts !== undefined &&
+      (!Array.isArray(casts) ||
+        !casts.length ||
+        casts.length > 64 ||
+        Array.from(casts).some(type => !isColumnarScalarType(type)))
+    )
+      throw new Error('Invalid columnar predicate casts');
     const path = getColumnarPredicatePath(leaf.args[0]);
     if (!path.length || path.some(component => !component)) {
       throw new Error('Columnar predicate property path must contain non-empty strings');
@@ -265,6 +281,7 @@ function copyColumnarPredicateProperty<PropertyT extends ColumnarPredicateProper
 ): PropertyT {
   return {
     ...property,
+    ...(property.casts ? {casts: [...property.casts]} : {}),
     property: typeof property.property === 'string' ? property.property : [...property.property]
   } as PropertyT;
 }

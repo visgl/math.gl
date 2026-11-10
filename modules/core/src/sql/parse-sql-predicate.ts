@@ -12,6 +12,7 @@ import type {
   SQLPredicateScalar,
   SQLPredicateValue
 } from './sql-predicate-types';
+import {sqlCastType} from './parse-sql-expression';
 import {validateSQLPredicate} from './sql-predicate-schema';
 import {isColumnarPredicateValue} from '../expressions/columnar-predicate';
 
@@ -112,12 +113,12 @@ class SQLPredicateParser {
       this.expectSymbol(')');
       return predicate;
     }
-    return this.parseLeaf();
+    return this.parseLeaf(depth);
   }
 
   /** Parses one comparison, membership, or null predicate. */
-  private parseLeaf(): SQLPredicate {
-    const property = this.parseProperty();
+  private parseLeaf(depth: number): SQLPredicate {
+    const property = this.parseProperty(depth);
     if (this.takeKeyword('IS')) {
       const negated = this.takeKeyword('NOT');
       this.expectKeyword('NULL');
@@ -156,7 +157,49 @@ class SQLPredicateParser {
   }
 
   /** Parses an identifier into a property reference. */
-  private parseProperty(): SQLPredicateProperty {
+  private parseProperty(depth: number): SQLPredicateProperty {
+    let property = this.parsePropertyPrimary(depth);
+    while (this.takeSymbol('::')) {
+      const token = this.take();
+      if (token?.kind !== 'identifier' || token.quoted)
+        throw new Error('SQL cast requires a target type');
+      let name = token.value;
+      if (name.toUpperCase() === 'DOUBLE') {
+        this.expectKeyword('PRECISION');
+        name += ' PRECISION';
+      }
+      if (name.toUpperCase() === 'CHARACTER') {
+        this.expectKeyword('VARYING');
+        name += ' VARYING';
+      }
+      property = {...property, casts: [...(property.casts ?? []), sqlCastType(name)]};
+      this.assertDepth(depth + property.casts!.length);
+    }
+    return property;
+  }
+
+  private parsePropertyPrimary(depth: number): SQLPredicateProperty {
+    this.assertDepth(depth);
+    if (this.takeKeyword('CAST')) {
+      this.expectSymbol('(');
+      const property = this.parseProperty(depth + 1);
+      this.expectKeyword('AS');
+      const target = this.take();
+      if (target?.kind !== 'identifier' || target.quoted)
+        throw new Error('SQL CAST requires a target type');
+      let name = target.value;
+      if (name.toUpperCase() === 'DOUBLE') {
+        this.expectKeyword('PRECISION');
+        name += ' PRECISION';
+      }
+      if (name.toUpperCase() === 'CHARACTER') {
+        this.expectKeyword('VARYING');
+        name += ' VARYING';
+      }
+      const type = sqlCastType(name);
+      this.expectSymbol(')');
+      return {...property, casts: [...(property.casts ?? []), type]};
+    }
     const token = this.take();
     if (token?.kind !== 'identifier') {
       throw new Error('SQL predicate expected a column identifier');
@@ -325,6 +368,9 @@ function tokenizeSQLPredicate(source: string): SQLPredicateToken[] {
       const result = readQuotedToken(source, position, '"', '"');
       tokens.push({kind: 'identifier', value: result.value, quoted: true});
       position = result.position;
+    } else if (source.startsWith('::', position)) {
+      tokens.push({kind: 'symbol', value: '::'});
+      position += 2;
     } else if (character === ':') {
       const match = /^[A-Za-z_][A-Za-z0-9_]*/.exec(source.slice(position + 1));
       if (!match) {

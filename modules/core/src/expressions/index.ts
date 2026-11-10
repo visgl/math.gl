@@ -22,3 +22,5 @@ export {BASIC_MATH_FUNCTION_LIBRARY, mergeFunctionLibraries} from './function-li
 export {parseExpressionString, type AccessorFunction} from './parse-expression-string';
 
 export * from './columnar-predicate';
+
+export {isColumnarScalarType, COLUMNAR_SCALAR_TYPES, type ColumnarScalarType} from './scalar-type';

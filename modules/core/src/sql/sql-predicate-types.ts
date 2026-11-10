@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import type {ColumnarScalarType} from '../expressions/scalar-type';
+
 import {
   isColumnarPredicateParameter,
   type ColumnarComparisonPredicate,
@@ -34,6 +36,8 @@ export type SQLPredicateProperty = Readonly<{
   property: string;
   /** Whether the complete property was a quoted SQL identifier. */
   quoted?: boolean;
+  /** Explicit conversions, applied in order before predicate comparison. */
+  casts?: readonly ColumnarScalarType[];
 }>;
 
 /** Binary comparison between a column and a scalar value. */

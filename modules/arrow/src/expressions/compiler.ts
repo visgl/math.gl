@@ -23,6 +23,7 @@ import {
 import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '../utf8/index';
 import {parse, type Expression} from '@math.gl/core/expressions';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
+import {bindCast} from './cast';
 import {createFunctionLookup} from './registry';
 import {
   isTupleType,
@@ -649,6 +650,25 @@ function bindCall(ast: any, options: BindingOptions): Node {
   if (ast.callee.type !== 'Identifier')
     throw new Error('Only registered named function calls are supported');
   const name = ast.callee.name;
+  if (name === 'cast') {
+    if (ast.arguments.length !== 2 || ast.arguments[1]?.type !== 'Literal')
+      throw new Error('cast requires a value and a literal scalar target');
+    const argument = bind(ast.arguments[0], options);
+    const cast = bindCast(argument.field.type, ast.arguments[1].value);
+    return {
+      field: new Field('cast', cast.type, argument.field.nullable),
+      hasKernel: argument.hasKernel,
+      prepare(batch, active) {
+        const child = argument.prepare(batch, active);
+        return {
+          get: row =>
+            cast.textInput && !DataType.isUtf8(cast.type)
+              ? cast.evaluate(null, bytes(child, row))
+              : cast.evaluate(child.get(row))
+        };
+      }
+    };
+  }
   const conversion = ['toFloat64', 'toInt32', 'toInt64'].includes(name);
   const nullTest = name === 'isNull' || name === 'isNotNull';
   if (conversion || nullTest || ['parseNumber', 'parseBigInt', 'parseBoolean'].includes(name)) {

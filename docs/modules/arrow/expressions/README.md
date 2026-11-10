@@ -313,3 +313,29 @@ It supports row-aligned numeric and Boolean Turf results: area, length, distance
 variants, angle and Boolean predicates. It retains each Turf function's units, geometry restrictions,
 CRS assumptions and null behavior. Geometry-producing functions, row-count-changing operations and
 flattened `bbox` results are excluded. Nested geometry arithmetic remains unsupported.
+
+## SQL CAST
+
+Use `parseSQLExpression` from `@math.gl/core/sql` to compile standard SQL cast syntax:
+
+```ts
+import {parseSQLExpression} from '@math.gl/core/sql';
+const converted = compileArrowExpression(parseSQLExpression('CAST(population AS BIGINT)'), {
+  inputSchema: batch.schema
+});
+```
+
+Supported targets are SMALLINT (Int16), INTEGER/INT (Int32), BIGINT (Int64), REAL (Float32),
+DOUBLE PRECISION (Float64), BOOLEAN (Bool), and VARCHAR/CHARACTER VARYING (Utf8).
+Nulls remain null. Numeric-to-integer casts truncate toward zero and reject overflow; text-to-integer
+casts require integer text. Invalid text, non-finite numeric results and overflow throw only for
+active rows. Boolean casts accept Boolean/text inputs; Boolean-to-text yields `TRUE` or `FALSE`.
+Text parsing uses the UTF-8 primitives without decoding numeric/Boolean input strings.
+Bigint-to-floating conversion can lose precision. Float32 casts round to Float32.
+
+The SQL parser emits the shared expression AST, equivalent to `cast(value, "int64")` in expression
+syntax. CAST can be nested, selected with an alias, or applied to a WHERE column before comparison.
+Precision/length modifiers, DECIMAL, date/time targets, casts on the
+right-hand predicate scalar are currently unsupported.
+
+Postfix `value::TYPE` and chained casts are also supported with the same conversion rules.

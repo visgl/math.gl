@@ -13,3 +13,5 @@ export type {
   TableReference,
   SQLCatalogQuery
 } from './query-types';
+
+export {parseSQLExpression} from './parse-sql-expression';

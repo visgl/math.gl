@@ -41,7 +41,7 @@ An injected WHERE parser can define a different predicate language.
 | Row limit                             | ✅      | `LIMIT` followed by a nonnegative safe integer, including zero.                                                                                   |
 | Catalog commands                      | ✅      | `SHOW SOURCES`, `SHOW TABLES [FROM source]`, and `DESCRIBE source[.table]`. `SHOW SOURCES` is a parser-specific command.                          |
 | Qualified column names                | ❌      | `SELECT table.column` and qualified WHERE columns in `parseSQLQuery()` are rejected. Quote literal column names containing dots.                  |
-| Computed columns and function calls   | ❌      | No arithmetic, SQL functions, `CASE`, or function-valued SELECT expressions.                                                                      |
+| Computed columns and function calls   | ⚠️      | CAST and postfix :: conversions only; no arithmetic, other SQL functions, or CASE.                                                                      |
 | Additional predicate operators        | ❌      | No `LIKE`, `ILIKE`, `BETWEEN`, regular expressions, or `EXISTS`.                                                                                  |
 | Sorting and pagination                | ❌      | No `ORDER BY`, `OFFSET`, or `FETCH`.                                                                                                              |
 | Aggregation and distinct rows         | ❌      | No aggregate functions, `GROUP BY`, `HAVING`, or `DISTINCT`.                                                                                      |
@@ -128,3 +128,22 @@ const result = await query("SHOW TABLES FROM warehouse", {
 `arrowTable` and `sources` are application-provided inputs. The query engine resolves source names,
 validates columns, and executes the result. math.gl does not import loaders.gl, and moving the
 loaders.gl parser implementation to this package is a separate migration.
+
+## CAST expressions
+
+`parseSQLExpression('CAST(value AS INTEGER)')` returns a core expression AST suitable for
+`compileArrowExpression` from `@math.gl/arrow/expressions`. The optional SQL module itself has no
+Arrow dependency. `SELECT CAST(value AS INTEGER) AS count` returns a selection with an `expression`
+AST and `as` alias. Existing plain-column selections retain their shapes.
+
+Supported SQL targets: SMALLINT, INTEGER/INT, BIGINT, REAL, DOUBLE PRECISION, BOOLEAN,
+VARCHAR and CHARACTER VARYING. CAST accepts columns, scalar literals and nested casts.
+`WHERE CAST(value AS INTEGER) >= :minimum` records ordered `casts` on the source property;
+executors must apply those conversions before testing the predicate. Binding, validation, copying
+and column discovery preserve this information. Arrow's predicate evaluator executes these casts.
+
+Unsupported targets/modifiers fail explicitly. This subset does not accept DECIMAL, date/time,
+length/precision modifiers, arbitrary arithmetic inside CAST, or casts on predicate scalar
+values. See [Arrow expression conversion rules](../../arrow/expressions/README.md#sql-cast).
+
+Postfix `value::TYPE` and chained casts are also supported with the same conversion rules.
