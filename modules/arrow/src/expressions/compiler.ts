@@ -521,28 +521,10 @@ function bindNode(
           selected ? active.map((value, row) => (value && !selected[row] ? 1 : 0)) : active,
           context
         );
-        if (list) {
-          const av = a.vector!,
-            bv = b.vector!;
-          if (!DataType.isDictionary(av.type) || !DataType.isDictionary(bv.type))
-            throw new Error('Conditional List values currently require array literal branches');
-          const left = av.data[0]!.dictionary!,
-            right = bv.data[0]!.dictionary!;
-          const dictionary = left.concat(right);
-          const indices = Int32Array.from(selected!, (value, row) =>
-            value ? Number(av.data[0]!.values[row]) : left.length + Number(bv.data[0]!.values[row])
-          );
+        if (list)
           return vectorReader(
-            makeVector(
-              makeData({
-                type: new Dictionary(field.type, new Int32()),
-                length: active.length,
-                data: indices,
-                dictionary
-              })
-            )
+            selectListVectors(field.type, a.vector!, b.vector!, selected!, active)
           );
-        }
         if (isTupleType(field.type)) {
           const validActive = context.failed
             ? active.map((value, row) => (value && !context.failed![row] ? 1 : 0))
@@ -735,6 +717,45 @@ function compare(op: string, a: any, b: any): boolean {
   }
 }
 
+/** Selects broadcast list arguments without decoding their elements. */
+function selectListVectors(
+  type: DataType,
+  left: Vector,
+  right: Vector,
+  selected: Mask,
+  active: Mask
+): Vector {
+  if (!DataType.isDictionary(left.type) || !DataType.isDictionary(right.type))
+    throw new Error('Computed List arguments require array literal branches');
+  const a = left.data[0]!,
+    b = right.data[0]!;
+  const leftDictionary = a.dictionary!,
+    rightDictionary = b.dictionary!;
+  const indices = new Int32Array(active.length);
+  const valid = new Uint8Array(active.length);
+  for (let row = 0; row < active.length; row++) {
+    if (!active[row]) continue;
+    if (selected[row]) {
+      indices[row] = Number(a.values[row]);
+      valid[row] = a.getValid(row) ? 1 : 0;
+    } else {
+      indices[row] = leftDictionary.length + Number(b.values[row]);
+      valid[row] = b.getValid(row) ? 1 : 0;
+    }
+  }
+  return maskTupleVector(
+    makeVector(
+      makeData({
+        type: new Dictionary(type, new Int32()),
+        length: active.length,
+        data: indices,
+        dictionary: leftDictionary.concat(rightDictionary)
+      })
+    ),
+    valid
+  );
+}
+
 /** Materializes one recovery boundary without retrying callbacks or leaking row errors outward. */
 function bindRecovery(
   name: string,
@@ -746,12 +767,25 @@ function bindRecovery(
     throw new Error('Dictionary function arguments require a dictionary-encoded source column');
   if (name === 'TRY' ? expressions.length < 1 || expressions.length > 2 : !expressions.length)
     throw new Error(`${name} has an invalid argument count`);
-  const typed = expressions.findIndex(expression => !isContextualLiteral(expression));
-  const nonNull = expressions.findIndex(
-    expression => !(expression.type === 'Literal' && expression.value === null)
-  );
-  const anchor = typed < 0 ? Math.max(0, nonNull) : typed;
-  const first = bind(expressions[anchor], options, expected);
+  const indices = expressions.map((_, index) => index);
+  const ordered = [
+    ...indices.filter(index => !isContextualLiteral(expressions[index])),
+    ...indices.filter(index => isContextualLiteral(expressions[index]))
+  ];
+  let anchor = 0;
+  let candidate: Node | undefined;
+  for (const index of ordered) {
+    const expression = expressions[index];
+    if (!expected && isContextualLiteral(expression) && containsContextualArray(expression))
+      continue;
+    const node = bind(expression, options, expected);
+    if (!candidate || !DataType.isNull(node.field.type)) {
+      anchor = index;
+      candidate = node;
+    }
+    if (!DataType.isNull(node.field.type)) break;
+  }
+  const first = candidate ?? bind(expressions[anchor], options, expected);
   const nodes = expressions.map((expression, index) =>
     index === anchor ? first : bind(expression, options, first.field.type)
   );
@@ -765,7 +799,8 @@ function bindRecovery(
   }
   const field = new Field(name.toLowerCase(), first.field.type, true, first.field.metadata);
   const tuple = isTupleType(field.type);
-  if (!tuple) typeKey(field.type);
+  const list = Boolean(expected && DataType.isList(expected) && DataType.isList(field.type));
+  if (!tuple && !list) typeKey(field.type);
   return {
     field,
     hasKernel: true,
@@ -776,7 +811,7 @@ function bindRecovery(
       const nullable = (node: Node) =>
         new Field(node.field.name, node.field.type, true, node.field.metadata);
       const materialize = (node: Node, prepared: Prepared, mask: Mask): Vector =>
-        tuple
+        tuple || list
           ? maskTupleVector(prepared.vector!, mask)
           : output(nullable(node), mask, prepared.get);
       const original = materialize(nodes[0]!, child, active);
@@ -788,8 +823,8 @@ function bindRecovery(
           ? 1
           : 0
       );
-      // A reported tuple error must be masked before selecting fallback values.
-      if (tuple && name === 'TRY')
+      // Mask reported errors before selecting nested fallback values.
+      if ((tuple || list) && name === 'TRY')
         result = maskTupleVector(
           result,
           active.map((value, row) => (value && !failed[row] ? 1 : 0))
@@ -801,6 +836,7 @@ function bindRecovery(
         const keep = active.map((value, row) => (value && !pending[row] ? 1 : 0));
         if (tuple)
           result = selectTupleVectors(field.type as FixedSizeList, result, vector, keep, active);
+        else if (list) result = selectListVectors(field.type, result, vector, keep, active);
         else {
           const a = new ColumnReader(result),
             b = new ColumnReader(vector);
@@ -1078,6 +1114,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
   const untypedNumeric = (value: any): boolean =>
     (value.type === 'Literal' && (value.value === null || typeof value.value === 'number')) ||
     isSignedLiteral(value) ||
+    Boolean(recoveryName(value) && value.arguments.every(untypedNumeric)) ||
     (value.type === 'ConditionalExpression' &&
       untypedNumeric(value.consequent) &&
       untypedNumeric(value.alternate));

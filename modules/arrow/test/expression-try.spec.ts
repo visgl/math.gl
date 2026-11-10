@@ -10,6 +10,7 @@ import {
   Float64,
   Int8,
   Int32,
+  List,
   Schema,
   Table,
   vectorFromArray
@@ -48,6 +49,10 @@ test('TRY catches classified row errors and its optional fallback is error-only'
   expect([...evaluate('COALESCE(TRY(SQRT(x)), 7)')]).toEqual([2, 7, 7, 3]);
   expect([...evaluate('TRY(NULL, 7)')]).toEqual([null, null, null, null]);
   expect([...evaluate('COALESCE(NULL, 7)')]).toEqual([7, 7, 7, 7]);
+  expect([...evaluate('COALESCE(TRY(NULL), 7)')]).toEqual([7, 7, 7, 7]);
+  const nested = evaluate('SQRT(TRY(NULL))');
+  expect(nested.type).toEqual(new Float64());
+  expect([...nested]).toEqual([null, null, null, null]);
   expect([...evaluate('TRY(ISNULL(SQRT(x)))')]).toEqual([false, null, true, false]);
 });
 test('fallback and subsequent callbacks run only on active rows and never twice', () => {
@@ -247,8 +252,10 @@ test('tuple recovery inherits metadata for literals and rejects independently in
     'matching types and metadata'
   );
 });
-test('recovery calls carry the enclosing prototype type to nested tuple literals', () => {
-  const type = new FixedSizeList(2, new Field('value', new Float64(), false));
+test.each([
+  new FixedSizeList(2, new Field('value', new Float64(), false)),
+  new List(new Field('value', new Float64(), false))
+])('recovery calls carry the enclosing prototype type to nested literals (%s)', type => {
   const f: ArrowTableFunction = {
     name: 'F',
     prototypes: [
