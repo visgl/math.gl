@@ -38,7 +38,7 @@ An optional SQL parser that converts a small SQL subset into portable query and 
 | Row limit                             | ✅      | `LIMIT` followed by a nonnegative safe integer, including zero.                                                                                   |
 | Catalog commands                      | ✅      | `SHOW SOURCES`, `SHOW TABLES [FROM source]`, and `DESCRIBE source[.table]`. `SHOW SOURCES` is a parser-specific command.                          |
 | Qualified column names                | ❌      | `SELECT table.column` and qualified WHERE columns in `parseSQLQuery()` are rejected. Quote literal column names containing dots.                  |
-| Computed columns and function calls   | ⚠️      | CAST and postfix :: conversions only; no arithmetic, other SQL functions, or CASE.                                                                |
+| Computed columns and function calls   | ⚠️      | CAST, postfix :: conversions and packed ARRAY projections; no arithmetic, other SQL functions, or CASE.                                           |
 | Additional predicate operators        | ❌      | No `LIKE`, `ILIKE`, `BETWEEN`, regular expressions, or `EXISTS`.                                                                                  |
 | Sorting and pagination                | ❌      | No `ORDER BY`, `OFFSET`, or `FETCH`.                                                                                                              |
 | Aggregation and distinct rows         | ❌      | No aggregate functions, `GROUP BY`, `HAVING`, or `DISTINCT`.                                                                                      |
@@ -151,3 +151,9 @@ Supported SQL targets: SMALLINT, INTEGER/INT, BIGINT, REAL, DOUBLE PRECISION, BO
 Unsupported targets/modifiers fail explicitly. This subset does not accept DECIMAL, date/time, length/precision modifiers, arbitrary arithmetic inside CAST, or casts on predicate scalar values. See [Arrow expression conversion rules](https://visgl.github.io/math.gl/next/docs/modules/arrow/expressions.md#sql-cast).
 
 Postfix `value::TYPE` and chained casts are also supported with the same conversion rules.
+
+## Packed floating-point arrays[​](#packed-floating-point-arrays "Direct link to Packed floating-point arrays")
+
+`SELECT ARRAY[x, y, z] AS position` returns `{array: ['x', 'y', 'z'], as: 'position'}`. Operands must be existing floating-point columns; literals and arbitrary expressions are unsupported. An alias is required. `::FLOAT32[3]` or `::REAL[3]` adds `type: 'float32'`; `::FLOAT64[3]` or `::DOUBLE PRECISION[3]` adds `type: 'float64'`. The declared width must match. Omitting a type preserves Float64 if any component is Float64, otherwise it uses Float32.
+
+Use `compileArrowArray(selection.array, {inputSchema, type: selection.type})` from `@math.gl/arrow/expressions` to evaluate the projection. This only constructs a column; it does not filter or compact rows. Null components make the whole tuple null with zero numeric padding. GPU consumers must respect parent validity or those invalid positions will appear at the origin.

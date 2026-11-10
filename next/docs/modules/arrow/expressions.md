@@ -306,3 +306,17 @@ Supported targets are SMALLINT (Int16), INTEGER/INT (Int32), BIGINT (Int64), REA
 The SQL parser emits the shared expression AST, equivalent to `cast(value, "int64")` in expression syntax. CAST can be nested, selected with an alias, or applied to a WHERE column before comparison. Precision/length modifiers, DECIMAL, date/time targets, casts on the right-hand predicate scalar are currently unsupported.
 
 Postfix `value::TYPE` and chained casts are also supported with the same conversion rules.
+
+## Packed source columns[​](#packed-source-columns "Direct link to Packed source columns")
+
+`compileArrowArray(columns, {inputSchema, type?})` packs existing floating-point columns into one fixed-size list vector. `type` may be `float32` or `float64`; omission preserves Float64 if present in any source component, otherwise Float32. Unknown and non-floating columns are rejected at binding.
+
+```
+import {compileArrowArray} from '@math.gl/arrow/expressions';
+
+const position = compileArrowArray(['x', 'y', 'z'], {inputSchema: arrowTable.schema});
+
+const positions = position.evaluateTable(arrowTable);
+```
+
+The optional SQL parser represents `ARRAY[x,y,z] AS position` as a portable array selection with an optional explicit precision. Pass its `array` and `type` to this helper. Evaluation interleaves each batch without row filtering, retaining source order and chunk boundaries. Any null component makes the parent list null; its numeric slots remain zeros. Masked rows follow the same rule. Consumers reading numeric buffers directly must honor parent validity. Empty results retain their fixed-size schema. Explicit Float32 conversion can lose precision, following Arrow floating-point conversion.
