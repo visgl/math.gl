@@ -7,9 +7,9 @@ import {OrthographicView, WebMercatorViewport} from '@deck.gl/core';
 import {
   getCutViewports,
   projectCutMap
-} from '../../../../examples/earth/sun-terminator/src/cut-maps.js';
-import {createCutTileAdapter} from '../../../../examples/earth/sun-terminator/src/cut-tile-layer.js';
-import {US_STATES} from '../../../../examples/earth/sun-terminator/src/us-state-mask.js';
+} from '../../../../examples/earth/sun-terminator/src/view-adapter.ts';
+import {createCutTileAdapter} from '../../../../examples/earth/sun-terminator/src/cut-tile-layer.ts';
+import {US_STATES} from '../../../../examples/earth/sun-terminator/src/us-state-mask.ts';
 const viewport = (target = [0, 0, 0], zoom = 3.2) =>
   new OrthographicView({flipY: false}).makeViewport({
     width: 1100,

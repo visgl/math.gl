@@ -6,7 +6,8 @@
 </p>
 
 Compile a `MapDescription` into spherical chart projection, layout, picking, and
-optional hinge motion. Import from `@math.gl/geospatial/discontinuous`.
+optional hinge motion. Import from `@math.gl/geospatial/projection`; the existing
+`@math.gl/geospatial/discontinuous` entry point remains supported.
 For a complete rendering workflow, see the [MapEngine guide](../developer-guide/map-engine.md).
 The API is experimental and may change before stabilization.
 
@@ -680,3 +681,25 @@ source frame. These corrections also apply without provenance; enabling the opti
 not change geometry. Constraint tracing is bounded to 20 million comparisons per call;
 unresolved or ambiguous topology rejects. It does not validate arbitrary invalid input
 polygons, certify continuous sampling error, or supply triangulation-interior provenance.
+
+## Prepared raster surfaces
+
+Call `map.prepareSurface(options)` to produce chart-local indexed positions,
+geographic or Mercator UVs, and chart IDs for raster rendering. The same shared
+sampler supports ordinary CRS projections through `prepareProjectionSurface`.
+See [Prepared surfaces and transitions](./surfaces.md) for options, units, budgets,
+coverage behavior, and the separate transition-buffer API.
+
+## H3-oriented face map
+
+`{type: 'h3'}` selects a deterministic twenty-chart gnomonic net aligned with H3's
+actual icosahedron face orientations. It is a face layout, not an H3 cell index or
+an equal-area projection. It uses the ordinary `MapEngine` point, inverse, line,
+layout, raster, and prepared-map contracts. `radius` is the positive output scale
+(default 1); layout compilation is lazy and cached. Same-version prepared maps
+restore without caller-provided projection callbacks.
+
+The lower-level `createH3FaceMap({radius?})` factory is available from both projection
+and discontinuous entry points and returns a `DiscontinuousMap`, consistently with
+the other map factories. It adds no H3 package dependency. Face-center constants
+come from H3 v4.3.0 under Apache-2.0; the package includes its license and notice.

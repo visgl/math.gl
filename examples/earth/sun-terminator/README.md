@@ -83,3 +83,19 @@ The root browser harness checks high-zoom GPU morphs, constant buffers, inset la
 
 Run `yarn start-local` within the math.gl repository to use workspace source,
 or `yarn start` to use package exports. `yarn build` produces a production bundle.
+
+## Source organization
+
+All browser code is TypeScript under `src/`. `app.ts` wires the renderer and
+lifecycle, `control-panel.ts` builds the collapsible controls, and `constants.ts`
+defines imagery settings and the projection menu. The existing shared Blue Marble
+helper remains in `examples/common`. `view-adapter.ts` adapts shared projection
+models to deck.gl cameras; `layers.ts` contains the rendering shaders.
+
+Chart definitions, cuts, insets, H3 face layout, raster mesh preparation, and
+transition mesh refinement come from `@math.gl/geospatial/projection`. The example
+owns imagery loading, the country mask, tile traversal adapters, and animation
+timing. Time starts after the first actual GPU draw; expensive mesh preparation
+yields to host tasks and is cancelled on disposal.
+
+Run `yarn tsc -p examples/earth/sun-terminator/tsconfig.json` for type checking.

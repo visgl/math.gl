@@ -8,7 +8,8 @@
     "start": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "start-local": "vite --config ../../vite.config.local.mjs"
+    "start-local": "vite --config ../../vite.config.local.mjs",
+    "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {
     "@deck.gl-community/geo-layers": "^9.4.8",
@@ -22,7 +23,6 @@
     "@luma.gl/engine": "~9.4.0",
     "@math.gl/earth": "workspace:*",
     "@math.gl/geospatial": "workspace:*",
-    "d3-geo": "^2.0.2",
     "h3-js": "^4.5.0"
   },
   "devDependencies": {

@@ -140,3 +140,19 @@ export type {
   SphericalCutPolygon,
   SphericalCutEdge
 } from './discontinuous/global-polygons';
+
+export {
+  prepareMapTransitionMesh,
+  prepareMapTransitionMeshAsync
+} from './discontinuous/map-transition-mesh';
+export type {
+  MapTransitionMeshPoint,
+  MapTransitionEndpoint,
+  MapTransitionMeshOptions,
+  MapTransitionMeshAsyncOptions,
+  MapTransitionMesh
+} from './discontinuous/map-transition-mesh';
+
+export {createH3FaceMap} from './discontinuous/h3-face-map';
+
+export type {MapSurfaceMesh, MapSurfaceMeshOptions} from './discontinuous/map-surface-mesh';

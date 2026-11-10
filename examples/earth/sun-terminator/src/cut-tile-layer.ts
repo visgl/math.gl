@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {WebMercatorViewport} from '@deck.gl/core';
 import {SharedTile2DLayer, sharedTile2DDeckAdapter} from '@deck.gl-community/geo-layers';
-import {getCutViewports, getCutRegions, cutPart, isCutMap, projectCutMap} from './cut-maps.js';
-import {LOBES as LOBES_FOR_TILES} from './cuts.js';
+import {getCutViewports, getCutRegions, isCutMap} from './view-adapter.ts';
+import {getMap} from './view-adapter.ts';
 
 const geographicReference = new WebMercatorViewport({width: 1, height: 1});
 
@@ -76,10 +76,15 @@ export function createCutTileAdapter(getMap, {pixelRatio = 1} = {}) {
 /** The shared tiler handles selection; geometry is already projected into the cut map. */
 export class CutTileLayer extends SharedTile2DLayer {
   static layerName = 'CutTileLayer';
-  getSubLayerPropsByTile(tile) {
+  getSubLayerPropsByTile(
+    tile
+  ): Partial<import('@deck.gl/core').LayerProps> & {allowedParts: number} {
     return {
       allowedParts:
-        this.state.tileset.adapter.getTilePartMask?.(tile, this.state.tileset) ?? 0xffffffff
+        (this.state.tileset.adapter as ReturnType<typeof createCutTileAdapter>).getTilePartMask?.(
+          tile,
+          this.state.tileset
+        ) ?? 0xffffffff
     };
   }
   filterSubLayer(context) {
@@ -96,52 +101,11 @@ export function getCutTileMesh(id, tile, content) {
   }
   if (cache.has(id)) return cache.get(id);
   const {west, south, east, north} = tile.bbox;
-  const mercator = lat => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
-  const top = mercator(north),
-    bottom = mercator(south);
-  const xs = Array.from({length: 17}, (_, i) => west + ((east - west) * i) / 16);
-  for (const lon of LOBES_FOR_TILES) if (lon > west && lon < east) xs.push(lon);
-  xs.sort((a, b) => a - b);
-  const positions = [],
-    texCoords = [],
-    partIds = [];
-  for (let y = 0; y < 16; y++)
-    for (let x = 0; x < xs.length - 1; x++) {
-      const lat = row =>
-        ((2 * Math.atan(Math.exp(top + ((bottom - top) * row) / 16)) - Math.PI / 2) * 180) /
-        Math.PI;
-      const a = [xs[x], lat(y)],
-        b = [xs[x + 1], lat(y)],
-        c = [xs[x], lat(y + 1)],
-        d = [xs[x + 1], lat(y + 1)];
-      for (const triangle of [
-        [a, c, b],
-        [b, c, d]
-      ]) {
-        const sector = (xs[x] + xs[x + 1]) / 2;
-        const p = triangle.map(v => projectCutMap(id, ...v, sector));
-        const parts = triangle.map((v, i) => p[i]?.part ?? cutPart(id, ...v, sector));
-        if (!p.every(Boolean) || p.some(v => !v.every(Number.isFinite))) continue;
-        if (parts.some(v => v !== parts[0])) continue;
-        if (p.some((v, i) => Math.hypot(v[0] - p[(i + 1) % 3][0], v[1] - p[(i + 1) % 3][1]) > 20))
-          continue;
-        p.forEach((v, i) => {
-          positions.push(...v);
-          partIds.push(parts[i]);
-          texCoords.push(
-            (triangle[i][0] - west) / (east - west),
-            (top - mercator(triangle[i][1])) / (top - bottom)
-          );
-        });
-      }
-    }
-  const mesh = {
-    positions: new Float64Array(positions),
-    partIds: new Float32Array(partIds),
-    texCoords: new Float32Array(texCoords),
-    indices: Uint32Array.from({length: positions.length / 3}, (_, i) => i),
-    vertexCount: positions.length / 3
-  };
+  const mesh = getMap(id).prepareSurface({
+    textureBounds: [west, south, east, north],
+    textureProjection: 'mercator',
+    maxAngularStep: Math.min(0.125, Math.max(0.005, Math.min(east - west, north - south) / 16))
+  });
   cache.set(id, mesh);
   return mesh;
 }

@@ -4,10 +4,10 @@
 import {
   projectCutMap,
   getCutViewports
-} from '../../../../examples/earth/sun-terminator/src/cut-maps.js';
-import {geographicCenter} from '../../../../examples/earth/sun-terminator/src/camera.js';
+} from '../../../../examples/earth/sun-terminator/src/view-adapter.ts';
+import {geographicCenter} from '../../../../examples/earth/sun-terminator/src/view-adapter.ts';
 import {Deck} from '@deck.gl/core';
-import {mountSunTerminator} from '../../../../examples/earth/sun-terminator/src/app.js';
+import {mountSunTerminator} from '../../../../examples/earth/sun-terminator/src/app.ts';
 import '../../../../examples/earth/sun-terminator/src/styles.css';
 
 // Observe the actual renderer in this fixture, without adding debug state to the app.

@@ -1036,7 +1036,9 @@
     "THIRD-PARTY-NOTICES.md",
     "PROJ-LICENSE.txt",
     "GEOGRAPHICLIB-LICENSE.txt",
-    "LICENSE"
+    "LICENSE",
+    "H3-LICENSE.TXT",
+    "H3-NOTICE.TXT"
   ],
   "dependencies": {
     "@mapbox/martini": "0.2.0",

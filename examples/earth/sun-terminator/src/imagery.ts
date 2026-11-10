@@ -1,15 +1,22 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-const ROOT = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best';
-export const DAY_TILES = `${ROOT}/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg`;
-export const NIGHT_TILES = `${ROOT}/VIIRS_Black_Marble/default/2016-01-01/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png`;
+import {DAY_TILES, NIGHT_TILES} from './constants.ts';
 
 /** A tile is ready only when both textures are available. TileLayer caches the pair. */
-export async function loadImageryTile({index: {x, y, z}, signal}) {
+export async function loadImageryTile({
+  index: {x, y, z},
+  signal
+}: {
+  index: {x: number; y: number; z: number};
+  signal?: AbortSignal;
+}): Promise<ImageryTile> {
   const results = await Promise.allSettled(
     [DAY_TILES, NIGHT_TILES].map(async template => {
-      const url = template.replace('{z}', z).replace('{y}', y).replace('{x}', x);
+      const url = template
+        .replace('{z}', String(z))
+        .replace('{y}', String(y))
+        .replace('{x}', String(x));
       const response = await fetch(url, {signal});
       if (!response.ok) throw new Error(`Imagery HTTP ${response.status}`);
       return createImageBitmap(await response.blob());
@@ -22,10 +29,15 @@ export async function loadImageryTile({index: {x, y, z}, signal}) {
     }
     throw failure?.reason || new DOMException('Tile request aborted', 'AbortError');
   }
-  return {day: results[0].value, night: results[1].value};
+  const [day, night] = results;
+  if (day.status !== 'fulfilled' || night.status !== 'fulfilled')
+    throw new Error('Incomplete imagery pair');
+  return {day: day.value, night: night.value};
 }
 
 export function releaseImageryTile(tile) {
   tile.content?.day.close();
   tile.content?.night.close();
 }
+
+export type ImageryTile = {day: ImageBitmap; night: ImageBitmap};

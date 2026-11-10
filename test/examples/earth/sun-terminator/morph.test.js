@@ -4,12 +4,13 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {
-  createMorphMesh,
   getMorphProgress,
   createEndpoint
-} from '../../../../examples/earth/sun-terminator/src/morph.js';
-import {interruptedPoint} from '../../../../examples/earth/sun-terminator/src/cuts.js';
-import {cutPart} from '../../../../examples/earth/sun-terminator/src/cut-maps.js';
+} from '../../../../examples/earth/sun-terminator/src/view-adapter.ts';
+import {prepareMapTransitionMesh as createMorphMesh} from '@math.gl/geospatial/discontinuous';
+import {projectCutMap} from '../../../../examples/earth/sun-terminator/src/view-adapter.ts';
+const interruptedPoint = (x, y, sector) => projectCutMap('isinu', x, y, sector);
+import {cutPart} from '../../../../examples/earth/sun-terminator/src/view-adapter.ts';
 import {MapView} from '@deck.gl/core';
 
 test('morph retains geographic texture coordinates and uploads both endpoints once', () => {

@@ -9,15 +9,16 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
-    "allowJs": true,
-    "checkJs": false,
+    "allowJs": false,
     "noEmit": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "types": [
       "vite/client"
-    ]
+    ],
+    "allowImportingTsExtensions": true,
+    "strict": false
   },
   "include": [
     "src/**/*"

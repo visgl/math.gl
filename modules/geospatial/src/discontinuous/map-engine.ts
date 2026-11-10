@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {projectSphericalPolygon, type SphericalCutOptions} from './global-polygons';
+import {createH3FaceMap} from './h3-face-map';
+import {
+  prepareMapSurfaceMesh,
+  type MapSurfaceMeshOptions,
+  type MapSurfaceMesh
+} from './map-surface-mesh';
 import {MapTransition, type MapTransitionOptions} from './map-transition';
 import {
   prepareMapFeatures,
@@ -77,7 +83,7 @@ export type MapDefinition =
   | ({type: 'projection'} & Omit<ProjectionMapOptions, 'radius'>)
   | ({type: 'regional'} & Omit<RegionalMapOptions, 'radius'>)
   | ({type: 'world'} & Omit<WorldMapOptions, 'radius'>)
-  | {type: 'gray-fuller' | 'isea' | 'dsea'}
+  | {type: 'gray-fuller' | 'isea' | 'dsea' | 'h3'}
   | {type: 'petroff'; centralMeridian?: number}
   | {type: 'healpix'; centralMeridian?: number}
   | {
@@ -262,6 +268,9 @@ export class MapEngine {
       case 'world':
         this.map = createWorldMap({...d, radius});
         break;
+      case 'h3':
+        this.map = createH3FaceMap({radius});
+        break;
       case 'gray-fuller':
         this.map = createGrayFullerMap({radius});
         break;
@@ -436,6 +445,10 @@ export class MapEngine {
     options: MapPrepareFeaturesOptions = {}
   ): PreparedMapGeometry {
     return prepareMapFeatures(this, features, options);
+  }
+  /** Prepare a chart-clipped geographic or Mercator raster surface. */
+  prepareSurface(options: MapSurfaceMeshOptions = {}): MapSurfaceMesh {
+    return prepareMapSurfaceMesh(this, options);
   }
   getLayout() {
     this.cachedLayout ??= getMapLayout(this.map, this.sampling);

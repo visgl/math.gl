@@ -11,7 +11,7 @@ import {promisify} from 'node:util';
 const root = fileURLToPath(new URL('../../../../examples/earth/sun-terminator', import.meta.url));
 const repositoryRoot = fileURLToPath(new URL('../../../../', import.meta.url));
 const fixtureRoot = fileURLToPath(new URL('.', import.meta.url));
-const configFile = join(root, 'vite.config.js');
+const configFile = join(root, 'vite.config.ts');
 const outDir = await mkdtemp(join(tmpdir(), 'sun-terminator-browser-'));
 let server;
 try {

@@ -30,7 +30,26 @@ try {
   await page.evaluate(() => {
     const deck = window.navigationDeck;
     deck.setProps({initialViewState: {longitude: -96, latitude: 38, zoom: 5}});
-    window.morphChecks = {progress: [], stable: true, mesh: null, uniqueVertices: 0, indices: 0};
+    window.morphChecks = {progress: [], stable: true, mesh: null, uniqueVertices: 0, indices: 0, drawn: [], warmed: false};
+    const afterRender = deck.props.onAfterRender;
+    deck.setProps({
+      onBeforeRender: () => {
+        if (deck.props.layers[0]?.id === 'earth-morph' && !window.morphChecks.warmed) {
+          window.morphChecks.warmed = true;
+          // Model a slow initial shader compilation/buffer upload. It must not
+          // consume the visible animation's duration.
+          const until = performance.now() + 650;
+          while (performance.now() < until) { /* shader warmup */ }
+        }
+      },
+      onAfterRender: () => {
+        const layer = deck.props.layers[0];
+        const check = window.morphChecks;
+        if (layer?.id === 'earth-morph') check.drawn.push({progress: layer.props.progress, time: performance.now()});
+        else if (check.drawn.length) check.completedAt = performance.now();
+        afterRender();
+      }
+    });
     const setProps = deck.setProps;
     deck.setProps = function (props) {
       const layer = props.layers?.[0];
@@ -53,12 +72,23 @@ try {
   assert.equal(check.stable, true, 'GPU morph must retain the same position buffers');
   assert.ok(new Set(check.progress).size > 3, 'must render intermediate GPU progress');
   assert.ok(check.uniqueVertices < check.indices / 2, 'continuous pieces should share vertices');
+  await page.waitForFunction(() => window.morphChecks.completedAt);
+  const duration = await page.evaluate(() => window.morphChecks.completedAt - window.morphChecks.drawn[0].time);
+  assert.ok(duration >= 1400, `shader warmup must not shorten the visible animation: ${duration} ms`);
   const focus = await page.evaluate(() => window.geographicCenter('albers-usa'));
   assert.ok(Math.abs(focus[0] + 96) < 0.001 && Math.abs(focus[1] - 38) < 0.001);
   await page.evaluate(() =>
     window.navigationDeck.setProps({initialViewState: {target: [0, 0, 0], zoom: 3.2}})
   );
   await page.screenshot({path: '/tmp/sun-albers-usa.png'});
+  await page.evaluate(() => {
+    window.morphChecks = {progress: [], stable: true, mesh: null, uniqueVertices: 0, indices: 0, drawn: [], warmed: true};
+  });
+  await page.locator('[data-role=view]').selectOption('globe');
+  await page.waitForFunction(() => window.navigationDeck.getViewports()[0].id === 'earth-globe');
+  const reverse = await page.evaluate(() => ({...window.morphChecks, mesh: undefined}));
+  assert.equal(reverse.stable, true);
+  assert.ok(new Set(reverse.progress).size > 3, 'Albers USA must also animate back to globe');
   await page.evaluate(() => {
     window.morphChecks.mesh = null;
   });
