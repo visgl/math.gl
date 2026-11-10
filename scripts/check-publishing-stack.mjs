@@ -20,7 +20,7 @@ export function checkPublishingStack() {
   const require = createRequire(import.meta.url);
   const lernaPath = packageFile(require.resolve('lerna'), 'lerna');
   const lerna = JSON.parse(readFileSync(lernaPath));
-  assert.equal(lerna.version, '10.1.1');
+  assert.equal(lerna.version, '10.1.2');
   const lernaRequire = createRequire(lernaPath);
   const publishPath = packageFile(lernaRequire.resolve('libnpmpublish'), 'libnpmpublish');
   const publishing = JSON.parse(readFileSync(publishPath));
