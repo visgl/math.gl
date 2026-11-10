@@ -3450,7 +3450,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/utils@npm:3.10.2":
+"@docusaurus/utils@npm:3.10.2, @docusaurus/utils@npm:^3.10.2":
   version: 3.10.2
   resolution: "@docusaurus/utils@npm:3.10.2"
   dependencies:
@@ -21372,6 +21372,7 @@ __metadata:
     "@deck.gl/layers": "npm:~9.4.0"
     "@deck.gl/widgets": "npm:~9.4.0"
     "@docusaurus/core": "npm:^3.10.2"
+    "@docusaurus/utils": "npm:^3.10.2"
     "@fontsource-variable/source-sans-3": "npm:^5.2.7"
     "@fontsource-variable/space-grotesk": "npm:^5.2.7"
     "@fontsource/ibm-plex-mono": "npm:^5.2.7"

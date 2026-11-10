@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import overviewUrl from './assets/blue-marble.jpg';
+
 export const BLUE_MARBLE_CREDIT_URL =
   'https://science.nasa.gov/earth/earth-observatory/blue-marble/';
 
 /** Bundled NASA overview; available before remote detail tiles or while offline. */
-export const BLUE_MARBLE_OVERVIEW_URL = new URL('./assets/blue-marble.jpg', import.meta.url).href;
+export const BLUE_MARBLE_OVERVIEW_URL = overviewUrl;
 
 /** Geographic images preserve latitude spacing, including the poles. */
 export function blueMarbleUrl(bounds, width = 512, height = 512) {

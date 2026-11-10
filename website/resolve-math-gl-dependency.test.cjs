@@ -64,3 +64,6 @@ test('website resolves grouped roots directly from source', () => {
   assert.equal(aliases['@math.gl/geometry$'], join(__dirname, '../modules/geometry/src/index.ts'));
   assert.equal(aliases['@math.gl/geospatial/crs$'], join(__dirname, '../modules/geospatial/src/crs/index.ts'));
 });
+
+// Exercise the website's image pipeline alongside dependency resolution in CI.
+require('./blue-marble-assets.test.cjs');

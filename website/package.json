@@ -50,6 +50,7 @@
     "unified": "^11.0.5"
   },
   "devDependencies": {
+    "@docusaurus/utils": "^3.10.2",
     "@types/d3-geo": "2",
     "@types/react": "^19.2.18",
     "proj4": "2.22.0",
