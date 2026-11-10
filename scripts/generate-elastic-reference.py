@@ -11,7 +11,7 @@ import math
 import re
 from pathlib import Path
 
-root = Path('modules/geospatial/test/discontinuous/fixtures/elastic')
+root = Path('modules/geospatial/test/maps/fixtures/elastic')
 output = []
 for roman in ['I', 'II', 'III']:
     lines = (root / ('elastic-' + roman + '.txt')).read_text().splitlines()

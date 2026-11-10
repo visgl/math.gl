@@ -1,16 +1,19 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {MapEngine} from '@math.gl/geospatial/discontinuous';
+import {MapEngine} from '@math.gl/geospatial/maps';
 import states from '../assets/us-states.json' with {type: 'json'};
 
 /** Describe the map, then clip source geometry into chart-local pieces. */
 export function createAlbersMap() {
-  const map = new MapEngine({
-    version: 1,
-    id: 'albers-usa',
-    definition: {type: 'albers-usa', includeTerritories: true}
-  });
+  const map = new MapEngine(
+    {
+      version: 1,
+      id: 'albers-usa',
+      definition: {type: 'albers-usa', includeTerritories: true}
+    },
+    {presets: [albersUsaMapPreset], geometry: mapGeometry}
+  );
   const ringsOf = geometry =>
     geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
   const features = states.flatMap(state =>
@@ -74,3 +77,5 @@ export function createAlbersMap() {
   });
   return {map, features, graticule};
 }
+
+import {albersUsaMapPreset, mapGeometry} from '@math.gl/geospatial/maps';

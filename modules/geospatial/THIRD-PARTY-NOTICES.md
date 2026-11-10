@@ -12,17 +12,17 @@ latest available upstream releases.
 | proj4js 2.22.0 / PROJ | Adapted projection kernels, helpers and datum transformations; [detailed file-level provenance](./THIRD-PARTY-NOTICES.md#projection-sources-and-notices), [proj4js terms](./PROJ4-LICENSE.md), [PROJ terms](./PROJ-LICENSE.txt). |
 | Bernie Jenny and Equal Earth collaborators | Equal Earth kernel ported through proj4js; Apache-2.0, [full license](./APACHE-2.0-LICENSE.txt). Source retains the original collaborator credits. |
 | Charles Karney / GeographicLib | Vendored geodesic solver and adapted rhumb, intersection and polygon algorithms; MIT, [notice](./GEOGRAPHICLIB-LICENSE.txt), [vendored version and modifications](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/vendor/geographiclib-geodesic/README.md). |
-| Mike Bostock / d3-geo-projection | Adapted [world projection kernels and modification inventory](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/discontinuous/world-kernels/README.md), elliptic, Guyou, Gringorten, quincuncial, Berghaus, Gingery, interrupted and polyhedral work; ISC, [D3 notice](./src/discontinuous/D3-LICENSE.txt). No D3 runtime dependency. |
-| Mike Bostock / d3-geo 3.1.1 | Adapted spherical circle clipping, reused by the original global polygon atlas adapter; ISC, [retained license](./src/discontinuous/spherical-clip/D3-GEO-LICENSE.txt), [modifications and file inventory](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/discontinuous/spherical-clip/README.md). No runtime D3 dependency. |
-| Ricky Reusser / scijs | Adaptive Simpson integration used by the hyperelliptical kernel, via d3-geo-projection; [MIT license](./src/discontinuous/world-kernels/INTEGRATE-LICENSE.txt). |
-| d3-geo-polygon contributors | AirOcean topology/rotation; ISC, [AirOcean notice](./src/discontinuous/AIR-OCEAN-LICENSE.txt). |
+| Mike Bostock / d3-geo-projection | Adapted [world projection kernels and modification inventory](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/maps/world-kernels/README.md), elliptic, Guyou, Gringorten, quincuncial, Berghaus, Gingery, interrupted and polyhedral work; ISC, [D3 notice](./src/maps/D3-LICENSE.txt). No D3 runtime dependency. |
+| Mike Bostock / d3-geo 3.1.1 | Adapted spherical circle clipping, reused by the original global polygon atlas adapter; ISC, [retained license](./src/maps/spherical-clip/D3-GEO-LICENSE.txt), [modifications and file inventory](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/maps/spherical-clip/README.md). No runtime D3 dependency. |
+| Ricky Reusser / scijs | Adaptive Simpson integration used by the hyperelliptical kernel, via d3-geo-projection; [MIT license](./src/maps/world-kernels/INTEGRATE-LICENSE.txt). |
+| d3-geo-polygon contributors | AirOcean topology/rotation; ISC, [AirOcean notice](./src/maps/AIR-OCEAN-LICENSE.txt). |
 
 The separately installed `polygon-clipping` dependency retains its own package
 license. The opt-in terrain/martini entry uses separately installed
 `@mapbox/martini` 0.2.0 by Vladimir Agafonkin / Mapbox under its ISC package license;
 the backend source is not vendored or copied.
 
-Projection authors receive mathematical credit in the [projection references](https://math.gl/docs/modules/geospatial/projection/developer-guide/discontinuous-projections#references-and-implementation-credits).
+Projection authors receive mathematical credit in the [projection references](https://math.gl/docs/modules/geospatial/maps/developer-guide/discontinuous-projections#references-and-implementation-credits).
 AirOcean is radial/gnomonic, not an exact Gray–Fuller implementation. Nico Belmonte's
 myriahedral demonstration is credited as inspiration; its application code is not incorporated.
 
@@ -38,7 +38,7 @@ HEALPix is independently implemented from M. R. Calabretta, [Mapping on the HEAL
 - **Matthew A. Petroff**: `petroff.ts` adapts the forward/inverse equations in
   `new_projection.py`, [Zenodo record 4661351](https://doi.org/10.5281/zenodo.4661351).
   The archive's code is **CC0-1.0**, as stated in its
-  [retained README/license](./src/discontinuous/PETROFF-LICENSE.txt). The record's
+  [retained README/license](./src/maps/PETROFF-LICENSE.txt). The record's
   CC-BY metadata also covers images that are not incorporated. Modifications:
   scalar TypeScript, stable Cartesian evaluation, explicit singular limits,
   chart-boundary ownership, and MapEngine integration.
@@ -49,7 +49,7 @@ HEALPix is independently implemented from M. R. Calabretta, [Mapping on the HEAL
 - **Felix Palmer / PROJ contributors**: `snyder-mesh.ts` adapts only polyhedron
   coordinate/face tables and parent trees from PROJ revision
   `5fa31c29f0a806568ed7bc76c1a557604db4a804`, under the
-  [retained PROJ MIT-style terms](./src/discontinuous/PROJ-LICENSE.txt).
+  [retained PROJ MIT-style terms](./src/maps/PROJ-LICENSE.txt).
   Source paths: `src/projections/polyhedral/polyhedra/{icosahedron,dodecahedron}.h`
   and `src/projections/polyhedral/nets/{isea/isea,dsea/dsea}.h`.
   The separately licensed A5/DGGAL projection implementation is not incorporated.
@@ -61,8 +61,8 @@ are spherical equal-area maps; they do not implement ellipsoidal CRS transforms.
 ## Elastic projection datasets
 
 Elastic I, II and III coordinate tables are by Justin Kunimune, released under the
-[Unlicense](./src/discontinuous/elastic/UNLICENSE.txt). See the
-[provenance record](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/discontinuous/elastic/README.md) for the pinned revision,
+[Unlicense](./src/maps/elastic/UNLICENSE.txt). See the
+[provenance record](https://github.com/visgl/math.gl/blob/master/modules/geospatial/src/maps/elastic/README.md) for the pinned revision,
 conversion details, units, and links to the published format and research.
 
 ## G8/G9 geodesics

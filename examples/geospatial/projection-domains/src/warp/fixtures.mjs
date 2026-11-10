@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
-import {createInterruptedSinusoidalMap, getMapLayout} from '@math.gl/geospatial/discontinuous';
+import {createInterruptedSinusoidalMap, getMapLayout} from '@math.gl/geospatial/maps';
 export const POLAR_CRS = '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +datum=WGS84 +units=m';
 export const UTM_CRS = '+proj=utm +zone=60 +datum=WGS84 +units=m';
 const engine = new FullProjectionEngine();

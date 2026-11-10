@@ -20,17 +20,17 @@ Choose a coordinate system, build a transformation, and explore how the world ca
       },
       {
         "title": "Coordinates",
-        "to": "/docs/modules/geospatial/projection/developer-guide/coordinate-systems",
+        "to": "/docs/modules/geospatial/projection/coordinate-systems",
         "description": "Units, axis order, reference frames, and height."
       },
       {
         "title": "Projections",
-        "to": "/docs/modules/geospatial/projection/developer-guide/projections",
+        "to": "/docs/modules/geospatial/projection/projections",
         "description": "Compare projection families and their trade-offs."
       },
       {
         "title": "Support",
-        "to": "/docs/modules/geospatial/projection/developer-guide/support",
+        "to": "/docs/modules/geospatial/projection/support",
         "description": "Check which definitions and operations are supported."
       }
     ]
@@ -41,7 +41,7 @@ Choose a coordinate system, build a transformation, and explore how the world ca
     "items": [
       {
         "title": "Projection engine",
-        "to": "/docs/modules/geospatial/projection/developer-guide/projection-engine",
+        "to": "/docs/modules/geospatial/projection/projection-engine",
         "description": "Resolve CRS definitions and reuse transformations."
       },
       {
@@ -51,12 +51,12 @@ Choose a coordinate system, build a transformation, and explore how the world ca
       },
       {
         "title": "Deformation",
-        "to": "/docs/modules/geospatial/projection/developer-guide/deformation-models",
+        "to": "/docs/modules/geospatial/projection/deformation-models",
         "description": "Work with velocity models and coordinate epochs."
       },
       {
         "title": "Map engine",
-        "to": "/docs/modules/geospatial/projection/developer-guide/map-engine",
+        "to": "/docs/modules/geospatial/maps/developer-guide/map-engine",
         "description": "Prepare geometry for clipping, layout, and display."
       }
     ]
@@ -67,37 +67,37 @@ Choose a coordinate system, build a transformation, and explore how the world ca
     "items": [
       {
         "title": "Discontinuous maps",
-        "to": "/docs/modules/geospatial/projection/developer-guide/discontinuous-projections",
+        "to": "/docs/modules/geospatial/maps/developer-guide/discontinuous-projections",
         "description": "Use interruptions, insets, and multiple charts."
       },
       {
         "title": "Myriahedral maps",
-        "to": "/docs/modules/geospatial/myriahedral-maps",
+        "to": "/docs/modules/geospatial/maps/myriahedral-maps",
         "description": "Unfold the globe into a geographically organized net."
       },
       {
         "title": "Elastic maps",
-        "to": "/docs/modules/geospatial/elastic-maps",
+        "to": "/docs/modules/geospatial/maps/elastic-maps",
         "description": "Explore flexible, mesh-based map projections."
       },
       {
         "title": "Catalogue",
-        "to": "/docs/modules/geospatial/discontinuous/projection-catalog",
+        "to": "/docs/modules/geospatial/maps/projection-catalog",
         "description": "Browse the available world projection families."
       },
       {
         "title": "Map layouts",
-        "to": "/docs/modules/geospatial/discontinuous",
+        "to": "/docs/modules/geospatial/maps",
         "description": "Understand chart placement and layout composition."
       },
       {
         "title": "Myriahedral construction",
-        "to": "/docs/modules/geospatial/projection/developer-guide/myriahedral-projections",
+        "to": "/docs/modules/geospatial/maps/developer-guide/myriahedral-projections",
         "description": "Build panel layouts and choose cuts."
       },
       {
         "title": "Myriahedral API",
-        "to": "/docs/modules/geospatial/discontinuous/myriahedral",
+        "to": "/docs/modules/geospatial/maps/myriahedral",
         "description": "Configure and evaluate a panel-based map."
       }
     ]

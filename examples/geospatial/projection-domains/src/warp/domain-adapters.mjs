@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
 import {createCRSProjectionDomain} from '@math.gl/geospatial/crs';
-import {getMapLayout} from '@math.gl/geospatial/discontinuous';
+import {getMapLayout} from '@math.gl/geospatial/maps';
 
 /** Qualified unit-sphere families, not arbitrary domain inference. An injected
  * engine must implement the requested spherical operation with the same units.

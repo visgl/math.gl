@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {readdirSync, readFileSync} from 'node:fs';
+import {existsSync, readdirSync, readFileSync} from 'node:fs';
 import {dirname, join, relative, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
@@ -22,8 +22,18 @@ function filesIn(folder) {
   });
 }
 
-const files = filesIn(directory).sort();
-const matches = path => relative(directory, path).includes(filter);
+const moduleDirectories = readdirSync(join(root, 'modules'))
+  .map(name => join(root, 'modules', name, 'test', 'examples'))
+  .filter(path => existsSync(path));
+const files = [directory, ...moduleDirectories].flatMap(filesIn).sort();
+// Module suites mirror examples/<module>/<application>; root checks are shared infrastructure.
+function examplePath(path) {
+  const parts = relative(root, path).split(sep);
+  return parts[0] === 'modules'
+    ? [parts[1], ...parts.slice(4)].join('/')
+    : relative(directory, path).split(sep).join('/');
+}
+const matches = path => examplePath(path).includes(filter);
 const nodeTests =
   mode === 'browser'
     ? []
@@ -72,7 +82,7 @@ if (list) {
   // Preserve application build coverage when CI selects only Node workflows.
   const nodeProjects = new Set(
     nodeTests
-      .map(path => relative(directory, path).split(sep))
+      .map(path => examplePath(path).split('/'))
       .filter(parts => parts.length >= 3)
       .map(parts => parts.slice(0, 2).join('/'))
   );
@@ -92,7 +102,7 @@ if (list) {
     ]);
   }
   for (const script of browserTests) {
-    const parts = relative(directory, script).split(sep);
+    const parts = examplePath(script).split('/');
     const project = parts.slice(0, 2).join('/');
     // Preview-based checks need dist; the solar harness builds its own test pages.
     if (!script.endsWith(`${sep}run-browser.mjs`)) await build(project);

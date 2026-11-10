@@ -101,7 +101,7 @@ export function getCutTileMesh(id, tile, content) {
   }
   if (cache.has(id)) return cache.get(id);
   const {west, south, east, north} = tile.bbox;
-  const mesh = getMap(id).prepareSurface({
+  const mesh = prepareMapSurface(getMap(id), {
     textureBounds: [west, south, east, north],
     textureProjection: 'mercator',
     // Keep a fixed tessellation budget per tile at every zoom.
@@ -110,3 +110,5 @@ export function getCutTileMesh(id, tile, content) {
   cache.set(id, mesh);
   return mesh;
 }
+
+import {prepareMapSurface} from '@math.gl/geospatial/maps';

@@ -1,0 +1,30 @@
+{
+  "engine": {
+    "minified": 9200,
+    "gzip": 3600
+  },
+  "albersPoints": {
+    "minified": 24700,
+    "gzip": 9400
+  },
+  "albersGeometry": {
+    "minified": 70900,
+    "gzip": 25300
+  },
+  "rasterSurface": {
+    "minified": 4100,
+    "gzip": 2000
+  },
+  "surfaceTransition": {
+    "minified": 5700,
+    "gzip": 2500
+  },
+  "featureTransition": {
+    "minified": 36600,
+    "gzip": 12300
+  },
+  "fullCatalogue": {
+    "minified": 194000,
+    "gzip": 73600
+  }
+}

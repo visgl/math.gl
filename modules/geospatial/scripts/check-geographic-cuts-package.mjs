@@ -31,6 +31,6 @@ try{
  // A new optional feature ceiling, not an increase to any existing entry budget.
  assert(bytes<=80000&&gzip<=29000,'Latitude cuts feature ceiling exceeded');
  const retained=Object.entries(Object.values(result.metafile.outputs)[0].inputs).filter(([,v])=>v.bytesInOutput>0).map(([p])=>p);
- assert(retained.every(p=>!p.includes('/src/projection/')&&!p.includes('/src/discontinuous/')&&!p.includes('polygon-clipping')),'Cut-only import retained unrelated engines');
+ assert(retained.every(p=>!p.includes('/src/projection/')&&!p.includes('/src/maps/')&&!p.includes('polygon-clipping')),'Cut-only import retained unrelated engines');
  console.log(JSON.stringify({exports:'ESM/CJS and public types passed',bytes,gzip}));
 }finally{rmSync(dir,{recursive:true,force:true});}

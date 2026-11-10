@@ -1,6 +1,6 @@
 # Albers USA
 
-A focused example of the experimental `@math.gl/geospatial/discontinuous` API.
+A focused example of the experimental `@math.gl/geospatial/maps` API.
 It renders public-domain Natural Earth 1:10m U.S. state polygons through
 `new MapEngine({version: 1, id: 'usa', definition: {type: 'albers-usa', includeTerritories: true}})`,
 fits the complete layout with `map.fit`, and uses `map.pick` for region-aware

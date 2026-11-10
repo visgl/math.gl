@@ -16,7 +16,7 @@ also cancels the obsolete job.
 
 From the repository root, run `yarn workspace math.gl-alpine-ice-age start`.
 Use `yarn workspace math.gl-alpine-ice-age build` for a standalone build and
-`node --test test/examples/geospatial/alpine-ice-age/*.test.mjs` for dataset/interpolation checks.
+`node --test modules/geospatial/test/examples/alpine-ice-age/*.test.mjs` for dataset/interpolation checks.
 
 ## Read the map code
 
@@ -179,7 +179,7 @@ The example fetches all ice-grid previews, preview manifests and climate JSON fr
 `src/sources.js` pins the merged repository commit; LFS gzip data uses GitHub media URLs,
 and ordinary JSON uses raw URLs. No scientific data is bundled into this example.
 Preparation scripts remain available for reproducing display assets locally.
-`node --test test/examples/geospatial/alpine-ice-age/*.test.mjs` verifies the pinned public downloads,
+`node --test modules/geospatial/test/examples/alpine-ice-age/*.test.mjs` verifies the pinned public downloads,
 checksums, source provenance, dimensions and scientific reference locations.
 
 ### Attribution widget
@@ -228,11 +228,11 @@ except for the hinge transitions of myriahedral maps described below.
 Statistics remain global even in the U.S. view. The U.S. masks include surrounding
 land and ocean and do not select political boundaries.
 
-See the [discontinuous projections guide](../../../docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md)
+See the [discontinuous projections guide](../../../docs/modules/geospatial/maps/developer-guide/discontinuous-projections.md)
 for API examples and limitations.
 
 Inset bounds, viewport fitting, draw order, outlines, and labels come from
-`@math.gl/geospatial/discontinuous` layout metadata. Alaska and Hawaii have visible
+`@math.gl/geospatial/maps` layout metadata. Alaska and Hawaii have visible
 frames. Each region uses its own display mesh spacing: 1° for the contiguous
 U.S., 0.5° for Alaska, and 0.25° for Hawaii. All meshes still sample the same
 1° PaleoMIST reconstruction, so finer display triangles do not invent finer
@@ -265,7 +265,7 @@ skip animations. The standalone example provides manual unfolding and subdivisio
 controls. Panel overlaps remain possible, and the
 namesake graticule strategies are not exact analytic equal-area projections.
 
-See the [myriahedral background and credits](../../../docs/modules/geospatial/projection/developer-guide/myriahedral-projections.md)
+See the [myriahedral background and credits](../../../docs/modules/geospatial/maps/developer-guide/myriahedral-projections.md)
 for Nico Belmonte's inspiration, Jarke van Wijk's research, and implementation limitations.
 
 ### H3 base-cell unfolding (experimental)
@@ -325,7 +325,7 @@ Mollweide and ocean Goode presets. All use `MapEngine` through
 `src/discontinuous-views.js`, including seam splitting and transitions through the globe.
 
 Sinu-Mollweide currently uses equatorial six-lobe cuts, not D3's oblique five-lobe
-arrangement. See the [supported families and projection credits](../../../docs/modules/geospatial/projection/developer-guide/discontinuous-projections.md)
+arrangement. See the [supported families and projection credits](../../../docs/modules/geospatial/maps/developer-guide/discontinuous-projections.md)
 for aspects, limitations, primary references, and D3/PROJ provenance.
 
 The longitude slider sets the globe longitude or the central meridian of global maps. Drag the globe to rotate; Shift-drag a global flat map to change its central meridian, or drag normally to pan. These controls stay synchronized. Regional/inset maps and geography-aware myriahedral layouts retain their fixed geographic orientation.

@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import {TaskRunner} from '@math.gl/tasks';
 import {ProjectCoordinatesTask, PrepareMapTask} from '@math.gl/geospatial/tasks';
-import {MapEngine} from '@math.gl/geospatial/discontinuous';
+import {MapEngine} from '@math.gl/geospatial/maps';
 
 const runner = new TaskRunner({maxConcurrency: 2});
 const projection = {from: 'EPSG:4326', to: 'EPSG:3857'};
@@ -31,10 +31,19 @@ try {
   const {map} = await runner.runTask(PrepareMapTask, {
     description: {version: 1, id: 'world', definition: {type: 'mercator'}}
   });
-  assert.deepEqual(MapEngine.fromPrepared(map).toPrepared(), map);
+  assert.deepEqual(
+    MapEngine.fromPrepared(map, {
+      presets: mapPresets,
+      geometry: mapGeometry,
+      transitions: mapTransitions
+    }).toPrepared(),
+    map
+  );
   console.log(
     'Provided geospatial tasks: atomic, multiple, streaming, persistent, and map checks passed.'
   );
 } finally {
   await runner.close();
 }
+
+import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';

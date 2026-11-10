@@ -1,8 +1,11 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {MapEngine, type MapDescription, type MapEngineOptions} from '../discontinuous/map-engine';
+import {MapEngine, type MapDescription, type MapEngineOptions} from '../maps/map-engine';
 import type {CreateProjectionOptions, ProjectionArray, Projection} from '../projection/types';
+import {mapPresets} from '../maps/presets';
+import {mapGeometry} from '../maps/geometry';
+import {mapTransitions} from '../maps/transitions';
 import type {TaskContext} from '@math.gl/tasks';
 type OperationContext = Partial<Omit<TaskContext<unknown>, 'state'>>;
 
@@ -18,10 +21,15 @@ export type BulkProjectionTask = {
 export function setupMap(
   description: MapDescription,
   context: OperationContext,
-  options?: MapEngineOptions
+  options?: Partial<MapEngineOptions>
 ): MapEngine {
   context.reportProgress?.({phase: 'map-setup', completed: 0, total: 1, unit: 'tasks'});
-  const map = new MapEngine(description, options);
+  const map = new MapEngine(description, {
+    presets: mapPresets,
+    geometry: mapGeometry,
+    transitions: mapTransitions,
+    ...options
+  });
   map.getLayout();
   context.reportProgress?.({phase: 'map-setup', completed: 1, total: 1, unit: 'tasks'});
   return map;

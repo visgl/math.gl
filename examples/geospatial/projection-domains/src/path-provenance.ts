@@ -3,25 +3,28 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {PathLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import {MapEngine} from '@math.gl/geospatial/discontinuous';
+import {MapEngine} from '@math.gl/geospatial/maps';
 import {elasticI} from '@math.gl/geospatial/elastic';
 
 /** Source distance drives dash phase across fragments; chart XY only draws it. */
 export function pathProvenanceLayers(showVertices = true, wrapper = 'goode') {
-  const map = new MapEngine({
-    version: 1,
-    id: 'lineage-goode',
-    definition:
-      wrapper === 'elastic'
-        ? {type: 'elastic', data: elasticI}
-        : wrapper === 'armadillo'
-          ? {type: 'regional', projection: 'armadillo'}
-          : wrapper === 'mercator'
-            ? {type: 'mercator', maxLatitude: 75}
-            : wrapper === 'satellite'
-              ? {type: 'regional', projection: 'satellite'}
-              : {type: 'goode'}
-  });
+  const map = new MapEngine(
+    {
+      version: 1,
+      id: 'lineage-goode',
+      definition:
+        wrapper === 'elastic'
+          ? {type: 'elastic', data: elasticI}
+          : wrapper === 'armadillo'
+            ? {type: 'regional', projection: 'armadillo'}
+            : wrapper === 'mercator'
+              ? {type: 'mercator', maxLatitude: 75}
+              : wrapper === 'satellite'
+                ? {type: 'regional', projection: 'satellite'}
+                : {type: 'goode'}
+    },
+    {presets: mapPresets, geometry: mapGeometry, transitions: mapTransitions}
+  );
   const prepared = map.prepareFeatures(
     [
       {
@@ -148,3 +151,5 @@ export function provenanceTooltip(object: any) {
     ? `Source segment ${object.segment}; t=${object.t.toFixed(4)}; distance ${(object.distance / 1000).toFixed(1)} km; time +${object.timeHours.toFixed(2)} h; ${object.reason}`
     : null;
 }
+
+import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';

@@ -273,14 +273,6 @@
                   "modules/geospatial/projection/developer-guide/projection-engine",
                   "modules/geospatial/projection/developer-guide/external-projection-engines",
                   "modules/geospatial/projection/developer-guide/deformation-models",
-                  "modules/geospatial/projection/developer-guide/map-engine",
-                  "modules/geospatial/projection/developer-guide/discontinuous-projections",
-                  "modules/geospatial/discontinuous/projection-catalog",
-                  "modules/geospatial/discontinuous/README",
-                  "modules/geospatial/myriahedral-maps",
-                  "modules/geospatial/projection/developer-guide/myriahedral-projections",
-                  "modules/geospatial/discontinuous/myriahedral",
-                  "modules/geospatial/elastic-maps",
                   {
                     "type": "category",
                     "label": "Validation",
@@ -314,7 +306,21 @@
                 "id": "modules/geospatial/crs/developer-guide/raster-mesh-preparation",
                 "label": "Projecting Raster Meshes"
               },
-              "modules/geospatial/terrain/README"
+              "modules/geospatial/terrain/README",
+              {
+                "type": "category",
+                "label": "Maps",
+                "items": [
+                  "modules/geospatial/maps/developer-guide/map-engine",
+                  "modules/geospatial/maps/developer-guide/discontinuous-projections",
+                  "modules/geospatial/maps/projection-catalog",
+                  "modules/geospatial/maps/README",
+                  "modules/geospatial/maps/myriahedral-maps",
+                  "modules/geospatial/maps/developer-guide/myriahedral-projections",
+                  "modules/geospatial/maps/myriahedral",
+                  "modules/geospatial/maps/elastic-maps"
+                ]
+              }
             ],
             "link": {
               "type": "generated-index",
@@ -379,9 +385,6 @@
             "label": "@math.gl/geospatial/projection",
             "items": [
               "modules/geospatial/projection/api-reference/projection",
-              "modules/geospatial/projection/api-reference/map-engine",
-              "modules/geospatial/projection/api-reference/surfaces",
-              "modules/geospatial/projection/api-reference/elastic",
               "modules/geospatial/projection/api-reference/projection-engine",
               "modules/geospatial/projection/api-reference/projection-transform",
               "modules/geospatial/projection/api-reference/projection-pipeline",
@@ -392,6 +395,19 @@
             "link": {
               "type": "doc",
               "id": "modules/geospatial/projection/README"
+            }
+          },
+          {
+            "type": "category",
+            "label": "@math.gl/geospatial/maps",
+            "items": [
+              "modules/geospatial/maps/api-reference/map-engine",
+              "modules/geospatial/maps/api-reference/surfaces",
+              "modules/geospatial/maps/api-reference/elastic"
+            ],
+            "link": {
+              "type": "doc",
+              "id": "modules/geospatial/maps/README"
             }
           }
         ],

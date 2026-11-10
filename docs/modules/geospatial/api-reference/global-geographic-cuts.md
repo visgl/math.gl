@@ -12,9 +12,10 @@ restriction. It handles directed global boundaries, hemispheres, polar regions,
 holes and complements before delegating to existing map-specific clipping.
 
 ```ts
-import {MapEngine, cutSphericalPolygon} from '@math.gl/geospatial/discontinuous';
+import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';
+import {MapEngine, cutSphericalPolygon} from '@math.gl/geospatial/maps';
 
-const map = new MapEngine({version: 1, id: 'goode', definition: {type: 'goode'}});
+const map = new MapEngine({version: 1, id: 'goode', definition: {type: 'goode'}}, {presets: mapPresets, geometry: mapGeometry, transitions: mapTransitions});
 const northernHemisphere = [[-135, 0], [-45, 0], [45, 0], [135, 0]] as const;
 const pieces = map.projectGlobalPolygon([northernHemisphere], {
   interior: 'left', tolerance: 1e-4, maxAngularStep: 2

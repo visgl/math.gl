@@ -57,7 +57,7 @@ for(const [name,entry,symbol,expression,budget] of [
   const result=await build({absWorkingDir:root,bundle:true,write:false,minify:true,format:'esm',metafile:true,
     stdin:{contents:`import {${symbol}} from './${entry}'; globalThis.result=${expression};`,resolveDir:root,loader:'ts'}});
   const runtime=Object.values(result.metafile.outputs).flatMap(output=>Object.entries(output.inputs).filter(([,info])=>info.bytesInOutput>0).map(([path])=>path));
-  assert(runtime.every(path=>!path.includes('/src/projection/')&&!path.includes('/src/discontinuous/')&&!path.includes('polygon-clipping')),name+': unrelated engine dependency');
+  assert(runtime.every(path=>!path.includes('/src/projection/')&&!path.includes('/src/maps/')&&!path.includes('polygon-clipping')),name+': unrelated engine dependency');
   if(name==='generic') assert(runtime.every(path=>!path.includes('modules/geospatial/')),name+': geographic dependency');
   if(['generic','ellipsoid','rhumb','adaptive-rhumb'].includes(name))
     assert(runtime.every(path=>!path.includes('geographiclib-geodesic')),name+': unnecessary geodesic solver');

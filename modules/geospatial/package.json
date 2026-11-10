@@ -1000,10 +1000,10 @@
       "import": "./dist/projection/transform-analysis.js",
       "require": "./dist/projection/transform-analysis.cjs"
     },
-    "./discontinuous": {
-      "types": "./dist/discontinuous.d.ts",
-      "import": "./dist/discontinuous.js",
-      "require": "./dist/discontinuous.cjs"
+    "./maps": {
+      "types": "./dist/maps.d.ts",
+      "import": "./dist/maps.js",
+      "require": "./dist/maps.cjs"
     },
     "./elastic": {
       "types": "./dist/elastic.d.ts",
@@ -1024,6 +1024,26 @@
       "types": "./dist/turf/expressions.d.ts",
       "import": "./dist/turf/expressions.js",
       "require": "./dist/turf/expressions.cjs"
+    },
+    "./maps/presets": {
+      "types": "./dist/maps/presets.d.ts",
+      "import": "./dist/maps/presets.js",
+      "require": "./dist/maps/presets.cjs"
+    },
+    "./maps/geometry": {
+      "types": "./dist/maps/geometry.d.ts",
+      "import": "./dist/maps/geometry.js",
+      "require": "./dist/maps/geometry.cjs"
+    },
+    "./maps/transitions": {
+      "types": "./dist/maps/transitions.d.ts",
+      "import": "./dist/maps/transitions.js",
+      "require": "./dist/maps/transitions.cjs"
+    },
+    "./maps/surfaces": {
+      "types": "./dist/maps/surfaces.d.ts",
+      "import": "./dist/maps/surfaces.js",
+      "require": "./dist/maps/surfaces.cjs"
     }
   },
   "files": [

@@ -14,7 +14,7 @@ import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {PathLayer, PolygonLayer, TextLayer} from '@deck.gl/layers';
 import {createMapGridPreparer} from './prepare-map-grid.js';
 import {createMapPreparationGate} from './map-preparation-gate.ts';
-import {fitMapLayout} from '@math.gl/geospatial/discontinuous';
+import {fitMapLayout} from '@math.gl/geospatial/maps';
 import {Geometry} from '@luma.gl/engine';
 import {projectionGrid, projectCoordinate} from './projection-grid.js';
 import {myriahedralPose, prepareMyriahedralAnimation} from './myriahedral-animation.js';

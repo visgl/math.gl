@@ -2,6 +2,6 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 /** Optional, published Elastic datasets. Not imported by the main map API. */
-export {elasticI} from './discontinuous/elastic/elasticI';
-export {elasticII} from './discontinuous/elastic/elasticII';
-export {elasticIII} from './discontinuous/elastic/elasticIII';
+export {elasticI} from './maps/elastic/elasticI';
+export {elasticII} from './maps/elastic/elasticII';
+export {elasticIII} from './maps/elastic/elasticIII';

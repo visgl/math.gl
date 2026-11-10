@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {TaskRunner} from '@math.gl/tasks';
-import {MapEngine} from '@math.gl/geospatial/discontinuous';
+import {MapEngine} from '@math.gl/geospatial/maps';
 import {prepareDiscontinuousGrid, DISCONTINUOUS_VIEWS} from './discontinuous-views.js';
 import {
   cacheProjectionGrid,
@@ -85,7 +85,14 @@ export async function prepareMapGrid(view, step, {signal, onProgress = () => {},
     signal?.throwIfAborted();
     if (discontinuous) {
       const {preparedMap, ...grid} = data;
-      result = {...grid, map: MapEngine.fromPrepared(preparedMap)};
+      result = {
+        ...grid,
+        map: MapEngine.fromPrepared(preparedMap, {
+          presets: mapPresets,
+          geometry: mapGeometry,
+          transitions: mapTransitions
+        })
+      };
     } else result = data;
   } else if (discontinuous) {
     result = await prepareDiscontinuousGrid(view, step, {signal, onProgress});
@@ -103,3 +110,5 @@ export async function prepareMapGrid(view, step, {signal, onProgress = () => {},
   cache.set(key, result);
   return result;
 }
+
+import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';

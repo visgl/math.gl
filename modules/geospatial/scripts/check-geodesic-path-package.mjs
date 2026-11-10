@@ -72,7 +72,7 @@ for (const [name, entry, expression] of [
     stdin: {contents: `import {${symbol}} from './${entry}'; globalThis.result = ${expression};`, resolveDir: root, loader: 'ts'}
   });
   const runtime = Object.values(result.metafile.outputs).flatMap(output => Object.entries(output.inputs).filter(([, info]) => info.bytesInOutput > 0).map(([path]) => path));
-  assert(runtime.every(path => !path.includes('/src/projection/') && !path.includes('/src/discontinuous/')), name + ': unrelated engine payload');
+  assert(runtime.every(path => !path.includes('/src/projection/') && !path.includes('/src/maps/')), name + ': unrelated engine payload');
   if (name === 'generic') assert(runtime.every(path => !path.includes('modules/geospatial/')), 'Generic geometry acquired geodesic dependencies');
   if (name === 'ellipsoid') assert(runtime.every(path => !path.includes('geographiclib-geodesic')), 'Ellipsoid-only consumers acquired a geodesic solver');
   const bytes = result.outputFiles[0].contents;

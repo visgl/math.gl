@@ -7,7 +7,7 @@ math.gl and distinguishes concepts that can look similar in a rendering.
 
 Start with [geodesic](#geodesic), [rhumb line](#rhumb-line-loxodrome),
 [chord](#chord), and [ellipsoid](#ellipsoid-and-spheroid). For the mathematical
-construction of map families, see [map projection families](../discontinuous/projection-catalog.md).
+construction of map families, see [map projection families](../maps/projection-catalog.md).
 
 ## Earth and surface models
 
@@ -212,8 +212,8 @@ is not a complete datum transformation. See the
 Longitude **wrapping** changes a coordinate's numeric representative, for example
 181° to −179°. It does not split a line or polygon at a cut. **Unwrapping** chooses
 continuous longitude representatives along a sequence; it also does not remove
-geometric seams. See [discontinuous maps](../projection/developer-guide/discontinuous-projections.md)
-and the [MapEngine reference](../projection/api-reference/map-engine.md).
+geometric seams. See [discontinuous maps](../maps/developer-guide/discontinuous-projections.md)
+and the [MapEngine reference](../maps/api-reference/map-engine.md).
 
 ## Sampling, meshes, and tiles
 

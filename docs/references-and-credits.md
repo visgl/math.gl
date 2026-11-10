@@ -88,7 +88,7 @@ own licenses; the table is not a transitive dependency bill of materials.
 
 ## Segmented maps and unfolding
 
-See the [projection bibliography and implementation credits](./modules/geospatial/projection/developer-guide/discontinuous-projections.md#references-and-implementation-credits)
+See the [projection bibliography and implementation credits](./modules/geospatial/maps/developer-guide/discontinuous-projections.md#references-and-implementation-credits)
 for Peirce, Guyou, Gringorten, Berghaus, Goode, Boggs, Collignon and Waterman,
 including free sources and the specific D3 code used here. Projection invention,
 numerical implementation and interactive visualization are distinct contributions.
@@ -96,7 +96,7 @@ numerical implementation and interactive visualization are distinct contribution
 **[Nico Belmonte](https://github.com/philogb)** inspired the myriahedral examples through his
 [interactive demonstration](https://philogb.github.io/page/myriahedral/) and
 [2018 article](https://medium.com/vis-gl/unfolding-the-earth-myriahedral-projections-in-webgl-6b2bcfd00a30).
-Our [myriahedral background](./modules/geospatial/myriahedral-maps.md) records the
+Our [myriahedral background](./modules/geospatial/maps/myriahedral-maps.md) records the
 research lineage and implementation differences. The hinge and myriahedral code
 was developed independently of Nico's application code. Attribution does not
 imply that an unlicensed application can be copied.

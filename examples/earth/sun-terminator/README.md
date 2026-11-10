@@ -90,7 +90,8 @@ All browser code is TypeScript under `src/`. `app.ts` wires the renderer and
 lifecycle, `control-panel.ts` builds the collapsible controls, and `constants.ts`
 defines imagery settings and the projection menu. The existing shared Blue Marble
 helper remains in `examples/common`. `view-adapter.ts` adapts shared projection
-models to deck.gl cameras; `layers.ts` contains the rendering shaders.
+models to deck.gl cameras; each bitmap layer has its own `*-bitmap-layer.ts` file with its shaders.
+`cut-tile-layer.ts` handles shared tile selection.
 
 Chart definitions, cuts, insets, H3 face layout, raster mesh preparation, and
 transition mesh refinement come from `@math.gl/geospatial/projection`. The example

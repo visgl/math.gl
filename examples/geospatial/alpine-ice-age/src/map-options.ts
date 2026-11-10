@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {MAP_PROJECTIONS} from '@math.gl/geospatial/discontinuous';
+import {MAP_PROJECTIONS} from '@math.gl/geospatial/maps';
 import {REGIONAL_VIEWS} from './regional-views.ts';
 
 // Modest panel counts keep map construction and the 1° field mesh interactive.

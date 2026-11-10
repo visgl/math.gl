@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import type {MapEngine, MapLine} from '@math.gl/geospatial/discontinuous';
+import type {MapEngine, MapLine} from '@math.gl/geospatial/maps';
 import {REGIONAL_VIEWS} from './regional-views.ts';
 
 export const canCenterMap = (view: unknown) =>

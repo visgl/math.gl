@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {
-  MapEngine,
-  type MyriahedralPreset,
-  type MyriahedralSolid
-} from '@math.gl/geospatial/discontinuous';
+import {MapEngine, type MyriahedralPreset, type MyriahedralSolid} from '@math.gl/geospatial/maps';
 import {isLand} from './shared/geometry/unfolding-polyhedron/geography';
 
 /** Only UI/data adaptation lives here; mesh, cuts, projection and motion are library APIs. */
@@ -33,7 +29,10 @@ export function createMyriahedralLayout(level: number, seed: number, mode: strin
       }
     },
     {
-      isLand: ([longitude, latitude]) => isLand(longitude, latitude)
+      presets: [myriahedralMapPreset],
+      ...{
+        isLand: ([longitude, latitude]) => isLand(longitude, latitude)
+      }
     }
   );
   const layout = engine.motion!;
@@ -44,3 +43,5 @@ export function createMyriahedralLayout(level: number, seed: number, mode: strin
     description: `${solid ?? preset} preset · sampled geography; land connectivity and overlap-free nets are not guaranteed.`
   };
 }
+
+import {myriahedralMapPreset} from '@math.gl/geospatial/maps';

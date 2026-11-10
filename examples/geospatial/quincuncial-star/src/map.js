@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {MapEngine} from '@math.gl/geospatial/discontinuous';
+import {MapEngine} from '@math.gl/geospatial/maps';
 import land from '../../../common/land.json' with {type: 'json'};
 
 /** Geographic preparation only: the renderer receives ordinary XY paths. */
@@ -14,7 +14,11 @@ export function createMapData(type, lobes, centralMeridian) {
         ? {type, lobes, centralMeridian}
         : {type, centralMeridian}
     },
-    {sampling: {maxAngularStep: 3, tolerance: 0.001}}
+    {
+      presets: [peirceQuincuncialMapPreset, berghausMapPreset, gingeryMapPreset],
+      geometry: mapGeometry,
+      ...{sampling: {maxAngularStep: 3, tolerance: 0.001}}
+    }
   );
   const coast = land.flatMap(polygon => polygon.flatMap(ring => map.projectLine(ring)));
   const grid = [];
@@ -39,3 +43,10 @@ export function createMapData(type, lobes, centralMeridian) {
   ].map(([label, lon, lat]) => ({label, ...map.projectPoint([lon, lat])}));
   return {map, coast, grid, polygon, cities};
 }
+
+import {
+  peirceQuincuncialMapPreset,
+  berghausMapPreset,
+  gingeryMapPreset,
+  mapGeometry
+} from '@math.gl/geospatial/maps';

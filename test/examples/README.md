@@ -14,8 +14,8 @@ yarn test-examples:node projection-domains
 yarn test-examples:browser proj-wasm-crs
 ```
 
-Node checks discover every `*.test.js`, `*.test.mjs`, and `*.test.ts` under this directory,
-including nested projection-domain suites. They build the selected applications and run matching test TypeScript configurations first.
+Node checks discover every `*.test.js`, `*.test.mjs`, and `*.test.ts` under `modules/<owner>/test/examples/`,
+including nested projection-domain suites. Shared runner, Vite infrastructure, and cross-example checks remain in this directory. They build the selected applications and run matching test TypeScript configurations first.
 Browser checks discover `browser-test.mjs` and `run-browser.mjs` entry points and use the root
 Playwright installation. They build each selected example before checking it; the solar harness
 builds its own application and test pages. Each subprocess reports its example or test path.

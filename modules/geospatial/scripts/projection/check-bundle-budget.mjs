@@ -2,15 +2,13 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
+import {checkMapBundleBudget} from '../maps/check-bundle-budget.mjs';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {gzipSync} from 'node:zlib';
 import {build} from 'esbuild';
 
 const fixtures = {
-  projectionSurface: "export {prepareProjectionSurface} from '@math.gl/geospatial/projection';",
-  transitionSurface: "export {prepareMapTransitionMesh, prepareMapTransitionMeshAsync} from '@math.gl/geospatial/projection';",
-  mapEngine: "export {MapEngine} from '@math.gl/geospatial/projection';",
   webMercatorEngine: "export {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection/web-mercator';",
   temporalModel: "export * from '@math.gl/geospatial/projection/temporal';",
   projectionBulk: "export * from '@math.gl/geospatial/projection/bulk';",
@@ -86,10 +84,6 @@ for (const [name, contents] of Object.entries(fixtures)) {
   }
   if (name === 'core')
     assert(!Object.keys(result.metafile.inputs).some(path => path.endsWith('/crs/datum-table.js')));
-  if (name === 'projectionSurface' || name === 'transitionSurface') {
-    assert(!retained.some(path => /\/(map-engine|h3-face-map)\.js$|\/world-kernels\//.test(path)),
-      name + ' must not retain chart catalogues or MapEngine');
-  }
   const bytes = result.outputFiles[0].contents;
   measurements[name] = {
     minified: bytes.length,
@@ -102,5 +96,9 @@ for (const [name, contents] of Object.entries(fixtures)) {
         `${name} ${metric}: ${measurements[name][metric]} exceeds budget ${budgets.limits[name][metric]}`
       );
     }
+}
+// Keep one JSON document for scorecard collectors while checking both subpaths.
+for (const [name, metrics] of Object.entries(await checkMapBundleBudget(!budgets))) {
+  measurements['maps/' + name] = metrics;
 }
 console.log(JSON.stringify(measurements, null, 2));

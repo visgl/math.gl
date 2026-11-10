@@ -3,23 +3,26 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {SolidPolygonLayer, PathLayer} from '@deck.gl/layers';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import {MapEngine} from '@math.gl/geospatial/discontinuous';
+import {MapEngine} from '@math.gl/geospatial/maps';
 import {elasticI} from '@math.gl/geospatial/elastic';
 export function polygonProvenanceLayers(showGenerated = false, wrapper = 'goode', atlas = false) {
-  const map = new MapEngine({
-    version: 1,
-    id: 'polygon-lineage-goode',
-    definition:
-      wrapper === 'mercator'
-        ? {type: 'mercator', maxLatitude: 45}
-        : wrapper === 'satellite'
-          ? {type: 'regional', projection: 'satellite'}
-          : wrapper === 'armadillo'
-            ? {type: 'regional', projection: 'armadillo'}
-            : wrapper === 'elastic'
-              ? {type: 'elastic', data: elasticI}
-              : {type: 'goode'}
-  });
+  const map = new MapEngine(
+    {
+      version: 1,
+      id: 'polygon-lineage-goode',
+      definition:
+        wrapper === 'mercator'
+          ? {type: 'mercator', maxLatitude: 45}
+          : wrapper === 'satellite'
+            ? {type: 'regional', projection: 'satellite'}
+            : wrapper === 'armadillo'
+              ? {type: 'regional', projection: 'armadillo'}
+              : wrapper === 'elastic'
+                ? {type: 'elastic', data: elasticI}
+                : {type: 'goode'}
+    },
+    {presets: mapPresets, geometry: mapGeometry, transitions: mapTransitions}
+  );
   const prepared = map.prepareFeatures(
     [
       {
@@ -122,3 +125,5 @@ export function polygonProvenanceTooltip(object: any) {
     ? `${['', 'Source boundary', 'Coverage boundary', 'Chart cut', 'Continuous chart join'][object.kind]}${object.kind === 1 ? `; ring ${object.ring}, segment ${object.segment}, t=${object.range.map((v: number) => v.toFixed(4)).join('→')}` : ''}`
     : null;
 }
+
+import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';

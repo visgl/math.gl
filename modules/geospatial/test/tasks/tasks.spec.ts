@@ -5,7 +5,7 @@ import {test, expect} from 'vitest';
 const isBrowser = typeof process === 'undefined' || !process.versions?.node;
 import {TaskRunner, preloadTasks} from '@math.gl/tasks';
 import {ProjectCoordinatesTask, PrepareMapTask} from '@math.gl/geospatial/tasks';
-import {MapEngine} from '@math.gl/geospatial/discontinuous/map-engine';
+import {MapEngine} from '@math.gl/geospatial/maps/map-engine';
 
 const initialization = {projection: {from: 'EPSG:4326', to: 'EPSG:3857'}};
 const input = () => ({coordinates: new Float64Array([0, 0, 10, 20])});
@@ -87,9 +87,17 @@ for (const execution of ['main-thread', 'worker'] as const) {
         {description: {version: 1, id: 'world', definition: {type: 'mercator'}}},
         {execution}
       );
-      expect(MapEngine.fromPrepared(map).toPrepared()).toEqual(map);
+      expect(
+        MapEngine.fromPrepared(map, {
+          presets: mapPresets,
+          geometry: mapGeometry,
+          transitions: mapTransitions
+        }).toPrepared()
+      ).toEqual(map);
     } finally {
       await runner.close();
     }
   });
 }
+
+import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';

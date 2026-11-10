@@ -6,6 +6,18 @@ const {dirname, join} = require('node:path');
 
 // Preserve bookmarks when guides move into their owning modules.
 const movedGuides = {
+  "modules/geospatial/discontinuous/map-engine": "modules/geospatial/maps/api-reference/map-engine",
+  "modules/geospatial/discontinuous": "modules/geospatial/maps",
+  "modules/geospatial/projection/api-reference/elastic": "modules/geospatial/maps/api-reference/elastic",
+  "modules/geospatial/projection/api-reference/map-engine": "modules/geospatial/maps/api-reference/map-engine",
+  "modules/geospatial/projection/api-reference/surfaces": "modules/geospatial/maps/api-reference/surfaces",
+  "modules/geospatial/projection/developer-guide/discontinuous-projections": "modules/geospatial/maps/developer-guide/discontinuous-projections",
+  "modules/geospatial/projection/developer-guide/map-engine": "modules/geospatial/maps/developer-guide/map-engine",
+  "modules/geospatial/projection/developer-guide/myriahedral-projections": "modules/geospatial/maps/developer-guide/myriahedral-projections",
+  "modules/geospatial/elastic-maps": "modules/geospatial/maps/elastic-maps",
+  "modules/geospatial/myriahedral-maps": "modules/geospatial/maps/myriahedral-maps",
+  "modules/geospatial/discontinuous/myriahedral": "modules/geospatial/maps/myriahedral",
+  "modules/geospatial/discontinuous/projection-catalog": "modules/geospatial/maps/projection-catalog",
   "modules/geospatial/geoarrow/api-reference/geoarrow": "modules/arrow/geoarrow-utils/api-reference/geoarrow",
   "modules/geospatial/projection/scorecard-methodology": "modules/geospatial/projection/scorecard#reproduction",
   "modules/geospatial/guide/crs": "modules/geospatial/crs/developer-guide/coordinate-reference-systems",
@@ -32,7 +44,6 @@ const movedGuides = {
   "developer-guide/working-with-ai": "developer-guide#work-with-an-ai-coding-agent",
   "developer-guide/root-exports-migration": "upgrade-guide#migrating-to-root-exports",
   "bibliography": "references-and-credits",
-  "modules/geospatial/discontinuous/map-engine": "modules/geospatial/projection/api-reference/map-engine",
   "developer-guide/external-frameworks": "modules/core#interoperability",
   "developer-guide/math/transformations": "modules/core/developer-guide/transformations",
   "developer-guide/math/view-and-projection": "modules/core/developer-guide/view-and-projection",
