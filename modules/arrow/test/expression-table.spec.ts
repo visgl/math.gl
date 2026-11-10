@@ -5,7 +5,7 @@
 import {scalarFunction} from './utils/scalar-function';
 
 import {expect, test} from 'vitest';
-import {parseSQLSelect} from '@math.gl/core/sql';
+import {parseSQLExpression} from '@math.gl/core/sql';
 import {
   Table,
   Int32,
@@ -275,7 +275,7 @@ test('nested list sizes match structurally even when type strings are uninformat
   ).toThrow('Argument type mismatch');
 });
 
-test('SQL replacements keep column order and read the original multi-batch table', () => {
+test('Arrow replacements keep column order and read the original multi-batch table', () => {
   const input = table();
   const functions = [
     scalarFunction({
@@ -285,8 +285,14 @@ test('SQL replacements keep column order and read the original multi-batch table
       evaluateScalar: (value: number) => value + 1
     })
   ];
-  const query = parseSQLSelect('SELECT *, increment(x) AS x, x AS text FROM data');
-  const result = replaceArrowColumns(input, query.replace!, {functions});
+  const result = replaceArrowColumns(
+    input,
+    [
+      {as: 'x', expression: parseSQLExpression('increment(x)')},
+      {as: 'text', expression: 'x'}
+    ],
+    {functions}
+  );
   expect(result.schema.fields.map(field => field.name)).toEqual(['x', 'text']);
   expect([...result.getChild('x')!]).toEqual([2, null, 4, 5, 6]);
   expect([...result.getChild('text')!]).toEqual([1, null, 3, 4, 5]);

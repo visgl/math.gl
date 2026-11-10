@@ -39,8 +39,6 @@ export type TableQuery<
   from?: TableReference;
   /** Output columns in selection order. Omission selects all source columns. */
   select?: readonly TableSelection[];
-  /** In-place projections after SELECT *. Expressions read the original input. */
-  replace?: readonly Readonly<{expression: Expression; as: string}>[];
   /** Predicate evaluated against source columns before output aliases are applied. */
   where?: PredicateT | Readonly<{expression: Expression}>;
   /** Maximum number of rows retained after filtering. */

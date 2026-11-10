@@ -164,21 +164,6 @@ length/precision modifiers, or casts on scalar values in the portable predicate 
 
 Postfix `value::TYPE` and chained casts are also supported with the same conversion rules.
 
-## Wildcard replacements
-
-In math.gl, an aliased expression after `SELECT *` replaces the input column
-with that name and keeps its position in the result.
-
-```sql
-SELECT *, increment(positions) AS positions FROM geoarrow
-```
-
-The parser returns these expressions in `TableQuery.replace`. Arrow callers can
-pass that array and their function declarations to `replaceArrowColumns` from
-`@math.gl/arrow/expressions`. Each expression sees the original input columns.
-Replacement names must exist in the input and be unique. The replacement’s
-expression determines its output type and metadata.
-
 ## Packed floating-point arrays
 
 `SELECT ARRAY[x, y, z] AS position` returns `{array: ['x', 'y', 'z'], as: 'position'}`.
