@@ -2,7 +2,16 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {Field, Float64, Int32, Table, vectorFromArray} from 'apache-arrow';
+import {
+  Field,
+  FixedSizeList,
+  Float32,
+  Float64,
+  Int32,
+  Schema,
+  Table,
+  vectorFromArray
+} from 'apache-arrow';
 import {parseSQLExpression} from '@math.gl/core/sql';
 import {
   compileArrowExpression,
@@ -201,4 +210,71 @@ test('TRY masks failed condition and branch rows before validating tuple outputs
     [2],
     [2]
   ]);
+});
+
+test('tuple recovery inherits metadata for literals and rejects independently incompatible fields', () => {
+  const type = new FixedSizeList(2, new Field('value', new Float64(), false));
+  const metadata = new Map([['ARROW:extension:name', 'geoarrow.point']]);
+  const fields = [
+    new Field('point', type, true, metadata),
+    new Field('other', type, true, new Map([['ARROW:extension:name', 'other.point']]))
+  ];
+  const input = new Table(new Schema(fields), {
+    point: vectorFromArray([[1, 2], null], type),
+    other: vectorFromArray(
+      [
+        [3, 4],
+        [5, 6]
+      ],
+      type
+    )
+  });
+  const options = {inputSchema: input.schema};
+  const tried = compileArrowExpression('TRY(point, null)', options);
+  expect(tried.outputField.metadata).toEqual(metadata);
+  expect(
+    Array.from(tried.evaluateTable(input), value => (value === null ? null : Array.from(value)))
+  ).toEqual([[1, 2], null]);
+  const coalesced = compileArrowExpression('COALESCE(point, [7,8])', options);
+  expect(coalesced.outputField.metadata).toEqual(metadata);
+  expect(Array.from(coalesced.evaluateTable(input), value => Array.from(value))).toEqual([
+    [1, 2],
+    [7, 8]
+  ]);
+  expect(() => compileArrowExpression('TRY(point, other)', options)).toThrow(
+    'matching types and metadata'
+  );
+});
+test('recovery calls carry the enclosing prototype type to nested tuple literals', () => {
+  const type = new FixedSizeList(2, new Field('value', new Float64(), false));
+  const f: ArrowTableFunction = {
+    name: 'F',
+    prototypes: [
+      {
+        arguments: [new Field('tuple', type, true)],
+        result: new Field('value', new Float64(), false),
+        evaluate([input], {length, activeRows}) {
+          return vectorFromArray(
+            Array.from({length}, (_, row) => (activeRows[row] ? input!.get(row).get(0) : null)),
+            new Float64()
+          );
+        }
+      }
+    ]
+  };
+  const compiled = compileArrowExpression('F(COALESCE(null, TRY([1,2])))', {
+    inputSchema: table.schema,
+    functions: [f]
+  });
+  expect([...compiled.evaluateTable(table)]).toEqual([1, 1, 1, 1]);
+});
+
+test('TRY catches finite arithmetic overflow but not unrepresentable typed literals', () => {
+  const input = new Table({x: vectorFromArray([2, 1e20], new Float32())});
+  const options = {inputSchema: input.schema};
+  expect([...compileArrowExpression('TRY(x * x)', options).evaluateTable(input)]).toEqual([
+    4,
+    null
+  ]);
+  expect(() => compileArrowExpression('TRY(x + 1e40)', options)).toThrow('literal overflow');
 });

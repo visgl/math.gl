@@ -450,6 +450,8 @@ function bindNode(
     }
     validateValue(value, type);
     const rounded = roundToType(type)(value);
+    if (typeof value === 'number' && Number.isFinite(value) && !Number.isFinite(rounded))
+      throw new Error(`Numeric literal overflow for ${type}`);
     const encoded = typeof value === 'string' ? encoder.encode(value) : undefined;
     const range: Range | undefined = encoded ? [encoded, 0, encoded.length] : undefined;
     return {
@@ -462,7 +464,7 @@ function bindNode(
       })
     };
   }
-  if (ast.type === 'CallExpression') return bindCall(ast, options);
+  if (ast.type === 'CallExpression') return bindCall(ast, options, expected);
   if (ast.type === 'ConditionalExpression') {
     const condition = bind(ast.test, options, bool);
     requireType(condition, 'bool');
@@ -734,20 +736,28 @@ function compare(op: string, a: any, b: any): boolean {
 }
 
 /** Materializes one recovery boundary without retrying callbacks or leaking row errors outward. */
-function bindRecovery(name: string, expressions: any[], options: BindingOptions): Node {
+function bindRecovery(
+  name: string,
+  expressions: any[],
+  options: BindingOptions,
+  expected?: DataType
+): Node {
   if (name === 'TRY' ? expressions.length < 1 || expressions.length > 2 : !expressions.length)
     throw new Error(`${name} has an invalid argument count`);
-  let nodes: Node[];
   const typed = expressions.findIndex(expression => !isContextualLiteral(expression));
   const nonNull = expressions.findIndex(
     expression => !(expression.type === 'Literal' && expression.value === null)
   );
-  const first = bind(expressions[typed < 0 ? Math.max(0, nonNull) : typed], options);
-  nodes = expressions.map(expression => bind(expression, options, first.field.type));
-  for (const node of nodes) {
+  const anchor = typed < 0 ? Math.max(0, nonNull) : typed;
+  const first = bind(expressions[anchor], options, expected);
+  const nodes = expressions.map((expression, index) =>
+    index === anchor ? first : bind(expression, options, first.field.type)
+  );
+  for (const [index, node] of nodes.entries()) {
     if (
       physicalKey(node.field.type) !== physicalKey(first.field.type) ||
-      extensionKey(node.field) !== extensionKey(first.field)
+      (!isContextualLiteral(expressions[index]) &&
+        extensionKey(node.field) !== extensionKey(first.field))
     )
       throw new Error(`${name} arguments must have matching types and metadata`);
   }
@@ -805,13 +815,12 @@ function bindRecovery(name: string, expressions: any[], options: BindingOptions)
 }
 
 /** Binds built-ins and custom functions, materializing arguments only for vector kernels. */
-function bindCall(ast: any, options: BindingOptions): Node {
+function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node {
   if (ast.callee.type !== 'Identifier')
     throw new Error('Only registered named function calls are supported');
   let name = ast.callee.name;
-  if (ast.sqlFunction && ['TRY', 'COALESCE'].includes(name.toUpperCase()))
-    name = name.toUpperCase();
-  if (['TRY', 'COALESCE'].includes(name)) return bindRecovery(name, ast.arguments, options);
+  const recovery = recoveryName(ast);
+  if (recovery) return bindRecovery(recovery, ast.arguments, options, expected);
   if (ast.sqlFunction) {
     const matches = [
       ...options.functionLookup.keys(),
@@ -1214,11 +1223,27 @@ function isSignedLiteral(ast: any): boolean {
     typeof ast.argument.value === 'number'
   );
 }
+function recoveryName(ast: any): 'TRY' | 'COALESCE' | undefined {
+  if (ast.type !== 'CallExpression' || ast.callee.type !== 'Identifier') return undefined;
+  const name = ast.sqlFunction ? ast.callee.name.toUpperCase() : ast.callee.name;
+  return name === 'TRY' || name === 'COALESCE' ? name : undefined;
+}
+
+function containsContextualArray(ast: any): boolean {
+  return (
+    ast.type === 'ArrayExpression' ||
+    (ast.type === 'ConditionalExpression' &&
+      (containsContextualArray(ast.consequent) || containsContextualArray(ast.alternate))) ||
+    Boolean(recoveryName(ast) && ast.arguments.some(containsContextualArray))
+  );
+}
+
 function isContextualLiteral(ast: any): boolean {
   return (
     ast.type === 'Literal' ||
     ast.type === 'ArrayExpression' ||
     isSignedLiteral(ast) ||
+    Boolean(recoveryName(ast) && ast.arguments.every(isContextualLiteral)) ||
     (ast.type === 'ConditionalExpression' &&
       isContextualLiteral(ast.consequent) &&
       isContextualLiteral(ast.alternate))
@@ -1230,6 +1255,7 @@ function needsArgumentContext(ast: any): boolean {
   return (
     ast.type === 'ArrayExpression' ||
     (ast.type === 'Literal' && ast.value === null) ||
+    Boolean(recoveryName(ast) && ast.arguments.some(containsContextualArray)) ||
     (ast.type === 'ConditionalExpression' &&
       (needsArgumentContext(ast.consequent) || needsArgumentContext(ast.alternate)))
   );
