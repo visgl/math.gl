@@ -175,6 +175,7 @@ test('star followed by aliased expressions represents in-place replacements', ()
   const expression = {
     type: 'CallExpression',
     callee: {type: 'Identifier', name: 'increment'},
+    sqlFunction: true,
     arguments: [{type: 'Identifier', name: 'positions'}]
   };
   expect(

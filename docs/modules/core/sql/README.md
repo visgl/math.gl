@@ -164,10 +164,7 @@ length/precision modifiers, or casts on scalar values in the portable predicate 
 
 Postfix `value::TYPE` and chained casts are also supported with the same conversion rules.
 
-## Function projections and wildcard replacements
-
-Named scalar function calls can appear in the select list. The parser preserves
-the function name for binding against the executor’s function registry.
+## Wildcard replacements
 
 In math.gl, an aliased expression after `SELECT *` replaces the input column
 with that name and keeps its position in the result.
