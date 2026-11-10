@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {COLOR_RGB, COLOR_TO_RGBA8} from '@math.gl/arrow/color';
 import {initializeTaskWorker} from '@math.gl/tasks';
 import {createArrowExpressionTask} from '@math.gl/arrow/expressions/worker';
 import {createTurfArrowFunction} from '@math.gl/geospatial/turf/expressions';
@@ -21,5 +22,5 @@ const color = {
   result: new Field('rgba', rgbaType, true, new Map([['color-space', 'srgb']])),
   evaluate: ([values, bins], {length, activeRows}) => vectorFromArray(Array.from({length}, (_, row) => activeRows[row] ? [values.get(row), bins.get(row).get(0), 0, 1] : null), rgbaType)
 };
-const functions = [double, color, createTurfArrowFunction({name: 'distance', arguments: [point, point], result: new Field('distance', new Float64(), true), evaluate: distance})];
+const functions = [COLOR_RGB, COLOR_TO_RGBA8, double, color, createTurfArrowFunction({name: 'distance', arguments: [point, point], result: new Field('distance', new Float64(), true), evaluate: distance})];
 await initializeTaskWorker(createArrowExpressionTask({functions}));

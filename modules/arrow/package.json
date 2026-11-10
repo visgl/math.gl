@@ -50,7 +50,12 @@
       "import": "./dist/expressions/worker.js",
       "require": "./dist/expressions/worker.cjs"
     },
-    "./expressions/worker-entry.js": "./dist/expressions/worker-entry.js"
+    "./expressions/worker-entry.js": "./dist/expressions/worker-entry.js",
+    "./color": {
+      "types": "./dist/color/index.d.ts",
+      "import": "./dist/color/index.js",
+      "require": "./dist/color/index.cjs"
+    }
   },
   "files": [
     "dist",
