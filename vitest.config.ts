@@ -27,7 +27,7 @@ export default getVitestConfig({
       test: {
         // Native workers inherit startup preloads, so private aliases also resolve outside Vite.
         execArgv: ['--import', new URL('./test/utils/register-worker-aliases.mjs', import.meta.url).href],
-        include: includePatterns,
+        include: [...includePatterns, 'scripts/deepmerge-security.spec.ts'],
         setupFiles: ['./test/utils/node-test-setup.ts']
       }
     },
