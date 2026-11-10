@@ -7,6 +7,7 @@ import {
   DataType,
   Field,
   Float64,
+  Dictionary,
   Int64,
   Int32,
   Null,
@@ -23,6 +24,14 @@ import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '.
 import {parse, type Expression} from '@math.gl/core/expressions';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
 import {createFunctionLookup} from './registry';
+import {
+  isTupleType,
+  nullTupleVector,
+  maskTupleVector,
+  validateTupleVector,
+  selectTupleVectors,
+  compileArrayLiteral
+} from './list-values';
 import type {
   ArrowTableFunction,
   ArrowExpression,
@@ -100,10 +109,11 @@ export function compileArrowExpression(
       ? evaluation.activeRows.slice()
       : new Uint8Array(batch.numRows).fill(1);
     const prepared = root.prepare(batch, active);
-    const result =
-      prepared.vector &&
-      !DataType.isDictionary(prepared.vector.type) &&
-      !active.some(value => !value)
+    const result = isTupleType(root.field.type)
+      ? maskTupleVector(prepared.vector!, active)
+      : prepared.vector &&
+          !DataType.isDictionary(prepared.vector.type) &&
+          !active.some(value => !value)
         ? prepared.vector
         : output(root.field, active, prepared.get);
     evaluation.signal?.throwIfAborted();
@@ -122,7 +132,11 @@ export function compileArrowExpression(
         offset += batch.numRows;
         return evaluate(batch, {...evaluation, activeRows}).data;
       });
-      return chunks.length ? new Vector(chunks) : output(root.field, new Uint8Array(0), () => null);
+      return chunks.length
+        ? new Vector(chunks)
+        : isTupleType(root.field.type)
+          ? nullTupleVector(root.field.type, 0)
+          : output(root.field, new Uint8Array(0), () => null);
     }
   });
 }
@@ -267,6 +281,24 @@ function sourceReader(vector: Vector): Prepared {
   };
 }
 
+/** Keeps nested values on the vector path, with parent validity available to null tests. */
+function vectorReader(vector: Vector): Prepared {
+  try {
+    typeKey(vector.type);
+    return sourceReader(vector);
+  } catch {
+    // Nested layouts have no scalar callback representation.
+  }
+  const reader = new ColumnReader(vector);
+  return {
+    vector,
+    isNull: row => !reader.isValid(row),
+    get: () => {
+      throw new Error('Nested values require a vector kernel');
+    }
+  };
+}
+
 /** Obtains UTF-8 bytes, encoding only values returned by scalar functions. */
 function bytes(value: Prepared, row: number): Range | null {
   if (value.bytes) return value.bytes(row);
@@ -282,11 +314,21 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
     const value = ast.operator === '-' ? -ast.argument.value : ast.argument.value;
     return bind({type: 'Literal', value}, options, expected, vectorInput);
   }
+  if (ast.type === 'ArrayExpression') {
+    if (!expected) throw new Error('Array literals require a declared list type');
+    const materialize = compileArrayLiteral(ast, expected);
+    return {
+      field: new Field('literal', expected, false),
+      hasKernel: false,
+      prepare: (_batch, active) => vectorReader(materialize(active.length))
+    };
+  }
   if (ast.type === 'Identifier') {
     const index = options.inputSchema.fields.findIndex(field => field.name === ast.name);
     if (index < 0) throw new Error(`Unknown Arrow expression field: ${ast.name}`);
     const source = options.inputSchema.fields[index]!;
-    if (!vectorInput) typeKey(source.type);
+    const tuple = isTupleType(source.type);
+    if (!vectorInput && !tuple) typeKey(source.type);
     return {
       field: new Field(
         source.name,
@@ -295,15 +337,10 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
         source.metadata
       ),
       hasKernel: false,
-      prepare: batch =>
-        vectorInput
-          ? {
-              vector: batch.getChildAt(index)!,
-              get: () => {
-                throw new Error('Nested function arguments require a vector kernel');
-              }
-            }
-          : sourceReader(batch.getChildAt(index)!)
+      prepare: batch => {
+        const vector = batch.getChildAt(index)!;
+        return vectorInput || tuple ? vectorReader(vector) : sourceReader(vector);
+      }
     };
   }
   if (ast.type === 'Literal') {
@@ -321,6 +358,12 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
             : typeof value === 'bigint'
               ? new Int64()
               : new Utf8());
+    if (value === null && isTupleType(type))
+      return {
+        field: new Field('literal', type, true),
+        hasKernel: false,
+        prepare: (_batch, active) => vectorReader(nullTupleVector(type, active.length))
+      };
     validateValue(value, type);
     const rounded = roundToType(type)(value);
     const encoded = typeof value === 'string' ? encoder.encode(value) : undefined;
@@ -339,21 +382,51 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
   if (ast.type === 'ConditionalExpression') {
     const condition = bind(ast.test, options, bool);
     requireType(condition, 'bool');
-    let yes = bind(ast.consequent, options),
-      no = bind(ast.alternate, options);
-    if (isContextualLiteral(ast.consequent) && !DataType.isNull(no.field.type))
-      yes = bind(ast.consequent, options, no.field.type);
-    if (isContextualLiteral(ast.alternate)) no = bind(ast.alternate, options, yes.field.type);
-    sameType(yes, no);
-    const field = new Field('conditional', yes.field.type, yes.field.nullable || no.field.nullable);
+    // Bind non-literal branches first so tuple literals inherit an exact declared type.
+    let yes: Node, no: Node;
+    if (isContextualLiteral(ast.consequent) && !isContextualLiteral(ast.alternate)) {
+      no = bind(ast.alternate, options, expected, vectorInput);
+      yes = bind(ast.consequent, options, no.field.type, vectorInput);
+    } else {
+      yes = bind(ast.consequent, options, expected, vectorInput);
+      no = bind(
+        ast.alternate,
+        options,
+        isContextualLiteral(ast.alternate) && !DataType.isNull(yes.field.type)
+          ? yes.field.type
+          : expected,
+        vectorInput
+      );
+      if (isContextualLiteral(ast.consequent) && !DataType.isNull(no.field.type))
+        yes = bind(ast.consequent, options, no.field.type, vectorInput);
+    }
+    const tuple = isTupleType(yes.field.type);
+    const list = DataType.isList(yes.field.type);
+    if (tuple || list) {
+      if (physicalKey(yes.field.type) !== physicalKey(no.field.type))
+        throw new Error('Arrow expression operand types must match');
+      if (
+        !isContextualLiteral(ast.consequent) &&
+        !isContextualLiteral(ast.alternate) &&
+        extensionKey(yes.field) !== extensionKey(no.field)
+      )
+        throw new Error('Arrow expression branch extension metadata must match');
+    } else sameType(yes, no);
+    const metadata = isContextualLiteral(ast.consequent) ? no.field.metadata : yes.field.metadata;
+    const field = new Field(
+      'conditional',
+      yes.field.type,
+      yes.field.nullable || no.field.nullable,
+      metadata
+    );
     return {
       field,
-      hasKernel: condition.hasKernel || yes.hasKernel || no.hasKernel,
+      hasKernel: tuple || list || condition.hasKernel || yes.hasKernel || no.hasKernel,
       prepare(batch, active) {
         const test = condition.prepare(batch, active);
         // A vector kernel must receive its branch mask before it executes. Pure scalar paths stay lazy.
         const selected =
-          yes.hasKernel || no.hasKernel
+          tuple || list || yes.hasKernel || no.hasKernel
             ? active.map((value, row) => (value && test.get(row) === true ? 1 : 0))
             : undefined;
         const a = yes.prepare(batch, selected ?? active);
@@ -361,6 +434,39 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
           batch,
           selected ? active.map((value, row) => (value && !selected[row] ? 1 : 0)) : active
         );
+        if (list) {
+          const av = a.vector!,
+            bv = b.vector!;
+          if (!DataType.isDictionary(av.type) || !DataType.isDictionary(bv.type))
+            throw new Error('Conditional List values currently require array literal branches');
+          const left = av.data[0]!.dictionary!,
+            right = bv.data[0]!.dictionary!;
+          const dictionary = left.concat(right);
+          const indices = Int32Array.from(selected!, (value, row) =>
+            value ? Number(av.data[0]!.values[row]) : left.length + Number(bv.data[0]!.values[row])
+          );
+          return vectorReader(
+            makeVector(
+              makeData({
+                type: new Dictionary(field.type, new Int32()),
+                length: active.length,
+                data: indices,
+                dictionary
+              })
+            )
+          );
+        }
+        if (isTupleType(field.type)) {
+          validateTupleVector(a.vector!, yes.field, selected!);
+          validateTupleVector(
+            b.vector!,
+            no.field,
+            active.map((value, row) => (value && !selected![row] ? 1 : 0))
+          );
+          return vectorReader(
+            selectTupleVectors(field.type, a.vector!, b.vector!, selected!, active)
+          );
+        }
         const choose = (row: number) =>
           (selected ? selected[row] : test.get(row) === true) ? a : b;
         return {
@@ -619,9 +725,12 @@ function bindCall(ast: any, options: BindingOptions): Node {
     return bound;
   }) as Node[];
   const result = declaration.result;
-  typeKey(result.type);
-  const validate = createValueValidator(result.type);
-  const round = roundToType(result.type);
+  const tuple = isTupleType(result.type);
+  if (tuple && declaration.evaluateScalar)
+    throw new Error('Fixed-size list results require a vector-only function');
+  if (!tuple) typeKey(result.type);
+  const validate = tuple ? undefined : createValueValidator(result.type);
+  const round = tuple ? undefined : roundToType(result.type);
   const field = new Field(
     result.name,
     valueType(result.type),
@@ -652,11 +761,22 @@ function bindCall(ast: any, options: BindingOptions): Node {
             activeRows: mask.slice(),
             length: active.length
           });
-          if (vector.length !== active.length || typeKey(vector.type) !== typeKey(result.type))
+          if (
+            vector.length !== active.length ||
+            (tuple
+              ? physicalKey(vector.type) !== physicalKey(result.type)
+              : typeKey(vector.type) !== typeKey(result.type))
+          )
             throw new Error(`Invalid kernel result for ${name}`);
+          if (tuple) {
+            validateTupleVector(vector, result, mask);
+            return vectorReader(maskTupleVector(vector, mask));
+          }
           kernel = sourceReader(vector);
         }
       }
+      if (isTupleType(result.type))
+        return vectorReader(nullTupleVector(result.type, active.length));
       return {
         get: row => {
           let value: ArrowExpressionValue;
@@ -671,8 +791,8 @@ function bindCall(ast: any, options: BindingOptions): Node {
           }
           if (value === null && !result.nullable)
             throw new Error(`Function ${name} returned null for a non-nullable result`);
-          validate(value);
-          return round(value);
+          validate!(value);
+          return round!(value);
         }
       };
     }
@@ -696,7 +816,7 @@ function isSignedLiteral(ast: any): boolean {
   );
 }
 function isContextualLiteral(ast: any): boolean {
-  return ast.type === 'Literal' || isSignedLiteral(ast);
+  return ast.type === 'Literal' || ast.type === 'ArrayExpression' || isSignedLiteral(ast);
 }
 
 /** Geometry encoding/CRS metadata is part of a schema-bound vector function contract. */
