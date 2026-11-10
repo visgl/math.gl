@@ -116,3 +116,35 @@ test('contextual conditional arguments retain type checks and widening costs', (
       .outputField.type
   ).toEqual(new Float64());
 });
+
+test('literal conditionals bind to narrow prototypes and prefer Float64 when overloaded', () => {
+  const table = input();
+  for (const type of [new Int32(), new Float32()]) {
+    const functions = [{name: 'F', prototypes: [prototype([type])]}];
+    const compiled = compileArrowExpression('F(true ? 1 : 2)', {
+      inputSchema: table.schema,
+      functions
+    });
+    expect(compiled.outputField.type).toEqual(type);
+    expect([...compiled.evaluateTable(table)]).toEqual([1, 1, 1]);
+  }
+  const functions = [
+    {name: 'F', prototypes: [prototype([new Float32()]), prototype([new Float64()])]}
+  ];
+  expect(
+    compileArrowExpression('F(true ? 1 : 2)', {inputSchema: table.schema, functions}).outputField
+      .type
+  ).toEqual(new Float64());
+});
+test('numeric built-in conversions classify fractional and nonfinite Int64 errors', () => {
+  for (const value of [1.5, Infinity, NaN]) {
+    const table = new Table({x: vectorFromArray([value], new Float64())});
+    try {
+      compileArrowExpression('toInt64(x)', {inputSchema: table.schema}).evaluateTable(table);
+      throw new Error('expected failure');
+    } catch (error) {
+      expect(error).toBeInstanceOf(ArrowEvaluationError);
+      expect((error as ArrowEvaluationError).code).toBe('conversion');
+    }
+  }
+});

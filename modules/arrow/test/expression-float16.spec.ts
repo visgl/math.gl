@@ -17,6 +17,7 @@ import {
 import {isFloat16Array, NativeFloat16ArrayConstructor} from '@math.gl/core';
 import {parseSQLExpression, parseSQLPredicate, parseSQLQuery} from '@math.gl/core/sql';
 import {
+  ArrowEvaluationError,
   compileArrowArray,
   compileArrowExpression,
   compileArrowPredicate,
@@ -147,6 +148,11 @@ test.runIf(supported)(
         row === null ? null : Array.from(row)
       )
     ).toEqual([[1.0009765625], null]);
-    expect(() => narrowed.evaluateTable(wide)).toThrow('overflow');
+    expect(() => narrowed.evaluateTable(wide)).toThrow(ArrowEvaluationError);
+    try {
+      narrowed.evaluateTable(wide);
+    } catch (error) {
+      expect((error as ArrowEvaluationError).code).toBe('overflow');
+    }
   }
 );

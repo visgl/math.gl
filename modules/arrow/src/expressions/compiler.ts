@@ -712,9 +712,14 @@ function bindCall(ast: any, options: BindingOptions): Node {
           data.setValid(row, true);
           for (let column = 0; column < values.length; column++) {
             const index = row * values.length + column;
-            output[index] = values[column]!.get(row) as number;
-            if (name === 'array_float16' && !Number.isFinite(output[index]))
-              throw new RangeError('Float16 ARRAY cast overflow or non-finite value');
+            const value = values[column]!.get(row) as number;
+            output[index] = value;
+            if (
+              name === 'array_float16' &&
+              Number.isFinite(value) &&
+              !Number.isFinite(output[index])
+            )
+              throw new ArrowEvaluationError('overflow', 'Float16 ARRAY cast overflow');
           }
         }
         return vectorReader(vector);
@@ -772,6 +777,11 @@ function bindCall(ast: any, options: BindingOptions): Node {
             if (conversion) {
               const value = child.get(row);
               if (value === null) return null;
+              if (name === 'toInt64' && typeof value === 'number' && !Number.isInteger(value))
+                throw new ArrowEvaluationError(
+                  'conversion',
+                  'Int64 conversion requires a finite integer'
+                );
               const result = name === 'toInt64' ? BigInt(value as number | bigint) : Number(value);
               validate(result);
               return result;
@@ -979,7 +989,14 @@ function isSignedLiteral(ast: any): boolean {
   );
 }
 function isContextualLiteral(ast: any): boolean {
-  return ast.type === 'Literal' || ast.type === 'ArrayExpression' || isSignedLiteral(ast);
+  return (
+    ast.type === 'Literal' ||
+    ast.type === 'ArrayExpression' ||
+    isSignedLiteral(ast) ||
+    (ast.type === 'ConditionalExpression' &&
+      isContextualLiteral(ast.consequent) &&
+      isContextualLiteral(ast.alternate))
+  );
 }
 
 /** Array and null branches receive their list/tuple type from the selected prototype. */
