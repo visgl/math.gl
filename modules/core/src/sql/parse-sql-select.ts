@@ -108,7 +108,9 @@ export class SQLQueryReader {
     const remaining = this.sql.slice(this.position);
     if (
       !/^CAST\s*\(/i.test(remaining) &&
-      !/^(?:"(?:[^"]|"")*"|[A-Za-z_][A-Za-z0-9_]*)\s*::/.test(remaining)
+      !/^(?:"(?:[^"]|"")*"|[A-Za-z_][A-Za-z0-9_]*|'(?:[^']|'')*'|[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*::/.test(
+        remaining
+      )
     )
       return undefined;
     this.countToken();

@@ -120,3 +120,12 @@ test('postfix casts match CAST syntax in projections and predicates', () => {
     parseSQLPredicate('CAST(x AS INTEGER) >= :minimum', {preserveParameters: true})
   );
 });
+
+test.each(["'12'", '12', '-12.5', 'TRUE', 'NULL', '"a b"'])(
+  'postfix SELECT accepts the same scalar operands as CAST: %s',
+  value => {
+    expect(parseSQLQuery(`SELECT ${value}::INTEGER AS n`)).toEqual(
+      parseSQLQuery(`SELECT CAST(${value} AS INTEGER) AS n`)
+    );
+  }
+);
