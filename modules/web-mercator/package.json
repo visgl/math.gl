@@ -39,8 +39,5 @@
   ],
   "dependencies": {
     "@math.gl/core": "5.0.0-beta.6"
-  },
-  "devDependencies": {
-    "mock-browser": "^0.92.14"
   }
 }
