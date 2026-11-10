@@ -15,6 +15,7 @@ export function createFunctionLookup(
       throw new Error('Invalid Arrow function name');
     if (
       [
+        'cast',
         'isNull',
         'isNotNull',
         'parseNumber',

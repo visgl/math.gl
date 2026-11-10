@@ -47,7 +47,13 @@ function toExpression(predicate: ColumnarPredicate): Expression {
   const path = (predicate.args[0] as ColumnarPredicateProperty).property;
   if (Array.isArray(path) && path.length !== 1)
     throw new Error('Nested Arrow predicate paths are not supported yet');
-  const left = {type: 'Identifier', name: typeof path === 'string' ? path : path[0]} as Expression;
+  let left = {type: 'Identifier', name: typeof path === 'string' ? path : path[0]} as Expression;
+  for (const target of (predicate.args[0] as ColumnarPredicateProperty).casts ?? [])
+    left = {
+      type: 'CallExpression',
+      callee: {type: 'Identifier', name: 'cast'},
+      arguments: [left, {type: 'Literal', value: target}]
+    } as Expression;
   if (predicate.op === 'isNull')
     return {
       type: 'CallExpression',

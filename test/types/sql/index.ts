@@ -4,6 +4,7 @@
 
 import {
   parseSQLQuery,
+  parseSQLExpression,
   parseSQLSelect,
   parseSQLPredicate,
   bindSQLPredicate,
@@ -50,3 +51,9 @@ const unsupported: SQLCatalogQuery = {command: 'showDatabases'};
 // @ts-expect-error Parameters must be bound before using the default TableQuery.
 const unresolved: TableQuery = {where: predicate};
 void [controlled, incomplete, unsupported, unresolved];
+
+const castSelection: TableSelection = {
+  expression: parseSQLExpression('value::INTEGER'),
+  as: 'count'
+};
+void castSelection;

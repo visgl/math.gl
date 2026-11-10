@@ -128,3 +128,22 @@ const result = await query("SHOW TABLES FROM warehouse", {
 `arrowTable` and `sources` are application-provided inputs. The query engine resolves source names,
 validates columns, and executes the result. math.gl does not import loaders.gl, and moving the
 loaders.gl parser implementation to this package is a separate migration.
+
+## CAST expressions
+
+`parseSQLExpression('CAST(value AS INTEGER)')` returns a core expression AST suitable for
+`compileArrowExpression` from `@math.gl/arrow/expressions`. The optional SQL module itself has no
+Arrow dependency. `SELECT CAST(value AS INTEGER) AS count` returns a selection with an `expression`
+AST and `as` alias. Existing plain-column selections retain their shapes.
+
+Supported SQL targets: SMALLINT, INTEGER/INT, BIGINT, REAL, DOUBLE PRECISION, BOOLEAN,
+VARCHAR and CHARACTER VARYING. CAST accepts columns, scalar literals and nested casts.
+`WHERE CAST(value AS INTEGER) >= :minimum` records ordered `casts` on the source property;
+executors must apply those conversions before testing the predicate. Binding, validation, copying
+and column discovery preserve this information. Arrow's predicate evaluator executes these casts.
+
+Unsupported targets/modifiers fail explicitly. This subset does not accept DECIMAL, date/time,
+length/precision modifiers, arbitrary arithmetic inside CAST, or casts on predicate scalar
+values. See [Arrow expression conversion rules](../../arrow/expressions/README.md#sql-cast).
+
+Postfix `value::TYPE` and chained casts are also supported with the same conversion rules.

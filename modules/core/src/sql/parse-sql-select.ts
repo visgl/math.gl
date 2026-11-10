@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import type {Expression} from '../expressions/index';
+import {SQLExpressionReader} from './parse-sql-expression';
 import type {ColumnarPredicate} from '../expressions/columnar-predicate';
 import type {TableQuery, TableSelection, TableReference} from './query-types';
 
@@ -45,8 +47,15 @@ export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}
   if (!reader.takeSymbol('*')) {
     select = [];
     do {
-      const column = reader.identifier();
-      select.push(reader.takeKeyword('AS') ? {column, as: reader.identifier()} : column);
+      const expression = reader.castExpression();
+      if (expression)
+        select.push(
+          reader.takeKeyword('AS') ? {expression, as: reader.identifier()} : {expression}
+        );
+      else {
+        const column = reader.identifier();
+        select.push(reader.takeKeyword('AS') ? {column, as: reader.identifier()} : column);
+      }
     } while (reader.takeSymbol(','));
   }
   let from: TableReference | undefined;
@@ -91,6 +100,22 @@ export class SQLQueryReader {
     if (typeof sql !== 'string' || !sql.trim() || sql.length > MAXIMUM_SQL_LENGTH)
       throw new Error('SQL query requires a non-empty statement of at most 65536 characters.');
     this.sql = sql;
+  }
+
+  /** Parses only CAST projections; ordinary selections retain their existing shape. */
+  castExpression(): Expression | undefined {
+    this.skipWhitespace();
+    const remaining = this.sql.slice(this.position);
+    if (
+      !/^CAST\s*\(/i.test(remaining) &&
+      !/^(?:"(?:[^"]|"")*"|[A-Za-z_][A-Za-z0-9_]*)\s*::/.test(remaining)
+    )
+      return undefined;
+    this.countToken();
+    const reader = new SQLExpressionReader(this.sql.slice(this.position));
+    const expression = reader.expression();
+    this.position += reader.position;
+    return expression;
   }
 
   /** Consumes one mandatory keyword. */

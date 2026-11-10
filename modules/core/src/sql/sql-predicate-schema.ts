@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {isColumnarScalarType, COLUMNAR_SCALAR_TYPES} from '../expressions/scalar-type';
+
 import {
   isSQLPredicateParameter,
   type SQLPredicate,
@@ -34,7 +36,13 @@ export const SQL_PREDICATE_JSON_SCHEMA = {
       required: ['property'],
       properties: {
         property: {type: 'string', minLength: 1},
-        quoted: {type: 'boolean'}
+        quoted: {type: 'boolean'},
+        casts: {
+          type: 'array',
+          minItems: 1,
+          maxItems: 64,
+          items: {enum: COLUMNAR_SCALAR_TYPES as readonly string[]}
+        }
       },
       additionalProperties: false
     },
@@ -215,13 +223,22 @@ function validatePredicateNode(
 function validatePredicateProperty(value: unknown, path: string): void {
   if (
     !isRecord(value) ||
-    !hasAllowedKeys(value, ['property', 'quoted']) ||
+    !hasAllowedKeys(value, ['property', 'quoted', 'casts']) ||
     typeof value['property'] !== 'string' ||
     value['property'].length === 0 ||
     (value['quoted'] !== undefined && typeof value['quoted'] !== 'boolean')
   ) {
     throw new Error(`SQL predicate ${path} requires a non-empty property reference`);
   }
+  const casts = value['casts'];
+  if (
+    casts !== undefined &&
+    (!Array.isArray(casts) ||
+      !casts.length ||
+      casts.length > 64 ||
+      Array.from(casts).some(type => !isColumnarScalarType(type)))
+  )
+    throw new Error(`SQL predicate ${path} has invalid casts`);
 }
 
 /** Validates one structured-cloneable predicate scalar. */

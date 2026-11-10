@@ -47,6 +47,7 @@ for (const name of expected) {
     }
     if (specifier === '@math.gl/core/sql') {
       for (const sql of [imported, required]) {
+        assert.equal(sql.parseSQLExpression('value::INTEGER').type, 'CallExpression');
         assert.deepEqual(sql.parseSQLQuery('SHOW TABLES FROM warehouse'), {command: 'showTables', from: 'warehouse'});
         assert.deepEqual(sql.parseSQLSelect('SELECT city AS name LIMIT 2'), {select: [{column: 'city', as: 'name'}], limit: 2});
         const predicate = sql.parseSQLPredicate('value >= :min', {preserveParameters: true});
