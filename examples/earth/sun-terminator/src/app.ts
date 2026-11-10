@@ -419,6 +419,7 @@ export function mountSunTerminator(root: HTMLDivElement) {
           {signal: transitionAbort.signal}
         );
       } catch (error) {
+        queuedView = null;
         if (!disposed) {
           view.value = activeView;
           status.textContent = error.message;

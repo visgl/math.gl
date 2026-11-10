@@ -1,7 +1,11 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {prepareMapSurfaceMesh, type MapSurfaceMeshOptions} from '../discontinuous/map-surface-mesh';
+import {
+  prepareMapSurfaceMesh,
+  type MapSurfaceMesh,
+  type MapSurfaceMeshOptions
+} from '../discontinuous/map-surface-mesh';
 import type {GeographicPosition, MapBounds} from '../discontinuous/map-layout';
 
 export type ProjectionSurfaceOptions = MapSurfaceMeshOptions & {
@@ -15,7 +19,7 @@ export type ProjectionSurfaceOptions = MapSurfaceMeshOptions & {
 export function prepareProjectionSurface(
   projection: {project(position: readonly number[]): readonly number[]},
   options: ProjectionSurfaceOptions
-) {
+): MapSurfaceMesh {
   const [west, south, east, north] = options.extent;
   const scale = options.scale ?? 1;
   if (

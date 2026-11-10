@@ -99,101 +99,102 @@ export function prepareMapSurfaceMesh(
     const southPole =
       Boolean(map.projectPoint([origin, -90], region.id)) &&
       map.regions.filter(r => map.projectPoint([origin, -90], r.id)).length === 1;
-    const west = Math.max(
-      northPole || southPole ? origin - 180 : Math.min(...boundary.map(p => p[0])),
-      options.textureBounds ? wrap(raster[0]) : -Infinity
-    );
-    const east = Math.min(
-      northPole || southPole ? origin + 180 : Math.max(...boundary.map(p => p[0])),
-      options.textureBounds ? wrap(raster[0]) + raster[2] - raster[0] : Infinity
-    );
-    const south = Math.max(southPole ? -90 : Math.min(...boundary.map(p => p[1])), raster[1]);
-    const north = Math.min(northPole ? 90 : Math.max(...boundary.map(p => p[1])), raster[3]);
-    if (!(west < east && south < north)) continue;
-    const columns = Math.ceil((east - west) / steps[0]),
-      rows = Math.ceil((north - south) / steps[1]);
-    if ((columns + 1) * (rows + 1) > maxVertices)
-      throw new RangeError('Surface grid exceeds vertex budget');
-    const grid: ({geographic: GeographicPosition; position: readonly number[]} | null)[] = [];
-    for (let y = 0; y <= rows; y++)
-      for (let x = 0; x <= columns; x++) {
-        const geographic: GeographicPosition = [
-          west + ((east - west) * x) / columns,
-          south + ((north - south) * y) / rows
-        ];
-        const point = map.projectPoint(geographic, region.id);
-        grid.push(
-          point && point.position.every(Number.isFinite)
-            ? {geographic, position: point.position}
-            : null
-        );
+    const regionWest = northPole || southPole ? origin - 180 : Math.min(...boundary.map(p => p[0]));
+    const regionEast = northPole || southPole ? origin + 180 : Math.max(...boundary.map(p => p[0]));
+    const intervals: {west: number; east: number; shift: number}[] = [];
+    if (options.textureBounds) {
+      const first = Math.ceil((regionWest - raster[2]) / 360);
+      const last = Math.floor((regionEast - raster[0]) / 360);
+      for (let copy = first; copy <= last; copy++) {
+        const shift = copy * 360;
+        const west = Math.max(regionWest, raster[0] + shift);
+        const east = Math.min(regionEast, raster[2] + shift);
+        if (west < east) intervals.push({west, east, shift});
       }
-    const sharedVertices = new Map<string, number>();
-    for (let y = 0; y < rows; y++)
-      for (let x = 0; x < columns; x++) {
-        const a = y * (columns + 1) + x,
-          b = a + 1,
-          c = a + columns + 1,
-          d = c + 1;
-        for (const indices of [
-          [a, b, c],
-          [b, d, c]
-        ]) {
-          const triangle = indices.map(i => grid[i]);
-          if (!triangle.every(Boolean)) continue;
-          if (
-            options.maxEdgeLength !== undefined &&
-            triangle.some(
-              (p, i) =>
-                Math.hypot(
-                  p!.position[0] - triangle[(i + 1) % 3]!.position[0],
-                  p!.position[1] - triangle[(i + 1) % 3]!.position[1]
-                ) > options.maxEdgeLength!
+    } else intervals.push({west: regionWest, east: regionEast, shift: 0});
+    for (const {west, east, shift} of intervals) {
+      const south = Math.max(southPole ? -90 : Math.min(...boundary.map(p => p[1])), raster[1]);
+      const north = Math.min(northPole ? 90 : Math.max(...boundary.map(p => p[1])), raster[3]);
+      if (!(west < east && south < north)) continue;
+      const columns = Math.ceil((east - west) / steps[0]),
+        rows = Math.ceil((north - south) / steps[1]);
+      if ((columns + 1) * (rows + 1) > maxVertices)
+        throw new RangeError('Surface grid exceeds vertex budget');
+      const grid: ({geographic: GeographicPosition; position: readonly number[]} | null)[] = [];
+      for (let y = 0; y <= rows; y++)
+        for (let x = 0; x <= columns; x++) {
+          const geographic: GeographicPosition = [
+            west + ((east - west) * x) / columns,
+            south + ((north - south) * y) / rows
+          ];
+          const point = map.projectPoint(geographic, region.id);
+          grid.push(
+            point && point.position.every(Number.isFinite)
+              ? {geographic, position: point.position}
+              : null
+          );
+        }
+      const sharedVertices = new Map<string, number>();
+      for (let y = 0; y < rows; y++)
+        for (let x = 0; x < columns; x++) {
+          const a = y * (columns + 1) + x,
+            b = a + 1,
+            c = a + columns + 1,
+            d = c + 1;
+          for (const indices of [
+            [a, b, c],
+            [b, d, c]
+          ]) {
+            const triangle = indices.map(i => grid[i]);
+            if (!triangle.every(Boolean)) continue;
+            if (
+              options.maxEdgeLength !== undefined &&
+              triangle.some(
+                (p, i) =>
+                  Math.hypot(
+                    p!.position[0] - triangle[(i + 1) % 3]!.position[0],
+                    p!.position[1] - triangle[(i + 1) % 3]!.position[1]
+                  ) > options.maxEdgeLength!
+              )
             )
-          )
-            continue;
-          const longitudeOffset = options.textureBounds
-            ? 0
-            : 360 *
-              Math.max(
-                0,
-                Math.ceil((-180 - Math.min(...triangle.map(p => p!.geographic[0]))) / 360)
-              );
-          for (const gridIndex of indices) {
-            const key = gridIndex + ':' + longitudeOffset;
-            if (sharedVertices.has(key)) {
-              outputIndices.push(sharedVertices.get(key)!);
               continue;
+            const longitudeOffset = options.textureBounds
+              ? 0
+              : 360 *
+                Math.max(
+                  0,
+                  Math.ceil((-180 - Math.min(...triangle.map(p => p!.geographic[0]))) / 360)
+                );
+            for (const gridIndex of indices) {
+              const key = gridIndex + ':' + longitudeOffset;
+              if (sharedVertices.has(key)) {
+                outputIndices.push(sharedVertices.get(key)!);
+                continue;
+              }
+              if (positions.length / 3 >= maxVertices)
+                throw new RangeError('Surface exceeds vertex budget');
+              const index = positions.length / 3;
+              sharedVertices.set(key, index);
+              outputIndices.push(index);
+              const point = grid[gridIndex];
+              const [px, py] = point!.position;
+              positions.push(px, py, 0);
+              partIds.push(part);
+              const lon = point!.geographic[0];
+              const textureLon = options.textureBounds ? lon - shift : lon + longitudeOffset;
+              texCoords.push(
+                (textureLon - raster[0]) / (raster[2] - raster[0]),
+                (latitude(raster[3]) - latitude(point!.geographic[1])) /
+                  (latitude(raster[3]) - latitude(raster[1]))
+              );
+              bounds[0] = Math.min(bounds[0], px);
+              bounds[1] = Math.min(bounds[1], py);
+              bounds[2] = Math.max(bounds[2], px);
+              bounds[3] = Math.max(bounds[3], py);
             }
-            if (positions.length / 3 >= maxVertices)
-              throw new RangeError('Surface exceeds vertex budget');
-            const index = positions.length / 3;
-            sharedVertices.set(key, index);
-            outputIndices.push(index);
-            const point = grid[gridIndex];
-            const [px, py] = point!.position;
-            positions.push(px, py, 0);
-            partIds.push(part);
-            const lon = point!.geographic[0];
-            const textureLon = options.textureBounds
-              ? (() => {
-                  const center = (raster[0] + raster[2]) / 2;
-                  const delta = ((lon - center + 540) % 360) - 180;
-                  return center + (delta === -180 && lon > center ? 180 : delta);
-                })()
-              : lon + longitudeOffset;
-            texCoords.push(
-              (textureLon - raster[0]) / (raster[2] - raster[0]),
-              (latitude(raster[3]) - latitude(point!.geographic[1])) /
-                (latitude(raster[3]) - latitude(raster[1]))
-            );
-            bounds[0] = Math.min(bounds[0], px);
-            bounds[1] = Math.min(bounds[1], py);
-            bounds[2] = Math.max(bounds[2], px);
-            bounds[3] = Math.max(bounds[3], py);
           }
         }
-      }
+    }
   }
   const indices = Uint32Array.from(outputIndices);
   return {

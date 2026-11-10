@@ -96,6 +96,30 @@ try {
   await page.waitForFunction(() => window.navigationDeck.getViewports()[0].id === 'earth-imoll');
   await page.locator('[data-role=view]').selectOption('isinu');
   await page.waitForFunction(() => window.navigationDeck.getViewports()[0].id === 'earth-isinu');
+  // A failed preparation must discard choices queued during that attempt.
+  await page.evaluate(() => {
+    const viewport = window.navigationDeck.getViewports()[0];
+    const width = viewport.width;
+    Object.defineProperty(viewport, 'width', {
+      configurable: true,
+      get() {
+        if (document.querySelector('[role=status]').textContent.startsWith('Preparing projection')) {
+          Object.defineProperty(viewport, 'width', {value: width, configurable: true, writable: true});
+          const select = document.querySelector('[data-role=view]');
+          select.value = 'robin';
+          select.dispatchEvent(new Event('change'));
+          throw new Error('Injected transition preparation failure');
+        }
+        return width;
+      }
+    });
+  });
+  await page.locator('[data-role=view]').selectOption('globe');
+  await page.locator('[role=status]').filter({hasText: 'Injected transition preparation failure'}).waitFor();
+  assert.equal(await page.locator('[data-role=view]').inputValue(), 'isinu');
+  await page.locator('[data-role=view]').selectOption('map');
+  await page.waitForFunction(() => window.navigationDeck.getViewports()[0].id === 'earth-map');
+  assert.equal(await page.locator('[data-role=view]').inputValue(), 'map');
   assert.deepEqual(errors, []);
   await page.evaluate(() => window.disposeExample());
   assert.equal(await page.locator('canvas').count(), 0);

@@ -60,8 +60,21 @@ function* createSurfaceMesh(
     groupIndices: number[] = [];
   const groups = new Map<
     string,
-    {index: number; pairs: [readonly number[], readonly number[]][]}
+    {
+      index: number;
+      count: number;
+      centers: number[];
+      dot: number;
+      cross: number;
+      focusDistance: number;
+    }
   >();
+  const partTokens = [new Map<string | number, number>(), new Map<string | number, number>()];
+  const seamTokens = [new Map<string | number, number>(), new Map<string | number, number>()];
+  const token = (tokens: Map<string | number, number>, value: string | number) => {
+    if (!tokens.has(value)) tokens.set(value, tokens.size);
+    return tokens.get(value)!;
+  };
   const vertices = new Map<string, number>(),
     indices: number[] = [];
   const width = source.width || 1000,
@@ -85,11 +98,19 @@ function* createSurfaceMesh(
     if (!va && !vb) return;
     if (indices.length / 3 >= (options.maxTriangles ?? 2000000))
       throw new RangeError('Transition triangle budget exceeded');
-    const key = `${va ? (a[0].part ?? 0) : 'none'}:${vb ? (b[0].part ?? 0) : 'none'}`;
-    if (!groups.has(key)) groups.set(key, {index: groups.size, pairs: []});
+    const key = `${va ? token(partTokens[0], a[0].part ?? 0) : -1}:${vb ? token(partTokens[1], b[0].part ?? 0) : -1}`;
+    if (!groups.has(key))
+      groups.set(key, {
+        index: groups.size,
+        count: 0,
+        centers: [0, 0, 0, 0],
+        dot: 0,
+        cross: 0,
+        focusDistance: Infinity
+      });
     const group = groups.get(key);
     triangle.forEach(([x, y], i) => {
-      const vertexKey = `${x},${y},${group.index},${va ? (a[i].seam ?? 0) : 0}:${vb ? (b[i].seam ?? 0) : 0}`;
+      const vertexKey = `${x},${y},${group.index},${va ? token(seamTokens[0], a[i].seam ?? 0) : -1}:${vb ? token(seamTokens[1], b[i].seam ?? 0) : -1}`;
       if (vertices.has(vertexKey)) {
         indices.push(vertices.get(vertexKey));
         return;
@@ -106,10 +127,25 @@ function* createSurfaceMesh(
       uv.push((x + 180) / 360, (90 - y) / 180);
       lifetime.push(va ? 1 : 0, vb ? 1 : 0);
       groupIndices.push(group.index);
-      if (va && vb && a[i].front !== false && b[i].front !== false) group.pairs.push([p, q]);
+      if (va && vb && a[i].front !== false && b[i].front !== false) {
+        const n = ++group.count;
+        const dx = p[0] - group.centers[0],
+          dy = p[1] - group.centers[1];
+        group.centers[0] += dx / n;
+        group.centers[1] += dy / n;
+        group.centers[2] += (q[0] - group.centers[2]) / n;
+        group.centers[3] += (q[1] - group.centers[3]) / n;
+        group.dot += dx * (q[0] - group.centers[2]) + dy * (q[1] - group.centers[3]);
+        group.cross += dx * (q[1] - group.centers[3]) - dy * (q[0] - group.centers[2]);
+        group.focusDistance = Math.min(
+          group.focusDistance,
+          Math.hypot(p[0], p[1]) + Math.hypot(q[0], q[1])
+        );
+      }
     });
   };
-  const refine = (lon: number, lat: number, size: number, depth: number) => {
+  function* refine(lon: number, lat: number, size: number, depth: number): Generator<void, void> {
+    yield;
     const sector = lon + size / 2;
     const coordinates = [
       [lon, lat],
@@ -179,63 +215,43 @@ function* createSurfaceMesh(
     }
     if (split && depth < maxDepth) {
       const half = size / 2;
-      refine(lon, lat, half, depth + 1);
-      refine(lon + half, lat, half, depth + 1);
-      refine(lon, lat + half, half, depth + 1);
-      refine(lon + half, lat + half, half, depth + 1);
+      yield* refine(lon, lat, half, depth + 1);
+      yield* refine(lon + half, lat, half, depth + 1);
+      yield* refine(lon, lat + half, half, depth + 1);
+      yield* refine(lon + half, lat + half, half, depth + 1);
     } else {
       emit([coordinates[0], coordinates[1], coordinates[2]], sector);
       emit([coordinates[1], coordinates[3], coordinates[2]], sector);
     }
-  };
+  }
   for (let lat = -90; lat < 90; lat += 2)
     for (let lon = -180; lon < 180; lon += 2) {
-      refine(lon, lat, 2, 0);
+      yield* refine(lon, lat, 2, 0);
       yield;
     }
 
   // Separate rigid motion of each cut piece from its remaining deformation.
-  const motions = Array.from(groups.values()).map(group => {
-    const pairs = group.pairs,
-      n = pairs.length;
-    if (!n) return [0, 0, 0, 0, 0];
-    const centers = [0, 0, 0, 0];
-    for (const [a, b] of pairs) {
-      centers[0] += a[0] / n;
-      centers[1] += a[1] / n;
-      centers[2] += b[0] / n;
-      centers[3] += b[1] / n;
-    }
-    let dot = 0,
-      cross = 0;
-    for (const [a, b] of pairs) {
-      const x = a[0] - centers[0],
-        y = a[1] - centers[1];
-      const u = b[0] - centers[2],
-        v = b[1] - centers[3];
-      dot += x * u + y * v;
-      cross += x * v - y * u;
-    }
-    return [...centers, Math.atan2(cross, dot)];
-  });
-  // Keep the viewed location fixed while the surrounding piece rotates.
+  const motions: number[][] = [];
   let focusGroup = -1,
     focusDistance = Infinity;
-  for (const group of groups.values())
-    for (const [a, b] of group.pairs) {
-      const distance = Math.hypot(a[0], a[1]) + Math.hypot(b[0], b[1]);
-      if (distance < focusDistance) {
-        focusDistance = distance;
-        focusGroup = group.index;
-      }
+  for (const group of groups.values()) {
+    motions.push([...group.centers, Math.atan2(group.cross, group.dot)]);
+    if (group.focusDistance < focusDistance) {
+      focusDistance = group.focusDistance;
+      focusGroup = group.index;
     }
+    yield;
+  }
   if (focusGroup >= 0 && focusDistance < 100) motions[focusGroup].fill(0, 0, 4);
   const pieceCenters = new Float32Array(groupIndices.length * 4),
     pieceAngles = new Float32Array(groupIndices.length);
-  groupIndices.forEach((group, i) => {
-    pieceCenters.set(motions[group].slice(0, 4), i * 4);
-    pieceAngles[i] = motions[group][4];
-  });
+  for (let i = 0; i < groupIndices.length; i++) {
+    const motion = motions[groupIndices[i]];
+    for (let k = 0; k < 4; k++) pieceCenters[i * 4 + k] = motion[k];
+    pieceAngles[i] = motion[4];
+    if (i % 256 === 0) yield;
+  }
+
   return {
     positions: new Float64Array(from),
     destination: new Float32Array(to),
@@ -304,7 +320,8 @@ function* buildMorphMesh(
     wrapped.maxEdgeLength = endpoint.maxEdgeLength;
     return wrapped;
   };
-  if (copies.length === 1) return yield* createSurfaceMesh(source, target, options);
+  if (copies.length === 1 && copies[0] === 0)
+    return yield* createSurfaceMesh(source, target, options);
   const meshes: MapTransitionMesh[] = [];
   let remainingVertices = vertices,
     remainingTriangles = triangles;
@@ -318,31 +335,37 @@ function* buildMorphMesh(
     remainingVertices -= mesh.positions.length / 3;
     remainingTriangles -= mesh.vertexCount / 3;
   }
-  const merge = <K extends Exclude<keyof MapTransitionMesh, 'vertexCount'>>(
+  function* merge<K extends Exclude<keyof MapTransitionMesh, 'vertexCount'>>(
     key: K
-  ): MapTransitionMesh[K] => {
+  ): Generator<void, MapTransitionMesh[K]> {
     const TypedArray = meshes[0][key].constructor as {new (length: number): MapTransitionMesh[K]};
     const result = new TypedArray(meshes.reduce((sum, mesh) => sum + mesh[key].length, 0));
     let offset = 0,
       vertexOffset = 0;
     for (const mesh of meshes) {
       if (key === 'indices') {
-        for (let i = 0; i < mesh.indices.length; i++)
+        for (let i = 0; i < mesh.indices.length; i++) {
           result[offset + i] = mesh.indices[i] + vertexOffset;
-      } else result.set(mesh[key], offset);
+          if (i % 4096 === 0) yield;
+        }
+      } else
+        for (let i = 0; i < mesh[key].length; i += 4096) {
+          result.set(mesh[key].subarray(i, i + 4096), offset + i);
+          yield;
+        }
       offset += mesh[key].length;
       vertexOffset += mesh.positions.length / 3;
     }
     return result;
-  };
+  }
   return {
-    positions: merge('positions'),
-    destination: merge('destination'),
-    texCoords: merge('texCoords'),
-    lifetime: merge('lifetime'),
-    pieceCenters: merge('pieceCenters'),
-    pieceAngles: merge('pieceAngles'),
-    indices: merge('indices'),
+    positions: yield* merge('positions'),
+    destination: yield* merge('destination'),
+    texCoords: yield* merge('texCoords'),
+    lifetime: yield* merge('lifetime'),
+    pieceCenters: yield* merge('pieceCenters'),
+    pieceAngles: yield* merge('pieceAngles'),
+    indices: yield* merge('indices'),
     vertexCount: meshes.reduce((sum, mesh) => sum + mesh.vertexCount, 0)
   };
 }

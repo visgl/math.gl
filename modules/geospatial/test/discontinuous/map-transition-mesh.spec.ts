@@ -70,3 +70,70 @@ test('transition work budgets reject instead of returning partial buffers', asyn
     prepareMapTransitionMeshAsync(identity, identity, {maxTriangles: 1})
   ).rejects.toBeInstanceOf(RangeError);
 });
+
+test('a single nonzero world copy receives its requested screen offset', () => {
+  const endpoint: MapTransitionEndpoint = Object.assign(identity, {
+    worldWidth: 500,
+    wrapCopies: [1]
+  });
+  const mesh = prepareMapTransitionMesh(endpoint, endpoint, {maxDepth: 0});
+  let left = Infinity,
+    right = -Infinity;
+  for (let i = 0; i < mesh.positions.length; i += 3) {
+    left = Math.min(left, mesh.positions[i]);
+    right = Math.max(right, mesh.positions[i]);
+  }
+  expect([left, right]).toEqual([320, 680]);
+  delete endpoint.worldWidth;
+  delete endpoint.wrapCopies;
+});
+
+test('part and seam IDs preserve their types and tuple boundaries', () => {
+  const source: MapTransitionEndpoint = (x, y) => ({
+    position: [x + 1000, y + 1000, 0],
+    inside: true,
+    part: x < 0 ? 'a:b' : 'a'
+  });
+  const target: MapTransitionEndpoint = (x, y) => ({
+    position: [x + 2000, y + 3000, 0],
+    inside: true,
+    part: x < 0 ? 'c' : 'b:c'
+  });
+  const mesh = prepareMapTransitionMesh(source, target, {maxDepth: 0});
+  expect(new Set(Array.from(mesh.pieceCenters).filter((_, i) => i % 4 === 0)).size).toBe(2);
+  const a: MapTransitionEndpoint = (x, y, sector = x) => ({
+    position: [x + (sector < 0 ? -500 : 500), y + 1000, 0],
+    inside: true,
+    seam: sector < 0 ? 'a:b' : 'a'
+  });
+  const b: MapTransitionEndpoint = (x, y, sector = x) => ({
+    position: [x + (sector < 0 ? -500 : 500), y + 1000, 0],
+    inside: true,
+    seam: sector < 0 ? 'c' : 'b:c'
+  });
+  const cut = prepareMapTransitionMesh(a, b, {maxDepth: 0});
+  const banks = new Set<number>();
+  for (let i = 0; i < cut.texCoords.length; i += 2)
+    if (cut.texCoords[i] === 0.5) banks.add(cut.positions[(i / 2) * 3]);
+  expect(banks).toEqual(new Set([-500, 500]));
+});
+
+test('cancellation is checked inside a deeply refined cell', async () => {
+  const controller = new AbortController();
+  let calls = 0;
+  const endpoint: MapTransitionEndpoint = Object.assign(
+    (x: number, y: number) => {
+      if (++calls === 50) controller.abort();
+      return {position: [x * 1000, y * 1000, 0] as const, inside: true};
+    },
+    {width: 1000000, height: 1000000}
+  );
+  await expect(
+    prepareMapTransitionMeshAsync(endpoint, endpoint, {
+      maxDepth: 12,
+      error: 1e-8,
+      signal: controller.signal
+    })
+  ).rejects.toHaveProperty('name', 'AbortError');
+  expect(calls).toBeLessThan(100);
+});

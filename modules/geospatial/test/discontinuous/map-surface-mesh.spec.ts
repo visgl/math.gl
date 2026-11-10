@@ -90,3 +90,31 @@ test('built-in H3 chart maps restore without callbacks and preserve radius scali
     expect(inverse[1]).toBeCloseTo(position[1], 8);
   }
 });
+
+test('explicit whole-world rasters and shifted banks preserve chart coverage', () => {
+  const projection = {project: (p: readonly number[]) => p};
+  const east = prepareProjectionSurface(projection, {
+    extent: [90, -10, 110, 10],
+    textureBounds: [-180, -90, 180, 90],
+    maxAngularStep: 2
+  });
+  expect(east.bounds).toEqual([90, -10, 110, 10]);
+  const shifted = prepareProjectionSurface(projection, {
+    extent: [-10, -10, 10, 10],
+    textureBounds: [350, -20, 370, 20],
+    maxAngularStep: 2
+  });
+  expect(shifted.bounds).toEqual([-10, -10, 10, 10]);
+  expect(Math.min(...shifted.texCoords)).toBe(0);
+  expect(Math.max(...shifted.texCoords)).toBe(1);
+  const split = prepareProjectionSurface(projection, {
+    extent: [-180, -10, 180, 10],
+    textureBounds: [170, -10, 190, 10],
+    maxAngularStep: 2
+  });
+  expect(split.bounds).toEqual([-180, -10, 180, 10]);
+  for (let i = 0; i < split.indices.length; i += 3) {
+    const xs = [0, 1, 2].map(j => split.positions[split.indices[i + j] * 3]);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeLessThanOrEqual(2);
+  }
+});
