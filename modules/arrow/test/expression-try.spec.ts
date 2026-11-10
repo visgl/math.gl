@@ -3,10 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
 import {
+  Dictionary,
   Field,
   FixedSizeList,
   Float32,
   Float64,
+  Int8,
   Int32,
   Schema,
   Table,
@@ -277,4 +279,26 @@ test('TRY catches finite arithmetic overflow but not unrepresentable typed liter
     null
   ]);
   expect(() => compileArrowExpression('TRY(x + 1e40)', options)).toThrow('literal overflow');
+});
+
+test('recovery cannot turn overflowing tuple literals or decoded values into valid arguments', () => {
+  const options = {inputSchema: table.schema};
+  const f = (type: Field['type']): ArrowTableFunction => ({
+    name: 'F',
+    prototypes: [
+      {
+        arguments: [new Field('arg', type, true)],
+        result: new Field('value', new Float64()),
+        evaluate: ([input]) => input!
+      }
+    ]
+  });
+  const tuple = new FixedSizeList(1, new Field('value', new Float32(), false));
+  expect(() =>
+    compileArrowExpression('F(TRY([1e40]))', {...options, functions: [f(tuple)]})
+  ).toThrow('literal overflow');
+  const dictionary = new Dictionary(new Float64(), new Int8());
+  expect(() =>
+    compileArrowExpression('F(TRY(null))', {...options, functions: [f(dictionary)]})
+  ).toThrow('dictionary-encoded');
 });

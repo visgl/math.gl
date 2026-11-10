@@ -15,7 +15,7 @@ import {
   type FixedSizeList,
   type List
 } from 'apache-arrow';
-import {float16Values} from './float16';
+import {float16Values, roundFloat16} from './float16';
 import {ColumnReader, typeKey, validateValue} from './buffers';
 import type {ArrowExpressionValue} from './types';
 
@@ -140,6 +140,13 @@ export function compileArrayLiteral(ast: any, type: DataType): (length: number) 
     throw new Error('Array literal length must match its FixedSizeList type');
   if (DataType.isFixedSizeList(type) && !isTupleType(type))
     throw new Error('Fixed-size array literals require non-nullable numeric elements');
+  const round = DataType.isFloat(child.type)
+    ? child.type.precision === Precision.HALF
+      ? roundFloat16()
+      : child.type.precision === Precision.SINGLE
+        ? Math.fround
+        : undefined
+    : undefined;
   const values = Array.from(ast.elements, (element: any): ArrowExpressionValue => {
     let value: ArrowExpressionValue;
     if (element?.type === 'Literal') value = element.value;
@@ -154,6 +161,12 @@ export function compileArrayLiteral(ast: any, type: DataType): (length: number) 
     if (value === null && !child.nullable)
       throw new Error('Array literal contains a null non-nullable element');
     validateValue(value, child.type);
+    if (round && typeof value === 'number') {
+      const rounded = round(value);
+      if (Number.isFinite(value) && !Number.isFinite(rounded))
+        throw new Error(`Numeric literal overflow for ${child.type}`);
+      return rounded;
+    }
     return value;
   });
   const literal = vectorFromArray([values], listType);

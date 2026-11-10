@@ -742,6 +742,8 @@ function bindRecovery(
   options: BindingOptions,
   expected?: DataType
 ): Node {
+  if (expected && DataType.isDictionary(expected))
+    throw new Error('Dictionary function arguments require a dictionary-encoded source column');
   if (name === 'TRY' ? expressions.length < 1 || expressions.length > 2 : !expressions.length)
     throw new Error(`${name} has an invalid argument count`);
   const typed = expressions.findIndex(expression => !isContextualLiteral(expression));
