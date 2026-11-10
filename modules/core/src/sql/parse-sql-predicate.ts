@@ -9,9 +9,11 @@ import type {
   SQLPredicateParameterValues,
   SQLPredicateParserOptions,
   SQLPredicateProperty,
+  SQLPredicateScalar,
   SQLPredicateValue
 } from './sql-predicate-types';
 import {validateSQLPredicate} from './sql-predicate-schema';
+import {isColumnarPredicateValue} from '../expressions/columnar-predicate';
 
 const MAXIMUM_SQL_LENGTH = 65_536;
 const MAXIMUM_SQL_TOKENS = 4096;
@@ -289,11 +291,8 @@ function parseNumericLiteral(source: string): number | bigint {
 }
 
 /** Validates one named parameter at its parser boundary. */
-function validateParameterValue(value: unknown, name: string): asserts value is SQLPredicateValue {
-  const probe = {op: '=', args: [{property: '_'}, value]} as unknown;
-  try {
-    validateSQLPredicate(probe);
-  } catch {
+function validateParameterValue(value: unknown, name: string): asserts value is SQLPredicateScalar {
+  if (!isColumnarPredicateValue(value)) {
     throw new Error(`SQL predicate parameter ":${name}" has an unsupported value`);
   }
 }

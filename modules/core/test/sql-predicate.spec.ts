@@ -164,3 +164,20 @@ test('parseSQLPredicate enforces input size and expression depth limits', () => 
   const deeplyNestedPredicate = `${'('.repeat(65)}value = 1${')'.repeat(65)}`;
   expect(() => parseSQLPredicate(deeplyNestedPredicate)).toThrow(/safe limit/);
 });
+
+test('runtime parameter values must be concrete scalars in comparisons and membership', () => {
+  for (const expression of ['value >= :minimum', 'value IN (:minimum)']) {
+    const template = parseSQLPredicate(expression, {preserveParameters: true});
+    for (const value of [{parameter: 'other'}, {}, null, undefined, NaN, new Date(NaN)]) {
+      const parameters = {minimum: value} as never;
+      expect(() => parseSQLPredicate(expression, {parameters})).toThrow('unsupported value');
+      expect(() => bindSQLPredicate(template, parameters)).toThrow();
+    }
+    for (const value of [0, 1n, false, '', new Date(0), new Uint8Array([1, 2])]) {
+      const parameters = {minimum: value};
+      expect(parseSQLPredicate(expression, {parameters})).toEqual(
+        bindSQLPredicate(template, parameters)
+      );
+    }
+  }
+});
