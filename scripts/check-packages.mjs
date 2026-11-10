@@ -41,6 +41,22 @@ for (const name of expected) {
       assert.equal('ArrowFunctionRegistry' in imported, false);
       assert.equal('ArrowFunctionRegistry' in required, false);
     }
+    if (specifier === '@math.gl/core') {
+      assert.equal('parseSQLQuery' in imported, false);
+      assert.equal('parseSQLQuery' in required, false);
+    }
+    if (specifier === '@math.gl/core/sql') {
+      for (const sql of [imported, required]) {
+        assert.deepEqual(sql.parseSQLQuery('SHOW TABLES FROM warehouse'), {command: 'showTables', from: 'warehouse'});
+        assert.deepEqual(sql.parseSQLSelect('SELECT city AS name LIMIT 2'), {select: [{column: 'city', as: 'name'}], limit: 2});
+        const predicate = sql.parseSQLPredicate('value >= :min', {preserveParameters: true});
+        const bound = sql.bindSQLPredicate(predicate, {min: 3});
+        sql.validateSQLPredicate(bound);
+        assert.equal(sql.isSQLPredicate(bound), true);
+        assert.deepEqual(bound, {op: '>=', args: [{property: 'value'}, 3]});
+        assert.equal(sql.SQL_PREDICATE_JSON_SCHEMA.$id, 'https://math.gl/schemas/sql-predicate.schema.json');
+      }
+    }
     if (specifier === '@math.gl/geometry/lighting') {
       for (const lighting of [imported, required]) {
         const profile = {verticalAngles: [0, 180], horizontalAngles: [0], intensities: [2, 2], intensityScale: 3, symmetry: 'rotational'};

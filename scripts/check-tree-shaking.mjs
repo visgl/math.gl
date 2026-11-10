@@ -15,9 +15,11 @@ const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
   {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /expressions\/(compiler|predicate)/], budget: 240000},
 
+  {symbol: 'parseSQLSelect', packages: ['@math.gl/core/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 5000},
+  {symbol: 'parseSQLQuery', packages: ['@math.gl/core/sql'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 16000},
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/core/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
-  {symbol:'spheroidToCartesian', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /expressions/], budget:1000},
-  {symbol:'vec3Normalize', packages:['@math.gl/core'], forbidden:[/mat4/, /vec2/, /expressions/], budget:500},
+  {symbol:'spheroidToCartesian', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
+  {symbol:'vec3Normalize', packages:['@math.gl/core'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
   {symbol:'getGeohashBounds', packages:['@math.gl/dggs'], forbidden:[/h3-js/, /a5-js/, /open-location-code/, /s2-geometry/], budget:2500},
   {symbol:'getClosestPointsSegmentTriangle', packages:['@math.gl/geometry'], forbidden:[/parametric/, /spatial-index/, /terrain/, /earcut/], budget:5000},
   {symbol:'getStarColor', packages:['@math.gl/earth'], forbidden:[/astronomy-engine/, /bright-stars/], budget:700},

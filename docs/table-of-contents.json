@@ -128,7 +128,8 @@
               "type": "doc",
               "id": "modules/core/expressions/README"
             }
-          }
+          },
+          "modules/core/sql/README"
         ],
         "link": {
           "type": "doc",
