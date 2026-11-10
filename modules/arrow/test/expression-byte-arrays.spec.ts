@@ -80,3 +80,11 @@ test('packing respects slices, nullable components, masks and empty schema', () 
   expect(empty.length).toBe(0);
   expect(empty.type.children[0]!.type).toEqual(new Uint8());
 });
+
+test('existing chained floating array casts retain their parser shape', () => {
+  const expected = parseSQLExpression('ARRAY[x]::DOUBLE PRECISION[1]');
+  expect(parseSQLExpression('ARRAY[x]::REAL[1]::DOUBLE PRECISION[1]')).toEqual(expected);
+  expect(parseSQLExpression('CAST(ARRAY[x]::REAL[1] AS DOUBLE PRECISION[1])')).toEqual(expected);
+  expect(() => parseSQLExpression('ARRAY[x]::REAL[1]::UINT8[1]')).toThrow('Chained UINT8');
+  expect(() => parseSQLExpression('ARRAY[x]::UINT8[1]::REAL[1]')).toThrow('Chained UINT8');
+});

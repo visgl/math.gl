@@ -201,7 +201,7 @@ export class SQLExpressionReader {
       const array = argument as any;
       if (
         array.type !== 'CallExpression' ||
-        array.callee.name !== 'array' ||
+        !/^array(?:_(?:float(?:16|32|64)|uint8))?$/.test(array.callee.name) ||
         Number(width[0]) !== array.arguments.length
       )
         throw new Error('ARRAY cast length must match the number of components');
@@ -216,6 +216,11 @@ export class SQLExpressionReader {
               : sqlCastType(name);
       if (!['float16', 'float32', 'float64', 'uint8'].includes(type))
         throw new Error('Unsupported ARRAY cast type');
+      if (
+        array.callee.name !== 'array' &&
+        (type === 'uint8' || array.callee.name === 'array_uint8')
+      )
+        throw new Error('Chained UINT8 array casts are not supported');
       return this.call(`array_${type}`, array.arguments);
     }
     const target = sqlCastType(match[0]);
