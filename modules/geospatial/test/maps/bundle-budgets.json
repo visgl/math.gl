@@ -16,7 +16,7 @@
     "gzip": 2000
   },
   "surfaceTransition": {
-    "minified": 5400,
+    "minified": 5700,
     "gzip": 2500
   },
   "featureTransition": {
