@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {Field, Schema, RecordBatch, Vector} from 'apache-arrow';
+import type {Field, Schema, RecordBatch, Vector, Table} from 'apache-arrow';
 import type {Expression} from '@math.gl/core/expressions';
 import type {ArrowFunctionRegistry} from './registry';
 
@@ -28,11 +28,20 @@ export type ArrowFunction = Readonly<{
   result: Field;
   /** Propagate null arguments, or pass them to the implementation. Defaults to propagate. */
   nullHandling?: 'propagate' | 'call';
-  /** Scalar fallback. Only active rows are decoded and invoked. */
-  scalar(...arguments_: ArrowExpressionValue[]): ArrowExpressionValue;
-  /** Optional vector implementation with the same semantics as scalar. */
-  kernel?: ArrowFunctionKernel;
-}>;
+}> &
+  (
+    | {
+        /** Scalar fallback for primitive arguments and results. */
+        scalar(...arguments_: ArrowExpressionValue[]): ArrowExpressionValue;
+        /** Optional vector implementation with the same semantics. */
+        kernel?: ArrowFunctionKernel;
+      }
+    | {
+        /** Vector-only functions may accept nested fields without decoding rows. */
+        kernel: ArrowFunctionKernel;
+        scalar?: never;
+      }
+  );
 
 /** Schema binding shared by predicate and expression compilation. */
 export type ArrowExpressionOptions = Readonly<{
@@ -42,12 +51,22 @@ export type ArrowExpressionOptions = Readonly<{
   registry?: ArrowFunctionRegistry;
 }>;
 
+/** Controls shared by batch and whole-table evaluation. */
+export type ArrowExpressionEvaluationOptions = {
+  /** One byte per logical row, including all batches when evaluating a table. */
+  activeRows?: Uint8Array;
+  /** Checked before and after each batch; synchronous execution does not yield. */
+  signal?: AbortSignal;
+};
+
 /** A compiled expression preserves row count and returns a non-dictionary vector. */
 export interface CompiledArrowExpression {
   /** Bound result type and nullability. */
   readonly outputField: Field;
   /** Evaluates a batch; optional masks skip rows and produce null at those positions. */
-  evaluate(batch: RecordBatch, options?: {activeRows?: Uint8Array}): Vector;
+  evaluate(batch: RecordBatch, options?: ArrowExpressionEvaluationOptions): Vector;
+  /** Evaluates ordered batches and combines output chunks without copying their buffers. */
+  evaluateTable(arrowTable: Table, options?: ArrowExpressionEvaluationOptions): Vector;
 }
 
 /** Text or the existing core expression AST. */

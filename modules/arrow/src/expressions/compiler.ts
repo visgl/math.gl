@@ -15,7 +15,9 @@ import {
   makeData,
   makeVector,
   type RecordBatch,
-  type Vector
+  Vector,
+  type Table,
+  type Schema
 } from 'apache-arrow';
 import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '../utf8/index';
 import {parse, type Expression} from '@math.gl/core/expressions';
@@ -23,6 +25,7 @@ import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} f
 import type {
   ArrowExpression,
   ArrowExpressionOptions,
+  ArrowExpressionEvaluationOptions,
   ArrowExpressionValue,
   CompiledArrowExpression
 } from './types';
@@ -55,35 +58,62 @@ export function compileArrowExpression(
   const keys = fields.map(field => ({
     name: field.name,
     type: physicalKey(field.type),
-    nullable: field.nullable
+    nullable: field.nullable,
+    extension: extensionKey(field)
   }));
+  const validateSchema = (schema: Schema) => {
+    if (
+      schema.fields.length !== keys.length ||
+      schema.fields.some((field, index) => {
+        const expected = keys[index]!;
+        return (
+          field.name !== expected.name ||
+          physicalKey(field.type) !== expected.type ||
+          field.nullable !== expected.nullable ||
+          extensionKey(field) !== expected.extension
+        );
+      })
+    )
+      throw new Error('Arrow expression input schema mismatch');
+  };
+  const validateMask = (mask: Uint8Array | undefined, length: number) => {
+    if (mask && (mask.length !== length || mask.some(value => value !== 0 && value !== 1)))
+      throw new Error('activeRows must contain one 0 or 1 per input row');
+  };
+  const evaluate = (
+    batch: RecordBatch,
+    evaluation: ArrowExpressionEvaluationOptions = {}
+  ): Vector => {
+    evaluation.signal?.throwIfAborted();
+    validateSchema(batch.schema);
+    validateMask(evaluation.activeRows, batch.numRows);
+    const active = evaluation.activeRows
+      ? evaluation.activeRows.slice()
+      : new Uint8Array(batch.numRows).fill(1);
+    const prepared = root.prepare(batch, active);
+    const result =
+      prepared.vector &&
+      !DataType.isDictionary(prepared.vector.type) &&
+      !active.some(value => !value)
+        ? prepared.vector
+        : output(root.field, active, prepared.get);
+    evaluation.signal?.throwIfAborted();
+    return result;
+  };
   return Object.freeze({
     outputField: root.field,
-    evaluate(batch: RecordBatch, evaluation: {activeRows?: Uint8Array} = {}): Vector {
-      if (
-        batch.schema.fields.length !== keys.length ||
-        batch.schema.fields.some((field, index) => {
-          const expected = keys[index]!;
-          return (
-            field.name !== expected.name ||
-            physicalKey(field.type) !== expected.type ||
-            field.nullable !== expected.nullable
-          );
-        })
-      )
-        throw new Error('Arrow expression input schema mismatch');
-      const mask = evaluation.activeRows;
-      if (mask && (mask.length !== batch.numRows || mask.some(value => value !== 0 && value !== 1)))
-        throw new Error('activeRows must contain one 0 or 1 per input row');
-      const active = mask ? mask.slice() : new Uint8Array(batch.numRows).fill(1);
-      const prepared = root.prepare(batch, active);
-      if (
-        prepared.vector &&
-        !DataType.isDictionary(prepared.vector.type) &&
-        !active.some(value => !value)
-      )
-        return prepared.vector;
-      return output(root.field, active, prepared.get);
+    evaluate,
+    evaluateTable(arrowTable: Table, evaluation: ArrowExpressionEvaluationOptions = {}): Vector {
+      evaluation.signal?.throwIfAborted();
+      validateSchema(arrowTable.schema);
+      validateMask(evaluation.activeRows, arrowTable.numRows);
+      let offset = 0;
+      const chunks = arrowTable.batches.flatMap(batch => {
+        const activeRows = evaluation.activeRows?.subarray(offset, offset + batch.numRows);
+        offset += batch.numRows;
+        return evaluate(batch, {...evaluation, activeRows}).data;
+      });
+      return chunks.length ? new Vector(chunks) : output(root.field, new Uint8Array(0), () => null);
     }
   });
 }
@@ -112,7 +142,14 @@ function physicalKey(type: DataType): string {
       : typeKey(type);
   } catch {
     // Unreferenced columns may have nested or extension layouts outside this evaluator's subset.
-    return `${type.typeId}:${type.toString()}`;
+    return `${type.typeId}:${type.toString()}:${JSON.stringify(
+      type.children?.map(field => [
+        field.name,
+        physicalKey(field.type),
+        field.nullable,
+        [...field.metadata]
+      ])
+    )}`;
   }
 }
 
@@ -206,7 +243,12 @@ function bytes(value: Prepared, row: number): Range | null {
 }
 
 /** Binds supported syntax to fused per-row operations and explicit vector boundaries. */
-function bind(ast: any, options: ArrowExpressionOptions, expected?: DataType): Node {
+function bind(
+  ast: any,
+  options: ArrowExpressionOptions,
+  expected?: DataType,
+  vectorInput = false
+): Node {
   if (isSignedLiteral(ast)) {
     const value = ast.operator === '-' ? -ast.argument.value : ast.argument.value;
     return bind({type: 'Literal', value}, options, expected);
@@ -215,11 +257,19 @@ function bind(ast: any, options: ArrowExpressionOptions, expected?: DataType): N
     const index = options.inputSchema.fields.findIndex(field => field.name === ast.name);
     if (index < 0) throw new Error(`Unknown Arrow expression field: ${ast.name}`);
     const source = options.inputSchema.fields[index]!;
-    typeKey(source.type);
+    if (!vectorInput) typeKey(source.type);
     return {
       field: new Field(source.name, valueType(source.type), source.nullable, source.metadata),
       hasKernel: false,
-      prepare: batch => sourceReader(batch.getChildAt(index)!)
+      prepare: batch =>
+        vectorInput
+          ? {
+              vector: batch.getChildAt(index)!,
+              get: () => {
+                throw new Error('Nested function arguments require a vector kernel');
+              }
+            }
+          : sourceReader(batch.getChildAt(index)!)
     };
   }
   if (ast.type === 'Literal') {
@@ -515,8 +565,15 @@ function bindCall(ast: any, options: ArrowExpressionOptions): Node {
     throw new Error(`Wrong argument count for ${name}`);
   const arguments_ = ast.arguments.map((argument: any, index: number) => {
     const field = declaration.arguments[index]!;
-    const bound = bind(argument, options, field.type);
-    if (typeKey(bound.field.type) !== typeKey(field.type))
+    const vectorInput = !declaration.scalar;
+    const bound = bind(argument, options, field.type, vectorInput);
+    if (
+      (vectorInput
+        ? physicalKey(bound.field.type) !== physicalKey(field.type)
+        : typeKey(bound.field.type) !== typeKey(field.type)) ||
+      (vectorInput &&
+        [...field.metadata].some(([key, value]) => bound.field.metadata.get(key) !== value))
+    )
       throw new Error(`Argument type mismatch for ${name}`);
     if (declaration.nullHandling === 'call' && bound.field.nullable && !field.nullable)
       throw new Error(`Nullable argument not accepted by ${name}`);
@@ -571,7 +628,7 @@ function bindCall(ast: any, options: ArrowExpressionOptions): Node {
             const args = children.map(child => child.get(row));
             if (declaration.nullHandling !== 'call' && args.some(value => value === null))
               return null;
-            value = declaration.scalar(...args);
+            value = declaration.scalar!(...args);
           }
           if (value === null && !result.nullable)
             throw new Error(`Function ${name} returned null for a non-nullable result`);
@@ -601,4 +658,12 @@ function isSignedLiteral(ast: any): boolean {
 }
 function isContextualLiteral(ast: any): boolean {
   return ast.type === 'Literal' || isSignedLiteral(ast);
+}
+
+/** Geometry encoding/CRS metadata is part of a schema-bound vector function contract. */
+function extensionKey(field: Field): string {
+  return JSON.stringify([
+    field.metadata.get('ARROW:extension:name'),
+    field.metadata.get('ARROW:extension:metadata')
+  ]);
 }

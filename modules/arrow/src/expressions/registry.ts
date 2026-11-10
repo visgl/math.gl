@@ -27,11 +27,12 @@ export class ArrowFunctionRegistry {
     if (this.functions.has(name)) throw new Error(`Duplicate Arrow function: ${name}`);
     if (
       !Array.isArray(declaration.arguments) ||
-      typeof declaration.scalar !== 'function' ||
+      (declaration.scalar !== undefined && typeof declaration.scalar !== 'function') ||
+      (typeof declaration.scalar !== 'function' && typeof declaration.kernel !== 'function') ||
       !declaration.result
     )
       throw new Error(
-        'Arrow functions require argument fields, a result field and a scalar implementation'
+        'Arrow functions require argument fields, a result field and a scalar implementation or vector kernel'
       );
     if (
       declaration.nullHandling !== undefined &&

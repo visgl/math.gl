@@ -8,6 +8,7 @@ export {ArrowFunctionRegistry} from './registry';
 export type {
   ArrowExpression,
   ArrowExpressionOptions,
+  ArrowExpressionEvaluationOptions,
   ArrowExpressionValue,
   ArrowFunction,
   ArrowFunctionKernel,

@@ -41,6 +41,11 @@ export function checkArrowConformance() {
   assert.deepEqual([...compileArrowExpression('score + 1', {inputSchema: expressionBatch.schema}).evaluate(expressionBatch)], [21, 31]);
   assert.deepEqual([...compileArrowPredicate({op: '=', args: [{property: 'name'}, 'gamma']}, {inputSchema: expressionBatch.schema}).evaluate(expressionBatch)], [null, true]);
 
+  const expressionTable = new arrow.Table(expressionBatch.schema, [expressionBatch, expressionBatch]);
+  const tableResult = compileArrowExpression('score + 1', {inputSchema: expressionTable.schema}).evaluateTable(expressionTable);
+  assert.deepEqual([...tableResult], [21, 31, 21, 31]);
+  assert.equal(tableResult.data.length, 2);
+
   // The documented Dictionary<Utf8> usage works on each supported Arrow runtime.
   const encodedNumbers = arrow.vectorFromArray(['12.5', '7', '12.5', null], new arrow.Dictionary(new arrow.Utf8(), new arrow.Int8()));
   const numberData = encodedNumbers.slice(1).data[0];

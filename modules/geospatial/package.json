@@ -1019,6 +1019,11 @@
       "types": "./dist/turf.d.ts",
       "import": "./dist/turf.js",
       "require": "./dist/turf.cjs"
+    },
+    "./turf/expressions": {
+      "types": "./dist/turf/expressions.d.ts",
+      "import": "./dist/turf/expressions.js",
+      "require": "./dist/turf/expressions.cjs"
     }
   },
   "files": [
