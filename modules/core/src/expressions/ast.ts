@@ -5,6 +5,7 @@ import type {Expression} from './expression-eval';
 
 // Includes the call and literal nodes around supported 4096-element arguments.
 const MAXIMUM_EXPRESSION_NODES = 16384;
+const MAXIMUM_EXPRESSION_DEPTH = 192;
 
 /** Structural limits apply to external ASTs as well as parser output. */
 export type ExpressionASTOptions = Readonly<{maxNodes?: number; maxDepth?: number}>;
@@ -40,17 +41,17 @@ function visitExpressionAST(
   options: ExpressionASTOptions
 ): void {
   const maxNodes = options.maxNodes ?? MAXIMUM_EXPRESSION_NODES,
-    maxDepth = options.maxDepth ?? 64;
+    maxDepth = options.maxDepth ?? MAXIMUM_EXPRESSION_DEPTH;
   if (
     !Number.isSafeInteger(maxNodes) ||
     maxNodes < 1 ||
     maxNodes > MAXIMUM_EXPRESSION_NODES ||
     !Number.isSafeInteger(maxDepth) ||
     maxDepth < 0 ||
-    maxDepth > 64
+    maxDepth > MAXIMUM_EXPRESSION_DEPTH
   )
     throw new Error(
-      `Expression AST limits must not exceed ${MAXIMUM_EXPRESSION_NODES} nodes and 64 levels`
+      `Expression AST limits must not exceed ${MAXIMUM_EXPRESSION_NODES} nodes and ${MAXIMUM_EXPRESSION_DEPTH} levels`
     );
   const stack: {node: unknown; depth: number; exit?: boolean}[] = [{node: value, depth: 0}];
   const ancestors = new Set<object>();

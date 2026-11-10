@@ -854,6 +854,56 @@ function bindRecovery(
   };
 }
 
+/** Binds a bounded IN list once, keeping the tested expression and casts as one subtree. */
+function bindMembership(arguments_: any[], options: BindingOptions): Node {
+  if (
+    arguments_.length < 2 ||
+    arguments_.length > 4097 ||
+    arguments_.slice(1).some(value => value.type !== 'Literal' && !isSignedLiteral(value))
+  )
+    throw new Error('IN requires a value and 1 to 4096 scalar literals');
+  const argument = bind(arguments_[0], options);
+  const utf8 = typeKey(argument.field.type) === 'utf8';
+  const literals = arguments_.slice(1).map(value => bind(value, options, argument.field.type));
+  return {
+    field: new Field(
+      'in',
+      bool,
+      argument.field.nullable || literals.some(value => value.field.nullable)
+    ),
+    hasKernel: argument.hasKernel,
+    prepare(batch, active, context) {
+      const source = argument.prepare(batch, active, context);
+      const constantMask = Uint8Array.of(1);
+      const prepared = literals.map(value => value.prepare(batch, constantMask, {}));
+      const values = new Set(prepared.map(value => value.get(0)));
+      const ranges = utf8
+        ? prepared.map(value => bytes(value, 0)).filter(range => range !== null)
+        : [];
+      return {
+        get(row) {
+          if (utf8) {
+            const value = bytes(source, row);
+            if (!value) return null;
+            if (
+              ranges.some(
+                range =>
+                  compareUTF8(value[0], value[1], value[2], range[0], range[1], range[2]) === 0
+              )
+            )
+              return true;
+          } else {
+            const value = source.get(row);
+            if (value === null) return null;
+            if (!Number.isNaN(value) && values.has(value)) return true;
+          }
+          return values.has(null) ? null : false;
+        }
+      };
+    }
+  };
+}
+
 /** Binds built-ins and custom functions, materializing arguments only for vector kernels. */
 function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node {
   if (ast.callee.type !== 'Identifier')
@@ -956,6 +1006,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
       }
     };
   }
+  if (name === 'in') return bindMembership(ast.arguments, options);
   if (name === 'cast') {
     if (ast.arguments.length !== 2 || ast.arguments[1]?.type !== 'Literal')
       throw new Error('cast requires a value and a literal scalar target');

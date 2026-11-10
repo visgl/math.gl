@@ -495,3 +495,18 @@ test('function declarations validate names, implementation contracts and null po
     ).toThrow();
   }
 });
+
+test('portable IN normalization preserves the full membership width with casts', () => {
+  const table = new Table({value: vectorFromArray([1, 4095, 4096, null], new Int32())});
+  const compiled = compileArrowPredicate(
+    {
+      op: 'in',
+      args: [
+        {property: 'value', casts: ['int16', 'int32', 'int64']},
+        Array.from({length: 4096}, (_, index) => index)
+      ]
+    },
+    {inputSchema: table.schema}
+  );
+  expect([...compiled.evaluateTable(table)]).toEqual([true, true, false, null]);
+});

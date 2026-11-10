@@ -62,7 +62,7 @@ test('external AST validation bounds cycles, depth, width, holes, malformed call
     })
   ).toThrow('limit');
   expect(() => validateExpressionAST(parse('x + 1'), {maxNodes: 2})).toThrow('limit');
-  expect(() => validateExpressionAST(parse('x'), {maxDepth: 65})).toThrow('limits');
+  expect(() => validateExpressionAST(parse('x'), {maxDepth: 193})).toThrow('limits');
   const ast = parseSQLExpression('x + 1');
   expect(() => validateExpressionAST(ast)).not.toThrow();
   const shared = {type: 'Identifier', name: 'x'};

@@ -16,7 +16,7 @@ const columns = getExpressionColumns(expression); // ['angle', 'offset']
 ```
 
 `validateExpressionAST(value, {maxNodes?, maxDepth?})` checks external ASTs without binding
-names, selecting types, or running functions. Defaults are 16,384 nodes and 64 levels;
+names, selecting types, or running functions. Defaults are 16,384 nodes and 192 levels;
 callers can tighten these limits. The budget accommodates existing 4,096-element arrays, including their enclosing expression nodes. SQL parser token limits are unchanged. Cycles, holes, malformed nodes, member calls, and unsupported
 literal objects fail explicitly. Repeated references to one child are allowed and count each time.
 
@@ -51,7 +51,7 @@ from the broader JavaScript evaluator are outside this portable subset.
 
 `columnarPredicateToExpression(predicate, {parameters?})` binds named parameters and normalizes
 portable comparisons, logical groups, membership lists, casts, and null tests into this AST.
-Logical groups and membership lists use balanced trees. It preserves exact top-level column
+Logical groups use balanced trees. Membership lowers to a compact `in(value, ...literals)` call, retaining a single copy of the tested expression and its casts. It preserves exact top-level column
 names and rejects nested property paths and Date/binary literals that need backend-specific
 conversion. The result uses the same AST limits. Arrow predicate compilation uses this utility.
 

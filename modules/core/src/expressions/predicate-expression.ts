@@ -21,6 +21,7 @@ export function columnarPredicateToExpression(
   // Bound the input before the recursive predicate utilities inspect it.
   const stack: {node: any; depth: number}[] = [{node: predicate, depth: 0}];
   let count = 0;
+  let membershipValues = 0;
   while (stack.length) {
     const {node, depth} = stack.pop()!;
     if (++count > 4096 || depth > 64) throw new Error('Predicate exceeds node or depth limit');
@@ -44,8 +45,10 @@ export function columnarPredicateToExpression(
       (node.op === 'in' && !Array.isArray(node.args[1]))
     )
       throw new Error('Invalid predicate arguments');
-    if (node.op === 'in' && node.args[1].length > 4096)
-      throw new Error('Predicate membership exceeds node limit');
+    if (node.op === 'in') {
+      membershipValues += node.args[1].length;
+      if (membershipValues > 4096) throw new Error('Predicate membership exceeds node limit');
+    }
   }
   const bound = bindColumnarPredicateParameters(predicate, options.parameters ?? {});
   validateColumnarPredicate(bound, new Set(getColumnarPredicateColumns(bound)));
@@ -101,14 +104,7 @@ function convert(predicate: ColumnarPredicate): Expression {
     } as Expression;
   };
   if (predicate.op === 'isNull') return call('isNull', [left]);
-  if (predicate.op === 'in')
-    return combine(
-      '||',
-      predicate.args[1].map(
-        value =>
-          ({type: 'BinaryExpression', operator: '==', left, right: literal(value)}) as Expression
-      )
-    );
+  if (predicate.op === 'in') return call('in', [left, ...predicate.args[1].map(literal)]);
   return {
     type: 'BinaryExpression',
     operator: predicate.op === '=' ? '==' : predicate.op === '<>' ? '!=' : predicate.op,
