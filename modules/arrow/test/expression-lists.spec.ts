@@ -358,3 +358,33 @@ test('nested list conditionals retain their chosen dictionary indices', () => {
     }).evaluateTable(table)
   ]).toEqual([3, 3, 2, 1]);
 });
+
+test('outer short circuit suppresses scalar callbacks inside tuple conditions', () => {
+  const table = new Table({
+    x: vectorFromArray([1, 2], new Int32()),
+    rgba: vectorFromArray(
+      [
+        [1, 2, 3, 4],
+        [4, 3, 2, 1]
+      ],
+      rgba
+    )
+  });
+  const check: ArrowTableFunction = {
+    name: 'check',
+    arguments: [new Field('x', new Int32())],
+    result: new Field('yes', new Bool()),
+    evaluate: () => {
+      throw new Error('skipped');
+    },
+    evaluateScalar: () => {
+      throw new Error('skipped');
+    }
+  };
+  expect([
+    ...compileArrowExpression('false && isNull(check(x) ? rgba : rgba)', {
+      inputSchema: table.schema,
+      functions: [check]
+    }).evaluateTable(table)
+  ]).toEqual([false, false]);
+});

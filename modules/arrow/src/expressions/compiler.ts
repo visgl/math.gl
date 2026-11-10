@@ -421,7 +421,7 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
     );
     return {
       field,
-      hasKernel: condition.hasKernel || yes.hasKernel || no.hasKernel,
+      hasKernel: tuple || list || condition.hasKernel || yes.hasKernel || no.hasKernel,
       prepare(batch, active) {
         const test = condition.prepare(batch, active);
         // A vector kernel must receive its branch mask before it executes. Pure scalar paths stay lazy.
