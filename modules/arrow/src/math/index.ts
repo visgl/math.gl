@@ -56,6 +56,7 @@ function declaration(
       let half: ((value: number) => number) | undefined;
       function run(values: readonly ArrowExpressionValue[]): Numeric | null {
         if (values.some(value => value === null)) return null;
+        if (values.some(value => typeof value === 'number' && Number.isNaN(value))) return NaN;
         const x = values[0] as Numeric;
         const y = values[1] as Numeric;
         let result = operation(x, y);

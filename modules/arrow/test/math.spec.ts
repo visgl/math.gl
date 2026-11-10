@@ -149,3 +149,19 @@ test.skipIf(!getFloat16ArrayConstructor())(
     expect(() => evaluate('EXP(x)', [12], new Float16())).toThrow(ArrowEvaluationError);
   }
 );
+
+test('POWER propagates NaNs before domain checks and exponentiation in both implementations', () => {
+  const prototype = math.POWER.prototypes.find(p => p.arguments[0]!.type.toString() === 'Float64')!;
+  for (const values of [
+    [-2, NaN],
+    [NaN, 0],
+    [0, NaN]
+  ]) {
+    expect(prototype.evaluateScalar!(...values)).toBeNaN();
+    const result = prototype.evaluate(
+      values.map(value => vectorFromArray([value], new Float64())),
+      {length: 1, activeRows: new Uint8Array([1])}
+    );
+    expect(result.get(0)).toBeNaN();
+  }
+});
