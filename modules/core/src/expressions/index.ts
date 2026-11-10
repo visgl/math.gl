@@ -24,3 +24,17 @@ export {parseExpressionString, type AccessorFunction} from './parse-expression-s
 export * from './columnar-predicate';
 
 export {isColumnarScalarType, COLUMNAR_SCALAR_TYPES, type ColumnarScalarType} from './scalar-type';
+
+export {validateExpressionAST, getExpressionColumns, type ExpressionASTOptions} from './ast';
+export {columnarPredicateToExpression} from './predicate-expression';
+export {
+  ExpressionEvaluationError,
+  isExpressionEvaluationError,
+  type ExpressionEvaluationErrorCode
+} from './evaluation-error';
+export {
+  NUMERIC_FUNCTION_DEFINITIONS,
+  type NumericFunctionDefinition,
+  type NumericFunctionPrototype,
+  type ExpressionNumericType
+} from './numeric-functions';

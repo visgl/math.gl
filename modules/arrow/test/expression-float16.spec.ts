@@ -17,7 +17,7 @@ import {
 import {isFloat16Array, NativeFloat16ArrayConstructor} from '@math.gl/core';
 import {parseSQLExpression, parseSQLPredicate, parseSQLQuery} from '@math.gl/core/sql';
 import {
-  ArrowEvaluationError,
+  ExpressionEvaluationError,
   compileArrowArray,
   compileArrowExpression,
   compileArrowPredicate,
@@ -64,7 +64,7 @@ test.runIf(supported)(
     const table = new Table({x: half([65504])});
     expect(() =>
       compileArrowExpression('x * 2', {inputSchema: table.schema}).evaluateTable(table)
-    ).toThrow(ArrowEvaluationError);
+    ).toThrow(ExpressionEvaluationError);
   }
 );
 test.runIf(supported)(
@@ -148,11 +148,11 @@ test.runIf(supported)(
         row === null ? null : Array.from(row)
       )
     ).toEqual([[1.0009765625], null]);
-    expect(() => narrowed.evaluateTable(wide)).toThrow(ArrowEvaluationError);
+    expect(() => narrowed.evaluateTable(wide)).toThrow(ExpressionEvaluationError);
     try {
       narrowed.evaluateTable(wide);
     } catch (error) {
-      expect((error as ArrowEvaluationError).code).toBe('overflow');
+      expect((error as ExpressionEvaluationError).code).toBe('overflow');
     }
   }
 );

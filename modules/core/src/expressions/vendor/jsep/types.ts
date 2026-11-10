@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) 2013 Stephen Oney
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Extended literal types to describe bigint values supplied in AST input.
 
 declare namespace jsep {
-		export type baseTypes = string | number | boolean | RegExp | null | undefined | object;
+		export type baseTypes = string | number | bigint | boolean | RegExp | null | undefined | object;
 		export interface Expression {
 			type: string;
 			[key: string]: baseTypes | Expression | Array<baseTypes | Expression>;
@@ -51,8 +53,8 @@ declare namespace jsep {
 
 		export interface Literal extends Expression {
 			type: 'Literal';
-			value: boolean | number | string | RegExp | null;
-			raw: string;
+			value: boolean | number | bigint | string | RegExp | null;
+			raw?: string;
 		}
 
 		export interface MemberExpression extends Expression {
@@ -71,7 +73,7 @@ declare namespace jsep {
 			type: 'UnaryExpression';
 			operator: string;
 			argument: Expression;
-			prefix: boolean;
+			prefix?: boolean;
 		}
 
 		export type ExpressionType =

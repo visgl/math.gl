@@ -177,3 +177,5 @@ The component type is the widest floating input, or Float64 for integer-only arr
 matching width. `FLOAT32` and `FLOAT64` are also accepted for fixed-array casts. Float16
 execution requires native Float16Array. Null components make the whole tuple null, with zero
 numeric padding. GPU consumers must respect parent validity or invalid positions appear at the origin.
+
+Executors can consume the [portable expression AST](../expressions/portable-ast.md) and Arrow-independent numeric metadata.

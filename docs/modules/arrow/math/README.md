@@ -40,7 +40,7 @@ functions; integer-preserving functions keep exact integer arithmetic, including
 bigints. Mixing integer and floating columns requires an explicit cast. Converting large
 integers to Float64 for transcendental functions can lose precision above 2^53.
 
-Invalid domains raise `ArrowEvaluationError` with code `domain`. Zero divisors raise
+Invalid domains raise `ExpressionEvaluationError` with code `domain`. Zero divisors raise
 `divisionByZero`. Integer overflow and finite-input overflow at the declared floating precision
 raise `overflow`. Subnormal results and underflow to zero are allowed. Input NaNs propagate;
 infinite inputs follow the mathematical operation when defined. Float16 execution requires

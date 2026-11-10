@@ -393,7 +393,7 @@ follow typed arguments; calls containing only numeric literals prefer their defa
 Use typed null casts to disambiguate otherwise ambiguous null arguments. Kernels receive the chosen
 prototype's declared input types. No per-batch overload lookup or callback probing occurs.
 
-`ArrowEvaluationError` exposes `code` values `domain`, `conversion`, `overflow` and
+`ExpressionEvaluationError` exposes `code` values `domain`, `conversion`, `overflow` and
 `divisionByZero`. Numeric data errors use this class; unknown names, incompatible signatures,
 schema mismatches and implementation failures remain ordinary fatal errors. Division and modulo
 by zero throw for integer and floating Arrow arithmetic. Error recovery is added separately.

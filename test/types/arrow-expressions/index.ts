@@ -158,3 +158,19 @@ compileArrowExpression('COLOR_TO_RGBA8(COLOR_RGB(1, 0, 0))', {
 import {SIN, POWER, ROUND} from '@math.gl/arrow/math';
 const mathFunctions: readonly ArrowTableFunction[] = [SIN, POWER, ROUND];
 void mathFunctions;
+
+import {
+  ExpressionEvaluationError,
+  getExpressionColumns,
+  validateExpressionAST,
+  columnarPredicateToExpression,
+  NUMERIC_FUNCTION_DEFINITIONS,
+  type Expression
+} from '@math.gl/core/expressions';
+const externalAST: unknown = {type: 'Literal', value: 1n};
+validateExpressionAST(externalAST);
+const portableAST: Expression = externalAST;
+const names: string[] = getExpressionColumns(portableAST);
+const normalized = columnarPredicateToExpression({op: '=', args: [{property: 'value'}, 1n]});
+const signature = NUMERIC_FUNCTION_DEFINITIONS.SIN.prototypes[0];
+void [names, normalized, signature, new ExpressionEvaluationError('domain', 'invalid value')];

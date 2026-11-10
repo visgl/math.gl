@@ -353,7 +353,7 @@ test('array type contracts reject non-list arguments, nullable tuple channels an
       inputSchema: table.schema,
       functions: [bins]
     })
-  ).toThrow('scalar literals');
+  ).toThrow('holes');
 });
 
 test('conditional variable-list literals retain dictionary broadcast semantics', () => {

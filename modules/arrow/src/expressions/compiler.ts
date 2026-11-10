@@ -25,12 +25,12 @@ import {
   type Schema
 } from 'apache-arrow';
 import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '../utf8/index';
-import {parse, type Expression} from '@math.gl/core/expressions';
+import {parse, validateExpressionAST, type Expression} from '@math.gl/core/expressions';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
 import {bindCast} from './cast';
 import {float16Values, roundFloat16} from './float16';
 import {physicalKey, extensionKey} from './signature';
-import {ArrowEvaluationError, isArrowEvaluationError} from './errors';
+import {ExpressionEvaluationError, isExpressionEvaluationError} from '@math.gl/core/expressions';
 import {createFunctionLookup} from './registry';
 import {
   isTupleType,
@@ -79,7 +79,9 @@ export function compileArrowExpression(
   const fields = [...options.inputSchema.fields];
   if (new Set(fields.map(field => field.name)).size !== fields.length)
     throw new Error('Expression input field names must be unique');
-  const root = bind(parse(expression), {
+  const ast = parse(expression);
+  validateExpressionAST(ast);
+  const root = bind(ast, {
     ...options,
     functionLookup: createFunctionLookup(options.functions)
   });
@@ -329,7 +331,7 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
           const value = read();
           return context.failed![row] ? null : value;
         } catch (error) {
-          if (!isArrowEvaluationError(error)) throw error;
+          if (!isExpressionEvaluationError(error)) throw error;
           context.failed![row] = 1;
           return null;
         }
@@ -671,7 +673,7 @@ function bindBinary(ast: any, options: BindingOptions): Node {
           if (x === null || y === null) return null;
           if (comparison) return compare(op, x, y);
           if ((op === '/' || op === '%') && (y === 0 || y === 0n))
-            throw new ArrowEvaluationError('divisionByZero', 'Division by zero');
+            throw new ExpressionEvaluationError('divisionByZero', 'Division by zero');
           const result =
             op === '+'
               ? x + y
@@ -687,7 +689,7 @@ function bindBinary(ast: any, options: BindingOptions): Node {
           validate(result);
           const rounded = round(result);
           if (!integer && Number.isFinite(x) && Number.isFinite(y) && !Number.isFinite(rounded))
-            throw new ArrowEvaluationError('overflow', 'Floating expression overflow');
+            throw new ExpressionEvaluationError('overflow', 'Floating expression overflow');
           return rounded;
         }
       };
@@ -940,10 +942,10 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
               const value = Number(rowValues[column]);
               output[index] = value;
               if (Number.isFinite(value) && !Number.isFinite(output[index]))
-                throw new ArrowEvaluationError('overflow', 'ARRAY cast overflow');
+                throw new ExpressionEvaluationError('overflow', 'ARRAY cast overflow');
             }
           } catch (error) {
-            if (!context.failed || !isArrowEvaluationError(error)) throw error;
+            if (!context.failed || !isExpressionEvaluationError(error)) throw error;
             context.failed[row] = 1;
             output.fill(0, row * values.length, (row + 1) * values.length);
             continue;
@@ -1006,7 +1008,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
               const value = child.get(row);
               if (value === null) return null;
               if (name === 'toInt64' && typeof value === 'number' && !Number.isInteger(value))
-                throw new ArrowEvaluationError(
+                throw new ExpressionEvaluationError(
                   'conversion',
                   'Int64 conversion requires a finite integer'
                 );
@@ -1198,7 +1200,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
             reportError(row, error) {
               if (!Number.isInteger(row) || row < 0 || row >= active.length || !mask[row])
                 throw new Error('Kernel reported an inactive or invalid row');
-              if (!context.failed || !isArrowEvaluationError(error)) throw error;
+              if (!context.failed || !isExpressionEvaluationError(error)) throw error;
               context.failed[row] = 1;
               mask[row] = 0;
             }
