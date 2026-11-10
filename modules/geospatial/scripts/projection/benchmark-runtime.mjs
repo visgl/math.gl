@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {build} from 'esbuild';
 import {execFileSync} from 'node:child_process';
-import {readFileSync, statSync} from 'node:fs';
+import {existsSync, readFileSync, statSync} from 'node:fs';
 import {dirname, join, relative, resolve} from 'node:path';
 
 // Historical measurements keep using that revision's source tree and export map.
@@ -134,13 +134,19 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
           if (!/\/modules\/.*\/src\//.test(base)) return;
           return resolveSource(base);
         });
-        builder.onLoad({filter: /\.(ts|js|json)$/, namespace: 'historical'}, args => ({
-          contents: git(historicalPath(relative(root, args.path))).replace(
-            /export \{ProjectionEngine, checkProjectionCompatibility\}/,
-            'export {ProjectionEngine, ProjectionEngine as ProjectionTransform, checkProjectionCompatibility}'),
-          resolveDir: dirname(args.path),
-          loader: args.path.endsWith('.json') ? 'json' : args.path.endsWith('.js') ? 'js' : 'ts'
-        }));
+        builder.onLoad({filter: /\.(ts|js|json)$/, namespace: 'historical'}, args => {
+          // esbuild's package resolver needs a directory present in this checkout.
+          // Relative historical imports still resolve from args.importer above.
+          let resolveDir = dirname(args.path);
+          while (!existsSync(resolveDir)) resolveDir = dirname(resolveDir);
+          return {
+            contents: git(historicalPath(relative(root, args.path))).replace(
+              /export \{ProjectionEngine, checkProjectionCompatibility\}/,
+              'export {ProjectionEngine, ProjectionEngine as ProjectionTransform, checkProjectionCompatibility}'),
+            resolveDir,
+            loader: args.path.endsWith('.json') ? 'json' : args.path.endsWith('.js') ? 'js' : 'ts'
+          };
+        });
       }
     }]
   });

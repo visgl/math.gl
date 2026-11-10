@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import {gzipSync} from 'node:zlib';
 import {build} from 'esbuild';
 const fixtures = {
@@ -19,55 +19,63 @@ const fixtures = {
   featureTransition: "export {mapTransitions} from '@math.gl/geospatial/maps/transitions';",
   fullCatalogue: "export {mapPresets} from '@math.gl/geospatial/maps/presets';"
 };
-const limits = process.argv.includes('--measure')
-  ? null
-  : JSON.parse(
-      readFileSync(new URL('../../test/maps/bundle-budgets.json', import.meta.url), 'utf8')
-    );
-const measurements = {};
-for (const [name, contents] of Object.entries(fixtures)) {
-  const result = await build({
-    stdin: {contents, resolveDir: fileURLToPath(new URL('../../', import.meta.url))},
-    bundle: true,
-    format: 'esm',
-    platform: 'browser',
-    target: 'es2020',
-    minify: true,
-    write: false,
-    metafile: true
-  });
-  const retained = Object.entries(Object.values(result.metafile.outputs)[0].inputs)
-    .filter(([, v]) => v.bytesInOutput > 0)
-    .map(([p]) => p);
-  if (['engine', 'albersPoints', 'rasterSurface', 'surfaceTransition'].includes(name)) {
-    assert(
-      !retained.some(p =>
-        /polygon-clipping|maps\/elastic|maps\/myriahedral|world-kernels|classes\/matrix4/.test(p)
-      ),
-      name + ' retained optional geometry or unrelated presets'
-    );
-  }
-  if (['albersPoints', 'albersGeometry'].includes(name))
-    assert(
-      !retained.some(p =>
-        /maps\/(?:elastic|h3-face-map|myriahedral|world-kernels|regional-map|quincuncial-star)/.test(
-          p
-        )
-      ),
-      name + ' retained unrelated presets'
-    );
-  if (name === 'albersGeometry' || name === 'featureTransition')
-    assert(
-      retained.some(p => p.includes('polygon-clipping')),
-      name + ' must exercise polygon support'
-    );
-  const bytes = result.outputFiles[0].contents;
-  measurements[name] = {minified: bytes.length, gzip: gzipSync(bytes, {level: 9}).length};
-  if (limits)
-    for (const metric of ['minified', 'gzip'])
-      assert(
-        measurements[name][metric] <= limits[name][metric],
-        `${name} ${metric}: ${measurements[name][metric]} exceeds ${limits[name][metric]}`
+export async function checkMapBundleBudget(measure = false) {
+  const limits = measure
+    ? null
+    : JSON.parse(
+        readFileSync(new URL('../../test/maps/bundle-budgets.json', import.meta.url), 'utf8')
       );
+  const measurements = {};
+  for (const [name, contents] of Object.entries(fixtures)) {
+    const result = await build({
+      stdin: {contents, resolveDir: fileURLToPath(new URL('../../', import.meta.url))},
+      bundle: true,
+      format: 'esm',
+      platform: 'browser',
+      target: 'es2020',
+      minify: true,
+      write: false,
+      metafile: true
+    });
+    const retained = Object.entries(Object.values(result.metafile.outputs)[0].inputs)
+      .filter(([, v]) => v.bytesInOutput > 0)
+      .map(([p]) => p);
+    if (['engine', 'albersPoints', 'rasterSurface', 'surfaceTransition'].includes(name)) {
+      assert(
+        !retained.some(p =>
+          /polygon-clipping|maps\/elastic|maps\/myriahedral|world-kernels|classes\/matrix4/.test(p)
+        ),
+        name + ' retained optional geometry or unrelated presets'
+      );
+    }
+    if (['albersPoints', 'albersGeometry'].includes(name))
+      assert(
+        !retained.some(p =>
+          /maps\/(?:elastic|h3-face-map|myriahedral|world-kernels|regional-map|quincuncial-star)/.test(
+            p
+          )
+        ),
+        name + ' retained unrelated presets'
+      );
+    if (name === 'albersGeometry' || name === 'featureTransition')
+      assert(
+        retained.some(p => p.includes('polygon-clipping')),
+        name + ' must exercise polygon support'
+      );
+    const bytes = result.outputFiles[0].contents;
+    measurements[name] = {minified: bytes.length, gzip: gzipSync(bytes, {level: 9}).length};
+    if (limits)
+      for (const metric of ['minified', 'gzip'])
+        assert(
+          measurements[name][metric] <= limits[name][metric],
+          `${name} ${metric}: ${measurements[name][metric]} exceeds ${limits[name][metric]}`
+        );
+  }
+  return measurements;
 }
-console.log(JSON.stringify(measurements, null, 2));
+
+if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+  console.log(
+    JSON.stringify(await checkMapBundleBudget(process.argv.includes('--measure')), null, 2)
+  );
+}

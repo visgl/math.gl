@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
+import {checkMapBundleBudget} from '../maps/check-bundle-budget.mjs';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {gzipSync} from 'node:zlib';
@@ -96,7 +97,8 @@ for (const [name, contents] of Object.entries(fixtures)) {
       );
     }
 }
+// Keep one JSON document for scorecard collectors while checking both subpaths.
+for (const [name, metrics] of Object.entries(await checkMapBundleBudget(!budgets))) {
+  measurements['maps/' + name] = metrics;
+}
 console.log(JSON.stringify(measurements, null, 2));
-
-// The existing CI entry checks both independently owned subpaths.
-await import('../maps/check-bundle-budget.mjs');

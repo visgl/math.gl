@@ -26,7 +26,11 @@ test('package aliases resolve public and private sources in current and historic
     write('modules/geospatial/src/geographic-seams/edge.ts', 'export const value = 42;');
     write('modules/geospatial/src/geographic-seams/index.ts', 'export const value = -1;');
     write('modules/geospatial/src/directory-only/index.ts', 'export const other = 7;');
-    write('benchmark/entry.ts', "export {value} from '@math.gl/geospatial/geographic-seams'; export {other} from '@math.gl/geospatial/directory-only'; export {publicValue} from '@math.gl/geospatial';");
+    write('modules/geospatial/node_modules/fixture-dependency/package.json', JSON.stringify({main: 'index.js'}));
+    write('modules/geospatial/node_modules/fixture-dependency/index.js', 'export const dependency = 8;');
+    write('modules/geospatial/src/removed-directory/inner.ts', 'export const inner = 9;');
+    write('modules/geospatial/src/removed-directory/index.ts', "import {dependency} from 'fixture-dependency'; import {inner} from './inner'; export const removed = dependency + inner;");
+    write('benchmark/entry.ts', "export {value} from '@math.gl/geospatial/geographic-seams'; export {other} from '@math.gl/geospatial/directory-only'; export {publicValue} from '@math.gl/geospatial'; export {removed} from '@math.gl/geospatial/removed-directory';");
     git('init', '--quiet');
     git('add', '.');
     git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', 'commit', '--quiet', '-m', 'fixture');
@@ -34,12 +38,14 @@ test('package aliases resolve public and private sources in current and historic
     // The historical bundle must ignore later working-tree changes.
     write('modules/geospatial/src/geographic-seams/edge.ts', 'export const value = 99;');
     for (const baseline of [undefined, ref]) {
+      if (baseline) rmSync(join(root, 'modules/geospatial/src/removed-directory'), {recursive: true});
       const outfile = join(root, baseline ? 'historical.mjs' : 'current.mjs');
       await bundleRuntime(root, 'benchmark/entry.ts', outfile, baseline);
       const result = await import(pathToFileURL(outfile).href);
       assert.equal(result.value, baseline ? 42 : 99);
       assert.equal(result.other, 7);
       assert.equal(result.publicValue, 12);
+      assert.equal(result.removed, 17);
     }
   } finally {
     rmSync(root, {recursive: true, force: true});
