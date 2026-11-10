@@ -21,7 +21,22 @@ export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}
   const reader = new SQLQueryReader(sql);
   reader.expectKeyword('SELECT');
   let select: TableSelection[] | undefined;
-  if (!reader.takeSymbol('*')) {
+  let replace: NonNullable<TableQuery['replace']> | undefined;
+  if (reader.takeSymbol('*')) {
+    if (reader.takeSymbol(',')) {
+      const names = new Set<string>();
+      const replacements = [];
+      do {
+        const expression = reader.selectionExpression();
+        reader.expectKeyword('AS');
+        const as = reader.identifier();
+        if (names.has(as)) throw new Error(`Duplicate SQL replacement target: ${as}`);
+        names.add(as);
+        replacements.push({expression, as});
+      } while (reader.takeSymbol(','));
+      replace = replacements;
+    }
+  } else {
     select = [];
     do {
       const expression = reader.selectionExpression() as any;
@@ -65,6 +80,7 @@ export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}
   reader.end();
   return {
     ...(select ? {select} : {}),
+    ...(replace ? {replace} : {}),
     ...(from === undefined ? {} : {from}),
     ...(where ? {where} : {}),
     ...(limit === undefined ? {} : {limit})

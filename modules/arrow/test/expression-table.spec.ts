@@ -5,6 +5,7 @@
 import {scalarFunction} from './utils/scalar-function';
 
 import {expect, test} from 'vitest';
+import {parseSQLSelect} from '@math.gl/core/sql';
 import {
   Table,
   Int32,
@@ -20,7 +21,8 @@ import {
 import {
   compileArrowExpression,
   compileArrowFunction,
-  compileArrowPredicate
+  compileArrowPredicate,
+  replaceArrowColumns
 } from '../src/expressions';
 
 function table() {
@@ -271,4 +273,25 @@ test('nested list sizes match structurally even when type strings are uninformat
       functions
     })
   ).toThrow('Argument type mismatch');
+});
+
+test('SQL replacements keep column order and read the original multi-batch table', () => {
+  const input = table();
+  const functions = [
+    scalarFunction({
+      name: 'increment',
+      arguments: [input.schema.fields[0]!],
+      result: new Field('incremented', new Int32(), true),
+      evaluateScalar: (value: number) => value + 1
+    })
+  ];
+  const query = parseSQLSelect('SELECT *, increment(x) AS x, x AS text FROM data');
+  const result = replaceArrowColumns(input, query.replace!, {functions});
+  expect(result.schema.fields.map(field => field.name)).toEqual(['x', 'text']);
+  expect([...result.getChild('x')!]).toEqual([2, null, 4, 5, 6]);
+  expect([...result.getChild('text')!]).toEqual([1, null, 3, 4, 5]);
+  expect([...input.getChild('x')!]).toEqual([1, null, 3, 4, 5]);
+  expect(() => replaceArrowColumns(input, [{as: 'missing', expression: 'x'}])).toThrow(
+    'Unknown Arrow replacement column: missing'
+  );
 });

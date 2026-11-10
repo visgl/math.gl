@@ -170,3 +170,25 @@ test.each(['value IN (1, 2)', 'value NOT IN (1, 2)', 'value in (1, 2)'])(
     expect(() => parseSQLQuery('SELECT value WHERE ' + excessive)).toThrow('nesting limit');
   }
 );
+
+test('star followed by aliased expressions represents in-place replacements', () => {
+  const expression = {
+    type: 'CallExpression',
+    callee: {type: 'Identifier', name: 'increment'},
+    arguments: [{type: 'Identifier', name: 'positions'}]
+  };
+  expect(
+    parseSQLQuery('SELECT *, increment(positions) AS positions FROM geoarrow LIMIT 3')
+  ).toEqual({
+    from: 'geoarrow',
+    limit: 3,
+    replace: [{expression, as: 'positions'}]
+  });
+  expect(parseSQLSelect('SELECT id, increment(positions) AS positions FROM geoarrow')).toEqual({
+    from: 'geoarrow',
+    select: ['id', {expression, as: 'positions'}]
+  });
+  expect(() => parseSQLSelect('SELECT *, x AS x, y AS x FROM geoarrow')).toThrow(
+    'Duplicate SQL replacement target: x'
+  );
+});

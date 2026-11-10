@@ -20,3 +20,5 @@ export {
   isExpressionEvaluationError,
   type ExpressionEvaluationErrorCode
 } from '@math.gl/core/expressions';
+
+export {replaceArrowColumns} from './replace-arrow-columns';
