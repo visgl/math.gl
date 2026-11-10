@@ -7,6 +7,7 @@ export type ColumnarScalarType =
   | 'int16'
   | 'int32'
   | 'int64'
+  | 'float16'
   | 'float32'
   | 'float64'
   | 'bool'
@@ -15,6 +16,7 @@ export const COLUMNAR_SCALAR_TYPES: readonly ColumnarScalarType[] = Object.freez
   'int16',
   'int32',
   'int64',
+  'float16',
   'float32',
   'float64',
   'bool',

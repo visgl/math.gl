@@ -4,10 +4,12 @@
 
 import {
   Bool,
+  Precision,
   DataType,
   Field,
   Float64,
   Float32,
+  Float16,
   FixedSizeList,
   Dictionary,
   Int64,
@@ -26,6 +28,7 @@ import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '.
 import {parse, type Expression} from '@math.gl/core/expressions';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
 import {bindCast} from './cast';
+import {float16Values, roundFloat16} from './float16';
 import {createFunctionLookup} from './registry';
 import {
   isTupleType,
@@ -163,7 +166,7 @@ export function compileArrowFunction(
 /** Compiles a packed floating-point source-column projection, preserving Float64 unless explicitly narrowed. */
 export function compileArrowArray(
   columns: readonly string[],
-  options: ArrowExpressionOptions & {type?: 'float32' | 'float64'}
+  options: ArrowExpressionOptions & {type?: 'float16' | 'float32' | 'float64'}
 ): CompiledArrowExpression {
   if (
     !Array.isArray(columns) ||
@@ -172,7 +175,7 @@ export function compileArrowArray(
     Array.from(columns).some(name => typeof name !== 'string' || !name.length)
   )
     throw new Error('ARRAY requires 1 to 4096 source column names');
-  if (options.type !== undefined && options.type !== 'float32' && options.type !== 'float64')
+  if (options.type !== undefined && !['float16', 'float32', 'float64'].includes(options.type))
     throw new Error('Unsupported ARRAY precision');
   return compileArrowExpression(
     {
@@ -250,6 +253,10 @@ function output(
   const data = isBoolean
     ? new Uint8Array(Math.ceil(active.length / 8))
     : new type.ArrayType(active.length);
+  const numericData =
+    DataType.isFloat(type) && type.precision === Precision.HALF
+      ? float16Values(data as Uint16Array)
+      : data;
   const validity = new Uint8Array(Math.ceil(active.length / 8));
   let nullCount = 0;
   for (let row = 0; row < active.length; row++) {
@@ -267,7 +274,7 @@ function output(
     validity[row >> 3] |= 1 << (row & 7);
     if (isBoolean) {
       if (value) data[row >> 3] |= 1 << (row & 7);
-    } else data[row] = value as any;
+    } else numericData[row] = value as any;
   }
   return makeVector(
     makeData({
@@ -283,7 +290,11 @@ function output(
 /** Wraps a source vector without materializing rows or decoding string operands. */
 function sourceReader(vector: Vector): Prepared {
   const data = vector.data[0];
-  if (vector.data.length === 1 && (DataType.isInt(data.type) || DataType.isFloat(data.type))) {
+  if (
+    vector.data.length === 1 &&
+    (DataType.isInt(data.type) ||
+      (DataType.isFloat(data.type) && data.type.precision !== Precision.HALF))
+  ) {
     const values = data.values,
       bitmap = data.nullBitmap,
       offset = data.offset;
@@ -676,7 +687,7 @@ function bindCall(ast: any, options: BindingOptions): Node {
   if (ast.callee.type !== 'Identifier')
     throw new Error('Only registered named function calls are supported');
   const name = ast.callee.name;
-  if (['array', 'array_float32', 'array_float64'].includes(name)) {
+  if (['array', 'array_float16', 'array_float32', 'array_float64'].includes(name)) {
     if (
       !ast.arguments.length ||
       ast.arguments.length > 4096 ||
@@ -687,11 +698,15 @@ function bindCall(ast: any, options: BindingOptions): Node {
     if (arguments_.some(value => !DataType.isFloat(value.field.type)))
       throw new Error('ARRAY requires floating-point source columns');
     const component =
-      name === 'array_float32'
-        ? new Float32()
-        : name === 'array_float64' || arguments_.some(value => typeKey(value.field.type) === 'f2')
-          ? new Float64()
-          : new Float32();
+      name === 'array_float16'
+        ? new Float16()
+        : name === 'array_float32'
+          ? new Float32()
+          : name === 'array_float64' || arguments_.some(value => typeKey(value.field.type) === 'f2')
+            ? new Float64()
+            : arguments_.some(value => typeKey(value.field.type) === 'f1')
+              ? new Float32()
+              : new Float16();
     const type = new FixedSizeList(arguments_.length, new Field('value', component, false));
     const field = new Field(
       'array',
@@ -705,12 +720,19 @@ function bindCall(ast: any, options: BindingOptions): Node {
         const values = arguments_.map(value => value.prepare(batch, active));
         const vector = nullTupleVector(type, active.length),
           data = vector.data[0]!,
-          output = data.children[0]!.values;
+          output =
+            component.precision === Precision.HALF
+              ? float16Values(data.children[0]!.values as Uint16Array)
+              : data.children[0]!.values;
         for (let row = 0; row < active.length; row++) {
           if (!active[row] || values.some(value => value.isNull!(row))) continue;
           data.setValid(row, true);
-          for (let column = 0; column < values.length; column++)
-            output[row * values.length + column] = values[column]!.get(row) as number;
+          for (let column = 0; column < values.length; column++) {
+            const index = row * values.length + column;
+            output[index] = values[column]!.get(row) as number;
+            if (name === 'array_float16' && !Number.isFinite(output[index]))
+              throw new RangeError('Float16 ARRAY cast overflow or non-finite value');
+          }
         }
         return vectorReader(vector);
       }
@@ -887,6 +909,10 @@ function bindCall(ast: any, options: BindingOptions): Node {
 
 /** Preserve declared Float32 precision at fused operation boundaries. */
 function roundToType(type: DataType): (value: ArrowExpressionValue) => ArrowExpressionValue {
+  if (typeKey(type) === 'f0') {
+    const round = roundFloat16();
+    return value => (value === null ? null : round(value as number));
+  }
   return typeKey(type) === 'f1'
     ? value => (value === null ? null : Math.fround(value as number))
     : value => value;

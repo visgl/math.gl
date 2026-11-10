@@ -16,6 +16,7 @@ export function createFunctionLookup(
     if (
       [
         'array',
+        'array_float16',
         'array_float32',
         'array_float64',
         'cast',

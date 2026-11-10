@@ -4,6 +4,7 @@
 
 import {
   DataType,
+  Precision,
   Dictionary,
   Uint8,
   Vector,
@@ -14,6 +15,7 @@ import {
   type FixedSizeList,
   type List
 } from 'apache-arrow';
+import {float16Values} from './float16';
 import {ColumnReader, typeKey, validateValue} from './buffers';
 import type {ArrowExpressionValue} from './types';
 
@@ -102,7 +104,11 @@ export function selectTupleVectors(
 ): Vector {
   const result = nullTupleVector(type, active.length);
   const data = result.data[0]!;
-  const values = data.children[0]!.values;
+  const child = data.children[0]!;
+  const values =
+    DataType.isFloat(child.type) && child.type.precision === Precision.HALF
+      ? float16Values(child.values as Uint16Array)
+      : child.values;
   const a = new ColumnReader(yes.getChildAt(0)!);
   const b = new ColumnReader(no.getChildAt(0)!);
   const aValid = new ColumnReader(yes);
@@ -159,7 +165,11 @@ export function compileArrayLiteral(ast: any, type: DataType): (length: number) 
       // Fixed tuples can be expression results, so retain their ordinary Arrow representation.
       const result = nullTupleVector(listType, length);
       const data = result.data[0]!;
-      const components = data.children[0]!.values;
+      const childData = data.children[0]!;
+      const components =
+        DataType.isFloat(childData.type) && childData.type.precision === Precision.HALF
+          ? float16Values(childData.values as Uint16Array)
+          : childData.values;
       for (let row = 0; row < length; row++) {
         data.setValid(row, true);
         for (let component = 0; component < listType.listSize; component++)

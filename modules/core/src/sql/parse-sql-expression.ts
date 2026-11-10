@@ -15,6 +15,8 @@ export function sqlCastType(name: string): ColumnarScalarType {
       return 'int32';
     case 'BIGINT':
       return 'int64';
+    case 'FLOAT16':
+      return 'float16';
     case 'REAL':
       return 'float32';
     case 'DOUBLE PRECISION':
@@ -76,7 +78,7 @@ export class SQLExpressionReader {
       this.position += 2;
       this.token();
       this.space();
-      const match = /^[A-Za-z]+(?:\s+(?:PRECISION|VARYING)\b)?/i.exec(
+      const match = /^[A-Za-z][A-Za-z0-9]*(?:\s+(?:PRECISION|VARYING)\b)?/i.exec(
         this.source.slice(this.position)
       );
       if (!match) throw new Error('SQL cast requires a target type');
@@ -100,7 +102,7 @@ export class SQLExpressionReader {
       const argument = this.expression(depth + 1);
       if (!this.word('AS')) throw new Error('SQL CAST requires AS');
       this.space();
-      const match = /^[A-Za-z]+(?:\s+(?:PRECISION|VARYING)\b)?/i.exec(
+      const match = /^[A-Za-z][A-Za-z0-9]*(?:\s+(?:PRECISION|VARYING)\b)?/i.exec(
         this.source.slice(this.position)
       );
       if (!match) throw new Error('SQL CAST requires a target type');

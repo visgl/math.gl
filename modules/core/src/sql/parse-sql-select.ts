@@ -53,10 +53,11 @@ export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}
         const array = [reader.identifier()];
         while (reader.takeSymbol(',')) array.push(reader.identifier());
         reader.arraySymbol(']');
-        let type: 'float32' | 'float64' | undefined;
+        let type: 'float16' | 'float32' | 'float64' | undefined;
         if (reader.takeSymbol(':')) {
           reader.arraySymbol(':');
-          if (reader.takeKeyword('FLOAT32') || reader.takeKeyword('REAL')) type = 'float32';
+          if (reader.takeKeyword('FLOAT16')) type = 'float16';
+          else if (reader.takeKeyword('FLOAT32') || reader.takeKeyword('REAL')) type = 'float32';
           else if (reader.takeKeyword('FLOAT64')) type = 'float64';
           else if (reader.takeKeyword('DOUBLE')) {
             reader.expectKeyword('PRECISION');

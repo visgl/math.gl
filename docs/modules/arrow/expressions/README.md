@@ -343,8 +343,8 @@ Postfix `value::TYPE` and chained casts are also supported with the same convers
 ## Packed source columns
 
 `compileArrowArray(columns, {inputSchema, type?})` packs existing floating-point columns into one
-fixed-size list vector. `type` may be `float32` or `float64`; omission preserves Float64 if present
-in any source component, otherwise Float32. Unknown and non-floating columns are rejected at binding.
+fixed-size list vector. `type` may be `float16`, `float32` or `float64`; omission preserves Float64 if present
+in any source component, otherwise Float32 or Float16, preserving the widest input precision. Unknown and non-floating columns are rejected at binding.
 
 ```ts
 import {compileArrowArray} from '@math.gl/arrow/expressions';
@@ -358,3 +358,20 @@ batch without row filtering, retaining source order and chunk boundaries. Any nu
 the parent list null; its numeric slots remain zeros. Masked rows follow the same rule. Consumers
 reading numeric buffers directly must honor parent validity. Empty results retain their fixed-size
 schema. Explicit Float32 conversion can lose precision, following Arrow floating-point conversion.
+
+## Float16
+
+Arrow `Float16` inputs, scalar results and fixed-size numeric tuple results use native
+`Float16Array` views over Arrow's Uint16 binary16 storage. Expressions decode logical numbers,
+respect slice offsets and nulls, and round at every half-precision operation boundary. Output
+buffers remain Arrow-compatible Uint16 bit patterns; buffer transport and worker evaluation retain
+that representation. Numeric projections can reuse input storage.
+
+`parseSQLExpression('value::FLOAT16')` and `CAST(value AS FLOAT16)` bind explicit half-precision
+casts. Values round using the runtime's binary16 conversion; finite values that overflow on explicit
+casts throw, while arithmetic retains IEEE infinity/NaN behavior. Subnormals and signed zero are
+preserved. Runtime native `Float16Array` support is required in every executing worker or thread;
+without it, Float16 operations fail with a capability error. Other expression types remain usable.
+The capability checks reuse the existing core Float16 helpers.
+
+Packed arrays also accept `ARRAY[x,y,z]::FLOAT16[3]` or `compileArrowArray(columns, {inputSchema, type: "float16"})`. Native Float16Array is required for half-precision execution.

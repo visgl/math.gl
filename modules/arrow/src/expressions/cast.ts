@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Bool, DataType, Float32, Float64, Int16, Int32, Int64, Utf8} from 'apache-arrow';
+import {Bool, DataType, Float16, Float32, Float64, Int16, Int32, Int64, Utf8} from 'apache-arrow';
 import {isColumnarScalarType} from '@math.gl/core/expressions';
 import {parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '../utf8/index';
+import {roundFloat16} from './float16';
 import {typeKey, createValueValidator} from './buffers';
 import type {ArrowExpressionValue} from './types';
 
@@ -20,13 +21,15 @@ export function bindCast(source: DataType, target: unknown) {
         ? new Int32()
         : target === 'int64'
           ? new Int64()
-          : target === 'float32'
-            ? new Float32()
-            : target === 'float64'
-              ? new Float64()
-              : target === 'bool'
-                ? new Bool()
-                : new Utf8();
+          : target === 'float16'
+            ? new Float16()
+            : target === 'float32'
+              ? new Float32()
+              : target === 'float64'
+                ? new Float64()
+                : target === 'bool'
+                  ? new Bool()
+                  : new Utf8();
   const sourceKey = typeKey(source);
   const textInput = sourceKey === 'utf8';
   if (
@@ -36,6 +39,7 @@ export function bindCast(source: DataType, target: unknown) {
   )
     throw new Error('CAST between Boolean and numeric values is not supported');
   const validate = createValueValidator(type);
+  const halfRound = target === 'float16' ? roundFloat16() : undefined;
   const encoder = new TextEncoder();
   return {
     type,
@@ -70,8 +74,12 @@ export function bindCast(source: DataType, target: unknown) {
         result = typeof value === 'bigint' ? value : BigInt(Math.trunc(value as number));
       } else if (target === 'int16' || target === 'int32') result = Math.trunc(Number(value));
       else result = Number(value);
+      if (halfRound) result = halfRound(result as number);
       if (target === 'float32') result = Math.fround(result as number);
-      if ((target === 'float32' || target === 'float64') && !Number.isFinite(result))
+      if (
+        (target === 'float16' || target === 'float32' || target === 'float64') &&
+        !Number.isFinite(result)
+      )
         throw new RangeError('Floating CAST overflow or non-finite value');
       validate(result);
       return result;
