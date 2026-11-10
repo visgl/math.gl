@@ -36,7 +36,7 @@ export type TableQuery<
   /** Output columns in selection order. Omission selects all source columns. */
   select?: readonly TableSelection[];
   /** Predicate evaluated against source columns before output aliases are applied. */
-  where?: PredicateT;
+  where?: PredicateT | Readonly<{expression: Expression}>;
   /** Maximum number of rows retained after filtering. */
   limit?: number;
 }>;

@@ -37,7 +37,7 @@ const RESERVED_WORDS = new Set([
 /** Optional WHERE support for the independently tree-shakeable structural parser. */
 export type SQLSelectParserOptions = Readonly<{
   /** Converts a WHERE expression to the portable predicate vocabulary. Omission rejects WHERE. */
-  parseWhere?: (expression: string) => ColumnarPredicate;
+  parseWhere?: (expression: string) => ColumnarPredicate | Readonly<{expression: Expression}>;
 }>;
 
 /** Parses SELECT columns/AS aliases, optional FROM, and LIMIT; WHERE requires a supplied parser. */
@@ -48,40 +48,23 @@ export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}
   if (!reader.takeSymbol('*')) {
     select = [];
     do {
-      if (reader.takeKeyword('ARRAY')) {
-        reader.arraySymbol('[');
-        const array = [reader.identifier()];
-        while (reader.takeSymbol(',')) array.push(reader.identifier());
-        reader.arraySymbol(']');
-        let type: 'float16' | 'float32' | 'float64' | undefined;
-        if (reader.takeSymbol(':')) {
-          reader.arraySymbol(':');
-          if (reader.takeKeyword('FLOAT16')) type = 'float16';
-          else if (reader.takeKeyword('FLOAT32') || reader.takeKeyword('REAL')) type = 'float32';
-          else if (reader.takeKeyword('FLOAT64')) type = 'float64';
-          else if (reader.takeKeyword('DOUBLE')) {
-            reader.expectKeyword('PRECISION');
-            type = 'float64';
-          } else throw new Error('Unsupported ARRAY cast type');
-          reader.arraySymbol('[');
-          const length = reader.limit();
-          reader.arraySymbol(']');
-          if (length !== array.length)
-            throw new Error('ARRAY cast length must match the number of components');
-        }
-        reader.expectKeyword('AS');
-        select.push({array, as: reader.identifier(), ...(type ? {type} : {})});
-        continue;
-      }
-      const expression = reader.castExpression();
-      if (expression)
-        select.push(
-          reader.takeKeyword('AS') ? {expression, as: reader.identifier()} : {expression}
-        );
-      else {
-        const column = reader.identifier();
-        select.push(reader.takeKeyword('AS') ? {column, as: reader.identifier()} : column);
-      }
+      const expression = reader.selectionExpression() as any;
+      const alias = reader.takeKeyword('AS') ? reader.identifier() : undefined;
+      if (expression.type === 'Identifier')
+        select.push(alias ? {column: expression.name, as: alias} : expression.name);
+      else if (
+        expression.type === 'CallExpression' &&
+        /^array(?:_float(?:16|32|64))?$/.test(expression.callee.name) &&
+        expression.arguments.every((argument: any) => argument.type === 'Identifier')
+      ) {
+        if (!alias) throw new Error('SQL ARRAY requires AS');
+        const type = expression.callee.name.slice(6);
+        select.push({
+          array: expression.arguments.map((argument: any) => argument.name),
+          as: alias,
+          ...(type ? {type} : {})
+        });
+      } else select.push({expression, ...(alias ? {as: alias} : {})});
     } while (reader.takeSymbol(','));
   }
   let from: TableReference | undefined;
@@ -91,7 +74,7 @@ export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}
     if (!source.trim() || (typeof from === 'object' && !from.table.trim()))
       throw new Error('SQL FROM requires non-empty names.');
   }
-  let where: ColumnarPredicate | undefined;
+  let where: ColumnarPredicate | Readonly<{expression: Expression}> | undefined;
   if (reader.takeKeyword('WHERE')) {
     if (typeof options.parseWhere !== 'function')
       throw new Error(
@@ -133,17 +116,9 @@ export class SQLQueryReader {
     if (!this.takeSymbol(symbol)) throw new Error(`SQL ARRAY expected ${symbol}`);
   }
 
-  /** Parses only CAST projections; ordinary selections retain their existing shape. */
-  castExpression(): Expression | undefined {
+  /** Reads a bounded scalar or fixed-array projection. */
+  selectionExpression(): Expression {
     this.skipWhitespace();
-    const remaining = this.sql.slice(this.position);
-    if (
-      !/^CAST\s*\(/i.test(remaining) &&
-      !/^(?:"(?:[^"]|"")*"|[A-Za-z_][A-Za-z0-9_]*|'(?:[^']|'')*'|[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*::/.test(
-        remaining
-      )
-    )
-      return undefined;
     this.countToken();
     const reader = new SQLExpressionReader(this.sql.slice(this.position));
     const expression = reader.expression();

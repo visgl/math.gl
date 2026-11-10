@@ -669,23 +669,34 @@ function compare(op: string, a: any, b: any): boolean {
 function bindCall(ast: any, options: BindingOptions): Node {
   if (ast.callee.type !== 'Identifier')
     throw new Error('Only registered named function calls are supported');
-  const name = ast.callee.name;
+  let name = ast.callee.name;
+  if (ast.sqlFunction) {
+    const matches = [...options.functionLookup.keys()].filter(
+      key => key.toUpperCase() === name.toUpperCase()
+    );
+    if (matches.length > 1) throw new Error(`Ambiguous SQL function: ${name}`);
+    name = matches[0] ?? name;
+  }
   if (['array', 'array_float16', 'array_float32', 'array_float64'].includes(name)) {
-    if (
-      !ast.arguments.length ||
-      ast.arguments.length > 4096 ||
-      ast.arguments.some((value: any) => value.type !== 'Identifier')
-    )
-      throw new Error('ARRAY requires 1 to 4096 floating-point source columns');
+    if (!ast.arguments.length || ast.arguments.length > 4096)
+      throw new Error('ARRAY requires 1 to 4096 numeric expressions');
     const arguments_ = ast.arguments.map((value: any) => bind(value, options)) as Node[];
-    if (arguments_.some(value => !DataType.isFloat(value.field.type)))
-      throw new Error('ARRAY requires floating-point source columns');
+    if (
+      arguments_.some(
+        value =>
+          !DataType.isFloat(valueType(value.field.type)) &&
+          !DataType.isInt(valueType(value.field.type))
+      )
+    )
+      throw new Error('ARRAY requires numeric expressions');
     const component =
       name === 'array_float16'
         ? new Float16()
         : name === 'array_float32'
           ? new Float32()
-          : name === 'array_float64' || arguments_.some(value => typeKey(value.field.type) === 'f2')
+          : name === 'array_float64' ||
+              arguments_.every(value => DataType.isInt(valueType(value.field.type))) ||
+              arguments_.some(value => typeKey(value.field.type) === 'f2')
             ? new Float64()
             : arguments_.some(value => typeKey(value.field.type) === 'f1')
               ? new Float32()
@@ -707,20 +718,20 @@ function bindCall(ast: any, options: BindingOptions): Node {
             component.precision === Precision.HALF
               ? float16Values(data.children[0]!.values as Uint16Array)
               : data.children[0]!.values;
+        const rowValues: (number | bigint | null)[] = new Array(values.length);
         for (let row = 0; row < active.length; row++) {
-          if (!active[row] || values.some(value => value.isNull!(row))) continue;
-          data.setValid(row, true);
+          if (!active[row]) continue;
+          for (let column = 0; column < values.length; column++)
+            rowValues[column] = values[column]!.get(row) as number | bigint | null;
+          if (rowValues.some(value => value === null)) continue;
           for (let column = 0; column < values.length; column++) {
             const index = row * values.length + column;
-            const value = values[column]!.get(row) as number;
+            const value = Number(rowValues[column]);
             output[index] = value;
-            if (
-              name === 'array_float16' &&
-              Number.isFinite(value) &&
-              !Number.isFinite(output[index])
-            )
-              throw new ArrowEvaluationError('overflow', 'Float16 ARRAY cast overflow');
+            if (Number.isFinite(value) && !Number.isFinite(output[index]))
+              throw new ArrowEvaluationError('overflow', 'ARRAY cast overflow');
           }
+          data.setValid(row, true);
         }
         return vectorReader(vector);
       }

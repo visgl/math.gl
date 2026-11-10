@@ -32,16 +32,16 @@ An injected WHERE parser can define a different predicate language.
 | Source and table references           | ✅      | `FROM cities` or `FROM warehouse.cities`; FROM is optional.                                                                                       |
 | Quoted identifiers                    | ✅      | Double quotes, including doubled quote escapes: `"city""name"`. Identifier case is preserved.                                                     |
 | Keywords and statement terminator     | ✅      | Case-insensitive keywords and one optional trailing semicolon.                                                                                    |
-| Comparisons                           | ⚠️      | A source column compared with a scalar: `=`, `!=`, `<>`, `<`, `<=`, `>`, `>=`. No column-to-column comparisons.                                   |
+| Comparisons                           | ⚠️      | Scalar expressions compared with `=`, `!=`, `<>`, `<`, `<=`, `>`, `>=`; includes column-to-column comparisons.                                   |
 | Boolean predicates                    | ✅      | `AND`, `OR`, `NOT`, and parentheses.                                                                                                              |
 | Membership                            | ✅      | `IN (...)` and `NOT IN (...)` with a nonempty list of scalar values.                                                                              |
-| Null tests                            | ✅      | `IS NULL` and `IS NOT NULL`; comparisons such as `= NULL` are rejected.                                                                           |
+| Null tests                            | ✅      | `IS NULL` and `IS NOT NULL`; expression comparisons with NULL evaluate to unknown.                                                                           |
 | Scalar literals                       | ✅      | Numbers, single-quoted strings with doubled quote escapes, and Boolean values. Use null tests rather than NULL literals.                          |
 | Named parameters                      | ⚠️      | `:name` in `parseSQLPredicate()`, with supplied values or preserved references. Use an injected WHERE parser for parameterized SELECT statements. |
 | Row limit                             | ✅      | `LIMIT` followed by a nonnegative safe integer, including zero.                                                                                   |
 | Catalog commands                      | ✅      | `SHOW SOURCES`, `SHOW TABLES [FROM source]`, and `DESCRIBE source[.table]`. `SHOW SOURCES` is a parser-specific command.                          |
 | Qualified column names                | ❌      | `SELECT table.column` and qualified WHERE columns in `parseSQLQuery()` are rejected. Quote literal column names containing dots.                  |
-| Computed columns and function calls   | ⚠️      | CAST, postfix :: conversions and packed ARRAY projections; no arithmetic, other SQL functions, or CASE.                                                                      |
+| Computed columns and function calls   | ⚠️      | CAST, postfix :: conversions, arithmetic + - * /, named functions, searched CASE, and fixed-size ARRAY expressions. Execution supplies registered functions.                                                                      |
 | Additional predicate operators        | ❌      | No `LIKE`, `ILIKE`, `BETWEEN`, regular expressions, or `EXISTS`.                                                                                  |
 | Sorting and pagination                | ❌      | No `ORDER BY`, `OFFSET`, or `FETCH`.                                                                                                              |
 | Aggregation and distinct rows         | ❌      | No aggregate functions, `GROUP BY`, `HAVING`, or `DISTINCT`.                                                                                      |
@@ -79,6 +79,23 @@ const query = parseSQLSelect("SELECT city WHERE population >= :minimum", {
 
 Importing only `parseSQLSelect` lets a tree-shaking bundler omit the built-in predicate parser.
 Without `parseWhere`, this function rejects statements containing WHERE.
+
+## Expressions
+
+`parseSQLExpression()` returns the shared expression AST. Computed selections use
+`{expression, as?}`; computed WHERE clauses use `{expression}`. Existing portable predicate
+shapes remain unchanged for predicates accepted by `parseSQLPredicate()`.
+
+`CASE WHEN condition THEN value ELSE fallback END` evaluates only the selected branch.
+Unquoted function names resolve case-insensitively; quoted function names and column names
+retain their exact case. Use `POWER(x, y)` and `MOD(x, y)`; SQL does not accept JavaScript
+`**`, `^`, or `%`. JavaScript expression parsing remains available separately.
+
+`ARRAY[x + 1, SIN(angle), 0]` has a fixed width known at compilation. Arrow evaluation
+infers the widest floating component type; integer-only arrays use Float64. Explicit casts
+such as `ARRAY[x, y]::REAL[2]` select Float16/32/64 precision and check finite overflow.
+Any null component produces a null tuple with zero-filled numeric padding. Variable-length
+result lists are deferred. SQL parsing and Arrow evaluation remain separate optional imports.
 
 ## Parameters and validation
 

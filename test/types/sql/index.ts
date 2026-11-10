@@ -57,3 +57,9 @@ const castSelection: TableSelection = {
   as: 'count'
 };
 void castSelection;
+
+const computedQuery = parseSQLQuery('SELECT SIN(angle) AS value WHERE x + 1 > 0');
+if ('where' in computedQuery && computedQuery.where && 'expression' in computedQuery.where) {
+  const expression: import('@math.gl/core/expressions').Expression = computedQuery.where.expression;
+  void expression;
+}
