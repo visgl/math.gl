@@ -26,6 +26,7 @@ Apache Arrow
 - [@math.gl/arrow](https://visgl.github.io/math.gl/next/docs/modules/arrow.md): Apache Arrow
 - [Arrow schema utilities](https://visgl.github.io/math.gl/next/docs/modules/arrow/arrow-schema-utils.md): The Arrow schema utilities help validate Apache Arrow JS tables at runtime and rename columns while
 - [Arrow table transport](https://visgl.github.io/math.gl/next/docs/modules/arrow/arrow-table-transport.md): Use column-buffer transport for worker hops between matching Apache Arrow JS
+- [Arrow color functions](https://visgl.github.io/math.gl/next/docs/modules/arrow/color.md): @math.gl/arrow/color exports named ArrowTableFunction declarations for schema-bound expressions.
 - [GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/arrow/developer-guide/geoarrow.md): GeoArrow stores geometry in typed-array buffers rather than one JavaScript object per row. math.gl describes those buffers with plain TypeScript objects, so the same geometry kernels can work with Apache Arrow, a loader, or application-owned storage without depending on a table runtime.
 - [Arrow expressions](https://visgl.github.io/math.gl/next/docs/modules/arrow/expressions.md): @math.gl/arrow/expressions evaluates schema-bound expressions directly over Arrow batches. Use it
 - [Arrow-backed GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow.md): @math.gl/arrow/geoarrow connects real Apache Arrow JS fields and vectors to
