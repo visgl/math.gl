@@ -111,6 +111,19 @@ test('integer math preserves exact bigint values and detects overflow', () => {
     expect((error as ArrowEvaluationError).code).toBe('overflow');
   }
 });
+test('math integer overflow has the documented code and untyped null calls propagate', () => {
+  const input = new Table({x: vectorFromArray([-128], new Int8())});
+  let caught: unknown;
+  try {
+    compileArrowExpression('ABS(x)', {inputSchema: input.schema, functions}).evaluateTable(input);
+  } catch (error) {
+    caught = error;
+  }
+  expect(caught).toBeInstanceOf(ArrowEvaluationError);
+  expect((caught as ArrowEvaluationError).code).toBe('overflow');
+  for (const name of ['ABS', 'SQRT'])
+    expect([...evaluate(`${name}(null)`, [1]).result]).toEqual([null]);
+});
 test('math throws classified domain, division and finite-input overflow errors', () => {
   for (const expression of [
     'SQRT(-1)',
