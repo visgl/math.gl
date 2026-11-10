@@ -54,6 +54,13 @@ function toExpression(predicate: ColumnarPredicate): Expression {
       callee: {type: 'Identifier', name: 'cast'},
       arguments: [left, {type: 'Literal', value: target}]
     } as Expression;
+  const casts = (predicate.args[0] as ColumnarPredicateProperty).casts;
+  const scalar = (value: unknown) =>
+    casts?.[casts.length - 1] === 'int64' &&
+    typeof value === 'number' &&
+    Number.isSafeInteger(value)
+      ? BigInt(value)
+      : value;
   if (predicate.op === 'isNull')
     return {
       type: 'CallExpression',
@@ -70,7 +77,7 @@ function toExpression(predicate: ColumnarPredicate): Expression {
             type: 'BinaryExpression',
             operator: '==',
             left,
-            right: {type: 'Literal', value}
+            right: {type: 'Literal', value: scalar(value)}
           }) as Expression
       )
       .reduce(
@@ -81,6 +88,6 @@ function toExpression(predicate: ColumnarPredicate): Expression {
     type: 'BinaryExpression',
     operator: predicate.op === '=' ? '==' : predicate.op === '<>' ? '!=' : predicate.op,
     left,
-    right: {type: 'Literal', value: predicate.args[1]}
+    right: {type: 'Literal', value: scalar(predicate.args[1])}
   } as Expression;
 }

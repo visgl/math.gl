@@ -4,7 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {Bool, Float64, Int32, Table, Utf8, vectorFromArray} from 'apache-arrow';
-import {parseSQLExpression, parseSQLQuery} from '@math.gl/core/sql';
+import {parseSQLExpression, parseSQLPredicate, parseSQLQuery} from '@math.gl/core/sql';
 import {compileArrowExpression, compileArrowPredicate} from '../src/expressions';
 
 function evaluate(sql: string, table: Table, activeRows?: Uint8Array) {
@@ -103,4 +103,14 @@ test('casts honor conditional short circuit, nullability and empty tables', () =
   expect(() => compileArrowExpression('cast(x, "date")', {inputSchema: table.schema})).toThrow(
     'target'
   );
+});
+
+test('BIGINT cast predicates contextually bind safe integer comparison and membership values', () => {
+  const table = new Table({x: vectorFromArray(['5', '6', null], new Utf8())});
+  for (const sql of ['CAST(x AS BIGINT) = 5', 'x::BIGINT IN (5, 7)'])
+    expect([
+      ...compileArrowPredicate(parseSQLPredicate(sql), {inputSchema: table.schema}).evaluateTable(
+        table
+      )
+    ]).toEqual([true, false, null]);
 });
