@@ -2,7 +2,7 @@
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
-Compile a `MapDescription` into spherical chart projection, layout, picking, and optional hinge motion. Import from `@math.gl/geospatial/discontinuous`. For a complete rendering workflow, see the [MapEngine guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/map-engine.md). The API is experimental and may change before stabilization.
+Compile a `MapDescription` into spherical chart projection, layout, picking, and optional hinge motion. Import from `@math.gl/geospatial/projection`; the existing `@math.gl/geospatial/discontinuous` entry point remains supported. For a complete rendering workflow, see the [MapEngine guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/map-engine.md). The API is experimental and may change before stabilization.
 
 ## MapDescription and MapDefinition[​](#mapdescription-and-mapdefinition "Direct link to MapDescription and MapDefinition")
 
@@ -413,6 +413,18 @@ Source-intersection and sampling work remain bounded and unresolved intersection
 The polygon provenance example now selects **Mercator latitude cuts**, **Satellite cap**, **Nonlinear Armadillo cap** or **Elastic chart constraints**, with an optional global atlas pass. Source rings and closing-segment identities survive clipping, holes and winding reversal. Atlas source edges compose their original directed fractions; artificial octant connectors become continuous computational joins unless they coincide with a real map cut or coverage boundary. Directional zero-length pole connectors never become original boundaries or extrusion walls.
 
 Constraint tracing restores source breakpoints removed by boolean collinear merging. Mercator/cap intersections and Elastic source-boundary samples follow the original minor arcs. Generated Elastic grid-domain boundaries remain linear in their declared source frame. These corrections also apply without provenance; enabling the option does not change geometry. Constraint tracing is bounded to 20 million comparisons per call; unresolved or ambiguous topology rejects. It does not validate arbitrary invalid input polygons, certify continuous sampling error, or supply triangulation-interior provenance.
+
+## Prepared raster surfaces[​](#prepared-raster-surfaces "Direct link to Prepared raster surfaces")
+
+Call `map.prepareSurface(options)` to produce chart-local indexed positions, geographic or Mercator UVs, and chart IDs for raster rendering. The same shared sampler supports ordinary CRS projections through `prepareProjectionSurface`. `map.projectSurfacePoint(position, regionId?)` projects one sample with the same inset-frame exclusion used by raster preparation. It returns `null` when a parent chart sample falls inside a child's placed frame. Use it for rendering endpoints; `projectPoint` continues to report geographic coverage without presentation holes.
+
+See [Prepared surfaces and transitions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/surfaces.md) for options, units, budgets, coverage behavior, and the separate transition-buffer API.
+
+## H3-oriented face map[​](#h3-oriented-face-map "Direct link to H3-oriented face map")
+
+`{type: 'h3'}` selects a deterministic twenty-chart gnomonic net aligned with H3's actual icosahedron face orientations. It is a face layout, not an H3 cell index or an equal-area projection. It uses the ordinary `MapEngine` point, inverse, line, layout, raster, and prepared-map contracts. `radius` is the positive output scale (default 1); layout compilation is lazy and cached. Same-version prepared maps restore without caller-provided projection callbacks.
+
+The lower-level `createH3FaceMap({radius?})` factory is available from both projection and discontinuous entry points and returns a `DiscontinuousMap`, consistently with the other map factories. It adds no H3 package dependency. Face-center constants come from H3 v4.3.0 under Apache-2.0; the package includes its license and notice.
 
 <!-- -->
 
