@@ -388,3 +388,22 @@ test('outer short circuit suppresses scalar callbacks inside tuple conditions', 
     }).evaluateTable(table)
   ]).toEqual([false, false]);
 });
+
+test('conditionals select sliced tuple source components in logical row order', () => {
+  const table = new Table({
+    rgba: vectorFromArray(
+      [
+        [9, 9, 9, 9],
+        [1, 2, 3, 4],
+        [5, 6, 7, 8]
+      ],
+      rgba
+    ),
+    yes: vectorFromArray([true, true, false], new Bool())
+  }).slice(1);
+  const compiled = compileArrowExpression('yes ? rgba : [0,0,0,1]', {inputSchema: table.schema});
+  expect(decode(compiled.evaluateTable(table))).toEqual([
+    [1, 2, 3, 4],
+    [0, 0, 0, 1]
+  ]);
+});
