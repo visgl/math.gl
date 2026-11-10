@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {Field, Float32, Float64, Int32, Table, vectorFromArray} from 'apache-arrow';
+import {Field, Bool, Float32, Float64, Int32, Table, vectorFromArray} from 'apache-arrow';
 import {
   compileArrowExpression,
   compileArrowFunction,
@@ -166,4 +166,30 @@ test('untyped null-only numeric overloads default to Float64 without widening ty
   expect(
     compileArrowExpression('F(x, null)', {inputSchema: table.schema, functions}).outputField.type
   ).toEqual(new Float32());
+});
+
+test('untyped nulls retain ambiguity across nonnumeric and mixed-width signatures', () => {
+  const table = input();
+  const numeric = prototype([new Float32()]);
+  const boolean = {...numeric, arguments: [new Field('flag', new Bool(), true)]};
+  expect(() =>
+    compileArrowExpression('F(null)', {
+      inputSchema: table.schema,
+      functions: [{name: 'F', prototypes: [numeric, boolean]}]
+    })
+  ).toThrow('Ambiguous');
+  expect(() =>
+    compileArrowExpression('F(null, null)', {
+      inputSchema: table.schema,
+      functions: [
+        {
+          name: 'F',
+          prototypes: [
+            prototype([new Float32(), new Float32()]),
+            prototype([new Float32(), new Float64()])
+          ]
+        }
+      ]
+    })
+  ).toThrow('Ambiguous');
 });

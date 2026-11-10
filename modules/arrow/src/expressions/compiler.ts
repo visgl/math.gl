@@ -836,13 +836,6 @@ function bindCall(ast: any, options: BindingOptions): Node {
           physicalKey(valueType(source.field.type)) !== physicalKey(field.type)
         )
           cost += 4;
-        if (
-          !source &&
-          !ast.arguments.some((value: any) => !isContextualLiteral(value)) &&
-          (DataType.isInt(field.type) || DataType.isFloat(field.type)) &&
-          !(DataType.isFloat(field.type) && field.type.precision === Precision.DOUBLE)
-        )
-          cost += 4;
       } else {
         bound = source!;
       }
@@ -890,6 +883,26 @@ function bindCall(ast: any, options: BindingOptions): Node {
       arguments_.push(bound);
     }
     if (compatible) candidates.push({prototype, arguments: arguments_, cost});
+  }
+  const untypedNull = (value: any): boolean =>
+    (value.type === 'Literal' && value.value === null) ||
+    (value.type === 'ConditionalExpression' &&
+      untypedNull(value.consequent) &&
+      untypedNull(value.alternate));
+  const allFloat64 = (prototype: ArrowTableFunctionPrototype) =>
+    prototype.arguments.every(
+      field => DataType.isFloat(field.type) && field.type.precision === Precision.DOUBLE
+    );
+  if (
+    ast.arguments.every(untypedNull) &&
+    candidates.every(candidate =>
+      candidate.prototype.arguments.every(
+        field => DataType.isInt(field.type) || DataType.isFloat(field.type)
+      )
+    ) &&
+    candidates.some(candidate => allFloat64(candidate.prototype))
+  ) {
+    for (const candidate of candidates) if (!allFloat64(candidate.prototype)) candidate.cost++;
   }
   candidates.sort((a, b) => a.cost - b.cost);
   if (!candidates.length && group.prototypes.length === 1 && contextualError) throw contextualError;
