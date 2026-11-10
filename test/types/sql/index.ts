@@ -63,3 +63,10 @@ if ('where' in computedQuery && computedQuery.where && 'expression' in computedQ
   const expression: import('@math.gl/core/expressions').Expression = computedQuery.where.expression;
   void expression;
 }
+
+const byteSelection: import('@math.gl/core/sql').TableSelection = {
+  array: ['r', 'g', 'b', 'a'],
+  as: 'color',
+  type: 'uint8'
+};
+void byteSelection;

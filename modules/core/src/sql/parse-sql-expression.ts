@@ -192,6 +192,7 @@ export class SQLExpressionReader {
     this.position += match[0].length;
     this.token();
     if (this.take('[')) {
+      this.space();
       const width = /^\d+/.exec(this.source.slice(this.position));
       if (!width) throw new Error('SQL ARRAY cast requires a fixed length');
       this.position += width[0].length;
@@ -200,14 +201,20 @@ export class SQLExpressionReader {
       const array = argument as any;
       if (
         array.type !== 'CallExpression' ||
-        !/^array(?:_float(?:16|32|64))?$/.test(array.callee.name) ||
+        array.callee.name !== 'array' ||
         Number(width[0]) !== array.arguments.length
       )
         throw new Error('ARRAY cast length must match the number of components');
       const name = match[0].toUpperCase();
       const type =
-        name === 'FLOAT32' ? 'float32' : name === 'FLOAT64' ? 'float64' : sqlCastType(name);
-      if (!['float16', 'float32', 'float64'].includes(type))
+        name === 'UINT8'
+          ? 'uint8'
+          : name === 'FLOAT32'
+            ? 'float32'
+            : name === 'FLOAT64'
+              ? 'float64'
+              : sqlCastType(name);
+      if (!['float16', 'float32', 'float64', 'uint8'].includes(type))
         throw new Error('Unsupported ARRAY cast type');
       return this.call(`array_${type}`, array.arguments);
     }

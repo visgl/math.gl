@@ -179,3 +179,7 @@ execution requires native Float16Array. Null components make the whole tuple nul
 numeric padding. GPU consumers must respect parent validity or invalid positions appear at the origin.
 
 Executors can consume the [portable expression AST](../expressions/portable-ast.md) and Arrow-independent numeric metadata.
+
+`ARRAY[r, g, b, a]::UINT8[4]` and `CAST(ARRAY[r, g, b, a] AS UINT8[4])` select byte storage.
+The parser checks the width and lowers both spellings to an `array_uint8` call. `PACK_UNORM8`
+is a separate call that scales normalized values. See [Byte arrays and normalized packing](../../arrow/expressions/README.md#byte-arrays-and-normalized-packing).

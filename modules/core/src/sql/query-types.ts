@@ -7,7 +7,11 @@ import type {ColumnarPredicate, ColumnarPredicateProperty} from '../expressions/
 
 /** One source column selected for logical output, optionally under a new name. */
 export type TableSelection =
-  | Readonly<{array: readonly string[]; as: string; type?: 'float16' | 'float32' | 'float64'}>
+  | Readonly<{
+      array: readonly string[];
+      as: string;
+      type?: 'float16' | 'float32' | 'float64' | 'uint8';
+    }>
   | Readonly<{expression: Expression; as?: string}>
   | string
   | Readonly<{

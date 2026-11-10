@@ -424,3 +424,21 @@ and clears that row in the kernel's active mask. A kernel without a reporter mus
 A thrown batch exception cannot be associated with a row and remains fatal, even inside TRY.
 
 See [SQL expression conformance](./sql-conformance.md) for syntax, numeric rules, worker registration, and the benchmark.
+
+## Byte arrays and normalized packing
+
+Use the conversion that matches the input units:
+
+| Expression | Input values | Output |
+| --- | --- | --- |
+| `ARRAY[r, g, b, a]::UINT8[4]` | Byte values. Fractions truncate toward zero; values outside 0–255 after truncation overflow. | `FixedSizeList<Uint8>` |
+| `PACK_UNORM8(ARRAY[r, g, b, a])` | Normalized values in `[0, 1]`. Multiplies by 255 and rounds to the nearest byte, with ties upward. Values outside the range raise a domain error. | `FixedSizeList<Uint8>` |
+
+`128` remains `128` in a value cast; `0.5` becomes `128` in normalized packing. Both forms support
+arbitrary fixed widths from 1 to 4,096. `PACK_UNORM8` also accepts an existing fixed-size numeric
+column. Nonfinite inputs raise conversion errors. Null rows and null components produce a null
+byte tuple with zero padding. `TRY` can recover row conversion errors.
+
+Arrow stores the bytes without normalized interpretation. A GPU consumer can bind a four-byte
+result as `unorm8x4` to read channels as normalized floats. The existing `COLOR_TO_RGBA8`
+helper remains the RGBA-specific, clamping conversion.
