@@ -38,15 +38,15 @@ export const DATA_SOURCES = {
     manifest: `${SNAPSHOT.replace('media.githubusercontent.com/media', 'raw.githubusercontent.com')}/muller2022/manifest.json`
   }
 };
-export function sourceFor(id) {
-  const source = Object.hasOwn(DATA_SOURCES, id) && DATA_SOURCES[id];
+export function sourceFor(id: string) {
+  const source = Object.hasOwn(DATA_SOURCES, id) && DATA_SOURCES[id as keyof typeof DATA_SOURCES];
   if (!source) throw new Error(`Unknown reconstruction source: ${id}`);
   return source;
 }
-export function clampTime(time, maxAge) {
+export function clampTime(time: number, maxAge: number) {
   return Math.max(-maxAge, Math.min(FUTURE_END, time));
 }
-export function rotationBracket(time, maxAge) {
+export function rotationBracket(time: number, maxAge: number): [number, number] {
   if (!Number.isFinite(time) || time < -maxAge || time > FUTURE_END)
     throw new RangeError('Time outside reconstruction range');
   const age = Math.max(0, -time),

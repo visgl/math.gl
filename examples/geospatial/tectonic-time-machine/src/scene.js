@@ -23,7 +23,7 @@ import {
   rotateToLonLat,
   REGIONS,
   timeLabel
-} from './math.js';
+} from './math.ts';
 import {snowballCoverage, snowballDynamics, timelinePlaybackSpeed} from './timeline.js';
 import {vegetationCoverage, microbialCoverage} from './earth-events.js';
 import {createJourneyTrail} from './journey-trail.js';
@@ -45,7 +45,7 @@ import {
   textureReveal,
   terrainImageryWeight
 } from './terrain-material.js';
-import {loadTerrain} from './terrain.js';
+import {loadTerrain} from './terrain.ts';
 import {makeMesh, blendWeights, transformMesh, binaryMesh, worldToGeographic} from './geometry.js';
 const RADIUS = 6371008.8,
   DURATION = 1200;

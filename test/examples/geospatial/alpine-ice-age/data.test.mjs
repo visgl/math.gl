@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { DATASETS } from "../../../../examples/geospatial/alpine-ice-age/src/sources.js";
-import { loadClimate, climateAt } from "../../../../examples/geospatial/alpine-ice-age/src/climate.js";
+import { DATASETS } from "../../../../examples/geospatial/alpine-ice-age/src/sources.ts";
+import { loadClimate, climateAt } from "../../../../examples/geospatial/alpine-ice-age/src/climate.ts";
 async function download(url) {
   const response = await fetch(url);
   assert(response.ok, `${url}: HTTP ${response.status}`);
@@ -120,7 +120,7 @@ test("projection transitions preserve endpoints and continuous interrupted shape
   assert.deepEqual(projectionWeights(midway, "merc", 1), { merc: 1 });
 });
 
-import { glacialPhase } from "../../../../examples/geospatial/alpine-ice-age/src/glacial-phase.js";
+import { glacialPhase } from "../../../../examples/geospatial/alpine-ice-age/src/glacial-phase.ts";
 test("timeline chapters change phase labels while keeping regional glaciation names meaningful", () => {
   assert.equal(glacialPhase(119), "Last interglacial");
   assert.equal(glacialPhase(80), "Last glacial period");
@@ -132,7 +132,7 @@ test("timeline chapters change phase labels while keeping regional glaciation na
 });
 
 test("climate context preserves source samples and never extrapolates albedo", async () => {
-  const { climateAt } = await import("../../../../examples/geospatial/alpine-ice-age/src/climate.js");
+  const { climateAt } = await import("../../../../examples/geospatial/alpine-ice-age/src/climate.ts");
   assert.equal(climateAt(0, climate).temperature, 0);
   assert.equal(climateAt(0, climate).albedo, null);
   assert.equal(climateAt(1, climate).albedo, null);
@@ -142,7 +142,7 @@ test("climate context preserves source samples and never extrapolates albedo", a
 });
 
 test("regional views retain native coordinates and clip cells instead of collapsing geography", async () => {
-  const { regionalCoordinate, inRegion } = await import("../../../../examples/geospatial/alpine-ice-age/src/regional-views.js");
+  const { regionalCoordinate, inRegion } = await import("../../../../examples/geospatial/alpine-ice-age/src/regional-views.ts");
   assert.deepEqual(regionalCoordinate("albersEurope", -120, -20), [-120, -20]);
   assert.equal(inRegion("albersEurope", -120, -20), false);
   assert.equal(inRegion("albersEurope", 10, 60), true);

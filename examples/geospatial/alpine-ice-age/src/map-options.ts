@@ -2,10 +2,13 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {MAP_PROJECTIONS} from '@math.gl/geospatial/discontinuous';
-import {REGIONAL_VIEWS} from './regional-views.js';
+import {REGIONAL_VIEWS} from './regional-views.ts';
 
 // Modest panel counts keep map construction and the 1° field mesh interactive.
-export const MYRIAHEDRAL_VIEWS = Object.fromEntries([
+export const MYRIAHEDRAL_VIEWS: Record<
+  string,
+  {preset: string; dggs?: string; solid?: string; columns?: number; subdivisions?: number}
+> = Object.fromEntries([
   ['myriahedral:h3-0', {preset: 'polyhedral', dggs: 'h3'}],
   ['myriahedral:a5-0', {preset: 'polyhedral', dggs: 'a5'}],
   ['myriahedral:a5-1', {preset: 'polyhedral', dggs: 'a5-1'}],

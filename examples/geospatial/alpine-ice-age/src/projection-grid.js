@@ -12,7 +12,7 @@ import {
   sinusoidal,
   millerCylindrical
 } from '@math.gl/geospatial/projection';
-import {REGIONAL_VIEWS, regionalCoordinate, inRegion} from './regional-views.js';
+import {REGIONAL_VIEWS, regionalCoordinate, inRegion} from './regional-views.ts';
 
 const R = 6371008.8;
 const plugins = {

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {useEffect, useState} from 'react';
 // Introduce each chapter briefly, then leave the map unobstructed.
-export function useChapterTitle(chapter, enabled, ready) {
+export function useChapterTitle(chapter: unknown, enabled: boolean, ready: boolean) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     if (!enabled || !ready) {

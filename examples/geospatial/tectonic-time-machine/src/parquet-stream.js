@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {ParquetSource} from 'math.gl-parquet-loader';
-import {snapshotRequest} from './snapshot-request.js';
+import {snapshotRequest} from './snapshot-request.ts';
 
 /** Reuse range reads from immutable, commit-pinned snapshots across column selections. */
 function remoteFile(url, size, fetchFile, signal, requestTimeout) {

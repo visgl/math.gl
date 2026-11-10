@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {unitVector} from '../../../../examples/geospatial/tectonic-time-machine/src/math.js';
+import {unitVector} from '../../../../examples/geospatial/tectonic-time-machine/src/math.ts';
 import {containsPlace,createPlaceTracker,easeCamera,cinematicShot} from '../../../../examples/geospatial/tectonic-time-machine/src/journeys.js';
 import {createJourneyTrail} from '../../../../examples/geospatial/tectonic-time-machine/src/journey-trail.js';
 import {createFutureComparison,majorFutureBlocks} from '../../../../examples/geospatial/tectonic-time-machine/src/future-comparison.js';

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original display adapter; Scotese/Wright source data retain CC-BY-4.0 attribution.
 import {createParquetReader} from './parquet-stream.js';
-import {snapshotRequest} from './snapshot-request.js';
+import {snapshotRequest} from './snapshot-request.ts';
 
 const COMMIT = 'eaa2649826c795492ee89a2632d863788545f2a2';
 const PATH = `visgl/deck.gl-data/${COMMIT}/earth/paleogeography/v1/paleodem`;

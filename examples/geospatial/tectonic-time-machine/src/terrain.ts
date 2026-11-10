@@ -4,7 +4,7 @@
 // NASA Blue Marble imagery has separate source terms; see assets/blue-marble.jpg.license.
 import terrainImageUrl from '../assets/blue-marble.jpg';
 export const TERRAIN_URL = terrainImageUrl;
-export async function loadTerrain(signal) {
+export async function loadTerrain(signal: AbortSignal) {
   const response = await fetch(TERRAIN_URL, {
     signal: AbortSignal.any([signal, AbortSignal.timeout(15000)])
   });

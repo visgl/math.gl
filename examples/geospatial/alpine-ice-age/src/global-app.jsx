@@ -1,19 +1,19 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {canCenterMap} from './map-center.js';
+import {canCenterMap} from './map-center.ts';
 import React, {useEffect, useRef, useState} from 'react';
 import {loadGlobalSimulation, sampleAt, clampAge} from './data.js';
 import {createGlobalScene} from './global-scene.js';
-import {GLOBAL_VIEWS} from './map-options.js';
+import {GLOBAL_VIEWS} from './map-options.ts';
 import './style.css';
 import AttributionWidget from '../../../common/attribution-widget.jsx';
-import {GLOBAL_SOURCES, INSET_REFERENCE_SOURCES} from './attribution.js';
-import {climateAt, loadClimate} from './climate.js';
+import {GLOBAL_SOURCES, INSET_REFERENCE_SOURCES} from './attribution.ts';
+import {climateAt, loadClimate} from './climate.ts';
 import {loadKrappSimulation, krappPhase, KRAPP_CHAPTERS} from './krapp-data.js';
-import {useChapterTitle} from './use-chapter-title.js';
-import {KRAPP_SOURCES} from './attribution.js';
-import {glacialPhase} from './glacial-phase.js';
+import {useChapterTitle} from './use-chapter-title.ts';
+import {KRAPP_SOURCES} from './attribution.ts';
+import {glacialPhase} from './glacial-phase.ts';
 const CHAPTERS = [
   {age: 80, name: 'Reconstruction begins'},
   {age: 60, name: 'Earlier ice sheets'},

@@ -1,7 +1,10 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-export const REGIONAL_VIEWS = {
+export const REGIONAL_VIEWS: Record<
+  string,
+  {title: string; bounds: [number, number, number, number]; definition: string}
+> = {
   albersNorthAmerica: {
     title: 'Albers · North America',
     bounds: [-170, 25, -45, 85],
@@ -13,10 +16,10 @@ export const REGIONAL_VIEWS = {
     definition: '+proj=aea +lon_0=20 +lat_0=55 +lat_1=45 +lat_2=65'
   }
 };
-export function regionalCoordinate(view, lon, lat) {
+export function regionalCoordinate(view: string, lon: number, lat: number): [number, number] {
   return [lon, view === 'merc' ? Math.max(-85, Math.min(85, lat)) : lat];
 }
-export function inRegion(view, lon, lat) {
+export function inRegion(view: string, lon: number, lat: number) {
   const region = REGIONAL_VIEWS[view];
   if (!region) return true;
   const [west, south, east, north] = region.bounds;

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {ParquetSource} from 'math.gl-parquet-loader';
-import {DATASETS} from './sources.js';
+import {DATASETS} from './sources.ts';
 export const KRAPP_CHAPTERS = [
   {age: 650, name: 'Günz'},
   {age: 450, name: 'Mindel'},

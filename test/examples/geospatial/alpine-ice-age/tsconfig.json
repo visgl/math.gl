@@ -1,0 +1,6 @@
+{
+  "extends": "../../../../examples/geospatial/alpine-ice-age/tsconfig.json",
+  "include": [
+    "../../../../examples/geospatial/alpine-ice-age/src/**/*"
+  ]
+}

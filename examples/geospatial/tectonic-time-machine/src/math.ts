@@ -4,7 +4,7 @@
 // Original spherical interpolation and scenario math; no upstream implementation source.
 const DEG = Math.PI / 180;
 export const IDENTITY = [1, 0, 0, 0];
-export function unitVector(lon, lat, out = new Float64Array(3)) {
+export function unitVector(lon: number, lat: number, out: NumericOutput = new Float64Array(3)) {
   const phi = lat * DEG,
     lambda = lon * DEG,
     c = Math.cos(phi);
@@ -13,7 +13,14 @@ export function unitVector(lon, lat, out = new Float64Array(3)) {
   out[2] = Math.sin(phi);
   return out;
 }
-export function slerp(a, b, t, out, aOffset = 0, bOffset = 0) {
+export function slerp(
+  a: ArrayLike<number>,
+  b: ArrayLike<number>,
+  t: number,
+  out: NumericOutput,
+  aOffset = 0,
+  bOffset = 0
+) {
   let dot = 0;
   for (let i = 0; i < 4; i++) dot += a[aOffset + i] * b[bOffset + i];
   const sign = dot < 0 ? -1 : 1;
@@ -35,7 +42,7 @@ export function slerp(a, b, t, out, aOffset = 0, bOffset = 0) {
   for (let i = 0; i < 4; i++) out[i] /= length;
   return out;
 }
-export function rotationBetween(from, to) {
+export function rotationBetween(from: readonly [number, number], to: readonly [number, number]) {
   const a = unitVector(...from),
     b = unitVector(...to);
   const dot = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
@@ -56,7 +63,13 @@ export function rotationBetween(from, to) {
   return q.map(x => x / n);
 }
 /** Scalar kernel writes lon/lat into caller storage; quaternions use the service's w,x,y,z order. */
-export function rotateToLonLat(q, xyz, offset, out, target) {
+export function rotateToLonLat(
+  q: ArrayLike<number>,
+  xyz: ArrayLike<number>,
+  offset: number,
+  out: NumericOutput,
+  target: number
+) {
   const x = xyz[offset],
     y = xyz[offset + 1],
     z = xyz[offset + 2];
@@ -69,7 +82,13 @@ export function rotateToLonLat(q, xyz, offset, out, target) {
   out[target] = Math.atan2(ry, rx) / DEG;
   out[target + 1] = Math.atan2(rz, Math.hypot(rx, ry)) / DEG;
 }
-export function historicalRotation(table, pid, age, out, maxAge = 500) {
+export function historicalRotation(
+  table: Record<string, RotationSlice>,
+  pid: number,
+  age: number,
+  out: NumericOutput,
+  maxAge = 500
+) {
   const low = Math.floor(age / 10) * 10,
     high = age === low ? low : Math.min(maxAge, low + 10);
   const lower = table[String(low)],
@@ -78,8 +97,8 @@ export function historicalRotation(table, pid, age, out, maxAge = 500) {
   // Legacy row fixtures remain useful for the scalar math tests.
   const a = lower?.values || lower?.[pid],
     b = upper?.values || upper?.[pid];
-  const aOffset = lower?.values ? lower.indices.get(pid) * 4 : 0;
-  const bOffset = upper?.values ? upper.indices.get(pid) * 4 : 0;
+  const aOffset = lower?.values ? lower.indices.get(pid)! * 4 : 0;
+  const bOffset = upper?.values ? upper.indices.get(pid)! * 4 : 0;
   if (!a || !b || !Number.isFinite(aOffset) || !Number.isFinite(bOffset)) return false;
   if (
     (lower?.available && !lower.available[aOffset / 4]) ||
@@ -98,13 +117,21 @@ export function historicalRotation(table, pid, age, out, maxAge = 500) {
   slerp(a, b, (age - low) / 10, out, aOffset, bOffset);
   return true;
 }
-function isIdentity(q, offset) {
+function isIdentity(q: ArrayLike<number>, offset: number) {
   return (
     Math.abs(q[offset]) > 0.999999999 &&
     Math.hypot(q[offset + 1], q[offset + 2], q[offset + 3]) < 1e-10
   );
 }
-export const REGIONS = {
+export const REGIONS: Record<
+  string,
+  {
+    center: [number, number];
+    atlantic: [number, number];
+    polar: [number, number];
+    color: [number, number, number];
+  }
+> = {
   'North America': {
     center: [-100, 45],
     atlantic: [-25, 35],
@@ -124,7 +151,7 @@ export const REGIONS = {
   Australia: {center: [135, -25], atlantic: [55, -25], polar: [150, 40], color: [219, 152, 195]},
   Antarctica: {center: [0, -90], atlantic: [20, -65], polar: [-170, 30], color: [166, 193, 211]}
 };
-export function regionFor(lon, lat) {
+export function regionFor(lon: number, lat: number) {
   if (lat < -55) return 'Antarctica';
   if (lon < -30) return lat > 12 ? 'North America' : 'South America';
   if (lon > 100 && lat < -10) return 'Australia';
@@ -132,19 +159,34 @@ export function regionFor(lon, lat) {
   if (lon > -25 && lon < 55 && lat < 36) return 'Africa';
   return lon < 55 ? 'Europe' : 'Asia';
 }
-export function futureRotations(scenario) {
+export function futureRotations(scenario: 'center' | 'atlantic' | 'polar') {
   return Object.fromEntries(
     Object.entries(REGIONS).map(([name, r]) => [name, rotationBetween(r.center, r[scenario])])
   );
 }
-export function futureRotation(target, years, out) {
+export function futureRotation(target: ArrayLike<number>, years: number, out: NumericOutput) {
   const t = Math.max(0, Math.min(1, years / 250));
   return slerp(IDENTITY, target, t * t * (3 - 2 * t), out);
 }
-export function timeLabel(time) {
+export function timeLabel(time: number) {
   return time < 0
     ? `${Math.abs(time).toFixed(0)} Ma ago`
     : time > 0
       ? `+${time.toFixed(0)} million years`
       : 'Present day';
 }
+
+type NumericOutput = number[] | Float64Array | Float32Array;
+type RotationSlice =
+  | {
+      values: ArrayLike<number>;
+      indices: ReadonlyMap<number, number>;
+      available?: ArrayLike<number>;
+      [plateId: number]: never;
+    }
+  | {
+      values?: undefined;
+      indices?: undefined;
+      available?: undefined;
+      [plateId: number]: ArrayLike<number>;
+    };

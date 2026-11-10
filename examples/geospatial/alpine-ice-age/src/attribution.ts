@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {DATA_COMMIT} from './sources.js';
+import {DATA_COMMIT} from './sources.ts';
 const hosted = `https://github.com/visgl/deck.gl-data/tree/${DATA_COMMIT}/earth/glaciations/v1`;
 export const ALPINE_SOURCES = [
   {

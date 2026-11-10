@@ -7,8 +7,8 @@ import {mountScene, VIEWS} from './scene.js';
 import {loadModel} from './data.js';
 import parquetWorkerUrl from 'math.gl-parquet-loader/worker';
 import {maintainHistory} from './history-stream.js';
-import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime} from './sources.js';
-import {REGIONS, timeLabel} from './math.js';
+import {DATA_SOURCES, DEFAULT_SOURCE, sourceFor, clampTime} from './sources.ts';
+import {REGIONS, timeLabel} from './math.ts';
 import {
   EARTH_EVENTS,
   EVENT_CATEGORIES,
@@ -32,7 +32,7 @@ import {
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
 import AttributionWidget from '../../../common/attribution-widget.jsx';
-import {tectonicSources} from './attribution.js';
+import {tectonicSources} from './attribution.ts';
 export default function TectonicTimeMachine() {
   const canvas = useRef(null),
     stage = useRef(null),
