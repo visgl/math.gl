@@ -10,11 +10,15 @@ import {
 import './example-panel.css';
 import {configureCompactPanel} from './compact-panel.js';
 
-/** Mount themed DOM controls; the invisible variant hides chrome and stays open. */
+/** Mount themed DOM controls; the invisible variant hides chrome and stays open.
+ * @param {HTMLElement | null} host
+ * @param {{title?: string, theme?: string, width?: number, variant?: 'default' | 'invisible'}} options
+ */
 export function mountInfoBox(
   host,
   {title, theme = 'sleek-dark', width = 280, variant = 'default'} = {}
 ) {
+  if (!host) throw new Error('Info box host is required');
   const invisible = variant === 'invisible';
   host.classList.add('example-panel', 'example-info-box');
   host.classList.toggle('example-panel-invisible', invisible);
