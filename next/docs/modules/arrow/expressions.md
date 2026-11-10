@@ -338,3 +338,25 @@ Each named `ArrowTableFunction` owns a non-empty `prototypes` array. A prototype
 Compilation selects one prototype: exact signatures win, otherwise Float16 can widen to Float32 or Float64 and Float32 can widen to Float64. The least total widening wins; ties are ambiguous and fail binding. Integer/float and mixed integer-width conversions require explicit casts. Literals follow typed arguments; calls containing only numeric literals prefer their default Float64 type. Use typed null casts to disambiguate otherwise ambiguous null arguments. Kernels receive the chosen prototype's declared input types. No per-batch overload lookup or callback probing occurs.
 
 `ArrowEvaluationError` exposes `code` values `domain`, `conversion`, `overflow` and `divisionByZero`. Numeric data errors use this class; unknown names, incompatible signatures, schema mismatches and implementation failures remain ordinary fatal errors. Division and modulo by zero throw for integer and floating Arrow arithmetic. Error recovery is added separately.
+
+## TRY and COALESCE[​](#try-and-coalesce "Direct link to TRY and COALESCE")
+
+`TRY(expression)` converts classified row-level domain, conversion, overflow, and division-by-zero errors to null. `TRY(expression, fallback)` evaluates the fallback only for failing rows; a genuine null result stays null. Use `COALESCE(TRY(expression), fallback)` to replace both.
+
+```
+import {parseSQLExpression} from '@math.gl/core/sql';
+
+import {SQRT} from '@math.gl/arrow/math';
+
+const compiled = compileArrowExpression(parseSQLExpression('TRY(SQRT(value), 0)'), {
+
+  inputSchema: arrowTable.schema,
+
+  functions: [SQRT]
+
+});
+```
+
+Fallback errors propagate unless separately wrapped in TRY. Nested recovery scopes are isolated. Syntax errors, unknown names, incompatible types, cancellation and unexpected callback/kernel exceptions remain fatal. TRY never retries a batch or invokes a callback twice. Recovery boundaries materialize an output vector; pure scalar operations outside them remain fused.
+
+Vector implementations can call `context.reportError?.(row, error)` with a classified error and then skip the rest of that row. Outside TRY the reporter throws. Inside TRY it records the row failure and clears that row in the kernel's active mask. A kernel without a reporter must throw the error. A thrown batch exception cannot be associated with a row and remains fatal, even inside TRY.
