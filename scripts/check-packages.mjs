@@ -38,6 +38,8 @@ for (const name of expected) {
     const imported = await import(specifier);
     const required = require(specifier);
     if (specifier === '@math.gl/arrow/expressions') {
+      assert.equal(imported.isArrowEvaluationError(new required.ArrowEvaluationError('domain', 'cross-bundle')), true);
+      assert.equal(required.isArrowEvaluationError(new imported.ArrowEvaluationError('overflow', 'cross-bundle')), true);
       assert.equal('ArrowFunctionRegistry' in imported, false);
       assert.equal('ArrowFunctionRegistry' in required, false);
     }

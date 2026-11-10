@@ -60,36 +60,44 @@ function colorFunction(
   const type = bytes ? rgba8 : rgba;
   return Object.freeze({
     name,
-    arguments: types.map((type, index) => new Field(`arg${index + 1}`, type, true)),
-    result: new Field('color', type, true),
-    evaluate(vectors, {length, activeRows}) {
-      const readers = vectors.map(vector => new ColumnReader(vector));
-      const read = readers.map(reader => (row: number) => reader.get(row));
-      const write = prepare(read, vectors);
-      const channels = bytes ? new Uint8Array(length * 4) : new Float32Array(length * 4);
-      const validity = new Uint8Array(Math.ceil(length / 8));
-      let nullCount = length;
-      for (let row = 0; row < length; row++)
-        if (
-          activeRows[row] &&
-          readers.every(reader => reader.isValid(row)) &&
-          write(row, channels, row * 4)
-        ) {
-          validity[row >> 3] |= 1 << (row & 7);
-          nullCount--;
+    prototypes: [
+      {
+        arguments: types.map((type, index) => new Field(`arg${index + 1}`, type, true)),
+        result: new Field('color', type, true),
+        evaluate(vectors, {length, activeRows}) {
+          const readers = vectors.map(vector => new ColumnReader(vector));
+          const read = readers.map(reader => (row: number) => reader.get(row));
+          const write = prepare(read, vectors);
+          const channels = bytes ? new Uint8Array(length * 4) : new Float32Array(length * 4);
+          const validity = new Uint8Array(Math.ceil(length / 8));
+          let nullCount = length;
+          for (let row = 0; row < length; row++)
+            if (
+              activeRows[row] &&
+              readers.every(reader => reader.isValid(row)) &&
+              write(row, channels, row * 4)
+            ) {
+              validity[row >> 3] |= 1 << (row & 7);
+              nullCount--;
+            }
+          return makeVector(
+            makeData({
+              type: type as FixedSizeList,
+              length,
+              nullBitmap: validity,
+              nullCount,
+              child: bytes
+                ? makeData({type: new Uint8(), data: channels as Uint8Array, length: length * 4})
+                : makeData({
+                    type: new Float32(),
+                    data: channels as Float32Array,
+                    length: length * 4
+                  })
+            })
+          );
         }
-      return makeVector(
-        makeData({
-          type: type as FixedSizeList,
-          length,
-          nullBitmap: validity,
-          nullCount,
-          child: bytes
-            ? makeData({type: new Uint8(), data: channels as Uint8Array, length: length * 4})
-            : makeData({type: new Float32(), data: channels as Float32Array, length: length * 4})
-        })
-      );
-    }
+      }
+    ]
   });
 }
 function numeric(read: readonly Reader[], row: number): number[] | null {
@@ -205,28 +213,32 @@ export const COLOR_TO_RGBA8: ArrowTableFunction = /* @__PURE__ */ colorFunction(
 /** Serializes normalized RGBA as lowercase #rrggbbaa, retaining transparent colors. */
 export const COLOR_TO_HEX: ArrowTableFunction = /* @__PURE__ */ Object.freeze({
   name: 'COLOR_TO_HEX',
-  arguments: [new Field('color', rgba, true)],
-  result: new Field('hex', text, true),
-  evaluate([vector], {length, activeRows}) {
-    const read = tuple(vector!);
-    return vectorFromArray(
-      Array.from({length}, (_, row) => {
-        if (!activeRows[row] || !vector!.isValid(row)) return null;
-        const value = colorAt(read, row);
-        return value
-          ? '#' +
-              value
-                .map(x =>
-                  Math.round(x * 255)
-                    .toString(16)
-                    .padStart(2, '0')
-                )
-                .join('')
-          : null;
-      }),
-      text
-    );
-  }
+  prototypes: [
+    {
+      arguments: [new Field('color', rgba, true)],
+      result: new Field('hex', text, true),
+      evaluate([vector], {length, activeRows}) {
+        const read = tuple(vector!);
+        return vectorFromArray(
+          Array.from({length}, (_, row) => {
+            if (!activeRows[row] || !vector!.isValid(row)) return null;
+            const value = colorAt(read, row);
+            return value
+              ? '#' +
+                  value
+                    .map(x =>
+                      Math.round(x * 255)
+                        .toString(16)
+                        .padStart(2, '0')
+                    )
+                    .join('')
+              : null;
+          }),
+          text
+        );
+      }
+    }
+  ]
 });
 /** Maps an explicit domain linearly between two colors. */
 export const COLOR_RAMP: ArrowTableFunction = /* @__PURE__ */ colorFunction(

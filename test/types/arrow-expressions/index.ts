@@ -31,10 +31,14 @@ const evaluate: ArrowTableFunctionType = ([prices], {length, activeRows}) =>
   );
 const discount: ArrowTableFunction = {
   name: 'discount',
-  arguments: [new Field('price', new Float64(), false)],
-  result: new Field('discounted', new Float64(), false),
-  evaluate,
-  evaluateScalar: (price: number) => price * 0.9
+  prototypes: [
+    {
+      arguments: [new Field('price', new Float64(), false)],
+      result: new Field('discounted', new Float64(), false),
+      evaluate,
+      evaluateScalar: (price: number) => price * 0.9
+    }
+  ]
 };
 const functions = [discount];
 const options = {inputSchema: batch.schema, functions};
@@ -103,12 +107,12 @@ createTurfArrowFunction({
   evaluate: booleanPointInPolygon
 });
 
-// @ts-expect-error evaluate is required even when a fused callback is supplied.
 const missingVector: ArrowTableFunction = {
   name: 'invalid',
-  arguments: [],
-  result: new Field('x', new Float64()),
-  evaluateScalar: () => 1
+  prototypes: [
+    // @ts-expect-error evaluate is required even when a fused callback is supplied.
+    {arguments: [], result: new Field('x', new Float64()), evaluateScalar: () => 1}
+  ]
 };
 // @ts-expect-error Public registration uses declarations, not a registry option.
 compileArrowExpression('price', {inputSchema: batch.schema, registry: {}});
@@ -118,9 +122,13 @@ createArrowExpressionTask({functions});
 const rgbaType = new FixedSizeList(4, new Field('channel', new Float32(), false));
 const color: ArrowTableFunction = {
   name: 'color',
-  arguments: [new Field('bins', new List(new Field('item', new Float64(), false)), false)],
-  result: new Field('rgba', rgbaType, true),
-  evaluate: (_arguments, {length}) => vectorFromArray(new Array(length).fill(null), rgbaType)
+  prototypes: [
+    {
+      arguments: [new Field('bins', new List(new Field('item', new Float64(), false)), false)],
+      result: new Field('rgba', rgbaType, true),
+      evaluate: (_arguments, {length}) => vectorFromArray(new Array(length).fill(null), rgbaType)
+    }
+  ]
 };
 compileArrowFunction('color', ['[0, 1, 2]'], {
   inputSchema: batch.schema,
@@ -132,9 +140,13 @@ compileArrowArray(['x', 'y'], {inputSchema: batch.schema, type: 'float32'}).eval
 import {Float16} from 'apache-arrow';
 const halfFunction: ArrowTableFunction = {
   name: 'half',
-  arguments: [new Field('x', new Float16())],
-  result: new Field('x', new Float16()),
-  evaluate: ([value]) => value!
+  prototypes: [
+    {
+      arguments: [new Field('x', new Float16())],
+      result: new Field('x', new Float16()),
+      evaluate: ([value]) => value!
+    }
+  ]
 };
 void halfFunction;
 import {COLOR_RGB, COLOR_TO_RGBA8} from '@math.gl/arrow/color';

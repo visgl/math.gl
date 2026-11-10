@@ -19,10 +19,8 @@ export type ArrowTableFunctionType = (
   }
 ) => Vector;
 
-/** Named, schema-declared function with one result value per input row. */
-export type ArrowTableFunction = Readonly<{
-  /** Unique expression identifier; built-in names are reserved. */
-  name: string;
+/** One schema-bound implementation of a named table function. */
+export type ArrowTableFunctionPrototype = Readonly<{
   /** Ordered argument fields, with exact types, nullability and extension metadata. */
   arguments: readonly Field[];
   /** Declared result field; its name is retained for direct calls. */
@@ -33,6 +31,14 @@ export type ArrowTableFunction = Readonly<{
   evaluate: ArrowTableFunctionType;
   /** Optional equivalent primitive implementation used for fused expression execution. */
   evaluateScalar?(...arguments_: ArrowExpressionValue[]): ArrowExpressionValue;
+}>;
+
+/** Named overload group; each argument signature must be unique. */
+export type ArrowTableFunction = Readonly<{
+  /** Unique expression identifier; built-in names are reserved. */
+  name: string;
+  /** Typed implementations selected once when compiling a call. */
+  prototypes: readonly ArrowTableFunctionPrototype[];
 }>;
 
 /** Schema binding shared by predicate and expression compilation. */

@@ -51,7 +51,7 @@ The returned evaluator produces a Bool vector using the null semantics described
 ## Named table functions
 
 Pass declarations through `functions`; the compiler builds a private name lookup once per compilation.
-Names must be valid identifiers and unique; built-in names are reserved. No global registry is modified.
+Names must be valid identifiers; built-in names are reserved. Argument signatures within each name must be unique. No global registry is modified.
 Treat declared fields and their types as immutable. Compilation snapshots the declarations and their
 argument arrays, so later changes to the supplied function list do not change existing evaluators.
 
@@ -61,7 +61,7 @@ import {compileArrowFunction, type ArrowTableFunction} from '@math.gl/arrow/expr
 
 const discount: ArrowTableFunction = {
   name: 'discount',
-  arguments: [new Field('price', new Float64(), true)],
+  prototypes: [{arguments: [new Field('price', new Float64(), true)],
   result: new Field('discounted_price', new Float64(), true),
   nullHandling: 'propagate',
   evaluate([prices], {length, activeRows}) {
@@ -70,6 +70,7 @@ const discount: ArrowTableFunction = {
     ), new Float64());
   },
   evaluateScalar: price => Number(price) * 0.9
+  }]
 };
 
 const compiled = compileArrowFunction('discount', ['price'], {
@@ -82,7 +83,7 @@ const prices = compiled.evaluate(batch);
 
 `ArrowTableFunctionType` is the type of `evaluate`: it accepts an ordered `readonly Vector[]`
 and `{activeRows: Uint8Array, length: number}`, and returns a `Vector` of the same length.
-`evaluate` is required and can also be called directly with those arguments. Direct callers must
+`evaluate` is required on every prototype and can be called directly as `function.prototypes[index].evaluate(...)`. Direct callers must
 supply correctly typed vectors and a mask, and honor the declaration's null policy; compilation
 provides these checks and null propagation when invoking functions inside expressions.
 
@@ -375,3 +376,24 @@ without it, Float16 operations fail with a capability error. Other expression ty
 The capability checks reuse the existing core Float16 helpers.
 
 Packed arrays also accept `ARRAY[x,y,z]::FLOAT16[3]` or `compileArrowArray(columns, {inputSchema, type: "float16"})`. Native Float16Array is required for half-precision execution.
+
+
+## Function prototypes and numeric overloads
+
+Each named `ArrowTableFunction` owns a non-empty `prototypes` array. A prototype declares its
+argument fields, result field, null policy, vector implementation and optional fused scalar
+implementation. Multiple objects with the same name may contribute distinct prototypes. Duplicate
+argument-type/metadata signatures are rejected; changing only return type or nullability does not
+create an overload. There are no legacy single-signature aliases.
+
+Compilation selects one prototype: exact signatures win, otherwise Float16 can widen to Float32 or
+Float64 and Float32 can widen to Float64. The least total widening wins; ties are ambiguous and
+fail binding. Integer/float and mixed integer-width conversions require explicit casts. Literals
+follow typed arguments; calls containing only numeric literals prefer their default Float64 type.
+Use typed null casts to disambiguate otherwise ambiguous null arguments. Kernels receive the chosen
+prototype's declared input types. No per-batch overload lookup or callback probing occurs.
+
+`ArrowEvaluationError` exposes `code` values `domain`, `conversion`, `overflow` and
+`divisionByZero`. Numeric data errors use this class; unknown names, incompatible signatures,
+schema mismatches and implementation failures remain ordinary fatal errors. Division and modulo
+by zero throw for integer and floating Arrow arithmetic. Error recovery is added separately.

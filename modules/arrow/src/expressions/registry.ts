@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {physicalKey} from './signature';
 import type {ArrowTableFunction} from './types';
 
 /** Builds one private, immutable declaration lookup per compilation. */
@@ -31,27 +32,48 @@ export function createFunctionLookup(
       ].includes(name)
     )
       throw new Error(`Reserved Arrow function: ${name}`);
-    if (functions.has(name)) throw new Error(`Duplicate Arrow function: ${name}`);
-    if (
-      !Array.isArray(declaration.arguments) ||
-      !declaration.result ||
-      typeof declaration.evaluate !== 'function'
-    )
-      throw new Error('Arrow functions require argument fields, a result field and evaluate');
-    if (
-      declaration.nullHandling !== undefined &&
-      !['propagate', 'call'].includes(declaration.nullHandling)
-    )
-      throw new Error('Unsupported null handling');
-    if (
-      declaration.evaluateScalar !== undefined &&
-      typeof declaration.evaluateScalar !== 'function'
-    )
-      throw new Error('Arrow function evaluateScalar must be a function');
-    functions.set(
-      name,
-      Object.freeze({...declaration, arguments: Object.freeze([...declaration.arguments])})
-    );
+    if (!Array.isArray(declaration.prototypes) || !declaration.prototypes.length)
+      throw new Error('Arrow functions require one or more prototypes');
+    const prototypes = [...(functions.get(name)?.prototypes ?? [])];
+    for (const prototype of declaration.prototypes) {
+      if (
+        !prototype ||
+        typeof prototype !== 'object' ||
+        !Array.isArray(prototype.arguments) ||
+        !prototype.result ||
+        typeof prototype.evaluate !== 'function'
+      )
+        throw new Error('Arrow prototypes require argument fields, a result field and evaluate');
+      if (
+        prototype.nullHandling !== undefined &&
+        !['propagate', 'call'].includes(prototype.nullHandling)
+      )
+        throw new Error('Unsupported null handling');
+      if (prototype.evaluateScalar !== undefined && typeof prototype.evaluateScalar !== 'function')
+        throw new Error('Arrow function evaluateScalar must be a function');
+      const key = JSON.stringify(
+        prototype.arguments.map(field => [
+          physicalKey(field.type),
+          [...field.metadata].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+        ])
+      );
+      if (
+        prototypes.some(
+          existing =>
+            JSON.stringify(
+              existing.arguments.map(field => [
+                physicalKey(field.type),
+                [...field.metadata].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+              ])
+            ) === key
+        )
+      )
+        throw new Error(`Duplicate Arrow function signature: ${name}`);
+      prototypes.push(
+        Object.freeze({...prototype, arguments: Object.freeze([...prototype.arguments])})
+      );
+    }
+    functions.set(name, Object.freeze({name, prototypes: Object.freeze(prototypes)}));
   }
   return functions;
 }

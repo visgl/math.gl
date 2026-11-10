@@ -29,6 +29,8 @@ import {parse, type Expression} from '@math.gl/core/expressions';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
 import {bindCast} from './cast';
 import {float16Values, roundFloat16} from './float16';
+import {physicalKey, extensionKey} from './signature';
+import {ArrowEvaluationError} from './errors';
 import {createFunctionLookup} from './registry';
 import {
   isTupleType,
@@ -40,6 +42,7 @@ import {
 } from './list-values';
 import type {
   ArrowTableFunction,
+  ArrowTableFunctionPrototype,
   ArrowExpression,
   ArrowExpressionOptions,
   ArrowExpressionEvaluationOptions,
@@ -185,44 +188,6 @@ export function compileArrowArray(
     } as Expression,
     options
   );
-}
-
-/** Compares physical encoding as well as logical type when reusing a bound evaluator. */
-function physicalKey(type: DataType): string {
-  try {
-    return DataType.isDictionary(type)
-      ? `dictionary:${typeKey(type.indices)}:${typeKey(type.dictionary)}:${type.isOrdered}`
-      : typeKey(type);
-  } catch {
-    // Unreferenced columns may have nested or extension layouts outside this evaluator's subset.
-    const properties = [
-      'bitWidth',
-      'isSigned',
-      'precision',
-      'scale',
-      'unit',
-      'timezone',
-      'byteWidth',
-      'listSize',
-      'keysSorted',
-      'isOrdered',
-      'mode'
-    ].map(key => (type as unknown as Record<string, unknown>)[key]);
-    return JSON.stringify([
-      type.typeId,
-      properties,
-      DataType.isUnion(type) ? Array.from(type.typeIds) : null,
-      DataType.isDictionary(type)
-        ? [physicalKey(type.indices), physicalKey(type.dictionary), type.isOrdered]
-        : null,
-      type.children?.map(field => [
-        field.name,
-        physicalKey(field.type),
-        field.nullable,
-        extensionKey(field)
-      ])
-    ]);
-  }
 }
 
 /** Builds one vector while validating output values before Arrow can truncate them. */
@@ -438,23 +403,23 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
   if (ast.type === 'ConditionalExpression') {
     const condition = bind(ast.test, options, bool);
     requireType(condition, 'bool');
-    // Bind non-literal branches first so tuple literals inherit an exact declared type.
+    // A computed conditional produces logical values, even when passed to a vector kernel.
+    // Raw dictionary encodings are retained only for direct source arguments.
     let yes: Node, no: Node;
     if (isContextualLiteral(ast.consequent) && !isContextualLiteral(ast.alternate)) {
-      no = bind(ast.alternate, options, expected, vectorInput);
-      yes = bind(ast.consequent, options, no.field.type, vectorInput);
+      no = bind(ast.alternate, options, expected);
+      yes = bind(ast.consequent, options, no.field.type);
     } else {
-      yes = bind(ast.consequent, options, expected, vectorInput);
+      yes = bind(ast.consequent, options, expected);
       no = bind(
         ast.alternate,
         options,
         isContextualLiteral(ast.alternate) && !DataType.isNull(yes.field.type)
           ? yes.field.type
-          : expected,
-        vectorInput
+          : expected
       );
       if (isContextualLiteral(ast.consequent) && !DataType.isNull(no.field.type))
-        yes = bind(ast.consequent, options, no.field.type, vectorInput);
+        yes = bind(ast.consequent, options, no.field.type);
     }
     const tuple = isTupleType(yes.field.type);
     const list = DataType.isList(yes.field.type);
@@ -656,8 +621,8 @@ function bindBinary(ast: any, options: BindingOptions): Node {
             y = b.get(row) as any;
           if (x === null || y === null) return null;
           if (comparison) return compare(op, x, y);
-          if (integer && (op === '/' || op === '%') && (y === 0 || y === 0n))
-            throw new RangeError('Division by zero');
+          if ((op === '/' || op === '%') && (y === 0 || y === 0n))
+            throw new ArrowEvaluationError('divisionByZero', 'Division by zero');
           const result =
             op === '+'
               ? x + y
@@ -747,9 +712,14 @@ function bindCall(ast: any, options: BindingOptions): Node {
           data.setValid(row, true);
           for (let column = 0; column < values.length; column++) {
             const index = row * values.length + column;
-            output[index] = values[column]!.get(row) as number;
-            if (name === 'array_float16' && !Number.isFinite(output[index]))
-              throw new RangeError('Float16 ARRAY cast overflow or non-finite value');
+            const value = values[column]!.get(row) as number;
+            output[index] = value;
+            if (
+              name === 'array_float16' &&
+              Number.isFinite(value) &&
+              !Number.isFinite(output[index])
+            )
+              throw new ArrowEvaluationError('overflow', 'Float16 ARRAY cast overflow');
           }
         }
         return vectorReader(vector);
@@ -807,6 +777,11 @@ function bindCall(ast: any, options: BindingOptions): Node {
             if (conversion) {
               const value = child.get(row);
               if (value === null) return null;
+              if (name === 'toInt64' && typeof value === 'number' && !Number.isInteger(value))
+                throw new ArrowEvaluationError(
+                  'conversion',
+                  'Int64 conversion requires a finite integer'
+                );
               const result = name === 'toInt64' ? BigInt(value as number | bigint) : Number(value);
               validate(result);
               return result;
@@ -827,29 +802,117 @@ function bindCall(ast: any, options: BindingOptions): Node {
       }
     };
   }
-  const declaration = options.functionLookup.get(name);
-  if (!declaration) throw new Error(`Unknown Arrow function: ${name}`);
-  if (ast.arguments.length !== declaration.arguments.length)
-    throw new Error(`Wrong argument count for ${name}`);
+  const group = options.functionLookup.get(name);
+  if (!group) throw new Error(`Unknown Arrow function: ${name}`);
+  const inferred = ast.arguments.map((argument: any) =>
+    needsArgumentContext(argument) ? undefined : bind(argument, options, undefined, true)
+  ) as (Node | undefined)[];
+  const candidates: {prototype: ArrowTableFunctionPrototype; arguments: Node[]; cost: number}[] =
+    [];
+  const allLiteralArguments = ast.arguments.every(isContextualLiteral);
+  let contextualError: unknown;
+  for (const prototype of group.prototypes) {
+    if (ast.arguments.length !== prototype.arguments.length) continue;
+    let cost = 0;
+    const arguments_: Node[] = [];
+    let compatible = true;
+    for (let index = 0; index < ast.arguments.length; index++) {
+      const argument = ast.arguments[index],
+        field = prototype.arguments[index]!,
+        source = inferred[index];
+      let bound: Node;
+      if (isContextualLiteral(argument) || !source) {
+        try {
+          bound = bind(argument, options, field.type, !prototype.evaluateScalar);
+        } catch (error) {
+          contextualError = error;
+          compatible = false;
+          break;
+        }
+        if (
+          source &&
+          allLiteralArguments &&
+          physicalKey(valueType(source.field.type)) !== physicalKey(field.type)
+        )
+          cost += 4;
+      } else {
+        bound = source!;
+      }
+      // Contextual binding can retain a column's physical type (for example
+      // flag ? intColumn : null). Validate it just like an inferred argument.
+      const sourceType = valueType(bound.field.type);
+      if (DataType.isDictionary(bound.field.type) && !DataType.isDictionary(field.type)) cost += 1;
+      if (
+        physicalKey(DataType.isDictionary(field.type) ? bound.field.type : sourceType) !==
+        physicalKey(field.type)
+      ) {
+        if (
+          DataType.isFloat(sourceType) &&
+          DataType.isFloat(field.type) &&
+          sourceType.precision < field.type.precision
+        ) {
+          cost += field.type.precision - sourceType.precision;
+          const child = bound,
+            round = roundToType(field.type);
+          bound = {
+            field: new Field(
+              child.field.name,
+              field.type,
+              child.field.nullable,
+              child.field.metadata
+            ),
+            hasKernel: child.hasKernel,
+            prepare(batch, active) {
+              const prepared = child.prepare(batch, active);
+              return {get: row => round(prepared.get(row))};
+            }
+          };
+        } else {
+          compatible = false;
+          break;
+        }
+      }
+      if (
+        [...field.metadata].some(([key, value]) => bound.field.metadata.get(key) !== value) ||
+        (prototype.nullHandling === 'call' && bound.field.nullable && !field.nullable)
+      ) {
+        compatible = false;
+        break;
+      }
+      arguments_.push(bound);
+    }
+    if (compatible) candidates.push({prototype, arguments: arguments_, cost});
+  }
+  const untypedNumeric = (value: any): boolean =>
+    (value.type === 'Literal' && (value.value === null || typeof value.value === 'number')) ||
+    isSignedLiteral(value) ||
+    (value.type === 'ConditionalExpression' &&
+      untypedNumeric(value.consequent) &&
+      untypedNumeric(value.alternate));
+  const allFloat64 = (prototype: ArrowTableFunctionPrototype) =>
+    prototype.arguments.every(
+      field => DataType.isFloat(field.type) && field.type.precision === Precision.DOUBLE
+    );
+  if (
+    ast.arguments.every(untypedNumeric) &&
+    candidates.every(candidate =>
+      candidate.prototype.arguments.every(
+        field => DataType.isInt(field.type) || DataType.isFloat(field.type)
+      )
+    ) &&
+    candidates.some(candidate => allFloat64(candidate.prototype))
+  ) {
+    for (const candidate of candidates) if (!allFloat64(candidate.prototype)) candidate.cost++;
+  }
+  candidates.sort((a, b) => a.cost - b.cost);
+  if (!candidates.length && group.prototypes.length === 1 && contextualError) throw contextualError;
+  if (!candidates.length)
+    throw new Error(`Argument type mismatch or wrong argument count for ${name}`);
+  if (candidates[1]?.cost === candidates[0]!.cost)
+    throw new Error(`Ambiguous Arrow function call: ${name}`);
+  const declaration = candidates[0]!.prototype;
+  const arguments_ = candidates[0]!.arguments;
   const evaluateVector = declaration.evaluateScalar ? undefined : declaration.evaluate;
-  const arguments_ = ast.arguments.map((argument: any, index: number) => {
-    const field = declaration.arguments[index]!;
-    const vectorInput = !declaration.evaluateScalar;
-    const bound = bind(argument, options, field.type, vectorInput);
-    if (
-      (vectorInput
-        ? physicalKey(
-            DataType.isDictionary(field.type) ? bound.field.type : valueType(bound.field.type)
-          ) !== physicalKey(field.type)
-        : typeKey(bound.field.type) !== typeKey(field.type)) ||
-      (vectorInput &&
-        [...field.metadata].some(([key, value]) => bound.field.metadata.get(key) !== value))
-    )
-      throw new Error(`Argument type mismatch for ${name}`);
-    if (declaration.nullHandling === 'call' && bound.field.nullable && !field.nullable)
-      throw new Error(`Nullable argument not accepted by ${name}`);
-    return bound;
-  }) as Node[];
   const result = declaration.result;
   const tuple = isTupleType(result.type);
   if (tuple && declaration.evaluateScalar)
@@ -946,13 +1009,22 @@ function isSignedLiteral(ast: any): boolean {
   );
 }
 function isContextualLiteral(ast: any): boolean {
-  return ast.type === 'Literal' || ast.type === 'ArrayExpression' || isSignedLiteral(ast);
+  return (
+    ast.type === 'Literal' ||
+    ast.type === 'ArrayExpression' ||
+    isSignedLiteral(ast) ||
+    (ast.type === 'ConditionalExpression' &&
+      isContextualLiteral(ast.consequent) &&
+      isContextualLiteral(ast.alternate))
+  );
 }
 
-/** Geometry encoding/CRS metadata is part of a schema-bound vector function contract. */
-function extensionKey(field: Field): string {
-  return JSON.stringify([
-    field.metadata.get('ARROW:extension:name'),
-    field.metadata.get('ARROW:extension:metadata')
-  ]);
+/** Array and null branches receive their list/tuple type from the selected prototype. */
+function needsArgumentContext(ast: any): boolean {
+  return (
+    ast.type === 'ArrayExpression' ||
+    (ast.type === 'Literal' && ast.value === null) ||
+    (ast.type === 'ConditionalExpression' &&
+      (needsArgumentContext(ast.consequent) || needsArgumentContext(ast.alternate)))
+  );
 }

@@ -4,6 +4,7 @@
 
 import {DataType, Precision, type Vector, type Data} from 'apache-arrow';
 import {float16Values, requireFloat16} from './float16';
+import {ArrowEvaluationError} from './errors';
 import type {ArrowExpressionValue} from './types';
 
 /** Dictionary encodings do not change expression value types. */
@@ -105,7 +106,8 @@ export function createValueValidator(inputType: DataType): (value: ArrowExpressi
       return value => {
         if (value === null) return;
         if (typeof value !== 'bigint') throw new Error('64-bit integers require bigint values');
-        if (value < min || value > max) throw new RangeError('Integer expression overflow');
+        if (value < min || value > max)
+          throw new ArrowEvaluationError('overflow', 'Integer expression overflow');
       };
     }
     const min = type.isSigned ? -(2 ** (type.bitWidth - 1)) : 0;
@@ -113,8 +115,12 @@ export function createValueValidator(inputType: DataType): (value: ArrowExpressi
     return value => {
       if (value === null) return;
       if (typeof value !== 'number' || !Number.isInteger(value))
-        throw new Error('Integer expression requires integral numbers');
-      if (value < min || value > max) throw new RangeError('Integer expression overflow');
+        throw new ArrowEvaluationError(
+          'conversion',
+          'Integer expression requires integral numbers'
+        );
+      if (value < min || value > max)
+        throw new ArrowEvaluationError('overflow', 'Integer expression overflow');
     };
   }
   const expected = DataType.isFloat(type) ? 'number' : key === 'bool' ? 'boolean' : 'string';

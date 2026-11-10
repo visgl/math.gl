@@ -17,6 +17,7 @@ import {
 import {isFloat16Array, NativeFloat16ArrayConstructor} from '@math.gl/core';
 import {parseSQLExpression, parseSQLPredicate, parseSQLQuery} from '@math.gl/core/sql';
 import {
+  ArrowEvaluationError,
   compileArrowArray,
   compileArrowExpression,
   compileArrowPredicate,
@@ -101,9 +102,13 @@ test.runIf(supported)(
     const tuple = new FixedSizeList(2, new Field('channel', new Float16(), false));
     const fn: ArrowTableFunction = {
       name: 'identity',
-      arguments: [new Field('value', tuple)],
-      result: new Field('value', tuple),
-      evaluate: ([v]) => v!
+      prototypes: [
+        {
+          arguments: [new Field('value', tuple)],
+          result: new Field('value', tuple),
+          evaluate: ([v]) => v!
+        }
+      ]
     };
     const expression = compileArrowExpression('x > 1 ? identity([1.0005, 2]) : identity([0, 1])', {
       inputSchema: table.schema,
@@ -143,6 +148,11 @@ test.runIf(supported)(
         row === null ? null : Array.from(row)
       )
     ).toEqual([[1.0009765625], null]);
-    expect(() => narrowed.evaluateTable(wide)).toThrow('overflow');
+    expect(() => narrowed.evaluateTable(wide)).toThrow(ArrowEvaluationError);
+    try {
+      narrowed.evaluateTable(wide);
+    } catch (error) {
+      expect((error as ArrowEvaluationError).code).toBe('overflow');
+    }
   }
 );

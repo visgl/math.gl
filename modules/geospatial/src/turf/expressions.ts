@@ -38,50 +38,60 @@ export function createTurfArrowFunction<const Fields extends readonly Field[]>(
   if (!result.nullable) throw new Error('Turf expression results must be nullable');
   return {
     name: options.name,
-    arguments: fields,
-    result,
-    nullHandling: 'propagate',
-    evaluate(vectors, {activeRows, length}) {
-      const columns = vectors.map((vector, index) => {
-        const column = makeGeoArrowColumnFromArrowVector(vector, {field: fields[index]});
-        let offset = 0;
-        return {
-          ...column,
-          chunks: column.chunks.map(chunk => {
-            const validity = new Uint8Array(Math.ceil(chunk.length / 8));
-            for (let row = 0; row < chunk.length; row++) {
-              if (activeRows[offset + row] && isGeoArrowValueValid(chunk.validity, row))
-                validity[row >> 3] |= 1 << (row & 7);
-            }
-            offset += chunk.length;
-            return {...chunk, validity: {values: validity}};
-          })
-        };
-      });
-      const output = (
-        evaluate as (...args: GeoArrowColumn[]) => TurfBatchResult<Float64Array | Uint8Array>
-      )(...columns);
-      if (
-        output.values.length !== length ||
-        output.validity.length < Math.ceil(length / 8) ||
-        (boolean
-          ? !(output.values instanceof Uint8Array)
-          : !(output.values instanceof Float64Array))
-      )
-        throw new Error('Turf expression kernel must return one declared scalar per input row');
-      const validity = new Uint8Array(Math.ceil(length / 8));
-      const values = boolean ? new Uint8Array(Math.ceil(length / 8)) : output.values;
-      let nullCount = 0;
-      for (let row = 0; row < length; row++) {
-        const bit = 1 << (row & 7);
-        if (activeRows[row] && output.validity[row >> 3]! & bit) {
-          validity[row >> 3] |= bit;
-          if (boolean && output.values[row]) values[row >> 3] |= bit;
-        } else nullCount++;
+    prototypes: [
+      {
+        arguments: fields,
+        result,
+        nullHandling: 'propagate',
+        evaluate(vectors, {activeRows, length}) {
+          const columns = vectors.map((vector, index) => {
+            const column = makeGeoArrowColumnFromArrowVector(vector, {field: fields[index]});
+            let offset = 0;
+            return {
+              ...column,
+              chunks: column.chunks.map(chunk => {
+                const validity = new Uint8Array(Math.ceil(chunk.length / 8));
+                for (let row = 0; row < chunk.length; row++) {
+                  if (activeRows[offset + row] && isGeoArrowValueValid(chunk.validity, row))
+                    validity[row >> 3] |= 1 << (row & 7);
+                }
+                offset += chunk.length;
+                return {...chunk, validity: {values: validity}};
+              })
+            };
+          });
+          const output = (
+            evaluate as (...args: GeoArrowColumn[]) => TurfBatchResult<Float64Array | Uint8Array>
+          )(...columns);
+          if (
+            output.values.length !== length ||
+            output.validity.length < Math.ceil(length / 8) ||
+            (boolean
+              ? !(output.values instanceof Uint8Array)
+              : !(output.values instanceof Float64Array))
+          )
+            throw new Error('Turf expression kernel must return one declared scalar per input row');
+          const validity = new Uint8Array(Math.ceil(length / 8));
+          const values = boolean ? new Uint8Array(Math.ceil(length / 8)) : output.values;
+          let nullCount = 0;
+          for (let row = 0; row < length; row++) {
+            const bit = 1 << (row & 7);
+            if (activeRows[row] && output.validity[row >> 3]! & bit) {
+              validity[row >> 3] |= bit;
+              if (boolean && output.values[row]) values[row >> 3] |= bit;
+            } else nullCount++;
+          }
+          return makeVector(
+            makeData({
+              type: result.type,
+              data: values,
+              length,
+              nullBitmap: validity,
+              nullCount
+            } as any)
+          );
+        }
       }
-      return makeVector(
-        makeData({type: result.type, data: values, length, nullBitmap: validity, nullCount} as any)
-      );
-    }
+    ]
   };
 }

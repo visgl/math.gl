@@ -144,7 +144,12 @@ test('palette endpoints clamp, invalid channels stay null, and direct kernels ho
     vectorFromArray([0, 0], new Float64())
   ];
   expect(
-    rows(colors.COLOR_RGB.evaluate(vectors, {length: 2, activeRows: new Uint8Array([0, 1])}))
+    rows(
+      colors.COLOR_RGB.prototypes[0]!.evaluate(vectors, {
+        length: 2,
+        activeRows: new Uint8Array([0, 1])
+      })
+    )
   ).toEqual([null, [0, 1, 0, 1]]);
 });
 

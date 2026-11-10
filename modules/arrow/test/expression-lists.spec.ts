@@ -34,22 +34,26 @@ const decode = (vector: Vector) =>
 function color(type = rgba): ArrowTableFunction {
   return {
     name: 'color',
-    arguments: [new Field('x', new Int32(), true)],
-    result: new Field('rgba', type, false, new Map([['color-space', 'srgb']])),
-    evaluate: ([values], {length, activeRows}) => {
-      const channels = new type.children[0]!.type.ArrayType(length * 4);
-      for (let row = 0; row < length; row++)
-        if (activeRows[row]) {
-          channels.set([values!.get(row), 0, 0, 1], row * 4);
+    prototypes: [
+      {
+        arguments: [new Field('x', new Int32(), true)],
+        result: new Field('rgba', type, false, new Map([['color-space', 'srgb']])),
+        evaluate: ([values], {length, activeRows}) => {
+          const channels = new type.children[0]!.type.ArrayType(length * 4);
+          for (let row = 0; row < length; row++)
+            if (activeRows[row]) {
+              channels.set([values!.get(row), 0, 0, 1], row * 4);
+            }
+          return makeVector(
+            makeData({
+              type,
+              length,
+              child: makeData({type: type.children[0]!.type, data: channels, length: length * 4})
+            })
+          );
         }
-      return makeVector(
-        makeData({
-          type,
-          length,
-          child: makeData({type: type.children[0]!.type, data: channels, length: length * 4})
-        })
-      );
-    }
+      }
+    ]
   };
 }
 
@@ -95,11 +99,16 @@ test('tuple conditionals mask kernels and support null and contextual array bran
   const fn = color();
   const functions = [
     {
-      ...fn,
-      evaluate: (args, context) => {
-        seen.push(Array.from(context.activeRows));
-        return fn.evaluate(args, context);
-      }
+      name: fn.name,
+      prototypes: [
+        {
+          ...fn.prototypes[0]!,
+          evaluate: (args, context) => {
+            seen.push(Array.from(context.activeRows));
+            return fn.prototypes[0]!.evaluate(args, context);
+          }
+        }
+      ]
     }
   ] satisfies ArrowTableFunction[];
   const options = {inputSchema: table.schema, functions};
@@ -128,15 +137,19 @@ test('tuple functions compose with vector arguments and skip entirely inactive c
   let calls = 0;
   const red: ArrowTableFunction = {
     name: 'red',
-    arguments: [new Field('rgba', rgba, true)],
-    result: new Field('red', new Float32(), true),
-    evaluate: ([values], {activeRows, length}) => {
-      calls++;
-      return vectorFromArray(
-        Array.from({length}, (_, row) => (activeRows[row] ? values!.get(row).get(0) : null)),
-        new Float32()
-      );
-    }
+    prototypes: [
+      {
+        arguments: [new Field('rgba', rgba, true)],
+        result: new Field('red', new Float32(), true),
+        evaluate: ([values], {activeRows, length}) => {
+          calls++;
+          return vectorFromArray(
+            Array.from({length}, (_, row) => (activeRows[row] ? values!.get(row).get(0) : null)),
+            new Float32()
+          );
+        }
+      }
+    ]
   };
   const compiled = compileArrowExpression('red(color(x))', {
     inputSchema: table.schema,
@@ -164,15 +177,19 @@ test('typed list literals broadcast one dictionary value for numeric bins and te
     let seen: Vector | undefined;
     const fn: ArrowTableFunction = {
       name: 'bins',
-      arguments: [new Field('bins', list, false)],
-      result: new Field('size', new Int32(), false),
-      evaluate: ([values], {length}) => {
-        seen = values;
-        expect(DataType.isDictionary(values!.type)).toBe(true);
-        expect(values!.data[0]!.dictionary!.length).toBe(1);
-        expect(Array.from(values!.get(0))).toEqual(expected);
-        return vectorFromArray(new Int32Array(length).fill(expected.length), new Int32());
-      }
+      prototypes: [
+        {
+          arguments: [new Field('bins', list, false)],
+          result: new Field('size', new Int32(), false),
+          evaluate: ([values], {length}) => {
+            seen = values;
+            expect(DataType.isDictionary(values!.type)).toBe(true);
+            expect(values!.data[0]!.dictionary!.length).toBe(1);
+            expect(Array.from(values!.get(0))).toEqual(expected);
+            return vectorFromArray(new Int32Array(length).fill(expected.length), new Int32());
+          }
+        }
+      ]
     };
     const compiled = compileArrowExpression(`bins(${expression})`, {
       inputSchema: table.schema,
@@ -189,9 +206,13 @@ test('typed array literals reject incompatible values, untyped arrays and dynami
   const table = input();
   const bins: ArrowTableFunction = {
     name: 'bins',
-    arguments: [new Field('bins', new List(new Field('item', new Uint8(), false)), false)],
-    result: new Field('x', new Int32()),
-    evaluate: () => vectorFromArray([], new Int32())
+    prototypes: [
+      {
+        arguments: [new Field('bins', new List(new Field('item', new Uint8(), false)), false)],
+        result: new Field('x', new Int32()),
+        evaluate: () => vectorFromArray([], new Int32())
+      }
+    ]
   };
   const options = {inputSchema: table.schema, functions: [bins, color()]};
   for (const expression of [
@@ -216,7 +237,9 @@ test('tuple result contracts reject wrong layouts, null components and scalar im
   expect(() =>
     compileArrowExpression('color(x)', {
       inputSchema: table.schema,
-      functions: [{...base, evaluateScalar: () => 1}]
+      functions: [
+        {name: base.name, prototypes: [{...base.prototypes[0]!, evaluateScalar: () => 1}]}
+      ]
     })
   ).toThrow('vector-only');
   for (const vector of [
@@ -227,7 +250,7 @@ test('tuple result contracts reject wrong layouts, null components and scalar im
   ]) {
     const compiled = compileArrowExpression('color(x)', {
       inputSchema: table.schema,
-      functions: [{...base, evaluate: () => vector}]
+      functions: [{name: base.name, prototypes: [{...base.prototypes[0]!, evaluate: () => vector}]}]
     });
     expect(() => compiled.evaluateTable(table)).toThrow();
   }
@@ -247,9 +270,13 @@ test('vector calls retain primitive conditional semantics and bind tuple literal
   ]);
   const identity: ArrowTableFunction = {
     name: 'identity',
-    arguments: [new Field('rgba', rgba, true)],
-    result: new Field('rgba', rgba, true),
-    evaluate: ([vector]) => vector!
+    prototypes: [
+      {
+        arguments: [new Field('rgba', rgba, true)],
+        result: new Field('rgba', rgba, true),
+        evaluate: ([vector]) => vector!
+      }
+    ]
   };
   expect(
     decode(
@@ -274,11 +301,16 @@ test('empty and wholly inactive tuple batches preserve type without calling kern
     inputSchema: table.schema,
     functions: [
       {
-        ...fn,
-        evaluate: (args, context) => {
-          calls++;
-          return fn.evaluate(args, context);
-        }
+        name: fn.name,
+        prototypes: [
+          {
+            ...fn.prototypes[0]!,
+            evaluate: (args, context) => {
+              calls++;
+              return fn.prototypes[0]!.evaluate(args, context);
+            }
+          }
+        ]
       }
     ]
   });
@@ -300,15 +332,22 @@ test('array type contracts reject non-list arguments, nullable tuple channels an
   const unsupported = new FixedSizeList(4, new Field('channel', new Float32(), true));
   const bad: ArrowTableFunction = {
     name: 'bad',
-    arguments: [new Field('input', unsupported)],
-    result: new Field('x', new Int32()),
-    evaluate: () => vectorFromArray([], new Int32())
+    prototypes: [
+      {
+        arguments: [new Field('input', unsupported)],
+        result: new Field('x', new Int32()),
+        evaluate: () => vectorFromArray([], new Int32())
+      }
+    ]
   };
   expect(() =>
     compileArrowExpression('bad([1,2,3,4])', {inputSchema: table.schema, functions: [bad]})
   ).toThrow('non-nullable');
   const list = new List(new Field('item', new Int32(), false));
-  const bins = {...bad, arguments: [new Field('input', list)]};
+  const bins = {
+    name: bad.name,
+    prototypes: [{...bad.prototypes[0]!, arguments: [new Field('input', list)]}]
+  };
   expect(() =>
     compileArrowFunction('bad', [{type: 'ArrayExpression', elements: Array(1)} as never], {
       inputSchema: table.schema,
@@ -322,13 +361,17 @@ test('conditional variable-list literals retain dictionary broadcast semantics',
   const list = new List(new Field('item', new Int32(), false));
   const fn: ArrowTableFunction = {
     name: 'bins',
-    arguments: [new Field('bins', list, false)],
-    result: new Field('first', new Int32(), false),
-    evaluate: ([values], {length, activeRows}) =>
-      vectorFromArray(
-        Array.from({length}, (_, row) => (activeRows[row] ? values!.get(row).get(0) : null)),
-        new Int32()
-      )
+    prototypes: [
+      {
+        arguments: [new Field('bins', list, false)],
+        result: new Field('first', new Int32(), false),
+        evaluate: ([values], {length, activeRows}) =>
+          vectorFromArray(
+            Array.from({length}, (_, row) => (activeRows[row] ? values!.get(row).get(0) : null)),
+            new Int32()
+          )
+      }
+    ]
   };
   expect([
     ...compileArrowExpression('bins(x > 2 ? [10,20] : [30,40])', {
@@ -343,13 +386,17 @@ test('nested list conditionals retain their chosen dictionary indices', () => {
   const list = new List(new Field('item', new Int32(), false));
   const fn: ArrowTableFunction = {
     name: 'bins',
-    arguments: [new Field('bins', list, false)],
-    result: new Field('first', new Int32(), false),
-    evaluate: ([v], {length}) =>
-      vectorFromArray(
-        Array.from({length}, (_, i) => v!.get(i).get(0)),
-        new Int32()
-      )
+    prototypes: [
+      {
+        arguments: [new Field('bins', list, false)],
+        result: new Field('first', new Int32(), false),
+        evaluate: ([v], {length}) =>
+          vectorFromArray(
+            Array.from({length}, (_, i) => v!.get(i).get(0)),
+            new Int32()
+          )
+      }
+    ]
   };
   expect([
     ...compileArrowExpression('bins(x > 2 ? (x > 3 ? [1] : [2]) : [3])', {
@@ -372,14 +419,18 @@ test('outer short circuit suppresses scalar callbacks inside tuple conditions', 
   });
   const check: ArrowTableFunction = {
     name: 'check',
-    arguments: [new Field('x', new Int32())],
-    result: new Field('yes', new Bool()),
-    evaluate: () => {
-      throw new Error('skipped');
-    },
-    evaluateScalar: () => {
-      throw new Error('skipped');
-    }
+    prototypes: [
+      {
+        arguments: [new Field('x', new Int32())],
+        result: new Field('yes', new Bool()),
+        evaluate: () => {
+          throw new Error('skipped');
+        },
+        evaluateScalar: () => {
+          throw new Error('skipped');
+        }
+      }
+    ]
   };
   expect([
     ...compileArrowExpression('false && isNull(check(x) ? rgba : rgba)', {
