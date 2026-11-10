@@ -259,7 +259,12 @@ function bind(
     const source = options.inputSchema.fields[index]!;
     if (!vectorInput) typeKey(source.type);
     return {
-      field: new Field(source.name, valueType(source.type), source.nullable, source.metadata),
+      field: new Field(
+        source.name,
+        vectorInput ? source.type : valueType(source.type),
+        source.nullable,
+        source.metadata
+      ),
       hasKernel: false,
       prepare: batch =>
         vectorInput
@@ -569,7 +574,9 @@ function bindCall(ast: any, options: ArrowExpressionOptions): Node {
     const bound = bind(argument, options, field.type, vectorInput);
     if (
       (vectorInput
-        ? physicalKey(bound.field.type) !== physicalKey(field.type)
+        ? physicalKey(
+            DataType.isDictionary(field.type) ? bound.field.type : valueType(bound.field.type)
+          ) !== physicalKey(field.type)
         : typeKey(bound.field.type) !== typeKey(field.type)) ||
       (vectorInput &&
         [...field.metadata].some(([key, value]) => bound.field.metadata.get(key) !== value))

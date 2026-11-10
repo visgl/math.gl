@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Table, Int32, Utf8, Schema, Field, vectorFromArray} from 'apache-arrow';
+import {Table, Int32, Int8, Dictionary, Utf8, Schema, Field, vectorFromArray} from 'apache-arrow';
 import {
   compileArrowExpression,
   compileArrowPredicate,
@@ -90,4 +90,47 @@ test('predicates, dictionaries and direct scalar functions work over all batches
     }).evaluateTable(data)
   ]).toEqual([0, 0, 0, 5, 6]);
   expect(calls).toBe(2);
+});
+
+test('vector-only functions accept matching dictionary encodings', () => {
+  const input = new Table({text: vectorFromArray(['a', null, 'bbb'])});
+  const type = input.schema.fields[0]!.type;
+  const registry = new ArrowFunctionRegistry().registerFunction('size', {
+    arguments: [new Field('text', type, true)],
+    result: new Field('size', new Int32(), true),
+    kernel: ([text], {activeRows}) => {
+      expect(text!.type).toBe(type);
+      return vectorFromArray(
+        Array.from(activeRows, (active, row) => (active ? text!.get(row).length : null)),
+        new Int32()
+      );
+    }
+  });
+  expect([
+    ...compileArrowExpression('size(text)', {
+      inputSchema: input.schema,
+      registry
+    }).evaluateTable(input)
+  ]).toEqual([1, null, 3]);
+  registry.registerFunction('logicalSize', {
+    ...registry.getFunction('size')!,
+    arguments: [new Field('text', new Utf8(), true)]
+  });
+  expect([
+    ...compileArrowExpression('logicalSize(text)', {
+      inputSchema: input.schema,
+      registry
+    }).evaluateTable(input)
+  ]).toEqual([1, null, 3]);
+  registry.registerFunction('wrongEncoding', {
+    arguments: [new Field('text', new Dictionary(new Utf8(), new Int8()), true)],
+    result: new Field('size', new Int32(), true),
+    kernel: () => vectorFromArray([], new Int32())
+  });
+  expect(() =>
+    compileArrowExpression('wrongEncoding(text)', {
+      inputSchema: input.schema,
+      registry
+    })
+  ).toThrow('Argument type mismatch');
 });
