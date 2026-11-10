@@ -29,6 +29,7 @@ export type ExpressionContext = Record<string, unknown>;
 export type Expression =
   | JsepTypes.ArrayExpression
   | JsepTypes.BinaryExpression
+  | JsepTypes.LogicalExpression
   | (JsepTypes.CallExpression & {
       /** SQL unquoted function names resolve case-insensitively. */ sqlFunction?: true;
     })
@@ -185,6 +186,7 @@ function evaluateExpression(
     case 'ArrayExpression':
       return evaluateArray(expression.elements, mergedContext);
 
+    case 'LogicalExpression':
     case 'BinaryExpression':
       if (expression.operator === '||') {
         return (
@@ -278,6 +280,7 @@ export async function evaluateAsync(
     case 'ArrayExpression':
       return await evaluateArrayAsync(expression.elements, mergedContext);
 
+    case 'LogicalExpression':
     case 'BinaryExpression':
       if (expression.operator === '||') {
         return (

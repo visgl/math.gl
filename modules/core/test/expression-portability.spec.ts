@@ -4,6 +4,7 @@
 import {expect, test} from 'vitest';
 import {
   parse,
+  compile,
   validateExpressionAST,
   getExpressionColumns,
   columnarPredicateToExpression,
@@ -57,7 +58,7 @@ test('external AST validation bounds cycles, depth, width, holes, malformed call
   expect(() =>
     validateExpressionAST({
       type: 'ArrayExpression',
-      elements: new Array(5000).fill({type: 'Literal', value: 1})
+      elements: new Array(16385).fill({type: 'Literal', value: 1})
     })
   ).toThrow('limit');
   expect(() => validateExpressionAST(parse('x + 1'), {maxNodes: 2})).toThrow('limit');
@@ -112,4 +113,17 @@ test('portable error classification rejects accidental or unknown errors', () =>
   );
   expect(isExpressionEvaluationError(new RangeError('bug'))).toBe(false);
   expect(() => new ExpressionEvaluationError('bogus' as any, 'bad')).toThrow(TypeError);
+});
+
+test('external logical nodes retain their shared Boolean semantics', () => {
+  const expression = {
+    type: 'LogicalExpression',
+    operator: '&&',
+    left: {type: 'Identifier', name: 'a'},
+    right: {type: 'Identifier', name: 'b'}
+  } as const;
+  validateExpressionAST(expression);
+  expect(getExpressionColumns(expression)).toEqual(['a', 'b']);
+  expect(compile(expression)({a: true, b: false})).toBe(false);
+  expect(() => validateExpressionAST({...expression, operator: '??'})).toThrow('logical operator');
 });

@@ -1148,6 +1148,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
   const tuple = isTupleType(result.type);
   if (tuple && declaration.evaluateScalar)
     throw new Error('Fixed-size list results require a vector-only function');
+  if (declaration.evaluateScalar) for (const argument of arguments_) typeKey(argument.field.type);
   if (!tuple) typeKey(result.type);
   const validate = tuple ? undefined : createValueValidator(result.type);
   const round = tuple ? undefined : roundToType(result.type);

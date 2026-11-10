@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) 2013 Stephen Oney
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Extended literal types to describe bigint values supplied in AST input.
+// SPDX-FileComment: Extended types for portable AST inputs, including bigint literals and logical nodes.
 
 declare namespace jsep {
 		export type baseTypes = string | number | bigint | boolean | RegExp | null | undefined | object;
@@ -19,6 +19,14 @@ declare namespace jsep {
 		export interface BinaryExpression extends Expression {
 			type: 'BinaryExpression';
 			operator: string;
+			left: Expression;
+			right: Expression;
+		}
+
+		/** Logical node shape accepted from external expression AST producers. */
+		export interface LogicalExpression extends Expression {
+			type: 'LogicalExpression';
+			operator: '&&' | '||';
 			left: Expression;
 			right: Expression;
 		}
@@ -87,11 +95,13 @@ declare namespace jsep {
 			| 'UnaryExpression'
 			| 'BinaryExpression'
 			| 'ConditionalExpression'
+			| 'LogicalExpression'
 			| 'ArrayExpression';
 
 		export type CoreExpression =
 			ArrayExpression
 			| BinaryExpression
+			| LogicalExpression
 			| CallExpression
 			| Compound
 			| SequenceExpression

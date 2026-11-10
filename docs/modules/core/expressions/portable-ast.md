@@ -16,8 +16,8 @@ const columns = getExpressionColumns(expression); // ['angle', 'offset']
 ```
 
 `validateExpressionAST(value, {maxNodes?, maxDepth?})` checks external ASTs without binding
-names, selecting types, or running functions. Defaults are 4,096 nodes and 64 levels;
-callers can tighten these limits. Cycles, holes, malformed nodes, member calls, and unsupported
+names, selecting types, or running functions. Defaults are 16,384 nodes and 64 levels;
+callers can tighten these limits. The budget accommodates existing 4,096-element arrays, including their enclosing expression nodes. SQL parser token limits are unchanged. Cycles, holes, malformed nodes, member calls, and unsupported
 literal objects fail explicitly. Repeated references to one child are allowed and count each time.
 
 `getExpressionColumns(expression, options?)` validates the same subset and returns exact
@@ -29,7 +29,7 @@ A quoted SQL identifier such as `"a.b"` is one literal column name, not a path.
 | `Identifier` | Exact source-column name. |
 | `Literal` | Number, bigint, Boolean, string, or null. Bigints may be supplied in ASTs; SQL uses quoted BIGINT casts. |
 | `UnaryExpression` | Operator and `argument`. |
-| `BinaryExpression` | Operator, `left`, and `right`. |
+| `BinaryExpression` | Operator, `left`, and `right`. External `LogicalExpression` nodes are also accepted for Boolean conjunction and disjunction. |
 | `CallExpression` | Named `callee` and ordered `arguments`. SQL unquoted calls carry `sqlFunction: true`. |
 | `ConditionalExpression` | `test`, `consequent`, `alternate`; only the selected branch executes. |
 | `ArrayExpression` | Ordered literal elements, interpreted against a declared list type by the Arrow evaluator. |

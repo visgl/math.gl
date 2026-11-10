@@ -3,6 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {Expression} from './expression-eval';
 
+// Includes the call and literal nodes around supported 4096-element arguments.
+const MAXIMUM_EXPRESSION_NODES = 16384;
+
 /** Structural limits apply to external ASTs as well as parser output. */
 export type ExpressionASTOptions = Readonly<{maxNodes?: number; maxDepth?: number}>;
 
@@ -36,17 +39,19 @@ function visitExpressionAST(
   visit: (node: any) => void,
   options: ExpressionASTOptions
 ): void {
-  const maxNodes = options.maxNodes ?? 4096,
+  const maxNodes = options.maxNodes ?? MAXIMUM_EXPRESSION_NODES,
     maxDepth = options.maxDepth ?? 64;
   if (
     !Number.isSafeInteger(maxNodes) ||
     maxNodes < 1 ||
-    maxNodes > 4096 ||
+    maxNodes > MAXIMUM_EXPRESSION_NODES ||
     !Number.isSafeInteger(maxDepth) ||
     maxDepth < 0 ||
     maxDepth > 64
   )
-    throw new Error('Expression AST limits must not exceed 4096 nodes and 64 levels');
+    throw new Error(
+      `Expression AST limits must not exceed ${MAXIMUM_EXPRESSION_NODES} nodes and 64 levels`
+    );
   const stack: {node: unknown; depth: number; exit?: boolean}[] = [{node: value, depth: 0}];
   const ancestors = new Set<object>();
   let count = 0;
@@ -86,6 +91,11 @@ function visitExpressionAST(
           throw new Error('Invalid unary annotation');
         children.push(node.argument);
         break;
+      case 'LogicalExpression':
+        if (node.operator !== '&&' && node.operator !== '||')
+          throw new Error('Invalid logical operator');
+        children.push(node.left, node.right);
+        break;
       case 'BinaryExpression':
         if (typeof node.operator !== 'string' || !node.operator.length || node.operator.length > 32)
           throw new Error('Invalid expression operator');
@@ -121,7 +131,8 @@ function visitExpressionAST(
       default:
         throw new Error(`Unsupported portable expression AST node: ${node.type}`);
     }
-    if (children.length + count > maxNodes) throw new Error('Expression AST exceeds node limit');
+    if (children.length + count + stack.length - ancestors.size > maxNodes)
+      throw new Error('Expression AST exceeds node limit');
     visit(node);
     for (let index = children.length - 1; index >= 0; index--)
       stack.push({node: children[index], depth: depth + 1});
