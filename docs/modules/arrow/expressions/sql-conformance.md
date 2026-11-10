@@ -83,7 +83,7 @@ Run `yarn build` and `yarn benchmark:arrow-expressions`. Use `--quick` for a smo
 benchmark reuses four Arrow batches and compiled expressions. It compares a numeric composition
 with the existing JavaScript evaluator over predecoded rows, then measures TRY with 1 in 1,024
 and 1 in 4 rows failing. It reports median and p95 execution time, rows per second, result chunks,
-and retained output buffer bytes.
+and retained output buffer bytes. Each Arrow result is checked against an independent expected value for every row outside the timed section.
 
 Scalar compositions are fused; vector kernels and TRY/COALESCE can materialize temporary vectors.
 TRY tracks failed rows per scope and skips subsequent work for those rows. A lazy fallback can

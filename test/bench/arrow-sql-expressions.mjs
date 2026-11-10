@@ -49,18 +49,20 @@ function summarize(workload) {
   };
 }
 
-function arrow(name, table, sql, expectedNulls, failingRows = 0) {
+function arrow(name, table, sql, expectedValue, expectedNulls, failingRows = 0) {
   const compiled = compileArrowExpression(parseSQLExpression(sql), {inputSchema: table.schema, functions});
   return workload(name, () => compiled.evaluateTable(table), vector => {
     assert.equal(vector.length, rows);
     assert.equal(vector.nullCount, expectedNulls);
+    const x = table.getChild('x'), y = table.getChild('y');
+    for (let row = 0; row < rows; row++) assert.equal(vector.get(row), expectedValue(x.get(row), y.get(row)), `Unexpected value at row ${row}`);
     return {failingRows, resultChunks: vector.data.length, retainedOutputBytes: vector.data.reduce((total, data) => total + data.values.byteLength + data.nullBitmap.byteLength, 0)};
   });
 }
 
 const input = fixture();
 const composition = 'SIN(x) + COS(y) * 2';
-const workloads = [arrow('Arrow numeric composition', input, composition, 0)];
+const workloads = [arrow('Arrow numeric composition', input, composition, (x, y) => Math.sin(x) + Math.cos(y) * 2, 0)];
 const rowEvaluator = compile('sin(x) + cos(y) * 2', {libraries: [BASIC_MATH_FUNCTION_LIBRARY]});
 const x = input.getChild('x'), y = input.getChild('y');
 const decodedRows = Array.from({length: rows}, (_, index) => ({x: x.get(index), y: y.get(index)}));
@@ -71,8 +73,8 @@ workloads.push(workload('JavaScript evaluator over predecoded rows', () => Float
 for (const [label, every] of [['mostly valid', 1024], ['frequent errors', 4]]) {
   const table = fixture(every);
   const failures = Math.ceil(rows / every);
-  workloads.push(arrow(`TRY null recovery: ${label}`, table, 'TRY(SQRT(x))', failures, failures));
-  workloads.push(arrow(`TRY fallback: ${label}`, table, 'TRY(SQRT(x), 0)', 0, failures));
+  workloads.push(arrow(`TRY null recovery: ${label}`, table, 'TRY(SQRT(x))', x => x < 0 ? null : Math.sqrt(x), failures, failures));
+  workloads.push(arrow(`TRY fallback: ${label}`, table, 'TRY(SQRT(x), 0)', x => x < 0 ? 0 : Math.sqrt(x), 0, failures));
 }
 
 for (let sample = -warmups; sample < samples; sample++) {
