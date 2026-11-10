@@ -193,3 +193,16 @@ test('untyped nulls retain ambiguity across nonnumeric and mixed-width signature
     })
   ).toThrow('Ambiguous');
 });
+
+test('nullable numeric literal conditionals keep the full Float64 default', () => {
+  const table = input();
+  const functions = [
+    {name: 'F', prototypes: [prototype([new Float32()]), prototype([new Float64()])]}
+  ];
+  const compiled = compileArrowExpression('F(x > 1 ? 1 : null)', {
+    inputSchema: table.schema,
+    functions
+  });
+  expect(compiled.outputField.type).toEqual(new Float64());
+  expect([...compiled.evaluateTable(table)]).toEqual([null, null, 1]);
+});

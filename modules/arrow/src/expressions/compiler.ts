@@ -884,17 +884,18 @@ function bindCall(ast: any, options: BindingOptions): Node {
     }
     if (compatible) candidates.push({prototype, arguments: arguments_, cost});
   }
-  const untypedNull = (value: any): boolean =>
-    (value.type === 'Literal' && value.value === null) ||
+  const untypedNumeric = (value: any): boolean =>
+    (value.type === 'Literal' && (value.value === null || typeof value.value === 'number')) ||
+    isSignedLiteral(value) ||
     (value.type === 'ConditionalExpression' &&
-      untypedNull(value.consequent) &&
-      untypedNull(value.alternate));
+      untypedNumeric(value.consequent) &&
+      untypedNumeric(value.alternate));
   const allFloat64 = (prototype: ArrowTableFunctionPrototype) =>
     prototype.arguments.every(
       field => DataType.isFloat(field.type) && field.type.precision === Precision.DOUBLE
     );
   if (
-    ast.arguments.every(untypedNull) &&
+    ast.arguments.every(untypedNumeric) &&
     candidates.every(candidate =>
       candidate.prototype.arguments.every(
         field => DataType.isInt(field.type) || DataType.isFloat(field.type)
