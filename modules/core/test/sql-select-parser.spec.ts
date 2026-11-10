@@ -153,3 +153,25 @@ test('SELECT and predicate parsing agree on the supported parenthesis boundary',
     parseSQLQuery('SELECT value WHERE ' + '('.repeat(64) + 'value = 1' + ')'.repeat(64))
   ).toEqual({select: ['value'], where: {op: '=', args: [{property: 'value'}, 1]}});
 });
+
+test.each(['value IN (1, 2)', 'value NOT IN (1, 2)', 'value in (1, 2)'])(
+  'SELECT and predicate nesting agree for %s',
+  predicate => {
+    const supported = '('.repeat(64) + predicate + ')'.repeat(64);
+    const where = parseSQLPredicate(supported);
+    expect(parseSQLQuery('SELECT value WHERE ' + supported + ' LIMIT 1')).toEqual({
+      select: ['value'],
+      where,
+      limit: 1
+    });
+    expect(
+      parseSQLSelect('SELECT value WHERE ' + supported, {parseWhere: parseSQLPredicate})
+    ).toEqual({
+      select: ['value'],
+      where
+    });
+    const excessive = '(' + supported + ')';
+    expect(() => parseSQLPredicate(excessive)).toThrow();
+    expect(() => parseSQLQuery('SELECT value WHERE ' + excessive)).toThrow('nesting limit');
+  }
+);

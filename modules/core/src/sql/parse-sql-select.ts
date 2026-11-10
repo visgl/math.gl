@@ -150,6 +150,8 @@ export class SQLQueryReader {
     const start = this.position;
     let quote = '';
     let depth = 0;
+    let groupingDepth = 0;
+    const membershipParens: boolean[] = [];
     while (this.position < this.sql.length) {
       const character = this.sql[this.position];
       if (quote) {
@@ -164,9 +166,15 @@ export class SQLQueryReader {
       else if (this.sql.startsWith('--', this.position) || this.sql.startsWith('/*', this.position))
         throw new Error('SQL comments are not supported.');
       else if (character === '(') {
-        if (++depth > 64) throw new Error('SQL query exceeds its predicate nesting limit.');
+        // IN list delimiters do not add a predicate grouping level.
+        const membership = /\bIN\s*$/i.test(this.sql.slice(start, this.position));
+        membershipParens.push(membership);
+        depth++;
+        if (!membership && ++groupingDepth > 64)
+          throw new Error('SQL query exceeds its predicate nesting limit.');
       } else if (character === ')') {
         if (--depth < 0) throw new Error('SQL query contains unbalanced parentheses.');
+        if (!membershipParens.pop()) groupingDepth--;
       } else if (
         depth === 0 &&
         (character === ';' ||
