@@ -41,7 +41,7 @@ export function compileAsync(expression,options) {
   const result = await build({
     entryPoints:[resolve(root,`examples/${example}/${entry}`)],
     outfile:resolve(root,`.review-output/${name}.js`),
-    bundle:true,format:'esm',platform:'browser',write:false,plugins,loader:{'.ttf':'dataurl'}
+    bundle:true,format:'esm',platform:'browser',write:false,plugins,loader:{'.ttf':'dataurl','.jpg':'dataurl'}
   });
   for (const file of result.outputFiles) files.set('/'+basename(file.path),file.contents);
   const html=readFileSync(resolve(root,`examples/${example}/index.html`),'utf8')
