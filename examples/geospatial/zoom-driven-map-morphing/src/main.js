@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
-import {BitmapLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {MeshBitmapLayer} from '@deck.gl/map-layers';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {
   BoxPanelContainer,
   CustomPanel,
@@ -57,12 +58,6 @@ const cities = [
 let longitude = -30,
   latitude = 25,
   zoom = 2;
-class SurfaceLayer extends BitmapLayer {
-  static layerName = 'ZoomMorphSurface';
-  _createMesh() {
-    return this.props.mesh;
-  }
-}
 const deck = new Deck({
   canvas,
   parent: root,
@@ -93,7 +88,7 @@ function render() {
   });
   deck.setProps({
     layers: [
-      new SurfaceLayer({
+      new MeshBitmapLayer({
         id: 'surface',
         mesh,
         image,

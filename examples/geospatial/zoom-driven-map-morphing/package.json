@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "build": "vite build",
+    "build": "yarn workspace @deck.gl/map-layers check && vite build",
     "start-local": "vite --config ../../vite.config.local.mjs"
   },
   "dependencies": {
     "@deck.gl-community/panels": "^9.4.8",
     "@deck.gl/core": "~9.4.0",
     "@deck.gl/layers": "~9.4.0",
+    "@deck.gl/map-layers": "workspace:*",
     "@loaders.gl/core": "^4.5.1",
     "@luma.gl/core": "~9.4.0",
     "@luma.gl/engine": "~9.4.0",
