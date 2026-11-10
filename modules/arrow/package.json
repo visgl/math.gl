@@ -39,6 +39,11 @@
       "types": "./dist/wkb/index.d.ts",
       "import": "./dist/wkb/index.js",
       "require": "./dist/wkb/index.cjs"
+    },
+    "./expressions": {
+      "types": "./dist/expressions/index.d.ts",
+      "import": "./dist/expressions/index.js",
+      "require": "./dist/expressions/index.cjs"
     }
   },
   "files": [

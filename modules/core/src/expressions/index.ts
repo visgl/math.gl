@@ -20,3 +20,5 @@ export {
 } from './expression-eval';
 export {BASIC_MATH_FUNCTION_LIBRARY, mergeFunctionLibraries} from './function-libraries';
 export {parseExpressionString, type AccessorFunction} from './parse-expression-string';
+
+export * from './columnar-predicate';
