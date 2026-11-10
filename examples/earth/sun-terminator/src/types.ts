@@ -1,11 +1,9 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-export type SurfaceMesh = {
-  positions: Float64Array | Float32Array;
-  texCoords: Float32Array;
-  indices: Uint32Array;
-  vertexCount: number;
+import type {BitmapMesh} from '@deck.gl/map-layers';
+
+export type SurfaceMesh = BitmapMesh & {
   bounds?: number[];
   destination?: Float32Array;
   lifetime?: Float32Array;

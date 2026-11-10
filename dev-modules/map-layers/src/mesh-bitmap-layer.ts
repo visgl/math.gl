@@ -4,10 +4,15 @@
 import {BitmapLayer} from '@deck.gl/layers';
 import type {DefaultProps, UpdateParameters} from '@deck.gl/core';
 
-export type BitmapMesh = ReturnType<BitmapLayer['_createMesh']>;
+type NativeBitmapMesh = ReturnType<BitmapLayer['_createMesh']>;
+export type BitmapMesh = Omit<NativeBitmapMesh, 'positions'> & {
+  positions: Float32Array | Float64Array;
+};
 
 /** BitmapLayer rendering with caller-owned, indexed geometry and UVs. */
-export class MeshBitmapLayer extends BitmapLayer<{mesh: BitmapMesh}> {
+export class MeshBitmapLayer<ExtraPropsT extends {} = {}> extends BitmapLayer<
+  {mesh?: BitmapMesh} & ExtraPropsT
+> {
   static override layerName = 'MeshBitmapLayer';
   static override defaultProps: DefaultProps = {
     mesh: {type: 'object', value: null, compare: false}
@@ -27,8 +32,8 @@ export class MeshBitmapLayer extends BitmapLayer<{mesh: BitmapMesh}> {
     }
   }
 
-  protected override _createMesh(): BitmapMesh {
-    if (!this.props.mesh) throw new Error('MeshBitmapLayer requires a mesh');
-    return this.props.mesh;
+  protected override _createMesh(): NativeBitmapMesh {
+    // BitmapLayer's position attribute accepts both float precisions.
+    return (this.props.mesh as NativeBitmapMesh | undefined) ?? super._createMesh();
   }
 }

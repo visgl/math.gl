@@ -15778,6 +15778,7 @@ __metadata:
     "@deck.gl/extensions": "npm:~9.4.0"
     "@deck.gl/geo-layers": "npm:~9.4.0"
     "@deck.gl/layers": "npm:~9.4.0"
+    "@deck.gl/map-layers": "workspace:*"
     "@loaders.gl/core": "npm:^4.5.1"
     "@luma.gl/core": "npm:~9.4.0"
     "@luma.gl/engine": "npm:~9.4.0"
