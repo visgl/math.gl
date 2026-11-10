@@ -142,14 +142,33 @@ function physicalKey(type: DataType): string {
       : typeKey(type);
   } catch {
     // Unreferenced columns may have nested or extension layouts outside this evaluator's subset.
-    return `${type.typeId}:${type.toString()}:${JSON.stringify(
+    const properties = [
+      'bitWidth',
+      'isSigned',
+      'precision',
+      'scale',
+      'unit',
+      'timezone',
+      'byteWidth',
+      'listSize',
+      'keysSorted',
+      'isOrdered',
+      'mode'
+    ].map(key => (type as unknown as Record<string, unknown>)[key]);
+    return JSON.stringify([
+      type.typeId,
+      properties,
+      DataType.isUnion(type) ? Array.from(type.typeIds) : null,
+      DataType.isDictionary(type)
+        ? [physicalKey(type.indices), physicalKey(type.dictionary), type.isOrdered]
+        : null,
       type.children?.map(field => [
         field.name,
         physicalKey(field.type),
         field.nullable,
         extensionKey(field)
       ])
-    )}`;
+    ]);
   }
 }
 
@@ -201,7 +220,13 @@ function output(
     } else data[row] = value as any;
   }
   return makeVector(
-    makeData({type, data, length: active.length, nullBitmap: validity, nullCount} as any)
+    makeData({
+      type,
+      data,
+      length: active.length,
+      nullBitmap: validity,
+      nullCount
+    } as any)
   );
 }
 
@@ -278,6 +303,8 @@ function bind(
     };
   }
   if (ast.type === 'Literal') {
+    if (vectorInput && expected && DataType.isDictionary(expected))
+      throw new Error('Dictionary function arguments require a dictionary-encoded source column');
     const value = ast.value as ArrowExpressionValue;
     const type =
       expected ??
