@@ -30,7 +30,7 @@ import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} f
 import {bindCast} from './cast';
 import {float16Values, roundFloat16} from './float16';
 import {physicalKey, extensionKey} from './signature';
-import {ArrowEvaluationError} from './errors';
+import {ArrowEvaluationError, isArrowEvaluationError} from './errors';
 import {createFunctionLookup} from './registry';
 import {
   isTupleType,
@@ -55,6 +55,7 @@ type BindingOptions = ArrowExpressionOptions & {
 };
 
 type Mask = Uint8Array;
+type ExecutionContext = {failed?: Uint8Array};
 type Range = [Uint8Array, number, number];
 type Prepared = {
   get: (row: number) => ArrowExpressionValue;
@@ -65,7 +66,7 @@ type Prepared = {
 type Node = {
   field: Field;
   hasKernel: boolean;
-  prepare: (batch: RecordBatch, active: Mask) => Prepared;
+  prepare: (batch: RecordBatch, active: Mask, context: ExecutionContext) => Prepared;
 };
 const encoder = new TextEncoder();
 const bool = new Bool();
@@ -117,7 +118,7 @@ export function compileArrowExpression(
     const active = evaluation.activeRows
       ? evaluation.activeRows.slice()
       : new Uint8Array(batch.numRows).fill(1);
-    const prepared = root.prepare(batch, active);
+    const prepared = root.prepare(batch, active, {});
     const result = isTupleType(root.field.type)
       ? maskTupleVector(prepared.vector!, active)
       : prepared.vector &&
@@ -311,8 +312,62 @@ function bytes(value: Prepared, row: number): Range | null {
   return [encoded, 0, encoded.length];
 }
 
-/** Binds supported syntax to fused per-row operations and explicit vector boundaries. */
+/** Wraps scalar reads only inside a recovery scope; normal fused paths remain allocation-free per row. */
 function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInput = false): Node {
+  const node = bindNode(ast, options, expected, vectorInput);
+  return {
+    ...node,
+    prepare(batch, active, context) {
+      const mask = context.failed
+        ? active.map((value, row) => (value && !context.failed![row] ? 1 : 0))
+        : active;
+      const prepared = node.prepare(batch, mask, context);
+      if (!context.failed) return prepared;
+      const guard = <T>(row: number, read: () => T): T | null => {
+        if (!mask[row] || context.failed![row]) return null;
+        try {
+          const value = read();
+          return context.failed![row] ? null : value;
+        } catch (error) {
+          if (!isArrowEvaluationError(error)) throw error;
+          context.failed![row] = 1;
+          return null;
+        }
+      };
+      return {
+        ...prepared,
+        get: row => guard(row, () => prepared.get(row)),
+        bytes: prepared.bytes ? row => guard(row, () => prepared.bytes!(row)) : undefined,
+        isNull: row =>
+          guard(row, () => (prepared.isNull ? prepared.isNull(row) : prepared.get(row) === null)) ??
+          true
+      };
+    }
+  };
+}
+
+/** Resolves earlier scalar inputs before later kernels can run in a recovery scope. */
+function prepareInput(
+  node: Node,
+  batch: RecordBatch,
+  active: Mask,
+  context: ExecutionContext,
+  force: boolean
+): Prepared {
+  const prepared = node.prepare(batch, active, context);
+  if (!context.failed || !force || prepared.vector) return prepared;
+  const mask = active.map((value, row) => (value && !context.failed![row] ? 1 : 0));
+  const field = new Field(node.field.name, node.field.type, true, node.field.metadata);
+  return sourceReader(output(field, mask, prepared.get));
+}
+
+/** Binds supported syntax to fused per-row operations and explicit vector boundaries. */
+function bindNode(
+  ast: any,
+  options: BindingOptions,
+  expected?: DataType,
+  vectorInput = false
+): Node {
   if (isSignedLiteral(ast)) {
     const value = ast.operator === '-' ? -ast.argument.value : ast.argument.value;
     return bind({type: 'Literal', value}, options, expected, vectorInput);
@@ -451,17 +506,18 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
     return {
       field,
       hasKernel: tuple || list || condition.hasKernel || yes.hasKernel || no.hasKernel,
-      prepare(batch, active) {
-        const test = condition.prepare(batch, active);
+      prepare(batch, active, context) {
+        const test = condition.prepare(batch, active, context);
         // A vector kernel must receive its branch mask before it executes. Pure scalar paths stay lazy.
         const selected =
           tuple || list || yes.hasKernel || no.hasKernel
             ? active.map((value, row) => (value && test.get(row) === true ? 1 : 0))
             : undefined;
-        const a = yes.prepare(batch, selected ?? active);
+        const a = yes.prepare(batch, selected ?? active, context);
         const b = no.prepare(
           batch,
-          selected ? active.map((value, row) => (value && !selected[row] ? 1 : 0)) : active
+          selected ? active.map((value, row) => (value && !selected[row] ? 1 : 0)) : active,
+          context
         );
         if (list) {
           const av = a.vector!,
@@ -519,8 +575,8 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
     return {
       field: new Field('unary', argument.field.type, argument.field.nullable),
       hasKernel: argument.hasKernel,
-      prepare(batch, active) {
-        const child = argument.prepare(batch, active);
+      prepare(batch, active, context) {
+        const child = argument.prepare(batch, active, context);
         return {
           get: row => {
             const value = child.get(row);
@@ -586,8 +642,8 @@ function bindBinary(ast: any, options: BindingOptions): Node {
   return {
     field,
     hasKernel: left.hasKernel || right.hasKernel,
-    prepare(batch, active) {
-      const a = left.prepare(batch, active);
+    prepare(batch, active, context) {
+      const a = prepareInput(left, batch, active, context, left.hasKernel || right.hasKernel);
       let truth: Uint8Array | undefined;
       let mask = active;
       if (logical && right.hasKernel) {
@@ -599,7 +655,7 @@ function bindBinary(ast: any, options: BindingOptions): Node {
           return (op === '&&' ? x !== false : x !== true) ? 1 : 0;
         });
       }
-      const b = right.prepare(batch, mask);
+      const b = right.prepare(batch, mask, context);
       return {
         get: row => {
           if (logical) {
@@ -644,7 +700,10 @@ function bindBinary(ast: any, options: BindingOptions): Node {
                       : x / y
                     : x % y;
           validate(result);
-          return round(result);
+          const rounded = round(result);
+          if (!integer && Number.isFinite(x) && Number.isFinite(y) && !Number.isFinite(rounded))
+            throw new ArrowEvaluationError('overflow', 'Floating expression overflow');
+          return rounded;
         }
       };
     }
@@ -673,11 +732,85 @@ function compare(op: string, a: any, b: any): boolean {
   }
 }
 
+/** Materializes one recovery boundary without retrying callbacks or leaking row errors outward. */
+function bindRecovery(name: string, expressions: any[], options: BindingOptions): Node {
+  if (name === 'TRY' ? expressions.length < 1 || expressions.length > 2 : !expressions.length)
+    throw new Error(`${name} has an invalid argument count`);
+  let nodes: Node[];
+  const typed = expressions.findIndex(expression => !isContextualLiteral(expression));
+  const nonNull = expressions.findIndex(
+    expression => !(expression.type === 'Literal' && expression.value === null)
+  );
+  const first = bind(expressions[typed < 0 ? Math.max(0, nonNull) : typed], options);
+  nodes = expressions.map(expression => bind(expression, options, first.field.type));
+  for (const node of nodes) {
+    if (
+      physicalKey(node.field.type) !== physicalKey(first.field.type) ||
+      extensionKey(node.field) !== extensionKey(first.field)
+    )
+      throw new Error(`${name} arguments must have matching types and metadata`);
+  }
+  const field = new Field(name.toLowerCase(), first.field.type, true, first.field.metadata);
+  const tuple = isTupleType(field.type);
+  if (!tuple) typeKey(field.type);
+  return {
+    field,
+    hasKernel: true,
+    prepare(batch, active, context) {
+      const failed = new Uint8Array(active.length);
+      const childContext = name === 'TRY' ? {failed} : context;
+      const child = nodes[0]!.prepare(batch, active, childContext);
+      const nullable = (node: Node) =>
+        new Field(node.field.name, node.field.type, true, node.field.metadata);
+      const materialize = (node: Node, prepared: Prepared, mask: Mask): Vector =>
+        tuple
+          ? maskTupleVector(prepared.vector!, mask)
+          : output(nullable(node), mask, prepared.get);
+      const original = materialize(nodes[0]!, child, active);
+      const reader = tuple ? undefined : new ColumnReader(original);
+      let result = original;
+      let pending = active.map((value, row) =>
+        value &&
+        (name === 'TRY' ? failed[row] : tuple ? !original.isValid(row) : !reader!.isValid(row))
+          ? 1
+          : 0
+      );
+      // A reported tuple error must be masked before selecting fallback values.
+      if (tuple && name === 'TRY')
+        result = maskTupleVector(
+          result,
+          active.map((value, row) => (value && !failed[row] ? 1 : 0))
+        );
+      for (let index = 1; index < nodes.length && pending.some(Boolean); index++) {
+        const node = nodes[index]!;
+        const fallback = node.prepare(batch, pending, context);
+        const vector = materialize(node, fallback, pending);
+        const keep = active.map((value, row) => (value && !pending[row] ? 1 : 0));
+        if (tuple)
+          result = selectTupleVectors(field.type as FixedSizeList, result, vector, keep, active);
+        else {
+          const a = new ColumnReader(result),
+            b = new ColumnReader(vector);
+          result = output(field, active, row => (pending[row] ? b.get(row) : a.get(row)));
+        }
+        const next = tuple ? undefined : new ColumnReader(vector);
+        pending = pending.map((value, row) =>
+          value && (tuple ? !vector.isValid(row) : !next!.isValid(row)) ? 1 : 0
+        );
+      }
+      return vectorReader(result);
+    }
+  };
+}
+
 /** Binds built-ins and custom functions, materializing arguments only for vector kernels. */
 function bindCall(ast: any, options: BindingOptions): Node {
   if (ast.callee.type !== 'Identifier')
     throw new Error('Only registered named function calls are supported');
   let name = ast.callee.name;
+  if (ast.sqlFunction && ['TRY', 'COALESCE'].includes(name.toUpperCase()))
+    name = name.toUpperCase();
+  if (['TRY', 'COALESCE'].includes(name)) return bindRecovery(name, ast.arguments, options);
   if (ast.sqlFunction) {
     const matches = [
       ...options.functionLookup.keys(),
@@ -731,8 +864,16 @@ function bindCall(ast: any, options: BindingOptions): Node {
     return {
       field,
       hasKernel: true,
-      prepare(batch, active) {
-        const values = arguments_.map(value => value.prepare(batch, active));
+      prepare(batch, active, context) {
+        const values = arguments_.map(value =>
+          prepareInput(
+            value,
+            batch,
+            active,
+            context,
+            arguments_.some(argument => argument.hasKernel)
+          )
+        );
         const vector = nullTupleVector(type, active.length),
           data = vector.data[0]!,
           output =
@@ -745,12 +886,19 @@ function bindCall(ast: any, options: BindingOptions): Node {
           for (let column = 0; column < values.length; column++)
             rowValues[column] = values[column]!.get(row) as number | bigint | null;
           if (rowValues.some(value => value === null)) continue;
-          for (let column = 0; column < values.length; column++) {
-            const index = row * values.length + column;
-            const value = Number(rowValues[column]);
-            output[index] = value;
-            if (Number.isFinite(value) && !Number.isFinite(output[index]))
-              throw new ArrowEvaluationError('overflow', 'ARRAY cast overflow');
+          try {
+            for (let column = 0; column < values.length; column++) {
+              const index = row * values.length + column;
+              const value = Number(rowValues[column]);
+              output[index] = value;
+              if (Number.isFinite(value) && !Number.isFinite(output[index]))
+                throw new ArrowEvaluationError('overflow', 'ARRAY cast overflow');
+            }
+          } catch (error) {
+            if (!context.failed || !isArrowEvaluationError(error)) throw error;
+            context.failed[row] = 1;
+            output.fill(0, row * values.length, (row + 1) * values.length);
+            continue;
           }
           data.setValid(row, true);
         }
@@ -766,8 +914,8 @@ function bindCall(ast: any, options: BindingOptions): Node {
     return {
       field: new Field('cast', cast.type, argument.field.nullable),
       hasKernel: argument.hasKernel,
-      prepare(batch, active) {
-        const child = argument.prepare(batch, active);
+      prepare(batch, active, context) {
+        const child = argument.prepare(batch, active, context);
         return {
           get: row =>
             cast.textInput && !DataType.isUtf8(cast.type)
@@ -798,8 +946,8 @@ function bindCall(ast: any, options: BindingOptions): Node {
     return {
       field,
       hasKernel: argument.hasKernel,
-      prepare(batch, active) {
-        const child = argument.prepare(batch, active);
+      prepare(batch, active, context) {
+        const child = argument.prepare(batch, active, context);
         return {
           get: row => {
             if (nullTest) {
@@ -894,8 +1042,8 @@ function bindCall(ast: any, options: BindingOptions): Node {
               child.field.metadata
             ),
             hasKernel: child.hasKernel,
-            prepare(batch, active) {
-              const prepared = child.prepare(batch, active);
+            prepare(batch, active, context) {
+              const prepared = child.prepare(batch, active, context);
               return {get: row => round(prepared.get(row))};
             }
           };
@@ -962,25 +1110,49 @@ function bindCall(ast: any, options: BindingOptions): Node {
   return {
     field,
     hasKernel: Boolean(evaluateVector) || arguments_.some(argument => argument.hasKernel),
-    prepare(batch, active) {
-      const children = arguments_.map(argument => argument.prepare(batch, active));
+    prepare(batch, active, context) {
+      const children = arguments_.map(argument =>
+        prepareInput(
+          argument,
+          batch,
+          active,
+          context,
+          Boolean(evaluateVector) || arguments_.some(value => value.hasKernel)
+        )
+      );
       let kernel: Prepared | undefined;
       let mask = active;
       if (evaluateVector && active.some(Boolean)) {
         const vectors = children.map(
-          (child, index) => child.vector ?? output(arguments_[index]!.field, active, child.get)
+          (child, index) =>
+            child.vector ??
+            output(
+              arguments_[index]!.field,
+              context.failed
+                ? active.map((value, row) => (value && !context.failed![row] ? 1 : 0))
+                : active,
+              child.get
+            )
         );
         const readers = vectors.map(vector => new ColumnReader(vector));
         mask = active.map((value, row) =>
           value &&
+          !context.failed?.[row] &&
           (declaration.nullHandling === 'call' || readers.every(reader => reader.isValid(row)))
             ? 1
             : 0
         );
         if (mask.some(Boolean)) {
           const vector = evaluateVector(vectors, {
-            activeRows: mask.slice(),
-            length: active.length
+            activeRows: mask,
+            length: active.length,
+            reportError(row, error) {
+              if (!Number.isInteger(row) || row < 0 || row >= active.length || !mask[row])
+                throw new Error('Kernel reported an inactive or invalid row');
+              if (!context.failed || !isArrowEvaluationError(error)) throw error;
+              context.failed[row] = 1;
+              mask[row] = 0;
+            }
           });
           if (
             vector.length !== active.length ||
@@ -1006,6 +1178,7 @@ function bindCall(ast: any, options: BindingOptions): Node {
             value = kernel.get(row);
           } else {
             const args = children.map(child => child.get(row));
+            if (context.failed?.[row]) return null;
             if (declaration.nullHandling !== 'call' && args.some(value => value === null))
               return null;
             value = declaration.evaluateScalar!(...args);

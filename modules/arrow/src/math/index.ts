@@ -21,7 +21,7 @@ import {
   makeVector
 } from 'apache-arrow';
 import {ColumnReader, createValueValidator} from '../expressions/buffers';
-import {ArrowEvaluationError} from '../expressions/errors';
+import {ArrowEvaluationError, isArrowEvaluationError} from '../expressions/errors';
 import {float16Values, roundFloat16} from '../expressions/float16';
 import type {ArrowTableFunction, ArrowExpressionValue} from '../expressions/types';
 
@@ -91,7 +91,7 @@ function declaration(
         ),
         result: new Field(name.toLowerCase(), output, false),
         evaluateScalar: (...values) => run(values),
-        evaluate(vectors, {length, activeRows}) {
+        evaluate(vectors, {length, activeRows, reportError}) {
           const readers = vectors.map(vector => new ColumnReader(vector));
           const values: ArrowExpressionValue[] = new Array(arity);
           const storage = new output.ArrayType(length);
@@ -104,7 +104,14 @@ function declaration(
           for (let row = 0; row < length; row++) {
             if (!activeRows[row]) continue;
             for (let arg = 0; arg < arity; arg++) values[arg] = readers[arg]!.get(row);
-            const value = run(values);
+            let value: Numeric | null;
+            try {
+              value = run(values);
+            } catch (error) {
+              if (!reportError || !isArrowEvaluationError(error)) throw error;
+              reportError(row, error);
+              continue;
+            }
             if (value === null) continue;
             // The prototype fixes both the output buffer and the scalar numeric kind.
             (decoded as Float64Array)[row] = value as number;

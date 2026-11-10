@@ -16,6 +16,8 @@ export function createFunctionLookup(
       throw new Error('Invalid Arrow function name');
     if (
       [
+        'TRY',
+        'COALESCE',
         'array',
         'array_float16',
         'array_float32',
