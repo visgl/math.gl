@@ -12,6 +12,14 @@ Numerical accuracy is evaluated against **native PROJ**. The pinned proj4js refe
 
 For definitions of surface models, paths, reference systems, and distortion properties, see [Geospatial terminology](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/terminology.md).
 
+## Relationship to maps[​](#relationship-to-maps "Direct link to Relationship to maps")
+
+Use this subpath when coordinates must be expressed in a different CRS. Use [`@math.gl/geospatial/maps`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps.md) when a renderer needs chart coverage, interruptions, insets, picking or unfolding. Map layouts consume spherical longitude/latitude in degrees; they do not resolve source CRSs or perform datum/epoch operations.
+
+The subpaths are independent. Convert source data with projection APIs before feeding it to a map when necessary. For a textured ordinary projection, [`prepareProjectionSurface`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/api-reference/surfaces.md) from `/maps/surfaces` samples a projection over an explicit geographic rectangle. Its placement in maps reflects its rendering responsibility, even when its coordinate transform comes from projection.
+
+See [choosing and combining the APIs](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps.md#projection-and-maps-choosing-the-right-api) for a decision table and the complete data-to-renderer workflow.
+
 ## Usage[​](#usage "Direct link to Usage")
 
 ```

@@ -233,7 +233,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Maps 🧪](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps.md): @math.gl/geospatial/maps owns spherical map descriptions, chart layouts, seams,
 - [Elastic sampled maps 🧪](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/api-reference/elastic.md): For background, an interactive example, numerical limits, and attribution, see
 - [MapEngine 🧪](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/api-reference/map-engine.md): Compile a MapDescription into spherical chart projection, layout, picking, and
-- [Prepared surfaces and transitions 🧪](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/api-reference/surfaces.md): These experimental APIs are available from @math.gl/geospatial/maps.
+- [Prepared surfaces and transitions 🧪](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/api-reference/surfaces.md): Import raster builders from @math.gl/geospatial/maps/surfaces and transition
 - [Discontinuous maps 🧪](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/developer-guide/discontinuous-projections.md): A discontinuous map places neighboring parts of the Earth in separate parts of a
 - [Rendering maps with MapEngine 🧪](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/developer-guide/map-engine.md): MapEngine gives a renderer one geometry interface for ordinary maps, interrupted
 - [Understanding myriahedral projections 🧪](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/developer-guide/myriahedral-projections.md): A myriahedral map replaces one continuous world map with many small, connected

@@ -9,7 +9,11 @@ Use this API for **maps with geographic coverage and layout**. Use [`ProjectionE
 ## Start with a description[​](#start-with-a-description "Direct link to Start with a description")
 
 ```
-import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';
+import {albersUsaMapPreset} from '@math.gl/geospatial/maps/presets';
+
+import {mapGeometry} from '@math.gl/geospatial/maps/geometry';
+
+import {mapTransitions} from '@math.gl/geospatial/maps/transitions';
 
 import {MapEngine, type MapDescription} from '@math.gl/geospatial/maps';
 
@@ -27,7 +31,7 @@ const description: MapDescription = {
 
 };
 
-const map = new MapEngine(description, {presets: mapPresets, geometry: mapGeometry, transitions: mapTransitions});
+const map = new MapEngine(description, {presets: [albersUsaMapPreset], geometry: mapGeometry, transitions: mapTransitions});
 
 const viewport = map.fit({width: 960, height: 600, padding: 24});
 
@@ -48,7 +52,7 @@ if (honolulu) {
 
 Descriptions contain plain data and can be stored as JSON. The engine snapshots them at construction; construct another engine to change the map. Keep an engine while the user pans or resizes. `fit()` reuses its cached static layout and preserves relative inset sizes and spacing.
 
-The same code can use these definitions:
+Other definitions use the same workflow, with their matching preset supplied in `presets`. Selecting a definition does not load or register its implementation:
 
 | Map              | `definition`                                              | What the renderer receives                                                     |
 | ---------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------ |
@@ -110,7 +114,11 @@ The scale pair measures longitude and latitude coordinate radians, not ground di
 ## Use the same geometry on a globe or hinged surface[​](#use-the-same-geometry-on-a-globe-or-hinged-surface "Direct link to Use the same geometry on a globe or hinged surface")
 
 ```
-import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';
+import {myriahedralMapPreset} from '@math.gl/geospatial/maps/presets';
+
+import {mapGeometry} from '@math.gl/geospatial/maps/geometry';
+
+import {mapTransitions} from '@math.gl/geospatial/maps/transitions';
 
 const panels = new MapEngine({
 
@@ -120,7 +128,7 @@ const panels = new MapEngine({
 
   definition: {type: 'myriahedral', preset: 'polyconic', columns: 24}
 
-}, {presets: mapPresets, geometry: mapGeometry, transitions: mapTransitions});
+}, {presets: [myriahedralMapPreset], geometry: mapGeometry, transitions: mapTransitions});
 
 const frame = panels.evaluate({type: 'hinge', amount: 0.5});
 
@@ -158,7 +166,11 @@ The initial planner is conservative: reusing the same engine is `direct`; differ
 Land masks and projection functions are runtime dependencies, not JSON:
 
 ```
-import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';
+import {myriahedralMapPreset} from '@math.gl/geospatial/maps/presets';
+
+import {mapGeometry} from '@math.gl/geospatial/maps/geometry';
+
+import {mapTransitions} from '@math.gl/geospatial/maps/transitions';
 
 const oceanCuts = new MapEngine({
 
@@ -170,7 +182,7 @@ const oceanCuts = new MapEngine({
 
 }, {
 
-  presets: mapPresets,
+  presets: [myriahedralMapPreset],
 
   geometry: mapGeometry,
 

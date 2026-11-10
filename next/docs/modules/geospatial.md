@@ -6,7 +6,7 @@
 
 Geographic arrays use `[longitude, latitude, height]`, with angles in degrees and ellipsoidal height in metres by default. Cartesian arrays use Earth-centered coordinates in metres. Geoid heights and general CRS conversion are handled by [geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md) and [projection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection.md).
 
-The geospatial group includes `@math.gl/geospatial`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`, `/expressions`, and `/terrain`. `@math.gl/web-mercator` remains available for existing imports. DGGS remains a separate package.
+The geospatial group includes `@math.gl/geospatial`, `/globe`, `/tiles`, `/crs`, `/projection`, `/maps`, `/web-mercator`, `/expressions`, and `/terrain`. `@math.gl/web-mercator` remains available for existing imports. DGGS remains a separate package.
 
 Arrow, GeoArrow, and WKB/WKT representations live in [`@math.gl/arrow`](https://visgl.github.io/math.gl/next/docs/modules/arrow.md).
 
