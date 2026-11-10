@@ -48,3 +48,10 @@ test('SELECT rejects comments outside quotes while retaining literal markers', (
   expect(parseSQLExpression("'--'")).toMatchObject({type: 'Literal', value: '--'});
   expect(() => parseSQLExpression('x - -y')).not.toThrow();
 });
+
+test('reserved SELECT words require quoting when used as columns', () => {
+  for (const name of ['DISTINCT', 'ORDER', 'GROUP', 'HAVING', 'OFFSET', 'JOIN', 'UNION', 'ALL']) {
+    expect(() => parseSQLQuery(`SELECT ${name}`)).toThrow();
+    expect(parseSQLQuery(`SELECT "${name}"`)).toEqual({select: [name]});
+  }
+});

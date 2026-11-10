@@ -3,36 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {Expression} from '../expressions/index';
-import {SQLExpressionReader} from './parse-sql-expression';
+import {SQLExpressionReader, SQL_RESERVED_WORDS} from './parse-sql-expression';
 import type {ColumnarPredicate} from '../expressions/columnar-predicate';
 import type {TableQuery, TableSelection, TableReference} from './query-types';
 
 const MAXIMUM_SQL_LENGTH = 65536;
 const MAXIMUM_SELECT_TOKENS = 4096;
-const RESERVED_WORDS = new Set([
-  'SELECT',
-  'ARRAY',
-  'FROM',
-  'WHERE',
-  'LIMIT',
-  'AS',
-  'TRUE',
-  'FALSE',
-  'NULL',
-  'ALL',
-  'AND',
-  'OR',
-  'NOT',
-  'IN',
-  'IS',
-  'DISTINCT',
-  'ORDER',
-  'GROUP',
-  'HAVING',
-  'OFFSET',
-  'JOIN',
-  'UNION'
-]);
 
 /** Optional WHERE support for the independently tree-shakeable structural parser. */
 export type SQLSelectParserOptions = Readonly<{
@@ -171,7 +147,7 @@ export class SQLQueryReader {
       throw new Error('SQL query contains an unterminated quoted identifier.');
     }
     const match = /^[A-Za-z_][A-Za-z0-9_]*/.exec(this.sql.slice(this.position));
-    if (!match || RESERVED_WORDS.has(match[0].toUpperCase()))
+    if (!match || SQL_RESERVED_WORDS.has(match[0].toUpperCase()))
       throw new Error('SQL query expected a column, alias, source, or table identifier.');
     this.position += match[0].length;
     return match[0];

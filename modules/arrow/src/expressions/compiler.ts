@@ -349,7 +349,15 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
   if (ast.type === 'Literal') {
     if (vectorInput && expected && DataType.isDictionary(expected))
       throw new Error('Dictionary function arguments require a dictionary-encoded source column');
-    const value = ast.value as ArrowExpressionValue;
+    let value = ast.value as ArrowExpressionValue;
+    if (
+      expected &&
+      DataType.isInt(expected) &&
+      expected.bitWidth === 64 &&
+      typeof value === 'number' &&
+      Number.isSafeInteger(value)
+    )
+      value = BigInt(value);
     const type =
       expected ??
       (value === null

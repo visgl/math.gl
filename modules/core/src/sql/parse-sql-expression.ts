@@ -5,6 +5,31 @@
 import type {Expression} from '../expressions/index';
 import type {ColumnarScalarType} from '../expressions/scalar-type';
 
+export const SQL_RESERVED_WORDS = new Set([
+  'SELECT',
+  'ARRAY',
+  'FROM',
+  'WHERE',
+  'LIMIT',
+  'AS',
+  'TRUE',
+  'FALSE',
+  'NULL',
+  'ALL',
+  'AND',
+  'OR',
+  'NOT',
+  'IN',
+  'IS',
+  'DISTINCT',
+  'ORDER',
+  'GROUP',
+  'HAVING',
+  'OFFSET',
+  'JOIN',
+  'UNION'
+]);
+
 /** Supported standard SQL type spellings. Precision/length modifiers are not yet supported. */
 export function sqlCastType(name: string): ColumnarScalarType {
   switch (name.toUpperCase().replace(/\s+/g, ' ').trim()) {
@@ -281,7 +306,8 @@ export class SQLExpressionReader {
     const identifier = /^[A-Za-z_][A-Za-z0-9_]*/.exec(this.source.slice(this.position));
     if (
       !identifier ||
-      /^(AS|SELECT|FROM|WHERE|LIMIT|WHEN|THEN|ELSE|END|AND|OR|IS|IN)$/i.test(identifier[0])
+      SQL_RESERVED_WORDS.has(identifier[0].toUpperCase()) ||
+      /^(WHEN|THEN|ELSE|END)$/i.test(identifier[0])
     )
       throw new Error('SQL expression requires a column, literal or function');
     this.position += identifier[0].length;

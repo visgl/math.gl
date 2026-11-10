@@ -81,3 +81,10 @@ test('SQL builtin function names fold case while quoted calls remain exact', () 
   expect([...evaluate('ISNULL(x)')]).toEqual([false, true, false]);
   expect(() => evaluate('"TOFLOAT64"(i)')).toThrow('Unknown');
 });
+
+test('safe integral literals inherit BIGINT arithmetic and comparison types', () => {
+  expect([...evaluate('CAST(i AS BIGINT) + 1')]).toEqual([2n, 3n, 4n]);
+  expect([...evaluate('CAST(i AS BIGINT) > 1')]).toEqual([false, true, true]);
+  expect([...evaluate('CAST(i AS BIGINT) + -1')]).toEqual([0n, 1n, 2n]);
+  expect(() => evaluate('CAST(i AS BIGINT) + 1.5')).toThrow();
+});
