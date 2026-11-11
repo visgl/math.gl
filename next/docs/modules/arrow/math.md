@@ -41,6 +41,6 @@ Each exported declaration has typed `prototypes` with equivalent scalar and mask
 
 Float16, Float32, and Float64 inputs retain their precision. Binary functions widen mixed floating arguments to the widest input type. Integers produce Float64 for transcendental functions; integer-preserving functions keep exact integer arithmetic, including Int64/Uint64 bigints. Mixing integer and floating columns requires an explicit cast. Converting large integers to Float64 for transcendental functions can lose precision above 2^53.
 
-Invalid domains raise `ArrowEvaluationError` with code `domain`. Zero divisors raise `divisionByZero`. Integer overflow and finite-input overflow at the declared floating precision raise `overflow`. Subnormal results and underflow to zero are allowed. Input NaNs propagate; infinite inputs follow the mathematical operation when defined. Float16 execution requires native `Float16Array` support.
+Invalid domains raise `ExpressionEvaluationError` with code `domain`. Zero divisors raise `divisionByZero`. Integer overflow and finite-input overflow at the declared floating precision raise `overflow`. Subnormal results and underflow to zero are allowed. Input NaNs propagate; infinite inputs follow the mathematical operation when defined. Float16 execution requires native `Float16Array` support.
 
 Decimal-place rounding is deferred. The existing JavaScript scalar math library is unchanged.

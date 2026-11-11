@@ -76,6 +76,7 @@ Apache Arrow
 - [Expression Evaluator 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/expression-eval.md): The core evaluator API is useful when you want direct control over parsing, AST reuse, or custom operator registration.
 - [Function Registry 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/function-registry.md): ExpressionFunctionRegistry maintains an isolated table of JavaScript functions that expression evaluators can call with evaluated arguments.
 - [Accessor Compiler 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/parse-expression-string.md): parseExpressionString(expression (row: Record) => unknown
+- [Portable expression AST](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/portable-ast.md): @math.gl/core/expressions provides a shared expression AST for independently implemented
 - [Core Guide](https://visgl.github.io/math.gl/next/docs/modules/core/guide.md): Guides and background for Core.
 - [Preliminaries](https://visgl.github.io/math.gl/next/docs/modules/core/guide/preliminaries.md): Mathematical foundations for working with transformations and 3D coordinates.
 - [@math.gl/core/sql 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/sql.md): An optional SQL parser that converts a small SQL subset into portable query and predicate objects.

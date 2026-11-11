@@ -165,3 +165,5 @@ Postfix `value::TYPE` and chained casts are also supported with the same convers
 `SELECT ARRAY[x, y, z] AS position` returns `{array: ['x', 'y', 'z'], as: 'position'}`. Source-only selections retain this shape and require an alias. Computed arrays such as `ARRAY[x + 1, SIN(angle), 0] AS position` return `{expression, as}`. Use `compileArrowArray(selection.array, {inputSchema, type: selection.type})` for the former, and `compileArrowExpression(selection.expression, {inputSchema, functions})` for the latter.
 
 The component type is the widest floating input, or Float64 for integer-only arrays. `::FLOAT16[3]`, `::REAL[3]`, and `::DOUBLE PRECISION[3]` explicitly choose precision and require matching width. `FLOAT32` and `FLOAT64` are also accepted for fixed-array casts. Float16 execution requires native Float16Array. Null components make the whole tuple null, with zero numeric padding. GPU consumers must respect parent validity or invalid positions appear at the origin.
+
+Executors can consume the [portable expression AST](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/portable-ast.md) and Arrow-independent numeric metadata.

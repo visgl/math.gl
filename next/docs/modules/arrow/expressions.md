@@ -337,7 +337,7 @@ Each named `ArrowTableFunction` owns a non-empty `prototypes` array. A prototype
 
 Compilation selects one prototype: exact signatures win, otherwise Float16 can widen to Float32 or Float64 and Float32 can widen to Float64. The least total widening wins; ties are ambiguous and fail binding. Integer/float and mixed integer-width conversions require explicit casts. Literals follow typed arguments; calls containing only numeric literals prefer their default Float64 type. Use typed null casts to disambiguate otherwise ambiguous null arguments. Kernels receive the chosen prototype's declared input types. No per-batch overload lookup or callback probing occurs.
 
-`ArrowEvaluationError` exposes `code` values `domain`, `conversion`, `overflow` and `divisionByZero`. Numeric data errors use this class; unknown names, incompatible signatures, schema mismatches and implementation failures remain ordinary fatal errors. Division and modulo by zero throw for integer and floating Arrow arithmetic. Error recovery is added separately.
+`ExpressionEvaluationError` exposes `code` values `domain`, `conversion`, `overflow` and `divisionByZero`. Numeric data errors use this class; unknown names, incompatible signatures, schema mismatches and implementation failures remain ordinary fatal errors. Division and modulo by zero throw for integer and floating Arrow arithmetic. Error recovery is added separately.
 
 ## TRY and COALESCE[​](#try-and-coalesce "Direct link to TRY and COALESCE")
 
