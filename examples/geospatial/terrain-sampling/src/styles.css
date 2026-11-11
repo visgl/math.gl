@@ -2,22 +2,63 @@
  * SPDX-License-Identifier: MIT
  * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
  */
-.terrain-sampling {display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:12px;height:100%;min-height:0;box-sizing:border-box;padding:12px;background:#081d2b;color:#e6f4ff;font:14px/1.5 system-ui,sans-serif;overflow:auto}
-.terrain-stage {min-width:0}.terrain-stage h2 {color:inherit}.terrain-stage>svg {width:100%;max-height:480px}
-.terrain-stage .terrain-plan {width:150px;height:150px;touch-action:none;cursor:crosshair}
-.terrain-analysis {max-width:420px}.terrain-analysis svg {width:180px;height:180px;display:block}.terrain-analysis label {max-width:200px}
-.contour-tiles {display:flex;flex-wrap:wrap;gap:12px}.contour-tiles label {margin:4px 0}
+/* Bound the workspace; the sidebar body and visualization area scroll independently. */
+.terrain-sampling {display:grid;grid-template-columns:280px minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:12px;height:100%;max-height:100vh;min-height:0;box-sizing:border-box;padding:12px;background:#081d2b;color:#e6f4ff;font:14px/1.5 system-ui,sans-serif;overflow:hidden}
+.terrain-groups {display:flex;flex-direction:column;gap:2px;min-width:0;min-height:0;overflow:hidden}
+.terrain-groups .example-panel {flex:none}
+.terrain-groups .terrain-group-expanded {flex:1;min-height:0}
+/* Stretch every shell layer so the active panel uses the space left by the headers. */
+.terrain-groups .terrain-group-expanded > .deck-widget-box,
+.terrain-groups .terrain-group-expanded > .deck-widget-box > section {flex:1;height:100%}
+.terrain-groups .terrain-group-expanded > .deck-widget-box > section {display:flex;flex-direction:column}
+.terrain-groups .terrain-group-expanded > .deck-widget-box > section > div {flex:1;min-height:0}
+.terrain-stage {min-width:0;min-height:0;overflow:auto}
+.terrain-stage h2,.terrain-stage h3 {color:inherit;margin-top:0}
+.terrain-stage svg {display:block;width:100%;height:auto;max-height:560px}
+.terrain-analysis {min-width:0}
+.terrain-surface {display:grid;grid-template-columns:minmax(240px,1fr) 200px;align-items:center;gap:20px}
+.terrain-surface>svg {max-height:380px}
+.terrain-probe-readout {font-size:13px}
+.terrain-probe-readout table {font-size:12px}
+/* Keep the dark readout legible inside light-themed documentation. */
+.terrain-sampling .terrain-probe-readout :is(table,thead,tbody,tr,th,td) {color:#e6f4ff;background:transparent;border-color:#426277}
+.terrain-analysis-grid {display:grid;grid-template-columns:repeat(4,minmax(150px,20%));justify-content:safe center;gap:32px}
+.terrain-edit-comparison {padding-top:32px;display:grid;grid-template-columns:repeat(3,minmax(180px,25%));justify-content:safe center;gap:32px}
+.terrain-edit-comparison svg {max-height:none}
+.terrain-mesh-comparison {padding-top:32px;display:grid;grid-template-columns:repeat(4,minmax(140px,20%));justify-content:safe center;gap:32px}
+.terrain-analysis-card,.terrain-mesh-result {margin:0;min-width:0}
+.terrain-analysis-card figcaption,.terrain-mesh-result figcaption {font-size:14px;font-weight:600;margin-bottom:8px}
+.terrain-analysis-card figcaption {min-height:42px}
+.terrain-caption-hint {color:#9aafbd;font-size:12px;font-weight:400}
+.terrain-analysis-card p,.terrain-mesh-result p {font-size:12px;line-height:1.5}
+.terrain-analysis-card svg,.terrain-mesh-result svg {aspect-ratio:1}
+/* Let the z=0 stroke sit on the square's bottom edge without clipping. */
+.terrain-cross-section svg {overflow:visible}
+.terrain-stage .terrain-plan {touch-action:none;cursor:crosshair}
 .terrain-sampling label {display:block;margin:14px 0}.terrain-sampling select,.terrain-sampling input[type=range] {display:block;width:100%}
 .terrain-sampling table {width:100%;border-collapse:collapse}.terrain-sampling td,.terrain-sampling th {padding:5px;text-align:left;border-bottom:1px solid #426277}
-@media(max-width:700px) {.terrain-sampling {grid-template-columns:1fr;grid-auto-rows:max-content}.terrain-sampling .example-panel {width:100%}}
-.terrain-seam-explorer {max-width:700px}
-.terrain-seam-explorer svg {width:100%;height:auto}
+@media(max-width:700px) {.terrain-sampling {grid-template-columns:minmax(160px,38%) minmax(0,1fr)}}
 
-/* Match the shared example controls without changing the terrain analysis widgets. */
+/* Every mode sends its controls into the active shared panel. */
 .terrain-sampling .example-panel label {font-size:12px;}
 .terrain-sampling .example-panel select {box-sizing:border-box;min-width:0;margin-top:6px;padding:9px;border:1px solid #35546f;border-radius:8px;background:#172d44;color:#eaf6ff;font:inherit;cursor:pointer;}
 .terrain-sampling .example-panel input[type='range'] {min-width:0;margin-top:8px;accent-color:var(--panel-accent-color);}
 .terrain-sampling .example-panel label:has(input[type='checkbox']) {display:flex;align-items:center;gap:8px;margin:9px 0;}
 .terrain-sampling .example-panel input[type='checkbox'] {flex:none;margin:0;accent-color:var(--panel-accent-color);}
-.terrain-sampling .example-panel p {font-size:13px;line-height:1.5;}
+.terrain-sampling .example-panel p {font-size:13px;line-height:1.5;color:#a9bed2;}
 .terrain-sampling .example-panel table {font-size:12px;}
+
+/* Compact headers are local to this multi-panel workspace. */
+.terrain-sampling .example-panel > .deck-widget-box > section > header > button {font-size:14px !important;min-height:36px !important;padding:8px 12px !important;}
+.terrain-transition-comparison {padding-top:32px;display:grid;grid-template-columns:repeat(2,minmax(300px,44%));justify-content:safe center;gap:32px}
+.terrain-transition-comparison svg {aspect-ratio:16/10;max-height:none}
+.terrain-seam-readings table {font-size:12px;color:#e6f4ff}
+.terrain-seam-readings :is(table,tr,th,td) {color:#e6f4ff;background:transparent;border-color:#426277}
+
+.terrain-streaming {height:100%;display:grid;place-items:center}
+.terrain-streaming-grid {position:relative;width:50%;max-width:280px;margin:0}
+/* Keep the tiles themselves centered; the legend follows below without shifting the grid. */
+.terrain-streaming-legend {position:absolute;top:100%;left:0;right:0;display:flex;justify-content:center;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:12px}
+.terrain-streaming-legend span {display:flex;align-items:center;gap:6px}
+
+.terrain-view-description {grid-column:1/-1;margin:0;color:#a9bed2;font-size:13px;line-height:1.5}
