@@ -66,12 +66,6 @@ Applications written against math.gl's projection interfaces can still work with
 
 <!-- -->
 
-The same application projects a graticule and a location through the selected engine.
-
-Preparing engine…
-
-XY only · latitude −80° to 80° · spherical Mercator · D3 scale 6,378,137, zero translation, north-positive Y. No datum or height conversion.
-
 [Open the separate example page](https://visgl.github.io/math.gl/next/examples/external-projection-engines) for the recipe, source and limits. The comparison uses XY spherical Mercator with matching units and axes; it does not imply that all backend CRS or geometry capabilities coincide.
 
 ## Synchronous adapters[​](#synchronous-adapters "Direct link to Synchronous adapters")
