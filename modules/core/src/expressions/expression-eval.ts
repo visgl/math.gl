@@ -12,6 +12,7 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return, @typescript-eslint/restrict-plus-operands */
 
+import {reportDiagnosticError, type DiagnosticLog} from '../diagnostic-log';
 import jsepRuntime from './vendor/jsep/runtime';
 import type {Jsep as JsepTypes} from './vendor/jsep/types';
 import {mergeFunctionLibraries, type ExpressionEvaluationOptions} from './function-libraries';
@@ -268,7 +269,7 @@ function evaluate(node: JsepTypes.Expression, context: ExpressionContext): unkno
  * expressions, conditionals, unary expressions, and binary expressions.
  */
 // eslint-disable-next-line complexity
-export async function evaluateAsync(
+async function evaluateExpressionAsync(
   node: JsepTypes.Expression,
   context: ExpressionContext,
   options?: ExpressionEvaluationOptions
@@ -284,19 +285,19 @@ export async function evaluateAsync(
     case 'BinaryExpression':
       if (expression.operator === '||') {
         return (
-          (await evaluateAsync(expression.left, mergedContext)) ||
-          (await evaluateAsync(expression.right, mergedContext))
+          (await evaluateExpressionAsync(expression.left, mergedContext)) ||
+          (await evaluateExpressionAsync(expression.right, mergedContext))
         );
       }
       if (expression.operator === '&&') {
         return (
-          (await evaluateAsync(expression.left, mergedContext)) &&
-          (await evaluateAsync(expression.right, mergedContext))
+          (await evaluateExpressionAsync(expression.left, mergedContext)) &&
+          (await evaluateExpressionAsync(expression.right, mergedContext))
         );
       }
       return binops[expression.operator](
-        await evaluateAsync(expression.left, mergedContext),
-        await evaluateAsync(expression.right, mergedContext)
+        await evaluateExpressionAsync(expression.left, mergedContext),
+        await evaluateExpressionAsync(expression.right, mergedContext)
       );
 
     case 'CallExpression': {
@@ -311,7 +312,9 @@ export async function evaluateAsync(
         caller = member[0];
         fn = member[1] as Callable | undefined;
       } else {
-        fn = (await evaluateAsync(expression.callee, mergedContext)) as Callable | undefined;
+        fn = (await evaluateExpressionAsync(expression.callee, mergedContext)) as
+          | Callable
+          | undefined;
       }
 
       if (typeof fn !== 'function') {
@@ -322,9 +325,9 @@ export async function evaluateAsync(
     }
 
     case 'ConditionalExpression':
-      return (await evaluateAsync(expression.test, mergedContext))
-        ? await evaluateAsync(expression.consequent, mergedContext)
-        : await evaluateAsync(expression.alternate, mergedContext);
+      return (await evaluateExpressionAsync(expression.test, mergedContext))
+        ? await evaluateExpressionAsync(expression.consequent, mergedContext)
+        : await evaluateExpressionAsync(expression.alternate, mergedContext);
 
     case 'Identifier':
       return mergedContext[expression.name];
@@ -339,7 +342,9 @@ export async function evaluateAsync(
       return mergedContext;
 
     case 'UnaryExpression':
-      return unops[expression.operator](await evaluateAsync(expression.argument, mergedContext));
+      return unops[expression.operator](
+        await evaluateExpressionAsync(expression.argument, mergedContext)
+      );
 
     default:
       return undefined;
@@ -357,8 +362,8 @@ export function compile(
   expression: string | JsepTypes.Expression,
   options?: ExpressionEvaluationOptions
 ): (context: ExpressionContext) => unknown {
-  const ast = parse(expression);
-  return (context: ExpressionContext) => evaluateExpression(ast, context, options);
+  const ast = parse(expression, options);
+  return (context: ExpressionContext) => evaluateWithDiagnostics(ast, context, options);
 }
 
 /**
@@ -372,7 +377,7 @@ export function compileAsync(
   expression: string | JsepTypes.Expression,
   options?: ExpressionEvaluationOptions
 ): (context: ExpressionContext) => Promise<unknown> {
-  const ast = parse(expression);
+  const ast = parse(expression, options);
   return (context: ExpressionContext) => evaluateAsync(ast, context, options);
 }
 
@@ -425,8 +430,16 @@ export function addBinaryOp(
  * @returns A parsed AST, or the supplied AST unchanged.
  * @throws If the expression string is not valid JSEP syntax.
  */
-export function parse(expression: string | JsepTypes.Expression): JsepTypes.Expression {
-  return typeof expression === 'string' ? jsep(expression) : expression;
+export function parse(
+  expression: string | JsepTypes.Expression,
+  options?: {log?: DiagnosticLog}
+): JsepTypes.Expression {
+  try {
+    return typeof expression === 'string' ? jsep(expression) : expression;
+  } catch (error) {
+    reportDiagnosticError(options?.log, error);
+    throw error;
+  }
 }
 
 /**
@@ -437,4 +450,31 @@ export function parse(expression: string | JsepTypes.Expression): JsepTypes.Expr
  * @param options - Function libraries to add to the context.
  * @returns The expression value.
  */
-export {evaluateExpression as evaluate};
+function evaluateWithDiagnostics(
+  node: JsepTypes.Expression,
+  context: ExpressionContext,
+  options?: ExpressionEvaluationOptions
+): unknown {
+  try {
+    return evaluateExpression(node, context, options);
+  } catch (error) {
+    reportDiagnosticError(options?.log, error);
+    throw error;
+  }
+}
+
+export {evaluateWithDiagnostics as evaluate};
+
+/** Evaluates an expression asynchronously and reports errors to the supplied logger. */
+export async function evaluateAsync(
+  node: JsepTypes.Expression,
+  context: ExpressionContext,
+  options?: ExpressionEvaluationOptions
+): Promise<unknown> {
+  try {
+    return await evaluateExpressionAsync(node, context, options);
+  } catch (error) {
+    reportDiagnosticError(options?.log, error);
+    throw error;
+  }
+}

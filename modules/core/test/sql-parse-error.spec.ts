@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
+import {MemoryLog} from 'probe.gl/log';
 import {
   parseSQLExpression,
   parseSQLPredicate,
@@ -48,4 +49,11 @@ test('injected WHERE parsers preserve their own exceptions', () => {
     })
   ).toThrow(failure);
   expect(() => parseSQLQuery('SELECT x FROM')).toThrow(expect.objectContaining({token: null}));
+});
+
+test('SQL query parsing reports the original diagnostic to a supplied Probe.gl logger', () => {
+  const log = new MemoryLog();
+  expect(() => parseSQLQuery('SHOW TABLES FROM 123', {log})).toThrow(SQLParseError);
+  expect(log.messages).toHaveLength(1);
+  expect(log.messages[0].args[0]).toBeInstanceOf(SQLParseError);
 });
