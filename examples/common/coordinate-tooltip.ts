@@ -4,7 +4,7 @@
 import './coordinate-tooltip.css';
 
 /** Show geographic hover details near the pointer without taking space from the map. */
-export function createCoordinateTooltip(parent) {
+export function createCoordinateTooltip(parent: HTMLElement) {
   const element = document.createElement('div');
   element.className = 'example-coordinate-tooltip';
   element.setAttribute('role', 'tooltip');
@@ -20,7 +20,7 @@ export function createCoordinateTooltip(parent) {
   window.addEventListener('resize', hide, {signal: abort.signal});
   window.addEventListener('blur', hide, {signal: abort.signal});
   return {
-    show(text, event) {
+    show(text: string, event: PointerEvent) {
       if (event.pointerType === 'touch') {
         hide();
         return;
