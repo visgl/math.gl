@@ -20,7 +20,7 @@ export class SQLParseError extends SyntaxError {
     const lines = source.slice(0, offset).split(/\r\n|\r|\n/);
     const line = lines.length;
     const column = lines[line - 1]!.length + 1;
-    const token = source.slice(offset, offset + 32).match(/^[\w]+|^\S/)?.[0] ?? null;
+    const token = source.slice(offset, offset + 32).match(/^:?\w+|^\S/u)?.[0] ?? null;
     super(
       `${reason} (line ${line}, column ${column}${token ? `, near ${JSON.stringify(token)}` : ''})`
     );

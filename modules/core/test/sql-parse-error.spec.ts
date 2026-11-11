@@ -17,6 +17,8 @@ test.each([
   [parseSQLQuery, 'SELECT x\nWHERE x > @', '@', 2, 11],
   [parseSQLQuery, 'SELECT x\nWHERE x > y + @', '@', 2, 15],
   [parseSQLPredicate, 'x >\n  @', '@', 2, 3],
+  [parseSQLPredicate, 'x = :missing AND y = 2', ':missing', 1, 5],
+  [parseSQLPredicate, 'x = :missing', ':missing', 1, 5],
   [parseSQLExpression, 'x +\n  @', '@', 2, 3],
   [parseSQLExpression, 'x::imaginary', 'imaginary', 1, 4]
 ] as const)(

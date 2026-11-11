@@ -245,7 +245,7 @@ class SQLPredicateParser {
         return {parameter: token.value};
       }
       if (!Object.prototype.hasOwnProperty.call(this.parameters, token.value)) {
-        throw this.error(`SQL predicate parameter ":${token.value}" requires a value`);
+        throw this.error(`SQL predicate parameter ":${token.value}" requires a value`, token);
       }
       const value = this.parameters[token.value];
       validateParameterValue(value, token.value);
