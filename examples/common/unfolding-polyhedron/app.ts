@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {mountInfoBox} from '../../../common/info-box.js';
+import {mountInfoBox} from '../info-box.js';
 
 import {createSolid, edgeKey, type Solid} from './polyhedra';
 import {createCutLayout, type CutMode} from './cut-layout';
@@ -18,7 +18,7 @@ export function mountUnfolding(
       level: number,
       seed: number,
       mode: string
-    ) => Omit<ReturnType<typeof createCutLayout>, 'cutLandKm' | 'baselineLandKm'> & {
+    ) => Pick<ReturnType<typeof createCutLayout>, 'mesh' | 'edges' | 'evaluate' | 'overlaps'> & {
       cutLandKm?: number;
       baselineLandKm?: number;
       description?: string;

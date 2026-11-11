@@ -10,7 +10,7 @@ import {
   faceNormal,
   subtract,
   edgeKey
-} from '../../../../examples/geometry/unfolding-polyhedron/src/polyhedra';
+} from '../../../../examples/common/unfolding-polyhedron/polyhedra';
 
 for (const columns of [24, 48, 72, 96]) {
   test(`graticule ${columns}: planar outward faces and a closed shared seam`, () => {

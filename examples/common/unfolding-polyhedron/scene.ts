@@ -36,11 +36,6 @@ export function createUnfoldingScene(
     },
     draw(layout: MotionLayout, hinges: Set<string>, state: UnfoldingViewState) {
       const {width, height} = canvas.getBoundingClientRect();
-      const dpr = Math.min(devicePixelRatio, 2);
-      if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
-        canvas.width = Math.round(width * dpr);
-        canvas.height = Math.round(height * dpr);
-      }
       const view = new Matrix4().rotateX(state.pitch).rotateY(state.yaw).rotateZ(state.rotationZ);
       const faces = layout
         .evaluate(state.unfolding)

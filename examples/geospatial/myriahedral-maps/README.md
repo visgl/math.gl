@@ -18,7 +18,7 @@ The shared files in `../../geometry/unfolding-polyhedron` have separate responsi
 
 - `src/app.ts`: control events, playback, orbit gestures, and tooltip presentation.
 - `scene.ts`: evaluates poses, fits the camera, and passes positions to the renderer.
-- `renderer.ts`: WebGL resources, shaders, textures, and drawing. Imagery status
+- `renderer.ts`: deck.gl panel and edge layers with spherical texture sampling. Imagery status
   is reported through a callback rather than written into the UI.
 - `picking.ts`: maps a rendered panel hit back to geographic coordinates.
 

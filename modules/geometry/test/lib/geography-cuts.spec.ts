@@ -7,14 +7,11 @@ import {
   isLand,
   landArc,
   oceanWeight
-} from '../../../../examples/geometry/unfolding-polyhedron/src/geography';
-import {createDymaxion} from '../../../../examples/geometry/unfolding-polyhedron/src/dymaxion';
-import {createCutLayout} from '../../../../examples/geometry/unfolding-polyhedron/src/cut-layout';
-import {createLayout} from '../../../../examples/geometry/unfolding-polyhedron/src/layout';
-import {
-  createSolid,
-  type Vec3
-} from '../../../../examples/geometry/unfolding-polyhedron/src/polyhedra';
+} from '../../../../examples/common/unfolding-polyhedron/geography';
+import {createDymaxion} from '../../../../examples/common/unfolding-polyhedron/dymaxion';
+import {createCutLayout} from '../../../../examples/common/unfolding-polyhedron/cut-layout';
+import {createLayout} from '../../../../examples/common/unfolding-polyhedron/layout';
+import {createSolid, type Vec3} from '../../../../examples/common/unfolding-polyhedron/polyhedra';
 
 const point = (lon: number, lat: number): Vec3 => {
   lon *= Math.PI / 180;
