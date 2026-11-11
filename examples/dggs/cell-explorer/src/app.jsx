@@ -121,7 +121,7 @@ export default function CellExplorer() {
         >
           Antimeridian sample
         </button>
-        <label>
+        <label className="dggs-check">
           <input
             type="checkbox"
             checked={unwrap}
@@ -129,7 +129,7 @@ export default function CellExplorer() {
           />
           Unwrap antimeridian
         </label>
-        <label>
+        <label className="dggs-check">
           <input
             type="checkbox"
             checked={compare}

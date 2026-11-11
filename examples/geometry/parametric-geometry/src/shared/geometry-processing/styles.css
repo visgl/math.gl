@@ -15,10 +15,10 @@
 }
 .processing-info {
   position: absolute;
+  /* Leave the camera toolbar accessible above the floating panel. */
   top: 56px;
   right: 12px;
   max-width: min(300px, calc(100% - 24px));
-  padding: 12px;
   border: 1px solid #526b84;
   border-radius: 8px;
   background: #132538ed;

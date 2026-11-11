@@ -3,17 +3,20 @@
  * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
  */
 .geometry-example {
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: 250px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   height: 100%;
   min-height: 0;
+  padding: 12px;
+  gap: 12px;
   color: #eef5ff;
   background: #07121e;
   font: 14px system-ui;
 }
 .geometry-panel {
-  overflow: auto;
-  padding: 18px;
+  font: 14px/1.5 system-ui, sans-serif;
   background: #132538;
 }
 .geometry-panel h2 {
@@ -22,23 +25,27 @@
   color: inherit;
 }
 .geometry-panel label {
+  font-size: 12px;
   display: block;
   margin-bottom: 16px;
 }
 .geometry-panel select {
   display: block;
   width: 100%;
-  margin-top: 7px;
-  padding: 7px;
+  margin-top: 6px;
+  padding: 9px;
   color: #eef5ff;
   background: #07121e;
   border: 1px solid #526b84;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 .geometry-panel .geometry-check {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+.geometry-panel :is(dl, summary) {
+  font-size: 12px;
 }
 .geometry-panel dl {
   display: grid;
@@ -57,12 +64,20 @@
   color: #c3e6ff;
 }
 .geometry-panel p {
+  font-size: 13px;
   color: #a7bcd0;
+}
+.geometry-panel .example-panel-content :is(button, select) {
+  font: inherit;
+}
+.geometry-panel .example-panel-content button {
+  padding: 9px;
+  border-radius: 8px;
 }
 .geometry-canvas {
   position: relative;
   min-width: 0;
-  min-height: 240px;
+  min-height: 0;
 }
 .geometry-canvas canvas {
   position: absolute;
@@ -100,14 +115,12 @@
   }
   .geometry-panel {
     flex: none;
-    overflow: visible;
-    padding: 12px;
   }
   .geometry-panel pre {
     display: none;
   }
   .geometry-canvas {
     flex: 1;
-    min-height: 300px;
+    min-height: 0;
   }
 }

@@ -5,18 +5,19 @@
 .math-playground {
   height: 100%;
   min-height: 0;
+  padding: 12px;
+  gap: 12px;
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 260px 1fr;
   background: #07121e;
   color: #e7f1fa;
   font:
-    14px/1.5 var(--ifm-font-family-base, system-ui),
+    14px/1.5 var(--example-font-family, system-ui),
     sans-serif;
   overflow: auto;
 }
 .math-playground aside {
-  padding: 20px;
   background: #0d2035;
   overflow: auto;
 }
@@ -27,10 +28,30 @@
 }
 .math-playground p {
   color: #b8c9d9;
+  font-size: 13px;
 }
 .math-playground label {
   display: block;
-  margin: 10px 0;
+  margin: 14px 0;
+  font-size: 12px;
+}
+.math-playground label.polygon-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  margin: 9px 0;
+}
+.math-playground input[type='checkbox'] {
+  flex: none;
+  margin: 0;
+  accent-color: #70c7ff;
+}
+.math-playground select {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 6px;
 }
 .math-playground input[type='range'] {
   width: 100%;
@@ -38,11 +59,11 @@
 }
 .math-playground button,
 .math-playground select {
-  padding: 6px 10px;
+  padding: 9px;
   background: #19344e;
   color: white;
   border: 1px solid #6c8195;
-  border-radius: 6px;
+  border-radius: 8px;
   font: inherit;
 }
 .math-playground button {
@@ -74,13 +95,6 @@
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(300px, 1fr);
   }
-  .math-playground aside {
-    padding: 12px;
-  }
-  .math-playground label {
-    display: inline-block;
-    margin: 4px 8px;
-  }
   .math-playground p {
     margin: 6px 0;
   }
@@ -102,10 +116,6 @@
     height: 320px;
     flex: none;
   }
-  .math-playground label {
-    width: calc(50% - 16px);
-    font-size: 12px;
-  }
 }
 .polygon-editor-view {
   position: relative;
@@ -116,13 +126,16 @@
   inset: 0;
 }
 .math-playground input[type='number'] {
+  display: block;
   width: 100%;
+  margin-top: 6px;
   box-sizing: border-box;
   background: #19344e;
   color: white;
   border: 1px solid #6c8195;
-  border-radius: 4px;
-  padding: 4px;
+  border-radius: 8px;
+  padding: 9px;
+  font: inherit;
 }
 @media (max-width: 600px) {
   .polygon-editor-view {

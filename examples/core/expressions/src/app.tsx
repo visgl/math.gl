@@ -55,7 +55,13 @@ const LIBRARIES: Record<
 
 const INITIAL_SAMPLE = EXPRESSION_SAMPLES[3];
 
-export default function ExpressionPlayground(): ReactElement {
+export default function ExpressionPlayground({
+  showHeader = true,
+  theme
+}: {
+  showHeader?: boolean;
+  theme?: 'light' | 'dark';
+}): ReactElement {
   const [sampleId, setSampleId] = useState(INITIAL_SAMPLE.id);
   const [expression, setExpression] = useState(INITIAL_SAMPLE.expression);
   const [contextText, setContextText] = useState(formatJson(INITIAL_SAMPLE.context));
@@ -122,45 +128,51 @@ export default function ExpressionPlayground(): ReactElement {
     );
   }
 
-  return (
-    <main className="expression-playground">
-      <header className="playground-header">
-        <div>
-          <p className="eyebrow">@math.gl/core</p>
-          <h1>Expression playground</h1>
-          <div className="release-status" aria-label="Release status">
-            <span>Experimental</span>
-            <span>From v4.2</span>
-          </div>
-        </div>
-        <label className="sample-picker">
-          <span>Sample</span>
-          <select
-            value={sampleId}
-            onChange={event => {
-              const sample = EXPRESSION_SAMPLES.find(
-                candidate => candidate.id === event.target.value
-              );
-              if (sample) {
-                selectSample(sample);
-              }
-            }}
-          >
-            <option value="" disabled>
-              Custom expression
-            </option>
-            {groupSamples(EXPRESSION_SAMPLES).map(([group, samples]) => (
-              <optgroup key={group} label={group}>
-                {samples.map(sample => (
-                  <option key={sample.id} value={sample.id}>
-                    {sample.label}
-                  </option>
-                ))}
-              </optgroup>
+  const samplePicker = (
+    <label className="sample-picker">
+      <span>Sample</span>
+      <select
+        value={sampleId}
+        onChange={event => {
+          const sample = EXPRESSION_SAMPLES.find(candidate => candidate.id === event.target.value);
+          if (sample) {
+            selectSample(sample);
+          }
+        }}
+      >
+        <option value="" disabled>
+          Custom expression
+        </option>
+        {groupSamples(EXPRESSION_SAMPLES).map(([group, samples]) => (
+          <optgroup key={group} label={group}>
+            {samples.map(sample => (
+              <option key={sample.id} value={sample.id}>
+                {sample.label}
+              </option>
             ))}
-          </select>
-        </label>
-      </header>
+          </optgroup>
+        ))}
+      </select>
+    </label>
+  );
+
+  return (
+    <main className="expression-playground" data-expression-theme={theme}>
+      {showHeader ? (
+        <header className="playground-header">
+          <div>
+            <p className="eyebrow">@math.gl/core</p>
+            <h1>Expression playground</h1>
+            <div className="release-status" aria-label="Release status">
+              <span>Experimental</span>
+              <span>From v4.2</span>
+            </div>
+          </div>
+          {samplePicker}
+        </header>
+      ) : (
+        <div className="playground-toolbar">{samplePicker}</div>
+      )}
 
       <section className="library-strip" aria-label="Function libraries">
         {(Object.keys(LIBRARIES) as LibraryId[]).map(libraryId => {

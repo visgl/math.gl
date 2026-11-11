@@ -84,7 +84,7 @@ export function createScene(canvas) {
     if (data) still.setData(data);
   };
   return {
-    async setData(target, {strategy = 'auto', animate = true} = {}) {
+    async setData(target, {strategy = 'auto', animate = true, onTransitionStart} = {}) {
       const token = ++generation;
       settle();
       if (!data || !animate || reduced.matches) {
@@ -120,6 +120,7 @@ export function createScene(canvas) {
       if (token !== generation) return false;
       destination = target;
       moving = true;
+      onTransitionStart?.();
       const start = performance.now();
       await new Promise(resolve => {
         const tick = now => {

@@ -5,18 +5,14 @@
 
 .expression-playground {
   box-sizing: border-box;
-  color: #18201c;
-  background: #f2f4f1;
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  color: var(--expression-text, #18201c);
+  background: var(--expression-background, #f2f4f1);
+  color-scheme: light;
+  font: 14px/1.5 system-ui, sans-serif;
   font-synthesis: none;
 }
+
+.expression-playground[data-expression-theme='dark'] { color-scheme: dark; }
 
 .expression-playground * {
   box-sizing: border-box;
@@ -35,15 +31,28 @@
 
 .expression-playground button,
 .expression-playground select {
-  border-radius: 6px;
+  padding: 9px;
+  border: 1px solid var(--expression-border, #b8cddc);
+  border-radius: 8px;
+  color: var(--expression-text, #1c3847);
+  background: var(--expression-control-background, #f4f9ff);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.expression-playground button:not(:disabled):hover,
+.expression-playground select:hover {
+  background: var(--expression-hover, #e5eff8);
 }
 
 .expression-playground {
   width: min(1440px, 100%);
   min-height: 100vh;
   margin: 0 auto;
-  background: #ffffff;
-  border-inline: 1px solid #d7ddd8;
+  background: var(--expression-background, #ffffff);
+  border-inline: 1px solid var(--expression-border, #d7ddd8);
 }
 
 .expression-playground .playground-header {
@@ -53,12 +62,12 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
-  border-bottom: 1px solid #cfd6d0;
+  border-bottom: 1px solid var(--expression-border, #cfd6d0);
 }
 
 .expression-playground .eyebrow {
   margin: 0 0 5px;
-  color: #167254;
+  color: var(--expression-accent, #167254);
   font-size: 13px;
   font-weight: 750;
   text-transform: uppercase;
@@ -68,14 +77,15 @@
 .expression-playground h2,
 .expression-playground p {
   margin-top: 0;
+  color: inherit;
 }
 
 .expression-playground h1 {
   margin-bottom: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 38px;
-  font-weight: 500;
-  line-height: 1;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .expression-playground .release-status {
@@ -87,9 +97,9 @@
 
 .expression-playground .release-status span {
   padding: 3px 7px;
-  color: #4d2710;
-  background: #ffe0bd;
-  border: 1px solid #d98845;
+  color: var(--expression-warning-text, #4d2710);
+  background: var(--expression-warning-background, #ffe0bd);
+  border: 1px solid var(--expression-warning-border, #d98845);
   border-radius: 4px;
   font-size: 11px;
   font-weight: 750;
@@ -97,19 +107,27 @@
 }
 
 .expression-playground .release-status span:last-child {
-  color: #123b55;
-  background: #dceefa;
-  border-color: #65a6cf;
+  color: var(--expression-info-text, #123b55);
+  background: var(--expression-info-background, #dceefa);
+  border-color: var(--expression-info-border, #65a6cf);
 }
 
 .expression-playground h2 {
   margin-bottom: 10px;
-  font-size: 13px;
-  font-weight: 750;
-  text-transform: uppercase;
+  font-family: inherit;
+  line-height: 1.3;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Keep sample selection available when the host supplies the page heading. */
+.expression-playground .playground-toolbar {
+  padding: 12px 28px;
+  border-bottom: 1px solid var(--expression-border, #cfd6d0);
 }
 
 .expression-playground .sample-picker {
+  display: block;
   width: min(360px, 100%);
 }
 
@@ -117,22 +135,17 @@
   display: block;
   margin-bottom: 6px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .expression-playground .sample-picker select {
   width: 100%;
-  min-height: 42px;
-  padding: 8px 36px 8px 12px;
-  color: #18201c;
-  background: #ffffff;
-  border: 1px solid #98a49c;
 }
 
 .expression-playground .library-strip {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  border-bottom: 1px solid #cfd6d0;
+  border-bottom: 1px solid var(--expression-border, #cfd6d0);
 }
 
 .expression-playground .library-toggle {
@@ -141,7 +154,7 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  border-right: 1px solid #dfe4e0;
+  border-right: 1px solid var(--expression-border, #dfe4e0);
   cursor: pointer;
 }
 
@@ -150,14 +163,14 @@
 }
 
 .expression-playground .library-toggle:has(input:checked) {
-  background: #e9f5ef;
+  background: var(--expression-active-background, #e9f5ef);
 }
 
 .expression-playground .library-toggle input {
   width: 17px;
   height: 17px;
   margin: 1px 0 0;
-  accent-color: #167254;
+  accent-color: var(--expression-accent, #167254);
 }
 
 .expression-playground .library-toggle strong,
@@ -167,12 +180,12 @@
 
 .expression-playground .library-toggle strong {
   margin-bottom: 4px;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .expression-playground .library-toggle small {
-  color: #59645d;
-  font-size: 11px;
+  color: var(--expression-muted, #59645d);
+  font-size: 13px;
   line-height: 1.35;
 }
 
@@ -189,26 +202,26 @@
 }
 
 .expression-playground .editor-pane {
-  border-right: 1px solid #cfd6d0;
+  border-right: 1px solid var(--expression-border, #cfd6d0);
 }
 
 .expression-playground .pane-heading,
 .expression-playground .preview-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
 
-.expression-playground .pane-heading button {
-  min-width: 96px;
-  min-height: 36px;
-  padding: 7px 16px;
-  color: #ffffff;
-  background: #167254;
-  border: 1px solid #0e5c42;
-  font-weight: 750;
-  cursor: pointer;
+.expression-playground .preview-heading label {
+  font-size: 12px;
+}
+
+.expression-playground .preview-heading select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
 }
 
 .expression-playground .pane-heading button:disabled {
@@ -219,9 +232,9 @@
 .expression-playground textarea {
   width: 100%;
   resize: vertical;
-  color: #172019;
-  background: #f7f8f6;
-  border: 1px solid #aab4ad;
+  color: var(--expression-text, #172019);
+  background: var(--expression-surface, #f7f8f6);
+  border: 1px solid var(--expression-border, #aab4ad);
   border-radius: 4px;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 13px;
@@ -231,7 +244,7 @@
 .expression-playground textarea:focus,
 .expression-playground select:focus,
 .expression-playground button:focus-visible {
-  outline: 3px solid #f0b83e;
+  outline: 2px solid var(--expression-focus, #2563eb);
   outline-offset: 2px;
 }
 
@@ -249,7 +262,7 @@
 .expression-playground .function-index {
   margin-top: 26px;
   padding-top: 22px;
-  border-top: 1px solid #dce1dd;
+  border-top: 1px solid var(--expression-border, #dce1dd);
 }
 
 .expression-playground .function-list {
@@ -262,27 +275,27 @@
 
 .expression-playground .function-list code {
   padding: 4px 7px;
-  color: #174c39;
-  background: #edf4f0;
-  border: 1px solid #bfd2c7;
+  color: var(--expression-accent, #174c39);
+  background: var(--expression-active-background, #edf4f0);
+  border: 1px solid var(--expression-border, #bfd2c7);
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .expression-playground .empty-message,
 .expression-playground .preview-heading span,
 .expression-playground .status {
-  color: #68736c;
+  color: var(--expression-muted, #68736c);
   font-size: 12px;
 }
 
 .expression-playground .status {
-  color: #167254;
+  color: var(--expression-accent, #167254);
   font-weight: 750;
 }
 
 .expression-playground .status-error {
-  color: #b42f25;
+  color: var(--expression-error-text, #b42f25);
 }
 
 .expression-playground .result-output,
@@ -300,21 +313,21 @@
 }
 
 .expression-playground .result-output {
-  color: #d9f5e8;
-  background: #17231d;
-  border: 1px solid #0e1712;
+  color: var(--expression-output-text, #d9f5e8);
+  background: var(--expression-output-background, #17231d);
+  border: 1px solid var(--expression-border, #0e1712);
 }
 
 .expression-playground .error-output {
-  color: #7a201a;
-  background: #fff0ed;
-  border: 1px solid #e3aaa3;
+  color: var(--expression-error-text, #7a201a);
+  background: var(--expression-error-background, #fff0ed);
+  border: 1px solid var(--expression-error-border, #e3aaa3);
 }
 
 .expression-playground .geometry-preview {
   margin-top: 28px;
   padding-top: 22px;
-  border-top: 1px solid #dce1dd;
+  border-top: 1px solid var(--expression-border, #dce1dd);
 }
 
 .expression-playground .map-stage {
@@ -322,8 +335,8 @@
   width: 100%;
   aspect-ratio: 2 / 1;
   overflow: hidden;
-  background: #dbe5e1;
-  border: 1px solid #a7b2ab;
+  background: var(--expression-surface, #dbe5e1);
+  border: 1px solid var(--expression-border, #a7b2ab);
   border-radius: 4px;
 }
 
@@ -350,13 +363,13 @@
   display: flex;
   justify-content: space-between;
   gap: 24px;
-  color: #59645d;
-  border-top: 1px solid #cfd6d0;
+  color: var(--expression-muted, #59645d);
+  border-top: 1px solid var(--expression-border, #cfd6d0);
   font-size: 12px;
 }
 
 .expression-playground .playground-footer a {
-  color: #126a4c;
+  color: var(--expression-accent, #126a4c);
 }
 
 @media (max-width: 900px) {
@@ -365,7 +378,7 @@
   }
 
   .expression-playground .library-toggle {
-    border-bottom: 1px solid #dfe4e0;
+    border-bottom: 1px solid var(--expression-border, #dfe4e0);
   }
 
   .expression-playground .workbench {
@@ -374,7 +387,7 @@
 
   .expression-playground .editor-pane {
     border-right: 0;
-    border-bottom: 1px solid #cfd6d0;
+    border-bottom: 1px solid var(--expression-border, #cfd6d0);
   }
 }
 
@@ -385,8 +398,8 @@
     flex-direction: column;
   }
 
-  .expression-playground h1 {
-    font-size: 32px;
+  .expression-playground .playground-toolbar {
+    padding: 12px 20px;
   }
 
   .expression-playground .sample-picker {
@@ -411,5 +424,12 @@
     padding: 14px 20px;
     flex-direction: column;
     gap: 6px;
+  }
+}
+
+@media (pointer: coarse), (max-width: 996px) {
+  .expression-playground button,
+  .expression-playground select {
+    min-height: 44px;
   }
 }

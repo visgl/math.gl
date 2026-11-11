@@ -30,12 +30,15 @@ export function mountUnfolding(
 ) {
   root.innerHTML = view;
   const selectors = root.querySelector<HTMLElement>('.selectors')!;
-  const playback = root.querySelector<HTMLElement>('footer .controls')!;
   const disposeSelectors = mountInfoBox(selectors, {
     title: 'Geometry and cuts',
     theme: 'sleek-dark'
   });
-  const disposePlayback = mountInfoBox(playback, {title: 'Unfolding', theme: 'sleek-dark'});
+  const disposePlayback = mountInfoBox(root.querySelector<HTMLElement>('footer .controls')!, {
+    title: 'Unfolding',
+    theme: 'sleek-dark',
+    variant: 'invisible'
+  });
   const abort = new AbortController();
   let frame = 0;
   function listen<K extends keyof HTMLElementEventMap>(
@@ -79,8 +82,8 @@ export function mountUnfolding(
   const earth = root.querySelector<HTMLInputElement>('#earth')!;
   const edges = root.querySelector<HTMLInputElement>('#edges')!;
   const slider = root.querySelector<HTMLInputElement>('#unfold')!;
-  const amount = root.querySelector<HTMLOutputElement>('#amount')!;
-  const play = root.querySelector<HTMLButtonElement>('#play')!;
+  const globe = root.querySelector<HTMLButtonElement>('#globe')!;
+  const flat = root.querySelector<HTMLButtonElement>('#flat')!;
   const solid = root.querySelector<HTMLSelectElement>('#solid')!;
   const cuts = root.querySelector<HTMLSelectElement>('#cuts')!;
   const cutSummary = root.querySelector<HTMLElement>('#cut-summary')!;
@@ -101,10 +104,8 @@ export function mountUnfolding(
   let hinges = new Set<string>();
   let yaw = options.northUp ? 0 : -0.3,
     pitch = options.northUp ? 0 : 0.65,
-    unfolding = 0,
-    playing = false,
-    direction = 1,
-    lastTime = 0;
+    unfolding = 0;
+  let transition: {from: number; to: number; start: number} | null = null;
   let drag: {x: number; y: number} | null = null;
   function describe() {
     const preset = cuts.value === 'dymaxion';
@@ -117,7 +118,7 @@ export function mountUnfolding(
       ? `${layout.cutLandKm === undefined ? '' : `Estimated land crossed by cuts: ${Math.round(layout.cutLandKm).toLocaleString()} km. `}${'description' in layout ? layout.description : ''}`
       : `Estimated land crossed by cuts: ${Math.round(layout.cutLandKm!).toLocaleString()} km · comparison strategy on this mesh: ${Math.round(layout.baselineLandKm!).toLocaleString()} km. ${preset ? 'AirOcean 24-panel topology; spherical texture mapping, not the Fuller projection.' : 'Ocean preference minimizes sampled land cuts; it cannot guarantee unbroken continents.'}`;
     hinges = new Set(layout.edges.filter(e => e.hinge).map(e => edgeKey(e.a, e.b)));
-    summary.textContent = `${layout.mesh.faces.length.toLocaleString()} panels · ${hinges.size.toLocaleString()} hinges · ${(layout.edges.length - hinges.size).toLocaleString()} cut edges · layout ${seed}`;
+    summary.textContent = `${layout.mesh.faces.length.toLocaleString()} panels · ${hinges.size.toLocaleString()} hinges (gold) · ${(layout.edges.length - hinges.size).toLocaleString()} cut edges (black) · layout ${seed}`;
     notice.textContent = layout.overlaps
       ? `Flat net: ${layout.overlaps.toLocaleString()} overlapping face pairs. Try another cut layout. Motion collisions are not checked.`
       : 'Flat net: no face overlaps detected. Motion collisions are not checked.';
@@ -147,30 +148,28 @@ export function mountUnfolding(
   function setUnfold(value: number) {
     unfolding = value;
     slider.value = String(value * 100);
-    amount.value = `${Math.round(value * 100)}%`;
+    slider.setAttribute('aria-valuetext', `${Math.round(value * 100)}% unfolded`);
+    globe.setAttribute('aria-pressed', String(value === 0));
+    flat.setAttribute('aria-pressed', String(value === 1));
+  }
+  // Endpoint actions share slider state; dragging interrupts the active transition.
+  function animateTo(target: number) {
+    yaw = target === 1 || options.northUp ? 0 : -0.3;
+    pitch = target === 1 || options.northUp ? 0 : 0.65;
+    transition = null;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setUnfold(target);
+      return;
+    }
+    transition = {from: unfolding, to: target, start: performance.now()};
   }
   listen(slider, 'input', () => {
-    playing = false;
-    play.textContent = 'Play';
+    transition = null;
     setUnfold(Number(slider.value) / 100);
   });
-  listen(play, 'click', () => {
-    playing = !playing;
-    if (unfolding >= 1) direction = -1;
-    if (unfolding <= 0) direction = 1;
-    play.textContent = playing ? 'Pause' : 'Play';
-  });
-  listen(root.querySelector('#flat')!, 'click', () => {
-    yaw = 0;
-    pitch = 0;
-    playing = false;
-    play.textContent = 'Play';
-    setUnfold(1);
-  });
-  listen(root.querySelector('#reset')!, 'click', () => {
-    yaw = options.northUp ? 0 : -0.3;
-    pitch = options.northUp ? 0 : 0.65;
-  });
+  listen(globe, 'click', () => animateTo(0));
+  listen(flat, 'click', () => animateTo(1));
+  setUnfold(0);
   listen(canvas, 'pointerdown', e => {
     drag = {x: e.clientX, y: e.clientY};
     tooltip.hidden = true;
@@ -211,11 +210,10 @@ export function mountUnfolding(
   );
   let previous = '';
   function render(time: number) {
-    const dt = Math.min((time - lastTime) / 1000, 0.05);
-    lastTime = time;
-    if (playing) {
-      setUnfold(Math.max(0, Math.min(1, unfolding + (direction * dt) / 5)));
-      if (unfolding === 0 || unfolding === 1) direction *= -1;
+    if (transition) {
+      const t = Math.min(1, (time - transition.start) / 1100);
+      setUnfold(transition.from + (transition.to - transition.from) * t * t * (3 - 2 * t));
+      if (t === 1) transition = null;
     }
     const {width, height} = canvas.getBoundingClientRect(),
       dpr = Math.min(devicePixelRatio, 2);

@@ -244,17 +244,17 @@ export default function PolygonPlayground() {
             <span data-role="drawing-count">{drawingCount} vertices</span>
           </p>
         )}
-        <label>
+        <label className="polygon-check">
           <input
             type="checkbox"
             checked={rings.length > 1}
             disabled={!ring.length || mode === 'draw'}
             onChange={e => accept(collection(e.target.checked ? [ring, hole] : [ring]))}
-          />{' '}
+          />
           Include a hole
         </label>
-        <label>
-          <input type="checkbox" checked={edges} onChange={e => setEdges(e.target.checked)} />{' '}
+        <label className="polygon-check">
+          <input type="checkbox" checked={edges} onChange={e => setEdges(e.target.checked)} />
           Triangle edges
         </label>
         <button
@@ -275,7 +275,7 @@ export default function PolygonPlayground() {
         {!!ring.length && (
           <>
             <label>
-              Outline vertex{' '}
+              Outline vertex
               <select
                 aria-label="Outline vertex"
                 value={vertex}

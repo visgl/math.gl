@@ -14,8 +14,8 @@ import {
 import './example-panel.css';
 import {configureCompactPanel} from './compact-panel.js';
 
-/** Keep React controls live inside the standalone community panel shell. */
-export default function ExamplePanel({title, className, children}) {
+/** Keep React controls live in a themed panel; invisible panels have no chrome. */
+export default function ExamplePanel({title, className, children, variant = 'default'}) {
   const host = useRef(null);
   const container = useRef(null);
   const [contentRoot, setContentRoot] = useState(null);
@@ -26,6 +26,7 @@ export default function ExamplePanel({title, className, children}) {
       id: 'example-controls',
       title: 'Controls',
       theme: 'sleek-dark',
+      className: 'example-panel-content',
       onRenderHTML: root => {
         setContentRoot(root);
       }
@@ -38,9 +39,7 @@ export default function ExamplePanel({title, className, children}) {
       style: {width: '100%'}
     });
     manager.setProps({components: [container.current]});
-    const cleanupCompact = configureCompactPanel(host.current, container.current);
     return () => {
-      cleanupCompact();
       manager.finalize();
       container.current = null;
     };
@@ -48,8 +47,23 @@ export default function ExamplePanel({title, className, children}) {
   useLayoutEffect(() => {
     container.current?.setProps({title});
   }, [title]);
+  useLayoutEffect(() => {
+    const invisible = variant === 'invisible';
+    container.current.setProps({collapsible: !invisible});
+    if (invisible) {
+      // Keep controls reachable without a header, including after a responsive collapse.
+      delete host.current.dataset.compactPanel;
+      container.current.setProps({open: true});
+      return;
+    }
+    return configureCompactPanel(host.current, container.current);
+  }, [variant]);
   return (
-    <aside ref={host} className={`example-panel ${className || ''}`}>
+    <aside
+      ref={host}
+      aria-label={title}
+      className={`example-panel ${variant === 'invisible' ? 'example-panel-invisible ' : ''}${className || ''}`}
+    >
       {contentRoot && createPortal(children, contentRoot)}
     </aside>
   );

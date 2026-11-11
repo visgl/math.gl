@@ -62,11 +62,14 @@
   color: #b0c1c8;
   pointer-events: none;
 }
+/* The sidebar stays dark when the surrounding documentation uses light mode. */
 .alpine-controls {
   padding: 14px 16px;
   background: #162730;
   border-left: 1px solid #344850;
   overflow: auto;
+  color-scheme: dark;
+  scrollbar-color: #4a6370 #162730;
 }
 .alpine-controls h2 {
   font-size: 18px;

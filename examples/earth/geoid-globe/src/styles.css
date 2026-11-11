@@ -24,26 +24,24 @@
 }
 .geoid-globe aside {
   position: absolute;
-  top: 24px;
-  left: 24px;
+  top: 12px;
+  left: 12px;
   box-sizing: border-box;
-  width: min(300px, calc(100% - 48px));
-  padding: 20px;
+  width: min(300px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
   border: 1px solid #496078;
   border-radius: 16px;
   background: #0d2035ed;
 }
-.geoid-globe h1 {
-  font-size: 24px;
-  line-height: 1.2;
-  margin: 0;
-}
 .geoid-globe p {
   color: #b8c9d9;
+  font-size: 13px;
+  line-height: 1.5;
 }
 .geoid-globe label {
   display: block;
-  margin-top: 12px;
+  margin: 14px 0 0;
+  font-size: 12px;
 }
 .geoid-globe output {
   display: block;
@@ -55,11 +53,17 @@
   accent-color: #ffd875;
 }
 .geoid-globe select {
-  padding: 8px;
+  display: block;
+  box-sizing: border-box;
+  min-width: 0;
+  margin-top: 6px;
+  padding: 9px;
+  font: inherit;
+  font-size: 12px;
   background: #19344e;
   color: white;
   border: 1px solid #6c8195;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 .geoid-globe .legend {
   height: 10px;
@@ -69,22 +73,15 @@
 .geoid-globe .legend-labels {
   display: flex;
   justify-content: space-between;
+  font-size: 12px;
 }
 .geoid-globe .credits {
-  font-size: 11px;
+  font-size: 13px;
 }
 .geoid-globe a {
   color: #97d6ff;
 }
 @media (max-width: 600px) {
-  .geoid-globe aside {
-    top: 12px;
-    left: 12px;
-    padding: 12px;
-  }
-  .geoid-globe h1 {
-    font-size: 18px;
-  }
   .geoid-globe aside > p:first-of-type {
     display: none;
   }
@@ -95,15 +92,16 @@
 @media (max-width: 600px) {
   .geoid-globe aside {
     width: 200px;
-    font-size: 11px;
   }
   .geoid-globe aside > p:not([data-role='status']) {
     display: none;
   }
-  .geoid-globe label {
-    margin-top: 6px;
-  }
-  .geoid-globe select {
-    padding: 4px;
-  }
+}
+
+.geoid-globe input[type='range'] {
+  display: block;
+  box-sizing: border-box;
+  min-width: 0;
+  margin-top: 8px;
+  accent-color: var(--panel-accent-color);
 }

@@ -10,12 +10,17 @@ import {
 import './example-panel.css';
 import {configureCompactPanel} from './compact-panel.js';
 
-/** Mount existing DOM controls in the shared collapsible panel without replacing their state. */
-export function mountInfoBox(host, {title, theme = 'sleek-dark', width = 280} = {}) {
+/** Mount themed DOM controls; the invisible variant hides chrome and stays open. */
+export function mountInfoBox(
+  host,
+  {title, theme = 'sleek-dark', width = 280, variant = 'default'} = {}
+) {
+  const invisible = variant === 'invisible';
   host.classList.add('example-panel', 'example-info-box');
+  host.classList.toggle('example-panel-invisible', invisible);
   host.setAttribute('aria-label', title);
   const content = document.createElement('div');
-  content.className = 'example-info-content';
+  content.className = 'example-info-content example-panel-content';
   content.append(...host.childNodes);
   applyPanelTheme(host, {base: theme, variables: {}});
   const manager = new PanelManager({parentElement: host});
@@ -31,12 +36,13 @@ export function mountInfoBox(host, {title, theme = 'sleek-dark', width = 280} = 
     title,
     panel,
     widthPx: width,
-    collapsible: true,
+    collapsible: !invisible,
     defaultOpen: true,
     style: {width: '100%'}
   });
   manager.setProps({components: [box]});
-  const cleanupCompact = configureCompactPanel(host, box);
+  // Hidden chrome must never leave controls collapsed behind an unavailable expander.
+  const cleanupCompact = invisible ? () => {} : configureCompactPanel(host, box);
   return () => {
     cleanupCompact();
     manager.finalize();

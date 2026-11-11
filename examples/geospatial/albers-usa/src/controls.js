@@ -4,16 +4,18 @@
 
 /** Controls own events and animation timing; the scene owns map coordinates. */
 export function bindControls(view, scene) {
-  const {svg, readout, viewToggle, unfold, zoomControls, layers} = view;
+  const {svg, tooltip, globeButton, unfoldedButton, unfold, zoomControls, layers} = view;
   const abort = new AbortController();
   let frame = 0;
   let dragPoint;
   const listen = (element, event, handler, options = {}) =>
     element.addEventListener(event, handler, {...options, signal: abort.signal});
   const setAmount = value => {
+    tooltip.hide();
     scene.setAmount(value);
     unfold.value = String(Math.round(scene.amount * 100));
-    viewToggle.textContent = scene.amount > 0.5 ? 'View globe' : 'Unfold map';
+    globeButton.setAttribute('aria-pressed', String(scene.amount === 0));
+    unfoldedButton.setAttribute('aria-pressed', String(scene.amount === 1));
   };
   function animateTo(target) {
     cancelAnimationFrame(frame);
@@ -30,14 +32,19 @@ export function bindControls(view, scene) {
     };
     frame = requestAnimationFrame(tick);
   }
-  listen(viewToggle, 'click', () => animateTo(scene.amount > 0.5 ? 0 : 1));
+  listen(globeButton, 'click', () => animateTo(0));
+  listen(unfoldedButton, 'click', () => animateTo(1));
   listen(unfold, 'input', () => {
     cancelAnimationFrame(frame);
     setAmount(Number(unfold.value) / 100);
   });
   for (const [name, input] of Object.entries(layers))
-    listen(input, 'change', () => scene.setLayers({[name]: input.checked}));
+    listen(input, 'change', () => {
+      tooltip.hide();
+      scene.setLayers({[name]: input.checked});
+    });
   listen(zoomControls, 'click', event => {
+    tooltip.hide();
     const action = event.target.closest('button')?.dataset.zoom;
     if (action === 'reset') scene.resetZoom();
     else if (action) scene.zoomBy(action === 'in' ? 1.5 : 1 / 1.5);
@@ -47,11 +54,13 @@ export function bindControls(view, scene) {
     'wheel',
     event => {
       event.preventDefault();
+      tooltip.hide();
       scene.zoomBy(event.deltaY < 0 ? 1.2 : 1 / 1.2, scene.eventPoint(event));
     },
     {passive: false}
   );
   listen(svg, 'pointerdown', event => {
+    tooltip.hide();
     if (scene.zoom === 1) return;
     dragPoint = {clientX: event.clientX, clientY: event.clientY};
     svg.setPointerCapture(event.pointerId);
@@ -64,22 +73,29 @@ export function bindControls(view, scene) {
     if (dragPoint) {
       scene.pan(scene.eventPoint(dragPoint), scene.eventPoint(event));
       dragPoint = {clientX: event.clientX, clientY: event.clientY};
+      tooltip.hide();
+      return;
     }
     if (scene.amount > 0.001 && scene.amount < 0.999) {
-      readout.textContent = 'Unfolding between globe and map';
+      tooltip.hide();
       return;
     }
     const hit = scene.pick(scene.eventPoint(event));
     const state = event.target.closest?.('[data-state]')?.getAttribute('data-state');
-    readout.textContent = hit
-      ? `${state && state !== hit.label ? `${state} · ` : ''}${hit.label} · ${Math.abs(hit.position[1]).toFixed(2)}° ${hit.position[1] < 0 ? 'S' : 'N'}, ${Math.abs(hit.position[0]).toFixed(2)}° ${hit.position[0] < 0 ? 'W' : 'E'}`
-      : 'Outside the map';
+    if (!hit) {
+      tooltip.hide();
+      return;
+    }
+    tooltip.show(
+      `${state && state !== hit.label ? `${state} · ` : ''}${hit.label} · ${Math.abs(hit.position[1]).toFixed(2)}° ${hit.position[1] < 0 ? 'S' : 'N'}, ${Math.abs(hit.position[0]).toFixed(2)}° ${hit.position[0] < 0 ? 'W' : 'E'}`,
+      event
+    );
   });
-  listen(svg, 'pointerleave', () => {
-    readout.textContent = 'Move over the map to inspect coordinates';
-  });
+  listen(svg, 'pointerleave', tooltip.hide);
+  listen(svg, 'pointercancel', tooltip.hide);
   return () => {
     abort.abort();
+    tooltip.dispose();
     cancelAnimationFrame(frame);
   };
 }

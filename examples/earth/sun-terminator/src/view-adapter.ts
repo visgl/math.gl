@@ -168,7 +168,12 @@ function transform(id) {
 export function geographicCenter(id, viewport) {
   if (id === 'globe' || id === 'map')
     return [((((viewport.longitude + 180) % 360) + 360) % 360) - 180, viewport.latitude];
-  const p = viewport.unproject([viewport.width / 2, viewport.height / 2]);
+  // The camera target sits at the padded center, beyond any overlaid controls.
+  const {left = 0, right = 0, top = 0, bottom = 0} = viewport.padding || {};
+  const p = viewport.unproject([
+    (viewport.width + left - right) / 2,
+    (viewport.height + top - bottom) / 2
+  ]);
   if (isCutMap(id)) return unprojectCutMap(id, p);
   return transform(id)
     .unproject([p[0] * 100000, p[1] * 100000])

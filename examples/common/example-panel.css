@@ -8,19 +8,38 @@ aside.example-panel.deck-widget-container {
   padding: 0;
   pointer-events: auto;
 }
+/* Let every shell layer shrink with the host; only the content body scrolls.
+ * Percentage limits avoid freezing an auto-height host at its initial empty size. */
 .example-panel > .deck-widget-box {
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 100% !important;
   width: 100%;
   max-width: 100% !important;
 }
 .example-panel > .deck-widget-box > section {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 100% !important;
+  overflow: hidden;
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box;
 }
 
+/* A low-priority fallback leaves example-specific inset and caption limits intact. */
+:where(.example-panel.deck-widget-container) { max-height: 100%; }
+
 /* Let the common panel own chrome while each example positions its host. */
 .example-panel.deck-widget-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden !important;
   padding: 0 !important;
+  margin: 0;
   border: 0 !important;
   border-radius: 0;
   background: transparent !important;
@@ -28,26 +47,92 @@ aside.example-panel.deck-widget-container {
   backdrop-filter: none;
   min-width: 0;
 }
-.example-panel .example-info-content { padding: 12px; }
+/* Scroll containers follow the panel theme even inside an oppositely themed page. */
+.example-panel,
+.example-panel [data-panel-theme-mode] {
+  scrollbar-color: var(--button-icon-idle, currentColor) var(--menu-background, transparent);
+}
+.example-panel:has([data-panel-theme-mode='dark']),
+.example-panel [data-panel-theme-mode='dark'] { color-scheme: dark; }
+.example-panel:has([data-panel-theme-mode='light']),
+.example-panel [data-panel-theme-mode='light'] { color-scheme: light; }
+
+/* React and DOM panels share one content inset; clear the library's outer
+ * padding so theme defaults cannot add a second layer or restore top padding. */
+.example-panel > .deck-widget-box > section > div {
+  padding: 0 !important;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.example-panel .example-panel-content { padding: 0 12px 12px; }
+/* Use the same themed range controls in both plain HTML and mounted panels. */
+.example-panel input[type='range'] {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 16px;
+  background: transparent;
+  cursor: pointer;
+}
+.example-panel input[type='range']::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--range-track-color);
+  border-radius: 1px;
+}
+.example-panel input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -6px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--panel-accent-color);
+}
+.example-panel input[type='range']::-moz-range-track {
+  height: 2px;
+  background: var(--range-track-color);
+  border-radius: 1px;
+}
+.example-panel input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--panel-accent-color);
+}
 .example-panel .example-info-content > :first-child { margin-top: 0; }
 .example-panel .example-info-content > :last-child { margin-bottom: 0; }
 .example-panel .example-info-content h1,
 .example-panel .example-info-content h2 { color: inherit; font-size: 1rem; }
-.example-panel .deck-widget-box { max-height: inherit; }
-.example-panel .deck-widget-box > section { max-height: inherit; overflow: auto; }
+/* The button owns the title inset; clear the library header's inline padding. */
+.example-panel > .deck-widget-box > section > header { flex: 0 0 auto; display: block !important; margin: 0 !important; padding: 0 !important; border: 0; }
 
-/* PanelManager measures viewport space; an auto-height host must not feed a tiny
- * measurement back into the outer box before its content lays out. */
-.example-panel > .deck-widget-box { max-height: none !important; }
-.example-panel > .deck-widget-box > section > header { display: block !important; margin: 0 !important; border: 0; }
-
-/* Inline controls have no predetermined host height. Bound their content against
- * the viewport instead of the empty host measured during the first mount. */
-.example-info-box > .deck-widget-box > section {
-  max-height: min(80vh, 720px) !important;
+/* Keep the shared expander readable and easy to hit at every viewport size. */
+.example-panel > .deck-widget-box > section > header > button {
+  min-height: 44px !important;
+  padding: 12px !important;
+  font-size: 16px !important;
+  line-height: 1.3 !important;
+  box-sizing: border-box;
 }
 
-/* Panel headers and controls remain easy to hit with a finger. */
+/* Mask the library's text glyph with an SVG that follows the theme icon color. */
+.example-panel > .deck-widget-box > section > header > button > span[aria-hidden='true'] {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  font-size: 0 !important;
+  background-color: currentColor;
+  mask: url('./assets/chevron-right.svg') center / contain no-repeat;
+  transform: none !important;
+}
+.example-panel > .deck-widget-box > section > header > button[aria-expanded='true'] > span[aria-hidden='true'] {
+  transform: rotate(90deg) !important;
+}
+
+/* Panel controls remain easy to hit with a finger. */
 @media (pointer: coarse), (max-width: 996px) {
   .example-panel button,
   .example-panel select,
@@ -55,18 +140,12 @@ aside.example-panel.deck-widget-container {
     min-height: 44px;
     box-sizing: border-box;
   }
-  .example-panel > .deck-widget-box > section > header > button {
-    min-height: 44px !important;
-    padding: 8px 12px !important;
-    line-height: 1.3 !important;
-  }
   .example-panel input:not([type='range']), .example-panel select { font-size: 16px; }
   .example-panel input[type='range'] { margin-top: 0; margin-bottom: 0; }
 }
+/* Reserve room for the canvas using the container's height, including short embeds. */
 aside.example-panel[data-compact-panel='true'] {
-  max-height: min(45svh, 360px);
-  overflow: auto;
-  overscroll-behavior: contain;
+  max-height: 45%;
 }
 aside.example-panel[data-compact-panel='true'] > .deck-widget-box > section > header {
   position: sticky;
@@ -80,6 +159,19 @@ aside.example-panel[data-compact-panel='true'] > .deck-widget-box > section > he
   position: relative !important;
   inset: auto !important;
 }
-aside.example-panel[data-compact-panel='true'] > .deck-widget-box > section {
-  max-height: none !important;
+
+/* Retain themed controls without chrome or insets so hosts can align them with their view. */
+.example-panel.example-panel-invisible > .deck-widget-box,
+.example-panel.example-panel-invisible > .deck-widget-box > section {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+.example-panel.example-panel-invisible > .deck-widget-box > section > header {
+  display: none !important;
+}
+.example-panel.example-panel-invisible .example-panel-content {
+  padding: 0;
 }

@@ -219,10 +219,6 @@ main:has(.theme-doc-markdown) > .container {
 .table-of-contents__link--active {
   color: var(--docs-accent-text);
 }
-.timezone-globe.timezone-globe,
-.geoid-globe.geoid-globe {
-  font-family: var(--ifm-font-family-base);
-}
 .timezone-globe h1,
 .geoid-globe h1 {
   font-family: var(--ifm-heading-font-family);
@@ -578,3 +574,6 @@ main:has(.theme-doc-card-container) > .container { max-width: none; }
 .markdown h2[id^='features'] + table :is(th, td):nth-child(2) {
   white-space: nowrap;
 }
+
+/* Website typography enters examples through a host-neutral font token. */
+.math-playground { --example-font-family: var(--ifm-font-family-base); }

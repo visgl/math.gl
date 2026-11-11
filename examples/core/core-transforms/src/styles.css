@@ -5,18 +5,19 @@
 .math-playground {
   height: 100%;
   min-height: 0;
+  padding: 12px;
+  gap: 12px;
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 260px 1fr;
   background: #07121e;
   color: #e7f1fa;
   font:
-    14px/1.5 var(--ifm-font-family-base, system-ui),
+    14px/1.5 var(--example-font-family, system-ui),
     sans-serif;
   overflow: auto;
 }
 .math-playground aside {
-  padding: 20px;
   background: #0d2035;
   overflow: auto;
 }
@@ -73,9 +74,6 @@
   .math-playground {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(300px, 1fr);
-  }
-  .math-playground aside {
-    padding: 12px;
   }
   .math-playground label {
     display: inline-block;

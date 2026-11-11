@@ -2,14 +2,26 @@
  * SPDX-License-Identifier: MIT
  * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
  */
-.elastic-maps {font: 14px system-ui, sans-serif; color: #17314a; background: #fff; border: 1px solid #cbdbe2; border-radius: 10px; margin: 24px 0; min-width: 0; max-width: 100%; overflow: hidden; container-type: inline-size;}
-.elastic-maps * {box-sizing: border-box;}
-.elastic-maps .elastic-controls {display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; padding: 12px 16px; border-top: 1px solid #dce7ea;}
-.elastic-maps label {display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; min-width: 0;}
-.elastic-maps select {font: inherit; color: inherit; background: #fff; border: 1px solid #b8d1d9; border-radius: 6px; padding: 6px 8px; max-width: 100%;}
-.elastic-maps input {accent-color: #2b7987;}
-.elastic-maps [hidden] {display: none;}
-.elastic-maps canvas {display: block; width: 100%; height: clamp(260px, 65cqw, 420px); background: #e9f2f3;}
-.elastic-maps [data-status] {min-height: 2.5em; margin: 0 16px 12px; padding: 9px 12px; background: #153b4b; color: #fff; border-radius: 8px; font-size: 13px; overflow-wrap: anywhere;}
-.elastic-maps footer {padding: 12px 16px; border-top: 1px solid #dce7ea; color: #58707e; font-size: 12px; line-height: 1.55;}
-.elastic-maps a {color: #147b89;}
+.elastic-maps {display:grid;grid-template-columns:280px minmax(0,1fr);gap:12px;align-items:start;box-sizing:border-box;font:14px/1.5 system-ui,sans-serif;color:#17314a;background:#fff;border:1px solid #cbdbe2;border-radius:10px;margin:0;padding:12px;min-width:0;max-width:100%;overflow:hidden;container-type:inline-size;}
+.elastic-maps * {box-sizing:border-box;}
+.elastic-maps .elastic-controls {min-width:0;}
+.elastic-maps .elastic-controls label {display:block;font-size:12px;margin:14px 0;}
+.elastic-maps .elastic-controls select {display:block;width:100%;max-width:100%;min-width:0;margin-top:6px;padding:9px;font:inherit;background:var(--button-background);color:var(--button-text);border:1px solid var(--menu-border-color);border-radius:8px;cursor:pointer;}
+.elastic-maps .elastic-controls .elastic-check {display:flex;align-items:center;gap:8px;margin:9px 0;}
+.elastic-maps input {accent-color:var(--panel-accent-color);}
+.elastic-maps .elastic-check input {flex:none;margin:0;}
+.elastic-maps [hidden] {display:none!important;}
+.elastic-maps .elastic-map {position:relative;min-width:0;}
+.elastic-maps canvas {display:block;width:100%;height:clamp(260px,65cqw,420px);background:#e9f2f3;}
+.elastic-maps .elastic-description,
+.elastic-maps [data-status] {margin:14px 0 0;color:#58707e;font-size:13px;line-height:1.5;overflow-wrap:anywhere;}
+.elastic-maps a {color:#147b89;}
+/* Compact headers follow this panel's light theme inside dark documentation pages. */
+.elastic-maps .example-panel[data-compact-panel='true'] > .deck-widget-box > section > header {background:var(--menu-background);}
+@media (max-width:767px) {
+  /* Natural flex sizing avoids reserving a grid row larger than the compact panel. */
+  .elastic-maps {display:flex;flex-direction:column;align-items:stretch;}
+}
+
+/* Progress overlays the map without moving the controls or changing the drawing size. */
+.elastic-maps .elastic-progress {position:absolute;z-index:2;top:12px;left:50%;transform:translateX(-50%);max-width:calc(100% - 24px);padding:6px 10px;border-radius:6px;background:#ffffffe6;color:#17314a;font-size:12px;text-align:center;pointer-events:none;}

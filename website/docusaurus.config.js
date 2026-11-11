@@ -62,6 +62,12 @@ const config = getDocusaurusConfig({
   }
 });
 
+// Keep example Markdown in document flow; interactive components own their viewport height.
+const examplesPlugin = config.plugins.find(
+  plugin => Array.isArray(plugin) && plugin[1]?.id === 'examples'
+);
+examplesPlugin[1].docItemComponent = resolve(__dirname, 'src/components/example-page/index.jsx');
+
 // Keep the repository link visible while showing the live, cached GitHub star count.
 const githubItem = config.themeConfig.navbar.items.find(
   item => item.href === 'https://github.com/visgl/math.gl'
@@ -105,7 +111,12 @@ webpackPlugin[1].plugins = [
 // Vendored gl-matrix sources use explicit .js imports with TypeScript source files.
 config.plugins.push(() => ({
   name: 'math-gl-source-extensions',
-  configureWebpack() {
+  configureWebpack(webpackConfig) {
+    // URL assets must bypass the legacy image loader; otherwise JPEG URLs serve its JS export.
+    const imageRule = webpackConfig.module.rules.find(
+      rule => rule.test instanceof RegExp && rule.test.test('overview.jpg')
+    );
+    imageRule.dependency = {not: ['url']};
     return {resolve: {extensionAlias: {'.js': ['.js', '.ts', '.tsx']}}};
   }
 }));

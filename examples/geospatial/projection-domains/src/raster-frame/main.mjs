@@ -7,7 +7,7 @@ import {mountInfoBox} from '../../../../common/info-box.js';
 import {createRasterFrame, rasterFrameFixtures} from './recipe.mjs';
 import '../style.css';
 export function mountRasterFrame(root) {
-  root.innerHTML = `<section class="projection-domains"><div class="projection-map"></div><aside><p>Array indices → explicit affine frame → stored CRS components → display XY. A CRS name alone does not locate raster samples.</p><label>Fixture<select data-frame>${rasterFrameFixtures.map(f => `<option value="${f.id}">${f.name}</option>`).join('')}</select></label><p>White dots are sample centers. Blue is the sample envelope; orange is declared cell coverage. Point registration has no inferred cell coverage.</p><p>Hover samples to inspect grid indices, CRS coordinates and inverse round-trip error. Display coordinates subtract the fixture origin and scale equally on both axes.</p></aside><output data-status aria-live="polite"></output></section>`;
+  root.innerHTML = `<section class="projection-domains"><div class="projection-map"></div><aside><p>Array indices → explicit affine frame → stored CRS components → display XY. A CRS name alone does not locate raster samples.</p><label>Fixture<select data-frame>${rasterFrameFixtures.map(f => `<option value="${f.id}">${f.name}</option>`).join('')}</select></label><p>White dots are sample centers. Blue is the sample envelope; orange is declared cell coverage. Point registration has no inferred cell coverage.</p><p>Hover samples to inspect grid indices, CRS coordinates and inverse round-trip error. Display coordinates subtract the fixture origin and scale equally on both axes.</p><output data-status aria-live="polite"></output></aside></section>`;
   const disposeInfo = mountInfoBox(root.querySelector('aside'), {
     title: 'Raster coordinate frames',
     theme: 'sleek-dark',
@@ -20,7 +20,10 @@ export function mountRasterFrame(root) {
     controller: true,
     getTooltip: ({object}) =>
       object?.index
-        ? `Sample ${object.index}; CRS XY ${object.xy.map(v => v.toFixed(3))}; round trip ${object.error.toExponential(2)} pixels`
+        ? {
+            text: `Sample ${object.index}\nCRS XY ${object.xy.map(v => v.toFixed(3))}\nRound trip ${object.error.toExponential(2)} pixels`,
+            style: {whiteSpace: 'pre-line'}
+          }
         : null
   });
   const select = root.querySelector('[data-frame]');

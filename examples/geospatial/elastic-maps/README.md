@@ -5,6 +5,10 @@ polygon crossing cuts, and coordinate picking. Direct and through-globe transiti
 MapEngine correspondence; reduced-motion settings skip the animation. Justin Kunimune's published data
 is public domain (Unlicense); Natural Earth coastlines are public domain.
 
+Projection, transition, and graticule controls share the vertical info panel with
+the description and credits. Hover over a mapped location for a coordinate tooltip.
+Preparation progress appears at the top center of the map until animation starts; errors appear in the panel.
+
 Run `yarn start` or `yarn build` in this directory. `src/main.js` owns the controls and
 lifecycle, `src/map.js` prepares MapEngine geometry, and `src/scene.js` owns transition preparation and animation, reusing the quincuncial
 canvas renderer for stationary maps. Preparation yields between features and

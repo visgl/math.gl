@@ -4,6 +4,7 @@
 import ExamplePanel from 'website-examples/common/example-panel';
 import React, {useEffect, useState} from 'react';
 import {createExampleEngine, prepareMap, RADIUS} from './engines';
+import styles from './styles.module.css';
 
 const cities = [['London', -0.1276, 51.5072], ['New York', -74.006, 40.7128], ['Tokyo', 139.6917, 35.6895], ['Sydney', 151.2093, -33.8688]];
 const graticule = [];
@@ -35,23 +36,57 @@ export default function ExternalProjectionEngines() {
       result = {xy, inverse, paths, marker: screen(xy)};
     }
   } catch (caught) { error = String(caught); }
-  return <section aria-label="Projection engine comparison" style={{border: '1px solid #778899', borderRadius: 8, padding: 16, margin: '20px 0'}}>
-    <ExamplePanel title="Projection engine comparison">
-      <label>Projection engine <select aria-label="Projection engine" value={backend} onChange={event => setBackend(event.target.value)}>{['math.gl', 'proj4js', 'D3'].map(name => <option key={name}>{name}</option>)}</select></label>
-      <label>Location <select aria-label="Location" value={cityIndex} onChange={event => setCityIndex(Number(event.target.value))}>{cities.map(([name], i) => <option key={name} value={i}>{name}</option>)}</select></label>
-    </ExamplePanel>
-    <p>The same application projects a graticule and a location through the selected engine.</p>
-    {error ? <p role="alert">{error}</p> : !result ? <p role="status">Preparing engine…</p> : <>
-      <svg viewBox="0 0 800 460" role="img" aria-label={`Mercator graticule with ${city[0]}, projected by ${backend}`} style={{width: '100%', background: '#102638', borderRadius: 6}}>
-        {result.paths.map((d, i) => <path key={i} d={d} fill="none" stroke="#557788" strokeWidth="1" />)}
-        <circle cx={result.marker[0]} cy={result.marker[1]} r="6" fill="#ffcc66" />
-        <text x={Math.min(700, result.marker[0] + 10)} y={result.marker[1] - 12} fill="white" fontSize="16">{city[0]}</text>
-      </svg>
-      <output aria-live="polite" style={{display: 'block', fontVariantNumeric: 'tabular-nums'}}>
-        {backend}: X {result.xy[0].toFixed(2)} m · Y {result.xy[1].toFixed(2)} m<br />
-        Inverse: {result.inverse[0].toFixed(6)}°, {result.inverse[1].toFixed(6)}°
-      </output>
-    </>}
-    <small>XY only · latitude −80° to 80° · spherical Mercator · D3 scale 6,378,137, zero translation, north-positive Y. No datum or height conversion.</small>
-  </section>;
+  return (
+    <section aria-label="Projection engine comparison" className={styles.example}>
+      <ExamplePanel title="Projection engine comparison" className={styles.panel}>
+        <label>
+          Projection engine
+          <select aria-label="Projection engine" value={backend} onChange={event => setBackend(event.target.value)}>
+            {['math.gl', 'proj4js', 'D3'].map(name => <option key={name}>{name}</option>)}
+          </select>
+        </label>
+        <label>
+          Location
+          <select aria-label="Location" value={cityIndex} onChange={event => setCityIndex(Number(event.target.value))}>
+            {cities.map(([name], i) => <option key={name} value={i}>{name}</option>)}
+          </select>
+        </label>
+        <p className={styles.description}>
+          The same application projects a graticule and a location through the selected engine.
+        </p>
+        {error ? <p role="alert" className={styles.description}>{error}</p> : !result ? (
+          <p role="status" className={styles.description}>Preparing engine…</p>
+        ) : null}
+        <p className={styles.description}>
+          XY only · latitude −80° to 80° · spherical Mercator · D3 scale 6,378,137, zero translation,
+          north-positive Y. No datum or height conversion.
+        </p>
+      </ExamplePanel>
+      <div className={styles.view}>
+        {result && (
+          <>
+            <svg viewBox="0 0 800 460" role="img" aria-label={`Mercator graticule with ${city[0]}, projected by ${backend}`}>
+              {result.paths.map((d, i) => <path key={i} d={d} fill="none" stroke="#557788" strokeWidth="1" />)}
+              <circle cx={result.marker[0]} cy={result.marker[1]} r="6" fill="#ffcc66" />
+              <text x={Math.min(700, result.marker[0] + 10)} y={result.marker[1] - 12} fill="white" fontSize="16">{city[0]}</text>
+            </svg>
+            <table className={styles.results} aria-label="Projected and inverse coordinates" aria-live="polite">
+              <tbody>
+                <tr>
+                  <th scope="row">Forward</th>
+                  <td>X {result.xy[0].toFixed(2)} m</td>
+                  <td>Y {result.xy[1].toFixed(2)} m</td>
+                </tr>
+                <tr>
+                  <th scope="row">Inverse</th>
+                  <td>lon {result.inverse[0].toFixed(6)}°</td>
+                  <td>lat {result.inverse[1].toFixed(6)}°</td>
+                </tr>
+              </tbody>
+            </table>
+          </>
+        )}
+      </div>
+    </section>
+  );
 }

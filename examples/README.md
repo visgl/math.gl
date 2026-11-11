@@ -1,6 +1,6 @@
 # Examples
 
-Sources live in `examples/<module>/<example-name>`, grouped by the published math.gl package. Projects declare their dependencies and keep application code local. Reusable UI components and helpers may be imported from [`examples/common`](common/); this is the exception to the example-local source rule.
+Sources live in `examples/<module>/<example-name>`, grouped by the published math.gl package. Projects declare their dependencies and keep application code local. Website hooks and theme-token bindings live in the website adapters. Reusable UI components and helpers may be imported from [`examples/common`](common/); this is the exception to the example-local source rule.
 
 - **@math.gl/core**: [core-transforms](core/core-transforms), [expressions](core/expressions)
 - **@math.gl/geometry**: [culling-playground](geometry/culling-playground), [culling-queries](geometry/culling-queries), [curves](geometry/curves), [geometry-processing](geometry/geometry-processing), [geometry-viewer](geometry/geometry-viewer), [parametric-geometry](geometry/parametric-geometry), [polygon-playground](geometry/polygon-playground), [spatial-index](geometry/spatial-index), [unfolding-polyhedron](geometry/unfolding-polyhedron)
@@ -12,6 +12,8 @@ Sources live in `examples/<module>/<example-name>`, grouped by the published mat
 After installing dependencies and building packages from the repository root, run `yarn start` from an example directory, or use its workspace name from the repository root, for example `yarn workspace math.gl-core-transforms start`.
 
 `yarn start` and `yarn build` use package exports. Within the repository, `yarn start-local` uses the shared [local Vite config](vite.config.local.mjs) to alias math.gl imports to workspace source while preserving the example's own Vite options. For a copy outside this repository, preserve the relative layout of any imported `examples/common` sources, replace `workspace:*` dependency versions with published versions, and run `yarn start`.
+
+Run `node test/examples/check-boundaries.js` to check imports across every project, including dependencies used by shared helpers. The example test runner also performs this audit before its selected checks.
 
 Run all example checks from the repository root with `yarn test-examples`. Use `yarn test-examples:node` or `yarn test-examples:browser` for one environment, and append an example name to filter the checks. Run the library benchmark suite in the dev-tools browser harness with `yarn benchmark:browser`.
 

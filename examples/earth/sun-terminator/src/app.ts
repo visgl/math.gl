@@ -31,13 +31,14 @@ import {NIGHT_DATE} from './constants.ts';
 /** Mount the shared standalone/website example; return cleanup. */
 export function mountSunTerminator(root: HTMLDivElement) {
   root.innerHTML = `
-    <canvas aria-label="Interactive solar terminator map"></canvas>
-    <aside class="sun-panel" aria-label="Solar terminator controls"></aside>`;
+    <div class="sun-view"><canvas aria-label="Interactive solar terminator map"></canvas></div>
+    <aside class="example-panel sun-panel" aria-label="Solar terminator controls"></aside>`;
+  const host = root.querySelector<HTMLElement>('.sun-panel')!;
   const {
     element: controls,
     getControl: control,
     finalize: finalizeControls
-  } = createControlPanel(root.querySelector('.sun-panel'));
+  } = createControlPanel(host);
   const date = control('date');
   const time = control('time');
   const view = control('view');
@@ -130,6 +131,15 @@ export function mountSunTerminator(root: HTMLDivElement) {
     offsetLabel.value = '+' + hours.toFixed(1) + ' h';
   };
   syncTime();
+  let panelWidth = host.getBoundingClientRect().width;
+  function createView(id) {
+    const props = {id: `earth-${id}`, controller: panController, padding: {left: panelWidth}};
+    return id === 'globe'
+      ? new GlobeView({...props, resolution: 2})
+      : id === 'map'
+        ? new MapView({...props, repeat: true})
+        : new OrthographicView({...props, flipY: false});
+  }
   const initialSun = getSunTerminator(timestamp).sunDirection;
   const initialLongitude =
     (((Math.atan2(initialSun[1], initialSun[0]) * 180) / Math.PI + 85 + 540) % 360) - 180;
@@ -139,8 +149,8 @@ export function mountSunTerminator(root: HTMLDivElement) {
       device = value;
     },
     canvas: root.querySelector('canvas'),
-    parent: root,
-    views: new GlobeView({id: 'earth-globe', controller: panController, resolution: 2}),
+    parent: root.querySelector('.sun-view'),
+    views: createView('globe'),
     initialViewState: {longitude: initialLongitude, latitude: 25, zoom: 2, minZoom: -1, maxZoom: 7},
     onViewStateChange: ({viewState, oldViewState}) => {
       return {...(preparing ? oldViewState : viewState), bearing: 0, pitch: 0};
@@ -159,6 +169,14 @@ export function mountSunTerminator(root: HTMLDivElement) {
       if (!disposed) status.textContent = `Imagery error: ${error.message}`;
     }
   });
+  // Measure the actual overlay width so responsive panels offset every projection equally.
+  const panelObserver = new ResizeObserver(() => {
+    const width = host.getBoundingClientRect().width;
+    if (width === panelWidth || disposed) return;
+    panelWidth = width;
+    if (!morph) deck.setProps({views: createView(activeView)});
+  });
+  panelObserver.observe(host);
   Promise.all([dayOverview.decode(), nightOverview.decode()])
     .then(() => {
       if (!disposed) {
@@ -386,12 +404,7 @@ export function mountSunTerminator(root: HTMLDivElement) {
       status.textContent = error.message;
       return;
     }
-    const targetView =
-      next === 'globe'
-        ? new GlobeView({id: 'earth-globe', controller: panController, resolution: 2})
-        : next === 'map'
-          ? new MapView({id: 'earth-map', controller: panController, repeat: true})
-          : new OrthographicView({id: `earth-${next}`, controller: panController, flipY: false});
+    const targetView = createView(next);
     let transfer;
     try {
       transfer = transferCamera(sourceView, sourceViewport, next, targetView);
@@ -434,7 +447,7 @@ export function mountSunTerminator(root: HTMLDivElement) {
     mesh = nextMesh;
     const finish = () => {
       morph = null;
-      deck.setProps({views: targetView, initialViewState: targetCamera});
+      deck.setProps({views: createView(next), initialViewState: targetCamera});
       render();
       const queued = queuedView;
       queuedView = null;
@@ -456,6 +469,7 @@ export function mountSunTerminator(root: HTMLDivElement) {
         target: next
       };
       deck.setProps({
+        // Morph vertices already include endpoint padding in their screen positions.
         views: new OrthographicView({id: 'earth-morph', controller: false, flipY: false}),
         initialViewState: {target: [0, 0, 0], zoom: 0}
       });
@@ -529,6 +543,7 @@ export function mountSunTerminator(root: HTMLDivElement) {
     altitude.removeEventListener('change', render);
     feather.removeEventListener('change', render);
     play.removeEventListener('click', togglePlay);
+    panelObserver.disconnect();
     deck.finalize();
     imageryTiles.finalize();
     usaMask?.destroy();

@@ -4,6 +4,7 @@
  */
 
 .unfolding-polyhedron {
+  box-sizing: border-box;
   font-family: system-ui, sans-serif;
   color: #e5edf0;
   background: #0e2029;
@@ -14,11 +15,18 @@
 }
 .unfolding-polyhedron {
   margin: 0;
+  padding: 12px;
 }
+/* The section fills the host; controls and credits take their own space inside the map column. */
 .unfolding-polyhedron main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
   max-width: 1200px;
   margin: auto;
-  padding: 30px 40px;
+  padding: 0;
 }
 .unfolding-polyhedron header {
   display: flex;
@@ -30,9 +38,18 @@
   color: #c8dce3;
   text-decoration: none;
 }
-.unfolding-polyhedron section {
+.unfolding-polyhedron main > header,
+.unfolding-polyhedron footer,
+.unfolding-polyhedron .intro {
+  flex: none;
+}
+.unfolding-polyhedron main > section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
   position: relative;
-  margin-top: 45px;
+  margin-top: 12px;
 }
 .unfolding-polyhedron .intro {
   pointer-events: none;
@@ -57,8 +74,9 @@
 .unfolding-polyhedron canvas {
   display: block;
   width: 100%;
-  height: min(62vh, 620px);
-  min-height: 360px;
+  flex: 1;
+  height: 0;
+  min-height: 0;
   touch-action: none;
   cursor: grab;
 }
@@ -71,15 +89,18 @@
   font-size: 12px;
   margin-top: 0;
 }
-.unfolding-polyhedron footer {
-  border-top: 1px solid #344953;
-  padding-top: 24px;
-  margin-top: 30px;
+/* Myriahedral shares the outer class; scope this reset to our map column so its footer border cannot leak in. */
+.unfolding-polyhedron .unfolding-view > footer {
+  border-top: 0;
+  padding-top: 12px;
+  margin-top: 24px;
+  margin-bottom: 24px;
 }
-.unfolding-polyhedron .controls {
-  display: flex;
+.unfolding-polyhedron .controls .example-info-content {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 24px;
+  gap: 8px;
 }
 .unfolding-polyhedron label {
   white-space: nowrap;
@@ -120,44 +141,34 @@
 }
 @media (max-width: 600px) {
   .unfolding-polyhedron main {
-    padding: 20px;
+    padding: 0;
   }
-  .unfolding-polyhedron header span {
+  .unfolding-polyhedron main > header span {
     display: none;
-  }
-  .unfolding-polyhedron .controls {
-    gap: 12px;
-    flex-wrap: wrap;
   }
   .unfolding-polyhedron input[type="range"] {
     min-width: 120px;
   }
-  .unfolding-polyhedron canvas {
-    height: 55vh;
-  }
   .unfolding-polyhedron .intro {
     position: static;
   }
-  .unfolding-polyhedron section {
-    margin-top: 30px;
+  .unfolding-polyhedron main > section {
+    margin-top: 12px;
   }
 }
 
 .unfolding-polyhedron .intro {
   position: static;
 }
-.unfolding-polyhedron section {
-  margin-top: 28px;
-}
-.unfolding-polyhedron canvas {
-  height: min(52vh, 540px);
+.unfolding-polyhedron main > section {
+  margin-top: 12px;
 }
 .unfolding-polyhedron .selectors {
   display: flex;
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
-  margin-top: 24px;
+  margin-top: 0;
 }
 .unfolding-polyhedron .selectors label {
   min-width: auto;
@@ -189,23 +200,19 @@
 }
 
 @media (min-width: 601px) {
-  .unfolding-polyhedron main {padding: 20px 32px;}
-  .unfolding-polyhedron section {margin-top: 16px;}
+  .unfolding-polyhedron main {padding: 0;}
+  .unfolding-polyhedron main > section {margin-top: 12px;}
   .unfolding-polyhedron h2 {font-size: 36px; margin: 8px 0;}
   .unfolding-polyhedron .eyebrow {margin: 8px 0;}
-  .unfolding-polyhedron .selectors {margin-top: 16px;}
-  .unfolding-polyhedron canvas {height: 36vh; min-height: 220px;}
-  .unfolding-polyhedron footer {margin-top: 16px; padding-top: 16px;}
+  .unfolding-polyhedron .selectors {margin-top: 0;}
   .unfolding-polyhedron footer > p {margin: 10px 0;}
 }
 
-.unfolding-polyhedron {height: 100%; overflow: auto; background: #0e2029; color: #e5edf0;}
-.unfolding-polyhedron[data-compact] canvas {height: 280px; min-height: 220px;}
-.unfolding-polyhedron .controls {flex-wrap: wrap;}
+.unfolding-polyhedron {height: 100%; min-height: 0; overflow: hidden; background: #0e2029; color: #e5edf0;}
 
-.unfolding-polyhedron[data-embedded] header,
+.unfolding-polyhedron[data-embedded] main > header,
 .unfolding-polyhedron[data-embedded] .intro {display: none;}
-.unfolding-polyhedron[data-embedded] section {margin-top: 0;}
+.unfolding-polyhedron[data-embedded] main > section {margin-top: 0;}
 
 .unfolding-polyhedron .coordinate-tooltip {
   position: absolute;
@@ -222,10 +229,37 @@
   box-shadow: 0 3px 12px #0005;
 }
 
-[data-fullscreen] .unfolding-polyhedron[data-compact] canvas {height: min(52vh, 540px); min-height: 220px;}
 
-/* Arrange this example's selector and control content inside the common panel. */
+/* Both columns share the full available height; only the sidebar body scrolls. */
+.unfolding-polyhedron .unfolding-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 12px; flex: 1; min-height: 0; }
+.unfolding-polyhedron .selectors { height: 100%; max-height: 100%; }
 .unfolding-polyhedron .selectors > .deck-widget-box,
-.unfolding-polyhedron .controls > .deck-widget-box { width: 100%; }
-.unfolding-polyhedron .selectors .example-info-content,
-.unfolding-polyhedron .controls .example-info-content { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.unfolding-polyhedron .selectors > .deck-widget-box > section { width: 100%; height: 100%; }
+.unfolding-polyhedron .unfolding-view { position: relative; display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0; }
+.unfolding-polyhedron .unfolding-view .hint { flex: none; margin-bottom: 0; padding-bottom: 0; }
+.unfolding-polyhedron .selectors .example-info-content { display: block; font: 14px/1.5 system-ui, sans-serif; }
+.unfolding-polyhedron .selectors label { display: block; margin: 14px 0 6px; font-size: 12px; white-space: normal; }
+.unfolding-polyhedron .selectors label:first-child { margin-top: 0; }
+.unfolding-polyhedron .selectors select { display: block; width: 100%; font: inherit; }
+.unfolding-polyhedron .selectors .unfolding-check { display: flex; align-items: center; gap: 8px; margin: 9px 0; }
+.unfolding-polyhedron .unfolding-check input { flex: none; margin: 0; }
+.unfolding-polyhedron button,
+.unfolding-polyhedron select { padding: 9px; border-radius: 8px; font: 14px/1.5 system-ui, sans-serif; }
+.unfolding-polyhedron .selectors #recut { width: 100%; margin-top: 12px; }
+.unfolding-polyhedron .unfolding-statistics { margin-top: 18px; padding-top: 12px; border-top: 1px solid #344953; }
+.unfolding-polyhedron .unfolding-statistics p { font-size: 13px; line-height: 1.5; color: #a0b6c0; margin: 0 0 12px; text-align: left; }
+.unfolding-polyhedron .unfolding-statistics #summary { margin-top: 0; }
+.unfolding-polyhedron .unfolding-statistics #notice { color: #edbd6d; }
+.unfolding-polyhedron .unfolding-statistics > :last-child { margin-bottom: 0; }
+@media (max-width: 767px) {
+  .unfolding-polyhedron .unfolding-layout { display: flex; flex-direction: column; }
+  .unfolding-polyhedron .selectors { width: 100%; height: auto; flex: 0 1 auto; max-height: 45%; }
+  .unfolding-polyhedron .selectors > .deck-widget-box,
+  .unfolding-polyhedron .selectors > .deck-widget-box > section { height: auto; }
+  .unfolding-polyhedron .unfolding-view { flex: 1; height: auto; }
+}
+
+/* Match Albers USA's compact endpoint buttons around a centered, flexible slider. */
+.unfolding-polyhedron .controls button { font-size: 12px; line-height: 1.5; padding: 4px 8px; min-height: 0; }
+.unfolding-polyhedron .controls button[aria-pressed='true'] { background: #304b57; }
+.unfolding-polyhedron .controls input[type='range'] { width: 100%; min-width: 0; margin: 0; }
