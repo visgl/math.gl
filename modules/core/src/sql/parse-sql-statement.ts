@@ -89,7 +89,7 @@ export function parseSQLSelectStatement(
 }
 
 function readTable(reader: RelationalQueryReader): SQLTableBinding {
-  const name = reader.identifier();
+  const name = reader.tableName();
   const alias = reader.takeKeyword('AS') ? reader.identifier() : reader.optionalAlias();
   return {name, ...(alias === undefined ? {} : {alias})};
 }
@@ -132,6 +132,14 @@ class RelationalQueryReader extends SQLQueryReader {
     super(sql);
   }
 
+  tableName(): string {
+    this.skipWhitespace();
+    if (/^LATERAL(?![A-Za-z0-9_])/i.test(this.sql.slice(this.position))) {
+      throw this.error('SQL LATERAL table expressions are not supported.');
+    }
+    return this.identifier();
+  }
+
   /** Reads an implicit alias unless the next token starts a clause. */
   optionalAlias(): string | undefined {
     this.skipWhitespace();
@@ -140,7 +148,7 @@ class RelationalQueryReader extends SQLQueryReader {
     if (
       name &&
       !SQL_RESERVED_WORDS.has(name.toUpperCase()) &&
-      !/^(INNER|LEFT|RIGHT|FULL|CROSS|OUTER|SEMI|ANTI|ON)$/i.test(name)
+      !/^(INNER|LEFT|RIGHT|FULL|CROSS|OUTER|SEMI|ANTI|NATURAL|LATERAL|ON)$/i.test(name)
     )
       return this.identifier();
     return undefined;

@@ -65,6 +65,9 @@ test('relational SELECT supports inner, semi, and anti joins with explicit condi
 test('relational SELECT rejects incomplete clauses, unbound parameters, and multiple statements', () => {
   for (const sql of [
     'SELECT * FROM a LEFT b',
+    'SELECT * FROM a NATURAL JOIN b ON a.id = b.id',
+    'SELECT * FROM a LATERAL JOIN b ON a.id = b.id',
+    'SELECT * FROM a JOIN LATERAL b ON a.id = b.id',
     'SELECT * FROM a JOIN b',
     'SELECT * FROM a WHERE :id = id',
     'SELECT * FROM a GROUP BY id,',
