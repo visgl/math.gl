@@ -171,6 +171,16 @@ Run `node modules/arrow/scripts/benchmark-expressions.mjs` after building to com
 
 This optional subpath does not add Arrow to core imports. Function declaration types are erased from runtime bundles. Application function libraries are included only when imported.
 
+## Replace Arrow columns[​](#replace-arrow-columns "Direct link to Replace Arrow columns")
+
+`replaceArrowColumns(table, replacements, {functions})` returns a table with computed columns in their original positions. Each replacement has an `as` field naming an existing column and an `expression` field. Use each name at most once. All expressions read the original table. The computed field supplies the output type and metadata.
+
+In SQL, write an explicit select list and alias the expression to the desired column name. For a table with `id` and `value` columns:
+
+```
+SELECT id, value + 1 AS value FROM data
+```
+
 ## Whole-table evaluation[​](#whole-table-evaluation "Direct link to Whole-table evaluation")
 
 `compiled.evaluateTable(arrowTable, {activeRows?, signal?})` evaluates the table's batches in order and returns one chunked Arrow vector. It reuses each batch result's buffers; it does not flatten or copy columns. Direct primitive projections reuse input buffers. Dictionary outputs use ordinary vectors. An empty table still validates its schema and produces an empty vector with the compiled output type.
