@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {parseSQLSelect, parseSQLSelectStatement} from '@math.gl/core/sql';
+import {SQLParseError, parseSQLSelect, parseSQLSelectStatement} from '@math.gl/core/sql';
 import {expect, test} from 'vitest';
 
 test('relational SELECT preserves qualified names, COUNT(*), joins, and sort options', () => {
@@ -28,7 +28,7 @@ test('relational SELECT preserves qualified names, COUNT(*), joins, and sort opt
         expression: {
           type: 'CallExpression',
           callee: {name: 'COUNT'},
-          arguments: [{type: 'Identifier', name: '*'}]
+          arguments: [{type: 'Identifier', name: '*', sqlWildcard: true}]
         },
         alias: 'trips'
       },
@@ -73,4 +73,23 @@ test('relational SELECT rejects incomplete clauses, unbound parameters, and mult
     expect(() => parseSQLSelectStatement(sql)).toThrow();
   }
   expect(() => parseSQLSelect('SELECT * FROM a ORDER BY id')).toThrow();
+});
+
+test('relational SELECT distinguishes wildcard arguments and reports statement offsets', () => {
+  const {select} = parseSQLSelectStatement('SELECT COUNT(*), COUNT("*") FROM a');
+  expect(select?.map(item => item.expression)).toMatchObject([
+    {arguments: [{name: '*', sqlWildcard: true}]},
+    {arguments: [{name: '*'}]}
+  ]);
+  const quotedArgument = select?.[1]?.expression;
+  if (quotedArgument?.type !== 'CallExpression') throw new Error('Expected COUNT call');
+  expect(quotedArgument.arguments[0]).not.toHaveProperty('sqlWildcard');
+
+  const sql = 'SELECT * FROM a\nWHERE id = :missing';
+  expect(() => parseSQLSelectStatement(sql)).toThrow(SQLParseError);
+  try {
+    parseSQLSelectStatement(sql);
+  } catch (error) {
+    expect(error).toMatchObject({offset: sql.indexOf(':missing')});
+  }
 });

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {Expression} from '../expressions/index';
-import type {SQLExpressionParserOptions} from './parse-sql-expression';
+import {SQLExpressionReader, SQL_RESERVED_WORDS} from './parse-sql-expression';
 import {SQLQueryReader} from './parse-sql-select';
 
 /** A named input with an optional alias in a relational SELECT. */
@@ -35,17 +35,18 @@ export type SQLSelectStatement = Readonly<{
   limit?: number;
 }>;
 
+/** Options for interpreting named parameters in a relational SELECT. */
+export type SQLSelectStatementOptions = Readonly<{
+  /** Supplies the AST for a named parameter such as :minimum. */
+  parseParameter?: (name: string) => Expression;
+}>;
+
 /** Parses a SELECT with a required FROM, without assuming an execution engine. */
 export function parseSQLSelectStatement(
   sql: string,
-  options: Pick<SQLExpressionParserOptions, 'parseParameter'> = {}
+  options: SQLSelectStatementOptions = {}
 ): SQLSelectStatement {
-  const reader = new SQLQueryReader(sql, {
-    parseParameter: options.parseParameter,
-    qualifiedColumns: true,
-    countWildcard: true,
-    lineComments: true
-  });
+  const reader = new RelationalQueryReader(sql, options);
   reader.expectKeyword('SELECT');
   const select = reader.takeSymbol('*')
     ? undefined
@@ -86,7 +87,7 @@ export function parseSQLSelectStatement(
   };
 }
 
-function readTable(reader: SQLQueryReader): SQLTableBinding {
+function readTable(reader: RelationalQueryReader): SQLTableBinding {
   const name = reader.identifier();
   const alias = reader.takeKeyword('AS') ? reader.identifier() : reader.optionalAlias();
   return {name, ...(alias === undefined ? {} : {alias})};
@@ -120,4 +121,96 @@ function readList<T>(reader: SQLQueryReader, readItem: () => T): T[] {
   const items = [readItem()];
   while (reader.takeSymbol(',')) items.push(readItem());
   return items;
+}
+
+class RelationalQueryReader extends SQLQueryReader {
+  constructor(
+    sql: string,
+    private readonly options: SQLSelectStatementOptions
+  ) {
+    super(sql);
+  }
+
+  /** Reads an implicit alias unless the next token starts a clause. */
+  optionalAlias(): string | undefined {
+    this.skipWhitespace();
+    if (this.sql[this.position] === '"') return this.identifier();
+    const name = /^[A-Za-z_][A-Za-z0-9_]*/.exec(this.sql.slice(this.position))?.[0];
+    if (
+      name &&
+      !SQL_RESERVED_WORDS.has(name.toUpperCase()) &&
+      !/^(INNER|LEFT|RIGHT|FULL|CROSS|OUTER|SEMI|ANTI|ON)$/i.test(name)
+    )
+      return this.identifier();
+    return undefined;
+  }
+
+  protected override expressionReader(): SQLExpressionReader {
+    return new RelationalExpressionReader(this.sql, this.position, this.options);
+  }
+
+  protected override skipWhitespace(): void {
+    this.position = skipLineComments(this.sql, this.position);
+  }
+}
+
+class RelationalExpressionReader extends SQLExpressionReader {
+  constructor(
+    source: string,
+    position: number,
+    private readonly options: SQLSelectStatementOptions
+  ) {
+    super(source, position);
+  }
+
+  override space(): void {
+    this.position = skipLineComments(this.source, this.position);
+    super.space();
+  }
+
+  protected override extendedPrimary(): Expression | undefined {
+    if (this.source[this.position] !== ':') return undefined;
+    const parameter = /^:([A-Za-z_][A-Za-z0-9_]*)/.exec(this.source.slice(this.position));
+    if (!parameter || !this.options.parseParameter) {
+      throw this.error('SQL named parameters require a name and parseParameter callback');
+    }
+    this.position += parameter[0].length;
+    this.token();
+    return this.node(this.options.parseParameter(parameter[1]!));
+  }
+
+  protected override qualifiedIdentifier(name: string): Expression | undefined {
+    if (!this.take('.')) return undefined;
+    this.space();
+    const column = /^(?:"((?:[^"]|"")+)"|([A-Za-z_][A-Za-z0-9_]*))/.exec(
+      this.source.slice(this.position)
+    );
+    if (!column) throw this.error('SQL qualified column requires a column identifier');
+    this.position += column[0].length;
+    this.token();
+    const property = this.node({
+      type: 'Identifier',
+      name: column[1]?.replace(/""/g, '"') ?? column[2]
+    });
+    const object = this.node({type: 'Identifier', name});
+    return this.node({type: 'MemberExpression', computed: false, object, property}, [
+      object,
+      property
+    ]);
+  }
+
+  protected override wildcardArgument(name: string): Expression | undefined {
+    if (name.toUpperCase() !== 'COUNT' || !this.take('*')) return undefined;
+    return this.node({type: 'Identifier', name: '*', sqlWildcard: true});
+  }
+}
+
+function skipLineComments(source: string, position: number): number {
+  while (position < source.length) {
+    if (/\s/.test(source[position]!)) position++;
+    else if (source.startsWith('--', position)) {
+      while (position < source.length && !/[\r\n]/.test(source[position]!)) position++;
+    } else break;
+  }
+  return position;
 }

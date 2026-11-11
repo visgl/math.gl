@@ -15,6 +15,13 @@ export type {
 } from './query-types';
 
 export {parseSQLExpression} from './parse-sql-expression';
-export type {SQLExpressionParserOptions} from './parse-sql-expression';
+
+export {SQLParseError} from './sql-parse-error';
 export {parseSQLSelectStatement} from './parse-sql-statement';
-export type {SQLSelectStatement, SQLTableBinding, SQLJoin, SQLSort} from './parse-sql-statement';
+export type {
+  SQLSelectStatement,
+  SQLSelectStatementOptions,
+  SQLTableBinding,
+  SQLJoin,
+  SQLSort
+} from './parse-sql-statement';
