@@ -78,7 +78,7 @@ test.each([
   'SELECT a, *',
   'SELECT a ORDER BY a',
   'SELECT a GROUP BY a',
-  'SELECT a OFFSET 1',
+  'SELECT a OFFSET 1.5',
   'SELECT a FROM a JOIN b',
   'SELECT a UNION SELECT a',
   'SELECT a LIMIT -1',
@@ -170,3 +170,22 @@ test.each(['value IN (1, 2)', 'value NOT IN (1, 2)', 'value in (1, 2)'])(
     expect(() => parseSQLQuery('SELECT value WHERE ' + excessive)).toThrow('nesting limit');
   }
 );
+
+test('pagination accepts either clause order and ignores quoted OFFSET in WHERE', () => {
+  const prefix = "SELECT x FROM source WHERE x = 'OFFSET'";
+  const expected = {
+    select: ['x'],
+    from: 'source',
+    where: {op: '=', args: [{property: 'x'}, 'OFFSET']},
+    offset: 2,
+    limit: 3
+  };
+  expect(parseSQLQuery(prefix + ' LIMIT 3 OFFSET 2')).toEqual(expected);
+  expect(parseSQLQuery(prefix + ' OFFSET 2 ROWS LIMIT 3')).toEqual(expected);
+  expect(parseSQLSelect('SELECT * OFFSET 0')).toEqual({offset: 0});
+  expect(() => parseSQLSelect('SELECT *\nOFFSET -1')).toThrow(/OFFSET.*line 2, column 8/);
+  expect(() => parseSQLSelect('SELECT * OFFSET 1.5')).toThrow(/OFFSET requires/);
+  expect(() => parseSQLSelect('SELECT * OFFSET 9007199254740992')).toThrow(/OFFSET requires/);
+  expect(() => parseSQLSelect('SELECT * LIMIT 0 LIMIT 1')).toThrow(/Duplicate SQL LIMIT/);
+  expect(() => parseSQLSelect('SELECT * OFFSET 0 OFFSET 1')).toThrow(/Duplicate SQL OFFSET/);
+});
