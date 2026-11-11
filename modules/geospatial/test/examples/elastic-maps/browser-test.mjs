@@ -39,7 +39,8 @@ try {
   await waitForPolygon();
   const before = await canvas.screenshot();
   await page.selectOption('[data-map]', 'sinusoidal');
-  await page.waitForFunction(() => document.querySelector('[data-status]').textContent === 'Move over the map to inspect coordinates.', null, {timeout: 60000});
+  await page.locator('.elastic-map[aria-busy="false"]').waitFor({timeout: 60000});
+  assert.equal(await page.locator('[data-status]').textContent(), '');
   await waitForPolygon();
   assert.notDeepEqual(await canvas.screenshot(), before);
   await page.setViewportSize({width: 520, height: 650});
