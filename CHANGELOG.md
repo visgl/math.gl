@@ -8,6 +8,7 @@
 - feat(expressions): Publish portable AST and numeric contracts, add an optional SQL parser entry point, and support row-level TRY recovery and lazy fallbacks (#467, #485, #488).
 - feat(geospatial): Coordinate terrain transitions and mixed-resolution isobands, and extract tree-shakeable map entry points with explicit presets and optional geometry (#458, #479).
 - fix(examples): Repair solar terminator daytime imagery and reuse shared projection surfaces and bitmap mesh adapters (#464, #472, #484, #486).
+- chore(website): Standardize example styling and validate example boundaries (#494).
 - docs: Clarify maps and projection responsibilities, and document SQL conformance and benchmark recovery (#483, #489).
 - build: Refresh patched release, HTTP, parsing, and website dependencies and prepare merge queue validation (#459, #462, #465, #466, #470).
 
