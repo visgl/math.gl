@@ -36,20 +36,21 @@ export default function ExternalProjectionEngines() {
   const [state, setState] = useState({});
   useEffect(() => {
     let active = true;
-    setState({});
     prepareMap(createExampleEngine(backend), mapName).then(
       projection => {
-        if (active) setState({projection});
+        if (active) setState({backend, mapName, projection});
       },
       error => {
-        if (active) setState({error: String(error)});
+        if (active) setState({backend, mapName, error: String(error)});
       }
     );
     return () => {
       active = false;
     };
   }, [backend, mapName]);
-  const projection = state.projection;
+  // Effects run after rendering, so only use results prepared for the current selection.
+  const currentState = state.backend === backend && state.mapName === mapName ? state : {};
+  const projection = currentState.projection;
   const {result, error: projectionError} = useMemo(() => {
     if (!projection || !cities) return {};
     try {
@@ -62,8 +63,10 @@ export default function ExternalProjectionEngines() {
           ])
         );
       }
-      for (let lat = map.minLatitude; lat <= 80; lat += 20) {
+      // Include the northern boundary even when the southern limit is off the 20° grid.
+      for (let lat = map.minLatitude; ; lat = Math.min(lat + 20, 80)) {
         graticule.push(Array.from({length: 181}, (_, i) => [-180 + i * 2, lat]));
+        if (lat === 80) break;
       }
       const lines = graticule.map(line => line.map(point => projection.project(point)));
       const projectedCities = cities.map(city => ({
@@ -93,7 +96,7 @@ export default function ExternalProjectionEngines() {
   const selectedMarker = result?.markers.find(marker => marker.city === selectedCity);
   const xy = selectedMarker?.xy;
   const inverse = xy && projection.unproject(xy);
-  const error = state.error || dataError || projectionError;
+  const error = currentState.error || dataError || projectionError;
   return (
     <section aria-label="Projection engine comparison" className={styles.example}>
       <ExamplePanel title="Projection engine comparison" className={styles.panel}>
