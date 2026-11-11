@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v5.0.0-beta.7
+
+- feat(arrow): Replace named columns with expressions evaluated against the original table while preserving column order, batch slice offsets, and row validity (#493).
+- feat(arrow): Add schema-bound expressions, typed function prototypes, classified errors, and whole-table evaluation in workers with Turf adapters (#457, #460, #480).
+- feat(arrow, SQL): Add computed expressions, scalar casts, packed and fixed-size arrays, Float16 and Uint8 support, normalized packing, RGBA and color functions, and optional numeric functions (#474–#478, #481, #482, #492).
+- feat(expressions): Publish portable AST and numeric contracts, add an optional SQL parser entry point, and support row-level TRY recovery and lazy fallbacks (#467, #485, #488).
+- feat(geospatial): Coordinate terrain transitions and mixed-resolution isobands, and extract tree-shakeable map entry points with explicit presets and optional geometry (#458, #479).
+- fix(examples): Repair solar terminator daytime imagery and reuse shared projection surfaces and bitmap mesh adapters (#464, #472, #484, #486).
+- chore(website): Standardize example styling and validate example boundaries (#494).
+- docs: Clarify maps and projection responsibilities, and document SQL conformance and benchmark recovery (#483, #489).
+- build: Refresh patched release, HTTP, parsing, and website dependencies and prepare merge queue validation (#459, #462, #465, #466, #470).
+
 ## v5.0.0-beta.6
 
 - feat(geometry): Add bounded nonlinear box projection with explicit sampled enclosures and conservative inflation under a supplied global Lipschitz contract (#456).

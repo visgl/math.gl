@@ -1,7 +1,7 @@
 {
   "name": "@math.gl/tasks",
   "description": "Typed task scheduling and worker execution",
-  "version": "5.0.0-beta.6",
+  "version": "5.0.0-beta.7",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
