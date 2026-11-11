@@ -40,8 +40,8 @@ Arguments:
 
 Returns:
 
-- `[x, y]` - the point that the function found.
-- `null` - if the polygon has no vertices or a coordinate that is not finite, or if the budget is too small for the first test point.
+- `[x, y]` - the point that the function found. The point is always strictly inside the polygon: not in a hole and not on an edge.
+- `null` - if the polygon has no vertices, a coordinate that is not finite, or no area. The function also returns `null` if the budget becomes empty before the function finds a point inside the polygon.
 
 ## Remarks
 
@@ -50,6 +50,7 @@ The function uses the best-first grid refinement of Garcia-Castellanos and Lomba
 The input can come from an untrusted source, for example a vector tile. Thus the function limits its work:
 
 - To test one point costs one point-to-segment test for each vertex. The function deducts these tests from `budget.segmentTests`. When the budget is empty, the function returns the best point that it found.
+- If the precision is coarse, the search continues until it finds a point inside the polygon.
 - You can use one budget object for many calls. Thus a set of large polygons cannot block the main thread.
 - The first grid has at most 64 squares along the longer side of the bounding box.
 - The function uses the even-odd rule. A point in a hole is outside the polygon.

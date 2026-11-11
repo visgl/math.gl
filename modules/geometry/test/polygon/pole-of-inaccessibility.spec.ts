@@ -227,3 +227,69 @@ describe('getPoleOfInaccessibility on known poles', () => {
     expect(distanceToOutline(triangle, pole)).toBeGreaterThan(1 - precision);
   });
 });
+
+describe('getPoleOfInaccessibility returns only points inside the polygon', () => {
+  // A frame 2 wide around a 6 x 6 hole. The centroid of the outer ring and the middle of the
+  // bounding box are both at (5, 5), in the hole.
+  const frame = [
+    [
+      [0, 0],
+      [10, 0],
+      [10, 10],
+      [0, 10],
+      [0, 0]
+    ],
+    [
+      [2, 2],
+      [2, 8],
+      [8, 8],
+      [8, 2],
+      [2, 2]
+    ]
+  ];
+
+  it('returns null when the budget runs out before an inside point is found', () => {
+    // The budget pays for the first scored point only, which is in the hole.
+    expect(getPoleOfInaccessibility(frame, 0.001, {segmentTests: 10})).toBeNull();
+  });
+
+  it('finds an inside point when the precision is coarser than the polygon', () => {
+    // The frame is 2 wide, so a precision of 5 stops the search before it finds the pole. The
+    // search must continue until it finds a point inside the frame.
+    const pole = getPoleOfInaccessibility(frame, 5);
+    expect(pole).not.toBeNull();
+    expect(distanceToOutline(frame, pole!)).toBeGreaterThan(0);
+  });
+
+  it('returns an inside point or null for each budget and precision', () => {
+    for (const precision of [0.001, 0.1, 1, 5, 100]) {
+      for (let segmentTests = 0; segmentTests <= 400; segmentTests += 10) {
+        const pole = getPoleOfInaccessibility(frame, precision, {segmentTests});
+        if (pole) {
+          expect(distanceToOutline(frame, pole)).toBeGreaterThan(0);
+        }
+      }
+      expect(getPoleOfInaccessibility(frame, precision)).not.toBeNull();
+    }
+  });
+
+  it('returns null for a polygon without area', () => {
+    const line = [
+      [
+        [0, 0],
+        [1, 0],
+        [0, 0]
+      ]
+    ];
+    expect(getPoleOfInaccessibility(line, 0.01)).toBeNull();
+    // A ring that goes out and back has a bounding box with area, but no inside point.
+    const outAndBack = [
+      [
+        [0, 0],
+        [1, 1],
+        [0, 0]
+      ]
+    ];
+    expect(getPoleOfInaccessibility(outAndBack, 0.01)).toBeNull();
+  });
+});

@@ -34,9 +34,12 @@ export type PoleSearchBudget = {
  * must be planar.
  *
  * The search spends at most `budget.segmentTests` point-to-segment distance tests and deducts
- * what it spends, so one budget can bound several searches. When the budget runs out the best
- * point found so far is returned. Returns null for a polygon without vertices, with a non-finite
- * coordinate, or when the budget cannot pay for the first scored point.
+ * what it spends, so one budget can bound several searches. When the budget runs out, the best
+ * point found so far is returned. The returned point is always strictly inside the polygon: not
+ * in a hole and not on an edge.
+ *
+ * Returns null for a polygon without vertices, with a non-finite coordinate, or with no area, and
+ * when the budget runs out before the search finds a point inside the polygon.
  */
 export function getPoleOfInaccessibility(
   polygon: number[][][],
@@ -58,12 +61,13 @@ export function getPoleOfInaccessibility(
   const width = box.right - box.left;
   const height = box.top - box.bottom;
   if (width === 0 || height === 0) {
-    return [box.left, box.bottom];
+    return null;
   }
   const longSide = Math.max(width, height);
+  const minTolerance = longSide * MIN_RELATIVE_PRECISION;
   const tolerance = Math.max(
     Number.isFinite(precision) && precision > 0 ? precision : 0,
-    longSide * MIN_RELATIVE_PRECISION
+    minTolerance
   );
 
   const search = new PoleSearch(polygon, vertexCount, budget);
@@ -93,7 +97,7 @@ export function getPoleOfInaccessibility(
     }
   }
 
-  search.refine(tolerance);
+  search.refine(tolerance, minTolerance);
   return search.bestPoint();
 }
 
@@ -175,8 +179,9 @@ class PoleSearch {
     this.budget = budget;
   }
 
-  bestPoint(): [number, number] {
-    return [this.bestX, this.bestY];
+  /** The best point so far, or null if no scored point is inside the polygon. */
+  bestPoint(): [number, number] | null {
+    return this.bestDistance > 0 ? [this.bestX, this.bestY] : null;
   }
 
   /**
@@ -201,13 +206,22 @@ class PoleSearch {
     return true;
   }
 
-  /** Splits the most promising squares until none can beat the best point by `tolerance`. */
-  refine(tolerance: number): void {
+  /**
+   * Splits the most promising squares until none can beat the best point by `tolerance`. While no
+   * scored point is inside the polygon, `tolerance` does not apply: the search continues while a
+   * square can hold an inside point and is larger than `minTolerance`.
+   */
+  refine(tolerance: number, minTolerance: number): void {
     while (this.heap.length > 0) {
       const index = this.dequeue();
-      if (this.reach[index] - this.bestDistance <= tolerance) {
+      const reach = this.reach[index];
+      if (this.bestDistance > 0 ? reach - this.bestDistance <= tolerance : reach <= 0) {
         // The heap is ordered by reach, so no remaining square can do better either.
         return;
+      }
+      if (this.bestDistance <= 0 && this.halfSide[index] * Math.SQRT2 <= minTolerance) {
+        // The square is too small to search further. Larger squares can remain in the heap.
+        continue;
       }
       const quarter = this.halfSide[index] / 2;
       const x = this.centerX[index];
