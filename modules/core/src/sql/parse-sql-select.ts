@@ -135,6 +135,7 @@ export class SQLQueryReader {
   identifier(): string {
     this.skipWhitespace();
     this.countToken();
+    const start = this.position;
     if (this.sql[this.position] === '"') {
       this.position++;
       let value = '';
@@ -145,11 +146,11 @@ export class SQLQueryReader {
           value += '"';
           this.position++;
         } else {
-          if (!value.length) throw this.error('SQL identifiers must not be empty.');
+          if (!value.length) throw this.error('SQL identifiers must not be empty.', start);
           return value;
         }
       }
-      throw this.error('SQL query contains an unterminated quoted identifier.');
+      throw this.error('SQL query contains an unterminated quoted identifier.', start);
     }
     const match = /^[A-Za-z_][A-Za-z0-9_]*/.exec(this.sql.slice(this.position));
     if (!match || SQL_RESERVED_WORDS.has(match[0].toUpperCase()))
@@ -173,8 +174,8 @@ export class SQLQueryReader {
   }
 
   /** Creates an error at the current statement cursor. */
-  error(message: string): SQLParseError {
-    return new SQLParseError(message, this.sql, this.position);
+  error(message: string, offset = this.position): SQLParseError {
+    return new SQLParseError(message, this.sql, offset);
   }
 
   /** Finds a top-level LIMIT/terminator without interpreting quoted predicate contents. */
@@ -182,6 +183,7 @@ export class SQLQueryReader {
     this.skipWhitespace();
     const start = this.position;
     let quote = '';
+    let quoteStart = start;
     let depth = 0;
     let groupingDepth = 0;
     const membershipParens: boolean[] = [];
@@ -195,8 +197,13 @@ export class SQLQueryReader {
           }
           quote = '';
         }
-      } else if (character === '"' || character === "'") quote = character;
-      else if (this.sql.startsWith('--', this.position) || this.sql.startsWith('/*', this.position))
+      } else if (character === '"' || character === "'") {
+        quote = character;
+        quoteStart = this.position;
+      } else if (
+        this.sql.startsWith('--', this.position) ||
+        this.sql.startsWith('/*', this.position)
+      )
         throw this.error('SQL comments are not supported.');
       else if (character === '(') {
         // IN list delimiters do not add a predicate grouping level.
@@ -218,7 +225,11 @@ export class SQLQueryReader {
         break;
       this.position++;
     }
-    if (quote || depth) throw this.error('SQL query contains an unterminated predicate.');
+    if (quote || depth)
+      throw this.error(
+        'SQL query contains an unterminated predicate.',
+        quote ? quoteStart : this.position
+      );
     const expression = this.sql.slice(start, this.position).trim();
     if (!expression) throw this.error('SQL WHERE requires a predicate.');
     return expression;
@@ -229,10 +240,10 @@ export class SQLQueryReader {
     this.skipWhitespace();
     const match = /^\d+/.exec(this.sql.slice(this.position));
     if (!match) throw this.error('SQL LIMIT requires a non-negative safe integer.');
-    this.position += match[0].length;
     const value = Number(match[0]);
     if (!Number.isSafeInteger(value))
       throw this.error('SQL LIMIT requires a non-negative safe integer.');
+    this.position += match[0].length;
     return value;
   }
 

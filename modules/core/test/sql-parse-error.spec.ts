@@ -14,6 +14,10 @@ import {
 test.each([
   [parseSQLSelect, 'SELECT x,\r\n  FROM source', 'FROM', 2, 3],
   [parseSQLQuery, 'SHOW TABLES FROM\n  123', '123', 2, 3],
+  [parseSQLQuery, 'SHOW TABLES FROM ""', '"', 1, 18],
+  [parseSQLQuery, 'SHOW TABLES FROM "bad', '"', 1, 18],
+  [parseSQLQuery, "SELECT x WHERE x = 'bad", "'", 1, 20],
+  [parseSQLQuery, 'SELECT x LIMIT 9007199254740992', '9007199254740992', 1, 16],
   [parseSQLQuery, 'SELECT x\nWHERE x > @', '@', 2, 11],
   [parseSQLQuery, 'SELECT x\nWHERE x > y + @', '@', 2, 15],
   [parseSQLPredicate, 'x >\n  @', '@', 2, 3],
