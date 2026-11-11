@@ -169,3 +169,7 @@ The component type is the widest floating input, or Float64 for integer-only arr
 Executors can consume the [portable expression AST](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/portable-ast.md) and Arrow-independent numeric metadata.
 
 `ARRAY[r, g, b, a]::UINT8[4]` and `CAST(ARRAY[r, g, b, a] AS UINT8[4])` select byte storage. The parser checks the width and lowers both spellings to an `array_uint8` call. `PACK_UNORM8` is a separate call that scales normalized values. See [Byte arrays and normalized packing](https://visgl.github.io/math.gl/next/docs/modules/arrow/expressions.md#byte-arrays-and-normalized-packing).
+
+### Syntax errors[​](#syntax-errors "Direct link to Syntax errors")
+
+Parser syntax errors use `SQLParseError`, a `SyntaxError` with a zero-based UTF-16 `offset`, one-based `line` and `column`, and a short `token` preview when a token is present. When parsing a complete statement, locations in the built-in WHERE parser refer to the original SQL text. Use the structured fields to highlight the location in an editor. Exceptions thrown by a custom WHERE parser are preserved.
