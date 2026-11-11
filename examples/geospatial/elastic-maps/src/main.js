@@ -27,13 +27,15 @@ export function mountElasticMaps(root) {
   const find = s => root.querySelector(s),
     scene = createScene(find('canvas')),
     abort = new AbortController();
-  const tooltip = createCoordinateTooltip(find('.elastic-map'));
+  const map = find('.elastic-map');
+  const tooltip = createCoordinateTooltip(map);
   const listen = (el, type, fn) => el.addEventListener(type, fn, {signal: abort.signal});
   let request = 0,
     busy = false;
   const update = async () => {
     const id = ++request;
     busy = true;
+    map.setAttribute('aria-busy', 'true');
     tooltip.hide();
     find('[data-status]').hidden = true;
     find('[data-status]').textContent = '';
@@ -50,11 +52,13 @@ export function mountElasticMaps(root) {
       });
       if (done && id === request) {
         busy = false;
+        map.setAttribute('aria-busy', 'false');
         find('[data-progress]').hidden = true;
       }
     } catch (error) {
       if (id === request) {
         busy = false;
+        map.setAttribute('aria-busy', 'false');
         find('[data-progress]').hidden = true;
         find('[data-status]').hidden = false;
         find('[data-status]').textContent = error.message;
