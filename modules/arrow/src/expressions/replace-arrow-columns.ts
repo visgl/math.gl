@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {RecordBatch, Schema, Struct, Table, makeData} from 'apache-arrow';
+import {RecordBatch, Schema, Struct, Table} from 'apache-arrow';
 import {compileArrowExpression} from './compiler';
 import type {ArrowExpression, ArrowExpressionOptions} from './types';
 
@@ -28,26 +28,44 @@ export function replaceArrowColumns(
     };
   });
 
-  let result = table;
   for (const {as, index, compiled} of plan) {
-    result = result.setChildAt(index, compiled.evaluateTable(table));
     fields[index] = compiled.outputField.clone({name: as});
   }
   const schema = new Schema(fields, table.schema.metadata, undefined, table.schema.metadataVersion);
   const struct = new Struct(fields);
-  return new Table(
-    schema,
-    result.batches.map(
-      batch =>
-        new RecordBatch(
-          schema,
-          makeData({
-            type: struct,
-            length: batch.numRows,
-            nullCount: 0,
-            children: batch.data.children
-          })
-        )
-    )
-  );
+  const batches = table.batches.flatMap(batch => {
+    const columns = plan.map(({index, compiled}) => ({index, vector: compiled.evaluate(batch)}));
+    // Vector kernels can return multiple chunks. Align the output batches at each boundary.
+    const boundaries = new Set([batch.numRows]);
+    for (const {vector} of columns) {
+      let end = 0;
+      for (const chunk of vector.data) {
+        end += chunk.length;
+        if (end > 0) boundaries.add(end);
+      }
+    }
+    let start = 0;
+    return [...boundaries]
+      .sort((a, b) => a - b)
+      .map(end => {
+        const wholeBatch = start === 0 && end === batch.numRows;
+        const source = wholeBatch ? batch.data : batch.data.slice(start, end - start);
+        const children = [...source.children];
+        for (const {index, vector} of columns) {
+          children[index] = (wholeBatch ? vector : vector.slice(start, end)).data[0]!;
+        }
+        start = end;
+        const data = source.clone(
+          struct,
+          source.offset,
+          source.length,
+          source.nullCount,
+          source.buffers,
+          children
+        );
+        // RecordBatch normalizes child lengths and recreates the parent struct.
+        return Object.assign(new RecordBatch(schema, data), {data});
+      });
+  });
+  return new Table(schema, batches);
 }
