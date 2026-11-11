@@ -30,7 +30,7 @@ export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}
         select.push(alias ? {column: expression.name, as: alias} : expression.name);
       else if (
         expression.type === 'CallExpression' &&
-        /^array(?:_float(?:16|32|64))?$/.test(expression.callee.name) &&
+        /^array(?:_(?:float(?:16|32|64)|uint8))?$/.test(expression.callee.name) &&
         expression.arguments.every((argument: any) => argument.type === 'Identifier')
       ) {
         if (!alias) throw new Error('SQL ARRAY requires AS');

@@ -14,6 +14,7 @@ import {
   Dictionary,
   Int64,
   Int32,
+  Uint8,
   Null,
   Utf8,
   vectorFromArray,
@@ -172,7 +173,7 @@ export function compileArrowFunction(
 /** Compiles a packed floating-point source-column projection, preserving Float64 unless explicitly narrowed. */
 export function compileArrowArray(
   columns: readonly string[],
-  options: ArrowExpressionOptions & {type?: 'float16' | 'float32' | 'float64'}
+  options: ArrowExpressionOptions & {type?: 'float16' | 'float32' | 'float64' | 'uint8'}
 ): CompiledArrowExpression {
   if (
     !Array.isArray(columns) ||
@@ -181,8 +182,11 @@ export function compileArrowArray(
     Array.from(columns).some(name => typeof name !== 'string' || !name.length)
   )
     throw new Error('ARRAY requires 1 to 4096 source column names');
-  if (options.type !== undefined && !['float16', 'float32', 'float64'].includes(options.type))
-    throw new Error('Unsupported ARRAY precision');
+  if (
+    options.type !== undefined &&
+    !['float16', 'float32', 'float64', 'uint8'].includes(options.type)
+  )
+    throw new Error('Unsupported ARRAY component type');
   return compileArrowExpression(
     {
       type: 'CallExpression',
@@ -904,6 +908,74 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
   };
 }
 
+/** Converts a number to a byte without typed-array wraparound. */
+function convertByte(value: number, normalized: boolean): number {
+  if (!Number.isFinite(value))
+    throw new ExpressionEvaluationError('conversion', 'Byte conversion requires a finite number');
+  if (normalized) {
+    if (value < 0 || value > 1)
+      throw new ExpressionEvaluationError('domain', 'PACK_UNORM8 requires values in [0, 1]');
+    return Math.round(value * 255);
+  }
+  const integer = Math.trunc(value);
+  if (integer < 0 || integer > 255)
+    throw new ExpressionEvaluationError('overflow', 'UINT8 cast overflow');
+  return integer;
+}
+
+/** Packs fixed-size numeric tuples directly from child buffers, including sliced inputs. */
+function bindPackUnorm8(arguments_: any[], options: BindingOptions): Node {
+  if (arguments_.length !== 1) throw new Error('PACK_UNORM8 requires one fixed-size numeric array');
+  const argument = bind(arguments_[0], options, undefined, true);
+  const inputType = argument.field.type;
+  if (!DataType.isFixedSizeList(inputType) || !inputType.listSize || inputType.listSize > 4096)
+    throw new Error('PACK_UNORM8 requires a fixed-size numeric array of 1 to 4096 components');
+  const width = inputType.listSize;
+  const child = inputType.children[0]!;
+  if (!DataType.isInt(valueType(child.type)) && !DataType.isFloat(valueType(child.type)))
+    throw new Error('PACK_UNORM8 requires numeric components');
+  const type = new FixedSizeList(width, new Field('value', new Uint8(), false));
+  const field = new Field('pack_unorm8', type, argument.field.nullable || child.nullable);
+  return {
+    field,
+    hasKernel: true,
+    prepare(batch, active, context) {
+      const input = argument.prepare(batch, active, context).vector!;
+      const parent = new ColumnReader(input);
+      const components = new ColumnReader(input.getChildAt(0)!);
+      const result = nullTupleVector(type, active.length);
+      const data = result.data[0]!;
+      const bytes = data.children[0]!.values as Uint8Array;
+      const rowValues = new Float64Array(width);
+      for (let row = 0; row < active.length; row++) {
+        if (!active[row] || context.failed?.[row] || !parent.isValid(row)) continue;
+        const start = row * width;
+        let valid = true;
+        for (let component = 0; component < width; component++) {
+          const value = components.get(start + component);
+          if (value === null) {
+            valid = false;
+            break;
+          }
+          rowValues[component] = Number(value);
+        }
+        if (!valid) continue;
+        try {
+          for (let component = 0; component < width; component++)
+            bytes[start + component] = convertByte(rowValues[component]!, true);
+        } catch (error) {
+          if (!context.failed || !isExpressionEvaluationError(error)) throw error;
+          context.failed[row] = 1;
+          bytes.fill(0, start, start + width);
+          continue;
+        }
+        data.setValid(row, true);
+      }
+      return vectorReader(result);
+    }
+  };
+}
+
 /** Binds built-ins and custom functions, materializing arguments only for vector kernels. */
 function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node {
   if (ast.callee.type !== 'Identifier')
@@ -918,6 +990,8 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
       'array_float16',
       'array_float32',
       'array_float64',
+      'array_uint8',
+      'PACK_UNORM8',
       'cast',
       'isNull',
       'isNotNull',
@@ -931,7 +1005,8 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
     if (matches.length > 1) throw new Error(`Ambiguous SQL function: ${name}`);
     name = matches[0] ?? name;
   }
-  if (['array', 'array_float16', 'array_float32', 'array_float64'].includes(name)) {
+  if (name === 'PACK_UNORM8') return bindPackUnorm8(ast.arguments, options);
+  if (['array', 'array_float16', 'array_float32', 'array_float64', 'array_uint8'].includes(name)) {
     if (!ast.arguments.length || ast.arguments.length > 4096)
       throw new Error('ARRAY requires 1 to 4096 numeric expressions');
     const arguments_ = ast.arguments.map((value: any) => bind(value, options)) as Node[];
@@ -944,17 +1019,19 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
     )
       throw new Error('ARRAY requires numeric expressions');
     const component =
-      name === 'array_float16'
-        ? new Float16()
-        : name === 'array_float32'
-          ? new Float32()
-          : name === 'array_float64' ||
-              arguments_.every(value => DataType.isInt(valueType(value.field.type))) ||
-              arguments_.some(value => typeKey(value.field.type) === 'f2')
-            ? new Float64()
-            : arguments_.some(value => typeKey(value.field.type) === 'f1')
-              ? new Float32()
-              : new Float16();
+      name === 'array_uint8'
+        ? new Uint8()
+        : name === 'array_float16'
+          ? new Float16()
+          : name === 'array_float32'
+            ? new Float32()
+            : name === 'array_float64' ||
+                arguments_.every(value => DataType.isInt(valueType(value.field.type))) ||
+                arguments_.some(value => typeKey(value.field.type) === 'f2')
+              ? new Float64()
+              : arguments_.some(value => typeKey(value.field.type) === 'f1')
+                ? new Float32()
+                : new Float16();
     const type = new FixedSizeList(arguments_.length, new Field('value', component, false));
     const field = new Field(
       'array',
@@ -977,7 +1054,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
         const vector = nullTupleVector(type, active.length),
           data = vector.data[0]!,
           output =
-            component.precision === Precision.HALF
+            DataType.isFloat(component) && component.precision === Precision.HALF
               ? float16Values(data.children[0]!.values as Uint16Array)
               : data.children[0]!.values;
         const rowValues: (number | bigint | null)[] = new Array(values.length);
@@ -990,7 +1067,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
             for (let column = 0; column < values.length; column++) {
               const index = row * values.length + column;
               const value = Number(rowValues[column]);
-              output[index] = value;
+              output[index] = name === 'array_uint8' ? convertByte(value, false) : value;
               if (Number.isFinite(value) && !Number.isFinite(output[index]))
                 throw new ExpressionEvaluationError('overflow', 'ARRAY cast overflow');
             }
