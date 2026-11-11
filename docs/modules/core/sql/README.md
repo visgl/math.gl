@@ -38,12 +38,12 @@ An injected WHERE parser can define a different predicate language.
 | Null tests                            | ✅      | `IS NULL` and `IS NOT NULL`; expression comparisons with NULL evaluate to unknown.                                                                           |
 | Scalar literals                       | ✅      | Numbers, single-quoted strings with doubled quote escapes, and Boolean values. Use null tests rather than NULL literals.                          |
 | Named parameters                      | ⚠️      | `:name` in `parseSQLPredicate()`, with supplied values or preserved references. Use an injected WHERE parser for parameterized SELECT statements. |
-| Row limit                             | ✅      | `LIMIT` followed by a nonnegative safe integer, including zero.                                                                                   |
+| Pagination                            | ✅      | `LIMIT` followed by a nonnegative safe integer, including zero. `OFFSET` skips rows before the limit.                                                                                   |
 | Catalog commands                      | ✅      | `SHOW SOURCES`, `SHOW TABLES [FROM source]`, and `DESCRIBE source[.table]`. `SHOW SOURCES` is a parser-specific command.                          |
 | Qualified column names                | ❌      | `SELECT table.column` and qualified WHERE columns in `parseSQLQuery()` are rejected. Quote literal column names containing dots.                  |
 | Computed columns and function calls   | ⚠️      | CAST, postfix :: conversions, arithmetic + - * /, named functions, searched CASE, and fixed-size ARRAY expressions. Execution supplies registered functions.                                                                      |
 | Additional predicate operators        | ❌      | No `LIKE`, `ILIKE`, `BETWEEN`, regular expressions, or `EXISTS`.                                                                                  |
-| Sorting and pagination                | ❌      | No `ORDER BY`, `OFFSET`, or `FETCH`.                                                                                                              |
+| Sorting and pagination                | ❌      | No `ORDER BY` or `FETCH`.                                                                                                              |
 | Aggregation and distinct rows         | ❌      | No aggregate functions, `GROUP BY`, `HAVING`, or `DISTINCT`.                                                                                      |
 | Joins and nested queries              | ❌      | No joins, subqueries, CTEs (`WITH`), or set operations such as `UNION`.                                                                           |
 | Table aliases and qualified wildcards | ❌      | No `FROM cities AS c` or `SELECT c.*`.                                                                                                            |
@@ -83,7 +83,7 @@ Without `parseWhere`, this function rejects statements containing WHERE.
 ## Relational SELECT
 
 Use `parseSQLSelectStatement()` when your application owns the query planner.
-It returns projection, source, join, filter, grouping, sorting, and limit clauses
+It returns projection, source, join, filter, grouping, sorting, and pagination clauses
 without resolving names or executing the query.
 
 ```ts
@@ -98,7 +98,7 @@ const statement = parseSQLSelectStatement(
 
 The parser supports table aliases, qualified column references, INNER, LEFT,
 SEMI, and ANTI joins with ON conditions, GROUP BY, ORDER BY with optional null
-placement, and SQL line comments. Aggregate calls are expression nodes. COUNT(*)
+placement, LIMIT, OFFSET, and SQL line comments. Aggregate calls are expression nodes. COUNT(*)
 is a call with a wildcard identifier argument marked `sqlWildcard: true`. The caller validates the supported
 join conditions and aggregate functions and binds parameters. Use
 `parseParameter` to supply an expression node for each named parameter.

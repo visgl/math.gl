@@ -17,7 +17,7 @@ export type SQLSelectParserOptions = Readonly<{
   parseWhere?: (expression: string) => ColumnarPredicate | Readonly<{expression: Expression}>;
 }>;
 
-/** Parses SELECT columns/AS aliases, optional FROM, and LIMIT; WHERE requires a supplied parser. */
+/** Parses SELECT columns/AS aliases, optional FROM, LIMIT and OFFSET; WHERE requires a supplied parser. */
 export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}): TableQuery {
   const reader = new SQLQueryReader(sql);
   reader.expectKeyword('SELECT');
@@ -61,14 +61,13 @@ export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}
     if (!where || typeof where !== 'object' || Array.isArray(where))
       throw reader.error('SQL WHERE parser must return a predicate.');
   }
-  let limit: number | undefined;
-  if (reader.takeKeyword('LIMIT')) limit = reader.limit();
+  const pagination = reader.pagination();
   reader.end();
   return {
     ...(select ? {select} : {}),
     ...(from === undefined ? {} : {from}),
     ...(where ? {where} : {}),
-    ...(limit === undefined ? {} : {limit})
+    ...pagination
   };
 }
 
@@ -178,7 +177,7 @@ export class SQLQueryReader {
     return new SQLParseError(message, this.sql, offset);
   }
 
-  /** Finds a top-level LIMIT/terminator without interpreting quoted predicate contents. */
+  /** Finds a top-level pagination clause or terminator without interpreting quoted predicate contents. */
   whereExpression(): string {
     this.skipWhitespace();
     const start = this.position;
@@ -215,14 +214,7 @@ export class SQLQueryReader {
       } else if (character === ')') {
         if (--depth < 0) throw this.error('SQL query contains unbalanced parentheses.');
         if (!membershipParens.pop()) groupingDepth--;
-      } else if (
-        depth === 0 &&
-        (character === ';' ||
-          (this.sql.slice(this.position, this.position + 5).toUpperCase() === 'LIMIT' &&
-            !/[A-Za-z0-9_.:]/.test(this.sql[this.position - 1] || '') &&
-            !/[A-Za-z0-9_.:]/.test(this.sql[this.position + 5] || '')))
-      )
-        break;
+      } else if (depth === 0 && (character === ';' || this.atPaginationClause())) break;
       this.position++;
     }
     if (quote || depth)
@@ -235,14 +227,41 @@ export class SQLQueryReader {
     return expression;
   }
 
-  /** Reads a non-negative safe integer row limit. */
-  limit(): number {
+  /** Checks for an unquoted pagination keyword at the current predicate boundary. */
+  private atPaginationClause(): boolean {
+    return (
+      !/[A-Za-z0-9_.:]/.test(this.sql[this.position - 1] || '') &&
+      /^(?:LIMIT|OFFSET)(?![A-Za-z0-9_.:])/i.test(this.sql.slice(this.position, this.position + 7))
+    );
+  }
+
+  /** Reads optional LIMIT and OFFSET in either order. */
+  pagination(): Pick<TableQuery, 'limit' | 'offset'> {
+    let limit: number | undefined;
+    let offset: number | undefined;
+    while (true) {
+      if (this.takeKeyword('LIMIT')) {
+        if (limit !== undefined) throw this.error('Duplicate SQL LIMIT clause.');
+        limit = this.rowCount('LIMIT');
+      } else if (this.takeKeyword('OFFSET')) {
+        if (offset !== undefined) throw this.error('Duplicate SQL OFFSET clause.');
+        offset = this.rowCount('OFFSET');
+        if (!this.takeKeyword('ROWS')) this.takeKeyword('ROW');
+      } else break;
+    }
+    return {
+      ...(offset === undefined ? {} : {offset}),
+      ...(limit === undefined ? {} : {limit})
+    };
+  }
+
+  /** Reads the non-negative safe integer for a pagination clause. */
+  private rowCount(clause: 'LIMIT' | 'OFFSET'): number {
     this.skipWhitespace();
-    const match = /^\d+/.exec(this.sql.slice(this.position));
-    if (!match) throw this.error('SQL LIMIT requires a non-negative safe integer.');
-    const value = Number(match[0]);
-    if (!Number.isSafeInteger(value))
-      throw this.error('SQL LIMIT requires a non-negative safe integer.');
+    const match = /^\d+(?![A-Za-z0-9_.])/.exec(this.sql.slice(this.position));
+    const value = Number(match?.[0]);
+    if (!match || !Number.isSafeInteger(value))
+      throw this.error(`SQL ${clause} requires a non-negative safe integer.`);
     this.position += match[0].length;
     return value;
   }

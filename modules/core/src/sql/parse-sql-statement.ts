@@ -33,6 +33,7 @@ export type SQLSelectStatement = Readonly<{
   groupBy?: readonly Expression[];
   orderBy?: readonly SQLSort[];
   limit?: number;
+  offset?: number;
 }>;
 
 /** Options for interpreting named parameters in a relational SELECT. */
@@ -74,7 +75,7 @@ export function parseSQLSelectStatement(
     reader.expectKeyword('BY');
     orderBy = readList(reader, () => readSort(reader));
   }
-  const limit = reader.takeKeyword('LIMIT') ? reader.limit() : undefined;
+  const pagination = reader.pagination();
   reader.end();
   return {
     ...(select ? {select} : {}),
@@ -83,7 +84,7 @@ export function parseSQLSelectStatement(
     ...(where ? {where} : {}),
     ...(groupBy ? {groupBy} : {}),
     ...(orderBy ? {orderBy} : {}),
-    ...(limit === undefined ? {} : {limit})
+    ...pagination
   };
 }
 

@@ -41,7 +41,9 @@ export type TableQuery<
   select?: readonly TableSelection[];
   /** Predicate evaluated against source columns before output aliases are applied. */
   where?: PredicateT | Readonly<{expression: Expression}>;
-  /** Maximum number of rows retained after filtering. */
+  /** Number of filtered rows skipped before applying the limit. */
+  offset?: number;
+  /** Maximum number of rows retained after filtering and offset. */
   limit?: number;
 }>;
 

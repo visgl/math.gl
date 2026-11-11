@@ -12,6 +12,7 @@ export const SQL_RESERVED_WORDS = new Set([
   'FROM',
   'WHERE',
   'LIMIT',
+  'OFFSET',
   'AS',
   'TRUE',
   'FALSE',

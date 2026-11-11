@@ -12,7 +12,7 @@ test('relational SELECT preserves qualified names, COUNT(*), joins, and sort opt
     FROM trips t LEFT OUTER JOIN regions AS r ON t.region = r.id
     WHERE t.fare >= :minimum
     GROUP BY t."home.region", r.name
-    ORDER BY total DESC NULLS LAST, region ASC LIMIT 10;`,
+    ORDER BY total DESC NULLS LAST, region ASC OFFSET 2 ROWS LIMIT 10;`,
     {parseParameter: name => ({type: 'Identifier', name: `:${name}`})}
   );
   const region = {
@@ -48,6 +48,7 @@ test('relational SELECT preserves qualified names, COUNT(*), joins, and sort opt
       {expression: {name: 'total'}, direction: 'desc', nulls: 'last'},
       {expression: {name: 'region'}, direction: 'asc'}
     ],
+    offset: 2,
     limit: 10
   });
 });
