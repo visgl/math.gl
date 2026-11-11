@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {SQLParseError} from './sql-parse-error';
 import type {Expression} from '../expressions/index';
 import {SQLExpressionReader, SQL_RESERVED_WORDS} from './parse-sql-expression';
 import type {ColumnarPredicate} from '../expressions/columnar-predicate';
@@ -33,7 +34,7 @@ export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}
         /^array(?:_(?:float(?:16|32|64)|uint8))?$/.test(expression.callee.name) &&
         expression.arguments.every((argument: any) => argument.type === 'Identifier')
       ) {
-        if (!alias) throw new Error('SQL ARRAY requires AS');
+        if (!alias) throw reader.error('SQL ARRAY requires AS');
         const type = expression.callee.name.slice(6);
         select.push({
           array: expression.arguments.map((argument: any) => argument.name),
@@ -48,17 +49,17 @@ export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}
     const source = reader.identifier();
     from = reader.takeSymbol('.') ? {source, table: reader.identifier()} : source;
     if (!source.trim() || (typeof from === 'object' && !from.table.trim()))
-      throw new Error('SQL FROM requires non-empty names.');
+      throw reader.error('SQL FROM requires non-empty names.');
   }
   let where: ColumnarPredicate | Readonly<{expression: Expression}> | undefined;
   if (reader.takeKeyword('WHERE')) {
     if (typeof options.parseWhere !== 'function')
-      throw new Error(
+      throw reader.error(
         'parseSQLSelect requires parseWhere for WHERE; use parseSQLQuery for built-in predicate support.'
       );
-    where = options.parseWhere(reader.whereExpression());
+    where = reader.parseWhere(options.parseWhere);
     if (!where || typeof where !== 'object' || Array.isArray(where))
-      throw new Error('SQL WHERE parser must return a predicate.');
+      throw reader.error('SQL WHERE parser must return a predicate.');
   }
   let limit: number | undefined;
   if (reader.takeKeyword('LIMIT')) limit = reader.limit();
@@ -83,28 +84,32 @@ export class SQLQueryReader {
   /** Rejects empty or oversized statements before scanning. */
   constructor(sql: string) {
     if (typeof sql !== 'string' || !sql.trim() || sql.length > MAXIMUM_SQL_LENGTH)
-      throw new Error('SQL query requires a non-empty statement of at most 65536 characters.');
+      throw new SQLParseError(
+        'SQL query requires a non-empty statement of at most 65536 characters.',
+        '',
+        0
+      );
     this.sql = sql;
   }
 
   /** Consumes punctuation in a bounded ARRAY constructor. */
   arraySymbol(symbol: string): void {
-    if (!this.takeSymbol(symbol)) throw new Error(`SQL ARRAY expected ${symbol}`);
+    if (!this.takeSymbol(symbol)) throw this.error(`SQL ARRAY expected ${symbol}`);
   }
 
   /** Reads a bounded scalar or fixed-array projection. */
   selectionExpression(): Expression {
     this.skipWhitespace();
     this.countToken();
-    const reader = new SQLExpressionReader(this.sql.slice(this.position));
+    const reader = new SQLExpressionReader(this.sql, this.position);
     const expression = reader.expression();
-    this.position += reader.position;
+    this.position = reader.position;
     return expression;
   }
 
   /** Consumes one mandatory keyword. */
   expectKeyword(keyword: string): void {
-    if (!this.takeKeyword(keyword)) throw new Error(`SQL query expected ${keyword}.`);
+    if (!this.takeKeyword(keyword)) throw this.error(`SQL query expected ${keyword}.`);
   }
 
   /** Consumes an unquoted keyword without folding identifier names. */
@@ -140,17 +145,36 @@ export class SQLQueryReader {
           value += '"';
           this.position++;
         } else {
-          if (!value.length) throw new Error('SQL identifiers must not be empty.');
+          if (!value.length) throw this.error('SQL identifiers must not be empty.');
           return value;
         }
       }
-      throw new Error('SQL query contains an unterminated quoted identifier.');
+      throw this.error('SQL query contains an unterminated quoted identifier.');
     }
     const match = /^[A-Za-z_][A-Za-z0-9_]*/.exec(this.sql.slice(this.position));
     if (!match || SQL_RESERVED_WORDS.has(match[0].toUpperCase()))
-      throw new Error('SQL query expected a column, alias, source, or table identifier.');
+      throw this.error('SQL query expected a column, alias, source, or table identifier.');
     this.position += match[0].length;
     return match[0];
+  }
+
+  /** Parses a WHERE fragment and translates its cursor back to the full statement. */
+  parseWhere(parse: NonNullable<SQLSelectParserOptions['parseWhere']>): ReturnType<typeof parse> {
+    this.skipWhitespace();
+    const start = this.position;
+    const source = this.whereExpression();
+    try {
+      return parse(source);
+    } catch (error) {
+      if (error instanceof SQLParseError)
+        throw new SQLParseError(error.reason, this.sql, start + error.offset);
+      throw error;
+    }
+  }
+
+  /** Creates an error at the current statement cursor. */
+  error(message: string): SQLParseError {
+    return new SQLParseError(message, this.sql, this.position);
   }
 
   /** Finds a top-level LIMIT/terminator without interpreting quoted predicate contents. */
@@ -173,16 +197,16 @@ export class SQLQueryReader {
         }
       } else if (character === '"' || character === "'") quote = character;
       else if (this.sql.startsWith('--', this.position) || this.sql.startsWith('/*', this.position))
-        throw new Error('SQL comments are not supported.');
+        throw this.error('SQL comments are not supported.');
       else if (character === '(') {
         // IN list delimiters do not add a predicate grouping level.
         const membership = /\bIN\s*$/i.test(this.sql.slice(start, this.position));
         membershipParens.push(membership);
         depth++;
         if (!membership && ++groupingDepth > 64)
-          throw new Error('SQL query exceeds its predicate nesting limit.');
+          throw this.error('SQL query exceeds its predicate nesting limit.');
       } else if (character === ')') {
-        if (--depth < 0) throw new Error('SQL query contains unbalanced parentheses.');
+        if (--depth < 0) throw this.error('SQL query contains unbalanced parentheses.');
         if (!membershipParens.pop()) groupingDepth--;
       } else if (
         depth === 0 &&
@@ -194,9 +218,9 @@ export class SQLQueryReader {
         break;
       this.position++;
     }
-    if (quote || depth) throw new Error('SQL query contains an unterminated predicate.');
+    if (quote || depth) throw this.error('SQL query contains an unterminated predicate.');
     const expression = this.sql.slice(start, this.position).trim();
-    if (!expression) throw new Error('SQL WHERE requires a predicate.');
+    if (!expression) throw this.error('SQL WHERE requires a predicate.');
     return expression;
   }
 
@@ -204,11 +228,11 @@ export class SQLQueryReader {
   limit(): number {
     this.skipWhitespace();
     const match = /^\d+/.exec(this.sql.slice(this.position));
-    if (!match) throw new Error('SQL LIMIT requires a non-negative safe integer.');
+    if (!match) throw this.error('SQL LIMIT requires a non-negative safe integer.');
     this.position += match[0].length;
     const value = Number(match[0]);
     if (!Number.isSafeInteger(value))
-      throw new Error('SQL LIMIT requires a non-negative safe integer.');
+      throw this.error('SQL LIMIT requires a non-negative safe integer.');
     return value;
   }
 
@@ -216,8 +240,7 @@ export class SQLQueryReader {
   end(): void {
     this.takeSymbol(';');
     this.skipWhitespace();
-    if (this.position !== this.sql.length)
-      throw new Error(`Unsupported SQL query syntax at character ${this.position}.`);
+    if (this.position !== this.sql.length) throw this.error('Unsupported SQL query syntax.');
   }
 
   /** Skips whitespace without altering quoted identifiers. */
@@ -228,6 +251,6 @@ export class SQLQueryReader {
   /** Bounds large projection lists independently of predicate parsing. */
   private countToken(): void {
     if (++this.tokens > MAXIMUM_SELECT_TOKENS)
-      throw new Error('SQL query exceeds its structural token limit.');
+      throw this.error('SQL query exceeds its structural token limit.');
   }
 }

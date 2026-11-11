@@ -15,3 +15,5 @@ export type {
 } from './query-types';
 
 export {parseSQLExpression} from './parse-sql-expression';
+
+export {SQLParseError} from './sql-parse-error';
