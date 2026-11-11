@@ -5,8 +5,11 @@
 import {scalarFunction} from './utils/scalar-function';
 
 import {expect, test} from 'vitest';
+import {parseSQLExpression} from '@math.gl/core/sql';
 import {
   Table,
+  RecordBatch,
+  makeData,
   Int32,
   Int8,
   Dictionary,
@@ -20,7 +23,8 @@ import {
 import {
   compileArrowExpression,
   compileArrowFunction,
-  compileArrowPredicate
+  compileArrowPredicate,
+  replaceArrowColumns
 } from '../src/expressions';
 
 function table() {
@@ -271,4 +275,80 @@ test('nested list sizes match structurally even when type strings are uninformat
       functions
     })
   ).toThrow('Argument type mismatch');
+});
+
+test('Arrow replacements keep column order and read the original multi-batch table', () => {
+  const input = table();
+  const functions = [
+    scalarFunction({
+      name: 'increment',
+      arguments: [input.schema.fields[0]!],
+      result: new Field('incremented', new Int32(), true),
+      evaluateScalar: (value: number) => value + 1
+    })
+  ];
+  const result = replaceArrowColumns(
+    input,
+    [
+      {as: 'x', expression: parseSQLExpression('increment(x)')},
+      {as: 'text', expression: 'x'}
+    ],
+    {functions}
+  );
+  expect(result.schema.fields.map(field => field.name)).toEqual(['x', 'text']);
+  expect([...result.getChild('x')!]).toEqual([2, null, 4, 5, 6]);
+  expect([...result.getChild('text')!]).toEqual([1, null, 3, 4, 5]);
+  expect([...input.getChild('x')!]).toEqual([1, null, 3, 4, 5]);
+  expect(() => replaceArrowColumns(input, [{as: 'missing', expression: 'x'}])).toThrow(
+    'Unknown Arrow replacement column: missing'
+  );
+});
+
+test('Arrow replacements retain sliced batch offsets and parent validity', () => {
+  const original = table().batches[0]!;
+  const data = makeData({
+    type: original.data.type,
+    length: original.numRows,
+    children: original.data.children,
+    nullCount: 1,
+    nullBitmap: new Uint8Array([0b101])
+  }).slice(1, 2);
+  // RecordBatch normalizes parent metadata, so install the sliced struct explicitly.
+  const batch = Object.assign(new RecordBatch(original.schema, data), {data});
+  const input = new Table(original.schema, [batch]);
+  const result = replaceArrowColumns(input, [{as: 'x', expression: 'x + 1'}]);
+  const replaced = result.batches[0]!;
+  expect(replaced.data.offset).toBe(1);
+  expect(replaced.data.nullBitmap).toBe(data.nullBitmap);
+  expect(replaced.nullCount).toBe(1);
+  expect(replaced.get(0)).toBeNull();
+  expect(replaced.get(1)?.x).toBe(4);
+  expect(replaced.data.children[1]).toBe(data.children[1]);
+});
+
+test('Arrow replacements keep every chunk of a vector kernel result', () => {
+  const input = table().slice(1, 3);
+  const type = new FixedSizeList(2, new Field('item', new Int32()));
+  const functions = [
+    {
+      name: 'pairs',
+      prototypes: [
+        {
+          arguments: [],
+          result: new Field('pair', type),
+          evaluate: () => vectorFromArray([[1, 2]], type).concat(vectorFromArray([[3, 4]], type))
+        }
+      ]
+    }
+  ];
+  const result = replaceArrowColumns(input, [{as: 'x', expression: 'pairs()'}], {functions});
+  expect(result.batches.map(batch => batch.data.offset)).toEqual([
+    input.batches[0]!.data.offset,
+    input.batches[0]!.data.offset + 1
+  ]);
+  expect([...result.getChild('x')!].map(value => [...value])).toEqual([
+    [1, 2],
+    [3, 4]
+  ]);
+  expect([...result.getChild('text')!]).toEqual([null, 'é']);
 });

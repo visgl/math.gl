@@ -205,6 +205,20 @@ This optional subpath does not add Arrow to core imports. Function declaration t
 from runtime bundles. Application function libraries are included only when imported.
 
 
+## Replace Arrow columns
+
+`replaceArrowColumns(table, replacements, {functions})` returns a table with computed
+columns in their original positions. Each replacement has an `as` field naming an
+existing column and an `expression` field. Use each name at most once. All expressions
+read the original table. The computed field supplies the output type and metadata.
+
+In SQL, write an explicit select list and alias the expression to the desired column
+name. For a table with `id` and `value` columns:
+
+```sql
+SELECT id, value + 1 AS value FROM data
+```
+
 ## Whole-table evaluation
 
 `compiled.evaluateTable(arrowTable, {activeRows?, signal?})` evaluates the table's batches in order and
