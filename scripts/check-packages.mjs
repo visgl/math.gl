@@ -38,8 +38,8 @@ for (const name of expected) {
     const imported = await import(specifier);
     const required = require(specifier);
     if (specifier === '@math.gl/arrow/expressions') {
-      assert.equal(imported.isArrowEvaluationError(new required.ArrowEvaluationError('domain', 'cross-bundle')), true);
-      assert.equal(required.isArrowEvaluationError(new imported.ArrowEvaluationError('overflow', 'cross-bundle')), true);
+      assert.equal(imported.isExpressionEvaluationError(new required.ExpressionEvaluationError('domain', 'cross-bundle')), true);
+      assert.equal(required.isExpressionEvaluationError(new imported.ExpressionEvaluationError('overflow', 'cross-bundle')), true);
       assert.equal('ArrowFunctionRegistry' in imported, false);
       assert.equal('ArrowFunctionRegistry' in required, false);
     }
@@ -49,6 +49,14 @@ for (const name of expected) {
         assert.equal(math.SIN.name, 'SIN');
         assert.equal(math.ROUND.prototypes.find(p => p.arguments[0].type.toString() === 'Float64').evaluateScalar(-1.5), -2);
       }
+    }
+    if (specifier === '@math.gl/core/expressions') {
+      for (const expressions of [imported, required]) {
+        expressions.validateExpressionAST({type:'Identifier',name:'x'});
+        assert.deepEqual(expressions.getExpressionColumns({type:'Identifier',name:'x'}), ['x']);
+        assert.equal(expressions.NUMERIC_FUNCTION_DEFINITIONS.SIN.prototypes.length, 11);
+      }
+      assert.equal(imported.isExpressionEvaluationError(new required.ExpressionEvaluationError('domain','cross-bundle')), true);
     }
     if (specifier === '@math.gl/core') {
       assert.equal('parseSQLQuery' in imported, false);

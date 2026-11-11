@@ -20,38 +20,39 @@ import {
   makeData,
   makeVector
 } from 'apache-arrow';
+import {NUMERIC_FUNCTION_DEFINITIONS, type ExpressionNumericType} from '@math.gl/core/expressions';
 import {ColumnReader, createValueValidator} from '../expressions/buffers';
-import {ArrowEvaluationError, isArrowEvaluationError} from '../expressions/errors';
+import {ExpressionEvaluationError, isExpressionEvaluationError} from '@math.gl/core/expressions';
 import {float16Values, roundFloat16} from '../expressions/float16';
 import type {ArrowTableFunction, ArrowExpressionValue} from '../expressions/types';
 
 type Numeric = number | bigint;
 type Operation = (x: Numeric, y: Numeric) => Numeric;
-const types = [
-  new Int8(),
-  new Int16(),
-  new Int32(),
-  new Int64(),
-  new Uint8(),
-  new Uint16(),
-  new Uint32(),
-  new Uint64(),
-  new Float16(),
-  new Float32(),
-  new Float64()
-];
+const types: Record<ExpressionNumericType, DataType> = {
+  int8: new Int8(),
+  int16: new Int16(),
+  int32: new Int32(),
+  int64: new Int64(),
+  uint8: new Uint8(),
+  uint16: new Uint16(),
+  uint32: new Uint32(),
+  uint64: new Uint64(),
+  float16: new Float16(),
+  float32: new Float32(),
+  float64: new Float64()
+};
 
 /** Internal declaration builder; public declarations take explicit numeric arguments. */
 function declaration(
-  name: string,
-  operation: Operation,
-  arity = 1,
-  preserveInteger = false
+  name: keyof typeof NUMERIC_FUNCTION_DEFINITIONS,
+  operation: Operation
 ): ArrowTableFunction {
   return {
     name,
-    prototypes: types.map(input => {
-      const output = DataType.isInt(input) && !preserveInteger ? new Float64() : input;
+    prototypes: NUMERIC_FUNCTION_DEFINITIONS[name].prototypes.map(prototype => {
+      const input = types[prototype.arguments[0]!];
+      const output = types[prototype.result];
+      const arity = prototype.arguments.length;
       const validate = DataType.isInt(output) ? createValueValidator(output) : undefined;
       let half: ((value: number) => number) | undefined;
       function run(values: readonly ArrowExpressionValue[]): Numeric | null {
@@ -71,7 +72,7 @@ function declaration(
             value => typeof value === 'bigint' || Number.isFinite(value)
           );
           if (finiteInputs && !Number.isFinite(result))
-            throw new ArrowEvaluationError(
+            throw new ExpressionEvaluationError(
               Number.isNaN(result) ? 'domain' : 'overflow',
               `${name}: result outside ${output}`
             );
@@ -79,7 +80,7 @@ function declaration(
             Number.isNaN(result) &&
             !values.some(value => typeof value === 'number' && Number.isNaN(value))
           )
-            throw new ArrowEvaluationError('domain', `${name}: invalid argument`);
+            throw new ExpressionEvaluationError('domain', `${name}: invalid argument`);
         }
         validate?.(result);
         return result;
@@ -108,7 +109,7 @@ function declaration(
             try {
               value = run(values);
             } catch (error) {
-              if (!reportError || !isArrowEvaluationError(error)) throw error;
+              if (!reportError || !isExpressionEvaluationError(error)) throw error;
               reportError(row, error);
               continue;
             }
@@ -133,7 +134,7 @@ function declaration(
   };
 }
 function domain(condition: boolean, name: string): void {
-  if (condition) throw new ArrowEvaluationError('domain', `${name}: invalid argument`);
+  if (condition) throw new ExpressionEvaluationError('domain', `${name}: invalid argument`);
 }
 function rounded(x: number): number {
   if (Number.isInteger(x)) return x;
@@ -142,46 +143,28 @@ function rounded(x: number): number {
 }
 
 /** Absolute value, preserving the argument type and checking integer overflow. */
-export const ABS: ArrowTableFunction = /* @__PURE__ */ declaration(
-  'ABS',
-  x => (typeof x === 'bigint' ? (x < 0n ? -x : x) : Math.abs(x)),
-  1,
-  true
+export const ABS: ArrowTableFunction = /* @__PURE__ */ declaration('ABS', x =>
+  typeof x === 'bigint' ? (x < 0n ? -x : x) : Math.abs(x)
 );
 /** Sign (-1, 0, 1), preserving the argument type. */
-export const SIGN: ArrowTableFunction = /* @__PURE__ */ declaration(
-  'SIGN',
-  x => (typeof x === 'bigint' ? (x < 0n ? -1n : x > 0n ? 1n : 0n) : Math.sign(x)),
-  1,
-  true
+export const SIGN: ArrowTableFunction = /* @__PURE__ */ declaration('SIGN', x =>
+  typeof x === 'bigint' ? (x < 0n ? -1n : x > 0n ? 1n : 0n) : Math.sign(x)
 );
 /** Round toward negative infinity. */
-export const FLOOR: ArrowTableFunction = /* @__PURE__ */ declaration(
-  'FLOOR',
-  x => (typeof x === 'bigint' ? x : Math.floor(x)),
-  1,
-  true
+export const FLOOR: ArrowTableFunction = /* @__PURE__ */ declaration('FLOOR', x =>
+  typeof x === 'bigint' ? x : Math.floor(x)
 );
 /** Round toward positive infinity. */
-export const CEILING: ArrowTableFunction = /* @__PURE__ */ declaration(
-  'CEILING',
-  x => (typeof x === 'bigint' ? x : Math.ceil(x)),
-  1,
-  true
+export const CEILING: ArrowTableFunction = /* @__PURE__ */ declaration('CEILING', x =>
+  typeof x === 'bigint' ? x : Math.ceil(x)
 );
 /** Round to the nearest integer, with ties away from zero. */
-export const ROUND: ArrowTableFunction = /* @__PURE__ */ declaration(
-  'ROUND',
-  x => (typeof x === 'bigint' ? x : rounded(x)),
-  1,
-  true
+export const ROUND: ArrowTableFunction = /* @__PURE__ */ declaration('ROUND', x =>
+  typeof x === 'bigint' ? x : rounded(x)
 );
 /** Truncate toward zero. */
-export const TRUNC: ArrowTableFunction = /* @__PURE__ */ declaration(
-  'TRUNC',
-  x => (typeof x === 'bigint' ? x : Math.trunc(x)),
-  1,
-  true
+export const TRUNC: ArrowTableFunction = /* @__PURE__ */ declaration('TRUNC', x =>
+  typeof x === 'bigint' ? x : Math.trunc(x)
 );
 /** Square root; negative arguments raise a domain error. */
 export const SQRT: ArrowTableFunction = /* @__PURE__ */ declaration('SQRT', x => {
@@ -189,19 +172,15 @@ export const SQRT: ArrowTableFunction = /* @__PURE__ */ declaration('SQRT', x =>
   return Math.sqrt(Number(x));
 });
 /** Exponentiation; negative bases require integral exponents. */
-export const POWER: ArrowTableFunction = /* @__PURE__ */ declaration(
-  'POWER',
-  (x, y) => {
-    domain(
-      ((x === 0 || x === 0n) && y < 0) || (x < 0 && typeof y !== 'bigint' && !Number.isInteger(y)),
-      'POWER'
-    );
-    // Preserve parity when a bigint exponent cannot be represented exactly as a number.
-    if (x < 0 && typeof y === 'bigint') return (y % 2n ? -1 : 1) * Math.pow(-Number(x), Number(y));
-    return Math.pow(Number(x), Number(y));
-  },
-  2
-);
+export const POWER: ArrowTableFunction = /* @__PURE__ */ declaration('POWER', (x, y) => {
+  domain(
+    ((x === 0 || x === 0n) && y < 0) || (x < 0 && typeof y !== 'bigint' && !Number.isInteger(y)),
+    'POWER'
+  );
+  // Preserve parity when a bigint exponent cannot be represented exactly as a number.
+  if (x < 0 && typeof y === 'bigint') return (y % 2n ? -1 : 1) * Math.pow(-Number(x), Number(y));
+  return Math.pow(Number(x), Number(y));
+});
 /** Natural exponential. */
 export const EXP: ArrowTableFunction = /* @__PURE__ */ declaration('EXP', x => Math.exp(Number(x)));
 /** Natural logarithm; arguments must be positive. */
@@ -235,10 +214,8 @@ export const ATAN: ArrowTableFunction = /* @__PURE__ */ declaration('ATAN', x =>
   Math.atan(Number(x))
 );
 /** Angle of (x, y) in radians, with arguments ordered (y, x). */
-export const ATAN2: ArrowTableFunction = /* @__PURE__ */ declaration(
-  'ATAN2',
-  (y, x) => Math.atan2(Number(y), Number(x)),
-  2
+export const ATAN2: ArrowTableFunction = /* @__PURE__ */ declaration('ATAN2', (y, x) =>
+  Math.atan2(Number(y), Number(x))
 );
 /** Convert radians to degrees. */
 export const DEGREES: ArrowTableFunction = /* @__PURE__ */ declaration(
@@ -251,13 +228,8 @@ export const RADIANS: ArrowTableFunction = /* @__PURE__ */ declaration(
   x => Number(x) * (Math.PI / 180)
 );
 /** Remainder with the dividend's sign; a zero divisor raises divisionByZero. */
-export const MOD: ArrowTableFunction = /* @__PURE__ */ declaration(
-  'MOD',
-  (x, y) => {
-    if (y === 0 || y === 0n)
-      throw new ArrowEvaluationError('divisionByZero', 'MOD: division by zero');
-    return typeof x === 'bigint' && typeof y === 'bigint' ? x % y : Number(x) % Number(y);
-  },
-  2,
-  true
-);
+export const MOD: ArrowTableFunction = /* @__PURE__ */ declaration('MOD', (x, y) => {
+  if (y === 0 || y === 0n)
+    throw new ExpressionEvaluationError('divisionByZero', 'MOD: division by zero');
+  return typeof x === 'bigint' && typeof y === 'bigint' ? x % y : Number(x) % Number(y);
+});

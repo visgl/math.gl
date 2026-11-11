@@ -23,6 +23,7 @@ export function createFunctionLookup(
         'array_float32',
         'array_float64',
         'cast',
+        'in',
         'isNull',
         'isNotNull',
         'parseNumber',

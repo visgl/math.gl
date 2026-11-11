@@ -16,7 +16,7 @@ import {
 import {
   compileArrowExpression,
   compileArrowFunction,
-  ArrowEvaluationError,
+  ExpressionEvaluationError,
   type ArrowTableFunction,
   type ArrowTableFunctionPrototype
 } from '../src/expressions';
@@ -91,17 +91,17 @@ test('numeric data errors are classified while binding and unexpected callback e
   const table = input();
   expect(() =>
     compileArrowExpression('i / 0', {inputSchema: table.schema}).evaluateTable(table)
-  ).toThrow(ArrowEvaluationError);
+  ).toThrow(ExpressionEvaluationError);
   try {
     compileArrowExpression('cast("bad", "int32")', {inputSchema: table.schema}).evaluateTable(
       table
     );
   } catch (error) {
-    expect(error).toBeInstanceOf(ArrowEvaluationError);
-    expect((error as ArrowEvaluationError).code).toBe('conversion');
+    expect(error).toBeInstanceOf(ExpressionEvaluationError);
+    expect((error as ExpressionEvaluationError).code).toBe('conversion');
   }
   expect(() => compileArrowExpression('missing', {inputSchema: table.schema})).not.toThrow(
-    ArrowEvaluationError
+    ExpressionEvaluationError
   );
 });
 
@@ -153,8 +153,8 @@ test('numeric built-in conversions classify fractional and nonfinite Int64 error
       compileArrowExpression('toInt64(x)', {inputSchema: table.schema}).evaluateTable(table);
       throw new Error('expected failure');
     } catch (error) {
-      expect(error).toBeInstanceOf(ArrowEvaluationError);
-      expect((error as ArrowEvaluationError).code).toBe('conversion');
+      expect(error).toBeInstanceOf(ExpressionEvaluationError);
+      expect((error as ExpressionEvaluationError).code).toBe('conversion');
     }
   }
 });

@@ -18,7 +18,7 @@ import {
 import {parseSQLExpression} from '@math.gl/core/sql';
 import {
   compileArrowExpression,
-  ArrowEvaluationError,
+  ExpressionEvaluationError,
   type ArrowTableFunction
 } from '../src/expressions';
 import {SQRT, LN, MOD} from '../src/math';
@@ -60,7 +60,7 @@ test('fallback and subsequent callbacks run only on active rows and never twice'
     fallbacks: number[] = [];
   const f = custom('F', x => {
     calls.push(x);
-    if (x < 0) throw new ArrowEvaluationError('domain', 'negative');
+    if (x < 0) throw new ExpressionEvaluationError('domain', 'negative');
     return x;
   });
   const fallback = custom('G', x => {
@@ -90,7 +90,7 @@ test('fallback and subsequent callbacks run only on active rows and never twice'
 });
 test('nested TRY scopes isolate errors and fallback errors escape their own TRY', () => {
   expect([...evaluate('TRY(COALESCE(TRY(SQRT(x)), 8))')]).toEqual([2, 8, 8, 3]);
-  expect(() => evaluate('TRY(SQRT(x), LN(x))')).toThrow(ArrowEvaluationError);
+  expect(() => evaluate('TRY(SQRT(x), LN(x))')).toThrow(ExpressionEvaluationError);
   expect([...evaluate('TRY(TRY(SQRT(x), LN(x)))')]).toEqual([2, null, null, 3]);
   expect([...evaluate('TRY(SQRT(x), TRY(LN(x), 8))')]).toEqual([2, 8, null, 3]);
 });
@@ -130,7 +130,7 @@ test('reported vector errors recover individual rows without retrying a kernel',
             rows.push(row);
             const x = input!.get(row) as number;
             if (x < 0) {
-              reportError!(row, new ArrowEvaluationError('domain', 'negative'));
+              reportError!(row, new ExpressionEvaluationError('domain', 'negative'));
               continue;
             }
             values[row] = x;
@@ -143,7 +143,7 @@ test('reported vector errors recover individual rows without retrying a kernel',
   expect([...evaluate('TRY(F(x), 7)', [f])]).toEqual([4, 7, null, 9]);
   expect(batches).toBe(1);
   expect(rows).toEqual([0, 1, 3]);
-  expect(() => evaluate('F(x)', [f])).toThrow(ArrowEvaluationError);
+  expect(() => evaluate('F(x)', [f])).toThrow(ExpressionEvaluationError);
   const unexpected = {
     ...f,
     prototypes: [
@@ -175,7 +175,7 @@ test('TRY supports fixed-size results and typed conversion failures', () => {
 test('earlier scalar failures suppress later vector arguments and fixed-array cast overflow recovers', () => {
   const rows: number[] = [];
   const f = custom('F', x => {
-    if (x < 0) throw new ArrowEvaluationError('domain', 'negative');
+    if (x < 0) throw new ExpressionEvaluationError('domain', 'negative');
     return x;
   });
   const g: ArrowTableFunction = {

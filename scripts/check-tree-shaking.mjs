@@ -13,6 +13,9 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  {symbol:'getExpressionColumns', packages:['@math.gl/core/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:4000},
+  {symbol:'columnarPredicateToExpression', packages:['@math.gl/core/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:10000},
+  {symbol:'NUMERIC_FUNCTION_DEFINITIONS', packages:['@math.gl/core/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:5000},
   {symbol:'SIN',packages:['@math.gl/arrow/math'],forbidden:[/expressions\/(compiler|predicate)/,/loaders.gl/],budget:210000},
   {symbol:'COLOR_RGB',packages:['@math.gl/arrow/color'],forbidden:[/expressions\/(compiler|predicate)/,/loaders.gl/],budget:250000},
   {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /expressions\/(compiler|predicate)/], budget: 240000},

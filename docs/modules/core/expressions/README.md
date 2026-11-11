@@ -138,3 +138,5 @@ This module is adapted from the expression parser that ships in [`@deck.gl/json`
 Its evaluator uses the vendored `jsep` 1.4.0 parser (MIT), with no external runtime dependency and derives from `expression-eval` by [Don McCurdy](https://github.com/donmccurdy). Source headers and distributed license notices retain the upstream attribution.
 
 See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
+See [Portable expression AST](./portable-ast.md) for validation, column discovery, predicate normalization, numeric signatures, and backend integration.

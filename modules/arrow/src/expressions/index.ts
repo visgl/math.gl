@@ -16,7 +16,7 @@ export type {
 } from './types';
 
 export {
-  ArrowEvaluationError,
-  isArrowEvaluationError,
-  type ArrowEvaluationErrorCode
-} from './errors';
+  ExpressionEvaluationError,
+  isExpressionEvaluationError,
+  type ExpressionEvaluationErrorCode
+} from '@math.gl/core/expressions';

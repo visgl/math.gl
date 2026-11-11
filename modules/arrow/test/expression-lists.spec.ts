@@ -21,6 +21,7 @@ import {
   vectorFromArray
 } from 'apache-arrow';
 import {
+  compileArrowArray,
   compileArrowExpression,
   compileArrowFunction,
   type ArrowTableFunction
@@ -353,7 +354,7 @@ test('array type contracts reject non-list arguments, nullable tuple channels an
       inputSchema: table.schema,
       functions: [bins]
     })
-  ).toThrow('scalar literals');
+  ).toThrow('holes');
 });
 
 test('conditional variable-list literals retain dictionary broadcast semantics', () => {
@@ -457,4 +458,65 @@ test('conditionals select sliced tuple source components in logical row order', 
     [1, 2, 3, 4],
     [0, 0, 0, 1]
   ]);
+});
+
+test('AST bounds retain 4096-element source arrays and typed list arguments', () => {
+  const table = new Table({x: vectorFromArray([2], new Float64())});
+  const inputSchema = table.schema;
+  const width = 4096;
+  const packed = compileArrowArray(new Array(width).fill('x'), {inputSchema}).evaluateTable(table);
+  expect(packed.get(0)?.length).toBe(width);
+  expect(packed.get(0)?.get(width - 1)).toBe(2);
+  const list = new List(new Field('value', new Float64(), false));
+  const last: ArrowTableFunction = {
+    name: 'last',
+    prototypes: [
+      {
+        arguments: [new Field('list', list, true)],
+        result: new Field('value', new Float64(), false),
+        evaluate([input]) {
+          return vectorFromArray([input!.get(0).get(width - 1)], new Float64());
+        }
+      }
+    ]
+  };
+  const literal = {type: 'UnaryExpression', operator: '-', argument: {type: 'Literal', value: 1}};
+  const compiled = compileArrowFunction(
+    'last',
+    [{type: 'ArrayExpression', elements: new Array(width).fill(literal)}],
+    {inputSchema, functions: [last]}
+  );
+  expect([...compiled.evaluateTable(table)]).toEqual([-1]);
+});
+
+test('Arrow compilation accepts external LogicalExpression nodes', () => {
+  const table = input();
+  const expression = {
+    type: 'LogicalExpression',
+    operator: '||',
+    left: {type: 'Literal', value: false},
+    right: {type: 'Literal', value: true}
+  } as const;
+  expect([
+    ...compileArrowExpression(expression, {inputSchema: table.schema}).evaluateTable(table)
+  ]).toEqual(new Array(table.numRows).fill(true));
+});
+
+test('scalar prototypes reject nonprimitive inputs instead of exposing Arrow objects to callbacks', () => {
+  const table = input();
+  const list = new List(new Field('value', new Float64(), false));
+  const scalar: ArrowTableFunction = {
+    name: 'scalar',
+    prototypes: [
+      {
+        arguments: [new Field('items', list)],
+        result: new Field('value', new Float64()),
+        evaluate: ([items]) => items!,
+        evaluateScalar: () => 0
+      }
+    ]
+  };
+  expect(() =>
+    compileArrowExpression('scalar([1,2])', {inputSchema: table.schema, functions: [scalar]})
+  ).toThrow('Unsupported Arrow expression type');
 });

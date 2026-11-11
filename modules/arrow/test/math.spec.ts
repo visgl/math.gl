@@ -14,7 +14,7 @@ import {
   vectorFromArray
 } from 'apache-arrow';
 import * as math from '../src/math';
-import {compileArrowExpression, ArrowEvaluationError} from '../src/expressions';
+import {compileArrowExpression, ExpressionEvaluationError} from '../src/expressions';
 import {NativeFloat16ArrayConstructor} from '@math.gl/core';
 
 const functions = Object.values(math);
@@ -101,14 +101,14 @@ test('integer math preserves exact bigint values and detects overflow', () => {
     compileArrowExpression('ABS(x)', {inputSchema: minimum.schema, functions}).evaluateTable(
       minimum
     )
-  ).toThrow(ArrowEvaluationError);
+  ).toThrow(ExpressionEvaluationError);
   try {
     compileArrowExpression('ABS(x)', {inputSchema: minimum.schema, functions}).evaluateTable(
       minimum
     );
     throw new Error('expected overflow');
   } catch (error) {
-    expect((error as ArrowEvaluationError).code).toBe('overflow');
+    expect((error as ExpressionEvaluationError).code).toBe('overflow');
   }
 });
 test('math integer overflow has the documented code and untyped null calls propagate', () => {
@@ -119,8 +119,8 @@ test('math integer overflow has the documented code and untyped null calls propa
   } catch (error) {
     caught = error;
   }
-  expect(caught).toBeInstanceOf(ArrowEvaluationError);
-  expect((caught as ArrowEvaluationError).code).toBe('overflow');
+  expect(caught).toBeInstanceOf(ExpressionEvaluationError);
+  expect((caught as ExpressionEvaluationError).code).toBe('overflow');
   for (const name of ['ABS', 'SQRT'])
     expect([...evaluate(`${name}(null)`, [1]).result]).toEqual([null]);
 });
@@ -142,8 +142,8 @@ test('math throws classified domain, division and finite-input overflow errors',
     } catch (error) {
       caught = error;
     }
-    expect(caught, expression).toBeInstanceOf(ArrowEvaluationError);
-    expect((caught as ArrowEvaluationError).code, expression).toBe(
+    expect(caught, expression).toBeInstanceOf(ExpressionEvaluationError);
+    expect((caught as ExpressionEvaluationError).code, expression).toBe(
       expression.startsWith('MOD')
         ? 'divisionByZero'
         : expression.startsWith('EXP')
@@ -155,7 +155,7 @@ test('math throws classified domain, division and finite-input overflow errors',
     evaluate('EXP(x)', [100], new Float32());
     throw new Error('expected overflow');
   } catch (error) {
-    expect((error as ArrowEvaluationError).code).toBe('overflow');
+    expect((error as ExpressionEvaluationError).code).toBe('overflow');
   }
   expect([...evaluate('EXP(x)', [-1000]).result]).toEqual([0]);
   expect([...evaluate('ABS(x)', [Number.MIN_VALUE]).result]).toEqual([Number.MIN_VALUE]);
@@ -185,7 +185,7 @@ test.skipIf(!NativeFloat16ArrayConstructor)(
     expect(compiled.outputField.type).toEqual(new Float16());
     const Half = NativeFloat16ArrayConstructor!;
     expect([...result]).toEqual([...new Half([Math.sin(1)])]);
-    expect(() => evaluate('EXP(x)', [12], new Float16())).toThrow(ArrowEvaluationError);
+    expect(() => evaluate('EXP(x)', [12], new Float16())).toThrow(ExpressionEvaluationError);
   }
 );
 

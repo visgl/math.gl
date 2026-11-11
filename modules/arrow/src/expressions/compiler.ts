@@ -25,12 +25,12 @@ import {
   type Schema
 } from 'apache-arrow';
 import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '../utf8/index';
-import {parse, type Expression} from '@math.gl/core/expressions';
+import {parse, validateExpressionAST, type Expression} from '@math.gl/core/expressions';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
 import {bindCast} from './cast';
 import {float16Values, roundFloat16} from './float16';
 import {physicalKey, extensionKey} from './signature';
-import {ArrowEvaluationError, isArrowEvaluationError} from './errors';
+import {ExpressionEvaluationError, isExpressionEvaluationError} from '@math.gl/core/expressions';
 import {createFunctionLookup} from './registry';
 import {
   isTupleType,
@@ -79,7 +79,9 @@ export function compileArrowExpression(
   const fields = [...options.inputSchema.fields];
   if (new Set(fields.map(field => field.name)).size !== fields.length)
     throw new Error('Expression input field names must be unique');
-  const root = bind(parse(expression), {
+  const ast = parse(expression);
+  validateExpressionAST(ast);
+  const root = bind(ast, {
     ...options,
     functionLookup: createFunctionLookup(options.functions)
   });
@@ -329,7 +331,7 @@ function bind(ast: any, options: BindingOptions, expected?: DataType, vectorInpu
           const value = read();
           return context.failed![row] ? null : value;
         } catch (error) {
-          if (!isArrowEvaluationError(error)) throw error;
+          if (!isExpressionEvaluationError(error)) throw error;
           context.failed![row] = 1;
           return null;
         }
@@ -671,7 +673,7 @@ function bindBinary(ast: any, options: BindingOptions): Node {
           if (x === null || y === null) return null;
           if (comparison) return compare(op, x, y);
           if ((op === '/' || op === '%') && (y === 0 || y === 0n))
-            throw new ArrowEvaluationError('divisionByZero', 'Division by zero');
+            throw new ExpressionEvaluationError('divisionByZero', 'Division by zero');
           const result =
             op === '+'
               ? x + y
@@ -687,7 +689,7 @@ function bindBinary(ast: any, options: BindingOptions): Node {
           validate(result);
           const rounded = round(result);
           if (!integer && Number.isFinite(x) && Number.isFinite(y) && !Number.isFinite(rounded))
-            throw new ArrowEvaluationError('overflow', 'Floating expression overflow');
+            throw new ExpressionEvaluationError('overflow', 'Floating expression overflow');
           return rounded;
         }
       };
@@ -852,6 +854,56 @@ function bindRecovery(
   };
 }
 
+/** Binds a bounded IN list once, keeping the tested expression and casts as one subtree. */
+function bindMembership(arguments_: any[], options: BindingOptions): Node {
+  if (
+    arguments_.length < 2 ||
+    arguments_.length > 4097 ||
+    arguments_.slice(1).some(value => value.type !== 'Literal' && !isSignedLiteral(value))
+  )
+    throw new Error('IN requires a value and 1 to 4096 scalar literals');
+  const argument = bind(arguments_[0], options);
+  const utf8 = typeKey(argument.field.type) === 'utf8';
+  const literals = arguments_.slice(1).map(value => bind(value, options, argument.field.type));
+  return {
+    field: new Field(
+      'in',
+      bool,
+      argument.field.nullable || literals.some(value => value.field.nullable)
+    ),
+    hasKernel: argument.hasKernel,
+    prepare(batch, active, context) {
+      const source = argument.prepare(batch, active, context);
+      const constantMask = Uint8Array.of(1);
+      const prepared = literals.map(value => value.prepare(batch, constantMask, {}));
+      const values = new Set(prepared.map(value => value.get(0)));
+      const ranges = utf8
+        ? prepared.map(value => bytes(value, 0)).filter(range => range !== null)
+        : [];
+      return {
+        get(row) {
+          if (utf8) {
+            const value = bytes(source, row);
+            if (!value) return null;
+            if (
+              ranges.some(
+                range =>
+                  compareUTF8(value[0], value[1], value[2], range[0], range[1], range[2]) === 0
+              )
+            )
+              return true;
+          } else {
+            const value = source.get(row);
+            if (value === null) return null;
+            if (!Number.isNaN(value) && values.has(value)) return true;
+          }
+          return values.has(null) ? null : false;
+        }
+      };
+    }
+  };
+}
+
 /** Binds built-ins and custom functions, materializing arguments only for vector kernels. */
 function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node {
   if (ast.callee.type !== 'Identifier')
@@ -940,10 +992,10 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
               const value = Number(rowValues[column]);
               output[index] = value;
               if (Number.isFinite(value) && !Number.isFinite(output[index]))
-                throw new ArrowEvaluationError('overflow', 'ARRAY cast overflow');
+                throw new ExpressionEvaluationError('overflow', 'ARRAY cast overflow');
             }
           } catch (error) {
-            if (!context.failed || !isArrowEvaluationError(error)) throw error;
+            if (!context.failed || !isExpressionEvaluationError(error)) throw error;
             context.failed[row] = 1;
             output.fill(0, row * values.length, (row + 1) * values.length);
             continue;
@@ -954,6 +1006,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
       }
     };
   }
+  if (name === 'in') return bindMembership(ast.arguments, options);
   if (name === 'cast') {
     if (ast.arguments.length !== 2 || ast.arguments[1]?.type !== 'Literal')
       throw new Error('cast requires a value and a literal scalar target');
@@ -1006,7 +1059,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
               const value = child.get(row);
               if (value === null) return null;
               if (name === 'toInt64' && typeof value === 'number' && !Number.isInteger(value))
-                throw new ArrowEvaluationError(
+                throw new ExpressionEvaluationError(
                   'conversion',
                   'Int64 conversion requires a finite integer'
                 );
@@ -1146,6 +1199,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
   const tuple = isTupleType(result.type);
   if (tuple && declaration.evaluateScalar)
     throw new Error('Fixed-size list results require a vector-only function');
+  if (declaration.evaluateScalar) for (const argument of arguments_) typeKey(argument.field.type);
   if (!tuple) typeKey(result.type);
   const validate = tuple ? undefined : createValueValidator(result.type);
   const round = tuple ? undefined : roundToType(result.type);
@@ -1198,7 +1252,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
             reportError(row, error) {
               if (!Number.isInteger(row) || row < 0 || row >= active.length || !mask[row])
                 throw new Error('Kernel reported an inactive or invalid row');
-              if (!context.failed || !isArrowEvaluationError(error)) throw error;
+              if (!context.failed || !isExpressionEvaluationError(error)) throw error;
               context.failed[row] = 1;
               mask[row] = 0;
             }

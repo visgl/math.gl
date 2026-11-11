@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) 2013 Stephen Oney
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileComment: Extended types for portable AST inputs, including bigint literals and logical nodes.
 
 declare namespace jsep {
-		export type baseTypes = string | number | boolean | RegExp | null | undefined | object;
+		export type baseTypes = string | number | bigint | boolean | RegExp | null | undefined | object;
 		export interface Expression {
 			type: string;
 			[key: string]: baseTypes | Expression | Array<baseTypes | Expression>;
@@ -17,6 +19,14 @@ declare namespace jsep {
 		export interface BinaryExpression extends Expression {
 			type: 'BinaryExpression';
 			operator: string;
+			left: Expression;
+			right: Expression;
+		}
+
+		/** Logical node shape accepted from external expression AST producers. */
+		export interface LogicalExpression extends Expression {
+			type: 'LogicalExpression';
+			operator: '&&' | '||';
 			left: Expression;
 			right: Expression;
 		}
@@ -51,8 +61,8 @@ declare namespace jsep {
 
 		export interface Literal extends Expression {
 			type: 'Literal';
-			value: boolean | number | string | RegExp | null;
-			raw: string;
+			value: boolean | number | bigint | string | RegExp | null;
+			raw?: string;
 		}
 
 		export interface MemberExpression extends Expression {
@@ -71,7 +81,7 @@ declare namespace jsep {
 			type: 'UnaryExpression';
 			operator: string;
 			argument: Expression;
-			prefix: boolean;
+			prefix?: boolean;
 		}
 
 		export type ExpressionType =
@@ -85,11 +95,13 @@ declare namespace jsep {
 			| 'UnaryExpression'
 			| 'BinaryExpression'
 			| 'ConditionalExpression'
+			| 'LogicalExpression'
 			| 'ArrayExpression';
 
 		export type CoreExpression =
 			ArrayExpression
 			| BinaryExpression
+			| LogicalExpression
 			| CallExpression
 			| Compound
 			| SequenceExpression

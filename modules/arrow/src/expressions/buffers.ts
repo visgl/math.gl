@@ -4,7 +4,7 @@
 
 import {DataType, Precision, type Vector, type Data} from 'apache-arrow';
 import {float16Values, requireFloat16} from './float16';
-import {ArrowEvaluationError} from './errors';
+import {ExpressionEvaluationError} from '@math.gl/core/expressions';
 import type {ArrowExpressionValue} from './types';
 
 /** Dictionary encodings do not change expression value types. */
@@ -107,20 +107,22 @@ export function createValueValidator(inputType: DataType): (value: ArrowExpressi
         if (value === null) return;
         if (typeof value !== 'bigint') throw new Error('64-bit integers require bigint values');
         if (value < min || value > max)
-          throw new ArrowEvaluationError('overflow', 'Integer expression overflow');
+          throw new ExpressionEvaluationError('overflow', 'Integer expression overflow');
       };
     }
     const min = type.isSigned ? -(2 ** (type.bitWidth - 1)) : 0;
     const max = type.isSigned ? 2 ** (type.bitWidth - 1) - 1 : 2 ** type.bitWidth - 1;
     return value => {
       if (value === null) return;
-      if (typeof value !== 'number' || !Number.isInteger(value))
-        throw new ArrowEvaluationError(
+      if (typeof value !== 'number')
+        throw new TypeError('Integer expressions require numeric values');
+      if (!Number.isInteger(value))
+        throw new ExpressionEvaluationError(
           'conversion',
           'Integer expression requires integral numbers'
         );
       if (value < min || value > max)
-        throw new ArrowEvaluationError('overflow', 'Integer expression overflow');
+        throw new ExpressionEvaluationError('overflow', 'Integer expression overflow');
     };
   }
   const expected = DataType.isFloat(type) ? 'number' : key === 'bool' ? 'boolean' : 'string';
