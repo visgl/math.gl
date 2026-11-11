@@ -136,7 +136,7 @@ async function evaluateArrayAsync(
   list: JsepTypes.Expression[],
   context: ExpressionContext
 ): Promise<unknown[]> {
-  return await Promise.all(list.map(value => evaluateAsync(value, context)));
+  return await Promise.all(list.map(value => evaluateExpressionAsync(value, context)));
 }
 
 /** Resolves a member expression and preserves its receiver for method calls. */
@@ -161,9 +161,9 @@ async function evaluateMemberAsync(
   node: JsepTypes.MemberExpression,
   context: ExpressionContext
 ): Promise<[Record<string, unknown>, unknown]> {
-  const object = (await evaluateAsync(node.object, context)) as Record<string, unknown>;
+  const object = (await evaluateExpressionAsync(node.object, context)) as Record<string, unknown>;
   const key = node.computed
-    ? ((await evaluateAsync(node.property, context)) as string)
+    ? ((await evaluateExpressionAsync(node.property, context)) as string)
     : (node.property as JsepTypes.Identifier).name;
 
   if (/^__proto__|prototype|constructor$/.test(key)) {
