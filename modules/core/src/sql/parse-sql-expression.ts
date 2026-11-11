@@ -56,9 +56,24 @@ export function sqlCastType(name: string): ColumnarScalarType {
   }
 }
 
+/** Optional syntax for callers with their own SQL name resolution and parameter binding. */
+export type SQLExpressionParserOptions = Readonly<{
+  /** Emits a non-computed member expression for a qualified column. */
+  qualifiedColumns?: boolean;
+  /** Supplies the AST for a named parameter such as :minimum. */
+  parseParameter?: (name: string) => Expression;
+  /** Accepts COUNT(*) and represents the wildcard as an identifier argument. */
+  countWildcard?: boolean;
+  /** Skips SQL line comments between tokens. */
+  lineComments?: boolean;
+}>;
+
 /** Parses bounded SQL expressions into the shared expression AST. */
-export function parseSQLExpression(source: string): Expression {
-  const reader = new SQLExpressionReader(source);
+export function parseSQLExpression(
+  source: string,
+  options?: SQLExpressionParserOptions
+): Expression {
+  const reader = new SQLExpressionReader(source, options);
   const expression = reader.expression();
   reader.space();
   if (reader.position !== source.length) throw new Error('Unexpected token after SQL expression');
@@ -70,13 +85,15 @@ export class SQLExpressionReader {
   position = 0;
   private tokens = 0;
   private readonly depths = new WeakMap<object, number>();
-  constructor(readonly source: string) {
+  constructor(
+    readonly source: string,
+    private readonly options: SQLExpressionParserOptions = {}
+  ) {
     if (typeof source !== 'string' || !source.trim() || source.length > 65536)
       throw new Error('SQL expression requires non-empty input of at most 65536 characters');
   }
   space(): void {
-    while (this.position < this.source.length && /\s/.test(this.source[this.position]!))
-      this.position++;
+    this.position = skipSQLWhitespace(this.source, this.position, this.options.lineComments);
     if (this.source.startsWith('--', this.position) || this.source.startsWith('/*', this.position))
       throw new Error('SQL comments are not supported.');
   }
@@ -276,6 +293,13 @@ export class SQLExpressionReader {
       return alternate;
     }
     this.space();
+    if (this.options.parseParameter && this.source[this.position] === ':') {
+      const parameter = /^:([A-Za-z_][A-Za-z0-9_]*)/.exec(this.source.slice(this.position));
+      if (!parameter) throw new Error('SQL expression requires a named parameter after colon');
+      this.position += parameter[0].length;
+      this.token();
+      return this.node(this.options.parseParameter(parameter[1]!));
+    }
     const quote = this.source[this.position];
     if (quote === '"' || quote === "'") {
       this.position++;
@@ -327,8 +351,32 @@ export class SQLExpressionReader {
     return this.identifier(identifier[0], depth, true);
   }
   private identifier(name: string, depth: number, fold: boolean): Expression {
+    if (this.options.qualifiedColumns && this.take('.')) {
+      this.space();
+      const column = /^(?:"((?:[^"]|"")+)"|([A-Za-z_][A-Za-z0-9_]*))/.exec(
+        this.source.slice(this.position)
+      );
+      if (!column || (column[2] && SQL_RESERVED_WORDS.has(column[2].toUpperCase()))) {
+        throw new Error('SQL qualified column requires a column identifier');
+      }
+      this.position += column[0].length;
+      this.token();
+      const property = this.node({
+        type: 'Identifier',
+        name: column[1]?.replace(/""/g, '"') ?? column[2]
+      });
+      const object = this.node({type: 'Identifier', name});
+      return this.node({type: 'MemberExpression', computed: false, object, property}, [
+        object,
+        property
+      ]);
+    }
     if (!this.take('(')) return this.node({type: 'Identifier', name});
     const args: Expression[] = [];
+    if (this.options.countWildcard && fold && name.toUpperCase() === 'COUNT' && this.take('*')) {
+      this.symbol(')');
+      return this.call(name, [this.node({type: 'Identifier', name: '*'})], true);
+    }
     if (!this.take(')')) {
       do {
         args.push(this.expression(depth + 1));
@@ -340,4 +388,15 @@ export class SQLExpressionReader {
   private token(): void {
     if (++this.tokens > 4096) throw new Error('SQL expression exceeds token limit');
   }
+}
+
+/** Skips trivia shared by the statement and expression readers. */
+export function skipSQLWhitespace(source: string, position: number, lineComments = false): number {
+  while (position < source.length) {
+    if (/\s/.test(source[position]!)) position++;
+    else if (lineComments && source.startsWith('--', position)) {
+      while (position < source.length && !/[\r\n]/.test(source[position]!)) position++;
+    } else break;
+  }
+  return position;
 }

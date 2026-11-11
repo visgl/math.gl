@@ -3,7 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {Expression} from '../expressions/index';
-import {SQLExpressionReader, SQL_RESERVED_WORDS} from './parse-sql-expression';
+import {
+  SQLExpressionReader,
+  SQL_RESERVED_WORDS,
+  skipSQLWhitespace,
+  type SQLExpressionParserOptions
+} from './parse-sql-expression';
 import type {ColumnarPredicate} from '../expressions/columnar-predicate';
 import type {TableQuery, TableSelection, TableReference} from './query-types';
 
@@ -81,7 +86,10 @@ export class SQLQueryReader {
   private tokens = 0;
 
   /** Rejects empty or oversized statements before scanning. */
-  constructor(sql: string) {
+  constructor(
+    sql: string,
+    private readonly expressionOptions?: SQLExpressionParserOptions
+  ) {
     if (typeof sql !== 'string' || !sql.trim() || sql.length > MAXIMUM_SQL_LENGTH)
       throw new Error('SQL query requires a non-empty statement of at most 65536 characters.');
     this.sql = sql;
@@ -96,7 +104,7 @@ export class SQLQueryReader {
   selectionExpression(): Expression {
     this.skipWhitespace();
     this.countToken();
-    const reader = new SQLExpressionReader(this.sql.slice(this.position));
+    const reader = new SQLExpressionReader(this.sql.slice(this.position), this.expressionOptions);
     const expression = reader.expression();
     this.position += reader.position;
     return expression;
@@ -124,6 +132,20 @@ export class SQLQueryReader {
     this.position++;
     this.countToken();
     return true;
+  }
+
+  /** Reads an implicit alias unless the next token starts a clause. */
+  optionalAlias(): string | undefined {
+    this.skipWhitespace();
+    if (this.sql[this.position] === '"') return this.identifier();
+    const name = /^[A-Za-z_][A-Za-z0-9_]*/.exec(this.sql.slice(this.position))?.[0];
+    if (
+      name &&
+      !SQL_RESERVED_WORDS.has(name.toUpperCase()) &&
+      !/^(INNER|LEFT|RIGHT|FULL|CROSS|OUTER|SEMI|ANTI|ON)$/i.test(name)
+    )
+      return this.identifier();
+    return undefined;
   }
 
   /** Reads one literal identifier, including doubled double-quote escapes. */
@@ -222,7 +244,11 @@ export class SQLQueryReader {
 
   /** Skips whitespace without altering quoted identifiers. */
   private skipWhitespace(): void {
-    while (this.position < this.sql.length && /\s/.test(this.sql[this.position])) this.position++;
+    this.position = skipSQLWhitespace(
+      this.sql,
+      this.position,
+      this.expressionOptions?.lineComments
+    );
   }
 
   /** Bounds large projection lists independently of predicate parsing. */
