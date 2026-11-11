@@ -456,3 +456,49 @@ byte tuple with zero padding. `TRY` can recover row conversion errors.
 Arrow stores the bytes without normalized interpretation. A GPU consumer can bind a four-byte
 result as `unorm8x4` to read channels as normalized floats. The existing `COLOR_TO_RGBA8`
 helper remains the RGBA-specific, clamping conversion.
+
+## Scalar aggregates
+
+Compile named reductions against a schema, then update the same accumulator as Arrow batches
+arrive. Each call to `result()` returns a snapshot of the current scalar values.
+
+```ts
+import {compileArrowAggregates} from '@math.gl/arrow/expressions';
+
+const plan = compileArrowAggregates({
+  rows: {operation: 'COUNT'},
+  revenue: {operation: 'SUM', expression: 'price * quantity'},
+  average: {operation: 'AVG', expression: 'price * quantity'}
+}, {inputSchema: schema});
+
+const state = plan.createAccumulator();
+for await (const batch of batches) {
+  state.update(batch);
+  console.log(state.result());
+}
+```
+
+Use `plan.evaluate(table)` for a complete Arrow table or `await plan.evaluateInBatches(batches)`
+for the final result of a stream. Use `state.merge(partial)` to add another accumulator from the
+same plan. Repeated expression strings or shared AST objects are evaluated once per batch.
+`SUM` and `AVG` share a sum and non-null count, so batches contribute in proportion to their
+valid row counts.
+
+| Operation | Input | Result |
+| --- | --- | --- |
+| `COUNT` | Omit the expression for all rows, or provide an expression to count non-null values | Exact `bigint` |
+| `SUM` | Numeric | Exact `bigint` for integer input, otherwise a Float64 number |
+| `AVG` | Numeric | Float64 number |
+| `MIN`, `MAX` | Numeric or UTF-8 | Input scalar type, with binary ordering for UTF-8 |
+| `EVERY`, `BOOL_AND`, `BOOL_OR` | Boolean | Boolean |
+| `BIT_AND`, `BIT_OR`, `BIT_XOR` | Integer | Number for up to 32 bits, `bigint` for 64 bits |
+
+All expression forms skip nulls. Empty or all-null input yields `0n` for counts and `null` for
+other reductions. Floating sums and averages use Float64 arithmetic, so rounding can vary with
+batch boundaries and merge order. IEEE infinities and NaNs can propagate. Integer averages
+convert the exact sum and count to Float64 before dividing.
+
+A running aggregate may change when a batch arrives. If you use it to compute another output
+such as a row's share of the total, wait for the final result or recompute that output when its
+aggregate changes. This API produces scalar results through Arrow expressions. SQL aggregate
+syntax and query planning are separate integration work.
