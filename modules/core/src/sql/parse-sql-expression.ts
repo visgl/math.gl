@@ -106,7 +106,7 @@ export class SQLExpressionReader {
     this.token();
     return true;
   }
-  private take(symbol: string): boolean {
+  protected take(symbol: string): boolean {
     this.space();
     if (!this.source.startsWith(symbol, this.position)) return false;
     this.position += symbol.length;
@@ -116,7 +116,7 @@ export class SQLExpressionReader {
   symbol(symbol: string): void {
     if (!this.take(symbol)) throw this.error(`SQL expression expected ${symbol}`);
   }
-  private node(value: object, children: Expression[] = []): Expression {
+  protected node(value: object, children: Expression[] = []): Expression {
     const depth = children.length
       ? 1 + Math.max(...children.map(child => this.depths.get(child) || 0))
       : 0;
@@ -293,6 +293,8 @@ export class SQLExpressionReader {
     }
     this.space();
     const start = this.position;
+    const extended = this.extendedPrimary();
+    if (extended) return extended;
     const quote = this.source[this.position];
     if (quote === '"' || quote === "'") {
       this.position++;
@@ -345,8 +347,15 @@ export class SQLExpressionReader {
     return this.identifier(identifier[0], depth, true);
   }
   private identifier(name: string, depth: number, fold: boolean): Expression {
+    const qualified = this.qualifiedIdentifier(name);
+    if (qualified) return qualified;
     if (!this.take('(')) return this.node({type: 'Identifier', name});
     const args: Expression[] = [];
+    const wildcard = fold && this.wildcardArgument(name);
+    if (wildcard) {
+      this.symbol(')');
+      return this.call(name, [wildcard], true);
+    }
     if (!this.take(')')) {
       do {
         args.push(this.expression(depth + 1));
@@ -355,7 +364,16 @@ export class SQLExpressionReader {
     }
     return this.call(name, args, fold);
   }
-  private token(): void {
+  protected extendedPrimary(): Expression | undefined {
+    return undefined;
+  }
+  protected qualifiedIdentifier(_name: string): Expression | undefined {
+    return undefined;
+  }
+  protected wildcardArgument(_name: string): Expression | undefined {
+    return undefined;
+  }
+  protected token(): void {
     if (++this.tokens > 4096) throw this.error('SQL expression exceeds token limit');
   }
 }

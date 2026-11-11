@@ -61,34 +61,22 @@ export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}
     if (!where || typeof where !== 'object' || Array.isArray(where))
       throw reader.error('SQL WHERE parser must return a predicate.');
   }
-  let limit: number | undefined;
-  let offset: number | undefined;
-  while (true) {
-    if (reader.takeKeyword('LIMIT')) {
-      if (limit !== undefined) throw reader.error('Duplicate SQL LIMIT clause.');
-      limit = reader.rowCount('LIMIT');
-    } else if (reader.takeKeyword('OFFSET')) {
-      if (offset !== undefined) throw reader.error('Duplicate SQL OFFSET clause.');
-      offset = reader.rowCount('OFFSET');
-      if (!reader.takeKeyword('ROWS')) reader.takeKeyword('ROW');
-    } else break;
-  }
+  const pagination = reader.pagination();
   reader.end();
   return {
     ...(select ? {select} : {}),
     ...(from === undefined ? {} : {from}),
     ...(where ? {where} : {}),
-    ...(offset === undefined ? {} : {offset}),
-    ...(limit === undefined ? {} : {limit})
+    ...pagination
   };
 }
 
 /** Small bounded scanner shared by structural and predicate-enabled SELECT parsing. */
 export class SQLQueryReader {
   /** Original SQL, retained for exact WHERE substring extraction. */
-  private readonly sql: string;
+  protected readonly sql: string;
   /** Current character offset. */
-  private position = 0;
+  protected position = 0;
   /** Number of consumed structural tokens. */
   private tokens = 0;
 
@@ -112,7 +100,7 @@ export class SQLQueryReader {
   selectionExpression(): Expression {
     this.skipWhitespace();
     this.countToken();
-    const reader = new SQLExpressionReader(this.sql, this.position);
+    const reader = this.expressionReader();
     const expression = reader.expression();
     this.position = reader.position;
     return expression;
@@ -247,8 +235,28 @@ export class SQLQueryReader {
     );
   }
 
+  /** Reads optional LIMIT and OFFSET in either order. */
+  pagination(): Pick<TableQuery, 'limit' | 'offset'> {
+    let limit: number | undefined;
+    let offset: number | undefined;
+    while (true) {
+      if (this.takeKeyword('LIMIT')) {
+        if (limit !== undefined) throw this.error('Duplicate SQL LIMIT clause.');
+        limit = this.rowCount('LIMIT');
+      } else if (this.takeKeyword('OFFSET')) {
+        if (offset !== undefined) throw this.error('Duplicate SQL OFFSET clause.');
+        offset = this.rowCount('OFFSET');
+        if (!this.takeKeyword('ROWS')) this.takeKeyword('ROW');
+      } else break;
+    }
+    return {
+      ...(offset === undefined ? {} : {offset}),
+      ...(limit === undefined ? {} : {limit})
+    };
+  }
+
   /** Reads the non-negative safe integer for a pagination clause. */
-  rowCount(clause: 'LIMIT' | 'OFFSET'): number {
+  private rowCount(clause: 'LIMIT' | 'OFFSET'): number {
     this.skipWhitespace();
     const match = /^\d+(?![A-Za-z0-9_.])/.exec(this.sql.slice(this.position));
     const value = Number(match?.[0]);
@@ -266,8 +274,12 @@ export class SQLQueryReader {
   }
 
   /** Skips whitespace without altering quoted identifiers. */
-  private skipWhitespace(): void {
+  protected skipWhitespace(): void {
     while (this.position < this.sql.length && /\s/.test(this.sql[this.position])) this.position++;
+  }
+
+  protected expressionReader(): SQLExpressionReader {
+    return new SQLExpressionReader(this.sql, this.position);
   }
 
   /** Bounds large projection lists independently of predicate parsing. */

@@ -22,7 +22,7 @@ The parser describes queries. A separate execution engine supplies data and eval
 
 ## SQL syntax features
 
-✅ Supported · ⚠️ Restricted · ❌ Unsupported. These statuses describe the built-in parser.
+✅ Supported · ⚠️ Restricted · ❌ Unsupported. These statuses describe `parseSQLQuery()`. See Relational SELECT below for the planner-oriented parser.
 An injected WHERE parser can define a different predicate language.
 
 | SQL feature                           | Support | Syntax and limitations                                                                                                                            |
@@ -79,6 +79,29 @@ const query = parseSQLSelect("SELECT city WHERE population >= :minimum", {
 
 Importing only `parseSQLSelect` lets a tree-shaking bundler omit the built-in predicate parser.
 Without `parseWhere`, this function rejects statements containing WHERE.
+
+## Relational SELECT
+
+Use `parseSQLSelectStatement()` when your application owns the query planner.
+It returns projection, source, join, filter, grouping, sorting, and pagination clauses
+without resolving names or executing the query.
+
+```ts
+import {parseSQLSelectStatement} from '@math.gl/core/sql';
+
+const statement = parseSQLSelectStatement(
+  'SELECT t.region, COUNT(*) AS total FROM trips AS t ' +
+    'WHERE t.fare >= :minimum GROUP BY t.region ORDER BY total DESC NULLS LAST LIMIT 10',
+  {parseParameter: name => ({type: 'Identifier', name: `:${name}`})}
+);
+```
+
+The parser supports table aliases, qualified column references, INNER, LEFT,
+SEMI, and ANTI joins with ON conditions, GROUP BY, ORDER BY with optional null
+placement, LIMIT, OFFSET, and SQL line comments. Aggregate calls are expression nodes. COUNT(*)
+is a call with a wildcard identifier argument marked `sqlWildcard: true`. The caller validates the supported
+join conditions and aggregate functions and binds parameters. Use
+`parseParameter` to supply an expression node for each named parameter.
 
 ## Expressions
 
