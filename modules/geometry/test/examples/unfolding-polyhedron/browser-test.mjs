@@ -67,7 +67,7 @@ try {
     input.value = '100';
     input.dispatchEvent(new Event('input', {bubbles: true}));
   });
-  await page.waitForFunction(() => document.querySelector('#amount').textContent === '100%');
+  await page.locator('#flat[aria-pressed="true"]').waitFor();
   const unfolded = await checkHemispheres();
   assert.notDeepEqual(unfolded, folded);
   assert.deepEqual(errors, []);
