@@ -16,3 +16,10 @@ test('chart coverage groups holes with their exterior and fills separate compone
     [disjoint]
   ]);
 });
+
+test('chart rings sharing a boundary vertex retain their separate fills', () => {
+  const outer = [[0, 0], [4, 0], [4, 4], [0, 4]];
+  const neighbor = [[0, 2], [-1, 3], [-1, 1]];
+  const hole = [[0, 2], [1, 3], [1, 1]];
+  assert.deepEqual(groupChartOutlines([outer, neighbor, hole]), [[outer, hole], [neighbor]]);
+});

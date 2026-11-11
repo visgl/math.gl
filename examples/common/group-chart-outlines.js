@@ -10,16 +10,34 @@ function signedArea(ring) {
   return area / 2;
 }
 
-function contains(ring, [x, y]) {
+function containsPoint(ring, [x, y]) {
   let inside = false;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
     const [ax, ay] = ring[j];
     const [bx, by] = ring[i];
+    if (
+      x >= Math.min(ax, bx) &&
+      x <= Math.max(ax, bx) &&
+      y >= Math.min(ay, by) &&
+      y <= Math.max(ay, by) &&
+      (x - ax) * (by - ay) === (y - ay) * (bx - ax)
+    ) {
+      return null;
+    }
     if (ay > y !== by > y && x < ax + ((bx - ax) * (y - ay)) / (by - ay)) {
       inside = !inside;
     }
   }
   return inside;
+}
+
+function containsRing(outer, inner) {
+  // Shared vertices cannot distinguish a nested ring from a neighboring ring.
+  for (const point of inner) {
+    const inside = containsPoint(outer, point);
+    if (inside !== null) return inside;
+  }
+  return false;
 }
 
 /** Convert non-crossing chart outlines from a nonzero-winding path to polygons with holes. */
@@ -33,7 +51,7 @@ export function groupChartOutlines(outlines) {
     const current = rings[i];
     let parent;
     for (let j = i - 1; j >= 0; j--) {
-      if (contains(rings[j].ring, current.ring[0])) {
+      if (containsRing(rings[j].ring, current.ring)) {
         parent = rings[j];
         break;
       }
