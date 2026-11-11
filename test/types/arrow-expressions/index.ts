@@ -16,6 +16,7 @@ import {type ParameterizedColumnarPredicate} from '@math.gl/core/expressions';
 import {
   type ArrowTableFunction,
   type ArrowTableFunctionType,
+  compileArrowAggregates,
   compileArrowExpression,
   compileArrowFunction,
   compileArrowPredicate
@@ -54,6 +55,17 @@ compileArrowFunction('discount', ['price'], options).evaluate(batch, {
   activeRows: new Uint8Array(batch.numRows)
 });
 compileArrowExpression('discount(price) > 10', options).evaluate(batch);
+const reductions = compileArrowAggregates(
+  {
+    total: {operation: 'SUM', expression: 'price'},
+    count: {operation: 'COUNT'}
+  },
+  options
+);
+const total = reductions.evaluate([batch]).total;
+void total;
+// @ts-expect-error Only COUNT may omit its expression.
+compileArrowAggregates({total: {operation: 'SUM'}}, options);
 // @ts-expect-error An input schema is required.
 compileArrowExpression('price', {functions});
 // @ts-expect-error The active mask is an explicit byte array.
