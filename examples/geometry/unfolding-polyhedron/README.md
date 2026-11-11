@@ -19,9 +19,9 @@ Subdivision is available only for the icosahedron.
 
 ## Source structure
 
-`src/app.ts` connects the UI to the layout and scene. `src/view.ts` contains markup;
-`src/scene.ts` evaluates poses and frames the camera; `src/renderer.ts` draws the panels and hinge edges with deck.gl. The scene takes plain view state rather than reading controls.
-`src/cut-layout.ts` builds the hinge layout and `src/picking.ts` handles geographic hits.
+[`app.ts`](../../common/unfolding-polyhedron/app.ts) connects the UI to the layout and scene. [`view.ts`](../../common/unfolding-polyhedron/view.ts) contains markup;
+[`scene.ts`](../../common/unfolding-polyhedron/scene.ts) evaluates poses and frames the camera; [`renderer.ts`](../../common/unfolding-polyhedron/renderer.ts) draws the panels and hinge edges with deck.gl. The scene takes plain view state rather than reading controls.
+[`cut-layout.ts`](../../common/unfolding-polyhedron/cut-layout.ts) builds the hinge layout and [`picking.ts`](../../common/unfolding-polyhedron/picking.ts) handles geographic hits.
 The myriahedral example reuses the controller, scene, renderer, and picking with
 its own layout builder.
 
@@ -54,13 +54,13 @@ See [data provenance and licenses](data/README.md).
 
 ## Construction
 
-- `src/polyhedra.ts` generates symmetric coordinates and finds convex polygon faces.
+- [`polyhedra.ts`](../../common/unfolding-polyhedron/polyhedra.ts) generates symmetric coordinates and finds convex polygon faces.
   The dodecahedron is constructed as the dual of the icosahedron. Spherical
   subdivision caches edge midpoints by vertex ID and normalizes them to unit radius.
-- `src/layout.ts` builds the dual adjacency graph from shared indexed edges. Kruskal's
+- [`layout.ts`](../../common/unfolding-polyhedron/layout.ts) builds the dual adjacency graph from shared indexed edges. Kruskal's
   algorithm finds a maximum spanning tree using scores that favor short edges
   with deterministic seeded variation. Every non-tree edge is cut. This heuristic
-  is the original strategy; `src/cut-layout.ts` adds land weights or fixed AirOcean joins.
+  is the original strategy; [`cut-layout.ts`](../../common/unfolding-polyhedron/cut-layout.ts) adds land weights or fixed AirOcean joins.
 - Each child hinge uses the original shared edge as its axis. A signed angle
   between face normals determines the flattening rotation. Panel coordinates
   remain in the original solid frame with identity rest transforms. `HingeTree`

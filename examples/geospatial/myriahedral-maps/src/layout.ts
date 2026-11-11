@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {MapEngine, type MyriahedralPreset, type MyriahedralSolid} from '@math.gl/geospatial/maps';
-import {isLand} from '../../../geometry/unfolding-polyhedron/src/geography';
+import {isLand} from '../../../common/unfolding-polyhedron/geography';
 
 /** Only UI/data adaptation lives here; mesh, cuts, projection and motion are library APIs. */
 export function createMyriahedralLayout(level: number, seed: number, mode: string) {

@@ -6,7 +6,7 @@ import {Deck, OrthographicView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {MeshBitmapLayer, type BitmapMesh} from '@deck.gl/map-layers';
 import {type Polyhedron, edgeKey} from './polyhedra';
-import {BLUE_MARBLE_WORLD_URL} from '../../../common/blue-marble';
+import {BLUE_MARBLE_WORLD_URL} from '../blue-marble';
 
 import {surfaceVertices} from './surface-vertices';
 
