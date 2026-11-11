@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {SQLParseError} from './sql-parse-error';
 import type {
   BoundSQLPredicate,
   SQLLogicalPredicate,
@@ -23,6 +24,7 @@ const MAXIMUM_EXPRESSION_DEPTH = 64;
 type SQLPredicateToken = Readonly<{
   kind: 'identifier' | 'number' | 'parameter' | 'string' | 'symbol';
   value: string;
+  offset: number;
   quoted?: boolean;
 }>;
 
@@ -64,7 +66,7 @@ class SQLPredicateParser {
   private position = 0;
 
   constructor(
-    source: string,
+    private readonly source: string,
     parameters: SQLPredicateParameterValues,
     preserveParameters: boolean
   ) {
@@ -73,13 +75,18 @@ class SQLPredicateParser {
     this.preserveParameters = preserveParameters;
   }
 
+  /** Reports the current token, or a token already consumed by the production. */
+  private error(reason: string, token = this.peek()): SQLParseError {
+    return new SQLParseError(reason, this.source, token?.offset ?? this.source.length);
+  }
+
   /** Parses the complete token stream. */
   parse(): SQLPredicate {
     const predicate = this.parseOr(0);
     this.takeSymbol(';');
     const token = this.peek();
     if (token) {
-      throw new Error(`SQL predicate contains unexpected token ${JSON.stringify(token.value)}`);
+      throw this.error(`SQL predicate contains unexpected token ${JSON.stringify(token.value)}`);
     }
     return predicate;
   }
@@ -131,7 +138,7 @@ class SQLPredicateParser {
       this.expectKeyword('IN');
       this.expectSymbol('(');
       if (this.peek()?.kind === 'symbol' && this.peek()?.value === ')') {
-        throw new Error('SQL predicate IN requires at least one scalar value');
+        throw this.error('SQL predicate IN requires at least one scalar value');
       }
       const values: SQLPredicateValue[] = [this.parseValue()];
       while (this.takeSymbol(',')) {
@@ -147,7 +154,7 @@ class SQLPredicateParser {
       token?.kind !== 'symbol' ||
       !['=', '!=', '<>', '<', '<=', '>', '>='].includes(token.value)
     ) {
-      throw new Error('SQL predicate expected a comparison, IN, or IS NULL operator');
+      throw this.error('SQL predicate expected a comparison, IN, or IS NULL operator', token);
     }
     const operator = token.value === '!=' ? '<>' : token.value;
     return {
@@ -162,7 +169,7 @@ class SQLPredicateParser {
     while (this.takeSymbol('::')) {
       const token = this.take();
       if (token?.kind !== 'identifier' || token.quoted)
-        throw new Error('SQL cast requires a target type');
+        throw this.error('SQL cast requires a target type', token);
       let name = token.value;
       if (name.toUpperCase() === 'DOUBLE') {
         this.expectKeyword('PRECISION');
@@ -172,7 +179,10 @@ class SQLPredicateParser {
         this.expectKeyword('VARYING');
         name += ' VARYING';
       }
-      property = {...property, casts: [...(property.casts ?? []), sqlCastType(name)]};
+      property = {
+        ...property,
+        casts: [...(property.casts ?? []), sqlCastType(name, this.source, token.offset)]
+      };
       this.assertDepth(depth + property.casts!.length);
     }
     return property;
@@ -186,7 +196,7 @@ class SQLPredicateParser {
       this.expectKeyword('AS');
       const target = this.take();
       if (target?.kind !== 'identifier' || target.quoted)
-        throw new Error('SQL CAST requires a target type');
+        throw this.error('SQL CAST requires a target type', target);
       let name = target.value;
       if (name.toUpperCase() === 'DOUBLE') {
         this.expectKeyword('PRECISION');
@@ -196,13 +206,13 @@ class SQLPredicateParser {
         this.expectKeyword('VARYING');
         name += ' VARYING';
       }
-      const type = sqlCastType(name);
+      const type = sqlCastType(name, this.source, target.offset);
       this.expectSymbol(')');
       return {...property, casts: [...(property.casts ?? []), type]};
     }
     const token = this.take();
     if (token?.kind !== 'identifier') {
-      throw new Error('SQL predicate expected a column identifier');
+      throw this.error('SQL predicate expected a column identifier', token);
     }
     return token.quoted ? {property: token.value, quoted: true} : {property: token.value};
   }
@@ -212,16 +222,20 @@ class SQLPredicateParser {
     const negative = this.takeSymbol('-');
     const token = this.take();
     if (!token) {
-      throw new Error('SQL predicate expected a scalar value');
+      throw this.error('SQL predicate expected a scalar value');
     }
     if (negative && token.kind !== 'number') {
-      throw new Error('SQL predicate only permits unary minus on numeric literals');
+      throw this.error('SQL predicate only permits unary minus on numeric literals', token);
     }
     if (token.kind === 'number') {
-      return parseNumericLiteral(negative ? `-${token.value}` : token.value);
+      return parseNumericLiteral(
+        negative ? `-${token.value}` : token.value,
+        this.source,
+        token.offset
+      );
     }
     if (negative) {
-      throw new Error('SQL predicate expected a numeric literal after unary minus');
+      throw this.error('SQL predicate expected a numeric literal after unary minus');
     }
     if (token.kind === 'string') {
       return token.value;
@@ -231,7 +245,7 @@ class SQLPredicateParser {
         return {parameter: token.value};
       }
       if (!Object.prototype.hasOwnProperty.call(this.parameters, token.value)) {
-        throw new Error(`SQL predicate parameter ":${token.value}" requires a value`);
+        throw this.error(`SQL predicate parameter ":${token.value}" requires a value`, token);
       }
       const value = this.parameters[token.value];
       validateParameterValue(value, token.value);
@@ -243,22 +257,28 @@ class SQLPredicateParser {
       return /^TRUE$/i.test(token.value);
     }
     if (token.kind === 'identifier' && !token.quoted && /^NULL$/i.test(token.value)) {
-      throw new Error('SQL predicate comparisons with NULL must use IS NULL or IS NOT NULL');
+      throw this.error(
+        'SQL predicate comparisons with NULL must use IS NULL or IS NOT NULL',
+        token
+      );
     }
-    throw new Error(`SQL predicate does not support scalar token ${JSON.stringify(token.value)}`);
+    throw this.error(
+      `SQL predicate does not support scalar token ${JSON.stringify(token.value)}`,
+      token
+    );
   }
 
   /** Rejects excessively nested inputs before recursion can exhaust the stack. */
   private assertDepth(depth: number): void {
     if (depth > MAXIMUM_EXPRESSION_DEPTH) {
-      throw new Error('SQL predicate nesting exceeds its safe limit');
+      throw this.error('SQL predicate nesting exceeds its safe limit');
     }
   }
 
   /** Consumes one required keyword. */
   private expectKeyword(keyword: string): void {
     if (!this.takeKeyword(keyword)) {
-      throw new Error(`SQL predicate expected ${keyword}`);
+      throw this.error(`SQL predicate expected ${keyword}`);
     }
   }
 
@@ -280,7 +300,7 @@ class SQLPredicateParser {
   /** Consumes one required symbol. */
   private expectSymbol(symbol: string): void {
     if (!this.takeSymbol(symbol)) {
-      throw new Error(`SQL predicate expected ${JSON.stringify(symbol)}`);
+      throw this.error(`SQL predicate expected ${JSON.stringify(symbol)}`);
     }
   }
 
@@ -321,7 +341,7 @@ function combineLogicalPredicate(
 }
 
 /** Converts a bounded SQL numeric token to a number or exact bigint. */
-function parseNumericLiteral(source: string): number | bigint {
+function parseNumericLiteral(source: string, sql: string, offset: number): number | bigint {
   if (/^-?\d+$/.test(source)) {
     const bigint = BigInt(source);
     if (bigint > BigInt(Number.MAX_SAFE_INTEGER) || bigint < BigInt(Number.MIN_SAFE_INTEGER)) {
@@ -330,7 +350,7 @@ function parseNumericLiteral(source: string): number | bigint {
   }
   const number = Number(source);
   if (!Number.isFinite(number)) {
-    throw new Error('SQL predicate numeric literals must be finite');
+    throw new SQLParseError('SQL predicate numeric literals must be finite', sql, offset);
   }
   return number;
 }
@@ -349,7 +369,7 @@ function tokenizeSQLPredicate(source: string): SQLPredicateToken[] {
     source.trim().length === 0 ||
     source.length > MAXIMUM_SQL_LENGTH
   ) {
-    throw new Error('SQL predicate requires a non-empty, safely bounded expression');
+    throw new SQLParseError('SQL predicate requires a non-empty, safely bounded expression', '', 0);
   }
 
   const tokens: SQLPredicateToken[] = [];
@@ -362,21 +382,21 @@ function tokenizeSQLPredicate(source: string): SQLPredicateToken[] {
     }
     if (character === "'") {
       const result = readQuotedToken(source, position, "'", "'");
-      tokens.push({kind: 'string', value: result.value});
+      tokens.push({offset: position, kind: 'string', value: result.value});
       position = result.position;
     } else if (character === '"') {
       const result = readQuotedToken(source, position, '"', '"');
-      tokens.push({kind: 'identifier', value: result.value, quoted: true});
+      tokens.push({offset: position, kind: 'identifier', value: result.value, quoted: true});
       position = result.position;
     } else if (source.startsWith('::', position)) {
-      tokens.push({kind: 'symbol', value: '::'});
+      tokens.push({offset: position, kind: 'symbol', value: '::'});
       position += 2;
     } else if (character === ':') {
       const match = /^[A-Za-z_][A-Za-z0-9_]*/.exec(source.slice(position + 1));
       if (!match) {
-        throw new Error(`SQL predicate contains an invalid parameter at character ${position}`);
+        throw new SQLParseError('SQL predicate contains an invalid parameter', source, position);
       }
-      tokens.push({kind: 'parameter', value: match[0]});
+      tokens.push({offset: position, kind: 'parameter', value: match[0]});
       position += match[0].length + 1;
     } else {
       const numberMatch = /^(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?/.exec(source.slice(position));
@@ -384,26 +404,26 @@ function tokenizeSQLPredicate(source: string): SQLPredicateToken[] {
         source.slice(position)
       );
       if (numberMatch) {
-        tokens.push({kind: 'number', value: numberMatch[0]});
+        tokens.push({offset: position, kind: 'number', value: numberMatch[0]});
         position += numberMatch[0].length;
       } else if (identifierMatch) {
-        tokens.push({kind: 'identifier', value: identifierMatch[0]});
+        tokens.push({offset: position, kind: 'identifier', value: identifierMatch[0]});
         position += identifierMatch[0].length;
       } else {
         const twoCharacters = source.slice(position, position + 2);
         if (['<=', '>=', '<>', '!='].includes(twoCharacters)) {
-          tokens.push({kind: 'symbol', value: twoCharacters});
+          tokens.push({offset: position, kind: 'symbol', value: twoCharacters});
           position += 2;
         } else if ('(),;-=<>'.includes(character)) {
-          tokens.push({kind: 'symbol', value: character});
+          tokens.push({offset: position, kind: 'symbol', value: character});
           position++;
         } else {
-          throw new Error(`SQL predicate contains an unsupported token at character ${position}`);
+          throw new SQLParseError('SQL predicate contains an unsupported token', source, position);
         }
       }
     }
     if (tokens.length > MAXIMUM_SQL_TOKENS) {
-      throw new Error('SQL predicate exceeds its safe token limit');
+      throw new SQLParseError('SQL predicate exceeds its safe token limit', source, position);
     }
   }
   return tokens;
@@ -430,5 +450,5 @@ function readQuotedToken(
     }
     return {value, position: position + 1};
   }
-  throw new Error(`SQL predicate contains an unterminated quoted value at character ${start}`);
+  throw new SQLParseError('SQL predicate contains an unterminated quoted value', source, start);
 }

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {SQLParseError} from './sql-parse-error';
 import type {Expression} from '../expressions/index';
 import type {ColumnarScalarType} from '../expressions/scalar-type';
 
@@ -31,7 +32,7 @@ export const SQL_RESERVED_WORDS = new Set([
 ]);
 
 /** Supported standard SQL type spellings. Precision/length modifiers are not yet supported. */
-export function sqlCastType(name: string): ColumnarScalarType {
+export function sqlCastType(name: string, source = name, offset = 0): ColumnarScalarType {
   switch (name.toUpperCase().replace(/\s+/g, ' ').trim()) {
     case 'SMALLINT':
       return 'int16';
@@ -52,7 +53,7 @@ export function sqlCastType(name: string): ColumnarScalarType {
     case 'CHARACTER VARYING':
       return 'utf8';
     default:
-      throw new Error(`Unsupported SQL CAST type: ${name}`);
+      throw new SQLParseError(`Unsupported SQL CAST type: ${name}`, source, offset);
   }
 }
 
@@ -61,24 +62,37 @@ export function parseSQLExpression(source: string): Expression {
   const reader = new SQLExpressionReader(source);
   const expression = reader.expression();
   reader.space();
-  if (reader.position !== source.length) throw new Error('Unexpected token after SQL expression');
+  if (reader.position !== source.length)
+    throw reader.error('Unexpected token after SQL expression');
   return expression;
 }
 
 /** Bounded expression reader shared by SELECT and standalone expressions. */
 export class SQLExpressionReader {
-  position = 0;
+  position: number;
   private tokens = 0;
   private readonly depths = new WeakMap<object, number>();
-  constructor(readonly source: string) {
-    if (typeof source !== 'string' || !source.trim() || source.length > 65536)
-      throw new Error('SQL expression requires non-empty input of at most 65536 characters');
+  constructor(
+    readonly source: string,
+    start = 0
+  ) {
+    this.position = start;
+    if (start === 0 && (typeof source !== 'string' || !source.trim() || source.length > 65536))
+      throw new SQLParseError(
+        'SQL expression requires non-empty input of at most 65536 characters',
+        '',
+        0
+      );
+  }
+  /** Creates an error at the current expression cursor. */
+  error(message: string, offset = this.position): SQLParseError {
+    return new SQLParseError(message, this.source, offset);
   }
   space(): void {
     while (this.position < this.source.length && /\s/.test(this.source[this.position]!))
       this.position++;
     if (this.source.startsWith('--', this.position) || this.source.startsWith('/*', this.position))
-      throw new Error('SQL comments are not supported.');
+      throw this.error('SQL comments are not supported.');
   }
   word(word: string): boolean {
     this.space();
@@ -99,18 +113,18 @@ export class SQLExpressionReader {
     return true;
   }
   symbol(symbol: string): void {
-    if (!this.take(symbol)) throw new Error(`SQL expression expected ${symbol}`);
+    if (!this.take(symbol)) throw this.error(`SQL expression expected ${symbol}`);
   }
   private node(value: object, children: Expression[] = []): Expression {
     const depth = children.length
       ? 1 + Math.max(...children.map(child => this.depths.get(child) || 0))
       : 0;
-    if (depth > 64) throw new Error('SQL expression exceeds nesting limit');
+    if (depth > 64) throw this.error('SQL expression exceeds nesting limit');
     this.depths.set(value, depth);
     return value as Expression;
   }
   expression(depth = 0, minimum = 0): Expression {
-    if (depth > 64) throw new Error('SQL expression exceeds nesting limit');
+    if (depth > 64) throw this.error('SQL expression exceeds nesting limit');
     let left: Expression;
     if (this.word('NOT')) {
       const argument = this.expression(depth + 1, 3);
@@ -134,7 +148,7 @@ export class SQLExpressionReader {
       }
       if (minimum <= 3 && this.word('IS')) {
         const negate = this.word('NOT');
-        if (!this.word('NULL')) throw new Error('SQL IS requires NULL or NOT NULL');
+        if (!this.word('NULL')) throw this.error('SQL IS requires NULL or NOT NULL');
         left = this.call(negate ? 'isNotNull' : 'isNull', [left]);
         continue;
       }
@@ -185,16 +199,17 @@ export class SQLExpressionReader {
   }
   private cast(argument: Expression): Expression {
     this.space();
+    const start = this.position;
     const match = /^[A-Za-z][A-Za-z0-9]*(?:\s+(?:PRECISION|VARYING)\b)?/i.exec(
       this.source.slice(this.position)
     );
-    if (!match) throw new Error('SQL cast requires a target type');
+    if (!match) throw this.error('SQL cast requires a target type');
     this.position += match[0].length;
     this.token();
     if (this.take('[')) {
       this.space();
       const width = /^\d+/.exec(this.source.slice(this.position));
-      if (!width) throw new Error('SQL ARRAY cast requires a fixed length');
+      if (!width) throw this.error('SQL ARRAY cast requires a fixed length');
       this.position += width[0].length;
       this.token();
       this.symbol(']');
@@ -204,7 +219,7 @@ export class SQLExpressionReader {
         !/^array(?:_(?:float(?:16|32|64)|uint8))?$/.test(array.callee.name) ||
         Number(width[0]) !== array.arguments.length
       )
-        throw new Error('ARRAY cast length must match the number of components');
+        throw this.error('ARRAY cast length must match the number of components');
       const name = match[0].toUpperCase();
       const type =
         name === 'UINT8'
@@ -213,24 +228,24 @@ export class SQLExpressionReader {
             ? 'float32'
             : name === 'FLOAT64'
               ? 'float64'
-              : sqlCastType(name);
+              : sqlCastType(name, this.source, start);
       if (!['float16', 'float32', 'float64', 'uint8'].includes(type))
-        throw new Error('Unsupported ARRAY cast type');
+        throw this.error('Unsupported ARRAY cast type');
       if (
         array.callee.name !== 'array' &&
         (type === 'uint8' || array.callee.name === 'array_uint8')
       )
-        throw new Error('Chained UINT8 array casts are not supported');
+        throw this.error('Chained UINT8 array casts are not supported');
       return this.call(`array_${type}`, array.arguments);
     }
-    const target = sqlCastType(match[0]);
+    const target = sqlCastType(match[0], this.source, start);
     return this.call('cast', [
       argument,
       this.node({type: 'Literal', value: target, raw: JSON.stringify(target)})
     ]);
   }
   private primary(depth: number): Expression {
-    if (depth > 64) throw new Error('SQL expression exceeds nesting limit');
+    if (depth > 64) throw this.error('SQL expression exceeds nesting limit');
     if (this.take('(')) {
       const value = this.expression(depth + 1);
       this.symbol(')');
@@ -239,7 +254,7 @@ export class SQLExpressionReader {
     if (this.word('CAST')) {
       this.symbol('(');
       const argument = this.expression(depth + 1);
-      if (!this.word('AS')) throw new Error('SQL CAST requires AS');
+      if (!this.word('AS')) throw this.error('SQL CAST requires AS');
       const result = this.cast(argument);
       this.symbol(')');
       return result;
@@ -257,14 +272,14 @@ export class SQLExpressionReader {
       const clauses: {test: Expression; consequent: Expression}[] = [];
       while (this.word('WHEN')) {
         const test = this.expression(depth + 1);
-        if (!this.word('THEN')) throw new Error('SQL CASE requires THEN');
+        if (!this.word('THEN')) throw this.error('SQL CASE requires THEN');
         clauses.push({test, consequent: this.expression(depth + 1)});
       }
-      if (!clauses.length) throw new Error('SQL CASE requires WHEN');
+      if (!clauses.length) throw this.error('SQL CASE requires WHEN');
       let alternate = this.word('ELSE')
         ? this.expression(depth + 1)
         : this.node({type: 'Literal', value: null, raw: 'null'});
-      if (!this.word('END')) throw new Error('SQL CASE requires END');
+      if (!this.word('END')) throw this.error('SQL CASE requires END');
       for (let index = clauses.length - 1; index >= 0; index--) {
         const {test, consequent} = clauses[index]!;
         alternate = this.node({type: 'ConditionalExpression', test, consequent, alternate}, [
@@ -276,6 +291,7 @@ export class SQLExpressionReader {
       return alternate;
     }
     this.space();
+    const start = this.position;
     const quote = this.source[this.position];
     if (quote === '"' || quote === "'") {
       this.position++;
@@ -288,12 +304,12 @@ export class SQLExpressionReader {
           value += quote;
           this.position++;
         } else {
-          if (quote === '"' && !value) throw new Error('SQL identifiers must not be empty');
+          if (quote === '"' && !value) throw this.error('SQL identifiers must not be empty', start);
           if (quote === '"') return this.identifier(value, depth, false);
           return this.node({type: 'Literal', value, raw: JSON.stringify(value)});
         }
       }
-      throw new Error('Unterminated SQL expression quote');
+      throw this.error('Unterminated SQL expression quote', start);
     }
     const number = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?/.exec(
       this.source.slice(this.position)
@@ -303,8 +319,9 @@ export class SQLExpressionReader {
       this.token();
       const value = Number(number[0]);
       if (!Number.isFinite(value) || (/^[+-]?\d+$/.test(number[0]) && !Number.isSafeInteger(value)))
-        throw new Error(
-          'SQL numeric literal must be finite and exactly representable; use a quoted BIGINT value'
+        throw this.error(
+          'SQL numeric literal must be finite and exactly representable; use a quoted BIGINT value',
+          start
         );
       return this.node({type: 'Literal', value, raw: number[0]});
     }
@@ -321,7 +338,7 @@ export class SQLExpressionReader {
       SQL_RESERVED_WORDS.has(identifier[0].toUpperCase()) ||
       /^(WHEN|THEN|ELSE|END)$/i.test(identifier[0])
     )
-      throw new Error('SQL expression requires a column, literal or function');
+      throw this.error('SQL expression requires a column, literal or function');
     this.position += identifier[0].length;
     this.token();
     return this.identifier(identifier[0], depth, true);
@@ -338,6 +355,6 @@ export class SQLExpressionReader {
     return this.call(name, args, fold);
   }
   private token(): void {
-    if (++this.tokens > 4096) throw new Error('SQL expression exceeds token limit');
+    if (++this.tokens > 4096) throw this.error('SQL expression exceeds token limit');
   }
 }
