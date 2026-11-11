@@ -12,7 +12,7 @@ export async function checkProjectionEngines(browser, base) {
     await page.addInitScript(() => {
       window.projectionSnapshots = {};
       window.projectionFailures = [];
-      window.projectionCommits = 0;
+      window.projectionObserved = {};
       // A commit hook observes the render before passive effects can replace a stale projector.
       // Waiting for a settled DOM would miss the transient mismatch reported in review.
       window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
@@ -27,7 +27,7 @@ export async function checkProjectionEngines(browser, base) {
           );
           const expected = window.projectionSnapshots[`${map}/${backend}`];
           if (!path || !expected) return;
-          window.projectionCommits++;
+          window.projectionObserved[`${map}/${backend}`] = true;
           if (path.getAttribute('d') !== expected.path || table?.textContent !== expected.table) {
             window.projectionFailures.push(`${map}/${backend}`);
           }
@@ -76,7 +76,11 @@ export async function checkProjectionEngines(browser, base) {
         assert.equal(await city.getAttribute('aria-pressed'), 'true');
       }
     }
-    assert.ok((await page.evaluate(() => window.projectionCommits)) >= 30);
+    // Re-selecting a value is a no-op; require coverage of every pair, not a commit count.
+    assert.deepEqual(
+      await page.evaluate(() => Object.keys(window.projectionObserved).sort()),
+      maps.flatMap(map => ['math.gl', 'proj4js', 'D3'].map(backend => `${map}/${backend}`)).sort()
+    );
     assert.deepEqual(await page.evaluate(() => window.projectionFailures), []);
     assert.equal(await page.locator('[role="alert"]').count(), 0);
     assert.deepEqual(errors, []);
