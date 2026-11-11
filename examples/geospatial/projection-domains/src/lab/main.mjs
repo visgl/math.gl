@@ -326,7 +326,7 @@ export function mountProjectionLab(
     root.dataset.ready = JSON.stringify(s);
     status.textContent = root.dataset.error
       ? 'Preparation failed explicitly; no partial mesh was published.'
-      : 'Ready. Pan and zoom inspect the prepared meshes; changing projection parameters rebuilds them. Forward error uses the declared 180 px/unit (world: 1.2 px/degree) scale, not a guarantee after zoom.';
+      : 'Forward error uses the declared 180 px/unit (world: 1.2 px/degree) scale, not a guarantee after zoom.';
   }
   function track(p) {
     pending.add(p);

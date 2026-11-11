@@ -21,14 +21,17 @@ The scene consumes plain layer and unfolding state. It never reads form controls
 To reuse the rendering with a different UI, call its methods directly. Each mount
 owns its observers, event listeners, animation frame, and SVG clip identifiers.
 
-The **View globe** button and **Unfold** slider animate the same projected
+The **Globe** and **Unfolded** buttons at the slider's ends animate the projected
 feature vertices between geographic globe positions and their fitted inset
-positions. A bundled public-domain Natural Earth 1:110m land layer provides
-global context on the globe. Reduced-motion preferences make the toggle instant.
+positions. Drag the slider to inspect intermediate positions. A bundled public-domain Natural Earth 1:110m land layer provides
+global context on the globe. Reduced-motion preferences make these transitions instant.
 Inset label font sizes adapt to the fitted frame width.
-Mouse-wheel and button zoom apply to the entire composite; drag to pan.
+Mouse-wheel and the top-right zoom buttons apply to the entire composite; drag to pan.
+The undo button resets zoom and pan.
 The default map omits graticules and inset frames; both remain optional
 inspection overlays. Labels stay visible without frames.
+The three layer toggles float at the top-left. Hover over a mapped location to
+inspect coordinates in a tooltip; empty space shows no message.
 
 The Albers USA preset uses broad spherical masks and a 0.35 linear scale for
 Alaska. It is an illustrative composite, not a political clip or a reproduction

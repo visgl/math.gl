@@ -1,0 +1,29 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.page {
+  /* Contain Markdown margins without constraining the height of its content. */
+  display: flow-root;
+  position: relative;
+  min-width: 0;
+}
+
+/* Match the docs reading width without narrowing interactive example components. */
+.page > :is(p, ul, ol, blockquote, dl, pre, table),
+.page > :global(.theme-code-block),
+.page > :global(.alert) {
+  max-width: 72ch;
+}
+
+/* Separate embedded apps from the prose without enlarging gaps after code or callouts. */
+.page > :is(div, section):not(:global(.theme-code-block)):not(:global(.alert))
+  + :is(p, ul, ol, blockquote, dl, pre, table, h2, h3, h4, h5, h6) {
+  margin-top: 3rem;
+}
+
+/* Example navigation supplies the title, matching the shared website layout. */
+.page > h1,
+.page > header {
+  display: none;
+}

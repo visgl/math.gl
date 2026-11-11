@@ -76,9 +76,14 @@ async function build(project) {
 if (list) {
   // biome-ignore lint/suspicious/noConsole: List the discovered checks without executing them.
   console.log(
-    [...typeConfigs, ...nodeTests, ...browserTests].map(path => relative(root, path)).join('\n')
+    [join(directory, 'check-boundaries.js'), ...typeConfigs, ...nodeTests, ...browserTests]
+      .map(path => relative(root, path))
+      .join('\n')
   );
 } else {
+  await run('Example import boundaries', process.execPath, [
+    join(directory, 'check-boundaries.js')
+  ]);
   // Preserve application build coverage when CI selects only Node workflows.
   const nodeProjects = new Set(
     nodeTests

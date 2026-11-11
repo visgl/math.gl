@@ -23,8 +23,10 @@
   position: relative;
 }
 
-.content > :global(*) {
+/* Embedded apps inherit the frame height even when their standalone view has a minimum. */
+.frame .content > :global(*) {
   height: 100%;
+  min-height: 0;
 }
 
 .fullscreenButton {
@@ -117,7 +119,6 @@
   .frame :global(.geometry-example > aside) {
     flex: none;
     max-height: 45%;
-    overflow: auto;
   }
   .frame :global(.core-transforms-view),
   .frame :global(.polygon-editor-view),

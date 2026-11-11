@@ -11,9 +11,10 @@ yarn install
 yarn workspace math.gl-unfolding-polyhedron start
 ```
 
-Choose a solid, use **Unfold** or **Play**, and drag to orbit. **New cut layout**
-changes the deterministic seed used to score edges. Gold edges remain connected
-as hinges; dark edges are cut. **Flat view** unfolds the net and looks straight at it.
+Choose a solid, drag the slider or select **Globe** or **Flat**, and drag the view to orbit.
+**Globe** folds the solid and restores its initial orientation. **Flat** unfolds the net
+and looks straight at it. **New cut layout** changes the deterministic seed used to
+score edges. Gold edges remain connected as hinges; dark edges are cut.
 Subdivision is available only for the icosahedron.
 
 ## Source structure

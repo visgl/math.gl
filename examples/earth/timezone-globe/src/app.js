@@ -16,8 +16,6 @@ export function mountTimezoneGlobe(root, {lowUrl, hiUrl}) {
   const instanceId = 'timezone-globe-' + nextInstance++;
   root.innerHTML = `    <canvas data-role="globe" aria-label="Interactive timezone globe"></canvas>
     <aside>
-      <h1>One globe, many clocks</h1>
-      <p>Drag to rotate. Scroll to zoom. Hover to see local time.</p>
       <label for="${instanceId}-day">Date at 12:00 UTC <output data-role="date"></output></label>
       <input data-role="day" id="${instanceId}-day" type="range" min="0" max="364" value="0" />
       <label for="${instanceId}-resolution">Geometry</label>

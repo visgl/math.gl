@@ -26,14 +26,16 @@ try {
   await page.goto(url, {waitUntil: 'domcontentloaded'});
   await page.locator('[role=status]').filter({hasText: 'overview ready'}).waitFor();
   assert.equal(tileRequests, 0, 'initial overview must not wait on remote imagery');
-  // The community panel can collapse, and every label shares its control's row.
-  assert.equal(await page.locator('.deck-widget-box').count(), 1);
+  // The independent HTML panel can collapse, with labels above their controls.
+  assert.equal(await page.locator('.sun-panel').count(), 1);
+  assert.equal(await page.locator('.sun-panel .deck-widget-box').count(), 0);
+  assert.equal(await page.locator('.sun-panel').evaluate(panel => panel.closest('.deck-widget-container')), null);
   assert.ok(
     await page.locator('.sun-controls label').evaluateAll((labels) =>
       labels.every((label) => {
         const a = label.querySelector('span').getBoundingClientRect();
         const b = label.querySelector('select,input').getBoundingClientRect();
-        return Math.abs(a.y + a.height / 2 - b.y - b.height / 2) < 2;
+        return b.top >= a.bottom;
       })
     )
   );
@@ -52,6 +54,9 @@ try {
   await page.getByRole('button', {name: 'Earth after dark', exact: true}).click();
   await page.getByRole('button', {name: 'Earth after dark', exact: true}).click();
   await page.mouse.move(700, 400);
+  // The padded viewport needs another zoom step to reach detail tile resolution.
+  await page.mouse.wheel(0, -600);
+  await page.waitForTimeout(300);
   await page.mouse.wheel(0, -600);
   await page.locator('[role=status]').filter({hasText: 'overview retained'}).waitFor();
   assert.ok(tileRequests > 0, 'zoom must request detail');
@@ -90,7 +95,7 @@ try {
   assert.ok(blended > 10, 'must check intermediate feather colors, not only day/night endpoints');
   assert.deepEqual(errors, []);
   console.log(
-    `Passed: inline community panel, offline overview, tile failure fallback, ${checked} coverage samples (${blended} inside feather).`
+    `Passed: independent HTML panel, offline overview, tile failure fallback, ${checked} coverage samples (${blended} inside feather).`
   );
 } finally {
   await browser.close();

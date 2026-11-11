@@ -2,10 +2,27 @@
  * SPDX-License-Identifier: MIT
  * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
  */
-.quincuncial-star {font: 14px system-ui; color: #193747; background: #fff; border-radius: 8px; padding: 16px;}
-.quincuncial-star .qs-controls {display:flex; flex-wrap:wrap; gap:12px; align-items:center;}
-.quincuncial-star label {display:flex; align-items:center; gap:6px;}
-.quincuncial-star [hidden] {display:none;}
+.quincuncial-star {display:grid;grid-template-columns:280px minmax(0,1fr);gap:12px;align-items:start;font: 14px system-ui; color: #193747; background: #fff; border: 1px solid #cbdbe2; border-radius: 10px; padding: 12px; box-sizing: border-box;}
+/* Keep the control column independent of the map's responsive drawing size. */
+.quincuncial-star .qs-controls {min-width:0;}
+.quincuncial-star .qs-controls label {display:block;margin:14px 0;}
+.quincuncial-star .qs-controls select {display:block;width:100%;max-width:100%;min-width:0;margin-top:6px;}
+.quincuncial-star .qs-controls input[type='range'] {display:block;width:100%;min-width:0;margin:8px 0 0;accent-color:var(--panel-accent-color);}
+.quincuncial-star .qs-controls output {float:right;color:var(--panel-accent-color);}
+.quincuncial-star .qs-controls .qs-check {display:flex;gap:8px;align-items:center;margin:9px 0;}
+/* Optional controls stay hidden when the label layout overrides native defaults. */
+.quincuncial-star [hidden] {display:none!important;}
 .quincuncial-star canvas {display:block; width:100%; height: min(65vh, 560px); min-height:320px;}
-.quincuncial-star p {min-height:1.5em; margin:8px 0;}
-.quincuncial-star small {color:#526b77;}
+.quincuncial-star .qs-map {position:relative;min-width:0;}
+.quincuncial-star .qs-description {margin:14px 0 0;color:#526b77;font-size:13px;line-height:1.5;}
+@media (max-width:767px) {
+  .quincuncial-star {grid-template-columns:minmax(0,1fr);}
+}
+
+/* Keep the light theme when the compact header becomes sticky. */
+.quincuncial-star .example-panel[data-compact-panel='true'] > .deck-widget-box > section > header {background: var(--menu-background);}
+
+/* Match Curve Flight Lab's typography and control sizing without changing the light palette. */
+.quincuncial-star .example-panel {font: 14px/1.5 system-ui, sans-serif;}
+.quincuncial-star .example-panel label {font-size: 12px;}
+.quincuncial-star .example-panel select {padding: 9px; font: inherit; background: var(--button-background); color: var(--button-text); border: 1px solid var(--menu-border-color); border-radius: 8px; cursor: pointer;}

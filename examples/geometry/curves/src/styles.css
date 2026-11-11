@@ -16,9 +16,9 @@
 .curves-panel {
   position: absolute;
   z-index: 2;
-  top: 16px;
-  left: 16px;
-  width: min(280px, calc(100% - 76px));
+  top: 12px;
+  left: 12px;
+  width: min(280px, calc(100% - 24px));
   max-height: calc(100% - 96px);
   overflow: auto;
   background: rgba(9, 21, 34, 0.94);
@@ -46,9 +46,6 @@
   font-size: 11px;
   font-weight: 400;
   padding-top: 3px;
-}
-.curves-panel-content {
-  padding: 16px;
 }
 .curves-eyebrow {
   font: 11px monospace;

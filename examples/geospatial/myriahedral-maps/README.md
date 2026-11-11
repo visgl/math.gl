@@ -4,6 +4,10 @@ An independent experimental globe-to-net example with 288–4,608 graticule pane
 resolution and unfolding controls, six graticule presets and all five Platonic solids,
 Natural Earth land/ocean colors, optional NASA textures, dark back faces, coordinate picking, and overlap diagnostics.
 
+Geometry controls and statistics fill the sidebar. Drag the unfolding slider or
+select **Globe** or **Flat** below the map. The sidebar collapses above the map on
+narrow screens; projection presets, resolution, and surface controls remain in it.
+
 ## Read the source
 
 Start with `src/layout.ts` for the `MapDescription` and `MapEngine` construction.

@@ -14,7 +14,7 @@ import LodStreaming from './lod-streaming';
 import CoordinatedTransitions from './coordinated-transitions';
 import './styles.css';
 
-export default function TerrainSampling() {
+export default function TerrainSampling({style}) {
   const [diagonal, setDiagonal] = useState('00-11');
   const [missing, setMissing] = useState(false);
   const [normals, setNormals] = useState(false);
@@ -42,7 +42,7 @@ export default function TerrainSampling() {
     setY(Math.max(0, Math.min(80, 80 - ((event.clientY - box.top) / box.height) * 80)));
   };
   return (
-    <div className="terrain-sampling">
+    <div className="terrain-sampling" style={style}>
       <div className="terrain-stage">
         <h2>Sample the surface</h2>
         <p>Local coordinates and heights in meters · Z up</p>

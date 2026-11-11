@@ -10,7 +10,8 @@ SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 .tectonic-heading h2 {margin:5px 0;font-size:clamp(22px,3vw,36px);font-weight:500;letter-spacing:-.03em;color:#f1f8fb;}
 .tectonic-heading p {margin:0;color:#9db8c6;font-size:12px;}
 .tectonic-instructions {position:absolute;bottom:15px;left:26px;color:#809aab;font-size:11px;pointer-events:none;}
-.tectonic-controls {background:#0b1b28;border-left:1px solid #263b49;padding:19px 18px;overflow:auto;min-height:0;}
+/* The sidebar stays dark when the surrounding documentation uses light mode. */
+.tectonic-controls {background:#0b1b28;border-left:1px solid #263b49;padding:19px 18px;overflow:auto;min-height:0;color-scheme:dark;scrollbar-color:#345064 #0b1b28;}
 .tectonic-controls-title h3 {font-size:16px;color:inherit;margin:0 0 7px;}
 .tectonic-badge {display:inline-block;font-size:9px;letter-spacing:.1em;border:1px solid #497b75;color:#9ad6c7;padding:3px 6px;margin-bottom:16px;border-radius:3px;}
 .tectonic-badge.future {border-color:#806342;color:#e9c78d;}

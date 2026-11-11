@@ -13,7 +13,7 @@ let nextInstance = 0;
 export function mountGeoidGlobe(root, {lowUrl, hiUrl}) {
   const id = `geoid-globe-${nextInstance++}`;
   root.innerHTML = `<canvas data-role="globe" aria-label="Interactive geoid globe"></canvas>
-    <aside><h1>Earth’s geoid</h1><p>Drag to rotate. Scroll to zoom. Hover for geoid height.</p>
+    <aside>
     <label for="${id}-resolution">EGM96 grid</label>
     <select id="${id}-resolution" data-role="resolution"><option value="low">Low · 1° preview</option><option value="hi">High · 15′ grid</option></select>
     <label for="${id}-interpolation">Interpolation</label>

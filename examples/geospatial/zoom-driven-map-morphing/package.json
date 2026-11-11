@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@deck.gl-community/panels": "^9.4.8",
-    "@deck.gl/core": "~9.4.0",
-    "@deck.gl/layers": "~9.4.0",
+    "@deck.gl/core": "~9.4.1",
+    "@deck.gl/layers": "~9.4.1",
     "@deck.gl/map-layers": "workspace:*",
     "@loaders.gl/core": "^4.5.1",
     "@luma.gl/core": "~9.4.0",

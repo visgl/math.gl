@@ -46,6 +46,11 @@ try {
   await page.getByRole('alert').waitFor();
   await page.getByRole('button',{name:'Reset ID'}).click();
   await page.getByRole('button',{name:'Fit cell'}).click();
+  // The fitted S2 sample exercises GlobeView's flat viewport above zoom 12.
+  await page.mouse.move(450,400);
+  await page.mouse.wheel(0,-300);
+  await page.waitForTimeout(500);
+  assert.deepEqual(errors,[],'Zooming the fitted S2 cell must not throw');
   await page.getByLabel('Compare six').check();
   await page.getByLabel('Unwrap antimeridian').uncheck();
   await page.getByLabel('Compare six').uncheck();

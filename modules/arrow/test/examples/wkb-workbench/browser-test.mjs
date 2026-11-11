@@ -13,12 +13,18 @@ try {
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto(server.resolvedUrls.local[0]);
   await page.getByTestId('wkb-statistics').waitFor();
+  assert.equal(await page.locator('.example-panel').count(),0);
+  assert.equal(await page.getByLabel('Formatted WKT',{exact:true}).evaluate(element=>element.tagName),'DIV');
+  assert.equal(await page.getByLabel('WKB bytes',{exact:true}).evaluate(element=>element.tagName),'DIV');
+  assert(await page.getByTestId('wkb-statistics').evaluate(element=>Boolean(element.compareDocumentPosition(document.querySelector('[aria-label="Formatted WKT"]')) & Node.DOCUMENT_POSITION_FOLLOWING)));
+  const fixtureBox=await page.getByLabel('Fixture',{exact:true}).boundingBox(),formatBox=await page.getByLabel('Input format',{exact:true}).boundingBox();
+  assert(fixtureBox.x<formatBox.x);
   for(const name of ['Polygon with hole','3D line','Measured point','ZM multipoint','Collection','Empty point','EWKB SRID 4326','Big endian point']) {
     await page.getByLabel('Fixture',{exact:true}).selectOption(name);
     assert.equal(await page.getByRole('alert').count(),0,name);
     await page.getByTestId('wkb-statistics').waitFor();
-    if(name==='Measured point') assert.match(await page.getByLabel('Formatted WKT',{exact:true}).inputValue(),/POINT M/);
-    if(name==='EWKB SRID 4326') assert.match(await page.getByTestId('wkb-statistics').innerText(),/SRID: 4326/);
+    if(name==='Measured point') assert.match(await page.getByLabel('Formatted WKT',{exact:true}).innerText(),/POINT M/);
+    if(name==='EWKB SRID 4326') assert.match(await page.getByTestId('wkb-statistics').innerText(),/SRID\s+4326/);
     if(name==='Big endian point') assert.match(await page.getByTestId('wkb-statistics').innerText(),/Big endian/);
   }
   const roundTrip=await page.evaluate(async()=> {
@@ -45,9 +51,6 @@ try {
   await page.getByLabel('Fixture',{exact:true}).selectOption('Polygon with hole');
   console.log('WKB: fixture round trips, dimensions, EWKB SRID, byte order, malformed input, truncation, trailing bytes, and mixed dimensions passed.');
   await page.setViewportSize({width:390,height:400});
-  await page.waitForFunction(()=>document.querySelector('.example-panel')?.dataset.compactPanel==='true');
-  const compactHeader=page.locator('.example-panel header button').first();
-  if(await compactHeader.getAttribute('aria-expanded')==='false') await compactHeader.click();
   assert.equal(await page.locator('.wkb-workbench').evaluate(element=>element.clientHeight),400);
   await page.getByText('Input is limited to').scrollIntoViewIfNeeded();
   const bottom=await page.getByText('Input is limited to').boundingBox();

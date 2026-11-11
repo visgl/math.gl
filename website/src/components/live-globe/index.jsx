@@ -12,7 +12,8 @@ export default function LiveGlobe({
   height,
   inline = false,
   interactive = false,
-  exampleProps
+  exampleProps,
+  style
 }) {
   const frameHeight =
     height ?? (inline ? 520 : 'max(240px, calc(100dvh - var(--ifm-navbar-height) - 4rem))');
@@ -106,7 +107,8 @@ export default function LiveGlobe({
       data-inline={inline || undefined}
       style={{
         '--doc-live-example-height':
-          typeof frameHeight === 'number' ? `${frameHeight}px` : frameHeight
+          typeof frameHeight === 'number' ? `${frameHeight}px` : frameHeight,
+        ...style
       }}
     >
       <div

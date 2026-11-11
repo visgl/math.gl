@@ -41,7 +41,7 @@ export function compileAsync(expression,options) {
   const result = await build({
     entryPoints:[resolve(root,`examples/${example}/${entry}`)],
     outfile:resolve(root,`.review-output/${name}.js`),
-    bundle:true,format:'esm',platform:'browser',write:false,plugins,loader:{'.ttf':'dataurl','.jpg':'dataurl'}
+    bundle:true,format:'esm',platform:'browser',write:false,plugins,loader:{'.ttf':'dataurl','.jpg':'dataurl','.svg':'dataurl'}
   });
   for (const file of result.outputFiles) files.set('/'+basename(file.path),file.contents);
   const html=readFileSync(resolve(root,`examples/${example}/index.html`),'utf8')
@@ -74,16 +74,27 @@ try {
   await panel.getByRole('button', {name: 'Geometry and cuts'}).click();
   await page.locator('#solid').waitFor({state: 'visible'});
   assert.equal(await page.locator('#solid').inputValue(), 'icosahedron');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.getByRole('button', {name:'Flat',exact:true}).click();
+  assert.equal(await page.locator('#unfold').inputValue(),'100');
+  assert.equal(await page.locator('#flat').getAttribute('aria-pressed'),'true');
+  await page.getByRole('button', {name:'Globe',exact:true}).click();
+  assert.equal(await page.locator('#unfold').inputValue(),'0');
+  assert.equal(await page.locator('#globe').getAttribute('aria-pressed'),'true');
+  await page.emulateMedia({reducedMotion:'no-preference'});
   const sizes=await page.evaluate(()=>{
     const root=document.querySelector('#app'),canvas=root.querySelector('canvas');
     const height=()=>canvas.getBoundingClientRect().height;
     const standalone=height();root.dataset.compact='true';const compact=height();
     document.body.dataset.fullscreen='true';const fullscreen=height();
     delete document.body.dataset.fullscreen;delete root.dataset.compact;
-    return {standalone,compact,fullscreen};
+    root.style.height='1200px';const taller=height();root.style.height='';
+    return {standalone,compact,fullscreen,taller};
   });
-  assert.equal(sizes.compact,280);
-  assert(sizes.standalone>sizes.compact && sizes.fullscreen>sizes.compact,JSON.stringify(sizes));
+  // Every mode fills the host; enlarging the host gives the canvas the extra height.
+  assert.equal(sizes.compact,sizes.standalone);
+  assert.equal(sizes.fullscreen,sizes.standalone);
+  assert(sizes.taller>sizes.standalone,JSON.stringify(sizes));
   await page.evaluate(()=>window.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true})));
   assert(await page.locator('#app').evaluate(root=>root.childElementCount>0),'Cached page must remain mounted');
   await page.evaluate(()=>{
@@ -96,16 +107,17 @@ try {
   await page.goto(url+'/albers');
   for (const width of [1200, 600, 375]) {
     await page.setViewportSize({width, height:1000});
-    const info = page.locator('.example-info-box');
+    const info = page.locator('.layer-controls');
     const toggle = info.getByRole('button', {name: 'Albers USA', exact:true});
-    await page.waitForFunction(() => document.querySelector('.example-info-box')?.dataset.compactPanel === String(matchMedia('(max-width: 767px), (max-width: 996px) and (max-height: 500px)').matches));
+    await page.waitForFunction(() => document.querySelector('.layer-controls')?.dataset.compactPanel === String(matchMedia('(max-width: 767px), (max-width: 996px) and (max-height: 500px)').matches));
     if (await toggle.getAttribute('aria-expanded') === 'false') await toggle.click();
     await info.scrollIntoViewIfNeeded();
-    assert((await info.boundingBox()).height > 100, 'Inline panel must retain its natural content height');
+    assert((await info.boundingBox()).height > 100, 'Expanded floating panel must expose its layer controls');
     await toggle.click();
-    await page.locator('.view-toggle').waitFor({state:'hidden'});
+    await page.locator('#states').waitFor({state:'hidden'});
+    assert(await page.locator('#unfold').isVisible(),'Invisible slider panel stays open');
     await toggle.click();
-    await page.locator('.view-toggle').waitFor({state:'visible'});
+    await page.locator('#states').waitFor({state:'visible'});
   }
   await page.setViewportSize({width:1200,height:1000});
 

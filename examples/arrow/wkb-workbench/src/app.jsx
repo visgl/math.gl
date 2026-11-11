@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // biome-ignore lint/correctness/noUnusedImports: Standalone examples use the classic JSX transform.
-import React, {useMemo, useState} from 'react';
-import ExamplePanel from '../../../common/example-panel';
+import React, {useId, useLayoutEffect, useMemo, useRef, useState} from 'react';
+import {applyPanelTheme} from '@deck.gl-community/panels';
 import {FIXTURES, inspectGeometry, geometryParts} from './model';
 import './styles.css';
 
@@ -28,7 +28,13 @@ function Preview({result}) {
           return part.coordinates
             .filter(p => Number.isFinite(p[0]) && Number.isFinite(p[1]))
             .map((p, j) => (
-              <circle key={`${i}-${j}`} cx={point(p)[0]} cy={point(p)[1]} r="5" fill="#ffd080" />
+              <circle
+                key={`${i}-${j}`}
+                cx={point(p)[0]}
+                cy={point(p)[1]}
+                r="5"
+                fill="var(--panel-accent-color)"
+              />
             ));
         if (part.kind === 'line')
           return (
@@ -36,7 +42,7 @@ function Preview({result}) {
               key={i}
               points={part.coordinates.map(p => point(p).join(',')).join(' ')}
               fill="none"
-              stroke="#ffd080"
+              stroke="var(--panel-accent-color)"
               strokeWidth="3"
             />
           );
@@ -48,9 +54,9 @@ function Preview({result}) {
           <path
             key={i}
             d={path}
-            fill="#3cabc477"
+            fill="var(--menu-item-hover)"
             fillRule="evenodd"
-            stroke="#72dcff"
+            stroke="var(--panel-accent-color)"
             strokeWidth="2"
           />
         );
@@ -58,7 +64,14 @@ function Preview({result}) {
     </svg>
   );
 }
-export default function WKBWorkbench() {
+export default function WKBWorkbench({style, theme = 'dark'}) {
+  const root = useRef(null);
+  const inputId = useId();
+  const instructionsId = `${inputId}-instructions`;
+  useLayoutEffect(() => {
+    // Use the shared control palette throughout the app, without mounting an info panel.
+    applyPanelTheme(root.current, {base: `sleek-${theme}`, variables: {}});
+  }, [theme]);
   const [mode, setMode] = useState('wkt');
   const [text, setText] = useState(FIXTURES['Polygon with hole'].text);
   const [fixture, setFixture] = useState('Polygon with hole');
@@ -74,126 +87,159 @@ export default function WKBWorkbench() {
     setMode(FIXTURES[name].mode);
     setText(FIXTURES[name].text);
   };
+  // Preserve the complete byte stream while marking the root header's hexadecimal prefix.
+  const headerHexLength = result.error ? 0 : result.statistics.header.byteLength * 3 - 1;
   return (
-    <div className="wkb-workbench">
+    <div className="wkb-workbench" ref={root} style={{colorScheme: theme, ...style}}>
       <main className="wkb-main">
         <h2>WKT ↔ WKB workbench</h2>
-        <p>
-          Edit text or hexadecimal bytes. Geometry is previewed in XY; Z and M remain visible in the
-          coordinate table.
+        <p className="wkb-description">
+          Inspect, convert, and preview geometry in WKT and WKB formats.
         </p>
-        <label>
-          Input format
-          <select
-            aria-label="Input format"
-            value={mode}
-            onChange={event => {
-              setMode(event.target.value);
-              setText(
-                event.target.value === 'wkt'
-                  ? FIXTURES['Polygon with hole'].text
-                  : '0101000000000000000000f03f0000000000000040'
-              );
-            }}
-          >
-            <option value="wkt">WKT</option>
-            <option value="hex">WKB hexadecimal</option>
-          </select>
-        </label>
-        <label>
-          Geometry input
+        <div className="wkb-controls">
+          <label>
+            Fixture
+            <select
+              aria-label="Fixture"
+              value={fixture}
+              onChange={event => load(event.target.value)}
+            >
+              {Object.keys(FIXTURES).map(name => (
+                <option key={name}>{name}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Input format
+            <select
+              aria-label="Input format"
+              value={mode}
+              onChange={event => {
+                setMode(event.target.value);
+                setText(
+                  event.target.value === 'wkt'
+                    ? FIXTURES['Polygon with hole'].text
+                    : '0101000000000000000000f03f0000000000000040'
+                );
+              }}
+            >
+              <option value="wkt">WKT</option>
+              <option value="hex">WKB hexadecimal</option>
+            </select>
+          </label>
+          <button type="button" onClick={() => load(fixture)}>
+            Reset fixture
+          </button>
+        </div>
+        <div className="wkb-input">
+          <label htmlFor={inputId}>Geometry input</label>
+          <p className="wkb-help" id={instructionsId}>
+            Enter WKT with matching coordinate dimensions in collections, or hexadecimal byte pairs
+            with optional whitespace. WKB supports either byte order and EWKB SRIDs. Input is
+            limited to 100,000 characters, 10,000 declared elements, and 32 nesting levels.
+          </p>
           <textarea
+            id={inputId}
+            aria-describedby={instructionsId}
             aria-label="Geometry input"
             spellCheck="false"
             value={text}
             onChange={event => setText(event.target.value)}
           />
-        </label>
+        </div>
         {result.error ? (
           <p role="alert">{result.error}</p>
         ) : (
           <>
             <Preview result={result} />
-            <label>
-              Formatted WKT
-              <textarea aria-label="Formatted WKT" readOnly value={result.wkt} />
-            </label>
-            <label>
-              WKB bytes
-              <textarea aria-label="WKB bytes" readOnly value={result.hex} />
-            </label>
-            <p>
-              Header bytes:{' '}
-              <code>
-                {result.hex.split(' ').slice(0, result.statistics.header.byteLength).join(' ')}
-              </code>{' '}
-              · Remaining bytes contain the geometry body.
-            </p>
-            <h3>Coordinate visitor</h3>
-            <p>First 100 coordinates, with offsets into the original byte buffer.</p>
-            <div className="wkb-table">
-              <table>
-                <thead>
-                  <tr>
-                    {['Byte offset', 'X', 'Y', 'Z', 'M'].map(name => (
-                      <th key={name}>{name}</th>
+            <div className="wkb-results">
+              <section
+                className="wkb-card wkb-statistics"
+                aria-label="Parsed geometry"
+                data-testid="wkb-statistics"
+              >
+                <h3>Parsed geometry</h3>
+                <div className="wkb-card-body">
+                  <dl>
+                    {[
+                      ['Geometry', result.statistics.header.geometryType],
+                      ['Dimensions', result.statistics.header.dimension.toUpperCase()],
+                      ['Size', `${result.statistics.byteLength} bytes`],
+                      ['Coordinates', result.statistics.coordinateCount],
+                      ['Rings', result.statistics.ringCount],
+                      ['Format', result.statistics.header.dialect],
+                      [
+                        'Byte order',
+                        result.statistics.header.littleEndian ? 'Little endian' : 'Big endian'
+                      ],
+                      ['SRID', result.statistics.header.srid ?? 'Not embedded']
+                    ].map(([label, value]) => (
+                      <div key={label}>
+                        <dt>{label}</dt>
+                        <dd>{value}</dd>
+                      </div>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.coordinates.slice(0, 100).map((coordinate, i) => (
-                    <tr key={i}>
-                      {['byteOffset', 'x', 'y', 'z', 'm'].map(key => (
-                        <td key={key}>
-                          {coordinate[key] === undefined ? '—' : String(coordinate[key])}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </dl>
+                  <div className="wkb-bounds">
+                    <span>Bounds</span>
+                    <pre>{JSON.stringify(result.statistics.bounds ?? {}, null, 2)}</pre>
+                  </div>
+                </div>
+              </section>
+              <section className="wkb-card">
+                <h3>Formatted WKT</h3>
+                <div className="wkb-card-body">
+                  <p className="wkb-help">little-endian ISO WKB</p>
+                  <div className="wkb-output" role="region" aria-label="Formatted WKT" tabIndex={0}>
+                    {result.wkt}
+                  </div>
+                </div>
+              </section>
+              <section className="wkb-card">
+                <h3>WKB bytes</h3>
+                <div className="wkb-card-body">
+                  <div className="wkb-output" role="region" aria-label="WKB bytes" tabIndex={0}>
+                    <span className="wkb-header-bytes" title="WKB header">
+                      {result.hex.slice(0, headerHexLength)}
+                    </span>
+                    {result.hex.slice(headerHexLength)}
+                  </div>
+                </div>
+              </section>
+              <section className="wkb-card">
+                <h3>Coordinate table</h3>
+                <div className="wkb-card-body">
+                  <p className="wkb-help">
+                    First 100 coordinates, with offsets into the original byte buffer.
+                  </p>
+                  <div className="wkb-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          {['Byte offset', 'X', 'Y', 'Z', 'M'].map(name => (
+                            <th key={name}>{name}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {result.coordinates.slice(0, 100).map((coordinate, i) => (
+                          <tr key={i}>
+                            {['byteOffset', 'x', 'y', 'z', 'm'].map(key => (
+                              <td key={key}>
+                                {coordinate[key] === undefined ? '—' : String(coordinate[key])}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
             </div>
           </>
         )}
       </main>
-      <ExamplePanel title="Geometry codecs">
-        <label>
-          Fixture
-          <select aria-label="Fixture" value={fixture} onChange={event => load(event.target.value)}>
-            {Object.keys(FIXTURES).map(name => (
-              <option key={name}>{name}</option>
-            ))}
-          </select>
-        </label>
-        <button onClick={() => load(fixture)}>Reset fixture</button>
-        {!result.error && (
-          <div data-testid="wkb-statistics">
-            <p>
-              {result.statistics.header.geometryType} ·{' '}
-              {result.statistics.header.dimension.toUpperCase()}
-            </p>
-            <p>
-              {result.statistics.byteLength} bytes · {result.statistics.coordinateCount} coordinates
-              · {result.statistics.ringCount} rings
-            </p>
-            <p>
-              {result.statistics.header.dialect} ·{' '}
-              {result.statistics.header.littleEndian ? 'Little endian' : 'Big endian'}
-            </p>
-            <p>SRID: {result.statistics.header.srid ?? 'not embedded'}</p>
-            <pre>{JSON.stringify(result.statistics.bounds ?? {}, null, 2)}</pre>
-          </div>
-        )}
-        <p>
-          WKT input writes deterministic little-endian ISO WKB. Pasted WKB can also contain EWKB
-          SRIDs or big-endian data. An SRID labels coordinates; this example does not reproject
-          them.
-        </p>
-        <p>
-          Input is limited to 100,000 characters and binary traversal to 10,000 declared elements
-          and 32 nesting levels.
-        </p>
-      </ExamplePanel>
     </div>
   );
 }

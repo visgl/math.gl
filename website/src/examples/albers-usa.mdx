@@ -9,16 +9,17 @@ import Example from '@site/src/components/albers-usa';
 This focused example shows the experimental [`createAlbersUsaMap`,
 `getMapLayout`, `fitMapLayout`, and `pickMapLayout`
 APIs](/docs/modules/geospatial/maps/). States are clipped at region
-boundaries, and the cursor readout resolves geographic coordinates through the
+boundaries, and the hover tooltip resolves geographic coordinates through the
 frontmost inset. The example enables the five inhabited U.S. territory insets
 with `{includeTerritories: true}` alongside Alaska and Hawaii. Alaska is
 displayed at 35% linear scale. The preset's broad geographic masks are not
 political borders or exact D3 inset clips. Minor outlying islands are outside
 this example's coverage.
 
-Use **View globe** to animate the mapped features back onto a sphere, or scrub
-the **Unfold** slider. The mouse wheel and zoom buttons magnify all insets
-together; drag to pan. The globe adds a public-domain Natural Earth 1:110m land
+Use **Globe** and **Unfolded** at either end of the slider to animate between
+the sphere and inset map, or scrub the slider to inspect intermediate positions.
+The mouse wheel and top-right zoom buttons magnify all insets together; drag to pan.
+The undo button resets zoom and pan. The globe adds a public-domain Natural Earth 1:110m land
 layer for context. The transition belongs to this example's renderer; the
 static `DiscontinuousMap` API supplies the source coordinates and inset layout.
 The map opens without graticules or inset boxes; the layer controls can show

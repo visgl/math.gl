@@ -13,9 +13,6 @@
     sans-serif;
   overflow: hidden;
 }
-.geographic-example .query-controls {
-  padding: 16px;
-}
 .geographic-example label {
   display: block;
   margin: 12px 0;
@@ -52,4 +49,4 @@
 }
 
 /* Position the controls over this app's canvas or map. */
-.geographic-example .example-panel { position: absolute; left: 16px; top: 16px; z-index: 2; width: min(290px, calc(100% - 76px)); max-height: calc(100% - 78px); overflow: auto; }
+.geographic-example .example-panel { position: absolute; left: 12px; top: 12px; z-index: 2; width: min(290px, calc(100% - 24px)); max-height: calc(100% - 78px); overflow: auto; }

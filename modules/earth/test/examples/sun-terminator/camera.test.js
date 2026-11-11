@@ -127,3 +127,19 @@ test('multiple eastward and westward turns preserve geographic focus', () => {
     }
   }
 });
+
+test('panel padding preserves geographic focus through a projected view', () => {
+  const padding = {left: 300};
+  const globeView = new GlobeView({padding});
+  const dimensions = {width: 1000, height: 800};
+  const source = globeView.makeViewport({
+    ...dimensions,
+    viewState: {longitude: 12, latitude: 24, zoom: 3}
+  });
+  const projectedView = new OrthographicView({padding, flipY: false});
+  const projected = transferCamera('globe', source, 'eqearth', projectedView);
+  const viewport = projectedView.makeViewport({...dimensions, viewState: projected.camera});
+  const result = transferCamera('eqearth', viewport, 'globe', globeView);
+  assert.ok(Math.abs(result.camera.longitude - 12) < 1e-6);
+  assert.ok(Math.abs(result.camera.latitude - 24) < 1e-6);
+});
