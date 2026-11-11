@@ -109,6 +109,8 @@ export {
   earcut,
   clipPolygon,
   clipPolyline,
+  getPoleOfInaccessibility,
+  DEFAULT_POLE_SEARCH_SEGMENT_TESTS,
   cutPolygonByGrid,
   cutPolylineByGrid,
   cutPolylineByMercatorBounds,
@@ -119,6 +121,7 @@ export {
 export type {
   PolygonWinding,
   WindingDirection,
+  PoleSearchBudget,
   SubdividePolylineOptions,
   SubdividedPolyline,
   PolylineEdgeSampler,
