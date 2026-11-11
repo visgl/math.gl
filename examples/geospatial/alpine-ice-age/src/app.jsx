@@ -5,7 +5,7 @@ import React, {useEffect, useRef, useState, useCallback} from 'react';
 import {loadSimulation, sampleAt} from './data.js';
 import {createScene} from './scene.js';
 import './style.css';
-import AttributionWidget from '../../../common/attribution-widget.jsx';
+import AttributionWidget from '../../../common/attribution-widget.js';
 import {ALPINE_SOURCES} from './attribution.ts';
 import {glacialPhase} from './glacial-phase.ts';
 import GlobalIceAge from './global-app.jsx';
