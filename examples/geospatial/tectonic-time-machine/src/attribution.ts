@@ -1,20 +1,10 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import type {AttributionSource} from '../../../common/attribution-widget.js';
 import type {sourceFor} from './sources.ts';
 export function tectonicSources(source: ReturnType<typeof sourceFor>) {
-  const entries: {
-    id: string;
-    title: string;
-    credit: string;
-    creators?: string;
-    dataset: string;
-    paper?: string;
-    license: string;
-    licenseUrl: string;
-    hosted?: string;
-    changes: string;
-  }[] = [
+  const entries: AttributionSource[] = [
     {
       id: source.id,
       title: 'Plate geometry and finite rotations',

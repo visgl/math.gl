@@ -7,7 +7,7 @@ import {loadGlobalSimulation, sampleAt, clampAge} from './data.js';
 import {createGlobalScene} from './global-scene.js';
 import {GLOBAL_VIEWS} from './map-options.ts';
 import './style.css';
-import AttributionWidget from '../../../common/attribution-widget.jsx';
+import AttributionWidget from '../../../common/attribution-widget.js';
 import {GLOBAL_SOURCES, INSET_REFERENCE_SOURCES} from './attribution.ts';
 import {climateAt, loadClimate} from './climate.ts';
 import {loadKrappSimulation, krappPhase, KRAPP_CHAPTERS} from './krapp-data.js';

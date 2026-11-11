@@ -4,8 +4,21 @@
 import React from 'react';
 import './attribution-widget.css';
 
+export type AttributionSource = {
+  id: string;
+  title: string;
+  credit: string;
+  creators?: string;
+  dataset: string;
+  paper?: string;
+  license: string;
+  licenseUrl: string;
+  hosted?: string;
+  changes?: string;
+};
+
 /** Compact source credits shared by standalone examples and website embeds. */
-export default function AttributionWidget({sources}) {
+export default function AttributionWidget({sources}: {sources: readonly AttributionSource[]}) {
   return (
     <details className="attribution-widget">
       <summary>

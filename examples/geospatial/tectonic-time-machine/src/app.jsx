@@ -31,7 +31,7 @@ import {
 } from './timeline.js';
 import '@deck.gl/widgets/stylesheet.css';
 import './styles.css';
-import AttributionWidget from '../../../common/attribution-widget.jsx';
+import AttributionWidget from '../../../common/attribution-widget.js';
 import {tectonicSources} from './attribution.ts';
 export default function TectonicTimeMachine() {
   const canvas = useRef(null),
