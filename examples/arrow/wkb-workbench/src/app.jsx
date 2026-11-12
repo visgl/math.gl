@@ -4,6 +4,7 @@
 // biome-ignore lint/correctness/noUnusedImports: Standalone examples use the classic JSX transform.
 import React, {useId, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import {applyPanelTheme} from '@deck.gl-community/panels';
+import ExamplePanel from '../../../common/example-panel';
 import {FIXTURES, inspectGeometry, geometryParts} from './model';
 import './styles.css';
 
@@ -69,7 +70,7 @@ export default function WKBWorkbench({style, theme = 'dark'}) {
   const inputId = useId();
   const instructionsId = `${inputId}-instructions`;
   useLayoutEffect(() => {
-    // Use the shared control palette throughout the app, without mounting an info panel.
+    // The preview and result cards share the control panel palette.
     applyPanelTheme(root.current, {base: `sleek-${theme}`, variables: {}});
   }, [theme]);
   const [mode, setMode] = useState('wkt');
@@ -96,41 +97,48 @@ export default function WKBWorkbench({style, theme = 'dark'}) {
         <p className="wkb-description">
           Inspect, convert, and preview geometry in WKT and WKB formats.
         </p>
-        <div className="wkb-controls">
-          <label>
-            Fixture
-            <select
-              aria-label="Fixture"
-              value={fixture}
-              onChange={event => load(event.target.value)}
-            >
-              {Object.keys(FIXTURES).map(name => (
-                <option key={name}>{name}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Input format
-            <select
-              aria-label="Input format"
-              value={mode}
-              onChange={event => {
-                setMode(event.target.value);
-                setText(
-                  event.target.value === 'wkt'
-                    ? FIXTURES['Polygon with hole'].text
-                    : '0101000000000000000000f03f0000000000000040'
-                );
-              }}
-            >
-              <option value="wkt">WKT</option>
-              <option value="hex">WKB hexadecimal</option>
-            </select>
-          </label>
-          <button type="button" onClick={() => load(fixture)}>
-            Reset fixture
-          </button>
-        </div>
+        <ExamplePanel
+          title="Geometry codecs"
+          theme={`sleek-${theme}`}
+          className="wkb-control-panel"
+          collapseOnCompact={false}
+        >
+          <div className="wkb-controls">
+            <label>
+              Fixture
+              <select
+                aria-label="Fixture"
+                value={fixture}
+                onChange={event => load(event.target.value)}
+              >
+                {Object.keys(FIXTURES).map(name => (
+                  <option key={name}>{name}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Input format
+              <select
+                aria-label="Input format"
+                value={mode}
+                onChange={event => {
+                  setMode(event.target.value);
+                  setText(
+                    event.target.value === 'wkt'
+                      ? FIXTURES['Polygon with hole'].text
+                      : '0101000000000000000000f03f0000000000000040'
+                  );
+                }}
+              >
+                <option value="wkt">WKT</option>
+                <option value="hex">WKB hexadecimal</option>
+              </select>
+            </label>
+            <button type="button" onClick={() => load(fixture)}>
+              Reset fixture
+            </button>
+          </div>
+        </ExamplePanel>
         <div className="wkb-input">
           <label htmlFor={inputId}>Geometry input</label>
           <p className="wkb-help" id={instructionsId}>

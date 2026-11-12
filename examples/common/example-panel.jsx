@@ -8,18 +8,18 @@ import {
   BoxPanelContainer,
   CustomPanel,
   PanelManager,
-  applyPanelTheme,
-  PANEL_THEME_SLEEK_DARK
+  applyPanelTheme
 } from '@deck.gl-community/panels';
 import './example-panel.css';
 import {configureCompactPanel} from './compact-panel.js';
 
-/** Keep React controls live in a themed panel; invisible panels have no chrome. */
+/** Keep React controls live in a themed panel. */
 export default function ExamplePanel({
   title,
   className,
   children,
-  variant = 'default',
+  theme = 'sleek-dark',
+  collapseOnCompact = true,
   open,
   onOpenChange
 }) {
@@ -27,12 +27,12 @@ export default function ExamplePanel({
   const container = useRef(null);
   const [contentRoot, setContentRoot] = useState(null);
   useLayoutEffect(() => {
-    applyPanelTheme(host.current, PANEL_THEME_SLEEK_DARK);
+    applyPanelTheme(host.current, {base: theme, variables: {}});
     const manager = new PanelManager({parentElement: host.current});
     const panel = new CustomPanel({
       id: 'example-controls',
       title: 'Controls',
-      theme: 'sleek-dark',
+      theme,
       className: 'example-panel-content',
       onRenderHTML: root => {
         setContentRoot(root);
@@ -50,33 +50,21 @@ export default function ExamplePanel({
       manager.finalize();
       container.current = null;
     };
-  }, []);
+  }, [theme]);
   useLayoutEffect(() => {
     container.current?.setProps({title});
-  }, [title]);
+  }, [title, theme]);
   useLayoutEffect(() => {
-    const invisible = variant === 'invisible';
-    container.current.setProps({collapsible: !invisible});
-    if (invisible) {
-      // Keep controls reachable without a header, including after a responsive collapse.
-      delete host.current.dataset.compactPanel;
-      container.current.setProps({open: true});
-      return;
-    }
     if (open !== undefined) {
       // Accordions own their open state, including on small screens.
       delete host.current.dataset.compactPanel;
       container.current.setProps({open, onOpenChange});
       return;
     }
-    return configureCompactPanel(host.current, container.current);
-  }, [variant, open, onOpenChange]);
+    return configureCompactPanel(host.current, container.current, collapseOnCompact);
+  }, [collapseOnCompact, open, onOpenChange, theme]);
   return (
-    <aside
-      ref={host}
-      aria-label={title}
-      className={`example-panel ${variant === 'invisible' ? 'example-panel-invisible ' : ''}${className || ''}`}
-    >
+    <aside ref={host} aria-label={title} className={`example-panel ${className || ''}`}>
       {contentRoot && createPortal(children, contentRoot)}
     </aside>
   );

@@ -25,26 +25,14 @@
 .wkb-workbench .wkb-description { color: inherit; }
 .wkb-workbench .wkb-help { color: var(--button-icon-idle); }
 .wkb-workbench label { display: block; font-size: 12px; }
+.wkb-control-panel { margin: 12px 0; }
 .wkb-controls {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
-  align-items: end;
+  align-items: center;
   gap: 12px;
-  margin: 16px 0;
+  margin: 0;
 }
-.wkb-workbench select, .wkb-workbench button {
-  box-sizing: border-box;
-  min-width: 0;
-  padding: 9px;
-  border: 1px solid var(--button-stroke);
-  border-radius: 8px;
-  background: var(--button-background);
-  color: var(--button-text);
-  font: 12px/1.5 system-ui, sans-serif;
-  cursor: pointer;
-}
-.wkb-workbench select { display: block; width: 100%; margin-top: 6px; }
-.wkb-workbench :is(select, button):hover { background: var(--panel-hover-background); }
 .wkb-workbench :is(textarea, select, button, [tabindex]):focus-visible {
   outline: 2px solid var(--panel-focus-color);
   outline-offset: -2px;
@@ -122,10 +110,6 @@
 @media (max-width: 600px) {
   .wkb-controls { grid-template-columns: minmax(0, 1fr); }
 }
-@media (pointer: coarse), (max-width: 996px) {
-  .wkb-workbench button, .wkb-workbench select { min-height: 44px; }
-}
-
 @media (max-width: 767px) {
   .wkb-results { grid-template-columns: minmax(0, 1fr); }
 }

@@ -131,7 +131,8 @@ export function mountSunTerminator(root: HTMLDivElement) {
     offsetLabel.value = '+' + hours.toFixed(1) + ' h';
   };
   syncTime();
-  let panelWidth = host.getBoundingClientRect().width;
+  const getPanelWidth = () => (root.clientWidth < 600 ? 0 : host.getBoundingClientRect().width);
+  let panelWidth = getPanelWidth();
   function createView(id) {
     const props = {id: `earth-${id}`, controller: panController, padding: {left: panelWidth}};
     return id === 'globe'
@@ -171,12 +172,13 @@ export function mountSunTerminator(root: HTMLDivElement) {
   });
   // Measure the actual overlay width so responsive panels offset every projection equally.
   const panelObserver = new ResizeObserver(() => {
-    const width = host.getBoundingClientRect().width;
+    const width = getPanelWidth();
     if (width === panelWidth || disposed) return;
     panelWidth = width;
     if (!morph) deck.setProps({views: createView(activeView)});
   });
   panelObserver.observe(host);
+  panelObserver.observe(root);
   Promise.all([dayOverview.decode(), nightOverview.decode()])
     .then(() => {
       if (!disposed) {

@@ -5,6 +5,7 @@ import {
   BoxPanelContainer,
   CustomPanel,
   PanelManager,
+  mountPanel,
   applyPanelTheme
 } from '@deck.gl-community/panels';
 import './example-panel.css';
@@ -21,32 +22,33 @@ export function mountInfoBox(
   if (!host) throw new Error('Info box host is required');
   const invisible = variant === 'invisible';
   host.classList.add('example-panel', 'example-info-box');
-  host.classList.toggle('example-panel-invisible', invisible);
   host.setAttribute('aria-label', title);
   const content = document.createElement('div');
   content.className = 'example-info-content example-panel-content';
   content.append(...host.childNodes);
   applyPanelTheme(host, {base: theme, variables: {}});
-  const manager = new PanelManager({parentElement: host});
   const panel = new CustomPanel({
     id: 'info-content',
     title,
     theme,
     onRenderHTML: root => root.append(content)
   });
+  if (invisible) {
+    const mount = mountPanel(panel, host);
+    return () => mount.finalize();
+  }
+  const manager = new PanelManager({parentElement: host});
   const box = new BoxPanelContainer({
     id: 'info-box',
     _container: host,
     title,
     panel,
     widthPx: width,
-    collapsible: !invisible,
     defaultOpen: true,
     style: {width: '100%'}
   });
   manager.setProps({components: [box]});
-  // Hidden chrome must never leave controls collapsed behind an unavailable expander.
-  const cleanupCompact = invisible ? () => {} : configureCompactPanel(host, box);
+  const cleanupCompact = configureCompactPanel(host, box);
   return () => {
     cleanupCompact();
     manager.finalize();

@@ -18,11 +18,11 @@ export function mountTimezoneGlobe(root, {lowUrl, hiUrl}) {
     <aside>
       <label for="${instanceId}-day">Date at 12:00 UTC <output data-role="date"></output></label>
       <input data-role="day" id="${instanceId}-day" type="range" min="0" max="364" value="0" />
-      <label for="${instanceId}-resolution">Geometry</label>
+      <div class="example-control-row"><label for="${instanceId}-resolution">Geometry</label>
       <select data-role="resolution" id="${instanceId}-resolution">
         <option value="low">Low · whole globe</option>
         <option value="hi">High · closer look</option>
-      </select>
+      </select></div>
       <p data-role="status" role="status">Loading timezone boundaries…</p>
       <div class="legend"></div>
       <div class="legend-labels">

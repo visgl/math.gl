@@ -26,16 +26,15 @@ try {
   await page.goto(url, {waitUntil: 'domcontentloaded'});
   await page.locator('[role=status]').filter({hasText: 'overview ready'}).waitFor();
   assert.equal(tileRequests, 0, 'initial overview must not wait on remote imagery');
-  // The independent HTML panel can collapse, with labels above their controls.
+  // The community panel can collapse, with labels alongside their controls.
   assert.equal(await page.locator('.sun-panel').count(), 1);
-  assert.equal(await page.locator('.sun-panel .deck-widget-box').count(), 0);
-  assert.equal(await page.locator('.sun-panel').evaluate(panel => panel.closest('.deck-widget-container')), null);
+  assert.equal(await page.locator('.sun-panel .deck-widget-box').count(), 1);
   assert.ok(
     await page.locator('.sun-controls label').evaluateAll((labels) =>
       labels.every((label) => {
         const a = label.querySelector('span').getBoundingClientRect();
         const b = label.querySelector('select,input').getBoundingClientRect();
-        return b.top >= a.bottom;
+        return Math.abs(a.y + a.height / 2 - b.y - b.height / 2) < 2;
       })
     )
   );
@@ -95,7 +94,7 @@ try {
   assert.ok(blended > 10, 'must check intermediate feather colors, not only day/night endpoints');
   assert.deepEqual(errors, []);
   console.log(
-    `Passed: independent HTML panel, offline overview, tile failure fallback, ${checked} coverage samples (${blended} inside feather).`
+    `Passed: community panel, offline overview, tile failure fallback, ${checked} coverage samples (${blended} inside feather).`
   );
 } finally {
   await browser.close();

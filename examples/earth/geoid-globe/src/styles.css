@@ -38,32 +38,9 @@
   font-size: 13px;
   line-height: 1.5;
 }
-.geoid-globe label {
-  display: block;
-  margin: 14px 0 0;
-  font-size: 12px;
-}
 .geoid-globe output {
   display: block;
   font-weight: bold;
-}
-.geoid-globe input,
-.geoid-globe select {
-  width: 100%;
-  accent-color: #ffd875;
-}
-.geoid-globe select {
-  display: block;
-  box-sizing: border-box;
-  min-width: 0;
-  margin-top: 6px;
-  padding: 9px;
-  font: inherit;
-  font-size: 12px;
-  background: #19344e;
-  color: white;
-  border: 1px solid #6c8195;
-  border-radius: 8px;
 }
 .geoid-globe .legend {
   height: 10px;
@@ -91,7 +68,7 @@
 }
 @media (max-width: 600px) {
   .geoid-globe aside {
-    width: 200px;
+    width: min(280px, calc(100% - 24px));
   }
   .geoid-globe aside > p:not([data-role='status']) {
     display: none;

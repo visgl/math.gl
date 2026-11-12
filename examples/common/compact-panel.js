@@ -3,13 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /** Collapse controls on phones without remounting their content or resetting values. */
-export function configureCompactPanel(host, box) {
+export function configureCompactPanel(host, box, collapseOnCompact = true) {
   const compact = window.matchMedia(
     '(max-width: 767px), (max-width: 996px) and (max-height: 500px)'
   );
   const update = () => {
-    host.dataset.compactPanel = String(compact.matches);
-    box.setProps({open: !compact.matches});
+    host.dataset.compactPanel = String(collapseOnCompact && compact.matches);
+    box.setProps({open: !collapseOnCompact || !compact.matches});
   };
   box.setProps({onOpenChange: open => box.setProps({open})});
   update();
