@@ -94,7 +94,7 @@ const FITBOUNDS_TEST_CASES: [
     },
     {
       longitude: -23.406499999999973,
-      latitude: 64.86850056273362,
+      latitude: 64.86692908823261,
       zoom: 12.89199533073045
     }
   ],
@@ -111,7 +111,7 @@ const FITBOUNDS_TEST_CASES: [
     },
     {
       longitude: -23.406499999999998,
-      latitude: 64.87085760222105,
+      latitude: 64.86876246621804,
       zoom: 12.476957831451607
     }
   ],
@@ -166,6 +166,71 @@ test('WebMercatorViewport.fitBounds', () => {
       true
     );
   }
+});
+
+test.each<{name: string; options: FitBoundsOptions; center: [number, number]}>([
+  {
+    name: 'asymmetric horizontal padding',
+    options: {
+      width: 1000,
+      height: 500,
+      bounds: [
+        [-10, -10],
+        [10, 10]
+      ],
+      padding: {top: 0, bottom: 0, left: 200, right: 0}
+    },
+    center: [600, 250]
+  },
+  {
+    name: 'asymmetric vertical padding',
+    options: {
+      width: 500,
+      height: 1000,
+      bounds: [
+        [-10, -1],
+        [10, 1]
+      ],
+      padding: {top: 300, bottom: 0, left: 0, right: 0}
+    },
+    center: [250, 650]
+  },
+  {
+    name: 'pixel offset',
+    options: {
+      width: 800,
+      height: 600,
+      bounds: [
+        [-10, -10],
+        [10, 10]
+      ],
+      offset: [100, 0]
+    },
+    center: [500, 300]
+  },
+  {
+    name: 'padding and offset at capped zoom',
+    options: {
+      width: 800,
+      height: 600,
+      bounds: [
+        [-10, -10],
+        [10, 10]
+      ],
+      maxZoom: 0,
+      padding: {top: 0, bottom: 80, left: 100, right: 0},
+      offset: [-20, 30]
+    },
+    center: [430, 290]
+  }
+])('fitBounds centers projected bounds with $name', ({options, center}) => {
+  const {width, height, bounds} = options;
+  const viewport = new WebMercatorViewport({width, height}).fitBounds(bounds, options);
+  const [[west, south], [east, north]] = bounds;
+  const northwest = viewport.project([west, north]);
+  const southeast = viewport.project([east, south]);
+  expect((northwest[0] + southeast[0]) / 2).toBeCloseTo(center[0], 8);
+  expect((northwest[1] + southeast[1]) / 2).toBeCloseTo(center[1], 8);
 });
 
 test('fitBounds#degenerate', () => {
