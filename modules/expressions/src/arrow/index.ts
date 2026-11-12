@@ -27,5 +27,6 @@ export {
   compileArrowAggregates,
   type ArrowAggregate,
   type ArrowAggregateAccumulator,
+  type ArrowGroupedAggregateAccumulator,
   type CompiledArrowAggregates
 } from './aggregates';

@@ -502,3 +502,15 @@ A running aggregate may change when a batch arrives. If you use it to compute an
 such as a row's share of the total, wait for the final result or recompute that output when its
 aggregate changes. This API produces scalar results through Arrow expressions. SQL aggregate
 syntax and query planning are separate integration work.
+
+### Grouped accumulators
+
+Call `plan.createGroupedAccumulator('region')` to run the same reductions independently for
+each scalar key. Update it with the original Arrow batches. The plan evaluates the grouping
+expression and shared reduction expressions against each batch, without copying rows into
+separate Arrow tables.
+
+`result()` returns a detached map from key to aggregate values in first-seen order. Null keys form
+one group. Supported keys include strings, booleans, integers, and finite floating-point values.
+Each successful batch commits its changes together. An expression error or cancellation preserves
+the previous result.
