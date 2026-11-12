@@ -214,3 +214,6 @@ one-based `line` and `column`, and a short `token` preview when a token is prese
 a complete statement, locations in the built-in WHERE parser refer to the original SQL text.
 Use the structured fields to highlight the location in an editor. Exceptions thrown by a
 custom WHERE parser are preserved.
+
+Pass a [probe.gl](https://vis.gl/probe.gl) logger as the `log` option to `parseSQLQuery` to capture parser
+errors. The parser reports the diagnostic and throws the original error.

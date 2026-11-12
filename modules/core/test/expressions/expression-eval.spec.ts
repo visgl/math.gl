@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
+import {MemoryLog} from 'probe.gl/log';
 import {
   BASIC_MATH_FUNCTION_LIBRARY,
   addBinaryOp,
@@ -217,4 +218,19 @@ test('Expression accessors cache prototype-named row fields as own entries', () 
     expect(accessor(row)).toBe(row[key]);
     expect(parseExpressionString(key)).toBe(accessor);
   }
+});
+
+test('expression parsing and evaluation report errors to a supplied probe.gl logger', async () => {
+  const log = new MemoryLog();
+  const failure = new Error('application function failed');
+  const context = {
+    fail: () => {
+      throw failure;
+    }
+  };
+  expect(() => compile('x +', {log})).toThrow();
+  expect(() => compile('1 + fail()', {log})(context)).toThrow(failure);
+  await expect(compileAsync('1 + fail()', {log})(context)).rejects.toBe(failure);
+  expect(log.messages).toHaveLength(3);
+  expect(log.messages.slice(1).map(message => message.args[0])).toEqual([failure, failure]);
 });

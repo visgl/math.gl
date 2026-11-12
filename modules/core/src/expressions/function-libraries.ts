@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return */
 
+import type {DiagnosticLog} from '../diagnostic-log';
 import {
   clamp,
   degrees,
@@ -33,6 +34,8 @@ export type ExpressionFunctionLibrary = Record<string, ExpressionFunction>;
  * Options shared by the synchronous and asynchronous expression evaluators.
  */
 export type ExpressionEvaluationOptions = {
+  /** Logs evaluation or compilation errors when supplied. */
+  log?: DiagnosticLog;
   /**
    * Instance-scoped registry of named functions available to the expression.
    */

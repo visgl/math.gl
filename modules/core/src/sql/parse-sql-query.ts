@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {reportDiagnosticError, type DiagnosticLog} from '../diagnostic-log';
 import type {TableQuery} from './query-types';
 import {parseSQLExpression} from './parse-sql-expression';
 import {parseSQLPredicate} from './parse-sql-predicate';
@@ -10,7 +11,20 @@ import type {SQLCatalogQuery} from './query-types';
 import {parseSQLSelect, SQLQueryReader} from './parse-sql-select';
 
 /** Parses the supported SELECT subset or SHOW SOURCES, SHOW TABLES and DESCRIBE commands. */
-export function parseSQLQuery(sql: string): TableQuery | SQLCatalogQuery {
+export function parseSQLQuery(
+  sql: string,
+  options?: {log?: DiagnosticLog}
+): TableQuery | SQLCatalogQuery {
+  try {
+    return parseQuery(sql);
+  } catch (error) {
+    reportDiagnosticError(options?.log, error);
+    throw error;
+  }
+}
+
+/** Parses a SQL request, including internal grammar fallbacks. */
+function parseQuery(sql: string): TableQuery | SQLCatalogQuery {
   const reader = new SQLQueryReader(sql);
   if (reader.takeKeyword('SHOW')) {
     let request: SQLCatalogQuery;
