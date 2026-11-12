@@ -9,7 +9,7 @@ Choose a module for your application. Each overview introduces its capabilities,
 
   [Vectors, matrices, quaternions, and the foundations of 3D math.](https://visgl.github.io/math.gl/next/docs/modules/core.md)
 
-  [Transforms](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/transformations.md) · [Types](https://visgl.github.io/math.gl/next/docs/modules/core/types.md) · [Expressions](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md)
+  [Transforms](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/transformations.md) · [Types](https://visgl.github.io/math.gl/next/docs/modules/core/types.md)
 
   [Explore module →](https://visgl.github.io/math.gl/next/docs/modules/core.md)
 * ## [Geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry.md)
@@ -60,6 +60,14 @@ Choose a module for your application. Each overview introduces its capabilities,
   [UTF-8](https://visgl.github.io/math.gl/next/docs/modules/arrow/utf8.md) · [GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow.md) · [GeoArrow utilities](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow-utils.md) · [WKB/WKT](https://visgl.github.io/math.gl/next/docs/modules/arrow/wkb.md)
 
   [Explore module →](https://visgl.github.io/math.gl/next/docs/modules/arrow.md)
+* ## [Expressions 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions.md)
+  [`@math.gl/expressions`](https://visgl.github.io/math.gl/next/docs/modules/expressions.md)
+
+  [Evaluate expressions against objects or Arrow columns and parse SQL into query objects.](https://visgl.github.io/math.gl/next/docs/modules/expressions.md)
+
+  [Object evaluation](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/expression-eval.md) · [SQL](https://visgl.github.io/math.gl/next/docs/modules/expressions/sql.md) · [Arrow execution](https://visgl.github.io/math.gl/next/docs/modules/expressions/arrow.md) · [Workers](https://visgl.github.io/math.gl/next/docs/modules/expressions/arrow.md#worker-execution)
+
+  [Explore module →](https://visgl.github.io/math.gl/next/docs/modules/expressions.md)
 * ## [Tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks.md)
   [`@math.gl/tasks`](https://visgl.github.io/math.gl/next/docs/modules/tasks.md)
 

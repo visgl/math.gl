@@ -26,16 +26,12 @@ Apache Arrow
 - [@math.gl/arrow](https://visgl.github.io/math.gl/next/docs/modules/arrow.md): Apache Arrow
 - [Arrow schema utilities](https://visgl.github.io/math.gl/next/docs/modules/arrow/arrow-schema-utils.md): The Arrow schema utilities help validate Apache Arrow JS tables at runtime and rename columns while
 - [Arrow table transport](https://visgl.github.io/math.gl/next/docs/modules/arrow/arrow-table-transport.md): Use column-buffer transport for worker hops between matching Apache Arrow JS
-- [Arrow color functions](https://visgl.github.io/math.gl/next/docs/modules/arrow/color.md): @math.gl/arrow/color exports named ArrowTableFunction declarations for schema-bound expressions.
 - [GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/arrow/developer-guide/geoarrow.md): GeoArrow stores geometry in typed-array buffers rather than one JavaScript object per row. math.gl describes those buffers with plain TypeScript objects, so the same geometry kernels can work with Apache Arrow, a loader, or application-owned storage without depending on a table runtime.
-- [Arrow expressions](https://visgl.github.io/math.gl/next/docs/modules/arrow/expressions.md): @math.gl/arrow/expressions evaluates schema-bound expressions directly over Arrow batches. Use it
-- [SQL expressions in Arrow](https://visgl.github.io/math.gl/next/docs/modules/arrow/expressions/sql-conformance.md): Parse SQL with @math.gl/core/sql, then bind the returned AST to an
 - [Arrow-backed GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow.md): @math.gl/arrow/geoarrow connects real Apache Arrow JS fields and vectors to
 - [@math.gl/arrow/geoarrow-utils](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow-utils.md): @math.gl/arrow/geoarrow-utils is the Arrow-runtime-independent home for columnar geospatial math in math.gl.
 - [GeoArrow API reference](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow-utils/api-reference/geoarrow.md): All root functions are synchronous. Unless a function explicitly returns a new column or fills a
 - [Indexed Arrow views](https://visgl.github.io/math.gl/next/docs/modules/arrow/indexed-arrow-table.md): IndexedArrowTable provides a cheap sorted view of an arrow.Table without
 - [MappedArrowTable](https://visgl.github.io/math.gl/next/docs/modules/arrow/mapped-arrow-table.md): MappedArrowTable provides a cheap key-value map view of an arrow.Table without
-- [@math.gl/arrow/math](https://visgl.github.io/math.gl/next/docs/modules/arrow/math.md): Optional SQL-style numeric function declarations for Arrow expressions.
 - [splitArrowBuffers](https://visgl.github.io/math.gl/next/docs/modules/arrow/split-arrow-buffers.md): splitArrowBuffers rebuilds Apache Arrow JS objects so sliced internal typed-array buffers are
 - [UTF-8 utilities](https://visgl.github.io/math.gl/next/docs/modules/arrow/utf8.md): @math.gl/arrow/utf8 helps applications work efficiently with binary UTF-8 strings
 - [@math.gl/arrow/wkb](https://visgl.github.io/math.gl/next/docs/modules/arrow/wkb.md): @math.gl/arrow/wkb provides dependency-free, synchronous codecs for individual WKB, EWKB, and WKT
@@ -71,15 +67,8 @@ Apache Arrow
 - [3D Rotations](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/rotations.md): Use Euler angles to specify an orientation, Quaternion to compose or interpolate rotations, and Matrix4 to combine rotation with translation and scale. All rotation angles in math.gl are in radians.
 - [Transformations](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/transformations.md): Use Matrix4 to combine translation, rotation, and scale. Use a quaternion when only rotation is needed. Core vector methods mutate their receiver; matrix transform methods write to a supplied result or allocate a new array.
 - [View and Projection Matrices](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/view-and-projection.md): A view matrix expresses world coordinates relative to a camera. A projection matrix maps those camera coordinates to homogeneous clip coordinates. Compose them as projection * view to transform a world-space point.
-- [@math.gl/core/expressions 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md): The experimental expression parser and evaluator are available from @math.gl/core/expressions.
-- [DGGS Function Libraries 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/dggs-function-libraries.md): Import optional Discrete Global Grid System function tables from @math.gl/dggs.
-- [Expression Evaluator 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/expression-eval.md): The core evaluator API is useful when you want direct control over parsing, AST reuse, or custom operator registration.
-- [Function Registry 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/function-registry.md): ExpressionFunctionRegistry maintains an isolated table of JavaScript functions that expression evaluators can call with evaluated arguments.
-- [Accessor Compiler 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/api-reference/parse-expression-string.md): parseExpressionString(expression (row: Record) => unknown
-- [Portable expression AST](https://visgl.github.io/math.gl/next/docs/modules/core/expressions/portable-ast.md): @math.gl/core/expressions provides a shared expression AST for independently implemented
 - [Core Guide](https://visgl.github.io/math.gl/next/docs/modules/core/guide.md): Guides and background for Core.
 - [Preliminaries](https://visgl.github.io/math.gl/next/docs/modules/core/guide/preliminaries.md): Mathematical foundations for working with transformations and 3D coordinates.
-- [@math.gl/core/sql 🧪](https://visgl.github.io/math.gl/next/docs/modules/core/sql.md): An optional SQL parser that converts a small SQL subset into portable query and predicate objects.
 - [@math.gl/core/types](https://visgl.github.io/math.gl/next/docs/modules/core/types.md): @math.gl/core provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
 - [Array Types](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/array-types.md): math.gl provides a number of numeric array types.
 - [Bounds](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds.md): Bounds is a type-only union of Bounds2D and Bounds3D. Each uses [minimum, maximum] coordinates.
@@ -124,6 +113,22 @@ Earth models, sunlight, astronomy, and timezones, available as named exports fro
 - [Sun](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sun.md): {/ SPDX-License-Identifier: MIT /}
 - [@math.gl/earth/timezone](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone.md): @math.gl/earth/timezone supplies geographic timezone lookup and numeric local-calendar computations. Use it for map labels, daily aggregation, and scheduling. It uses the runtime's timezone rules; use Intl.DateTimeFormat for localized presentation.
 - [Timezone utilities](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone/api-reference/timezone.md): getTimezoneOffset(timezone, date?)
+
+#### expressions
+
+Use @math.gl/expressions to evaluate expressions against JavaScript objects, parse SQL into
+
+- [@math.gl/expressions 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions.md): Use @math.gl/expressions to evaluate expressions against JavaScript objects, parse SQL into
+- [DGGS Function Libraries 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/dggs-function-libraries.md): Import optional Discrete Global Grid System function tables from @math.gl/dggs.
+- [Expression Evaluator 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/expression-eval.md): The core evaluator API is useful when you want direct control over parsing, AST reuse, or custom operator registration.
+- [Function Registry 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/function-registry.md): ExpressionFunctionRegistry maintains an isolated table of JavaScript functions that expression evaluators can call with evaluated arguments.
+- [Accessor Compiler 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/parse-expression-string.md): parseExpressionString(expression (row: Record) => unknown
+- [Arrow expressions](https://visgl.github.io/math.gl/next/docs/modules/expressions/arrow.md): @math.gl/expressions/arrow evaluates schema-bound expressions directly over Arrow batches. Use it
+- [SQL expressions in Arrow](https://visgl.github.io/math.gl/next/docs/modules/expressions/arrow/sql-conformance.md): Parse SQL with @math.gl/expressions/sql, then bind the returned AST to an
+- [Arrow color functions](https://visgl.github.io/math.gl/next/docs/modules/expressions/color.md): @math.gl/expressions/color exports named ArrowTableFunction declarations for schema-bound expressions.
+- [@math.gl/expressions/math](https://visgl.github.io/math.gl/next/docs/modules/expressions/math.md): Optional SQL-style numeric function declarations for Arrow expressions.
+- [Portable expression AST](https://visgl.github.io/math.gl/next/docs/modules/expressions/portable-ast.md): @math.gl/expressions provides a shared expression AST for independently implemented
+- [@math.gl/expressions/sql 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions/sql.md): Import @math.gl/expressions/sql to parse supported SQL statements into portable query and
 
 #### geometry
 

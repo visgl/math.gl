@@ -32,7 +32,7 @@ Look up a location's timezone with [timezone](https://visgl.github.io/math.gl/ne
 
 ### Keep the math close and the bundle lean[​](#keep-the-math-close-and-the-bundle-lean "Direct link to Keep the math close and the bundle lean")
 
-[Core](https://visgl.github.io/math.gl/next/docs/modules/core.md) adds clearer matrix and rotation conversions, stronger array types, and tree-shakeable low-level namespaces. New [expressions](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md) tools make it possible to parse and evaluate configurable expressions; expression evaluation is experimental.
+[Core](https://visgl.github.io/math.gl/next/docs/modules/core.md) adds clearer matrix and rotation conversions, stronger array types, and tree-shakeable low-level namespaces. New [expressions](https://visgl.github.io/math.gl/next/docs/modules/expressions.md) tools make it possible to parse and evaluate configurable expressions; expression evaluation is experimental.
 
 ### Lighting and color calculations[​](#lighting-and-color-calculations "Direct link to Lighting and color calculations")
 
@@ -40,7 +40,7 @@ Opt-in [photometric and color LUT utilities](https://visgl.github.io/math.gl/nex
 
 ### Module structure[​](#module-structure "Direct link to Module structure")
 
-Version 5 groups related tools into eight packages. Install the package root and use its focused entry points where available. See the [migration table](https://visgl.github.io/math.gl/next/docs/upgrade-guide.md#removed-standalone-packages) for the former package names.
+Version 5 groups related tools into nine packages. Install the package root and use its focused entry points where available. See the [migration table](https://visgl.github.io/math.gl/next/docs/upgrade-guide.md#removed-standalone-packages) for the former package names.
 
 | Package                                                                                        | Purpose                                                        |
 | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |

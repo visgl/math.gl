@@ -2,149 +2,26 @@
 
 ## Upgrading to v5.0[​](#upgrading-to-v50 "Direct link to Upgrading to v5.0")
 
-Start with the package mapping below, then check the API changes for the modules you use. See [What’s New](https://visgl.github.io/math.gl/next/docs/whats-new.md#v50) for the highlights.
+Use this guide to upgrade from a stable math.gl 4.x release to 5.0. See [What’s New](https://visgl.github.io/math.gl/next/docs/whats-new.md#v50) for new capabilities.
 
-### Binary data and geometry utilities moved to @math.gl/arrow[​](#binary-data-and-geometry-utilities-moved-to-mathglarrow "Direct link to Binary data and geometry utilities moved to @math.gl/arrow")
+### Package imports[​](#package-imports "Direct link to Package imports")
 
-These utilities are now owned by a separate package. Install `@math.gl/arrow` and update the imports below; core and geospatial no longer forward these exports.
+| 4.x package                                                          | 5.0 import                       |
+| -------------------------------------------------------------------- | -------------------------------- |
+| `math.gl`                                                            | `@math.gl/core`                  |
+| `@math.gl/types`                                                     | `@math.gl/core`                  |
+| `@math.gl/polygon`                                                   | `@math.gl/geometry`              |
+| `@math.gl/culling`                                                   | `@math.gl/geometry/culling`      |
+| `@math.gl/proj4`                                                     | `@math.gl/geospatial/projection` |
+| `@math.gl/geoid`                                                     | `@math.gl/earth`                 |
+| `@math.gl/sun`                                                       | `@math.gl/earth/sun`             |
+| `@math.gl/dggs-s2`, `@math.gl/dggs-geohash`, `@math.gl/dggs-quadkey` | `@math.gl/dggs`                  |
 
-| Previous import                                     | New import                      |
-| --------------------------------------------------- | ------------------------------- |
-| `@math.gl/core/arrow`                               | `@math.gl/arrow`                |
-| `@math.gl/core/utf8`                                | `@math.gl/arrow/utf8`           |
-| `@math.gl/geospatial/geoarrow` physical descriptors | `@math.gl/arrow/geoarrow-utils` |
-| `@math.gl/geospatial/geoarrow-utils`                | `@math.gl/arrow/geoarrow-utils` |
-| `@math.gl/geospatial` WKB/WKT exports               | `@math.gl/arrow/wkb`            |
-| `@math.gl/geospatial` GeoArrow descriptor exports   | `@math.gl/arrow/geoarrow-utils` |
+Update the dependency and import together. When the 5.0 import contains a subpath, install its package root. See the API changes below for changes to named exports and calls.
 
-Use `@math.gl/arrow/geoarrow` for real Arrow fields and vectors. Only the package root and `/geoarrow` require the optional Apache Arrow 17+ peer; `/utf8`, `/wkb`, and `/geoarrow-utils` work without it. Descriptor `spatialReference` values are now opaque; use geospatial CRS APIs when interpreting them. Task execution also moves from `@math.gl/core/tasks` to `@math.gl/tasks`. See the [task migration guide](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/migration.md).
+### Expressions and SQL package[​](#expressions-and-sql-package "Direct link to Expressions and SQL package")
 
-### Migrating to root exports[​](#migrating-to-root-exports "Direct link to Migrating to root exports")
-
-The APIs below moved to package or capability roots. The old API subpaths are no longer exported; update imports before upgrading. Existing named symbols and public types remain available at the destination, except for the explicitly renamed type collisions below. Projection catalogs and data assets retain their paths.
-
-| Previous import                                         | New import                      |
-| ------------------------------------------------------- | ------------------------------- |
-| `@math.gl/core/local-frame`                             | `@math.gl/core`                 |
-| `@math.gl/core/mat3`                                    | `@math.gl/core`                 |
-| `@math.gl/core/mat4`                                    | `@math.gl/core`                 |
-| `@math.gl/core/quat`                                    | `@math.gl/core`                 |
-| `@math.gl/core/spheroid`                                | `@math.gl/core`                 |
-| `@math.gl/core/types`                                   | `@math.gl/core`                 |
-| `@math.gl/core/vec2`                                    | `@math.gl/core`                 |
-| `@math.gl/core/vec3`                                    | `@math.gl/core`                 |
-| `@math.gl/core/vec4`                                    | `@math.gl/core`                 |
-| `@math.gl/dggs/a5`                                      | `@math.gl/dggs`                 |
-| `@math.gl/dggs/expressions`                             | `@math.gl/dggs`                 |
-| `@math.gl/dggs/geohash`                                 | `@math.gl/dggs`                 |
-| `@math.gl/dggs/h3`                                      | `@math.gl/dggs`                 |
-| `@math.gl/dggs/plus-code`                               | `@math.gl/dggs`                 |
-| `@math.gl/dggs/quadkey`                                 | `@math.gl/dggs`                 |
-| `@math.gl/dggs/s2`                                      | `@math.gl/dggs`                 |
-| `@math.gl/earth/geoid`                                  | `@math.gl/earth`                |
-| `@math.gl/earth/sun/astronomy`                          | `@math.gl/earth/sun`            |
-| `@math.gl/earth/sun/planets`                            | `@math.gl/earth/sun`            |
-| `@math.gl/earth/timezone/lookup`                        | `@math.gl/earth/timezone`       |
-| `@math.gl/earth/timezone/temporal`                      | `@math.gl/earth/timezone`       |
-| `@math.gl/geometry/culling/oriented-box-2d`             | `@math.gl/geometry/culling`     |
-| `@math.gl/geometry/culling/queries`                     | `@math.gl/geometry/culling`     |
-| `@math.gl/geometry/curves`                              | `@math.gl/geometry`             |
-| `@math.gl/geometry/parametric`                          | `@math.gl/geometry`             |
-| `@math.gl/geometry/polygon`                             | `@math.gl/geometry`             |
-| `@math.gl/geometry/spatial-index`                       | `@math.gl/geometry`             |
-| `@math.gl/geometry/spatial-index/boxes`                 | `@math.gl/geometry`             |
-| `@math.gl/geometry/utils`                               | `@math.gl/geometry`             |
-| `@math.gl/geometry/utils/interpolate-packed-attributes` | `@math.gl/geometry`             |
-| `@math.gl/geospatial/coordinates`                       | `@math.gl/geospatial`           |
-| `@math.gl/geospatial/crs/metadata`                      | `@math.gl/geospatial/crs`       |
-| `@math.gl/geospatial/crs/proj-string`                   | `@math.gl/geospatial/crs`       |
-| `@math.gl/geospatial/crs`                               | `@math.gl/geospatial/crs`       |
-| `@math.gl/geospatial/crs/spatial-reference`             | `@math.gl/geospatial/crs`       |
-| `@math.gl/geospatial/crs/wkt`                           | `@math.gl/geospatial/crs`       |
-| `@math.gl/geospatial/ellipsoid`                         | `@math.gl/geospatial`           |
-| `@math.gl/geospatial/expressions`                       | `@math.gl/geospatial`           |
-| `@math.gl/geospatial/geoarrow/builder`                  | `@math.gl/arrow/geoarrow-utils` |
-| `@math.gl/geospatial/geoarrow/tessellation`             | `@math.gl/arrow/geoarrow-utils` |
-| `@math.gl/geospatial/geoarrow/wkb`                      | `@math.gl/arrow/geoarrow-utils` |
-| `@math.gl/geospatial/geoarrow/worker`                   | `@math.gl/arrow/geoarrow-utils` |
-| `@math.gl/geospatial/geodesic-buffer`                   | `@math.gl/geospatial`           |
-| `@math.gl/geospatial/geodesic-exact`                    | `@math.gl/geospatial`           |
-| `@math.gl/geospatial/geographic-atlas`                  | `@math.gl/geospatial`           |
-| `@math.gl/geospatial/geographic-cuts`                   | `@math.gl/geospatial`           |
-| `@math.gl/geospatial/globe`                             | `@math.gl/geospatial`           |
-| `@math.gl/geospatial/terrain/bounds`                    | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/contour-paths`             | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/contour-simplify`          | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/contours`                  | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/delatin`                   | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/derivatives`               | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/geographic`                | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/geometry`                  | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/martini`                   | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/mesh`                      | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/mesh-edges`                | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/mesh-error`                | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/mesh-stitch`               | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/packed`                    | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/profile`                   | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/profile-measure`           | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/slope-aspect`              | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/surface`                   | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/tiled`                     | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/terrain/vertex-tiles`              | `@math.gl/geospatial/terrain`   |
-| `@math.gl/geospatial/tile-matrix`                       | `@math.gl/geospatial`           |
-| `@math.gl/geospatial/tiles`                             | `@math.gl/geospatial`           |
-| `@math.gl/geospatial/triaxial`                          | `@math.gl/geospatial`           |
-| `@math.gl/geospatial/web-mercator`                      | `@math.gl/geospatial`           |
-| `@math.gl/geospatial/wkb`                               | `@math.gl/arrow/wkb`            |
-
-`@math.gl/geospatial/terrain`, `@math.gl/geospatial/crs`, `@math.gl/arrow/geoarrow-utils`, `@math.gl/geometry/culling`, `@math.gl/earth/sun`, and `@math.gl/earth/timezone` remain capability roots. Geospatial capability roots retain their documented root exports. Arrow utility subpaths are independent entries; their symbols are not collected in the Arrow root. The `@math.gl/earth/sun/stars` catalog entry and data asset paths remain.
-
-Matrix, quaternion and vector modules share names such as `create` and `multiply`. Import their namespaces from core, for example `import {mat4, vec3} from '@math.gl/core'`. For fine-grained tree-shaking, use prefixed named operations such as `mat4GetScaling` and `vec3Normalize`. The former geometry-utils structural types `Geometry` and `GeometryAttribute` are now `UtilityGeometry` and `UtilityGeometryAttribute`, avoiding collisions with the existing geometry class and attribute type.
-
-Named imports can be eliminated by ESM bundlers. Native Node ESM and CommonJS load static root dependencies even when a single name is used. In particular, `astronomy-engine` is now an Earth runtime dependency because astronomy functions are synchronous root exports. No shader code is introduced.
-
-### Expression imports and evaluation names[​](#expression-imports-and-evaluation-names "Direct link to Expression imports and evaluation names")
-
-Import expression APIs and types from `@math.gl/core/expressions`. If you used the package root in an earlier v5 prerelease, update the import specifier.
-
-The v5 prerelease expression exports `eval` and `evalAsync` are renamed to `evaluate` and `evaluateAsync`. Update named imports and namespace calls. The old names are removed: `eval` cannot be used as a local binding in strict-mode modules, including generated namespace wrappers.
-
-```
-import {evaluate, parse} from '@math.gl/core/expressions';
-
-
-
-const value = evaluate(parse('x * 2'), {x: 3});
-```
-
-### Grouped package subpaths[​](#grouped-package-subpaths "Direct link to Grouped package subpaths")
-
-Install one of the six package roots listed below and update both dependencies and import specifiers. The unscoped `math.gl` package has been removed; use `@math.gl/core` instead.
-
-Import `subdivideGlobeMesh` and its options from `@math.gl/geospatial`; they are no longer exported by polygon or geometry.
-
-### Removed standalone packages[​](#removed-standalone-packages "Direct link to Removed standalone packages")
-
-| Removed package           | Install                 | Import from                      |
-| ------------------------- | ----------------------- | -------------------------------- |
-| `@math.gl/types`          | `@math.gl/core`         | `@math.gl/core`                  |
-| `@math.gl/expressions`    | `@math.gl/core`         | `@math.gl/core/expressions`      |
-| `@math.gl/geometry-utils` | `@math.gl/geometry`     | `@math.gl/geometry`              |
-| `@math.gl/curves`         | `@math.gl/geometry`     | `@math.gl/geometry`              |
-| `@math.gl/polygon`        | `@math.gl/geometry`     | `@math.gl/geometry`              |
-| `@math.gl/culling`        | `@math.gl/geometry`     | `@math.gl/geometry/culling`      |
-| `@math.gl/spatial-index`  | `@math.gl/geometry`     | `@math.gl/geometry`              |
-| `@math.gl/crs`            | `@math.gl/geospatial`   | `@math.gl/geospatial/crs`        |
-| `@math.gl/projection`     | `@math.gl/geospatial`   | `@math.gl/geospatial/projection` |
-| `@math.gl/wkb`            | `@math.gl/geospatial`   | `@math.gl/geospatial`            |
-| `@math.gl/geoarrow`       | `@math.gl/geospatial`   | `@math.gl/arrow/geoarrow-utils`  |
-| `@math.gl/geoid`          | `@math.gl/earth`        | `@math.gl/earth`                 |
-| `@math.gl/sun`            | `@math.gl/earth`        | `@math.gl/earth/sun`             |
-| `@math.gl/timezone`       | `@math.gl/earth`        | `@math.gl/earth/timezone`        |
-| `@math.gl/proj`           | `@math.gl/web-mercator` | `@math.gl/web-mercator`          |
-
-Some nested entrypoints are consolidated, for example `@math.gl/crs/wkt` becomes `@math.gl/geospatial/crs`, and `@math.gl/timezone/lookup` becomes `@math.gl/earth/timezone`. DGGS expression helpers move from `@math.gl/expressions/dggs` to `@math.gl/dggs`.
+Install [`@math.gl/expressions`](https://visgl.github.io/math.gl/next/docs/modules/expressions.md) to evaluate expressions or parse SQL in 5.0. Install Apache Arrow 17 or later for Arrow execution.
 
 ### Polygon, culling, and viewport APIs[​](#polygon-culling-and-viewport-apis "Direct link to Polygon, culling, and viewport APIs")
 
@@ -155,18 +32,18 @@ Some nested entrypoints are consolidated, for example `@math.gl/crs/wkt` becomes
 | `INTERSECTION.OUTSIDE`, `.INTERSECTING`, `.INSIDE` | `'outside'`, `'intersecting'`, `'inside'` (`CullingResult`)         |
 | `viewport.getLocationAtPoint(options)`             | `viewport.getMapCenterByLngLatPosition(options)`                    |
 
-### Optional ellipsoid and OBB operations[​](#optional-ellipsoid-and-obb-operations "Direct link to Optional ellipsoid and OBB operations")
+### Ellipsoid frame and oriented bounding box operations[​](#ellipsoid-frame-and-oriented-bounding-box-operations "Direct link to Ellipsoid frame and oriented bounding box operations")
 
-Frame and quaternion helpers are standalone named exports so unused operations can be removed from bundles.
+Import ellipsoid frame helpers from `@math.gl/geospatial` and oriented bounding box helpers from `@math.gl/geometry/culling`.
 
-| Removed API                                                      | Replacement                                                                                                 |
-| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `ellipsoid.eastNorthUpToFixedFrame(origin, result)`              | `eastNorthUpToFixedFrame(ellipsoid, origin, result)` from `@math.gl/geospatial`                             |
-| `ellipsoid.localFrameToFixedFrame(a, b, c, origin, result)`      | `localFrameToFixedFrame(ellipsoid, a, b, c, origin, result)` from `@math.gl/geospatial`                     |
-| `box.quaternion`                                                 | `getOrientedBoundingBoxQuaternion(box)` from `@math.gl/geometry/culling`                                    |
-| `box.fromCenterHalfSizeQuaternion(center, halfSize, quaternion)` | `makeOrientedBoundingBoxFromQuaternion(center, halfSize, quaternion, box)` from `@math.gl/geometry/culling` |
+| Removed API                                                      | Replacement                                                                             |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `ellipsoid.eastNorthUpToFixedFrame(origin, result)`              | `eastNorthUpToFixedFrame(ellipsoid, origin, result)` from `@math.gl/geospatial`         |
+| `ellipsoid.localFrameToFixedFrame(a, b, c, origin, result)`      | `localFrameToFixedFrame(ellipsoid, a, b, c, origin, result)` from `@math.gl/geospatial` |
+| `box.quaternion`                                                 | `getOrientedBoundingBoxQuaternion(box)`                                                 |
+| `box.fromCenterHalfSizeQuaternion(center, halfSize, quaternion)` | `makeOrientedBoundingBoxFromQuaternion(center, halfSize, quaternion, box)`              |
 
-Frame functions preserve the original matrix conventions and return a new `Matrix4` when the result is omitted. The OBB factory allocates a new box when its optional result is omitted.
+Frame functions preserve the original matrix conventions and return a new `Matrix4` when the result is omitted.
 
 ### TypeScript and runtime support[​](#typescript-and-runtime-support "Direct link to TypeScript and runtime support")
 
@@ -209,7 +86,7 @@ Euler rotation orders are now represented directly by the `EulerRotationOrder` s
 
 ### Low-level function imports[​](#low-level-function-imports "Direct link to Low-level function imports")
 
-Low-level `mat3`, `mat4`, `quat`, `vec2`, `vec3`, and `vec4` namespaces are named exports from `@math.gl/core`. The former individual low-level subpaths are no longer exported.
+Low-level `mat3`, `mat4`, `quat`, `vec2`, `vec3`, and `vec4` namespaces are named exports from `@math.gl/core`.
 
 ```
 import {mat4, vec3} from '@math.gl/core';
@@ -227,11 +104,9 @@ import {mat4, vec3} from '@math.gl/core';
 
 ### DGGS packages[​](#dggs-packages "Direct link to DGGS packages")
 
-* Replace `@math.gl/dggs-s2`, `@math.gl/dggs-geohash`, and `@math.gl/dggs-quadkey` with `@math.gl/dggs` subpaths `/s2`, `/geohash`, and `/quadkey`.
-* Additional decoders are available at `/a5`, `/h3`, and `/plus-code`.
+* Import `S2Decoder`, `GeohashDecoder`, and `QuadkeyDecoder` from `@math.gl/dggs`.
 * Each decoder implements the shared `DGGSDecoder` API.
 * `DGGSDecoder` cell geometry methods accept `string | bigint`; A5, H3, and S2 support both representations.
-* Replace standalone calls such as `getS2LngLat(...)` with `S2Decoder.cellToLngLat(...)`.
 
 ## Upgrading to v4.1[​](#upgrading-to-v41 "Direct link to Upgrading to v4.1")
 

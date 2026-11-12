@@ -4,14 +4,6 @@
 
 `@math.gl/core` provides array-based vectors, matrices, quaternions, and coordinate helpers. Use it to compose transforms, rotate geometry, and work with reusable numeric objects.
 
-The separate [`@math.gl/arrow`](https://visgl.github.io/math.gl/next/docs/modules/arrow.md) entry provides Arrow table views, schema utilities, and buffer ownership helpers. Install Apache Arrow 17 or newer to use it.
-
-Its Arrow-independent [`@math.gl/arrow/utf8`](https://visgl.github.io/math.gl/next/docs/modules/arrow/utf8.md) entry provides byte-range comparison and scalar parsing without decoding strings.
-
-The optional [`@math.gl/tasks`](https://visgl.github.io/math.gl/next/docs/modules/tasks.md) entry provides typed worker processing, bounded scheduling, persistent resources, cancellation, and shared state.
-
-Shared types and expression parsing are available at `@math.gl/core` and `@math.gl/core`. The basic math expression library is included there; geospatial and DGGS expression functions live at `@math.gl/geospatial` and `@math.gl/dggs`.
-
 <!-- -->
 
 ## Usage[​](#usage "Direct link to Usage")
@@ -35,7 +27,6 @@ const y = vector[1];
 | Rigid poses and local frames                           | ✅      | [Pose](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/pose.md) and [local frames](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/local-frame.md); units and coordinate conventions remain explicit.                           |
 | Spherical and spheroid coordinates                     | ✅      | [SphericalCoordinates](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/spherical-coordinates.md) and [spheroid conversions](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/spheroid.md) within their documented shape domains. |
 | Reusable outputs and numeric interoperability          | ✅      | [MathArray](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/math-array.md) operations interoperate with arrays and typed arrays; individual methods document ownership.                                                                                           |
-| Expressions and worker execution                       | ✅      | Optional [expression](https://visgl.github.io/math.gl/next/docs/modules/core/expressions.md) and [task](https://visgl.github.io/math.gl/next/docs/modules/tasks.md) capabilities have their own contracts and feature cards.                                              |
 | General dense/sparse linear algebra                    | ❌      | No public general-size QR/SVD, sparse factorization, or tensor engine. The matrix classes target graphics-sized transforms.                                                                                                                                                                         |
 | Arbitrary-precision arithmetic and autodifferentiation | ❌      | Numerical classes use JavaScript numbers; no arbitrary-precision scalar or gradient-tape backend.                                                                                                                                                                                                   |
 | Built-in SIMD, WASM, or GPU numeric backend            | ❌      | CPU JavaScript math is implemented; accelerated numerical backends remain [roadmap research](https://github.com/visgl/math.gl/blob/master/dev-docs/ROADMAP.md). Worker scheduling is a separate capability.                                                                                         |
