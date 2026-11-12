@@ -206,8 +206,8 @@ Parameters:
 * `opts.bounds` (Array, required) - opposite corners specified as `[[lon, lat], [lon, lat]]`
 * `opts.minExtent` (Number, optional) - If supplied, the bounds used to calculate the new map settings will be expanded if the delta width or height of the supplied `bounds` is smaller than this value.
 * `opts.maxZoom`=`24` (Number, optional) - The returned zoom value will be capped to this value. Avoids returning infinite `zoom` when the supplied `bounds` have zero width or height deltas.
-* `opts.padding`=`0` (Number, optional) - the amount of padding in pixels to add to the given bounds.
-* `opts.offset`=`[0,0]` (Array, optional) - the center of the given bounds relative to the map's center, `[x, y]` measured in pixels.
+* `opts.padding`=`0` (Number or Object, optional) - pixel padding around the bounds. Supply a number for all sides or an object with `top`, `bottom`, `left`, and `right`. The projected bounds are centered in the padded area.
+* `opts.offset`=`[0,0]` (Array, optional) - additional `[x, y]` pixel shift from the padded center. Positive x moves right and positive y moves down.
 
 Returns:
 
