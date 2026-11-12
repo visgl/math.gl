@@ -96,6 +96,13 @@ aside.example-panel.deck-widget-container {
 .example-panel .example-info-content > :last-child { margin-bottom: 0; }
 .example-panel .example-info-content h1,
 .example-panel .example-info-content h2 { color: inherit; font-size: 1rem; }
+/* Keep the controls scrollable when the example constrains the panel height. */
+.example-panel > .deck-widget-box > section > div {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .example-panel > .deck-widget-box > section > header {
   flex: none;
   display: block;

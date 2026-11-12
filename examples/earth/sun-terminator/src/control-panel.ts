@@ -21,7 +21,7 @@ export function createControlPanel(host: HTMLElement) {
       <label><span>Date · UTC</span><input data-role="date" type="date" /></label>
       <div class="time-row"><label><span>Time · UTC</span><input data-role="time" type="time" step="60" /></label>
         <button data-role="play" type="button" aria-pressed="false">Play</button></div>
-      <label><span>Offset <output data-role="offset-label">+0 h</output></span><input data-role="offset" type="range" min="0" max="24" step="0.05" value="0" aria-label="Time offset in hours" /></label>
+      <label><span>Offset</span><input data-role="offset" type="range" min="0" max="24" step="0.05" value="0" aria-label="Time offset in hours" /><output data-role="offset-label">+0 h</output></label>
       <label><span>Speed</span><select data-role="speed"><option value="1">1 hour / second</option><option value="3" selected>3 hours / second</option><option value="6">6 hours / second</option></select></label>
       <label><span>Darkness</span><select data-role="altitude">
         <option value="0">Sunset · 0°</option><option value="-6">Civil · −6°</option>

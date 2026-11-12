@@ -32,7 +32,7 @@
 .sun-controls .intro, .sun-controls [role='status'] { margin: 6px 0; color: var(--button-icon-idle); }
 .sun-controls .time-row { display: flex; align-items: center; gap: 6px; }
 .sun-controls .time-row label { flex: 1; min-width: 0; }
-.sun-controls output { color: var(--panel-accent-color); font-variant-numeric: tabular-nums; }
+.sun-controls output { flex: none; white-space: nowrap; color: var(--panel-accent-color); font-variant-numeric: tabular-nums; }
 .sun-controls .credits summary { cursor: pointer; }
 .sun-controls .credits p { margin-bottom: 0; }
 .sun-controls a { color: var(--panel-focus-color); }
