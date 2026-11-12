@@ -1,7 +1,7 @@
 # @math.gl/expressions/math
 
 Optional SQL-style numeric function declarations for [Arrow expressions](../arrow/README.md).
-Import the functions you use; this entry point is separate from the Arrow and core roots.
+Import the functions you use from `@math.gl/expressions/math` and pass them to the Arrow compiler.
 
 ```typescript
 import {compileArrowExpression} from '@math.gl/expressions/arrow';

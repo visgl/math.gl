@@ -1,8 +1,8 @@
 # @math.gl/expressions/sql 🧪
 
-An optional SQL parser that converts a small SQL subset into portable query and predicate objects.
-Import it from `@math.gl/expressions/sql`; it is not exported from the core root.
-The parser describes queries. A separate execution engine supplies data and evaluates them.
+Import `@math.gl/expressions/sql` to parse supported SQL statements into portable query and
+predicate objects. The application supplies data and executes the query. The parser works without
+Apache Arrow.
 
 ## Submodule features
 

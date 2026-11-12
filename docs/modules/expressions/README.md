@@ -5,13 +5,30 @@
   <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" />
 </p>
 
-The experimental expression parser and evaluator are available from `@math.gl/expressions`.
-Geospatial function libraries are exported from `@math.gl/geospatial`; DGGS function
-libraries are exported from `@math.gl/dggs`.
+Use `@math.gl/expressions` to evaluate expressions against JavaScript objects, parse SQL into
+query objects, or compute values directly from Apache Arrow columns.
 
-It extracts the expression machinery that has shipped inside `@deck.gl/json` and provides it as a standalone package. Its API remains experimental.
+## Installation
 
-## Usage
+```bash
+npm install @math.gl/expressions
+```
+
+Install `apache-arrow` (17 or later) to use the Arrow entry points.
+
+| Import | Use it to |
+| --- | --- |
+| `@math.gl/expressions` | Parse and evaluate expressions against JavaScript objects. |
+| [`@math.gl/expressions/sql`](./sql/README.md) | Parse SQL statements, predicates, and named parameters for a query engine. |
+| [`@math.gl/expressions/arrow`](./arrow/README.md) | Evaluate schema-bound expressions and predicates over Arrow batches and tables. |
+| [`@math.gl/expressions/arrow/worker`](./arrow/README.md#worker-execution) | Run Arrow expressions in a worker. |
+| [`@math.gl/expressions/math`](./math/README.md) and [`@math.gl/expressions/color`](./color/README.md) | Register typed numeric and color functions for Arrow expressions. |
+
+The package root and SQL parser work without Apache Arrow. The SQL parser returns query and
+predicate objects. The application resolves data sources, plans queries, and selects result rows.
+
+## Evaluate expressions against objects
+
 Evaluate a parsed expression against a data object:
 
 ```js
@@ -77,23 +94,9 @@ const fill = getFill({style: {fill: {color: '#08f'}}});
 // '#08f'
 ```
 
-## Features
-
-| Feature | Support | Notes |
-| --- | --- | --- |
-| Expression parsing and evaluation | ✅ | [Parse and evaluate](api-reference/expression-eval.md) JSEP expressions against an explicit context. |
-| Reusable compiled accessors | ✅ | Synchronous and asynchronous compile/evaluate APIs reuse parsed expressions. |
-| Custom operators and function libraries | ✅ | Isolated [function registries](api-reference/function-registry.md), custom operators, basic math, and optional geospatial/DGGS libraries. |
-| Restricted property-access expressions | ✅ | [parseExpressionString](api-reference/parse-expression-string.md) builds accessors with function calls disabled. |
-| Full JavaScript programs and process isolation | ❌ | This is an expression evaluator, not a separate JavaScript runtime or security sandbox; registered functions run application code. |
-| Reactive dependency tracking | ❌ | No incremental dependency graph, automatic invalidation, or reactive recomputation engine. |
-| Shader compilation and automatic differentiation | ❌ | Compilation produces reusable JavaScript evaluators, without a GPU code generator or differentiation backend. |
-
-## Installation
-
-```bash
-npm install @math.gl/core
-```
+The evaluator accepts expressions and runs registered functions as application code. Treat those
+functions and their input contexts as trusted. See [portable expression AST](portable-ast.md) for
+validation, column discovery, and predicate normalization.
 
 ## API Surface
 
@@ -129,7 +132,8 @@ For applications that build function sets incrementally, use an [`ExpressionFunc
 
 Optional [DGGS function tables](/docs/modules/expressions/api-reference/dggs-function-libraries) are available from `@math.gl/dggs`.
 
-Try the APIs in the [expression playground](https://math.gl/examples/expressions).
+Try the APIs in the [expression playground](https://math.gl/examples/expressions). See the
+[upgrade guide](../../upgrade-guide.md#expressions-and-sql-package) for import paths.
 
 ## Attribution
 

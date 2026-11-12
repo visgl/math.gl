@@ -2,7 +2,7 @@
 
 `@math.gl/expressions/arrow` evaluates schema-bound expressions directly over Arrow batches. Use it
 for WHERE predicates, derived columns and typed application functions. It reuses the parser from
-`@math.gl/expressions`; it does not parse SQL or perform table query planning.
+`@math.gl/expressions`; use [the SQL parser](../sql/README.md) for SQL syntax and your application for query planning.
 
 ```ts
 import {compileArrowExpression, compileArrowPredicate} from '@math.gl/expressions/arrow';
@@ -32,7 +32,7 @@ Returns a reusable evaluator with `outputField: Field` and
 
 | Parameter | Description |
 | --- | --- |
-| `expression` | Expression text or the AST accepted by core expressions. |
+| `expression` | Expression text or the AST accepted by `@math.gl/expressions`. |
 | `options.inputSchema` | Required Arrow schema used to bind field names and types. |
 | `options.functions` | Optional array of named `ArrowTableFunction` declarations. |
 | `activeRows` | Optional `Uint8Array`, one 0 or 1 per input row. Zero skips evaluation. |
@@ -198,11 +198,11 @@ may require a mask prepass; working memory remains bounded by the current batch.
 field projections can reuse input buffers; retain those outputs only as long as needed.
 
 Run `node modules/arrow/scripts/benchmark-expressions.mjs` after building to compare numeric and UTF-8
-workloads with the existing expression evaluator. The report separates throughput, row objects,
+workloads with the scalar evaluator from `@math.gl/expressions`. The report separates throughput, row objects,
 string decodes and output buffer bytes; it does not claim to measure total allocator traffic.
 
-This optional subpath does not add Arrow to core imports. Function declaration types are erased
-from runtime bundles. Application function libraries are included only when imported.
+This entry point requires Apache Arrow 17 or later. Import function libraries separately to
+register the functions your application uses.
 
 
 ## Replace Arrow columns
