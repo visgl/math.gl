@@ -5,14 +5,34 @@
 import assert from 'node:assert/strict';
 import {existsSync, readFileSync, readdirSync} from 'node:fs';
 import {createRequire} from 'node:module';
+import {execFileSync} from 'node:child_process';
 
 const root = new URL('../', import.meta.url);
 const require = createRequire(import.meta.url);
-const expected = ['arrow', 'core', 'dggs', 'earth', 'geometry', 'geospatial', 'tasks', 'web-mercator'];
+const expected = ['arrow', 'core', 'dggs', 'earth', 'expressions', 'geometry', 'geospatial', 'tasks', 'web-mercator'];
 const modules = readdirSync(new URL('modules/', root)).filter(name =>
   existsSync(new URL(`modules/${name}/package.json`, root))
 );
 assert.deepEqual(modules.sort(), expected, 'Published workspace packages must match the supported package set');
+// Verify the actual built ESM and CommonJS entrypoints with Arrow resolution disabled.
+execFileSync(process.execPath, ['--input-type=module', '-e', `
+  import assert from 'node:assert/strict';
+  import {createRequire, registerHooks} from 'node:module';
+  registerHooks({resolve(specifier, context, nextResolve) {
+    if (specifier === 'apache-arrow' || specifier.startsWith('apache-arrow/')) {
+      throw new Error('Unexpected Apache Arrow dependency: ' + specifier);
+    }
+    return nextResolve(specifier, context);
+  }});
+  const require = createRequire(import.meta.url);
+  for (const load of [specifier => import(specifier), specifier => require(specifier)]) {
+    const {compile} = await load('@math.gl/expressions');
+    assert.equal(compile('value * 2')({value: 5}), 10);
+    const {parseSQLQuery} = await load('@math.gl/expressions/sql');
+    assert.deepEqual(parseSQLQuery('SHOW SOURCES'), {command: 'showSources'});
+  }
+`], {cwd: root, stdio: 'inherit'});
+
 const packageNames = new Set(expected.map(name => '@math.gl/' + name));
 let entrypoints = 0;
 for (const name of expected) {
@@ -37,7 +57,7 @@ for (const name of expected) {
     const specifier = manifest.name + (subpath === '.' ? '' : subpath.slice(1));
     const imported = await import(specifier);
     const required = require(specifier);
-    if (specifier === '@math.gl/arrow/expressions') {
+    if (specifier === '@math.gl/expressions/arrow') {
       assert.equal(typeof imported.compileArrowAggregates, 'function');
       assert.equal(typeof required.compileArrowAggregates, 'function');
       assert.equal(imported.isExpressionEvaluationError(new required.ExpressionEvaluationError('domain', 'cross-bundle')), true);
@@ -45,14 +65,14 @@ for (const name of expected) {
       assert.equal('ArrowFunctionRegistry' in imported, false);
       assert.equal('ArrowFunctionRegistry' in required, false);
     }
-    if (specifier === '@math.gl/arrow/math') {
+    if (specifier === '@math.gl/expressions/math') {
       for (const math of [imported, required]) {
         assert.equal(Object.keys(math).length, 21);
         assert.equal(math.SIN.name, 'SIN');
         assert.equal(math.ROUND.prototypes.find(p => p.arguments[0].type.toString() === 'Float64').evaluateScalar(-1.5), -2);
       }
     }
-    if (specifier === '@math.gl/core/expressions') {
+    if (specifier === '@math.gl/expressions') {
       for (const expressions of [imported, required]) {
         expressions.validateExpressionAST({type:'Identifier',name:'x'});
         assert.deepEqual(expressions.getExpressionColumns({type:'Identifier',name:'x'}), ['x']);
@@ -64,7 +84,7 @@ for (const name of expected) {
       assert.equal('parseSQLQuery' in imported, false);
       assert.equal('parseSQLQuery' in required, false);
     }
-    if (specifier === '@math.gl/core/sql') {
+    if (specifier === '@math.gl/expressions/sql') {
       for (const sql of [imported, required]) {
         assert.equal(sql.parseSQLExpression('value::INTEGER').type, 'CallExpression');
         assert.deepEqual(sql.parseSQLQuery('SHOW TABLES FROM warehouse'), {command: 'showTables', from: 'warehouse'});
@@ -101,7 +121,7 @@ for (const packageName of ['@math.gl/core', '@math.gl/geometry', '@math.gl/geosp
 }
 assert.equal('subdivideGlobeMesh' in await import('@math.gl/geometry'), false);
 assert.equal(typeof (await import('@math.gl/geospatial')).subdivideGlobeMesh, 'function');
-console.log(`${entrypoints} ESM/CommonJS entrypoints and all published assets/declarations passed across the eight packages.`);
+console.log(`${entrypoints} ESM/CommonJS entrypoints and all published assets/declarations passed across the supported packages.`);
 
 await import('./check-terrain-package.mjs');
 await import('./check-root-exports.mjs');

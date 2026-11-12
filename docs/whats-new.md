@@ -36,7 +36,7 @@ Look up a location's timezone with [timezone](./modules/earth/timezone/README.md
 
 ### Keep the math close and the bundle lean
 
-[Core](./modules/core/README.md) adds clearer matrix and rotation conversions, stronger array types, and tree-shakeable low-level namespaces. New [expressions](./modules/core/expressions/README.md) tools make it possible to parse and evaluate configurable expressions; expression evaluation is experimental.
+[Core](./modules/core/README.md) adds clearer matrix and rotation conversions, stronger array types, and tree-shakeable low-level namespaces. New [expressions](modules/expressions/README.md) tools make it possible to parse and evaluate configurable expressions; expression evaluation is experimental.
 
 ### Lighting and color calculations
 
@@ -47,7 +47,7 @@ loaders.gl or other readers, and no dependencies are added.
 
 ### Module structure
 
-Version 5 groups related tools into eight packages. Install the package root and use its focused entry points where available. See the [migration table](./upgrade-guide.md#removed-standalone-packages) for the former package names.
+Version 5 groups related tools into nine packages. Install the package root and use its focused entry points where available. See the [migration table](./upgrade-guide.md#removed-standalone-packages) for the former package names.
 
 | Package | Purpose |
 | --- | --- |

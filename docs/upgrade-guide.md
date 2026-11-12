@@ -4,6 +4,23 @@
 
 Start with the package mapping below, then check the API changes for the modules you use. See [What’s New](./whats-new.md#v50) for the highlights.
 
+### Expressions and SQL package
+
+Install `@math.gl/expressions` and update imports using this mapping.
+
+| Previous import | Import |
+| --- | --- |
+| `@math.gl/core/expressions` | `@math.gl/expressions` |
+| `@math.gl/core/sql` | `@math.gl/expressions/sql` |
+| `@math.gl/arrow/expressions` | `@math.gl/expressions/arrow` |
+| `@math.gl/arrow/expressions/worker` | `@math.gl/expressions/arrow/worker` |
+| `@math.gl/arrow/expressions/worker-entry.js` | `@math.gl/expressions/arrow/worker-entry.js` |
+| `@math.gl/arrow/math` | `@math.gl/expressions/math` |
+| `@math.gl/arrow/color` | `@math.gl/expressions/color` |
+
+The root and SQL entry points work without Apache Arrow. Install Apache Arrow 17
+or later for the Arrow, worker, math, and color entry points.
+
 ### Binary data and geometry utilities moved to @math.gl/arrow
 
 These utilities are now owned by a separate package. Install `@math.gl/arrow` and
@@ -128,15 +145,14 @@ functions are synchronous root exports. No shader code is introduced.
 
 ### Expression imports and evaluation names
 
-Import expression APIs and types from `@math.gl/core/expressions`. If you used
-the package root in an earlier v5 prerelease, update the import specifier.
+Import expression APIs and types from `@math.gl/expressions`.
 
 The v5 prerelease expression exports `eval` and `evalAsync` are renamed to
 `evaluate` and `evaluateAsync`. Update named imports and namespace calls. The old names are removed: `eval` cannot be used as a local
 binding in strict-mode modules, including generated namespace wrappers.
 
 ```ts
-import {evaluate, parse} from '@math.gl/core/expressions';
+import {evaluate, parse} from '@math.gl/expressions';
 
 const value = evaluate(parse('x * 2'), {x: 3});
 ```
@@ -152,7 +168,6 @@ Import `subdivideGlobeMesh` and its options from `@math.gl/geospatial`; they are
 | Removed package | Install | Import from |
 | --- | --- | --- |
 | `@math.gl/types` | `@math.gl/core` | `@math.gl/core` |
-| `@math.gl/expressions` | `@math.gl/core` | `@math.gl/core/expressions` |
 | `@math.gl/geometry-utils` | `@math.gl/geometry` | `@math.gl/geometry` |
 | `@math.gl/curves` | `@math.gl/geometry` | `@math.gl/geometry` |
 | `@math.gl/polygon` | `@math.gl/geometry` | `@math.gl/geometry` |

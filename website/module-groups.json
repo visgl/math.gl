@@ -6,7 +6,7 @@
     "modules": [
       "core",
       "core/types",
-      "core/expressions"
+      "expressions"
     ]
   },
   {

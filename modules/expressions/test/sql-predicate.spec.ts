@@ -1,0 +1,225 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+
+import {expect, test} from 'vitest';
+
+import {
+  bindSQLPredicate,
+  isSQLPredicate,
+  parseSQLPredicate,
+  SQL_PREDICATE_JSON_SCHEMA,
+  validateSQLPredicate
+} from '@math.gl/expressions/sql';
+
+test('parseSQLPredicate emits a CQL2-shaped AST with SQL precedence', () => {
+  expect(
+    parseSQLPredicate("status = 'valid' OR category IN ('a', 'b') AND value >= :minimum", {
+      parameters: {minimum: 10}
+    })
+  ).toEqual({
+    op: 'or',
+    args: [
+      {op: '=', args: [{property: 'status'}, 'valid']},
+      {
+        op: 'and',
+        args: [
+          {op: 'in', args: [{property: 'category'}, ['a', 'b']]},
+          {op: '>=', args: [{property: 'value'}, 10]}
+        ]
+      }
+    ]
+  });
+});
+
+test('parseSQLPredicate normalizes null, inequality, negation, identifiers, and exact integers', () => {
+  expect(
+    parseSQLPredicate(
+      '"source id" IS NOT NULL AND NOT (count != -9223372036854775808 OR active = FALSE)'
+    )
+  ).toEqual({
+    op: 'and',
+    args: [
+      {
+        op: 'not',
+        args: [{op: 'isNull', args: [{property: 'source id', quoted: true}]}]
+      },
+      {
+        op: 'not',
+        args: [
+          {
+            op: 'or',
+            args: [
+              {
+                op: '<>',
+                args: [{property: 'count'}, -9223372036854775808n]
+              },
+              {op: '=', args: [{property: 'active'}, false]}
+            ]
+          }
+        ]
+      }
+    ]
+  });
+});
+
+test('parseSQLPredicate preserves dots inside quoted identifiers', () => {
+  expect(parseSQLPredicate('"metric.value" = 1')).toEqual({
+    op: '=',
+    args: [{property: 'metric.value', quoted: true}, 1]
+  });
+});
+
+test('parseSQLPredicate preserves escaped strings and structured-cloneable parameters', () => {
+  const timestamp = new Date('2026-08-20T00:00:00Z');
+  const binary = new Uint8Array([1, 2, 3]);
+  expect(
+    parseSQLPredicate("name = 'O''Brien' AND timestamp >= :timestamp AND payload = :binary;", {
+      parameters: {timestamp, binary}
+    })
+  ).toEqual({
+    op: 'and',
+    args: [
+      {op: '=', args: [{property: 'name'}, "O'Brien"]},
+      {op: '>=', args: [{property: 'timestamp'}, timestamp]},
+      {op: '=', args: [{property: 'payload'}, binary]}
+    ]
+  });
+});
+
+test('parseSQLPredicate can preserve named parameters for late binding', () => {
+  const predicate = parseSQLPredicate('value >= :minimum AND active = :active', {
+    preserveParameters: true
+  });
+
+  expect(predicate).toEqual({
+    op: 'and',
+    args: [
+      {op: '>=', args: [{property: 'value'}, {parameter: 'minimum'}]},
+      {op: '=', args: [{property: 'active'}, {parameter: 'active'}]}
+    ]
+  });
+  expect(bindSQLPredicate(predicate, {minimum: 10, active: true})).toEqual({
+    op: 'and',
+    args: [
+      {op: '>=', args: [{property: 'value'}, 10]},
+      {op: '=', args: [{property: 'active'}, true]}
+    ]
+  });
+  expect(() => bindSQLPredicate(predicate, {minimum: 10})).toThrow(/:active/);
+});
+
+test('SQL predicate validators accept supported ASTs and reject malformed payloads', () => {
+  const predicate = {op: '=', args: [{property: 'value'}, 4]} as const;
+  expect(isSQLPredicate(predicate)).toBe(true);
+  expect(() => validateSQLPredicate(predicate)).not.toThrow();
+
+  expect(isSQLPredicate({op: 'and', args: [predicate]})).toBe(false);
+  expect(isSQLPredicate({op: 'in', args: [{property: 'value'}, []]})).toBe(false);
+  expect(isSQLPredicate({op: '=', args: [{property: 'value'}, Number.NaN]})).toBe(false);
+  expect(isSQLPredicate({op: '=', args: [{property: 'value'}, 1], extra: true})).toBe(false);
+});
+
+test('SQL predicate JSON Schema describes the dependency-free JSON payload subset', () => {
+  expect(SQL_PREDICATE_JSON_SCHEMA.$schema).toBe('https://json-schema.org/draft/2020-12/schema');
+  expect(SQL_PREDICATE_JSON_SCHEMA.$defs.logical.properties.args.minItems).toBe(2);
+  expect(SQL_PREDICATE_JSON_SCHEMA.$defs.value.oneOf).toHaveLength(2);
+});
+
+test.each([
+  ['', /non-empty/],
+  ['WHERE value = 1', /expected a comparison/],
+  ['value = NULL', /must use IS NULL/],
+  ['value IN ()', /requires at least one scalar value/],
+  ['value = :missing', /requires a value/],
+  ["value = 'unterminated", /unterminated/],
+  ['value LIKE 1', /expected a comparison/],
+  ['value = 1 trailing', /unexpected token/]
+])('parseSQLPredicate rejects unsupported input %o', (source, expectedError) => {
+  expect(() => parseSQLPredicate(source)).toThrow(expectedError);
+});
+
+test('parseSQLPredicate parses decimal, exponent, and negative numeric literals', () => {
+  expect(parseSQLPredicate('ratio > -1.25 AND score = 1e3 AND count = 9007199254740993')).toEqual({
+    op: 'and',
+    args: [
+      {op: '>', args: [{property: 'ratio'}, -1.25]},
+      {op: '=', args: [{property: 'score'}, 1000]},
+      {op: '=', args: [{property: 'count'}, 9007199254740993n]}
+    ]
+  });
+});
+
+test.each([
+  [':', /invalid parameter/],
+  ['value = @', /unsupported token/],
+  ['value = -name', /unary minus/],
+  ['value = 1e999', /finite/]
+])('parseSQLPredicate rejects malformed scalar syntax %o', (source, expectedError) => {
+  expect(() => parseSQLPredicate(source)).toThrow(expectedError);
+});
+
+test('parseSQLPredicate enforces input size and expression depth limits', () => {
+  expect(() => parseSQLPredicate('value = 1'.repeat(8000))).toThrow(/safely bounded/);
+  const deeplyNestedPredicate = `${'('.repeat(65)}value = 1${')'.repeat(65)}`;
+  expect(() => parseSQLPredicate(deeplyNestedPredicate)).toThrow(/safe limit/);
+});
+
+test('runtime parameter values must be concrete scalars in comparisons and membership', () => {
+  for (const expression of ['value >= :minimum', 'value IN (:minimum)']) {
+    const template = parseSQLPredicate(expression, {preserveParameters: true});
+    for (const value of [{parameter: 'other'}, {}, null, undefined, NaN, new Date(NaN)]) {
+      const parameters = {minimum: value} as never;
+      expect(() => parseSQLPredicate(expression, {parameters})).toThrow('unsupported value');
+      expect(() => bindSQLPredicate(template, parameters)).toThrow();
+    }
+    for (const value of [0, 1n, false, '', new Date(0), new Uint8Array([1, 2])]) {
+      const parameters = {minimum: value};
+      expect(parseSQLPredicate(expression, {parameters})).toEqual(
+        bindSQLPredicate(template, parameters)
+      );
+    }
+  }
+});
+
+test('predicate nesting counts parentheses and negation rather than precedence methods', () => {
+  const leaf = parseSQLPredicate('value = 1');
+  expect(parseSQLPredicate('('.repeat(64) + 'value = 1' + ')'.repeat(64))).toEqual(leaf);
+  expect(() => parseSQLPredicate('('.repeat(65) + 'value = 1' + ')'.repeat(65))).toThrow(
+    'safe limit'
+  );
+  expect(() => parseSQLPredicate('NOT '.repeat(64) + 'value = 1')).not.toThrow();
+  expect(() => parseSQLPredicate('NOT '.repeat(65) + 'value = 1')).toThrow('safe limit');
+  expect(() => parseSQLPredicate('NOT ('.repeat(32) + 'value = 1' + ')'.repeat(32))).not.toThrow();
+  expect(() => parseSQLPredicate('NOT ('.repeat(33) + 'value = 1' + ')'.repeat(33))).toThrow(
+    'safe limit'
+  );
+});
+
+test('predicate validation and binding reject sparse membership lists', () => {
+  for (const values of [Array(1), [1, , 3], [1, undefined]]) {
+    const predicate = {op: 'in', args: [{property: 'value'}, values]} as const;
+    expect(isSQLPredicate(predicate)).toBe(false);
+    expect(() => validateSQLPredicate(predicate)).toThrow('unsupported scalar');
+    expect(() => bindSQLPredicate(predicate as never, {})).toThrow('unsupported scalar');
+  }
+});
+
+test.each(['value = :input', 'value IN (:input)'])(
+  'parse-time binding snapshots mutable scalars for %s',
+  sql => {
+    for (const value of [new Date('2024-01-01T00:00:00Z'), new Uint8Array([1, 2, 3])]) {
+      const parameters = {input: value};
+      const parsed = parseSQLPredicate(sql, {parameters});
+      const bound = bindSQLPredicate(
+        parseSQLPredicate(sql, {preserveParameters: true}),
+        parameters
+      );
+      expect(parsed).toEqual(bound);
+      if (value instanceof Date) value.setUTCFullYear(2030);
+      else value.fill(9);
+      expect(parsed).toEqual(bound);
+      expect(parseSQLPredicate(sql, {parameters})).not.toEqual(parsed);
+    }
+  }
+);

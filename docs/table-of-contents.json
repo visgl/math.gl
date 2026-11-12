@@ -114,22 +114,7 @@
               "type": "doc",
               "id": "modules/core/types/README"
             }
-          },
-          {
-            "type": "category",
-            "label": "@math.gl/core/expressions",
-            "items": [
-              "modules/core/expressions/api-reference/expression-eval",
-              "modules/core/expressions/api-reference/function-registry",
-              "modules/core/expressions/api-reference/dggs-function-libraries",
-              "modules/core/expressions/api-reference/parse-expression-string"
-            ],
-            "link": {
-              "type": "doc",
-              "id": "modules/core/expressions/README"
-            }
-          },
-          "modules/core/sql/README"
+          }
         ],
         "link": {
           "type": "doc",
@@ -544,8 +529,6 @@
         },
         "items": [
           "modules/arrow/utf8/README",
-          "modules/arrow/expressions/README",
-          "modules/arrow/color/README",
           {
             "type": "category",
             "label": "Arrow utilities",
@@ -581,6 +564,26 @@
               "modules/arrow/wkb/api-reference/wkb"
             ]
           }
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Expressions and SQL",
+        "link": {
+          "type": "doc",
+          "id": "modules/expressions/README"
+        },
+        "items": [
+          "modules/expressions/api-reference/expression-eval",
+          "modules/expressions/api-reference/function-registry",
+          "modules/expressions/api-reference/dggs-function-libraries",
+          "modules/expressions/api-reference/parse-expression-string",
+          "modules/expressions/portable-ast",
+          "modules/expressions/sql/README",
+          "modules/expressions/arrow/README",
+          "modules/expressions/arrow/sql-conformance",
+          "modules/expressions/math/README",
+          "modules/expressions/color/README"
         ]
       },
       {

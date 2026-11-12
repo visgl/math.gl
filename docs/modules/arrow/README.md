@@ -55,8 +55,8 @@ Your application supplies one compatible Arrow installation. Importing the packa
 
 | Import | Purpose | Apache Arrow required |
 | --- | --- | --- |
-| [`@math.gl/arrow/math`](./math/README.md) | Typed SQL numeric functions, null propagation, classified errors | Yes, 17+ |
-| [`@math.gl/arrow/color`](./color/README.md) | Typed RGBA, color ramps, bins, and categories | Yes, 17+ |
+| [`@math.gl/expressions/math`](../expressions/math/README.md) | Typed SQL numeric functions, null propagation, classified errors | Yes, 17+ |
+| [`@math.gl/expressions/color`](../expressions/color/README.md) | Typed RGBA, color ramps, bins, and categories | Yes, 17+ |
 | `@math.gl/arrow` | Arrow table/vector views, schemas, copying, and transport | Yes, 17+ |
 | [`@math.gl/arrow/utf8`](./utf8/README.md) | Byte-oriented string comparison and scalar parsing | No |
 | [`@math.gl/arrow/geoarrow`](./geoarrow/README.md) | Arrow-native GeoArrow adapters and processing | Yes, 17+ |

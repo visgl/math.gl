@@ -35,16 +35,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    },
-    "./expressions": {
-      "types": "./dist/expressions/index.d.ts",
-      "import": "./dist/expressions/index.js",
-      "require": "./dist/expressions/index.cjs"
-    },
-    "./sql": {
-      "types": "./dist/sql/index.d.ts",
-      "import": "./dist/sql/index.js",
-      "require": "./dist/sql/index.cjs"
     }
   },
   "files": [

@@ -8,7 +8,7 @@ import {
   createArrowExpressionTask,
   prepareArrowExpressionInput,
   hydrateArrowExpressionResult
-} from '@math.gl/arrow/expressions/worker';
+} from '@math.gl/expressions/arrow/worker';
 const table = new Table({value: vectorFromArray([1, null, 3], new Float64())}).concat(
   new Table({value: vectorFromArray([4, 5], new Float64())})
 );

@@ -11,7 +11,7 @@ import {
   validateSQLPredicate,
   isSQLPredicate,
   SQL_PREDICATE_JSON_SCHEMA
-} from '@math.gl/core/sql';
+} from '@math.gl/expressions/sql';
 import type {
   TableQuery,
   TableReference,
@@ -19,8 +19,8 @@ import type {
   SQLCatalogQuery,
   SQLPredicate,
   BoundSQLPredicate
-} from '@math.gl/core/sql';
-import type {ColumnarPredicate} from '@math.gl/core/expressions';
+} from '@math.gl/expressions/sql';
+import type {ColumnarPredicate} from '@math.gl/expressions';
 
 const reference: TableReference = {source: 'warehouse', table: 'cities'};
 const selection: TableSelection = {column: 'city', as: 'name'};
@@ -60,11 +60,11 @@ void castSelection;
 
 const computedQuery = parseSQLQuery('SELECT SIN(angle) AS value WHERE x + 1 > 0');
 if ('where' in computedQuery && computedQuery.where && 'expression' in computedQuery.where) {
-  const expression: import('@math.gl/core/expressions').Expression = computedQuery.where.expression;
+  const expression: import('@math.gl/expressions').Expression = computedQuery.where.expression;
   void expression;
 }
 
-const byteSelection: import('@math.gl/core/sql').TableSelection = {
+const byteSelection: import('@math.gl/expressions/sql').TableSelection = {
   array: ['r', 'g', 'b', 'a'],
   as: 'color',
   type: 'uint8'
