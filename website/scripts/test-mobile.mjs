@@ -6,6 +6,7 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 import { chromium, webkit } from 'playwright';
+import {checkProjectionEngines} from './check-projection-engines.mjs';
 
 const root = resolve('website/build');
 const basePath = process.env.WEBSITE_BASE_URL || '/math.gl/';
@@ -237,7 +238,8 @@ try {
     assert.deepEqual(errors, []);
     await testContext.close();
   }
-  console.log('Mobile navigation, panel layouts, and native/fallback fullscreen checks passed.');
+  await checkProjectionEngines(browser, base);
+  console.log('Mobile navigation, panel layouts, fullscreen, and projection engine checks passed.');
 } finally {
   await browser.close();
   if (server) await new Promise((done) => server.close(done));
