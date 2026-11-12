@@ -19,8 +19,8 @@
   .quincuncial-star {grid-template-columns:minmax(0,1fr);}
 }
 
-/* Keep the light theme when the compact header becomes sticky. */
-.quincuncial-star .example-panel[data-compact-panel='true'] > .deck-widget-box > section > header {background: var(--menu-background);}
+/* This panel sits above the map on phones, in a row sized by its own content. */
+.quincuncial-star aside.example-panel[data-compact-panel='true'] {max-height:min(45svh, 360px);}
 
 /* Match Curve Flight Lab's typography and control sizing without changing the light palette. */
 .quincuncial-star .example-panel {font: 14px/1.5 system-ui, sans-serif;}
