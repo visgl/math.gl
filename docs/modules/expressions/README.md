@@ -8,6 +8,20 @@
 Use `@math.gl/expressions` to evaluate expressions against JavaScript objects, parse SQL into
 query objects, or compute values directly from Apache Arrow columns.
 
+## Features
+
+| Feature | Support | Notes |
+| --- | --- | --- |
+| Expression parsing and evaluation | ✅ | [Parse and evaluate](./api-reference/expression-eval.md) JSEP expressions against an explicit context. |
+| Reusable compiled accessors | ✅ | Synchronous and asynchronous compile/evaluate APIs reuse parsed expressions. |
+| Custom operators and function libraries | ✅ | Isolated [function registries](./api-reference/function-registry.md), custom operators, basic math, and optional geospatial/DGGS libraries. |
+| Restricted property-access expressions | ✅ | [parseExpressionString](./api-reference/parse-expression-string.md) builds accessors with function calls disabled. |
+| SQL parsing | ✅ | [Parse SQL](./sql/README.md) into query and predicate objects. |
+| Arrow column evaluation | ✅ | [Evaluate expressions](./arrow/README.md) over batches or tables with Apache Arrow installed. |
+| Full JavaScript programs and process isolation | ❌ | This is an expression evaluator, not a separate JavaScript runtime or security sandbox; registered functions run application code. |
+| Reactive dependency tracking | ❌ | No incremental dependency graph, automatic invalidation, or reactive recomputation engine. |
+| Shader compilation and automatic differentiation | ❌ | Compilation produces reusable JavaScript evaluators, without a GPU code generator or differentiation backend. |
+
 ## Installation
 
 ```bash
@@ -132,8 +146,7 @@ For applications that build function sets incrementally, use an [`ExpressionFunc
 
 Optional [DGGS function tables](/docs/modules/expressions/api-reference/dggs-function-libraries) are available from `@math.gl/dggs`.
 
-Try the APIs in the [expression playground](https://math.gl/examples/expressions). See the
-[upgrade guide](../../upgrade-guide.md#expressions-and-sql-package) for import paths.
+Try the APIs in the [expression playground](https://math.gl/examples/expressions).
 
 ## Attribution
 
