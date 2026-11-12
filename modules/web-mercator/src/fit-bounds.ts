@@ -24,7 +24,7 @@ export type FitBoundsOptions = {
    * Can also be an object with top, bottom, left and right properties defining the padding.
    */
   padding?: number | Padding;
-  /** The center of the given bounds relative to the map's center,  */
+  /** Pixel offset from the padded center. Positive x moves right and positive y moves down. */
   offset?: number[];
 };
 
@@ -90,16 +90,17 @@ export function fitBounds(options: FitBoundsOptions): ViewportProps {
   const scaleX = targetSize[0] / size[0];
   const scaleY = targetSize[1] / size[1];
 
-  // Find how much we need to shift the center
-  const offsetX = (padding.right - padding.left) / 2 / scaleX;
-  const offsetY = (padding.top - padding.bottom) / 2 / scaleY;
-
-  const center = [(se[0] + nw[0]) / 2 + offsetX, (se[1] + nw[1]) / 2 + offsetY];
-
-  const centerLngLat = worldToLngLat(center);
   const zoom = Math.min(maxZoom, log2(Math.abs(Math.min(scaleX, scaleY))));
-
   assert(Number.isFinite(zoom));
+
+  // Translate the viewport center by the inverse of the desired screen-space shift.
+  const scale = 2 ** zoom;
+  const shiftX = (padding.left - padding.right) / 2 + offset[0];
+  const shiftY = (padding.top - padding.bottom) / 2 + offset[1];
+  const centerLngLat = worldToLngLat([
+    (se[0] + nw[0]) / 2 - shiftX / scale,
+    (se[1] + nw[1]) / 2 + shiftY / scale
+  ]);
 
   return {
     longitude: centerLngLat[0],
