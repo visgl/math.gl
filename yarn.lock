@@ -5491,13 +5491,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/arrow@npm:5.0.0-beta.7, @math.gl/arrow@workspace:*, @math.gl/arrow@workspace:modules/arrow":
+"@math.gl/arrow@npm:5.0.0-beta.8, @math.gl/arrow@workspace:*, @math.gl/arrow@workspace:modules/arrow":
   version: 0.0.0-use.local
   resolution: "@math.gl/arrow@workspace:modules/arrow"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-beta.7"
-    "@math.gl/geometry": "npm:5.0.0-beta.7"
-    "@math.gl/tasks": "npm:5.0.0-beta.7"
+    "@math.gl/core": "npm:5.0.0-beta.8"
+    "@math.gl/geometry": "npm:5.0.0-beta.8"
+    "@math.gl/tasks": "npm:5.0.0-beta.8"
   peerDependencies:
     apache-arrow: ">=17.0.0"
   peerDependenciesMeta:
@@ -5524,7 +5524,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/core@npm:5.0.0-beta.7, @math.gl/core@workspace:*, @math.gl/core@workspace:modules/core":
+"@math.gl/core@npm:5.0.0-beta.8, @math.gl/core@workspace:*, @math.gl/core@workspace:modules/core":
   version: 0.0.0-use.local
   resolution: "@math.gl/core@workspace:modules/core"
   languageName: unknown
@@ -5551,7 +5551,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs@workspace:modules/dggs"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-beta.7"
+    "@math.gl/core": "npm:5.0.0-beta.8"
     a5-js: "npm:^0.10.0"
     h3-js: "npm:^4.5.0"
     open-location-code: "npm:^1.0.3"
@@ -5563,19 +5563,19 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/earth@workspace:modules/earth"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-beta.7"
+    "@math.gl/core": "npm:5.0.0-beta.8"
     astronomy-engine: "npm:2.1.19"
   languageName: unknown
   linkType: soft
 
-"@math.gl/expressions@npm:5.0.0-beta.7, @math.gl/expressions@workspace:*, @math.gl/expressions@workspace:modules/expressions":
+"@math.gl/expressions@npm:5.0.0-beta.8, @math.gl/expressions@workspace:*, @math.gl/expressions@workspace:modules/expressions":
   version: 0.0.0-use.local
   resolution: "@math.gl/expressions@workspace:modules/expressions"
   dependencies:
-    "@math.gl/arrow": "npm:5.0.0-beta.7"
-    "@math.gl/core": "npm:5.0.0-beta.7"
-    "@math.gl/geometry": "npm:5.0.0-beta.7"
-    "@math.gl/tasks": "npm:5.0.0-beta.7"
+    "@math.gl/arrow": "npm:5.0.0-beta.8"
+    "@math.gl/core": "npm:5.0.0-beta.8"
+    "@math.gl/geometry": "npm:5.0.0-beta.8"
+    "@math.gl/tasks": "npm:5.0.0-beta.8"
   peerDependencies:
     apache-arrow: ">=17.0.0"
   peerDependenciesMeta:
@@ -5606,11 +5606,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/geometry@npm:5.0.0-beta.7, @math.gl/geometry@workspace:*, @math.gl/geometry@workspace:modules/geometry":
+"@math.gl/geometry@npm:5.0.0-beta.8, @math.gl/geometry@workspace:*, @math.gl/geometry@workspace:modules/geometry":
   version: 0.0.0-use.local
   resolution: "@math.gl/geometry@workspace:modules/geometry"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-beta.7"
+    "@math.gl/core": "npm:5.0.0-beta.8"
   languageName: unknown
   linkType: soft
 
@@ -5629,12 +5629,12 @@ __metadata:
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:
     "@mapbox/martini": "npm:0.2.0"
-    "@math.gl/arrow": "npm:5.0.0-beta.7"
-    "@math.gl/core": "npm:5.0.0-beta.7"
-    "@math.gl/expressions": "npm:5.0.0-beta.7"
-    "@math.gl/geometry": "npm:5.0.0-beta.7"
-    "@math.gl/tasks": "npm:5.0.0-beta.7"
-    "@math.gl/web-mercator": "npm:5.0.0-beta.7"
+    "@math.gl/arrow": "npm:5.0.0-beta.8"
+    "@math.gl/core": "npm:5.0.0-beta.8"
+    "@math.gl/expressions": "npm:5.0.0-beta.8"
+    "@math.gl/geometry": "npm:5.0.0-beta.8"
+    "@math.gl/tasks": "npm:5.0.0-beta.8"
+    "@math.gl/web-mercator": "npm:5.0.0-beta.8"
     "@turf/area": "npm:^7.2.0"
     "@turf/bearing": "npm:^7.2.0"
     "@turf/boolean-point-in-polygon": "npm:^7.2.0"
@@ -5681,7 +5681,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/tasks@npm:5.0.0-beta.7, @math.gl/tasks@workspace:*, @math.gl/tasks@workspace:modules/tasks":
+"@math.gl/tasks@npm:5.0.0-beta.8, @math.gl/tasks@workspace:*, @math.gl/tasks@workspace:modules/tasks":
   version: 0.0.0-use.local
   resolution: "@math.gl/tasks@workspace:modules/tasks"
   languageName: unknown
@@ -5701,11 +5701,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/web-mercator@npm:5.0.0-beta.7, @math.gl/web-mercator@workspace:*, @math.gl/web-mercator@workspace:modules/web-mercator":
+"@math.gl/web-mercator@npm:5.0.0-beta.8, @math.gl/web-mercator@workspace:*, @math.gl/web-mercator@workspace:modules/web-mercator":
   version: 0.0.0-use.local
   resolution: "@math.gl/web-mercator@workspace:modules/web-mercator"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-beta.7"
+    "@math.gl/core": "npm:5.0.0-beta.8"
   languageName: unknown
   linkType: soft
 
@@ -15512,7 +15512,7 @@ __metadata:
   dependencies:
     "@math.gl/core": "workspace:*"
     "@math.gl/dggs": "workspace:*"
-    "@math.gl/expressions": "npm:5.0.0-beta.7"
+    "@math.gl/expressions": "npm:5.0.0-beta.8"
     "@math.gl/geospatial": "workspace:*"
     "@types/react": "npm:^19.2.18"
     "@types/react-dom": "npm:^19.2.5"
@@ -15629,7 +15629,7 @@ __metadata:
     "@citation-js/core": "npm:^0.9.0"
     "@citation-js/plugin-bibtex": "npm:^0.9.0"
     "@deck.gl/core": "npm:^9.4.1"
-    "@math.gl/expressions": "npm:5.0.0-beta.7"
+    "@math.gl/expressions": "npm:5.0.0-beta.8"
     "@turf/destination": "npm:^7.4.0"
     "@types/node": "npm:^22.20.1"
     "@vis.gl/dev-tools": "npm:^2.0.0-beta.2"
@@ -19312,7 +19312,7 @@ __metadata:
     "@math.gl/core": "workspace:*"
     "@math.gl/dggs": "workspace:*"
     "@math.gl/earth": "workspace:*"
-    "@math.gl/expressions": "npm:5.0.0-beta.7"
+    "@math.gl/expressions": "npm:5.0.0-beta.8"
     "@math.gl/geometry": "workspace:*"
     "@math.gl/geospatial": "workspace:*"
     "@math.gl/tasks": "workspace:*"
