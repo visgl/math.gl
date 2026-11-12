@@ -13,17 +13,17 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
-  {symbol:'getExpressionColumns', packages:['@math.gl/core/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:4000},
-  {symbol:'columnarPredicateToExpression', packages:['@math.gl/core/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:10000},
-  {symbol:'NUMERIC_FUNCTION_DEFINITIONS', packages:['@math.gl/core/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:5000},
-  {symbol:'SIN',packages:['@math.gl/arrow/math'],forbidden:[/expressions\/(compiler|predicate)/,/loaders.gl/],budget:210000},
-  {symbol:'COLOR_RGB',packages:['@math.gl/arrow/color'],forbidden:[/expressions\/(compiler|predicate)/,/loaders.gl/],budget:250000},
-  {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /expressions\/(compiler|predicate)/], budget: 240000},
+  {symbol:'getExpressionColumns', packages:['@math.gl/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:4000},
+  {symbol:'columnarPredicateToExpression', packages:['@math.gl/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:10000},
+  {symbol:'NUMERIC_FUNCTION_DEFINITIONS', packages:['@math.gl/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:5000},
+  {symbol:'SIN',packages:['@math.gl/expressions/math'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:210000},
+  {symbol:'COLOR_RGB',packages:['@math.gl/expressions/color'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:250000},
+  {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
 
-  {symbol: 'parseSQLSelect', packages: ['@math.gl/core/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 12600},
-  {symbol: 'parseSQLSelectStatement', packages: ['@math.gl/core/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 15000},
-  {symbol: 'parseSQLQuery', packages: ['@math.gl/core/sql'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 24000},
-  {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/core/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
+  {symbol: 'parseSQLSelect', packages: ['@math.gl/expressions/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 12600},
+  {symbol: 'parseSQLSelectStatement', packages: ['@math.gl/expressions/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 15000},
+  {symbol: 'parseSQLQuery', packages: ['@math.gl/expressions/sql'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 24000},
+  {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
   {symbol:'spheroidToCartesian', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
   {symbol:'vec3Normalize', packages:['@math.gl/core'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
   {symbol:'getGeohashBounds', packages:['@math.gl/dggs'], forbidden:[/h3-js/, /a5-js/, /open-location-code/, /s2-geometry/], budget:2500},

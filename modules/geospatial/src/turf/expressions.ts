@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {DataType, Precision, makeData, makeVector, type Field} from 'apache-arrow';
-import type {ArrowTableFunction} from '@math.gl/arrow/expressions';
+import type {ArrowTableFunction} from '@math.gl/expressions/arrow';
 import {makeGeoArrowColumnFromArrowVector} from '@math.gl/arrow/geoarrow';
 import {isGeoArrowValueValid, type GeoArrowColumn} from '@math.gl/arrow/geoarrow-utils';
 import type {TurfBatchResult} from '../turf';

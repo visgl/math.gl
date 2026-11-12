@@ -26,7 +26,7 @@ const packages = [
 const jsepHeader = '// SPDX-License-Identifier: MIT\n// SPDX-FileCopyrightText: Copyright (c) 2013 Stephen Oney\n';
 const temporalHeader = '// SPDX-License-Identifier: ISC AND Apache-2.0\n// SPDX-FileCopyrightText: Copyright 2017, 2018, 2019, 2020 ECMA International\n// SPDX-FileCopyrightText: the V8 project authors\n';
 const lookupHeader = '// SPDX-License-Identifier: CC0-1.0\n// SPDX-FileCopyrightText: PhotoStructure, Inc. and tz-lookup contributors\n';
-const jsepDir = 'modules/core/src/expressions/vendor/jsep';
+const jsepDir = 'modules/expressions/src/expressions/vendor/jsep';
 const temporalDir = 'modules/earth/src/timezone/vendor/temporal';
 const lookupDir = 'modules/earth/src/timezone/vendor/tz-lookup';
 async function save(path, contents) {

@@ -6,18 +6,14 @@
 .dggs-globe {position:absolute; inset:0}
 .dggs-explorer .example-panel {position:absolute; top:12px; right:12px; width:290px; max-width:calc(100% - 24px); max-height:calc(100% - 24px); font:14px/1.5 system-ui,sans-serif;}
 .dggs-explorer label {display:block; margin:12px 0}
-.dggs-explorer select,.dggs-explorer input:not([type=checkbox]) {display:block; width:100%; box-sizing:border-box}
-.dggs-explorer button {margin:4px; padding:6px}
-.dggs-explorer a {color:#75d9ff}
+.dggs-explorer select {display:block; width:100%; box-sizing:border-box}
 .dggs-explorer [role=alert] {color:#ffad9d}
 @media(max-width:600px) {.dggs-explorer .example-panel {width:220px}}
-.dggs-explorer button,.dggs-explorer select,.dggs-explorer input:not([type=checkbox]) {background:#17384b;color:#e6f4ff;border:1px solid #52738a;border-radius:4px;padding:7px}
-.dggs-explorer button:disabled {opacity:.5}
+.dggs-explorer select {background:#17384b;color:#e6f4ff;border:1px solid #52738a;border-radius:4px;padding:7px}
 
 /* Keep the panel typography consistent while preserving the globe's widget styles. */
-.dggs-explorer .example-panel :is(p, a) {font-size:13px;}
+.dggs-explorer .example-panel p {font-size:13px;}
 .dggs-explorer .example-panel label {font-size:12px;margin:14px 0;}
-.dggs-explorer .example-panel :is(select, input:not([type='checkbox'])) {margin-top:6px;}
-.dggs-explorer .example-panel-content :is(button, select, input:not([type='checkbox'])) {font:inherit;padding:9px;border-radius:8px;}
-.dggs-explorer .example-panel :is(button, select) {cursor:pointer;}
-.dggs-explorer .example-panel .dggs-check {display:flex;gap:8px;align-items:center;margin:9px 0;}
+.dggs-explorer .example-panel select {margin-top:6px;}
+.dggs-explorer .example-panel-content select {font:inherit;padding:9px;border-radius:8px;}
+.dggs-explorer .example-panel select {cursor:pointer;}

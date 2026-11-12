@@ -19,7 +19,7 @@ or geospatial projections; CRS metadata is retained opaquely.
 | Import | Purpose | Apache Arrow required |
 | --- | --- | --- |
 | `@math.gl/arrow` | Indexed tables/vectors, schema validation, renaming, buffer ownership, hydration and IPC | Yes |
-| `@math.gl/arrow/expressions` | Schema-bound predicates, computed columns and typed functions | Yes |
+| `@math.gl/expressions/arrow` | Schema-bound predicates, computed columns and typed functions | Yes |
 | `@math.gl/arrow/utf8` | Compare UTF-8 byte ranges and parse ASCII scalar values | No |
 | `@math.gl/arrow/geoarrow` | Borrow Arrow geometry buffers, inspect metadata, compute bounds, map coordinates, and rewind rings | Yes |
 | `@math.gl/arrow/geoarrow-utils` | Runtime-independent geometry descriptors, builders, kernels, codecs, tessellation, and streaming | No |

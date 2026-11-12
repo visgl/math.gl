@@ -16,6 +16,12 @@ export {earcut} from './earcut';
 
 export {clipPolygon, clipPolyline} from './lineclip';
 
+export {
+  getPoleOfInaccessibility,
+  DEFAULT_POLE_SEARCH_SEGMENT_TESTS
+} from './pole-of-inaccessibility';
+export type {PoleSearchBudget} from './pole-of-inaccessibility';
+
 export {cutPolygonByGrid, cutPolylineByGrid} from './cut-by-grid';
 
 export {cutPolylineByMercatorBounds, cutPolygonByMercatorBounds} from './cut-by-mercator-bounds';

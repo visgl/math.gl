@@ -18,7 +18,7 @@ function run(command, args, cwd = temporary) {
   });
 }
 try {
-  for (const name of ['core', 'geometry', 'web-mercator', 'geospatial']) {
+  for (const name of ['core', 'expressions', 'geometry', 'web-mercator', 'geospatial']) {
     const [manifest] = JSON.parse(
       run(
         'npm',
@@ -97,6 +97,10 @@ try {
     assert(!cjs.includes('function clenshaw'), path + ' must not inline a projection kernel');
   }
   const entrySmoke = `
+    const {compile} = await load('@math.gl/expressions');
+    const {GEOSPATIAL_FUNCTION_LIBRARY} = await load('@math.gl/geospatial');
+    const toRadians = compile('toRadians(angle)', {libraries: [GEOSPATIAL_FUNCTION_LIBRARY]});
+    assert.equal(toRadians({angle: 180}), Math.PI);
     const maps = await load('@math.gl/geospatial/maps');
     const presets = await load('@math.gl/geospatial/maps/presets');
     const geometry = await load('@math.gl/geospatial/maps/geometry');

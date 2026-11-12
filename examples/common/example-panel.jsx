@@ -15,7 +15,14 @@ import './example-panel.css';
 import {configureCompactPanel} from './compact-panel.js';
 
 /** Keep React controls live in a themed panel; invisible panels have no chrome. */
-export default function ExamplePanel({title, className, children, variant = 'default'}) {
+export default function ExamplePanel({
+  title,
+  className,
+  children,
+  variant = 'default',
+  open,
+  onOpenChange
+}) {
   const host = useRef(null);
   const container = useRef(null);
   const [contentRoot, setContentRoot] = useState(null);
@@ -56,8 +63,14 @@ export default function ExamplePanel({title, className, children, variant = 'def
       container.current.setProps({open: true});
       return;
     }
+    if (open !== undefined) {
+      // Accordions own their open state, including on small screens.
+      delete host.current.dataset.compactPanel;
+      container.current.setProps({open, onOpenChange});
+      return;
+    }
     return configureCompactPanel(host.current, container.current);
-  }, [variant]);
+  }, [variant, open, onOpenChange]);
   return (
     <aside
       ref={host}

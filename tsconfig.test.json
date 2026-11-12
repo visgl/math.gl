@@ -647,14 +647,15 @@
       "@math.gl/core/types/*": [
         "./modules/core/src/types/*"
       ],
-      "@math.gl/core/expressions": [
-        "./modules/core/src/expressions/index.ts"
+      "@math.gl/expressions": [
+        "./modules/expressions/src/index.ts"
       ],
-      "@math.gl/core/expressions/test/*": [
-        "./modules/core/test/expressions/*"
+      "@math.gl/expressions/test/*": [
+        "./modules/expressions/test/expressions/*"
       ],
-      "@math.gl/core/expressions/*": [
-        "./modules/core/src/expressions/*"
+      "@math.gl/expressions/*": [
+        "./modules/expressions/src/*",
+        "./modules/expressions/src/expressions/*"
       ],
       "@math.gl/geometry/utils/test/*": [
         "./modules/geometry/test/utils/*"

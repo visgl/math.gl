@@ -38,6 +38,7 @@
   cursor: pointer;
 }
 .description { margin: 14px 0; color: #a9bed2; font-size: 13px; line-height: 1.5; }
+.description a { color: #6ecce8; }
 .description:last-child { margin-bottom: 0; }
 .view .results {
   display: table;
@@ -61,6 +62,10 @@
 .view .results td { padding: 4px 8px; text-align: left; }
 .view .results th { padding-left: 0; font-weight: 500; }
 .view .results td:last-child { padding-right: 0; }
+.view .results .selectedCity { padding-left: 0; color: #ffcc66; }
+.city { cursor: pointer; }
+.city:hover,
+.city:focus-visible { fill: #ffcc66; stroke: white; stroke-width: 2; outline: none; }
 .view { min-width: 0; }
 .view svg { display: block; width: 100%; height: auto; border-radius: 6px; background: #102638; }
 /* A flex stack lets compact panels size naturally above the map on phones. */
