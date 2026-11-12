@@ -5568,6 +5568,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@math.gl/expressions@npm:5.0.0-beta.7, @math.gl/expressions@workspace:*, @math.gl/expressions@workspace:modules/expressions":
+  version: 0.0.0-use.local
+  resolution: "@math.gl/expressions@workspace:modules/expressions"
+  dependencies:
+    "@math.gl/arrow": "npm:5.0.0-beta.7"
+    "@math.gl/core": "npm:5.0.0-beta.7"
+    "@math.gl/geometry": "npm:5.0.0-beta.7"
+    "@math.gl/tasks": "npm:5.0.0-beta.7"
+  peerDependencies:
+    apache-arrow: ">=17.0.0"
+  peerDependenciesMeta:
+    apache-arrow:
+      optional: true
+  languageName: unknown
+  linkType: soft
+
 "@math.gl/geoarrow@npm:5.0.0-alpha.12":
   version: 5.0.0-alpha.12
   resolution: "@math.gl/geoarrow@npm:5.0.0-alpha.12"
@@ -5615,6 +5631,7 @@ __metadata:
     "@mapbox/martini": "npm:0.2.0"
     "@math.gl/arrow": "npm:5.0.0-beta.7"
     "@math.gl/core": "npm:5.0.0-beta.7"
+    "@math.gl/expressions": "npm:5.0.0-beta.7"
     "@math.gl/geometry": "npm:5.0.0-beta.7"
     "@math.gl/tasks": "npm:5.0.0-beta.7"
     "@math.gl/web-mercator": "npm:5.0.0-beta.7"
@@ -15380,6 +15397,7 @@ __metadata:
   resolution: "math.gl-arrow-expressions-worker@workspace:examples/arrow/expressions-worker"
   dependencies:
     "@math.gl/arrow": "workspace:*"
+    "@math.gl/expressions": "workspace:*"
     "@math.gl/tasks": "workspace:*"
     apache-arrow: "npm:17.0.0"
   languageName: unknown
@@ -15494,6 +15512,7 @@ __metadata:
   dependencies:
     "@math.gl/core": "workspace:*"
     "@math.gl/dggs": "workspace:*"
+    "@math.gl/expressions": "npm:5.0.0-beta.7"
     "@math.gl/geospatial": "workspace:*"
     "@types/react": "npm:^19.2.18"
     "@types/react-dom": "npm:^19.2.5"
@@ -15610,6 +15629,7 @@ __metadata:
     "@citation-js/core": "npm:^0.9.0"
     "@citation-js/plugin-bibtex": "npm:^0.9.0"
     "@deck.gl/core": "npm:^9.4.1"
+    "@math.gl/expressions": "npm:5.0.0-beta.7"
     "@turf/destination": "npm:^7.4.0"
     "@types/node": "npm:^22.20.1"
     "@vis.gl/dev-tools": "npm:^2.0.0-beta.2"
@@ -19292,6 +19312,7 @@ __metadata:
     "@math.gl/core": "workspace:*"
     "@math.gl/dggs": "workspace:*"
     "@math.gl/earth": "workspace:*"
+    "@math.gl/expressions": "npm:5.0.0-beta.7"
     "@math.gl/geometry": "workspace:*"
     "@math.gl/geospatial": "workspace:*"
     "@math.gl/tasks": "workspace:*"

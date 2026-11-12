@@ -4,7 +4,7 @@
 
 import {expect, test, vi} from 'vitest';
 import {Bool, Field, Float64, Schema, Table, Int32, vectorFromArray} from 'apache-arrow';
-import {compileArrowExpression} from '@math.gl/arrow/expressions';
+import {compileArrowExpression} from '@math.gl/expressions/arrow';
 import {makeArrowVectorFromGeoArrowColumn} from '@math.gl/arrow/geoarrow';
 import {makeGeoArrowColumnFromGeometryRows} from '@math.gl/arrow/geoarrow-utils';
 import {createTurfArrowFunction} from '../src/turf/expressions';

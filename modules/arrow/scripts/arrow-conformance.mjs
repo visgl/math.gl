@@ -4,7 +4,7 @@
 
 import assert from 'node:assert/strict';
 import * as arrow from 'apache-arrow';
-import {compileArrowExpression, compileArrowPredicate} from '../src/expressions/index.ts';
+import {compileArrowExpression, compileArrowPredicate} from '../../expressions/src/arrow/index.ts';
 import {parseUTF8Number, compareUTF8} from '../src/utf8/index.ts';
 import {
   IndexedArrowTable,

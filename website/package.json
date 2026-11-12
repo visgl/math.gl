@@ -33,6 +33,7 @@
     "@math.gl/core": "workspace:*",
     "@math.gl/dggs": "workspace:*",
     "@math.gl/earth": "workspace:*",
+    "@math.gl/expressions": "5.0.0-beta.7",
     "@math.gl/geometry": "workspace:*",
     "@math.gl/geospatial": "workspace:*",
     "@math.gl/tasks": "workspace:*",

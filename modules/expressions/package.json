@@ -1,0 +1,76 @@
+{
+  "name": "@math.gl/expressions",
+  "version": "5.0.0-beta.7",
+  "description": "Portable expression and SQL parsing, evaluation, and optional Arrow execution",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "files": [
+    "dist",
+    "src",
+    "!src/**/README.md",
+    "README.md",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./sql": {
+      "types": "./dist/sql/index.d.ts",
+      "import": "./dist/sql/index.js",
+      "require": "./dist/sql/index.cjs"
+    },
+    "./arrow": {
+      "types": "./dist/arrow/index.d.ts",
+      "import": "./dist/arrow/index.js",
+      "require": "./dist/arrow/index.cjs"
+    },
+    "./arrow/worker": {
+      "types": "./dist/arrow/worker.d.ts",
+      "import": "./dist/arrow/worker.js",
+      "require": "./dist/arrow/worker.cjs"
+    },
+    "./arrow/worker-entry.js": "./dist/arrow/worker-entry.js",
+    "./math": {
+      "types": "./dist/math/index.d.ts",
+      "import": "./dist/math/index.js",
+      "require": "./dist/math/index.cjs"
+    },
+    "./color": {
+      "types": "./dist/color/index.d.ts",
+      "import": "./dist/color/index.js",
+      "require": "./dist/color/index.cjs"
+    }
+  },
+  "sideEffects": [
+    "./dist/arrow/worker-entry.js",
+    "./src/arrow/worker-entry.ts"
+  ],
+  "dependencies": {
+    "@math.gl/arrow": "5.0.0-beta.7",
+    "@math.gl/core": "5.0.0-beta.7",
+    "@math.gl/geometry": "5.0.0-beta.7",
+    "@math.gl/tasks": "5.0.0-beta.7"
+  },
+  "peerDependencies": {
+    "apache-arrow": ">=17.0.0"
+  },
+  "peerDependenciesMeta": {
+    "apache-arrow": {
+      "optional": true
+    }
+  }
+}

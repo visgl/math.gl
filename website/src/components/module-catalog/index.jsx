@@ -7,7 +7,7 @@ import styles from "./styles.module.css";
 
 const modules = [
   ['Core', 'core', 'Vectors, matrices, quaternions, and the foundations of 3D math.', [
-    ['Transforms', 'core/developer-guide/transformations'], ['Types', 'core/types'], ['Expressions', 'core/expressions']
+    ['Transforms', 'core/developer-guide/transformations'], ['Types', 'core/types']
   ]],
   ['Geometry', 'geometry', 'Build, query, and process shapes from curves and polygons to 3D meshes.', [
     ['Curves', 'geometry/curves'], ['Polygons', 'geometry/polygon'], ['Culling', 'geometry/culling'], ['Spatial indexes', 'geometry/spatial-index']
@@ -26,6 +26,9 @@ const modules = [
   ]],
   ['Arrow', 'arrow', 'Process binary data and exchange Arrow and GeoArrow representations.', [
     ['UTF-8', 'arrow/utf8'], ['GeoArrow', 'arrow/geoarrow'], ['GeoArrow utilities', 'arrow/geoarrow-utils'], ['WKB/WKT', 'arrow/wkb']
+  ]],
+  ['Expressions 🧪', 'expressions', 'Evaluate expressions against objects or Arrow columns and parse SQL into query objects.', [
+    ['Object evaluation', 'expressions/api-reference/expression-eval'], ['SQL', 'expressions/sql'], ['Arrow execution', 'expressions/arrow'], ['Workers', 'expressions/arrow#worker-execution']
   ]],
   ['Tasks', 'tasks', 'Schedule typed work locally and in browser or Node workers.', [
     ['Scheduling', 'tasks/developer-guide/execution'], ['Workers', 'tasks/developer-guide/custom-workers'], ['Streams', 'tasks/developer-guide/task-runner'], ['State', 'tasks/developer-guide/persistent-resources']

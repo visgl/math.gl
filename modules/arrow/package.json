@@ -39,27 +39,6 @@
       "types": "./dist/wkb/index.d.ts",
       "import": "./dist/wkb/index.js",
       "require": "./dist/wkb/index.cjs"
-    },
-    "./expressions": {
-      "types": "./dist/expressions/index.d.ts",
-      "import": "./dist/expressions/index.js",
-      "require": "./dist/expressions/index.cjs"
-    },
-    "./expressions/worker": {
-      "types": "./dist/expressions/worker.d.ts",
-      "import": "./dist/expressions/worker.js",
-      "require": "./dist/expressions/worker.cjs"
-    },
-    "./expressions/worker-entry.js": "./dist/expressions/worker-entry.js",
-    "./color": {
-      "types": "./dist/color/index.d.ts",
-      "import": "./dist/color/index.js",
-      "require": "./dist/color/index.cjs"
-    },
-    "./math": {
-      "types": "./dist/math/index.d.ts",
-      "import": "./dist/math/index.js",
-      "require": "./dist/math/index.cjs"
     }
   },
   "files": [
@@ -69,10 +48,6 @@
     "README.md",
     "LICENSE",
     "THIRD-PARTY-NOTICES.md"
-  ],
-  "sideEffects": [
-    "./dist/expressions/worker-entry.js",
-    "./src/expressions/worker-entry.ts"
   ],
   "dependencies": {
     "@math.gl/core": "5.0.0-beta.7",

@@ -12,7 +12,7 @@ import {
   type Vector,
   vectorFromArray
 } from 'apache-arrow';
-import {type ParameterizedColumnarPredicate} from '@math.gl/core/expressions';
+import {type ParameterizedColumnarPredicate} from '@math.gl/expressions';
 import {
   type ArrowTableFunction,
   type ArrowTableFunctionType,
@@ -20,7 +20,7 @@ import {
   compileArrowExpression,
   compileArrowFunction,
   compileArrowPredicate
-} from '@math.gl/arrow/expressions';
+} from '@math.gl/expressions/arrow';
 
 declare const batch: RecordBatch;
 const evaluate: ArrowTableFunctionType = ([prices], {length, activeRows}) =>
@@ -78,7 +78,7 @@ import {
   createArrowExpressionTask,
   prepareArrowExpressionInput,
   hydrateArrowExpressionResult
-} from '@math.gl/arrow/expressions/worker';
+} from '@math.gl/expressions/arrow/worker';
 declare const table: Table;
 compileArrowExpression('price', options).evaluateTable(table, {
   signal: new AbortController().signal
@@ -147,7 +147,7 @@ compileArrowFunction('color', ['[0, 1, 2]'], {
   functions: [color]
 }).evaluateTable(table);
 
-import {compileArrowArray} from '@math.gl/arrow/expressions';
+import {compileArrowArray} from '@math.gl/expressions/arrow';
 compileArrowArray(['x', 'y'], {inputSchema: batch.schema, type: 'float32'}).evaluateTable(table);
 import {Float16} from 'apache-arrow';
 const halfFunction: ArrowTableFunction = {
@@ -161,13 +161,13 @@ const halfFunction: ArrowTableFunction = {
   ]
 };
 void halfFunction;
-import {COLOR_RGB, COLOR_TO_RGBA8} from '@math.gl/arrow/color';
+import {COLOR_RGB, COLOR_TO_RGBA8} from '@math.gl/expressions/color';
 compileArrowExpression('COLOR_TO_RGBA8(COLOR_RGB(1, 0, 0))', {
   inputSchema: batch.schema,
   functions: [COLOR_RGB, COLOR_TO_RGBA8]
 }).evaluate(batch);
 
-import {SIN, POWER, ROUND} from '@math.gl/arrow/math';
+import {SIN, POWER, ROUND} from '@math.gl/expressions/math';
 const mathFunctions: readonly ArrowTableFunction[] = [SIN, POWER, ROUND];
 void mathFunctions;
 
@@ -178,7 +178,7 @@ import {
   columnarPredicateToExpression,
   NUMERIC_FUNCTION_DEFINITIONS,
   type Expression
-} from '@math.gl/core/expressions';
+} from '@math.gl/expressions';
 const externalAST: unknown = {type: 'Literal', value: 1n};
 validateExpressionAST(externalAST);
 const portableAST: Expression = externalAST;
