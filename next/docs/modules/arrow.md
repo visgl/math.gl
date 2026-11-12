@@ -76,3 +76,7 @@ CRS metadata is retained opaquely; interpretation, projection, and geographic ca
 | [Table transport](https://visgl.github.io/math.gl/next/docs/modules/arrow/arrow-table-transport.md)                        | Hydrate/dehydrate column buffers or encode/decode full Arrow IPC.                |
 
 The table views are read-only APIs, not deeply immutable snapshots. Treat their backing tables, index arrays, and maps as immutable while views are in use. Transport payloads are a math.gl protocol, not loaders.gl table wrappers.
+
+### Column inspection[​](#column-inspection "Direct link to Column inspection")
+
+Use `isArrowTable` to recognize a table across Arrow package copies. `findArrowColumn(table, ['feature', 'position'])` looks up a nested column and returns `null` if the path is missing. Pass a single segment to look up a literal field name that contains a dot. `isNumericArrowType` and `isFixedSizeListArrowType` inspect schema types without reading column values.
