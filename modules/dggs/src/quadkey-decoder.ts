@@ -63,6 +63,7 @@ function getQuadkeyBounds(quadkey: string): Bounds2D {
   ];
 }
 
+/** Return full cell bounds as [[west, north], [east, south]] in 512-unit Web Mercator world coordinates. */
 export function quadkeyToWorldBounds(quadkey: string): [[number, number], [number, number]] {
   let x = 0;
   let y = 0;
@@ -77,7 +78,7 @@ export function quadkeyToWorldBounds(quadkey: string): [[number, number], [numbe
   }
   return [
     [x / scale, TILE_SIZE - y / scale],
-    [(x + 0.99) / scale, TILE_SIZE - (y + 0.99) / scale]
+    [(x + 1) / scale, TILE_SIZE - (y + 1) / scale]
   ];
 }
 
