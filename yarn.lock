@@ -2807,6 +2807,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@deck.gl/react@npm:~9.4.1":
+  version: 9.4.1
+  resolution: "@deck.gl/react@npm:9.4.1"
+  peerDependencies:
+    "@deck.gl/core": ~9.4.0
+    "@deck.gl/widgets": ~9.4.0
+    react: ">=16.3.0"
+    react-dom: ">=16.3.0"
+  checksum: 10c0/556d581aff3077fe048820b101cae2a876539c6c72de83be277ed75e6cb3018f29abbc3e9f7968198d64a24edbe0b723b6f09bc3567ece3b1d9383d019a5c872
+  languageName: node
+  linkType: hard
+
 "@deck.gl/widgets@npm:~9.4.1":
   version: 9.4.1
   resolution: "@deck.gl/widgets@npm:9.4.1"
@@ -15443,15 +15455,23 @@ __metadata:
   dependencies:
     "@deck.gl-community/panels": "npm:^9.4.8"
     "@deck.gl/core": "npm:~9.4.1"
+    "@deck.gl/extensions": "npm:~9.4.1"
+    "@deck.gl/geo-layers": "npm:~9.4.1"
     "@deck.gl/layers": "npm:~9.4.1"
+    "@deck.gl/mesh-layers": "npm:~9.4.1"
+    "@deck.gl/react": "npm:~9.4.1"
+    "@deck.gl/widgets": "npm:~9.4.1"
     "@loaders.gl/core": "npm:^4.4.3"
     "@luma.gl/core": "npm:~9.4.0"
     "@luma.gl/engine": "npm:~9.4.0"
     "@luma.gl/shadertools": "npm:~9.4.0"
     "@math.gl/dggs": "workspace:*"
+    a5-js: "npm:^0.10.0"
     h3-js: "npm:^4.5.0"
+    open-location-code: "npm:^1.0.3"
     react: "npm:^19.2.8"
     react-dom: "npm:^19.2.8"
+    s2-geometry: "npm:^1.2.10"
     vite: "npm:^8.3.6"
   languageName: unknown
   linkType: soft
@@ -19257,6 +19277,7 @@ __metadata:
     "@deck.gl/extensions": "npm:~9.4.1"
     "@deck.gl/geo-layers": "npm:~9.4.1"
     "@deck.gl/layers": "npm:~9.4.1"
+    "@deck.gl/react": "npm:~9.4.1"
     "@deck.gl/widgets": "npm:~9.4.1"
     "@docusaurus/core": "npm:^3.10.2"
     "@docusaurus/utils": "npm:^3.10.2"
@@ -19280,15 +19301,18 @@ __metadata:
     "@types/d3-geo": "npm:2"
     "@types/react": "npm:^19.2.18"
     "@vis.gl/docusaurus-website": "npm:2.0.0-alpha.6"
+    a5-js: "npm:^0.10.0"
     d3-geo: "npm:^2.0.2"
     h3-js: "npm:^4.5.0"
     math.gl-parquet-loader: "workspace:*"
+    open-location-code: "npm:^1.0.3"
     prism-react-renderer: "npm:^2.4.1"
     probe.gl: "npm:^5.0.0"
     proj4: "npm:2.22.0"
     react: "npm:^19.2.8"
     react-dom: "npm:^19.2.8"
     remark-parse: "npm:^11.0.0"
+    s2-geometry: "npm:^1.2.10"
     unified: "npm:^11.0.5"
     webpack: "npm:^5.109.2"
   languageName: unknown
