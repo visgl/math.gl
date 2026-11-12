@@ -5,7 +5,8 @@ import {describe, expect, test} from 'vitest';
 import {
   createExampleEngine,
   prepareMap,
-  RADIUS
+  RADIUS,
+  MAPS
 } from '../../../../../website/src/components/external-projection-engines/engines';
 
 for (const backend of ['math.gl', 'proj4js', 'D3'] as const) {
@@ -56,5 +57,45 @@ for (const backend of ['math.gl', 'proj4js', 'D3'] as const) {
         expect(Array.from(packed)).toEqual([1, 2, NaN, 3]);
         expect(() => projection.projectTo([1, 2], new Float64Array(1))).toThrow();
       });
+  });
+}
+
+for (const map of Object.keys(MAPS) as (keyof typeof MAPS)[]) {
+  test(`${map} matches across engines and round-trips global city coordinates`, async () => {
+    const projections = await Promise.all(
+      (['math.gl', 'proj4js', 'D3'] as const).map(backend =>
+        prepareMap(createExampleEngine(backend), map)
+      )
+    );
+    for (const input of [
+      [0, 0],
+      [12, 55],
+      [-74, 40],
+      [151, -34],
+      [-179, -38],
+      [179, 60]
+    ]) {
+      const expected = projections[0].project(input);
+      for (const projection of projections) {
+        const xy = projection.project(input);
+        expect(xy[0]).toBeCloseTo(expected[0], 5);
+        expect(xy[1]).toBeCloseTo(expected[1], 5);
+        const inverse = projection.unproject(xy);
+        expect(inverse[0]).toBeCloseTo(input[0], 7);
+        expect(inverse[1]).toBeCloseTo(input[1], 7);
+      }
+    }
+  });
+}
+
+for (const backend of ['math.gl', 'proj4js', 'D3'] as const) {
+  test(`${backend} uses conventional polar stereographic scale and axes`, async () => {
+    const projection = await prepareMap(createExampleEngine(backend), 'stereographic');
+    const xy = projection.project([90, 0]);
+    expect(xy[0]).toBeCloseTo(2 * RADIUS, 6);
+    expect(xy[1]).toBeCloseTo(0, 6);
+    const equator = projection.project([0, 0]);
+    expect(equator[0]).toBeCloseTo(0, 6);
+    expect(equator[1]).toBeCloseTo(-2 * RADIUS, 6);
   });
 }

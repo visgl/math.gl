@@ -9,29 +9,42 @@ import Example from '@site/src/components/external-projection-engines';
 
 <Example />
 
+Click one of the 1,000 most populous cities to see its projected and inverse
+coordinates. Choose a projection and switch engines to compare the same selection. Cities are ranked by
+`pop_max` from Natural Earth's public-domain [populated places dataset via geojson.xyz](https://geojson.xyz/).
+The example loads a local GeoJSON subset containing the first 1,000 features in
+descending population order.
+
 ## The recipe
 
-The application calls `prepareMap(engine)` once, then uses only `project()` and
+The application calls `prepareMap(engine, mapName)` for the selected projection, then uses only `project()` and
 `unproject()`. Switching between math.gl, proj4js and D3 changes the factory,
 not the rendering code. See the [adapters and shared output handling](https://github.com/visgl/math.gl/tree/master/website/src/components/external-projection-engines).
 
 ```typescript
 const engine = createExampleEngine(backend); // math.gl, proj4js or D3
-const projection = await prepareMap(engine);
+const projection = await prepareMap(engine, 'equalEarth');
 const xy = projection.project([12, 55]);
 const longitudeLatitude = projection.unproject(xy);
 ```
 
-This comparison deliberately uses only longitude/latitude XY and spherical Web
-Mercator. D3's scale, translation and Y direction are configured to match its
-point formula in metres. This does not make other D3 projections equivalent to
-EPSG CRSs. Extra ordinates are rejected by these external adapters; no datum,
-vertical or epoch operation is implied. The interface permits differing backend
-capabilities, so production applications must declare and validate their own domain.
+Choose Mercator, [Equal Earth](https://d3js.org/d3-geo/cylindrical#geoEqualEarth),
+[Albers Equal Area or Lambert Conformal Conic](https://d3js.org/d3-geo/conic), or
+[polar stereographic](https://d3js.org/d3-geo/azimuthal#geoStereographic). All presets
+use a sphere of radius 6,378,137 metres, zero false easting and northing, and
+north-positive Y. The conic presets use standard parallels of 20° and 50° and
+an origin of 0° longitude, 0° latitude. Stereographic is centered on the North
+Pole with a scale factor of 1. D3's scale, rotation, center and Y direction are
+configured to match the same point formulas in metres.
 
-The graticule is sampled inside ±80° latitude. It contains no seam-crossing
-geometry. General lines and polygons need clipping, antimeridian splitting and
-resampling; retain D3's streaming pipeline where appropriate.
+The map fits each projection to the view while the coordinate table shows the
+engine's original metre coordinates. The graticule extends to 80° north; its
+southern limit is 80° south for Mercator and Equal Earth, 60° south for the conic
+presets, and 50° south for stereographic. These limits keep the view away from
+polar singularities while including all 1,000 cities.
+
+For general lines and polygons, use clipping, antimeridian splitting and
+resampling; see [D3's streaming pipeline](https://d3js.org/d3-geo/stream).
 
 proj4js and D3 are website dependencies only. Published math.gl packages do not
 acquire them. proj-wasm has an asynchronous execution API and is covered separately
