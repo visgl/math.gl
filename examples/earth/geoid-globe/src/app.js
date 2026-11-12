@@ -14,10 +14,10 @@ export function mountGeoidGlobe(root, {lowUrl, hiUrl}) {
   const id = `geoid-globe-${nextInstance++}`;
   root.innerHTML = `<canvas data-role="globe" aria-label="Interactive geoid globe"></canvas>
     <aside>
-    <label for="${id}-resolution">EGM96 grid</label>
-    <select id="${id}-resolution" data-role="resolution"><option value="low">Low · 1° preview</option><option value="hi">High · 15′ grid</option></select>
-    <label for="${id}-interpolation">Interpolation</label>
-    <select id="${id}-interpolation" data-role="interpolation"><option value="cubic">Cubic</option><option value="bilinear">Bilinear</option></select>
+    <div class="example-control-row"><label for="${id}-resolution">EGM96 grid</label>
+    <select id="${id}-resolution" data-role="resolution"><option value="low">Low · 1° preview</option><option value="hi">High · 15′ grid</option></select></div>
+    <div class="example-control-row"><label for="${id}-interpolation">Interpolation</label>
+    <select id="${id}-interpolation" data-role="interpolation"><option value="cubic">Cubic</option><option value="bilinear">Bilinear</option></select></div>
     <p data-role="status" role="status">Loading EGM96…</p><div class="legend"></div>
     <div class="legend-labels"><span>−110 m</span><span>0 m</span><span>+110 m</span></div>
     <p>Geoid height N above the WGS84 ellipsoid. Ellipsoidal height h = orthometric height H + N.</p>

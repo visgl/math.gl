@@ -57,16 +57,6 @@ aside.example-panel.deck-widget-container {
 .example-panel:has([data-panel-theme-mode='light']),
 .example-panel [data-panel-theme-mode='light'] { color-scheme: light; }
 
-/* React and DOM panels share one content inset; clear the library's outer
- * padding so theme defaults cannot add a second layer or restore top padding. */
-.example-panel > .deck-widget-box > section > div {
-  padding: 0 !important;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-.example-panel .example-panel-content { padding: 0 12px 12px; }
 /* Use the same themed range controls in both plain HTML and mounted panels. */
 .example-panel input[type='range'] {
   appearance: none;
@@ -106,30 +96,10 @@ aside.example-panel.deck-widget-container {
 .example-panel .example-info-content > :last-child { margin-bottom: 0; }
 .example-panel .example-info-content h1,
 .example-panel .example-info-content h2 { color: inherit; font-size: 1rem; }
-/* The button owns the title inset; clear the library header's inline padding. */
-.example-panel > .deck-widget-box > section > header { flex: 0 0 auto; display: block !important; margin: 0 !important; padding: 0 !important; border: 0; }
-
-/* Keep the shared expander readable and easy to hit at every viewport size. */
-.example-panel > .deck-widget-box > section > header > button {
-  min-height: 44px !important;
-  padding: 12px !important;
-  font-size: 16px !important;
-  line-height: 1.3 !important;
-  box-sizing: border-box;
-}
-
-/* Mask the library's text glyph with an SVG that follows the theme icon color. */
-.example-panel > .deck-widget-box > section > header > button > span[aria-hidden='true'] {
-  width: 12px;
-  height: 12px;
-  flex: 0 0 12px;
-  font-size: 0 !important;
-  background-color: currentColor;
-  mask: url('./assets/chevron-right.svg') center / contain no-repeat;
-  transform: none !important;
-}
-.example-panel > .deck-widget-box > section > header > button[aria-expanded='true'] > span[aria-hidden='true'] {
-  transform: rotate(90deg) !important;
+.example-panel > .deck-widget-box > section > header {
+  flex: none;
+  display: block;
+  margin: 0;
 }
 
 /* Panel controls remain easy to hit with a finger. */
@@ -147,12 +117,6 @@ aside.example-panel.deck-widget-container {
 aside.example-panel[data-compact-panel='true'] {
   max-height: 45%;
 }
-aside.example-panel[data-compact-panel='true'] > .deck-widget-box > section > header {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: #08111f;
-}
 /* Hosts already choose the panel placement. Keep its box in normal flow so
  * collapsed controls reserve their own space beside or below the canvas. */
 .example-panel > .deck-widget-box {
@@ -160,18 +124,45 @@ aside.example-panel[data-compact-panel='true'] > .deck-widget-box > section > he
   inset: auto !important;
 }
 
-/* Retain themed controls without chrome or insets so hosts can align them with their view. */
-.example-panel.example-panel-invisible > .deck-widget-box,
-.example-panel.example-panel-invisible > .deck-widget-box > section {
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 0;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
+
+/* Keep labels beside their controls while letting long values shrink. */
+.example-panel .example-panel-content :is(label:has(> select, > input[type='range'], > input[type='date'], > input[type='time']), .example-control-row) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+  font-size: 12px;
 }
-.example-panel.example-panel-invisible > .deck-widget-box > section > header {
-  display: none !important;
+.example-panel .example-panel-content :is(label, .example-control-row) > :is(select, input:not([type='checkbox'], [type='radio'])) {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  margin: 0;
 }
-.example-panel.example-panel-invisible .example-panel-content {
-  padding: 0;
+.example-panel .example-panel-content :is(label > span:first-child, .example-control-row > label) {
+  flex: 0 0 76px;
+  margin: 0;
+  white-space: normal;
+}
+.example-panel .example-panel-content :is(select, button, input[type='date'], input[type='time']) {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: var(--panel-control-height);
+  padding: var(--panel-control-padding);
+  border: 1px solid var(--button-stroke);
+  border-radius: var(--panel-input-corner-radius);
+  background: var(--button-background);
+  color: var(--button-text);
+  font: inherit;
+  font-size: 12px;
+}
+.example-panel .example-panel-content :is(select, button):hover { background: var(--panel-hover-background); }
+.example-panel .example-panel-content :is(input, select, button, summary):focus-visible {
+  outline: 2px solid var(--panel-focus-color);
+  outline-offset: -2px;
+}
+@media (pointer: coarse), (max-width: 996px) {
+  .example-panel .example-panel-content :is(select, button, input[type='date'], input[type='time']) { min-height: 44px; }
+  .example-panel .example-panel-content :is(select, input:not([type='range'])) { font-size: 16px; }
+  .example-panel > .deck-widget-box > section > header > button { min-height: 44px; }
 }

@@ -13,7 +13,7 @@ try {
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto(server.resolvedUrls.local[0]);
   await page.getByTestId('wkb-statistics').waitFor();
-  assert.equal(await page.locator('.example-panel').count(),0);
+  assert.equal(await page.locator('.wkb-control-panel .deck-widget-box').count(),1);
   assert.equal(await page.getByLabel('Formatted WKT',{exact:true}).evaluate(element=>element.tagName),'DIV');
   assert.equal(await page.getByLabel('WKB bytes',{exact:true}).evaluate(element=>element.tagName),'DIV');
   assert(await page.getByTestId('wkb-statistics').evaluate(element=>Boolean(element.compareDocumentPosition(document.querySelector('[aria-label="Formatted WKT"]')) & Node.DOCUMENT_POSITION_FOLLOWING)));
