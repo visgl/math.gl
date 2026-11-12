@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v5.0.0-beta.8
+
+- Restore `@math.gl/expressions` as a standalone package for portable expressions, SQL parsing and evaluation, and optional Arrow execution (#511).
+- feat(sql): Add relational SELECT parsing, OFFSET pagination, and compact diagnostics with source locations (#499, #500, #502).
+- feat(arrow): Add mergeable scalar aggregates and structural column inspection helpers (#498, #503).
+- feat(geometry): Add `getPoleOfInaccessibility` for polygon interior points (#507).
+- feat(core): Accept probe.gl loggers for operation diagnostics (#505).
+- fix(web-mercator): Center fitted bounds with padding and offset (#512).
+- fix(dggs): Remove arbitrary scaling from quadkey polygons (#510).
+- examples: Share deck.gl rendering across map and unfolding examples, update terrain and DGGS demos, and type shared coordinate and attribution controls (#490, #491, #496, #497, #501, #506, #508, #509).
+- build(deps): Update fast-xml-parser to 5.12.0 (#487).
+
 ## v5.0.0-beta.7
 
 - feat(arrow): Replace named columns with expressions evaluated against the original table while preserving column order, batch slice offsets, and row validity (#493).
