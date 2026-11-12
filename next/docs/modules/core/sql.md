@@ -195,3 +195,5 @@ Executors can consume the [portable expression AST](https://visgl.github.io/math
 ### Syntax errors[​](#syntax-errors "Direct link to Syntax errors")
 
 Parser syntax errors use `SQLParseError`, a `SyntaxError` with a zero-based UTF-16 `offset`, one-based `line` and `column`, and a short `token` preview when a token is present. When parsing a complete statement, locations in the built-in WHERE parser refer to the original SQL text. Use the structured fields to highlight the location in an editor. Exceptions thrown by a custom WHERE parser are preserved.
+
+Pass a [probe.gl](https://vis.gl/probe.gl) logger as the `log` option to `parseSQLQuery` to capture parser errors. The parser reports the diagnostic and throws the original error.
