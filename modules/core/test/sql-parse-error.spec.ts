@@ -51,7 +51,7 @@ test('injected WHERE parsers preserve their own exceptions', () => {
   expect(() => parseSQLQuery('SELECT x FROM')).toThrow(expect.objectContaining({token: null}));
 });
 
-test('SQL query parsing reports the original diagnostic to a supplied Probe.gl logger', () => {
+test('SQL query parsing reports the original diagnostic to a supplied probe.gl logger', () => {
   const log = new MemoryLog();
   expect(() => parseSQLQuery('SHOW TABLES FROM 123', {log})).toThrow(SQLParseError);
   expect(log.messages).toHaveLength(1);

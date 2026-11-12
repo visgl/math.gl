@@ -76,5 +76,5 @@ The module provides these importable libraries:
 Use `mergeFunctionLibraries(context, options)` when integrating libraries with a custom evaluation workflow. It does not mutate the supplied context or libraries.
 
 Pass `{log}` to `parse`, `compile`, `compileAsync`, `evaluate`, or `evaluateAsync`
-to capture failures with a Probe.gl logger. The operation throws the original
-error after reporting it. A Probe.gl `MemoryLog` records diagnostics for inspection.
+to capture failures with a [probe.gl](https://vis.gl/probe.gl) logger. The operation throws the original
+error after reporting it. A probe.gl `MemoryLog` records diagnostics for inspection.

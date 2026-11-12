@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-/** An optional Probe.gl-compatible sink for operation errors. */
+/** An optional probe.gl-compatible sink for operation errors. */
 export type DiagnosticLog = {
   /** Prepares an error message for emission. */
   error(message: string, ...details: unknown[]): () => void;

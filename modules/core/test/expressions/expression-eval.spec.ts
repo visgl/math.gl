@@ -220,7 +220,7 @@ test('Expression accessors cache prototype-named row fields as own entries', () 
   }
 });
 
-test('expression parsing and evaluation report errors to a supplied Probe.gl logger', async () => {
+test('expression parsing and evaluation report errors to a supplied probe.gl logger', async () => {
   const log = new MemoryLog();
   const failure = new Error('application function failed');
   const context = {

@@ -215,5 +215,5 @@ a complete statement, locations in the built-in WHERE parser refer to the origin
 Use the structured fields to highlight the location in an editor. Exceptions thrown by a
 custom WHERE parser are preserved.
 
-Pass a Probe.gl logger as the `log` option to `parseSQLQuery` to capture parser
+Pass a [probe.gl](https://vis.gl/probe.gl) logger as the `log` option to `parseSQLQuery` to capture parser
 errors. The parser reports the diagnostic and throws the original error.
