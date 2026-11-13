@@ -1,0 +1,27 @@
+{
+  "name": "math.gl-bathymetry",
+  "version": "5.0.0-alpha.12",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --config ../../vite.config.local.mjs",
+    "build": "vite build --config ../../vite.config.local.mjs",
+    "serve": "vite preview",
+    "start-local": "vite --config ../../vite.config.local.mjs"
+  },
+  "dependencies": {
+    "@deck.gl-community/panels": "10.0.0-alpha.1",
+    "@deck.gl/core": "10.0.0-alpha.1",
+    "@deck.gl/layers": "10.0.0-alpha.1",
+    "@deck.gl/mesh-layers": "10.0.0-alpha.1",
+    "@loaders.gl/core": "5.0.0-beta.8",
+    "@luma.gl/core": "10.0.0-alpha.14",
+    "@luma.gl/engine": "10.0.0-alpha.14",
+    "@luma.gl/shaders": "10.0.0-alpha.14",
+    "@math.gl/geospatial": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^8.3.6"
+  }
+}

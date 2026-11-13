@@ -1,0 +1,13 @@
+{
+  "dataset": "NOAA NGDC ETOPO1 Ice Surface",
+  "source": "https://coastwatch.pfeg.noaa.gov/erddap/griddap/etopo180.csv?altitude[(-90):30:(90)][(-180):30:(180)]",
+  "width": 721,
+  "height": 361,
+  "spacingDegrees": 0.5,
+  "encoding": "little-endian int16 meters; south to north, west to east",
+  "sha256": "d191e7b9b870d93162d2db4217d8e78e5c021566576b775249ef14a4cc30a7f7",
+  "csvSha256": "5de38ca2ac2c441508a4b2c5e57fd9bcf897dbf89e729189e873241c20b9fee5",
+  "preprocessing": "Every 30th source node, no interpolation; packed CSV altitude into int16",
+  "license": "Free use and redistribution; see NOAA ERDDAP metadata",
+  "reference": "Amante and Eakins (2009), NOAA Technical Memorandum NESDIS NGDC-24"
+}
