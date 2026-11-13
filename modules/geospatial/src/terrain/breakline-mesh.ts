@@ -50,6 +50,8 @@ export function createBreaklineTerrainMesh(
     const ids = new Map(points.map(([x, y], i) => [`${x},${y}`, i]));
     const fixed = new Map<number, number>();
     const excluded = new Set<number>();
+    const fixedSamples = new Set<number>();
+
     const add = ([x, y, z]: TerrainBreaklinePoint): number => {
       if (
         ![x, y, z, z - originZ].every(Number.isFinite) ||
@@ -129,6 +131,8 @@ export function createBreaklineTerrainMesh(
         for (let x = Math.ceil(Math.min(p[0], q[0])); x <= Math.floor(Math.max(p[0], q[0])); x++) {
           const source = field.getHeight(x, y);
           if (source === undefined || !onSegment(p, q, [x, y])) continue;
+          fixedSamples.add(y * field.width + x);
+
           const dx = q[0] - p[0],
             dy = q[1] - p[1];
           const f = Math.abs(dx) >= Math.abs(dy) ? (x - p[0]) / dx : (y - p[1]) / dy;
@@ -143,7 +147,7 @@ export function createBreaklineTerrainMesh(
     // Samples on constraints are already represented by the linear constraint.
     // Prevent refinement from introducing T-junctions through roundoff.
     overriddenSamples = excluded.size;
-    return {edges, excluded};
+    return {edges, excluded, fixedSamples};
   });
   const edges = new Set<string>();
   for (let i = 0; i < mesh.indices.length; i += 3) {

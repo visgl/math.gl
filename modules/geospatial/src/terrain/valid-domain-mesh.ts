@@ -48,7 +48,7 @@ export type DomainConstraints = (
   edges: Edge[],
   selected: Int32Array,
   originZ: number
-) => {edges: Edge[]; excluded: Set<number>};
+) => {edges: Edge[]; excluded: Set<number>; fixedSamples: Set<number>};
 
 export function meshValidDomain(
   field: HeightField,
@@ -158,7 +158,7 @@ export function meshValidDomain(
                   w * heights[a] + u * heights[b] + v * heights[c] - regular.positions[3 * i + 2]
                 );
           maxSampleError = Math.max(maxSampleError, error);
-          if (error > worst) {
+          if (error > worst && !extra?.fixedSamples.has(i)) {
             worst = error;
             candidate = i;
           }
@@ -172,7 +172,7 @@ export function meshValidDomain(
     if (!Array.from(refine).some(i => selected[i] < 0))
       throw new Error('Cannot certify mesh tolerance');
     if (pass === 63) {
-      for (let i = 0; i < count; i++) if (active[i] && !extra?.excluded.has(i)) add(i);
+      for (let i = 0; i < count; i++) if (active[i] && !extra?.fixedSamples.has(i)) add(i);
     } else {
       for (const i of refine) add(i);
     }
