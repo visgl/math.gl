@@ -186,3 +186,11 @@ export {
   type TerrainContinuousMesh,
   type TerrainContinuousError
 } from './continuous-mesh-error';
+
+export {
+  wrapTerrainLongitude,
+  measureGeographicTerrainSeam,
+  type TerrainGeographicProbe
+} from './geographic-seam';
+export {selectTerrainLod, type TerrainLodCandidate, type TerrainLodView} from './lod-select';
+export {stitchTerrainLodCut, type TerrainLodSeam} from './lod-stitch';

@@ -383,3 +383,15 @@ export {
   type TerrainContinuousMesh,
   type TerrainContinuousError
 } from './terrain/continuous-mesh-error';
+
+export {
+  wrapTerrainLongitude,
+  measureGeographicTerrainSeam,
+  type TerrainGeographicProbe
+} from './terrain/geographic-seam';
+export {
+  selectTerrainLod,
+  type TerrainLodCandidate,
+  type TerrainLodView
+} from './terrain/lod-select';
+export {stitchTerrainLodCut, type TerrainLodSeam} from './terrain/lod-stitch';
