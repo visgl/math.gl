@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import ExamplePanel from '../../../common/example-panel';
 import React, {useEffect, useRef, useState} from 'react';
-import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {SolidPolygonLayer, LineLayer} from '@deck.gl/layers';
 import {
   EditableGeoJsonLayer,
@@ -167,14 +167,14 @@ export default function PolygonPlayground() {
       layers: [
         new SolidPolygonLayer({
           id: 'math-triangles',
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           data: triangles,
           getPolygon: p => p,
           getFillColor: (_, info) => [40 + ((info.index * 13) % 150), 140, 210, 170]
         }),
         new LineLayer({
           id: 'triangle-edges',
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           data: edges ? triangles.flatMap(t => t.map((p, i) => [p, t[(i + 1) % 3]])) : [],
           getSourcePosition: d => d[0],
           getTargetPosition: d => d[1],
@@ -183,7 +183,7 @@ export default function PolygonPlayground() {
         }),
         new EditableGeoJsonLayer({
           id: 'polygon-editor',
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           data,
           mode: mode === 'draw' ? DrawPolygonMode : ModifyMode,
           selectedFeatureIndexes: data.features.length ? [0] : [],

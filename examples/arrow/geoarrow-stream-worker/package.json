@@ -5,8 +5,8 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "start": "vite",
-    "build": "vite build",
+    "start": "vite --config ../../vite.config.local.mjs",
+    "build": "vite build --config ../../vite.config.local.mjs",
     "start-local": "vite --config ../../vite.config.local.mjs"
   },
   "dependencies": {

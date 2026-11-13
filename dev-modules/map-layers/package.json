@@ -12,8 +12,8 @@
     "check": "tsc --project tsconfig.json"
   },
   "peerDependencies": {
-    "@deck.gl/core": "~9.4.0",
-    "@deck.gl/layers": "~9.4.0"
+    "@deck.gl/core": "10.0.0-alpha.1",
+    "@deck.gl/layers": "10.0.0-alpha.1"
   },
   "devDependencies": {
     "typescript": "^6.0.3"

@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {Deck, OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck, OrbitView} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TextLayer} from '@deck.gl/layers';
 import {Geometry} from '@luma.gl/engine';
@@ -101,7 +101,7 @@ export function createScene(canvas, onError) {
         layers: [
           new SimpleMeshLayer({
             id: 'alpine-surface',
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             data: [{}],
             mesh,
             getPosition: [0, 0, 0],
@@ -111,7 +111,7 @@ export function createScene(canvas, onError) {
           options.labels &&
             new TextLayer({
               id: 'alpine-places',
-              coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+              coordinateSystem: 'cartesian',
               data: labels,
               getPosition: d => d.position,
               getText: d => d.name,

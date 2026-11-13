@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original deck.gl material adapter. Imports luma.gl waterMaterial; no upstream shader code is copied.
 import {SolidPolygonLayer} from '@deck.gl/layers';
-import {waterMaterial} from '@luma.gl/shadertools';
+import {waterMaterial} from '@luma.gl/shaders';
 import {thermalPulse} from './planetary-history.js';
 const block = `layout(std140) uniform tectonicSurfaceUniforms {
   float isWater;

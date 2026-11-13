@@ -4,7 +4,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import './geometry-viewer.css';
 import {luma} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/webgl';
+import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {Geometry as LumaGeometry, Model, OrbitControls} from '@luma.gl/engine';
 import {Matrix4, toRadians} from '@math.gl/core';
 

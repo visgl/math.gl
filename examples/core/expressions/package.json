@@ -5,8 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "vite",
-    "build": "tsc --noEmit && vite build",
+    "start": "vite --config ../../vite.config.local.mjs",
+    "build": "tsc --noEmit && vite build --config ../../vite.config.local.mjs",
     "serve": "vite preview",
     "start-local": "vite --config ../../vite.config.local.mjs"
   },

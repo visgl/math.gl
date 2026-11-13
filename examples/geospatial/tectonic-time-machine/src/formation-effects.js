@@ -3,7 +3,6 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original cinematic art, not an orbital or atmospheric simulation.
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 
 class CelestialBodyLayer extends ScatterplotLayer {
   static layerName = 'TectonicCelestialBodyLayer';
@@ -77,7 +76,7 @@ export function createFormationEffects() {
       p.color[3] = 220 * ring * alpha;
     }
     const common = {
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       radiusUnits: 'meters',
       getPosition: position,
       getFillColor: color,

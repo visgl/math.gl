@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {PathLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {mountInfoBox} from '../../../../common/info-box.js';
 import {createRasterFrame, rasterFrameFixtures} from './recipe.mjs';
@@ -65,7 +65,7 @@ export function mountRasterFrame(root) {
             getColor: d => d.color,
             getWidth: 3,
             widthUnits: 'pixels',
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+            coordinateSystem: 'cartesian'
           }),
           new ScatterplotLayer({
             id: 'raster-frame-samples',
@@ -75,7 +75,7 @@ export function mountRasterFrame(root) {
             radiusUnits: 'pixels',
             getFillColor: [245, 245, 245],
             pickable: true,
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+            coordinateSystem: 'cartesian'
           })
         ]
       });

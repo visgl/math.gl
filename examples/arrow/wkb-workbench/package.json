@@ -5,12 +5,12 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "start": "vite",
-    "build": "vite build",
+    "start": "vite --config ../../vite.config.local.mjs",
+    "build": "vite build --config ../../vite.config.local.mjs",
     "start-local": "vite --config ../../vite.config.local.mjs"
   },
   "dependencies": {
-    "@deck.gl-community/panels": "^9.4.8",
+    "@deck.gl-community/panels": "10.0.0-alpha.1",
     "@math.gl/arrow": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
