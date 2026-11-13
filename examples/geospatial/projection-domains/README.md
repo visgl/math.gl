@@ -87,11 +87,23 @@ at the poles. Both texture modes share the same UVs and source-pixel error polic
 imagery, not live imagery, a higher-resolution tile service or a COG demonstration. NASA Earth
 Observatory and NASA GIBS/ESDIS supply the imagery, hosted in deck.gl-data.
 
-## deck.gl 10 projection integration
+## Centered Oblique Mercator renderers
 
-Run `yarn workspace math.gl-projection-domains start-local` and open `/deck.html`
-to compare Albers equal area and Mercator using deck.gl's experimental
-`_CustomProjectionView`. The view resolves its CRS through the repository's math.gl
-source. Layers receive WGS84 coordinates directly; there is no application-side
-preprojection. The small North American graticule avoids global seam handling and
-loads without external data. This experimental deck.gl API may change.
+Open `/centered-omerc.html` from the projection-domains development server. The
+**Prepared paths** renderer projects and qualifies paths in math.gl before handing
+Cartesian coordinates to deck.gl. **deck.gl custom projection** passes the same
+prepared CRS descriptor and geographic paths to deck.gl. Both modes retain the
+local patch and branch checks, and the engine selector chooses either the math.gl
+or proj4js converter. The deck.gl renderer requires the prepared-descriptor API in
+[deck.gl #11106](https://github.com/visgl/deck.gl/pull/11106). The currently pinned
+`10.0.0-alpha.1` release does not support passing this descriptor. Keep this change
+in draft until that upstream PR is merged and published, then update the deck.gl
+packages together to a release containing it and regenerate the lockfile. A green
+build alone does not establish runtime compatibility with the pinned release.
+
+Local Fiji validation used a build of the upstream PR: at 180°E, 17°S and 35°
+orientation, both renderers matched all 3,281 orange boundary pixels within two
+pixels in each direction, with either engine. This checks the qualified local
+patch across the geographic seam, not arbitrary global projection domains.
+Repeat that browser comparison with a clean install of the published release
+before marking this PR ready. No local deck.gl package patches are committed.

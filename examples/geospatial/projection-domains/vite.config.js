@@ -12,7 +12,6 @@ export default async () => {
       rollupOptions: {
         input: [
           'index.html',
-          'deck.html',
           'lab.html',
           'centered-omerc.html',
           'raster-frame.html',
