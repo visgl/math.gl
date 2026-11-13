@@ -24,6 +24,7 @@ try {
   }
   const martini = join(directory, 'node_modules/@mapbox/martini');
   cpSync(dirname(require.resolve('@mapbox/martini')), martini, {recursive: true});
+  symlinkSync(dirname(require.resolve('cdt2d')), join(directory, 'node_modules/cdt2d'), 'dir');
   assert(readFileSync(join(target, 'src/terrain/vendor/DELATIN-LICENSE.txt'), 'utf8').includes('Permission to use'));
   writeFileSync(join(directory, 'package.json'), '{"type":"module"}');
   const body = `
