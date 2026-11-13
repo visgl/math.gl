@@ -432,3 +432,9 @@ Use `plan.evaluate(table)` for a complete Arrow table or `await plan.evaluateInB
 All expression forms skip nulls. Empty or all-null input yields `0n` for counts and `null` for other reductions. Floating sums and averages use Float64 arithmetic, so rounding can vary with batch boundaries and merge order. IEEE infinities and NaNs can propagate. Integer averages convert the exact sum and count to Float64 before dividing.
 
 A running aggregate may change when a batch arrives. If you use it to compute another output such as a row's share of the total, wait for the final result or recompute that output when its aggregate changes. This API produces scalar results through Arrow expressions. SQL aggregate syntax and query planning are separate integration work.
+
+### Grouped accumulators[​](#grouped-accumulators "Direct link to Grouped accumulators")
+
+Call `plan.createGroupedAccumulator('region')` to run the same reductions independently for each scalar key. Update it with the original Arrow batches. The plan evaluates the grouping expression and shared reduction expressions against each batch, without copying rows into separate Arrow tables.
+
+`result()` returns a detached map from key to aggregate values in first-seen order. Null keys form one group. Supported keys include strings, booleans, integers, and finite floating-point values. Each successful batch commits its changes together. An expression error or cancellation preserves the previous result.
