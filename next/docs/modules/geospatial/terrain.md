@@ -907,3 +907,9 @@ No constrained mesher or additional public API is introduced. See the [qualifica
 `createValidDomainTerrainMesh(field, {maxError})` preserves the union of valid regular triangles, including holes, isolated components and half cells. Every boundary sample is retained. Refinement checks every source sample incident to a valid triangle, including shared edges. Isolated samples with no incident triangle do not define surface area.
 
 The output includes detached positions, indices, sample-grid coordinates and the achieved nodal error. Optional sample, triangle and sample-test limits throw when exceeded. The tolerance applies at source samples.
+
+### XYZ breaklines[​](#xyz-breaklines "Direct link to XYZ breaklines")
+
+`createBreaklineTerrainMesh(field, {maxError, breaklines})` accepts XYZ segments in sample-index XY and the field's height reference. Fractional coordinates place vertices between raster samples. Segments can share endpoints with identical heights. Split crossings and T-junctions before calling the mesher. Segments must lie in the valid domain.
+
+The returned `breaklineEdges` buffer maps each input segment to its output vertex pair. The mesher rejects source samples that conflict with the line and requested tolerance. To give the line priority, set `breaklinesOverrideSamples: true`. The result reports the number of samples excluded from nodal certification under this policy. The valid raster domain still determines coverage on both sides of each segment.
