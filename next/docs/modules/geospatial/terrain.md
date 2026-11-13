@@ -921,3 +921,13 @@ The returned `breaklineEdges` buffer maps each input segment to its output verte
 The upper bound covers every point in the overlap, including triangle edges. The lower bound is supported by the returned witness in sample coordinates. Overlapping faces contribute independently. This measures error on the common domain; use separate coverage diagnostics to detect holes or excess geometry. A null upper bound indicates no surviving comparison boxes. At the depth limit the bracket can remain wider than the requested gap. Exceeding the box budget throws rather than returning an incomplete bound.
 
 In Mesh generation, choose **Source triangles** or **Bilinear cells** under **Continuous error reference** to compare this bracket with nodal error.
+
+### Geographic seam diagnostics and sparse LOD cuts[​](#geographic-seam-diagnostics-and-sparse-lod-cuts "Direct link to Geographic seam diagnostics and sparse LOD cuts")
+
+`measureGeographicTerrainSeam` compares paired one-sided stencils in their shared east/north frame. Longitude aliases are mapped explicitly into each tile's unwrapped interval. A full-world interval gives precedence to the west endpoint. Exact poles are outside the derivative domain. Pass a null tile to represent eviction. Height and gradient statuses remain separate, and the reported normal angle measures the discontinuity between the two stencils.
+
+`selectTerrainLod` takes resident tile trees with Cartesian bounds and geometric errors, plus camera position, vertical field of view and viewport height. It uses distance to the tile bounds to estimate projected error in pixels and accepts the previous refined set for hysteresis. Callers supply complete child partitions. A parent stays selected until all immediate children are resident. Unavailable roots are reported explicitly.
+
+`stitchTerrainLodCut` applies caller-supplied seam pairs and partial edge ranges to a selected cut. Put the coarse height owner first. Only incident boundary faces are split. It verifies that earlier seams remain intact after later stitches and rejects incompatible shared corners. The caller supplies the neighbor topology and can use the existing coordinated morph API for animation.
+
+The **Geographic seams & LOD** example lets you inspect antimeridian and near-pole derivative jumps, simulate eviction, and compare sparse transitions with full refinement while changing camera height.
