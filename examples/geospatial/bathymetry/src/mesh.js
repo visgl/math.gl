@@ -87,10 +87,17 @@ export function createGlobeMesh(
               )
             )
           : latitude;
+      // A flat longitude unit is one degree, while the radius-180 globe uses pi
+      // units per equatorial degree. Mercator adds its local sec(latitude) scale.
+      const flatHeight =
+        ((r - 180) / Math.PI) *
+        (projection === 'mercator'
+          ? 1 / Math.cos((Math.max(-85.051129, Math.min(85.051129, latitude)) * Math.PI) / 180)
+          : 1);
       positions.set(
         [
           (1 - morph) * r * cos * Math.sin(lon) + morph * longitude || 0,
-          (1 - morph) * -r * cos * Math.cos(lon) + morph * (-180 - (r - 180)),
+          (1 - morph) * -r * cos * Math.cos(lon) + morph * (-180 - flatHeight),
           (1 - morph) * r * Math.sin(lat) + morph * flatY
         ],
         i * 3

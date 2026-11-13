@@ -4,15 +4,9 @@
 import {Deck, OrbitView, AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {mountInfoBox} from '../../../common/info-box.js';
-import {createGlobeMesh, getExaggeration} from './mesh';
-import {
-  selectRefinement,
-  createRefinementSource,
-  sampleCoarsePosition,
-  mapLatitude,
-  geographicLatitude,
-  normalizeLongitude
-} from './refinement';
+import {createGlobeMesh, getExaggeration} from './mesh.js';
+import {selectRefinement, createRefinementSource, sampleCoarsePosition} from './refinement.js';
+import {getMorphFocus, getMorphViewState} from './camera.js';
 import elevationUrl from '../assets/etopo1.bin?url';
 
 /** Mount a global relief globe with no water surface obscuring the seafloor. */
@@ -43,8 +37,7 @@ export function mountBathymetry(root) {
     detailTimer,
     detailAbort,
     desiredKey;
-  let globeRotation = 160,
-    globeTilt = 12;
+  let focus = {longitude: -160, latitude: 12};
   const loadRefinement = createRefinementSource();
   let state = {
     target: [0, 0, 0],
@@ -68,10 +61,7 @@ export function mountBathymetry(root) {
     onViewStateChange: ({viewState}) => {
       state = viewState;
       deck.setProps({viewState: state});
-      if (Number(controls('morph').value) === 0) {
-        globeRotation = -normalizeLongitude(-state.rotationOrbit);
-        globeTilt = state.rotationX;
-      }
+      focus = getMorphFocus(state, Number(controls('morph').value), controls('projection').value);
       schedule();
       queueRefinement();
     }
@@ -146,13 +136,12 @@ export function mountBathymetry(root) {
       indian: -80,
       americas: 100
     };
-    globeRotation = rotations[event.target.value];
-    globeTilt = 12;
+    focus = {longitude: -rotations[event.target.value], latitude: 12};
     controls('morph').value = 0;
     state = {
       ...state,
       target: [0, 0, 0],
-      rotationOrbit: globeRotation,
+      rotationOrbit: -focus.longitude,
       rotationX: 12,
       zoom: 0
     };
@@ -160,50 +149,25 @@ export function mountBathymetry(root) {
     schedule();
     queueRefinement();
   };
-  controls('projection').onchange = () => {
-    const t = Number(controls('morph').value);
-    if (t > 0) {
-      const latitude = geographicLatitude(state.target[2] / t, lastProjection);
-      state = {
-        ...state,
-        target: [
-          state.target[0],
-          state.target[1],
-          mapLatitude(latitude, controls('projection').value) * t
-        ]
-      };
-      deck.setProps({viewState: state});
-    }
-    schedule();
-    queueRefinement();
-  };
-  controls('morph').oninput = () => {
-    const t = Number(controls('morph').value);
-    state = {
-      ...state,
-      rotationOrbit: globeRotation * (1 - t),
-      rotationX: globeTilt * (1 - t),
-      target: [
-        -globeRotation * t,
-        -180 * t,
-        mapLatitude(globeTilt, controls('projection').value) * t
-      ]
-    };
+  function updateMorph() {
+    state = getMorphViewState(
+      focus,
+      Number(controls('morph').value),
+      controls('projection').value,
+      state
+    );
     deck.setProps({viewState: state});
     schedule();
     queueRefinement();
-  };
+  }
+  controls('projection').onchange = updateMorph;
+  controls('morph').oninput = updateMorph;
   function queueRefinement() {
     clearTimeout(detailTimer);
     detailTimer = setTimeout(refine, 250);
   }
   async function refine() {
-    const flat = Number(controls('morph').value) > 0.5;
-    const request = selectRefinement(
-      flat ? state.target[0] : -state.rotationOrbit,
-      flat ? geographicLatitude(state.target[2], controls('projection').value) : state.rotationX,
-      state.zoom
-    );
+    const request = selectRefinement(focus.longitude, focus.latitude, state.zoom);
     if (!request) {
       desiredKey = undefined;
       detailAbort?.abort();

@@ -105,3 +105,17 @@ test('refined boundaries lie on the coarse edge in globe, intermediate and flat 
       }
   }
 });
+
+test('flat maps use geographic meter scale for unexaggerated heights', () => {
+  const heights = new Int16Array(45).fill(1000);
+  const metersPerDegree = (6371008.8 * Math.PI) / 180;
+  for (const projection of ['equirectangular', 'mercator']) {
+    const mesh = createGlobeMesh(heights, 1, 9, 5, undefined, {morph: 1, projection});
+    const p = mesh.attributes.POSITION.value;
+    assert.ok(Math.abs(-p[(2 * 9 + 4) * 3 + 1] - 180 - 1000 / metersPerDegree) < 1e-5);
+    const latitudeScale = projection === 'mercator' ? Math.SQRT2 : 1;
+    assert.ok(
+      Math.abs(-p[(3 * 9 + 4) * 3 + 1] - 180 - (1000 / metersPerDegree) * latitudeScale) < 1e-5
+    );
+  }
+});
