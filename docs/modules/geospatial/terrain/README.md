@@ -1557,3 +1557,17 @@ The reported bands describe the reconciled displayed surface, which can differ n
 adjusted seams from each raw input DEM. Geographic wrapping and datum conversion remain
 outside these local affine operations. The coordinated transition/band example shows
 2:1/4:1 factors, shared corners and missing coarse support.
+
+
+## Boundary fidelity qualification
+
+The terrain example's **Mesh generation → Boundary qualification study** compares
+current regular, MARTINI and Delatin meshes with pinned offline constrained references.
+It separates nodal tolerance, sampled surface error, supplied-boundary height error,
+interior crossings and missing/excess domain coverage. The Sierra study references
+are labeled counterexamples: they preserve the intended planar domain but fail
+independent nodal tolerance checks on triangle edges.
+
+No constrained mesher or additional public API is introduced. See the
+[qualification methodology and reproduction instructions](../../../../test/terrain-boundaries/README.md)
+and [roadmap findings](../../../../dev-docs/terrain-roadmap.md).
