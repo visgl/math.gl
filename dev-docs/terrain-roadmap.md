@@ -10,6 +10,32 @@ not math.gl.
 
 ## Implementation progress
 
+### Boundary qualification (November 13, 2026)
+
+The qualification-only response to [mdsumner's study](https://github.com/visgl/math.gl/issues/341#issuecomment-6807738999)
+adds full-precision pinned constrained references, independent XYZ mesh diagnostics,
+and a boundary-study mode in the existing mesh lab. Runtime APIs, nodata handling,
+and mesh generation are unchanged. See the [reproduction instructions and results](../test/terrain-boundaries/README.md).
+
+| Case | Independent observation |
+| --- | --- |
+| Pacific, 10 / 20 / 40 m | Current Delatin boundary maxima: 170.5 / 170.5 / 175.75 m; constrained references: 0 m. |
+| Sierra, 10 / 20 / 40 m | Constrained references have 80,310 / 63,025 / 41,311 triangles and cover the four-corner domain, but fail nodal tolerance on edges: maximum 778.455 m at all three tolerances. |
+| Sierra domain policy | Current regular mesh: 119,560 triangles and area 59,780 sample cells. Study four-corner domain: 118,624 triangles and area 59,312. |
+| Analytical cliff, 0.5 m | Constrained reference: 1,335 triangles, nodal maximum 0.499 m and 4× sampled analytical maximum 0.501 m. |
+
+The Sierra references are retained as explicit counterexamples, not accepted accuracy
+oracles. Interior-only nodal measurements miss the large edge errors. The original
+study's rasterization is a candidate explanation; this PR does not alter its mesher.
+Pacific reference counts vary slightly with the pinned regeneration toolchain, and
+math.gl's independent certification can refine more aggressively than standalone
+Delatin. All comparisons retain their actual tessellator, domain and probe definition.
+
+Next constrained-meshing work must preserve geometry **and height authority**, handle
+off-grid vertex/edge provenance, include boundary samples in error certification,
+and explicitly choose the valid-domain policy. Sampled area/surface results are not
+continuous certificates. Earlier implementation notes below are historical.
+
 October 26, 2026: the first local Cartesian foundation is implemented in
 [`@math.gl/geospatial/terrain`](../docs/modules/geospatial/terrain/README.md), with a dependency-free runtime
 sampling entry and optional `@math.gl/geospatial/terrain/geometry` mesh entry. The opt-in subpath follows master's six-package consolidation while keeping

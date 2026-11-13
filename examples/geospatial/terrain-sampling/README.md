@@ -66,3 +66,20 @@ Streaming replay has its own panel. Its slider loads real Sierra DEM patches,
 edits a tile, evicts it, and restores it. Gold marks rebuilt halos, cyan marks
 reused tiles, and gray marks absent tiles. The browser replay uses unit sample
 spacing; the qualification report uses the declared projected frame.
+
+
+### Boundary study
+
+In **Mesh generation**, enable **Boundary qualification study** to compare Pacific
+coastline, Sierra nodata, and analytical cliff cases. Choose regular, MARTINI,
+Delatin or a precomputed constrained reference and a pinned tolerance. Yellow lines
+show supplied boundaries, lavender lines the domain, and red triangles interior
+crossings. Metrics distinguish nodal, analytical/bilinear/triangulated surface,
+boundary and coverage measurements. Work runs in a cancellable worker.
+
+Sierra constrained references are explicitly marked as failing independent nodal
+qualification: edge samples expose errors hidden by interior-only measurements.
+The example preserves current adaptive nodata rejection and shows both nodata-domain
+policies. Precomputed references are not a new math.gl constrained-meshing API.
+
+See [reproduction and attribution](../../../test/terrain-boundaries/README.md).

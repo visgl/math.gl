@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // biome-ignore lint/correctness/noUnusedImports: Standalone examples use the classic JSX transform.
 import React, {useMemo, useState} from 'react';
+import BoundaryLab from './boundary-lab';
 import TerrainControls from './terrain-controls';
 import {
   HeightField,
@@ -28,6 +29,30 @@ const algorithms = [
 ];
 
 export default function MeshLab({controlsRoot}) {
+  const [boundaryStudy, setBoundaryStudy] = useState(false);
+  return (
+    <>
+      <TerrainControls target={controlsRoot}>
+        <label>
+          <input
+            type="checkbox"
+            aria-label="Boundary qualification study"
+            checked={boundaryStudy}
+            onChange={e => setBoundaryStudy(e.target.checked)}
+          />
+          Boundary qualification study
+        </label>
+      </TerrainControls>
+      {boundaryStudy ? (
+        <BoundaryLab controlsRoot={controlsRoot} />
+      ) : (
+        <GridMeshLab controlsRoot={controlsRoot} />
+      )}
+    </>
+  );
+}
+
+function GridMeshLab({controlsRoot}) {
   const [heatmap, setHeatmap] = useState(false);
   const [dataset, setDataset] = useState('mountain');
   const [tolerance, setTolerance] = useState(2);

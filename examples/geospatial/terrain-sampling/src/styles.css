@@ -62,3 +62,7 @@
 .terrain-streaming-legend span {display:flex;align-items:center;gap:6px}
 
 .terrain-view-description {grid-column:1/-1;margin:0;color:#a9bed2;font-size:13px;line-height:1.5}
+
+/* Keep study selectors readable in the narrow community-panel sidebar. */
+.terrain-sampling .example-panel .terrain-boundary-controls label:has(select) {display:flex;flex-direction:column;align-items:stretch;gap:4px}
+.terrain-sampling .example-panel .example-panel-content .terrain-boundary-controls label > select {flex:none;width:100%;min-width:0;margin:0}

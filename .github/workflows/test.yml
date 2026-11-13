@@ -194,6 +194,9 @@ jobs:
       - name: Check selective imports and optional dependency removal
         run: yarn check:tree-shaking
 
+      - name: Qualify pinned terrain boundaries
+        run: node --test test/terrain-boundaries/*.test.mjs
+
       - name: Check consolidated packages, exports, and assets
         run: yarn check:packages
 
