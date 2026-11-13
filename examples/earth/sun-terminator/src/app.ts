@@ -1,13 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {
-  Deck,
-  MapView,
-  OrthographicView,
-  COORDINATE_SYSTEM,
-  _GlobeView as GlobeView
-} from '@deck.gl/core';
+import {Deck, MapView, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {SharedTileset2D} from '@deck.gl-community/geo-layers';
 import {CutTileLayer, createCutTileAdapter, getCutTileMesh} from './cut-tile-layer.ts';
@@ -232,7 +226,7 @@ export function mountSunTerminator(root: HTMLDivElement) {
             onDraw: () => {
               if (morph && morph.started === null) morph.started = performance.now();
             },
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             image: dayTexture || DAY_OVERVIEW,
             nightImage: nightTexture || NIGHT_OVERVIEW,
             bounds: [-180, -90, 180, 90],
@@ -256,7 +250,7 @@ export function mountSunTerminator(root: HTMLDivElement) {
           ? new ProjectedBitmapLayer({
               id: `projected-${activeView}`,
               mesh,
-              coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+              coordinateSystem: 'cartesian',
               image: dayTexture || DAY_OVERVIEW,
               nightImage: nightTexture || NIGHT_OVERVIEW,
               bounds: [-180, -90, 180, 90],
@@ -316,7 +310,7 @@ export function mountSunTerminator(root: HTMLDivElement) {
                 return new CutBitmapLayer(layerProps, {
                   id: `${props.id}-${activeView}`,
                   mesh: tileMesh,
-                  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+                  coordinateSystem: 'cartesian',
                   image: props.data.day,
                   nightImage: props.data.night,
                   bounds: [west, south, east, north],
@@ -343,7 +337,7 @@ export function mountSunTerminator(root: HTMLDivElement) {
               .getLayout()
               .regions.flatMap(r => r.outlines.map(ring => ring.map(p => [...p, 0]))),
             getPath: path => path,
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             getColor: [180, 210, 230, 160],
             getWidth: 1,
             widthUnits: 'pixels',
@@ -356,7 +350,7 @@ export function mountSunTerminator(root: HTMLDivElement) {
             id: 'h3-cell-grid',
             data: h3GridPaths,
             getPath: path => path,
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             getColor: [180, 210, 230, 90],
             getWidth: 0.7,
             widthUnits: 'pixels',

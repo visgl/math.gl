@@ -551,7 +551,9 @@ jobs:
         run: yarn install --immutable
 
       - name: Test website dependency resolution
-        run: node --test website/resolve-math-gl-dependency.test.cjs
+        run: |
+          node --test scripts/math-gl-source-aliases.test.cjs
+          yarn check:visgl-dependencies
 
       # Match website deployment: build from source before any package dist files exist.
       - name: Build website

@@ -9,7 +9,7 @@ import {
   geographicSource,
   sampleLongitudeRow
 } from './map-center.ts';
-import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {PathLayer, PolygonLayer, TextLayer} from '@deck.gl/layers';
 import {createMapGridPreparer} from './prepare-map-grid.js';
@@ -526,7 +526,7 @@ export function createGlobalScene(
     setLayers(opts.view, mesh, lines, [
       new PolygonLayer({
         id: 'modern-island-reference',
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         data: referenceLand,
         getPolygon: d => d.polygon,
         getFillColor: [170, 175, 125, 255],
@@ -538,7 +538,7 @@ export function createGlobalScene(
       }),
       new PathLayer({
         id: 'inset-frames',
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         data: frameData,
         getPath: d => d.path,
         getColor: [224, 235, 240, 230],
@@ -547,7 +547,7 @@ export function createGlobalScene(
       }),
       new TextLayer({
         id: 'inset-labels',
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         data: frameData,
         getText: d => d.label,
         getPosition: d => d.anchor,
@@ -568,7 +568,7 @@ export function createGlobalScene(
       layers: [
         new SimpleMeshLayer({
           id: 'global-ice',
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           data: [{}],
           mesh,
           getPosition: [0, 0, 0],
@@ -577,7 +577,7 @@ export function createGlobalScene(
         }),
         new PathLayer({
           id: 'global-graticule',
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           data: lines,
           getPath: d => d.path,
           getColor: d =>

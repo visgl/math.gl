@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TaskRunner} from '@math.gl/tasks';
@@ -195,7 +195,7 @@ export function mountProjectionLab(
           material: {unlit: true},
           getPosition: [0, 0, 0],
           getColor: [255, 255, 255],
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           pickable: true,
           parameters: {depthCompare: 'always'}
         })
@@ -205,7 +205,7 @@ export function mountProjectionLab(
         id: `${mode}-charts`,
         data: domains,
         getPath: d => d.ring,
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         getColor: [240, 244, 250],
         getWidth: 1.4,
         widthUnits: 'pixels',
@@ -226,7 +226,7 @@ export function mountProjectionLab(
           id: `${mode}-mesh`,
           data: edges,
           getPath: d => d,
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           getColor: [255, 209, 137, 110],
           getWidth: 0.6,
           widthUnits: 'pixels',
@@ -500,7 +500,7 @@ export function mountProjectionLab(
           material: {unlit: true},
           getPosition: zero,
           getColor: white,
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+          coordinateSystem: 'cartesian'
         };
         decks.inverse.setProps({
           initialViewState: {

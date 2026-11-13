@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {Deck, OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck, OrbitView} from '@deck.gl/core';
 import {PolygonLayer, PathLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {mountInfoBox} from '../../../../common/info-box.js';
 import {prepareSurfacePatch, evaluateSurfacePatch, pickSurfacePatch} from './recipe.mjs';
@@ -71,7 +71,7 @@ export function mountSurfaceMesh(root) {
             getFillColor: d => d.color,
             stroked: false,
             pickable: true,
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+            coordinateSystem: 'cartesian'
           }),
           new PolygonLayer({
             id: 'surface-source-walls',
@@ -79,7 +79,7 @@ export function mountSurfaceMesh(root) {
             getPolygon: p => p.map(q => q.map(v => v * 700)),
             getFillColor: [80, 120, 170],
             stroked: false,
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+            coordinateSystem: 'cartesian'
           }),
           new PathLayer({
             id: 'surface-boundaries',
@@ -88,7 +88,7 @@ export function mountSurfaceMesh(root) {
             getColor: d => d.color,
             getWidth: 2,
             widthUnits: 'pixels',
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+            coordinateSystem: 'cartesian'
           }),
           new ScatterplotLayer({
             id: 'surface-ray-hit',
@@ -97,7 +97,7 @@ export function mountSurfaceMesh(root) {
             getRadius: 5,
             radiusUnits: 'pixels',
             getFillColor: [255, 80, 80],
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+            coordinateSystem: 'cartesian'
           })
         ]
       });

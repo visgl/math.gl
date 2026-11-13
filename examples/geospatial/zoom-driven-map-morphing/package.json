@@ -4,18 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "vite",
-    "build": "yarn workspace @deck.gl/map-layers check && vite build",
+    "start": "vite --config ../../vite.config.local.mjs",
+    "build": "yarn workspace @deck.gl/map-layers check && vite build --config ../../vite.config.local.mjs",
     "start-local": "vite --config ../../vite.config.local.mjs"
   },
   "dependencies": {
-    "@deck.gl-community/panels": "^9.4.8",
-    "@deck.gl/core": "~9.4.1",
-    "@deck.gl/layers": "~9.4.1",
+    "@deck.gl-community/panels": "10.0.0-alpha.1",
+    "@deck.gl/core": "10.0.0-alpha.1",
+    "@deck.gl/layers": "10.0.0-alpha.1",
     "@deck.gl/map-layers": "workspace:*",
-    "@loaders.gl/core": "^4.5.1",
-    "@luma.gl/core": "~9.4.0",
-    "@luma.gl/engine": "~9.4.0",
+    "@loaders.gl/core": "5.0.0-beta.8",
+    "@luma.gl/core": "10.0.0-alpha.14",
+    "@luma.gl/engine": "10.0.0-alpha.14",
+    "@luma.gl/shaders": "10.0.0-alpha.14",
     "@math.gl/geospatial": "workspace:*"
   },
   "devDependencies": {

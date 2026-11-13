@@ -1,0 +1,17 @@
+<!doctype html>
+<!-- math.gl
+SPDX-License-Identifier: MIT
+SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+-->
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>deck.gl custom projections</title></head>
+<body style="margin:0;background:#101820;color:#eee;font:14px sans-serif">
+<canvas id="map" aria-label="Projected graticule and cities"></canvas>
+<aside style="position:absolute;top:16px;left:16px;padding:16px;background:#182532;max-width:280px">
+<h1 style="font-size:18px;margin-top:0">deck.gl custom projections</h1>
+<label>Projection <select id="projection"><option value="albers">Albers equal area</option><option value="mercator">Mercator</option></select></label>
+<p>Pan and zoom to explore. City positions and the graticule stay in longitude/latitude; deck.gl projects them through math.gl.</p>
+<p id="status" role="status">Initializing…</p>
+</aside>
+<script type="module" src="./src/deck/main.js"></script>
+</body></html>

@@ -4,8 +4,7 @@
 const {getDocusaurusConfig} = require('@vis.gl/docusaurus-website');
 const {resolve} = require('path');
 const {themes} = require('prism-react-renderer');
-const {NormalModuleReplacementPlugin} = require('webpack');
-const resolveMathGlDependency = require('./resolve-math-gl-dependency.cjs');
+const getMathGlSourceAliases = require('../scripts/math-gl-source-aliases.cjs');
 const docsTableOfContents = require('../docs/table-of-contents.json');
 
 const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/math.gl/';
@@ -92,22 +91,12 @@ const webpackPlugin = config.plugins.find(
     Array.isArray(plugin) && plugin[0] === '@vis.gl/docusaurus-website/plugin-webpack-config'
 );
 // Respect package-local dependencies before the website plugin's root fallbacks.
-// The private Parquet adapter uses loaders.gl v5 while deck.gl remains on v4.
 webpackPlugin[1].resolve.modules.unshift('node_modules');
 // Preserve the published Parquet worker as a bundled asset, shared with Vite's ?url import.
 webpackPlugin[1].module = {rules: [{resourceQuery: /\?url$/, type: 'asset/resource'}]};
 const aliases = webpackPlugin[1].resolve.alias;
 // Compile the private workspace source rather than its node_modules symlink.
 aliases['@deck.gl/map-layers$'] = resolve(__dirname, '../dev-modules/map-layers/src/index.ts');
-// Dependencies such as deck.gl 9.4 require math.gl 4.x. Keep their imports on
-// their installed dependency versions rather than the website's 5.x source aliases.
-webpackPlugin[1].plugins = [
-  new NormalModuleReplacementPlugin(/^@math\.gl\//, resource => {
-    if (resource.context.includes('node_modules')) {
-      resource.request = resolveMathGlDependency(resource.request, resource.context);
-    }
-  })
-];
 // Vendored gl-matrix sources use explicit .js imports with TypeScript source files.
 config.plugins.push(() => ({
   name: 'math-gl-source-extensions',
@@ -180,16 +169,10 @@ delete config.onBrokenMarkdownLinks;
 
 module.exports = config;
 
-// Exact aliases cover every consolidated public entrypoint, including nested subpaths.
-for (const name of ['arrow', 'core', 'geometry', 'geospatial', 'earth', 'dggs', 'web-mercator', 'tasks']) {
-  const pkg = require('../modules/' + name + '/package.json');
-  delete aliases[pkg.name];
-  for (const [subpath, entry] of Object.entries(pkg.exports)) {
-    const target = typeof entry === 'string' ? entry : entry.import;
-    const source = target.replace('./dist/', 'src/').replace(/\.js$/, '.ts');
-    aliases[pkg.name + (subpath === '.' ? '' : subpath.slice(1)) + '$'] =
-      resolve(__dirname, '../modules/' + name, source);
-  }
+// Exact aliases also apply to imports from deck.gl, luma.gl, and loaders.gl.
+for (const [name, source] of Object.entries(getMathGlSourceAliases())) {
+  delete aliases[name];
+  aliases[name + '$'] = source;
 }
 
 // Resolve shared BibTeX citations for docs and example MDX, including /next/.
