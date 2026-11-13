@@ -1644,3 +1644,21 @@ neighbor topology and can use the existing coordinated morph API for animation.
 The **Geographic seams & LOD** example lets you inspect antimeridian and
 near-pole derivative jumps, simulate eviction, and compare sparse transitions
 with full refinement while changing camera height.
+
+### Breakline preprocessing and regional edit replay
+
+`splitTerrainBreaklines` splits XYZ crossings and T-junctions before passing
+the resulting segments to the breakline mesher. The parallel
+`sourceSegments` array maps each output segment to its input. The first
+accepted height owns a junction within the supplied tolerance. Incompatible
+heights and overlapping collinear segments throw. Pair and output limits
+bound work. Coordinates are floating-point sample indices and the function
+does not snap nearby independent lines onto each other. The **Breakline
+authoring** example lets you move a ridge and inspect height conflicts.
+
+After building, run `node scripts/benchmark-terrain-edit-replay.mjs` to compare
+point and patch edits with full regular mesh rebuilds at three regional
+scales. The replay checks positions, topology and sample coordinates against
+every full rebuild. It reports median and p95 timings, new output buffer
+bytes, rebuilt regions and process peak memory. It establishes a synthetic
+baseline for future spatial indexes and adaptive updates.

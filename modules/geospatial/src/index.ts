@@ -395,3 +395,5 @@ export {
   type TerrainLodView
 } from './terrain/lod-select';
 export {stitchTerrainLodCut, type TerrainLodSeam} from './terrain/lod-stitch';
+
+export {splitTerrainBreaklines} from './terrain/breakline-preprocess';

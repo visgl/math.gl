@@ -30,7 +30,7 @@ try {
   assert(themedBorders.light.every(color=>color==='rgb(66, 98, 119)'));
 
   const headers = page.locator('.terrain-groups > .example-panel header button');
-  assert.equal(await headers.count(), 6);
+  assert.equal(await headers.count(), 7);
   assert.deepEqual(await headers.first().evaluate(el=>{const s=getComputedStyle(el);return [s.fontSize,s.paddingTop,s.paddingBottom];}),['14px','8px','8px']);
   assert.equal(await page.locator('.terrain-groups').evaluate(el=>getComputedStyle(el).gap),'2px');
   async function openGroup(title) {
@@ -168,6 +168,11 @@ try {
   await page.getByLabel('Neighbor and fine tile resident').uncheck();
   assert.match(await geographic.getByRole('status').first().innerText(), /neighbor unavailable/);
   assert.match(await geographic.getByRole('status').last().innerText(), /Coarse east tile/);
+  await openGroup('Breakline authoring');
+  const authoring = page.getByRole('region', {name: 'Terrain breakline authoring'});
+  assert.match(await authoring.getByRole('status').innerText(), /6 segments/);
+  await page.getByLabel('Ridge height').fill('1');
+  assert.match(await authoring.getByRole('status').innerText(), /Conflicting breakline heights/);
   await openGroup('Streaming replay');
   const replayLayout=await page.getByRole('img',{name:'Resident and rebuilt terrain tiles',exact:true}).evaluate(svg=>{
     const r=svg.getBoundingClientRect(),main=svg.closest('main').getBoundingClientRect();
