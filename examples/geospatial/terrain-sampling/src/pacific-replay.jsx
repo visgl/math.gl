@@ -50,7 +50,32 @@ export default function PacificReplay() {
   const {tiles, heights} = useMemo(() => {
     const active = step === 5 ? fine.slice(1) : step === 6 ? [] : fine.slice(0, step);
     const {tiles} = createTerrainMixedVertexTileHalos([coarse, ...active]);
-    const fields = tiles.map(tile => ({...tile, sampler: new HeightField(tile.field)}));
+    const fields = tiles.map(tile => {
+      const {field, spacing, column, row} = tile;
+      const width = field.width - 2,
+        height = field.height - 2;
+      const heights = Float64Array.from({length: width * height}, (_, i) => {
+        const j = (Math.floor(i / width) + 1) * field.width + (i % width) + 1;
+        return field.validity[j] ? field.heights[j] : NaN;
+      });
+      return {
+        ...tile,
+        width,
+        height,
+        sampler: new HeightField({
+          ...field,
+          width,
+          height,
+          heights,
+          validity: undefined,
+          offset: 0,
+          stride: width,
+          origin: [column, row],
+          columnStep: [spacing, 0],
+          rowStep: [0, spacing]
+        })
+      };
+    });
     const heights = Array.from({length: 33 * 33}, (_, index) => {
       const x = index % 33,
         y = Math.floor(index / 33);
@@ -58,10 +83,16 @@ export default function PacificReplay() {
         t =>
           x >= t.column &&
           y >= t.row &&
-          x <= t.column + (t.field.width - 3) * t.spacing &&
-          y <= t.row + (t.field.height - 3) * t.spacing
+          x <= t.column + (t.width - 1) * t.spacing &&
+          y <= t.row + (t.height - 1) * t.spacing
       );
-      const sample = owner?.sampler.sample(x, y, {interpolation: 'triangle'});
+      if (!owner) return null;
+      const column = (x - owner.column) / owner.spacing,
+        row = (y - owner.row) / owner.spacing;
+      if (Number.isInteger(column) && Number.isInteger(row)) {
+        return owner.sampler.getHeight(column, row) ?? null;
+      }
+      const sample = owner.sampler.sample(x, y, {interpolation: 'triangle'});
       return sample?.status === TerrainSampleStatus.VALID ? sample.height : null;
     });
     return {tiles, heights};
