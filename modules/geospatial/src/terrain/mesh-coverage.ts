@@ -83,7 +83,7 @@ export function certifyTerrainMeshCoverage(
 
   const vertices: Point[] = [];
   const vertexIds = new Map<string, number>();
-  const edges = new Map<string, Edge>();
+  const edges = new Map<number | string, Edge>();
   function vertex(x: number, y: number): number {
     if (!Number.isFinite(x) || !Number.isFinite(y))
       throw new Error('Nonfinite coverage coordinate');
@@ -100,7 +100,8 @@ export function certifyTerrainMeshCoverage(
       [a, b] = [b, a];
       weight = -weight;
     }
-    const key = `${a},${b}`;
+    // Pack two 26-bit vertex IDs into an exactly representable number on ordinary workloads.
+    const key = b < 2 ** 26 ? a * 2 ** 26 + b : `${a},${b}`;
     const sum = (edges.get(key)?.weight ?? 0) + weight;
     if (sum === 0) edges.delete(key);
     else edges.set(key, {a, b, weight: sum});
@@ -183,7 +184,10 @@ export function certifyTerrainMeshCoverage(
     if (dx < 0n || (dx === 0n && dy < 0n)) [dx, dy] = [-dx, -dy];
     const key = `${dx},${dy},${dx * y - dy * x}`;
     let events = lines.get(key);
-    if (!events) lines.set(key, (events = new Map()));
+    if (!events) {
+      events = new Map();
+      lines.set(key, events);
+    }
     const axis = dx === 0n ? 1 : 0;
     const delta = weight;
     events.set(p[axis], {point: p, delta: (events.get(p[axis])?.delta ?? 0) + delta});

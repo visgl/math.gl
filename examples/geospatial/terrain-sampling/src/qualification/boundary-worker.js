@@ -34,16 +34,17 @@ self.onmessage = async ({data: {url, algorithm}}) => {
         (_, i) => positions[Math.floor(i / 2) * 3 + (i % 2)]
       )
     });
-    const study = fixture.name === 'pacific' && algorithm === 'constrained';
-    const coverage = terrain.certifyTerrainMeshCoverage(field, xy(mesh), {
-      reference: study ? xy(fixture) : 'triangle'
-    });
-    const coverageDomain = study ? 'supplied study-domain' : 'valid raster triangle';
+    const study = fixture.name === 'pacific' && algorithm !== 'constrained';
+    const candidate = xy(mesh);
+    const coverage = terrain.certifyTerrainMeshCoverage(field, candidate);
+    const studyCoverage = study
+      ? terrain.certifyTerrainMeshCoverage(field, candidate, {reference: xy(fixture)})
+      : null;
     self.postMessage({
       mesh,
       metrics,
       coverage,
-      coverageDomain,
+      studyCoverage,
       segments: fixture.segments,
       domainSegments: fixture.domainSegments
     });

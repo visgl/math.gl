@@ -175,8 +175,11 @@ export default function BoundaryLab({controlsRoot}) {
         {result?.unsupported && <p role="status">{result.unsupported}</p>}
         {result?.coverage && (
           <p data-testid="boundary-coverage">
-            Exact {result.coverageDomain} coverage: {result.coverage.status}. Magenta marks one
-            unmatched boundary interval. The reference domain is listed with the result.
+            Exact valid raster triangle coverage: {result.coverage.status}.{' '}
+            {result.studyCoverage &&
+              `Exact Pacific study-domain coverage: ${result.studyCoverage.status}. `}
+            Magenta marks an unmatched raster-domain boundary interval. The reference domain is
+            listed with the result.
           </p>
         )}
         {result?.error && <p role="alert">{result.error}</p>}
