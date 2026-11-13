@@ -1662,3 +1662,15 @@ scales. The replay checks positions, topology and sample coordinates against
 every full rebuild. It reports median and p95 timings, new output buffer
 bytes, rebuilt regions and process peak memory. It establishes a synthetic
 baseline for future spatial indexes and adaptive updates.
+
+`updateTerrainValidDomainMeshRegions` applies the same dirty-window contract
+to adaptive meshes with nodata. Report every changed height or validity bit.
+The updater preserves untouched region objects and rebuilds all regions
+when tessellation settings change. Region bounds and per-region
+triangulation limits are explicit. Boundary samples remain fixed to the
+valid raster domain. The tolerance applies to covered source nodes.
+
+Run `node scripts/benchmark-terrain-edit-replay.mjs --dem` after building
+to replay point and patch edits on the pinned Pacific and Sierra nodata
+DEMs with the adaptive updater. The comparison checks every mesh buffer
+against a full rebuild of the same regional decomposition.

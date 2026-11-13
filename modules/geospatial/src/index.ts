@@ -397,3 +397,9 @@ export {
 export {stitchTerrainLodCut, type TerrainLodSeam} from './terrain/lod-stitch';
 
 export {splitTerrainBreaklines} from './terrain/breakline-preprocess';
+
+export {
+  updateTerrainValidDomainMeshRegions,
+  type TerrainValidDomainMeshRegions,
+  type TerrainValidDomainRegionOptions
+} from './terrain/valid-domain-regions';

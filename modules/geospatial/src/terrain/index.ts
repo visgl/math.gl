@@ -196,3 +196,9 @@ export {selectTerrainLod, type TerrainLodCandidate, type TerrainLodView} from '.
 export {stitchTerrainLodCut, type TerrainLodSeam} from './lod-stitch';
 
 export {splitTerrainBreaklines} from './breakline-preprocess';
+
+export {
+  updateTerrainValidDomainMeshRegions,
+  type TerrainValidDomainMeshRegions,
+  type TerrainValidDomainRegionOptions
+} from './valid-domain-regions';
