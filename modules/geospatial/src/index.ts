@@ -377,3 +377,9 @@ export {
   type BreaklineTerrainMesh,
   type BreaklineMeshOptions
 } from './terrain/breakline-mesh';
+
+export {
+  boundTerrainMeshError,
+  type TerrainContinuousMesh,
+  type TerrainContinuousError
+} from './terrain/continuous-mesh-error';

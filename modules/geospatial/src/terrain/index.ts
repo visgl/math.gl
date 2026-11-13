@@ -180,3 +180,9 @@ export {
   type BreaklineTerrainMesh,
   type BreaklineMeshOptions
 } from './breakline-mesh';
+
+export {
+  boundTerrainMeshError,
+  type TerrainContinuousMesh,
+  type TerrainContinuousError
+} from './continuous-mesh-error';
