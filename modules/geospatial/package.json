@@ -1068,6 +1068,7 @@
     "@math.gl/geometry": "5.0.0-beta.8",
     "@math.gl/tasks": "5.0.0-beta.8",
     "@math.gl/web-mercator": "5.0.0-beta.8",
+    "cdt2d": "1.0.0",
     "polygon-clipping": "0.15.7"
   },
   "devDependencies": {

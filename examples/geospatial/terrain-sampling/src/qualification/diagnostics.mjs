@@ -231,6 +231,6 @@ export function gridDomain(fixture, policy) {
       d = valid(i + 1, j + 1);
     if (policy === 'four-corners') return a && b && c && d;
     if (policy !== 'triangles') throw new Error('Unknown domain');
-    return y - j <= x - i ? a && b && d : a && d && c;
+    return (y - j <= x - i && a && b && d) || (y - j >= x - i && a && d && c);
   };
 }

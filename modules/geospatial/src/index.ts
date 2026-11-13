@@ -363,3 +363,9 @@ export {coordinateTerrainLodMorphs} from './terrain/lod-coordinate';
 export {createTerrainMixedIsobands} from './terrain/isobands-mixed';
 export type {TerrainLodTile} from './terrain/lod-coordinate';
 export type {TerrainMixedSurface, TerrainMixedSurfaceOptions} from './terrain/mixed-surface';
+
+export {
+  createValidDomainTerrainMesh,
+  type ValidDomainTerrainMesh,
+  type ValidDomainMeshOptions
+} from './terrain/valid-domain-mesh';

@@ -1571,3 +1571,15 @@ independent nodal tolerance checks on triangle edges.
 No constrained mesher or additional public API is introduced. See the
 [qualification methodology and reproduction instructions](../../../../test/terrain-boundaries/README.md)
 and [roadmap findings](../../../../dev-docs/terrain-roadmap.md).
+
+### Adaptive meshing with nodata
+
+`createValidDomainTerrainMesh(field, {maxError})` preserves the union of
+valid regular triangles, including holes, isolated components and half cells.
+Every boundary sample is retained. Refinement checks every source sample
+incident to a valid triangle, including shared edges. Isolated samples with
+no incident triangle do not define surface area.
+
+The output includes detached positions, indices, sample-grid coordinates and
+the achieved nodal error. Optional sample, triangle and sample-test limits
+throw when exceeded. The tolerance applies at source samples.
