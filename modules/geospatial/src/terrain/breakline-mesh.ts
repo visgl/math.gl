@@ -30,7 +30,10 @@ type XY = readonly [number, number];
 const cross = (a: XY, b: XY, c: XY) =>
   (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
 const onSegment = (a: XY, b: XY, p: XY) =>
-  cross(a, b, p) === 0 &&
+  Math.abs(cross(a, b, p)) <=
+    8 *
+      Number.EPSILON *
+      (Math.abs((b[0] - a[0]) * (p[1] - a[1])) + Math.abs((b[1] - a[1]) * (p[0] - a[0]))) &&
   p[0] >= Math.min(a[0], b[0]) &&
   p[0] <= Math.max(a[0], b[0]) &&
   p[1] >= Math.min(a[1], b[1]) &&
