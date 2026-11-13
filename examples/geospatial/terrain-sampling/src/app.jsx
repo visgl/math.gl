@@ -9,6 +9,7 @@ import MeshLab from './mesh-lab';
 import BandsUpdates from './bands-updates';
 import {TerrainStreaming} from './lod-streaming';
 import TileTransitions from './coordinated-transitions';
+import GeographicLod from './geographic-lod';
 import './styles.css';
 
 const groups = [
@@ -16,6 +17,7 @@ const groups = [
   {id: 'mesh', title: 'Mesh generation', Component: MeshLab},
   {id: 'contours', title: 'Contour tolerance', Component: BandsUpdates},
   {id: 'tiles', title: 'Tiles & LOD', Component: TileTransitions},
+  {id: 'geographic', title: 'Geographic seams & LOD', Component: GeographicLod},
   {id: 'streaming', title: 'Streaming replay', Component: TerrainStreaming}
 ];
 

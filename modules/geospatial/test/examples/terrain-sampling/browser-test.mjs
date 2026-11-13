@@ -30,7 +30,7 @@ try {
   assert(themedBorders.light.every(color=>color==='rgb(66, 98, 119)'));
 
   const headers = page.locator('.terrain-groups > .example-panel header button');
-  assert.equal(await headers.count(), 5);
+  assert.equal(await headers.count(), 6);
   assert.deepEqual(await headers.first().evaluate(el=>{const s=getComputedStyle(el);return [s.fontSize,s.paddingTop,s.paddingBottom];}),['14px','8px','8px']);
   assert.equal(await page.locator('.terrain-groups').evaluate(el=>getComputedStyle(el).gap),'2px');
   async function openGroup(title) {
@@ -157,6 +157,17 @@ try {
   await page.getByLabel('Terrain brush peak').fill('4');
   assert.equal(await profile.locator('[data-section-path="sampled"]').count(),1);
   if(process.env.SCREENSHOT_PATH) await page.screenshot({path:process.env.SCREENSHOT_PATH.replace(/\.png$/, '-edits.png')});
+  await openGroup('Geographic seams & LOD');
+  const geographic = page.getByRole('region', {name: 'Geographic seam and sparse terrain LOD'});
+  assert.match(await geographic.getByRole('status').first().innerText(), /height jump 0\.00 m/);
+  assert.match(await geographic.getByRole('status').last().innerText(), /Coarse east tile/);
+  await page.getByLabel('Camera height').fill('1');
+  assert.match(await geographic.getByRole('status').last().innerText(), /42 triangles/);
+  await page.getByLabel('Near-pole seam').check();
+  assert.match(await geographic.getByRole('status').first().innerText(), /88\.5°/);
+  await page.getByLabel('Neighbor and fine tile resident').uncheck();
+  assert.match(await geographic.getByRole('status').first().innerText(), /neighbor unavailable/);
+  assert.match(await geographic.getByRole('status').last().innerText(), /Coarse east tile/);
   await openGroup('Streaming replay');
   const replayLayout=await page.getByRole('img',{name:'Resident and rebuilt terrain tiles',exact:true}).evaluate(svg=>{
     const r=svg.getBoundingClientRect(),main=svg.closest('main').getBoundingClientRect();

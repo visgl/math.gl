@@ -13,6 +13,13 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  {symbol: 'measureGeographicTerrainSeam', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/height-field\./, /geographic\./, /lod-select/, /mesh-stitch/], budget: 5000},
+  {symbol: 'selectTerrainLod', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/height-field\./, /mesh-stitch/, /geographic-seam/], budget: 5000},
+  {symbol: 'stitchTerrainLodCut', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/height-field\./, /lod-select/, /lod-coordinate/, /geographic-seam/], budget: 17000},
+
   {symbol: 'boundTerrainMeshError', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/cdt2d/, /martini/, /delatin/, /height-field\./, /mesh-data\./], budget: 9000},
 
