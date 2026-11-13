@@ -143,6 +143,11 @@
         "type": "doc",
         "label": "Terrain sampling",
         "id": "terrain-sampling"
+      },
+      {
+        "type": "doc",
+        "label": "Bathymetry globe",
+        "id": "bathymetry"
       }
     ]
   },
