@@ -14,7 +14,7 @@ test('continuous bounds enclose an independent saddle maximum between zero-error
   expect(result.upperBound).toBeLessThan(1.1);
   expect(result.lowerBound).toBeGreaterThan(0.9);
   expect(result.witness).not.toBeNull();
-  expect(boundTerrainMeshError(field, mesh, {maxDepth: 18}).upperBound).toBeLessThan(0.05);
+  expect(boundTerrainMeshError(field, mesh).upperBound).toBe(0);
 
   // Reversing the diagonal keeps all nodal values but changes the center by 2 m.
   const opposite = createTerrainMesh(
@@ -33,9 +33,11 @@ test('continuous bounds enclose an independent saddle maximum between zero-error
 test('half-cell nodata remains comparable only in triangle mode', () => {
   const field = new HeightField({width: 2, height: 2, heights: Float64Array.of(2, 3, NaN, 5)});
   const mesh = createTerrainMesh(field);
-  expect(boundTerrainMeshError(field, mesh, {maxDepth: 18}).upperBound).toBeLessThan(0.05);
+  expect(boundTerrainMeshError(field, mesh).upperBound).toBe(0);
   expect(boundTerrainMeshError(field, mesh, {reference: 'bilinear'}).upperBound).toBeNull();
-  expect(() => boundTerrainMeshError(field, mesh, {maxBoxes: 1})).toThrow(/limit/);
+  expect(() => boundTerrainMeshError(field, {...mesh, origin: [0, 0, 1]}, {maxBoxes: 1})).toThrow(
+    /limit/
+  );
 });
 
 test('fractional mesh footprints and rebased heights retain their vertical error', () => {

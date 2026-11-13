@@ -138,6 +138,18 @@ export function boundTerrainMeshError(
       [za, zb, zc].some(z => !Number.isFinite(z[0]))
     )
       throw new Error('Nonfinite continuous error vertex');
+    // A face identical to a reference half cell has zero difference on its
+    // entire footprint, including shared boundaries with neighboring cells.
+    if (
+      reference === 'triangle' &&
+      origin[2] === 0 &&
+      matchesReferenceHalf(field, triangle, [za[0], zb[0], zc[0]])
+    ) {
+      if (++boxes > maxBoxes) throw new Error('Continuous error box limit exceeded');
+      upperBound ??= 0;
+      witness ??= a;
+      continue;
+    }
     const dx = sub(exact(b[0]), exact(a[0])),
       dy = sub(exact(b[1]), exact(a[1]));
     const ex = sub(exact(c[0]), exact(a[0])),
@@ -277,4 +289,33 @@ export function boundTerrainMeshError(
     boxes,
     converged: upperBound !== null && upperBound - lowerBound <= gap
   };
+}
+
+function matchesReferenceHalf(field: HeightField, triangle: Triangle, heights: number[]): boolean {
+  const column = Math.min(...triangle.map(p => p[0]));
+  const row = Math.min(...triangle.map(p => p[1]));
+  if (
+    !Number.isInteger(column) ||
+    !Number.isInteger(row) ||
+    column < 0 ||
+    row < 0 ||
+    column >= field.width - 1 ||
+    row >= field.height - 1
+  )
+    return false;
+  const corners = new Set<number>();
+  for (let i = 0; i < 3; i++) {
+    const [x, y] = triangle[i];
+    const u = x - column,
+      v = y - row;
+    if ((u !== 0 && u !== 1) || (v !== 0 && v !== 1) || field.getHeight(x, y) !== heights[i])
+      return false;
+    corners.add(u + 2 * v);
+  }
+  return (
+    corners.size === 3 &&
+    (field.diagonal === '00-11'
+      ? corners.has(0) && corners.has(3)
+      : corners.has(1) && corners.has(2))
+  );
 }
