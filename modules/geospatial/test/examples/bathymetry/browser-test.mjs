@@ -83,7 +83,7 @@ try {
   await page.locator('[data-role=wireframe]').check();
   await page.setViewportSize({width: 390, height: 844});
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
-  assert.equal(await page.locator('aside').getAttribute('data-compact-panel'), 'true');
+  await page.locator('aside[data-compact-panel=true]').waitFor();
   assert.deepEqual(errors, []);
 } finally {
   await browser.close();
