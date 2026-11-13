@@ -1,0 +1,112 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+
+.bathymetry {
+  position: relative;
+  isolation: isolate;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #07121e;
+  color: #e7f1fa;
+  font:
+    14px/1.5 system-ui,
+    sans-serif;
+}
+.bathymetry [data-role='globe'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.bathymetry aside {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  box-sizing: border-box;
+  width: min(300px, calc(100% - 48px));
+  padding: 20px;
+  border: 1px solid #496078;
+  border-radius: 16px;
+  background: #0d2035ed;
+}
+.bathymetry h1 {
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 0;
+}
+.bathymetry p {
+  color: #b8c9d9;
+}
+.bathymetry label {
+  display: block;
+  margin-top: 12px;
+}
+.bathymetry output {
+  display: block;
+  font-weight: bold;
+}
+.bathymetry input,
+.bathymetry select {
+  width: 100%;
+  accent-color: #ffd875;
+}
+.bathymetry select {
+  padding: 8px;
+  background: #19344e;
+  color: white;
+  border: 1px solid #6c8195;
+  border-radius: 6px;
+}
+.bathymetry .legend-labels {
+  display: flex;
+  justify-content: space-between;
+}
+.bathymetry .credits {
+  font-size: 11px;
+}
+.bathymetry a {
+  color: #97d6ff;
+}
+@media (max-width: 600px) {
+  .bathymetry aside {
+    top: 12px;
+    left: 12px;
+    padding: 12px;
+  }
+  .bathymetry h1 {
+    font-size: 18px;
+  }
+  .bathymetry aside > p:first-of-type {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .bathymetry aside {
+    width: 200px;
+    font-size: 11px;
+  }
+  .bathymetry aside > p:not([data-role='status']) {
+    display: none;
+  }
+  .bathymetry label {
+    margin-top: 6px;
+  }
+  .bathymetry select {
+    padding: 4px;
+  }
+}
+
+.bathymetry aside {
+  max-height: calc(100% - 48px);
+  overflow: auto;
+}
+
+.bathymetry .legend {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(to right, #020c27, #123f88, #168fa7, #8edbc3);
+}
