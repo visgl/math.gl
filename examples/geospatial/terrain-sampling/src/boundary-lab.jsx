@@ -9,7 +9,7 @@ const references = import.meta.glob('./qualification/artifacts/*.json.gz', {
   import: 'default',
   eager: true
 });
-const number = value => (value === null ? 'uncovered' : value.toFixed(3));
+const number = (value, missing = 'uncovered') => (value === null ? missing : value.toFixed(3));
 
 export default function BoundaryLab({controlsRoot}) {
   const [dataset, setDataset] = useState('pacific');
@@ -167,8 +167,8 @@ export default function BoundaryLab({controlsRoot}) {
               </p>
             )}
             <p>
-              Interior / edge-only nodal max: {number(m.nodal.maxInteriorError)} /{' '}
-              {number(m.nodal.maxEdgeOnlyError)} m.
+              Interior / edge-only nodal max: {number(m.nodal.maxInteriorError, 'no probes')} /{' '}
+              {number(m.nodal.maxEdgeOnlyError, 'no probes')} m.
             </p>
             <p>
               {m.triangles.toLocaleString()} triangles; actual tessellator: {m.tessellator}
