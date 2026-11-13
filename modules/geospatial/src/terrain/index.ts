@@ -172,3 +172,11 @@ export {
   type ValidDomainTerrainMesh,
   type ValidDomainMeshOptions
 } from './valid-domain-mesh';
+
+export {
+  createBreaklineTerrainMesh,
+  type TerrainBreaklinePoint,
+  type TerrainBreakline,
+  type BreaklineTerrainMesh,
+  type BreaklineMeshOptions
+} from './breakline-mesh';

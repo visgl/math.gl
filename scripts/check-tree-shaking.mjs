@@ -13,10 +13,13 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  {symbol: 'createBreaklineTerrainMesh', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/martini/, /delatin/, /\/surface\./], budget: 45000},
+
   {symbol: 'createTerrainMesh', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/cdt2d/, /valid-domain-mesh/, /martini/, /delatin/], budget: 10000},
   {symbol: 'createValidDomainTerrainMesh', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
-    forbidden: [/martini/, /delatin/, /\/surface\./], budget: 45000},
+    forbidden: [/martini/, /delatin/, /\/surface\./, /breakline-mesh/], budget: 45000},
 
   {symbol:'getExpressionColumns', packages:['@math.gl/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:4000},
   {symbol:'columnarPredicateToExpression', packages:['@math.gl/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:10000},

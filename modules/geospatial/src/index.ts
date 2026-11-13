@@ -369,3 +369,11 @@ export {
   type ValidDomainTerrainMesh,
   type ValidDomainMeshOptions
 } from './terrain/valid-domain-mesh';
+
+export {
+  createBreaklineTerrainMesh,
+  type TerrainBreaklinePoint,
+  type TerrainBreakline,
+  type BreaklineTerrainMesh,
+  type BreaklineMeshOptions
+} from './terrain/breakline-mesh';
