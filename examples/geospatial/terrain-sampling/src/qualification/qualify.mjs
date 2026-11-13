@@ -66,7 +66,9 @@ export function buildCandidate(api, fixture, algorithm) {
   });
   if (algorithm === 'breakline') {
     const mesh = api.createBreaklineTerrainMesh(field, {
-      maxError: fixture.tolerance, breaklines: fixture.segments, breaklinesOverrideSamples: true
+      maxError: fixture.tolerance,
+      breaklines: fixture.segments,
+      breaklinesOverrideSamples: true
     });
     return {positions: mesh.positions, indices: mesh.indices};
   }
