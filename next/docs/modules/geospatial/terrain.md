@@ -901,3 +901,9 @@ Expanded triangle admission uses the polygonizer's `maxTriangles`; level/vertex/
 The terrain example's **Mesh generation → Boundary qualification study** compares current regular, MARTINI and Delatin meshes with pinned offline constrained references. It separates nodal tolerance, sampled surface error, supplied-boundary height error, interior crossings and missing/excess domain coverage. The Sierra study references are labeled counterexamples: they preserve the intended planar domain but fail independent nodal tolerance checks on triangle edges.
 
 No constrained mesher or additional public API is introduced. See the [qualification methodology and reproduction instructions](https://visgl.github.io/math.gl/next/math.gl/test/terrain-boundaries/README) and [roadmap findings](https://visgl.github.io/math.gl/next/math.gl/dev-docs/terrain-roadmap).
+
+### Adaptive meshing with nodata[​](#adaptive-meshing-with-nodata "Direct link to Adaptive meshing with nodata")
+
+`createValidDomainTerrainMesh(field, {maxError})` preserves the union of valid regular triangles, including holes, isolated components and half cells. Every boundary sample is retained. Refinement checks every source sample incident to a valid triangle, including shared edges. Isolated samples with no incident triangle do not define surface area.
+
+The output includes detached positions, indices, sample-grid coordinates and the achieved nodal error. Optional sample, triangle and sample-test limits throw when exceeded. The tolerance applies at source samples.
