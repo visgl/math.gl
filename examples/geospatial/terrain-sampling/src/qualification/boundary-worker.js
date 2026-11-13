@@ -22,9 +22,28 @@ self.onmessage = async ({data: {url, algorithm}}) => {
     }
     const mesh = buildCandidate(terrain, fixture, algorithm);
     const metrics = qualify(fixture, mesh);
+    const field = new terrain.HeightField({
+      width: fixture.width,
+      height: fixture.height,
+      heights: Float64Array.from(fixture.heights, h => h ?? NaN)
+    });
+    const xy = ({positions, indices}) => ({
+      indices,
+      gridCoordinates: Float64Array.from(
+        {length: (positions.length / 3) * 2},
+        (_, i) => positions[Math.floor(i / 2) * 3 + (i % 2)]
+      )
+    });
+    const study = fixture.name === 'pacific' && algorithm === 'constrained';
+    const coverage = terrain.certifyTerrainMeshCoverage(field, xy(mesh), {
+      reference: study ? xy(fixture) : 'triangle'
+    });
+    const coverageDomain = study ? 'supplied study-domain' : 'valid raster triangle';
     self.postMessage({
       mesh,
       metrics,
+      coverage,
+      coverageDomain,
       segments: fixture.segments,
       domainSegments: fixture.domainSegments
     });

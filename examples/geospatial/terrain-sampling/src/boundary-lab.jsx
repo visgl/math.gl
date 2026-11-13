@@ -55,6 +55,15 @@ export default function BoundaryLab({controlsRoot}) {
     };
     draw(false);
     draw(true);
+    const witness = result.coverage?.witness;
+    if (witness) {
+      ctx.beginPath();
+      ctx.moveTo(witness.start[0] * 3, witness.start[1] * 3);
+      ctx.lineTo(witness.end[0] * 3, witness.end[1] * 3);
+      ctx.strokeStyle = '#ff4ada';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
     if (overlay) {
       for (const [segments, color] of [
         [result.domainSegments, '#bcbcff'],
@@ -83,6 +92,7 @@ export default function BoundaryLab({controlsRoot}) {
               value={dataset}
               onChange={e => {
                 setDataset(e.target.value);
+                setAlgorithm('regular');
                 setTolerance(e.target.value === 'step' ? 0.5 : 20);
               }}
             >
@@ -98,6 +108,12 @@ export default function BoundaryLab({controlsRoot}) {
               value={algorithm}
               onChange={e => setAlgorithm(e.target.value)}
             >
+              {dataset === 'pacific' && (
+                <option value="breakline">Constrained breakline mesh</option>
+              )}
+              {dataset === 'sierra' && (
+                <option value="valid-domain">Nodata-aware adaptive mesh</option>
+              )}
               <option value="regular">Current regular mesh</option>
               <option value="martini">Current MARTINI</option>
               <option value="delatin">Current Delatin</option>
@@ -157,6 +173,12 @@ export default function BoundaryLab({controlsRoot}) {
         />
         {!result && <p role="status">Computing independent qualification…</p>}
         {result?.unsupported && <p role="status">{result.unsupported}</p>}
+        {result?.coverage && (
+          <p data-testid="boundary-coverage">
+            Exact {result.coverageDomain} coverage: {result.coverage.status}. Magenta marks one
+            unmatched boundary interval. The reference domain is listed with the result.
+          </p>
+        )}
         {result?.error && <p role="alert">{result.error}</p>}
         {m && (
           <div data-testid="boundary-metrics">

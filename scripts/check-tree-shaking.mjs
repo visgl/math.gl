@@ -13,6 +13,8 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  {symbol: 'certifyTerrainMeshCoverage', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/height-field\./, /mesh-data\./, /continuous-mesh-error/, /cdt2d/, /martini/, /delatin/], budget: 6500},
   {symbol: 'updateTerrainValidDomainMeshRegions', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/martini/, /delatin/, /breakline-mesh/, /continuous-mesh-error/], budget: 45000},
 
@@ -33,7 +35,7 @@ const probes = [
     forbidden: [/martini/, /delatin/, /\/surface\./], budget: 45000},
 
   {symbol: 'createTerrainMesh', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
-    forbidden: [/continuous-mesh-error/, /cdt2d/, /valid-domain-mesh/, /martini/, /delatin/], budget: 10000},
+    forbidden: [/mesh-coverage/, /continuous-mesh-error/, /cdt2d/, /valid-domain-mesh/, /martini/, /delatin/], budget: 10000},
   {symbol: 'createValidDomainTerrainMesh', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/martini/, /delatin/, /\/surface\./, /breakline-mesh/], budget: 45000},
 

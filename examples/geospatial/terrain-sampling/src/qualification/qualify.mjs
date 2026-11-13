@@ -64,7 +64,14 @@ export function buildCandidate(api, fixture, algorithm) {
     height,
     heights: Float64Array.from(heights, h => h ?? NaN)
   });
+  if (algorithm === 'breakline') {
+    const mesh = api.createBreaklineTerrainMesh(field, {
+      maxError: fixture.tolerance, breaklines: fixture.segments, breaklinesOverrideSamples: true
+    });
+    return {positions: mesh.positions, indices: mesh.indices};
+  }
   const create = {
+    'valid-domain': api.createValidDomainTerrainMesh,
     regular: api.createTerrainMesh,
     martini: api.createMartiniTerrainMesh,
     delatin: api.createDelatinTerrainMesh
