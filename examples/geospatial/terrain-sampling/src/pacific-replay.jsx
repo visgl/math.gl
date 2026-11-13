@@ -2,8 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // biome-ignore lint/correctness/noUnusedImports: Standalone examples use the classic JSX transform.
-import React, {useState} from 'react';
-import {createTerrainMixedVertexTileHalos} from '@math.gl/geospatial/terrain';
+import React, {useMemo, useState} from 'react';
+import {
+  HeightField,
+  TerrainSampleStatus,
+  createTerrainMixedVertexTileHalos
+} from '@math.gl/geospatial/terrain';
 import data from './assets/pacific-reference.json';
 
 const tile = (column, row, spacing, width) => ({
@@ -40,41 +44,71 @@ const steps = [
 export default function PacificReplay() {
   const [step, setStep] = useState(1);
   const resident = step === 5 ? fine.slice(1) : step === 6 ? [] : fine.slice(0, step);
-  const {tiles} = createTerrainMixedVertexTileHalos([coarse, ...resident]);
-  const finest = tiles.slice().reverse();
+  const [azimuth, setAzimuth] = useState(35);
+  const [tilt, setTilt] = useState(55);
+  const {tiles, heights} = useMemo(() => {
+    const active = step === 5 ? fine.slice(1) : step === 6 ? [] : fine.slice(0, step);
+    const {tiles} = createTerrainMixedVertexTileHalos([coarse, ...active]);
+    const fields = tiles.map(tile => ({...tile, sampler: new HeightField(tile.field)}));
+    const heights = Array.from({length: 33 * 33}, (_, index) => {
+      const x = index % 33,
+        y = Math.floor(index / 33);
+      const owner = fields.find(
+        t =>
+          x >= t.column &&
+          y >= t.row &&
+          x <= t.column + (t.field.width - 3) * t.spacing &&
+          y <= t.row + (t.field.height - 3) * t.spacing
+      );
+      const sample = owner?.sampler.sample(x, y, {interpolation: 'triangle'});
+      return sample?.status === TerrainSampleStatus.VALID ? sample.height : null;
+    });
+    return {tiles, heights};
+  }, [step]);
+  const yaw = (azimuth * Math.PI) / 180,
+    pitch = (tilt * Math.PI) / 180;
+  const vertices = heights.map((z, i) => {
+    const x = (i % 33) - 16,
+      y = Math.floor(i / 33) - 16;
+    const across = x * Math.cos(yaw) - y * Math.sin(yaw);
+    const forward = x * Math.sin(yaw) + y * Math.cos(yaw);
+    const relief = (z ?? 0) / 500;
+    return [
+      across,
+      forward * Math.cos(pitch) - relief * Math.sin(pitch),
+      forward * Math.sin(pitch) + relief * Math.cos(pitch)
+    ];
+  });
+  const faces = [];
   let belowZero = 0;
-  const cells = [];
-  for (const {field, column, row, spacing} of finest) {
-    for (let y = 1; y < field.height - 2; y++) {
-      for (let x = 1; x < field.width - 2; x++) {
-        const index = y * field.width + x;
-        const z = field.heights[index];
-        const gx = column + (x - 1) * spacing,
-          gy = row + (y - 1) * spacing;
-        if (
-          spacing === 4 &&
-          resident.some(t => gx >= t.column && gx < t.column + 16 && gy >= t.row && gy < t.row + 16)
-        )
-          continue;
-        if (field.validity[index] && z < 0) belowZero++;
-        const color = !field.validity[index]
-          ? '#677686'
-          : z < 0
-            ? `hsl(208 75% ${Math.max(15, 65 + z / 70)}%)`
-            : `hsl(${120 - Math.min(82, z / 25)} 45% ${Math.min(80, 38 + z / 110)}%)`;
-        cells.push(
-          <rect
-            key={`${spacing}/${gx}/${gy}`}
-            x={gx}
-            y={gy}
-            width={spacing}
-            height={spacing}
-            fill={color}
-          />
-        );
+  for (let y = 0; y < 32; y++) {
+    for (let x = 0; x < 32; x++) {
+      const a = y * 33 + x,
+        b = a + 1,
+        c = a + 33,
+        d = c + 1;
+      if (heights[a] !== null && heights[a] < 0) belowZero++;
+      for (const ids of [
+        [a, b, d],
+        [a, d, c]
+      ]) {
+        if (ids.some(id => heights[id] === null)) continue;
+        const points = ids.map(id => vertices[id]);
+        const z = ids.reduce((sum, id) => sum + heights[id] / 3, 0);
+        const color =
+          z < 0
+            ? `hsl(210 78% ${Math.max(12, 66 + z / 78)}%)`
+            : `hsl(${115 - Math.min(78, z / 25)} 42% ${Math.min(80, 41 + z / 115)}%)`;
+        faces.push({
+          id: faces.length,
+          depth: points.reduce((sum, p) => sum + p[2], 0),
+          points: points.map(p => `${p[0]},${p[1]}`).join(' '),
+          color
+        });
       }
     }
   }
+  faces.sort((a, b) => a.depth - b.depth);
   return (
     <section aria-label="Pacific bathymetry replay">
       <label>
@@ -94,28 +128,64 @@ export default function PacificReplay() {
       <p role="status">
         {tiles.length} resident tiles · {belowZero} displayed below-zero cells
       </p>
+      <label>
+        Rotate seafloor
+        <input
+          aria-label="Rotate seafloor"
+          type="range"
+          min="-180"
+          max="180"
+          value={azimuth}
+          onChange={e => setAzimuth(Number(e.target.value))}
+        />
+      </label>
+      <label>
+        View tilt
+        <input
+          aria-label="View tilt"
+          type="range"
+          min="15"
+          max="75"
+          value={tilt}
+          onChange={e => setTilt(Number(e.target.value))}
+        />
+      </label>
       <svg
-        viewBox="0 0 32 32"
+        viewBox="-25 -21 50 44"
         role="img"
-        aria-label="Pacific topography and bathymetry"
-        style={{width: 'min(100%, 520px)', display: 'block'}}
+        aria-label="3D Pacific topography and bathymetry"
+        style={{width: 'min(100%, 760px)', display: 'block'}}
       >
-        {cells}
-        {resident.map(t => (
-          <rect
-            key={`${t.column}/${t.row}`}
-            x={t.column}
-            y={t.row}
-            width="16"
-            height="16"
-            fill="none"
-            stroke="#fff1a7"
-            strokeWidth=".18"
+        {faces.map(face => (
+          <polygon
+            key={face.id}
+            points={face.points}
+            fill={face.color}
+            stroke={face.color}
+            strokeWidth=".04"
           />
         ))}
+        {resident.map(t => {
+          const a = t.row * 33 + t.column;
+          const perimeter = [];
+          for (let i = 0; i < 16; i++) perimeter.push(a + i);
+          for (let i = 0; i < 16; i++) perimeter.push(a + 16 + i * 33);
+          for (let i = 0; i < 16; i++) perimeter.push(a + 16 * 33 + 16 - i);
+          for (let i = 0; i < 16; i++) perimeter.push(a + (16 - i) * 33);
+          return (
+            <polygon
+              key={a}
+              points={perimeter.map(i => vertices[i].slice(0, 2).join(',')).join(' ')}
+              fill="none"
+              stroke="#ffdf91"
+              strokeWidth=".12"
+            />
+          );
+        })}
       </svg>
       <p>
-        Blue shows negative elevations. Gold outlines fine tiles. Eviction reveals the coarse DEM.
+        Darker blue means deeper water. Relief is exaggerated to reveal the shape of the seafloor.
+        Gold outlines resident fine tiles.
       </p>
       <p>Mapzen / AWS Terrain Tiles. USGS 3DEP, SRTM and GMTED2010; NOAA ETOPO1.</p>
     </section>
