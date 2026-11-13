@@ -196,6 +196,9 @@ jobs:
 
       - name: Qualify pinned terrain boundaries
         run: node --test test/terrain-boundaries/*.test.mjs
+      - name: Qualify continuous terrain bounds against independent DEM probes
+        run: node test/terrain-boundaries/continuous.mjs
+
 
       - name: Check consolidated packages, exports, and assets
         run: yarn check:packages

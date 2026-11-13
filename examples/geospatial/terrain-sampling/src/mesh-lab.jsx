@@ -10,6 +10,7 @@ import {
   createTerrainMesh,
   createMartiniTerrainMesh,
   createDelatinTerrainMesh,
+  boundTerrainMeshError,
   measureTerrainMeshError
 } from '@math.gl/geospatial/terrain';
 import {getMeshLabData, getMeshLabErrors} from './mesh-lab-data';
@@ -54,6 +55,7 @@ export default function MeshLab({controlsRoot}) {
 
 function GridMeshLab({controlsRoot}) {
   const [heatmap, setHeatmap] = useState(false);
+  const [reference, setReference] = useState('off');
   const [dataset, setDataset] = useState('mountain');
   const [tolerance, setTolerance] = useState(2);
   const {field, description} = useMemo(() => {
@@ -103,9 +105,17 @@ function GridMeshLab({controlsRoot}) {
             <span style={{color: '#aaa'}}>uncovered</span>)
           </span>
         </label>
+        <label>
+          Continuous error reference
+          <select value={reference} onChange={event => setReference(event.target.value)}>
+            <option value="off">Off</option>
+            <option value="triangle">Source triangles</option>
+            <option value="bilinear">Bilinear cells</option>
+          </select>
+        </label>
         <p>
-          Errors are measured at source grid nodes, not a continuous-surface error bound. Output
-          bytes exclude temporary allocations.
+          Bounds apply where the mesh and reference overlap. The yellow dot marks the largest
+          verified probe.
         </p>
       </TerrainControls>
       <div className="terrain-mesh-comparison">
@@ -116,6 +126,7 @@ function GridMeshLab({controlsRoot}) {
             algorithm={algorithm}
             field={field}
             tolerance={algorithm.id === 'regular' ? 0 : tolerance}
+            reference={reference}
             heatmap={heatmap}
             colorTolerance={tolerance}
           />
@@ -169,7 +180,7 @@ function SourceGrid({field, description}) {
   );
 }
 
-function MeshResult({algorithm, field, tolerance, heatmap, colorTolerance}) {
+function MeshResult({algorithm, field, tolerance, heatmap, colorTolerance, reference}) {
   const {mesh, error, milliseconds, unsupported} = useMemo(() => {
     // Adaptive builders need complete grids; regular meshes retain nodata holes.
     if (algorithm.id !== 'regular' && field.validCount !== field.width * field.height)
@@ -179,6 +190,19 @@ function MeshResult({algorithm, field, tolerance, heatmap, colorTolerance}) {
     const milliseconds = performance.now() - start;
     return {mesh, milliseconds, error: measureTerrainMeshError(field, mesh)};
   }, [algorithm, field, tolerance]);
+  const continuous = useMemo(() => {
+    if (!mesh || reference === 'off') return null;
+    try {
+      return boundTerrainMeshError(field, mesh, {
+        reference,
+        gap: 0.2,
+        maxDepth: 8,
+        maxBoxes: 300000
+      });
+    } catch (failure) {
+      return {failure: failure.message};
+    }
+  }, [field, mesh, reference]);
   const errors = useMemo(
     () => (heatmap && mesh ? getMeshLabErrors(field, mesh) : []),
     [field, mesh, heatmap]
@@ -226,7 +250,23 @@ function MeshResult({algorithm, field, tolerance, heatmap, colorTolerance}) {
             }
           />
         ))}
+        {continuous?.witness && (
+          <circle
+            cx={(continuous.witness[0] * 320) / (mesh.width - 1)}
+            cy={320 - (continuous.witness[1] * 320) / (mesh.height - 1)}
+            r="5"
+            fill="#ffef72"
+          />
+        )}
       </svg>
+      {continuous && (
+        <p role="status">
+          {continuous.failure ||
+            (continuous.upperBound === null
+              ? 'No comparable surface boxes'
+              : `Continuous error: ${continuous.lowerBound.toPrecision(4)} to ${continuous.upperBound.toPrecision(4)} m. ${continuous.converged ? 'Gap reached.' : 'Depth limit reached.'}`)}
+        </p>
+      )}
       {unsupported ? (
         <p role="status">Incomplete data: adaptive meshing requires a complete grid.</p>
       ) : (

@@ -1598,3 +1598,23 @@ and requested tolerance. To give the line priority, set
 `breaklinesOverrideSamples: true`. The result reports the number of samples
 excluded from nodal certification under this policy. The valid raster
 domain still determines coverage on both sides of each segment.
+
+### Continuous mesh error bounds
+
+`boundTerrainMeshError(field, mesh, options)` brackets the maximum absolute
+vertical difference over the overlap of a mesh and a raster reference. Select
+`reference: 'triangle'` for the field diagonal or `'bilinear'` for complete
+cells. Each valid half cell contributes independently in triangle mode.
+Mesh grid coordinates are authoritative and can be fractional. Mesh Z uses
+the supplied origin and must share the field’s height reference.
+
+The upper bound covers every point in the overlap, including triangle edges.
+The lower bound is supported by the returned witness in sample coordinates.
+Overlapping faces contribute independently. This measures error on the common
+domain; use separate coverage diagnostics to detect holes or excess geometry.
+A null upper bound indicates no surviving comparison boxes. At the depth
+limit the bracket can remain wider than the requested gap. Exceeding the
+box budget throws rather than returning an incomplete bound.
+
+In Mesh generation, choose **Source triangles** or **Bilinear cells** under
+**Continuous error reference** to compare this bracket with nodal error.
