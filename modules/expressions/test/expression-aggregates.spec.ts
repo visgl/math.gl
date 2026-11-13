@@ -143,3 +143,53 @@ test('a shared expression runs once per batch and a failed update keeps the prev
     )
   ).toThrow('does not support');
 });
+
+test('grouped aggregates update interleaved keys across batches and detach snapshots', () => {
+  const table = new Table({
+    region: vectorFromArray(['west', null, 'west', 'east', 'west'], new Utf8()),
+    price: vectorFromArray([2, null, 4, 10, null], new Float64()),
+    note: vectorFromArray([null, 'yes', 'yes', null, 'yes'], new Utf8())
+  });
+  const plan = compileArrowAggregates(
+    {
+      rows: {operation: 'COUNT'},
+      valid: {operation: 'COUNT', expression: 'price'},
+      tagged: {operation: 'COUNT', expression: 'note'},
+      mean: {operation: 'AVG', expression: 'price'}
+    },
+    {inputSchema: table.schema}
+  );
+  const grouped = plan.createGroupedAccumulator('region');
+  expect(grouped.result().size).toBe(0);
+  grouped.update(table.slice(0, 3).batches[0]!);
+  const first = grouped.result();
+  grouped.update(table.slice(3).batches[0]!);
+  expect([...first]).toEqual([
+    ['west', {rows: 2n, valid: 2n, tagged: 1n, mean: 3}],
+    [null, {rows: 1n, valid: 0n, tagged: 1n, mean: null}]
+  ]);
+  expect([...grouped.result()]).toEqual([
+    ['west', {rows: 3n, valid: 2n, tagged: 2n, mean: 3}],
+    [null, {rows: 1n, valid: 0n, tagged: 1n, mean: null}],
+    ['east', {rows: 1n, valid: 1n, tagged: 0n, mean: 10}]
+  ]);
+});
+
+test('grouped aggregate updates preserve prior results on a key error or cancellation', () => {
+  const table = new Table({key: vectorFromArray([1, 2, Infinity], new Float64())});
+  const grouped = compileArrowAggregates(
+    {rows: {operation: 'COUNT'}},
+    {
+      inputSchema: table.schema
+    }
+  ).createGroupedAccumulator('key');
+  grouped.update(table.slice(0, 1).batches[0]!);
+  const before = grouped.result();
+  expect(() => grouped.update(table.slice(1).batches[0]!)).toThrow('group keys must be finite');
+  expect(() =>
+    grouped.update(table.slice(1, 2).batches[0]!, {
+      signal: AbortSignal.abort()
+    })
+  ).toThrow();
+  expect(grouped.result()).toEqual(before);
+});

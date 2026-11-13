@@ -40,7 +40,18 @@ export interface ArrowAggregateAccumulator<K extends string> {
   result(): Record<K, ArrowExpressionValue>;
 }
 
+/** Incrementally reduces rows into groups without storing the input rows. */
+export interface ArrowGroupedAggregateAccumulator<K extends string> {
+  /** Adds one batch atomically. An expression error or cancellation leaves the previous state intact. */
+  update(batch: RecordBatch, options?: {signal?: AbortSignal}): void;
+  /** Returns a detached snapshot in first-seen key order. Null keys form one group. */
+  result(): ReadonlyMap<ArrowExpressionValue, Record<K, ArrowExpressionValue>>;
+}
+
+/** A schema-bound plan for scalar or grouped reductions. */
 export interface CompiledArrowAggregates<K extends string> {
+  /** Starts a grouped reduction using one scalar key expression. */
+  createGroupedAccumulator(groupBy: ArrowExpression): ArrowGroupedAggregateAccumulator<K>;
   createAccumulator(): ArrowAggregateAccumulator<K>;
   evaluate(
     input: Table | Iterable<RecordBatch>,
@@ -127,13 +138,22 @@ export function compileArrowAggregates<K extends string>(
     group.reductions = [...group.operations].filter(operation => reductions.has(operation));
   }
 
+  /** Materializes one aggregate result without exposing accumulator state. */
+  const resultFor = (states: Map<Group, State>): Record<K, ArrowExpressionValue> =>
+    Object.fromEntries(
+      outputs.map(({name, operation, group}) => [
+        name,
+        finish(operation, group, states.get(group)!)
+      ])
+    ) as Record<K, ArrowExpressionValue>;
+
   const accumulators = new WeakMap<ArrowAggregateAccumulator<K>, Map<Group, State>>();
   const createAccumulator = (): ArrowAggregateAccumulator<K> => {
     const states = new Map(groups.map(group => [group, emptyState(group)]));
     const accumulator: ArrowAggregateAccumulator<K> = {
       update(batch, {signal} = {}) {
         signal?.throwIfAborted();
-        const partials = groups.map(group => summarize(group, batch, signal));
+        const partials = groups.map(group => summarize(group, batch, signal)[0]!);
         signal?.throwIfAborted();
         groups.forEach((group, index) => mergeState(group, states.get(group)!, partials[index]!));
       },
@@ -144,12 +164,7 @@ export function compileArrowAggregates<K extends string>(
         for (const group of groups) mergeState(group, states.get(group)!, source.get(group)!);
       },
       result() {
-        return Object.fromEntries(
-          outputs.map(({name, operation, group}) => [
-            name,
-            finish(operation, group, states.get(group)!)
-          ])
-        ) as Record<K, ArrowExpressionValue>;
+        return resultFor(states);
       }
     };
     accumulators.set(accumulator, states);
@@ -157,6 +172,42 @@ export function compileArrowAggregates<K extends string>(
   };
   return {
     createAccumulator,
+    createGroupedAccumulator(groupBy) {
+      const keyExpression = compileArrowExpression(groupBy, options);
+      const type = valueType(keyExpression.outputField.type);
+      if (
+        !(
+          DataType.isInt(type) ||
+          DataType.isFloat(type) ||
+          DataType.isBool(type) ||
+          DataType.isUtf8(type) ||
+          DataType.isNull(type)
+        )
+      ) {
+        throw new Error(`Unsupported Arrow aggregate group key type: ${type}`);
+      }
+      const statesByKey = new Map<ArrowExpressionValue, Map<Group, State>>();
+      return {
+        update(batch, {signal} = {}) {
+          const partition = partitionRows(keyExpression, batch, signal);
+          const partials = groups.map(group => summarize(group, batch, signal, partition));
+          signal?.throwIfAborted();
+          for (const [key, index] of partition.indexByKey) {
+            let states = statesByKey.get(key);
+            if (!states) {
+              states = new Map(groups.map(group => [group, emptyState(group)]));
+              statesByKey.set(key, states);
+            }
+            groups.forEach((group, groupIndex) =>
+              mergeState(group, states.get(group)!, partials[groupIndex]![index]!)
+            );
+          }
+        },
+        result() {
+          return new Map(Array.from(statesByKey, ([key, states]) => [key, resultFor(states)]));
+        }
+      };
+    },
     evaluate(input, evaluation) {
       evaluation?.signal?.throwIfAborted();
       const accumulator = createAccumulator();
@@ -178,23 +229,69 @@ function emptyState(group: Group): State {
   return {count: 0n, sum: group.integer ? 0n : 0, values: new Map()};
 }
 
-function summarize(group: Group, batch: RecordBatch, signal?: AbortSignal): State {
-  const state = emptyState(group);
+/** Dense batch-local group indices keep expression evaluation independent of group count. */
+type RowPartition = {
+  indexByKey: ReadonlyMap<ArrowExpressionValue, number>;
+  indexByRow: Uint32Array;
+  rowCounts: readonly number[];
+};
+
+/** Resolves one group key per row and records first-seen order. */
+function partitionRows(
+  expression: CompiledArrowExpression,
+  batch: RecordBatch,
+  signal?: AbortSignal
+): RowPartition {
+  const reader = new ColumnReader(expression.evaluate(batch, {signal}));
+  const indexByKey = new Map<ArrowExpressionValue, number>();
+  const indexByRow = new Uint32Array(batch.numRows);
+  const rowCounts: number[] = [];
+  for (let row = 0; row < batch.numRows; row++) {
+    if (row % 1024 === 0) signal?.throwIfAborted();
+    const key = reader.get(row);
+    if (typeof key === 'number' && !Number.isFinite(key))
+      throw new Error('Arrow aggregate group keys must be finite');
+    let index = indexByKey.get(key);
+    if (index === undefined) {
+      index = indexByKey.size;
+      indexByKey.set(key, index);
+      rowCounts.push(0);
+    }
+    indexByRow[row] = index;
+    rowCounts[index]!++;
+  }
+  return {indexByKey, indexByRow, rowCounts};
+}
+
+/** Reduces one expression across the batch, optionally routing rows to groups. */
+function summarize(
+  group: Group,
+  batch: RecordBatch,
+  signal?: AbortSignal,
+  partition?: RowPartition
+): State[] {
+  const states = Array.from({length: partition?.indexByKey.size ?? 1}, () => emptyState(group));
   if (!group.expression) {
-    state.count = BigInt(batch.numRows);
-    return state;
+    for (let index = 0; index < states.length; index++)
+      states[index]!.count = BigInt(partition?.rowCounts[index] ?? batch.numRows);
+    return states;
   }
   const vector = group.expression.evaluate(batch, {signal});
-  if (!group.sums && !group.reductions.length) {
-    state.count = BigInt(vector.length - vector.nullCount);
-    return state;
+  const countOnly = !group.sums && !group.reductions.length;
+  if (countOnly && !partition) {
+    states[0]!.count = BigInt(vector.length - vector.nullCount);
+    return states;
   }
   const reader = new ColumnReader(vector);
-  let count = 0;
+  const counts = Array.from({length: states.length}, () => 0);
   for (let row = 0; row < vector.length; row++) {
-    if (group.utf8) {
+    if (row % 1024 === 0) signal?.throwIfAborted();
+    const index = partition?.indexByRow[row] ?? 0;
+    const state = states[index]!;
+    if (countOnly || group.utf8) {
       if (!reader.isValid(row)) continue;
-      count++;
+      counts[index]!++;
+      if (countOnly) continue;
       const bytes = reader.utf8(row);
       for (const operation of group.reductions) {
         const previous = state.values.get(operation) as Uint8Array | undefined;
@@ -204,7 +301,7 @@ function summarize(group: Group, batch: RecordBatch, signal?: AbortSignal): Stat
     } else {
       const value = reader.get(row) as number | bigint | boolean | null;
       if (value === null) continue;
-      count++;
+      counts[index]!++;
       if (group.sums) state.sum = add(group, state.sum, value as number | bigint);
       for (const operation of group.reductions) {
         const operand = operation.startsWith('BIT_') ? BigInt(value) : value;
@@ -212,8 +309,10 @@ function summarize(group: Group, batch: RecordBatch, signal?: AbortSignal): Stat
       }
     }
   }
-  state.count = BigInt(count);
-  return state;
+  states.forEach((state, index) => {
+    state.count = BigInt(counts[index]!);
+  });
+  return states;
 }
 
 function add(group: Group, left: number | bigint, right: number | bigint): number | bigint {
