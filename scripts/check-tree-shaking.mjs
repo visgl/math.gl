@@ -13,6 +13,9 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  {symbol: 'updateTerrainValidDomainMeshRegions', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/martini/, /delatin/, /breakline-mesh/, /continuous-mesh-error/], budget: 45000},
+
   {symbol: 'splitTerrainBreaklines', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/cdt2d/, /breakline-mesh/, /valid-domain-mesh/, /height-field\./], budget: 5000},
 

@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import type {TerrainGridMesh} from './mesh-data';
+import type {TerrainSeamMesh} from './mesh-stitch';
 import {HeightField} from './height-field';
 import {
   validateTerrainDirtyWindows,
@@ -18,7 +18,7 @@ export type TerrainMeshRegions<T> = {
   rebuilt: Uint32Array;
 };
 /** Internal independent chunk updater. Buffers in untouched regions remain shared. */
-export function updateMeshRegions<T extends TerrainGridMesh | null>(
+export function updateMeshRegions<T extends TerrainSeamMesh | null>(
   previous: TerrainMeshRegions<T> | null,
   field: HeightField,
   dirty: readonly TerrainDirtyWindow[],
