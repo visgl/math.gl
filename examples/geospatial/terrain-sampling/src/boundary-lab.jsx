@@ -4,11 +4,28 @@
 // biome-ignore lint/correctness/noUnusedImports: Standalone examples use the classic JSX transform.
 import React, {useEffect, useRef, useState} from 'react';
 import TerrainControls from './terrain-controls';
-const references = import.meta.glob('./qualification/artifacts/*.json.gz', {
-  query: '?url',
-  import: 'default',
-  eager: true
-});
+import reference0 from './qualification/artifacts/pacific-10.json.gz?url';
+import reference1 from './qualification/artifacts/pacific-20.json.gz?url';
+import reference2 from './qualification/artifacts/pacific-40.json.gz?url';
+import reference3 from './qualification/artifacts/sierra-10.json.gz?url';
+import reference4 from './qualification/artifacts/sierra-20.json.gz?url';
+import reference5 from './qualification/artifacts/sierra-40.json.gz?url';
+import reference6 from './qualification/artifacts/step-0.25.json.gz?url';
+import reference7 from './qualification/artifacts/step-0.5.json.gz?url';
+import reference8 from './qualification/artifacts/step-1.json.gz?url';
+import reference9 from './qualification/artifacts/step-2.json.gz?url';
+const references = {
+  'pacific-10': reference0,
+  'pacific-20': reference1,
+  'pacific-40': reference2,
+  'sierra-10': reference3,
+  'sierra-20': reference4,
+  'sierra-40': reference5,
+  'step-0.25': reference6,
+  'step-0.5': reference7,
+  'step-1': reference8,
+  'step-2': reference9
+};
 const number = (value, missing = 'uncovered') => (value === null ? missing : value.toFixed(3));
 
 export default function BoundaryLab({controlsRoot}) {
@@ -27,7 +44,7 @@ export default function BoundaryLab({controlsRoot}) {
     worker.onmessage = ({data}) => setResult(data);
     worker.onerror = event => setResult({error: event.message});
     worker.postMessage({
-      url: references[`./qualification/artifacts/${dataset}-${tolerance}.json.gz`],
+      url: references[`${dataset}-${tolerance}`],
       algorithm
     });
     return () => worker.terminate();
