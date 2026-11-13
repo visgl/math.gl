@@ -41,6 +41,24 @@ export function updateMeshRegions<T extends TerrainGridMesh | null>(
     sameTerrainFrame(previous.field, field) &&
     previous.cellsPerRegion === cells &&
     previous.configuration === configuration;
+  const affectedRegions = new Set<number>();
+  const columns = Math.ceil((field.width - 1) / cells);
+  const rows = Math.ceil((field.height - 1) / cells);
+  if (reusable) {
+    for (const window of dirty) {
+      // Shared sample rows and columns belong to both incident regions.
+      const firstColumn = Math.max(0, Math.ceil(window.minColumn / cells) - 1);
+      const firstRow = Math.max(0, Math.ceil(window.minRow / cells) - 1);
+      const lastColumn = Math.min(columns - 1, Math.floor(window.maxColumn / cells));
+      const lastRow = Math.min(rows - 1, Math.floor(window.maxRow / cells));
+      for (let y = firstRow; y <= lastRow; y++) {
+        for (let x = firstColumn; x <= lastColumn; x++) {
+          if (++tests > budget) throw new Error('Terrain mesh region work budget exceeded');
+          affectedRegions.add(y * columns + x);
+        }
+      }
+    }
+  }
   const cache = new Map(previous?.regions.map(r => [`${r.column},${r.row}`, r]));
   for (let row = 0; row < field.height - 1; row += cells)
     for (let column = 0; column < field.width - 1; column += cells) {
@@ -49,17 +67,7 @@ export function updateMeshRegions<T extends TerrainGridMesh | null>(
       count += width * height;
       if (!Number.isSafeInteger(count) || count > limit)
         throw new Error('Terrain mesh region sample capacity exceeded');
-      let affected = !reusable;
-      for (const w of reusable ? dirty : []) {
-        if (++tests > budget) throw new Error('Terrain mesh region work budget exceeded');
-        if (
-          w.minColumn <= column + width - 1 &&
-          w.maxColumn >= column &&
-          w.minRow <= row + height - 1 &&
-          w.maxRow >= row
-        )
-          affected = true;
-      }
+      const affected = !reusable || affectedRegions.has((row / cells) * columns + column / cells);
       const old = cache.get(`${column},${row}`);
       if (!affected && old) {
         regions.push(old);

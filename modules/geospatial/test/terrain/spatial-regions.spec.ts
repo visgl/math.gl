@@ -257,3 +257,20 @@ test('returned decimal mesh regions remain qualified by the public error measure
   forged.positions[0] += 1e-6;
   expect(() => measureTerrainMeshError(r.field, forged)).toThrow(/frame/);
 });
+
+test('regional dirty selection charges only incident blocks and includes shared corners', () => {
+  const heights = new Float64Array(33 * 33);
+  const options = {cellsPerRegion: 4, maxTests: 4};
+  const field = () => new HeightField({width: 33, height: 33, heights});
+  const first = updateTerrainMeshRegions(null, field(), [], options);
+  heights[4 * 33 + 4] = 1;
+  const dirty = [{minColumn: 4, maxColumn: 4, minRow: 4, maxRow: 4}];
+  const next = updateTerrainMeshRegions(first, field(), dirty, options);
+  expect([...next.rebuilt]).toEqual([0, 1, 8, 9]);
+  expect(next.regions[10]).toBe(first.regions[10]);
+  const full = updateTerrainMeshRegions(null, field(), [], options);
+  expect(next.regions.map(region => region.data)).toEqual(full.regions.map(region => region.data));
+  expect(() => updateTerrainMeshRegions(first, field(), dirty, {...options, maxTests: 3})).toThrow(
+    /budget/
+  );
+});
