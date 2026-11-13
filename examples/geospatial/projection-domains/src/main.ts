@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Renderer adapted from visgl/deck.gl PR #10966 (MIT).
-import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {SolidPolygonLayer, PathLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TaskRunner} from '@math.gl/tasks';
@@ -133,7 +133,7 @@ export function mountProjectionDomains(root: HTMLElement) {
             data: [0],
             mesh,
             texture,
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             getPosition: [0, 0, 0],
             getColor: [255, 255, 255],
             material: false,
@@ -151,7 +151,7 @@ export function mountProjectionDomains(root: HTMLElement) {
                 getFillColor: {value: colors, size: 4}
               }
             },
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             pickable: true,
             parameters: {depthCompare: 'always'}
           }),
@@ -159,7 +159,7 @@ export function mountProjectionDomains(root: HTMLElement) {
             id: 'domain',
             data: domain.rings,
             getPath: d => d,
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             getColor: [225, 235, 245],
             getWidth: 2,
             widthUnits: 'pixels',

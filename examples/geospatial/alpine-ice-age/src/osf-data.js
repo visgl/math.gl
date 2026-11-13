@@ -120,7 +120,7 @@ export async function loadQuaternarySimulation(base, signal) {
       const bytes = await (await get(downloadUrl(shp), requestSignal)).arrayBuffer();
       const [{parse}, {SHPLoader}] = await Promise.all([
         import('@loaders.gl/core'),
-        import('@loaders.gl/shapefile')
+        import('@loaders.gl/geospatial/shapefile')
       ]);
       const decoded = await parse(bytes, SHPLoader, {
         worker: false,

@@ -78,7 +78,7 @@ export function mountTimezoneGlobe(root, {lowUrl, hiUrl}) {
   const deck = new Deck({
     canvas: root.querySelector('[data-role="globe"]'),
     parent: root,
-    views: new GlobeView({id: 'globe', controller: true, resolution: 3}),
+    views: new GlobeView({id: 'globe', controller: true, resolution: 120}),
     initialViewState: {
       longitude: -25,
       latitude: 25,

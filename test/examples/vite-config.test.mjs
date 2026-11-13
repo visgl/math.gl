@@ -12,7 +12,7 @@ import {createServer} from 'vite';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const example = join(root, 'examples/geospatial/geographic-tiles');
 
-test('local Vite config resolves workspace source without replacing dependency versions', async () => {
+test('local Vite config resolves application and dependency imports to workspace source', async () => {
   const previousDirectory = process.cwd();
   const cacheDir = await mkdtemp(join(tmpdir(), 'math-gl-vite-config-'));
   // start-local loads the project-owned config from the example's working directory.
@@ -38,8 +38,7 @@ test('local Vite config resolves workspace source without replacing dependency v
           const asset = await resolve('@math.gl/earth/timezone/timezone-geometry-low.json?url');
           assert.ok(asset?.id.includes('/modules/earth/data/timezone/'));
           const dependency = await resolve('@math.gl/core', join(root, 'node_modules/@deck.gl/core/dist/index.js'));
-          assert.ok(dependency?.id.includes('/dist/'), dependency?.id);
-          assert.ok(!dependency.id.includes('/modules/core/src/'), dependency.id);
+          assert.ok(dependency?.id.includes('/modules/core/src/'), dependency?.id);
         }
       } finally {
         await server.close();

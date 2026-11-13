@@ -9,9 +9,8 @@
     "./worker": "./worker.js"
   },
   "dependencies": {
-    "@loaders.gl/core": "5.0.0-alpha.9",
-    "@loaders.gl/loader-utils": "5.0.0-alpha.9",
-    "@loaders.gl/parquet": "5.0.0-alpha.9",
+    "@loaders.gl/core": "5.0.0-beta.8",
+    "@loaders.gl/tables": "5.0.0-beta.8",
     "apache-arrow": "^21.1.0",
     "compress-utils": "^0.8.0"
   }

@@ -10,10 +10,7 @@ test('workspace layer supports both caller geometry and ordinary bitmap bounds',
   const geometry = mesh();
   const layer = new MeshBitmapLayer({id: 'test', mesh: geometry});
   assert.equal(layer._createMesh(), geometry);
-  const fallback = MeshBitmapLayer.prototype._createMesh.call({
-    props: {bounds: [0, 0, 1, 1]},
-    context: {viewport: {}}
-  });
+  const fallback = new MeshBitmapLayer({id: 'bounds', bounds: [0, 0, 1, 1]})._createMesh();
   assert.equal(fallback.vertexCount, 6);
   assert.equal(fallback.positions.length, 12);
 });
@@ -23,8 +20,9 @@ test('mesh replacement refreshes GPU attributes with stable bounds', () => {
   const calls = [];
   const context = {
     props: {mesh: nextMesh},
-    state: {mesh: oldMesh, model: {setVertexCount: count => calls.push(count)}},
+    state: {mesh: oldMesh, subdivisionStep: 0, model: {setVertexCount: count => calls.push(count)}},
     _createMesh: () => nextMesh,
+    getSubdivisionStep: () => 0,
     getAttributeManager: () => ({invalidateAll: () => calls.push('invalidate')}),
     setState: value => Object.assign(context.state, value)
   };

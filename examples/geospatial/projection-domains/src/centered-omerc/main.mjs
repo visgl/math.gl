@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {mountInfoBox} from '../../../../common/info-box.js';
 import {prepareCenteredFrame} from './recipe.mjs';
@@ -47,7 +47,7 @@ export function mountCenteredObliqueMercator(root) {
             getColor: [255, 170, 70],
             getWidth: 3,
             widthUnits: 'pixels',
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             pickable: true
           }),
           new PathLayer({
@@ -57,7 +57,7 @@ export function mountCenteredObliqueMercator(root) {
             getColor: [100, 200, 225],
             getWidth: 1,
             widthUnits: 'pixels',
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+            coordinateSystem: 'cartesian'
           })
         ]
       });

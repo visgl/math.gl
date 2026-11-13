@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {MeshBitmapLayer} from '@deck.gl/map-layers';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {
@@ -93,7 +93,7 @@ function render() {
         mesh,
         image,
         bounds: [-180, -90, 180, 90],
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         parameters: {
           cullMode: 'back',
           depthCompare: 'less-equal',
@@ -103,7 +103,7 @@ function render() {
       new ScatterplotLayer({
         id: 'cities',
         data: visibleCities,
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         getPosition: d => point(d.coordinates),
         getRadius: 6,
         radiusUnits: 'pixels',

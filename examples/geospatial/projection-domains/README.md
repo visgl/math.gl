@@ -86,3 +86,12 @@ actual ellipsoidal polar CRS and rotated Fiji transform. Bilinear sampling wraps
 at the poles. Both texture modes share the same UVs and source-pixel error policy. This is overview
 imagery, not live imagery, a higher-resolution tile service or a COG demonstration. NASA Earth
 Observatory and NASA GIBS/ESDIS supply the imagery, hosted in deck.gl-data.
+
+## deck.gl 10 projection integration
+
+Run `yarn workspace math.gl-projection-domains start-local` and open `/deck.html`
+to compare Albers equal area and Mercator using deck.gl's experimental
+`_CustomProjectionView`. The view resolves its CRS through the repository's math.gl
+source. Layers receive WGS84 coordinates directly; there is no application-side
+preprojection. The small North American graticule avoids global seam handling and
+loads without external data. This experimental deck.gl API may change.

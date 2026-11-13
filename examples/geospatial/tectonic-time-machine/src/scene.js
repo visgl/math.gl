@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original example rendering adapter. All map transformations use the math.gl engine.
-import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {PathLayer, ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';
 import {
@@ -401,7 +401,7 @@ export function mountScene(
     // External triangle indices were generated in geographic cells, before any projection.
     // They remain identical at all interpolation endpoints, including the globe's back face.
     const common = {
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       _normalize: false,
       filled: true,
       extruded: false,
@@ -481,7 +481,7 @@ export function mountScene(
             id: 'journey-trail',
             data: trailPaths,
             getPath: d => d.positions,
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             getColor: [255, 214, 120, 180],
             getWidth: 2,
             widthUnits: 'pixels',
@@ -506,7 +506,7 @@ export function mountScene(
             id: 'journey-place',
             data: markerData,
             getPosition: d => d.positions,
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             radiusUnits: 'pixels',
             getRadius: 6,
             getFillColor: [255, 211, 104],
@@ -534,7 +534,7 @@ export function mountScene(
             data: markerData,
             getPosition: d => d.positions,
             getText: () => followPlace.name,
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             getSize: 12,
             sizeUnits: 'pixels',
             getColor: [255, 235, 190],
@@ -563,7 +563,7 @@ export function mountScene(
             id: 'future-alternative',
             data: alternativePaths,
             getPath: d => d.positions,
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             getColor: [197, 160, 255, 150],
             getWidth: 1.5,
             widthUnits: 'pixels',
@@ -584,7 +584,7 @@ export function mountScene(
           id: 'tectonic-grid',
           data: paths,
           getPath: p => p,
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           getColor: [120, 160, 181, 90],
           widthUnits: 'pixels',
           getWidth: 0.6,

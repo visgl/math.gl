@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {PathLayer, ScatterplotLayer} from '@deck.gl/layers';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {MapEngine} from '@math.gl/geospatial/maps';
 import {elasticI} from '@math.gl/geospatial/elastic';
 
@@ -121,7 +120,7 @@ export function pathProvenanceLayers(showVertices = true, wrapper = 'goode') {
       }
     }
   }
-  const common = {coordinateSystem: COORDINATE_SYSTEM.CARTESIAN, pickable: true};
+  const common = {coordinateSystem: 'cartesian', pickable: true};
   return {
     prepared,
     layers: [

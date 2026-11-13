@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {SolidPolygonLayer, PathLayer} from '@deck.gl/layers';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {MapEngine} from '@math.gl/geospatial/maps';
 import {elasticI} from '@math.gl/geospatial/elastic';
 export function polygonProvenanceLayers(showGenerated = false, wrapper = 'goode', atlas = false) {
@@ -105,7 +104,7 @@ export function polygonProvenanceLayers(showGenerated = false, wrapper = 'goode'
         data: fills,
         getPolygon: d => d.rings,
         getFillColor: [80, 150, 220, 160],
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+        coordinateSystem: 'cartesian'
       }),
       new PathLayer({
         id: 'provenance-boundaries',
@@ -114,7 +113,7 @@ export function polygonProvenanceLayers(showGenerated = false, wrapper = 'goode'
         getColor: d => (d.kind === 1 ? [255, 255, 255] : [255, 130, 60]),
         getWidth: 3,
         widthUnits: 'pixels',
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         pickable: true
       })
     ]
