@@ -36,7 +36,7 @@ export function mountGeoidGlobe(root, {lowUrl, hiUrl}) {
   const deck = new Deck({
     canvas: root.querySelector('canvas'),
     parent: root,
-    views: new GlobeView({controller: true, resolution: 2}),
+    views: new GlobeView({controller: true, resolution: 180}),
     initialViewState: {
       longitude: 30,
       latitude: 15,

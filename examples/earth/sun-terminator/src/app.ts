@@ -130,7 +130,7 @@ export function mountSunTerminator(root: HTMLDivElement) {
   function createView(id) {
     const props = {id: `earth-${id}`, controller: panController, padding: {left: panelWidth}};
     return id === 'globe'
-      ? new GlobeView({...props, resolution: 2})
+      ? new GlobeView({...props, resolution: 180})
       : id === 'map'
         ? new MapView({...props, repeat: true})
         : new OrthographicView({...props, flipY: false});

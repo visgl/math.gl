@@ -44,7 +44,7 @@ const layer = new DayNightBitmapLayer({
 const deck = new Deck({
   canvas,
   parent: document.body,
-  views: mode === 'globe' ? new GlobeView({resolution: 2}) : new MapView(),
+  views: mode === 'globe' ? new GlobeView({resolution: 180}) : new MapView(),
   initialViewState: {
     longitude,
     latitude,
