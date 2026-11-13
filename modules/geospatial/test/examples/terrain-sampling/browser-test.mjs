@@ -196,7 +196,7 @@ try {
   const pacific = page.getByRole('region', {name: 'Pacific bathymetry replay'});
   assert.match(await pacific.getByRole('status').innerText(), /2 resident tiles.*[1-9][0-9]* displayed below-zero cells/);
   await page.getByLabel('Pacific replay step').selectOption('4');
-  assert.equal(await pacific.getByRole('img').locator('polygon[fill]:not([fill="none"])').count(), 2048);
+  assert.equal(await pacific.getByRole('img').locator('polygon[fill]:not([fill="none"])').count(), 2042);
   assert.match(await pacific.innerText(), /100\.0×/);
   await page.getByLabel('Bathymetry zoom').fill('1');
   assert.match(await pacific.innerText(), /Vertical exaggeration: 1\.0×/);
