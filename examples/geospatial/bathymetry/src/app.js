@@ -1,14 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {
-  Deck,
-  OrbitView,
-  COORDINATE_SYSTEM,
-  AmbientLight,
-  DirectionalLight,
-  LightingEffect
-} from '@deck.gl/core';
+import {Deck, OrbitView, AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {mountInfoBox} from '../../../common/info-box.js';
 import {createGlobeMesh, getExaggeration} from './mesh';
@@ -121,7 +114,7 @@ export function mountBathymetry(root) {
             id: `bathymetry-${index}`,
             data: [{}],
             mesh: geometry,
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             getPosition: [0, 0, 0],
             getColor: [255, 255, 255],
             wireframe: controls('wireframe').checked,

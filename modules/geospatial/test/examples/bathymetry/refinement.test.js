@@ -43,8 +43,9 @@ test('coarse edge interpolation retains exact vertices and line segments', () =>
 });
 
 test('Mercator focus roundtrips to the geographic refinement latitude', async () => {
-  const {mapLatitude, geographicLatitude} =
-    await import('../../../../../examples/geospatial/bathymetry/src/refinement.js');
+  const {mapLatitude, geographicLatitude} = await import(
+    '../../../../../examples/geospatial/bathymetry/src/refinement.js'
+  );
   for (const latitude of [-80, -45, 0, 45, 80]) {
     assert.ok(
       Math.abs(geographicLatitude(mapLatitude(latitude, 'mercator'), 'mercator') - latitude) < 1e-10
@@ -53,8 +54,9 @@ test('Mercator focus roundtrips to the geographic refinement latitude', async ()
 });
 
 test('multiple globe turns preserve the flat map focus longitude', async () => {
-  const {normalizeLongitude} =
-    await import('../../../../../examples/geospatial/bathymetry/src/refinement.js');
+  const {normalizeLongitude} = await import(
+    '../../../../../examples/geospatial/bathymetry/src/refinement.js'
+  );
   for (const longitude of [-160, -30, 80, 100]) {
     assert.equal(normalizeLongitude(longitude + 720), longitude);
     assert.equal(normalizeLongitude(longitude - 1080), longitude);

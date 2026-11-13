@@ -82,8 +82,9 @@ test('refinement cutout is reversible and exact boundary positions are shared', 
 });
 
 test('refined boundaries lie on the coarse edge in globe, intermediate and flat views', async () => {
-  const {sampleCoarsePosition} =
-    await import('../../../../../examples/geospatial/bathymetry/src/refinement.js');
+  const {sampleCoarsePosition} = await import(
+    '../../../../../examples/geospatial/bathymetry/src/refinement.js'
+  );
   const heights = new Int16Array(721 * 361).fill(-4000);
   const fineHeights = new Int16Array(81 * 81).fill(-6000);
   for (const morph of [0, 0.5, 1]) {
