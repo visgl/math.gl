@@ -24,7 +24,11 @@ const groups = [
 ];
 
 export default function TerrainSampling({style}) {
-  const [active, setActive] = useState('sampling');
+  const [active, setActive] = useState(() =>
+    new URLSearchParams(window.location.search).get('terrain') === 'pacific'
+      ? 'streaming'
+      : 'sampling'
+  );
   const [controlsRoot, setControlsRoot] = useState(null);
   const group = groups.find(item => item.id === active);
   const ActiveView = group.Component;

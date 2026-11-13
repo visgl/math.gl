@@ -192,6 +192,12 @@ try {
   assert.match(await page.getByTestId('streaming-result').innerText(), /1 evictions/);
   await page.getByLabel('Terrain streaming step').fill('19');
   assert.match(await page.getByTestId('streaming-result').innerText(), /16 resident tiles/);
+  await page.getByLabel('Pacific bathymetry').check();
+  const pacific = page.getByRole('region', {name: 'Pacific bathymetry replay'});
+  assert.match(await pacific.getByRole('status').innerText(), /2 resident tiles.*[1-9][0-9]* displayed below-zero cells/);
+  await page.getByLabel('Pacific replay step').selectOption('6');
+  assert.match(await pacific.getByRole('status').innerText(), /1 resident tiles/);
+
   await openGroup('Mesh generation');
   assert.equal(await page.getByTestId('streaming-result').count(), 0);
   assert.equal(await page.getByLabel('Mesh algorithm', {exact:true}).count(), 0);
