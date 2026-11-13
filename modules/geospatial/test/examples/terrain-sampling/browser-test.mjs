@@ -195,6 +195,9 @@ try {
   await page.getByLabel('Pacific bathymetry').check();
   const pacific = page.getByRole('region', {name: 'Pacific bathymetry replay'});
   assert.match(await pacific.getByRole('status').innerText(), /2 resident tiles.*[1-9][0-9]* displayed below-zero cells/);
+  assert.match(await pacific.innerText(), /100\.0×/);
+  await page.getByLabel('Bathymetry zoom').fill('1');
+  assert.match(await pacific.innerText(), /Vertical exaggeration: 1\.0×/);
   await page.getByLabel('Pacific replay step').selectOption('6');
   assert.match(await pacific.getByRole('status').innerText(), /1 resident tiles/);
 

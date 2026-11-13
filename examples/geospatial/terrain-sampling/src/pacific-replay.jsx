@@ -45,6 +45,7 @@ export default function PacificReplay() {
   const [step, setStep] = useState(1);
   const resident = step === 5 ? fine.slice(1) : step === 6 ? [] : fine.slice(0, step);
   const [azimuth, setAzimuth] = useState(35);
+  const [zoom, setZoom] = useState(0);
   const [tilt, setTilt] = useState(55);
   const {tiles, heights} = useMemo(() => {
     const active = step === 5 ? fine.slice(1) : step === 6 ? [] : fine.slice(0, step);
@@ -67,12 +68,16 @@ export default function PacificReplay() {
   }, [step]);
   const yaw = (azimuth * Math.PI) / 180,
     pitch = (tilt * Math.PI) / 180;
+  // Fade logarithmically from overview relief to the DEM's true vertical scale.
+  const exaggeration = 100 ** (1 - zoom);
+  const latitude = Math.atan(Math.sinh(data.origin[1] / 6378137));
+  const groundStep = Math.abs(data.columnStep[0]) * Math.cos(latitude);
   const vertices = heights.map((z, i) => {
     const x = (i % 33) - 16,
       y = Math.floor(i / 33) - 16;
     const across = x * Math.cos(yaw) - y * Math.sin(yaw);
     const forward = x * Math.sin(yaw) + y * Math.cos(yaw);
-    const relief = (z ?? 0) / 500;
+    const relief = ((z ?? 0) / groundStep) * exaggeration;
     return [
       across,
       forward * Math.cos(pitch) - relief * Math.sin(pitch),
@@ -109,6 +114,11 @@ export default function PacificReplay() {
     }
   }
   faces.sort((a, b) => a.depth - b.depth);
+  const ys = vertices.map(p => p[1]);
+  const bottom = Math.min(-20, ...ys) - 2;
+  const top = Math.max(20, ...ys) + 2;
+  const size = Math.max(50, top - bottom) / (1 + 1.5 * zoom);
+  const viewBox = `${-size / 2} ${(top + bottom - size) / 2} ${size} ${size}`;
   return (
     <section aria-label="Pacific bathymetry replay">
       <label>
@@ -128,6 +138,19 @@ export default function PacificReplay() {
       <p role="status">
         {tiles.length} resident tiles · {belowZero} displayed below-zero cells
       </p>
+      <label>
+        Zoom: {zoom === 0 ? 'overview' : zoom === 1 ? 'detail' : `${Math.round(zoom * 100)}%`}
+        <input
+          aria-label="Bathymetry zoom"
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value={zoom}
+          onChange={e => setZoom(Number(e.target.value))}
+        />
+      </label>
+      <p aria-live="polite">Vertical exaggeration: {exaggeration.toFixed(1)}×</p>
       <label>
         Rotate seafloor
         <input
@@ -151,7 +174,7 @@ export default function PacificReplay() {
         />
       </label>
       <svg
-        viewBox="-25 -21 50 44"
+        viewBox={viewBox}
         role="img"
         aria-label="3D Pacific topography and bathymetry"
         style={{width: 'min(100%, 760px)', display: 'block'}}
@@ -184,8 +207,8 @@ export default function PacificReplay() {
         })}
       </svg>
       <p>
-        Darker blue means deeper water. Relief is exaggerated to reveal the shape of the seafloor.
-        Gold outlines resident fine tiles.
+        Darker blue means deeper water. Zoom in to bring relief toward true scale. Gold outlines
+        resident fine tiles.
       </p>
       <p>Mapzen / AWS Terrain Tiles. USGS 3DEP, SRTM and GMTED2010; NOAA ETOPO1.</p>
     </section>
