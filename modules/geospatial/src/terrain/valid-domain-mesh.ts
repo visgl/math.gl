@@ -26,7 +26,7 @@ export type ValidDomainTerrainMesh = {
   certifiedSamples: number;
 };
 
-type Edge = [number, number];
+export type Edge = [number, number];
 type Triangle = [number, number, number];
 
 function capacity(value: number): number {
@@ -38,6 +38,22 @@ function capacity(value: number): number {
 export function createValidDomainTerrainMesh(
   field: HeightField,
   options: ValidDomainMeshOptions
+): ValidDomainTerrainMesh {
+  return meshValidDomain(field, options);
+}
+
+export type DomainConstraints = (
+  points: [number, number][],
+  heights: number[],
+  edges: Edge[],
+  selected: Int32Array,
+  originZ: number
+) => {edges: Edge[]; excluded: Set<number>};
+
+export function meshValidDomain(
+  field: HeightField,
+  options: ValidDomainMeshOptions,
+  constraints?: DomainConstraints
 ): ValidDomainTerrainMesh {
   const {maxError} = options;
   const count = field.width * field.height;
@@ -71,13 +87,31 @@ export function createValidDomainTerrainMesh(
     return selected[i];
   };
   const edges = Array.from(boundary.values(), ([a, b]): Edge => [add(a), add(b)]);
+  const extra = constraints?.(points, heights, edges, selected, origin[2]);
+  const inDomain = ([a, b, c]: Triangle): boolean => {
+    const x = (points[a][0] + points[b][0] + points[c][0]) / 3;
+    const y = (points[a][1] + points[b][1] + points[c][1]) / 3;
+    const i = Math.floor(x),
+      j = Math.floor(y);
+    const u = x - i,
+      v = y - j;
+    const valid = (dx: number, dy: number) => field.getHeight(i + dx, j + dy) !== undefined;
+    if (field.diagonal === '00-11') {
+      return valid(0, 0) && valid(1, 1) && (u > v ? valid(1, 0) : valid(0, 1));
+    }
+    return valid(1, 0) && valid(0, 1) && (u + v < 1 ? valid(0, 0) : valid(1, 1));
+  };
   const covered = new Uint8Array(count);
   let triangles: Triangle[] = [];
   let maxSampleError = 0;
   let certifiedSamples = 0;
   let tests = 0;
   for (let pass = 0; points.length; pass++) {
-    triangles = triangulate(points, edges, {exterior: false, delaunay: false});
+    triangles = triangulate(points, extra?.edges ?? edges, {
+      exterior: Boolean(extra),
+      delaunay: false
+    });
+    if (extra) triangles = triangles.filter(inDomain);
 
     if (triangles.length > maxTriangles) throw new Error('Triangle limit exceeded');
     covered.fill(0);
@@ -110,7 +144,7 @@ export function createValidDomainTerrainMesh(
         for (let x = Math.ceil(left - 1e-10); x <= Math.floor(right + 1e-10); x++) {
           if (++tests > maxTests) throw new Error('Sample test limit exceeded');
           const i = y * width + x;
-          if (!active[i]) continue;
+          if (!active[i] || extra?.excluded.has(i)) continue;
           const u = ((x - ax) * (cy - ay) - (y - ay) * (cx - ax)) / det;
           const v = ((bx - ax) * (y - ay) - (by - ay) * (x - ax)) / det;
           const w = 1 - u - v;
@@ -118,7 +152,7 @@ export function createValidDomainTerrainMesh(
           if (!covered[i]) certifiedSamples++;
           covered[i] = 1;
           const error =
-            selected[i] === a || selected[i] === b || selected[i] === c
+            !extra && (selected[i] === a || selected[i] === b || selected[i] === c)
               ? 0
               : Math.abs(
                   w * heights[a] + u * heights[b] + v * heights[c] - regular.positions[3 * i + 2]
@@ -132,13 +166,13 @@ export function createValidDomainTerrainMesh(
       }
       if (candidate >= 0) refine.add(candidate);
     }
-    if (active.some((value, i) => value && !covered[i]))
+    if (active.some((value, i) => value && !covered[i] && !extra?.excluded.has(i)))
       throw new Error('Incomplete domain triangulation');
     if (maxSampleError <= maxError) break;
     if (!Array.from(refine).some(i => selected[i] < 0))
       throw new Error('Cannot certify mesh tolerance');
     if (pass === 63) {
-      for (let i = 0; i < count; i++) if (active[i]) add(i);
+      for (let i = 0; i < count; i++) if (active[i] && !extra?.excluded.has(i)) add(i);
     } else {
       for (const i of refine) add(i);
     }
@@ -146,9 +180,23 @@ export function createValidDomainTerrainMesh(
   const reverse =
     field.columnStep[0] * field.rowStep[1] - field.columnStep[1] * field.rowStep[0] < 0;
   const positions = new Float64Array(points.length * 3);
-  for (let i = 0; i < count; i++) {
-    if (selected[i] >= 0)
-      positions.set(regular.positions.subarray(3 * i, 3 * i + 3), 3 * selected[i]);
+  const shift = field.registration === 'cell' ? 0.5 : 0;
+  for (let i = 0; i < points.length; i++) {
+    const [x, y] = points[i];
+    positions.set(
+      [
+        field.origin[0] -
+          origin[0] +
+          (x + shift) * field.columnStep[0] +
+          (y + shift) * field.rowStep[0],
+        field.origin[1] -
+          origin[1] +
+          (x + shift) * field.columnStep[1] +
+          (y + shift) * field.rowStep[1],
+        heights[i]
+      ],
+      i * 3
+    );
   }
   const indices = new Uint32Array(triangles.length * 3);
   for (let i = 0; i < triangles.length; i++) {
