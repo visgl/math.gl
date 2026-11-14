@@ -4,7 +4,7 @@
 
 import {SQLParseError} from './sql-parse-error';
 import type {Expression} from '../expressions/index';
-import {isColumnarScalarType, type ColumnarScalarType} from '../expressions/scalar-type';
+import type {ColumnarScalarType} from '../expressions/scalar-type';
 
 export const SQL_RESERVED_WORDS = new Set([
   'SELECT',
@@ -27,32 +27,36 @@ export const SQL_RESERVED_WORDS = new Set([
   'ORDER',
   'GROUP',
   'HAVING',
-  'OFFSET',
   'JOIN',
   'UNION'
 ]);
 
-/** Standard SQL names for portable scalar cast targets. */
-const SQL_CAST_ALIASES: Readonly<Record<string, ColumnarScalarType>> = {
-  smallint: 'int16',
-  int: 'int32',
-  integer: 'int32',
-  bigint: 'int64',
-  real: 'float32',
-  'double precision': 'float64',
-  boolean: 'bool',
-  varchar: 'utf8',
-  'character varying': 'utf8'
-};
-
-/** Resolves SQL cast type names and explicit numeric widths. */
+/** Resolves standard SQL names and explicit numeric widths. */
 export function sqlCastType(name: string, source = name, offset = 0): ColumnarScalarType {
   const normalized = name.toLowerCase().replace(/\s+/g, ' ').trim();
-  if (isColumnarScalarType(normalized) && normalized !== 'bool' && normalized !== 'utf8') {
-    return normalized;
+  if (/^(?:u?int(?:8|16|32|64)|float(?:16|32|64))$/.test(normalized)) {
+    return normalized as ColumnarScalarType;
   }
-  if (Object.hasOwn(SQL_CAST_ALIASES, normalized)) return SQL_CAST_ALIASES[normalized]!;
-  throw new SQLParseError(`Unsupported SQL CAST type: ${name}`, source, offset);
+  switch (normalized) {
+    case 'smallint':
+      return 'int16';
+    case 'int':
+    case 'integer':
+      return 'int32';
+    case 'bigint':
+      return 'int64';
+    case 'real':
+      return 'float32';
+    case 'double precision':
+      return 'float64';
+    case 'boolean':
+      return 'bool';
+    case 'varchar':
+    case 'character varying':
+      return 'utf8';
+    default:
+      throw new SQLParseError(`Unsupported SQL CAST type: ${name}`, source, offset);
+  }
 }
 
 /** Parses bounded SQL expressions into the shared expression AST. */
