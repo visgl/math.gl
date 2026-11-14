@@ -236,3 +236,9 @@ export {sweepTerrainCylinder} from './sweep-cylinder';
 
 export {sweepTerrainPlane} from './sweep-plane';
 export {discoverGeographicTerrainLodSeams} from './geographic-lod-seams';
+
+export {
+  discoverGeographicTerrainPoles,
+  type TerrainPoleIncidence,
+  type TerrainPoleCoverage
+} from './geographic-poles';
