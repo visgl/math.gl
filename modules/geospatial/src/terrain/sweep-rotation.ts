@@ -104,7 +104,7 @@ export function sweepTerrainRotatingPolytope(
     const [lo, hi] = pending.pop()!;
     const mid = lo + (hi - lo) / 2;
     const shape = pose(mid);
-    const padding = speed * ((hi - lo) / 2);
+    const padding = speed * Math.max(mid - lo, hi - mid);
     const expanded = probe(shape, padding + 8 * Number.EPSILON * (radius + padding));
     if (expanded.status === 'miss') {
       clearUntil = hi;
