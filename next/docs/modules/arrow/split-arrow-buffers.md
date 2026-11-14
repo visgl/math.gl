@@ -28,7 +28,7 @@ splitArrowBuffers(input, options);
 
 | Value      | Behavior                                                                 |
 | ---------- | ------------------------------------------------------------------------ |
-| `'none'`   | Never copy typed arrays                                                  |
+| `'none'`   | Reuse typed arrays unless retained                                       |
 | `'sliced'` | Default. Copy only typed arrays that view a larger backing `ArrayBuffer` |
 | `'all'`    | Copy every Arrow internal typed array                                    |
 

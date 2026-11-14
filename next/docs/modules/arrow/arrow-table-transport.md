@@ -52,3 +52,13 @@ const restored = deserializeArrowTableFromIPC(payload);
 ```
 
 `serializeArrowTableToIPC` returns `SerializedArrowTableIPC`, containing `transport: 'arrow-ipc'` and `data: Uint8Array`. It serializes the entire table, including schema, batches, and dictionaries. This costs additional encoding work but provides Arrow's standard interchange format. A receiver must support the Arrow types used by the sender; a newer runtime does not make newer types readable by an older runtime.
+
+## Transfer results that share retained data[​](#transfer-results-that-share-retained-data "Direct link to Transfer results that share retained data")
+
+A worker can keep a source table for repeated queries and return results that share some of its column buffers. Pass the retained Arrow objects so the transport copies their aliased buffers and can transfer newly allocated result buffers.
+
+```
+const payload = dehydrateArrowTable(result, {copy: 'none', retain: [source]});
+```
+
+`retain` matches backing buffers, including nested columns and dictionaries. With the default copy mode, sliced views of other buffers are also copied. Include every Arrow object that must remain usable after the payload is transferred.
