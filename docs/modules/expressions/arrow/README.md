@@ -514,3 +514,26 @@ separate Arrow tables.
 one group. Supported keys include strings, booleans, integers, and finite floating-point values.
 Each successful batch commits its changes together. An expression error or cancellation preserves
 the previous result.
+
+## Query an Arrow table
+
+`queryArrowTable()` runs an in-memory SELECT on a native Apache Arrow table and returns
+a native Arrow table. Supply the input table directly. If the SELECT names a source
+with `FROM`, the caller resolves that name before invoking the executor.
+
+```ts
+import {queryArrowTable} from '@math.gl/expressions/arrow';
+import {parseSQLQuery} from '@math.gl/expressions/sql';
+
+const query = parseSQLQuery(
+  'SELECT id, price * quantity AS total FROM orders WHERE quantity > 0 LIMIT 100'
+);
+if ('command' in query) throw new Error('Expected SELECT');
+const result = queryArrowTable(orders, query);
+```
+
+Queries can project and alias existing fields, evaluate computed columns, filter with
+SQL Boolean and null semantics, and apply `OFFSET` and `LIMIT` in source order.
+Computed columns read the filtered source columns. Output aliases only name result
+fields. Direct projections share Arrow buffers when rows need no gathering. Computed
+types and error behavior follow the Arrow expression compiler.
