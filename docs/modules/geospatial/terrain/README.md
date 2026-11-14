@@ -1704,3 +1704,45 @@ In **Streaming replay**, enable **Pacific bathymetry** to compare fine tile
 arrival and eviction in a regional relief map. Negative elevations remain
 valid terrain. Convert positive-down depths to signed elevations and align
 vertical datums before combining source datasets.
+
+### Worker-owned mixed halo residency
+
+Initialize `TerrainResidencyTask` from `@math.gl/geospatial/tasks` once per
+resident terrain region. The task starts empty at revision zero. Submit
+`upsert`, `remove`, and `samples` edits in a batch using the last revision.
+The reply contains changed halos and removed keys, plus the new revision.
+Apply changed halos by their `spacing/column/row` key. Initial upserts return
+all newly resident halos. A sample height of `null` marks nodata.
+
+```js
+import {TaskRunner} from '@math.gl/tasks';
+import {TerrainResidencyTask} from '@math.gl/geospatial/tasks';
+
+const runner = new TaskRunner();
+try {
+  const terrain = await runner.initializeTask(TerrainResidencyTask, {}, {execution: 'worker'});
+  const address = {column: 0, row: 0, spacing: 1};
+  const tile = {...address, field: {width: 2, height: 2, heights: new Float32Array(4)}};
+  const initial = await terrain.runTask({revision: 0, edits: [{type: 'upsert', tile}]});
+  const delta = await terrain.runTask({
+    revision: initial.revision,
+    edits: [{type: 'samples', address, samples: [{index: 0, height: 12}]}]
+  });
+  // Apply delta.tiles and delta.removed to the client cache.
+} finally {
+  await runner.close();
+}
+```
+
+The task serializes edits and rejects stale revisions. A failed validation
+leaves the last committed snapshot intact. Use `{type: 'snapshot'}` to
+recover the full current state if a response is lost and the handle remains
+usable. If the worker is closed, initialize a new handle and reseed it.
+Returned buffers are independent of resident buffers, so transfer cannot
+detach state used by the next edit.
+
+Run `node scripts/benchmark-terrain-resident-worker.mjs` for Pacific and Sierra
+replays. The script compares end-to-end worker update latency with direct
+full-rebuild compute time and verifies every delta against the rebuilt result.
+Byte totals count output typed arrays. They exclude message metadata and copies
+inside the worker.
