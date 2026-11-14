@@ -230,7 +230,7 @@ function collectArrowBuffers(
 ): void {
   if (visited.has(data)) return;
   visited.add(data);
-  for (const view of [...data.buffers, ...getArrowVariadicBuffers(data)]) {
+  for (const view of [...Object.values(data.buffers), ...getArrowVariadicBuffers(data)]) {
     if (isArrowTypedArray(view)) buffers.add(view.buffer);
   }
   for (const child of data.children) collectArrowBuffers(child, buffers, visited);
