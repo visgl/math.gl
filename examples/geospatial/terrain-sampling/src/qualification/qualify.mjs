@@ -70,7 +70,7 @@ export function buildCandidate(api, fixture, algorithm) {
       breaklines: fixture.segments,
       breaklinesOverrideSamples: true
     });
-    return {positions: mesh.positions, indices: mesh.indices};
+    return {positions: mesh.positions, indices: mesh.indices, tessellator: 'breakline'};
   }
   const create = {
     'valid-domain': api.createValidDomainTerrainMesh,
@@ -85,7 +85,7 @@ export function buildCandidate(api, fixture, algorithm) {
       ? mesh.positions[i] + mesh.origin[2]
       : mesh.gridCoordinates[Math.floor(i / 3) * 2 + (i % 3)]
   );
-  return {positions, indices: mesh.indices, tessellator: mesh.tessellator || 'regular'};
+  return {positions, indices: mesh.indices, tessellator: mesh.tessellator || algorithm};
 }
 
 export function qualify(fixture, mesh, {denseSurface = true} = {}) {
