@@ -112,7 +112,10 @@ test('sparse cut inserts only the two half-side chains and preserves total area'
 
 test('same-level terrain seams agree from both sides, including wrapped aliases', () => {
   const level = 2;
-  const edgePairs = [['west', 'east'], ['north', 'south']] as const;
+  const edgePairs = [
+    ['west', 'east'],
+    ['north', 'south']
+  ] as const;
   for (let y = 0; y < 4; y++) {
     for (let x = 0; x < 4; x++) {
       const tile = {x, y, level};
@@ -133,10 +136,15 @@ test('same-level terrain seams agree from both sides, including wrapped aliases'
   expect(getGeographicTerrainNeighbor({x: 0, y: 3, level}, 'south')).toBeNull();
   const world = {x: 0, y: 0, level: 0};
   expect(getGeographicTerrainNeighbor(world, 'west')).toEqual({
-    owner: world, ownerEdge: 'west', other: world, otherEdge: 'east', crossesAntimeridian: true
+    owner: world,
+    ownerEdge: 'west',
+    other: world,
+    otherEdge: 'east',
+    crossesAntimeridian: true
   });
   expect(getGeographicTerrainNeighbor(world, 'east')).toEqual(
     getGeographicTerrainNeighbor(world, 'west')
   );
   expect(() => getGeographicTerrainNeighbor({x: 4, y: 0, level}, 'east')).toThrow(RangeError);
+  expect(() => getGeographicTerrainNeighbor(world, 'invalid' as 'west')).toThrow(RangeError);
 });
