@@ -1801,3 +1801,14 @@ hull in the same Cartesian frame. Both hold orientation fixed and test
 separating axes against active triangles. Work counts axis tests. A hit
 returns the first fraction, terrain triangle index, and entry normal when
 defined. Initial overlaps have no unique entry normal.
+
+`sweepTerrainCylinder` sweeps a fixed +Z cylinder or frustum with positive
+end radii. The inscribed and circumscribed polygonal bounds give an upper
+and lower impact fraction. More sides tighten the bounds at greater cost.
+An outer-only contact returns `incomplete`. The reported triangle is an
+inner witness, and the smooth contact normal is unavailable.
+
+For luma.gl, convert collider dimensions and axis conventions into the
+terrain frame before comparing results. Use convex hulls for moving mesh
+proxies. The terrain triangle sheet itself represents the static mesh
+collider.

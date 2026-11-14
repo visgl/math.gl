@@ -10,6 +10,7 @@ import {
   sweepTerrainBox,
   sweepTerrainPolytope,
   sweepTerrainCapsule,
+  sweepTerrainCylinder,
   sweepTerrainSphere
 } from '@math.gl/geospatial/terrain';
 import {intersectRayTriangle, getClosestPointOnTriangle} from '@math.gl/geometry/culling';
@@ -328,4 +329,18 @@ test('terrain polytope sweeps find box and tetrahedron impact times', () => {
       motion
     )
   ).toMatchObject({status: 'hit', fraction: 0.25, triangleIndex: 0});
+});
+
+test('polygon bounds bracket terrain impact for a conical frustum', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 4, 0, 0, 0, 4, 0),
+    indices: Uint32Array.of(0, 1, 2)
+  });
+  expect(sweepTerrainCylinder(surface, [1, 1, 2], 1, 0.25, 0.5, [0, 0, -4])).toMatchObject({
+    status: 'hit',
+    fraction: 0.375,
+    lowerFraction: 0.375,
+    normal: null
+  });
+  expect(sweepTerrainCylinder(surface, [5, 5, 2], 1, 0.25, 0.5, [0, 0, -4]).status).toBe('miss');
 });

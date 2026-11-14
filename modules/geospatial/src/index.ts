@@ -427,3 +427,5 @@ export {
   type TerrainPolytope,
   type TerrainPolytopeSweepResult
 } from './terrain/sweep-polytope';
+
+export {sweepTerrainCylinder} from './terrain/sweep-cylinder';
