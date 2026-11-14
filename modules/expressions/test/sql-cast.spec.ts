@@ -19,6 +19,17 @@ const cast = (argument: unknown, target: string) => ({
   arguments: [argument, {type: 'Literal', value: target, raw: JSON.stringify(target)}]
 });
 test.each([
+  ['INT8', 'int8'],
+  ['INT16', 'int16'],
+  ['INT32', 'int32'],
+  ['INT64', 'int64'],
+  ['UINT8', 'uint8'],
+  ['UINT16', 'uint16'],
+  ['UINT32', 'uint32'],
+  ['UINT64', 'uint64'],
+  ['FLOAT16', 'float16'],
+  ['FLOAT32', 'float32'],
+  ['FLOAT64', 'float64'],
   ['SMALLINT', 'int16'],
   ['INT', 'int32'],
   ['INTEGER', 'int32'],

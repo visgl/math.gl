@@ -2,7 +2,22 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Bool, DataType, Float16, Float32, Float64, Int16, Int32, Int64, Utf8} from 'apache-arrow';
+import {
+  Bool,
+  DataType,
+  Float16,
+  Float32,
+  Float64,
+  Int8,
+  Int16,
+  Int32,
+  Int64,
+  Uint8,
+  Uint16,
+  Uint32,
+  Uint64,
+  Utf8
+} from 'apache-arrow';
 import {isColumnarScalarType} from '../expressions/index';
 import {parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '@math.gl/arrow/utf8';
 import {ExpressionEvaluationError} from '../expressions/index';
@@ -10,27 +25,31 @@ import {roundFloat16} from './float16';
 import {typeKey, createValueValidator} from './buffers';
 import type {ArrowExpressionValue} from './types';
 
+/** Arrow constructors for portable scalar cast targets. */
+const CAST_TYPES = {
+  int8: Int8,
+  int16: Int16,
+  int32: Int32,
+  int64: Int64,
+  uint8: Uint8,
+  uint16: Uint16,
+  uint32: Uint32,
+  uint64: Uint64,
+  float16: Float16,
+  float32: Float32,
+  float64: Float64,
+  bool: Bool,
+  utf8: Utf8
+};
+
 type Range = [Uint8Array, number, number];
 
 /** Resolves explicit scalar casts once, leaving active-row selection to the expression compiler. */
 export function bindCast(source: DataType, target: unknown) {
   if (!isColumnarScalarType(target)) throw new Error('Unsupported scalar CAST target');
-  const type =
-    target === 'int16'
-      ? new Int16()
-      : target === 'int32'
-        ? new Int32()
-        : target === 'int64'
-          ? new Int64()
-          : target === 'float16'
-            ? new Float16()
-            : target === 'float32'
-              ? new Float32()
-              : target === 'float64'
-                ? new Float64()
-                : target === 'bool'
-                  ? new Bool()
-                  : new Utf8();
+  const type = new CAST_TYPES[target]();
+  const integer = DataType.isInt(type);
+  const wideInteger = integer && type.bitWidth === 64;
   const sourceKey = typeKey(source);
   const textInput = sourceKey === 'utf8';
   if (
@@ -63,18 +82,18 @@ export function bindCast(source: DataType, target: unknown) {
         result =
           target === 'bool'
             ? (parseUTF8Boolean(bytes, start, end) ?? null)
-            : target.startsWith('int')
+            : integer
               ? (parseUTF8BigInt(bytes, start, end) ?? null)
               : (parseUTF8Number(bytes, start, end) ?? null);
         if (result === null)
           throw new ExpressionEvaluationError('conversion', `Invalid text for CAST to ${target}`);
-        if (target === 'int16' || target === 'int32') result = Number(result);
+        if (integer && !wideInteger) result = Number(result);
       } else if (target === 'bool') result = value;
-      else if (target === 'int64') {
+      else if (wideInteger) {
         if (typeof value === 'number' && !Number.isFinite(value))
           throw new ExpressionEvaluationError('conversion', 'Non-finite integer CAST');
         result = typeof value === 'bigint' ? value : BigInt(Math.trunc(value as number));
-      } else if (target === 'int16' || target === 'int32') result = Math.trunc(Number(value));
+      } else if (integer) result = Math.trunc(Number(value));
       else result = Number(value);
       if (halfRound) result = halfRound(result as number);
       if (target === 'float32') result = Math.fround(result as number);

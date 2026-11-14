@@ -120,3 +120,19 @@ test('BIGINT cast predicates contextually bind safe integer comparison and membe
       )
     ]).toEqual([true, false, null]);
 });
+
+test('integer width casts retain bigint precision and reject out-of-range values', () => {
+  const table = new Table({
+    value: vectorFromArray(
+      ['18446744073709551615', '18446744073709551616', '-1', '255', '256', null],
+      new Utf8()
+    )
+  });
+  expect(evaluate('CAST(value AS UINT64)', table.slice(0, 1)).get(0)).toBe(18446744073709551615n);
+  expect(() => evaluate('CAST(value AS UINT64)', table.slice(1, 2))).toThrow(/overflow/i);
+  expect(() => evaluate('CAST(value AS UINT64)', table.slice(2, 3))).toThrow(/overflow/i);
+  expect(evaluate('CAST(value AS UINT8)', table.slice(3, 4)).get(0)).toBe(255);
+  expect(() => evaluate('CAST(value AS UINT8)', table.slice(4, 5))).toThrow(/overflow/i);
+  expect(evaluate('CAST(value AS INT8)', table.slice(2, 3)).get(0)).toBe(-1);
+  expect(evaluate('CAST(value AS INT8)', table.slice(5)).get(0)).toBeNull();
+});

@@ -35,18 +35,33 @@ export const SQL_RESERVED_WORDS = new Set([
 /** Supported standard SQL type spellings. Precision/length modifiers are not yet supported. */
 export function sqlCastType(name: string, source = name, offset = 0): ColumnarScalarType {
   switch (name.toUpperCase().replace(/\s+/g, ' ').trim()) {
+    case 'INT8':
+      return 'int8';
+    case 'UINT8':
+      return 'uint8';
+    case 'UINT16':
+      return 'uint16';
+    case 'UINT32':
+      return 'uint32';
+    case 'UINT64':
+      return 'uint64';
     case 'SMALLINT':
+    case 'INT16':
       return 'int16';
     case 'INT':
     case 'INTEGER':
+    case 'INT32':
       return 'int32';
     case 'BIGINT':
+    case 'INT64':
       return 'int64';
     case 'FLOAT16':
       return 'float16';
     case 'REAL':
+    case 'FLOAT32':
       return 'float32';
     case 'DOUBLE PRECISION':
+    case 'FLOAT64':
       return 'float64';
     case 'BOOLEAN':
       return 'bool';
