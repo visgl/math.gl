@@ -92,7 +92,7 @@ import * as tasks from '@math.gl/tasks';
 import * as geospatial from '@math.gl/geospatial/tasks';
 const require = createRequire(import.meta.url);
 for (const api of [tasks, require('@math.gl/tasks')]) assert.deepEqual(Object.keys(api).sort(), ${JSON.stringify(expected)});
-for (const api of [geospatial, require('@math.gl/geospatial/tasks')]) assert.deepEqual(Object.keys(api).sort(), ['CertifyTerrainCoverageTask', 'PrepareMapTask', 'ProjectCoordinatesTask']);
+for (const api of [geospatial, require('@math.gl/geospatial/tasks')]) assert.deepEqual(Object.keys(api).sort(), ['CertifyTerrainCoverageTask', 'PrepareMapTask', 'ProjectCoordinatesTask', 'TerrainResidencyTask']);
 for (const api of [tasks, require('@math.gl/tasks')]) {
   const runner = new api.TaskRunner();
   const task = {
@@ -120,6 +120,25 @@ for (const [api, provided] of [[tasks, geospatial], [require('@math.gl/tasks'), 
     assert(Math.abs(coordinates[0] - 1113194.9079) < 0.001);
     const {map} = await runner.runTask(provided.PrepareMapTask, {description: {version: 1, id: 'world', definition: {type: 'mercator'}}});
     assert(map);
+    const resident = await runner.initializeTask(provided.TerrainResidencyTask, {}, {execution: 'worker'});
+    try {
+      const address = {column: 0, row: 0, spacing: 1};
+      const tile = {...address, field: {width: 2, height: 2, heights: new Float32Array(4)}};
+      const first = await resident.runTask({revision: 0, edits: [{type: 'upsert', tile}]});
+      assert.equal(first.tiles.length, 1);
+      const sample = {type: 'samples', address, samples: [{index: 0, height: 2}]};
+      assert.match((await resident.runTask({revision: 1, edits: [
+        sample, {...sample, samples: [{index: 5, height: 2}]}
+      ]})).error, /Invalid terrain sample edit/);
+      assert.deepEqual((await resident.runTask({type: 'snapshot'})).tiles, first.tiles);
+      const edited = await resident.runTask({revision: 1, edits: [sample]});
+      assert.equal(edited.tiles[0].field.heights[5], 2);
+      assert.match((await resident.runTask({revision: 1, edits: []})).error, /Stale/);
+      assert.deepEqual(await resident.runTask({revision: 2, edits: [sample]}),
+        {revision: 3, tiles: [], removed: []});
+      assert.deepEqual(await resident.runTask({revision: 3, edits: [{type: 'remove', address}]}),
+        {revision: 4, tiles: [], removed: ['1/0/0']});
+    } finally {await resident.close();}
   } finally {await runner.close();}
 }
 `

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {TaskWorker} from '@math.gl/tasks';
+import {TerrainResidencyTask as residencyTask} from './terrain-residency';
 import {CertifyTerrainCoverageTask as coverageTask} from './terrain-coverage';
 import {ProjectCoordinatesTask as projectionTask, PrepareMapTask as mapTask} from './definitions';
 export type {ProjectCoordinatesTypes, PrepareMapTypes} from './definitions';
@@ -50,6 +51,22 @@ export const CertifyTerrainCoverageTask: typeof coverageTask & {worker: TaskWork
       : {
           create: () =>
             new Worker(new URL('./terrain-coverage-worker.js', import.meta.url), {type: 'module'})
+        }),
+    capabilities: {atomic: true, streaming: false}
+  }
+};
+
+export type {TerrainResidencyEdit, TerrainResidencyTypes} from './terrain-residency';
+
+/** Apply revisioned edit batches to one resident mixed halo snapshot per initialized worker. */
+export const TerrainResidencyTask: typeof residencyTask & {worker: TaskWorker} = {
+  ...residencyTask,
+  worker: {
+    ...(!isBrowser
+      ? {url: /* @__PURE__ */ (() => new URL('./terrain-residency-worker.js', moduleUrl).href)()}
+      : {
+          create: () =>
+            new Worker(new URL('./terrain-residency-worker.js', import.meta.url), {type: 'module'})
         }),
     capabilities: {atomic: true, streaming: false}
   }
