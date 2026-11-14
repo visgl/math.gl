@@ -2,7 +2,16 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Data, DataType, RecordBatch, Schema, Struct, Table, type Field} from 'apache-arrow';
+import {
+  Data,
+  DataType,
+  type RecordBatch,
+  Schema,
+  Struct,
+  Table,
+  type Field,
+  util
+} from 'apache-arrow';
 import {
   getRecordBatchMetadata,
   createRecordBatchWithMetadata,
@@ -26,24 +35,28 @@ import {
 } from './relational-query';
 import type {ArrowExpressionOptions, CompiledArrowExpression} from './types';
 
-/** An in-memory SELECT and its execution options. The caller supplies the table named by FROM. */
-export type ArrowTableQuery = TableQuery<ParameterizedColumnarPredicate> &
+/** A linear Arrow query that can execute incrementally over batches. */
+export type ArrowBatchQuery = TableQuery<ParameterizedColumnarPredicate> &
   Omit<ArrowExpressionOptions, 'inputSchema'> & {
-    /** Append schema-compatible tables before filtering. */
-    union?: readonly Table[];
-    /** Join a second table before filtering. */
-    join?: ArrowQueryJoin;
-    /** Scalar source columns that define groups. */
-    groupBy?: readonly string[];
-    /** Aggregate reductions indexed by output name. */
-    aggregates?: Readonly<Record<string, ArrowAggregate>>;
-    /** Stable ordering applied after grouping and before pagination. */
-    orderBy?: readonly ArrowQueryOrder[];
     /** Named values for a parameterized predicate. */
     parameters?: ColumnarPredicateParameterValues;
     /** Checked between batches and during expression evaluation. */
     signal?: AbortSignal;
   };
+
+/** An in-memory SELECT with optional relational operators. */
+export type ArrowTableQuery = ArrowBatchQuery & {
+  /** Append schema-compatible tables before filtering. */
+  union?: readonly Table[];
+  /** Join a second table before filtering. */
+  join?: ArrowQueryJoin;
+  /** Scalar source columns that define groups. */
+  groupBy?: readonly string[];
+  /** Aggregate reductions indexed by output name. */
+  aggregates?: Readonly<Record<string, ArrowAggregate>>;
+  /** Stable ordering applied after grouping and before pagination. */
+  orderBy?: readonly ArrowQueryOrder[];
+};
 
 /** A bound output field and either a source column index or a computed expression. */
 type Projection = {field: Field} & ({index: number} | {expression: CompiledArrowExpression});
@@ -52,9 +65,7 @@ type Projection = {field: Field} & ({index: number} | {expression: CompiledArrow
 export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Table {
   const {select, where, offset = 0, limit, functions, parameters, signal} = query;
   signal?.throwIfAborted();
-  if (!Number.isSafeInteger(offset) || offset < 0) throw new Error('Invalid Arrow query offset');
-  if (limit !== undefined && (!Number.isSafeInteger(limit) || limit < 0))
-    throw new Error('Invalid Arrow query limit');
+  validatePagination(offset, limit);
 
   const {union, join, groupBy, aggregates, orderBy} = query;
   if (union?.length) source = unionArrowTables(source, union);
@@ -76,7 +87,45 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
     return queryArrowTable(source, {select, offset, limit, functions, signal});
   }
 
-  const inputSchema = source.schema;
+  const plan = compileArrowQuery(source.schema, query);
+  const result: RecordBatch[] = [];
+  for (const batch of source.batches) {
+    if (plan.done()) break;
+    for (const output of plan.execute(batch)) result.push(output);
+  }
+  return new Table(plan.schema, result);
+}
+
+/** Streams a linear Arrow query with global pagination and source backpressure. */
+export async function* queryArrowTableInBatches(
+  input: AsyncIterable<RecordBatch> | Iterable<RecordBatch>,
+  inputSchema: Schema,
+  query: ArrowBatchQuery = {}
+): AsyncIterable<RecordBatch> {
+  query.signal?.throwIfAborted();
+  validatePagination(query.offset ?? 0, query.limit);
+  const plan = compileArrowQuery(inputSchema, query);
+  if (plan.done()) return;
+  for await (const batch of input) {
+    query.signal?.throwIfAborted();
+    if (batch.schema !== inputSchema && !util.compareSchemas(batch.schema, inputSchema)) {
+      throw new Error('Arrow query batch does not match the input schema');
+    }
+    yield* plan.execute(batch);
+    if (plan.done()) return;
+  }
+}
+
+/** Validates pagination before the query reads or transforms any rows. */
+function validatePagination(offset: number, limit?: number): void {
+  if (!Number.isSafeInteger(offset) || offset < 0) throw new Error('Invalid Arrow query offset');
+  if (limit !== undefined && (!Number.isSafeInteger(limit) || limit < 0))
+    throw new Error('Invalid Arrow query limit');
+}
+
+/** Binds predicates and projection to a schema once per execution. */
+function compileArrowQuery(inputSchema: Schema, query: ArrowBatchQuery) {
+  const {select, where, offset = 0, limit, functions, parameters, signal} = query;
   const options = {inputSchema, functions};
   const predicate = where
     ? 'expression' in where
@@ -131,11 +180,10 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
         inputSchema.metadataVersion
       )
     : inputSchema;
-  const result: RecordBatch[] = [];
   let skip = offset;
   let remaining = limit ?? Infinity;
-  for (const batch of source.batches) {
-    if (remaining === 0) break;
+  /** Evaluates one batch using the remaining pagination budget. */
+  function* execute(batch: RecordBatch): Iterable<RecordBatch> {
     signal?.throwIfAborted();
     const metadata = getRecordBatchMetadata(batch);
     const mask = predicate?.evaluate(batch, {signal});
@@ -143,12 +191,22 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
     if (mask) {
       const indexes: number[] = [];
       for (let row = 0; row < batch.numRows && indexes.length < remaining; row++) {
+        if ((row & 1023) === 0) signal?.throwIfAborted();
         if (mask.get(row) !== true) continue;
         if (skip > 0) skip--;
         else indexes.push(row);
       }
       if (indexes.length === batch.numRows) selected = batch;
-      else if (indexes.length) {
+      else if (
+        indexes.length &&
+        indexes[indexes.length - 1]! - indexes[0]! + 1 === indexes.length
+      ) {
+        selected = createRecordBatchWithMetadata(
+          batch.schema,
+          batch.data.slice(indexes[0]!, indexes.length),
+          metadata
+        );
+      } else if (indexes.length) {
         const gathered = takeArrowTableRows(
           new Table(inputSchema, [batch]),
           Int32Array.from(indexes)
@@ -165,13 +223,20 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
       skip -= start;
       const end = start + Math.min(batch.numRows - start, remaining);
       if (end > start)
-        selected = start === 0 && end === batch.numRows ? batch : batch.slice(start, end);
+        selected =
+          start === 0 && end === batch.numRows
+            ? batch
+            : createRecordBatchWithMetadata(
+                batch.schema,
+                batch.data.slice(start, end - start),
+                metadata
+              );
     }
-    if (!selected?.numRows) continue;
+    if (!selected?.numRows) return;
     remaining -= selected.numRows;
     if (!select) {
-      result.push(selected);
-      continue;
+      yield selected;
+      return;
     }
 
     const columns = projection.map(item =>
@@ -198,11 +263,11 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
             : column.slice(start, end - start)
           : column.slice(start, end).data[0]!
       );
-      result.push(makeQueryBatch(schema, children, end - start, metadata));
+      yield makeQueryBatch(schema, children, end - start, metadata);
       start = end;
     }
   }
-  return new Table(schema, result);
+  return {schema, done: () => remaining === 0, execute};
 }
 
 /** Creates a batch while preserving its row count even for an empty projection. */
