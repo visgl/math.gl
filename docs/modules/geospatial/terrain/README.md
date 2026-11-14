@@ -1746,3 +1746,14 @@ replays. The script compares end-to-end worker update latency with direct
 full-rebuild compute time and verifies every delta against the rebuilt result.
 Byte totals count output typed arrays. They exclude message metadata and copies
 inside the worker.
+
+Run `node scripts/benchmark-terrain-worker-batching.mjs` to sweep individual
+edits and batches capped at 2, 4 or 8 edits on the same 80-tile Pacific and
+Sierra layouts. The replay schedules 128 edits at 8 ms intervals, either one
+at a time or in bursts of eight, and allows up to 2 ms to fill a batch.
+Requests are serialized by revision. The replay reports p50, p95 and p99 for
+edit-to-ack latency, arrival-to-send latency (batch fill and queue time), and
+worker request round trips, plus response buffer bytes. The separately timed
+full rebuild oracle checks every committed delta and confirms that every
+batching and ownership mode produces the same final terrain. Oracle work
+runs after dispatch and acknowledgement timing has finished.
