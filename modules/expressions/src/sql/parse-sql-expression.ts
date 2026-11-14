@@ -4,7 +4,7 @@
 
 import {SQLParseError} from './sql-parse-error';
 import type {Expression} from '../expressions/index';
-import type {ColumnarScalarType} from '../expressions/scalar-type';
+import {isColumnarScalarType, type ColumnarScalarType} from '../expressions/scalar-type';
 
 export const SQL_RESERVED_WORDS = new Set([
   'SELECT',
@@ -32,45 +32,27 @@ export const SQL_RESERVED_WORDS = new Set([
   'UNION'
 ]);
 
-/** Supported standard SQL type spellings. Precision/length modifiers are not yet supported. */
+/** Standard SQL names for portable scalar cast targets. */
+const SQL_CAST_ALIASES: Readonly<Record<string, ColumnarScalarType>> = {
+  smallint: 'int16',
+  int: 'int32',
+  integer: 'int32',
+  bigint: 'int64',
+  real: 'float32',
+  'double precision': 'float64',
+  boolean: 'bool',
+  varchar: 'utf8',
+  'character varying': 'utf8'
+};
+
+/** Resolves SQL cast type names and explicit numeric widths. */
 export function sqlCastType(name: string, source = name, offset = 0): ColumnarScalarType {
-  switch (name.toUpperCase().replace(/\s+/g, ' ').trim()) {
-    case 'INT8':
-      return 'int8';
-    case 'UINT8':
-      return 'uint8';
-    case 'UINT16':
-      return 'uint16';
-    case 'UINT32':
-      return 'uint32';
-    case 'UINT64':
-      return 'uint64';
-    case 'SMALLINT':
-    case 'INT16':
-      return 'int16';
-    case 'INT':
-    case 'INTEGER':
-    case 'INT32':
-      return 'int32';
-    case 'BIGINT':
-    case 'INT64':
-      return 'int64';
-    case 'FLOAT16':
-      return 'float16';
-    case 'REAL':
-    case 'FLOAT32':
-      return 'float32';
-    case 'DOUBLE PRECISION':
-    case 'FLOAT64':
-      return 'float64';
-    case 'BOOLEAN':
-      return 'bool';
-    case 'VARCHAR':
-    case 'CHARACTER VARYING':
-      return 'utf8';
-    default:
-      throw new SQLParseError(`Unsupported SQL CAST type: ${name}`, source, offset);
+  const normalized = name.toLowerCase().replace(/\s+/g, ' ').trim();
+  if (isColumnarScalarType(normalized) && normalized !== 'bool' && normalized !== 'utf8') {
+    return normalized;
   }
+  if (Object.hasOwn(SQL_CAST_ALIASES, normalized)) return SQL_CAST_ALIASES[normalized]!;
+  throw new SQLParseError(`Unsupported SQL CAST type: ${name}`, source, offset);
 }
 
 /** Parses bounded SQL expressions into the shared expression AST. */

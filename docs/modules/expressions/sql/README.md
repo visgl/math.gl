@@ -176,8 +176,11 @@ loaders.gl parser implementation to this package is a separate migration.
 Arrow dependency. `SELECT CAST(value AS INTEGER) AS count` returns a selection with an `expression`
 AST and `as` alias. Existing plain-column selections retain their shapes.
 
-Supported SQL targets: SMALLINT, INTEGER/INT, BIGINT, REAL, DOUBLE PRECISION, BOOLEAN,
-VARCHAR, CHARACTER VARYING and FLOAT16. CAST accepts columns, scalar literals and nested expressions.
+Numeric targets include `FLOAT16`, `FLOAT32`, `FLOAT64`, and the signed and unsigned widths
+`INT8`, `UINT8`, `INT16`, `UINT16`, `INT32`, `UINT32`, `INT64`, and `UINT64`.
+The SQL names SMALLINT, INTEGER/INT, BIGINT, REAL, DOUBLE PRECISION, BOOLEAN,
+VARCHAR, and CHARACTER VARYING are also supported. CAST accepts columns, scalar literals,
+and nested expressions. Integer casts reject overflow and return bigint for 64-bit targets.
 `WHERE CAST(value AS INTEGER) >= :minimum` records ordered `casts` on the source property;
 executors must apply those conversions before testing the predicate. Binding, validation, copying
 and column discovery preserve this information. Arrow's predicate evaluator executes these casts.
