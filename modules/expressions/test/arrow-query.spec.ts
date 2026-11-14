@@ -238,3 +238,24 @@ test('contiguous filtered matches share source values', () => {
     source.getChild('x')!.data[0]!.values.buffer
   );
 });
+
+test('streaming queries can emit projected empty batches with source batch metadata', async () => {
+  const source = new Table({x: vectorFromArray([0, 2], new Int32())});
+  const rejected = source.batches[0]!.slice(0, 1);
+  const accepted = source.batches[0]!.slice(1);
+  const metadata = Reflect.get(rejected, 'metadata') ?? new Map<string, string>();
+  metadata.set('partition', 'rejected');
+  if (!Reflect.get(rejected, 'metadata')) Object.assign(rejected, {metadata});
+  const query = select('SELECT x AS value WHERE x > 0 LIMIT 1');
+  const input = [rejected, accepted];
+  const output = await Array.fromAsync(
+    queryArrowTableInBatches(input, source.schema, {...query, emitEmptyBatches: true})
+  );
+  expect(output.map(batch => batch.numRows)).toEqual([0, 1]);
+  expect(output[0]!.schema.fields.map(field => field.name)).toEqual(['value']);
+  expect(Reflect.get(output[0]!, 'metadata')?.get('partition')).toBe('rejected');
+  expect(output[1]!.getChild('value')?.get(0)).toBe(2);
+  expect(await Array.fromAsync(queryArrowTableInBatches(input, source.schema, query))).toHaveLength(
+    1
+  );
+});

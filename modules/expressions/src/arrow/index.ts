@@ -35,6 +35,7 @@ export {
   queryArrowTable,
   queryArrowTableInBatches,
   type ArrowBatchQuery,
+  type ArrowStreamingQuery,
   type ArrowTableQuery
 } from './query-arrow-table';
 export type {ArrowQueryJoin, ArrowQueryOrder} from './relational-query';

@@ -631,3 +631,7 @@ linear query before accumulating scalar aggregates or grouping by one source
 column. Each snapshot contains an independent Arrow table, the number of
 rows processed, and a `final` flag. Set `emitEveryBatches` to control provisional
 snapshots. A final snapshot is emitted even when the stream is empty.
+
+Set `emitEmptyBatches: true` to keep a schema-bearing batch with its input
+batch metadata when filtering or pagination leaves no rows in an input batch.
+Empty batches do not consume the row limit. The option defaults to false.
