@@ -233,15 +233,25 @@ export class SQLExpressionReader {
         throw this.error('Chained UINT8 array casts are not supported');
       return this.call(`array_${type}`, array.arguments);
     }
-    const target = /^dictionary$/i.test(match[0])
-      ? this.dictionaryCastType()
-      : /^(?:binary|varbinary|blob|fixedsizebinary)$/i.test(match[0])
-        ? this.binaryCastType(match[0].toLowerCase())
-        : sqlCastType(match[0], this.source, start);
+    const name = match[0].toLowerCase();
+    let target: string;
+    if (name === 'timestamp') target = this.timestampCastType();
+    else if (name === 'date' || name === 'geometry') target = name;
+    else if (name === 'dictionary') target = this.dictionaryCastType();
+    else if (/^(?:binary|varbinary|blob|fixedsizebinary)$/.test(name))
+      target = this.binaryCastType(name);
+    else target = sqlCastType(name, this.source, start);
     return this.call('cast', [
       argument,
       this.node({type: 'Literal', value: target, raw: JSON.stringify(target)})
     ]);
+  }
+  /** Parses the optional SQL time zone qualifier. */
+  private timestampCastType(): string {
+    const zoned = this.word('WITH');
+    if (!zoned && !this.word('WITHOUT')) return 'timestamp';
+    if (!this.word('TIME') || !this.word('ZONE')) throw this.error('Expected TIME ZONE');
+    return zoned ? 'timestamp_utc' : 'timestamp';
   }
   /** Parses the supported Arrow dictionary layout. */
   private dictionaryCastType(): string {

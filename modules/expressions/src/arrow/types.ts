@@ -5,7 +5,10 @@
 import type {Field, Schema, RecordBatch, Vector, Table} from 'apache-arrow';
 import type {Expression} from '../expressions/index';
 
-/** Scalar values exposed to user callbacks. */
+/**
+ * Scalar values exposed to user callbacks. Date32 uses epoch days and microsecond
+ * timestamps use bigint microseconds, matching their Arrow storage buffers.
+ */
 export type ArrowExpressionValue = number | bigint | boolean | string | Uint8Array | null;
 
 /** A vector kernel receives full-length inputs and must evaluate only active rows. */

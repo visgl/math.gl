@@ -7,10 +7,12 @@ import {
   Binary,
   Bool,
   DataType,
+  DateDay,
   FixedSizeBinary,
   Float64,
   Int32,
   Table,
+  TimestampMicrosecond,
   Utf8,
   vectorFromArray
 } from 'apache-arrow';
@@ -116,7 +118,7 @@ test('casts honor conditional short circuit, nullability and empty tables', () =
   expect(() => compileArrowExpression('cast(x, enabled)', {inputSchema: table.schema})).toThrow(
     'literal'
   );
-  expect(() => compileArrowExpression('cast(x, "date")', {inputSchema: table.schema})).toThrow(
+  expect(() => compileArrowExpression('cast(x, "interval")', {inputSchema: table.schema})).toThrow(
     'target'
   );
 });
@@ -219,4 +221,82 @@ test('binary CAST reads binary columns and preserves fixed-width bytes through c
   }).slice(1);
   expect([...evaluate('x::BLOB', valid)]).toEqual([Uint8Array.of(255, 0)]);
   expect([...evaluate("CAST('a' AS BINARY) = CAST('a' AS VARBINARY(1))", valid)]).toEqual([true]);
+});
+
+test('DATE casts preserve calendar days and nulls', () => {
+  const table = new Table({
+    x: vectorFromArray(['skip', '1969-12-31', '1970-01-01', '2000-02-29', null], new Utf8())
+  }).slice(1);
+  const dates = evaluate('CAST(x AS DATE)', table);
+  expect(dates.type).toEqual(new DateDay());
+  expect([...dates.data[0]!.values.slice(0, 4)]).toEqual([-1, 0, 11016, 0]);
+  expect(dates.isValid(3)).toBe(false);
+  expect([...evaluate('x::DATE', new Table({x: dates}).slice(1))]).toEqual([...dates].slice(1));
+  expect(() => evaluate("CAST('1900-02-29' AS DATE)", table)).toThrow(/temporal CAST/);
+  expect(() => evaluate("CAST('2024-13-01' AS DATE)", table)).toThrow(/temporal CAST/);
+});
+
+test('timestamp casts use exact microseconds and explicit time zone semantics', () => {
+  const table = new Table({
+    x: vectorFromArray(
+      ['1969-12-31 23:59:59.999999', '1970-01-01T00:00:00.123456', null],
+      new Utf8()
+    )
+  });
+  for (const target of ['TIMESTAMP', 'TIMESTAMP WITHOUT TIME ZONE']) {
+    const values = evaluate(`x::${target}`, table);
+    expect(values.type).toEqual(new TimestampMicrosecond());
+    expect([...values.data[0]!.values.slice(0, 3)]).toEqual([-1n, 123456n, 0n]);
+    expect(values.isValid(2)).toBe(false);
+  }
+  const offsets = new Table({
+    x: vectorFromArray(
+      ['1970-01-01T00:30:00.000001+01:00', '1969-12-31T23:30:00.000001Z'],
+      new Utf8()
+    )
+  });
+  const zoned = evaluate('CAST(x AS TIMESTAMP WITH TIME ZONE)', offsets);
+  expect(zoned.type).toEqual(new TimestampMicrosecond('UTC'));
+  expect([...zoned.data[0]!.values.slice(0, 2)]).toEqual([-1799999999n, -1799999999n]);
+  const query = parseSQLQuery('SELECT CAST(x AS TIMESTAMP WITH TIME ZONE) AS instant');
+  expect(query).toMatchObject({
+    select: [{as: 'instant', expression: parseSQLExpression('x::TIMESTAMP WITH TIME ZONE')}]
+  });
+  const filtered = parseSQLQuery(
+    "SELECT x WHERE CAST(x AS TIMESTAMP) > CAST('1970-01-01T00:00:00' AS TIMESTAMP)"
+  );
+  if (!('where' in filtered) || !filtered.where || !('expression' in filtered.where))
+    throw new Error('Expected temporal predicate expression');
+  expect([
+    ...compileArrowExpression(filtered.where.expression, {inputSchema: table.schema}).evaluateTable(
+      table
+    )
+  ]).toEqual([false, true, null]);
+  for (const sql of [
+    "CAST('1970-01-01T00:00:00Z' AS TIMESTAMP)",
+    "CAST('1970-01-01T00:00:00' AS TIMESTAMP WITH TIME ZONE)",
+    "CAST('1970-01-01T00:00:00+00:60' AS TIMESTAMP WITH TIME ZONE)",
+    "CAST('1970-01-01T00:00:00.0000001' AS TIMESTAMP)",
+    "CAST('1970-01-01T24:00:00' AS TIMESTAMP)"
+  ])
+    expect(() => evaluate(sql, table)).toThrow(/temporal CAST/);
+});
+
+test('GEOMETRY casts label opaque WKB bytes and retain field metadata', () => {
+  const x = vectorFromArray([Uint8Array.of(1, 2, 3), null], new Binary());
+  const table = new Table({x});
+  const source = table.schema.fields[0]!;
+  const compiled = compileArrowExpression(parseSQLExpression('CAST(x AS GEOMETRY)'), {
+    inputSchema: table.schema
+  });
+  expect(source.metadata.has('ARROW:extension:name')).toBe(false);
+  expect(compiled.outputField.metadata.get('ARROW:extension:name')).toBe('geoarrow.wkb');
+  expect([...compiled.evaluateTable(table)]).toEqual([...x]);
+  source.metadata.set('ARROW:extension:name', 'geoarrow.wkb');
+  source.metadata.set('ARROW:extension:metadata', '{"crs":"EPSG:4326"}');
+  const existing = compileArrowExpression(parseSQLExpression('x::GEOMETRY'), {
+    inputSchema: table.schema
+  });
+  expect(existing.outputField.metadata).toEqual(source.metadata);
+  expect(() => evaluate("CAST('POINT (0 0)' AS GEOMETRY)", table)).toThrow(/Binary WKB/);
 });

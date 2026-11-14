@@ -24,6 +24,7 @@ import {
 import {isColumnarScalarType} from '../expressions/index';
 import {parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '@math.gl/arrow/utf8';
 import {ExpressionEvaluationError} from '../expressions/index';
+import {bindTemporalCast} from './temporal-cast';
 import {roundFloat16} from './float16';
 import {typeKey, createValueValidator} from './buffers';
 import type {ArrowExpressionValue} from './types';
@@ -49,6 +50,8 @@ type Range = [Uint8Array, number, number];
 
 /** Resolves explicit scalar casts once, leaving active-row selection to the expression compiler. */
 export function bindCast(source: DataType, target: unknown) {
+  if (target === 'date' || target === 'timestamp' || target === 'timestamp_utc')
+    return bindTemporalCast(source, target);
   const binaryTarget =
     typeof target === 'string' && /^(varbinary|fixedsizebinary):([1-9]\d*)$/.exec(target);
   if (target === 'binary' || binaryTarget) {
@@ -93,6 +96,8 @@ export function bindCast(source: DataType, target: unknown) {
   const wideInteger = integer && type.bitWidth === 64;
   const sourceKey = typeKey(source);
   const textInput = sourceKey === 'utf8';
+  if (sourceKey === 'date32' || sourceKey.startsWith('timestamp_us:'))
+    throw new Error('Temporal CAST requires a matching temporal target');
   if (sourceKey === 'binary' || sourceKey.startsWith('fixedsizebinary:'))
     throw new Error('CAST from binary requires a binary target');
   if (

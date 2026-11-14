@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {
+  Binary,
   Bool,
   Precision,
   DataType,
@@ -860,6 +861,27 @@ function bindRecovery(
   };
 }
 
+/** Labels opaque WKB bytes as geometry and preserves metadata from existing WKB fields. */
+function bindGeometryCast(argument: Node): Node {
+  const source = valueType(argument.field.type);
+  const metadata = new Map(argument.field.metadata);
+  const extension = metadata.get('ARROW:extension:name');
+  if (
+    (!DataType.isBinary(source) && !DataType.isNull(source)) ||
+    (extension && extension !== 'geoarrow.wkb')
+  )
+    throw new Error('GEOMETRY CAST requires Binary WKB input');
+  metadata.set('ARROW:extension:name', 'geoarrow.wkb');
+  return {
+    ...argument,
+    field: new Field('cast', new Binary(), argument.field.nullable, metadata),
+    prepare(batch, active, context) {
+      const child = argument.prepare(batch, active, context);
+      return {get: row => child.get(row)};
+    }
+  };
+}
+
 /** Binds a bounded IN list once, keeping the tested expression and casts as one subtree. */
 function bindMembership(arguments_: any[], options: BindingOptions): Node {
   if (
@@ -1090,7 +1112,9 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
     if (ast.arguments.length !== 2 || ast.arguments[1]?.type !== 'Literal')
       throw new Error('cast requires a value and a literal scalar target');
     const argument = bind(ast.arguments[0], options);
-    const cast = bindCast(argument.field.type, ast.arguments[1].value);
+    const target = ast.arguments[1].value;
+    if (target === 'geometry') return bindGeometryCast(argument);
+    const cast = bindCast(argument.field.type, target);
     return {
       field: new Field('cast', cast.type, argument.field.nullable),
       hasKernel: argument.hasKernel,

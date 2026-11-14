@@ -91,7 +91,7 @@ test('WHERE casts survive binding, copying, null predicates and column discovery
 test.each([
   'CAST(x INTEGER)',
   'CAST(x AS)',
-  'CAST(x AS DATE)',
+  'CAST(x AS TIMESTAMP WITH TIME)',
   'CAST(x AS DECIMAL(8,2))',
   'CAST(x AS VARCHAR(2))',
   'CAST(x AS DOUBLE)',

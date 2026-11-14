@@ -198,6 +198,10 @@ spelling supported in that column.
 | `BLOB` | `BINARY`, `VARBINARY` | `Binary` |
 | — | `VARBINARY(n)` | `Binary` with an `n`-byte cap at cast time |
 | `BINARY(n)` | `FIXEDSIZEBINARY(n)` | `FixedSizeBinary(n)` |
+| `DATE` | — | `Date32` (`DateDay` in Arrow JS) |
+| `TIMESTAMP`, `TIMESTAMP WITHOUT TIME ZONE` | — | `Timestamp(MICROSECOND)` |
+| `TIMESTAMP WITH TIME ZONE` | — | `Timestamp(MICROSECOND, "UTC")` |
+| — | `GEOMETRY` | `Binary` with the `geoarrow.wkb` extension |
 | — | `FLOAT16[n]`, `FLOAT32[n]`, `FLOAT64[n]`, `UINT8[n]` | `FixedSizeList` of the corresponding element type |
 
 CAST accepts columns, scalar literals, and nested expressions. Integer casts reject overflow
@@ -221,6 +225,17 @@ within each evaluated batch. Nulls remain null.
 `Binary` and rejects values larger than `n` bytes. `BINARY(n)` and `FIXEDSIZEBINARY(n)`
 select Arrow `FixedSizeBinary(n)`, zero-pad shorter values on the right, and reject
 longer values. Binary casts accept existing bytes or the UTF-8 bytes of text.
+
+`DATE` accepts ISO `YYYY-MM-DD` text. Timestamp casts accept a date and time
+separated by `T` or a space, with up to six fractional second digits. Zoned timestamps
+require `Z` or a signed `HH:MM` offset and are normalized to UTC. Timestamps without
+a time zone require offset-free text and preserve the wall-clock fields. Temporal
+casts preserve nulls and reject invalid calendar values and excess fractional digits.
+An input column of the matching Arrow temporal type can also be cast directly.
+
+`CAST(payload AS GEOMETRY)` labels a binary WKB value with the `geoarrow.wkb`
+extension. The cast treats the bytes as opaque and preserves existing WKB field
+metadata, including CRS when present.
 
 ## Packed floating-point arrays
 

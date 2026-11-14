@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {DataType, Precision, type Vector, type Data} from 'apache-arrow';
+import {DataType, DateUnit, Precision, TimeUnit, type Vector, type Data} from 'apache-arrow';
 import {float16Values, requireFloat16} from './float16';
 import {ExpressionEvaluationError} from '../expressions/index';
 import type {ArrowExpressionValue} from './types';
@@ -22,6 +22,9 @@ export function typeKey(type: DataType): string {
   }
   if (DataType.isBool(type)) return 'bool';
   if (DataType.isUtf8(type)) return 'utf8';
+  if (DataType.isDate(type) && type.unit === DateUnit.DAY) return 'date32';
+  if (DataType.isTimestamp(type) && type.unit === TimeUnit.MICROSECOND)
+    return `timestamp_us:${type.timezone ?? ''}`;
   if (DataType.isBinary(type)) return 'binary';
   if (DataType.isFixedSizeBinary(type)) return `fixedsizebinary:${type.byteWidth}`;
   if (DataType.isNull(type)) return 'null';
@@ -84,6 +87,7 @@ export class ColumnReader {
       const bit = data.offset + index;
       return Boolean(data.values[bit >> 3]! & (1 << (bit & 7)));
     }
+    // Temporal values use their physical units so microseconds never pass through Number.
     return this.half.has(data)
       ? this.half.get(data)![index]!
       : (data.values[index] as number | bigint);
@@ -129,6 +133,25 @@ export function createValueValidator(inputType: DataType): (value: ArrowExpressi
         );
       if (value < min || value > max)
         throw new ExpressionEvaluationError('overflow', 'Integer expression overflow');
+    };
+  }
+  if (key === 'date32') {
+    return value => {
+      if (value === null) return;
+      if (
+        typeof value !== 'number' ||
+        !Number.isInteger(value) ||
+        value < -0x80000000 ||
+        value > 0x7fffffff
+      )
+        throw new ExpressionEvaluationError('overflow', 'Invalid Date32 epoch day');
+    };
+  }
+  if (key.startsWith('timestamp_us:')) {
+    return value => {
+      if (value === null) return;
+      if (typeof value !== 'bigint' || value !== BigInt.asIntN(64, value))
+        throw new ExpressionEvaluationError('overflow', 'Invalid timestamp epoch microseconds');
     };
   }
   if (DataType.isBinary(type) || DataType.isFixedSizeBinary(type)) {
