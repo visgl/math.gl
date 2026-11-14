@@ -133,7 +133,7 @@ for (const [api, provided] of [[tasks, geospatial], [require('@math.gl/tasks'), 
       assert.deepEqual((await resident.runTask({type: 'snapshot'})).tiles, first.tiles);
       const edited = await resident.runTask({revision: 1, edits: [sample]});
       assert.equal(edited.tiles[0].field.heights[5], 2);
-      assert.match((await resident.runTask({revision: 1, edits: []}), /Stale/);
+      assert.match((await resident.runTask({revision: 1, edits: []})).error, /Stale/);
       assert.deepEqual(await resident.runTask({revision: 2, edits: [sample]}),
         {revision: 3, tiles: [], removed: []});
       assert.deepEqual(await resident.runTask({revision: 3, edits: [{type: 'remove', address}]}),
