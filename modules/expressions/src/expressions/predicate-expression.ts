@@ -106,7 +106,7 @@ function convert(predicate: ColumnarPredicate): Expression {
     if (value instanceof Date || value instanceof Uint8Array)
       throw new Error('Date and binary predicate literals require explicit backend conversion');
     if (
-      property.casts?.[property.casts.length - 1] === 'int64' &&
+      ['int64', 'uint64'].includes(property.casts?.at(-1) ?? '') &&
       typeof value === 'number' &&
       Number.isSafeInteger(value)
     )

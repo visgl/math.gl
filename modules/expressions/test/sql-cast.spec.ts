@@ -19,6 +19,17 @@ const cast = (argument: unknown, target: string) => ({
   arguments: [argument, {type: 'Literal', value: target, raw: JSON.stringify(target)}]
 });
 test.each([
+  ['INT8', 'int8'],
+  ['INT16', 'int16'],
+  ['INT32', 'int32'],
+  ['INT64', 'int64'],
+  ['UINT8', 'uint8'],
+  ['UINT16', 'uint16'],
+  ['UINT32', 'uint32'],
+  ['UINT64', 'uint64'],
+  ['FLOAT16', 'float16'],
+  ['FLOAT32', 'float32'],
+  ['FLOAT64', 'float64'],
   ['SMALLINT', 'int16'],
   ['INT', 'int32'],
   ['INTEGER', 'int32'],
@@ -27,6 +38,7 @@ test.each([
   ['DOUBLE PRECISION', 'float64'],
   ['BOOLEAN', 'bool'],
   ['VARCHAR', 'utf8'],
+  ['UTF8', 'utf8'],
   ['CHARACTER VARYING', 'utf8']
 ])('SQL CAST maps %s to %s without Arrow dependencies', (sql, target) => {
   const expression = cast({type: 'Identifier', name: 'population'}, target);
@@ -79,7 +91,7 @@ test('WHERE casts survive binding, copying, null predicates and column discovery
 test.each([
   'CAST(x INTEGER)',
   'CAST(x AS)',
-  'CAST(x AS DATE)',
+  'CAST(x AS TIMESTAMP WITH TIME)',
   'CAST(x AS DECIMAL(8,2))',
   'CAST(x AS VARCHAR(2))',
   'CAST(x AS DOUBLE)',

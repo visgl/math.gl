@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {
+  Binary,
   Bool,
   Precision,
   DataType,
@@ -205,7 +206,7 @@ function output(
 ): Vector {
   const type = valueType(field.type);
   const validate = createValueValidator(type);
-  if (DataType.isUtf8(type)) {
+  if (DataType.isUtf8(type) || DataType.isBinary(type) || DataType.isFixedSizeBinary(type)) {
     const values: ArrowExpressionValue[] = new Array(active.length).fill(null);
     for (let row = 0; row < active.length; row++)
       if (active[row]) {
@@ -215,7 +216,7 @@ function output(
         validate(value);
         values[row] = value;
       }
-    return vectorFromArray(values as any[], type);
+    return vectorFromArray(values as any[], field.type);
   }
   if (DataType.isNull(type)) {
     for (let row = 0; row < active.length; row++) if (active[row]) validate(evaluate(row));
@@ -622,6 +623,7 @@ function bindBinary(ast: any, options: BindingOptions): Node {
   }
   const type = left.field.type,
     utf8 = typeKey(type) === 'utf8',
+    binary = DataType.isBinary(type) || DataType.isFixedSizeBinary(type),
     integer = DataType.isInt(type);
   const validate = createValueValidator(type);
   const round = roundToType(type);
@@ -675,6 +677,7 @@ function bindBinary(ast: any, options: BindingOptions): Node {
           const x = a.get(row) as any,
             y = b.get(row) as any;
           if (x === null || y === null) return null;
+          if (binary) return compare(op, compareUTF8(x, 0, x.length, y, 0, y.length), 0);
           if (comparison) return compare(op, x, y);
           if ((op === '/' || op === '%') && (y === 0 || y === 0n))
             throw new ExpressionEvaluationError('divisionByZero', 'Division by zero');
@@ -854,6 +857,27 @@ function bindRecovery(
         );
       }
       return vectorReader(result);
+    }
+  };
+}
+
+/** Labels opaque WKB bytes as geometry and preserves metadata from existing WKB fields. */
+function bindGeometryCast(argument: Node): Node {
+  const source = valueType(argument.field.type);
+  const metadata = new Map(argument.field.metadata);
+  const extension = metadata.get('ARROW:extension:name');
+  if (
+    (!DataType.isBinary(source) && !DataType.isNull(source)) ||
+    (extension && extension !== 'geoarrow.wkb')
+  )
+    throw new Error('GEOMETRY CAST requires Binary WKB input');
+  metadata.set('ARROW:extension:name', 'geoarrow.wkb');
+  return {
+    ...argument,
+    field: new Field('cast', new Binary(), argument.field.nullable, metadata),
+    prepare(batch, active, context) {
+      const child = argument.prepare(batch, active, context);
+      return {get: row => child.get(row)};
     }
   };
 }
@@ -1088,7 +1112,9 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
     if (ast.arguments.length !== 2 || ast.arguments[1]?.type !== 'Literal')
       throw new Error('cast requires a value and a literal scalar target');
     const argument = bind(ast.arguments[0], options);
-    const cast = bindCast(argument.field.type, ast.arguments[1].value);
+    const target = ast.arguments[1].value;
+    if (target === 'geometry') return bindGeometryCast(argument);
+    const cast = bindCast(argument.field.type, target);
     return {
       field: new Field('cast', cast.type, argument.field.nullable),
       hasKernel: argument.hasKernel,
@@ -1096,7 +1122,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
         const child = argument.prepare(batch, active, context);
         return {
           get: row =>
-            cast.textInput && !DataType.isUtf8(cast.type)
+            cast.textInput && !DataType.isUtf8(valueType(cast.type))
               ? cast.evaluate(null, bytes(child, row))
               : cast.evaluate(child.get(row))
         };

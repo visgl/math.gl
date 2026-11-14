@@ -27,31 +27,33 @@ export const SQL_RESERVED_WORDS = new Set([
   'ORDER',
   'GROUP',
   'HAVING',
-  'OFFSET',
   'JOIN',
   'UNION'
 ]);
 
-/** Supported standard SQL type spellings. Precision/length modifiers are not yet supported. */
+/** Resolves standard SQL names and explicit numeric widths. */
 export function sqlCastType(name: string, source = name, offset = 0): ColumnarScalarType {
-  switch (name.toUpperCase().replace(/\s+/g, ' ').trim()) {
-    case 'SMALLINT':
+  const normalized = name.toLowerCase().replace(/\s+/g, ' ').trim();
+  if (/^(?:u?int(?:8|16|32|64)|float(?:16|32|64))$/.test(normalized)) {
+    return normalized as ColumnarScalarType;
+  }
+  switch (normalized) {
+    case 'smallint':
       return 'int16';
-    case 'INT':
-    case 'INTEGER':
+    case 'int':
+    case 'integer':
       return 'int32';
-    case 'BIGINT':
+    case 'bigint':
       return 'int64';
-    case 'FLOAT16':
-      return 'float16';
-    case 'REAL':
+    case 'real':
       return 'float32';
-    case 'DOUBLE PRECISION':
+    case 'double precision':
       return 'float64';
-    case 'BOOLEAN':
+    case 'boolean':
       return 'bool';
-    case 'VARCHAR':
-    case 'CHARACTER VARYING':
+    case 'utf8':
+    case 'varchar':
+    case 'character varying':
       return 'utf8';
     default:
       throw new SQLParseError(`Unsupported SQL CAST type: ${name}`, source, offset);
@@ -221,15 +223,7 @@ export class SQLExpressionReader {
         Number(width[0]) !== array.arguments.length
       )
         throw this.error('ARRAY cast length must match the number of components');
-      const name = match[0].toUpperCase();
-      const type =
-        name === 'UINT8'
-          ? 'uint8'
-          : name === 'FLOAT32'
-            ? 'float32'
-            : name === 'FLOAT64'
-              ? 'float64'
-              : sqlCastType(name, this.source, start);
+      const type = sqlCastType(match[0], this.source, start);
       if (!['float16', 'float32', 'float64', 'uint8'].includes(type))
         throw this.error('Unsupported ARRAY cast type');
       if (
@@ -239,11 +233,51 @@ export class SQLExpressionReader {
         throw this.error('Chained UINT8 array casts are not supported');
       return this.call(`array_${type}`, array.arguments);
     }
-    const target = sqlCastType(match[0], this.source, start);
+    const name = match[0].toLowerCase();
+    let target: string;
+    if (name === 'timestamp') target = this.timestampCastType();
+    else if (name === 'date' || name === 'geometry') target = name;
+    else if (name === 'dictionary') target = this.dictionaryCastType();
+    else if (/^(?:binary|varbinary|blob|fixedsizebinary)$/.test(name))
+      target = this.binaryCastType(name);
+    else target = sqlCastType(name, this.source, start);
     return this.call('cast', [
       argument,
       this.node({type: 'Literal', value: target, raw: JSON.stringify(target)})
     ]);
+  }
+  /** Parses the optional SQL time zone qualifier. */
+  private timestampCastType(): string {
+    const zoned = this.word('WITH');
+    if (!zoned && !this.word('WITHOUT')) return 'timestamp';
+    if (!this.word('TIME') || !this.word('ZONE')) throw this.error('Expected TIME ZONE');
+    return zoned ? 'timestamp_utc' : 'timestamp';
+  }
+  /** Parses the supported Arrow dictionary layout. */
+  private dictionaryCastType(): string {
+    this.symbol('(');
+    if (!this.word('UTF8')) throw this.error('Expected UTF8 dictionary values');
+    this.symbol(',');
+    if (!this.word('INT32')) throw this.error('Expected INT32 dictionary indices');
+    this.symbol(')');
+    return 'dictionary_utf8_int32';
+  }
+  /** Parses binary aliases and optional positive byte widths. */
+  private binaryCastType(name: string): string {
+    if (name === 'blob') return 'binary';
+    if (!this.take('(')) {
+      if (name === 'fixedsizebinary') throw this.error('FIXEDSIZEBINARY requires a byte width');
+      return 'binary';
+    }
+    this.space();
+    const width = /^\d+/.exec(this.source.slice(this.position))?.[0] ?? '';
+    const byteWidth = Number(width);
+    if (byteWidth < 1 || byteWidth > 0x7fffffff)
+      throw this.error('Binary CAST requires a positive 32-bit byte width');
+    this.position += width.length;
+    this.token();
+    this.symbol(')');
+    return `${name === 'varbinary' ? 'varbinary' : 'fixedsizebinary'}:${byteWidth}`;
   }
   private primary(depth: number): Expression {
     if (depth > 64) throw this.error('SQL expression exceeds nesting limit');

@@ -46,9 +46,10 @@ const probes = [
   {symbol:'COLOR_RGB',packages:['@math.gl/expressions/color'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:250000},
   {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
 
-  {symbol: 'parseSQLSelect', packages: ['@math.gl/expressions/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 12600},
-  {symbol: 'parseSQLSelectStatement', packages: ['@math.gl/expressions/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 15000},
-  {symbol: 'parseSQLQuery', packages: ['@math.gl/expressions/sql'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 24000},
+  // Measured with explicit numeric, dictionary, binary and temporal CAST targets.
+  {symbol: 'parseSQLSelect', packages: ['@math.gl/expressions/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 13700},
+  {symbol: 'parseSQLSelectStatement', packages: ['@math.gl/expressions/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 15950},
+  {symbol: 'parseSQLQuery', packages: ['@math.gl/expressions/sql'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 24450},
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
   {symbol:'spheroidToCartesian', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
   {symbol:'vec3Normalize', packages:['@math.gl/core'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
