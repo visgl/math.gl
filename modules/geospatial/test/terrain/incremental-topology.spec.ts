@@ -148,3 +148,32 @@ test('monotone straight runs simplify without cancelling unrelated reductions', 
   expect(out.rejected).toBe(false);
   expect(out.indices.length).toBe(4);
 });
+
+test('interior edits preserve nearby halo identities while corner edits invalidate them', () => {
+  const left = tile(0);
+  left.field.width = left.field.height = 9;
+  left.field.heights = new Float64Array(81);
+  const right = tile(8);
+  const diagonal = {...tile(8), row: 8, field: {...tile(8).field, origin: [8, 8] as const}};
+  const resident = [left, right, diagonal, ...Array.from({length: 9}, (_, i) => tile(100 + 8 * i))];
+  let state = updateTerrainMixedVertexTileHalos(null, resident);
+  for (const [index, expected] of [
+    [40, ['1/0/0']],
+    [80, ['1/0/0', '1/8/8']]
+  ] as const) {
+    const heights = Float64Array.from(resident[0].field.heights);
+    heights[index] = NaN;
+    resident[0] = {...left, field: {...left.field, heights}};
+    const next = updateTerrainMixedVertexTileHalos(state, resident);
+    expect(next.tiles).toEqual(createTerrainMixedVertexTileHalos(resident).tiles);
+    expect(next.rebuilt).toEqual(expected);
+    for (const halo of next.tiles) {
+      if (!next.rebuilt.includes(`${halo.spacing}/${halo.column}/${halo.row}`)) {
+        expect(halo).toBe(
+          state.tiles.find(old => old.column === halo.column && old.row === halo.row)
+        );
+      }
+    }
+    state = next;
+  }
+});

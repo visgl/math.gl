@@ -737,3 +737,15 @@ One local 20-job run of the 64-coarse-tile case (566,280 input and 796,250
 output buffer bytes per job) measured 169 jobs/s with four copy workers and
 245 jobs/s with four transfer workers. The one-worker results were 212 and
 196 jobs/s respectively. These observations depend on the host and load.
+
+Run `node scripts/benchmark-terrain-edit-fanout.mjs <baseline-commit>` to compare
+mixed halo updates against a pinned Git revision using Pacific and Sierra.
+The sweep alternates baseline and candidate order for interior, shared-corner,
+and burst edits. Each event compares both revisions against a full rebuild.
+Report rebuilt tiles and output bytes alongside p95 latency. Host contention
+can dominate the timing, so repeat the sweep before adopting latency targets.
+
+For same-size replacements, compare the effective samples and expand the dirty
+bounds by one source cell for interpolation. Layout changes still invalidate
+overlapping old and new coverage. The target overlap index is reused across
+edits when ordered tile addresses and dimensions are stable.
