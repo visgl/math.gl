@@ -941,3 +941,9 @@ After building, run `node scripts/benchmark-terrain-edit-replay.mjs` to compare 
 `updateTerrainValidDomainMeshRegions` applies the same dirty-window contract to adaptive meshes with nodata. Report every changed height or validity bit. The updater preserves untouched region objects and rebuilds all regions when tessellation settings change. Region bounds and per-region triangulation limits are explicit. Boundary samples remain fixed to the valid raster domain. The tolerance applies to covered source nodes.
 
 Run `node scripts/benchmark-terrain-edit-replay.mjs --dem` after building to replay point and patch edits on the pinned Pacific and Sierra nodata DEMs with the adaptive updater. The comparison checks every mesh buffer against a full rebuild of the same regional decomposition.
+
+### Mixed-level DEM residency replay[​](#mixed-level-dem-residency-replay "Direct link to Mixed-level DEM residency replay")
+
+Run `node scripts/qualify-terrain-residency.mjs` after building. The replay loads and evicts spacing-1 tiles over spacing-4 coverage on the pinned Pacific and Sierra nodata DEMs. It compares every incremental halo with a full rebuild from reversed input order and checks reuse of untouched halos. It reports p95 latency, output buffer bytes and process peak RSS. For larger resident sets, the halo builder uses a spatial broad phase to exclude tiles that cannot intersect the target halo. Finest-resident ownership and the distinction between nodata and absence are unchanged.
+
+In **Streaming replay**, enable **Pacific bathymetry** to compare fine tile arrival and eviction in a regional relief map. Negative elevations remain valid terrain. Convert positive-down depths to signed elevations and align vertical datums before combining source datasets.
