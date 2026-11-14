@@ -176,11 +176,45 @@ const result = await query("SHOW TABLES FROM warehouse", {
 
 `parseSQLExpression('CAST(value AS INTEGER)')` returns a core expression AST suitable for `compileArrowExpression` from `@math.gl/expressions/arrow`. The optional SQL module itself has no Arrow dependency. `SELECT CAST(value AS INTEGER) AS count` returns a selection with an `expression` AST and `as` alias. Existing plain-column selections retain their shapes.
 
-Supported SQL targets: SMALLINT, INTEGER/INT, BIGINT, REAL, DOUBLE PRECISION, BOOLEAN, VARCHAR, CHARACTER VARYING and FLOAT16. CAST accepts columns, scalar literals and nested expressions. `WHERE CAST(value AS INTEGER) >= :minimum` records ordered `casts` on the source property; executors must apply those conversions before testing the predicate. Binding, validation, copying and column discovery preserve this information. Arrow's predicate evaluator executes these casts.
+### SQL type card[​](#sql-type-card "Direct link to SQL type card")
 
-Unsupported targets/modifiers fail explicitly. This subset does not accept DECIMAL, date/time, length/precision modifiers, or casts on scalar values in the portable predicate representation. See [Arrow expression conversion rules](https://visgl.github.io/math.gl/next/docs/modules/expressions/arrow.md#sql-cast).
+These are the cast targets supported by math.gl. The middle column lists Arrow-oriented spellings and dialect aliases accepted by the parser. A dash means there is no corresponding spelling supported in that column.
+
+| SQL standard type                          | SQL Arrow type                                       | Arrow type                                        |
+| ------------------------------------------ | ---------------------------------------------------- | ------------------------------------------------- |
+| —                                          | `INT8`                                               | `Int8`                                            |
+| `SMALLINT`                                 | `INT16`                                              | `Int16`                                           |
+| `INTEGER`, `INT`                           | `INT32`                                              | `Int32`                                           |
+| `BIGINT`                                   | `INT64`                                              | `Int64`                                           |
+| —                                          | `UINT8`, `UINT16`, `UINT32`, `UINT64`                | `Uint8`, `Uint16`, `Uint32`, `Uint64`             |
+| —                                          | `FLOAT16`                                            | `Float16`                                         |
+| `REAL`                                     | `FLOAT32`                                            | `Float32`                                         |
+| `DOUBLE PRECISION`                         | `FLOAT64`                                            | `Float64`                                         |
+| `BOOLEAN`                                  | —                                                    | `Bool`                                            |
+| `VARCHAR`, `CHARACTER VARYING`             | `UTF8`                                               | `Utf8`                                            |
+| —                                          | `DICTIONARY(UTF8, INT32)`                            | `Dictionary<Utf8, Int32>`                         |
+| `BLOB`                                     | `BINARY`, `VARBINARY`                                | `Binary`                                          |
+| —                                          | `VARBINARY(n)`                                       | `Binary` with an `n`-byte cap at cast time        |
+| `BINARY(n)`                                | `FIXEDSIZEBINARY(n)`                                 | `FixedSizeBinary(n)`                              |
+| `DATE`                                     | —                                                    | `Date32` (`DateDay` in Arrow JS)                  |
+| `TIMESTAMP`, `TIMESTAMP WITHOUT TIME ZONE` | —                                                    | `Timestamp(MICROSECOND)`                          |
+| `TIMESTAMP WITH TIME ZONE`                 | —                                                    | `Timestamp(MICROSECOND, "UTC")`                   |
+| —                                          | `GEOMETRY`                                           | `Binary` with the `geoarrow.wkb` extension        |
+| —                                          | `FLOAT16[n]`, `FLOAT32[n]`, `FLOAT64[n]`, `UINT8[n]` | `FixedSizeList` of the corresponding element type |
+
+CAST accepts columns, scalar literals, and nested expressions. Integer casts reject overflow and return bigint for 64-bit targets. `WHERE CAST(value AS INTEGER) >= :minimum` records ordered `casts` on the source property; executors must apply those conversions before testing the predicate. Binding, validation, copying and column discovery preserve this information. Arrow's predicate evaluator executes these casts.
+
+Unsupported targets/modifiers fail explicitly. This subset does not accept DECIMAL, date/time, or scalar length or precision modifiers other than binary widths. The portable predicate representation supports scalar casts on columns only. See [Arrow expression conversion rules](https://visgl.github.io/math.gl/next/docs/modules/expressions/arrow.md#sql-cast).
 
 Postfix `value::TYPE` and chained casts are also supported with the same conversion rules.
+
+`CAST(category AS UTF8)` returns plain Arrow UTF-8, like `VARCHAR`. `CAST(category AS DICTIONARY(UTF8, INT32))` requests dictionary-encoded UTF-8 with signed 32-bit indices. Dictionary entries are assigned in encounter order within each evaluated batch. Nulls remain null.
+
+`BINARY`, `VARBINARY`, and `BLOB` select Arrow `Binary`. `VARBINARY(n)` also selects `Binary` and rejects values larger than `n` bytes. `BINARY(n)` and `FIXEDSIZEBINARY(n)` select Arrow `FixedSizeBinary(n)`, zero-pad shorter values on the right, and reject longer values. Binary casts accept existing bytes or the UTF-8 bytes of text.
+
+`DATE` accepts ISO `YYYY-MM-DD` text. Timestamp casts accept a date and time separated by `T` or a space, with up to six fractional second digits. Zoned timestamps require `Z` or a signed `HH:MM` offset and are normalized to UTC. Timestamps without a time zone require offset-free text and preserve the wall-clock fields. Temporal casts preserve nulls and reject invalid calendar values and excess fractional digits. An input column of the matching Arrow temporal type can also be cast directly.
+
+`CAST(payload AS GEOMETRY)` labels a binary WKB value with the `geoarrow.wkb` extension. The cast treats the bytes as opaque and preserves existing WKB field metadata, including CRS when present.
 
 ## Packed floating-point arrays[​](#packed-floating-point-arrays "Direct link to Packed floating-point arrays")
 
