@@ -4,7 +4,18 @@
 
 import {expect, test} from 'vitest';
 import {HeightField, TerrainSampleStatus as Status} from '@math.gl/geospatial/terrain';
-import {TerrainSurface, createTerrainSurface} from '@math.gl/geospatial/terrain';
+import {
+  TerrainSurface,
+  createTerrainSurface,
+  sweepTerrainBox,
+  sweepTerrainPlane,
+  sweepTerrainPolytope,
+  sweepTerrainTriangleMesh,
+  sweepTerrainCapsule,
+  sweepTerrainCylinder,
+  sweepTerrainSphere,
+  sweepTerrainTaperedCapsule
+} from '@math.gl/geospatial/terrain';
 import {intersectRayTriangle, getClosestPointOnTriangle} from '@math.gl/geometry/culling';
 
 function plane(): TerrainSurface {
@@ -238,4 +249,151 @@ test('surface numeric failures are explicit and leave no successful sample paylo
   });
   expect(distant.sample(-1e308, 0).status).toBe(Status.NUMERIC_ERROR);
   expect(() => distant.nearest([-1e308, 0, 0])).toThrow('coordinate overflow');
+});
+
+test('bounded sphere sweep brackets first contact through a terrain sheet', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0),
+    indices: Uint32Array.of(0, 1, 2, 0, 2, 3)
+  });
+  const hit = sweepTerrainSphere(surface, [1, 1, 3], [1, 1, -3], 0.75);
+  expect(hit.status).toBe('hit');
+  if (hit.status !== 'hit') throw new Error('Expected impact');
+  expect(hit.lowerFraction).toBeLessThan(0.375);
+  expect(hit.fraction).toBeGreaterThanOrEqual(0.375);
+  expect(hit.fraction - hit.lowerFraction).toBeLessThanOrEqual(1e-6);
+  expect(hit.contact.normal[2]).toBe(1);
+  const grazing = sweepTerrainSphere(surface, [-1, -1, 0], [3, -1, 0], 1);
+  expect(grazing.status).toBe('hit');
+  if (grazing.status !== 'hit') throw new Error('Expected grazing impact');
+  expect(grazing.fraction).toBeCloseTo(0.25, 5);
+  expect(sweepTerrainSphere(surface, [1, 1, 0], [1, 1, 3], 1)).toMatchObject({
+    status: 'hit',
+    fraction: 0
+  });
+  expect(sweepTerrainSphere(surface, [3, 3, 3], [3, 3, -3], 0.5).status).toBe('miss');
+  expect(sweepTerrainSphere(surface, [1, 1, 3], [1, 1, -3], 1, {maxWork: 0})).toEqual({
+    status: 'incomplete',
+    work: 0
+  });
+});
+
+test('translation of a capsule detects contact along the axis interior', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0),
+    indices: Uint32Array.of(0, 1, 2, 0, 2, 3)
+  });
+  const a = [-2, 1, 3] as const;
+  const b = [4, 1, 3] as const;
+  const motion = [0, 0, -6] as const;
+  const hit = sweepTerrainCapsule(surface, a, b, motion, 0.75);
+  expect(hit.status).toBe('hit');
+  if (hit.status !== 'hit') throw new Error('Expected capsule impact');
+  expect(hit.lowerFraction).toBeLessThanOrEqual(0.375);
+  expect(hit.fraction).toBeGreaterThanOrEqual(0.375);
+  expect(hit.fraction - hit.lowerFraction).toBeLessThanOrEqual(1e-6);
+  expect(hit.contact.segmentFraction).toBeGreaterThan(0);
+  expect(hit.contact.segmentFraction).toBeLessThan(1);
+  expect(sweepTerrainCapsule(surface, a, b, [0, 0, 1], 0.75).status).toBe('miss');
+  expect(sweepTerrainCapsule(surface, a, b, motion, 0.75, {maxWork: 0}).status).toBe('incomplete');
+});
+
+test('terrain polytope sweeps find box and tetrahedron impact times', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 4, 0, 0, 0, 4, 0),
+    indices: Uint32Array.of(0, 1, 2)
+  });
+  const motion = [0, 0, -4] as const;
+  const box = sweepTerrainBox(surface, [1, 1, 2], [0.25, 0.25, 0.5], motion);
+  expect(box).toMatchObject({status: 'hit', fraction: 0.375, triangleIndex: 0});
+  expect(box.status === 'hit' && box.normal?.[2]).toBe(1);
+  expect(sweepTerrainBox(surface, [5, 5, 2], [0.25, 0.25, 0.5], motion).status).toBe('miss');
+  expect(sweepTerrainBox(surface, [1, 1, 2], [0.25, 0.25, 0.5], motion, {maxWork: 0})).toEqual({
+    status: 'incomplete',
+    work: 0
+  });
+  expect(
+    sweepTerrainPolytope(
+      surface,
+      {
+        vertices: [
+          [1, 1, 1],
+          [2, 1, 2],
+          [1, 2, 2],
+          [1, 1, 2]
+        ],
+        faces: [
+          [0, 1, 2],
+          [0, 3, 1],
+          [0, 2, 3],
+          [1, 3, 2]
+        ]
+      },
+      motion
+    )
+  ).toMatchObject({status: 'hit', fraction: 0.25, triangleIndex: 0});
+});
+
+test('polygon bounds bracket terrain impact for a conical frustum', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 4, 0, 0, 0, 4, 0),
+    indices: Uint32Array.of(0, 1, 2)
+  });
+  expect(sweepTerrainCylinder(surface, [1, 1, 2], 1, 0.25, 0.5, [0, 0, -4])).toMatchObject({
+    status: 'hit',
+    fraction: 0.375,
+    lowerFraction: 0.375,
+    normal: null
+  });
+  expect(sweepTerrainCylinder(surface, [5, 5, 2], 1, 0.25, 0.5, [0, 0, -4]).status).toBe('miss');
+});
+
+test('moving triangle meshes handle coplanar edge entry', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 2, 0, 0, 0, 2, 0),
+    indices: Uint32Array.of(0, 1, 2)
+  });
+  const mesh = {
+    vertices: [
+      [-2, 0, 0],
+      [-1, 0, 0],
+      [-2, 1, 0]
+    ],
+    faces: [[0, 1, 2]]
+  } as const;
+  expect(sweepTerrainTriangleMesh(surface, mesh, [2, 0, 0])).toMatchObject({
+    status: 'hit',
+    fraction: 0.5
+  });
+  expect(sweepTerrainTriangleMesh(surface, mesh, [0, 2, 0]).status).toBe('miss');
+});
+
+test('infinite plane sweep detects entry from either side', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 4, 0, 0, 0, 4, 0),
+    indices: Uint32Array.of(0, 1, 2)
+  });
+  expect(sweepTerrainPlane(surface, [0, 0, 2], [0, 0, 2], [0, 0, -4])).toMatchObject({
+    status: 'hit',
+    fraction: 0.5,
+    triangleIndex: 0,
+    normal: [0, 0, 1]
+  });
+  expect(sweepTerrainPlane(surface, [0, 0, -2], [0, 0, 1], [0, 0, 4])).toMatchObject({
+    status: 'hit',
+    fraction: 0.5
+  });
+  expect(sweepTerrainPlane(surface, [0, 0, 2], [0, 0, 1], [0, 0, 4]).status).toBe('miss');
+});
+
+test('tapered capsule impact lies between inner and outer capsule times', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 4, 0, 0, 0, 4, 0),
+    indices: Uint32Array.of(0, 1, 2)
+  });
+  const result = sweepTerrainTaperedCapsule(surface, [1, 1, 2], [2, 1, 2], [0, 0, -4], 0.25, 0.5);
+  expect(result.status).toBe('hit');
+  if (result.status !== 'hit') throw new Error('Expected tapered capsule witness');
+  expect(result.lowerFraction).toBeLessThanOrEqual(0.375);
+  expect(result.fraction).toBeGreaterThanOrEqual(0.375);
 });

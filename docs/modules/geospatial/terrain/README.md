@@ -1782,3 +1782,48 @@ Set `measureStages: true` on a residency edit request to include worker-local
 durations for applying edits, updating halos, and preparing the delta. The
 round trip minus worker process time includes transport, scheduling and task
 runtime work.
+
+### Continuous sphere contact
+
+`sweepTerrainSphere(surface, start, end, radius)` brackets the first contact
+of a translating sphere against the active terrain triangles. Coordinates and
+radius use the same local Cartesian units as the surface. A hit includes a
+contact witness and the lower and upper fractions of the impact interval.
+The witness's `segmentFraction` is relative to the tested motion prefix.
+An exhausted budget returns `incomplete`. A `miss` means the motion missed
+the supplied triangles, which may omit nodata or nonresident tiles.
+
+For CPU/GPU qualification of a packed height field, construct the CPU surface
+from `unpackTerrainHeightField` using triangle interpolation and the same
+diagonal and validity mask as the GPU collider. Use the same local origin and
+physical units when comparing time of impact and contact normals.
+
+`sweepTerrainCapsule(surface, axisStart, axisEnd, translation, radius)`
+moves a constant-radius capsule with a fixed axis. It uses the change in
+segment-to-terrain clearance to eliminate time intervals, and reports
+`incomplete` when the budget or tolerance leaves an interval unresolved.
+The hit includes the closest terrain and axis points at the witness time.
+`sweepTerrainTaperedCapsule` brackets the convex hull of two endpoint spheres
+using inner and outer capsules. Its bracket can be wider than the sweep
+tolerance because it also includes the difference between those bounds.
+
+`sweepTerrainBox` sweeps an axis-aligned box. `sweepTerrainPolytope` accepts
+a closed, triangulated convex boundary, including a preoriented box or convex
+hull in the same Cartesian frame. Both hold orientation fixed and test
+separating axes against active triangles. Work counts axis tests. A hit
+returns the first fraction, terrain triangle index, and entry normal when
+defined. Initial overlaps have no unique entry normal.
+
+`sweepTerrainCylinder` sweeps a fixed +Z cylinder or frustum with positive
+end radii. The inscribed and circumscribed polygonal bounds give an upper
+and lower impact fraction. More sides tighten the bounds at greater cost.
+An outer-only contact returns `incomplete`. The reported triangle is an
+inner witness, and the smooth contact normal is unavailable.
+
+For luma.gl, convert collider dimensions and axis conventions into the
+terrain frame before comparing results. For a moving mesh proxy, use a convex hull or sweep its indexed triangles.
+The terrain triangle sheet represents the static mesh collider.
+
+`sweepTerrainTriangleMesh` sweeps a two-sided indexed triangle sheet,
+including a finite plane represented by two triangles. It reports the
+first terrain triangle touched by any moving face. `sweepTerrainPlane` handles infinite two-sided planes directly.

@@ -212,4 +212,27 @@ export {
   type TerrainGeographicNeighbor
 } from './geographic-neighbor';
 
+export {
+  sweepTerrainSphere,
+  type TerrainSphereSweepOptions,
+  type TerrainSphereSweepResult
+} from './sweep-sphere';
+
+export {
+  sweepTerrainCapsule,
+  sweepTerrainTaperedCapsule,
+  type TerrainCapsuleSweepResult
+} from './sweep-capsule';
+
+export {
+  sweepTerrainBox,
+  sweepTerrainPolytope,
+  sweepTerrainTriangleMesh,
+  type TerrainPolytope,
+  type TerrainPolytopeSweepResult
+} from './sweep-polytope';
+
+export {sweepTerrainCylinder} from './sweep-cylinder';
+
+export {sweepTerrainPlane} from './sweep-plane';
 export {discoverGeographicTerrainLodSeams} from './geographic-lod-seams';
