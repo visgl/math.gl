@@ -176,17 +176,38 @@ loaders.gl parser implementation to this package is a separate migration.
 Arrow dependency. `SELECT CAST(value AS INTEGER) AS count` returns a selection with an `expression`
 AST and `as` alias. Existing plain-column selections retain their shapes.
 
-Numeric targets include `FLOAT16`, `FLOAT32`, `FLOAT64`, and the signed and unsigned widths
-`INT8`, `UINT8`, `INT16`, `UINT16`, `INT32`, `UINT32`, `INT64`, and `UINT64`.
-The SQL names SMALLINT, INTEGER/INT, BIGINT, REAL, DOUBLE PRECISION, BOOLEAN,
-VARCHAR, and CHARACTER VARYING are also supported. CAST accepts columns, scalar literals,
-and nested expressions. Integer casts reject overflow and return bigint for 64-bit targets.
+### SQL type card
+
+These are the cast targets supported by math.gl. The middle column lists Arrow-oriented
+spellings and dialect aliases accepted by the parser. A dash means there is no corresponding
+spelling supported in that column.
+
+| SQL standard type | SQL Arrow type | Arrow type |
+| --- | --- | --- |
+| — | `INT8` | `Int8` |
+| `SMALLINT` | `INT16` | `Int16` |
+| `INTEGER`, `INT` | `INT32` | `Int32` |
+| `BIGINT` | `INT64` | `Int64` |
+| — | `UINT8`, `UINT16`, `UINT32`, `UINT64` | `Uint8`, `Uint16`, `Uint32`, `Uint64` |
+| — | `FLOAT16` | `Float16` |
+| `REAL` | `FLOAT32` | `Float32` |
+| `DOUBLE PRECISION` | `FLOAT64` | `Float64` |
+| `BOOLEAN` | — | `Bool` |
+| `VARCHAR`, `CHARACTER VARYING` | `UTF8` | `Utf8` |
+| — | `DICTIONARY(UTF8, INT32)` | `Dictionary<Utf8, Int32>` |
+| `BLOB` | `BINARY`, `VARBINARY` | `Binary` |
+| — | `VARBINARY(n)` | `Binary` with an `n`-byte cap at cast time |
+| `BINARY(n)` | `FIXEDSIZEBINARY(n)` | `FixedSizeBinary(n)` |
+| — | `FLOAT16[n]`, `FLOAT32[n]`, `FLOAT64[n]`, `UINT8[n]` | `FixedSizeList` of the corresponding element type |
+
+CAST accepts columns, scalar literals, and nested expressions. Integer casts reject overflow
+and return bigint for 64-bit targets.
 `WHERE CAST(value AS INTEGER) >= :minimum` records ordered `casts` on the source property;
 executors must apply those conversions before testing the predicate. Binding, validation, copying
 and column discovery preserve this information. Arrow's predicate evaluator executes these casts.
 
 Unsupported targets/modifiers fail explicitly. This subset does not accept DECIMAL, date/time,
-or length/precision modifiers other than the binary widths below. The portable predicate
+or scalar length or precision modifiers other than binary widths. The portable predicate
 representation supports scalar casts on columns only. See [Arrow expression conversion rules](../arrow/README.md#sql-cast).
 
 Postfix `value::TYPE` and chained casts are also supported with the same conversion rules.
