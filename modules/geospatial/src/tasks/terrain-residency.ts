@@ -48,7 +48,7 @@ function sameHalo(a: ResidentHalo, b: ResidentHalo): boolean {
       const left = af[key];
       const right = bf[key];
       if (typeof left === 'object' && typeof right === 'object') return sameArray(left, right);
-      return Object.hasOwn(bf, key) && Object.is(left, right);
+      return Object.prototype.hasOwnProperty.call(bf, key) && Object.is(left, right);
     }) &&
     sameArray(a.statuses, b.statuses)
   );
@@ -79,7 +79,7 @@ export const TerrainResidencyTask = {
     context.throwIfAborted();
     const sources = new Map(state.snapshot?.sources.map(tile => [addressKey(tile), tile]));
     // Several edits to a tile in one batch share one private copy.
-    const writable = new Map<string, ReturnType<HeightField['copyData']>>();
+    const writable = new Map<string, ReturnType<InstanceType<typeof HeightField>['copyData']>>();
     for (const edit of input.edits) {
       if (edit.type === 'upsert') {
         const key = addressKey(edit.tile);
