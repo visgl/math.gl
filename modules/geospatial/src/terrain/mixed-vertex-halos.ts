@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {createTerrainBoxIndex} from './box-index';
 import {HeightField} from './height-field';
 import {sampleTerrainTriangleHeight} from './sample-triangle-height';
 import type {HeightFieldProps} from './types';
@@ -109,7 +110,22 @@ export function buildMixedVertexTileHalos(
     if (sources.length && !Number.isSafeInteger(max - min))
       throw new Error('Mixed halo lattice span overflow');
   }
+  if (targets && targets.size === 0) return {tiles: []};
+  const index =
+    sources.length > 8
+      ? createTerrainBoxIndex(
+          sources.map(tile => ({
+            minX: tile.column,
+            minY: tile.row,
+            maxX: tile.column + (tile.source.width - 1) * tile.spacing,
+            maxY: tile.row + (tile.source.height - 1) * tile.spacing
+          }))
+        )
+      : undefined;
   let tests = 0;
+  const charge = () => {
+    if (++tests > maxTests) throw new Error('Mixed halo tile-test budget exceeded');
+  };
   return {
     tiles: sources
       .filter(tile => !targets || targets.has(`${tile.spacing}/${tile.column}/${tile.row}`))
@@ -120,14 +136,24 @@ export function buildMixedVertexTileHalos(
         const heights = new Float64Array(width * height),
           validity = new Uint8Array(heights.length),
           statuses = new Uint8Array(heights.length);
+        const candidates =
+          index?.(
+            {
+              minX: tile.column - tile.spacing,
+              minY: tile.row - tile.spacing,
+              maxX: tile.column + source.width * tile.spacing,
+              maxY: tile.row + source.height * tile.spacing
+            },
+            charge
+          ).map(id => sources[id]) ?? sources;
         for (let y = 0; y < height; y++)
           for (let x = 0; x < width; x++) {
             const gx = tile.column + (x - 1) * tile.spacing,
               gy = tile.row + (y - 1) * tile.spacing;
             if (![gx, gy].every(Number.isSafeInteger))
               throw new Error('Mixed halo lattice overflow');
-            for (const candidate of sources) {
-              if (++tests > maxTests) throw new Error('Mixed halo tile-test budget exceeded');
+            for (const candidate of candidates) {
+              charge();
               const cx = (gx - candidate.column) / candidate.spacing,
                 cy = (gy - candidate.row) / candidate.spacing;
               const f = candidate.source;
