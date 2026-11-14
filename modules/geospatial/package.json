@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-beta.8",
+  "version": "5.0.0-beta.9",
   "keywords": [
     "webgl",
     "javascript",
@@ -1062,12 +1062,12 @@
   ],
   "dependencies": {
     "@mapbox/martini": "0.2.0",
-    "@math.gl/arrow": "5.0.0-beta.8",
-    "@math.gl/core": "5.0.0-beta.8",
-    "@math.gl/expressions": "5.0.0-beta.8",
-    "@math.gl/geometry": "5.0.0-beta.8",
-    "@math.gl/tasks": "5.0.0-beta.8",
-    "@math.gl/web-mercator": "5.0.0-beta.8",
+    "@math.gl/arrow": "5.0.0-beta.9",
+    "@math.gl/core": "5.0.0-beta.9",
+    "@math.gl/expressions": "5.0.0-beta.9",
+    "@math.gl/geometry": "5.0.0-beta.9",
+    "@math.gl/tasks": "5.0.0-beta.9",
+    "@math.gl/web-mercator": "5.0.0-beta.9",
     "cdt2d": "1.0.0",
     "polygon-clipping": "0.15.7"
   },

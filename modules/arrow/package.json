@@ -1,6 +1,6 @@
 {
   "name": "@math.gl/arrow",
-  "version": "5.0.0-beta.8",
+  "version": "5.0.0-beta.9",
   "description": "Arrow and GeoArrow binary data utilities",
   "license": "MIT",
   "type": "module",
@@ -50,9 +50,9 @@
     "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-beta.8",
-    "@math.gl/geometry": "5.0.0-beta.8",
-    "@math.gl/tasks": "5.0.0-beta.8"
+    "@math.gl/core": "5.0.0-beta.9",
+    "@math.gl/geometry": "5.0.0-beta.9",
+    "@math.gl/tasks": "5.0.0-beta.9"
   },
   "peerDependencies": {
     "apache-arrow": ">=17.0.0"

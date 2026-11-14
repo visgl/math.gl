@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v5.0.0-beta.9
+
+- feat(arrow): Add grouped aggregate accumulators, native Arrow SQL queries with relational operations, and worker-side query planning and retained tables (#514, #534, #535, #536).
+- fix(arrow): Preserve retained buffers during transfer (#530).
+- feat(expressions): Support explicit widths for SQL numeric casts (#529).
+- feat(terrain): Add nodata-aware adaptive meshes, preserve off-grid breaklines, qualify boundary fidelity and constrained coverage, and bound continuous vertical error (#516–#519, #521, #522, #527).
+- feat(terrain): Add geographic seam diagnostics and sparse LOD cuts. Qualify regional residency and edits on Pacific and Sierra data, narrow halo invalidation, and retain edited halos and prepared sources in workers (#520, #524, #528, #531–#533, #537).
+- examples: Upgrade to deck.gl 10, share math.gl source resolution, add a bathymetry globe with projection morphs and terrain refinement, and restore compact community panels (#515, #523, #526).
+
 ## v5.0.0-beta.8
 
 - Restore `@math.gl/expressions` as a standalone package for portable expressions, SQL parsing and evaluation, and optional Arrow execution (#511).
