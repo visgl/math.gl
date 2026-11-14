@@ -8,11 +8,13 @@ import {
   TerrainSurface,
   createTerrainSurface,
   sweepTerrainBox,
+  sweepTerrainPlane,
   sweepTerrainPolytope,
   sweepTerrainTriangleMesh,
   sweepTerrainCapsule,
   sweepTerrainCylinder,
-  sweepTerrainSphere
+  sweepTerrainSphere,
+  sweepTerrainTaperedCapsule
 } from '@math.gl/geospatial/terrain';
 import {intersectRayTriangle, getClosestPointOnTriangle} from '@math.gl/geometry/culling';
 
@@ -364,4 +366,34 @@ test('moving triangle meshes handle coplanar edge entry', () => {
     fraction: 0.5
   });
   expect(sweepTerrainTriangleMesh(surface, mesh, [0, 2, 0]).status).toBe('miss');
+});
+
+test('infinite plane sweep detects entry from either side', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 4, 0, 0, 0, 4, 0),
+    indices: Uint32Array.of(0, 1, 2)
+  });
+  expect(sweepTerrainPlane(surface, [0, 0, 2], [0, 0, 2], [0, 0, -4])).toMatchObject({
+    status: 'hit',
+    fraction: 0.5,
+    triangleIndex: 0,
+    normal: [0, 0, 1]
+  });
+  expect(sweepTerrainPlane(surface, [0, 0, -2], [0, 0, 1], [0, 0, 4])).toMatchObject({
+    status: 'hit',
+    fraction: 0.5
+  });
+  expect(sweepTerrainPlane(surface, [0, 0, 2], [0, 0, 1], [0, 0, 4]).status).toBe('miss');
+});
+
+test('tapered capsule impact lies between inner and outer capsule times', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 4, 0, 0, 0, 4, 0),
+    indices: Uint32Array.of(0, 1, 2)
+  });
+  const result = sweepTerrainTaperedCapsule(surface, [1, 1, 2], [2, 1, 2], [0, 0, -4], 0.25, 0.5);
+  expect(result.status).toBe('hit');
+  if (result.status !== 'hit') throw new Error('Expected tapered capsule witness');
+  expect(result.lowerFraction).toBeLessThanOrEqual(0.375);
+  expect(result.fraction).toBeGreaterThanOrEqual(0.375);
 });

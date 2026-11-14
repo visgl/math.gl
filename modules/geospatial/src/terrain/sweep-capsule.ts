@@ -102,3 +102,47 @@ export function sweepTerrainCapsule(
     ? {status: 'hit', work, lowerFraction: clearUntil, ...witness}
     : {status: 'miss', work};
 }
+
+/**
+ * Bracket the impact of the convex hull of two endpoint spheres with potentially
+ * different radii. Constant-radius inner and outer capsules bound the hull.
+ */
+export function sweepTerrainTaperedCapsule(
+  surface: Pick<TerrainSurface, 'nearestSegmentQuery'>,
+  start: Point,
+  end: Point,
+  translation: Point,
+  radiusStart: number,
+  radiusEnd: number,
+  {maxWork = 100_000, fractionTolerance}: TerrainSphereSweepOptions = {}
+): TerrainCapsuleSweepResult {
+  if (![radiusStart, radiusEnd].every(radius => Number.isFinite(radius) && radius >= 0))
+    throw new RangeError('Invalid terrain tapered capsule radii');
+  const outer = sweepTerrainCapsule(
+    surface,
+    start,
+    end,
+    translation,
+    Math.max(radiusStart, radiusEnd),
+    {
+      maxWork,
+      fractionTolerance
+    }
+  );
+  if (outer.status !== 'hit' || radiusStart === radiusEnd) return outer;
+  const inner = sweepTerrainCapsule(
+    surface,
+    start,
+    end,
+    translation,
+    Math.min(radiusStart, radiusEnd),
+    {
+      maxWork: maxWork - outer.work,
+      fractionTolerance
+    }
+  );
+  const work = outer.work + inner.work;
+  return inner.status === 'hit' && outer.lowerFraction <= inner.fraction
+    ? {...inner, lowerFraction: outer.lowerFraction, work}
+    : {status: 'incomplete', work};
+}

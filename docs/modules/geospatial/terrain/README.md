@@ -1794,6 +1794,9 @@ moves a constant-radius capsule with a fixed axis. It uses the change in
 segment-to-terrain clearance to eliminate time intervals, and reports
 `incomplete` when the budget or tolerance leaves an interval unresolved.
 The hit includes the closest terrain and axis points at the witness time.
+`sweepTerrainTaperedCapsule` brackets the convex hull of two endpoint spheres
+using inner and outer capsules. Its bracket can be wider than the sweep
+tolerance because it also includes the difference between those bounds.
 
 `sweepTerrainBox` sweeps an axis-aligned box. `sweepTerrainPolytope` accepts
 a closed, triangulated convex boundary, including a preoriented box or convex
@@ -1809,11 +1812,9 @@ An outer-only contact returns `incomplete`. The reported triangle is an
 inner witness, and the smooth contact normal is unavailable.
 
 For luma.gl, convert collider dimensions and axis conventions into the
-terrain frame before comparing results. Use convex hulls for moving mesh
-proxies. The terrain triangle sheet itself represents the static mesh
-collider.
+terrain frame before comparing results. For a moving mesh proxy, use a convex hull or sweep its indexed triangles.
+The terrain triangle sheet represents the static mesh collider.
 
 `sweepTerrainTriangleMesh` sweeps a two-sided indexed triangle sheet,
 including a finite plane represented by two triangles. It reports the
-first terrain triangle touched by any moving face. Infinite planes are
-outside the finite-motion mesh interface.
+first terrain triangle touched by any moving face. `sweepTerrainPlane` handles infinite two-sided planes directly.
