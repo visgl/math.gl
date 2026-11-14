@@ -924,6 +924,8 @@ In Mesh generation, choose **Source triangles** or **Bilinear cells** under **Co
 
 ### Geographic seam diagnostics and sparse LOD cuts[​](#geographic-seam-diagnostics-and-sparse-lod-cuts "Direct link to Geographic seam diagnostics and sparse LOD cuts")
 
+`getGeographicTerrainNeighbor(tile, edge)` identifies the same-level seam in the equal-angle geographic tile grid. The tile on the east or south side owns the shared edge. At the antimeridian, the westernmost tile owns the seam and the result identifies the longitude wrap. Polar edges return `null`. For the level-zero world tile, the wrapped seam joins its west and east edges. This topology helper works with tile addresses and does not require resident height data.
+
 `measureGeographicTerrainSeam` compares paired one-sided stencils in their shared east/north frame. Longitude aliases are mapped explicitly into each tile's unwrapped interval. A full-world interval gives precedence to the west endpoint. Exact poles are outside the derivative domain. Pass a null tile to represent eviction. Height and gradient statuses remain separate, and the reported normal angle measures the discontinuity between the two stencils.
 
 `selectTerrainLod` takes resident tile trees with Cartesian bounds and geometric errors, plus camera position, vertical field of view and viewport height. It uses distance to the tile bounds to estimate projected error in pixels and accepts the previous refined set for hysteresis. Callers supply complete child partitions. A parent stays selected until all immediate children are resident. Unavailable roots are reported explicitly.
