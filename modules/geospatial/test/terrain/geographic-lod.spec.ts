@@ -4,6 +4,7 @@
 import {expect, test} from 'vitest';
 import {
   createTerrainMesh,
+  discoverGeographicTerrainLodSeams,
   GeographicHeightField,
   getGeographicTerrainNeighbor,
   HeightField,
@@ -147,4 +148,64 @@ test('same-level terrain seams agree from both sides, including wrapped aliases'
   );
   expect(() => getGeographicTerrainNeighbor({x: 4, y: 0, level}, 'east')).toThrow(RangeError);
   expect(() => getGeographicTerrainNeighbor(world, 'invalid' as 'west')).toThrow(RangeError);
+});
+
+test('resident geographic cut discovers fine edge spans and stitches a wrapped coarse edge', () => {
+  const cut = [
+    {x: 0, y: 0, level: 1},
+    {x: 3, y: 0, level: 2},
+    {x: 3, y: 1, level: 2}
+  ];
+  const seams = discoverGeographicTerrainLodSeams(cut);
+  expect(seams).toEqual([
+    {
+      a: 0,
+      edgeA: 'minColumn',
+      b: 1,
+      edgeB: 'maxColumn',
+      offsetBX: -360,
+      options: {rangeA: [0, 0.5]}
+    },
+    {
+      a: 0,
+      edgeA: 'minColumn',
+      b: 2,
+      edgeB: 'maxColumn',
+      offsetBX: -360,
+      options: {rangeA: [0.5, 1]}
+    }
+  ]);
+  const make = (x: number, y: number, dx: number, dy: number) =>
+    createTerrainMesh(
+      new HeightField({
+        width: 3,
+        height: 3,
+        heights: new Float64Array(9),
+        origin: [x, y],
+        columnStep: [dx, 0],
+        rowStep: [0, dy]
+      })
+    );
+  const meshes = [make(-180, 90, 90, -45), make(90, 90, 45, -22.5), make(90, 45, 45, -22.5)];
+  const stitched = stitchTerrainLodCut(meshes, seams);
+  expect(stitched.map(mesh => mesh.indices.length / 3)).toEqual([10, 8, 8]);
+  expect(meshes[0].indices.length / 3).toBe(8);
+  for (const mesh of stitched.slice(1)) {
+    const longitudes = Array.from(mesh.positions)
+      .filter((_, i) => i % 3 === 0)
+      .map(x => x + mesh.origin[0]);
+    expect(Math.min(...longitudes)).toBe(90);
+    expect(Math.max(...longitudes)).toBe(180);
+  }
+});
+
+test('resident geographic cut reports partial horizontal coverage and rejects overlap', () => {
+  const coarse = {x: 0, y: 0, level: 1};
+  const fine = {x: 1, y: 4, level: 3};
+  expect(discoverGeographicTerrainLodSeams([fine, coarse])).toEqual([
+    {a: 1, edgeA: 'maxRow', b: 0, edgeB: 'minRow', options: {rangeA: [0.25, 0.5]}}
+  ]);
+  expect(discoverGeographicTerrainLodSeams([coarse, {x: 2, y: 2, level: 2}])).toEqual([]);
+  expect(() => discoverGeographicTerrainLodSeams([coarse, coarse])).toThrow(/Duplicate/);
+  expect(() => discoverGeographicTerrainLodSeams([coarse, {...fine, y: 0}])).toThrow(/Overlapping/);
 });
