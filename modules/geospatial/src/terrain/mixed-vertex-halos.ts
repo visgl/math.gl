@@ -35,11 +35,18 @@ export function createTerrainMixedVertexTileHalos(
   return buildMixedVertexTileHalos(tiles, options);
 }
 
+/** Internal preparation shared only by immutable incremental snapshots. */
+export type MixedHaloPreparation = {
+  fields: WeakMap<TerrainMixedVertexTile, HeightField>;
+  layout?: {keys: string[]; query: ReturnType<typeof createTerrainBoxIndex>};
+};
+
 /** Internal selective builder; all source metadata and total capacity are validated. */
 export function buildMixedVertexTileHalos(
   tiles: readonly TerrainMixedVertexTile[],
   options: {maxSamples?: number; maxTileTests?: number} = {},
-  targets?: ReadonlySet<string>
+  targets?: ReadonlySet<string>,
+  preparation?: MixedHaloPreparation
 ): ReturnType<typeof createTerrainMixedVertexTileHalos> {
   const maxSamples = options.maxSamples ?? 4_000_000,
     maxTests = options.maxTileTests ?? 10_000_000;
@@ -65,7 +72,11 @@ export function buildMixedVertexTileHalos(
       count += (tile.field.width + 2) * (tile.field.height + 2);
       if (!Number.isSafeInteger(count) || count > maxSamples)
         throw new Error('Mixed halo sample capacity exceeded');
-      const field = new HeightField(tile.field);
+      let field = preparation?.fields.get(tile);
+      if (!field) {
+        field = new HeightField(tile.field);
+        preparation?.fields.set(tile, field);
+      }
       if (field.registration !== 'vertex')
         throw new Error('Mixed halos require vertex registration');
       const column = field.columnStep.map(v => v / tile.spacing);
@@ -111,17 +122,34 @@ export function buildMixedVertexTileHalos(
       throw new Error('Mixed halo lattice span overflow');
   }
   if (targets && targets.size === 0) return {tiles: []};
-  const index =
-    sources.length > 8
-      ? createTerrainBoxIndex(
-          sources.map(tile => ({
-            minX: tile.column,
-            minY: tile.row,
-            maxX: tile.column + (tile.source.width - 1) * tile.spacing,
-            maxY: tile.row + (tile.source.height - 1) * tile.spacing
-          }))
-        )
-      : undefined;
+  let index: ReturnType<typeof createTerrainBoxIndex> | undefined;
+  if (sources.length > 8) {
+    const keys =
+      preparation &&
+      sources.map(
+        tile =>
+          `${tile.spacing}/${tile.column}/${tile.row}/${tile.source.width}/${tile.source.height}`
+      );
+    const cached = preparation?.layout;
+    if (
+      keys &&
+      cached &&
+      keys.length === cached.keys.length &&
+      keys.every((key, i) => key === cached.keys[i])
+    ) {
+      index = cached.query;
+    } else {
+      index = createTerrainBoxIndex(
+        sources.map(tile => ({
+          minX: tile.column,
+          minY: tile.row,
+          maxX: tile.column + (tile.source.width - 1) * tile.spacing,
+          maxY: tile.row + (tile.source.height - 1) * tile.spacing
+        }))
+      );
+      if (preparation && keys) preparation.layout = {keys, query: index};
+    }
+  }
   let tests = 0;
   const charge = () => {
     if (++tests > maxTests) throw new Error('Mixed halo tile-test budget exceeded');

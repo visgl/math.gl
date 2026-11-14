@@ -23,7 +23,7 @@ const moved = {
   timezone: ['earth', 'timezone']
 };
 
-export async function bundleRuntime(root, entry, outfile, baselineCommit) {
+export async function bundleRuntime(root, entry, outfile, baselineCommit, platform = 'browser') {
   const cache = new Map();
   // Reject Git tree objects: an extensionless import may name both a source
   // file and a directory. A tree listing is not loadable module source.
@@ -99,7 +99,7 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit) {
   }
   return build({
     entryPoints: [join(root, entry)], outfile, bundle: true, metafile: true,
-    format: 'esm', platform: 'browser', target: 'es2020', tsconfigRaw: {},
+    format: 'esm', platform, target: 'es2020', tsconfigRaw: {},
     plugins: [{
       name: 'historical-runtime-sources',
       setup(builder) {
