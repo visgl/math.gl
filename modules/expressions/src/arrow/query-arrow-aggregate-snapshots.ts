@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Schema, Table, vectorFromArray, type RecordBatch} from 'apache-arrow';
+import {DataType, Schema, Table, vectorFromArray, type RecordBatch} from 'apache-arrow';
 import {compileArrowAggregates, type ArrowAggregate} from './aggregates';
 import {queryArrowTableInBatches, type ArrowBatchQuery} from './query-arrow-table';
 import {getArrowAggregateFields} from './relational-query';
@@ -54,8 +54,12 @@ export async function* queryArrowAggregateSnapshots(
     : undefined;
   const scalar = grouped ? undefined : plan.createAccumulator();
   const aggregateFields = getArrowAggregateFields(aggregates, compileOptions);
+  const outputGroupField =
+    groupField && DataType.isDictionary(groupField.type)
+      ? groupField.clone({type: groupField.type.dictionary})
+      : groupField;
   const schema = new Schema(
-    groupField ? [groupField, ...aggregateFields] : aggregateFields,
+    outputGroupField ? [outputGroupField, ...aggregateFields] : aggregateFields,
     inputSchema.metadata
   );
   let rowsProcessed = 0;
@@ -74,8 +78,11 @@ export async function* queryArrowAggregateSnapshots(
         )
       ])
     );
-    if (groupField && groups) {
-      columns.set(groupField.name, vectorFromArray([...groups.keys()], groupField.type));
+    if (outputGroupField && groups) {
+      columns.set(
+        outputGroupField.name,
+        vectorFromArray([...groups.keys()], outputGroupField.type)
+      );
     }
     return {
       table: new Table(

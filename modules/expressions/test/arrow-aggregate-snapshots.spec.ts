@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Int32, Table, Utf8, vectorFromArray} from 'apache-arrow';
+import {Dictionary, Int8, Int32, Table, Utf8, vectorFromArray} from 'apache-arrow';
 import {expect, test} from 'vitest';
 import {queryArrowAggregateSnapshots} from '@math.gl/expressions/arrow';
 
@@ -43,4 +43,21 @@ test('an empty input emits a typed final scalar snapshot', async () => {
   expect(result?.rowsProcessed).toBe(0);
   expect(result?.table.getChild('count')?.get(0)).toBe(0n);
   expect(result?.table.getChild('sum')?.get(0)).toBeNull();
+});
+
+test('dictionary group keys can outgrow a source batch index width', async () => {
+  const type = new Dictionary(new Utf8(), new Int8());
+  const first = Array.from({length: 100}, (_, index) => String(index));
+  const second = Array.from({length: 100}, (_, index) => String(index + 100));
+  const source = new Table({key: vectorFromArray(first, type)});
+  const other = new Table({key: vectorFromArray(second, type)});
+  const results = await Array.fromAsync(
+    queryArrowAggregateSnapshots([...source.batches, ...other.batches], source.schema, {
+      groupBy: 'key',
+      aggregates: {count: {operation: 'COUNT'}}
+    })
+  );
+  const keys = results.at(-1)!.table.getChild('key')!;
+  expect(keys.type).toBeInstanceOf(Utf8);
+  expect(Array.from(keys)).toEqual([...first, ...second]);
 });
