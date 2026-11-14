@@ -2,7 +2,16 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Data, DataType, RecordBatch, Schema, Struct, Table, type Field} from 'apache-arrow';
+import {
+  Data,
+  DataType,
+  makeData,
+  type RecordBatch,
+  Schema,
+  Struct,
+  Table,
+  type Field
+} from 'apache-arrow';
 import {
   getRecordBatchMetadata,
   createRecordBatchWithMetadata,
@@ -235,8 +244,8 @@ function compileArrowQuery(inputSchema: Schema, query: ArrowBatchQuery) {
     }
     if (!selected?.numRows) {
       if (emitEmpty) {
-        const empty = new RecordBatch(schema, undefined);
-        yield createRecordBatchWithMetadata(schema, empty.data, metadata);
+        const children = schema.fields.map(field => makeData({type: field.type, nullCount: 0}));
+        yield makeQueryBatch(schema, children, 0, metadata);
       }
       return;
     }
