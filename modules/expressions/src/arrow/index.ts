@@ -39,3 +39,9 @@ export {
 } from './query-arrow-table';
 export type {ArrowQueryJoin, ArrowQueryOrder} from './relational-query';
 export {queryArrowSQL} from './query-arrow-sql';
+
+export {
+  queryArrowAggregateSnapshots,
+  type ArrowAggregateSnapshot,
+  type ArrowAggregateSnapshotOptions
+} from './query-arrow-aggregate-snapshots';
