@@ -15,6 +15,8 @@ const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
   {symbol: 'sweepTerrainSphere', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /terrain\/surface\./, /triangle-bvh/, /mesh-stitch/], budget: 3300},
+  {symbol: 'sweepTerrainCapsule', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/height-field\./, /terrain\/surface\./, /triangle-bvh/, /mesh-stitch/], budget: 3900},
   {symbol: 'certifyTerrainMeshCoverage', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /mesh-data\./, /continuous-mesh-error/, /cdt2d/, /martini/, /delatin/], budget: 6500},
   {symbol: 'updateTerrainValidDomainMeshRegions', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],

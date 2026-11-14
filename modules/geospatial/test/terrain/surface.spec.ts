@@ -7,6 +7,7 @@ import {HeightField, TerrainSampleStatus as Status} from '@math.gl/geospatial/te
 import {
   TerrainSurface,
   createTerrainSurface,
+  sweepTerrainCapsule,
   sweepTerrainSphere
 } from '@math.gl/geospatial/terrain';
 import {intersectRayTriangle, getClosestPointOnTriangle} from '@math.gl/geometry/culling';
@@ -269,4 +270,24 @@ test('bounded sphere sweep brackets first contact through a terrain sheet', () =
     status: 'incomplete',
     work: 0
   });
+});
+
+test('translation of a capsule detects contact along the axis interior', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0),
+    indices: Uint32Array.of(0, 1, 2, 0, 2, 3)
+  });
+  const a = [-2, 1, 3] as const;
+  const b = [4, 1, 3] as const;
+  const motion = [0, 0, -6] as const;
+  const hit = sweepTerrainCapsule(surface, a, b, motion, 0.75);
+  expect(hit.status).toBe('hit');
+  if (hit.status !== 'hit') throw new Error('Expected capsule impact');
+  expect(hit.lowerFraction).toBeLessThanOrEqual(0.375);
+  expect(hit.fraction).toBeGreaterThanOrEqual(0.375);
+  expect(hit.fraction - hit.lowerFraction).toBeLessThanOrEqual(1e-6);
+  expect(hit.contact.segmentFraction).toBeGreaterThan(0);
+  expect(hit.contact.segmentFraction).toBeLessThan(1);
+  expect(sweepTerrainCapsule(surface, a, b, [0, 0, 1], 0.75).status).toBe('miss');
+  expect(sweepTerrainCapsule(surface, a, b, motion, 0.75, {maxWork: 0}).status).toBe('incomplete');
 });

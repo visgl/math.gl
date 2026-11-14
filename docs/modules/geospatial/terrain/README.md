@@ -1788,3 +1788,9 @@ For CPU/GPU qualification of a packed height field, construct the CPU surface
 from `unpackTerrainHeightField` using triangle interpolation and the same
 diagonal and validity mask as the GPU collider. Use the same local origin and
 physical units when comparing time of impact and contact normals.
+
+`sweepTerrainCapsule(surface, axisStart, axisEnd, translation, radius)`
+moves a constant-radius capsule with a fixed axis. It uses the change in
+segment-to-terrain clearance to eliminate time intervals, and reports
+`incomplete` when the budget or tolerance leaves an interval unresolved.
+The hit includes the closest terrain and axis points at the witness time.

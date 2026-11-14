@@ -217,3 +217,5 @@ export {
   type TerrainSphereSweepOptions,
   type TerrainSphereSweepResult
 } from './sweep-sphere';
+
+export {sweepTerrainCapsule, type TerrainCapsuleSweepResult} from './sweep-capsule';
