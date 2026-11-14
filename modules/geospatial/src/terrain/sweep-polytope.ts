@@ -60,7 +60,69 @@ export function sweepTerrainPolytope(
     normals.push(normal);
     directions.push(...side);
   }
+  return sweepTriangles(surface.copyData(), vertices, normals, directions, translation, maxWork);
+}
+
+/** Sweep a two-sided triangle mesh under translation. A finite plane can be
+ * represented by two coplanar triangles. Work is shared across moving faces. */
+export function sweepTerrainTriangleMesh(
+  surface: Pick<TerrainSurface, 'copyData' | 'origin'>,
+  collider: TerrainPolytope,
+  translation: Point,
+  {maxWork = 100_000}: {maxWork?: number} = {}
+): TerrainPolytopeSweepResult {
+  if (
+    !Number.isSafeInteger(maxWork) ||
+    maxWork < 0 ||
+    translation.length !== 3 ||
+    !translation.every(Number.isFinite)
+  )
+    throw new RangeError('Invalid terrain triangle mesh sweep');
   const data = surface.copyData();
+  let work = 0;
+  let best: Extract<TerrainPolytopeSweepResult, {status: 'hit'}> | undefined;
+  for (const face of collider.faces) {
+    if (face.length !== 3) throw new RangeError('Invalid terrain sweep mesh face');
+    const vertices = face.map(index => {
+      const point = collider.vertices[index];
+      if (
+        !Number.isSafeInteger(index) ||
+        !point ||
+        point.length !== 3 ||
+        !point.every(Number.isFinite)
+      )
+        throw new RangeError('Invalid terrain sweep mesh vertex');
+      return sub(point, surface.origin);
+    });
+    const directions = edges(vertices as unknown as Triangle);
+    const normal = cross(directions[0], directions[1]);
+    if (!normal.every(Number.isFinite) || !normal.some(Boolean))
+      throw new RangeError('Degenerate terrain sweep mesh face');
+    const result = sweepTriangles(
+      data,
+      vertices,
+      [normal],
+      directions,
+      translation,
+      maxWork - work,
+      normal
+    );
+    work += result.work;
+    if (result.status === 'incomplete') return {status: 'incomplete', work};
+    if (result.status === 'hit' && (!best || result.fraction < best.fraction)) best = result;
+  }
+  return best ? {...best, work} : {status: 'miss', work};
+}
+
+function sweepTriangles(
+  data: ReturnType<TerrainSurface['copyData']>,
+  vertices: readonly Point[],
+  normals: readonly Point[],
+  directions: readonly Point[],
+  translation: Point,
+  maxWork: number,
+  movingTriangleNormal?: Point
+): TerrainPolytopeSweepResult {
   let work = 0;
   let best: Extract<TerrainPolytopeSweepResult, {status: 'hit'}> | undefined;
   const vertex = (index: number): Point => {
@@ -75,7 +137,12 @@ export function sweepTerrainPolytope(
     let exit = best?.fraction ?? 1;
     let normal: Point | null = null;
     function* axes() {
-      yield cross(sides[0], sides[1]);
+      const terrainNormal = cross(sides[0], sides[1]);
+      yield terrainNormal;
+      if (movingTriangleNormal) {
+        for (const side of sides) yield cross(terrainNormal, side);
+        for (const direction of directions) yield cross(movingTriangleNormal, direction);
+      }
       yield* normals;
       for (const side of sides) for (const direction of directions) yield cross(side, direction);
     }

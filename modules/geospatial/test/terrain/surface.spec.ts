@@ -9,6 +9,7 @@ import {
   createTerrainSurface,
   sweepTerrainBox,
   sweepTerrainPolytope,
+  sweepTerrainTriangleMesh,
   sweepTerrainCapsule,
   sweepTerrainCylinder,
   sweepTerrainSphere
@@ -343,4 +344,24 @@ test('polygon bounds bracket terrain impact for a conical frustum', () => {
     normal: null
   });
   expect(sweepTerrainCylinder(surface, [5, 5, 2], 1, 0.25, 0.5, [0, 0, -4]).status).toBe('miss');
+});
+
+test('moving triangle meshes handle coplanar edge entry', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 2, 0, 0, 0, 2, 0),
+    indices: Uint32Array.of(0, 1, 2)
+  });
+  const mesh = {
+    vertices: [
+      [-2, 0, 0],
+      [-1, 0, 0],
+      [-2, 1, 0]
+    ],
+    faces: [[0, 1, 2]]
+  } as const;
+  expect(sweepTerrainTriangleMesh(surface, mesh, [2, 0, 0])).toMatchObject({
+    status: 'hit',
+    fraction: 0.5
+  });
+  expect(sweepTerrainTriangleMesh(surface, mesh, [0, 2, 0]).status).toBe('miss');
 });

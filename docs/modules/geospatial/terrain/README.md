@@ -1812,3 +1812,8 @@ For luma.gl, convert collider dimensions and axis conventions into the
 terrain frame before comparing results. Use convex hulls for moving mesh
 proxies. The terrain triangle sheet itself represents the static mesh
 collider.
+
+`sweepTerrainTriangleMesh` sweeps a two-sided indexed triangle sheet,
+including a finite plane represented by two triangles. It reports the
+first terrain triangle touched by any moving face. Infinite planes are
+outside the finite-motion mesh interface.

@@ -223,6 +223,7 @@ export {sweepTerrainCapsule, type TerrainCapsuleSweepResult} from './sweep-capsu
 export {
   sweepTerrainBox,
   sweepTerrainPolytope,
+  sweepTerrainTriangleMesh,
   type TerrainPolytope,
   type TerrainPolytopeSweepResult
 } from './sweep-polytope';
