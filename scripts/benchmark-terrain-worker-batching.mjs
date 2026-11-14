@@ -110,8 +110,10 @@ async function replay(
     while (end < limit && events[end].arrivalMs <= deadline) end++;
     // A full batch or the end of the stream can dispatch immediately.
     const readyMs = end === limit ? events[end - 1].arrivalMs : deadline;
-    while (performance.now() - start < readyMs) {
-      await delay(readyMs - (performance.now() - start));
+    let remainingMs = readyMs - (performance.now() - start);
+    while (remainingMs > 0) {
+      await delay(remainingMs);
+      remainingMs = readyMs - (performance.now() - start);
     }
     const batch = events.slice(cursor, end);
     const sentMs = performance.now() - start;
