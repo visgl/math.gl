@@ -155,3 +155,32 @@ test('Arrow IPC accepts envelopes, typed arrays, and ArrayBuffers', () => {
     expect(hydrated.schema.metadata).toEqual(table.schema.metadata);
   }
 });
+
+test('selective transfer protects retained slices and dictionaries and moves fresh buffers', () => {
+  const retained = createTransportTable();
+  const dictionary = retained.getChild('category')!;
+  const fresh = new Float64Array([10, 20]);
+  const result = new arrow.Table({category: dictionary.slice(1), fresh: arrow.makeVector(fresh)});
+  const payload = dehydrateArrowTable(result, {copy: 'none', retain: [retained]});
+  const {children} = payload.batches[0]!;
+  const indexes = children[0]!.buffers[arrow.BufferType.DATA]!;
+  const dictionaryBuffers = children[0]!.dictionary![0]!.buffers;
+  expect(indexes.buffer).not.toBe(dictionary.data[0]!.values.buffer);
+  expect(children[1]!.buffers[arrow.BufferType.DATA]).toBe(fresh);
+
+  const transfer = new Set([
+    payload.schema.buffer,
+    indexes.buffer,
+    fresh.buffer,
+    ...Object.values(dictionaryBuffers)
+      .filter(Boolean)
+      .map(view => view!.buffer)
+  ]);
+  const hydrated = hydrateArrowTable(
+    structuredClone(payload, {transfer: [...transfer] as ArrayBuffer[]})
+  );
+  expect(fresh.byteLength).toBe(0);
+  expect(Array.from(hydrated.getChild('fresh')!)).toEqual([10, 20]);
+  expect(Array.from(hydrated.getChild('category')!)).toEqual(['second', 'first']);
+  expect(Array.from(dictionary)).toEqual(['first', 'second', 'first']);
+});

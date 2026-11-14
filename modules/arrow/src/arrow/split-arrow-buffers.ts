@@ -36,12 +36,16 @@ export type SplitArrowBuffersOptions = {
    * - 'all': copy every Arrow internal typed array.
    */
   copy?: 'none' | 'sliced' | 'all';
+  /** Also copy views whose backing buffer is used by any of these retained Arrow objects. */
+  retain?: readonly SplitArrowBuffersInput[];
 };
 
 /** Copy ownership is scoped to one outgoing Arrow object. */
 type SplitArrowBuffersContext = SplitArrowBuffersOptions & {
   /** Reuses a copy when multiple columns or dictionaries reference the same typed-array view. */
   copies: WeakMap<object, ArrowTypedArray>;
+  /** Buffer identity catches aliases even when views cover disjoint byte ranges. */
+  retainedBuffers: Set<ArrayBufferLike>;
 };
 
 /**
@@ -71,7 +75,17 @@ export function splitArrowBuffers<T extends SplitArrowBuffersInput>(
   input: T,
   options: SplitArrowBuffersOptions = {}
 ): T {
-  const context: SplitArrowBuffersContext = {...options, copies: new WeakMap()};
+  const retainedBuffers = new Set<ArrayBufferLike>();
+  const visited = new Set<arrow.Data>();
+  for (const retained of options.retain ?? []) {
+    const chunks = isArrowTable(retained)
+      ? retained.batches.map(batch => batch.data)
+      : isArrowVector(retained)
+        ? retained.data
+        : [isArrowRecordBatch(retained) ? retained.data : retained];
+    for (const data of chunks) collectArrowBuffers(data, retainedBuffers, visited);
+  }
+  const context: SplitArrowBuffersContext = {...options, copies: new WeakMap(), retainedBuffers};
   if (isArrowTable(input)) {
     return splitArrowTableBuffersInternal(input, context) as T;
   }
@@ -208,6 +222,21 @@ function splitArrowVectorBuffers<T extends arrow.DataType>(
   return new arrow.Vector(vector.data.map(data => splitArrowDataBuffers(data, options)));
 }
 
+/** Collects backing buffers from nested children, dictionaries, and view types. */
+function collectArrowBuffers(
+  data: arrow.Data,
+  buffers: Set<ArrayBufferLike>,
+  visited: Set<arrow.Data>
+): void {
+  if (visited.has(data)) return;
+  visited.add(data);
+  for (const view of [...data.buffers, ...getArrowVariadicBuffers(data)]) {
+    if (isArrowTypedArray(view)) buffers.add(view.buffer);
+  }
+  for (const child of data.children) collectArrowBuffers(child, buffers, visited);
+  for (const chunk of data.dictionary?.data ?? []) collectArrowBuffers(chunk, buffers, visited);
+}
+
 /**
  * Copies a typed-array view when requested or when it does not span its full backing buffer.
  * @param array Typed array from an Arrow buffer slot.
@@ -219,14 +248,11 @@ function splitArrowBuffer<T>(array: T, options: SplitArrowBuffersContext): T {
     return array;
   }
 
-  if (options.copy === 'none') {
-    return array;
-  }
-
+  const sliced = array.byteOffset !== 0 || array.byteLength !== array.buffer.byteLength;
   if (
+    !options.retainedBuffers.has(array.buffer) &&
     options.copy !== 'all' &&
-    array.byteOffset === 0 &&
-    array.byteLength === array.buffer.byteLength
+    (options.copy === 'none' || !sliced)
   ) {
     return array;
   }
