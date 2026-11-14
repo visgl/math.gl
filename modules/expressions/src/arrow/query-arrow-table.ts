@@ -11,11 +11,30 @@ import type {
 import type {TableQuery} from '../sql/query-types';
 import {compileArrowArray, compileArrowExpression} from './compiler';
 import {compileArrowPredicate} from './predicate';
+import type {ArrowAggregate} from './aggregates';
+import {
+  groupArrowTable,
+  joinArrowTables,
+  orderArrowTable,
+  unionArrowTables,
+  type ArrowQueryJoin,
+  type ArrowQueryOrder
+} from './relational-query';
 import type {ArrowExpressionOptions, CompiledArrowExpression} from './types';
 
 /** An in-memory SELECT and its execution options. The caller supplies the table named by FROM. */
 export type ArrowTableQuery = TableQuery<ParameterizedColumnarPredicate> &
   Omit<ArrowExpressionOptions, 'inputSchema'> & {
+    /** Append schema-compatible tables before filtering. */
+    union?: readonly Table[];
+    /** Join a second table before filtering. */
+    join?: ArrowQueryJoin;
+    /** Scalar source columns that define groups. */
+    groupBy?: readonly string[];
+    /** Aggregate reductions indexed by output name. */
+    aggregates?: Readonly<Record<string, ArrowAggregate>>;
+    /** Stable ordering applied after grouping and before pagination. */
+    orderBy?: readonly ArrowQueryOrder[];
     /** Named values for a parameterized predicate. */
     parameters?: ColumnarPredicateParameterValues;
     /** Checked between batches and during expression evaluation. */
@@ -32,6 +51,26 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
   if (!Number.isSafeInteger(offset) || offset < 0) throw new Error('Invalid Arrow query offset');
   if (limit !== undefined && (!Number.isSafeInteger(limit) || limit < 0))
     throw new Error('Invalid Arrow query limit');
+
+  const {union, join, groupBy, aggregates, orderBy} = query;
+  if (union?.length) source = unionArrowTables(source, union);
+  if (join) source = joinArrowTables(source, join, signal);
+
+  if (groupBy?.length || Object.keys(aggregates ?? {}).length || orderBy?.length) {
+    source = queryArrowTable(source, {where, functions, parameters, signal});
+    if (groupBy?.length || Object.keys(aggregates ?? {}).length) {
+      source = groupArrowTable(source, groupBy ?? [], aggregates ?? {}, {
+        inputSchema: source.schema,
+        functions,
+        signal
+      });
+    }
+    if (orderBy?.length) {
+      source = orderArrowTable(source, orderBy, offset, limit, signal);
+      return queryArrowTable(source, {select, functions, signal});
+    }
+    return queryArrowTable(source, {select, offset, limit, functions, signal});
+  }
 
   const inputSchema = source.schema;
   const options = {inputSchema, functions};
