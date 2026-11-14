@@ -21,6 +21,8 @@ const probes = [
   {symbol: 'splitTerrainBreaklines', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/cdt2d/, /breakline-mesh/, /valid-domain-mesh/, /height-field\./], budget: 5000},
 
+  {symbol: 'getGeographicTerrainNeighbor', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/height-field\./, /geographic-seam\./, /lod-select/, /mesh-stitch/], budget: 2500},
   {symbol: 'measureGeographicTerrainSeam', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /geographic\./, /lod-select/, /mesh-stitch/], budget: 5000},
   {symbol: 'selectTerrainLod', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],

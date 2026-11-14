@@ -5,6 +5,7 @@ import {expect, test} from 'vitest';
 import {
   createTerrainMesh,
   GeographicHeightField,
+  getGeographicTerrainNeighbor,
   HeightField,
   measureGeographicTerrainSeam,
   selectTerrainLod,
@@ -107,4 +108,35 @@ test('sparse cut inserts only the two half-side chains and preserves total area'
     area += ((p[b] - p[a]) * (p[c + 1] - p[a + 1]) - (p[c] - p[a]) * (p[b + 1] - p[a + 1])) / 2;
   }
   expect(area).toBe(4);
+});
+
+test('same-level terrain seams agree from both sides, including wrapped aliases', () => {
+  const level = 2;
+  const edgePairs = [['west', 'east'], ['north', 'south']] as const;
+  for (let y = 0; y < 4; y++) {
+    for (let x = 0; x < 4; x++) {
+      const tile = {x, y, level};
+      for (const [ownerEdge, otherEdge] of edgePairs) {
+        const seam = getGeographicTerrainNeighbor(tile, ownerEdge);
+        if (ownerEdge === 'north' && y === 0) {
+          expect(seam).toBeNull();
+          continue;
+        }
+        expect(seam?.owner).toEqual(tile);
+        expect(seam?.ownerEdge).toBe(ownerEdge);
+        expect(seam?.otherEdge).toBe(otherEdge);
+        expect(seam?.crossesAntimeridian).toBe(ownerEdge === 'west' && x === 0);
+        expect(getGeographicTerrainNeighbor(seam!.other, otherEdge)).toEqual(seam);
+      }
+    }
+  }
+  expect(getGeographicTerrainNeighbor({x: 0, y: 3, level}, 'south')).toBeNull();
+  const world = {x: 0, y: 0, level: 0};
+  expect(getGeographicTerrainNeighbor(world, 'west')).toEqual({
+    owner: world, ownerEdge: 'west', other: world, otherEdge: 'east', crossesAntimeridian: true
+  });
+  expect(getGeographicTerrainNeighbor(world, 'east')).toEqual(
+    getGeographicTerrainNeighbor(world, 'west')
+  );
+  expect(() => getGeographicTerrainNeighbor({x: 4, y: 0, level}, 'east')).toThrow(RangeError);
 });
