@@ -13,6 +13,8 @@ import {
   validateArrowTableSchema,
   renameArrowColumns,
   splitArrowBuffers,
+  createRecordBatchWithMetadata,
+  getRecordBatchMetadata,
   dehydrateArrowTable,
   hydrateArrowTable,
   serializeArrowTableToIPC,
@@ -69,6 +71,16 @@ export function checkArrowConformance() {
   assert.deepEqual(Array.from(renamed.getChild('value').toArray()), [10, 20, 30]);
   assert.deepEqual(renamed.schema.metadata, table.schema.metadata);
   const combined = table.concat(table.slice(1));
+  const metadataBatch = createRecordBatchWithMetadata(
+    table.schema,
+    table.batches[0].data,
+    new Map([['partition', 'first']])
+  );
+  const metadataTable = new arrow.Table(table.schema, [metadataBatch]);
+  const metadataPayload = dehydrateArrowTable(metadataTable);
+  const [restoredBatch] = hydrateArrowTable(structuredClone(metadataPayload)).batches;
+  assert.deepEqual(getRecordBatchMetadata(restoredBatch), new Map([['partition', 'first']]));
+  assert.equal(Object.hasOwn(restoredBatch, 'metadata'), !('metadata' in arrow.RecordBatch.prototype));
   const payload = dehydrateArrowTable(combined, {copy: 'all'});
   const hydrated = hydrateArrowTable(structuredClone(payload));
   assert.deepEqual(readRows(hydrated), readRows(combined));

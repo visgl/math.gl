@@ -3,7 +3,11 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Data, DataType, RecordBatch, Schema, Struct, Table, type Field} from 'apache-arrow';
-import {takeArrowTableRows} from '@math.gl/arrow';
+import {
+  getRecordBatchMetadata,
+  createRecordBatchWithMetadata,
+  takeArrowTableRows
+} from '@math.gl/arrow';
 import type {
   ColumnarPredicateParameterValues,
   ParameterizedColumnarPredicate
@@ -133,7 +137,7 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
   for (const batch of source.batches) {
     if (remaining === 0) break;
     signal?.throwIfAborted();
-    const {metadata} = batch as RecordBatch & {metadata?: Map<string, string>};
+    const metadata = getRecordBatchMetadata(batch);
     const mask = predicate?.evaluate(batch, {signal});
     let selected: RecordBatch | undefined;
     if (mask) {
@@ -209,10 +213,5 @@ function makeQueryBatch(
   metadata: Map<string, string> | undefined
 ): RecordBatch {
   const data = new Data(new Struct(schema.fields), 0, length, 0, undefined, children);
-  const batch = Object.assign(new RecordBatch(schema, data), {data});
-  // Some Arrow runtimes expose metadata through a getter without a setter.
-  if (metadata !== undefined) {
-    Object.defineProperty(batch, 'metadata', {value: metadata});
-  }
-  return batch;
+  return createRecordBatchWithMetadata(schema, data, metadata);
 }

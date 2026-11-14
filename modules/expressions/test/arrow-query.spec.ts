@@ -44,24 +44,18 @@ test('projection shares source buffers and empty results retain their schema', (
   );
 });
 
-test('projection and sparse filtering preserve getter-only batch metadata', () => {
+test('projection and sparse filtering preserve batch metadata through the runtime API', () => {
   const source = new Table({x: vectorFromArray([3, 0, 4], new Int32())});
   const metadata = new Map([['partition', 'first']]);
-  const prototype = Object.getPrototypeOf(source.batches[0]);
-  const originalMetadata = Object.getOwnPropertyDescriptor(prototype, 'metadata');
-  Object.defineProperty(prototype, 'metadata', {
-    configurable: true,
-    get: () => new Map()
-  });
-  Object.defineProperty(source.batches[0], 'metadata', {value: metadata});
-  try {
-    const result = queryArrowTable(source, select('SELECT x AS value WHERE x > 0'));
-    expect(Array.from(result.getChild('value')!)).toEqual([3, 4]);
-    expect(Reflect.get(result.batches[0], 'metadata')).toBe(metadata);
-  } finally {
-    if (originalMetadata) Object.defineProperty(prototype, 'metadata', originalMetadata);
-    else Reflect.deleteProperty(prototype, 'metadata');
-  }
+  const batch = source.batches[0]!;
+  const nativeMetadata = Reflect.get(batch, 'metadata') as Map<string, string> | undefined;
+  if (nativeMetadata) nativeMetadata.set('partition', 'first');
+  else Object.assign(batch, {metadata});
+
+  const result = queryArrowTable(source, select('SELECT x AS value WHERE x > 0'));
+  expect(Array.from(result.getChild('value')!)).toEqual([3, 4]);
+  expect(Reflect.get(result.batches[0], 'metadata')).toBe(nativeMetadata ?? metadata);
+  expect(Object.hasOwn(result.batches[0]!, 'metadata')).toBe(!nativeMetadata);
 });
 
 test('unaliased computed columns get distinct names without displacing explicit aliases', () => {
