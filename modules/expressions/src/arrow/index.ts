@@ -33,3 +33,4 @@ export {
 
 export {queryArrowTable, type ArrowTableQuery} from './query-arrow-table';
 export type {ArrowQueryJoin, ArrowQueryOrder} from './relational-query';
+export {queryArrowSQL} from './query-arrow-sql';

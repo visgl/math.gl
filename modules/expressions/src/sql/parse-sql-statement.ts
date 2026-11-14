@@ -48,6 +48,36 @@ export function parseSQLSelectStatement(
   options: SQLSelectStatementOptions = {}
 ): SQLSelectStatement {
   const reader = new RelationalQueryReader(sql, options);
+  const statement = {...readSelect(reader), ...readTail(reader)};
+  reader.end();
+  return statement;
+}
+
+/** SELECT inputs followed by ordering and pagination for the combined result. */
+export type SQLSelectCompound = {
+  inputs: readonly SQLSelectStatement[];
+  orderBy?: readonly SQLSort[];
+  limit?: number;
+  offset?: number;
+};
+
+/** Parses SELECT or a sequence of UNION ALL inputs. */
+export function parseSQLSelectCompound(
+  sql: string,
+  options: SQLSelectStatementOptions = {}
+): SQLSelectCompound {
+  const reader = new RelationalQueryReader(sql, options);
+  const inputs = [readSelect(reader)];
+  while (reader.takeKeyword('UNION')) {
+    reader.expectKeyword('ALL');
+    inputs.push(readSelect(reader));
+  }
+  const tail = readTail(reader);
+  reader.end();
+  return {inputs, ...tail};
+}
+
+function readSelect(reader: RelationalQueryReader): SQLSelectStatement {
   reader.expectKeyword('SELECT');
   const select = reader.takeSymbol('*')
     ? undefined
@@ -65,27 +95,25 @@ export function parseSQLSelectStatement(
     joins.push({type, table, on: reader.selectionExpression()});
   }
   const where = reader.takeKeyword('WHERE') ? reader.selectionExpression() : undefined;
-  let groupBy: Expression[] | undefined;
-  if (reader.takeKeyword('GROUP')) {
-    reader.expectKeyword('BY');
-    groupBy = readList(reader, () => reader.selectionExpression());
-  }
-  let orderBy: SQLSort[] | undefined;
-  if (reader.takeKeyword('ORDER')) {
-    reader.expectKeyword('BY');
-    orderBy = readList(reader, () => readSort(reader));
-  }
-  const pagination = reader.pagination();
-  reader.end();
+  const groupBy = readBy(reader, 'GROUP', () => reader.selectionExpression());
   return {
-    ...(select ? {select} : {}),
     from,
     joins,
+    ...(select ? {select} : {}),
     ...(where ? {where} : {}),
-    ...(groupBy ? {groupBy} : {}),
-    ...(orderBy ? {orderBy} : {}),
-    ...pagination
+    ...(groupBy ? {groupBy} : {})
   };
+}
+
+function readTail(reader: RelationalQueryReader) {
+  const orderBy = readBy(reader, 'ORDER', () => readSort(reader));
+  return {...(orderBy ? {orderBy} : {}), ...reader.pagination()};
+}
+
+function readBy<T>(reader: RelationalQueryReader, clause: string, read: () => T): T[] | undefined {
+  if (!reader.takeKeyword(clause)) return undefined;
+  reader.expectKeyword('BY');
+  return readList(reader, read);
 }
 
 function readTable(reader: RelationalQueryReader): SQLTableBinding {

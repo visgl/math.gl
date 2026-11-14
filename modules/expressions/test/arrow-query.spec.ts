@@ -4,7 +4,7 @@
 
 import {Float64, Int32, Int64, Table, Utf8, vectorFromArray} from 'apache-arrow';
 import {expect, test} from 'vitest';
-import {queryArrowTable} from '@math.gl/expressions/arrow';
+import {queryArrowTable, queryArrowSQL} from '@math.gl/expressions/arrow';
 import {parseSQLQuery} from '@math.gl/expressions/sql';
 
 /** Parses the SELECT requests used by these tests. */
@@ -131,4 +131,36 @@ test('sort orders supplementary characters by UTF-8, as WHERE does', () => {
   const source = new Table({key: vectorFromArray(['😀', null, '\uE000'], new Utf8())});
   const result = queryArrowTable(source, {orderBy: [{column: 'key'}]});
   expect(Array.from(result.getChild('key')!)).toEqual(['\uE000', '😀', null]);
+});
+
+test('plans a qualified join, grouped aggregates and ordering by output alias from SQL', () => {
+  const orders = new Table({
+    product: vectorFromArray([1, 1, 2], new Int32()),
+    units: vectorFromArray([2, 3, 1], new Int32())
+  });
+  const products = new Table({
+    id: vectorFromArray([1, 2], new Int32()),
+    category: vectorFromArray(['a', 'b'], new Utf8())
+  });
+  const result = queryArrowSQL(
+    'SELECT p.category AS category, SUM(o.units) AS units, COUNT(*) AS n FROM orders o ' +
+      'JOIN products p ON p.id = o.product WHERE o.units > 0 GROUP BY p.category ORDER BY units DESC LIMIT 1',
+    new Map<string, Table>([
+      ['orders', orders],
+      ['products', products]
+    ])
+  );
+  expect(Array.from(result.getChild('category')!)).toEqual(['a']);
+  expect(Array.from(result.getChild('units')!)).toEqual([5n]);
+  expect(Array.from(result.getChild('n')!)).toEqual([2n]);
+});
+
+test('executes UNION ALL branches before applying global ordering and pagination', () => {
+  const source = new Table({id: vectorFromArray([1, 2, 3], new Int32())});
+  const result = queryArrowSQL(
+    'SELECT id AS result FROM input WHERE id < 3 UNION ALL SELECT id AS other FROM input ' +
+      'WHERE id > 1 ORDER BY result DESC LIMIT 2',
+    new Map([['input', source]])
+  );
+  expect(Array.from(result.getChild('result')!)).toEqual([3, 2]);
 });
