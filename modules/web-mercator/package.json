@@ -4,7 +4,7 @@
   "author": "Uber Technologies, Inc.",
   "license": "MIT",
   "type": "module",
-  "version": "5.0.0-beta.8",
+  "version": "5.0.0-beta.9",
   "keywords": [
     "webgl",
     "javascript",
@@ -38,6 +38,6 @@
     "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-beta.8"
+    "@math.gl/core": "5.0.0-beta.9"
   }
 }
