@@ -714,3 +714,13 @@ real-DEM qualification report compare shared nodes and total band area against r
 triangle coverage. The reference densifies coarse patches; sparse transition topology,
 normal continuity, camera selection and geographic/mixed-datum policies remain future
 work. These remain plain independently exported CPU functions, without shader code.
+
+### Regional residency performance sweep
+
+Run `node scripts/benchmark-terrain-residency.mjs --quick` for two small smoke
+cases, or omit `--quick` for the regional matrix. The sweep varies resident tile
+count, tile dimensions, nodata and refinement ratio. It measures arrival, edits
+and eviction independently, checking every incremental result against a full
+rebuild. Compare p95 latency and rebuilt buffer bytes across revisions. Run the
+same command in each checkout on an otherwise idle host. Peak RSS covers the
+entire process, so it cannot attribute memory to an individual operation.
