@@ -7,6 +7,12 @@ import type {TerrainMixedHaloSnapshot} from '../terrain/mixed-halo-update';
 import type {TerrainMixedVertexTile} from '../terrain/mixed-vertex-halos';
 
 type TileAddress = Pick<TerrainMixedVertexTile, 'column' | 'row' | 'spacing'>;
+type TerrainResidencyTimings = {
+  applyEditsMs: number;
+  updateHalosMs: number;
+  prepareDeltaMs: number;
+  processMs: number;
+};
 type ResidentHalo = TerrainMixedHaloSnapshot['tiles'][number];
 export type TerrainResidencyEdit =
   | {type: 'upsert'; tile: TerrainMixedVertexTile}
@@ -25,8 +31,16 @@ export type TerrainResidencyTypes = {
     snapshot: TerrainMixedHaloSnapshot | null;
     revision: number;
   };
-  input: {revision: number; edits: readonly TerrainResidencyEdit[]} | {type: 'snapshot'};
-  output: {revision: number; tiles: ResidentHalo[]; removed: string[]; error?: string};
+  input:
+    | {revision: number; edits: readonly TerrainResidencyEdit[]; measureStages?: boolean}
+    | {type: 'snapshot'};
+  output: {
+    revision: number;
+    tiles: ResidentHalo[];
+    removed: string[];
+    error?: string;
+    timings?: TerrainResidencyTimings;
+  };
 };
 
 const addressKey = ({spacing, column, row}: TileAddress) => `${spacing}/${column}/${row}`;
@@ -70,6 +84,7 @@ export const TerrainResidencyTask = {
         removed: []
       };
     }
+    const start = input.measureStages ? performance.now() : 0;
     try {
       if (input.revision !== state.revision) throw new Error('Stale terrain residency revision');
 
@@ -123,11 +138,13 @@ export const TerrainResidencyTask = {
           data.validity[index] = height === null ? 0 : 1;
         }
       }
+      const applied = input.measureStages ? performance.now() : 0;
       const next = updateTerrainMixedVertexTileHalos(
         state.snapshot,
         [...sources.values()],
         state.limits
       );
+      const updated = input.measureStages ? performance.now() : 0;
       const old = new Map(state.snapshot?.tiles.map(tile => [addressKey(tile), tile]));
       // Copy outgoing buffers so transfer cannot detach the resident snapshot.
       const tiles = structuredClone(
@@ -139,7 +156,21 @@ export const TerrainResidencyTask = {
       context.throwIfAborted();
       state.snapshot = next;
       state.revision++;
-      return {revision: state.revision, tiles, removed: next.removed};
+      const result: TerrainResidencyTypes['output'] = {
+        revision: state.revision,
+        tiles,
+        removed: next.removed
+      };
+      if (input.measureStages) {
+        const finish = performance.now();
+        result.timings = {
+          applyEditsMs: applied - start,
+          updateHalosMs: updated - applied,
+          prepareDeltaMs: finish - updated,
+          processMs: finish - start
+        };
+      }
+      return result;
     } catch (error) {
       context.throwIfAborted();
       // A rejected transaction preserves the initialized handle on both task transports.

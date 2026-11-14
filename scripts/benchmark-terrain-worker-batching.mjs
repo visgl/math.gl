@@ -96,8 +96,7 @@ async function replay(
   events,
   revision,
   outputOwnership,
-  maxBatchSize,
-  maxWaitMs,
+  { policy, maxBatchSize, maxWaitMs },
 ) {
   const start = performance.now();
   const commits = [];
@@ -107,22 +106,38 @@ async function replay(
     const limit = Math.min(cursor + maxBatchSize, events.length);
     const deadline = first.arrivalMs + maxWaitMs;
     let end = cursor + 1;
-    while (end < limit && events[end].arrivalMs <= deadline) end++;
-    // A full batch or the end of the stream can dispatch immediately.
-    const readyMs = end === limit ? events[end - 1].arrivalMs : deadline;
+    if (policy === "bounded-wait") {
+      while (end < limit && events[end].arrivalMs <= deadline) end++;
+    }
+    const readyMs =
+      policy === "bounded-wait" && end < limit
+        ? deadline
+        : events[end - 1].arrivalMs;
     let remainingMs = readyMs - (performance.now() - start);
     while (remainingMs > 0) {
       await delay(remainingMs);
       remainingMs = readyMs - (performance.now() - start);
     }
+    if (policy === "opportunistic") {
+      // Capture the backlog as dispatch begins. Never wait to fill a batch.
+      const now = performance.now() - start;
+      while (end < limit && events[end].arrivalMs <= now) end++;
+    }
     const batch = events.slice(cursor, end);
     const sentMs = performance.now() - start;
     const delta = await handle.runTask(
-      { revision, edits: batch.map((event) => event.edit) },
+      {
+        revision,
+        edits: batch.map((event) => event.edit),
+        measureStages: true,
+      },
       { outputOwnership },
     );
     const ackMs = performance.now() - start;
     assert.equal(delta.error, undefined);
+    for (const value of Object.values(delta.timings)) {
+      assert.ok(Number.isFinite(value) && value >= 0);
+    }
     assert.equal(delta.revision, ++revision);
     commits.push({ batch, delta, sentMs, ackMs });
     cursor = end;
@@ -205,85 +220,111 @@ try {
         const events = makeEvents(source, burstSize);
         let expected;
         for (const outputOwnership of ["copy", "transfer"]) {
-          for (const maxBatchSize of [1, 2, 4, 8]) {
-            const maxWaitMs = maxBatchSize === 1 ? 0 : 2;
-            const handle = await runner.initializeTask(
-              task,
-              {},
-              { execution: "worker" },
-            );
-            try {
-              const upserts = source.map((tile) => ({ type: "upsert", tile }));
-              await handle.runTask(
-                { revision: 0, edits: upserts },
-                { outputOwnership },
+          const policies = [
+            { policy: "single", maxBatchSize: 1, maxWaitMs: 0 },
+            { policy: "bounded-wait", maxBatchSize: 8, maxWaitMs: 2 },
+            { policy: "opportunistic", maxBatchSize: 8, maxWaitMs: 0 },
+          ];
+          for (let repeat = 0; repeat < 3; repeat++) {
+            for (let i = 0; i < policies.length; i++) {
+              const config = policies[(i + repeat) % policies.length];
+              const handle = await runner.initializeTask(
+                task,
+                {},
+                { execution: "worker" },
               );
-              const warmup = await handle.runTask(
-                {
-                  revision: 1,
-                  edits: events.slice(0, 16).map((event) => event.edit),
-                },
-                { outputOwnership },
-              );
-              assert.equal(warmup.revision, 2);
-              const reset = await handle.runTask(
-                { revision: 2, edits: upserts },
-                { outputOwnership },
-              );
-              assert.equal(reset.revision, 3);
-              const seed = await handle.runTask(
-                { type: "snapshot" },
-                { outputOwnership },
-              );
-              assert.equal(seed.revision, 3);
-              const commits = await replay(
-                handle,
-                events,
-                seed.revision,
-                outputOwnership,
-                maxBatchSize,
-                maxWaitMs,
-              );
-              const { final, rebuildMs } = verify(
-                source,
-                seed,
-                commits,
-                createTerrainMixedVertexTileHalos,
-              );
-              expected ??= final;
-              assert.deepEqual(final, expected);
-              results.push({
-                name,
-                sha256,
-                burstSize,
-                outputOwnership,
-                maxBatchSize,
-                maxWaitMs,
-                edits: events.length,
-                commits: commits.length,
-                editToAckMs: percentiles(
-                  commits.flatMap(({ batch, ackMs }) =>
-                    batch.map((event) => ackMs - event.arrivalMs),
+              try {
+                const upserts = source.map((tile) => ({
+                  type: "upsert",
+                  tile,
+                }));
+                await handle.runTask(
+                  { revision: 0, edits: upserts },
+                  { outputOwnership },
+                );
+                const warmup = await handle.runTask(
+                  {
+                    revision: 1,
+                    edits: events.slice(0, 16).map((event) => event.edit),
+                  },
+                  { outputOwnership },
+                );
+                assert.equal(warmup.revision, 2);
+                const reset = await handle.runTask(
+                  { revision: 2, edits: upserts },
+                  { outputOwnership },
+                );
+                assert.equal(reset.revision, 3);
+                const seed = await handle.runTask(
+                  { type: "snapshot" },
+                  { outputOwnership },
+                );
+                assert.equal(seed.revision, 3);
+                const commits = await replay(
+                  handle,
+                  events,
+                  seed.revision,
+                  outputOwnership,
+                  config,
+                );
+                const { final, rebuildMs } = verify(
+                  source,
+                  seed,
+                  commits,
+                  createTerrainMixedVertexTileHalos,
+                );
+                expected ??= final;
+                assert.deepEqual(final, expected);
+                results.push({
+                  name,
+                  sha256,
+                  burstSize,
+                  outputOwnership,
+                  repeat,
+                  ...config,
+                  edits: events.length,
+                  commits: commits.length,
+                  editToAckMs: percentiles(
+                    commits.flatMap(({ batch, ackMs }) =>
+                      batch.map((event) => ackMs - event.arrivalMs),
+                    ),
                   ),
-                ),
-                arrivalToSendMs: percentiles(
-                  commits.flatMap(({ batch, sentMs }) =>
-                    batch.map((event) => sentMs - event.arrivalMs),
+                  arrivalToSendMs: percentiles(
+                    commits.flatMap(({ batch, sentMs }) =>
+                      batch.map((event) => sentMs - event.arrivalMs),
+                    ),
                   ),
-                ),
-                requestMs: percentiles(
-                  commits.map(({ sentMs, ackMs }) => ackMs - sentMs),
-                ),
-                directRebuildMs: rebuildMs,
-                outputBytes: commits.reduce(
-                  (total, { delta }) =>
-                    total +
-                    delta.tiles.reduce((sum, tile) => sum + tileBytes(tile), 0),
-                  0,
-                ),
-              });
-            } finally {
-              await handle.close();
+                  requestMs: percentiles(
+                    commits.map(({ sentMs, ackMs }) => ackMs - sentMs),
+                  ),
+                  workerStagesMs: Object.fromEntries(
+                    Object.keys(commits[0].delta.timings).map((stage) => [
+                      stage,
+                      percentiles(
+                        commits.map(({ delta }) => delta.timings[stage]),
+                      ),
+                    ]),
+                  ),
+                  requestOutsideProcessMs: percentiles(
+                    commits.map(
+                      ({ sentMs, ackMs, delta }) =>
+                        ackMs - sentMs - delta.timings.processMs,
+                    ),
+                  ),
+                  directRebuildMs: rebuildMs,
+                  outputBytes: commits.reduce(
+                    (total, { delta }) =>
+                      total +
+                      delta.tiles.reduce(
+                        (sum, tile) => sum + tileBytes(tile),
+                        0,
+                      ),
+                    0,
+                  ),
+                });
+              } finally {
+                await handle.close();
+              }
             }
           }
         }
