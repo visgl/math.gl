@@ -209,5 +209,10 @@ function makeQueryBatch(
   metadata: Map<string, string> | undefined
 ): RecordBatch {
   const data = new Data(new Struct(schema.fields), 0, length, 0, undefined, children);
-  return Object.assign(new RecordBatch(schema, data), {data, ...(metadata && {metadata})});
+  const batch = Object.assign(new RecordBatch(schema, data), {data});
+  // Some Arrow runtimes expose metadata through a getter without a setter.
+  if (metadata !== undefined) {
+    Object.defineProperty(batch, 'metadata', {value: metadata});
+  }
+  return batch;
 }
