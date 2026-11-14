@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Bool, Float64, Int32, Table, Utf8, vectorFromArray} from 'apache-arrow';
+import {Bool, DataType, Float64, Int32, Table, Utf8, vectorFromArray} from 'apache-arrow';
 import {parseSQLExpression, parseSQLPredicate, parseSQLQuery} from '@math.gl/expressions/sql';
 import {compileArrowExpression, compileArrowPredicate} from '../src/arrow';
 
@@ -135,4 +135,23 @@ test('integer width casts retain bigint precision and reject out-of-range values
   expect(() => evaluate('CAST(value AS UINT8)', table.slice(4, 5))).toThrow(/overflow/i);
   expect(evaluate('CAST(value AS INT8)', table.slice(2, 3)).get(0)).toBe(-1);
   expect(evaluate('CAST(value AS INT8)', table.slice(5)).get(0)).toBeNull();
+});
+
+test('UTF8 and dictionary casts preserve string values, nulls, and empty output types', () => {
+  const table = new Table({category: vectorFromArray(['red', null, 'blue', 'red'], new Utf8())});
+  const plain = evaluate('CAST(category AS UTF8)', table);
+  expect(plain.type).toEqual(new Utf8());
+  const dictionary = evaluate('CAST(category AS DICTIONARY(UTF8, INT32))', table);
+  expect(DataType.isDictionary(dictionary.type)).toBe(true);
+  expect(String(dictionary.type)).toBe('Dictionary<Int32, Utf8>');
+  expect([...dictionary]).toEqual([...plain]);
+  expect([...dictionary.data[0]!.dictionary!]).toEqual(['red', 'blue']);
+  expect(dictionary.data[0]!.values[0]).toBe(dictionary.data[0]!.values[3]);
+  expect([
+    ...evaluate('CAST(category AS DICTIONARY(UTF8, INT32))', table, new Uint8Array([0, 1, 1, 0]))
+  ]).toEqual([null, null, 'blue', null]);
+  expect(
+    String(evaluate('CAST(category AS DICTIONARY(UTF8, INT32))', table.slice(0, 0)).type)
+  ).toBe(String(dictionary.type));
+  expect(() => parseSQLExpression('CAST(category AS DICTIONARY(UTF8, INT8))')).toThrow(/INT32/);
 });

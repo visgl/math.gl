@@ -51,6 +51,7 @@ export function sqlCastType(name: string, source = name, offset = 0): ColumnarSc
       return 'float64';
     case 'boolean':
       return 'bool';
+    case 'utf8':
     case 'varchar':
     case 'character varying':
       return 'utf8';
@@ -222,15 +223,7 @@ export class SQLExpressionReader {
         Number(width[0]) !== array.arguments.length
       )
         throw this.error('ARRAY cast length must match the number of components');
-      const name = match[0].toUpperCase();
-      const type =
-        name === 'UINT8'
-          ? 'uint8'
-          : name === 'FLOAT32'
-            ? 'float32'
-            : name === 'FLOAT64'
-              ? 'float64'
-              : sqlCastType(name, this.source, start);
+      const type = sqlCastType(match[0], this.source, start);
       if (!['float16', 'float32', 'float64', 'uint8'].includes(type))
         throw this.error('Unsupported ARRAY cast type');
       if (
@@ -240,11 +233,22 @@ export class SQLExpressionReader {
         throw this.error('Chained UINT8 array casts are not supported');
       return this.call(`array_${type}`, array.arguments);
     }
-    const target = sqlCastType(match[0], this.source, start);
+    const target = /^dictionary$/i.test(match[0])
+      ? this.dictionaryCastType()
+      : sqlCastType(match[0], this.source, start);
     return this.call('cast', [
       argument,
       this.node({type: 'Literal', value: target, raw: JSON.stringify(target)})
     ]);
+  }
+  /** Parses the supported Arrow dictionary layout. */
+  private dictionaryCastType(): string {
+    this.symbol('(');
+    if (!this.word('UTF8')) throw this.error('Expected UTF8 dictionary values');
+    this.symbol(',');
+    if (!this.word('INT32')) throw this.error('Expected INT32 dictionary indices');
+    this.symbol(')');
+    return 'dictionary_utf8_int32';
   }
   private primary(depth: number): Expression {
     if (depth > 64) throw this.error('SQL expression exceeds nesting limit');

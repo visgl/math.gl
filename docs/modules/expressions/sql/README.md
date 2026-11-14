@@ -220,3 +220,8 @@ custom WHERE parser are preserved.
 
 Pass a [probe.gl](https://vis.gl/probe.gl) logger as the `log` option to `parseSQLQuery` to capture parser
 errors. The parser reports the diagnostic and throws the original error.
+
+`CAST(category AS UTF8)` returns plain Arrow UTF-8, like `VARCHAR`.
+`CAST(category AS DICTIONARY(UTF8, INT32))` requests dictionary-encoded UTF-8
+with signed 32-bit indices. Dictionary entries are assigned in encounter order
+within each evaluated batch. Nulls remain null.

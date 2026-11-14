@@ -5,6 +5,7 @@
 import {
   Bool,
   DataType,
+  Dictionary,
   Float16,
   Float32,
   Float64,
@@ -46,6 +47,8 @@ type Range = [Uint8Array, number, number];
 
 /** Resolves explicit scalar casts once, leaving active-row selection to the expression compiler. */
 export function bindCast(source: DataType, target: unknown) {
+  const dictionary = target === 'dictionary_utf8_int32';
+  if (dictionary) target = 'utf8';
   if (!isColumnarScalarType(target)) throw new Error('Unsupported scalar CAST target');
   const type = new CAST_TYPES[target]();
   const integer = DataType.isInt(type);
@@ -62,7 +65,7 @@ export function bindCast(source: DataType, target: unknown) {
   const halfRound = target === 'float16' ? roundFloat16() : undefined;
   const encoder = new TextEncoder();
   return {
-    type,
+    type: dictionary ? new Dictionary(new Utf8(), new Int32()) : type,
     textInput,
     evaluate(value: ArrowExpressionValue, range?: Range | null): ArrowExpressionValue {
       if (value === null && !range) return null;

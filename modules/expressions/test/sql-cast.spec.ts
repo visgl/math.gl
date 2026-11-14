@@ -38,6 +38,7 @@ test.each([
   ['DOUBLE PRECISION', 'float64'],
   ['BOOLEAN', 'bool'],
   ['VARCHAR', 'utf8'],
+  ['UTF8', 'utf8'],
   ['CHARACTER VARYING', 'utf8']
 ])('SQL CAST maps %s to %s without Arrow dependencies', (sql, target) => {
   const expression = cast({type: 'Identifier', name: 'population'}, target);

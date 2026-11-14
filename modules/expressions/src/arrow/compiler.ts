@@ -215,7 +215,7 @@ function output(
         validate(value);
         values[row] = value;
       }
-    return vectorFromArray(values as any[], type);
+    return vectorFromArray(values as any[], field.type);
   }
   if (DataType.isNull(type)) {
     for (let row = 0; row < active.length; row++) if (active[row]) validate(evaluate(row));
@@ -1096,7 +1096,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
         const child = argument.prepare(batch, active, context);
         return {
           get: row =>
-            cast.textInput && !DataType.isUtf8(cast.type)
+            cast.textInput && !DataType.isUtf8(valueType(cast.type))
               ? cast.evaluate(null, bytes(child, row))
               : cast.evaluate(child.get(row))
         };
