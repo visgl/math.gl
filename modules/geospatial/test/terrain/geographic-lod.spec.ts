@@ -5,6 +5,7 @@ import {expect, test} from 'vitest';
 import {
   createTerrainMesh,
   discoverGeographicTerrainLodSeams,
+  discoverGeographicTerrainPoles,
   GeographicHeightField,
   getGeographicTerrainNeighbor,
   HeightField,
@@ -208,4 +209,35 @@ test('resident geographic cut reports partial horizontal coverage and rejects ov
   expect(discoverGeographicTerrainLodSeams([coarse, {x: 2, y: 2, level: 2}])).toEqual([]);
   expect(() => discoverGeographicTerrainLodSeams([coarse, coarse])).toThrow(/Duplicate/);
   expect(() => discoverGeographicTerrainLodSeams([coarse, {...fine, y: 0}])).toThrow(/Overlapping/);
+});
+
+test('polar incidence reports resident sectors and gaps in canonical longitude order', () => {
+  const poles = discoverGeographicTerrainPoles([
+    {x: 3, y: 0, level: 2},
+    {x: 0, y: 0, level: 1},
+    {x: 0, y: 3, level: 2}
+  ]);
+  expect(poles.north).toEqual({
+    latitude: 90,
+    incident: [
+      {tile: 1, edge: 'north', longitude: [-180, 0]},
+      {tile: 0, edge: 'north', longitude: [90, 180]}
+    ],
+    gaps: [[0, 90]]
+  });
+  expect(poles.south).toEqual({
+    latitude: -90,
+    incident: [{tile: 2, edge: 'south', longitude: [-180, -90]}],
+    gaps: [[-90, 180]]
+  });
+  const world = discoverGeographicTerrainPoles([{x: 0, y: 0, level: 0}]);
+  expect(world.north.gaps).toEqual([]);
+  expect(world.south.gaps).toEqual([]);
+  expect(discoverGeographicTerrainPoles([]).north.gaps).toEqual([[-180, 180]]);
+  expect(() =>
+    discoverGeographicTerrainPoles([
+      {x: 0, y: 0, level: 0},
+      {x: 0, y: 0, level: 1}
+    ])
+  ).toThrow(/Overlapping/);
 });

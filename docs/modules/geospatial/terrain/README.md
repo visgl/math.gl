@@ -1638,6 +1638,12 @@ point-only contacts produce no span. For antimeridian spans, use longitude
 degrees for mesh X. Stitching aligns the edges and preserves each tile's
 longitude branch.
 
+Use `discoverGeographicTerrainPoles(cut)` to enumerate pole-incident edges
+and gaps in angular coverage, including mixed-level cuts. Each pole is one
+geographic point. The longitude intervals describe the sectors from which
+resident tiles approach it. They can drive polar mesh assembly or coverage
+diagnostics. Height agreement and nodata require separate sample checks.
+
 `measureGeographicTerrainSeam` compares paired one-sided stencils in their
 shared east/north frame. Longitude aliases are mapped explicitly into each
 tile's unwrapped interval. A full-world interval gives precedence to the west

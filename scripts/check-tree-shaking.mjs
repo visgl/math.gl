@@ -35,6 +35,8 @@ const probes = [
     forbidden: [/height-field\./, /geographic\./, /lod-select/, /mesh-stitch/], budget: 5000},
   {symbol: 'selectTerrainLod', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /mesh-stitch/, /geographic-seam/], budget: 5000},
+  {symbol: 'discoverGeographicTerrainPoles', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/height-field\./, /lod-seams/, /lod-stitch/, /mesh-stitch/], budget: 2500},
   {symbol: 'discoverGeographicTerrainLodSeams', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /lod-stitch/, /mesh-stitch/, /lod-select/], budget: 4500},
   {symbol: 'stitchTerrainLodCut', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
