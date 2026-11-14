@@ -60,7 +60,7 @@ export const TerrainResidencyTask = {
   initialize(limits): TerrainResidencyTypes['state'] {
     return {limits: {...limits}, snapshot: null, revision: 0};
   },
-  async process(input, _options, context) {
+  async process(input, _options, context): Promise<TerrainResidencyTypes['output']> {
     const state = context.state;
     if ('type' in input) {
       if (input.type !== 'snapshot') throw new Error('Unknown terrain residency request');
