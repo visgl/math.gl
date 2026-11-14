@@ -724,3 +724,16 @@ and eviction independently, checking every incremental result against a full
 rebuild. Compare p95 latency and rebuilt buffer bytes across revisions. Run the
 same command in each checkout on an otherwise idle host. Peak RSS covers the
 entire process, so it cannot attribute memory to an individual operation.
+
+The same command also measures batches of independent full halo builds on
+persistent Node workers. It varies one, two, and four workers and either
+copies or transfers buffers in both directions. JSON reports startup,
+throughput, queue and end-to-end p95 latency, worker service p95, and payload
+buffer sizes. Each timed job matches an untimed direct result. Payload
+preparation and verification are outside the timed interval. Process peak RSS
+includes staged requests and retained responses and is not per-worker memory.
+
+One local 20-job run of the 64-coarse-tile case (566,280 input and 796,250
+output buffer bytes per job) measured 169 jobs/s with four copy workers and
+245 jobs/s with four transfer workers. The one-worker results were 212 and
+196 jobs/s respectively. These observations depend on the host and load.
