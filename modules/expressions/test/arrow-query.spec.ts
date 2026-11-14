@@ -56,6 +56,9 @@ test('projection and sparse filtering preserve batch metadata through the runtim
   expect(Array.from(result.getChild('value')!)).toEqual([3, 4]);
   expect(Reflect.get(result.batches[0], 'metadata')).toBe(nativeMetadata ?? metadata);
   expect(Object.hasOwn(result.batches[0]!, 'metadata')).toBe(!nativeMetadata);
+  const paginated = queryArrowTable(source, {offset: 1, limit: 1});
+  expect(Array.from(paginated.getChild('x')!)).toEqual([0]);
+  expect(Reflect.get(paginated.batches[0], 'metadata')).toBe(nativeMetadata ?? metadata);
 });
 
 test('unaliased computed columns get distinct names without displacing explicit aliases', () => {
