@@ -218,6 +218,12 @@ test('streaming LIMIT 0 leaves input unopened and schema mismatches fail before 
     await Array.fromAsync(queryArrowTableInBatches(batches(), source.schema, {limit: 0}))
   ).toEqual([]);
   expect(opened).toBe(false);
+  const compatible = new Table({x: vectorFromArray([2], new Int32())});
+  expect(compatible.schema).not.toBe(source.schema);
+  const matching = await Array.fromAsync(
+    queryArrowTableInBatches(compatible.batches, source.schema)
+  );
+  expect(matching[0]?.getChild('x')?.get(0)).toBe(2);
   const incompatible = new Table({y: vectorFromArray([2], new Int32())});
   await expect(
     Array.fromAsync(queryArrowTableInBatches(incompatible.batches, source.schema))

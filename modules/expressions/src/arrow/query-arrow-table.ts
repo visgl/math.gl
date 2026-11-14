@@ -2,19 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {
-  Data,
-  DataType,
-  type RecordBatch,
-  Schema,
-  Struct,
-  Table,
-  type Field,
-  util
-} from 'apache-arrow';
+import {Data, DataType, type RecordBatch, Schema, Struct, Table, type Field} from 'apache-arrow';
 import {
   getRecordBatchMetadata,
   createRecordBatchWithMetadata,
+  validateArrowTableSchema,
   takeArrowTableRows
 } from '@math.gl/arrow';
 import type {
@@ -108,8 +100,11 @@ export async function* queryArrowTableInBatches(
   if (plan.done()) return;
   for await (const batch of input) {
     query.signal?.throwIfAborted();
-    if (batch.schema !== inputSchema && !util.compareSchemas(batch.schema, inputSchema)) {
-      throw new Error('Arrow query batch does not match the input schema');
+    if (batch.schema !== inputSchema) {
+      validateArrowTableSchema(new Table(batch.schema, []), inputSchema, {
+        rejectExtraFields: true,
+        schemaName: 'query input schema'
+      });
     }
     yield* plan.execute(batch);
     if (plan.done()) return;
