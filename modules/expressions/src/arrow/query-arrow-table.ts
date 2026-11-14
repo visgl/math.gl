@@ -3,7 +3,11 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Data, DataType, RecordBatch, Schema, Struct, Table, type Field} from 'apache-arrow';
-import {takeArrowTableRows} from '@math.gl/arrow';
+import {
+  getRecordBatchMetadata,
+  createRecordBatchWithMetadata,
+  takeArrowTableRows
+} from '@math.gl/arrow';
 import type {
   ColumnarPredicateParameterValues,
   ParameterizedColumnarPredicate
@@ -133,7 +137,7 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
   for (const batch of source.batches) {
     if (remaining === 0) break;
     signal?.throwIfAborted();
-    const {metadata} = batch as RecordBatch & {metadata?: Map<string, string>};
+    const metadata = getRecordBatchMetadata(batch);
     const mask = predicate?.evaluate(batch, {signal});
     let selected: RecordBatch | undefined;
     if (mask) {
@@ -161,7 +165,14 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
       skip -= start;
       const end = start + Math.min(batch.numRows - start, remaining);
       if (end > start)
-        selected = start === 0 && end === batch.numRows ? batch : batch.slice(start, end);
+        selected =
+          start === 0 && end === batch.numRows
+            ? batch
+            : createRecordBatchWithMetadata(
+                batch.schema,
+                batch.data.slice(start, end - start),
+                metadata
+              );
     }
     if (!selected?.numRows) continue;
     remaining -= selected.numRows;
@@ -209,5 +220,5 @@ function makeQueryBatch(
   metadata: Map<string, string> | undefined
 ): RecordBatch {
   const data = new Data(new Struct(schema.fields), 0, length, 0, undefined, children);
-  return Object.assign(new RecordBatch(schema, data), {data, ...(metadata && {metadata})});
+  return createRecordBatchWithMetadata(schema, data, metadata);
 }
