@@ -205,3 +205,9 @@ export {
 
 export {certifyTerrainMeshCoverage} from './mesh-coverage';
 export type {TerrainCoverageMesh, TerrainMeshCoverage} from './mesh-coverage';
+
+export {
+  getGeographicTerrainNeighbor,
+  type TerrainGeographicEdge,
+  type TerrainGeographicNeighbor
+} from './geographic-neighbor';
