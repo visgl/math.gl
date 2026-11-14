@@ -62,3 +62,7 @@ const payload = dehydrateArrowTable(result, {copy: 'none', retain: [source]});
 ```
 
 `retain` matches backing buffers, including nested columns and dictionaries. With the default copy mode, sliced views of other buffers are also copied. Include every Arrow object that must remain usable after the payload is transferred.
+
+Batch metadata is stored separately from the IPC schema. The column-buffer payload preserves batch maps, including application-defined maps on older Arrow JS versions. Use `createRecordBatchWithMetadata(schema, data, metadata)` and `getRecordBatchMetadata(batch)` from `@math.gl/arrow` when working across Arrow versions. For full IPC streams, batch metadata support depends on the Arrow runtime.
+
+Use `dehydrateArrowRecordBatch(batch, options?)` and `hydrateArrowRecordBatch(payload)` when sending one record batch. They use the same payload as table transport and hydration requires exactly one batch.
