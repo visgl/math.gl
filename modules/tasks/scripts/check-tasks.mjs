@@ -92,7 +92,7 @@ import * as tasks from '@math.gl/tasks';
 import * as geospatial from '@math.gl/geospatial/tasks';
 const require = createRequire(import.meta.url);
 for (const api of [tasks, require('@math.gl/tasks')]) assert.deepEqual(Object.keys(api).sort(), ${JSON.stringify(expected)});
-for (const api of [geospatial, require('@math.gl/geospatial/tasks')]) assert.deepEqual(Object.keys(api).sort(), ['PrepareMapTask', 'ProjectCoordinatesTask']);
+for (const api of [geospatial, require('@math.gl/geospatial/tasks')]) assert.deepEqual(Object.keys(api).sort(), ['CertifyTerrainCoverageTask', 'PrepareMapTask', 'ProjectCoordinatesTask']);
 for (const api of [tasks, require('@math.gl/tasks')]) {
   const runner = new api.TaskRunner();
   const task = {

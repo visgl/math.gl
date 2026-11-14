@@ -1675,6 +1675,20 @@ to replay point and patch edits on the pinned Pacific and Sierra nodata
 DEMs with the adaptive updater. The comparison checks every mesh buffer
 against a full rebuild of the same regional decomposition.
 
+### Certify horizontal mesh coverage
+
+`certifyTerrainMeshCoverage(field, mesh, options)` compares coverage multiplicity
+in fractional sample coordinates. Choose valid raster triangles (the default),
+four-corner-valid cells (`reference: 'bilinear'`), or a reference triangulation
+known to cover the intended domain once. A `certified` result proves equality
+almost everywhere. `mismatch` reports a boundary interval with a nonzero
+multiplicity jump, and `budget-exhausted` means no certificate was computed.
+Use `boundTerrainMeshError` separately for vertical accuracy over shared coverage.
+
+The method uses exact binary64 coordinates, so even a small unsnapped gap can
+fail certification. It does not certify isolated lines or points. The boundary
+lab shows the selected domain and highlights a witness on mismatch.
+
 ### Mixed-level DEM residency replay
 
 Run `node scripts/qualify-terrain-residency.mjs` after building. The replay

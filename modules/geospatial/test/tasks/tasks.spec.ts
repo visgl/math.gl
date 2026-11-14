@@ -4,7 +4,11 @@
 import {test, expect} from 'vitest';
 const isBrowser = typeof process === 'undefined' || !process.versions?.node;
 import {TaskRunner, preloadTasks} from '@math.gl/tasks';
-import {ProjectCoordinatesTask, PrepareMapTask} from '@math.gl/geospatial/tasks';
+import {
+  ProjectCoordinatesTask,
+  PrepareMapTask,
+  CertifyTerrainCoverageTask
+} from '@math.gl/geospatial/tasks';
 import {MapEngine} from '@math.gl/geospatial/maps/map-engine';
 
 const initialization = {projection: {from: 'EPSG:4326', to: 'EPSG:3857'}};
@@ -101,3 +105,35 @@ for (const execution of ['main-thread', 'worker'] as const) {
 }
 
 import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';
+
+test('coverage worker returns the same certificate as direct task execution', async () => {
+  const runner = new TaskRunner();
+  const task = {
+    ...CertifyTerrainCoverageTask,
+    worker: {
+      ...(isBrowser
+        ? {
+            create: () =>
+              new Worker(new URL('../../src/tasks/terrain-coverage-worker.ts', import.meta.url), {
+                type: 'module'
+              })
+          }
+        : {url: new URL('../../dist/tasks/terrain-coverage-worker.js', import.meta.url)}),
+      capabilities: {atomic: true, streaming: false}
+    }
+  };
+  const input = {
+    field: {width: 2, height: 2, heights: new Float32Array(4)},
+    mesh: {
+      gridCoordinates: new Float64Array([0, 0, 1, 0, 0, 1, 1, 1]),
+      indices: new Uint32Array([0, 1, 2, 1, 3, 2])
+    }
+  };
+  try {
+    const direct = await runner.runTask(task, input, {execution: 'main-thread'});
+    expect(direct.status).toBe('certified');
+    expect(await runner.runTask(task, input, {execution: 'worker'})).toEqual(direct);
+  } finally {
+    await runner.close();
+  }
+});
