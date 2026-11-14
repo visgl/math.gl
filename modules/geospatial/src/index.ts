@@ -412,3 +412,5 @@ export {
   type TerrainGeographicEdge,
   type TerrainGeographicNeighbor
 } from './terrain/geographic-neighbor';
+
+export {discoverGeographicTerrainLodSeams} from './terrain/geographic-lod-seams';
