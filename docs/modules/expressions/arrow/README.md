@@ -583,6 +583,8 @@ the source and accepts structured query options, including native Arrow join and
 union inputs. `getTable()` returns a snapshot and `takeTable()` transfers the source
 back and closes the worker. By default the source is copied on initialization.
 Use `inputOwnership: 'transfer'` to relinquish the source and its buffer aliases.
+A query error keeps the session usable. Aborting a query stops the caller's wait.
+The worker drains any accepted query before serving later session operations.
 
 ```ts
 import {createArrowQueryWorker} from '@math.gl/expressions/arrow/worker';

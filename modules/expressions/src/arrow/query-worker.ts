@@ -16,10 +16,12 @@ type QueryPayload = Omit<ArrowWorkerQuery, 'signal' | 'union' | 'join'> & {
   join?: Omit<NonNullable<ArrowTableQuery['join']>, 'table'> & {table: DehydratedArrowTable};
 };
 
+type QueryResult = {table: DehydratedArrowTable} | {error: {name: string; message: string}};
+
 type QueryTask = {
   initialization: {table: DehydratedArrowTable};
   input: {operation: 'query'; query: QueryPayload} | {operation: 'get' | 'take'};
-  output: {table: DehydratedArrowTable};
+  output: QueryResult;
   state: Table;
 };
 
@@ -56,17 +58,27 @@ export function createArrowQueryTask(
     process(input, _options, {state, signal}) {
       if (input.operation === 'take') return {table: dehydrateArrowTable(state, {copy: 'none'})};
       let result = state;
-      if (input.operation === 'query') {
-        const {union, join, ...query} = input.query;
-        result = queryArrowTable(state, {
-          ...query,
-          union: union?.map(hydrateArrowTable),
-          join: join && {...join, table: hydrateArrowTable(join.table)},
-          functions: options.functions,
-          signal
-        });
+      try {
+        if (input.operation === 'query') {
+          const {union, join, ...query} = input.query;
+          result = queryArrowTable(state, {
+            ...query,
+            union: union?.map(hydrateArrowTable),
+            join: join && {...join, table: hydrateArrowTable(join.table)},
+            functions: options.functions,
+            signal
+          });
+        }
+        return {table: dehydrateArrowTable(result, {retain: [state]})};
+      } catch (error) {
+        // A query error is a response, so the task runner keeps the pinned worker alive.
+        return {
+          error: {
+            name: error instanceof Error ? error.name : 'Error',
+            message: error instanceof Error ? error.message : String(error)
+          }
+        };
       }
-      return {table: dehydrateArrowTable(result, {retain: [state]})};
     }
   };
 }
@@ -92,28 +104,29 @@ export async function createArrowQueryWorker(
       async query({signal: querySignal, union, join, ...query} = {}) {
         assertOpen();
         querySignal?.throwIfAborted();
-        const result = await task.runTask(
-          {
-            operation: 'query',
-            query: {
-              ...query,
-              union: union?.map(table => dehydrateArrowTable(table, {copy: 'none'})),
-              join: join && {...join, table: dehydrateArrowTable(join.table, {copy: 'none'})}
-            }
-          },
-          {signal: querySignal}
+        const result = await runQueryWithSignal(
+          () =>
+            task.runTask({
+              operation: 'query',
+              query: {
+                ...query,
+                union: union?.map(table => dehydrateArrowTable(table, {copy: 'none'})),
+                join: join && {...join, table: dehydrateArrowTable(join.table, {copy: 'none'})}
+              }
+            }),
+          querySignal
         );
-        return hydrateArrowTable(result.table);
+        return hydrateQueryResult(result);
       },
       async getTable() {
         assertOpen();
-        return hydrateArrowTable((await task.runTask({operation: 'get'})).table);
+        return hydrateQueryResult(await task.runTask({operation: 'get'}));
       },
       async takeTable() {
         assertOpen();
         closing = true;
         try {
-          return hydrateArrowTable((await task.runTask({operation: 'take'})).table);
+          return hydrateQueryResult(await task.runTask({operation: 'take'}));
         } finally {
           await runner.close();
         }
@@ -135,13 +148,43 @@ export async function queryArrowTableInWorker(
   query: ArrowWorkerQuery,
   options: ArrowQueryWorkerOptions
 ): Promise<Table> {
-  const session = await createArrowQueryWorker(source, {
-    ...options,
-    signal: query.signal ?? options.signal
-  });
+  const signal = query.signal ?? options.signal;
+  const session = await createArrowQueryWorker(source, {...options, signal});
   try {
-    return await session.query(query);
+    return await session.query({...query, signal});
   } finally {
-    await session.close();
+    // Cancellation stops the caller's wait. Drain the worker independently.
+    if (signal?.aborted) void session.close().catch(() => {});
+    else await session.close();
   }
+}
+
+/** Restores a result or propagates a query error without invalidating the session. */
+function hydrateQueryResult(result: QueryResult): Table {
+  if ('table' in result) return hydrateArrowTable(result.table);
+  const error = new Error(result.error.message);
+  error.name = result.error.name;
+  throw error;
+}
+
+/** Cancels the caller's wait while leaving accepted work queued on the retained worker. */
+async function runQueryWithSignal<T>(run: () => Promise<T>, signal?: AbortSignal): Promise<T> {
+  if (!signal) return run();
+  signal.throwIfAborted();
+  const pending = run();
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(signal.reason);
+    signal.addEventListener('abort', abort, {once: true});
+    if (signal.aborted) abort();
+    void pending.then(
+      result => {
+        signal.removeEventListener('abort', abort);
+        resolve(result);
+      },
+      error => {
+        signal.removeEventListener('abort', abort);
+        reject(error);
+      }
+    );
+  });
 }

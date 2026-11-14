@@ -30,3 +30,26 @@ test.skipIf(typeof window !== 'undefined')(
     }
   }
 );
+
+test.skipIf(typeof window !== 'undefined')(
+  'failed and canceled queries preserve transferred source buffers',
+  async () => {
+    const input = new Table({id: vectorFromArray([1, 2, 3], new Int32())});
+    const buffer = input.getChild('id')!.data[0]!.values.buffer;
+    const session = await createArrowQueryWorker(input, {
+      worker: {url: new URL('../dist/arrow/query-worker-entry.js', import.meta.url)},
+      inputOwnership: 'transfer'
+    });
+    try {
+      expect(buffer.byteLength).toBe(0);
+      await expect(session.query({select: ['missing']})).rejects.toThrow('missing');
+      const controller = new AbortController();
+      const pending = session.query({orderBy: [{column: 'id'}], signal: controller.signal});
+      controller.abort(new Error('cancel query'));
+      await expect(pending).rejects.toThrow('cancel query');
+      expect(Array.from((await session.takeTable()).getChild('id')!)).toEqual([1, 2, 3]);
+    } finally {
+      await session.close();
+    }
+  }
+);
