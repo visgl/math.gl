@@ -7,6 +7,8 @@ import {HeightField, TerrainSampleStatus as Status} from '@math.gl/geospatial/te
 import {
   TerrainSurface,
   createTerrainSurface,
+  sweepTerrainBox,
+  sweepTerrainPolytope,
   sweepTerrainCapsule,
   sweepTerrainSphere
 } from '@math.gl/geospatial/terrain';
@@ -290,4 +292,40 @@ test('translation of a capsule detects contact along the axis interior', () => {
   expect(hit.contact.segmentFraction).toBeLessThan(1);
   expect(sweepTerrainCapsule(surface, a, b, [0, 0, 1], 0.75).status).toBe('miss');
   expect(sweepTerrainCapsule(surface, a, b, motion, 0.75, {maxWork: 0}).status).toBe('incomplete');
+});
+
+test('terrain polytope sweeps find box and tetrahedron impact times', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 4, 0, 0, 0, 4, 0),
+    indices: Uint32Array.of(0, 1, 2)
+  });
+  const motion = [0, 0, -4] as const;
+  const box = sweepTerrainBox(surface, [1, 1, 2], [0.25, 0.25, 0.5], motion);
+  expect(box).toMatchObject({status: 'hit', fraction: 0.375, triangleIndex: 0});
+  expect(box.status === 'hit' && box.normal?.[2]).toBe(1);
+  expect(sweepTerrainBox(surface, [5, 5, 2], [0.25, 0.25, 0.5], motion).status).toBe('miss');
+  expect(sweepTerrainBox(surface, [1, 1, 2], [0.25, 0.25, 0.5], motion, {maxWork: 0})).toEqual({
+    status: 'incomplete',
+    work: 0
+  });
+  expect(
+    sweepTerrainPolytope(
+      surface,
+      {
+        vertices: [
+          [1, 1, 1],
+          [2, 1, 2],
+          [1, 2, 2],
+          [1, 1, 2]
+        ],
+        faces: [
+          [0, 1, 2],
+          [0, 3, 1],
+          [0, 2, 3],
+          [1, 3, 2]
+        ]
+      },
+      motion
+    )
+  ).toMatchObject({status: 'hit', fraction: 0.25, triangleIndex: 0});
 });

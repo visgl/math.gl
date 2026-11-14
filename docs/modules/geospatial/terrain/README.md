@@ -1794,3 +1794,10 @@ moves a constant-radius capsule with a fixed axis. It uses the change in
 segment-to-terrain clearance to eliminate time intervals, and reports
 `incomplete` when the budget or tolerance leaves an interval unresolved.
 The hit includes the closest terrain and axis points at the witness time.
+
+`sweepTerrainBox` sweeps an axis-aligned box. `sweepTerrainPolytope` accepts
+a closed, triangulated convex boundary, including a preoriented box or convex
+hull in the same Cartesian frame. Both hold orientation fixed and test
+separating axes against active triangles. Work counts axis tests. A hit
+returns the first fraction, terrain triangle index, and entry normal when
+defined. Initial overlaps have no unique entry normal.

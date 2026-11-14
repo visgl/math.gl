@@ -219,3 +219,10 @@ export {
 } from './sweep-sphere';
 
 export {sweepTerrainCapsule, type TerrainCapsuleSweepResult} from './sweep-capsule';
+
+export {
+  sweepTerrainBox,
+  sweepTerrainPolytope,
+  type TerrainPolytope,
+  type TerrainPolytopeSweepResult
+} from './sweep-polytope';
