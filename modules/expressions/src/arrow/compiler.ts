@@ -205,7 +205,7 @@ function output(
 ): Vector {
   const type = valueType(field.type);
   const validate = createValueValidator(type);
-  if (DataType.isUtf8(type)) {
+  if (DataType.isUtf8(type) || DataType.isBinary(type) || DataType.isFixedSizeBinary(type)) {
     const values: ArrowExpressionValue[] = new Array(active.length).fill(null);
     for (let row = 0; row < active.length; row++)
       if (active[row]) {
@@ -622,6 +622,7 @@ function bindBinary(ast: any, options: BindingOptions): Node {
   }
   const type = left.field.type,
     utf8 = typeKey(type) === 'utf8',
+    binary = DataType.isBinary(type) || DataType.isFixedSizeBinary(type),
     integer = DataType.isInt(type);
   const validate = createValueValidator(type);
   const round = roundToType(type);
@@ -675,6 +676,7 @@ function bindBinary(ast: any, options: BindingOptions): Node {
           const x = a.get(row) as any,
             y = b.get(row) as any;
           if (x === null || y === null) return null;
+          if (binary) return compare(op, compareUTF8(x, 0, x.length, y, 0, y.length), 0);
           if (comparison) return compare(op, x, y);
           if ((op === '/' || op === '%') && (y === 0 || y === 0n))
             throw new ExpressionEvaluationError('divisionByZero', 'Division by zero');

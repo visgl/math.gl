@@ -22,6 +22,8 @@ export function typeKey(type: DataType): string {
   }
   if (DataType.isBool(type)) return 'bool';
   if (DataType.isUtf8(type)) return 'utf8';
+  if (DataType.isBinary(type)) return 'binary';
+  if (DataType.isFixedSizeBinary(type)) return `fixedsizebinary:${type.byteWidth}`;
   if (DataType.isNull(type)) return 'null';
   throw new Error(`Unsupported Arrow expression type: ${type}`);
 }
@@ -74,6 +76,10 @@ export class ColumnReader {
       return this.decoder.decode(
         data.values.subarray(data.valueOffsets[index], data.valueOffsets[index + 1])
       );
+    if (DataType.isBinary(data.type))
+      return data.values.subarray(data.valueOffsets[index], data.valueOffsets[index + 1]);
+    if (DataType.isFixedSizeBinary(data.type))
+      return data.values.subarray(data.stride * index, data.stride * (index + 1));
     if (DataType.isBool(data.type)) {
       const bit = data.offset + index;
       return Boolean(data.values[bit >> 3]! & (1 << (bit & 7)));
@@ -123,6 +129,16 @@ export function createValueValidator(inputType: DataType): (value: ArrowExpressi
         );
       if (value < min || value > max)
         throw new ExpressionEvaluationError('overflow', 'Integer expression overflow');
+    };
+  }
+  if (DataType.isBinary(type) || DataType.isFixedSizeBinary(type)) {
+    return value => {
+      if (value === null) return;
+      if (
+        !(value instanceof Uint8Array) ||
+        (DataType.isFixedSizeBinary(type) && value.byteLength !== type.byteWidth)
+      )
+        throw new Error(`Invalid value for ${type}`);
     };
   }
   const expected = DataType.isFloat(type) ? 'number' : key === 'bool' ? 'boolean' : 'string';

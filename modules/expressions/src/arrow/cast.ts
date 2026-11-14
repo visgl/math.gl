@@ -3,9 +3,11 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {
+  Binary,
   Bool,
   DataType,
   Dictionary,
+  FixedSizeBinary,
   Float16,
   Float32,
   Float64,
@@ -47,6 +49,42 @@ type Range = [Uint8Array, number, number];
 
 /** Resolves explicit scalar casts once, leaving active-row selection to the expression compiler. */
 export function bindCast(source: DataType, target: unknown) {
+  const binaryTarget =
+    typeof target === 'string' && /^(varbinary|fixedsizebinary):([1-9]\d*)$/.exec(target);
+  if (target === 'binary' || binaryTarget) {
+    const byteWidth = binaryTarget ? Number(binaryTarget[2]) : undefined;
+    if (byteWidth !== undefined && byteWidth > 0x7fffffff)
+      throw new Error('Binary CAST requires a positive 32-bit byte width');
+    const type =
+      binaryTarget && binaryTarget[1] === 'fixedsizebinary'
+        ? new FixedSizeBinary(byteWidth!)
+        : new Binary();
+    const sourceKey = typeKey(source);
+    const textInput = sourceKey === 'utf8';
+    if (
+      !textInput &&
+      sourceKey !== 'null' &&
+      sourceKey !== 'binary' &&
+      !sourceKey.startsWith('fixedsizebinary:')
+    )
+      throw new Error('Binary CAST requires binary or UTF8 input');
+    return {
+      type,
+      textInput,
+      evaluate(value: ArrowExpressionValue, range?: Range | null): ArrowExpressionValue {
+        const bytes = range ? range[0].subarray(range[1], range[2]) : (value as Uint8Array | null);
+        if (bytes === null || byteWidth === undefined) return bytes;
+        if (bytes.byteLength > byteWidth)
+          throw new ExpressionEvaluationError('overflow', `Binary CAST exceeds ${byteWidth} bytes`);
+        if (DataType.isFixedSizeBinary(type) && bytes.byteLength < byteWidth) {
+          const padded = new Uint8Array(byteWidth);
+          padded.set(bytes);
+          return padded;
+        }
+        return bytes;
+      }
+    };
+  }
   const dictionary = target === 'dictionary_utf8_int32';
   if (dictionary) target = 'utf8';
   if (!isColumnarScalarType(target)) throw new Error('Unsupported scalar CAST target');
@@ -55,6 +93,8 @@ export function bindCast(source: DataType, target: unknown) {
   const wideInteger = integer && type.bitWidth === 64;
   const sourceKey = typeKey(source);
   const textInput = sourceKey === 'utf8';
+  if (sourceKey === 'binary' || sourceKey.startsWith('fixedsizebinary:'))
+    throw new Error('CAST from binary requires a binary target');
   if (
     sourceKey !== 'null' &&
     ((sourceKey === 'bool' && !['bool', 'utf8'].includes(target)) ||

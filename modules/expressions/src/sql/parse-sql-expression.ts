@@ -235,7 +235,9 @@ export class SQLExpressionReader {
     }
     const target = /^dictionary$/i.test(match[0])
       ? this.dictionaryCastType()
-      : sqlCastType(match[0], this.source, start);
+      : /^(?:binary|varbinary|blob|fixedsizebinary)$/i.test(match[0])
+        ? this.binaryCastType(match[0].toLowerCase())
+        : sqlCastType(match[0], this.source, start);
     return this.call('cast', [
       argument,
       this.node({type: 'Literal', value: target, raw: JSON.stringify(target)})
@@ -249,6 +251,23 @@ export class SQLExpressionReader {
     if (!this.word('INT32')) throw this.error('Expected INT32 dictionary indices');
     this.symbol(')');
     return 'dictionary_utf8_int32';
+  }
+  /** Parses binary aliases and optional positive byte widths. */
+  private binaryCastType(name: string): string {
+    if (name === 'blob') return 'binary';
+    if (!this.take('(')) {
+      if (name === 'fixedsizebinary') throw this.error('FIXEDSIZEBINARY requires a byte width');
+      return 'binary';
+    }
+    this.space();
+    const width = /^\d+/.exec(this.source.slice(this.position))?.[0] ?? '';
+    const byteWidth = Number(width);
+    if (byteWidth < 1 || byteWidth > 0x7fffffff)
+      throw this.error('Binary CAST requires a positive 32-bit byte width');
+    this.position += width.length;
+    this.token();
+    this.symbol(')');
+    return `${name === 'varbinary' ? 'varbinary' : 'fixedsizebinary'}:${byteWidth}`;
   }
   private primary(depth: number): Expression {
     if (depth > 64) throw this.error('SQL expression exceeds nesting limit');

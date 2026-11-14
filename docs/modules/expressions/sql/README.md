@@ -186,9 +186,20 @@ executors must apply those conversions before testing the predicate. Binding, va
 and column discovery preserve this information. Arrow's predicate evaluator executes these casts.
 
 Unsupported targets/modifiers fail explicitly. This subset does not accept DECIMAL, date/time,
-length/precision modifiers, or casts on scalar values in the portable predicate representation. See [Arrow expression conversion rules](../arrow/README.md#sql-cast).
+or length/precision modifiers other than the binary widths below. The portable predicate
+representation supports scalar casts on columns only. See [Arrow expression conversion rules](../arrow/README.md#sql-cast).
 
 Postfix `value::TYPE` and chained casts are also supported with the same conversion rules.
+
+`CAST(category AS UTF8)` returns plain Arrow UTF-8, like `VARCHAR`.
+`CAST(category AS DICTIONARY(UTF8, INT32))` requests dictionary-encoded UTF-8
+with signed 32-bit indices. Dictionary entries are assigned in encounter order
+within each evaluated batch. Nulls remain null.
+
+`BINARY`, `VARBINARY`, and `BLOB` select Arrow `Binary`. `VARBINARY(n)` also selects
+`Binary` and rejects values larger than `n` bytes. `BINARY(n)` and `FIXEDSIZEBINARY(n)`
+select Arrow `FixedSizeBinary(n)`, zero-pad shorter values on the right, and reject
+longer values. Binary casts accept existing bytes or the UTF-8 bytes of text.
 
 ## Packed floating-point arrays
 
@@ -220,8 +231,3 @@ custom WHERE parser are preserved.
 
 Pass a [probe.gl](https://vis.gl/probe.gl) logger as the `log` option to `parseSQLQuery` to capture parser
 errors. The parser reports the diagnostic and throws the original error.
-
-`CAST(category AS UTF8)` returns plain Arrow UTF-8, like `VARCHAR`.
-`CAST(category AS DICTIONARY(UTF8, INT32))` requests dictionary-encoded UTF-8
-with signed 32-bit indices. Dictionary entries are assigned in encounter order
-within each evaluated batch. Nulls remain null.

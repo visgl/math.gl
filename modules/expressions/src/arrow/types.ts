@@ -6,7 +6,7 @@ import type {Field, Schema, RecordBatch, Vector, Table} from 'apache-arrow';
 import type {Expression} from '../expressions/index';
 
 /** Scalar values exposed to user callbacks. */
-export type ArrowExpressionValue = number | bigint | boolean | string | null;
+export type ArrowExpressionValue = number | bigint | boolean | string | Uint8Array | null;
 
 /** A vector kernel receives full-length inputs and must evaluate only active rows. */
 export type ArrowTableFunctionType = (

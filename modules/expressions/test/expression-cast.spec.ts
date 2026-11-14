@@ -3,7 +3,17 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Bool, DataType, Float64, Int32, Table, Utf8, vectorFromArray} from 'apache-arrow';
+import {
+  Binary,
+  Bool,
+  DataType,
+  FixedSizeBinary,
+  Float64,
+  Int32,
+  Table,
+  Utf8,
+  vectorFromArray
+} from 'apache-arrow';
 import {parseSQLExpression, parseSQLPredicate, parseSQLQuery} from '@math.gl/expressions/sql';
 import {compileArrowExpression, compileArrowPredicate} from '../src/arrow';
 
@@ -154,4 +164,59 @@ test('UTF8 and dictionary casts preserve string values, nulls, and empty output 
     String(evaluate('CAST(category AS DICTIONARY(UTF8, INT32))', table.slice(0, 0)).type)
   ).toBe(String(dictionary.type));
   expect(() => parseSQLExpression('CAST(category AS DICTIONARY(UTF8, INT8))')).toThrow(/INT32/);
+});
+
+test('binary CAST aliases choose the Arrow layout and enforce widths in bytes', () => {
+  const table = new Table({
+    x: vectorFromArray(['skip', 'é', 'a', '', null, 'abc'], new Utf8())
+  }).slice(1);
+  expect(parseSQLQuery('SELECT CAST(x AS VARBINARY(2)) AS payload')).toMatchObject({
+    select: [{as: 'payload', expression: parseSQLExpression('x::VARBINARY(2)')}]
+  });
+  const expected = [Uint8Array.of(195, 169), Uint8Array.of(97), new Uint8Array(), null];
+  for (const target of ['BINARY', 'VARBINARY', 'BLOB', 'VARBINARY(2)']) {
+    const result = evaluate(`CAST(x AS ${target})`, table.slice(0, 4));
+    expect(result.type).toEqual(new Binary());
+    expect([...result]).toEqual(expected);
+  }
+  for (const target of ['BINARY(2)', 'FIXEDSIZEBINARY(2)', 'VARBINARY(2)']) {
+    expect(() => evaluate(`CAST(x AS ${target})`, table)).toThrow('exceeds 2 bytes');
+    const result = evaluate(`CAST(x AS ${target})`, table, Uint8Array.of(1, 1, 1, 1, 0));
+    if (target !== 'VARBINARY(2)') {
+      expect(result.type).toEqual(new FixedSizeBinary(2));
+      expect([...result]).toEqual([
+        expected[0],
+        Uint8Array.of(97, 0),
+        Uint8Array.of(0, 0),
+        null,
+        null
+      ]);
+    }
+  }
+  expect(() => evaluate('x::VARBINARY(1)', table.slice(0, 1))).toThrow('exceeds 1 bytes');
+  for (const target of [
+    'VARBINARY(0)',
+    'BINARY(-1)',
+    'BINARY(1.5)',
+    'BINARY(2147483648)',
+    'FIXEDSIZEBINARY',
+    'BLOB(2)'
+  ]) {
+    expect(() => parseSQLExpression(`CAST(x AS ${target})`)).toThrow();
+  }
+});
+
+test('binary CAST reads binary columns and preserves fixed-width bytes through chained casts', () => {
+  const binary = new Table({
+    x: vectorFromArray([Uint8Array.of(99), Uint8Array.of(255), null], new Binary())
+  }).slice(1);
+  const fixed = evaluate('x::FIXEDSIZEBINARY(2)', binary);
+  expect([...fixed]).toEqual([Uint8Array.of(255, 0), null]);
+  const table = new Table({x: fixed}).slice(1);
+  expect([...evaluate('x::BLOB', table)]).toEqual([null]);
+  const valid = new Table({
+    x: vectorFromArray([Uint8Array.of(0, 0), Uint8Array.of(255, 0)], new FixedSizeBinary(2))
+  }).slice(1);
+  expect([...evaluate('x::BLOB', valid)]).toEqual([Uint8Array.of(255, 0)]);
+  expect([...evaluate("CAST('a' AS BINARY) = CAST('a' AS VARBINARY(1))", valid)]).toEqual([true]);
 });
