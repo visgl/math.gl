@@ -462,3 +462,31 @@ const result = queryArrowTable(orders, query);
 ```
 
 Queries can project and alias existing fields, evaluate computed columns, filter with SQL Boolean and null semantics, and apply `OFFSET` and `LIMIT` in source order. Computed columns read the filtered source columns. Output aliases only name result fields. Unaliased computed fields receive unique names based on their SELECT position. Direct projections share Arrow buffers when rows need no gathering. Computed types and error behavior follow the Arrow expression compiler.
+
+For relational queries, pass native Arrow inputs and structured options:
+
+```
+const totals = queryArrowTable(orders, {
+
+  union: [moreOrders],
+
+  join: {table: products, left: 'product_id', right: 'id', rightPrefix: 'product.'},
+
+  groupBy: ['product.category'],
+
+  aggregates: {
+
+    units: {operation: 'SUM', expression: 'quantity'},
+
+    orders: {operation: 'COUNT'}
+
+  },
+
+  orderBy: [{column: 'units', direction: 'desc'}],
+
+  limit: 10
+
+});
+```
+
+`union` appends schema-compatible tables in input order, retaining duplicates. `join` performs an inner equi-join. Null keys do not match, and duplicate keys produce all matching pairs. Right column names use the specified prefix. The executor applies `WHERE` after combining the inputs, then groups and aggregates before sorting and pagination. Sort keys reference input or grouped columns before SELECT aliases. Sorting is stable, and nulls sort last by default. Counts and sums of integer columns use Arrow Int64. Supply these relational operations through query options.
