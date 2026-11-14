@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Data, DataType, type RecordBatch, Schema, Struct, Table, type Field} from 'apache-arrow';
+import {Data, DataType, RecordBatch, Schema, Struct, Table, type Field} from 'apache-arrow';
 import {
   getRecordBatchMetadata,
   createRecordBatchWithMetadata,
@@ -35,6 +35,12 @@ export type ArrowBatchQuery = TableQuery<ParameterizedColumnarPredicate> &
     /** Checked between batches and during expression evaluation. */
     signal?: AbortSignal;
   };
+
+/** Options specific to streaming Arrow queries. */
+export type ArrowStreamingQuery = ArrowBatchQuery & {
+  /** Emit a schema-bearing empty batch when an input batch produces no rows. */
+  emitEmptyBatches?: boolean;
+};
 
 /** An in-memory SELECT with optional relational operators. */
 export type ArrowTableQuery = ArrowBatchQuery & {
@@ -92,7 +98,7 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
 export async function* queryArrowTableInBatches(
   input: AsyncIterable<RecordBatch> | Iterable<RecordBatch>,
   inputSchema: Schema,
-  query: ArrowBatchQuery = {}
+  query: ArrowStreamingQuery = {}
 ): AsyncIterable<RecordBatch> {
   query.signal?.throwIfAborted();
   validatePagination(query.offset ?? 0, query.limit);
@@ -106,7 +112,7 @@ export async function* queryArrowTableInBatches(
         schemaName: 'query input schema'
       });
     }
-    yield* plan.execute(batch);
+    yield* plan.execute(batch, query.emitEmptyBatches);
     if (plan.done()) return;
   }
 }
@@ -178,7 +184,7 @@ function compileArrowQuery(inputSchema: Schema, query: ArrowBatchQuery) {
   let skip = offset;
   let remaining = limit ?? Infinity;
   /** Evaluates one batch using the remaining pagination budget. */
-  function* execute(batch: RecordBatch): Iterable<RecordBatch> {
+  function* execute(batch: RecordBatch, emitEmpty = false): Iterable<RecordBatch> {
     signal?.throwIfAborted();
     const metadata = getRecordBatchMetadata(batch);
     const mask = predicate?.evaluate(batch, {signal});
@@ -227,7 +233,13 @@ function compileArrowQuery(inputSchema: Schema, query: ArrowBatchQuery) {
                 metadata
               );
     }
-    if (!selected?.numRows) return;
+    if (!selected?.numRows) {
+      if (emitEmpty) {
+        const empty = new RecordBatch(schema, undefined);
+        yield createRecordBatchWithMetadata(schema, empty.data, metadata);
+      }
+      return;
+    }
     remaining -= selected.numRows;
     if (!select) {
       yield selected;
