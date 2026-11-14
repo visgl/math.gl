@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Float64, Table, vectorFromArray} from 'apache-arrow';
+import {Float64, Int32, Int64, Table, Utf8, vectorFromArray} from 'apache-arrow';
 import {expect, test} from 'vitest';
 import {queryArrowTable} from '@math.gl/expressions/arrow';
 import {parseSQLQuery} from '@math.gl/expressions/sql';
@@ -116,4 +116,19 @@ test('sorts by multiple keys with stable ties and explicit null placement', () =
     limit: 3
   });
   expect(Array.from(result.getChild('index')!)).toEqual([3, 0, 4]);
+});
+
+test('join compares narrow and wide integer keys without rounding the wide key', () => {
+  const left = new Table({id: vectorFromArray([1, 2], new Int32())});
+  const right = new Table({id: vectorFromArray([1n, 9007199254740993n], new Int64())});
+  const join = {table: right, left: 'id', right: 'id', rightPrefix: 'right.'};
+  expect(Array.from(queryArrowTable(left, {join}).getChild('right.id')!)).toEqual([1n]);
+  const rounded = new Table({id: vectorFromArray([9007199254740992], new Float64())});
+  expect(queryArrowTable(rounded, {join}).numRows).toBe(0);
+});
+
+test('sort orders supplementary characters by UTF-8, as WHERE does', () => {
+  const source = new Table({key: vectorFromArray(['😀', null, '\uE000'], new Utf8())});
+  const result = queryArrowTable(source, {orderBy: [{column: 'key'}]});
+  expect(Array.from(result.getChild('key')!)).toEqual(['\uE000', '😀', null]);
 });

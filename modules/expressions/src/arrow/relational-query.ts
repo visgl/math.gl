@@ -14,7 +14,8 @@ import {
 } from 'apache-arrow';
 import {takeArrowTableRows, validateArrowTableSchema} from '@math.gl/arrow';
 import {compileArrowAggregates, type ArrowAggregate} from './aggregates';
-import {valueType} from './buffers';
+import {compareUTF8} from '@math.gl/arrow/utf8';
+import {ColumnReader, valueType} from './buffers';
 import {compileArrowExpression} from './compiler';
 import type {ArrowExpressionOptions, ArrowExpressionValue} from './types';
 
@@ -70,7 +71,7 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
   const rightRows = new Map<ArrowExpressionValue, number[]>();
   for (let row = 0; row < right.numRows; row++) {
     signal?.throwIfAborted();
-    const key = rightKey!.get(row);
+    const key = normalizeJoinKey(rightKey!.get(row));
     if (key === null || (typeof key === 'number' && Number.isNaN(key))) continue;
     const matches = rightRows.get(key);
     if (matches) matches.push(row);
@@ -80,7 +81,7 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
   const rightIndexes: number[] = [];
   for (let row = 0; row < left.numRows; row++) {
     signal?.throwIfAborted();
-    const key = leftKey!.get(row);
+    const key = normalizeJoinKey(leftKey!.get(row));
     for (const match of rightRows.get(key) ?? []) {
       leftIndexes.push(row);
       rightIndexes.push(match);
@@ -101,6 +102,11 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
   );
 }
 
+/** Canonicalizes numeric keys without narrowing 64-bit integers to Number. */
+function normalizeJoinKey(value: ArrowExpressionValue): ArrowExpressionValue {
+  return typeof value === 'number' && Number.isInteger(value) ? BigInt(value) : value;
+}
+
 /** Sorts stably by scalar keys and gathers only the requested rows. */
 export function orderArrowTable(
   table: Table,
@@ -109,16 +115,33 @@ export function orderArrowTable(
   limit: number | undefined,
   signal?: AbortSignal
 ): Table {
-  const keys = orderBy.map(key => ({...key, vector: getScalarColumn(table, key.column).vector}));
+  const keys = orderBy.map(key => {
+    const {field, vector} = getScalarColumn(table, key.column);
+    return {
+      ...key,
+      reader: vector && new ColumnReader(vector),
+      utf8: DataType.isUtf8(valueType(field.type))
+    };
+  });
   const indexes = Array.from({length: table.numRows}, (_, index) => index);
   indexes.sort((left, right) => {
     signal?.throwIfAborted();
-    for (const {vector, direction, nulls} of keys) {
-      const a = vector!.get(left);
-      const b = vector!.get(right);
-      if (a === b) continue;
-      if (a === null || b === null) return (a === null ? -1 : 1) * (nulls === 'first' ? 1 : -1);
-      const order = a < b ? -1 : a > b ? 1 : Number(Number.isNaN(a)) - Number(Number.isNaN(b));
+    for (const {reader, utf8, direction, nulls} of keys) {
+      const leftValid = reader!.isValid(left);
+      const rightValid = reader!.isValid(right);
+      if (!leftValid || !rightValid) {
+        if (leftValid === rightValid) continue;
+        return (leftValid ? 1 : -1) * (nulls === 'first' ? 1 : -1);
+      }
+      let order: number;
+      if (utf8) {
+        const [a, start, end] = reader!.utf8(left);
+        order = compareUTF8(a, start, end, ...reader!.utf8(right));
+      } else {
+        const a = reader!.get(left)!;
+        const b = reader!.get(right)!;
+        order = a < b ? -1 : a > b ? 1 : Number(Number.isNaN(a)) - Number(Number.isNaN(b));
+      }
       if (order) return direction === 'desc' ? -order : order;
     }
     return 0;
