@@ -942,6 +942,12 @@ After building, run `node scripts/benchmark-terrain-edit-replay.mjs` to compare 
 
 Run `node scripts/benchmark-terrain-edit-replay.mjs --dem` after building to replay point and patch edits on the pinned Pacific and Sierra nodata DEMs with the adaptive updater. The comparison checks every mesh buffer against a full rebuild of the same regional decomposition.
 
+### Certify horizontal mesh coverage[​](#certify-horizontal-mesh-coverage "Direct link to Certify horizontal mesh coverage")
+
+`certifyTerrainMeshCoverage(field, mesh, options)` compares coverage multiplicity in fractional sample coordinates. Choose valid raster triangles (the default), four-corner-valid cells (`reference: 'bilinear'`), or a reference triangulation known to cover the intended domain once. A `certified` result proves equality almost everywhere. `mismatch` reports a boundary interval with a nonzero multiplicity jump, and `budget-exhausted` means no certificate was computed. Use `boundTerrainMeshError` separately for vertical accuracy over shared coverage.
+
+The method uses exact binary64 coordinates, so even a small unsnapped gap can fail certification. It does not certify isolated lines or points. The boundary lab shows the selected domain and highlights a witness on mismatch.
+
 ### Mixed-level DEM residency replay[​](#mixed-level-dem-residency-replay "Direct link to Mixed-level DEM residency replay")
 
 Run `node scripts/qualify-terrain-residency.mjs` after building. The replay loads and evicts spacing-1 tiles over spacing-4 coverage on the pinned Pacific and Sierra nodata DEMs. It compares every incremental halo with a full rebuild from reversed input order and checks reuse of untouched halos. It reports p95 latency, output buffer bytes and process peak RSS. For larger resident sets, the halo builder uses a spatial broad phase to exclude tiles that cannot intersect the target halo. Finest-resident ownership and the distinction between nodata and absence are unchanged.
