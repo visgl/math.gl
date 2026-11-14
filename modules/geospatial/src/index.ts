@@ -403,3 +403,6 @@ export {
   type TerrainValidDomainMeshRegions,
   type TerrainValidDomainRegionOptions
 } from './terrain/valid-domain-regions';
+
+export {certifyTerrainMeshCoverage} from './terrain/mesh-coverage';
+export type {TerrainCoverageMesh, TerrainMeshCoverage} from './terrain/mesh-coverage';

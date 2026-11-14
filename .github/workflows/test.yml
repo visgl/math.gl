@@ -196,6 +196,8 @@ jobs:
 
       - name: Qualify pinned terrain boundaries
         run: node --test test/terrain-boundaries/*.test.mjs
+      - name: Qualify constrained terrain coverage
+        run: node test/terrain-boundaries/coverage.mjs
       - name: Qualify continuous terrain bounds against independent DEM probes
         run: node test/terrain-boundaries/continuous.mjs
 

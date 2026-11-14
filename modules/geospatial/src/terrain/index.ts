@@ -202,3 +202,6 @@ export {
   type TerrainValidDomainMeshRegions,
   type TerrainValidDomainRegionOptions
 } from './valid-domain-regions';
+
+export {certifyTerrainMeshCoverage} from './mesh-coverage';
+export type {TerrainCoverageMesh, TerrainMeshCoverage} from './mesh-coverage';

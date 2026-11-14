@@ -106,3 +106,27 @@ tolerance or treating the upstream CSV as an oracle. Their planar domain coverag
 constraint geometry still provide useful evidence for adaptive nodata meshing. The
 original supplied XYZ outline and independently measured source-node elevations are
 reported separately: geometric preservation alone does not establish height fidelity.
+
+### Exact horizontal coverage
+
+`node test/terrain-boundaries/coverage.mjs` checks the current Pacific breakline
+and Sierra nodata-aware meshes at 10, 20, and 40 m against the valid raster
+triangle domain. Coverage is independent of vertical error. Pacific's derived
+coastline is an interior constraint in this check. Sierra also compares the
+four-corner study domain. The boundary lab displays a witness interval on mismatch.
+
+`certifyTerrainMeshCoverage` compares oriented triangle boundaries in fractional
+sample coordinates. The difference in multiplicity has compact support and can
+change only across its boundary. Cancelling that boundary proves equality almost
+everywhere, including absence of positive-area holes, excess and overlaps when
+the reference covers its domain once. An explicit reference triangulation must
+meet that condition. Exact coordinate equality means no snapping tolerance is
+applied to narrow gaps. The certificate does not adjudicate height or isolated
+point and line features.
+
+Run `node scripts/benchmark-terrain-coverage.mjs 20` to sweep regular mesh creation
+and certification separately over sizes and nodata patterns. Compare JSON on the
+same machine and Node version. Reported peak RSS is process-wide, and input bytes
+describe the horizontal buffers only. This is a starting workload for optimization,
+alongside the regional edit and contour sweeps. For worker scheduling experiments,
+the `@math.gl/geospatial/tasks` subpath exports `CertifyTerrainCoverageTask`.
