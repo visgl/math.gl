@@ -165,7 +165,14 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
       skip -= start;
       const end = start + Math.min(batch.numRows - start, remaining);
       if (end > start)
-        selected = start === 0 && end === batch.numRows ? batch : batch.slice(start, end);
+        selected =
+          start === 0 && end === batch.numRows
+            ? batch
+            : createRecordBatchWithMetadata(
+                batch.schema,
+                batch.data.slice(start, end - start),
+                metadata
+              );
     }
     if (!selected?.numRows) continue;
     remaining -= selected.numRows;
