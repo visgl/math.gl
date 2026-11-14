@@ -16,6 +16,8 @@ import {
   createRecordBatchWithMetadata,
   getRecordBatchMetadata,
   dehydrateArrowTable,
+  dehydrateArrowRecordBatch,
+  hydrateArrowRecordBatch,
   hydrateArrowTable,
   serializeArrowTableToIPC,
   deserializeArrowTableFromIPC
@@ -76,9 +78,11 @@ export function checkArrowConformance() {
     table.batches[0].data,
     new Map([['partition', 'first']])
   );
-  const metadataTable = new arrow.Table(table.schema, [metadataBatch]);
-  const metadataPayload = dehydrateArrowTable(metadataTable);
-  const [restoredBatch] = hydrateArrowTable(structuredClone(metadataPayload)).batches;
+  const metadataPayload = dehydrateArrowRecordBatch(metadataBatch, {copy: 'all'});
+  const restoredBatch = hydrateArrowRecordBatch(structuredClone(metadataPayload));
+  assert.equal(restoredBatch.numRows, metadataBatch.numRows);
+  assert.deepEqual(restoredBatch.schema.metadata, metadataBatch.schema.metadata);
+  assert.throws(() => hydrateArrowRecordBatch({...metadataPayload, batches: []}), /exactly one/);
   assert.deepEqual(getRecordBatchMetadata(restoredBatch), new Map([['partition', 'first']]));
   assert.equal(Object.hasOwn(restoredBatch, 'metadata'), !('metadata' in arrow.RecordBatch.prototype));
   const payload = dehydrateArrowTable(combined, {copy: 'all'});

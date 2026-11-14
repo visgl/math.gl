@@ -86,3 +86,7 @@ payload preserves batch maps, including application-defined maps on
 older Arrow JS versions. Use `createRecordBatchWithMetadata(schema, data, metadata)`
 and `getRecordBatchMetadata(batch)` from `@math.gl/arrow` when working across Arrow
 versions. For full IPC streams, batch metadata support depends on the Arrow runtime.
+
+Use `dehydrateArrowRecordBatch(batch, options?)` and
+`hydrateArrowRecordBatch(payload)` when sending one record batch. They use the
+same payload as table transport and hydration requires exactly one batch.

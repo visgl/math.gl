@@ -167,3 +167,19 @@ function hydrateArrowData<T extends arrow.DataType>(
     data.variadicBuffers
   );
 }
+
+/** Dehydrates one batch using the same schema and buffer ownership format as table transport. */
+export function dehydrateArrowRecordBatch(
+  batch: arrow.RecordBatch,
+  options?: SplitArrowBuffersOptions
+): DehydratedArrowTable {
+  return dehydrateArrowTable(new arrow.Table(batch.schema, [batch]), options);
+}
+
+/** Hydrates a column-buffer payload containing exactly one Arrow record batch. */
+export function hydrateArrowRecordBatch(payload: DehydratedArrowTable): arrow.RecordBatch {
+  if (payload.batches.length !== 1) {
+    throw new Error('Arrow record batch transport requires exactly one batch.');
+  }
+  return hydrateArrowTable(payload).batches[0]!;
+}
