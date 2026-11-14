@@ -1734,8 +1734,8 @@ try {
 }
 ```
 
-The task serializes edits and rejects stale revisions. A failed validation
-leaves the last committed snapshot intact. Use `{type: 'snapshot'}` to
+The task serializes edits. A stale revision or invalid edit returns an error
+message with empty changes and the last committed revision. Use `{type: 'snapshot'}` to
 recover the full current state if a response is lost and the handle remains
 usable. If the worker is closed, initialize a new handle and reseed it.
 Returned buffers are independent of resident buffers, so transfer cannot
