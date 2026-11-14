@@ -1748,12 +1748,20 @@ Byte totals count output typed arrays. They exclude message metadata and copies
 inside the worker.
 
 Run `node scripts/benchmark-terrain-worker-batching.mjs` to sweep individual
-edits and batches capped at 2, 4 or 8 edits on the same 80-tile Pacific and
+edits and batches capped at eight edits on the same 80-tile Pacific and
 Sierra layouts. The replay schedules 128 edits at 8 ms intervals, either one
-at a time or in bursts of eight, and allows up to 2 ms to fill a batch.
+at a time or in bursts of eight, and compares three dispatch policies.
 Requests are serialized by revision. The replay reports p50, p95 and p99 for
 edit-to-ack latency, arrival-to-send latency (batch fill and queue time), and
 worker request round trips, plus response buffer bytes. The separately timed
 full rebuild oracle checks every committed delta and confirms that every
 batching and ownership mode produces the same final terrain. Oracle work
 runs after dispatch and acknowledgement timing has finished.
+
+The opportunistic replay sends immediately when idle and groups only edits
+that have arrived by dispatch, capped at eight. The comparison rotates
+singles, a 2 ms bounded wait and opportunistic batching over three repeats.
+Set `measureStages: true` on a residency edit request to include worker-local
+durations for applying edits, updating halos, and preparing the delta. The
+round trip minus worker process time includes transport, scheduling and task
+runtime work.

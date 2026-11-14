@@ -126,12 +126,16 @@ for (const [api, provided] of [[tasks, geospatial], [require('@math.gl/tasks'), 
       const tile = {...address, field: {width: 2, height: 2, heights: new Float32Array(4)}};
       const first = await resident.runTask({revision: 0, edits: [{type: 'upsert', tile}]});
       assert.equal(first.tiles.length, 1);
+      assert.equal(first.timings, undefined);
       const sample = {type: 'samples', address, samples: [{index: 0, height: 2}]};
       assert.match((await resident.runTask({revision: 1, edits: [
         sample, {...sample, samples: [{index: 5, height: 2}]}
       ]})).error, /Invalid terrain sample edit/);
       assert.deepEqual((await resident.runTask({type: 'snapshot'})).tiles, first.tiles);
-      const edited = await resident.runTask({revision: 1, edits: [sample]});
+      const edited = await resident.runTask({revision: 1, edits: [sample], measureStages: true});
+      for (const stage of ['applyEditsMs', 'updateHalosMs', 'prepareDeltaMs', 'processMs']) {
+        assert(Number.isFinite(edited.timings[stage]) && edited.timings[stage] >= 0);
+      }
       assert.equal(edited.tiles[0].field.heights[5], 2);
       assert.match((await resident.runTask({revision: 1, edits: []})).error, /Stale/);
       assert.deepEqual(await resident.runTask({revision: 2, edits: [sample]}),

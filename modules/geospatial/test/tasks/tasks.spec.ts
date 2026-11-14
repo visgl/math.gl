@@ -7,7 +7,8 @@ import {TaskRunner, preloadTasks} from '@math.gl/tasks';
 import {
   ProjectCoordinatesTask,
   PrepareMapTask,
-  CertifyTerrainCoverageTask
+  CertifyTerrainCoverageTask,
+  TerrainResidencyTask
 } from '@math.gl/geospatial/tasks';
 import {MapEngine} from '@math.gl/geospatial/maps/map-engine';
 
@@ -133,6 +134,40 @@ test('coverage worker returns the same certificate as direct task execution', as
     const direct = await runner.runTask(task, input, {execution: 'main-thread'});
     expect(direct.status).toBe('certified');
     expect(await runner.runTask(task, input, {execution: 'worker'})).toEqual(direct);
+  } finally {
+    await runner.close();
+  }
+});
+
+test('terrain residency reports stage timings only for measured commits', async () => {
+  const runner = new TaskRunner();
+  try {
+    const handle = await runner.initializeTask(
+      TerrainResidencyTask,
+      {},
+      {execution: 'main-thread'}
+    );
+    const address = {column: 0, row: 0, spacing: 1};
+    const tile = {...address, field: {width: 2, height: 2, heights: new Float64Array(4)}};
+    const initial = await handle.runTask({revision: 0, edits: [{type: 'upsert', tile}]});
+    expect(initial.timings).toBeUndefined();
+
+    const measured = await handle.runTask({
+      revision: 1,
+      measureStages: true,
+      edits: [{type: 'samples', address, samples: [{index: 0, height: 2}]}]
+    });
+    expect(measured.revision).toBe(2);
+    expect(measured.tiles[0].field.heights[5]).toBe(2);
+    const {applyEditsMs, updateHalosMs, prepareDeltaMs, processMs} = measured.timings!;
+    for (const duration of [applyEditsMs, updateHalosMs, prepareDeltaMs]) {
+      expect(Number.isFinite(duration)).toBe(true);
+      expect(duration).toBeGreaterThanOrEqual(0);
+    }
+    expect(processMs).toBeCloseTo(applyEditsMs + updateHalosMs + prepareDeltaMs, 8);
+    const stale = await handle.runTask({revision: 1, measureStages: true, edits: []});
+    expect(stale.timings).toBeUndefined();
+    expect(stale.error).toMatch(/Stale/);
   } finally {
     await runner.close();
   }
