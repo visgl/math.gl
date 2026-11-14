@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {createTerrainBoxIndex, type TerrainBox} from './box-index';
-import {buildMixedVertexTileHalos, type TerrainMixedVertexTile} from './mixed-vertex-halos';
+import {
+  buildMixedVertexTileHalos,
+  type TerrainMixedVertexTile,
+  type MixedHaloPreparation
+} from './mixed-vertex-halos';
 
 export type TerrainMixedHaloSnapshot = {
   /** Immutable source descriptors and buffers; replace the descriptor after every edit. */
@@ -18,6 +22,8 @@ const bounds = (tile: TerrainMixedVertexTile, padding = 0): TerrainBox => ({
   maxX: tile.column + (tile.field.width - 1) * tile.spacing + padding,
   maxY: tile.row + (tile.field.height - 1) * tile.spacing + padding
 });
+
+const preparations = new WeakMap<TerrainMixedHaloSnapshot, MixedHaloPreparation>();
 
 const targetIndexes = new WeakMap<
   TerrainMixedHaloSnapshot,
@@ -116,7 +122,12 @@ export function updateTerrainMixedVertexTileHalos(
   for (const [address, tile] of old) {
     if (!current.has(address) && resident.length) invalidate(bounds(tile));
   }
-  const built = buildMixedVertexTileHalos(resident, options, targets).tiles;
+  const priorPreparation = previous && preparations.get(previous);
+  const preparation: MixedHaloPreparation = {
+    fields: priorPreparation?.fields ?? new WeakMap(),
+    layout: priorPreparation?.layout
+  };
+  const built = buildMixedVertexTileHalos(resident, options, targets, preparation).tiles;
   for (const tile of built) cached.set(key(tile), tile);
   const tiles = resident
     .map(t => cached.get(key(t))!)
@@ -127,6 +138,7 @@ export function updateTerrainMixedVertexTileHalos(
     rebuilt: built.map(key),
     removed: [...old.keys()].filter(k => !current.has(k)).sort()
   };
+  preparations.set(snapshot, preparation);
   if (index) targetIndexes.set(snapshot, index);
   return snapshot;
 }

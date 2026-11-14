@@ -177,3 +177,25 @@ test('interior edits preserve nearby halo identities while corner edits invalida
     state = next;
   }
 });
+
+test('mixed halo preparation follows layout changes and preserves retained snapshots', () => {
+  const sources = Array.from({length: 10}, (_, i) => tile(i * 4));
+  const initial = updateTerrainMixedVertexTileHalos(null, sources);
+  const resized = {
+    ...sources[3],
+    field: {...sources[3].field, width: 6, heights: new Float64Array(30)}
+  };
+  const edited = sources.map((source, i) => (i === 3 ? resized : source));
+  const next = updateTerrainMixedVertexTileHalos(initial, edited);
+  expect(next.tiles).toEqual(createTerrainMixedVertexTileHalos(edited).tiles);
+  const branch = sources.slice(1).reverse();
+  expect(updateTerrainMixedVertexTileHalos(initial, branch).tiles).toEqual(
+    createTerrainMixedVertexTileHalos(branch).tiles
+  );
+  expect(updateTerrainMixedVertexTileHalos(next, sources).tiles).toEqual(
+    createTerrainMixedVertexTileHalos(sources).tiles
+  );
+  expect(() => updateTerrainMixedVertexTileHalos(next, edited, {maxSamples: 1})).toThrow(
+    /capacity/
+  );
+});

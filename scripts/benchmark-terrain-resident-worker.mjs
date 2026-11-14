@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {mkdtempSync, readFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -20,13 +21,17 @@ const p95 = times => [...times].sort((a, b) => a - b)[Math.ceil(times.length * 0
 try {
   const entries = ['geospatial/src/terrain/index.ts', 'tasks/src/index.ts',
     'geospatial/src/tasks/terrain-residency.ts', 'geospatial/src/tasks/terrain-residency-worker.ts'];
+  const baseline = process.argv[2] === undefined ? undefined :
+    execFileSync('git', ['rev-parse', '--verify', process.argv[2] + '^{commit}'], {
+      cwd: root, encoding: 'utf8'
+    }).trim();
   const modules = [];
   for (const [i, entry] of entries.entries()) {
     const output = join(directory, i + '.mjs');
-    await bundleRuntime(root, './modules/' + entry, output);
+    await bundleRuntime(root, './modules/' + entry, output, baseline, 'node');
     modules.push(pathToFileURL(output));
   }
-  const {createTerrainMixedVertexTileHalos} = await import(modules[0]);
+  const {createTerrainMixedVertexTileHalos, updateTerrainMixedVertexTileHalos} = await import(modules[0]);
   const {TaskRunner} = await import(modules[1]);
   const {TerrainResidencyTask} = await import(modules[2]);
   const task = {...TerrainResidencyTask, worker: {url: modules[3], capabilities: {atomic: true, streaming: false}}};
@@ -52,7 +57,8 @@ try {
           let {revision, tiles} = await handle.runTask({revision: 0, edits: source.map(tile => ({type: 'upsert', tile}))}, {outputOwnership});
           const current = new Map(tiles.map(tile => [key(tile), tile]));
           let changedBytes = 0, fullBytes = 0, changedTiles = 0;
-          const workerTimes = [], fullTimes = [];
+          const workerTimes = [], fullTimes = [], incrementalTimes = [];
+          let direct = updateTerrainMixedVertexTileHalos(null, source);
           for (let step = 0; step < 45; step++) {
             const slot = (step * 17) % source.length;
             const old = source[slot];
@@ -69,9 +75,13 @@ try {
             const workerMs = performance.now() - start;
             assert.equal(delta.revision, revision + 1);
             revision = delta.revision;
+            const incrementalStart = performance.now();
+            direct = updateTerrainMixedVertexTileHalos(direct, source);
+            const incrementalMs = performance.now() - incrementalStart;
             const fullStart = performance.now();
             const full = createTerrainMixedVertexTileHalos(source).tiles;
             const fullMs = performance.now() - fullStart;
+            assert.deepEqual(direct.tiles, full);
             const changed = full.filter(tile => {
               const before = current.get(key(tile));
               const equal = (a, b) => a.every((value, i) => Object.is(value, b[i]));
@@ -84,6 +94,7 @@ try {
             assert.deepEqual(full.map(tile => current.get(key(tile))), full);
             if (step >= 5) {
               workerTimes.push(workerMs);
+              incrementalTimes.push(incrementalMs);
               fullTimes.push(fullMs);
               changedBytes += bytes(delta.tiles);
               fullBytes += bytes(full);
@@ -91,7 +102,7 @@ try {
             }
           }
           results.push({name, sha256: dem.sha256, outputOwnership, events: 40, changedTiles,
-            changedBytes, fullBytes, workerP95Ms: p95(workerTimes), directFullP95Ms: p95(fullTimes)});
+            changedBytes, fullBytes, workerP95Ms: p95(workerTimes), directIncrementalP95Ms: p95(incrementalTimes), directFullP95Ms: p95(fullTimes)});
         } finally {
           await handle.close();
         }
@@ -100,7 +111,7 @@ try {
   } finally {
     await runner.close();
   }
-  console.log(JSON.stringify({node: process.version, platform: process.platform, arch: process.arch,
+  console.log(JSON.stringify({revision: baseline ?? 'working tree', node: process.version, platform: process.platform, arch: process.arch,
     processPeakRssKiB: process.resourceUsage().maxRSS, results}, null, 2));
 } finally {
   rmSync(directory, {recursive: true, force: true});

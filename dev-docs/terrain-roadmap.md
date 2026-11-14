@@ -749,3 +749,17 @@ For same-size replacements, compare the effective samples and expand the dirty
 bounds by one source cell for interpolation. Layout changes still invalidate
 overlapping old and new coverage. The target overlap index is reused across
 edits when ordered tile addresses and dimensions are stable.
+
+For paired worker-edit timing, run `node scripts/benchmark-terrain-resident-worker.mjs
+<baseline-commit>` and then run the same command without the commit to measure
+the working tree. The Pacific and Sierra replays compare worker round-trip
+latency, direct incremental compute, and full-rebuild compute on the same
+edits. Each event checks both incremental results against the full rebuild.
+For CPU profiles, add Node's `--cpu-prof --cpu-prof-interval=100` flags before
+the script path. Run timing separately from profiling.
+
+Incremental snapshots now reuse normalized source fields by immutable tile
+descriptor and reuse the sampling overlap index while the sorted layout is
+stable. Per-call frame and capacity checks still run, and full rebuilds
+prepare their own sources. The cache retains prepared sample storage for
+live descriptors, trading memory for fewer copies on each edit.
