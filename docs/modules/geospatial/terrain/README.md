@@ -1833,3 +1833,21 @@ The terrain triangle sheet represents the static mesh collider.
 `sweepTerrainTriangleMesh` sweeps a two-sided indexed triangle sheet,
 including a finite plane represented by two triangles. It reports the
 first terrain triangle touched by any moving face. `sweepTerrainPlane` handles infinite two-sided planes directly.
+
+### Rotational box and hull contacts
+
+`sweepTerrainRotatingBox` starts with an axis-aligned box.
+`sweepTerrainRotatingPolytope` starts with a triangulated convex hull in its
+initial orientation. Both apply a shortest-arc relative quaternion in XYZW
+order about the supplied pivot and add linear translation. Fractions range
+from zero to one. A hit brackets first impact and identifies a terrain
+triangle at the upper fraction. A rotational witness may have no unique
+entry normal. Unresolved grazing and exhausted work return `incomplete`.
+An identity rotation uses the fixed-orientation sweep directly.
+
+The CPU parity fixture in
+`modules/geospatial/test/terrain/fixtures/rotational-sweep-parity.json`
+retains elevations and nodata from pinned Pacific and Sierra windows on a
+synthetic unit-spaced Cartesian grid. The CPU test packs and unpacks the
+height field before triangulating. This gives downstream parity tests the
+same vertex registration, diagonal, validity, and quantized elevations.

@@ -242,3 +242,10 @@ export {
   type TerrainPoleIncidence,
   type TerrainPoleCoverage
 } from './geographic-poles';
+
+export {
+  sweepTerrainRotatingBox,
+  sweepTerrainRotatingPolytope,
+  type TerrainRigidMotion,
+  type TerrainRotationalSweepResult
+} from './sweep-rotation';
