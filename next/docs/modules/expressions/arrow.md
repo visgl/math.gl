@@ -558,3 +558,7 @@ for await (const batch of queryArrowTableInBatches(inputBatches, schema, {
 
 }
 ```
+
+### Progressive aggregate snapshots[​](#progressive-aggregate-snapshots "Direct link to Progressive aggregate snapshots")
+
+`queryArrowAggregateSnapshots(batches, schema, options)` applies an optional linear query before accumulating scalar aggregates or grouping by one source column. Each snapshot contains an independent Arrow table, the number of rows processed, and a `final` flag. Set `emitEveryBatches` to control provisional snapshots. A final snapshot is emitted even when the stream is empty.
