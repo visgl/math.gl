@@ -604,3 +604,22 @@ try {
 In a browser, supply a module worker factory pointing to a local module that imports
 the query worker entry. Custom functions can be registered in that module with
 `initializeTaskWorker(createArrowQueryTask({functions}))`.
+
+### Querying a stream of record batches
+
+`queryArrowTableInBatches(batches, schema, query)` applies the same schema-bound
+WHERE and SELECT as `queryArrowTable` to an iterable or async iterable of
+Arrow record batches. OFFSET and LIMIT apply across the stream, and reaching
+the limit closes the input iterator. Supply the schema up front, including
+for empty inputs. Grouping, sorting, joins and unions use the table engine.
+
+```ts
+import {queryArrowTableInBatches} from '@math.gl/expressions/arrow';
+
+for await (const batch of queryArrowTableInBatches(inputBatches, schema, {
+  select: [{column: 'value', as: 'measurement'}],
+  limit: 1000
+})) {
+  consume(batch);
+}
+```
