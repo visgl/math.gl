@@ -4,7 +4,11 @@
 
 import {expect, test} from 'vitest';
 import {HeightField, TerrainSampleStatus as Status} from '@math.gl/geospatial/terrain';
-import {TerrainSurface, createTerrainSurface} from '@math.gl/geospatial/terrain';
+import {
+  TerrainSurface,
+  createTerrainSurface,
+  sweepTerrainSphere
+} from '@math.gl/geospatial/terrain';
 import {intersectRayTriangle, getClosestPointOnTriangle} from '@math.gl/geometry/culling';
 
 function plane(): TerrainSurface {
@@ -238,4 +242,31 @@ test('surface numeric failures are explicit and leave no successful sample paylo
   });
   expect(distant.sample(-1e308, 0).status).toBe(Status.NUMERIC_ERROR);
   expect(() => distant.nearest([-1e308, 0, 0])).toThrow('coordinate overflow');
+});
+
+test('bounded sphere sweep brackets first contact through a terrain sheet', () => {
+  const surface = new TerrainSurface({
+    positions: Float64Array.of(0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0),
+    indices: Uint32Array.of(0, 1, 2, 0, 2, 3)
+  });
+  const hit = sweepTerrainSphere(surface, [1, 1, 3], [1, 1, -3], 0.75);
+  expect(hit.status).toBe('hit');
+  if (hit.status !== 'hit') throw new Error('Expected impact');
+  expect(hit.lowerFraction).toBeLessThan(0.375);
+  expect(hit.fraction).toBeGreaterThanOrEqual(0.375);
+  expect(hit.fraction - hit.lowerFraction).toBeLessThanOrEqual(1e-6);
+  expect(hit.contact.normal[2]).toBe(1);
+  const grazing = sweepTerrainSphere(surface, [-1, -1, 0], [3, -1, 0], 1);
+  expect(grazing.status).toBe('hit');
+  if (grazing.status !== 'hit') throw new Error('Expected grazing impact');
+  expect(grazing.fraction).toBeCloseTo(0.25, 5);
+  expect(sweepTerrainSphere(surface, [1, 1, 0], [1, 1, 3], 1)).toMatchObject({
+    status: 'hit',
+    fraction: 0
+  });
+  expect(sweepTerrainSphere(surface, [3, 3, 3], [3, 3, -3], 0.5).status).toBe('miss');
+  expect(sweepTerrainSphere(surface, [1, 1, 3], [1, 1, -3], 1, {maxWork: 0})).toEqual({
+    status: 'incomplete',
+    work: 0
+  });
 });

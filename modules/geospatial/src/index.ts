@@ -412,3 +412,9 @@ export {
   type TerrainGeographicEdge,
   type TerrainGeographicNeighbor
 } from './terrain/geographic-neighbor';
+
+export {
+  sweepTerrainSphere,
+  type TerrainSphereSweepOptions,
+  type TerrainSphereSweepResult
+} from './terrain/sweep-sphere';

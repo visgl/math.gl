@@ -1773,3 +1773,18 @@ Set `measureStages: true` on a residency edit request to include worker-local
 durations for applying edits, updating halos, and preparing the delta. The
 round trip minus worker process time includes transport, scheduling and task
 runtime work.
+
+### Continuous sphere contact
+
+`sweepTerrainSphere(surface, start, end, radius)` brackets the first contact
+of a translating sphere against the active terrain triangles. Coordinates and
+radius use the same local Cartesian units as the surface. A hit includes a
+contact witness and the lower and upper fractions of the impact interval.
+The witness's `segmentFraction` is relative to the tested motion prefix.
+An exhausted budget returns `incomplete`. A `miss` means the motion missed
+the supplied triangles, which may omit nodata or nonresident tiles.
+
+For CPU/GPU qualification of a packed height field, construct the CPU surface
+from `unpackTerrainHeightField` using triangle interpolation and the same
+diagonal and validity mask as the GPU collider. Use the same local origin and
+physical units when comparing time of impact and contact normals.
