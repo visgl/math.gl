@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v5.0.0-beta.10
+
+- feat(arrow): Share query execution across tables and streams, and emit progressive aggregate snapshots (#542, #543).
+- fix(arrow): Support getter-only RecordBatch metadata in queries (#540).
+- feat(terrain): Discover canonical same-level seams and stitch mixed-level geographic seams (#541, #544).
+- feat(terrain): Add continuous terrain sweeps for rigid-body collider shapes and describe polar incidence in resident cuts (#545, #547).
+- perf(terrain): Compare opportunistic worker edit batching with per-stage timing (#538).
+
 ## v5.0.0-beta.9
 
 - feat(arrow): Add grouped aggregate accumulators, native Arrow SQL queries with relational operations, and worker-side query planning and retained tables (#514, #534, #535, #536).
