@@ -37,6 +37,18 @@ export function sweepTerrainPolytope(
   translation: Point,
   {maxWork = 100_000}: {maxWork?: number} = {}
 ): TerrainPolytopeSweepResult {
+  return queryTerrainPolytope(surface.copyData(), surface.origin, collider, translation, maxWork);
+}
+
+/** @internal Test a conservative projection expansion along each separating axis. */
+export function queryTerrainPolytope(
+  data: ReturnType<TerrainSurface['copyData']>,
+  origin: Point,
+  collider: TerrainPolytope,
+  translation: Point,
+  maxWork: number,
+  padding = 0
+): TerrainPolytopeSweepResult {
   if (
     !Number.isSafeInteger(maxWork) ||
     maxWork < 0 ||
@@ -47,7 +59,7 @@ export function sweepTerrainPolytope(
     collider.vertices.some(point => point.length !== 3 || !point.every(Number.isFinite))
   )
     throw new RangeError('Invalid terrain polytope sweep');
-  const vertices = collider.vertices.map(point => sub(point, surface.origin));
+  const vertices = collider.vertices.map(point => sub(point, origin));
   const normals: Point[] = [];
   const directions: Point[] = [];
   for (const face of collider.faces) {
@@ -60,7 +72,16 @@ export function sweepTerrainPolytope(
     normals.push(normal);
     directions.push(...side);
   }
-  return sweepTriangles(surface.copyData(), vertices, normals, directions, translation, maxWork);
+  return sweepTriangles(
+    data,
+    vertices,
+    normals,
+    directions,
+    translation,
+    maxWork,
+    undefined,
+    padding
+  );
 }
 
 /** Sweep a two-sided triangle mesh under translation. A finite plane can be
@@ -121,7 +142,8 @@ function sweepTriangles(
   directions: readonly Point[],
   translation: Point,
   maxWork: number,
-  movingTriangleNormal?: Point
+  movingTriangleNormal?: Point,
+  padding = 0
 ): TerrainPolytopeSweepResult {
   let work = 0;
   let best: Extract<TerrainPolytopeSweepResult, {status: 'hit'}> | undefined;
@@ -161,6 +183,8 @@ function sweepTriangles(
         min = Math.min(min, projection);
         max = Math.max(max, projection);
       }
+      min -= padding;
+      max += padding;
       const speed = dot(translation, unit);
       if (![low, high, min, max, speed, length].every(Number.isFinite))
         throw new RangeError('Terrain polytope projection overflow');
@@ -194,6 +218,11 @@ export function sweepTerrainBox(
   translation: Point,
   options?: {maxWork?: number}
 ): TerrainPolytopeSweepResult {
+  return sweepTerrainPolytope(surface, createSweepBox(center, halfExtents), translation, options);
+}
+
+/** @internal */
+export function createSweepBox(center: Point, halfExtents: Point): TerrainPolytope {
   if (halfExtents.length !== 3 || halfExtents.some(value => !(value > 0)))
     throw new RangeError('Terrain box half extents must be positive');
   const vertices = Array.from(
@@ -204,26 +233,21 @@ export function sweepTerrainBox(
       center[2] + (i & 4 ? 1 : -1) * halfExtents[2]
     ]
   );
-  return sweepTerrainPolytope(
-    surface,
-    {
-      vertices,
-      faces: [
-        [0, 1, 3],
-        [0, 3, 2],
-        [4, 6, 7],
-        [4, 7, 5],
-        [0, 4, 5],
-        [0, 5, 1],
-        [2, 3, 7],
-        [2, 7, 6],
-        [0, 2, 6],
-        [0, 6, 4],
-        [1, 5, 7],
-        [1, 7, 3]
-      ]
-    },
-    translation,
-    options
-  );
+  return {
+    vertices,
+    faces: [
+      [0, 1, 3],
+      [0, 3, 2],
+      [4, 6, 7],
+      [4, 7, 5],
+      [0, 4, 5],
+      [0, 5, 1],
+      [2, 3, 7],
+      [2, 7, 6],
+      [0, 2, 6],
+      [0, 6, 4],
+      [1, 5, 7],
+      [1, 7, 3]
+    ]
+  };
 }

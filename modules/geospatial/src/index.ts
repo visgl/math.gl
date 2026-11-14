@@ -443,3 +443,10 @@ export {
   type TerrainPoleIncidence,
   type TerrainPoleCoverage
 } from './terrain/geographic-poles';
+
+export {
+  sweepTerrainRotatingBox,
+  sweepTerrainRotatingPolytope,
+  type TerrainRigidMotion,
+  type TerrainRotationalSweepResult
+} from './terrain/sweep-rotation';
