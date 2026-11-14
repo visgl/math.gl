@@ -562,3 +562,43 @@ all matching pairs. Right column names use the specified prefix. The executor ap
 pagination. Sort keys reference input or grouped columns before SELECT aliases.
 Sorting is stable, and nulls sort last by default. Counts and sums of integer columns
 use Arrow Int64. Supply these relational operations through query options.
+
+Use `queryArrowSQL(sql, tables)` to run relational SQL directly against a map of named
+Arrow tables. It supports one inner equality join per SELECT, column-based grouping,
+top-level aggregate calls, ordering by output columns, and UNION ALL with matching
+output schemas. Trailing ORDER BY, OFFSET, and LIMIT apply to the combined result.
+
+```ts
+import {queryArrowSQL} from '@math.gl/expressions/arrow';
+
+const totals = queryArrowSQL(
+  'SELECT category, SUM(quantity) AS units FROM orders GROUP BY category ORDER BY units DESC',
+  new Map([['orders', orders]])
+);
+```
+
+For full table queries off the calling thread, use `createArrowQueryWorker()` or
+`queryArrowTableInWorker()` from `@math.gl/expressions/arrow/worker`. A session retains
+the source and accepts structured query options, including native Arrow join and
+union inputs. `getTable()` returns a snapshot and `takeTable()` transfers the source
+back and closes the worker. By default the source is copied on initialization.
+Use `inputOwnership: 'transfer'` to relinquish the source and its buffer aliases.
+
+```ts
+import {createArrowQueryWorker} from '@math.gl/expressions/arrow/worker';
+
+const session = await createArrowQueryWorker(orders, {
+  worker: {
+    url: new URL(import.meta.resolve('@math.gl/expressions/arrow/query-worker-entry.js'))
+  }
+});
+try {
+  const result = await session.query({select: ['category'], limit: 100});
+} finally {
+  await session.close();
+}
+```
+
+In a browser, supply a module worker factory pointing to a local module that imports
+the query worker entry. Custom functions can be registered in that module with
+`initializeTaskWorker(createArrowQueryTask({functions}))`.

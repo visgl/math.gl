@@ -168,10 +168,8 @@ function splitArrowRecordBatchBuffers<T extends arrow.TypeMap>(
   recordBatch: arrow.RecordBatch<T>,
   options: SplitArrowBuffersContext
 ): arrow.RecordBatch<T> {
-  return new arrow.RecordBatch(
-    recordBatch.schema,
-    splitArrowDataBuffers(recordBatch.data, options)
-  );
+  const data = splitArrowDataBuffers(recordBatch.data, options);
+  return Object.assign(new arrow.RecordBatch(recordBatch.schema, data), {data});
 }
 
 /**

@@ -85,9 +85,10 @@ export function hydrateArrowTable(table: DehydratedArrowTable): arrow.Table {
     table.metadataVersion
   );
   const type = new arrow.Struct(schema.fields);
-  const batches = table.batches.map(
-    data => new arrow.RecordBatch(schema, hydrateArrowData(data, type))
-  );
+  const batches = table.batches.map(payload => {
+    const data = hydrateArrowData(payload, type);
+    return Object.assign(new arrow.RecordBatch(schema, data), {data});
+  });
   return new arrow.Table(schema, batches);
 }
 

@@ -128,3 +128,12 @@ export function hydrateArrowExpressionResult(output: ArrowExpressionTaskOutput):
   if (table.numCols !== 1) throw new Error('Arrow expression task must return exactly one column');
   return {field: table.schema.fields[0]!, vector: table.getChildAt(0)!};
 }
+
+export {
+  createArrowQueryTask,
+  createArrowQueryWorker,
+  queryArrowTableInWorker,
+  type ArrowQueryWorkerOptions,
+  type ArrowQueryWorkerSession,
+  type ArrowWorkerQuery
+} from './query-worker';

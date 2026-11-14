@@ -17,10 +17,11 @@ export type {
 export {parseSQLExpression} from './parse-sql-expression';
 
 export {SQLParseError} from './sql-parse-error';
-export {parseSQLSelectStatement} from './parse-sql-statement';
+export {parseSQLSelectStatement, parseSQLSelectCompound} from './parse-sql-statement';
 export type {
   SQLSelectStatement,
   SQLSelectStatementOptions,
+  SQLSelectCompound,
   SQLTableBinding,
   SQLJoin,
   SQLSort

@@ -48,6 +48,37 @@ export function parseSQLSelectStatement(
   options: SQLSelectStatementOptions = {}
 ): SQLSelectStatement {
   const reader = new RelationalQueryReader(sql, options);
+  const statement = readSelect(reader);
+  const tail = readTail(reader);
+  reader.end();
+  return {...statement, ...tail};
+}
+
+/** SELECT inputs followed by ordering and pagination for the combined result. */
+export type SQLSelectCompound = {
+  inputs: readonly SQLSelectStatement[];
+  orderBy?: readonly SQLSort[];
+  limit?: number;
+  offset?: number;
+};
+
+/** Parses SELECT or a sequence of UNION ALL inputs. */
+export function parseSQLSelectCompound(
+  sql: string,
+  options: SQLSelectStatementOptions = {}
+): SQLSelectCompound {
+  const reader = new RelationalQueryReader(sql, options);
+  const inputs = [readSelect(reader)];
+  while (reader.takeKeyword('UNION')) {
+    reader.expectKeyword('ALL');
+    inputs.push(readSelect(reader));
+  }
+  const tail = readTail(reader);
+  reader.end();
+  return {inputs, ...tail};
+}
+
+function readSelect(reader: RelationalQueryReader): SQLSelectStatement {
   reader.expectKeyword('SELECT');
   const select = reader.takeSymbol('*')
     ? undefined
@@ -70,22 +101,23 @@ export function parseSQLSelectStatement(
     reader.expectKeyword('BY');
     groupBy = readList(reader, () => reader.selectionExpression());
   }
+  return {
+    from,
+    joins,
+    ...(select ? {select} : {}),
+    ...(where ? {where} : {}),
+    ...(groupBy ? {groupBy} : {})
+  };
+}
+
+function readTail(reader: RelationalQueryReader) {
   let orderBy: SQLSort[] | undefined;
   if (reader.takeKeyword('ORDER')) {
     reader.expectKeyword('BY');
     orderBy = readList(reader, () => readSort(reader));
   }
   const pagination = reader.pagination();
-  reader.end();
-  return {
-    ...(select ? {select} : {}),
-    from,
-    joins,
-    ...(where ? {where} : {}),
-    ...(groupBy ? {groupBy} : {}),
-    ...(orderBy ? {orderBy} : {}),
-    ...pagination
-  };
+  return {...(orderBy ? {orderBy} : {}), ...pagination};
 }
 
 function readTable(reader: RelationalQueryReader): SQLTableBinding {
