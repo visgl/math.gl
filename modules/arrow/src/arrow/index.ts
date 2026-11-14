@@ -16,3 +16,4 @@ export {
   isFixedSizeListArrowType,
   isNumericArrowType
 } from './arrow-column-utils';
+export {takeArrowTableRows} from './take-arrow-rows';

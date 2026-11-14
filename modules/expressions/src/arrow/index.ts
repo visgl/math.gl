@@ -30,3 +30,5 @@ export {
   type ArrowGroupedAggregateAccumulator,
   type CompiledArrowAggregates
 } from './aggregates';
+
+export {queryArrowTable, type ArrowTableQuery} from './query-arrow-table';
