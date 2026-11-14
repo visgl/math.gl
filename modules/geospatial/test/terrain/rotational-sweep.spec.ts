@@ -132,3 +132,28 @@ for (const [i, entry] of fixture.cases.entries()) {
     }
   });
 }
+
+test('isolated grazing is never classified as a clear sweep', () => {
+  const pivot = [0, 0, Math.hypot(1, 0.25)] as const;
+  const result = sweepTerrainRotatingBox(surface, pivot, half, {...motion, pivot});
+  expect(result.status).not.toBe('miss');
+  if (result.status === 'hit') {
+    const fraction = Math.atan2(1, 0.25) / (Math.PI / 2);
+    expect(result.lowerFraction).toBeLessThanOrEqual(fraction);
+    expect(result.fraction).toBeCloseTo(fraction, 5);
+  }
+});
+
+test('rejects invalid motion quaternions and budgets', () => {
+  expect(() =>
+    sweepTerrainRotatingBox(surface, center, half, {
+      ...motion,
+      rotation: [0, 0, 0, 0]
+    })
+  ).toThrow(RangeError);
+  expect(() =>
+    sweepTerrainRotatingBox(surface, center, half, motion, {
+      maxWork: -1
+    })
+  ).toThrow(RangeError);
+});
