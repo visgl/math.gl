@@ -4,6 +4,7 @@
 
 import * as arrow from 'apache-arrow';
 import type {Buffers} from 'apache-arrow/data';
+import {getRecordBatchMetadata, createRecordBatchWithMetadata} from './arrow-record-batch';
 import {createArrowData, getArrowVariadicBuffers} from './arrow-data';
 
 /** Arrow JS typed array used in Arrow internal buffer slots. */
@@ -169,7 +170,11 @@ function splitArrowRecordBatchBuffers<T extends arrow.TypeMap>(
   options: SplitArrowBuffersContext
 ): arrow.RecordBatch<T> {
   const data = splitArrowDataBuffers(recordBatch.data, options);
-  return Object.assign(new arrow.RecordBatch(recordBatch.schema, data), {data});
+  return createRecordBatchWithMetadata(
+    recordBatch.schema,
+    data,
+    getRecordBatchMetadata(recordBatch)
+  );
 }
 
 /**

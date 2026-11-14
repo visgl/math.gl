@@ -4,7 +4,7 @@
 
 import {Float64, Int32, Int64, Table, Utf8, vectorFromArray} from 'apache-arrow';
 import {expect, test} from 'vitest';
-import {queryArrowTable, queryArrowSQL} from '@math.gl/expressions/arrow';
+import {queryArrowTable, queryArrowTableInBatches, queryArrowSQL} from '@math.gl/expressions/arrow';
 import {parseSQLQuery} from '@math.gl/expressions/sql';
 
 /** Parses the SELECT requests used by these tests. */
@@ -42,6 +42,23 @@ test('projection shares source buffers and empty results retain their schema', (
   expect(() => queryArrowTable(source, {select: ['x', {column: 'x', as: 'x'}]})).toThrow(
     /duplicate/
   );
+});
+
+test('projection and sparse filtering preserve batch metadata through the runtime API', () => {
+  const source = new Table({x: vectorFromArray([3, 0, 4], new Int32())});
+  const metadata = new Map([['partition', 'first']]);
+  const batch = source.batches[0]!;
+  const nativeMetadata = Reflect.get(batch, 'metadata') as Map<string, string> | undefined;
+  if (nativeMetadata) nativeMetadata.set('partition', 'first');
+  else Object.assign(batch, {metadata});
+
+  const result = queryArrowTable(source, select('SELECT x AS value WHERE x > 0'));
+  expect(Array.from(result.getChild('value')!)).toEqual([3, 4]);
+  expect(Reflect.get(result.batches[0], 'metadata')).toBe(nativeMetadata ?? metadata);
+  expect(Object.hasOwn(result.batches[0]!, 'metadata')).toBe(!nativeMetadata);
+  const paginated = queryArrowTable(source, {offset: 1, limit: 1});
+  expect(Array.from(paginated.getChild('x')!)).toEqual([0]);
+  expect(Reflect.get(paginated.batches[0], 'metadata')).toBe(nativeMetadata ?? metadata);
 });
 
 test('unaliased computed columns get distinct names without displacing explicit aliases', () => {
@@ -163,4 +180,61 @@ test('executes UNION ALL branches before applying global ordering and pagination
     new Map([['input', source]])
   );
   expect(Array.from(result.getChild('result')!)).toEqual([3, 2]);
+});
+
+test('streaming query matches the table plan and closes the input at its global limit', async () => {
+  const first = new Table({x: vectorFromArray([0, 1, 2], new Int32())});
+  const second = new Table({x: vectorFromArray([3, 0, 4, 5], new Int32())});
+  const source = first.concat(second);
+  const query = select('SELECT x AS value WHERE x > 0 LIMIT 3 OFFSET 1');
+  let pulls = 0;
+  let closed = false;
+  async function* batches() {
+    try {
+      for (const batch of [...source.batches, ...source.batches]) {
+        pulls++;
+        yield batch;
+      }
+    } finally {
+      closed = true;
+    }
+  }
+  const result = await Array.fromAsync(queryArrowTableInBatches(batches(), source.schema, query));
+  expect(result.flatMap(batch => Array.from(batch.getChild('value')!))).toEqual(
+    Array.from(queryArrowTable(source, query).getChild('value')!)
+  );
+  expect(pulls).toBe(2);
+  expect(closed).toBe(true);
+});
+
+test('streaming LIMIT 0 leaves input unopened and schema mismatches fail before output', async () => {
+  const source = new Table({x: vectorFromArray([1], new Int32())});
+  let opened = false;
+  function* batches() {
+    opened = true;
+    yield* source.batches;
+  }
+  expect(
+    await Array.fromAsync(queryArrowTableInBatches(batches(), source.schema, {limit: 0}))
+  ).toEqual([]);
+  expect(opened).toBe(false);
+  const compatible = new Table({x: vectorFromArray([2], new Int32())});
+  expect(compatible.schema).not.toBe(source.schema);
+  const matching = await Array.fromAsync(
+    queryArrowTableInBatches(compatible.batches, source.schema)
+  );
+  expect(matching[0]?.getChild('x')?.get(0)).toBe(2);
+  const incompatible = new Table({y: vectorFromArray([2], new Int32())});
+  await expect(
+    Array.fromAsync(queryArrowTableInBatches(incompatible.batches, source.schema))
+  ).rejects.toThrow(/input schema/);
+});
+
+test('contiguous filtered matches share source values', () => {
+  const source = new Table({x: vectorFromArray([0, 1, 2, 0], new Int32())});
+  const result = queryArrowTable(source, select('SELECT x WHERE x > 0'));
+  expect(Array.from(result.getChild('x')!)).toEqual([1, 2]);
+  expect(result.getChild('x')!.data[0]!.values.buffer).toBe(
+    source.getChild('x')!.data[0]!.values.buffer
+  );
 });

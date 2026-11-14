@@ -436,3 +436,4 @@ export {
 export {sweepTerrainCylinder} from './terrain/sweep-cylinder';
 
 export {sweepTerrainPlane} from './terrain/sweep-plane';
+export {discoverGeographicTerrainLodSeams} from './terrain/geographic-lod-seams';

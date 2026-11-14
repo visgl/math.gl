@@ -31,6 +31,17 @@ export {
   type CompiledArrowAggregates
 } from './aggregates';
 
-export {queryArrowTable, type ArrowTableQuery} from './query-arrow-table';
+export {
+  queryArrowTable,
+  queryArrowTableInBatches,
+  type ArrowBatchQuery,
+  type ArrowTableQuery
+} from './query-arrow-table';
 export type {ArrowQueryJoin, ArrowQueryOrder} from './relational-query';
 export {queryArrowSQL} from './query-arrow-sql';
+
+export {
+  queryArrowAggregateSnapshots,
+  type ArrowAggregateSnapshot,
+  type ArrowAggregateSnapshotOptions
+} from './query-arrow-aggregate-snapshots';

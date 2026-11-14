@@ -4,6 +4,7 @@
 
 import * as arrow from 'apache-arrow';
 import type {Buffers} from 'apache-arrow/data';
+import {getRecordBatchMetadata, createRecordBatchWithMetadata} from './arrow-record-batch';
 import {createArrowData, getArrowVariadicBuffers} from './arrow-data';
 import {splitArrowBuffers, type SplitArrowBuffersOptions} from './split-arrow-buffers';
 
@@ -36,7 +37,10 @@ export type DehydratedArrowTable = {
   /** Original Arrow schema metadata version. */
   metadataVersion: arrow.MetadataVersion;
   /** Struct data for each record batch. */
-  batches: DehydratedArrowData[];
+  batches: (DehydratedArrowData & {
+    /** Optional per-batch metadata entries, separate from schema metadata. */
+    metadata?: [string, string][];
+  })[];
 };
 
 /** Arrow IPC payload for transport across compatible Arrow JS versions. */
@@ -64,7 +68,13 @@ export function dehydrateArrowTable(
     version: 1,
     schema: arrow.tableToIPC(new arrow.Table(splitTable.schema, [])),
     metadataVersion: splitTable.schema.metadataVersion,
-    batches: splitTable.batches.map(batch => dehydrateArrowData(batch.data))
+    batches: splitTable.batches.map(batch => {
+      const metadata = getRecordBatchMetadata(batch);
+      return {
+        ...dehydrateArrowData(batch.data),
+        ...(metadata !== undefined ? {metadata: [...metadata]} : {})
+      };
+    })
   };
 }
 
@@ -87,7 +97,11 @@ export function hydrateArrowTable(table: DehydratedArrowTable): arrow.Table {
   const type = new arrow.Struct(schema.fields);
   const batches = table.batches.map(payload => {
     const data = hydrateArrowData(payload, type);
-    return Object.assign(new arrow.RecordBatch(schema, data), {data});
+    return createRecordBatchWithMetadata(
+      schema,
+      data,
+      payload.metadata && new Map(payload.metadata)
+    );
   });
   return new arrow.Table(schema, batches);
 }
@@ -152,4 +166,20 @@ function hydrateArrowData<T extends arrow.DataType>(
     dictionary,
     data.variadicBuffers
   );
+}
+
+/** Dehydrates one batch using the same schema and buffer ownership format as table transport. */
+export function dehydrateArrowRecordBatch(
+  batch: arrow.RecordBatch,
+  options?: SplitArrowBuffersOptions
+): DehydratedArrowTable {
+  return dehydrateArrowTable(new arrow.Table(batch.schema, [batch]), options);
+}
+
+/** Hydrates a column-buffer payload containing exactly one Arrow record batch. */
+export function hydrateArrowRecordBatch(payload: DehydratedArrowTable): arrow.RecordBatch {
+  if (payload.batches.length !== 1) {
+    throw new Error('Arrow record batch transport requires exactly one batch.');
+  }
+  return hydrateArrowTable(payload).batches[0]!;
 }

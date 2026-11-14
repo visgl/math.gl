@@ -1629,6 +1629,15 @@ seam and the result identifies the longitude wrap. Polar edges return
 east edges. This topology helper works with tile addresses and does not
 require resident height data.
 
+Pass the equal-angle tile addresses in a resident cut to
+`discoverGeographicTerrainLodSeams(cut)`, then pass the returned spans as
+the second argument to `stitchTerrainLodCut`. Keep the meshes in cut order,
+with columns increasing eastward and rows increasing southward. Each mixed
+span uses the coarse edge as its height profile. Missing neighbors and
+point-only contacts produce no span. For antimeridian spans, use longitude
+degrees for mesh X. Stitching aligns the edges and preserves each tile's
+longitude branch.
+
 `measureGeographicTerrainSeam` compares paired one-sided stencils in their
 shared east/north frame. Longitude aliases are mapped explicitly into each
 tile's unwrapped interval. A full-world interval gives precedence to the west

@@ -190,7 +190,27 @@ export function groupArrowTable(
       options
     )
   );
-  const aggregateFields = definitions.map(([name, aggregate]) => {
+  const aggregateFields = getArrowAggregateFields(aggregates, options);
+  const schema = new Schema([...fields, ...aggregateFields], table.schema.metadata);
+  if (!results.length) return new Table(schema, []);
+  const columns = [
+    ...fields.map(field => selected.getChild(field.name)!),
+    ...aggregateFields.map(field =>
+      vectorFromArray(
+        results.map(result => result[field.name]),
+        field.type
+      )
+    )
+  ];
+  return new Table(schema, Object.fromEntries(names.map((name, index) => [name, columns[index]!])));
+}
+
+/** Derives output fields consistently for materialized and incremental aggregates. */
+export function getArrowAggregateFields(
+  aggregates: Readonly<Record<string, ArrowAggregate>>,
+  options: ArrowExpressionOptions
+): Field[] {
+  return Object.entries(aggregates).map(([name, aggregate]) => {
     const expression =
       aggregate.expression === undefined
         ? undefined
@@ -205,18 +225,6 @@ export function groupArrowTable(
           : inputType;
     return new Field(name, type, aggregate.operation !== 'COUNT');
   });
-  const schema = new Schema([...fields, ...aggregateFields], table.schema.metadata);
-  if (!results.length) return new Table(schema, []);
-  const columns = [
-    ...fields.map(field => selected.getChild(field.name)!),
-    ...aggregateFields.map(field =>
-      vectorFromArray(
-        results.map(result => result[field.name]),
-        field.type
-      )
-    )
-  ];
-  return new Table(schema, Object.fromEntries(names.map((name, index) => [name, columns[index]!])));
 }
 
 /** Validates scalar key types consistently even when there are no rows. */

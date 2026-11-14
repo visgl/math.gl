@@ -16,6 +16,8 @@ export type TerrainLodSeam = {
   b: number;
   edgeB: TerrainMeshEdge;
   options?: TerrainMeshStitchOptions;
+  /** Translate B along X for this seam, then restore its original longitude branch. */
+  offsetBX?: number;
 };
 
 /** Stitch a selected cut by splitting only incident boundary faces. */
@@ -24,18 +26,34 @@ export function stitchTerrainLodCut(
   seams: readonly TerrainLodSeam[]
 ): TerrainSeamMesh[] {
   const meshes = input.slice();
-  const paired: {a: number; b: number; idsA: Uint32Array; idsB: Uint32Array}[] = [];
-  for (const {a, edgeA, b, edgeB, options} of seams) {
+  const paired: {a: number; b: number; idsA: Uint32Array; idsB: Uint32Array; offsetBX: number}[] =
+    [];
+  for (const {a, edgeA, b, edgeB, options, offsetBX = 0} of seams) {
     if (a === b || !Number.isInteger(a) || !Number.isInteger(b) || !meshes[a] || !meshes[b])
       throw new Error('Invalid terrain LOD seam tile index');
-    const result = stitchTerrainMeshEdges(meshes[a], edgeA, meshes[b], edgeB, options);
+    if (!Number.isFinite(offsetBX)) throw new Error('Invalid terrain LOD seam offset');
+    const meshB = meshes[b];
+    const shiftedB: TerrainSeamMesh =
+      offsetBX === 0
+        ? meshB
+        : {
+            ...meshB,
+            origin: [meshB.origin[0] + offsetBX, meshB.origin[1], meshB.origin[2]]
+          };
+    const result = stitchTerrainMeshEdges(meshes[a], edgeA, shiftedB, edgeB, options);
     meshes[a] = result.a;
-    meshes[b] = result.b;
-    paired.push({a, b, idsA: result.seamA, idsB: result.seamB});
+    meshes[b] =
+      offsetBX === 0
+        ? result.b
+        : {
+            ...result.b,
+            origin: [result.b.origin[0] - offsetBX, result.b.origin[1], result.b.origin[2]]
+          };
+    paired.push({a, b, idsA: result.seamA, idsB: result.seamB, offsetBX});
   }
   // Later operations may move shared corners or subdivide an earlier seam.
   // Recheck complete segment chains against the final meshes.
-  for (const {a, b, idsA, idsB} of paired) {
+  for (const {a, b, idsA, idsB, offsetBX} of paired) {
     const ma = meshes[a],
       mb = meshes[b];
     const path = (mesh: TerrainSeamMesh, ids: Uint32Array) => {
@@ -56,7 +74,7 @@ export function stitchTerrainLodCut(
       throw new Error('Overlapping terrain LOD seam ranges require a common subdivision');
     for (let i = 0; i < idsA.length; i++) {
       for (let axis = 0; axis < 3; axis++) {
-        const offset = mb.origin[axis] - ma.origin[axis];
+        const offset = mb.origin[axis] + (axis === 0 ? offsetBX : 0) - ma.origin[axis];
         const av = ma.positions[3 * idsA[i] + axis],
           bv = mb.positions[3 * idsB[i] + axis];
         const residual = av - bv - offset;

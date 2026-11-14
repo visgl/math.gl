@@ -7,6 +7,8 @@ import * as arrow from 'apache-arrow';
 import {
   dehydrateArrowTable,
   hydrateArrowTable,
+  getRecordBatchMetadata,
+  splitArrowBuffers,
   serializeArrowTableToIPC,
   deserializeArrowTableFromIPC,
   type DehydratedArrowTable
@@ -54,6 +56,30 @@ test('Arrow transport round trips cloned nested and dictionary buffers across ba
   );
   expect((hydrated.schema.fields[2]!.type as arrow.Dictionary).id).toBe(42);
   expect((hydrated.schema.fields[2]!.type as arrow.Dictionary).isOrdered).toBe(true);
+});
+
+test('Arrow transport round trips distinct batch metadata independently of schema metadata', () => {
+  const table = createTransportTable().concat(createTransportTable());
+  const snapshots = table.batches.map((batch, index) => {
+    const metadata = getRecordBatchMetadata(batch) ?? new Map<string, string>();
+    metadata.set('partition', String(index));
+    if (!getRecordBatchMetadata(batch)) Object.assign(batch, {metadata});
+    return metadata;
+  });
+  const split = splitArrowBuffers(table, {copy: 'all'});
+  expect(split.batches.map(getRecordBatchMetadata)).toEqual(snapshots);
+
+  const payload = dehydrateArrowTable(table, {copy: 'all'});
+  table.batches.forEach(batch => getRecordBatchMetadata(batch)?.clear());
+  const output = hydrateArrowTable(structuredClone(payload));
+  expect(output.schema.metadata).toEqual(new Map([['source', 'transport test']]));
+  expect(output.batches.map(batch => getRecordBatchMetadata(batch)?.get('partition'))).toEqual([
+    '0',
+    '1'
+  ]);
+  expect(output.batches.map(batch => Object.hasOwn(batch, 'metadata'))).toEqual(
+    table.batches.map(batch => Object.hasOwn(batch, 'metadata'))
+  );
 });
 
 test('Arrow transport preserves sliced bitmap offsets and does not mutate source buffers', () => {
