@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import type {TaskWorker} from '@math.gl/tasks';
+import {CertifyTerrainCoverageTask as coverageTask} from './terrain-coverage';
 import {ProjectCoordinatesTask as projectionTask, PrepareMapTask as mapTask} from './definitions';
 export type {ProjectCoordinatesTypes, PrepareMapTypes} from './definitions';
 declare const __filename: string;
@@ -34,6 +35,22 @@ export const PrepareMapTask: typeof mapTask & {worker: TaskWorker} = {
     ...(!isBrowser
       ? {url: /* @__PURE__ */ (() => new URL('./map-worker.js', moduleUrl).href)()}
       : {create: () => new Worker(new URL('./map-worker.js', import.meta.url), {type: 'module'})}),
+    capabilities: {atomic: true, streaming: false}
+  }
+};
+
+export type {CertifyTerrainCoverageTypes} from './terrain-coverage';
+
+/** Certify horizontal terrain coverage in an atomic task. */
+export const CertifyTerrainCoverageTask: typeof coverageTask & {worker: TaskWorker} = {
+  ...coverageTask,
+  worker: {
+    ...(!isBrowser
+      ? {url: /* @__PURE__ */ (() => new URL('./terrain-coverage-worker.js', moduleUrl).href)()}
+      : {
+          create: () =>
+            new Worker(new URL('./terrain-coverage-worker.js', import.meta.url), {type: 'module'})
+        }),
     capabilities: {atomic: true, streaming: false}
   }
 };

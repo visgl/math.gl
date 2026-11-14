@@ -4,11 +4,28 @@
 // biome-ignore lint/correctness/noUnusedImports: Standalone examples use the classic JSX transform.
 import React, {useEffect, useRef, useState} from 'react';
 import TerrainControls from './terrain-controls';
-const references = import.meta.glob('./qualification/artifacts/*.json.gz', {
-  query: '?url',
-  import: 'default',
-  eager: true
-});
+import reference0 from './qualification/artifacts/pacific-10.json.gz?url';
+import reference1 from './qualification/artifacts/pacific-20.json.gz?url';
+import reference2 from './qualification/artifacts/pacific-40.json.gz?url';
+import reference3 from './qualification/artifacts/sierra-10.json.gz?url';
+import reference4 from './qualification/artifacts/sierra-20.json.gz?url';
+import reference5 from './qualification/artifacts/sierra-40.json.gz?url';
+import reference6 from './qualification/artifacts/step-0.25.json.gz?url';
+import reference7 from './qualification/artifacts/step-0.5.json.gz?url';
+import reference8 from './qualification/artifacts/step-1.json.gz?url';
+import reference9 from './qualification/artifacts/step-2.json.gz?url';
+const references = {
+  'pacific-10': reference0,
+  'pacific-20': reference1,
+  'pacific-40': reference2,
+  'sierra-10': reference3,
+  'sierra-20': reference4,
+  'sierra-40': reference5,
+  'step-0.25': reference6,
+  'step-0.5': reference7,
+  'step-1': reference8,
+  'step-2': reference9
+};
 const number = (value, missing = 'uncovered') => (value === null ? missing : value.toFixed(3));
 
 export default function BoundaryLab({controlsRoot}) {
@@ -27,7 +44,7 @@ export default function BoundaryLab({controlsRoot}) {
     worker.onmessage = ({data}) => setResult(data);
     worker.onerror = event => setResult({error: event.message});
     worker.postMessage({
-      url: references[`./qualification/artifacts/${dataset}-${tolerance}.json.gz`],
+      url: references[`${dataset}-${tolerance}`],
       algorithm
     });
     return () => worker.terminate();
@@ -55,6 +72,15 @@ export default function BoundaryLab({controlsRoot}) {
     };
     draw(false);
     draw(true);
+    const witness = result.coverage?.witness;
+    if (witness) {
+      ctx.beginPath();
+      ctx.moveTo(witness.start[0] * 3, witness.start[1] * 3);
+      ctx.lineTo(witness.end[0] * 3, witness.end[1] * 3);
+      ctx.strokeStyle = '#ff4ada';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
     if (overlay) {
       for (const [segments, color] of [
         [result.domainSegments, '#bcbcff'],
@@ -83,6 +109,7 @@ export default function BoundaryLab({controlsRoot}) {
               value={dataset}
               onChange={e => {
                 setDataset(e.target.value);
+                setAlgorithm('regular');
                 setTolerance(e.target.value === 'step' ? 0.5 : 20);
               }}
             >
@@ -98,6 +125,12 @@ export default function BoundaryLab({controlsRoot}) {
               value={algorithm}
               onChange={e => setAlgorithm(e.target.value)}
             >
+              {dataset === 'pacific' && (
+                <option value="breakline">Constrained breakline mesh</option>
+              )}
+              {dataset === 'sierra' && (
+                <option value="valid-domain">Nodata-aware adaptive mesh</option>
+              )}
               <option value="regular">Current regular mesh</option>
               <option value="martini">Current MARTINI</option>
               <option value="delatin">Current Delatin</option>
@@ -157,6 +190,15 @@ export default function BoundaryLab({controlsRoot}) {
         />
         {!result && <p role="status">Computing independent qualification…</p>}
         {result?.unsupported && <p role="status">{result.unsupported}</p>}
+        {result?.coverage && (
+          <p data-testid="boundary-coverage">
+            Exact valid raster triangle coverage: {result.coverage.status}.{' '}
+            {result.studyCoverage &&
+              `Exact Pacific study-domain coverage: ${result.studyCoverage.status}. `}
+            Magenta marks an unmatched raster-domain boundary interval. The reference domain is
+            listed with the result.
+          </p>
+        )}
         {result?.error && <p role="alert">{result.error}</p>}
         {m && (
           <div data-testid="boundary-metrics">
