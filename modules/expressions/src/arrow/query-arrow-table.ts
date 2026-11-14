@@ -44,34 +44,39 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
     throw new Error('Arrow query WHERE requires a Boolean expression');
 
   const names = new Set<string>();
+  for (const selection of select ?? []) {
+    const name =
+      typeof selection === 'string'
+        ? selection
+        : (selection.as ?? ('column' in selection ? selection.column : undefined));
+    if (name === undefined) continue;
+    if (names.has(name) || (typeof selection !== 'string' && selection.as === ''))
+      throw new Error(`Invalid or duplicate Arrow query output name: ${name}`);
+    names.add(name);
+  }
   const projection: Projection[] = select
-    ? select.map(selection => {
-        let output: Projection;
+    ? select.map((selection, ordinal) => {
         if (typeof selection !== 'string' && ('array' in selection || 'expression' in selection)) {
           const expression =
             'array' in selection
               ? compileArrowArray(selection.array, {...options, type: selection.type})
               : compileArrowExpression(selection.expression, options);
-          output = {
-            expression,
-            field: expression.outputField.clone({name: selection.as ?? expression.outputField.name})
-          };
-        } else {
-          const column = typeof selection === 'string' ? selection : selection.column;
-          const index = inputSchema.fields.findIndex(field => field.name === column);
-          if (index < 0) throw new Error(`Arrow query column not found: ${column}`);
-          const field = inputSchema.fields[index]!;
-          output = {
-            index,
-            field:
-              typeof selection === 'string' ? field : field.clone({name: selection.as ?? column})
-          };
+          let name = selection.as;
+          if (name === undefined) {
+            name = `expression_${ordinal + 1}`;
+            while (names.has(name)) name += '_';
+            names.add(name);
+          }
+          return {expression, field: expression.outputField.clone({name})};
         }
-        const name = output.field.name;
-        if (names.has(name) || (typeof selection !== 'string' && selection.as === ''))
-          throw new Error(`Invalid or duplicate Arrow query output name: ${name}`);
-        names.add(name);
-        return output;
+        const column = typeof selection === 'string' ? selection : selection.column;
+        const index = inputSchema.fields.findIndex(field => field.name === column);
+        if (index < 0) throw new Error(`Arrow query column not found: ${column}`);
+        const field = inputSchema.fields[index]!;
+        return {
+          index,
+          field: typeof selection === 'string' ? field : field.clone({name: selection.as ?? column})
+        };
       })
     : inputSchema.fields.map((field, index) => ({field, index}));
 

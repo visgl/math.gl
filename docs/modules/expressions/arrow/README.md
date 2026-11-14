@@ -535,5 +535,6 @@ const result = queryArrowTable(orders, query);
 Queries can project and alias existing fields, evaluate computed columns, filter with
 SQL Boolean and null semantics, and apply `OFFSET` and `LIMIT` in source order.
 Computed columns read the filtered source columns. Output aliases only name result
-fields. Direct projections share Arrow buffers when rows need no gathering. Computed
+fields. Unaliased computed fields receive unique names based on their SELECT position.
+Direct projections share Arrow buffers when rows need no gathering. Computed
 types and error behavior follow the Arrow expression compiler.

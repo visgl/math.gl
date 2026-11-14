@@ -43,3 +43,15 @@ test('projection shares source buffers and empty results retain their schema', (
     /duplicate/
   );
 });
+
+test('unaliased computed columns get distinct names without displacing explicit aliases', () => {
+  const source = new Table({x: vectorFromArray([1], new Float64())});
+  const result = queryArrowTable(source, select('SELECT x + 1, x - 1, x AS expression_1'));
+  expect(result.schema.fields.map(field => field.name)).toEqual([
+    'expression_1_',
+    'expression_2',
+    'expression_1'
+  ]);
+  expect(Array.from(result.getChildAt(0)!)).toEqual([2]);
+  expect(Array.from(result.getChildAt(1)!)).toEqual([0]);
+});
