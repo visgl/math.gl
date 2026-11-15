@@ -46,14 +46,8 @@ The grouped package entry points are:
 | `@math.gl/arrow` | `/utf8`, `/geoarrow`, `/geoarrow-utils`, `/wkb` |
 | `@math.gl/tasks` | Task execution at the package root |
 
-The implementations live in these grouped packages. The former standalone leaf packages have
-been removed. `@math.gl/dggs` remains separate; `@math.gl/web-mercator` is retained for compatibility.
-
-## Legacy packages
-
-The unscoped `math.gl` compatibility package has been removed from the workspace; use
-`@math.gl/core` for core math. `@math.gl/web-mercator` remains available for compatibility, and
-`viewport-mercator-project` re-exports Web Mercator utilities.
+Import core math from `@math.gl/core`. The `viewport-mercator-project` package
+re-exports Web Mercator utilities.
 
 ## Supported Browsers and Node Versions
 

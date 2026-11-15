@@ -1397,7 +1397,7 @@ an editable patch, nodata holes, conservative extrema and a reused distant mesh.
 
 ### Indexed topology and path-local rejection
 
-Contour topology validation now uses a static bounding-box hierarchy to narrow exact
+Contour topology validation uses a static bounding-box hierarchy to narrow exact
 edge predicates and swept-region vertex tests. Isobands use independent indexes for
 patch overlap, height-range selection and ring-parent lookup. Broad-phase traversal
 is charged to the existing work budgets; exact predicates and clipping still decide

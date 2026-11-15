@@ -79,14 +79,14 @@ the star-field's mean-frame approximation omits the nutation included here.
 
 For unresolved planets, visual magnitude provides relative point-source brightness:
 `10 ** (-0.4 * magnitude)`, on an arbitrary magnitude-zero scale. This is not solar
-or lunar light intensity. Use exposure and tone mapping in the renderer. Moon magnitudes now use an approximate Lambert phase law and NASA geometric
+or lunar light intensity. Use exposure and tone mapping in the renderer. Moon magnitudes use an approximate Lambert phase law and NASA geometric
 albedos, with eclipse and occultation attenuation reported separately. No RGB colors or surface textures are supplied.
 
 ## When planets become visible
 
 A planet rising above the horizon and becoming detectable against the twilight sky
 are separate events. Brighter planets can emerge earlier in dusk and remain visible
-later in dawn. Every planet now includes a current `visibility` estimate:
+later in dawn. Every planet includes a current `visibility` estimate:
 
 - `visible`: whether brightness, altitude and Sun separation meet the heuristic thresholds.
 - `fade`: a smooth 0–1 rendering blend around those thresholds, not a probability.

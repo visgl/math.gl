@@ -49,5 +49,4 @@ requirements: `ProjectCoordinatesTask`, for example, accepts ordinary
 
 Sharing data does not change cancellation behavior. Use `signal` and `onProgress`
 for cancellation and progress; cancelling worker work still terminates its worker.
-The old shared cancellation/progress control blocks are no longer public APIs.
 See the [reference](../api-reference/task-runner.md#request-fields) for all controls.

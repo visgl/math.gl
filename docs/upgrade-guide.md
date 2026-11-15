@@ -112,9 +112,25 @@ import {mat4, vec3} from '@math.gl/core';
 
 - Import CRS types, syntax codecs, and spatial-reference descriptors from `@math.gl/geospatial/crs`. Authority codes, WKT, and PROJ definitions remain strings.
 - Rename `@math.gl/proj4` imports and dependencies to `@math.gl/geospatial/projection`, and create transforms with `projectionEngine.createProjection({from, to})` instead of `new Proj4Projection(...)`. The alias, `/classic`, and proj4js helpers are removed; install `proj4` directly for its API.
-- Use `ProjectionTransform` for a configured CRS pair and `ConfigurableProjectionEngine` for reusable configuration and `checkProjectionCompatibility()` for capability checks. See the [migration contract](./modules/geospatial/projection/developer-guide/support.md).
+- Use `ProjectionTransform` for a configured CRS pair and `ConfigurableProjectionEngine` for reusable configuration and `checkProjectionCompatibility()` for capability checks. See the [projection support profile](./modules/geospatial/projection/developer-guide/support.md).
 
 - Axis-order enforcement remains opt-in through `enforceAxis: true`. Prepare NTv2 grids with `parseNTv2Grid()` and register them on an engine through `datumGrids` before using definitions that reference them.
+
+- Replace `new Projection(options)` with `projectionEngine.createProjection(options)`. Replace `new LazyProjection(options)` and `LazyProjection.create(options)` with `lazyProjectionEngine.createProjection(options)` and `lazyProjectionEngine.createProjectionAsync(options)`, respectively. Pass registrations to the engine constructor in place of static registration methods.
+- Replace the alpha `TypeScriptProjection` export with `ProjectionTransform`. The associated names are `ProjectionTransformOptions`, `ProjectionTransformCreateOptions`, `ProjectionCompatibility`, and `checkProjectionCompatibility`.
+- Import nested CRS syntax codecs and resolver APIs from the `@math.gl/geospatial/crs` entry point.
+
+### Map preparation
+
+Replace `@math.gl/geospatial/discontinuous` and map exports from
+`@math.gl/geospatial/projection` with the `@math.gl/geospatial/maps` entry points.
+Supply presets explicitly, import geometry and transitions as needed, and use
+`prepareMapSurface(map, options)` in place of `map.prepareSurface(options)`.
+
+### GeoArrow descriptors
+
+Import physical descriptor helpers from `@math.gl/arrow/geoarrow-utils` in place
+of `@math.gl/arrow/geoarrow`. The corresponding root exports remain available.
 
 ### DGGS packages
 

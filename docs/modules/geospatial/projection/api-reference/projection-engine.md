@@ -112,11 +112,10 @@ longitude/latitude order, matching the full engine's built-in aliases. Other def
 datums, grid shifts and projections require a configurable or full engine. Heights
 and trailing ordinates pass through unchanged. Latitudes at or beyond the poles are rejected.
 
-## Moving configuration onto engines
+## Engine configuration
 
 Create a full engine with `new FullProjectionEngine({aliases, datumGrids, verticalGrids})`
 when multiple CRS pairs share registrations. There is no global alias or grid registry.
 The default `projectionEngine` is ready to use; it does not inherit registrations from
-other engines. The former `Projection` and `LazyProjection` runtime classes are removed.
-Use factories to create transforms; direct configurable construction remains available
-as `new ProjectionTransform(options)`.
+other engines. Use a factory to create a transform or construct
+`new ProjectionTransform(options)` for per-instance configuration.
