@@ -6,6 +6,7 @@ import * as arrow from 'apache-arrow';
 import type {Buffers} from 'apache-arrow/data';
 import {getRecordBatchMetadata, createRecordBatchWithMetadata} from './arrow-record-batch';
 import {createArrowData, getArrowVariadicBuffers} from './arrow-data';
+import {isArrowRecordBatch, isArrowTable} from './arrow-column-utils';
 
 /** Arrow JS typed array used in Arrow internal buffer slots. */
 type ArrowTypedArray =
@@ -114,24 +115,6 @@ export function splitArrowTableBuffers<T extends arrow.TypeMap>(
   options?: SplitArrowBuffersOptions
 ): arrow.Table<T> {
   return splitArrowBuffers(arrowTable, options);
-}
-
-/**
- * Tests whether a value is an Arrow table.
- * @param input Value to test.
- * @returns True when the value is an Arrow table.
- */
-function isArrowTable(input: SplitArrowBuffersInput): input is arrow.Table {
-  return 'batches' in input;
-}
-
-/**
- * Tests whether a value is an Arrow record batch.
- * @param input Value to test.
- * @returns True when the value is an Arrow record batch.
- */
-function isArrowRecordBatch(input: SplitArrowBuffersInput): input is arrow.RecordBatch {
-  return 'schema' in input && 'data' in input && !Array.isArray(input.data);
 }
 
 /**

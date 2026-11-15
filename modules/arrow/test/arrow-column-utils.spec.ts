@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {expect, test} from 'vitest';
+import {expect, expectTypeOf, test} from 'vitest';
 import * as arrow from 'apache-arrow';
 import {
   findArrowColumn,
+  isArrowRecordBatch,
   isArrowTable,
   isFixedSizeListArrowType,
   isNumericArrowType
@@ -25,6 +26,32 @@ test('Arrow table detection uses the table interface', () => {
   ).toBe(true);
   expect(isArrowTable(table.batches[0])).toBe(false);
   expect(isArrowTable(null)).toBe(false);
+});
+
+test('Arrow table and record batch guards narrow unknown values', () => {
+  const table: unknown = arrow.tableFromArrays({value: [1]});
+  expect(isArrowTable(table)).toBe(true);
+  expect(isArrowRecordBatch(table)).toBe(false);
+  if (isArrowTable(table)) {
+    expectTypeOf(table).toEqualTypeOf<arrow.Table>();
+    const batch: unknown = table.batches[0];
+    expect(isArrowRecordBatch(batch)).toBe(true);
+    if (isArrowRecordBatch(batch)) {
+      expectTypeOf(batch).toEqualTypeOf<arrow.RecordBatch>();
+      expect(
+        isArrowRecordBatch({
+          numRows: batch.numRows,
+          schema: batch.schema,
+          data: batch.data,
+          get: batch.get.bind(batch),
+          getChild: batch.getChild.bind(batch)
+        })
+      ).toBe(true);
+    }
+    expect(isArrowRecordBatch(table.getChild('value'))).toBe(false);
+    expect(isArrowRecordBatch({shape: 'arrow-table', data: table})).toBe(false);
+  }
+  expect(isArrowRecordBatch(null)).toBe(false);
 });
 
 test('Arrow column lookup resolves nested fields and literal dotted names', () => {

@@ -26,6 +26,19 @@ export function isArrowTable(value: unknown): value is Table {
   );
 }
 
+/** Recognizes an Arrow record batch across Arrow package instances without loading the runtime. */
+export function isArrowRecordBatch(value: unknown): value is RecordBatch {
+  const batch = value as RecordBatch | null | undefined;
+  return Boolean(
+    batch &&
+      Number.isInteger(batch.numRows) &&
+      Array.isArray(batch.schema?.fields) &&
+      Array.isArray(batch.data?.children) &&
+      typeof batch.get === 'function' &&
+      typeof batch.getChild === 'function'
+  );
+}
+
 // Arrow IPC type IDs are stable across Arrow package versions.
 const INT_TYPE = 2 satisfies Type.Int;
 const FLOAT_TYPE = 3 satisfies Type.Float;
