@@ -14,7 +14,7 @@ type Point = readonly [number, number, number];
  * Bracket first contact for a capsule under linear pivot translation and shortest-arc
  * rotation. Coincident axis endpoints describe a sphere, including an off-pivot
  * sphere whose center follows a curved path. Unresolved tangency returns incomplete.
- * The witness is the nearest axis/triangle pair at the upper fraction.
+ * The witness is an axis/triangle pair within the radius at the upper fraction.
  */
 export function sweepTerrainRotatingCapsule(
   surface: Pick<TerrainSurface, 'nearestSegmentQuery'>,

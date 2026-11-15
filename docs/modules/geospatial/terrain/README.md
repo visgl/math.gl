@@ -1906,7 +1906,7 @@ takes the initial capsule-axis endpoints in the Cartesian terrain frame.
 uses coincident endpoints. An off-pivot sphere center follows the prescribed
 rotation and translation. Both functions are independently importable from
 `@math.gl/geospatial` and `@math.gl/geospatial/terrain`. A hit gives a first-impact
-interval and a nearest axis/triangle witness at its upper endpoint. The
+interval and an axis/triangle witness within the capsule radius at its upper endpoint. The
 capsule-axis displacement bounds clearance changes throughout each interval.
 Unresolved tangencies and exhausted budgets return `incomplete`. The budget
 counts pose probes and terrain index work, and the default fraction tolerance
