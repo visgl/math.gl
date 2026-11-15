@@ -936,6 +936,8 @@ Use `discoverGeographicTerrainPoles(cut)` to enumerate pole-incident edges and g
 
 `stitchTerrainLodCut` applies caller-supplied seam pairs and partial edge ranges to a selected cut. Put the coarse height owner first. Only incident boundary faces are split. It verifies that earlier seams remain intact after later stitches and rejects incompatible shared corners. The caller supplies the neighbor topology and can use the existing coordinated morph API for animation.
 
+For a geographic morph replay, evaluate each tile at its own factor with `evaluateTerrainLodMorph`, build its mesh, and stitch the discovered mixed-level spans for that frame. Same-level edges and pole heights must already agree. The CPU qualification replays 2:1 and 4:1 cuts at both poles, checks the indexed edge chains against an analytical height profile, and checks angular gaps after eviction. Pole vertices remain in longitude/latitude coordinates. A globe renderer can use the common pole height when assembling its cap.
+
 The **Geographic seams & LOD** example lets you inspect antimeridian and near-pole derivative jumps, simulate eviction, and compare sparse transitions with full refinement while changing camera height.
 
 ### Breakline preprocessing and regional edit replay[​](#breakline-preprocessing-and-regional-edit-replay "Direct link to Breakline preprocessing and regional edit replay")
