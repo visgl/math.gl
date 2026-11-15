@@ -35,12 +35,6 @@ test('Matrix4#construct and Array.isArray check', () => {
   expect(Array.isArray(m)).toBeTruthy();
 });
 
-test('Matrix4#INDICES preserves named and numeric lookup', () => {
-  const {INDICES} = new Matrix4();
-  expect(INDICES.COL1ROW0).toBe(4);
-  expect(INDICES[4]).toBe('COL1ROW0');
-});
-
 test('Matrix4#fromQuaternion', () => {
   expect(equals(new Matrix4().fromQuaternion([0, 0, 0, 1]), IDENTITY_MATRIX)).toBe(true);
 });

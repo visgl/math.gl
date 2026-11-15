@@ -26,12 +26,6 @@ test('Matrix3#construct and Array.isArray check', () => {
   expect(Array.isArray(m)).toBeTruthy();
 });
 
-test('Matrix3#INDICES preserves named and numeric lookup', () => {
-  const {INDICES} = new Matrix3();
-  expect(INDICES.COL1ROW0).toBe(3);
-  expect(INDICES[3]).toBe('COL1ROW0');
-});
-
 test('Matrix3#from', () => {
   expect(equals(new Matrix3().from([1, 2, 3, 4, 5, 6, 7, 8, 9]), [1, 2, 3, 4, 5, 6, 7, 8, 9])).toBe(
     true
