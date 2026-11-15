@@ -343,7 +343,7 @@ export class Euler extends MathArray {
     const b = Math.sin(x);
     const d = Math.sin(y);
     const f = Math.sin(z);
-    switch (this.order) {
+    switch (getOrder(this[3])) {
       case 'xyz': {
         const ae = a * e,
           af = a * f,
