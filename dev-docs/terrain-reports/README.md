@@ -64,3 +64,13 @@ coordinated regular-triangle coverage, including nodata. XY intentionally uses u
 sample spacing; source provenance is in the fixture documentation. Expanded sample
 counts expose the cost of the bounded common-lattice reference. Single-run timings
 are diagnostic, not sparse-LOD or regional-throughput claims.
+
+## Worker edit allocation and tail latency (2026-11-15)
+
+[Methodology and findings](./worker-tail-2026-11-15.md) and
+[per-trial summaries](./worker-tail-2026-11-15.json) cover an interleaved
+pre-#559/master/candidate comparison, worker CPU/allocation diagnostics,
+transport controls, and a warmed direct-update probe. All measured commits
+match historical full rebuilds. Worker processing and allocation traffic
+improve; Sierra end-to-end p99 remains variable, so no default scheduling
+policy or tail-latency guarantee is inferred.
