@@ -392,6 +392,7 @@ export {
 export {
   selectTerrainLod,
   type TerrainLodCandidate,
+  type TerrainLodCertifiedView,
   type TerrainLodView
 } from './terrain/lod-select';
 export {stitchTerrainLodCut, type TerrainLodSeam} from './terrain/lod-stitch';
@@ -450,3 +451,9 @@ export {
   type TerrainRigidMotion,
   type TerrainRotationalSweepResult
 } from './terrain/sweep-rotation';
+
+export {
+  boundTerrainLodScreenError,
+  type TerrainLodErrorBounds,
+  type TerrainLodProjection
+} from './terrain/lod-screen-error';

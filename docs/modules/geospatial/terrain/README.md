@@ -1658,6 +1658,26 @@ accepts the previous refined set for hysteresis. Callers supply complete
 child partitions. A parent stays selected until all immediate children are
 resident. Unavailable roots are reported explicitly.
 
+Pass `{projection: {matrix, width, height, depthRange, reversedDepth}, targetPixels}` to
+`selectTerrainLod` to use a conservative screen-space bound instead of the
+distance estimate. `boundTerrainLodScreenError(tile, projection)` is also
+available as a standalone query. Use Cartesian tile bounds and a Euclidean
+displacement limit in the same frame as the column-major clip transform.
+For geographic terrain, first establish those bounds and the mesh error in
+ECEF or a shared local Cartesian frame.
+
+The bound accounts for both axes, perspective division and off-axis
+projection. The default depth range is `negative-one-to-one`. Use
+`zero-to-one` for a zero-to-one clip projection and `reversedDepth: true`
+when the matrix reverses near and far depth. A fully near-clipped
+displacement envelope contributes zero. A potentially visible envelope
+that touches the near plane or reaches nonpositive clip W returns
+`Infinity`, which requests refinement where resident children are available.
+A parent retained for residency can therefore report `Infinity`. Side and
+far clipping are ignored. The query bounds displacement between
+corresponding projected points, so the input geometric error must itself
+bound displacement between the surfaces being compared.
+
 `stitchTerrainLodCut` applies caller-supplied seam pairs and partial edge ranges
 to a selected cut. Put the coarse height owner first. Only incident boundary
 faces are split. It verifies that earlier seams remain intact after later
