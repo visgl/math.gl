@@ -11,6 +11,7 @@ import {TerrainStreaming} from './lod-streaming';
 import TileTransitions from './coordinated-transitions';
 import GeographicLod from './geographic-lod';
 import BreaklineAuthoring from './breakline-authoring';
+import TrailPlanner from './trail-planner';
 import './styles.css';
 
 const groups = [
@@ -19,6 +20,7 @@ const groups = [
   {id: 'contours', title: 'Contour tolerance', Component: BandsUpdates},
   {id: 'tiles', title: 'Tiles & LOD', Component: TileTransitions},
   {id: 'geographic', title: 'Geographic seams & LOD', Component: GeographicLod},
+  {id: 'trail', title: 'Trail planner', Component: TrailPlanner},
   {id: 'breaklines', title: 'Breakline authoring', Component: BreaklineAuthoring},
   {id: 'streaming', title: 'Streaming replay', Component: TerrainStreaming}
 ];

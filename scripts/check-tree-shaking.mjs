@@ -184,6 +184,8 @@ const probes = [
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/profile\./, /\/profile-measure\./],
     budget: 3500
   },
+  {symbol: 'createTerrainRegionalViewshed', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/height-field\./, /profile-horizon/, /profile-viewshed/, /mixed-halo/, /triangle-bvh/], budget: 5500},
   ...['getTerrainProfileHorizon', 'getTerrainProfileViewshed'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/profile\./, /\/profile-measure\./, /\/profile-visibility\./],

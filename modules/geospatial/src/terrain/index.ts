@@ -260,3 +260,11 @@ export {
   type TerrainLodErrorBounds,
   type TerrainLodProjection
 } from './lod-screen-error';
+
+export {
+  createTerrainRegionalViewshed,
+  TerrainRegionalViewStatus,
+  type TerrainRegionalViewshed,
+  type TerrainRegionalViewshedOptions,
+  type TerrainViewshedGrid
+} from './regional-viewshed';
