@@ -8,6 +8,9 @@ import type {SubdividedTriangleMesh, SubdivideTriangleMeshOptions} from '@math.g
 
 // Pins the exact output and the transform call count of representative refinements.
 // The digests were captured from the implementation that sampled every face in every round.
+// They hash the Math.sin/cos/log results of the test transforms, which differ between
+// Node and browser engines in the last bits, so the digests are checked in Node only.
+// The call counts do not depend on those bits, and they are checked everywhere.
 
 const DEG = Math.PI / 180;
 
@@ -241,9 +244,12 @@ const CASES: Case[] = [
   }
 ];
 
-test.each(CASES)('$name: output is unchanged', ({mesh, options, expected}) => {
-  expect(run(mesh, options).digest).toBe(expected);
-});
+test.skipIf(typeof window !== 'undefined').each(CASES)(
+  '$name: output is unchanged',
+  ({mesh, options, expected}) => {
+    expect(run(mesh, options).digest).toBe(expected);
+  }
+);
 
 test.each(CASES)('$name: transform call count', ({mesh, options, calls}) => {
   expect(run(mesh, options).calls).toEqual(calls);
