@@ -111,7 +111,7 @@ const CASES: Case[] = [
     },
     expected:
       'v1089 t2048 17424:6834e171 26136:1a27221f 24576:03ba8b2a 13068:3e524085 26136:1f0cc5f8 8192:299addc5',
-    calls: [20865, 0]
+    calls: [20193, 0]
   },
   {
     name: 'raster tile near the transverse Mercator central meridian',
@@ -138,7 +138,7 @@ const CASES: Case[] = [
     },
     expected:
       'v1994 t3808 31904:88a32de6 31904:7068c313 45696:1758751c 23928:8e74e9b5 47856:8f091a02 15232:71edf5e5',
-    calls: [38450, 0]
+    calls: [37439, 0]
   },
   {
     name: 'maxDepth is exhausted',
@@ -171,7 +171,7 @@ const CASES: Case[] = [
     },
     expected:
       'v171 t294 2736:2e7d61b4 2736:efea5128 3528:af0fad94 2052:49ce8309 4104:a6c45d94 1176:0f284581',
-    calls: [3147, 2976]
+    calls: [3053, 2976]
   },
   {
     name: 'XYZ source to geocentric output',
@@ -186,7 +186,7 @@ const CASES: Case[] = [
     },
     expected:
       'v153 t256 3672:38b06d49 3672:2bdba9bc 3072:e920047e 1836:653d2305 3672:ce208d5d 1024:1f116dc5',
-    calls: [2543, 0]
+    calls: [2488, 0]
   },
   {
     name: 'transform error with a source edge limit',
@@ -198,7 +198,7 @@ const CASES: Case[] = [
     },
     expected:
       'v1089 t2048 17424:ec5007fd 17424:86cad79b 24576:6df22b3d 13068:11e731f1 26136:c0a63fc8 8192:cc58bdc5',
-    calls: [20625, 0]
+    calls: [20065, 0]
   },
   {
     name: 'source-edge refinement',
@@ -225,7 +225,7 @@ const CASES: Case[] = [
     },
     expected:
       'v90 t128 1440:d4787de5 1440:b45bab8c 1536:76073fb5 1080:df904005 2160:6c7999a5 512:457623c5',
-    calls: [1341, 0]
+    calls: [1308, 0]
   }
 ];
 

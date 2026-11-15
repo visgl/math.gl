@@ -122,6 +122,8 @@ export function subdivideTriangleMesh(
   let faces: Face[] = [];
   /** Sampled errors per undirected edge, ordered from its lower vertex index. */
   const edgeErrors = new Map<string, number[]>();
+  /** Projected midpoints of sampled edges, reused when the edge is split. */
+  const edgeMidpointTargets = new Map<string, number[]>();
   for (let i = 0; i < mesh.positions.length; i += size) {
     const source = Array.from({length: size}, (_, j) => mesh.positions[i + j]);
     if (!source.every(Number.isFinite)) throw new RangeError('Source positions must be finite');
@@ -211,7 +213,7 @@ export function subdivideTriangleMesh(
     return target;
   }
 
-  function error(points: Vertex[], weights: number[]): number {
+  function error(points: Vertex[], weights: number[], keepExact?: number[][]): number {
     const source = blend(
       points.map(p => p.source),
       weights
@@ -221,8 +223,9 @@ export function subdivideTriangleMesh(
       weights
     );
     const exact = project(source);
+    keepExact?.push(exact);
     if (!errorMetric) return Math.hypot(...exact.map((value, i) => value - linearTarget[i]));
-    const value = errorMetric({source, exact, interpolated: linearTarget});
+    const value = errorMetric({source, exact: exact.slice(), interpolated: linearTarget});
     if (!Number.isFinite(value) || value < 0) {
       throw new RangeError('errorMetric must return a finite nonnegative value');
     }
@@ -243,8 +246,11 @@ export function subdivideTriangleMesh(
     let value = errors[slot];
     if (value === undefined) {
       const fraction = EDGE_FRACTIONS[sample];
-      value = error([vertices[a], vertices[b]], [1 - fraction, fraction]);
+      // The midpoint sample has the source coordinates that midpoint() would project.
+      const keepExact = fraction === 0.5 ? [] : undefined;
+      value = error([vertices[a], vertices[b]], [1 - fraction, fraction], keepExact);
       errors[slot] = value;
+      if (keepExact) edgeMidpointTargets.set(key, keepExact[0]);
     }
     return value;
   }
@@ -285,7 +291,7 @@ export function subdivideTriangleMesh(
     // the original edge endpoints, so at most three source vertices contribute.
     if (weights.size > 3) throw new Error('Inconsistent mesh provenance');
     const index = vertices.length;
-    vertices.push({source, target: project(source), weights});
+    vertices.push({source, target: edgeMidpointTargets.get(key) ?? project(source), weights});
     midpoints.set(key, index);
     return index;
   }
