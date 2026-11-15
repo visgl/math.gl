@@ -74,6 +74,15 @@ test('Euler#coverage', () => {
   euler.toVector3([0, 0, 0]);
 });
 
+test('Euler preserves the numeric rotation order in its array representation', () => {
+  const orders = ['zyx', 'yxz', 'xzy', 'zxy', 'yzx', 'xyz'] as const;
+  for (const [index, order] of orders.entries()) {
+    const euler = new Euler(1, 2, 3, order);
+    expect(euler.toArray4()).toEqual([1, 2, 3, index]);
+    expect(new Euler().copy([1, 2, 3, index]).order).toBe(order);
+  }
+});
+
 test('Euler#fromQuaternion supports every rotation order', () => {
   const angles = [30 * DEGREE_TO_RADIANS, 45 * DEGREE_TO_RADIANS, 60 * DEGREE_TO_RADIANS];
   const orders = ['xyz', 'yxz', 'zxy', 'zyx', 'yzx', 'xzy'] as const;

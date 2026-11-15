@@ -24,7 +24,12 @@ test('Matrix3#types', () => {
 test('Matrix3#construct and Array.isArray check', () => {
   const m = new Matrix3();
   expect(Array.isArray(m)).toBeTruthy();
-  expect(m.INDICES).toBeTruthy();
+});
+
+test('Matrix3#INDICES preserves named and numeric lookup', () => {
+  const {INDICES} = new Matrix3();
+  expect(INDICES.COL1ROW0).toBe(3);
+  expect(INDICES[3]).toBe('COL1ROW0');
 });
 
 test('Matrix3#from', () => {

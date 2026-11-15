@@ -22,18 +22,27 @@ import {
 import {transformMat3 as vec2_transformMat3} from '../gl-matrix/vec2';
 import {transformMat3 as vec3_transformMat3} from '../gl-matrix/vec3';
 
-// eslint-disable-next-line no-shadow
-enum INDICES {
-  COL0ROW0 = 0,
-  COL0ROW1 = 1,
-  COL0ROW2 = 2,
-  COL1ROW0 = 3,
-  COL1ROW1 = 4,
-  COL1ROW2 = 5,
-  COL2ROW0 = 6,
-  COL2ROW1 = 7,
-  COL2ROW2 = 8
-}
+const INDICES = {
+  COL0ROW0: 0,
+  COL0ROW1: 1,
+  COL0ROW2: 2,
+  COL1ROW0: 3,
+  COL1ROW1: 4,
+  COL1ROW2: 5,
+  COL2ROW0: 6,
+  COL2ROW1: 7,
+  COL2ROW2: 8,
+  // Preserve numeric lookup on the public INDICES getter.
+  0: 'COL0ROW0',
+  1: 'COL0ROW1',
+  2: 'COL0ROW2',
+  3: 'COL1ROW0',
+  4: 'COL1ROW1',
+  5: 'COL1ROW2',
+  6: 'COL2ROW0',
+  7: 'COL2ROW1',
+  8: 'COL2ROW2'
+} as const;
 
 const IDENTITY_MATRIX = Object.freeze([1, 0, 0, 0, 1, 0, 0, 0, 1]);
 

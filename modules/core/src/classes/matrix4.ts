@@ -33,25 +33,41 @@ import {transformMat4 as vec2_transformMat4} from '../gl-matrix/vec2';
 import {transformMat4 as vec3_transformMat4} from '../gl-matrix/vec3';
 import {transformMat4 as vec4_transformMat4} from '../gl-matrix/vec4';
 
-// eslint-disable-next-line no-shadow
-enum INDICES {
-  COL0ROW0 = 0,
-  COL0ROW1 = 1,
-  COL0ROW2 = 2,
-  COL0ROW3 = 3,
-  COL1ROW0 = 4,
-  COL1ROW1 = 5,
-  COL1ROW2 = 6,
-  COL1ROW3 = 7,
-  COL2ROW0 = 8,
-  COL2ROW1 = 9,
-  COL2ROW2 = 10,
-  COL2ROW3 = 11,
-  COL3ROW0 = 12,
-  COL3ROW1 = 13,
-  COL3ROW2 = 14,
-  COL3ROW3 = 15
-}
+const INDICES = {
+  COL0ROW0: 0,
+  COL0ROW1: 1,
+  COL0ROW2: 2,
+  COL0ROW3: 3,
+  COL1ROW0: 4,
+  COL1ROW1: 5,
+  COL1ROW2: 6,
+  COL1ROW3: 7,
+  COL2ROW0: 8,
+  COL2ROW1: 9,
+  COL2ROW2: 10,
+  COL2ROW3: 11,
+  COL3ROW0: 12,
+  COL3ROW1: 13,
+  COL3ROW2: 14,
+  COL3ROW3: 15,
+  // Preserve numeric lookup on the public INDICES getter.
+  0: 'COL0ROW0',
+  1: 'COL0ROW1',
+  2: 'COL0ROW2',
+  3: 'COL0ROW3',
+  4: 'COL1ROW0',
+  5: 'COL1ROW1',
+  6: 'COL1ROW2',
+  7: 'COL1ROW3',
+  8: 'COL2ROW0',
+  9: 'COL2ROW1',
+  10: 'COL2ROW2',
+  11: 'COL2ROW3',
+  12: 'COL3ROW0',
+  13: 'COL3ROW1',
+  14: 'COL3ROW2',
+  15: 'COL3ROW3'
+} as const;
 
 const DEFAULT_FOVY = (45 * Math.PI) / 180;
 const DEFAULT_ASPECT = 1;
