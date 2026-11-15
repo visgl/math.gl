@@ -5,6 +5,7 @@
 import type {Task} from '@math.gl/tasks';
 import type {TerrainMixedHaloSnapshot} from '../terrain/mixed-halo-update';
 import type {TerrainMixedVertexTile} from '../terrain/mixed-vertex-halos';
+import type {HeightFieldProps, TerrainArray} from '../terrain/types';
 
 type TileAddress = Pick<TerrainMixedVertexTile, 'column' | 'row' | 'spacing'>;
 type TerrainResidencyTimings = {
@@ -43,6 +44,9 @@ export type TerrainResidencyTypes = {
   };
 };
 
+/** Address lookup retained with an immutable source layout, not rebuilt per sample batch. */
+const sourceIndexes = new WeakMap<TerrainMixedHaloSnapshot, Map<string, number>>();
+
 const addressKey = ({spacing, column, row}: TileAddress) => `${spacing}/${column}/${row}`;
 
 function sameArray(a: ArrayLike<number>, b: ArrayLike<number>): boolean {
@@ -68,6 +72,50 @@ function sameHalo(a: ResidentHalo, b: ResidentHalo): boolean {
   );
 }
 
+/** Copy already validated resident samples once, preserving precision and nodata normalization. */
+function copyResidentSamples(field: HeightFieldProps): {
+  heights: TerrainArray;
+  validity: Uint8Array;
+} {
+  const {width, height, offset = 0, stride = width} = field;
+  const heights =
+    field.heights instanceof Float64Array
+      ? new Float64Array(width * height)
+      : new Float32Array(width * height);
+  const validity = new Uint8Array(heights.length);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const input = offset + y * stride + x;
+      const output = y * width + x;
+      const value = field.heights[input];
+      if (Number.isFinite(value) && (!field.validity || field.validity[input] !== 0)) {
+        heights[output] = value;
+        validity[output] = 1;
+      }
+    }
+  }
+  return {heights, validity};
+}
+
+/** Compare halo addresses in the order used by the incremental builder. */
+function compareAddress(a: TileAddress, b: TileAddress): number {
+  return a.spacing - b.spacing || a.column - b.column || a.row - b.row;
+}
+
+/** Compute changed outputs with a linear merge over sorted snapshots. */
+function changedHalos(previous: readonly ResidentHalo[], next: readonly ResidentHalo[]) {
+  const changed: ResidentHalo[] = [];
+  let index = 0;
+  for (let i = 0; i < next.length; i++) {
+    const tile = next[i];
+    while (index < previous.length && compareAddress(previous[index], tile) < 0) index++;
+    const prior = previous[index];
+    if (!prior || (prior !== tile && (compareAddress(prior, tile) !== 0 || !sameHalo(prior, tile))))
+      changed.push(tile);
+  }
+  return changed;
+}
+
 /** Keep mixed halo sources and outputs resident across serialized edit batches. */
 export const TerrainResidencyTask = {
   id: 'terrain-residency',
@@ -88,37 +136,59 @@ export const TerrainResidencyTask = {
     try {
       if (input.revision !== state.revision) throw new Error('Stale terrain residency revision');
 
-      const [{updateTerrainMixedVertexTileHalos}, {HeightField}] = await Promise.all([
-        import('../terrain/mixed-halo-update'),
-        import('../terrain/height-field')
-      ]);
+      const {updateTerrainMixedVertexTileHalos} = await import('../terrain/mixed-halo-update');
       context.throwIfAborted();
-      const sources = new Map(state.snapshot?.sources.map(tile => [addressKey(tile), tile]));
+      const priorSources = state.snapshot?.sources ?? [];
+      let sourceIndex = state.snapshot && sourceIndexes.get(state.snapshot);
+      if (!sourceIndex) {
+        sourceIndex = new Map();
+        for (let i = 0; i < priorSources.length; i++)
+          sourceIndex.set(addressKey(priorSources[i]), i);
+      }
+      // Sample-only transactions copy one reference array. Structural edits lazily
+      // create a map; neither path mutates the committed snapshot on rejection.
+      const resident = priorSources.slice();
+      let structural: Map<string, TerrainMixedVertexTile> | undefined;
+      const getSource = (key: string) =>
+        structural ? structural.get(key) : resident[sourceIndex.get(key)!];
+      const setSource = (key: string, tile: TerrainMixedVertexTile) => {
+        if (structural) structural.set(key, tile);
+        else resident[sourceIndex.get(key)!] = tile;
+      };
+      const editLayout = () => {
+        if (!structural) {
+          structural = new Map();
+          for (const tile of resident) structural.set(addressKey(tile), tile);
+        }
+        return structural;
+      };
       // Several edits to a tile in one batch share one private copy.
-      const writable = new Map<string, ReturnType<InstanceType<typeof HeightField>['copyData']>>();
+      const writable = new Map<string, ReturnType<typeof copyResidentSamples>>();
       for (const edit of input.edits) {
         if (edit.type === 'upsert') {
           const key = addressKey(edit.tile);
-          sources.set(key, structuredClone(edit.tile));
+          editLayout().set(key, structuredClone(edit.tile));
           writable.delete(key);
           continue;
         }
         const key = addressKey(edit.address);
         if (edit.type === 'remove') {
-          sources.delete(key);
+          editLayout().delete(key);
           writable.delete(key);
           continue;
         }
         if (edit.type !== 'samples') throw new Error('Unknown terrain residency edit');
-        const source = sources.get(key);
+        const source = getSource(key);
         if (!source) throw new Error('Terrain sample edit requires a resident tile');
         if (!edit.samples.length) continue;
         let data = writable.get(key);
         if (!data) {
-          const copied = new HeightField(source.field).copyData();
-          data = {heights: copied.heights, validity: copied.validity};
+          // Upserts in this transaction have not passed halo validation yet.
+          data = structural
+            ? new (await import('../terrain/height-field')).HeightField(source.field).copyData()
+            : copyResidentSamples(source.field);
           writable.set(key, data);
-          sources.set(key, {
+          setSource(key, {
             ...source,
             field: {...source.field, ...data, offset: 0, stride: source.field.width}
           });
@@ -141,19 +211,14 @@ export const TerrainResidencyTask = {
       const applied = input.measureStages ? performance.now() : 0;
       const next = updateTerrainMixedVertexTileHalos(
         state.snapshot,
-        [...sources.values()],
+        structural ? [...structural.values()] : resident,
         state.limits
       );
       const updated = input.measureStages ? performance.now() : 0;
-      const old = new Map(state.snapshot?.tiles.map(tile => [addressKey(tile), tile]));
-      // Copy outgoing buffers so transfer cannot detach the resident snapshot.
-      const tiles = structuredClone(
-        next.tiles.filter(tile => {
-          const prior = old.get(addressKey(tile));
-          return !prior || !sameHalo(prior, tile);
-        })
-      );
+      // Both snapshots are in address order. Unchanged halos retain object identity.
+      const tiles = structuredClone(changedHalos(state.snapshot?.tiles ?? [], next.tiles));
       context.throwIfAborted();
+      if (!structural) sourceIndexes.set(next, sourceIndex);
       state.snapshot = next;
       state.revision++;
       const result: TerrainResidencyTypes['output'] = {

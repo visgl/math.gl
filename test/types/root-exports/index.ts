@@ -4,11 +4,7 @@
 
 import {mat4, mat4GetScaling, vec3Normalize, createLocalFrameBasis} from '@math.gl/core';
 import {getGeohashBounds} from '@math.gl/dggs';
-import {
-  TriangleBVH,
-  getClosestPointsSegmentTriangle,
-  type UtilityGeometry
-} from '@math.gl/geometry';
+import {TriangleBVH, getClosestPointsSegmentTriangle, type GeometryInput} from '@math.gl/geometry';
 import {getSkySnapshot, getStartOfDay, type SkySnapshotOptions} from '@math.gl/earth';
 import {
   createTerrainMesh,
@@ -125,7 +121,7 @@ void [
   removedBVH
 ];
 const typeChecks: [
-  UtilityGeometry?,
+  GeometryInput?,
   TerrainMixedSurface?,
   TerrainSurface?,
   SkySnapshotOptions?,

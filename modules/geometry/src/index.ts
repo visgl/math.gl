@@ -16,11 +16,17 @@ export type {HingePanel} from './lib/hinge-tree';
 export {unpackIndexedGeometry} from './lib/geometry-utils';
 
 export {BoxGeometry, CubeGeometry} from './geometries/box-geometry';
-export type {BoxGeometryProps, CubeGeometryProps} from './geometries/box-geometry';
+export type {
+  BoxGeometryProps,
+  CubeGeometryProps
+} from './geometries/box-geometry';
 export {CapsuleGeometry} from './geometries/capsule-geometry';
 export type {CapsuleGeometryProps} from './geometries/capsule-geometry';
 export {CylinderGeometry, ConeGeometry} from './geometries/cylinder-geometry';
-export type {CylinderGeometryProps, ConeGeometryProps} from './geometries/cylinder-geometry';
+export type {
+  CylinderGeometryProps,
+  ConeGeometryProps
+} from './geometries/cylinder-geometry';
 export {PlaneGeometry} from './geometries/plane-geometry';
 export type {PlaneGeometryProps} from './geometries/plane-geometry';
 export {SphereGeometry} from './geometries/sphere-geometry';
@@ -45,11 +51,6 @@ export type {
   LatheGeometryProps
 } from './parametric';
 export {
-  GL,
-  GL_TYPE,
-  GL_PRIMITIVE,
-  GL_PRIMITIVE_MODE,
-  GLType,
   isGeometry,
   makeAttributeIterator,
   makePrimitiveIterator,
@@ -175,7 +176,10 @@ export {
   getClosestPointsOnSegments,
   getClosestPointsSegmentTriangle
 } from './culling/queries';
-export type {SegmentClosestPoints, SegmentTriangleClosestPoints} from './culling/queries';
+export type {
+  SegmentClosestPoints,
+  SegmentTriangleClosestPoints
+} from './culling/queries';
 export {BoxIndex, PointIndex, TriangleBVH} from './spatial-index/index';
 export type {
   BoxIndexOptions,
@@ -194,7 +198,7 @@ export type {
 } from './spatial-index/index';
 
 export type {
-  Geometry as UtilityGeometry,
+  GeometryInput,
   GeometryAttribute as UtilityGeometryAttribute
 } from './utils/geometry';
 
@@ -240,8 +244,15 @@ export {
   triangleIntersectsBounds
 } from './culling/geometric-queries';
 export type {RaySegmentClosestPoints} from './culling/geometric-queries';
-export {sampleCurveAdaptive, computeParallelTransportFrames} from './curves/index';
-export type {AdaptiveCurveOptions, AdaptiveCurveSamples, CurveFrames} from './curves/index';
+export {
+  sampleCurveAdaptive,
+  computeParallelTransportFrames
+} from './curves/index';
+export type {
+  AdaptiveCurveOptions,
+  AdaptiveCurveSamples,
+  CurveFrames
+} from './curves/index';
 
 export {projectBounds} from './utils/project-bounds';
 export type {

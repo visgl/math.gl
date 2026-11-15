@@ -3,15 +3,17 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Vector3} from '@math.gl/core';
-import {GL} from './constants';
-import type {Geometry} from './geometry';
-import {getAttributeValues, getGeometryMode, getPositionAttribute} from './geometry';
+import type {GeometryInput} from './geometry';
+import {getAttributeValues, getPositionAttribute} from './geometry';
 import {makePrimitiveIterator} from './primitive-iterator';
 
 /** Computes smooth, area-weighted vertex normals for a triangle geometry. */
-export function computeVertexNormals(geometry: Geometry): Float32Array {
-  const mode = getGeometryMode(geometry);
-  if (mode !== GL.TRIANGLES && mode !== GL.TRIANGLE_STRIP && mode !== GL.TRIANGLE_FAN) {
+export function computeVertexNormals(geometry: GeometryInput): Float32Array {
+  if (
+    geometry.topology !== 'triangle-list' &&
+    geometry.topology !== 'triangle-strip' &&
+    geometry.topology !== 'triangle-fan'
+  ) {
     throw new Error('Triangle geometry is required');
   }
 

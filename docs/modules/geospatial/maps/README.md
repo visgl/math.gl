@@ -95,13 +95,6 @@ import {prepareMapSurface} from '@math.gl/geospatial/maps/surfaces';
 const surface = prepareMapSurface(map, {maxAngularStep: 1});
 ```
 
-## Breaking migration
-
-Replace `@math.gl/geospatial/discontinuous` imports with `@math.gl/geospatial/maps`.
-Map exports have also been removed from `/projection`. Supply presets explicitly,
-opt into geometry/transitions as needed, and replace `map.prepareSurface(options)`
-with `prepareMapSurface(map, options)`. No compatibility entry point is provided.
-
 ## Chart geometry
 
 <p class="badges">
@@ -379,7 +372,7 @@ Cache this result while the map is unchanged.
 
 `fitMapLayout` returns a uniform `scale`, forward `project` and inverse `unproject`
 functions, fitted `bounds`, and fitted `regions`. Region bounds, frames, and outlines
-are now in viewport pixels; `placement` remains the canonical map-space transform.
+are expressed in viewport pixels. `placement` is the canonical map-space transform.
 Each region also has a sequential `layer` index for rendering. Higher layers
 should cover lower layers. Use the same order for picking overlapping insets.
 `pickMapLayout(map, fit, pixel)` converts a viewport pixel to map space and

@@ -37,7 +37,7 @@ export function createTerrainMixedVertexTileHalos(
 
 /** Internal preparation shared only by immutable incremental snapshots. */
 export type MixedHaloPreparation = {
-  fields: WeakMap<TerrainMixedVertexTile, HeightField>;
+  tiles: WeakMap<TerrainMixedVertexTile, ReturnType<typeof prepareMixedHaloTile>>;
   layout?: {keys: string[]; query: ReturnType<typeof createTerrainBoxIndex>};
 };
 
@@ -53,89 +53,74 @@ export function buildMixedVertexTileHalos(
   if (![maxSamples, maxTests].every(v => Number.isSafeInteger(v) && v >= 0))
     throw new Error('Invalid mixed halo capacity');
   let count = 0;
-  const addresses = new Set<string>();
+  let previousKey: string | undefined;
   let frame:
     | {origin: number[]; column: number[]; row: number[]; reference: string; scale: number[]}
     | undefined;
   const sources = [...tiles]
     .sort((a, b) => a.spacing - b.spacing || a.column - b.column || a.row - b.row)
     .map(tile => {
-      if (
-        ![tile.column, tile.row, tile.spacing].every(Number.isSafeInteger) ||
-        tile.spacing < 1 ||
-        2 ** Math.round(Math.log2(tile.spacing)) !== tile.spacing
-      )
-        throw new Error('Invalid mixed halo lattice');
-      const key = `${tile.spacing}/${tile.column}/${tile.row}`;
-      if (addresses.has(key)) throw new Error('Duplicate mixed halo tile');
-      addresses.add(key);
       count += (tile.field.width + 2) * (tile.field.height + 2);
       if (!Number.isSafeInteger(count) || count > maxSamples)
         throw new Error('Mixed halo sample capacity exceeded');
-      let field = preparation?.fields.get(tile);
-      if (!field) {
-        field = new HeightField(tile.field);
-        preparation?.fields.set(tile, field);
+      let prepared = preparation?.tiles.get(tile);
+      if (!prepared) {
+        prepared = prepareMixedHaloTile(tile);
+        preparation?.tiles.set(tile, prepared);
       }
-      if (field.registration !== 'vertex')
-        throw new Error('Mixed halos require vertex registration');
-      const column = field.columnStep.map(v => v / tile.spacing);
-      const row = field.rowStep.map(v => v / tile.spacing);
-      const origin = field.origin.map(
-        (v, axis) => v - tile.column * column[axis] - tile.row * row[axis]
-      );
-      const scale = field.origin.map((v, i) =>
-        Math.max(1, Math.abs(v), Math.abs(tile.column * column[i]), Math.abs(tile.row * row[i]))
-      );
-      if (!origin.every(Number.isFinite)) throw new Error('Mixed halo coordinate overflow');
-      if (
-        frame &&
-        (frame.reference !== field.heightReference ||
-          column.some((v, i) => v !== frame!.column[i]) ||
-          row.some((v, i) => v !== frame!.row[i]) ||
-          origin.some(
-            (v, i) =>
-              Math.abs(v - frame!.origin[i]) >
-              Math.min(
-                16 * Number.EPSILON * Math.max(scale[i], frame!.scale[i]),
-                1e-9 * Math.max(Math.abs(column[i]), Math.abs(row[i]))
-              )
-          ))
-      )
-        throw new Error('Mixed halo frames or height references differ');
+      const {
+        key,
+        source: field,
+        columnStep: column,
+        rowStep: row,
+        frameOrigin: origin,
+        scale
+      } = prepared;
+      // Address sorting makes duplicate tiles adjacent; no per-build Set is needed.
+      if (previousKey === key) throw new Error('Duplicate mixed halo tile');
+      previousKey = key;
+      if (frame) {
+        if (frame.reference !== field.heightReference)
+          throw new Error('Mixed halo frames or height references differ');
+        for (let i = 0; i < 2; i++) {
+          if (
+            column[i] !== frame.column[i] ||
+            row[i] !== frame.row[i] ||
+            (origin[i] !== frame.origin[i] &&
+              Math.abs(origin[i] - frame.origin[i]) >
+                Math.min(
+                  16 * Number.EPSILON * Math.max(scale[i], frame.scale[i]),
+                  1e-9 * Math.max(Math.abs(column[i]), Math.abs(row[i]))
+                ))
+          )
+            throw new Error('Mixed halo frames or height references differ');
+        }
+      }
       frame ??= {origin, column, row, reference: field.heightReference, scale};
-      return {...tile, source: field};
+      return prepared;
     });
   // Bound the full lattice span so relative coordinates remain exact integers.
-  for (const axis of ['column', 'row'] as const) {
-    let min = Infinity,
-      max = -Infinity;
-    for (const tile of sources) {
-      const size = axis === 'column' ? tile.source.width : tile.source.height;
-      const low = tile[axis] - tile.spacing,
-        high = tile[axis] + size * tile.spacing;
-      if (![low, high].every(Number.isSafeInteger)) throw new Error('Mixed halo lattice overflow');
-      min = Math.min(min, low);
-      max = Math.max(max, high);
-    }
-    if (sources.length && !Number.isSafeInteger(max - min))
-      throw new Error('Mixed halo lattice span overflow');
+  let minX = Infinity,
+    minY = Infinity,
+    maxX = -Infinity,
+    maxY = -Infinity;
+  for (let i = 0; i < sources.length; i++) {
+    const {haloBounds} = sources[i];
+    minX = Math.min(minX, haloBounds.minX);
+    minY = Math.min(minY, haloBounds.minY);
+    maxX = Math.max(maxX, haloBounds.maxX);
+    maxY = Math.max(maxY, haloBounds.maxY);
   }
+  if (sources.length && (!Number.isSafeInteger(maxX - minX) || !Number.isSafeInteger(maxY - minY)))
+    throw new Error('Mixed halo lattice span overflow');
   if (targets && targets.size === 0) return {tiles: []};
   let index: ReturnType<typeof createTerrainBoxIndex> | undefined;
   if (sources.length > 8) {
-    const keys =
-      preparation &&
-      sources.map(
-        tile =>
-          `${tile.spacing}/${tile.column}/${tile.row}/${tile.source.width}/${tile.source.height}`
-      );
     const cached = preparation?.layout;
     if (
-      keys &&
       cached &&
-      keys.length === cached.keys.length &&
-      keys.every((key, i) => key === cached.keys[i])
+      sources.length === cached.keys.length &&
+      sources.every((tile, i) => tile.layoutKey === cached.keys[i])
     ) {
       index = cached.query;
     } else {
@@ -147,7 +132,8 @@ export function buildMixedVertexTileHalos(
           maxY: tile.row + (tile.source.height - 1) * tile.spacing
         }))
       );
-      if (preparation && keys) preparation.layout = {keys, query: index};
+      if (preparation)
+        preparation.layout = {keys: sources.map(tile => tile.layoutKey), query: index};
     }
   }
   let tests = 0;
@@ -156,7 +142,7 @@ export function buildMixedVertexTileHalos(
   };
   return {
     tiles: sources
-      .filter(tile => !targets || targets.has(`${tile.spacing}/${tile.column}/${tile.row}`))
+      .filter(tile => !targets || targets.has(tile.key))
       .map(tile => {
         const source = tile.source,
           width = source.width + 2,
@@ -164,23 +150,15 @@ export function buildMixedVertexTileHalos(
         const heights = new Float64Array(width * height),
           validity = new Uint8Array(heights.length),
           statuses = new Uint8Array(heights.length);
-        const candidates =
-          index?.(
-            {
-              minX: tile.column - tile.spacing,
-              minY: tile.row - tile.spacing,
-              maxX: tile.column + source.width * tile.spacing,
-              maxY: tile.row + source.height * tile.spacing
-            },
-            charge
-          ).map(id => sources[id]) ?? sources;
+        const candidates = index?.(tile.haloBounds, charge).map(id => sources[id]) ?? sources;
         for (let y = 0; y < height; y++)
           for (let x = 0; x < width; x++) {
             const gx = tile.column + (x - 1) * tile.spacing,
               gy = tile.row + (y - 1) * tile.spacing;
-            if (![gx, gy].every(Number.isSafeInteger))
+            if (!Number.isSafeInteger(gx) || !Number.isSafeInteger(gy))
               throw new Error('Mixed halo lattice overflow');
-            for (const candidate of candidates) {
+            for (let candidateIndex = 0; candidateIndex < candidates.length; candidateIndex++) {
+              const candidate = candidates[candidateIndex];
               charge();
               const cx = (gx - candidate.column) / candidate.spacing,
                 cy = (gy - candidate.row) / candidate.spacing;
@@ -220,5 +198,43 @@ export function buildMixedVertexTileHalos(
           }
         };
       })
+  };
+}
+
+/** Prepare immutable geometry and normalized data once per source descriptor. */
+function prepareMixedHaloTile(tile: TerrainMixedVertexTile) {
+  const {column, row, spacing} = tile;
+  if (
+    ![column, row, spacing].every(Number.isSafeInteger) ||
+    spacing < 1 ||
+    2 ** Math.round(Math.log2(spacing)) !== spacing
+  )
+    throw new Error('Invalid mixed halo lattice');
+  const source = new HeightField(tile.field);
+  if (source.registration !== 'vertex') throw new Error('Mixed halos require vertex registration');
+  const columnStep = source.columnStep.map(v => v / spacing);
+  const rowStep = source.rowStep.map(v => v / spacing);
+  const frameOrigin = source.origin.map((v, i) => v - column * columnStep[i] - row * rowStep[i]);
+  const scale = source.origin.map((v, i) =>
+    Math.max(1, Math.abs(v), Math.abs(column * columnStep[i]), Math.abs(row * rowStep[i]))
+  );
+  if (!frameOrigin.every(Number.isFinite)) throw new Error('Mixed halo coordinate overflow');
+  const minX = column - spacing,
+    minY = row - spacing;
+  const maxX = column + source.width * spacing,
+    maxY = row + source.height * spacing;
+  if (![minX, minY, maxX, maxY].every(Number.isSafeInteger))
+    throw new Error('Mixed halo lattice overflow');
+  const key = `${spacing}/${column}/${row}`;
+  return {
+    ...tile,
+    source,
+    columnStep,
+    rowStep,
+    frameOrigin,
+    scale,
+    key,
+    layoutKey: `${key}/${source.width}/${source.height}`,
+    haloBounds: {minX, minY, maxX, maxY}
   };
 }

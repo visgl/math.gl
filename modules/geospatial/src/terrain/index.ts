@@ -192,7 +192,12 @@ export {
   measureGeographicTerrainSeam,
   type TerrainGeographicProbe
 } from './geographic-seam';
-export {selectTerrainLod, type TerrainLodCandidate, type TerrainLodView} from './lod-select';
+export {
+  selectTerrainLod,
+  type TerrainLodCandidate,
+  type TerrainLodCertifiedView,
+  type TerrainLodView
+} from './lod-select';
 export {stitchTerrainLodCut, type TerrainLodSeam} from './lod-stitch';
 
 export {splitTerrainBreaklines} from './breakline-preprocess';
@@ -232,6 +237,7 @@ export {
   type TerrainPolytopeSweepResult
 } from './sweep-polytope';
 
+export {sweepTerrainRotatingCapsule, sweepTerrainRotatingSphere} from './sweep-rotating-capsule';
 export {sweepTerrainCylinder} from './sweep-cylinder';
 
 export {sweepTerrainPlane} from './sweep-plane';
@@ -249,3 +255,17 @@ export {
   type TerrainRigidMotion,
   type TerrainRotationalSweepResult
 } from './sweep-rotation';
+
+export {
+  boundTerrainLodScreenError,
+  type TerrainLodErrorBounds,
+  type TerrainLodProjection
+} from './lod-screen-error';
+
+export {
+  createTerrainRegionalViewshed,
+  TerrainRegionalViewStatus,
+  type TerrainRegionalViewshed,
+  type TerrainRegionalViewshedOptions,
+  type TerrainViewshedGrid
+} from './regional-viewshed';

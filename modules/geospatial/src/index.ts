@@ -392,6 +392,7 @@ export {
 export {
   selectTerrainLod,
   type TerrainLodCandidate,
+  type TerrainLodCertifiedView,
   type TerrainLodView
 } from './terrain/lod-select';
 export {stitchTerrainLodCut, type TerrainLodSeam} from './terrain/lod-stitch';
@@ -433,6 +434,10 @@ export {
   type TerrainPolytopeSweepResult
 } from './terrain/sweep-polytope';
 
+export {
+  sweepTerrainRotatingCapsule,
+  sweepTerrainRotatingSphere
+} from './terrain/sweep-rotating-capsule';
 export {sweepTerrainCylinder} from './terrain/sweep-cylinder';
 
 export {sweepTerrainPlane} from './terrain/sweep-plane';
@@ -450,3 +455,17 @@ export {
   type TerrainRigidMotion,
   type TerrainRotationalSweepResult
 } from './terrain/sweep-rotation';
+
+export {
+  boundTerrainLodScreenError,
+  type TerrainLodErrorBounds,
+  type TerrainLodProjection
+} from './terrain/lod-screen-error';
+
+export {
+  createTerrainRegionalViewshed,
+  TerrainRegionalViewStatus,
+  type TerrainRegionalViewshed,
+  type TerrainRegionalViewshedOptions,
+  type TerrainViewshedGrid
+} from './terrain/regional-viewshed';

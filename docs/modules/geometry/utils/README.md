@@ -63,7 +63,7 @@ Declare linear and flat policies explicitly, including mixed policies within one
 
 - Geometry inspection and traversal: `isGeometry`, `makeAttributeIterator`,
   `makePrimitiveIterator`, `computeVertexNormals`
-- Typed arrays and component types: `GL`, `GL_TYPE`, `GLType`, `concatTypedArrays`
+- Typed arrays: `concatTypedArrays`
 - Packed attributes: `interpolatePackedAttributes`, `encodeRGB565`, `decodeRGB565`, octahedral vector encoding, texture-coordinate
   compression, and ZigZag delta decoding
 - Coordinate helpers: `emod`

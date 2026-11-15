@@ -22,7 +22,6 @@ const copy = new Float64Array(16);
 mat4.copy(copy, model);
 ```
 
-The former imports such as `@math.gl/core/mat4` are no longer exported in v5.
 Individual exports such as `mat4Copy` also allow selective imports without passing a
 namespace object around.
 

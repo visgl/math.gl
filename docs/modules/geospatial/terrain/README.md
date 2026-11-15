@@ -1397,7 +1397,7 @@ an editable patch, nodata holes, conservative extrema and a reused distant mesh.
 
 ### Indexed topology and path-local rejection
 
-Contour topology validation now uses a static bounding-box hierarchy to narrow exact
+Contour topology validation uses a static bounding-box hierarchy to narrow exact
 edge predicates and swept-region vertex tests. Isobands use independent indexes for
 patch overlap, height-range selection and ring-parent lookup. Broad-phase traversal
 is charged to the existing work budgets; exact predicates and clipping still decide
@@ -1658,11 +1658,39 @@ accepts the previous refined set for hysteresis. Callers supply complete
 child partitions. A parent stays selected until all immediate children are
 resident. Unavailable roots are reported explicitly.
 
+Pass `{projection: {matrix, width, height, depthRange, reversedDepth}, targetPixels}` to
+`selectTerrainLod` to use a conservative screen-space bound instead of the
+distance estimate. `boundTerrainLodScreenError(tile, projection)` is also
+available as a standalone query. Use Cartesian tile bounds and a Euclidean
+displacement limit in the same frame as the column-major clip transform.
+For geographic terrain, first establish those bounds and the mesh error in
+ECEF or a shared local Cartesian frame.
+
+The bound accounts for both axes, perspective division and off-axis
+projection. The default depth range is `negative-one-to-one`. Use
+`zero-to-one` for a zero-to-one clip projection and `reversedDepth: true`
+when the matrix reverses near and far depth. A fully near-clipped
+displacement envelope contributes zero. A potentially visible envelope
+that touches the near plane or reaches nonpositive clip W returns
+`Infinity`, which requests refinement where resident children are available.
+A parent retained for residency can therefore report `Infinity`. Side and
+far clipping are ignored. The query bounds displacement between
+corresponding projected points, so the input geometric error must itself
+bound displacement between the surfaces being compared.
+
 `stitchTerrainLodCut` applies caller-supplied seam pairs and partial edge ranges
 to a selected cut. Put the coarse height owner first. Only incident boundary
 faces are split. It verifies that earlier seams remain intact after later
 stitches and rejects incompatible shared corners. The caller supplies the
 neighbor topology and can use the existing coordinated morph API for animation.
+
+For a geographic morph replay, evaluate each tile at its own factor with
+`evaluateTerrainLodMorph`, build its mesh, and stitch the discovered mixed-level
+spans for that frame. Same-level edges and pole heights must already agree.
+The CPU qualification replays 2:1 and 4:1 cuts at both poles, checks the
+indexed edge chains against an analytical height profile, and checks angular
+gaps after eviction. Pole vertices remain in longitude/latitude coordinates.
+A globe renderer can use the common pole height when assembling its cap.
 
 The **Geographic seams & LOD** example lets you inspect antimeridian and
 near-pole derivative jumps, simulate eviction, and compare sparse transitions
@@ -1789,6 +1817,33 @@ durations for applying edits, updating halos, and preparing the delta. The
 round trip minus worker process time includes transport, scheduling and task
 runtime work.
 
+For interleaved historical/candidate comparisons, run
+`TERRAIN_LAYOUT_COPIES=2 node scripts/benchmark-terrain-worker-tail.mjs`.
+`TERRAIN_TAIL_REFS` selects comma-separated commits and/or `working-tree`;
+`TERRAIN_TAIL_REPEATS` controls repeated trials with alternating revision order.
+The benchmark checks each delta and direct incremental snapshot against an
+independent full rebuild for that exact edit prefix. Rebuilds are prepared
+outside the measured dispatch loop and reused across trials.
+
+The benchmark-only worker records entry/exit timestamps, so inbound and outbound
+latency can be examined separately from processing and scheduled-arrival queue
+delay. These intervals include task protocol, serialization and OS scheduling;
+they are not pure wire time. Raw request samples and GC events are retained.
+Run `TERRAIN_PROFILE=1` separately for worker CPU and sampled allocation profiles
+(including collected objects). Profiling perturbs latency. Worker heap and
+ArrayBuffer peaks are sampled at request boundaries, not continuous maxima;
+RSS includes the entire process and the main-thread qualification oracle.
+Diagnostic runs also compare retained heap after forced collection; that
+collection is excluded from unprofiled runs. A transport-only control clones
+a representative reply while bypassing terrain processing.
+
+Sample-only residency batches reuse an address index and copy a reference array,
+then copy each edited source's samples once. Structural transactions lazily
+construct a private address map. This retains one index per live source layout;
+it avoids allocating a map entry and address tuple for every resident tile on
+each sample-only batch. Snapshot buffers and failed-transaction isolation remain
+independent. Neither profiling nor qualification data is imported by runtime APIs.
+
 ### Continuous sphere contact
 
 `sweepTerrainSphere(surface, start, end, radius)` brackets the first contact
@@ -1834,7 +1889,7 @@ The terrain triangle sheet represents the static mesh collider.
 including a finite plane represented by two triangles. It reports the
 first terrain triangle touched by any moving face. `sweepTerrainPlane` handles infinite two-sided planes directly.
 
-### Rotational box and hull contacts
+### Rotational collider contacts
 
 `sweepTerrainRotatingBox` starts with an axis-aligned box.
 `sweepTerrainRotatingPolytope` starts with a triangulated convex hull in its
@@ -1845,9 +1900,59 @@ triangle at the upper fraction. A rotational witness may have no unique
 entry normal. Unresolved grazing and exhausted work return `incomplete`.
 An identity rotation uses the fixed-orientation sweep directly.
 
+`sweepTerrainRotatingCapsule(surface, start, end, radius, motion, options)`
+takes the initial capsule-axis endpoints in the Cartesian terrain frame.
+`sweepTerrainRotatingSphere(surface, center, radius, motion, options)`
+uses coincident endpoints. An off-pivot sphere center follows the prescribed
+rotation and translation. Both functions are independently importable from
+`@math.gl/geospatial` and `@math.gl/geospatial/terrain`. A hit gives a first-impact
+interval and an axis/triangle witness within the capsule radius at its upper endpoint. The
+capsule-axis displacement bounds clearance changes throughout each interval.
+Unresolved tangencies and exhausted budgets return `incomplete`. The budget
+counts pose probes and terrain index work, and the default fraction tolerance
+is 0.00001. Use a well-conditioned Cartesian frame.
+
+The **Rotating collider replay** in Terrain Sampling shows the two-patch seam,
+a grazing orbit and an axis-aligned box starting pose. The independent
+`rotating-round-contacts.json` fixture gives analytical plane contact times
+and exercises shared edges, grazing and exhausted work.
+
 The CPU parity fixture in
 `modules/geospatial/test/terrain/fixtures/rotational-sweep-parity.json`
 retains elevations and nodata from pinned Pacific and Sierra windows on a
 synthetic unit-spaced Cartesian grid. The CPU test packs and unpacks the
 height field before triangulating. This gives downstream parity tests the
 same vertex registration, diagonal, validity, and quantized elevations.
+
+For a larger worker replay, set `TERRAIN_LAYOUT_COPIES=2` to arrange four
+copies of the regional layout in a 320-tile cut. Source elevations are reused
+at translated coordinates. Set `TERRAIN_BASELINE_REF` to a commit to replay
+the same workload against that revision. The default is three repeats per
+configuration. The full rebuild oracle runs outside the timed edit loop.
+
+### Regional viewsheds
+
+`createTerrainRegionalViewshed(grid, sample, options)` classifies a
+row-major grid of targets using radial terrain samples. Provide an
+absolute observer elevation, a maximum distance between samples, and
+optionally a target height above the sampled ground. The sample callback
+can read a local height field or resolve resident terrain tiles.
+
+A valid target is visible when every sampled station is clear. Missing
+stations make an otherwise clear path unknown. A known obstruction can
+still block that path. Target availability and sampled path coverage are
+returned separately, so a blocked target can also have incomplete coverage.
+The bound on callback invocations includes the observer, targets, and
+intermediate stations.
+
+With `radius`, distances along each ray represent spherical surface arc
+lengths and elevations are relative to that sphere. The query compares
+straight sightlines in the corresponding radial plane. Use an
+observer-centered azimuthal equidistant frame with compatible elevation
+data for geographic input. The result applies to sampled stations. It
+does not certify visibility between stations or model ellipsoidal
+curvature or atmospheric refraction.
+
+The **Trail planner** in Terrain Sampling overlays an illustrative route on
+a Sierra DEM. Switch observer waypoints, vary eye height, and simulate tile
+eviction to see how missing coverage changes the result.

@@ -6,13 +6,8 @@
 
 ## Geometry types
 
-`Geometry` is the minimal indexed or non-indexed geometry shape accepted by this module.
+`GeometryInput` is the minimal indexed or non-indexed geometry shape accepted by this module.
 Attributes may store typed arrays in either `value` or legacy `values` fields.
-
-The primitive type is read from `topology` (`'point-list'`, `'line-list'`, `'line-strip'`,
-`'triangle-list'` or `'triangle-strip'`), the field that the geometry generators set. The
-deprecated WebGL `mode` (for example `GL.TRIANGLES`) is used when `topology` is absent. Line
-loops and triangle fans have no topology value and need `mode`.
 
 ## Primitive iteration
 
@@ -20,11 +15,15 @@ loops and triangle fans have no topology value and need `mode`.
 
 Iterates over fixed-size typed-array elements.
 
-#### `makePrimitiveIterator(geometry)`
+#### `makePrimitiveIterator(geometry, {start?, end?})`
 
 Iterates over points, lines, or triangles and dereferences optional
-indices. It supports point, line-list, line-strip, line-loop, triangle-list, triangle-strip, and
-triangle-fan modes.
+indices. Accepted input topologies are `'point-list'`, `'line-list'`, `'line-strip'`,
+`'line-loop'`, `'triangle-list'`, `'triangle-strip'`, and `'triangle-fan'`. Each yielded
+primitive has a `type` of `'point-list'`, `'line-list'`, or `'triangle-list'`.
+
+The optional range is zero-based and end-exclusive. By default it spans the index buffer
+for indexed geometry or the position attribute for non-indexed geometry.
 
 ## Vertex normals
 
@@ -33,9 +32,7 @@ triangle-fan modes.
 Calculates smooth, area-weighted normals for indexed or non-indexed
 triangle geometry. Triangle strips and triangle fans are supported.
 
-## Component types and typed arrays
-
-`GLType` converts between WebGL-compatible component constants and typed-array constructors.
+## Typed arrays
 
 #### `concatTypedArrays(arrays)`
 

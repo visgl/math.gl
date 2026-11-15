@@ -5,7 +5,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, realpathSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
@@ -23,13 +23,20 @@ const tileBytes = (tile) =>
   tile.field.validity.byteLength +
   tile.statuses.byteLength;
 
-function percentiles(times) {
+/** Nearest-rank percentiles for a nonempty set of measured durations. */
+export function percentiles(times) {
   const sorted = [...times].sort((a, b) => a - b);
   const quantile = (p) => sorted[Math.ceil(sorted.length * p) - 1];
   return { p50: quantile(0.5), p95: quantile(0.95), p99: quantile(0.99) };
 }
 
-function readSource(name) {
+const layoutCopies = Number(process.env.TERRAIN_LAYOUT_COPIES ?? 1);
+assert.ok(
+  Number.isInteger(layoutCopies) && layoutCopies >= 1 && layoutCopies <= 4,
+);
+
+/** Load and hash-check a pinned DEM on the selected translated resident layout. */
+export function readSource(name) {
   const dem = JSON.parse(
     readFileSync(new URL(name + "-streaming.json", fixtures)),
   );
@@ -68,10 +75,26 @@ function readSource(name) {
   const fine = Array.from({ length: 16 }, (_, i) =>
     tile(96 + (i % 4) * 8, 96 + Math.floor(i / 4) * 8, 1),
   );
-  return { source: [...coarse, ...fine], sha256: dem.sha256 };
+  const source = [];
+  for (let y = 0; y < layoutCopies; y++) {
+    for (let x = 0; x < layoutCopies; x++) {
+      for (const tile of [...coarse, ...fine]) {
+        const column = tile.column + x * 256;
+        const row = tile.row + y * 256;
+        source.push({
+          ...tile,
+          column,
+          row,
+          field: { ...tile.field, origin: [column, row] },
+        });
+      }
+    }
+  }
+  return { source, sha256: dem.sha256 };
 }
 
-function makeEvents(source, burstSize) {
+/** Deterministic sparse edits with scheduled individual or burst arrivals. */
+export function makeEvents(source, burstSize) {
   return Array.from({ length: 128 }, (_, i) => {
     // Revisit the same tile within bursts and exercise both edge and interior samples.
     const { column, row, spacing, field } =
@@ -91,7 +114,8 @@ function makeEvents(source, burstSize) {
   });
 }
 
-async function replay(
+/** Dispatch revisioned edits without running qualification inside the timed loop. */
+export async function replay(
   handle,
   events,
   revision,
@@ -145,7 +169,8 @@ async function replay(
   return commits;
 }
 
-function verify(source, seed, commits, rebuild) {
+/** Compare every committed delta and reconstructed snapshot with full rebuilds. */
+export function verify(source, seed, commits, rebuild) {
   const input = new Map(source.map((tile) => [key(tile), tile]));
   let previous = rebuild(source).tiles;
   assert.deepEqual(seed.tiles, previous);
@@ -187,170 +212,191 @@ function verify(source, seed, commits, rebuild) {
   return { final: previous, rebuildMs: percentiles(rebuildMs) };
 }
 
-const directory = mkdtempSync(join(tmpdir(), "terrain-worker-batching-"));
-try {
-  const entries = [
-    "geospatial/src/terrain/index.ts",
-    "tasks/src/index.ts",
-    "geospatial/src/tasks/terrain-residency.ts",
-    "geospatial/src/tasks/terrain-residency-worker.ts",
-  ];
-  const modules = [];
-  for (const [i, entry] of entries.entries()) {
-    const output = join(directory, i + ".mjs");
-    await bundleRuntime(root, "./modules/" + entry, output, undefined, "node");
-    modules.push(pathToFileURL(output));
-  }
-  const { createTerrainMixedVertexTileHalos } = await import(modules[0]);
-  const { TaskRunner } = await import(modules[1]);
-  const { TerrainResidencyTask } = await import(modules[2]);
-  const task = {
-    ...TerrainResidencyTask,
-    worker: {
-      url: modules[3],
-      capabilities: { atomic: true, streaming: false },
-    },
-  };
-  const runner = new TaskRunner();
-  const results = [];
+async function main() {
+  const repeats = Number(process.env.TERRAIN_REPEATS ?? 3);
+  const baseline =
+    process.env.TERRAIN_BASELINE_REF === undefined
+      ? undefined
+      : execFileSync(
+          "git",
+          [
+            "rev-parse",
+            "--verify",
+            process.env.TERRAIN_BASELINE_REF + "^{commit}",
+          ],
+          {
+            cwd: root,
+            encoding: "utf8",
+          },
+        ).trim();
+  assert.ok(Number.isInteger(repeats) && repeats >= 1 && repeats <= 10);
+  const directory = mkdtempSync(join(tmpdir(), "terrain-worker-batching-"));
   try {
-    for (const name of ["pacific", "sierra-nodata"]) {
-      const { source, sha256 } = readSource(name);
-      for (const burstSize of [1, 8]) {
-        const events = makeEvents(source, burstSize);
-        let expected;
-        for (const outputOwnership of ["copy", "transfer"]) {
-          const policies = [
-            { policy: "single", maxBatchSize: 1, maxWaitMs: 0 },
-            { policy: "bounded-wait", maxBatchSize: 8, maxWaitMs: 2 },
-            { policy: "opportunistic", maxBatchSize: 8, maxWaitMs: 0 },
-          ];
-          for (let repeat = 0; repeat < 3; repeat++) {
-            for (let i = 0; i < policies.length; i++) {
-              const config = policies[(i + repeat) % policies.length];
-              const handle = await runner.initializeTask(
-                task,
-                {},
-                { execution: "worker" },
-              );
-              try {
-                const upserts = source.map((tile) => ({
-                  type: "upsert",
-                  tile,
-                }));
-                await handle.runTask(
-                  { revision: 0, edits: upserts },
-                  { outputOwnership },
+    const entries = [
+      "geospatial/src/terrain/index.ts",
+      "tasks/src/index.ts",
+      "geospatial/src/tasks/terrain-residency.ts",
+      "geospatial/src/tasks/terrain-residency-worker.ts",
+    ];
+    const modules = [];
+    for (const [i, entry] of entries.entries()) {
+      const output = join(directory, i + ".mjs");
+      await bundleRuntime(root, "./modules/" + entry, output, baseline, "node");
+      modules.push(pathToFileURL(output));
+    }
+    const { createTerrainMixedVertexTileHalos } = await import(modules[0]);
+    const { TaskRunner } = await import(modules[1]);
+    const { TerrainResidencyTask } = await import(modules[2]);
+    const task = {
+      ...TerrainResidencyTask,
+      worker: {
+        url: modules[3],
+        capabilities: { atomic: true, streaming: false },
+      },
+    };
+    const runner = new TaskRunner();
+    const results = [];
+    try {
+      for (const name of ["pacific", "sierra-nodata"]) {
+        const { source, sha256 } = readSource(name);
+        for (const burstSize of [1, 8]) {
+          const events = makeEvents(source, burstSize);
+          let expected;
+          for (const outputOwnership of ["copy", "transfer"]) {
+            const policies = [
+              { policy: "single", maxBatchSize: 1, maxWaitMs: 0 },
+              { policy: "bounded-wait", maxBatchSize: 8, maxWaitMs: 2 },
+              { policy: "opportunistic", maxBatchSize: 8, maxWaitMs: 0 },
+            ];
+            for (let repeat = 0; repeat < repeats; repeat++) {
+              for (let i = 0; i < policies.length; i++) {
+                const config = policies[(i + repeat) % policies.length];
+                const handle = await runner.initializeTask(
+                  task,
+                  {},
+                  { execution: "worker" },
                 );
-                const warmup = await handle.runTask(
-                  {
-                    revision: 1,
-                    edits: events.slice(0, 16).map((event) => event.edit),
-                  },
-                  { outputOwnership },
-                );
-                assert.equal(warmup.revision, 2);
-                const reset = await handle.runTask(
-                  { revision: 2, edits: upserts },
-                  { outputOwnership },
-                );
-                assert.equal(reset.revision, 3);
-                const seed = await handle.runTask(
-                  { type: "snapshot" },
-                  { outputOwnership },
-                );
-                assert.equal(seed.revision, 3);
-                const commits = await replay(
-                  handle,
-                  events,
-                  seed.revision,
-                  outputOwnership,
-                  config,
-                );
-                const { final, rebuildMs } = verify(
-                  source,
-                  seed,
-                  commits,
-                  createTerrainMixedVertexTileHalos,
-                );
-                expected ??= final;
-                assert.deepEqual(final, expected);
-                results.push({
-                  name,
-                  sha256,
-                  burstSize,
-                  outputOwnership,
-                  repeat,
-                  ...config,
-                  edits: events.length,
-                  commits: commits.length,
-                  editToAckMs: percentiles(
-                    commits.flatMap(({ batch, ackMs }) =>
-                      batch.map((event) => ackMs - event.arrivalMs),
-                    ),
-                  ),
-                  arrivalToSendMs: percentiles(
-                    commits.flatMap(({ batch, sentMs }) =>
-                      batch.map((event) => sentMs - event.arrivalMs),
-                    ),
-                  ),
-                  requestMs: percentiles(
-                    commits.map(({ sentMs, ackMs }) => ackMs - sentMs),
-                  ),
-                  workerStagesMs: Object.fromEntries(
-                    Object.keys(commits[0].delta.timings).map((stage) => [
-                      stage,
-                      percentiles(
-                        commits.map(({ delta }) => delta.timings[stage]),
+                try {
+                  const upserts = source.map((tile) => ({
+                    type: "upsert",
+                    tile,
+                  }));
+                  await handle.runTask(
+                    { revision: 0, edits: upserts },
+                    { outputOwnership },
+                  );
+                  const warmup = await handle.runTask(
+                    {
+                      revision: 1,
+                      edits: events.slice(0, 16).map((event) => event.edit),
+                    },
+                    { outputOwnership },
+                  );
+                  assert.equal(warmup.revision, 2);
+                  const reset = await handle.runTask(
+                    { revision: 2, edits: upserts },
+                    { outputOwnership },
+                  );
+                  assert.equal(reset.revision, 3);
+                  const seed = await handle.runTask(
+                    { type: "snapshot" },
+                    { outputOwnership },
+                  );
+                  assert.equal(seed.revision, 3);
+                  const commits = await replay(
+                    handle,
+                    events,
+                    seed.revision,
+                    outputOwnership,
+                    config,
+                  );
+                  const { final, rebuildMs } = verify(
+                    source,
+                    seed,
+                    commits,
+                    createTerrainMixedVertexTileHalos,
+                  );
+                  expected ??= final;
+                  assert.deepEqual(final, expected);
+                  results.push({
+                    name,
+                    sha256,
+                    residentTiles: source.length,
+                    burstSize,
+                    outputOwnership,
+                    repeat,
+                    ...config,
+                    edits: events.length,
+                    commits: commits.length,
+                    editToAckMs: percentiles(
+                      commits.flatMap(({ batch, ackMs }) =>
+                        batch.map((event) => ackMs - event.arrivalMs),
                       ),
-                    ]),
-                  ),
-                  requestOutsideProcessMs: percentiles(
-                    commits.map(
-                      ({ sentMs, ackMs, delta }) =>
-                        ackMs - sentMs - delta.timings.processMs,
                     ),
-                  ),
-                  directRebuildMs: rebuildMs,
-                  outputBytes: commits.reduce(
-                    (total, { delta }) =>
-                      total +
-                      delta.tiles.reduce(
-                        (sum, tile) => sum + tileBytes(tile),
-                        0,
+                    arrivalToSendMs: percentiles(
+                      commits.flatMap(({ batch, sentMs }) =>
+                        batch.map((event) => sentMs - event.arrivalMs),
                       ),
-                    0,
-                  ),
-                });
-              } finally {
-                await handle.close();
+                    ),
+                    requestMs: percentiles(
+                      commits.map(({ sentMs, ackMs }) => ackMs - sentMs),
+                    ),
+                    workerStagesMs: Object.fromEntries(
+                      Object.keys(commits[0].delta.timings).map((stage) => [
+                        stage,
+                        percentiles(
+                          commits.map(({ delta }) => delta.timings[stage]),
+                        ),
+                      ]),
+                    ),
+                    requestOutsideProcessMs: percentiles(
+                      commits.map(
+                        ({ sentMs, ackMs, delta }) =>
+                          ackMs - sentMs - delta.timings.processMs,
+                      ),
+                    ),
+                    directRebuildMs: rebuildMs,
+                    outputBytes: commits.reduce(
+                      (total, { delta }) =>
+                        total +
+                        delta.tiles.reduce(
+                          (sum, tile) => sum + tileBytes(tile),
+                          0,
+                        ),
+                      0,
+                    ),
+                  });
+                } finally {
+                  await handle.close();
+                }
               }
             }
           }
         }
       }
+    } finally {
+      await runner.close();
     }
+    const revision = execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: root,
+      encoding: "utf8",
+    }).trim();
+    console.log(
+      JSON.stringify(
+        {
+          revision: baseline ?? revision,
+          node: process.version,
+          platform: process.platform,
+          arch: process.arch,
+          processPeakRssKiB: process.resourceUsage().maxRSS,
+          results,
+        },
+        null,
+        2,
+      ),
+    );
   } finally {
-    await runner.close();
+    rmSync(directory, { recursive: true, force: true });
   }
-  const revision = execFileSync("git", ["rev-parse", "HEAD"], {
-    cwd: root,
-    encoding: "utf8",
-  }).trim();
-  console.log(
-    JSON.stringify(
-      {
-        revision,
-        node: process.version,
-        platform: process.platform,
-        arch: process.arch,
-        processPeakRssKiB: process.resourceUsage().maxRSS,
-        results,
-      },
-      null,
-      2,
-    ),
-  );
-} finally {
-  rmSync(directory, { recursive: true, force: true });
 }
+if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href) await main();

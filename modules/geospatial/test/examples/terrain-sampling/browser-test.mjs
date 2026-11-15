@@ -30,7 +30,7 @@ try {
   assert(themedBorders.light.every(color=>color==='rgb(66, 98, 119)'));
 
   const headers = page.locator('.terrain-groups > .example-panel header button');
-  assert.equal(await headers.count(), 7);
+  assert.equal(await headers.count(), 9);
   assert.deepEqual(await headers.first().evaluate(el=>{const s=getComputedStyle(el);return [s.fontSize,s.paddingTop,s.paddingBottom];}),['14px','8px','8px']);
   assert.equal(await page.locator('.terrain-groups').evaluate(el=>getComputedStyle(el).gap),'2px');
   async function openGroup(title) {
@@ -168,6 +168,15 @@ try {
   await page.getByLabel('Neighbor and fine tile resident').uncheck();
   assert.match(await geographic.getByRole('status').first().innerText(), /neighbor unavailable/);
   assert.match(await geographic.getByRole('status').last().innerText(), /Coarse east tile/);
+  await openGroup('Trail planner');
+  await page.getByRole('img', {name: /Sampled Sierra viewshed/}).waitFor();
+  await page.getByLabel('Observer waypoint').selectOption('1');
+  await page.getByText(/visible from waypoint 2/).waitFor();
+  const legend = page.getByRole('list', {name: 'Viewshed legend'});
+  const beforeEviction = await legend.innerText();
+  await page.getByLabel('Simulate missing tile').check();
+  await page.waitForFunction(previous => document.querySelector('[aria-label="Viewshed legend"]').innerText !== previous, beforeEviction);
+  await page.getByLabel('Earth curvature').uncheck();
   await openGroup('Breakline authoring');
   const authoring = page.getByRole('region', {name: 'Terrain breakline authoring'});
   assert.match(await authoring.getByRole('status').innerText(), /6 segments/);
@@ -284,6 +293,21 @@ try {
   probe = await probePosition(35,35);await page.mouse.click(probe.x,probe.y);
   assert.match(await page.getByTestId('sample-status').innerText(),/VALID/);
   console.log('Terrain: mesh, interpolation differences, diagonals, missing samples, outside domain, normals, and pointer controls passed.');
+  await openGroup('Rotating collider replay');
+  const replay = page.getByRole('main', {name: 'Rotating collider replay'});
+  await replay.getByLabel('Rotating collider above two terrain tiles').waitFor();
+  const result = replay.locator('figcaption');
+  assert.match(await result.innerText(), /hit.*First contact/);
+  await page.getByRole('button', {name:'Show contact pose'}).click();
+  assert(Math.abs(Number(await page.getByLabel('Motion fraction').inputValue()) - 1 / 3) < 0.002);
+  await page.getByLabel('Work budget').selectOption('6');
+  assert.match(await result.innerText(), /incomplete/);
+  await page.getByLabel('Work budget').selectOption('100000');
+  await page.getByLabel('Collider scenario').selectOption('box');
+  assert.match(await result.innerText(), /hit.*First contact/);
+  await page.getByLabel('Collider scenario').selectOption('grazing');
+  assert.match(await result.innerText(), /hit|incomplete/);
+  await openGroup('Sampling & analysis');
   await page.setViewportSize({width:390,height:400});
   assert.equal(await page.locator('.terrain-groups header button[aria-expanded="true"]').count(), 1);
   await openGroup('Mesh generation');

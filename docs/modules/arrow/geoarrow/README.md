@@ -142,15 +142,12 @@ can affect the source Arrow vector. For worker ownership, use the generic
 [Arrow transport APIs](../arrow-table-transport.md) on an assembled
 Arrow table, or the descriptor transfer helpers in `geoarrow-utils`.
 
-## Examples and migration
+## Examples
 
 - [Runnable Arrow-table example](https://github.com/visgl/math.gl/tree/master/examples/arrow/geoarrow-table)
   demonstrates discovery, borrowing, bounds, coordinate mapping, and round trips.
 - The [stream/task-worker example](https://github.com/visgl/math.gl/tree/master/examples/arrow/geoarrow-stream-worker)
-  now imports `geoarrow-utils` because its worker messages contain plain descriptors.
-- Existing physical-descriptor callers should change imports from
-  `@math.gl/arrow/geoarrow` to `@math.gl/arrow/geoarrow-utils`.
-  Descriptor implementations and the corresponding root exports retain their behavior.
+  imports `geoarrow-utils` for the plain descriptors in its worker messages.
 
 The first upstreamed layer is the Arrow adapter, metadata discovery, and thin
 inspection/processing facades. Loader wrappers, GeoParquet metadata policy,

@@ -83,3 +83,10 @@ The example preserves current adaptive nodata rejection and shows both nodata-do
 policies. Precomputed references are not a new math.gl constrained-meshing API.
 
 See [reproduction and attribution](../../../test/terrain-boundaries/README.md).
+
+## Rotating collider replay
+
+Inspect a capsule hitting a shared tile edge, a grazing sphere orbit, or a
+rotating box. Scrub the prescribed motion, orbit the view, jump to a witness
+pose when available, and reduce the work budget to see an incomplete query.
+The readout shows the first-contact bracket and work consumed.

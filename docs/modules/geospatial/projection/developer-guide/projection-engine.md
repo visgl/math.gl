@@ -22,7 +22,7 @@ Choose the API that fits your application:
 
 All are exported by `@math.gl/geospatial/projection` or its documented subpaths. Selective imports
 reduce the initial bundle; reuse a converter to transform many coordinates between
-the same pair of CRSs. See [supported transformations and migration](./support.md)
+the same pair of CRSs. See [supported transformations](./support.md)
 for input limits, and [independent validation](../independent-validation.md) for accuracy.
 The package has no runtime dependency on proj4js. Applications needing the upstream
 API can install `proj4` separately.
@@ -579,8 +579,7 @@ Register the optional readers for the CRS representations your application accep
 ### Public subpaths
 
 All paths below have the `@math.gl/geospatial/projection/` prefix and support ESM, CommonJS and types.
-The `native` and `experimental` paths remain legacy aliases; new code can use the
-shorter paths below. The former `classic` subpath is removed.
+The `native` and `experimental` paths alias the configurable engine.
 
 | Subpath                 | Exports                                                                                                |
 | ----------------------- | ------------------------------------------------------------------------------------------------------ |

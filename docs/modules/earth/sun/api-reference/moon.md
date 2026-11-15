@@ -109,7 +109,7 @@ All APIs reject invalid/nonfinite numeric inputs with `RangeError`.
 ## Daytime visibility and sky brightness
 
 The main entry point also exports `getMoonAppearance(moonAltitude, sunAltitude,
-options)` from v5.0. Unlike direct moonlight, apparent disk visibility depends on
+options)`. Unlike direct moonlight, apparent disk visibility depends on
 solar glare and the sky background. It returns physical lighting quantities plus
 `visible` and a smooth `fade` for rendering. See the complete
 [daytime Moon appearance reference](./sky.md#moon-brightness-through-the-day)

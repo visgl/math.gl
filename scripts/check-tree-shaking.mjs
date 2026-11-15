@@ -13,6 +13,11 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  ...['sweepTerrainRotatingCapsule', 'sweepTerrainRotatingSphere'].map(symbol => ({
+    symbol, packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/sweep-cylinder/, /sweep-polytope/, /sweep-rotation/, /terrain\/surface\./, /triangle-bvh/],
+    budget: 6000
+  })),
   {symbol: 'sweepTerrainRotatingBox', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/sweep-cylinder/, /sweep-capsule/, /terrain\/surface\./, /triangle-bvh/], budget: 8500},
   {symbol: 'sweepTerrainSphere', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
@@ -35,6 +40,8 @@ const probes = [
     forbidden: [/height-field\./, /geographic-seam\./, /lod-select/, /mesh-stitch/], budget: 2500},
   {symbol: 'measureGeographicTerrainSeam', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /geographic\./, /lod-select/, /mesh-stitch/], budget: 5000},
+  {symbol: 'boundTerrainLodScreenError', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/lod-select/, /height-field\./, /mesh-stitch/, /geographic-lod-seams/], budget: 4500},
   {symbol: 'selectTerrainLod', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /mesh-stitch/, /geographic-seam/], budget: 5000},
   {symbol: 'discoverGeographicTerrainPoles', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
@@ -182,6 +189,8 @@ const probes = [
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/profile\./, /\/profile-measure\./],
     budget: 3500
   },
+  {symbol: 'createTerrainRegionalViewshed', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/height-field\./, /profile-horizon/, /profile-viewshed/, /mixed-halo/, /triangle-bvh/], budget: 5500},
   ...['getTerrainProfileHorizon', 'getTerrainProfileViewshed'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/profile\./, /\/profile-measure\./, /\/profile-visibility\./],

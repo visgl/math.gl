@@ -4,19 +4,42 @@
 import {expect, test} from 'vitest';
 import {Matrix4} from '@math.gl/core';
 import {
-  GL,
+  LatheGeometry,
+  computeVertexNormals,
   transformGeometry,
   mergeGeometries,
   weldGeometry,
   getDegenerateTriangles
-} from '@math.gl/geometry/utils';
-import type {Geometry} from '@math.gl/geometry/utils';
-import {LatheGeometry} from '@math.gl/geometry';
-const triangle = (): Geometry => ({
-  mode: GL.TRIANGLES,
-  attributes: {POSITION: {size: 3, value: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])}}
+} from '@math.gl/geometry';
+import type {GeometryInput} from '@math.gl/geometry';
+test('mesh utilities accept topology from geometry generators', () => {
+  const geometry = new LatheGeometry({
+    points: [
+      [1, 0],
+      [1, 1]
+    ],
+    segments: 4
+  });
+  const vertexCount = values(geometry).length / 3;
+  const indices = geometry.indices.value;
+  const merged = mergeGeometries([geometry, geometry]);
+  expect(merged.topology).toBe('triangle-list');
+  expect(merged.indices).toEqual(
+    Uint32Array.from([...indices, ...indices.map(index => index + vertexCount)])
+  );
+  expect(transformGeometry(geometry, new Matrix4()).topology).toBe('triangle-list');
+  expect(weldGeometry(geometry).geometry.topology).toBe('triangle-list');
+  expect(getDegenerateTriangles(geometry)).toEqual(new Uint32Array());
+  expect(computeVertexNormals(geometry)).toHaveLength(vertexCount * 3);
 });
-function values(geometry: Geometry, name = 'POSITION'): number[] {
+
+const triangle = (): GeometryInput => ({
+  topology: 'triangle-list',
+  attributes: {
+    POSITION: {size: 3, value: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])}
+  }
+});
+function values(geometry: GeometryInput, name = 'POSITION'): number[] {
   return Array.from(geometry.attributes[name].value);
 }
 
@@ -33,7 +56,10 @@ test('affine transformations copy inputs and preserve fractional coordinates fro
 
 test('nonuniform normal transforms, tangent orthogonalization and reflections are consistent', () => {
   const input = triangle();
-  input.attributes.NORMAL = {size: 3, value: new Float32Array([1, 1, 0, 1, 1, 0, 1, 1, 0])};
+  input.attributes.NORMAL = {
+    size: 3,
+    value: new Float32Array([1, 1, 0, 1, 1, 0, 1, 1, 0])
+  };
   input.attributes.TANGENT = {
     size: 4,
     value: new Float32Array([1, -1, 0, 1, 1, -1, 0, 1, 1, -1, 0, 1])
@@ -63,59 +89,18 @@ test('merging offsets indices, retains attribute types, and supports legacy valu
   expect(() => mergeGeometries([a, b])).toThrow(/names/);
 });
 
-test('mesh operations accept generator geometries that set topology', () => {
-  const a = new LatheGeometry({
-      points: [
-        [0, 0],
-        [1, 1]
-      ],
-      segments: 3
-    }),
-    b = new LatheGeometry({
-      points: [
-        [1, 1],
-        [0, 2]
-      ],
-      segments: 3
-    });
-  const count = values(a).length / 3,
-    indexCount = a.indices.value.length;
-  const output = mergeGeometries([a, b]);
-  expect(output.topology).toBe('triangle-list');
-  expect(output.mode).toBe(GL.TRIANGLES);
-  expect(values(output)).toEqual([...values(a), ...values(b)]);
-  expect(Array.from(output.indices as Uint32Array)).toEqual([
-    ...a.indices.value,
-    ...Array.from(b.indices.value, index => index + count)
-  ]);
-  expect(Object.keys(output.attributes).sort()).toEqual(Object.keys(a.attributes).sort());
-  expect(values(transformGeometry(a, new Matrix4().translate([1, 0, 0])))[0]).toBe(
-    values(a)[0] + 1
-  );
-  expect(weldGeometry(a).geometry.topology).toBe('triangle-list');
-  expect(getDegenerateTriangles(a).length).toBeLessThan(indexCount / 3);
-});
-
-test('topology takes precedence over the deprecated mode', () => {
-  const input = triangle();
-  expect(mergeGeometries([{...input, topology: 'triangle-list', mode: GL.LINES}]).indices).toEqual(
-    new Uint32Array([0, 1, 2])
-  );
-  expect(() => mergeGeometries([{...input, topology: 'triangle-strip'}])).toThrow(/triangle-list/);
-  expect(() => mergeGeometries([{attributes: input.attributes} as Geometry])).toThrow(
-    /triangle-list/
-  );
-});
-
 test('welding preserves UV seams and normal discontinuities while returning provenance', () => {
-  const input: Geometry = {
-    mode: GL.TRIANGLES,
+  const input: GeometryInput = {
+    topology: 'triangle-list',
     attributes: {
       POSITION: {
         size: 3,
         value: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0])
       },
-      TEXCOORD_0: {size: 2, value: new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1])}
+      TEXCOORD_0: {
+        size: 2,
+        value: new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1])
+      }
     }
   };
   const result = weldGeometry(input);
@@ -132,9 +117,14 @@ test('welding preserves UV seams and normal discontinuities while returning prov
 });
 
 test('position-grid welding is opt-in and preserves the first tuple', () => {
-  const input: Geometry = {
-    mode: GL.TRIANGLES,
-    attributes: {POSITION: {size: 3, value: new Float64Array([0.01, 0, 0, 0.02, 0, 0, 1, 0, 0])}}
+  const input: GeometryInput = {
+    topology: 'triangle-list',
+    attributes: {
+      POSITION: {
+        size: 3,
+        value: new Float64Array([0.01, 0, 0, 0.02, 0, 0, 1, 0, 0])
+      }
+    }
   };
   expect(weldGeometry(input).removedVertices).toBe(0);
   const output = weldGeometry(input, {positionGridSize: 0.1});
@@ -155,7 +145,7 @@ test('degenerate detection uses filled area and returns original triangle number
 
 test('invalid topology, attribute layouts, indices and transforms are rejected', () => {
   const bad = triangle();
-  bad.mode = GL.TRIANGLE_STRIP;
+  bad.topology = 'triangle-strip';
   expect(() => weldGeometry(bad)).toThrow();
   const input = triangle();
   input.indices = new Uint32Array([0, 1, 3]);
@@ -172,7 +162,10 @@ test('invalid topology, attribute layouts, indices and transforms are rejected',
 
 test('extreme invertible scales preserve normals, tangents and reflection winding', () => {
   const input = triangle();
-  input.attributes.NORMAL = {size: 3, value: new Float64Array([1, 1, 1, 1, 1, 1, 1, 1, 1])};
+  input.attributes.NORMAL = {
+    size: 3,
+    value: new Float64Array([1, 1, 1, 1, 1, 1, 1, 1, 1])
+  };
   input.attributes.TANGENT = {
     size: 4,
     value: new Float64Array([1, -1, 0, 1, 1, -1, 0, 1, 1, -1, 0, 1])
@@ -198,8 +191,8 @@ test('extreme invertible scales preserve normals, tangents and reflection windin
 });
 
 test('degenerate area checks avoid cross-product overflow and underflow', () => {
-  const mesh = (positions: number[]): Geometry => ({
-    mode: GL.TRIANGLES,
+  const mesh = (positions: number[]): GeometryInput => ({
+    topology: 'triangle-list',
     attributes: {POSITION: {size: 3, value: new Float64Array(positions)}}
   });
   expect(getDegenerateTriangles(mesh([0, 0, 0, 1e155, 1e155, 0, 2e155, 2e155, 0]))).toEqual(
@@ -217,17 +210,20 @@ test('degenerate area checks avoid cross-product overflow and underflow', () => 
 });
 
 test('area fallback retains tiny components of extremely anisotropic triangles', () => {
-  const mesh: Geometry = {
-    mode: GL.TRIANGLES,
+  const mesh: GeometryInput = {
+    topology: 'triangle-list',
     attributes: {
-      POSITION: {size: 3, value: new Float64Array([0, 0, 0, 1e200, 1e-130, 0, 2e200, 3e-130, 0])}
+      POSITION: {
+        size: 3,
+        value: new Float64Array([0, 0, 0, 1e200, 1e-130, 0, 2e200, 3e-130, 0])
+      }
     }
   };
   expect(getDegenerateTriangles(mesh)).toEqual(new Uint32Array());
   expect(getDegenerateTriangles(mesh, 1e69)).toEqual(new Uint32Array());
   expect(getDegenerateTriangles(mesh, 1e70)).toEqual(new Uint32Array([0]));
-  const tiny: Geometry = {
-    mode: GL.TRIANGLES,
+  const tiny: GeometryInput = {
+    topology: 'triangle-list',
     attributes: {
       POSITION: {
         size: 3,
