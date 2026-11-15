@@ -172,3 +172,144 @@ test('terrain residency reports stage timings only for measured commits', async 
     await runner.close();
   }
 });
+
+for (const ArrayType of [Float32Array, Float64Array]) {
+  test(`resident sample transactions preserve strided ${ArrayType.name} data and rollback`, async () => {
+    const {createTerrainMixedVertexTileHalos} = await import('@math.gl/geospatial/terrain');
+    const runner = new TaskRunner();
+    const handle = await runner.initializeTask(
+      TerrainResidencyTask,
+      {},
+      {execution: 'main-thread'}
+    );
+    const address = {column: 0, row: 0, spacing: 1};
+    const otherAddress = {column: 1, row: 0, spacing: 1};
+    const tile = {
+      ...address,
+      field: {
+        width: 2,
+        height: 2,
+        offset: 1,
+        stride: 3,
+        heights: new ArrayType([99, 1, NaN, 99, 3, 4]),
+        validity: new Uint8Array([1, 1, 1, 1, 0, 1])
+      }
+    };
+    try {
+      await handle.runTask({revision: 0, edits: [{type: 'upsert', tile}]});
+      const retained = await handle.runTask({type: 'snapshot'});
+      const update = await handle.runTask({
+        revision: 1,
+        edits: [
+          {type: 'samples', address, samples: [{index: 1, height: 2}]},
+          {type: 'samples', address, samples: [{index: 3, height: null}]}
+        ]
+      });
+      expect(update.error).toBeUndefined();
+      const expected = {
+        ...address,
+        field: {width: 2, height: 2, heights: new ArrayType([1, 2, NaN, NaN])}
+      };
+      expect(update.tiles).toEqual(createTerrainMixedVertexTileHalos([expected]).tiles);
+      expect(retained.tiles).toEqual(createTerrainMixedVertexTileHalos([tile]).tiles);
+      const saved = await handle.runTask({type: 'snapshot'});
+      const invalid = await handle.runTask({
+        revision: 2,
+        edits: [
+          {type: 'samples', address, samples: [{index: 0, height: 77}]},
+          {type: 'samples', address, samples: [{index: 4, height: 77}]}
+        ]
+      });
+      expect(invalid.error).toMatch(/Invalid/);
+      expect(await handle.runTask({type: 'snapshot'})).toEqual(saved);
+      // Switch from the indexed sample path to a structural transaction midway.
+      const other = {
+        ...otherAddress,
+        field: {
+          width: 2,
+          height: 2,
+          origin: [1, 0] as [number, number],
+          heights: new ArrayType([5, 6, 7, 8])
+        }
+      };
+      const mixed = await handle.runTask({
+        revision: 2,
+        edits: [
+          {type: 'samples', address, samples: [{index: 0, height: 10}]},
+          {type: 'upsert', tile: other},
+          {type: 'samples', address: otherAddress, samples: [{index: 3, height: 9}]},
+          {type: 'remove', address},
+          {type: 'upsert', tile},
+          {type: 'samples', address, samples: [{index: 0, height: 11}]}
+        ]
+      });
+      expect(mixed.error).toBeUndefined();
+      const finalTiles = [
+        {...address, field: {width: 2, height: 2, heights: new ArrayType([11, NaN, NaN, 4])}},
+        {...other, field: {...other.field, heights: new ArrayType([5, 6, 7, 9])}}
+      ];
+      expect((await handle.runTask({type: 'snapshot'})).tiles).toEqual(
+        createTerrainMixedVertexTileHalos(finalTiles).tiles
+      );
+      // A new layout must invalidate the address index, including insertion order.
+      const last = await handle.runTask({
+        revision: 3,
+        edits: [{type: 'samples', address: otherAddress, samples: [{index: 0, height: 12}]}]
+      });
+      expect(last.error).toBeUndefined();
+      finalTiles[1].field.heights[0] = 12;
+      expect((await handle.runTask({type: 'snapshot'})).tiles).toEqual(
+        createTerrainMixedVertexTileHalos(finalTiles).tiles
+      );
+      if (ArrayType === Float32Array) {
+        const rejected = await handle.runTask({
+          revision: 4,
+          edits: [{type: 'samples', address, samples: [{index: 0, height: Number.MAX_VALUE}]}]
+        });
+        expect(rejected.error).toMatch(/overflow/);
+        expect((await handle.runTask({type: 'snapshot'})).tiles).toEqual(
+          createTerrainMixedVertexTileHalos(finalTiles).tiles
+        );
+      }
+    } finally {
+      await handle.close();
+      await runner.close();
+    }
+  });
+}
+
+test('resident source index rejects invalid structural edits without poisoning the next commit', async () => {
+  const runner = new TaskRunner();
+  const handle = await runner.initializeTask(TerrainResidencyTask, {}, {execution: 'main-thread'});
+  const address = {column: 0, row: 0, spacing: 1};
+  const tile = {...address, field: {width: 2, height: 2, heights: new Float64Array(4)}};
+  try {
+    await handle.runTask({revision: 0, edits: [{type: 'upsert', tile}]});
+    const before = await handle.runTask({type: 'snapshot'});
+    for (const edits of [
+      [
+        {type: 'remove', address},
+        {type: 'samples', address, samples: [{index: 0, height: 1}]}
+      ],
+      [
+        {type: 'upsert', tile: {...tile, field: {...tile.field, width: 20}}},
+        {type: 'samples', address, samples: [{index: 0, height: 1}]}
+      ]
+    ] as const) {
+      expect((await handle.runTask({revision: 1, edits})).error).toBeDefined();
+      expect(await handle.runTask({type: 'snapshot'})).toEqual(before);
+    }
+    const next = await handle.runTask({
+      revision: 1,
+      edits: [
+        {type: 'samples', address, samples: []},
+        {type: 'samples', address, samples: [{index: 0, height: 3}]}
+      ]
+    });
+    expect(next.error).toBeUndefined();
+    expect(next.revision).toBe(2);
+  } finally {
+    await handle.close();
+    await runner.close();
+  }
+});

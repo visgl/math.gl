@@ -1817,6 +1817,33 @@ durations for applying edits, updating halos, and preparing the delta. The
 round trip minus worker process time includes transport, scheduling and task
 runtime work.
 
+For interleaved historical/candidate comparisons, run
+`TERRAIN_LAYOUT_COPIES=2 node scripts/benchmark-terrain-worker-tail.mjs`.
+`TERRAIN_TAIL_REFS` selects comma-separated commits and/or `working-tree`;
+`TERRAIN_TAIL_REPEATS` controls repeated trials with alternating revision order.
+The benchmark checks each delta and direct incremental snapshot against an
+independent full rebuild for that exact edit prefix. Rebuilds are prepared
+outside the measured dispatch loop and reused across trials.
+
+The benchmark-only worker records entry/exit timestamps, so inbound and outbound
+latency can be examined separately from processing and scheduled-arrival queue
+delay. These intervals include task protocol, serialization and OS scheduling;
+they are not pure wire time. Raw request samples and GC events are retained.
+Run `TERRAIN_PROFILE=1` separately for worker CPU and sampled allocation profiles
+(including collected objects). Profiling perturbs latency. Worker heap and
+ArrayBuffer peaks are sampled at request boundaries, not continuous maxima;
+RSS includes the entire process and the main-thread qualification oracle.
+Diagnostic runs also compare retained heap after forced collection; that
+collection is excluded from unprofiled runs. A transport-only control clones
+a representative reply while bypassing terrain processing.
+
+Sample-only residency batches reuse an address index and copy a reference array,
+then copy each edited source's samples once. Structural transactions lazily
+construct a private address map. This retains one index per live source layout;
+it avoids allocating a map entry and address tuple for every resident tile on
+each sample-only batch. Snapshot buffers and failed-transaction isolation remain
+independent. Neither profiling nor qualification data is imported by runtime APIs.
+
 ### Continuous sphere contact
 
 `sweepTerrainSphere(surface, start, end, radius)` brackets the first contact

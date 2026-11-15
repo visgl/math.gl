@@ -53,7 +53,7 @@ export function buildMixedVertexTileHalos(
   if (![maxSamples, maxTests].every(v => Number.isSafeInteger(v) && v >= 0))
     throw new Error('Invalid mixed halo capacity');
   let count = 0;
-  const addresses = new Set<string>();
+  let previousKey: string | undefined;
   let frame:
     | {origin: number[]; column: number[]; row: number[]; reference: string; scale: number[]}
     | undefined;
@@ -76,23 +76,26 @@ export function buildMixedVertexTileHalos(
         frameOrigin: origin,
         scale
       } = prepared;
-      if (addresses.has(key)) throw new Error('Duplicate mixed halo tile');
-      addresses.add(key);
-      if (
-        frame &&
-        (frame.reference !== field.heightReference ||
-          column.some((v, i) => v !== frame!.column[i]) ||
-          row.some((v, i) => v !== frame!.row[i]) ||
-          origin.some(
-            (v, i) =>
-              Math.abs(v - frame!.origin[i]) >
-              Math.min(
-                16 * Number.EPSILON * Math.max(scale[i], frame!.scale[i]),
-                1e-9 * Math.max(Math.abs(column[i]), Math.abs(row[i]))
-              )
-          ))
-      )
-        throw new Error('Mixed halo frames or height references differ');
+      // Address sorting makes duplicate tiles adjacent; no per-build Set is needed.
+      if (previousKey === key) throw new Error('Duplicate mixed halo tile');
+      previousKey = key;
+      if (frame) {
+        if (frame.reference !== field.heightReference)
+          throw new Error('Mixed halo frames or height references differ');
+        for (let i = 0; i < 2; i++) {
+          if (
+            column[i] !== frame.column[i] ||
+            row[i] !== frame.row[i] ||
+            (origin[i] !== frame.origin[i] &&
+              Math.abs(origin[i] - frame.origin[i]) >
+                Math.min(
+                  16 * Number.EPSILON * Math.max(scale[i], frame.scale[i]),
+                  1e-9 * Math.max(Math.abs(column[i]), Math.abs(row[i]))
+                ))
+          )
+            throw new Error('Mixed halo frames or height references differ');
+        }
+      }
       frame ??= {origin, column, row, reference: field.heightReference, scale};
       return prepared;
     });
@@ -101,7 +104,8 @@ export function buildMixedVertexTileHalos(
     minY = Infinity,
     maxX = -Infinity,
     maxY = -Infinity;
-  for (const {haloBounds} of sources) {
+  for (let i = 0; i < sources.length; i++) {
+    const {haloBounds} = sources[i];
     minX = Math.min(minX, haloBounds.minX);
     minY = Math.min(minY, haloBounds.minY);
     maxX = Math.max(maxX, haloBounds.maxX);
@@ -112,13 +116,11 @@ export function buildMixedVertexTileHalos(
   if (targets && targets.size === 0) return {tiles: []};
   let index: ReturnType<typeof createTerrainBoxIndex> | undefined;
   if (sources.length > 8) {
-    const keys = preparation && sources.map(tile => tile.layoutKey);
     const cached = preparation?.layout;
     if (
-      keys &&
       cached &&
-      keys.length === cached.keys.length &&
-      keys.every((key, i) => key === cached.keys[i])
+      sources.length === cached.keys.length &&
+      sources.every((tile, i) => tile.layoutKey === cached.keys[i])
     ) {
       index = cached.query;
     } else {
@@ -130,7 +132,8 @@ export function buildMixedVertexTileHalos(
           maxY: tile.row + (tile.source.height - 1) * tile.spacing
         }))
       );
-      if (preparation && keys) preparation.layout = {keys, query: index};
+      if (preparation)
+        preparation.layout = {keys: sources.map(tile => tile.layoutKey), query: index};
     }
   }
   let tests = 0;
@@ -152,9 +155,10 @@ export function buildMixedVertexTileHalos(
           for (let x = 0; x < width; x++) {
             const gx = tile.column + (x - 1) * tile.spacing,
               gy = tile.row + (y - 1) * tile.spacing;
-            if (![gx, gy].every(Number.isSafeInteger))
+            if (!Number.isSafeInteger(gx) || !Number.isSafeInteger(gy))
               throw new Error('Mixed halo lattice overflow');
-            for (const candidate of candidates) {
+            for (let candidateIndex = 0; candidateIndex < candidates.length; candidateIndex++) {
+              const candidate = candidates[candidateIndex];
               charge();
               const cx = (gx - candidate.column) / candidate.spacing,
                 cy = (gy - candidate.row) / candidate.spacing;

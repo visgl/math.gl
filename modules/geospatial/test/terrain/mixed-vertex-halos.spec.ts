@@ -67,6 +67,9 @@ test('mixed halo admission and frames are checked even for disjoint tiles', () =
   const a = tile(0, 0, 1);
   expect(createTerrainMixedVertexTileHalos([])).toEqual({tiles: []});
   expect(() => createTerrainMixedVertexTileHalos([a, a])).toThrow(/Duplicate/);
+  expect(() =>
+    createTerrainMixedVertexTileHalos([tile(100, 0, 1), a, tile(-100, 0, 1), {...a, column: -0}])
+  ).toThrow(/Duplicate/);
   for (const spacing of [0, 3, NaN, 1.5])
     expect(() => createTerrainMixedVertexTileHalos([{...a, spacing}])).toThrow();
   for (const maxSamples of [-1, NaN, 48])
