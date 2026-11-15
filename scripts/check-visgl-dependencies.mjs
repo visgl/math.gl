@@ -15,13 +15,26 @@ for (const [, name, locator] of lock.matchAll(/^  resolution: "((?:@(?:deck\.gl(
   packages.set(name, versions);
 }
 assert.ok(packages.size > 20, 'Expected the complete vis.gl dependency graph');
+// The pinned 3D Tiles loader imports APIs removed from the geometry workspace.
+const geometryPackage = '@math.gl/geometry';
+const geometryWorkspace = 'workspace:modules/geometry';
+const tilesGeometryVersion = 'npm:5.0.0-beta.8';
 for (const [name, versions] of packages) {
+  if (name === geometryPackage) {
+    assert.deepEqual(versions, new Set([geometryWorkspace, tilesGeometryVersion]));
+    continue;
+  }
   assert.equal(versions.size, 1, `${name} has multiple resolutions: ${[...versions]}`);
   if (name.startsWith('@math.gl/')) {
     assert.match([...versions][0], /^workspace:modules\//, `${name} must use this repository`);
   }
 }
 const root = fileURLToPath(new URL('../', import.meta.url));
+const tilesGeometryPath = resolve(
+  root,
+  'node_modules/@loaders.gl/tiles-3d/node_modules/@math.gl/geometry'
+);
+assert.ok(existsSync(tilesGeometryPath), 'Expected the pinned 3D Tiles geometry dependency');
 const visited = new Set();
 function checkInstall(directory) {
   if (!existsSync(directory) || visited.has(directory)) return;
@@ -40,7 +53,10 @@ function checkInstall(directory) {
       assert.ok(resolutions, packageRoot + ' is not in the lockfile');
     }
     if (resolutions) {
-      const [locator] = resolutions;
+      let [locator] = resolutions;
+      if (pkg.name === geometryPackage) {
+        locator = packageRoot === tilesGeometryPath ? tilesGeometryVersion : geometryWorkspace;
+      }
       if (locator.startsWith('workspace:')) {
         assert.equal(realpathSync(packageRoot), realpathSync(resolve(root, locator.slice(10))),
           pkg.name + ' must resolve to the workspace');
@@ -62,4 +78,4 @@ for (const group of ['modules', 'dev-modules', 'examples']) {
   }
 }
 checkInstall(resolve(root, 'website/node_modules'));
-console.log(`Verified ${packages.size} vis.gl packages: one resolution each; math.gl uses workspaces.`);
+console.log(`Verified ${packages.size} vis.gl packages: workspace math.gl with the pinned 3D Tiles dependency isolated.`);
