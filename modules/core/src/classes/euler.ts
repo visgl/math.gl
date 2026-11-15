@@ -19,7 +19,7 @@ export type {EulerLike, EulerRotationOrder} from './euler-types';
 const ERR_UNKNOWN_ORDER = 'Unknown Euler angle order';
 const ALMOST_ONE = 0.99999;
 
-// The tuple order defines the numeric value stored in the fourth array slot.
+/** Maps each numeric array order index to its rotation order string. */
 const ROTATION_ORDERS = ['zyx', 'yxz', 'xzy', 'zxy', 'yzx', 'xyz'] as const;
 
 export class Euler extends MathArray {
@@ -62,7 +62,7 @@ export class Euler extends MathArray {
   //   this._fromRotationMat[-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0];
   //   return this.check();
   // }
-  // If copied array does contain fourth element, preserves currently set order
+  /** Copies three angles and an optional numeric rotation order index. */
   copy(array: Readonly<NumericArray>): this {
     this[0] = array[0];
     this[1] = array[1];
@@ -100,7 +100,7 @@ export class Euler extends MathArray {
     return array;
   }
 
-  // Copies the orientation element
+  /** Writes the angles and numeric rotation order index at the given offset. */
   toArray4(array: NumericArray = [], offset: number = 0): NumericArray {
     array[offset] = this[0];
     array[offset + 1] = this[1];
@@ -204,10 +204,11 @@ export class Euler extends MathArray {
     this[2] = checkNumber(value);
   }
 
-  // rotation order, in all three angle notations
+  /** The axis order used to interpret the three angles. */
   get order(): EulerRotationOrder {
     return getOrder(this[3]);
   }
+  /** Sets the axis order while preserving the three angles. */
   set order(value: EulerRotationOrder) {
     this[3] = checkOrder(value);
   }
@@ -254,6 +255,7 @@ export class Euler extends MathArray {
   //   const q = new Quaternion().setFromEuler(this);
   //   return this.setFromQuaternion(q, newOrder);
   /* eslint-disable complexity, max-statements, one-var */
+  /** Extracts angles in the requested axis order from an unscaled rotation matrix. */
   _fromRotationMatrix(m: Readonly<NumericArray>, order: EulerRotationOrder = this.order): this {
     // assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
     const m11 = m[0],
@@ -332,6 +334,7 @@ export class Euler extends MathArray {
     return this;
   }
 
+  /** Writes the rotation matrix for the stored angles and axis order. */
   _getRotationMatrix(result: NumericArray): NumericArray {
     const te = result || [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0];
     const x = this.x,
@@ -456,10 +459,12 @@ export class Euler extends MathArray {
 
 // HELPER FUNCTIONS
 
+/** Tests whether a numeric order value lies within the supported range. */
 function validateOrder(value: number): boolean {
   return value >= 0 && value < ROTATION_ORDERS.length;
 }
 
+/** Looks up the array index for a rotation order. Throws for unknown orders. */
 function checkOrder(value: EulerRotationOrder): number {
   const index = ROTATION_ORDERS.indexOf(value);
   if (index === -1) {
@@ -468,6 +473,7 @@ function checkOrder(value: EulerRotationOrder): number {
   return index;
 }
 
+/** Looks up the rotation order for an array index. Throws for unknown indices. */
 function getOrder(index: number): EulerRotationOrder {
   const order = ROTATION_ORDERS[index];
   if (!Number.isInteger(index) || order === undefined) {
