@@ -1,5 +1,13 @@
 # AGENTS.md
 
+## Documentation
+
+- Describe the current API and its behavior in API documentation. Put descriptions of changes and migration steps in the changelog or upgrade guide.
+
+## Source code
+
+- Add TSDoc comments to functions, methods, types, fields, and other declarations. Document private and internal declarations as well as public APIs.
+
 ## Publishing releases
 
 - Publish only from `master` or a release branch named `<major>.<minor>-release`, such as `5.0-release`.
