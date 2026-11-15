@@ -194,6 +194,8 @@ jobs:
       - name: Check selective imports and optional dependency removal
         run: yarn check:tree-shaking
 
+      - name: Check terrain browser replay traces
+        run: node --test scripts/terrain-browser/*.test.mjs
       - name: Qualify pinned terrain boundaries
         run: node --test test/terrain-boundaries/*.test.mjs
       - name: Qualify constrained terrain coverage
