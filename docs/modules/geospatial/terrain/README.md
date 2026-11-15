@@ -2016,7 +2016,42 @@ const area = contributingCells[outlet] * cellArea; // 600 m²
 // catchment is [1, 1, 1, 0, 0, 0]
 ```
 
-The result describes the unconditioned raster. Depression filling, flat
+The result describes the unconditioned raster. Regional conditioning, flat
 resolution, tile-boundary routing, and geographic cell metrics require separate
 methods. The returned geometry supports horizontal flux integration. It does
 not prescribe a flux law, boundary conditions, or a solver timestep.
+
+### Outlet-driven depression filling
+
+Use `fillTerrainDepressions(field, {outlets, maxCells})` to derive a conditioned
+cell-registered height field. Supply valid row-major cell indices as outlets.
+An outlet can be interior or on the raster edge. Nodata and the exterior are
+closed. Connectivity uses the four faces of each cell.
+
+The fill raises cells to their minimum spill elevation. This is the lowest
+maximum source elevation along any face-connected path to an outlet. Valid
+cells disconnected from every outlet retain their heights and are counted
+separately. The returned `receiver` forest follows nonincreasing conditioned
+heights across flats and terminates at the supplied outlets. A receiver of
+`-1` denotes an outlet. A receiver of `-2` denotes a disconnected cell or
+nodata, distinguishable through the returned field's validity mask.
+
+```ts
+import {fillTerrainDepressions, HeightField} from '@math.gl/geospatial';
+
+const basin = new HeightField({
+  width: 3,
+  height: 3,
+  registration: 'cell',
+  heights: new Float64Array([9, 9, 4, 9, 0, 5, 9, 9, 9])
+});
+const conditioned = fillTerrainDepressions(basin, {outlets: [2]});
+// conditioned.field.getHeight(1, 1) === 5
+// The center drains via cell 5 to outlet 2.
+```
+
+This uses the [Priority-Flood algorithm](https://arxiv.org/abs/1511.04463)
+with explicit outlet seeds. Route across conditioned flats using its receiver
+forest. The separate `createTerrainDrainage` function uses strictly descending
+neighbors and therefore stops at flats. Preserve the original field alongside
+the derived field when the analysis needs elevations before conditioning.
