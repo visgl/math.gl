@@ -112,3 +112,33 @@ patches. Samples are interpreted as vertices at their original cell-center coord
 Every persistent node/count is compared to a fresh flat hierarchy, and four retained
 snapshots are hashed to detect mutation. Timings exclude the full-rebuild oracles and
 snapshot hashing; memory reports include their process cost. No missing data is filled.
+
+## Packed rotating capsule and sphere parity
+
+[packed-round-contact-parity.json](./packed-round-contact-parity.json) is a
+CPU reference corpus for downstream terrain collision implementations
+([math.gl #546](https://github.com/visgl/math.gl/issues/546)). Regenerate it with
+`python3 scripts/generate-terrain-packed-round-parity.py`. The generator takes
+5 × 5 windows from the pinned Pacific and Sierra nodata streaming fixtures,
+verifies the source TIFF hashes, and computes binary32 words independently of
+the TypeScript packer.
+
+The corpus declares the packed header and transform shared by all tiles.
+Each window is split into two 3 × 5 vertex-registered tiles with a duplicated
+seam column. Interpret `heightWords` as unsigned IEEE 754 binary32 bits and
+`validity` as u32 values. Decode each tile with its XY origin and use the shared
+Z origin for the motion frame. Invalid samples contribute no triangles. Cells
+use the 00–11 diagonal and each triangle requires three valid corners.
+The local unit lattice is a qualification coordinate system.
+
+Both seam cases use a crop whose highest packed sample lies on the seam.
+A quarter turn about Z and vertical translation bring the leading endpoint
+(or sphere center) one radius above that vertex at fraction 0.5. The entire
+axis is above the highest surface point by more than the radius before then,
+so this gives the first contact without using a mesh sweep as the oracle.
+The Sierra nodata case descends through a cell with four invalid corners.
+The entire swept XY footprint stays inside that cell with clearance from its
+edges, yielding a miss. These cases qualify the packed geometry and the CPU
+algorithm. Downstream shader arithmetic and GPU impact brackets can be compared
+using the declared fraction and witness tolerances without requiring the same
+triangle ID at a shared edge.
