@@ -195,7 +195,7 @@ longitude and draw the returned pieces independently.
 `DiscontinuousMap.getRegionOutlines(regionId, sampling?)` returns sampled visible
 coverage rings or edge parts for that chart. Layout fitting uses it so regional
 caps contribute their actual outline rather than an unclipped computational
-triangle. It is also new in v5.0 and experimental.
+triangle. This projection is experimental.
 
 ## References and attribution
 

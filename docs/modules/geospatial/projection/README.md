@@ -107,7 +107,7 @@ ellipsoid support. It includes examples for regional, global and polar maps.
 | [Temporal models](./temporal-models.md)                                | Combine velocities, acceleration, events and relaxation with explicit epochs                 |
 | [Optional acceleration](./acceleration.md)                             | Evaluate persistent workers, ownership and complete application costs                        |
 | [Deformation models](./developer-guide/deformation-models.md)          | Propagate coordinates between epochs with prepared velocity grids                            |
-| [Support and migration](./developer-guide/support.md)                  | Understand accepted definitions and differences from proj4js                                 |
+| [Supported definitions](./developer-guide/support.md)                  | Understand accepted definitions and differences from proj4js                                 |
 | [Performance and live benchmarks](./benchmarks.md)                     | Compare math.gl flat and scalar transforms with proj4js in your browser                      |
 | [Projection scorecard](./scorecard.md)                                 | Inspect source-matched accuracy, throughput, startup, allocation, memory and bundle evidence |
 | [Independent validation](./independent-validation.md)                  | Inspect numerical references and qualification limits                                        |
@@ -161,14 +161,6 @@ There is no automatic EPSG database lookup or network access. Supply other named
 definitions through aliases or pass an explicit PROJ string, WKT or supported
 PROJJSON object. A CRS identifier describes much more than a projection algorithm;
 check its datum, units, axes and area of use.
-
-## Migration from @math.gl/proj4
-
-The v5 alpha package is renamed to `@math.gl/geospatial/projection`. Update the dependency
-name and import prefix, and use `projectionEngine.createProjection({from, to})` instead of the removed
-`Proj4Projection` alias. The `/classic` wrapper and its proj4js-specific CRS helpers
-are removed. Applications needing proj4js behavior can install and import `proj4`
-directly. The math.gl package has no runtime dependency on proj4js.
 
 ## Attribution
 

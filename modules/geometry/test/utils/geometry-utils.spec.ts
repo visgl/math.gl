@@ -4,8 +4,7 @@
 
 import {Vector2, Vector3, Vector4} from '@math.gl/core';
 import {
-  GL,
-  GLType,
+  type GeometryInput,
   computeVertexNormals,
   compressTextureCoordinates,
   concatTypedArrays,
@@ -34,18 +33,6 @@ import {
   isGeometry
 } from '@math.gl/geometry/utils/geometry';
 
-test('GLType converts component types and preserves view offsets', () => {
-  expect(GLType.fromTypedArray(new Uint16Array(1))).toBe(GL.UNSIGNED_SHORT);
-  expect(GLType.fromTypedArray(new Uint8ClampedArray([0, 255]))).toBe(GL.UNSIGNED_BYTE);
-  expect(GLType.fromTypedArray(Uint8ClampedArray)).toBe(GL.UNSIGNED_BYTE);
-  expect(GLType.fromName('FLOAT')).toBe(GL.FLOAT);
-  expect(GLType.getByteSize(GL.DOUBLE)).toBe(8);
-  expect(GLType.validate(-1)).toBeFalsy();
-
-  const source = new Uint8Array([10, 20, 30, 40]).subarray(1, 3);
-  expect(Array.from(GLType.createTypedArray(GL.UNSIGNED_BYTE, source))).toEqual([20, 30]);
-});
-
 test('makeAttributeIterator iterates fixed-size elements', () => {
   const iterator = makeAttributeIterator(new Float32Array([1, 2, 3, 4]), 2);
   expect(Array.from(iterator, value => Array.from(value))).toEqual([
@@ -54,33 +41,19 @@ test('makeAttributeIterator iterates fixed-size elements', () => {
   ]);
 });
 
-test('makePrimitiveIterator expands indexed loops and preserves strip winding', () => {
-  const loop = Array.from(
-    makePrimitiveIterator(new Uint16Array([3, 1, 4]), {}, GL.LINE_LOOP),
-    primitive => [primitive.i1, primitive.i2]
-  );
-  expect(loop).toEqual([
-    [3, 1],
-    [1, 4],
-    [4, 3]
-  ]);
-
-  const strip = Array.from(
-    makePrimitiveIterator(undefined, {}, GL.TRIANGLE_STRIP, 0, 4),
-    primitive => [primitive.i1, primitive.i2, primitive.i3]
-  );
-  expect(strip).toEqual([
-    [0, 1, 2],
-    [2, 1, 3]
-  ]);
-});
-
-test('computeVertexNormals supports indexed geometry', () => {
+test.each([
+  ['triangle-list', [0, 1, 2, 0, 2, 3]],
+  ['triangle-strip', [0, 1, 3, 2]],
+  ['triangle-fan', [0, 1, 2, 3]]
+] as const)('computeVertexNormals supports indexed %s geometry', (topology, indices) => {
   const normals = computeVertexNormals({
-    mode: GL.TRIANGLES,
-    indices: new Uint16Array([0, 1, 2, 0, 2, 3]),
+    topology,
+    indices: new Uint16Array(indices),
     attributes: {
-      POSITION: {value: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0]), size: 3}
+      POSITION: {
+        value: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0]),
+        size: 3
+      }
     }
   });
   expect(Array.from(normals)).toEqual([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]);
@@ -161,42 +134,121 @@ test('octahedral compression handles lower hemisphere and packed vectors', () =>
   ).toEqual(new Vector2(0, 1));
 });
 
-test('primitive iterator supports every WebGL primitive mode and validates inputs', () => {
-  expect([...makePrimitiveIterator(undefined, {}, GL.POINTS, 0, 2)].map(p => p.i1)).toEqual([0, 1]);
-  expect([...makePrimitiveIterator(undefined, {}, GL.LINES, 0, 4)].map(p => [p.i1, p.i2])).toEqual([
-    [0, 1],
-    [2, 3]
+test('primitive iterator expands each topology into independent primitives', () => {
+  const attributes = {POSITION: {value: new Float32Array(12), size: 3}};
+  const cases: [GeometryInput['topology'], string, number[][]][] = [
+    ['point-list', 'point-list', [[0], [1], [2], [3]]],
+    [
+      'line-list',
+      'line-list',
+      [
+        [0, 1],
+        [2, 3]
+      ]
+    ],
+    [
+      'line-strip',
+      'line-list',
+      [
+        [0, 1],
+        [1, 2],
+        [2, 3]
+      ]
+    ],
+    [
+      'line-loop',
+      'line-list',
+      [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 0]
+      ]
+    ],
+    ['triangle-list', 'triangle-list', [[0, 1, 2]]],
+    [
+      'triangle-strip',
+      'triangle-list',
+      [
+        [0, 1, 2],
+        [2, 1, 3]
+      ]
+    ],
+    [
+      'triangle-fan',
+      'triangle-list',
+      [
+        [0, 1, 2],
+        [0, 2, 3]
+      ]
+    ]
+  ];
+  for (const [topology, type, indices] of cases) {
+    const primitives = [...makePrimitiveIterator({topology, attributes})];
+    expect(primitives).toEqual(
+      indices.map(([i1, i2, i3], primitiveIndex) => ({
+        attributes,
+        type,
+        i1,
+        ...(i2 === undefined ? {} : {i2}),
+        ...(i3 === undefined ? {} : {i3}),
+        primitiveIndex
+      }))
+    );
+  }
+});
+
+test('primitive iterator uses zero-based, end-exclusive ranges', () => {
+  const indices = {value: new Uint16Array([8, 3, 1, 4, 6])};
+  const loop = [
+    ...makePrimitiveIterator({topology: 'line-loop', indices, attributes: {}}, {start: 1, end: 4})
+  ];
+  expect(loop.map(p => [p.i1, p.i2])).toEqual([
+    [3, 1],
+    [1, 4],
+    [4, 3]
   ]);
-  expect(
-    [...makePrimitiveIterator(undefined, {}, GL.LINE_STRIP, 0, 3)].map(p => [p.i1, p.i2])
-  ).toEqual([
-    [0, 1],
-    [1, 2]
+  const points = [
+    ...makePrimitiveIterator({topology: 'point-list', indices, attributes: {}}, {start: 3})
+  ];
+  expect(points.map(p => p.i1)).toEqual([4, 6]);
+  const fan = [
+    ...makePrimitiveIterator({topology: 'triangle-fan', attributes: {}}, {start: 2, end: 6})
+  ];
+  expect(fan.map(p => [p.i1, p.i2, p.i3])).toEqual([
+    [2, 3, 4],
+    [2, 4, 5]
   ]);
-  expect(
-    [...makePrimitiveIterator(undefined, {}, GL.TRIANGLES, 0, 3)].map(p => [p.i1, p.i2, p.i3])
-  ).toEqual([[0, 1, 2]]);
-  expect(
-    [...makePrimitiveIterator(undefined, {}, GL.TRIANGLE_FAN, 0, 4)].map(p => [p.i1, p.i2, p.i3])
-  ).toEqual([
-    [0, 1, 2],
-    [0, 2, 3]
-  ]);
-  expect([...makePrimitiveIterator(undefined, {}, GL.POINTS)]).toEqual([]);
-  expect(() => [...makePrimitiveIterator(undefined, {})]).toThrow(/mode is required/);
-  expect(() => [...makePrimitiveIterator(undefined, {}, 999)]).toThrow(/Unknown primitive mode/);
+});
+
+test('primitive iterator rejects missing, numeric, and unknown topologies', () => {
+  for (const input of [
+    {attributes: {}},
+    {topology: 4, attributes: {}},
+    {topology: 'constructor', attributes: {}}
+  ]) {
+    expect(isGeometry(input)).toBe(false);
+    expect(() => [...makePrimitiveIterator(input as GeometryInput)]).toThrow(/topology/);
+  }
 });
 
 test('geometry utility validation covers non-indexed normals and iterator guards', () => {
   const geometry = {
-    mode: GL.TRIANGLES,
-    attributes: {positions: {values: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]), size: 3}}
+    topology: 'triangle-list' as const,
+    attributes: {
+      positions: {
+        values: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]),
+        size: 3
+      }
+    }
   };
   expect(Array.from(computeVertexNormals(geometry))).toEqual([0, 0, 1, 0, 0, 1, 0, 0, 1]);
-  expect(() => computeVertexNormals({...geometry, mode: GL.LINES})).toThrow(/Triangle geometry/);
+  expect(() => computeVertexNormals({...geometry, topology: 'line-list'})).toThrow(
+    /Triangle geometry/
+  );
   expect(() =>
     computeVertexNormals({
-      mode: GL.TRIANGLES,
+      topology: 'triangle-list',
       attributes: {POSITION: {value: new Float32Array(3), size: 2}}
     })
   ).toThrow(/at least three/);
@@ -206,20 +258,29 @@ test('geometry utility validation covers non-indexed normals and iterator guards
 
 test('geometry attribute helpers distinguish supported legacy shapes', () => {
   expect(isGeometry(null)).toBe(false);
-  expect(isGeometry({mode: 'triangles', attributes: {}})).toBe(false);
-  expect(isGeometry({mode: 4, attributes: {}})).toBe(true);
+  expect(isGeometry({topology: 'triangle-fan', attributes: {}})).toBe(true);
+  expect(isGeometry({topology: 'line-loop', attributes: []})).toBe(false);
+  expect(isGeometry({topology: 'point-list', attributes: 'positions'})).toBe(false);
   const values = new Float32Array([1, 2]);
   expect(getAttributeValues(values)).toBe(values);
   expect(getAttributeValues({value: values})).toBe(values);
   expect(getAttributeValues({values})).toBe(values);
   expect(() => getAttributeValues({})).toThrow(/typed-array/);
-  expect(getPositionAttribute({mode: GL.POINTS, attributes: {POSITION: {value: values}}})).toEqual({
+  expect(
+    getPositionAttribute({
+      topology: 'point-list',
+      attributes: {POSITION: {value: values}}
+    })
+  ).toEqual({
     value: values
   });
-  expect(getPositionAttribute({mode: GL.POINTS, attributes: {positions: {value: values}}})).toEqual(
-    {
-      value: values
-    }
-  );
-  expect(() => getPositionAttribute({mode: GL.POINTS, attributes: {}})).toThrow(/position/);
+  expect(
+    getPositionAttribute({
+      topology: 'point-list',
+      attributes: {positions: {value: values}}
+    })
+  ).toEqual({
+    value: values
+  });
+  expect(() => getPositionAttribute({topology: 'point-list', attributes: {}})).toThrow(/position/);
 });

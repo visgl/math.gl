@@ -3,7 +3,7 @@
 <p class="badges"><img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" /> <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" /></p>
 
 For background, an interactive example, numerical limits, and attribution, see
-[Elastic maps](../elastic-maps.md). All APIs on this page are new in v5.0 and experimental.
+[Elastic maps](../elastic-maps.md). These APIs are experimental.
 
 ## `MapDefinition: {type: 'elastic', data}`
 
