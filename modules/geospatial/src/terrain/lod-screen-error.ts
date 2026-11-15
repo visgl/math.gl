@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import type {ProjectionDepthOptions} from '@math.gl/core';
+
 /** Cartesian bounds and a Euclidean bound on displacement from any point in those bounds. */
 export type TerrainLodErrorBounds = {
   /** Lower corner in the input frame of the clip transform. */
@@ -13,15 +15,13 @@ export type TerrainLodErrorBounds = {
 };
 
 /** Projection parameters for a pixel-error certificate. */
-export type TerrainLodProjection = {
+export type TerrainLodProjection = ProjectionDepthOptions & {
   /** Column-major Cartesian-to-clip matrix. Use a common local frame for matrix and bounds. */
   matrix: ArrayLike<number>;
   /** Viewport width in pixels. */
   width: number;
   /** Viewport height in pixels. */
   height: number;
-  /** Clip Z convention. Defaults to minus-one-to-one. */
-  depthRange?: 'minus-one-to-one' | 'zero-to-one';
 };
 
 /** Pad outward enough to enclose each binary64 operation, including subnormal results. */
@@ -62,7 +62,7 @@ export function boundTerrainLodScreenError(
 
 /** @internal Validate and snapshot the camera once per resident cut selection. */
 export function prepareTerrainLodScreenError(projection: TerrainLodProjection) {
-  const {width, height, depthRange = 'minus-one-to-one'} = projection;
+  const {width, height, depthRange = 'negative-one-to-one', reversedDepth = false} = projection;
   if (projection.matrix.length !== 16) throw new RangeError('Invalid terrain LOD clip matrix');
   const matrix = Array.from(projection.matrix);
   if (
@@ -71,7 +71,7 @@ export function prepareTerrainLodScreenError(projection: TerrainLodProjection) {
     width <= 0 ||
     !Number.isFinite(height) ||
     height <= 0 ||
-    (depthRange !== 'minus-one-to-one' && depthRange !== 'zero-to-one')
+    (depthRange !== 'negative-one-to-one' && depthRange !== 'zero-to-one')
   )
     throw new RangeError('Invalid terrain LOD projection');
   return ({min, max, geometricError: error}: TerrainLodErrorBounds) => {
@@ -95,9 +95,19 @@ export function prepareTerrainLodScreenError(projection: TerrainLodProjection) {
 
     const w = row(3);
     const z = row(2);
-    const nearLow = depthRange === 'zero-to-one' ? z.lower : down(z.lower + w.lower);
-    const nearHigh = depthRange === 'zero-to-one' ? z.upper : up(z.upper + w.upper);
-    const nearChange = depthRange === 'zero-to-one' ? z.change : up(z.change + w.change);
+    // Near clipping uses W-Z for reversed depth, Z for zero-to-one, and Z+W otherwise.
+    const nearLow = reversedDepth
+      ? down(w.lower - z.upper)
+      : depthRange === 'zero-to-one'
+        ? z.lower
+        : down(z.lower + w.lower);
+    const nearHigh = reversedDepth
+      ? up(w.upper - z.lower)
+      : depthRange === 'zero-to-one'
+        ? z.upper
+        : up(z.upper + w.upper);
+    const nearChange =
+      !reversedDepth && depthRange === 'zero-to-one' ? z.change : up(z.change + w.change);
     if (up(nearHigh + nearChange) < 0) return 0;
     const denominator = down(w.lower - w.change);
     if (!(down(nearLow - nearChange) > 0 && denominator > 0)) return Infinity;

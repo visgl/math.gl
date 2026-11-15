@@ -1658,7 +1658,7 @@ accepts the previous refined set for hysteresis. Callers supply complete
 child partitions. A parent stays selected until all immediate children are
 resident. Unavailable roots are reported explicitly.
 
-Pass `{projection: {matrix, width, height, depthRange}, targetPixels}` to
+Pass `{projection: {matrix, width, height, depthRange, reversedDepth}, targetPixels}` to
 `selectTerrainLod` to use a conservative screen-space bound instead of the
 distance estimate. `boundTerrainLodScreenError(tile, projection)` is also
 available as a standalone query. Use Cartesian tile bounds and a Euclidean
@@ -1667,8 +1667,9 @@ For geographic terrain, first establish those bounds and the mesh error in
 ECEF or a shared local Cartesian frame.
 
 The bound accounts for both axes, perspective division and off-axis
-projection. The default depth range is `minus-one-to-one`. Use
-`zero-to-one` for a zero-to-one clip projection. A fully near-clipped
+projection. The default depth range is `negative-one-to-one`. Use
+`zero-to-one` for a zero-to-one clip projection and `reversedDepth: true`
+when the matrix reverses near and far depth. A fully near-clipped
 displacement envelope contributes zero. A potentially visible envelope
 that touches the near plane or reaches nonpositive clip W returns
 `Infinity`, which requests refinement where resident children are available.

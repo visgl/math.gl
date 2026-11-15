@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
+import {mat4FrustumProjection} from '@math.gl/core';
 import {
   boundTerrainLodScreenError,
   selectTerrainLod,
@@ -141,4 +142,30 @@ test('uncertain homogeneous division and invalid empty-cut projections are expli
       projection: {...projection, matrix: []}
     })
   ).toThrow(/clip matrix/);
+});
+
+test('core projection options work with both forward and reversed depth', () => {
+  for (const depthRange of ['negative-one-to-one', 'zero-to-one'] as const) {
+    for (const reversedDepth of [false, true]) {
+      const options = {depthRange, reversedDepth};
+      const matrix = mat4FrustumProjection(new Float64Array(16), {
+        left: -0.5,
+        right: 1,
+        bottom: -1,
+        top: 1,
+        near: 1,
+        far: 100,
+        ...options
+      });
+      const view = {...projection, matrix, ...options};
+      const at = (z: number): TerrainLodErrorBounds => ({
+        min: [0, 0, z],
+        max: [1, 1, z],
+        geometricError: 0.25
+      });
+      expect(boundTerrainLodScreenError(at(-0.25), view)).toBe(0);
+      expect(boundTerrainLodScreenError(at(-1.125), view)).toBe(Infinity);
+      expect(Number.isFinite(boundTerrainLodScreenError(at(-3), view))).toBe(true);
+    }
+  }
 });
