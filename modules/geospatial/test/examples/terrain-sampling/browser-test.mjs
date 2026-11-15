@@ -30,7 +30,7 @@ try {
   assert(themedBorders.light.every(color=>color==='rgb(66, 98, 119)'));
 
   const headers = page.locator('.terrain-groups > .example-panel header button');
-  assert.equal(await headers.count(), 7);
+  assert.equal(await headers.count(), 8);
   assert.deepEqual(await headers.first().evaluate(el=>{const s=getComputedStyle(el);return [s.fontSize,s.paddingTop,s.paddingBottom];}),['14px','8px','8px']);
   assert.equal(await page.locator('.terrain-groups').evaluate(el=>getComputedStyle(el).gap),'2px');
   async function openGroup(title) {
@@ -168,6 +168,15 @@ try {
   await page.getByLabel('Neighbor and fine tile resident').uncheck();
   assert.match(await geographic.getByRole('status').first().innerText(), /neighbor unavailable/);
   assert.match(await geographic.getByRole('status').last().innerText(), /Coarse east tile/);
+  await openGroup('Trail planner');
+  await page.getByRole('img', {name: /Sampled Sierra viewshed/}).waitFor();
+  await page.getByLabel('Observer waypoint').selectOption('1');
+  await page.getByText(/visible from waypoint 2/).waitFor();
+  const legend = page.getByRole('list', {name: 'Viewshed legend'});
+  const beforeEviction = await legend.innerText();
+  await page.getByLabel('Simulate missing tile').check();
+  await page.waitForFunction(previous => document.querySelector('[aria-label="Viewshed legend"]').innerText !== previous, beforeEviction);
+  await page.getByLabel('Earth curvature').uncheck();
   await openGroup('Breakline authoring');
   const authoring = page.getByRole('region', {name: 'Terrain breakline authoring'});
   assert.match(await authoring.getByRole('status').innerText(), /6 segments/);
