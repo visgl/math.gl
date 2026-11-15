@@ -269,3 +269,11 @@ export {
   type TerrainRegionalViewshedOptions,
   type TerrainViewshedGrid
 } from './regional-viewshed';
+
+export {
+  createTerrainDrainage,
+  getTerrainCellMetrics,
+  type TerrainCellMetrics,
+  type TerrainDrainage,
+  type TerrainDrainageOptions
+} from './hydrology';

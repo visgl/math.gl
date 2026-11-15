@@ -1974,3 +1974,49 @@ curvature or atmospheric refraction.
 The **Trail planner** in Terrain Sampling overlays an illustrative route on
 a Sierra DEM. Switch observer waypoints, vary eye height, and simulate tile
 eviction to see how missing coverage changes the result.
+
+### Cell drainage and finite-volume metrics
+
+Use `getTerrainCellMetrics(field)` for the horizontal control-volume area,
+face lengths, and outward unit normals of an affine, cell-registered
+`HeightField`. Faces are ordered negative column, positive column, negative
+row, positive row. Opposite faces have equal lengths and opposite normals.
+Metrics are uniform across the grid and use the full affine transform, including
+shear and reflection.
+
+`createTerrainDrainage(field, {outlets, maxCells})` routes each valid cell to
+the steepest strictly descending neighbor among eight candidates. It measures
+slope over the actual horizontal center distance and breaks exact ties by lower
+row-major index. A diagonal requires both adjacent side cells to be valid.
+Nodata and the raster exterior are closed boundaries. Flats and pits terminate
+flow. An explicit outlet also terminates flow, even if it has lower neighbors.
+The function uses linear time and linear storage, with an explicit cell budget.
+
+To select the catchment for a known outlet, compare its cell index with
+each entry of `terminal`. Multiply `contributingCells[index]` by `cellArea`
+to get projected contributing area, including the cell itself.
+
+```ts
+import {createTerrainDrainage, HeightField} from '@math.gl/geospatial';
+
+const field = new HeightField({
+  width: 3,
+  height: 2,
+  registration: 'cell',
+  columnStep: [10, 0],
+  rowStep: [0, -20],
+  heights: new Float64Array([9, 6, 3, 9, 6, 3])
+});
+const outlet = 2;
+const {terminal, contributingCells, cellArea} = createTerrainDrainage(field, {
+  outlets: [outlet]
+});
+const catchment = terminal.map(index => Number(index === outlet));
+const area = contributingCells[outlet] * cellArea; // 600 m²
+// catchment is [1, 1, 1, 0, 0, 0]
+```
+
+The result describes the unconditioned raster. Depression filling, flat
+resolution, tile-boundary routing, and geographic cell metrics require separate
+methods. The returned geometry supports horizontal flux integration. It does
+not prescribe a flux law, boundary conditions, or a solver timestep.
