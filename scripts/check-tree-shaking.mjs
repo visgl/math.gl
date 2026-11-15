@@ -196,6 +196,11 @@ const probes = [
     forbidden: [/height-field\./, /triangle-bvh/, /martini/, /delatin/],
     budget: symbol === 'getTerrainCellMetrics' ? 900 : 3500
   })),
+  {
+    symbol: 'fillTerrainDepressions', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/hydrology\./, /triangle-bvh/, /martini/, /delatin/],
+    budget: 11000
+  },
   ...['getTerrainProfileHorizon', 'getTerrainProfileViewshed'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/profile\./, /\/profile-measure\./, /\/profile-visibility\./],

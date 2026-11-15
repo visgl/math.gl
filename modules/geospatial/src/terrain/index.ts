@@ -277,3 +277,9 @@ export {
   type TerrainDrainage,
   type TerrainDrainageOptions
 } from './hydrology';
+
+export {
+  fillTerrainDepressions,
+  type TerrainDepressionFill,
+  type TerrainDepressionFillOptions
+} from './depression-fill';
