@@ -68,21 +68,22 @@ Euler rotation orders are now represented directly by the `EulerRotationOrder` s
 
 ### Removed core compatibility APIs[​](#removed-core-compatibility-apis "Direct link to Removed core compatibility APIs")
 
-| Removed API                                                             | Replacement                                                                                                 |
-| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `_Euler`, `_Pose`, `_SphericalCoordinates`                              | `Euler`, `Pose`, `SphericalCoordinates`                                                                     |
-| `new Matrix3(m00, ...m22)`                                              | `new Matrix3([m00, ...m22])`                                                                                |
-| `mathArray.toFloat32Array()`                                            | `new Float32Array(mathArray)`                                                                               |
-| `mathArray.elements`                                                    | `mathArray` (the classes extend `Array`)                                                                    |
-| `mathArray.sub(value)`                                                  | `mathArray.subtract(value)`                                                                                 |
-| `mathArray.setScalar(value)`                                            | `mathArray.fill(value)`                                                                                     |
-| `mathArray.multiplyScalar(value)`                                       | `mathArray.multiplyByScalar(value)`                                                                         |
-| `mathArray.divideScalar(value)`                                         | `mathArray.multiplyByScalar(1 / value)`                                                                     |
-| `mathArray.addScalar()`, `subScalar()`, `clampScalar()`                 | Use `add()`, `subtract()`, or `clamp()` with matching arrays, or update the elements explicitly             |
-| `Matrix3.transformVector()`, `transformVector2()`, `transformVector3()` | `Matrix3.transform()`                                                                                       |
-| `Matrix4.transformPoint()`, `transformVector()`                         | `Matrix4.transformAsPoint()` for two- and three-element inputs, or `Matrix4.transform()` for general inputs |
-| `Matrix4.transformDirection()`                                          | `Matrix4.transformAsVector()`                                                                               |
-| `sin()`, `cos()`, `tan()`, `asin()`, `acos()`, `atan()`                 | The corresponding `Math` function for scalars; map it over arrays explicitly                                |
+| Removed API                                                             | Replacement                                                                                                  |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `_Euler`, `_Pose`, `_SphericalCoordinates`                              | `Euler`, `Pose`, `SphericalCoordinates`                                                                      |
+| `new Matrix3(m00, ...m22)`                                              | `new Matrix3([m00, ...m22])`                                                                                 |
+| `mathArray.toFloat32Array()`                                            | `new Float32Array(mathArray)`                                                                                |
+| `mathArray.elements`                                                    | `mathArray` (the classes extend `Array`)                                                                     |
+| `mathArray.sub(value)`                                                  | `mathArray.subtract(value)`                                                                                  |
+| `mathArray.setScalar(value)`                                            | `mathArray.fill(value)`                                                                                      |
+| `mathArray.multiplyScalar(value)`                                       | `mathArray.multiplyByScalar(value)`                                                                          |
+| `mathArray.divideScalar(value)`                                         | `mathArray.multiplyByScalar(1 / value)`                                                                      |
+| `mathArray.addScalar()`, `subScalar()`, `clampScalar()`                 | Use `add()`, `subtract()`, or `clamp()` with matching arrays, or update the elements explicitly              |
+| `Matrix3.INDICES`, `Matrix4.INDICES` instance getters                   | `matrix.getElement(row, column)` for reads or `matrix.getElementIndex(row, column)` for the flat array index |
+| `Matrix3.transformVector()`, `transformVector2()`, `transformVector3()` | `Matrix3.transform()`                                                                                        |
+| `Matrix4.transformPoint()`, `transformVector()`                         | `Matrix4.transformAsPoint()` for two- and three-element inputs, or `Matrix4.transform()` for general inputs  |
+| `Matrix4.transformDirection()`                                          | `Matrix4.transformAsVector()`                                                                                |
+| `sin()`, `cos()`, `tan()`, `asin()`, `acos()`, `atan()`                 | The corresponding `Math` function for scalars; map it over arrays explicitly                                 |
 
 ### Low-level function imports[​](#low-level-function-imports "Direct link to Low-level function imports")
 
