@@ -213,6 +213,18 @@ const CASES: Case[] = [
     calls: [145, 0]
   },
   {
+    name: 'interior bump that is zero on every edge',
+    mesh: {positions: [0, 0, 1, 0, 0, 1], indices: [0, 1, 2]},
+    options: {
+      transform: ([x, y]) => [x, y, 27 * x * y * (1 - x - y)],
+      targetSize: 3,
+      tolerance: 0.02
+    },
+    expected:
+      'v225 t382 3600:51ae3b55 5400:976338a8 4584:ad80e685 2700:5f58b8c5 5400:92833aa1 1528:98645625',
+    calls: [3662, 0]
+  },
+  {
     name: 'signed zero sources stay distinct',
     // Vertex (-0, 0.5) and the +0 midpoint of the second triangle's left edge compare equal.
     mesh: {
