@@ -36,7 +36,7 @@ phi, theta, psi angle notation
 
 ### order[​](#order "Direct link to order")
 
-rotation order in all notations
+The axis order used to interpret the three angles. Assigning a new order preserves the angle values.
 
 ## Methods[​](#methods "Direct link to Methods")
 
@@ -64,9 +64,9 @@ Sets this Euler instance from `q` using the requested rotation order. All six ro
 
 ### copy[​](#copy "Direct link to copy")
 
-If copied array does contain fourth element, preserves currently set order.
-
 `euler.copy(array)`
+
+Copies the first three angles from a numeric array. A supported order index in the fourth slot sets the rotation order. A three-element array preserves the current order.
 
 ### set[​](#set "Direct link to set")
 
@@ -82,9 +82,9 @@ Does not copy the orientation element
 
 ### toArray4[​](#toarray4 "Direct link to toArray4")
 
-Copies the orientation element
-
 `euler.toArray4(array = [], offset = 0)`
+
+Writes the angles and numeric order index starting at `offset`. The order indices from 0 through 5 are `'zyx'`, `'yxz'`, `'xzy'`, `'zxy'`, `'yzx'`, and `'xyz'`. Pass the returned four-element array to `copy()` to restore the angles and order.
 
 ### toVector3[​](#tovector3 "Direct link to toVector3")
 
