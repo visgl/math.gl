@@ -1036,9 +1036,13 @@ For luma.gl, convert collider dimensions and axis conventions into the terrain f
 
 `sweepTerrainTriangleMesh` sweeps a two-sided indexed triangle sheet, including a finite plane represented by two triangles. It reports the first terrain triangle touched by any moving face. `sweepTerrainPlane` handles infinite two-sided planes directly.
 
-### Rotational box and hull contacts[​](#rotational-box-and-hull-contacts "Direct link to Rotational box and hull contacts")
+### Rotational collider contacts[​](#rotational-collider-contacts "Direct link to Rotational collider contacts")
 
 `sweepTerrainRotatingBox` starts with an axis-aligned box. `sweepTerrainRotatingPolytope` starts with a triangulated convex hull in its initial orientation. Both apply a shortest-arc relative quaternion in XYZW order about the supplied pivot and add linear translation. Fractions range from zero to one. A hit brackets first impact and identifies a terrain triangle at the upper fraction. A rotational witness may have no unique entry normal. Unresolved grazing and exhausted work return `incomplete`. An identity rotation uses the fixed-orientation sweep directly.
+
+`sweepTerrainRotatingCapsule(surface, start, end, radius, motion, options)` takes the initial capsule-axis endpoints in the Cartesian terrain frame. `sweepTerrainRotatingSphere(surface, center, radius, motion, options)` uses coincident endpoints. An off-pivot sphere center follows the prescribed rotation and translation. Both functions are independently importable from `@math.gl/geospatial` and `@math.gl/geospatial/terrain`. A hit gives a first-impact interval and an axis/triangle witness within the capsule radius at its upper endpoint. The capsule-axis displacement bounds clearance changes throughout each interval. Unresolved tangencies and exhausted budgets return `incomplete`. The budget counts pose probes and terrain index work, and the default fraction tolerance is 0.00001. Use a well-conditioned Cartesian frame.
+
+The **Rotating collider replay** in Terrain Sampling shows the two-patch seam, a grazing orbit and an axis-aligned box starting pose. The independent `rotating-round-contacts.json` fixture gives analytical plane contact times and exercises shared edges, grazing and exhausted work.
 
 The CPU parity fixture in `modules/geospatial/test/terrain/fixtures/rotational-sweep-parity.json` retains elevations and nodata from pinned Pacific and Sierra windows on a synthetic unit-spaced Cartesian grid. The CPU test packs and unpacks the height field before triangulating. This gives downstream parity tests the same vertex registration, diagonal, validity, and quantized elevations.
 
