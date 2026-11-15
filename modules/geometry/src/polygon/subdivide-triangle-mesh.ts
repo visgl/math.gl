@@ -84,6 +84,7 @@ type Face = {
 };
 
 const EDGE_FRACTIONS = [0.25, 0.5, 0.75];
+const EDGE_SAMPLE_ORDER = [1, 0, 2];
 const FACE_WEIGHTS = [
   [1 / 3, 1 / 3, 1 / 3],
   [0.5, 0.25, 0.25],
@@ -261,11 +262,10 @@ export function subdivideTriangleMesh(
     for (let i = 0; i < 3; i++) {
       if (sourceEdgeLength(points[i], points[(i + 1) % 3]) > maxEdgeLength) return true;
     }
-    for (let i = 0; i < 3; i++) {
-      const a = face.vertices[i];
-      const b = face.vertices[(i + 1) % 3];
-      for (let sample = 0; sample < EDGE_FRACTIONS.length; sample++) {
-        if (edgeError(a, b, sample) > limit) return true;
+    // Midpoints first: a failed face splits all three edges and keeps their projections.
+    for (const sample of EDGE_SAMPLE_ORDER) {
+      for (let i = 0; i < 3; i++) {
+        if (edgeError(face.vertices[i], face.vertices[(i + 1) % 3], sample) > limit) return true;
       }
     }
     for (const weights of FACE_WEIGHTS) {
