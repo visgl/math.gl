@@ -1037,3 +1037,13 @@ For luma.gl, convert collider dimensions and axis conventions into the terrain f
 The CPU parity fixture in `modules/geospatial/test/terrain/fixtures/rotational-sweep-parity.json` retains elevations and nodata from pinned Pacific and Sierra windows on a synthetic unit-spaced Cartesian grid. The CPU test packs and unpacks the height field before triangulating. This gives downstream parity tests the same vertex registration, diagonal, validity, and quantized elevations.
 
 For a larger worker replay, set `TERRAIN_LAYOUT_COPIES=2` to arrange four copies of the regional layout in a 320-tile cut. Source elevations are reused at translated coordinates. Set `TERRAIN_BASELINE_REF` to a commit to replay the same workload against that revision. The default is three repeats per configuration. The full rebuild oracle runs outside the timed edit loop.
+
+### Regional viewsheds[​](#regional-viewsheds "Direct link to Regional viewsheds")
+
+`createTerrainRegionalViewshed(grid, sample, options)` classifies a row-major grid of targets using radial terrain samples. Provide an absolute observer elevation, a maximum distance between samples, and optionally a target height above the sampled ground. The sample callback can read a local height field or resolve resident terrain tiles.
+
+A valid target is visible when every sampled station is clear. Missing stations make an otherwise clear path unknown. A known obstruction can still block that path. Target availability and sampled path coverage are returned separately, so a blocked target can also have incomplete coverage. The bound on callback invocations includes the observer, targets, and intermediate stations.
+
+With `radius`, distances along each ray represent spherical surface arc lengths and elevations are relative to that sphere. The query compares straight sightlines in the corresponding radial plane. Use an observer-centered azimuthal equidistant frame with compatible elevation data for geographic input. The result applies to sampled stations. It does not certify visibility between stations or model ellipsoidal curvature or atmospheric refraction.
+
+The **Trail planner** in Terrain Sampling overlays an illustrative route on a Sierra DEM. Switch observer waypoints, vary eye height, and simulate tile eviction to see how missing coverage changes the result.
