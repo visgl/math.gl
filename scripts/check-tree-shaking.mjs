@@ -13,6 +13,11 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  ...['sweepTerrainRotatingCapsule', 'sweepTerrainRotatingSphere'].map(symbol => ({
+    symbol, packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/sweep-cylinder/, /sweep-polytope/, /sweep-rotation/, /terrain\/surface\./, /triangle-bvh/],
+    budget: 6000
+  })),
   {symbol: 'sweepTerrainRotatingBox', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/sweep-cylinder/, /sweep-capsule/, /terrain\/surface\./, /triangle-bvh/], budget: 8500},
   {symbol: 'sweepTerrainSphere', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
