@@ -15,9 +15,11 @@ for (const [, name, locator] of lock.matchAll(/^  resolution: "((?:@(?:deck\.gl(
   packages.set(name, versions);
 }
 assert.ok(packages.size > 20, 'Expected the complete vis.gl dependency graph');
-// The pinned 3D Tiles loader imports APIs removed from the geometry workspace.
+/** Geometry package name shared by workspace and pinned loader imports. */
 const geometryPackage = '@math.gl/geometry';
+/** Yarn locator for the workspace geometry package. */
 const geometryWorkspace = 'workspace:modules/geometry';
+/** Yarn locator for the published geometry dependency of the pinned loader. */
 const tilesGeometryVersion = 'npm:5.0.0-beta.8';
 for (const [name, versions] of packages) {
   if (name === geometryPackage) {
@@ -30,12 +32,14 @@ for (const [name, versions] of packages) {
   }
 }
 const root = fileURLToPath(new URL('../', import.meta.url));
+/** The only install path that may contain the published geometry package. */
 const tilesGeometryPath = resolve(
   root,
   'node_modules/@loaders.gl/tiles-3d/node_modules/@math.gl/geometry'
 );
 assert.ok(existsSync(tilesGeometryPath), 'Expected the pinned 3D Tiles geometry dependency');
 const visited = new Set();
+/** Verifies installed package locations and versions recursively. */
 function checkInstall(directory) {
   if (!existsSync(directory) || visited.has(directory)) return;
   visited.add(directory);

@@ -18,8 +18,8 @@ export default defineConfig(async environment => {
         find: new RegExp(`^${name.replaceAll('.', '\\.')}(?=$|\\?)`),
         replacement,
         ...(name === '@math.gl/geometry' && {
+          /** Keeps imports from the pinned 3D Tiles loader on its published geometry version. */
           customResolver(source, importer, options) {
-            // The pinned 3D Tiles loader uses its published geometry dependency.
             const usePublishedGeometry = importer?.includes('/node_modules/@loaders.gl/tiles-3d/');
             return this.resolve(usePublishedGeometry ? name : source, importer, {
               ...options,

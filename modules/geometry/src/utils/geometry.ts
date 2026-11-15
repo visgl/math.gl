@@ -7,15 +7,21 @@ import type {PrimitiveTopology} from '../lib/geometry';
 
 /** A typed geometry attribute with either loaders.gl-style `value` or legacy `values` storage. */
 export type GeometryAttribute = {
+  /** Attribute data in canonical storage. */
   value?: TypedArray;
+  /** Alternate field for attribute data. */
   values?: TypedArray;
+  /** Number of components per element. */
   size?: number;
 };
 
 /** Minimal geometry shape understood by the geometry utilities. */
 export type GeometryInput = {
+  /** Connectivity of the indexed or sequential vertices. */
   topology: PrimitiveTopology | 'line-loop' | 'triangle-fan';
+  /** Optional vertex indices in a packed array. */
   indices?: GeometryAttribute | TypedArray;
+  /** Vertex attributes keyed by semantic name. */
   attributes: Record<string, GeometryAttribute>;
 };
 

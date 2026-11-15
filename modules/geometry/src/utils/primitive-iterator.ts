@@ -7,25 +7,40 @@ import {getAttributeValues, getPositionAttribute, isGeometry} from './geometry';
 
 /** One dereferenced point, line, or triangle primitive. */
 export type Primitive = {
+  /** The input geometry’s attribute map. */
   attributes: object;
+  /** List topology of the emitted primitive. */
   type: 'point-list' | 'line-list' | 'triangle-list';
+  /** Index of the first vertex. */
   i1: number;
+  /** Index of the second vertex on a line or triangle. */
   i2?: number;
+  /** Index of the third vertex on a triangle. */
   i3?: number;
+  /** Zero-based index in this iteration. */
   primitiveIndex: number;
 };
 
 /**
  * Iterates through a geometry's primitives and dereferences optional indices.
- * The optional range is zero-based and end-exclusive.
+ *
+ * @param geometry - Geometry whose optional indices are dereferenced.
+ * @param options - Zero-based, end-exclusive range in the index or vertex sequence.
  */
 export function* makePrimitiveIterator(
   geometry: GeometryInput,
-  {start = 0, end}: {start?: number; end?: number} = {}
+  options: {
+    /** Offset of the first index or vertex to consider. */
+    start?: number;
+    /** Exclusive end of the range. Defaults to the index or vertex count. */
+    end?: number;
+  } = {}
 ): Iterable<Primitive> {
   if (!isGeometry(geometry)) {
     throw new TypeError('Geometry with a supported topology and attributes is required');
   }
+  const {start = 0} = options;
+  let end = options.end;
   const {attributes, topology} = geometry;
   const indices = geometry.indices ? getAttributeValues(geometry.indices) : undefined;
   if (end === undefined) {
@@ -37,6 +52,7 @@ export function* makePrimitiveIterator(
     }
   }
 
+  /** Resolves an index-buffer offset or sequential vertex index. */
   const dereference = (index: number): number => Number(indices ? indices[index] : index);
   let primitiveIndex = 0;
 

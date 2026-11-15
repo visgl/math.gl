@@ -6,12 +6,18 @@ import {Matrix4} from '@math.gl/core';
 import type {TypedArray, TypedArrayConstructor} from '@math.gl/core';
 import {getAttributeValues, type GeometryInput, type GeometryAttribute} from './geometry';
 
+/** Geometry emitted by triangle mesh operations. */
 type TriangleGeometry = GeometryInput & {topology: 'triangle-list'};
 
+/** Validated, packed mesh buffers used internally by mesh operations. */
 type MeshData = {
+  /** Attributes with resolved buffers and element sizes. */
   attributes: Record<string, {value: TypedArray; size: number}>;
+  /** Semantic name of the position attribute. */
   position: string;
+  /** Number of vertices in each attribute buffer. */
   count: number;
+  /** Explicit triangle indices, including those generated for non-indexed input. */
   indices: Uint32Array;
 };
 
@@ -152,12 +158,17 @@ export function mergeGeometries(geometries: readonly GeometryInput[]): TriangleG
   return {topology: 'triangle-list', attributes, indices};
 }
 
+/** Controls vertex matching during a weld. */
 export type WeldGeometryOptions = {
   /** Position quantization step; zero means exact matching. */ positionGridSize?: number;
 };
+/** Welded mesh and the mapping from its original vertices. */
 export type WeldGeometryResult = {
+  /** Welded triangle mesh. */
   geometry: TriangleGeometry;
+  /** Welded vertex index for each original vertex. */
   vertexMap: Uint32Array;
+  /** Number of duplicate vertices removed. */
   removedVertices: number;
 };
 
@@ -257,6 +268,7 @@ export function getDegenerateTriangles(geometry: GeometryInput, areaEpsilon = 0)
   return Uint32Array.from(result);
 }
 
+/** Validates triangle connectivity and resolves the packed input buffers. */
 function readMesh(geometry: GeometryInput): MeshData {
   if (geometry.topology !== 'triangle-list')
     throw new RangeError('Packed triangle-list geometry is required');
