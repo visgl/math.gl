@@ -142,6 +142,17 @@ for (const [api, provided] of [[tasks, geospatial], [require('@math.gl/tasks'), 
         {revision: 3, tiles: [], removed: []});
       assert.deepEqual(await resident.runTask({revision: 3, edits: [{type: 'remove', address}]}),
         {revision: 4, tiles: [], removed: ['1/0/0']});
+      const before = {...tile, column: -20, field: {...tile.field, origin: [-20, 0]}};
+      const after = {...tile, column: 20, field: {...tile.field, origin: [20, 0]}};
+      const added = await resident.runTask({revision: 4, edits: [after, tile, before].map(tile =>
+        ({type: 'upsert', tile}))}, {outputOwnership: 'transfer'});
+      assert.deepEqual(added.tiles.map(tile => tile.column), [-20, 0, 20]);
+      const moved = await resident.runTask({revision: 5, edits: [
+        {type: 'remove', address: before}, {...sample, address: after}
+      ]}, {outputOwnership: 'transfer'});
+      assert.deepEqual(moved.tiles.map(tile => tile.column), [20]);
+      assert.deepEqual(moved.removed, ['1/-20/0']);
+      assert.deepEqual((await resident.runTask({type: 'snapshot'})).tiles.map(tile => tile.column), [0, 20]);
     } finally {await resident.close();}
   } finally {await runner.close();}
 }
