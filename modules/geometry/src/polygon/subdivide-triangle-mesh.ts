@@ -76,7 +76,12 @@ export type SubdividedTriangleMesh = {
 };
 
 type Vertex = {source: number[]; target: number[]; weights: Map<number, number>};
-type Face = {vertices: [number, number, number]; sourceTriangle: number};
+type Face = {
+  vertices: [number, number, number];
+  sourceTriangle: number;
+  /** Passed the error probes. Probes are deterministic, so an unsplit face is not probed again. */
+  accepted?: boolean;
+};
 
 const EDGE_FRACTIONS = [0.25, 0.5, 0.75];
 const FACE_WEIGHTS = [
@@ -139,11 +144,15 @@ export function subdivideTriangleMesh(
             splitEdges.add(edgeKey(a, b));
           }
         }
+      } else if (face.accepted) {
+        // Probed in an earlier pass and not split since.
       } else if (needsRefinement(face)) {
         const [a, b, c] = face.vertices;
         splitEdges.add(edgeKey(a, b));
         splitEdges.add(edgeKey(b, c));
         splitEdges.add(edgeKey(c, a));
+      } else {
+        face.accepted = true;
       }
     }
     if (!splitEdges.size) return buildResult();
@@ -270,8 +279,11 @@ export function subdivideTriangleMesh(
     const bc = splitEdges.has(edgeKey(b, c)) ? midpoint(b, c, midpoints) : -1;
     const ca = splitEdges.has(edgeKey(c, a)) ? midpoint(c, a, midpoints) : -1;
     const count = Number(ab >= 0) + Number(bc >= 0) + Number(ca >= 0);
-    if (count === 0) emit(a, b, c);
-    else if (count === 3) {
+    if (count === 0) {
+      if (output.length >= maxTriangles)
+        throw new RangeError('Triangle mesh subdivision exceeded maxTriangles');
+      output.push(face);
+    } else if (count === 3) {
       emit(a, ab, ca);
       emit(ab, b, bc);
       emit(ca, bc, c);

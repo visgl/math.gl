@@ -138,7 +138,7 @@ const CASES: Case[] = [
     },
     expected:
       'v1994 t3808 31904:88a32de6 31904:7068c313 45696:1758751c 23928:8e74e9b5 47856:8f091a02 15232:71edf5e5',
-    calls: [86988, 0]
+    calls: [68268, 0]
   },
   {
     name: 'maxDepth is exhausted',
@@ -171,7 +171,7 @@ const CASES: Case[] = [
     },
     expected:
       'v171 t294 2736:2e7d61b4 2736:efea5128 3528:af0fad94 2052:49ce8309 4104:a6c45d94 1176:0f284581',
-    calls: [6177, 6006]
+    calls: [5423, 5252]
   },
   {
     name: 'XYZ source to geocentric output',
