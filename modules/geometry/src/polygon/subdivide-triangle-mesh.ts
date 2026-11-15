@@ -120,6 +120,8 @@ export function subdivideTriangleMesh(
   validateOptions();
   const vertices: Vertex[] = [];
   let faces: Face[] = [];
+  /** Sampled errors per undirected edge, ordered from its lower vertex index. */
+  const edgeErrors = new Map<string, number[]>();
   for (let i = 0; i < mesh.positions.length; i += size) {
     const source = Array.from({length: size}, (_, j) => mesh.positions[i + j]);
     if (!source.every(Number.isFinite)) throw new RangeError('Source positions must be finite');
@@ -227,6 +229,26 @@ export function subdivideTriangleMesh(
     return value;
   }
 
+  /** Error at one edge fraction, cached per undirected edge for the neighbouring face.
+   * Blending two points is bitwise symmetric, so a->b at f is b->a at 1 - f.
+   */
+  function edgeError(a: number, b: number, sample: number): number {
+    const key = edgeKey(a, b);
+    let errors = edgeErrors.get(key);
+    if (!errors) {
+      errors = [];
+      edgeErrors.set(key, errors);
+    }
+    const slot = a <= b ? sample : EDGE_FRACTIONS.length - 1 - sample;
+    let value = errors[slot];
+    if (value === undefined) {
+      const fraction = EDGE_FRACTIONS[sample];
+      value = error([vertices[a], vertices[b]], [1 - fraction, fraction]);
+      errors[slot] = value;
+    }
+    return value;
+  }
+
   function needsRefinement(face: Face): boolean {
     const points = face.vertices.map(index => vertices[index]);
     const limit = tolerance ?? Infinity;
@@ -234,10 +256,10 @@ export function subdivideTriangleMesh(
       if (sourceEdgeLength(points[i], points[(i + 1) % 3]) > maxEdgeLength) return true;
     }
     for (let i = 0; i < 3; i++) {
-      const a = points[i];
-      const b = points[(i + 1) % 3];
-      for (const fraction of EDGE_FRACTIONS) {
-        if (error([a, b], [1 - fraction, fraction]) > limit) return true;
+      const a = face.vertices[i];
+      const b = face.vertices[(i + 1) % 3];
+      for (let sample = 0; sample < EDGE_FRACTIONS.length; sample++) {
+        if (edgeError(a, b, sample) > limit) return true;
       }
     }
     for (const weights of FACE_WEIGHTS) {
