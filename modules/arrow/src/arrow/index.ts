@@ -12,6 +12,7 @@ export * from './split-arrow-buffers';
 export * from './arrow-table-transport';
 export {
   findArrowColumn,
+  isArrowRecordBatch,
   isArrowTable,
   isFixedSizeListArrowType,
   isNumericArrowType
