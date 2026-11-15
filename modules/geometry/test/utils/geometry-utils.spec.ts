@@ -86,6 +86,33 @@ test('computeVertexNormals supports indexed geometry', () => {
   expect(Array.from(normals)).toEqual([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]);
 });
 
+test('geometry utilities read topology and fall back to the deprecated mode', () => {
+  const attributes = {
+    POSITION: {value: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0]), size: 3}
+  };
+  const strip = {indices: new Uint16Array([0, 1, 3, 2]), attributes};
+  const triangles = (geometry: Parameters<typeof makePrimitiveIterator>[0]) =>
+    Array.from(makePrimitiveIterator(geometry), primitive => [
+      primitive.i1,
+      primitive.i2,
+      primitive.i3
+    ]);
+  const expected = [
+    [0, 1, 3],
+    [3, 1, 2]
+  ];
+  expect(triangles({...strip, topology: 'triangle-strip'})).toEqual(expected);
+  expect(triangles({...strip, mode: GL.TRIANGLE_STRIP})).toEqual(expected);
+  expect(triangles({...strip, topology: 'triangle-strip', mode: GL.POINTS})).toEqual(expected);
+  expect(Array.from(computeVertexNormals({...strip, topology: 'triangle-strip'}))).toEqual(
+    Array.from(computeVertexNormals({...strip, mode: GL.TRIANGLE_STRIP}))
+  );
+  expect(() => computeVertexNormals({...strip, topology: 'line-list'})).toThrow(/Triangle/);
+  expect(isGeometry({topology: 'triangle-list', attributes})).toBe(true);
+  expect(isGeometry({topology: 'triangle-fan', attributes})).toBe(false);
+  expect(isGeometry({attributes})).toBe(false);
+});
+
 test('RGB565 encodes and decodes canonical colors', () => {
   expect(encodeRGB565([255, 0, 0])).toBe(0xf800);
   expect(encodeRGB565([0, 255, 0])).toBe(0x07e0);

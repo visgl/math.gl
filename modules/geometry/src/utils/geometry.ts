@@ -3,6 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {TypedArray} from '@math.gl/core';
+import type {PrimitiveTopology} from '../lib/geometry';
+import {GL} from './constants';
 
 /** A typed geometry attribute with either loaders.gl-style `value` or legacy `values` storage. */
 export type GeometryAttribute = {
@@ -13,7 +15,10 @@ export type GeometryAttribute = {
 
 /** Minimal geometry shape understood by the geometry utilities. */
 export type Geometry = {
-  mode: number;
+  /** Primitive topology, as set by the geometry generators. Takes precedence over `mode`. */
+  topology?: PrimitiveTopology;
+  /** @deprecated Use `topology`. WebGL primitive mode, for example `GL.TRIANGLES`. */
+  mode?: number;
   indices?: GeometryAttribute | TypedArray;
   attributes: Record<string, GeometryAttribute>;
 };
@@ -24,7 +29,23 @@ export function isGeometry(value: unknown): value is Geometry {
     return false;
   }
   const geometry = value as Partial<Geometry>;
-  return typeof geometry.mode === 'number' && Boolean(geometry.attributes);
+  return getGeometryMode(geometry) !== undefined && Boolean(geometry.attributes);
+}
+
+const TOPOLOGY_MODES: Record<PrimitiveTopology, number> = {
+  'point-list': GL.POINTS,
+  'line-list': GL.LINES,
+  'line-strip': GL.LINE_STRIP,
+  'triangle-list': GL.TRIANGLES,
+  'triangle-strip': GL.TRIANGLE_STRIP
+};
+
+/** Returns the WebGL primitive mode of a geometry, from `topology` or the deprecated `mode`. */
+export function getGeometryMode(geometry: Pick<Geometry, 'topology' | 'mode'>): number | undefined {
+  if (typeof geometry.topology === 'string') {
+    return TOPOLOGY_MODES[geometry.topology];
+  }
+  return typeof geometry.mode === 'number' ? geometry.mode : undefined;
 }
 
 /** Returns the typed array stored in a geometry attribute. */

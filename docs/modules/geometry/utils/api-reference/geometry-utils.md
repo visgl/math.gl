@@ -9,6 +9,11 @@
 `Geometry` is the minimal indexed or non-indexed geometry shape accepted by this module.
 Attributes may store typed arrays in either `value` or legacy `values` fields.
 
+The primitive type is read from `topology` (`'point-list'`, `'line-list'`, `'line-strip'`,
+`'triangle-list'` or `'triangle-strip'`), the field that the geometry generators set. The
+deprecated WebGL `mode` (for example `GL.TRIANGLES`) is used when `topology` is absent. Line
+loops and triangle fans have no topology value and need `mode`.
+
 ## Primitive iteration
 
 #### `makeAttributeIterator(values, size)`

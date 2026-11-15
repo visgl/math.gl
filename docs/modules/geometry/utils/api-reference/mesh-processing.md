@@ -9,12 +9,15 @@ import {transformGeometry, mergeGeometries, weldGeometry, getDegenerateTriangles
   from '@math.gl/geometry';
 ```
 
-These operations accept the module's minimal `Geometry` shape: `mode: GL.TRIANGLES`,
-packed typed-array attributes, and optional indices. Positions use `POSITION` or
+These operations accept the module's minimal `Geometry` shape: `topology: 'triangle-list'`,
+packed typed-array attributes, and optional indices. Generator geometries such as
+`SphereGeometry` and `LatheGeometry` have this shape. The deprecated `mode: GL.TRIANGLES`
+is accepted when `topology` is absent. Positions use `POSITION` or
 `positions` with size 3. Each other attribute needs an explicit size and the same
 vertex count. Both `value` and legacy `values` storage are accepted. Interleaved and
 constant attributes are not supported. Values must be finite and indices valid.
-Outputs have fresh buffers and Uint32 indices; inputs are never modified.
+Outputs have fresh buffers and Uint32 indices; inputs are never modified. Outputs set
+both `topology` and `mode`.
 
 #### `transformGeometry(geometry, matrix)`
 

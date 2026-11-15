@@ -11,6 +11,7 @@ import {
   getDegenerateTriangles
 } from '@math.gl/geometry/utils';
 import type {Geometry} from '@math.gl/geometry/utils';
+import {LatheGeometry} from '@math.gl/geometry';
 const triangle = (): Geometry => ({
   mode: GL.TRIANGLES,
   attributes: {POSITION: {size: 3, value: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])}}
@@ -60,6 +61,50 @@ test('merging offsets indices, retains attribute types, and supports legacy valu
   expect(() => mergeGeometries([])).toThrow();
   b.attributes.COLOR = {size: 3, value: new Float32Array(9)};
   expect(() => mergeGeometries([a, b])).toThrow(/names/);
+});
+
+test('mesh operations accept generator geometries that set topology', () => {
+  const a = new LatheGeometry({
+      points: [
+        [0, 0],
+        [1, 1]
+      ],
+      segments: 3
+    }),
+    b = new LatheGeometry({
+      points: [
+        [1, 1],
+        [0, 2]
+      ],
+      segments: 3
+    });
+  const count = values(a).length / 3,
+    indexCount = a.indices.value.length;
+  const output = mergeGeometries([a, b]);
+  expect(output.topology).toBe('triangle-list');
+  expect(output.mode).toBe(GL.TRIANGLES);
+  expect(values(output)).toEqual([...values(a), ...values(b)]);
+  expect(Array.from(output.indices as Uint32Array)).toEqual([
+    ...a.indices.value,
+    ...Array.from(b.indices.value, index => index + count)
+  ]);
+  expect(Object.keys(output.attributes).sort()).toEqual(Object.keys(a.attributes).sort());
+  expect(values(transformGeometry(a, new Matrix4().translate([1, 0, 0])))[0]).toBe(
+    values(a)[0] + 1
+  );
+  expect(weldGeometry(a).geometry.topology).toBe('triangle-list');
+  expect(getDegenerateTriangles(a).length).toBeLessThan(indexCount / 3);
+});
+
+test('topology takes precedence over the deprecated mode', () => {
+  const input = triangle();
+  expect(mergeGeometries([{...input, topology: 'triangle-list', mode: GL.LINES}]).indices).toEqual(
+    new Uint32Array([0, 1, 2])
+  );
+  expect(() => mergeGeometries([{...input, topology: 'triangle-strip'}])).toThrow(/triangle-list/);
+  expect(() => mergeGeometries([{attributes: input.attributes} as Geometry])).toThrow(
+    /triangle-list/
+  );
 });
 
 test('welding preserves UV seams and normal discontinuities while returning provenance', () => {

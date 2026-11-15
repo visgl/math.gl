@@ -15,11 +15,11 @@ depending on a WebGL or WebGPU runtime.
 ## Usage
 
 ```typescript
-import {GL, computeVertexNormals, octDecode} from '@math.gl/geometry';
+import {computeVertexNormals, octDecode} from '@math.gl/geometry';
 import {Vector3} from '@math.gl/core';
 
 const normals = computeVertexNormals({
-  mode: GL.TRIANGLES,
+  topology: 'triangle-list',
   attributes: {
     POSITION: {value: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]), size: 3}
   }

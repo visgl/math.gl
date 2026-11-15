@@ -5,16 +5,13 @@
 import {Vector3} from '@math.gl/core';
 import {GL} from './constants';
 import type {Geometry} from './geometry';
-import {getAttributeValues, getPositionAttribute} from './geometry';
+import {getAttributeValues, getGeometryMode, getPositionAttribute} from './geometry';
 import {makePrimitiveIterator} from './primitive-iterator';
 
 /** Computes smooth, area-weighted vertex normals for a triangle geometry. */
 export function computeVertexNormals(geometry: Geometry): Float32Array {
-  if (
-    geometry.mode !== GL.TRIANGLES &&
-    geometry.mode !== GL.TRIANGLE_STRIP &&
-    geometry.mode !== GL.TRIANGLE_FAN
-  ) {
+  const mode = getGeometryMode(geometry);
+  if (mode !== GL.TRIANGLES && mode !== GL.TRIANGLE_STRIP && mode !== GL.TRIANGLE_FAN) {
     throw new Error('Triangle geometry is required');
   }
 

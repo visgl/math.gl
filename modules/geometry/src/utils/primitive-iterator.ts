@@ -5,7 +5,7 @@
 import type {TypedArray} from '@math.gl/core';
 import {GL} from './constants';
 import type {Geometry} from './geometry';
-import {getAttributeValues, getPositionAttribute, isGeometry} from './geometry';
+import {getAttributeValues, getGeometryMode, getPositionAttribute, isGeometry} from './geometry';
 
 /** One dereferenced point, line, or triangle primitive. */
 export type Primitive = {
@@ -34,7 +34,7 @@ export function* makePrimitiveIterator(
     const geometry = geometryOrIndices;
     indices = geometry.indices ? getAttributeValues(geometry.indices) : undefined;
     attributes = geometry.attributes;
-    mode = geometry.mode;
+    mode = getGeometryMode(geometry);
     if (end === undefined) {
       const position = getPositionAttribute(geometry);
       end = indices?.length ?? getAttributeValues(position).length / (position.size || 3);

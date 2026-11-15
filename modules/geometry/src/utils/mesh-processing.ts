@@ -5,7 +5,12 @@
 import {Matrix4} from '@math.gl/core';
 import type {TypedArray, TypedArrayConstructor} from '@math.gl/core';
 import {GL} from './constants';
-import {getAttributeValues, type Geometry, type GeometryAttribute} from './geometry';
+import {
+  getAttributeValues,
+  getGeometryMode,
+  type Geometry,
+  type GeometryAttribute
+} from './geometry';
 
 type MeshData = {
   attributes: Record<string, {value: TypedArray; size: number}>;
@@ -99,7 +104,7 @@ export function transformGeometry(
   if (determinant < 0)
     for (let i = 0; i < indices.length; i += 3)
       [indices[i + 1], indices[i + 2]] = [indices[i + 2], indices[i + 1]];
-  return {mode: GL.TRIANGLES, attributes, indices};
+  return {topology: 'triangle-list', mode: GL.TRIANGLES, attributes, indices};
 }
 
 /** Concatenates compatible triangle meshes and offsets vertex indices. */
@@ -148,7 +153,7 @@ export function mergeGeometries(geometries: readonly Geometry[]): Geometry {
     for (const index of mesh.indices) indices[indexOffset++] = index + vertexOffset;
     vertexOffset += mesh.count;
   }
-  return {mode: GL.TRIANGLES, attributes, indices};
+  return {topology: 'triangle-list', mode: GL.TRIANGLES, attributes, indices};
 }
 
 export type WeldGeometryOptions = {
@@ -208,6 +213,7 @@ export function weldGeometry(
   }
   return {
     geometry: {
+      topology: 'triangle-list',
       mode: GL.TRIANGLES,
       attributes,
       indices: Uint32Array.from(mesh.indices, index => vertexMap[index])
@@ -257,7 +263,7 @@ export function getDegenerateTriangles(geometry: Geometry, areaEpsilon = 0): Uin
 }
 
 function readMesh(geometry: Geometry): MeshData {
-  if (geometry.mode !== GL.TRIANGLES)
+  if (getGeometryMode(geometry) !== GL.TRIANGLES)
     throw new RangeError('Packed triangle-list geometry is required');
   const position = geometry.attributes['POSITION']
     ? 'POSITION'
