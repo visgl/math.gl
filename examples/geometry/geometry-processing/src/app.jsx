@@ -6,7 +6,6 @@ import React, {useMemo, useState} from 'react';
 import {Matrix4} from '@math.gl/core';
 import {Geometry, SphereGeometry, unpackIndexedGeometry} from '@math.gl/geometry';
 import {
-  GL,
   transformGeometry,
   mergeGeometries,
   weldGeometry,
@@ -24,10 +23,13 @@ export default function Example() {
     const base = unpackIndexedGeometry(new SphereGeometry({nlat: 12, nlong: 18}));
     const count = base.attributes.POSITION.value.length / 3;
     const colored = color => ({
-      mode: GL.TRIANGLES,
+      topology: 'triangle-list',
       attributes: {
         ...base.attributes,
-        COLOR_0: {size: 3, value: Float32Array.from({length: count * 3}, (_, i) => color[i % 3])}
+        COLOR_0: {
+          size: 3,
+          value: Float32Array.from({length: count * 3}, (_, i) => color[i % 3])
+        }
       }
     });
     const left = transformGeometry(colored([0.2, 0.85, 1]), new Matrix4().translate([-1.6, 0, 0]));

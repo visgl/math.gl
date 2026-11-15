@@ -235,8 +235,8 @@ const moonWindows = searchSkyVisibility(now, now + 86400000,
 
 ## Observer and direction helpers
 
-All helpers in this section are imported from `@math.gl/earth/sun` and are available
-from v5.0. Geographic coordinates are degrees; sky angles are radians.
+Import these helpers from `@math.gl/earth/sun`. Geographic coordinates are in
+degrees and sky angles are in radians.
 
 #### `createSkyObserver({latitude, longitude, elevation?})`
 
@@ -260,7 +260,7 @@ orbital position; use it as a visibility threshold.
 
 ## Photometry helper reference
 
-These functions are exported by `@math.gl/earth/sun` from v5.0. Angles are radians.
+Import these functions from `@math.gl/earth/sun`. Angles are radians.
 
 #### `createSkyAtmosphere(options?)`
 
@@ -302,7 +302,7 @@ undetectable against the daytime background.
 
 ## Globe helper reference
 
-Import these adapters from `@math.gl/earth/sun` (from v5.0). They use deck.gl's spherical
+Import these adapters from `@math.gl/earth/sun`. They use deck.gl's spherical
 Earth, not the WGS84 ellipsoid. `SKY_GLOBE_EARTH_RADIUS` is 6,370,972 meters.
 
 #### `getSkyGlobeRotation(observer)`
@@ -329,9 +329,8 @@ supply coordinates; layer depth, clipping and camera placement are renderer choi
 
 #### `searchSkyVisibility(start, end, visible, options?)`
 
-Is exported from
-`@math.gl/earth/sun` from v5.0. Start/end are valid Dates or Unix milliseconds, with
-end strictly after start. The callback receives Unix milliseconds and must return
+Import this function from `@math.gl/earth/sun`. Supply valid Dates or Unix
+milliseconds, with `end` strictly after `start`. The callback receives Unix milliseconds and must return
 a boolean; a different return type throws `TypeError`.
 
 `sampleSeconds` defaults to 30 and must be 0.1–3600. `transitionSeconds`

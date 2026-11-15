@@ -660,7 +660,7 @@ The Projection domains example includes a polygon-with-hole mode showing origina
 outlines and optional generated closures. It illustrates the boundary distinction
 required by [deck.gl#10922](https://github.com/visgl/deck.gl/issues/10922).
 
-Mercator path preparation now carries source lineage through its latitude-band
+Mercator path preparation carries source lineage through its latitude-band
 clipping stage. Latitude intersections are evaluated on the sampled source
 minor-great-circle arc, rather than inverse-projecting a straight projected chord.
 Source distances and endpoint reasons survive the additional cut. In the path
@@ -673,20 +673,19 @@ attributing streamed intersections to the active sampled edge before resampling.
 Nonlinear cap intersections are refined on their owning original source arc before
 resampling, preserving source segment parameters even when the local transform bends
 that arc. Elastic paths carry segment ancestry through source-domain clipping and
-sample the original minor great-circle arc through the grid. This corrects the old
-linear longitude/latitude interpolation between source samples; provenance on/off
-produce identical geometry under the corrected path algorithm. Per-part boundaries
+sample the original minor great-circle arc through the grid. Enabling provenance
+produces the same geometry. Per-part boundaries
 use the Elastic chart's own coverage/cut/join constraints. Distances retain the
 explicit spherical policy and do not restart at computational chart boundaries.
 
 Source-intersection and sampling work remain bounded and unresolved intersections
 reject. The [Projection domains example](https://visgl.github.io/math.gl/next/examples/projection-domains)
-adds **Nonlinear Armadillo cuts** and **Elastic source arcs** under its path provenance
+offers **Nonlinear Armadillo cuts** and **Elastic source arcs** under its path provenance
 mode. These buffers do not define deck.gl cap/join rendering or extrusion behavior.
 
 ### Wrapper and atlas polygon constraints
 
-The polygon provenance example now selects **Mercator latitude cuts**, **Satellite cap**,
+The polygon provenance example offers **Mercator latitude cuts**, **Satellite cap**,
 **Nonlinear Armadillo cap** or **Elastic chart constraints**, with an optional global
 atlas pass. Source rings and closing-segment identities survive clipping, holes and
 winding reversal. Atlas source edges compose their original directed fractions;
@@ -697,8 +696,7 @@ become original boundaries or extrusion walls.
 Constraint tracing restores source breakpoints removed by boolean collinear merging.
 Mercator/cap intersections and Elastic source-boundary samples follow the original
 minor arcs. Generated Elastic grid-domain boundaries remain linear in their declared
-source frame. These corrections also apply without provenance; enabling the option does
-not change geometry. Constraint tracing is bounded to 20 million comparisons per call;
+source frame. Geometry is identical with or without provenance. Constraint tracing is bounded to 20 million comparisons per call;
 unresolved or ambiguous topology rejects. It does not validate arbitrary invalid input
 polygons, certify continuous sampling error, or supply triangulation-interior provenance.
 
