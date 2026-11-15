@@ -73,10 +73,6 @@ import {prepareMapSurface} from '@math.gl/geospatial/maps/surfaces';
 const surface = prepareMapSurface(map, {maxAngularStep: 1});
 ```
 
-## Breaking migration[​](#breaking-migration "Direct link to Breaking migration")
-
-Replace `@math.gl/geospatial/discontinuous` imports with `@math.gl/geospatial/maps`. Map exports have also been removed from `/projection`. Supply presets explicitly, opt into geometry/transitions as needed, and replace `map.prepareSurface(options)` with `prepareMapSurface(map, options)`. No compatibility entry point is provided.
-
 ## Chart geometry[​](#chart-geometry "Direct link to Chart geometry")
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
@@ -274,7 +270,7 @@ const candidates = pickMapLayout(map, fit, pixel);
 
 `getMapLayout` returns `{bounds, regions}`. Regions are sorted back-to-front and include IDs, labels (defaulting to IDs), kinds (default `panel`), parent IDs, optional relative scales, draw order (default `0`), canonical affine placements, projected `bounds`, optional frames, and sampled coverage `outlines`. Overall bounds include both coverage and visual frames. Bounds sample curved projected edges using the same criteria as `projectLine`; they are approximate, not analytic or guaranteed conservative bounds. Choose tolerance in your map's output units. Cache this result while the map is unchanged.
 
-`fitMapLayout` returns a uniform `scale`, forward `project` and inverse `unproject` functions, fitted `bounds`, and fitted `regions`. Region bounds, frames, and outlines are now in viewport pixels; `placement` remains the canonical map-space transform. Each region also has a sequential `layer` index for rendering. Higher layers should cover lower layers. Use the same order for picking overlapping insets. `pickMapLayout(map, fit, pixel)` converts a viewport pixel to map space and returns inverse candidates in top-to-bottom layer order, each with a `layer`. It resolves layout overlap, but a renderer should still reject candidates hidden by its own feature geometry. See the [interactive Albers USA example](https://visgl.github.io/math.gl/next/examples/albers-usa) for a complete SVG rendering and pointer readout.
+`fitMapLayout` returns a uniform `scale`, forward `project` and inverse `unproject` functions, fitted `bounds`, and fitted `regions`. Region bounds, frames, and outlines are expressed in viewport pixels. `placement` is the canonical map-space transform. Each region also has a sequential `layer` index for rendering. Higher layers should cover lower layers. Use the same order for picking overlapping insets. `pickMapLayout(map, fit, pixel)` converts a viewport pixel to map space and returns inverse candidates in top-to-bottom layer order, each with a `layer`. It resolves layout overlap, but a renderer should still reject candidates hidden by its own feature geometry. See the [interactive Albers USA example](https://visgl.github.io/math.gl/next/examples/albers-usa) for a complete SVG rendering and pointer readout.
 
 The default viewport origin is top left, with Y down; `flipY: false` selects bottom left with Y up. Padding is in pixels and may be a uniform number or a per-side object (omitted sides default to zero). The helper centers the map in the remaining rectangle and preserves all inset scale ratios and gaps. It does not independently reflow insets, enlarge small islands, or convert pixel gaps into new geographic coverage. Viewport dimensions must be finite and positive, padding finite and nonnegative, and usable width and height positive.
 

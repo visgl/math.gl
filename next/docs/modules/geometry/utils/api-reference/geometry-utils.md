@@ -4,7 +4,7 @@
 
 ## Geometry types[​](#geometry-types "Direct link to Geometry types")
 
-`Geometry` is the minimal indexed or non-indexed geometry shape accepted by this module. Attributes may store typed arrays in either `value` or legacy `values` fields.
+`GeometryInput` is the minimal indexed or non-indexed geometry shape accepted by this module. Attributes may store typed arrays in either `value` or legacy `values` fields.
 
 ## Primitive iteration[​](#primitive-iteration "Direct link to Primitive iteration")
 
@@ -12,9 +12,11 @@
 
 Iterates over fixed-size typed-array elements.
 
-#### `makePrimitiveIterator(geometry)`[​](#makeprimitiveiteratorgeometry "Direct link to makeprimitiveiteratorgeometry")
+#### `makePrimitiveIterator(geometry, {start?, end?})`[​](#makeprimitiveiteratorgeometry-start-end "Direct link to makeprimitiveiteratorgeometry-start-end")
 
-Iterates over points, lines, or triangles and dereferences optional indices. It supports point, line-list, line-strip, line-loop, triangle-list, triangle-strip, and triangle-fan modes.
+Iterates over points, lines, or triangles and dereferences optional indices. Accepted input topologies are `'point-list'`, `'line-list'`, `'line-strip'`, `'line-loop'`, `'triangle-list'`, `'triangle-strip'`, and `'triangle-fan'`. Each yielded primitive has a `type` of `'point-list'`, `'line-list'`, or `'triangle-list'`.
+
+The optional range is zero-based and end-exclusive. By default it spans the index buffer for indexed geometry or the position attribute for non-indexed geometry.
 
 ## Vertex normals[​](#vertex-normals "Direct link to Vertex normals")
 
@@ -22,9 +24,7 @@ Iterates over points, lines, or triangles and dereferences optional indices. It 
 
 Calculates smooth, area-weighted normals for indexed or non-indexed triangle geometry. Triangle strips and triangle fans are supported.
 
-## Component types and typed arrays[​](#component-types-and-typed-arrays "Direct link to Component types and typed arrays")
-
-`GLType` converts between WebGL-compatible component constants and typed-array constructors.
+## Typed arrays[​](#typed-arrays "Direct link to Typed arrays")
 
 #### `concatTypedArrays(arrays)`[​](#concattypedarraysarrays "Direct link to concattypedarraysarrays")
 

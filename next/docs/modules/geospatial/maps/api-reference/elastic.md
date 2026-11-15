@@ -2,7 +2,7 @@
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
 
-For background, an interactive example, numerical limits, and attribution, see [Elastic maps](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/elastic-maps.md). All APIs on this page are new in v5.0 and experimental.
+For background, an interactive example, numerical limits, and attribution, see [Elastic maps](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/elastic-maps.md). These APIs are experimental.
 
 ## `MapDefinition: {type: 'elastic', data}`[​](#mapdefinition-type-elastic-data "Direct link to mapdefinition-type-elastic-data")
 

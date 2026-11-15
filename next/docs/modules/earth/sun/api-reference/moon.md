@@ -84,7 +84,7 @@ All APIs reject invalid/nonfinite numeric inputs with `RangeError`.
 
 ## Daytime visibility and sky brightness[​](#daytime-visibility-and-sky-brightness "Direct link to Daytime visibility and sky brightness")
 
-The main entry point also exports `getMoonAppearance(moonAltitude, sunAltitude, options)` from v5.0. Unlike direct moonlight, apparent disk visibility depends on solar glare and the sky background. It returns physical lighting quantities plus `visible` and a smooth `fade` for rendering. See the complete [daytime Moon appearance reference](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sky.md#moon-brightness-through-the-day) for required phase/separation options, result fields and limitations.
+The main entry point also exports `getMoonAppearance(moonAltitude, sunAltitude, options)`. Unlike direct moonlight, apparent disk visibility depends on solar glare and the sky background. It returns physical lighting quantities plus `visible` and a smooth `fade` for rendering. See the complete [daytime Moon appearance reference](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sky.md#moon-brightness-through-the-day) for required phase/separation options, result fields and limitations.
 
 For the Moon's contribution to the surrounding sky, use [`getScatteredMoonLuminance`](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sky.md#photometry-helper-reference). For intervals when the disk is detectable, use [`searchSkyVisibility`](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/sky.md#visibility-search-reference) with an appearance predicate or a cached sky snapshot.
 

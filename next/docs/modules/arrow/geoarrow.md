@@ -106,10 +106,9 @@ Canonical GeoArrow native coordinates use Float64; this adapter also accepts Flo
 
 Borrowing is not an immutable snapshot. Mutating or transferring shared buffers can affect the source Arrow vector. For worker ownership, use the generic [Arrow transport APIs](https://visgl.github.io/math.gl/next/docs/modules/arrow/arrow-table-transport.md) on an assembled Arrow table, or the descriptor transfer helpers in `geoarrow-utils`.
 
-## Examples and migration[​](#examples-and-migration "Direct link to Examples and migration")
+## Examples[​](#examples "Direct link to Examples")
 
 * [Runnable Arrow-table example](https://github.com/visgl/math.gl/tree/master/examples/arrow/geoarrow-table) demonstrates discovery, borrowing, bounds, coordinate mapping, and round trips.
-* The [stream/task-worker example](https://github.com/visgl/math.gl/tree/master/examples/arrow/geoarrow-stream-worker) now imports `geoarrow-utils` because its worker messages contain plain descriptors.
-* Existing physical-descriptor callers should change imports from `@math.gl/arrow/geoarrow` to `@math.gl/arrow/geoarrow-utils`. Descriptor implementations and the corresponding root exports retain their behavior.
+* The [stream/task-worker example](https://github.com/visgl/math.gl/tree/master/examples/arrow/geoarrow-stream-worker) imports `geoarrow-utils` for the plain descriptors in its worker messages.
 
 The first upstreamed layer is the Arrow adapter, metadata discovery, and thin inspection/processing facades. Loader wrappers, GeoParquet metadata policy, GeoJSON compatibility converters, file loading, and rendering adapters remain outside this subpath.

@@ -23,6 +23,12 @@ Update the dependency and import together. When the 5.0 import contains a subpat
 
 Install [`@math.gl/expressions`](https://visgl.github.io/math.gl/next/docs/modules/expressions.md) to evaluate expressions or parse SQL in 5.0. Install Apache Arrow 17 or later for Arrow execution.
 
+### Geometry utilities[​](#geometry-utilities "Direct link to Geometry utilities")
+
+* Import `GeometryInput` in place of `UtilityGeometry`. Supply a string `topology` in place of numeric `mode`. For triangle meshes, use `topology: 'triangle-list'`.
+* Pass a geometry object and optional `{start, end}` range to `makePrimitiveIterator`. The iterator yields `Primitive.type` as `'point-list'`, `'line-list'`, or `'triangle-list'`. Use `'line-loop'` and `'triangle-fan'` on inputs that require those expansions.
+* The `GL`, `GL_TYPE`, `GL_PRIMITIVE`, `GL_PRIMITIVE_MODE`, and `GLType` exports were removed. Use typed-array constructors and their `BYTES_PER_ELEMENT` for component storage. Convert numeric enums where your renderer requires them.
+
 ### Polygon, culling, and viewport APIs[​](#polygon-culling-and-viewport-apis "Direct link to Polygon, culling, and viewport APIs")
 
 | Removed API                                        | Replacement                                                         |
@@ -99,9 +105,23 @@ import {mat4, vec3} from '@math.gl/core';
 
 * Rename `@math.gl/proj4` imports and dependencies to `@math.gl/geospatial/projection`, and create transforms with `projectionEngine.createProjection({from, to})` instead of `new Proj4Projection(...)`. The alias, `/classic`, and proj4js helpers are removed; install `proj4` directly for its API.
 
-* Use `ProjectionTransform` for a configured CRS pair and `ConfigurableProjectionEngine` for reusable configuration and `checkProjectionCompatibility()` for capability checks. See the [migration contract](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md).
+* Use `ProjectionTransform` for a configured CRS pair and `ConfigurableProjectionEngine` for reusable configuration and `checkProjectionCompatibility()` for capability checks. See the [projection support profile](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md).
 
 * Axis-order enforcement remains opt-in through `enforceAxis: true`. Prepare NTv2 grids with `parseNTv2Grid()` and register them on an engine through `datumGrids` before using definitions that reference them.
+
+* Replace `new Projection(options)` with `projectionEngine.createProjection(options)`. Replace `new LazyProjection(options)` and `LazyProjection.create(options)` with `lazyProjectionEngine.createProjection(options)` and `lazyProjectionEngine.createProjectionAsync(options)`, respectively. Pass registrations to the engine constructor in place of static registration methods.
+
+* Replace the alpha `TypeScriptProjection` export with `ProjectionTransform`. The associated names are `ProjectionTransformOptions`, `ProjectionTransformCreateOptions`, `ProjectionCompatibility`, and `checkProjectionCompatibility`.
+
+* Import nested CRS syntax codecs and resolver APIs from the `@math.gl/geospatial/crs` entry point.
+
+### Map preparation[​](#map-preparation "Direct link to Map preparation")
+
+Replace `@math.gl/geospatial/discontinuous` and map exports from `@math.gl/geospatial/projection` with the `@math.gl/geospatial/maps` entry points. Supply presets explicitly, import geometry and transitions as needed, and use `prepareMapSurface(map, options)` in place of `map.prepareSurface(options)`.
+
+### GeoArrow descriptors[​](#geoarrow-descriptors "Direct link to GeoArrow descriptors")
+
+Import physical descriptor helpers from `@math.gl/arrow/geoarrow-utils` in place of `@math.gl/arrow/geoarrow`. The corresponding root exports remain available.
 
 ### DGGS packages[​](#dggs-packages "Direct link to DGGS packages")
 

@@ -13,7 +13,7 @@ Utilities for processing renderer-independent geometry stored in typed arrays. T
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {GL, computeVertexNormals, octDecode} from '@math.gl/geometry';
+import {computeVertexNormals, octDecode} from '@math.gl/geometry';
 
 import {Vector3} from '@math.gl/core';
 
@@ -21,7 +21,7 @@ import {Vector3} from '@math.gl/core';
 
 const normals = computeVertexNormals({
 
-  mode: GL.TRIANGLES,
+  topology: 'triangle-list',
 
   attributes: {
 
@@ -66,7 +66,7 @@ npm install @math.gl/geometry
 ## API[​](#api "Direct link to API")
 
 * Geometry inspection and traversal: `isGeometry`, `makeAttributeIterator`, `makePrimitiveIterator`, `computeVertexNormals`
-* Typed arrays and component types: `GL`, `GL_TYPE`, `GLType`, `concatTypedArrays`
+* Typed arrays: `concatTypedArrays`
 * Packed attributes: `interpolatePackedAttributes`, `encodeRGB565`, `decodeRGB565`, octahedral vector encoding, texture-coordinate compression, and ZigZag delta decoding
 * Coordinate helpers: `emod`
 

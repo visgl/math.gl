@@ -91,7 +91,7 @@ Start with [coordinate systems, ellipsoids, datums and epochs](https://visgl.git
 | [Temporal models](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/temporal-models.md)                | Combine velocities, acceleration, events and relaxation with explicit epochs                 |
 | [Optional acceleration](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/acceleration.md)             | Evaluate persistent workers, ownership and complete application costs                        |
 | [Deformation models](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/deformation-models.md)          | Propagate coordinates between epochs with prepared velocity grids                            |
-| [Support and migration](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md)                  | Understand accepted definitions and differences from proj4js                                 |
+| [Supported definitions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md)                  | Understand accepted definitions and differences from proj4js                                 |
 | [Performance and live benchmarks](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/benchmarks.md)     | Compare math.gl flat and scalar transforms with proj4js in your browser                      |
 | [Projection scorecard](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/scorecard.md)                 | Inspect source-matched accuracy, throughput, startup, allocation, memory and bundle evidence |
 | [Independent validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/independent-validation.md)  | Inspect numerical references and qualification limits                                        |
@@ -130,10 +130,6 @@ These definitions are built in. Selective engines still require the correspondin
 | WGS84 UPS north/south                       | `EPSG:5041`, `EPSG:5042`                                         | `stereographic`               |
 
 There is no automatic EPSG database lookup or network access. Supply other named definitions through aliases or pass an explicit PROJ string, WKT or supported PROJJSON object. A CRS identifier describes much more than a projection algorithm; check its datum, units, axes and area of use.
-
-## Migration from @math.gl/proj4[​](#migration-from-mathglproj4 "Direct link to Migration from @math.gl/proj4")
-
-The v5 alpha package is renamed to `@math.gl/geospatial/projection`. Update the dependency name and import prefix, and use `projectionEngine.createProjection({from, to})` instead of the removed `Proj4Projection` alias. The `/classic` wrapper and its proj4js-specific CRS helpers are removed. Applications needing proj4js behavior can install and import `proj4` directly. The math.gl package has no runtime dependency on proj4js.
 
 ## Attribution[​](#attribution "Direct link to Attribution")
 

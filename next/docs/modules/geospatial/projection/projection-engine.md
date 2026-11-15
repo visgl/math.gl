@@ -13,7 +13,7 @@ Choose the API that fits your application:
 | `LazyProjectionEngine`         | You want built-in projection algorithms to load automatically when requested.     |
 | `ProjectionPipeline`           | You need to specify the order of individual coordinate operations.                |
 
-All are exported by `@math.gl/geospatial/projection` or its documented subpaths. Selective imports reduce the initial bundle; reuse a converter to transform many coordinates between the same pair of CRSs. See [supported transformations and migration](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md) for input limits, and [independent validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/independent-validation.md) for accuracy. The package has no runtime dependency on proj4js. Applications needing the upstream API can install `proj4` separately.
+All are exported by `@math.gl/geospatial/projection` or its documented subpaths. Selective imports reduce the initial bundle; reuse a converter to transform many coordinates between the same pair of CRSs. See [supported transformations](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md) for input limits, and [independent validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/independent-validation.md) for accuracy. The package has no runtime dependency on proj4js. Applications needing the upstream API can install `proj4` separately.
 
 ## Start with the projections you need[​](#start-with-the-projections-you-need "Direct link to Start with the projections you need")
 
@@ -432,7 +432,7 @@ The definition must select an algorithm supplied in `projections`. The WKT reade
 
 ### Public subpaths[​](#public-subpaths "Direct link to Public subpaths")
 
-All paths below have the `@math.gl/geospatial/projection/` prefix and support ESM, CommonJS and types. The `native` and `experimental` paths remain legacy aliases; new code can use the shorter paths below. The former `classic` subpath is removed.
+All paths below have the `@math.gl/geospatial/projection/` prefix and support ESM, CommonJS and types. The `native` and `experimental` paths alias the configurable engine.
 
 | Subpath                 | Exports                                                                                                |
 | ----------------------- | ------------------------------------------------------------------------------------------------------ |

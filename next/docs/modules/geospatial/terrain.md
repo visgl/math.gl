@@ -846,7 +846,7 @@ Each function is independently tree-shakable through both geospatial entry point
 
 ### Indexed topology and path-local rejection[​](#indexed-topology-and-path-local-rejection "Direct link to Indexed topology and path-local rejection")
 
-Contour topology validation now uses a static bounding-box hierarchy to narrow exact edge predicates and swept-region vertex tests. Isobands use independent indexes for patch overlap, height-range selection and ring-parent lookup. Broad-phase traversal is charged to the existing work budgets; exact predicates and clipping still decide geometry. Dense overlapping candidates can retain quadratic worst-case work.
+Contour topology validation uses a static bounding-box hierarchy to narrow exact edge predicates and swept-region vertex tests. Isobands use independent indexes for patch overlap, height-range selection and ring-parent lookup. Broad-phase traversal is charged to the existing work budgets; exact predicates and clipping still decide geometry. Dense overlapping candidates can retain quadratic worst-case work.
 
 `simplifyTerrainContourPathsTopology(paths, {maxError, rejection: 'path'})` restores only unsafe paths, retaining safe reductions in other paths. The default `'batch'` policy remains conservative whole-result fallback. Path-local fallback retains the input vertex pool and identity source mapping so restored and simplified paths share anchors. `maxDeviation` remains a conservative accepted-error bound. `rejected` means at least one path was restored, not that all paths were restored.
 

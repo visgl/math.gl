@@ -30,7 +30,7 @@ const copy = new Float64Array(16);
 mat4.copy(copy, model);
 ```
 
-The former imports such as `@math.gl/core/mat4` are no longer exported in v5. Individual exports such as `mat4Copy` also allow selective imports without passing a namespace object around.
+Individual exports such as `mat4Copy` also allow selective imports without passing a namespace object around.
 
 Output-writing functions take the destination first. Supply an array or typed array with enough elements; the operation mutates it. Other functions, such as `quatGetAngle(a, b)`, return a scalar and have no output argument. Constructors such as `mat4Create()` allocate storage. Check each operation's aliasing and failure behavior before reusing an input as its destination. Functional operations do not provide the class API's optional debug validation.
 

@@ -109,7 +109,7 @@ Named regional presets retain their native parameters and control frames. Use th
 
 Edges are minor great-circle arcs. Polygon inputs must fit an open hemisphere; split larger polygons first. Clipped horizon curves are sampled, and returned polygons stay closed with matching source coordinates. Sampling has a bounded work limit; an impractically tight tolerance throws instead of running indefinitely. Some formulas stretch a geographic pole into an edge: retain directional polar longitude and draw the returned pieces independently.
 
-`DiscontinuousMap.getRegionOutlines(regionId, sampling?)` returns sampled visible coverage rings or edge parts for that chart. Layout fitting uses it so regional caps contribute their actual outline rather than an unclipped computational triangle. It is also new in v5.0 and experimental.
+`DiscontinuousMap.getRegionOutlines(regionId, sampling?)` returns sampled visible coverage rings or edge parts for that chart. Layout fitting uses it so regional caps contribute their actual outline rather than an unclipped computational triangle. This projection is experimental.
 
 ## References and attribution[​](#references-and-attribution "Direct link to References and attribution")
 

@@ -2,7 +2,7 @@
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
-The configurable math.gl projection engine used by the full, configurable and lazy engines; see the [support and migration contract](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md). Import it from `@math.gl/geospatial/projection` or the isolated `@math.gl/geospatial/projection/core` entry point. The package has no proj4js runtime dependency. Install `proj4` separately when its upstream behavior is required.
+The configurable math.gl projection engine used by the full, configurable and lazy engines; see the [supported definitions and operations](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md). Import it from `@math.gl/geospatial/projection` or the isolated `@math.gl/geospatial/projection/core` entry point. The package has no proj4js runtime dependency. Install `proj4` separately when its upstream behavior is required.
 
 ```
 import { ProjectionTransform, mercator } from "@math.gl/geospatial/projection";

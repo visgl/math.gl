@@ -149,7 +149,7 @@ const moonWindows = searchSkyVisibility(now, now + 86400000,
 
 ## Observer and direction helpers[​](#observer-and-direction-helpers "Direct link to Observer and direction helpers")
 
-All helpers in this section are imported from `@math.gl/earth/sun` and are available from v5.0. Geographic coordinates are degrees; sky angles are radians.
+Import these helpers from `@math.gl/earth/sun`. Geographic coordinates are in degrees and sky angles are in radians.
 
 #### `createSkyObserver({latitude, longitude, elevation?})`[​](#createskyobserverlatitude-longitude-elevation "Direct link to createskyobserverlatitude-longitude-elevation")
 
@@ -171,7 +171,7 @@ Invalid helper inputs throw `RangeError`. A terrain profile does not change the 
 
 ## Photometry helper reference[​](#photometry-helper-reference "Direct link to Photometry helper reference")
 
-These functions are exported by `@math.gl/earth/sun` from v5.0. Angles are radians.
+Import these functions from `@math.gl/earth/sun`. Angles are radians.
 
 #### `createSkyAtmosphere(options?)`[​](#createskyatmosphereoptions "Direct link to createskyatmosphereoptions")
 
@@ -210,7 +210,7 @@ Nonfinite or out-of-range arguments throw `RangeError`. Transmission and contras
 
 ## Globe helper reference[​](#globe-helper-reference "Direct link to Globe helper reference")
 
-Import these adapters from `@math.gl/earth/sun` (from v5.0). They use deck.gl's spherical Earth, not the WGS84 ellipsoid. `SKY_GLOBE_EARTH_RADIUS` is 6,370,972 meters.
+Import these adapters from `@math.gl/earth/sun`. They use deck.gl's spherical Earth, not the WGS84 ellipsoid. `SKY_GLOBE_EARTH_RADIUS` is 6,370,972 meters.
 
 #### `getSkyGlobeRotation(observer)`[​](#getskygloberotationobserver "Direct link to getskygloberotationobserver")
 
@@ -234,7 +234,7 @@ Use outward rays for body positions and incoming rays for lighting. These helper
 
 #### `searchSkyVisibility(start, end, visible, options?)`[​](#searchskyvisibilitystart-end-visible-options "Direct link to searchskyvisibilitystart-end-visible-options")
 
-Is exported from `@math.gl/earth/sun` from v5.0. Start/end are valid Dates or Unix milliseconds, with end strictly after start. The callback receives Unix milliseconds and must return a boolean; a different return type throws `TypeError`.
+Import this function from `@math.gl/earth/sun`. Supply valid Dates or Unix milliseconds, with `end` strictly after `start`. The callback receives Unix milliseconds and must return a boolean; a different return type throws `TypeError`.
 
 `sampleSeconds` defaults to 30 and must be 0.1–3600. `transitionSeconds` defaults to 1 and must be 0.001–sampleSeconds. Invalid bounds or a search requiring more than 100000 base samples throw `RangeError`.
 

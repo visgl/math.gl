@@ -38,4 +38,4 @@ A `SharedArrayBuffer` remains shared under every ownership policy, including `'c
 
 A custom task may accept shared arrays in its input object. Check each task's requirements: `ProjectCoordinatesTask`, for example, accepts ordinary `Float32Array` or `Float64Array` storage, not shared buffers.
 
-Sharing data does not change cancellation behavior. Use `signal` and `onProgress` for cancellation and progress; cancelling worker work still terminates its worker. The old shared cancellation/progress control blocks are no longer public APIs. See the [reference](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/task-runner.md#request-fields) for all controls.
+Sharing data does not change cancellation behavior. Use `signal` and `onProgress` for cancellation and progress; cancelling worker work still terminates its worker. See the [reference](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/task-runner.md#request-fields) for all controls.

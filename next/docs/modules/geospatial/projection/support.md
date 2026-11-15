@@ -1,12 +1,10 @@
-# Projection API support and migration
+# Projection API support
 
-`@math.gl/geospatial/projection` uses the math.gl projection engine by default. `projectionEngine` supplies all projection plugins and WKT/PROJJSON readers through its factory API. `ProjectionTransform` exposes per-instance configuration for smaller bundles. The former `/classic` wrapper and proj4js-specific CRS helpers are removed. Applications needing the upstream runtime can install `proj4` directly.
+`@math.gl/geospatial/projection` uses the math.gl projection engine by default. `projectionEngine` supplies all projection plugins and WKT/PROJJSON readers through its factory API. `ProjectionTransform` exposes per-instance configuration for smaller bundles. Import projection APIs from the root or the `core`, `projections/*`, `parsers/*`, and `grids/*` subpaths. The `native` and `experimental` subpaths alias the configurable engine.
 
-The old `native` and `experimental` subpaths remain compatibility aliases for the configurable engine; use the root, `core`, `projections/*`, `parsers/*` and `grids/*` paths in new code. This API is available in releases containing these exports.
+## Named datum catalogues[​](#named-datum-catalogues "Direct link to Named datum catalogues")
 
-## Named datum catalogue migration[​](#named-datum-catalogue-migration "Direct link to Named datum catalogue migration")
-
-The default `ProjectionTransform`, `LazyProjectionEngine`, and `normalizeCRS` retain only WGS84 and NAD83 as named datums. Register regional definitions explicitly:
+The default `ProjectionTransform`, `LazyProjectionEngine`, and `normalizeCRS` recognize WGS84 and NAD83 as named datums. Register regional definitions explicitly:
 
 ```
 import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
@@ -26,13 +24,9 @@ const projection = new ProjectionTransform({
 });
 ```
 
-Supply required datum-grid data separately; the catalogue contains definitions, not grids. The option also applies to WKT/PROJJSON readers and capability checks. Explicit ellipsoid and operation parameters remain available without named datum registration. The default `projectionEngine` includes the catalogue internally and preserves its existing behavior. See the [datum registration guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#register-regional-datums).
+Supply required datum-grid data separately; the catalogue contains definitions, not grids. The option also applies to WKT/PROJJSON readers and capability checks. Explicit ellipsoid and operation parameters remain available without named datum registration. The default `projectionEngine` includes the catalogue internally. See the [datum registration guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#register-regional-datums).
 
 API compatibility does not imply identical numerical results or accepted inputs. The documented corrections and strict-input exceptions below still apply. The engine never silently falls back to proj4js.
-
-## Renamed configurable API[​](#renamed-configurable-api "Direct link to Renamed configurable API")
-
-`ProjectionTransform` replaces `TypeScriptProjection` during the alpha release cycle; the former name is no longer exported. Update imports and constructors, and use `ProjectionTransformOptions`, `ProjectionTransformCreateOptions`, `ProjectionCompatibility` and `checkProjectionCompatibility` in place of the former TypeScript-prefixed names. `projectionEngine` provides the ready-to-use API, and `LazyProjectionEngine` loads built-in algorithms on demand.
 
 ## Supported profile[​](#supported-profile "Direct link to Supported profile")
 
@@ -58,16 +52,14 @@ Default coordinate order remains east/north (longitude/latitude for geographic c
 
 Public entry points, option meanings, plugin/reader contracts, typed-array ownership, and error categories form the compatibility contract. Human-readable error text is not a stable identifier. Coordinate corrections and stricter rejection of invalid inputs may ship as bug fixes; release notes must identify material numerical changes. No sub-metre/global-domain guarantee follows from API stability.
 
-## Migration[​](#migration "Direct link to Migration")
+## Creating transforms[​](#creating-transforms "Direct link to Creating transforms")
 
-`Projection` and `ProjectionEngine` are type contracts exported from `/types`. Replace the former `new Projection({from, to})` with `projectionEngine.createProjection({from, to})`. Replace `new LazyProjection(options)` with `lazyProjectionEngine.createProjection(options)` and `LazyProjection.create(options)` with `lazyProjectionEngine.createProjectionAsync(options)`.
-
-The configurable, full and lazy engine classes are named `ConfigurableProjectionEngine`, `FullProjectionEngine` and `LazyProjectionEngine`. Registrations belong to engines: use `new FullProjectionEngine({aliases, datumGrids, verticalGrids})` instead of static registration methods. Prepare NTv2 grids with `parseNTv2Grid(bytes, {includeErrorFields})`. Direct construction of `ProjectionTransform` remains available for explicit configuration. No deprecated class aliases are exported during the alpha cycle.
+`Projection` and `ProjectionEngine` are type contracts exported from `/types`. Use `projectionEngine.createProjection(options)` for the full engine. `LazyProjectionEngine` loads built-in algorithms on demand through `createProjectionAsync(options)`. Use `new ProjectionTransform(options)` for explicit per-instance configuration.
 
 ## Default backend and future work[​](#default-backend-and-future-work "Direct link to Default backend and future work")
 
-Native PROJ is the numerical accuracy reference. Proj4js is retained for API/input compatibility comparisons and benchmarks; agreement with it does not qualify an ellipsoidal algorithm or its pole boundaries. Orthographic now uses ellipsoidal equations for ellipsoidal definitions. Ellipsoidal gnomonic uses the shared `EllipsoidGeodesic` solver and Karney's reduced-length/geodesic-scale formulation; spherical definitions retain spherical equations. Unchanged ellipsoidal definitions are checked against native PROJ controls. Forward points require positive geodesic scale (inside the gnomonic horizon), and the bounded inverse rejects nonconvergence. These sampled controls do not establish uniform accuracy at the singular horizon. See the [modern PROJ audit](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/modern-proj-audit.md) for retained boundary findings and the numerical domains that remain unqualified.
+Native PROJ is the numerical accuracy reference. Proj4js is retained for API/input compatibility comparisons and benchmarks; agreement with it does not qualify an ellipsoidal algorithm or its pole boundaries. Orthographic uses ellipsoidal equations for ellipsoidal definitions. Ellipsoidal gnomonic uses the shared `EllipsoidGeodesic` solver and Karney's reduced-length/geodesic-scale formulation; spherical definitions retain spherical equations. Unchanged ellipsoidal definitions are checked against native PROJ controls. Forward points require positive geodesic scale (inside the gnomonic horizon), and the bounded inverse rejects nonconvergence. These sampled controls do not establish uniform accuracy at the singular horizon. See the [modern PROJ audit](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/modern-proj-audit.md) for retained boundary findings and the numerical domains that remain unqualified.
 
-The package has no runtime dependency on proj4js. The pinned development dependency remains for compatibility tests and benchmarks. This rename and wrapper removal are breaking alpha API changes; no release is published by this work.
+The package has no runtime dependency on proj4js. The pinned development dependency supports compatibility tests and benchmarks.
 
 Broader derived/compound CRS execution, arbitrary axis rotations, uncommon GeoTIFF band conventions, dynamic datums and automatic EPSG operation lookup are outside this profile. More datasets and denser sampling can expand the profile without representing unfinished work in the four qualification tranches. Exact allocation counts and guarantees about every browser/device are also not claimed; the recorded performance baselines are measurements, not service-level promises.

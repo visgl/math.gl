@@ -66,11 +66,11 @@ The result lists seven planets in order from Mercury to Neptune, followed by the
 
 Sky directions point **towards** each body. Existing `getSunDirection` and `getMoonDirection` describe incoming light and point the other way. At the zenith, `direction` is `[0, 0, 1]`. Preserve that distinction when positioning objects. The equatorial direction shares the J2000 asset axes used by `getStarfieldRotation`. Use the returned ENU direction directly for the most consistent local placement; the star-field's mean-frame approximation omits the nutation included here.
 
-For unresolved planets, visual magnitude provides relative point-source brightness: `10 ** (-0.4 * magnitude)`, on an arbitrary magnitude-zero scale. This is not solar or lunar light intensity. Use exposure and tone mapping in the renderer. Moon magnitudes now use an approximate Lambert phase law and NASA geometric albedos, with eclipse and occultation attenuation reported separately. No RGB colors or surface textures are supplied.
+For unresolved planets, visual magnitude provides relative point-source brightness: `10 ** (-0.4 * magnitude)`, on an arbitrary magnitude-zero scale. This is not solar or lunar light intensity. Use exposure and tone mapping in the renderer. Moon magnitudes use an approximate Lambert phase law and NASA geometric albedos, with eclipse and occultation attenuation reported separately. No RGB colors or surface textures are supplied.
 
 ## When planets become visible[​](#when-planets-become-visible "Direct link to When planets become visible")
 
-A planet rising above the horizon and becoming detectable against the twilight sky are separate events. Brighter planets can emerge earlier in dusk and remain visible later in dawn. Every planet now includes a current `visibility` estimate:
+A planet rising above the horizon and becoming detectable against the twilight sky are separate events. Brighter planets can emerge earlier in dusk and remain visible later in dawn. Every planet includes a current `visibility` estimate:
 
 * `visible`: whether brightness, altitude and Sun separation meet the heuristic thresholds.
 * `fade`: a smooth 0–1 rendering blend around those thresholds, not a probability.
