@@ -81,20 +81,29 @@ export function updateTerrainMixedVertexTileHalos(
   const budget = options.maxDependencyTests ?? 10_000_000;
   if (!Number.isSafeInteger(budget) || budget < 0)
     throw new Error('Invalid mixed halo dependency budget');
-  const old = new Map(previous?.sources.map(t => [key(t), t]));
-  const current = new Map(resident.map(t => [key(t), t]));
-  const cached = new Map(previous?.tiles.map(t => [key(t), t]));
-  const targets = new Set<string>();
   const unchangedLayout =
     previous?.sources.length === resident.length &&
     resident.every((tile, i) => {
       const prior = previous.sources[i];
       return (
-        key(prior) === key(tile) &&
-        prior.field.width === tile.field.width &&
-        prior.field.height === tile.field.height
+        prior === tile ||
+        (prior.column === tile.column &&
+          prior.row === tile.row &&
+          prior.spacing === tile.spacing &&
+          prior.field.width === tile.field.width &&
+          prior.field.height === tile.field.height)
       );
     });
+  const old = unchangedLayout ? undefined : new Map(previous?.sources.map(t => [key(t), t]));
+  const targets = new Set<string>();
+  const initialized = previous !== null && preparations.has(previous);
+  if (!initialized) {
+    const cached = new Set(previous?.tiles.map(key));
+    for (const tile of resident) {
+      const address = key(tile);
+      if (!cached.has(address)) targets.add(address);
+    }
+  }
   let index = unchangedLayout && previous ? targetIndexes.get(previous) : undefined;
   let tests = 0;
   const charge = () => {
@@ -104,11 +113,12 @@ export function updateTerrainMixedVertexTileHalos(
     index ??= createTerrainBoxIndex(resident.map(tile => bounds(tile, tile.spacing)));
     for (const id of index(box, charge)) targets.add(key(resident[id]));
   }
-  for (const tile of resident) {
-    const address = key(tile);
-    const prior = old.get(address);
-    if (!cached.has(address) || prior !== tile) targets.add(address);
-    if (prior === tile || !previous) continue;
+  for (let i = 0; i < resident.length; i++) {
+    const tile = resident[i];
+    const prior = unchangedLayout ? previous!.sources[i] : old?.get(key(tile));
+    if (prior === tile) continue;
+    targets.add(key(tile));
+    if (!previous) continue;
     if (!prior) {
       invalidate(bounds(tile));
     } else if (prior.field.width !== tile.field.width || prior.field.height !== tile.field.height) {
@@ -119,24 +129,48 @@ export function updateTerrainMixedVertexTileHalos(
       if (dirty) invalidate(dirty);
     }
   }
-  for (const [address, tile] of old) {
-    if (!current.has(address) && resident.length) invalidate(bounds(tile));
+  const removed: string[] = [];
+  if (old?.size) {
+    const current = new Set(resident.map(key));
+    for (const [address, tile] of old) {
+      if (current.has(address)) continue;
+      removed.push(address);
+      if (resident.length) invalidate(bounds(tile));
+    }
   }
   const priorPreparation = previous && preparations.get(previous);
   const preparation: MixedHaloPreparation = {
-    fields: priorPreparation?.fields ?? new WeakMap(),
+    tiles: priorPreparation?.tiles ?? new WeakMap(),
     layout: priorPreparation?.layout
   };
   const built = buildMixedVertexTileHalos(resident, options, targets, preparation).tiles;
-  for (const tile of built) cached.set(key(tile), tile);
-  const tiles = resident
-    .map(t => cached.get(key(t))!)
-    .sort((a, b) => a.spacing - b.spacing || a.column - b.column || a.row - b.row);
+  let tiles: TerrainMixedHaloSnapshot['tiles'];
+  if (unchangedLayout && initialized) {
+    // Built halos form a sorted subsequence of the previous output.
+    let cursor = 0;
+    tiles = previous!.tiles.map(tile => {
+      const replacement = built[cursor];
+      if (
+        replacement?.spacing !== tile.spacing ||
+        replacement.column !== tile.column ||
+        replacement.row !== tile.row
+      )
+        return tile;
+      cursor++;
+      return replacement;
+    });
+  } else {
+    const cached = new Map(previous?.tiles.map(tile => [key(tile), tile]));
+    for (const tile of built) cached.set(key(tile), tile);
+    tiles = resident
+      .map(tile => cached.get(key(tile))!)
+      .sort((a, b) => a.spacing - b.spacing || a.column - b.column || a.row - b.row);
+  }
   const snapshot = {
     sources: resident.slice(),
     tiles,
     rebuilt: built.map(key),
-    removed: [...old.keys()].filter(k => !current.has(k)).sort()
+    removed: removed.sort()
   };
   preparations.set(snapshot, preparation);
   if (index) targetIndexes.set(snapshot, index);

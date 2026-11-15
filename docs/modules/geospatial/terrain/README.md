@@ -1879,3 +1879,9 @@ retains elevations and nodata from pinned Pacific and Sierra windows on a
 synthetic unit-spaced Cartesian grid. The CPU test packs and unpacks the
 height field before triangulating. This gives downstream parity tests the
 same vertex registration, diagonal, validity, and quantized elevations.
+
+For a larger worker replay, set `TERRAIN_LAYOUT_COPIES=2` to arrange four
+copies of the regional layout in a 320-tile cut. Source elevations are reused
+at translated coordinates. Set `TERRAIN_BASELINE_REF` to a commit to replay
+the same workload against that revision. The default is three repeats per
+configuration. The full rebuild oracle runs outside the timed edit loop.

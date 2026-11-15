@@ -29,6 +29,28 @@ function percentiles(times) {
   return { p50: quantile(0.5), p95: quantile(0.95), p99: quantile(0.99) };
 }
 
+const layoutCopies = Number(process.env.TERRAIN_LAYOUT_COPIES ?? 1);
+const repeats = Number(process.env.TERRAIN_REPEATS ?? 3);
+const baseline =
+  process.env.TERRAIN_BASELINE_REF === undefined
+    ? undefined
+    : execFileSync(
+        "git",
+        [
+          "rev-parse",
+          "--verify",
+          process.env.TERRAIN_BASELINE_REF + "^{commit}",
+        ],
+        {
+          cwd: root,
+          encoding: "utf8",
+        },
+      ).trim();
+assert.ok(
+  Number.isInteger(layoutCopies) && layoutCopies >= 1 && layoutCopies <= 4,
+);
+assert.ok(Number.isInteger(repeats) && repeats >= 1 && repeats <= 10);
+
 function readSource(name) {
   const dem = JSON.parse(
     readFileSync(new URL(name + "-streaming.json", fixtures)),
@@ -68,7 +90,22 @@ function readSource(name) {
   const fine = Array.from({ length: 16 }, (_, i) =>
     tile(96 + (i % 4) * 8, 96 + Math.floor(i / 4) * 8, 1),
   );
-  return { source: [...coarse, ...fine], sha256: dem.sha256 };
+  const source = [];
+  for (let y = 0; y < layoutCopies; y++) {
+    for (let x = 0; x < layoutCopies; x++) {
+      for (const tile of [...coarse, ...fine]) {
+        const column = tile.column + x * 256;
+        const row = tile.row + y * 256;
+        source.push({
+          ...tile,
+          column,
+          row,
+          field: { ...tile.field, origin: [column, row] },
+        });
+      }
+    }
+  }
+  return { source, sha256: dem.sha256 };
 }
 
 function makeEvents(source, burstSize) {
@@ -198,7 +235,7 @@ try {
   const modules = [];
   for (const [i, entry] of entries.entries()) {
     const output = join(directory, i + ".mjs");
-    await bundleRuntime(root, "./modules/" + entry, output, undefined, "node");
+    await bundleRuntime(root, "./modules/" + entry, output, baseline, "node");
     modules.push(pathToFileURL(output));
   }
   const { createTerrainMixedVertexTileHalos } = await import(modules[0]);
@@ -225,7 +262,7 @@ try {
             { policy: "bounded-wait", maxBatchSize: 8, maxWaitMs: 2 },
             { policy: "opportunistic", maxBatchSize: 8, maxWaitMs: 0 },
           ];
-          for (let repeat = 0; repeat < 3; repeat++) {
+          for (let repeat = 0; repeat < repeats; repeat++) {
             for (let i = 0; i < policies.length; i++) {
               const config = policies[(i + repeat) % policies.length];
               const handle = await runner.initializeTask(
@@ -278,6 +315,7 @@ try {
                 results.push({
                   name,
                   sha256,
+                  residentTiles: source.length,
                   burstSize,
                   outputOwnership,
                   repeat,
@@ -340,7 +378,7 @@ try {
   console.log(
     JSON.stringify(
       {
-        revision,
+        revision: baseline ?? revision,
         node: process.version,
         platform: process.platform,
         arch: process.arch,

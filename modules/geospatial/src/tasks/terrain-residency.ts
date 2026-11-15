@@ -68,6 +68,24 @@ function sameHalo(a: ResidentHalo, b: ResidentHalo): boolean {
   );
 }
 
+/** Compare halo addresses in the order used by the incremental builder. */
+function compareAddress(a: TileAddress, b: TileAddress): number {
+  return a.spacing - b.spacing || a.column - b.column || a.row - b.row;
+}
+
+/** Compute changed outputs with a linear merge over sorted snapshots. */
+function changedHalos(previous: readonly ResidentHalo[], next: readonly ResidentHalo[]) {
+  const changed: ResidentHalo[] = [];
+  let index = 0;
+  for (const tile of next) {
+    while (index < previous.length && compareAddress(previous[index], tile) < 0) index++;
+    const prior = previous[index];
+    if (!prior || (prior !== tile && (compareAddress(prior, tile) !== 0 || !sameHalo(prior, tile))))
+      changed.push(tile);
+  }
+  return changed;
+}
+
 /** Keep mixed halo sources and outputs resident across serialized edit batches. */
 export const TerrainResidencyTask = {
   id: 'terrain-residency',
@@ -145,14 +163,8 @@ export const TerrainResidencyTask = {
         state.limits
       );
       const updated = input.measureStages ? performance.now() : 0;
-      const old = new Map(state.snapshot?.tiles.map(tile => [addressKey(tile), tile]));
-      // Copy outgoing buffers so transfer cannot detach the resident snapshot.
-      const tiles = structuredClone(
-        next.tiles.filter(tile => {
-          const prior = old.get(addressKey(tile));
-          return !prior || !sameHalo(prior, tile);
-        })
-      );
+      // Both snapshots are in address order. Unchanged halos retain object identity.
+      const tiles = structuredClone(changedHalos(state.snapshot?.tiles ?? [], next.tiles));
       context.throwIfAborted();
       state.snapshot = next;
       state.revision++;
