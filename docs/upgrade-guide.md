@@ -26,6 +26,17 @@ install its package root. See the API changes below for changes to named exports
 Install [`@math.gl/expressions`](./modules/expressions/README.md) to evaluate expressions or
 parse SQL in 5.0. Install Apache Arrow 17 or later for Arrow execution.
 
+### Geometry utilities
+
+- Import `GeometryInput` in place of `UtilityGeometry`. Supply a string `topology` in place
+  of numeric `mode`. For triangle meshes, use `topology: 'triangle-list'`.
+- Pass a geometry object and optional `{start, end}` range to `makePrimitiveIterator`. The
+  iterator yields `Primitive.type` as `'point-list'`, `'line-list'`, or `'triangle-list'`.
+  Use `'line-loop'` and `'triangle-fan'` on inputs that require those expansions.
+- The `GL`, `GL_TYPE`, `GL_PRIMITIVE`, `GL_PRIMITIVE_MODE`, and `GLType` exports were
+  removed. Use typed-array constructors and their `BYTES_PER_ELEMENT` for component
+  storage. Convert numeric enums where your renderer requires them.
+
 ### Polygon, culling, and viewport APIs
 
 | Removed API | Replacement |

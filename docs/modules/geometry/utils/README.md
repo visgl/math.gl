@@ -15,11 +15,11 @@ depending on a WebGL or WebGPU runtime.
 ## Usage
 
 ```typescript
-import {GL, computeVertexNormals, octDecode} from '@math.gl/geometry';
+import {computeVertexNormals, octDecode} from '@math.gl/geometry';
 import {Vector3} from '@math.gl/core';
 
 const normals = computeVertexNormals({
-  mode: GL.TRIANGLES,
+  topology: 'triangle-list',
   attributes: {
     POSITION: {value: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]), size: 3}
   }
@@ -63,7 +63,7 @@ Declare linear and flat policies explicitly, including mixed policies within one
 
 - Geometry inspection and traversal: `isGeometry`, `makeAttributeIterator`,
   `makePrimitiveIterator`, `computeVertexNormals`
-- Typed arrays and component types: `GL`, `GL_TYPE`, `GLType`, `concatTypedArrays`
+- Typed arrays: `concatTypedArrays`
 - Packed attributes: `interpolatePackedAttributes`, `encodeRGB565`, `decodeRGB565`, octahedral vector encoding, texture-coordinate
   compression, and ZigZag delta decoding
 - Coordinate helpers: `emod`

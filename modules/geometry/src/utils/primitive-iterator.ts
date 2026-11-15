@@ -2,15 +2,13 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {TypedArray} from '@math.gl/core';
-import {GL} from './constants';
-import type {Geometry} from './geometry';
+import type {GeometryInput} from './geometry';
 import {getAttributeValues, getPositionAttribute, isGeometry} from './geometry';
 
 /** One dereferenced point, line, or triangle primitive. */
 export type Primitive = {
   attributes: object;
-  type: number;
+  type: 'point-list' | 'line-list' | 'triangle-list';
   i1: number;
   i2?: number;
   i3?: number;
@@ -19,55 +17,46 @@ export type Primitive = {
 
 /**
  * Iterates through a geometry's primitives and dereferences optional indices.
- *
- * The legacy argument form `(indices, attributes, mode, start, end)` is also supported.
+ * The optional range is zero-based and end-exclusive.
  */
 export function* makePrimitiveIterator(
-  geometryOrIndices?: Geometry | TypedArray | {value?: TypedArray; values?: TypedArray},
-  attributes: object = {},
-  mode?: number,
-  start = 0,
-  end?: number
+  geometry: GeometryInput,
+  {start = 0, end}: {start?: number; end?: number} = {}
 ): Iterable<Primitive> {
-  let indices: TypedArray | undefined;
-  if (isGeometry(geometryOrIndices)) {
-    const geometry = geometryOrIndices;
-    indices = geometry.indices ? getAttributeValues(geometry.indices) : undefined;
-    attributes = geometry.attributes;
-    mode = geometry.mode;
-    if (end === undefined) {
+  if (!isGeometry(geometry)) {
+    throw new TypeError('Geometry with a supported topology and attributes is required');
+  }
+  const {attributes, topology} = geometry;
+  const indices = geometry.indices ? getAttributeValues(geometry.indices) : undefined;
+  if (end === undefined) {
+    if (indices) {
+      end = indices.length;
+    } else {
       const position = getPositionAttribute(geometry);
-      end = indices?.length ?? getAttributeValues(position).length / (position.size || 3);
+      end = getAttributeValues(position).length / (position.size || 3);
     }
-  } else if (geometryOrIndices) {
-    indices = getAttributeValues(geometryOrIndices);
   }
-
-  if (mode === undefined) {
-    throw new Error('Primitive mode is required');
-  }
-  end ??= indices?.length ?? start;
 
   const dereference = (index: number): number => Number(indices ? indices[index] : index);
   let primitiveIndex = 0;
 
-  switch (mode) {
-    case GL.POINTS:
+  switch (topology) {
+    case 'point-list':
       for (let index = start; index < end; index++) {
         yield {
           attributes,
-          type: GL.POINTS,
+          type: 'point-list',
           i1: dereference(index),
           primitiveIndex: primitiveIndex++
         };
       }
       return;
 
-    case GL.LINES:
+    case 'line-list':
       for (let index = start; index + 1 < end; index += 2) {
         yield {
           attributes,
-          type: GL.LINES,
+          type: 'line-list',
           i1: dereference(index),
           i2: dereference(index + 1),
           primitiveIndex: primitiveIndex++
@@ -75,11 +64,11 @@ export function* makePrimitiveIterator(
       }
       return;
 
-    case GL.LINE_STRIP:
+    case 'line-strip':
       for (let index = start; index + 1 < end; index++) {
         yield {
           attributes,
-          type: GL.LINES,
+          type: 'line-list',
           i1: dereference(index),
           i2: dereference(index + 1),
           primitiveIndex: primitiveIndex++
@@ -87,11 +76,11 @@ export function* makePrimitiveIterator(
       }
       return;
 
-    case GL.LINE_LOOP:
+    case 'line-loop':
       for (let index = start; index < end; index++) {
         yield {
           attributes,
-          type: GL.LINES,
+          type: 'line-list',
           i1: dereference(index),
           i2: dereference(index + 1 < end ? index + 1 : start),
           primitiveIndex: primitiveIndex++
@@ -99,11 +88,11 @@ export function* makePrimitiveIterator(
       }
       return;
 
-    case GL.TRIANGLES:
+    case 'triangle-list':
       for (let index = start; index + 2 < end; index += 3) {
         yield {
           attributes,
-          type: GL.TRIANGLES,
+          type: 'triangle-list',
           i1: dereference(index),
           i2: dereference(index + 1),
           i3: dereference(index + 2),
@@ -112,12 +101,12 @@ export function* makePrimitiveIterator(
       }
       return;
 
-    case GL.TRIANGLE_STRIP:
+    case 'triangle-strip':
       for (let index = start; index + 2 < end; index++) {
         const odd = (index - start) % 2 === 1;
         yield {
           attributes,
-          type: GL.TRIANGLES,
+          type: 'triangle-list',
           i1: dereference(odd ? index + 1 : index),
           i2: dereference(odd ? index : index + 1),
           i3: dereference(index + 2),
@@ -126,11 +115,11 @@ export function* makePrimitiveIterator(
       }
       return;
 
-    case GL.TRIANGLE_FAN:
+    case 'triangle-fan':
       for (let index = start + 1; index + 1 < end; index++) {
         yield {
           attributes,
-          type: GL.TRIANGLES,
+          type: 'triangle-list',
           i1: dereference(start),
           i2: dereference(index),
           i3: dereference(index + 1),
@@ -138,8 +127,5 @@ export function* makePrimitiveIterator(
         };
       }
       return;
-
-    default:
-      throw new Error(`Unknown primitive mode ${mode}`);
   }
 }
