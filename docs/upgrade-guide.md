@@ -83,6 +83,7 @@ Euler rotation orders are now represented directly by the `EulerRotationOrder` s
 | `mathArray.multiplyScalar(value)` | `mathArray.multiplyByScalar(value)` |
 | `mathArray.divideScalar(value)` | `mathArray.multiplyByScalar(1 / value)` |
 | `mathArray.addScalar()`, `subScalar()`, `clampScalar()` | Use `add()`, `subtract()`, or `clamp()` with matching arrays, or update the elements explicitly |
+| `Matrix3.INDICES`, `Matrix4.INDICES` instance getters | `matrix.getElement(row, column)` for reads or `matrix.getElementIndex(row, column)` for the flat array index |
 | `Matrix3.transformVector()`, `transformVector2()`, `transformVector3()` | `Matrix3.transform()` |
 | `Matrix4.transformPoint()`, `transformVector()` | `Matrix4.transformAsPoint()` for two- and three-element inputs, or `Matrix4.transform()` for general inputs |
 | `Matrix4.transformDirection()` | `Matrix4.transformAsVector()` |

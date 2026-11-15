@@ -24,7 +24,6 @@ test('Matrix3#types', () => {
 test('Matrix3#construct and Array.isArray check', () => {
   const m = new Matrix3();
   expect(Array.isArray(m)).toBeTruthy();
-  expect(m.INDICES).toBeTruthy();
 });
 
 test('Matrix3#from', () => {
