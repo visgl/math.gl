@@ -1,0 +1,13 @@
+{
+  "method": "Analytical plane support. The capsule endpoints rotate about +X, so the lowest point is z = 0.75 - sin(pi*t/2) - 0.25. Its X coordinate is zero, on the shared edge of independently indexed patches. The sphere orbits about +Y with z = 1.25 - sin(pi*t), touching only at t=0.5.",
+  "patches": [
+    {"positions": [-4,-4,0, 0,-4,0, 0,4,0, -4,4,0], "indices": [0,1,2, 0,2,3]},
+    {"positions": [0,-4,0, 4,-4,0, 4,4,0, 0,4,0], "indices": [0,1,2, 0,2,3]}
+  ],
+  "cases": [
+    {"name":"capsule hits shared tile edge", "start":[0,-1,0.75], "end":[0,1,0.75], "pivot":[0,0,0.75], "translation":[0,0,0], "rotation":[0.7071067811865475,0,0,0.7071067811865475], "radius":0.25, "maxWork":100000, "expected":"hit", "time":0.3333333333333333},
+    {"name":"off-axis sphere grazes between clear endpoints", "start":[1,0,1.25], "end":[1,0,1.25], "pivot":[0,0,1.25], "translation":[0,0,0], "rotation":[0,1,0,0], "radius":0.25, "maxWork":100000, "expected":"grazing", "time":0.5},
+    {"name":"budget expires after the initial query", "start":[0,-1,0.75], "end":[0,1,0.75], "pivot":[0,0,0.75], "translation":[0,0,0], "rotation":[0.7071067811865475,0,0,0.7071067811865475], "radius":0.25, "maxWork":6, "expected":"incomplete", "time":0.3333333333333333},
+    {"name":"sphere clears even at its lowest point", "start":[1,0,1.26], "end":[1,0,1.26], "pivot":[0,0,1.26], "translation":[0,0,0], "rotation":[0,1,0,0], "radius":0.25, "maxWork":100000, "expected":"miss", "time":0.5}
+  ]
+}

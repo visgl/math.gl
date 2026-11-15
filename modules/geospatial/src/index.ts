@@ -434,6 +434,10 @@ export {
   type TerrainPolytopeSweepResult
 } from './terrain/sweep-polytope';
 
+export {
+  sweepTerrainRotatingCapsule,
+  sweepTerrainRotatingSphere
+} from './terrain/sweep-rotating-capsule';
 export {sweepTerrainCylinder} from './terrain/sweep-cylinder';
 
 export {sweepTerrainPlane} from './terrain/sweep-plane';
