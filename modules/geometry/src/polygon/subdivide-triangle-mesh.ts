@@ -229,21 +229,21 @@ export function subdivideTriangleMesh(
 
   function needsRefinement(face: Face): boolean {
     const points = face.vertices.map(index => vertices[index]);
-    let exceedsTolerance = false;
+    const limit = tolerance ?? Infinity;
+    for (let i = 0; i < 3; i++) {
+      if (sourceEdgeLength(points[i], points[(i + 1) % 3]) > maxEdgeLength) return true;
+    }
     for (let i = 0; i < 3; i++) {
       const a = points[i];
       const b = points[(i + 1) % 3];
-      const length = sourceEdgeLength(a, b);
-      if (length > maxEdgeLength) exceedsTolerance = true;
       for (const fraction of EDGE_FRACTIONS) {
-        if (error([a, b], [1 - fraction, fraction]) > (tolerance ?? Infinity))
-          exceedsTolerance = true;
+        if (error([a, b], [1 - fraction, fraction]) > limit) return true;
       }
     }
     for (const weights of FACE_WEIGHTS) {
-      if (error(points, weights) > (tolerance ?? Infinity)) exceedsTolerance = true;
+      if (error(points, weights) > limit) return true;
     }
-    return exceedsTolerance;
+    return false;
   }
 
   function midpoint(a: number, b: number, midpoints: Map<string, number>): number {
