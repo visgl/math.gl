@@ -80,7 +80,9 @@ Transport payloads are a math.gl protocol, not loaders.gl table wrappers.
 
 ### Column inspection
 
-Use `isArrowTable` to recognize a table across Arrow package copies.
+Use `isArrowTable(value)` and `isArrowRecordBatch(value)` to narrow an unknown
+value to an Apache Arrow `Table` or `RecordBatch`. Both guards recognize native
+Arrow values from different package copies.
 `findArrowColumn(table, ['feature', 'position'])` looks up a nested column and
 returns `null` if the path is missing. Pass a single segment to look up a
 literal field name that contains a dot. `isNumericArrowType` and
