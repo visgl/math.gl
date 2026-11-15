@@ -85,8 +85,8 @@ worker: {
 }
 ```
 
-Import `scaleTask` into your application and call `runner.runTask` as before.
-The default execution mode now uses its worker. You can also pass
+Import `scaleTask` into your application and call `runner.runTask`.
+The default execution mode uses the task’s worker. You can also pass
 `execution: 'worker'` to require worker execution.
 
 Use exactly one target form. Node needs a compiled module URL. Capabilities must

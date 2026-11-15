@@ -147,9 +147,8 @@ definitions and descriptor-owned arrays are cloned and recursively frozen. See t
 ## Imports and bundle boundaries
 
 Import syntax codecs, metadata helpers and the optional resolver as named exports
-from `@math.gl/geospatial/crs` or `@math.gl/geospatial`. These consolidated entry
-points provide ESM, CommonJS and declarations; separate nested syntax or resolver
-export paths are no longer supported. Use `import type` for TypeScript-only APIs.
+from `@math.gl/geospatial/crs` or `@math.gl/geospatial`. Both entry points provide ESM, CommonJS and
+TypeScript declarations. Use `import type` for TypeScript-only APIs.
 Tree-shaking bundlers can remove unused codecs and resolution code. CommonJS and
 namespace imports can retain more code; inspect emitted bundles when size matters.
 

@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>
 
-The configurable math.gl projection engine used by the full, configurable and lazy engines; see the [support and migration contract](../developer-guide/support.md).
+The configurable math.gl projection engine used by the full, configurable and lazy engines; see the [supported definitions and operations](../developer-guide/support.md).
 Import it from `@math.gl/geospatial/projection` or the isolated `@math.gl/geospatial/projection/core` entry point.
 The package has no proj4js runtime dependency. Install `proj4` separately when
 its upstream behavior is required.
