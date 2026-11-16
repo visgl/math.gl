@@ -24,3 +24,12 @@ export {compileResolvedScale} from './compile-scale';
 export {resolvePalette, listScalePalettes} from './palettes';
 
 export {ScaleQuantileSketch} from './quantile-sketch';
+
+export {
+  convertScaleColor,
+  decodeSRGB,
+  encodeSRGB,
+  packFloat16,
+  unpackFloat16,
+  packRGBA16F
+} from './hdr-colors';
