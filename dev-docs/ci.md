@@ -24,7 +24,8 @@ both `/math.gl/` and `/math.gl/next/`.
 | Complete browser timing/workload matrix and worker cost evaluation | Tooling-change PRs | Yes |
 | Node timing, allocations, memory, startup evidence and matched three-browser scorecard | Tooling-change PRs | Yes |
 | Paired projection/pipeline performance against the PR base | Except allowlisted documentation-only PRs | Not on schedule/master |
-| Example correctness and rendering regressions | Yes | Yes |
+| Example correctness and rendering regressions, including solar browser smoke | Yes | Yes |
+| Full solar browser camera, projection, morph and state-detail conformance | Affected PRs | Yes |
 
 Paired timing comparisons are skipped only when every changed path is under `docs/` or
 `dev-docs/`, or is the root `README.md`, `CHANGELOG.md` or `LICENSE`. Any other path,
@@ -49,6 +50,14 @@ scheduled full run. Full evidence remains available in the `projection-scorecard
 `projection-browser-qualification-*` artifacts. Scheduled failures fail the workflow.
 
 ## Measurement and follow-up
+
+In [master run 43919463527](https://github.com/visgl/math.gl/actions/runs/43919463527),
+examples took 6m45s, with 93s for Node and 230s for browser checks. The solar browser
+suite used about 124s, including a smoke check for the real demo, offline tile fallback
+and coverage samples. Regular PRs and master run that smoke case. The rest of the
+solar matrix runs nightly, manually, and on PRs or merge groups touching shared CI,
+the solar example, its workspace dependencies or example test infrastructure. Node
+and browser checks share one example-runner invocation so they reuse app builds.
 
 Successful master run [41093049118](https://github.com/visgl/math.gl/actions/runs/41093049118)
 spent 13m47s in the old `checks` job, near its 15-minute deadline. Package compilation
