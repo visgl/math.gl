@@ -2056,6 +2056,44 @@ forest. The separate `createTerrainDrainage` function uses strictly descending
 neighbors and therefore stops at flats. Preserve the original field alongside
 the derived field when the analysis needs elevations before conditioning.
 
+### Terrain cutouts and paired skirts
+
+Use `splitTerrainMesh` to split an indexed terrain mesh by a rectangle or
+strictly convex polygon in the mesh's local XY frame. Pass a ring without
+a repeated endpoint. Both ring windings are supported.
+
+```ts
+import {createTerrainCutoutSkirts, splitTerrainMesh} from '@math.gl/geospatial';
+
+const cut = splitTerrainMesh(mesh, [[10, 10], [30, 10], [30, 25], [10, 25]]);
+const raised = createTerrainCutoutSkirts(cut, {
+  lift: 5,
+  patch: {baseZ: -2},
+  remainder: {baseZ: -2}
+});
+```
+
+The split returns upward-facing patch and remainder meshes in Float64.
+Each pair in `patch.cutEdges` matches the same pair in `remainder.cutEdges`
+in reverse direction. Only shared cut edges get walls. The patch skirt
+faces out and the remainder skirt faces into the opening.
+Use a common local `baseZ` or specify a positive `height` separately for
+each wall. Empty pieces and pieces with no paired edges have no skirt.
+Use each piece's `surface` for queries and its optional `skirt` mesh for
+rendering the surface plus walls. The returned skirt marks wall triangles
+as visual geometry in `triangleValidity`.
+
+Each surface vertex has a source triangle ID and three interpolation
+weights in that triangle's index order. Follow a lower skirt vertex's
+`sourceVertexIndices` entry to the surface vertex before interpolating
+draped attributes.
+
+Use a local frame and a conforming terrain mesh. Overlapping XY sheets,
+unwelded shared edges and hanging vertices are rejected. A cut that creates
+an unrepresentable sliver fails explicitly. Set the work and output limits
+for your workload. Concave cuts and cuts spanning separate tile meshes
+require additional partitioning and seam reconciliation.
+
 ### Watersheds on conditioned terrain
 
 Pass the receiver forest from `fillTerrainDepressions` to

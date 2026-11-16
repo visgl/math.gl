@@ -12,6 +12,7 @@ import TileTransitions from './coordinated-transitions';
 import GeographicLod from './geographic-lod';
 import BreaklineAuthoring from './breakline-authoring';
 import TrailPlanner from './trail-planner';
+import CutoutLab from './cutout-lab';
 import ColliderReplay from './collider-replay';
 import './styles.css';
 
@@ -24,6 +25,7 @@ const groups = [
   {id: 'colliders', title: 'Rotating collider replay', Component: ColliderReplay},
   {id: 'trail', title: 'Trail planner', Component: TrailPlanner},
   {id: 'breaklines', title: 'Breakline authoring', Component: BreaklineAuthoring},
+  {id: 'cutouts', title: 'Terrain cutouts', Component: CutoutLab},
   {id: 'streaming', title: 'Streaming replay', Component: TerrainStreaming}
 ];
 
