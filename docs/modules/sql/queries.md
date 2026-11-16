@@ -86,6 +86,10 @@ for await (const batch of queryArrowTableInBatches(inputBatches, schema, {
 }
 ```
 
+Set `emitEmptyBatches: true` to keep a schema-bearing batch with its input
+batch metadata when filtering or pagination leaves no rows in an input batch.
+Empty batches do not consume the row limit. The option defaults to false.
+
 ### Progressive aggregate snapshots
 
 `queryArrowAggregateSnapshots(batches, schema, options)` applies an optional
@@ -94,9 +98,19 @@ column. Each snapshot contains an independent Arrow table, the number of
 rows processed, and a `final` flag. Set `emitEveryBatches` to control provisional
 snapshots. A final snapshot is emitted even when the stream is empty.
 
-Set `emitEmptyBatches: true` to keep a schema-bearing batch with its input
-batch metadata when filtering or pagination leaves no rows in an input batch.
-Empty batches do not consume the row limit. The option defaults to false.
+## Replace Arrow columns
+
+`replaceArrowColumns(table, replacements, {functions})` returns a table with computed
+columns in their original positions. Each replacement has an `as` field naming an
+existing column and an `expression` field. Use each name at most once. All expressions
+read the original table. The computed field supplies the output type and metadata.
+
+In SQL, write an explicit select list and alias the expression to the desired column
+name. For a table with `id` and `value` columns:
+
+```sql
+SELECT id, value + 1 AS value FROM data
+```
 
 ## Scalar aggregates
 

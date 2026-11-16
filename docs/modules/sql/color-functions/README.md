@@ -1,7 +1,8 @@
 # Arrow color functions
 
 `@math.gl/sql/color-functions` exports named `ArrowTableFunction` declarations for schema-bound expressions.
-Pass the declarations you use through `functions`. All configuration is supplied as arguments.
+Pass the declarations you use through `functions` on `queryArrowSQL`, `queryArrowTable`, or
+the Arrow compiler. All color configuration is supplied as function arguments.
 
 ```ts
 import {compileArrowExpression} from '@math.gl/sql/arrow';
@@ -63,4 +64,5 @@ vectors and small temporary color values; scalar fusion does not apply to tuple 
 
 Importing individual declarations allows unused functions to tree-shake. The color entry point does
 not import the expression compiler. Register declarations in a worker's local expression task to use
-identical kernels there. SQL function-valued SELECT planning remains an application responsibility.
+identical kernels there. Use `queryArrowSQL` from the package root to execute color functions
+in SELECT expressions; pass the same declarations in its `functions` option.

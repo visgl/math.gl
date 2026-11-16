@@ -1,7 +1,8 @@
 # @math.gl/sql/math-functions
 
 Optional SQL-style numeric function declarations for [Arrow expressions](../arrow/README.md).
-Import the functions you use from `@math.gl/sql/math-functions` and pass them to the Arrow compiler.
+Import the functions you use from `@math.gl/sql/math-functions` and pass them through `functions`
+to `queryArrowSQL`, `queryArrowTable`, or the Arrow compiler. See the [SQL quick start](../README.md#add-functions).
 
 ```typescript
 import {compileArrowExpression} from '@math.gl/sql/arrow';
@@ -46,4 +47,5 @@ raise `overflow`. Subnormal results and underflow to zero are allowed. Input NaN
 infinite inputs follow the mathematical operation when defined. Float16 execution requires
 native `Float16Array` support.
 
-Decimal-place rounding is deferred. The existing JavaScript scalar math library is unchanged.
+`ROUND` rounds to an integer; it does not accept a decimal-place argument. For evaluation
+against JavaScript objects, use `BASIC_MATH_FUNCTION_LIBRARY` from `@math.gl/sql/expressions`.

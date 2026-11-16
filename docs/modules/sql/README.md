@@ -43,6 +43,14 @@ console.log(result.getChild('units')?.get(0)); // 5n (Arrow Int64)
 resolves names in `FROM` and `JOIN`. Results retain Arrow types and nulls; integer sums and
 counts use Int64. Unknown tables or columns, unsupported syntax, and incompatible types throw.
 
+The optional third argument accepts:
+
+| Option | Purpose |
+| --- | --- |
+| `functions` | Typed application function declarations, registered for this query. |
+| `signal` | An `AbortSignal` checked during execution. |
+| `parseParameter` | A callback from a named SQL parameter to an expression AST; see [relational parsing](parser/README.md#relational-select). |
+
 Direct column projections can share input buffers. Filtering, sorting, joins, and computed
 columns may allocate results. See [query execution](queries.md) for structured queries,
 record-batch streaming, and progressive aggregates.
