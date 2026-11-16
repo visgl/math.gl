@@ -46,6 +46,10 @@ if (mesh.error.maxSampleError !== 0 || mesh.indices.length !== 6) throw new Erro
   }
   // Analysis APIs share the terrain root; tree-shaking is checked separately.
   for (const [entry, symbol, expression] of [
+    ['tile-cutout-update', 'updateTerrainTileCutouts', 'create([], [[0,0],[1,0],[1,1],[0,1]]).tiles.size === 0'],
+    ['geographic-cutout-frame', 'createGeographicTerrainCutoutFrame', 'create({center:[180,90]}).center[0] === -180'],
+    ['geographic-cutout-project', 'projectGeographicTerrainCutout', 'create(Float64Array.of(0,0,4), {center:[0,0],radius:6378137,maxAngularRadius:30})[2] === 4'],
+    ['geographic-cutout-unproject', 'unprojectGeographicTerrainCutout', 'create(Float64Array.of(0,0,4), {center:[0,0],radius:6378137,maxAngularRadius:30})[2] === 4'],
     ['tile-cutout', 'splitTerrainMeshTiles', 'create([], [[0,0],[1,0],[1,1],[0,1]]).sourceTiles.length === 0'],
     ['derivatives', 'createTerrainGradientGrid', 'create(field).gradients.length === 18'],
     ['slope-aspect', 'getTerrainSlopeAspect', 'create(1, 0).slope === Math.PI / 4'],

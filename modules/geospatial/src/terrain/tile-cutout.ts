@@ -35,6 +35,19 @@ export function splitTerrainMeshTiles(
   polygon: readonly (readonly [number, number])[],
   options: TerrainCutoutOptions = {}
 ): TerrainTileCutout {
+  const assembled = assembleTerrainCutoutTiles(tiles, options);
+  return {
+    ...splitTerrainMesh(assembled.mesh, polygon, {...options, maxWork: assembled.remainingWork}),
+    sourceTiles: assembled.sourceTiles,
+    sourceTileFaces: assembled.sourceTileFaces
+  };
+}
+
+/** @internal Assemble a bounded, exact-welded mesh without clipping it. */
+export function assembleTerrainCutoutTiles(
+  tiles: readonly TerrainCutoutInput[],
+  options: TerrainCutoutOptions = {}
+) {
   const maxVertices = options.maxVertices ?? 500_000;
   const maxTriangles = options.maxTriangles ?? 500_000;
   const maxWork = options.maxWork ?? 4_000_000;
@@ -100,11 +113,9 @@ export function splitTerrainMeshTiles(
     faceOffset += tile.indices.length / 3;
   }
   return {
-    ...splitTerrainMesh({positions: positions.subarray(0, vertexOffset * 3), indices}, polygon, {
-      ...options,
-      maxWork: maxWork - work
-    }),
+    mesh: {positions: positions.subarray(0, vertexOffset * 3), indices},
     sourceTiles,
-    sourceTileFaces
+    sourceTileFaces,
+    remainingWork: maxWork - work
   };
 }

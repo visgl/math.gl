@@ -2,15 +2,21 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // biome-ignore lint/correctness/noUnusedImports: Standalone examples use the classic JSX transform.
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useRef, useState} from 'react';
 import {
   createTerrainCutoutSkirts,
   createTerrainMesh,
   HeightField,
-  splitTerrainMeshTiles,
+  updateTerrainTileCutouts,
   stitchTerrainMeshEdges
 } from '@math.gl/geospatial/terrain';
 import TerrainControls from './terrain-controls';
+import {geographicCutoutScene} from './geographic-cutout-scenes';
+
+const geographicScenes = Object.fromEntries(
+  ['Antimeridian', 'North pole', 'South pole'].map(name => [name, geographicCutoutScene(name)])
+);
+const chartScale = (6378137 * Math.PI) / 180;
 
 const mesh = createTerrainMesh(
   new HeightField({
@@ -73,19 +79,24 @@ const rings = {
 };
 
 /** Project a local Cartesian vertex into the lab's oblique view. */
-function project(positions, index) {
-  const [x, y, z] = positions.subarray(index * 3, index * 3 + 3);
+function project(positions, index, geographic) {
+  let [x, y, z] = positions.subarray(index * 3, index * 3 + 3);
+  if (geographic) {
+    x = 4 + x / chartScale;
+    y = 4 + y / chartScale;
+    z = 1 + z / 1000;
+  }
   return [260 + 27 * (x - y), 120 + 13 * (x + y) - 32 * z, 32 * (x + y) + 26 * z];
 }
 
 /** Draw projected triangles in depth order, culling back-facing walls. */
-function faces(piece, showWall, patch) {
+function faces(piece, showWall, patch, geographic) {
   const mesh = showWall && piece.skirt ? piece.skirt : piece.surface;
   const topTriangles = piece.surface.indices.length / 3;
   const result = [];
   for (let i = 0; i < mesh.indices.length; i += 3) {
     const [a, b, c] = Array.from(mesh.indices.subarray(i, i + 3), id =>
-      project(mesh.positions, id)
+      project(mesh.positions, id, geographic)
     );
     const wall = i / 3 >= topTriangles;
     const facing = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
@@ -102,6 +113,9 @@ function faces(piece, showWall, patch) {
 
 /** Inspect the shared terrain cut and the two differently oriented walls. */
 export default function CutoutLab({controlsRoot}) {
+  const [scenario, setScenario] = useState('Local');
+  const cache = useRef();
+  const geographic = scenario !== 'Local';
   const [resolution, setResolution] = useState('Same level');
   const [residency, setResidency] = useState('Both tiles');
   const [shape, setShape] = useState('Rectangle');
@@ -110,26 +124,63 @@ export default function CutoutLab({controlsRoot}) {
   const [remainderWall, setRemainderWall] = useState(true);
   const [edges, setEdges] = useState(true);
   const cut = useMemo(() => {
-    const resident = resolution === 'Same level' ? tiles : mixedTiles;
-    return splitTerrainMeshTiles(
-      residency === 'Both tiles' ? resident : [resident[residency === 'Left tile' ? 0 : 1]],
-      rings[shape]
-    );
-  }, [shape, residency, resolution]);
+    const resident = geographic
+      ? geographicScenes[scenario].meshes
+      : resolution === 'Same level'
+        ? tiles
+        : mixedTiles;
+    const selected = resident
+      .map((mesh, i) => ({id: String(i), revision: 0, mesh}))
+      .filter((_, i) => residency === 'Both tiles' || i === (residency === 'Left tile' ? 0 : 1));
+    const polygon = geographic
+      ? rings[shape].map(([x, y]) => [(x - 4) * chartScale * 0.65, (y - 4) * chartScale * 0.65])
+      : rings[shape];
+    const result = updateTerrainTileCutouts(selected, polygon, cache.current);
+    cache.current = result.cache;
+    return result;
+  }, [shape, residency, resolution, scenario, geographic]);
   const pieces = useMemo(
-    () => createTerrainCutoutSkirts(cut, {lift, patch: {baseZ: -1}, remainder: {baseZ: -1}}),
-    [cut, lift]
+    () =>
+      [...cut.tiles.values()].map(tile =>
+        createTerrainCutoutSkirts(tile, {
+          lift: lift * (geographic ? 1000 : 1),
+          patch: {baseZ: geographic ? -3000 : -1},
+          remainder: {baseZ: geographic ? -3000 : -1}
+        })
+      ),
+    [cut, lift, geographic]
   );
-  const triangles = [
-    ...faces(pieces.patch, lift !== 0 && patchWall, true),
-    ...faces(pieces.remainder, lift !== 0 && remainderWall, false)
-  ].sort((a, b) => a.depth - b.depth);
+  const triangles = pieces
+    .flatMap((piece, tile) =>
+      [
+        ...faces(piece.patch, lift !== 0 && patchWall, true, geographic),
+        ...faces(piece.remainder, lift !== 0 && remainderWall, false, geographic)
+      ].map(face => ({...face, key: tile + ':' + face.key}))
+    )
+    .sort((a, b) => a.depth - b.depth);
+  const surfaces = pieces.flatMap(piece => [piece.remainder.surface, piece.patch.surface]);
+  const edgeCount = [...cut.tiles.values()].reduce(
+    (sum, tile) => sum + tile.patch.cutEdges.length / 2,
+    0
+  );
   return (
     <>
       <TerrainControls target={controlsRoot}>
         <label>
+          Cutout region
+          <select value={scenario} onChange={event => setScenario(event.target.value)}>
+            {['Local', ...Object.keys(geographicScenes)].map(name => (
+              <option key={name}>{name}</option>
+            ))}
+          </select>
+        </label>
+        <label>
           Seam resolution
-          <select value={resolution} onChange={event => setResolution(event.target.value)}>
+          <select
+            disabled={geographic}
+            value={resolution}
+            onChange={event => setResolution(event.target.value)}
+          >
             {['Same level', 'Mixed 2:1'].map(name => (
               <option key={name}>{name}</option>
             ))}
@@ -203,10 +254,10 @@ export default function CutoutLab({controlsRoot}) {
           />
         ))}
         {edges &&
-          [pieces.remainder.surface, pieces.patch.surface].map((piece, side) =>
+          surfaces.map((piece, side) =>
             Array.from({length: piece.cutEdges.length / 2}, (_, i) => {
-              const [x1, y1] = project(piece.positions, piece.cutEdges[i * 2]);
-              const [x2, y2] = project(piece.positions, piece.cutEdges[i * 2 + 1]);
+              const [x1, y1] = project(piece.positions, piece.cutEdges[i * 2], geographic);
+              const [x2, y2] = project(piece.positions, piece.cutEdges[i * 2 + 1], geographic);
               return (
                 <line
                   key={side + ':' + i}
@@ -214,7 +265,7 @@ export default function CutoutLab({controlsRoot}) {
                   y1={y1}
                   x2={x2}
                   y2={y2}
-                  stroke={side ? '#ffe2a8' : '#d3f4e6'}
+                  stroke={side % 2 ? '#ffe2a8' : '#d3f4e6'}
                   strokeWidth="1.4"
                 />
               );
@@ -222,10 +273,15 @@ export default function CutoutLab({controlsRoot}) {
           )}
       </svg>
       <p>
-        {cut.patch.cutEdges.length / 2} paired cut edges · {residency} · lift {lift.toFixed(1)} m
-        {resolution === 'Mixed 2:1' && (
+        {edgeCount} paired cut edges · {residency} · lift{' '}
+        {(lift * (geographic ? 1000 : 1)).toFixed(1)} m
+        {!geographic && resolution === 'Mixed 2:1' && (
           <> · reconciled seam adjustment {stitched.maxHeightAdjustment.toFixed(3)} m</>
         )}
+      </p>
+      <p data-testid="cutout-cache-status">
+        {cut.rebuilt.length} tiles rebuilt · {cut.changed.length} outputs changed · {scenario}
+        {geographic && ' · spherical chart, height preserved; display vertically exaggerated'}
       </p>
     </>
   );

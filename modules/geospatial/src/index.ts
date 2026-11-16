@@ -506,3 +506,18 @@ export {
   type TerrainCutoutTile,
   type TerrainTileCutout
 } from './terrain/tile-cutout';
+
+export {
+  updateTerrainTileCutouts,
+  type TerrainCutoutResident,
+  type TerrainTileCutoutUpdateOptions,
+  type TerrainTileCutoutCache,
+  type TerrainTileCutoutUpdate
+} from './terrain/tile-cutout-update';
+export {
+  createGeographicTerrainCutoutFrame,
+  projectGeographicTerrainCutout,
+  unprojectGeographicTerrainCutout,
+  type GeographicTerrainCutoutFrame,
+  type GeographicTerrainCutoutFrameOptions
+} from './terrain/geographic-cutout';
