@@ -283,3 +283,9 @@ export {
   type TerrainDepressionFill,
   type TerrainDepressionFillOptions
 } from './depression-fill';
+
+export {
+  accumulateTerrainWatersheds,
+  type TerrainWatershedAccumulation,
+  type TerrainWatershedAccumulationOptions
+} from './watershed-accumulation';
