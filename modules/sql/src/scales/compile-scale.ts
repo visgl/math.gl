@@ -7,19 +7,19 @@ import {
   type ResolvedScale,
   type ResolvedScaleDescriptor,
   type ScaleColor,
+  type ScaleColorEncoding,
   type ScaleSpec,
   type ScaleValue
 } from './scale-types';
 import {resolvePalette} from './palettes';
+import {convertScaleColor, decodeSRGB, encodeSRGB} from './hdr-colors';
+
+/** Encoding of the built-in palette stops and the sRGB interpolation helpers. */
+const SRGB: ScaleColorEncoding = {primaries: 'srgb', transfer: 'srgb', format: 'rgba32float'};
 
 const clamp01 = (value: number): number => Math.min(1, Math.max(0, value));
-const srgbToLinear = (v: number): number =>
-  v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-const linearToSrgb = (v: number): number =>
-  v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055;
-
 function toOklab(color: ScaleColor): [number, number, number] {
-  const [r, g, b] = color.slice(0, 3).map(srgbToLinear);
+  const [r, g, b] = color.slice(0, 3).map(decodeSRGB);
   const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
   const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
   const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
@@ -34,9 +34,9 @@ function fromOklab([L, a, b]: number[]): [number, number, number] {
   const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
   const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
   return [
-    linearToSrgb(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
-    linearToSrgb(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
-    linearToSrgb(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s)
+    encodeSRGB(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+    encodeSRGB(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+    encodeSRGB(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s)
   ];
 }
 function interpolateColor(
@@ -58,9 +58,9 @@ function interpolateColor(
   }
   if (space === 'linear-srgb') {
     return [
-      linearToSrgb(mix(srgbToLinear(a[0]), srgbToLinear(b[0]))),
-      linearToSrgb(mix(srgbToLinear(a[1]), srgbToLinear(b[1]))),
-      linearToSrgb(mix(srgbToLinear(a[2]), srgbToLinear(b[2]))),
+      encodeSRGB(mix(decodeSRGB(a[0]), decodeSRGB(b[0]))),
+      encodeSRGB(mix(decodeSRGB(a[1]), decodeSRGB(b[1]))),
+      encodeSRGB(mix(decodeSRGB(a[2]), decodeSRGB(b[2]))),
       alpha
     ];
   }
@@ -124,11 +124,21 @@ export function compileResolvedScale(
       (_, i) => i === 0 || i === original.length || original[i - 1] !== original[i]
     );
   }
-  if (spec.type === 'ordinal' && domain.length > (palette?.length ?? 0)) {
+  const encoding = spec.encoding ?? SRGB;
+  const paletteStops =
+    palette && spec.range.type === 'palette' && spec.encoding
+      ? palette.map(color => convertScaleColor(color, SRGB, encoding))
+      : palette;
+  const space = spec.interpolation ?? 'srgb';
+  const workingStops =
+    paletteStops && (space === 'linear-srgb' || space === 'oklab')
+      ? paletteStops.map(color => convertScaleColor(color, encoding, SRGB))
+      : paletteStops;
+  if (spec.type === 'ordinal' && domain.length > (paletteStops?.length ?? 0)) {
     throw new Error('Ordinal palette must have at least one color per category');
   }
   const resolvedRange: ResolvedScaleDescriptor['range'] =
-    spec.range.type === 'numeric' ? spec.range : {type: 'colors', values: palette!};
+    spec.range.type === 'numeric' ? spec.range : {type: 'colors', values: paletteStops!};
   const descriptor: ResolvedScaleDescriptor = {
     ...spec,
     domain: [...domain],
@@ -151,7 +161,7 @@ export function compileResolvedScale(
     if (value === null) return spec.nullColor ?? null;
     if (isOrdinal) {
       const index = values.indexOf(value);
-      return index === -1 ? (spec.nullColor ?? null) : palette![index]!;
+      return index === -1 ? (spec.nullColor ?? null) : paletteStops![index]!;
     }
     if (typeof value !== 'number' || !Number.isFinite(value)) return spec.nullColor ?? null;
     const min = numerical[0]!,
@@ -162,12 +172,12 @@ export function compileResolvedScale(
     if (spec.type === 'quantile' || spec.type === 'quantize' || spec.type === 'threshold') {
       const index = breaks.findIndex(boundary => value < boundary);
       const colorIndex = index < 0 ? breaks.length : index;
-      return palette![Math.min(colorIndex, palette!.length - 1)]!;
+      return paletteStops![Math.min(colorIndex, paletteStops!.length - 1)]!;
     }
 
     // Piecewise ranges use the resolved domain values as positioned stops.
     const stopCount = colorType
-      ? palette!.length
+      ? paletteStops!.length
       : (resolvedRange as {values: readonly number[]}).values.length;
     if (numerical.length !== 2 && numerical.length !== stopCount) {
       throw new Error('Piecewise domain and range stops must have equal lengths');
@@ -191,13 +201,15 @@ export function compileResolvedScale(
       if (spec.clamp ?? colorType) t = clamp01(t);
     }
     if (!Number.isFinite(t)) return spec.nullColor ?? null;
-    if (colorType)
-      return interpolateColor(
-        palette![segment]!,
-        palette![segment + 1]!,
+    if (colorType) {
+      const color = interpolateColor(
+        workingStops![segment]!,
+        workingStops![segment + 1]!,
         t,
-        spec.interpolation ?? 'srgb'
+        space
       );
+      return workingStops === paletteStops ? color : convertScaleColor(color, SRGB, encoding);
+    }
     const numbers = (resolvedRange as {values: readonly number[]}).values;
     return numbers[segment]! + (numbers[segment + 1]! - numbers[segment]!) * t;
   };
