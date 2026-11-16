@@ -84,6 +84,8 @@ type ColumnState = {
 export type StreamingDomainOptions = {
   /** Maximum retained weighted samples per referenced percentile column. */
   quantileCapacity?: number;
+  /** Also keep quantile sketches for these columns, e.g. SCALE_QUANTILE inputs. */
+  quantileColumns?: readonly string[];
 };
 
 /**
@@ -99,11 +101,12 @@ export function createStreamingDomainAccumulator(
   quantileBreaks(column: string, classes: number): readonly number[];
 } {
   const columns = new Map<string, ColumnState>();
+  const quantileColumns = new Set(options.quantileColumns ?? []);
   for (const domain of domains) {
     if (domain.type === 'fixed') continue;
     const previous = columns.get(domain.column);
     if (previous) {
-      if (domain.type === 'percentile' && !previous.sketch) {
+      if ((domain.type === 'percentile' || quantileColumns.has(domain.column)) && !previous.sketch) {
         previous.sketch = new ScaleQuantileSketch(options.quantileCapacity);
       }
       continue;
@@ -111,8 +114,15 @@ export function createStreamingDomainAccumulator(
     columns.set(domain.column, {
       min: Infinity, max: -Infinity, seen: 0,
       categories: new Set(),
-      ...(domain.type === 'percentile'
+      ...(domain.type === 'percentile' || quantileColumns.has(domain.column)
         ? {sketch: new ScaleQuantileSketch(options.quantileCapacity)} : {})
+    });
+  }
+
+  for (const name of quantileColumns) {
+    if (!columns.has(name)) columns.set(name, {
+      min: Infinity, max: -Infinity, seen: 0,
+      categories: new Set(), sketch: new ScaleQuantileSketch(options.quantileCapacity)
     });
   }
 
