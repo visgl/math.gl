@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {tableFromArrays, Schema, Field, Struct, Int32} from 'apache-arrow';
+import {tableFromArrays, tableFromIPC, Schema, Field, Struct, Int32} from 'apache-arrow';
+import {tableFromArrays as fromOtherArrow, tableToIPC} from 'apache-arrow-current';
 import {SQLCatalog, type SQLTableDefinition} from '@math.gl/sql';
 
 const trips = tableFromArrays({
@@ -216,4 +217,29 @@ test('nested Arrow types survive metadata inspection and notifications unsubscri
   catalog.removeTable('nested');
   expect(listener).toHaveBeenCalledTimes(3);
   expect(catalog.listSchemas()).toEqual(['data', 'custom', 'empty']);
+});
+
+test('loader adapters normalize foreign Arrow runtimes explicitly', async () => {
+  const externalTable = fromOtherArrow({id: new Int32Array([7])});
+  expect(() => new SQLCatalog({tables: {foreign: externalTable}})).toThrow('different runtime');
+  const catalog = new SQLCatalog({
+    tables: {
+      foreign: {read: async () => externalTable},
+      adapted: {read: async () => tableFromIPC(tableToIPC(externalTable))}
+    }
+  });
+  await expect(catalog.queryAsync('SELECT id FROM foreign')).rejects.toThrow('different runtime');
+  expect(rows(await catalog.queryAsync('SELECT id FROM adapted'))).toEqual([{id: 7}]);
+});
+
+test('discovery accepts leading, interstitial and trailing line comments without rewriting names', async () => {
+  const catalog = new SQLCatalog({tables: {'with--dash': trips}});
+  expect(rows(catalog.query('-- list\nSHOW -- namespace\nSCHEMAS -- end'))).toEqual([
+    {schema_name: 'data'}
+  ]);
+  expect(rows(await catalog.queryAsync('-- list\nSHOW TABLES -- in\nFROM data; -- done'))).toEqual([
+    {schema_name: 'data', table_name: 'with--dash'}
+  ]);
+  expect(catalog.query('-- types\nDESCRIBE data. -- table\n"with--dash"; -- done').numRows).toBe(2);
+  expect(catalog.query('-- rows\nSELECT * FROM "with--dash"').numRows).toBe(2);
 });

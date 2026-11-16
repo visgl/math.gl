@@ -100,6 +100,12 @@ in the integration. math.gl does not import loaders.gl, deck.gl or DuckDB. A loa
 can expose `read: ({signal}) => loadAsArrow(url, {signal})`; a renderer can supply the Arrow
 table it already holds. Both can include `arrowSchema` and `description` for panels.
 
+Use the same Apache Arrow runtime as math.gl. A table from a separate Arrow package instance
+is rejected with an adapter hint: serialize using the **producer's** `tableToIPC()` and
+read using the catalog runtime's `tableFromIPC()`. This explicit conversion copies data;
+sharing one Arrow runtime avoids it. Do not pass foreign batches directly to local Arrow
+constructors, which can reject or misinterpret them.
+
 For a DuckDB connection, wrap the application's existing Arrow-producing operation:
 
 ```ts

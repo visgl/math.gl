@@ -8,8 +8,11 @@ import {SQLQueryReader} from './parse-sql-select';
 
 /** A named input with an optional alias in a relational SELECT. */
 export type SQLTableBinding = Readonly<{
+  /** Literal table identifier. */
   name: string;
+  /** Optional SQL namespace; omission uses the executor default. Dots in name remain literal. */
   schema?: string;
+  /** Optional local qualifier for column references. */
   alias?: string;
 }>;
 
@@ -48,7 +51,7 @@ export type SQLSelectStatementOptions = Readonly<{
   parseParameter?: (name: string) => Expression;
 }>;
 
-/** Parses a SELECT with a required FROM, without assuming an execution engine. */
+/** Parses relational SELECT; FROM is required unless defaultFrom is explicitly supplied. */
 export function parseSQLSelectStatement(
   sql: string,
   options: SQLSelectStatementOptions = {}
@@ -204,7 +207,7 @@ class RelationalQueryReader extends SQLQueryReader {
   }
 
   protected override skipWhitespace(): void {
-    this.position = skipLineComments(this.sql, this.position);
+    this.position = skipSQLLineComments(this.sql, this.position);
   }
 }
 
@@ -218,7 +221,7 @@ class RelationalExpressionReader extends SQLExpressionReader {
   }
 
   override space(): void {
-    this.position = skipLineComments(this.source, this.position);
+    this.position = skipSQLLineComments(this.source, this.position);
     super.space();
   }
 
@@ -248,7 +251,8 @@ class RelationalExpressionReader extends SQLExpressionReader {
   }
 }
 
-function skipLineComments(source: string, position: number): number {
+/** Skips whitespace and SQL line comments without changing offsets or quoted identifiers. */
+export function skipSQLLineComments(source: string, position: number): number {
   while (position < source.length) {
     if (/\s/.test(source[position]!)) position++;
     else if (source.startsWith('--', position)) {

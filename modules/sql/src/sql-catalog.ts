@@ -3,9 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Table, Schema, Utf8, Bool, vectorFromArray, tableFromArrays} from 'apache-arrow';
-import {validateArrowTableSchema} from '@math.gl/arrow';
+import {isArrowTable, validateArrowTableSchema} from '@math.gl/arrow';
 import {
   parseSQLSelectCompound,
+  skipSQLLineComments,
   type SQLSelectCompound,
   type SQLTableBinding
 } from './sql/parse-sql-statement';
@@ -23,7 +24,7 @@ export interface SQLTableSource {
   getSchema?(options: {signal?: AbortSignal}): Promise<Schema>;
 }
 
-/** Experimental portable registration supplied by applications, loaders.gl or deck.gl adapters. */
+/** Experimental framework-independent registration supplied by applications, loaders.gl or deck.gl adapters. */
 export interface SQLTableDefinition {
   /** Literal table name; dots are not namespace separators. */
   name: string;
@@ -128,6 +129,7 @@ export class SQLCatalog {
       name: validName(definition.name),
       schema: validName(definition.schema ?? this.defaultSchema)
     });
+    rejectForeignTable(entry.source);
     if (!(entry.source instanceof Table) && typeof entry.source?.read !== 'function')
       throw new Error('SQL table source requires an Arrow Table or read()');
     const key = this.key(entry);
@@ -239,6 +241,7 @@ export class SQLCatalog {
         const table =
           source instanceof Table ? source : await source.read({signal: options.signal});
         options.signal?.throwIfAborted();
+        rejectForeignTable(table);
         if (!(table instanceof Table)) throw new Error('read() must return an Arrow Table');
         if (expected) validate(table, expected, entry);
         tables.set(key, table);
@@ -416,7 +419,7 @@ function describeResult(info: SQLTableInfo): Table {
 
 /** Reads bounded discovery syntax with the same quoted identifier rules as SELECT. */
 function parseDiscovery(sql: string, defaultSchema: string): Discovery | undefined {
-  const reader = new SQLQueryReader(sql);
+  const reader = new CatalogQueryReader(sql);
   if (reader.takeKeyword('SHOW')) {
     if (reader.takeKeyword('SCHEMAS')) {
       reader.end();
@@ -448,4 +451,27 @@ function rejectConstantColumns(input: SQLSelectCompound['inputs'][number]): void
   visit(input.select);
   visit(input.where);
   visit(input.groupBy);
+}
+
+/** Rejects incompatible runtime instances before Arrow constructors can misinterpret their batches. */
+function rejectForeignTable(value: unknown): void {
+  if (isArrowTable(value) && !(value instanceof Table)) {
+    throw new Error(
+      "Arrow Table belongs to a different runtime; use the producer's tableToIPC() and this runtime's tableFromIPC() in the source adapter"
+    );
+  }
+}
+
+/** Uses the relational parser's line-comment rules for catalog discovery commands. */
+class CatalogQueryReader extends SQLQueryReader {
+  /** Skips comments before handing a literal name to the shared identifier reader. */
+  override identifier(): string {
+    this.skipWhitespace();
+    return super.identifier();
+  }
+
+  /** Advances whitespace/comments without rewriting the SQL or its diagnostic positions. */
+  protected override skipWhitespace(): void {
+    this.position = skipSQLLineComments(this.sql, this.position);
+  }
 }

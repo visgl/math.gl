@@ -104,6 +104,12 @@ is a call with a wildcard identifier argument marked `sqlWildcard: true`. The ca
 join conditions and aggregate functions and binds parameters. Use
 `parseParameter` to supply an expression node for each named parameter.
 
+Relational table bindings retain an optional `schema` separately from `name`. For example,
+`FROM data.trips` produces `{schema: 'data', name: 'trips'}`, while `FROM "data.trips"`
+produces `{name: 'data.trips'}`. The experimental `defaultFrom` option supplies a binding
+for omitted FROM; without it, FROM remains required. `SQLCatalog` supplies this option
+from its primary-table setting.
+
 ## Expressions
 
 `parseSQLExpression()` returns the shared expression AST. Computed selections use
