@@ -7,7 +7,14 @@ import {SQLExpressionReader, SQL_RESERVED_WORDS} from './parse-sql-expression';
 import {SQLQueryReader} from './parse-sql-select';
 
 /** A named input with an optional alias in a relational SELECT. */
-export type SQLTableBinding = Readonly<{name: string; alias?: string}>;
+export type SQLTableBinding = Readonly<{
+  /** Literal table identifier. */
+  name: string;
+  /** Optional SQL namespace; omission uses the executor default. Dots in name remain literal. */
+  schema?: string;
+  /** Optional local qualifier for column references. */
+  alias?: string;
+}>;
 
 /** A join whose condition is interpreted by the query planner. */
 export type SQLJoin = Readonly<{
@@ -38,11 +45,13 @@ export type SQLSelectStatement = Readonly<{
 
 /** Options for interpreting named parameters in a relational SELECT. */
 export type SQLSelectStatementOptions = Readonly<{
+  /** Experimental fallback for SELECT without FROM; catalog callers supply this binding. */
+  defaultFrom?: SQLTableBinding;
   /** Supplies the AST for a named parameter such as :minimum. */
   parseParameter?: (name: string) => Expression;
 }>;
 
-/** Parses a SELECT with a required FROM, without assuming an execution engine. */
+/** Parses relational SELECT; FROM is required unless defaultFrom is explicitly supplied. */
 export function parseSQLSelectStatement(
   sql: string,
   options: SQLSelectStatementOptions = {}
@@ -86,8 +95,7 @@ function readSelect(reader: RelationalQueryReader): SQLSelectStatement {
         const alias = reader.takeKeyword('AS') ? reader.identifier() : undefined;
         return {expression, ...(alias === undefined ? {} : {alias})};
       });
-  reader.expectKeyword('FROM');
-  const from = readTable(reader);
+  const from = reader.takeKeyword('FROM') ? readTable(reader) : reader.defaultFrom();
   const joins: SQLJoin[] = [];
   for (let type = readJoinType(reader); type; type = readJoinType(reader)) {
     const table = readTable(reader);
@@ -117,9 +125,15 @@ function readBy<T>(reader: RelationalQueryReader, clause: string, read: () => T)
 }
 
 function readTable(reader: RelationalQueryReader): SQLTableBinding {
-  const name = reader.tableName();
+  const first = reader.tableName();
+  const qualified = reader.takeSymbol('.');
+  const name = qualified ? reader.tableName() : first;
   const alias = reader.takeKeyword('AS') ? reader.identifier() : reader.optionalAlias();
-  return {name, ...(alias === undefined ? {} : {alias})};
+  return {
+    name,
+    ...(qualified ? {schema: first} : {}),
+    ...(alias === undefined ? {} : {alias})
+  };
 }
 
 function readJoinType(reader: SQLQueryReader): SQLJoin['type'] | undefined {
@@ -160,6 +174,12 @@ class RelationalQueryReader extends SQLQueryReader {
     super(sql);
   }
 
+  /** Resolves an explicitly enabled implicit input. */
+  defaultFrom(): SQLTableBinding {
+    if (!this.options.defaultFrom) throw this.error('SQL query expected FROM.');
+    return this.options.defaultFrom;
+  }
+
   tableName(): string {
     this.skipWhitespace();
     if (/^LATERAL(?![A-Za-z0-9_])/i.test(this.sql.slice(this.position))) {
@@ -187,7 +207,7 @@ class RelationalQueryReader extends SQLQueryReader {
   }
 
   protected override skipWhitespace(): void {
-    this.position = skipLineComments(this.sql, this.position);
+    this.position = skipSQLLineComments(this.sql, this.position);
   }
 }
 
@@ -201,7 +221,7 @@ class RelationalExpressionReader extends SQLExpressionReader {
   }
 
   override space(): void {
-    this.position = skipLineComments(this.source, this.position);
+    this.position = skipSQLLineComments(this.source, this.position);
     super.space();
   }
 
@@ -231,7 +251,8 @@ class RelationalExpressionReader extends SQLExpressionReader {
   }
 }
 
-function skipLineComments(source: string, position: number): number {
+/** Skips whitespace and SQL line comments without changing offsets or quoted identifiers. */
+export function skipSQLLineComments(source: string, position: number): number {
   while (position < source.length) {
     if (/\s/.test(source[position]!)) position++;
     else if (source.startsWith('--', position)) {

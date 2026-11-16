@@ -92,3 +92,35 @@ const tableQuery: ArrowTableQuery = {select: ['quantity'], limit: 2};
 queryArrowTable(orders, tableQuery);
 const streamingQuery: ArrowStreamingQuery = {...tableQuery, emitEmptyBatches: true};
 queryArrowTableInBatches(orders.batches, orders.schema, streamingQuery);
+
+// Experimental catalog definitions are shared by loader and renderer integrations.
+import {
+  SQLCatalog,
+  type SQLTableDefinition,
+  type SQLTableInfo,
+  type SQLTableSource
+} from '@math.gl/sql';
+import type {Table, Schema} from 'apache-arrow';
+
+const arrowTable = tableFromArrays({id: new Int32Array([1])});
+const lazySource: SQLTableSource = {
+  async read({signal}): Promise<Table> {
+    signal?.throwIfAborted();
+    return arrowTable;
+  },
+  async getSchema(): Promise<Schema> {
+    return arrowTable.schema;
+  }
+};
+const tableDefinitions: SQLTableDefinition[] = [
+  {name: 'resident', source: arrowTable, arrowSchema: arrowTable.schema},
+  {schema: 'remote', name: 'lazy', source: lazySource}
+];
+const catalog = new SQLCatalog({tables: tableDefinitions, primaryTable: 'resident'});
+const tableInfo: SQLTableInfo = catalog.describeTable({schema: 'remote', name: 'lazy'});
+const queryResult: Table = catalog.query('SELECT *');
+const asyncQueryResult: Promise<Table> = catalog.queryAsync('SELECT * FROM remote.lazy');
+void [tableInfo, queryResult, asyncQueryResult];
+// @ts-expect-error Materializers must return native Arrow tables.
+const invalidSource: SQLTableSource = {read: async () => [{id: 1}]};
+void invalidSource;
