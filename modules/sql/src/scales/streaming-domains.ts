@@ -5,79 +5,13 @@
 import type {RecordBatch} from 'apache-arrow';
 import type {ScaleDomain, ScaleValue} from './scale-types';
 
-/**
- * Deterministic, bounded-memory weighted compactor for approximate quantiles.
- * Compaction preserves total weight and varies the retained parity to avoid
- * persistent low/high bias. This is a practical sketch, not an exact error-bounded GK estimate.
- */
-export class ScaleQuantileSketch {
-  readonly capacity: number;
-  private samples: {value: number; weight: number}[] = [];
-  private parity = 0;
-  private count = 0;
-
-  constructor(capacity = 256) {
-    if (!Number.isSafeInteger(capacity) || capacity < 16 || capacity > 65536) {
-      throw new Error('Quantile sketch capacity must be an integer between 16 and 65536');
-    }
-    this.capacity = capacity;
-  }
-
-  get length(): number { return this.count; }
-  get storedSamples(): number { return this.samples.length; }
-
-  add(value: number): void {
-    if (!Number.isFinite(value)) throw new Error('Quantile sketch requires finite values');
-    this.samples.push({value, weight: 1});
-    this.count++;
-    if (this.samples.length >= this.capacity * 2) this.compact();
-  }
-
-  merge(other: ScaleQuantileSketch): void {
-    if (other === this) throw new Error('Cannot merge a quantile sketch with itself');
-    for (const item of other.samples) this.samples.push({...item});
-    this.count += other.count;
-    while (this.samples.length > this.capacity) this.compact();
-  }
-
-  quantile(probability: number): number | null {
-    if (!Number.isFinite(probability) || probability < 0 || probability > 1) {
-      throw new Error('Quantile probability must be in [0, 1]');
-    }
-    if (!this.count) return null;
-    const sorted = [...this.samples].sort((a, b) => a.value - b.value);
-    if (probability === 0) return sorted[0]!.value;
-    if (probability === 1) return sorted[sorted.length - 1]!.value;
-    const target = probability * (this.count - 1);
-    let rank = 0;
-    for (const sample of sorted) {
-      if (target < rank + sample.weight) return sample.value;
-      rank += sample.weight;
-    }
-    return sorted[sorted.length - 1]!.value;
-  }
-
-  private compact(): void {
-    this.samples.sort((a, b) => a.value - b.value);
-    const next: {value: number; weight: number}[] = [];
-    for (let i = 0; i < this.samples.length; i += 2) {
-      const first = this.samples[i]!;
-      const second = this.samples[i + 1];
-      if (!second) { next.push(first); continue; }
-      next.push({
-        value: this.parity++ % 2 ? first.value : second.value,
-        weight: first.weight + second.weight
-      });
-    }
-    this.samples = next;
-  }
-}
+import {ScaleQuantileSketch} from './quantile-sketch';
 
 type ColumnState = {
   min: number;
   max: number;
   seen: number;
-  categories: Set<string>;
+  categories?: Set<ScaleValue>;
   sketch?: ScaleQuantileSketch;
 };
 
@@ -106,24 +40,34 @@ export function createStreamingDomainAccumulator(
     if (domain.type === 'fixed') continue;
     const previous = columns.get(domain.column);
     if (previous) {
-      if ((domain.type === 'percentile' || quantileColumns.has(domain.column)) && !previous.sketch) {
+      if (
+        (domain.type === 'percentile' || quantileColumns.has(domain.column)) &&
+        !previous.sketch
+      ) {
         previous.sketch = new ScaleQuantileSketch(options.quantileCapacity);
       }
+      if (domain.type === 'categories') previous.categories ??= new Set();
       continue;
     }
     columns.set(domain.column, {
-      min: Infinity, max: -Infinity, seen: 0,
-      categories: new Set(),
+      min: Infinity,
+      max: -Infinity,
+      seen: 0,
+      ...(domain.type === 'categories' ? {categories: new Set<ScaleValue>()} : {}),
       ...(domain.type === 'percentile' || quantileColumns.has(domain.column)
-        ? {sketch: new ScaleQuantileSketch(options.quantileCapacity)} : {})
+        ? {sketch: new ScaleQuantileSketch(options.quantileCapacity)}
+        : {})
     });
   }
 
   for (const name of quantileColumns) {
-    if (!columns.has(name)) columns.set(name, {
-      min: Infinity, max: -Infinity, seen: 0,
-      categories: new Set(), sketch: new ScaleQuantileSketch(options.quantileCapacity)
-    });
+    if (!columns.has(name))
+      columns.set(name, {
+        min: Infinity,
+        max: -Infinity,
+        seen: 0,
+        sketch: new ScaleQuantileSketch(options.quantileCapacity)
+      });
   }
 
   return {
@@ -135,8 +79,9 @@ export function createStreamingDomainAccumulator(
           const value = vector.get(row);
           if (value === null || value === undefined) continue;
           if (typeof value === 'string') {
-            state.categories.add(value);
+            state.categories?.add(value);
           } else if (typeof value === 'number' && Number.isFinite(value)) {
+            state.categories?.add(value);
             state.seen++;
             state.min = Math.min(state.min, value);
             state.max = Math.max(state.max, value);
@@ -152,8 +97,12 @@ export function createStreamingDomainAccumulator(
         if (domain.type === 'fixed') return [...domain.values];
         const state = columns.get(domain.column)!;
         if (domain.type === 'categories') {
-          const labels = [...state.categories];
-          return domain.order === 'first-seen' ? labels : labels.sort();
+          const labels = [...state.categories!];
+          return domain.order === 'first-seen'
+            ? labels
+            : labels.sort((a, b) =>
+                typeof a === 'number' && typeof b === 'number' ? a - b : a < b ? -1 : a > b ? 1 : 0
+              );
         }
         if (!state.seen) return [];
         if (domain.type === 'percentile') {
@@ -161,7 +110,8 @@ export function createStreamingDomainAccumulator(
         }
         if (domain.type === 'symmetric') {
           const radius = Math.max(
-            Math.abs(state.min - domain.pivot), Math.abs(state.max - domain.pivot)
+            Math.abs(state.min - domain.pivot),
+            Math.abs(state.max - domain.pivot)
           );
           return [domain.pivot - radius, domain.pivot + radius];
         }
@@ -176,8 +126,7 @@ export function createStreamingDomainAccumulator(
       const sketch = columns.get(column)?.sketch;
       if (!sketch) throw new Error(`Column ${column} has no quantile sketch`);
       if (!sketch.length) return [];
-      return Array.from({length: classes - 1}, (_, i) =>
-        sketch.quantile((i + 1) / classes)!);
+      return Array.from({length: classes - 1}, (_, i) => sketch.quantile((i + 1) / classes)!);
     }
   };
 }

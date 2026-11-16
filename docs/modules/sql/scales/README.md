@@ -74,3 +74,10 @@ format. The sampler and legend use the same resolved domain and color stops.
 Quantile scales collapse tied class breaks and omit the corresponding empty
 classes from the resolved colors. Arrow Int64 and Uint64 values are accepted
 within JavaScript's safe integer range.
+## Resolve domains from a stream
+
+Create a streaming domain accumulator from `@math.gl/sql/arrow-scales` and call
+`update(batch)` for every Arrow record batch. Call `result()` to read the latest
+resolved domains in request order. Extents track exact bounds. Percentiles and
+quantile breaks use a bounded approximate sketch, and categorical domains
+retain each distinct value in memory.
