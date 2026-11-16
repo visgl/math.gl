@@ -112,6 +112,12 @@ export function compileResolvedScale(
   const numerical = isOrdinal ? [] : numericValues(domain);
   if (!isOrdinal && numerical.length < 2) throw new Error('Numeric domain requires two endpoints');
   const breaks = thresholds ?? [];
+  if (['quantile', 'quantize', 'threshold'].includes(spec.type) && !thresholds) {
+    throw new Error(`${spec.type} scale requires resolved class breaks`);
+  }
+  if (breaks.length && breaks.length + 1 !== (palette?.length ?? 0)) {
+    throw new Error('Scale class count must match palette color count');
+  }
   const sample = (value: ScaleValue | null): number | ScaleColor | null => {
     if (value === null) return spec.nullColor ?? null;
     if (isOrdinal) {
@@ -149,7 +155,7 @@ export function compileResolvedScale(
     }
     if (!Number.isFinite(t)) return spec.nullColor ?? null;
     if (colorType) return interpolateColor(palette![segment]!, palette![segment + 1]!, t,
-      spec.interpolation ?? (spec.encoding?.transfer === 'linear' ? 'srgb' : 'srgb'));
+      spec.interpolation ?? 'srgb');
     const numbers = (resolvedRange as {values: readonly number[]}).values;
     return numbers[segment]! + (numbers[segment + 1]! - numbers[segment]!) * t;
   };
