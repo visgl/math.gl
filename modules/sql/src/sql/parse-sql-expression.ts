@@ -165,8 +165,22 @@ export class SQLExpressionReader {
         left = this.call(negate ? 'isNotNull' : 'isNull', [left]);
         continue;
       }
+      if (minimum <= 3) {
+        const negate = this.word('NOT');
+        const insensitive = this.word('ILIKE');
+        if (insensitive || this.word('LIKE')) {
+          const pattern = this.expression(depth + 1, 4);
+          const args = [left, pattern];
+          if (this.word('ESCAPE')) args.push(this.expression(depth + 1, 4));
+          left = this.call(insensitive ? 'ilike' : 'like', args);
+          if (negate)
+            left = this.node({type: 'UnaryExpression', operator: '!', argument: left}, [left]);
+          continue;
+        }
+        this.position = start;
+      }
       this.space();
-      const match = /^(OR\b|AND\b|<>|!=|<=|>=|=|<|>|\+|-|\*|\/)/i.exec(
+      const match = /^(OR\b|AND\b|\|\||<>|!=|<=|>=|=|<|>|\+|-|\*|\/)/i.exec(
         this.source.slice(this.position)
       );
       if (!match) break;
@@ -178,13 +192,17 @@ export class SQLExpressionReader {
             ? 2
             : ['=', '<>', '!=', '<', '>', '<=', '>='].includes(token)
               ? 3
-              : token === '+' || token === '-'
+              : token === '+' || token === '-' || token === '||'
                 ? 4
                 : 5;
       if (precedence < minimum) break;
       this.position += match[0].length;
       this.token();
       const right = this.expression(depth + 1, precedence + 1);
+      if (token === '||') {
+        left = this.call('concatStrict', [left, right]);
+        continue;
+      }
       const operator =
         token === 'OR'
           ? '||'

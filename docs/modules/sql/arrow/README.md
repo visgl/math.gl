@@ -395,3 +395,34 @@ Arrow stores the bytes without normalized interpretation. A GPU consumer can bin
 result as `unorm8x4` to read channels as normalized floats. The existing `COLOR_TO_RGBA8`
 helper remains the RGBA-specific, clamping conversion.
 
+
+### SQL string expressions
+
+Arrow SQL supports `LIKE`, `ILIKE`, `NOT LIKE`, and `NOT ILIKE`.
+Patterns match the entire value. `%` matches zero or more characters and
+`_` matches one Unicode code point. `ESCAPE '$'` designates a literal
+single-character escape, for example `name LIKE 'a$%b' ESCAPE '$'`.
+
+Literal patterns are compiled once. Matching reads Arrow UTF-8 byte ranges,
+including sliced and dictionary-encoded columns, without decoding whole rows.
+Dynamic patterns are supported and compiled per evaluated row. Null input or
+pattern produces null. `ILIKE` uses locale-independent, per-code-point Unicode
+lowercase matching, with a direct ASCII path.
+
+| Expression | Result |
+| --- | --- |
+| `'Airport' ILIKE 'air%'` | `true` |
+| `'é😀' LIKE '__'` | `true` |
+| `'Air' || 'port'` | `'Airport'` |
+| `'Air' || NULL` | `NULL` |
+| `CONCAT('Air', NULL, 'port')` | `'Airport'` |
+| `UPPER('école')` | `'ÉCOLE'` |
+| `LOWER('ÉCOLE')` | `'école'` |
+| `CAPITALIZE('hello WORLD')` | `'Hello WORLD'` |
+
+Concatenation and case conversion accept text. Use an explicit SQL cast for
+numeric inputs. `CAPITALIZE` changes only the first Unicode code point.
+Case conversion uses JavaScript's locale-independent Unicode mappings.
+These functions preserve nulls, except `CONCAT`, which skips null arguments.
+Empty strings are preserved. Regular expressions, `SIMILAR TO`, and `GLOB`
+are outside this supported subset.
