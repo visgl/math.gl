@@ -50,7 +50,7 @@ test('quantile class boundaries can be maintained without percentile domains', (
     quantileColumns: ['value']
   });
   for (const batch of table.batches) accumulator.update(batch);
-  expect(accumulator.quantileBreaks('value', 5)).toHaveLength(4);
+  expect(accumulator.quantileBreaks('value', 5)).toEqual([8, 16, 24, 32]);
 });
 
 test('merged sketches preserve sample count and exact extrema', () => {

@@ -55,13 +55,20 @@ export class ScaleQuantileSketch {
     const sorted = [...this.samples].sort((a, b) => a.value - b.value);
     if (probability === 0) return this.min;
     if (probability === 1) return this.max;
-    const target = probability * (this.count - 1);
-    let rank = 0;
+    const index = probability * (this.count - 1);
+    const lowerRank = Math.floor(index);
+    const upperRank = Math.ceil(index);
+    const fraction = index - lowerRank;
+    let cumulative = 0;
+    let lower: number | undefined;
     for (const sample of sorted) {
-      if (target < rank + sample.weight) return sample.value;
-      rank += sample.weight;
+      cumulative += sample.weight;
+      if (lowerRank < cumulative) {
+        lower ??= sample.value;
+        if (upperRank < cumulative) return lower * (1 - fraction) + sample.value * fraction;
+      }
     }
-    return sorted[sorted.length - 1]!.value;
+    return this.max;
   }
 
   /** Compact comparable weights first so recent rows do not absorb older heavy samples. */
