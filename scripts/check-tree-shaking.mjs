@@ -203,6 +203,11 @@ const probes = [
     forbidden: [/hydrology\./, /triangle-bvh/, /martini/, /delatin/],
     budget: 11000
   },
+  {
+    symbol: 'accumulateTerrainWatersheds', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/depression-fill\./, /hydrology\./, /height-field\./, /triangle-bvh/],
+    budget: 2000
+  },
   ...['getTerrainProfileHorizon', 'getTerrainProfileViewshed'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/profile\./, /\/profile-measure\./, /\/profile-visibility\./],
