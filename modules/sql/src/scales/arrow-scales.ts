@@ -118,7 +118,12 @@ export function bindArrowScale(
   /** Number of discrete classes declared by the palette, if any. */
   const classCount = parsed.scale.range.type === 'palette' ? parsed.scale.range.count : undefined;
   if (kind === 'quantile') {
-    if (!classCount || quantileBreaks?.length !== classCount - 1) {
+    if (
+      classCount === undefined ||
+      !Number.isSafeInteger(classCount) ||
+      classCount < 2 ||
+      quantileBreaks?.length !== classCount - 1
+    ) {
       throw new Error('Quantile scale requires one resolved break per class boundary');
     }
     if (

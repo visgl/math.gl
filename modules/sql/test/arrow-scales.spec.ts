@@ -166,6 +166,15 @@ test('tied quantiles drop empty classes from the sampler and legend', () => {
   expect(scale.scale.sample(0)).toEqual(range.values[1]);
 });
 
+test('constant quantize domains retain only reachable palette classes', () => {
+  const table = tableFromArrays({value: [5, 5]});
+  const parsed = parseSQLScaleExpression("SCALE_QUANTIZE(value, 5, PALETTE('Blues'))");
+  const result = bindArrowScale(table.schema, parsed, {domain: [5, 5]});
+  expect(result.scale.descriptor.thresholds).toEqual([5]);
+  expect(result.scale.descriptor.range.values).toHaveLength(2);
+  expect(result.scale.sample(5)).toEqual(result.scale.descriptor.range.values[1]);
+});
+
 test('safe Arrow Int64 values scale without losing missing color rows', () => {
   const table = tableFromArrays({v: [0n, null, 10n]});
   const scale = compileArrowScale(
