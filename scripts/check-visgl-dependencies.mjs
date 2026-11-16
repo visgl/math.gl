@@ -21,7 +21,14 @@ const geometryPackage = '@math.gl/geometry';
 const geometryWorkspace = 'workspace:modules/geometry';
 /** Yarn locator for the published geometry dependency of the pinned loader. */
 const tilesGeometryVersion = 'npm:5.0.0-beta.8';
+// Pinned loaders.gl releases still consume the published package under its former name.
+/** Published expressions version used only by external dependencies. */
+const publishedExpressionsVersion = 'npm:5.0.0-beta.10';
 for (const [name, versions] of packages) {
+  if (name === '@math.gl/expressions') {
+    assert.deepEqual(versions, new Set([publishedExpressionsVersion]));
+    continue;
+  }
   if (name === geometryPackage) {
     assert.deepEqual(versions, new Set([geometryWorkspace, tilesGeometryVersion]));
     continue;
@@ -82,4 +89,4 @@ for (const group of ['modules', 'dev-modules', 'examples']) {
   }
 }
 checkInstall(resolve(root, 'website/node_modules'));
-console.log(`Verified ${packages.size} vis.gl packages: workspace math.gl with the pinned 3D Tiles dependency isolated.`);
+console.log(`Verified ${packages.size} vis.gl packages: workspace math.gl with pinned published dependencies for 3D Tiles and legacy expressions.`);

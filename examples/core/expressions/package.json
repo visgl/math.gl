@@ -13,8 +13,8 @@
   "dependencies": {
     "@math.gl/core": "workspace:*",
     "@math.gl/dggs": "workspace:*",
-    "@math.gl/expressions": "5.0.0-beta.10",
     "@math.gl/geospatial": "workspace:*",
+    "@math.gl/sql": "5.0.0-beta.10",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

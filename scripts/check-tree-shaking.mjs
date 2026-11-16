@@ -13,6 +13,8 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  {symbol:'queryArrowSQL', packages:['@math.gl/sql'], forbidden:[/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/loaders.gl/,/geospatial\//], budget:305000},
+
   ...['sweepTerrainRotatingCapsule', 'sweepTerrainRotatingSphere'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/sweep-cylinder/, /sweep-polytope/, /sweep-rotation/, /terrain\/surface\./, /triangle-bvh/],
@@ -62,18 +64,18 @@ const probes = [
   {symbol: 'createValidDomainTerrainMesh', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/martini/, /delatin/, /\/surface\./, /breakline-mesh/], budget: 45000},
 
-  {symbol:'getExpressionColumns', packages:['@math.gl/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:4000},
-  {symbol:'columnarPredicateToExpression', packages:['@math.gl/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:10000},
-  {symbol:'NUMERIC_FUNCTION_DEFINITIONS', packages:['@math.gl/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:5000},
-  {symbol:'SIN',packages:['@math.gl/expressions/math'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:210000},
-  {symbol:'COLOR_RGB',packages:['@math.gl/expressions/color'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:250000},
+  {symbol:'getExpressionColumns', packages:['@math.gl/sql/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:4000},
+  {symbol:'columnarPredicateToExpression', packages:['@math.gl/sql/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:10000},
+  {symbol:'NUMERIC_FUNCTION_DEFINITIONS', packages:['@math.gl/sql/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:5000},
+  {symbol:'SIN',packages:['@math.gl/sql/math-functions'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:210000},
+  {symbol:'COLOR_RGB',packages:['@math.gl/sql/color-functions'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:250000},
   {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
 
   // Measured with explicit numeric, dictionary, binary and temporal CAST targets.
-  {symbol: 'parseSQLSelect', packages: ['@math.gl/expressions/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 13700},
-  {symbol: 'parseSQLSelectStatement', packages: ['@math.gl/expressions/sql'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 15950},
-  {symbol: 'parseSQLQuery', packages: ['@math.gl/expressions/sql'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 24450},
-  {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
+  {symbol: 'parseSQLSelect', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 13700},
+  {symbol: 'parseSQLSelectStatement', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 15950},
+  {symbol: 'parseSQLQuery', packages: ['@math.gl/sql/parser'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 24450},
+  {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/sql/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
   {symbol:'spheroidToCartesian', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
   {symbol:'vec3Normalize', packages:['@math.gl/core'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
   {symbol:'getGeohashBounds', packages:['@math.gl/dggs'], forbidden:[/h3-js/, /a5-js/, /open-location-code/, /s2-geometry/], budget:2500},

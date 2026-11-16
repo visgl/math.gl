@@ -92,9 +92,13 @@ for (const path of removed) {
   assert.throws(() => require.resolve(path), error => error.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED', path);
 }
 
+for (const subpath of ['sql', 'math', 'color', 'arrow/worker', 'arrow/worker-entry.js', 'arrow/query-worker-entry.js']) {
+  assert.throws(() => require.resolve('@math.gl/sql/' + subpath), {code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'});
+}
 const roots = {
   '@math.gl/core': ['spheroidToCartesian','createLocalFrameBasis','mat4GetScaling','vec3Normalize','mat4'],
-  '@math.gl/expressions': ['parse','evaluate','compile','parseExpressionString','ExpressionFunctionRegistry'],
+  '@math.gl/sql': ['queryArrowSQL','queryArrowTable','queryArrowTableInBatches','queryArrowAggregateSnapshots','compileArrowAggregates','replaceArrowColumns'],
+  '@math.gl/sql/expressions': ['parse','evaluate','compile','parseExpressionString','ExpressionFunctionRegistry'],
   '@math.gl/dggs': ['getGeohashBounds','DGGS_FUNCTION_LIBRARY'],
   '@math.gl/geometry': ['ParametricGeometry','Curve','clipPolygon','TriangleBVH','getClosestPointsSegmentTriangle'],
   '@math.gl/geometry/culling': ['getClosestPointsOnSegments','getClosestPointsSegmentTriangle'],

@@ -28,7 +28,7 @@
       "path": "../tasks"
     },
     {
-      "path": "../expressions"
+      "path": "../sql"
     }
   ]
 }

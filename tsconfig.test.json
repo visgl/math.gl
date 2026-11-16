@@ -647,16 +647,6 @@
       "@math.gl/core/types/*": [
         "./modules/core/src/types/*"
       ],
-      "@math.gl/expressions": [
-        "./modules/expressions/src/index.ts"
-      ],
-      "@math.gl/expressions/test/*": [
-        "./modules/expressions/test/expressions/*"
-      ],
-      "@math.gl/expressions/*": [
-        "./modules/expressions/src/*",
-        "./modules/expressions/src/expressions/*"
-      ],
       "@math.gl/geometry/utils/test/*": [
         "./modules/geometry/test/utils/*"
       ],
@@ -767,6 +757,30 @@
       ],
       "@math.gl/tasks/test/*": [
         "./modules/tasks/test/*"
+      ],
+      "@math.gl/sql": [
+        "./modules/sql/src/index.ts"
+      ],
+      "@math.gl/sql/parser": [
+        "./modules/sql/src/sql/index.ts"
+      ],
+      "@math.gl/sql/expressions": [
+        "./modules/sql/src/expressions/index.ts"
+      ],
+      "@math.gl/sql/arrow": [
+        "./modules/sql/src/arrow/index.ts"
+      ],
+      "@math.gl/sql/worker": [
+        "./modules/sql/src/arrow/worker.ts"
+      ],
+      "@math.gl/sql/math-functions": [
+        "./modules/sql/src/math/index.ts"
+      ],
+      "@math.gl/sql/color-functions": [
+        "./modules/sql/src/color/index.ts"
+      ],
+      "@math.gl/sql/expressions/test/*": [
+        "./modules/sql/test/expressions/*"
       ]
     }
   }
