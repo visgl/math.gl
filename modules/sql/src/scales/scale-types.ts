@@ -8,8 +8,10 @@
  * so it can be serialized, transferred to workers, or used by other renderers.
  */
 export type ScaleColor = readonly [number, number, number, number];
+/** Numeric or categorical value accepted by a scale. */
 export type ScaleValue = number | string;
 
+/** Fixed values or a request to derive the domain from a column. */
 export type ScaleDomain =
   | {readonly type: 'fixed'; readonly values: readonly ScaleValue[]}
   | {readonly type: 'extent'; readonly column: string; readonly includeZero?: boolean}
@@ -26,6 +28,7 @@ export type ScaleDomain =
       readonly order?: 'sorted' | 'first-seen';
     };
 
+/** Numeric output, explicit colors, or a named palette to resolve. */
 export type ScaleRange =
   | {readonly type: 'numeric'; readonly values: readonly number[]}
   | {
@@ -44,6 +47,7 @@ export type ScaleColorEncoding = {
   readonly referenceWhiteNits?: number;
 };
 
+/** Serializable scale inputs and optional presentation metadata. */
 export type ScaleSpec = {
   readonly id?: string;
   readonly type:
