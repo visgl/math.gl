@@ -141,6 +141,16 @@ export class SQLExpressionReader {
     } else left = this.primary(depth);
     while (true) {
       const start = this.position;
+      if (this.take('[')) {
+        const index = this.expression(depth + 1);
+        this.symbol(']');
+        left = this.call('LIST_EXTRACT', [left, index], true);
+        continue;
+      }
+      if (this.take('.')) {
+        left = this.memberAccess(left, this.readIdentifier(true));
+        continue;
+      }
       if (this.take('::')) {
         if (minimum > 7) {
           this.position = start;
@@ -155,8 +165,22 @@ export class SQLExpressionReader {
         left = this.call(negate ? 'isNotNull' : 'isNull', [left]);
         continue;
       }
+      if (minimum <= 3) {
+        const negate = this.word('NOT');
+        const insensitive = this.word('ILIKE');
+        if (insensitive || this.word('LIKE')) {
+          const pattern = this.expression(depth + 1, 4);
+          const args = [left, pattern];
+          if (this.word('ESCAPE')) args.push(this.expression(depth + 1, 4));
+          left = this.call(insensitive ? 'ilike' : 'like', args);
+          if (negate)
+            left = this.node({type: 'UnaryExpression', operator: '!', argument: left}, [left]);
+          continue;
+        }
+        this.position = start;
+      }
       this.space();
-      const match = /^(OR\b|AND\b|<>|!=|<=|>=|=|<|>|\+|-|\*|\/)/i.exec(
+      const match = /^(OR\b|AND\b|\|\||<>|!=|<=|>=|=|<|>|\+|-|\*|\/)/i.exec(
         this.source.slice(this.position)
       );
       if (!match) break;
@@ -168,13 +192,17 @@ export class SQLExpressionReader {
             ? 2
             : ['=', '<>', '!=', '<', '>', '<=', '>='].includes(token)
               ? 3
-              : token === '+' || token === '-'
+              : token === '+' || token === '-' || token === '||'
                 ? 4
                 : 5;
       if (precedence < minimum) break;
       this.position += match[0].length;
       this.token();
       const right = this.expression(depth + 1, precedence + 1);
+      if (token === '||') {
+        left = this.call('concatStrict', [left, right]);
+        continue;
+      }
       const operator =
         token === 'OR'
           ? '||'
@@ -331,22 +359,10 @@ export class SQLExpressionReader {
     if (extended) return extended;
     const quote = this.source[this.position];
     if (quote === '"' || quote === "'") {
-      this.position++;
-      this.token();
-      let value = '';
-      while (this.position < this.source.length) {
-        const character = this.source[this.position++]!;
-        if (character !== quote) value += character;
-        else if (this.source[this.position] === quote) {
-          value += quote;
-          this.position++;
-        } else {
-          if (quote === '"' && !value) throw this.error('SQL identifiers must not be empty', start);
-          if (quote === '"') return this.identifier(value, depth, false);
-          return this.node({type: 'Literal', value, raw: JSON.stringify(value)});
-        }
-      }
-      throw this.error('Unterminated SQL expression quote', start);
+      const value = this.quoted(quote);
+      return quote === '"'
+        ? this.identifier(value, depth, false)
+        : this.node({type: 'Literal', value, raw: JSON.stringify(value)});
     }
     const number = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?/.exec(
       this.source.slice(this.position)
@@ -369,20 +385,46 @@ export class SQLExpressionReader {
     ] as const)
       if (this.word(keyword))
         return this.node({type: 'Literal', value, raw: keyword.toLowerCase()});
-    const identifier = /^[A-Za-z_][A-Za-z0-9_]*/.exec(this.source.slice(this.position));
+    return this.identifier(this.readIdentifier(), depth, true);
+  }
+
+  /** Reads an identifier in projections, source references, and field access. */
+  readIdentifier(member = false): string {
+    this.space();
+    if (this.source[this.position] === '"') return this.quoted('"');
+    const identifier = /^[A-Za-z_][A-Za-z0-9_]*/.exec(this.source.slice(this.position))?.[0];
     if (
       !identifier ||
-      SQL_RESERVED_WORDS.has(identifier[0].toUpperCase()) ||
-      /^(WHEN|THEN|ELSE|END)$/i.test(identifier[0])
+      (!member &&
+        (SQL_RESERVED_WORDS.has(identifier.toUpperCase()) ||
+          /^(WHEN|THEN|ELSE|END)$/i.test(identifier)))
     )
       throw this.error('SQL expression requires a column, literal or function');
-    this.position += identifier[0].length;
+    this.position += identifier.length;
     this.token();
-    return this.identifier(identifier[0], depth, true);
+    return identifier;
   }
+
+  /** Decodes a quoted token, including doubled quote escapes. */
+  private quoted(quote: string): string {
+    const start = this.position++;
+    this.token();
+    let value = '';
+    while (this.position < this.source.length) {
+      const character = this.source[this.position++]!;
+      if (character !== quote) value += character;
+      else if (this.source[this.position] === quote) {
+        value += quote;
+        this.position++;
+      } else {
+        if (quote === '"' && !value) throw this.error('SQL identifiers must not be empty', start);
+        return value;
+      }
+    }
+    throw this.error('Unterminated SQL expression quote', start);
+  }
+
   private identifier(name: string, depth: number, fold: boolean): Expression {
-    const qualified = this.qualifiedIdentifier(name);
-    if (qualified) return qualified;
     if (!this.take('(')) return this.node({type: 'Identifier', name});
     const args: Expression[] = [];
     const wildcard = fold && this.wildcardArgument(name);
@@ -401,8 +443,10 @@ export class SQLExpressionReader {
   protected extendedPrimary(): Expression | undefined {
     return undefined;
   }
-  protected qualifiedIdentifier(_name: string): Expression | undefined {
-    return undefined;
+  /** Lowers field access to a portable expression call for Arrow binding. */
+  protected memberAccess(object: Expression, name: string): Expression {
+    const key = this.node({type: 'Literal', value: name, raw: JSON.stringify(name)});
+    return this.call('STRUCT_EXTRACT', [object, key], true);
   }
   protected wildcardArgument(_name: string): Expression | undefined {
     return undefined;

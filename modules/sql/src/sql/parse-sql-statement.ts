@@ -216,20 +216,9 @@ class RelationalExpressionReader extends SQLExpressionReader {
     return this.node(this.options.parseParameter(parameter[1]!));
   }
 
-  protected override qualifiedIdentifier(name: string): Expression | undefined {
-    if (!this.take('.')) return undefined;
-    this.space();
-    const column = /^(?:"((?:[^"]|"")+)"|([A-Za-z_][A-Za-z0-9_]*))/.exec(
-      this.source.slice(this.position)
-    );
-    if (!column) throw this.error('SQL qualified column requires a column identifier');
-    this.position += column[0].length;
-    this.token();
-    const property = this.node({
-      type: 'Identifier',
-      name: column[1]?.replace(/""/g, '"') ?? column[2]
-    });
-    const object = this.node({type: 'Identifier', name});
+  /** Preserves dot access until the planner can resolve table aliases. */
+  protected override memberAccess(object: Expression, name: string): Expression {
+    const property = this.node({type: 'Identifier', name});
     return this.node({type: 'MemberExpression', computed: false, object, property}, [
       object,
       property

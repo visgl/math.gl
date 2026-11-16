@@ -494,3 +494,9 @@ export {
   type SkirtedTerrainCutout,
   type TerrainCutoutSkirtOptions
 } from './terrain/index';
+
+export {
+  accumulateTerrainWatersheds,
+  type TerrainWatershedAccumulation,
+  type TerrainWatershedAccumulationOptions
+} from './terrain/watershed-accumulation';

@@ -2093,3 +2093,31 @@ unwelded shared edges and hanging vertices are rejected. A cut that creates
 an unrepresentable sliver fails explicitly. Set the work and output limits
 for your workload. Concave cuts and cuts spanning separate tile meshes
 require additional partitioning and seam reconciliation.
+
+### Watersheds on conditioned terrain
+
+Pass the receiver forest from `fillTerrainDepressions` to
+`accumulateTerrainWatersheds` to label each cell by its designated outlet and
+count upstream cells, including the cell itself. The accumulation follows the
+conditioner's receivers through filled flats. Nodata and valid cells
+disconnected from all outlets are excluded and contribute zero area.
+
+```ts
+import {
+  accumulateTerrainWatersheds,
+  fillTerrainDepressions,
+  getTerrainCellMetrics
+} from '@math.gl/geospatial';
+
+// field is a cell-registered HeightField. outlet is a valid row-major index.
+const {receiver} = fillTerrainDepressions(field, {outlets: [outlet]});
+const {terminal, contributingCells} = accumulateTerrainWatersheds(receiver);
+const catchmentMask = Uint8Array.from(terminal, index => Number(index === outlet));
+const areaSquareMeters = contributingCells[outlet] * getTerrainCellMetrics(field).area;
+```
+
+For an affine grid, multiplying each outlet's count by the cell area gives
+its projected catchment area. Summing those areas accounts for every valid
+cell connected to the declared outlets exactly once. A supplied forest must
+use `-1` for outlets and `-2` for excluded cells. The function rejects cycles
+and invalid links. It expects the caller to supply the routing topology.

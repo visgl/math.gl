@@ -71,10 +71,10 @@ const probes = [
   {symbol:'COLOR_RGB',packages:['@math.gl/sql/color-functions'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:250000},
   {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
 
-  // Measured with explicit numeric, dictionary, binary and temporal CAST targets.
-  {symbol: 'parseSQLSelect', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 13700},
+  // Measured with explicit numeric, dictionary, binary and temporal CAST targets and SQL pattern operators.
+  {symbol: 'parseSQLSelect', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 13900},
   {symbol: 'parseSQLSelectStatement', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 15950},
-  {symbol: 'parseSQLQuery', packages: ['@math.gl/sql/parser'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 24450},
+  {symbol: 'parseSQLQuery', packages: ['@math.gl/sql/parser'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 24650},
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/sql/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
   {symbol:'spheroidToCartesian', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
   {symbol:'vec3Normalize', packages:['@math.gl/core'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
@@ -208,6 +208,11 @@ const probes = [
     symbol: 'fillTerrainDepressions', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
     forbidden: [/hydrology\./, /triangle-bvh/, /martini/, /delatin/],
     budget: 11000
+  },
+  {
+    symbol: 'accumulateTerrainWatersheds', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    forbidden: [/depression-fill\./, /hydrology\./, /height-field\./, /triangle-bvh/],
+    budget: 2000
   },
   ...['getTerrainProfileHorizon', 'getTerrainProfileViewshed'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],

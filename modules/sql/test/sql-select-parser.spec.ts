@@ -94,7 +94,7 @@ test.each([
   'SELECT "unterminated',
   `SELECT a WHERE a = 'unterminated`,
   'SELECT a WHERE a IS "NULL"',
-  'SELECT a WHERE table.a = 1'
+  'SELECT a WHERE table. = 1'
 ])('unsupported or malformed SELECT is rejected: %s', sql => {
   expect(() => parseSQLQuery(sql)).toThrow();
 });

@@ -30,6 +30,7 @@ import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '@
 import {parse, validateExpressionAST, type Expression} from '../expressions/index';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
 import {bindCast} from './cast';
+import {compileUTF8Like} from './like';
 import {float16Values, roundFloat16} from './float16';
 import {physicalKey, extensionKey} from './signature';
 import {ExpressionEvaluationError, isExpressionEvaluationError} from '../expressions/index';
@@ -125,11 +126,13 @@ export function compileArrowExpression(
     const prepared = root.prepare(batch, active, {});
     const result = isTupleType(root.field.type)
       ? maskTupleVector(prepared.vector!, active)
-      : prepared.vector &&
-          !DataType.isDictionary(prepared.vector.type) &&
-          !active.some(value => !value)
-        ? prepared.vector
-        : output(root.field, active, prepared.get);
+      : isNestedType(root.field.type)
+        ? nestedVector(prepared.vector!, root.field.type, active)
+        : prepared.vector &&
+            !DataType.isDictionary(prepared.vector.type) &&
+            !active.some(value => !value)
+          ? prepared.vector
+          : output(root.field, active, prepared.get);
     evaluation.signal?.throwIfAborted();
     return result;
   };
@@ -150,7 +153,9 @@ export function compileArrowExpression(
         ? new Vector(chunks)
         : isTupleType(root.field.type)
           ? nullTupleVector(root.field.type, 0)
-          : output(root.field, new Uint8Array(0), () => null);
+          : isNestedType(root.field.type)
+            ? vectorFromArray([], root.field.type)
+            : output(root.field, new Uint8Array(0), () => null);
     }
   });
 }
@@ -932,6 +937,38 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
   };
 }
 
+/** Binds SQL pattern matching and precompiles literal patterns. */
+function bindLike(args: any[], options: BindingOptions, insensitive: boolean): Node {
+  if (args.length < 2 || args.length > 3) throw new Error('LIKE requires two or three arguments');
+  const value = bind(args[0], options, new Utf8());
+  const pattern = bind(args[1], options, new Utf8());
+  requireType(value, 'utf8');
+  requireType(pattern, 'utf8');
+  const escape = args[2];
+  if (escape && (escape.type !== 'Literal' || typeof escape.value !== 'string')) {
+    throw new Error('LIKE ESCAPE requires a literal character');
+  }
+  const compile = (text: string) => compileUTF8Like(text, insensitive, escape?.value);
+  const literal = args[1].type === 'Literal' && typeof args[1].value === 'string';
+  const matcher = literal ? compile(args[1].value) : undefined;
+  return {
+    field: new Field('like', bool, value.field.nullable || pattern.field.nullable),
+    hasKernel: value.hasKernel || pattern.hasKernel,
+    prepare(batch, active, context) {
+      const source = value.prepare(batch, active, context);
+      const patterns = pattern.prepare(batch, active, context);
+      return {
+        get(row) {
+          const range = bytes(source, row);
+          const text = patterns.get(row) as string | null;
+          if (!range || text === null) return null;
+          return (matcher || compile(text))(...range);
+        }
+      };
+    }
+  };
+}
+
 /** Converts a number to a byte without typed-array wraparound. */
 function convertByte(value: number, normalized: boolean): number {
   if (!Number.isFinite(value))
@@ -1000,6 +1037,91 @@ function bindPackUnorm8(arguments_: any[], options: BindingOptions): Node {
   };
 }
 
+/** Identifies the Arrow layouts that can be traversed with nested extraction. */
+function isNestedType(type: DataType): boolean {
+  return DataType.isStruct(type) || DataType.isList(type) || DataType.isFixedSizeList(type);
+}
+
+/** Converts nested Arrow values to builder inputs while preserving scalar values. */
+function nestedValue(value: any, type: DataType): unknown {
+  if (value == null) return null;
+  if (DataType.isList(type) || DataType.isFixedSizeList(type))
+    return Array.from(value as Vector, item => nestedValue(item, type.valueType));
+  if (DataType.isStruct(type))
+    return Object.fromEntries(
+      type.children.map(field => [field.name, nestedValue(value[field.name], field.type)])
+    );
+  return value;
+}
+
+/** Masks nested results without coercing their child types. */
+function nestedVector(vector: Vector, type: DataType, active: Mask): Vector {
+  if (!active.includes(0)) return vector;
+  return vectorFromArray(
+    Array.from(active, (valid, row) => (valid ? nestedValue(vector.get(row), type) : null)),
+    type
+  );
+}
+
+/** Binds list indexing and named struct access against the input Arrow types. */
+function bindNestedExtract(
+  name: 'LIST_EXTRACT' | 'STRUCT_EXTRACT',
+  args: readonly Expression[],
+  options: BindingOptions
+): Node {
+  if (args.length !== 2) throw new Error(`${name} requires two arguments`);
+  const input = bind(args[0], options, undefined, true);
+  const inputType = input.field.type;
+  const selector = args[1]!;
+  let child: Field;
+  let index: Node | undefined;
+
+  if (name === 'LIST_EXTRACT') {
+    if (!DataType.isList(inputType) && !DataType.isFixedSizeList(inputType))
+      throw new Error('LIST_EXTRACT requires an Arrow List or FixedSizeList');
+    child = inputType.children[0]!;
+    index = bind(selector, options);
+    if (
+      !DataType.isInt(index.field.type) &&
+      !DataType.isFloat(index.field.type) &&
+      !DataType.isNull(index.field.type)
+    )
+      throw new Error('LIST_EXTRACT requires an integer index');
+  } else {
+    if (!DataType.isStruct(inputType)) throw new Error('STRUCT_EXTRACT requires an Arrow Struct');
+    if (selector.type !== 'Literal' || typeof selector.value !== 'string')
+      throw new Error('STRUCT_EXTRACT requires a literal field name');
+    const field = inputType.children.find(candidate => candidate.name === selector.value);
+    if (!field) throw new Error(`Unknown Arrow struct field: ${selector.value}`);
+    child = field;
+  }
+  const field = new Field(child.name, valueType(child.type), true, child.metadata);
+  return {
+    field,
+    hasKernel: true,
+    prepare(batch, active, context) {
+      const inputValues = input.prepare(batch, active, context).vector!;
+      const positions = index?.prepare(batch, active, context);
+      const childValues = index ? undefined : inputValues.getChild(child.name)!;
+      const values = Array.from(active, (valid, row) => {
+        if (!valid || !inputValues.isValid(row)) return null;
+        if (!positions) return nestedValue(childValues!.get(row), field.type);
+
+        const position = positions.get(row);
+        if (position === null) return null;
+        const offset = Number(position);
+        if (!Number.isSafeInteger(offset)) return null;
+        const list = inputValues.get(row) as Vector;
+        const element = offset < 0 ? list.length + offset : offset - 1;
+        return element >= 0 && element < list.length
+          ? nestedValue(list.get(element), field.type)
+          : null;
+      });
+      return vectorReader(vectorFromArray(values, field.type));
+    }
+  };
+}
+
 /** Binds built-ins and custom functions, materializing arguments only for vector kernels. */
 function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node {
   if (ast.callee.type !== 'Identifier')
@@ -1016,7 +1138,16 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
       'array_float64',
       'array_uint8',
       'PACK_UNORM8',
+      'LIST_EXTRACT',
+      'STRUCT_EXTRACT',
       'cast',
+      'like',
+      'ilike',
+      'concat',
+      'concatStrict',
+      'upper',
+      'lower',
+      'capitalize',
       'isNull',
       'isNotNull',
       'parseNumber',
@@ -1029,6 +1160,8 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
     if (matches.length > 1) throw new Error(`Ambiguous SQL function: ${name}`);
     name = matches[0] ?? name;
   }
+  if (name === 'LIST_EXTRACT' || name === 'STRUCT_EXTRACT')
+    return bindNestedExtract(name, ast.arguments, options);
   if (name === 'PACK_UNORM8') return bindPackUnorm8(ast.arguments, options);
   if (['array', 'array_float16', 'array_float32', 'array_float64', 'array_uint8'].includes(name)) {
     if (!ast.arguments.length || ast.arguments.length > 4096)
@@ -1104,6 +1237,58 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
           data.setValid(row, true);
         }
         return vectorReader(vector);
+      }
+    };
+  }
+  if (name === 'like' || name === 'ilike')
+    return bindLike(ast.arguments, options, name === 'ilike');
+  if (name === 'upper' || name === 'lower' || name === 'capitalize') {
+    if (ast.arguments.length !== 1) throw new Error('Case conversion requires one argument');
+    const arg = bind(ast.arguments[0], options, new Utf8());
+    requireType(arg, 'utf8');
+    return {
+      field: new Field(name, new Utf8(), arg.field.nullable),
+      hasKernel: arg.hasKernel,
+      prepare(batch, active, context) {
+        const input = arg.prepare(batch, active, context);
+        return {
+          get(row) {
+            const value = input.get(row) as string | null;
+            if (!value) return value;
+            if (name === 'upper') return value.toUpperCase();
+            if (name === 'lower') return value.toLowerCase();
+            const first = String.fromCodePoint(value.codePointAt(0)!);
+            return first.toUpperCase() + value.slice(first.length);
+          }
+        };
+      }
+    };
+  }
+  if (name === 'concat' || name === 'concatStrict') {
+    if (!ast.arguments.length) throw new Error('CONCAT requires at least one argument');
+    const args = ast.arguments.map((arg: any) => bind(arg, options, new Utf8()));
+    for (const arg of args) requireType(arg, 'utf8');
+    const strict = name === 'concatStrict';
+    return {
+      field: new Field(
+        'concat',
+        new Utf8(),
+        strict && args.some((arg: Node) => arg.field.nullable)
+      ),
+      hasKernel: args.some((arg: Node) => arg.hasKernel),
+      prepare(batch, active, context) {
+        const inputs = args.map((arg: Node) => arg.prepare(batch, active, context));
+        return {
+          get(row) {
+            let result = '';
+            for (const input of inputs) {
+              const value = input.get(row);
+              if (value === null && strict) return null;
+              if (value !== null) result += value;
+            }
+            return result;
+          }
+        };
       }
     };
   }
