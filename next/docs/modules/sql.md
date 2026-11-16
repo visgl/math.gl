@@ -74,6 +74,7 @@ Direct column projections can share input buffers. Filtering, sorting, joins, an
 | [`@math.gl/sql/worker`](https://visgl.github.io/math.gl/next/docs/modules/sql/workers.md)                  | Execute structured queries and expressions in workers.                                        |
 | [`@math.gl/sql/math-functions`](https://visgl.github.io/math.gl/next/docs/modules/sql/math-functions.md)   | Register typed numeric functions such as `SIN` and `SQRT`.                                    |
 | [`@math.gl/sql/color-functions`](https://visgl.github.io/math.gl/next/docs/modules/sql/color-functions.md) | Register color construction, conversion, and mapping functions.                               |
+| [`@math.gl/sql/scales`](https://visgl.github.io/math.gl/next/docs/modules/sql/scales.md)                   | Define portable visualization scales and resolve legend descriptors.                          |
 | [`@math.gl/sql/expressions`](https://visgl.github.io/math.gl/next/docs/modules/sql/expressions.md)         | Parse and evaluate portable expressions against JavaScript objects.                           |
 
 ## Supported SQL[​](#supported-sql "Direct link to Supported SQL")
