@@ -347,3 +347,78 @@ test('subdivide polygon with holes', () => {
     expect(arePolygonsEqual(result[i], expected[i]), `polygon ${i}`).toBeTruthy();
   }
 });
+
+/** Returns the area of a polygon: the outer ring minus its holes. */
+function getCutArea(positions: Readonly<NumericArray>, holeIndices: Readonly<NumericArray> = []) {
+  const ends = [...holeIndices, positions.length];
+  let area = 0;
+  let start = 0;
+  for (const end of ends) {
+    // Measure from the first vertex to keep precision far from the origin.
+    const x0 = positions[start];
+    const y0 = positions[start + 1];
+    let ringArea = 0;
+    for (let i = start; i < end; i += 2) {
+      const j = i + 2 < end ? i + 2 : start;
+      ringArea +=
+        (positions[i] - x0) * (positions[j + 1] - y0) -
+        (positions[j] - x0) * (positions[i + 1] - y0);
+    }
+    area += start === 0 ? Math.abs(ringArea) / 2 : -Math.abs(ringArea) / 2;
+    start = end;
+  }
+  return area;
+}
+
+/** Cuts a polygon and checks that every part fits one grid cell and the area is kept. */
+function expectValidCut(positions: number[], gridResolution: number) {
+  const parts = cutPolygonByGrid(positions, null, {gridResolution, edgeTypes: true});
+  let area = 0;
+  for (const part of parts) {
+    const xs = part.positions.filter((_, i) => i % 2 === 0);
+    const ys = part.positions.filter((_, i) => i % 2 === 1);
+    const tolerance = gridResolution * 1e-9;
+    expect(Math.max(...xs) - Math.min(...xs)).toBeLessThanOrEqual(gridResolution + tolerance);
+    expect(Math.max(...ys) - Math.min(...ys)).toBeLessThanOrEqual(gridResolution + tolerance);
+    expect(part.edgeTypes).toHaveLength(part.positions.length / 2);
+    area += getCutArea(part.positions);
+  }
+  const expected = getCutArea(positions);
+  expect(Math.abs(area - expected)).toBeLessThanOrEqual(expected * 1e-9 + 1e-15);
+  return parts;
+}
+
+test('subdivide polygon - cut lies on a rounded grid line', () => {
+  // A tile-local MVT ring with the grid step that deck.gl uses for 360 subdivisions at zoom 0.
+  // 0.6 + 1/90 rounds below 55/90, so the upper part starts on the line it was cut at.
+  const parts = expectValidCut(
+    [
+      0.204345703125, 0.612548828125, 0.206787109375, 0.6064453125, 0.2060546875, 0.605712890625,
+      0.204345703125, 0.612548828125
+    ],
+    1 / 90
+  );
+  expect(parts.length).toBe(2);
+});
+
+test('subdivide polygon - grid cell rounds past the minimum', () => {
+  // Math.floor(1.7 / 0.1) * 0.1 is 1.7000000000000002, above the ring.
+  const parts = cutPolygonByGrid([0.05, 1.7, 0.08, 1.7, 0.06, 1.7], null, {gridResolution: 0.1});
+  expect(parts.length).toBe(1);
+});
+
+test('subdivide polygon - near the Web Mercator latitude limit', () => {
+  for (const gridResolution of [0.1, 0.3, 1 / 3, 1 / 90]) {
+    expectValidCut(
+      [10.03, -85.0511, 10.47, -85.0511, 10.47, -84.73, 10.03, -84.73],
+      gridResolution
+    );
+    expectValidCut([-179.3, -85.0511, -178.1, -85.0511, -178.7, -84.3], gridResolution);
+  }
+});
+
+test('subdivide polygon - vertices and edges on grid lines', () => {
+  expectValidCut([0, 0, 0.3, 0.6, 0.6, 0], 0.1);
+  expectValidCut([0, 0, 20, 0, 20, 20, 0, 20], 10);
+  expectValidCut([0.1, 0.1, 0.7, 0.1, 0.7, 0.3, 0.1, 0.3], 0.1);
+});
