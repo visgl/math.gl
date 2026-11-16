@@ -40,7 +40,8 @@ An injected WHERE parser can define a different predicate language.
 | Named parameters                      | ⚠️      | `:name` in `parseSQLPredicate()`, with supplied values or preserved references. Use an injected WHERE parser for parameterized SELECT statements. |
 | Pagination                            | ✅      | `LIMIT` followed by a nonnegative safe integer, including zero. `OFFSET` skips rows before the limit.                                                                                   |
 | Catalog commands                      | ✅      | `SHOW SOURCES`, `SHOW TABLES [FROM source]`, and `DESCRIBE source[.table]`. `SHOW SOURCES` is a parser-specific command.                          |
-| Qualified column names                | ❌      | `SELECT table.column` and qualified WHERE columns in `parseSQLQuery()` are rejected. Quote literal column names containing dots.                  |
+| Nested column access                  | ✅      | `start[1]` reads a list element. `endpoint.longitude` reads a struct field. Quote literal column names containing dots. |
+| Qualified column names                | ❌      | Use the relational SELECT parser for table-qualified names. In `parseSQLQuery()`, dots access struct fields. |
 | Computed columns and function calls   | ⚠️      | CAST, postfix :: conversions, arithmetic + - * /, named functions, searched CASE, and fixed-size ARRAY expressions. Execution supplies registered functions.                                                                      |
 | Additional predicate operators        | ❌      | No `LIKE`, `ILIKE`, `BETWEEN`, regular expressions, or `EXISTS`.                                                                                  |
 | Sorting and pagination                | ❌      | No `ORDER BY` or `FETCH`.                                                                                                              |

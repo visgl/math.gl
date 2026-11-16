@@ -24,6 +24,8 @@ export function createFunctionLookup(
         'array_float64',
         'array_uint8',
         'PACK_UNORM8',
+        'LIST_EXTRACT',
+        'STRUCT_EXTRACT',
         'cast',
         'in',
         'isNull',
