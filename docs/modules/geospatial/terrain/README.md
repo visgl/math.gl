@@ -2121,3 +2121,45 @@ its projected catchment area. Summing those areas accounts for every valid
 cell connected to the declared outlets exactly once. A supplied forest must
 use `-1` for outlets and `-2` for excluded cells. The function rejects cycles
 and invalid links. It expects the caller to supply the routing topology.
+
+### Cutouts across resident tiles
+
+`splitTerrainMeshTiles(tiles, polygon, options)` welds identical XYZ vertices
+across a conforming resident tile set before splitting it. Both pieces share
+exact cut coordinates, including where the polygon crosses tile seams. Use
+`createTerrainCutoutSkirts` on the result: interior tile seams receive no walls.
+A cut coinciding with a tile seam receives paired walls only where both the
+patch and remainder actually exist. Missing tiles and nodata remain uncovered.
+
+```ts
+import {splitTerrainMeshTiles, createTerrainCutoutSkirts} from '@math.gl/geospatial';
+
+// All positions and the polygon use one local Cartesian coordinate frame.
+const cut = splitTerrainMeshTiles(residentMeshes, polygon);
+const displayed = createTerrainCutoutSkirts(cut, {
+  lift: 20,
+  patch: {baseZ: -100},
+  remainder: {baseZ: -100}
+});
+// Recover a vertex's source tile and face; sourceWeights retain its corner order.
+const face = cut.patch.sourceTriangles[0];
+const tileIndex = cut.sourceTiles[face];
+const triangleIndex = cut.sourceTileFaces[face];
+```
+
+For mixed resolutions, first reconcile edge spans with `stitchTerrainMeshEdges`
+or `stitchTerrainLodCut`, then supply the resulting meshes in a common frame.
+This operation does not silently snap vertices or change elevation. Unreconciled
+hanging nodes, overlapping resident parent/child tiles and conflicting seam
+heights are rejected. An exact weld requires identical coordinates, so perform
+any coordinate-frame conversion consistently before calling it.
+
+Recompute with the new resident set on tile arrival or eviction. The operation
+is stateless; tile indices refer to that call's array, not persistent tile IDs.
+Input vertex/triangle limits cover the complete set, including duplicate vertices;
+assembly and clipping share the work budget. This first implementation rebuilds
+the cut rather than incrementally caching it. The cutout lab's **Resident tiles**
+control demonstrates arrival/eviction without walls along an absent neighbor.
+Select **Mixed 2:1** to inspect a coarse/fine pair reconciled by the sparse
+stitcher before cutting. The example reports the maximum seam height adjustment
+separately from the cutout, which itself preserves the supplied surface.
