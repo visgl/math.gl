@@ -6,23 +6,31 @@ import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
 import {parseSQLScaleExpression} from '../src/scales';
 import {compileResolvedScale, resolvePalette} from '../src/scales';
-import {compileArrowScale, compileArrowScales} from '../src/scales/arrow-scales';
+import {compileArrowScale, compileArrowScales} from '@math.gl/sql/arrow-scales';
 import {resolveArrowDomains, resolveArrowQuantiles} from '../src/scales/arrow-domains';
 
 test('shared Arrow extents, symmetric and percentile domains', () => {
   const table = tableFromArrays({value: [-10, 0, 20, null], label: ['B', 'A', 'B', 'C']});
-  expect(resolveArrowDomains(table, [
-    {type: 'extent', column: 'value'},
-    {type: 'symmetric', column: 'value', pivot: 0},
-    {type: 'percentile', column: 'value', lower: 0.25, upper: 0.75},
-    {type: 'categories', column: 'label'}
-  ])).toEqual([[-10, 20], [-20, 20], [-5, 10], ['A', 'B', 'C']]);
+  expect(
+    resolveArrowDomains(table, [
+      {type: 'extent', column: 'value'},
+      {type: 'symmetric', column: 'value', pivot: 0},
+      {type: 'percentile', column: 'value', lower: 0.25, upper: 0.75},
+      {type: 'categories', column: 'label'}
+    ])
+  ).toEqual([
+    [-10, 20],
+    [-20, 20],
+    [-5, 10],
+    ['A', 'B', 'C']
+  ]);
 });
 
 test('numeric Arrow scale preserves rows and exposes resolved numeric domain', () => {
   const table = tableFromArrays({population: [0, 25, 100, null]});
   const compiled = compileArrowScale(
-    table, parseSQLScaleExpression('SCALE_SQRT(population, DOMAIN(population), RANGE(2, 20))')
+    table,
+    parseSQLScaleExpression('SCALE_SQRT(population, DOMAIN(population), RANGE(2, 20))')
   );
   expect(compiled.scale.descriptor.domain).toEqual([0, 100]);
   expect(compiled.evaluate(table).toArray()[2]).toBeCloseTo(20);
@@ -32,7 +40,8 @@ test('numeric Arrow scale preserves rows and exposes resolved numeric domain', (
 test('continuous color scale and legend sample agree', () => {
   const table = tableFromArrays({value: [0, 50, 100]});
   const compiled = compileArrowScale(
-    table, parseSQLScaleExpression("SCALE_COLOR(value, DOMAIN(value), PALETTE('viridis'))")
+    table,
+    parseSQLScaleExpression("SCALE_COLOR(value, DOMAIN(value), PALETTE('viridis'))")
   );
   const middle = compiled.scale.sample(50) as readonly number[];
   const vector = compiled.evaluate(table);
@@ -45,7 +54,8 @@ test('quantile class breaks are explicit and stable', () => {
   const table = tableFromArrays({v: [0, 10, 20, 30, 40]});
   expect(resolveArrowQuantiles(table, 'v', 5)).toEqual([8, 16, 24, 32]);
   const result = compileArrowScale(
-    table, parseSQLScaleExpression("SCALE_QUANTILE(v, 5, PALETTE('Blues'))")
+    table,
+    parseSQLScaleExpression("SCALE_QUANTILE(v, 5, PALETTE('Blues'))")
   );
   expect(result.scale.descriptor.thresholds).toEqual([8, 16, 24, 32]);
   expect(result.evaluate(table).length).toBe(5);
@@ -63,11 +73,51 @@ test('shared domain planner returns separate compiled attribute scales', () => {
 });
 
 test('HDR explicit stops are not clamped by sampling', () => {
-  const scale = compileResolvedScale({
-    type: 'sequential', domain: {type: 'fixed', values: [0, 1]},
-    range: {type: 'colors', values: [[0, 0, 0, 1], [4, 2, 0.5, 1]]},
-    encoding: {primaries: 'rec2020', transfer: 'linear', format: 'rgba32float'}
-  }, [0, 1]);
+  const scale = compileResolvedScale(
+    {
+      type: 'sequential',
+      domain: {type: 'fixed', values: [0, 1]},
+      range: {
+        type: 'colors',
+        values: [
+          [0, 0, 0, 1],
+          [4, 2, 0.5, 1]
+        ]
+      },
+      encoding: {primaries: 'rec2020', transfer: 'linear', format: 'rgba32float'}
+    },
+    [0, 1]
+  );
   expect(scale.sample(1)).toEqual([4, 2, 0.5, 1]);
   expect(resolvePalette({type: 'palette', name: 'viridis'}).length).toBeGreaterThan(2);
+});
+
+test('numeric categories sort numerically and can bind an ordinal scale', () => {
+  const table = tableFromArrays({code: [10, 2, 10]});
+  const scale = compileArrowScale(
+    table,
+    parseSQLScaleExpression("SCALE_ORDINAL(code, PALETTE('Tableau10'))")
+  );
+  expect(scale.scale.descriptor.domain).toEqual([2, 10]);
+  expect(scale.evaluate(table).get(0)?.toArray()).toEqual(scale.evaluate(table).get(2)?.toArray());
+});
+
+test('diverging pivot centers colors and Arrow emits actual binary16 channels', () => {
+  const table = tableFromArrays({v: [-10, 0, 30, null]});
+  const parsed = parseSQLScaleExpression(
+    "SCALE_DIVERGING(v, DOMAIN(v), PALETTE('#000000', '#800000', '#ffffff'))"
+  );
+  const scale = compileArrowScale(table, {
+    ...parsed,
+    scale: {
+      ...parsed.scale,
+      pivot: 0,
+      encoding: {primaries: 'srgb', transfer: 'srgb', format: 'rgba16float'}
+    }
+  });
+  expect(scale.scale.sample(0)).toEqual([128 / 255, 0, 0, 1]);
+  const output = scale.evaluate(table);
+  expect(String(output.type)).toContain('Float16');
+  expect(output.get(1)?.get(0)).toBeCloseTo(128 / 255, 3);
+  expect(output.get(3)).toBeNull();
 });

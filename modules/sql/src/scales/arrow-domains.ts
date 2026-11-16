@@ -7,7 +7,7 @@ import type {ScaleDomain, ScaleValue} from './scale-types';
 
 type DomainStatistics = {
   readonly values: number[];
-  readonly categories: Set<string>;
+  readonly categories: Set<ScaleValue>;
   min: number;
   max: number;
 };
@@ -34,8 +34,10 @@ export function resolveArrowDomains(
 ): readonly (readonly ScaleValue[])[] {
   const columns = new Map<string, DomainStatistics>();
   const needsSamples = new Set<string>();
+  const needsCategories = new Set<string>();
   for (const domain of domains) {
     if (domain.type === 'percentile') needsSamples.add(domain.column);
+    if (domain.type === 'categories') needsCategories.add(domain.column);
     if (domain.type !== 'fixed' && !table.getChild(domain.column)) {
       throw new Error(`Unknown scale domain column: ${domain.column}`);
     }
@@ -44,19 +46,23 @@ export function resolveArrowDomains(
     if (domain.type === 'fixed' || columns.has(domain.column)) continue;
     const vector = table.getChild(domain.column)!;
     const state: DomainStatistics = {
-      values: [], categories: new Set(), min: Infinity, max: -Infinity
+      values: [],
+      categories: new Set(),
+      min: Infinity,
+      max: -Infinity
     };
     const samples = needsSamples.has(domain.column);
     for (let row = 0; row < vector.length; row++) {
       const value = vector.get(row);
       if (value === null || value === undefined) continue;
       if (typeof value === 'string') {
-        state.categories.add(value);
+        if (needsCategories.has(domain.column)) state.categories.add(value);
         continue;
       }
       if (typeof value !== 'number' || !Number.isFinite(value)) {
         throw new Error(`Unsupported scale domain value in ${domain.column} at row ${row}`);
       }
+      if (needsCategories.has(domain.column)) state.categories.add(value);
       if (value < state.min) state.min = value;
       if (value > state.max) state.max = value;
       if (samples) state.values.push(value);
@@ -70,7 +76,10 @@ export function resolveArrowDomains(
     const data = columns.get(domain.column)!;
     if (domain.type === 'categories') {
       const values = [...data.categories];
-      if (domain.order !== 'first-seen') values.sort();
+      if (domain.order !== 'first-seen')
+        values.sort((a, b) =>
+          typeof a === 'number' && typeof b === 'number' ? a - b : a < b ? -1 : a > b ? 1 : 0
+        );
       if (!values.length) throw new Error(`Empty categorical scale domain: ${domain.column}`);
       return values;
     }
@@ -95,7 +104,8 @@ export function resolveArrowQuantiles(
   column: string,
   classes: number
 ): readonly number[] {
-  if (!Number.isSafeInteger(classes) || classes < 2) throw new Error('Quantile classes must be >= 2');
+  if (!Number.isSafeInteger(classes) || classes < 2)
+    throw new Error('Quantile classes must be >= 2');
   const vector = table.getChild(column);
   if (!vector) throw new Error(`Unknown quantile column: ${column}`);
   const values: number[] = [];

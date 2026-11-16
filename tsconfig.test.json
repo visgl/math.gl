@@ -770,6 +770,12 @@
       "@math.gl/sql/arrow": [
         "./modules/sql/src/arrow/index.ts"
       ],
+      "@math.gl/sql/scales": [
+        "./modules/sql/src/scales/index.ts"
+      ],
+      "@math.gl/sql/arrow-scales": [
+        "./modules/sql/src/scales/arrow-scales.ts"
+      ],
       "@math.gl/sql/worker": [
         "./modules/sql/src/arrow/worker.ts"
       ],

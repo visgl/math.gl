@@ -3,8 +3,17 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {
-  Field, FixedSizeList, Float32, Float64, Uint8, Uint16, vectorFromArray,
-  type RecordBatch, type Table, type Vector
+  Field,
+  FixedSizeList,
+  Float16,
+  Float32,
+  Float64,
+  Uint8,
+  Uint16,
+  vectorFromArray,
+  type RecordBatch,
+  type Table,
+  type Vector
 } from 'apache-arrow';
 import {compileArrowExpression} from '../arrow/compiler';
 import type {ArrowExpression} from '../arrow/types';
@@ -33,15 +42,26 @@ function toVector(rows: (number | ScaleColor | null)[], spec: ScaleSpec): Vector
     return vectorFromArray(rows as (number | null)[], new Float64());
   }
   const format = spec.encoding?.format ?? 'rgba8unorm';
-  const type = format === 'rgba8unorm' ? new Uint8() :
-    format === 'rgba16unorm' ? new Uint16() : new Float32();
+  const type =
+    format === 'rgba8unorm'
+      ? new Uint8()
+      : format === 'rgba16unorm'
+        ? new Uint16()
+        : format === 'rgba16float'
+          ? new Float16()
+          : new Float32();
   const factor = format === 'rgba8unorm' ? 255 : format === 'rgba16unorm' ? 65535 : undefined;
   const colors = rows.map(value => {
     const color = asColor(value);
     if (!color) return null;
-    for (const channel of color) if (!Number.isFinite(channel)) {
-      throw new Error('Scale produced a non-finite color channel');
-    }
+    for (const channel of color)
+      if (
+        !Number.isFinite(channel) ||
+        (format === 'rgba16float' && Math.abs(channel) >= 65520) ||
+        (format === 'rgba32float' && !Number.isFinite(Math.fround(channel)))
+      ) {
+        throw new Error('Scale color cannot be represented in the requested format');
+      }
     return factor === undefined
       ? [...color]
       : color.map(component => Math.round(Math.max(0, Math.min(1, component)) * factor));
@@ -67,12 +87,20 @@ export function compileArrowScale(
     const column = parsed.scale.domain.column;
     thresholds = resolveArrowQuantiles(table, column, classCount);
   } else if (kind === 'quantize') {
-    if (!classCount || domain.length !== 2 ||
-        typeof domain[0] !== 'number' || typeof domain[1] !== 'number') {
+    if (
+      !classCount ||
+      domain.length !== 2 ||
+      typeof domain[0] !== 'number' ||
+      typeof domain[1] !== 'number'
+    ) {
       throw new Error('Quantize scale requires a numeric extent and a class count');
     }
-    thresholds = Array.from({length: classCount - 1},
-      (_, i) => domain[0] as number + ((domain[1] as number) - (domain[0] as number)) * (i + 1) / classCount);
+    thresholds = Array.from(
+      {length: classCount - 1},
+      (_, i) =>
+        (domain[0] as number) +
+        (((domain[1] as number) - (domain[0] as number)) * (i + 1)) / classCount
+    );
   } else if (kind === 'threshold') {
     if (domain.some(value => typeof value !== 'number')) {
       throw new Error('Thresholds require numeric domain values');
@@ -80,7 +108,9 @@ export function compileArrowScale(
     thresholds = domain as readonly number[];
   }
   const scale = compileResolvedScale(parsed.scale, domain, thresholds);
-  const compiled = compileArrowExpression(parsed.value as ArrowExpression, {inputSchema: table.schema});
+  const compiled = compileArrowExpression(parsed.value as ArrowExpression, {
+    inputSchema: table.schema
+  });
   const evaluateVector = (input: Vector): Vector => {
     const result: (number | ScaleColor | null)[] = Array.from({length: input.length}, (_, i) => {
       const value = input.get(i);
@@ -108,7 +138,11 @@ export function compileArrowScales<K extends string>(
   expressions: Readonly<Record<K, ParsedSQLScale>>
 ): Record<K, CompiledArrowScale> {
   const entries = Object.entries(expressions) as [K, ParsedSQLScale][];
-  const domains = resolveArrowDomains(table, entries.map(([, parsed]) => parsed.scale.domain));
-  return Object.fromEntries(entries.map(([key, parsed], index) =>
-    [key, compileArrowScale(table, parsed, domains[index])])) as Record<K, CompiledArrowScale>;
+  const domains = resolveArrowDomains(
+    table,
+    entries.map(([, parsed]) => parsed.scale.domain)
+  );
+  return Object.fromEntries(
+    entries.map(([key, parsed], index) => [key, compileArrowScale(table, parsed, domains[index])])
+  ) as Record<K, CompiledArrowScale>;
 }

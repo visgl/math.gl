@@ -4,14 +4,19 @@
 
 import {
   createResolvedScale,
-  type ResolvedScale, type ResolvedScaleDescriptor,
-  type ScaleColor, type ScaleSpec, type ScaleValue
+  type ResolvedScale,
+  type ResolvedScaleDescriptor,
+  type ScaleColor,
+  type ScaleSpec,
+  type ScaleValue
 } from './scale-types';
 import {resolvePalette} from './palettes';
 
 const clamp01 = (value: number): number => Math.min(1, Math.max(0, value));
-const srgbToLinear = (v: number): number => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-const linearToSrgb = (v: number): number => v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055;
+const srgbToLinear = (v: number): number =>
+  v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+const linearToSrgb = (v: number): number =>
+  v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055;
 
 function toOklab(color: ScaleColor): [number, number, number] {
   const [r, g, b] = color.slice(0, 3).map(srgbToLinear);
@@ -34,15 +39,20 @@ function fromOklab([L, a, b]: number[]): [number, number, number] {
     linearToSrgb(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s)
   ];
 }
-function interpolateColor(a: ScaleColor, b: ScaleColor, t: number,
-  space: ScaleSpec['interpolation'] = 'srgb'): ScaleColor {
+function interpolateColor(
+  a: ScaleColor,
+  b: ScaleColor,
+  t: number,
+  space: ScaleSpec['interpolation'] = 'srgb'
+): ScaleColor {
   if (space === 'jzazbz') {
     throw new Error('Jzazbz interpolation is not implemented yet');
   }
   const mix = (x: number, y: number) => x + (y - x) * t;
   const alpha = mix(a[3], b[3]);
   if (space === 'oklab') {
-    const lhs = toOklab(a), rhs = toOklab(b);
+    const lhs = toOklab(a),
+      rhs = toOklab(b);
     const rgb = fromOklab(lhs.map((v, i) => mix(v, rhs[i]!)));
     return [rgb[0], rgb[1], rgb[2], alpha];
   }
@@ -90,20 +100,29 @@ export function compileResolvedScale(
   domain: readonly ScaleValue[],
   thresholds?: readonly number[]
 ): ResolvedScale {
-  const colorType = ['sequential', 'diverging', 'ordinal', 'quantize',
-    'quantile', 'threshold', 'piecewise'].includes(spec.type);
+  const colorType = [
+    'sequential',
+    'diverging',
+    'ordinal',
+    'quantize',
+    'quantile',
+    'threshold',
+    'piecewise'
+  ].includes(spec.type);
   if (colorType && spec.range.type === 'numeric') throw new Error('Color scale requires colors');
-  if (!colorType && spec.range.type !== 'numeric') throw new Error('Numeric scale requires numeric range');
+  if (!colorType && spec.range.type !== 'numeric')
+    throw new Error('Numeric scale requires numeric range');
   const classes = spec.range.type === 'palette' ? spec.range.count : undefined;
   const palette = colorType ? resolvePalette(spec.range, classes) : undefined;
   if (spec.type === 'ordinal' && domain.length > (palette?.length ?? 0)) {
     throw new Error('Ordinal palette must have at least one color per category');
   }
-  const resolvedRange: ResolvedScaleDescriptor['range'] = spec.range.type === 'numeric'
-    ? spec.range
-    : {type: 'colors', values: palette!};
+  const resolvedRange: ResolvedScaleDescriptor['range'] =
+    spec.range.type === 'numeric' ? spec.range : {type: 'colors', values: palette!};
   const descriptor: ResolvedScaleDescriptor = {
-    ...spec, domain: [...domain], range: resolvedRange,
+    ...spec,
+    domain: [...domain],
+    range: resolvedRange,
     ...(spec.range.type === 'palette' ? {palette: spec.range.name} : {}),
     ...(thresholds ? {thresholds: [...thresholds]} : {})
   };
@@ -111,6 +130,9 @@ export function compileResolvedScale(
   const values = isOrdinal ? domain : numericValues(domain);
   const numerical = isOrdinal ? [] : numericValues(domain);
   if (!isOrdinal && numerical.length < 2) throw new Error('Numeric domain requires two endpoints');
+  const pivot = spec.type === 'diverging' ? spec.pivot : undefined;
+  if (pivot !== undefined && !(numerical[0]! < pivot && pivot < numerical[numerical.length - 1]!))
+    throw new Error('Diverging scale pivot must be between the domain endpoints');
   const breaks = thresholds ?? [];
   if (['quantile', 'quantize', 'threshold'].includes(spec.type) && !thresholds) {
     throw new Error(`${spec.type} scale requires resolved class breaks`);
@@ -125,7 +147,8 @@ export function compileResolvedScale(
       return index === -1 ? (spec.nullColor ?? null) : palette![index]!;
     }
     if (typeof value !== 'number' || !Number.isFinite(value)) return spec.nullColor ?? null;
-    const min = numerical[0]!, max = numerical[numerical.length - 1]!;
+    const min = numerical[0]!,
+      max = numerical[numerical.length - 1]!;
     if (value < min && spec.underColor) return spec.underColor;
     if (value > max && spec.overColor) return spec.overColor;
 
@@ -136,14 +159,21 @@ export function compileResolvedScale(
     }
 
     // Piecewise ranges use the resolved domain values as positioned stops.
-    const stopCount = colorType ? palette!.length : (resolvedRange as {values: readonly number[]}).values.length;
+    const stopCount = colorType
+      ? palette!.length
+      : (resolvedRange as {values: readonly number[]}).values.length;
     if (numerical.length !== 2 && numerical.length !== stopCount) {
       throw new Error('Piecewise domain and range stops must have equal lengths');
     }
     let segment = 0;
     let t: number;
     if (numerical.length === 2) {
-      t = normalize(value, min, max, spec.type);
+      t =
+        pivot === undefined
+          ? normalize(value, min, max, spec.type)
+          : value <= pivot
+            ? normalize(value, min, pivot, spec.type) / 2
+            : 0.5 + normalize(value, pivot, max, spec.type) / 2;
       if (spec.clamp ?? colorType) t = clamp01(t);
       const position = t * (stopCount - 1);
       segment = Math.min(stopCount - 2, Math.max(0, Math.floor(position)));
@@ -154,8 +184,13 @@ export function compileResolvedScale(
       if (spec.clamp ?? colorType) t = clamp01(t);
     }
     if (!Number.isFinite(t)) return spec.nullColor ?? null;
-    if (colorType) return interpolateColor(palette![segment]!, palette![segment + 1]!, t,
-      spec.interpolation ?? 'srgb');
+    if (colorType)
+      return interpolateColor(
+        palette![segment]!,
+        palette![segment + 1]!,
+        t,
+        spec.interpolation ?? 'srgb'
+      );
     const numbers = (resolvedRange as {values: readonly number[]}).values;
     return numbers[segment]! + (numbers[segment + 1]! - numbers[segment]!) * t;
   };
