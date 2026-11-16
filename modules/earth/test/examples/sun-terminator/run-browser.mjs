@@ -30,13 +30,17 @@ try {
   await build({root: repositoryRoot, configFile, build: options});
   server = await preview({root: repositoryRoot, configFile, build: options, preview: {host: '127.0.0.1', port: 0}});
   const url = 'http://127.0.0.1:' + server.httpServer.address().port;
-  for (const script of [
+  const scripts = [
     'browser.mjs',
     'camera-browser.mjs',
     'projections-browser.mjs',
     'cut-morph-browser.mjs',
     'state-detail-browser.mjs'
-  ]) {
+  ];
+  // The smoke case boots the real demo and checks rendering and offline tile fallback.
+  const selected =
+    process.env.MATHGL_SOLAR_BROWSER_PROFILE === 'smoke' ? scripts.slice(0, 1) : scripts;
+  for (const script of selected) {
     const {stdout, stderr} = await promisify(execFile)(
       process.execPath,
       [join(fixtureRoot, script)],

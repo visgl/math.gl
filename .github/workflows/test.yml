@@ -25,6 +25,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       full: ${{ steps.profile.outputs.full }}
+      solar-full: ${{ steps.profile.outputs.solar-full }}
       browsers: ${{ steps.profile.outputs.browsers }}
       performance: ${{ steps.profile.outputs.performance }}
     steps:
@@ -335,6 +336,7 @@ jobs:
     timeout-minutes: 15
     needs:
       - build
+      - plan
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -388,12 +390,11 @@ jobs:
       - name: Install Chromium for coverage
         run: yarn playwright install --with-deps chromium
 
-      - name: Test example Node workflows
-        run: yarn test-examples:node
-
-      - name: Test example browser workflows
-        timeout-minutes: 10
-        run: yarn test-examples:browser
+      - name: Test example Node and browser workflows
+        timeout-minutes: 12
+        env:
+          MATHGL_SOLAR_BROWSER_PROFILE: ${{ needs.plan.outputs.solar-full == 'false' && 'smoke' || 'full' }}
+        run: yarn test-examples
 
       - name: Check regressions from landed example reviews
         timeout-minutes: 2
