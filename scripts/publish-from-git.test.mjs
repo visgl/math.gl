@@ -24,22 +24,29 @@ const state = (exists, tagged = exists, provenance = exists) => [
 const ok = () => ({status: 0, output: ''});
 const noWait = async () => {};
 
-test('only the exact two beta.5 bootstrap tarballs may lack provenance', () => {
+test('only checksum-pinned bootstrap tarballs may lack provenance', () => {
   const cases = [
     [
       '@math.gl/arrow',
+      '5.0.0-beta.5',
       'sha512-2Q8LahH2pWpTnmMQOVZ5X424l9Y9J6rhWLcgcMLw8uhjgm0Pk8uNEgrogMBMPoECsRdTsO9/Mw1Xrl7Z2VZSww=='
     ],
     [
       '@math.gl/tasks',
+      '5.0.0-beta.5',
       'sha512-JmsQMUtyBWp+eysANnpaQQttNpJY0Ff7Xu3LvRRjiqkxQ6ZXJd7Z8XJW62pa0yWwickvSkiygVPtlr0Sbz8B3Q=='
+    ],
+    [
+      '@math.gl/sql',
+      '5.0.0-beta.11',
+      'sha512-VxpySm0tH3muEYcbL6+f/XMPyByNdo2F55YBxxFCx1wp05jeaQkxgdqR6AHxzmg4WPZUYHGOqEcrXIW0WEG4dw=='
     ]
   ];
-  for (const [name, integrity] of cases) {
-    assert.equal(verifiedPublication(name, '5.0.0-beta.5', {integrity}), true);
-    assert.equal(verifiedPublication(name, '5.0.0-beta.6', {integrity}), false);
-    assert.equal(verifiedPublication(name, '5.0.0-beta.5', {integrity: 'wrong'}), false);
-    assert.equal(verifiedPublication(name, '5.0.0-beta.5', undefined), false);
+  for (const [name, version, integrity] of cases) {
+    assert.equal(verifiedPublication(name, version, {integrity}), true);
+    assert.equal(verifiedPublication(name, '5.0.0-beta.12', {integrity}), false);
+    assert.equal(verifiedPublication(name, version, {integrity: 'wrong'}), false);
+    assert.equal(verifiedPublication(name, version, undefined), false);
   }
   assert.equal(verifiedPublication('@math.gl/core', '5.0.0-beta.5', {}), false);
   assert.equal(
