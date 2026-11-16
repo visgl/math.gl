@@ -123,3 +123,40 @@ test('list elements and struct fields can be chained without losing nested types
   expect(Array.from(result).slice(1)).toEqual([null, null, null]);
   expect(selected.evaluateTable(new Table(input.schema, [])).type).toEqual(point);
 });
+
+test('CASE selects nested list and struct results from Arrow extraction', () => {
+  const list = new List(new Field('item', new Int32(), true));
+  const entry = new Struct([new Field('values', list)]);
+  const input = new Table({
+    selectLeft: vectorFromArray([true, false, true]),
+    leftEntry: vectorFromArray([{values: [1]}, {values: [2]}, null], entry),
+    rightEntry: vectorFromArray([{values: [3]}, {values: [4, null]}, {values: [5]}], entry),
+    entries: vectorFromArray(
+      [[{values: [1]}], [{values: [2]}], []],
+      new List(new Field('item', entry))
+    )
+  });
+  const result = queryArrowSQL(
+    `SELECT CASE WHEN selectLeft THEN leftEntry.values ELSE rightEntry.values END AS vals,
+            CASE WHEN selectLeft THEN entries[1] ELSE entries[-1] END AS entry,
+            CASE WHEN selectLeft THEN entries[1] END AS maybeEntry
+     FROM data`,
+    new Map([['data', input]])
+  );
+  const lists = result.getChild('vals')!;
+  expect(Array.from(lists, value => (value === null ? null : Array.from(value)))).toEqual([
+    [1],
+    [4, null],
+    null
+  ]);
+  const entries = result.getChild('entry')!;
+  expect(Array.from(entries, value => (value === null ? null : Array.from(value.values)))).toEqual([
+    [1],
+    [2],
+    null
+  ]);
+  const optional = result.getChild('maybeEntry')!;
+  expect(Array.from(optional, value => (value === null ? null : Array.from(value.values)))).toEqual(
+    [[1], null, null]
+  );
+});
