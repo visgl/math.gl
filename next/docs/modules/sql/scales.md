@@ -53,3 +53,31 @@ The scale **descriptor** remains JSON-safe for transport, legends and tooltips. 
 Color values are normalized-channel tuples, not CSS encodings. The `ScaleColorEncoding` distinguishes primaries (sRGB, Display P3, Rec.2020), transfer (sRGB, linear, PQ, HLG), and storage (UNORM8/16, Float16/32). Values above 1 are **not clipped** in a floating-point scene-linear range; gamut mapping, tone mapping and output presentation are separate downstream responsibilities.
 
 See <https://github.com/visgl/deck.gl/issues/11147> for the cross-repository tracker.
+
+## Evaluate on Arrow[​](#evaluate-on-arrow "Direct link to Evaluate on Arrow")
+
+Install Apache Arrow and import `compileArrowScale` from `@math.gl/sql/arrow-scales`. It resolves the domain from your table, binds the input expression, and returns a sampler and an evaluator for Arrow tables and record batches.
+
+```
+import {parseSQLScaleExpression} from '@math.gl/sql/scales';
+
+import {compileArrowScale} from '@math.gl/sql/arrow-scales';
+
+
+
+const parsed = parseSQLScaleExpression(
+
+  "SCALE_COLOR(temperature, DOMAIN(temperature), PALETTE('viridis'))"
+
+);
+
+const scale = compileArrowScale(table, parsed);
+
+const colors = scale.evaluate(table);
+
+const legend = scale.scale.descriptor;
+```
+
+Color evaluation returns a four-channel Arrow vector with the requested storage format. The sampler and legend use the same resolved domain and color stops.
+
+Quantile scales collapse tied class breaks and omit the corresponding empty classes from the resolved colors. Arrow Int64 and Uint64 values are accepted within JavaScript's safe integer range.
