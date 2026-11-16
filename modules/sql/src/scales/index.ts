@@ -19,3 +19,6 @@ export type {
 
 export {parseSQLScaleExpression} from './parse-sql-scale';
 export type {ParsedSQLScale} from './parse-sql-scale';
+
+export {compileResolvedScale} from './compile-scale';
+export {resolvePalette, listScalePalettes} from './palettes';
