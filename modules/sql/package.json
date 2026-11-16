@@ -33,6 +33,11 @@
       "import": "./dist/scales/index.js",
       "require": "./dist/scales/index.cjs"
     },
+    "./scales/arrow": {
+      "types": "./dist/scales/arrow-scales.d.ts",
+      "import": "./dist/scales/arrow-scales.js",
+      "require": "./dist/scales/arrow-scales.cjs"
+    },
     "./parser": {
       "types": "./dist/sql/index.d.ts",
       "import": "./dist/sql/index.js",
