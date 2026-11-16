@@ -6,7 +6,12 @@ import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
 import {parseSQLScaleExpression} from '../src/scales';
 import {compileResolvedScale, resolvePalette} from '../src/scales';
-import {compileArrowScale, compileArrowScales} from '@math.gl/sql/arrow-scales';
+import {
+  bindArrowScale,
+  compileArrowScale,
+  compileArrowScales,
+  createStreamingDomainAccumulator
+} from '@math.gl/sql/arrow-scales';
 import {resolveArrowDomains, resolveArrowQuantiles} from '../src/scales/arrow-domains';
 
 test('shared Arrow extents, symmetric and percentile domains', () => {
@@ -59,6 +64,33 @@ test('quantile class breaks are explicit and stable', () => {
   );
   expect(result.scale.descriptor.thresholds).toEqual([8, 16, 24, 32]);
   expect(result.evaluate(table).length).toBe(5);
+});
+
+test('binds streamed quantile breaks without scanning evaluation rows', () => {
+  const training = tableFromArrays({value: [0, 10, 20, 30, 40]});
+  const evaluation = tableFromArrays({value: [5, 6, 7]});
+  const parsed = parseSQLScaleExpression("SCALE_QUANTILE(value, 5, PALETTE('Blues'))");
+  const accumulator = createStreamingDomainAccumulator([parsed.scale.domain], {
+    quantileColumns: ['value']
+  });
+  for (const batch of training.batches) accumulator.update(batch);
+  const domain = accumulator.result()[0]!;
+  const quantileBreaks = accumulator.quantileBreaks('value', 5);
+  const result = bindArrowScale(training.schema, parsed, {domain, quantileBreaks});
+  expect(result.scale.descriptor.domain).toEqual([0, 40]);
+  expect(result.scale.descriptor.thresholds).toEqual([8, 16, 24, 32]);
+  expect(result.evaluateBatch(evaluation.batches[0]!).get(2)?.toArray()).toEqual(
+    new Uint8Array(
+      (result.scale.sample(7) as readonly number[]).map(value => Math.round(value * 255))
+    )
+  );
+  expect(() => bindArrowScale(training.schema, parsed, {domain})).toThrow('resolved break');
+  expect(() =>
+    bindArrowScale(training.schema, parsed, {
+      domain,
+      quantileBreaks: [8, 16, 12, 32]
+    })
+  ).toThrow('nondecreasing');
 });
 
 test('shared domain planner returns separate compiled attribute scales', () => {
@@ -132,6 +164,15 @@ test('tied quantiles drop empty classes from the sampler and legend', () => {
   expect(thresholds).toEqual([0, expect.closeTo(4), 10]);
   expect(range.values).toHaveLength(4);
   expect(scale.scale.sample(0)).toEqual(range.values[1]);
+});
+
+test('constant quantize domains retain only reachable palette classes', () => {
+  const table = tableFromArrays({value: [5, 5]});
+  const parsed = parseSQLScaleExpression("SCALE_QUANTIZE(value, 5, PALETTE('Blues'))");
+  const result = bindArrowScale(table.schema, parsed, {domain: [5, 5]});
+  expect(result.scale.descriptor.thresholds).toEqual([5]);
+  expect(result.scale.descriptor.range.values).toHaveLength(2);
+  expect(result.scale.sample(5)).toEqual(result.scale.descriptor.range.values[1]);
 });
 
 test('safe Arrow Int64 values scale without losing missing color rows', () => {
