@@ -15,10 +15,10 @@
       "measuredUpdates": 20,
       "rebuiltTiles": 24,
       "fullRebuildParity": true,
-      "incrementalMedianMs": 4.929040999999984,
-      "incrementalP95Ms": 7.76724999999999,
-      "fullMedianMs": 18.410750000000007,
-      "fullP95Ms": 21.131458000000066
+      "incrementalMedianMs": 4.315083999999956,
+      "incrementalP95Ms": 7.806750000000079,
+      "fullMedianMs": 18.74654099999998,
+      "fullP95Ms": 23.429959000000053
     },
     {
       "dataset": "sierra-nodata",
@@ -32,10 +32,10 @@
       "measuredUpdates": 20,
       "rebuiltTiles": 24,
       "fullRebuildParity": true,
-      "incrementalMedianMs": 2.791832999999997,
-      "incrementalP95Ms": 3.740792000000056,
-      "fullMedianMs": 14.017749999999978,
-      "fullP95Ms": 16.58020800000031
+      "incrementalMedianMs": 2.964915999999903,
+      "incrementalP95Ms": 3.5629160000000866,
+      "fullMedianMs": 13.899209000000155,
+      "fullP95Ms": 15.75850000000014
     }
   ]
 }

@@ -222,3 +222,18 @@ test('bounded multi-tile edit/eviction replay agrees with every full rebuild', (
     cache = update.cache;
   }
 });
+
+test('resident reordering preserves output identity for seam-coincident and local cut edges', () => {
+  const polygon = [
+    [0.25, 0.25],
+    [1, 0.25],
+    [1, 0.75],
+    [0.25, 0.75]
+  ] as const;
+  const tiles = [resident('left', 0), resident('right', 1)];
+  const initial = updateTerrainTileCutouts(tiles, polygon);
+  const reordered = updateTerrainTileCutouts([...tiles].reverse(), polygon, initial.cache);
+  expect(reordered.rebuilt).toEqual([]);
+  expect(reordered.changed).toEqual([]);
+  for (const tile of tiles) expect(reordered.tiles.get(tile.id)).toBe(initial.tiles.get(tile.id));
+});

@@ -163,21 +163,20 @@ export function updateTerrainTileCutouts(
       const combined = assembleTerrainCutoutTiles([a.resident.mesh, b.resident.mesh], limits);
       validateTerrainCutoutTopology(combined.mesh, combined.remainingWork);
     }
-  const boundaries = new Map<string, {edge: Boundary; tile: number; paired: boolean}>();
-  const cuts = values.map(() => [[], []] as [number[], number[]]);
+  const boundaries = new Map<string, {edge: Boundary; paired: boolean}>();
+  const cutKeys = new Set<string>();
   for (let tile = 0; tile < values.length; tile++)
     for (const edge of values[tile].edges) {
       const other = boundaries.get(edge.key);
       if (!other) {
-        boundaries.set(edge.key, {edge, tile, paired: false});
+        boundaries.set(edge.key, {edge, paired: false});
         continue;
       }
       if (other.paired || other.edge.start !== edge.end || other.edge.end !== edge.start)
         throw new RangeError('Nonconforming terrain cutout tile boundary');
       other.paired = true;
       if (other.edge.side !== edge.side) {
-        cuts[other.tile][other.edge.side].push(other.edge.a, other.edge.b);
-        cuts[tile][edge.side].push(edge.a, edge.b);
+        cutKeys.add(edge.key);
       }
     }
   const tiles = new Map<string, TerrainCutout>();
@@ -185,8 +184,11 @@ export function updateTerrainTileCutouts(
   for (let i = 0; i < values.length; i++) {
     const entry = values[i];
     const old = prior?.entries.get(entry.resident.id);
-    const patch = withEdges(entry.split.patch, cuts[i][0], old?.displayed.patch);
-    const remainder = withEdges(entry.split.remainder, cuts[i][1], old?.displayed.remainder);
+    // Emit in cached tile-local order, independent of resident visitation order.
+    const cuts: [number[], number[]] = [[], []];
+    for (const edge of entry.edges) if (cutKeys.has(edge.key)) cuts[edge.side].push(edge.a, edge.b);
+    const patch = withEdges(entry.split.patch, cuts[0], old?.displayed.patch);
+    const remainder = withEdges(entry.split.remainder, cuts[1], old?.displayed.remainder);
     const displayed =
       old && patch === old.displayed.patch && remainder === old.displayed.remainder
         ? old.displayed
