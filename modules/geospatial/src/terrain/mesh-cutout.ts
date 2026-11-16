@@ -47,7 +47,15 @@ export type TerrainCutoutOptions = {
 export type TerrainCutout = {patch: TerrainCutoutPiece; remainder: TerrainCutoutPiece};
 
 type Fragment = {ids: number[]; inside: boolean};
-type Boundary = {edge: Edge; count: number; polygon: number};
+/** Edge incidence and owning polygon while assembling one output piece. */
+type Boundary = {
+  /** Directed output vertex IDs. */
+  edge: Edge;
+  /** Number of incident output faces. */
+  count: number;
+  /** Input polygon index of the incident face, or -1 for the remainder. */
+  polygon: number;
+};
 type PieceBuilder = {
   ids: Map<number, number>;
   positions: number[];
@@ -57,7 +65,9 @@ type PieceBuilder = {
   sourceFaces: number[];
   boundary: Map<string, Boundary>;
   cutEdges: number[];
+  /** One input polygon index per face; remainder -1 converts to Uint32 0xffffffff. */
   polygonIndices: number[];
+  /** One owning patch polygon index per directed cut edge, on both sides. */
   cutPolygonIndices: number[];
 };
 

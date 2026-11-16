@@ -38,6 +38,7 @@ export type TerrainTileCutoutUpdateOptions = TerrainCutoutOptions & {
 };
 /** Directed boundary edge with exact coordinate keys and local vertex IDs. */
 type Boundary = {
+  /** Incident face polygon index; remainder faces use the Uint32 sentinel 0xffffffff. */
   polygon: number;
   key: string;
   start: string;
@@ -251,7 +252,16 @@ function withEdges(
 }
 /** Cache only exposed edges; interior triangulation edges never become walls. */
 function boundaryEdges(piece: TerrainCutoutPiece, side: 0 | 1): Boundary[] {
-  const edges = new Map<string, {a: number; b: number; count: number; polygon: number}>();
+  const edges = new Map<
+    string,
+    {
+      a: number;
+      b: number;
+      count: number;
+      /** Incident face polygon index, including the remainder sentinel 0xffffffff. */
+      polygon: number;
+    }
+  >();
   for (let i = 0; i < piece.indices.length; i += 3)
     for (let j = 0; j < 3; j++) {
       const a = piece.indices[i + j],
