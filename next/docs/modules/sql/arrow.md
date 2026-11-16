@@ -28,6 +28,18 @@ console.log(expression.outputField, result);
 
 Compile once and reuse across batches with the same ordered field names, types, encodings and nullability. GeoArrow extension encoding/CRS metadata must match; other metadata differences do not invalidate a binding. Evaluation preserves row count; empty batches return empty vectors. Output field names can be replaced by an application's SELECT AS alias. WHERE column names and SELECT alias resolution belong to the caller's query planner.
 
+## Nested columns[​](#nested-columns "Direct link to Nested columns")
+
+Use `LIST_EXTRACT(start, 3)` or `start[3]` to read the third element of an Arrow `List` or `FixedSizeList` column. Indexes start at 1, and negative indexes count from the end. Zero, non-integer or out-of-range indexes, and null inputs return null.
+
+Use `STRUCT_EXTRACT(endpoint, 'longitude')` or `endpoint.longitude` to read a named field from an Arrow `Struct` column. The field must exist in the Arrow schema and the explicit function takes its name as a string literal. A null parent struct yields null. Each operation retains the selected element or field type.
+
+```
+SELECT start[3] AS altitude, endpoint.longitude AS longitude
+
+WHERE start[3] > 0
+```
+
 ## Functions[​](#functions "Direct link to Functions")
 
 ### compileArrowExpression(expression, options)[​](#compilearrowexpressionexpression-options "Direct link to compileArrowExpression(expression, options)")
