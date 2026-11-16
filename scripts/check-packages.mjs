@@ -9,7 +9,7 @@ import {execFileSync} from 'node:child_process';
 
 const root = new URL('../', import.meta.url);
 const require = createRequire(import.meta.url);
-const expected = ['arrow', 'core', 'dggs', 'earth', 'expressions', 'geometry', 'geospatial', 'tasks', 'web-mercator'];
+const expected = ['arrow', 'core', 'dggs', 'earth', 'geometry', 'geospatial', 'sql', 'tasks', 'web-mercator'];
 const modules = readdirSync(new URL('modules/', root)).filter(name =>
   existsSync(new URL(`modules/${name}/package.json`, root))
 );
@@ -26,9 +26,9 @@ execFileSync(process.execPath, ['--input-type=module', '-e', `
   }});
   const require = createRequire(import.meta.url);
   for (const load of [specifier => import(specifier), specifier => require(specifier)]) {
-    const {compile} = await load('@math.gl/expressions');
+    const {compile} = await load('@math.gl/sql/expressions');
     assert.equal(compile('value * 2')({value: 5}), 10);
-    const {parseSQLQuery} = await load('@math.gl/expressions/sql');
+    const {parseSQLQuery} = await load('@math.gl/sql/parser');
     assert.deepEqual(parseSQLQuery('SHOW SOURCES'), {command: 'showSources'});
   }
 `], {cwd: root, stdio: 'inherit'});
@@ -57,22 +57,40 @@ for (const name of expected) {
     const specifier = manifest.name + (subpath === '.' ? '' : subpath.slice(1));
     const imported = await import(specifier);
     const required = require(specifier);
-    if (specifier === '@math.gl/expressions/arrow') {
-      assert.equal(typeof imported.compileArrowAggregates, 'function');
-      assert.equal(typeof required.compileArrowAggregates, 'function');
+    if (specifier === '@math.gl/sql') {
+      for (const [sql, arrow] of [[imported, await import('apache-arrow')], [required, require('apache-arrow')]]) {
+        const orders = arrow.tableFromArrays({
+          category: ['books', 'games', 'books'], quantity: new Int32Array([2, 1, 3])
+        });
+        const result = sql.queryArrowSQL(
+          'SELECT category, SUM(quantity) AS units FROM orders GROUP BY category ORDER BY units DESC',
+          new Map([['orders', orders]])
+        );
+        assert.equal(result.getChild('category').get(0), 'books');
+        assert.equal(result.getChild('units').get(0), 5n);
+        assert.equal(typeof sql.queryArrowTableInBatches, 'function');
+        assert.equal(typeof sql.queryArrowAggregateSnapshots, 'function');
+        assert.equal('compile' in sql, false, 'Portable evaluation belongs to /expressions');
+        assert.equal('createArrowQueryWorker' in sql, false, 'Workers must be opt-in');
+        assert.equal('SIN' in sql, false, 'Function libraries must be opt-in');
+      }
+    }
+    if (specifier === '@math.gl/sql/arrow') {
+      assert.equal(typeof imported.compileArrowExpression, 'function');
+      assert.equal(typeof required.compileArrowExpression, 'function');
       assert.equal(imported.isExpressionEvaluationError(new required.ExpressionEvaluationError('domain', 'cross-bundle')), true);
       assert.equal(required.isExpressionEvaluationError(new imported.ExpressionEvaluationError('overflow', 'cross-bundle')), true);
       assert.equal('ArrowFunctionRegistry' in imported, false);
       assert.equal('ArrowFunctionRegistry' in required, false);
     }
-    if (specifier === '@math.gl/expressions/math') {
+    if (specifier === '@math.gl/sql/math-functions') {
       for (const math of [imported, required]) {
         assert.equal(Object.keys(math).length, 21);
         assert.equal(math.SIN.name, 'SIN');
         assert.equal(math.ROUND.prototypes.find(p => p.arguments[0].type.toString() === 'Float64').evaluateScalar(-1.5), -2);
       }
     }
-    if (specifier === '@math.gl/expressions') {
+    if (specifier === '@math.gl/sql/expressions') {
       for (const expressions of [imported, required]) {
         expressions.validateExpressionAST({type:'Identifier',name:'x'});
         assert.deepEqual(expressions.getExpressionColumns({type:'Identifier',name:'x'}), ['x']);
@@ -84,7 +102,7 @@ for (const name of expected) {
       assert.equal('parseSQLQuery' in imported, false);
       assert.equal('parseSQLQuery' in required, false);
     }
-    if (specifier === '@math.gl/expressions/sql') {
+    if (specifier === '@math.gl/sql/parser') {
       for (const sql of [imported, required]) {
         assert.equal(sql.parseSQLExpression('value::INTEGER').type, 'CallExpression');
         assert.deepEqual(sql.parseSQLQuery('SHOW TABLES FROM warehouse'), {command: 'showTables', from: 'warehouse'});

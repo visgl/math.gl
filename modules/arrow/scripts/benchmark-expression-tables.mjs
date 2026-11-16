@@ -3,13 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {performance} from 'node:perf_hooks';
 import {Table, Float64, Utf8, vectorFromArray} from 'apache-arrow';
-import {compile} from '@math.gl/expressions';
+import {compile} from '@math.gl/sql/expressions';
 import {TaskRunner} from '@math.gl/tasks';
 import {splitArrowBuffers} from '@math.gl/arrow';
-import {compileArrowExpression} from '@math.gl/expressions/arrow';
-import {createArrowExpressionTask, prepareArrowExpressionInput, hydrateArrowExpressionResult} from '@math.gl/expressions/arrow/worker';
+import {compileArrowExpression} from '@math.gl/sql/arrow';
+import {createArrowExpressionTask, prepareArrowExpressionInput, hydrateArrowExpressionResult} from '@math.gl/sql/worker';
 
-const task = createArrowExpressionTask({worker: {url: new URL(import.meta.resolve('@math.gl/expressions/arrow/worker-entry.js')), capabilities: {atomic: true, streaming: false}}});
+const task = createArrowExpressionTask({worker: {url: new URL(import.meta.resolve('@math.gl/sql/worker-entry.js')), capabilities: {atomic: true, streaming: false}}});
 const runner = new TaskRunner();
 const iterations = 5;
 let checksum = 0;

@@ -13,7 +13,7 @@ test('public entrypoints resolve to workspace source, including consolidated pro
     resolve(__dirname, '../modules/geospatial/src/projection/experimental/core.ts'));
   assert.equal(aliases['@math.gl/geospatial/projection/projections/merc'],
     resolve(__dirname, '../modules/geospatial/src/projection/experimental/entries/projections/merc.ts'));
-  assert.ok(Object.keys(aliases).some(name => name.startsWith('@math.gl/expressions')));
+  assert.ok(Object.keys(aliases).some(name => name.startsWith('@math.gl/sql/expressions')));
   assert.ok(Object.values(aliases).every(path => !path.includes('/dist/')));
 });
 
@@ -58,7 +58,12 @@ test('deck.gl custom projections use the repository projection engine', async ()
       }}]
     });
     assert.ok(Object.keys(result.metafile.inputs).some(path => path.includes('modules/geospatial/src/')));
-    assert.ok(!Object.keys(result.metafile.inputs).some(path => path.includes('node_modules/@math.gl/')));
+    // Published dependencies may still use packages outside the current workspace set.
+    const workspacePackages = new Set(Object.keys(aliases).map(name => name.split('/').slice(0, 2).join('/')));
+    assert.ok(!Object.keys(result.metafile.inputs).some(path => {
+      const dependency = path.match(/node_modules\/(@math\.gl\/[^/]+)/)?.[1];
+      return dependency && workspacePackages.has(dependency);
+    }));
     const {sameEngine, roundTrip} = await (await import(pathToFileURL(outfile))).check();
     assert.equal(sameEngine, true, 'deck.gl and the application must share the projection engine');
     assert.ok(Math.abs(roundTrip[0] + 100) < 1e-7);

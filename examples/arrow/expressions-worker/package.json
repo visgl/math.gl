@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@math.gl/arrow": "workspace:*",
-    "@math.gl/expressions": "workspace:*",
+    "@math.gl/sql": "workspace:*",
     "@math.gl/tasks": "workspace:*",
     "apache-arrow": "17.0.0"
   }

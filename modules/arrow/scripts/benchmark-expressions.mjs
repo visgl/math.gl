@@ -4,8 +4,8 @@
 
 import {performance} from 'node:perf_hooks';
 import {Table, Float64, Utf8, vectorFromArray} from 'apache-arrow';
-import {compile} from '@math.gl/expressions';
-import {compileArrowExpression} from '@math.gl/expressions/arrow';
+import {compile} from '@math.gl/sql/expressions';
+import {compileArrowExpression} from '@math.gl/sql/arrow';
 
 const count = 16384;
 const iterations = 30;

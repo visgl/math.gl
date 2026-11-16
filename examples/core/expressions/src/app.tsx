@@ -8,7 +8,7 @@ import {
   ExpressionFunctionRegistry,
   compileAsync,
   type ExpressionFunctionLibrary
-} from '@math.gl/expressions';
+} from '@math.gl/sql/expressions';
 import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial';
 /* The repository ESLint resolver does not understand package export subpaths. */
 /* eslint-disable import/no-unresolved */

@@ -4,10 +4,10 @@
 import assert from 'node:assert/strict';
 import {cpus} from 'node:os';
 import {Table, makeVector} from 'apache-arrow';
-import {compile, BASIC_MATH_FUNCTION_LIBRARY} from '@math.gl/expressions';
-import {parseSQLExpression} from '@math.gl/expressions/sql';
-import {compileArrowExpression} from '@math.gl/expressions/arrow';
-import {SIN, COS, SQRT} from '@math.gl/expressions/math';
+import {compile, BASIC_MATH_FUNCTION_LIBRARY} from '@math.gl/sql/expressions';
+import {parseSQLExpression} from '@math.gl/sql/parser';
+import {compileArrowExpression} from '@math.gl/sql/arrow';
+import {SIN, COS, SQRT} from '@math.gl/sql/math-functions';
 
 const quick = process.argv.includes('--quick');
 const batchRows = quick ? 1024 : 16384;

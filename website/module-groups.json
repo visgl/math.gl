@@ -2,11 +2,11 @@
   {
     "id": "foundations",
     "label": "Foundations",
-    "description": "Vectors, matrices, shared numeric types, and expression evaluation.",
+    "description": "Vectors, matrices, shared numeric types, and SQL queries over Arrow tables.",
     "modules": [
       "core",
       "core/types",
-      "expressions"
+      "sql"
     ]
   },
   {

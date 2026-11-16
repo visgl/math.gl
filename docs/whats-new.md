@@ -36,7 +36,7 @@ Look up a location's timezone with [timezone](./modules/earth/timezone/README.md
 
 ### Keep the math close and the bundle lean
 
-[Core](./modules/core/README.md) adds clearer matrix and rotation conversions, stronger array types, and tree-shakeable low-level namespaces. New [expressions](modules/expressions/README.md) tools make it possible to parse and evaluate configurable expressions; expression evaluation is experimental.
+[Core](./modules/core/README.md) adds clearer matrix and rotation conversions, stronger array types, and tree-shakeable low-level namespaces. The experimental [SQL engine](modules/sql/README.md) queries native Arrow tables, computes columns, and aggregates record batches. It also provides portable SQL parsing and expression evaluation.
 
 ### Lighting and color calculations
 
@@ -51,7 +51,8 @@ Version 5 groups related tools into nine packages. Install the package root and 
 
 | Package | Purpose |
 | --- | --- |
-| [core](./modules/core/README.md) | Vectors, matrices, rotations, types, and expressions |
+| [core](./modules/core/README.md) | Vectors, matrices, rotations, and types |
+| [sql](./modules/sql/README.md) | SQL queries over Arrow tables, parsing, and expression evaluation |
 | [geometry](./modules/geometry/README.md) | Primitives, polygons, geometry utilities, and culling |
 | [geospatial](./modules/geospatial/README.md) | Ellipsoids, coordinate systems, projections, and tile matrices |
 | [earth](./modules/earth/README.md) | Geoid models, sky calculations, and timezones |
