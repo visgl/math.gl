@@ -56,7 +56,7 @@ export function projectGeographicTerrainCutout(
   validatePositions(positions);
   const result = new Float64Array(positions.length);
   const [sin0, cos0] = latitude(frame.center[1]);
-  const minimum = Math.cos(frame.maxAngularRadius * RAD);
+  const maximum = chartLimit(frame);
   for (let i = 0; i < positions.length; i += 3) {
     const lon = positions[i],
       lat = positions[i + 1];
@@ -65,9 +65,12 @@ export function projectGeographicTerrainCutout(
     const cos = Math.abs(lat) === 90 ? 0 : Math.cos(lat * RAD);
     const delta = wrap(wrap(lon) - frame.center[0]) * RAD;
     const dot = sin0 * sin + cos0 * cos * Math.cos(delta);
-    if (dot < minimum) throw new RangeError('Terrain coordinate exceeds geographic cutout chart');
-    result[i] = (frame.radius * cos * Math.sin(delta)) / dot;
-    result[i + 1] = (frame.radius * (cos0 * sin - sin0 * cos * Math.cos(delta))) / dot;
+    const x = (cos * Math.sin(delta)) / dot;
+    const y = (cos0 * sin - sin0 * cos * Math.cos(delta)) / dot;
+    if (!(dot > 0) || Math.hypot(x, y) > maximum)
+      throw new RangeError('Terrain coordinate exceeds geographic cutout chart');
+    result[i] = frame.radius * x;
+    result[i + 1] = frame.radius * y;
     result[i] ||= 0;
     result[i + 1] ||= 0;
     result[i + 2] = positions[i + 2];
@@ -89,12 +92,12 @@ export function unprojectGeographicTerrainCutout(
   validatePositions(positions);
   const result = new Float64Array(positions.length);
   const [sin0, cos0] = latitude(frame.center[1]);
-  const maximum = Math.tan(frame.maxAngularRadius * RAD);
+  const maximum = chartLimit(frame);
   for (let i = 0; i < positions.length; i += 3) {
     const x = positions[i] / frame.radius,
       y = positions[i + 1] / frame.radius;
     const distance = Math.hypot(x, y);
-    if (!Number.isFinite(distance) || distance > maximum * (1 + 8 * Number.EPSILON))
+    if (!Number.isFinite(distance) || distance > maximum)
       throw new RangeError('Terrain coordinate exceeds geographic cutout chart');
     const horizontal = cos0 - y * sin0;
     const vertical = sin0 + y * cos0;
@@ -142,4 +145,10 @@ function validatePositions(positions: Float32Array | Float64Array) {
     !positions.every(Number.isFinite)
   )
     throw new RangeError('Invalid geographic terrain cutout positions');
+}
+
+/** Shared roundoff allowance for inclusive forward/inverse angular caps. */
+function chartLimit(frame: GeographicTerrainCutoutFrame) {
+  const distance = Math.tan(frame.maxAngularRadius * RAD);
+  return distance + 16 * Number.EPSILON * (1 + distance);
 }

@@ -2227,7 +2227,8 @@ chart. `projectGeographicTerrainCutout` maps packed longitude/latitude/height
 arrays to chart X/Y/height; `unprojectGeographicTerrainCutout` reverses this.
 Horizontal coordinates are meters and heights retain their original units and
 vertical datum. The default radius is 6378137 m; the default angular cap is 30°,
-with a maximum configurable cap of 80°.
+with a maximum configurable cap of 80°. Forward and inverse checks use the
+same small floating-point allowance at the inclusive cap boundary.
 
 ```ts
 import {

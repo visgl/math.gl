@@ -190,3 +190,27 @@ test('projection validates packed shapes and prevents numerical overflow', () =>
   );
   expect(() => unprojectGeographicTerrainCutout(Float64Array.of(Infinity, 0, 0), frame)).toThrow();
 });
+
+test('inclusive chart caps survive non-equatorial forward/inverse round trips', () => {
+  for (const centerLatitude of Array.from({length: 33}, (_, i) => -80 + i * 5))
+    for (const cap of [1, 5, 10, 20, 30, 40, 60, 80]) {
+      const frame = createGeographicTerrainCutoutFrame({
+        center: [0, centerLatitude],
+        maxAngularRadius: cap
+      });
+      for (const latitude of [centerLatitude - cap, centerLatitude + cap]) {
+        if (Math.abs(latitude) > 90) continue;
+        const positions = Float64Array.of(0, latitude, -4000);
+        const projected = projectGeographicTerrainCutout(positions, frame);
+        const restored = unprojectGeographicTerrainCutout(projected, frame);
+        expect(restored[1]).toBeCloseTo(latitude, 12);
+        expect(restored[2]).toBe(-4000);
+      }
+      expect(() =>
+        projectGeographicTerrainCutout(
+          Float64Array.of(0, centerLatitude + cap + 0.000001, 0),
+          frame
+        )
+      ).toThrow();
+    }
+});
