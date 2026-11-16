@@ -22,3 +22,6 @@ export type {ParsedSQLScale} from './parse-sql-scale';
 
 export {compileResolvedScale} from './compile-scale';
 export {resolvePalette, listScalePalettes} from './palettes';
+
+export {createStreamingDomainAccumulator, ScaleQuantileSketch} from './streaming-domains';
+export type {StreamingDomainOptions} from './streaming-domains';
