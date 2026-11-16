@@ -582,6 +582,7 @@
           "modules/sql/arrow/sql-conformance",
           "modules/sql/math-functions/README",
           "modules/sql/color-functions/README",
+          "modules/sql/scales/README",
           "modules/sql/expressions",
           "modules/sql/api-reference/expression-eval",
           "modules/sql/api-reference/function-registry",
