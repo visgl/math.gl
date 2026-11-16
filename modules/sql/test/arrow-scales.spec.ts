@@ -1,0 +1,73 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+
+import {expect, test} from 'vitest';
+import {tableFromArrays} from 'apache-arrow';
+import {parseSQLScaleExpression} from '../src/scales';
+import {compileResolvedScale, resolvePalette} from '../src/scales';
+import {compileArrowScale, compileArrowScales} from '../src/scales/arrow-scales';
+import {resolveArrowDomains, resolveArrowQuantiles} from '../src/scales/arrow-domains';
+
+test('shared Arrow extents, symmetric and percentile domains', () => {
+  const table = tableFromArrays({value: [-10, 0, 20, null], label: ['B', 'A', 'B', 'C']});
+  expect(resolveArrowDomains(table, [
+    {type: 'extent', column: 'value'},
+    {type: 'symmetric', column: 'value', pivot: 0},
+    {type: 'percentile', column: 'value', lower: 0.25, upper: 0.75},
+    {type: 'categories', column: 'label'}
+  ])).toEqual([[-10, 20], [-20, 20], [-5, 10], ['A', 'B', 'C']]);
+});
+
+test('numeric Arrow scale preserves rows and exposes resolved numeric domain', () => {
+  const table = tableFromArrays({population: [0, 25, 100, null]});
+  const compiled = compileArrowScale(
+    table, parseSQLScaleExpression('SCALE_SQRT(population, DOMAIN(population), RANGE(2, 20))')
+  );
+  expect(compiled.scale.descriptor.domain).toEqual([0, 100]);
+  expect(compiled.evaluate(table).toArray()[2]).toBeCloseTo(20);
+  expect(compiled.evaluate(table).get(3)).toBeNull();
+});
+
+test('continuous color scale and legend sample agree', () => {
+  const table = tableFromArrays({value: [0, 50, 100]});
+  const compiled = compileArrowScale(
+    table, parseSQLScaleExpression("SCALE_COLOR(value, DOMAIN(value), PALETTE('viridis'))")
+  );
+  const middle = compiled.scale.sample(50) as readonly number[];
+  const vector = compiled.evaluate(table);
+  const channels = vector.get(1)!.toArray() as Uint8Array;
+  expect(Array.from(channels)).toEqual(middle.map(x => Math.round(x * 255)));
+  expect(compiled.scale.descriptor.palette).toBe('viridis');
+});
+
+test('quantile class breaks are explicit and stable', () => {
+  const table = tableFromArrays({v: [0, 10, 20, 30, 40]});
+  expect(resolveArrowQuantiles(table, 'v', 5)).toEqual([8, 16, 24, 32]);
+  const result = compileArrowScale(
+    table, parseSQLScaleExpression("SCALE_QUANTILE(v, 5, PALETTE('Blues'))")
+  );
+  expect(result.scale.descriptor.thresholds).toEqual([8, 16, 24, 32]);
+  expect(result.evaluate(table).length).toBe(5);
+});
+
+test('shared domain planner returns separate compiled attribute scales', () => {
+  const table = tableFromArrays({value: [1, 4, 9]});
+  const result = compileArrowScales(table, {
+    radius: parseSQLScaleExpression('SCALE_SQRT(value, DOMAIN(value), RANGE(2, 20))'),
+    fill: parseSQLScaleExpression("SCALE_COLOR(value, DOMAIN(value), PALETTE('viridis'))")
+  });
+  expect(result.radius.scale.descriptor.domain).toEqual(result.fill.scale.descriptor.domain);
+  expect(result.radius.evaluate(table).length).toBe(3);
+  expect(result.fill.evaluate(table).length).toBe(3);
+});
+
+test('HDR explicit stops are not clamped by sampling', () => {
+  const scale = compileResolvedScale({
+    type: 'sequential', domain: {type: 'fixed', values: [0, 1]},
+    range: {type: 'colors', values: [[0, 0, 0, 1], [4, 2, 0.5, 1]]},
+    encoding: {primaries: 'rec2020', transfer: 'linear', format: 'rgba32float'}
+  }, [0, 1]);
+  expect(scale.sample(1)).toEqual([4, 2, 0.5, 1]);
+  expect(resolvePalette({type: 'palette', name: 'viridis'}).length).toBeGreaterThan(2);
+});
