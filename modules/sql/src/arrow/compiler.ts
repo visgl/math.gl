@@ -500,7 +500,8 @@ function bindNode(
     }
     const tuple = isTupleType(yes.field.type);
     const list = DataType.isList(yes.field.type);
-    if (tuple || list) {
+    const nested = isNestedType(yes.field.type);
+    if (nested) {
       if (physicalKey(yes.field.type) !== physicalKey(no.field.type))
         throw new Error('Arrow expression operand types must match');
       if (
@@ -519,12 +520,12 @@ function bindNode(
     );
     return {
       field,
-      hasKernel: tuple || list || condition.hasKernel || yes.hasKernel || no.hasKernel,
+      hasKernel: nested || condition.hasKernel || yes.hasKernel || no.hasKernel,
       prepare(batch, active, context) {
         const test = condition.prepare(batch, active, context);
         // A vector kernel must receive its branch mask before it executes. Pure scalar paths stay lazy.
         const selected =
-          tuple || list || yes.hasKernel || no.hasKernel
+          nested || yes.hasKernel || no.hasKernel
             ? active.map((value, row) => (value && test.get(row) === true ? 1 : 0))
             : undefined;
         const a = yes.prepare(batch, selected ?? active, context);
@@ -533,11 +534,11 @@ function bindNode(
           selected ? active.map((value, row) => (value && !selected[row] ? 1 : 0)) : active,
           context
         );
-        if (list)
+        if (list && DataType.isDictionary(a.vector!.type) && DataType.isDictionary(b.vector!.type))
           return vectorReader(
             selectListVectors(field.type, a.vector!, b.vector!, selected!, active)
           );
-        if (isTupleType(field.type)) {
+        if (tuple) {
           const validActive = context.failed
             ? active.map((value, row) => (value && !context.failed![row] ? 1 : 0))
             : active;
@@ -548,6 +549,14 @@ function bindNode(
           return vectorReader(
             selectTupleVectors(field.type, a.vector!, b.vector!, yesMask, validActive)
           );
+        }
+        if (nested) {
+          const values = Array.from(active, (valid, row) =>
+            valid && !context.failed?.[row]
+              ? nestedValue((selected![row] ? a : b).vector!.get(row), field.type)
+              : null
+          );
+          return vectorReader(vectorFromArray(values, field.type));
         }
         const choose = (row: number) =>
           (selected ? selected[row] : test.get(row) === true) ? a : b;
