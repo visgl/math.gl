@@ -4,7 +4,7 @@
 
 import {SQLParseError} from './sql-parse-error';
 import type {Expression} from '../expressions/index';
-import {SQLExpressionReader, SQL_RESERVED_WORDS} from './parse-sql-expression';
+import {SQLExpressionReader} from './parse-sql-expression';
 import type {ColumnarPredicate} from '../expressions/columnar-predicate';
 import type {TableQuery, TableSelection, TableReference} from './query-types';
 
@@ -91,11 +91,6 @@ export class SQLQueryReader {
     this.sql = sql;
   }
 
-  /** Consumes punctuation in a bounded ARRAY constructor. */
-  arraySymbol(symbol: string): void {
-    if (!this.takeSymbol(symbol)) throw this.error(`SQL ARRAY expected ${symbol}`);
-  }
-
   /** Reads a bounded scalar or fixed-array projection. */
   selectionExpression(): Expression {
     this.skipWhitespace();
@@ -132,30 +127,11 @@ export class SQLQueryReader {
 
   /** Reads one literal identifier, including doubled double-quote escapes. */
   identifier(): string {
-    this.skipWhitespace();
     this.countToken();
-    const start = this.position;
-    if (this.sql[this.position] === '"') {
-      this.position++;
-      let value = '';
-      while (this.position < this.sql.length) {
-        const character = this.sql[this.position++];
-        if (character !== '"') value += character;
-        else if (this.sql[this.position] === '"') {
-          value += '"';
-          this.position++;
-        } else {
-          if (!value.length) throw this.error('SQL identifiers must not be empty.', start);
-          return value;
-        }
-      }
-      throw this.error('SQL query contains an unterminated quoted identifier.', start);
-    }
-    const match = /^[A-Za-z_][A-Za-z0-9_]*/.exec(this.sql.slice(this.position));
-    if (!match || SQL_RESERVED_WORDS.has(match[0].toUpperCase()))
-      throw this.error('SQL query expected a column, alias, source, or table identifier.');
-    this.position += match[0].length;
-    return match[0];
+    const reader = this.expressionReader();
+    const identifier = reader.readIdentifier();
+    this.position = reader.position;
+    return identifier;
   }
 
   /** Parses a WHERE fragment and translates its cursor back to the full statement. */

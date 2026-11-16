@@ -17,7 +17,7 @@ test.each([
   'f(1,)',
   'x IS TRUE',
   'x IN (1)',
-  'x.y',
+  'x.',
   'x +',
   'f() x',
   '1; SELECT 2',

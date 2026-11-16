@@ -46,19 +46,18 @@ function parseQuery(sql: string): TableQuery | SQLCatalogQuery {
   }
   return parseSQLSelect(sql, {
     parseWhere: expression => {
-      let predicate: BoundSQLPredicate;
       try {
-        predicate = parseSQLPredicate(expression);
+        const predicate = parseSQLPredicate(expression);
+        validateColumnReferences(predicate);
+        return predicate;
       } catch {
         return {expression: parseSQLExpression(expression)};
       }
-      validateColumnReferences(predicate);
-      return predicate;
     }
   });
 }
 
-/** Keeps table qualification distinct from literal dotted source-column names. */
+/** Routes unquoted nested fields to expression evaluation instead of flat predicates. */
 function validateColumnReferences(predicate: BoundSQLPredicate): void {
   if (predicate.op === 'and' || predicate.op === 'or') {
     predicate.args.forEach(validateColumnReferences);
@@ -67,7 +66,7 @@ function validateColumnReferences(predicate: BoundSQLPredicate): void {
     const property = predicate.args[0] as SQLPredicateProperty;
     if (!property.quoted && property.property.includes('.'))
       throw new Error(
-        'Qualified WHERE columns are not supported; quote literal column names containing dots.'
+        'Nested fields require expression evaluation; quote literal column names containing dots.'
       );
   }
 }

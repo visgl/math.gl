@@ -92,7 +92,15 @@ function executeSelect(
       if (column.qualifier === leftAlias) return column.name;
       if (column.qualifier && column.qualifier === rightAlias)
         return column.qualifier + '.' + column.name;
-      if (column.qualifier) throw new Error(`Unknown Arrow SQL table alias: ${column.qualifier}`);
+      if (column.qualifier) {
+        if (
+          [source, rightTable].some(table =>
+            table?.schema.fields.some(field => field.name === column.qualifier)
+          )
+        )
+          return undefined;
+        throw new Error(`Unknown Arrow SQL table alias: ${column.qualifier}`);
+      }
       const onRight = rightTable?.schema.fields.some(field => field.name === column.name);
       if (!onRight) return column.name;
       if (source.schema.fields.some(field => field.name === column.name))
@@ -151,9 +159,13 @@ function requireColumn(node: Expression): string {
 }
 
 /** Resolves SQL column references while leaving function names and literals intact. */
-function bindColumns(node: Expression, resolve: (column: Column) => string): Expression {
+function bindColumns(
+  node: Expression,
+  resolve: (column: Column) => string | undefined
+): Expression {
   const column = qualifiedColumn(node);
-  if (column) return {type: 'Identifier', name: resolve(column)};
+  const name = column && resolve(column);
+  if (name !== undefined) return {type: 'Identifier', name};
   const bind = (child: unknown) => bindColumns(child as Expression, resolve);
   switch (node.type) {
     case 'BinaryExpression':
@@ -163,6 +175,23 @@ function bindColumns(node: Expression, resolve: (column: Column) => string): Exp
       return {...node, argument: bind(node.argument)};
     case 'CallExpression':
       return {...node, arguments: node.arguments.map(bind)};
+    case 'MemberExpression': {
+      if (node.computed || node.property.type !== 'Identifier')
+        throw new Error('Arrow SQL struct access requires a field identifier');
+      const name = String(node.property['name']);
+      return {
+        type: 'CallExpression',
+        callee: {type: 'Identifier', name: 'STRUCT_EXTRACT'},
+        arguments: [bind(node.object), {type: 'Literal', value: name, raw: JSON.stringify(name)}]
+      };
+    }
+    case 'ConditionalExpression':
+      return {
+        ...node,
+        test: bind(node.test),
+        consequent: bind(node.consequent),
+        alternate: bind(node.alternate)
+      };
     default:
       return node;
   }
