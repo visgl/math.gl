@@ -30,6 +30,7 @@ import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '@
 import {parse, validateExpressionAST, type Expression} from '../expressions/index';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
 import {bindCast} from './cast';
+import {compileUTF8Like} from './like';
 import {float16Values, roundFloat16} from './float16';
 import {physicalKey, extensionKey} from './signature';
 import {ExpressionEvaluationError, isExpressionEvaluationError} from '../expressions/index';
@@ -936,6 +937,38 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
   };
 }
 
+/** Binds SQL pattern matching and precompiles literal patterns. */
+function bindLike(args: any[], options: BindingOptions, insensitive: boolean): Node {
+  if (args.length < 2 || args.length > 3) throw new Error('LIKE requires two or three arguments');
+  const value = bind(args[0], options, new Utf8());
+  const pattern = bind(args[1], options, new Utf8());
+  requireType(value, 'utf8');
+  requireType(pattern, 'utf8');
+  const escape = args[2];
+  if (escape && (escape.type !== 'Literal' || typeof escape.value !== 'string')) {
+    throw new Error('LIKE ESCAPE requires a literal character');
+  }
+  const compile = (text: string) => compileUTF8Like(text, insensitive, escape?.value);
+  const literal = args[1].type === 'Literal' && typeof args[1].value === 'string';
+  const matcher = literal ? compile(args[1].value) : undefined;
+  return {
+    field: new Field('like', bool, value.field.nullable || pattern.field.nullable),
+    hasKernel: value.hasKernel || pattern.hasKernel,
+    prepare(batch, active, context) {
+      const source = value.prepare(batch, active, context);
+      const patterns = pattern.prepare(batch, active, context);
+      return {
+        get(row) {
+          const range = bytes(source, row);
+          const text = patterns.get(row) as string | null;
+          if (!range || text === null) return null;
+          return (matcher || compile(text))(...range);
+        }
+      };
+    }
+  };
+}
+
 /** Converts a number to a byte without typed-array wraparound. */
 function convertByte(value: number, normalized: boolean): number {
   if (!Number.isFinite(value))
@@ -1108,6 +1141,13 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
       'LIST_EXTRACT',
       'STRUCT_EXTRACT',
       'cast',
+      'like',
+      'ilike',
+      'concat',
+      'concatStrict',
+      'upper',
+      'lower',
+      'capitalize',
       'isNull',
       'isNotNull',
       'parseNumber',
@@ -1197,6 +1237,58 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
           data.setValid(row, true);
         }
         return vectorReader(vector);
+      }
+    };
+  }
+  if (name === 'like' || name === 'ilike')
+    return bindLike(ast.arguments, options, name === 'ilike');
+  if (name === 'upper' || name === 'lower' || name === 'capitalize') {
+    if (ast.arguments.length !== 1) throw new Error('Case conversion requires one argument');
+    const arg = bind(ast.arguments[0], options, new Utf8());
+    requireType(arg, 'utf8');
+    return {
+      field: new Field(name, new Utf8(), arg.field.nullable),
+      hasKernel: arg.hasKernel,
+      prepare(batch, active, context) {
+        const input = arg.prepare(batch, active, context);
+        return {
+          get(row) {
+            const value = input.get(row) as string | null;
+            if (!value) return value;
+            if (name === 'upper') return value.toUpperCase();
+            if (name === 'lower') return value.toLowerCase();
+            const first = String.fromCodePoint(value.codePointAt(0)!);
+            return first.toUpperCase() + value.slice(first.length);
+          }
+        };
+      }
+    };
+  }
+  if (name === 'concat' || name === 'concatStrict') {
+    if (!ast.arguments.length) throw new Error('CONCAT requires at least one argument');
+    const args = ast.arguments.map((arg: any) => bind(arg, options, new Utf8()));
+    for (const arg of args) requireType(arg, 'utf8');
+    const strict = name === 'concatStrict';
+    return {
+      field: new Field(
+        'concat',
+        new Utf8(),
+        strict && args.some((arg: Node) => arg.field.nullable)
+      ),
+      hasKernel: args.some((arg: Node) => arg.hasKernel),
+      prepare(batch, active, context) {
+        const inputs = args.map((arg: Node) => arg.prepare(batch, active, context));
+        return {
+          get(row) {
+            let result = '';
+            for (const input of inputs) {
+              const value = input.get(row);
+              if (value === null && strict) return null;
+              if (value !== null) result += value;
+            }
+            return result;
+          }
+        };
       }
     };
   }
