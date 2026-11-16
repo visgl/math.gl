@@ -15,17 +15,37 @@ const workflow = readFileSync(new URL('../.github/workflows/test.yml', import.me
 
 test('ordinary PRs retain Chromium; nightly and manual runs exercise the full matrix', () => {
   for (const event of ['pull_request', 'merge_group', 'push'])
-    assert.deepEqual(selectProfile(event, ['modules/core/src/vector3.ts']), {
+    assert.deepEqual(selectProfile(event, ['modules/sql/src/index.ts']), {
       full: false,
+      solarFull: false,
       performance: ['pull_request', 'merge_group'].includes(event),
       browsers: ['chromium']
     });
   for (const event of ['schedule', 'workflow_dispatch'])
     assert.deepEqual(selectProfile(event), {
       full: true,
+      solarFull: true,
       performance: false,
       browsers: ['chromium', 'firefox', 'webkit']
     });
+});
+
+test('solar example and dependency changes exercise the full solar browser matrix', () => {
+  for (const path of [
+    'examples/earth/sun-terminator/src/app.tsx',
+    'examples/common/path.ts',
+    'examples/vite.config.local.mjs',
+    'modules/core/src/vector3.ts',
+    'modules/earth/test/examples/sun-terminator/run-browser.mjs',
+    'modules/geospatial/src/index.ts',
+    'dev-modules/map-layers/src/index.ts',
+    'test/examples/run.js'
+  ]) {
+    const profile = selectProfile('merge_group', [path]);
+    assert.equal(profile.solarFull, true, path);
+    assert.equal(profile.full, false, path);
+  }
+  assert.match(workflow, /MATHGL_SOLAR_BROWSER_PROFILE: .*outputs.solar-full == 'false'/);
 });
 
 test('changes to qualification definitions and shared tooling validate the full path on PRs', () => {
