@@ -189,3 +189,65 @@ PROJJSON inputs remain assignable to this type, while descriptors returned by
 
 The frame describes stored coordinates. It is intentionally broader than PROJJSON CRS types so a
 loader can report local coordinate systems that do not have a conventional CRS definition.
+
+## Schema and field metadata
+
+`SPATIAL_REFERENCE_METADATA_KEY` is `vis.gl:spatial_reference`. Its value is a JSON-serialized
+`SpatialReference` describing **current coordinate values**, not just their original source CRS.
+The convention works with Apache Arrow schema and field metadata without importing Arrow.
+Format-specific metadata can separately preserve original definitions and source provenance.
+
+- Schema metadata supplies a default for coordinate fields identified by the consumer. It does
+  not label every numeric field as a coordinate.
+- Field metadata overrides the entire schema descriptor. An explicit `unknown` or `absent` field
+  reference blocks inheritance. A missing key allows inheritance.
+- Coordinate order describes stored components, regardless of the CRS's authoritative axis order.
+- Reprojection must update the descriptor. Selection and renaming can preserve it. Arbitrary
+  coordinate calculations must not inherit a reference unless their coordinate meaning is known.
+- GeoArrow geometry fields use their standard extension metadata as the authority. Adapters must
+  handle that metadata before these helpers and reject conflicting declarations; these helpers
+  do not inspect GeoArrow extensions or determine CRS equivalence.
+
+```ts
+import {
+  createSpatialReference,
+  setSpatialReferenceMetadata,
+  resolveSpatialReferenceMetadata
+} from '@math.gl/geospatial/crs';
+
+const schemaMetadata = setSpatialReferenceMetadata(undefined, createSpatialReference({
+  crs: {
+    state: 'explicit',
+    definition: 'EPSG:4326',
+    representation: 'identifier',
+    provenance: 'metadata'
+  },
+  coordinateFrame: 'geographic',
+  coordinateOrder: ['longitude', 'latitude'],
+  units: ['degree', 'degree']
+}));
+// Pass this map to an Arrow Schema. Resolve metadata for a selected coordinate field:
+const reference = resolveSpatialReferenceMetadata(schemaMetadata, positionField.metadata);
+```
+
+#### `setSpatialReferenceMetadata(metadata, spatialReference)`
+
+Returns a new `Map<string, string>` with the serialized descriptor, preserving unrelated entries.
+Accepts `ReadonlyMap<string, string> | undefined` and a `SpatialReference`. Does not modify the
+input map or descriptor. Replaces any existing value at `SPATIAL_REFERENCE_METADATA_KEY`.
+
+#### `getSpatialReferenceMetadata(metadata)`
+
+Accepts `ReadonlyMap<string, string> | undefined`. Returns a deeply immutable `SpatialReference`,
+or `undefined` if the key is missing. Malformed JSON and invalid descriptor envelopes throw.
+
+#### `resolveSpatialReferenceMetadata(schemaMetadata, fieldMetadata?)`
+
+Accepts metadata maps and returns the field declaration when present, otherwise the schema
+reference. Returns `undefined` when neither declares a reference. Invalid field metadata throws
+rather than falling back to the schema.
+
+The helpers validate states, representations, component arrays, and finite coordinate epochs.
+They do not validate WKT, PROJ strings, or the full PROJJSON schema, resolve identifiers, infer
+missing CRSs, or load a projection engine. In streaming data, producers must keep declarations
+consistent with each batch's coordinate values; these helpers do not reconcile batches.

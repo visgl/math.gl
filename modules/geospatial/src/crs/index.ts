@@ -100,3 +100,10 @@ export type {
 
 export {createCRSExecutionIdentity, getCRSExecutionKey} from './execution-identity';
 export type {CRSExecutionIdentity} from './execution-identity';
+
+export {
+  SPATIAL_REFERENCE_METADATA_KEY,
+  getSpatialReferenceMetadata,
+  setSpatialReferenceMetadata,
+  resolveSpatialReferenceMetadata
+} from './spatial-reference-metadata';
