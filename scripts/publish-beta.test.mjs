@@ -10,13 +10,16 @@ function fixture({
   branch = 'master',
   dirty = false,
   changelog = '## v5.0.0-beta.1',
-  failVersion = false
+  failVersion = false,
+  version = '5.0.0-alpha.20',
+  remoteHead = 'prepared-head',
+  tagHead = 'prepared-head'
 } = {}) {
   const calls = [];
   return {
     calls,
     root: '/repo',
-    read: (path) => (path.endsWith('lerna.json') ? '{"version":"5.0.0-alpha.20"}' : changelog),
+    read: (path) => (path.endsWith('lerna.json') ? JSON.stringify({version}) : changelog),
     run(command, args) {
       calls.push([command, ...args]);
       if (command === 'npx') {
@@ -26,6 +29,8 @@ function fixture({
       if (args[0] === 'branch') return branch;
       if (args[0] === 'status') return dirty ? ' M package.json' : '';
       if (args[0] === 'describe') return 'v5.0.0-beta.1';
+      if (args[0] === 'ls-remote') return `${remoteHead}\trefs/heads/${branch}`;
+      if (args[0] === 'rev-parse') return args[1] === 'HEAD' ? 'prepared-head' : tagHead;
       return '';
     }
   };
@@ -81,4 +86,22 @@ test('never pushes after versioning fails', () => {
   const f = fixture({failVersion: true});
   assert.throws(() => publishBeta(f));
   assert.ok(f.calls.every((call) => call[1] !== 'push'));
+});
+
+test('publishes a landed beta prep by checking and pushing only its release tag', () => {
+  const f = fixture({version: '5.0.0-beta.1'});
+  assert.deepEqual(publishBeta({...f, prepared: true}), {version: '5.0.0-beta.1'});
+  assert.deepEqual(f.calls.slice(-2), [
+    [process.execPath, 'scripts/publish-from-git.mjs', '--check', '--tag', 'v5.0.0-beta.1'],
+    ['git', 'push', 'origin', 'refs/tags/v5.0.0-beta.1']
+  ]);
+  assert.equal(f.calls.some(([command]) => command === 'npx'), false);
+});
+
+test('refuses to publish an unlanded or mistagged prep', () => {
+  for (const mismatch of [{remoteHead: 'newer'}, {tagHead: 'old-prep'}]) {
+    const f = fixture({version: '5.0.0-beta.1', ...mismatch});
+    assert.throws(() => publishBeta({...f, prepared: true}));
+    assert.ok(f.calls.every((call) => call[1] !== 'push'));
+  }
 });
