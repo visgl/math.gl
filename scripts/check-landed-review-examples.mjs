@@ -21,7 +21,7 @@ for (const [name, example, entry] of [
   const plugins = name === 'expressions' ? [{
     name: 'controlled-async-evaluation',
     setup(builder) {
-      builder.onResolve({filter: /^@math\.gl\/expressions$/}, args =>
+      builder.onResolve({filter: /^@math\.gl\/sql\/expressions$/}, args =>
         args.importer === resolve(root,'examples/core/expressions/src/app.tsx') ? {path:'controlled',namespace:'review'} : null
       );
       builder.onLoad({filter:/.*/,namespace:'review'}, () => ({
