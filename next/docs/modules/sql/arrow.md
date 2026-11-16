@@ -321,3 +321,22 @@ Use the conversion that matches the input units:
 `128` remains `128` in a value cast; `0.5` becomes `128` in normalized packing. Both forms support arbitrary fixed widths from 1 to 4,096. `PACK_UNORM8` also accepts an existing fixed-size numeric column. Nonfinite inputs raise conversion errors. Null rows and null components produce a null byte tuple with zero padding. `TRY` can recover row conversion errors.
 
 Arrow stores the bytes without normalized interpretation. A GPU consumer can bind a four-byte result as `unorm8x4` to read channels as normalized floats. The existing `COLOR_TO_RGBA8` helper remains the RGBA-specific, clamping conversion.
+
+### SQL string expressions[​](#sql-string-expressions "Direct link to SQL string expressions")
+
+Arrow SQL supports `LIKE`, `ILIKE`, `NOT LIKE`, and `NOT ILIKE`. Patterns match the entire value. `%` matches zero or more characters and `_` matches one Unicode code point. `ESCAPE '$'` designates a literal single-character escape, for example `name LIKE 'a$%b' ESCAPE '$'`.
+
+Literal patterns are compiled once. Matching reads Arrow UTF-8 byte ranges, including sliced and dictionary-encoded columns, without decoding whole rows. Dynamic patterns are supported and compiled per evaluated row. Null input or pattern produces null. `ILIKE` uses locale-independent, per-code-point Unicode lowercase matching, with a direct ASCII path.
+
+| Expression                    | Result          |
+| ----------------------------- | --------------- |
+| `'Airport' ILIKE 'air%'`      | `true`          |
+| `'é😀' LIKE '__'`             | `true`          |
+| \`'Air'                       |                 |
+| \`'Air'                       |                 |
+| `CONCAT('Air', NULL, 'port')` | `'Airport'`     |
+| `UPPER('école')`              | `'ÉCOLE'`       |
+| `LOWER('ÉCOLE')`              | `'école'`       |
+| `CAPITALIZE('hello WORLD')`   | `'Hello WORLD'` |
+
+Concatenation and case conversion accept text. Use an explicit SQL cast for numeric inputs. `CAPITALIZE` changes only the first Unicode code point. Case conversion uses JavaScript's locale-independent Unicode mappings. These functions preserve nulls, except `CONCAT`, which skips null arguments. Empty strings are preserved. Regular expressions, `SIMILAR TO`, and `GLOB` are outside this supported subset.
