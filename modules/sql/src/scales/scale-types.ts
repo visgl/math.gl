@@ -120,19 +120,22 @@ export function validateScaleSpec(spec: ScaleSpec): ScaleSpec {
     'piecewise'
   ];
   if (!kinds.includes(spec.type)) throw new Error(`Unsupported scale type: ${spec.type}`);
+  const minimumStops = spec.type === 'ordinal' ? 1 : 2;
   const domain = spec.domain;
   if (!domain || typeof domain !== 'object') throw new Error('Scale domain is required');
   switch (domain.type) {
     case 'fixed':
       if (
         !Array.isArray(domain.values) ||
-        domain.values.length < 2 ||
+        domain.values.length < minimumStops ||
         domain.values.some(
           value =>
             typeof value !== 'string' && (typeof value !== 'number' || !Number.isFinite(value))
         )
       )
-        throw new Error('Fixed scale domain requires at least two finite or string values');
+        throw new Error(
+          `Fixed scale domain requires at least ${minimumStops} finite or string values`
+        );
       break;
     case 'extent':
     case 'categories':
@@ -162,11 +165,13 @@ export function validateScaleSpec(spec: ScaleSpec): ScaleSpec {
   if (!spec.range) throw new Error('Scale range is required');
   switch (spec.range.type) {
     case 'numeric':
-      if (spec.range.values.length < 2) throw new Error('Numeric range needs two or more values');
+      if (spec.range.values.length < minimumStops)
+        throw new Error(`Numeric range requires at least ${minimumStops} values`);
       spec.range.values.forEach(value => assertFinite(value, 'Numeric range'));
       break;
     case 'colors':
-      if (spec.range.values.length < 2) throw new Error('Color range needs two or more colors');
+      if (spec.range.values.length < minimumStops)
+        throw new Error(`Color range requires at least ${minimumStops} colors`);
       spec.range.values.forEach((value, index) => checkColor(value, `Color stop ${index}`));
       break;
     case 'palette':
@@ -209,10 +214,10 @@ export function createResolvedScale(
   if (descriptor.thresholds) {
     if (
       descriptor.thresholds.some(
-        (value, i) => !Number.isFinite(value) || (i > 0 && value < descriptor.thresholds![i - 1]!)
+        (value, i) => !Number.isFinite(value) || (i > 0 && value <= descriptor.thresholds![i - 1]!)
       )
     ) {
-      throw new Error('Thresholds must be finite and ordered');
+      throw new Error('Thresholds must be finite and strictly ordered');
     }
   }
   return Object.freeze({descriptor, sample});

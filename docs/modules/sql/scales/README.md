@@ -31,7 +31,9 @@ const resolved = createResolvedScale({
 stops or named palettes, classification type, pivot, clamping, interpolation and
 display metadata. `ResolvedScaleDescriptor` captures the **actual** domain,
 resolved color stops, class breaks and palette identification. A
-`ResolvedScale` binds the descriptor to a source-specific sampling function.
+`ResolvedScale` binds the descriptor to a source-specific sampling function. Class breaks must
+be strictly increasing. An ordinal domain and its resolved range can each contain
+a single entry.
 
 The scale **descriptor** remains JSON-safe for transport, legends and tooltips.
 The callback is a separate runtime facility. This module deliberately does not

@@ -81,21 +81,36 @@ test('invalid intervals, HDR settings, and breaks are rejected', () => {
       }
     })
   ).toThrow('finite');
-  expect(() =>
-    createResolvedScale(
-      {
-        type: 'threshold',
-        domain: [0, 100],
-        range: {
-          type: 'colors',
-          values: [
-            [0, 0, 0, 1],
-            [1, 1, 1, 1]
-          ]
+  for (const thresholds of [
+    [40, 20],
+    [20, 20]
+  ]) {
+    expect(() =>
+      createResolvedScale(
+        {
+          type: 'threshold',
+          domain: [0, 100],
+          range: {
+            type: 'colors',
+            values: [
+              [0, 0, 0, 1],
+              [1, 1, 1, 1]
+            ]
+          },
+          thresholds
         },
-        thresholds: [40, 20]
-      },
-      () => null
-    )
-  ).toThrow('ordered');
+        () => null
+      )
+    ).toThrow('strictly ordered');
+  }
+});
+
+test('a resolved ordinal scale can contain one category and one color', () => {
+  const color = [1, 0, 0, 1] as const;
+  const scale = createResolvedScale(
+    {type: 'ordinal', domain: ['road'], range: {type: 'colors', values: [color]}},
+    value => (value === 'road' ? color : null)
+  );
+  expect(scale.descriptor.domain).toEqual(['road']);
+  expect(scale.sample('road')).toEqual(color);
 });
