@@ -76,9 +76,15 @@ export type SubdividedTriangleMesh = {
 };
 
 type Vertex = {source: number[]; target: number[]; weights: Map<number, number>};
-type Face = {vertices: [number, number, number]; sourceTriangle: number};
+type Face = {
+  vertices: [number, number, number];
+  sourceTriangle: number;
+  /** Passed the error probes. Probes are deterministic, so an unsplit face is not probed again. */
+  accepted?: boolean;
+};
 
 const EDGE_FRACTIONS = [0.25, 0.5, 0.75];
+const EDGE_SAMPLE_ORDER = [1, 0, 2];
 const FACE_WEIGHTS = [
   [1 / 3, 1 / 3, 1 / 3],
   [0.5, 0.25, 0.25],
@@ -115,6 +121,10 @@ export function subdivideTriangleMesh(
   validateOptions();
   const vertices: Vertex[] = [];
   let faces: Face[] = [];
+  /** Sampled errors per undirected edge, ordered from its lower vertex index. */
+  const edgeErrors = new Map<string, number[]>();
+  /** Projected midpoints of sampled edges, reused when the edge is split. */
+  const edgeMidpointTargets = new Map<string, number[]>();
   for (let i = 0; i < mesh.positions.length; i += size) {
     const source = Array.from({length: size}, (_, j) => mesh.positions[i + j]);
     if (!source.every(Number.isFinite)) throw new RangeError('Source positions must be finite');
@@ -139,11 +149,15 @@ export function subdivideTriangleMesh(
             splitEdges.add(edgeKey(a, b));
           }
         }
+      } else if (face.accepted) {
+        // Probed in an earlier pass and not split since.
       } else if (needsRefinement(face)) {
         const [a, b, c] = face.vertices;
         splitEdges.add(edgeKey(a, b));
         splitEdges.add(edgeKey(b, c));
         splitEdges.add(edgeKey(c, a));
+      } else {
+        face.accepted = true;
       }
     }
     if (!splitEdges.size) return buildResult();
@@ -200,7 +214,7 @@ export function subdivideTriangleMesh(
     return target;
   }
 
-  function error(points: Vertex[], weights: number[]): number {
+  function error(points: Vertex[], weights: number[], keepExact?: number[][]): number {
     const source = blend(
       points.map(p => p.source),
       weights
@@ -210,31 +224,54 @@ export function subdivideTriangleMesh(
       weights
     );
     const exact = project(source);
+    keepExact?.push(exact);
     if (!errorMetric) return Math.hypot(...exact.map((value, i) => value - linearTarget[i]));
-    const value = errorMetric({source, exact, interpolated: linearTarget});
+    const value = errorMetric({source, exact: exact.slice(), interpolated: linearTarget});
     if (!Number.isFinite(value) || value < 0) {
       throw new RangeError('errorMetric must return a finite nonnegative value');
     }
     return value;
   }
 
+  /** Error at one edge fraction, cached per undirected edge for the neighbouring face.
+   * Blending two points is bitwise symmetric, so a->b at f is b->a at 1 - f.
+   */
+  function edgeError(a: number, b: number, sample: number): number {
+    const key = edgeKey(a, b);
+    let errors = edgeErrors.get(key);
+    if (!errors) {
+      errors = [];
+      edgeErrors.set(key, errors);
+    }
+    const slot = a <= b ? sample : EDGE_FRACTIONS.length - 1 - sample;
+    let value = errors[slot];
+    if (value === undefined) {
+      const fraction = EDGE_FRACTIONS[sample];
+      // The midpoint sample has the source coordinates that midpoint() would project.
+      const keepExact = fraction === 0.5 ? [] : undefined;
+      value = error([vertices[a], vertices[b]], [1 - fraction, fraction], keepExact);
+      errors[slot] = value;
+      if (keepExact) edgeMidpointTargets.set(key, keepExact[0]);
+    }
+    return value;
+  }
+
   function needsRefinement(face: Face): boolean {
     const points = face.vertices.map(index => vertices[index]);
-    let exceedsTolerance = false;
+    const limit = tolerance ?? Infinity;
     for (let i = 0; i < 3; i++) {
-      const a = points[i];
-      const b = points[(i + 1) % 3];
-      const length = sourceEdgeLength(a, b);
-      if (length > maxEdgeLength) exceedsTolerance = true;
-      for (const fraction of EDGE_FRACTIONS) {
-        if (error([a, b], [1 - fraction, fraction]) > (tolerance ?? Infinity))
-          exceedsTolerance = true;
+      if (sourceEdgeLength(points[i], points[(i + 1) % 3]) > maxEdgeLength) return true;
+    }
+    // Midpoints first: a failed face splits all three edges and keeps their projections.
+    for (const sample of EDGE_SAMPLE_ORDER) {
+      for (let i = 0; i < 3; i++) {
+        if (edgeError(face.vertices[i], face.vertices[(i + 1) % 3], sample) > limit) return true;
       }
     }
     for (const weights of FACE_WEIGHTS) {
-      if (error(points, weights) > (tolerance ?? Infinity)) exceedsTolerance = true;
+      if (error(points, weights) > limit) return true;
     }
-    return exceedsTolerance;
+    return false;
   }
 
   function midpoint(a: number, b: number, midpoints: Map<string, number>): number {
@@ -254,7 +291,7 @@ export function subdivideTriangleMesh(
     // the original edge endpoints, so at most three source vertices contribute.
     if (weights.size > 3) throw new Error('Inconsistent mesh provenance');
     const index = vertices.length;
-    vertices.push({source, target: project(source), weights});
+    vertices.push({source, target: edgeMidpointTargets.get(key) ?? project(source), weights});
     midpoints.set(key, index);
     return index;
   }
@@ -270,8 +307,11 @@ export function subdivideTriangleMesh(
     const bc = splitEdges.has(edgeKey(b, c)) ? midpoint(b, c, midpoints) : -1;
     const ca = splitEdges.has(edgeKey(c, a)) ? midpoint(c, a, midpoints) : -1;
     const count = Number(ab >= 0) + Number(bc >= 0) + Number(ca >= 0);
-    if (count === 0) emit(a, b, c);
-    else if (count === 3) {
+    if (count === 0) {
+      if (output.length >= maxTriangles)
+        throw new RangeError('Triangle mesh subdivision exceeded maxTriangles');
+      output.push(face);
+    } else if (count === 3) {
       emit(a, ab, ca);
       emit(ab, b, bc);
       emit(ca, bc, c);
