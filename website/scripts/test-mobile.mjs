@@ -168,7 +168,10 @@ try {
       waitUntil: 'domcontentloaded'
     });
     const open = testPage.getByRole('button', { name: 'Open Unfolding Earth fullscreen' });
-    await open.waitFor();
+    // The server renders the button before React can handle the tap.
+    await testPage.locator('html[data-has-hydrated="true"]').waitFor();
+    const canvas = testPage.locator('[aria-label="Unfolding Earth"][data-inline] canvas').first();
+    await canvas.waitFor();
     await open.scrollIntoViewIfNeeded();
     const originalScroll = await testPage.evaluate(() => window.scrollY);
     const originalLock = await testPage.evaluate(() =>
@@ -184,23 +187,22 @@ try {
     } else {
       const dialog = testPage.getByRole('dialog', { name: 'Unfolding Earth' });
       await dialog.waitFor();
+      const scrollLock = testPage.locator('html[data-example-expanded="true"]');
+      await scrollLock.waitFor();
       assert.equal(
         await testPage.evaluate(() => getComputedStyle(document.body).overflow),
         'hidden'
       );
-      const canvas = testPage.locator('[aria-label="Unfolding Earth"][data-inline] canvas').first();
-      await canvas.waitFor();
       await canvas.evaluate((element) => {
         element.dataset.mobileTest = 'preserved';
       });
       for (const size of sizes) {
         await testPage.setViewportSize(size);
-        await testPage.waitForTimeout(100);
-        const rect = await dialog.boundingBox();
-        assert.ok(
-          Math.abs(rect.width - size.width) < 2 && Math.abs(rect.height - size.height) < 2,
-          'Fallback fills viewport after rotation'
-        );
+        await testPage.waitForFunction(({width, height}) => {
+          const rect = document.querySelector('[role="dialog"][aria-label="Unfolding Earth"]')
+            ?.getBoundingClientRect();
+          return rect && Math.abs(rect.width - width) < 2 && Math.abs(rect.height - height) < 2;
+        }, size);
         assert.equal(
           await testPage.evaluate(() => getComputedStyle(document.body).overflow),
           'hidden'
@@ -216,13 +218,11 @@ try {
         true
       );
       await close.tap();
-      assert.equal(await canvas.getAttribute('data-mobile-test'), 'preserved');
-      assert.equal(
-        await testPage.evaluate(() =>
-          document.documentElement.getAttribute('data-example-expanded')
-        ),
-        originalLock
+      await dialog.waitFor({ state: 'hidden' });
+      await testPage.waitForFunction((lock) =>
+        document.documentElement.getAttribute('data-example-expanded') === lock, originalLock
       );
+      assert.equal(await canvas.getAttribute('data-mobile-test'), 'preserved');
       assert.notEqual(
         await testPage.evaluate(() => getComputedStyle(document.body).overflow),
         'hidden'
@@ -230,6 +230,8 @@ try {
       await testPage.waitForFunction((y) => Math.abs(window.scrollY - y) < 2, originalScroll);
       assert.equal(await open.evaluate((element) => element === document.activeElement), true);
       await open.tap();
+      await dialog.waitFor();
+      await scrollLock.waitFor();
       await testPage.keyboard.press('Escape');
       await dialog.waitFor({ state: 'hidden' });
     }
