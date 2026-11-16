@@ -81,3 +81,11 @@ Create a streaming domain accumulator from `@math.gl/sql/arrow-scales` and call
 resolved domains in request order. Extents track exact bounds. Percentiles and
 quantile breaks use a bounded approximate sketch, and categorical domains
 retain each distinct value in memory.
+
+
+To evaluate batches using statistics collected during a scan, call
+`bindArrowScale(schema, parsed, {domain, quantileBreaks})` from
+`@math.gl/sql/arrow-scales`. Use the matching domain from the accumulator's
+`result()`. For quantile classification, pass the class boundaries from
+`quantileBreaks(column, classCount)`. The binder reads no rows. Its
+`evaluateBatch()` method and resolved descriptor use the same boundaries.

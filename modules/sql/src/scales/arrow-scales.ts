@@ -12,6 +12,7 @@ import {
   Uint16,
   vectorFromArray,
   type RecordBatch,
+  type Schema,
   type Table,
   type Vector
 } from 'apache-arrow';
@@ -81,16 +82,54 @@ export function compileArrowScale(
   parsed: ParsedSQLScale,
   resolvedDomain?: readonly ScaleValue[]
 ): CompiledArrowScale {
-  const domain = resolvedDomain ?? resolveArrowDomains(table, [parsed.scale.domain])[0]!;
+  /** Class count used by the palette for quantile classification. */
+  const classCount = parsed.scale.range.type === 'palette' ? parsed.scale.range.count : undefined;
+  if (parsed.scale.type === 'quantile' && (!classCount || parsed.scale.domain.type === 'fixed')) {
+    throw new Error('Quantile scale requires a class count and a source column');
+  }
+  /** Resolved inputs shared with the schema-only binder. */
+  const resolution: ArrowScaleResolution = {
+    domain: resolvedDomain ?? resolveArrowDomains(table, [parsed.scale.domain])[0]!,
+    ...(parsed.scale.type === 'quantile' && parsed.scale.domain.type !== 'fixed'
+      ? {quantileBreaks: resolveArrowQuantiles(table, parsed.scale.domain.column, classCount!)}
+      : {})
+  };
+  return bindArrowScale(table.schema, parsed, resolution);
+}
+
+/** Statistics needed to bind a scale without retaining its source table. */
+export type ArrowScaleResolution = Readonly<{
+  /** Resolved extent, categories, or explicit domain stops. */
+  domain: readonly ScaleValue[];
+  /** Required for quantile classification. Supply one break per class boundary. */
+  quantileBreaks?: readonly number[];
+}>;
+
+/** Binds a resolved scale to an Arrow schema without reading any rows. */
+export function bindArrowScale(
+  inputSchema: Schema,
+  parsed: ParsedSQLScale,
+  {domain, quantileBreaks}: ArrowScaleResolution
+): CompiledArrowScale {
+  /** Break points used by classified scales. */
   let thresholds: readonly number[] | undefined;
+  /** Scale transform and classification family. */
   const kind = parsed.scale.type;
+  /** Number of discrete classes declared by the palette, if any. */
   const classCount = parsed.scale.range.type === 'palette' ? parsed.scale.range.count : undefined;
   if (kind === 'quantile') {
-    if (!classCount || parsed.scale.domain.type === 'fixed') {
-      throw new Error('Quantile scale requires a class count and a source column');
+    if (!classCount || quantileBreaks?.length !== classCount - 1) {
+      throw new Error('Quantile scale requires one resolved break per class boundary');
     }
-    const column = parsed.scale.domain.column;
-    thresholds = resolveArrowQuantiles(table, column, classCount);
+    if (
+      quantileBreaks.some(
+        (value, index) =>
+          !Number.isFinite(value) || (index > 0 && value < quantileBreaks[index - 1]!)
+      )
+    ) {
+      throw new Error('Quantile scale breaks must be finite and nondecreasing');
+    }
+    thresholds = quantileBreaks;
   } else if (kind === 'quantize') {
     if (
       !classCount ||
@@ -112,10 +151,11 @@ export function compileArrowScale(
     }
     thresholds = domain as readonly number[];
   }
+  /** Evaluator shared by Arrow output and descriptor consumers. */
   const scale = compileResolvedScale(parsed.scale, domain, thresholds);
-  const compiled = compileArrowExpression(parsed.value as ArrowExpression, {
-    inputSchema: table.schema
-  });
+  /** Input expression bound once to the source schema. */
+  const compiled = compileArrowExpression(parsed.value as ArrowExpression, {inputSchema});
+  /** Maps one vector to the selected scalar or color encoding. */
   const evaluateVector = (input: Vector): Vector => {
     const result: (number | ScaleColor | null)[] = Array.from({length: input.length}, (_, i) => {
       const value = arrowScaleValue(input.get(i));
