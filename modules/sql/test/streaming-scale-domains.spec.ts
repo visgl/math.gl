@@ -9,7 +9,7 @@ import {ScaleQuantileSketch} from '@math.gl/sql/scales';
 
 test('streaming min/max, symmetric, percentile and category snapshots', () => {
   const table = tableFromArrays({
-    value: [2, 4, 6, 8, 10],
+    value: [2n, 4n, 6n, 8n, 10n],
     type: ['B', 'A', 'B', 'C', 'A']
   });
   const accumulator = createStreamingDomainAccumulator(

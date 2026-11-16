@@ -4,6 +4,7 @@
 
 import type {RecordBatch} from 'apache-arrow';
 import type {ScaleDomain, ScaleValue} from './scale-types';
+import {arrowScaleValue} from './arrow-domains';
 
 import {ScaleQuantileSketch} from './quantile-sketch';
 
@@ -76,7 +77,7 @@ export function createStreamingDomainAccumulator(
         const vector = batch.getChild(name);
         if (!vector) throw new Error(`Missing scale column: ${name}`);
         for (let row = 0; row < vector.length; row++) {
-          const value = vector.get(row);
+          const value = arrowScaleValue(vector.get(row));
           if (value === null || value === undefined) continue;
           if (typeof value === 'string') {
             state.categories?.add(value);
