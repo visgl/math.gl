@@ -65,6 +65,7 @@ record-batch streaming, and progressive aggregates.
 | [`@math.gl/sql/worker`](workers.md) | Execute structured queries and expressions in workers. |
 | [`@math.gl/sql/math-functions`](math-functions/README.md) | Register typed numeric functions such as `SIN` and `SQRT`. |
 | [`@math.gl/sql/color-functions`](color-functions/README.md) | Register color construction, conversion, and mapping functions. |
+| [`@math.gl/sql/scales`](scales/README.md) | Define portable visualization scales and resolve legend descriptors. |
 | [`@math.gl/sql/expressions`](expressions.md) | Parse and evaluate portable expressions against JavaScript objects. |
 
 ## Supported SQL

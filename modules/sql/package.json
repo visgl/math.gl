@@ -28,6 +28,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./scales": {
+      "types": "./dist/scales/index.d.ts",
+      "import": "./dist/scales/index.js",
+      "require": "./dist/scales/index.cjs"
+    },
     "./parser": {
       "types": "./dist/sql/index.d.ts",
       "import": "./dist/sql/index.js",
