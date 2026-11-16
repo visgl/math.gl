@@ -55,6 +55,12 @@ Direct column projections can share input buffers. Filtering, sorting, joins, an
 columns may allocate results. See [query execution](queries.md) for structured queries,
 record-batch streaming, and progressive aggregates.
 
+## Reuse named tables
+
+The experimental [SQLCatalog](catalog.md) accepts table definitions from applications,
+loaders.gl adapters and deck.gl integrations. It adds the default `data` namespace,
+an explicit primary table, lazy external sources, and schema discovery.
+
 ## Choose an entry point
 
 | Import | Purpose |

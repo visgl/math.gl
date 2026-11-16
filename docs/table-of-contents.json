@@ -576,6 +576,7 @@
         },
         "items": [
           "modules/sql/queries",
+          "modules/sql/catalog",
           "modules/sql/workers",
           "modules/sql/parser/README",
           "modules/sql/arrow/README",

@@ -38,3 +38,13 @@ export {
   isExpressionEvaluationError,
   type ExpressionEvaluationErrorCode
 } from './expressions/evaluation-error';
+
+export {SQLCatalog} from './sql-catalog';
+export type {
+  SQLTableName,
+  SQLTableSource,
+  SQLTableDefinition,
+  SQLTableInfo,
+  SQLCatalogOptions,
+  SQLCatalogQueryOptions
+} from './sql-catalog';

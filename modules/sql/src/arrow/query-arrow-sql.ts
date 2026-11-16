@@ -7,6 +7,7 @@ import type {Expression} from '../expressions/index';
 import {
   parseSQLSelectCompound,
   type SQLSelectStatement,
+  type SQLSelectCompound,
   type SQLSelectStatementOptions,
   type SQLSort
 } from '../sql/parse-sql-statement';
@@ -21,7 +22,15 @@ export function queryArrowSQL(
   tables: ReadonlyMap<string, Table>,
   options: Execution & SQLSelectStatementOptions = {}
 ): Table {
-  const {inputs, orderBy, offset, limit} = parseSQLSelectCompound(sql, options);
+  return executeArrowSQL(parseSQLSelectCompound(sql, options), tables, options);
+}
+
+/** Executes a bound compound query; shared by synchronous and asynchronous catalogs. */
+export function executeArrowSQL(
+  {inputs, orderBy, offset, limit}: SQLSelectCompound,
+  tables: ReadonlyMap<string, Table>,
+  options: Execution = {}
+): Table {
   const execution = {signal: options.signal, functions: options.functions};
   const [first, ...rest] = inputs.map(input => executeSelect(input, tables, execution)) as [
     Table,
@@ -60,6 +69,8 @@ function executeSelect(
   tables: ReadonlyMap<string, Table>,
   execution: Execution
 ): Table {
+  if (statement.from.schema || statement.joins.some(join => join.table.schema))
+    throw new Error('Schema-qualified tables require SQLCatalog');
   const source = getTable(tables, statement.from.name);
   const leftAlias = statement.from.alias ?? statement.from.name;
   const [right] = statement.joins;
@@ -148,7 +159,10 @@ function qualifiedColumn(node: Expression): Column | undefined {
     node.object.type === 'Identifier' &&
     node.property.type === 'Identifier'
   )
-    return {name: String(node.property['name']), qualifier: String(node.object['name'])};
+    return {
+      name: String(node.property['name']),
+      qualifier: String(node.object['name'])
+    };
   return undefined;
 }
 
