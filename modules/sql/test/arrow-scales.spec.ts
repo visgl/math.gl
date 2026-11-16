@@ -121,3 +121,30 @@ test('diverging pivot centers colors and Arrow emits actual binary16 channels', 
   expect(output.get(1)?.get(0)).toBeCloseTo(128 / 255, 3);
   expect(output.get(3)).toBeNull();
 });
+
+test('tied quantiles drop empty classes from the sampler and legend', () => {
+  const table = tableFromArrays({v: [0, 0, 0, 10, 10]});
+  const scale = compileArrowScale(
+    table,
+    parseSQLScaleExpression("SCALE_QUANTILE(v, 5, PALETTE('Blues'))")
+  );
+  const {thresholds, range} = scale.scale.descriptor;
+  expect(thresholds).toEqual([0, expect.closeTo(4), 10]);
+  expect(range.values).toHaveLength(4);
+  expect(scale.scale.sample(0)).toEqual(range.values[1]);
+});
+
+test('safe Arrow Int64 values scale without losing missing color rows', () => {
+  const table = tableFromArrays({v: [0n, null, 10n]});
+  const scale = compileArrowScale(
+    table,
+    parseSQLScaleExpression("SCALE_COLOR(v, DOMAIN(v), PALETTE('viridis'))")
+  );
+  const vector = scale.evaluate(table);
+  expect(scale.scale.descriptor.domain).toEqual([0, 10]);
+  expect(vector.get(1)).toBeNull();
+  expect(vector.get(2)?.get(0)).toBe(253);
+  const child = vector.getChildAt(0)!;
+  expect(child.length).toBe(12);
+  expect(child.nullCount).toBe(0);
+});

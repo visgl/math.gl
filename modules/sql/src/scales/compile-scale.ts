@@ -113,7 +113,17 @@ export function compileResolvedScale(
   if (!colorType && spec.range.type !== 'numeric')
     throw new Error('Numeric scale requires numeric range');
   const classes = spec.range.type === 'palette' ? spec.range.count : undefined;
-  const palette = colorType ? resolvePalette(spec.range, classes) : undefined;
+  let palette = colorType ? resolvePalette(spec.range, classes) : undefined;
+  if (thresholds?.length && thresholds.length + 1 !== (palette?.length ?? 0))
+    throw new Error('Scale class count must match palette color count');
+  if (spec.type === 'quantile' && thresholds) {
+    // Repeated breakpoints create empty classes. Keep the colors of the intervals that remain.
+    const original = thresholds;
+    thresholds = original.filter((value, i) => i === 0 || value !== original[i - 1]);
+    palette = palette!.filter(
+      (_, i) => i === 0 || i === original.length || original[i - 1] !== original[i]
+    );
+  }
   if (spec.type === 'ordinal' && domain.length > (palette?.length ?? 0)) {
     throw new Error('Ordinal palette must have at least one color per category');
   }
@@ -136,9 +146,6 @@ export function compileResolvedScale(
   const breaks = thresholds ?? [];
   if (['quantile', 'quantize', 'threshold'].includes(spec.type) && !thresholds) {
     throw new Error(`${spec.type} scale requires resolved class breaks`);
-  }
-  if (breaks.length && breaks.length + 1 !== (palette?.length ?? 0)) {
-    throw new Error('Scale class count must match palette color count');
   }
   const sample = (value: ScaleValue | null): number | ScaleColor | null => {
     if (value === null) return spec.nullColor ?? null;

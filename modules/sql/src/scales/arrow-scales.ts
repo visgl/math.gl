@@ -16,9 +16,10 @@ import {
   type Vector
 } from 'apache-arrow';
 import {compileArrowExpression} from '../arrow/compiler';
+import {nullTupleVector} from '../arrow/list-values';
 import type {ArrowExpression} from '../arrow/types';
 import {compileResolvedScale} from './compile-scale';
-import {resolveArrowDomains, resolveArrowQuantiles} from './arrow-domains';
+import {arrowScaleValue, resolveArrowDomains, resolveArrowQuantiles} from './arrow-domains';
 import type {ParsedSQLScale} from './parse-sql-scale';
 import type {ResolvedScale, ScaleColor, ScaleSpec, ScaleValue} from './scale-types';
 
@@ -51,23 +52,27 @@ function toVector(rows: (number | ScaleColor | null)[], spec: ScaleSpec): Vector
           ? new Float16()
           : new Float32();
   const factor = format === 'rgba8unorm' ? 255 : format === 'rgba16unorm' ? 65535 : undefined;
-  const colors = rows.map(value => {
-    const color = asColor(value);
-    if (!color) return null;
-    for (const channel of color)
+  const vector = nullTupleVector(new FixedSizeList(4, new Field('item', type, false)), rows.length);
+  const channels = vector.getChildAt(0)!;
+  for (let row = 0; row < rows.length; row++) {
+    const color = asColor(rows[row]!);
+    if (!color) continue;
+    for (let component = 0; component < 4; component++) {
+      const channel = color[component]!;
       if (
         !Number.isFinite(channel) ||
         (format === 'rgba16float' && Math.abs(channel) >= 65520) ||
         (format === 'rgba32float' && !Number.isFinite(Math.fround(channel)))
-      ) {
+      )
         throw new Error('Scale color cannot be represented in the requested format');
-      }
-    return factor === undefined
-      ? [...color]
-      : color.map(component => Math.round(Math.max(0, Math.min(1, component)) * factor));
-  });
-  // The parent validity bitmap represents missing colors, never NaN sentinels.
-  return vectorFromArray(colors, new FixedSizeList(4, new Field('item', type, false)));
+      channels.set(
+        row * 4 + component,
+        factor === undefined ? channel : Math.round(Math.max(0, Math.min(1, channel)) * factor)
+      );
+    }
+    vector.data[0]!.setValid(row, true);
+  }
+  return vector;
 }
 
 /** Compile a shared domain + range and bind its per-row Arrow expression once. */
@@ -113,7 +118,7 @@ export function compileArrowScale(
   });
   const evaluateVector = (input: Vector): Vector => {
     const result: (number | ScaleColor | null)[] = Array.from({length: input.length}, (_, i) => {
-      const value = input.get(i);
+      const value = arrowScaleValue(input.get(i));
       if (value === null || value === undefined) return scale.sample(null);
       if (typeof value !== 'number' && typeof value !== 'string') {
         throw new Error('Scale expression must produce scalar numeric or categorical values');

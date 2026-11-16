@@ -12,6 +12,15 @@ type DomainStatistics = {
   max: number;
 };
 
+/** Converts 64-bit Arrow integers only when the scale can represent them exactly. */
+export function arrowScaleValue(value: unknown): unknown {
+  if (typeof value !== 'bigint') return value;
+  const numeric = Number(value);
+  if (!Number.isSafeInteger(numeric))
+    throw new RangeError('Scale integer exceeds the safe numeric range');
+  return numeric;
+}
+
 /** Exact type-7 interpolated quantile; caller supplies sorted finite samples. */
 export function quantileSorted(sorted: readonly number[], probability: number): number {
   if (!sorted.length || !Number.isFinite(probability) || probability < 0 || probability > 1) {
@@ -53,7 +62,7 @@ export function resolveArrowDomains(
     };
     const samples = needsSamples.has(domain.column);
     for (let row = 0; row < vector.length; row++) {
-      const value = vector.get(row);
+      const value = arrowScaleValue(vector.get(row));
       if (value === null || value === undefined) continue;
       if (typeof value === 'string') {
         if (needsCategories.has(domain.column)) state.categories.add(value);
@@ -110,7 +119,7 @@ export function resolveArrowQuantiles(
   if (!vector) throw new Error(`Unknown quantile column: ${column}`);
   const values: number[] = [];
   for (let row = 0; row < vector.length; row++) {
-    const value = vector.get(row);
+    const value = arrowScaleValue(vector.get(row));
     if (value === null || value === undefined) continue;
     if (typeof value !== 'number' || !Number.isFinite(value)) {
       throw new Error(`Quantile column ${column} must be finite numeric`);
