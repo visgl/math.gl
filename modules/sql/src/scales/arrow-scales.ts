@@ -151,3 +151,6 @@ export function compileArrowScales<K extends string>(
     entries.map(([key, parsed], index) => [key, compileArrowScale(table, parsed, domains[index])])
   ) as Record<K, CompiledArrowScale>;
 }
+
+export {createStreamingDomainAccumulator} from './streaming-domains';
+export type {StreamingDomainOptions} from './streaming-domains';
