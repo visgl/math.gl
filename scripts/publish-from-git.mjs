@@ -15,12 +15,14 @@ export const retryablePublishError = (text) =>
   /TLOG_CREATE_ENTRY_ERROR|ECONNRESET|ETIMEDOUT|EAI_AGAIN|E50[0234]/.test(text);
 
 // These first publications created the packages before OIDC could be configured.
-// Their immutable beta.5 tarballs cannot acquire CI provenance retroactively.
+// Verify the exact bootstrap tarballs, which do not have CI provenance.
 const bootstrapIntegrity = {
   '@math.gl/arrow@5.0.0-beta.5':
     'sha512-2Q8LahH2pWpTnmMQOVZ5X424l9Y9J6rhWLcgcMLw8uhjgm0Pk8uNEgrogMBMPoECsRdTsO9/Mw1Xrl7Z2VZSww==',
   '@math.gl/tasks@5.0.0-beta.5':
-    'sha512-JmsQMUtyBWp+eysANnpaQQttNpJY0Ff7Xu3LvRRjiqkxQ6ZXJd7Z8XJW62pa0yWwickvSkiygVPtlr0Sbz8B3Q=='
+    'sha512-JmsQMUtyBWp+eysANnpaQQttNpJY0Ff7Xu3LvRRjiqkxQ6ZXJd7Z8XJW62pa0yWwickvSkiygVPtlr0Sbz8B3Q==',
+  '@math.gl/sql@5.0.0-beta.11':
+    'sha512-VxpySm0tH3muEYcbL6+f/XMPyByNdo2F55YBxxFCx1wp05jeaQkxgdqR6AHxzmg4WPZUYHGOqEcrXIW0WEG4dw=='
 };
 
 export function verifiedPublication(name, version, dist) {

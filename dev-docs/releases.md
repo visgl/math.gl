@@ -30,6 +30,11 @@ data paths remain available.
    version in Lerna's prompt. The command updates workspace versions and exact
    internal dependencies, creates the release commit/tag, and atomically pushes
    the branch and that tag. It does not publish directly to npm.
+   If branch protection requires landing the version bump as a PR, fetch the
+   merged commit and check out the current permitted branch tip. Create the
+   annotated release tag locally on that commit, then run
+   `yarn run publish-beta --prepared`. It validates the existing version and
+   tag and pushes the tag to start the release workflow.
 4. Verify the tag-triggered GitHub `release` workflow succeeds. That workflow
    builds, runs release tests, and publishes through npm trusted publishing with
    the `beta` dist-tag. Verify every publishable `modules/*` package exists at

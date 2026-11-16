@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## v5.0.0-beta.11
+
+- **Breaking:** Rename the standalone `@math.gl/expressions` package to `@math.gl/sql`. Update package dependencies and imports to the new name (#571).
+- feat(sql): Add Arrow string functions, nested-value extraction and CASE results, and an Arrow RecordBatch type guard. Preserve schemas in empty streaming batches (#550, #564, #569, #572, #579).
+- feat(sql): Add portable visualization scale descriptors and SQL syntax, Arrow domain resolution, compiled color scales, and incremental domains with bounded quantile sketches (#575, #576, #580, #581).
+- feat(sql): Convert scale palettes between sRGB, Display P3 and Rec.2020, and pack IEEE binary16 color components with ties-to-even rounding (#582).
+- feat(terrain): Add affine cell metrics, depression filling, watershed accumulation, and sampled regional viewsheds (#560, #566, #567, #570).
+- feat(terrain): Plan and split convex cutouts with paired skirts, certify geographic LOD screen-space error, and qualify terrain morphs across pole sectors (#557, #558, #573, #578).
+- feat(terrain): Extend rotating collider sweep coverage to boxes, hulls, capsules, and spheres. Improve worker edit allocation and timing (#549, #559, #561–#563, #565).
+- feat(geospatial): Add spatial reference metadata helpers (#577).
+- fix(geometry): Handle polygon cuts on rounded grid lines and reduce subdivision transform calls (#568, #574).
+- **Breaking:** Remove WebGL enums from geometry utilities and replace remaining TypeScript enums (#553, #554).
+- docs: Clarify API reference and TSDoc requirements, Euler rotation order, and numeric array layout (#555, #556).
+
 ## v5.0.0-beta.10
 
 - feat(arrow): Share query execution across tables and streams, and emit progressive aggregate snapshots (#542, #543).
