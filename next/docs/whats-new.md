@@ -32,7 +32,7 @@ Look up a location's timezone with [timezone](https://visgl.github.io/math.gl/ne
 
 ### Keep the math close and the bundle lean[​](#keep-the-math-close-and-the-bundle-lean "Direct link to Keep the math close and the bundle lean")
 
-[Core](https://visgl.github.io/math.gl/next/docs/modules/core.md) adds clearer matrix and rotation conversions, stronger array types, and tree-shakeable low-level namespaces. New [expressions](https://visgl.github.io/math.gl/next/docs/modules/expressions.md) tools make it possible to parse and evaluate configurable expressions; expression evaluation is experimental.
+[Core](https://visgl.github.io/math.gl/next/docs/modules/core.md) adds clearer matrix and rotation conversions, stronger array types, and tree-shakeable low-level namespaces. The experimental [SQL engine](https://visgl.github.io/math.gl/next/docs/modules/sql.md) queries native Arrow tables, computes columns, and aggregates record batches. It also provides portable SQL parsing and expression evaluation.
 
 ### Lighting and color calculations[​](#lighting-and-color-calculations "Direct link to Lighting and color calculations")
 
@@ -42,16 +42,17 @@ Opt-in [photometric and color LUT utilities](https://visgl.github.io/math.gl/nex
 
 Version 5 groups related tools into nine packages. Install the package root and use its focused entry points where available. See the [migration table](https://visgl.github.io/math.gl/next/docs/upgrade-guide.md#removed-standalone-packages) for the former package names.
 
-| Package                                                                                        | Purpose                                                        |
-| ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| [core](https://visgl.github.io/math.gl/next/docs/modules/core.md)                 | Vectors, matrices, rotations, types, and expressions           |
-| [geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry.md)         | Primitives, polygons, geometry utilities, and culling          |
-| [geospatial](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md)     | Ellipsoids, coordinate systems, projections, and tile matrices |
-| [earth](https://visgl.github.io/math.gl/next/docs/modules/earth.md)               | Geoid models, sky calculations, and timezones                  |
-| [dggs](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)                 | Six grid systems behind a common decoder API                   |
-| [web-mercator](https://visgl.github.io/math.gl/next/docs/modules/web-mercator.md) | Map viewport and Web Mercator calculations                     |
-| [arrow](https://visgl.github.io/math.gl/next/docs/modules/arrow.md)               | Arrow views and transport, UTF-8, GeoArrow, and WKB/WKT        |
-| [tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks.md)               | Task scheduling, typed operations, and worker execution        |
+| Package                                                                                        | Purpose                                                           |
+| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| [core](https://visgl.github.io/math.gl/next/docs/modules/core.md)                 | Vectors, matrices, rotations, and types                           |
+| [sql](https://visgl.github.io/math.gl/next/docs/modules/sql.md)                   | SQL queries over Arrow tables, parsing, and expression evaluation |
+| [geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry.md)         | Primitives, polygons, geometry utilities, and culling             |
+| [geospatial](https://visgl.github.io/math.gl/next/docs/modules/geospatial.md)     | Ellipsoids, coordinate systems, projections, and tile matrices    |
+| [earth](https://visgl.github.io/math.gl/next/docs/modules/earth.md)               | Geoid models, sky calculations, and timezones                     |
+| [dggs](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)                 | Six grid systems behind a common decoder API                      |
+| [web-mercator](https://visgl.github.io/math.gl/next/docs/modules/web-mercator.md) | Map viewport and Web Mercator calculations                        |
+| [arrow](https://visgl.github.io/math.gl/next/docs/modules/arrow.md)               | Arrow views and transport, UTF-8, GeoArrow, and WKB/WKT           |
+| [tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks.md)               | Task scheduling, typed operations, and worker execution           |
 
 For detailed changes, see the [changelog](https://github.com/visgl/math.gl/blob/master/CHANGELOG.md).
 

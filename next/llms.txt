@@ -114,22 +114,6 @@ Earth models, sunlight, astronomy, and timezones, available as named exports fro
 - [@math.gl/earth/timezone](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone.md): @math.gl/earth/timezone supplies geographic timezone lookup and numeric local-calendar computations. Use it for map labels, daily aggregation, and scheduling. It uses the runtime's timezone rules; use Intl.DateTimeFormat for localized presentation.
 - [Timezone utilities](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone/api-reference/timezone.md): getTimezoneOffset(timezone, date?)
 
-#### expressions
-
-Use @math.gl/expressions to evaluate expressions against JavaScript objects, parse SQL into
-
-- [@math.gl/expressions 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions.md): Use @math.gl/expressions to evaluate expressions against JavaScript objects, parse SQL into
-- [DGGS Function Libraries 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/dggs-function-libraries.md): Import optional Discrete Global Grid System function tables from @math.gl/dggs.
-- [Expression Evaluator 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/expression-eval.md): The core evaluator API is useful when you want direct control over parsing, AST reuse, or custom operator registration.
-- [Function Registry 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/function-registry.md): ExpressionFunctionRegistry maintains an isolated table of JavaScript functions that expression evaluators can call with evaluated arguments.
-- [Accessor Compiler 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/parse-expression-string.md): parseExpressionString(expression (row: Record) => unknown
-- [Arrow expressions](https://visgl.github.io/math.gl/next/docs/modules/expressions/arrow.md): @math.gl/expressions/arrow evaluates schema-bound expressions directly over Arrow batches. Use it
-- [SQL expressions in Arrow](https://visgl.github.io/math.gl/next/docs/modules/expressions/arrow/sql-conformance.md): Parse SQL with @math.gl/expressions/sql, then bind the returned AST to an
-- [Arrow color functions](https://visgl.github.io/math.gl/next/docs/modules/expressions/color.md): @math.gl/expressions/color exports named ArrowTableFunction declarations for schema-bound expressions.
-- [@math.gl/expressions/math](https://visgl.github.io/math.gl/next/docs/modules/expressions/math.md): Optional SQL-style numeric function declarations for Arrow expressions.
-- [Portable expression AST](https://visgl.github.io/math.gl/next/docs/modules/expressions/portable-ast.md): @math.gl/expressions provides a shared expression AST for independently implemented
-- [@math.gl/expressions/sql 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions/sql.md): Import @math.gl/expressions/sql to parse supported SQL statements into portable query and
-
 #### geometry
 
 The @math.gl/geometry module provides renderer-independent CPU mesh data and primitive
@@ -282,6 +266,25 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Projection API support](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md): @math.gl/geospatial/projection uses the math.gl projection engine by default. projectionEngine supplies
 - [Temporal deformation models](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/temporal-models.md): A coordinate can move between observation epochs because of a steady velocity,
 - [Terrain](https://visgl.github.io/math.gl/next/docs/modules/geospatial/terrain.md): Experimental CPU terrain data and algorithms, usable in Node.js, browser workers,
+
+#### sql
+
+A lightweight SQL query engine for Apache Arrow tables. Query tables already in memory,
+
+- [@math.gl/sql](https://visgl.github.io/math.gl/next/docs/modules/sql.md): A lightweight SQL query engine for Apache Arrow tables. Query tables already in memory,
+- [DGGS Function Libraries 🧪](https://visgl.github.io/math.gl/next/docs/modules/sql/api-reference/dggs-function-libraries.md): Import optional Discrete Global Grid System function tables from @math.gl/dggs.
+- [Expression Evaluator 🧪](https://visgl.github.io/math.gl/next/docs/modules/sql/api-reference/expression-eval.md): The core evaluator API is useful when you want direct control over parsing, AST reuse, or custom operator registration.
+- [Function Registry 🧪](https://visgl.github.io/math.gl/next/docs/modules/sql/api-reference/function-registry.md): ExpressionFunctionRegistry maintains an isolated table of JavaScript functions that expression evaluators can call with evaluated arguments.
+- [Accessor Compiler 🧪](https://visgl.github.io/math.gl/next/docs/modules/sql/api-reference/parse-expression-string.md): parseExpressionString(expression (row: Record) => unknown
+- [Arrow expressions](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow.md): @math.gl/sql/arrow evaluates schema-bound expressions directly over Arrow batches. Use it
+- [SQL expressions in Arrow](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow/sql-conformance.md): Parse SQL with @math.gl/sql/parser, then bind the returned AST to an
+- [Arrow color functions](https://visgl.github.io/math.gl/next/docs/modules/sql/color-functions.md): @math.gl/sql/color-functions exports named ArrowTableFunction declarations for schema-bound expressions.
+- [Portable expressions](https://visgl.github.io/math.gl/next/docs/modules/sql/expressions.md): Use @math.gl/sql/expressions to parse and evaluate expressions against JavaScript objects.
+- [@math.gl/sql/math-functions](https://visgl.github.io/math.gl/next/docs/modules/sql/math-functions.md): Optional SQL-style numeric function declarations for Arrow expressions.
+- [@math.gl/sql/parser 🧪](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md): Import @math.gl/sql/parser to parse supported SQL statements into portable query and
+- [Portable expression AST](https://visgl.github.io/math.gl/next/docs/modules/sql/portable-ast.md): @math.gl/sql/expressions provides a shared expression AST for independently implemented
+- [Query execution](https://visgl.github.io/math.gl/next/docs/modules/sql/queries.md): Use the functions exported by @math.gl/sql to query native Arrow tables and record batches.
+- [Workers](https://visgl.github.io/math.gl/next/docs/modules/sql/workers.md): Use @math.gl/sql/worker to run structured queries or compiled expressions off the calling thread.
 
 #### tasks
 

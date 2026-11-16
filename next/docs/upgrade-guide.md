@@ -21,7 +21,7 @@ Update the dependency and import together. When the 5.0 import contains a subpat
 
 ### Expressions and SQL package[​](#expressions-and-sql-package "Direct link to Expressions and SQL package")
 
-Install [`@math.gl/expressions`](https://visgl.github.io/math.gl/next/docs/modules/expressions.md) to evaluate expressions or parse SQL in 5.0. Install Apache Arrow 17 or later for Arrow execution.
+Install [`@math.gl/sql`](https://visgl.github.io/math.gl/next/docs/modules/sql.md) to query Arrow tables, parse SQL, or evaluate expressions in 5.0. Install Apache Arrow 17 or later for execution.
 
 ### Geometry utilities[​](#geometry-utilities "Direct link to Geometry utilities")
 

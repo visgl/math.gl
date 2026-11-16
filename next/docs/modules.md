@@ -60,14 +60,14 @@ Choose a module for your application. Each overview introduces its capabilities,
   [UTF-8](https://visgl.github.io/math.gl/next/docs/modules/arrow/utf8.md) · [GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow.md) · [GeoArrow utilities](https://visgl.github.io/math.gl/next/docs/modules/arrow/geoarrow-utils.md) · [WKB/WKT](https://visgl.github.io/math.gl/next/docs/modules/arrow/wkb.md)
 
   [Explore module →](https://visgl.github.io/math.gl/next/docs/modules/arrow.md)
-* ## [Expressions 🧪](https://visgl.github.io/math.gl/next/docs/modules/expressions.md)
-  [`@math.gl/expressions`](https://visgl.github.io/math.gl/next/docs/modules/expressions.md)
+* ## [SQL 🧪](https://visgl.github.io/math.gl/next/docs/modules/sql.md)
+  [`@math.gl/sql`](https://visgl.github.io/math.gl/next/docs/modules/sql.md)
 
-  [Evaluate expressions against objects or Arrow columns and parse SQL into query objects.](https://visgl.github.io/math.gl/next/docs/modules/expressions.md)
+  [Query native Arrow tables with SQL, compute columns, and aggregate record batches.](https://visgl.github.io/math.gl/next/docs/modules/sql.md)
 
-  [Object evaluation](https://visgl.github.io/math.gl/next/docs/modules/expressions/api-reference/expression-eval.md) · [SQL](https://visgl.github.io/math.gl/next/docs/modules/expressions/sql.md) · [Arrow execution](https://visgl.github.io/math.gl/next/docs/modules/expressions/arrow.md) · [Workers](https://visgl.github.io/math.gl/next/docs/modules/expressions/arrow.md#worker-execution)
+  [Queries](https://visgl.github.io/math.gl/next/docs/modules/sql/queries.md) · [SQL parser](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md) · [Arrow expressions](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow.md) · [Workers](https://visgl.github.io/math.gl/next/docs/modules/sql/workers.md)
 
-  [Explore module →](https://visgl.github.io/math.gl/next/docs/modules/expressions.md)
+  [Explore module →](https://visgl.github.io/math.gl/next/docs/modules/sql.md)
 * ## [Tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks.md)
   [`@math.gl/tasks`](https://visgl.github.io/math.gl/next/docs/modules/tasks.md)
 

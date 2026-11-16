@@ -24,16 +24,17 @@ math.gl is an [Open Visualization](https://openvisualization.org/), OpenJS Found
 
 The grouped package entry points are:
 
-| Package                 | Subpaths                                                                |
-| ----------------------- | ----------------------------------------------------------------------- |
-| `@math.gl/core`         | `/expressions`                                                          |
-| `@math.gl/geometry`     | `/culling`, `/lighting`, `/color`                                       |
-| `@math.gl/geospatial`   | `/crs`, `/projection`, `/terrain`, `/turf`, `/tasks`                    |
-| `@math.gl/earth`        | `/sun`, `/timezone`, `/sun/stars`; optional geoid and timezone datasets |
-| `@math.gl/dggs`         | Grid decoding and indexing at the package root                          |
-| `@math.gl/web-mercator` | Map viewport and camera calculations at the package root                |
-| `@math.gl/arrow`        | `/utf8`, `/geoarrow`, `/geoarrow-utils`, `/wkb`                         |
-| `@math.gl/tasks`        | Task execution at the package root                                      |
+| Package                 | Subpaths                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------- |
+| `@math.gl/core`         | Vectors, matrices, and numeric utilities at the package root                          |
+| `@math.gl/sql`          | `/parser`, `/expressions`, `/arrow`, `/worker`, `/math-functions`, `/color-functions` |
+| `@math.gl/geometry`     | `/culling`, `/lighting`, `/color`                                                     |
+| `@math.gl/geospatial`   | `/crs`, `/projection`, `/terrain`, `/turf`, `/tasks`                                  |
+| `@math.gl/earth`        | `/sun`, `/timezone`, `/sun/stars`; optional geoid and timezone datasets               |
+| `@math.gl/dggs`         | Grid decoding and indexing at the package root                                        |
+| `@math.gl/web-mercator` | Map viewport and camera calculations at the package root                              |
+| `@math.gl/arrow`        | `/utf8`, `/geoarrow`, `/geoarrow-utils`, `/wkb`                                       |
+| `@math.gl/tasks`        | Task execution at the package root                                                    |
 
 Import core math from `@math.gl/core`. The `viewport-mercator-project` package re-exports Web Mercator utilities.
 
