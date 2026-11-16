@@ -114,6 +114,12 @@ const probes = [
     forbidden: [/\/geometry\//, /\/core\//, /\/projection\//, /\/height-field\./, /\/surface\./, /martini/, /delatin/],
     budget: 5000
   },
+  ...['splitTerrainMesh', 'createTerrainCutoutSkirts'].map(symbol => ({
+    symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/height-field\./, /surface\./, /triangle-bvh/, /delatin/, /martini/,
+      symbol === 'splitTerrainMesh' ? /mesh-skirts\./ : /mesh-cutout\./],
+    budget: 10000
+  })),
   {
     symbol: 'packTerrainHeightField',
     packages: ['@math.gl/geospatial/terrain'],

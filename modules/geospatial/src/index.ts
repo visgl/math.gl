@@ -483,3 +483,14 @@ export {
   type TerrainDepressionFill,
   type TerrainDepressionFillOptions
 } from './terrain/depression-fill';
+
+export {
+  splitTerrainMesh,
+  createTerrainCutoutSkirts,
+  type TerrainCutout,
+  type TerrainCutoutInput,
+  type TerrainCutoutOptions,
+  type TerrainCutoutPiece,
+  type SkirtedTerrainCutout,
+  type TerrainCutoutSkirtOptions
+} from './terrain/index';

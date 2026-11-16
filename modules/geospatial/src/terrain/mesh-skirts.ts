@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-export type TerrainSkirtOptions = {
-  /** Positive downward distance in the same units as positions. */
-  height: number;
+type TerrainSkirtVertical =
+  | {/** Positive downward distance. */ height: number; baseZ?: never}
+  | {/** Local elevation below every selected boundary vertex. */ baseZ: number; height?: never};
+
+export type TerrainSkirtOptions = TerrainSkirtVertical & {
   /** Optional unordered pairs of boundary vertex IDs. Omit to skirt every boundary, including holes. */
   edges?: Uint16Array | Uint32Array;
   maxVertices?: number;
@@ -33,12 +35,13 @@ export function createTerrainSkirt(
   options: TerrainSkirtOptions
 ): TerrainSkirtMesh {
   const {positions, indices} = mesh,
-    {height, edges} = options;
+    {height, baseZ, edges} = options;
   const maxVertices = options.maxVertices ?? 2_000_000,
     maxTriangles = options.maxTriangles ?? 4_000_000;
   if (
-    !Number.isFinite(height) ||
-    height <= 0 ||
+    (baseZ === undefined
+      ? !(Number.isFinite(height) && height! > 0)
+      : height !== undefined || !Number.isFinite(baseZ)) ||
     !Number.isSafeInteger(maxVertices) ||
     maxVertices < 0 ||
     maxVertices > 0xffffffff ||
@@ -133,7 +136,7 @@ export function createTerrainSkirt(
       [b, lowerB]
     ]) {
       resultPositions.set(positions.subarray(3 * source, 3 * source + 3), 3 * target);
-      resultPositions[3 * target + 2] = positions[3 * source + 2] - height;
+      resultPositions[3 * target + 2] = baseZ ?? positions[3 * source + 2] - height!;
       if (
         !Number.isFinite(resultPositions[3 * target + 2]) ||
         resultPositions[3 * target + 2] >= positions[3 * source + 2]

@@ -81,7 +81,7 @@
 @media (max-width: 700px) and (max-height: 460px) {
   .terrain-sampling .example-panel > .deck-widget-box > section > header > button {
     line-height: 1.2 !important;
-    min-height: 30px !important;
-    padding-block: 3px !important;
+    min-height: 25px !important;
+    padding-block: 2px !important;
   }
 }
