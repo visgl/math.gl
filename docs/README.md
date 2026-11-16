@@ -37,7 +37,8 @@ The grouped package entry points are:
 
 | Package | Subpaths |
 | --- | --- |
-| `@math.gl/core` | `/expressions` |
+| `@math.gl/core` | Vectors, matrices, and numeric utilities at the package root |
+| `@math.gl/sql` | `/parser`, `/expressions`, `/arrow`, `/worker`, `/math-functions`, `/color-functions` |
 | `@math.gl/geometry` | `/culling`, `/lighting`, `/color` |
 | `@math.gl/geospatial` | `/crs`, `/projection`, `/terrain`, `/turf`, `/tasks` |
 | `@math.gl/earth` | `/sun`, `/timezone`, `/sun/stars`; optional geoid and timezone datasets |

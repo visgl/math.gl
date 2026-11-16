@@ -13,7 +13,7 @@ test('public entrypoints resolve to workspace source, including consolidated pro
     resolve(__dirname, '../modules/geospatial/src/projection/experimental/core.ts'));
   assert.equal(aliases['@math.gl/geospatial/projection/projections/merc'],
     resolve(__dirname, '../modules/geospatial/src/projection/experimental/entries/projections/merc.ts'));
-  assert.ok(Object.keys(aliases).some(name => name.startsWith('@math.gl/expressions')));
+  assert.ok(Object.keys(aliases).some(name => name.startsWith('@math.gl/sql/expressions')));
   assert.ok(Object.values(aliases).every(path => !path.includes('/dist/')));
 });
 

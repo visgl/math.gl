@@ -23,8 +23,8 @@ install its package root. See the API changes below for changes to named exports
 
 ### Expressions and SQL package
 
-Install [`@math.gl/expressions`](./modules/expressions/README.md) to evaluate expressions or
-parse SQL in 5.0. Install Apache Arrow 17 or later for Arrow execution.
+Install [`@math.gl/sql`](./modules/sql/README.md) to query Arrow tables, parse SQL, or
+evaluate expressions in 5.0. Install Apache Arrow 17 or later for execution.
 
 ### Geometry utilities
 

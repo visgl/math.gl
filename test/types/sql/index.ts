@@ -11,7 +11,7 @@ import {
   validateSQLPredicate,
   isSQLPredicate,
   SQL_PREDICATE_JSON_SCHEMA
-} from '@math.gl/expressions/sql';
+} from '@math.gl/sql/parser';
 import type {
   TableQuery,
   TableReference,
@@ -19,8 +19,8 @@ import type {
   SQLCatalogQuery,
   SQLPredicate,
   BoundSQLPredicate
-} from '@math.gl/expressions/sql';
-import type {ColumnarPredicate} from '@math.gl/expressions';
+} from '@math.gl/sql/parser';
+import type {ColumnarPredicate} from '@math.gl/sql/expressions';
 
 const reference: TableReference = {source: 'warehouse', table: 'cities'};
 const selection: TableSelection = {column: 'city', as: 'name'};
@@ -60,13 +60,35 @@ void castSelection;
 
 const computedQuery = parseSQLQuery('SELECT SIN(angle) AS value WHERE x + 1 > 0');
 if ('where' in computedQuery && computedQuery.where && 'expression' in computedQuery.where) {
-  const expression: import('@math.gl/expressions').Expression = computedQuery.where.expression;
+  const expression: import('@math.gl/sql/expressions').Expression = computedQuery.where.expression;
   void expression;
 }
 
-const byteSelection: import('@math.gl/expressions/sql').TableSelection = {
+const byteSelection: import('@math.gl/sql/parser').TableSelection = {
   array: ['r', 'g', 'b', 'a'],
   as: 'color',
   type: 'uint8'
 };
 void byteSelection;
+
+// The primary entry point accepts native Arrow tables and typed function declarations.
+import {tableFromArrays} from 'apache-arrow';
+import {
+  queryArrowSQL,
+  queryArrowTable,
+  queryArrowTableInBatches,
+  type ArrowTableQuery,
+  type ArrowStreamingQuery
+} from '@math.gl/sql';
+import {SQRT} from '@math.gl/sql/math-functions';
+import {COLOR_RGB} from '@math.gl/sql/color-functions';
+
+const orders = tableFromArrays({quantity: new Int32Array([2, 1, 3])});
+const tables = new Map([['orders', orders]]);
+queryArrowSQL('SELECT SQRT(CAST(quantity AS FLOAT64)) AS root FROM orders', tables, {
+  functions: [SQRT, COLOR_RGB]
+});
+const tableQuery: ArrowTableQuery = {select: ['quantity'], limit: 2};
+queryArrowTable(orders, tableQuery);
+const streamingQuery: ArrowStreamingQuery = {...tableQuery, emitEmptyBatches: true};
+queryArrowTableInBatches(orders.batches, orders.schema, streamingQuery);

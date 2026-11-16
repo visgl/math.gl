@@ -27,8 +27,8 @@ const modules = [
   ['Arrow', 'arrow', 'Process binary data and exchange Arrow and GeoArrow representations.', [
     ['UTF-8', 'arrow/utf8'], ['GeoArrow', 'arrow/geoarrow'], ['GeoArrow utilities', 'arrow/geoarrow-utils'], ['WKB/WKT', 'arrow/wkb']
   ]],
-  ['Expressions 🧪', 'expressions', 'Evaluate expressions against objects or Arrow columns and parse SQL into query objects.', [
-    ['Object evaluation', 'expressions/api-reference/expression-eval'], ['SQL', 'expressions/sql'], ['Arrow execution', 'expressions/arrow'], ['Workers', 'expressions/arrow#worker-execution']
+  ['SQL 🧪', 'sql', 'Query native Arrow tables with SQL, compute columns, and aggregate record batches.', [
+    ['Queries', 'sql/queries'], ['SQL parser', 'sql/parser'], ['Arrow expressions', 'sql/arrow'], ['Workers', 'sql/workers']
   ]],
   ['Tasks', 'tasks', 'Schedule typed work locally and in browser or Node workers.', [
     ['Scheduling', 'tasks/developer-guide/execution'], ['Workers', 'tasks/developer-guide/custom-workers'], ['Streams', 'tasks/developer-guide/task-runner'], ['State', 'tasks/developer-guide/persistent-resources']

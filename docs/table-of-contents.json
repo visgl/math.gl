@@ -569,22 +569,25 @@
       },
       {
         "type": "category",
-        "label": "Expressions and SQL",
+        "label": "SQL",
         "link": {
           "type": "doc",
-          "id": "modules/expressions/README"
+          "id": "modules/sql/README"
         },
         "items": [
-          "modules/expressions/api-reference/expression-eval",
-          "modules/expressions/api-reference/function-registry",
-          "modules/expressions/api-reference/dggs-function-libraries",
-          "modules/expressions/api-reference/parse-expression-string",
-          "modules/expressions/portable-ast",
-          "modules/expressions/sql/README",
-          "modules/expressions/arrow/README",
-          "modules/expressions/arrow/sql-conformance",
-          "modules/expressions/math/README",
-          "modules/expressions/color/README"
+          "modules/sql/queries",
+          "modules/sql/workers",
+          "modules/sql/parser/README",
+          "modules/sql/arrow/README",
+          "modules/sql/arrow/sql-conformance",
+          "modules/sql/math-functions/README",
+          "modules/sql/color-functions/README",
+          "modules/sql/expressions",
+          "modules/sql/api-reference/expression-eval",
+          "modules/sql/api-reference/function-registry",
+          "modules/sql/api-reference/dggs-function-libraries",
+          "modules/sql/api-reference/parse-expression-string",
+          "modules/sql/portable-ast"
         ]
       },
       {
