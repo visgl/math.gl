@@ -763,3 +763,7 @@ descriptor and reuse the sampling overlap index while the sorted layout is
 stable. Per-call frame and capacity checks still run, and full rebuilds
 prepare their own sources. The cache retains prepared sample storage for
 live descriptors, trading memory for fewer copies on each edit.
+
+## Terrain cutouts
+
+See the [paired-skirt cutout design](./terrain-cutouts.md) for terrain segmentation, lifted patches, and acceptance tests.
