@@ -138,7 +138,8 @@ test('CASE selects nested list and struct results from Arrow extraction', () => 
   });
   const result = queryArrowSQL(
     `SELECT CASE WHEN selectLeft THEN leftEntry.values ELSE rightEntry.values END AS vals,
-            CASE WHEN selectLeft THEN entries[1] ELSE entries[-1] END AS entry
+            CASE WHEN selectLeft THEN entries[1] ELSE entries[-1] END AS entry,
+            CASE WHEN selectLeft THEN entries[1] END AS maybeEntry
      FROM data`,
     new Map([['data', input]])
   );
@@ -154,4 +155,8 @@ test('CASE selects nested list and struct results from Arrow extraction', () => 
     [2],
     null
   ]);
+  const optional = result.getChild('maybeEntry')!;
+  expect(Array.from(optional, value => (value === null ? null : Array.from(value.values)))).toEqual(
+    [[1], null, null]
+  );
 });

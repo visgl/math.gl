@@ -460,6 +460,13 @@ function bindNode(
           )
       };
     }
+    if (value === null && isNestedType(type))
+      return {
+        field: new Field('literal', type, true),
+        hasKernel: false,
+        prepare: (_batch, active) =>
+          vectorReader(vectorFromArray(Array(active.length).fill(null), type))
+      };
     validateValue(value, type);
     const rounded = roundToType(type)(value);
     if (typeof value === 'number' && Number.isFinite(value) && !Number.isFinite(rounded))
