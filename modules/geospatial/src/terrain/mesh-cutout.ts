@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {getTerrainCutoutPlan, type TerrainCutoutRegion} from './cutout-region';
+
 type XY = readonly [number, number];
 type XYZ = readonly [number, number, number];
 type Face = [number, number, number];
@@ -25,6 +27,10 @@ export type TerrainCutoutPiece = {
   sourceFaces: Uint32Array;
   /** Directed boundary edges paired with the other piece in reverse order. */
   cutEdges: Uint32Array;
+  /** Input polygon index per output face; 0 for raw convex rings, 0xffffffff for remainder. */
+  polygonIndices: Uint32Array;
+  /** Patch polygon index per directed cut edge, also present on the paired remainder edge. */
+  cutPolygonIndices: Uint32Array;
 };
 
 /** Bounds for the splitter's working storage and pair/fragment checks. */
@@ -37,11 +43,11 @@ export type TerrainCutoutOptions = {
   maxTriangles?: number;
 };
 
-/** Both sides of a convex cut, with matching directed edges along the opening. */
+/** Both sides of a terrain cut, with matching directed edges along the opening. */
 export type TerrainCutout = {patch: TerrainCutoutPiece; remainder: TerrainCutoutPiece};
 
 type Fragment = {ids: number[]; inside: boolean};
-type Boundary = {edge: Edge; count: number};
+type Boundary = {edge: Edge; count: number; polygon: number};
 type PieceBuilder = {
   ids: Map<number, number>;
   positions: number[];
@@ -51,15 +57,17 @@ type PieceBuilder = {
   sourceFaces: number[];
   boundary: Map<string, Boundary>;
   cutEdges: number[];
+  polygonIndices: number[];
+  cutPolygonIndices: number[];
 };
 
-/** Split a conforming 2.5D terrain mesh by a strictly convex ring in local XY.
+/** Split conforming 2.5D terrain by a convex ring or prepared polygon set in local XY.
  * Either ring winding is accepted. Ring vertices must omit a closing duplicate.
  * Rejects overlapping sheets, nonconforming edges and unrepresentable slivers.
  */
 export function splitTerrainMesh(
   mesh: TerrainCutoutInput,
-  polygon: readonly XY[],
+  polygon: TerrainCutoutRegion,
   {maxWork = 4_000_000, maxVertices = 500_000, maxTriangles = 500_000}: TerrainCutoutOptions = {}
 ): TerrainCutout {
   if (
@@ -83,7 +91,9 @@ export function splitTerrainMesh(
     if (work > maxWork) throw new RangeError('Terrain cutout work budget exceeded');
   }
 
-  const ring = validatePolygon(polygon, charge);
+  const prepared = getTerrainCutoutPlan(polygon);
+  const ring = prepared ? undefined : validatePolygon(polygon as readonly XY[], charge);
+  const lines = prepared?.lines ?? ring!.map((p, i) => [p, ring![(i + 1) % ring!.length]] as const);
   const vertices: XYZ[] = [];
   for (let i = 0; i < mesh.positions.length; i += 3)
     vertices.push([mesh.positions[i], mesh.positions[i + 1], mesh.positions[i + 2]]);
@@ -99,7 +109,7 @@ export function splitTerrainMesh(
 
   const patch = createPiece();
   const remainder = createPiece();
-  const intersections = ring.map(() => new Map<string, number>());
+  const intersections = lines.map(() => new Map<string, number>());
   let fragmentCount = 0;
 
   /** Allocate a vertex once for both pieces and every incident fragment. */
@@ -143,10 +153,9 @@ export function splitTerrainMesh(
     let fragments: Fragment[] = [{ids: faces[source], inside: true}];
     // Split both sides by every supporting line. This preserves matching
     // subdivisions on remainder edges beyond the finite polygon segments.
-    for (let line = 0; line < ring.length; line++) {
+    for (let line = 0; line < lines.length; line++) {
       const next: Fragment[] = [];
-      const a = ring[line];
-      const b = ring[(line + 1) % ring.length];
+      const [a, b] = lines[line];
       for (const fragment of fragments) {
         const {ids} = fragment;
         charge(ids.length);
@@ -179,25 +188,35 @@ export function splitTerrainMesh(
     }
     fragmentCount += fragments.length;
     for (const {ids, inside} of fragments) {
-      const piece = inside ? patch : remainder;
-      if (ids.length === 3) emit(piece, ids as Face, source);
-      else {
-        // A center fan retains collinear boundary vertices and therefore pairs
-        // every constrained boundary segment with its neighbor.
-        const center = [...vertices[ids[0]]] as [number, number, number];
+      // A strict interior point classifies each arrangement cell. Its artificial
+      // subdivision edges disappear when same-piece boundary incidences cancel.
+      let center: [number, number, number] | undefined;
+      if (prepared || ids.length > 3) {
+        center = [...vertices[ids[0]]] as [number, number, number];
         for (const id of ids) {
           for (let k = 0; k < 3; k++)
             center[k] += (vertices[id][k] - vertices[ids[0]][k]) / ids.length;
         }
-        const hub = addVertex(center);
+      }
+      const polygonIndex = prepared
+        ? prepared.classify([center![0], center![1]], charge)
+        : inside
+          ? 0
+          : -1;
+      const piece = polygonIndex >= 0 ? patch : remainder;
+      if (ids.length === 3) emit(piece, ids as Face, source, polygonIndex);
+      else {
+        // A center fan retains collinear boundary vertices and therefore pairs
+        // every constrained boundary segment with its neighbor.
+        const hub = addVertex(center!);
         for (let i = 0; i < ids.length; i++)
-          emit(piece, [ids[i], ids[(i + 1) % ids.length], hub], source);
+          emit(piece, [ids[i], ids[(i + 1) % ids.length], hub], source, polygonIndex);
       }
     }
   }
 
   /** Emit a triangle and weld all of its edges by their shared topology IDs. */
-  function emit(piece: PieceBuilder, face: Face, source: number) {
+  function emit(piece: PieceBuilder, face: Face, source: number, polygonIndex: number) {
     if (patch.sourceFaces.length + remainder.sourceFaces.length >= maxTriangles)
       throw new RangeError('Terrain cutout triangle budget exceeded');
     checkTriangle(vertices[face[0]], vertices[face[1]], vertices[face[2]]);
@@ -219,9 +238,10 @@ export function splitTerrainMesh(
         );
       }
       piece.indices.push(piece.ids.get(id)!);
-      addEdge(piece.boundary, id, face[(i + 1) % 3]);
+      addEdge(piece.boundary, id, face[(i + 1) % 3], polygonIndex);
     }
     piece.sourceFaces.push(source);
+    piece.polygonIndices.push(polygonIndex);
   }
 
   for (const [key, inside] of patch.boundary) {
@@ -232,6 +252,8 @@ export function splitTerrainMesh(
       throw new Error('Nonconforming terrain cut boundary');
     patch.cutEdges.push(patch.ids.get(a)!, patch.ids.get(b)!);
     remainder.cutEdges.push(remainder.ids.get(b)!, remainder.ids.get(a)!);
+    patch.cutPolygonIndices.push(inside.polygon);
+    remainder.cutPolygonIndices.push(inside.polygon);
   }
   return {patch: finish(patch), remainder: finish(remainder)};
 }
@@ -321,10 +343,10 @@ function checkJunctions(a: Face, b: Face, vertices: XYZ[]) {
 }
 
 /** Track the first direction and incidence count of an indexed edge. */
-function addEdge(edges: Map<string, Boundary>, a: number, b: number) {
+function addEdge(edges: Map<string, Boundary>, a: number, b: number, polygon = -1) {
   const key = edgeKey(a, b);
   const entry = edges.get(key);
-  if (!entry) edges.set(key, {edge: [a, b], count: 1});
+  if (!entry) edges.set(key, {edge: [a, b], count: 1, polygon});
   else {
     if (entry.count !== 1 || entry.edge[0] !== b)
       throw new RangeError('Terrain cut mesh has inconsistent or nonmanifold edges');
@@ -352,7 +374,9 @@ function createPiece(): PieceBuilder {
     sourceWeights: [],
     sourceFaces: [],
     boundary: new Map(),
-    cutEdges: []
+    cutEdges: [],
+    polygonIndices: [],
+    cutPolygonIndices: []
   };
 }
 
@@ -364,7 +388,9 @@ function finish(piece: PieceBuilder): TerrainCutoutPiece {
     sourceTriangles: Uint32Array.from(piece.sourceTriangles),
     sourceWeights: Float64Array.from(piece.sourceWeights),
     sourceFaces: Uint32Array.from(piece.sourceFaces),
-    cutEdges: Uint32Array.from(piece.cutEdges)
+    cutEdges: Uint32Array.from(piece.cutEdges),
+    polygonIndices: Uint32Array.from(piece.polygonIndices),
+    cutPolygonIndices: Uint32Array.from(piece.cutPolygonIndices)
   };
 }
 

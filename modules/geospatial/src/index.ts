@@ -521,3 +521,13 @@ export {
   type GeographicTerrainCutoutFrame,
   type GeographicTerrainCutoutFrameOptions
 } from './terrain/geographic-cutout';
+
+export {
+  prepareTerrainCutoutPolygons,
+  type TerrainCutoutPolygonOptions
+} from './terrain/cutout-polygons';
+export type {
+  TerrainCutoutPolygon,
+  TerrainCutoutPolygonSet,
+  TerrainCutoutRegion
+} from './terrain/cutout-region';

@@ -10,31 +10,68 @@ import {
   HeightField,
   createTerrainMesh,
   splitTerrainMeshTiles,
-  updateTerrainTileCutouts
+  updateTerrainTileCutouts,
+  prepareTerrainCutoutPolygons
 } from '../modules/geospatial/dist/terrain/index.js';
 
 // Interleave incremental and monolithic cuts on the same deterministic edit prefix.
 const results = [];
-const polygon = [
-  [1.3, 2.7],
-  [61.3, 3.1],
-  [60.7, 29.3],
-  [2.3, 30.1]
-];
+const complex = process.argv.includes('--polygons');
+const preparationStart = performance.now();
+const polygon = complex
+  ? prepareTerrainCutoutPolygons([
+      {
+        outer: [
+          [1.25, 1.25],
+          [62.75, 1.25],
+          [62.75, 12.75],
+          [40.75, 12.75],
+          [40.75, 30.75],
+          [1.25, 30.75]
+        ],
+        holes: [
+          [
+            [8.25, 8.25],
+            [20.75, 8.25],
+            [20.75, 20.75],
+            [8.25, 20.75]
+          ]
+        ]
+      },
+      {
+        outer: [
+          [11.25, 11.25],
+          [16.75, 11.25],
+          [16.75, 16.75],
+          [11.25, 16.75]
+        ]
+      }
+    ])
+  : [
+      [1.3, 2.7],
+      [61.3, 3.1],
+      [60.7, 29.3],
+      [2.3, 30.1]
+    ];
+const preparationMs = performance.now() - preparationStart;
 const quantile = (values, q) => [...values].sort((a, b) => a - b)[Math.ceil(values.length * q) - 1];
 const boundary = piece =>
   Array.from({length: piece.cutEdges.length / 2}, (_, i) => {
     const a = piece.cutEdges[i * 2] * 3,
       b = piece.cutEdges[i * 2 + 1] * 3;
-    return `${piece.positions.slice(a, a + 3)}/${piece.positions.slice(b, b + 3)}`;
+    return `${piece.cutPolygonIndices[i]}:${piece.positions.slice(a, a + 3)}/${piece.positions.slice(b, b + 3)}`;
   });
 const triangles = piece =>
-  Array.from({length: piece.indices.length / 3}, (_, i) =>
-    Array.from(piece.indices.subarray(i * 3, i * 3 + 3), id =>
-      String(piece.positions.slice(id * 3, id * 3 + 3))
-    )
-      .sort()
-      .join('/')
+  Array.from(
+    {length: piece.indices.length / 3},
+    (_, i) =>
+      piece.polygonIndices[i] +
+      ':' +
+      Array.from(piece.indices.subarray(i * 3, i * 3 + 3), id =>
+        String(piece.positions.slice(id * 3, id * 3 + 3))
+      )
+        .sort()
+        .join('/')
   );
 const area = piece => {
   let sum = 0;
@@ -110,6 +147,7 @@ for (const name of ['pacific', 'sierra-nodata']) {
   }
   results.push({
     dataset: name,
+    shape: complex ? 'concave-hole-island' : 'convex',
     sourceSha256: dem.sha256,
     sourceOrigin,
     inputTriangles,
@@ -125,7 +163,13 @@ for (const name of ['pacific', 'sierra-nodata']) {
 }
 console.log(
   JSON.stringify(
-    {node: process.version, platform: process.platform, architecture: process.arch, results},
+    {
+      preparationMs,
+      node: process.version,
+      platform: process.platform,
+      architecture: process.arch,
+      results
+    },
     null,
     2
   )

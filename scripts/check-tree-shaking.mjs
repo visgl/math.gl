@@ -116,10 +116,16 @@ const probes = [
   },
   ...['splitTerrainMesh', 'splitTerrainMeshTiles', 'updateTerrainTileCutouts', 'createTerrainCutoutSkirts'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
-    forbidden: [/height-field\./, /surface\./, /triangle-bvh/, /delatin/, /martini/,
+    forbidden: [/height-field\./, /surface\./, /triangle-bvh/, /delatin/, /martini/, /cutout-polygons\./,
       symbol !== 'createTerrainCutoutSkirts' ? /mesh-skirts\./ : /mesh-cutout\./],
     budget: symbol === 'updateTerrainTileCutouts' ? 15000 : 10000
   })),
+  {
+    symbol: 'prepareTerrainCutoutPolygons',
+    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/height-field\./, /surface\./, /mesh-cutout\./, /mesh-skirts\./, /delatin/, /martini/, /\/projection\//],
+    budget: 6500
+  },
   ...['createGeographicTerrainCutoutFrame', 'projectGeographicTerrainCutout', 'unprojectGeographicTerrainCutout'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
     forbidden: [/height-field\./, /surface\./, /triangle-bvh/, /delatin/, /martini/, /mesh-cutout\./, /mesh-skirts\./, /\/projection\//],
