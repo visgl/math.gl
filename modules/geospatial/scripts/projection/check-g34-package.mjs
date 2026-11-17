@@ -13,10 +13,8 @@ import ts from 'typescript';
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
 const manifest = JSON.parse(readFileSync(join(root, 'modules/geospatial/package.json')));
 const entry = manifest.exports['.'];
-const esm = await import(new URL('../../dist/index.js', import.meta.url));
-const cjs = createRequire(import.meta.url)(
-  new URL('../../dist/index.cjs', import.meta.url).pathname
-);
+const esm = await import('@math.gl/geospatial');
+const cjs = createRequire(import.meta.url)('@math.gl/geospatial');
 for (const api of [esm, cjs]) {
   const m = new api.EllipsoidMetrics({semiMajorAxis: 1, semiMinorAxis: 1});
   assert(Math.abs(m.surfaceArea - 4 * Math.PI) < 1e-13);

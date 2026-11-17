@@ -38,6 +38,10 @@ const trackedFiles = execFileSync('git', ['ls-files'], {cwd: root, encoding: 'ut
 for (const filename of trackedFiles) {
   if (!/\.(?:[cm]?[jt]sx?|mdx?)$/.test(filename) || !existsSync(new URL(filename, root))) continue;
   const contents = readFileSync(new URL(filename, root), 'utf8');
+  // Include constructed first-party paths, while leaving pinned external oracle files alone.
+  for (const [, specifier] of contents.matchAll(/\b(?:import|require)\s*\([^;\n]*?['"]((?:\.\.?\/|\/modules\/)[^'"]*\/index(?:\.[cm]?[jt]s)?)['"]/g)) {
+    assert.fail(`${filename}: redundant constructed /index import ${specifier}`);
+  }
   for (const [, specifier] of contents.matchAll(/(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*)['"]([^'"\s]+)['"]/g)) {
     if (specifier.startsWith('.') || specifier.startsWith('@math.gl/')) {
       assert(!/\/index(?:\.[cm]?[jt]s)?$/.test(specifier), `${filename}: redundant /index import ${specifier}`);
