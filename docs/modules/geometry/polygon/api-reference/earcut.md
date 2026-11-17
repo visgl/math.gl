@@ -10,11 +10,11 @@ Computes a triangulation of a polygon using the [earcut library](https://github.
 import {earcut} from '@math.gl/geometry';
 
 earcut([10, 0, 0, 50, 60, 60, 70, 10]);
-// returns [1, 0, 3, 3, 2, 1]
+// returns [1, 0, 3, 1, 3, 2]
 
 // Polygon with a hole starting at vertex 4
 earcut([0, 0, 100, 0, 100, 100, 0, 100, 20, 20, 80, 20, 80, 80, 20, 80], [4]);
-// returns [3, 0, 4, 5, 4, 0, 3, 4, 7, 5, 0, 1, 2, 3, 7, 6, 5, 1, 2, 7, 6, 6, 1, 2]
+// returns [0, 4, 7, 5, 4, 0, 5, 0, 1, 5, 1, 2, 3, 0, 7, 3, 7, 6, 6, 5, 2, 6, 2, 3]
 ```
 
 ## Usage
@@ -33,28 +33,31 @@ Arguments:
 
 Returns:
 
-An array of indices into the `positions` array that describes the triangulation of the polygon
+An array of indices into the `positions` array that describes the triangulation of the polygon.
+Triangle order and the choice of valid diagonals are implementation details and may change between versions.
 
 ## Implementation and performance
 
-The custom implementation incorporates the general-purpose optimizations from
-[loaders.gl's WKB triangulator](https://github.com/visgl/loaders.gl/blob/5cbc82c81c78e297cfdc5e04b3aefc97bc3d0ba5/modules/arrow/src/arrow-geometry/triangulate-wkb.ts):
-reusable vertex nodes and hole queues, direct vertex indices in the clipping loop,
-and a combined coordinate-reading and signed-area pass when areas are not supplied.
-WKB header parsing, binary ring layouts, and little-endian decoding remain specific
-to loaders.gl's binary-input API.
+The triangulation core uses bounding-box blocks to accelerate hole bridging,
+radix sorting for spatial hashing, local filtering around bridges, and an explicit
+stack for polygon splits. Strictly convex hashed rings skip interior-point checks.
+
+Reusable vertex nodes and hole queues reduce allocations across calls. When areas
+are not supplied, coordinate reads and signed-area accumulation share one pass.
+The `areas` parameter skips this calculation; the `plane` parameter selects the
+coordinates used by ring construction and spatial indexes.
 
 Precomputed areas must use the same projection plane as triangulation. Polygons
 with more than 80 input vertices use spatial hashing on that plane. Output indices
 refer to vertices, so multiply by `size` to locate coordinates in `positions`.
 
-Scratch nodes are reused across calls, with all mutable node fields reset before
-reuse. Nested calls and exceptions restore scratch state. Calls requiring more
-than 65,536 scratch nodes release the node cache on completion; smaller calls keep
-it for reuse. Input arrays and returned triangle arrays are never retained in the
-cache. As with upstream Earcut, self-intersections and other invalid polygons are
+Scratch storage is isolated for calls nested through input getters and reset even
+when a getter throws. Node references in sorting and bridge-index buffers are
+cleared after use. Calls exceeding 65,536 cached nodes or spatial-index entries
+release their caches on completion; smaller calls keep bounded storage for reuse.
+Input arrays and returned triangle arrays are never retained in the cache. As with upstream Earcut, self-intersections and other invalid polygons are
 handled on a best-effort basis, without a guarantee of a correct triangulation.
 
 When the leftmost vertex of a hole is also a vertex of the outer ring or of a hole
-that is already bridged, the hole is bridged at that shared vertex, as in upstream
-Earcut 3.0.1. Rings that touch at a vertex are common in clipped vector tiles.
+that is already bridged, the hole is bridged at that shared vertex. Rings that
+touch at a vertex are common in clipped vector tiles.

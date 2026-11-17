@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+- fix(geometry): Port upstream Earcut touching-ring and bridge-healing fixes, indexed hole bridging, radix sorting, convex-ring acceleration, and iterative polygon splits. Preserve precomputed areas and projection planes. Triangle order and valid diagonal choices may change.
+
 ## v5.0.0-beta.11
 
 - **Breaking:** Rename the standalone `@math.gl/expressions` package to `@math.gl/sql`. Update package dependencies and imports to the new name (#571).
