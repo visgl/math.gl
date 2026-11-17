@@ -4,7 +4,7 @@
 // SPDX-FileComment: Original adapter; named-axis fallback inspired by proj4js 2.22.0 / wkt-parser (MIT). See ../../../../PROJ4-LICENSE.md for upstream attribution.
 import {inferCRSRepresentation} from '../../../crs/spatial-reference';
 import {parseWKTCRS} from '../../../crs/wkt-crs';
-import type {WKTCRSNode} from '../../../crs/index';
+import type {WKTCRSNode} from '../../../crs';
 import type {CRSParser} from './types';
 import {unsupportedStage} from './types';
 import {readStructuredCRS} from './structured';

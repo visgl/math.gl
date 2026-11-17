@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {Expression} from '../expressions/index';
+import type {Expression} from '../expressions';
 import {SQLExpressionReader, SQL_RESERVED_WORDS} from './parse-sql-expression';
 import {SQLQueryReader} from './parse-sql-select';
 

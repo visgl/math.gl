@@ -16,7 +16,7 @@ import {
   type GeoArrowColumn,
   type GeoArrowDenseUnion,
   type GeoArrowGeometryValue
-} from '@math.gl/arrow/geoarrow-utils/index';
+} from '@math.gl/arrow/geoarrow-utils';
 
 const geometries: GeoArrowGeometryValue[] = [
   {type: 'Point', coordinates: [1, 2]},

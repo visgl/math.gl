@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original qualification tests for the proj4js-inspired API, using native PROJ expectations.
 import {expect, test} from 'vitest';
-import * as native from '@math.gl/geospatial/projection/experimental';
-import type {ProjectionPlugin} from '@math.gl/geospatial/projection/experimental';
+import * as native from '@math.gl/geospatial/projection';
+import type {ProjectionPlugin} from '@math.gl/geospatial/projection';
 import inputs from '../fixtures/native-proj-cases.json';
 import reference from '../fixtures/native-proj-reference.json';
 import {nativeForwardExpectation} from '../native-forward-reference';

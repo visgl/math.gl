@@ -12,7 +12,7 @@ import {
   ExpressionEvaluationError,
   isExpressionEvaluationError
 } from '../src/expressions';
-import {parseSQLExpression, parseSQLQuery} from '../src/sql';
+import {parseSQLExpression, parseSQLQuery} from '../src/parser';
 function canonical(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonical);
   if (value && typeof value === 'object')

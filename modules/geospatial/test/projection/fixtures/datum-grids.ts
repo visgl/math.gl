@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Authored synthetic grids: analytically checkable, no third-party grid data or network access.
-import type {
-  DatumGridGeoTIFF,
-  DatumGridGeoTIFFImage
-} from '@math.gl/geospatial/projection/experimental';
+import type {DatumGridGeoTIFF, DatumGridGeoTIFFImage} from '@math.gl/geospatial/projection';
 export type GridFixture = {
   name?: string;
   parent?: string;

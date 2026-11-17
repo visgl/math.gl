@@ -7,7 +7,7 @@ import {spawnSync} from 'node:child_process';
 import {Session} from 'node:inspector';
 import {performance} from 'node:perf_hooks';
 import {fileURLToPath} from 'node:url';
-import {HeightField,createTerrainMesh,createMartiniTerrainMesh,createDelatinTerrainMesh,createTerrainGradientGrid} from '../modules/geospatial/dist/terrain/index.js';
+import {HeightField,createTerrainMesh,createMartiniTerrainMesh,createDelatinTerrainMesh,createTerrainGradientGrid} from '@math.gl/geospatial/terrain';
 const names=['sierra','pacific','sierra-nodata'],backends=['regular','martini','delatin'];
 const folder=new URL('../modules/geospatial/test/terrain/fixtures/',import.meta.url);
 if(!process.argv.includes('--case')){

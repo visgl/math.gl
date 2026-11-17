@@ -15,7 +15,7 @@ import {
   vectorFromArray
 } from 'apache-arrow';
 import {compileArrowExpression} from '../src/arrow';
-import * as colors from '../src/color';
+import * as colors from '../src/color-functions';
 const functions = Object.values(colors);
 function run(
   expression: string,

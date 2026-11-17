@@ -4,7 +4,7 @@
 // SPDX-FileComment: Original comparison demo; runtime deck.gl CDN dependency is MIT.
 import {writeFile} from 'node:fs/promises';
 import {createSkyContext} from '../../dist/sun/astronomy.js';
-import {createSkyObserver, getSkyGlobePosition} from '../../dist/sun/index.js';
+import {createSkyObserver, getSkyGlobePosition} from '@math.gl/earth/sun';
 
 const output = process.argv[2];
 if (!output) throw new Error('Usage: node modules/earth/scripts/sun/create-sky-demo.mjs /absolute/path/sky.html');

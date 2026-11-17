@@ -78,7 +78,7 @@ export {
   weldGeometry,
   getDegenerateTriangles,
   interpolatePackedAttributes
-} from './utils/index';
+} from './utils';
 export type {
   TypedArray,
   TypedArrayConstructor,
@@ -90,7 +90,7 @@ export type {
   PackedAttribute,
   AttributeInterpolationProvenance,
   PackedAttributeInterpolationOptions
-} from './utils/index';
+} from './utils';
 export {
   Curve,
   LineCurve,
@@ -99,8 +99,8 @@ export {
   HermiteCurve,
   CatmullRomCurve,
   CurveArcLength
-} from './curves/index';
-export type {CurvePoint, CatmullRomCurveOptions} from './curves/index';
+} from './curves';
+export type {CurvePoint, CatmullRomCurveOptions} from './curves';
 export {
   Polygon,
   getPolygonSignedArea,
@@ -118,7 +118,7 @@ export {
   cutPolygonByMercatorBounds,
   subdividePolyline,
   subdivideTriangleMesh
-} from './polygon/index';
+} from './polygon';
 export type {
   EarcutOptions,
   PolygonWinding,
@@ -130,7 +130,7 @@ export type {
   TriangleMesh,
   SubdivideTriangleMeshOptions,
   SubdividedTriangleMesh
-} from './polygon/index';
+} from './polygon';
 export {
   AxisAlignedBoundingBox,
   BoundingSphere,
@@ -155,7 +155,7 @@ export {
   intersectOrientedBoxes2D,
   getOrientedBoundingBoxQuaternion,
   makeOrientedBoundingBoxFromQuaternion
-} from './culling/index';
+} from './culling';
 export type {
   CullingResult,
   ImplicitShape,
@@ -169,7 +169,7 @@ export type {
   QueryPoint,
   TriangleRayHit,
   OrientedBox2D
-} from './culling/index';
+} from './culling';
 export {
   validateQueryPoint,
   validateQueryDistance,
@@ -181,7 +181,7 @@ export type {
   SegmentClosestPoints,
   SegmentTriangleClosestPoints
 } from './culling/queries';
-export {BoxIndex, PointIndex, TriangleBVH} from './spatial-index/index';
+export {BoxIndex, PointIndex, TriangleBVH} from './spatial-index';
 export type {
   BoxIndexOptions,
   NearestIndexOptions,
@@ -196,7 +196,7 @@ export type {
   TriangleRayOptions,
   TriangleNearestOptions,
   TriangleSegmentResult
-} from './spatial-index/index';
+} from './spatial-index';
 
 export type {
   GeometryInput,
@@ -228,7 +228,7 @@ export {
   clampPointToBounds,
   spheresIntersect,
   boundsIntersectSphere
-} from './culling/index';
+} from './culling';
 export {
   getRayPoint,
   getClosestPointOnRay,
@@ -248,12 +248,12 @@ export type {RaySegmentClosestPoints} from './culling/geometric-queries';
 export {
   sampleCurveAdaptive,
   computeParallelTransportFrames
-} from './curves/index';
+} from './curves';
 export type {
   AdaptiveCurveOptions,
   AdaptiveCurveSamples,
   CurveFrames
-} from './curves/index';
+} from './curves';
 
 export {projectBounds} from './utils/project-bounds';
 export type {

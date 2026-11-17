@@ -82,9 +82,8 @@ try {
     .filter(path => path.startsWith('./projection/'))
     .map(path => '.' + path.slice('./projection'.length));
   // Enumerate the manifest so every newly supported subpath must work in a real tarball.
-  for (const [path, entry] of Object.entries(packageManifest.exports)) {
-    if (path.startsWith('./projection/native'))
-      assert.deepEqual(entry, packageManifest.exports[path.replace('./projection/native', './projection/experimental')]);
+  for (const path of Object.keys(packageManifest.exports)) {
+    assert(!/^\.\/projection\/(?:native|experimental)(?:\/|$)/.test(path), `Redundant projection entrypoint: ${path}`);
   }
   // CJS descriptors must keep their package imports deferred, too.
   const packedRoot = join(temporary, 'node_modules/@math.gl/geospatial');

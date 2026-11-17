@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {DateDay, TimestampMicrosecond, type DataType} from 'apache-arrow';
-import {ExpressionEvaluationError} from '../expressions/index';
+import {ExpressionEvaluationError} from '../expressions';
 import {typeKey} from './buffers';
 import type {ArrowExpressionValue} from './types';
 

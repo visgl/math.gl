@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {createWorker, WorkerBody, getTransferList, type WorkerContext} from '../worker-utils/index';
+import {createWorker, WorkerBody, getTransferList, type WorkerContext} from '../worker-utils';
 import {preloadTaskCode} from './task-preload';
 import type {AnyTask, TaskContext, TaskRunControls} from './task';
 import {TaskChannel, type TaskChannelMessage} from './task-channel';

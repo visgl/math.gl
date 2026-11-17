@@ -260,7 +260,7 @@ void removedGeospatialWorkers;
 import * as removedOperations from '@math.gl/geospatial/workers/operations';
 void removedOperations;
 // @ts-expect-error package exports block deep imports to private transport
-import * as privateTransport from '@math.gl/core/dist/worker-utils/index.js';
+import * as privateTransport from '@math.gl/core/dist/worker-utils';
 void privateTransport;
 
 void [

@@ -7,8 +7,8 @@ import * as arrow from 'apache-arrow';
 import {
   getGeometryColumnsFromSchema, makeGeoArrowColumnFromArrowVector,
   makeArrowVectorFromGeoArrowColumn, getGeoArrowBounds, mapGeoArrowCoordinates
-} from '../../src/geoarrow/index.ts';
-import {materializeGeoArrowRows, makeGeoArrowColumnFromGeometryRows, sliceGeoArrowColumn} from '../../src/geoarrow-utils/index.ts';
+} from '@math.gl/arrow/geoarrow';
+import {materializeGeoArrowRows, makeGeoArrowColumnFromGeometryRows, sliceGeoArrowColumn} from '@math.gl/arrow/geoarrow-utils';
 
 /** Checks borrowing, nulls, slices, semantic metadata, mapping, and newer runtime storage. */
 export function checkGeoArrowConformance() {

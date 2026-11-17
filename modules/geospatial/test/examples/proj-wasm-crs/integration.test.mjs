@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {runExample} from '../../../../../examples/geospatial/proj-wasm-crs/src/crs-resolution/index.mjs';
+import {runExample} from '../../../../../examples/geospatial/proj-wasm-crs/src/crs-resolution/run-example.mjs';
 
 test('real proj-wasm database resolution and normalized execution', {timeout: 60000}, async () => {
   const result = await runExample();

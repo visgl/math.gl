@@ -13,7 +13,7 @@ import {
   Table,
   vectorFromArray
 } from 'apache-arrow';
-import * as math from '../src/math';
+import * as math from '../src/math-functions';
 import {compileArrowExpression, ExpressionEvaluationError} from '../src/arrow';
 import {NativeFloat16ArrayConstructor} from '@math.gl/core';
 

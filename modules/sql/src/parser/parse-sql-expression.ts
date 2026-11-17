@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {SQLParseError} from './sql-parse-error';
-import type {Expression} from '../expressions/index';
+import type {Expression} from '../expressions';
 import type {ColumnarScalarType} from '../expressions/scalar-type';
 
 export const SQL_RESERVED_WORDS = new Set([

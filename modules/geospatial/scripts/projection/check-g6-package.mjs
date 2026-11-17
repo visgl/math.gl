@@ -13,10 +13,8 @@ import ts from 'typescript';
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
 const manifest = JSON.parse(readFileSync(join(root, 'modules/geospatial/package.json')));
 const entry = manifest.exports['.'];
-const esm = await import(new URL('../../dist/index.js', import.meta.url));
-const cjs = createRequire(import.meta.url)(
-  new URL('../../dist/index.cjs', import.meta.url).pathname
-);
+const esm = await import('@math.gl/geospatial');
+const cjs = createRequire(import.meta.url)('@math.gl/geospatial');
 for (const api of [esm,cjs]) {
   const g=new api.GeodesicIntersections({semiMajorAxis:1,semiMinorAxis:1.01});
   const a={latitude:0,longitude:0,azimuth:90};

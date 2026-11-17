@@ -5,7 +5,7 @@
 import type {Table, Vector} from 'apache-arrow';
 import {compileArrowExpression} from '../arrow/compiler';
 import type {ArrowExpression, ArrowTableFunction} from '../arrow/types';
-import type {Expression} from '../expressions/index';
+import type {Expression} from '../expressions';
 import type {ScaleDomain, ScaleValue} from './scale-types';
 
 type DomainStatistics = {

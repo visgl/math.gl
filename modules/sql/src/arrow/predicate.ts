@@ -6,7 +6,7 @@ import {
   columnarPredicateToExpression,
   type ParameterizedColumnarPredicate,
   type ColumnarPredicateParameterValues
-} from '../expressions/index';
+} from '../expressions';
 import {compileArrowExpression} from './compiler';
 import type {ArrowExpressionOptions, CompiledArrowExpression} from './types';
 

@@ -21,7 +21,7 @@ import {
   ExpressionEvaluationError,
   type ArrowTableFunction
 } from '../src/arrow';
-import {SQRT, LN, MOD} from '../src/math';
+import {SQRT, LN, MOD} from '../src/math-functions';
 const table = new Table({x: vectorFromArray([4, -1, null, 9], new Float64())});
 const functions: ArrowTableFunction[] = [SQRT, LN, MOD];
 function evaluate(sql: string, custom = functions) {

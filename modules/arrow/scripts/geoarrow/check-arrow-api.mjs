@@ -23,7 +23,7 @@ try {
       entryPoints: [join(root, 'modules/arrow/scripts/geoarrow/arrow-conformance.mjs')],
       outfile: output,
       bundle: true, platform: 'node', format: 'cjs', metafile: true,
-      alias: {'apache-arrow': entry, '@math.gl/arrow': join(root, 'modules/arrow/src/arrow/index.ts')},
+      alias: {'apache-arrow': entry, '@math.gl/arrow': join(root, 'modules/arrow/src')},
       logLevel: 'silent'
     });
     assert.ok(Object.keys(result.metafile.inputs).every(path => !path.includes('@loaders.gl')));

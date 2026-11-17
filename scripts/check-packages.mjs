@@ -33,6 +33,22 @@ execFileSync(process.execPath, ['--input-type=module', '-e', `
   }
 `], {cwd: root, stdio: 'inherit'});
 
+// Check source imports as well as manifests so relative /index paths cannot return.
+const trackedFiles = execFileSync('git', ['ls-files'], {cwd: root, encoding: 'utf8'}).trim().split('\n');
+for (const filename of trackedFiles) {
+  if (!/\.(?:[cm]?[jt]sx?|mdx?)$/.test(filename) || !existsSync(new URL(filename, root))) continue;
+  const contents = readFileSync(new URL(filename, root), 'utf8');
+  // Include constructed first-party paths, while leaving pinned external oracle files alone.
+  for (const [, specifier] of contents.matchAll(/\b(?:import|require)\s*\([^;\n]*?['"]((?:\.\.?\/|\/modules\/)[^'"]*\/index(?:\.[cm]?[jt]s)?)['"]/g)) {
+    assert.fail(`${filename}: redundant constructed /index import ${specifier}`);
+  }
+  for (const [, specifier] of contents.matchAll(/(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*)['"]([^'"\s]+)['"]/g)) {
+    if (specifier.startsWith('.') || specifier.startsWith('@math.gl/')) {
+      assert(!/\/index(?:\.[cm]?[jt]s)?$/.test(specifier), `${filename}: redundant /index import ${specifier}`);
+    }
+  }
+}
+
 const packageNames = new Set(expected.map(name => '@math.gl/' + name));
 let entrypoints = 0;
 for (const name of expected) {
@@ -49,6 +65,8 @@ for (const name of expected) {
     assert(Object.keys(manifest.dependencies || {}).every(dependency => dependency.startsWith('@math.gl/')), 'Core must not introduce external runtime dependencies');
   }
   for (const [subpath, entry] of Object.entries(manifest.exports)) {
+    assert(!/\/(?:index|unbundled)$/.test(subpath), `Redundant public entrypoint: ${manifest.name}${subpath.slice(1)}`);
+    assert(!/^\.\/projection\/(?:experimental|native)(?:\/|$)/.test(subpath), `Use canonical projection paths: ${subpath}`);
     const targets = typeof entry === 'string' ? [entry] : Object.values(entry);
     for (const target of targets) {
       assert(existsSync(new URL(target, directory)), `Missing published target: ${manifest.name}${subpath.slice(1)} ${target}`);

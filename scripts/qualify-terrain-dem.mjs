@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {performance} from 'node:perf_hooks';
-import {HeightField} from '../modules/geospatial/dist/terrain/index.js';
+import {HeightField} from '@math.gl/geospatial/terrain';
 import {createTerrainGradientGrid} from '../modules/geospatial/dist/terrain/derivatives.js';
 import {createTerrainSlopeAspectGrid} from '../modules/geospatial/dist/terrain/slope-aspect.js';
 import {createMartiniTerrainMesh} from '../modules/geospatial/dist/terrain/martini.js';

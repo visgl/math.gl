@@ -27,7 +27,7 @@ export {
   PROJStringSyntaxError,
   getCRSSignature,
   linearUnits
-} from './crs/index';
+} from './crs';
 export type {
   CRSExecutionIdentity,
   CRSDefinition,
@@ -83,7 +83,7 @@ export type {
   CRSRenderingScale,
   CRSRenderingScaleCallback,
   CRSUnit
-} from './crs/index';
+} from './crs';
 export {createCRSDictionaryProvider, createCRSResolver, CRSResolutionError} from './crs/resolver';
 export type {
   CRSDefinitionProvider,
@@ -191,7 +191,7 @@ export type {
   SubdivideGeographicCutRingOptions,
   SubdividedGeographicCutRing
 } from './geographic-cuts';
-export {HeightField, TerrainSampleStatus, createTerrainSkirt} from './terrain/index';
+export {HeightField, TerrainSampleStatus, createTerrainSkirt} from './terrain';
 export type {
   HeightFieldProps,
   TerrainArray,
@@ -203,7 +203,7 @@ export type {
   TerrainSampleBatch,
   TerrainSkirtOptions,
   TerrainSkirtMesh
-} from './terrain/index';
+} from './terrain';
 export {HeightFieldGeometry} from './terrain/geometry';
 export type {HeightFieldGeometryOptions} from './terrain/geometry';
 export {GeographicHeightField} from './terrain/geographic';
@@ -493,7 +493,7 @@ export {
   type TerrainCutoutPiece,
   type SkirtedTerrainCutout,
   type TerrainCutoutSkirtOptions
-} from './terrain/index';
+} from './terrain';
 
 export {
   accumulateTerrainWatersheds,

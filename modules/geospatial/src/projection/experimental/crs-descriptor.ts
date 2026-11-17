@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {CRSMetadata, CRSUnit} from '../../crs/index';
+import type {CRSMetadata, CRSUnit} from '../../crs';
 import type {CRSResolver} from '../../crs/resolver';
 import {normalizeCRS} from './crs/normalize';
 import {createRenderingScale} from './crs-rendering-scale';

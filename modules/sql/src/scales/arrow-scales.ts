@@ -27,8 +27,8 @@ import {
   resolveArrowQuantiles
 } from './arrow-domains';
 import {parseSQLScaleAST, type ParsedSQLScale} from './parse-sql-scale';
-import {parseSQLExpression} from '../sql/parse-sql-expression';
-import type {Expression} from '../expressions/index';
+import {parseSQLExpression} from '../parser/parse-sql-expression';
+import type {Expression} from '../expressions';
 import type {CompiledArrowExpression} from '../arrow/types';
 import type {ResolvedScale, ScaleColor, ScaleSpec, ScaleValue} from './scale-types';
 

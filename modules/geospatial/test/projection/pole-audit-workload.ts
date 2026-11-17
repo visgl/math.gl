@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original unchanged-definition audit against independent native PROJ coordinates.
-import * as native from '@math.gl/geospatial/projection/experimental';
-import type {ProjectionPlugin} from '@math.gl/geospatial/projection/experimental';
+import * as native from '@math.gl/geospatial/projection';
+import type {ProjectionPlugin} from '@math.gl/geospatial/projection';
 import reference from './fixtures/pole-audit-reference.json';
 
 type OracleRow = {

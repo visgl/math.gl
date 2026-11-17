@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {WorkerPool, preloadWorker, type WorkerObject} from '../worker-utils/index';
+import {WorkerPool, preloadWorker, type WorkerObject} from '../worker-utils';
 import type {AnyTask, TaskPreloadOptions} from './task';
 
 const pending = new WeakMap<AnyTask, Promise<void>>();

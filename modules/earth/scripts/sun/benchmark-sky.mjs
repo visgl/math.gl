@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {performance} from 'node:perf_hooks';
 import {createSkyContext} from '../../dist/sun/astronomy.js';
-import {createSkyObserver} from '../../dist/sun/index.js';
+import {createSkyObserver} from '@math.gl/earth/sun';
 
 const observer = createSkyObserver({latitude: 37.8, longitude: -122.4});
 const context = createSkyContext(observer, {cacheSize: 48});

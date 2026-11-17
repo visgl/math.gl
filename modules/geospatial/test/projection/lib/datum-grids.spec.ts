@@ -13,8 +13,8 @@ import {
   normalizeCRS,
   mercator,
   geocentric
-} from '@math.gl/geospatial/projection/experimental';
-import type {DatumGrid, DatumGridGeoTIFF} from '@math.gl/geospatial/projection/experimental';
+} from '@math.gl/geospatial/projection';
+import type {DatumGrid, DatumGridGeoTIFF} from '@math.gl/geospatial/projection';
 import {makeNTv2, makeGeoTIFF} from '../fixtures/datum-grids';
 const D2R = Math.PI / 180;
 function close(actual: readonly number[], expected: readonly number[], tolerance = 1e-9): void {

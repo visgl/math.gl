@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {performance} from 'node:perf_hooks';
-import {createTerrainMixedVertexTileHalos, updateTerrainMixedVertexTileHalos} from '../modules/geospatial/dist/terrain/index.js';
+import {createTerrainMixedVertexTileHalos, updateTerrainMixedVertexTileHalos} from '@math.gl/geospatial/terrain';
 
 const folder = new URL('../modules/geospatial/test/terrain/fixtures/', import.meta.url);
 const key = t => `${t.spacing}/${t.column}/${t.row}`;

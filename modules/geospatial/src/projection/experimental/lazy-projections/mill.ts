@@ -7,5 +7,8 @@ import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyMillerCylindrical: ProjectionDescriptor =
   /* @__PURE__ */ createProjectionDescriptor(
     {name: 'mill', aliases: ['Miller_Cylindrical']},
-    async () => (await import('@math.gl/geospatial/projection/projections/mill')).millerCylindrical
+    async () => {
+      const projectionModule = await import('@math.gl/geospatial/projection/projections/mill');
+      return projectionModule.millerCylindrical;
+    }
   );

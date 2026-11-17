@@ -10,7 +10,7 @@ import {
   coordinateTerrainLodMorphs,
   createTerrainMixedIsobands,
   createTerrainMesh,
-} from "../modules/geospatial/dist/terrain/index.js";
+} from "@math.gl/geospatial/terrain";
 const folder = new URL(
     "../modules/geospatial/test/terrain/fixtures/",
     import.meta.url,

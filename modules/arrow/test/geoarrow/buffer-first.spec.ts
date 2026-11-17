@@ -8,7 +8,7 @@ import {
   makeGeoArrowColumnFromGeometryRows,
   mapGeoArrowCoordinates,
   validateGeoArrowColumn
-} from '@math.gl/arrow/geoarrow-utils/index';
+} from '@math.gl/arrow/geoarrow-utils';
 import type {GeoArrowColumn} from '@math.gl/arrow/geoarrow-utils/types';
 import {materializeGeoArrowRows} from '@math.gl/arrow/geoarrow-utils/layout';
 

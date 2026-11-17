@@ -5,7 +5,7 @@
 import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
 import {compileArrowExpression} from '../src/arrow';
-import {parseSQLExpression} from '../src/sql';
+import {parseSQLExpression} from '../src/parser';
 
 /** Evaluates the SQL time conversion against a small Arrow fixture. */
 function evaluate(sql: string, text: (string | null)[]) {

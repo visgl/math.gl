@@ -5,10 +5,10 @@
 import {expect, test} from 'vitest';
 import {createSpatialReference} from '@math.gl/geospatial/crs';
 import type {PROJJSONCRSByType} from '@math.gl/geospatial/crs';
-import {ProjectionTransform, normalizeCRS} from '@math.gl/geospatial/projection/experimental/core';
-import {stereographic} from '@math.gl/geospatial/projection/experimental/projections/stere';
-import {wktCRSParser} from '@math.gl/geospatial/projection/experimental/parsers/wkt';
-import {projJSONCRSParser} from '@math.gl/geospatial/projection/experimental/parsers/projjson';
+import {ProjectionTransform, normalizeCRS} from '@math.gl/geospatial/projection/core';
+import {stereographic} from '@math.gl/geospatial/projection/projections/stere';
+import {wktCRSParser} from '@math.gl/geospatial/projection/parsers/wkt';
+import {projJSONCRSParser} from '@math.gl/geospatial/projection/parsers/projjson';
 import {projectedJSON} from '../fixtures/crs-datums';
 import corpus from '../fixtures/upstream-corpus-2.22.0.json';
 

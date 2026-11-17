@@ -3,13 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {Table} from 'apache-arrow';
-import type {Expression} from '../expressions/index';
+import type {Expression} from '../expressions';
 import {
   parseSQLSelectCompound,
   type SQLSelectStatement,
   type SQLSelectStatementOptions,
   type SQLSort
-} from '../sql/parse-sql-statement';
+} from '../parser/parse-sql-statement';
 import {queryArrowTable, type ArrowTableQuery} from './query-arrow-table';
 import type {ArrowAggregate} from './aggregates';
 

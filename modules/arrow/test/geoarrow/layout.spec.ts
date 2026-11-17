@@ -19,7 +19,7 @@ import {
   type GeoArrowColumn,
   type GeoArrowDimension,
   type GeoArrowGeometryValue
-} from '@math.gl/arrow/geoarrow-utils/index';
+} from '@math.gl/arrow/geoarrow-utils';
 import {prepareGeoArrowTransfer} from '@math.gl/arrow/geoarrow-utils/worker';
 import {
   getEncodingForGeometryValue,

@@ -44,9 +44,9 @@
       "require": "./dist/scales/arrow-scales.cjs"
     },
     "./parser": {
-      "types": "./dist/sql/index.d.ts",
-      "import": "./dist/sql/index.js",
-      "require": "./dist/sql/index.cjs"
+      "types": "./dist/parser/index.d.ts",
+      "import": "./dist/parser/index.js",
+      "require": "./dist/parser/index.cjs"
     },
     "./expressions": {
       "types": "./dist/expressions/index.d.ts",
@@ -66,14 +66,14 @@
     "./worker-entry.js": "./dist/arrow/worker-entry.js",
     "./query-worker-entry.js": "./dist/arrow/query-worker-entry.js",
     "./math-functions": {
-      "types": "./dist/math/index.d.ts",
-      "import": "./dist/math/index.js",
-      "require": "./dist/math/index.cjs"
+      "types": "./dist/math-functions/index.d.ts",
+      "import": "./dist/math-functions/index.js",
+      "require": "./dist/math-functions/index.cjs"
     },
     "./color-functions": {
-      "types": "./dist/color/index.d.ts",
-      "import": "./dist/color/index.js",
-      "require": "./dist/color/index.cjs"
+      "types": "./dist/color-functions/index.d.ts",
+      "import": "./dist/color-functions/index.js",
+      "require": "./dist/color-functions/index.cjs"
     }
   },
   "sideEffects": [

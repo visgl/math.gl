@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {isTaskCodeLoaded} from './task-preload';
-import {getTransferList} from '../worker-utils/index';
+import {getTransferList} from '../worker-utils';
 import {assertPayload, clonePayload, taskContext, localContext} from './task-runtime';
 import type {AnyTask, TaskInput, TaskOutput, TaskSyncRunOptions} from './task';
 

@@ -11,7 +11,7 @@ import {
   lambertConformalConic,
   albersEqualArea,
   equidistantConic
-} from '@math.gl/geospatial/projection/experimental';
+} from '@math.gl/geospatial/projection';
 import type {
   ProjectionPlugin,
   ProjectionFlatContext,

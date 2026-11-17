@@ -10,7 +10,7 @@ import {
 } from '@math.gl/geospatial/projection/analysis';
 import type {ProjectionFactors} from '@math.gl/geospatial/projection/analysis';
 import {normalizeCRS} from '@math.gl/geospatial/projection/core';
-import * as catalogue from '@math.gl/geospatial/projection/experimental';
+import * as catalogue from '@math.gl/geospatial/projection';
 import {mercator} from '@math.gl/geospatial/projection/projections/merc';
 import reference from '../fixtures/factors-reference.json';
 const rad = Math.PI / 180;

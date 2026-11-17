@@ -6,5 +6,8 @@ import {createProjectionDescriptor} from '../projection-descriptor';
 import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyMollweide: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'moll', aliases: ['Mollweide']},
-  async () => (await import('@math.gl/geospatial/projection/projections/moll')).mollweide
+  async () => {
+    const projectionModule = await import('@math.gl/geospatial/projection/projections/moll');
+    return projectionModule.mollweide;
+  }
 );

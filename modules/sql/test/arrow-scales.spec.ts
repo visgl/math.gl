@@ -4,7 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
-import {ABS} from '../src/math';
+import {ABS} from '../src/math-functions';
 import {parseSQLScaleExpression} from '../src/scales';
 import {compileResolvedScale, resolvePalette} from '../src/scales';
 import {

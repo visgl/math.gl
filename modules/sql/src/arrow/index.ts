@@ -19,4 +19,4 @@ export {
   ExpressionEvaluationError,
   isExpressionEvaluationError,
   type ExpressionEvaluationErrorCode
-} from '../expressions/index';
+} from '../expressions';

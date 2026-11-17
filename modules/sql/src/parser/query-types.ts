@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {Expression} from '../expressions/index';
+import type {Expression} from '../expressions';
 import type {ColumnarPredicate, ColumnarPredicateProperty} from '../expressions/columnar-predicate';
 
 /** One source column selected for logical output, optionally under a new name. */
