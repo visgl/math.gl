@@ -121,3 +121,23 @@ test.each(['v + 1', 'UNKNOWN(v)', 'SCALE_LINEAR(v)', 'SCALE_COLOR(v, DOMAIN(v), 
     expect(() => parseSQLScaleAST(parseSQLExpression(sql))).toThrow();
   }
 );
+
+test('SQL thresholds take explicit increasing breaks and one extra palette color', () => {
+  expect(
+    parseSQLScaleExpression("SCALE_THRESHOLD(risk, ARRAY[-1, 5, 20], PALETTE('YlOrRd'))").scale
+  ).toEqual({
+    type: 'threshold',
+    domain: {type: 'fixed', values: [-1, 5, 20]},
+    range: {type: 'palette', name: 'YlOrRd', count: 4}
+  });
+  expect(
+    parseSQLScaleExpression("SCALE_THRESHOLD(risk, ARRAY[5], PALETTE('#ffffff', '#000000'))").scale
+      .domain
+  ).toEqual({type: 'fixed', values: [5]});
+  expect(() =>
+    parseSQLScaleExpression("SCALE_THRESHOLD(risk, ARRAY[5, 5], PALETTE('YlOrRd'))")
+  ).toThrow('strictly increasing');
+  expect(() =>
+    parseSQLScaleExpression("SCALE_THRESHOLD(risk, ARRAY[5], PALETTE('YlOrRd', 3))")
+  ).toThrow('one more color');
+});

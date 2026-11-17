@@ -150,7 +150,9 @@ export function compileResolvedScale(
   const isOrdinal = spec.type === 'ordinal';
   const values = isOrdinal ? domain : numericValues(domain);
   const numerical = isOrdinal ? [] : numericValues(domain);
-  if (!isOrdinal && numerical.length < 2) throw new Error('Numeric domain requires two endpoints');
+  if (!isOrdinal && spec.type !== 'threshold' && numerical.length < 2) {
+    throw new Error('Numeric domain requires two endpoints');
+  }
   const pivot = spec.type === 'diverging' ? spec.pivot : undefined;
   if (pivot !== undefined && !(numerical[0]! < pivot && pivot < numerical[numerical.length - 1]!))
     throw new Error('Diverging scale pivot must be between the domain endpoints');
