@@ -92,3 +92,19 @@ const tableQuery: ArrowTableQuery = {select: ['quantity'], limit: 2};
 queryArrowTable(orders, tableQuery);
 const streamingQuery: ArrowStreamingQuery = {...tableQuery, emitEmptyBatches: true};
 queryArrowTableInBatches(orders.batches, orders.schema, streamingQuery);
+
+import {parseSQLScaleAST, parseSQLScaleExpression, type ParsedSQLScale} from '@math.gl/sql/scales';
+import {SCALE_CONFORMANCE_CASES, type ScaleConformanceCase} from '@math.gl/sql/scales/conformance';
+
+const parsedScale: ParsedSQLScale = parseSQLScaleAST(
+  parseSQLExpression('SCALE_LINEAR(quantity, DOMAIN(0, 10), RANGE(0, 1))')
+);
+const textScale: ParsedSQLScale = parseSQLScaleExpression(
+  'SCALE_LINEAR(quantity, DOMAIN(0, 10), RANGE(0, 1))'
+);
+const scaleCases: readonly ScaleConformanceCase[] = SCALE_CONFORMANCE_CASES;
+void parsedScale;
+void textScale;
+void scaleCases;
+// @ts-expect-error The AST entry point does not accept SQL source text.
+parseSQLScaleAST('quantity');

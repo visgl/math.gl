@@ -3,7 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {parseSQLScaleExpression} from '../src/scales';
+import {parseSQLScaleExpression, parseSQLScaleAST} from '../src/scales';
+import {parseSQLExpression, parseSQLSelectStatement} from '../src/sql';
+import type {Expression} from '../src/expressions';
 
 test('SQL sequential scale preserves value AST and declares data-derived domain', () => {
   const {value, scale} = parseSQLScaleExpression(
@@ -84,3 +86,38 @@ test('SQL scale parser rejects row-changing statements, invalid arguments and mi
     parseSQLScaleExpression("SCALE_COLOR(v, DOMAIN(0, 50, 100), PALETTE('#000000', '#FFFFFF'))")
   ).toThrow('equal lengths');
 });
+
+test('AST scale parsing reuses SELECT projection nodes without mutation', () => {
+  const statement = parseSQLSelectStatement(
+    "SELECT SCALE_COLOR(temperature * 2, DOMAIN(0, 100), PALETTE('viridis')) AS color FROM observations"
+  );
+  const expression = statement.select![0]!.expression;
+  const snapshot = JSON.stringify(expression);
+  const parsed = parseSQLScaleAST(expression);
+  expect(parsed).toEqual(
+    parseSQLScaleExpression("SCALE_COLOR(temperature * 2, DOMAIN(0, 100), PALETTE('viridis'))")
+  );
+  expect(parsed.value).toBe(
+    (expression as Extract<Expression, {type: 'CallExpression'}>).arguments[0]
+  );
+  expect(JSON.stringify(expression)).toBe(snapshot);
+});
+
+test.each([
+  'SCALE_LINEAR(v, DOMAIN(-20, 50), RANGE(0, 1))',
+  'SCALE_SQRT(v, DOMAIN_ZERO(v), RANGE(0, 1))',
+  'SCALE_LOG(v, DOMAIN(1, 100), RANGE(0, 1))',
+  "SCALE_DIVERGING(v, DOMAIN_SYMMETRIC(v, 0), PALETTE('RdBu'))",
+  "SCALE_ORDINAL(v, PALETTE('Tableau10'))",
+  "SCALE_QUANTILE(v, 5, PALETTE('Blues'))",
+  "SCALE_QUANTIZE(v, 5, PALETTE('Blues'))"
+])('AST and text scale entry points agree: %s', sql => {
+  expect(parseSQLScaleAST(parseSQLExpression(sql))).toEqual(parseSQLScaleExpression(sql));
+});
+
+test.each(['v + 1', 'UNKNOWN(v)', 'SCALE_LINEAR(v)', 'SCALE_COLOR(v, DOMAIN(v), RANGE(0, 1))'])(
+  'AST scale entry rejects invalid scale semantics: %s',
+  sql => {
+    expect(() => parseSQLScaleAST(parseSQLExpression(sql))).toThrow();
+  }
+);
