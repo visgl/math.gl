@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {Expression} from '../expressions/index';
+import type {Expression} from '../expressions';
 import {bindSQLParameter, type SQLParameters} from './sql-parameters';
 
 /** Opaque immutable handle for validated, detached parameter values. */

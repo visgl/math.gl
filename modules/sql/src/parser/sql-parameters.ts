@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {isSQLParameterSnapshot, snapshotParameter, type SQLParameterSnapshot} from './parameter-snapshots';
+import {
+  isSQLParameterSnapshot,
+  snapshotParameter,
+  type SQLParameterSnapshot
+} from './parameter-snapshots';
 import type {Expression} from '../expressions';
 import {
   isColumnarPredicateValue,
