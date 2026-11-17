@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {rejectRasterPrimitive} from './signature';
 import {DataType, type Table, type RecordBatch} from 'apache-arrow';
 import {compareUTF8} from '@math.gl/arrow/utf8';
 import {ColumnReader, valueType} from './buffers';
@@ -120,6 +121,8 @@ export function compileArrowAggregates<K extends string>(
       byExpression.set(expression, group);
       groups.push(group);
     }
+    if (group.expression && operation !== 'COUNT')
+      rejectRasterPrimitive(group.expression.outputField);
     const type = group.expression && valueType(group.expression.outputField.type);
     if (type && !DataType.isNull(type) && operation !== 'COUNT') {
       const numeric = group.integer || DataType.isFloat(type);
@@ -174,6 +177,7 @@ export function compileArrowAggregates<K extends string>(
     createAccumulator,
     createGroupedAccumulator(groupBy) {
       const keyExpression = compileArrowExpression(groupBy, options);
+      rejectRasterPrimitive(keyExpression.outputField);
       const type = valueType(keyExpression.outputField.type);
       if (
         !(

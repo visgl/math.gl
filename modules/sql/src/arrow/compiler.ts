@@ -32,7 +32,7 @@ import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} f
 import {bindCast} from './cast';
 import {compileUTF8Like} from './like';
 import {float16Values, roundFloat16} from './float16';
-import {physicalKey, extensionKey} from './signature';
+import {physicalKey, extensionKey, isRasterField, rejectRasterPrimitive} from './signature';
 import {ExpressionEvaluationError, isExpressionEvaluationError} from '../expressions/index';
 import {createFunctionLookup} from './registry';
 import {
@@ -58,7 +58,7 @@ type BindingOptions = ArrowExpressionOptions & {
 };
 
 type Mask = Uint8Array;
-type ExecutionContext = {failed?: Uint8Array};
+type ExecutionContext = {failed?: Uint8Array; signal?: AbortSignal};
 type Range = [Uint8Array, number, number];
 type Prepared = {
   get: (row: number) => ArrowExpressionValue;
@@ -123,7 +123,7 @@ export function compileArrowExpression(
     const active = evaluation.activeRows
       ? evaluation.activeRows.slice()
       : new Uint8Array(batch.numRows).fill(1);
-    const prepared = root.prepare(batch, active, {});
+    const prepared = root.prepare(batch, active, {signal: evaluation.signal});
     const result = isTupleType(root.field.type)
       ? maskTupleVector(prepared.vector!, active)
       : isNestedType(root.field.type)
@@ -442,6 +442,13 @@ function bindNode(
         hasKernel: false,
         prepare: (_batch, active) => vectorReader(nullTupleVector(type, active.length))
       };
+    if (value === null && DataType.isStruct(type))
+      return {
+        field: new Field('literal', type, true),
+        hasKernel: false,
+        prepare: (_batch, active) =>
+          vectorReader(vectorFromArray(Array(active.length).fill(null), type))
+      };
     if (value === null && DataType.isList(type)) {
       const dictionary = vectorFromArray([null], type);
       return {
@@ -504,6 +511,14 @@ function bindNode(
       );
       if (isContextualLiteral(ast.consequent) && !DataType.isNull(no.field.type))
         yes = bind(ast.consequent, options, no.field.type);
+    }
+    if (isRasterField(yes.field) || isRasterField(no.field)) {
+      if (ast.consequent.type === 'Literal' && ast.consequent.value === null)
+        yes = {...yes, field: new Field(yes.field.name, yes.field.type, true, no.field.metadata)};
+      if (ast.alternate.type === 'Literal' && ast.alternate.value === null)
+        no = {...no, field: new Field(no.field.name, no.field.type, true, yes.field.metadata)};
+      if (extensionKey(yes.field) !== extensionKey(no.field))
+        throw new Error('RASTER branches must have matching logical types');
     }
     const tuple = isTupleType(yes.field.type);
     const list = DataType.isList(yes.field.type);
@@ -615,6 +630,7 @@ function sameType(a: Node, b: Node): void {
 }
 /** Requires a particular primitive type. */
 function requireType(node: Node, key: string): void {
+  rejectRasterPrimitive(node.field);
   if (typeKey(node.field.type) !== key) throw new Error(`Arrow expression requires ${key}`);
 }
 /** Requires a numeric primitive. */
@@ -634,6 +650,8 @@ function bindBinary(ast: any, options: BindingOptions): Node {
       left = bind(ast.left, options, right.field.type);
     if (isContextualLiteral(ast.right)) right = bind(ast.right, options, left.field.type);
   }
+  rejectRasterPrimitive(left.field);
+  rejectRasterPrimitive(right.field);
   sameType(left, right);
   const comparison = ['==', '===', '!=', '!==', '<', '<=', '>', '>='].includes(op);
   if (logical) requireType(left, 'bool');
@@ -821,6 +839,12 @@ function bindRecovery(
   );
   for (const [index, node] of nodes.entries()) {
     if (
+      (isRasterField(first.field) || isRasterField(node.field)) &&
+      !(expressions[index].type === 'Literal' && expressions[index].value === null) &&
+      extensionKey(first.field) !== extensionKey(node.field)
+    )
+      throw new Error('RASTER branches must have matching logical types');
+    if (
       physicalKey(node.field.type) !== physicalKey(first.field.type) ||
       (!isContextualLiteral(expressions[index]) &&
         extensionKey(node.field) !== extensionKey(first.field))
@@ -829,21 +853,24 @@ function bindRecovery(
   }
   const field = new Field(name.toLowerCase(), first.field.type, true, first.field.metadata);
   const tuple = isTupleType(field.type);
+  const struct = DataType.isStruct(field.type);
   const list = Boolean(expected && DataType.isList(expected) && DataType.isList(field.type));
-  if (!tuple && !list) typeKey(field.type);
+  if (!tuple && !list && !struct) typeKey(field.type);
   return {
     field,
     hasKernel: true,
     prepare(batch, active, context) {
       const failed = new Uint8Array(active.length);
-      const childContext = name === 'TRY' ? {failed} : context;
+      const childContext = name === 'TRY' ? {...context, failed} : context;
       const child = nodes[0]!.prepare(batch, active, childContext);
       const nullable = (node: Node) =>
         new Field(node.field.name, node.field.type, true, node.field.metadata);
       const materialize = (node: Node, prepared: Prepared, mask: Mask): Vector =>
         tuple || list
           ? maskTupleVector(prepared.vector!, mask)
-          : output(nullable(node), mask, prepared.get);
+          : struct
+            ? nestedVector(prepared.vector!, field.type, mask)
+            : output(nullable(node), mask, prepared.get);
       const original = materialize(nodes[0]!, child, active);
       const reader = tuple ? undefined : new ColumnReader(original);
       let result = original;
@@ -859,6 +886,12 @@ function bindRecovery(
           result,
           active.map((value, row) => (value && !failed[row] ? 1 : 0))
         );
+      if (struct && name === 'TRY')
+        result = nestedVector(
+          result,
+          field.type,
+          active.map((value, row) => (value && !failed[row] ? 1 : 0))
+        );
       for (let index = 1; index < nodes.length && pending.some(Boolean); index++) {
         const node = nodes[index]!;
         const fallback = node.prepare(batch, pending, context);
@@ -867,6 +900,13 @@ function bindRecovery(
         if (tuple)
           result = selectTupleVectors(field.type as FixedSizeList, result, vector, keep, active);
         else if (list) result = selectListVectors(field.type, result, vector, keep, active);
+        else if (struct)
+          result = vectorFromArray(
+            Array.from(active, (valid, row) =>
+              valid ? nestedValue((pending[row] ? vector : result).get(row), field.type) : null
+            ),
+            field.type
+          );
         else {
           const a = new ColumnReader(result),
             b = new ColumnReader(vector);
@@ -912,6 +952,7 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
   )
     throw new Error('IN requires a value and 1 to 4096 scalar literals');
   const argument = bind(arguments_[0], options);
+  rejectRasterPrimitive(argument.field);
   const utf8 = typeKey(argument.field.type) === 'utf8';
   const literals = arguments_.slice(1).map(value => bind(value, options, argument.field.type));
   return {
@@ -1339,6 +1380,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
     if (ast.arguments.length !== 2 || ast.arguments[1]?.type !== 'Literal')
       throw new Error('cast requires a value and a literal scalar target');
     const argument = bind(ast.arguments[0], options);
+    rejectRasterPrimitive(argument.field);
     const target = ast.arguments[1].value;
     if (target === 'geometry') return bindGeometryCast(argument);
     const cast = bindCast(argument.field.type, target);
@@ -1449,8 +1491,18 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
       } else {
         bound = source!;
       }
+      // Explicit Null signatures disambiguate null-propagating overload groups.
+      if (argument.type === 'Literal' && argument.value === null && DataType.isNull(field.type))
+        cost--;
       // Contextual binding can retain a column's physical type (for example
       // flag ? intColumn : null). Validate it just like an inferred argument.
+      if (
+        isRasterField(bound.field) !== isRasterField(field) &&
+        !(argument.type === 'Literal' && argument.value === null)
+      ) {
+        compatible = false;
+        break;
+      }
       const sourceType = valueType(bound.field.type);
       if (DataType.isDictionary(bound.field.type) && !DataType.isDictionary(field.type)) cost += 1;
       if (
@@ -1484,7 +1536,8 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
         }
       }
       if (
-        [...field.metadata].some(([key, value]) => bound.field.metadata.get(key) !== value) ||
+        (!(argument.type === 'Literal' && argument.value === null) &&
+          [...field.metadata].some(([key, value]) => bound.field.metadata.get(key) !== value)) ||
         (prototype.nullHandling === 'call' && bound.field.nullable && !field.nullable)
       ) {
         compatible = false;
@@ -1527,12 +1580,13 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
   const evaluateVector = declaration.evaluateScalar ? undefined : declaration.evaluate;
   const result = declaration.result;
   const tuple = isTupleType(result.type);
-  if (tuple && declaration.evaluateScalar)
-    throw new Error('Fixed-size list results require a vector-only function');
+  const nested = isNestedType(result.type);
+  if (nested && declaration.evaluateScalar)
+    throw new Error('Nested results require a vector-only function');
   if (declaration.evaluateScalar) for (const argument of arguments_) typeKey(argument.field.type);
-  if (!tuple) typeKey(result.type);
-  const validate = tuple ? undefined : createValueValidator(result.type);
-  const round = tuple ? undefined : roundToType(result.type);
+  if (!nested) typeKey(result.type);
+  const validate = nested ? undefined : createValueValidator(result.type);
+  const round = nested ? undefined : roundToType(result.type);
   const field = new Field(
     result.name,
     valueType(result.type),
@@ -1578,6 +1632,8 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
         if (mask.some(Boolean)) {
           const vector = evaluateVector(vectors, {
             activeRows: mask,
+            signal: context.signal,
+            argumentFields: arguments_.map(argument => argument.field),
             length: active.length,
             reportError(row, error) {
               if (!Number.isInteger(row) || row < 0 || row >= active.length || !mask[row])
@@ -1589,7 +1645,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
           });
           if (
             vector.length !== active.length ||
-            (tuple
+            (nested
               ? physicalKey(vector.type) !== physicalKey(result.type)
               : typeKey(vector.type) !== typeKey(result.type))
           )
@@ -1598,11 +1654,19 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
             validateTupleVector(vector, result, mask);
             return vectorReader(maskTupleVector(vector, mask));
           }
+          if (nested) {
+            for (let row = 0; row < mask.length; row++)
+              if (mask[row] && !result.nullable && !vector.isValid(row))
+                throw new Error(`Function ${name} returned null for a non-nullable result`);
+            return vectorReader(nestedVector(vector, result.type, mask));
+          }
           kernel = sourceReader(vector);
         }
       }
       if (isTupleType(result.type))
         return vectorReader(nullTupleVector(result.type, active.length));
+      if (nested)
+        return vectorReader(vectorFromArray(Array(active.length).fill(null), result.type));
       return {
         get: row => {
           let value: ArrowExpressionValue;

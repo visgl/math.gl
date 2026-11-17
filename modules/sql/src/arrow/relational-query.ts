@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {rejectRasterPrimitive} from './signature';
 import {
   DataType,
   Field,
@@ -231,6 +232,7 @@ export function getArrowAggregateFields(
 function getScalarColumn(table: Table, name: string): {field: Field; vector: Vector | null} {
   const field = table.schema.fields.find(field => field.name === name);
   if (!field) throw new Error(`Arrow query column not found: ${name}`);
+  rejectRasterPrimitive(field);
   const type = valueType(field.type);
   if (
     !(

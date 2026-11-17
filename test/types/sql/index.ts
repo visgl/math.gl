@@ -108,3 +108,26 @@ void textScale;
 void scaleCases;
 // @ts-expect-error The AST entry point does not accept SQL source text.
 parseSQLScaleAST('quantity');
+import {createRasterSourceFromData, RasterContext} from '@math.gl/sql/raster';
+import type {SyncRasterSource, NumericRasterData} from '@math.gl/sql/raster';
+import {
+  createRasterField,
+  createRasterVector,
+  createRasterFunctions
+} from '@math.gl/sql/arrow-raster';
+const payload: NumericRasterData = {
+  width: 1,
+  height: 1,
+  bandCount: 1,
+  dtype: 'uint8',
+  data: new Uint8Array([7])
+};
+const raster: SyncRasterSource = createRasterSourceFromData(payload);
+const context = new RasterContext();
+const rasterField = createRasterField('raster');
+const rasterVector = createRasterVector(context, [raster, null]);
+const rasterFunctions = createRasterFunctions(context);
+void [rasterField, rasterVector, rasterFunctions];
+// @ts-expect-error This interface is deliberately synchronous.
+const asyncRaster: SyncRasterSource = {metadata: raster.metadata, readWindow: async () => payload};
+void asyncRaster;

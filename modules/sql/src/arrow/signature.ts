@@ -48,3 +48,12 @@ export function extensionKey(field: Field): string {
     field.metadata.get('ARROW:extension:metadata')
   ]);
 }
+
+/** Whether this field is an opaque raster handle, never a primitive string. */
+export function isRasterField(field: Field): boolean {
+  return field.metadata.get('ARROW:extension:name') === 'math.gl.raster';
+}
+/** Rejects operations that would expose a raster's physical handle encoding. */
+export function rejectRasterPrimitive(field: Field): void {
+  if (isRasterField(field)) throw new Error('RASTER is opaque; use RT_* functions');
+}
