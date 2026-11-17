@@ -58,3 +58,25 @@ This is a small front-end contract; it is *not* a new SQL statement dialect. In 
 Deferred syntax: arbitrary computed domain expressions, explicit thresholds, piecewise domains, `PALETTE(RGBA16F(...), ...)`, HDR color options, palettes with interpolation modifiers, and richer scalar transforms. Avoid changing `parseSQLExpression` globally for these scale-only semantics.
 
 Tracker: <https://github.com/visgl/deck.gl/issues/11147>
+
+## Already parsed expressions[​](#already-parsed-expressions "Direct link to Already parsed expressions")
+
+Use `parseSQLScaleAST(expression)` when a query planner already has an expression from `parseSQLExpression` or a SELECT projection. It applies the same scale validation as the text entry point without converting the AST back to SQL.
+
+```
+import {parseSQLSelectStatement} from '@math.gl/sql/parser';
+
+import {parseSQLScaleAST} from '@math.gl/sql/scales';
+
+
+
+const statement = parseSQLSelectStatement(
+
+  "SELECT SCALE_COLOR(temperature, DOMAIN(temperature), PALETTE('viridis')) AS color FROM observations"
+
+);
+
+const {value, scale} = parseSQLScaleAST(statement.select![0].expression);
+```
+
+The returned `value` is the original row-expression node, not a clone. The input AST is not mutated. This helper validates scale arguments; it does not validate whether a backend can execute the row expression. Backends must reject unsupported operations before compilation. Domain resolution and GPU/Arrow execution remain separate steps.
