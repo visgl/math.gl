@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {formatWKT, inspectWKBHeader, parseWKT, visitWKB} from '../wkb/index';
-import type {WKBHeader, WKBTraversalOptions} from '../wkb/index';
-import {WKBBuilder} from '../wkb/index';
+import {formatWKT, inspectWKBHeader, parseWKT, visitWKB} from '../wkb';
+import type {WKBHeader, WKBTraversalOptions} from '../wkb';
+import {WKBBuilder} from '../wkb';
 import type {
   GeoArrowColumn,
   GeoArrowCoordinateLayout,

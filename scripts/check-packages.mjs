@@ -33,6 +33,18 @@ execFileSync(process.execPath, ['--input-type=module', '-e', `
   }
 `], {cwd: root, stdio: 'inherit'});
 
+// Check source imports as well as manifests so relative /index paths cannot return.
+const trackedFiles = execFileSync('git', ['ls-files'], {cwd: root, encoding: 'utf8'}).trim().split('\n');
+for (const filename of trackedFiles) {
+  if (!/\.(?:[cm]?[jt]sx?|mdx?)$/.test(filename) || !existsSync(new URL(filename, root))) continue;
+  const contents = readFileSync(new URL(filename, root), 'utf8');
+  for (const [, specifier] of contents.matchAll(/(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*)['"]([^'"\s]+)['"]/g)) {
+    if (specifier.startsWith('.') || specifier.startsWith('@math.gl/')) {
+      assert(!/\/index(?:\.[cm]?[jt]s)?$/.test(specifier), `${filename}: redundant /index import ${specifier}`);
+    }
+  }
+}
+
 const packageNames = new Set(expected.map(name => '@math.gl/' + name));
 let entrypoints = 0;
 for (const name of expected) {

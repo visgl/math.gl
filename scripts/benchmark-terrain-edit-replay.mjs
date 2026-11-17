@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {performance} from 'node:perf_hooks';
-import {HeightField, updateTerrainMeshRegions, updateTerrainValidDomainMeshRegions} from '../modules/geospatial/dist/terrain/index.js';
+import {HeightField, updateTerrainMeshRegions, updateTerrainValidDomainMeshRegions} from '@math.gl/geospatial/terrain';
 
 const quantile = (values, p) => [...values].sort((a,b)=>a-b)[Math.ceil(values.length*p)-1];
 function replay(width, radius, fixture) {

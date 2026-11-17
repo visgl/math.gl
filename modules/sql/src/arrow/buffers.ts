@@ -4,7 +4,7 @@
 
 import {DataType, DateUnit, Precision, TimeUnit, type Vector, type Data} from 'apache-arrow';
 import {float16Values, requireFloat16} from './float16';
-import {ExpressionEvaluationError} from '../expressions/index';
+import {ExpressionEvaluationError} from '../expressions';
 import type {ArrowExpressionValue} from './types';
 
 /** Dictionary encodings do not change expression value types. */

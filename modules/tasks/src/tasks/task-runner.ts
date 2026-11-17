@@ -10,7 +10,7 @@ import {
   processOnWorkerInBatches,
   type WorkerObject,
   type ProcessOnWorkerOptions
-} from '../worker-utils/index';
+} from '../worker-utils';
 import {TaskRuntime, assertPayload, clonePayload, localContext} from './task-runtime';
 import {runTaskSync} from './task-sync';
 import {TaskOperationQueue} from './task-operation-queue';

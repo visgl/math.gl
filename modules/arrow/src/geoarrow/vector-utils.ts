@@ -16,7 +16,7 @@ import {
   type GeoArrowCoordinateLayout,
   type GeoArrowDimension,
   type RewindGeoArrowOptions
-} from '../geoarrow-utils/index';
+} from '../geoarrow-utils';
 import {getGeoArrowExtensionMetadata, type GeoArrowExtensionMetadata} from './metadata';
 import {
   makeGeoArrowColumnFromArrowVector,

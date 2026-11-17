@@ -7,7 +7,7 @@ import type {Task, TaskWorker} from '@math.gl/tasks';
 import type {
   ParameterizedColumnarPredicate,
   ColumnarPredicateParameterValues
-} from '../expressions/index';
+} from '../expressions';
 import {dehydrateArrowTable, hydrateArrowTable, type DehydratedArrowTable} from '@math.gl/arrow';
 import {compileArrowExpression} from './compiler';
 import {compileArrowPredicate} from './predicate';

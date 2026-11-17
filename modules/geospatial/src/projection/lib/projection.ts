@@ -46,7 +46,7 @@ import {
   obliqueTransformation,
   wktCRSParser,
   projJSONCRSParser
-} from '../experimental/index';
+} from '../experimental';
 import {CORE_PARAMETERS} from '../experimental/crs/normalize';
 import type {ProjectionPlugin} from '../experimental/types';
 

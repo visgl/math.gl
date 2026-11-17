@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-export * as geoid from './geoid/index';
-export * as sun from './sun/index';
-export * as timezone from './timezone/index';
+export * as geoid from './geoid';
+export * as sun from './sun';
+export * as timezone from './timezone';
 
 // Public named exports. Implementations remain in independently tree-shakable files.
-export {parsePGM, Geoid, createGeoidFromGrid} from './geoid/index';
-export type {GeoidGridProps} from './geoid/index';
+export {parsePGM, Geoid, createGeoidFromGrid} from './geoid';
+export type {GeoidGridProps} from './geoid';
 export {
   getMoonPosition,
   getMoonDirection,
@@ -37,7 +37,7 @@ export {
   getSkyGlobePosition,
   skyRotationToGlobe,
   getCloudLighting
-} from './sun/index';
+} from './sun';
 export type {
   MoonPosition,
   MoonIllumination,
@@ -54,7 +54,7 @@ export type {
   SkyLightingOptions,
   CloudLighting,
   CloudLightingOptions
-} from './sun/index';
+} from './sun';
 export {getPlanetSkyInfo, getPlanetVisibility, getPlanetVisibilityTimes} from './sun/planets';
 export type {
   PlanetName,
@@ -94,8 +94,8 @@ export {
   getLocalDateTime,
   getTimezoneLabel,
   isTimezoneSupported
-} from './timezone/index';
-export type {LocalDateTime} from './timezone/index';
+} from './timezone';
+export type {LocalDateTime} from './timezone';
 export {lookupTimezone} from './timezone/lookup';
 export {getStartOfDay, localDateTimeToInstant, getTimezoneTransitions} from './timezone/temporal';
 export type {

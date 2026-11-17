@@ -20,9 +20,9 @@ import {
   makeData,
   makeVector
 } from 'apache-arrow';
-import {NUMERIC_FUNCTION_DEFINITIONS, type ExpressionNumericType} from '../expressions/index';
+import {NUMERIC_FUNCTION_DEFINITIONS, type ExpressionNumericType} from '../expressions';
 import {ColumnReader, createValueValidator} from '../arrow/buffers';
-import {ExpressionEvaluationError, isExpressionEvaluationError} from '../expressions/index';
+import {ExpressionEvaluationError, isExpressionEvaluationError} from '../expressions';
 import {float16Values, roundFloat16} from '../arrow/float16';
 import type {ArrowTableFunction, ArrowExpressionValue} from '../arrow/types';
 

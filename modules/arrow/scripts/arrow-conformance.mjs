@@ -4,8 +4,8 @@
 
 import assert from 'node:assert/strict';
 import * as arrow from 'apache-arrow';
-import {compileArrowExpression, compileArrowPredicate} from '../../sql/src/arrow/index.ts';
-import {parseUTF8Number, compareUTF8} from '../src/utf8/index.ts';
+import {compileArrowExpression, compileArrowPredicate} from '@math.gl/sql/arrow';
+import {parseUTF8Number, compareUTF8} from '@math.gl/arrow/utf8';
 import {
   IndexedArrowTable,
   IndexedArrowVector,
@@ -21,7 +21,7 @@ import {
   hydrateArrowTable,
   serializeArrowTableToIPC,
   deserializeArrowTableFromIPC
-} from '../src/arrow/index.ts';
+} from '@math.gl/arrow';
 
 /** Builds a nullable, nested, dictionary-encoded fixture for each Arrow runtime. */
 function makeTable() {

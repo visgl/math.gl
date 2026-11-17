@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {Field, Schema, RecordBatch, Vector, Table} from 'apache-arrow';
-import type {Expression} from '../expressions/index';
+import type {Expression} from '../expressions';
 
 /**
  * Scalar values exposed to user callbacks. Date32 uses epoch days and microsecond

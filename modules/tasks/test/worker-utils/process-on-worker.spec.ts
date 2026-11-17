@@ -4,7 +4,7 @@
 import {expect, test as baseTest} from 'vitest';
 import {isBrowser} from '@math.gl/tasks/worker-utils';
 const test = baseTest.runIf(!isBrowser);
-import {processOnWorker} from '../../src/worker-utils/index';
+import {processOnWorker} from '../../src/worker-utils';
 const TestWorker = {
   id: 'context-test',
   name: 'context-test',

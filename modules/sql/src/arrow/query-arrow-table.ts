@@ -21,7 +21,7 @@ import {
 import type {
   ColumnarPredicateParameterValues,
   ParameterizedColumnarPredicate
-} from '../expressions/index';
+} from '../expressions';
 import type {TableQuery} from '../parser/query-types';
 import {compileArrowArray, compileArrowExpression} from './compiler';
 import {compileArrowPredicate} from './predicate';

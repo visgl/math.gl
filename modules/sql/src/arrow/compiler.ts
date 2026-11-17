@@ -27,13 +27,13 @@ import {
   type Schema
 } from 'apache-arrow';
 import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '@math.gl/arrow/utf8';
-import {parse, validateExpressionAST, type Expression} from '../expressions/index';
+import {parse, validateExpressionAST, type Expression} from '../expressions';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
 import {bindCast} from './cast';
 import {compileUTF8Like} from './like';
 import {float16Values, roundFloat16} from './float16';
 import {physicalKey, extensionKey} from './signature';
-import {ExpressionEvaluationError, isExpressionEvaluationError} from '../expressions/index';
+import {ExpressionEvaluationError, isExpressionEvaluationError} from '../expressions';
 import {createFunctionLookup} from './registry';
 import {
   isTupleType,

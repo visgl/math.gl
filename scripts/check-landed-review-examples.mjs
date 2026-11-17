@@ -26,8 +26,8 @@ for (const [name, example, entry] of [
       );
       builder.onLoad({filter:/.*/,namespace:'review'}, () => ({
         resolveDir:root,
-        contents:`export * from ${JSON.stringify(resolve(root,'modules/sql/src/expressions/index.ts'))};
-import {compileAsync as original} from ${JSON.stringify(resolve(root,'modules/sql/src/expressions/index.ts'))};
+        contents:`export * from ${JSON.stringify(resolve(root,'modules/sql/src/expressions'))};
+import {compileAsync as original} from ${JSON.stringify(resolve(root,'modules/sql/src/expressions'))};
 export function compileAsync(expression,options) {
   if (expression === 'reviewPending') return () => new Promise((yes,no) => {
     window.reviewRequest=(window.reviewRequest || 0)+1;

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {performance} from 'node:perf_hooks';
-import {HeightField,updateTerrainMeshRegions,updateTerrainBoundsRegions,createTerrainGradientGrid,updateTerrainGradientPyramidRegions,stitchTerrainContours,simplifyTerrainContourPathsTopology,createTerrainIsobands} from '../modules/geospatial/dist/terrain/index.js';
+import {HeightField,updateTerrainMeshRegions,updateTerrainBoundsRegions,createTerrainGradientGrid,updateTerrainGradientPyramidRegions,stitchTerrainContours,simplifyTerrainContourPathsTopology,createTerrainIsobands} from '@math.gl/geospatial/terrain';
 const width=129,heights=Float64Array.from({length:width*width},(_,i)=>Math.sin(i%width/10)+Math.cos(Math.floor(i/width)/10));
 const before=new HeightField({width,height:width,heights});
 const initialMesh=updateTerrainMeshRegions(null,before,[],{cellsPerRegion:16}),initialBounds=updateTerrainBoundsRegions(null,before,[]),initialGradients=updateTerrainGradientPyramidRegions(null,createTerrainGradientGrid(before),[]);

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original cloud-sample visualization; no external artwork or runtime dependencies.
 import {writeFile} from 'node:fs/promises';
-import {getCloudLighting} from '../../dist/sun/index.js';
+import {getCloudLighting} from '@math.gl/earth/sun';
 
 const output = process.argv[2];
 if (!output) throw new Error('Usage: node modules/earth/scripts/sun/create-cloud-demo.mjs /absolute/path/clouds.html');

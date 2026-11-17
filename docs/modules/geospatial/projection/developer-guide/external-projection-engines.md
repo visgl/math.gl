@@ -356,7 +356,7 @@ geometry topology are separate concerns. See its source for the explicit samplin
 
 ### Adaptive raster batches
 
-The [proj-wasm raster recipe](https://github.com/visgl/math.gl/blob/master/examples/geospatial/proj-wasm-crs/src/raster-preparation/index.mjs)
+The [proj-wasm raster recipe](https://github.com/visgl/math.gl/blob/master/examples/geospatial/proj-wasm-crs/src/raster-preparation/run-example.mjs)
 drives adaptive raster refinement with real asynchronous PROJ sample batches. It reuses a normalized
 operation, bounds each frontier batch, checks cancellation around awaited calls, and transfers the
 completed mesh into an owned math.gl task worker. Node and Chromium validate coordinate agreement,

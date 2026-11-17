@@ -1,8 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {runExample} from './crs-resolution/index.mjs';
-import {runRasterExample} from './raster-preparation/index.mjs';
+import {runExample} from './crs-resolution/run-example.mjs';
+import {runRasterExample} from './raster-preparation/run-example.mjs';
 
 const output = document.querySelector('#result');
 const result = runExample().then(async crs => ({...crs, raster: await runRasterExample()}));

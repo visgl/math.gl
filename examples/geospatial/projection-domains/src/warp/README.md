@@ -60,7 +60,7 @@ individual calls; the cumulative sample budget bounds the complete job. Inputs a
 results are validated, and AbortSignal is checked before and after every awaited call. Cancellation
 cannot interrupt a native PROJ call already in progress, but it prevents partial/stale publication.
 
-The sibling `proj-wasm-crs/src/raster-preparation/index.mjs` runs a real PROJ operation for the source-grid
+The sibling `proj-wasm-crs/src/raster-preparation/run-example.mjs` runs a real PROJ operation for the source-grid
 conversion throughout adaptive refinement, then transfers the resulting mesh into an owned math.gl
 task worker. Node and Chromium exercise the same path, including buffer detachment and identity.
 Native charts supply target inverse branches; proj-wasm supplies WGS84-to-source conversion.

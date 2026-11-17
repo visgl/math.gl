@@ -6,8 +6,8 @@ import {
   createPhotometricSampler,
   integrateLuminousFlux,
   resamplePhotometricProfile
-} from '../../src/lighting/index';
-import type {PhotometricProfile, PhotometricResampleOptions} from '../../src/lighting/index';
+} from '../../src/lighting';
+import type {PhotometricProfile, PhotometricResampleOptions} from '../../src/lighting';
 
 /** Builds tiny distributions whose intensities and solid-angle integrals are known analytically. */
 function createProfile(

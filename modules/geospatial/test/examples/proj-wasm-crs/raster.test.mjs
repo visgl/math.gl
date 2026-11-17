@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {runRasterExample} from '../../../../../examples/geospatial/proj-wasm-crs/src/raster-preparation/index.mjs';
+import {runRasterExample} from '../../../../../examples/geospatial/proj-wasm-crs/src/raster-preparation/run-example.mjs';
 test('real proj-wasm drives adaptive EPSG:3031 raster preparation',{timeout:120000},async()=>{
   const result=await runRasterExample();
   assert(result.transferred);assert(result.workerParity);

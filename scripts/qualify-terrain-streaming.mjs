@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {performance} from 'node:perf_hooks';
-import {HeightField,HeightFieldMinMax,createTerrainGradientGrid,createTerrainGradientPyramid,updateTerrainMixedVertexTileHalos,updateTerrainMeshRegions,updateTerrainPersistentBounds,updateTerrainPersistentGradients,getTerrainHierarchyNode} from '../modules/geospatial/dist/terrain/index.js';
+import {HeightField,HeightFieldMinMax,createTerrainGradientGrid,createTerrainGradientPyramid,updateTerrainMixedVertexTileHalos,updateTerrainMeshRegions,updateTerrainPersistentBounds,updateTerrainPersistentGradients,getTerrainHierarchyNode} from '@math.gl/geospatial/terrain';
 const folder=new URL('../modules/geospatial/test/terrain/fixtures/',import.meta.url);
 if(!process.argv.includes('--case')){
  const results=[];for(const name of ['sierra','pacific','sierra-nodata'])for(const method of ['horn','zevenbergen-thorne']){

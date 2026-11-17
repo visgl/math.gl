@@ -229,3 +229,5 @@ The `Euler` class is no longer included as an experimental export. It would need
 ## Affine extraction correctness
 
 Rotation extraction now rejects singular, sheared, non-finite and projective matrices instead of returning invalid rotations. `mat4Decompose`, `mat4GetRotation`, `Matrix4.getRotation` and `Matrix4.getRotationMatrix3` support finite nonsingular affine TRS, including nonuniform scale and reflections. Reflections are represented with a negative X scale. Preserve original factors when exact original sign assignments matter. AABB transforms now rebuild enclosing bounds under rotation and shear and reject projective matrices.
+
+Relative source imports also omit `/index`. Native build output resolves directory entry points and adds `.js` extensions during compilation.

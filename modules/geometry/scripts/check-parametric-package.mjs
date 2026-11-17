@@ -62,7 +62,7 @@ const sample:SurfaceSampler=(u,v)=>new Float64Array([u,v,0]);new ParametricGeome
     {stdio: 'inherit', cwd: temporary}
   );
   const bundle = await build({
-    stdin: {contents: "export {PrismGeometry} from './modules/geometry/src/index.ts'", resolveDir: root},
+    stdin: {contents: "export {PrismGeometry} from './modules/geometry/src'", resolveDir: root},
     bundle: true,
     write: false,
     metafile: true,
