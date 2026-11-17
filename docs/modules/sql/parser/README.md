@@ -37,7 +37,7 @@ An injected WHERE parser can define a different predicate language.
 | Membership                            | ✅      | `IN (...)` and `NOT IN (...)` with a nonempty list of scalar values.                                                                              |
 | Null tests                            | ✅      | `IS NULL` and `IS NOT NULL`; expression comparisons with NULL evaluate to unknown.                                                                           |
 | Scalar literals                       | ✅      | Numbers, single-quoted strings with doubled quote escapes, and Boolean values. Use null tests rather than NULL literals.                          |
-| Named parameters                      | ⚠️      | `:name` in `parseSQLPredicate()`, with supplied values or preserved references. Use an injected WHERE parser for parameterized SELECT statements. |
+| Named parameters                      | ✅      | `:name` binds values from `parameters` in expressions, SELECT statements, and scale expressions. Predicate templates also support preserved references. |
 | Pagination                            | ✅      | `LIMIT` followed by a nonnegative safe integer, including zero. `OFFSET` skips rows before the limit.                                                                                   |
 | Catalog commands                      | ✅      | `SHOW SOURCES`, `SHOW TABLES [FROM source]`, and `DESCRIBE source[.table]`. `SHOW SOURCES` is a parser-specific command.                          |
 | Nested column access                  | ✅      | `start[1]` reads a list element. `endpoint.longitude` reads a struct field. Quote literal column names containing dots. |
@@ -250,3 +250,39 @@ custom WHERE parser are preserved.
 
 Pass a [probe.gl](https://vis.gl/probe.gl) logger as the `log` option to `parseSQLQuery` to capture parser
 errors. The parser reports the diagnostic and throws the original error.
+
+
+## Named query parameters
+
+Pass a readonly object with case-sensitive keys, omitting the colon from each key:
+
+```ts
+const query = parseSQLQuery(
+  'SELECT price * :factor AS adjusted WHERE category IN (:categories)',
+  {parameters: {factor: 1.2, categories: ['food', 'books']}}
+);
+```
+
+`parseSQLExpression`, `parseSQLSelect`, `parseSQLQuery`, `parseSQLSelectStatement`,
+`parseSQLSelectCompound`, and `queryArrowSQL` accept `parameters` in their options.
+`parseSQLSelect` still requires a `parseWhere` callback for WHERE; use `parseSQLQuery`
+for built-in predicate and expression handling.
+
+`SQLParameterValue`, `SQLParameters`, and `SQLParameterOptions` are exported from
+`@math.gl/sql/parser` and `@math.gl/sql`. Values can be finite numbers, strings,
+booleans, bigint, null, Date, Uint8Array, homogeneous numeric/string arrays, or
+arrays of numeric tuples. Readonly arrays and tuples are accepted. Mutable values
+are copied when bound. Array values are limited to 4096 entries per array.
+
+Arrays remain one argument in expressions and use the receiving Arrow function's
+List or FixedSizeList signature. Numeric tuple projections can declare their width
+with a cast, for example `SELECT :position::FLOAT32[3] AS position`. In `IN (:values)`
+and `NOT IN (:values)`, flat arrays expand into scalar membership entries; empty
+arrays yield false and true respectively, including for null input rows.
+
+Parameters are values, not table names, column names, or SQL fragments. Quoted
+strings containing colons stay literal strings. Missing values and unsupported
+types fail with the parameter name; extra keys are allowed. The custom
+`parseParameter(name)` AST callback remains available, but cannot be combined with
+`parameters`. The existing scalar-only `parseSQLPredicate` and preserved predicate
+binding APIs retain their contracts; use the expression or query parser for arrays.

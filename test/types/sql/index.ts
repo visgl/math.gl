@@ -108,3 +108,22 @@ void textScale;
 void scaleCases;
 // @ts-expect-error The AST entry point does not accept SQL source text.
 parseSQLScaleAST('quantity');
+
+// Readonly tuples and palette lists bind through the public parser APIs.
+import type {SQLParameters, SQLParameterValue} from '@math.gl/sql/parser';
+const sqlParameters: SQLParameters = {
+  minimum: 1,
+  vector: [1, 2, 3] as const,
+  names: ['a', 'b'] as const,
+  colors: [
+    [0, 0, 0],
+    [1, 1, 1, 1]
+  ] as const
+};
+const sqlValue: SQLParameterValue = sqlParameters.colors!;
+parseSQLExpression(':vector', {parameters: sqlParameters});
+parseSQLQuery('SELECT :minimum AS minimum', {parameters: sqlParameters});
+queryArrowSQL('SELECT :minimum FROM data', new Map(), {parameters: sqlParameters});
+// @ts-expect-error Arbitrary objects are not SQL values.
+const invalidSQLValue: SQLParameterValue = {value: 1};
+void [sqlValue, invalidSQLValue];

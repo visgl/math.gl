@@ -16,7 +16,6 @@ test.each([
   'ARRAY[1,]',
   'f(1,)',
   'x IS TRUE',
-  'x IN (1)',
   'x.',
   'x +',
   'f() x',

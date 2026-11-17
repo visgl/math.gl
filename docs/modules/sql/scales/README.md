@@ -109,3 +109,28 @@ after repeated-break removal, and extended linear HDR channels.
 These are evaluator samples **before storage quantization**. Packed color formats,
 GPU layouts, approximate domain statistics, and broader color-space conversion
 need additional tests. The main scales entry does not import these test fixtures.
+
+
+## Parameterized scale inputs
+
+`parseSQLScaleExpression(sql, {parameters})` binds values before validating the scale:
+
+```ts
+const scale = parseSQLScaleExpression(
+  'SCALE_COLOR(value, DOMAIN(:domain), PALETTE(:colors))',
+  {parameters: {domain: [0, 50, 100], colors: ['#440154', '#21918c', '#fde725']}}
+);
+```
+
+`PALETTE(:colors)` accepts an array of `#RRGGBB`/`#RRGGBBAA` strings or an array of
+numeric RGB/RGBA tuples. Numeric channels follow the scale's normalized color
+convention, with alpha defaulting to 1 for RGB; there is no implicit byte conversion
+or clipping. An array always specifies explicit colors, even when it contains only
+one string. A scalar string in `PALETTE(:name)` retains named-palette behavior.
+
+`DOMAIN(:domain)` and `RANGE(:range)` accept numeric stop arrays, and
+`CATEGORIES(:categories)` accepts fixed category arrays. Existing scale validation
+still applies, including matching domain/color lengths and minimum stop counts.
+Binding copies the arrays, so later edits to the caller's palette do not change the
+parsed scale. A bound scale call in a SELECT projection can also be passed to
+`parseSQLScaleAST`.

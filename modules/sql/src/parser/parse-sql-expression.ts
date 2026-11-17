@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {
+  bindSQLParameter,
+  validateSQLParameterOptions,
+  type SQLParameterOptions
+} from './sql-parameters';
 import {SQLParseError} from './sql-parse-error';
 import type {Expression} from '../expressions';
 import type {ColumnarScalarType} from '../expressions/scalar-type';
@@ -61,8 +66,8 @@ export function sqlCastType(name: string, source = name, offset = 0): ColumnarSc
 }
 
 /** Parses bounded SQL expressions into the shared expression AST. */
-export function parseSQLExpression(source: string): Expression {
-  const reader = new SQLExpressionReader(source);
+export function parseSQLExpression(source: string, options: SQLParameterOptions = {}): Expression {
+  const reader = new SQLExpressionReader(source, 0, options);
   const expression = reader.expression();
   reader.space();
   if (reader.position !== source.length)
@@ -77,8 +82,11 @@ export class SQLExpressionReader {
   private readonly depths = new WeakMap<object, number>();
   constructor(
     readonly source: string,
-    start = 0
+    start = 0,
+    /** Binding configuration shared by standalone and structural SQL parsers. */
+    protected readonly parameterOptions: SQLParameterOptions = {}
   ) {
+    validateSQLParameterOptions(parameterOptions);
     this.position = start;
     if (start === 0 && (typeof source !== 'string' || !source.trim() || source.length > 65536))
       throw new SQLParseError(
@@ -167,6 +175,27 @@ export class SQLExpressionReader {
       }
       if (minimum <= 3) {
         const negate = this.word('NOT');
+        if (this.word('IN')) {
+          this.symbol('(');
+          const values: Expression[] = [];
+          do {
+            const item = this.expression(depth + 1);
+            if (item.type === 'ArrayExpression') {
+              for (const element of item.elements) {
+                if (element.type !== 'Literal') throw this.error('SQL IN requires scalar values');
+                values.push(element as Expression);
+              }
+            } else values.push(item);
+            if (values.length > 4096) throw this.error('SQL IN exceeds 4096 values');
+          } while (this.take(','));
+          this.symbol(')');
+          left = values.length
+            ? this.call('in', [left, ...values])
+            : this.node({type: 'Literal', value: false, raw: 'false'});
+          if (negate)
+            left = this.node({type: 'UnaryExpression', operator: '!', argument: left}, [left]);
+          continue;
+        }
         const insensitive = this.word('ILIKE');
         if (insensitive || this.word('LIKE')) {
           const pattern = this.expression(depth + 1, 4);
@@ -244,7 +273,10 @@ export class SQLExpressionReader {
       this.position += width[0].length;
       this.token();
       this.symbol(']');
-      const array = argument as any;
+      const array =
+        argument.type === 'ArrayExpression'
+          ? {type: 'CallExpression', callee: {name: 'array'}, arguments: argument.elements}
+          : (argument as any);
       if (
         array.type !== 'CallExpression' ||
         !/^array(?:_(?:float(?:16|32|64)|uint8))?$/.test(array.callee.name) ||
@@ -440,8 +472,19 @@ export class SQLExpressionReader {
     }
     return this.call(name, args, fold);
   }
+  /** Reads named value placeholders; quotes and identifiers use separate productions. */
   protected extendedPrimary(): Expression | undefined {
-    return undefined;
+    if (this.source[this.position] !== ':') return undefined;
+    const start = this.position;
+    const parameter = /^:([A-Za-z_][A-Za-z0-9_]*)/.exec(this.source.slice(start));
+    if (!parameter) throw this.error('SQL named parameters require a name');
+    this.position += parameter[0].length;
+    this.token();
+    try {
+      return this.node(bindSQLParameter(parameter[1]!, this.parameterOptions));
+    } catch (error) {
+      throw this.error(error instanceof Error ? error.message : String(error), start);
+    }
   }
   /** Lowers field access to a portable expression call for Arrow binding. */
   protected memberAccess(object: Expression, name: string): Expression {

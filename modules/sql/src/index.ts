@@ -38,3 +38,5 @@ export {
   isExpressionEvaluationError,
   type ExpressionEvaluationErrorCode
 } from './expressions/evaluation-error';
+
+export type {SQLParameterValue, SQLParameters, SQLParameterOptions} from './sql/sql-parameters';

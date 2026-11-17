@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {validateSQLParameterOptions, type SQLParameterOptions} from './sql-parameters';
 import {SQLParseError} from './sql-parse-error';
 import type {Expression} from '../expressions';
 import {SQLExpressionReader} from './parse-sql-expression';
@@ -12,14 +13,15 @@ const MAXIMUM_SQL_LENGTH = 65536;
 const MAXIMUM_SELECT_TOKENS = 4096;
 
 /** Optional WHERE support for the independently tree-shakeable structural parser. */
-export type SQLSelectParserOptions = Readonly<{
-  /** Converts a WHERE expression to the portable predicate vocabulary. Omission rejects WHERE. */
-  parseWhere?: (expression: string) => ColumnarPredicate | Readonly<{expression: Expression}>;
-}>;
+export type SQLSelectParserOptions = SQLParameterOptions &
+  Readonly<{
+    /** Converts a WHERE expression to the portable predicate vocabulary. Omission rejects WHERE. */
+    parseWhere?: (expression: string) => ColumnarPredicate | Readonly<{expression: Expression}>;
+  }>;
 
 /** Parses SELECT columns/AS aliases, optional FROM, LIMIT and OFFSET; WHERE requires a supplied parser. */
 export function parseSQLSelect(sql: string, options: SQLSelectParserOptions = {}): TableQuery {
-  const reader = new SQLQueryReader(sql);
+  const reader = new SQLQueryReader(sql, options);
   reader.expectKeyword('SELECT');
   let select: TableSelection[] | undefined;
   if (!reader.takeSymbol('*')) {
@@ -81,7 +83,11 @@ export class SQLQueryReader {
   private tokens = 0;
 
   /** Rejects empty or oversized statements before scanning. */
-  constructor(sql: string) {
+  constructor(
+    sql: string,
+    protected readonly parameterOptions: SQLParameterOptions = {}
+  ) {
+    validateSQLParameterOptions(parameterOptions);
     if (typeof sql !== 'string' || !sql.trim() || sql.length > MAXIMUM_SQL_LENGTH)
       throw new SQLParseError(
         'SQL query requires a non-empty statement of at most 65536 characters.',
@@ -255,7 +261,7 @@ export class SQLQueryReader {
   }
 
   protected expressionReader(): SQLExpressionReader {
-    return new SQLExpressionReader(this.sql, this.position);
+    return new SQLExpressionReader(this.sql, this.position, this.parameterOptions);
   }
 
   /** Bounds large projection lists independently of predicate parsing. */

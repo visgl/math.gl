@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import type {SQLParameterOptions} from '../parser/sql-parameters';
 import type {Expression} from '../expressions';
 import {parseSQLExpression} from '../parser/parse-sql-expression';
 import {
@@ -94,10 +95,11 @@ function color(hex: string): ScaleColor {
 function parseDomain(node: Expression): ScaleDomain {
   const fn = call(node);
   const functionName = fn.callee.name.toUpperCase();
-  const args = fn.arguments;
+  const args = arrayArguments(fn.arguments);
   switch (functionName) {
     case 'DOMAIN':
-      if (args.length === 1) return {type: 'extent', column: name(args[0]!)};
+      if (args.length === 1 && args[0]!.type === 'Identifier')
+        return {type: 'extent', column: name(args[0]!)};
       if (args.length >= 2) return {type: 'fixed', values: args.map(number)};
       break;
     case 'DOMAIN_ZERO':
@@ -123,7 +125,7 @@ function parseDomain(node: Expression): ScaleDomain {
 
 /** Parses an ordered list of unique fixed category keys. */
 function parseCategories(node: Expression): ScaleDomain {
-  const values = call(node, 'CATEGORIES').arguments.map(argument =>
+  const values = arrayArguments(call(node, 'CATEGORIES').arguments).map(argument =>
     argument.type === 'Literal' ? literal(argument) : number(argument)
   );
   if (!values.length || new Set(values).size !== values.length) {
@@ -132,9 +134,38 @@ function parseCategories(node: Expression): ScaleDomain {
   return {type: 'fixed', values};
 }
 
+/** Accepts a single bound list wherever a scale expects an explicit list of stops. */
+function arrayArguments(args: Expression[]): Expression[] {
+  return args.length === 1 && args[0]!.type === 'ArrayExpression'
+    ? (args[0]!.elements as Expression[])
+    : args;
+}
+
+/** Converts explicit hex colors or normalized numeric RGB/RGBA tuples. */
+function colorStop(node: Expression): ScaleColor {
+  if (node.type !== 'ArrayExpression') {
+    const value = literal(node);
+    if (typeof value !== 'string')
+      throw new Error('Palette colors require hex strings or RGB/RGBA tuples');
+    return color(value);
+  }
+  if (node.elements.length !== 3 && node.elements.length !== 4) {
+    throw new Error('Palette colors require RGB or RGBA tuples');
+  }
+  const components = (node.elements as Expression[]).map(number);
+  return [components[0]!, components[1]!, components[2]!, components[3] ?? 1];
+}
+
 function parseRange(node: Expression): ScaleRange {
   const fn = call(node);
-  const args = fn.arguments;
+  const args = arrayArguments(fn.arguments);
+  if (
+    fn.callee.name.toUpperCase() === 'PALETTE' &&
+    fn.arguments.length === 1 &&
+    fn.arguments[0]?.type === 'ArrayExpression'
+  ) {
+    return {type: 'colors', values: args.map(colorStop)};
+  }
   switch (fn.callee.name.toUpperCase()) {
     case 'RANGE':
       if (args.length >= 2) return {type: 'numeric', values: args.map(number)};
@@ -170,8 +201,11 @@ function parseRange(node: Expression): ScaleRange {
  * Parse one scale expression into a row-value AST and a JSON-safe scale spec.
  * This does not evaluate domain statistics, produce colors, or modify row count.
  */
-export function parseSQLScaleExpression(sql: string): ParsedSQLScale {
-  return parseSQLScaleAST(parseSQLExpression(sql));
+export function parseSQLScaleExpression(
+  sql: string,
+  options: SQLParameterOptions = {}
+): ParsedSQLScale {
+  return parseSQLScaleAST(parseSQLExpression(sql, options));
 }
 
 /**
