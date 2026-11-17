@@ -98,3 +98,30 @@ AST is not mutated. This helper validates scale arguments; it does not validate
 whether a backend can execute the row expression. Backends must reject unsupported
 operations before compilation. Domain resolution and GPU/Arrow execution remain
 separate steps.
+
+## Composing scales with conditional expressions
+
+`compileArrowScaleExpression(table, sqlOrAST, functions?)` from
+`@math.gl/sql/arrow-scales` supports scales inside `CASE`, `COALESCE`, and compatible
+numeric expressions. It returns the standard compiled Arrow expression plus a
+`scales` array of authoritative resolved samplers, in outer-before-inner expression traversal order. A scale input can itself contain
+a conditional expression or another numeric scale.
+
+```typescript
+const compiled = compileArrowScaleExpression(table, `
+  CASE WHEN flow > 0
+    THEN SCALE_COLOR(magnitude, DOMAIN(magnitude), PALETTE('Blues'))
+    ELSE SCALE_COLOR(magnitude, DOMAIN(magnitude), PALETTE('Reds'))
+  END
+`);
+const colors = compiled.evaluateTable(table);
+const legends = compiled.scales.map(scale => scale.descriptor);
+```
+
+Domains resolve once over the complete input table, not just rows selecting a
+branch. This includes computed quantile domain expressions: domain resolution
+evaluates those expressions over all rows even if a CASE branch is never selected.
+Conditional branches preserve lazy per-row evaluation after domains are resolved. All branches must
+have compatible result types. Recompile when data-derived domains change; compiling
+on a new table does not mutate an earlier compiled expression. This function does
+not change the single-scale parser or register scales as global functions.

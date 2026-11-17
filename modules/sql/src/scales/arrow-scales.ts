@@ -26,7 +26,10 @@ import {
   resolveArrowExpressionStatistics,
   resolveArrowQuantiles
 } from './arrow-domains';
-import type {ParsedSQLScale} from './parse-sql-scale';
+import {parseSQLScaleAST, type ParsedSQLScale} from './parse-sql-scale';
+import {parseSQLExpression} from '../sql/parse-sql-expression';
+import type {Expression} from '../expressions/index';
+import type {CompiledArrowExpression} from '../arrow/types';
 import type {ResolvedScale, ScaleColor, ScaleSpec, ScaleValue} from './scale-types';
 
 export type CompiledArrowScale = Readonly<{
@@ -239,3 +242,122 @@ export function compileArrowScales<K extends string>(
 
 export {createStreamingDomainAccumulator} from './streaming-domains';
 export type {StreamingDomainOptions} from './streaming-domains';
+
+/** A composed expression with one authoritative descriptor per scale call, in traversal order. */
+export type CompiledArrowScaleExpression = CompiledArrowExpression & {
+  /** Domains resolve against the complete input table, independently of CASE branch selection. */
+  readonly scales: readonly ResolvedScale[];
+};
+
+/**
+ * Compiles SQL containing scales inside CASE, COALESCE, or other expressions.
+ * Domains resolve once over the complete table. Per-row scale inputs obey the
+ * expression compiler's active-row masks, so unselected CASE branches are not evaluated.
+ * Recompile after changing the source data to refresh data-derived domains.
+ */
+export function compileArrowScaleExpression(
+  table: Table,
+  expression: string | Expression,
+  functions: readonly ArrowTableFunction[] = []
+): CompiledArrowScaleExpression {
+  /** Parsed caller expression; rewriting never mutates it. */
+  const ast = typeof expression === 'string' ? parseSQLExpression(expression) : expression;
+  /** Reserved caller identifiers and generated function names. */
+  const names = new Set(functions.map(fn => fn.name.toUpperCase()));
+  /** Resolved descriptors in outer-before-inner traversal order. */
+  const scales: ResolvedScale[] = [];
+  /** Caller functions followed by generated scale functions. */
+  const declarations = [...functions];
+  /** Reserves user identifiers before allocating internal function names. */
+  function reserve(node: unknown): void {
+    if (!node || typeof node !== 'object') return;
+    if ('type' in node && node.type === 'Identifier' && 'name' in node)
+      names.add(String(node.name).toUpperCase());
+    for (const value of Object.values(node)) reserve(value);
+  }
+  reserve(ast);
+  /** Monotonic suffix for collision-free internal names. */
+  let nextName = 0;
+  /** Replaces each scale call with a typed vector function bound to its resolved domain. */
+  function visit(node: any): any {
+    if (!node || typeof node !== 'object') return node;
+    if (Array.isArray(node)) return node.map(visit);
+    if (
+      node.type === 'CallExpression' &&
+      node.callee?.type === 'Identifier' &&
+      /^SCALE_(LINEAR|SQRT|LOG|COLOR|DIVERGING|ORDINAL|QUANTILE|QUANTIZE|THRESHOLD)$/i.test(
+        node.callee.name
+      )
+    ) {
+      /** Reserve descriptor order before recursively resolving nested scale inputs. */
+      const scaleIndex = scales.length;
+      scales.length++;
+      /** Rewrite the value before parsing so computed domains reference generated functions too. */
+      const valueExpression = visit(node.arguments[0]);
+      /** Validated outer scale with nested inputs already bound. */
+      const parsed = parseSQLScaleAST({
+        ...node,
+        arguments: [valueExpression, ...node.arguments.slice(1)]
+      });
+      /** Whole-table domain and sampler, using all nested function declarations. */
+      const {scale} = compileArrowScale(table, parsed, undefined, declarations);
+      scales[scaleIndex] = scale;
+      /** Input type for the generated vector function overload. */
+      const input = compileArrowExpression(parsed.value as ArrowExpression, {
+        inputSchema: table.schema,
+        functions: declarations
+      });
+      /** Private function identifier that cannot shadow a caller name. */
+      let name: string;
+      do {
+        name = '__scale_' + nextName++;
+      } while (names.has(name.toUpperCase()));
+      names.add(name.toUpperCase());
+      declarations.push({
+        name,
+        prototypes: [
+          {
+            arguments: [input.outputField],
+            result: new Field(name, toVector([], parsed.scale).type, true),
+            nullHandling: 'call',
+            evaluate: ([values], {activeRows, length}) =>
+              toVector(
+                Array.from({length}, (_, row) => {
+                  if (!activeRows[row]) return null;
+                  /** Active scalar input with Arrow integer normalization. */
+                  const value = arrowScaleValue(values!.get(row));
+                  if (
+                    value !== null &&
+                    value !== undefined &&
+                    typeof value !== 'number' &&
+                    typeof value !== 'string'
+                  ) {
+                    throw new Error('Scale input must be numeric or categorical');
+                  }
+                  return scale.sample((value ?? null) as ScaleValue | null) as
+                    | number
+                    | ScaleColor
+                    | null;
+                }),
+                parsed.scale
+              )
+          }
+        ]
+      });
+      return {
+        type: 'CallExpression',
+        callee: {type: 'Identifier', name},
+        arguments: [parsed.value]
+      };
+    }
+    return Object.fromEntries(Object.entries(node).map(([key, value]) => [key, visit(value)]));
+  }
+  /** Ordinary Arrow expression after removing every supported scale call. */
+  const rewritten = visit(ast);
+  /** Final evaluator with caller and generated declarations. */
+  const compiled = compileArrowExpression(rewritten, {
+    inputSchema: table.schema,
+    functions: declarations
+  });
+  return {...compiled, scales};
+}

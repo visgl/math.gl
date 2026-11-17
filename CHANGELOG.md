@@ -6,6 +6,7 @@
 
 - fix(geometry): Port upstream Earcut touching-ring and bridge-healing fixes, indexed hole bridging, radix sorting, convex-ring acceleration, and iterative polygon splits. Preserve precomputed areas and projection planes. Triangle order and valid diagonal choices may change.
 - SQL: add `EPOCH_MS` for DATE and microsecond TIMESTAMP interoperability with JavaScript time values
+- SQL: compose Arrow scales inside conditional expressions with resolved legend metadata
 
 ## v5.0.0-beta.11
 
