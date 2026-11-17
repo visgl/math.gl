@@ -39,7 +39,7 @@ const {value, scale} = parseSQLScaleExpression(
 | `SCALE_DIVERGING(value, domain, palette)`             | Diverging color                           |
 | `SCALE_ORDINAL(column, palette)`                      | Discover categories from a column         |
 | `SCALE_ORDINAL(value, CATEGORIES(key, ...), palette)` | Specify categories in palette order       |
-| `SCALE_QUANTILE(column, count, palette)`              | Equal-frequency class request             |
+| `SCALE_QUANTILE(value, count, palette)`               | Equal-frequency class request             |
 | `SCALE_QUANTIZE(column, count, palette)`              | Equal-width class request                 |
 | `SCALE_THRESHOLD(value, ARRAY[break, ...], palette)`  | Explicit class boundaries                 |
 
@@ -65,7 +65,9 @@ The breaks must be strictly increasing. A value equal to a break starts the next
 
 Fixed category keys are unique string or numeric literals. The first key maps to the first color, even when the input contains only later categories.
 
-Deferred syntax: arbitrary computed domain expressions, piecewise domains, `PALETTE(RGBA16F(...), ...)`, HDR color options, palettes with interpolation modifiers, and richer scalar transforms. Avoid changing `parseSQLExpression` globally for these scale-only semantics.
+A quantile scale can classify a computed numeric value. For example, `SCALE_QUANTILE(ABS(flow), 2, PALETTE('#fee8c8', '#e34a33'))` classifies flow magnitudes using two explicit colors. Supply the `ABS` Arrow function declaration when compiling the scale. Domain statistics, class breaks, and row colors use the same function declarations. For streaming domains, project the computed value to a column and classify that column.
+
+Deferred syntax: computed domains outside quantile scales, piecewise domains, `PALETTE(RGBA16F(...), ...)`, HDR color options, palettes with interpolation modifiers, and richer scalar transforms. Avoid changing `parseSQLExpression` globally for these scale-only semantics.
 
 Tracker: <https://github.com/visgl/deck.gl/issues/11147>
 
