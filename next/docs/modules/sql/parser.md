@@ -250,3 +250,21 @@ const parameters = {
 Float32/Float64 and 8/16/32-bit numeric typed arrays are accepted. A bare `Uint8Array` is a binary scalar; tag it as `array` for numeric list semantics or `utf8` for text semantics. `SQLNumericArray` and `SQLBinaryParameter` describe these inputs. DataView and bigint typed arrays are not supported.
 
 Binding snapshots buffers and validates UTF-8. The AST retains ordinary string values/array elements for portable evaluators alongside their binary storage. Arrow compilation reuses matching typed element layouts and supplied UTF-8 bytes; comparisons do not encode or decode text per row. Different receiving numeric types are converted once during compilation. This is copy-on-bind, not a borrowed buffer or ownership-transfer API.
+
+## Reusable parameter snapshots[​](#reusable-parameter-snapshots "Direct link to Reusable parameter snapshots")
+
+`prepareSQLParameters(values, {previous?})` validates and copies values into an opaque snapshot accepted by parser `parameters` options. Equal entries reuse previous storage. When every entry matches, preparation returns the previous handle. Caller mutations are detected when preparing the next snapshot, including edits to typed arrays.
+
+`getSQLParameterNames(sql)` returns unique names in first-use order while ignoring quoted text, comments, and casts. Retain this list with each query and call `areSQLParametersEqual(previous, next, {names})` to compare only its dependencies. Omitting `names` compares the complete map. Missing values differ from present values. Physical typed-array types participate in equality. Snapshots retain private buffer ownership and binding returns detached ASTs. Prepare snapshots separately in each worker. SQL text, source data, schema and function changes also require invalidation.
+
+```
+const names = getSQLParameterNames(sql);
+
+const next = prepareSQLParameters(values, {previous});
+
+if (!areSQLParametersEqual(previous, next, {names})) {
+
+  result = queryArrowSQL(sql, tables, {parameters: next});
+
+}
+```
