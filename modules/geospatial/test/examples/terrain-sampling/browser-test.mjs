@@ -195,6 +195,12 @@ try {
   assert.match(await page.getByTestId('cutout-cache-status').innerText(), /0 tiles rebuilt/);
   await page.getByLabel('Resident tiles').selectOption('Both tiles');
   assert.match(await page.getByTestId('cutout-cache-status').innerText(), /1 tiles rebuilt/);
+  for (const shape of ['Concave', 'Island with lake', 'Lake with island']) {
+    await page.getByLabel('Cut shape').selectOption(shape);
+    assert.match(await page.getByTestId('cutout-cache-status').innerText(), /polygon regions/);
+    assert(await page.getByRole('img', {name: 'Terrain cutout with paired skirts'}).locator('polygon').count() > 0);
+  }
+  assert.match(await page.getByTestId('cutout-cache-status').innerText(), /2 polygon regions · 1 holes/);
   for (const region of ['Antimeridian', 'North pole', 'South pole']) {
     await page.getByLabel('Cutout region').selectOption(region);
     assert.match(await page.getByTestId('cutout-cache-status').innerText(), /spherical chart/);

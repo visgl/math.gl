@@ -8,6 +8,7 @@ import {
   createTerrainMesh,
   HeightField,
   updateTerrainTileCutouts,
+  prepareTerrainCutoutPolygons,
   stitchTerrainMeshEdges
 } from '@math.gl/geospatial/terrain';
 import TerrainControls from './terrain-controls';
@@ -78,6 +79,78 @@ const rings = {
   ]
 };
 
+/** Prepared shapes are retained across tile arrival/eviction cache updates. */
+const polygonSets = {
+  Concave: [
+    {
+      outer: [
+        [2, 2],
+        [6, 2],
+        [6, 3.5],
+        [3.5, 3.5],
+        [3.5, 6],
+        [2, 6]
+      ]
+    }
+  ],
+  'Island with lake': [
+    {
+      outer: [
+        [2, 2],
+        [6, 2],
+        [6, 6],
+        [2, 6]
+      ],
+      holes: [
+        [
+          [3, 3],
+          [5, 3],
+          [5, 5],
+          [3, 5]
+        ]
+      ]
+    }
+  ],
+  'Lake with island': [
+    {
+      outer: [
+        [2, 2],
+        [6, 2],
+        [6, 6],
+        [2, 6]
+      ],
+      holes: [
+        [
+          [3, 3],
+          [5, 3],
+          [5, 5],
+          [3, 5]
+        ]
+      ]
+    },
+    {
+      outer: [
+        [3.5, 3.5],
+        [4.5, 3.5],
+        [4.5, 4.5],
+        [3.5, 4.5]
+      ]
+    }
+  ]
+};
+const shapeNames = [...Object.keys(rings), ...Object.keys(polygonSets)];
+/** Prepare one shape per frame and selector state, not on every resident update. */
+function cutShape(shape, geographic) {
+  const convert = ring =>
+    geographic
+      ? ring.map(([x, y]) => [(x - 4) * chartScale * 0.65, (y - 4) * chartScale * 0.65])
+      : ring;
+  if (rings[shape]) return convert(rings[shape]);
+  return prepareTerrainCutoutPolygons(
+    polygonSets[shape].map(p => ({outer: convert(p.outer), holes: p.holes?.map(convert)}))
+  );
+}
+
 /** Project a local Cartesian vertex into the lab's oblique view. */
 function project(positions, index, geographic) {
   let [x, y, z] = positions.subarray(index * 3, index * 3 + 3);
@@ -105,7 +178,15 @@ function faces(piece, showWall, patch, geographic) {
       key: (patch ? 'patch' : 'remainder') + i,
       depth: a[2] + b[2] + c[2],
       points: [a, b, c].map(p => p.slice(0, 2).join(',')).join(' '),
-      color: wall ? (patch ? '#82532e' : '#533d2d') : patch ? '#e6ac62' : '#6c9d84'
+      color: wall
+        ? patch
+          ? '#82532e'
+          : '#533d2d'
+        : patch
+          ? piece.surface.polygonIndices[i / 3] === 1
+            ? '#e4cf81'
+            : '#e6ac62'
+          : '#6c9d84'
     });
   }
   return result;
@@ -123,6 +204,7 @@ export default function CutoutLab({controlsRoot}) {
   const [patchWall, setPatchWall] = useState(true);
   const [remainderWall, setRemainderWall] = useState(true);
   const [edges, setEdges] = useState(true);
+  const polygon = useMemo(() => cutShape(shape, geographic), [shape, geographic]);
   const cut = useMemo(() => {
     const resident = geographic
       ? geographicScenes[scenario].meshes
@@ -132,13 +214,10 @@ export default function CutoutLab({controlsRoot}) {
     const selected = resident
       .map((mesh, i) => ({id: String(i), revision: 0, mesh}))
       .filter((_, i) => residency === 'Both tiles' || i === (residency === 'Left tile' ? 0 : 1));
-    const polygon = geographic
-      ? rings[shape].map(([x, y]) => [(x - 4) * chartScale * 0.65, (y - 4) * chartScale * 0.65])
-      : rings[shape];
     const result = updateTerrainTileCutouts(selected, polygon, cache.current);
     cache.current = result.cache;
     return result;
-  }, [shape, residency, resolution, scenario, geographic]);
+  }, [polygon, residency, resolution, scenario, geographic]);
   const pieces = useMemo(
     () =>
       [...cut.tiles.values()].map(tile =>
@@ -197,7 +276,7 @@ export default function CutoutLab({controlsRoot}) {
         <label>
           Cut shape
           <select value={shape} onChange={event => setShape(event.target.value)}>
-            {Object.keys(rings).map(name => (
+            {shapeNames.map(name => (
               <option key={name}>{name}</option>
             ))}
           </select>
@@ -282,6 +361,13 @@ export default function CutoutLab({controlsRoot}) {
       <p data-testid="cutout-cache-status">
         {cut.rebuilt.length} tiles rebuilt · {cut.changed.length} outputs changed · {scenario}
         {geographic && ' · spherical chart, height preserved; display vertically exaggerated'}
+        {polygonSets[shape] && (
+          <>
+            {' '}
+            · {polygonSets[shape].length} polygon regions ·{' '}
+            {(polygonSets[shape][0].holes ?? []).length} holes
+          </>
+        )}
       </p>
     </>
   );

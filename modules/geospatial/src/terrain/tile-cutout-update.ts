@@ -3,6 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {
+  copyTerrainCutoutRegion,
+  sameTerrainCutoutRegion,
+  type TerrainCutoutRegion
+} from './cutout-region';
+
+import {
   splitTerrainMesh,
   validateTerrainCutoutTopology,
   type TerrainCutout,
@@ -31,7 +37,16 @@ export type TerrainTileCutoutUpdateOptions = TerrainCutoutOptions & {
   maxBoundaryEdges?: number;
 };
 /** Directed boundary edge with exact coordinate keys and local vertex IDs. */
-type Boundary = {key: string; start: string; end: string; a: number; b: number; side: 0 | 1};
+type Boundary = {
+  /** Incident face polygon index; remainder faces use the Uint32 sentinel 0xffffffff. */
+  polygon: number;
+  key: string;
+  start: string;
+  end: string;
+  a: number;
+  b: number;
+  side: 0 | 1;
+};
 /** Cached clipping and boundary summaries for one immutable tile revision. */
 type Entry = {
   resident: TerrainCutoutResident;
@@ -45,7 +60,7 @@ const CACHE = Symbol('terrain-cutout-cache');
 /** Opaque reusable cache. Do not mutate cached results or resident buffers without a new revision. */
 export type TerrainTileCutoutCache = {
   readonly [CACHE]: {
-    polygon: readonly (readonly [number, number])[];
+    polygon: TerrainCutoutRegion;
     options: Required<TerrainTileCutoutUpdateOptions>;
     entries: ReadonlyMap<string, Entry>;
   };
@@ -74,7 +89,7 @@ export type TerrainTileCutoutUpdate = {
  */
 export function updateTerrainTileCutouts(
   residents: readonly TerrainCutoutResident[],
-  polygon: readonly (readonly [number, number])[],
+  polygon: TerrainCutoutRegion,
   previous?: TerrainTileCutoutCache,
   options: TerrainTileCutoutUpdateOptions = {}
 ): TerrainTileCutoutUpdate {
@@ -96,7 +111,7 @@ export function updateTerrainTileCutouts(
   const prior = previous?.[CACHE];
   const compatible =
     prior &&
-    samePolygon(prior.polygon, polygon) &&
+    sameTerrainCutoutRegion(prior.polygon, polygon) &&
     (Object.keys(limits) as (keyof typeof limits)[]).every(
       key => prior.options[key] === limits[key]
     );
@@ -164,7 +179,7 @@ export function updateTerrainTileCutouts(
       validateTerrainCutoutTopology(combined.mesh, combined.remainingWork);
     }
   const boundaries = new Map<string, {edge: Boundary; paired: boolean}>();
-  const cutKeys = new Set<string>();
+  const cutKeys = new Map<string, number>();
   for (let tile = 0; tile < values.length; tile++)
     for (const edge of values[tile].edges) {
       const other = boundaries.get(edge.key);
@@ -176,7 +191,7 @@ export function updateTerrainTileCutouts(
         throw new RangeError('Nonconforming terrain cutout tile boundary');
       other.paired = true;
       if (other.edge.side !== edge.side) {
-        cutKeys.add(edge.key);
+        cutKeys.set(edge.key, edge.side === 0 ? edge.polygon : other.edge.polygon);
       }
     }
   const tiles = new Map<string, TerrainCutout>();
@@ -186,9 +201,21 @@ export function updateTerrainTileCutouts(
     const old = prior?.entries.get(entry.resident.id);
     // Emit in cached tile-local order, independent of resident visitation order.
     const cuts: [number[], number[]] = [[], []];
-    for (const edge of entry.edges) if (cutKeys.has(edge.key)) cuts[edge.side].push(edge.a, edge.b);
-    const patch = withEdges(entry.split.patch, cuts[0], old?.displayed.patch);
-    const remainder = withEdges(entry.split.remainder, cuts[1], old?.displayed.remainder);
+    const polygons: [number[], number[]] = [[], []];
+    for (const edge of entry.edges) {
+      const polygonIndex = cutKeys.get(edge.key);
+      if (polygonIndex !== undefined) {
+        cuts[edge.side].push(edge.a, edge.b);
+        polygons[edge.side].push(polygonIndex);
+      }
+    }
+    const patch = withEdges(entry.split.patch, cuts[0], polygons[0], old?.displayed.patch);
+    const remainder = withEdges(
+      entry.split.remainder,
+      cuts[1],
+      polygons[1],
+      old?.displayed.remainder
+    );
     const displayed =
       old && patch === old.displayed.patch && remainder === old.displayed.remainder
         ? old.displayed
@@ -198,7 +225,7 @@ export function updateTerrainTileCutouts(
     tiles.set(entry.resident.id, displayed);
   }
   return {
-    cache: {[CACHE]: {polygon: polygon.map(p => [p[0], p[1]] as const), options: limits, entries}},
+    cache: {[CACHE]: {polygon: copyTerrainCutoutRegion(polygon), options: limits, entries}},
     tiles,
     changed,
     rebuilt,
@@ -206,25 +233,35 @@ export function updateTerrainTileCutouts(
   };
 }
 
-/** Compare ring coordinates without relying on caller array identity. */
-function samePolygon(a: readonly (readonly number[])[], b: readonly (readonly number[])[]) {
-  return (
-    a.length === b.length &&
-    a.every((p, i) => b[i].length === 2 && p[0] === b[i][0] && p[1] === b[i][1])
-  );
-}
 /** Reuse surface buffers and unchanged boundary descriptors. */
-function withEdges(piece: TerrainCutoutPiece, edges: number[], old?: TerrainCutoutPiece) {
+function withEdges(
+  piece: TerrainCutoutPiece,
+  edges: number[],
+  polygons: number[],
+  old?: TerrainCutoutPiece
+) {
   const same =
     old &&
     old.positions === piece.positions &&
     old.cutEdges.length === edges.length &&
-    old.cutEdges.every((id, i) => id === edges[i]);
-  return same ? old : {...piece, cutEdges: Uint32Array.from(edges)};
+    old.cutEdges.every((id, i) => id === edges[i]) &&
+    old.cutPolygonIndices.every((id, i) => id === polygons[i]);
+  return same
+    ? old
+    : {...piece, cutEdges: Uint32Array.from(edges), cutPolygonIndices: Uint32Array.from(polygons)};
 }
 /** Cache only exposed edges; interior triangulation edges never become walls. */
 function boundaryEdges(piece: TerrainCutoutPiece, side: 0 | 1): Boundary[] {
-  const edges = new Map<string, {a: number; b: number; count: number}>();
+  const edges = new Map<
+    string,
+    {
+      a: number;
+      b: number;
+      count: number;
+      /** Incident face polygon index, including the remainder sentinel 0xffffffff. */
+      polygon: number;
+    }
+  >();
   for (let i = 0; i < piece.indices.length; i += 3)
     for (let j = 0; j < 3; j++) {
       const a = piece.indices[i + j],
@@ -232,17 +269,18 @@ function boundaryEdges(piece: TerrainCutoutPiece, side: 0 | 1): Boundary[] {
       const key = a < b ? `${a},${b}` : `${b},${a}`;
       const old = edges.get(key);
       if (old) old.count++;
-      else edges.set(key, {a, b, count: 1});
+      else edges.set(key, {a, b, count: 1, polygon: piece.polygonIndices[i / 3]});
     }
   const result: Boundary[] = [];
   /** Encode exact XYZ; no snapping or tolerance-based topology decisions. */
   const point = (id: number) =>
     `${piece.positions[id * 3]},${piece.positions[id * 3 + 1]},${piece.positions[id * 3 + 2]}`;
-  for (const {a, b, count} of edges.values())
+  for (const {a, b, count, polygon} of edges.values())
     if (count === 1) {
       const start = point(a),
         end = point(b);
       result.push({
+        polygon,
         a,
         b,
         side,

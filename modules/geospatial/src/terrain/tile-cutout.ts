@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import type {TerrainCutoutRegion} from './cutout-region';
+
 import {
   splitTerrainMesh,
   type TerrainCutout,
@@ -32,7 +34,7 @@ export type TerrainTileCutout = TerrainCutout & {
  */
 export function splitTerrainMeshTiles(
   tiles: readonly TerrainCutoutTile[],
-  polygon: readonly (readonly [number, number])[],
+  polygon: TerrainCutoutRegion,
   options: TerrainCutoutOptions = {}
 ): TerrainTileCutout {
   const assembled = assembleTerrainCutoutTiles(tiles, options);
