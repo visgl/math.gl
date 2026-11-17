@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v5.0.0-beta.12
 
 - SQL: expand list and map columns through experimental SQL UNNEST with left joins and ordinality
 
@@ -10,6 +10,12 @@
 - SQL: add `EPOCH_MS` for DATE and microsecond TIMESTAMP interoperability with JavaScript time values
 - SQL: compose Arrow scales inside conditional expressions with resolved legend metadata
 
+- feat(sql): Add fixed ordinal and threshold color mappings, computed quantile palettes, Arrow schema binding, and a parsed scale AST adapter with backend conformance fixtures (#589, #593, #595–#597).
+- feat(sql): Support named query parameters and binary inputs, immutable parameter snapshots, and query dependency comparison (#602, #604).
+- **Breaking:** Clean projection exports and align SQL entrypoint names (#603).
+- feat(terrain): Add conforming resident tile cutouts with paired skirts, incremental and geographic cutouts, concave polygons, holes and polygon IDs. Qualify cutout partition scaling through 512 residents (#583, #586, #588, #605).
+- fix(geometry): Bridge Earcut holes at a shared vertex and extract rotations from reflected bounding boxes (#594, #606).
+- ci: Synchronize mobile fullscreen checks with hydration and UI state, reuse example builds, and run full solar browser conformance on affected changes and nightly (#585, #587).
 
 ## v5.0.0-beta.11
 
