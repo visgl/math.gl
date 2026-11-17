@@ -47,7 +47,7 @@ loaders.gl or other readers, and no dependencies are added.
 
 ### Module structure
 
-Version 5 groups related tools into seven packages. Install the package root and use its focused entry points where available. See the [migration table](./upgrade-guide.md#removed-standalone-packages) for the former package names.
+Version 5 groups related tools into seven packages. Install the package root and use its focused entry points where available. See the [migration table](./upgrade-guide.md#package-imports) for the former package names.
 
 | Package | Purpose |
 | --- | --- |
