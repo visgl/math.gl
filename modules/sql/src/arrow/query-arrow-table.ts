@@ -17,7 +17,7 @@ import {
   createRecordBatchWithMetadata,
   validateArrowTableSchema,
   takeArrowTableRows
-} from '@math.gl/arrow';
+} from '@math.gl/core/arrow';
 import type {
   ColumnarPredicateParameterValues,
   ParameterizedColumnarPredicate

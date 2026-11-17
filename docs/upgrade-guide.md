@@ -14,7 +14,7 @@ For example, replace `@math.gl/geospatial/projection/native/core` with
 `@math.gl/geospatial/projection/core`. Lazy projection descriptors remain under
 `@math.gl/geospatial/projection/projections/lazy`.
 
-Use `@math.gl/arrow/geoarrow-utils` without `/index`. Private implementation files
+Use `@math.gl/core/arrow` without `/index`. Private implementation files
 are not package entry points; package-internal tests should import them relatively.
 
 Relative source imports also omit `/index`. Native build output resolves directory entry points and adds `.js` extensions during compilation.
@@ -143,8 +143,8 @@ Supply presets explicitly, import geometry and transitions as needed, and use
 
 ### GeoArrow descriptors
 
-Import physical descriptor helpers from `@math.gl/arrow/geoarrow-utils` in place
-of `@math.gl/arrow/geoarrow`. The corresponding root exports remain available.
+Import physical descriptor helpers from `@math.gl/core/arrow` in place
+of `@math.gl/core/arrow`. The corresponding root exports remain available.
 
 ### DGGS packages
 
@@ -231,3 +231,21 @@ The `Euler` class is no longer included as an experimental export. It would need
 ## Affine extraction correctness
 
 Rotation extraction now rejects singular, sheared, non-finite and projective matrices instead of returning invalid rotations. `mat4Decompose`, `mat4GetRotation`, `Matrix4.getRotation` and `Matrix4.getRotationMatrix3` support finite nonsingular affine TRS, including nonuniform scale and reflections. Reflections are represented with a negative X scale. Preserve original factors when exact original sign assignments matter. AABB transforms now rebuild enclosing bounds under rotation and shear and reject projective matrices.
+
+### Core and geospatial package consolidation
+
+Install `@math.gl/core` in place of `@math.gl/arrow`, and `@math.gl/geospatial` in place of `@math.gl/web-mercator`. Tasks and DGGS remain separate packages.
+
+| Previous import | Current import |
+| --- | --- |
+| `@math.gl/arrow`, `/geoarrow`, `/geoarrow-utils`, `/wkb` | `@math.gl/core/arrow` |
+| `@math.gl/arrow/utf8` | `@math.gl/core/utf8` |
+| `@math.gl/web-mercator` | `@math.gl/geospatial/web-mercator` |
+| `@math.gl/sql/arrow-scales` | `@math.gl/sql/scales` |
+| `@math.gl/geometry/color` | `@math.gl/core/color` (compatibility re-exports remain) |
+
+The focused `@math.gl/core/matrix` entry point shares constructor identity with the core root. `@math.gl/core/color` provides reusable colors, scales, palettes, and LUTs. SQL parsing, domain resolution, and Arrow scale evaluation remain together in `@math.gl/sql/scales`.
+
+Applications importing `@math.gl/core/arrow` install the optional `apache-arrow >=17` peer. Matrix, color, and UTF-8 consumers can omit it. Descriptor kernels retain their names; Arrow vector operations use `getGeoArrowVectorBounds`, `getGeoArrowVectorRowBounds`, `getGeoArrowVectorVertexCount`, `mapGeoArrowVectorCoordinates`, and `rewindGeoArrowVector` to distinguish them from descriptor kernels.
+
+Import `tessellateGeoArrowPolygons` and `tessellateGeoArrowStream` from `@math.gl/geometry/arrow`. Arrow examples now live under `examples/core/`; Web Mercator examples live under `examples/geospatial/`.

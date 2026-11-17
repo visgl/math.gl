@@ -38,7 +38,7 @@
       "Choose a suitable coordinate frame"
     ],
     "sources": [
-      "docs/modules/web-mercator/developer-guide/web-mercator-coordinates.md"
+      "docs/modules/geospatial/web-mercator/developer-guide/web-mercator-coordinates.md"
     ]
   },
   {

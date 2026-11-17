@@ -179,7 +179,7 @@ jobs:
       - name: Check task runtime exports and execution routes
         run: |
           yarn check:tasks
-          yarn workspace math.gl-arrow-expressions-worker start
+          yarn workspace math.gl-sql-expressions-worker start
           yarn workspace math.gl-task-runner start
           yarn workspace math.gl-task-runner geospatial
 

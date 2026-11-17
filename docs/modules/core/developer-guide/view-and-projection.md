@@ -64,4 +64,4 @@ the homogeneous result.
 
 Keep the near and far planes close to the visible range when possible to improve depth-buffer precision. Matrix storage is column-major; multiplication order and coordinate conventions matter independently of how a matrix is printed.
 
-See [Matrix4](../api-reference/matrix4.md) for projection options and [WebMercatorViewport](../../web-mercator/api-reference/web-mercator-viewport.md) for a geographic map camera.
+See [Matrix4](../api-reference/matrix4.md) for projection options and [WebMercatorViewport](../../geospatial/web-mercator/api-reference/web-mercator-viewport.md) for a geographic map camera.

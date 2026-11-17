@@ -27,7 +27,7 @@ import {
   type Table,
   type Schema
 } from 'apache-arrow';
-import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '@math.gl/arrow/utf8';
+import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '@math.gl/core/utf8';
 import {parse, validateExpressionAST, type Expression} from '../expressions';
 import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
 import {bindCast} from './cast';

@@ -2,4 +2,4 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-export * from '@math.gl/web-mercator';
+export * from '@math.gl/geospatial/web-mercator';

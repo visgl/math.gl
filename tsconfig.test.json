@@ -35,8 +35,8 @@
       "@math.gl/geospatial/projection": [
         "./modules/geospatial/src/projection/index.ts"
       ],
-      "@math.gl/arrow/geoarrow-utils": [
-        "./modules/arrow/src/geoarrow-utils/index.ts"
+      "@math.gl/core/arrow": [
+        "./modules/core/src/arrow.ts"
       ],
       "@math.gl/geospatial/crs/projjson.schema.json": [
         "./modules/geospatial/src/crs/projjson.schema.json"
@@ -362,11 +362,11 @@
       "@math.gl/dggs/test/*": [
         "./modules/dggs/test/*"
       ],
-      "@math.gl/web-mercator": [
-        "./modules/web-mercator/src/index.ts"
+      "@math.gl/geospatial/web-mercator": [
+        "./modules/geospatial/src/web-mercator/index.ts"
       ],
-      "@math.gl/web-mercator/test/*": [
-        "./modules/web-mercator/test/*"
+      "@math.gl/geospatial/web-mercator/test/*": [
+        "./modules/geospatial/test/web-mercator/*"
       ],
       "@math.gl/core/types/test/*": [
         "./modules/core/test/types/*"
@@ -416,18 +416,6 @@
       "@math.gl/geospatial/projection/*": [
         "./modules/geospatial/src/projection/*"
       ],
-      "@math.gl/arrow/wkb/test/*": [
-        "./modules/arrow/test/wkb/*"
-      ],
-      "@math.gl/arrow/wkb/*": [
-        "./modules/arrow/src/wkb/*"
-      ],
-      "@math.gl/arrow/geoarrow-utils/test/*": [
-        "./modules/arrow/test/geoarrow/*"
-      ],
-      "@math.gl/arrow/geoarrow-utils/*": [
-        "./modules/arrow/src/geoarrow-utils/*"
-      ],
       "@math.gl/earth/geoid/test/*": [
         "./modules/earth/test/geoid/*"
       ],
@@ -461,20 +449,14 @@
       "@math.gl/dggs/*": [
         "./modules/dggs/src/*"
       ],
-      "@math.gl/web-mercator/*": [
-        "./modules/web-mercator/src/*"
+      "@math.gl/geospatial/web-mercator/*": [
+        "./modules/geospatial/src/web-mercator/*"
       ],
       "@math.gl/geospatial/terrain": [
         "./modules/geospatial/src/terrain/index.ts"
       ],
       "@math.gl/geospatial/terrain/*": [
         "./modules/geospatial/src/terrain/*"
-      ],
-      "@math.gl/arrow": [
-        "./modules/arrow/src/index.ts"
-      ],
-      "@math.gl/arrow/*": [
-        "./modules/arrow/src/*"
       ],
       "@math.gl/tasks": [
         "./modules/tasks/src/index.ts"
@@ -500,9 +482,6 @@
       "@math.gl/sql/scales": [
         "./modules/sql/src/scales/index.ts"
       ],
-      "@math.gl/sql/arrow-scales": [
-        "./modules/sql/src/scales/arrow-scales.ts"
-      ],
       "@math.gl/sql/worker": [
         "./modules/sql/src/arrow/worker.ts"
       ],
@@ -514,6 +493,18 @@
       ],
       "@math.gl/sql/expressions/test/*": [
         "./modules/sql/test/expressions/*"
+      ],
+      "@math.gl/core/color": [
+        "./modules/core/src/color/index.ts"
+      ],
+      "@math.gl/core/matrix": [
+        "./modules/core/src/matrix.ts"
+      ],
+      "@math.gl/core/utf8": [
+        "./modules/core/src/utf8.ts"
+      ],
+      "@math.gl/geometry/arrow": [
+        "./modules/geometry/src/arrow/index.ts"
       ]
     }
   }

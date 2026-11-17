@@ -2,11 +2,16 @@
   {
     "id": "foundations",
     "label": "Foundations",
-    "description": "Vectors, matrices, shared numeric types, and SQL queries over Arrow tables.",
+    "description": "Matrix math, colors, binary data, Arrow integration, and SQL queries.",
     "modules": [
       "core",
       "core/types",
-      "sql"
+      "sql",
+      "core/arrow",
+      "core/arrow/utf8",
+      "core/arrow/geoarrow",
+      "core/arrow/geoarrow-utils",
+      "core/arrow/wkb"
     ]
   },
   {
@@ -30,7 +35,7 @@
       "geospatial",
       "geospatial/crs",
       "geospatial/projection",
-      "web-mercator"
+      "geospatial/web-mercator"
     ]
   },
   {
@@ -50,18 +55,6 @@
     "description": "A separate module for discrete global grid systems.",
     "modules": [
       "dggs"
-    ]
-  },
-  {
-    "id": "arrow",
-    "label": "Arrow",
-    "description": "Binary data, Arrow interoperability, and GeoArrow geometry representations.",
-    "modules": [
-      "arrow",
-      "arrow/utf8",
-      "arrow/geoarrow",
-      "arrow/geoarrow-utils",
-      "arrow/wkb"
     ]
   },
   {

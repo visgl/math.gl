@@ -107,7 +107,7 @@ export function compileArrowScale(
   if (parsed.scale.domain.type === 'expression-extent') {
     const resolution = resolveArrowExpressionStatistics(
       table,
-      parsed.scale.domain.expression,
+      parsed.scale.domain.expression as Expression,
       parsed.scale.type === 'quantile' ? classCount : undefined,
       functions
     );

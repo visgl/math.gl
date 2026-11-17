@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {longitudeCopies} from '../../../../../examples/core/expressions/src/preview-paths.ts';
+import {longitudeCopies} from '../../../../../examples/sql/expressions/src/preview-paths.ts';
 
 test('Unwrapped and wrapped dateline paths retain both map-edge halves', () => {
   for (const end of [181,-179]) {

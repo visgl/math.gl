@@ -93,8 +93,12 @@ export function resolveArrowDomains(
   return domains.map(domain => {
     if (domain.type === 'fixed') return [...domain.values];
     if (domain.type === 'expression-extent') {
-      return resolveArrowExpressionStatistics(table, domain.expression, undefined, functions)
-        .domain;
+      return resolveArrowExpressionStatistics(
+        table,
+        domain.expression as Expression,
+        undefined,
+        functions
+      ).domain;
     }
     const data = columns.get(domain.column)!;
     if (domain.type === 'categories') {

@@ -33,6 +33,24 @@
     "paths": {
       "test/*": [
         "./test/*"
+      ],
+      "@math.gl/core/arrow": [
+        "./modules/core/src/arrow.ts"
+      ],
+      "@math.gl/core/color": [
+        "./modules/core/src/color/index.ts"
+      ],
+      "@math.gl/core/matrix": [
+        "./modules/core/src/matrix.ts"
+      ],
+      "@math.gl/core/utf8": [
+        "./modules/core/src/utf8.ts"
+      ],
+      "@math.gl/geometry/arrow": [
+        "./modules/geometry/src/arrow/index.ts"
+      ],
+      "@math.gl/sql/scales": [
+        "./modules/sql/src/scales/index.ts"
       ]
     },
     "plugins": [
@@ -56,7 +74,7 @@
     "modules/*/src",
     "modules/*/test",
     "modules/*/*/test",
-    "examples/core/expressions"
+    "examples/sql/expressions"
   ],
   "exclude": [
     "node_modules",

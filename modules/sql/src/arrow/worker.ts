@@ -8,7 +8,11 @@ import type {
   ParameterizedColumnarPredicate,
   ColumnarPredicateParameterValues
 } from '../expressions';
-import {dehydrateArrowTable, hydrateArrowTable, type DehydratedArrowTable} from '@math.gl/arrow';
+import {
+  dehydrateArrowTable,
+  hydrateArrowTable,
+  type DehydratedArrowTable
+} from '@math.gl/core/arrow';
 import {compileArrowExpression} from './compiler';
 import {compileArrowPredicate} from './predicate';
 import type {ArrowExpression, CompiledArrowExpression} from './types';

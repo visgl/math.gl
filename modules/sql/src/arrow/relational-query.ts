@@ -12,9 +12,9 @@ import {
   vectorFromArray,
   type Vector
 } from 'apache-arrow';
-import {takeArrowTableRows, validateArrowTableSchema} from '@math.gl/arrow';
+import {takeArrowTableRows, validateArrowTableSchema} from '@math.gl/core/arrow';
 import {compileArrowAggregates, type ArrowAggregate} from './aggregates';
-import {compareUTF8} from '@math.gl/arrow/utf8';
+import {compareUTF8} from '@math.gl/core/utf8';
 import {ColumnReader, valueType} from './buffers';
 import {compileArrowExpression} from './compiler';
 import type {ArrowExpressionOptions, ArrowExpressionValue} from './types';
