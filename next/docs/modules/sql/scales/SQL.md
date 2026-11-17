@@ -22,25 +22,26 @@ const {value, scale} = parseSQLScaleExpression(
 
 ## Initial SQL vocabulary[​](#initial-sql-vocabulary "Direct link to Initial SQL vocabulary")
 
-| Form                                                 | Purpose                                   |
-| ---------------------------------------------------- | ----------------------------------------- |
-| `DOMAIN(0, 100)`                                     | Fixed numeric domain                      |
-| `DOMAIN(column)`                                     | Observed min/max of a named source column |
-| `DOMAIN_ZERO(column)`                                | Data extent including 0                   |
-| `DOMAIN_SYMMETRIC(column, pivot)`                    | Domain symmetric about a fixed center     |
-| `DOMAIN_QUANTILE(column, lower, upper)`              | Percentile-trimmed continuous domain      |
-| `RANGE(min, max [, ...])`                            | Numeric output range                      |
-| `PALETTE('viridis' [, count])`                       | Named palette reference                   |
-| `PALETTE('#000000', '#FFFFFF' [, ...])`              | Explicit color stops (hex RGB/RGBA)       |
-| `SCALE_LINEAR(value, domain, range)`                 | Continuous linear numeric                 |
-| `SCALE_SQRT(value, domain, range)`                   | Square-root numeric                       |
-| `SCALE_LOG(value, domain, range)`                    | Log numeric                               |
-| `SCALE_COLOR(value, domain, palette)`                | Sequential color                          |
-| `SCALE_DIVERGING(value, domain, palette)`            | Diverging color                           |
-| `SCALE_ORDINAL(column, palette)`                     | Stable categorical scale request          |
-| `SCALE_QUANTILE(column, count, palette)`             | Equal-frequency class request             |
-| `SCALE_QUANTIZE(column, count, palette)`             | Equal-width class request                 |
-| `SCALE_THRESHOLD(value, ARRAY[break, ...], palette)` | Explicit class boundaries                 |
+| Form                                                  | Purpose                                   |
+| ----------------------------------------------------- | ----------------------------------------- |
+| `DOMAIN(0, 100)`                                      | Fixed numeric domain                      |
+| `DOMAIN(column)`                                      | Observed min/max of a named source column |
+| `DOMAIN_ZERO(column)`                                 | Data extent including 0                   |
+| `DOMAIN_SYMMETRIC(column, pivot)`                     | Domain symmetric about a fixed center     |
+| `DOMAIN_QUANTILE(column, lower, upper)`               | Percentile-trimmed continuous domain      |
+| `RANGE(min, max [, ...])`                             | Numeric output range                      |
+| `PALETTE('viridis' [, count])`                        | Named palette reference                   |
+| `PALETTE('#000000', '#FFFFFF' [, ...])`               | Explicit color stops (hex RGB/RGBA)       |
+| `SCALE_LINEAR(value, domain, range)`                  | Continuous linear numeric                 |
+| `SCALE_SQRT(value, domain, range)`                    | Square-root numeric                       |
+| `SCALE_LOG(value, domain, range)`                     | Log numeric                               |
+| `SCALE_COLOR(value, domain, palette)`                 | Sequential color                          |
+| `SCALE_DIVERGING(value, domain, palette)`             | Diverging color                           |
+| `SCALE_ORDINAL(column, palette)`                      | Discover categories from a column         |
+| `SCALE_ORDINAL(value, CATEGORIES(key, ...), palette)` | Specify categories in palette order       |
+| `SCALE_QUANTILE(column, count, palette)`              | Equal-frequency class request             |
+| `SCALE_QUANTIZE(column, count, palette)`              | Equal-width class request                 |
+| `SCALE_THRESHOLD(value, ARRAY[break, ...], palette)`  | Explicit class boundaries                 |
 
 For example:
 
@@ -54,11 +55,15 @@ SCALE_QUANTILE(income, 5, PALETTE('Blues'))
 SCALE_ORDINAL(country, PALETTE('Tableau10'))
 
 SCALE_THRESHOLD(risk, ARRAY[20, 50, 80], PALETTE('YlOrRd'))
+
+SCALE_ORDINAL(landcover, CATEGORIES(10, 20), PALETTE('#235100', '#d7c59b'))
 ```
 
 This is a small front-end contract; it is *not* a new SQL statement dialect. In particular, WHERE, LIMIT, OFFSET and GROUP BY cannot be embedded into per-column scale expressions. The result `value` retains the original row-wise expression AST, and the `scale` has unresolved domain dependencies. A later Arrow/GPU planner will resolve and share those dependencies.
 
 The breaks must be strictly increasing. A value equal to a break starts the next class. Provide one more explicit color than breaks. Named palettes default to that color count.
+
+Fixed category keys are unique string or numeric literals. The first key maps to the first color, even when the input contains only later categories.
 
 Deferred syntax: arbitrary computed domain expressions, piecewise domains, `PALETTE(RGBA16F(...), ...)`, HDR color options, palettes with interpolation modifiers, and richer scalar transforms. Avoid changing `parseSQLExpression` globally for these scale-only semantics.
 
