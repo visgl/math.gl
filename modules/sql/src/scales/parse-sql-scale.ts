@@ -172,7 +172,8 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
     SCALE_DIVERGING: 'diverging',
     SCALE_ORDINAL: 'ordinal',
     SCALE_QUANTILE: 'quantile',
-    SCALE_QUANTIZE: 'quantize'
+    SCALE_QUANTIZE: 'quantize',
+    SCALE_THRESHOLD: 'threshold'
   };
   const type = names[fn];
   if (!type) throw new Error(`Unsupported SQL scale function: ${fn}`);
@@ -185,7 +186,9 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
       ? {type: 'categories' as const, column: name(value)}
       : fn === 'SCALE_QUANTILE' || fn === 'SCALE_QUANTIZE'
         ? {type: 'extent' as const, column: name(value)}
-        : parseDomain(args[1]!);
+        : fn === 'SCALE_THRESHOLD'
+          ? {type: 'fixed' as const, values: call(args[1]!, 'ARRAY').arguments.map(number)}
+          : parseDomain(args[1]!);
   let range = parseRange(args[fn === 'SCALE_ORDINAL' ? 1 : 2]!);
   if (fn === 'SCALE_QUANTILE' || fn === 'SCALE_QUANTIZE') {
     const count = number(args[1]!);
@@ -195,10 +198,30 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
     if (range.type !== 'palette') throw new Error(`${fn} requires a named palette`);
     range = {...range, count};
   }
-  const colors = ['sequential', 'diverging', 'ordinal', 'quantile', 'quantize'].includes(type);
+  const colors = [
+    'sequential',
+    'diverging',
+    'ordinal',
+    'quantile',
+    'quantize',
+    'threshold'
+  ].includes(type);
   if (colors && range.type === 'numeric') throw new Error(`${fn} requires a color range`);
   if (!colors && range.type !== 'numeric') throw new Error(`${fn} requires a numeric RANGE`);
-  if (
+  if (type === 'threshold' && domain.type === 'fixed') {
+    const breaks = domain.values as readonly number[];
+    if (!breaks.length || breaks.some((value, index) => index > 0 && value <= breaks[index - 1]!)) {
+      throw new Error('SCALE_THRESHOLD breaks must be nonempty and strictly increasing');
+    }
+    const count = breaks.length + 1;
+    if (range.type === 'palette' && range.count === undefined) range = {...range, count};
+    if (
+      (range.type === 'colors' && range.values.length !== count) ||
+      (range.type === 'palette' && range.count !== count)
+    ) {
+      throw new Error('SCALE_THRESHOLD requires one more color than breaks');
+    }
+  } else if (
     domain.type === 'fixed' &&
     range.type === 'colors' &&
     domain.values.length !== range.values.length

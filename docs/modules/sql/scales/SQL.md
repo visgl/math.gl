@@ -36,6 +36,7 @@ const {value, scale} = parseSQLScaleExpression(
 | `SCALE_ORDINAL(column, palette)` | Stable categorical scale request |
 | `SCALE_QUANTILE(column, count, palette)` | Equal-frequency class request |
 | `SCALE_QUANTIZE(column, count, palette)` | Equal-width class request |
+| `SCALE_THRESHOLD(value, ARRAY[break, ...], palette)` | Explicit class boundaries |
 
 For example:
 
@@ -44,6 +45,7 @@ SCALE_SQRT(population, DOMAIN(population), RANGE(2, 20))
 SCALE_DIVERGING(anomaly, DOMAIN_SYMMETRIC(anomaly, 0), PALETTE('RdBu'))
 SCALE_QUANTILE(income, 5, PALETTE('Blues'))
 SCALE_ORDINAL(country, PALETTE('Tableau10'))
+SCALE_THRESHOLD(risk, ARRAY[20, 50, 80], PALETTE('YlOrRd'))
 ```
 
 This is a small front-end contract; it is *not* a new SQL statement dialect.
@@ -52,7 +54,11 @@ per-column scale expressions. The result `value` retains the original
 row-wise expression AST, and the `scale` has unresolved domain dependencies.
 A later Arrow/GPU planner will resolve and share those dependencies.
 
-Deferred syntax: arbitrary computed domain expressions, explicit thresholds,
+The breaks must be strictly increasing. A value equal to a break starts the
+next class. Provide one more explicit color than breaks. Named palettes default
+to that color count.
+
+Deferred syntax: arbitrary computed domain expressions,
 piecewise domains, `PALETTE(RGBA16F(...), ...)`, HDR color options, palettes
 with interpolation modifiers, and richer scalar transforms. Avoid changing
 `parseSQLExpression` globally for these scale-only semantics.
