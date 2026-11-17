@@ -46,3 +46,9 @@ export type {
   SQLNumericArray,
   SQLBinaryParameter
 } from './parser/sql-parameters';
+export {
+  prepareSQLParameters,
+  areSQLParametersEqual,
+  getSQLParameterNames,
+  type SQLParameterSnapshot
+} from './parser/parameter-snapshots';

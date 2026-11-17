@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {isSQLParameterSnapshot} from './parameter-snapshots';
 import type {SQLParameterOptions} from './sql-parameters';
 import type {SQLPredicateParameterValues} from './sql-predicate-types';
 import {reportDiagnosticError, type DiagnosticLog} from '../diagnostic-log';
@@ -52,7 +53,7 @@ function parseQuery(sql: string, options: SQLParameterOptions): TableQuery | SQL
       try {
         // The portable predicate fast path accepts scalars. Arrays and custom bindings
         // are handled by the shared expression parser below.
-        if (options.parseParameter)
+        if (options.parseParameter || isSQLParameterSnapshot(options.parameters))
           throw new Error('Custom parameter AST requires expression parsing');
         const predicate = parseSQLPredicate(expression, {
           parameters: options.parameters as SQLPredicateParameterValues

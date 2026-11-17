@@ -74,11 +74,10 @@ const probes = [
 
   // Measured with explicit numeric, dictionary, binary and temporal CAST targets and SQL pattern operators.
   // Named scalar/binary parameter binding and expression IN syntax are part of each parser.
-  // Published consumers measure 17,252 / 18,834 / 27,915 bytes; keep dependency exclusions intact.
-  {symbol: 'parseSQLSelect', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 17500},
-  // UNNEST grammar adds approximately 532 bytes to the relational parser.
-  {symbol: 'parseSQLSelectStatement', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 19700},
-  {symbol: 'parseSQLQuery', packages: ['@math.gl/sql/parser'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 28200},
+  // Published consumers with snapshot binding measure 17,588 / approximately 19,702 with UNNEST / 28,441 bytes; keep dependency exclusions intact.
+  {symbol: 'parseSQLSelect', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 17850},
+  {symbol: 'parseSQLSelectStatement', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 20100},
+  {symbol: 'parseSQLQuery', packages: ['@math.gl/sql/parser'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 28750},
 
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/sql/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
   {symbol:'spheroidToCartesian', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
