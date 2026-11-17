@@ -117,6 +117,10 @@ for (const [path, symbols] of Object.entries(roots)) {
   const esm = await import(path), cjs = require(path);
   for (const name of symbols) { assert.notEqual(esm[name], undefined, path + ' ESM missing ' + name); assert.notEqual(cjs[name], undefined, path + ' CJS missing ' + name); }
 }
+for (const symbol of ['Vector3', 'Matrix4', 'Quaternion']) {
+  assert.equal((await import('@math.gl/core'))[symbol], (await import('@math.gl/core/matrix'))[symbol], symbol + ' ESM constructor identity');
+  assert.equal(require('@math.gl/core')[symbol], require('@math.gl/core/matrix')[symbol], symbol + ' CommonJS constructor identity');
+}
 assert.equal(typeof (await import('@math.gl/earth/sun/stars')).STAR_CATALOG, 'object');
 const repository = fileURLToPath(new URL('../', import.meta.url));
 execFileSync(process.execPath, [join(repository,'node_modules/typescript/bin/tsc'), '--project', join(repository,'test/types/root-exports/tsconfig.json')], {stdio:'inherit'});

@@ -10,7 +10,9 @@
 - `@math.gl/dggs`: cell decoding across grid systems. Specify the grid and resolution; cell identifiers are not interchangeable.
 - `@math.gl/earth/sun` and `@math.gl/earth/timezone`: astronomical and timezone calculations. Verify time units, timezone handling and optional data requirements.
 
-- `@math.gl/core/arrow`: Arrow views and transport; `/utf8`, `/geoarrow`, `/geoarrow-utils`, and `/wkb` for binary and geometry representations. Preserve offsets, dimensions, and ownership.
+- `@math.gl/core/arrow`: Arrow views/transport, GeoArrow descriptors and adapters, and WKB integration. Applications provide the optional Apache Arrow peer. Preserve offsets, dimensions, and ownership.
+- `@math.gl/core/matrix`, `/color`, and `/utf8`: focused matrix math, reusable colors/scales/LUTs, and UTF-8 utilities; these do not require Apache Arrow.
+- `@math.gl/sql/scales`: SQL scale parsing, data-derived domains, and numeric/color Arrow evaluation.
 - `@math.gl/tasks`: scheduling and worker execution; domain task catalogs remain in their owning packages.
 
 Consult each module's `package.json`, `src/index.ts`, tests, and `docs/modules/<module>` pages for exact APIs and maturity. Internal helpers and experimental APIs are not guarantees of stable application support.
