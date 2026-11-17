@@ -115,3 +115,23 @@ test('rank-zero and partially clipped rank-one UV mappings retain target area',(
     assert.equal(area,expectedArea);assert(m.uv.every(v=>v>=0&&v<=1));assert(m.sourceRows.every(r=>r===7));
   }
 });
+
+test('convex chart seeds partition the boundary without a long triangle fan', () => {
+  const ring = Array.from({length: 128}, (_, i) => [Math.cos(i * Math.PI / 64), Math.sin(i * Math.PI / 64)]);
+  for (const points of [ring, [...ring].reverse()]) {
+    const mesh = seedDomain({polygons: [{outer: [...points, points[0]]}]});
+    assert.equal(mesh.positions.length / 2, 128);
+    assert.equal(mesh.indices.length / 3, 126);
+    const incidence = new Uint32Array(128);
+    let area = 0;
+    for (let i = 0; i < mesh.indices.length; i += 3) {
+      const [a, b, c] = Array.from(mesh.indices.slice(i, i + 3), index => {
+        incidence[index]++;
+        return points[index];
+      });
+      area += Math.abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) / 2;
+    }
+    assert(Math.max(...incidence) < 16, 'no vertex owns a boundary-length fan');
+    assert(Math.abs(area - 64 * Math.sin(Math.PI / 64)) < 1e-12);
+  }
+});

@@ -18,7 +18,20 @@ export function seedDomain(domain) {
       if (i) holes.push(flat.length / 2);
       for (const p of ring.slice(0, -1)) flat.push(...p);
     }
-    indices.push(...earcut(flat, holes, 2).map(i => i + offset));
+    // Convex chart boundaries need balanced seed triangles for adaptive error sampling.
+    // A boundary fan from a generic fill triangulator can create arbitrarily thin seeds.
+    if (!holes.length && isConvexRing(flat) && flat.length > 8) {
+      const pending = [Array.from({length: flat.length / 2}, (_, i) => i)];
+      while (pending.length) {
+        const ring = pending.pop();
+        if (ring.length < 3) continue;
+        const middle = Math.floor(ring.length / 2);
+        indices.push(offset + ring[0], offset + ring[middle], offset + ring[ring.length - 1]);
+        pending.push(ring.slice(0, middle + 1), ring.slice(middle));
+      }
+    } else {
+      indices.push(...earcut(flat, holes, 2).map(i => i + offset));
+    }
     positions.push(...flat);
   }
   return {positions: new Float64Array(positions), indices: new Uint32Array(indices)};
@@ -159,4 +172,21 @@ export function inspectWarp(mesh, chart) {
     }
   }
   return {maximumError, triangles: mesh.indices.length / 3};
+}
+
+/** Check convexity before partitioning a chart into balanced boundary triangles. */
+function isConvexRing(flat) {
+  let sign = 0;
+  for (let i = 0; i < flat.length; i += 2) {
+    const j = (i + 2) % flat.length,
+      k = (i + 4) % flat.length;
+    const cross =
+      (flat[j] - flat[i]) * (flat[k + 1] - flat[j + 1]) -
+      (flat[j + 1] - flat[i + 1]) * (flat[k] - flat[j]);
+    if (cross) {
+      if (sign && Math.sign(cross) !== sign) return false;
+      sign = Math.sign(cross);
+    }
+  }
+  return sign !== 0;
 }
