@@ -6,6 +6,7 @@ import {
   prepareSQLParameters,
   areSQLParametersEqual,
   getSQLParameterNames,
+  parseSQLQuery,
   parseSQLExpression
 } from '../src/parser';
 
@@ -47,4 +48,14 @@ test('dependency discovery ignores quotes, comments and casts', () => {
     getSQLParameterNames(`SELECT :x::FLOAT32, ':ignored', ":quoted", :x, :colors -- :comment
   /* :hidden */ WHERE y = :minimum`)
   ).toEqual(['x', 'colors', 'minimum']);
+});
+
+test('query predicates bind the prepared kind value and reject missing kind', () => {
+  const parameters = prepareSQLParameters({kind: 'road'});
+  expect(parseSQLQuery('SELECT x WHERE x = :kind', {parameters})).toMatchObject({
+    where: {expression: {right: {value: 'road'}}}
+  });
+  expect(() =>
+    parseSQLQuery('SELECT x WHERE x = :kind', {parameters: prepareSQLParameters({})})
+  ).toThrow('requires a value');
 });
