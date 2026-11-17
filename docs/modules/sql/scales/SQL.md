@@ -33,7 +33,8 @@ const {value, scale} = parseSQLScaleExpression(
 | `SCALE_LOG(value, domain, range)` | Log numeric |
 | `SCALE_COLOR(value, domain, palette)` | Sequential color |
 | `SCALE_DIVERGING(value, domain, palette)` | Diverging color |
-| `SCALE_ORDINAL(column, palette)` | Stable categorical scale request |
+| `SCALE_ORDINAL(column, palette)` | Discover categories from a column |
+| `SCALE_ORDINAL(value, CATEGORIES(key, ...), palette)` | Specify categories in palette order |
 | `SCALE_QUANTILE(column, count, palette)` | Equal-frequency class request |
 | `SCALE_QUANTIZE(column, count, palette)` | Equal-width class request |
 | `SCALE_THRESHOLD(value, ARRAY[break, ...], palette)` | Explicit class boundaries |
@@ -46,6 +47,7 @@ SCALE_DIVERGING(anomaly, DOMAIN_SYMMETRIC(anomaly, 0), PALETTE('RdBu'))
 SCALE_QUANTILE(income, 5, PALETTE('Blues'))
 SCALE_ORDINAL(country, PALETTE('Tableau10'))
 SCALE_THRESHOLD(risk, ARRAY[20, 50, 80], PALETTE('YlOrRd'))
+SCALE_ORDINAL(landcover, CATEGORIES(10, 20), PALETTE('#235100', '#d7c59b'))
 ```
 
 This is a small front-end contract; it is *not* a new SQL statement dialect.
@@ -57,6 +59,9 @@ A later Arrow/GPU planner will resolve and share those dependencies.
 The breaks must be strictly increasing. A value equal to a break starts the
 next class. Provide one more explicit color than breaks. Named palettes default
 to that color count.
+
+Fixed category keys are unique string or numeric literals. The first key maps
+to the first color, even when the input contains only later categories.
 
 Deferred syntax: arbitrary computed domain expressions,
 piecewise domains, `PALETTE(RGBA16F(...), ...)`, HDR color options, palettes

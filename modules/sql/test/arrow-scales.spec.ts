@@ -203,3 +203,33 @@ test('Arrow threshold scale binds a single break and starts the upper class at e
     [255, 255, 255, 255]
   ]);
 });
+
+test('SQL ordinal scales retain fixed category colors when earlier categories are absent', () => {
+  const data = tableFromArrays({category: [20, 20, 99]});
+  const parsed = parseSQLScaleExpression(
+    "SCALE_ORDINAL(category, CATEGORIES(-10, 20), PALETTE('#ff0000', '#0000ff'))"
+  );
+  const result = compileArrowScale(data, parsed);
+  expect(result.scale.descriptor.domain).toEqual([-10, 20]);
+  expect(Array.from(result.evaluate(data).get(0))).toEqual([0, 0, 255, 255]);
+  expect(result.evaluate(data).get(2)).toBeNull();
+  expect(() =>
+    parseSQLScaleExpression("SCALE_ORDINAL(category, CATEGORIES(20, 20), PALETTE('Tableau10'))")
+  ).toThrow('no duplicates');
+});
+
+test('fixed ordinal mappings remain stable across separately evaluated batches', () => {
+  const first = tableFromArrays({category: new Int32Array([10, 20])});
+  const second = tableFromArrays({category: new Int32Array([20, 10, 99])});
+  const scale = compileArrowScale(
+    first,
+    parseSQLScaleExpression(
+      "SCALE_ORDINAL(category, CATEGORIES(10, 20), PALETTE('#ff0000', '#0000ff'))"
+    )
+  );
+  const initial = scale.evaluateBatch(first.batches[0]!);
+  const later = scale.evaluateBatch(second.batches[0]!);
+  expect(Array.from(later.get(0))).toEqual(Array.from(initial.get(1)));
+  expect(Array.from(later.get(1))).toEqual(Array.from(initial.get(0)));
+  expect(later.get(2)).toBeNull();
+});
