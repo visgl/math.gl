@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {Table} from 'apache-arrow';
+import {DataType, type Table} from 'apache-arrow';
+import {unnestArrowColumn} from './unnest-arrow-column';
 import type {Expression} from '../expressions';
 import {
   parseSQLSelectCompound,
@@ -48,11 +49,15 @@ export function queryArrowSQL(
 }
 
 function planOrder(orderBy?: readonly SQLSort[]) {
-  return orderBy?.map(({expression, direction, nulls}) => ({
-    column: requireColumn(expression),
-    direction,
-    nulls
-  }));
+  return orderBy?.map(({expression, direction, nulls}) => {
+    /** Qualified projected output name, including UNNEST aliases. */
+    const column = qualifiedColumn(expression);
+    return {
+      column: column?.qualifier ? column.qualifier + '.' + column.name : requireColumn(expression),
+      direction,
+      nulls
+    };
+  });
 }
 
 function executeSelect(
@@ -60,13 +65,36 @@ function executeSelect(
   tables: ReadonlyMap<string, Table>,
   execution: Execution
 ): Table {
-  const source = getTable(tables, statement.from.name);
+  let source = getTable(tables, statement.from.name);
   const leftAlias = statement.from.alias ?? statement.from.name;
   const [right] = statement.joins;
   let join: ArrowTableQuery['join'];
   let rightAlias: string | undefined;
   let rightTable: Table | undefined;
-  if (right) {
+  if (right?.unnest) {
+    if (statement.joins.length !== 1)
+      throw new Error('UNNEST currently supports one expansion per SELECT');
+    const {expression, columns, ordinality} = right.unnest;
+    const column = qualifiedColumn(expression);
+    if (!column || (column.qualifier && column.qualifier !== leftAlias))
+      throw new Error('UNNEST requires a column of its parent table');
+    const field = source.schema.fields.find(field => field.name === column.name);
+    if (!field) throw new Error(`Unknown UNNEST column: ${column.name}`);
+    const map = DataType.isMap(field.type);
+    if (!map && !DataType.isList(field.type) && !DataType.isFixedSizeList(field.type))
+      throw new Error('SQL UNNEST requires List, FixedSizeList or Map');
+    if (columns.length !== (map ? 2 : 1) + (ordinality ? 1 : 0))
+      throw new Error('UNNEST column alias count does not match its output');
+    rightAlias = right.table.alias!;
+    if (rightAlias === leftAlias) throw new Error('Duplicate Arrow SQL table alias');
+    source = unnestArrowColumn(source, column.name, {
+      valueColumn: rightAlias + '.' + columns[map ? 1 : 0],
+      keyColumn: map ? rightAlias + '.' + columns[0] : undefined,
+      ordinalColumn: ordinality ? rightAlias + '.' + columns[map ? 2 : 1] : undefined,
+      outer: right.type === 'left',
+      signal: execution.signal
+    });
+  } else if (right) {
     if (statement.joins.length > 1 || right.type !== 'inner')
       throw new Error('Arrow SQL supports one INNER JOIN per SELECT');
     rightAlias = right.table.alias ?? right.table.name;

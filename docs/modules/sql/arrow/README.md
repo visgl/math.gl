@@ -441,3 +441,4 @@ SELECT EPOCH_MS(CAST(observed_at AS TIMESTAMP WITH TIME ZONE)) AS time
 Temporal casts accept ISO date/time text. Explicit offsets are normalized to UTC.
 Timezone-free timestamps use their stored epoch without applying the host timezone.
 Non-ISO source strings still need normalization by the loader or application.
+

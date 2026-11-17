@@ -87,6 +87,11 @@ The executor does not support writes or schema changes, CTEs, subqueries, window
 `parseSQLQuery`, such as `SHOW SOURCES`, are for applications to handle; they are not executable
 by `queryArrowSQL`. See [the parser reference](parser/README.md) for each parser's contract.
 
+## Expand nested collections
+
+Experimental [SQL UNNEST](unnest.md) expands List, FixedSizeList and Map columns
+with CROSS or LEFT joins, output aliases and optional ordinality.
+
 ## Add functions
 
 Function declarations are explicit and local to a query. Import only the functions you need:
