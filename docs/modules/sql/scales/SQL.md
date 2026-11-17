@@ -104,7 +104,8 @@ separate steps.
 `compileArrowScaleExpression(table, sqlOrAST, functions?)` from
 `@math.gl/sql/arrow-scales` supports scales inside `CASE`, `COALESCE`, and compatible
 numeric expressions. It returns the standard compiled Arrow expression plus a
-`scales` array of authoritative resolved samplers, in expression traversal order.
+`scales` array of authoritative resolved samplers, in outer-before-inner expression traversal order. A scale input can itself contain
+a conditional expression or another numeric scale.
 
 ```typescript
 const compiled = compileArrowScaleExpression(table, `
@@ -118,7 +119,9 @@ const legends = compiled.scales.map(scale => scale.descriptor);
 ```
 
 Domains resolve once over the complete input table, not just rows selecting a
-branch. Conditional branches preserve lazy per-row evaluation. All branches must
+branch. This includes computed quantile domain expressions: domain resolution
+evaluates those expressions over all rows even if a CASE branch is never selected.
+Conditional branches preserve lazy per-row evaluation after domains are resolved. All branches must
 have compatible result types. Recompile when data-derived domains change; compiling
 on a new table does not mutate an earlier compiled expression. This function does
 not change the single-scale parser or register scales as global functions.

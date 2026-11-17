@@ -52,3 +52,40 @@ test('caller masks, scale-free expressions and incompatible branch types', () =>
     )
   ).toThrow();
 });
+
+test('nested scales bind inner inputs before outer scales and retain descriptor order', () => {
+  const data = tableFromArrays({value: [-1, 0, 5, 10]});
+  const compiled = compileArrowScaleExpression(
+    data,
+    'SCALE_LINEAR(CASE WHEN value > 0 THEN SCALE_LINEAR(value, DOMAIN(0, 10), RANGE(0, 1)) ELSE 0 END, DOMAIN(0, 1), RANGE(0, 100))'
+  );
+  expect(Array.from(compiled.evaluateTable(data))).toEqual([0, 0, 50, 100]);
+  expect(compiled.scales.map(scale => scale.descriptor.domain)).toEqual([
+    [0, 1],
+    [0, 10]
+  ]);
+});
+
+test('conditional expressions support threshold scales and computed quantiles together', () => {
+  const data = tableFromArrays({value: [-2, 0, 2, 4]});
+  const compiled = compileArrowScaleExpression(
+    data,
+    "CASE WHEN value < 0 THEN SCALE_THRESHOLD(value, ARRAY[0], PALETTE('#ff0000', '#00ff00')) ELSE SCALE_QUANTILE(value * 2, 2, PALETTE('#000000', '#ffffff')) END"
+  );
+  expect(compiled.scales[1]!.descriptor.thresholds).toEqual([2]);
+  expect(Array.from(compiled.evaluateTable(data), row => Array.from(row))).toEqual([
+    [255, 0, 0, 255],
+    [0, 0, 0, 255],
+    [255, 255, 255, 255],
+    [255, 255, 255, 255]
+  ]);
+});
+
+test('COALESCE preserves fallback masking and skips caller-reserved internal names', () => {
+  const data = tableFromArrays({value: [null, 5], __scale_0: [7, 8]});
+  const compiled = compileArrowScaleExpression(
+    data,
+    'COALESCE(SCALE_LINEAR(value, DOMAIN(0, 10), RANGE(0, 1)), __scale_0)'
+  );
+  expect(Array.from(compiled.evaluateTable(data))).toEqual([7, 0.5]);
+});
