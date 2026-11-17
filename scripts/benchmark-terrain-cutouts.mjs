@@ -16,6 +16,16 @@ import {
 
 // Interleave incremental and monolithic cuts on the same deterministic edit prefix.
 const results = [];
+// Keep the source footprint fixed while varying the resident partition size.
+const tileSize = Number(
+  process.argv.find(arg => arg.startsWith('--tile-size='))?.split('=')[1] ?? 8
+);
+if (![2, 4, 8].includes(tileSize)) throw new RangeError('tile-size must be 2, 4 or 8');
+const columns = 64 / tileSize;
+const residentCount = columns * (32 / tileSize);
+const vertexWidth = tileSize + 1;
+const evictionId = String(residentCount - 1);
+const limits = {maxTiles: 512, maxPairChecks: 131072};
 const complex = process.argv.includes('--polygons');
 const preparationStart = performance.now();
 const polygon = complex
@@ -92,30 +102,32 @@ for (const name of ['pacific', 'sierra-nodata']) {
     dem.sha256
   );
   const sourceOrigin = name === 'pacific' ? [96, 96] : [48, 80];
-  const residents = Array.from({length: 32}, (_, i) => {
-    const column = (i % 8) * 8,
-      row = Math.floor(i / 8) * 8;
-    const heights = Float64Array.from({length: 81}, (_, j) => {
+  const residents = Array.from({length: residentCount}, (_, i) => {
+    const column = (i % columns) * tileSize,
+      row = Math.floor(i / columns) * tileSize;
+    const heights = Float64Array.from({length: vertexWidth ** 2}, (_, j) => {
       const value =
         dem.heights[
-          (sourceOrigin[1] + row + Math.floor(j / 9)) * dem.width +
+          (sourceOrigin[1] + row + Math.floor(j / vertexWidth)) * dem.width +
             sourceOrigin[0] +
             column +
-            (j % 9)
+            (j % vertexWidth)
         ];
       return typeof value === 'number' ? value : NaN;
     });
     const mesh = createTerrainMesh(
-      new HeightField({width: 9, height: 9, origin: [column, row], heights}),
+      new HeightField({width: vertexWidth, height: vertexWidth, origin: [column, row], heights}),
       {origin: [0, 0, 0]}
     );
     return {id: String(i), revision: 0, mesh};
   });
   const inputTriangles = residents.reduce((sum, t) => sum + t.mesh.indices.length / 3, 0);
   assert(inputTriangles > 1000, 'Qualification must contain a substantial valid terrain domain');
-  const editable = residents.filter(t => t.id !== '31' && t.mesh.indices.includes(40));
+  const editable = residents.filter(
+    t => t.id !== evictionId && t.mesh.indices.includes((tileSize / 2) * vertexWidth + tileSize / 2)
+  );
   assert(editable.length > 0);
-  let cache = updateTerrainTileCutouts(residents, polygon).cache;
+  let cache = updateTerrainTileCutouts(residents, polygon, undefined, limits).cache;
   const incremental = [],
     full = [];
   let rebuilt = 0;
@@ -123,12 +135,12 @@ for (const name of ['pacific', 'sierra-nodata']) {
     const edited = editable[(step * 7) % editable.length];
     edited.revision++;
     // Interior vertex edit cannot invalidate neighboring seam profiles.
-    edited.mesh.positions[(4 * 9 + 4) * 3 + 2] += 0.125;
-    const active = step % 5 === 0 ? residents.filter(t => t.id !== '31') : residents;
+    edited.mesh.positions[((tileSize / 2) * vertexWidth + tileSize / 2) * 3 + 2] += 0.125;
+    const active = step % 5 === 0 ? residents.filter(t => t.id !== evictionId) : residents;
     let update, reference;
     for (const mode of step % 2 ? ['full', 'incremental'] : ['incremental', 'full']) {
       const start = performance.now();
-      if (mode === 'incremental') update = updateTerrainTileCutouts(active, polygon, cache);
+      if (mode === 'incremental') update = updateTerrainTileCutouts(active, polygon, cache, limits);
       else
         reference = splitTerrainMeshTiles(
           active.map(t => t.mesh),
@@ -151,7 +163,8 @@ for (const name of ['pacific', 'sierra-nodata']) {
     sourceSha256: dem.sha256,
     sourceOrigin,
     inputTriangles,
-    residents: 32,
+    residents: residentCount,
+    tileSize,
     measuredUpdates: 20,
     rebuiltTiles: rebuilt,
     fullRebuildParity: true,
