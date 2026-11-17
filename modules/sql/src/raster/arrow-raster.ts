@@ -14,7 +14,13 @@ import {
 } from 'apache-arrow';
 import {parseWKB, writeWKB} from '@math.gl/arrow/wkb';
 import type {ArrowTableFunction} from '../arrow/types';
-import {RasterContext, rasterToWorld, worldToRaster, requireTransform} from './source';
+import {
+  RasterContext,
+  rasterToWorld,
+  worldToRaster,
+  requireTransform,
+  getRasterSRID as srid
+} from './source';
 import {
   rasterBand,
   rasterValue,
@@ -47,18 +53,6 @@ export function createRasterVector(
     sources.map(source => (source === null ? null : context.register(source))),
     new Utf8()
   );
-}
-/** Extracts an EPSG identifier without guessing equivalent CRS aliases. */
-function srid(crs: RasterCRS | undefined): number | null {
-  let code: number | undefined;
-  if (typeof crs === 'string') {
-    const match = /^EPSG:(\d+)$/i.exec(crs);
-    if (match) code = Number(match[1]);
-  } else {
-    const id = (crs as {id?: {authority?: string; code?: number | string}} | undefined)?.id;
-    if (id?.authority?.toUpperCase() === 'EPSG') code = Number(id.code);
-  }
-  return Number.isSafeInteger(code) && code! > 0 && code! <= 0x7fffffff ? code! : null;
 }
 /** Adds EWKB SRID metadata where the source has an EPSG identity. */
 function footprintWKB(source: SyncRasterSource): Uint8Array {

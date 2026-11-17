@@ -7,8 +7,22 @@ import type {
   RasterMetadata,
   RasterWindow,
   SyncRasterSource,
-  RasterAffineTransform
+  RasterAffineTransform,
+  RasterCRS
 } from './types';
+
+/** Normalizes declared EPSG identities without a registry lookup or reprojection. */
+export function getRasterSRID(crs: RasterCRS | undefined): number | null {
+  let code: number | undefined;
+  if (typeof crs === 'string') {
+    const match = /^EPSG:(\d+)$/i.exec(crs);
+    if (match) code = Number(match[1]);
+  } else {
+    const id = (crs as {id?: {authority?: string; code?: number | string}} | undefined)?.id;
+    if (id?.authority?.toUpperCase() === 'EPSG') code = Number(id.code);
+  }
+  return Number.isSafeInteger(code) && code! > 0 && code! <= 0x7fffffff ? code! : null;
+}
 
 /** Finite invertible affine, required by spatial operations. */
 export function requireTransform(metadata: Readonly<RasterMetadata>): RasterAffineTransform {

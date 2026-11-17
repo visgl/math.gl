@@ -62,8 +62,9 @@ Transforms use `[a, b, c, d, e, f]`:
 Area samples are centered at grid coordinates plus 0.5; point samples at integer coordinates.
 Missing registration defaults to area. Spatial operations require a finite invertible affine;
 they never infer it from bounds. CRS accepts serialized definitions or PROJJSON objects
-structurally, without importing geospatial into SQL. Matching requires equal definitions
-(object key order is ignored), not alias resolution or reprojection.
+structurally, without importing geospatial into SQL. Matching accepts equal definitions
+(object key order is ignored) or the same declared EPSG identity, including EPSG identifiers
+and PROJJSON IDs. It does not resolve other aliases or reproject.
 
 Validity follows loaders.gl: finite raw value, raw NoData exclusion (including Float32
 rounding), then all applicable masks. Per-band NoData overrides dataset NoData; explicit null

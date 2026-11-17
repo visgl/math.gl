@@ -4,6 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {
+  Binary,
   Field,
   Float64,
   Schema,
@@ -508,4 +509,80 @@ test('resident window accounting uses selected sample widths plus validity masks
   expect(rasterWindowByteLength(mixed, 10, [0])).toBe(20);
   expect(rasterWindowByteLength(mixed, 10, [1])).toBe(90);
   expect(rasterWindowByteLength(mixed, 10, [0, 1])).toBe(110);
+});
+
+test('clip accepts matching EPSG encodings and preserves empty source band representation', () => {
+  const crs = {type: 'GeographicCRS', id: {authority: 'EPSG', code: 4326}};
+  for (const definition of ['epsg:4326', crs]) {
+    const context = new RasterContext(),
+      input = table(context, [raster({crs: definition})]),
+      functions = createRasterFunctions(context);
+    const result = compileArrowExpression('RT_Clip(r,RT_ConvexHull(r),"EPSG:4326")', {
+      inputSchema: input.schema,
+      functions
+    }).evaluateTable(input);
+    expect(rasterSummary(context.resolve(result.get(0)), 0).count).toBe(4);
+    expect(() =>
+      compileArrowExpression('RT_Clip(r,RT_ConvexHull(r),"EPSG:3857")', {
+        inputSchema: input.schema,
+        functions
+      }).evaluateTable(input)
+    ).toThrow(/CRS/);
+  }
+  const context = new RasterContext(),
+    base = table(context, [raster()]);
+  const hull = compileArrowExpression('RT_ConvexHull(r)', {
+    inputSchema: base.schema,
+    functions: createRasterFunctions(context)
+  }).evaluateTable(base);
+  const geometryField = new Field(
+    'polygon',
+    new Binary(),
+    true,
+    new Map([
+      ['ARROW:extension:name', 'geoarrow.wkb'],
+      ['ARROW:extension:metadata', JSON.stringify({crs})]
+    ])
+  );
+  const schema = new Schema([createRasterField('r'), geometryField]);
+  const withGeometry = new Table(
+    new RecordBatch(
+      schema,
+      makeData({
+        type: new Struct(schema.fields),
+        length: 1,
+        children: [base.getChild('r')!.data[0]!, hull.data[0]!]
+      })
+    )
+  );
+  const matching = compileArrowExpression('RT_Clip(r,polygon,"epsg:4326")', {
+    inputSchema: schema,
+    functions: createRasterFunctions(context, {geometryField})
+  }).evaluateTable(withGeometry);
+  expect(rasterSummary(context.resolve(matching.get(0)), 0).count).toBe(4);
+  const source = raster({
+    dtype: 'uint16',
+    data: new Uint16Array([1, 2, 3, 4]),
+    noData: 99,
+    bands: [{index: 3, dtype: 'uint16', noData: 9, scale: 2, offset: 3}]
+  });
+  const empty = rasterClip(source, {crs: 'EPSG:4326', coordinates: []});
+  const miss = rasterClip(source, {
+    crs: 'EPSG:4326',
+    coordinates: [
+      [
+        [10, 10],
+        [11, 10],
+        [11, 11],
+        [10, 11],
+        [10, 10]
+      ]
+    ]
+  });
+  expect(empty.metadata.dtype).toBe(miss.metadata.dtype);
+  expect(empty.metadata.bands).toEqual(miss.metadata.bands);
+  expect(empty.metadata.noData).toBe(99);
+  const data = empty.readWindow({x: 0, y: 0, width: 0, height: 0});
+  expect(data.data[0]).toBeInstanceOf(Uint16Array);
+  expect(data.bands![0]).toMatchObject({index: 3, dtype: 'uint16', noData: 9, scale: 2, offset: 3});
 });

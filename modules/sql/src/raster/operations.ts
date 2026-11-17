@@ -4,7 +4,7 @@
 
 import type {RasterMetadata, RasterPolygon, RasterSummary, SyncRasterSource} from './types';
 import {
-  createRasterSourceFromData,
+  getRasterSRID,
   immutableMetadata,
   rasterSample,
   rasterToWorld,
@@ -27,7 +27,13 @@ function canonical(value: unknown): string {
 }
 /** Requires known, equal CRS definitions. */
 export function requireSameCRS(a: Readonly<RasterMetadata>, b: Readonly<RasterMetadata>): void {
-  if (!a.crs || !b.crs || canonical(a.crs) !== canonical(b.crs))
+  const aSRID = getRasterSRID(a.crs),
+    bSRID = getRasterSRID(b.crs);
+  if (
+    !a.crs ||
+    !b.crs ||
+    (canonical(a.crs) !== canonical(b.crs) && !(aSRID !== null && aSRID === bSRID))
+  )
     throw new Error('Raster operations require matching known CRSs');
 }
 /** Zero-based sample-center offset in native grid coordinates. */
@@ -353,19 +359,6 @@ function inRing(x: number, y: number, ring: readonly (readonly number[])[]): boo
 export function rasterClip(source: SyncRasterSource, polygon: RasterPolygon): SyncRasterSource {
   requireSameCRS(source.metadata, {...source.metadata, crs: polygon.crs});
   requireTransform(source.metadata);
-  if (!polygon.coordinates.length)
-    return createRasterSourceFromData({
-      ...source.metadata,
-      width: 0,
-      height: 0,
-      dtype: 'float64',
-      bands: Array.from({length: source.metadata.bandCount}, (_, index) => ({
-        ...source.metadata.bands?.[index],
-        index: source.metadata.bands?.[index]?.index ?? index,
-        dtype: 'float64'
-      })),
-      data: Array.from({length: source.metadata.bandCount}, () => new Float64Array(0))
-    });
   if (
     polygon.coordinates.some(
       r =>
@@ -378,7 +371,7 @@ export function rasterClip(source: SyncRasterSource, polygon: RasterPolygon): Sy
     throw new Error('Raster clip requires closed polygon rings');
   const rings = polygon.coordinates.map(ring => ring.map(point => [point[0]!, point[1]!]));
   const holes = rings.slice(1);
-  const pixels = rings[0]!.map(p => worldToRaster(source.metadata, p[0]!, p[1]!));
+  const pixels = (rings[0] ?? []).map(p => worldToRaster(source.metadata, p[0]!, p[1]!));
   const offset = center(source.metadata);
   let minX = Infinity,
     minY = Infinity,
