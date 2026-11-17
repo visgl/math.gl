@@ -65,9 +65,14 @@ jobs:
 
       - name: Publish to NPM
         run: |
+          failed=0
           for package in modules/*; do
             if [ "$(node -p "require('./$package/package.json').private || false")" = "true" ]; then
               continue
             fi
-            npm publish "./$package" --access public --tag latest --provenance
+            name=$(node -p "require('./$package/package.json').name")
+            version=$(node -p "require('./$package/package.json').version")
+            if npm view "$name@$version" version >/dev/null 2>&1; then continue; fi
+            npm publish "./$package" --access public --tag latest --provenance || failed=1
           done
+          exit "$failed"
