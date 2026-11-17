@@ -115,6 +115,17 @@ export function splitTerrainMesh(
     const cache = intersections[line];
     const saved = cache.get(key);
     if (saved !== undefined) return saved;
+    // Canonical coordinate order also makes independently clipped tile edges
+    // bit-identical, regardless of their local vertex IDs or face traversal.
+    const pa = vertices[a],
+      pb = vertices[b];
+    if (
+      pa[0] > pb[0] ||
+      (pa[0] === pb[0] && (pa[1] > pb[1] || (pa[1] === pb[1] && pa[2] > pb[2])))
+    ) {
+      [a, b] = [b, a];
+      [da, db] = [db, da];
+    }
     const t = Math.abs(da) / (Math.abs(da) + Math.abs(db));
     if (!(t > 0 && t < 1)) throw new RangeError('Unrepresentable terrain cut intersection');
     const u = vertices[a];
@@ -355,4 +366,19 @@ function finish(piece: PieceBuilder): TerrainCutoutPiece {
     sourceFaces: Uint32Array.from(piece.sourceFaces),
     cutEdges: Uint32Array.from(piece.cutEdges)
   };
+}
+
+/** @internal Check topology of already range-validated assembled tile inputs. */
+export function validateTerrainCutoutTopology(mesh: TerrainCutoutInput, maxWork: number) {
+  const vertices: XYZ[] = [];
+  const faces: Face[] = [];
+  for (let i = 0; i < mesh.positions.length; i += 3)
+    vertices.push([mesh.positions[i], mesh.positions[i + 1], mesh.positions[i + 2]]);
+  for (let i = 0; i < mesh.indices.length; i += 3)
+    faces.push([mesh.indices[i], mesh.indices[i + 1], mesh.indices[i + 2]]);
+  let work = 0;
+  validateTopology(vertices, faces, amount => {
+    work += amount;
+    if (work > maxWork) throw new RangeError('Terrain cutout topology work budget exceeded');
+  });
 }

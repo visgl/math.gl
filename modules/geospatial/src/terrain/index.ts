@@ -304,3 +304,18 @@ export {
 } from './watershed-accumulation';
 
 export {splitTerrainMeshTiles, type TerrainCutoutTile, type TerrainTileCutout} from './tile-cutout';
+
+export {
+  updateTerrainTileCutouts,
+  type TerrainCutoutResident,
+  type TerrainTileCutoutUpdateOptions,
+  type TerrainTileCutoutCache,
+  type TerrainTileCutoutUpdate
+} from './tile-cutout-update';
+export {
+  createGeographicTerrainCutoutFrame,
+  projectGeographicTerrainCutout,
+  unprojectGeographicTerrainCutout,
+  type GeographicTerrainCutoutFrame,
+  type GeographicTerrainCutoutFrameOptions
+} from './geographic-cutout';

@@ -114,11 +114,16 @@ const probes = [
     forbidden: [/\/geometry\//, /\/core\//, /\/projection\//, /\/height-field\./, /\/surface\./, /martini/, /delatin/],
     budget: 5000
   },
-  ...['splitTerrainMesh', 'splitTerrainMeshTiles', 'createTerrainCutoutSkirts'].map(symbol => ({
+  ...['splitTerrainMesh', 'splitTerrainMeshTiles', 'updateTerrainTileCutouts', 'createTerrainCutoutSkirts'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
     forbidden: [/height-field\./, /surface\./, /triangle-bvh/, /delatin/, /martini/,
       symbol !== 'createTerrainCutoutSkirts' ? /mesh-skirts\./ : /mesh-cutout\./],
-    budget: 10000
+    budget: symbol === 'updateTerrainTileCutouts' ? 15000 : 10000
+  })),
+  ...['createGeographicTerrainCutoutFrame', 'projectGeographicTerrainCutout', 'unprojectGeographicTerrainCutout'].map(symbol => ({
+    symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    forbidden: [/height-field\./, /surface\./, /triangle-bvh/, /delatin/, /martini/, /mesh-cutout\./, /mesh-skirts\./, /\/projection\//],
+    budget: 4000
   })),
   {
     symbol: 'packTerrainHeightField',

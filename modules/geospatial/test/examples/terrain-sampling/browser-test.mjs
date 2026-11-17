@@ -192,7 +192,17 @@ try {
   assert.match(await page.locator('.terrain-stage').innerText(), /reconciled seam adjustment/);
   await page.getByLabel('Resident tiles').selectOption('Left tile');
   assert.match(await page.locator('.terrain-stage').innerText(), /Left tile · lift 0.0 m/);
+  assert.match(await page.getByTestId('cutout-cache-status').innerText(), /0 tiles rebuilt/);
   await page.getByLabel('Resident tiles').selectOption('Both tiles');
+  assert.match(await page.getByTestId('cutout-cache-status').innerText(), /1 tiles rebuilt/);
+  for (const region of ['Antimeridian', 'North pole', 'South pole']) {
+    await page.getByLabel('Cutout region').selectOption(region);
+    assert.match(await page.getByTestId('cutout-cache-status').innerText(), /spherical chart/);
+    assert(await page.getByRole('img', {name: 'Terrain cutout with paired skirts'}).locator('polygon').count() > 0);
+    await page.getByLabel('Resident tiles').selectOption('Left tile');
+    assert.match(await page.getByTestId('cutout-cache-status').innerText(), /0 tiles rebuilt/);
+    await page.getByLabel('Resident tiles').selectOption('Both tiles');
+  }
 
   await openGroup('Streaming replay');
   const replayLayout=await page.getByRole('img',{name:'Resident and rebuilt terrain tiles',exact:true}).evaluate(svg=>{
