@@ -1,0 +1,142 @@
+# @math.gl/geospatial/projection
+
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
+
+<!-- -->
+
+<!-- -->
+
+`@math.gl/geospatial/projection` converts coordinates between geographic, projected and geocentric coordinate reference systems. Use it for map coordinates, in-place coordinate buffers, explicit datum transformations and coordinate propagation between epochs.
+
+Numerical accuracy is evaluated against **native PROJ**. The pinned proj4js reference serves compatibility tests and benchmarks. The independent references qualify specific configurations and coordinate domains; they do not establish complete modern PROJ equivalence. See [independent validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/independent-validation.md) and the [modern PROJ audit](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/modern-proj-audit.md) for coverage and remaining gaps.
+
+For definitions of surface models, paths, reference systems, and distortion properties, see [Geospatial terminology](https://visgl.github.io/math.gl/next/docs/modules/geospatial/developer-guide/terminology.md).
+
+## Relationship to maps[​](#relationship-to-maps "Direct link to Relationship to maps")
+
+Use this subpath when coordinates must be expressed in a different CRS. Use [`@math.gl/geospatial/maps`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps.md) when a renderer needs chart coverage, interruptions, insets, picking or unfolding. Map layouts consume spherical longitude/latitude in degrees; they do not resolve source CRSs or perform datum/epoch operations.
+
+The subpaths are independent. Convert source data with projection APIs before feeding it to a map when necessary. For a textured ordinary projection, [`prepareProjectionSurface`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps/api-reference/surfaces.md) from `/maps/surfaces` samples a projection over an explicit geographic rectangle. Its placement in maps reflects its rendering responsibility, even when its coordinate transform comes from projection.
+
+See [choosing and combining the APIs](https://visgl.github.io/math.gl/next/docs/modules/geospatial/maps.md#projection-and-maps-choosing-the-right-api) for a decision table and the complete data-to-renderer workflow.
+
+## Usage[​](#usage "Direct link to Usage")
+
+```
+import { projectionEngine } from "@math.gl/geospatial/projection";
+
+
+
+const projection = projectionEngine.createProjection({
+
+  from: "EPSG:4326",
+
+  to: "EPSG:3857",
+
+});
+
+const meters = projection.project([12, 55]);
+
+const longitudeLatitude = projection.unproject(meters);
+
+
+
+const positions = new Float64Array([12, 55, 13, 56]);
+
+projection.projectFlat(positions, 2); // transforms the same buffer
+```
+
+## Features[​](#features "Direct link to Features")
+
+| Feature                                         | Support | Notes                                                                                                                                                                                                                                                                                                                               |
+| ----------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Geographic, projected and geocentric transforms | ✅      | [Projection engines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md) and the [algorithm catalogue](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projections.md) support the documented definitions and parameters. |
+| Bulk buffers and reusable output storage        | ✅      | [ProjectionBuffer](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/bulk-layouts.md) supports strided/interleaved/column layouts and explicit ownership contracts.                                                                                                                              |
+| Explicit unit, axis and datum pipelines         | ✅      | [ProjectionPipeline](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/operation-pipelines.md) composes supported stages in a declared order.                                                                                                                                                    |
+| Horizontal and vertical grid operations         | ✅      | [Prepared datum/height grids](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/datum-grids.md), including supported NTv2 and decoded GeoTIFF inputs; data loading stays explicit.                                                                                                 |
+| Coordinate epochs and deformation models        | ✅      | [Temporal models](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/temporal-models.md) and [deformation operations](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/deformation-models.md) have model/coverage-specific contracts.                         |
+| Reviewed operation selection                    | ✅      | [OperationCatalog](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/operation-selection.md) selects application-supplied operations by area, epoch, accuracy and grid metadata.                                                                                                                 |
+| Lazy/selective loading and worker execution     | ✅      | [Entry-point choices](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md) and [persistent worker recipes](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/acceleration.md) separate startup, transfer and warm execution costs.         |
+| Complete modern PROJ numerical/parameter parity | ◐       | The [independent validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/independent-validation.md) and [modern PROJ audit](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/modern-proj-audit.md) report tested domains and retained findings.        |
+| Unrestricted EPSG operation discovery           | ❌      | No bundled complete authority/operation database or automatic remote-grid search; the application reviews catalogue entries.                                                                                                                                                                                                        |
+| Arbitrary PROJ pipeline/compound-CRS execution  | ◐       | Supported typed stages and reader profiles are implemented; unrestricted pipeline/compound semantics remain [bounded roadmap work](https://github.com/visgl/math.gl/blob/master/dev-docs/projection-roadmap.md).                                                                                                                    |
+| Built-in WASM/SIMD/GPU algorithm backends       | ❌      | Worker acceleration and external-engine adapters exist; native accelerated math.gl kernels are not delivered by the acceleration probes.                                                                                                                                                                                            |
+
+## Tectonic time machine[​](#tectonic-time-machine "Direct link to Tectonic time machine")
+
+Loading <!-- -->Tectonic time machine<!-- -->…
+
+⛶
+
+About this example
+
+Play continental motion from **1.8 billion years ago** to **300 Ma into the future**, and change projections while playback continues. Past positions use published GPlates rotations; future assembly is **illustrative, not a forecast**. Terrain shows modern NASA imagery carried with the blocks, not reconstructed ancient landscapes. Choose a data source to visit Nuna (Columbia), Rodinia and Pangaea.
+
+[Open the full example](https://visgl.github.io/math.gl/next/examples/tectonic-time-machine) for data credits and limits.
+
+See [external projection engines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/external-projection-engines.md) for proj4js and D3 adapter examples.
+
+## Learn about projections[​](#learn-about-projections "Direct link to Learn about projections")
+
+Start with [coordinate systems, ellipsoids, datums and epochs](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/coordinate-systems.md) for the concepts behind a transformation. The [projection catalogue](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projections.md) explains the built-in algorithms, their distortion tradeoffs and their sphere or ellipsoid support. It includes examples for regional, global and polar maps.
+
+| Guide                                                                                                                                     | What you will learn                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [Imports, plugins and loading](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md) | Choose entry points, register algorithms, load on demand and compare bundle sizes            |
+| [Coordinate systems](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/coordinate-systems.md)          | Distinguish projection, ellipsoid, datum, height and coordinate epoch                        |
+| [Projection catalogue](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projections.md)               | Choose an algorithm and understand its useful domain                                         |
+| [Reusable coordinate buffers](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/bulk-layouts.md)       | Transform separate, strided and column buffers with reusable scratch and explicit ownership  |
+| [Operation pipelines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/operation-pipelines.md)        | Order units, axes, projections, datum shifts and time-dependent operations explicitly        |
+| [Operation selection](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/operation-selection.md)        | Select application-reviewed operations by area, epoch, accuracy and prepared grids           |
+| [Temporal models](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/temporal-models.md)                | Combine velocities, acceleration, events and relaxation with explicit epochs                 |
+| [Optional acceleration](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/acceleration.md)             | Evaluate persistent workers, ownership and complete application costs                        |
+| [Deformation models](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/deformation-models.md)          | Propagate coordinates between epochs with prepared velocity grids                            |
+| [Supported definitions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md)                  | Understand accepted definitions and differences from proj4js                                 |
+| [Performance and live benchmarks](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/benchmarks.md)     | Compare math.gl flat and scalar transforms with proj4js in your browser                      |
+| [Projection scorecard](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/scorecard.md)                 | Inspect source-matched accuracy, throughput, startup, allocation, memory and bundle evidence |
+| [Independent validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/independent-validation.md)  | Inspect numerical references and qualification limits                                        |
+
+## Choose an API[​](#choose-an-api "Direct link to Choose an API")
+
+The [CRS and projection API guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/developer-guide/api-guide.md) explains how source metadata, CRS descriptors, transforms, algorithm plugins and projection analysis fit together, and when to use each.
+
+| API                                                                                                                                                                | Use it when                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| [`FullProjectionEngine`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md)                  | You want all built-in algorithms and WKT/PROJJSON readers                    |
+| [`ConfigurableProjectionEngine`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md)          | You want an explicit list of plugins, readers and grids for a smaller bundle |
+| `LazyProjectionEngine` (`/projections/lazy`)                                                                                                                       | You want built-in algorithms to load automatically when requested            |
+| `WebMercatorProjectionEngine` (`/web-mercator`)                                                                                                                    | You need only WGS84 and EPSG:3857 with a minimal bundle                      |
+| `ProjectionPipeline` (`/pipeline`)                                                                                                                                 | You need explicit operation order or coordinate epochs                       |
+| `OperationCatalog` (`/operations`)                                                                                                                                 | You need to select among application-reviewed transformations                |
+| [`createCRSDescriptor`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/crs-descriptor.md) (`@math.gl/geospatial/crs`) | You have external converters and explicit CRS metadata/rendering policy      |
+
+The package root exports the full and configurable engines and the default `projectionEngine`. `Projection` and `ProjectionEngine` are type contracts, available from `/types`. `/core` contains the engine without the catalogue. `/projections/<id>` contains an individual algorithm; `/projections/lazy/<id>` contains its deferred descriptor. Readers, grids, pipelines, operation selection and deformation models have optional subpaths. See the [entry-point reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#public-subpaths).
+
+[`@math.gl/geospatial/crs`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs.md) provides CRS definitions, syntax readers and spatial reference metadata. This module executes supported coordinate operations. Reading a CRS definition successfully does not establish that its coordinates can be transformed: use `checkProjectionCompatibility` with the same plugins and readers as construction, then verify your coordinate domain and grid coverage.
+
+### Named coordinate systems[​](#named-coordinate-systems "Direct link to Named coordinate systems")
+
+These definitions are built in. Selective engines still require the corresponding projection algorithm; an alias does not load it.
+
+| Coordinate system                           | Aliases                                                          | Algorithm                     |
+| ------------------------------------------- | ---------------------------------------------------------------- | ----------------------------- |
+| WGS84 longitude/latitude                    | `EPSG:4326`, `WGS84`                                             | Core geographic coordinates   |
+| NAD83 longitude/latitude                    | `EPSG:4269`                                                      | Core geographic coordinates   |
+| WGS84 longitude/latitude/ellipsoidal height | `EPSG:4979`                                                      | Core geographic coordinates   |
+| WGS84 geocentric                            | `EPSG:4978`                                                      | `geocentric`                  |
+| Web Mercator                                | `EPSG:3857`, `EPSG:3785`, `GOOGLE`, `EPSG:900913`, `EPSG:102113` | `mercator`                    |
+| WGS84 UTM north                             | `EPSG:32601` through `EPSG:32660`                                | `universalTransverseMercator` |
+| WGS84 UTM south                             | `EPSG:32701` through `EPSG:32760`                                | `universalTransverseMercator` |
+| WGS84 UPS north/south                       | `EPSG:5041`, `EPSG:5042`                                         | `stereographic`               |
+
+There is no automatic EPSG database lookup or network access. Supply other named definitions through aliases or pass an explicit PROJ string, WKT or supported PROJJSON object. A CRS identifier describes much more than a projection algorithm; check its datum, units, axes and area of use.
+
+## Attribution[​](#attribution "Direct link to Attribution")
+
+The math.gl projection engine is **derived from proj4js, with an independently designed modular runtime and additional coordinate operations**. Many numerical kernels, shared mathematical helpers and datum equations are direct ports or adaptations of [proj4js](https://proj4js.org/). Selected algorithms and numerical corrections also draw on [PROJ](https://proj.org/). These contributions are an important part of the implementation; the engine is not a clean-room rewrite.
+
+The plugin architecture, execution and loading system, bulk coordinate APIs and much of the newer pipeline and epoch functionality are original math.gl work. Source headers distinguish direct ports, adaptations and implementations inspired by upstream work. Distributed license files and [third-party notices](https://github.com/visgl/math.gl/blob/master/modules/geospatial/THIRD-PARTY-NOTICES.md) retain the applicable upstream credits and terms. Engine source headers use `SPDX-License-Identifier` for licenses, `SPDX-FileCopyrightText` for copyright holders and `SPDX-FileComment` for provenance and modifications. Equal Earth retains its Apache-2.0 license and original authorship. Removing the proj4js runtime dependency does not remove attribution for derived code. The shared spheroid arithmetic in `@math.gl/core` retains the existing proj4js MIT attribution and full notice in the core package. Geospatial's retained three-radius/interior kernels preserve their CesiumJS/Apache-2.0 provenance.
+
+The implementation has diverged through selective imports, deferred algorithms, in-place buffers and additional explicit operations. Performance advantages depend on the workload; numerical improvements and supported features are qualified individually. This is not a claim of unrestricted proj4js or PROJ parity. See the [parity audit](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/parity-audit.md), [independent validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/independent-validation.md) and [support profile](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md) for the measured scope and current limits.
+
+See [Attributions](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
