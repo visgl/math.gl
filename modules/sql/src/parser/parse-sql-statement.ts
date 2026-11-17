@@ -12,7 +12,9 @@ export type SQLTableBinding = Readonly<{name: string; alias?: string}>;
 
 /** A join whose condition is interpreted by the query planner. */
 export type SQLJoin = Readonly<{
-  type: 'inner' | 'left' | 'semi' | 'anti';
+  type: 'inner' | 'left' | 'semi' | 'anti' | 'cross';
+  /** Experimental lateral collection expansion. */
+  unnest?: Readonly<{expression: Expression; columns: readonly string[]; ordinality: boolean}>;
   table: SQLTableBinding;
   on: Expression;
 }>;
@@ -88,6 +90,30 @@ function readSelect(reader: RelationalQueryReader): SQLSelectStatement {
   const from = readTable(reader);
   const joins: SQLJoin[] = [];
   for (let type = readJoinType(reader); type; type = readJoinType(reader)) {
+    if (reader.takeKeyword('UNNEST')) {
+      reader.expectSymbol('(');
+      const expression = reader.selectionExpression();
+      reader.expectSymbol(')');
+      const ordinality = reader.takeKeyword('WITH');
+      if (ordinality) reader.expectKeyword('ORDINALITY');
+      reader.expectKeyword('AS');
+      const alias = reader.identifier();
+      reader.expectSymbol('(');
+      const columns = readList(reader, () => reader.identifier());
+      reader.expectSymbol(')');
+      if (type === 'left') {
+        reader.expectKeyword('ON');
+        reader.expectKeyword('TRUE');
+      } else if (type !== 'cross') throw reader.error('UNNEST requires CROSS JOIN or LEFT JOIN');
+      joins.push({
+        type,
+        table: {name: alias, alias},
+        on: {type: 'Literal', value: true},
+        unnest: {expression, columns, ordinality}
+      });
+      continue;
+    }
+    if (type === 'cross') throw reader.error('CROSS JOIN requires UNNEST');
     const table = readTable(reader);
     reader.expectKeyword('ON');
     joins.push({type, table, on: reader.selectionExpression()});
@@ -121,6 +147,10 @@ function readTable(reader: RelationalQueryReader): SQLTableBinding {
 }
 
 function readJoinType(reader: SQLQueryReader): SQLJoin['type'] | undefined {
+  if (reader.takeKeyword('CROSS')) {
+    reader.expectKeyword('JOIN');
+    return 'cross';
+  }
   if (reader.takeKeyword('JOIN')) return 'inner';
   let type: SQLJoin['type'];
   if (reader.takeKeyword('INNER')) type = 'inner';
@@ -151,6 +181,11 @@ function readList<T>(reader: SQLQueryReader, readItem: () => T): T[] {
 }
 
 class RelationalQueryReader extends SQLQueryReader {
+  /** Requires punctuation with a positioned diagnostic. */
+  expectSymbol(symbol: string): void {
+    if (!this.takeSymbol(symbol)) throw this.error(`Expected ${symbol}`);
+  }
+
   constructor(
     sql: string,
     private readonly options: SQLSelectStatementOptions

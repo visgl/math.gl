@@ -12,6 +12,8 @@ export type UnnestArrowColumnOptions = {
   valueColumn: string;
   /** Optional map/struct key or one-based list position column. */
   keyColumn?: string;
+  /** Optional one-based element position, including for maps. */
+  ordinalColumn?: string;
   /** Retain null and empty containers as one row with null key/value. Defaults to false. */
   outer?: boolean;
   /** Synchronous cancellation, checked per source row. */
@@ -53,7 +55,8 @@ export function unnestArrowColumn(
   const fields = [
     ...table.schema.fields,
     valueField.clone({name: options.valueColumn, nullable: true}),
-    ...(options.keyColumn ? [new Field(options.keyColumn, keyType, true)] : [])
+    ...(options.keyColumn ? [new Field(options.keyColumn, keyType, true)] : []),
+    ...(options.ordinalColumn ? [new Field(options.ordinalColumn, new Int32(), true)] : [])
   ];
   if (new Set(fields.map(field => field.name)).size !== fields.length) {
     throw new Error('Duplicate UNNEST output name');
@@ -62,16 +65,22 @@ export function unnestArrowColumn(
   const parentRows: number[] = [];
   const values: unknown[] = [];
   const keys: unknown[] = [];
+  /** One-based position within each parent collection. */
+  const positions: (number | null)[] = [];
+  /** Current collection position, reset for each parent. */
+  let position = 0;
   /** Appends one expanded row while preserving its parent index. */
   function append(row: number, key: unknown, value: unknown): void {
     parentRows.push(row);
     keys.push(key);
     values.push(value);
+    positions.push(key === null ? null : ++position);
   }
   for (let row = 0; row < table.numRows; row++) {
     options.signal?.throwIfAborted();
     const value = input.get(row);
     const before = parentRows.length;
+    position = 0;
     if (value !== null) {
       if (list) {
         for (let index = 0; index < value.length; index++) append(row, index + 1, value.get(index));
@@ -90,6 +99,9 @@ export function unnestArrowColumn(
       table.schema.fields.map(field => [field.name, parents.getChild(field.name)!])
     ),
     [options.valueColumn]: vectorFromArray(values, valueField.type),
-    ...(options.keyColumn ? {[options.keyColumn]: vectorFromArray(keys, keyType)} : {})
+    ...(options.keyColumn ? {[options.keyColumn]: vectorFromArray(keys, keyType)} : {}),
+    ...(options.ordinalColumn
+      ? {[options.ordinalColumn]: vectorFromArray(positions, new Int32())}
+      : {})
   });
 }

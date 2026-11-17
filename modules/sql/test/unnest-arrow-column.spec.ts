@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {unnestArrowColumn} from '../src/arrow/unnest-arrow-column';
 import {expect, test} from 'vitest';
 import {
   Field,
@@ -15,7 +16,7 @@ import {
   tableFromArrays,
   vectorFromArray
 } from 'apache-arrow';
-import {unnestArrowColumn, queryArrowSQL} from '../src';
+import {queryArrowSQL} from '../src';
 
 test('unnest lists preserves sliced parents, null elements, ordinality and empty schema', () => {
   const input = new Table({
@@ -88,4 +89,70 @@ test('homogeneous struct expansion, collisions, unsupported columns and cancella
   expect(() =>
     unnestArrowColumn(input, 'flows', {valueColumn: 'v', signal: controller.signal})
   ).toThrow();
+});
+
+test('SQL UNNEST filters, aggregates and preserves empty parents with ordinality', () => {
+  const input = new Table({
+    id: vectorFromArray([1, 2, 3], new Int32()),
+    items: vectorFromArray([[10, 20], [], null], new List(new Field('item', new Int32(), true)))
+  });
+  const tables = new Map([['parents', input]]);
+  const cross = queryArrowSQL(
+    'SELECT p.id, u.value, u.position FROM parents p CROSS JOIN UNNEST(p.items) WITH ORDINALITY AS u(value, position) WHERE u.value > 10',
+    tables
+  );
+  expect(cross.toArray().map(row => row.toJSON())).toEqual([
+    {id: 1, 'u.value': 20, 'u.position': 2}
+  ]);
+  const outer = queryArrowSQL(
+    'SELECT p.id, u.value FROM parents p LEFT JOIN UNNEST(p.items) AS u(value) ON TRUE',
+    tables
+  );
+  expect(outer.numRows).toBe(4);
+  expect(outer.getChild('u.value')!.get(3)).toBeNull();
+  const aggregate = queryArrowSQL(
+    'SELECT SUM(u.value) AS total FROM parents p CROSS JOIN UNNEST(p.items) AS u(value)',
+    tables
+  );
+  expect(aggregate.getChild('total')!.get(0)).toBe(30n);
+});
+
+test('SQL map UNNEST retains keys and ordinality and rejects unsupported syntax', () => {
+  const type = new Map_(
+    new Field(
+      'entries',
+      new Struct([new Field('key', new Utf8(), false), new Field('value', new Int32(), true)]),
+      false
+    )
+  );
+  const input = new Table({
+    items: vectorFromArray(
+      [
+        new Map([
+          ['A', 5],
+          ['B', 8]
+        ]),
+        null
+      ],
+      type
+    )
+  });
+  const tables = new Map([['parents', input]]);
+  const result = queryArrowSQL(
+    'SELECT u.key, u.value, u.position FROM parents p LEFT JOIN UNNEST(p.items) WITH ORDINALITY AS u(key, value, position) ON TRUE',
+    tables
+  );
+  expect(result.toArray().map(row => row.toJSON())).toEqual([
+    {'u.key': 'A', 'u.value': 5, 'u.position': 1},
+    {'u.key': 'B', 'u.value': 8, 'u.position': 2},
+    {'u.key': null, 'u.value': null, 'u.position': null}
+  ]);
+  for (const sql of [
+    'SELECT * FROM parents p CROSS JOIN UNNEST(p.items) AS u(value)',
+    'SELECT * FROM parents p LEFT JOIN UNNEST(p.items) AS u(key, value) ON FALSE',
+    'SELECT * FROM parents p INNER JOIN UNNEST(p.items) AS u(key, value)',
+    'SELECT * FROM parents p CROSS JOIN UNNEST(other.items) AS u(key, value)',
+    'SELECT * FROM parents p CROSS JOIN UNNEST(p.items) AS p(key, value)'
+  ])
+    expect(() => queryArrowSQL(sql, tables)).toThrow();
 });
