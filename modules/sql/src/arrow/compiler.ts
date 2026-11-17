@@ -1154,6 +1154,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
       'array_float64',
       'array_uint8',
       'PACK_UNORM8',
+      'EPOCH_MS',
       'LIST_EXTRACT',
       'STRUCT_EXTRACT',
       'cast',
@@ -1309,6 +1310,31 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
     };
   }
   if (name === 'in') return bindMembership(ast.arguments, options);
+  if (name === 'EPOCH_MS') {
+    if (ast.arguments.length !== 1) throw new Error('EPOCH_MS requires one argument');
+    const argument = bind(ast.arguments[0], options);
+    const key = typeKey(argument.field.type);
+    if (key !== 'date32' && !key.startsWith('timestamp_us:')) {
+      throw new Error('EPOCH_MS requires DATE or microsecond TIMESTAMP');
+    }
+    return {
+      field: new Field('epoch_ms', new Float64(), argument.field.nullable),
+      hasKernel: argument.hasKernel,
+      prepare(batch, active, context) {
+        const input = argument.prepare(batch, active, context);
+        return {
+          get(row) {
+            const value = input.get(row);
+            if (value === null) return null;
+            // Divide before conversion to retain submillisecond precision around the epoch.
+            return key === 'date32'
+              ? Number(value) * 86400000
+              : Number((value as bigint) / 1000n) + Number((value as bigint) % 1000n) / 1000;
+          }
+        };
+      }
+    };
+  }
   if (name === 'cast') {
     if (ast.arguments.length !== 2 || ast.arguments[1]?.type !== 'Literal')
       throw new Error('cast requires a value and a literal scalar target');
