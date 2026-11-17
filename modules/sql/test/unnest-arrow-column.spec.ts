@@ -156,3 +156,41 @@ test('SQL map UNNEST retains keys and ordinality and rejects unsupported syntax'
   ])
     expect(() => queryArrowSQL(sql, tables)).toThrow();
 });
+
+test('SQL UNNEST retains nested values and physical timestamp precision', async () => {
+  const {TimestampMicrosecond} = await import('apache-arrow');
+  const timestamps = vectorFromArray(
+    [[new Date(1700000000000)]],
+    new List(new Field('item', new TimestampMicrosecond()))
+  );
+  const physical = timestamps.data[0]!.children[0]!.values as BigInt64Array;
+  physical[0] = 1700000000000001n;
+  const input = new Table({items: timestamps});
+  const result = queryArrowSQL(
+    'SELECT u.value FROM source s CROSS JOIN UNNEST(s.items) AS u(value)',
+    new Map([['source', input]])
+  );
+  expect(result.getChild('u.value')!.data[0]!.values[0]).toBe(1700000000000001n);
+  const nested = new Table({
+    items: vectorFromArray(
+      [[[1, 2], [3]]],
+      new List(new Field('item', new List(new Field('n', new Int32()))))
+    )
+  });
+  const expanded = queryArrowSQL(
+    'SELECT u.value FROM source s CROSS JOIN UNNEST(s.items) AS u(value)',
+    new Map([['source', nested]])
+  );
+  expect(Array.from(expanded.getChild('u.value')!.get(0))).toEqual([1, 2]);
+  const structs = new Table({
+    items: vectorFromArray(
+      [[{count: 4}]],
+      new List(new Field('item', new Struct([new Field('count', new Int32())])))
+    )
+  });
+  const fields = queryArrowSQL(
+    'SELECT u.item.count AS count FROM source s CROSS JOIN UNNEST(s.items) AS u(item)',
+    new Map([['source', structs]])
+  );
+  expect(fields.getChild('count')!.get(0)).toBe(4);
+});

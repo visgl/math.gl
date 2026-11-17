@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {DataType, Field, Int32, Schema, Table, Utf8, vectorFromArray} from 'apache-arrow';
+import {DataType, Field, Int32, Schema, Table, Utf8, Vector, vectorFromArray} from 'apache-arrow';
 import {takeArrowTableRows} from '@math.gl/arrow';
 import {physicalKey, extensionKey} from './signature';
 
@@ -63,34 +63,72 @@ export function unnestArrowColumn(
   }
   const schema = new Schema(fields, table.schema.metadata);
   const parentRows: number[] = [];
-  const values: unknown[] = [];
-  const keys: unknown[] = [];
+  /** Physical child slices preserve timestamps, dictionaries and nested values. */
+  const values: Vector[] = [];
+  /** Physical map keys or generated struct/list positions. */
+  const keys: Vector[] = [];
   /** One-based position within each parent collection. */
   const positions: (number | null)[] = [];
   /** Current collection position, reset for each parent. */
   let position = 0;
   /** Appends one expanded row while preserving its parent index. */
-  function append(row: number, key: unknown, value: unknown): void {
+  function append(row: number, key: Vector, value: Vector, ordinal: number | null): void {
     parentRows.push(row);
     keys.push(key);
     values.push(value);
-    positions.push(key === null ? null : ++position);
+    positions.push(ordinal);
   }
-  for (let row = 0; row < table.numRows; row++) {
-    options.signal?.throwIfAborted();
-    const value = input.get(row);
-    const before = parentRows.length;
-    position = 0;
-    if (value !== null) {
-      if (list) {
-        for (let index = 0; index < value.length; index++) append(row, index + 1, value.get(index));
-      } else if (map) {
-        for (const [key, item] of value) append(row, key, item);
-      } else {
-        for (const field of children) append(row, field.name, value[field.name]);
+  /** Tracks logical parent positions across Arrow chunks. */
+  let row = 0;
+  for (const data of input.data) {
+    /** Chunk-local parent validity and offsets. */
+    const chunk = new Vector([data]);
+    for (let local = 0; local < chunk.length; local++, row++) {
+      options.signal?.throwIfAborted();
+      const before = parentRows.length;
+      position = 0;
+      if (chunk.isValid(local)) {
+        if (struct) {
+          for (let index = 0; index < children.length; index++) {
+            append(
+              row,
+              vectorFromArray([children[index]!.name], keyType),
+              new Vector([data.children[index]!]).slice(local, local + 1),
+              ++position
+            );
+          }
+        } else {
+          /** Collection offsets already account for sliced variable-length parents. */
+          const begin =
+            list && DataType.isFixedSizeList(type)
+              ? (data.offset + local) * type.listSize
+              : Number(data.valueOffsets[local]);
+          const end =
+            list && DataType.isFixedSizeList(type)
+              ? begin + type.listSize
+              : Number(data.valueOffsets[local + 1]);
+          /** Physical collection values, including map entry structs. */
+          const child = new Vector([data.children[0]!]);
+          for (let index = begin; index < end; index++) {
+            options.signal?.throwIfAborted();
+            const value = map
+              ? child.getChildAt(1)!.slice(index, index + 1)
+              : child.slice(index, index + 1);
+            const key = map
+              ? child.getChildAt(0)!.slice(index, index + 1)
+              : vectorFromArray([index - begin + 1], keyType);
+            append(row, key, value, ++position);
+          }
+        }
       }
+      if (options.outer && before === parentRows.length)
+        append(
+          row,
+          vectorFromArray([null], keyType),
+          vectorFromArray([null], valueField.type),
+          null
+        );
     }
-    if (options.outer && before === parentRows.length) append(row, null, null);
   }
   if (!parentRows.length) return new Table(schema, []);
   const parents = takeArrowTableRows(table, Int32Array.from(parentRows));
@@ -98,8 +136,8 @@ export function unnestArrowColumn(
     ...Object.fromEntries(
       table.schema.fields.map(field => [field.name, parents.getChild(field.name)!])
     ),
-    [options.valueColumn]: vectorFromArray(values, valueField.type),
-    ...(options.keyColumn ? {[options.keyColumn]: vectorFromArray(keys, keyType)} : {}),
+    [options.valueColumn]: new Vector(values.flatMap(value => value.data)),
+    ...(options.keyColumn ? {[options.keyColumn]: new Vector(keys.flatMap(key => key.data))} : {}),
     ...(options.ordinalColumn
       ? {[options.ordinalColumn]: vectorFromArray(positions, new Int32())}
       : {})
