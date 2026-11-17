@@ -141,3 +141,28 @@ test('SQL thresholds take explicit increasing breaks and one extra palette color
     parseSQLScaleExpression("SCALE_THRESHOLD(risk, ARRAY[5], PALETTE('YlOrRd', 3))")
   ).toThrow('one more color');
 });
+
+test('fixed ordinal categories preserve literal types and allow a single explicit color', () => {
+  expect(
+    parseSQLScaleExpression("SCALE_ORDINAL(label, CATEGORIES('only'), PALETTE('#123456'))").scale
+  ).toEqual({
+    type: 'ordinal',
+    domain: {type: 'fixed', values: ['only']},
+    range: {type: 'colors', values: [[0x12 / 255, 0x34 / 255, 0x56 / 255, 1]]}
+  });
+  expect(
+    parseSQLScaleExpression("SCALE_ORDINAL(value, CATEGORIES(-1, +2, '2'), PALETTE('Tableau10'))")
+      .scale.domain
+  ).toEqual({type: 'fixed', values: [-1, 2, '2']});
+  for (const categories of [
+    'CATEGORIES()',
+    "CATEGORIES('a', 'a')",
+    'CATEGORIES(NULL)',
+    'CATEGORIES(TRUE)',
+    'CATEGORIES(value)'
+  ]) {
+    expect(() =>
+      parseSQLScaleExpression(`SCALE_ORDINAL(value, ${categories}, PALETTE('Tableau10'))`)
+    ).toThrow();
+  }
+});

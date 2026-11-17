@@ -114,6 +114,17 @@ function parseDomain(node: Expression): ScaleDomain {
   throw new Error(`Invalid ${functionName} domain arguments`);
 }
 
+/** Parses an ordered list of unique fixed category keys. */
+function parseCategories(node: Expression): ScaleDomain {
+  const values = call(node, 'CATEGORIES').arguments.map(argument =>
+    argument.type === 'Literal' ? literal(argument) : number(argument)
+  );
+  if (!values.length || new Set(values).size !== values.length) {
+    throw new Error('CATEGORIES requires at least one category and no duplicates');
+  }
+  return {type: 'fixed', values};
+}
+
 function parseRange(node: Expression): ScaleRange {
   const fn = call(node);
   const args = fn.arguments;
@@ -122,6 +133,12 @@ function parseRange(node: Expression): ScaleRange {
       if (args.length >= 2) return {type: 'numeric', values: args.map(number)};
       break;
     case 'PALETTE': {
+      if (args.length === 1) {
+        const stop = literal(args[0]!);
+        if (typeof stop === 'string' && stop.startsWith('#')) {
+          return {type: 'colors', values: [color(stop)]};
+        }
+      }
       if (
         args.length === 1 ||
         (args.length === 2 &&
@@ -177,19 +194,21 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
   };
   const type = names[fn];
   if (!type) throw new Error(`Unsupported SQL scale function: ${fn}`);
-  if (args.length !== (fn === 'SCALE_ORDINAL' ? 2 : 3)) {
-    throw new Error(`${fn} expects ${fn === 'SCALE_ORDINAL' ? 'two' : 'three'} arguments`);
+  const inferredOrdinal = fn === 'SCALE_ORDINAL' && args.length === 2;
+  if (!inferredOrdinal && args.length !== 3) {
+    throw new Error(`${fn} expects ${fn === 'SCALE_ORDINAL' ? 'two or three' : 'three'} arguments`);
   }
   const value = args[0]!;
-  const domain =
-    fn === 'SCALE_ORDINAL'
-      ? {type: 'categories' as const, column: name(value)}
+  const domain = inferredOrdinal
+    ? {type: 'categories' as const, column: name(value)}
+    : fn === 'SCALE_ORDINAL'
+      ? parseCategories(args[1]!)
       : fn === 'SCALE_QUANTILE' || fn === 'SCALE_QUANTIZE'
         ? {type: 'extent' as const, column: name(value)}
         : fn === 'SCALE_THRESHOLD'
           ? {type: 'fixed' as const, values: call(args[1]!, 'ARRAY').arguments.map(number)}
           : parseDomain(args[1]!);
-  let range = parseRange(args[fn === 'SCALE_ORDINAL' ? 1 : 2]!);
+  let range = parseRange(args[inferredOrdinal ? 1 : 2]!);
   if (fn === 'SCALE_QUANTILE' || fn === 'SCALE_QUANTIZE') {
     const count = number(args[1]!);
     if (!Number.isSafeInteger(count) || count < 2) {
