@@ -46,6 +46,13 @@ function name(node: Expression): string {
   return candidate.name;
 }
 
+/** Uses an existing column directly or records a computed numeric domain. */
+function quantileDomain(value: Expression): ScaleDomain {
+  return value.type === 'Identifier'
+    ? {type: 'extent', column: name(value)}
+    : {type: 'expression-extent', expression: value};
+}
+
 function literal(node: Expression): string | number {
   const value = node as {type: string; value?: unknown};
   if (
@@ -203,7 +210,9 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
     ? {type: 'categories' as const, column: name(value)}
     : fn === 'SCALE_ORDINAL'
       ? parseCategories(args[1]!)
-      : fn === 'SCALE_QUANTILE' || fn === 'SCALE_QUANTIZE'
+      : fn === 'SCALE_QUANTILE'
+        ? quantileDomain(value)
+        : fn === 'SCALE_QUANTIZE'
         ? {type: 'extent' as const, column: name(value)}
         : fn === 'SCALE_THRESHOLD'
           ? {type: 'fixed' as const, values: call(args[1]!, 'ARRAY').arguments.map(number)}
@@ -214,8 +223,13 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
     if (!Number.isSafeInteger(count) || count < 2) {
       throw new Error(`${fn} class count must be an integer >= 2`);
     }
-    if (range.type !== 'palette') throw new Error(`${fn} requires a named palette`);
-    range = {...range, count};
+    if (range.type === 'palette') {
+      range = {...range, count};
+    } else if (fn !== 'SCALE_QUANTILE' || range.type !== 'colors') {
+      throw new Error(`${fn} requires a named palette`);
+    } else if (range.values.length !== count) {
+      throw new Error('SCALE_QUANTILE requires one color per class');
+    }
   }
   const colors = [
     'sequential',

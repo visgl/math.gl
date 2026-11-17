@@ -18,9 +18,14 @@ import {
 } from 'apache-arrow';
 import {compileArrowExpression} from '../arrow/compiler';
 import {nullTupleVector} from '../arrow/list-values';
-import type {ArrowExpression} from '../arrow/types';
+import type {ArrowExpression, ArrowTableFunction} from '../arrow/types';
 import {compileResolvedScale} from './compile-scale';
-import {arrowScaleValue, resolveArrowDomains, resolveArrowQuantiles} from './arrow-domains';
+import {
+  arrowScaleValue,
+  resolveArrowDomains,
+  resolveArrowExpressionStatistics,
+  resolveArrowQuantiles
+} from './arrow-domains';
 import type {ParsedSQLScale} from './parse-sql-scale';
 import type {ResolvedScale, ScaleColor, ScaleSpec, ScaleValue} from './scale-types';
 
@@ -76,16 +81,34 @@ function toVector(rows: (number | ScaleColor | null)[], spec: ScaleSpec): Vector
   return vector;
 }
 
+/** Determines the number of classes declared by the range. */
+function getClassCount(spec: ScaleSpec): number | undefined {
+  if (spec.range.type === 'palette') return spec.range.count;
+  return spec.type === 'quantile' && spec.range.type === 'colors'
+    ? spec.range.values.length
+    : undefined;
+}
+
 /** Compile a shared domain + range and bind its per-row Arrow expression once. */
 export function compileArrowScale(
   table: Table,
   parsed: ParsedSQLScale,
-  resolvedDomain?: readonly ScaleValue[]
+  resolvedDomain?: readonly ScaleValue[],
+  functions?: readonly ArrowTableFunction[]
 ): CompiledArrowScale {
   /** Class count used by the palette for quantile classification. */
-  const classCount = parsed.scale.range.type === 'palette' ? parsed.scale.range.count : undefined;
+  const classCount = getClassCount(parsed.scale);
   if (parsed.scale.type === 'quantile' && (!classCount || parsed.scale.domain.type === 'fixed')) {
-    throw new Error('Quantile scale requires a class count and a source column');
+    throw new Error('Quantile scale requires a class count and a data-derived domain');
+  }
+  if (parsed.scale.domain.type === 'expression-extent') {
+    const resolution = resolveArrowExpressionStatistics(
+      table,
+      parsed.scale.domain.expression,
+      parsed.scale.type === 'quantile' ? classCount : undefined,
+      functions
+    );
+    return bindArrowScale(table.schema, parsed, resolution, functions);
   }
   /** Resolved inputs shared with the schema-only binder. */
   const resolution: ArrowScaleResolution = {
@@ -94,7 +117,7 @@ export function compileArrowScale(
       ? {quantileBreaks: resolveArrowQuantiles(table, parsed.scale.domain.column, classCount!)}
       : {})
   };
-  return bindArrowScale(table.schema, parsed, resolution);
+  return bindArrowScale(table.schema, parsed, resolution, functions);
 }
 
 /** Statistics needed to bind a scale without retaining its source table. */
@@ -109,14 +132,15 @@ export type ArrowScaleResolution = Readonly<{
 export function bindArrowScale(
   inputSchema: Schema,
   parsed: ParsedSQLScale,
-  {domain, quantileBreaks}: ArrowScaleResolution
+  {domain, quantileBreaks}: ArrowScaleResolution,
+  functions?: readonly ArrowTableFunction[]
 ): CompiledArrowScale {
   /** Break points used by classified scales. */
   let thresholds: readonly number[] | undefined;
   /** Scale transform and classification family. */
   const kind = parsed.scale.type;
   /** Number of discrete classes declared by the palette, if any. */
-  const classCount = parsed.scale.range.type === 'palette' ? parsed.scale.range.count : undefined;
+  const classCount = getClassCount(parsed.scale);
   if (kind === 'quantile') {
     if (
       classCount === undefined ||
@@ -159,7 +183,10 @@ export function bindArrowScale(
   /** Evaluator shared by Arrow output and descriptor consumers. */
   const scale = compileResolvedScale(parsed.scale, domain, thresholds);
   /** Input expression bound once to the source schema. */
-  const compiled = compileArrowExpression(parsed.value as ArrowExpression, {inputSchema});
+  const compiled = compileArrowExpression(parsed.value as ArrowExpression, {
+    inputSchema,
+    functions
+  });
   /** Maps one vector to the selected scalar or color encoding. */
   const evaluateVector = (input: Vector): Vector => {
     const result: (number | ScaleColor | null)[] = Array.from({length: input.length}, (_, i) => {
@@ -185,15 +212,23 @@ export function bindArrowScale(
  */
 export function compileArrowScales<K extends string>(
   table: Table,
-  expressions: Readonly<Record<K, ParsedSQLScale>>
+  expressions: Readonly<Record<K, ParsedSQLScale>>,
+  functions?: readonly ArrowTableFunction[]
 ): Record<K, CompiledArrowScale> {
   const entries = Object.entries(expressions) as [K, ParsedSQLScale][];
+  const columnEntries = entries.filter(
+    ([, parsed]) => parsed.scale.domain.type !== 'expression-extent'
+  );
   const domains = resolveArrowDomains(
     table,
-    entries.map(([, parsed]) => parsed.scale.domain)
+    columnEntries.map(([, parsed]) => parsed.scale.domain)
   );
+  const domainsByKey = new Map(columnEntries.map(([key], index) => [key, domains[index]!]));
   return Object.fromEntries(
-    entries.map(([key, parsed], index) => [key, compileArrowScale(table, parsed, domains[index])])
+    entries.map(([key, parsed]) => [
+      key,
+      compileArrowScale(table, parsed, domainsByKey.get(key), functions)
+    ])
   ) as Record<K, CompiledArrowScale>;
 }
 

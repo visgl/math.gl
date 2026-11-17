@@ -4,6 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
+import {ABS} from '../src/math';
 import {parseSQLScaleExpression} from '../src/scales';
 import {compileResolvedScale, resolvePalette} from '../src/scales';
 import {
@@ -232,4 +233,21 @@ test('fixed ordinal mappings remain stable across separately evaluated batches',
   expect(Array.from(later.get(0))).toEqual(Array.from(initial.get(1)));
   expect(Array.from(later.get(1))).toEqual(Array.from(initial.get(0)));
   expect(later.get(2)).toBeNull();
+});
+
+test('quantiles classify an Arrow row expression with explicit colors', () => {
+  const data = tableFromArrays({flow: [-20, 3, -1, 8, null]});
+  const parsed = parseSQLScaleExpression(
+    "SCALE_QUANTILE(ABS(flow), 2, PALETTE('#ffeecc', '#993300'))"
+  );
+  const result = compileArrowScales(data, {flow: parsed}, [ABS]).flow;
+  expect(result.scale.descriptor.domain).toEqual([1, 20]);
+  expect(result.scale.descriptor.thresholds).toEqual([5.5]);
+  const colors = result.evaluate(data);
+  expect(Array.from(colors.get(0))).toEqual([153, 51, 0, 255]);
+  expect(Array.from(colors.get(1))).toEqual([255, 238, 204, 255]);
+  expect(colors.get(4)).toBeNull();
+  expect(() =>
+    parseSQLScaleExpression("SCALE_QUANTILE(ABS(flow), 3, PALETTE('#ffeecc', '#993300'))")
+  ).toThrow('one color per class');
 });

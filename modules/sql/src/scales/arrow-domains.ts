@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {Table} from 'apache-arrow';
+import type {Table, Vector} from 'apache-arrow';
+import {compileArrowExpression} from '../arrow/compiler';
+import type {ArrowExpression, ArrowTableFunction} from '../arrow/types';
+import type {Expression} from '../expressions/index';
 import type {ScaleDomain, ScaleValue} from './scale-types';
 
 type DomainStatistics = {
@@ -39,12 +42,14 @@ export function quantileSorted(sorted: readonly number[], probability: number): 
  */
 export function resolveArrowDomains(
   table: Table,
-  domains: readonly ScaleDomain[]
+  domains: readonly ScaleDomain[],
+  functions?: readonly ArrowTableFunction[]
 ): readonly (readonly ScaleValue[])[] {
   const columns = new Map<string, DomainStatistics>();
   const needsSamples = new Set<string>();
   const needsCategories = new Set<string>();
   for (const domain of domains) {
+    if (domain.type === 'expression-extent') continue;
     if (domain.type === 'percentile') needsSamples.add(domain.column);
     if (domain.type === 'categories') needsCategories.add(domain.column);
     if (domain.type !== 'fixed' && !table.getChild(domain.column)) {
@@ -52,7 +57,12 @@ export function resolveArrowDomains(
     }
   }
   for (const domain of domains) {
-    if (domain.type === 'fixed' || columns.has(domain.column)) continue;
+    if (
+      domain.type === 'fixed' ||
+      domain.type === 'expression-extent' ||
+      columns.has(domain.column)
+    )
+      continue;
     const vector = table.getChild(domain.column)!;
     const state: DomainStatistics = {
       values: [],
@@ -82,6 +92,10 @@ export function resolveArrowDomains(
 
   return domains.map(domain => {
     if (domain.type === 'fixed') return [...domain.values];
+    if (domain.type === 'expression-extent') {
+      return resolveArrowExpressionStatistics(table, domain.expression, undefined, functions)
+        .domain;
+    }
     const data = columns.get(domain.column)!;
     if (domain.type === 'categories') {
       const values = [...data.categories];
@@ -107,25 +121,66 @@ export function resolveArrowDomains(
   });
 }
 
+/** Resolves numeric statistics over an evaluated row expression. */
+export function resolveArrowExpressionStatistics(
+  table: Table,
+  expression: Expression,
+  classes?: number,
+  functions?: readonly ArrowTableFunction[]
+): {domain: readonly number[]; quantileBreaks?: readonly number[]} {
+  const compiled = compileArrowExpression(expression as ArrowExpression, {
+    inputSchema: table.schema,
+    functions
+  });
+  const values = readNumericSamples(compiled.evaluateTable(table), 'Quantile expression');
+  if (!values.length) throw new Error('Empty numeric scale expression domain');
+  if (classes === undefined) {
+    let min = Infinity;
+    let max = -Infinity;
+    for (const value of values) {
+      min = Math.min(min, value);
+      max = Math.max(max, value);
+    }
+    return {domain: [min, max]};
+  }
+  values.sort((a, b) => a - b);
+  return {
+    domain: [values[0]!, values[values.length - 1]!],
+    quantileBreaks: computeQuantileBreaks(values, classes)
+  };
+}
+
 /** Exact, deterministic quantile class breaks; duplicate values may produce empty classes. */
 export function resolveArrowQuantiles(
   table: Table,
   column: string,
   classes: number
 ): readonly number[] {
-  if (!Number.isSafeInteger(classes) || classes < 2)
-    throw new Error('Quantile classes must be >= 2');
   const vector = table.getChild(column);
   if (!vector) throw new Error(`Unknown quantile column: ${column}`);
+  const values = readNumericSamples(vector, `Quantile column ${column}`);
+  values.sort((a, b) => a - b);
+  return computeQuantileBreaks(values, classes);
+}
+
+/** Collects finite numbers and skips missing rows. */
+function readNumericSamples(vector: Vector, label: string): number[] {
   const values: number[] = [];
   for (let row = 0; row < vector.length; row++) {
     const value = arrowScaleValue(vector.get(row));
     if (value === null || value === undefined) continue;
     if (typeof value !== 'number' || !Number.isFinite(value)) {
-      throw new Error(`Quantile column ${column} must be finite numeric`);
+      throw new Error(`${label} must be finite numeric`);
     }
     values.push(value);
   }
-  values.sort((a, b) => a - b);
+  return values;
+}
+
+/** Computes exact class cuts from sorted finite samples. */
+function computeQuantileBreaks(values: number[], classes: number): readonly number[] {
+  if (!Number.isSafeInteger(classes) || classes < 2) {
+    throw new Error('Quantile classes must be >= 2');
+  }
   return Array.from({length: classes - 1}, (_, i) => quantileSorted(values, (i + 1) / classes));
 }
