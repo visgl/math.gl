@@ -213,10 +213,10 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
       : fn === 'SCALE_QUANTILE'
         ? quantileDomain(value)
         : fn === 'SCALE_QUANTIZE'
-        ? {type: 'extent' as const, column: name(value)}
-        : fn === 'SCALE_THRESHOLD'
-          ? {type: 'fixed' as const, values: call(args[1]!, 'ARRAY').arguments.map(number)}
-          : parseDomain(args[1]!);
+          ? {type: 'extent' as const, column: name(value)}
+          : fn === 'SCALE_THRESHOLD'
+            ? {type: 'fixed' as const, values: call(args[1]!, 'ARRAY').arguments.map(number)}
+            : parseDomain(args[1]!);
   let range = parseRange(args[inferredOrdinal ? 1 : 2]!);
   if (fn === 'SCALE_QUANTILE' || fn === 'SCALE_QUANTIZE') {
     const count = number(args[1]!);
