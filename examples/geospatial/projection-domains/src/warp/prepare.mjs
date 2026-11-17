@@ -18,7 +18,9 @@ export function seedDomain(domain) {
       if (i) holes.push(flat.length / 2);
       for (const p of ring.slice(0, -1)) flat.push(...p);
     }
-    indices.push(...earcut(flat, holes, 2).map(i => i + offset));
+    indices.push(
+      ...earcut(flat, holes, 2, undefined, 'xy', {triangulation: 'balanced'}).map(i => i + offset)
+    );
     positions.push(...flat);
   }
   return {positions: new Float64Array(positions), indices: new Uint32Array(indices)};
