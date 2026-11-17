@@ -8,6 +8,7 @@
 - SQL: add `EPOCH_MS` for DATE and microsecond TIMESTAMP interoperability with JavaScript time values
 - SQL: compose Arrow scales inside conditional expressions with resolved legend metadata
 
+
 ## v5.0.0-beta.11
 
 - **Breaking:** Rename the standalone `@math.gl/expressions` package to `@math.gl/sql`. Update package dependencies and imports to the new name (#571).
