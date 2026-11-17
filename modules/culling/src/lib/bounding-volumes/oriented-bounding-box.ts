@@ -64,7 +64,7 @@ export class OrientedBoundingBox implements BoundingVolume {
     return [new Vector3(xAxis).len(), new Vector3(yAxis).len(), new Vector3(zAxis).len()];
   }
 
-  /** Returns a quaternion describing the orientation of the bounding box */
+  /** Returns a unit rotation quaternion, using an equivalent right-handed basis for reflected boxes. */
   get quaternion(): Quaternion {
     const xAxis = this.halfAxes.getColumn(0);
     const yAxis = this.halfAxes.getColumn(1);
@@ -72,7 +72,11 @@ export class OrientedBoundingBox implements BoundingVolume {
     const normXAxis = new Vector3(xAxis).normalize();
     const normYAxis = new Vector3(yAxis).normalize();
     const normZAxis = new Vector3(zAxis).normalize();
-    return new Quaternion().fromMatrix3(new Matrix3([...normXAxis, ...normYAxis, ...normZAxis]));
+    // Negating one half-axis leaves the box unchanged while removing a reflection.
+    if (this.halfAxes.determinant() < 0) normZAxis.negate();
+    return new Quaternion()
+      .fromMatrix3(new Matrix3([...normXAxis, ...normYAxis, ...normZAxis]))
+      .normalize();
   }
 
   /**
