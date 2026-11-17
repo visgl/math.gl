@@ -116,7 +116,7 @@ test('rank-zero and partially clipped rank-one UV mappings retain target area',(
   }
 });
 
-test('convex chart seeds partition the boundary without a long triangle fan', () => {
+test('balanced triangulation seeds avoid a long boundary fan', () => {
   const ring = Array.from({length: 128}, (_, i) => [Math.cos(i * Math.PI / 64), Math.sin(i * Math.PI / 64)]);
   for (const points of [ring, [...ring].reverse()]) {
     const mesh = seedDomain({polygons: [{outer: [...points, points[0]]}]});

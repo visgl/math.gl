@@ -19,8 +19,9 @@ yarn vitest run --project headless modules/geometry/test/polygon/earcut.spec.ts
 ```
 
 The standalone benchmark verifies exact upstream output on every fixture and on
-119,680 MVT polygons, including precomputed-area output. It also verifies projected
-MVT output, then reports timings for MVT inputs, precomputed areas, projected
+119,680 MVT polygons in fast mode, including precomputed-area output. It checks
+zero MVT area deviation and precomputed/projected output parity for balanced mode. It also verifies projected
+MVT output, then reports timings for both strategies on MVT inputs, precomputed areas, projected
 inputs, stars, and a large convex polygon. The MVT corpus stays in the upstream
 checkout rather than duplicating its binary in math.gl.
 

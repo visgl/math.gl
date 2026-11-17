@@ -13,6 +13,7 @@ export {
 export type {PolygonWinding, WindingDirection} from './polygon-utils';
 
 export {earcut} from './earcut';
+export type {EarcutOptions} from './earcut';
 
 export {clipPolygon, clipPolyline} from './lineclip';
 

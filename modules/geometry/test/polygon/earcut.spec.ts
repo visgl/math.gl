@@ -102,6 +102,28 @@ Object.keys(expected.triangles).forEach(id => {
     ).toEqual(indices);
   });
 
+  test(`${id} balanced triangulation with areas and projections`, async () => {
+    const {vertices, holes, dimensions} = flatten(await openFile(`${FIXTURES_PATH}${id}.json`));
+    const options = {triangulation: 'balanced'};
+    const indices = earcut(vertices, holes, dimensions, undefined, 'xy', options);
+    const areas = extractAreas(vertices, holes, dimensions);
+    // Different summation order: this fixture measures 2.009e-15 in balanced mode.
+    const tolerance = id === 'eberly-6' ? 3e-15 : expected.errors[id] || 0;
+    if (expected.triangles[id] > 0) {
+      expect(deviation(vertices, holes, dimensions, indices)).toBeLessThanOrEqual(tolerance);
+    }
+    expect(earcut(vertices, holes, dimensions, areas, 'xy', options)).toEqual(indices);
+    for (const plane of ['xz', 'yz']) {
+      const positions = new Float64Array((vertices.length / dimensions) * 3).fill(1e9);
+      for (let i = 0; i < vertices.length / dimensions; i++) {
+        positions[i * 3 + (plane === 'xz' ? 0 : 1)] = vertices[i * dimensions];
+        positions[i * 3 + 2] = vertices[i * dimensions + 1];
+      }
+      expect(earcut(positions, holes, 3, undefined, plane, options)).toEqual(indices);
+      expect(earcut(positions, holes, 3, areas, plane, options)).toEqual(indices);
+    }
+  });
+
   for (const rotation of [90, 180, 270]) {
     test(`${id} rotation ${rotation}`, async () => {
       const raw = await openFile(`${FIXTURES_PATH}${id}.json`);
@@ -297,4 +319,32 @@ test('deeply nested splits complete without recursive clipping', () => {
   const indices = earcut(vertices, holes);
   expect(indices.length / 3).toBe(3002);
   expect(deviation(vertices, holes, 2, indices)).toBe(0);
+});
+
+test('balanced layout reduces a convex boundary fan and nested calls keep their strategy', () => {
+  const vertices = [];
+  for (let i = 0; i < 128; i++)
+    vertices.push(Math.cos((i * Math.PI) / 64), Math.sin((i * Math.PI) / 64));
+  const fast = earcut(vertices);
+  const balanced = earcut(vertices, undefined, 2, undefined, 'xy', {triangulation: 'balanced'});
+  const incidence = indices => {
+    const counts = new Uint32Array(128);
+    for (const i of indices) counts[i]++;
+    return Math.max(...counts);
+  };
+  expect(incidence(fast)).toBe(126);
+  expect(incidence(balanced)).toBeLessThan(16);
+  expect(balanced.length).toBe(fast.length);
+  expect(deviation(vertices, [], 2, balanced)).toBeLessThan(1e-12);
+  const nested = [...vertices];
+  Object.defineProperty(nested, 10, {
+    get() {
+      expect(earcut(vertices)).toEqual(fast);
+      return vertices[10];
+    }
+  });
+  expect(earcut(nested, undefined, 2, undefined, 'xy', {triangulation: 'balanced'})).toEqual(
+    balanced
+  );
+  expect(earcut(vertices)).toEqual(fast);
 });

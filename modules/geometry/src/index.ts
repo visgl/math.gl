@@ -120,6 +120,7 @@ export {
   subdivideTriangleMesh
 } from './polygon/index';
 export type {
+  EarcutOptions,
   PolygonWinding,
   WindingDirection,
   PoleSearchBudget,

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- feat(geometry): Add `EarcutOptions.triangulation` to choose upstream `fast` clipping or `balanced` clipping that reduces long triangle fans. Use the shared balanced strategy for projection-domain warp seeds.
+
 - fix(geometry): Port upstream Earcut touching-ring and bridge-healing fixes, indexed hole bridging, radix sorting, convex-ring acceleration, and iterative polygon splits. Preserve precomputed areas and projection planes. Triangle order and valid diagonal choices may change.
 
 ## v5.0.0-beta.11

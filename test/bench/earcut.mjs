@@ -43,7 +43,10 @@ const {readTilesFixture} = await import(
   pathToFileURL(resolve(upstreamPath, 'bench/tiles-fixture.js'))
 );
 const polygons = readTilesFixture();
-const variants = {baseline, port: current, upstream};
+/** Use the public balanced strategy with the same inputs as the fast strategy. */
+const balanced = (vertices, holes, dim, areas, plane = 'xy') =>
+  current(vertices, holes, dim, areas, plane, {triangulation: 'balanced'});
+const variants = {baseline, fast: current, balanced, upstream};
 let baselineDeviations = 0;
 
 // Check exact indices, not just area: area alone can hide compensating gaps and overlaps.
@@ -56,6 +59,9 @@ for (const polygon of polygons) {
     baselineDeviations++;
   polygon.areas = areas(vertices, holes, dimensions);
   assert.deepEqual(current(vertices, holes, dimensions, polygon.areas), expected);
+  const balancedIndices = balanced(vertices, holes, dimensions);
+  assert.equal(deviation(vertices, holes, dimensions, balancedIndices), 0);
+  assert.deepEqual(balanced(vertices, holes, dimensions, polygon.areas), balancedIndices);
 }
 let fixtureCount = 0;
 const fixturesPath = resolve(root, 'modules/geometry/test/polygon/data/earcut/fixtures');
@@ -80,7 +86,8 @@ console.log(
     fixtures: fixtureCount,
     exactParity: true,
     baselineDeviations,
-    portDeviations: 0
+    portDeviations: 0,
+    balancedDeviations: 0
   })
 );
 
@@ -94,6 +101,10 @@ const projected = polygons.map(polygon => {
     vertices[i * 3 + 2] = polygon.vertices[i * 2 + 1];
   }
   const result = {...polygon, vertices, dimensions: 3};
+  assert.deepEqual(
+    balanced(vertices, polygon.holes, 3, polygon.areas, 'xz'),
+    balanced(polygon.vertices, polygon.holes, 2, polygon.areas)
+  );
   assert.deepEqual(
     current(vertices, polygon.holes, 3, polygon.areas, 'xz'),
     upstream(polygon.vertices, polygon.holes, 2)

@@ -35,6 +35,16 @@
 import type {NumericArray} from '@math.gl/core';
 import {DimIndex, Plane2D} from './polygon-utils';
 
+/** Controls the tradeoff between clipping speed and triangle layout. */
+export type EarcutOptions = {
+  /**
+   * `fast` follows upstream's next-ear order. `balanced` skips a vertex after each
+   * cut to reduce long triangle fans, which can help subsequent mesh refinement.
+   * This is a heuristic, not a minimum-angle or Delaunay guarantee. Default `fast`.
+   */
+  triangulation?: 'fast' | 'balanced';
+};
+
 /**
  * Computes a triangulation of a polygon
  * @param positions a flat array of the vertex positions that define the polygon.
@@ -42,6 +52,7 @@ import {DimIndex, Plane2D} from './polygon-utils';
  * @param dim the number of elements in each vertex. Size `2` will interpret `positions` as `[x0, y0, x1, y1, ...]` and size `3` will interpret `positions` as `[x0, y0, z0, x1, y1, z1, ...]`. Default `2`.
  * @param areas areas of outer polygon and holes as computed by `getPolygonSignedArea()`. Can be optionally supplied to speed up triangulation
  * @param plane the coordinate plane to triangulate (`xy`, `xz`, or `yz`).
+ * @param options clipping strategy; `balanced` trades some speed for fewer long fans.
  * @returns array of indices into the `positions` array that describes the triangulation of the polygon
  * Adapted from https://github.com/mapbox/earcut
  */
@@ -50,13 +61,14 @@ export function earcut(
   holeIndices?: NumericArray,
   dim: number = 2,
   areas?: NumericArray,
-  plane: Plane2D = 'xy'
+  plane: Plane2D = 'xy',
+  options: EarcutOptions = {}
 ): number[] {
   if (!triangulators[callDepth]) triangulators[callDepth] = createTriangulator();
   const triangulate = triangulators[callDepth];
   callDepth++;
   try {
-    return triangulate(positions, holeIndices, dim, areas, plane);
+    return triangulate(positions, holeIndices, dim, areas, plane, options);
   } finally {
     callDepth--;
   }
@@ -73,6 +85,8 @@ let callDepth = 0;
  * Keeps upstream's cut order (does not include PR #222).
  */
 function createTriangulator() {
+  /** Whether to skip the next candidate after clipping an ear in this call. */
+  let balanceTriangles = false;
   /**
    * A vertex in a circular doubly linked list representing a polygon ring.
    * `prev`/`next` are always linked (set immediately after {@link createNode}), so they're typed
@@ -274,8 +288,8 @@ function createTriangulator() {
         triangles.push(prev.i, ear.i, next.i); // cut off the triangle
 
         removeNode(ear);
-        ear = next;
-        stop = next;
+        ear = balanceTriangles ? next.next : next;
+        stop = ear;
         continue;
       }
 
@@ -1067,9 +1081,11 @@ function createTriangulator() {
     holeIndices: NumericArray | undefined,
     dim: number,
     areas: NumericArray | undefined,
-    plane: Plane2D
+    plane: Plane2D,
+    options: EarcutOptions
   ): number[] => {
     try {
+      balanceTriangles = options.triangulation === 'balanced';
       return triangulate(positions, holeIndices, dim, areas, plane);
     } finally {
       // Also restore state when an input getter throws during ring construction.
