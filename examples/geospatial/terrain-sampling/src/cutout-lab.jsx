@@ -7,7 +7,8 @@ import {
   createTerrainCutoutSkirts,
   createTerrainMesh,
   HeightField,
-  splitTerrainMesh
+  splitTerrainMeshTiles,
+  stitchTerrainMeshEdges
 } from '@math.gl/geospatial/terrain';
 import TerrainControls from './terrain-controls';
 
@@ -23,6 +24,38 @@ const mesh = createTerrainMesh(
   }),
   {origin: [0, 0, 0]}
 );
+// Keep tile-local index arrays; the cutout operation welds their shared edge.
+const tiles = [false, true].map(right => ({
+  positions: mesh.positions,
+  indices: Uint32Array.from(
+    Array.from({length: mesh.indices.length / 3}, (_, face) =>
+      Array.from(mesh.indices.subarray(face * 3, face * 3 + 3))
+    )
+      .filter(ids => ids.reduce((sum, id) => sum + mesh.positions[id * 3], 0) / 3 > 4 === right)
+      .flat()
+  )
+}));
+const mixedInputs = [5, 9].map((height, index) =>
+  createTerrainMesh(
+    new HeightField({
+      width: 5,
+      height,
+      origin: [index * 4, 0],
+      columnStep: [1, 0],
+      rowStep: [0, 8 / (height - 1)],
+      heights: Float64Array.from({length: 5 * height}, (_, i) => {
+        const x = index * 4 + (i % 5);
+        const y = (Math.floor(i / 5) * 8) / (height - 1);
+        return 2.2 * Math.exp(-((x - 4) ** 2 + (y - 5) ** 2) / 9) + 0.12 * y;
+      })
+    }),
+    {origin: [0, 0, 0]}
+  )
+);
+const stitched = stitchTerrainMeshEdges(mixedInputs[0], 'maxColumn', mixedInputs[1], 'minColumn', {
+  maxHeightAdjustment: 1
+});
+const mixedTiles = [stitched.a, stitched.b];
 const rings = {
   Rectangle: [
     [2.2, 1.7],
@@ -69,12 +102,20 @@ function faces(piece, showWall, patch) {
 
 /** Inspect the shared terrain cut and the two differently oriented walls. */
 export default function CutoutLab({controlsRoot}) {
+  const [resolution, setResolution] = useState('Same level');
+  const [residency, setResidency] = useState('Both tiles');
   const [shape, setShape] = useState('Rectangle');
   const [lift, setLift] = useState(2);
   const [patchWall, setPatchWall] = useState(true);
   const [remainderWall, setRemainderWall] = useState(true);
   const [edges, setEdges] = useState(true);
-  const cut = useMemo(() => splitTerrainMesh(mesh, rings[shape]), [shape]);
+  const cut = useMemo(() => {
+    const resident = resolution === 'Same level' ? tiles : mixedTiles;
+    return splitTerrainMeshTiles(
+      residency === 'Both tiles' ? resident : [resident[residency === 'Left tile' ? 0 : 1]],
+      rings[shape]
+    );
+  }, [shape, residency, resolution]);
   const pieces = useMemo(
     () => createTerrainCutoutSkirts(cut, {lift, patch: {baseZ: -1}, remainder: {baseZ: -1}}),
     [cut, lift]
@@ -86,6 +127,22 @@ export default function CutoutLab({controlsRoot}) {
   return (
     <>
       <TerrainControls target={controlsRoot}>
+        <label>
+          Seam resolution
+          <select value={resolution} onChange={event => setResolution(event.target.value)}>
+            {['Same level', 'Mixed 2:1'].map(name => (
+              <option key={name}>{name}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Resident tiles
+          <select value={residency} onChange={event => setResidency(event.target.value)}>
+            {['Both tiles', 'Left tile', 'Right tile'].map(name => (
+              <option key={name}>{name}</option>
+            ))}
+          </select>
+        </label>
         <label>
           Cut shape
           <select value={shape} onChange={event => setShape(event.target.value)}>
@@ -165,7 +222,10 @@ export default function CutoutLab({controlsRoot}) {
           )}
       </svg>
       <p>
-        {cut.patch.cutEdges.length / 2} paired cut edges · lift {lift.toFixed(1)} m
+        {cut.patch.cutEdges.length / 2} paired cut edges · {residency} · lift {lift.toFixed(1)} m
+        {resolution === 'Mixed 2:1' && (
+          <> · reconciled seam adjustment {stitched.maxHeightAdjustment.toFixed(3)} m</>
+        )}
       </p>
     </>
   );

@@ -186,7 +186,13 @@ try {
   await page.getByRole('img', {name: 'Terrain cutout with paired skirts'}).waitFor();
   await page.getByLabel('Cut shape').selectOption('Oblique');
   await page.getByLabel('Patch lift').fill('0');
-  assert.match(await page.locator('.terrain-stage').innerText(), /paired cut edges · lift 0.0 m/);
+  assert.match(await page.locator('.terrain-stage').innerText(), /paired cut edges · Both tiles · lift 0.0 m/);
+
+  await page.getByLabel('Seam resolution').selectOption('Mixed 2:1');
+  assert.match(await page.locator('.terrain-stage').innerText(), /reconciled seam adjustment/);
+  await page.getByLabel('Resident tiles').selectOption('Left tile');
+  assert.match(await page.locator('.terrain-stage').innerText(), /Left tile · lift 0.0 m/);
+  await page.getByLabel('Resident tiles').selectOption('Both tiles');
 
   await openGroup('Streaming replay');
   const replayLayout=await page.getByRole('img',{name:'Resident and rebuilt terrain tiles',exact:true}).evaluate(svg=>{

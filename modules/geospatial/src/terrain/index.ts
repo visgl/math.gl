@@ -302,3 +302,5 @@ export {
   type TerrainWatershedAccumulation,
   type TerrainWatershedAccumulationOptions
 } from './watershed-accumulation';
+
+export {splitTerrainMeshTiles, type TerrainCutoutTile, type TerrainTileCutout} from './tile-cutout';

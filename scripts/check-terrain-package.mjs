@@ -46,6 +46,7 @@ if (mesh.error.maxSampleError !== 0 || mesh.indices.length !== 6) throw new Erro
   }
   // Analysis APIs share the terrain root; tree-shaking is checked separately.
   for (const [entry, symbol, expression] of [
+    ['tile-cutout', 'splitTerrainMeshTiles', 'create([], [[0,0],[1,0],[1,1],[0,1]]).sourceTiles.length === 0'],
     ['derivatives', 'createTerrainGradientGrid', 'create(field).gradients.length === 18'],
     ['slope-aspect', 'getTerrainSlopeAspect', 'create(1, 0).slope === Math.PI / 4'],
     ['profile', 'sampleTerrainProfile', 'create((x: number, y: number) => field.sample(x, y), [0, 0, 2, 0], {spacing: 1}).heights.length === 3'],
