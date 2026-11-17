@@ -123,3 +123,7 @@ Streaming queries do not make joins, sorting, or arbitrary relational SQL increm
 The synchronous engine checks cancellation during execution, but a worker is needed to keep
 long-running work off the UI thread. Registered functions run application code; evaluation
 is not a security sandbox.
+
+## Scales
+
+Import SQL scale parsing, domain resolution, compilation, and numeric/color Arrow evaluation from `@math.gl/sql/scales`. Reusable color and LUT algorithms are available from `@math.gl/core/color`.

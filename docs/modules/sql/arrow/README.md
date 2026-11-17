@@ -214,7 +214,7 @@ Temporary vectors are materialized at registered vector boundaries and for tuple
 may require a mask prepass; working memory remains bounded by the current batch. Direct
 field projections can reuse input buffers; retain those outputs only as long as needed.
 
-Run `node modules/arrow/scripts/benchmark-expressions.mjs` after building to compare numeric and UTF-8
+Run `node modules/core/scripts/arrow/benchmark-expressions.mjs` after building to compare numeric and UTF-8
 workloads with the scalar evaluator from `@math.gl/sql/expressions`. The report separates throughput, row objects,
 string decodes and output buffer bytes; it does not claim to measure total allocator traffic.
 

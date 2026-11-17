@@ -102,7 +102,7 @@ separate steps.
 ## Composing scales with conditional expressions
 
 `compileArrowScaleExpression(table, sqlOrAST, functions?)` from
-`@math.gl/sql/arrow-scales` supports scales inside `CASE`, `COALESCE`, and compatible
+`@math.gl/sql/scales` supports scales inside `CASE`, `COALESCE`, and compatible
 numeric expressions. It returns the standard compiled Arrow expression plus a
 `scales` array of authoritative resolved samplers, in outer-before-inner expression traversal order. A scale input can itself contain
 a conditional expression or another numeric scale.

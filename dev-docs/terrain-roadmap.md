@@ -118,7 +118,7 @@ features are published. Code takes precedence over older roadmap status tables.
 math.gl already supplies [typed geometry](../modules/geometry/src/lib/geometry.ts),
 [ellipsoid transformations](../modules/geospatial/src/ellipsoid.ts),
 [projection](../modules/geospatial/README.md#projection),
-[Web Mercator utilities](../modules/web-mercator/src/), and
+[Web Mercator utilities](../modules/geospatial/src/web-mercator/), and
 [geoid conversion](../modules/earth/README.md#geoid). Reuse these foundations. In
 particular, existing `PlaneGeometry` is Y-up; a geographic east/north/up terrain
 frame is Z-up. An adapter must express that distinction.

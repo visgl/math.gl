@@ -38,11 +38,6 @@
       "import": "./dist/scales/conformance.js",
       "require": "./dist/scales/conformance.cjs"
     },
-    "./arrow-scales": {
-      "types": "./dist/scales/arrow-scales.d.ts",
-      "import": "./dist/scales/arrow-scales.js",
-      "require": "./dist/scales/arrow-scales.cjs"
-    },
     "./parser": {
       "types": "./dist/parser/index.d.ts",
       "import": "./dist/parser/index.js",
@@ -83,7 +78,6 @@
     "./src/arrow/query-worker-entry.ts"
   ],
   "dependencies": {
-    "@math.gl/arrow": "5.0.0-beta.11",
     "@math.gl/core": "5.0.0-beta.11",
     "@math.gl/geometry": "5.0.0-beta.11",
     "@math.gl/tasks": "5.0.0-beta.11"

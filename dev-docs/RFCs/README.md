@@ -15,6 +15,7 @@ Writeups of directions in major areas of interest
 
 | RFC | Status | Description |
 | --- | --- | --- |
+| [Core package consolidation](./core-package-consolidation-rfc.md) | Draft | Move Arrow into core, retain tasks separately, move Web Mercator into geospatial, and organize flat core subpaths |
 | [TaskRunner API](./task-runner-rfc.md) | Draft / prototype | Typed tasks, atomic and streaming execution, and automatic or explicit state lifetimes |
 
 ## v3.0 RFCs

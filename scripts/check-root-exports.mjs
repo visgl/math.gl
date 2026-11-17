@@ -41,11 +41,8 @@ const removed = [
   "@math.gl/geometry/culling/queries",
   "@math.gl/geometry/spatial-index/boxes",
   "@math.gl/geospatial/tile-matrix",
-  "@math.gl/geospatial/web-mercator",
   "@math.gl/geospatial/wkb",
-  "@math.gl/core/arrow",
   "@math.gl/core/tasks",
-  "@math.gl/core/utf8",
   "@math.gl/geospatial/geoarrow",
   "@math.gl/geospatial/geoarrow-utils",
   "@math.gl/geospatial/expressions",
@@ -96,6 +93,11 @@ for (const subpath of ['sql', 'math', 'color', 'arrow/worker', 'arrow/worker-ent
   assert.throws(() => require.resolve('@math.gl/sql/' + subpath), {code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'});
 }
 const roots = {
+  '@math.gl/core/matrix': ['Vector3','Matrix4'],
+  '@math.gl/core/color': ['compileResolvedScale','createColorLUTSampler'],
+  '@math.gl/core/arrow': ['IndexedArrowTable','hydrateArrowTable','parseWKB','parseWKT','makeGeoArrowColumnFromArrowVector','GeoArrowBuilder','prepareGeoArrowTransfer'],
+  '@math.gl/geometry/arrow': ['tessellateGeoArrowPolygons','tessellateGeoArrowStream'],
+  '@math.gl/geospatial/web-mercator': ['WebMercatorViewport'],
   '@math.gl/core': ['spheroidToCartesian','createLocalFrameBasis','mat4GetScaling','vec3Normalize','mat4'],
   '@math.gl/sql': ['queryArrowSQL','queryArrowTable','queryArrowTableInBatches','queryArrowAggregateSnapshots','compileArrowAggregates','replaceArrowColumns'],
   '@math.gl/sql/expressions': ['parse','evaluate','compile','parseExpressionString','ExpressionFunctionRegistry'],
@@ -109,15 +111,15 @@ const roots = {
   '@math.gl/geospatial/terrain': ['HeightField','createTerrainSkirt','createTerrainMesh','createMartiniTerrainMesh','stitchTerrainMeshEdges','simplifyTerrainContourPaths','weldTerrainContourTiles','weldTerrainMixedContourTiles','diagnoseTerrainContourBoundaries','TerrainContourBoundaryAxis','stitchTerrainContourTiles','createTerrainGradientPyramid','getTerrainProfileVisibility','getTerrainProfileHorizon','getTerrainProfileViewshed','TerrainProfileViewStatus','updateTerrainMixedVertexTileHalos','updateTerrainMixedGradientGrids','simplifyTerrainContourPathsTopology','createTerrainIsobands','updateTerrainMeshes','updateTerrainBounds','updateTerrainGradientPyramids','updateTerrainMeshRegions','updateTerrainMartiniMeshRegions','updateTerrainDelatinMeshRegions','updateTerrainBoundsRegions','updateTerrainGradientPyramidRegions','updateTerrainPersistentBounds','updateTerrainPersistentGradients','getTerrainHierarchyNode','createTerrainLodMorph','evaluateTerrainLodMorph','TerrainMorphStatus','coordinateTerrainLodMorphs','createTerrainMixedIsobands','createTerrainMixedVertexTileHalos','createTerrainVertexTileHalos','TerrainVertexHaloStatus','getTerrainVertexHaloAffectedTiles','updateTerrainVertexTileHalos','createTerrainFilteredPyramid'],
   '@math.gl/geospatial/crs': ['createSpatialReference','createCRSResolver'],
   '@math.gl/tasks': ['TaskRunner','preloadTasks'],
-  '@math.gl/arrow': ['IndexedArrowTable','hydrateArrowTable'],
-  '@math.gl/arrow/utf8': ['compareUTF8','parseUTF8Number'],
-  '@math.gl/arrow/wkb': ['parseWKB','parseWKT'],
-  '@math.gl/arrow/geoarrow': ['makeGeoArrowColumnFromArrowVector'],
-  '@math.gl/arrow/geoarrow-utils': ['GeoArrowBuilder','prepareGeoArrowTransfer']
+  '@math.gl/core/utf8': ['compareUTF8','parseUTF8Number'],
 };
 for (const [path, symbols] of Object.entries(roots)) {
   const esm = await import(path), cjs = require(path);
   for (const name of symbols) { assert.notEqual(esm[name], undefined, path + ' ESM missing ' + name); assert.notEqual(cjs[name], undefined, path + ' CJS missing ' + name); }
+}
+for (const symbol of ['Vector3', 'Matrix4', 'Quaternion']) {
+  assert.equal((await import('@math.gl/core'))[symbol], (await import('@math.gl/core/matrix'))[symbol], symbol + ' ESM constructor identity');
+  assert.equal(require('@math.gl/core')[symbol], require('@math.gl/core/matrix')[symbol], symbol + ' CommonJS constructor identity');
 }
 assert.equal(typeof (await import('@math.gl/earth/sun/stars')).STAR_CATALOG, 'object');
 const repository = fileURLToPath(new URL('../', import.meta.url));

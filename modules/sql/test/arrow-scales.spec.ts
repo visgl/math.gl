@@ -12,7 +12,7 @@ import {
   compileArrowScale,
   compileArrowScales,
   createStreamingDomainAccumulator
-} from '@math.gl/sql/arrow-scales';
+} from '@math.gl/sql/scales';
 import {resolveArrowDomains, resolveArrowQuantiles} from '../src/scales/arrow-domains';
 
 test('shared Arrow extents, symmetric and percentile domains', () => {

@@ -1569,8 +1569,8 @@ are labeled counterexamples: they preserve the intended planar domain but fail
 independent nodal tolerance checks on triangle edges.
 
 No constrained mesher or additional public API is introduced. See the
-[qualification methodology and reproduction instructions](../../../../test/terrain-boundaries/README.md)
-and [roadmap findings](../../../../dev-docs/terrain-roadmap.md).
+[qualification methodology and reproduction instructions](https://github.com/visgl/math.gl/blob/master/test/terrain-boundaries/README.md)
+and [roadmap findings](https://github.com/visgl/math.gl/blob/master/dev-docs/terrain-roadmap.md).
 
 ### Adaptive meshing with nodata
 

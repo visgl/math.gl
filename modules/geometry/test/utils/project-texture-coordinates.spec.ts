@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {lngLatToWorld} from '@math.gl/web-mercator';
+import {lngLatToWorld} from '@math.gl/geospatial/web-mercator';
 import {projectTextureCoordinates} from '@math.gl/geometry';
 
 const bounds = [10, 20, 30, 60] as const;

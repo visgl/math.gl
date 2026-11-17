@@ -18,7 +18,7 @@ function run(command, args, cwd = temporary) {
   });
 }
 try {
-  for (const name of ['core', 'sql', 'geometry', 'web-mercator', 'geospatial']) {
+  for (const name of ['core', 'sql', 'geometry', 'tasks', 'geospatial']) {
     const [manifest] = JSON.parse(
       run(
         'npm',

@@ -42,6 +42,8 @@
         "type": "category",
         "label": "Core",
         "items": [
+          "modules/core/matrix",
+          "modules/core/color",
           {
             "type": "category",
             "label": "Guide",
@@ -114,6 +116,52 @@
               "type": "doc",
               "id": "modules/core/types/README"
             }
+          },
+          {
+            "type": "category",
+            "label": "Arrow",
+            "link": {
+              "type": "doc",
+              "id": "modules/core/arrow/README"
+            },
+            "items": [
+              "modules/core/arrow/utf8/README",
+              {
+                "type": "category",
+                "label": "Arrow utilities",
+                "items": [
+                  "modules/core/arrow/indexed-arrow-table",
+                  "modules/core/arrow/mapped-arrow-table",
+                  "modules/core/arrow/arrow-schema-utils",
+                  "modules/core/arrow/split-arrow-buffers",
+                  "modules/core/arrow/arrow-table-transport"
+                ]
+              },
+              "modules/core/arrow/geoarrow/README",
+              {
+                "type": "category",
+                "label": "GeoArrow utilities",
+                "link": {
+                  "type": "doc",
+                  "id": "modules/core/arrow/geoarrow-utils/README"
+                },
+                "items": [
+                  "modules/core/arrow/geoarrow-utils/api-reference/geoarrow",
+                  "modules/core/arrow/developer-guide/geoarrow"
+                ]
+              },
+              {
+                "type": "category",
+                "label": "WKB and WKT",
+                "link": {
+                  "type": "doc",
+                  "id": "modules/core/arrow/wkb/README"
+                },
+                "items": [
+                  "modules/core/arrow/wkb/api-reference/wkb"
+                ]
+              }
+            ]
           }
         ],
         "link": {
@@ -395,6 +443,33 @@
               "type": "doc",
               "id": "modules/geospatial/maps/README"
             }
+          },
+          {
+            "type": "category",
+            "label": "Web Mercator",
+            "items": [
+              {
+                "type": "doc",
+                "id": "modules/geospatial/web-mercator/developer-guide/web-mercator-coordinates",
+                "label": "Guide"
+              },
+              {
+                "type": "category",
+                "label": "@math.gl/geospatial/web-mercator",
+                "items": [
+                  "modules/geospatial/web-mercator/api-reference/web-mercator-utils",
+                  "modules/geospatial/web-mercator/api-reference/web-mercator-viewport"
+                ],
+                "link": {
+                  "type": "doc",
+                  "id": "modules/geospatial/web-mercator/README"
+                }
+              }
+            ],
+            "link": {
+              "type": "doc",
+              "id": "modules/geospatial/web-mercator/README"
+            }
           }
         ],
         "link": {
@@ -493,79 +568,6 @@
           "type": "doc",
           "id": "modules/dggs/README"
         }
-      },
-      {
-        "type": "category",
-        "label": "Web Mercator",
-        "items": [
-          {
-            "type": "doc",
-            "id": "modules/web-mercator/developer-guide/web-mercator-coordinates",
-            "label": "Guide"
-          },
-          {
-            "type": "category",
-            "label": "@math.gl/web-mercator",
-            "items": [
-              "modules/web-mercator/api-reference/web-mercator-utils",
-              "modules/web-mercator/api-reference/web-mercator-viewport"
-            ],
-            "link": {
-              "type": "doc",
-              "id": "modules/web-mercator/README"
-            }
-          }
-        ],
-        "link": {
-          "type": "doc",
-          "id": "modules/web-mercator/README"
-        }
-      },
-      {
-        "type": "category",
-        "label": "Arrow",
-        "link": {
-          "type": "doc",
-          "id": "modules/arrow/README"
-        },
-        "items": [
-          "modules/arrow/utf8/README",
-          {
-            "type": "category",
-            "label": "Arrow utilities",
-            "items": [
-              "modules/arrow/indexed-arrow-table",
-              "modules/arrow/mapped-arrow-table",
-              "modules/arrow/arrow-schema-utils",
-              "modules/arrow/split-arrow-buffers",
-              "modules/arrow/arrow-table-transport"
-            ]
-          },
-          "modules/arrow/geoarrow/README",
-          {
-            "type": "category",
-            "label": "GeoArrow utilities",
-            "link": {
-              "type": "doc",
-              "id": "modules/arrow/geoarrow-utils/README"
-            },
-            "items": [
-              "modules/arrow/geoarrow-utils/api-reference/geoarrow",
-              "modules/arrow/developer-guide/geoarrow"
-            ]
-          },
-          {
-            "type": "category",
-            "label": "WKB and WKT",
-            "link": {
-              "type": "doc",
-              "id": "modules/arrow/wkb/README"
-            },
-            "items": [
-              "modules/arrow/wkb/api-reference/wkb"
-            ]
-          }
-        ]
       },
       {
         "type": "category",

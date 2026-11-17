@@ -76,7 +76,7 @@ await initializeTaskWorker(createArrowExpressionTask());
 For Node, use `worker.url: new URL('./expression-worker.mjs', import.meta.url)` instead of a factory.
 The shipped `@math.gl/sql/worker-entry.js` is a module worker for built-ins; use a custom
 worker module to construct and register application functions or Turf adapters locally.
-The executable example is in `examples/arrow/expressions-worker`.
+The executable example is in `examples/sql/expressions-worker`.
 
 ### Ownership and cancellation
 
@@ -93,7 +93,7 @@ input tables remain owned by the caller unless explicitly transferred. Workers y
 for cancellation and report row progress. Errors reject the operation; cancellation returns no partial
 result. Do not mutate borrowed input buffers while a task is running.
 
-Run `node modules/arrow/scripts/benchmark-expression-tables.mjs` after building. It reports local and
+Run `node modules/core/scripts/arrow/benchmark-expression-tables.mjs` after building. It reports local and
 worker throughput, cold startup, warm round-trip costs, preparation time, output chunks/bytes and known
 row-object/string-decoding allocations. Worker timings include transfer and hydration. The transfer
 case includes preparing an owned copy so its reusable source fixture remains intact. Workers can cost

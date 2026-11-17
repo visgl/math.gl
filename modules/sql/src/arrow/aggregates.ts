@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {DataType, type Table, type RecordBatch} from 'apache-arrow';
-import {compareUTF8} from '@math.gl/arrow/utf8';
+import {compareUTF8} from '@math.gl/core/utf8';
 import {ColumnReader, valueType} from './buffers';
 import {compileArrowExpression} from './compiler';
 import type {

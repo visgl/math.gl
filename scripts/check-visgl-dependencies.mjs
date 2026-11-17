@@ -24,9 +24,18 @@ const tilesGeometryVersion = 'npm:5.0.0-beta.8';
 // Pinned loaders.gl releases still consume the published package under its former name.
 /** Published expressions version used only by external dependencies. */
 const publishedExpressionsVersion = 'npm:5.0.0-beta.10';
+/** Retired packages still consumed by pinned external loaders and deck.gl releases. */
+const publishedLegacyPackages = new Map([
+  ['@math.gl/arrow', 'npm:5.0.0-beta.11'],
+  ['@math.gl/web-mercator', 'npm:5.0.0-beta.8']
+]);
 for (const [name, versions] of packages) {
   if (name === '@math.gl/expressions') {
     assert.deepEqual(versions, new Set([publishedExpressionsVersion]));
+    continue;
+  }
+  if (publishedLegacyPackages.has(name)) {
+    assert.deepEqual(versions, new Set([publishedLegacyPackages.get(name)]));
     continue;
   }
   if (name === geometryPackage) {
@@ -89,4 +98,4 @@ for (const group of ['modules', 'dev-modules', 'examples']) {
   }
 }
 checkInstall(resolve(root, 'website/node_modules'));
-console.log(`Verified ${packages.size} vis.gl packages: workspace math.gl with pinned published dependencies for 3D Tiles and legacy expressions.`);
+console.log(`Verified ${packages.size} vis.gl packages: workspace math.gl with pinned published dependencies for 3D Tiles, legacy expressions, and retired Arrow/Web Mercator dependencies.`);

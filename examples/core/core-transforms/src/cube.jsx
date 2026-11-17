@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {useEffect, useRef} from 'react';
 import {OrbitControls} from '@luma.gl/engine';
-import {Matrix4, toRadians} from '@math.gl/core';
+import {Matrix4, toRadians} from '@math.gl/core/matrix';
 
 const INITIAL_CAMERA = {distance: 12, yaw: 0.5, pitch: 0.3};
 const vertices = [

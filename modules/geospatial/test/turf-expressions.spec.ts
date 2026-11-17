@@ -5,8 +5,8 @@
 import {expect, test, vi} from 'vitest';
 import {Bool, Field, Float64, Schema, Table, Int32, vectorFromArray} from 'apache-arrow';
 import {compileArrowExpression} from '@math.gl/sql/arrow';
-import {makeArrowVectorFromGeoArrowColumn} from '@math.gl/arrow/geoarrow';
-import {makeGeoArrowColumnFromGeometryRows} from '@math.gl/arrow/geoarrow-utils';
+import {makeArrowVectorFromGeoArrowColumn} from '@math.gl/core/arrow';
+import {makeGeoArrowColumnFromGeometryRows} from '@math.gl/core/arrow';
 import {createTurfArrowFunction} from '../src/turf/expressions';
 import {area, distance, booleanPointInPolygon, bbox} from '../src/turf';
 

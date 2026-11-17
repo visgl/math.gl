@@ -9,7 +9,7 @@ import {execFileSync} from 'node:child_process';
 
 const root = new URL('../', import.meta.url);
 const require = createRequire(import.meta.url);
-const expected = ['arrow', 'core', 'dggs', 'earth', 'geometry', 'geospatial', 'sql', 'tasks', 'web-mercator'];
+const expected = ['core', 'dggs', 'earth', 'geometry', 'geospatial', 'sql', 'tasks'];
 const modules = readdirSync(new URL('modules/', root)).filter(name =>
   existsSync(new URL(`modules/${name}/package.json`, root))
 );

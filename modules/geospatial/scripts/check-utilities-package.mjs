@@ -11,7 +11,7 @@ for(const load of[p=>import(p),p=>require(p)]){
 }
 const dir=mkdtempSync(join(tmpdir(),'mathgl-utility-package-'));
 try{
- const scope=join(dir,'node_modules/@math.gl');mkdirSync(scope,{recursive:true});for(const name of['core','geometry','geospatial','web-mercator'])symlinkSync(join(root,'modules',name),join(scope,name));writeFileSync(join(dir,'package.json'),'{"type":"module"}');
+ const scope=join(dir,'node_modules/@math.gl');mkdirSync(scope,{recursive:true});for(const name of['core','geometry','geospatial'])symlinkSync(join(root,'modules',name),join(scope,name));writeFileSync(join(dir,'package.json'),'{"type":"module"}');
  for(const ext of['ts','cts'])writeFileSync(join(dir,'consumer.'+ext),readFileSync(join(root,'test/types/geographic-utilities/index.'+ext)));
  writeFileSync(join(dir,'tsconfig.json'),JSON.stringify({compilerOptions:{target:'es2020',module:'NodeNext',moduleResolution:'NodeNext',strict:true,noEmit:true,skipLibCheck:false,types:[]},include:['consumer.ts','consumer.cts']}));execFileSync(process.execPath,[require.resolve('typescript/bin/tsc'),'--project',join(dir,'tsconfig.json')],{stdio:'inherit'});
  const rows=[];
