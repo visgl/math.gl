@@ -1607,6 +1607,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
           const vector = evaluateVector(vectors, {
             activeRows: mask,
             signal: context.signal,
+            argumentFields: arguments_.map(argument => argument.field),
             length: active.length,
             reportError(row, error) {
               if (!Number.isInteger(row) || row < 0 || row >= active.length || !mask[row])

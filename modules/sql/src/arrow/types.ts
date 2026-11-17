@@ -19,6 +19,8 @@ export type ArrowTableFunctionType = (
     activeRows: Uint8Array;
     /** Cooperative cancellation forwarded to synchronous kernels. */
     signal?: AbortSignal;
+    /** Bound argument fields, including actual extension metadata. Supplied by compiled calls. */
+    argumentFields?: readonly Field[];
     /** Number of rows in every argument and the returned vector. */
     length: number;
     /** Report a row failure; TRY recovers classified errors, otherwise the call throws. */

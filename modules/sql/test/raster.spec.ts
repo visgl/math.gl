@@ -560,6 +560,16 @@ test('clip accepts matching EPSG encodings and preserves empty source band repre
     functions: createRasterFunctions(context, {geometryField})
   }).evaluateTable(withGeometry);
   expect(rasterSummary(context.resolve(matching.get(0)), 0).count).toBe(4);
+  const automaticMetadata = compileArrowExpression('RT_Clip(r,polygon)', {
+    inputSchema: schema,
+    functions: createRasterFunctions(context)
+  }).evaluateTable(withGeometry);
+  expect(rasterSummary(context.resolve(automaticMetadata.get(0)), 0).count).toBe(4);
+  const nestedHull = compileArrowExpression('RT_Clip(r, RT_ConvexHull(r))', {
+    inputSchema: schema,
+    functions: createRasterFunctions(context, {geometryField})
+  }).evaluateTable(withGeometry);
+  expect(rasterSummary(context.resolve(nestedHull.get(0)), 0).count).toBe(4);
   const source = raster({
     dtype: 'uint16',
     data: new Uint16Array([1, 2, 3, 4]),

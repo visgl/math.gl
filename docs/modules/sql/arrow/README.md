@@ -99,7 +99,9 @@ const prices = compiled.evaluate(batch);
 ```
 
 `ArrowTableFunctionType` is the type of `evaluate`: it accepts an ordered `readonly Vector[]`
-and `{activeRows: Uint8Array, length: number}`, and returns a `Vector` of the same length.
+and `{activeRows: Uint8Array, length: number, signal?, argumentFields?}`, and returns a `Vector`
+of the same length. Compiled calls provide the actual bound argument fields, including extension
+metadata; direct kernel callers may omit them. The optional signal supports cooperative cancellation.
 `evaluate` is required on every prototype and can be called directly as `function.prototypes[index].evaluate(...)`. Direct callers must
 supply correctly typed vectors and a mask, and honor the declaration's null policy; compilation
 provides these checks and null propagation when invoking functions inside expressions.

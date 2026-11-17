@@ -72,7 +72,7 @@ function footprintWKB(source: SyncRasterSource): Uint8Array {
 }
 /** Options for a schema-bound geometry input, including its GeoArrow CRS metadata. */
 export type RasterFunctionOptions = {
-  /** Polygon WKB field; default accepts geoarrow.wkb and requires EWKB SRID or explicit clip CRS. */
+  /** Fallback WKB metadata for direct kernel calls; compiled SQL uses the actual argument field. */
   geometryField?: Field;
 };
 /** Creates synchronous typed RT_* declarations bound to a caller-owned raster context. */
@@ -83,9 +83,12 @@ export function createRasterFunctions(
   const raster = createRasterField('raster'),
     number = new Field('number', new Float64(), true),
     text = new Field('text', new Utf8(), true);
-  const geometry =
-    options.geometryField ??
-    new Field('geometry', new Binary(), true, new Map([['ARROW:extension:name', 'geoarrow.wkb']]));
+  const geometry = new Field(
+    'geometry',
+    new Binary(),
+    true,
+    new Map([['ARROW:extension:name', 'geoarrow.wkb']])
+  );
   const outputGeometry = new Field(
     'geometry',
     new Binary(),
@@ -105,7 +108,7 @@ export function createRasterFunctions(
         {
           arguments: arguments_,
           result,
-          evaluate(vectors, {length, activeRows, reportError, signal}) {
+          evaluate(vectors, {length, activeRows, reportError, signal, argumentFields}) {
             const values: unknown[] = Array(length).fill(null);
             for (let row = 0; row < length; row++)
               if (activeRows[row]) {
@@ -113,7 +116,7 @@ export function createRasterFunctions(
                 if (args.some(arg => arg === null)) continue;
                 try {
                   signal?.throwIfAborted();
-                  values[row] = fn(...args, signal);
+                  values[row] = fn(...args, signal, argumentFields);
                 } catch (error) {
                   if (reportError) reportError(row, error);
                   else throw error;
@@ -201,10 +204,12 @@ export function createRasterFunctions(
       context.register(rasterArithmetic(source(a), b, operation))
     );
   }
-  const clip = (h: string, bytes: Uint8Array, crs?: RasterCRS) => {
+  const clip = (h: string, bytes: Uint8Array, crs?: RasterCRS, argumentField?: Field) => {
     const parsed = parseWKB(bytes);
     if (parsed.geometry.type !== 'Polygon') throw new Error('RT_Clip requires a Polygon');
-    const encoded = geometry.metadata.get('ARROW:extension:metadata');
+    const encoded = (argumentField ?? options.geometryField)?.metadata.get(
+      'ARROW:extension:metadata'
+    );
     const fieldCRS = encoded ? JSON.parse(encoded).crs : undefined;
     const polygonCRS =
       crs ?? fieldCRS ?? (parsed.srid === undefined ? undefined : `EPSG:${parsed.srid}`);
@@ -228,7 +233,11 @@ export function createRasterFunctions(
       })
     );
   };
-  add('RT_Clip', [raster, geometry], raster, (h, bytes) => clip(h, bytes));
-  add('RT_Clip', [raster, geometry, text], raster, (h, bytes, crs) => clip(h, bytes, crs));
+  add('RT_Clip', [raster, geometry], raster, (h, bytes, _signal, fields) =>
+    clip(h, bytes, undefined, fields?.[1])
+  );
+  add('RT_Clip', [raster, geometry, text], raster, (h, bytes, crs, _signal, fields) =>
+    clip(h, bytes, crs, fields?.[1])
+  );
   return functions;
 }

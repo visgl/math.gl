@@ -95,9 +95,10 @@ All functions propagate SQL null arguments.
 | `RT_Resample(r, reference[, method])` | Same-CRS reference grid, nearest (default) or bilinear |
 | `RT_Add/Subtract/Multiply/Divide(r, other)` | Aligned raster bands or raster and scalar |
 
-Clipping accepts Polygon WKB. Supply `geometryField` to `createRasterFunctions` to bind an
-input field's GeoArrow CRS metadata, use EWKB with an SRID, or provide an explicit serialized
-CRS argument. Footprints for non-EPSG CRS definitions have no embedded CRS and require an
+Clipping accepts Polygon WKB. Compiled queries read GeoArrow CRS metadata from the actual
+geometry argument field, or use an EWKB SRID or explicit serialized CRS argument.
+For direct kernel calls without bound argument fields, `createRasterFunctions` accepts
+`geometryField` as fallback metadata. Footprints for non-EPSG CRS definitions have no embedded CRS and require an
 explicit CRS when reused. Polygon exterior boundaries are included and hole boundaries excluded.
 Empty clips have an empty grid; empty footprints are Polygon EMPTY.
 
