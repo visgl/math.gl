@@ -19,6 +19,7 @@ export function prepareSQLParameters(
   const entries = new Map<string, Expression>();
   for (const name of Object.keys(parameters)) {
     const expression = bindSQLParameter(name, {parameters});
+    encodeStrings(expression);
     const old = previous?.get(name);
     entries.set(name, old && equalValue(old, expression) ? old : expression);
   }
@@ -90,4 +91,13 @@ export function getSQLParameterNames(sql: string): readonly string[] {
     /'(?:''|[^'])*'|"(?:""|[^"])*"|--[^\r\n]*|\/\*[\s\S]*?\*\/|::|:([A-Za-z_][A-Za-z0-9_]*)/g;
   for (const match of sql.matchAll(tokens)) if (match[1]) names.add(match[1]);
   return Object.freeze([...names]);
+}
+
+/** Pre-encodes text once when a snapshot is prepared for reuse by Arrow compilation. */
+function encodeStrings(expression: Expression): void {
+  if (expression.type === 'Literal' && typeof expression.value === 'string' && !expression.utf8) {
+    expression.utf8 = new TextEncoder().encode(expression.value);
+  } else if (expression.type === 'ArrayExpression') {
+    for (const element of expression.elements) encodeStrings(element as Expression);
+  }
 }
