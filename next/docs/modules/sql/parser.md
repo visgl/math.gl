@@ -34,7 +34,7 @@ Import `@math.gl/sql/parser` to parse supported SQL statements into portable que
 | Membership                            | ✅      | `IN (...)` and `NOT IN (...)` with a nonempty list of scalar values.                                                                                          |
 | Null tests                            | ✅      | `IS NULL` and `IS NOT NULL`; expression comparisons with NULL evaluate to unknown.                                                                            |
 | Scalar literals                       | ✅      | Numbers, single-quoted strings with doubled quote escapes, and Boolean values. Use null tests rather than NULL literals.                                      |
-| Named parameters                      | ⚠️      | `:name` in `parseSQLPredicate()`, with supplied values or preserved references. Use an injected WHERE parser for parameterized SELECT statements.             |
+| Named parameters                      | ✅      | `:name` binds values from `parameters` in expressions, SELECT statements, and scale expressions. Predicate templates also support preserved references.       |
 | Pagination                            | ✅      | `LIMIT` followed by a nonnegative safe integer, including zero. `OFFSET` skips rows before the limit.                                                         |
 | Catalog commands                      | ✅      | `SHOW SOURCES`, `SHOW TABLES [FROM source]`, and `DESCRIBE source[.table]`. `SHOW SOURCES` is a parser-specific command.                                      |
 | Nested column access                  | ✅      | `start[1]` reads a list element. `endpoint.longitude` reads a struct field. Quote literal column names containing dots.                                       |
@@ -204,3 +204,49 @@ Executors can consume the [portable expression AST](https://visgl.github.io/math
 Parser syntax errors use `SQLParseError`, a `SyntaxError` with a zero-based UTF-16 `offset`, one-based `line` and `column`, and a short `token` preview when a token is present. When parsing a complete statement, locations in the built-in WHERE parser refer to the original SQL text. Use the structured fields to highlight the location in an editor. Exceptions thrown by a custom WHERE parser are preserved.
 
 Pass a [probe.gl](https://vis.gl/probe.gl) logger as the `log` option to `parseSQLQuery` to capture parser errors. The parser reports the diagnostic and throws the original error.
+
+## Named query parameters[​](#named-query-parameters "Direct link to Named query parameters")
+
+Pass a readonly object with case-sensitive keys, omitting the colon from each key:
+
+```
+const query = parseSQLQuery(
+
+  'SELECT price * :factor AS adjusted WHERE category IN (:categories)',
+
+  {parameters: {factor: 1.2, categories: ['food', 'books']}}
+
+);
+```
+
+`parseSQLExpression`, `parseSQLSelect`, `parseSQLQuery`, `parseSQLSelectStatement`, `parseSQLSelectCompound`, and `queryArrowSQL` accept `parameters` in their options. `parseSQLSelect` still requires a `parseWhere` callback for WHERE; use `parseSQLQuery` for built-in predicate and expression handling.
+
+`SQLParameterValue`, `SQLParameters`, and `SQLParameterOptions` are exported from `@math.gl/sql/parser` and `@math.gl/sql`. Values can be finite numbers, strings, booleans, bigint, null, Date, Uint8Array, homogeneous numeric/string arrays, or arrays of numeric tuples. Readonly arrays and tuples are accepted. Mutable values are copied when bound. Array values are limited to 4096 entries per array.
+
+Arrays remain one argument in expressions and use the receiving Arrow function's List or FixedSizeList signature. Numeric tuple projections can declare their width with a cast, for example `SELECT :position::FLOAT32[3] AS position`. In `IN (:values)` and `NOT IN (:values)`, flat arrays expand into scalar membership entries; empty arrays yield false and true respectively, including for null input rows.
+
+Parameters are values, not table names, column names, or SQL fragments. Quoted strings containing colons stay literal strings. Missing values and unsupported types fail with the parameter name; extra keys are allowed. The custom `parseParameter(name)` AST callback remains available, but cannot be combined with `parameters`. The existing scalar-only `parseSQLPredicate` and preserved predicate binding APIs retain their contracts; use the expression or query parser for arrays.
+
+Arrow compilation converts bound values to the receiving field/function type once. String comparisons use pre-encoded UTF-8 bytes without decoding table values. Membership compiles numeric lookup sets or sorted UTF-8/binary byte ranges reused across batches. List arguments retain one typed Arrow dictionary value, and fixed tuples copy preconverted physical components into each output batch. Date values bind to epoch days for Date32 or epoch microseconds for timestamps (UTC by default). These compiled buffers belong to the compiled expression; changing a parameter map requires parsing and compiling again.
+
+### Binary inputs[​](#binary-inputs "Direct link to Binary inputs")
+
+Callers can supply pre-encoded text and numeric typed arrays:
+
+```
+const parameters = {
+
+  name: {type: 'utf8', value: new TextEncoder().encode('Montréal')},
+
+  weights: new Float32Array([0.2, 0.3, 0.5]),
+
+  channels: {type: 'array', value: new Uint8Array([255, 0, 128])},
+
+  payload: {type: 'binary', value: new Uint8Array([1, 2, 3])}
+
+} satisfies SQLParameters;
+```
+
+Float32/Float64 and 8/16/32-bit numeric typed arrays are accepted. A bare `Uint8Array` is a binary scalar; tag it as `array` for numeric list semantics or `utf8` for text semantics. `SQLNumericArray` and `SQLBinaryParameter` describe these inputs. DataView and bigint typed arrays are not supported.
+
+Binding snapshots buffers and validates UTF-8. The AST retains ordinary string values/array elements for portable evaluators alongside their binary storage. Arrow compilation reuses matching typed element layouts and supplied UTF-8 bytes; comparisons do not encode or decode text per row. Different receiving numeric types are converted once during compilation. This is copy-on-bind, not a borrowed buffer or ownership-transfer API.

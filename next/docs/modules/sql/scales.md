@@ -95,3 +95,21 @@ The optional `@math.gl/sql/scales/conformance` entry exports `SCALE_CONFORMANCE_
 Use the same cases for a CPU, worker, or GPU implementation. A backend that supports only a subset should explicitly select and report supported case IDs; unsupported cases must not silently fall back to a different scale. Numeric results compare by absolute error; nulls and color arity compare exactly. NaN must fail a numeric comparison. The corpus covers extrapolation, log-domain rejection, linear-sRGB interpolation, null/under/over colors, quantile boundaries after repeated-break removal, and extended linear HDR channels.
 
 These are evaluator samples **before storage quantization**. Packed color formats, GPU layouts, approximate domain statistics, and broader color-space conversion need additional tests. The main scales entry does not import these test fixtures.
+
+## Parameterized scale inputs[​](#parameterized-scale-inputs "Direct link to Parameterized scale inputs")
+
+`parseSQLScaleExpression(sql, {parameters})` binds values before validating the scale:
+
+```
+const scale = parseSQLScaleExpression(
+
+  'SCALE_COLOR(value, DOMAIN(:domain), PALETTE(:colors))',
+
+  {parameters: {domain: [0, 50, 100], colors: ['#440154', '#21918c', '#fde725']}}
+
+);
+```
+
+`PALETTE(:colors)` accepts an array of `#RRGGBB`/`#RRGGBBAA` strings or an array of numeric RGB/RGBA tuples. Numeric channels follow the scale's normalized color convention, with alpha defaulting to 1 for RGB; there is no implicit byte conversion or clipping. An array always specifies explicit colors, even when it contains only one string. A scalar string in `PALETTE(:name)` retains named-palette behavior.
+
+`DOMAIN(:domain)` and `RANGE(:range)` accept numeric stop arrays, and `CATEGORIES(:categories)` accepts fixed category arrays. Existing scale validation still applies, including matching domain/color lengths and minimum stop counts. Binding copies the arrays, so later edits to the caller's palette do not change the parsed scale. A bound scale call in a SELECT projection can also be passed to `parseSQLScaleAST`.
