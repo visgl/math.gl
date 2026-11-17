@@ -64,4 +64,10 @@ jobs:
         run: npm install --global npm@^11.15.0
 
       - name: Publish to NPM
-        run: npx ocular-publish from-git
+        run: |
+          for package in modules/*; do
+            if [ "$(node -p "require('./$package/package.json').private || false")" = "true" ]; then
+              continue
+            fi
+            npm publish "./$package" --access public --tag latest --provenance
+          done
