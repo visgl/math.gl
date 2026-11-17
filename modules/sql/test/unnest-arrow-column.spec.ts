@@ -194,3 +194,19 @@ test('SQL UNNEST retains nested values and physical timestamp precision', async 
   );
   expect(fields.getChild('count')!.get(0)).toBe(4);
 });
+
+test('UNNEST orders qualified child outputs and retains sliced internal struct values', () => {
+  const input = new Table({
+    items: vectorFromArray([[3, 1]], new List(new Field('item', new Int32())))
+  });
+  const ordered = queryArrowSQL(
+    'SELECT u.value FROM source s CROSS JOIN UNNEST(s.items) AS u(value) ORDER BY u.value',
+    new Map([['source', input]])
+  );
+  expect(Array.from(ordered.getChild('u.value')!)).toEqual([1, 3]);
+  const structs = new Table({
+    items: vectorFromArray([{a: 1}, {a: 9}], new Struct([new Field('a', new Int32())]))
+  }).slice(1);
+  const result = unnestArrowColumn(structs, 'items', {valueColumn: 'value'});
+  expect(Array.from(result.getChild('value')!)).toEqual([9]);
+});

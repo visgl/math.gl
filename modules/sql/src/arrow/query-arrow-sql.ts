@@ -49,11 +49,15 @@ export function queryArrowSQL(
 }
 
 function planOrder(orderBy?: readonly SQLSort[]) {
-  return orderBy?.map(({expression, direction, nulls}) => ({
-    column: requireColumn(expression),
-    direction,
-    nulls
-  }));
+  return orderBy?.map(({expression, direction, nulls}) => {
+    /** Qualified projected output name, including UNNEST aliases. */
+    const column = qualifiedColumn(expression);
+    return {
+      column: column?.qualifier ? column.qualifier + '.' + column.name : requireColumn(expression),
+      direction,
+      nulls
+    };
+  });
 }
 
 function executeSelect(
