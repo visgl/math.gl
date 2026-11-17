@@ -305,7 +305,7 @@ metadata.
 
 #### `tessellateGeoArrowPolygons(column, options?)`
 
-Import this optional function from `@math.gl/core/arrow`. It returns `GeoArrowTessellation`:
+Import this function from `@math.gl/geometry/arrow`. It returns `GeoArrowTessellation`:
 
 | Field | Description |
 | --- | --- |

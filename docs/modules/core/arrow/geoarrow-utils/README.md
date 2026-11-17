@@ -10,7 +10,7 @@
 It defines a small immutable descriptor ABI over borrowed typed arrays and implements synchronous
 geometry kernels directly over that ABI.
 
-For real Arrow `Table`/`Vector` inputs, use the separate [Arrow-backed GeoArrow entry](../geoarrow/README.md). This subpath retains the physical descriptor API and does not require Arrow.
+For real Arrow `Table`/`Vector` inputs, use the [GeoArrow adapters](../geoarrow/README.md) from the same entry point. Descriptor kernels accept physical column descriptors; vector wrappers use explicitly named vector APIs.
 
 ## Usage
 
@@ -64,7 +64,7 @@ getGeoArrowBounds(points);
 ## Installation
 
 ```bash
-npm install @math.gl/core/arrow
+npm install @math.gl/core apache-arrow
 ```
 
 ## Where to go next

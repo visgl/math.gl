@@ -4,9 +4,7 @@
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>
 
-`@math.gl/core/arrow` provides dependency-free, synchronous codecs for individual WKB, EWKB, and WKT
-geometry values. It is the neutral format layer used by `@math.gl/core/arrow`, but has no dependency
-on GeoArrow or Apache Arrow.
+`@math.gl/core/arrow` provides synchronous codecs for individual WKB, EWKB, and WKT geometry values. The codec implementation operates independently of GeoArrow descriptors, while importing the combined Arrow entry point requires the application-provided Apache Arrow peer.
 
 ## Usage
 

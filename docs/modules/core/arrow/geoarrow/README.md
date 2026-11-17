@@ -14,7 +14,7 @@ import * as arrow from 'apache-arrow';
 import {
   getGeometryColumnsFromSchema,
   makeGeoArrowColumnFromArrowVector,
-  getGeoArrowVectorBounds as getGeoArrowBounds
+  getGeoArrowVectorBounds
 } from '@math.gl/core/arrow';
 
 const vector = arrow.vectorFromArray(
@@ -58,24 +58,15 @@ a named `xyz`/`xym` child or an explicit `dimension`; width alone cannot disting
 | Apache Arrow versions | ✅ | Optional peer supporting 17+; checked on 17–21. |
 | Geodesic bounds and CRS reprojection | ❌ | Bounds use coordinate space; geographic interpretation belongs to geospatial. |
 
-## Choose an entry point
+## Installation and input models
 
-| Entry | Input | Arrow installation |
-| --- | --- | --- |
-| `@math.gl/core/arrow` | General Arrow tables, vectors, schemas, and transport payloads | Required for this subpath, version 17+ |
-| `@math.gl/core/arrow` | Arrow `Field`, `Schema`, and `Vector` objects with geospatial meaning | Required for this subpath, version 17+ |
-| `@math.gl/core/arrow` | Plain physical descriptors over typed arrays | Not required |
-
-Apache Arrow is an optional peer dependency of the package. Install it when using
-the Arrow-backed subpath:
+Install core and its optional Apache Arrow peer when using the combined Arrow entry point:
 
 ```sh
-npm install @math.gl/core/arrow apache-arrow
+npm install @math.gl/core apache-arrow
 ```
 
-Importing `/utf8`, `/wkb`, or `/geoarrow-utils` does not import Apache Arrow. APIs with
-similar names in the two subpaths accept different inputs: `/geoarrow` accepts
-Arrow vectors; `/geoarrow-utils` accepts physical column descriptors.
+`@math.gl/core/arrow` exposes both physical descriptor kernels and Arrow vector adapters. Descriptor kernels retain names such as `getGeoArrowBounds`; the vector equivalent is `getGeoArrowVectorBounds`. Only `@math.gl/core/utf8`, matrix, and color entry points can be imported without Apache Arrow.
 
 ## API
 
@@ -123,16 +114,16 @@ geometry vectors must be decoded to their physical geometry storage before adapt
 - `inspectGeoArrowVector(vector, options?)` reports physical-layout validation,
   row/chunk/null counts, and native coordinate count. It does not decode WKB/WKT
   payloads or validate geometry topology.
-- `getGeoArrowBounds`, `getGeoArrowRowBounds`, and `getGeoArrowVertexCount` delegate
+- `getGeoArrowVectorBounds`, `getGeoArrowVectorRowBounds`, and `getGeoArrowVectorVertexCount` delegate
   to the existing descriptor kernels. Bounds are XY coordinate-space extents,
   not geodesic or antimeridian-aware envelopes. Decode serialized geometries with
   `geoarrow-utils` codecs before using native-only kernels.
-- `mapGeoArrowCoordinates(vector, mapper, options?)` returns a transformed vector
+- `mapGeoArrowVectorCoordinates(vector, mapper, options?)` returns a transformed vector
   with new coordinate buffers and preserves null rows. The mapper receives the
   coordinate and logical row index. The source is unchanged. Update CRS/extent metadata yourself if the transformation changes
   its meaning; metadata is not reprojected by the mapper. Boxes are bounds, not coordinate
   tuples; map the source geometries and recompute their bounds instead.
-- `rewindGeoArrow(vector, options?)` accepts `outer: 'clockwise' |
+- `rewindGeoArrowVector(vector, options?)` accepts `outer: 'clockwise' |
   'counter-clockwise'` and the existing resource-limit options. It returns the
   rewound vector; unchanged geometry may retain borrowed buffers. Boxes have no rings
   and are returned unchanged.

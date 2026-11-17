@@ -94,7 +94,7 @@ Loaders.gl owns file/network loading, schema interpretation, GeoParquet metadata
 Decode serialized inputs and convert Z/M dimensions or boxes explicitly. Streaming preserves winding, CRS units, and planar/spherical edge semantics. D3 expects longitude/latitude degrees and its spherical ring convention; projecting individual points does not replace clipping a geometry stream.
 
 ```typescript
-import {tessellateGeoArrowStream} from '@math.gl/core/arrow';
+import {tessellateGeoArrowStream} from '@math.gl/geometry/arrow';
 import {geoOrthographic} from 'd3-geo'; // An optional application dependency.
 
 const projection = geoOrthographic().rotate([-20, 30]);

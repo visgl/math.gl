@@ -13,7 +13,7 @@ Geographic inputs use `[longitude, latitude]` in degrees, with optional altitude
 ## Usage
 
 ```bash
-npm install @math.gl/geospatial/web-mercator
+npm install @math.gl/geospatial
 ```
 
 ```js
