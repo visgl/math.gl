@@ -426,3 +426,18 @@ Case conversion uses JavaScript's locale-independent Unicode mappings.
 These functions preserve nulls, except `CONCAT`, which skips null arguments.
 Empty strings are preserved. Regular expressions, `SIMILAR TO`, and `GLOB`
 are outside this supported subset.
+
+### Epoch milliseconds
+
+`EPOCH_MS(timestamp)` converts an Arrow microsecond timestamp or `DATE` to a
+Float64 number of milliseconds since 1970-01-01. This is suitable for JavaScript
+Date values and time sliders. Nulls propagate; timestamps retain fractional
+milliseconds, including before the epoch. Large epochs have Float64 precision.
+
+```sql
+SELECT EPOCH_MS(CAST(observed_at AS TIMESTAMP WITH TIME ZONE)) AS time
+```
+
+Temporal casts accept ISO date/time text. Explicit offsets are normalized to UTC.
+Timezone-free timestamps use their stored epoch without applying the host timezone.
+Non-ISO source strings still need normalization by the loader or application.
