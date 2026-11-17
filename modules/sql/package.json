@@ -74,6 +74,16 @@
       "types": "./dist/color/index.d.ts",
       "import": "./dist/color/index.js",
       "require": "./dist/color/index.cjs"
+    },
+    "./raster": {
+      "types": "./dist/raster/index.d.ts",
+      "import": "./dist/raster/index.js",
+      "require": "./dist/raster/index.cjs"
+    },
+    "./arrow-raster": {
+      "types": "./dist/raster/arrow-raster.d.ts",
+      "import": "./dist/raster/arrow-raster.js",
+      "require": "./dist/raster/arrow-raster.cjs"
     }
   },
   "sideEffects": [

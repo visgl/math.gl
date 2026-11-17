@@ -21,7 +21,8 @@ console.log(result.getChild('units')?.get(0)); // 6n
 Query native Arrow tables, compute columns, aggregate record batches, or run structured queries
 in workers. Apache Arrow 17 or later is required for execution. The `/parser` and `/expressions`
 entry points work without Arrow. Optional `/math-functions` and `/color-functions` entries
-provide typed query functions.
+provide typed query functions. `/raster` provides synchronous raster sources;
+`/arrow-raster` supplies opaque RASTER columns and lazy `RT_*` query functions.
 
 See the [SQL documentation](https://math.gl/docs/modules/sql) for the supported SQL subset,
 streaming APIs, worker execution, and examples.
