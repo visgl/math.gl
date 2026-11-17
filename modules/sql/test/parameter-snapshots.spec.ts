@@ -7,7 +7,7 @@ import {
   areSQLParametersEqual,
   getSQLParameterNames,
   parseSQLExpression
-} from '../src/sql';
+} from '../src/parser';
 
 test('snapshots detect mutations and compare query-specific dependencies', () => {
   const colors = [1, 2];
