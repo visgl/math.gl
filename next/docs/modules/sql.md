@@ -93,6 +93,10 @@ These capabilities describe **`queryArrowSQL`**, rather than every parser entry 
 
 The executor does not support writes or schema changes, CTEs, subqueries, window functions, `DISTINCT`, `HAVING`, or general SQL dialect compatibility. Catalog commands accepted by `parseSQLQuery`, such as `SHOW SOURCES`, are for applications to handle; they are not executable by `queryArrowSQL`. See [the parser reference](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md) for each parser's contract.
 
+## Expand nested collections[​](#expand-nested-collections "Direct link to Expand nested collections")
+
+Experimental [SQL UNNEST](https://visgl.github.io/math.gl/next/docs/modules/sql/unnest.md) expands List, FixedSizeList and Map columns with CROSS or LEFT joins, output aliases and optional ordinality.
+
 ## Add functions[​](#add-functions "Direct link to Add functions")
 
 Function declarations are explicit and local to a query. Import only the functions you need:

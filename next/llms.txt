@@ -286,6 +286,7 @@ A lightweight SQL query engine for Apache Arrow tables. Query tables already in 
 - [Query execution](https://visgl.github.io/math.gl/next/docs/modules/sql/queries.md): Use the functions exported by @math.gl/sql to query native Arrow tables and record batches.
 - [Portable visualization scale descriptors (experimental)](https://visgl.github.io/math.gl/next/docs/modules/sql/scales.md): The optional @math.gl/sql/scales entry point defines serializable scale
 - [SQL scale specifications (experimental)](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/SQL.md): Import parseSQLScaleExpression from @math.gl/sql/scales. It parses
+- [UNNEST (experimental)](https://visgl.github.io/math.gl/next/docs/modules/sql/unnest.md): UNNEST expands a list or map column into rows. Each element produces one output
 - [Workers](https://visgl.github.io/math.gl/next/docs/modules/sql/workers.md): Use @math.gl/sql/worker to run structured queries or compiled expressions off the calling thread.
 
 #### tasks
