@@ -108,7 +108,12 @@ export function compileArrowScale(
       parsed.scale.type === 'quantile' ? classCount : undefined,
       functions
     );
-    return bindArrowScale(table.schema, parsed, resolution, functions);
+    return bindArrowScale(
+      table.schema,
+      parsed,
+      {...resolution, domain: resolvedDomain ?? resolution.domain},
+      functions
+    );
   }
   /** Resolved inputs shared with the schema-only binder. */
   const resolution: ArrowScaleResolution = {

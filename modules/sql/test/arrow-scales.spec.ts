@@ -251,3 +251,15 @@ test('quantiles classify an Arrow row expression with explicit colors', () => {
     parseSQLScaleExpression("SCALE_QUANTILE(ABS(flow), 3, PALETTE('#ffeecc', '#993300'))")
   ).toThrow('one color per class');
 });
+
+test('computed Arrow quantiles preserve a supplied extent and use projected streaming domains', () => {
+  const data = tableFromArrays({flow: [-20, 3, -1, 8, null]});
+  const parsed = parseSQLScaleExpression(
+    "SCALE_QUANTILE(ABS(flow), 2, PALETTE('#ffeecc', '#993300'))"
+  );
+  expect(resolveArrowDomains(data, [parsed.scale.domain], [ABS])).toEqual([[1, 20]]);
+  const resolved = compileArrowScale(data, parsed, [0, 25], [ABS]);
+  expect(resolved.scale.descriptor.domain).toEqual([0, 25]);
+  expect(resolved.scale.descriptor.thresholds).toEqual([5.5]);
+  expect(() => createStreamingDomainAccumulator([parsed.scale.domain])).toThrow('projected column');
+});

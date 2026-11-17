@@ -37,11 +37,14 @@ export function createStreamingDomainAccumulator(
 } {
   const columns = new Map<string, ColumnState>();
   const quantileColumns = new Set(options.quantileColumns ?? []);
-  for (const domain of domains) {
-    if (domain.type === 'fixed') continue;
+  const streamingDomains = domains.map(domain => {
     if (domain.type === 'expression-extent') {
       throw new Error('Streaming scale domains require computed values in a projected column');
     }
+    return domain;
+  });
+  for (const domain of streamingDomains) {
+    if (domain.type === 'fixed') continue;
     const previous = columns.get(domain.column);
     if (previous) {
       if (
@@ -97,11 +100,8 @@ export function createStreamingDomainAccumulator(
       }
     },
     result() {
-      return domains.map(domain => {
+      return streamingDomains.map(domain => {
         if (domain.type === 'fixed') return [...domain.values];
-        if (domain.type === 'expression-extent') {
-          throw new Error('Streaming scale domains require computed values in a projected column');
-        }
         const state = columns.get(domain.column)!;
         if (domain.type === 'categories') {
           const labels = [...state.categories!];
