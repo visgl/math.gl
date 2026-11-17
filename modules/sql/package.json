@@ -33,6 +33,11 @@
       "import": "./dist/scales/index.js",
       "require": "./dist/scales/index.cjs"
     },
+    "./scales/conformance": {
+      "types": "./dist/scales/conformance.d.ts",
+      "import": "./dist/scales/conformance.js",
+      "require": "./dist/scales/conformance.cjs"
+    },
     "./arrow-scales": {
       "types": "./dist/scales/arrow-scales.d.ts",
       "import": "./dist/scales/arrow-scales.js",

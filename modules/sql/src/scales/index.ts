@@ -17,7 +17,7 @@ export type {
   ResolvedScale
 } from './scale-types';
 
-export {parseSQLScaleExpression} from './parse-sql-scale';
+export {parseSQLScaleExpression, parseSQLScaleAST} from './parse-sql-scale';
 export type {ParsedSQLScale} from './parse-sql-scale';
 
 export {compileResolvedScale} from './compile-scale';

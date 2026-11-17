@@ -19,6 +19,7 @@ type Call = {
   arguments: Expression[];
 };
 
+/** A row expression and its validated, unresolved visualization scale. */
 export type ParsedSQLScale = Readonly<{
   /** Row-preserving value expression, evaluated by an Arrow/GPU backend. */
   value: Expression;
@@ -146,7 +147,21 @@ function parseRange(node: Expression): ScaleRange {
  * This does not evaluate domain statistics, produce colors, or modify row count.
  */
 export function parseSQLScaleExpression(sql: string): ParsedSQLScale {
-  const root = call(parseSQLExpression(sql));
+  return parseSQLScaleAST(parseSQLExpression(sql));
+}
+
+/**
+ * Extracts a scale from a parsed SQL expression without reparsing or evaluating it.
+ *
+ * Pass a scale call from `parseSQLExpression` or a SELECT projection. The returned
+ * value retains the input row-expression identity; this function does not mutate
+ * the AST, resolve domain statistics, or compile backend-specific code.
+ * @param expression - A scale call in the public portable expression AST.
+ * @returns The row-value expression and validated scale specification.
+ * @throws If the root is not a supported scale call or its scale arguments are invalid.
+ */
+export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
+  const root = call(expression);
   const fn = root.callee.name.toUpperCase();
   const args = root.arguments;
   const names: Record<string, ScaleSpec['type']> = {
