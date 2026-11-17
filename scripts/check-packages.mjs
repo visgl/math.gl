@@ -49,6 +49,8 @@ for (const name of expected) {
     assert(Object.keys(manifest.dependencies || {}).every(dependency => dependency.startsWith('@math.gl/')), 'Core must not introduce external runtime dependencies');
   }
   for (const [subpath, entry] of Object.entries(manifest.exports)) {
+    assert(!/\/(?:index|unbundled)$/.test(subpath), `Redundant public entrypoint: ${manifest.name}${subpath.slice(1)}`);
+    assert(!/^\.\/projection\/(?:experimental|native)(?:\/|$)/.test(subpath), `Use canonical projection paths: ${subpath}`);
     const targets = typeof entry === 'string' ? [entry] : Object.values(entry);
     for (const target of targets) {
       assert(existsSync(new URL(target, directory)), `Missing published target: ${manifest.name}${subpath.slice(1)} ${target}`);

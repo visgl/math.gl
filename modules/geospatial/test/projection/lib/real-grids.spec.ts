@@ -5,12 +5,8 @@
 // Dataset attribution and redistribution terms: ../fixtures/real-grids/README.md.
 import {beforeAll, expect, test} from 'vitest';
 import {fromArrayBuffer} from 'geotiff';
-import {
-  loadGeoTIFFGrid,
-  parseNTv2Grid,
-  ProjectionTransform
-} from '@math.gl/geospatial/projection/experimental';
-import type {DatumGrid} from '@math.gl/geospatial/projection/experimental';
+import {loadGeoTIFFGrid, parseNTv2Grid, ProjectionTransform} from '@math.gl/geospatial/projection';
+import type {DatumGrid} from '@math.gl/geospatial/projection';
 import inputs from '../fixtures/real-grid-cases.json';
 import reference from '../fixtures/real-grid-reference.json';
 

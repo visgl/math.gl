@@ -227,7 +227,7 @@ test('native rhumb operations match Turf across the antimeridian', async () => {
 
 test('native generated circles, bounds polygons, arcs, and line sampling', async () => {
   const api = await import('@math.gl/geospatial/turf');
-  const {materializeGeoArrowRows} = await import('@math.gl/arrow/geoarrow-utils/index');
+  const {materializeGeoArrowRows} = await import('@math.gl/arrow/geoarrow-utils');
   const {default: oracleCircle} = await import('@turf/circle');
   const input = column([point(10, 20), null]);
   const generated = api.circle(input, 10, {steps: 8});
@@ -284,7 +284,7 @@ test('line predicates, ring orientation and explicit-origin scale', async () => 
 test('native geometry conversion and decomposition preserve topology', async () => {
   const api = await import('@math.gl/geospatial/turf');
   const {materializeGeoArrowRows, getGeoArrowRowCount, validateGeoArrowColumn} = await import(
-    '@math.gl/arrow/geoarrow-utils/index'
+    '@math.gl/arrow/geoarrow-utils'
   );
   const input = column([polygon, null]);
   const lines = api.polygonToLine(input);
@@ -368,7 +368,7 @@ test('point-on-line tolerance works perpendicular to axis-aligned segments', asy
 test('native boundary intersections and kinks preserve row alignment', async () => {
   const api = await import('@math.gl/geospatial/turf');
   const {materializeGeoArrowRows, validateGeoArrowColumn} = await import(
-    '@math.gl/arrow/geoarrow-utils/index'
+    '@math.gl/arrow/geoarrow-utils'
   );
   const {lineIntersect: oracle} = await import('@turf/line-intersect');
   const a = {
@@ -435,7 +435,7 @@ test('native boundary intersections and kinks preserve row alignment', async () 
 
 test('intersections handle separated chunks, duplicate joins and collinear overlaps', async () => {
   const {lineIntersect, kinks} = await import('@math.gl/geospatial/turf');
-  const {materializeGeoArrowRows} = await import('@math.gl/arrow/geoarrow-utils/index');
+  const {materializeGeoArrowRows} = await import('@math.gl/arrow/geoarrow-utils');
   const geometry = {
     type: 'LineString' as const,
     coordinates: [
@@ -495,7 +495,7 @@ test('intersections handle separated chunks, duplicate joins and collinear overl
 
 test('isolated collinear contacts and shared floating-point endpoints', async () => {
   const {lineIntersect} = await import('@math.gl/geospatial/turf');
-  const {materializeGeoArrowRows} = await import('@math.gl/arrow/geoarrow-utils/index');
+  const {materializeGeoArrowRows} = await import('@math.gl/arrow/geoarrow-utils');
   const line = (coordinates: number[][]) => column([{type: 'LineString', coordinates}]);
   expect(
     materializeGeoArrowRows(

@@ -17,7 +17,7 @@ import {
   mercator,
   stereographic,
   obliqueStereographic
-} from '@math.gl/geospatial/projection/experimental';
+} from '@math.gl/geospatial/projection';
 import {geographicWKT, projectedJSON} from '../fixtures/crs-datums';
 import corpus from '../fixtures/upstream-corpus-2.22.0.json';
 const datumCatalogs = [datumCatalog, unshiftedStructuredDatums];

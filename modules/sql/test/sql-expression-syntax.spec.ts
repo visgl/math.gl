@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {parseSQLExpression, parseSQLQuery, parseSQLSelect} from '../src/sql';
+import {parseSQLExpression, parseSQLQuery, parseSQLSelect} from '../src/parser';
 test.each([
   'x ** 2',
   'x--y',

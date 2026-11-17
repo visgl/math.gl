@@ -8,8 +8,8 @@ import {
   ProjectionTransform,
   mercator,
   equidistantCylindrical
-} from '@math.gl/geospatial/projection/experimental';
-import type {ProjectionPlugin} from '@math.gl/geospatial/projection/experimental';
+} from '@math.gl/geospatial/projection';
+import type {ProjectionPlugin} from '@math.gl/geospatial/projection';
 
 const projections = [mercator, equidistantCylindrical];
 const definitions = [

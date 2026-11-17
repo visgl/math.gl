@@ -9,7 +9,7 @@ import {
   type SQLSelectStatement,
   type SQLSelectStatementOptions,
   type SQLSort
-} from '../sql/parse-sql-statement';
+} from '../parser/parse-sql-statement';
 import {queryArrowTable, type ArrowTableQuery} from './query-arrow-table';
 import type {ArrowAggregate} from './aggregates';
 

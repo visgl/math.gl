@@ -157,9 +157,7 @@ test('flag presence survives JSON and metadata follows actual axis and height ex
 });
 
 test('horizontal extraction and geocentric dimensional semantics remain explicit', async () => {
-  const {projJSONCRSParser, geocentric} = await import(
-    '@math.gl/geospatial/projection/experimental'
-  );
+  const {projJSONCRSParser, geocentric} = await import('@math.gl/geospatial/projection');
   const {geographicJSON} = await import('../fixtures/crs-datums');
   const horizontal = new ProjectionTransform({
     from: {

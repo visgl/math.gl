@@ -10,11 +10,8 @@ import {
   streamGeoArrow,
   tessellateGeoArrowStream,
   sliceGeoArrowColumn
-} from '@math.gl/arrow/geoarrow-utils/index';
-import type {
-  GeoArrowGeometryValue,
-  GeoArrowGeometryStream
-} from '@math.gl/arrow/geoarrow-utils/index';
+} from '@math.gl/arrow/geoarrow-utils';
+import type {GeoArrowGeometryValue, GeoArrowGeometryStream} from '@math.gl/arrow/geoarrow-utils';
 const polygon: GeoArrowGeometryValue = {
   type: 'Polygon',
   coordinates: [

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {Expression} from '../expressions/index';
-import {parseSQLExpression} from '../sql/parse-sql-expression';
+import {parseSQLExpression} from '../parser/parse-sql-expression';
 import {
   validateScaleSpec,
   type ScaleColor,

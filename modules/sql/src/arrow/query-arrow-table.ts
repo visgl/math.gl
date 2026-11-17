@@ -22,7 +22,7 @@ import type {
   ColumnarPredicateParameterValues,
   ParameterizedColumnarPredicate
 } from '../expressions/index';
-import type {TableQuery} from '../sql/query-types';
+import type {TableQuery} from '../parser/query-types';
 import {compileArrowArray, compileArrowExpression} from './compiler';
 import {compileArrowPredicate} from './predicate';
 import type {ArrowAggregate} from './aggregates';

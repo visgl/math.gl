@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import * as native from '@math.gl/geospatial/projection/experimental';
+import * as native from '@math.gl/geospatial/projection';
 import type {
   ProjectionPlugin,
   ProjectionPoint,
   ProjectionTransformOptions
-} from '@math.gl/geospatial/projection/experimental';
+} from '@math.gl/geospatial/projection';
 import {commonProjectionCases} from '../fixtures/common-projections';
 import {catalogueProjectionCases} from '../fixtures/catalogue-projections';
 import {makeNTv2, makeGeoTIFF} from '../fixtures/datum-grids';

@@ -14,7 +14,7 @@ import {
   type GeoArrowColumn,
   type GeoArrowDimension,
   type GeoArrowGeometryValue
-} from '@math.gl/arrow/geoarrow-utils/index';
+} from '@math.gl/arrow/geoarrow-utils';
 import {materializeGeoArrowRows} from '@math.gl/arrow/geoarrow-utils/layout';
 
 test('column codecs preserve nulls, declared dimensions and metadata', () => {

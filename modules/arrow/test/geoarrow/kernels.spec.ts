@@ -17,7 +17,7 @@ import {
   sliceGeoArrowColumn,
   tessellateGeoArrowPolygons,
   type GeoArrowGeometryValue
-} from '@math.gl/arrow/geoarrow-utils/index';
+} from '@math.gl/arrow/geoarrow-utils';
 import {materializeGeoArrowRows} from '@math.gl/arrow/geoarrow-utils/layout';
 
 test('coordinate mapping, into mapping and layout conversion are deterministic', () => {

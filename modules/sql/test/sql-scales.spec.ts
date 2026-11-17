@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import {parseSQLScaleExpression, parseSQLScaleAST} from '../src/scales';
-import {parseSQLExpression, parseSQLSelectStatement} from '../src/sql';
+import {parseSQLExpression, parseSQLSelectStatement} from '../src/parser';
 import type {Expression} from '../src/expressions';
 
 test('SQL sequential scale preserves value AST and declares data-derived domain', () => {

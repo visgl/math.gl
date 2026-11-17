@@ -10,11 +10,8 @@ import {datumCatalog} from '@math.gl/geospatial/projection/datums';
 import {unshiftedStructuredDatums} from '../fixtures/unshifted-structured-datums';
 import proj4 from 'proj4';
 import upstreamManifest from 'proj4/package.json';
-import * as native from '@math.gl/geospatial/projection/experimental';
-import type {
-  TypeScriptCRSInput,
-  ProjectionPlugin
-} from '@math.gl/geospatial/projection/experimental';
+import * as native from '@math.gl/geospatial/projection';
+import type {TypeScriptCRSInput, ProjectionPlugin} from '@math.gl/geospatial/projection';
 import corpus from '../fixtures/upstream-corpus-2.22.0.json';
 import corrections from '../fixtures/upstream-corpus-numeric-corrections.json';
 import independent from '../fixtures/native-proj-reference.json';

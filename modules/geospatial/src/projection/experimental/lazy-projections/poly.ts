@@ -6,5 +6,8 @@ import {createProjectionDescriptor} from '../projection-descriptor';
 import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyPolyconic: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'poly', aliases: ['Polyconic', 'American_Polyconic']},
-  async () => (await import('@math.gl/geospatial/projection/projections/poly')).polyconic
+  async () => {
+    const projectionModule = await import('@math.gl/geospatial/projection/projections/poly');
+    return projectionModule.polyconic;
+  }
 );

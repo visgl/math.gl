@@ -5,7 +5,7 @@ import {expect, test} from 'vitest';
 import {Float32, Float64, Int32, Table, vectorFromArray} from 'apache-arrow';
 import {parseSQLExpression, parseSQLQuery} from '@math.gl/sql/parser';
 import {compileArrowExpression} from '../src/arrow';
-import {SIN, POWER, MOD} from '../src/math';
+import {SIN, POWER, MOD} from '../src/math-functions';
 const table = new Table({
   x: vectorFromArray([1, null, 3], new Float64()),
   angle: vectorFromArray([0, 1, 2], new Float32()),

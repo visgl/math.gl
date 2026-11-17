@@ -57,7 +57,7 @@ the math.gl projection engine must never silently fall back to proj4js.
 
 ### Tranche 0: implemented foundation
 
-- `@math.gl/geospatial/projection/experimental` exports `ProjectionEngine`, plugin types,
+- `@math.gl/geospatial/projection` exports `ProjectionEngine`, plugin types,
   `mercator`, and `equidistantCylindrical` without importing proj4js.
 - Plugins and aliases are supplied per instance. Geographic coordinates work without
   plugins; no global projection registry is populated as an import side effect.

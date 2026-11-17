@@ -17,7 +17,7 @@ import {
   stereographic,
   obliqueStereographic,
   azimuthalEquidistant
-} from '@math.gl/geospatial/projection/experimental';
+} from '@math.gl/geospatial/projection';
 import {commonProjectionCases} from '../fixtures/common-projections';
 import {upstreamFixtures} from '../fixtures/upstream-2.22.0';
 

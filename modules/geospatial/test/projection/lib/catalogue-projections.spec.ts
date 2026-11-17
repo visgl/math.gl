@@ -11,7 +11,7 @@ import upstreamOrtho from 'proj4/lib/projections/ortho';
 import upstreamGstmerc from 'proj4/lib/projections/gstmerc';
 // @ts-expect-error Upstream ships no declarations for individual kernels.
 import upstreamEqui from 'proj4/lib/projections/equi';
-import * as native from '@math.gl/geospatial/projection/experimental';
+import * as native from '@math.gl/geospatial/projection';
 import independent from '../fixtures/native-proj-reference.json';
 import polePrecision from '../fixtures/pole-precision-reference.json';
 import {catalogueProjectionCases} from '../fixtures/catalogue-projections';

@@ -87,7 +87,7 @@ import {
   projJSONCRSParser,
   type TypeScriptCRSInput,
   type NormalizedCRS
-} from '@math.gl/geospatial/projection/experimental';
+} from '@math.gl/geospatial/projection';
 const nativeInput: TypeScriptCRSInput = spatialReference;
 new ProjectionTransform({
   from: nativeInput,
@@ -109,7 +109,7 @@ import {
   type DatumGrid,
   type DatumGridCollection,
   type DatumGridGeoTIFF
-} from '@math.gl/geospatial/projection/experimental';
+} from '@math.gl/geospatial/projection';
 const preparedGrid: DatumGrid = parseNTv2Grid(new ArrayBuffer(0), {
   includeErrorFields: false
 });

@@ -5,7 +5,7 @@
 import {expect, test} from 'vitest';
 import {datumCatalog} from '@math.gl/geospatial/projection/datums';
 import {unshiftedStructuredDatums} from '../fixtures/unshifted-structured-datums';
-import * as native from '@math.gl/geospatial/projection/experimental';
+import * as native from '@math.gl/geospatial/projection';
 import structured from '../fixtures/structured-proj-reference.json';
 import datumInputs from '../fixtures/datum-proj-cases.json';
 import datums from '../fixtures/datum-proj-reference.json';
