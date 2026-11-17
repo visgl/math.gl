@@ -4,9 +4,9 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {TaskRunner} from '@math.gl/tasks';
-import {getGeoArrowTransferList} from '../../../../src/arrow-integration/geoarrow-utils';
-import {geometryTask} from '../../../../../../examples/core/geoarrow-stream-worker/src/task.mjs';
-import {fixture} from '../../../../../../examples/core/geoarrow-stream-worker/src/fixture.mjs';
+import {getGeoArrowTransferList} from '@math.gl/core/arrow';
+import {geometryTask} from '../../../../../examples/core/geoarrow-stream-worker/src/task.mjs';
+import {fixture} from '../../../../../examples/core/geoarrow-stream-worker/src/fixture.mjs';
 const runner = new TaskRunner();
 test('task worker matches local clipping and transfers owned input', async () => {
   try {
