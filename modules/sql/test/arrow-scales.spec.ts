@@ -189,3 +189,17 @@ test('safe Arrow Int64 values scale without losing missing color rows', () => {
   expect(child.length).toBe(12);
   expect(child.nullCount).toBe(0);
 });
+
+test('Arrow threshold scale binds a single break and starts the upper class at equality', () => {
+  const data = tableFromArrays({risk: [4, 5, 6]});
+  const parsed = parseSQLScaleExpression(
+    "SCALE_THRESHOLD(risk, ARRAY[5], PALETTE('#000000', '#ffffff'))"
+  );
+  const result = compileArrowScale(data, parsed);
+  expect(result.scale.descriptor.thresholds).toEqual([5]);
+  expect(Array.from(result.evaluate(data), row => Array.from(row))).toEqual([
+    [0, 0, 0, 255],
+    [255, 255, 255, 255],
+    [255, 255, 255, 255]
+  ]);
+});
