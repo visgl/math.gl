@@ -47,3 +47,5 @@ The custom implementation incorporates the general-purpose optimizations from [l
 Precomputed areas must use the same projection plane as triangulation. Polygons with more than 80 input vertices use spatial hashing on that plane. Output indices refer to vertices, so multiply by `size` to locate coordinates in `positions`.
 
 Scratch nodes are reused across calls, with all mutable node fields reset before reuse. Nested calls and exceptions restore scratch state. Calls requiring more than 65,536 scratch nodes release the node cache on completion; smaller calls keep it for reuse. Input arrays and returned triangle arrays are never retained in the cache. As with upstream Earcut, self-intersections and other invalid polygons are handled on a best-effort basis, without a guarantee of a correct triangulation.
+
+When the leftmost vertex of a hole is also a vertex of the outer ring or of a hole that is already bridged, the hole is bridged at that shared vertex, as in upstream Earcut 3.0.1. Rings that touch at a vertex are common in clipped vector tiles.
