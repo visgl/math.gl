@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import type {Expression} from '../expressions/index';
+
 /**
  * Portable, JSON-safe vocabulary for data-driven visualization scales.
  * A specification describes an unresolved scale. It never contains an evaluator,
@@ -14,6 +16,11 @@ export type ScaleValue = number | string;
 /** Fixed values or a request to derive the domain from a column. */
 export type ScaleDomain =
   | {readonly type: 'fixed'; readonly values: readonly ScaleValue[]}
+  | {
+      readonly type: 'expression-extent';
+      /** Row expression whose evaluated values define the extent. */
+      readonly expression: Expression;
+    }
   | {readonly type: 'extent'; readonly column: string; readonly includeZero?: boolean}
   | {readonly type: 'symmetric'; readonly column: string; readonly pivot: number}
   | {
@@ -121,21 +128,27 @@ export function validateScaleSpec(spec: ScaleSpec): ScaleSpec {
   ];
   if (!kinds.includes(spec.type)) throw new Error(`Unsupported scale type: ${spec.type}`);
   const minimumStops = spec.type === 'ordinal' ? 1 : 2;
+  const minimumDomainStops = spec.type === 'threshold' ? 1 : minimumStops;
   const domain = spec.domain;
   if (!domain || typeof domain !== 'object') throw new Error('Scale domain is required');
   switch (domain.type) {
     case 'fixed':
       if (
         !Array.isArray(domain.values) ||
-        domain.values.length < minimumStops ||
+        domain.values.length < minimumDomainStops ||
         domain.values.some(
           value =>
             typeof value !== 'string' && (typeof value !== 'number' || !Number.isFinite(value))
         )
       )
         throw new Error(
-          `Fixed scale domain requires at least ${minimumStops} finite or string values`
+          `Fixed scale domain requires at least ${minimumDomainStops} finite or string values`
         );
+      break;
+    case 'expression-extent':
+      if (typeof domain.expression?.type !== 'string') {
+        throw new Error('Scale domain requires a row expression');
+      }
       break;
     case 'extent':
     case 'categories':

@@ -493,7 +493,10 @@ function findHoleBridge(hole, outerNode) {
 
   // find a segment intersected by a ray from the hole's leftmost point to the left;
   // segment's endpoint with lesser x will be potential connection point
+  // unless they intersect at a vertex, then choose the vertex
+  if (equals(hole, p)) return p;
   do {
+    if (equals(hole, p.next)) return p.next;
     if (hy <= p.y && hy >= p.next.y && p.next.y !== p.y) {
       const x = p.x + ((hy - p.y) * (p.next.x - p.x)) / (p.next.y - p.y);
       if (x <= hx && x > qx) {

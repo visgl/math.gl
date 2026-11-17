@@ -54,3 +54,7 @@ than 65,536 scratch nodes release the node cache on completion; smaller calls ke
 it for reuse. Input arrays and returned triangle arrays are never retained in the
 cache. As with upstream Earcut, self-intersections and other invalid polygons are
 handled on a best-effort basis, without a guarantee of a correct triangulation.
+
+When the leftmost vertex of a hole is also a vertex of the outer ring or of a hole
+that is already bridged, the hole is bridged at that shared vertex, as in upstream
+Earcut 3.0.1. Rings that touch at a vertex are common in clipped vector tiles.

@@ -103,6 +103,44 @@ Object.keys(expected.triangles).forEach(id => {
   });
 });
 
+test('hole touching another ring at its leftmost vertex leaves no gap', async () => {
+  // Land polygon from a 4096-unit vector tile: 120 rings, several holes share a vertex
+  // with another ring. Before the bridge fix, a hairline crack of these points stayed open.
+  const data = flatten(await openFile(`${FIXTURES_PATH}vector-tile-touching-holes.json`));
+  const indices = earcut(data.vertices, data.holes);
+  expect(deviation(data.vertices, data.holes, 2, indices)).toBeLessThan(1e-12);
+
+  const crackPoints = [
+    [1427.3, 2419.3],
+    [2666.9, 2502.7],
+    [3085.3, 2525.3],
+    [3922.1, 2570.6]
+  ];
+  for (const [x, y] of crackPoints) {
+    expect(isCovered(data.vertices, indices, x, y), `${x},${y} is covered`).toBe(true);
+  }
+});
+
+/** Returns true when 2D point `x`,`y` lies inside or on one of the triangles. */
+function isCovered(vertices, indices, x, y) {
+  for (let i = 0; i < indices.length; i += 3) {
+    const a = indices[i] * 2;
+    const b = indices[i + 1] * 2;
+    const c = indices[i + 2] * 2;
+    const d1 =
+      (vertices[b] - vertices[a]) * (y - vertices[a + 1]) -
+      (vertices[b + 1] - vertices[a + 1]) * (x - vertices[a]);
+    const d2 =
+      (vertices[c] - vertices[b]) * (y - vertices[b + 1]) -
+      (vertices[c + 1] - vertices[b + 1]) * (x - vertices[b]);
+    const d3 =
+      (vertices[a] - vertices[c]) * (y - vertices[c + 1]) -
+      (vertices[a + 1] - vertices[c + 1]) * (x - vertices[c]);
+    if ((d1 >= 0 && d2 >= 0 && d3 >= 0) || (d1 <= 0 && d2 <= 0 && d3 <= 0)) return true;
+  }
+  return false;
+}
+
 for (const plane of ['xz', 'yz']) {
   test(`hashed triangulation on ${plane}`, async () => {
     const data = flatten(await openFile(`${FIXTURES_PATH}water.json`));
