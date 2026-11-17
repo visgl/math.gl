@@ -4,6 +4,14 @@
 
 Use this guide to upgrade from a stable math.gl 4.x release to 5.0. See [What’s New](https://visgl.github.io/math.gl/next/docs/whats-new.md#v50) for new capabilities.
 
+### Canonical projection paths[​](#canonical-projection-paths "Direct link to Canonical projection paths")
+
+Use `@math.gl/geospatial/projection` and its focused `/core`, `/projections/<id>`, `/parsers/<format>`, and `/grids/<format>` subpaths. The duplicate `/projection/experimental` and `/projection/native` trees have been removed. For example, replace `@math.gl/geospatial/projection/native/core` with `@math.gl/geospatial/projection/core`. Lazy projection descriptors remain under `@math.gl/geospatial/projection/projections/lazy`.
+
+Use `@math.gl/arrow/geoarrow-utils` without `/index`. Private implementation files are not package entry points; package-internal tests should import them relatively.
+
+Relative source imports also omit `/index`. Native build output resolves directory entry points and adds `.js` extensions during compilation.
+
 ### Package imports[​](#package-imports "Direct link to Package imports")
 
 | 4.x package                                                          | 5.0 import                       |
