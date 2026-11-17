@@ -1233,3 +1233,87 @@ const triangleIndex = cut.sourceTileFaces[face];
 For mixed resolutions, first reconcile edge spans with `stitchTerrainMeshEdges` or `stitchTerrainLodCut`, then supply the resulting meshes in a common frame. This operation does not silently snap vertices or change elevation. Unreconciled hanging nodes, overlapping resident parent/child tiles and conflicting seam heights are rejected. An exact weld requires identical coordinates, so perform any coordinate-frame conversion consistently before calling it.
 
 Recompute with the new resident set on tile arrival or eviction. The operation is stateless; tile indices refer to that call's array, not persistent tile IDs. Input vertex/triangle limits cover the complete set, including duplicate vertices; assembly and clipping share the work budget. This first implementation rebuilds the cut rather than incrementally caching it. The cutout lab's **Resident tiles** control demonstrates arrival/eviction without walls along an absent neighbor. Select **Mixed 2:1** to inspect a coarse/fine pair reconciled by the sparse stitcher before cutting. The example reports the maximum seam height adjustment separately from the cutout, which itself preserves the supplied surface.
+
+### Incremental resident cutouts[​](#incremental-resident-cutouts "Direct link to Incremental resident cutouts")
+
+Use `updateTerrainTileCutouts` when edits or tile arrival/eviction should preserve unchanged clipped buffers. Each resident has a unique string ID, a mesh in the common local frame, and a nonnegative integer revision. Increment the revision **after any in-place buffer edit**; replacing the mesh object also invalidates it. Treat returned arrays and cached inputs as read-only within a revision.
+
+```
+import {updateTerrainTileCutouts, createTerrainCutoutSkirts} from '@math.gl/geospatial';
+
+
+
+let result = updateTerrainTileCutouts(residents, polygon);
+
+// Edit only an interior sample, or reconcile changed seam profiles first.
+
+residents[0].mesh.positions[interiorVertex * 3 + 2] += 1;
+
+residents[0].revision++;
+
+result = updateTerrainTileCutouts(residents, polygon, result.cache);
+
+for (const id of result.changed) {
+
+  const walls = createTerrainCutoutSkirts(result.tiles.get(id)!, {
+
+    lift: 20, patch: {baseZ: -100}, remainder: {baseZ: -100}
+
+  });
+
+  // Replace this tile's displayed buffers with walls.patch/walls.remainder.
+
+}
+
+// Remove displayed entries named in result.removed.
+```
+
+`rebuilt` identifies tiles actually clipped; `changed` also includes neighbors whose exposed cut edges changed without reclipping their surface. Source triangle and barycentric references are **local to each input tile**, unlike the assembled face table returned by `splitTerrainMeshTiles`. The cache is opaque, synchronous and local to the module instance; it is not a worker-transfer format.
+
+Adjacent source meshes must be conforming, including mixed-level edge spans. Reconcile them using the existing stitchers before updating the cut. The cache validates new/changed adjacent source pairs and rejects overlap, hanging nodes and inconsistent heights. Independent clipping uses canonical intersection arithmetic, then pairs exact XYZ boundary edges. No tolerance-based snapping or nodata filling occurs. Existing missing-domain boundaries get no paired walls. Polygon or option changes invalidate all clips; failed updates leave the old cache intact. Changing frames requires new mesh objects or revisions as well as a polygon expressed in the new frame.
+
+Work consists of clipping changed tiles, validating changed adjacent pairs, a resident-pair broad phase, and reconciling cached exposed-edge summaries. Unchanged triangles are not rescanned or reclipped. The broad phase is currently quadratic in resident count; `maxPairChecks` bounds it. `maxTiles` and `maxBoundaryEdges` bound resident reconciliation. `maxWork`, `maxVertices` and `maxTriangles` apply separately to each tile clip and each adjacent-pair check; they are not aggregate per-update limits. This is not an incremental skirt cache: callers may rebuild skirts for `changed` tiles only.
+
+The cutout lab reports rebuilt tiles and changed outputs while switching resident sets. Run `node scripts/benchmark-terrain-cutouts.mjs` after `yarn build` for an interleaved Pacific/Sierra comparison against monolithic full rebuilds. It checks exact triangle geometry and cut edges, plus coverage area, after every edit/arrival/eviction step. See the [qualification report](https://github.com/visgl/math.gl/blob/master/dev-docs/terrain-cutout-qualification.md).
+
+### Geographic cut preparation[​](#geographic-cut-preparation "Direct link to Geographic cut preparation")
+
+`createGeographicTerrainCutoutFrame` defines a bounded **spherical gnomonic** chart. `projectGeographicTerrainCutout` maps packed longitude/latitude/height arrays to chart X/Y/height; `unprojectGeographicTerrainCutout` reverses this. Horizontal coordinates are meters and heights retain their original units and vertical datum. The default radius is 6378137 m; the default angular cap is 30°, with a maximum configurable cap of 80°. Forward and inverse checks use the same small floating-point allowance at the inclusive cap boundary.
+
+```
+import {
+
+  createGeographicTerrainCutoutFrame, projectGeographicTerrainCutout,
+
+  unprojectGeographicTerrainCutout, splitTerrainMesh
+
+} from '@math.gl/geospatial';
+
+
+
+const frame = createGeographicTerrainCutoutFrame({center: [180, 0]});
+
+const positions = projectGeographicTerrainCutout(longitudeLatitudeHeight, frame);
+
+const projectedRing = projectGeographicTerrainCutout(Float64Array.of(
+
+  179, -1, 0, -179, -1, 0, -179, 1, 0, 179, 1, 0
+
+), frame);
+
+const polygon = Array.from({length: projectedRing.length / 3}, (_, i) =>
+
+  [projectedRing[3 * i], projectedRing[3 * i + 1]] as const);
+
+const cut = splitTerrainMesh({positions, indices}, polygon);
+
+const patchGeographicPositions = unprojectGeographicTerrainCutout(
+
+  cut.patch.positions, frame
+
+);
+```
+
+Longitude aliases at the antimeridian map identically. Either pole can be the chart center; pole coordinates are independent of longitude. Prepare explicit polar-fan connectivity rather than degenerate duplicate-pole rows. The helpers do not alter indices or repair winding. All mesh and polygon vertices must be within the chosen cap; global extents and the opposite hemisphere are rejected. The existing planar splitter still requires a strictly convex projected ring.
+
+[Spherical gnomonic projection](https://proj.org/en/stable/operations/projections/gnom.html) maps minor great-circle segments to straight chart lines. This defines the horizontal edge model used here. Heights interpolate over the **projected triangulated surface**, not an ellipsoid or an ECEF triangle. A constant-latitude boundary must be sampled explicitly if it is intended to follow a parallel; there is no automatic densification or continuous geographic error certificate. Inverse projection emits canonical longitudes, so a renderer needing unwrapped longitudes must choose its own longitude interval. These helpers prepare regional cuts; they do not implement global polygon partitioning, globe rendering, or radial extrusion. The example provides antimeridian and north/south polar views, with vertical display exaggeration labeled separately.
