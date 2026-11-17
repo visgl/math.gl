@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {snapshotParameter, type SQLParameterSnapshot} from './parameter-snapshots';
 import type {Expression} from '../expressions';
 import {
   isColumnarPredicateValue,
@@ -41,7 +42,7 @@ export type SQLParameters = Readonly<Record<string, SQLParameterValue>>;
 /** Bind values directly, or retain the existing custom AST interpretation callback. */
 export type SQLParameterOptions = Readonly<{
   /** Values referenced by SQL placeholders such as `:minimum` or `:colors`. */
-  parameters?: SQLParameters;
+  parameters?: SQLParameters | SQLParameterSnapshot;
   /** Custom interpretation of a placeholder; mutually exclusive with parameters. */
   parseParameter?: (name: string) => Expression;
 }>;
@@ -56,6 +57,8 @@ export function validateSQLParameterOptions(options: SQLParameterOptions): void 
 /** Resolves a named value into a copied literal AST without interpreting it as SQL. */
 export function bindSQLParameter(name: string, options: SQLParameterOptions): Expression {
   if (options.parseParameter) return options.parseParameter(name);
+  if (options.parameters?.kind === 'sql-parameter-snapshot')
+    return snapshotParameter(options.parameters as SQLParameterSnapshot, name);
   if (!Object.prototype.hasOwnProperty.call(options.parameters ?? {}, name)) {
     throw new Error(`SQL parameter ":${name}" requires a value`);
   }

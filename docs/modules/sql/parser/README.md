@@ -321,3 +321,26 @@ Arrow compilation reuses matching typed element layouts and supplied UTF-8 bytes
 comparisons do not encode or decode text per row. Different receiving numeric
 types are converted once during compilation. This is copy-on-bind, not a borrowed
 buffer or ownership-transfer API.
+
+## Reusable parameter snapshots
+
+`prepareSQLParameters(values, {previous?})` validates and copies values into an opaque
+snapshot accepted by parser `parameters` options. Equal entries reuse previous storage.
+When every entry matches, preparation returns the previous handle. Caller mutations
+are detected when preparing the next snapshot, including edits to typed arrays.
+
+`getSQLParameterNames(sql)` returns unique names in first-use order while ignoring
+quoted text, comments, and casts. Retain this list with each query and call
+`areSQLParametersEqual(previous, next, {names})` to compare only its dependencies.
+Omitting `names` compares the complete map. Missing values differ from present values.
+Physical typed-array types participate in equality. Snapshots retain private buffer
+ownership and binding returns detached ASTs. Prepare snapshots separately in each
+worker. SQL text, source data, schema and function changes also require invalidation.
+
+```ts
+const names = getSQLParameterNames(sql);
+const next = prepareSQLParameters(values, {previous});
+if (!areSQLParametersEqual(previous, next, {names})) {
+  result = queryArrowSQL(sql, tables, {parameters: next});
+}
+```
