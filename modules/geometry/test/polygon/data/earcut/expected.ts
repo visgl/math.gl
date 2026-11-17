@@ -45,7 +45,8 @@ export default {
     touching3: 15,
     touching4: 20,
     rain: 2681,
-    issue131: 12
+    issue131: 12,
+    'vector-tile-touching-holes': 1493
   },
   errors: {
     dude: 2e-15,
