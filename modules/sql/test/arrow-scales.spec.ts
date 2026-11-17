@@ -6,7 +6,12 @@ import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
 import {parseSQLScaleExpression} from '../src/scales';
 import {compileResolvedScale, resolvePalette} from '../src/scales';
-import {compileArrowScale, compileArrowScales} from '@math.gl/sql/arrow-scales';
+import {
+  bindArrowScale,
+  compileArrowScale,
+  compileArrowScales,
+  createStreamingDomainAccumulator
+} from '@math.gl/sql/arrow-scales';
 import {resolveArrowDomains, resolveArrowQuantiles} from '../src/scales/arrow-domains';
 
 test('shared Arrow extents, symmetric and percentile domains', () => {
@@ -59,6 +64,33 @@ test('quantile class breaks are explicit and stable', () => {
   );
   expect(result.scale.descriptor.thresholds).toEqual([8, 16, 24, 32]);
   expect(result.evaluate(table).length).toBe(5);
+});
+
+test('binds streamed quantile breaks without scanning evaluation rows', () => {
+  const training = tableFromArrays({value: [0, 10, 20, 30, 40]});
+  const evaluation = tableFromArrays({value: [5, 6, 7]});
+  const parsed = parseSQLScaleExpression("SCALE_QUANTILE(value, 5, PALETTE('Blues'))");
+  const accumulator = createStreamingDomainAccumulator([parsed.scale.domain], {
+    quantileColumns: ['value']
+  });
+  for (const batch of training.batches) accumulator.update(batch);
+  const domain = accumulator.result()[0]!;
+  const quantileBreaks = accumulator.quantileBreaks('value', 5);
+  const result = bindArrowScale(training.schema, parsed, {domain, quantileBreaks});
+  expect(result.scale.descriptor.domain).toEqual([0, 40]);
+  expect(result.scale.descriptor.thresholds).toEqual([8, 16, 24, 32]);
+  expect(result.evaluateBatch(evaluation.batches[0]!).get(2)?.toArray()).toEqual(
+    new Uint8Array(
+      (result.scale.sample(7) as readonly number[]).map(value => Math.round(value * 255))
+    )
+  );
+  expect(() => bindArrowScale(training.schema, parsed, {domain})).toThrow('resolved break');
+  expect(() =>
+    bindArrowScale(training.schema, parsed, {
+      domain,
+      quantileBreaks: [8, 16, 12, 32]
+    })
+  ).toThrow('nondecreasing');
 });
 
 test('shared domain planner returns separate compiled attribute scales', () => {
@@ -134,6 +166,15 @@ test('tied quantiles drop empty classes from the sampler and legend', () => {
   expect(scale.scale.sample(0)).toEqual(range.values[1]);
 });
 
+test('constant quantize domains retain only reachable palette classes', () => {
+  const table = tableFromArrays({value: [5, 5]});
+  const parsed = parseSQLScaleExpression("SCALE_QUANTIZE(value, 5, PALETTE('Blues'))");
+  const result = bindArrowScale(table.schema, parsed, {domain: [5, 5]});
+  expect(result.scale.descriptor.thresholds).toEqual([5]);
+  expect(result.scale.descriptor.range.values).toHaveLength(2);
+  expect(result.scale.sample(5)).toEqual(result.scale.descriptor.range.values[1]);
+});
+
 test('safe Arrow Int64 values scale without losing missing color rows', () => {
   const table = tableFromArrays({v: [0n, null, 10n]});
   const scale = compileArrowScale(
@@ -147,4 +188,48 @@ test('safe Arrow Int64 values scale without losing missing color rows', () => {
   const child = vector.getChildAt(0)!;
   expect(child.length).toBe(12);
   expect(child.nullCount).toBe(0);
+});
+
+test('Arrow threshold scale binds a single break and starts the upper class at equality', () => {
+  const data = tableFromArrays({risk: [4, 5, 6]});
+  const parsed = parseSQLScaleExpression(
+    "SCALE_THRESHOLD(risk, ARRAY[5], PALETTE('#000000', '#ffffff'))"
+  );
+  const result = compileArrowScale(data, parsed);
+  expect(result.scale.descriptor.thresholds).toEqual([5]);
+  expect(Array.from(result.evaluate(data), row => Array.from(row))).toEqual([
+    [0, 0, 0, 255],
+    [255, 255, 255, 255],
+    [255, 255, 255, 255]
+  ]);
+});
+
+test('SQL ordinal scales retain fixed category colors when earlier categories are absent', () => {
+  const data = tableFromArrays({category: [20, 20, 99]});
+  const parsed = parseSQLScaleExpression(
+    "SCALE_ORDINAL(category, CATEGORIES(-10, 20), PALETTE('#ff0000', '#0000ff'))"
+  );
+  const result = compileArrowScale(data, parsed);
+  expect(result.scale.descriptor.domain).toEqual([-10, 20]);
+  expect(Array.from(result.evaluate(data).get(0))).toEqual([0, 0, 255, 255]);
+  expect(result.evaluate(data).get(2)).toBeNull();
+  expect(() =>
+    parseSQLScaleExpression("SCALE_ORDINAL(category, CATEGORIES(20, 20), PALETTE('Tableau10'))")
+  ).toThrow('no duplicates');
+});
+
+test('fixed ordinal mappings remain stable across separately evaluated batches', () => {
+  const first = tableFromArrays({category: new Int32Array([10, 20])});
+  const second = tableFromArrays({category: new Int32Array([20, 10, 99])});
+  const scale = compileArrowScale(
+    first,
+    parseSQLScaleExpression(
+      "SCALE_ORDINAL(category, CATEGORIES(10, 20), PALETTE('#ff0000', '#0000ff'))"
+    )
+  );
+  const initial = scale.evaluateBatch(first.batches[0]!);
+  const later = scale.evaluateBatch(second.batches[0]!);
+  expect(Array.from(later.get(0))).toEqual(Array.from(initial.get(1)));
+  expect(Array.from(later.get(1))).toEqual(Array.from(initial.get(0)));
+  expect(later.get(2)).toBeNull();
 });

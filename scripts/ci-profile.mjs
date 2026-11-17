@@ -24,8 +24,17 @@ export function selectProfile(event, paths = []) {
   const docsOnly =
     paths.length > 0 &&
     paths.every(path => /^(docs\/|dev-docs\/|README\.md$|CHANGELOG\.md$|LICENSE$)/.test(path));
+  // Run the solar matrix when its workspace code or shared example tooling changes.
+  const solarFull =
+    full ||
+    paths.some(path =>
+      /^(?:examples\/(?:earth\/sun-terminator\/|common\/|vite[^/]*\.mjs$)|modules\/(?:core|earth|geometry|geospatial|tasks|web-mercator)\/|dev-modules\/map-layers\/|test\/examples\/)/.test(
+        path
+      )
+    );
   return {
     full,
+    solarFull,
     performance: ['pull_request', 'merge_group'].includes(event) && !docsOnly,
     browsers: full ? ['chromium', 'firefox', 'webkit'] : ['chromium']
   };
@@ -50,7 +59,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const profile = selectProfile(event, paths);
   appendFileSync(
     process.env.GITHUB_OUTPUT,
-    `full=${profile.full}\nperformance=${profile.performance}\nbrowsers=${JSON.stringify(profile.browsers)}\n`
+    `full=${profile.full}\nsolar-full=${profile.solarFull}\nperformance=${profile.performance}\nbrowsers=${JSON.stringify(profile.browsers)}\n`
   );
   console.log(JSON.stringify(profile));
 }

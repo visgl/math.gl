@@ -116,8 +116,9 @@ export function compileResolvedScale(
   let palette = colorType ? resolvePalette(spec.range, classes) : undefined;
   if (thresholds?.length && thresholds.length + 1 !== (palette?.length ?? 0))
     throw new Error('Scale class count must match palette color count');
-  if (spec.type === 'quantile' && thresholds) {
+  if ((spec.type === 'quantile' || spec.type === 'quantize') && thresholds) {
     // Repeated breakpoints create empty classes. Keep the colors of the intervals that remain.
+    /** Breaks before empty intervals are removed. */
     const original = thresholds;
     thresholds = original.filter((value, i) => i === 0 || value !== original[i - 1]);
     palette = palette!.filter(
@@ -149,7 +150,9 @@ export function compileResolvedScale(
   const isOrdinal = spec.type === 'ordinal';
   const values = isOrdinal ? domain : numericValues(domain);
   const numerical = isOrdinal ? [] : numericValues(domain);
-  if (!isOrdinal && numerical.length < 2) throw new Error('Numeric domain requires two endpoints');
+  if (!isOrdinal && spec.type !== 'threshold' && numerical.length < 2) {
+    throw new Error('Numeric domain requires two endpoints');
+  }
   const pivot = spec.type === 'diverging' ? spec.pivot : undefined;
   if (pivot !== undefined && !(numerical[0]! < pivot && pivot < numerical[numerical.length - 1]!))
     throw new Error('Diverging scale pivot must be between the domain endpoints');

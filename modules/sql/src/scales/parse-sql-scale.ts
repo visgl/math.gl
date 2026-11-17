@@ -19,6 +19,7 @@ type Call = {
   arguments: Expression[];
 };
 
+/** A row expression and its validated, unresolved visualization scale. */
 export type ParsedSQLScale = Readonly<{
   /** Row-preserving value expression, evaluated by an Arrow/GPU backend. */
   value: Expression;
@@ -113,6 +114,17 @@ function parseDomain(node: Expression): ScaleDomain {
   throw new Error(`Invalid ${functionName} domain arguments`);
 }
 
+/** Parses an ordered list of unique fixed category keys. */
+function parseCategories(node: Expression): ScaleDomain {
+  const values = call(node, 'CATEGORIES').arguments.map(argument =>
+    argument.type === 'Literal' ? literal(argument) : number(argument)
+  );
+  if (!values.length || new Set(values).size !== values.length) {
+    throw new Error('CATEGORIES requires at least one category and no duplicates');
+  }
+  return {type: 'fixed', values};
+}
+
 function parseRange(node: Expression): ScaleRange {
   const fn = call(node);
   const args = fn.arguments;
@@ -121,6 +133,12 @@ function parseRange(node: Expression): ScaleRange {
       if (args.length >= 2) return {type: 'numeric', values: args.map(number)};
       break;
     case 'PALETTE': {
+      if (args.length === 1) {
+        const stop = literal(args[0]!);
+        if (typeof stop === 'string' && stop.startsWith('#')) {
+          return {type: 'colors', values: [color(stop)]};
+        }
+      }
       if (
         args.length === 1 ||
         (args.length === 2 &&
@@ -146,7 +164,21 @@ function parseRange(node: Expression): ScaleRange {
  * This does not evaluate domain statistics, produce colors, or modify row count.
  */
 export function parseSQLScaleExpression(sql: string): ParsedSQLScale {
-  const root = call(parseSQLExpression(sql));
+  return parseSQLScaleAST(parseSQLExpression(sql));
+}
+
+/**
+ * Extracts a scale from a parsed SQL expression without reparsing or evaluating it.
+ *
+ * Pass a scale call from `parseSQLExpression` or a SELECT projection. The returned
+ * value retains the input row-expression identity; this function does not mutate
+ * the AST, resolve domain statistics, or compile backend-specific code.
+ * @param expression - A scale call in the public portable expression AST.
+ * @returns The row-value expression and validated scale specification.
+ * @throws If the root is not a supported scale call or its scale arguments are invalid.
+ */
+export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
+  const root = call(expression);
   const fn = root.callee.name.toUpperCase();
   const args = root.arguments;
   const names: Record<string, ScaleSpec['type']> = {
@@ -157,21 +189,26 @@ export function parseSQLScaleExpression(sql: string): ParsedSQLScale {
     SCALE_DIVERGING: 'diverging',
     SCALE_ORDINAL: 'ordinal',
     SCALE_QUANTILE: 'quantile',
-    SCALE_QUANTIZE: 'quantize'
+    SCALE_QUANTIZE: 'quantize',
+    SCALE_THRESHOLD: 'threshold'
   };
   const type = names[fn];
   if (!type) throw new Error(`Unsupported SQL scale function: ${fn}`);
-  if (args.length !== (fn === 'SCALE_ORDINAL' ? 2 : 3)) {
-    throw new Error(`${fn} expects ${fn === 'SCALE_ORDINAL' ? 'two' : 'three'} arguments`);
+  const inferredOrdinal = fn === 'SCALE_ORDINAL' && args.length === 2;
+  if (!inferredOrdinal && args.length !== 3) {
+    throw new Error(`${fn} expects ${fn === 'SCALE_ORDINAL' ? 'two or three' : 'three'} arguments`);
   }
   const value = args[0]!;
-  const domain =
-    fn === 'SCALE_ORDINAL'
-      ? {type: 'categories' as const, column: name(value)}
+  const domain = inferredOrdinal
+    ? {type: 'categories' as const, column: name(value)}
+    : fn === 'SCALE_ORDINAL'
+      ? parseCategories(args[1]!)
       : fn === 'SCALE_QUANTILE' || fn === 'SCALE_QUANTIZE'
         ? {type: 'extent' as const, column: name(value)}
-        : parseDomain(args[1]!);
-  let range = parseRange(args[fn === 'SCALE_ORDINAL' ? 1 : 2]!);
+        : fn === 'SCALE_THRESHOLD'
+          ? {type: 'fixed' as const, values: call(args[1]!, 'ARRAY').arguments.map(number)}
+          : parseDomain(args[1]!);
+  let range = parseRange(args[inferredOrdinal ? 1 : 2]!);
   if (fn === 'SCALE_QUANTILE' || fn === 'SCALE_QUANTIZE') {
     const count = number(args[1]!);
     if (!Number.isSafeInteger(count) || count < 2) {
@@ -180,10 +217,30 @@ export function parseSQLScaleExpression(sql: string): ParsedSQLScale {
     if (range.type !== 'palette') throw new Error(`${fn} requires a named palette`);
     range = {...range, count};
   }
-  const colors = ['sequential', 'diverging', 'ordinal', 'quantile', 'quantize'].includes(type);
+  const colors = [
+    'sequential',
+    'diverging',
+    'ordinal',
+    'quantile',
+    'quantize',
+    'threshold'
+  ].includes(type);
   if (colors && range.type === 'numeric') throw new Error(`${fn} requires a color range`);
   if (!colors && range.type !== 'numeric') throw new Error(`${fn} requires a numeric RANGE`);
-  if (
+  if (type === 'threshold' && domain.type === 'fixed') {
+    const breaks = domain.values as readonly number[];
+    if (!breaks.length || breaks.some((value, index) => index > 0 && value <= breaks[index - 1]!)) {
+      throw new Error('SCALE_THRESHOLD breaks must be nonempty and strictly increasing');
+    }
+    const count = breaks.length + 1;
+    if (range.type === 'palette' && range.count === undefined) range = {...range, count};
+    if (
+      (range.type === 'colors' && range.values.length !== count) ||
+      (range.type === 'palette' && range.count !== count)
+    ) {
+      throw new Error('SCALE_THRESHOLD requires one more color than breaks');
+    }
+  } else if (
     domain.type === 'fixed' &&
     range.type === 'colors' &&
     domain.values.length !== range.values.length
