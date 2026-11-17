@@ -132,6 +132,26 @@ export function immutableMetadata(metadata: Readonly<RasterMetadata>): Readonly<
   freeze(copy);
   return copy;
 }
+/** Exact output sample-and-mask allocation, including mixed band representations. */
+export function rasterWindowByteLength(
+  payload: NumericRasterData,
+  pixels: number,
+  bands: readonly number[]
+): number {
+  return (
+    pixels *
+    bands.reduce(
+      (bytes, band) =>
+        bytes +
+        (Array.isArray(payload.data)
+          ? payload.data[band]!.BYTES_PER_ELEMENT
+          : payload.data.BYTES_PER_ELEMENT) +
+        1,
+      0
+    )
+  );
+}
+
 /** Wraps a resident loaders.gl-compatible payload; input buffers must remain stable. */
 export function createRasterSourceFromData(payload: NumericRasterData): SyncRasterSource {
   if (
@@ -188,7 +208,7 @@ export function createRasterSourceFromData(payload: NumericRasterData): SyncRast
     metadata,
     readWindow(window) {
       const bands = validateWindow(metadata, window);
-      if (window.width * window.height * bands.length * 9 > 256 * 1024 * 1024)
+      if (rasterWindowByteLength(input, window.width * window.height, bands) > 256 * 1024 * 1024)
         throw new Error('Raster window exceeds decoded-byte budget');
       const result = windowMetadata(metadata, window, bands);
       const validityMasks = bands.map((_, band) => ({

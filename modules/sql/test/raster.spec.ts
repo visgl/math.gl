@@ -422,3 +422,90 @@ test('SQL metadata accessors, struct extraction, multiple batches and cancellati
   ).toThrow();
   expect(received).toBe(abort.signal);
 });
+
+test('statistics structs compose with null branches and raster masks remain lazy', () => {
+  const context = new RasterContext(),
+    input = table(context),
+    functions = createRasterFunctions(context);
+  const run = (expression: string) =>
+    compileArrowExpression(expression, {inputSchema: input.schema, functions}).evaluateTable(input);
+  expect(run('x == 0 ? RT_SummaryStats(r,1) : null').get(0).mean).toBe(2.5);
+  expect(run('COALESCE(RT_SummaryStats(r,1), null)').get(0).mean).toBe(2.5);
+  expect(run('TRY(RT_SummaryStats(r,1), null)').get(1)).toBeNull();
+  let registered = 0;
+  const register = context.register.bind(context);
+  context.register = source => {
+    registered++;
+    return register(source);
+  };
+  expect(Array.from(run('x == 1 ? RT_Band(r,1) : null'))).toEqual([null, null]);
+  expect(registered).toBe(0);
+  const empty = rasterClip(raster(), {crs: 'EPSG:4326', coordinates: []});
+  expect(rasterSummary(empty, 0).count).toBe(0);
+  const first = {
+    type: 'GeographicCRS',
+    coordinate_system: {axis: [{name: 'Longitude', unit: 'degree'}]}
+  };
+  const second = {
+    coordinate_system: {axis: [{unit: 'degree', name: 'Longitude'}]},
+    type: 'GeographicCRS'
+  };
+  expect(
+    rasterValue(rasterArithmetic(raster({crs: first}), raster({crs: second}), 'add'), 0, 0, 0)
+  ).toBe(2);
+  expect(() => run('RT_Clip(r,RT_ConvexHull(r),"EPSG:3857")')).toThrow(/CRS/);
+});
+
+test('all raster arithmetic overloads propagate untyped and typed null operands', () => {
+  const context = new RasterContext(),
+    input = table(context),
+    functions = createRasterFunctions(context);
+  const typedNulls = queryArrowSQL(
+    'SELECT r, NULL AS missing FROM input',
+    new Map([['input', input]])
+  );
+  expect(
+    Array.from(
+      compileArrowExpression('RT_Add(r, missing)', {
+        inputSchema: typedNulls.schema,
+        functions
+      }).evaluateTable(typedNulls)
+    )
+  ).toEqual([null, null]);
+  for (const op of ['Add', 'Subtract', 'Multiply', 'Divide'])
+    for (const args of ['r,null', 'null,r', 'null,2', 'null,null']) {
+      const compiled = compileArrowExpression(`RT_${op}(${args})`, {
+        inputSchema: input.schema,
+        functions
+      });
+      expect(Array.from(compiled.evaluateTable(input))).toEqual([null, null]);
+      expect(compiled.outputField.metadata.get('ARROW:extension:name')).toBe('math.gl.raster');
+    }
+});
+
+test('resident window accounting uses selected sample widths plus validity masks', async () => {
+  const {rasterWindowByteLength} = await import('../src/raster/source');
+  const bytes: NumericRasterData = {
+    width: 1,
+    height: 1,
+    bandCount: 4,
+    dtype: 'uint8',
+    data: new Uint8Array(4),
+    interleaved: true
+  };
+  expect(rasterWindowByteLength(bytes, 8_000_000, [0, 1, 2, 3])).toBe(64_000_000);
+  const mixed: NumericRasterData = {
+    width: 1,
+    height: 1,
+    bandCount: 2,
+    dtype: 'mixed',
+    data: [new Uint8Array(1), new Float64Array(1)],
+    bands: [
+      {index: 0, dtype: 'uint8'},
+      {index: 1, dtype: 'float64'}
+    ]
+  };
+  expect(rasterWindowByteLength(mixed, 10, [0])).toBe(20);
+  expect(rasterWindowByteLength(mixed, 10, [1])).toBe(90);
+  expect(rasterWindowByteLength(mixed, 10, [0, 1])).toBe(110);
+});

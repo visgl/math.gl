@@ -2,7 +2,16 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Binary, Field, Float64, Struct, Utf8, vectorFromArray, type Vector} from 'apache-arrow';
+import {
+  Binary,
+  Field,
+  Float64,
+  Null,
+  Struct,
+  Utf8,
+  vectorFromArray,
+  type Vector
+} from 'apache-arrow';
 import {parseWKB, writeWKB} from '@math.gl/arrow/wkb';
 import type {ArrowTableFunction} from '../arrow/types';
 import {RasterContext, rasterToWorld, worldToRaster, requireTransform} from './source';
@@ -13,7 +22,8 @@ import {
   rasterSummary,
   rasterArithmetic,
   rasterResample,
-  rasterClip
+  rasterClip,
+  requireSameCRS
 } from './operations';
 import type {RasterCRS, SyncRasterSource} from './types';
 
@@ -40,14 +50,15 @@ export function createRasterVector(
 }
 /** Extracts an EPSG identifier without guessing equivalent CRS aliases. */
 function srid(crs: RasterCRS | undefined): number | null {
+  let code: number | undefined;
   if (typeof crs === 'string') {
     const match = /^EPSG:(\d+)$/i.exec(crs);
-    return match ? Number(match[1]) : null;
+    if (match) code = Number(match[1]);
+  } else {
+    const id = (crs as {id?: {authority?: string; code?: number | string}} | undefined)?.id;
+    if (id?.authority?.toUpperCase() === 'EPSG') code = Number(id.code);
   }
-  const id = (crs as {id?: {authority?: string; code?: number | string}} | undefined)?.id;
-  return id?.authority?.toUpperCase() === 'EPSG' && Number.isSafeInteger(Number(id.code))
-    ? Number(id.code)
-    : null;
+  return Number.isSafeInteger(code) && code! > 0 && code! <= 0x7fffffff ? code! : null;
 }
 /** Adds EWKB SRID metadata where the source has an EPSG identity. */
 function footprintWKB(source: SyncRasterSource): Uint8Array {
@@ -188,6 +199,7 @@ export function createRasterFunctions(
   );
   for (const operation of ['add', 'subtract', 'multiply', 'divide'] as const) {
     const name = `RT_${operation[0]!.toUpperCase()}${operation.slice(1)}`;
+    add(name, [raster, new Field('null', new Null(), true)], raster, () => null);
     add(name, [raster, raster], raster, (a, b) =>
       context.register(rasterArithmetic(source(a), source(b), operation))
     );
@@ -202,6 +214,17 @@ export function createRasterFunctions(
     const fieldCRS = encoded ? JSON.parse(encoded).crs : undefined;
     const polygonCRS =
       crs ?? fieldCRS ?? (parsed.srid === undefined ? undefined : `EPSG:${parsed.srid}`);
+    for (const declared of [
+      crs,
+      fieldCRS,
+      parsed.srid === undefined ? undefined : `EPSG:${parsed.srid}`
+    ]) {
+      if (declared)
+        requireSameCRS(
+          {...source(h).metadata, crs: polygonCRS},
+          {...source(h).metadata, crs: declared}
+        );
+    }
     if (!polygonCRS)
       throw new Error('RT_Clip requires geometry CRS metadata, EWKB SRID or explicit CRS');
     return context.register(

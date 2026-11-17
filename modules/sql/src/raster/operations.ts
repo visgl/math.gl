@@ -4,6 +4,7 @@
 
 import type {RasterMetadata, RasterPolygon, RasterSummary, SyncRasterSource} from './types';
 import {
+  createRasterSourceFromData,
   immutableMetadata,
   rasterSample,
   rasterToWorld,
@@ -15,6 +16,7 @@ import {
 
 /** Canonical structural CRS comparison; does not resolve aliases or reproject. */
 function canonical(value: unknown): string {
+  if (Array.isArray(value)) return JSON.stringify(value.map(canonical));
   if (value && typeof value === 'object' && !Array.isArray(value))
     return JSON.stringify(
       Object.keys(value)
@@ -351,8 +353,20 @@ function inRing(x: number, y: number, ring: readonly (readonly number[])[]): boo
 export function rasterClip(source: SyncRasterSource, polygon: RasterPolygon): SyncRasterSource {
   requireSameCRS(source.metadata, {...source.metadata, crs: polygon.crs});
   requireTransform(source.metadata);
+  if (!polygon.coordinates.length)
+    return createRasterSourceFromData({
+      ...source.metadata,
+      width: 0,
+      height: 0,
+      dtype: 'float64',
+      bands: Array.from({length: source.metadata.bandCount}, (_, index) => ({
+        ...source.metadata.bands?.[index],
+        index: source.metadata.bands?.[index]?.index ?? index,
+        dtype: 'float64'
+      })),
+      data: Array.from({length: source.metadata.bandCount}, () => new Float64Array(0))
+    });
   if (
-    !polygon.coordinates.length ||
     polygon.coordinates.some(
       r =>
         r.length < 4 ||

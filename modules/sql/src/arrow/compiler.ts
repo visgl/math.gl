@@ -442,6 +442,13 @@ function bindNode(
         hasKernel: false,
         prepare: (_batch, active) => vectorReader(nullTupleVector(type, active.length))
       };
+    if (value === null && DataType.isStruct(type))
+      return {
+        field: new Field('literal', type, true),
+        hasKernel: false,
+        prepare: (_batch, active) =>
+          vectorReader(vectorFromArray(Array(active.length).fill(null), type))
+      };
     if (value === null && DataType.isList(type)) {
       const dictionary = vectorFromArray([null], type);
       return {
@@ -846,8 +853,9 @@ function bindRecovery(
   }
   const field = new Field(name.toLowerCase(), first.field.type, true, first.field.metadata);
   const tuple = isTupleType(field.type);
+  const struct = DataType.isStruct(field.type);
   const list = Boolean(expected && DataType.isList(expected) && DataType.isList(field.type));
-  if (!tuple && !list) typeKey(field.type);
+  if (!tuple && !list && !struct) typeKey(field.type);
   return {
     field,
     hasKernel: true,
@@ -860,7 +868,9 @@ function bindRecovery(
       const materialize = (node: Node, prepared: Prepared, mask: Mask): Vector =>
         tuple || list
           ? maskTupleVector(prepared.vector!, mask)
-          : output(nullable(node), mask, prepared.get);
+          : struct
+            ? nestedVector(prepared.vector!, field.type, mask)
+            : output(nullable(node), mask, prepared.get);
       const original = materialize(nodes[0]!, child, active);
       const reader = tuple ? undefined : new ColumnReader(original);
       let result = original;
@@ -876,6 +886,12 @@ function bindRecovery(
           result,
           active.map((value, row) => (value && !failed[row] ? 1 : 0))
         );
+      if (struct && name === 'TRY')
+        result = nestedVector(
+          result,
+          field.type,
+          active.map((value, row) => (value && !failed[row] ? 1 : 0))
+        );
       for (let index = 1; index < nodes.length && pending.some(Boolean); index++) {
         const node = nodes[index]!;
         const fallback = node.prepare(batch, pending, context);
@@ -884,6 +900,13 @@ function bindRecovery(
         if (tuple)
           result = selectTupleVectors(field.type as FixedSizeList, result, vector, keep, active);
         else if (list) result = selectListVectors(field.type, result, vector, keep, active);
+        else if (struct)
+          result = vectorFromArray(
+            Array.from(active, (valid, row) =>
+              valid ? nestedValue((pending[row] ? vector : result).get(row), field.type) : null
+            ),
+            field.type
+          );
         else {
           const a = new ColumnReader(result),
             b = new ColumnReader(vector);
@@ -1442,6 +1465,9 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
       } else {
         bound = source!;
       }
+      // Explicit Null signatures disambiguate null-propagating overload groups.
+      if (argument.type === 'Literal' && argument.value === null && DataType.isNull(field.type))
+        cost--;
       // Contextual binding can retain a column's physical type (for example
       // flag ? intColumn : null). Validate it just like an inferred argument.
       if (
