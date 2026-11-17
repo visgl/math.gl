@@ -227,8 +227,8 @@ test('fixed ordinal mappings remain stable across separately evaluated batches',
       "SCALE_ORDINAL(category, CATEGORIES(10, 20), PALETTE('#ff0000', '#0000ff'))"
     )
   );
-  const initial = scale.evaluate(first.batches[0]!);
-  const later = scale.evaluate(second.batches[0]!);
+  const initial = scale.evaluateBatch(first.batches[0]!);
+  const later = scale.evaluateBatch(second.batches[0]!);
   expect(Array.from(later.get(0))).toEqual(Array.from(initial.get(1)));
   expect(Array.from(later.get(1))).toEqual(Array.from(initial.get(0)));
   expect(later.get(2)).toBeNull();
