@@ -1142,7 +1142,7 @@ This uses the [Priority-Flood algorithm](https://arxiv.org/abs/1511.04463) with 
 
 ### Terrain cutouts and paired skirts[​](#terrain-cutouts-and-paired-skirts "Direct link to Terrain cutouts and paired skirts")
 
-Use `splitTerrainMesh` to split an indexed terrain mesh by a rectangle or strictly convex polygon in the mesh's local XY frame. Pass a ring without a repeated endpoint. Both ring windings are supported.
+Use `splitTerrainMesh` to split an indexed terrain mesh by a rectangle or strictly convex polygon in the mesh's local XY frame. Pass a ring without a repeated endpoint. Both ring windings are supported. For concave rings, holes and disjoint polygon regions, prepare an immutable polygon set as described below.
 
 ```
 import {createTerrainCutoutSkirts, splitTerrainMesh} from '@math.gl/geospatial';
@@ -1314,6 +1314,54 @@ const patchGeographicPositions = unprojectGeographicTerrainCutout(
 );
 ```
 
-Longitude aliases at the antimeridian map identically. Either pole can be the chart center; pole coordinates are independent of longitude. Prepare explicit polar-fan connectivity rather than degenerate duplicate-pole rows. The helpers do not alter indices or repair winding. All mesh and polygon vertices must be within the chosen cap; global extents and the opposite hemisphere are rejected. The existing planar splitter still requires a strictly convex projected ring.
+Longitude aliases at the antimeridian map identically. Either pole can be the chart center; pole coordinates are independent of longitude. Prepare explicit polar-fan connectivity rather than degenerate duplicate-pole rows. The helpers do not alter indices or repair winding. All mesh and polygon vertices must be within the chosen cap; global extents and the opposite hemisphere are rejected. Pass a strictly convex projected ring directly, or use `prepareTerrainCutoutPolygons` for simple concave projected rings, holes and disjoint regions.
 
 [Spherical gnomonic projection](https://proj.org/en/stable/operations/projections/gnom.html) maps minor great-circle segments to straight chart lines. This defines the horizontal edge model used here. Heights interpolate over the **projected triangulated surface**, not an ellipsoid or an ECEF triangle. A constant-latitude boundary must be sampled explicitly if it is intended to follow a parallel; there is no automatic densification or continuous geographic error certificate. Inverse projection emits canonical longitudes, so a renderer needing unwrapped longitudes must choose its own longitude interval. These helpers prepare regional cuts; they do not implement global polygon partitioning, globe rendering, or radial extrusion. The example provides antimeridian and north/south polar views, with vertical display exaggeration labeled separately.
+
+### Concave cutouts, holes and polygon IDs[​](#concave-cutouts-holes-and-polygon-ids "Direct link to Concave cutouts, holes and polygon IDs")
+
+Import `prepareTerrainCutoutPolygons` only when complex polygon preparation is needed. The convex splitter and cache remain independently tree-shakable without pulling in polygon validation or winding classification.
+
+```
+import {
+
+  prepareTerrainCutoutPolygons, splitTerrainMesh, updateTerrainTileCutouts,
+
+  createTerrainCutoutSkirts
+
+} from '@math.gl/geospatial';
+
+
+
+const region = prepareTerrainCutoutPolygons([
+
+  {outer: islandBoundary, holes: [lakeBoundary]},
+
+  {outer: islandInsideLake}
+
+]);
+
+const cut = splitTerrainMesh(mesh, region);
+
+const walls = createTerrainCutoutSkirts(cut, {
+
+  lift: 30, patch: {baseZ: -100}, remainder: {baseZ: -100}
+
+});
+
+let residentCut = updateTerrainTileCutouts(residents, region);
+
+// Keep the same prepared descriptor when only residents change.
+
+residentCut = updateTerrainTileCutouts(newResidents, region, residentCut.cache);
+```
+
+Each polygon has one `outer` ring and optional `holes`. Either winding is accepted; omit repeated closing points. Simple forward-collinear vertices are allowed. Self-intersections, backtracking edges, touching/crossing rings, non-contained or nested holes, and overlapping polygon domains are rejected. An independent polygon may lie inside another polygon's hole. Separate polygon domains must not touch: this API is not an overlapping-polygon union or a shared administrative-boundary partitioner.
+
+The prepared descriptor copies the input coordinates and is immutable. Reuse it across mesh/tile calls. Creating another descriptor invalidates incremental clips even if its coordinates are identical. It contains private CPU classification functions, so serialize the input polygons and prepare separately in each worker; do not transfer the descriptor itself.
+
+Both pieces expose `polygonIndices`, one entry per output triangle. Patch values are zero-based input polygon indices; remainder values are `0xffffffff`. Raw convex rings use patch index zero. `cutPolygonIndices` contains one patch polygon index per directed cut edge (one value per two `cutEdges` entries), including on the paired remainder wall. These IDs identify polygon regions, not individual original ring segments. Existing source-triangle and barycentric provenance is retained. Skirt composition retains these arrays on its `surface` output; its wall buffers keep the existing skirt provenance contract. All patch regions use the requested common lift; independent per-region transforms are caller work.
+
+Partitioning splits triangles along shared polygon supporting lines and classifies the resulting cells. Artificial subdivisions cancel within each piece, so they never become cut skirts. Holes remain in the remainder; original nodata or missing-tile boundaries receive no paired wall unless terrain exists on both sides. No tiny positive-area fragments are silently dropped: unrepresentable fragments are rejected under the existing mesh contract.
+
+Preparation defaults to 2048 total ring edges and four million bounded operations (`maxEdges`, `maxWork`). Split-time work/vertex/triangle limits are separate and remain necessary: arrangements can grow quadratically with polygon edge count. Complex coastline data may require preprocessing and a deliberate work budget. The lab includes **Concave**, **Island with lake**, and **Lake with island** scenarios in local, antimeridian and polar charts. Island regions have distinct colors. Run `node scripts/benchmark-terrain-cutouts.mjs --polygons` after building to compare incremental and monolithic Pacific/Sierra cuts with region-ID parity.
