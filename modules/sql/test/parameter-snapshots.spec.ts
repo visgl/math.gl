@@ -24,7 +24,7 @@ test('snapshots detect mutations and compare query-specific dependencies', () =>
   const ast = parseSQLExpression(':colors', {parameters: previous}) as any;
   ast.elements[0].value = 100;
   expect(parseSQLExpression(':colors', {parameters: previous})).toMatchObject({
-    elements: [{value: 1}]
+    elements: [{value: 1}, {value: 2}]
   });
 });
 
