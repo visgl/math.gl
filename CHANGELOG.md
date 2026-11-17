@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v4.1.1
+
+- Fix quaternion reconstruction for reflected oriented bounding boxes (#610)
+- Publish releases through npm trusted publishing
+
 ## v4.1.0
 
 - Website home page pass
