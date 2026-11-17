@@ -48,6 +48,13 @@ export function areSQLParametersEqual(
   );
 }
 
+/** Recognizes locally prepared handles without reserving any caller parameter names. */
+export function isSQLParameterSnapshot(value: unknown): value is SQLParameterSnapshot {
+  return Boolean(
+    value && typeof value === 'object' && snapshots.has(value as SQLParameterSnapshot)
+  );
+}
+
 /** Returns a detached AST for binding while retaining exclusive ownership of cached buffers. */
 export function snapshotParameter(snapshot: SQLParameterSnapshot, name: string): Expression {
   const expression = storage(snapshot).get(name);

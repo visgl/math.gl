@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {snapshotParameter, type SQLParameterSnapshot} from './parameter-snapshots';
+import {isSQLParameterSnapshot, snapshotParameter, type SQLParameterSnapshot} from './parameter-snapshots';
 import type {Expression} from '../expressions';
 import {
   isColumnarPredicateValue,
@@ -57,7 +57,7 @@ export function validateSQLParameterOptions(options: SQLParameterOptions): void 
 /** Resolves a named value into a copied literal AST without interpreting it as SQL. */
 export function bindSQLParameter(name: string, options: SQLParameterOptions): Expression {
   if (options.parseParameter) return options.parseParameter(name);
-  if (options.parameters?.kind === 'sql-parameter-snapshot')
+  if (isSQLParameterSnapshot(options.parameters))
     return snapshotParameter(options.parameters as SQLParameterSnapshot, name);
   if (!Object.prototype.hasOwnProperty.call(options.parameters ?? {}, name)) {
     throw new Error(`SQL parameter ":${name}" requires a value`);
