@@ -463,3 +463,21 @@ test('UTF-8 scalar substitutions materialize projections without re-encoding', (
     encode.mockRestore();
   }
 });
+
+test('computed quantile scales bind class counts, expressions and explicit palettes', () => {
+  const table = tableFromArrays({value: [1, 2, 3, 4, null]});
+  const bound = parseSQLScaleExpression(
+    'SCALE_QUANTILE(value * :factor, :classes, PALETTE(:colors))',
+    {parameters: {factor: 2, classes: 3, colors: ['#000000', '#808080', '#ffffff']}}
+  );
+  const explicit = parseSQLScaleExpression(
+    "SCALE_QUANTILE(value * 2, 3, PALETTE('#000000', '#808080', '#ffffff'))"
+  );
+  expect(bound).toEqual(explicit);
+  const actual = compileArrowScale(table, bound);
+  const expected = compileArrowScale(table, explicit);
+  expect(actual.scale.descriptor).toEqual(expected.scale.descriptor);
+  expect(
+    Array.from(actual.evaluate(table), row => (row === null ? null : Array.from(row)))
+  ).toEqual(Array.from(expected.evaluate(table), row => (row === null ? null : Array.from(row))));
+});
