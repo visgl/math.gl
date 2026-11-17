@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {Expression} from '../expressions/index';
+import type {Expression} from '../expressions';
 
 /**
  * Portable, JSON-safe vocabulary for data-driven visualization scales.

@@ -12,7 +12,7 @@ import {
   splitTerrainMeshTiles,
   updateTerrainTileCutouts,
   prepareTerrainCutoutPolygons
-} from '../modules/geospatial/dist/terrain/index.js';
+} from '@math.gl/geospatial/terrain';
 
 // Interleave incremental and monolithic cuts on the same deterministic edit prefix.
 const results = [];
