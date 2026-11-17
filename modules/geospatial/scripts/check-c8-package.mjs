@@ -28,7 +28,7 @@ for(const format of ['esm','cjs']){
 const directory=mkdtempSync(join(tmpdir(),'mathgl-c8-package-'));
 try {
  const scope=join(directory,'node_modules/@math.gl');mkdirSync(scope,{recursive:true});
- for(const name of ['core','geospatial','geometry','web-mercator'])symlinkSync(join(root,'modules',name),join(scope,name));
+ for(const name of ['core','geospatial','geometry'])symlinkSync(join(root,'modules',name),join(scope,name));
  writeFileSync(join(directory,'package.json'),'{"type":"module"}');
  writeFileSync(join(directory,'consumer.ts'),readFileSync(join(root,'test/types/local-frames/index.ts')));
  writeFileSync(join(directory,'consumer.cts'),readFileSync(join(root,'test/types/local-frames/index.cts')));

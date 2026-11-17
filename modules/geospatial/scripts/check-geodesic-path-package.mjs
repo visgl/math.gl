@@ -46,7 +46,7 @@ const temporary = await mkdtemp(join(tmpdir(), 'mathgl-geodesic-path-package-'))
 try {
   const scope = join(temporary, 'node_modules/@math.gl');
   await mkdir(scope, {recursive: true});
-  for (const name of ['geospatial', 'geometry', 'core', 'web-mercator']) {
+  for (const name of ['geospatial', 'geometry', 'core']) {
     await symlink(join(root, 'modules', name), join(scope, name));
   }
   await writeFile(join(temporary, 'package.json'), '{"type":"module"}');

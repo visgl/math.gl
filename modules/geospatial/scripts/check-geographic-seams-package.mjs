@@ -38,7 +38,7 @@ for(const format of ['esm','cjs']) {
 const temporary=await mkdtemp(join(tmpdir(),'mathgl-seams-package-'));
 try {
   const scope=join(temporary,'node_modules/@math.gl');await mkdir(scope,{recursive:true});
-  for(const name of ['geospatial','geometry','core','web-mercator']) await symlink(join(root,'modules',name),join(scope,name));
+  for(const name of ['geospatial','geometry','core']) await symlink(join(root,'modules',name),join(scope,name));
   await writeFile(join(temporary,'package.json'),'{"type":"module"}');
   await writeFile(join(temporary,'consumer.ts'),await readFile(join(root,'test/types/geographic-seams/index.ts')));
   await writeFile(join(temporary,'tsconfig.json'),JSON.stringify({compilerOptions:{target:'es2020',module:'NodeNext',moduleResolution:'NodeNext',strict:true,noEmit:true,skipLibCheck:false,types:[]},include:['consumer.ts']}));
