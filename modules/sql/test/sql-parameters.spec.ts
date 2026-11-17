@@ -25,7 +25,7 @@ import {
   parseSQLSelectCompound,
   SQLParseError,
   type SQLParameters
-} from '../src/sql';
+} from '../src/parser';
 import {parseSQLScaleExpression} from '../src/scales';
 import {compileArrowExpression, type ArrowTableFunction} from '../src/arrow';
 import {compileArrowScale} from '../src/scales/arrow-scales';
@@ -480,4 +480,15 @@ test('computed quantile scales bind class counts, expressions and explicit palet
   expect(
     Array.from(actual.evaluate(table), row => (row === null ? null : Array.from(row)))
   ).toEqual(Array.from(expected.evaluate(table), row => (row === null ? null : Array.from(row))));
+});
+
+test('query parser routes Date and binary filters to Arrow expressions', () => {
+  for (const value of [new Date(0), new Uint8Array([1])]) {
+    expect(parseSQLQuery('SELECT x WHERE x = :value', {parameters: {value}})).toHaveProperty(
+      'where.expression'
+    );
+    expect(parseSQLQuery('SELECT x WHERE x IN (:value)', {parameters: {value}})).toHaveProperty(
+      'where.expression'
+    );
+  }
 });

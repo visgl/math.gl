@@ -72,6 +72,14 @@ function validateColumnReferences(predicate: BoundSQLPredicate): void {
     predicate.args.forEach(validateColumnReferences);
   } else if (predicate.op === 'not') validateColumnReferences(predicate.args[0]);
   else {
+    const values =
+      predicate.op === 'in'
+        ? predicate.args[1]
+        : predicate.op === 'isNull'
+          ? []
+          : [predicate.args[1]];
+    if (values.some(value => value instanceof Date || value instanceof Uint8Array))
+      throw new Error('Date and binary values require expression evaluation');
     const property = predicate.args[0] as SQLPredicateProperty;
     if (!property.quoted && property.property.includes('.'))
       throw new Error(

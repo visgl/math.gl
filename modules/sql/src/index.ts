@@ -45,4 +45,4 @@ export type {
   SQLParameterOptions,
   SQLNumericArray,
   SQLBinaryParameter
-} from './sql/sql-parameters';
+} from './parser/sql-parameters';
