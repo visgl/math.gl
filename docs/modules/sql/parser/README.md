@@ -286,3 +286,38 @@ types fail with the parameter name; extra keys are allowed. The custom
 `parseParameter(name)` AST callback remains available, but cannot be combined with
 `parameters`. The existing scalar-only `parseSQLPredicate` and preserved predicate
 binding APIs retain their contracts; use the expression or query parser for arrays.
+
+
+Arrow compilation converts bound values to the receiving field/function type once.
+String comparisons use pre-encoded UTF-8 bytes without decoding table values.
+Membership compiles numeric lookup sets or sorted UTF-8/binary byte ranges reused
+across batches. List arguments retain one typed Arrow dictionary value, and fixed
+tuples copy preconverted physical components into each output batch. Date values
+bind to epoch days for Date32 or epoch microseconds for timestamps (UTC by default).
+These compiled buffers belong to the compiled expression; changing a parameter map
+requires parsing and compiling again.
+
+### Binary inputs
+
+Callers can supply pre-encoded text and numeric typed arrays:
+
+```ts
+const parameters = {
+  name: {type: 'utf8', value: new TextEncoder().encode('Montréal')},
+  weights: new Float32Array([0.2, 0.3, 0.5]),
+  channels: {type: 'array', value: new Uint8Array([255, 0, 128])},
+  payload: {type: 'binary', value: new Uint8Array([1, 2, 3])}
+} satisfies SQLParameters;
+```
+
+Float32/Float64 and 8/16/32-bit numeric typed arrays are accepted. A bare
+`Uint8Array` is a binary scalar; tag it as `array` for numeric list semantics or
+`utf8` for text semantics. `SQLNumericArray` and `SQLBinaryParameter` describe these
+inputs. DataView and bigint typed arrays are not supported.
+
+Binding snapshots buffers and validates UTF-8. The AST retains ordinary string
+values/array elements for portable evaluators alongside their binary storage.
+Arrow compilation reuses matching typed element layouts and supplied UTF-8 bytes;
+comparisons do not encode or decode text per row. Different receiving numeric
+types are converted once during compilation. This is copy-on-bind, not a borrowed
+buffer or ownership-transfer API.

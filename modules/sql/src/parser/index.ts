@@ -27,4 +27,10 @@ export type {
   SQLSort
 } from './parse-sql-statement';
 
-export type {SQLParameterValue, SQLParameters, SQLParameterOptions} from './sql-parameters';
+export type {
+  SQLParameterValue,
+  SQLParameters,
+  SQLParameterOptions,
+  SQLNumericArray,
+  SQLBinaryParameter
+} from './sql-parameters';

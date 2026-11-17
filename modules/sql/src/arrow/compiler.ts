@@ -14,6 +14,7 @@ import {
   FixedSizeList,
   Dictionary,
   Int64,
+  TimestampMicrosecond,
   Int32,
   Uint8,
   Null,
@@ -67,6 +68,8 @@ type Prepared = {
   vector?: Vector;
 };
 type Node = {
+  /** Preconverted literal storage, shared by all batches of a compiled expression. */
+  constant?: Prepared;
   field: Field;
   hasKernel: boolean;
   prepare: (batch: RecordBatch, active: Mask, context: ExecutionContext) => Prepared;
@@ -129,8 +132,8 @@ export function compileArrowExpression(
       : isNestedType(root.field.type)
         ? nestedVector(prepared.vector!, root.field.type, active)
         : prepared.vector &&
-            !DataType.isDictionary(prepared.vector.type) &&
-            !active.some(value => !value)
+            (root.constant ||
+              (!DataType.isDictionary(prepared.vector.type) && !active.some(value => !value)))
           ? prepared.vector
           : output(root.field, active, prepared.get);
     evaluation.signal?.throwIfAborted();
@@ -416,7 +419,15 @@ function bindNode(
   if (ast.type === 'Literal') {
     if (vectorInput && expected && DataType.isDictionary(expected))
       throw new Error('Dictionary function arguments require a dictionary-encoded source column');
-    let value = ast.value as ArrowExpressionValue;
+    // Dates enter as immutable parameter snapshots; physical Arrow storage uses days
+    // or microseconds, chosen once from the receiving schema.
+    const date = ast.value instanceof Date ? ast.value : undefined;
+    let value: ArrowExpressionValue = date
+      ? expected && DataType.isDate(expected)
+        ? Math.floor(date.getTime() / 86400000)
+        : BigInt(date.getTime()) * 1000n
+      : ast.value;
+    if (value instanceof Uint8Array) value = new Uint8Array(value);
     if (
       expected &&
       DataType.isInt(expected) &&
@@ -427,15 +438,19 @@ function bindNode(
       value = BigInt(value);
     const type =
       expected ??
-      (value === null
-        ? new Null()
-        : typeof value === 'boolean'
-          ? bool
-          : typeof value === 'number'
-            ? new Float64()
-            : typeof value === 'bigint'
-              ? new Int64()
-              : new Utf8());
+      (date
+        ? new TimestampMicrosecond('UTC')
+        : value instanceof Uint8Array
+          ? new Binary()
+          : value === null
+            ? new Null()
+            : typeof value === 'boolean'
+              ? bool
+              : typeof value === 'number'
+                ? new Float64()
+                : typeof value === 'bigint'
+                  ? new Int64()
+                  : new Utf8());
     if (value === null && isTupleType(type))
       return {
         field: new Field('literal', type, true),
@@ -471,16 +486,38 @@ function bindNode(
     const rounded = roundToType(type)(value);
     if (typeof value === 'number' && Number.isFinite(value) && !Number.isFinite(rounded))
       throw new Error(`Numeric literal overflow for ${type}`);
-    const encoded = typeof value === 'string' ? encoder.encode(value) : undefined;
+    // A tagged UTF-8 parameter supplies physical bytes. Check the optional annotation
+    // against the portable value once, so edited external ASTs cannot change semantics.
+    const encoded =
+      typeof value === 'string'
+        ? ast.utf8 instanceof Uint8Array &&
+          new TextDecoder('utf-8', {ignoreBOM: true}).decode(ast.utf8) === value
+          ? new Uint8Array(ast.utf8)
+          : encoder.encode(value)
+        : undefined;
     const range: Range | undefined = encoded ? [encoded, 0, encoded.length] : undefined;
+    const constant: Prepared = {
+      get: () => rounded,
+      isNull: () => value === null,
+      bytes: range ? () => range : undefined
+    };
     return {
       field: new Field('literal', type, value === null),
       hasKernel: false,
-      prepare: () => ({
-        get: () => rounded,
-        isNull: () => value === null,
-        bytes: range ? () => range : undefined
-      })
+      constant,
+      prepare: (_batch, active) => {
+        if (!encoded) return constant;
+        let vector: Vector | undefined;
+        return {
+          ...constant,
+          // Comparisons only read bytes. Materialize physical UTF-8 only when a
+          // projection or vector function actually requests a batch-sized vector.
+          get vector() {
+            if (!vector) vector = repeatUTF8(encoded, active);
+            return vector;
+          }
+        };
+      }
     };
   }
   if (ast.type === 'CallExpression') return bindCall(ast, options, expected);
@@ -913,7 +950,21 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
     throw new Error('IN requires a value and 1 to 4096 scalar literals');
   const argument = bind(arguments_[0], options);
   const utf8 = typeKey(argument.field.type) === 'utf8';
+  const binary =
+    DataType.isBinary(argument.field.type) || DataType.isFixedSizeBinary(argument.field.type);
   const literals = arguments_.slice(1).map(value => bind(value, options, argument.field.type));
+  // Every membership item is a scalar literal: convert and index once at compilation.
+  const prepared = literals.map(value => value.constant!);
+  const values = new Set(prepared.map(value => value.get(0)));
+  const ranges: Range[] = utf8
+    ? prepared.map(value => bytes(value, 0)).filter((range): range is Range => range !== null)
+    : binary
+      ? prepared.flatMap(value => {
+          const data = value.get(0) as Uint8Array | null;
+          return data === null ? [] : [[data, 0, data.length] as Range];
+        })
+      : [];
+  ranges.sort((a, b) => compareUTF8(a[0], a[1], a[2], b[0], b[1], b[2]));
   return {
     field: new Field(
       'in',
@@ -923,24 +974,17 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
     hasKernel: argument.hasKernel,
     prepare(batch, active, context) {
       const source = argument.prepare(batch, active, context);
-      const constantMask = Uint8Array.of(1);
-      const prepared = literals.map(value => value.prepare(batch, constantMask, {}));
-      const values = new Set(prepared.map(value => value.get(0)));
-      const ranges = utf8
-        ? prepared.map(value => bytes(value, 0)).filter(range => range !== null)
-        : [];
       return {
         get(row) {
-          if (utf8) {
-            const value = bytes(source, row);
+          if (utf8 || binary) {
+            const data = binary ? (source.get(row) as Uint8Array | null) : null;
+            const value: Range | null = utf8
+              ? bytes(source, row)
+              : data === null
+                ? null
+                : [data, 0, data.length];
             if (!value) return null;
-            if (
-              ranges.some(
-                range =>
-                  compareUTF8(value[0], value[1], value[2], range[0], range[1], range[2]) === 0
-              )
-            )
-              return true;
+            if (containsByteRange(ranges, value)) return true;
           } else {
             const value = source.get(row);
             if (value === null) return null;
@@ -951,6 +995,55 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
       };
     }
   };
+}
+
+/** Broadcasts pre-encoded text to Arrow storage without re-encoding strings per row. */
+function repeatUTF8(encoded: Uint8Array, active: Mask): Vector<Utf8> {
+  const count = active.reduce((sum, value) => sum + value, 0);
+  const data = new Uint8Array(count * encoded.length);
+  const offsets = new Int32Array(active.length + 1);
+  const validity = new Uint8Array(Math.ceil(active.length / 8));
+  let position = 0;
+  for (let row = 0; row < active.length; row++) {
+    if (active[row]) {
+      data.set(encoded, position);
+      position += encoded.length;
+      validity[row >> 3] |= 1 << (row & 7);
+    }
+    offsets[row + 1] = position;
+  }
+  return makeVector(
+    makeData({
+      type: new Utf8(),
+      length: active.length,
+      data,
+      valueOffsets: offsets,
+      nullBitmap: validity,
+      nullCount: active.length - count
+    })
+  );
+}
+
+/** Searches pre-sorted UTF-8 or binary constants without decoding source values. */
+function containsByteRange(ranges: readonly Range[], value: Range): boolean {
+  let low = 0;
+  let high = ranges.length - 1;
+  while (low <= high) {
+    const middle = (low + high) >>> 1;
+    const candidate = ranges[middle]!;
+    const order = compareUTF8(
+      value[0],
+      value[1],
+      value[2],
+      candidate[0],
+      candidate[1],
+      candidate[2]
+    );
+    if (order === 0) return true;
+    if (order < 0) high = middle - 1;
+    else low = middle + 1;
+  }
+  return false;
 }
 
 /** Binds SQL pattern matching and precompiles literal patterns. */

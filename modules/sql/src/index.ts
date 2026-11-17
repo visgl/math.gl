@@ -39,4 +39,10 @@ export {
   type ExpressionEvaluationErrorCode
 } from './expressions/evaluation-error';
 
-export type {SQLParameterValue, SQLParameters, SQLParameterOptions} from './sql/sql-parameters';
+export type {
+  SQLParameterValue,
+  SQLParameters,
+  SQLParameterOptions,
+  SQLNumericArray,
+  SQLBinaryParameter
+} from './sql/sql-parameters';

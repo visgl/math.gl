@@ -2,11 +2,15 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {expect, test} from 'vitest';
+import {expect, test, vi} from 'vitest';
 import {
+  Binary,
+  DateDay,
+  TimestampMicrosecond,
   Field,
   FixedSizeList,
   Float64,
+  Float32,
   List,
   Table,
   Utf8,
@@ -266,4 +270,196 @@ test('fixed numeric parameters can be projected with an explicit tuple width', (
   expect(() =>
     parseSQLExpression(':position::FLOAT32[2]', {parameters: {position: [1, 2, 3]}})
   ).toThrow('length');
+});
+
+test('UTF-8 parameters encode at compilation and compare byte ranges across batches', () => {
+  const table = tableFromArrays({text: ['é', 'a', 'z', null]});
+  const ast = parseSQLExpression('text IN (:values) OR text = :last', {
+    parameters: {values: ['é', 'a'], last: 'z'}
+  });
+  const encode = vi.spyOn(TextEncoder.prototype, 'encode');
+  const decode = vi.spyOn(TextDecoder.prototype, 'decode');
+  try {
+    const compiled = compileArrowExpression(ast, {inputSchema: table.schema});
+    const conversions = encode.mock.calls.length;
+    expect(conversions).toBeGreaterThanOrEqual(3);
+    for (let pass = 0; pass < 2; pass++) {
+      expect(Array.from(compiled.evaluateTable(table.slice(0, 2)))).toEqual([true, true]);
+      expect(Array.from(compiled.evaluateTable(table.slice(2)))).toEqual([true, null]);
+    }
+    expect(encode).toHaveBeenCalledTimes(conversions);
+    expect(decode).not.toHaveBeenCalled();
+  } finally {
+    encode.mockRestore();
+    decode.mockRestore();
+  }
+});
+
+test('list substitutions reuse compiled typed UTF-8 buffers across batches', () => {
+  const table = tableFromArrays({x: [1, 2, 3]});
+  const buffers: unknown[] = [];
+  const type = new List(new Field('item', new Utf8(), false));
+  const fn: ArrowTableFunction = {
+    name: 'size',
+    prototypes: [
+      {
+        arguments: [new Field('values', type, false)],
+        result: new Field('size', new Float64(), false),
+        evaluate: ([values], {length}) => {
+          const dictionary = values!.data[0]!.dictionary!;
+          buffers.push(dictionary.data[0]!.children[0]!.values);
+          return vectorFromArray(Array(length).fill(2), new Float64());
+        }
+      }
+    ]
+  };
+  const compiled = compileArrowExpression(
+    parseSQLExpression('size(:values)', {parameters: {values: ['é', 'a']}}),
+    {inputSchema: table.schema, functions: [fn]}
+  );
+  compiled.evaluateTable(table.slice(0, 2));
+  compiled.evaluateTable(table.slice(2));
+  expect(buffers).toHaveLength(2);
+  expect(buffers[0]).toBeInstanceOf(Uint8Array);
+  expect(buffers[1]).toBe(buffers[0]);
+});
+
+test('binary parameter comparisons and membership compare contents rather than object identity', () => {
+  const table = new Table({
+    value: vectorFromArray(
+      [new Uint8Array([1, 2]), new Uint8Array([3]), new Uint8Array([]), null],
+      new Binary()
+    )
+  });
+  for (const sql of ['value = :bytes', 'value IN (:bytes)']) {
+    const expression = compileArrowExpression(
+      parseSQLExpression(sql, {parameters: {bytes: new Uint8Array([1, 2])}}),
+      {inputSchema: table.schema}
+    );
+    expect(Array.from(expression.evaluateTable(table))).toEqual([true, false, false, null]);
+  }
+  const expression = compileArrowExpression(
+    parseSQLExpression('value IN (:bytes, :empty, NULL)', {
+      parameters: {bytes: new Uint8Array([1, 2]), empty: new Uint8Array([])}
+    }),
+    {inputSchema: table.schema}
+  );
+  expect(Array.from(expression.evaluateTable(table))).toEqual([true, null, true, null]);
+});
+
+test('Date parameters convert once to schema-specific epoch values', () => {
+  const date = new Date('2026-01-02T00:00:00Z');
+  for (const type of [new DateDay(), new TimestampMicrosecond('UTC')]) {
+    const table = new Table({value: vectorFromArray([date, new Date(0), null], type)});
+    const compiled = compileArrowExpression(
+      parseSQLExpression('value = :date', {parameters: {date}}),
+      {inputSchema: table.schema}
+    );
+    expect(Array.from(compiled.evaluateTable(table))).toEqual([true, false, null]);
+  }
+  expect(() => parseSQLExpression(':date', {parameters: {date: new Date(NaN)}})).toThrow(
+    'unsupported'
+  );
+});
+
+test('pre-encoded UTF-8 parameters retain byte comparisons without text encoding', () => {
+  const table = tableFromArrays({text: ['é', 'other', null]});
+  const input = new Uint8Array([0xc3, 0xa9]);
+  const encode = vi.spyOn(TextEncoder.prototype, 'encode');
+  try {
+    const ast = parseSQLExpression('text IN (:text)', {
+      parameters: {text: {type: 'utf8', value: input}}
+    });
+    input.fill(0);
+    const compiled = compileArrowExpression(ast, {inputSchema: table.schema});
+    const decode = vi.spyOn(TextDecoder.prototype, 'decode');
+    try {
+      expect(Array.from(compiled.evaluateTable(table))).toEqual([true, false, null]);
+      expect(Array.from(compiled.evaluateTable(table))).toEqual([true, false, null]);
+      expect(encode).not.toHaveBeenCalled();
+      expect(decode).not.toHaveBeenCalled();
+    } finally {
+      decode.mockRestore();
+    }
+  } finally {
+    encode.mockRestore();
+  }
+  expect(() =>
+    parseSQLExpression(':text', {parameters: {text: {type: 'utf8', value: new Uint8Array([0xff])}}})
+  ).toThrow('UTF-8');
+});
+
+test('numeric typed parameters and explicitly tagged byte arrays use typed list storage', () => {
+  const table = tableFromArrays({x: [1, 2]});
+  const input = new Float32Array([1.5, 2.5]);
+  const type = new List(new Field('value', new Float32(), false));
+  const buffers: unknown[] = [];
+  const fn: ArrowTableFunction = {
+    name: 'first',
+    prototypes: [
+      {
+        arguments: [new Field('values', type, false)],
+        result: new Field('first', new Float64(), false),
+        evaluate: ([values], {length}) => {
+          const physical = values!.data[0]!.dictionary!.data[0]!.children[0]!.values;
+          buffers.push(physical);
+          return vectorFromArray(Array(length).fill(physical[0]), new Float64());
+        }
+      }
+    ]
+  };
+  const ast = parseSQLExpression('first(:values)', {parameters: {values: input}});
+  input.fill(0);
+  const compiled = compileArrowExpression(ast, {inputSchema: table.schema, functions: [fn]});
+  expect(Array.from(compiled.evaluateTable(table))).toEqual([1.5, 1.5]);
+  compiled.evaluateTable(table);
+  expect(buffers[0]).toBeInstanceOf(Float32Array);
+  expect(buffers[1]).toBe(buffers[0]);
+  expect(buffers[0]).not.toBe(input);
+  for (const values of [
+    new Float64Array([1, 2]),
+    new Int8Array([1, 2]),
+    new Uint8ClampedArray([1, 2]),
+    new Int16Array([1, 2]),
+    new Uint16Array([1, 2]),
+    new Int32Array([1, 2]),
+    new Uint32Array([1, 2]),
+    {type: 'array' as const, value: new Uint8Array([1, 2])}
+  ]) {
+    expect(parseSQLExpression(':values', {parameters: {values}})).toMatchObject({
+      type: 'ArrayExpression',
+      elements: [{value: 1}, {value: 2}]
+    });
+  }
+  const binary = {type: 'binary' as const, value: new Uint8Array([1, 2])};
+  expect(parseSQLExpression(':value', {parameters: {value: binary}})).toMatchObject({
+    type: 'Literal',
+    value: binary.value
+  });
+  expect(() =>
+    parseSQLExpression(':value', {parameters: {value: new Float32Array([Infinity])}})
+  ).toThrow('numeric array');
+  expect(() =>
+    parseSQLExpression(':value', {
+      parameters: {value: {type: 'utf8', value: 'text'}}
+    } as unknown as {parameters: SQLParameters})
+  ).toThrow('binary format');
+});
+
+test('UTF-8 scalar substitutions materialize projections without re-encoding', () => {
+  const table = tableFromArrays({x: [1, 2, 3]});
+  const ast = parseSQLExpression(':text', {
+    parameters: {text: {type: 'utf8', value: new Uint8Array([0xc3, 0xa9])}}
+  });
+  const encode = vi.spyOn(TextEncoder.prototype, 'encode');
+  try {
+    const compiled = compileArrowExpression(ast, {inputSchema: table.schema});
+    expect(Array.from(compiled.evaluateTable(table))).toEqual(['é', 'é', 'é']);
+    expect(
+      Array.from(compiled.evaluateTable(table, {activeRows: new Uint8Array([1, 0, 1])}))
+    ).toEqual(['é', null, 'é']);
+    expect(encode).not.toHaveBeenCalled();
+  } finally {
+    encode.mockRestore();
+  }
 });
