@@ -4,8 +4,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cellToBoundary, getNumCells, getRes0Cells } from "a5-js";
-import { createA5MyriahedralMesh } from "../../../../../examples/geospatial/alpine-ice-age/src/dggs-mesh.js";
-import { discontinuousGrid } from "../../../../../examples/geospatial/alpine-ice-age/src/discontinuous-views.js";
+import { createA5MyriahedralMesh } from "../../../../examples/showcase/alpine-ice-age/src/dggs-mesh.js";
+import { discontinuousGrid } from "../../../../examples/showcase/alpine-ice-age/src/discontinuous-views.js";
 
 const rad = Math.PI / 180;
 const unit = ([lon, lat]) => [

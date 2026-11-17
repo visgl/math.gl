@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {PALEO_FEATURES, featuresAtAge, searchPaleoFeatures} from '../../../../../examples/geospatial/tectonic-time-machine/src/paleo-features.js';
+import {PALEO_FEATURES, featuresAtAge, searchPaleoFeatures} from '../../../../examples/showcase/tectonic-time-machine/src/paleo-features.js';
 
 test('paleogeographic features are active only in their inclusive age intervals', () => {
   assert.ok(featuresAtAge(-550).some(feature => feature.id === 'transgondwanan'));

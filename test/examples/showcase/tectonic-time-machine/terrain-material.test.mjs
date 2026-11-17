@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {DEFAULT_TERRAIN_PALETTE,calibrateTerrainPalette,terrainImageryWeight,textureReveal} from '../../../../../examples/geospatial/tectonic-time-machine/src/terrain-material.js';
+import {DEFAULT_TERRAIN_PALETTE,calibrateTerrainPalette,terrainImageryWeight,textureReveal} from '../../../../examples/showcase/tectonic-time-machine/src/terrain-material.js';
 
 test('calibration uses land samples without contaminating the palette with sea or white ice',()=>{
   const pixels=new Uint8ClampedArray([

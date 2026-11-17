@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { DATASETS } from "../../../../../examples/geospatial/alpine-ice-age/src/sources.ts";
-import { loadClimate, climateAt } from "../../../../../examples/geospatial/alpine-ice-age/src/climate.ts";
+import { DATASETS } from "../../../../examples/showcase/alpine-ice-age/src/sources.ts";
+import { loadClimate, climateAt } from "../../../../examples/showcase/alpine-ice-age/src/climate.ts";
 async function download(url) {
   const response = await fetch(url);
   assert(response.ok, `${url}: HTTP ${response.status}`);
@@ -25,7 +25,7 @@ import {
   sampleAt,
   loadGlobalSimulation,
   clampAge,
-} from "../../../../../examples/geospatial/alpine-ice-age/src/data.js";
+} from "../../../../examples/showcase/alpine-ice-age/src/data.js";
 const manifest = JSON.parse(manifestBytes);
 const raw = gunzipSync(packed);
 test("the upstream simulation is complete, ordered and pinned to its published source", () => {
@@ -103,7 +103,7 @@ test("global reconstruction preserves its full time range, source and longitude 
   assert(m.volumeKm3[m.ages.indexOf(20)] > m.volumeKm3.at(-1) * 2);
 });
 
-import { projectionWeights } from "../../../../../examples/geospatial/alpine-ice-age/src/projection-transition.js";
+import { projectionWeights } from "../../../../examples/showcase/alpine-ice-age/src/projection-transition.js";
 test("projection transitions preserve endpoints and continuous interrupted shapes", () => {
   assert.deepEqual(projectionWeights({ globe: 1 }, "eqearth", 0), { globe: 1 });
   assert.deepEqual(projectionWeights({ globe: 1 }, "eqearth", 1), {
@@ -120,7 +120,7 @@ test("projection transitions preserve endpoints and continuous interrupted shape
   assert.deepEqual(projectionWeights(midway, "merc", 1), { merc: 1 });
 });
 
-import { glacialPhase } from "../../../../../examples/geospatial/alpine-ice-age/src/glacial-phase.ts";
+import { glacialPhase } from "../../../../examples/showcase/alpine-ice-age/src/glacial-phase.ts";
 test("timeline chapters change phase labels while keeping regional glaciation names meaningful", () => {
   assert.equal(glacialPhase(119), "Last interglacial");
   assert.equal(glacialPhase(80), "Last glacial period");
@@ -132,7 +132,7 @@ test("timeline chapters change phase labels while keeping regional glaciation na
 });
 
 test("climate context preserves source samples and never extrapolates albedo", async () => {
-  const { climateAt } = await import("../../../../../examples/geospatial/alpine-ice-age/src/climate.ts");
+  const { climateAt } = await import("../../../../examples/showcase/alpine-ice-age/src/climate.ts");
   assert.equal(climateAt(0, climate).temperature, 0);
   assert.equal(climateAt(0, climate).albedo, null);
   assert.equal(climateAt(1, climate).albedo, null);
@@ -142,7 +142,7 @@ test("climate context preserves source samples and never extrapolates albedo", a
 });
 
 test("regional views retain native coordinates and clip cells instead of collapsing geography", async () => {
-  const { regionalCoordinate, inRegion } = await import("../../../../../examples/geospatial/alpine-ice-age/src/regional-views.ts");
+  const { regionalCoordinate, inRegion } = await import("../../../../examples/showcase/alpine-ice-age/src/regional-views.ts");
   assert.deepEqual(regionalCoordinate("albersEurope", -120, -20), [-120, -20]);
   assert.equal(inRegion("albersEurope", -120, -20), false);
   assert.equal(inRegion("albersEurope", 10, 60), true);
@@ -169,7 +169,7 @@ import {
   loadQuaternarySimulation,
   nearestOSFChapter,
   rasterizeFootprints,
-} from "../../../../../examples/geospatial/alpine-ice-age/src/osf-data.js";
+} from "../../../../examples/showcase/alpine-ice-age/src/osf-data.js";
 test("OSF failure leaves the current reconstruction available", async (t) => {
   t.mock.method(globalThis, "fetch", async (url) => {
     if (url === DATASETS.globalManifest)
@@ -252,7 +252,7 @@ test("footprint rasterization preserves holes and excludes the Southern Hemisphe
   );
 });
 
-import { maskFrame, krappPhase, loadKrappSimulation } from "../../../../../examples/geospatial/alpine-ice-age/src/krapp-data.js";
+import { maskFrame, krappPhase, loadKrappSimulation } from "../../../../examples/showcase/alpine-ice-age/src/krapp-data.js";
 import { ParquetSource } from "math.gl-parquet-loader";
 test("successful Krapp loads assemble ordered batches and interpolate area", async (t) => {
   const rows = 720 * 360;

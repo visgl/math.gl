@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {createMapPreparationGate} from '../../../../../examples/geospatial/alpine-ice-age/src/map-preparation-gate.ts';
+import {createMapPreparationGate} from '../../../../examples/showcase/alpine-ice-age/src/map-preparation-gate.ts';
 
 test('cancel aborts globe preparation and prevents unrelated renders restarting it', () => {
   const gate = createMapPreparationGate();

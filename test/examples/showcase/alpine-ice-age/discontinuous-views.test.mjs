@@ -8,7 +8,7 @@ import {
   discontinuousGrid,
   sourceSample,
   sampleField,
-} from "../../../../../examples/geospatial/alpine-ice-age/src/discontinuous-views.js";
+} from "../../../../examples/showcase/alpine-ice-age/src/discontinuous-views.js";
 
 test("geographic field sampling wraps at the date line and stays within polar rows", () => {
   assert.deepEqual(sourceSample([-180, 30]), sourceSample([180, 30]));
@@ -64,7 +64,7 @@ for (const view of Object.keys(DISCONTINUOUS_VIEWS)) {
 }
 
 test("layout metadata drives inset order and finer reference polygons retain all main Hawaiian islands", async () => {
-  const { default: land } = await import("../../../../../examples/geospatial/alpine-ice-age/assets/hawaii-land.json", {
+  const { default: land } = await import("../../../../examples/showcase/alpine-ice-age/assets/hawaii-land.json", {
     with: { type: "json" },
   });
   const grid = discontinuousGrid("albersUsa", 5);
@@ -212,7 +212,7 @@ test("cycling bounds cached mesh retention", () => {
 });
 
 test("cooperative grid preparation matches synchronous output and can be cancelled", async () => {
-  const { prepareDiscontinuousGrid } = await import("../../../../../examples/geospatial/alpine-ice-age/src/discontinuous-views.js");
+  const { prepareDiscontinuousGrid } = await import("../../../../examples/showcase/alpine-ice-age/src/discontinuous-views.js");
   let yields = 0;
   const grid = await prepareDiscontinuousGrid("guyou", 30, {
     yieldTask: async () => {
@@ -233,7 +233,7 @@ test("cooperative grid preparation matches synchronous output and can be cancell
 });
 
 test("source triangulation preserves a clipped polygon's hole", async () => {
-  const {triangulateSourcePolygon} = await import("../../../../../examples/geospatial/alpine-ice-age/src/triangulate-source-polygon.js");
+  const {triangulateSourcePolygon} = await import("../../../../examples/showcase/alpine-ice-age/src/triangulate-source-polygon.js");
   const rings = [
     [[0, 0], [4, 0], [4, 4], [0, 4], [0, 0]],
     [[1, 1], [1, 2], [2, 2], [2, 1], [1, 1]],
@@ -248,7 +248,7 @@ test("source triangulation preserves a clipped polygon's hole", async () => {
 });
 
 test("a visible center does not fill a concave source notch", async () => {
-  const {isConvexSourcePolygon, triangulateSourcePolygon} = await import("../../../../../examples/geospatial/alpine-ice-age/src/triangulate-source-polygon.js");
+  const {isConvexSourcePolygon, triangulateSourcePolygon} = await import("../../../../examples/showcase/alpine-ice-age/src/triangulate-source-polygon.js");
   // A narrow notch in the top edge: the vertex average is still in the polygon.
   const ring = [[0,0],[6,0],[6,6],[4,6],[4,5],[3,5],[3,6],[0,6],[0,0]];
   const part = {coordinates:[ring], sourceCoordinates:[ring]};

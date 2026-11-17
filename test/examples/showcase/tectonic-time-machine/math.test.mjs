@@ -13,7 +13,7 @@ import {
   futureRotation,
   futureRotations,
   timeLabel
-} from '../../../../../examples/geospatial/tectonic-time-machine/src/math.ts';
+} from '../../../../examples/showcase/tectonic-time-machine/src/math.ts';
 const near = (a, b, epsilon = 1e-9) => assert(Math.abs(a - b) < epsilon, `${a} != ${b}`);
 test('rigid spherical rotations preserve known axis fixtures and distances', () => {
   const out = new Float64Array(6);
@@ -84,7 +84,7 @@ test('timeline distinguishes past, present and future', () => {
   assert.equal(timeLabel(250), '+250 million years');
 });
 
-import {makeMesh, blendWeights, transformMesh, worldToGeographic} from '../../../../../examples/geospatial/tectonic-time-machine/src/geometry.js';
+import {makeMesh, blendWeights, transformMesh, worldToGeographic} from '../../../../examples/showcase/tectonic-time-machine/src/geometry.js';
 test('geographic cell triangulation preserves holes and area before spherical morphs', () => {
   const mesh = makeMesh([
     {
@@ -222,7 +222,7 @@ test('Equal Earth hover outside its outline returns no coordinate instead of a r
   );
 });
 
-import {LANDMASS_CHAPTERS, chapterOpacity, timelineMilestones} from '../../../../../examples/geospatial/tectonic-time-machine/src/timeline.js';
+import {LANDMASS_CHAPTERS, chapterOpacity, timelineMilestones} from '../../../../examples/showcase/tectonic-time-machine/src/timeline.js';
 test('landmass titles fade with geological time, and future names follow the selected scenario', () => {
   for (const chapter of LANDMASS_CHAPTERS) {
     const [start, formed, held, end] = chapter.fade;
@@ -258,10 +258,10 @@ test('landmass titles fade with geological time, and future names follow the sel
   }
 });
 
-import {DATA_SOURCES, rotationBracket, clampTime, sourceFor} from '../../../../../examples/geospatial/tectonic-time-machine/src/sources.ts';
-import {createRotationCache, polygonFeature, loadModel} from '../../../../../examples/geospatial/tectonic-time-machine/src/data.js';
-import {rotationGroups} from '../../../../../examples/geospatial/tectonic-time-machine/src/parquet-stream.js';
-import {maintainHistory, waitForRetry} from '../../../../../examples/geospatial/tectonic-time-machine/src/history-stream.js';
+import {DATA_SOURCES, rotationBracket, clampTime, sourceFor} from '../../../../examples/showcase/tectonic-time-machine/src/sources.ts';
+import {createRotationCache, polygonFeature, loadModel} from '../../../../examples/showcase/tectonic-time-machine/src/data.js';
+import {rotationGroups} from '../../../../examples/showcase/tectonic-time-machine/src/parquet-stream.js';
+import {maintainHistory, waitForRetry} from '../../../../examples/showcase/tectonic-time-machine/src/history-stream.js';
 test('source ranges include Rodinia and restrict Nuna to the 1.8 Ga source', () => {
   assert.equal(sourceFor('CAO2024').license, 'CC-BY-4.0');
   assert.equal(sourceFor('MULLER2022').license, 'CC-BY-4.0');
@@ -460,9 +460,9 @@ test('Cao loads geometry once and returns a playable model while column-pruned P
 });
 
 import {readFile} from 'node:fs/promises';
-import {createParquetReader} from '../../../../../examples/geospatial/tectonic-time-machine/src/parquet-stream.js';
+import {createParquetReader} from '../../../../examples/showcase/tectonic-time-machine/src/parquet-stream.js';
 test('published Parquet loader prunes columns and reuses one download for Cao-style geometry/rotation reads',async()=>{
-  const data=await readFile(new URL('../../../../../examples/geospatial/tectonic-time-machine/test-data/streaming.parquet',import.meta.url));let downloads=0;
+  const data=await readFile(new URL('../../../../examples/showcase/tectonic-time-machine/test-data/streaming.parquet',import.meta.url));let downloads=0;
   const read=createParquetReader(async(url,{signal})=>{
     signal.throwIfAborted();downloads++;return new Response(data);
   });
@@ -486,7 +486,7 @@ test('published Parquet loader prunes columns and reuses one download for Cao-st
 
 
 test('TypeScript Parquet decoder streams selected row groups and columns through byte ranges',async()=>{
-  const data=await readFile(new URL('../../../../../examples/geospatial/tectonic-time-machine/test-data/streaming.parquet',import.meta.url));
+  const data=await readFile(new URL('../../../../examples/showcase/tectonic-time-machine/test-data/streaming.parquet',import.meta.url));
   const requests=[];
   const read=createParquetReader(async(url,{signal,headers})=>{
     signal.throwIfAborted();
@@ -517,7 +517,7 @@ test('TypeScript Parquet decoder streams selected row groups and columns through
 });
 
 test('snapshot byte ranges reject truncated or incorrectly addressed responses',async()=>{
-  const data=await readFile(new URL('../../../../../examples/geospatial/tectonic-time-machine/test-data/streaming.parquet',import.meta.url));
+  const data=await readFile(new URL('../../../../examples/showcase/tectonic-time-machine/test-data/streaming.parquet',import.meta.url));
   for (const wrongHeader of [false,true]) {
     const read=createParquetReader(async()=>new Response(new Uint8Array(wrongHeader?4:3),{
       status:206,headers:wrongHeader?{'Content-Range':`bytes 1-4/${data.byteLength}`}:{}}));
@@ -529,7 +529,7 @@ test('snapshot byte ranges reject truncated or incorrectly addressed responses',
   }
 });
 
-import {snapshotRequest} from '../../../../../examples/geospatial/tectonic-time-machine/src/snapshot-request.ts';
+import {snapshotRequest} from '../../../../examples/showcase/tectonic-time-machine/src/snapshot-request.ts';
 test('snapshot deadlines cover stalled headers and bodies without aborting the model lifetime',async()=>{
   for (const phase of ['headers','body']) {
     const model=new AbortController();let requestSignal;
@@ -577,7 +577,7 @@ test('manifest header and JSON body stalls report failure before any geometry lo
   }
 });
 test('a stalled range body is evicted and the same source retries successfully',async()=>{
-  const data=await readFile(new URL('../../../../../examples/geospatial/tectonic-time-machine/test-data/streaming.parquet',import.meta.url));
+  const data=await readFile(new URL('../../../../examples/showcase/tectonic-time-machine/test-data/streaming.parquet',import.meta.url));
   const staleBody=deferred();let attempts=0,failedRequestSignal;
   const read=createParquetReader(async(_url,{signal,headers})=>{
     if (++attempts===1) {

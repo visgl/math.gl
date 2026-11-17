@@ -8,8 +8,8 @@ import {
   sampleLongitudeRow,
   wrapLongitude,
   geographicSource,
-} from "../../../../../examples/geospatial/alpine-ice-age/src/map-center.ts";
-import { sourceSample, sampleField } from "../../../../../examples/geospatial/alpine-ice-age/src/discontinuous-views.js";
+} from "../../../../examples/showcase/alpine-ice-age/src/map-center.ts";
+import { sourceSample, sampleField } from "../../../../examples/showcase/alpine-ice-age/src/discontinuous-views.js";
 
 test("central meridian resamples geography periodically without bridging map seams", () => {
   const field = Float32Array.from({ length: 360 * 181 }, (_, i) =>
@@ -43,7 +43,7 @@ test("fixed geographic layouts keep their masks and drag longitudes wrap", () =>
 });
 
 test("centered graticules retain actual geographic meridians and cache reprojection", async () => {
-  const { centeredGraticules } = await import("../../../../../examples/geospatial/alpine-ice-age/src/map-center.ts");
+  const { centeredGraticules } = await import("../../../../examples/showcase/alpine-ice-age/src/map-center.ts");
   let calls = 0;
   const map = {
     projectLine: (sourceCoordinates) => {

@@ -3,10 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {unitVector} from '../../../../../examples/geospatial/tectonic-time-machine/src/math.ts';
-import {containsPlace,createPlaceTracker,easeCamera,cinematicShot} from '../../../../../examples/geospatial/tectonic-time-machine/src/journeys.js';
-import {createJourneyTrail} from '../../../../../examples/geospatial/tectonic-time-machine/src/journey-trail.js';
-import {createFutureComparison,majorFutureBlocks} from '../../../../../examples/geospatial/tectonic-time-machine/src/future-comparison.js';
+import {unitVector} from '../../../../examples/showcase/tectonic-time-machine/src/math.ts';
+import {containsPlace,createPlaceTracker,easeCamera,cinematicShot} from '../../../../examples/showcase/tectonic-time-machine/src/journeys.js';
+import {createJourneyTrail} from '../../../../examples/showcase/tectonic-time-machine/src/journey-trail.js';
+import {createFutureComparison,majorFutureBlocks} from '../../../../examples/showcase/tectonic-time-machine/src/future-comparison.js';
 function feature(rings) {
   const count=rings.reduce((n,ring)=>n+ring.length/2,0),xyz=new Float64Array(count*3),holes=[];
   let index=0;

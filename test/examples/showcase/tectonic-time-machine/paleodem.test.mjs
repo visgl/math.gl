@@ -4,9 +4,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {loadPaleoTerrain, terrainBracket, validateTerrainManifest} from '../../../../../examples/geospatial/tectonic-time-machine/src/paleodem.js';
+import {loadPaleoTerrain, terrainBracket, validateTerrainManifest} from '../../../../examples/showcase/tectonic-time-machine/src/paleodem.js';
 
-const manifest = JSON.parse(await readFile(new URL('../../../../../examples/geospatial/tectonic-time-machine/test-data/paleodem-manifest.json', import.meta.url)));
+const manifest = JSON.parse(await readFile(new URL('../../../../examples/showcase/tectonic-time-machine/test-data/paleodem-manifest.json', import.meta.url)));
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
 test('terrain brackets retain source ages, exact endpoints and interpolation direction', () => {

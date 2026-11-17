@@ -3,16 +3,16 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { discontinuousGrid } from "../../../../../examples/geospatial/alpine-ice-age/src/discontinuous-views.js";
+import { discontinuousGrid } from "../../../../examples/showcase/alpine-ice-age/src/discontinuous-views.js";
 import {
   prepareMyriahedralAnimation,
   myriahedralPose,
-} from "../../../../../examples/geospatial/alpine-ice-age/src/myriahedral-animation.js";
+} from "../../../../examples/showcase/alpine-ice-age/src/myriahedral-animation.js";
 import {
   projectionRoute,
   segmentedPosition,
   globePosition,
-} from "../../../../../examples/geospatial/alpine-ice-age/src/projection-transition.js";
+} from "../../../../examples/showcase/alpine-ice-age/src/projection-transition.js";
 
 test("hinge transitions match globe and flat endpoints and preserve panel edges", () => {
   const viewport = { width: 900, height: 570, longitude: -25, latitude: 35 };
@@ -123,7 +123,7 @@ test("separate seam copies meet on the globe and interpolate continuously", () =
 });
 
 test("cache eviction retains the next stage while another selection finishes loading", async () => {
-  const { prunePreparedMaps } = await import("../../../../../examples/geospatial/alpine-ice-age/src/projection-transition.js");
+  const { prunePreparedMaps } = await import("../../../../examples/showcase/alpine-ice-age/src/projection-transition.js");
   const cache = new Map(["A", "B", "X", "C"].map((id) => [id, {}]));
   prunePreparedMaps(cache, "A", "C", { view: "A" }, [{ view: "B" }]);
   assert.deepEqual([...cache.keys()], ["A", "B", "C"]);

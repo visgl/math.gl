@@ -4,8 +4,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { S2Decoder } from "@math.gl/dggs";
-import { createS2MyriahedralMesh } from "../../../../../examples/geospatial/alpine-ice-age/src/dggs-mesh.js";
-import { discontinuousGrid } from "../../../../../examples/geospatial/alpine-ice-age/src/discontinuous-views.js";
+import { createS2MyriahedralMesh } from "../../../../examples/showcase/alpine-ice-age/src/dggs-mesh.js";
+import { discontinuousGrid } from "../../../../examples/showcase/alpine-ice-age/src/discontinuous-views.js";
 
 test("S2 level-zero cells form an outward-wound closed cube", () => {
   const { mesh, cells } = createS2MyriahedralMesh();
