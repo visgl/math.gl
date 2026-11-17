@@ -26,3 +26,11 @@ export type {
   SQLJoin,
   SQLSort
 } from './parse-sql-statement';
+
+export type {
+  SQLParameterValue,
+  SQLParameters,
+  SQLParameterOptions,
+  SQLNumericArray,
+  SQLBinaryParameter
+} from './sql-parameters';

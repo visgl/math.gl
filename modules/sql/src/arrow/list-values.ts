@@ -169,7 +169,30 @@ export function compileArrayLiteral(ast: any, type: DataType): (length: number) 
     }
     return value;
   });
-  const literal = vectorFromArray([values], listType);
+  // Typed parameter storage can already have the exact physical element layout.
+  // Keep the portable elements authoritative if an external caller edits the AST.
+  const typed = ast.typedValues;
+  const matchingStorage =
+    typed &&
+    typed.constructor === child.type.ArrayType &&
+    typed.length === values.length &&
+    values.every((value, index) => Object.is(value, typed[index]));
+  const literal: Vector<List | FixedSizeList> = matchingStorage
+    ? new Vector<List | FixedSizeList>([
+        DataType.isList(listType)
+          ? makeData({
+              type: listType,
+              length: 1,
+              valueOffsets: Int32Array.of(0, values.length),
+              child: makeData({type: child.type, length: values.length, data: typed.slice()})
+            })
+          : makeData({
+              type: listType,
+              length: 1,
+              child: makeData({type: child.type, length: values.length, data: typed.slice()})
+            })
+      ])
+    : vectorFromArray([values], listType);
   const dictionaryType = new Dictionary(listType, new Uint8());
   let cached: Vector | undefined;
   return length => {
@@ -179,14 +202,12 @@ export function compileArrayLiteral(ast: any, type: DataType): (length: number) 
       const result = nullTupleVector(listType, length);
       const data = result.data[0]!;
       const childData = data.children[0]!;
-      const components =
-        DataType.isFloat(childData.type) && childData.type.precision === Precision.HALF
-          ? float16Values(childData.values as Uint16Array)
-          : childData.values;
+      // Copy the already converted physical values, including Float16 bits. Repeating
+      // a tuple must not re-encode or re-round its JavaScript components for each row.
+      const components = literal.data[0]!.children[0]!.values.subarray(0, listType.listSize);
       for (let row = 0; row < length; row++) {
         data.setValid(row, true);
-        for (let component = 0; component < listType.listSize; component++)
-          components[row * listType.listSize + component] = values[component] as any;
+        childData.values.set(components, row * listType.listSize);
       }
       cached = result;
     } else {

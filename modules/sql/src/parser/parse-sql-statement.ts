@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import type {SQLParameterOptions} from './sql-parameters';
 import type {Expression} from '../expressions';
 import {SQLExpressionReader, SQL_RESERVED_WORDS} from './parse-sql-expression';
 import {SQLQueryReader} from './parse-sql-select';
@@ -37,10 +38,7 @@ export type SQLSelectStatement = Readonly<{
 }>;
 
 /** Options for interpreting named parameters in a relational SELECT. */
-export type SQLSelectStatementOptions = Readonly<{
-  /** Supplies the AST for a named parameter such as :minimum. */
-  parseParameter?: (name: string) => Expression;
-}>;
+export type SQLSelectStatementOptions = SQLParameterOptions;
 
 /** Parses a SELECT with a required FROM, without assuming an execution engine. */
 export function parseSQLSelectStatement(
@@ -157,7 +155,7 @@ class RelationalQueryReader extends SQLQueryReader {
     sql: string,
     private readonly options: SQLSelectStatementOptions
   ) {
-    super(sql);
+    super(sql, options);
   }
 
   tableName(): string {
@@ -192,28 +190,13 @@ class RelationalQueryReader extends SQLQueryReader {
 }
 
 class RelationalExpressionReader extends SQLExpressionReader {
-  constructor(
-    source: string,
-    position: number,
-    private readonly options: SQLSelectStatementOptions
-  ) {
-    super(source, position);
+  constructor(source: string, position: number, options: SQLSelectStatementOptions) {
+    super(source, position, options);
   }
 
   override space(): void {
     this.position = skipLineComments(this.source, this.position);
     super.space();
-  }
-
-  protected override extendedPrimary(): Expression | undefined {
-    if (this.source[this.position] !== ':') return undefined;
-    const parameter = /^:([A-Za-z_][A-Za-z0-9_]*)/.exec(this.source.slice(this.position));
-    if (!parameter || !this.options.parseParameter) {
-      throw this.error('SQL named parameters require a name and parseParameter callback');
-    }
-    this.position += parameter[0].length;
-    this.token();
-    return this.node(this.options.parseParameter(parameter[1]!));
   }
 
   /** Preserves dot access until the planner can resolve table aliases. */

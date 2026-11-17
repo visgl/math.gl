@@ -36,7 +36,16 @@ export type Expression =
     })
   | JsepTypes.ConditionalExpression
   | JsepTypes.Identifier
-  | JsepTypes.Literal
+  | {
+      /** Literal node discriminator. */
+      type: 'Literal';
+      /** Original spelling when the literal came from source text. */
+      raw?: string;
+      /** Scalar value, including structured-cloneable binary and date parameters. */
+      value: JsepTypes.Literal['value'] | Date | Uint8Array;
+      /** Optional pre-encoded UTF-8 storage corresponding to a string value. */
+      utf8?: Uint8Array;
+    }
   | JsepTypes.MemberExpression
   | JsepTypes.ThisExpression
   | JsepTypes.UnaryExpression;

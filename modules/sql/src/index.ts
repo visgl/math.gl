@@ -38,3 +38,11 @@ export {
   isExpressionEvaluationError,
   type ExpressionEvaluationErrorCode
 } from './expressions/evaluation-error';
+
+export type {
+  SQLParameterValue,
+  SQLParameters,
+  SQLParameterOptions,
+  SQLNumericArray,
+  SQLBinaryParameter
+} from './parser/sql-parameters';

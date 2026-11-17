@@ -79,7 +79,9 @@ function visitExpressionAST(
       case 'Literal':
         if (
           node.value !== null &&
-          !['number', 'bigint', 'boolean', 'string'].includes(typeof node.value)
+          !['number', 'bigint', 'boolean', 'string'].includes(typeof node.value) &&
+          !(node.value instanceof Uint8Array) &&
+          !(node.value instanceof Date && Number.isFinite(node.value.getTime()))
         )
           throw new Error('Unsupported expression literal');
         if (node.raw !== undefined && typeof node.raw !== 'string')

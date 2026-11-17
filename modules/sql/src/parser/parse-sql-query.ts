@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import type {SQLParameterOptions} from './sql-parameters';
+import type {SQLPredicateParameterValues} from './sql-predicate-types';
 import {reportDiagnosticError, type DiagnosticLog} from '../diagnostic-log';
 import type {TableQuery} from './query-types';
 import {parseSQLExpression} from './parse-sql-expression';
@@ -13,10 +15,10 @@ import {parseSQLSelect, SQLQueryReader} from './parse-sql-select';
 /** Parses the supported SELECT subset or SHOW SOURCES, SHOW TABLES and DESCRIBE commands. */
 export function parseSQLQuery(
   sql: string,
-  options?: {log?: DiagnosticLog}
+  options: SQLParameterOptions & {log?: DiagnosticLog} = {}
 ): TableQuery | SQLCatalogQuery {
   try {
-    return parseQuery(sql);
+    return parseQuery(sql, options);
   } catch (error) {
     reportDiagnosticError(options?.log, error);
     throw error;
@@ -24,8 +26,8 @@ export function parseSQLQuery(
 }
 
 /** Parses a SQL request, including internal grammar fallbacks. */
-function parseQuery(sql: string): TableQuery | SQLCatalogQuery {
-  const reader = new SQLQueryReader(sql);
+function parseQuery(sql: string, options: SQLParameterOptions): TableQuery | SQLCatalogQuery {
+  const reader = new SQLQueryReader(sql, options);
   if (reader.takeKeyword('SHOW')) {
     let request: SQLCatalogQuery;
     if (reader.takeKeyword('SOURCES')) request = {command: 'showSources'};
@@ -45,13 +47,20 @@ function parseQuery(sql: string): TableQuery | SQLCatalogQuery {
     return {command: 'describe', from};
   }
   return parseSQLSelect(sql, {
+    ...options,
     parseWhere: expression => {
       try {
-        const predicate = parseSQLPredicate(expression);
+        // The portable predicate fast path accepts scalars. Arrays and custom bindings
+        // are handled by the shared expression parser below.
+        if (options.parseParameter)
+          throw new Error('Custom parameter AST requires expression parsing');
+        const predicate = parseSQLPredicate(expression, {
+          parameters: options.parameters as SQLPredicateParameterValues
+        });
         validateColumnReferences(predicate);
         return predicate;
       } catch {
-        return {expression: parseSQLExpression(expression)};
+        return {expression: parseSQLExpression(expression, options)};
       }
     }
   });
@@ -63,6 +72,14 @@ function validateColumnReferences(predicate: BoundSQLPredicate): void {
     predicate.args.forEach(validateColumnReferences);
   } else if (predicate.op === 'not') validateColumnReferences(predicate.args[0]);
   else {
+    const values =
+      predicate.op === 'in'
+        ? predicate.args[1]
+        : predicate.op === 'isNull'
+          ? []
+          : [predicate.args[1]];
+    if (values.some(value => value instanceof Date || value instanceof Uint8Array))
+      throw new Error('Date and binary values require expression evaluation');
     const property = predicate.args[0] as SQLPredicateProperty;
     if (!property.quoted && property.property.includes('.'))
       throw new Error(
