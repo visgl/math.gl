@@ -1,0 +1,17 @@
+{
+  "name": "math.gl-sql-expressions-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "node src/main.mjs",
+    "build": "node src/main.mjs"
+  },
+  "dependencies": {
+    "@math.gl/core": "workspace:*",
+    "@math.gl/sql": "workspace:*",
+    "@math.gl/tasks": "workspace:*",
+    "apache-arrow": "17.0.0"
+  }
+}

@@ -10,10 +10,10 @@ Version 5.0 is in prerelease development. See the [upgrade guide](./upgrade-guid
 
 ### A separate Arrow package
 
-The optional [`@math.gl/arrow/geoarrow`](./modules/arrow/geoarrow/README.md)
+The optional [`@math.gl/core/arrow`](./modules/core/arrow/geoarrow/README.md)
 entry adapts Arrow 17+ fields/vectors to the existing geometry kernels without a loaders.gl
 schema dependency. Physical descriptors remain Arrow-independent at
-[`@math.gl/arrow/geoarrow-utils`](./modules/arrow/geoarrow-utils/README.md).
+[`@math.gl/core/arrow`](./modules/core/arrow/geoarrow-utils/README.md).
 The new runnable Arrow-table example complements the updated descriptor/task-worker example.
 
 ### Work across coordinate systems
@@ -28,7 +28,7 @@ The new [DGGS module](./modules/dggs/README.md) brings A5, GeoHash, H3, Plus Cod
 
 ### Move geometry from data to visualization
 
-Read and write WKB, EWKB, and WKT with [WKB](./modules/arrow/wkb/README.md), or process columnar geometry with [GeoArrow](./modules/arrow/geoarrow-utils/README.md). [Geometry](./modules/geometry/README.md) and [geometry-utils](./modules/geometry/README.md) tools provide renderer-independent building blocks, including prisms, solid rings, and optional parametric shapes. [Polygon](./modules/geometry/polygon/README.md) can adaptively subdivide meshes and lines, including meshes for globes, while preserving attributes through refinement.
+Read and write WKB, EWKB, and WKT with [WKB](./modules/core/arrow/wkb/README.md), or process columnar geometry with [GeoArrow](./modules/core/arrow/geoarrow-utils/README.md). [Geometry](./modules/geometry/README.md) and [geometry-utils](./modules/geometry/README.md) tools provide renderer-independent building blocks, including prisms, solid rings, and optional parametric shapes. [Polygon](./modules/geometry/polygon/README.md) can adaptively subdivide meshes and lines, including meshes for globes, while preserving attributes through refinement.
 
 ### Bring globes to life
 
@@ -47,18 +47,16 @@ loaders.gl or other readers, and no dependencies are added.
 
 ### Module structure
 
-Version 5 groups related tools into nine packages. Install the package root and use its focused entry points where available. See the [migration table](./upgrade-guide.md#removed-standalone-packages) for the former package names.
+Version 5 groups related tools into seven packages. Install the package root and use its focused entry points where available. See the [migration table](./upgrade-guide.md#package-imports) for the former package names.
 
 | Package | Purpose |
 | --- | --- |
-| [core](./modules/core/README.md) | Vectors, matrices, rotations, and types |
+| [core](./modules/core/README.md) | Vectors, matrices, colors, LUTs, UTF-8, and optional Arrow/GeoArrow integration |
 | [sql](./modules/sql/README.md) | SQL queries over Arrow tables, parsing, and expression evaluation |
 | [geometry](./modules/geometry/README.md) | Primitives, polygons, geometry utilities, and culling |
-| [geospatial](./modules/geospatial/README.md) | Ellipsoids, coordinate systems, projections, and tile matrices |
+| [geospatial](./modules/geospatial/README.md) | Ellipsoids, coordinate systems, projections, tile matrices, and Web Mercator |
 | [earth](./modules/earth/README.md) | Geoid models, sky calculations, and timezones |
 | [dggs](./modules/dggs/README.md) | Six grid systems behind a common decoder API |
-| [web-mercator](./modules/web-mercator/README.md) | Map viewport and Web Mercator calculations |
-| [arrow](./modules/arrow/README.md) | Arrow views and transport, UTF-8, GeoArrow, and WKB/WKT |
 | [tasks](./modules/tasks/README.md) | Task scheduling, typed operations, and worker execution |
 
 For detailed changes, see the [changelog](https://github.com/visgl/math.gl/blob/master/CHANGELOG.md).
@@ -137,7 +135,7 @@ are no longer supported. For details, consult the [upgrade guide](./upgrade-guid
 
 Release Date: July 14, 2021
 
-**`@math.gl/web-mercator`**
+**`@math.gl/geospatial/web-mercator`**
 
 - `getBounds()` now supports an optional `fovy` parameter on the `WebMercatorViewport` object
 - `getProjectionMatrix()` and `getProjectionParameters()` now accept a `fovy` parameter
@@ -192,10 +190,10 @@ Release Date: July 18, 2020
 
 Release date: Dec 16, 2019
 
-### `@math.gl/web-mercator`
+### `@math.gl/geospatial/web-mercator`
 
-- WebMercator projection support is now available through the new `@math.gl/web-mercator` npm sub-module.
-- The `@math.gl/web-mercator` module is an evolution of the now archived [`viewport-mercator-project`](https://github.com/uber-archive/viewport-mercator-project) repository.
+- WebMercator projection support is now available through the new `@math.gl/geospatial/web-mercator` npm sub-module.
+- The `@math.gl/geospatial/web-mercator` module is an evolution of the now archived [`viewport-mercator-project`](https://github.com/uber-archive/viewport-mercator-project) repository.
 
 ## v3.0
 

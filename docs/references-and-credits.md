@@ -29,7 +29,7 @@ was adapted. Source headers identify upstream copyright holders and licenses.
 | [geospatial](https://github.com/visgl/math.gl/blob/master/modules/geospatial/THIRD-PARTY-NOTICES.md) | CesiumJS geometry; proj4js and PROJ projection work; Charles Karney's GeographicLib; Mike Bostock and D3 contributors' segmented projections. |
 | [earth](https://github.com/visgl/math.gl/blob/master/modules/earth/THIRD-PARTY-NOTICES.md) | GeographicLib geoid interpolation; [Volodymyr Agafonkin](https://github.com/mourner)'s SunCalc; Hošek–Wilkie model data; Bretton Wade's star catalogue conversion; Temporal/JSBI; PhotoStructure's tz-lookup; optional NGA and timezone boundary datasets. |
 | [dggs](https://github.com/visgl/math.gl/blob/master/modules/dggs/THIRD-PARTY-NOTICES.md) | Jon Atkins and AJ ONeal's s2-geometry; CesiumJS token code; separately installed A5, H3 and Open Location Code libraries. |
-| [web-mercator](https://github.com/visgl/math.gl/blob/master/modules/web-mercator/THIRD-PARTY-NOTICES.md) | Perspective viewport utilities; van Wijk and Nuij's zoom/pan algorithm; Mapbox/react-map-gl compatibility references. |
+| [web-mercator](https://github.com/visgl/math.gl/blob/master/modules/geospatial/web-mercator/THIRD-PARTY-NOTICES.md) | Perspective viewport utilities; van Wijk and Nuij's zoom/pan algorithm; Mapbox/react-map-gl compatibility references. |
 
 The [projection provenance inventory](https://github.com/visgl/math.gl/blob/master/modules/geospatial/THIRD-PARTY-NOTICES.md)
 records individual ports, versions, modifications, reference fixtures and grid

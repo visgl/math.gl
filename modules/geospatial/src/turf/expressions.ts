@@ -4,8 +4,8 @@
 
 import {DataType, Precision, makeData, makeVector, type Field} from 'apache-arrow';
 import type {ArrowTableFunction} from '@math.gl/sql/arrow';
-import {makeGeoArrowColumnFromArrowVector} from '@math.gl/arrow/geoarrow';
-import {isGeoArrowValueValid, type GeoArrowColumn} from '@math.gl/arrow/geoarrow-utils';
+import {makeGeoArrowColumnFromArrowVector} from '@math.gl/core/arrow';
+import {isGeoArrowValueValid, type GeoArrowColumn} from '@math.gl/core/arrow';
 import type {TurfBatchResult} from '../turf';
 
 /** Adapter for row-preserving numeric/Boolean functions from @math.gl/geospatial/turf. */

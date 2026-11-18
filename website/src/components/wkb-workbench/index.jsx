@@ -4,7 +4,7 @@
 import React, {lazy} from 'react';
 import {useColorMode} from '@docusaurus/theme-common';
 import LiveExample from '../live-globe';
-const Example = lazy(() => import('website-examples/arrow/wkb-workbench/src/app.jsx'));
+const Example = lazy(() => import('website-examples/core/wkb-workbench/src/app.jsx'));
 export default function Component(props) {
   const {colorMode} = useColorMode();
   // Let the document own vertical scrolling for the full workbench and its readouts.

@@ -8,7 +8,7 @@ For documentation please visit the [website](https://math.gl).
 
 The grouped subpaths include `@math.gl/geospatial`, `/globe`, `/tiles`, `/crs`, `/projection`, `/web-mercator`,
 `/expressions`, and the experimental `/discontinuous`. DGGS remains a separate module at `@math.gl/dggs`.
-`@math.gl/web-mercator` remains available for existing applications.
+`@math.gl/geospatial/web-mercator` remains available for existing applications.
 
 Use `@math.gl/geospatial` for ellipsoid coordinate math and local tangent frames,
 `@math.gl/geospatial` for geographic regions, bounding boxes, horizon bounds, occlusion, and globe mesh subdivision,
@@ -29,7 +29,7 @@ Use `@math.gl/geospatial` for [oblique ellipsoidal visibility and shared cut gra
 
 ## Batched GeoArrow operations
 
-Import `@math.gl/geospatial/turf` for Turf-style operations on native GeoArrow columns from `@math.gl/arrow/geoarrow-utils`.
+Import `@math.gl/geospatial/turf` for Turf-style operations on native GeoArrow columns from `@math.gl/core/arrow`.
 The entry point processes physical coordinate buffers without materializing GeoJSON rows.
 `bbox`, `distance`, `bearing`, `length`, `area`, and `booleanPointInPolygon` return
 `{values, validity}`: values are typed arrays in row order and validity is an Arrow bitmap
@@ -244,5 +244,5 @@ These are CPU/data APIs; shader and device execution stay in luma.gl.
 ## Binary geometry representations
 
 Arrow and GeoArrow adapters, physical descriptor kernels, tessellation, and WKB/WKT
-codecs are provided by [`@math.gl/arrow`](../arrow/README.md). Geographic operations
+codecs are provided by [`@math.gl/core/arrow`](../arrow/README.md). Geographic operations
 in this package can consume its descriptors without requiring Apache Arrow.

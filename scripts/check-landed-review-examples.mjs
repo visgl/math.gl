@@ -16,13 +16,13 @@ for (const [name, example, entry] of [
   ['unfold','geometry/unfolding-polyhedron','src/main.ts'],
   ['globe','geospatial/globe-primitives','src/app.js'],
   ['albers','geospatial/albers-usa','src/standalone.js'],
-  ['expressions','core/expressions','src/main.tsx']
+  ['expressions','sql/expressions','src/main.tsx']
 ]) {
   const plugins = name === 'expressions' ? [{
     name: 'controlled-async-evaluation',
     setup(builder) {
       builder.onResolve({filter: /^@math\.gl\/sql\/expressions$/}, args =>
-        args.importer === resolve(root,'examples/core/expressions/src/app.tsx') ? {path:'controlled',namespace:'review'} : null
+        args.importer === resolve(root,'examples/sql/expressions/src/app.tsx') ? {path:'controlled',namespace:'review'} : null
       );
       builder.onLoad({filter:/.*/,namespace:'review'}, () => ({
         resolveDir:root,

@@ -33,3 +33,5 @@ export {
   unpackFloat16,
   packRGBA16F
 } from './hdr-colors';
+
+export * from './arrow-scales';

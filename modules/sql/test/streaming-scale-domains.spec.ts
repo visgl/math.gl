@@ -4,7 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
-import {createStreamingDomainAccumulator} from '@math.gl/sql/arrow-scales';
+import {createStreamingDomainAccumulator} from '@math.gl/sql/scales';
 import {ScaleQuantileSketch} from '@math.gl/sql/scales';
 
 test('streaming min/max, symmetric, percentile and category snapshots', () => {

@@ -7,12 +7,18 @@
 import {Matrix3, Quaternion, Vector3} from '@math.gl/core';
 import {OrientedBoundingBox} from '../bounding-volumes/oriented-bounding-box';
 
-/** Return the orientation of a box, excluding the scale of its half axes. */
+/**
+ * Return a unit rotation quaternion for the box, excluding half-axis scale.
+ * Reflected half axes use an equivalent right-handed basis without mutating the box.
+ */
 export function getOrientedBoundingBoxQuaternion(box: OrientedBoundingBox): Quaternion {
   const x = new Vector3(box.halfAxes.getColumn(0)).normalize();
   const y = new Vector3(box.halfAxes.getColumn(1)).normalize();
   const z = new Vector3(box.halfAxes.getColumn(2)).normalize();
-  return new Quaternion().fromMatrix3(new Matrix3([...x, ...y, ...z]));
+  // Reversing one half-axis preserves the box while removing a reflection,
+  // which cannot be represented by a rotation quaternion.
+  if (box.halfAxes.determinant() < 0) z.negate();
+  return new Quaternion().fromMatrix3(new Matrix3([...x, ...y, ...z])).normalize();
 }
 
 /** Construct a box from its center, half sizes and quaternion, optionally reusing a box. */

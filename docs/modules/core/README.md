@@ -87,3 +87,12 @@ When interoperating with other numeric APIs:
 - Use `vector.len()` for magnitude; `vector.length` is the array's element count.
 - Matrix elements use column-major storage. Check the argument order when copying values through another library's setters.
 - Methods that depend on renderer-owned geometries or buffer attributes are outside the core API. Copy their numeric components into math.gl vectors or matrices instead.
+
+## Focused entry points
+
+- `@math.gl/core/matrix`: vectors, matrices, rotations, and transforms.
+- `@math.gl/core/color`: colors, reusable scales, palettes, and LUTs.
+- `@math.gl/core/utf8`: UTF-8 buffer utilities.
+- `@math.gl/core/arrow`: Arrow tables/vectors, GeoArrow, and WKB integration. Install the optional `apache-arrow >=17` peer when using this entry point.
+
+The root retains the foundational math API. Tasks and DGGS remain separate packages.

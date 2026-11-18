@@ -52,13 +52,13 @@ See https://github.com/visgl/deck.gl/issues/11147 for the cross-repository track
 
 ## Evaluate on Arrow
 
-Install Apache Arrow and import `compileArrowScale` from `@math.gl/sql/arrow-scales`.
+Install Apache Arrow and import `compileArrowScale` from `@math.gl/sql/scales`.
 It resolves the domain from your table, binds the input expression, and returns a
 sampler and an evaluator for Arrow tables and record batches.
 
 ```ts
 import {parseSQLScaleExpression} from '@math.gl/sql/scales';
-import {compileArrowScale} from '@math.gl/sql/arrow-scales';
+import {compileArrowScale} from '@math.gl/sql/scales';
 
 const parsed = parseSQLScaleExpression(
   "SCALE_COLOR(temperature, DOMAIN(temperature), PALETTE('viridis'))"
@@ -76,7 +76,7 @@ classes from the resolved colors. Arrow Int64 and Uint64 values are accepted
 within JavaScript's safe integer range.
 ## Resolve domains from a stream
 
-Create a streaming domain accumulator from `@math.gl/sql/arrow-scales` and call
+Create a streaming domain accumulator from `@math.gl/sql/scales` and call
 `update(batch)` for every Arrow record batch. Call `result()` to read the latest
 resolved domains in request order. Extents track exact bounds. Percentiles and
 quantile breaks use a bounded approximate sketch, and categorical domains
@@ -85,7 +85,7 @@ retain each distinct value in memory.
 
 To evaluate batches using statistics collected during a scan, call
 `bindArrowScale(schema, parsed, {domain, quantileBreaks})` from
-`@math.gl/sql/arrow-scales`. Use the matching domain from the accumulator's
+`@math.gl/sql/scales`. Use the matching domain from the accumulator's
 `result()`. For quantile classification, pass the class boundaries from
 `quantileBreaks(column, classCount)`. The binder reads no rows. Its
 `evaluateBatch()` method and resolved descriptor use the same boundaries.

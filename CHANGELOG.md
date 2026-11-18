@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## Unreleased
+## v5.0.0-beta.12
+
+- **Breaking:** Consolidate Arrow, GeoArrow and WKB integration into `@math.gl/core/arrow` and `@math.gl/geometry/arrow`, and move Web Mercator to `@math.gl/geospatial/web-mercator`. Organize core matrix, color and UTF-8 APIs and unify SQL scales under `@math.gl/sql/scales` (#608).
 
 - SQL: expand list and map columns through experimental SQL UNNEST with left joins and ordinality
 
@@ -10,6 +12,12 @@
 - SQL: add `EPOCH_MS` for DATE and microsecond TIMESTAMP interoperability with JavaScript time values
 - SQL: compose Arrow scales inside conditional expressions with resolved legend metadata
 
+- feat(sql): Add fixed ordinal and threshold color mappings, computed quantile palettes, Arrow schema binding, and a parsed scale AST adapter with backend conformance fixtures (#589, #593, #595–#597).
+- feat(sql): Support named query parameters and binary inputs, immutable parameter snapshots, and query dependency comparison (#602, #604).
+- **Breaking:** Clean projection exports and align SQL entrypoint names (#603).
+- feat(terrain): Add conforming resident tile cutouts with paired skirts, incremental and geographic cutouts, concave polygons, holes and polygon IDs. Qualify cutout partition scaling through 512 residents (#583, #586, #588, #605).
+- fix(geometry): Bridge Earcut holes at a shared vertex and extract rotations from reflected bounding boxes (#594, #606).
+- ci: Synchronize mobile fullscreen checks with hydration and UI state, reuse example builds, and run full solar browser conformance on affected changes and nightly (#585, #587).
 
 ## v5.0.0-beta.11
 
@@ -76,12 +84,12 @@
 
 ## v5.0.0-beta.5
 
-- **Breaking:** Extract `@math.gl/arrow` and `@math.gl/tasks` as standalone packages. Move Arrow/GeoArrow utilities, UTF-8, and WKB/WKT from core and geospatial to the Arrow package and its capability subpaths; move task execution from `@math.gl/core/tasks` to `@math.gl/tasks`. The former packages no longer forward these exports. See the [upgrade guide](docs/upgrade-guide.md) (#447, #448).
+- **Breaking:** Extract `@math.gl/core/arrow` and `@math.gl/tasks` as standalone packages. Move Arrow/GeoArrow utilities, UTF-8, and WKB/WKT from core and geospatial to the Arrow package and its capability subpaths; move task execution from `@math.gl/core/tasks` to `@math.gl/tasks`. The former packages no longer forward these exports. See the [upgrade guide](docs/upgrade-guide.md) (#447, #448).
 - feat(arrow): Add optional Apache Arrow 17+ utilities and Arrow-backed GeoArrow operations, with layout, null, union, slice, buffer-ownership, and browser-bundle qualification (#447, #448).
 - feat(core, geometry): Add numeric helpers, projection helpers, sample tracks, extended bounds and geometric queries, adaptive curve sampling, and parallel-transport frames. Improve numerical stability for extreme scales, vector/quaternion normalization, and cubic tangents (#432).
 - feat(tasks): Support concurrent operations on initialized tasks and bidirectional worker services (#423).
 - feat(terrain): Add opt-in raster-footprint clamping and support-only bilinear nodata sampling with bounded grid-node roundoff handling; add mixed-resolution contour welding and a qualified terrain mesh lab (#426, #436).
-- feat(core): Restore the dedicated expressions entry point; add dependency-free UTF-8 utilities, now available at `@math.gl/arrow/utf8` (#429, #446, #448).
+- feat(core): Restore the dedicated expressions entry point; add dependency-free UTF-8 utilities, now available at `@math.gl/core/utf8` (#429, #446, #448).
 - feat(geometry): Add photometric and color lookup-table calculations (#439).
 - feat(geospatial): Expose resolved projection metadata for matching external backends (#438).
 - chore(web-mercator): Remove the unpublished GlobeMercatorProjection class (#440).
@@ -645,7 +653,7 @@
 - Refactor WebMercatorViewport (#145)
 - Clean up bounding volume classes and docs (#144)
 - Fix web mercator projection far plane at high pitch (#142)
-- Restore default export of @math.gl/web-mercator (#141)
+- Restore default export of @math.gl/geospatial/web-mercator (#141)
 
 ## v3.2.0-alpha.2 - Apr 12, 2020
 
@@ -688,7 +696,7 @@
 
 ## v3.1.0-alpha.1 - Nov 4, 2019
 
-- Rename viewport-mercator-project to @math.gl/web-mercator (#116)
+- Rename viewport-mercator-project to @math.gl/geospatial/web-mercator (#116)
 - [viewport-mercator-project] use zoom-independent world space (#118)
 - Add sun module (#114)
 - Port sun calculations from deck (#111)
@@ -883,3 +891,9 @@
 
 ### 1.0.0-alpha.1
 - Initial source code copy from luma.gl v4.1-alpha branch
+
+## Unreleased package consolidation
+
+- Consolidate Arrow, GeoArrow, and WKB integration in core/arrow; expose matrix, color, and UTF-8 core entry points. Apache Arrow remains an optional peer supplied by the application.
+- Move Web Mercator into geospatial/web-mercator; organize docs and examples under the owning packages.
+- Merge Arrow scale evaluation into sql/scales. Keep tasks and DGGS separate.

@@ -3,7 +3,11 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {Table} from 'apache-arrow';
-import {dehydrateArrowTable, hydrateArrowTable, type DehydratedArrowTable} from '@math.gl/arrow';
+import {
+  dehydrateArrowTable,
+  hydrateArrowTable,
+  type DehydratedArrowTable
+} from '@math.gl/core/arrow';
 import {TaskRunner, type Task, type TaskWorker} from '@math.gl/tasks';
 import {queryArrowTable, type ArrowTableQuery} from './query-arrow-table';
 import type {ArrowTableFunction} from './types';

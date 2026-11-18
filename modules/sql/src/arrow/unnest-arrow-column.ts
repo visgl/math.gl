@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {DataType, Field, Int32, Schema, Table, Utf8, Vector, vectorFromArray} from 'apache-arrow';
-import {takeArrowTableRows} from '@math.gl/arrow';
+import {takeArrowTableRows} from '@math.gl/core/arrow';
 import {physicalKey, extensionKey} from './signature';
 
 /** Names and cancellation for expanding a nested column into relational rows. */

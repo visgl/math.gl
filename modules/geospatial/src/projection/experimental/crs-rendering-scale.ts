@@ -4,14 +4,23 @@
 
 import {NumericalDerivative} from '../numerical-derivative';
 import {normalizeCRS} from './crs/normalize';
-import type {NormalizedCRS} from './crs/types';
+import type {Ellipsoid, NormalizedCRS} from './crs/types';
 import type {CRSRenderingScale} from './types';
 import type {PreparedProjection, ProjectionCoordinate} from '../types';
 
 const RADIANS = Math.PI / 180;
-// Samples are returned by the WGS84 converter, regardless of the target ellipsoid.
+/** Ground units for Earth CRSs, whose samples come from the WGS84 converter. */
 const WGS84 = normalizeCRS('WGS84').ellipsoid;
 
+/**
+ * Returns true for an Earth ellipsoid or sphere. This is the semi-major axis test
+ * of PROJ's `Ellipsoid::guessBodyName`: within 0.7% of a 6375 km mean radius.
+ */
+function isEarth(ellipsoid: Ellipsoid): boolean {
+  return Math.abs(ellipsoid.semiMajorAxis - 6375000) < 0.007 * 6375000;
+}
+
+/** Throws unless the scale has three finite, positive components. */
 function validateScale(scale: CRSRenderingScale): CRSRenderingScale {
   if (scale.length !== 3 || scale.some(value => !Number.isFinite(value) || value <= 0))
     throw new Error('Invalid CRS rendering scale');
@@ -39,6 +48,9 @@ export function createRenderingScale(
     geographic = [0, 0, 0],
     sample = [0, 0, 0];
   const derivatives = Array.from({length: 3}, () => [0, 0, 0]);
+  // Earth CRSs keep WGS84 ground units. Another body has no datum stage, so the
+  // sampled degrees are on its own ellipsoid or sphere.
+  const body = isEarth(crs.ellipsoid) ? WGS84 : crs.ellipsoid;
   let component = 0,
     longitudeMeters = 0,
     latitudeMeters = 0,
@@ -69,8 +81,8 @@ export function createRenderingScale(
       if (!anchor.every(Number.isFinite)) return null;
       projection.unprojectTo(anchor, geographic);
       const latitude = geographic[1] * RADIANS;
-      const a = WGS84.semiMajorAxis,
-        es = WGS84.eccentricitySquared;
+      const a = body.semiMajorAxis,
+        es = body.eccentricitySquared;
       const denominator = 1 - es * Math.sin(latitude) ** 2;
       longitudeMeters = ((a * Math.cos(latitude)) / Math.sqrt(denominator)) * RADIANS;
       latitudeMeters = ((a * (1 - es)) / denominator ** 1.5) * RADIANS;

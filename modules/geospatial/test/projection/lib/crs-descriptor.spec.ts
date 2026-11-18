@@ -650,6 +650,59 @@ test('datum-shifted scales use WGS84 curvature rather than the target ellipsoid'
   }
 });
 
+test('scales on other bodies use the CRS ellipsoid or sphere rather than WGS84', async () => {
+  // Without a datum stage the converter's degrees are on the CRS's own body.
+  const moon = await projectionEngine.getCRS('+proj=eqc +R=1737400 +units=m');
+  const equator = moon.getRenderingScale(moon.converter.WGS84.from([15, 0, 0]))!;
+  for (const value of equator) expect(value).toBeCloseTo(1, 6);
+  const north = moon.getRenderingScale(moon.converter.WGS84.from([15, 45, 0]))!;
+  expect(north[0]).toBeCloseTo(Math.SQRT1_2, 6);
+  expect(north[1]).toBeCloseTo(1, 6);
+  expect(north[2]).toBeCloseTo(Math.SQRT1_2 ** 0.5, 6);
+  const mars = await projectionEngine.getCRS('+proj=eqc +R=3396190 +units=m');
+  for (const value of mars.getRenderingScale(mars.converter.WGS84.from([15, 0, 0]))!)
+    expect(value).toBeCloseTo(1, 6);
+  // An oblate body uses its own eccentricity: meridional radius b²/a at the equator.
+  const oblate = await projectionEngine.getCRS('+proj=eqc +a=3396190 +b=3376200 +units=m');
+  const scale = oblate.getRenderingScale(oblate.converter.WGS84.from([15, 0, 0]))!;
+  expect(scale[0]).toBeCloseTo(1, 6);
+  expect(scale[1]).toBeCloseTo((3376200 / 3396190) ** 2, 6);
+});
+
+test('Earth scales keep WGS84 ground units with or without a datum shift', async () => {
+  // Values measured before non-Earth bodies used their own surface.
+  const cases: [string, number[]][] = [
+    ['+proj=eqc +ellps=clrk66', [0.7082854637513476, 0.9983028794571533, 0.8408825232698177]],
+    [
+      '+proj=merc +R=6378137 +lon_0=180',
+      [0.7082931707894847, 0.7059144176212712, 0.7071027939154128]
+    ],
+    ['WGS84', [78846.83507352923, 111131.77732364474, 1]],
+    ['EPSG:3857', [0.708293170590288, 0.7059144176212712, 0.7071027938159817]],
+    ['EPSG:32632', [0.9976546430190658, 0.9976546406231894, 0.9976546418211275]],
+    [
+      '+proj=utm +zone=33 +ellps=intl +towgs84=-87,-98,-121 +units=m',
+      [1.0003935102502999, 1.0003934856120802, 1.0003934978381739]
+    ]
+  ];
+  // PROJ's Earth test: semi-major axis within 0.7% of 6375 km.
+  for (const [radius, expected] of [
+    [6331100, 6378137 / 6331100],
+    [6329000, 1]
+  ]) {
+    const crs = await projectionEngine.getCRS(`+proj=eqc +R=${radius} +units=m`);
+    expect(crs.getRenderingScale(crs.converter.WGS84.from([15, 0, 0]))![0]).toBeCloseTo(
+      expected,
+      9
+    );
+  }
+  for (const [definition, expected] of cases) {
+    const crs = await projectionEngine.getCRS(definition);
+    const scale = crs.getRenderingScale(crs.converter.WGS84.from([15, 45, 0]))!;
+    for (let i = 0; i < 3; i++) expect(scale[i] / expected[i]).toBeCloseTo(1, 7);
+  }
+});
+
 test('custom angular units retain factors and distinguish descriptor identity', async () => {
   const definition = (conversionFactor: number) => ({
     ...geographicJSON,

@@ -22,7 +22,7 @@ import {
   Utf8
 } from 'apache-arrow';
 import {isColumnarScalarType} from '../expressions';
-import {parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '@math.gl/arrow/utf8';
+import {parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '@math.gl/core/utf8';
 import {ExpressionEvaluationError} from '../expressions';
 import {bindTemporalCast} from './temporal-cast';
 import {roundFloat16} from './float16';

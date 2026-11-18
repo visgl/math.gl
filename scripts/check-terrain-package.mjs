@@ -19,7 +19,7 @@ try {
   for (const file of ['package.json', 'dist', 'src/terrain/vendor']) {
     cpSync(join(root, 'modules/geospatial', file), join(target, file), {recursive: true});
   }
-  for (const name of ['core', 'geometry', 'arrow', 'web-mercator']) {
+  for (const name of ['core', 'geometry', 'tasks', 'sql']) {
     symlinkSync(join(root, 'modules', name), join(directory, 'node_modules/@math.gl', name), 'dir');
   }
   const martini = join(directory, 'node_modules/@mapbox/martini');

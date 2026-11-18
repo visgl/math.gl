@@ -5,7 +5,7 @@ import {getVitestConfig} from '@vis.gl/dev-tools';
 
 const includePatterns = [
   'modules/**/*.spec.{ts,js}',
-  'modules/web-mercator/test/fp32-limits.ts'
+  'modules/geospatial/test/web-mercator/fp32-limits.ts'
 ];
 
 const excludePatterns = [
@@ -14,7 +14,7 @@ const excludePatterns = [
   // These suites were not imported by the previous aggregate test harness.
   'modules/core/test/threejs-tests/euler-three.spec.ts',
   'modules/core/test/threejs-tests/matrix3-three.spec.ts',
-  'modules/web-mercator/test/spec/versus-mapbox/**',
+  'modules/geospatial/test/web-mercator/spec/versus-mapbox/**',
   'test/bench/**/*.bench.*',
   'test/size/**'
 ];
