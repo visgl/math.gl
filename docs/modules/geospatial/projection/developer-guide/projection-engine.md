@@ -162,7 +162,9 @@ interchangeability across engines or perform arbitrary CRS equivalence testing.
 provides one entry point for both. Horizontal factors measure WGS84 reference-surface
 metres per stored target-axis unit through the complete inverse transform, including
 CRS units, axis order and datum stages. The metric uses the WGS84 ellipsoid consistently
-with the converter's output, even when the target projection uses a sphere.
+with the converter's output, even when the target projection uses a sphere. A CRS on
+another body measures metres on its own ellipsoid or sphere; a semi-major axis within
+0.7% of 6375 km identifies Earth, as in PROJ.
 
 For projected CRSs, the vertical factor is an isotropic rendering sizing convention:
 the square root of the inverse horizontal area scale, expressed in the vertical unit.
