@@ -21,7 +21,8 @@ export type CRSBounds = readonly [
 
 /** Rendering factors in effective target-axis order. Horizontal factors measure
  * WGS84 reference-surface metres per stored coordinate unit through the full inverse
- * transform. For projected CRSs the vertical factor uses the square root of the
+ * transform. A CRS on another body (semi-major axis more than 0.7% from 6375 km)
+ * measures metres on its own ellipsoid or sphere instead. For projected CRSs the vertical factor uses the square root of the
  * inverse horizontal area scale, expressed in the declared vertical unit.
  * This sizing convention is independent of altitude conversion; use the component
  * unit metadata and converters for physical heights. Geocentric/identity factors
