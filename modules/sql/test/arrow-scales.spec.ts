@@ -5,12 +5,14 @@
 import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
 import {ABS} from '../src/math-functions';
+import {parseSQLExpression} from '../src/parser/parse-sql-expression';
 import {parseSQLScaleExpression} from '../src/scales';
 import {compileResolvedScale, resolvePalette} from '../src/scales';
 import {
   bindArrowScale,
   compileArrowScale,
   compileArrowScales,
+  evaluateArrowScaleProjection,
   createStreamingDomainAccumulator
 } from '@math.gl/sql/scales';
 import {resolveArrowDomains, resolveArrowQuantiles} from '../src/scales/arrow-domains';
@@ -262,4 +264,18 @@ test('computed Arrow quantiles preserve a supplied extent and use projected stre
   expect(resolved.scale.descriptor.domain).toEqual([0, 25]);
   expect(resolved.scale.descriptor.thresholds).toEqual([5.5]);
   expect(() => createStreamingDomainAccumulator([parsed.scale.domain])).toThrow('projected column');
+});
+
+test('evaluates parsed Arrow projections with resolved scale metadata', () => {
+  const data = tableFromArrays({value: [0, 5, 10]});
+  const result = evaluateArrowScaleProjection(data, {
+    shifted: parseSQLExpression('value + 1'),
+    color: parseSQLExpression("SCALE_COLOR(value, DOMAIN(value), PALETTE('#000000', '#ffffff'))")
+  });
+
+  expect(result.table.schema.fields.map(field => field.name)).toEqual(['shifted', 'color']);
+  expect(Array.from(result.table.getChild('shifted')!)).toEqual([1, 6, 11]);
+  expect(Array.from(result.table.getChild('color')!.get(2))).toEqual([255, 255, 255, 255]);
+  expect(result.scales.shifted).toEqual([]);
+  expect(result.scales.color?.[0]?.descriptor.domain).toEqual([0, 10]);
 });

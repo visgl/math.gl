@@ -125,3 +125,18 @@ Conditional branches preserve lazy per-row evaluation after domains are resolved
 have compatible result types. Recompile when data-derived domains change; compiling
 on a new table does not mutate an earlier compiled expression. This function does
 not change the single-scale parser or register scales as global functions.
+
+## Evaluating named Arrow columns
+
+`evaluateArrowScaleProjection(table, expressions, functions?)` accepts a record
+of output names to parsed expressions and returns `{table, scales}`. The output
+table keeps the input row order. Each entry in `scales` lists the resolved scales
+for that output column, in expression traversal order. An ordinary expression
+has an empty list.
+
+```typescript
+const {table: output, scales} = evaluateArrowScaleProjection(table, {
+  value: parseSQLExpression('magnitude'),
+  color: parseSQLExpression("SCALE_COLOR(magnitude, DOMAIN(magnitude), PALETTE('Blues'))")
+});
+```

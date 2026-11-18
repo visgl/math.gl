@@ -4,6 +4,7 @@
 
 import {
   Field,
+  Table,
   FixedSizeList,
   Float16,
   Float32,
@@ -13,7 +14,6 @@ import {
   vectorFromArray,
   type RecordBatch,
   type Schema,
-  type Table,
   type Vector
 } from 'apache-arrow';
 import {compileArrowExpression} from '../arrow/compiler';
@@ -360,4 +360,35 @@ export function compileArrowScaleExpression(
     functions: declarations
   });
   return {...compiled, scales};
+}
+
+/** A row-preserving projection and its resolved scales, keyed by output column. */
+export type ArrowScaleProjection = {
+  /** Evaluated columns in the input row order. */
+  table: Table;
+  /** Resolved scales in expression traversal order, with empty arrays for unscaled columns. */
+  scales: Readonly<Record<string, readonly ResolvedScale[]>>;
+};
+
+/**
+ * Evaluates named, parsed Arrow expressions and returns their resolved scales.
+ * Each scale resolves against the full input table. Call again when the source
+ * changes to refresh data-derived domains.
+ */
+export function evaluateArrowScaleProjection(
+  table: Table,
+  expressions: Readonly<Record<string, Expression>>,
+  functions?: readonly ArrowTableFunction[]
+): ArrowScaleProjection {
+  /** Compiled projections in the declared output column order. */
+  const compiled = Object.entries(expressions).map(
+    ([name, expression]) =>
+      [name, compileArrowScaleExpression(table, expression, functions)] as const
+  );
+  return {
+    table: new Table(
+      Object.fromEntries(compiled.map(([name, column]) => [name, column.evaluateTable(table)]))
+    ),
+    scales: Object.fromEntries(compiled.map(([name, column]) => [name, column.scales]))
+  };
 }
