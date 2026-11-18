@@ -133,7 +133,7 @@ Additional converters use direct CRS-pair transformations. Their normalization f
 
 ### Rendering scales and projection analysis[​](#rendering-scales-and-projection-analysis "Direct link to Rendering scales and projection analysis")
 
-`renderingScale` is a constant triple or a position callback; `getRenderingScale(position)` provides one entry point for both. Horizontal factors measure WGS84 reference-surface metres per stored target-axis unit through the complete inverse transform, including CRS units, axis order and datum stages. The metric uses the WGS84 ellipsoid consistently with the converter's output, even when the target projection uses a sphere.
+`renderingScale` is a constant triple or a position callback; `getRenderingScale(position)` provides one entry point for both. Horizontal factors measure WGS84 reference-surface metres per stored target-axis unit through the complete inverse transform, including CRS units, axis order and datum stages. The metric uses the WGS84 ellipsoid consistently with the converter's output, even when the target projection uses a sphere. A CRS on another body measures metres on its own ellipsoid or sphere; a semi-major axis within 0.7% of 6375 km identifies Earth, as in PROJ.
 
 For projected CRSs, the vertical factor is an isotropic rendering sizing convention: the square root of the inverse horizontal area scale, expressed in the vertical unit. It is not an altitude conversion. Use the component unit metadata and prepared converters for physical heights. At 60° latitude, EPSG:3857 has approximately `[0.501260, 0.500417, 0.500838]`; converting a height of 100 metres still preserves 100. Geocentric and identity CRSs expose constant physical unit factors.
 

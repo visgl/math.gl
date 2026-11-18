@@ -312,7 +312,9 @@ Normalization is an explicit rendering operation. It wraps or clamps a source co
 
 ## Choose rendering scales or projection analysis by their meaning[​](#choose-rendering-scales-or-projection-analysis-by-their-meaning "Direct link to Choose rendering scales or projection analysis by their meaning")
 
-`getRenderingScale(position)` evaluates at a position in the **target CRS's stored units and axis order**. For geographic and projected CRSs, it samples the complete inverse transform to WGS84, retaining axis/unit adaptations and datum stages. Local lengths use WGS84 curvature radii, with ellipsoidal-height changes included in the axis lengths. The target projection may use a different ellipsoid or a sphere.
+`getRenderingScale(position)` evaluates at a position in the **target CRS's stored units and axis order**. For geographic and projected CRSs, it samples the complete inverse transform to WGS84, retaining axis/unit adaptations and datum stages. Local lengths use WGS84 curvature radii, with ellipsoidal-height changes included in the axis lengths. An Earth target projection may use a different ellipsoid or a sphere.
+
+A CRS for another body, such as `+proj=eqc +R=1737400` for the Moon, has no datum stage to WGS84. Its local lengths use the curvature radii of its own ellipsoid or sphere. As in PROJ, a semi-major axis within 0.7% of 6375 km identifies Earth.
 
 For projected CRSs, the factor in the vertical component is instead an isotropic **rendering sizing convention**, derived from the square root of the inverse horizontal area scale and expressed in the vertical unit. It does not convert physical altitude. Use the component unit metadata and converters for height conversion. Geocentric and identity descriptors have constant physical unit factors.
 
