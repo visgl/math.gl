@@ -7,6 +7,7 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 import groups from "../../examples/table-of-contents.json";
 import styles from "./styles.module.css";
 const descriptions = {
+  showcase: "Explore Earth’s history through interactive scientific visualizations.",
   core: "Explore transforms and expression evaluation.",
   geometry: "Build shapes, manipulate polygons, and test visibility.",
   geospatial:
@@ -26,15 +27,15 @@ export default function ExampleCatalog() {
         {groups
           .filter((g) => g.type === "category")
           .map((g) => (
-            <a key={g.label} href={`#${g.label.split("/")[1]}`}>
-              {g.label.split("/")[1]}
+            <a key={g.label} href={`#${g.label.split("/")[1] || g.label.toLowerCase()}`}>
+              {g.label.split("/")[1] || g.label}
             </a>
           ))}
       </nav>
       {groups
         .filter((g) => g.type === "category")
         .map((group) => {
-          const id = group.label.split("/")[1];
+          const id = group.label.split("/")[1] || group.label.toLowerCase();
           return (
             <section key={id} className={styles.section}>
               <h2 id={id}>{group.label}</h2>

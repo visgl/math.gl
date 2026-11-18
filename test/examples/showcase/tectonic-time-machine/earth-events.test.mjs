@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {EARTH_EVENTS, EVENT_CATEGORIES, filterEarthEvents, eventIsReconstructable, vegetationCoverage, microbialCoverage, LAND_PLANTS_AGE_MA} from '../../../../../examples/geospatial/tectonic-time-machine/src/earth-events.js';
+import {EARTH_EVENTS, EVENT_CATEGORIES, filterEarthEvents, eventIsReconstructable, vegetationCoverage, microbialCoverage, LAND_PLANTS_AGE_MA} from '../../../../examples/showcase/tectonic-time-machine/src/earth-events.js';
 
 test('chronology is sourced, unique and spans planetary formation through K-Pg', () => {
   assert.equal(new Set(EARTH_EVENTS.map(e => e.id)).size, EARTH_EVENTS.length);

@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {prepareMapGrid} from '../../../../../examples/geospatial/alpine-ice-age/src/prepare-map-grid.js';
-import {discontinuousGrid} from '../../../../../examples/geospatial/alpine-ice-age/src/discontinuous-views.js';
+import {prepareMapGrid} from '../../../../examples/showcase/alpine-ice-age/src/prepare-map-grid.js';
+import {discontinuousGrid} from '../../../../examples/showcase/alpine-ice-age/src/discontinuous-views.js';
 
 test('worker preparation restores geometry, caches success and propagates cancellation and failure', async () => {
   const original = globalThis.Worker;

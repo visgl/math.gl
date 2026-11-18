@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {EARTH_FORMATION_MA, clampTimelineTime, isEarlyEarth, earlyEarthBlend, thermalPulse, earlyEarthMaterial, planetaryStage, validateGeologicalSeries, selectGeologicalSeries} from '../../../../../examples/geospatial/tectonic-time-machine/src/planetary-history.js';
+import {EARTH_FORMATION_MA, clampTimelineTime, isEarlyEarth, earlyEarthBlend, thermalPulse, earlyEarthMaterial, planetaryStage, validateGeologicalSeries, selectGeologicalSeries} from '../../../../examples/showcase/tectonic-time-machine/src/planetary-history.js';
 
 test('planetary stages distinguish the giant impact from known tectonic history', () => {
   assert.equal(planetaryStage(4567).id, 'accretion');
@@ -108,7 +108,7 @@ test('steam condenses through a rainy interval before clear early seas', () => {
 });
 
 test('orbital vignette is bounded, seekable and fades with map transitions', async () => {
-  const {createFormationEffects}=await import('../../../../../examples/geospatial/tectonic-time-machine/src/formation-effects.js');
+  const {createFormationEffects}=await import('../../../../examples/showcase/tectonic-time-machine/src/formation-effects.js');
   const effects=createFormationEffects();
   assert.deepEqual(effects(-4567,1),[]);
   assert.deepEqual(effects(-4300,1),[]);

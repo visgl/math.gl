@@ -6,6 +6,23 @@
   },
   {
     "type": "category",
+    "label": "Showcase",
+    "collapsed": false,
+    "items": [
+      {
+        "type": "doc",
+        "label": "Tectonic time machine",
+        "id": "tectonic-time-machine"
+      },
+      {
+        "type": "doc",
+        "label": "Glaciation Explorer",
+        "id": "alpine-ice-age"
+      }
+    ]
+  },
+  {
+    "type": "category",
     "label": "@math.gl/core",
     "collapsed": false,
     "items": [
@@ -69,16 +86,6 @@
         "type": "doc",
         "label": "WKT and WKB workbench",
         "id": "wkb-workbench"
-      },
-      {
-        "type": "doc",
-        "label": "Tectonic time machine",
-        "id": "tectonic-time-machine"
-      },
-      {
-        "type": "doc",
-        "label": "Glaciation Explorer",
-        "id": "alpine-ice-age"
       },
       {
         "type": "doc",

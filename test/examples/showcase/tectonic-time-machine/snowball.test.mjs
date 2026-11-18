@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {snowballCoverage, timelineMilestones} from '../../../../../examples/geospatial/tectonic-time-machine/src/timeline.js';
+import {snowballCoverage, timelineMilestones} from '../../../../examples/showcase/tectonic-time-machine/src/timeline.js';
 
 test('ice covers both Cryogenian events but not the intervening warmer interval', () => {
   assert.equal(snowballCoverage(-700), 1);
@@ -23,7 +23,7 @@ test('chapter markers are ordered and respect the source age limit', () => {
   assert(!timelineMilestones('atlantic', 500).some(c => c.name.includes('Snowball')));
 });
 
-import {makeMesh, binaryMesh, transformMesh} from '../../../../../examples/geospatial/tectonic-time-machine/src/geometry.js';
+import {makeMesh, binaryMesh, transformMesh} from '../../../../examples/showcase/tectonic-time-machine/src/geometry.js';
 test('ice latitude follows geographic positions independently of camera tilt', () => {
   const mesh = makeMesh([{positions: [-10, 50, 10, 50, 10, 60, -10, 60, -10, 50], color: [20, 40, 60]}]);
   const ice = Array.from(binaryMesh(mesh).attributes.getIceLatitude.value);
@@ -78,7 +78,7 @@ test('land relief retains plate coordinates while the ice edge uses reconstructe
   assert.deepEqual(Array.from(land.reference), before);
 });
 
-import {glaciationPlaybackSpeed} from '../../../../../examples/geospatial/tectonic-time-machine/src/timeline.js';
+import {glaciationPlaybackSpeed} from '../../../../examples/showcase/tectonic-time-machine/src/timeline.js';
 test('playback slows before both ice edges and resumes within events and the warmer interval', () => {
   for (const time of [-719, -716, -664, -659, -652, -649, -638, -634])
     assert.equal(glaciationPlaybackSpeed(time, 40), 0.75);
@@ -88,7 +88,7 @@ test('playback slows before both ice edges and resumes within events and the war
   assert.equal(glaciationPlaybackSpeed(-716, 0.5), 0.5);
 });
 
-import {timelinePlaybackSpeed} from '../../../../../examples/geospatial/tectonic-time-machine/src/timeline.js';
+import {timelinePlaybackSpeed} from '../../../../examples/showcase/tectonic-time-machine/src/timeline.js';
 test('deep time accelerates fivefold and lands exactly on the selected data boundary', () => {
   assert.equal(timelinePlaybackSpeed(-3000, 20, 1000), 100);
   assert.equal(timelinePlaybackSpeed(-2000, 40, 1800), 200);
@@ -112,7 +112,7 @@ test('event focus gives Theia, oceans and bombardment time to be seen', () => {
 
 
 test('deglaciation dynamics stay bounded and vanish outside glaciations',async()=>{
-  const {snowballDynamics}=await import('../../../../../examples/geospatial/tectonic-time-machine/src/timeline.js');
+  const {snowballDynamics}=await import('../../../../examples/showcase/tectonic-time-machine/src/timeline.js');
   const scratch={};
   assert.equal(snowballDynamics(-700,scratch),scratch);
   assert.equal(scratch.retreat,0);
@@ -129,7 +129,7 @@ test('deglaciation dynamics stay bounded and vanish outside glaciations',async()
 
 
 test('one dominant caption survives overlapping life and continent chapters',async()=>{
-  const {activeChapter}=await import('../../../../../examples/geospatial/tectonic-time-machine/src/timeline.js');
+  const {activeChapter}=await import('../../../../examples/showcase/tectonic-time-machine/src/timeline.js');
   assert.equal(activeChapter(-430,'atlantic',1000).name,'Life reaches the land');
   assert.equal(activeChapter(-400,'atlantic',1000).name,'Euramerica (Laurussia)');
   assert.equal(activeChapter(-700,'atlantic',1000,false),null);

@@ -16,7 +16,7 @@ also cancels the obsolete job.
 
 From the repository root, run `yarn workspace math.gl-alpine-ice-age start`.
 Use `yarn workspace math.gl-alpine-ice-age build` for a standalone build and
-`node --test modules/geospatial/test/examples/alpine-ice-age/*.test.mjs` for dataset/interpolation checks.
+`node --test test/examples/showcase/alpine-ice-age/*.test.mjs` for dataset/interpolation checks.
 
 ## Read the map code
 
@@ -72,8 +72,8 @@ measurements. Grid-cell areas use the nominal model spacing.
 Download the source file linked above, then use a temporary Python environment:
 
 ```sh
-python -m pip install -r examples/geospatial/alpine-ice-age/scripts/requirements.txt
-python examples/geospatial/alpine-ice-age/scripts/prepare-data.py /path/to/alpcyc.2km.epic.pp.ex.1ka.nc
+python -m pip install -r examples/showcase/alpine-ice-age/scripts/requirements.txt
+python examples/showcase/alpine-ice-age/scripts/prepare-data.py /path/to/alpcyc.2km.epic.pp.ex.1ka.nc
 ```
 
 The converter verifies the published MD5 before reading data and records the
@@ -118,7 +118,7 @@ Extract `ice_reconstruction/global_grid/reconstruction_1_degree.nc` from the
 then run:
 
 ```sh
-python examples/geospatial/alpine-ice-age/scripts/prepare-global.py /path/to/reconstruction_1_degree.nc
+python examples/showcase/alpine-ice-age/scripts/prepare-global.py /path/to/reconstruction_1_degree.nc
 ```
 
 The converter verifies the extracted source SHA-256 before processing, and records
@@ -179,7 +179,7 @@ The example fetches all ice-grid previews, preview manifests and climate JSON fr
 `src/sources.js` pins the merged repository commit; LFS gzip data uses GitHub media URLs,
 and ordinary JSON uses raw URLs. No scientific data is bundled into this example.
 Preparation scripts remain available for reproducing display assets locally.
-`node --test modules/geospatial/test/examples/alpine-ice-age/*.test.mjs` verifies the pinned public downloads,
+`node --test test/examples/showcase/alpine-ice-age/*.test.mjs` verifies the pinned public downloads,
 checksums, source provenance, dimensions and scientific reference locations.
 
 ### Attribution widget

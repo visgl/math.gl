@@ -14494,9 +14494,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-alpine-ice-age@workspace:examples/geospatial/alpine-ice-age":
+"math.gl-alpine-ice-age@workspace:examples/showcase/alpine-ice-age":
   version: 0.0.0-use.local
-  resolution: "math.gl-alpine-ice-age@workspace:examples/geospatial/alpine-ice-age"
+  resolution: "math.gl-alpine-ice-age@workspace:examples/showcase/alpine-ice-age"
   dependencies:
     "@deck.gl/core": "npm:10.0.0-alpha.1"
     "@deck.gl/layers": "npm:10.0.0-alpha.1"
@@ -14997,9 +14997,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"math.gl-tectonic-time-machine@workspace:examples/geospatial/tectonic-time-machine":
+"math.gl-tectonic-time-machine@workspace:examples/showcase/tectonic-time-machine":
   version: 0.0.0-use.local
-  resolution: "math.gl-tectonic-time-machine@workspace:examples/geospatial/tectonic-time-machine"
+  resolution: "math.gl-tectonic-time-machine@workspace:examples/showcase/tectonic-time-machine"
   dependencies:
     "@deck.gl/core": "npm:10.0.0-alpha.1"
     "@deck.gl/layers": "npm:10.0.0-alpha.1"

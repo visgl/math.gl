@@ -10,7 +10,7 @@ import {ProjectCoordinatesTask, PrepareMapTask} from '@math.gl/geospatial/tasks'
 const gridTask = {
   id: 'ice-age-grid',
   worker: {
-    url: new URL('../../../../../examples/geospatial/alpine-ice-age/src/discontinuous-grid-worker.js', import.meta.url),
+    url: new URL('../../../../examples/showcase/alpine-ice-age/src/discontinuous-grid-worker.js', import.meta.url),
     capabilities: {atomic: true, streaming: false}
   }
 };
@@ -141,7 +141,7 @@ test('cancelling a running projection preserves copied input', async () => {
 });
 
 test('cached projection grids skip reprojecting and emit completed progress', async () => {
-  const {prepareProjectionGrid, cacheProjectionGrid} = await import('../../../../../examples/geospatial/alpine-ice-age/src/projection-grid.js');
+  const {prepareProjectionGrid, cacheProjectionGrid} = await import('../../../../examples/showcase/alpine-ice-age/src/projection-grid.js');
   const cached = {positions: new Float32Array([1, 2]), indices: new Uint32Array([0])};
   cacheProjectionGrid('cached-test', cached);
   const progress = [];
@@ -157,8 +157,8 @@ test('scene cancellation aborts repeated globe requests and ignores late complet
   const {readFile} = await import('node:fs/promises');
   const {runInNewContext} = await import('node:vm');
   const {transformSync} = await import('esbuild');
-  const {createMapPreparationGate} = await import('../../../../../examples/geospatial/alpine-ice-age/src/map-preparation-gate.ts');
-  const source = await readFile(new URL('../../../../../examples/geospatial/alpine-ice-age/src/global-scene.js', import.meta.url), 'utf8');
+  const {createMapPreparationGate} = await import('../../../../examples/showcase/alpine-ice-age/src/map-preparation-gate.ts');
+  const source = await readFile(new URL('../../../../examples/showcase/alpine-ice-age/src/global-scene.js', import.meta.url), 'utf8');
   const requests = [];
   const loading = [],
     progress = [],
@@ -237,7 +237,7 @@ test('scene cancellation aborts repeated globe requests and ignores late complet
 });
 
 test('scene preparer retains its worker and replaces it after cancellation', async () => {
-  const {createMapGridPreparer} = await import('../../../../../examples/geospatial/alpine-ice-age/src/prepare-map-grid.js');
+  const {createMapGridPreparer} = await import('../../../../examples/showcase/alpine-ice-age/src/prepare-map-grid.js');
   class RecordingRunner extends TaskRunner {
     initialized = 0;
     initializeTask(...args) {
