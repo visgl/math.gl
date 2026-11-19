@@ -16,7 +16,7 @@ import {takeArrowTableRows, validateArrowTableSchema} from '@math.gl/core/arrow'
 import {compileArrowAggregates, type ArrowAggregate} from './aggregates';
 import {compareUTF8} from '@math.gl/core/utf8';
 import {ColumnReader, valueType} from './buffers';
-import {compileArrowExpression} from './compiler';
+import {compileArrowExpression, writeArrowExpressionValues} from './compiler';
 import type {ArrowExpressionOptions, ArrowExpressionValue} from './types';
 
 /** A stable ordering key resolved against the source or grouped result. */
@@ -152,17 +152,26 @@ export function orderArrowTable(
   );
 }
 
+/** A custom aggregate bound once to the input schema. */
+export type BoundRelationAggregate = {
+  /** Arrow field shared by all groups of this aggregate call. */
+  readonly outputField: Field;
+  /** Reduces one group's rows to a value in the field's physical units. */
+  evaluate(table: Table): ArrowExpressionValue;
+};
+
 /** Groups by scalar source columns and evaluates the shared Arrow aggregate kernels. */
 export function groupArrowTable(
   table: Table,
   groupBy: readonly string[],
   aggregates: Readonly<Record<string, ArrowAggregate>>,
-  options: ArrowExpressionOptions & {signal?: AbortSignal}
+  options: ArrowExpressionOptions & {signal?: AbortSignal},
+  custom: ReadonlyMap<string, BoundRelationAggregate> = new Map()
 ): Table {
   const keys = groupBy.map(name => getScalarColumn(table, name));
   const fields = keys.map(({field}) => field);
   const definitions = Object.entries(aggregates);
-  const names = [...groupBy, ...definitions.map(([name]) => name)];
+  const names = [...groupBy, ...definitions.map(([name]) => name), ...custom.keys()];
   if (new Set(names).size !== names.length) throw new Error('Duplicate Arrow grouping output name');
 
   const compiled = compileArrowAggregates(aggregates, options);
@@ -184,23 +193,35 @@ export function groupArrowTable(
   const rows = [...groups.values()];
   const representatives = rows.flatMap(indexes => (indexes.length ? [indexes[0]!] : []));
   const selected = takeArrowTableRows(table, Int32Array.from(representatives));
-  const results = rows.map(indexes =>
-    compiled.evaluate(
-      groupBy.length ? takeArrowTableRows(table, Int32Array.from(indexes)) : table,
-      options
-    )
-  );
-  const aggregateFields = getArrowAggregateFields(aggregates, options);
+  const results = rows.map(indexes => {
+    const input = groupBy.length ? takeArrowTableRows(table, Int32Array.from(indexes)) : table;
+    const output = compiled.evaluate(input, options);
+    for (const [name, aggregate] of custom) {
+      Object.defineProperty(output, name, {value: aggregate.evaluate(input)});
+    }
+    return output;
+  });
+  const aggregateFields = [
+    ...getArrowAggregateFields(aggregates, options),
+    ...Array.from(custom, ([name, aggregate]) => aggregate.outputField.clone({name}))
+  ];
   const schema = new Schema([...fields, ...aggregateFields], table.schema.metadata);
   if (!results.length) return new Table(schema, []);
   const columns = [
     ...fields.map(field => selected.getChild(field.name)!),
-    ...aggregateFields.map(field =>
-      vectorFromArray(
+    ...aggregateFields.map(field => {
+      if (custom.has(field.name)) {
+        return writeArrowExpressionValues(
+          field,
+          new Uint8Array(results.length).fill(1),
+          row => results[row]![field.name]!
+        );
+      }
+      return vectorFromArray(
         results.map(result => result[field.name]),
         field.type
-      )
-    )
+      );
+    })
   ];
   return new Table(schema, Object.fromEntries(names.map((name, index) => [name, columns[index]!])));
 }

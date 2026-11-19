@@ -33,7 +33,10 @@ export type ArrowProjectionOperation<M> = Readonly<{
   };
 }>;
 
-function mapChildren(node: Expression, visit: (child: Expression) => Expression): Expression {
+export function mapArrowExpressionChildren(
+  node: Expression,
+  visit: (child: Expression) => Expression
+): Expression {
   // Literal payloads can contain binary data or dates. They are opaque to traversal.
   if (node.type === 'Literal') return node;
   function map(value: unknown): unknown {
@@ -51,15 +54,16 @@ export function prepareArrowColumn<M>(
   table: Table,
   expression: Expression,
   operations: readonly ArrowProjectionOperation<M>[],
-  functions: readonly ArrowFunctionPackage[] = []
+  functions: readonly ArrowFunctionPackage[] = [],
+  describeReference?: (node: Expression) => M | undefined
 ): {compiled: CompiledArrowExpression; metadata: M[]} {
   const declarations = [...walkArrowFunctions(functions)].filter(
-    (fn): fn is ArrowTableFunction => !('prepare' in fn)
+    (fn): fn is ArrowTableFunction => 'prototypes' in fn
   );
   const names = new Set(declarations.map(fn => fn.name.toUpperCase()));
   function reserve(node: Expression): Expression {
     if (node.type === 'Identifier') names.add(node.name.toUpperCase());
-    mapChildren(node, reserve);
+    mapArrowExpressionChildren(node, reserve);
     return node;
   }
   const metadata: M[] = [];
@@ -78,18 +82,25 @@ export function prepareArrowColumn<M>(
   };
   function visit(node: Expression): Expression {
     const operation = node.type === 'CallExpression' && operations.find(op => op.matches(node));
-    if (!operation) return mapChildren(node, visit);
+    if (!operation) {
+      const entry = describeReference?.(node);
+      if (entry !== undefined) metadata.push(entry);
+      return mapArrowExpressionChildren(node, visit);
+    }
     const index = metadata.length++;
-    const prepared = operation.prepare(mapChildren(node, visit) as Call, context);
+    const prepared = operation.prepare(mapArrowExpressionChildren(node, visit) as Call, context);
     metadata[index] = prepared.metadata;
     declarations.push(...(prepared.functions ?? []));
     return prepared.expression;
   }
   if (operations.length) reserve(expression);
-  const compiled = compileArrowExpression(operations.length ? visit(expression) : expression, {
-    inputSchema: table.schema,
-    functions: declarations
-  });
+  const compiled = compileArrowExpression(
+    operations.length || describeReference ? visit(expression) : expression,
+    {
+      inputSchema: table.schema,
+      functions: declarations
+    }
+  );
   return {compiled, metadata};
 }
 

@@ -224,3 +224,17 @@ for (const entry of taggedQuery.columnMetadata['value'] ?? []) {
   if (entry.kind === 'scale') entry.scale.sample(1);
   else entry.label.toUpperCase();
 }
+
+import type {AggregateFunction} from '@math.gl/sql';
+declare const summaryFunction: AggregateFunction<{kind: 'summary'; unit: string}>;
+const summaries = queryArrowSQLWithMetadata(
+  'SELECT summary(value) AS total FROM input',
+  new Map([['input', source]]),
+  {
+    functions: [VISUALIZATION_FUNCTIONS, [summaryFunction]]
+  }
+);
+for (const item of summaries.columnMetadata['total'] ?? []) {
+  if (item.kind === 'summary') item.unit.toUpperCase();
+  else item.scale.sample(1);
+}

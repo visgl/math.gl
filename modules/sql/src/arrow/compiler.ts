@@ -1801,3 +1801,6 @@ function needsArgumentContext(ast: any): boolean {
       (needsArgumentContext(ast.consequent) || needsArgumentContext(ast.alternate)))
   );
 }
+
+// Shared by the grouped relation executor, with the same physical value contract.
+export {output as writeArrowExpressionValues};

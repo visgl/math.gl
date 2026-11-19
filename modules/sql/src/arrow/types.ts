@@ -67,11 +67,39 @@ export type PreparedScalarFunction<M> = Pick<ArrowProjectionOperation<M>, 'prepa
   readonly name: string;
 };
 
+/** Independent state for one aggregate call in one group. */
+export interface AggregateAccumulator {
+  /** Adds an input batch. A zero-argument aggregate receives its row count here. */
+  update(arguments_: readonly Vector[], context: {length: number; signal?: AbortSignal}): void;
+  /** Combines an independent partial accumulator when supported. */
+  merge?(partial: AggregateAccumulator): void;
+  /** Returns the result, including the declared empty or null-only behavior. */
+  finalize(): ArrowExpressionValue;
+}
+
+/** A reduction that binds its schema and creates independent group state. */
+export type AggregateFunction<M = never> = Readonly<{
+  /** SQL execution kind for a group reduction. */
+  kind: 'aggregate';
+  /** SQL call name. */
+  name: string;
+  /** Binds the evaluated argument fields once per query. */
+  bind(context: {arguments: readonly Field[]}): {
+    /** Arrow field produced by each group. */
+    outputField: Field;
+    /** Creates independent state for a group. */
+    createAccumulator(): AggregateAccumulator;
+    /** Optional application data attached to the output expression. */
+    metadata?: M;
+  };
+}>;
+
 /** A function or a reusable package of functions. */
 export type ArrowFunctionPackage =
   | ArrowTableFunction
   | ScalarFunction
   | PreparedScalarFunction<unknown>
+  | AggregateFunction<unknown>
   | readonly ArrowFunctionPackage[];
 
 /** Schema binding shared by predicate and expression compilation. */

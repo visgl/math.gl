@@ -10,6 +10,8 @@ export type {
   ArrowExpressionEvaluationOptions,
   ArrowExpressionValue,
   ArrowTableFunction,
+  AggregateAccumulator,
+  AggregateFunction,
   ArrowFunctionPackage,
   ScalarFunction,
   PreparedScalarFunction,
