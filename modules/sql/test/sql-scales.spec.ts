@@ -195,3 +195,15 @@ test('NICE rounds reversed sequential bounds without reversing the palette', () 
   expect(resolved.sample(35)).toEqual([0, 0, 0, 1]);
   expect(resolved.sample(5)).toEqual([1, 1, 1, 1]);
 });
+
+test('NICE preserves exact decimal grid points and rounds genuinely off-grid values outward', () => {
+  const {scale} = parseSQLScaleExpression(
+    "SCALE_COLOR(value, DOMAIN(value), PALETTE('viridis'), NICE())"
+  );
+  const domain = (bounds: readonly [number, number]) =>
+    compileResolvedScale(scale, bounds).descriptor.domain;
+  expect(domain([0.6, 1.8])).toEqual([0.6, 1.8]);
+  expect(domain([-1.8, -0.6])).toEqual([-1.8, -0.6]);
+  expect(domain([0.5999999999999999, 1.8000000000000003])).toEqual([0.4, 2]);
+  expect(domain([1.8, 0.6])).toEqual([1.8, 0.6]);
+});

@@ -35,12 +35,21 @@ export function niceScale(
     return {domain, thresholds};
   }
 
-  /** Quantizes in decimal space to avoid visible binary floating-point artifacts. */
-  const snap = (value: number, unit: number, round: (x: number) => number): number =>
-    Number((round(value / unit) * unit).toPrecision(15));
+  /** Reconstructs a decimal grid point without the multiplication's binary artifacts. */
+  const gridPoint = (index: number, unit: number): number => Number((index * unit).toPrecision(15));
 
-  const min = Math.min(lower, snap(lower, endpointStep, Math.floor));
-  const max = Math.max(upper, snap(upper, endpointStep, Math.ceil));
+  /** Compares against the reconstructed grid point before moving outward. */
+  const endpoint = (value: number, upper: boolean): number => {
+    const index = Math.round(value / endpointStep);
+    const nearest = gridPoint(index, endpointStep);
+    // An exact decimal value can divide to just below or above an integer.
+    // The reconstructed grid point distinguishes it from a value actually off the grid.
+    if (upper ? nearest >= value : nearest <= value) return nearest;
+    return gridPoint(index + (upper ? 1 : -1), endpointStep);
+  };
+
+  const min = Math.min(lower, endpoint(lower, false));
+  const max = Math.max(upper, endpoint(upper, true));
   if (!Number.isFinite(min) || !Number.isFinite(max)) {
     return {domain, thresholds};
   }
@@ -49,7 +58,7 @@ export function niceScale(
   if (thresholds?.length) {
     const original = [lower, ...thresholds, upper];
     for (let unit = step; unit > 0; ) {
-      const candidate = thresholds.map(value => snap(value, unit, Math.round));
+      const candidate = thresholds.map(value => gridPoint(Math.round(value / unit), unit));
       const boundaries = [min, ...candidate, max];
       if (
         boundaries.every(
