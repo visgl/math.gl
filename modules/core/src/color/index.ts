@@ -8,3 +8,4 @@ export * from './palettes';
 export * from './quantile-sketch';
 export * from './hdr-colors';
 export * from './lut';
+export * from './bivariate-scale';
