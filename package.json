@@ -27,6 +27,7 @@
     "check:geoarrow-boundary": "node modules/core/scripts/arrow/geoarrow/check-package-boundary.mjs",
     "check:timezone-types": "npx tsc --project test/types/timezone/tsconfig.json",
     "check:timezone-boundary": "node modules/earth/scripts/timezone/check-package-boundary.mjs",
+    "check:ocean-package": "node modules/earth/scripts/ocean/check-ocean-package.mjs",
     "check:wkb-boundary": "node modules/core/scripts/arrow/wkb/check-package-boundary.mjs",
     "check:projjson-types": "node scripts/generate-projjson-types.mjs --check",
     "generate:projjson-types": "node scripts/generate-projjson-types.mjs",

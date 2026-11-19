@@ -15,6 +15,7 @@ import {Geoid, getSunPosition, getMoonPosition} from '@math.gl/earth';
 | Geoid models | ✅ | Parse grids and compute height offsets; load optional datasets explicitly. |
 | Sun, Moon, and sky | ✅ | Observer-based positions, illumination, and lighting calculations. |
 | Timezone calculations | ✅ | Geographic lookup and local calendar operations. |
+| Seawater and underwater acoustics | ✅ | Optional `/ocean` entry point: TEOS-10 subset, classic sound-speed and absorption equations. |
 | Automatic dataset fetching | ❌ | Applications control data loading and ownership. |
 
 ## API
@@ -26,5 +27,7 @@ import {Geoid, getSunPosition, getMoonPosition} from '@math.gl/earth';
 | [Timezone](./timezone/README.md) | Geographic timezone lookup and local calendar calculations |
 
 The root also exports `geoid`, `sun`, and `timezone` namespaces. The `/sun` and `/timezone` entry points provide focused imports. Star-catalog data is available separately from [`@math.gl/earth/sun/stars`](./sun/api-reference/stars.md).
+
+The optional [`@math.gl/earth/ocean`](./ocean/README.md) entry point evaluates seawater state, sound speed and sound absorption without datasets. Import it explicitly; the root does not export it.
 
 Load optional geoid grids and timezone geometry explicitly; importing the root does not automatically fetch these datasets.

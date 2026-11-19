@@ -323,3 +323,42 @@ test('projected columns retain their compiled metadata and nullability under ali
   expect(table.schema.fields[0]?.nullable).toBe(true);
   expect(table.schema.fields[0]?.metadata).toEqual(metadata);
 });
+
+test('numeric Arrow scales retain label, input units, and output units on the shared sampler', () => {
+  const input = tableFromArrays({visits: [0, 250, 1000, null]});
+  const parsed = parseSQLScaleExpression('SCALE_SQRT(visits, DOMAIN(0, 1000), RANGE(0, 20))');
+  const {scale, evaluate} = compileArrowScale(input, {
+    ...parsed,
+    scale: {
+      ...parsed.scale,
+      label: 'Visits',
+      units: 'legacy display label',
+      inputUnits: 'visits',
+      outputUnits: 'px'
+    }
+  });
+  expect(Array.from(evaluate(input))).toEqual([0, 10, 20, null]);
+  expect(scale.sample(250)).toBe(10);
+  expect(JSON.parse(JSON.stringify(scale.descriptor))).toMatchObject({
+    label: 'Visits',
+    units: 'legacy display label',
+    inputUnits: 'visits',
+    outputUnits: 'px',
+    domain: [0, 1000],
+    range: {type: 'numeric', values: [0, 20]}
+  });
+});
+
+test('numeric scale projections expose their sampler and range under the output alias', () => {
+  const input = tableFromArrays({traffic: [0, 5000, 10000]});
+  const {table, columnMetadata} = createArrowColumns(
+    input,
+    {lineWidth: parseSQLExpression('SCALE_LINEAR(traffic, DOMAIN(0, 10000), RANGE(1, 9))')},
+    {operations: [scaleProjectionOperation]}
+  );
+  const vector = table.getChild('lineWidth')!;
+  const scale = columnMetadata.lineWidth[0]!.scale;
+  expect(scale.descriptor.range).toEqual({type: 'numeric', values: [1, 9]});
+  expect(scale.sample(5000)).toBe(vector.get(1));
+  expect(Array.from(vector)).toEqual([1, 5, 9]);
+});
