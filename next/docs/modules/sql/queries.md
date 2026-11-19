@@ -294,3 +294,61 @@ const {table, columnMetadata} = queryArrowSQLWithMetadata(
 ```
 
 Use the `elevation` column for the layer's elevation accessor and `columnMetadata.elevation` for the legend. For transforms whose signature depends on a source field, provide `resolvePrototype(fields)` to declare the input and output schema at bind time.
+
+### Aggregate function declarations[​](#aggregate-function-declarations "Direct link to Aggregate function declarations")
+
+Aggregate calls can appear inside grouped projections, such as `SELECT category, MAX(value) - MIN(value) AS extent FROM observations GROUP BY category`. The planner computes the reductions first, then evaluates each surrounding expression over the group keys and reduction results. Aggregate calls require projection scope. Nesting one aggregate inside another and referring to ungrouped input columns in grouped expressions are SQL errors.
+
+A flat declaration can bind an aggregate against its Arrow argument fields:
+
+```
+import {Field, Float64} from 'apache-arrow';
+
+import type {AggregateFunction} from '@math.gl/sql';
+
+
+
+const SUM_SQUARES = {
+
+  kind: 'aggregate',
+
+  name: 'SUM_SQUARES',
+
+  bind({arguments: fields}) {
+
+    if (fields.length !== 1) throw new Error('SUM_SQUARES requires one argument');
+
+    return {
+
+      outputField: new Field('sum_squares', new Float64(), false),
+
+      createAccumulator() {
+
+        let total = 0;
+
+        return {
+
+          update([values]) {
+
+            for (const value of values!) {
+
+              if (value !== null) total += Number(value) ** 2;
+
+            }
+
+          },
+
+          finalize: () => total
+
+        };
+
+      }
+
+    };
+
+  }
+
+} satisfies AggregateFunction;
+```
+
+Register this declaration through `functions` and use `SUM_SQUARES(value)` in a projection. The query creates one accumulator per group. The accumulator defines null handling and the result for an empty input. An aggregate can also emit metadata at binding, which is available on its projected output column.
