@@ -62,8 +62,16 @@ export type ScaleColorEncoding = {
 
 /** Continuous domain transform retained in resolved scale metadata. */
 export type ScaleTransform =
-  | {readonly type: 'power'; readonly exponent: number}
-  | {readonly type: 'symlog'; readonly constant: number};
+  | {
+      readonly type: 'power';
+      /** Positive finite exponent applied to the magnitude while preserving the sign. */
+      readonly exponent: number;
+    }
+  | {
+      readonly type: 'symlog';
+      /** Positive finite width of the near-linear region around zero. */
+      readonly constant: number;
+    };
 
 /** Serializable scale inputs and optional presentation metadata. */
 export type ScaleSpec = {
@@ -84,6 +92,7 @@ export type ScaleSpec = {
   readonly range: ScaleRange;
   readonly clamp?: boolean;
   readonly pivot?: number;
+  /** Continuous transform used to normalize the original domain and input values. */
   readonly transform?: ScaleTransform;
   readonly interpolation?: 'srgb' | 'linear-srgb' | 'oklab' | 'jzazbz';
   readonly encoding?: ScaleColorEncoding;
