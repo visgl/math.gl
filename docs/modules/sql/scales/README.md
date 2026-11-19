@@ -52,6 +52,8 @@ See https://github.com/visgl/deck.gl/issues/11147 for the cross-repository track
 
 For clustered observations, see [Fisher–Jenks natural breaks](natural-breaks.md).
 
+See [numeric scales and legends](numeric.md) for elevation, radius, and line-width examples.
+
 ## Evaluate on Arrow
 
 Install Apache Arrow and import `compileArrowScale` from `@math.gl/sql/scales`.

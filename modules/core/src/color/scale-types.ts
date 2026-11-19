@@ -85,7 +85,12 @@ export type ScaleSpec = {
   readonly underColor?: ScaleColor;
   readonly overColor?: ScaleColor;
   readonly label?: string;
+  /** Legacy display units. Prefer axis-specific units for new scales. */
   readonly units?: string;
+  /** Units of the input domain, such as population per square kilometer. */
+  readonly inputUnits?: string;
+  /** Units of the sampled output, such as meters or pixels. */
+  readonly outputUnits?: string;
 };
 
 /**
