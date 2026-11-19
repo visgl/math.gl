@@ -4,7 +4,7 @@
 
 import {DataType, type Table} from 'apache-arrow';
 import {unnestArrowColumn} from './unnest-arrow-column';
-import type {Expression} from '../expressions';
+import {getExpressionColumns, type Expression} from '../expressions';
 import {
   parseSQLSelectCompound,
   type SQLSelectStatement,
@@ -14,19 +14,31 @@ import {
 } from '../parser/parse-sql-statement';
 import {executeArrowProjection, queryArrowTable, type ArrowTableQuery} from './query-arrow-table';
 import type {ArrowAggregate} from './aggregates';
-import {getProjectionOperations, prepareArrowColumn} from './create-arrow-columns';
+import {
+  getProjectionOperations,
+  mapArrowExpressionChildren,
+  prepareArrowColumn
+} from './create-arrow-columns';
 import {parseSQLExpression} from '../parser/parse-sql-expression';
-import type {ArrowFunctionPackage, PreparedScalarFunction} from './types';
+import type {AggregateFunction, ArrowFunctionPackage, PreparedScalarFunction} from './types';
+import {groupArrowTable, type BoundRelationAggregate} from './relational-query';
+import {
+  bindSQLAggregate,
+  getSQLAggregateCall,
+  getSQLAggregateFunctions,
+  rejectSQLAggregates
+} from './sql-aggregate-functions';
 
 /** Metadata emitted by declarations in a nested package. */
-type PackageMetadata<F, Depth extends readonly unknown[] = []> =
-  F extends PreparedScalarFunction<infer M>
-    ? M
-    : Depth['length'] extends 12
-      ? unknown
-      : F extends readonly (infer Item)[]
-        ? PackageMetadata<Item, [...Depth, unknown]>
-        : never;
+type PackageMetadata<F, Depth extends readonly unknown[] = []> = F extends
+  | PreparedScalarFunction<infer M>
+  | AggregateFunction<infer M>
+  ? M
+  : Depth['length'] extends 12
+    ? unknown
+    : F extends readonly (infer Item)[]
+      ? PackageMetadata<Item, [...Depth, unknown]>
+      : never;
 
 /** An Arrow query result with metadata attributed to each projected column. */
 export type ArrowSQLMetadataResult<M> = {
@@ -85,7 +97,10 @@ function executeSQL(
     return tableFunctions[key]!(getTable(tables, inputTable));
   };
   const operations = getProjectionOperations(options.functions);
-  const results = inputs.map(input => executeSelect(input, resolveTable, execution, operations));
+  const aggregateFunctions = getSQLAggregateFunctions(execution.functions);
+  const results = inputs.map(input =>
+    executeSelect(input, resolveTable, execution, operations, aggregateFunctions)
+  );
   const [first, ...rest] = results.map(result => result.table) as [Table, ...Table[]];
   // Plan the final order against the projected names, including SELECT aliases.
   const table = queryArrowTable(first, {
@@ -133,7 +148,8 @@ function executeSelect(
   statement: SQLSelectStatement,
   resolveTable: (binding: SQLTableBinding) => Table,
   execution: Execution,
-  operations: ReturnType<typeof getProjectionOperations>
+  operations: ReturnType<typeof getProjectionOperations>,
+  aggregateFunctions: ReturnType<typeof getSQLAggregateFunctions>
 ): ArrowSQLMetadataResult<unknown> {
   let source = resolveTable(statement.from);
   const leftAlias = statement.from.alias ?? statement.from.name;
@@ -205,47 +221,119 @@ function executeSelect(
         throw new Error(`Ambiguous Arrow SQL column: ${column.name}`);
       return rightAlias + '.' + column.name;
     });
-  const groupBy = statement.groupBy?.map(expression => requireColumn(bind(expression)));
-  const aggregates = new Map<string, ArrowAggregate>();
-  const select = statement.select?.map(({expression, alias}, index) => {
-    const aggregate = planAggregate(expression, bind);
-    if (aggregate) {
-      const name = alias ?? `aggregate_${index + 1}`;
-      if (aggregates.has(name) || groupBy?.includes(name))
-        throw new Error(`Duplicate Arrow SQL aggregate name: ${name}`);
-      aggregates.set(name, aggregate);
-      return name;
+  const groupBy = statement.groupBy?.map(expression => {
+    rejectSQLAggregates(expression, aggregateFunctions, 'GROUP BY');
+    return requireColumn(bind(expression));
+  });
+  if (statement.where) rejectSQLAggregates(statement.where, aggregateFunctions, 'WHERE');
+  const builtins = new Map<string, ArrowAggregate>();
+  const customCalls = new Map<string, NonNullable<ReturnType<typeof getSQLAggregateCall>>>();
+  const names = new Set(
+    [...source.schema.fields, ...(rightTable?.schema.fields ?? [])].map(field => field.name)
+  );
+  for (const selection of statement.select ?? []) {
+    if (selection.alias) names.add(selection.alias);
+    for (const name of getExpressionColumns(bind(selection.expression))) names.add(name);
+  }
+  let nextAggregate = 0;
+  const rewrite = (node: Expression): Expression => {
+    const call = getSQLAggregateCall(node, aggregateFunctions);
+    if (!call) return mapArrowExpressionChildren(node, rewrite);
+    let name: string;
+    do {
+      name = '__aggregate_' + nextAggregate++;
+    } while (names.has(name));
+    names.add(name);
+    for (const arg of call.arguments)
+      rejectSQLAggregates(arg, aggregateFunctions, 'aggregate arguments');
+    if (call.builtin) {
+      builtins.set(
+        name,
+        call.arguments[0]
+          ? {operation: call.builtin, expression: call.arguments[0]}
+          : {operation: 'COUNT'}
+      );
+    } else {
+      customCalls.set(name, call);
     }
-    const bound = bind(expression);
-    if (bound.type === 'Identifier') return {column: bound.name, as: alias};
+    return {type: 'Identifier', name};
+  };
+  const select = statement.select?.map(({expression, alias}, index) => {
+    const topLevel = getSQLAggregateCall(expression, aggregateFunctions);
+    const bound = rewrite(bind(expression));
+    if (bound.type === 'Identifier')
+      return {column: bound.name, as: alias ?? (topLevel ? `aggregate_${index + 1}` : undefined)};
     return {expression: bound, as: alias};
   });
+  const grouped = Boolean(groupBy?.length || builtins.size || customCalls.size);
+  if (grouped) {
+    const valid = new Set([...(groupBy ?? []), ...builtins.keys(), ...customCalls.keys()]);
+    for (const selection of select ?? []) {
+      const references =
+        'column' in selection ? [selection.column] : getExpressionColumns(selection.expression);
+      const ungrouped = references.find(name => !valid.has(name));
+      if (ungrouped)
+        throw new Error(`Arrow SQL column ${ungrouped} must appear in GROUP BY or an aggregate`);
+    }
+  }
+
   const query = {
     ...execution,
     join,
-    where: statement.where && {expression: bind(statement.where)},
-    groupBy,
-    aggregates: Object.fromEntries(aggregates)
+    where: statement.where && {expression: bind(statement.where)}
   };
   const columnMetadata: Record<string, readonly unknown[]> = Object.create(null);
-  if (!operations.length || !select) {
+  if (!grouped && (!operations.length || !select)) {
     return {table: queryArrowTable(source, {...query, select}), columnMetadata};
   }
-  const aggregateSelection = [...(groupBy ?? []), ...aggregates.keys()];
-  const input = queryArrowTable(source, {
-    ...query,
-    select: aggregateSelection.length ? aggregateSelection : undefined
-  });
-  const table = executeArrowProjection(input, {select, ...execution}, (expression, name) => {
-    const result = prepareArrowColumn(
+  let input = queryArrowTable(source, query);
+  const custom = new Map<string, BoundRelationAggregate & {metadata?: unknown}>();
+  if (grouped) {
+    for (const [name, call] of customCalls)
+      custom.set(name, bindSQLAggregate(call, input, execution.functions, execution.signal));
+    input = groupArrowTable(
       input,
-      typeof expression === 'string' ? parseSQLExpression(expression) : expression,
-      operations,
-      execution.functions
+      groupBy ?? [],
+      Object.fromEntries(builtins),
+      {
+        inputSchema: input.schema,
+        ...execution
+      },
+      custom
     );
-    columnMetadata[name] = result.metadata;
-    return result.compiled;
-  });
+  }
+  const table = executeArrowProjection(
+    input,
+    {select, ...execution},
+    operations.length
+      ? (expression, name) => {
+          const result = prepareArrowColumn(
+            input,
+            typeof expression === 'string' ? parseSQLExpression(expression) : expression,
+            operations,
+            execution.functions
+          );
+          columnMetadata[name] = result.metadata;
+          return result.compiled;
+        }
+      : undefined
+  );
+  if (custom.size) {
+    table.schema.fields.forEach((field, index) => {
+      const selection = select?.[index];
+      const references = selection
+        ? 'column' in selection
+          ? [selection.column]
+          : getExpressionColumns(selection.expression)
+        : [field.name];
+      const metadata = references.flatMap(name => {
+        const entry = custom.get(name)?.metadata;
+        return entry === undefined ? [] : [entry];
+      });
+      if (metadata.length)
+        columnMetadata[field.name] = [...metadata, ...(columnMetadata[field.name] ?? [])];
+    });
+  }
   return {table, columnMetadata};
 }
 
@@ -280,6 +368,7 @@ function bindColumns(
   node: Expression,
   resolve: (column: Column) => string | undefined
 ): Expression {
+  if (node.type === 'Identifier' && node['sqlWildcard']) return node;
   const column = qualifiedColumn(node);
   const name = column && resolve(column);
   if (name !== undefined) return {type: 'Identifier', name};
@@ -312,33 +401,4 @@ function bindColumns(
     default:
       return node;
   }
-}
-
-const aggregateOperations = new Set<ArrowAggregate['operation']>([
-  'COUNT',
-  'SUM',
-  'MIN',
-  'MAX',
-  'AVG',
-  'EVERY',
-  'BOOL_AND',
-  'BOOL_OR',
-  'BIT_AND',
-  'BIT_OR',
-  'BIT_XOR'
-]);
-
-function planAggregate(
-  node: Expression,
-  bind: (expression: Expression) => Expression
-): ArrowAggregate | undefined {
-  if (node.type !== 'CallExpression' || node.callee.type !== 'Identifier' || !node.sqlFunction)
-    return undefined;
-  const operation = String(node.callee['name']).toUpperCase() as ArrowAggregate['operation'];
-  if (!aggregateOperations.has(operation)) return undefined;
-  if (node.arguments.length !== 1) throw new Error(`Arrow SQL ${operation} requires one argument`);
-  const argument = node.arguments[0] as Expression & {sqlWildcard?: boolean};
-  return operation === 'COUNT' && argument.sqlWildcard
-    ? {operation}
-    : {operation, expression: bind(argument)};
 }
