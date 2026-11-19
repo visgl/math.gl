@@ -57,9 +57,12 @@ test('PostGIS point-in-polygon signatures distinguish hole boundaries from inter
     ...table.slice(3).batches
   ]);
   const result = select(
-    'SELECT st_contains(shape, p) AS inside, ST_Covers(shape, p) AS covered FROM features',
+    `SELECT st_contains(shape, p) AS inside, ST_Covers(shape, p) AS covered,
+            ST_Within(p, shape) AS within_result, ST_CoveredBy(p, shape) AS covered_by FROM features`,
     batched
   );
+  expect([...result.getChild('within_result')!]).toEqual([false, false, false, true, false, null]);
+  expect([...result.getChild('covered_by')!]).toEqual([true, true, false, true, false, null]);
   expect([...result.getChild('inside')!]).toEqual([false, false, false, true, false, null]);
   expect([...result.getChild('covered')!]).toEqual([true, true, false, true, false, null]);
 });
