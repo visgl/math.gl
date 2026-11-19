@@ -1,5 +1,7 @@
 # Portable visualization scale descriptors (experimental)
 
+Compare ramps and class breaks in the [color scale gallery](gallery.mdx).
+
 The optional `@math.gl/sql/scales` entry point defines serializable scale
 **specifications** and resolved scale metadata without introducing a D3, renderer,
 Apache Arrow, or GPU runtime dependency.
