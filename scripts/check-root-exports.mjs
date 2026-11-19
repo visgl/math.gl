@@ -86,7 +86,9 @@ const removed = [
   "@math.gl/geospatial/terrain/mesh-stitch"
 ];
 for (const path of removed) {
-  assert.throws(() => require.resolve(path), error => error.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED', path);
+  assert.throws(() => require.resolve(path), error =>
+    error.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED' ||
+    (path.startsWith('@math.gl/arrow/') && error.code === 'MODULE_NOT_FOUND'), path);
 }
 
 for (const subpath of ['sql', 'math', 'color', 'arrow/worker', 'arrow/worker-entry.js', 'arrow/query-worker-entry.js']) {

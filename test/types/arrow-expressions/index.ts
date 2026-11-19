@@ -186,3 +186,26 @@ const names: string[] = getExpressionColumns(portableAST);
 const normalized = columnarPredicateToExpression({op: '=', args: [{property: 'value'}, 1n]});
 const signature = NUMERIC_FUNCTION_DEFINITIONS.SIN.prototypes[0];
 void [names, normalized, signature, new ExpressionEvaluationError('domain', 'invalid value')];
+
+import {createArrowColumns, type ArrowProjectionOperation} from '@math.gl/sql/arrow';
+import {scaleProjectionOperation, type ResolvedScale} from '@math.gl/sql/scales';
+import {parseSQLExpression} from '@math.gl/sql/parser';
+declare const source: import('apache-arrow').Table;
+declare const tag: ArrowProjectionOperation<{kind: 'tag'; label: string}>;
+const expressions = {color: parseSQLExpression('value')};
+const scalesOnly = createArrowColumns(source, expressions, {
+  operations: [scaleProjectionOperation]
+});
+for (const entry of scalesOnly.columnMetadata.color) {
+  const scale: ResolvedScale = entry.scale;
+  scale.sample(1);
+}
+// @ts-expect-error Only declared output column names are valid.
+scalesOnly.columnMetadata.colour;
+const mixed = createArrowColumns(source, expressions, {
+  operations: [tag, scaleProjectionOperation]
+});
+for (const entry of mixed.columnMetadata.color) {
+  if (entry.kind === 'scale') entry.scale.sample(1);
+  else entry.label.toUpperCase();
+}
