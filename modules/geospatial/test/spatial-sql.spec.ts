@@ -246,3 +246,49 @@ test('Turf SQL declarations retain the defaults of the direct Turf kernels', () 
   expect(center?.type === 'Point' && center.coordinates[1]).toBeCloseTo(0);
   expect(result.getChild('covered')!.get(0)).toBe(true);
 });
+
+test('empty point members do not alter centroids, bounds or envelopes', () => {
+  const mixed = {
+    type: 'MultiPoint' as const,
+    coordinates: [
+      [NaN, NaN],
+      [2, 4]
+    ]
+  };
+  const native = makeArrowVectorFromGeoArrowColumn(makeGeoArrowColumnFromGeometryRows([mixed]));
+  const serialized = vectorFromArray([writeWKB(mixed)], new Binary());
+  const collection = wkb('GEOMETRYCOLLECTION(POINT EMPTY,POINT(2 4))');
+  const table = new Table(
+    new Schema([
+      geometryField('native', native, 'multipoint'),
+      geometryField('serialized', serialized),
+      geometryField('collection', collection)
+    ]),
+    {native, serialized, collection}
+  );
+  const result = select(
+    `SELECT ST_Centroid(native) AS a, ST_Centroid(serialized) AS b,
+    ST_Envelope(collection) AS extent, TURF_BBOX(serialized) AS bbox FROM features`,
+    table
+  );
+  for (const name of ['a', 'b', 'extent']) {
+    expect(geometryAt(result, name, 0)).toEqual({type: 'Point', coordinates: [2, 4]});
+  }
+  expect(Array.from(result.getChild('bbox')!.get(0))).toEqual([2, 4, 2, 4]);
+});
+
+test('empty centroids remain usable in nested point functions', () => {
+  const shape = wkb('POLYGON EMPTY');
+  const target = wkb('POINT(2 4)');
+  const table = new Table(
+    new Schema([geometryField('shape', shape), geometryField('target', target)]),
+    {shape, target}
+  );
+  const result = select(
+    `SELECT ST_Distance(ST_Centroid(shape), target) AS distance,
+    ST_Centroid(ST_Centroid(shape)) AS center FROM features`,
+    table
+  );
+  expect(result.getChild('distance')!.get(0)).toBeNull();
+  expect(geometryAt(result, 'center', 0)).toEqual({type: 'Point', coordinates: [NaN, NaN]});
+});

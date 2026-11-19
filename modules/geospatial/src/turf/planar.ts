@@ -11,7 +11,14 @@ type Path = readonly Position[];
 /** A polygon's exterior ring followed by interior rings. */
 type Rings = readonly Path[];
 /** A centroid numerator and its weight. */
-type Moments = {x: number; y: number; weight: number};
+type Moments = {
+  /** Weighted X numerator. */
+  x: number;
+  /** Weighted Y numerator. */
+  y: number;
+  /** Total contribution, in points, length, or area. */
+  weight: number;
+};
 
 /** Iterates path segments, including the closing segment for polygon rings. */
 function visitSegments(
@@ -23,13 +30,20 @@ function visitSegments(
   if (closed && path.length > 1) visit(path[path.length - 1]!, path[0]!);
 }
 
+/** Identifies a finite point, excluding WKB NaNs and native empty coordinates. */
+function isPresentPoint(position: Position): boolean {
+  return Number.isFinite(position[0]) && Number.isFinite(position[1]);
+}
+
 /** Iterates position sequences in a supported geometry, retaining path boundaries. */
 function visitPaths(geometry: WellKnownGeometry, visit: (path: Path) => void): void {
   switch (geometry.type) {
     case 'Point':
-      if (geometry.coordinates.length) visit([geometry.coordinates]);
+      if (isPresentPoint(geometry.coordinates)) visit([geometry.coordinates]);
       break;
     case 'MultiPoint':
+      visit(geometry.coordinates.filter(isPresentPoint));
+      break;
     case 'LineString':
       visit(geometry.coordinates);
       break;

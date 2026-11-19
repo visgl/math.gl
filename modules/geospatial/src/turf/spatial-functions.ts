@@ -36,8 +36,9 @@ import {
 } from '../turf';
 import {planarArea, planarBounds, planarCentroid, planarEnvelope, planarLength} from './planar';
 
-/** GeoArrow's Arrow field metadata keys. */
+/** Field metadata key for the GeoArrow encoding. */
 const EXTENSION_NAME = 'ARROW:extension:name';
+/** Field metadata key for GeoArrow CRS and edge metadata. */
 const EXTENSION_METADATA = 'ARROW:extension:metadata';
 
 /** Supported 2D native encodings and their WKB counterparts. */
@@ -49,13 +50,18 @@ const geometryTypes = [
   'Polygon',
   'MultiPolygon'
 ] as const;
+/** Geometry kind discovered from a native field or a WKB row. */
 type GeometryKind = WellKnownGeometry['type'];
+/** Types accepted by point-only signatures. */
 const pointKinds = ['Point'] as const;
+/** Linear types accepted by line-only signatures. */
 const lineKinds = ['LineString', 'MultiLineString'] as const;
+/** Areal types accepted by polygon-only signatures. */
 const polygonKinds = ['Polygon', 'MultiPolygon'] as const;
 
 /** Supported Arrow result storage for a spatial function. */
 type SpatialResult = Float64 | Bool | Binary | FixedSizeList<Float64>;
+/** A nullable result value passed to the Arrow vector builder. */
 type SpatialValue = number | boolean | number[] | Uint8Array | null;
 
 /** Adapts an Arrow vector to a reader which decodes only active geometry rows. */
@@ -101,6 +107,7 @@ function spatialFunction(
   return {
     name,
     prototypes: [],
+    /** Binds the allowed geometry types and result metadata to a call. */
     resolvePrototype(fields) {
       if (fields.length !== signatures.length) return undefined;
       const extensions = fields.map((field, index) => {
@@ -141,6 +148,7 @@ function spatialFunction(
       return {
         arguments: arguments_,
         result: new Field(name, type, true, metadata),
+        /** Evaluates active rows and retains their positions in the output batch. */
         evaluate(vectors, {activeRows, length: rowCount}) {
           const readers = vectors.map((vector, index) =>
             readGeometry(vector, arguments_[index]!, activeRows)
