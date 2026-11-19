@@ -102,30 +102,45 @@ type TableFunctionOutput<M> = Readonly<{
 /** A relation produced by a table function with one catalog table argument. */
 export type BoundTableFunction<M> = TableFunctionOutput<M> &
   Readonly<{
+    /** Transforms the input into the declared relation. Honor the signal during long evaluations. */
     evaluate(input: Table, options: {signal?: AbortSignal}): Table;
   }>;
 
 /** A correlated relation indexed by the original parent row positions. */
 export type BoundLateralTableFunction<M> = TableFunctionOutput<M> &
   Readonly<{
+    /** Expands parent rows into the declared relation. Honor the signal during long evaluations. */
     evaluate(
       input: Table,
       options: {signal?: AbortSignal}
     ): {
+      /** Output relation whose rows correspond positionally to entries in parentRows. */
       table: Table;
-      /** One input row index per output row in nondecreasing order. */
+      /** One zero-based input row index per output row, in nondecreasing order. */
       parentRows: Int32Array;
     };
   }>;
 
 /** A named relation-producing function. Implement either or both binding modes. */
-export type TableFunction<M = never> = Readonly<{kind: 'table'; name: string}> &
+export type TableFunction<M = never> = Readonly<{
+  /** SQL execution kind for a relation-producing function. */
+  kind: 'table';
+  /** SQL call name. */
+  name: string;
+}> &
   (
     | Readonly<{
+        /** Declares the output and evaluator for a catalog table argument. */
         bind(inputSchema: Schema): BoundTableFunction<M>;
+        /** Optionally declares an evaluator for a correlated column argument. */
         bindLateral?: LateralTableBinder<M>;
       }>
-    | Readonly<{bind?: never; bindLateral: LateralTableBinder<M>}>
+    | Readonly<{
+        /** This function only accepts a correlated column argument. */
+        bind?: never;
+        /** Declares the output and evaluator for a correlated column argument. */
+        bindLateral: LateralTableBinder<M>;
+      }>
   );
 
 /** Binds one correlated column against the parent schema. */
