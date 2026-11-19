@@ -63,7 +63,8 @@ Limits:
   work on the Earth.
 - The IAU Moon model approximates the mean Earth/polar axis frame. It is not the principal axis
   frame of a lunar ephemeris.
-- The IAU models use TDB. The functions use TT in place of TDB; the two differ by less than 2 ms.
+- The IAU models use TDB. The functions use TT in place of TDB; the two differ by less than 2 ms. At
+  the same physical instant, that moves W by up to about 1e-5 degrees for Jupiter.
 
 ## Approximate planet positions
 
@@ -122,11 +123,17 @@ CSPICE N0067 (SpiceyPy 8.4.0) with NAIF `pck00011.tpc` and `de440s.bsp`, pinned 
 independent Python evaluation of the JPL element tables, parsed from the JPL table text. It does
 not run the TypeScript code. Ordinary CI uses only the stored controls.
 
+The rotation, frame and subsolar gates state agreement with CSPICE at the same numerical
+ephemeris-time argument. The generator gives CSPICE the TT seconds from J2000.0 as TDB seconds, so
+the controls test the rotation models, not the TT-to-TDB conversion. At the same physical instant
+the TT−TDB difference (less than 2 ms) moves W by up to about 1e-5 degrees for Jupiter. A
+same-instant accuracy claim needs a TT-to-TDB conversion and its own controls.
+
 | Function | Control | Gate |
 | --- | --- | --- |
-| `getBodyRotationElements` | CSPICE `pxform` and `m2eul`, 10 bodies, 9 dates | 1e-8 degrees |
-| `getBodyFixedFrame` | CSPICE `pxform` and `sxform` | 1e-10 (matrix), 1e-14 per second (rate) |
-| `getBodySubsolarPoint` | CSPICE frame, DE440 Sun position | 1e-8 degrees |
+| `getBodyRotationElements` | CSPICE `pxform` and `m2eul`, 10 bodies, 9 dates, same time argument | 1e-8 degrees |
+| `getBodyFixedFrame` | CSPICE `pxform` and `sxform`, same time argument | 1e-10 (matrix), 1e-14 per second (rate) |
+| `getBodySubsolarPoint` | CSPICE frame, DE440 Sun position, same time argument | 1e-8 degrees |
 | `getApproximatePlanetPosition` | Python evaluation of the JPL tables, 12 dates from 3000 BC to 3000 AD | 1e-10 au |
 | `getApproximatePlanetPosition` | DE440, 1850 to 2050 | the measured gates above |
 

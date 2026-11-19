@@ -181,8 +181,13 @@ function evaluate(model: RotationModel, days: number): RotationState {
  * Coordinates and Rotational Elements: 2015", Celest. Mech. Dyn. Astr. 130:22,
  * doi:10.1007/s10569-017-9805-5, Tables 1 and 2, including the periodic terms of Mercury, the Moon,
  * Mars, Jupiter and Neptune. The coefficients are as NAIF `pck00011.tpc` gives them. The result
- * agrees with CSPICE and `pck00011.tpc` to 1e-8 degrees in the supported range; the limit is the
- * binary64 precision of W, which grows to 3e7 degrees for Jupiter in 2100.
+ * agrees with CSPICE and `pck00011.tpc` to 1e-8 degrees in the supported range, at the same
+ * numerical ephemeris-time argument: the controls give CSPICE the TT seconds from J2000.0 as TDB
+ * seconds. The limit is the binary64 precision of W, which grows to 3e7 degrees for Jupiter in 2100.
+ *
+ * The models use TDB, and this function uses TT in its place. At the same physical instant the two
+ * differ by less than 2 ms, which moves W by up to about 1e-5 degrees for Jupiter (360 degrees in
+ * about 10 hours). No control tests a same-instant accuracy.
  *
  * The IAU Earth model is a simple linear model. It has no nutation and no polar motion, and it uses
  * TT in place of UT1; its error is of the order of 0.1 degree in W. Use an Earth orientation model
@@ -221,7 +226,8 @@ export function getBodyRotationElements(
  * `R = Rz(W) Rx(90° − δ0) Rz(90° + α0)`, where each factor rotates the frame (not the vector).
  * The derivative includes the rates of α0, δ0 and W. `frame.transformState` thus gives a
  * body-fixed velocity from an ICRF state. The result agrees with the CSPICE `sxform` from `J2000`
- * to `IAU_<BODY>` with `pck00011.tpc` to 1e-10 in the matrix and 1e-14 per second in the derivative.
+ * to `IAU_<BODY>` with `pck00011.tpc` to 1e-10 in the matrix and 1e-14 per second in the derivative,
+ * at the same numerical ephemeris-time argument (TT used as TDB; see {@link getBodyRotationElements}).
  * @param body - The body.
  * @param tt - The date, a `JulianDate` in the TT scale, from 1900-01-01T12:00 to 2100-01-01T12:00 TT.
  * @returns A frame snapshot from `'ICRF'` to `'IAU_<BODY>'` (for example `'IAU_MARS'`), at `tt`,
