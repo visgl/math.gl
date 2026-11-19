@@ -6,6 +6,40 @@ import {fileURLToPath} from 'node:url';
 import {preview} from 'vite';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
+import {gzipSync} from 'node:zlib';
+import {
+  STANDARD_DEPTHS,
+  WOA23_MANIFEST_URL,
+  WOA23_PREVIEW_URL,
+  syntheticProfileSource
+} from '../../../../../examples/geospatial/bathymetry/src/profile-sources.js';
+
+// Offline stand-in for the pinned WOA23 preview: synthetic profiles in the same format.
+const previewManifest = {
+  latitudes: [-60, -30, 0, 12, 30, 60],
+  longitudes: Array.from({length: 12}, (_, i) => -180 + 30 * i),
+  depths: STANDARD_DEPTHS,
+  temperature: {scale: 0.01, fill: -32768},
+  salinity: {scale: 0.01, fill: 65535}
+};
+const previewCells = previewManifest.latitudes.length * previewManifest.longitudes.length;
+const previewTemperature = new Int16Array(previewCells * STANDARD_DEPTHS.length);
+const previewSalinity = new Uint16Array(previewCells * STANDARD_DEPTHS.length);
+previewManifest.latitudes.forEach((latitude, row) =>
+  previewManifest.longitudes.forEach((longitude, col) => {
+    const profile = syntheticProfileSource.getProfile(longitude, latitude);
+    const offset = (row * previewManifest.longitudes.length + col) * STANDARD_DEPTHS.length;
+    profile.temperature.forEach((t, i) => {
+      previewTemperature[offset + i] = Math.round(t * 100);
+    });
+    profile.practicalSalinity.forEach((value, i) => {
+      previewSalinity[offset + i] = Math.round(value * 100);
+    });
+  })
+);
+const previewBody = gzipSync(
+  Buffer.concat([Buffer.from(previewTemperature.buffer), Buffer.from(previewSalinity.buffer)])
+);
 
 const server = await preview({
   configFile: false,
@@ -34,6 +68,15 @@ try {
   await page.route('https://s3.amazonaws.com/elevation-tiles-prod/**', route => {
     tileRequests++;
     return route.fulfill({contentType: 'image/png', body: tile});
+  });
+  let previewRequests = 0;
+  await page.route(WOA23_MANIFEST_URL, route => {
+    previewRequests++;
+    return route.fulfill({contentType: 'application/json', body: JSON.stringify(previewManifest)});
+  });
+  await page.route(WOA23_PREVIEW_URL, route => {
+    previewRequests++;
+    return route.fulfill({contentType: 'application/octet-stream', body: previewBody});
   });
   page.on('pageerror', error => errors.push(error.message));
   const response = await fetch(server.resolvedUrls.local[0]);
@@ -84,6 +127,11 @@ try {
   assert.match(profileText, /12\.00°, -30\.00°/);
   assert.match(profileText, /deep sound channel axis/);
   assert.match(profileText, /Absorption at 12 kHz/);
+  assert.equal(previewRequests, 2, 'Manifest and preview load once from the pinned commit');
+  assert.match(
+    await page.locator('[data-role=profile-source]').textContent(),
+    /World Ocean Atlas 2023.*Locarnini et al\. 2023; Reagan et al\. 2023/
+  );
   await page.locator('[data-role=frequency]').selectOption('400000');
   await page.waitForFunction(() =>
     document.querySelector('[data-role=absorption]').textContent.includes('400 kHz')

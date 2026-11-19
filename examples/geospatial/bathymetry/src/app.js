@@ -8,12 +8,13 @@ import {createGlobeMesh, getExaggeration} from './mesh.js';
 import {selectRefinement, createRefinementSource, sampleCoarsePosition} from './refinement.js';
 import {getMorphFocus, getMorphViewState} from './camera.js';
 import {computeSoundProfile, pickSeaLevelPoint, sampleHeight} from './sound-profile.js';
-import {syntheticProfileSource} from './profile-sources.js';
+import {loadWoa23ProfileSource} from './profile-sources.js';
 import {renderSoundProfile} from './profile-panel.js';
 import elevationUrl from '../assets/etopo1.bin?url';
 
 /** Mount a global relief globe with no water surface obscuring the seafloor. */
-export function mountBathymetry(root, {profileSource = syntheticProfileSource} = {}) {
+/** `profileSource` replaces the WOA23 preview, for example with a synthetic source in tests. */
+export function mountBathymetry(root, {profileSource} = {}) {
   root.innerHTML = `<canvas data-role="globe" aria-label="Interactive three dimensional ocean floor globe"></canvas>
   <aside><h1>The ocean, uncovered</h1><p>Explore Earth's hidden ridges, trenches and continental shelves.</p>
   <label>Destination <select data-role="destination"><option value="pacific">Pacific Ocean</option><option value="atlantic">Mid-Atlantic Ridge</option><option value="indian">Indian Ocean</option><option value="americas">The Americas</option></select></label>
@@ -172,8 +173,19 @@ export function mountBathymetry(root, {profileSource = syntheticProfileSource} =
     queueRefinement();
   }
   let selected;
-  controls('profile-source').textContent =
-    `Profile source: ${profileSource.name}. A climatology is a long-term mean, not a measured cast; not for navigation.`;
+  const profileSourceReady = profileSource
+    ? Promise.resolve(profileSource)
+    : loadWoa23ProfileSource({signal: abort.signal});
+  profileSourceReady.then(
+    source => {
+      controls('profile-source').textContent =
+        `Profiles: ${source.name}. A climatology is a long-term mean, not a measured cast; not for navigation.`;
+    },
+    error => {
+      if (!abort.signal.aborted)
+        controls('profile-source').textContent = `Unable to load ocean profiles: ${error.message}`;
+    }
+  );
   function selectPoint(x, y) {
     const viewport = deck.getViewports()[0];
     if (!viewport || !heights) return;
@@ -192,11 +204,21 @@ export function mountBathymetry(root, {profileSource = syntheticProfileSource} =
     selected = point;
     showProfile();
   }
-  function showProfile() {
+  async function showProfile() {
     if (!selected) return;
-    const {longitude, latitude} = selected;
+    const request = selected;
+    const {longitude, latitude} = request;
+    let source;
+    try {
+      controls('profile').textContent = 'Loading ocean profiles…';
+      source = await profileSourceReady;
+    } catch (error) {
+      controls('profile').textContent = `Unable to load ocean profiles (${error.message}).`;
+      return;
+    }
+    if (request !== selected || abort.signal.aborted) return;
     const seafloorDepth = -sampleHeight(heights, longitude, latitude);
-    const profile = seafloorDepth > 0 ? profileSource.getProfile(longitude, latitude) : null;
+    const profile = seafloorDepth > 0 ? source.getProfile(longitude, latitude) : null;
     if (!profile) {
       controls('profile').textContent =
         `${latitude.toFixed(2)}°, ${longitude.toFixed(2)}° is not ocean in the profile data. Click the ocean.`;

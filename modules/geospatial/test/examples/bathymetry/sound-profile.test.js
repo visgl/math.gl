@@ -15,9 +15,13 @@ import {
   pickSeaLevelPoint,
   sampleHeight
 } from '../../../../../examples/geospatial/bathymetry/src/sound-profile.js';
+import {gzipSync} from 'node:zlib';
 import {
   STANDARD_DEPTHS,
+  WOA23_MANIFEST_URL,
+  WOA23_PREVIEW_URL,
   createPreviewProfileSource,
+  loadWoa23ProfileSource,
   syntheticProfileSource
 } from '../../../../../examples/geospatial/bathymetry/src/profile-sources.js';
 import {createSoundProfileMarkup} from '../../../../../examples/geospatial/bathymetry/src/profile-panel.js';
@@ -157,4 +161,46 @@ test('the panel marks the sound-channel axis and names the frequency', () => {
   assert.match(markup, /data-role="minimum-marker"/);
   assert.match(markup, /deep sound channel axis/);
   assert.match(markup, /Absorption at 100 kHz/);
+});
+
+test('the WOA23 loader fetches the pinned manifest and gunzips the preview', async () => {
+  const commit = /\/visgl\/deck\.gl-data\/([0-9a-f]{40})\/earth\/oceanography\/v1\/woa23\//;
+  assert.match(WOA23_PREVIEW_URL, /^https:\/\/media\.githubusercontent\.com\/media\//);
+  assert.match(WOA23_MANIFEST_URL, /^https:\/\/raw\.githubusercontent\.com\//);
+  assert.equal(WOA23_PREVIEW_URL.match(commit)[1], WOA23_MANIFEST_URL.match(commit)[1]);
+  const manifest = {
+    latitudes: [0],
+    longitudes: [178.5, -179.5],
+    depths: [0, 10],
+    temperature: {scale: 0.01, fill: -32768},
+    salinity: {scale: 0.01, fill: 65535}
+  };
+  const bytes = Buffer.concat([
+    Buffer.from(new Int16Array([1000, 900, 2500, 2400]).buffer),
+    Buffer.from(new Uint16Array([3400, 3410, 3500, 3510]).buffer)
+  ]);
+  const requested = [];
+  const original = globalThis.fetch;
+  globalThis.fetch = async url => {
+    requested.push(url);
+    return url.endsWith('.json')
+      ? new Response(JSON.stringify(manifest))
+      : new Response(gzipSync(bytes));
+  };
+  try {
+    const source = await loadWoa23ProfileSource({
+      manifestUrl: 'https://example.test/woa23/preview-manifest.json',
+      previewUrl: 'https://example.test/woa23/preview.bin.gz'
+    });
+    assert.deepEqual(requested.sort(), [
+      'https://example.test/woa23/preview-manifest.json',
+      'https://example.test/woa23/preview.bin.gz'
+    ]);
+    // 179.9° E is nearer to -179.5° across the antimeridian than to 178.5°.
+    assert.deepEqual(source.getProfile(179.9, 0).temperature, [25, 24]);
+    assert.deepEqual(source.getProfile(178, 0).practicalSalinity, [34, 34.1]);
+    assert.match(source.name, /Locarnini et al\. 2023; Reagan et al\. 2023/);
+  } finally {
+    globalThis.fetch = original;
+  }
 });

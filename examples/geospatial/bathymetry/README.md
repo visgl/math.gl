@@ -32,16 +32,27 @@ panel also gives the absorption at 12, 100 or 400 kHz, and the one-way vertical
 absorption loss from the surface to the seafloor. Clicks between the globe and the
 map (a partial morph) do not select a point.
 
-**Profile data.** The profiles are synthetic and idealized
-(`src/profile-sources.js`): a warm upper layer over cold deep water that depends on
-latitude only. They are not measured data. The seam for real data is the
-`profileSource` option of `mountBathymetry`: an object with a `name` and
-`getProfile(longitude, latitude)` that returns in-situ temperature (°C) and
-Practical Salinity at depths in meters, or `null` on land.
-`createPreviewProfileSource(manifest, buffer)` already reads the NOAA World Ocean
-Atlas 2023 display preview format of the deck.gl-data Earth catalog. A later change
-can load that preview from its pinned URL. A climatology is a long-term mean, not a
-measured cast, and the result is not for navigation or sonar performance prediction.
+**Profile data.** The profiles come from the NOAA NCEI World Ocean Atlas 2023
+(WOA23) annual 1° climatology, all decades 1955–2022: objectively analyzed in-situ
+temperature (`t_an`) and Practical Salinity (`s_an`). Cite Locarnini et al. (2023),
+World Ocean Atlas 2023, Volume 1: Temperature, NOAA Atlas NESDIS 89,
+https://doi.org/10.25923/54bh-1613, and Reagan et al. (2023), World Ocean Atlas
+2023, Volume 2: Salinity, NOAA Atlas NESDIS 90, https://doi.org/10.25923/70qt-9574.
+NCEI states that the data are openly available to the public.
+
+The example loads the 598 KB display preview of the
+[deck.gl-data Earth catalog](https://github.com/visgl/deck.gl-data/tree/master/earth/stac)
+(`earth/oceanography/v1/woa23`) from its pinned dataset commit, as the geoid example
+does for EGM96. The preview keeps every second WOA23 node (2°) at 33 standard depths,
+quantized to 0.01 °C and 0.01 salinity units. The panel uses the nearest preview
+cell; the WOA23 profile can end above the ETOPO1 seafloor. A climatology is a
+long-term mean, not a measured cast, and the result is not for navigation or sonar
+performance prediction.
+
+`mountBathymetry(root, {profileSource})` replaces the preview with another source:
+an object with a `name` and `getProfile(longitude, latitude)` that returns in-situ
+temperature (°C) and Practical Salinity at depths in meters, or `null` on land. The
+tests use `syntheticProfileSource`, an idealized latitude-only profile.
 
 ## Data and interpretation
 
@@ -65,7 +76,8 @@ and polar vertices are reconciled for rendering only; the source binary is uncha
 To reproduce, download its CSV source URL, skip the two header rows, and pack the
 altitude column as signed little-endian int16 values in row order. No resampling,
 filling or smoothing is performed on the bundled grid. Zoom refinement requires
-network access to `s3.amazonaws.com/elevation-tiles-prod`. Terrarium pixels are
+network access to `s3.amazonaws.com/elevation-tiles-prod`. The sound-speed panel requires network access to
+`media.githubusercontent.com` and `raw.githubusercontent.com` for the WOA23 preview. Terrarium pixels are
 decoded as signed meters, then bilinearly sampled into a geographic display grid.
 The [Tilezen sources](https://github.com/tilezen/joerd/blob/master/docs/data-sources.md)
 use ETOPO1 for oceans and multiple sources on land; finer pixels do not imply
