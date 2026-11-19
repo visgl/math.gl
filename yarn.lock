@@ -14532,6 +14532,7 @@ __metadata:
     "@luma.gl/core": "npm:10.0.0-alpha.14"
     "@luma.gl/engine": "npm:10.0.0-alpha.14"
     "@luma.gl/shaders": "npm:10.0.0-alpha.14"
+    "@math.gl/earth": "workspace:*"
     "@math.gl/geospatial": "workspace:*"
     vite: "npm:^8.3.6"
   languageName: unknown

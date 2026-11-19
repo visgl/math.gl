@@ -57,9 +57,12 @@ test('PostGIS point-in-polygon signatures distinguish hole boundaries from inter
     ...table.slice(3).batches
   ]);
   const result = select(
-    'SELECT st_contains(shape, p) AS inside, ST_Covers(shape, p) AS covered FROM features',
+    `SELECT st_contains(shape, p) AS inside, ST_Covers(shape, p) AS covered,
+            ST_Within(p, shape) AS within_result, ST_CoveredBy(p, shape) AS covered_by FROM features`,
     batched
   );
+  expect([...result.getChild('within_result')!]).toEqual([false, false, false, true, false, null]);
+  expect([...result.getChild('covered_by')!]).toEqual([true, true, false, true, false, null]);
   expect([...result.getChild('inside')!]).toEqual([false, false, false, true, false, null]);
   expect([...result.getChild('covered')!]).toEqual([true, true, false, true, false, null]);
 });
@@ -299,4 +302,16 @@ test('empty centroids remain usable in nested point functions', () => {
   );
   expect(result.getChild('distance')!.get(0)).toBeNull();
   expect(geometryAt(result, 'center', 0)).toEqual({type: 'Point', coordinates: [NaN, NaN]});
+});
+
+test('extracts route endpoint coordinates through nested SQL calls', () => {
+  const route = wkb('LINESTRING(-73 40,-72 41,-71 42)', 'LINESTRING EMPTY', null);
+  const table = new Table(new Schema([geometryField('route', route)]), {route});
+  const result = select(
+    `SELECT ST_X(ST_StartPoint(route)) AS start_x, ST_Y(ST_EndPoint(route)) AS end_y
+     FROM features`,
+    table
+  );
+  expect([...result.getChild('start_x')!]).toEqual([-73, null, null]);
+  expect([...result.getChild('end_y')!]).toEqual([42, null, null]);
 });

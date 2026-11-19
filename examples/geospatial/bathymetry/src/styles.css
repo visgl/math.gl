@@ -110,3 +110,38 @@
   border-radius: 5px;
   background: linear-gradient(to right, #020c27, #123f88, #168fa7, #8edbc3);
 }
+.bathymetry aside.sound-profile {
+  left: auto;
+  right: 24px;
+}
+.bathymetry [data-role='profile-chart'] {
+  display: block;
+  margin-top: 8px;
+  font-size: 10px;
+}
+.bathymetry [data-role='profile-chart'] text {
+  fill: #b8c9d9;
+}
+.bathymetry [data-role='profile-chart'] .axis {
+  stroke: #6f8aa3;
+}
+.bathymetry [data-role='profile-chart'] .seafloor {
+  stroke: #9d9360;
+  stroke-dasharray: 4 3;
+}
+.bathymetry [data-role='profile-chart'] .profile {
+  fill: none;
+  stroke: #85dac7;
+  stroke-width: 2;
+}
+.bathymetry [data-role='profile-chart'] .minimum {
+  stroke: #ffd875;
+  fill: #ffd875;
+  stroke-dasharray: 2 3;
+}
+@media (max-width: 600px) {
+  .bathymetry aside.sound-profile {
+    top: auto;
+    bottom: 24px;
+  }
+}
