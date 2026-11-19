@@ -35,17 +35,14 @@ export function queryArrowSQL(
 ): Table {
   const {inputs, orderBy, offset, limit} = parseSQLSelectCompound(sql, options);
   const execution = {signal: options.signal, functions: options.functions};
-  const tableFunctions = new Map(
-    Object.entries(options.tableFunctions ?? {}).map(([name, fn]) => [name.toUpperCase(), fn])
-  );
+  const tableFunctions = options.tableFunctions ?? {};
   /** Resolves a catalog binding or invokes a registered table source once. */
-  const resolveTable = (binding: SQLTableBinding) => {
-    if (binding.inputTable === undefined) return getTable(tables, binding.name);
-    const fn = tableFunctions.get(binding.name.toUpperCase());
-    if (!fn) throw new Error(`Unknown Arrow SQL table function: ${binding.name}`);
-    const input = getTable(tables, binding.inputTable);
-    options.signal?.throwIfAborted();
-    return fn(input);
+  const resolveTable = ({name, inputTable}: SQLTableBinding) => {
+    if (inputTable === undefined) return getTable(tables, name);
+    const key = Object.keys(tableFunctions).find(key => key.toUpperCase() === name.toUpperCase());
+    if (key === undefined) throw new Error(`Unknown Arrow SQL table function: ${name}`);
+    execution.signal?.throwIfAborted();
+    return tableFunctions[key]!(getTable(tables, inputTable));
   };
   const [first, ...rest] = inputs.map(input => executeSelect(input, resolveTable, execution)) as [
     Table,
