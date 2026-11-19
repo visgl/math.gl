@@ -10,12 +10,19 @@ import styles from './styles.module.css';
 const palette = name => ({type: 'palette', name});
 /** Explicit colors encoded as normalized sRGB. */
 const colors = (...values) => ({type: 'colors', values});
+/** Dark sRGB swatch for the lowest classified bin. */
 const night = [0.19, 0.14, 0.34, 1];
+/** Violet sRGB swatch for the second classified bin. */
 const violet = [0.38, 0.3, 0.66, 1];
+/** Teal sRGB swatch for the third bin and forest category. */
 const teal = [0.13, 0.68, 0.63, 1];
+/** Gold sRGB swatch for the highest classified bin. */
 const gold = [0.98, 0.79, 0.32, 1];
+/** Blue sRGB swatch for negative deviations and the water category. */
 const blue = [0.15, 0.37, 0.72, 1];
+/** Neutral sRGB swatch at the diverging pivot. */
 const white = [0.95, 0.94, 0.91, 1];
+/** Red sRGB swatch for positive deviations and high alerts. */
 const red = [0.74, 0.16, 0.24, 1];
 
 /** Compiles the scale using the same API as the layer or legend. */
@@ -49,6 +56,7 @@ const examples = [
 /** The sample behind the displayed quantile cuts. */
 const observations = [0, 2, 4, 6, 8, 8, 10, 13, 16, 19, 19, 23, 28, 34, 42, 42, 51, 64, 82, 100];
 
+/** Shared number format for legend ticks. */
 const format = new Intl.NumberFormat('en-US', {maximumFractionDigits: 2});
 
 /** Converts a normalized scale color to a CSS color. */
