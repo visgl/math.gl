@@ -17,3 +17,9 @@ test('Jenks handles ties, nonfinite rows, and invalid class counts', () => {
   expect(() => getJenksBreaks([1, 1], 2)).toThrow('distinct finite');
   expect(() => getJenksBreaks([1], 0)).toThrow('positive integer');
 });
+
+test('Jenks preserves variance within a tight cluster far from the minimum', () => {
+  expect(getJenksBreaks([0, 1000000000, 1000000001, 1000000002, 1000000010], 3)).toEqual([
+    1000000000, 1000000010
+  ]);
+});

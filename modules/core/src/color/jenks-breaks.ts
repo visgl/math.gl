@@ -32,27 +32,54 @@ export function getJenksBreaks(values: Iterable<number>, classCount: number): nu
   const first = sorted[0]!;
   const last = sorted[size - 1]!;
   const divisor = Number.isFinite(last - first) ? last - first : Math.max(-first, last);
-  const count = new Float64Array(size + 1);
-  const sum = new Float64Array(size + 1);
-  const squares = new Float64Array(size + 1);
+  // Merge disjoint interval moments so a small cluster is never recovered by
+  // subtracting nearly equal prefix sums dominated by a distant observation.
+  const leaves = 2 ** Math.ceil(Math.log2(size));
+  const counts = new Float64Array(2 * leaves);
+  const means = new Float64Array(2 * leaves);
+  const errors = new Float64Array(2 * leaves);
   for (let i = 0; i < size; i++) {
     const value = sorted[i]!;
-    const weight = frequencies.get(value)!;
-    const x = Number.isFinite(value - first)
+    counts[leaves + i] = frequencies.get(value)!;
+    means[leaves + i] = Number.isFinite(value - first)
       ? (value - first) / divisor
       : value / divisor - first / divisor;
-    count[i + 1] = count[i]! + weight;
-    sum[i + 1] = sum[i]! + weight * x;
-    squares[i + 1] = squares[i]! + weight * x * x;
+  }
+  for (let i = leaves - 1; i > 0; i--) {
+    const left = 2 * i;
+    const right = left + 1;
+    const leftCount = counts[left]!;
+    const rightCount = counts[right]!;
+    const count = leftCount + rightCount;
+    if (!count) continue;
+    const delta = means[right]! - means[left]!;
+    const fraction = rightCount / count;
+    counts[i] = count;
+    means[i] = means[left]! + delta * fraction;
+    errors[i] = errors[left]! + errors[right]! + delta * delta * leftCount * fraction;
   }
 
-  /** Squared error for a contiguous class from start (inclusive) to end (exclusive). */
+  /** Combines the disjoint tree nodes covering a contiguous class. */
   const cost = (start: number, end: number): number => {
-    const total = sum[end]! - sum[start]!;
-    return Math.max(
-      0,
-      squares[end]! - squares[start]! - (total * total) / (count[end]! - count[start]!)
-    );
+    let count = 0;
+    let mean = 0;
+    let error = 0;
+    /** Incorporates a node using the parallel variance update. */
+    function add(index: number): void {
+      const weight = counts[index]!;
+      const delta = means[index]! - mean;
+      const fraction = weight / (count + weight);
+      error += errors[index]! + delta * delta * count * fraction;
+      mean += delta * fraction;
+      count += weight;
+    }
+    for (let left = leaves + start, right = leaves + end; left < right; ) {
+      if (left % 2) add(left++);
+      if (right % 2) add(--right);
+      left = Math.floor(left / 2);
+      right = Math.floor(right / 2);
+    }
+    return error;
   };
 
   let previous = Float64Array.from({length: size + 1}, (_, end) => (end ? cost(0, end) : 0));
