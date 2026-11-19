@@ -81,7 +81,7 @@ test('planar measurements and weighted centroids agree with PostGIS geometry fix
     ST_Centroid(shape) AS center, ST_Envelope(shape) AS extent FROM features`,
     table
   );
-  // PostGIS geometry fixtures: use ST_Area, ST_Length and ST_AsText(ST_Centroid(...)) with these WKTs.
+  // Verified with PostGIS 3.6.2 using ST_Area, ST_Length, ST_Centroid and ST_Envelope.
   expect([...result.getChild('area')!]).toEqual([60, 0, 0, 0, 0, null]);
   expect([...result.getChild('length')!]).toEqual([0, 6, 0, 0, 0, null]);
   expect(geometryAt(result, 'center', 0)).toEqual({
@@ -97,12 +97,12 @@ test('planar measurements and weighted centroids agree with PostGIS geometry fix
     coordinates: [3, 6]
   });
   expect(geometryAt(result, 'center', 3)).toEqual({
-    type: 'GeometryCollection',
-    geometries: []
+    type: 'Point',
+    coordinates: [NaN, NaN]
   });
   expect(geometryAt(result, 'center', 4)).toEqual({
-    type: 'GeometryCollection',
-    geometries: []
+    type: 'Point',
+    coordinates: [NaN, NaN]
   });
   expect(geometryAt(result, 'center', 5)).toBeNull();
   expect(geometryAt(result, 'extent', 3)).toEqual({
@@ -194,4 +194,55 @@ test('validates native signatures at bind time and only decodes active WKB rows'
   );
   expect([...result.getChild('distance')!]).toEqual([0, 0, 0]);
   expect([...result.getChild('null_distance')!]).toEqual([null, null, null]);
+});
+
+test('resolves nullable computed geometries and keeps named CRS constraints', () => {
+  const a = wkb('POINT(3 4)', 'POINT(3 4)');
+  const b = wkb('POINT(0 0)', 'POINT(0 0)');
+  const id = vectorFromArray([0, 1], new Int32());
+  const table = new Table(
+    new Schema([
+      geometryField('a', a, 'wkb', {crs: 'EPSG:3857'}),
+      geometryField('b', b, 'wkb', {crs: 'EPSG:3857'}),
+      geometryField('other', b, 'wkb', {crs: 'EPSG:4326'}),
+      new Field('id', new Int32(), false)
+    ]),
+    {a, b, other: b, id}
+  );
+  const result = select(
+    'SELECT ST_Distance(CASE WHEN id = 0 THEN a ELSE NULL END, b) AS d FROM features',
+    table
+  );
+  expect([...result.getChild('d')!]).toEqual([5, null]);
+  expect(() => select('SELECT ST_Distance(a, other) FROM features', table)).toThrow('same CRS');
+});
+
+test('Turf SQL declarations retain the defaults of the direct Turf kernels', () => {
+  const p = wkb('POINT(0 0)');
+  const q = wkb('POINT(2 0)');
+  const path = wkb('LINESTRING(0 0,2 0,2 1)');
+  const polygon = wkb('POLYGON((0 0,4 0,0 2,0 0))');
+  const table = new Table(
+    new Schema([
+      geometryField('p', p),
+      geometryField('q', q),
+      geometryField('path', path),
+      geometryField('polygon', polygon)
+    ]),
+    {p, q, path, polygon}
+  );
+  const result = select(
+    `SELECT TURF_BEARING(p, q) AS bearing, TURF_LENGTH(path) AS length,
+    TURF_AREA(polygon) AS area, TURF_CENTROID(path) AS centroid, TURF_MIDPOINT(p, q) AS midpoint,
+    TURF_BOOLEAN_POINT_IN_POLYGON(p, polygon) AS covered FROM features`,
+    table
+  );
+  expect(result.getChild('bearing')!.get(0)).toBe(90);
+  expect(result.getChild('length')!.get(0)).toBeCloseTo(333.58524, 4);
+  expect(result.getChild('area')!.get(0)).toBeCloseTo(49447340364.086, -3);
+  expect(geometryAt(result, 'centroid', 0)).toEqual({type: 'Point', coordinates: [4 / 3, 1 / 3]});
+  const center = geometryAt(result, 'midpoint', 0);
+  expect(center?.type === 'Point' && center.coordinates[0]).toBeCloseTo(1);
+  expect(center?.type === 'Point' && center.coordinates[1]).toBeCloseTo(0);
+  expect(result.getChild('covered')!.get(0)).toBe(true);
 });

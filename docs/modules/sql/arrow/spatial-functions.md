@@ -56,7 +56,7 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_Azimuth(a, b)` | Two Points | Float64 radians clockwise from positive Y in `[0, 2π)`. Coincident and empty points yield null. |
 | `ST_Area(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar polygon area with holes subtracted. Empty and non-areal inputs yield zero. |
 | `ST_Length(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar line length. Empty and non-linear inputs yield zero. |
-| `ST_Centroid(geometry)` | Point, LineString, Polygon, and their multi-types | GeoArrow WKB. Points have equal weight, lines are weighted by segment length, and polygons are weighted by area. Empty inputs yield an empty geometry collection. |
+| `ST_Centroid(geometry)` | Point, LineString, Polygon, and their multi-types | GeoArrow WKB. Points have equal weight, lines are weighted by segment length, and polygons are weighted by area. Empty inputs yield an empty Point. |
 | `ST_Envelope(geometry)` | Point, LineString, Polygon, and their multi-types, or a WKB GeometryCollection | GeoArrow WKB Point, LineString, or Polygon according to the extent. An empty input keeps its geometry type. |
 
 Each call produces one value per input row. A null argument produces null.

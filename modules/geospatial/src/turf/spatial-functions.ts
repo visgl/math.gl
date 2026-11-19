@@ -14,8 +14,7 @@ import {
 } from 'apache-arrow';
 import type {ArrowTableFunction} from '@math.gl/sql/arrow';
 import {
-  getGeoArrowExtensionMetadata,
-  inferGeoArrowDimensionFromArrowType,
+  getGeoArrowFieldInfo,
   isGeoArrowValueValid,
   makeGeoArrowColumnFromArrowVector,
   makeGeoArrowColumnFromGeometryRows,
@@ -106,7 +105,7 @@ function spatialFunction(
       if (fields.length !== signatures.length) return undefined;
       const extensions = fields.map((field, index) => {
         if (!field) return undefined;
-        const extension = getGeoArrowExtensionMetadata(field);
+        const extension = getGeoArrowFieldInfo(field);
         const encoding = extension?.encoding;
         const kinds = signatures[index]!;
         if (
@@ -115,8 +114,7 @@ function spatialFunction(
         ) {
           // WKB reveals its geometry kind and dimensionality per row.
         } else if (kinds.some(kind => encoding === 'geoarrow.' + kind.toLowerCase())) {
-          if (inferGeoArrowDimensionFromArrowType(field.type) !== 'xy')
-            throw new Error(`${name} requires 2D geometry`);
+          if (extension?.dimension !== 'xy') throw new Error(`${name} requires 2D geometry`);
         } else {
           throw new Error(`${name} argument ${index + 1} requires GeoArrow ${kinds.join(' or ')}`);
         }
@@ -280,16 +278,17 @@ export const ST_ENVELOPE = /* @__PURE__ */ spatialFunction(
 );
 
 /** Opt-in PostGIS-aligned 2D geometry functions for the Arrow SQL function list. */
-export const POSTGIS_SPATIAL_FUNCTIONS: readonly ArrowTableFunction[] = Object.freeze([
-  ST_CONTAINS,
-  ST_COVERS,
-  ST_DISTANCE,
-  ST_AZIMUTH,
-  ST_AREA,
-  ST_LENGTH,
-  ST_CENTROID,
-  ST_ENVELOPE
-]);
+export const POSTGIS_SPATIAL_FUNCTIONS: readonly ArrowTableFunction[] =
+  /* @__PURE__ */ Object.freeze([
+    ST_CONTAINS,
+    ST_COVERS,
+    ST_DISTANCE,
+    ST_AZIMUTH,
+    ST_AREA,
+    ST_LENGTH,
+    ST_CENTROID,
+    ST_ENVELOPE
+  ]);
 
 /** Returns great-circle point distance in kilometers. */
 export const TURF_DISTANCE = /* @__PURE__ */ spatialFunction(

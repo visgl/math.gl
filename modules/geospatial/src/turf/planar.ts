@@ -134,7 +134,7 @@ export function planarCentroid(geometry: WellKnownGeometry): WellKnownGeometry {
       points.weight++;
     }
   });
-  if (!origin) return {type: 'GeometryCollection', geometries: []};
+  if (!origin) return {type: 'Point', coordinates: []};
   for (const polygon of polygons) {
     const part = polygonMoments(polygon, origin);
     areas.x += part.x;
