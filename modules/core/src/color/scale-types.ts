@@ -91,6 +91,8 @@ export type ScaleSpec = {
     | 'piecewise';
   readonly domain: ScaleDomain;
   readonly range: ScaleRange;
+  /** Rounds the resolved extent and quantile breaks for two-endpoint color scales. */
+  readonly nice?: boolean;
   readonly clamp?: boolean;
   readonly pivot?: number;
   /** Continuous transform used to normalize the original domain and input values. */
@@ -108,7 +110,7 @@ export type ScaleSpec = {
  * The resolved descriptor records *actual* domain and class breaks, not an
  * inferred palette. Consumers can generate faithful ticks and legend labels.
  */
-export type ResolvedScaleDescriptor = Omit<ScaleSpec, 'domain' | 'range'> & {
+export type ResolvedScaleDescriptor = Omit<ScaleSpec, 'domain' | 'range' | 'nice'> & {
   readonly domain: readonly ScaleValue[];
   readonly range: Exclude<ScaleRange, {readonly type: 'palette'}>;
   readonly thresholds?: readonly number[];

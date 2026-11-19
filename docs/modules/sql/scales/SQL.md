@@ -16,6 +16,8 @@ const {value, scale} = parseSQLScaleExpression(
 //         range: {type: 'palette', name: 'viridis'}}
 ```
 
+See [rounded bounds and breaks](nice.md) for the optional `NICE()` modifier.
+
 ## Initial SQL vocabulary
 
 | Form | Purpose |

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {niceScale} from './nice-scale';
 import {
   createResolvedScale,
   type ResolvedScale,
@@ -114,6 +115,15 @@ export function compileResolvedScale(
   domain: readonly ScaleValue[],
   thresholds?: readonly number[]
 ): ResolvedScale {
+  /** The resolution request is consumed before producing the portable descriptor. */
+  const {nice, ...resolvedSpec} = spec;
+  if (nice) {
+    const values = numericValues(domain);
+    if ((spec.type !== 'sequential' && spec.type !== 'quantile') || values.length !== 2) {
+      throw new Error('Nice scales require a two-endpoint sequential or quantile scale');
+    }
+    ({domain, thresholds} = niceScale([values[0]!, values[1]!], thresholds));
+  }
   const colorType = [
     'cyclic',
     'sequential',
@@ -156,7 +166,7 @@ export function compileResolvedScale(
   const resolvedRange: ResolvedScaleDescriptor['range'] =
     spec.range.type === 'numeric' ? spec.range : {type: 'colors', values: paletteStops!};
   const descriptor: ResolvedScaleDescriptor = {
-    ...spec,
+    ...resolvedSpec,
     domain: [...domain],
     range: resolvedRange,
     ...(spec.range.type === 'palette' ? {palette: spec.range.name} : {}),
