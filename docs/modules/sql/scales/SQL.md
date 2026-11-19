@@ -125,3 +125,5 @@ Conditional branches preserve lazy per-row evaluation after domains are resolved
 have compatible result types. Recompile when data-derived domains change; compiling
 on a new table does not mutate an earlier compiled expression. This function does
 not change the single-scale parser or register scales as global functions.
+
+See [Creating Arrow columns](../arrow-columns.md) for a color column and its legend.
