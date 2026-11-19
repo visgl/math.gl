@@ -174,6 +174,36 @@ function spatialFunction(
   };
 }
 
+/** Constructs XY, XYZ, or XYZM points from numeric ordinates. */
+export const ST_MAKEPOINT: ScalarFunction = {
+  kind: 'scalar',
+  name: 'ST_MakePoint',
+  prototypes: [],
+  resolvePrototype(fields) {
+    if (fields.length < 2 || fields.length > 4) return undefined;
+    const arguments_ = fields.map(field => {
+      if (field && !DataType.isInt(field.type) && !DataType.isFloat(field.type))
+        throw new Error('ST_MakePoint requires numeric coordinates');
+      return field ?? new Field('coordinate', new Float64(), true);
+    });
+    const type = new Binary();
+    return {
+      arguments: arguments_,
+      result: new Field('ST_MakePoint', type, true, new Map([[EXTENSION_NAME, 'geoarrow.wkb']])),
+      evaluate(vectors, {activeRows, length}) {
+        const values = new Array<Uint8Array | null>(length).fill(null);
+        for (let row = 0; row < length; row++) {
+          if (activeRows[row]) {
+            const coordinates = vectors.map(vector => Number(vector.get(row)));
+            values[row] = writeWKB({type: 'Point', coordinates});
+          }
+        }
+        return vectorFromArray(values, type);
+      }
+    };
+  }
+};
+
 /** Extracts a nonempty point coordinate pair. */
 function pointCoordinates(geometry: WellKnownGeometry): readonly number[] | null {
   return geometry.type === 'Point' &&
@@ -357,6 +387,7 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly ArrowTableFunction[] =
     ST_COVEREDBY,
     ST_DISTANCE,
     ST_AZIMUTH,
+    ST_MAKEPOINT,
     ST_AREA,
     ST_LENGTH,
     ST_CENTROID,

@@ -315,3 +315,27 @@ test('extracts route endpoint coordinates through nested SQL calls', () => {
   expect([...result.getChild('start_x')!]).toEqual([-73, null, null]);
   expect([...result.getChild('end_y')!]).toEqual([42, null, null]);
 });
+
+test('constructs XY, XYZ and XYZM points from nullable numeric coordinates', () => {
+  const x = vectorFromArray([3, null], new Int32());
+  const table = new Table({x});
+  const result = select(
+    `SELECT ST_MakePoint(x, 4.5) AS xy, ST_MakePoint(x, 4, 5) AS xyz,
+            ST_MakePoint(x, 4, 5, 6) AS xyzm FROM features`,
+    table
+  );
+  for (const [name, coordinates] of Object.entries({
+    xy: [3, 4.5],
+    xyz: [3, 4, 5],
+    xyzm: [3, 4, 5, 6]
+  })) {
+    expect(parseWKB(result.getChild(name)!.get(0))).toMatchObject({
+      dimension: name,
+      geometry: {type: 'Point', coordinates}
+    });
+    expect(result.getChild(name)!.get(1)).toBeNull();
+    expect(
+      result.schema.fields.find(field => field.name === name)!.metadata.get('ARROW:extension:name')
+    ).toBe('geoarrow.wkb');
+  }
+});
