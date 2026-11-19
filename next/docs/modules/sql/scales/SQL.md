@@ -45,6 +45,8 @@ See [rounded bounds and breaks](https://visgl.github.io/math.gl/next/docs/module
 | `SCALE_QUANTIZE(column, count, palette)`              | Equal-width class request                 |
 | `SCALE_THRESHOLD(value, ARRAY[break, ...], palette)`  | Explicit class boundaries                 |
 
+See [numeric scales and legends](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/numeric.md) for elevation, radius, and width mappings.
+
 For example:
 
 ```

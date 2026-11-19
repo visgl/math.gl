@@ -2,10 +2,10 @@
 
 Compare ramps and class breaks in the [color scale gallery](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/gallery.md).
 
-The optional `@math.gl/sql/scales` entry point defines serializable scale **specifications** and resolved scale metadata without introducing a D3, renderer, Apache Arrow, or GPU runtime dependency.
+Use `@math.gl/core/color` for portable scale specifications and samplers. For SQL parsing, Arrow domain resolution, and column evaluation, use `@math.gl/sql/scales`.
 
 ```
-import {validateScaleSpec, createResolvedScale} from '@math.gl/sql/scales';
+import {validateScaleSpec, compileResolvedScale} from '@math.gl/core/color';
 
 
 
@@ -25,30 +25,16 @@ const spec = validateScaleSpec({
 
 
 
-// After a source-specific backend computes the domain and resolves the palette:
+// The source supplies its observed domain before sampling.
 
-const resolved = createResolvedScale({
+const resolved = compileResolvedScale(spec, [-20, 50]);
 
-  id: 'temperature',
-
-  type: 'sequential',
-
-  domain: [-20, 50],
-
-  range: {type: 'colors', values: [[0.1, 0, 0.3, 1], [1, 0.9, 0.2, 1]]}
-
-}, value => {
-
-  // Backend-provided evaluator; the layer and legend must share this callback.
-
-  return value === null ? null : [1, 0.9, 0.2, 1];
-
-});
+const color = resolved.sample(12);
 ```
 
 `ScaleSpec` describes fixed/data-derived domains, numeric ranges, explicit color stops or named palettes, classification type, pivot, clamping, interpolation and display metadata. `ResolvedScaleDescriptor` captures the **actual** domain, resolved color stops, class breaks and palette identification. A `ResolvedScale` binds the descriptor to a source-specific sampling function. Class breaks must be strictly increasing. An ordinal domain and its resolved range can each contain a single entry.
 
-The scale **descriptor** remains JSON-safe for transport, legends and tooltips. The callback is a separate runtime facility. This module deliberately does not compute data-derived statistics, fetch palettes, interpolate colors, or render legends. Those belong in subsequent PRs.
+The scale **descriptor** remains JSON-safe for transport, legends and tooltips. Use the sampler to style marks and to build a legend from the same mapping. For numeric scales, `inputUnits` labels the data domain and `outputUnits` labels the sampled measurement.
 
 ### HDR interpretation[​](#hdr-interpretation "Direct link to HDR interpretation")
 
@@ -57,6 +43,8 @@ Color values are normalized-channel tuples, not CSS encodings. The `ScaleColorEn
 See <https://github.com/visgl/deck.gl/issues/11147> for the cross-repository tracker.
 
 For clustered observations, see [Fisher–Jenks natural breaks](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/natural-breaks.md).
+
+See [numeric scales and legends](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/numeric.md) for elevation, radius, and line-width examples.
 
 ## Evaluate on Arrow[​](#evaluate-on-arrow "Direct link to Evaluate on Arrow")
 

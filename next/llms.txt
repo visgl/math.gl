@@ -295,6 +295,7 @@ A lightweight SQL query engine for Apache Arrow tables. Query tables already in 
 - [Color scale gallery](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/gallery.md): A color scale maps numbers or categories to colors. The domain describes the inputs, and the
 - [Natural breaks](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/natural-breaks.md): Use getJenksBreaks(values, classCount) from @math.gl/core/color to compute
 - [Rounded bounds and breaks](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/nice.md): Add NICE() as the fourth argument to SCALE_COLOR with a two-endpoint domain
+- [Numeric scales and legends](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/numeric.md): A numeric scale maps data values to measurements such as elevation, point radius, or
 - [SQL scale specifications (experimental)](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/SQL.md): Import parseSQLScaleExpression from @math.gl/sql/scales. It parses
 - [UNNEST (experimental)](https://visgl.github.io/math.gl/next/docs/modules/sql/unnest.md): UNNEST expands a list or map column into rows. Each element produces one output
 - [Workers](https://visgl.github.io/math.gl/next/docs/modules/sql/workers.md): Use @math.gl/sql/worker to run structured queries or compiled expressions off the calling thread.
