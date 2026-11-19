@@ -358,3 +358,36 @@ test('constructs XY, XYZ and XYZM points from nullable numeric coordinates', () 
     ).toBe('geoarrow.wkb');
   }
 });
+
+test('extracts Z and M independently for dimensional points', () => {
+  const p = vectorFromArray(
+    ['xy', 'xyz', 'xym', 'xyzm'].map(dimension =>
+      writeWKB(
+        {type: 'Point', coordinates: [2, 3, 4, 5]},
+        dimension as 'xy' | 'xyz' | 'xym' | 'xyzm'
+      )
+    ),
+    new Binary()
+  );
+  const table = new Table(new Schema([geometryField('p', p)]), {p});
+  const result = select('SELECT ST_X(p) AS x, ST_Z(p) AS z, ST_M(p) AS m FROM features', table);
+  expect([...result.getChild('x')!]).toEqual([2, 2, 2, 2]);
+  expect([...result.getChild('z')!]).toEqual([null, 4, null, 4]);
+  expect([...result.getChild('m')!]).toEqual([null, null, 4, 5]);
+});
+
+test('native XYZ and constructed XYZM points expose their ordinates', () => {
+  const native = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows([{type: 'Point', coordinates: [3, 4, 8]}, null], {
+      dimension: 'xyz'
+    })
+  );
+  const table = new Table(new Schema([geometryField('p', native, 'point')]), {p: native});
+  const result = select(
+    'SELECT ST_Z(p) AS z, ST_M(p) AS m, ST_M(ST_MakePoint(1, 2, 3, ST_Z(p))) AS nested FROM features',
+    table
+  );
+  expect([...result.getChild('z')!]).toEqual([8, null]);
+  expect([...result.getChild('m')!]).toEqual([null, null]);
+  expect([...result.getChild('nested')!]).toEqual([8, null]);
+});

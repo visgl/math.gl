@@ -51,6 +51,7 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | Function | Accepted input | Result |
 | --- | --- | --- |
 | `ST_X(point)` | Point | X coordinate. Empty input yields null. |
+| `ST_Z(point)`, `ST_M(point)` | Point of any dimension | Elevation or measure. A missing ordinate or empty Point yields null. |
 | `ST_Y(point)` | Point | Y coordinate. Empty input yields null. |
 | `ST_StartPoint(line)` | LineString | First vertex. Empty input yields null. |
 | `ST_EndPoint(line)` | LineString | Last vertex. Empty input yields null. |

@@ -22,6 +22,7 @@ import {
   parseWKB,
   writeWKB,
   type GeoArrowColumn,
+  type WellKnownDimension,
   type WellKnownGeometry
 } from '@math.gl/core/arrow';
 import {
@@ -65,20 +66,23 @@ type SpatialResult = Float64 | Bool | Binary | FixedSizeList<Float64>;
 type SpatialValue = number | boolean | number[] | Uint8Array | null;
 
 /** Adapts an Arrow vector to a reader which decodes only active geometry rows. */
-function readGeometry(
+function readGeometryValue<T>(
   vector: Vector,
   field: Field,
-  active: Uint8Array
-): (row: number) => WellKnownGeometry {
+  active: Uint8Array,
+  value: (geometry: WellKnownGeometry, dimension: WellKnownDimension) => T
+): (row: number) => T {
   if (field.metadata.get(EXTENSION_NAME) === 'geoarrow.wkb') {
     return row => {
       const {geometry, dimension, srid} = parseWKB(vector.get(row) as Uint8Array);
-      if (dimension !== 'xy') throw new Error('Spatial SQL functions require 2D geometry');
       if (srid)
         throw new Error('Use GeoArrow field metadata for CRS information instead of EWKB SRIDs');
-      return geometry.type === 'Point' && geometry.coordinates.every(Number.isNaN)
-        ? {type: 'Point', coordinates: []}
-        : geometry;
+      return value(
+        geometry.type === 'Point' && geometry.coordinates.every(Number.isNaN)
+          ? {type: 'Point', coordinates: []}
+          : geometry,
+        dimension
+      );
     };
   }
   const column = makeGeoArrowColumnFromArrowVector(vector, {field});
@@ -94,7 +98,16 @@ function readGeometry(
     return {...chunk, validity: {values}};
   });
   const geometries = materializeGeoArrowRows({...column, chunks});
-  return row => geometries[row]!;
+  return row => value(geometries[row]!, column.dimension);
+}
+
+/** Enforces the planar kernels' XY-only WKB contract at evaluation time. */
+function planarGeometry(
+  geometry: WellKnownGeometry,
+  dimension: WellKnownDimension
+): WellKnownGeometry {
+  if (dimension !== 'xy') throw new Error('Spatial SQL functions require 2D geometry');
+  return geometry;
 }
 
 /** Declares a row-preserving spatial overload using the input columns' GeoArrow types. */
@@ -164,7 +177,9 @@ function spatialFunction(
           const numbers = vectors.slice(signatures.length);
           const readers = vectors
             .slice(0, signatures.length)
-            .map((vector, index) => readGeometry(vector, arguments_[index]!, activeRows));
+            .map((vector, index) =>
+              readGeometryValue(vector, arguments_[index]!, activeRows, planarGeometry)
+            );
           const values = new Array<SpatialValue>(rowCount).fill(null);
           for (let row = 0; row < rowCount; row++) {
             if (!activeRows[row]) continue;
@@ -253,21 +268,59 @@ function pointInPolygon(
   return value === null ? null : value === 1;
 }
 
-/** X coordinate for the supported 2D geometry signature. */
-export const ST_X = /* @__PURE__ */ spatialFunction(
-  'ST_X',
-  [pointKinds],
-  /* @__PURE__ */ new Float64(),
-  ([p]) => pointCoordinates(p!)?.[0] ?? null
-);
+/** Binds a point accessor while preserving the semantic distinction between Z and M. */
+function pointOrdinate(ordinate: 'x' | 'y' | 'z' | 'm'): ScalarFunction {
+  const name = 'ST_' + ordinate.toUpperCase();
+  return {
+    kind: 'scalar',
+    name,
+    prototypes: [],
+    /** Accepts native Points or WKB whose geometry kind is checked per active row. */
+    resolvePrototype(fields) {
+      if (fields.length !== 1) return undefined;
+      const field =
+        fields[0] ??
+        new Field('point', new Binary(), true, new Map([[EXTENSION_NAME, 'geoarrow.wkb']]));
+      const extension = getGeoArrowFieldInfo(field);
+      if (extension?.metadata['edges'] === 'spherical')
+        throw new Error(`${name} requires planar geometry`);
+      const encoding = extension?.encoding;
+      if (
+        encoding !== 'geoarrow.point' &&
+        !(
+          encoding === 'geoarrow.wkb' &&
+          (DataType.isBinary(field.type) || DataType.isLargeBinary(field.type))
+        )
+      )
+        throw new Error(`${name} requires a GeoArrow Point`);
+      const type = new Float64();
+      return {
+        arguments: [field],
+        result: new Field(name, type, true),
+        /** Extracts ordinates using the WKB row or native field dimension. */
+        evaluate([vector], {length, activeRows}) {
+          const read = readGeometryValue(vector!, field, activeRows, (geometry, dimension) => {
+            if (geometry.type !== 'Point') throw new Error(`${name} requires a Point`);
+            return pointCoordinates(geometry)?.[dimension.indexOf(ordinate)] ?? null;
+          });
+          return vectorFromArray(
+            Array.from({length}, (_, i) => (activeRows[i] ? read(i) : null)),
+            type
+          );
+        }
+      };
+    }
+  };
+}
 
-/** Y coordinate for the supported 2D geometry signature. */
-export const ST_Y = /* @__PURE__ */ spatialFunction(
-  'ST_Y',
-  [pointKinds],
-  /* @__PURE__ */ new Float64(),
-  ([p]) => pointCoordinates(p!)?.[1] ?? null
-);
+/** X coordinate of a point. */
+export const ST_X = /* @__PURE__ */ pointOrdinate('x');
+/** Y coordinate of a point. */
+export const ST_Y = /* @__PURE__ */ pointOrdinate('y');
+/** Elevation of a point with a Z ordinate. */
+export const ST_Z = /* @__PURE__ */ pointOrdinate('z');
+/** Measure of a point with an M ordinate. */
+export const ST_M = /* @__PURE__ */ pointOrdinate('m');
 
 /** First vertex for the supported 2D geometry signature. */
 export const ST_STARTPOINT = /* @__PURE__ */ spatialFunction(
@@ -406,6 +459,8 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly ArrowTableFunction[] =
   /* @__PURE__ */ Object.freeze([
     ST_X,
     ST_Y,
+    ST_Z,
+    ST_M,
     ST_STARTPOINT,
     ST_ENDPOINT,
     ST_CONTAINS,
