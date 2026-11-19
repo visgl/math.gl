@@ -8,4 +8,5 @@ export * from './palettes';
 export * from './quantile-sketch';
 export * from './hdr-colors';
 export * from './lut';
+export * from './jenks-breaks';
 export * from './bivariate-scale';
