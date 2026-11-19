@@ -58,6 +58,7 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_Covers(polygon, point)` | Polygon or MultiPolygon, then Point | Boolean. Boundary points are included. Points inside a hole are excluded. |
 | `ST_Within(point, polygon)` | Point, then Polygon or MultiPolygon | Interior only. Empty input yields false. |
 | `ST_CoveredBy(point, polygon)` | Point, then Polygon or MultiPolygon | Interior or boundary. Empty input yields false. |
+| `ST_DWithin(a, b, distance)` | Two 2D Points and a nonnegative numeric radius | Boolean. Includes points exactly at the radius, in planar coordinate units. Empty points yield false. |
 | `ST_Distance(a, b)` | Two Points | Float64 Cartesian distance in coordinate units. Empty points yield null. |
 | `ST_Azimuth(a, b)` | Two Points | Float64 radians clockwise from positive Y in `[0, 2π)`. Coincident and empty points yield null. |
 | `ST_Area(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar polygon area with holes subtracted. Empty and non-areal inputs yield zero. |
