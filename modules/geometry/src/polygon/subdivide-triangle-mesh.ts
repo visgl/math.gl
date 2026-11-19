@@ -123,8 +123,12 @@ export function subdivideTriangleMesh(
   let faces: Face[] = [];
   /** Sampled errors per undirected edge, ordered from its lower vertex index. */
   const edgeErrors = new Map<string, number[]>();
-  /** Projected midpoints of sampled edges, reused when the edge is split. */
-  const edgeMidpointTargets = new Map<string, number[]>();
+  /** Projected edge samples, in the same order. The midpoint is reused when the edge is split. */
+  const edgeTargets = new Map<string, number[][]>();
+  /** Projections made only to validate the probes of a failed face, by exact source coordinates.
+   * Its children often probe the same points bitwise, and take the projection from here.
+   */
+  const validatedTargets: CoordinateMap = new Map();
   for (let i = 0; i < mesh.positions.length; i += size) {
     const source = Array.from({length: size}, (_, j) => mesh.positions[i + j]);
     if (!source.every(Number.isFinite)) throw new RangeError('Source positions must be finite');
@@ -214,17 +218,32 @@ export function subdivideTriangleMesh(
     return target;
   }
 
-  function error(points: Vertex[], weights: number[], keepExact?: number[][]): number {
-    const source = blend(
-      points.map(p => p.source),
-      weights
-    );
+  /** Projects a probe only to check that the transform accepts it, and keeps the projection. */
+  function validate(source: number[]): number[] {
+    const target = project(source);
+    let map = validatedTargets;
+    for (const value of source.slice(0, -1)) {
+      if (!map.has(value)) map.set(value, new Map());
+      map = map.get(value) as CoordinateMap;
+    }
+    map.set(source[source.length - 1], target);
+    return target;
+  }
+
+  /** Projects a probe, or takes the projection that validate() kept for the same coordinates. */
+  function probe(source: number[]): number[] {
+    let entry: CoordinateMap | number[] | undefined = validatedTargets;
+    for (const value of source) entry = (entry as CoordinateMap | undefined)?.get(value);
+    return (entry as number[] | undefined) ?? project(source);
+  }
+
+  function error(points: Vertex[], weights: number[], exact?: number[]): number {
+    const source = blendSources(points, weights);
     const linearTarget = blend(
       points.map(p => p.target),
       weights
     );
-    const exact = project(source);
-    keepExact?.push(exact);
+    exact ??= probe(source);
     if (!errorMetric) return Math.hypot(...exact.map((value, i) => value - linearTarget[i]));
     const value = errorMetric({source, exact: exact.slice(), interpolated: linearTarget});
     if (!Number.isFinite(value) || value < 0) {
@@ -233,9 +252,26 @@ export function subdivideTriangleMesh(
     return value;
   }
 
-  /** Error at one edge fraction, cached per undirected edge for the neighbouring face.
+  /** Projection at one edge fraction, cached per undirected edge for the neighbouring face.
    * Blending two points is bitwise symmetric, so a->b at f is b->a at 1 - f.
    */
+  function edgeTarget(a: number, b: number, sample: number, validateOnly = false): number[] {
+    const key = edgeKey(a, b);
+    let targets = edgeTargets.get(key);
+    if (!targets) {
+      targets = [];
+      edgeTargets.set(key, targets);
+    }
+    const slot = a <= b ? sample : EDGE_FRACTIONS.length - 1 - sample;
+    if (!targets[slot]) {
+      const fraction = EDGE_FRACTIONS[sample];
+      const source = blendSources([vertices[a], vertices[b]], [1 - fraction, fraction]);
+      targets[slot] = validateOnly ? validate(source) : probe(source);
+    }
+    return targets[slot];
+  }
+
+  /** Error at one edge fraction, cached like edgeTarget. */
   function edgeError(a: number, b: number, sample: number): number {
     const key = edgeKey(a, b);
     let errors = edgeErrors.get(key);
@@ -244,34 +280,39 @@ export function subdivideTriangleMesh(
       edgeErrors.set(key, errors);
     }
     const slot = a <= b ? sample : EDGE_FRACTIONS.length - 1 - sample;
-    let value = errors[slot];
-    if (value === undefined) {
-      const fraction = EDGE_FRACTIONS[sample];
-      // The midpoint sample has the source coordinates that midpoint() would project.
-      const keepExact = fraction === 0.5 ? [] : undefined;
-      value = error([vertices[a], vertices[b]], [1 - fraction, fraction], keepExact);
-      errors[slot] = value;
-      if (keepExact) edgeMidpointTargets.set(key, keepExact[0]);
-    }
-    return value;
+    const fraction = EDGE_FRACTIONS[sample];
+    errors[slot] ??= error(
+      [vertices[a], vertices[b]],
+      [1 - fraction, fraction],
+      edgeTarget(a, b, sample)
+    );
+    return errors[slot];
   }
 
+  /** After the first failed check, the remaining probes are only projected: the children do not
+   * repeat them bitwise, and a transform that rejects any probe point must reject the mesh.
+   */
   function needsRefinement(face: Face): boolean {
     const points = face.vertices.map(index => vertices[index]);
     const limit = tolerance ?? Infinity;
-    for (let i = 0; i < 3; i++) {
-      if (sourceEdgeLength(points[i], points[(i + 1) % 3]) > maxEdgeLength) return true;
+    let failed = false;
+    for (let i = 0; i < 3 && !failed; i++) {
+      failed = sourceEdgeLength(points[i], points[(i + 1) % 3]) > maxEdgeLength;
     }
     // Midpoints first: a failed face splits all three edges and keeps their projections.
     for (const sample of EDGE_SAMPLE_ORDER) {
       for (let i = 0; i < 3; i++) {
-        if (edgeError(face.vertices[i], face.vertices[(i + 1) % 3], sample) > limit) return true;
+        const a = face.vertices[i];
+        const b = face.vertices[(i + 1) % 3];
+        if (failed) edgeTarget(a, b, sample, true);
+        else failed = edgeError(a, b, sample) > limit;
       }
     }
     for (const weights of FACE_WEIGHTS) {
-      if (error(points, weights) > limit) return true;
+      if (failed) validate(blendSources(points, weights));
+      else failed = error(points, weights) > limit;
     }
-    return false;
+    return failed;
   }
 
   function midpoint(a: number, b: number, midpoints: Map<string, number>): number {
@@ -291,7 +332,8 @@ export function subdivideTriangleMesh(
     // the original edge endpoints, so at most three source vertices contribute.
     if (weights.size > 3) throw new Error('Inconsistent mesh provenance');
     const index = vertices.length;
-    vertices.push({source, target: edgeMidpointTargets.get(key) ?? project(source), weights});
+    // The 0.5 edge sample has these source coordinates.
+    vertices.push({source, target: edgeTargets.get(key)?.[1] ?? probe(source), weights});
     midpoints.set(key, index);
     return index;
   }
@@ -369,12 +411,22 @@ function sourceEdgeLength(a: Vertex, b: Vertex): number {
   return Math.hypot(...a.source.map((value, component) => value - b.source[component]));
 }
 
+/** Nested by source component. A blend starts its sums at +0, so it never yields -0. */
+type CoordinateMap = Map<number, CoordinateMap | number[]>;
+
 function edgeKey(a: number, b: number): string {
   return a <= b ? `${a}:${b}` : `${b}:${a}`;
 }
 
 function validLimit(value: number): boolean {
   return Number.isSafeInteger(value) && value > 0 && value <= 0xffffffff;
+}
+
+function blendSources(points: Vertex[], weights: number[]): number[] {
+  return blend(
+    points.map(p => p.source),
+    weights
+  );
 }
 
 function blend(positions: number[][], weights: number[]): number[] {

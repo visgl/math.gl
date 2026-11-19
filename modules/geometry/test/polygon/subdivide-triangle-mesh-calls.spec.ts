@@ -116,7 +116,7 @@ const CASES: Case[] = [
     },
     expected:
       'v1089 t2048 17424:6834e171 26136:e2a78c29 24576:03ba8b2a 13068:3e524085 26136:1f0cc5f8 8192:299addc5',
-    calls: [18689, 0]
+    calls: [19418, 0]
   },
   {
     name: 'raster tile near the transverse Mercator central meridian',
@@ -129,7 +129,7 @@ const CASES: Case[] = [
     },
     expected:
       'v289 t512 4624:9ba2d4d5 6936:d825551b 6144:c417f930 3468:643799c5 6936:734236f8 2048:07742dc5',
-    calls: [4737, 0]
+    calls: [4963, 0]
   },
   {
     name: 'lng/lat quad in polar stereographic',
@@ -143,7 +143,7 @@ const CASES: Case[] = [
     },
     expected:
       'v1994 t3808 31904:88a32de6 31904:f3f21a32 45696:1758751c 23928:8e74e9b5 47856:8f091a02 15232:71edf5e5',
-    calls: [34821, 0]
+    calls: [36128, 0]
   },
   {
     name: 'maxDepth is exhausted',
@@ -155,7 +155,7 @@ const CASES: Case[] = [
       maxDepth: 3
     },
     expected: 'throws Triangle mesh subdivision exceeded maxDepth',
-    calls: [801, 0]
+    calls: [5661, 0]
   },
   {
     name: 'errorMetric that also overwrites its sample arrays',
@@ -176,7 +176,7 @@ const CASES: Case[] = [
     },
     expected:
       'v171 t294 2736:2e7d61b4 2736:9f1b15b8 3528:af0fad94 2052:49ce8309 4104:a6c45d94 1176:0f284581',
-    calls: [2885, 2836]
+    calls: [2954, 2836]
   },
   {
     name: 'XYZ source to geocentric output',
@@ -191,7 +191,7 @@ const CASES: Case[] = [
     },
     expected:
       'v153 t256 3672:38b06d49 3672:c51ba390 3072:e920047e 1836:653d2305 3672:ce208d5d 1024:1f116dc5',
-    calls: [2401, 0]
+    calls: [2541, 0]
   },
   {
     name: 'transform error with a source edge limit',
@@ -203,7 +203,7 @@ const CASES: Case[] = [
     },
     expected:
       'v1089 t2048 17424:ec5007fd 17424:7c48a51e 24576:6df22b3d 13068:11e731f1 26136:c0a63fc8 8192:cc58bdc5',
-    calls: [18689, 0]
+    calls: [19530, 0]
   },
   {
     name: 'source-edge refinement',
@@ -227,7 +227,7 @@ const CASES: Case[] = [
     },
     expected:
       'v225 t382 3600:51ae3b55 5400:4a3fa390 4584:ad80e685 2700:5f58b8c5 5400:92833aa1 1528:98645625',
-    calls: [3662, 0]
+    calls: [3792, 0]
   },
   {
     name: 'signed zero sources stay distinct',
@@ -242,7 +242,7 @@ const CASES: Case[] = [
     },
     expected:
       'v90 t128 1440:d4787de5 1440:72e4a30c 1536:76073fb5 1080:df904005 2160:6c7999a5 512:457623c5',
-    calls: [1250, 0]
+    calls: [1326, 0]
   }
 ];
 
@@ -272,6 +272,50 @@ test('a nonfinite sample inside the domain still rejects the mesh', () => {
       })
     ).toThrow(RangeError);
   }
+});
+
+test('a transform that rejects one probe point of a split face still rejects the mesh', () => {
+  const mesh = {positions: [0.02, 0, 1.02, 0, 0.04, 1], indices: [0, 1, 2]};
+  const rejecting = (x: number, y: number) => (p: readonly number[]) =>
+    p[0] === x && p[1] === y ? null : [p[0], p[1] + p[0] * p[0]];
+  // The probe points of the input face, blended as the implementation blends them.
+  const corners = [0, 1, 2].map(i => [mesh.positions[2 * i], mesh.positions[2 * i + 1]]);
+  const blend = (points: number[][], weights: number[]) =>
+    [0, 1].map(i => points.reduce((sum, p, j) => sum + p[i] * weights[j], 0));
+  const probes = [
+    ...[0, 1, 2].flatMap(i =>
+      [0.25, 0.5, 0.75].map(f => blend([corners[i], corners[(i + 1) % 3]], [1 - f, f]))
+    ),
+    ...[
+      [1 / 3, 1 / 3, 1 / 3],
+      [0.5, 0.25, 0.25],
+      [0.25, 0.5, 0.25],
+      [0.25, 0.25, 0.5]
+    ].map(weights => blend(corners, weights))
+  ];
+  // The face fails on its source edge length before any probe, or on its first probe.
+  for (const options of [
+    {maxEdgeLength: 1.1, tolerance: 1e9},
+    {tolerance: 0.01},
+    {
+      tolerance: 0.01,
+      errorMetric: ({exact, interpolated}) => Math.abs(exact[1] - interpolated[1])
+    }
+  ]) {
+    for (const [x, y] of probes) {
+      expect(() => subdivideTriangleMesh(mesh, {transform: rejecting(x, y), ...options})).toThrow(
+        RangeError
+      );
+    }
+  }
+  // The reported case: the face centroid.
+  expect(() =>
+    subdivideTriangleMesh(mesh, {
+      maxEdgeLength: 1.1,
+      tolerance: 0.01,
+      transform: p => (p[0] === 0.35999999999999993 && p[1] === 0.3333333333333333 ? null : p)
+    })
+  ).toThrow(RangeError);
 });
 
 function run(
