@@ -100,6 +100,10 @@ export function createTurfArrowFunction<const Fields extends readonly Field[]>(
 
 export {
   POSTGIS_SPATIAL_FUNCTIONS,
+  ST_X,
+  ST_Y,
+  ST_STARTPOINT,
+  ST_ENDPOINT,
   ST_AREA,
   ST_AZIMUTH,
   ST_CENTROID,

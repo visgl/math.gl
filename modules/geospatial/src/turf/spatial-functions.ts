@@ -209,6 +209,47 @@ function pointInPolygon(
   return value === null ? null : value === 1;
 }
 
+/** X coordinate for the supported 2D geometry signature. */
+export const ST_X = /* @__PURE__ */ spatialFunction(
+  'ST_X',
+  [pointKinds],
+  /* @__PURE__ */ new Float64(),
+  ([p]) => pointCoordinates(p!)?.[0] ?? null
+);
+
+/** Y coordinate for the supported 2D geometry signature. */
+export const ST_Y = /* @__PURE__ */ spatialFunction(
+  'ST_Y',
+  [pointKinds],
+  /* @__PURE__ */ new Float64(),
+  ([p]) => pointCoordinates(p!)?.[1] ?? null
+);
+
+/** First vertex for the supported 2D geometry signature. */
+export const ST_STARTPOINT = /* @__PURE__ */ spatialFunction(
+  'ST_StartPoint',
+  [['LineString']],
+  /* @__PURE__ */ new Binary(),
+  ([line]) => {
+    if (line?.type !== 'LineString' || !line.coordinates.length) return null;
+    return writeWKB({type: 'Point', coordinates: line.coordinates[0]!}, 'xy');
+  }
+);
+
+/** Last vertex for the supported 2D geometry signature. */
+export const ST_ENDPOINT = /* @__PURE__ */ spatialFunction(
+  'ST_EndPoint',
+  [['LineString']],
+  /* @__PURE__ */ new Binary(),
+  ([line]) => {
+    if (line?.type !== 'LineString' || !line.coordinates.length) return null;
+    return writeWKB(
+      {type: 'Point', coordinates: line.coordinates[line.coordinates.length - 1]!},
+      'xy'
+    );
+  }
+);
+
 /** Tests whether a point is in a polygon's interior. */
 export const ST_CONTAINS = /* @__PURE__ */ spatialFunction(
   'ST_Contains',
@@ -289,6 +330,10 @@ export const ST_ENVELOPE = /* @__PURE__ */ spatialFunction(
 /** Opt-in PostGIS-aligned 2D geometry functions for the Arrow SQL function list. */
 export const POSTGIS_SPATIAL_FUNCTIONS: readonly ArrowTableFunction[] =
   /* @__PURE__ */ Object.freeze([
+    ST_X,
+    ST_Y,
+    ST_STARTPOINT,
+    ST_ENDPOINT,
     ST_CONTAINS,
     ST_COVERS,
     ST_DISTANCE,
