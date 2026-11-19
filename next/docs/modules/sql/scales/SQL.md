@@ -20,6 +20,8 @@ const {value, scale} = parseSQLScaleExpression(
 //         range: {type: 'palette', name: 'viridis'}}
 ```
 
+See [rounded bounds and breaks](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/nice.md) for the optional `NICE()` modifier.
+
 ## Initial SQL vocabulary[​](#initial-sql-vocabulary "Direct link to Initial SQL vocabulary")
 
 | Form                                                  | Purpose                                   |
