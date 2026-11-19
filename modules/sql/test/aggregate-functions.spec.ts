@@ -5,6 +5,7 @@
 import {Field, Float64, tableFromArrays} from 'apache-arrow';
 import {expect, test} from 'vitest';
 import {queryArrowSQL, queryArrowSQLWithMetadata, type AggregateFunction} from '@math.gl/sql';
+import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 
 const SPREAD = {
   kind: 'aggregate',
@@ -62,4 +63,14 @@ test('ungrouped empty reductions produce a row and SQL scope errors are explicit
     'aggregate arguments'
   );
   expect(() => queryArrowSQL('SELECT x FROM data WHERE MAX(x) > 0', tables)).toThrow('WHERE');
+});
+
+test('scale and aggregate metadata follow expression nesting order', () => {
+  const tables = new Map([['data', tableFromArrays({x: [1, 4]})]]);
+  const {columnMetadata} = queryArrowSQLWithMetadata(
+    "SELECT SCALE_COLOR(SPREAD(x), DOMAIN(0, 10), PALETTE('viridis')) AS color FROM data",
+    tables,
+    {functions: [[VISUALIZATION_FUNCTIONS, SPREAD]]}
+  );
+  expect(columnMetadata['color']?.map(entry => entry.kind)).toEqual(['scale', 'spread']);
 });

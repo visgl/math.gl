@@ -305,13 +305,14 @@ function executeSelect(
   const table = executeArrowProjection(
     input,
     {select, ...execution},
-    operations.length
+    operations.length || custom.size
       ? (expression, name) => {
           const result = prepareArrowColumn(
             input,
             typeof expression === 'string' ? parseSQLExpression(expression) : expression,
             operations,
-            execution.functions
+            execution.functions,
+            node => (node.type === 'Identifier' ? custom.get(node.name)?.metadata : undefined)
           );
           columnMetadata[name] = result.metadata;
           return result.compiled;
@@ -321,17 +322,13 @@ function executeSelect(
   if (custom.size) {
     table.schema.fields.forEach((field, index) => {
       const selection = select?.[index];
-      const references = selection
+      const reference = selection
         ? 'column' in selection
-          ? [selection.column]
-          : getExpressionColumns(selection.expression)
-        : [field.name];
-      const metadata = references.flatMap(name => {
-        const entry = custom.get(name)?.metadata;
-        return entry === undefined ? [] : [entry];
-      });
-      if (metadata.length)
-        columnMetadata[field.name] = [...metadata, ...(columnMetadata[field.name] ?? [])];
+          ? selection.column
+          : undefined
+        : field.name;
+      const entry = reference === undefined ? undefined : custom.get(reference)?.metadata;
+      if (entry !== undefined) columnMetadata[field.name] = [entry];
     });
   }
   return {table, columnMetadata};
