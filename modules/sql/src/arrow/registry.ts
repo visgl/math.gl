@@ -40,9 +40,15 @@ export function createFunctionLookup(
       ].includes(name)
     )
       throw new Error(`Reserved Arrow function: ${name}`);
-    if (!Array.isArray(declaration.prototypes) || !declaration.prototypes.length)
-      throw new Error('Arrow functions require one or more prototypes');
-    const prototypes = [...(functions.get(name)?.prototypes ?? [])];
+    const previous = functions.get(name);
+    const resolver = declaration.resolvePrototype;
+    if (resolver !== undefined && typeof resolver !== 'function')
+      throw new Error('Arrow function resolvePrototype must be a function');
+    if (resolver && previous?.resolvePrototype)
+      throw new Error(`Duplicate Arrow function resolver: ${name}`);
+    if (!Array.isArray(declaration.prototypes) || (!declaration.prototypes.length && !resolver))
+      throw new Error('Arrow functions require one or more prototypes or a resolver');
+    const prototypes = [...(previous?.prototypes ?? [])];
     for (const prototype of declaration.prototypes) {
       if (
         !prototype ||
@@ -78,10 +84,20 @@ export function createFunctionLookup(
       )
         throw new Error(`Duplicate Arrow function signature: ${name}`);
       prototypes.push(
-        Object.freeze({...prototype, arguments: Object.freeze([...prototype.arguments])})
+        Object.freeze({
+          ...prototype,
+          arguments: Object.freeze([...prototype.arguments])
+        })
       );
     }
-    functions.set(name, Object.freeze({name, prototypes: Object.freeze(prototypes)}));
+    functions.set(
+      name,
+      Object.freeze({
+        name,
+        prototypes: Object.freeze(prototypes),
+        resolvePrototype: resolver ?? previous?.resolvePrototype
+      })
+    );
   }
   return functions;
 }

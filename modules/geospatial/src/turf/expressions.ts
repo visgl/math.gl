@@ -45,7 +45,9 @@ export function createTurfArrowFunction<const Fields extends readonly Field[]>(
         nullHandling: 'propagate',
         evaluate(vectors, {activeRows, length}) {
           const columns = vectors.map((vector, index) => {
-            const column = makeGeoArrowColumnFromArrowVector(vector, {field: fields[index]});
+            const column = makeGeoArrowColumnFromArrowVector(vector, {
+              field: fields[index]
+            });
             let offset = 0;
             return {
               ...column,
@@ -95,3 +97,24 @@ export function createTurfArrowFunction<const Fields extends readonly Field[]>(
     ]
   };
 }
+
+export {
+  POSTGIS_SPATIAL_FUNCTIONS,
+  ST_AREA,
+  ST_AZIMUTH,
+  ST_CENTROID,
+  ST_CONTAINS,
+  ST_COVERS,
+  ST_DISTANCE,
+  ST_ENVELOPE,
+  ST_LENGTH,
+  TURF_FUNCTIONS,
+  TURF_AREA,
+  TURF_BBOX,
+  TURF_BEARING,
+  TURF_BOOLEAN_POINT_IN_POLYGON,
+  TURF_CENTROID,
+  TURF_DISTANCE,
+  TURF_LENGTH,
+  TURF_MIDPOINT
+} from './spatial-functions';
