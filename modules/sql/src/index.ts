@@ -5,8 +5,8 @@
 export {
   queryArrowSQL,
   queryArrowSQLWithMetadata,
-  type ArrowSQLQueryOptions,
   type ArrowSQLTableFunction,
+  type ArrowSQLQueryOptions,
   type ArrowSQLMetadataResult
 } from './arrow/query-arrow-sql';
 export {
@@ -38,6 +38,10 @@ export type {
   ArrowTableFunction,
   AggregateAccumulator,
   AggregateFunction,
+  TableFunction,
+  BoundTableFunction,
+  BoundLateralTableFunction,
+  LateralTableBinder,
   ArrowFunctionPackage,
   ScalarFunction,
   PreparedScalarFunction,
@@ -63,3 +67,5 @@ export {
   getSQLParameterNames,
   type SQLParameterSnapshot
 } from './parser/parameter-snapshots';
+
+export {UNNEST} from './arrow/sql-table-function-packages';

@@ -7,6 +7,7 @@ import type {
   AggregateFunction,
   ArrowFunctionPackage,
   ArrowTableFunction,
+  TableFunction,
   PreparedScalarFunction
 } from './types';
 
@@ -14,7 +15,12 @@ import type {
 export function* walkArrowFunctions(
   declarations: readonly ArrowFunctionPackage[],
   ancestors = new Set<readonly ArrowFunctionPackage[]>()
-): Iterable<ArrowTableFunction | PreparedScalarFunction<unknown> | AggregateFunction<unknown>> {
+): Iterable<
+  | ArrowTableFunction
+  | PreparedScalarFunction<unknown>
+  | AggregateFunction<unknown>
+  | TableFunction<unknown>
+> {
   if (ancestors.has(declarations)) throw new Error('Cyclic Arrow function package');
   ancestors.add(declarations);
   try {
@@ -24,7 +30,8 @@ export function* walkArrowFunctions(
         yield entry as
           | ArrowTableFunction
           | PreparedScalarFunction<unknown>
-          | AggregateFunction<unknown>;
+          | AggregateFunction<unknown>
+          | TableFunction<unknown>;
     }
   } finally {
     ancestors.delete(declarations);
