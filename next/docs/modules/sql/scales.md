@@ -54,6 +54,8 @@ Color values are normalized-channel tuples, not CSS encodings. The `ScaleColorEn
 
 See <https://github.com/visgl/deck.gl/issues/11147> for the cross-repository tracker.
 
+For clustered observations, see [Fisher–Jenks natural breaks](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/natural-breaks.md).
+
 ## Evaluate on Arrow[​](#evaluate-on-arrow "Direct link to Evaluate on Arrow")
 
 Install Apache Arrow and import `compileArrowScale` from `@math.gl/sql/scales`. It resolves the domain from your table, binds the input expression, and returns a sampler and an evaluator for Arrow tables and record batches.
