@@ -174,7 +174,8 @@
         "label": "@math.gl/earth/celestial",
         "items": [
           "modules/earth/celestial/README",
-          "modules/earth/celestial/arrow-time-mapping"
+          "modules/earth/celestial/arrow-time-mapping",
+          "modules/earth/celestial/solar-system-bodies"
         ]
       },
       {
