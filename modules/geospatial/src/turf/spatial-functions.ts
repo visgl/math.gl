@@ -203,9 +203,10 @@ function pointInPolygon(
   point: WellKnownGeometry,
   polygon: WellKnownGeometry,
   ignoreBoundary = false
-): boolean {
-  if (!pointCoordinates(point)) return false;
-  return scalar(booleanPointInPolygon(column(point), column(polygon), {ignoreBoundary})) === 1;
+): boolean | null {
+  if (!pointCoordinates(point)) return null;
+  const value = scalar(booleanPointInPolygon(column(point), column(polygon), {ignoreBoundary}));
+  return value === null ? null : value === 1;
 }
 
 /** Tests whether a point is in a polygon's interior. */
@@ -213,7 +214,7 @@ export const ST_CONTAINS = /* @__PURE__ */ spatialFunction(
   'ST_Contains',
   [polygonKinds, pointKinds],
   /* @__PURE__ */ new Bool(),
-  ([polygon, point]) => pointInPolygon(point!, polygon!, true)
+  ([polygon, point]) => pointInPolygon(point!, polygon!, true) ?? false
 );
 
 /** Tests whether a point is in a polygon's interior or boundary. */
@@ -221,7 +222,7 @@ export const ST_COVERS = /* @__PURE__ */ spatialFunction(
   'ST_Covers',
   [polygonKinds, pointKinds],
   /* @__PURE__ */ new Bool(),
-  ([polygon, point]) => pointInPolygon(point!, polygon!)
+  ([polygon, point]) => pointInPolygon(point!, polygon!) ?? false
 );
 
 /** Returns 2D Cartesian point-to-point distance in coordinate units. */

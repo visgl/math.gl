@@ -215,6 +215,14 @@ test('resolves nullable computed geometries and keeps named CRS constraints', ()
   );
   expect([...result.getChild('d')!]).toEqual([5, null]);
   expect(() => select('SELECT ST_Distance(a, other) FROM features', table)).toThrow('same CRS');
+  expect(() =>
+    select('SELECT ST_Distance(CASE WHEN id = 0 THEN a ELSE other END, b) FROM features', table)
+  ).toThrow('branch extension metadata must match');
+  const missing = select(
+    'SELECT ST_Distance(CASE WHEN id = 0 THEN NULL ELSE NULL END, b) AS d FROM features',
+    table
+  );
+  expect([...missing.getChild('d')!]).toEqual([null, null]);
 });
 
 test('Turf SQL declarations retain the defaults of the direct Turf kernels', () => {

@@ -553,13 +553,14 @@ function bindNode(
     if (nested) {
       if (physicalKey(yes.field.type) !== physicalKey(no.field.type))
         throw new Error('Arrow expression operand types must match');
-      if (
-        !isContextualLiteral(ast.consequent) &&
-        !isContextualLiteral(ast.alternate) &&
-        extensionKey(yes.field) !== extensionKey(no.field)
-      )
-        throw new Error('Arrow expression branch extension metadata must match');
     } else sameType(yes, no);
+    if (
+      (nested || DataType.isBinary(yes.field.type)) &&
+      !isContextualLiteral(ast.consequent) &&
+      !isContextualLiteral(ast.alternate) &&
+      extensionKey(yes.field) !== extensionKey(no.field)
+    )
+      throw new Error('Arrow expression branch extension metadata must match');
     const metadata = isContextualLiteral(ast.consequent) ? no.field.metadata : yes.field.metadata;
     const field = new Field(
       'conditional',
@@ -1530,7 +1531,9 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
       inferred.map((node, index) => {
         if (node) return node.field;
         const argument = ast.arguments[index];
-        return argument.type === 'ConditionalExpression'
+        return argument.type === 'ConditionalExpression' &&
+          !isContextualLiteral(argument) &&
+          !containsContextualArray(argument)
           ? bind(argument, options, undefined, true).field
           : undefined;
       })
