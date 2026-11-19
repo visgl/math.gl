@@ -61,6 +61,7 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_DWithin(a, b, distance)` | Two 2D Points and a nonnegative numeric radius | Boolean. Includes points exactly at the radius, in planar coordinate units. Empty points yield false. |
 | `ST_Distance(a, b)` | Two Points | Float64 Cartesian distance in coordinate units. Empty points yield null. |
 | `ST_Azimuth(a, b)` | Two Points | Float64 radians clockwise from positive Y in `[0, 2π)`. Coincident and empty points yield null. |
+| `ST_MakePoint(x, y [, z [, m]])` | Integer or floating-point ordinates | GeoArrow WKB Point with XY, XYZ, or XYZM coordinates and unknown CRS. Use XY with the 2D predicates and measurements. |
 | `ST_Area(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar polygon area with holes subtracted. Empty and non-areal inputs yield zero. |
 | `ST_Length(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar line length. Empty and non-linear inputs yield zero. |
 | `ST_Centroid(geometry)` | Point, LineString, Polygon, and their multi-types | GeoArrow WKB. Points have equal weight, lines are weighted by segment length, and polygons are weighted by area. Empty inputs yield an empty Point. |
