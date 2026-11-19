@@ -225,6 +225,22 @@ export const ST_COVERS = /* @__PURE__ */ spatialFunction(
   ([polygon, point]) => pointInPolygon(point!, polygon!) ?? false
 );
 
+/** Interior only for the supported 2D geometry signature. */
+export const ST_WITHIN = /* @__PURE__ */ spatialFunction(
+  'ST_Within',
+  [pointKinds, polygonKinds],
+  /* @__PURE__ */ new Bool(),
+  ([p, polygon]) => pointInPolygon(p!, polygon!, true) ?? false
+);
+
+/** Interior or boundary for the supported 2D geometry signature. */
+export const ST_COVEREDBY = /* @__PURE__ */ spatialFunction(
+  'ST_CoveredBy',
+  [pointKinds, polygonKinds],
+  /* @__PURE__ */ new Bool(),
+  ([p, polygon]) => pointInPolygon(p!, polygon!) ?? false
+);
+
 /** Returns 2D Cartesian point-to-point distance in coordinate units. */
 export const ST_DISTANCE = /* @__PURE__ */ spatialFunction(
   'ST_Distance',
@@ -291,6 +307,8 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly ArrowTableFunction[] =
   /* @__PURE__ */ Object.freeze([
     ST_CONTAINS,
     ST_COVERS,
+    ST_WITHIN,
+    ST_COVEREDBY,
     ST_DISTANCE,
     ST_AZIMUTH,
     ST_AREA,
