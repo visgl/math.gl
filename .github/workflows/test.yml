@@ -278,6 +278,11 @@ jobs:
           yarn check:timezone-boundary
           yarn check:timezone-types
 
+      - name: Check ocean controls, subpath exports, public types and bundle budget
+        run: |
+          python3 modules/earth/scripts/ocean/generate-acoustic-reference.py --check
+          yarn check:ocean-package
+
       - name: Check WKB package boundary
         run: yarn check:wkb-boundary
 

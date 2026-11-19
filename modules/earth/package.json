@@ -12,6 +12,7 @@
     "geoid",
     "sun",
     "timezone",
+    "ocean",
     "geospatial"
   ],
   "repository": {
@@ -36,6 +37,11 @@
       "types": "./dist/timezone/index.d.ts",
       "import": "./dist/timezone/index.js",
       "require": "./dist/timezone/index.cjs"
+    },
+    "./ocean": {
+      "types": "./dist/ocean/index.d.ts",
+      "import": "./dist/ocean/index.js",
+      "require": "./dist/ocean/index.cjs"
     },
     "./geoid/geoid-egm96-low.pgm": "./data/geoid/geoid-egm96-low.pgm",
     "./geoid/geoid-egm96-hi.pgm": "./data/geoid/geoid-egm96-hi.pgm",

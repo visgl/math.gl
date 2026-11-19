@@ -522,6 +522,18 @@
           },
           {
             "type": "category",
+            "label": "@math.gl/earth/ocean",
+            "items": [
+              "modules/earth/ocean/api-reference/seawater",
+              "modules/earth/ocean/api-reference/sound"
+            ],
+            "link": {
+              "type": "doc",
+              "id": "modules/earth/ocean/README"
+            }
+          },
+          {
+            "type": "category",
             "label": "@math.gl/earth/timezone",
             "items": [
               "modules/earth/timezone/api-reference/timezone"
@@ -590,6 +602,8 @@
           "modules/sql/scales/gallery",
           "modules/sql/scales/SQL",
           "modules/sql/scales/bivariate",
+          "modules/sql/scales/numeric",
+
           "modules/sql/expressions",
           "modules/sql/api-reference/expression-eval",
           "modules/sql/api-reference/function-registry",
