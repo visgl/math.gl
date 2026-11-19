@@ -13,6 +13,7 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  {symbol: "createArrowColumns", packages: ["@math.gl/sql/arrow"], forbidden: [/sql\/(src|dist)\/scales\//], budget: 307000},
   // SQL UNNEST includes physical child expansion (306,241 bytes measured).
   {symbol:'queryArrowSQL', packages:['@math.gl/sql'], forbidden:[/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/loaders.gl/,/geospatial\//], budget:307000},
 

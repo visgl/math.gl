@@ -4,7 +4,7 @@
 
 import {
   Field,
-  Table,
+  type Table,
   FixedSizeList,
   Float16,
   Float32,
@@ -16,6 +16,7 @@ import {
   type Schema,
   type Vector
 } from 'apache-arrow';
+import {prepareArrowColumn, type ArrowProjectionOperation} from '../arrow/create-arrow-columns';
 import {compileArrowExpression} from '../arrow/compiler';
 import {nullTupleVector} from '../arrow/list-values';
 import type {ArrowExpression, ArrowTableFunction} from '../arrow/types';
@@ -262,133 +263,76 @@ export function compileArrowScaleExpression(
 ): CompiledArrowScaleExpression {
   /** Parsed caller expression; rewriting never mutates it. */
   const ast = typeof expression === 'string' ? parseSQLExpression(expression) : expression;
-  /** Reserved caller identifiers and generated function names. */
-  const names = new Set(functions.map(fn => fn.name.toUpperCase()));
-  /** Resolved descriptors in outer-before-inner traversal order. */
-  const scales: ResolvedScale[] = [];
-  /** Caller functions followed by generated scale functions. */
-  const declarations = [...functions];
-  /** Reserves user identifiers before allocating internal function names. */
-  function reserve(node: unknown): void {
-    if (!node || typeof node !== 'object') return;
-    if ('type' in node && node.type === 'Identifier' && 'name' in node)
-      names.add(String(node.name).toUpperCase());
-    for (const value of Object.values(node)) reserve(value);
-  }
-  reserve(ast);
-  /** Monotonic suffix for collision-free internal names. */
-  let nextName = 0;
-  /** Replaces each scale call with a typed vector function bound to its resolved domain. */
-  function visit(node: any): any {
-    if (!node || typeof node !== 'object') return node;
-    if (Array.isArray(node)) return node.map(visit);
-    if (
-      node.type === 'CallExpression' &&
-      node.callee?.type === 'Identifier' &&
+  const {compiled, metadata} = prepareArrowColumn(
+    table,
+    ast,
+    [scaleProjectionOperation],
+    functions
+  );
+  return {...compiled, scales: metadata.map(entry => entry.scale)};
+}
+
+export type ScaleProjectionMetadata = {
+  readonly kind: 'scale';
+  readonly scale: ResolvedScale;
+};
+
+export const scaleProjectionOperation: ArrowProjectionOperation<ScaleProjectionMetadata> = {
+  matches(call) {
+    return (
+      call.callee.type === 'Identifier' &&
       /^SCALE_(LINEAR|SQRT|LOG|COLOR|DIVERGING|ORDINAL|QUANTILE|QUANTIZE|THRESHOLD)$/i.test(
-        node.callee.name
+        String(call.callee['name'])
       )
-    ) {
-      /** Reserve descriptor order before recursively resolving nested scale inputs. */
-      const scaleIndex = scales.length;
-      scales.length++;
-      /** Rewrite the value before parsing so computed domains reference generated functions too. */
-      const valueExpression = visit(node.arguments[0]);
-      /** Validated outer scale with nested inputs already bound. */
-      const parsed = parseSQLScaleAST({
-        ...node,
-        arguments: [valueExpression, ...node.arguments.slice(1)]
-      });
-      /** Whole-table domain and sampler, using all nested function declarations. */
-      const {scale} = compileArrowScale(table, parsed, undefined, declarations);
-      scales[scaleIndex] = scale;
-      /** Input type for the generated vector function overload. */
-      const input = compileArrowExpression(parsed.value as ArrowExpression, {
-        inputSchema: table.schema,
-        functions: declarations
-      });
-      /** Private function identifier that cannot shadow a caller name. */
-      let name: string;
-      do {
-        name = '__scale_' + nextName++;
-      } while (names.has(name.toUpperCase()));
-      names.add(name.toUpperCase());
-      declarations.push({
-        name,
-        prototypes: [
-          {
-            arguments: [input.outputField],
-            result: new Field(name, toVector([], parsed.scale).type, true),
-            nullHandling: 'call',
-            evaluate: ([values], {activeRows, length}) =>
-              toVector(
-                Array.from({length}, (_, row) => {
-                  if (!activeRows[row]) return null;
-                  /** Active scalar input with Arrow integer normalization. */
-                  const value = arrowScaleValue(values!.get(row));
-                  if (
-                    value !== null &&
-                    value !== undefined &&
-                    typeof value !== 'number' &&
-                    typeof value !== 'string'
-                  ) {
-                    throw new Error('Scale input must be numeric or categorical');
-                  }
-                  return scale.sample((value ?? null) as ScaleValue | null) as
-                    | number
-                    | ScaleColor
-                    | null;
-                }),
-                parsed.scale
-              )
-          }
-        ]
-      });
-      return {
+    );
+  },
+  prepare(call, {table, functions, allocateName}) {
+    const parsed = parseSQLScaleAST(call);
+    const {scale} = compileArrowScale(table, parsed, undefined, functions);
+    const input = compileArrowExpression(parsed.value as ArrowExpression, {
+      inputSchema: table.schema,
+      functions
+    });
+    const name = allocateName();
+    const fn: ArrowTableFunction = {
+      name,
+      prototypes: [
+        {
+          arguments: [input.outputField],
+          result: new Field(name, toVector([], parsed.scale).type, true),
+          nullHandling: 'call',
+          evaluate: ([values], {activeRows, length}) =>
+            toVector(
+              Array.from({length}, (_, row) => {
+                if (!activeRows[row]) return null;
+                /** Active scalar input with Arrow integer normalization. */
+                const value = arrowScaleValue(values!.get(row));
+                if (
+                  value !== null &&
+                  value !== undefined &&
+                  typeof value !== 'number' &&
+                  typeof value !== 'string'
+                ) {
+                  throw new Error('Scale input must be numeric or categorical');
+                }
+                return scale.sample((value ?? null) as ScaleValue | null) as
+                  | number
+                  | ScaleColor
+                  | null;
+              }),
+              parsed.scale
+            )
+        }
+      ]
+    };
+    return {
+      metadata: {kind: 'scale', scale},
+      functions: [fn],
+      expression: {
         type: 'CallExpression',
         callee: {type: 'Identifier', name},
         arguments: [parsed.value]
-      };
-    }
-    return Object.fromEntries(Object.entries(node).map(([key, value]) => [key, visit(value)]));
+      }
+    };
   }
-  /** Ordinary Arrow expression after removing every supported scale call. */
-  const rewritten = visit(ast);
-  /** Final evaluator with caller and generated declarations. */
-  const compiled = compileArrowExpression(rewritten, {
-    inputSchema: table.schema,
-    functions: declarations
-  });
-  return {...compiled, scales};
-}
-
-/** A row-preserving projection and its resolved scales, keyed by output column. */
-export type ArrowScaleProjection = {
-  /** Evaluated columns in the input row order. */
-  table: Table;
-  /** Resolved scales in expression traversal order, with empty arrays for unscaled columns. */
-  scales: Readonly<Record<string, readonly ResolvedScale[]>>;
 };
-
-/**
- * Evaluates named, parsed Arrow expressions and returns their resolved scales.
- * Each scale resolves against the full input table. Call again when the source
- * changes to refresh data-derived domains.
- */
-export function evaluateArrowScaleProjection(
-  table: Table,
-  expressions: Readonly<Record<string, Expression>>,
-  functions?: readonly ArrowTableFunction[]
-): ArrowScaleProjection {
-  /** Compiled projections in the declared output column order. */
-  const compiled = Object.entries(expressions).map(
-    ([name, expression]) =>
-      [name, compileArrowScaleExpression(table, expression, functions)] as const
-  );
-  return {
-    table: new Table(
-      Object.fromEntries(compiled.map(([name, column]) => [name, column.evaluateTable(table)]))
-    ),
-    scales: Object.fromEntries(compiled.map(([name, column]) => [name, column.scales]))
-  };
-}

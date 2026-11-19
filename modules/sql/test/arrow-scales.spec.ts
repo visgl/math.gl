@@ -4,6 +4,8 @@
 
 import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
+import {createArrowColumns, type ArrowProjectionOperation} from '@math.gl/sql/arrow';
+import type {Expression} from '../src/expressions';
 import {ABS} from '../src/math-functions';
 import {parseSQLExpression} from '../src/parser/parse-sql-expression';
 import {parseSQLScaleExpression} from '../src/scales';
@@ -12,7 +14,7 @@ import {
   bindArrowScale,
   compileArrowScale,
   compileArrowScales,
-  evaluateArrowScaleProjection,
+  scaleProjectionOperation,
   createStreamingDomainAccumulator
 } from '@math.gl/sql/scales';
 import {resolveArrowDomains, resolveArrowQuantiles} from '../src/scales/arrow-domains';
@@ -268,14 +270,41 @@ test('computed Arrow quantiles preserve a supplied extent and use projected stre
 
 test('evaluates parsed Arrow projections with resolved scale metadata', () => {
   const data = tableFromArrays({value: [0, 5, 10]});
-  const result = evaluateArrowScaleProjection(data, {
-    shifted: parseSQLExpression('value + 1'),
-    color: parseSQLExpression("SCALE_COLOR(value, DOMAIN(value), PALETTE('#000000', '#ffffff'))")
-  });
+  const tag: ArrowProjectionOperation<{kind: 'tag'}> = {
+    matches: call => call.callee['name'] === 'TAG',
+    prepare: call => ({
+      expression: call.arguments[0] as Expression,
+      metadata: {kind: 'tag'}
+    })
+  };
+  const result = createArrowColumns(
+    data,
+    {
+      value: parseSQLExpression('ABS(value + 1)'),
+      color: parseSQLExpression(
+        "TAG(SCALE_COLOR(value, DOMAIN(value), PALETTE('#000000', '#ffffff')))"
+      )
+    },
+    {operations: [tag, scaleProjectionOperation], functions: [ABS]}
+  );
 
-  expect(result.table.schema.fields.map(field => field.name)).toEqual(['shifted', 'color']);
-  expect(Array.from(result.table.getChild('shifted')!)).toEqual([1, 6, 11]);
+  expect(result.table.schema.fields.map(field => field.name)).toEqual(['value', 'color']);
+  expect(Array.from(result.table.getChild('value')!)).toEqual([1, 6, 11]);
   expect(Array.from(result.table.getChild('color')!.get(2))).toEqual([255, 255, 255, 255]);
-  expect(result.scales.shifted).toEqual([]);
-  expect(result.scales.color?.[0]?.descriptor.domain).toEqual([0, 10]);
+  expect(result.columnMetadata.value).toEqual([]);
+  expect(result.columnMetadata.color.map(entry => entry.kind)).toEqual(['tag', 'scale']);
+  const scale = result.columnMetadata.color[1];
+  expect(scale?.kind === 'scale' && scale.scale.descriptor.domain).toEqual([0, 10]);
+  expect(data.schema.fields.map(field => field.name)).toEqual(['value']);
+  expect(Array.from(data.getChild('value')!)).toEqual([0, 5, 10]);
+});
+
+test('an empty projection preserves rows across batches', () => {
+  const first = tableFromArrays({value: [0, 1]});
+  const input = first.concat(first);
+  const {table, columnMetadata} = createArrowColumns(input, {});
+  expect(table.numRows).toBe(4);
+  expect(table.numCols).toBe(0);
+  expect(columnMetadata).toEqual({});
+  expect(input.numCols).toBe(1);
 });
