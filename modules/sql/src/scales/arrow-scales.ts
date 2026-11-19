@@ -281,7 +281,7 @@ export const scaleProjectionOperation: ArrowProjectionOperation<ScaleProjectionM
   matches(call) {
     return (
       call.callee.type === 'Identifier' &&
-      /^SCALE_(LINEAR|SQRT|LOG|COLOR|DIVERGING|ORDINAL|QUANTILE|QUANTIZE|THRESHOLD)$/i.test(
+      /^SCALE_(LINEAR|SQRT|LOG|POWER|SYMLOG|COLOR|CYCLIC|DIVERGING|ORDINAL|QUANTILE|QUANTIZE|THRESHOLD)$/i.test(
         String(call.callee['name'])
       )
     );

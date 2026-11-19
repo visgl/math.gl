@@ -129,3 +129,38 @@ on a new table does not mutate an earlier compiled expression. This function doe
 not change the single-scale parser or register scales as global functions.
 
 See [Creating Arrow columns](../arrow-columns.md) for a color column and its legend.
+
+## Cyclic color
+
+Use `SCALE_CYCLIC` for measurements that repeat, such as a compass heading or
+the hour of day. Supply the fixed origin and end of one complete period.
+
+```sql
+SCALE_CYCLIC(heading_degrees, DOMAIN(0, 360), PALETTE('compass'))
+```
+
+Zero, 360, and −360 degrees all sample the same color. The palette stops are
+evenly spaced around the period, including the transition from its last stop
+back to its first. Custom colors go in cycle order. The sampler closes the loop
+automatically. Use the resolved scale to draw a circular legend.
+
+## Power and symmetric log
+
+Use `SCALE_POWER(value, DOMAIN(min, max), RANGE(low, high), exponent)` to tune
+contrast. The transform preserves the sign and raises the magnitude to the
+positive exponent.
+
+Use `SCALE_SYMLOG(value, DOMAIN(min, max), RANGE(low, high), constant)` when
+values span orders of magnitude on both sides of zero. The transform is nearly
+linear around zero and logarithmic farther away. The positive constant controls
+that transition and defaults to 1.
+
+For a palette, apply the same transform to the domain:
+
+```sql
+SCALE_COLOR(magnitude, TRANSFORM_DOMAIN(DOMAIN(0, 100), POWER(0.4)), PALETTE('viridis'))
+```
+
+`TRANSFORM_DOMAIN` accepts `POWER(exponent)` or `SYMLOG(constant)` on a linear,
+sequential, or diverging scale. The resolved descriptor records the transform
+and the original domain so a legend can label values in their original units.

@@ -588,7 +588,9 @@
           "modules/sql/color-functions/README",
           "modules/sql/scales/README",
           "modules/sql/scales/SQL",
+          "modules/sql/scales/bivariate",
           "modules/sql/scales/numeric",
+
           "modules/sql/expressions",
           "modules/sql/api-reference/expression-eval",
           "modules/sql/api-reference/function-registry",
