@@ -101,6 +101,7 @@ export function compileResolvedScale(
   thresholds?: readonly number[]
 ): ResolvedScale {
   const colorType = [
+    'cyclic',
     'sequential',
     'diverging',
     'ordinal',
@@ -169,6 +170,22 @@ export function compileResolvedScale(
     if (typeof value !== 'number' || !Number.isFinite(value)) return spec.nullColor ?? null;
     const min = numerical[0]!,
       max = numerical[numerical.length - 1]!;
+    if (spec.type === 'cyclic') {
+      const period = max - min;
+      const offset = value - min;
+      const fraction = Number.isFinite(offset)
+        ? (offset % period) / period
+        : (value % period) / period - (min % period) / period;
+      const position = (fraction - Math.floor(fraction)) * workingStops!.length;
+      const index = Math.floor(position);
+      const color = interpolateColor(
+        workingStops![index % workingStops!.length]!,
+        workingStops![(index + 1) % workingStops!.length]!,
+        position - index,
+        space
+      );
+      return workingStops === paletteStops ? color : convertScaleColor(color, SRGB, encoding);
+    }
     if (value < min && spec.underColor) return spec.underColor;
     if (value > max && spec.overColor) return spec.overColor;
 

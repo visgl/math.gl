@@ -285,7 +285,7 @@ export function compileArrowScaleExpression(
     if (
       node.type === 'CallExpression' &&
       node.callee?.type === 'Identifier' &&
-      /^SCALE_(LINEAR|SQRT|LOG|COLOR|DIVERGING|ORDINAL|QUANTILE|QUANTIZE|THRESHOLD)$/i.test(
+      /^SCALE_(LINEAR|SQRT|LOG|COLOR|CYCLIC|DIVERGING|ORDINAL|QUANTILE|QUANTIZE|THRESHOLD)$/i.test(
         node.callee.name
       )
     ) {
