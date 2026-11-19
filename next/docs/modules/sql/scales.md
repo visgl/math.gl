@@ -1,5 +1,7 @@
 # Portable visualization scale descriptors (experimental)
 
+Compare ramps and class breaks in the [color scale gallery](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/gallery.md).
+
 The optional `@math.gl/sql/scales` entry point defines serializable scale **specifications** and resolved scale metadata without introducing a D3, renderer, Apache Arrow, or GPU runtime dependency.
 
 ```

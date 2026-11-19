@@ -287,8 +287,9 @@ A lightweight SQL query engine for Apache Arrow tables. Query tables already in 
 - [@math.gl/sql/parser 🧪](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md): Import @math.gl/sql/parser to parse supported SQL statements into portable query and
 - [Portable expression AST](https://visgl.github.io/math.gl/next/docs/modules/sql/portable-ast.md): @math.gl/sql/expressions provides a shared expression AST for independently implemented
 - [Query execution](https://visgl.github.io/math.gl/next/docs/modules/sql/queries.md): Use the functions exported by @math.gl/sql to query native Arrow tables and record batches.
-- [Portable visualization scale descriptors (experimental)](https://visgl.github.io/math.gl/next/docs/modules/sql/scales.md): The optional @math.gl/sql/scales entry point defines serializable scale
+- [Portable visualization scale descriptors (experimental)](https://visgl.github.io/math.gl/next/docs/modules/sql/scales.md): Compare ramps and class breaks in the color scale gallery.
 - [Bivariate color scales](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/bivariate.md): Use a bivariate scale to show two numeric variables in a single color, such as
+- [Color scale gallery](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/gallery.md): A color scale maps numbers or categories to colors. The domain describes the inputs, and the
 - [Natural breaks](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/natural-breaks.md): Use getJenksBreaks(values, classCount) from @math.gl/core/color to compute
 - [Rounded bounds and breaks](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/nice.md): Add NICE() as the fourth argument to SCALE_COLOR with a two-endpoint domain
 - [SQL scale specifications (experimental)](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/SQL.md): Import parseSQLScaleExpression from @math.gl/sql/scales. It parses
