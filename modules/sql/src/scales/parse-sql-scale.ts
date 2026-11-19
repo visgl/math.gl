@@ -220,14 +220,34 @@ export function parseSQLScaleExpression(
  */
 export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
   const root = call(expression);
+  const trailing = root.arguments.length === 4 ? root.arguments[3] : undefined;
+  if (
+    trailing?.type !== 'CallExpression' ||
+    trailing.callee.type !== 'Identifier' ||
+    String(trailing.callee['name']).toUpperCase() !== 'NICE'
+  )
+    return parseScaleCall(root);
+
+  const {value, scale} = parseScaleCall({...root, arguments: root.arguments.slice(0, 3)});
+  if (
+    (scale.type !== 'sequential' && scale.type !== 'quantile') ||
+    trailing.arguments.length ||
+    (scale.domain.type === 'fixed' && scale.domain.values.length !== 2)
+  )
+    throw new Error('NICE() requires a two-endpoint sequential or quantile scale');
+  return {value, scale: validateScaleSpec({...scale, nice: true})};
+}
+
+/** Parses the underlying scale arguments before applying optional rounding. */
+function parseScaleCall(root: Call): ParsedSQLScale {
   const fn = root.callee.name.toUpperCase();
-  const niceArgument = root.arguments.length === 4 ? root.arguments[3] : undefined;
-  const args = niceArgument ? root.arguments.slice(0, 3) : root.arguments;
+  const args = root.arguments;
   const names: Record<string, ScaleSpec['type']> = {
     SCALE_LINEAR: 'linear',
     SCALE_SQRT: 'sqrt',
     SCALE_LOG: 'log',
     SCALE_COLOR: 'sequential',
+    SCALE_CYCLIC: 'cyclic',
     SCALE_DIVERGING: 'diverging',
     SCALE_ORDINAL: 'ordinal',
     SCALE_QUANTILE: 'quantile',
@@ -267,6 +287,7 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
     }
   }
   const colors = [
+    'cyclic',
     'sequential',
     'diverging',
     'ordinal',
@@ -290,21 +311,13 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
       throw new Error('SCALE_THRESHOLD requires one more color than breaks');
     }
   } else if (
+    type !== 'cyclic' &&
     domain.type === 'fixed' &&
     range.type === 'colors' &&
     domain.values.length !== range.values.length
   ) {
     throw new Error('Explicit domain and color stops must have equal lengths');
   }
-  if (niceArgument) {
-    if (
-      (type !== 'sequential' && type !== 'quantile') ||
-      call(niceArgument, 'NICE').arguments.length ||
-      (domain.type === 'fixed' && domain.values.length !== 2)
-    ) {
-      throw new Error('NICE() requires a two-endpoint sequential or quantile scale');
-    }
-  }
-  const scale = validateScaleSpec({type, domain, range, ...(niceArgument && {nice: true})});
+  const scale = validateScaleSpec({type, domain, range});
   return {value, scale};
 }
