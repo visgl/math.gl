@@ -238,25 +238,29 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
   return {value, scale: validateScaleSpec({...scale, nice: true})};
 }
 
+/** Maps supported SQL scale call names to portable scale types. */
+export const SQL_SCALE_TYPES: Readonly<Record<string, ScaleSpec['type']>> = {
+  SCALE_LINEAR: 'linear',
+  SCALE_SQRT: 'sqrt',
+  SCALE_LOG: 'log',
+  SCALE_POWER: 'linear',
+  SCALE_SYMLOG: 'symlog',
+  SCALE_COLOR: 'sequential',
+  SCALE_CYCLIC: 'cyclic',
+  SCALE_DIVERGING: 'diverging',
+  SCALE_ORDINAL: 'ordinal',
+  SCALE_QUANTILE: 'quantile',
+  SCALE_QUANTIZE: 'quantize',
+  SCALE_THRESHOLD: 'threshold'
+};
+
 /** Parses the underlying scale arguments before applying optional rounding. */
 function parseScaleCall(root: Call): ParsedSQLScale {
   const fn = root.callee.name.toUpperCase();
   const args = root.arguments;
-  const names: Record<string, ScaleSpec['type']> = {
-    SCALE_LINEAR: 'linear',
-    SCALE_SQRT: 'sqrt',
-    SCALE_LOG: 'log',
-    SCALE_POWER: 'linear',
-    SCALE_SYMLOG: 'symlog',
-    SCALE_COLOR: 'sequential',
-    SCALE_CYCLIC: 'cyclic',
-    SCALE_DIVERGING: 'diverging',
-    SCALE_ORDINAL: 'ordinal',
-    SCALE_QUANTILE: 'quantile',
-    SCALE_QUANTIZE: 'quantize',
-    SCALE_THRESHOLD: 'threshold'
-  };
-  const type = names[fn];
+  const type = Object.prototype.hasOwnProperty.call(SQL_SCALE_TYPES, fn)
+    ? SQL_SCALE_TYPES[fn]
+    : undefined;
   if (!type) throw new Error(`Unsupported SQL scale function: ${fn}`);
   const inferredOrdinal = fn === 'SCALE_ORDINAL' && args.length === 2;
   const special = fn === 'SCALE_POWER' || fn === 'SCALE_SYMLOG';

@@ -4,8 +4,10 @@
 
 export {
   queryArrowSQL,
+  queryArrowSQLWithMetadata,
   type ArrowSQLQueryOptions,
-  type ArrowSQLTableFunction
+  type ArrowSQLTableFunction,
+  type ArrowSQLMetadataResult
 } from './arrow/query-arrow-sql';
 export {
   queryArrowTable,
@@ -34,6 +36,9 @@ export type {
   ArrowExpressionEvaluationOptions,
   ArrowExpressionValue,
   ArrowTableFunction,
+  ArrowFunctionPackage,
+  ScalarFunction,
+  PreparedScalarFunction,
   ArrowTableFunctionPrototype,
   ArrowTableFunctionType
 } from './arrow/types';

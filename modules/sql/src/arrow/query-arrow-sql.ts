@@ -12,8 +12,29 @@ import {
   type SQLSort,
   type SQLTableBinding
 } from '../parser/parse-sql-statement';
-import {queryArrowTable, type ArrowTableQuery} from './query-arrow-table';
+import {executeArrowProjection, queryArrowTable, type ArrowTableQuery} from './query-arrow-table';
 import type {ArrowAggregate} from './aggregates';
+import {getProjectionOperations, prepareArrowColumn} from './create-arrow-columns';
+import {parseSQLExpression} from '../parser/parse-sql-expression';
+import type {ArrowFunctionPackage, PreparedScalarFunction} from './types';
+
+/** Metadata emitted by declarations in a nested package. */
+type PackageMetadata<F, Depth extends readonly unknown[] = []> =
+  F extends PreparedScalarFunction<infer M>
+    ? M
+    : Depth['length'] extends 12
+      ? unknown
+      : F extends readonly (infer Item)[]
+        ? PackageMetadata<Item, [...Depth, unknown]>
+        : never;
+
+/** An Arrow query result with metadata attributed to each projected column. */
+export type ArrowSQLMetadataResult<M> = {
+  /** Query output with its native Apache Arrow schema. */
+  readonly table: Table;
+  /** Ordered metadata grouped by final SQL output name. */
+  readonly columnMetadata: Readonly<Record<string, readonly M[] | undefined>>;
+};
 
 type Execution = Pick<ArrowTableQuery, 'signal' | 'functions'>;
 
@@ -33,10 +54,29 @@ export function queryArrowSQL(
   tables: ReadonlyMap<string, Table>,
   options: ArrowSQLQueryOptions = {}
 ): Table {
+  return executeSQL(sql, tables, options, false).table;
+}
+
+/** Runs an Arrow SQL query and returns typed metadata from its registered functions. */
+export function queryArrowSQLWithMetadata<const F extends readonly ArrowFunctionPackage[] = []>(
+  sql: string,
+  tables: ReadonlyMap<string, Table>,
+  options: Omit<ArrowSQLQueryOptions, 'functions'> & {functions?: F} = {}
+): ArrowSQLMetadataResult<PackageMetadata<F>> {
+  return executeSQL(sql, tables, options, true) as ArrowSQLMetadataResult<PackageMetadata<F>>;
+}
+
+/** Executes SELECT branches before applying the compound query's ordering and pagination. */
+function executeSQL(
+  sql: string,
+  tables: ReadonlyMap<string, Table>,
+  options: ArrowSQLQueryOptions,
+  collectMetadata: boolean
+): ArrowSQLMetadataResult<unknown> {
   const {inputs, orderBy, offset, limit} = parseSQLSelectCompound(sql, options);
   const execution = {signal: options.signal, functions: options.functions};
   const tableFunctions = options.tableFunctions ?? {};
-  /** Resolves a catalog binding or invokes a registered table source once. */
+  /** Resolves a catalog binding or invokes its registered table source. */
   const resolveTable = ({name, inputTable}: SQLTableBinding) => {
     if (inputTable === undefined) return getTable(tables, name);
     const key = Object.keys(tableFunctions).find(key => key.toUpperCase() === name.toUpperCase());
@@ -44,12 +84,11 @@ export function queryArrowSQL(
     execution.signal?.throwIfAborted();
     return tableFunctions[key]!(getTable(tables, inputTable));
   };
-  const [first, ...rest] = inputs.map(input => executeSelect(input, resolveTable, execution)) as [
-    Table,
-    ...Table[]
-  ];
+  const operations = getProjectionOperations(options.functions);
+  const results = inputs.map(input => executeSelect(input, resolveTable, execution, operations));
+  const [first, ...rest] = results.map(result => result.table) as [Table, ...Table[]];
   // Plan the final order against the projected names, including SELECT aliases.
-  return queryArrowTable(first, {
+  const table = queryArrowTable(first, {
     ...execution,
     union: rest.map(table => {
       if (table.numCols !== first.numCols)
@@ -66,6 +105,16 @@ export function queryArrowSQL(
     offset,
     limit
   });
+  const columnMetadata: Record<string, readonly unknown[]> = Object.create(null);
+  if (collectMetadata)
+    table.schema.fields.forEach((field, index) => {
+      columnMetadata[field.name] = Object.freeze(
+        results.flatMap(
+          result => result.columnMetadata[result.table.schema.fields[index]!.name] ?? []
+        )
+      );
+    });
+  return {table, columnMetadata: Object.freeze(columnMetadata)};
 }
 
 function planOrder(orderBy?: readonly SQLSort[]) {
@@ -83,8 +132,9 @@ function planOrder(orderBy?: readonly SQLSort[]) {
 function executeSelect(
   statement: SQLSelectStatement,
   resolveTable: (binding: SQLTableBinding) => Table,
-  execution: Execution
-): Table {
+  execution: Execution,
+  operations: ReturnType<typeof getProjectionOperations>
+): ArrowSQLMetadataResult<unknown> {
   let source = resolveTable(statement.from);
   const leftAlias = statement.from.alias ?? statement.from.name;
   const [right] = statement.joins;
@@ -170,14 +220,33 @@ function executeSelect(
     if (bound.type === 'Identifier') return {column: bound.name, as: alias};
     return {expression: bound, as: alias};
   });
-  return queryArrowTable(source, {
+  const query = {
     ...execution,
     join,
-    select,
     where: statement.where && {expression: bind(statement.where)},
     groupBy,
     aggregates: Object.fromEntries(aggregates)
+  };
+  const columnMetadata: Record<string, readonly unknown[]> = Object.create(null);
+  if (!operations.length || !select) {
+    return {table: queryArrowTable(source, {...query, select}), columnMetadata};
+  }
+  const aggregateSelection = [...(groupBy ?? []), ...aggregates.keys()];
+  const input = queryArrowTable(source, {
+    ...query,
+    select: aggregateSelection.length ? aggregateSelection : undefined
   });
+  const table = executeArrowProjection(input, {select, ...execution}, (expression, name) => {
+    const result = prepareArrowColumn(
+      input,
+      typeof expression === 'string' ? parseSQLExpression(expression) : expression,
+      operations,
+      execution.functions
+    );
+    columnMetadata[name] = result.metadata;
+    return result.compiled;
+  });
+  return {table, columnMetadata};
 }
 
 function getTable(tables: ReadonlyMap<string, Table>, name: string): Table {

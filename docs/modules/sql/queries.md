@@ -187,3 +187,92 @@ one group. Supported keys include strings, booleans, integers, and finite floati
 Each successful batch commits its changes together. An expression error or cancellation preserves
 the previous result.
 
+
+## Function packages and column metadata
+
+The `functions` option accepts individual declarations and nested readonly arrays.
+Pass exported packages directly to reuse them across calls.
+
+```ts
+import {tableFromArrays} from 'apache-arrow';
+import {queryArrowSQLWithMetadata} from '@math.gl/sql';
+import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/turf/expressions';
+import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
+
+const tables = new Map([['observations', tableFromArrays({value: [0, 2, 6, 8]})]]);
+const {table, columnMetadata} = queryArrowSQLWithMetadata(
+  "SELECT value, SCALE_COLOR(value, DOMAIN(value), PALETTE('Blues')) AS color " +
+    "FROM observations WHERE value > 0 ORDER BY value LIMIT 2",
+  tables,
+  {functions: [POSTGIS_SPATIAL_FUNCTIONS, VISUALIZATION_FUNCTIONS]}
+);
+const scale = columnMetadata.color?.find(entry => entry.kind === 'scale')?.scale;
+// The table has two rows. The scale domain is [2, 8], including the filtered row beyond LIMIT.
+```
+
+The returned scale is the same `ResolvedScale` that generated the color column.
+Use its descriptor to build a legend. Each output column has an ordered list of
+metadata entries. A column without metadata has an empty list. Entries in a
+conditional expression describe all the bound calls, including calls in branches
+that some rows skip. A `UNION ALL` combines entries by output position in branch
+order and uses the first branch's column names.
+
+Use `queryArrowSQL` when you only need the table. A prepared scalar declaration
+uses a flat object with `kind: 'scalar'`, a SQL `name`, and a `prepare` method.
+Use `satisfies ScalarFunction<MyMetadata>` to check the declaration and retain the
+metadata type. Preparation can inspect the filtered input table and return a
+rewritten expression, generated scalar declarations, and one metadata entry.
+
+### Package transforms in a deck.gl example
+
+Export example-specific transforms from the example module and register the
+package with the rest of its SQL functions. The descriptor can close over
+example configuration or a geometry kernel. Its Arrow evaluator can reuse
+existing vectors and receives a mask for the rows it should evaluate.
+
+```ts
+import {Field, Float64, vectorFromArray} from 'apache-arrow';
+import type {ScalarFunction} from '@math.gl/sql';
+
+const float = new Float64();
+
+const HEIGHT_OFFSET = {
+  kind: 'scalar',
+  name: 'HEIGHT_OFFSET',
+  prototypes: [{
+    arguments: [new Field('height', float, true), new Field('offset', float, true)],
+    result: new Field('elevation', float, true),
+    evaluate([heights, offsets], {length, activeRows}) {
+      return vectorFromArray(Array.from({length}, (_, row) =>
+        activeRows[row] ? Number(heights!.get(row)) + Number(offsets!.get(row)) : null
+      ), float);
+    }
+  }]
+} satisfies ScalarFunction;
+
+export const EXAMPLE_TRANSFORMS = [HEIGHT_OFFSET] as const;
+```
+
+Pass the example's Arrow table as `features` and bind `offset` from a UI control.
+The transform composes with the built-in scale and the result carries the
+resolved scale metadata for a legend.
+
+```ts
+import {queryArrowSQLWithMetadata} from '@math.gl/sql';
+import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
+
+const {table, columnMetadata} = queryArrowSQLWithMetadata(
+  `SELECT SCALE_LINEAR(HEIGHT_OFFSET(height, :offset), DOMAIN(0, 100), RANGE(0, 200))
+     AS elevation FROM features`,
+  new Map([['features', features]]),
+  {
+    functions: [EXAMPLE_TRANSFORMS, VISUALIZATION_FUNCTIONS],
+    parameters: {offset}
+  }
+);
+```
+
+Use the `elevation` column for the layer's elevation accessor and
+`columnMetadata.elevation` for the legend.
+For transforms whose signature depends on a source field, provide
+`resolvePrototype(fields)` to declare the input and output schema at bind time.
