@@ -7,8 +7,15 @@ import type {Expression} from '../expressions';
 import {SQLExpressionReader, SQL_RESERVED_WORDS} from './parse-sql-expression';
 import {SQLQueryReader} from './parse-sql-select';
 
-/** A named input with an optional alias in a relational SELECT. */
-export type SQLTableBinding = Readonly<{name: string; alias?: string}>;
+/** A named input or a function of one named table in a relational SELECT. */
+export type SQLTableBinding = Readonly<{
+  /** Catalog table or registered function name. */
+  name: string;
+  /** Optional qualifier for columns supplied by the binding. */
+  alias?: string;
+  /** Catalog table passed to the function when this binding is a call. */
+  inputTable?: string;
+}>;
 
 /** A join whose condition is interpreted by the query planner. */
 export type SQLJoin = Readonly<{
@@ -142,8 +149,17 @@ function readBy<T>(reader: RelationalQueryReader, clause: string, read: () => T)
 
 function readTable(reader: RelationalQueryReader): SQLTableBinding {
   const name = reader.tableName();
+  let inputTable: string | undefined;
+  if (reader.takeSymbol('(')) {
+    inputTable = reader.tableName();
+    reader.expectSymbol(')');
+  }
   const alias = reader.takeKeyword('AS') ? reader.identifier() : reader.optionalAlias();
-  return {name, ...(alias === undefined ? {} : {alias})};
+  return {
+    name,
+    ...(alias === undefined ? {} : {alias}),
+    ...(inputTable === undefined ? {} : {inputTable})
+  };
 }
 
 function readJoinType(reader: SQLQueryReader): SQLJoin['type'] | undefined {

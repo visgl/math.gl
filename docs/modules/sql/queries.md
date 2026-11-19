@@ -65,6 +65,24 @@ const totals = queryArrowSQL(
 );
 ```
 
+#### Table functions
+
+Pass `tableFunctions` to use application-defined sources in `FROM` or an inner join.
+Each function accepts one named catalog table and synchronously returns an Arrow
+table. Function names are case-insensitive. The returned rows participate in
+projection, filtering, and sorting like any other source.
+
+```ts
+const trips = queryArrowSQL(
+  'SELECT path, timestamps FROM EXPAND_TRIPS(data)',
+  new Map([['data', tripDictionary]]),
+  {tableFunctions: {expand_trips: expandTripDictionary}}
+);
+```
+
+`expandTripDictionary` is an application function that resolves the segment
+references and returns the assembled trip rows.
+
 For worker execution, see [Workers](workers.md).
 
 ### Querying a stream of record batches

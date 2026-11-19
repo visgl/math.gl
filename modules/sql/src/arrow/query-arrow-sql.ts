@@ -9,22 +9,45 @@ import {
   parseSQLSelectCompound,
   type SQLSelectStatement,
   type SQLSelectStatementOptions,
-  type SQLSort
+  type SQLSort,
+  type SQLTableBinding
 } from '../parser/parse-sql-statement';
 import {queryArrowTable, type ArrowTableQuery} from './query-arrow-table';
 import type {ArrowAggregate} from './aggregates';
 
 type Execution = Pick<ArrowTableQuery, 'signal' | 'functions'>;
 
+/** A synchronous SQL source that derives an Arrow table from one catalog table. */
+export type ArrowSQLTableFunction = (input: Table) => Table;
+
+/** Controls relational SQL execution and its function registries. */
+export type ArrowSQLQueryOptions = Execution &
+  SQLSelectStatementOptions & {
+    /** Case-insensitive names usable in table positions as NAME(input_table). */
+    tableFunctions?: Readonly<Record<string, ArrowSQLTableFunction>>;
+  };
+
 /** Executes relational SQL over a caller-supplied catalog of in-memory Arrow tables. */
 export function queryArrowSQL(
   sql: string,
   tables: ReadonlyMap<string, Table>,
-  options: Execution & SQLSelectStatementOptions = {}
+  options: ArrowSQLQueryOptions = {}
 ): Table {
   const {inputs, orderBy, offset, limit} = parseSQLSelectCompound(sql, options);
   const execution = {signal: options.signal, functions: options.functions};
-  const [first, ...rest] = inputs.map(input => executeSelect(input, tables, execution)) as [
+  const tableFunctions = new Map(
+    Object.entries(options.tableFunctions ?? {}).map(([name, fn]) => [name.toUpperCase(), fn])
+  );
+  /** Resolves a catalog binding or invokes a registered table source once. */
+  const resolveTable = (binding: SQLTableBinding) => {
+    if (binding.inputTable === undefined) return getTable(tables, binding.name);
+    const fn = tableFunctions.get(binding.name.toUpperCase());
+    if (!fn) throw new Error(`Unknown Arrow SQL table function: ${binding.name}`);
+    const input = getTable(tables, binding.inputTable);
+    options.signal?.throwIfAborted();
+    return fn(input);
+  };
+  const [first, ...rest] = inputs.map(input => executeSelect(input, resolveTable, execution)) as [
     Table,
     ...Table[]
   ];
@@ -62,10 +85,10 @@ function planOrder(orderBy?: readonly SQLSort[]) {
 
 function executeSelect(
   statement: SQLSelectStatement,
-  tables: ReadonlyMap<string, Table>,
+  resolveTable: (binding: SQLTableBinding) => Table,
   execution: Execution
 ): Table {
-  let source = getTable(tables, statement.from.name);
+  let source = resolveTable(statement.from);
   const leftAlias = statement.from.alias ?? statement.from.name;
   const [right] = statement.joins;
   let join: ArrowTableQuery['join'];
@@ -98,7 +121,7 @@ function executeSelect(
     if (statement.joins.length > 1 || right.type !== 'inner')
       throw new Error('Arrow SQL supports one INNER JOIN per SELECT');
     rightAlias = right.table.alias ?? right.table.name;
-    rightTable = getTable(tables, right.table.name);
+    rightTable = resolveTable(right.table);
     if (leftAlias === rightAlias) throw new Error('Duplicate Arrow SQL table alias');
     const {on} = right;
     if (on.type !== 'BinaryExpression' || on.operator !== '==')

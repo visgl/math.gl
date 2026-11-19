@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-export {queryArrowSQL} from './arrow/query-arrow-sql';
+export {
+  queryArrowSQL,
+  type ArrowSQLQueryOptions,
+  type ArrowSQLTableFunction
+} from './arrow/query-arrow-sql';
 export {
   queryArrowTable,
   queryArrowTableInBatches,
