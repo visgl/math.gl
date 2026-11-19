@@ -125,3 +125,11 @@ Conditional branches preserve lazy per-row evaluation after domains are resolved
 have compatible result types. Recompile when data-derived domains change; compiling
 on a new table does not mutate an earlier compiled expression. This function does
 not change the single-scale parser or register scales as global functions.
+
+## Natural breaks
+
+Use `getJenksBreaks(values, classCount)` from `@math.gl/core/color` to compute
+Fisher–Jenks thresholds for numeric observations. The optimizer minimizes
+within-class squared error and keeps equal observations together. Supply the
+result as the explicit break list for `SCALE_THRESHOLD`. Each threshold is the
+first value of the upper class.
