@@ -8,14 +8,22 @@ import {
   getSeawaterSoundSpeed,
   getSoundAbsorptionFrancoisGarrison
 } from '@math.gl/earth/ocean';
-import {geographicLatitude, normalizeLongitude} from './refinement.js';
+import {geographicLatitude, mapLatitude, normalizeLongitude} from './refinement.js';
 
+/** Radius of the sea-level sphere in display units; `mesh.js` uses the same globe radius. */
 const SEA_LEVEL_RADIUS = 180;
 
 /**
  * Geographic point where the view ray through a pixel meets sea level.
  * Works on the globe (morph 0) and on the flat map (morph 1); returns null
- * between them, or when the ray misses the globe.
+ * between them, when the ray misses the globe, or outside the rendered map
+ * (Mercator stops at ±85.051129°).
+ * @param {import('@deck.gl/core').Viewport} viewport
+ * @param {number} x Pixel x.
+ * @param {number} y Pixel y.
+ * @param {number} morph Globe → map morph, 0 to 1.
+ * @param {'equirectangular' | 'mercator'} projection Flat map projection.
+ * @returns {{longitude: number, latitude: number} | null}
  */
 export function pickSeaLevelPoint(viewport, x, y, morph, projection) {
   if (morph !== 0 && morph !== 1) return null;
@@ -23,6 +31,7 @@ export function pickSeaLevelPoint(viewport, x, y, morph, projection) {
   const far = viewport.unproject([x, y, 1]);
   const direction = far.map((value, i) => value - near[i]);
   const camera = viewport.cameraPosition;
+  /** Of the ray points at the parameters `candidates`, the one nearest to the camera. */
   const closest = candidates => {
     const points = candidates.map(t => near.map((value, i) => value + t * direction[i]));
     const distance = point => Math.hypot(...point.map((value, i) => value - camera[i]));
@@ -31,9 +40,9 @@ export function pickSeaLevelPoint(viewport, x, y, morph, projection) {
   if (morph === 1) {
     if (Math.abs(direction[1]) < 1e-12) return null;
     const [longitude, , ordinate] = closest([(-SEA_LEVEL_RADIUS - near[1]) / direction[1]]);
-    const latitude = geographicLatitude(ordinate, projection);
-    if (Math.abs(longitude) > 180 || Math.abs(latitude) > 90) return null;
-    return {longitude, latitude};
+    // mapLatitude clamps Mercator to the rendered ±85.051129° edge.
+    if (Math.abs(longitude) > 180 || Math.abs(ordinate) > mapLatitude(90, projection)) return null;
+    return {longitude, latitude: geographicLatitude(ordinate, projection)};
   }
   const a = direction.reduce((sum, value) => sum + value * value, 0);
   const b = 2 * direction.reduce((sum, value, i) => sum + value * near[i], 0);
@@ -56,6 +65,7 @@ export function sampleHeight(heights, longitude, latitude, width = 721, height =
     y0 = Math.min(height - 2, Math.floor(y));
   const fx = x - x0,
     fy = y - y0;
+  /** Grid height at offset (i, j) from the lower-left node of the cell. */
   const at = (i, j) => heights[(y0 + j) * width + x0 + i];
   return (
     (1 - fy) * ((1 - fx) * at(0, 0) + fx * at(1, 0)) + fy * ((1 - fx) * at(0, 1) + fx * at(1, 1))
@@ -78,6 +88,7 @@ export function computeSoundProfile(profile, {latitude, seafloorDepth, frequency
   if (samples.length && samples.at(-1)[0] < deepest) {
     const i = samples.length;
     const t = (deepest - depths[i - 1]) / (depths[i] - depths[i - 1]);
+    /** Linear interpolation of a profile variable at the seafloor depth. */
     const mix = values => values[i - 1] + t * (values[i] - values[i - 1]);
     samples.push([deepest, mix(temperature), mix(practicalSalinity)]);
   }

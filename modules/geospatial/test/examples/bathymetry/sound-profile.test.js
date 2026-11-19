@@ -114,6 +114,25 @@ test('the view ray meets sea level at the focus of the globe and of the flat map
   }
   const viewport = view.makeViewport({width: 1200, height: 800, viewState: base});
   assert.equal(pickSeaLevelPoint(viewport, 600, 400, 0.5, 'equirectangular'), null);
+  // The Mercator mesh ends at ±85.051129°: the background above it selects nothing.
+  const north = view.makeViewport({
+    width: 1200,
+    height: 800,
+    viewState: getMorphViewState({longitude: 0, latitude: 84}, 1, 'mercator', base)
+  });
+  assert.ok(Math.abs(pickSeaLevelPoint(north, 600, 400, 1, 'mercator').latitude - 84) < 1e-6);
+  assert.equal(pickSeaLevelPoint(north, 600, 5, 1, 'mercator'), null, 'Above the Mercator map');
+  const south = pickSeaLevelPoint(north, 600, 600, 1, 'mercator');
+  assert.ok(
+    south.latitude < 84 && south.latitude > -85.051129,
+    'Below the focus, still on the map'
+  );
+  const equirectangular = view.makeViewport({
+    width: 1200,
+    height: 800,
+    viewState: getMorphViewState({longitude: 0, latitude: 84}, 1, 'equirectangular', base)
+  });
+  assert.equal(pickSeaLevelPoint(equirectangular, 600, 5, 1, 'equirectangular'), null);
   assert.equal(
     pickSeaLevelPoint(viewport, 5, 5, 0, 'equirectangular'),
     null,

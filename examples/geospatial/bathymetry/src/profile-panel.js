@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+/** Chart size and margins, in SVG units. */
 const WIDTH = 260,
   HEIGHT = 240,
   LEFT = 44,
@@ -44,6 +45,13 @@ export function createSoundProfileMarkup(result, {longitude, latitude, seafloorD
   ${truncated ? '<p>The profile data end above this seafloor.</p>' : ''}`;
 }
 
+/**
+ * Replace the content of `element` with the chart and summary of one profile.
+ * The markup holds only numbers that this module formats.
+ * @param {HTMLElement} element
+ * @param {ReturnType<import('./sound-profile.js').computeSoundProfile>} result
+ * @param {{longitude: number, latitude: number, seafloorDepth: number, frequency: number}} location
+ */
 export function renderSoundProfile(element, result, location) {
   element.innerHTML = createSoundProfileMarkup(result, location);
 }

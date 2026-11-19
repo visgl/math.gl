@@ -172,7 +172,9 @@ export function mountBathymetry(root, {profileSource} = {}) {
     schedule();
     queueRefinement();
   }
+  /** Geographic point of the last accepted click, or undefined before the first one. */
   let selected;
+  /** Profile source: the caller's, or the WOA23 preview once it loads. */
   const profileSourceReady = profileSource
     ? Promise.resolve(profileSource)
     : loadWoa23ProfileSource({signal: abort.signal});
@@ -186,6 +188,7 @@ export function mountBathymetry(root, {profileSource} = {}) {
         controls('profile-source').textContent = `Unable to load ocean profiles: ${error.message}`;
     }
   );
+  /** Select the sea-level point under a click at pixel (x, y) and show its profile. */
   function selectPoint(x, y) {
     const viewport = deck.getViewports()[0];
     if (!viewport || !heights) return;
@@ -204,6 +207,7 @@ export function mountBathymetry(root, {profileSource} = {}) {
     selected = point;
     showProfile();
   }
+  /** Show the profile of the selected point at the selected frequency, after the profile source loads. */
   async function showProfile() {
     if (!selected) return;
     const request = selected;
