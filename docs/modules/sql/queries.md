@@ -300,3 +300,37 @@ Register this declaration through `functions` and use `SUM_SQUARES(value)` in a
 projection. The query creates one accumulator per group. The accumulator defines
 null handling and the result for an empty input. An aggregate can also emit
 metadata at binding, which is available on its projected output column.
+
+### Table function declarations
+
+A standalone table function receives a named catalog table. Declare the output
+schema during binding and evaluate against that input. The SQL engine validates
+the returned schema.
+
+```ts
+import type {TableFunction} from '@math.gl/sql';
+
+const COPY_ROWS = {
+  kind: 'table',
+  name: 'COPY_ROWS',
+  bind(inputSchema) {
+    return {
+      outputSchema: inputSchema,
+      evaluate: input => input
+    };
+  }
+} satisfies TableFunction;
+```
+
+Register `COPY_ROWS` through `functions` and use `SELECT * FROM COPY_ROWS(input)`.
+The legacy `tableFunctions` map still supports synchronous table transforms.
+A descriptor can attach typed metadata to named output fields. Direct SELECT
+projections carry those entries forward under the final output aliases.
+
+A correlated descriptor implements `bindLateral` for a single input column.
+Its evaluator returns a table and one parent row index per output row. Parent
+positions must be nondecreasing. Use
+`CROSS JOIN LATERAL NAME(source.column) AS alias(output)` to emit the matching
+rows. `LEFT JOIN LATERAL ... ON TRUE` retains unmatched parents and fills the
+function columns with nulls. The built-in `UNNEST` uses the same lateral
+execution path and is available without registration.

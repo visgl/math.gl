@@ -91,12 +91,55 @@ export type AggregateFunction<M = never> = Readonly<{
   };
 }>;
 
+/** Schema and output metadata common to standalone and correlated table functions. */
+type TableFunctionOutput<M> = Readonly<{
+  outputSchema: Schema;
+  columnMetadata?: Readonly<Record<string, readonly M[]>>;
+}>;
+
+/** A relation produced by a table function with one catalog table argument. */
+export type BoundTableFunction<M> = TableFunctionOutput<M> &
+  Readonly<{
+    evaluate(input: Table, options: {signal?: AbortSignal}): Table;
+  }>;
+
+/** A correlated relation indexed by the original parent row positions. */
+export type BoundLateralTableFunction<M> = TableFunctionOutput<M> &
+  Readonly<{
+    evaluate(
+      input: Table,
+      options: {signal?: AbortSignal}
+    ): {
+      table: Table;
+      /** One input row index per output row in nondecreasing order. */
+      parentRows: Int32Array;
+    };
+  }>;
+
+/** A named relation-producing function. Implement either or both binding modes. */
+export type TableFunction<M = never> = Readonly<{kind: 'table'; name: string}> &
+  (
+    | Readonly<{
+        bind(inputSchema: Schema): BoundTableFunction<M>;
+        bindLateral?: LateralTableBinder<M>;
+      }>
+    | Readonly<{bind?: never; bindLateral: LateralTableBinder<M>}>
+  );
+
+/** Binds one correlated column against the parent schema. */
+export type LateralTableBinder<M> = (context: {
+  inputSchema: Schema;
+  argument: Field;
+  ordinality: boolean;
+}) => BoundLateralTableFunction<M>;
+
 /** A function or a reusable package of functions. */
 export type ArrowFunctionPackage =
   | ArrowTableFunction
   | ScalarFunction
   | PreparedScalarFunction<unknown>
   | AggregateFunction<unknown>
+  | TableFunction<unknown>
   | readonly ArrowFunctionPackage[];
 
 /** Schema binding shared by predicate and expression compilation. */
