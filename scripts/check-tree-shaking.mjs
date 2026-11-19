@@ -13,6 +13,7 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  {symbol: "createArrowColumns", packages: ["@math.gl/sql/arrow"], forbidden: [/sql\/(src|dist)\/scales\//], budget: 307000},
   // Schema-dependent function binding brings the SQL query consumer to 307,216 bytes.
   {symbol:'queryArrowSQL', packages:['@math.gl/sql'], forbidden:[/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/loaders.gl/,/geospatial\//], budget:307500},
 
