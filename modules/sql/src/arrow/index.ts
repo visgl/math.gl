@@ -20,3 +20,5 @@ export {
   isExpressionEvaluationError,
   type ExpressionEvaluationErrorCode
 } from '../expressions';
+
+export {createArrowColumns, type ArrowProjectionOperation} from './create-arrow-columns';
