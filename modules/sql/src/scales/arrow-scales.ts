@@ -27,7 +27,7 @@ import {
   resolveArrowExpressionStatistics,
   resolveArrowQuantiles
 } from './arrow-domains';
-import {parseSQLScaleAST, type ParsedSQLScale} from './parse-sql-scale';
+import {parseSQLScaleAST, SQL_SCALE_TYPES, type ParsedSQLScale} from './parse-sql-scale';
 import {parseSQLExpression} from '../parser/parse-sql-expression';
 import type {Expression} from '../expressions';
 import type {CompiledArrowExpression} from '../arrow/types';
@@ -281,7 +281,7 @@ export const scaleProjectionOperation: ArrowProjectionOperation<ScaleProjectionM
   matches(call) {
     return (
       call.callee.type === 'Identifier' &&
-      /^SCALE_(LINEAR|SQRT|LOG|COLOR|DIVERGING|ORDINAL|QUANTILE|QUANTIZE|THRESHOLD)$/i.test(
+      /^SCALE_(LINEAR|SQRT|LOG|POWER|SYMLOG|COLOR|CYCLIC|DIVERGING|ORDINAL|QUANTILE|QUANTIZE|THRESHOLD)$/i.test(
         String(call.callee['name'])
       )
     );
@@ -340,19 +340,9 @@ export const scaleProjectionOperation: ArrowProjectionOperation<ScaleProjectionM
 /** SQL scale functions that contribute their resolved descriptors to query metadata. */
 export const VISUALIZATION_FUNCTIONS: readonly PreparedScalarFunction<ScaleProjectionMetadata>[] =
   /* @__PURE__ */ Object.freeze(
-    [
-      'LINEAR',
-      'SQRT',
-      'LOG',
-      'COLOR',
-      'DIVERGING',
-      'ORDINAL',
-      'QUANTILE',
-      'QUANTIZE',
-      'THRESHOLD'
-    ].map(name => ({
+    Object.keys(SQL_SCALE_TYPES).map(name => ({
       kind: 'scalar' as const,
-      name: 'SCALE_' + name,
+      name,
       prepare: scaleProjectionOperation.prepare
     }))
   );
