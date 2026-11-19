@@ -76,11 +76,17 @@ export interface AggregateAccumulator {
 
 /** A reduction that binds its schema and creates independent group state. */
 export type AggregateFunction<M = never> = Readonly<{
+  /** SQL execution kind for a group reduction. */
   kind: 'aggregate';
+  /** SQL call name. */
   name: string;
+  /** Binds the evaluated argument fields once per query. */
   bind(context: {arguments: readonly Field[]}): {
+    /** Arrow field produced by each group. */
     outputField: Field;
+    /** Creates independent state for a group. */
     createAccumulator(): AggregateAccumulator;
+    /** Optional application data attached to the output expression. */
     metadata?: M;
   };
 }>;
