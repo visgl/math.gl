@@ -58,7 +58,9 @@ export type ScalarFunction<M = never> = [M] extends [never]
 
 /** Scalar declaration requiring access to the projection input before evaluation. */
 export type PreparedScalarFunction<M> = Pick<ArrowProjectionOperation<M>, 'prepare'> & {
+  /** SQL execution kind for a row-preserving expression. */
   readonly kind: 'scalar';
+  /** SQL call name matched case-insensitively during preparation. */
   readonly name: string;
 };
 

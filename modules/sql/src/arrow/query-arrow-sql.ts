@@ -29,7 +29,9 @@ type PackageMetadata<F, Depth extends readonly unknown[] = []> =
 
 /** An Arrow query result with metadata attributed to each projected column. */
 export type ArrowSQLMetadataResult<M> = {
+  /** Query output with its native Apache Arrow schema. */
   readonly table: Table;
+  /** Ordered metadata grouped by final SQL output name. */
   readonly columnMetadata: Readonly<Record<string, readonly M[] | undefined>>;
 };
 
