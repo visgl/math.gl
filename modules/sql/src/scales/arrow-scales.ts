@@ -19,7 +19,7 @@ import {
 import {prepareArrowColumn, type ArrowProjectionOperation} from '../arrow/create-arrow-columns';
 import {compileArrowExpression} from '../arrow/compiler';
 import {nullTupleVector} from '../arrow/list-values';
-import type {ArrowExpression, ArrowTableFunction} from '../arrow/types';
+import type {ArrowExpression, ArrowTableFunction, PreparedScalarFunction} from '../arrow/types';
 import {compileResolvedScale} from './compile-scale';
 import {
   arrowScaleValue,
@@ -336,3 +336,23 @@ export const scaleProjectionOperation: ArrowProjectionOperation<ScaleProjectionM
     };
   }
 };
+
+/** SQL scale functions that contribute their resolved descriptors to query metadata. */
+export const VISUALIZATION_FUNCTIONS: readonly PreparedScalarFunction<ScaleProjectionMetadata>[] =
+  /* @__PURE__ */ Object.freeze(
+    [
+      'LINEAR',
+      'SQRT',
+      'LOG',
+      'COLOR',
+      'DIVERGING',
+      'ORDINAL',
+      'QUANTILE',
+      'QUANTIZE',
+      'THRESHOLD'
+    ].map(name => ({
+      kind: 'scalar' as const,
+      name: 'SCALE_' + name,
+      prepare: scaleProjectionOperation.prepare
+    }))
+  );

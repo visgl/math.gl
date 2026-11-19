@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-export {queryArrowSQL} from './arrow/query-arrow-sql';
+export {
+  queryArrowSQL,
+  queryArrowSQLWithMetadata,
+  type ArrowSQLMetadataResult
+} from './arrow/query-arrow-sql';
 export {
   queryArrowTable,
   queryArrowTableInBatches,
@@ -30,6 +34,9 @@ export type {
   ArrowExpressionEvaluationOptions,
   ArrowExpressionValue,
   ArrowTableFunction,
+  ArrowFunctionPackage,
+  ScalarFunction,
+  PreparedScalarFunction,
   ArrowTableFunctionPrototype,
   ArrowTableFunctionType
 } from './arrow/types';

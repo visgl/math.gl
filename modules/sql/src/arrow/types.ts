@@ -4,6 +4,7 @@
 
 import type {Field, Schema, RecordBatch, Vector, Table} from 'apache-arrow';
 import type {Expression} from '../expressions';
+import type {ArrowProjectionOperation} from './create-arrow-columns';
 
 /**
  * Scalar values exposed to user callbacks. Date32 uses epoch days and microsecond
@@ -50,12 +51,30 @@ export type ArrowTableFunction = Readonly<{
   ): ArrowTableFunctionPrototype | undefined;
 }>;
 
+/** Flat declaration for a schema-bound scalar function. */
+export type ScalarFunction<M = never> = [M] extends [never]
+  ? ArrowTableFunction & {readonly kind: 'scalar'}
+  : PreparedScalarFunction<M>;
+
+/** Scalar declaration requiring access to the projection input before evaluation. */
+export type PreparedScalarFunction<M> = Pick<ArrowProjectionOperation<M>, 'prepare'> & {
+  readonly kind: 'scalar';
+  readonly name: string;
+};
+
+/** A function or a reusable package of functions. */
+export type ArrowFunctionPackage =
+  | ArrowTableFunction
+  | ScalarFunction
+  | PreparedScalarFunction<unknown>
+  | readonly ArrowFunctionPackage[];
+
 /** Schema binding shared by predicate and expression compilation. */
 export type ArrowExpressionOptions = Readonly<{
   /** Expected batch schema, validated before evaluation. */
   inputSchema: Schema;
   /** Named function declarations, snapshotted into a private lookup during compilation. */
-  functions?: readonly ArrowTableFunction[];
+  functions?: readonly ArrowFunctionPackage[];
 }>;
 
 /** Controls shared by batch and whole-table evaluation. */

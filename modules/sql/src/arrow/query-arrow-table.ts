@@ -34,7 +34,7 @@ import {
   type ArrowQueryJoin,
   type ArrowQueryOrder
 } from './relational-query';
-import type {ArrowExpressionOptions, CompiledArrowExpression} from './types';
+import type {ArrowExpression, ArrowExpressionOptions, CompiledArrowExpression} from './types';
 
 /** A linear Arrow query that can execute incrementally over batches. */
 export type ArrowBatchQuery = TableQuery<ParameterizedColumnarPredicate> &
@@ -94,7 +94,16 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
     return queryArrowTable(source, {select, offset, limit, functions, signal});
   }
 
-  const plan = compileArrowQuery(source.schema, query);
+  return executeArrowProjection(source, query);
+}
+
+/** Executes an already filtered input, optionally binding prepared projection calls. */
+export function executeArrowProjection(
+  source: Table,
+  query: ArrowBatchQuery,
+  prepare?: (expression: ArrowExpression, name: string) => CompiledArrowExpression
+): Table {
+  const plan = compileArrowQuery(source.schema, query, prepare);
   const result: RecordBatch[] = [];
   for (const batch of source.batches) {
     if (plan.done()) break;
@@ -134,7 +143,11 @@ function validatePagination(offset: number, limit?: number): void {
 }
 
 /** Binds predicates and projection to a schema once per execution. */
-function compileArrowQuery(inputSchema: Schema, query: ArrowBatchQuery) {
+function compileArrowQuery(
+  inputSchema: Schema,
+  query: ArrowBatchQuery,
+  prepare?: Parameters<typeof executeArrowProjection>[2]
+) {
   const {select, where, offset = 0, limit, functions, parameters, signal} = query;
   const options = {inputSchema, functions};
   const predicate = where
@@ -159,16 +172,18 @@ function compileArrowQuery(inputSchema: Schema, query: ArrowBatchQuery) {
   const projection: Projection[] = select
     ? select.map((selection, ordinal) => {
         if (typeof selection !== 'string' && ('array' in selection || 'expression' in selection)) {
-          const expression =
-            'array' in selection
-              ? compileArrowArray(selection.array, {...options, type: selection.type})
-              : compileArrowExpression(selection.expression, options);
           let name = selection.as;
           if (name === undefined) {
             name = `expression_${ordinal + 1}`;
             while (names.has(name)) name += '_';
             names.add(name);
           }
+          const expression =
+            'array' in selection
+              ? compileArrowArray(selection.array, {...options, type: selection.type})
+              : prepare
+                ? prepare(selection.expression, name)
+                : compileArrowExpression(selection.expression, options);
           return {expression, field: expression.outputField.clone({name})};
         }
         const column = typeof selection === 'string' ? selection : selection.column;

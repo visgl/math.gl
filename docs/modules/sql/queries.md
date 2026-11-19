@@ -169,3 +169,38 @@ one group. Supported keys include strings, booleans, integers, and finite floati
 Each successful batch commits its changes together. An expression error or cancellation preserves
 the previous result.
 
+
+## Function packages and column metadata
+
+The `functions` option accepts individual declarations and nested readonly arrays.
+Pass exported packages directly to reuse them across calls.
+
+```ts
+import {tableFromArrays} from 'apache-arrow';
+import {queryArrowSQLWithMetadata} from '@math.gl/sql';
+import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/turf/expressions';
+import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
+
+const tables = new Map([['observations', tableFromArrays({value: [0, 2, 6, 8]})]]);
+const {table, columnMetadata} = queryArrowSQLWithMetadata(
+  "SELECT value, SCALE_COLOR(value, DOMAIN(value), PALETTE('Blues')) AS color " +
+    "FROM observations WHERE value > 0 ORDER BY value LIMIT 2",
+  tables,
+  {functions: [POSTGIS_SPATIAL_FUNCTIONS, VISUALIZATION_FUNCTIONS]}
+);
+const scale = columnMetadata.color?.find(entry => entry.kind === 'scale')?.scale;
+// The table has two rows. The scale domain is [2, 8], including the filtered row beyond LIMIT.
+```
+
+The returned scale is the same `ResolvedScale` that generated the color column.
+Use its descriptor to build a legend. Each output column has an ordered list of
+metadata entries. A column without metadata has an empty list. Entries in a
+conditional expression describe all the bound calls, including calls in branches
+that some rows skip. A `UNION ALL` combines entries by output position in branch
+order and uses the first branch's column names.
+
+Use `queryArrowSQL` when you only need the table. A prepared scalar declaration
+uses a flat object with `kind: 'scalar'`, a SQL `name`, and a `prepare` method.
+Use `satisfies ScalarFunction<MyMetadata>` to check the declaration and retain the
+metadata type. Preparation can inspect the filtered input table and return a
+rewritten expression, generated scalar declarations, and one metadata entry.

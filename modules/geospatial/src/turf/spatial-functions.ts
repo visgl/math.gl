@@ -12,7 +12,7 @@ import {
   vectorFromArray,
   type Vector
 } from 'apache-arrow';
-import type {ArrowTableFunction} from '@math.gl/sql/arrow';
+import type {ArrowTableFunction, ScalarFunction} from '@math.gl/sql/arrow';
 import {
   getGeoArrowFieldInfo,
   isGeoArrowValueValid,
@@ -103,8 +103,9 @@ function spatialFunction(
   signatures: readonly (readonly GeometryKind[])[],
   type: SpatialResult,
   evaluate: (geometries: readonly WellKnownGeometry[]) => SpatialValue
-): ArrowTableFunction {
+): ScalarFunction {
   return {
+    kind: 'scalar',
     name,
     prototypes: [],
     /** Binds the allowed geometry types and result metadata to a call. */

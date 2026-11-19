@@ -6,7 +6,13 @@ import {createRecordBatchWithMetadata} from '@math.gl/core/arrow';
 import {Data, Schema, Struct, Table, type Field} from 'apache-arrow';
 import type {Expression} from '../expressions';
 import {compileArrowExpression} from './compiler';
-import type {ArrowTableFunction, CompiledArrowExpression} from './types';
+import {walkArrowFunctions} from './registry';
+import type {
+  ArrowFunctionPackage,
+  ArrowTableFunction,
+  CompiledArrowExpression,
+  PreparedScalarFunction
+} from './types';
 
 type Call = Extract<Expression, {type: 'CallExpression'}>;
 
@@ -45,10 +51,12 @@ export function prepareArrowColumn<M>(
   table: Table,
   expression: Expression,
   operations: readonly ArrowProjectionOperation<M>[],
-  functions: readonly ArrowTableFunction[] = []
+  functions: readonly ArrowFunctionPackage[] = []
 ): {compiled: CompiledArrowExpression; metadata: M[]} {
-  const declarations = [...functions];
-  const names = new Set(functions.map(fn => fn.name.toUpperCase()));
+  const declarations = [...walkArrowFunctions(functions)].filter(
+    (fn): fn is ArrowTableFunction => !('prepare' in fn)
+  );
+  const names = new Set(declarations.map(fn => fn.name.toUpperCase()));
   function reserve(node: Expression): Expression {
     if (node.type === 'Identifier') names.add(node.name.toUpperCase());
     mapChildren(node, reserve);
@@ -85,6 +93,34 @@ export function prepareArrowColumn<M>(
   return {compiled, metadata};
 }
 
+/** Indexes the prepared calls contributed by nested packages. */
+export function getProjectionOperations(
+  functions: readonly ArrowFunctionPackage[] = []
+): readonly ArrowProjectionOperation<unknown>[] {
+  const prepared = new Map<string, PreparedScalarFunction<unknown>>();
+  const names = new Set<string>();
+  for (const declaration of walkArrowFunctions(functions)) {
+    if (typeof declaration?.name !== 'string') throw new Error('Invalid Arrow function name');
+    const name = declaration.name.toUpperCase();
+    if (prepared.has(name) || ('prepare' in declaration && names.has(name)))
+      throw new Error(`Duplicate Arrow prepared function: ${name}`);
+    names.add(name);
+    if ('prepare' in declaration) prepared.set(name, declaration);
+  }
+  if (!prepared.size) return [];
+  return [
+    {
+      matches: call =>
+        call.callee.type === 'Identifier' &&
+        prepared.has(String(call.callee['name']).toUpperCase()),
+      prepare(call, context) {
+        if (call.callee.type !== 'Identifier') throw new Error('Expected an Arrow function name');
+        return prepared.get(String(call.callee['name']).toUpperCase())!.prepare(call, context);
+      }
+    }
+  ];
+}
+
 /** Creates a new table of named output columns and collects metadata per column. */
 export function createArrowColumns<
   K extends string,
@@ -94,7 +130,7 @@ export function createArrowColumns<
   expressions: Readonly<Record<K, Expression>>,
   options: {
     operations?: readonly O[];
-    functions?: readonly ArrowTableFunction[];
+    functions?: readonly ArrowFunctionPackage[];
   } = {}
 ) {
   type Metadata = ReturnType<O['prepare']>['metadata'];

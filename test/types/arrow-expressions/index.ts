@@ -209,3 +209,18 @@ for (const entry of mixed.columnMetadata.color) {
   if (entry.kind === 'scale') entry.scale.sample(1);
   else entry.label.toUpperCase();
 }
+
+import {queryArrowSQLWithMetadata, type ScalarFunction} from '@math.gl/sql';
+import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
+declare const tagFunction: ScalarFunction<{kind: 'tag'; label: string}>;
+const taggedQuery = queryArrowSQLWithMetadata(
+  'SELECT value FROM input',
+  new Map([['input', source]]),
+  {
+    functions: [VISUALIZATION_FUNCTIONS, [[tagFunction]]]
+  }
+);
+for (const entry of taggedQuery.columnMetadata['value'] ?? []) {
+  if (entry.kind === 'scale') entry.scale.sample(1);
+  else entry.label.toUpperCase();
+}

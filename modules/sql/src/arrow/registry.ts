@@ -3,14 +3,31 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {physicalKey} from './signature';
-import type {ArrowTableFunction} from './types';
+import type {ArrowFunctionPackage, ArrowTableFunction, PreparedScalarFunction} from './types';
+
+/** Traverses packages without changing or spreading the supplied arrays. */
+export function* walkArrowFunctions(
+  declarations: readonly ArrowFunctionPackage[],
+  ancestors = new Set<readonly ArrowFunctionPackage[]>()
+): Iterable<ArrowTableFunction | PreparedScalarFunction<unknown>> {
+  if (ancestors.has(declarations)) throw new Error('Cyclic Arrow function package');
+  ancestors.add(declarations);
+  try {
+    for (const entry of declarations) {
+      if (Array.isArray(entry)) yield* walkArrowFunctions(entry, ancestors);
+      else yield entry as ArrowTableFunction | PreparedScalarFunction<unknown>;
+    }
+  } finally {
+    ancestors.delete(declarations);
+  }
+}
 
 /** Builds one private, immutable declaration lookup per compilation. */
 export function createFunctionLookup(
-  declarations: readonly ArrowTableFunction[] = []
+  declarations: readonly ArrowFunctionPackage[] = []
 ): ReadonlyMap<string, ArrowTableFunction> {
   const functions = new Map<string, ArrowTableFunction>();
-  for (const declaration of declarations) {
+  for (const declaration of walkArrowFunctions(declarations)) {
     const name = declaration?.name;
     if (typeof name !== 'string' || !/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(name))
       throw new Error('Invalid Arrow function name');
@@ -40,6 +57,7 @@ export function createFunctionLookup(
       ].includes(name)
     )
       throw new Error(`Reserved Arrow function: ${name}`);
+    if ('prepare' in declaration) continue;
     const previous = functions.get(name);
     const resolver = declaration.resolvePrototype;
     if (resolver !== undefined && typeof resolver !== 'function')
