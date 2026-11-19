@@ -229,6 +229,7 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
     SCALE_POWER: 'linear',
     SCALE_SYMLOG: 'symlog',
     SCALE_COLOR: 'sequential',
+    SCALE_CYCLIC: 'cyclic',
     SCALE_DIVERGING: 'diverging',
     SCALE_ORDINAL: 'ordinal',
     SCALE_QUANTILE: 'quantile',
@@ -298,6 +299,7 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
     }
   }
   const colors = [
+    'cyclic',
     'sequential',
     'diverging',
     'ordinal',
@@ -321,6 +323,7 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
       throw new Error('SCALE_THRESHOLD requires one more color than breaks');
     }
   } else if (
+    type !== 'cyclic' &&
     domain.type === 'fixed' &&
     range.type === 'colors' &&
     domain.values.length !== range.values.length

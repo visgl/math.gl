@@ -128,6 +128,20 @@ not change the single-scale parser or register scales as global functions.
 
 See [Creating Arrow columns](../arrow-columns.md) for a color column and its legend.
 
+## Cyclic color
+
+Use `SCALE_CYCLIC` for measurements that repeat, such as a compass heading or
+the hour of day. Supply the fixed origin and end of one complete period.
+
+```sql
+SCALE_CYCLIC(heading_degrees, DOMAIN(0, 360), PALETTE('compass'))
+```
+
+Zero, 360, and −360 degrees all sample the same color. The palette stops are
+evenly spaced around the period, including the transition from its last stop
+back to its first. Custom colors go in cycle order. The sampler closes the loop
+automatically. Use the resolved scale to draw a circular legend.
+
 ## Power and symmetric log
 
 Use `SCALE_POWER(value, DOMAIN(min, max), RANGE(low, high), exponent)` to tune

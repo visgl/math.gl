@@ -50,6 +50,8 @@ tone mapping and output presentation are separate downstream responsibilities.
 
 See https://github.com/visgl/deck.gl/issues/11147 for the cross-repository tracker.
 
+For clustered observations, see [Fisher–Jenks natural breaks](natural-breaks.md).
+
 ## Evaluate on Arrow
 
 Install Apache Arrow and import `compileArrowScale` from `@math.gl/sql/scales`.
