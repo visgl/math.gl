@@ -179,6 +179,7 @@ export const ST_MAKEPOINT: ScalarFunction = {
   kind: 'scalar',
   name: 'ST_MakePoint',
   prototypes: [],
+  /** Binds two to four numeric ordinate fields and declares a WKB result. */
   resolvePrototype(fields) {
     if (fields.length < 2 || fields.length > 4) return undefined;
     const arguments_ = fields.map(field => {
@@ -190,6 +191,7 @@ export const ST_MAKEPOINT: ScalarFunction = {
     return {
       arguments: arguments_,
       result: new Field('ST_MakePoint', type, true, new Map([[EXTENSION_NAME, 'geoarrow.wkb']])),
+      /** Writes one point per active row, retaining nulls in all other rows. */
       evaluate(vectors, {activeRows, length}) {
         const values = new Array<Uint8Array | null>(length).fill(null);
         for (let row = 0; row < length; row++) {
