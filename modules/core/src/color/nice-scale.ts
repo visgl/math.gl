@@ -19,6 +19,12 @@ export function niceScale(
   thresholds?: readonly number[]
 ): {domain: readonly [number, number]; thresholds?: readonly number[]} {
   const [lower, upper] = domain;
+  if (lower > upper && !thresholds) {
+    const {
+      domain: [min, max]
+    } = niceScale([upper, lower]);
+    return {domain: [max, min]};
+  }
   const span = upper - lower;
   if (!(span > 0) || !Number.isFinite(span)) {
     return {domain, thresholds};

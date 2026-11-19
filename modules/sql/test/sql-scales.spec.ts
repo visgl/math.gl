@@ -185,3 +185,13 @@ test('NICE rounds the actual continuous bounds and quantile breaks', () => {
     parseSQLScaleExpression("SCALE_COLOR(value, DOMAIN(0, 1, 2), PALETTE('viridis'), NICE())")
   ).toThrow('NICE()');
 });
+
+test('NICE rounds reversed sequential bounds without reversing the palette', () => {
+  const {scale} = parseSQLScaleExpression(
+    "SCALE_COLOR(value, DOMAIN(33, 5.1), PALETTE('#000000', '#ffffff'), NICE())"
+  );
+  const resolved = compileResolvedScale(scale, [33, 5.1]);
+  expect(resolved.descriptor.domain).toEqual([35, 5]);
+  expect(resolved.sample(35)).toEqual([0, 0, 0, 1]);
+  expect(resolved.sample(5)).toEqual([1, 1, 1, 1]);
+});
