@@ -77,6 +77,8 @@ export type ScaleSpec = {
     | 'piecewise';
   readonly domain: ScaleDomain;
   readonly range: ScaleRange;
+  /** Rounds the resolved extent and quantile breaks for two-endpoint color scales. */
+  readonly nice?: boolean;
   readonly clamp?: boolean;
   readonly pivot?: number;
   readonly interpolation?: 'srgb' | 'linear-srgb' | 'oklab' | 'jzazbz';

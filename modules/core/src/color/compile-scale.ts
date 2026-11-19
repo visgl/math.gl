@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {niceScale} from './nice-scale';
 import {
   createResolvedScale,
   type ResolvedScale,
@@ -100,6 +101,13 @@ export function compileResolvedScale(
   domain: readonly ScaleValue[],
   thresholds?: readonly number[]
 ): ResolvedScale {
+  if (spec.nice) {
+    const values = numericValues(domain);
+    if ((spec.type !== 'sequential' && spec.type !== 'quantile') || values.length !== 2) {
+      throw new Error('Nice scales require a two-endpoint sequential or quantile scale');
+    }
+    ({domain, thresholds} = niceScale([values[0]!, values[1]!], thresholds));
+  }
   const colorType = [
     'sequential',
     'diverging',

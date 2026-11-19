@@ -221,7 +221,8 @@ export function parseSQLScaleExpression(
 export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
   const root = call(expression);
   const fn = root.callee.name.toUpperCase();
-  const args = root.arguments;
+  const niceArgument = root.arguments.length === 4 ? root.arguments[3] : undefined;
+  const args = niceArgument ? root.arguments.slice(0, 3) : root.arguments;
   const names: Record<string, ScaleSpec['type']> = {
     SCALE_LINEAR: 'linear',
     SCALE_SQRT: 'sqrt',
@@ -295,6 +296,15 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
   ) {
     throw new Error('Explicit domain and color stops must have equal lengths');
   }
-  const scale = validateScaleSpec({type, domain, range});
+  if (niceArgument) {
+    if (
+      (type !== 'sequential' && type !== 'quantile') ||
+      call(niceArgument, 'NICE').arguments.length ||
+      (domain.type === 'fixed' && domain.values.length !== 2)
+    ) {
+      throw new Error('NICE() requires a two-endpoint sequential or quantile scale');
+    }
+  }
+  const scale = validateScaleSpec({type, domain, range, ...(niceArgument && {nice: true})});
   return {value, scale};
 }

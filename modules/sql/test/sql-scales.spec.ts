@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {parseSQLScaleExpression, parseSQLScaleAST} from '../src/scales';
+import {compileResolvedScale, parseSQLScaleExpression, parseSQLScaleAST} from '../src/scales';
 import {parseSQLExpression, parseSQLSelectStatement} from '../src/parser';
 import type {Expression} from '../src/expressions';
 
@@ -165,4 +165,23 @@ test('fixed ordinal categories preserve literal types and allow a single explici
       parseSQLScaleExpression(`SCALE_ORDINAL(value, ${categories}, PALETTE('Tableau10'))`)
     ).toThrow();
   }
+});
+
+test('NICE rounds the actual continuous bounds and quantile breaks', () => {
+  const continuous = parseSQLScaleExpression(
+    "SCALE_COLOR(value, DOMAIN(value), PALETTE('#000000', '#ffffff'), NICE())"
+  );
+  const quantile = parseSQLScaleExpression("SCALE_QUANTILE(value, 5, PALETTE('viridis'), NICE())");
+  expect(continuous.scale.nice).toBe(true);
+  expect(compileResolvedScale(continuous.scale, [5.1, 33]).descriptor.domain).toEqual([5, 35]);
+  const scale = compileResolvedScale(quantile.scale, [17, 89], [27, 41, 58, 72]);
+  expect(scale.descriptor.domain).toEqual([15, 90]);
+  expect(scale.descriptor.thresholds).toEqual([30, 40, 60, 70]);
+  expect(scale.sample(29)).not.toEqual(scale.sample(30));
+  expect(
+    compileResolvedScale(quantile.scale, [0, 100], [20, 21, 60, 80]).descriptor.thresholds
+  ).toHaveLength(4);
+  expect(() =>
+    parseSQLScaleExpression("SCALE_COLOR(value, DOMAIN(0, 1, 2), PALETTE('viridis'), NICE())")
+  ).toThrow('NICE()');
 });

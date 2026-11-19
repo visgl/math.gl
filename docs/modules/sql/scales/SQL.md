@@ -125,3 +125,16 @@ Conditional branches preserve lazy per-row evaluation after domains are resolved
 have compatible result types. Recompile when data-derived domains change; compiling
 on a new table does not mutate an earlier compiled expression. This function does
 not change the single-scale parser or register scales as global functions.
+
+## Rounded bounds and breaks
+
+Add `NICE()` as the fourth argument to `SCALE_COLOR` with a two-endpoint domain
+or to `SCALE_QUANTILE`. The scale rounds the endpoints outward and snaps quantile
+breaks to nearby decimal steps. If rounding would merge distinct breaks, it
+tries a finer step. The reported bounds and breaks also control the color
+mapping. Rounded quantile classes can have different numbers of observations.
+
+```sql
+SCALE_COLOR(height, DOMAIN(height), PALETTE('YlOrRd'), NICE())
+SCALE_QUANTILE(coverage, 5, PALETTE('viridis'), NICE())
+```
