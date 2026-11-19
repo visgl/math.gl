@@ -1,11 +1,11 @@
 # Portable visualization scale descriptors (experimental)
 
-The optional `@math.gl/sql/scales` entry point defines serializable scale
-**specifications** and resolved scale metadata without introducing a D3, renderer,
-Apache Arrow, or GPU runtime dependency.
+Use `@math.gl/core/color` for portable scale specifications and samplers.
+For SQL parsing, Arrow domain resolution, and column evaluation, use
+`@math.gl/sql/scales`.
 
 ```ts
-import {validateScaleSpec, createResolvedScale} from '@math.gl/sql/scales';
+import {validateScaleSpec, compileResolvedScale} from '@math.gl/core/color';
 
 const spec = validateScaleSpec({
   id: 'temperature',
@@ -15,16 +15,9 @@ const spec = validateScaleSpec({
   interpolation: 'oklab'
 });
 
-// After a source-specific backend computes the domain and resolves the palette:
-const resolved = createResolvedScale({
-  id: 'temperature',
-  type: 'sequential',
-  domain: [-20, 50],
-  range: {type: 'colors', values: [[0.1, 0, 0.3, 1], [1, 0.9, 0.2, 1]]}
-}, value => {
-  // Backend-provided evaluator; the layer and legend must share this callback.
-  return value === null ? null : [1, 0.9, 0.2, 1];
-});
+// The source supplies its observed domain before sampling.
+const resolved = compileResolvedScale(spec, [-20, 50]);
+const color = resolved.sample(12);
 ```
 
 `ScaleSpec` describes fixed/data-derived domains, numeric ranges, explicit color
@@ -36,9 +29,9 @@ be strictly increasing. An ordinal domain and its resolved range can each contai
 a single entry.
 
 The scale **descriptor** remains JSON-safe for transport, legends and tooltips.
-The callback is a separate runtime facility. This module deliberately does not
-compute data-derived statistics, fetch palettes, interpolate colors, or render
-legends. Those belong in subsequent PRs.
+Use the sampler to style marks and to build a legend from the same mapping.
+For numeric scales, `inputUnits` labels the data domain and `outputUnits` labels
+the sampled measurement.
 
 ### HDR interpretation
 
