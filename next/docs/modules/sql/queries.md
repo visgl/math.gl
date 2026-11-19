@@ -70,6 +70,24 @@ const totals = queryArrowSQL(
 );
 ```
 
+#### Table functions[​](#table-functions "Direct link to Table functions")
+
+Pass `tableFunctions` to use application-defined sources in `FROM` or an inner join. Each function accepts one named catalog table and synchronously returns an Arrow table. Function names are case-insensitive. The returned rows participate in projection, filtering, and sorting like any other source.
+
+```
+const trips = queryArrowSQL(
+
+  'SELECT path, timestamps FROM EXPAND_TRIPS(data)',
+
+  new Map([['data', tripDictionary]]),
+
+  {tableFunctions: {expand_trips: expandTripDictionary}}
+
+);
+```
+
+`expandTripDictionary` is an application function that resolves the segment references and returns the assembled trip rows.
+
 For worker execution, see [Workers](https://visgl.github.io/math.gl/next/docs/modules/sql/workers.md).
 
 ### Querying a stream of record batches[​](#querying-a-stream-of-record-batches "Direct link to Querying a stream of record batches")
