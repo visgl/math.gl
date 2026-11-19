@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {niceScale} from './nice-scale';
 import {
   createResolvedScale,
   type ResolvedScale,
@@ -67,7 +68,9 @@ function interpolateColor(
   return [mix(a[0], b[0]), mix(a[1], b[1]), mix(a[2], b[2]), alpha];
 }
 
-function normalize(value: number, a: number, b: number, type: ScaleSpec['type']): number {
+/** Normalizes in the transformed domain, preserving the raw domain in the descriptor. */
+function normalize(value: number, a: number, b: number, spec: ScaleSpec): number {
+  const {type, transform} = spec;
   if (a === b) return 0.5;
   if (type === 'log') {
     if (a <= 0 || b <= 0 || value <= 0) return NaN;
@@ -77,8 +80,20 @@ function normalize(value: number, a: number, b: number, type: ScaleSpec['type'])
     if (a < 0 || b < 0 || value < 0) return NaN;
     return (Math.sqrt(value) - Math.sqrt(a)) / (Math.sqrt(b) - Math.sqrt(a));
   }
-  if (type === 'symlog') {
-    const symlog = (v: number) => Math.sign(v) * Math.log1p(Math.abs(v));
+  if (transform?.type === 'power') {
+    const magnitude = Math.max(Math.abs(a), Math.abs(b));
+    const power = (v: number) => Math.sign(v) * (Math.abs(v) / magnitude) ** transform.exponent;
+    return (power(value) - power(a)) / (power(b) - power(a));
+  }
+  if (type === 'symlog' || transform?.type === 'symlog') {
+    const constant = transform?.type === 'symlog' ? transform.constant : 1;
+    const symlog = (v: number) => {
+      const ratio = Math.abs(v) / constant;
+      return (
+        Math.sign(v) *
+        (Number.isFinite(ratio) ? Math.log1p(ratio) : Math.log(Math.abs(v)) - Math.log(constant))
+      );
+    };
     return (symlog(value) - symlog(a)) / (symlog(b) - symlog(a));
   }
   return (value - a) / (b - a);
@@ -100,7 +115,17 @@ export function compileResolvedScale(
   domain: readonly ScaleValue[],
   thresholds?: readonly number[]
 ): ResolvedScale {
+  /** The resolution request is consumed before producing the portable descriptor. */
+  const {nice, ...resolvedSpec} = spec;
+  if (nice) {
+    const values = numericValues(domain);
+    if ((spec.type !== 'sequential' && spec.type !== 'quantile') || values.length !== 2) {
+      throw new Error('Nice scales require a two-endpoint sequential or quantile scale');
+    }
+    ({domain, thresholds} = niceScale([values[0]!, values[1]!], thresholds));
+  }
   const colorType = [
+    'cyclic',
     'sequential',
     'diverging',
     'ordinal',
@@ -141,7 +166,7 @@ export function compileResolvedScale(
   const resolvedRange: ResolvedScaleDescriptor['range'] =
     spec.range.type === 'numeric' ? spec.range : {type: 'colors', values: paletteStops!};
   const descriptor: ResolvedScaleDescriptor = {
-    ...spec,
+    ...resolvedSpec,
     domain: [...domain],
     range: resolvedRange,
     ...(spec.range.type === 'palette' ? {palette: spec.range.name} : {}),
@@ -169,6 +194,28 @@ export function compileResolvedScale(
     if (typeof value !== 'number' || !Number.isFinite(value)) return spec.nullColor ?? null;
     const min = numerical[0]!,
       max = numerical[numerical.length - 1]!;
+    if (spec.type === 'cyclic') {
+      /** Length of one complete cycle in input units. */
+      const period = max - min;
+      /** Signed distance from the cycle origin. */
+      const offset = value - min;
+      /** Fractional offset. Separate remainders avoid overflow when subtracting the origin. */
+      const fraction = Number.isFinite(offset)
+        ? (offset % period) / period
+        : (value % period) / period - (min % period) / period;
+      /** Wrapped fractional position among the palette stops. */
+      const position = (fraction - Math.floor(fraction)) * workingStops!.length;
+      /** The stop immediately before the sampled position. */
+      const index = Math.floor(position);
+      /** Interpolated color, using the first stop after the last stop. */
+      const color = interpolateColor(
+        workingStops![index % workingStops!.length]!,
+        workingStops![(index + 1) % workingStops!.length]!,
+        position - index,
+        space
+      );
+      return workingStops === paletteStops ? color : convertScaleColor(color, SRGB, encoding);
+    }
     if (value < min && spec.underColor) return spec.underColor;
     if (value > max && spec.overColor) return spec.overColor;
 
@@ -190,17 +237,17 @@ export function compileResolvedScale(
     if (numerical.length === 2) {
       t =
         pivot === undefined
-          ? normalize(value, min, max, spec.type)
+          ? normalize(value, min, max, spec)
           : value <= pivot
-            ? normalize(value, min, pivot, spec.type) / 2
-            : 0.5 + normalize(value, pivot, max, spec.type) / 2;
+            ? normalize(value, min, pivot, spec) / 2
+            : 0.5 + normalize(value, pivot, max, spec) / 2;
       if (spec.clamp ?? colorType) t = clamp01(t);
       const position = t * (stopCount - 1);
       segment = Math.min(stopCount - 2, Math.max(0, Math.floor(position)));
       t = position - segment;
     } else {
       while (segment < numerical.length - 2 && value > numerical[segment + 1]!) segment++;
-      t = normalize(value, numerical[segment]!, numerical[segment + 1]!, spec.type);
+      t = normalize(value, numerical[segment]!, numerical[segment + 1]!, spec);
       if (spec.clamp ?? colorType) t = clamp01(t);
     }
     if (!Number.isFinite(t)) return spec.nullColor ?? null;

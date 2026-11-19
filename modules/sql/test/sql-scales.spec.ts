@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {parseSQLScaleExpression, parseSQLScaleAST} from '../src/scales';
+import {compileResolvedScale, parseSQLScaleExpression, parseSQLScaleAST} from '../src/scales';
 import {parseSQLExpression, parseSQLSelectStatement} from '../src/parser';
 import type {Expression} from '../src/expressions';
 
@@ -165,4 +165,62 @@ test('fixed ordinal categories preserve literal types and allow a single explici
       parseSQLScaleExpression(`SCALE_ORDINAL(value, ${categories}, PALETTE('Tableau10'))`)
     ).toThrow();
   }
+});
+
+test('NICE rounds the actual continuous bounds and quantile breaks', () => {
+  const continuous = parseSQLScaleExpression(
+    "SCALE_COLOR(value, DOMAIN(value), PALETTE('#000000', '#ffffff'), NICE())"
+  );
+  const quantile = parseSQLScaleExpression("SCALE_QUANTILE(value, 5, PALETTE('viridis'), NICE())");
+  expect(continuous.scale.nice).toBe(true);
+  expect(compileResolvedScale(continuous.scale, [5.1, 33]).descriptor.domain).toEqual([5, 35]);
+  const scale = compileResolvedScale(quantile.scale, [17, 89], [27, 41, 58, 72]);
+  expect(scale.descriptor.domain).toEqual([15, 90]);
+  expect(scale.descriptor.thresholds).toEqual([30, 40, 60, 70]);
+  expect(scale.sample(29)).not.toEqual(scale.sample(30));
+  expect(
+    compileResolvedScale(quantile.scale, [0, 100], [20, 21, 60, 80]).descriptor.thresholds
+  ).toHaveLength(4);
+  expect(() =>
+    parseSQLScaleExpression("SCALE_COLOR(value, DOMAIN(0, 1, 2), PALETTE('viridis'), NICE())")
+  ).toThrow('NICE()');
+});
+
+test('NICE rounds reversed sequential bounds without reversing the palette', () => {
+  const {scale} = parseSQLScaleExpression(
+    "SCALE_COLOR(value, DOMAIN(33, 5.1), PALETTE('#000000', '#ffffff'), NICE())"
+  );
+  const resolved = compileResolvedScale(scale, [33, 5.1]);
+  expect(resolved.descriptor.domain).toEqual([35, 5]);
+  expect(resolved.sample(35)).toEqual([0, 0, 0, 1]);
+  expect(resolved.sample(5)).toEqual([1, 1, 1, 1]);
+});
+
+test('NICE preserves exact decimal grid points and rounds genuinely off-grid values outward', () => {
+  const {scale} = parseSQLScaleExpression(
+    "SCALE_COLOR(value, DOMAIN(value), PALETTE('viridis'), NICE())"
+  );
+  const domain = (bounds: readonly [number, number]) =>
+    compileResolvedScale(scale, bounds).descriptor.domain;
+  expect(domain([0.6, 1.8])).toEqual([0.6, 1.8]);
+  expect(domain([-1.8, -0.6])).toEqual([-1.8, -0.6]);
+  expect(domain([0.5999999999999999, 1.8000000000000003])).toEqual([0.4, 2]);
+  expect(domain([1.8, 0.6])).toEqual([1.8, 0.6]);
+});
+
+test('NICE resolved quantile descriptors reconstruct exactly without a second rounding pass', () => {
+  const {scale} = parseSQLScaleExpression("SCALE_QUANTILE(value, 5, PALETTE('viridis'), NICE())");
+  const resolved = compileResolvedScale(scale, [0.1, 10.7], [2.644, 5.188, 7.096, 8.58]);
+  const {descriptor} = resolved;
+  expect(descriptor).not.toHaveProperty('nice');
+  expect(descriptor.thresholds).toEqual([3, 5, 7, 9]);
+  const reloaded = compileResolvedScale(
+    {...descriptor, domain: {type: 'fixed', values: descriptor.domain}},
+    descriptor.domain,
+    descriptor.thresholds
+  );
+  expect(reloaded.descriptor).toEqual(descriptor);
+  expect([0, 3, 5, 7, 9, 11].map(reloaded.sample)).toEqual(
+    [0, 3, 5, 7, 9, 11].map(resolved.sample)
+  );
 });

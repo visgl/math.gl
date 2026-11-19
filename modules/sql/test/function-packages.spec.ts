@@ -101,3 +101,17 @@ test('a deck example can package a custom Arrow transform and use SQL parameters
     values: [0, 200]
   });
 });
+
+test.each([
+  'SCALE_POWER(value, DOMAIN(0, 10), RANGE(0, 100), 2)',
+  'SCALE_SYMLOG(value, DOMAIN(0, 10), RANGE(0, 100))',
+  "SCALE_CYCLIC(value, DOMAIN(0, 360), PALETTE('compass'))"
+])('visualization package prepares %s with typed metadata', expression => {
+  const {table, columnMetadata} = queryArrowSQLWithMetadata(
+    `SELECT ${expression} AS mapped FROM data`,
+    new Map([['data', tableFromArrays({value: [5]})]]),
+    {functions: [VISUALIZATION_FUNCTIONS]}
+  );
+  expect(table.getChild('mapped')?.get(0)).not.toBeNull();
+  expect(columnMetadata['mapped']?.[0]?.kind).toBe('scale');
+});

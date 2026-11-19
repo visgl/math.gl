@@ -13,6 +13,7 @@ export type {
   ScaleRange,
   ScaleColorEncoding,
   ScaleSpec,
+  ScaleTransform,
   ResolvedScaleDescriptor,
   ResolvedScale
 } from './scale-types';
@@ -35,3 +36,14 @@ export {
 } from './hdr-colors';
 
 export * from './arrow-scales';
+
+export {
+  compileBivariateColorScale,
+  type BivariateColorScaleSpec,
+  type BivariateColorScaleDescriptor,
+  type ResolvedBivariateColorScale
+} from '@math.gl/core/color';
+export {
+  compileArrowBivariateScale,
+  type CompiledArrowBivariateScale
+} from './arrow-bivariate-scale';
