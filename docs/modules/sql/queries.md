@@ -253,8 +253,26 @@ const HEIGHT_OFFSET = {
 export const EXAMPLE_TRANSFORMS = [HEIGHT_OFFSET] as const;
 ```
 
-Register `functions: [EXAMPLE_TRANSFORMS, VISUALIZATION_FUNCTIONS]` and use
-`HEIGHT_OFFSET(height, :offset) AS elevation` in the projection. Bind `offset`
-from a control and feed the resulting column to the layer's elevation accessor.
+Pass the example's Arrow table as `features` and bind `offset` from a UI control.
+The transform composes with the built-in scale and the result carries the
+resolved scale metadata for a legend.
+
+```ts
+import {queryArrowSQLWithMetadata} from '@math.gl/sql';
+import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
+
+const {table, columnMetadata} = queryArrowSQLWithMetadata(
+  `SELECT SCALE_LINEAR(HEIGHT_OFFSET(height, :offset), DOMAIN(0, 100), RANGE(0, 200))
+     AS elevation FROM features`,
+  new Map([['features', features]]),
+  {
+    functions: [EXAMPLE_TRANSFORMS, VISUALIZATION_FUNCTIONS],
+    parameters: {offset}
+  }
+);
+```
+
+Use the `elevation` column for the layer's elevation accessor and
+`columnMetadata.elevation` for the legend.
 For transforms whose signature depends on a source field, provide
 `resolvePrototype(fields)` to declare the input and output schema at bind time.
