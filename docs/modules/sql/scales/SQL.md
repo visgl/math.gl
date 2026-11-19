@@ -126,6 +126,8 @@ have compatible result types. Recompile when data-derived domains change; compil
 on a new table does not mutate an earlier compiled expression. This function does
 not change the single-scale parser or register scales as global functions.
 
+See [Creating Arrow columns](../arrow-columns.md) for a color column and its legend.
+
 ## Cyclic color
 
 Use `SCALE_CYCLIC` for measurements that repeat, such as a compass heading or

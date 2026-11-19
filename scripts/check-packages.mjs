@@ -94,6 +94,10 @@ for (const name of expected) {
       }
     }
     if (specifier === '@math.gl/sql/arrow') {
+      for (const arrow of [imported, required]) {
+        assert.equal(typeof arrow.createArrowColumns, 'function');
+        assert.equal('scaleProjectionOperation' in arrow, false);
+      }
       assert.equal(typeof imported.compileArrowExpression, 'function');
       assert.equal(typeof required.compileArrowExpression, 'function');
       assert.equal(imported.isExpressionEvaluationError(new required.ExpressionEvaluationError('domain', 'cross-bundle')), true);
