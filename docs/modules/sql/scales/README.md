@@ -1,5 +1,7 @@
 # Portable visualization scale descriptors (experimental)
 
+Compare ramps and class breaks in the [color scale gallery](gallery.mdx).
+
 The optional `@math.gl/sql/scales` entry point defines serializable scale
 **specifications** and resolved scale metadata without introducing a D3, renderer,
 Apache Arrow, or GPU runtime dependency.
@@ -49,6 +51,8 @@ above 1 are **not clipped** in a floating-point scene-linear range; gamut mappin
 tone mapping and output presentation are separate downstream responsibilities.
 
 See https://github.com/visgl/deck.gl/issues/11147 for the cross-repository tracker.
+
+For clustered observations, see [Fisher–Jenks natural breaks](natural-breaks.md).
 
 ## Evaluate on Arrow
 
