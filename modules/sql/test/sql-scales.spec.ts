@@ -207,3 +207,20 @@ test('NICE preserves exact decimal grid points and rounds genuinely off-grid val
   expect(domain([0.5999999999999999, 1.8000000000000003])).toEqual([0.4, 2]);
   expect(domain([1.8, 0.6])).toEqual([1.8, 0.6]);
 });
+
+test('NICE resolved quantile descriptors reconstruct exactly without a second rounding pass', () => {
+  const {scale} = parseSQLScaleExpression("SCALE_QUANTILE(value, 5, PALETTE('viridis'), NICE())");
+  const resolved = compileResolvedScale(scale, [0.1, 10.7], [2.644, 5.188, 7.096, 8.58]);
+  const {descriptor} = resolved;
+  expect(descriptor).not.toHaveProperty('nice');
+  expect(descriptor.thresholds).toEqual([3, 5, 7, 9]);
+  const reloaded = compileResolvedScale(
+    {...descriptor, domain: {type: 'fixed', values: descriptor.domain}},
+    descriptor.domain,
+    descriptor.thresholds
+  );
+  expect(reloaded.descriptor).toEqual(descriptor);
+  expect([0, 3, 5, 7, 9, 11].map(reloaded.sample)).toEqual(
+    [0, 3, 5, 7, 9, 11].map(resolved.sample)
+  );
+});

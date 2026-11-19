@@ -101,7 +101,9 @@ export function compileResolvedScale(
   domain: readonly ScaleValue[],
   thresholds?: readonly number[]
 ): ResolvedScale {
-  if (spec.nice) {
+  /** The resolution request is consumed before producing the portable descriptor. */
+  const {nice, ...resolvedSpec} = spec;
+  if (nice) {
     const values = numericValues(domain);
     if ((spec.type !== 'sequential' && spec.type !== 'quantile') || values.length !== 2) {
       throw new Error('Nice scales require a two-endpoint sequential or quantile scale');
@@ -149,7 +151,7 @@ export function compileResolvedScale(
   const resolvedRange: ResolvedScaleDescriptor['range'] =
     spec.range.type === 'numeric' ? spec.range : {type: 'colors', values: paletteStops!};
   const descriptor: ResolvedScaleDescriptor = {
-    ...spec,
+    ...resolvedSpec,
     domain: [...domain],
     range: resolvedRange,
     ...(spec.range.type === 'palette' ? {palette: spec.range.name} : {}),

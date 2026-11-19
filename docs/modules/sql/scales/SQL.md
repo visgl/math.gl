@@ -140,3 +140,6 @@ mapping. Rounded quantile classes can have different numbers of observations.
 SCALE_COLOR(height, DOMAIN(height), PALETTE('YlOrRd'), NICE())
 SCALE_QUANTILE(coverage, 5, PALETTE('viridis'), NICE())
 ```
+
+The resolved descriptor stores the resulting bounds and breaks. Use those values
+directly to reconstruct a sampler or draw a legend.
