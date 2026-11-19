@@ -5,6 +5,8 @@
 export {
   queryArrowSQL,
   queryArrowSQLWithMetadata,
+  type ArrowSQLQueryOptions,
+  type ArrowSQLTableFunction,
   type ArrowSQLMetadataResult
 } from './arrow/query-arrow-sql';
 export {

@@ -2,9 +2,14 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {tableFromArrays} from 'apache-arrow';
+import {Field, Float64, tableFromArrays, vectorFromArray} from 'apache-arrow';
 import {expect, expectTypeOf, test} from 'vitest';
-import {queryArrowSQL, queryArrowSQLWithMetadata, type PreparedScalarFunction} from '@math.gl/sql';
+import {
+  queryArrowSQL,
+  queryArrowSQLWithMetadata,
+  type PreparedScalarFunction,
+  type ScalarFunction
+} from '@math.gl/sql';
 import {ABS} from '@math.gl/sql/math-functions';
 import {VISUALIZATION_FUNCTIONS, type ScaleProjectionMetadata} from '@math.gl/sql/scales';
 
@@ -55,4 +60,34 @@ test('duplicate prepared names and cyclic packages fail at registration', () => 
   expect(() => queryArrowSQL('SELECT value FROM data', tables, {functions: cyclic})).toThrow(
     'Cyclic Arrow function package'
   );
+});
+
+test('a deck example can package a custom Arrow transform and use SQL parameters', () => {
+  const type = new Float64();
+  const HEIGHT_OFFSET = {
+    kind: 'scalar',
+    name: 'HEIGHT_OFFSET',
+    prototypes: [
+      {
+        arguments: [new Field('height', type, true), new Field('offset', type, true)],
+        result: new Field('elevation', type, true),
+        evaluate([heights, offsets], {length, activeRows}) {
+          return vectorFromArray(
+            Array.from({length}, (_, row) =>
+              activeRows[row] ? Number(heights!.get(row)) + Number(offsets!.get(row)) : null
+            ),
+            type
+          );
+        }
+      }
+    ]
+  } satisfies ScalarFunction;
+  const EXAMPLE_TRANSFORMS = [HEIGHT_OFFSET] as const;
+  const tables = new Map([['features', tableFromArrays({height: [0, 50, null]})]]);
+  const result = queryArrowSQL(
+    'SELECT ABS(HEIGHT_OFFSET(height, :offset)) AS elevation FROM features',
+    tables,
+    {functions: [EXAMPLE_TRANSFORMS, [ABS]], parameters: {offset: 5}}
+  );
+  expect(Array.from(result.getChild('elevation')!)).toEqual([5, 55, null]);
 });

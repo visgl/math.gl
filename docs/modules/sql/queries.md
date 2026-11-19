@@ -65,6 +65,24 @@ const totals = queryArrowSQL(
 );
 ```
 
+#### Table functions
+
+Pass `tableFunctions` to use application-defined sources in `FROM` or an inner join.
+Each function accepts one named catalog table and synchronously returns an Arrow
+table. Function names are case-insensitive. The returned rows participate in
+projection, filtering, and sorting like any other source.
+
+```ts
+const trips = queryArrowSQL(
+  'SELECT path, timestamps FROM EXPAND_TRIPS(data)',
+  new Map([['data', tripDictionary]]),
+  {tableFunctions: {expand_trips: expandTripDictionary}}
+);
+```
+
+`expandTripDictionary` is an application function that resolves the segment
+references and returns the assembled trip rows.
+
 For worker execution, see [Workers](workers.md).
 
 ### Querying a stream of record batches
@@ -204,3 +222,39 @@ uses a flat object with `kind: 'scalar'`, a SQL `name`, and a `prepare` method.
 Use `satisfies ScalarFunction<MyMetadata>` to check the declaration and retain the
 metadata type. Preparation can inspect the filtered input table and return a
 rewritten expression, generated scalar declarations, and one metadata entry.
+
+### Package transforms in a deck.gl example
+
+Export example-specific transforms from the example module and register the
+package with the rest of its SQL functions. The descriptor can close over
+example configuration or a geometry kernel. Its Arrow evaluator can reuse
+existing vectors and receives a mask for the rows it should evaluate.
+
+```ts
+import {Field, Float64, vectorFromArray} from 'apache-arrow';
+import type {ScalarFunction} from '@math.gl/sql';
+
+const float = new Float64();
+
+const HEIGHT_OFFSET = {
+  kind: 'scalar',
+  name: 'HEIGHT_OFFSET',
+  prototypes: [{
+    arguments: [new Field('height', float, true), new Field('offset', float, true)],
+    result: new Field('elevation', float, true),
+    evaluate([heights, offsets], {length, activeRows}) {
+      return vectorFromArray(Array.from({length}, (_, row) =>
+        activeRows[row] ? Number(heights!.get(row)) + Number(offsets!.get(row)) : null
+      ), float);
+    }
+  }]
+} satisfies ScalarFunction;
+
+export const EXAMPLE_TRANSFORMS = [HEIGHT_OFFSET] as const;
+```
+
+Register `functions: [EXAMPLE_TRANSFORMS, VISUALIZATION_FUNCTIONS]` and use
+`HEIGHT_OFFSET(height, :offset) AS elevation` in the projection. Bind `offset`
+from a control and feed the resulting column to the layer's elevation accessor.
+For transforms whose signature depends on a source field, provide
+`resolvePrototype(fields)` to declare the input and output schema at bind time.

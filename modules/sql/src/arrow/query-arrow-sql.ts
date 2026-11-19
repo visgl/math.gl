@@ -9,7 +9,8 @@ import {
   parseSQLSelectCompound,
   type SQLSelectStatement,
   type SQLSelectStatementOptions,
-  type SQLSort
+  type SQLSort,
+  type SQLTableBinding
 } from '../parser/parse-sql-statement';
 import {executeArrowProjection, queryArrowTable, type ArrowTableQuery} from './query-arrow-table';
 import type {ArrowAggregate} from './aggregates';
@@ -37,11 +38,21 @@ export type ArrowSQLMetadataResult<M> = {
 
 type Execution = Pick<ArrowTableQuery, 'signal' | 'functions'>;
 
+/** A synchronous SQL source that derives an Arrow table from one catalog table. */
+export type ArrowSQLTableFunction = (input: Table) => Table;
+
+/** Controls relational SQL execution and its function registries. */
+export type ArrowSQLQueryOptions = Execution &
+  SQLSelectStatementOptions & {
+    /** Case-insensitive names usable in table positions as NAME(input_table). */
+    tableFunctions?: Readonly<Record<string, ArrowSQLTableFunction>>;
+  };
+
 /** Executes relational SQL over a caller-supplied catalog of in-memory Arrow tables. */
 export function queryArrowSQL(
   sql: string,
   tables: ReadonlyMap<string, Table>,
-  options: Execution & SQLSelectStatementOptions = {}
+  options: ArrowSQLQueryOptions = {}
 ): Table {
   return executeSQL(sql, tables, options, false).table;
 }
@@ -50,7 +61,7 @@ export function queryArrowSQL(
 export function queryArrowSQLWithMetadata<const F extends readonly ArrowFunctionPackage[] = []>(
   sql: string,
   tables: ReadonlyMap<string, Table>,
-  options: Omit<Execution, 'functions'> & SQLSelectStatementOptions & {functions?: F} = {}
+  options: Omit<ArrowSQLQueryOptions, 'functions'> & {functions?: F} = {}
 ): ArrowSQLMetadataResult<PackageMetadata<F>> {
   return executeSQL(sql, tables, options, true) as ArrowSQLMetadataResult<PackageMetadata<F>>;
 }
@@ -59,13 +70,22 @@ export function queryArrowSQLWithMetadata<const F extends readonly ArrowFunction
 function executeSQL(
   sql: string,
   tables: ReadonlyMap<string, Table>,
-  options: Execution & SQLSelectStatementOptions,
+  options: ArrowSQLQueryOptions,
   collectMetadata: boolean
 ): ArrowSQLMetadataResult<unknown> {
   const {inputs, orderBy, offset, limit} = parseSQLSelectCompound(sql, options);
   const execution = {signal: options.signal, functions: options.functions};
+  const tableFunctions = options.tableFunctions ?? {};
+  /** Resolves a catalog binding or invokes its registered table source. */
+  const resolveTable = ({name, inputTable}: SQLTableBinding) => {
+    if (inputTable === undefined) return getTable(tables, name);
+    const key = Object.keys(tableFunctions).find(key => key.toUpperCase() === name.toUpperCase());
+    if (key === undefined) throw new Error(`Unknown Arrow SQL table function: ${name}`);
+    execution.signal?.throwIfAborted();
+    return tableFunctions[key]!(getTable(tables, inputTable));
+  };
   const operations = getProjectionOperations(options.functions);
-  const results = inputs.map(input => executeSelect(input, tables, execution, operations));
+  const results = inputs.map(input => executeSelect(input, resolveTable, execution, operations));
   const [first, ...rest] = results.map(result => result.table) as [Table, ...Table[]];
   // Plan the final order against the projected names, including SELECT aliases.
   const table = queryArrowTable(first, {
@@ -111,11 +131,11 @@ function planOrder(orderBy?: readonly SQLSort[]) {
 
 function executeSelect(
   statement: SQLSelectStatement,
-  tables: ReadonlyMap<string, Table>,
+  resolveTable: (binding: SQLTableBinding) => Table,
   execution: Execution,
   operations: ReturnType<typeof getProjectionOperations>
 ): ArrowSQLMetadataResult<unknown> {
-  let source = getTable(tables, statement.from.name);
+  let source = resolveTable(statement.from);
   const leftAlias = statement.from.alias ?? statement.from.name;
   const [right] = statement.joins;
   let join: ArrowTableQuery['join'];
@@ -148,7 +168,7 @@ function executeSelect(
     if (statement.joins.length > 1 || right.type !== 'inner')
       throw new Error('Arrow SQL supports one INNER JOIN per SELECT');
     rightAlias = right.table.alias ?? right.table.name;
-    rightTable = getTable(tables, right.table.name);
+    rightTable = resolveTable(right.table);
     if (leftAlias === rightAlias) throw new Error('Duplicate Arrow SQL table alias');
     const {on} = right;
     if (on.type !== 'BinaryExpression' || on.operator !== '==')

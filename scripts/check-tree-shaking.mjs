@@ -14,8 +14,8 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
   {symbol: "createArrowColumns", packages: ["@math.gl/sql/arrow"], forbidden: [/sql\/(src|dist)\/scales\//], budget: 307000},
-  // Nested function packages and prepared SQL columns bring the query consumer to 309,647 bytes.
-  {symbol:'queryArrowSQL', packages:['@math.gl/sql'], forbidden:[/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/loaders.gl/,/geospatial\//], budget:310000},
+  // Nested function packages and prepared SQL columns bring the query consumer to approximately 310 KB.
+  {symbol:'queryArrowSQL', packages:['@math.gl/sql'], forbidden:[/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/loaders.gl/,/geospatial\//], budget:310500},
 
   ...['sweepTerrainRotatingCapsule', 'sweepTerrainRotatingSphere'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
