@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {createRecordBatchWithMetadata} from '@math.gl/core/arrow';
-import {Data, Schema, Struct, Table} from 'apache-arrow';
+import {Data, Schema, Struct, Table, type Field} from 'apache-arrow';
 import type {Expression} from '../expressions';
 import {compileArrowExpression} from './compiler';
 import type {ArrowTableFunction, CompiledArrowExpression} from './types';
@@ -100,14 +100,16 @@ export function createArrowColumns<
   type Metadata = ReturnType<O['prepare']>['metadata'];
   const operations = (options.operations ?? []) as readonly ArrowProjectionOperation<Metadata>[];
   const columnMetadata: Record<K, readonly Metadata[]> = Object.create(null);
+  const fields: Field[] = [];
   const columns = (Object.entries(expressions) as [K, Expression][]).map(([name, expr]) => {
     const {compiled, metadata} = prepareArrowColumn(input, expr, operations, options.functions);
+    fields.push(compiled.outputField.clone({name}));
     columnMetadata[name] = Object.freeze(metadata);
     return [name, compiled.evaluateTable(input)] as const;
   });
-  const schema = new Schema([]);
+  const schema = new Schema(fields);
   const table: Table = columns.length
-    ? new Table(Object.fromEntries(columns))
+    ? new Table(schema, Object.fromEntries(columns))
     : new Table(
         schema,
         input.batches.map(batch =>

@@ -125,8 +125,9 @@ agree on values and errors. Conditional branches and null propagation skip scala
 
 The example uses `vectorFromArray` for readability; vector kernels can write Arrow buffers directly.
 Geometry functions can supply only `evaluate`, with exact nested argument fields and GeoArrow
-extension metadata. Geometry layouts require schema-bound declarations; there is no overload
-resolution yet. Results support primitives and fixed-size numeric tuples. Other nested results, including variable-length geometry output, are not supported.
+extension metadata. Results support primitives and fixed-size numeric tuples. A geometry result can
+use Binary with the `geoarrow.wkb` extension. The [spatial function guide](spatial-functions.md)
+shows how to use those results in another expression.
 
 ### RGBA and other numeric tuple results
 
@@ -235,6 +236,9 @@ cancellation. A single large batch or custom synchronous kernel cannot be interr
 
 ## Turf functions
 
+Use the [spatial SQL function libraries](spatial-functions.md) to register
+PostGIS-aligned geometry functions or Turf functions for computed columns.
+
 `@math.gl/geospatial/turf/expressions` exports `createTurfArrowFunction({name, arguments, result, evaluate})`.
 Pass the exact GeoArrow argument fields and a nullable Float64 or Bool result. Import only the Turf
 functions you use; the adapter itself imports no Turf implementations.
@@ -332,7 +336,7 @@ Packed arrays also accept `ARRAY[x,y,z]::FLOAT16[3]` or `compileArrowArray(colum
 
 ## Function prototypes and numeric overloads
 
-Each named `ArrowTableFunction` owns a non-empty `prototypes` array. A prototype declares its
+A named `ArrowTableFunction` can supply fixed prototypes through `prototypes`. A prototype declares its
 argument fields, result field, null policy, vector implementation and optional fused scalar
 implementation. Multiple objects with the same name may contribute distinct prototypes. Duplicate
 argument-type/metadata signatures are rejected; changing only return type or nullability does not
@@ -343,7 +347,14 @@ Float64 and Float32 can widen to Float64. The least total widening wins; ties ar
 fail binding. Integer/float and mixed integer-width conversions require explicit casts. Literals
 follow typed arguments; calls containing only numeric literals prefer their default Float64 type.
 Use typed null casts to disambiguate otherwise ambiguous null arguments. Kernels receive the chosen
-prototype's declared input types. No per-batch overload lookup or callback probing occurs.
+prototype's declared input types.
+
+A declaration can also provide `resolvePrototype(fields)` for a schema-dependent signature. The
+compiler calls the resolver during binding when no fixed prototype matches. A function with only a
+resolver uses `prototypes: []`. The resolver receives the inferred argument fields in call order.
+An undefined field indicates an argument that needs type context, such as a bare `NULL`. Return
+one prototype for a supported signature, or undefined to indicate no match. Only one resolver can
+be registered per function name. The chosen prototype is reused across batches.
 
 `ExpressionEvaluationError` exposes `code` values `domain`, `conversion`, `overflow` and
 `divisionByZero`. Numeric data errors use this class; unknown names, incompatible signatures,

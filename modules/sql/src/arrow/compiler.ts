@@ -182,7 +182,9 @@ export function compileArrowFunction(
 /** Compiles a packed floating-point source-column projection, preserving Float64 unless explicitly narrowed. */
 export function compileArrowArray(
   columns: readonly string[],
-  options: ArrowExpressionOptions & {type?: 'float16' | 'float32' | 'float64' | 'uint8'}
+  options: ArrowExpressionOptions & {
+    type?: 'float16' | 'float32' | 'float64' | 'uint8';
+  }
 ): CompiledArrowExpression {
   if (
     !Array.isArray(columns) ||
@@ -199,7 +201,10 @@ export function compileArrowArray(
   return compileArrowExpression(
     {
       type: 'CallExpression',
-      callee: {type: 'Identifier', name: options.type ? `array_${options.type}` : 'array'},
+      callee: {
+        type: 'Identifier',
+        name: options.type ? `array_${options.type}` : 'array'
+      },
       arguments: columns.map(name => ({type: 'Identifier', name}))
     } as Expression,
     options
@@ -548,13 +553,14 @@ function bindNode(
     if (nested) {
       if (physicalKey(yes.field.type) !== physicalKey(no.field.type))
         throw new Error('Arrow expression operand types must match');
-      if (
-        !isContextualLiteral(ast.consequent) &&
-        !isContextualLiteral(ast.alternate) &&
-        extensionKey(yes.field) !== extensionKey(no.field)
-      )
-        throw new Error('Arrow expression branch extension metadata must match');
     } else sameType(yes, no);
+    if (
+      (nested || DataType.isBinary(yes.field.type)) &&
+      !isContextualLiteral(ast.consequent) &&
+      !isContextualLiteral(ast.alternate) &&
+      extensionKey(yes.field) !== extensionKey(no.field)
+    )
+      throw new Error('Arrow expression branch extension metadata must match');
     const metadata = isContextualLiteral(ast.consequent) ? no.field.metadata : yes.field.metadata;
     const field = new Field(
       'conditional',
@@ -1511,11 +1517,30 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
   const inferred = ast.arguments.map((argument: any) =>
     needsArgumentContext(argument) ? undefined : bind(argument, options, undefined, true)
   ) as (Node | undefined)[];
-  const candidates: {prototype: ArrowTableFunctionPrototype; arguments: Node[]; cost: number}[] =
-    [];
+  const candidates: {
+    prototype: ArrowTableFunctionPrototype;
+    arguments: Node[];
+    cost: number;
+  }[] = [];
   const allLiteralArguments = ast.arguments.every(isContextualLiteral);
   let contextualError: unknown;
-  for (const prototype of group.prototypes) {
+  // Try a schema-dependent overload only when no fixed overload matches.
+  const resolvePrototype = group.resolvePrototype;
+  const resolve = () =>
+    resolvePrototype?.(
+      inferred.map((node, index) => {
+        if (node) return node.field;
+        const argument = ast.arguments[index];
+        return argument.type === 'ConditionalExpression' &&
+          !isContextualLiteral(argument) &&
+          !containsContextualArray(argument)
+          ? bind(argument, options, undefined, true).field
+          : undefined;
+      })
+    );
+  for (let index = 0; index <= group.prototypes.length; index++) {
+    const prototype = group.prototypes[index] ?? (candidates.length ? undefined : resolve());
+    if (!prototype) break;
     if (ast.arguments.length !== prototype.arguments.length) continue;
     let cost = 0;
     const arguments_: Node[] = [];

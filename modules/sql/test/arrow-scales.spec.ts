@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {tableFromArrays} from 'apache-arrow';
+import {Binary, Field, Schema, Table, tableFromArrays, vectorFromArray} from 'apache-arrow';
 import {createArrowColumns, type ArrowProjectionOperation} from '@math.gl/sql/arrow';
 import type {Expression} from '../src/expressions';
 import {ABS} from '../src/math-functions';
@@ -307,4 +307,19 @@ test('an empty projection preserves rows across batches', () => {
   expect(table.numCols).toBe(0);
   expect(columnMetadata).toEqual({});
   expect(input.numCols).toBe(1);
+});
+
+test('projected columns retain their compiled metadata and nullability under aliases', () => {
+  const binary = new Binary();
+  const metadata = new Map([
+    ['ARROW:extension:name', 'geoarrow.wkb'],
+    ['ARROW:extension:metadata', '{"crs":"EPSG:4326"}']
+  ]);
+  const source = new Table(new Schema([new Field('g', binary, true, metadata)]), {
+    g: vectorFromArray([new Uint8Array([1])], binary)
+  });
+  const {table} = createArrowColumns(source, {geometry: parseSQLExpression('g')});
+  expect(table.schema.fields[0]?.name).toBe('geometry');
+  expect(table.schema.fields[0]?.nullable).toBe(true);
+  expect(table.schema.fields[0]?.metadata).toEqual(metadata);
 });
