@@ -50,6 +50,10 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 
 | Function | Accepted input | Result |
 | --- | --- | --- |
+| `ST_X(point)` | Point | X coordinate. Empty input yields null. |
+| `ST_Y(point)` | Point | Y coordinate. Empty input yields null. |
+| `ST_StartPoint(line)` | LineString | First vertex. Empty input yields null. |
+| `ST_EndPoint(line)` | LineString | Last vertex. Empty input yields null. |
 | `ST_Contains(polygon, point)` | Polygon or MultiPolygon, then Point | Boolean. Points on the exterior boundary or a hole boundary are excluded. |
 | `ST_Covers(polygon, point)` | Polygon or MultiPolygon, then Point | Boolean. Boundary points are included. Points inside a hole are excluded. |
 | `ST_Distance(a, b)` | Two Points | Float64 Cartesian distance in coordinate units. Empty points yield null. |

@@ -300,3 +300,15 @@ test('empty centroids remain usable in nested point functions', () => {
   expect(result.getChild('distance')!.get(0)).toBeNull();
   expect(geometryAt(result, 'center', 0)).toEqual({type: 'Point', coordinates: [NaN, NaN]});
 });
+
+test('extracts route endpoint coordinates through nested SQL calls', () => {
+  const route = wkb('LINESTRING(-73 40,-72 41,-71 42)', 'LINESTRING EMPTY', null);
+  const table = new Table(new Schema([geometryField('route', route)]), {route});
+  const result = select(
+    `SELECT ST_X(ST_StartPoint(route)) AS start_x, ST_Y(ST_EndPoint(route)) AS end_y
+     FROM features`,
+    table
+  );
+  expect([...result.getChild('start_x')!]).toEqual([-73, null, null]);
+  expect([...result.getChild('end_y')!]).toEqual([42, null, null]);
+});
