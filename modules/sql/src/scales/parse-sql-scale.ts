@@ -258,7 +258,9 @@ export const SQL_SCALE_TYPES: Readonly<Record<string, ScaleSpec['type']>> = {
 function parseScaleCall(root: Call): ParsedSQLScale {
   const fn = root.callee.name.toUpperCase();
   const args = root.arguments;
-  const type = Object.hasOwn(SQL_SCALE_TYPES, fn) ? SQL_SCALE_TYPES[fn] : undefined;
+  const type = Object.prototype.hasOwnProperty.call(SQL_SCALE_TYPES, fn)
+    ? SQL_SCALE_TYPES[fn]
+    : undefined;
   if (!type) throw new Error(`Unsupported SQL scale function: ${fn}`);
   const inferredOrdinal = fn === 'SCALE_ORDINAL' && args.length === 2;
   const special = fn === 'SCALE_POWER' || fn === 'SCALE_SYMLOG';
