@@ -13,6 +13,7 @@ export type {
   ScaleRange,
   ScaleColorEncoding,
   ScaleSpec,
+  ScaleTransform,
   ResolvedScaleDescriptor,
   ResolvedScale
 } from './scale-types';

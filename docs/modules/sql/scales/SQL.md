@@ -125,3 +125,24 @@ Conditional branches preserve lazy per-row evaluation after domains are resolved
 have compatible result types. Recompile when data-derived domains change; compiling
 on a new table does not mutate an earlier compiled expression. This function does
 not change the single-scale parser or register scales as global functions.
+
+## Power and symmetric log
+
+Use `SCALE_POWER(value, DOMAIN(min, max), RANGE(low, high), exponent)` to tune
+contrast. The transform preserves the sign and raises the magnitude to the
+positive exponent.
+
+Use `SCALE_SYMLOG(value, DOMAIN(min, max), RANGE(low, high), constant)` when
+values span orders of magnitude on both sides of zero. The transform is nearly
+linear around zero and logarithmic farther away. The positive constant controls
+that transition and defaults to 1.
+
+For a palette, apply the same transform to the domain:
+
+```sql
+SCALE_COLOR(magnitude, TRANSFORM_DOMAIN(DOMAIN(0, 100), POWER(0.4)), PALETTE('viridis'))
+```
+
+`TRANSFORM_DOMAIN` accepts `POWER(exponent)` or `SYMLOG(constant)` on a linear,
+sequential, or diverging scale. The resolved descriptor records the transform
+and the original domain so a legend can label values in their original units.

@@ -226,6 +226,8 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
     SCALE_LINEAR: 'linear',
     SCALE_SQRT: 'sqrt',
     SCALE_LOG: 'log',
+    SCALE_POWER: 'linear',
+    SCALE_SYMLOG: 'symlog',
     SCALE_COLOR: 'sequential',
     SCALE_DIVERGING: 'diverging',
     SCALE_ORDINAL: 'ordinal',
@@ -236,10 +238,40 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
   const type = names[fn];
   if (!type) throw new Error(`Unsupported SQL scale function: ${fn}`);
   const inferredOrdinal = fn === 'SCALE_ORDINAL' && args.length === 2;
-  if (!inferredOrdinal && args.length !== 3) {
+  const special = fn === 'SCALE_POWER' || fn === 'SCALE_SYMLOG';
+  if (fn === 'SCALE_POWER' && args.length !== 4)
+    throw new Error('SCALE_POWER requires four arguments');
+  if (!inferredOrdinal && args.length !== 3 && !(special && args.length === 4)) {
     throw new Error(`${fn} expects ${fn === 'SCALE_ORDINAL' ? 'two or three' : 'three'} arguments`);
   }
   const value = args[0]!;
+  const domainArg = args[1];
+  const wrapped =
+    domainArg?.type === 'CallExpression' &&
+    domainArg.callee.type === 'Identifier' &&
+    String(domainArg.callee['name']).toUpperCase() === 'TRANSFORM_DOMAIN'
+      ? call(domainArg, 'TRANSFORM_DOMAIN').arguments
+      : undefined;
+  if (
+    wrapped &&
+    (wrapped.length !== 2 ||
+      args.length !== 3 ||
+      !['SCALE_LINEAR', 'SCALE_COLOR', 'SCALE_DIVERGING'].includes(fn))
+  )
+    throw new Error('TRANSFORM_DOMAIN requires a domain and a transform on a continuous scale');
+  const modifier = wrapped && call(wrapped[1]!);
+  const transformName = modifier?.callee.name.toUpperCase();
+  if (
+    modifier &&
+    (modifier.arguments.length !== 1 || (transformName !== 'POWER' && transformName !== 'SYMLOG'))
+  )
+    throw new Error('Expected POWER(exponent) or SYMLOG(constant)');
+  const transform =
+    fn === 'SCALE_POWER' || transformName === 'POWER'
+      ? {type: 'power' as const, exponent: number(args[3] ?? modifier!.arguments[0]!)}
+      : (fn === 'SCALE_SYMLOG' && args[3]) || transformName === 'SYMLOG'
+        ? {type: 'symlog' as const, constant: number(args[3] ?? modifier!.arguments[0]!)}
+        : undefined;
   const domain = inferredOrdinal
     ? {type: 'categories' as const, column: name(value)}
     : fn === 'SCALE_ORDINAL'
@@ -250,7 +282,7 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
           ? {type: 'extent' as const, column: name(value)}
           : fn === 'SCALE_THRESHOLD'
             ? {type: 'fixed' as const, values: call(args[1]!, 'ARRAY').arguments.map(number)}
-            : parseDomain(args[1]!);
+            : parseDomain(wrapped?.[0] ?? args[1]!);
   let range = parseRange(args[inferredOrdinal ? 1 : 2]!);
   if (fn === 'SCALE_QUANTILE' || fn === 'SCALE_QUANTIZE') {
     const count = number(args[1]!);
@@ -295,6 +327,6 @@ export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
   ) {
     throw new Error('Explicit domain and color stops must have equal lengths');
   }
-  const scale = validateScaleSpec({type, domain, range});
+  const scale = validateScaleSpec({type, domain, range, ...(transform ? {transform} : {})});
   return {value, scale};
 }

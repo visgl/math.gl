@@ -67,7 +67,9 @@ function interpolateColor(
   return [mix(a[0], b[0]), mix(a[1], b[1]), mix(a[2], b[2]), alpha];
 }
 
-function normalize(value: number, a: number, b: number, type: ScaleSpec['type']): number {
+/** Normalizes in the transformed domain, preserving the raw domain in the descriptor. */
+function normalize(value: number, a: number, b: number, spec: ScaleSpec): number {
+  const {type, transform} = spec;
   if (a === b) return 0.5;
   if (type === 'log') {
     if (a <= 0 || b <= 0 || value <= 0) return NaN;
@@ -77,8 +79,20 @@ function normalize(value: number, a: number, b: number, type: ScaleSpec['type'])
     if (a < 0 || b < 0 || value < 0) return NaN;
     return (Math.sqrt(value) - Math.sqrt(a)) / (Math.sqrt(b) - Math.sqrt(a));
   }
-  if (type === 'symlog') {
-    const symlog = (v: number) => Math.sign(v) * Math.log1p(Math.abs(v));
+  if (transform?.type === 'power') {
+    const magnitude = Math.max(Math.abs(a), Math.abs(b));
+    const power = (v: number) => Math.sign(v) * (Math.abs(v) / magnitude) ** transform.exponent;
+    return (power(value) - power(a)) / (power(b) - power(a));
+  }
+  if (type === 'symlog' || transform?.type === 'symlog') {
+    const constant = transform?.type === 'symlog' ? transform.constant : 1;
+    const symlog = (v: number) => {
+      const ratio = Math.abs(v) / constant;
+      return (
+        Math.sign(v) *
+        (Number.isFinite(ratio) ? Math.log1p(ratio) : Math.log(Math.abs(v)) - Math.log(constant))
+      );
+    };
     return (symlog(value) - symlog(a)) / (symlog(b) - symlog(a));
   }
   return (value - a) / (b - a);
@@ -190,17 +204,17 @@ export function compileResolvedScale(
     if (numerical.length === 2) {
       t =
         pivot === undefined
-          ? normalize(value, min, max, spec.type)
+          ? normalize(value, min, max, spec)
           : value <= pivot
-            ? normalize(value, min, pivot, spec.type) / 2
-            : 0.5 + normalize(value, pivot, max, spec.type) / 2;
+            ? normalize(value, min, pivot, spec) / 2
+            : 0.5 + normalize(value, pivot, max, spec) / 2;
       if (spec.clamp ?? colorType) t = clamp01(t);
       const position = t * (stopCount - 1);
       segment = Math.min(stopCount - 2, Math.max(0, Math.floor(position)));
       t = position - segment;
     } else {
       while (segment < numerical.length - 2 && value > numerical[segment + 1]!) segment++;
-      t = normalize(value, numerical[segment]!, numerical[segment + 1]!, spec.type);
+      t = normalize(value, numerical[segment]!, numerical[segment + 1]!, spec);
       if (spec.clamp ?? colorType) t = clamp01(t);
     }
     if (!Number.isFinite(t)) return spec.nullColor ?? null;

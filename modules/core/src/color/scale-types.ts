@@ -60,6 +60,11 @@ export type ScaleColorEncoding = {
   readonly referenceWhiteNits?: number;
 };
 
+/** Continuous domain transform retained in resolved scale metadata. */
+export type ScaleTransform =
+  | {readonly type: 'power'; readonly exponent: number}
+  | {readonly type: 'symlog'; readonly constant: number};
+
 /** Serializable scale inputs and optional presentation metadata. */
 export type ScaleSpec = {
   readonly id?: string;
@@ -79,6 +84,7 @@ export type ScaleSpec = {
   readonly range: ScaleRange;
   readonly clamp?: boolean;
   readonly pivot?: number;
+  readonly transform?: ScaleTransform;
   readonly interpolation?: 'srgb' | 'linear-srgb' | 'oklab' | 'jzazbz';
   readonly encoding?: ScaleColorEncoding;
   readonly nullColor?: ScaleColor;
@@ -133,6 +139,16 @@ export function validateScaleSpec(spec: ScaleSpec): ScaleSpec {
     'piecewise'
   ];
   if (!kinds.includes(spec.type)) throw new Error(`Unsupported scale type: ${spec.type}`);
+  if (spec.transform) {
+    const transform = spec.transform;
+    if (!['linear', 'symlog', 'sequential', 'diverging', 'piecewise'].includes(spec.type))
+      throw new Error('Scale transform requires a continuous scale');
+    if (transform.type !== 'power' && transform.type !== 'symlog')
+      throw new Error('Unsupported scale transform');
+    const parameter = transform.type === 'power' ? transform.exponent : transform.constant;
+    if (!Number.isFinite(parameter) || parameter <= 0)
+      throw new Error('Scale transform parameter must be positive and finite');
+  }
   const minimumStops = spec.type === 'ordinal' ? 1 : 2;
   const minimumDomainStops = spec.type === 'threshold' ? 1 : minimumStops;
   const domain = spec.domain;
