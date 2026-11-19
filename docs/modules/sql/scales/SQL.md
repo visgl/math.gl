@@ -41,6 +41,8 @@ See [rounded bounds and breaks](nice.md) for the optional `NICE()` modifier.
 | `SCALE_QUANTIZE(column, count, palette)` | Equal-width class request |
 | `SCALE_THRESHOLD(value, ARRAY[break, ...], palette)` | Explicit class boundaries |
 
+See [numeric scales and legends](numeric.md) for elevation, radius, and width mappings.
+
 For example:
 
 ```sql
