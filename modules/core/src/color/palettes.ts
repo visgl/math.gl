@@ -20,6 +20,7 @@ const rgba = (hex: string): ScaleColor => {
  * No D3 runtime dependency is required.
  */
 const PALETTES: Record<string, readonly string[]> = {
+  compass: ['#5046b7', '#2f89d8', '#36b795', '#e6c45a', '#e48156', '#bd4d8f'],
   viridis: ['#440154', '#414487', '#2a788e', '#22a884', '#7ad151', '#fde725'],
   plasma: ['#0d0887', '#7e03a8', '#cc4778', '#f89540', '#f0f921'],
   inferno: ['#000004', '#420a68', '#932667', '#dd513a', '#fca50a', '#fcffa4'],

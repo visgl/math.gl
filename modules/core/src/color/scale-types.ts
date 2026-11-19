@@ -68,6 +68,7 @@ export type ScaleSpec = {
     | 'sqrt'
     | 'log'
     | 'symlog'
+    | 'cyclic'
     | 'sequential'
     | 'diverging'
     | 'ordinal'
@@ -124,6 +125,7 @@ export function validateScaleSpec(spec: ScaleSpec): ScaleSpec {
     'sqrt',
     'log',
     'symlog',
+    'cyclic',
     'sequential',
     'diverging',
     'ordinal',
@@ -180,6 +182,21 @@ export function validateScaleSpec(spec: ScaleSpec): ScaleSpec {
       break;
     default:
       throw new Error('Unsupported scale domain');
+  }
+  if (spec.type === 'cyclic') {
+    if (
+      domain.type !== 'fixed' ||
+      domain.values.length !== 2 ||
+      domain.values.some(value => typeof value !== 'number') ||
+      !(Number(domain.values[0]) < Number(domain.values[1])) ||
+      !Number.isFinite(Number(domain.values[1]) - Number(domain.values[0]))
+    ) {
+      throw new Error(
+        'Cyclic scale requires a fixed origin and endpoint with a positive finite period'
+      );
+    }
+    if (spec.clamp !== undefined || spec.underColor || spec.overColor || spec.pivot !== undefined)
+      throw new Error('Cyclic scales always wrap around the domain');
   }
   if (!spec.range) throw new Error('Scale range is required');
   switch (spec.range.type) {
