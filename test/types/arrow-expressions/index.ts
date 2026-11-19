@@ -238,3 +238,17 @@ for (const item of summaries.columnMetadata['total'] ?? []) {
   if (item.kind === 'summary') item.unit.toUpperCase();
   else item.scale.sample(1);
 }
+
+import type {TableFunction} from '@math.gl/sql';
+declare const sourceFunction: TableFunction<{kind: 'source'; id: string}>;
+const taggedSource = queryArrowSQLWithMetadata(
+  'SELECT value FROM source(input)',
+  new Map([['input', source]]),
+  {
+    functions: [VISUALIZATION_FUNCTIONS, [[sourceFunction]]]
+  }
+);
+for (const item of taggedSource.columnMetadata['value'] ?? []) {
+  if (item.kind === 'source') item.id.toUpperCase();
+  else item.scale.sample(1);
+}

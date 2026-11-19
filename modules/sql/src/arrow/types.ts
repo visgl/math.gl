@@ -93,7 +93,9 @@ export type AggregateFunction<M = never> = Readonly<{
 
 /** Schema and output metadata common to standalone and correlated table functions. */
 type TableFunctionOutput<M> = Readonly<{
+  /** Schema declared before reading rows. */
   outputSchema: Schema;
+  /** Typed metadata keyed by the names in the output schema. */
   columnMetadata?: Readonly<Record<string, readonly M[]>>;
 }>;
 
@@ -128,8 +130,11 @@ export type TableFunction<M = never> = Readonly<{kind: 'table'; name: string}> &
 
 /** Binds one correlated column against the parent schema. */
 export type LateralTableBinder<M> = (context: {
+  /** Schema of the relation that provides each parent row. */
   inputSchema: Schema;
+  /** Field referenced by the correlated argument. */
   argument: Field;
+  /** Whether the SQL call declared WITH ORDINALITY. */
   ordinality: boolean;
 }) => BoundLateralTableFunction<M>;
 
