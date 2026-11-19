@@ -107,6 +107,8 @@ const roots = queryArrowSQL(
 );
 ```
 
+See [spatial SQL functions](arrow/spatial-functions.md) to derive geometry and measurement columns.
+
 See [typed functions](arrow/README.md#named-table-functions) for application-defined functions
 and [color functions](color-functions/README.md) for visualization-oriented queries.
 Geospatial and DGGS libraries remain in their owning packages.

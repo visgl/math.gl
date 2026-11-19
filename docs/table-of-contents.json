@@ -582,6 +582,7 @@
           "modules/sql/workers",
           "modules/sql/parser/README",
           "modules/sql/arrow/README",
+          "modules/sql/arrow/spatial-functions",
           "modules/sql/arrow/sql-conformance",
           "modules/sql/math-functions/README",
           "modules/sql/color-functions/README",

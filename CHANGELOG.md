@@ -4,6 +4,7 @@
 
 - **Breaking:** Consolidate Arrow, GeoArrow and WKB integration into `@math.gl/core/arrow` and `@math.gl/geometry/arrow`, and move Web Mercator to `@math.gl/geospatial/web-mercator`. Organize core matrix, color and UTF-8 APIs and unify SQL scales under `@math.gl/sql/scales` (#608).
 
+- SQL: register PostGIS-aligned spatial functions and Turf operations to derive Arrow columns.
 - SQL: expand list and map columns through experimental SQL UNNEST with left joins and ordinality
 
 - feat(geometry): Add `EarcutOptions.triangulation` to choose upstream `fast` clipping or `balanced` clipping that reduces long triangle fans. Use the shared balanced strategy for projection-domain warp seeds.
