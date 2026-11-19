@@ -123,7 +123,7 @@ The vector implementation receives full-length Arrow vectors, potentially dictio
 
 An optional `evaluateScalar(...values)` provides equivalent primitive row semantics. When present, the expression compiler uses it to fuse the function into its output loop, avoiding intermediate vectors. Without it, the compiler calls `evaluate` at the vector boundary. It never runs both implementations or retries a failure through the other implementation. Both implementations must agree on values and errors. Conditional branches and null propagation skip scalar callbacks too.
 
-The example uses `vectorFromArray` for readability; vector kernels can write Arrow buffers directly. Geometry functions can supply only `evaluate`, with exact nested argument fields and GeoArrow extension metadata. Geometry layouts require schema-bound declarations; there is no overload resolution yet. Results support primitives and fixed-size numeric tuples. Other nested results, including variable-length geometry output, are not supported.
+The example uses `vectorFromArray` for readability; vector kernels can write Arrow buffers directly. Geometry functions can supply only `evaluate`, with exact nested argument fields and GeoArrow extension metadata. Results support primitives and fixed-size numeric tuples. A geometry result can use Binary with the `geoarrow.wkb` extension. The [spatial function guide](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow/spatial-functions.md) shows how to use those results in another expression.
 
 ### RGBA and other numeric tuple results[​](#rgba-and-other-numeric-tuple-results "Direct link to RGBA and other numeric tuple results")
 
@@ -190,6 +190,8 @@ This entry point requires Apache Arrow 17 or later. Import function libraries se
 A table mask contains one byte per row across all batches. Cancellation is checked before and after each batch; synchronous evaluation does not yield to the event loop. Use a worker for responsive UI cancellation. A single large batch or custom synchronous kernel cannot be interrupted mid-call.
 
 ## Turf functions[​](#turf-functions "Direct link to Turf functions")
+
+Use the [spatial SQL function libraries](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow/spatial-functions.md) to register PostGIS-aligned geometry functions or Turf functions for computed columns.
 
 `@math.gl/geospatial/turf/expressions` exports `createTurfArrowFunction({name, arguments, result, evaluate})`. Pass the exact GeoArrow argument fields and a nullable Float64 or Bool result. Import only the Turf functions you use; the adapter itself imports no Turf implementations.
 
@@ -279,9 +281,11 @@ Packed arrays also accept `ARRAY[x,y,z]::FLOAT16[3]` or `compileArrowArray(colum
 
 ## Function prototypes and numeric overloads[​](#function-prototypes-and-numeric-overloads "Direct link to Function prototypes and numeric overloads")
 
-Each named `ArrowTableFunction` owns a non-empty `prototypes` array. A prototype declares its argument fields, result field, null policy, vector implementation and optional fused scalar implementation. Multiple objects with the same name may contribute distinct prototypes. Duplicate argument-type/metadata signatures are rejected; changing only return type or nullability does not create an overload. There are no legacy single-signature aliases.
+A named `ArrowTableFunction` can supply fixed prototypes through `prototypes`. A prototype declares its argument fields, result field, null policy, vector implementation and optional fused scalar implementation. Multiple objects with the same name may contribute distinct prototypes. Duplicate argument-type/metadata signatures are rejected; changing only return type or nullability does not create an overload. There are no legacy single-signature aliases.
 
-Compilation selects one prototype: exact signatures win, otherwise Float16 can widen to Float32 or Float64 and Float32 can widen to Float64. The least total widening wins; ties are ambiguous and fail binding. Integer/float and mixed integer-width conversions require explicit casts. Literals follow typed arguments; calls containing only numeric literals prefer their default Float64 type. Use typed null casts to disambiguate otherwise ambiguous null arguments. Kernels receive the chosen prototype's declared input types. No per-batch overload lookup or callback probing occurs.
+Compilation selects one prototype: exact signatures win, otherwise Float16 can widen to Float32 or Float64 and Float32 can widen to Float64. The least total widening wins; ties are ambiguous and fail binding. Integer/float and mixed integer-width conversions require explicit casts. Literals follow typed arguments; calls containing only numeric literals prefer their default Float64 type. Use typed null casts to disambiguate otherwise ambiguous null arguments. Kernels receive the chosen prototype's declared input types.
+
+A declaration can also provide `resolvePrototype(fields)` for a schema-dependent signature. The compiler calls the resolver during binding when no fixed prototype matches. A function with only a resolver uses `prototypes: []`. The resolver receives the inferred argument fields in call order. An undefined field indicates an argument that needs type context, such as a bare `NULL`. Return one prototype for a supported signature, or undefined to indicate no match. Only one resolver can be registered per function name. The chosen prototype is reused across batches.
 
 `ExpressionEvaluationError` exposes `code` values `domain`, `conversion`, `overflow` and `divisionByZero`. Numeric data errors use this class; unknown names, incompatible signatures, schema mismatches and implementation failures remain ordinary fatal errors. Division and modulo by zero throw for integer and floating Arrow arithmetic. Use `TRY` for row-level recovery, as described below.
 

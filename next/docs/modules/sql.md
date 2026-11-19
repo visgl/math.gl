@@ -119,6 +119,8 @@ const roots = queryArrowSQL(
 );
 ```
 
+See [spatial SQL functions](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow/spatial-functions.md) to derive geometry and measurement columns.
+
 See [typed functions](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow.md#named-table-functions) for application-defined functions and [color functions](https://visgl.github.io/math.gl/next/docs/modules/sql/color-functions.md) for visualization-oriented queries. Geospatial and DGGS libraries remain in their owning packages.
 
 ## Execution choices[​](#execution-choices "Direct link to Execution choices")

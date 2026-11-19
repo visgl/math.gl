@@ -278,6 +278,7 @@ A lightweight SQL query engine for Apache Arrow tables. Query tables already in 
 - [Function Registry 🧪](https://visgl.github.io/math.gl/next/docs/modules/sql/api-reference/function-registry.md): ExpressionFunctionRegistry maintains an isolated table of JavaScript functions that expression evaluators can call with evaluated arguments.
 - [Accessor Compiler 🧪](https://visgl.github.io/math.gl/next/docs/modules/sql/api-reference/parse-expression-string.md): parseExpressionString(expression (row: Record) => unknown
 - [Arrow expressions](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow.md): @math.gl/sql/arrow evaluates schema-bound expressions directly over Arrow batches. Use it
+- [Spatial SQL functions](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow/spatial-functions.md): Register spatial functions to calculate new columns from GeoArrow geometry. The same
 - [SQL expressions in Arrow](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow/sql-conformance.md): Parse SQL with @math.gl/sql/parser, then bind the returned AST to an
 - [Arrow color functions](https://visgl.github.io/math.gl/next/docs/modules/sql/color-functions.md): @math.gl/sql/color-functions exports named ArrowTableFunction declarations for schema-bound expressions.
 - [Portable expressions](https://visgl.github.io/math.gl/next/docs/modules/sql/expressions.md): Use @math.gl/sql/expressions to parse and evaluate expressions against JavaScript objects.
