@@ -52,3 +52,11 @@ test('Arrow evaluates two expressions and shares the bilinear sampler', () => {
   expect(Array.from(output.get(2))).toEqual([255, 255, 255, 255]);
   expect(output.get(3)).toBeNull();
 });
+
+test('Arrow bivariate axes reject lossy Int64 conversion', () => {
+  const wide = new BigInt64Array([9007199254740995n]);
+  const input = tableFromArrays({x: wide, y: [1]});
+  const bound = compileArrowBivariateScale('x', 'y', spec, {inputSchema: input.schema});
+  expect(() => bound.evaluateTable(input)).toThrow('safe numeric range');
+  expect(bound.evaluateTable(input, {activeRows: Uint8Array.of(0)}).get(0)).toBeNull();
+});

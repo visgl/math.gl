@@ -21,15 +21,19 @@ export type BivariateColorScaleSpec = Readonly<{
 /** The palette and the actual axis boundaries a legend should use. */
 export type BivariateColorScaleDescriptor = BivariateColorScaleSpec &
   Readonly<{
+    /** Actual sampling method on the color grid. */
     interpolation: 'discrete' | 'bilinear';
     /** Internal equal-interval class boundaries for discrete scales. */
     xBreaks?: readonly number[];
+    /** Internal equal-interval y-axis class boundaries for discrete scales. */
     yBreaks?: readonly number[];
   }>;
 
 /** A bivariate scale and its transportable legend description. */
 export type ResolvedBivariateColorScale = Readonly<{
+  /** Two-axis domains, class boundaries, and palette used to draw the legend. */
   descriptor: BivariateColorScaleDescriptor;
+  /** Samples a clamped pair. Missing or nonfinite values use the null color. */
   sample(x: number | null, y: number | null): ScaleColor | null;
 }>;
 
