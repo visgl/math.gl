@@ -67,6 +67,22 @@ test('PostGIS point-in-polygon signatures distinguish hole boundaries from inter
   expect([...result.getChild('covered')!]).toEqual([true, true, false, true, false, null]);
 });
 
+test('queries route vertices and constructs viewport polygons', () => {
+  const route = wkb(...Array(6).fill('LINESTRING(0 0,2 3,4 5)'));
+  const n = vectorFromArray([1, -2, 0, 4, -4, null], new Int32());
+  const table = new Table(
+    new Schema([geometryField('route', route), new Field('n', n.type, true)]),
+    {route, n}
+  );
+  const result = select(
+    `SELECT ST_Y(ST_PointN(route, n)) AS y, ST_MakeEnvelope(0, 1, n, 4) AS box FROM features`,
+    table
+  );
+  expect([...result.getChild('y')!]).toEqual([0, 3, null, null, null, null]);
+  expect(geometryAt(result, 'box', 0)).toEqual(parseWKT('POLYGON((0 1,0 4,1 4,1 1,0 1))'));
+  expect(geometryAt(result, 'box', 5)).toBeNull();
+});
+
 test('filters point pairs with inclusive per-row planar radii', () => {
   const p = wkb('POINT(3 4)', 'POINT(3 4)', 'POINT(0 0)', 'POINT EMPTY', null, 'POINT(1 0)');
   const origin = wkb(...Array(6).fill('POINT(0 0)'));

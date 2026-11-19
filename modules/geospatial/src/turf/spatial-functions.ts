@@ -115,8 +115,8 @@ function spatialFunction(
       const geometryFields = fields.slice(0, signatures.length);
       const numberFields = fields.slice(signatures.length).map(field => {
         if (field && !DataType.isInt(field.type) && !DataType.isFloat(field.type))
-          throw new Error(`${name} requires a numeric distance`);
-        return field ?? new Field('distance', new Float64(), true);
+          throw new Error(`${name} requires numeric arguments`);
+        return field ?? new Field('number', new Float64(), true);
       });
       const extensions = geometryFields.map((field, index) => {
         if (!field) return undefined;
@@ -149,7 +149,7 @@ function spatialFunction(
       const metadata = new Map<string, string>();
       if (DataType.isBinary(type)) {
         metadata.set(EXTENSION_NAME, 'geoarrow.wkb');
-        const inputMetadata = fields[0]?.metadata.get(EXTENSION_METADATA);
+        const inputMetadata = geometryFields[0]?.metadata.get(EXTENSION_METADATA);
         if (inputMetadata) metadata.set(EXTENSION_METADATA, inputMetadata);
       }
       const arguments_ = [
@@ -294,6 +294,45 @@ export const ST_COVEREDBY = /* @__PURE__ */ spatialFunction(
   ([p, polygon]) => pointInPolygon(p!, polygon!) ?? false
 );
 
+/** Returns a LineString vertex by signed one-based position. */
+export const ST_POINTN = /* @__PURE__ */ spatialFunction(
+  'ST_PointN',
+  [['LineString']],
+  /* @__PURE__ */ new Binary(),
+  ([line], position) => {
+    if (!Number.isInteger(position)) throw new Error('ST_PointN requires an integer position');
+    if (line?.type !== 'LineString' || !position) return null;
+    const index = position > 0 ? position - 1 : line.coordinates.length + position;
+    const coordinates = line.coordinates[index];
+    return coordinates ? writeWKB({type: 'Point', coordinates}, 'xy') : null;
+  },
+  1
+);
+
+/** Constructs a closed rectangular polygon in an unspecified coordinate system. */
+export const ST_MAKEENVELOPE = /* @__PURE__ */ spatialFunction(
+  'ST_MakeEnvelope',
+  [],
+  /* @__PURE__ */ new Binary(),
+  (_, xmin, ymin, xmax, ymax) =>
+    writeWKB(
+      {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [xmin, ymin],
+            [xmin, ymax],
+            [xmax, ymax],
+            [xmax, ymin],
+            [xmin, ymin]
+          ]
+        ]
+      },
+      'xy'
+    ),
+  4
+);
+
 /** Returns 2D Cartesian point-to-point distance in coordinate units. */
 export const ST_DISTANCE = /* @__PURE__ */ spatialFunction(
   'ST_Distance',
@@ -380,6 +419,8 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly ArrowTableFunction[] =
     ST_COVERS,
     ST_WITHIN,
     ST_COVEREDBY,
+    ST_POINTN,
+    ST_MAKEENVELOPE,
     ST_DISTANCE,
     ST_DWITHIN,
     ST_AZIMUTH,
