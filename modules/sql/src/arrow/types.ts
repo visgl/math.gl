@@ -53,7 +53,10 @@ export type ArrowTableFunction = Readonly<{
 
 /** Flat declaration for a schema-bound scalar function. */
 export type ScalarFunction<M = never> = [M] extends [never]
-  ? ArrowTableFunction & {readonly kind: 'scalar'}
+  ? ArrowTableFunction & {
+      /** SQL execution kind for a row-preserving schema-bound function. */
+      readonly kind: 'scalar';
+    }
   : PreparedScalarFunction<M>;
 
 /** Scalar declaration requiring access to the projection input before evaluation. */

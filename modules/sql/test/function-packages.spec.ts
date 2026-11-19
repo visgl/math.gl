@@ -84,10 +84,20 @@ test('a deck example can package a custom Arrow transform and use SQL parameters
   } satisfies ScalarFunction;
   const EXAMPLE_TRANSFORMS = [HEIGHT_OFFSET] as const;
   const tables = new Map([['features', tableFromArrays({height: [0, 50, null]})]]);
-  const result = queryArrowSQL(
-    'SELECT ABS(HEIGHT_OFFSET(height, :offset)) AS elevation FROM features',
+  const {table, columnMetadata} = queryArrowSQLWithMetadata(
+    'SELECT SCALE_LINEAR(ABS(HEIGHT_OFFSET(height, :offset)), DOMAIN(0, 100), RANGE(0, 200)) AS elevation FROM features',
     tables,
-    {functions: [EXAMPLE_TRANSFORMS, [ABS]], parameters: {offset: 5}}
+    {functions: [EXAMPLE_TRANSFORMS, VISUALIZATION_FUNCTIONS, [ABS]], parameters: {offset: 5}}
   );
-  expect(Array.from(result.getChild('elevation')!)).toEqual([5, 55, null]);
+  const elevation = table.getChild('elevation')!;
+  expect(elevation.get(0)).toBeCloseTo(10);
+  expect(elevation.get(1)).toBeCloseTo(110);
+  expect(elevation.get(2)).toBeNull();
+  expectTypeOf(columnMetadata['elevation']?.[0]).toEqualTypeOf<
+    ScaleProjectionMetadata | undefined
+  >();
+  expect(columnMetadata['elevation']?.[0]?.scale.descriptor.range).toEqual({
+    type: 'numeric',
+    values: [0, 200]
+  });
 });
