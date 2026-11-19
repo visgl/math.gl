@@ -67,6 +67,25 @@ test('PostGIS point-in-polygon signatures distinguish hole boundaries from inter
   expect([...result.getChild('covered')!]).toEqual([true, true, false, true, false, null]);
 });
 
+test('filters point pairs with inclusive per-row planar radii', () => {
+  const p = wkb('POINT(3 4)', 'POINT(3 4)', 'POINT(0 0)', 'POINT EMPTY', null, 'POINT(1 0)');
+  const origin = wkb(...Array(6).fill('POINT(0 0)'));
+  const r = vectorFromArray([5, 4, 0, 0, 9, null], new Int32());
+  const table = new Table(
+    new Schema([
+      geometryField('p', p),
+      geometryField('origin', origin),
+      new Field('r', r.type, true)
+    ]),
+    {p, origin, r}
+  );
+  const result = select('SELECT ST_DWithin(p, origin, r) AS nearby FROM features', table);
+  expect([...result.getChild('nearby')!]).toEqual([true, false, true, false, null, null]);
+  expect(() => select('SELECT ST_DWithin(p, origin, -1) FROM features', table)).toThrow(
+    /nonnegative/
+  );
+});
+
 test('planar measurements and weighted centroids agree with PostGIS geometry fixture values', () => {
   const shape = wkb(
     'POLYGON((0 0,8 0,8 8,0 8,0 0),(1 1,3 1,3 3,1 3,1 1))',

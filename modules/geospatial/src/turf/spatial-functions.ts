@@ -102,7 +102,8 @@ function spatialFunction(
   name: string,
   signatures: readonly (readonly GeometryKind[])[],
   type: SpatialResult,
-  evaluate: (geometries: readonly WellKnownGeometry[]) => SpatialValue
+  evaluate: (geometries: readonly WellKnownGeometry[], ...numbers: number[]) => SpatialValue,
+  numericArguments = 0
 ): ScalarFunction {
   return {
     kind: 'scalar',
@@ -110,8 +111,14 @@ function spatialFunction(
     prototypes: [],
     /** Binds the allowed geometry types and result metadata to a call. */
     resolvePrototype(fields) {
-      if (fields.length !== signatures.length) return undefined;
-      const extensions = fields.map((field, index) => {
+      if (fields.length !== signatures.length + numericArguments) return undefined;
+      const geometryFields = fields.slice(0, signatures.length);
+      const numberFields = fields.slice(signatures.length).map(field => {
+        if (field && !DataType.isInt(field.type) && !DataType.isFloat(field.type))
+          throw new Error(`${name} requires a numeric distance`);
+        return field ?? new Field('distance', new Float64(), true);
+      });
+      const extensions = geometryFields.map((field, index) => {
         if (!field) return undefined;
         const extension = getGeoArrowFieldInfo(field);
         const encoding = extension?.encoding;
@@ -145,15 +152,19 @@ function spatialFunction(
         const inputMetadata = fields[0]?.metadata.get(EXTENSION_METADATA);
         if (inputMetadata) metadata.set(EXTENSION_METADATA, inputMetadata);
       }
-      const arguments_ = fields.map(field => field ?? new Field('geometry', new Binary(), true));
+      const arguments_ = [
+        ...geometryFields.map(field => field ?? new Field('geometry', new Binary(), true)),
+        ...numberFields
+      ];
       return {
         arguments: arguments_,
         result: new Field(name, type, true, metadata),
         /** Evaluates active rows and retains their positions in the output batch. */
         evaluate(vectors, {activeRows, length: rowCount}) {
-          const readers = vectors.map((vector, index) =>
-            readGeometry(vector, arguments_[index]!, activeRows)
-          );
+          const numbers = vectors.slice(signatures.length);
+          const readers = vectors
+            .slice(0, signatures.length)
+            .map((vector, index) => readGeometry(vector, arguments_[index]!, activeRows));
           const values = new Array<SpatialValue>(rowCount).fill(null);
           for (let row = 0; row < rowCount; row++) {
             if (!activeRows[row]) continue;
@@ -165,7 +176,7 @@ function spatialFunction(
                 );
               return geometry;
             });
-            values[row] = evaluate(geometries);
+            values[row] = evaluate(geometries, ...numbers.map(vector => Number(vector.get(row))));
           }
           return vectorFromArray(values, type);
         }
@@ -295,6 +306,20 @@ export const ST_DISTANCE = /* @__PURE__ */ spatialFunction(
   }
 );
 
+/** Tests an inclusive planar radius in the coordinate units of two points. */
+export const ST_DWITHIN = /* @__PURE__ */ spatialFunction(
+  'ST_DWithin',
+  [pointKinds, pointKinds],
+  /* @__PURE__ */ new Bool(),
+  ([a, b], radius) => {
+    if (radius! < 0) throw new Error('ST_DWithin distance must be nonnegative');
+    const p = pointCoordinates(a!);
+    const q = pointCoordinates(b!);
+    return Boolean(p && q && Math.hypot(q[0]! - p[0]!, q[1]! - p[1]!) <= radius!);
+  },
+  1
+);
+
 /** Returns clockwise azimuth from positive Y in radians. */
 export const ST_AZIMUTH = /* @__PURE__ */ spatialFunction(
   'ST_Azimuth',
@@ -356,6 +381,7 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly ArrowTableFunction[] =
     ST_WITHIN,
     ST_COVEREDBY,
     ST_DISTANCE,
+    ST_DWITHIN,
     ST_AZIMUTH,
     ST_AREA,
     ST_LENGTH,
