@@ -220,6 +220,26 @@ export function parseSQLScaleExpression(
  */
 export function parseSQLScaleAST(expression: Expression): ParsedSQLScale {
   const root = call(expression);
+  const trailing = root.arguments.length === 4 ? root.arguments[3] : undefined;
+  if (
+    trailing?.type !== 'CallExpression' ||
+    trailing.callee.type !== 'Identifier' ||
+    String(trailing.callee['name']).toUpperCase() !== 'NICE'
+  )
+    return parseScaleCall(root);
+
+  const {value, scale} = parseScaleCall({...root, arguments: root.arguments.slice(0, 3)});
+  if (
+    (scale.type !== 'sequential' && scale.type !== 'quantile') ||
+    trailing.arguments.length ||
+    (scale.domain.type === 'fixed' && scale.domain.values.length !== 2)
+  )
+    throw new Error('NICE() requires a two-endpoint sequential or quantile scale');
+  return {value, scale: validateScaleSpec({...scale, nice: true})};
+}
+
+/** Parses the underlying scale arguments before applying optional rounding. */
+function parseScaleCall(root: Call): ParsedSQLScale {
   const fn = root.callee.name.toUpperCase();
   const args = root.arguments;
   const names: Record<string, ScaleSpec['type']> = {

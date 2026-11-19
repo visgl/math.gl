@@ -587,6 +587,7 @@
           "modules/sql/math-functions/README",
           "modules/sql/color-functions/README",
           "modules/sql/scales/README",
+          "modules/sql/scales/gallery",
           "modules/sql/scales/SQL",
           "modules/sql/scales/bivariate",
           "modules/sql/scales/numeric",

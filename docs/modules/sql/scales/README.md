@@ -1,5 +1,7 @@
 # Portable visualization scale descriptors (experimental)
 
+Compare ramps and class breaks in the [color scale gallery](gallery.mdx).
+
 Use `@math.gl/core/color` for portable scale specifications and samplers.
 For SQL parsing, Arrow domain resolution, and column evaluation, use
 `@math.gl/sql/scales`.
