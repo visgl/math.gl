@@ -118,3 +118,13 @@ const legends = compiled.scales.map(scale => scale.descriptor);
 Domains resolve once over the complete input table, not just rows selecting a branch. This includes computed quantile domain expressions: domain resolution evaluates those expressions over all rows even if a CASE branch is never selected. Conditional branches preserve lazy per-row evaluation after domains are resolved. All branches must have compatible result types. Recompile when data-derived domains change; compiling on a new table does not mutate an earlier compiled expression. This function does not change the single-scale parser or register scales as global functions.
 
 See [Creating Arrow columns](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow-columns.md) for a color column and its legend.
+
+## Cyclic color[​](#cyclic-color "Direct link to Cyclic color")
+
+Use `SCALE_CYCLIC` for measurements that repeat, such as a compass heading or the hour of day. Supply the fixed origin and end of one complete period.
+
+```
+SCALE_CYCLIC(heading_degrees, DOMAIN(0, 360), PALETTE('compass'))
+```
+
+Zero, 360, and −360 degrees all sample the same color. The palette stops are evenly spaced around the period, including the transition from its last stop back to its first. Custom colors go in cycle order. The sampler closes the loop automatically. Use the resolved scale to draw a circular legend.
