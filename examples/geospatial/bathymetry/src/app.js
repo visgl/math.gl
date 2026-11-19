@@ -7,10 +7,14 @@ import {mountInfoBox} from '../../../common/info-box.js';
 import {createGlobeMesh, getExaggeration} from './mesh.js';
 import {selectRefinement, createRefinementSource, sampleCoarsePosition} from './refinement.js';
 import {getMorphFocus, getMorphViewState} from './camera.js';
+import {computeSoundProfile, pickSeaLevelPoint, sampleHeight} from './sound-profile.js';
+import {loadWoa23ProfileSource} from './profile-sources.js';
+import {renderSoundProfile} from './profile-panel.js';
 import elevationUrl from '../assets/etopo1.bin?url';
 
 /** Mount a global relief globe with no water surface obscuring the seafloor. */
-export function mountBathymetry(root) {
+/** `profileSource` replaces the WOA23 preview, for example with a synthetic source in tests. */
+export function mountBathymetry(root, {profileSource} = {}) {
   root.innerHTML = `<canvas data-role="globe" aria-label="Interactive three dimensional ocean floor globe"></canvas>
   <aside><h1>The ocean, uncovered</h1><p>Explore Earth's hidden ridges, trenches and continental shelves.</p>
   <label>Destination <select data-role="destination"><option value="pacific">Pacific Ocean</option><option value="atlantic">Mid-Atlantic Ridge</option><option value="indian">Indian Ocean</option><option value="americas">The Americas</option></select></label>
@@ -24,9 +28,16 @@ export function mountBathymetry(root) {
   <p data-role="status" role="status">Loading global relief…</p>
   <div class="legend"></div><div class="legend-labels"><span>−11 km</span><span>−6 km</span><span>0 m</span></div>
   <p>Drag to rotate · scroll to zoom. Depth and height fade from 100× to true scale as you zoom in. Colors always show real elevation.</p>
-  <p class="credits">NOAA NGDC <a href="https://coastwatch.pfeg.noaa.gov/erddap/info/etopo180/index.html" target="_blank" rel="noreferrer">ETOPO1</a> · Amante & Eakins (2009). Global 0.5° overview; zoom loads finer <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" target="_blank" rel="noreferrer">Mapzen / Tilezen terrain tiles</a> from AWS. Ocean source: ETOPO1 (1′); finer display samples are not new seabed measurements. Refined patch edges match the coarse mesh. Polar caps retain the overview. Spherical display, heights relative to mean sea level.</p></aside>`;
+  <p class="credits">NOAA NGDC <a href="https://coastwatch.pfeg.noaa.gov/erddap/info/etopo180/index.html" target="_blank" rel="noreferrer">ETOPO1</a> · Amante & Eakins (2009). Global 0.5° overview; zoom loads finer <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" target="_blank" rel="noreferrer">Mapzen / Tilezen terrain tiles</a> from AWS. Ocean source: ETOPO1 (1′); finer display samples are not new seabed measurements. Refined patch edges match the coarse mesh. Polar caps retain the overview. Spherical display, heights relative to mean sea level.</p></aside>
+  <aside class="sound-profile"><label>Absorption frequency <select data-role="frequency"><option value="12000">12 kHz</option><option value="100000">100 kHz</option><option value="400000">400 kHz</option></select></label>
+  <div data-role="profile" role="status"><p>Click the ocean on the globe or on the flat map to see the sound-speed profile down to the seafloor.</p></div>
+  <p class="credits" data-role="profile-source"></p></aside>`;
   const disposePanel = mountInfoBox(root.querySelector('aside'), {
     title: 'Bathymetry',
+    width: 300
+  });
+  const disposeProfilePanel = mountInfoBox(root.querySelector('aside.sound-profile'), {
+    title: 'Sound speed',
     width: 300
   });
   const controls = role => root.querySelector(`[data-role="${role}"]`);
@@ -58,6 +69,7 @@ export function mountBathymetry(root) {
         sun: new DirectionalLight({direction: [-3, -4, -2], intensity: 1.7})
       })
     ],
+    onClick: info => selectPoint(info.x, info.y),
     onViewStateChange: ({viewState}) => {
       state = viewState;
       deck.setProps({viewState: state});
@@ -160,6 +172,76 @@ export function mountBathymetry(root) {
     schedule();
     queueRefinement();
   }
+  /** Geographic point of the last accepted click, or undefined before the first one. */
+  let selected;
+  /** Profile source: the caller's, or the WOA23 preview once it loads. */
+  const profileSourceReady = profileSource
+    ? Promise.resolve(profileSource)
+    : loadWoa23ProfileSource({signal: abort.signal});
+  profileSourceReady.then(
+    source => {
+      controls('profile-source').textContent =
+        `Profiles: ${source.name}. A climatology is a long-term mean, not a measured cast; not for navigation.`;
+    },
+    error => {
+      if (!abort.signal.aborted)
+        controls('profile-source').textContent = `Unable to load ocean profiles: ${error.message}`;
+    }
+  );
+  /** Select the sea-level point under a click at pixel (x, y) and show its profile. */
+  function selectPoint(x, y) {
+    const viewport = deck.getViewports()[0];
+    if (!viewport || !heights) return;
+    const point = pickSeaLevelPoint(
+      viewport,
+      x,
+      y,
+      Number(controls('morph').value),
+      controls('projection').value
+    );
+    if (!point) {
+      controls('profile').textContent =
+        'Set the globe → map slider fully to the globe or to the map, then click the ocean.';
+      return;
+    }
+    selected = point;
+    showProfile();
+  }
+  /** Show the profile of the selected point at the selected frequency, after the profile source loads. */
+  async function showProfile() {
+    if (!selected) return;
+    const request = selected;
+    const {longitude, latitude} = request;
+    let source;
+    try {
+      controls('profile').textContent = 'Loading ocean profiles…';
+      source = await profileSourceReady;
+    } catch (error) {
+      controls('profile').textContent = `Unable to load ocean profiles (${error.message}).`;
+      return;
+    }
+    if (request !== selected || abort.signal.aborted) return;
+    const seafloorDepth = -sampleHeight(heights, longitude, latitude);
+    const profile = seafloorDepth > 0 ? source.getProfile(longitude, latitude) : null;
+    if (!profile) {
+      controls('profile').textContent =
+        `${latitude.toFixed(2)}°, ${longitude.toFixed(2)}° is not ocean in the profile data. Click the ocean.`;
+      return;
+    }
+    const frequency = Number(controls('frequency').value);
+    try {
+      const result = computeSoundProfile(profile, {latitude, seafloorDepth, frequency});
+      renderSoundProfile(controls('profile'), result, {
+        longitude,
+        latitude,
+        seafloorDepth,
+        frequency
+      });
+    } catch (error) {
+      controls('profile').textContent = `No profile at this point (${error.message}).`;
+    }
+  }
+  controls('frequency').onchange = showProfile;
   controls('projection').onchange = updateMorph;
   controls('morph').oninput = updateMorph;
   function queueRefinement() {
@@ -225,6 +307,7 @@ export function mountBathymetry(root) {
     cancelAnimationFrame(frame);
     deck.finalize();
     disposePanel();
+    disposeProfilePanel();
     root.replaceChildren();
   };
 }

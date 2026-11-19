@@ -19,6 +19,7 @@
     "@luma.gl/core": "10.0.0-alpha.14",
     "@luma.gl/engine": "10.0.0-alpha.14",
     "@luma.gl/shaders": "10.0.0-alpha.14",
+    "@math.gl/earth": "workspace:*",
     "@math.gl/geospatial": "workspace:*"
   },
   "devDependencies": {
