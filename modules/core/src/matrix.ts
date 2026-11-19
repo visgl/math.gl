@@ -414,3 +414,10 @@ export {
 } from './numeric-helpers';
 export {SampleTrack} from './sample-track';
 export type {SampleTrackOptions} from './sample-track';
+export {SimulationClock, interpolateTickState} from './simulation-clock';
+export type {
+  SimulationClockOptions,
+  SimulationClockAdvance,
+  SimulationClockCatchUpPolicy,
+  TickStateInterpolator
+} from './simulation-clock';
