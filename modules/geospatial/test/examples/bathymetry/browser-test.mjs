@@ -77,13 +77,30 @@ try {
         bluePixels++;
     }
   assert.ok(bluePixels > 10000, 'Rendered blue seafloor occupies the globe');
+  // The globe center is the Atlantic focus (12°N, 30°W): a click opens its sound-speed profile.
+  await page.mouse.click(600, 400);
+  await page.locator('[data-role=profile-chart]').waitFor();
+  const profileText = await page.locator('[data-role=profile]').textContent();
+  assert.match(profileText, /12\.00°, -30\.00°/);
+  assert.match(profileText, /deep sound channel axis/);
+  assert.match(profileText, /Absorption at 12 kHz/);
+  await page.locator('[data-role=frequency]').selectOption('400000');
+  await page.waitForFunction(() =>
+    document.querySelector('[data-role=absorption]').textContent.includes('400 kHz')
+  );
+  await page.locator('[data-role=morph]').fill('0.5');
+  await page.mouse.click(600, 400);
+  await page.waitForFunction(() =>
+    document.querySelector('[data-role=profile]').textContent.includes('fully to the globe')
+  );
+  await page.locator('[data-role=morph]').fill('0');
   await page.locator('[data-role=morph]').fill('1');
   await page.locator('[data-role=projection]').selectOption('mercator');
   await page.locator('[data-role=morph]').fill('0');
   await page.locator('[data-role=wireframe]').check();
   await page.setViewportSize({width: 390, height: 844});
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
-  await page.locator('aside[data-compact-panel=true]').waitFor();
+  await page.locator('aside[data-compact-panel=true]').first().waitFor();
   assert.deepEqual(errors, []);
 } finally {
   await browser.close();
