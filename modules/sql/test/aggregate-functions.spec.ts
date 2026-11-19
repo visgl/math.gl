@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Field, Float64, tableFromArrays} from 'apache-arrow';
+import {DateDay, Field, Float64, TimestampMicrosecond, tableFromArrays} from 'apache-arrow';
 import {expect, test} from 'vitest';
 import {queryArrowSQL, queryArrowSQLWithMetadata, type AggregateFunction} from '@math.gl/sql';
 import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
@@ -73,4 +73,35 @@ test('scale and aggregate metadata follow expression nesting order', () => {
     {functions: [[VISUALIZATION_FUNCTIONS, SPREAD]]}
   );
   expect(columnMetadata['color']?.map(entry => entry.kind)).toEqual(['scale', 'spread']);
+});
+
+test('custom aggregate output preserves Arrow date days and timestamp microseconds', () => {
+  const DAY = {
+    kind: 'aggregate',
+    name: 'DAY',
+    bind() {
+      return {
+        outputField: new Field('day', new DateDay(), false),
+        createAccumulator: () => ({update() {}, finalize: () => 1})
+      };
+    }
+  } satisfies AggregateFunction;
+  const TICK = {
+    kind: 'aggregate',
+    name: 'TICK',
+    bind() {
+      return {
+        outputField: new Field('tick', new TimestampMicrosecond(), false),
+        createAccumulator: () => ({update() {}, finalize: () => 1234n})
+      };
+    }
+  } satisfies AggregateFunction;
+  const input = tableFromArrays({x: [1]});
+  const result = queryArrowSQL(
+    'SELECT DAY() AS day, TICK() AS tick FROM data',
+    new Map([['data', input]]),
+    {functions: [[DAY, TICK]]}
+  );
+  expect(result.getChild('day')!.data[0]!.values[0]).toBe(1);
+  expect(result.getChild('tick')!.data[0]!.values[0]).toBe(1234n);
 });
