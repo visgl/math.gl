@@ -687,6 +687,35 @@ test('spatial constructors preserve order, point duplicates and collection nesti
   expect(geometryAt(missing, 'neither', 0)).toBeNull();
 });
 
+test('XYZ tile polygons use top-left indexing, root CRS and clamped fractional margins', () => {
+  const g = wkb('LINESTRING(0 0,80 40)', null);
+  const table = new Table(new Schema([geometryField('g', g, 'wkb', {crs: 'EPSG:4326'})]), {g});
+  const result = select(
+    `SELECT ST_TileEnvelope(2,1,1) AS mercator,
+    ST_TileEnvelope(2,0,0,g,0.25) AS custom, ST_TileEnvelope(2,0,0,g,-0.25) AS inset FROM features`,
+    table
+  );
+  expect(geometryAt(result, 'mercator', 0)).toEqual(
+    parseWKT(
+      'POLYGON((-10018754.171394622 0,-10018754.171394622 10018754.171394622,0 10018754.171394622,0 0,-10018754.171394622 0))'
+    )
+  );
+  expect(geometryAt(result, 'custom', 0)).toEqual(
+    parseWKT('POLYGON((0 27.5,0 40,25 40,25 27.5,0 27.5))')
+  );
+  expect(geometryAt(result, 'inset', 0)).toEqual(
+    parseWKT('POLYGON((5 32.5,5 37.5,15 37.5,15 32.5,5 32.5))')
+  );
+  expect(geometryAt(result, 'custom', 1)).toBeNull();
+  expect(JSON.parse(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')!).crs).toBe(
+    'EPSG:3857'
+  );
+  expect(JSON.parse(result.schema.fields[1]!.metadata.get('ARROW:extension:metadata')!).crs).toBe(
+    'EPSG:4326'
+  );
+  expect(() => select('SELECT ST_TileEnvelope(1,2,0) FROM features', table)).toThrow(/index/);
+});
+
 test('ST_Extent combines groups across batches and ignores empty and null rows', () => {
   const g = wkb('LINESTRING(-4 8,3 5)', null, 'POINT(7 -2)', 'POLYGON EMPTY');
   const k = vectorFromArray([1, 2, 1, 2], new Int32());
