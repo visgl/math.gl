@@ -713,6 +713,7 @@ function makeEnvelopeFunction(): ScalarFunction {
 
   return {
     ...envelopeFunction,
+    /** Keeps the WKB evaluator and binds the bounds kernel for native columns. */
     resolvePrototype(fields) {
       const prototype = envelopeFunction.resolvePrototype!(fields);
       const field = fields[0];
@@ -726,6 +727,7 @@ function makeEnvelopeFunction(): ScalarFunction {
       }
       return {
         ...prototype,
+        /** Evaluates active rows and preserves the type of empty geometries. */
         evaluate([vector], {activeRows, length}) {
           const column = readActiveGeoArrowColumn(vector!, field, activeRows);
           const bounds = getGeoArrowRowBounds(column);
