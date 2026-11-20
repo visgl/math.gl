@@ -4,6 +4,12 @@
 
 import {mat4, mat4GetScaling, vec3Normalize, createLocalFrameBasis} from '@math.gl/core';
 import {getGeohashBounds} from '@math.gl/dggs';
+import {A5Decoder} from '@math.gl/dggs/a5';
+import {GeohashDecoder} from '@math.gl/dggs/geohash';
+import {H3Decoder} from '@math.gl/dggs/h3';
+import {PlusCodeDecoder} from '@math.gl/dggs/plus-code';
+import {QuadkeyDecoder} from '@math.gl/dggs/quadkey';
+import {S2Decoder} from '@math.gl/dggs/s2';
 import {TriangleBVH, getClosestPointsSegmentTriangle, type GeometryInput} from '@math.gl/geometry';
 import {getSkySnapshot, getStartOfDay, type SkySnapshotOptions} from '@math.gl/earth';
 import {
@@ -71,6 +77,12 @@ void [
   vec3Normalize,
   createLocalFrameBasis,
   getGeohashBounds,
+  A5Decoder,
+  GeohashDecoder,
+  H3Decoder,
+  PlusCodeDecoder,
+  QuadkeyDecoder,
+  S2Decoder,
   TriangleBVH,
   getClosestPointsSegmentTriangle,
   getSkySnapshot,
