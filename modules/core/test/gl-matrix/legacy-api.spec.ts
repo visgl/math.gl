@@ -195,6 +195,20 @@ describe('gl-matrix compatibility API', () => {
     expect(vec4.length(vec4.random(o4, 2))).toBeCloseTo(2);
   });
 
+  test('vec3.slerp handles parallel and opposite vectors', () => {
+    expectArray(vec3.slerp(vec3.create(), [0, 0, 1], [0, 0, 1], 0.5), [0, 0, 1]);
+    for (const t of [0.25, 0.5, 0.75]) {
+      const result = vec3.slerp(vec3.create(), [1, 0, 0], [-1, 0, 0], t);
+      expect(vec3.length(result)).toBeCloseTo(1);
+      expect(result[0]).toBeCloseTo(Math.cos(t * Math.PI));
+    }
+    expectArray(vec3.slerp(vec3.create(), [1, 0, 0], [-1, 0, 0], 0), [1, 0, 0]);
+    expectArray(vec3.slerp(vec3.create(), [1, 0, 0], [-1, 0, 0], 1), [-1, 0, 0]);
+    expect(vec3.length(vec3.slerp(vec3.create(), [0, 0, 1], [0, 0, -1], 0.5))).toBeCloseTo(1);
+    // nearly opposite: turns towards the side b leans to
+    expectArray(vec3.slerp(vec3.create(), [1, 0, 0], [-1, 1e-9, 0], 0.5), [0, 1, 0]);
+  });
+
   test('mat3 covers construction, transforms, inversion, and arithmetic', () => {
     const a = mat3.fromValues(1, 2, 3, 0, 1, 4, 5, 6, 0);
     const b = mat3.fromValues(2, 0, 1, 1, 2, 0, 0, 1, 2);
