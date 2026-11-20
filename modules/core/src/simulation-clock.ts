@@ -129,9 +129,11 @@ function getSplitErrorBound(time: number, tickInterval: number): number {
  * advance adds `7u(|t| + tickInterval)`, where `u = 2^-53` and `t` is the time that the advance
  * splits into ticks; `seek` sets the bound to `7u(|t| + tickInterval)` for the time after
  * `startTime`. A remainder within this bound below `tickInterval` is on the next tick
- * boundary. Thus 1 advance of 300 ms and 3 advances of 100 ms with a 0.1 s tick both give
- * 3 ticks and `alpha` 0, while 299.999 ms stays on tick 2. When each advance is at most one
- * tick, the bound after 1e9 advances is less than `1.6e-6 * tickInterval`.
+ * boundary. The snap window is at most `tickInterval / 2`, so a time exactly on a tick stays
+ * on that tick, also when the bound is larger than a tick at a large time. Thus 1 advance of
+ * 300 ms and 3 advances of 100 ms with a 0.1 s tick both give 3 ticks and `alpha` 0, while
+ * 299.999 ms stays on tick 2. When each advance is at most one tick, the bound after 1e9
+ * advances is less than `1.6e-6 * tickInterval`.
  */
 export class SimulationClock {
   /** Fixed tick interval, in simulated seconds. */
@@ -353,11 +355,13 @@ export class SimulationClock {
       throw new RangeError('SimulationClock seek time must be finite');
     }
     const elapsed = time - this.epoch;
-    if (!Number.isSafeInteger(Math.floor(elapsed / this.tickInterval))) {
+    const errorBound = getSplitErrorBound(elapsed, this.tickInterval);
+    // Check the index after the carry and the snap of the split, before any state changes.
+    const tickIndex = this.splitTicks(elapsed, errorBound);
+    if (!Number.isSafeInteger(tickIndex)) {
       throw new RangeError('SimulationClock seek time is outside the safe tick range');
     }
-    const errorBound = getSplitErrorBound(elapsed, this.tickInterval);
-    this.tickIndex = this.splitTicks(elapsed, errorBound);
+    this.tickIndex = tickIndex;
     this.remainder = this.splitRemainder;
     this.remainderErrorBound = errorBound;
   }
@@ -367,9 +371,12 @@ export class SimulationClock {
    * [0, `tickInterval`), with the tick boundary policy:
    * - The rounded quotient can be one tick off, for example `1.7 - 17 * 0.1 < 0`. The split
    *   moves the remainder back into [0, `tickInterval`).
-   * - A remainder that is within `errorBound` below `tickInterval` is on the next tick
+   * - A remainder that is within the snap window below `tickInterval` is on the next tick
    *   boundary: the split counts that tick and sets the remainder to 0. For example, with a
    *   0.1 s tick, `0.3 / 0.1` is `2.9999999999999996`, and 300 ms count as 3 ticks.
+   * - The snap window is `errorBound`, but at most `tickInterval / 2`. A remainder of 0 is then
+   *   always outside the window, so a time exactly on a tick stays on that tick at any
+   *   magnitude, and a snap never moves the time by more than half a tick.
    * @param time Seconds after the start of the current tick.
    * @param errorBound Bound on the rounding error of `time`, in seconds.
    * @returns The tick count. The remainder is in `splitRemainder`.
@@ -384,7 +391,8 @@ export class SimulationClock {
       ticks += 1;
       remainder -= this.tickInterval;
     }
-    if (this.tickInterval - remainder <= errorBound) {
+    const snapWindow = Math.min(errorBound, this.tickInterval / 2);
+    if (this.tickInterval - remainder <= snapWindow) {
       ticks += 1;
       remainder = 0;
     }

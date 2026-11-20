@@ -442,6 +442,72 @@ it('SimulationClock keeps a time that is clearly before a tick boundary on the e
   expect(seekNear.getTickAlpha()).toBeLessThan(1e-14);
 });
 
+it('SimulationClock seeks exactly to a tick at a large time', () => {
+  // Review regression: the bound 7u(2e15 + 1) is 1.55 s, more than the 1 s tick, and the
+  // snap moved the exact tick 2e15 to 2e15 + 1.
+  const clock = new SimulationClock({tickInterval: 1});
+  clock.seek(2e15);
+  expect(clock.getTickIndex()).toBe(2e15);
+  expect(clock.getSecondsIntoTick()).toBe(0);
+  expect(clock.getTickAlpha()).toBe(0);
+
+  // The largest safe tick index is in the safe range, so the seek lands on it exactly.
+  const limit = new SimulationClock({tickInterval: 1});
+  limit.seek(Number.MAX_SAFE_INTEGER);
+  expect(limit.getTickIndex()).toBe(Number.MAX_SAFE_INTEGER);
+  expect(Number.isSafeInteger(limit.getTickIndex())).toBe(true);
+  expect(limit.getSecondsIntoTick()).toBe(0);
+
+  // One tick more is outside the safe range: the seek throws and the clock does not change.
+  const before = {
+    tickIndex: limit.getTickIndex(),
+    seconds: limit.getSecondsIntoTick(),
+    time: limit.getTime()
+  };
+  expect(() => limit.seek(2 ** 53)).toThrow(
+    new RangeError('SimulationClock seek time is outside the safe tick range')
+  );
+  expect(limit.getTickIndex()).toBe(before.tickIndex);
+  expect(limit.getSecondsIntoTick()).toBe(before.seconds);
+  expect(limit.getTime()).toBe(before.time);
+  // An advance past the limit also throws without a change.
+  expect(() => limit.advance(1000)).toThrow(RangeError);
+  expect(limit.getTickIndex()).toBe(before.tickIndex);
+  expect(limit.getSecondsIntoTick()).toBe(before.seconds);
+});
+
+it('SimulationClock seeks to integer multiples of the tick at all safe magnitudes', () => {
+  const u = Number.EPSILON / 2;
+  for (const tickInterval of [1, 1 / 60, 0.001, 7]) {
+    const clock = new SimulationClock({tickInterval});
+    // Tick indices from 1 to the limit. For an integer tick, the limit is the safe integer
+    // range of the time, where `tickIndex * tickInterval` is exact. Otherwise it is 2^50: a
+    // tick then spans at least 4 ULPs of the time, because ULP(t) <= 2u * t <= tickInterval / 4.
+    const lastTick = Number.isInteger(tickInterval)
+      ? Math.floor(Number.MAX_SAFE_INTEGER / tickInterval)
+      : 2 ** 50;
+    const tickIndices = [lastTick, lastTick - 1];
+    for (let exponent = 0; exponent <= 16; exponent++) {
+      for (const mantissa of [1, 3, 7, 9]) {
+        const tickIndex = mantissa * 10 ** exponent;
+        if (tickIndex <= lastTick) tickIndices.push(tickIndex);
+      }
+    }
+    for (const tickIndex of tickIndices) {
+      const boundary = tickIndex * tickInterval;
+      clock.seek(boundary);
+      expect(clock.getTickIndex(), `${tickInterval} x ${tickIndex}`).toBe(tickIndex);
+      expect(clock.getSecondsIntoTick(), `${tickInterval} x ${tickIndex}`).toBe(0);
+
+      // The snap window is the seek bound, at most half a tick. A time 1.5 windows below the
+      // boundary is outside the window, so it stays on the tick before.
+      const snapWindow = Math.min(7 * u * (boundary + tickInterval), tickInterval / 2);
+      clock.seek(boundary - 1.5 * snapWindow);
+      expect(clock.getTickIndex(), `${tickInterval} x ${tickIndex} - 1.5w`).toBe(tickIndex - 1);
+    }
+  }
+});
+
 it('SimulationClock counts the same ticks for every partition of a nominal time', () => {
   // Each piece is an exact number of sub-tick units, with an exact or 1-rounding real time,
   // so the nominal total is exactly `tickCount` ticks.

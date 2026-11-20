@@ -110,7 +110,8 @@ if `rate` is not finite.
 #### `seek(time)`
 
 Moves the clock to a simulated time. You must then set the state at the new tick. It throws
-`RangeError` if `time` is not finite or is outside the safe tick range.
+`RangeError` if `time` is not finite or if its tick index is not a safe integer. The clock
+checks the tick index after the tick boundary policy, and does not change when it throws.
 
 #### `rebase()`
 
@@ -165,6 +166,10 @@ while 3 advances of 100 ms reach tick 3. The clock uses this policy:
   `2u(|t| + tickInterval)`, and their sum is at most `7u(|t| + tickInterval)`.
 - A remainder within the bound below `tickInterval` is on the next tick boundary. The clock
   counts that tick, and sets `alpha` and the seconds into the tick to 0.
+- The snap window is the bound, but at most `tickInterval / 2`. At a large time the bound can
+  be larger than a tick: with `tickInterval: 1`, the bound for `seek(2e15)` is 1.55 s. The cap
+  keeps a remainder of 0 outside the window, so a time exactly on a tick stays on that tick,
+  and a snap never moves the time by more than half a tick.
 
 So 1 advance of 300 ms and 3 advances of 100 ms both give 3 ticks and `alpha` 0. An advance
 of 299.999 ms stays on tick 2. The bound grows with the number of advances. When each
