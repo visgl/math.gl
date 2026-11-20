@@ -437,7 +437,15 @@ function bindNode(
         : BigInt(date.getTime()) * 1000n
       : ast.value;
     if (value instanceof Uint8Array) value = new Uint8Array(value);
+    // Portable numeric literals keep their input representation until comparison.
+    const portableNumber =
+      options.portablePredicate &&
+      expected &&
+      (DataType.isInt(expected) || DataType.isFloat(expected)) &&
+      (typeof value === 'number' || typeof value === 'bigint');
+
     if (
+      !portableNumber &&
       expected &&
       DataType.isInt(expected) &&
       expected.bitWidth === 64 &&
@@ -491,8 +499,8 @@ function bindNode(
         prepare: (_batch, active) =>
           vectorReader(vectorFromArray(Array(active.length).fill(null), type))
       };
-    validateValue(value, type);
-    const rounded = roundToType(type)(value);
+    if (!portableNumber) validateValue(value, type);
+    const rounded = portableNumber ? value : roundToType(type)(value);
     if (typeof value === 'number' && Number.isFinite(value) && !Number.isFinite(rounded))
       throw new Error(`Numeric literal overflow for ${type}`);
     // A tagged UTF-8 parameter supplies physical bytes. Check the optional annotation
@@ -679,7 +687,7 @@ function bindBinary(ast: any, options: BindingOptions): Node {
   let left = bind(ast.left, options, logical ? bool : undefined);
   let right: Node;
   if (portableComparison && ast.right.type === 'Literal') {
-    right = bindPortablePredicateLiteral(ast.right, options, left.field.type);
+    right = bind(ast.right, options, left.field.type);
   } else {
     right = bind(ast.right, options, logical ? bool : undefined);
     if (!logical) {
@@ -753,10 +761,10 @@ function bindBinary(ast: any, options: BindingOptions): Node {
           if (x === null || y === null) return null;
           if (binary) return compare(op, compareUTF8(x, 0, x.length, y, 0, y.length), 0);
           if (comparison) {
-            if (portableComparison && isPredicateNumber(x) && isPredicateNumber(y)) {
-              assertFinitePredicateNumber(x);
-              assertFinitePredicateNumber(y);
-              return compare(op, x < y ? -1 : x > y ? 1 : 0, 0);
+            if (portableComparison) {
+              const left = portableMembershipKey(x);
+              const right = portableMembershipKey(y);
+              return compare(op, left, right);
             }
             return compare(op, x, y);
           }
@@ -785,43 +793,15 @@ function bindBinary(ast: any, options: BindingOptions): Node {
   };
 }
 
-/** Keeps mixed numeric predicate literals in their original representation. */
-function bindPortablePredicateLiteral(ast: any, options: BindingOptions, type: DataType): Node {
-  const value = ast.type === 'Literal' ? ast.value : undefined;
-  const mixed =
-    (typeof value === 'number' && DataType.isInt(type) && type.bitWidth === 64) ||
-    (typeof value === 'bigint' &&
-      (DataType.isFloat(type) || (DataType.isInt(type) && type.bitWidth < 64)));
-  if (!mixed) return bind(ast, options, type);
-  assertFinitePredicateNumber(value);
-  const constant: Prepared = {get: () => value};
-  return {
-    field: new Field('literal', type, false),
-    hasKernel: false,
-    constant,
-    prepare: () => constant
-  };
-}
-
-/** Identifies the two scalar numeric representations used by portable predicates. */
-function isPredicateNumber(value: unknown): value is number | bigint {
-  return typeof value === 'number' || typeof value === 'bigint';
-}
-
-/** Portable predicates reject non-finite numeric operands. */
-function assertFinitePredicateNumber(value: number | bigint): void {
-  if (typeof value === 'number' && !Number.isFinite(value))
+/** Gives integers the same predicate key without rounding large integers to Number. */
+function portableMembershipKey(value: ArrowExpressionValue): ArrowExpressionValue {
+  if (typeof value !== 'number') return value;
+  if (!Number.isFinite(value))
     throw new ExpressionEvaluationError(
       'domain',
       'Arrow predicate cannot compare non-finite numbers'
     );
-}
-
-/** Gives integers the same membership key without rounding large integers to Number. */
-function portableMembershipKey(value: ArrowExpressionValue): ArrowExpressionValue {
-  if (!isPredicateNumber(value)) return value;
-  assertFinitePredicateNumber(value);
-  return typeof value === 'number' && Number.isInteger(value) ? BigInt(value) : value;
+  return Number.isInteger(value) ? BigInt(value) : value;
 }
 
 /** Primitive comparisons preserve IEEE NaN behavior. */
@@ -1014,13 +994,7 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
   const utf8 = typeKey(argument.field.type) === 'utf8';
   const binary =
     DataType.isBinary(argument.field.type) || DataType.isFixedSizeBinary(argument.field.type);
-  const literals = arguments_
-    .slice(1)
-    .map(value =>
-      options.portablePredicate
-        ? bindPortablePredicateLiteral(value, options, argument.field.type)
-        : bind(value, options, argument.field.type)
-    );
+  const literals = arguments_.slice(1).map(value => bind(value, options, argument.field.type));
   // Every membership item is a scalar literal: convert and index once at compilation.
   const prepared = literals.map(value => value.constant!);
   const key = options.portablePredicate

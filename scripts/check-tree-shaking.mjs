@@ -14,8 +14,8 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
   {symbol: "createArrowColumns", packages: ["@math.gl/sql/arrow"], forbidden: [/sql\/(src|dist)\/scales\//], budget: 307000},
-  // The published query consumer measures 316059 bytes with bind-time numeric literal metadata.
-  {symbol:'queryArrowSQL', packages:['@math.gl/sql'], forbidden:[/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/loaders.gl/,/geospatial\//], budget:316100},
+  // SQL text uses expression WHERE clauses; it does not need the portable predicate normalizer.
+  {symbol:'queryArrowSQL', packages:['@math.gl/sql'], forbidden:[/predicate-expression/,/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/loaders.gl/,/geospatial\//], budget:316100},
 
   ...['sweepTerrainRotatingCapsule', 'sweepTerrainRotatingSphere'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
