@@ -3,7 +3,16 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Binary, Field, Int32, Schema, Table, vectorFromArray, type Vector} from 'apache-arrow';
+import {
+  Binary,
+  LargeBinary,
+  Field,
+  Int32,
+  Schema,
+  Table,
+  vectorFromArray,
+  type Vector
+} from 'apache-arrow';
 import {
   makeArrowVectorFromGeoArrowColumn,
   makeGeoArrowColumnFromGeometryRows,
@@ -412,6 +421,47 @@ test('constructs XY, XYZ and XYZM points from nullable numeric coordinates', () 
       result.schema.fields.find(field => field.name === name)!.metadata.get('ARROW:extension:name')
     ).toBe('geoarrow.wkb');
   }
+});
+
+test('ST_Extent combines groups across batches and ignores empty and null rows', () => {
+  const g = wkb('LINESTRING(-4 8,3 5)', null, 'POINT(7 -2)', 'POLYGON EMPTY');
+  const k = vectorFromArray([1, 2, 1, 2], new Int32());
+  const source = new Table(new Schema([geometryField('g', g), new Field('k', k.type, false)]), {
+    g,
+    k
+  });
+  const table = source.slice(0, 2).concat(source.slice(2));
+  const result = select(
+    'SELECT k, ST_Extent(g) AS bounds FROM features GROUP BY k ORDER BY k',
+    table
+  );
+  expect(Array.from(result.getChild('bounds')!.get(0))).toEqual([-4, -2, 7, 8]);
+  expect(result.getChild('bounds')!.get(1)).toBeNull();
+  const empty = select('SELECT ST_Extent(g) AS bounds FROM features WHERE k = 3', table);
+  expect(empty.getChild('bounds')!.get(0)).toBeNull();
+});
+
+test('ST_Extent accepts LargeBinary geometry columns', () => {
+  const g = vectorFromArray([writeWKB(parseWKT('POINT(2 3)')), null], new LargeBinary());
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select('SELECT ST_Extent(g) AS bounds FROM features', table);
+  expect(Array.from(result.getChild('bounds')!.get(0))).toEqual([2, 3, 2, 3]);
+});
+
+test('ST_Extent aggregates native polygon columns with nested Arrow storage', () => {
+  const shapes = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows([
+      parseWKT('POLYGON((2 1,6 1,6 4,2 1))'),
+      null,
+      parseWKT('POLYGON((-4 0,0 0,0 8,-4 0))')
+    ])
+  );
+  const table = new Table(new Schema([geometryField('g', shapes, 'polygon')]), {g: shapes});
+  const result = select(
+    'SELECT ST_Extent(g) AS bounds FROM features',
+    table.slice(0, 1).concat(table.slice(1))
+  );
+  expect(Array.from(result.getChild('bounds')!.get(0))).toEqual([-4, 0, 6, 8]);
 });
 
 test('extracts Z and M independently for dimensional points', () => {
