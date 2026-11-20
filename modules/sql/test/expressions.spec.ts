@@ -6,10 +6,20 @@ import {scalarFunction} from './utils/scalar-function';
 
 import {expect, test, vi} from 'vitest';
 import {
+  makeData,
+  makeVector,
   Binary,
   Bool,
   Struct,
   DateDay,
+  DateMillisecond,
+  DurationMillisecond,
+  TimeMicrosecond,
+  TimeSecond,
+  TimestampSecond,
+  TimestampMillisecond,
+  TimestampNanosecond,
+  TimestampMicrosecond,
   Field,
   Float32,
   Null,
@@ -317,6 +327,68 @@ test('portable predicates resolve nested struct paths and missing members as nul
       options
     ).evaluate(input)
   ]).toEqual([null, null, null]);
+});
+
+test.each([
+  [new DateMillisecond(), 1000n, 2000n],
+  [new TimestampSecond(), 1n, 2n],
+  [new TimestampMillisecond(), 1000n, 2000n],
+  [new TimestampMicrosecond(), 1000000n, 2000000n],
+  [new TimestampNanosecond(), 1000000000n, 2000000000n]
+] as const)(
+  'portable Date predicates bind to Arrow %s without truncating the bound',
+  (type, first, second) => {
+    const input = batch({
+      when: makeVector(
+        makeData({
+          type,
+          length: 3,
+          data: BigInt64Array.of(first, second, 0n),
+          nullCount: 1,
+          nullBitmap: Uint8Array.of(3)
+        })
+      )
+    });
+    const options = {inputSchema: input.schema};
+    const bound = new Date(1500);
+    expect([
+      ...compileArrowPredicate({op: '>', args: [{property: 'when'}, bound]}, options).evaluate(
+        input
+      )
+    ]).toEqual([false, true, null]);
+    expect([
+      ...compileArrowPredicate({op: 'in', args: [{property: 'when'}, [bound]]}, options).evaluate(
+        input
+      )
+    ]).toEqual([false, false, null]);
+    expect(() => values('cast(when, "utf8")', input)).toThrow('Temporal CAST requires');
+  }
+);
+
+test('portable time and duration predicates compare physical values exactly', () => {
+  const input = batch({
+    seconds: vectorFromArray([1, 2, null], new TimeSecond()),
+    micros: vectorFromArray([1n, 2n, null], new TimeMicrosecond()),
+    duration: vectorFromArray(
+      [9007199254740992n, 9007199254740993n, null],
+      new DurationMillisecond()
+    )
+  });
+  const options = {inputSchema: input.schema};
+  expect([
+    ...compileArrowPredicate({op: '>', args: [{property: 'seconds'}, 1.5]}, options).evaluate(input)
+  ]).toEqual([false, true, null]);
+  expect([
+    ...compileArrowPredicate({op: '>', args: [{property: 'micros'}, 1.5]}, options).evaluate(input)
+  ]).toEqual([false, true, null]);
+  expect([
+    ...compileArrowPredicate(
+      {op: '>', args: [{property: 'duration'}, 9007199254740992]},
+      options
+    ).evaluate(input)
+  ]).toEqual([false, true, null]);
+  for (const column of ['seconds', 'micros', 'duration'])
+    expect(() => values(`cast(${column}, "utf8")`, input)).toThrow('Temporal CAST requires');
 });
 
 test('integer bounds and exact argument types are checked before truncation', () => {

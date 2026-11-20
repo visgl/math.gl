@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {DataType, DateUnit, Precision, TimeUnit, type Vector, type Data} from 'apache-arrow';
+import {DataType, DateUnit, Int32, Precision, type Vector, type Data} from 'apache-arrow';
 import {float16Values, requireFloat16} from './float16';
 import {ExpressionEvaluationError} from '../expressions';
 import type {ArrowExpressionValue} from './types';
@@ -22,9 +22,13 @@ export function typeKey(type: DataType): string {
   }
   if (DataType.isBool(type)) return 'bool';
   if (DataType.isUtf8(type)) return 'utf8';
-  if (DataType.isDate(type) && type.unit === DateUnit.DAY) return 'date32';
-  if (DataType.isTimestamp(type) && type.unit === TimeUnit.MICROSECOND)
-    return `timestamp_us:${type.timezone ?? ''}`;
+  if (DataType.isDate(type)) return type.unit === DateUnit.DAY ? 'date32' : 'date64';
+  if (DataType.isTimestamp(type)) {
+    const unit = ['s', 'ms', 'us', 'ns'][type.unit];
+    return `timestamp_${unit}:${type.timezone ?? ''}`;
+  }
+  if (DataType.isTime(type)) return 'time_' + type.unit;
+  if (DataType.isDuration(type)) return 'duration_' + type.unit;
   if (DataType.isBinary(type)) return 'binary';
   if (DataType.isFixedSizeBinary(type)) return `fixedsizebinary:${type.byteWidth}`;
   if (DataType.isNull(type)) return 'null';
@@ -147,11 +151,17 @@ export function createValueValidator(inputType: DataType): (value: ArrowExpressi
         throw new ExpressionEvaluationError('overflow', 'Invalid Date32 epoch day');
     };
   }
-  if (key.startsWith('timestamp_us:')) {
+  if (DataType.isTime(type) && type.bitWidth === 32) return createValueValidator(new Int32());
+  if (
+    key === 'date64' ||
+    DataType.isTimestamp(type) ||
+    DataType.isTime(type) ||
+    DataType.isDuration(type)
+  ) {
     return value => {
       if (value === null) return;
       if (typeof value !== 'bigint' || value !== BigInt.asIntN(64, value))
-        throw new ExpressionEvaluationError('overflow', 'Invalid timestamp epoch microseconds');
+        throw new ExpressionEvaluationError('overflow', 'Invalid temporal epoch value');
     };
   }
   if (DataType.isBinary(type) || DataType.isFixedSizeBinary(type)) {
