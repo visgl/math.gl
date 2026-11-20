@@ -7,24 +7,35 @@ import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {resolve} from 'node:path';
 
+/** Returns the next beta in the current prerelease series. */
 export function nextBetaVersion(version) {
   const match = /^(\d+\.\d+\.\d+)-(alpha|beta)\.(\d+)$/.exec(version);
   if (!match) throw new Error(`Expected an alpha or beta version, got ${version}`);
   return `${match[1]}-beta.${match[2] === 'beta' ? Number(match[3]) + 1 : 1}`;
 }
 
+/** Promotes a beta to rc.1 or increments an existing release candidate. */
+export function nextRcVersion(version) {
+  const match = /^(\d+\.\d+\.\d+)-(beta|rc)\.(\d+)$/.exec(version);
+  if (!match) throw new Error(`Expected a beta or rc version, got ${version}`);
+  return `${match[1]}-rc.${match[2] === 'rc' ? Number(match[3]) + 1 : 1}`;
+}
+
+/** Versions or publishes a prepared prerelease through the tag workflow. */
 export function publishBeta({
   root,
   dryRun = false,
   prepared = false,
+  rc = false,
   run = execFileSync,
   read = readFileSync
 }) {
   const git = (...args) => run('git', args, {cwd: root, encoding: 'utf8'}).trim();
   const current = JSON.parse(read(resolve(root, 'lerna.json'), 'utf8')).version;
-  const version = prepared ? current : nextBetaVersion(current);
-  if (!/^\d+\.\d+\.\d+-beta\.\d+$/.test(version)) {
-    throw new Error(`Expected a prepared beta version, got ${version}`);
+  if (prepared && rc) throw new Error('--prepared takes the prerelease version from lerna.json');
+  const version = prepared ? current : rc ? nextRcVersion(current) : nextBetaVersion(current);
+  if (!/^\d+\.\d+\.\d+-(beta|rc)\.\d+$/.test(version)) {
+    throw new Error(`Expected a beta or rc version, got ${version}`);
   }
   const tag = `v${version}`;
   const changelog = read(resolve(root, 'CHANGELOG.md'), 'utf8');
@@ -88,12 +99,13 @@ export function publishBeta({
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const args = process.argv.slice(2);
-    if (args.some((arg) => arg !== '--dry-run' && arg !== '--prepared'))
-      throw new Error('Usage: yarn publish-beta [--dry-run] [--prepared]');
+    if (args.some((arg) => !['--dry-run', '--prepared', '--rc'].includes(arg)))
+      throw new Error('Usage: yarn publish-beta [--dry-run] [--rc | --prepared]');
     const result = publishBeta({
       root: fileURLToPath(new URL('../', import.meta.url)),
       dryRun: args.includes('--dry-run'),
-      prepared: args.includes('--prepared')
+      prepared: args.includes('--prepared'),
+      rc: args.includes('--rc')
     });
     console.log(JSON.stringify(result, null, 2));
   } catch (error) {
