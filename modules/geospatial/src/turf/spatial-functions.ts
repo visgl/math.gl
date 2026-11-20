@@ -36,6 +36,7 @@ import {
   type TurfBatchResult
 } from '../turf';
 import {planarIntersects} from './planar-intersects';
+import {lineLocatePoint, lineSubstring} from './linear-referencing';
 import {
   planarArea,
   planarBounds,
@@ -463,6 +464,36 @@ export const ST_INTERSECTS = /* @__PURE__ */ spatialFunction(
   ([a, b]) => planarIntersects(a!, b!)
 );
 
+/** Interpolates a point at a fraction of the planar length. */
+export const ST_LINEINTERPOLATEPOINT = /* @__PURE__ */ spatialFunction(
+  'ST_LineInterpolatePoint',
+  [['LineString']],
+  /* @__PURE__ */ new Binary(),
+  ([line], fraction) =>
+    writeWKB(lineSubstring(line!, fraction!, fraction!) ?? {type: 'Point', coordinates: []}, 'xy'),
+  1
+);
+
+/** Locates the closest point along a route, measured as a fraction of total length. */
+export const ST_LINELOCATEPOINT = /* @__PURE__ */ spatialFunction(
+  'ST_LineLocatePoint',
+  [['LineString'], pointKinds],
+  /* @__PURE__ */ new Float64(),
+  ([line, point]) => lineLocatePoint(line!, point!)
+);
+
+/** Extracts a route section between two inclusive fractions of the planar length. */
+export const ST_LINESUBSTRING = /* @__PURE__ */ spatialFunction(
+  'ST_LineSubstring',
+  [['LineString']],
+  /* @__PURE__ */ new Binary(),
+  ([line], start, end) => {
+    const result = lineSubstring(line!, start!, end!);
+    return result ? writeWKB(result, 'xy') : null;
+  },
+  2
+);
+
 /** Returns clockwise azimuth from positive Y in radians. */
 export const ST_AZIMUTH = /* @__PURE__ */ spatialFunction(
   'ST_Azimuth',
@@ -594,6 +625,9 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_MAKEPOINT,
     ST_AREA,
     ST_LENGTH,
+    ST_LINEINTERPOLATEPOINT,
+    ST_LINELOCATEPOINT,
+    ST_LINESUBSTRING,
     ST_POINTONSURFACE,
     ST_CENTROID,
     ST_ENVELOPE,

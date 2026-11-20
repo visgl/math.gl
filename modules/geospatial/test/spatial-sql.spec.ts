@@ -453,6 +453,36 @@ test('ST_Intersects includes touching features and excludes holes in either argu
     expect([...result.getChild(name)!]).toEqual(fixtures.map(row => row[2]));
 });
 
+test('a substring of a zero-length route has one distinct point', () => {
+  const route = wkb('LINESTRING(1 2,1 2)');
+  const table = new Table(new Schema([geometryField('route', route)]), {route});
+  const result = select('SELECT ST_LineSubstring(route,0,1) AS section FROM features', table);
+  expect(geometryAt(result, 'section', 0)).toEqual(parseWKT('POINT(1 2)'));
+});
+
+test('linear referencing uses segment lengths and includes bends in clipped routes', () => {
+  const line = wkb('LINESTRING(0 0,3 0,3 0,3 7)', 'LINESTRING EMPTY', null);
+  const point = wkb('POINT(5 3)', 'POINT(1 1)', 'POINT EMPTY');
+  const table = new Table(new Schema([geometryField('l', line), geometryField('p', point)]), {
+    l: line,
+    p: point
+  });
+  const result = select(
+    `SELECT ST_LineLocatePoint(l,p) AS f, ST_LineInterpolatePoint(l,0.6) AS marker,
+    ST_LineSubstring(l,0.1,0.8) AS section, ST_LineSubstring(l,0.3,0.3) AS bend FROM features`,
+    table
+  );
+  expect([...result.getChild('f')!]).toEqual([0.6, null, null]);
+  expect(geometryAt(result, 'marker', 0)).toEqual(parseWKT('POINT(3 3)'));
+  expect(geometryAt(result, 'section', 0)).toEqual(parseWKT('LINESTRING(1 0,3 0,3 5)'));
+  expect(geometryAt(result, 'bend', 0)).toEqual(parseWKT('POINT(3 0)'));
+  expect(geometryAt(result, 'section', 1)).toBeNull();
+  expect(geometryAt(result, 'marker', 1)).toEqual({type: 'Point', coordinates: [NaN, NaN]});
+  expect(() => select('SELECT ST_LineSubstring(l,0.8,0.2) FROM features', table)).toThrow(
+    /fractions/
+  );
+});
+
 test('ST_Extent combines groups across batches and ignores empty and null rows', () => {
   const g = wkb('LINESTRING(-4 8,3 5)', null, 'POINT(7 -2)', 'POLYGON EMPTY');
   const k = vectorFromArray([1, 2, 1, 2], new Int32());
