@@ -8,7 +8,7 @@
 // See ../../../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
 /* eslint-disable */
-import {Vector3, equals, assert, NumericArray, _MathUtils} from '@math.gl/core';
+import {Vector3, equals, assert, NumericArray, _MathUtils} from '@math.gl/core/matrix';
 import {Ray} from './ray';
 
 const scratchPosition = new Vector3();

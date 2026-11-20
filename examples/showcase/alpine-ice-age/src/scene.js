@@ -5,7 +5,7 @@ import {Deck, OrbitView} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TextLayer} from '@deck.gl/layers';
 import {Geometry} from '@luma.gl/engine';
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 import {interpolateField} from './data.js';
 const a = new Vector3(),
   b = new Vector3(),

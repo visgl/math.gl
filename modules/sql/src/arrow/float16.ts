@@ -1,7 +1,11 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {getFloat16ArrayConstructor, isFloat16Array, isFloat16ArrayConstructor} from '@math.gl/core';
+import {
+  getFloat16ArrayConstructor,
+  isFloat16Array,
+  isFloat16ArrayConstructor
+} from '@math.gl/core/matrix';
 
 /** Requires decoded native binary16 arithmetic rather than treating Uint16 storage as numbers. */
 export function requireFloat16(): void {

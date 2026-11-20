@@ -5,7 +5,7 @@
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
 import {BoundingVolume} from './bounding-volume';
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 import {Plane} from '../plane';
 import type {CullingResult} from '../../constants';
 

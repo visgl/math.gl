@@ -7,7 +7,7 @@
 // This file is derived from the Cesium library under Apache 2 license
 // See ../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
-import {Vector3, normalizeAngle, _MathUtils} from '@math.gl/core';
+import {Vector3, normalizeAngle, _MathUtils} from '@math.gl/core/matrix';
 
 /** A two dimensional region specified as longitude and latitude coordinates. */
 export class LngLatRectangle {

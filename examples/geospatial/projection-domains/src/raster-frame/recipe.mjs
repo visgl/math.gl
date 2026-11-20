@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {Matrix3} from '@math.gl/core';
+import {Matrix3} from '@math.gl/core/matrix';
 import {createSpatialReference} from '@math.gl/geospatial/crs';
 
 /** Example-owned composition, not a CF/OME/GDAL parser. Affine coefficients map

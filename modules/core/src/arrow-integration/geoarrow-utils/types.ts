@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {TypedArray} from '@math.gl/core';
+import type {TypedArray} from '@math.gl/core/matrix';
 /** Minimal tagged geometry shape used only by compatibility builders.
  *
  * The physical GeoArrow APIs never create these values. Keeping the structural type here avoids

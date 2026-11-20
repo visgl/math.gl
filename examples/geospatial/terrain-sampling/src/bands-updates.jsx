@@ -13,7 +13,7 @@ import {
   updateTerrainGradientPyramids,
   updateTerrainMixedVertexTileHalos,
   updateTerrainMixedGradientGrids
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 export default function BandsUpdates({controlsRoot}) {
   const [peak, setPeak] = useState(4),
     [band, setBand] = useState(2);

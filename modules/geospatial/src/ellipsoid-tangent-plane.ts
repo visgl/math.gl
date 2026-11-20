@@ -7,8 +7,8 @@
 // This file is derived from the Cesium library under Apache 2 license
 // See ../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
-import {Vector2, Vector3} from '@math.gl/core';
-import type {NumericArray} from '@math.gl/core';
+import {Vector2, Vector3} from '@math.gl/core/matrix';
+import type {NumericArray} from '@math.gl/core/matrix';
 import {Plane} from '@math.gl/geometry/culling';
 import {Ellipsoid} from './ellipsoid';
 import {compensatedDot3, exactNormalIntersection} from './ellipsoid-helpers/tangent-plane-numerics';

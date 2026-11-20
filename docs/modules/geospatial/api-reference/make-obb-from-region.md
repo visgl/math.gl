@@ -11,7 +11,7 @@ The returned box is expressed in ellipsoid-fixed Cartesian coordinates. Its orie
 ## Usage
 
 ```js
-import {toRadians} from '@math.gl/core';
+import {toRadians} from '@math.gl/core/matrix';
 import {makeOBBFromRegion} from '@math.gl/geospatial';
 
 const region = [

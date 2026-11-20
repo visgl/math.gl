@@ -50,6 +50,7 @@ export type {
   TorusGeometryProps,
   LatheGeometryProps
 } from './parametric';
+/** @deprecated Import geometry processing helpers from `@math.gl/geometry/processing`. */
 export {
   isGeometry,
   makeAttributeIterator,
@@ -181,7 +182,9 @@ export type {
   SegmentClosestPoints,
   SegmentTriangleClosestPoints
 } from './culling/queries';
+/** @deprecated Import spatial index classes from `@math.gl/geometry/spatial-index`. */
 export {BoxIndex, PointIndex, TriangleBVH} from './spatial-index';
+/** @deprecated Import spatial index types from `@math.gl/geometry/spatial-index`. */
 export type {
   BoxIndexOptions,
   NearestIndexOptions,

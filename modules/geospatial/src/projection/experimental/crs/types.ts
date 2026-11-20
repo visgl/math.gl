@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import type {SpheroidParameters} from '@math.gl/core';
+import type {SpheroidParameters} from '@math.gl/core/matrix';
 import type {CRSMetadata, ReadonlyCRSDefinition} from '../../../crs';
 import type {ProjectionParameters} from '../types';
 import type {DatumGridReference} from '../grids/types';

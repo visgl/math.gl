@@ -11,7 +11,7 @@ import GeoidGlobe from '@site/src/components/geoid-globe';
 ## Usage
 
 ```js
-import { parsePGM } from "@math.gl/earth";
+import { parsePGM } from "@math.gl/earth/geoid";
 import gridUrl from "@math.gl/earth/geoid/geoid-egm96-hi.pgm?url";
 
 const response = await fetch(gridUrl);

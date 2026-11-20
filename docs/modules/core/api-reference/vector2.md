@@ -9,7 +9,7 @@ A two dimensional vector
 ## Usage
 
 ```js
-import {Vector2} from '@math.gl/core';
+import {Vector2} from '@math.gl/core/matrix';
 const vector = new Vector2(1, 1);
 ```
 

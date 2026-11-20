@@ -1,11 +1,11 @@
 # projectTextureCoordinates
 
 Generate texture coordinates for packed CPU positions using an already prepared synchronous
-source-to-image transform. Import from `@math.gl/geometry`; no projection engine, Arrow runtime
+source-to-image transform. Import from `@math.gl/geometry/processing`; no projection engine, Arrow runtime
 or renderer is loaded by this helper.
 
 ```ts
-import {projectTextureCoordinates} from '@math.gl/geometry';
+import {projectTextureCoordinates} from '@math.gl/geometry/processing';
 
 const texCoords = projectTextureCoordinates(positions, {
   size: 3,

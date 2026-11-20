@@ -14,7 +14,7 @@ class Pose
 ## Usage
 
 ```js
-import {Pose} from '@math.gl/core';
+import {Pose} from '@math.gl/core/matrix';
 ```
 
 ## Members

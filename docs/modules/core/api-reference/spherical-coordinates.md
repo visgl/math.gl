@@ -9,7 +9,7 @@ Stores `radius`, `phi`, and `theta`, with angle and geographic convenience acces
 ## Construction
 
 ```js
-import {SphericalCoordinates} from '@math.gl/core';
+import {SphericalCoordinates} from '@math.gl/core/matrix';
 
 const spherical = new SphericalCoordinates({radius: 2, phi: Math.PI / 2, theta: 0});
 ```

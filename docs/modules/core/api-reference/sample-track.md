@@ -4,7 +4,7 @@ Evaluate timestamped scalar, vector, or quaternion samples with reusable outputs
 Import `SampleTrack` and `SampleTrackOptions` from `@math.gl/core`.
 
 ```js
-import {SampleTrack} from '@math.gl/core';
+import {SampleTrack} from '@math.gl/core/matrix';
 
 const track = new SampleTrack([0, 1, 3], [0, 0, 2, 3, 6, 9], {
   size: 2,

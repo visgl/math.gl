@@ -6,7 +6,7 @@
 // Arrangement implementation credited upstream to Jason Davies, Enrico Spinielli,
 // and Philippe Riviere. Hinge geometry and rendering are independent of Nico's code.
 
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {add, cross, dot, scale, type Vector as Vec3} from './math';
 const subtract = (a: Vec3, b: Vec3) => add(a, scale(b, -1));
 const center = (points: Vec3[]) => scale(points.reduce(add, [0, 0, 0]), 1 / points.length);

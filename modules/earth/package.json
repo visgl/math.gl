@@ -28,6 +28,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./geoid": {
+      "types": "./dist/geoid/index.d.ts",
+      "import": "./dist/geoid/index.js",
+      "require": "./dist/geoid/index.cjs"
+    },
     "./sun": {
       "types": "./dist/sun/index.d.ts",
       "import": "./dist/sun/index.js",

@@ -6,7 +6,7 @@
 
 ```typescript
 import {transformGeometry, mergeGeometries, weldGeometry, getDegenerateTriangles}
-  from '@math.gl/geometry';
+  from '@math.gl/geometry/processing';
 ```
 
 These operations accept `GeometryInput` with `topology: 'triangle-list'`, packed

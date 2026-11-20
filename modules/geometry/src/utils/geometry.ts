@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {TypedArray} from '@math.gl/core';
+import type {TypedArray} from '@math.gl/core/matrix';
 import type {PrimitiveTopology} from '../lib/geometry';
 
 /** A typed geometry attribute with either loaders.gl-style `value` or legacy `values` storage. */

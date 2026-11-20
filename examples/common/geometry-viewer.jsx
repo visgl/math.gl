@@ -6,7 +6,7 @@ import './geometry-viewer.css';
 import {luma} from '@luma.gl/core';
 import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {Geometry as LumaGeometry, Model, OrbitControls} from '@luma.gl/engine';
-import {Matrix4, toRadians} from '@math.gl/core';
+import {Matrix4, toRadians} from '@math.gl/core/matrix';
 
 const camera = {distance: 3.5, yaw: 0.6, pitch: 0.35, target: [0, 0, 0]};
 const uniforms = `uniform viewerUniforms {
