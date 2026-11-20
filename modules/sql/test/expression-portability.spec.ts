@@ -84,9 +84,10 @@ test('predicate normalization binds parameters, preserves casts and produces the
   expect(() => columnarPredicateToExpression({op: '=', args: [{property: ['x', 'y']}, 1]})).toThrow(
     'top-level'
   );
-  expect(() =>
-    columnarPredicateToExpression({op: '=', args: [{property: 'x'}, new Date()]})
-  ).toThrow('explicit backend');
+  const date = new Date('2026-01-02');
+  expect(columnarPredicateToExpression({op: '=', args: [{property: 'x'}, date]})).toMatchObject({
+    right: {type: 'Literal', value: date}
+  });
   const cycle: any = {op: 'not', args: []};
   cycle.args.push(cycle);
   expect(() => columnarPredicateToExpression(cycle)).toThrow('limit');

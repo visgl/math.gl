@@ -6,7 +6,9 @@ import {scalarFunction} from './utils/scalar-function';
 
 import {expect, test, vi} from 'vitest';
 import {
+  Binary,
   Bool,
+  DateDay,
   Field,
   Float32,
   Null,
@@ -204,6 +206,24 @@ test('portable predicates compile through shared Arrow kernels and bind paramete
       {inputSchema: input.schema}
     )
   ).toThrow('requires a value');
+});
+
+test('portable predicates bind Date and binary literals with null propagation', () => {
+  const input = batch({
+    day: vectorFromArray([Date.UTC(2026, 0, 1), Date.UTC(2026, 0, 2), null], new DateDay()),
+    bytes: vectorFromArray([Uint8Array.of(1, 2), Uint8Array.of(1, 3), null], new Binary())
+  });
+  const options = {inputSchema: input.schema, parameters: {day: new Date('2026-01-02')}};
+  const datePredicate = compileArrowPredicate(
+    {op: '=', args: [{property: 'day'}, {parameter: 'day'}]},
+    options
+  );
+  expect([...datePredicate.evaluate(input)]).toEqual([false, true, null]);
+  const binaryPredicate = compileArrowPredicate(
+    {op: '<', args: [{property: 'bytes'}, Uint8Array.of(1, 3)]},
+    options
+  );
+  expect([...binaryPredicate.evaluate(input)]).toEqual([true, false, null]);
 });
 
 test('integer bounds and exact argument types are checked before truncation', () => {

@@ -200,8 +200,8 @@ rows; skipped positions are null even when `outputField` describes a non-nullabl
 The format-neutral `ColumnarPredicate` vocabulary and its parameter-binding, validation, column-path
 and copy utilities are exported from `@math.gl/sql/expressions`, without an Arrow dependency.
 `compileArrowPredicate` accepts comparisons, `in`, `isNull`, `and`, `or` and `not`, plus named parameters.
-Its v1 Arrow executor supports top-level primitive fields; nested paths, dates, binary values and other
-Arrow types fail explicitly. A string property containing dots is one literal field name.
+The Arrow executor accepts Date literals for supported Date32 and microsecond timestamp fields,
+and byte-array literals for binary fields. A string property containing dots is one literal field name.
 
 SQL parsing, source pushdown and result-row selection remain the query engine's responsibility.
 Only true predicate results select rows; false and null results do not. Computed SELECT functions
