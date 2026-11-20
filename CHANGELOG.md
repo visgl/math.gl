@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v5.0.0-rc.1
+
+- Add spatial SQL functions for geometry construction and inspection, planar predicates, route linear referencing, SRID and Web Mercator transforms, and XYZ tile queries. Expose flat spatial SQL entry points and use native GeoArrow buffers (#616, #630–#635, #642–#649, #654).
+- Add SQL function packages for scalar, aggregate, standalone and lateral table functions, and support typed Arrow column metadata (#614, #615, #626–#628).
+- Add natural breaks, cyclic and bivariate coloring, power and symmetric-log transforms, nice bounds, units and legend guidance, plus an interactive scale gallery (#617, #618, #621–#625).
+- Add TEOS-10 seawater state and acoustics through `@math.gl/earth/ocean` and a sound-speed panel in the bathymetry example (#619, #620, #639).
+- Share zero-copy GeoArrow views and union schemas, and read semantic Z and M ordinates (#636, #650, #651).
+- Expose focused DGGS decoder subpaths, fix spherical interpolation for parallel and opposite vectors, and measure rendering scales on the CRS body (#612, #640, #653).
+- Organize the tectonics and ice age examples under Showcase (#609).
+
 ## v5.0.0-beta.12
 
 - **Breaking:** Consolidate Arrow, GeoArrow and WKB integration into `@math.gl/core/arrow` and `@math.gl/geometry/arrow`, and move Web Mercator to `@math.gl/geospatial/web-mercator`. Organize core matrix, color and UTF-8 APIs and unify SQL scales under `@math.gl/sql/scales` (#608).
