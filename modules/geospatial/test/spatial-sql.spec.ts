@@ -523,6 +523,21 @@ test('CRS assignment and reprojection bind output metadata for nested spatial SQ
   expect(() => select('SELECT ST_SetSRID(g,ST_SRID(g)) FROM features', table)).toThrow(/constant/);
 });
 
+test('CRS metadata functions preserve spherical edges', () => {
+  const g = wkb('LINESTRING(0 0,10 45)');
+  const table = new Table(
+    new Schema([geometryField('g', g, 'wkb', {crs: 'EPSG:4326', edges: 'spherical'})]),
+    {g}
+  );
+  const result = select('SELECT ST_SRID(g) AS code, ST_SetSRID(g,0) AS shape FROM features', table);
+  expect([...result.getChild('code')!]).toEqual([4326]);
+  expect(JSON.parse(result.schema.fields[1]!.metadata.get('ARROW:extension:metadata')!)).toEqual({
+    edges: 'spherical'
+  });
+  expect(geometryAt(result, 'shape', 0)).toEqual(parseWKT('LINESTRING(0 0,10 45)'));
+  expect(() => select('SELECT ST_Transform(g,3857) FROM features', table)).toThrow(/planar/);
+});
+
 test('reads PROJJSON EPSG identifiers and preserves extension metadata across inverse transforms', () => {
   const g = wkb('POINT(1113194.9079327357 5621521.486192066)');
   const crs = {type: 'ProjectedCRS', id: {authority: 'EPSG', code: 3857}};

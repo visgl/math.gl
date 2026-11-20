@@ -158,7 +158,12 @@ function spatialFunction(
         } else {
           throw new Error(`${name} argument ${index + 1} requires GeoArrow ${kinds.join(' or ')}`);
         }
-        if (name.startsWith('ST_') && extension?.metadata['edges'] === 'spherical')
+        if (
+          name.startsWith('ST_') &&
+          name !== 'ST_SRID' &&
+          name !== 'ST_SetSRID' &&
+          extension?.metadata['edges'] === 'spherical'
+        )
           throw new Error(`${name} requires planar geometry`);
         return extension;
       });
