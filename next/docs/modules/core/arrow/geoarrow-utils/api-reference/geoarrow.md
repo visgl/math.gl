@@ -16,7 +16,7 @@ All root functions are synchronous. Unless a function explicitly returns a new c
 * `GeoArrowSerialized`
 * `GeoArrowValidity`
 
-Related semantic types include `GeoArrowEncoding`, `GeoArrowDimension`, `GeoArrowCoordinateLayout`, `GeoArrowGeometryValue`, and `GeoArrowBounds`.
+Related semantic types include `GeoArrowEncoding`, `GeoArrowDimension`, `GeoArrowCoordinateLayout`, `GeoArrowDecodedGeometry`, and `GeoArrowBounds`.
 
 #### `mergeGeoArrowDimensions(left, right)`[​](#mergegeoarrowdimensionsleft-right "Direct link to mergegeoarrowdimensionsleft-right")
 
@@ -36,9 +36,9 @@ Returns `{valid, issues}`. Each issue has a stable `code`, physical `path`, and 
 
 Visits native coordinate tuples in logical row order. The callback receives `(coordinate, rowIndex)`. The returned callback value is ignored; use `mapGeoArrowCoordinates` to allocate mapped output.
 
-#### `sliceGeoArrowColumn(column, begin?, end?)`[​](#slicegeoarrowcolumncolumn-begin-end "Direct link to slicegeoarrowcolumncolumn-begin-end")
+#### `getGeoArrowColumnView(column, start?, end?)`[​](#getgeoarrowcolumnviewcolumn-start-end "Direct link to getgeoarrowcolumnviewcolumn-start-end")
 
-Returns a zero-copy logical slice while preserving chunk boundaries. A full slice returns `column`.
+Borrows the half-open range `[start, end)` while retaining chunk boundaries and the source encoding. Bounds default to the start and end of the column. Negative bounds count backwards from the end. A view of the full range returns `column`.
 
 #### `sliceGeoArrowArray(array, begin, end)`[​](#slicegeoarrowarrayarray-begin-end "Direct link to slicegeoarrowarrayarray-begin-end")
 
@@ -56,7 +56,7 @@ Count logical rows or native coordinate tuples directly over descriptors. Serial
 
 ## Borrowed geometry batches and rows[​](#borrowed-geometry-batches-and-rows "Direct link to Borrowed geometry batches and rows")
 
-These native-geometry APIs create only JavaScript descriptors and reference lists: no new typed arrays, subarray views, coordinate copies, rebased offsets, or expanded feature IDs. Existing `sliceGeoArrowColumn` and `sliceGeoArrowArray` also retain the original typed-array objects. Use valid descriptors; call `validateGeoArrowColumn` separately for untrusted physical input.
+These native-geometry APIs create only JavaScript descriptors and reference lists: no new typed arrays, subarray views, coordinate copies, rebased offsets, or expanded feature IDs. Existing `getGeoArrowColumnView` and `sliceGeoArrowArray` also retain the original typed-array objects. Use valid descriptors; call `validateGeoArrowColumn` separately for untrusted physical input.
 
 Storage is borrowed, not immutable: callers must not mutate, recycle, or transfer/detach buffers while any view is in use. Retained streaming batches must keep their original buffers alive. Small slices may retain large buffers. Cloning, decoding WKB/WKT, filtering/compaction, interleaving, reprojection, and renderer preparation are separate operations outside this allocation guarantee.
 
