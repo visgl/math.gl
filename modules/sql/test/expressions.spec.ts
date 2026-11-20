@@ -206,6 +206,40 @@ test('portable predicates compile through shared Arrow kernels and bind paramete
   ).toThrow('requires a value');
 });
 
+test('portable predicates compare mixed numeric representations without rounding', () => {
+  const input = batch({x: vectorFromArray([1n, 2n, 9007199254740993n, null], new Int64())});
+  const options = {inputSchema: input.schema};
+  expect([
+    ...compileArrowPredicate({op: '>', args: [{property: 'x'}, 1.5]}, options).evaluate(input)
+  ]).toEqual([false, true, true, null]);
+  expect([
+    ...compileArrowPredicate(
+      {op: 'in', args: [{property: 'x'}, [2, 9007199254740992]]},
+      options
+    ).evaluate(input)
+  ]).toEqual([false, true, false, null]);
+
+  const floats = batch({x: vectorFromArray([9007199254740992, null], new Float64())});
+  expect([
+    ...compileArrowPredicate(
+      {op: '<', args: [{property: 'x'}, 9007199254740993n]},
+      {inputSchema: floats.schema}
+    ).evaluate(floats)
+  ]).toEqual([true, null]);
+});
+
+test('portable predicates reject non-finite operands while expressions retain IEEE behavior', () => {
+  const input = batch({x: vectorFromArray([Infinity, NaN], new Float64())});
+  const options = {inputSchema: input.schema};
+  expect(values('x > 1', input)).toEqual([true, false]);
+  expect(() =>
+    compileArrowPredicate({op: '>', args: [{property: 'x'}, 1]}, options).evaluate(input)
+  ).toThrow('non-finite');
+  expect(() =>
+    compileArrowPredicate({op: 'in', args: [{property: 'x'}, [1]]}, options).evaluate(input)
+  ).toThrow('non-finite');
+});
+
 test('integer bounds and exact argument types are checked before truncation', () => {
   const input = batch({x: vectorFromArray([127], new Int8())});
   expect(() => values('x + 1', input)).toThrow('overflow');

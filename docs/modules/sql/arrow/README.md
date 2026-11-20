@@ -202,6 +202,8 @@ and copy utilities are exported from `@math.gl/sql/expressions`, without an Arro
 `compileArrowPredicate` accepts comparisons, `in`, `isNull`, `and`, `or` and `not`, plus named parameters.
 Its v1 Arrow executor supports top-level primitive fields; nested paths, dates, binary values and other
 Arrow types fail explicitly. A string property containing dots is one literal field name.
+Portable comparisons and membership preserve exact ordering and equality between bigint and number
+operands. Numeric comparisons reject NaN and infinity in portable predicates.
 
 SQL parsing, source pushdown and result-row selection remain the query engine's responsibility.
 Only true predicate results select rows; false and null results do not. Computed SELECT functions

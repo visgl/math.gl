@@ -55,6 +55,8 @@ import type {
 } from './types';
 
 type BindingOptions = ArrowExpressionOptions & {
+  /** Use portable comparisons for values originating in a columnar predicate. */
+  portablePredicate?: boolean;
   functionLookup: ReadonlyMap<string, ArrowTableFunction>;
 };
 
@@ -80,7 +82,8 @@ const bool = new Bool();
 /** Compiles a core expression AST against a fixed Arrow schema. */
 export function compileArrowExpression(
   expression: ArrowExpression,
-  options: ArrowExpressionOptions
+  options: ArrowExpressionOptions,
+  portablePredicate = false
 ): CompiledArrowExpression {
   const fields = [...options.inputSchema.fields];
   if (new Set(fields.map(field => field.name)).size !== fields.length)
@@ -89,6 +92,7 @@ export function compileArrowExpression(
   validateExpressionAST(ast);
   const root = bind(ast, {
     ...options,
+    portablePredicate,
     functionLookup: createFunctionLookup(options.functions)
   });
   const keys = fields.map(field => ({
@@ -670,15 +674,21 @@ function requireNumeric(node: Node): void {
 function bindBinary(ast: any, options: BindingOptions): Node {
   const op = ast.operator,
     logical = op === '&&' || op === '||';
-  let left = bind(ast.left, options, logical ? bool : undefined),
+  const comparison = ['==', '===', '!=', '!==', '<', '<=', '>', '>='].includes(op);
+  const portableComparison = comparison && options.portablePredicate;
+  let left = bind(ast.left, options, logical ? bool : undefined);
+  let right: Node;
+  if (portableComparison && ast.right.type === 'Literal') {
+    right = bindPortablePredicateLiteral(ast.right, options, left.field.type);
+  } else {
     right = bind(ast.right, options, logical ? bool : undefined);
-  if (!logical) {
-    if (isContextualLiteral(ast.left) && !DataType.isNull(right.field.type))
-      left = bind(ast.left, options, right.field.type);
-    if (isContextualLiteral(ast.right)) right = bind(ast.right, options, left.field.type);
+    if (!logical) {
+      if (isContextualLiteral(ast.left) && !DataType.isNull(right.field.type))
+        left = bind(ast.left, options, right.field.type);
+      if (isContextualLiteral(ast.right)) right = bind(ast.right, options, left.field.type);
+    }
   }
   sameType(left, right);
-  const comparison = ['==', '===', '!=', '!==', '<', '<=', '>', '>='].includes(op);
   if (logical) requireType(left, 'bool');
   else if (!comparison) {
     if (!['+', '-', '*', '/', '%'].includes(op))
@@ -742,7 +752,14 @@ function bindBinary(ast: any, options: BindingOptions): Node {
             y = b.get(row) as any;
           if (x === null || y === null) return null;
           if (binary) return compare(op, compareUTF8(x, 0, x.length, y, 0, y.length), 0);
-          if (comparison) return compare(op, x, y);
+          if (comparison) {
+            if (portableComparison && isPredicateNumber(x) && isPredicateNumber(y)) {
+              assertFinitePredicateNumber(x);
+              assertFinitePredicateNumber(y);
+              return compare(op, x < y ? -1 : x > y ? 1 : 0, 0);
+            }
+            return compare(op, x, y);
+          }
           if ((op === '/' || op === '%') && (y === 0 || y === 0n))
             throw new ExpressionEvaluationError('divisionByZero', 'Division by zero');
           const result =
@@ -766,6 +783,45 @@ function bindBinary(ast: any, options: BindingOptions): Node {
       };
     }
   };
+}
+
+/** Keeps mixed numeric predicate literals in their original representation. */
+function bindPortablePredicateLiteral(ast: any, options: BindingOptions, type: DataType): Node {
+  const value = ast.type === 'Literal' ? ast.value : undefined;
+  const mixed =
+    (typeof value === 'number' && DataType.isInt(type) && type.bitWidth === 64) ||
+    (typeof value === 'bigint' &&
+      (DataType.isFloat(type) || (DataType.isInt(type) && type.bitWidth < 64)));
+  if (!mixed) return bind(ast, options, type);
+  assertFinitePredicateNumber(value);
+  const constant: Prepared = {get: () => value};
+  return {
+    field: new Field('literal', type, false),
+    hasKernel: false,
+    constant,
+    prepare: () => constant
+  };
+}
+
+/** Identifies the two scalar numeric representations used by portable predicates. */
+function isPredicateNumber(value: unknown): value is number | bigint {
+  return typeof value === 'number' || typeof value === 'bigint';
+}
+
+/** Portable predicates reject non-finite numeric operands. */
+function assertFinitePredicateNumber(value: number | bigint): void {
+  if (typeof value === 'number' && !Number.isFinite(value))
+    throw new ExpressionEvaluationError(
+      'domain',
+      'Arrow predicate cannot compare non-finite numbers'
+    );
+}
+
+/** Gives integers the same membership key without rounding large integers to Number. */
+function portableMembershipKey(value: ArrowExpressionValue): ArrowExpressionValue {
+  if (!isPredicateNumber(value)) return value;
+  assertFinitePredicateNumber(value);
+  return typeof value === 'number' && Number.isInteger(value) ? BigInt(value) : value;
 }
 
 /** Primitive comparisons preserve IEEE NaN behavior. */
@@ -958,10 +1014,19 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
   const utf8 = typeKey(argument.field.type) === 'utf8';
   const binary =
     DataType.isBinary(argument.field.type) || DataType.isFixedSizeBinary(argument.field.type);
-  const literals = arguments_.slice(1).map(value => bind(value, options, argument.field.type));
+  const literals = arguments_
+    .slice(1)
+    .map(value =>
+      options.portablePredicate
+        ? bindPortablePredicateLiteral(value, options, argument.field.type)
+        : bind(value, options, argument.field.type)
+    );
   // Every membership item is a scalar literal: convert and index once at compilation.
   const prepared = literals.map(value => value.constant!);
-  const values = new Set(prepared.map(value => value.get(0)));
+  const key = options.portablePredicate
+    ? portableMembershipKey
+    : (value: ArrowExpressionValue) => value;
+  const values = new Set(prepared.map(value => key(value.get(0))));
   const ranges: Range[] = utf8
     ? prepared.map(value => bytes(value, 0)).filter((range): range is Range => range !== null)
     : binary
@@ -994,7 +1059,8 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
           } else {
             const value = source.get(row);
             if (value === null) return null;
-            if (!Number.isNaN(value) && values.has(value)) return true;
+            if ((options.portablePredicate || !Number.isNaN(value)) && values.has(key(value)))
+              return true;
           }
           return values.has(null) ? null : false;
         }

@@ -15,5 +15,5 @@ export function compileArrowPredicate(
   predicate: ParameterizedColumnarPredicate,
   options: ArrowExpressionOptions & {parameters?: ColumnarPredicateParameterValues}
 ): CompiledArrowExpression {
-  return compileArrowExpression(columnarPredicateToExpression(predicate, options), options);
+  return compileArrowExpression(columnarPredicateToExpression(predicate, options), options, true);
 }
