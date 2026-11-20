@@ -81,7 +81,7 @@ Validity is a bitmap with an optional `bitOffset`; bit `bitOffset + i` describes
 
 A dense union has `typeIds`, `valueOffsets`, and named children with stable integer IDs. Each row selects a child and a value inside that child. Children stay compact and may specify their own encoding, dimension, and coordinate layout; populate that metadata to preserve distinctions such as Point Z versus Point M. Legacy descriptors without it fall back to the column declaration.
 
-Arrow dense unions have no root validity buffer. A null geometry selects a real child slot whose child validity bit is cleared. Builders and decoders emit this form. Readers also accept legacy descriptor-level validity, but Arrow adapters must not use that legacy form to construct a dense union. Geometry collections are lists of the same union representation. `normalizeGeoArrowUnion` orders children by ID without changing dispatch buffers or backing-buffer identity.
+Arrow dense unions have no root validity buffer. A null geometry selects a real child slot whose child validity bit is cleared. Builders and decoders emit this form. Readers also accept legacy descriptor-level validity, but Arrow adapters must not use that legacy form to construct a dense union. Geometry collections are lists of the same union representation. `sortGeoArrowUnionChildren` orders children by ID without changing dispatch buffers or backing-buffer identity.
 
 ### Serialized geometry and boxes[​](#serialized-geometry-and-boxes "Direct link to Serialized geometry and boxes")
 
@@ -145,4 +145,4 @@ For deck.gl, supply returned offsets, positions, and indices as binary attribute
 
 When moving Arrow-backed work from a loader or renderer, introduce one buffer adapter first. Compare inspection, vertex counts, bounds, mapping, winding, WKB/WKT decoding, tessellation, and buffer identity against the existing fixtures before deleting old kernels.
 
-Use `interleaveGeoArrowCoordinates`, `normalizeGeoArrowUnion`, and `tessellateGeoArrowPolygons` for the corresponding renderer prototypes. Tessellation supports Polygon/MultiPolygon and dense unions, holes, source-row identity, ZM preservation, float-width conversion, and Uint16/Uint32 indices. The stream tessellator's XY-only contract is separate. Runtime-specific field negotiation, metadata merging, color expansion, and GPU creation remain with their consumers.
+Use `interleaveGeoArrowCoordinates`, `sortGeoArrowUnionChildren`, and `tessellateGeoArrowPolygons` for the corresponding renderer prototypes. Tessellation supports Polygon/MultiPolygon and dense unions, holes, source-row identity, ZM preservation, float-width conversion, and Uint16/Uint32 indices. The stream tessellator's XY-only contract is separate. Runtime-specific field negotiation, metadata merging, color expansion, and GPU creation remain with their consumers.

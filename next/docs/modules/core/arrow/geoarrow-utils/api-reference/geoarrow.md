@@ -120,9 +120,11 @@ Converts separated coordinates to fixed-size interleaved tuples. Already interle
 
 #### `convertGeoArrowColumn(column, options?)`[​](#convertgeoarrowcolumncolumn-options "Direct link to convertgeoarrowcolumncolumn-options")
 
-Converts native geometry family, semantic dimension, coordinate layout, coordinate type, or offset width. Options are `encoding`, `dimension`, `coordinateLayout` (`preserve`, `interleaved`, or `separated`), `coordinateType` (`preserve`, `float32`, or `float64`), and `offsetType` (`preserve`, `int32`, or `int64`). Use `/wkb` for serialized targets. Semantic ordinates map by name, so M is not reinterpreted as Z.
+Converts native geometry family, semantic dimension, coordinate layout, coordinate type, or offset width. Options are `encoding`, `dimension`, `coordinateLayout` (`preserve`, `interleaved`, or `separated`), `coordinateType` (`preserve`, `float32`, or `float64`), and `offsetType` (`preserve`, `int32`, or `int64`). Semantic ordinates map by name, preserving the distinction between M and Z. Requests for `geoarrow.wkb` or `geoarrow.wkt` encode native geometry as variable-width values. Decode serialized input before changing its encoding.
 
-#### `normalizeGeoArrowUnion(column)`[​](#normalizegeoarrowunioncolumn "Direct link to normalizegeoarrowunioncolumn")
+For a dense-union stream, set `unionChildren` to ordered, empty `GeoArrowDenseUnionChild` descriptors. Populated children are matched by encoding and dimension and must match the target's physical layout after any requested conversions. Missing families reuse the target's empty children. The result borrows compatible geometry and rewrites selectors only when their type IDs change.
+
+#### `sortGeoArrowUnionChildren(column)`[​](#sortgeoarrowunionchildrencolumn "Direct link to sortgeoarrowunionchildrencolumn")
 
 Sorts dense-union child descriptors by type ID. Dispatch and child buffers are retained. Non-union columns and already normalized unions are identity operations.
 
