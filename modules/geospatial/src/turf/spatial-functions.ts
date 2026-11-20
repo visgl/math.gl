@@ -35,7 +35,14 @@ import {
   midpoint,
   type TurfBatchResult
 } from '../turf';
-import {planarArea, planarBounds, planarCentroid, planarEnvelope, planarLength} from './planar';
+import {
+  planarArea,
+  planarBounds,
+  planarCentroid,
+  planarEnvelope,
+  planarLength,
+  planarPolygonPointOnSurface
+} from './planar';
 
 /** Field metadata key for the GeoArrow encoding. */
 const EXTENSION_NAME = 'ARROW:extension:name';
@@ -485,6 +492,14 @@ export const ST_CENTROID = /* @__PURE__ */ spatialFunction(
   ([geometry]) => writeWKB(planarCentroid(geometry!), 'xy')
 );
 
+/** Returns an interior label point for a planar polygonal surface. */
+export const ST_POINTONSURFACE = /* @__PURE__ */ spatialFunction(
+  'ST_PointOnSurface',
+  [polygonKinds],
+  /* @__PURE__ */ new Binary(),
+  ([polygon]) => writeWKB(planarPolygonPointOnSurface(polygon!), 'xy')
+);
+
 /** Returns the 2D extent as GeoArrow WKB. */
 export const ST_ENVELOPE = /* @__PURE__ */ spatialFunction(
   'ST_Envelope',
@@ -514,6 +529,7 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly ArrowTableFunction[] =
     ST_MAKEPOINT,
     ST_AREA,
     ST_LENGTH,
+    ST_POINTONSURFACE,
     ST_CENTROID,
     ST_ENVELOPE
   ]);

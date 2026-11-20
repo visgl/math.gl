@@ -207,3 +207,55 @@ export function planarEnvelope(geometry: WellKnownGeometry): WellKnownGeometry {
     ]
   };
 }
+
+/** Finds a polygon label point on the widest interior span of a horizontal scan line. */
+export function planarPolygonPointOnSurface(geometry: WellKnownGeometry): WellKnownGeometry {
+  const polygons =
+    geometry.type === 'MultiPolygon'
+      ? geometry.coordinates
+      : geometry.type === 'Polygon'
+        ? [geometry.coordinates]
+        : [];
+  let coordinates: number[] = [];
+  let widest = -1;
+  for (const rings of polygons) {
+    const shell = rings[0];
+    if (!shell?.length) continue;
+    let low = Infinity;
+    let high = -Infinity;
+    for (const point of shell) {
+      low = Math.min(low, point[1]!);
+      high = Math.max(high, point[1]!);
+    }
+    const center = low / 2 + high / 2;
+    // Choose a scan line between vertex elevations so holes and concavities
+    // contribute pairs of crossings even when the envelope center hits a vertex.
+    for (const ring of rings) {
+      for (const point of ring) {
+        const y = point[1]!;
+        if (y <= center) low = Math.max(low, y);
+        else high = Math.min(high, y);
+      }
+    }
+    const y = low / 2 + high / 2;
+    const crossings: number[] = [];
+    for (const ring of rings) {
+      visitSegments(ring, true, (a, b) => {
+        if (a[1]! > y === b[1]! > y) return;
+        const t = (y - a[1]!) / (b[1]! - a[1]!);
+        crossings.push((1 - t) * a[0]! + t * b[0]!);
+      });
+    }
+    crossings.sort((a, b) => a - b);
+    if (widest < 0) coordinates = [...shell[0]!];
+    for (let i = 1; i < crossings.length; i += 2) {
+      const start = crossings[i - 1]!;
+      const end = crossings[i]!;
+      if (end - start > widest) {
+        widest = end - start;
+        coordinates = [start / 2 + end / 2, y];
+      }
+    }
+  }
+  return {type: 'Point', coordinates};
+}
