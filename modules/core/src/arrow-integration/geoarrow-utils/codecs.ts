@@ -2,21 +2,28 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {formatWKT, inspectWKBHeader, parseWKT, visitWKB} from '../wkb';
+import {inspectWKBHeader, parseWKT, visitWKB} from '../wkb';
 import type {WKBHeader, WKBTraversalOptions} from '../wkb';
 import {WKBBuilder} from '../wkb';
 import type {
+  GeoArrowArray,
   GeoArrowColumn,
+  GeoArrowEncoding,
   GeoArrowCoordinateLayout,
   GeoArrowDenseUnionChild,
   GeoArrowDimension,
   GeoArrowDecodedGeometry,
   GeoArrowSerialized
 } from './types';
-import {getGeoArrowDimensionSize, mergeGeoArrowDimensions} from './types';
+import {getGeoArrowDimensionSize, getGeoArrowGeometryType, mergeGeoArrowDimensions} from './types';
 import type {GeoArrowBuilderEncoding} from './builder';
 import {GeoArrowBuilder, makeGeoArrowColumnFromGeometryRows} from './builder';
-import {getGeoArrowOffset, isGeoArrowValueValid, materializeGeometryRow} from './layout';
+import {
+  getEncodingFromChildName,
+  getGeoArrowOffset,
+  isGeoArrowValueValid,
+  readCoordinate
+} from './layout';
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
@@ -959,16 +966,105 @@ export function decodeGeoArrowWKT(column: GeoArrowColumn): GeoArrowColumn {
 /** Encodes a native GeoArrow column as variable-width UTF-8 WKT. */
 export function encodeGeoArrowWKT(column: GeoArrowColumn): GeoArrowColumn {
   if (column.encoding === 'geoarrow.wkt') return column;
-  const values: Array<Uint8Array | null> = [];
-  for (const chunk of column.chunks) {
+  const chunks = column.chunks.map(chunk => {
+    const values: Array<Uint8Array | null> = [];
     for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
-      const row = isGeoArrowValueValid(chunk.validity, rowIndex)
-        ? materializeGeometryRow(chunk, rowIndex, column.encoding)
-        : null;
-      values.push(row ? textEncoder.encode(formatWKT(row, column.dimension)) : null);
+      const row = formatPhysicalWKTRow(chunk, rowIndex, column.encoding, column.dimension);
+      values.push(row ? textEncoder.encode(row.text) : null);
+    }
+    return makeWKTChunk(values);
+  });
+  return copyMetadata(column, {
+    encoding: 'geoarrow.wkt',
+    dimension: column.dimension,
+    coordinateLayout: null,
+    chunks
+  });
+}
+
+/** Formats one native row and records its effective dimension for collection inheritance. */
+function formatPhysicalWKTRow(
+  array: GeoArrowArray,
+  rowIndex: number,
+  encoding: GeoArrowEncoding,
+  dimension: GeoArrowDimension
+): {text: string; dimension: GeoArrowDimension} | null {
+  if (!isGeoArrowValueValid(array.validity, rowIndex)) return null;
+  if (encoding === 'geoarrow.geometry') {
+    if (array.kind !== 'dense-union') return null;
+    const physical = (array.offset || 0) + rowIndex;
+    const child = array.children.find(candidate => candidate.typeId === array.typeIds[physical]);
+    const childRow = array.valueOffsets[physical];
+    if (!child || childRow < 0 || childRow >= child.data.length) return null;
+    return formatPhysicalWKTRow(
+      child.data,
+      childRow,
+      child.encoding || getEncodingFromChildName(child.name),
+      child.dimension || dimension
+    );
+  }
+  const type = getGeoArrowGeometryType(encoding);
+  if (!type) return null;
+  let coordinates: string;
+  let outputDimension = dimension;
+  if (type === 'GeometryCollection') {
+    if (array.kind !== 'list') return null;
+    const children: string[] = [];
+    const [first, last] = getListRange(array, rowIndex);
+    for (let index = first; index < last; index++) {
+      const child = formatPhysicalWKTRow(array.child, index, 'geoarrow.geometry', dimension);
+      if (child) {
+        children.push(child.text);
+        // An unqualified XY child would inherit a Z or M collection qualifier.
+        if (child.dimension === 'xy') outputDimension = 'xy';
+      }
+    }
+    coordinates = children.length ? `(${children.join(', ')})` : 'EMPTY';
+  } else {
+    const value = formatPhysicalWKTCoordinates(
+      array,
+      rowIndex,
+      getEncodingDepth(encoding),
+      type === 'MultiPoint'
+    );
+    if (!value) return null;
+    coordinates =
+      value.hasCoordinates || (type === 'MultiPoint' && value.hasMembers) ? value.text : 'EMPTY';
+  }
+  const token = outputDimension === 'xy' ? '' : ' ' + outputDimension.slice(2).toUpperCase();
+  return {text: `${type.toUpperCase()}${token} ${coordinates}`, dimension: outputDimension};
+}
+
+/** Walks native list offsets and formats one coordinate tuple at a time. */
+function formatPhysicalWKTCoordinates(
+  array: GeoArrowArray,
+  index: number,
+  depth: number,
+  multiPoint: boolean,
+  bareTuple = false
+): {text: string; hasCoordinates: boolean; hasMembers: boolean} | null {
+  if (depth === 0) {
+    const coordinate = readCoordinate(array, index);
+    if (!coordinate) return null;
+    const hasCoordinates = coordinate.some(Number.isFinite);
+    const values = coordinate
+      .map(value => (Number.isFinite(value) ? String(value) : 'NaN'))
+      .join(' ');
+    const text = multiPoint && !hasCoordinates ? 'EMPTY' : bareTuple ? values : `(${values})`;
+    return {text, hasCoordinates, hasMembers: true};
+  }
+  if (array.kind !== 'list' || !isGeoArrowValueValid(array.validity, index)) return null;
+  const parts: string[] = [];
+  let hasCoordinates = false;
+  const [first, last] = getListRange(array, index);
+  for (let childIndex = first; childIndex < last; childIndex++) {
+    const part = formatPhysicalWKTCoordinates(array.child, childIndex, depth - 1, multiPoint, true);
+    if (part) {
+      parts.push(part.text);
+      hasCoordinates ||= part.hasCoordinates;
     }
   }
-  return copyMetadata(column, makeSerializedColumn(values, 'geoarrow.wkt', column.dimension));
+  return {text: `(${parts.join(', ')})`, hasCoordinates, hasMembers: parts.length > 0};
 }
 
 function writePhysicalGeometry(
@@ -1227,11 +1323,8 @@ function getSerializedBytes(array: GeoArrowSerialized, rowIndex: number): Uint8A
   return array.values.subarray(first, last);
 }
 
-function makeSerializedColumn(
-  rows: readonly (Uint8Array | null)[],
-  encoding: 'geoarrow.wkb' | 'geoarrow.wkt',
-  dimension: GeoArrowDimension
-): GeoArrowColumn {
+/** Packs one output chunk’s UTF-8 rows into shared values, offsets and validity buffers. */
+function makeWKTChunk(rows: readonly (Uint8Array | null)[]): GeoArrowSerialized {
   let byteLength = 0;
   for (const row of rows) byteLength += row?.byteLength || 0;
   const values = new Uint8Array(byteLength);
@@ -1247,15 +1340,14 @@ function makeSerializedColumn(
     }
     offsets[rowIndex + 1] = byteOffset;
   }
-  const chunk: GeoArrowSerialized = {
+  return {
     kind: 'serialized',
-    encoding: encoding === 'geoarrow.wkb' ? 'binary' : 'utf8',
+    encoding: 'utf8',
     length: rows.length,
     offsets,
     values,
     validity: {values: validity}
   };
-  return {encoding, dimension, coordinateLayout: null, chunks: [chunk]};
 }
 
 function copyMetadata(source: GeoArrowColumn, target: GeoArrowColumn): GeoArrowColumn {

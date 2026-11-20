@@ -3,12 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {writeWKB} from '../../../src/arrow-integration/wkb';
+import {formatWKT, parseWKTWithMetadata, writeWKB} from '../../../src/arrow-integration/wkb';
 import {
   decodeGeoArrowWKB,
   decodeGeoArrowWKT,
   encodeGeoArrowWKB,
   encodeGeoArrowWKT,
+  getGeoArrowColumnView,
   getGeoArrowWKBVertexCount,
   makeGeoArrowColumnFromGeometryRows,
   type GeoArrowColumn,
@@ -38,6 +39,71 @@ test('column codecs preserve nulls, declared dimensions and metadata', () => {
       expect(materializeGeoArrowRows(decoded)).toEqual([point, null]);
     }
   }
+});
+
+test('native WKT keeps per-row dimensions, sliced offsets, and nulls', () => {
+  const point = writeWKB({type: 'Point', coordinates: [1, 2]}, 'xy');
+  const line = writeWKB(
+    {
+      type: 'LineString',
+      coordinates: [
+        [3, 4, 5],
+        [6, 7, 8]
+      ]
+    },
+    'xym'
+  );
+  const source = decodeGeoArrowWKB(makeSerializedWKBRows([point, line, null, point]), {
+    coordinateLayout: 'separated'
+  });
+  const sliced = getGeoArrowColumnView(source, 1);
+  const encoded = encodeGeoArrowWKT({...sliced, chunks: [...sliced.chunks, ...sliced.chunks]});
+  expect(encoded.chunks).toHaveLength(2);
+  for (const chunk of encoded.chunks) {
+    if (chunk.kind !== 'serialized') throw new Error('Expected WKT chunk');
+    const decoder = new TextDecoder();
+    const first = decoder.decode(chunk.values.subarray(0, Number(chunk.offsets[1])));
+    const third = decoder.decode(
+      chunk.values.subarray(Number(chunk.offsets[2]), Number(chunk.offsets[3]))
+    );
+    expect(first).toBe('LINESTRING M (3 4 5, 6 7 8)');
+    expect(parseWKTWithMetadata(first).dimension).toBe('xym');
+    expect(chunk.offsets[1]).toBe(chunk.offsets[2]);
+    expect(chunk.validity?.values[0]).toBe(0b101);
+    expect(third).toBe('POINT (1 2)');
+  }
+});
+
+test('native WKT matches the materialized formatter for nested and empty geometries', () => {
+  const collection: GeoArrowDecodedGeometry = {
+    type: 'GeometryCollection',
+    geometries: [
+      {type: 'Point', coordinates: []},
+      {
+        type: 'MultiPoint',
+        coordinates: [
+          [1, 2],
+          [NaN, NaN]
+        ]
+      },
+      {
+        type: 'MultiPolygon',
+        coordinates: [
+          [
+            [
+              [0, 0],
+              [1, 1],
+              [0, 0]
+            ]
+          ]
+        ]
+      }
+    ]
+  };
+  const source = makeGeoArrowColumnFromGeometryRows([collection], {dimension: 'xy'});
+  const encoded = encodeGeoArrowWKT(source).chunks[0];
+  if (encoded.kind !== 'serialized') throw new Error('Expected WKT chunk');
+  expect(new TextDecoder().decode(encoded.values)).toBe(formatWKT(collection, 'xy'));
 });
 
 test('serialized identity is preserved', () => {
