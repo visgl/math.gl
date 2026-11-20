@@ -25,6 +25,7 @@ import {
   concatenateGeoArrowColumns,
   encodeGeoArrowWKB,
   getGeoArrowColumnView,
+  convertGeoArrowColumn,
   type GeoArrowDecodedGeometry
 } from '../../../src/arrow-integration/geoarrow-utils';
 
@@ -268,6 +269,98 @@ test('normalizes unsigned union IDs without sign-extending them', () => {
   const result = makeArrowVectorFromGeoArrowColumn(unsignedColumn);
   expect(result.data[0].typeIds[0]).toBe(1);
   expect(materializeGeoArrowRows(makeGeoArrowColumnFromArrowVector(result))).toEqual([geometry]);
+});
+
+test('converts independent geometry batches to one declared union schema', () => {
+  const point = {type: 'Point', coordinates: [3, 4]} as const;
+  const polygon = {
+    type: 'Polygon',
+    coordinates: [
+      [
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [0, 0]
+      ]
+    ]
+  } as const;
+  const pointColumn = GeoArrowBuilder.build([point, null], {encoding: 'geoarrow.point'});
+  const polygonColumn = GeoArrowBuilder.build([polygon], {
+    encoding: 'geoarrow.polygon',
+    coordinateLayout: 'separated'
+  });
+  const unionChildren = (['geoarrow.point', 'geoarrow.polygon'] as const).map(
+    (encoding, index) => ({
+      encoding,
+      name: index === 0 ? 'Point' : 'Polygon',
+      typeId: index === 0 ? 1 : 3,
+      dimension: 'xy' as const,
+      coordinateLayout: 'interleaved' as const,
+      data: GeoArrowBuilder.build([], {encoding}).chunks[0]
+    })
+  );
+  const options = {unionChildren, coordinateLayout: 'interleaved'} as const;
+  const pointUnion = convertGeoArrowColumn(pointColumn, options);
+  const polygonUnion = convertGeoArrowColumn(polygonColumn, options);
+  const pointChunk = pointUnion.chunks[0];
+  if (pointChunk.kind !== 'dense-union') throw new Error('Expected a dense union');
+  expect(pointChunk.children[0].data).toBe(pointColumn.chunks[0]);
+  expect(pointChunk.children[1].data).toBe(unionChildren[1].data);
+  expect(() => convertGeoArrowColumn(polygonColumn, {unionChildren})).toThrow(/storage/);
+  expect(() =>
+    convertGeoArrowColumn(polygonColumn, {...options, unionChildren: unionChildren.slice(0, 1)})
+  ).toThrow(/does not declare/);
+  const points = makeArrowVectorFromGeoArrowColumn(pointUnion);
+  const polygons = makeArrowVectorFromGeoArrowColumn(polygonUnion);
+  expect(points.type).toEqual(polygons.type);
+  const table = new arrow.Table({geometry: points.concat(polygons)});
+  const restored = arrow.tableFromIPC(arrow.tableToIPC(table)).getChild('geometry')!;
+  expect(materializeGeoArrowRows(makeGeoArrowColumnFromArrowVector(restored))).toEqual([
+    point,
+    null,
+    polygon
+  ]);
+  const mixed = makeGeoArrowColumnFromArrowVector(restored);
+  for (const encoding of ['geoarrow.wkb', 'geoarrow.wkt'] as const) {
+    const serialized = convertGeoArrowColumn(mixed, {encoding});
+    expect(serialized.encoding).toBe(encoding);
+    expect(convertGeoArrowColumn(serialized, {encoding})).toBe(serialized);
+  }
+});
+
+test('reuses declared target storage for empty union children', () => {
+  const point = {type: 'Point', coordinates: [3, 4]} as const;
+  const pointColumn = GeoArrowBuilder.build([point], {encoding: 'geoarrow.point'});
+  const pointChild = {
+    encoding: 'geoarrow.point',
+    name: 'Point',
+    typeId: 1,
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    data: GeoArrowBuilder.build([], {encoding: 'geoarrow.point'}).chunks[0]
+  } as const;
+  const polygonChild = {
+    encoding: 'geoarrow.polygon',
+    name: 'Polygon',
+    typeId: 3,
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    data: GeoArrowBuilder.build([], {
+      encoding: 'geoarrow.polygon',
+      coordinateType: 'float32'
+    }).chunks[0]
+  } as const;
+  const source = convertGeoArrowColumn(pointColumn, {unionChildren: [pointChild, polygonChild]});
+  const targetPolygon = {
+    ...polygonChild,
+    data: GeoArrowBuilder.build([], {encoding: 'geoarrow.polygon'}).chunks[0]
+  };
+  const result = convertGeoArrowColumn(source, {unionChildren: [pointChild, targetPolygon]});
+  const chunk = result.chunks[0];
+  if (chunk.kind !== 'dense-union') throw new Error('Expected a dense union');
+  expect(chunk.children[0].data).toBe(pointColumn.chunks[0]);
+  expect(chunk.children[1]).toBe(targetPolygon);
+  expect(materializeGeoArrowRows(result)).toEqual([point]);
 });
 
 test('GeoArrow preserves XYM when adapting and mapping without modifying input', () => {

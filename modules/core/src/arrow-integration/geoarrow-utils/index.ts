@@ -83,7 +83,7 @@ export {
   interleaveGeoArrowCoordinates,
   mapGeoArrowCoordinates,
   mapGeoArrowCoordinatesInto,
-  normalizeGeoArrowUnion,
+  sortGeoArrowUnionChildren,
   rewindGeoArrow
 } from './kernels';
 
