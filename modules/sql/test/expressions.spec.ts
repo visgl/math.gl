@@ -9,6 +9,10 @@ import {
   Binary,
   Bool,
   DateDay,
+  DateMillisecond,
+  TimestampSecond,
+  TimestampMillisecond,
+  TimestampNanosecond,
   Field,
   Float32,
   Null,
@@ -293,6 +297,20 @@ test('portable predicates bind Date and binary literals with null propagation', 
     options
   );
   expect([...binaryPredicate.evaluate(input)]).toEqual([true, false, null]);
+});
+
+test.each([
+  new DateMillisecond(),
+  new TimestampSecond(),
+  new TimestampMillisecond(),
+  new TimestampNanosecond()
+])('portable Date predicates bind to Arrow %s without truncating the bound', type => {
+  const input = batch({when: vectorFromArray([1000, 2000, null], type)});
+  const compiled = compileArrowPredicate(
+    {op: '>', args: [{property: 'when'}, new Date(1500)]},
+    {inputSchema: input.schema}
+  );
+  expect([...compiled.evaluate(input)]).toEqual([false, true, null]);
 });
 
 test('integer bounds and exact argument types are checked before truncation', () => {

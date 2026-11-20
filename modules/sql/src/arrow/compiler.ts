@@ -7,6 +7,8 @@ import {
   Bool,
   Precision,
   DataType,
+  DateUnit,
+  TimeUnit,
   Field,
   Float64,
   Float32,
@@ -385,6 +387,24 @@ function prepareInput(
   return sourceReader(output(field, mask, prepared.get));
 }
 
+/** Converts a Date literal to the receiving Arrow temporal unit. */
+function bindDateLiteral(date: Date, type: DataType | undefined): number | bigint {
+  const milliseconds = date.getTime();
+  if (type && DataType.isDate(type))
+    return type.unit === DateUnit.DAY ? Math.floor(milliseconds / 86400000) : BigInt(milliseconds);
+  if (type && DataType.isTimestamp(type)) {
+    switch (type.unit) {
+      case TimeUnit.SECOND:
+        return milliseconds % 1000 === 0 ? BigInt(milliseconds / 1000) : milliseconds / 1000;
+      case TimeUnit.MILLISECOND:
+        return BigInt(milliseconds);
+      case TimeUnit.NANOSECOND:
+        return BigInt(milliseconds) * 1000000n;
+    }
+  }
+  return BigInt(milliseconds) * 1000n;
+}
+
 /** Binds supported syntax to fused per-row operations and explicit vector boundaries. */
 function bindNode(
   ast: any,
@@ -428,14 +448,8 @@ function bindNode(
   if (ast.type === 'Literal') {
     if (vectorInput && expected && DataType.isDictionary(expected))
       throw new Error('Dictionary function arguments require a dictionary-encoded source column');
-    // Dates enter as immutable parameter snapshots; physical Arrow storage uses days
-    // or microseconds, chosen once from the receiving schema.
     const date = ast.value instanceof Date ? ast.value : undefined;
-    let value: ArrowExpressionValue = date
-      ? expected && DataType.isDate(expected)
-        ? Math.floor(date.getTime() / 86400000)
-        : BigInt(date.getTime()) * 1000n
-      : ast.value;
+    let value: ArrowExpressionValue = date ? bindDateLiteral(date, expected) : ast.value;
     if (value instanceof Uint8Array) value = new Uint8Array(value);
     // Portable numeric literals keep their input representation until comparison.
     const portableNumber =
@@ -499,7 +513,12 @@ function bindNode(
         prepare: (_batch, active) =>
           vectorReader(vectorFromArray(Array(active.length).fill(null), type))
       };
-    if (!portableNumber) validateValue(value, type);
+    const fractionalTimestampSecond =
+      date &&
+      DataType.isTimestamp(type) &&
+      type.unit === TimeUnit.SECOND &&
+      typeof value === 'number';
+    if (!portableNumber && !fractionalTimestampSecond) validateValue(value, type);
     const rounded = portableNumber ? value : roundToType(type)(value);
     if (typeof value === 'number' && Number.isFinite(value) && !Number.isFinite(rounded))
       throw new Error(`Numeric literal overflow for ${type}`);
