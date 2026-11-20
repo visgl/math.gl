@@ -12,7 +12,7 @@ import {
   vectorFromArray,
   type Vector
 } from 'apache-arrow';
-import type {ArrowTableFunction, ScalarFunction} from '@math.gl/sql/arrow';
+import type {AggregateFunction, ArrowTableFunction, ScalarFunction} from '@math.gl/sql/arrow';
 import {
   getGeoArrowFieldInfo,
   isGeoArrowValueValid,
@@ -508,8 +508,60 @@ export const ST_ENVELOPE = /* @__PURE__ */ spatialFunction(
   ([geometry]) => writeWKB(planarEnvelope(geometry!), 'xy')
 );
 
+/** Reduces a geometry column to its four planar bounds, ignoring null and empty rows. */
+export const ST_EXTENT: AggregateFunction = {
+  kind: 'aggregate',
+  name: 'ST_Extent',
+  /** Binds the input geometry signature and the fixed-size box result. */
+  bind({arguments: fields}) {
+    const field = fields[0];
+    if (!field || fields.length !== 1) throw new Error('ST_Extent requires one geometry column');
+    ST_ENVELOPE.resolvePrototype!([field]);
+    return {
+      outputField: new Field(
+        'ST_Extent',
+        new FixedSizeList(4, new Field('value', new Float64(), false)),
+        true
+      ),
+      /** Creates independent bounds for this group. */
+      createAccumulator() {
+        let bounds: number[] | null = null;
+        /** Includes a geometry or partial accumulator in the current bounds. */
+        function include(box: readonly number[]) {
+          if (!bounds) bounds = [...box];
+          else {
+            bounds[0] = Math.min(bounds[0]!, box[0]!);
+            bounds[1] = Math.min(bounds[1]!, box[1]!);
+            bounds[2] = Math.max(bounds[2]!, box[2]!);
+            bounds[3] = Math.max(bounds[3]!, box[3]!);
+          }
+        }
+        return {
+          /** Accumulates nonempty geometry bounds from one record batch. */
+          update([vector], {length}) {
+            const active = Uint8Array.from({length}, (_, i) => Number(vector!.isValid(i)));
+            const read = readGeometryValue(vector!, field, active, planarGeometry);
+            for (let i = 0; i < length; i++) {
+              if (!active[i]) continue;
+              const box = planarBounds(read(i));
+              if (box) include(box);
+            }
+          },
+          /** Combines bounds from another group partition. */
+          merge(partial) {
+            const box = partial.finalize();
+            if (Array.isArray(box)) include(box);
+          },
+          /** Returns a detached snapshot, or null for a group without coordinates. */
+          finalize: () => bounds && [...bounds]
+        };
+      }
+    };
+  }
+};
+
 /** Opt-in PostGIS-aligned 2D geometry functions for the Arrow SQL function list. */
-export const POSTGIS_SPATIAL_FUNCTIONS: readonly ArrowTableFunction[] =
+export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | AggregateFunction)[] =
   /* @__PURE__ */ Object.freeze([
     ST_X,
     ST_Y,
@@ -531,7 +583,8 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly ArrowTableFunction[] =
     ST_LENGTH,
     ST_POINTONSURFACE,
     ST_CENTROID,
-    ST_ENVELOPE
+    ST_ENVELOPE,
+    ST_EXTENT
   ]);
 
 /** Returns great-circle point distance in kilometers. */

@@ -157,7 +157,7 @@ export type BoundRelationAggregate = {
   /** Arrow field shared by all groups of this aggregate call. */
   readonly outputField: Field;
   /** Reduces one group's rows to a value in the field's physical units. */
-  evaluate(table: Table): ArrowExpressionValue;
+  evaluate(table: Table): ArrowExpressionValue | readonly number[];
 };
 
 /** Groups by scalar source columns and evaluates the shared Arrow aggregate kernels. */
@@ -210,7 +210,7 @@ export function groupArrowTable(
   const columns = [
     ...fields.map(field => selected.getChild(field.name)!),
     ...aggregateFields.map(field => {
-      if (custom.has(field.name)) {
+      if (custom.has(field.name) && !DataType.isFixedSizeList(field.type)) {
         return writeArrowExpressionValues(
           field,
           new Uint8Array(results.length).fill(1),
