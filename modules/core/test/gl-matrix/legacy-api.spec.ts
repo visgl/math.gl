@@ -207,6 +207,9 @@ describe('gl-matrix compatibility API', () => {
     expect(vec3.length(vec3.slerp(vec3.create(), [0, 0, 1], [0, 0, -1], 0.5))).toBeCloseTo(1);
     // nearly opposite: turns towards the side b leans to
     expectArray(vec3.slerp(vec3.create(), [1, 0, 0], [-1, 1e-9, 0], 0.5), [0, 1, 0]);
+    // in place
+    const inPlace = vec3.fromValues(1, 0, 0);
+    expectArray(vec3.slerp(inPlace, inPlace, [-1, 1e-9, 0], 0.5), [0, 1, 0]);
   });
 
   test('mat3 covers construction, transforms, inversion, and arithmetic', () => {
