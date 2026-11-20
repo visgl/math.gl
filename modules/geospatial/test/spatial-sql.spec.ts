@@ -102,6 +102,24 @@ test('filters point pairs with inclusive per-row planar radii', () => {
   );
 });
 
+test('label points lie inside concave, holed and multipart surfaces', () => {
+  const g = wkb(
+    'POLYGON((0 0,6 0,6 1,1 1,1 6,0 6,0 0))',
+    'POLYGON((0 0,8 0,8 8,0 8,0 0),(1 1,7 1,7 7,1 7,1 1))',
+    'MULTIPOLYGON(((0 0,1 0,1 1,0 1,0 0)),((10 0,20 0,20 4,10 4,10 0)))',
+    'POLYGON EMPTY',
+    null
+  );
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    'SELECT ST_Contains(g, ST_PointOnSurface(g)) AS inside, ST_PointOnSurface(g) AS anchor FROM features',
+    table
+  );
+  expect([...result.getChild('inside')!]).toEqual([true, true, true, false, null]);
+  expect(geometryAt(result, 'anchor', 2)).toEqual({type: 'Point', coordinates: [15, 2]});
+  expect(geometryAt(result, 'anchor', 3)).toEqual({type: 'Point', coordinates: [NaN, NaN]});
+});
+
 test('planar measurements and weighted centroids agree with PostGIS geometry fixture values', () => {
   const shape = wkb(
     'POLYGON((0 0,8 0,8 8,0 8,0 0),(1 1,3 1,3 3,1 3,1 1))',
@@ -349,6 +367,27 @@ test('extracts route endpoint coordinates through nested SQL calls', () => {
   );
   expect([...result.getChild('start_x')!]).toEqual([-73, null, null]);
   expect([...result.getChild('end_y')!]).toEqual([42, null, null]);
+});
+
+test('label scan includes the implied closing edge of a native polygon ring', () => {
+  const shape = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows([
+      {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [0, 0],
+            [8, 0],
+            [8, 4],
+            [0, 4]
+          ]
+        ]
+      }
+    ])
+  );
+  const table = new Table(new Schema([geometryField('g', shape, 'polygon')]), {g: shape});
+  const result = select('SELECT ST_PointOnSurface(g) AS anchor FROM features', table);
+  expect(geometryAt(result, 'anchor', 0)).toEqual({type: 'Point', coordinates: [4, 2]});
 });
 
 test('constructs XY, XYZ and XYZM points from nullable numeric coordinates', () => {

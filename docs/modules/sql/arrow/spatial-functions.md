@@ -67,6 +67,7 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_MakePoint(x, y [, z [, m]])` | Integer or floating-point ordinates | GeoArrow WKB Point with XY, XYZ, or XYZM coordinates and unknown CRS. Use XY with the 2D predicates and measurements. |
 | `ST_Area(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar polygon area with holes subtracted. Empty and non-areal inputs yield zero. |
 | `ST_Length(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar line length. Empty and non-linear inputs yield zero. |
+| `ST_PointOnSurface(polygon)` | Polygon or MultiPolygon | GeoArrow WKB Point for label placement inside a valid polygon. Empty inputs yield an empty Point. |
 | `ST_Centroid(geometry)` | Point, LineString, Polygon, and their multi-types | GeoArrow WKB. Points have equal weight, lines are weighted by segment length, and polygons are weighted by area. Empty inputs yield an empty Point. |
 | `ST_Envelope(geometry)` | Point, LineString, Polygon, and their multi-types, or a WKB GeometryCollection | GeoArrow WKB Point, LineString, or Polygon according to the extent. An empty input keeps its geometry type. |
 
