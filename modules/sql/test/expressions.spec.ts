@@ -6,6 +6,8 @@ import {scalarFunction} from './utils/scalar-function';
 
 import {expect, test, vi} from 'vitest';
 import {
+  makeData,
+  makeVector,
   Binary,
   Bool,
   DateDay,
@@ -13,6 +15,7 @@ import {
   TimestampSecond,
   TimestampMillisecond,
   TimestampNanosecond,
+  TimestampMicrosecond,
   Field,
   Float32,
   Null,
@@ -300,18 +303,40 @@ test('portable predicates bind Date and binary literals with null propagation', 
 });
 
 test.each([
-  new DateMillisecond(),
-  new TimestampSecond(),
-  new TimestampMillisecond(),
-  new TimestampNanosecond()
-])('portable Date predicates bind to Arrow %s without truncating the bound', type => {
-  const input = batch({when: vectorFromArray([1000, 2000, null], type)});
-  const compiled = compileArrowPredicate(
-    {op: '>', args: [{property: 'when'}, new Date(1500)]},
-    {inputSchema: input.schema}
-  );
-  expect([...compiled.evaluate(input)]).toEqual([false, true, null]);
-});
+  [new DateMillisecond(), 1000n, 2000n],
+  [new TimestampSecond(), 1n, 2n],
+  [new TimestampMillisecond(), 1000n, 2000n],
+  [new TimestampMicrosecond(), 1000000n, 2000000n],
+  [new TimestampNanosecond(), 1000000000n, 2000000000n]
+] as const)(
+  'portable Date predicates bind to Arrow %s without truncating the bound',
+  (type, first, second) => {
+    const input = batch({
+      when: makeVector(
+        makeData({
+          type,
+          length: 3,
+          data: BigInt64Array.of(first, second, 0n),
+          nullCount: 1,
+          nullBitmap: Uint8Array.of(3)
+        })
+      )
+    });
+    const options = {inputSchema: input.schema};
+    const bound = new Date(1500);
+    expect([
+      ...compileArrowPredicate({op: '>', args: [{property: 'when'}, bound]}, options).evaluate(
+        input
+      )
+    ]).toEqual([false, true, null]);
+    expect([
+      ...compileArrowPredicate({op: 'in', args: [{property: 'when'}, [bound]]}, options).evaluate(
+        input
+      )
+    ]).toEqual([false, false, null]);
+    expect(() => values('cast(when, "utf8")', input)).toThrow('Temporal CAST requires');
+  }
+);
 
 test('integer bounds and exact argument types are checked before truncation', () => {
   const input = batch({x: vectorFromArray([127], new Int8())});
