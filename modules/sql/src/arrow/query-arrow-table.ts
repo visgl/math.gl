@@ -70,6 +70,15 @@ type Projection = {field: Field} & ({index: number} | {expression: CompiledArrow
 
 /** Applies WHERE, projection, and pagination directly to a native Apache Arrow table. */
 export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Table {
+  return executeArrowTableQuery(source, query, compileArrowPredicate);
+}
+
+/** Runs the table executor with the calling entry point's WHERE binder, when needed. */
+export function executeArrowTableQuery(
+  source: Table,
+  query: ArrowTableQuery,
+  bindPredicate?: typeof compileArrowPredicate
+): Table {
   const {select, where, offset = 0, limit, functions, parameters, signal} = query;
   signal?.throwIfAborted();
   validatePagination(offset, limit);
@@ -79,7 +88,7 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
   if (join) source = joinArrowTables(source, join, signal);
 
   if (groupBy?.length || Object.keys(aggregates ?? {}).length || orderBy?.length) {
-    source = queryArrowTable(source, {where, functions, parameters, signal});
+    source = executeArrowTableQuery(source, {where, functions, parameters, signal}, bindPredicate);
     if (groupBy?.length || Object.keys(aggregates ?? {}).length) {
       source = groupArrowTable(source, groupBy ?? [], aggregates ?? {}, {
         inputSchema: source.schema,
@@ -89,21 +98,22 @@ export function queryArrowTable(source: Table, query: ArrowTableQuery = {}): Tab
     }
     if (orderBy?.length) {
       source = orderArrowTable(source, orderBy, offset, limit, signal);
-      return queryArrowTable(source, {select, functions, signal});
+      return executeArrowTableQuery(source, {select, functions, signal});
     }
-    return queryArrowTable(source, {select, offset, limit, functions, signal});
+    return executeArrowTableQuery(source, {select, offset, limit, functions, signal});
   }
 
-  return executeArrowProjection(source, query);
+  return executeArrowProjection(source, query, undefined, bindPredicate);
 }
 
 /** Executes an already filtered input, optionally binding prepared projection calls. */
 export function executeArrowProjection(
   source: Table,
   query: ArrowBatchQuery,
-  prepare?: (expression: ArrowExpression, name: string) => CompiledArrowExpression
+  prepare?: (expression: ArrowExpression, name: string) => CompiledArrowExpression,
+  bindPredicate?: typeof compileArrowPredicate
 ): Table {
-  const plan = compileArrowQuery(source.schema, query, prepare);
+  const plan = compileArrowQuery(source.schema, query, prepare, bindPredicate);
   const result: RecordBatch[] = [];
   for (const batch of source.batches) {
     if (plan.done()) break;
@@ -120,7 +130,7 @@ export async function* queryArrowTableInBatches(
 ): AsyncIterable<RecordBatch> {
   query.signal?.throwIfAborted();
   validatePagination(query.offset ?? 0, query.limit);
-  const plan = compileArrowQuery(inputSchema, query);
+  const plan = compileArrowQuery(inputSchema, query, undefined, compileArrowPredicate);
   if (plan.done()) return;
   for await (const batch of input) {
     query.signal?.throwIfAborted();
@@ -146,14 +156,17 @@ function validatePagination(offset: number, limit?: number): void {
 function compileArrowQuery(
   inputSchema: Schema,
   query: ArrowBatchQuery,
-  prepare?: Parameters<typeof executeArrowProjection>[2]
+  prepare?: Parameters<typeof executeArrowProjection>[2],
+  bindPredicate?: typeof compileArrowPredicate
 ) {
   const {select, where, offset = 0, limit, functions, parameters, signal} = query;
   const options = {inputSchema, functions};
+  if (where && !('expression' in where) && !bindPredicate)
+    throw new Error('Portable Arrow predicates require a predicate binder');
   const predicate = where
     ? 'expression' in where
       ? compileArrowExpression(where.expression, options)
-      : compileArrowPredicate(where, {...options, parameters})
+      : bindPredicate!(where, {...options, parameters})
     : undefined;
   if (predicate && !DataType.isBool(predicate.outputField.type))
     throw new Error('Arrow query WHERE requires a Boolean expression');

@@ -204,6 +204,8 @@ The Arrow executor accepts Date literals for supported Date32 and microsecond ti
 and byte-array literals for binary fields. Date32 compares UTC calendar days, so a non-midnight
 Date literal matches the stored day in comparisons and membership. Microsecond timestamps
 compare instants. A string property containing dots is one literal field name.
+Portable comparisons and membership preserve exact ordering and equality between bigint and number
+operands. Numeric comparisons reject NaN and infinity in portable predicates.
 
 SQL parsing, source pushdown and result-row selection remain the query engine's responsibility.
 Only true predicate results select rows; false and null results do not. Computed SELECT functions
