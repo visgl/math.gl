@@ -240,13 +240,11 @@ export function planarPolygonPointOnSurface(geometry: WellKnownGeometry): WellKn
     const y = low / 2 + high / 2;
     const crossings: number[] = [];
     for (const ring of rings) {
-      for (let i = 1; i < ring.length; i++) {
-        const a = ring[i - 1]!;
-        const b = ring[i]!;
-        if (a[1]! > y === b[1]! > y) continue;
+      visitSegments(ring, true, (a, b) => {
+        if (a[1]! > y === b[1]! > y) return;
         const t = (y - a[1]!) / (b[1]! - a[1]!);
         crossings.push((1 - t) * a[0]! + t * b[0]!);
-      }
+      });
     }
     crossings.sort((a, b) => a - b);
     if (widest < 0) coordinates = [...shell[0]!];

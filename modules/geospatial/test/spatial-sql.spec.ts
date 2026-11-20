@@ -352,3 +352,24 @@ test('extracts route endpoint coordinates through nested SQL calls', () => {
   expect([...result.getChild('start_x')!]).toEqual([-73, null, null]);
   expect([...result.getChild('end_y')!]).toEqual([42, null, null]);
 });
+
+test('label scan includes the implied closing edge of a native polygon ring', () => {
+  const shape = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows([
+      {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [0, 0],
+            [8, 0],
+            [8, 4],
+            [0, 4]
+          ]
+        ]
+      }
+    ])
+  );
+  const table = new Table(new Schema([geometryField('g', shape, 'polygon')]), {g: shape});
+  const result = select('SELECT ST_PointOnSurface(g) AS anchor FROM features', table);
+  expect(geometryAt(result, 'anchor', 0)).toEqual({type: 'Point', coordinates: [4, 2]});
+});
