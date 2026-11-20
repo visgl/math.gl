@@ -9,6 +9,7 @@ import {
   Field,
   FixedSizeList,
   Float64,
+  Int32,
   vectorFromArray,
   type Vector
 } from 'apache-arrow';
@@ -37,6 +38,8 @@ import {
 } from '../turf';
 import {planarIntersects} from './planar-intersects';
 import {lineLocatePoint, lineSubstring} from './linear-referencing';
+import {normalizeCRSIdentifier} from '../crs/crs-identifier';
+import {EPSG3857ToLngLat, EPSG4326ToEPSG3857} from '../web-mercator/mercator-meters';
 import {
   planarArea,
   planarBounds,
@@ -70,7 +73,7 @@ const lineKinds = ['LineString', 'MultiLineString'] as const;
 const polygonKinds = ['Polygon', 'MultiPolygon'] as const;
 
 /** Supported Arrow result storage for a spatial function. */
-type SpatialResult = Float64 | Bool | Binary | FixedSizeList<Float64>;
+type SpatialResult = Int32 | Float64 | Bool | Binary | FixedSizeList<Float64>;
 /** A nullable result value passed to the Arrow vector builder. */
 type SpatialValue = number | boolean | number[] | Uint8Array | null;
 
@@ -155,7 +158,12 @@ function spatialFunction(
         } else {
           throw new Error(`${name} argument ${index + 1} requires GeoArrow ${kinds.join(' or ')}`);
         }
-        if (name.startsWith('ST_') && extension?.metadata['edges'] === 'spherical')
+        if (
+          name.startsWith('ST_') &&
+          name !== 'ST_SRID' &&
+          name !== 'ST_SetSRID' &&
+          extension?.metadata['edges'] === 'spherical'
+        )
           throw new Error(`${name} requires planar geometry`);
         return extension;
       });
@@ -494,6 +502,123 @@ export const ST_LINESUBSTRING = /* @__PURE__ */ spatialFunction(
   2
 );
 
+/** Extracts an EPSG code from a GeoArrow authority identifier or a PROJJSON root ID. */
+function geometrySRID(crs: unknown): number {
+  let identifier = typeof crs === 'string' ? normalizeCRSIdentifier(crs) : '';
+  if (crs && typeof crs === 'object' && 'id' in crs) {
+    const id = crs.id;
+    if (
+      id &&
+      typeof id === 'object' &&
+      'authority' in id &&
+      'code' in id &&
+      id.authority === 'EPSG'
+    )
+      identifier = 'EPSG:' + String(id.code);
+  }
+  return /^EPSG:\d+$/.test(identifier) ? Number(identifier.slice(5)) : 0;
+}
+
+/** Applies a planar coordinate conversion throughout a multipart or collection geometry. */
+function projectGeometry(
+  geometry: WellKnownGeometry,
+  project: (p: readonly number[]) => number[]
+): WellKnownGeometry {
+  const path = (points: readonly (readonly number[])[]) => points.map(project);
+  switch (geometry.type) {
+    case 'Point':
+      return {
+        type: 'Point',
+        coordinates:
+          geometry.coordinates.length && !geometry.coordinates.every(Number.isNaN)
+            ? project(geometry.coordinates)
+            : []
+      };
+    case 'MultiPoint':
+      return {
+        type: 'MultiPoint',
+        coordinates: geometry.coordinates.map(p =>
+          !p.length || p.every(Number.isNaN) ? p : project(p)
+        )
+      };
+    case 'LineString':
+      return {type: 'LineString', coordinates: path(geometry.coordinates)};
+    case 'MultiLineString':
+    case 'Polygon':
+      return {type: geometry.type, coordinates: geometry.coordinates.map(path)};
+    case 'MultiPolygon':
+      return {type: 'MultiPolygon', coordinates: geometry.coordinates.map(poly => poly.map(path))};
+    case 'GeometryCollection':
+      return {
+        type: 'GeometryCollection',
+        geometries: geometry.geometries.map(child => projectGeometry(child, project))
+      };
+  }
+}
+
+/** Binds a single output CRS for the entire Arrow field, including empty batches. */
+function crsFunction(name: 'ST_SRID' | 'ST_SetSRID' | 'ST_Transform'): ScalarFunction {
+  const read = name === 'ST_SRID';
+  return {
+    kind: 'scalar',
+    name,
+    prototypes: [],
+    /** Resolves the source from field metadata and the target from the SQL literal. */
+    resolvePrototype(fields, literals) {
+      if (fields.length !== (read ? 1 : 2)) return undefined;
+      const metadata = fields[0] && getGeoArrowFieldInfo(fields[0])?.metadata;
+      const source = geometrySRID(metadata?.['crs']);
+      const target = literals?.[1] ?? 0;
+      if (
+        !read &&
+        (literals?.[1] === undefined ||
+          !Number.isSafeInteger(target) ||
+          target < 0 ||
+          target > 998999)
+      )
+        throw new Error(name + ' requires a constant integer SRID between 0 and 998999');
+      if (
+        name === 'ST_Transform' &&
+        (![4326, 3857].includes(source) || ![4326, 3857].includes(target))
+      )
+        throw new Error('ST_Transform supports EPSG:4326 and EPSG:3857 source and target CRS');
+      const implementation = spatialFunction(
+        name,
+        [[...geometryTypes, 'GeometryCollection']],
+        read ? new Int32() : new Binary(),
+        ([geometry]) => {
+          if (read) return source;
+          const output =
+            name === 'ST_Transform' && source !== target
+              ? projectGeometry(geometry!, p =>
+                  target === 3857
+                    ? EPSG4326ToEPSG3857([...p], {clampLatitude: false})
+                    : EPSG3857ToLngLat([...p])
+                )
+              : geometry!;
+          return writeWKB(output, 'xy');
+        },
+        read ? 0 : 1
+      ).resolvePrototype!(fields)!;
+      if (!read) {
+        const crsMetadata = {...metadata};
+        delete crsMetadata['crs_type'];
+        delete crsMetadata['crs'];
+        if (target) Object.assign(crsMetadata, {crs_type: 'authority_code', crs: 'EPSG:' + target});
+        implementation.result.metadata.set(EXTENSION_METADATA, JSON.stringify(crsMetadata));
+      }
+      return implementation;
+    }
+  };
+}
+
+/** Returns the field EPSG code, or zero for an unidentified CRS. */
+export const ST_SRID = /* @__PURE__ */ crsFunction('ST_SRID');
+/** Assigns a CRS to a geometry column, preserving its coordinate values. */
+export const ST_SETSRID = /* @__PURE__ */ crsFunction('ST_SetSRID');
+/** Reprojects a planar geometry column between geographic and Web Mercator coordinates. */
+export const ST_TRANSFORM = /* @__PURE__ */ crsFunction('ST_Transform');
+
 /** Returns clockwise azimuth from positive Y in radians. */
 export const ST_AZIMUTH = /* @__PURE__ */ spatialFunction(
   'ST_Azimuth',
@@ -621,6 +746,9 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_DISTANCE,
     ST_DWITHIN,
     ST_INTERSECTS,
+    ST_SRID,
+    ST_SETSRID,
+    ST_TRANSFORM,
     ST_AZIMUTH,
     ST_MAKEPOINT,
     ST_AREA,

@@ -483,6 +483,88 @@ test('linear referencing uses segment lengths and includes bends in clipped rout
   );
 });
 
+test('projecting a collection preserves empty point members', () => {
+  const g = wkb('GEOMETRYCOLLECTION(POINT EMPTY,POINT(10 45))');
+  const table = new Table(new Schema([geometryField('g', g, 'wkb', {crs: 'EPSG:4326'})]), {g});
+  const result = geometryAt(
+    select('SELECT ST_Transform(g,3857) AS projected FROM features', table),
+    'projected',
+    0
+  );
+  expect(result?.type).toBe('GeometryCollection');
+  if (result?.type === 'GeometryCollection') {
+    expect(result.geometries[0]).toEqual({type: 'Point', coordinates: [NaN, NaN]});
+    expect(result.geometries[1]?.type).toBe('Point');
+  }
+});
+
+test('CRS assignment and reprojection bind output metadata for nested spatial SQL', () => {
+  const g = wkb('LINESTRING(0 0,10 45)', 'LINESTRING EMPTY', null);
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    `SELECT ST_SRID(g) AS unknown, ST_SetSRID(g,4326) AS labeled,
+    ST_Transform(ST_SetSRID(g,4326),3857) AS meters,
+    ST_SRID(ST_Transform(ST_SetSRID(g,4326),3857)) AS code FROM features`,
+    table
+  );
+  expect([...result.getChild('unknown')!]).toEqual([0, 0, null]);
+  expect([...result.getChild('code')!]).toEqual([3857, 3857, null]);
+  expect(geometryAt(result, 'labeled', 0)).toEqual(parseWKT('LINESTRING(0 0,10 45)'));
+  const projected = geometryAt(result, 'meters', 0);
+  expect(projected?.type).toBe('LineString');
+  if (projected?.type === 'LineString') {
+    expect(projected.coordinates[1]![0]).toBeCloseTo(1113194.90793, 4);
+    expect(projected.coordinates[1]![1]).toBeCloseTo(5621521.48619, 4);
+  }
+  expect(geometryAt(result, 'meters', 1)).toEqual(parseWKT('LINESTRING EMPTY'));
+  expect(() => select('SELECT ST_Transform(g,3857) FROM features', table)).toThrow(
+    /source and target/
+  );
+  expect(() => select('SELECT ST_SetSRID(g,ST_SRID(g)) FROM features', table)).toThrow(/constant/);
+});
+
+test('CRS metadata functions preserve spherical edges', () => {
+  const g = wkb('LINESTRING(0 0,10 45)');
+  const table = new Table(
+    new Schema([geometryField('g', g, 'wkb', {crs: 'EPSG:4326', edges: 'spherical'})]),
+    {g}
+  );
+  const result = select('SELECT ST_SRID(g) AS code, ST_SetSRID(g,0) AS shape FROM features', table);
+  expect([...result.getChild('code')!]).toEqual([4326]);
+  expect(JSON.parse(result.schema.fields[1]!.metadata.get('ARROW:extension:metadata')!)).toEqual({
+    edges: 'spherical'
+  });
+  expect(geometryAt(result, 'shape', 0)).toEqual(parseWKT('LINESTRING(0 0,10 45)'));
+  expect(() => select('SELECT ST_Transform(g,3857) FROM features', table)).toThrow(/planar/);
+});
+
+test('reads PROJJSON EPSG identifiers and preserves extension metadata across inverse transforms', () => {
+  const g = wkb('POINT(1113194.9079327357 5621521.486192066)');
+  const crs = {type: 'ProjectedCRS', id: {authority: 'EPSG', code: 3857}};
+  const table = new Table(
+    new Schema([geometryField('g', g, 'wkb', {crs, crs_type: 'projjson', edges: 'planar'})]),
+    {g}
+  );
+  const result = select(
+    `SELECT ST_SRID(g) AS srid, ST_Transform(g,4326) AS lonlat,
+    ST_SRID(ST_SetSRID(g,0)) AS cleared FROM features`,
+    table
+  );
+  expect(result.getChild('srid')!.get(0)).toBe(3857);
+  expect(result.getChild('cleared')!.get(0)).toBe(0);
+  const point = geometryAt(result, 'lonlat', 0);
+  expect(point?.type).toBe('Point');
+  if (point?.type === 'Point') {
+    expect(point.coordinates[0]).toBeCloseTo(10, 10);
+    expect(point.coordinates[1]).toBeCloseTo(45, 10);
+  }
+  expect(JSON.parse(result.schema.fields[1]!.metadata.get('ARROW:extension:metadata')!)).toEqual({
+    crs: 'EPSG:4326',
+    crs_type: 'authority_code',
+    edges: 'planar'
+  });
+});
+
 test('ST_Extent combines groups across batches and ignores empty and null rows', () => {
   const g = wkb('LINESTRING(-4 8,3 5)', null, 'POINT(7 -2)', 'POLYGON EMPTY');
   const k = vectorFromArray([1, 2, 1, 2], new Int32());

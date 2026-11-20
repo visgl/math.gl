@@ -1536,7 +1536,10 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
           !containsContextualArray(argument)
           ? bind(argument, options, undefined, true).field
           : undefined;
-      })
+      }),
+      ast.arguments.map((arg: Expression) =>
+        arg.type === 'Literal' && typeof arg.value === 'number' ? arg.value : undefined
+      )
     );
   for (let index = 0; index <= group.prototypes.length; index++) {
     const prototype = group.prototypes[index] ?? (candidates.length ? undefined : resolve());
