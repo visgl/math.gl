@@ -43,6 +43,7 @@ import {normalizeCRSIdentifier} from '../crs/crs-identifier';
 import {EPSG3857ToLngLat, EPSG4326ToEPSG3857} from '../web-mercator/mercator-meters';
 import {vertexCount, memberCount, geometryMember} from './geometry-inspection';
 import {reduceLineVertices} from './line-simplification';
+import {collectPair, makeLine} from './geometry-constructors';
 import {
   planarArea,
   planarBounds,
@@ -98,7 +99,7 @@ function readGeometryValue<T>(
   ) => T,
   captureMembers = false
 ): (row: number) => T {
-  if (field.metadata.get(EXTENSION_NAME) === 'geoarrow.wkb') {
+  if (DataType.isBinary(field.type) || DataType.isLargeBinary(field.type)) {
     return row => {
       const {geometry, dimension, srid, members} = parseWKB(vector.get(row) as Uint8Array, {
         captureMembers
@@ -146,7 +147,8 @@ function spatialFunction(
   type: SpatialResult,
   evaluate: (geometries: readonly GeometryRow[], ...numbers: number[]) => SpatialValue,
   numericArguments = 0,
-  allDimensions = false
+  allDimensions = false,
+  skipNullGeometries = false
 ): ScalarFunction {
   return {
     kind: 'scalar',
@@ -198,7 +200,9 @@ function spatialFunction(
       const metadata = new Map<string, string>();
       if (DataType.isBinary(type)) {
         metadata.set(EXTENSION_NAME, 'geoarrow.wkb');
-        const inputMetadata = geometryFields[0]?.metadata.get(EXTENSION_METADATA);
+        const inputMetadata = geometryFields
+          .find(field => field?.metadata.has(EXTENSION_METADATA))
+          ?.metadata.get(EXTENSION_METADATA);
         if (inputMetadata) metadata.set(EXTENSION_METADATA, inputMetadata);
       }
       const arguments_ = [
@@ -207,6 +211,7 @@ function spatialFunction(
       ];
       return {
         arguments: arguments_,
+        nullHandling: skipNullGeometries ? 'call' : 'propagate',
         result: new Field(name, type, true, metadata),
         /** Evaluates active rows and retains their positions in the output batch. */
         evaluate(vectors, {activeRows, length: rowCount}) {
@@ -227,14 +232,16 @@ function spatialFunction(
           const values = new Array<SpatialValue>(rowCount).fill(null);
           for (let row = 0; row < rowCount; row++) {
             if (!activeRows[row]) continue;
-            const geometries = readers.map((read, index) => {
-              const geometry = read(row);
+            const geometries: WellKnownGeometry[] = [];
+            for (let index = 0; index < readers.length; index++) {
+              if (skipNullGeometries && !vectors[index]!.isValid(row)) continue;
+              const geometry = readers[index]!(row);
               if (!signatures[index]!.includes(geometry.type))
                 throw new Error(
                   `${name} argument ${index + 1} does not support ${geometry.type} at row ${row}`
                 );
-              return geometry;
-            });
+              geometries.push(geometry);
+            }
             values[row] = evaluate(geometries, ...numbers.map(vector => Number(vector.get(row))));
           }
           return vectorFromArray(values, type);
@@ -784,6 +791,31 @@ export const ST_GEOMETRYN = /* @__PURE__ */ spatialFunction(
   true
 );
 
+/** Connects two point, multipoint or line inputs in their given order. */
+export const ST_MAKELINE = /* @__PURE__ */ spatialFunction(
+  'ST_MakeLine',
+  [
+    ['Point', 'MultiPoint', 'LineString'],
+    ['Point', 'MultiPoint', 'LineString']
+  ],
+  /* @__PURE__ */ new Binary(),
+  geometries => writeWKB(makeLine(geometries), 'xy')
+);
+
+/** Collects two geometries without dissolving or flattening them. */
+export const ST_COLLECT = /* @__PURE__ */ spatialFunction(
+  'ST_Collect',
+  [
+    [...geometryTypes, 'GeometryCollection'],
+    [...geometryTypes, 'GeometryCollection']
+  ],
+  /* @__PURE__ */ new Binary(),
+  ([a, b]) => (a ? writeWKB(b ? collectPair(a, b) : a, 'xy') : null),
+  0,
+  false,
+  true
+);
+
 /** Returns an interior label point for a planar polygonal surface. */
 export const ST_POINTONSURFACE = /* @__PURE__ */ spatialFunction(
   'ST_PointOnSurface',
@@ -890,6 +922,8 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_GEOMETRYTYPE,
     ST_FORCE2D,
     ST_GEOMETRYN,
+    ST_MAKELINE,
+    ST_COLLECT,
     ST_ENVELOPE,
     ST_EXTENT
   ]);

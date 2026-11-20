@@ -661,6 +661,32 @@ test('simplifying an empty route preserves its geometry type', () => {
   expect(geometryAt(result, 'reduced', 1)).toEqual(parseWKT('MULTILINESTRING EMPTY'));
 });
 
+test('spatial constructors preserve order, point duplicates and collection nesting', () => {
+  const a = wkb('POINT(1 2)', 'LINESTRING(0 0,1 2)', 'MULTIPOINT((0 0),(1 2))', null);
+  const b = wkb('POINT(1 2)', 'LINESTRING(1 2,1 2,3 4)', 'POINT(3 4)', 'POINT EMPTY');
+  const table = new Table(new Schema([geometryField('a', a), geometryField('b', b)]), {a, b});
+  const result = select(
+    'SELECT ST_MakeLine(a,b) AS route, ST_Collect(a,b) AS parts FROM features',
+    table
+  );
+  expect(geometryAt(result, 'route', 0)).toEqual(parseWKT('LINESTRING(1 2,1 2)'));
+  expect(geometryAt(result, 'route', 1)).toEqual(parseWKT('LINESTRING(0 0,1 2,1 2,3 4)'));
+  expect(geometryAt(result, 'route', 2)).toEqual(parseWKT('LINESTRING(0 0,1 2,3 4)'));
+  expect(geometryAt(result, 'parts', 0)).toEqual(parseWKT('MULTIPOINT((1 2),(1 2))'));
+  expect(geometryAt(result, 'parts', 1)?.type).toBe('MultiLineString');
+  expect(geometryAt(result, 'parts', 2)).toEqual(
+    parseWKT('GEOMETRYCOLLECTION(MULTIPOINT((0 0),(1 2)),POINT(3 4))')
+  );
+  expect(geometryAt(result, 'route', 3)).toBeNull();
+  expect(geometryAt(result, 'parts', 3)).toEqual({type: 'Point', coordinates: [NaN, NaN]});
+  const missing = select(
+    'SELECT ST_Collect(NULL,a) AS single, ST_Collect(NULL,NULL) AS neither FROM features',
+    table
+  );
+  expect(geometryAt(missing, 'single', 0)).toEqual(parseWKT('POINT(1 2)'));
+  expect(geometryAt(missing, 'neither', 0)).toBeNull();
+});
+
 test('ST_Extent combines groups across batches and ignores empty and null rows', () => {
   const g = wkb('LINESTRING(-4 8,3 5)', null, 'POINT(7 -2)', 'POLYGON EMPTY');
   const k = vectorFromArray([1, 2, 1, 2], new Int32());
