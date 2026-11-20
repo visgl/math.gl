@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v5.0.0-rc.2
+
+- Expose a focused SQL query entry point (#658).
+- Accept Date and binary Arrow predicate literals and preserve batch metadata when gathering Arrow rows (#657, #660).
+- Preserve mixed numeric Arrow predicate comparisons (#659).
+- Write WKT directly from native GeoArrow buffers (#661).
+- Reject incomplete geoid PGM rasters (#662).
+
 ## v5.0.0-rc.1
 
 - Add spatial SQL functions for geometry construction and inspection, planar predicates, route linear referencing, SRID and Web Mercator transforms, and XYZ tile queries. Expose flat spatial SQL entry points and use native GeoArrow buffers (#616, #630–#635, #642–#649, #654).
