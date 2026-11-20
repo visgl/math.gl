@@ -12,7 +12,7 @@ import {
   makeGeoArrowColumnFromGeometryRows,
   mapGeoArrowCoordinates,
   mapGeoArrowCoordinatesInto,
-  normalizeGeoArrowUnion,
+  sortGeoArrowUnionChildren,
   rewindGeoArrow,
   getGeoArrowColumnView,
   type GeoArrowDecodedGeometry
@@ -609,15 +609,13 @@ test('union normalization and conversion reject incompatible output families', (
     ...point,
     chunks: [{...union, children: [...union.children].reverse()}]
   };
-  const normalized = normalizeGeoArrowUnion(shuffled);
+  const normalized = sortGeoArrowUnionChildren(shuffled);
   expect(normalized).not.toBe(shuffled);
-  expect(normalizeGeoArrowUnion(normalized)).toBe(normalized);
+  expect(sortGeoArrowUnionChildren(normalized)).toBe(normalized);
   const nonMixed = {...point, encoding: 'geoarrow.point' as const};
-  expect(normalizeGeoArrowUnion(nonMixed)).toBe(nonMixed);
+  expect(sortGeoArrowUnionChildren(nonMixed)).toBe(nonMixed);
 
-  expect(() => convertGeoArrowColumn(point, {encoding: 'geoarrow.wkb'})).toThrow(
-    /serialized output/
-  );
+  expect(convertGeoArrowColumn(point, {encoding: 'geoarrow.wkb'}).encoding).toBe('geoarrow.wkb');
   const line = makeGeoArrowColumnFromGeometryRows([
     {
       type: 'LineString',

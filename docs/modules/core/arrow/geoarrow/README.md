@@ -85,6 +85,56 @@ constructing a new Arrow field or schema.
 These are CPU-side borrowing rules. GPU uploads and renderer-specific attributes depend on
 the consuming application.
 
+## Convert geometry for another consumer
+
+Use `convertGeoArrowColumn` to choose the output layout and encoding.
+
+| Goal | Options | Work involved |
+| --- | --- | --- |
+| Keep the geometry encoding and interleave coordinates | `{coordinateLayout: 'interleaved'}` | Pack separate ordinates where the layout changes. |
+| Send mixed geometries as native Arrow across batches | `{encoding: 'geoarrow.geometry', coordinateLayout: 'interleaved', unionChildren}` | Reuse compatible geometry storage. Create or remap selectors when needed. |
+| Send geometry to a WKB consumer | `{encoding: 'geoarrow.wkb'}` | Encode bytes per source chunk. Every batch uses a binary field. |
+
+For a stream, declare the ordered target children once. A point-only batch and a polygon-only
+batch then expose the same union type even though each batch contains an empty child. This
+example uses XY and interleaved Float64 storage for both children.
+
+```typescript
+import {convertGeoArrowColumn, GeoArrowBuilder} from '@math.gl/core/arrow';
+import type {GeoArrowDenseUnionChild} from '@math.gl/core/arrow';
+
+const unionChildren: readonly GeoArrowDenseUnionChild[] = [
+  {
+    encoding: 'geoarrow.point',
+    name: 'Point',
+    typeId: 1,
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    data: GeoArrowBuilder.build([], {encoding: 'geoarrow.point'}).chunks[0]
+  },
+  {
+    encoding: 'geoarrow.polygon',
+    name: 'Polygon',
+    typeId: 3,
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    data: GeoArrowBuilder.build([], {encoding: 'geoarrow.polygon'}).chunks[0]
+  }
+];
+
+const geometry = convertGeoArrowColumn(batchGeometry, {
+  encoding: 'geoarrow.geometry',
+  coordinateLayout: 'interleaved',
+  unionChildren
+});
+```
+
+Populate the target with every family and dimension you expect in the stream. An undeclared
+populated child or physical mismatch raises an error. Choose the desired coordinate precision and
+offset width explicitly when inputs vary. Keep each GeometryCollection child's nested union layout
+consistent with its target descriptor. `sortGeoArrowUnionChildren` only orders existing children
+by ID within a chunk. Use `unionChildren` when the schema must match across chunks.
+
 ## Geometry field metadata
 
 GeoArrow `edges: 'planar' | 'spherical'` metadata is preserved on the descriptor's
