@@ -299,10 +299,9 @@ Encodes native GeoArrow descriptors into WKB chunks.
 
 Encodes native GeoArrow descriptors into WKT chunks.
 
-Import these functions from `@math.gl/core/arrow`. They encode native descriptors into
-variable-width serialized descriptors using an exact measure/write pass per source chunk. WKB
-encoding traverses physical descriptors directly, retains chunk boundaries, and represents
-dense-union child nulls in the serialized validity bitmap. A column already in the requested
+Import these functions from `@math.gl/core/arrow`. Both encoders traverse physical descriptors
+directly, retain chunk boundaries, and represent dense-union child nulls in the serialized validity
+bitmap. WKT uses the semantic dimension of each native union row. A column already in the requested
 encoding is returned unchanged.
 
 Individual geometry parsing and formatting live in `@math.gl/core/arrow`. GeoArrow's four codec functions
