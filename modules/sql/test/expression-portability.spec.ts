@@ -81,9 +81,11 @@ test('predicate normalization binds parameters, preserves casts and produces the
   );
   expect(getExpressionColumns(ast)).toEqual(['x']);
   expect((ast as any).right.value).toBe(2n);
-  expect(() => columnarPredicateToExpression({op: '=', args: [{property: ['x', 'y']}, 1]})).toThrow(
-    'top-level'
-  );
+  expect(
+    getExpressionColumns(
+      columnarPredicateToExpression({op: '=', args: [{property: ['x', 'y']}, 1]})
+    )
+  ).toEqual(['x']);
   const date = new Date('2026-01-02');
   expect(columnarPredicateToExpression({op: '=', args: [{property: 'x'}, date]})).toMatchObject({
     right: {type: 'Literal', value: date}

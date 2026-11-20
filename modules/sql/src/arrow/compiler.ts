@@ -685,6 +685,7 @@ function bindBinary(ast: any, options: BindingOptions): Node {
   const comparison = ['==', '===', '!=', '!==', '<', '<=', '>', '>='].includes(op);
   const portableComparison = comparison && options.portablePredicate;
   let left = bind(ast.left, options, logical ? bool : undefined);
+  if (portableComparison && DataType.isNull(left.field.type)) return makeUnknownPredicate();
   let right: Node;
   if (portableComparison && ast.right.type === 'Literal') {
     right = bind(ast.right, options, left.field.type);
@@ -991,6 +992,8 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
   )
     throw new Error('IN requires a value and 1 to 4096 scalar literals');
   const argument = bind(arguments_[0], options);
+  if (options.portablePredicate && DataType.isNull(argument.field.type))
+    return makeUnknownPredicate();
   const utf8 = typeKey(argument.field.type) === 'utf8';
   const binary =
     DataType.isBinary(argument.field.type) || DataType.isFixedSizeBinary(argument.field.type);
@@ -1218,6 +1221,24 @@ function nestedVector(vector: Vector, type: DataType, active: Mask): Vector {
   );
 }
 
+/** Returns a nullable Boolean expression for a comparison against a missing field. */
+function makeUnknownPredicate(): Node {
+  return {
+    field: new Field('predicate', bool, true),
+    hasKernel: false,
+    prepare: () => ({get: () => null})
+  };
+}
+
+/** Represents a missing portable property with an Arrow Null type. */
+function makeMissingProperty(): Node {
+  return {
+    field: new Field('missing', new Null(), true),
+    hasKernel: false,
+    prepare: () => ({get: () => null, isNull: () => true})
+  };
+}
+
 /** Binds list indexing and named struct access against the input Arrow types. */
 function bindNestedExtract(
   name: 'LIST_EXTRACT' | 'STRUCT_EXTRACT',
@@ -1243,11 +1264,17 @@ function bindNestedExtract(
     )
       throw new Error('LIST_EXTRACT requires an integer index');
   } else {
-    if (!DataType.isStruct(inputType)) throw new Error('STRUCT_EXTRACT requires an Arrow Struct');
+    if (!DataType.isStruct(inputType)) {
+      if (options.portablePredicate) return makeMissingProperty();
+      throw new Error('STRUCT_EXTRACT requires an Arrow Struct');
+    }
     if (selector.type !== 'Literal' || typeof selector.value !== 'string')
       throw new Error('STRUCT_EXTRACT requires a literal field name');
     const field = inputType.children.find(candidate => candidate.name === selector.value);
-    if (!field) throw new Error(`Unknown Arrow struct field: ${selector.value}`);
+    if (!field) {
+      if (options.portablePredicate) return makeMissingProperty();
+      throw new Error(`Unknown Arrow struct field: ${selector.value}`);
+    }
     child = field;
   }
   const field = new Field(child.name, valueType(child.type), true, child.metadata);
