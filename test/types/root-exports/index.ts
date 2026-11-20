@@ -64,8 +64,7 @@ import {createCRSResolver as crsResolver} from '@math.gl/geospatial/crs';
 import {STAR_CATALOG} from '@math.gl/earth/sun/stars';
 // @ts-expect-error The old terrain leaf is not a published API.
 import {createTerrainMesh as removedMesh} from '@math.gl/geospatial/terrain/mesh';
-// @ts-expect-error The old geometry leaf is not a published API.
-import {TriangleBVH as removedBVH} from '@math.gl/geometry/spatial-index';
+import {TriangleBVH as spatialIndexBVH} from '@math.gl/geometry/spatial-index';
 void [
   mat4,
   mat4GetScaling,
@@ -118,7 +117,7 @@ void [
   crsResolver,
   STAR_CATALOG,
   removedMesh,
-  removedBVH
+  spatialIndexBVH
 ];
 const typeChecks: [
   GeometryInput?,

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {ProjectionDepthOptions} from '@math.gl/core';
+import type {ProjectionDepthOptions} from '@math.gl/core/matrix';
 
 /** Cartesian bounds and a Euclidean bound on displacement from any point in those bounds. */
 export type TerrainLodErrorBounds = {

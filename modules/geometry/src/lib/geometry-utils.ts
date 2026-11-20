@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {TypedArray, TypedArrayConstructor} from '@math.gl/core';
+import type {TypedArray, TypedArrayConstructor} from '@math.gl/core/matrix';
 import type {GeometryAttribute} from './geometry';
 
 type GeometryLike = {

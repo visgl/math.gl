@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Matrix4} from '@math.gl/core';
-import type {TypedArray, TypedArrayConstructor} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
+import type {TypedArray, TypedArrayConstructor} from '@math.gl/core/matrix';
 import {getAttributeValues, type GeometryInput, type GeometryAttribute} from './geometry';
 
 /** Geometry emitted by triangle mesh operations. */

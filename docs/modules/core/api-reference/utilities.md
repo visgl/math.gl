@@ -9,13 +9,13 @@ Configuration, numeric comparisons, angle conversions, and array helpers for cor
 ## Usage
 
 ```js
-import {config, equals} from '@math.gl/core';
+import {config, equals} from '@math.gl/core/matrix';
 ```
 
 Setting configuration
 
 ```js
-import {config} from '@math.gl/core';
+import {config} from '@math.gl/core/matrix';
 config.EPSILON = 1e-12;
 config.debug = true;
 config.printRowMajor = true;

@@ -16,7 +16,7 @@ The class support two representations of an oriented bounding box:
 Create an `OrientedBoundingBox` using a transformation matrix, a position where the box will be translated, and a scale.
 
 ```js
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 import {OrientedBoundingBox} from '@math.gl/geometry/culling';
 
 const center = new Vector3(1.0, 0.0, 0.0);

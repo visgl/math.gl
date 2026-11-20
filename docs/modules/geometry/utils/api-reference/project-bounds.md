@@ -5,7 +5,7 @@ corners, the sampling lattice includes edges, faces and interiors. No projection
 renderer or Arrow runtime is imported.
 
 ```ts
-import {projectBounds} from '@math.gl/geometry';
+import {projectBounds} from '@math.gl/geometry/processing';
 
 const result = projectBounds([minimum, maximum], {
   transform: position => projection.projectSync(position),

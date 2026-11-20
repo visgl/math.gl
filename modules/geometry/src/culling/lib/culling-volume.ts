@@ -8,7 +8,7 @@
 // See ../../../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
 /* eslint-disable */
-import {Vector3, assert, type ProjectionDepthOptions} from '@math.gl/core';
+import {Vector3, assert, type ProjectionDepthOptions} from '@math.gl/core/matrix';
 import {extractFrustumPlanes} from '../frustum-planes';
 import type {CullingResult} from '../constants';
 import {Plane} from './plane';

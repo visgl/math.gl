@@ -47,7 +47,9 @@ export type ArrowTableFunction = Readonly<{
   prototypes: readonly ArrowTableFunctionPrototype[];
   /** Resolves a schema-dependent overload from inferred arguments. Undefined fields need context. */
   resolvePrototype?(
-    fields: readonly (Field | undefined)[]
+    fields: readonly (Field | undefined)[],
+    /** Numeric literals known at bind time, indexed by argument position. */
+    numericLiterals?: readonly (number | undefined)[]
   ): ArrowTableFunctionPrototype | undefined;
 }>;
 

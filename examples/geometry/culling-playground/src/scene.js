@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {Matrix4, Vector3, toRadians} from '@math.gl/core';
+import {Matrix4, Vector3, toRadians} from '@math.gl/core/matrix';
 import {
   BoundingSphere,
   AxisAlignedBoundingBox,

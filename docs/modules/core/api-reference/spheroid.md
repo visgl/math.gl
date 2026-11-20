@@ -15,7 +15,7 @@ For three-radius geometry, surface normals and local frames, use
 [`Ellipsoid`](../../geospatial/api-reference/ellipsoid.md).
 
 ```ts
-import {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core';
+import {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core/matrix';
 
 const a = 6378137;
 const b = 6356752.314245179;

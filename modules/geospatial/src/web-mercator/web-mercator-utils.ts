@@ -5,9 +5,9 @@
 
 import {createMat4, transformVector, clamp, log2} from './math-utils';
 
-import {mat4} from '@math.gl/core';
-import {vec2} from '@math.gl/core';
-import {vec3} from '@math.gl/core';
+import {mat4} from '@math.gl/core/matrix';
+import {vec2} from '@math.gl/core/matrix';
+import {vec3} from '@math.gl/core/matrix';
 import {assert} from './assert';
 
 // CONSTANTS

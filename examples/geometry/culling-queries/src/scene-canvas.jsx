@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import React, {useEffect, useRef} from 'react';
-import {Matrix4, toRadians} from '@math.gl/core';
+import {Matrix4, toRadians} from '@math.gl/core/matrix';
 import {OrbitControls} from '@luma.gl/engine';
 
 /** Lightweight CPU perspective view for math examples. */

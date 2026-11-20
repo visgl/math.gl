@@ -7,7 +7,7 @@
 // Derived from Cesium under the Apache 2.0 license.
 // https://github.com/CesiumGS/cesium/blob/main/LICENSE.md
 
-import {Vector2, Vector3, assert, clamp, _MathUtils} from '@math.gl/core';
+import {Vector2, Vector3, assert, clamp, _MathUtils} from '@math.gl/core/matrix';
 
 type Vector4 = {x: number; y: number; z: number; w: number};
 

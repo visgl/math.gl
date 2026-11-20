@@ -1997,7 +1997,7 @@ each entry of `terminal`. Multiply `contributingCells[index]` by `cellArea`
 to get projected contributing area, including the cell itself.
 
 ```ts
-import {createTerrainDrainage, HeightField} from '@math.gl/geospatial';
+import {createTerrainDrainage, HeightField} from '@math.gl/geospatial/terrain';
 
 const field = new HeightField({
   width: 3,
@@ -2037,7 +2037,7 @@ heights across flats and terminates at the supplied outlets. A receiver of
 nodata, distinguishable through the returned field's validity mask.
 
 ```ts
-import {fillTerrainDepressions, HeightField} from '@math.gl/geospatial';
+import {fillTerrainDepressions, HeightField} from '@math.gl/geospatial/terrain';
 
 const basin = new HeightField({
   width: 3,
@@ -2064,7 +2064,7 @@ a repeated endpoint. Both ring windings are supported. For concave rings, holes
 and disjoint polygon regions, prepare an immutable polygon set as described below.
 
 ```ts
-import {createTerrainCutoutSkirts, splitTerrainMesh} from '@math.gl/geospatial';
+import {createTerrainCutoutSkirts, splitTerrainMesh} from '@math.gl/geospatial/terrain';
 
 const cut = splitTerrainMesh(mesh, [[10, 10], [30, 10], [30, 25], [10, 25]]);
 const raised = createTerrainCutoutSkirts(cut, {
@@ -2108,7 +2108,7 @@ import {
   accumulateTerrainWatersheds,
   fillTerrainDepressions,
   getTerrainCellMetrics
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 // field is a cell-registered HeightField. outlet is a valid row-major index.
 const {receiver} = fillTerrainDepressions(field, {outlets: [outlet]});
@@ -2133,7 +2133,7 @@ A cut coinciding with a tile seam receives paired walls only where both the
 patch and remainder actually exist. Missing tiles and nodata remain uncovered.
 
 ```ts
-import {splitTerrainMeshTiles, createTerrainCutoutSkirts} from '@math.gl/geospatial';
+import {splitTerrainMeshTiles, createTerrainCutoutSkirts} from '@math.gl/geospatial/terrain';
 
 // All positions and the polygon use one local Cartesian coordinate frame.
 const cut = splitTerrainMeshTiles(residentMeshes, polygon);
@@ -2174,7 +2174,7 @@ common local frame, and a nonnegative integer revision. Increment the revision
 Treat returned arrays and cached inputs as read-only within a revision.
 
 ```ts
-import {updateTerrainTileCutouts, createTerrainCutoutSkirts} from '@math.gl/geospatial';
+import {updateTerrainTileCutouts, createTerrainCutoutSkirts} from '@math.gl/geospatial/terrain';
 
 let result = updateTerrainTileCutouts(residents, polygon);
 // Edit only an interior sample, or reconcile changed seam profiles first.
@@ -2235,7 +2235,7 @@ same small floating-point allowance at the inclusive cap boundary.
 import {
   createGeographicTerrainCutoutFrame, projectGeographicTerrainCutout,
   unprojectGeographicTerrainCutout, splitTerrainMesh
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 const frame = createGeographicTerrainCutoutFrame({center: [180, 0]});
 const positions = projectGeographicTerrainCutout(longitudeLatitudeHeight, frame);
@@ -2281,7 +2281,7 @@ pulling in polygon validation or winding classification.
 import {
   prepareTerrainCutoutPolygons, splitTerrainMesh, updateTerrainTileCutouts,
   createTerrainCutoutSkirts
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 const region = prepareTerrainCutoutPolygons([
   {outer: islandBoundary, holes: [lakeBoundary]},

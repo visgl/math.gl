@@ -4984,6 +4984,7 @@ __metadata:
     cdt2d: "npm:1.0.0"
     polygon-clipping: "npm:0.15.7"
     proj4: "npm:2.22.0"
+    robust-predicates: "npm:^3.0.2"
   peerDependencies:
     apache-arrow: ">=17.0.0"
   peerDependenciesMeta:

@@ -9,7 +9,7 @@ is absent from a class or when callers own the output buffers.
 Import namespaces or individual operations from the package root:
 
 ```js
-import {Matrix4, mat4, mat4FromRotationTranslationScale} from '@math.gl/core';
+import {Matrix4, mat4, mat4FromRotationTranslationScale} from '@math.gl/core/matrix';
 
 const rotation = [0, 0, 0, 1]; // Quaternion: x, y, z, w
 const translation = [1, 2, 3];
@@ -60,7 +60,7 @@ Normals need the inverse transpose of the linear part of the model matrix, espec
 with nonuniform scale. Copying its upper-left 3x3 block is not equivalent.
 
 ```js
-import {mat3NormalFromMat4, vec3TransformMat3, vec3Normalize} from '@math.gl/core';
+import {mat3NormalFromMat4, vec3TransformMat3, vec3Normalize} from '@math.gl/core/matrix';
 
 const normalMatrix = new Float64Array(9);
 const normal = [0, 0, 1];

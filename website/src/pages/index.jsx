@@ -29,8 +29,8 @@ export default function IndexPage() {
               of the world.
             </h1>
             <p className={styles.heroLead}>
-              From vectors and matrices to coordinate systems and planetary geometry. Composable
-              TypeScript tools for the world you’re building.
+              From matrices to coordinate systems and planetary geometry. Composable tools for the
+              world you are building.
             </p>
             <div className={styles.heroActions}>
               <a className={styles.primaryAction} href={`${baseUrl}docs`}>

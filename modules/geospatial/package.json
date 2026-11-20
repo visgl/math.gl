@@ -622,7 +622,8 @@
     "@math.gl/sql": "5.0.0-beta.12",
     "@math.gl/tasks": "5.0.0-beta.12",
     "cdt2d": "1.0.0",
-    "polygon-clipping": "0.15.7"
+    "polygon-clipping": "0.15.7",
+    "robust-predicates": "^3.0.2"
   },
   "devDependencies": {
     "@turf/area": "^7.2.0",

@@ -14,7 +14,7 @@ entry, absent from the core root.
 import {
   createLocalFrameBasis, eastNorthUpBasis, localToFixed, fixedToLocal,
   localFrameToMatrix
-} from '@math.gl/core';
+} from '@math.gl/core/matrix';
 
 const basis = createLocalFrameBasis(); // Allocate once, reuse for many points.
 const velocity = {x: 0.01, y: 0.02, z: 0.03}; // ENU metres/year.

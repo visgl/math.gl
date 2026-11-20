@@ -13,7 +13,7 @@ import {
   safeMod,
   toDegrees,
   toRadians
-} from '@math.gl/core';
+} from '@math.gl/core/matrix';
 import type {ExpressionFunctionRegistry} from './function-registry';
 
 /**

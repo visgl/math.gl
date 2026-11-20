@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {TypedArray} from '@math.gl/core';
+import type {TypedArray} from '../../types';
+
 /** Standalone decoded geometry expressed as tagged JavaScript coordinate arrays. */
 export type GeoArrowDecodedGeometry =
   | {type: 'Point'; coordinates: readonly number[]}
@@ -12,6 +13,9 @@ export type GeoArrowDecodedGeometry =
   | {type: 'MultiLineString'; coordinates: readonly (readonly (readonly number[])[])[]}
   | {type: 'MultiPolygon'; coordinates: readonly (readonly (readonly (readonly number[])[])[])[]}
   | {type: 'GeometryCollection'; geometries: readonly GeoArrowDecodedGeometry[]};
+
+/** @deprecated Use GeoArrowDecodedGeometry. */
+export type GeoArrowGeometryValue = GeoArrowDecodedGeometry;
 
 /** GeoArrow concrete, mixed, bounding-box, and serialized encodings. */
 export type GeoArrowEncoding =

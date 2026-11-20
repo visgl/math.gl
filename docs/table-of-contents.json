@@ -36,14 +36,12 @@
   },
   {
     "type": "category",
-    "label": "Modules",
+    "label": "Packages",
     "items": [
       {
         "type": "category",
-        "label": "Core",
+        "label": "@math.gl/core",
         "items": [
-          "modules/core/matrix",
-          "modules/core/color",
           {
             "type": "category",
             "label": "Guide",
@@ -78,7 +76,21 @@
           },
           {
             "type": "category",
-            "label": "@math.gl/core",
+            "label": "@math.gl/core/types",
+            "items": [
+              "modules/core/types/api-reference/array-types",
+              "modules/core/types/api-reference/bounds",
+              "modules/core/types/api-reference/bounds2d",
+              "modules/core/types/api-reference/bounds3d"
+            ],
+            "link": {
+              "type": "doc",
+              "id": "modules/core/types/README"
+            }
+          },
+          {
+            "type": "category",
+            "label": "@math.gl/core/matrix",
             "items": [
               "modules/core/api-reference/euler",
               "modules/core/api-reference/math-array",
@@ -100,32 +112,17 @@
             ],
             "link": {
               "type": "doc",
-              "id": "modules/core/README"
+              "id": "modules/core/matrix"
             }
           },
           {
             "type": "category",
-            "label": "@math.gl/core/types",
-            "items": [
-              "modules/core/types/api-reference/array-types",
-              "modules/core/types/api-reference/bounds",
-              "modules/core/types/api-reference/bounds2d",
-              "modules/core/types/api-reference/bounds3d"
-            ],
-            "link": {
-              "type": "doc",
-              "id": "modules/core/types/README"
-            }
-          },
-          {
-            "type": "category",
-            "label": "Arrow",
+            "label": "@math.gl/core/arrow",
             "link": {
               "type": "doc",
               "id": "modules/core/arrow/README"
             },
             "items": [
-              "modules/core/arrow/utf8/README",
               {
                 "type": "category",
                 "label": "Arrow utilities",
@@ -162,7 +159,9 @@
                 ]
               }
             ]
-          }
+          },
+          "modules/core/arrow/utf8/README",
+          {"type": "doc", "id": "modules/core/color", "label": "@math.gl/core/color"}
         ],
         "link": {
           "type": "doc",
@@ -171,19 +170,17 @@
       },
       {
         "type": "category",
-        "label": "Geometry",
+        "label": "@math.gl/geometry",
         "items": [
           {
             "type": "doc",
-            "id": "modules/geometry/spatial-index/README",
+            "id": "modules/geometry/lighting/README",
             "label": "Guide"
           },
           {
             "type": "category",
-            "label": "@math.gl/geometry",
+            "label": "@math.gl/geometry/primitives",
             "items": [
-              "modules/geometry/api-reference/geometry",
-              "modules/geometry/api-reference/hinge-tree",
               "modules/geometry/api-reference/box-geometry",
               "modules/geometry/api-reference/cube-geometry",
               "modules/geometry/api-reference/capsule-geometry",
@@ -195,11 +192,12 @@
               "modules/geometry/api-reference/ico-sphere-geometry",
               "modules/geometry/api-reference/prism-geometry",
               "modules/geometry/api-reference/ring-geometry",
-              "modules/geometry/api-reference/parametric"
+              "modules/geometry/api-reference/parametric",
+              "modules/geometry/api-reference/hinge-tree"
             ],
             "link": {
               "type": "doc",
-              "id": "modules/geometry/README"
+              "id": "modules/geometry/api-reference/geometry"
             }
           },
           {
@@ -263,7 +261,7 @@
           },
           {
             "type": "category",
-            "label": "@math.gl/geometry/utils",
+            "label": "@math.gl/geometry/processing",
             "items": [
               "modules/geometry/utils/api-reference/geometry-utils",
               "modules/geometry/utils/api-reference/mesh-processing",
@@ -275,7 +273,7 @@
               "id": "modules/geometry/utils/README"
             }
           },
-          "modules/geometry/lighting/README"
+          "modules/geometry/spatial-index/README"
         ],
         "link": {
           "type": "doc",
@@ -284,7 +282,7 @@
       },
       {
         "type": "category",
-        "label": "Geospatial",
+        "label": "@math.gl/geospatial",
         "items": [
           {
             "type": "category",
@@ -365,40 +363,84 @@
           },
           {
             "type": "category",
-            "label": "@math.gl/geospatial",
+            "label": "Ellipsoids",
             "items": [
-              "modules/geospatial/api-reference/ellipsoid",
               "modules/geospatial/api-reference/ellipsoid-metrics",
+              "modules/geospatial/api-reference/triaxial-geometry"
+            ],
+            "link": {
+              "type": "doc",
+              "id": "modules/geospatial/api-reference/ellipsoid"
+            }
+          },
+          {
+            "type": "category",
+            "label": "Geodesics",
+            "items": [
               "modules/geospatial/api-reference/geodesic-polygon",
               "modules/geospatial/api-reference/ellipsoid-rhumb",
               "modules/geospatial/api-reference/geodesic-intersections",
-              "modules/geospatial/api-reference/globe-queries",
-              "modules/geospatial/api-reference/subdivide-globe-mesh",
-              "modules/geospatial/api-reference/geodesic-path",
               "modules/geospatial/api-reference/subdivide-geodesic-polyline",
               "modules/geospatial/api-reference/rhumb-path",
-              "modules/geospatial/api-reference/geographic-seams",
+              "modules/geospatial/api-reference/ellipsoid-geodesic-exact",
+              "modules/geospatial/api-reference/geodesic-exact-area-qualification",
+              "modules/geospatial/api-reference/geodesic-line-buffer",
+              "modules/geospatial/api-reference/geodesic-g89-qualification"
+            ],
+            "link": {
+              "type": "doc",
+              "id": "modules/geospatial/api-reference/geodesic-path"
+            }
+          },
+          {
+            "type": "category",
+            "label": "Globe geometry",
+            "items": [
+              "modules/geospatial/api-reference/subdivide-globe-mesh",
+              "modules/geospatial/api-reference/make-obb-from-region",
+              "modules/geospatial/api-reference/lng-lat-rectangle"
+            ],
+            "link": {
+              "type": "doc",
+              "id": "modules/geospatial/api-reference/globe-queries"
+            }
+          },
+          {
+            "type": "category",
+            "label": "Map seams",
+            "items": [
               "modules/geospatial/api-reference/latitude-geographic-cuts",
               "modules/geospatial/api-reference/geographic-atlas",
-              "modules/geospatial/api-reference/global-geographic-cuts",
-              "modules/geospatial/api-reference/geographic-tiles",
-              "modules/geospatial/api-reference/tile-matrix",
+              "modules/geospatial/api-reference/global-geographic-cuts"
+            ],
+            "link": {
+              "type": "doc",
+              "id": "modules/geospatial/api-reference/geographic-seams"
+            }
+          },
+          {
+            "type": "category",
+            "label": "Tiles",
+            "items": [
+              "modules/geospatial/api-reference/tile-matrix"
+            ],
+            "link": {
+              "type": "doc",
+              "id": "modules/geospatial/api-reference/geographic-tiles"
+            }
+          },
+          {
+            "type": "category",
+            "label": "Coordinates and frames",
+            "items": [
               "modules/geospatial/api-reference/ellipsoid-tangent-plane",
               "modules/geospatial/api-reference/local-reference-frame",
               "modules/geospatial/api-reference/local-frame-qualification",
-              "modules/geospatial/api-reference/ellipsoid-geodesic-exact",
-              "modules/geospatial/api-reference/geodesic-exact-area-qualification",
-              "modules/geospatial/api-reference/triaxial-geometry",
-              "modules/geospatial/api-reference/coordinate-utilities",
-              "modules/geospatial/api-reference/geodesic-line-buffer",
-              "modules/geospatial/api-reference/geodesic-g89-qualification",
-              "modules/geospatial/api-reference/lng-lat-rectangle",
-              "modules/geospatial/api-reference/make-obb-from-region",
               "modules/geospatial/api-reference/helpers"
             ],
             "link": {
               "type": "doc",
-              "id": "modules/geospatial/README"
+              "id": "modules/geospatial/api-reference/coordinate-utilities"
             }
           },
           {
@@ -418,6 +460,7 @@
             "type": "category",
             "label": "@math.gl/geospatial/projection",
             "items": [
+              "modules/geospatial/projection/types",
               "modules/geospatial/projection/api-reference/projection",
               "modules/geospatial/projection/api-reference/projection-engine",
               "modules/geospatial/projection/api-reference/projection-transform",
@@ -446,25 +489,15 @@
           },
           {
             "type": "category",
-            "label": "Web Mercator",
+            "label": "@math.gl/geospatial/web-mercator",
             "items": [
               {
                 "type": "doc",
                 "id": "modules/geospatial/web-mercator/developer-guide/web-mercator-coordinates",
                 "label": "Guide"
               },
-              {
-                "type": "category",
-                "label": "@math.gl/geospatial/web-mercator",
-                "items": [
-                  "modules/geospatial/web-mercator/api-reference/web-mercator-utils",
-                  "modules/geospatial/web-mercator/api-reference/web-mercator-viewport"
-                ],
-                "link": {
-                  "type": "doc",
-                  "id": "modules/geospatial/web-mercator/README"
-                }
-              }
+              "modules/geospatial/web-mercator/api-reference/web-mercator-utils",
+              "modules/geospatial/web-mercator/api-reference/web-mercator-viewport"
             ],
             "link": {
               "type": "doc",
@@ -479,17 +512,12 @@
       },
       {
         "type": "category",
-        "label": "Earth",
+        "label": "@math.gl/earth",
         "items": [
           {
             "type": "doc",
             "id": "modules/earth/geoid/developer-guide/geospatial-models",
             "label": "Guide"
-          },
-          {
-            "type": "doc",
-            "id": "modules/earth/README",
-            "label": "@math.gl/earth"
           },
           {
             "type": "category",
@@ -551,7 +579,7 @@
       },
       {
         "type": "category",
-        "label": "DGGS",
+        "label": "@math.gl/dggs 🧪",
         "items": [
           {
             "type": "doc",
@@ -583,7 +611,7 @@
       },
       {
         "type": "category",
-        "label": "SQL",
+        "label": "@math.gl/sql",
         "link": {
           "type": "doc",
           "id": "modules/sql/README"
@@ -614,7 +642,7 @@
       },
       {
         "type": "category",
-        "label": "Tasks",
+        "label": "@math.gl/tasks",
         "link": {
           "type": "doc",
           "id": "modules/tasks/README"

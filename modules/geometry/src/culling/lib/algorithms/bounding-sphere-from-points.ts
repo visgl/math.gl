@@ -7,7 +7,7 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See ../../../../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 import {BoundingSphere} from '../bounding-volumes/bounding-sphere';
 
 /* eslint-disable */

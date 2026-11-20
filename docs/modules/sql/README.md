@@ -16,6 +16,24 @@ npm install @math.gl/sql apache-arrow
 Apache Arrow 17 or later is required for execution. The `/parser` and `/expressions` entry
 points can be used without Arrow; it is an optional peer dependency for those uses.
 
+## Package entry points
+
+| Import path | Use it to |
+| --- | --- |
+| `@math.gl/sql` | Run [queries over Arrow tables](queries.md), compute columns, or aggregate record batches. |
+| `@math.gl/sql/parser` | [Parse SQL](parser/README.md) into expressions, predicates, or queries without executing it. |
+| `@math.gl/sql/expressions` | [Evaluate portable expressions](expressions.md) against JavaScript objects. |
+| `@math.gl/sql/arrow` | [Compile expressions and predicates](arrow/README.md) against an Arrow schema for reuse across batches. |
+| `@math.gl/sql/worker` | Run structured queries and expressions [off the calling thread](workers.md). |
+| `@math.gl/sql/math-functions` | Register [numeric SQL functions](math-functions/README.md) such as `SIN` and `SQRT`. |
+| `@math.gl/sql/color-functions` | Register [color functions](color-functions/README.md) for construction, conversion, and mapping. |
+| `@math.gl/sql/scales` | [Parse scale expressions, resolve domains, and evaluate scales](scales/README.md) on Arrow columns. |
+
+Worker bootstrap entry points `@math.gl/sql/worker-entry.js` and
+`@math.gl/sql/query-worker-entry.js` start their respective worker runtimes. See
+[Workers](workers.md) for setup. The test-only entry point
+`@math.gl/sql/scales/conformance` provides shared fixture cases for scale implementations.
+
 ## Run a query
 
 ```ts
@@ -55,27 +73,15 @@ Direct column projections can share input buffers. Filtering, sorting, joins, an
 columns may allocate results. See [query execution](queries.md) for structured queries,
 record-batch streaming, and progressive aggregates.
 
-## Choose an entry point
-
-| Import | Purpose |
-| --- | --- |
-| `@math.gl/sql` | Execute SQL or structured queries, replace computed columns, and aggregate tables or streams. |
-| [`@math.gl/sql/parser`](parser/README.md) | Parse SQL into expressions, predicates, or query representations without executing it. |
-| [`@math.gl/sql/arrow`](arrow/README.md) | Compile expressions and predicates against an Arrow schema. |
-| [`@math.gl/sql/worker`](workers.md) | Execute structured queries and expressions in workers. |
-| [`@math.gl/sql/math-functions`](math-functions/README.md) | Register typed numeric functions such as `SIN` and `SQRT`. |
-| [`@math.gl/sql/color-functions`](color-functions/README.md) | Register color construction, conversion, and mapping functions. |
-| [`@math.gl/sql/scales`](scales/README.md) | Define portable visualization scales and resolve legend descriptors. |
-| [`@math.gl/sql/expressions`](expressions.md) | Parse and evaluate portable expressions against JavaScript objects. |
-
 ## Supported SQL
 
-These capabilities describe **`queryArrowSQL`**, rather than every parser entry point.
+This table describes the SQL that `queryArrowSQL` executes.
 
 | Capability | Support and limits |
 | --- | --- |
 | Projection and filtering | Columns, aliases, computed expressions, and Boolean `WHERE` expressions. |
 | Joins | One inner equality join per SELECT; qualify both join keys with table names or aliases. |
+| Table functions | Standalone `FROM function(...)` and correlated `CROSS JOIN LATERAL` or `LEFT JOIN LATERAL … ON TRUE`. See [table functions](queries.md#table-function-declarations). |
 | Aggregation | Column-based `GROUP BY` and top-level aggregate calls such as `SUM(quantity)` and `COUNT(*)`. |
 | Sorting | `ORDER BY` output columns or aliases; stable ordering with nulls last by default. |
 | Pagination | Nonnegative integer `OFFSET` and `LIMIT`. |
@@ -107,11 +113,10 @@ const roots = queryArrowSQL(
 );
 ```
 
-See [spatial SQL functions](arrow/spatial-functions.md) to derive geometry and measurement columns.
-
-See [typed functions](arrow/README.md#named-table-functions) for application-defined functions
-and [color functions](color-functions/README.md) for visualization-oriented queries.
-Geospatial and DGGS libraries remain in their owning packages.
+See [function packages and column metadata](queries.md#function-packages-and-column-metadata)
+to write scalar, aggregate, and table functions. For functions supplied by other math.gl
+packages, see [spatial SQL](arrow/spatial-functions.md) and
+[DGGS function libraries](api-reference/dggs-function-libraries.md).
 
 ## Execution choices
 
@@ -125,7 +130,3 @@ Streaming queries do not make joins, sorting, or arbitrary relational SQL increm
 The synchronous engine checks cancellation during execution, but a worker is needed to keep
 long-running work off the UI thread. Registered functions run application code; evaluation
 is not a security sandbox.
-
-## Scales
-
-Import SQL scale parsing, domain resolution, compilation, and numeric/color Arrow evaluation from `@math.gl/sql/scales`. Reusable color and LUT algorithms are available from `@math.gl/core/color`.
