@@ -10,7 +10,7 @@ a native Arrow table. Supply the input table directly. If the SELECT names a sou
 with `FROM`, the caller resolves that name before invoking the executor.
 
 ```ts
-import {queryArrowTable} from '@math.gl/sql';
+import {queryArrowTable} from '@math.gl/sql/query';
 import {parseSQLQuery} from '@math.gl/sql/parser';
 
 const query = parseSQLQuery(
@@ -57,7 +57,7 @@ top-level aggregate calls, ordering by output columns, and UNION ALL with matchi
 output schemas. Trailing ORDER BY, OFFSET, and LIMIT apply to the combined result.
 
 ```ts
-import {queryArrowSQL} from '@math.gl/sql';
+import {queryArrowSQL} from '@math.gl/sql/query';
 
 const totals = queryArrowSQL(
   'SELECT category, SUM(quantity) AS units FROM orders GROUP BY category ORDER BY units DESC',
@@ -94,7 +94,7 @@ the limit closes the input iterator. Supply the schema up front, including
 for empty inputs. Grouping, sorting, joins and unions use the table engine.
 
 ```ts
-import {queryArrowTableInBatches} from '@math.gl/sql';
+import {queryArrowTableInBatches} from '@math.gl/sql/query';
 
 for await (const batch of queryArrowTableInBatches(inputBatches, schema, {
   select: [{column: 'value', as: 'measurement'}],
@@ -136,7 +136,7 @@ Compile named reductions against a schema, then update the same accumulator as A
 arrive. Each call to `result()` returns a snapshot of the current scalar values.
 
 ```ts
-import {compileArrowAggregates} from '@math.gl/sql';
+import {compileArrowAggregates} from '@math.gl/sql/query';
 
 const plan = compileArrowAggregates({
   rows: {operation: 'COUNT'},
@@ -195,7 +195,7 @@ Pass exported packages directly to reuse them across calls.
 
 ```ts
 import {tableFromArrays} from 'apache-arrow';
-import {queryArrowSQLWithMetadata} from '@math.gl/sql';
+import {queryArrowSQLWithMetadata} from '@math.gl/sql/query';
 import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
 import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 
@@ -258,7 +258,7 @@ The transform composes with the built-in scale and the result carries the
 resolved scale metadata for a legend.
 
 ```ts
-import {queryArrowSQLWithMetadata} from '@math.gl/sql';
+import {queryArrowSQLWithMetadata} from '@math.gl/sql/query';
 import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 
 const {table, columnMetadata} = queryArrowSQLWithMetadata(
