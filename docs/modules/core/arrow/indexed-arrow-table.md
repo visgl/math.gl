@@ -101,6 +101,9 @@ Array-like search helpers over visible rows.
 
 #### `materializeArrowTable()`
 
+Each output record batch retains metadata from the source batch it gathers, even when the
+selection revisits a source batch.
+
 Copies the visible rows into a new concrete Arrow table. Physical row gathering preserves union child IDs, nested layouts, and exact scalar
 storage without decoding values. Consecutive selections from the same input batch are
 compacted into one output batch. Dictionaries and out-of-line view buffers are copied

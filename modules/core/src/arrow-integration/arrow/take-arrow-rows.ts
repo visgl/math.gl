@@ -5,6 +5,7 @@
 import * as arrow from 'apache-arrow';
 import type {Buffers} from 'apache-arrow/data';
 import {createArrowData, getArrowVariadicBuffers} from './arrow-data';
+import {createRecordBatchWithMetadata, getRecordBatchMetadata} from './arrow-record-batch';
 import {splitArrowBuffers} from './split-arrow-buffers';
 
 /** Shared ownership for dictionaries and out-of-line view buffers in one snapshot. */
@@ -23,7 +24,7 @@ type ArrowRowRun = {
   indexes: number[];
 };
 
-/** Materializes selected physical rows without decoding union tags or scalar values. */
+/** Materializes selected physical rows without decoding union tags or scalar values, retaining each source batch’s metadata. */
 export function takeArrowTableRows<T extends arrow.TypeMap>(
   arrowTable: arrow.Table<T>,
   indexes: Int32Array
@@ -61,7 +62,7 @@ export function takeArrowTableRows<T extends arrow.TypeMap>(
       undefined,
       children
     );
-    return new arrow.RecordBatch(arrowTable.schema, data);
+    return createRecordBatchWithMetadata(arrowTable.schema, data, getRecordBatchMetadata(source));
   });
   return new arrow.Table(arrowTable.schema, batches);
 }
