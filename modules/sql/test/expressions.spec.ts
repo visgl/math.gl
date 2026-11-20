@@ -363,6 +363,8 @@ test('portable time and duration predicates compare physical values exactly', ()
       options
     ).evaluate(input)
   ]).toEqual([false, true, null]);
+  for (const column of ['seconds', 'micros', 'duration'])
+    expect(() => values(`cast(${column}, "utf8")`, input)).toThrow('Temporal CAST requires');
 });
 
 test('integer bounds and exact argument types are checked before truncation', () => {
