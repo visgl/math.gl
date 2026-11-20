@@ -183,7 +183,12 @@ export function planarBounds(geometry: WellKnownGeometry): number[] | null {
 export function planarEnvelope(geometry: WellKnownGeometry): WellKnownGeometry {
   const bounds = planarBounds(geometry);
   if (!bounds) return geometry;
-  const [x0, y0, x1, y1] = bounds as [number, number, number, number];
+  return envelopeFromBounds(bounds);
+}
+
+/** Creates the narrowest geometry that covers a finite XY extent. */
+export function envelopeFromBounds(bounds: readonly number[]): WellKnownGeometry {
+  const [x0, y0, x1, y1] = bounds as readonly [number, number, number, number];
   if (x0 === x1 && y0 === y1) return {type: 'Point', coordinates: [x0, y0]};
   if (x0 === x1 || y0 === y1) {
     return {

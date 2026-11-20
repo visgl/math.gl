@@ -21,7 +21,8 @@ import {
   writeWKB
 } from '@math.gl/core/arrow';
 import {queryArrowSQL} from '@math.gl/sql';
-import {POSTGIS_SPATIAL_FUNCTIONS, TURF_FUNCTIONS} from '@math.gl/geospatial/turf/expressions';
+import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
+import {TURF_FUNCTIONS} from '@math.gl/geospatial/turf-functions';
 
 /** Marks a native or WKB vector with the extension and optional CRS used by SQL binding. */
 function geometryField(name: string, vector: Vector, encoding = 'wkb', metadata?: object): Field {
@@ -821,4 +822,68 @@ test('repeated-point removal preserves empty multipart line members', () => {
       []
     ]
   });
+});
+
+test('native point access honors sliced validity, active rows, and XYM in both coordinate layouts', () => {
+  for (const coordinateLayout of ['interleaved', 'separated'] as const) {
+    const g = makeArrowVectorFromGeoArrowColumn(
+      makeGeoArrowColumnFromGeometryRows(
+        [
+          {type: 'Point', coordinates: [100, 100, 100]},
+          null,
+          {type: 'Point', coordinates: [1, 2, 3]},
+          {type: 'Point', coordinates: []},
+          {type: 'Point', coordinates: [4, 5, 6]}
+        ],
+        {dimension: 'xym', coordinateLayout}
+      )
+    );
+    const id = vectorFromArray([0, 1, 2, 3, 4], new Int32());
+    const table = new Table(
+      new Schema([geometryField('g', g, 'point'), new Field('id', id.type)]),
+      {
+        g,
+        id
+      }
+    );
+    const sliced = table.slice(1, 3).concat(table.slice(3));
+    const result = select(
+      'SELECT CASE WHEN id < 4 THEN ST_M(g) ELSE 0 END AS m, ST_Z(g) AS z, ST_X(g) AS x FROM features',
+      sliced
+    );
+    expect([...result.getChild('m')!]).toEqual([null, 3, null, 0]);
+    expect([...result.getChild('z')!]).toEqual([null, null, null, null]);
+    expect([...result.getChild('x')!]).toEqual([null, 1, null, 4]);
+  }
+});
+
+test('native envelopes retain empty types and extent honors sliced and filtered rows', () => {
+  const shapes = [
+    'LINESTRING(100 100,110 110)',
+    null,
+    'LINESTRING EMPTY',
+    'LINESTRING(2 8,2 3)',
+    'LINESTRING(-4 5,4 1)'
+  ];
+  const g = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows(shapes.map(shape => (shape ? parseWKT(shape) : null)))
+  );
+  const id = vectorFromArray([0, 1, 2, 3, 4], new Int32());
+  const table = new Table(
+    new Schema([geometryField('g', g, 'linestring'), new Field('id', id.type)]),
+    {
+      g,
+      id
+    }
+  );
+  const sliced = table.slice(1, 3).concat(table.slice(3));
+  const native = select('SELECT ST_Envelope(g) AS box FROM features', sliced);
+  const bytes = wkb(...shapes.slice(1));
+  const serialized = select(
+    'SELECT ST_Envelope(g) AS box FROM features',
+    new Table(new Schema([geometryField('g', bytes)]), {g: bytes})
+  );
+  expect([...native.getChild('box')!]).toEqual([...serialized.getChild('box')!]);
+  const extent = select('SELECT ST_Extent(g) AS box FROM features WHERE id < 4', sliced);
+  expect(Array.from(extent.getChild('box')!.get(0))).toEqual([2, 3, 2, 8]);
 });

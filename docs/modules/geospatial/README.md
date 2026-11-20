@@ -79,6 +79,8 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 | `@math.gl/geospatial` | [Oblique ellipsoidal visibility and shared cut graphs](./api-reference/geographic-atlas.md) |
 | `@math.gl/geospatial` | [Ellipsoidal/rhumb latitude-domain clipping and adaptive projection](./api-reference/latitude-geographic-cuts.md) |
 | `@math.gl/geospatial` | [Geographic tile queries](./api-reference/geographic-tiles.md) and [tile-matrix utilities](./api-reference/tile-matrix.md) |
+| `@math.gl/geospatial/st-functions` | [PostGIS-style functions for Arrow SQL](../sql/arrow/spatial-functions.md) |
+| `@math.gl/geospatial/turf-functions` | [Turf function declarations and the Arrow SQL adapter](../sql/arrow/README.md#turf-functions) |
 | `@math.gl/geospatial/tasks` | [Map preparation and coordinate projection tasks](../tasks/developer-guide/task-runner.md) |
 
 ## Classes

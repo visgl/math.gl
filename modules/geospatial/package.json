@@ -570,10 +570,20 @@
       "import": "./dist/turf.js",
       "require": "./dist/turf.cjs"
     },
+    "./st-functions": {
+      "types": "./dist/st-functions.d.ts",
+      "import": "./dist/st-functions.js",
+      "require": "./dist/st-functions.cjs"
+    },
+    "./turf-functions": {
+      "types": "./dist/turf-functions.d.ts",
+      "import": "./dist/turf-functions.js",
+      "require": "./dist/turf-functions.cjs"
+    },
     "./turf/expressions": {
-      "types": "./dist/turf/expressions.d.ts",
-      "import": "./dist/turf/expressions.js",
-      "require": "./dist/turf/expressions.cjs"
+      "types": "./dist/turf-expressions.d.ts",
+      "import": "./dist/turf-expressions.js",
+      "require": "./dist/turf-expressions.cjs"
     },
     "./maps/presets": {
       "types": "./dist/maps/presets.d.ts",

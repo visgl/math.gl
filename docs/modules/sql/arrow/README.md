@@ -239,14 +239,14 @@ cancellation. A single large batch or custom synchronous kernel cannot be interr
 Use the [spatial SQL function libraries](spatial-functions.md) to register
 PostGIS-aligned geometry functions or Turf functions for computed columns.
 
-`@math.gl/geospatial/turf/expressions` exports `createTurfArrowFunction({name, arguments, result, evaluate})`.
+`@math.gl/geospatial/turf-functions` exports `createTurfArrowFunction({name, arguments, result, evaluate})`.
 Pass the exact GeoArrow argument fields and a nullable Float64 or Bool result. Import only the Turf
 functions you use; the adapter itself imports no Turf implementations.
 
 ```ts
 import {Field, Float64} from 'apache-arrow';
 import {area, distance} from '@math.gl/geospatial/turf';
-import {createTurfArrowFunction} from '@math.gl/geospatial/turf/expressions';
+import {createTurfArrowFunction} from '@math.gl/geospatial/turf-functions';
 const functions = [
   createTurfArrowFunction({
     name: 'area',
