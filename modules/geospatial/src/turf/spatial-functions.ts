@@ -10,6 +10,7 @@ import {
   FixedSizeList,
   Float64,
   Int32,
+  Utf8,
   vectorFromArray,
   type Vector
 } from 'apache-arrow';
@@ -40,6 +41,7 @@ import {planarIntersects} from './planar-intersects';
 import {lineLocatePoint, lineSubstring} from './linear-referencing';
 import {normalizeCRSIdentifier} from '../crs/crs-identifier';
 import {EPSG3857ToLngLat, EPSG4326ToEPSG3857} from '../web-mercator/mercator-meters';
+import {vertexCount, memberCount, geometryMember} from './geometry-inspection';
 import {
   planarArea,
   planarBounds,
@@ -73,27 +75,41 @@ const lineKinds = ['LineString', 'MultiLineString'] as const;
 const polygonKinds = ['Polygon', 'MultiPolygon'] as const;
 
 /** Supported Arrow result storage for a spatial function. */
-type SpatialResult = Int32 | Float64 | Bool | Binary | FixedSizeList<Float64>;
+type SpatialResult = Int32 | Float64 | Bool | Binary | FixedSizeList<Float64> | Utf8;
 /** A nullable result value passed to the Arrow vector builder. */
-type SpatialValue = number | boolean | number[] | Uint8Array | null;
+type SpatialValue = string | number | boolean | number[] | Uint8Array | null;
+
+/** A decoded row with its semantic dimension for geometry-valued accessors. */
+type GeometryRow = WellKnownGeometry & {
+  dimension?: WellKnownDimension;
+  members?: readonly Uint8Array[];
+};
 
 /** Adapts an Arrow vector to a reader which decodes only active geometry rows. */
 function readGeometryValue<T>(
   vector: Vector,
   field: Field,
   active: Uint8Array,
-  value: (geometry: WellKnownGeometry, dimension: WellKnownDimension) => T
+  value: (
+    geometry: WellKnownGeometry,
+    dimension: WellKnownDimension,
+    members?: readonly Uint8Array[]
+  ) => T,
+  captureMembers = false
 ): (row: number) => T {
   if (field.metadata.get(EXTENSION_NAME) === 'geoarrow.wkb') {
     return row => {
-      const {geometry, dimension, srid} = parseWKB(vector.get(row) as Uint8Array);
+      const {geometry, dimension, srid, members} = parseWKB(vector.get(row) as Uint8Array, {
+        captureMembers
+      });
       if (srid)
         throw new Error('Use GeoArrow field metadata for CRS information instead of EWKB SRIDs');
       return value(
         geometry.type === 'Point' && geometry.coordinates.every(Number.isNaN)
           ? {type: 'Point', coordinates: []}
           : geometry,
-        dimension
+        dimension,
+        members
       );
     };
   }
@@ -127,8 +143,9 @@ function spatialFunction(
   name: string,
   signatures: readonly (readonly GeometryKind[])[],
   type: SpatialResult,
-  evaluate: (geometries: readonly WellKnownGeometry[], ...numbers: number[]) => SpatialValue,
-  numericArguments = 0
+  evaluate: (geometries: readonly GeometryRow[], ...numbers: number[]) => SpatialValue,
+  numericArguments = 0,
+  allDimensions = false
 ): ScalarFunction {
   return {
     kind: 'scalar',
@@ -154,7 +171,8 @@ function spatialFunction(
         ) {
           // WKB reveals its geometry kind and dimensionality per row.
         } else if (kinds.some(kind => encoding === 'geoarrow.' + kind.toLowerCase())) {
-          if (extension?.dimension !== 'xy') throw new Error(`${name} requires 2D geometry`);
+          if (!allDimensions && extension?.dimension !== 'xy')
+            throw new Error(`${name} requires 2D geometry`);
         } else {
           throw new Error(`${name} argument ${index + 1} requires GeoArrow ${kinds.join(' or ')}`);
         }
@@ -195,7 +213,15 @@ function spatialFunction(
           const readers = vectors
             .slice(0, signatures.length)
             .map((vector, index) =>
-              readGeometryValue(vector, arguments_[index]!, activeRows, planarGeometry)
+              readGeometryValue<GeometryRow>(
+                vector,
+                arguments_[index]!,
+                activeRows,
+                allDimensions
+                  ? (g, dimension, members) => ({...g, dimension, members})
+                  : planarGeometry,
+                name === 'ST_GeometryN'
+              )
             );
           const values = new Array<SpatialValue>(rowCount).fill(null);
           for (let row = 0; row < rowCount; row++) {
@@ -660,6 +686,72 @@ export const ST_CENTROID = /* @__PURE__ */ spatialFunction(
   ([geometry]) => writeWKB(planarCentroid(geometry!), 'xy')
 );
 
+/** Inspection functions also accept WKB geometry collections. */
+const inspectionKinds = [[...geometryTypes, 'GeometryCollection']] as const;
+
+/** Vertex count including polygon ring closures. */
+export const ST_NPOINTS = /* @__PURE__ */ spatialFunction(
+  'ST_NPoints',
+  inspectionKinds,
+  /* @__PURE__ */ new Int32(),
+  ([g]) => vertexCount(g!),
+  0,
+  true
+);
+
+/** Number of top-level components, or zero for empty geometry. */
+export const ST_NUMGEOMETRIES = /* @__PURE__ */ spatialFunction(
+  'ST_NumGeometries',
+  inspectionKinds,
+  /* @__PURE__ */ new Int32(),
+  ([g]) => memberCount(g!),
+  0,
+  true
+);
+
+/** Whether the geometry contains no vertices. */
+export const ST_ISEMPTY = /* @__PURE__ */ spatialFunction(
+  'ST_IsEmpty',
+  inspectionKinds,
+  /* @__PURE__ */ new Bool(),
+  ([g]) => !vertexCount(g!),
+  0,
+  true
+);
+
+/** Geometry type name with the ST_ prefix. */
+export const ST_GEOMETRYTYPE = /* @__PURE__ */ spatialFunction(
+  'ST_GeometryType',
+  inspectionKinds,
+  /* @__PURE__ */ new Utf8(),
+  ([g]) => 'ST_' + g!.type,
+  0,
+  true
+);
+
+/** WKB geometry containing only XY ordinates. */
+export const ST_FORCE2D = /* @__PURE__ */ spatialFunction(
+  'ST_Force2D',
+  inspectionKinds,
+  /* @__PURE__ */ new Binary(),
+  ([g]) => writeWKB(g!, 'xy'),
+  0,
+  true
+);
+
+/** One-based component as WKB with the input dimension. */
+export const ST_GEOMETRYN = /* @__PURE__ */ spatialFunction(
+  'ST_GeometryN',
+  inspectionKinds,
+  /* @__PURE__ */ new Binary(),
+  ([g], position) => {
+    const part = geometryMember(g!, position!);
+    return part ? (g!.members?.[position! - 1] ?? writeWKB(part, g!.dimension ?? 'xy')) : null;
+  },
+  1,
+  true
+);
+
 /** Returns an interior label point for a planar polygonal surface. */
 export const ST_POINTONSURFACE = /* @__PURE__ */ spatialFunction(
   'ST_PointOnSurface',
@@ -758,6 +850,12 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_LINESUBSTRING,
     ST_POINTONSURFACE,
     ST_CENTROID,
+    ST_NPOINTS,
+    ST_NUMGEOMETRIES,
+    ST_ISEMPTY,
+    ST_GEOMETRYTYPE,
+    ST_FORCE2D,
+    ST_GEOMETRYN,
     ST_ENVELOPE,
     ST_EXTENT
   ]);

@@ -565,6 +565,66 @@ test('reads PROJJSON EPSG identifiers and preserves extension metadata across in
   });
 });
 
+test('geometry inspection distinguishes nested components, vertices, empty geometries and nulls', () => {
+  const g = wkb(
+    'GEOMETRYCOLLECTION(MULTIPOINT((1 2),(4 5)),LINESTRING(0 0,1 0,2 0))',
+    'POLYGON((0 0,1 0,0 1,0 0))',
+    'POINT EMPTY',
+    null
+  );
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    `SELECT ST_NPoints(g) AS vertices, ST_NumGeometries(g) AS parts,
+    ST_IsEmpty(g) AS empty, ST_GeometryType(ST_GeometryN(g,2)) AS second FROM features`,
+    table
+  );
+  expect([...result.getChild('vertices')!]).toEqual([5, 4, 0, null]);
+  expect([...result.getChild('parts')!]).toEqual([2, 1, 0, null]);
+  expect([...result.getChild('empty')!]).toEqual([false, false, true, null]);
+  expect([...result.getChild('second')!]).toEqual(['ST_LineString', null, null, null]);
+});
+
+test('component extraction uses the selected WKB header and excludes empty atomic geometries', () => {
+  const child = writeWKB({type: 'Point', coordinates: [1, 2, 7]}, 'xym');
+  const bytes = Uint8Array.from([1, 7, 0, 0, 0, 1, 0, 0, 0, ...child]);
+  const g = vectorFromArray([bytes, writeWKB(parseWKT('POINT EMPTY'))], new Binary());
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select('SELECT ST_GeometryN(g,1) AS member FROM features', table);
+  expect(result.getChild('member')!.get(0)).toEqual(child);
+  expect(result.getChild('member')!.get(1)).toBeNull();
+});
+
+test('component extraction retains M and force-2D removes it', () => {
+  const g = vectorFromArray(
+    [
+      writeWKB(
+        {
+          type: 'MultiPoint',
+          coordinates: [
+            [1, 2, 7],
+            [3, 4, 8]
+          ]
+        },
+        'xym'
+      )
+    ],
+    new Binary()
+  );
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    'SELECT ST_GeometryN(g,2) AS part, ST_Force2D(ST_GeometryN(g,2)) AS xy FROM features',
+    table
+  );
+  expect(parseWKB(result.getChild('part')!.get(0))).toMatchObject({
+    dimension: 'xym',
+    geometry: {type: 'Point', coordinates: [3, 4, 8]}
+  });
+  expect(parseWKB(result.getChild('xy')!.get(0))).toMatchObject({
+    dimension: 'xy',
+    geometry: {type: 'Point', coordinates: [3, 4]}
+  });
+});
+
 test('ST_Extent combines groups across batches and ignores empty and null rows', () => {
   const g = wkb('LINESTRING(-4 8,3 5)', null, 'POINT(7 -2)', 'POLYGON EMPTY');
   const k = vectorFromArray([1, 2, 1, 2], new Int32());
