@@ -201,7 +201,9 @@ The format-neutral `ColumnarPredicate` vocabulary and its parameter-binding, val
 and copy utilities are exported from `@math.gl/sql/expressions`, without an Arrow dependency.
 `compileArrowPredicate` accepts comparisons, `in`, `isNull`, `and`, `or` and `not`, plus named parameters.
 The Arrow executor accepts Date literals for supported Date32 and microsecond timestamp fields,
-and byte-array literals for binary fields. A string property containing dots is one literal field name.
+and byte-array literals for binary fields. Date32 compares UTC calendar days, so a non-midnight
+Date literal matches the stored day in comparisons and membership. Microsecond timestamps
+compare instants. A string property containing dots is one literal field name.
 
 SQL parsing, source pushdown and result-row selection remain the query engine's responsibility.
 Only true predicate results select rows; false and null results do not. Computed SELECT functions

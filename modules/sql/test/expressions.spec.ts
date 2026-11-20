@@ -219,6 +219,13 @@ test('portable predicates bind Date and binary literals with null propagation', 
     options
   );
   expect([...datePredicate.evaluate(input)]).toEqual([false, true, null]);
+  const noon = new Date('2026-01-02T12:00:00Z');
+  expect([
+    ...compileArrowPredicate({op: '=', args: [{property: 'day'}, noon]}, options).evaluate(input)
+  ]).toEqual([false, true, null]);
+  expect([
+    ...compileArrowPredicate({op: 'in', args: [{property: 'day'}, [noon]]}, options).evaluate(input)
+  ]).toEqual([false, true, null]);
   const binaryPredicate = compileArrowPredicate(
     {op: '<', args: [{property: 'bytes'}, Uint8Array.of(1, 3)]},
     options
