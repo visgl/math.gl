@@ -36,7 +36,12 @@ export {
   skyDirectionToGlobe,
   getSkyGlobePosition,
   skyRotationToGlobe,
-  getCloudLighting
+  getCloudLighting,
+  getRayleighPhaseFunction,
+  getHenyeyGreensteinPhaseFunction,
+  getCornetteShanksPhaseFunction,
+  getApproximateErfcx,
+  getChapmanGrazingIncidenceFunction
 } from './sun';
 export type {
   MoonPosition,
