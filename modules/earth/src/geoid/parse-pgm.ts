@@ -34,7 +34,7 @@ export function parsePGM(
   if (currentLine.done || currentLine.value.line !== 'P5') {
     throw new Error('Geoid model file: File not in PGM format');
   }
-  let _offset = Number.MAX_VALUE;
+  let _offset = NaN;
   let _scale = 0;
   let _maxerror = -1;
   let _rmserror = -1;
@@ -46,6 +46,7 @@ export function parsePGM(
   let _swidth: number | null = null;
   do {
     currentLine = getline.next();
+    if (currentLine.done) throw new Error('Geoid model file: Error reading raster size');
     const s = currentLine.value.line;
     if (!s.length) {
       continue; // eslint-disable-line no-continue
@@ -67,13 +68,13 @@ export function parsePGM(
         if (!sArr[2]) {
           throw new Error('Geoid model file: Error reading offset');
         }
-        _offset = parseInt(sArr[2], 10);
+        _offset = Number(sArr[2]);
       } else if (key === 'Scale') {
         // eslint-disable-next-line max-depth
         if (!sArr[2]) {
           throw new Error('Geoid model file: Error reading scale');
         }
-        _scale = parseFloat(sArr[2]);
+        _scale = Number(sArr[2]);
       } else if (key === (options.cubic ? 'MaxCubicError' : 'MaxBilinearError')) {
         // It's not an error if the error can't be read
         // eslint-disable-next-line max-depth
@@ -88,11 +89,14 @@ export function parsePGM(
         }
       }
     } else {
-      let sArr = s.split(' ');
-      sArr = sArr.filter(testString => testString !== '');
-      _width = parseInt(sArr[0], 10);
-      _height = parseInt(sArr[1], 10);
-      if (!(_width && _height)) {
+      const dimensions = s.trim().split(/\s+/);
+      [_width, _height] = dimensions.map(Number);
+      if (
+        dimensions.length !== 2 ||
+        dimensions.some(value => !/^\d+$/.test(value)) ||
+        !Number.isSafeInteger(_width) ||
+        !Number.isSafeInteger(_height)
+      ) {
         throw new Error('Geoid model file: Error reading raster size');
       }
       break;
@@ -100,25 +104,22 @@ export function parsePGM(
   } while (!currentLine.done);
 
   currentLine = getline.next();
-  const maxval = parseInt(currentLine.value.line, 10);
   if (currentLine.done) {
     throw new Error('Geoid model file: Error reading maxval');
   }
-  if (maxval !== PIXEL_MAX) {
+  const maxval = currentLine.value.line.trim();
+  if (!/^\d+$/.test(maxval) || Number(maxval) !== PIXEL_MAX) {
     throw new Error('Geoid model file: Incorrect value of maxval');
   }
   // Add 1 for whitespace after maxval
   _datastart = currentLine.value.offset;
   _swidth = _width;
 
-  if (_offset === Number.MAX_VALUE) {
-    throw new Error('Geoid model file: Offset not set');
+  if (!Number.isFinite(_offset)) {
+    throw new Error('Geoid model file: Offset must be finite');
   }
-  if (_scale === 0) {
-    throw new Error('Geoid model file: Scale not set');
-  }
-  if (_scale < 0) {
-    throw new Error('Geoid model file: Scale must be positive');
+  if (!Number.isFinite(_scale) || _scale <= 0) {
+    throw new Error('Geoid model file: Scale must be finite and positive');
   }
   if (_height < 2 || _width < 2) {
     // Coarsest grid spacing is 180deg.
@@ -131,6 +132,11 @@ export function parsePGM(
   if (!(_height & 1)) {
     // This is so that latitude grid includes the equator.
     throw new Error('Geoid model file: Raster height is even');
+  }
+
+  const rasterBytes = _width * _height * 2;
+  if (!Number.isSafeInteger(rasterBytes) || data.byteLength - _datastart !== rasterBytes) {
+    throw new Error('Geoid model file: Raster byte length does not match its dimensions');
   }
 
   const _rlonres = _width / 360;
