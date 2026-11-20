@@ -200,11 +200,11 @@ rows; skipped positions are null even when `outputField` describes a non-nullabl
 The format-neutral `ColumnarPredicate` vocabulary and its parameter-binding, validation, column-path
 and copy utilities are exported from `@math.gl/sql/expressions`, without an Arrow dependency.
 `compileArrowPredicate` accepts comparisons, `in`, `isNull`, `and`, `or` and `not`, plus named parameters.
-The Arrow executor accepts Date literals for supported Date32 and microsecond timestamp fields,
+The Arrow executor accepts Date literals for Date32, DateMillisecond and all Arrow timestamp units,
 and byte-array literals for binary fields. Date32 compares UTC calendar days, so a non-midnight
-Date literal matches the stored day in comparisons and membership. Microsecond timestamps
-compare instants. Use an array such as `['item', 'value']` to read a nested struct field. A missing nested member
-is null, and a string with dots remains one literal field name.
+Date literal matches the stored day in comparisons and membership. DateMillisecond and timestamps
+compare instants. Use an array such as `['item', 'value']` to read a nested struct field. A missing
+nested member is null, and a string with dots remains one literal field name.
 Portable comparisons and membership preserve exact ordering and equality between bigint and number
 operands. Numeric comparisons reject NaN and infinity in portable predicates.
 

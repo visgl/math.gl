@@ -96,7 +96,7 @@ export function bindCast(source: DataType, target: unknown) {
   const wideInteger = integer && type.bitWidth === 64;
   const sourceKey = typeKey(source);
   const textInput = sourceKey === 'utf8';
-  if (sourceKey === 'date32' || sourceKey.startsWith('timestamp_us:'))
+  if (DataType.isDate(source) || DataType.isTimestamp(source))
     throw new Error('Temporal CAST requires a matching temporal target');
   if (sourceKey === 'binary' || sourceKey.startsWith('fixedsizebinary:'))
     throw new Error('CAST from binary requires a binary target');
