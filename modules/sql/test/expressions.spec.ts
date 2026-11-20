@@ -228,6 +228,34 @@ test('portable predicates compare mixed numeric representations without rounding
   ]).toEqual([true, null]);
 });
 
+test('portable predicates retain fractional literals for Int32 and Float32', () => {
+  const integers = batch({x: vectorFromArray([1, 2, null], new Int32())});
+  const integerOptions = {inputSchema: integers.schema};
+  expect([
+    ...compileArrowPredicate({op: '>', args: [{property: 'x'}, 1.5]}, integerOptions).evaluate(
+      integers
+    )
+  ]).toEqual([false, true, null]);
+  expect([
+    ...compileArrowPredicate(
+      {op: 'in', args: [{property: 'x'}, [1.5, 2]]},
+      integerOptions
+    ).evaluate(integers)
+  ]).toEqual([false, true, null]);
+
+  const floats = batch({x: vectorFromArray([0.1, null], new Float32())});
+  const floatOptions = {inputSchema: floats.schema};
+  expect([
+    ...compileArrowPredicate({op: '=', args: [{property: 'x'}, 0.1]}, floatOptions).evaluate(floats)
+  ]).toEqual([false, null]);
+  expect([
+    ...compileArrowPredicate({op: 'in', args: [{property: 'x'}, [0.1]]}, floatOptions).evaluate(
+      floats
+    )
+  ]).toEqual([false, null]);
+  expect(values('x == 0.1', floats)).toEqual([true, null]);
+});
+
 test('portable predicates reject non-finite operands while expressions retain IEEE behavior', () => {
   const input = batch({x: vectorFromArray([Infinity, NaN], new Float64())});
   const options = {inputSchema: input.schema};
