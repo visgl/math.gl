@@ -2,11 +2,39 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {DataType, Precision, makeData, makeVector, type Field} from 'apache-arrow';
+import {
+  Binary,
+  Bool,
+  FixedSizeList,
+  Float64,
+  DataType,
+  Precision,
+  makeData,
+  makeVector,
+  Field
+} from 'apache-arrow';
 import type {ArrowTableFunction} from '@math.gl/sql/arrow';
 import {makeGeoArrowColumnFromArrowVector} from '@math.gl/core/arrow';
-import {isGeoArrowValueValid, type GeoArrowColumn} from '@math.gl/core/arrow';
-import type {TurfBatchResult} from '../turf';
+import {
+  materializeGeoArrowRows,
+  writeWKB,
+  isGeoArrowValueValid,
+  type GeoArrowColumn
+} from '@math.gl/core/arrow';
+import type {TurfBatchResult} from './turf';
+
+import {area, bearing, centroid, distance, length, midpoint} from './turf';
+import {
+  column,
+  geometryTypes,
+  lineKinds,
+  pointInPolygon,
+  pointKinds,
+  polygonKinds,
+  scalar,
+  spatialFunction
+} from './spatial-sql';
+import {planarBounds} from './spatial-planar';
 
 /** Adapter for row-preserving numeric/Boolean functions from @math.gl/geospatial/turf. */
 export type TurfArrowFunctionOptions<Fields extends readonly Field[] = readonly Field[]> = {
@@ -98,55 +126,87 @@ export function createTurfArrowFunction<const Fields extends readonly Field[]>(
   };
 }
 
-export {
-  POSTGIS_SPATIAL_FUNCTIONS,
-  ST_X,
-  ST_Y,
-  ST_Z,
-  ST_M,
-  ST_STARTPOINT,
-  ST_ENDPOINT,
-  ST_TILEENVELOPE,
-  ST_AREA,
-  ST_INTERSECTS,
-  ST_SRID,
-  ST_SETSRID,
-  ST_TRANSFORM,
-  ST_REMOVEREPEATEDPOINTS,
-  ST_SIMPLIFY,
-  ST_AZIMUTH,
-  ST_POINTONSURFACE,
-  ST_CENTROID,
-  ST_CONTAINS,
-  ST_COVERS,
-  ST_WITHIN,
-  ST_COVEREDBY,
-  ST_POINTN,
-  ST_MAKEENVELOPE,
-  ST_DISTANCE,
-  ST_DWITHIN,
-  ST_NPOINTS,
-  ST_NUMGEOMETRIES,
-  ST_ISEMPTY,
-  ST_GEOMETRYTYPE,
-  ST_FORCE2D,
-  ST_GEOMETRYN,
-  ST_MAKELINE,
-  ST_COLLECT,
-  ST_ENVELOPE,
-  ST_EXTENT,
-  ST_LENGTH,
-  ST_LINEINTERPOLATEPOINT,
-  ST_LINELOCATEPOINT,
-  ST_LINESUBSTRING,
-  ST_MAKEPOINT,
-  TURF_FUNCTIONS,
-  TURF_AREA,
-  TURF_BBOX,
-  TURF_BEARING,
-  TURF_BOOLEAN_POINT_IN_POLYGON,
-  TURF_CENTROID,
+/** Returns the first geometry from a single-row Turf batch as GeoArrow WKB. */
+function geometryResult(result: GeoArrowColumn): Uint8Array | null {
+  const [geometry] = materializeGeoArrowRows(result);
+  return geometry ? writeWKB(geometry, 'xy') : null;
+}
+
+/** Returns great-circle point distance in kilometers. */
+export const TURF_DISTANCE = /* @__PURE__ */ spatialFunction(
+  'TURF_DISTANCE',
+  [pointKinds, pointKinds],
+  /* @__PURE__ */ new Float64(),
+  ([a, b]) => scalar(distance(column(a!), column(b!)))
+);
+
+/** Returns initial great-circle bearing in degrees. */
+export const TURF_BEARING = /* @__PURE__ */ spatialFunction(
+  'TURF_BEARING',
+  [pointKinds, pointKinds],
+  /* @__PURE__ */ new Float64(),
+  ([a, b]) => scalar(bearing(column(a!), column(b!)))
+);
+
+/** Returns spherical polygon area in square meters. */
+export const TURF_AREA = /* @__PURE__ */ spatialFunction(
+  'TURF_AREA',
+  [polygonKinds],
+  /* @__PURE__ */ new Float64(),
+  ([geometry]) => scalar(area(column(geometry!)))
+);
+
+/** Returns great-circle line length in kilometers. */
+export const TURF_LENGTH = /* @__PURE__ */ spatialFunction(
+  'TURF_LENGTH',
+  [lineKinds],
+  /* @__PURE__ */ new Float64(),
+  ([geometry]) => scalar(length(column(geometry!)))
+);
+
+/** Returns the Turf vertex-mean centroid as GeoArrow WKB. */
+export const TURF_CENTROID = /* @__PURE__ */ spatialFunction(
+  'TURF_CENTROID',
+  [geometryTypes],
+  /* @__PURE__ */ new Binary(),
+  ([geometry]) => geometryResult(centroid(column(geometry!)))
+);
+
+/** Returns the Turf great-circle midpoint as GeoArrow WKB. */
+export const TURF_MIDPOINT = /* @__PURE__ */ spatialFunction(
+  'TURF_MIDPOINT',
+  [pointKinds, pointKinds],
+  /* @__PURE__ */ new Binary(),
+  ([a, b]) => geometryResult(midpoint(column(a!), column(b!)))
+);
+
+/** Returns [minX, minY, maxX, maxY] per geometry. */
+export const TURF_BBOX = /* @__PURE__ */ spatialFunction(
+  'TURF_BBOX',
+  [geometryTypes],
+  /* @__PURE__ */ new FixedSizeList(
+    4,
+    /* @__PURE__ */ new Field('value', /* @__PURE__ */ new Float64(), false)
+  ),
+  ([geometry]) => planarBounds(geometry!)
+);
+
+/** Tests whether a point is in a polygon, including its boundary, with Turf argument order. */
+export const TURF_BOOLEAN_POINT_IN_POLYGON = /* @__PURE__ */ spatialFunction(
+  'TURF_BOOLEAN_POINT_IN_POLYGON',
+  [pointKinds, polygonKinds],
+  /* @__PURE__ */ new Bool(),
+  ([point, polygon]) => pointInPolygon(point!, polygon!)
+);
+
+/** Opt-in SQL declarations for the initial row-preserving Turf function library. */
+export const TURF_FUNCTIONS: readonly ArrowTableFunction[] = /* @__PURE__ */ Object.freeze([
   TURF_DISTANCE,
+  TURF_BEARING,
+  TURF_AREA,
   TURF_LENGTH,
-  TURF_MIDPOINT
-} from './spatial-functions';
+  TURF_CENTROID,
+  TURF_MIDPOINT,
+  TURF_BBOX,
+  TURF_BOOLEAN_POINT_IN_POLYGON
+]);

@@ -4,7 +4,7 @@
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
 import {orient2d} from 'robust-predicates';
-import {planarBounds} from './planar';
+import {planarBounds} from './spatial-planar';
 
 /** One atomic planar geometry after collection expansion. */
 type Primitive = Extract<WellKnownGeometry, {type: 'Point' | 'LineString' | 'Polygon'}>;

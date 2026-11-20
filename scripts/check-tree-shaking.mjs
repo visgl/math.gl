@@ -71,8 +71,8 @@ const probes = [
   {symbol:'NUMERIC_FUNCTION_DEFINITIONS', packages:['@math.gl/sql/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:5000},
   {symbol:'SIN',packages:['@math.gl/sql/math-functions'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:210000},
   {symbol:'COLOR_RGB',packages:['@math.gl/sql/color-functions'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:250000},
-  {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
-  {symbol: 'ST_AREA', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
+  {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf-functions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
+  {symbol: 'ST_AREA', packages: ['@math.gl/geospatial/st-functions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
 
   // Measured with explicit numeric, dictionary, binary and temporal CAST targets and SQL pattern operators.
   // Named scalar/binary parameter binding and expression IN syntax are part of each parser.

@@ -97,7 +97,7 @@ async function workerTypes() {
 }
 void workerTypes;
 
-import {createTurfArrowFunction} from '@math.gl/geospatial/turf/expressions';
+import {createTurfArrowFunction} from '@math.gl/geospatial/turf-functions';
 import {distance, booleanPointInPolygon} from '@math.gl/geospatial/turf';
 declare const geometryField: Field;
 createTurfArrowFunction({
