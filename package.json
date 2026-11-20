@@ -71,7 +71,7 @@
     "@citation-js/core": "^0.9.0",
     "@citation-js/plugin-bibtex": "^0.9.0",
     "@deck.gl/core": "10.0.0-alpha.1",
-    "@math.gl/sql": "5.0.0-rc.1",
+    "@math.gl/sql": "5.0.0-rc.2",
     "@turf/destination": "^7.4.0",
     "@types/node": "^22.20.1",
     "@vis.gl/dev-tools": "^2.0.0-beta.2",

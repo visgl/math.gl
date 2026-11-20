@@ -4898,7 +4898,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/core@workspace:modules/core"
   dependencies:
-    "@math.gl/tasks": "npm:5.0.0-rc.1"
+    "@math.gl/tasks": "npm:5.0.0-rc.2"
   peerDependencies:
     apache-arrow: ">=17.0.0"
   peerDependenciesMeta:
@@ -4911,7 +4911,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs@workspace:modules/dggs"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-rc.1"
+    "@math.gl/core": "npm:5.0.0-rc.2"
     a5-js: "npm:^0.10.0"
     h3-js: "npm:^4.5.0"
     open-location-code: "npm:^1.0.3"
@@ -4923,7 +4923,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/earth@workspace:modules/earth"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-rc.1"
+    "@math.gl/core": "npm:5.0.0-rc.2"
     astronomy-engine: "npm:2.1.19"
   languageName: unknown
   linkType: soft
@@ -4958,7 +4958,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/geometry@workspace:modules/geometry"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-rc.1"
+    "@math.gl/core": "npm:5.0.0-rc.2"
   peerDependencies:
     apache-arrow: ">=17.0.0"
   peerDependenciesMeta:
@@ -4972,10 +4972,10 @@ __metadata:
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:
     "@mapbox/martini": "npm:0.2.0"
-    "@math.gl/core": "npm:5.0.0-rc.1"
-    "@math.gl/geometry": "npm:5.0.0-rc.1"
-    "@math.gl/sql": "npm:5.0.0-rc.1"
-    "@math.gl/tasks": "npm:5.0.0-rc.1"
+    "@math.gl/core": "npm:5.0.0-rc.2"
+    "@math.gl/geometry": "npm:5.0.0-rc.2"
+    "@math.gl/sql": "npm:5.0.0-rc.2"
+    "@math.gl/tasks": "npm:5.0.0-rc.2"
     "@turf/area": "npm:^7.2.0"
     "@turf/bearing": "npm:^7.2.0"
     "@turf/boolean-point-in-polygon": "npm:^7.2.0"
@@ -4997,9 +4997,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@math.gl/sql@workspace:modules/sql"
   dependencies:
-    "@math.gl/core": "npm:5.0.0-rc.1"
-    "@math.gl/geometry": "npm:5.0.0-rc.1"
-    "@math.gl/tasks": "npm:5.0.0-rc.1"
+    "@math.gl/core": "npm:5.0.0-rc.2"
+    "@math.gl/geometry": "npm:5.0.0-rc.2"
+    "@math.gl/tasks": "npm:5.0.0-rc.2"
   peerDependencies:
     apache-arrow: ">=17.0.0"
   peerDependenciesMeta:
@@ -14766,7 +14766,7 @@ __metadata:
     "@citation-js/core": "npm:^0.9.0"
     "@citation-js/plugin-bibtex": "npm:^0.9.0"
     "@deck.gl/core": "npm:10.0.0-alpha.1"
-    "@math.gl/sql": "npm:5.0.0-rc.1"
+    "@math.gl/sql": "npm:5.0.0-rc.2"
     "@turf/destination": "npm:^7.4.0"
     "@types/node": "npm:^22.20.1"
     "@vis.gl/dev-tools": "npm:^2.0.0-beta.2"
@@ -18454,7 +18454,7 @@ __metadata:
     "@math.gl/earth": "workspace:*"
     "@math.gl/geometry": "workspace:*"
     "@math.gl/geospatial": "workspace:*"
-    "@math.gl/sql": "npm:5.0.0-rc.1"
+    "@math.gl/sql": "npm:5.0.0-rc.2"
     "@math.gl/tasks": "workspace:*"
     "@mdx-js/react": "npm:^3.1.1"
     "@signalwire/docusaurus-plugin-llms-txt": "npm:^1.2.2"
