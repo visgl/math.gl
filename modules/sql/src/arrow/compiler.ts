@@ -455,7 +455,10 @@ function bindNode(
     const portableNumber =
       options.portablePredicate &&
       expected &&
-      (DataType.isInt(expected) || DataType.isFloat(expected)) &&
+      (DataType.isInt(expected) ||
+        DataType.isFloat(expected) ||
+        DataType.isTime(expected) ||
+        DataType.isDuration(expected)) &&
       (typeof value === 'number' || typeof value === 'bigint');
 
     if (

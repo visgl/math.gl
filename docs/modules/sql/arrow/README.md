@@ -207,6 +207,7 @@ compare instants. Use an array such as `['item', 'value']` to read a nested stru
 nested member is null, and a string with dots remains one literal field name.
 Portable comparisons and membership preserve exact ordering and equality between bigint and number
 operands. Numeric comparisons reject NaN and infinity in portable predicates.
+Time-of-day and duration predicates compare numeric bounds in the column’s physical unit.
 
 SQL parsing, source pushdown and result-row selection remain the query engine's responsibility.
 Only true predicate results select rows; false and null results do not. Computed SELECT functions
