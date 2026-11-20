@@ -1,12 +1,26 @@
 # @math.gl/tasks
 
-Tasks lets you move heavy operations, such as computations on large datasets, to worker threads. The main thread can keep responding to input and drawing your application while the computation runs in the background.
+`@math.gl/tasks` provides generic task infrastructure for browsers and Node.js. It defines the task contract and provides a runner for local or worker execution. The runner manages worker startup, messages, and cleanup.
 
-A **task** describes a calculation. A **TaskRunner** runs it and returns the result. The runner handles worker startup, messages, and cleanup, so you do not have to write that plumbing yourself. It works in browsers and Node.js.
+Applications and other math.gl packages import `@math.gl/tasks` to define and run their own operations. Each package owns its task implementations. The task runtime has no dependencies on other math.gl packages.
+
+## Package entry points[​](#package-entry-points "Direct link to Package entry points")
+
+`@math.gl/tasks` exposes the task API through its root import.
+
+| Export                                 | Use it to                                                                                                                                                                          |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TaskRunner` and `InitializedTask`     | [Run tasks and manage reusable sessions](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/task-runner.md).                                       |
+| `preloadTasks`                         | [Prepare tasks before first use](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/task-runner.md#preloadtasks).                                  |
+| `Task`, `TaskTypes`, and `TaskContext` | [Define a calculation and its input, result, and progress types](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/task-runner.md#task-type-map). |
+| `createTypedTaskDispatcher`            | [Route typed operations through a persistent task](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/persistent-resources.md).                  |
+| `initializeTaskWorker`                 | [Start a custom task implementation inside a worker](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/custom-workers.md).                      |
+
+Import ready-made tasks from their owning package. For example, `@math.gl/geospatial/tasks` exports `ProjectCoordinatesTask`.
 
 ## Run a task[​](#run-a-task "Direct link to Run a task")
 
-For example, project a set of coordinates in a worker:
+This example combines the generic runner with a projection task implemented by `@math.gl/geospatial`.
 
 ```
 import {TaskRunner} from '@math.gl/tasks';
@@ -38,7 +52,7 @@ try {
 
 `ProjectCoordinatesTask` includes a worker implementation. You send coordinates and a projection, then await the converted coordinates. Inputs are copied by default, so your application can keep using the original arrays.
 
-Start with the [getting-started guide](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/task-runner.md) for setup and examples. You can use tasks provided by a math.gl module or [write a task](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/custom-workers.md) for your own computation. `@math.gl/tasks` itself has no runtime dependencies and can be used without the other math.gl packages.
+Start with the [getting-started guide](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/task-runner.md) for setup and examples, or [write a task](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/custom-workers.md) for your own computation.
 
 ## Features[​](#features "Direct link to Features")
 

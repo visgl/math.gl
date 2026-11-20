@@ -1,4 +1,4 @@
-# Modules
+# Packages
 
 <!-- -->
 
@@ -36,7 +36,7 @@ Choose a module for your application. Each overview introduces its capabilities,
   [Geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md) · [Sun](https://visgl.github.io/math.gl/next/docs/modules/earth/sun.md) · [Timezones](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone.md)
 
   [Explore module →](https://visgl.github.io/math.gl/next/docs/modules/earth.md)
-* ## [DGGS 🧪](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)
+* ## [DGGS](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)
   [`@math.gl/dggs`](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)
 
   [Explore discrete global grids and decode geographic cell boundaries.](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)

@@ -3,7 +3,7 @@
 A reusable rigid frame at a fixed Cartesian origin on a sphere or oblate spheroid. The class snapshots its origin, signed axes, and geodetic basis. It does not retain mutable ellipsoid state, infer a CRS, or convert datums. Available from `@math.gl/geospatial` and the package root.
 
 ```
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 
 import {Ellipsoid, LocalReferenceFrame} from '@math.gl/geospatial';
 

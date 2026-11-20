@@ -11,7 +11,7 @@ import {
 
   localFrameToMatrix
 
-} from '@math.gl/core';
+} from '@math.gl/core/matrix';
 
 
 

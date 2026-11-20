@@ -9,7 +9,7 @@ Evaluates rigid panels connected by hinges, independently of mesh generation and
 ```
 import {HingeTree} from '@math.gl/geometry';
 
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
 
 

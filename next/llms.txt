@@ -17,13 +17,13 @@ Start with a small calculation, then choose the modules your application needs. 
 
 ### modules
 
-- [Modules](https://visgl.github.io/math.gl/next/docs/modules.md)
+- [Packages](https://visgl.github.io/math.gl/next/docs/modules.md)
 
 #### core
 
-@math.gl/core provides array-based vectors, matrices, quaternions, and coordinate helpers. Use it to compose transforms, rotate geometry, and work with reusable numeric objects.
+The core package provides vectors, matrices, and rotations for 3D math, plus utilities for colors, UTF-8 text, and Apache Arrow data.
 
-- [@math.gl/core](https://visgl.github.io/math.gl/next/docs/modules/core.md): @math.gl/core provides array-based vectors, matrices, quaternions, and coordinate helpers. Use it to compose transforms, rotate geometry, and work with reusable numeric objects.
+- [@math.gl/core](https://visgl.github.io/math.gl/next/docs/modules/core.md): The core package provides vectors, matrices, and rotations for 3D math, plus utilities for colors, UTF-8 text, and Apache Arrow data.
 - [Euler](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/euler.md): A class to handle Euler rotation. More information on rotation using a Euler vector can be found here. Generally speaking the three components of the Euler object represents the roll, pitch and yaw angles and the rotation is applied according to a specific rotation order.
 - [Local frames](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/local-frame.md): Use @math.gl/core to rotate offsets or velocities between a local
 - [MathArray](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/math-array.md): MathArray is the shared array base for core vectors, matrices, quaternions, and Euler angles. Use a concrete class rather than constructing it directly. Mutating methods return the receiver.
@@ -51,10 +51,10 @@ Start with a small calculation, then choose the modules your application needs. 
 - [Indexed Arrow views](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/indexed-arrow-table.md): IndexedArrowTable provides a cheap sorted view of an arrow.Table without
 - [MappedArrowTable](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/mapped-arrow-table.md): MappedArrowTable provides a cheap key-value map view of an arrow.Table without
 - [splitArrowBuffers](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/split-arrow-buffers.md): splitArrowBuffers rebuilds Apache Arrow JS objects so sliced internal typed-array buffers are
-- [UTF-8 utilities](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/utf8.md): @math.gl/core/utf8 helps applications work efficiently with binary UTF-8 strings
+- [@math.gl/core/utf8](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/utf8.md): @math.gl/core/utf8 helps applications work efficiently with binary UTF-8 strings
 - [@math.gl/core/arrow](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/wkb.md): @math.gl/core/arrow provides synchronous codecs for individual WKB, EWKB, and WKT geometry values. The codec implementation operates independently of GeoArrow descriptors, while importing the combined Arrow entry point requires the application-provided Apache Arrow peer.
 - [WKB and WKT API reference](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/wkb/api-reference/wkb.md): All APIs are synchronous. Inputs are borrowed and never detached or mutated.
-- [Colors, scales, and LUTs](https://visgl.github.io/math.gl/next/docs/modules/core/color.md): @math.gl/core/color provides reusable color conversions, palettes, scale compilation, quantile sketches, and RGB lookup-table sampling. It operates on ordinary values and typed arrays and does not require Apache Arrow or a SQL runtime.
+- [@math.gl/core/color](https://visgl.github.io/math.gl/next/docs/modules/core/color.md): @math.gl/core/color provides reusable color conversions, palettes, scale compilation, quantile sketches, and RGB lookup-table sampling. It operates on ordinary values and typed arrays and does not require Apache Arrow or a SQL runtime.
 - [Benchmarks](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/benchmarks.md): Run the general math.gl benchmark suite in your browser. Start with Core math for vectors,
 - [3D Coordinate Systems](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/coordinate-systems.md): Choose coordinates that fit the operation you need. Core provides Cartesian vectors, spherical coordinates, and homogeneous coordinates for matrix transforms.
 - [Floating Point](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/floating-point.md): Rounding can make mathematically equivalent calculations produce slightly different numeric results. Use approximate comparisons for computed coordinates, and exact comparisons when identical stored values are required.
@@ -65,7 +65,7 @@ Start with a small calculation, then choose the modules your application needs. 
 - [View and Projection Matrices](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/view-and-projection.md): A view matrix expresses world coordinates relative to a camera. A projection matrix maps those camera coordinates to homogeneous clip coordinates. Compose them as projection * view to transform a world-space point.
 - [Core Guide](https://visgl.github.io/math.gl/next/docs/modules/core/guide.md): Guides and background for Core.
 - [Preliminaries](https://visgl.github.io/math.gl/next/docs/modules/core/guide/preliminaries.md): Mathematical foundations for working with transformations and 3D coordinates.
-- [Matrix math](https://visgl.github.io/math.gl/next/docs/modules/core/matrix.md): Import foundational vector and matrix math from @math.gl/core/matrix:
+- [@math.gl/core/matrix](https://visgl.github.io/math.gl/next/docs/modules/core/matrix.md): This entry point exposes the foundational core math API, including vectors, matrices, quaternions, Euler rotations, poses, coordinate conversions, numeric types, and utilities.
 - [@math.gl/core/types](https://visgl.github.io/math.gl/next/docs/modules/core/types.md): @math.gl/core provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
 - [Array Types](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/array-types.md): math.gl provides a number of numeric array types.
 - [Bounds](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds.md): Bounds is a type-only union of Bounds2D and Bounds3D. Each uses [minimum, maximum] coordinates.
@@ -76,7 +76,7 @@ Start with a small calculation, then choose the modules your application needs. 
 
 @math.gl/dggs provides a deliberately small JavaScript API for decoding cell geometry from A5, GeoHash, H3, Quadkey, S2, and full Google Plus Code identifiers. It also detects their conventional data-column names so visualization layers such as deck.gl-community's GlobalGridLayer can select the appropriate decoder.
 
-- [@math.gl/dggs 🧪](https://visgl.github.io/math.gl/next/docs/modules/dggs.md): @math.gl/dggs provides a deliberately small JavaScript API for decoding cell geometry from A5, GeoHash, H3, Quadkey, S2, and full Google Plus Code identifiers. It also detects their conventional data-column names so visualization layers such as deck.gl-community's GlobalGridLayer can select the appropriate decoder.
+- [@math.gl/dggs](https://visgl.github.io/math.gl/next/docs/modules/dggs.md): @math.gl/dggs provides a deliberately small JavaScript API for decoding cell geometry from A5, GeoHash, H3, Quadkey, S2, and full Google Plus Code identifiers. It also detects their conventional data-column names so visualization layers such as deck.gl-community's GlobalGridLayer can select the appropriate decoder.
 - [A5Decoder](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/a5-decoder.md): A5Decoder is the lightweight A5 geometry adapter exported by @math.gl/dggs. It accepts hexadecimal tokens and bigint indexes, and implements the common DGGSDecoder center, boundary, bounds, and token/index conversion methods.
 - [DGGSDecoder](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/dggs-decoder.md): DGGSDecoder defines the common API implemented by the decoder objects exported from @math.gl/dggs.
 - [geohash-decoder](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/geohash-decoder.md): GeohashDecoder
@@ -88,9 +88,9 @@ Start with a small calculation, then choose the modules your application needs. 
 
 #### earth
 
-Earth models, sunlight, astronomy, and timezones, available as named exports from the package root.
+Earth models, sunlight, astronomy, time zones, and ocean calculations. Import each API from its feature subpath.
 
-- [@math.gl/earth](https://visgl.github.io/math.gl/next/docs/modules/earth.md): Earth models, sunlight, astronomy, and timezones, available as named exports from the package root.
+- [@math.gl/earth](https://visgl.github.io/math.gl/next/docs/modules/earth.md): Earth models, sunlight, astronomy, time zones, and ocean calculations. Import each API from its feature subpath.
 - [@math.gl/earth/geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md): The @math.gl/earth module evaluates geoid heights from Earth gravity model grids.
 - [createGeoidFromGrid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/create-geoid-from-grid.md): Creates a Geoid from a complete global grid of decoded unsigned 16-bit samples.
 - [Geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/geoid.md): class Geoid - "Gravity Height Model"
@@ -154,7 +154,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [CurveArcLength](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/curve-arc-length.md): Constructor
 - [Curve classes](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/curves.md): Constructors
 - [Adaptive sampling and transport frames](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves/api-reference/sampling-and-frames.md): Import these helpers from @math.gl/geometry. Existing parametric curves and
-- [Lighting and color calculations](https://visgl.github.io/math.gl/next/docs/modules/geometry/lighting.md): @math.gl/geometry/lighting and @math.gl/geometry/color provide opt-in CPU calculations
+- [Lighting and color subpaths](https://visgl.github.io/math.gl/next/docs/modules/geometry/lighting.md): | Import path | Use it to |
 - [@math.gl/geometry/polygon](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md): @math.gl/geometry clips and splits polygons and polylines, computes winding and area, and adaptively subdivides geometry through coordinate transforms. Use it to prepare geometry before triangulation or rendering.
 - [clipPolygon](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/clip-polygon.md): Clips a polygon with a bounding box.
 - [clipPolyline](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/clip-polyline.md): Clips a polyline with a bounding box.
@@ -169,8 +169,8 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [polygon-utils](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/polygon-utils.md): A set of polygon-related utility functions. Utility functions are available for flat arrays and for arrays of points. Note: the \*Points set of functions is used for arrays of points, and is separated for performance and backwards compatibility reasons.
 - [subdividePolyline](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/subdivide-polyline.md): Subdivides source-coordinate edges until sampled error after a supplied transform is within a tolerance. Use it to approximate curved projected paths and polygon boundaries before rendering or triangulation.
 - [subdivideTriangleMesh](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon/api-reference/subdivide-triangle-mesh.md): Adaptively refines an indexed triangle mesh through a supplied coordinate transform. Use it to approximate filled polygons or deform textured bitmap meshes when transformed triangles need more vertices to follow a curved surface.
-- [@math.gl/geometry (POC)](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md): This proof of concept indexes static Cartesian boxes, points, and triangles. It uses a
-- [@math.gl/geometry/utils](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils.md): Utilities for processing renderer-independent geometry stored in typed arrays. The module is
+- [@math.gl/geometry/spatial-index 🧪](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md): This proof of concept indexes static Cartesian boxes, points, and triangles. It uses a
+- [@math.gl/geometry/processing](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils.md): Utilities for processing renderer-independent geometry stored in typed arrays. The module is
 - [Geometry utilities](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/geometry-utils.md): Geometry types
 - [interpolatePackedAttributes](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/interpolate-packed-attributes.md): Reconstruct attributes in interleaved vertex buffers from original-vertex provenance, such as
 - [Triangle mesh processing](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/mesh-processing.md): These operations accept GeometryInput with topology: 'triangle-list', packed
@@ -265,6 +265,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Projection scorecard](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/scorecard.md): Complete Node / Chromium / Firefox / WebKit evidence.
 - [Projection API support](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md): @math.gl/geospatial/projection uses the math.gl projection engine by default. projectionEngine supplies
 - [Temporal deformation models](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/temporal-models.md): A coordinate can move between observation epochs because of a steady velocity,
+- [@math.gl/geospatial/projection/types](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/types.md): Projection describes a transformation between a source and target CRS.
 - [Terrain](https://visgl.github.io/math.gl/next/docs/modules/geospatial/terrain.md): Experimental CPU terrain data and algorithms, usable in Node.js, browser workers,
 - [@math.gl/geospatial/web-mercator](https://visgl.github.io/math.gl/next/docs/modules/geospatial/web-mercator.md): @math.gl/geospatial/web-mercator is considered deprecated. Prefer @math.gl/geospatial/projection for new work.
 - [Web Mercator Utility Functions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/web-mercator/api-reference/web-mercator-utils.md): lngLatToWorld(lngLat)
@@ -302,9 +303,9 @@ A lightweight SQL query engine for Apache Arrow tables. Query tables already in 
 
 #### tasks
 
-Tasks lets you move heavy operations, such as computations on large datasets, to
+@math.gl/tasks provides generic task infrastructure for browsers and Node.js.
 
-- [@math.gl/tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks.md): Tasks lets you move heavy operations, such as computations on large datasets, to
+- [@math.gl/tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks.md): @math.gl/tasks provides generic task infrastructure for browsers and Node.js.
 - [Task runtime API](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/runtime.md): TaskRunner runs tasks in workers or locally and manages their
 - [TaskRunner API](https://visgl.github.io/math.gl/next/docs/modules/tasks/api-reference/task-runner.md): Use TaskRunner to run a task, await its result, and manage its workers and setup.
 - [Measuring task execution](https://visgl.github.io/math.gl/next/docs/modules/tasks/developer-guide/benchmarks.md): Measure the whole operation before tuning worker count or buffer ownership.

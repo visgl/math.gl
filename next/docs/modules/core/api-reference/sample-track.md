@@ -3,7 +3,7 @@
 Evaluate timestamped scalar, vector, or quaternion samples with reusable outputs. Import `SampleTrack` and `SampleTrackOptions` from `@math.gl/core`.
 
 ```
-import {SampleTrack} from '@math.gl/core';
+import {SampleTrack} from '@math.gl/core/matrix';
 
 
 

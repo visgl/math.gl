@@ -7,7 +7,7 @@ A 4x4 matrix. Any arguments to `Matrix4` methods can be plain JavaScript arrays 
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 ```
 
 Copy a matrix to a `Matrix4` so that it can be manipulated (and mutated) with `Matrix4` methods:

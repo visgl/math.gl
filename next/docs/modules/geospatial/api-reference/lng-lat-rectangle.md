@@ -7,7 +7,7 @@ A longitude-latitude rectangle on an ellipsoid. Angular values are stored in rad
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {toRadians} from '@math.gl/core';
+import {toRadians} from '@math.gl/core/matrix';
 
 import {LngLatRectangle} from '@math.gl/geospatial';
 

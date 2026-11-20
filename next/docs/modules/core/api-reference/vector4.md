@@ -9,7 +9,7 @@ Use `Matrix4.transform(vector4, result)` for a full homogeneous transform. `Vect
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {Vector4} from '@math.gl/core';
+import {Vector4} from '@math.gl/core/matrix';
 
 const vector = new Vector4(1, 1, 1, 0);
 

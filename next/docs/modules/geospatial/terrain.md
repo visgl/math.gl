@@ -1071,7 +1071,7 @@ Use `getTerrainCellMetrics(field)` for the horizontal control-volume area, face 
 To select the catchment for a known outlet, compare its cell index with each entry of `terminal`. Multiply `contributingCells[index]` by `cellArea` to get projected contributing area, including the cell itself.
 
 ```
-import {createTerrainDrainage, HeightField} from '@math.gl/geospatial';
+import {createTerrainDrainage, HeightField} from '@math.gl/geospatial/terrain';
 
 
 
@@ -1115,7 +1115,7 @@ Use `fillTerrainDepressions(field, {outlets, maxCells})` to derive a conditioned
 The fill raises cells to their minimum spill elevation. This is the lowest maximum source elevation along any face-connected path to an outlet. Valid cells disconnected from every outlet retain their heights and are counted separately. The returned `receiver` forest follows nonincreasing conditioned heights across flats and terminates at the supplied outlets. A receiver of `-1` denotes an outlet. A receiver of `-2` denotes a disconnected cell or nodata, distinguishable through the returned field's validity mask.
 
 ```
-import {fillTerrainDepressions, HeightField} from '@math.gl/geospatial';
+import {fillTerrainDepressions, HeightField} from '@math.gl/geospatial/terrain';
 
 
 
@@ -1145,7 +1145,7 @@ This uses the [Priority-Flood algorithm](https://arxiv.org/abs/1511.04463) with 
 Use `splitTerrainMesh` to split an indexed terrain mesh by a rectangle or strictly convex polygon in the mesh's local XY frame. Pass a ring without a repeated endpoint. Both ring windings are supported. For concave rings, holes and disjoint polygon regions, prepare an immutable polygon set as described below.
 
 ```
-import {createTerrainCutoutSkirts, splitTerrainMesh} from '@math.gl/geospatial';
+import {createTerrainCutoutSkirts, splitTerrainMesh} from '@math.gl/geospatial/terrain';
 
 
 
@@ -1181,7 +1181,7 @@ import {
 
   getTerrainCellMetrics
 
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 
 
@@ -1203,7 +1203,7 @@ For an affine grid, multiplying each outlet's count by the cell area gives its p
 `splitTerrainMeshTiles(tiles, polygon, options)` welds identical XYZ vertices across a conforming resident tile set before splitting it. Both pieces share exact cut coordinates, including where the polygon crosses tile seams. Use `createTerrainCutoutSkirts` on the result: interior tile seams receive no walls. A cut coinciding with a tile seam receives paired walls only where both the patch and remainder actually exist. Missing tiles and nodata remain uncovered.
 
 ```
-import {splitTerrainMeshTiles, createTerrainCutoutSkirts} from '@math.gl/geospatial';
+import {splitTerrainMeshTiles, createTerrainCutoutSkirts} from '@math.gl/geospatial/terrain';
 
 
 
@@ -1239,7 +1239,7 @@ Recompute with the new resident set on tile arrival or eviction. The operation i
 Use `updateTerrainTileCutouts` when edits or tile arrival/eviction should preserve unchanged clipped buffers. Each resident has a unique string ID, a mesh in the common local frame, and a nonnegative integer revision. Increment the revision **after any in-place buffer edit**; replacing the mesh object also invalidates it. Treat returned arrays and cached inputs as read-only within a revision.
 
 ```
-import {updateTerrainTileCutouts, createTerrainCutoutSkirts} from '@math.gl/geospatial';
+import {updateTerrainTileCutouts, createTerrainCutoutSkirts} from '@math.gl/geospatial/terrain';
 
 
 
@@ -1287,7 +1287,7 @@ import {
 
   unprojectGeographicTerrainCutout, splitTerrainMesh
 
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 
 
@@ -1329,7 +1329,7 @@ import {
 
   createTerrainCutoutSkirts
 
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 
 

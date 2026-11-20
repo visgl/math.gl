@@ -7,7 +7,7 @@ Stores `radius`, `phi`, and `theta`, with angle and geographic convenience acces
 ## Construction[​](#construction "Direct link to Construction")
 
 ```
-import {SphericalCoordinates} from '@math.gl/core';
+import {SphericalCoordinates} from '@math.gl/core/matrix';
 
 
 

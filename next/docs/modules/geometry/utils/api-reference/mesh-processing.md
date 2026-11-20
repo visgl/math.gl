@@ -5,7 +5,7 @@
 ```
 import {transformGeometry, mergeGeometries, weldGeometry, getDegenerateTriangles}
 
-  from '@math.gl/geometry';
+  from '@math.gl/geometry/processing';
 ```
 
 These operations accept `GeometryInput` with `topology: 'triangle-list'`, packed typed-array attributes, and optional indices. They accept compatible geometry generator outputs directly. Positions use `POSITION` or `positions` with size 3. Each other attribute needs an explicit size and the same vertex count. Both `value` and legacy `values` storage are accepted. Interleaved and constant attributes are not supported. Values must be finite and indices valid. Outputs have fresh buffers and Uint32 indices; inputs are never modified.

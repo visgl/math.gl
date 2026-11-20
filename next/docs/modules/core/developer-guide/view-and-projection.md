@@ -7,7 +7,7 @@ A view matrix expresses world coordinates relative to a camera. A projection mat
 `lookAt()` takes the camera position, its target, and an up direction:
 
 ```
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
 
 
@@ -59,7 +59,7 @@ const ndc = [clip[0] / clip[3], clip[1] / clip[3], clip[2] / clip[3]];
 The `Matrix4` projection methods use the OpenGL/WebGL depth convention: normalized device coordinates span -1 to 1 in X, Y, and Z. The functional API also provides projections with Z in \[0, 1], as used by WebGPU:
 
 ```
-import {mat4PerspectiveZO} from '@math.gl/core';
+import {mat4PerspectiveZO} from '@math.gl/core/matrix';
 
 
 

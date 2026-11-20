@@ -7,7 +7,7 @@ The class and functional APIs share array-compatible storage, but expose differe
 Import namespaces or individual operations from the package root:
 
 ```
-import {Matrix4, mat4, mat4FromRotationTranslationScale} from '@math.gl/core';
+import {Matrix4, mat4, mat4FromRotationTranslationScale} from '@math.gl/core/matrix';
 
 
 
@@ -57,7 +57,7 @@ Quaternion angles are radians. `quatGetAngle` and `quatRotationTo` require unit 
 Normals need the inverse transpose of the linear part of the model matrix, especially with nonuniform scale. Copying its upper-left 3x3 block is not equivalent.
 
 ```
-import {mat3NormalFromMat4, vec3TransformMat3, vec3Normalize} from '@math.gl/core';
+import {mat3NormalFromMat4, vec3TransformMat3, vec3Normalize} from '@math.gl/core/matrix';
 
 
 

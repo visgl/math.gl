@@ -9,7 +9,7 @@ The `@math.gl/earth` module evaluates geoid heights from Earth gravity model gri
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import { parsePGM } from "@math.gl/earth";
+import { parsePGM } from "@math.gl/earth/geoid";
 
 import gridUrl from "@math.gl/earth/geoid/geoid-egm96-hi.pgm?url";
 

@@ -7,13 +7,13 @@ Configuration, numeric comparisons, angle conversions, and array helpers for cor
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {config, equals} from '@math.gl/core';
+import {config, equals} from '@math.gl/core/matrix';
 ```
 
 Setting configuration
 
 ```
-import {config} from '@math.gl/core';
+import {config} from '@math.gl/core/matrix';
 
 config.EPSILON = 1e-12;
 

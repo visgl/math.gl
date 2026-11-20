@@ -9,7 +9,7 @@ The returned box is expressed in ellipsoid-fixed Cartesian coordinates. Its orie
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {toRadians} from '@math.gl/core';
+import {toRadians} from '@math.gl/core/matrix';
 
 import {makeOBBFromRegion} from '@math.gl/geospatial';
 

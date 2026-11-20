@@ -11,7 +11,7 @@ A class to handle Euler rotation. More information on rotation using a Euler vec
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {Euler} from '@math.gl/core';
+import {Euler} from '@math.gl/core/matrix';
 ```
 
 Rotation order is represented by the `EulerRotationOrder` type. Its valid values are `'xyz'`, `'xzy'`, `'yxz'`, `'yzx'`, `'zxy'`, and `'zyx'`. The default is `'zyx'`.

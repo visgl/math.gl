@@ -11,7 +11,7 @@ npm install @math.gl/core
 ```
 
 ```
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 
 
 
@@ -39,7 +39,7 @@ Check a known point before processing a whole dataset. For rotations and matrix 
 Enable core validation to find invalid numeric results close to the operation that produced them:
 
 ```
-import {configure, Vector3} from '@math.gl/core';
+import {configure, Vector3} from '@math.gl/core/matrix';
 
 
 
@@ -61,7 +61,7 @@ Test with independent expected values and a tolerance appropriate to the scale a
 Allocate scratch objects outside hot loops. Consume each result before reusing its storage, and copy it if it needs to outlive the iteration:
 
 ```
-import {Matrix4, Vector3} from '@math.gl/core';
+import {Matrix4, Vector3} from '@math.gl/core/matrix';
 
 
 
@@ -85,7 +85,7 @@ For large coordinate datasets, prefer [projection buffer APIs](https://visgl.git
 Use named imports from documented package entry points:
 
 ```
-import {Matrix4, Vector3, mat4, vec3} from '@math.gl/core';
+import {Matrix4, Vector3, mat4, vec3} from '@math.gl/core/matrix';
 ```
 
 Production ESM bundlers can remove unused exports. Avoid storing or passing the complete package namespace, which can make every export observable and prevent tree shaking. Native Node ESM and CommonJS load static root dependencies even when you import a single name; tree shaking is a bundler optimization.

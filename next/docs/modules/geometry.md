@@ -14,7 +14,12 @@ All generated meshes use `triangle-list` topology and expose `POSITION`, `NORMAL
 
 The root entry point also exports mesh utilities, curves, polygon operations, analytic queries, and spatial indexes. Their reference pages are grouped by topic in the sidebar. `@math.gl/geometry/culling` is also available as a dedicated entry point for bounding volumes and queries.
 
-Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](https://visgl.github.io/math.gl/next/docs/modules/geometry/lighting.md). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
+## Lighting and color subpaths[​](#lighting-and-color-subpaths "Direct link to Lighting and color subpaths")
+
+| Import path                  | Use it to                                                                                                                                                                              |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@math.gl/geometry/lighting` | [Sample intensity, integrate luminous flux, and resample photometric profiles](https://visgl.github.io/math.gl/next/docs/modules/geometry/lighting.md#photometric-model). |
+| `@math.gl/geometry/color`    | [Sample and apply color lookup tables](https://visgl.github.io/math.gl/next/docs/modules/geometry/lighting.md#numerical-color-luts).                                      |
 
 ## Usage[​](#usage "Direct link to Usage")
 

@@ -5,7 +5,7 @@ Rounding can make mathematically equivalent calculations produce slightly differ
 ## Compare values[​](#compare-values "Direct link to Compare values")
 
 ```
-import {equals, exactEquals, Vector3} from '@math.gl/core';
+import {equals, exactEquals, Vector3} from '@math.gl/core/matrix';
 
 
 

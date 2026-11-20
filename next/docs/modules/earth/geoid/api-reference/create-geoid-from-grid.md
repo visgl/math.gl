@@ -5,7 +5,7 @@
 Creates a `Geoid` from a complete global grid of decoded unsigned 16-bit samples. It uses the same bilinear or cubic interpolation as `parsePGM`, without requiring Arrow or a Parquet decoder in `@math.gl/earth`.
 
 ```
-import {createGeoidFromGrid} from '@math.gl/earth';
+import {createGeoidFromGrid} from '@math.gl/earth/geoid';
 
 
 

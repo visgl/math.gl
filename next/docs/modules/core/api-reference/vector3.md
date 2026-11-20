@@ -7,7 +7,7 @@
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 
 const vector = new Vector3(1, 1, 1);
 ```

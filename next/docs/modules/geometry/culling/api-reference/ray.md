@@ -7,7 +7,7 @@ A ray that extends infinitely from an origin in one direction.
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 
 import {Plane, Ray} from '@math.gl/geometry/culling';
 

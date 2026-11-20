@@ -16,7 +16,7 @@ Use `Euler` angles to specify an orientation, `Quaternion` to compose or interpo
 Convert Euler angles to a quaternion, then transform a vector directly or build a matrix:
 
 ```
-import {Euler, Quaternion, Matrix4, Vector3} from '@math.gl/core';
+import {Euler, Quaternion, Matrix4, Vector3} from '@math.gl/core/matrix';
 
 
 

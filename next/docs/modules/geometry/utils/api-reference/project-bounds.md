@@ -3,7 +3,7 @@
 Project a finite 2D/3D box through a prepared synchronous transform. Unlike projecting only corners, the sampling lattice includes edges, faces and interiors. No projection engine, renderer or Arrow runtime is imported.
 
 ```
-import {projectBounds} from '@math.gl/geometry';
+import {projectBounds} from '@math.gl/geometry/processing';
 
 
 

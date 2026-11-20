@@ -1,4 +1,4 @@
-# @math.gl/geometry/utils
+# @math.gl/geometry/processing
 
 ![From v4.2](https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square)
 
@@ -13,9 +13,9 @@ Utilities for processing renderer-independent geometry stored in typed arrays. T
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {computeVertexNormals, octDecode} from '@math.gl/geometry';
+import {computeVertexNormals, octDecode} from '@math.gl/geometry/processing';
 
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 
 
 

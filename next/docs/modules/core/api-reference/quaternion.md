@@ -9,7 +9,7 @@ Stores quaternion components as `[x, y, z, w]`. Use unit quaternions for rotatio
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {Quaternion} from '@math.gl/core';
+import {Quaternion} from '@math.gl/core/matrix';
 ```
 
 ## Members[​](#members "Direct link to Members")

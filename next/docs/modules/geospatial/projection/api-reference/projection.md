@@ -4,23 +4,7 @@
 
 `Projection` is the backend-independent type for a coordinate transformation between one source and target CRS. Create instances through a [ProjectionEngine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md). It is a type, not a constructor.
 
-```
-import type { Projection, ProjectionEngine } from "@math.gl/geospatial/projection/types";
-
-import { projectionEngine } from "@math.gl/geospatial/projection";
-
-
-
-const engine: ProjectionEngine = projectionEngine;
-
-const projection: Projection = engine.createProjection({ to: "EPSG:3857" });
-
-const meters = await projection.project([12, 55]);
-
-const longitudeLatitude = await projection.unproject(meters);
-```
-
-The `/types` entry point exports only types and adds no runtime code when used with `import type`. Applications can accept this contract without depending on a particular engine.
+See [`@math.gl/geospatial/projection/types`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/types.md) for the import and usage example.
 
 ## Coordinate methods[​](#coordinate-methods "Direct link to Coordinate methods")
 

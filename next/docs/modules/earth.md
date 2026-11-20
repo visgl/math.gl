@@ -1,12 +1,6 @@
 # @math.gl/earth
 
-Earth models, sunlight, astronomy, and timezones, available as named exports from the package root.
-
-## Usage[​](#usage "Direct link to Usage")
-
-```
-import {Geoid, getSunPosition, getMoonPosition} from '@math.gl/earth';
-```
+Earth models, sunlight, astronomy, time zones, and ocean calculations. Import each API from its feature subpath.
 
 ## Features[​](#features "Direct link to Features")
 
@@ -18,16 +12,14 @@ import {Geoid, getSunPosition, getMoonPosition} from '@math.gl/earth';
 | Seawater and underwater acoustics | ✅      | Optional `/ocean` entry point: TEOS-10 subset, classic sound-speed and absorption equations. |
 | Automatic dataset fetching        | ❌      | Applications control data loading and ownership.                                             |
 
-## API[​](#api "Direct link to API")
+## Entry points[​](#entry-points "Direct link to Entry points")
 
-| Topic                                                                                        | Root exports                                                              |
-| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| [Geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md)       | `Geoid`, `parsePGM`, `createGeoidFromGrid`                                |
-| [Sun](https://visgl.github.io/math.gl/next/docs/modules/earth/sun.md)           | Solar and lunar positions, daylight, sky lighting, and observer utilities |
-| [Timezone](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone.md) | Geographic timezone lookup and local calendar calculations                |
+| Import                                                                                                                        | Description                                                               |
+| ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [`@math.gl/earth/geoid`](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md)                       | Parse geoid grids and compute height offsets.                             |
+| [`@math.gl/earth/sun`](https://visgl.github.io/math.gl/next/docs/modules/earth/sun.md)                           | Solar and lunar positions, daylight, observer geometry, and sky lighting. |
+| [`@math.gl/earth/sun/stars`](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/stars.md) | Star catalog and galactic calculations.                                   |
+| [`@math.gl/earth/timezone`](https://visgl.github.io/math.gl/next/docs/modules/earth/timezone.md)                 | Geographic timezone lookup and local calendar calculations.               |
+| [`@math.gl/earth/ocean`](https://visgl.github.io/math.gl/next/docs/modules/earth/ocean.md)                       | Seawater state, underwater sound speed, and absorption.                   |
 
-The root also exports `geoid`, `sun`, and `timezone` namespaces. The `/sun` and `/timezone` entry points provide focused imports. Star-catalog data is available separately from [`@math.gl/earth/sun/stars`](https://visgl.github.io/math.gl/next/docs/modules/earth/sun/api-reference/stars.md).
-
-The optional [`@math.gl/earth/ocean`](https://visgl.github.io/math.gl/next/docs/modules/earth/ocean.md) entry point evaluates seawater state, sound speed and sound absorption without datasets. Import it explicitly; the root does not export it.
-
-Load optional geoid grids and timezone geometry explicitly; importing the root does not automatically fetch these datasets.
+Load optional geoid grids and timezone geometry explicitly when your application needs them.

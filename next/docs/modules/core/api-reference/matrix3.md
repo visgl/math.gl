@@ -7,7 +7,7 @@ A 3x3 matrix. Any arguments can be plain JavaScript arrays or other `math.gl` ob
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {Matrix3} from '@math.gl/core';
+import {Matrix3} from '@math.gl/core/matrix';
 ```
 
 Copy a matrix to a `Matrix3` so that it can be manipulated (and mutated) with `Matrix3` methods:

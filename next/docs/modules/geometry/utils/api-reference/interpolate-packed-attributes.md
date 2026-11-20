@@ -4,14 +4,14 @@
 
 Reconstruct attributes in interleaved vertex buffers from original-vertex provenance, such as the output of `subdivideTriangleMesh` or `subdivideGlobeMesh`. The helper does not depend on a renderer, GPU API, or polygon module at runtime. It returns a fresh `Uint8Array` with the same record stride and never modifies its input.
 
-Use the dedicated `@math.gl/geometry` subpath for a standalone import with no runtime dependencies. The root package also exports the helper and its types for convenience; its existing geometry-processing dependencies are unchanged.
+Use the dedicated `@math.gl/geometry/processing` subpath for a standalone import with no runtime dependencies. The root package also exports the helper and its types for convenience; its existing geometry-processing dependencies are unchanged.
 
 ## Example[​](#example "Direct link to Example")
 
 ```
-import {interpolatePackedAttributes} from '@math.gl/geometry';
+import {interpolatePackedAttributes} from '@math.gl/geometry/processing';
 
-import {subdivideTriangleMesh} from '@math.gl/geometry';
+import {subdivideTriangleMesh} from '@math.gl/geometry/processing';
 
 
 
@@ -63,7 +63,7 @@ const attributes = [
 
   {type: 'uint8', size: 4, byteOffset: 12, interpolation: 'flat'}
 
-] satisfies import('@math.gl/geometry').PackedAttribute[];
+] satisfies import('@math.gl/geometry/processing').PackedAttribute[];
 ```
 
 ## API[​](#api "Direct link to API")
@@ -102,7 +102,7 @@ Invalid layouts, overlapping fields, contributing indices, weights, nonfinite de
 
 #### `composeAttributeProvenance(parent, child, options?)`[​](#composeattributeprovenanceparent-child-options "Direct link to composeattributeprovenanceparent-child-options")
 
-Import from `@math.gl/geometry`. Compose the triplet provenance returned by clipping or subdivision: `parent` maps intermediate vertices to original records, and `child` maps final vertices to intermediate records. The result owns `Uint32Array sourceVertexIndices` and `Float64Array sourceVertexWeights`, with three slots per final vertex. Coincident contributor indices are combined and weights normalized to sum to one within floating-point arithmetic. Inputs remain unchanged and the result is structured-cloneable.
+Import from `@math.gl/geometry/processing`. Compose the triplet provenance returned by clipping or subdivision: `parent` maps intermediate vertices to original records, and `child` maps final vertices to intermediate records. The result owns `Uint32Array sourceVertexIndices` and `Float64Array sourceVertexWeights`, with three slots per final vertex. Coincident contributor indices are combined and weights normalized to sum to one within floating-point arithmetic. Inputs remain unchanged and the result is structured-cloneable.
 
 `maxVertices` defaults to 65536 and bounds output allocation. Invalid indices, negative/nonfinite weights, triplets not summing to one within 1e-10, and more than three distinct original contributors reject. Zero-weight slots are ignored. The triplet restriction describes source triangles; it does not represent arbitrary interpolation across multiple source triangles. Compose triangle identities separately through `sourceTriangleIndices`.
 

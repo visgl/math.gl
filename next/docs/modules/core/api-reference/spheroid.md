@@ -7,7 +7,7 @@ The optional `@math.gl/core` entry provides low-level conversions between longit
 For CRS units, axes, datums, grids and epochs, use [`ProjectionEngine`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md). For three-radius geometry, surface normals and local frames, use [`Ellipsoid`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid.md).
 
 ```
-import {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core';
+import {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core/matrix';
 
 
 

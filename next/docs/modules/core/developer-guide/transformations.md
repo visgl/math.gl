@@ -7,7 +7,7 @@ Use `Matrix4` to combine translation, rotation, and scale. Use a quaternion when
 Points include translation; directions do not:
 
 ```
-import {Matrix4, Vector3} from '@math.gl/core';
+import {Matrix4, Vector3} from '@math.gl/core/matrix';
 
 
 

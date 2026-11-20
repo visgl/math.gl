@@ -5,7 +5,7 @@
 `Bounds2D` describes an axis-aligned 2D extent as `[[minX, minY], [maxX, maxY]]`.
 
 ```
-import type {Bounds2D} from '@math.gl/core';
+import type {Bounds2D} from '@math.gl/core/types';
 
 
 

@@ -12,6 +12,21 @@ npm install @math.gl/sql apache-arrow
 
 Apache Arrow 17 or later is required for execution. The `/parser` and `/expressions` entry points can be used without Arrow; it is an optional peer dependency for those uses.
 
+## Package entry points[​](#package-entry-points "Direct link to Package entry points")
+
+| Import path                    | Use it to                                                                                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@math.gl/sql`                 | Run [queries over Arrow tables](https://visgl.github.io/math.gl/next/docs/modules/sql/queries.md), compute columns, or aggregate record batches.       |
+| `@math.gl/sql/parser`          | [Parse SQL](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md) into expressions, predicates, or queries without executing it.            |
+| `@math.gl/sql/expressions`     | [Evaluate portable expressions](https://visgl.github.io/math.gl/next/docs/modules/sql/expressions.md) against JavaScript objects.                      |
+| `@math.gl/sql/arrow`           | [Compile expressions and predicates](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow.md) against an Arrow schema for reuse across batches. |
+| `@math.gl/sql/worker`          | Run structured queries and expressions [off the calling thread](https://visgl.github.io/math.gl/next/docs/modules/sql/workers.md).                     |
+| `@math.gl/sql/math-functions`  | Register [numeric SQL functions](https://visgl.github.io/math.gl/next/docs/modules/sql/math-functions.md) such as `SIN` and `SQRT`.                    |
+| `@math.gl/sql/color-functions` | Register [color functions](https://visgl.github.io/math.gl/next/docs/modules/sql/color-functions.md) for construction, conversion, and mapping.        |
+| `@math.gl/sql/scales`          | [Parse scale expressions, resolve domains, and evaluate scales](https://visgl.github.io/math.gl/next/docs/modules/sql/scales.md) on Arrow columns.     |
+
+Worker bootstrap entry points `@math.gl/sql/worker-entry.js` and `@math.gl/sql/query-worker-entry.js` start their respective worker runtimes. See [Workers](https://visgl.github.io/math.gl/next/docs/modules/sql/workers.md) for setup. The test-only entry point `@math.gl/sql/scales/conformance` provides shared fixture cases for scale implementations.
+
 ## Run a query[​](#run-a-query "Direct link to Run a query")
 
 ```
@@ -64,32 +79,20 @@ The optional third argument accepts:
 
 Direct column projections can share input buffers. Filtering, sorting, joins, and computed columns may allocate results. See [query execution](https://visgl.github.io/math.gl/next/docs/modules/sql/queries.md) for structured queries, record-batch streaming, and progressive aggregates.
 
-## Choose an entry point[​](#choose-an-entry-point "Direct link to Choose an entry point")
-
-| Import                                                                                                                  | Purpose                                                                                       |
-| ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `@math.gl/sql`                                                                                                          | Execute SQL or structured queries, replace computed columns, and aggregate tables or streams. |
-| [`@math.gl/sql/parser`](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md)                   | Parse SQL into expressions, predicates, or query representations without executing it.        |
-| [`@math.gl/sql/arrow`](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow.md)                     | Compile expressions and predicates against an Arrow schema.                                   |
-| [`@math.gl/sql/worker`](https://visgl.github.io/math.gl/next/docs/modules/sql/workers.md)                  | Execute structured queries and expressions in workers.                                        |
-| [`@math.gl/sql/math-functions`](https://visgl.github.io/math.gl/next/docs/modules/sql/math-functions.md)   | Register typed numeric functions such as `SIN` and `SQRT`.                                    |
-| [`@math.gl/sql/color-functions`](https://visgl.github.io/math.gl/next/docs/modules/sql/color-functions.md) | Register color construction, conversion, and mapping functions.                               |
-| [`@math.gl/sql/scales`](https://visgl.github.io/math.gl/next/docs/modules/sql/scales.md)                   | Define portable visualization scales and resolve legend descriptors.                          |
-| [`@math.gl/sql/expressions`](https://visgl.github.io/math.gl/next/docs/modules/sql/expressions.md)         | Parse and evaluate portable expressions against JavaScript objects.                           |
-
 ## Supported SQL[​](#supported-sql "Direct link to Supported SQL")
 
-These capabilities describe **`queryArrowSQL`**, rather than every parser entry point.
+This table describes the SQL that `queryArrowSQL` executes.
 
-| Capability               | Support and limits                                                                                                                                                                                                       |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Projection and filtering | Columns, aliases, computed expressions, and Boolean `WHERE` expressions.                                                                                                                                                 |
-| Joins                    | One inner equality join per SELECT; qualify both join keys with table names or aliases.                                                                                                                                  |
-| Aggregation              | Column-based `GROUP BY` and top-level aggregate calls such as `SUM(quantity)` and `COUNT(*)`.                                                                                                                            |
-| Sorting                  | `ORDER BY` output columns or aliases; stable ordering with nulls last by default.                                                                                                                                        |
-| Pagination               | Nonnegative integer `OFFSET` and `LIMIT`.                                                                                                                                                                                |
-| Set operations           | `UNION ALL` with compatible output schemas; trailing sorting and pagination apply to the combined result.                                                                                                                |
-| Typed expressions        | Explicit casts, arithmetic, supported scalar functions, searched CASE, and fixed-size arrays. See [expression conformance](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow/sql-conformance.md). |
+| Capability               | Support and limits                                                                                                                                                                                                                      |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Projection and filtering | Columns, aliases, computed expressions, and Boolean `WHERE` expressions.                                                                                                                                                                |
+| Joins                    | One inner equality join per SELECT; qualify both join keys with table names or aliases.                                                                                                                                                 |
+| Table functions          | Standalone `FROM function(...)` and correlated `CROSS JOIN LATERAL` or `LEFT JOIN LATERAL … ON TRUE`. See [table functions](https://visgl.github.io/math.gl/next/docs/modules/sql/queries.md#table-function-declarations). |
+| Aggregation              | Column-based `GROUP BY` and top-level aggregate calls such as `SUM(quantity)` and `COUNT(*)`.                                                                                                                                           |
+| Sorting                  | `ORDER BY` output columns or aliases; stable ordering with nulls last by default.                                                                                                                                                       |
+| Pagination               | Nonnegative integer `OFFSET` and `LIMIT`.                                                                                                                                                                                               |
+| Set operations           | `UNION ALL` with compatible output schemas; trailing sorting and pagination apply to the combined result.                                                                                                                               |
+| Typed expressions        | Explicit casts, arithmetic, supported scalar functions, searched CASE, and fixed-size arrays. See [expression conformance](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow/sql-conformance.md).                |
 
 The executor does not support writes or schema changes, CTEs, subqueries, window functions, `DISTINCT`, `HAVING`, or general SQL dialect compatibility. Catalog commands accepted by `parseSQLQuery`, such as `SHOW SOURCES`, are for applications to handle; they are not executable by `queryArrowSQL`. See [the parser reference](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md) for each parser's contract.
 
@@ -119,9 +122,7 @@ const roots = queryArrowSQL(
 );
 ```
 
-See [spatial SQL functions](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow/spatial-functions.md) to derive geometry and measurement columns.
-
-See [typed functions](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow.md#named-table-functions) for application-defined functions and [color functions](https://visgl.github.io/math.gl/next/docs/modules/sql/color-functions.md) for visualization-oriented queries. Geospatial and DGGS libraries remain in their owning packages.
+See [function packages and column metadata](https://visgl.github.io/math.gl/next/docs/modules/sql/queries.md#function-packages-and-column-metadata) to write scalar, aggregate, and table functions. For functions supplied by other math.gl packages, see [spatial SQL](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow/spatial-functions.md) and [DGGS function libraries](https://visgl.github.io/math.gl/next/docs/modules/sql/api-reference/dggs-function-libraries.md).
 
 ## Execution choices[​](#execution-choices "Direct link to Execution choices")
 
@@ -132,7 +133,3 @@ See [typed functions](https://visgl.github.io/math.gl/next/docs/modules/sql/arro
 * Use a [worker session](https://visgl.github.io/math.gl/next/docs/modules/sql/workers.md) for structured queries off the calling thread.
 
 Streaming queries do not make joins, sorting, or arbitrary relational SQL incremental. The synchronous engine checks cancellation during execution, but a worker is needed to keep long-running work off the UI thread. Registered functions run application code; evaluation is not a security sandbox.
-
-## Scales[​](#scales "Direct link to Scales")
-
-Import SQL scale parsing, domain resolution, compilation, and numeric/color Arrow evaluation from `@math.gl/sql/scales`. Reusable color and LUT algorithms are available from `@math.gl/core/color`.

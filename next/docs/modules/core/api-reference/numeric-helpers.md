@@ -31,7 +31,7 @@ Sum absolute component differences.
 These helpers are separate functions so importing a vector class alone does not retain their code. Pass a vector instance as the output to mutate it explicitly.
 
 ```
-import {Vector3, vectorReflect, vectorClampLength} from '@math.gl/core';
+import {Vector3, vectorReflect, vectorClampLength} from '@math.gl/core/matrix';
 
 
 

@@ -1,4 +1,4 @@
-# @math.gl/geometry (POC)
+# @math.gl/geometry/spatial-index 🧪
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
@@ -13,7 +13,7 @@ This proof of concept indexes static Cartesian boxes, points, and triangles. It 
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {BoxIndex, PointIndex, TriangleBVH} from '@math.gl/geometry';
+import {BoxIndex, PointIndex, TriangleBVH} from '@math.gl/geometry/spatial-index';
 
 
 
@@ -110,7 +110,7 @@ Inputs must be finite XYZ points. Coordinate spans and output distances that ove
 
 For background on closest-pair formulations, see Geometric Tools' [segment/triangle query](https://github.com/davideberly/GeometricTools/blob/master/GTE/Mathematics/DistSegment3Triangle3.h) and [segment-distance analysis](https://www.geometrictools.com/Documentation/DistanceLine3Line3.pdf).
 
-The ray and triangle geometry kernels are reused from `@math.gl/geometry/culling`. `@math.gl/geometry` provides BoxIndex and PointIndex without the triangle code.
+The ray and triangle geometry kernels are reused from `@math.gl/geometry/culling`.
 
 For terrain picking, keep physical heights and validity masks in the caller (for example loaders.gl height grids). The BVH indexes displayed geometry; it does not infer datums, reconstruct elevation, or apply exaggeration:
 

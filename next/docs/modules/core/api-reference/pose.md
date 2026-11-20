@@ -11,7 +11,7 @@ class Pose
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {Pose} from '@math.gl/core';
+import {Pose} from '@math.gl/core/matrix';
 ```
 
 ## Members[​](#members "Direct link to Members")

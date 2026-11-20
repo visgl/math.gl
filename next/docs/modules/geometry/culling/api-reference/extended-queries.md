@@ -73,7 +73,7 @@ Builds an asymmetric perspective matrix from the near-plane `left`, `right`, `bo
 Builds an orthographic matrix from `left`, `right`, `bottom`, and `top`, with finite `near` and `far`.
 
 ```
-import {mat4PerspectiveProjection} from '@math.gl/core';
+import {mat4PerspectiveProjection} from '@math.gl/core/matrix';
 
 import {CullingVolume} from '@math.gl/geometry';
 

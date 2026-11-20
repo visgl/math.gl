@@ -1,6 +1,6 @@
-# @math.gl/dggs 🧪
+# @math.gl/dggs
 
-![From-v4.0](https://img.shields.io/badge/From-v4.0-blue.svg?style=flat-square)![Status: Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)
+![From-v4.0](https://img.shields.io/badge/From-v4.0-blue.svg?style=flat-square)
 
 `@math.gl/dggs` provides a deliberately small JavaScript API for decoding cell geometry from A5, GeoHash, H3, Quadkey, S2, and full Google Plus Code identifiers. It also detects their conventional data-column names so visualization layers such as deck.gl-community's [`GlobalGridLayer`](https://github.com/visgl/deck.gl-community/tree/master/modules/geo-layers/src/global-grid-layer) can select the appropriate decoder.
 
@@ -24,23 +24,18 @@ const match = findDGGSCellColumn(['name', 's2_token', 'value']);
 // {columnName: 's2_token', decoder: S2Decoder}
 ```
 
-The root export contains the shared types, bundled decoder registry, cell-column detection, and all decoders. Decoder-specific subpaths are also available when an application only needs one grid:
+## Decoders[​](#decoders "Direct link to Decoders")
 
-* `@math.gl/dggs`
-* `@math.gl/dggs`
-* `@math.gl/dggs`
-* `@math.gl/dggs`
-* `@math.gl/dggs`
-* `@math.gl/dggs`
+Import individual decoders, shared types, the decoder registry, and column detection from `@math.gl/dggs`.
 
-| Decoder   | Cell identifier                | Classification           |
-| --------- | ------------------------------ | ------------------------ |
-| A5        | hexadecimal string or `bigint` | DGGS                     |
-| GeoHash   | string                         | DGGS-like geocode        |
-| H3        | hexadecimal string or `bigint` | DGGS                     |
-| Plus Code | full string code               | DGGS-like geocode        |
-| Quadkey   | string                         | DGGS-like tile hierarchy |
-| S2        | token string or `bigint`       | DGGS                     |
+| Decoder                                                                                                                     | Cell identifier                | Classification           |
+| --------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------------------------ |
+| [`A5Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/a5-decoder.md)              | Hexadecimal string or `bigint` | DGGS                     |
+| [`GeohashDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/geohash-decoder.md)    | String                         | DGGS-like geocode        |
+| [`H3Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/h3-decoder.md)              | Hexadecimal string or `bigint` | DGGS                     |
+| [`PlusCodeDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/plus-code-decoder.md) | Full string code               | DGGS-like geocode        |
+| [`QuadkeyDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/quadkey-decoder.md)    | String                         | DGGS-like tile hierarchy |
+| [`S2Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/s2-decoder.md)              | Token string or `bigint`       | DGGS                     |
 
 Only full Plus Codes can be decoded without more context. Short Plus Codes are intentionally unsupported because recovering one requires a reference location.
 

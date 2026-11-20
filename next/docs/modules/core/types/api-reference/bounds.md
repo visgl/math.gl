@@ -5,7 +5,7 @@
 `Bounds` is a type-only union of [Bounds2D](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds2d.md) and [Bounds3D](https://visgl.github.io/math.gl/next/docs/modules/core/types/api-reference/bounds3d.md). Each uses `[minimum, maximum]` coordinates.
 
 ```
-import type {Bounds} from '@math.gl/core';
+import type {Bounds} from '@math.gl/core/types';
 
 
 

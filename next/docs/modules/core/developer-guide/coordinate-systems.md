@@ -11,7 +11,7 @@ Choose coordinates that fit the operation you need. Core provides Cartesian vect
 ## Convert spherical coordinates[​](#convert-spherical-coordinates "Direct link to Convert spherical coordinates")
 
 ```
-import {SphericalCoordinates, Vector3} from '@math.gl/core';
+import {SphericalCoordinates, Vector3} from '@math.gl/core/matrix';
 
 
 
