@@ -13,7 +13,7 @@ import {parseWKT, writeWKB} from '@math.gl/core/arrow';
 
 import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
 
-import {queryArrowSQL} from '@math.gl/sql';
+import {queryArrowSQL} from '@math.gl/sql/query';
 
 
 

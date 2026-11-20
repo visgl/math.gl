@@ -32,7 +32,7 @@ Worker bootstrap entry points `@math.gl/sql/worker-entry.js` and `@math.gl/sql/q
 ```
 import {tableFromArrays} from 'apache-arrow';
 
-import {queryArrowSQL} from '@math.gl/sql';
+import {queryArrowSQL} from '@math.gl/sql/query';
 
 
 
@@ -105,7 +105,7 @@ Experimental [SQL UNNEST](https://visgl.github.io/math.gl/next/docs/modules/sql/
 Function declarations are explicit and local to a query. Import only the functions you need:
 
 ```
-import {queryArrowSQL} from '@math.gl/sql';
+import {queryArrowSQL} from '@math.gl/sql/query';
 
 import {SQRT} from '@math.gl/sql/math-functions';
 

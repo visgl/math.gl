@@ -7,7 +7,7 @@ Use the functions exported by `@math.gl/sql` to query native Arrow tables and re
 `queryArrowTable()` runs an in-memory SELECT on a native Apache Arrow table and returns a native Arrow table. Supply the input table directly. If the SELECT names a source with `FROM`, the caller resolves that name before invoking the executor.
 
 ```
-import {queryArrowTable} from '@math.gl/sql';
+import {queryArrowTable} from '@math.gl/sql/query';
 
 import {parseSQLQuery} from '@math.gl/sql/parser';
 
@@ -57,7 +57,7 @@ const totals = queryArrowTable(orders, {
 Use `queryArrowSQL(sql, tables)` to run relational SQL directly against a map of named Arrow tables. It supports one inner equality join per SELECT, column-based grouping, top-level aggregate calls, ordering by output columns, and UNION ALL with matching output schemas. Trailing ORDER BY, OFFSET, and LIMIT apply to the combined result.
 
 ```
-import {queryArrowSQL} from '@math.gl/sql';
+import {queryArrowSQL} from '@math.gl/sql/query';
 
 
 
@@ -95,7 +95,7 @@ For worker execution, see [Workers](https://visgl.github.io/math.gl/next/docs/mo
 `queryArrowTableInBatches(batches, schema, query)` applies the same schema-bound WHERE and SELECT as `queryArrowTable` to an iterable or async iterable of Arrow record batches. OFFSET and LIMIT apply across the stream, and reaching the limit closes the input iterator. Supply the schema up front, including for empty inputs. Grouping, sorting, joins and unions use the table engine.
 
 ```
-import {queryArrowTableInBatches} from '@math.gl/sql';
+import {queryArrowTableInBatches} from '@math.gl/sql/query';
 
 
 
@@ -133,7 +133,7 @@ SELECT id, value + 1 AS value FROM data
 Compile named reductions against a schema, then update the same accumulator as Arrow batches arrive. Each call to `result()` returns a snapshot of the current scalar values.
 
 ```
-import {compileArrowAggregates} from '@math.gl/sql';
+import {compileArrowAggregates} from '@math.gl/sql/query';
 
 
 
@@ -188,7 +188,7 @@ The `functions` option accepts individual declarations and nested readonly array
 ```
 import {tableFromArrays} from 'apache-arrow';
 
-import {queryArrowSQLWithMetadata} from '@math.gl/sql';
+import {queryArrowSQLWithMetadata} from '@math.gl/sql/query';
 
 import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
 
@@ -268,7 +268,7 @@ export const EXAMPLE_TRANSFORMS = [HEIGHT_OFFSET] as const;
 Pass the example's Arrow table as `features` and bind `offset` from a UI control. The transform composes with the built-in scale and the result carries the resolved scale metadata for a legend.
 
 ```
-import {queryArrowSQLWithMetadata} from '@math.gl/sql';
+import {queryArrowSQLWithMetadata} from '@math.gl/sql/query';
 
 import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 

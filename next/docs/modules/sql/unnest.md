@@ -7,7 +7,7 @@
 ```
 import {Field, Int32, List, Table, vectorFromArray} from 'apache-arrow';
 
-import {queryArrowSQL} from '@math.gl/sql';
+import {queryArrowSQL} from '@math.gl/sql/query';
 
 
 
