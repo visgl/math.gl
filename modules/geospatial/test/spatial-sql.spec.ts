@@ -423,6 +423,36 @@ test('constructs XY, XYZ and XYZM points from nullable numeric coordinates', () 
   }
 });
 
+test('ST_Intersects includes touching features and excludes holes in either argument order', () => {
+  const region = 'POLYGON((0 0,8 0,8 8,0 8,0 0),(2 2,6 2,6 6,2 6,2 2))';
+  const fixtures: [string | null, string, boolean | null][] = [
+    ['POINT(1 1)', region, true],
+    ['POINT(5 5)', region, false],
+    ['POINT(2 4)', region, true],
+    ['LINESTRING(-2 3,10 3)', region, true],
+    ['LINESTRING(3 3,5 5)', region, false],
+    ['POLYGON((3 3,4 3,4 4,3 3))', region, false],
+    ['POLYGON((8 2,9 2,9 3,8 2))', region, true],
+    ['POLYGON((1 1,1.5 1,1.5 1.5,1 1))', region, true],
+    ['LINESTRING(0 0,4 4)', 'LINESTRING(0 4,4 0)', true],
+    ['LINESTRING(0 0,4 4)', 'LINESTRING(2 2,6 6)', true],
+    ['LINESTRING(0 0,4 4)', 'LINESTRING(1 2,4 5)', false],
+    ['MULTIPOINT((20 20),(1 1))', region, true],
+    ['GEOMETRYCOLLECTION(POINT(5 5),LINESTRING(3 3,4 4))', region, false],
+    ['POINT EMPTY', region, false],
+    [null, region, null]
+  ];
+  const a = wkb(...fixtures.map(row => row[0])),
+    b = wkb(...fixtures.map(row => row[1]));
+  const table = new Table(new Schema([geometryField('a', a), geometryField('b', b)]), {a, b});
+  const result = select(
+    'SELECT ST_Intersects(a,b) AS forward, ST_Intersects(b,a) AS backward FROM features',
+    table
+  );
+  for (const name of ['forward', 'backward'])
+    expect([...result.getChild(name)!]).toEqual(fixtures.map(row => row[2]));
+});
+
 test('ST_Extent combines groups across batches and ignores empty and null rows', () => {
   const g = wkb('LINESTRING(-4 8,3 5)', null, 'POINT(7 -2)', 'POLYGON EMPTY');
   const k = vectorFromArray([1, 2, 1, 2], new Int32());

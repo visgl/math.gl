@@ -35,6 +35,7 @@ import {
   midpoint,
   type TurfBatchResult
 } from '../turf';
+import {planarIntersects} from './planar-intersects';
 import {
   planarArea,
   planarBounds,
@@ -451,6 +452,17 @@ export const ST_DWITHIN = /* @__PURE__ */ spatialFunction(
   1
 );
 
+/** Tests whether two planar geometries share any point, including their boundaries. */
+export const ST_INTERSECTS = /* @__PURE__ */ spatialFunction(
+  'ST_Intersects',
+  [
+    [...geometryTypes, 'GeometryCollection'],
+    [...geometryTypes, 'GeometryCollection']
+  ],
+  /* @__PURE__ */ new Bool(),
+  ([a, b]) => planarIntersects(a!, b!)
+);
+
 /** Returns clockwise azimuth from positive Y in radians. */
 export const ST_AZIMUTH = /* @__PURE__ */ spatialFunction(
   'ST_Azimuth',
@@ -577,6 +589,7 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_MAKEENVELOPE,
     ST_DISTANCE,
     ST_DWITHIN,
+    ST_INTERSECTS,
     ST_AZIMUTH,
     ST_MAKEPOINT,
     ST_AREA,
