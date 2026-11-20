@@ -88,6 +88,32 @@ export type TickStateEvaluator<StateT> = (tickIndex: number, secondsIntoTick: nu
 /** Default value of {@link SimulationClockOptions.maxTicksPerAdvance}. */
 const DEFAULT_MAX_TICKS_PER_ADVANCE = 1000;
 
+/** Unit roundoff of float64, `u = 2^-53`: the relative error bound of one rounded operation. */
+const UNIT_ROUNDOFF = Number.EPSILON / 2;
+
+/**
+ * Number of unit roundoffs, for each second of `|time| + tickInterval`, in the error bound of
+ * one split of a time into ticks. With `t` the time to split, `d` the tick interval and `q`
+ * the tick quotient, the rounded operations give:
+ * - `realMilliseconds` from the caller: at most 1 rounding, `u * |delta|`;
+ * - `delta = realMilliseconds / 1000 * rate`: 2 roundings, `2u * |delta|`;
+ * - `total = remainder + delta`: 1 rounding, `u * |t|`;
+ * - `q * d`, and the difference between `d` and the nominal tick interval that `d` rounds:
+ *   `u * |q| * d` each, with `|q| * d <= |t| + d`.
+ * As `|delta| <= |t| + d`, the sum is at most `3u(|t| + d) + u|t| + 2u(|t| + 2d) <= 7u(|t| + d)`.
+ */
+const ROUNDING_TERMS = 7;
+
+/**
+ * Returns the bound on the rounding error of one split of a time into ticks.
+ * @param time Time to split, in seconds.
+ * @param tickInterval Tick interval, in seconds.
+ * @returns `7u(|time| + tickInterval)`, in seconds.
+ */
+function getSplitErrorBound(time: number, tickInterval: number): number {
+  return ROUNDING_TERMS * UNIT_ROUNDOFF * (Math.abs(time) + tickInterval);
+}
+
 /**
  * A fixed-tick time base for animated scenes.
  *
@@ -98,6 +124,14 @@ const DEFAULT_MAX_TICKS_PER_ADVANCE = 1000;
  *
  * The clock is time-scale-free: simulated time is a number of seconds from an epoch that
  * the caller chooses.
+ *
+ * Tick boundaries: the clock keeps a bound on the rounding error of its remainder. Each
+ * advance adds `7u(|t| + tickInterval)`, where `u = 2^-53` and `t` is the time that the advance
+ * splits into ticks; `seek` sets the bound to `7u(|t| + tickInterval)` for the time after
+ * `startTime`. A remainder within this bound below `tickInterval` is on the next tick
+ * boundary. Thus 1 advance of 300 ms and 3 advances of 100 ms with a 0.1 s tick both give
+ * 3 ticks and `alpha` 0, while 299.999 ms stays on tick 2. When each advance is at most one
+ * tick, the bound after 1e9 advances is less than `1.6e-6 * tickInterval`.
  */
 export class SimulationClock {
   /** Fixed tick interval, in simulated seconds. */
@@ -116,6 +150,13 @@ export class SimulationClock {
   private tickIndex = 0;
   /** Simulated seconds after the tick `tickIndex`, in [0, `tickInterval`). */
   private remainder = 0;
+  /**
+   * Bound on the rounding error that `remainder` carries, in seconds. Each advance adds the
+   * bound of its own split; `seek` sets it to the bound of the seek.
+   */
+  private remainderErrorBound = 0;
+  /** Remainder that {@link SimulationClock.splitTicks} returns with the tick count. */
+  private splitRemainder = 0;
 
   /**
    * Creates a clock at tick 0.
@@ -179,16 +220,9 @@ export class SimulationClock {
     }
     // Tick arithmetic stays in integers; only the sub-tick remainder is fractional.
     const total = this.remainder + delta;
-    let passedTicks = Math.floor(total / this.tickInterval);
-    let remainder = total - passedTicks * this.tickInterval;
-    // The rounded quotient can be one tick off, for example 1.7 - 17 * 0.1 < 0.
-    if (remainder < 0) {
-      passedTicks -= 1;
-      remainder += this.tickInterval;
-    } else if (remainder >= this.tickInterval) {
-      passedTicks += 1;
-      remainder -= this.tickInterval;
-    }
+    let errorBound = this.remainderErrorBound + getSplitErrorBound(total, this.tickInterval);
+    const passedTicks = this.splitTicks(total, errorBound);
+    let remainder = this.splitRemainder;
     let ticks = passedTicks;
     let skippedTicks = 0;
     if (Math.abs(passedTicks) > this.maxTicksPerAdvance) {
@@ -199,6 +233,7 @@ export class SimulationClock {
         // Lag: stop exactly `ticks` ticks later and keep the old fraction of a tick.
         out.droppedTime = delta - ticks * this.tickInterval;
         remainder = this.remainder;
+        errorBound = this.remainderErrorBound;
       }
     }
     const tickIndex = this.tickIndex + ticks + skippedTicks;
@@ -207,6 +242,7 @@ export class SimulationClock {
     }
     this.tickIndex = tickIndex;
     this.remainder = remainder;
+    this.remainderErrorBound = errorBound;
     out.ticks = ticks;
     out.skippedTicks = skippedTicks;
     return out;
@@ -317,21 +353,43 @@ export class SimulationClock {
       throw new RangeError('SimulationClock seek time must be finite');
     }
     const elapsed = time - this.epoch;
-    let tickIndex = Math.floor(elapsed / this.tickInterval);
-    if (!Number.isSafeInteger(tickIndex)) {
+    if (!Number.isSafeInteger(Math.floor(elapsed / this.tickInterval))) {
       throw new RangeError('SimulationClock seek time is outside the safe tick range');
     }
-    let remainder = elapsed - tickIndex * this.tickInterval;
-    // The rounded quotient can be one tick off, as in advance().
+    const errorBound = getSplitErrorBound(elapsed, this.tickInterval);
+    this.tickIndex = this.splitTicks(elapsed, errorBound);
+    this.remainder = this.splitRemainder;
+    this.remainderErrorBound = errorBound;
+  }
+
+  /**
+   * Splits a time after the start of the current tick into whole ticks and a remainder in
+   * [0, `tickInterval`), with the tick boundary policy:
+   * - The rounded quotient can be one tick off, for example `1.7 - 17 * 0.1 < 0`. The split
+   *   moves the remainder back into [0, `tickInterval`).
+   * - A remainder that is within `errorBound` below `tickInterval` is on the next tick
+   *   boundary: the split counts that tick and sets the remainder to 0. For example, with a
+   *   0.1 s tick, `0.3 / 0.1` is `2.9999999999999996`, and 300 ms count as 3 ticks.
+   * @param time Seconds after the start of the current tick.
+   * @param errorBound Bound on the rounding error of `time`, in seconds.
+   * @returns The tick count. The remainder is in `splitRemainder`.
+   */
+  private splitTicks(time: number, errorBound: number): number {
+    let ticks = Math.floor(time / this.tickInterval);
+    let remainder = time - ticks * this.tickInterval;
     if (remainder < 0) {
-      tickIndex -= 1;
+      ticks -= 1;
       remainder += this.tickInterval;
     } else if (remainder >= this.tickInterval) {
-      tickIndex += 1;
+      ticks += 1;
       remainder -= this.tickInterval;
     }
-    this.tickIndex = tickIndex;
-    this.remainder = remainder;
+    if (this.tickInterval - remainder <= errorBound) {
+      ticks += 1;
+      remainder = 0;
+    }
+    this.splitRemainder = remainder;
+    return ticks;
   }
 
   /**

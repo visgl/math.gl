@@ -142,8 +142,10 @@ it('SimulationClock keeps alpha in [0, 1) and counts every tick', () => {
     expect(clock.getTickAlpha()).toBeLessThan(1);
     expect(clock.getTime()).toBeCloseTo(time, 14);
   }
+  // 1.7 is on the boundary of tick 17 within the rounding bound, so the clock is on tick 17.
   clock.seek(1.7);
-  expect(clock.getTickIndex()).toBe(16);
+  expect(clock.getTickIndex()).toBe(17);
+  expect(clock.getTickAlpha()).toBe(0);
   const fine = new SimulationClock({tickInterval: 0.001});
   fine.seek(128.076);
   expect(fine.getTickIndex()).toBe(128076);
@@ -151,8 +153,8 @@ it('SimulationClock keeps alpha in [0, 1) and counts every tick', () => {
 
   // The same rounding in an advance moves the tick index, and the result counts the move.
   const advanced = new SimulationClock({tickInterval: 0.1});
-  expect(advanced.advance(1700)).toEqual({ticks: 16, skippedTicks: 0, droppedTime: 0});
-  expect(advanced.getTickAlpha()).toBeLessThan(1);
+  expect(advanced.advance(1700)).toEqual({ticks: 17, skippedTicks: 0, droppedTime: 0});
+  expect(advanced.getTickAlpha()).toBe(0);
   const advancedFine = new SimulationClock({tickInterval: 0.001, maxTicksPerAdvance: 1e6});
   expect(advancedFine.advance(128076)).toEqual({ticks: 128076, skippedTicks: 0, droppedTime: 0});
   const capped = new SimulationClock({tickInterval: 0.001, maxTicksPerAdvance: 1000});
@@ -386,4 +388,127 @@ it('SimulationClock rebase moves the epoch and keeps the time', () => {
   expect(before.startTime).toBe(-2.5);
   expect(before.getTime()).toBe(-2.25);
   expect(before.rebase()).toBe(0);
+});
+
+/**
+ * Advances a clock through a list of real-time pieces and sums the reported ticks.
+ * @param clock Clock to advance.
+ * @param pieces Real milliseconds for each advance.
+ * @returns The sum of `ticks + skippedTicks` over all advances.
+ */
+function advanceAll(clock: SimulationClock, pieces: number[]): number {
+  let total = 0;
+  for (const milliseconds of pieces) {
+    const result = clock.advance(milliseconds);
+    total += result.ticks + result.skippedTicks;
+  }
+  return total;
+}
+
+it('SimulationClock counts the same ticks for 1 x 300 ms and 3 x 100 ms', () => {
+  // Review regression: 0.3 / 0.1 is 2.9999999999999996 in float64.
+  const whole = new SimulationClock({tickInterval: 0.1});
+  const parts = new SimulationClock({tickInterval: 0.1});
+  expect(advanceAll(whole, [300])).toBe(3);
+  expect(advanceAll(parts, [100, 100, 100])).toBe(3);
+  for (const clock of [whole, parts]) {
+    expect(clock.getTickIndex()).toBe(3);
+    expect(clock.getTickAlpha()).toBe(0);
+    expect(clock.getSecondsIntoTick()).toBe(0);
+  }
+});
+
+it('SimulationClock keeps a time that is clearly before a tick boundary on the earlier tick', () => {
+  // 299.999 ms is 1e-6 s before tick 3: much more than the rounding bound.
+  const control = new SimulationClock({tickInterval: 0.1});
+  expect(advanceAll(control, [299.999])).toBe(2);
+  expect(control.getTickIndex()).toBe(2);
+  expect(control.getSecondsIntoTick()).toBeCloseTo(0.099999, 12);
+  expect(control.getTickAlpha()).toBeCloseTo(0.99999, 10);
+
+  // 1e-15 s before tick 3 is about 3 times the bound 7u(0.3 + 0.1) = 3.1e-16 s, so it stays
+  // on tick 2. A tolerance 10 times larger would move it to tick 3.
+  const near = new SimulationClock({tickInterval: 0.1});
+  expect(advanceAll(near, [299.999999999999])).toBe(2);
+  expect(near.getTickIndex()).toBe(2);
+  const seekNear = new SimulationClock({tickInterval: 0.1});
+  seekNear.seek(0.3 - 1e-15);
+  expect(seekNear.getTickIndex()).toBe(2);
+  seekNear.seek(0.3);
+  expect(seekNear.getTickIndex()).toBe(3);
+  expect(seekNear.getTickAlpha()).toBe(0);
+  seekNear.seek(-0.3);
+  expect(seekNear.getTickIndex()).toBe(-3);
+  expect(seekNear.getTickAlpha()).toBeLessThan(1e-14);
+});
+
+it('SimulationClock counts the same ticks for every partition of a nominal time', () => {
+  // Each piece is an exact number of sub-tick units, with an exact or 1-rounding real time,
+  // so the nominal total is exactly `tickCount` ticks.
+  const cases = [
+    {tickInterval: 0.1, numerator: 100, denominator: 1},
+    {tickInterval: 1 / 60, numerator: 1000, denominator: 60},
+    {tickInterval: 0.3, numerator: 300, denominator: 1}
+  ];
+  const rates = [1, 2, 0.5, 4, 8, 0.25];
+  const random = createRandom(11);
+  const unitsPerTick = 12;
+  for (const {tickInterval, numerator, denominator} of cases) {
+    for (let trial = 0; trial < 300; trial++) {
+      const tickCount = 1 + Math.floor(random() * 40);
+      const pieceCount = 1 + Math.floor(random() * 30);
+      const units: number[] = [];
+      let sum = 0;
+      for (let i = 0; i < pieceCount - 1; i++) {
+        let unit = Math.floor(random() * 50) - 15;
+        if (unit === 0) unit = 1;
+        units.push(unit);
+        sum += unit;
+      }
+      const last = tickCount * unitsPerTick - sum;
+      if (last !== 0) units.push(last);
+
+      const clock = new SimulationClock({tickInterval, maxTicksPerAdvance: 1e6});
+      let ticks = 0;
+      for (const unit of units) {
+        const rate = Math.sign(unit) * rates[Math.floor(random() * rates.length)];
+        clock.setRate(rate);
+        // Real milliseconds for `unit` sub-tick units at `rate`: one rounded division.
+        const milliseconds =
+          (Math.abs(unit) * numerator) / (unitsPerTick * denominator * Math.abs(rate));
+        const result = clock.advance(milliseconds);
+        ticks += result.ticks + result.skippedTicks;
+      }
+      expect(ticks).toBe(tickCount);
+      expect(clock.getTickIndex()).toBe(tickCount);
+      expect(clock.getTickAlpha()).toBeLessThan(1e-12);
+      expect(clock.getSecondsIntoTick()).toBeLessThan(1e-12 * tickInterval);
+
+      const whole = new SimulationClock({tickInterval, maxTicksPerAdvance: 1e6});
+      expect(advanceAll(whole, [(tickCount * numerator) / denominator])).toBe(tickCount);
+      expect(whole.getTickIndex()).toBe(tickCount);
+      expect(Math.abs(whole.getTickAlpha() - clock.getTickAlpha())).toBeLessThan(1e-12);
+    }
+  }
+});
+
+it('SimulationClock applies the boundary policy backward and after a seek', () => {
+  // Backward: 0.01 s - 2.41 s is nominally tick -24. The split gives -25 and a remainder
+  // 3.6e-16 s below 0.1 s, inside the bound 7u(2.4 + 0.1) + 7u(0.01 + 0.1).
+  const backward = new SimulationClock({tickInterval: 0.1});
+  backward.seek(0.01);
+  backward.setRate(-1);
+  expect(backward.advance(2410)).toEqual({ticks: -24, skippedTicks: 0, droppedTime: 0});
+  expect(backward.getTickIndex()).toBe(-24);
+  expect(backward.getTickAlpha()).toBe(0);
+
+  // After a seek, the remainder carries the rounding error of the seek. 2.05 s + 50 ms is
+  // nominally tick 21; the remainder is 1.8e-16 s below 0.1 s, more than the bound of the
+  // advance alone but inside the bound that includes the seek.
+  const afterSeek = new SimulationClock({tickInterval: 0.1});
+  afterSeek.seek(2.05);
+  expect(afterSeek.getTickIndex()).toBe(20);
+  expect(afterSeek.advance(50)).toEqual({ticks: 1, skippedTicks: 0, droppedTime: 0});
+  expect(afterSeek.getTickIndex()).toBe(21);
+  expect(afterSeek.getTickAlpha()).toBe(0);
 });

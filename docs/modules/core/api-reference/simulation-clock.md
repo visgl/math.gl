@@ -148,6 +148,29 @@ const rotation = clock.interpolate(previousRotation, nextRotation, (a, b, alpha)
 );
 ```
 
+## Tick boundaries
+
+Most tick intervals, such as 0.1 s or 1/60 s, are not exact in binary. Thus `0.3 / 0.1` is
+`2.9999999999999996`, and a plain floor division puts 300 ms on tick 2 with `alpha` near 1,
+while 3 advances of 100 ms reach tick 3. The clock uses this policy:
+
+- The clock keeps a bound on the rounding error of its remainder. Each advance adds
+  `7u(|t| + tickInterval)` seconds, where `u = 2^-53` is the unit roundoff of float64 and `t`
+  is the time that the advance splits into ticks. `seek` sets the bound to
+  `7u(|t| + tickInterval)` for the time after `startTime`.
+- The factor 7 counts the rounded operations of one split: 1 rounding of `realMilliseconds`
+  by the caller, 2 in `realMilliseconds / 1000 * rate`, 1 in the sum with the remainder, 1 in
+  `tickIndex * tickInterval`, and 1 for the difference between `tickInterval` and the nominal
+  interval that it rounds. Each term is at most `u(|t| + tickInterval)` or
+  `2u(|t| + tickInterval)`, and their sum is at most `7u(|t| + tickInterval)`.
+- A remainder within the bound below `tickInterval` is on the next tick boundary. The clock
+  counts that tick, and sets `alpha` and the seconds into the tick to 0.
+
+So 1 advance of 300 ms and 3 advances of 100 ms both give 3 ticks and `alpha` 0. An advance
+of 299.999 ms stays on tick 2. The bound grows with the number of advances. When each
+advance is at most one tick, the bound after 1e9 advances is less than
+`1.6e-6 * tickInterval`. A `seek` resets it.
+
 ## Large rates
 
 At a rate of one year per second and a tick of 1/60 s, one 16 ms frame passes about
