@@ -84,11 +84,13 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_GeometryType(g)` | Native geometry or WKB, including dimensional points and WKB collections | Geometry type name with the ST_ prefix. |
 | `ST_Force2D(g)` | Native geometry or WKB, including dimensional points and WKB collections | WKB geometry containing only XY ordinates. |
 | `ST_GeometryN(g, n)` | Native geometry or WKB, including dimensional points and WKB collections | One-based component as WKB with the input dimension. |
+| `ST_MakeLine(a, b)` | Two 2D Point, MultiPoint or LineString inputs | WKB LineString in argument order. An incoming line shares its first vertex with a coincident previous endpoint. |
+| `ST_Collect(a, b)` | Two 2D geometries | WKB MultiPoint, MultiLineString or MultiPolygon for matching atomic types. Mixed and multipart inputs form a GeometryCollection retaining both members. |
 | `ST_Envelope(geometry)` | Point, LineString, Polygon, and their multi-types, or a WKB GeometryCollection | GeoArrow WKB Point, LineString, or Polygon according to the extent. An empty input keeps its geometry type. |
 
 `ST_Extent(geometry)` is an aggregate. It returns the planar box of all nonempty geometries in each group as a four-element Float64 list `[xmin, ymin, xmax, ymax]`. An empty or null-only group yields null.
 
-Each scalar call produces one value per input row. A null argument produces null.
+Each scalar call produces one value per input row. A null argument produces null except in the two-argument `ST_Collect`, which returns the other geometry when just one argument is null.
 The predicates return false for empty inputs. Native GeoArrow argument types are
 checked when the query binds. WKB geometry kinds are checked when a row is
 evaluated. An unlabelled Binary column can be labelled in SQL with
