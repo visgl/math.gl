@@ -9,7 +9,7 @@ It is not a general abstraction over the full API surface of DGGS implementation
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {GeohashDecoder} from '@math.gl/dggs';
+import {GeohashDecoder} from '@math.gl/dggs/geohash';
 
 const polygon = GeohashDecoder.cellToBoundary(geohashId);
 ```
@@ -24,18 +24,18 @@ const match = findDGGSCellColumn(['name', 's2_token', 'value']);
 // {columnName: 's2_token', decoder: S2Decoder}
 ```
 
-## Decoders[​](#decoders "Direct link to Decoders")
+## Package subpaths[​](#package-subpaths "Direct link to Package subpaths")
 
-Import individual decoders, shared types, the decoder registry, and column detection from `@math.gl/dggs`.
+Import from `@math.gl/dggs` for shared types, the decoder registry, or column detection. If the grid is known in advance, use its decoder subpath.
 
-| Decoder                                                                                                                     | Cell identifier                | Classification           |
-| --------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------------------------ |
-| [`A5Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/a5-decoder.md)              | Hexadecimal string or `bigint` | DGGS                     |
-| [`GeohashDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/geohash-decoder.md)    | String                         | DGGS-like geocode        |
-| [`H3Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/h3-decoder.md)              | Hexadecimal string or `bigint` | DGGS                     |
-| [`PlusCodeDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/plus-code-decoder.md) | Full string code               | DGGS-like geocode        |
-| [`QuadkeyDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/quadkey-decoder.md)    | String                         | DGGS-like tile hierarchy |
-| [`S2Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/s2-decoder.md)              | Token string or `bigint`       | DGGS                     |
+| Import path               | Decoder                                                                                                                     | Cell identifier                | Classification           |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------------------------ |
+| `@math.gl/dggs/a5`        | [`A5Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/a5-decoder.md)              | Hexadecimal string or `bigint` | DGGS                     |
+| `@math.gl/dggs/geohash`   | [`GeohashDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/geohash-decoder.md)    | String                         | DGGS-like geocode        |
+| `@math.gl/dggs/h3`        | [`H3Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/h3-decoder.md)              | Hexadecimal string or `bigint` | DGGS                     |
+| `@math.gl/dggs/plus-code` | [`PlusCodeDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/plus-code-decoder.md) | Full string code               | DGGS-like geocode        |
+| `@math.gl/dggs/quadkey`   | [`QuadkeyDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/quadkey-decoder.md)    | String                         | DGGS-like tile hierarchy |
+| `@math.gl/dggs/s2`        | [`S2Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/s2-decoder.md)              | Token string or `bigint`       | DGGS                     |
 
 Only full Plus Codes can be decoded without more context. Short Plus Codes are intentionally unsupported because recovering one requires a reference location.
 
