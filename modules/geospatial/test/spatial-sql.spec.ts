@@ -376,3 +376,19 @@ test('ST_Extent combines groups across batches and ignores empty and null rows',
   const empty = select('SELECT ST_Extent(g) AS bounds FROM features WHERE k = 3', table);
   expect(empty.getChild('bounds')!.get(0)).toBeNull();
 });
+
+test('ST_Extent aggregates native polygon columns with nested Arrow storage', () => {
+  const shapes = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows([
+      parseWKT('POLYGON((2 1,6 1,6 4,2 1))'),
+      null,
+      parseWKT('POLYGON((-4 0,0 0,0 8,-4 0))')
+    ])
+  );
+  const table = new Table(new Schema([geometryField('g', shapes, 'polygon')]), {g: shapes});
+  const result = select(
+    'SELECT ST_Extent(g) AS bounds FROM features',
+    table.slice(0, 1).concat(table.slice(1))
+  );
+  expect(Array.from(result.getChild('bounds')!.get(0))).toEqual([-4, 0, 6, 8]);
+});

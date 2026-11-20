@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {Table} from 'apache-arrow';
+import type {RecordBatch, Table} from 'apache-arrow';
 import {DataType} from 'apache-arrow';
 import type {Expression} from '../expressions';
 import type {ArrowAggregate} from './aggregates';
@@ -88,9 +88,23 @@ export function bindSQLAggregate(
   functions?: readonly ArrowFunctionPackage[],
   signal?: AbortSignal
 ): BoundRelationAggregate & {metadata?: unknown} {
-  const args = call.arguments.map(expression =>
-    compileArrowExpression(expression, {inputSchema: table.schema, functions})
-  );
+  const args = call.arguments.map(expression => {
+    // An aggregate consumes vectors. Pass nested source columns through with their
+    // physical layout and extension metadata, just as a spatial scalar kernel does.
+    if (expression.type === 'Identifier') {
+      const index = table.schema.fields.findIndex(field => field.name === expression.name);
+      const field = table.schema.fields[index];
+      if (
+        field &&
+        (DataType.isList(field.type) ||
+          DataType.isStruct(field.type) ||
+          DataType.isFixedSizeList(field.type))
+      ) {
+        return {outputField: field, evaluate: (batch: RecordBatch) => batch.getChildAt(index)!};
+      }
+    }
+    return compileArrowExpression(expression, {inputSchema: table.schema, functions});
+  });
   const {outputField, createAccumulator, metadata} = call.custom!.bind({
     arguments: args.map(arg => arg.outputField)
   });
