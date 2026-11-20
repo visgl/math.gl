@@ -35,8 +35,9 @@ const FREEZING_COEFFICIENTS = [
   1.596435439942262, 0.1338002171109174, 1.242891021876471
 ];
 
-/** Coefficients a and b of the dissolved-air term of the same fit. */
+/** Coefficient a of the dissolved-air term of the same fit. */
 const AIR_A = 0.014289763856964;
+/** Coefficient b of the dissolved-air term of the same fit. */
 const AIR_B = 0.05700064989972;
 
 /**
