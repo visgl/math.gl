@@ -84,6 +84,14 @@ export type {LocalFramePoint, LocalFrameAxis, LocalFrameBasis} from './local-fra
 export {spheroidToCartesian, cartesianToSpheroid} from './spheroid';
 export type {SpheroidGeometry, SpheroidPoint} from './spheroid';
 export {
+  getFloat32Spacing,
+  splitFloat64,
+  splitFloat64Array,
+  subtractOrigin,
+  subtractOriginFromMatrix4
+} from './float-precision';
+export type {SubtractOriginOptions} from './float-precision';
+export {
   isUint16Array,
   NativeFloat16ArrayConstructor,
   getFloat16ArrayConstructor,

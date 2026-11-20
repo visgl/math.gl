@@ -84,6 +84,10 @@ const probes = [
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/sql/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
   {symbol:'spheroidToCartesian', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
   {symbol:'vec3Normalize', packages:['@math.gl/core'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
+  // The float precision helpers are leaves: none of them pulls in the matrix or vector code.
+  ...['splitFloat64Array', 'subtractOrigin', 'subtractOriginFromMatrix4', 'getFloat32Spacing'].map(symbol => ({
+    symbol, packages: ['@math.gl/core'], forbidden: [/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget: 1000
+  })),
   {symbol:'getGeohashBounds', packages:['@math.gl/dggs'], forbidden:[/h3-js/, /a5-js/, /open-location-code/, /s2-geometry/], budget:2500},
   {symbol:'getClosestPointsSegmentTriangle', packages:['@math.gl/geometry'], forbidden:[/parametric/, /spatial-index/, /terrain/, /earcut/], budget:5000},
   {symbol:'getStarColor', packages:['@math.gl/earth'], forbidden:[/astronomy-engine/, /bright-stars/], budget:700},
