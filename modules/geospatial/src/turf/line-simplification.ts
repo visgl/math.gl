@@ -90,10 +90,8 @@ export function reduceLineVertices(
       : null;
   }
   if (geometry.type !== 'MultiLineString') throw new Error('Expected line geometry');
-  const coordinates = geometry.coordinates
-    .map(path => reduce(path, tolerance))
-    .filter(path => path.length);
-  return coordinates.length || mode === 'removeRepeated'
-    ? {type: 'MultiLineString', coordinates}
-    : null;
+  const reduced = geometry.coordinates.map(path => reduce(path, tolerance));
+  if (mode === 'removeRepeated') return {type: 'MultiLineString', coordinates: reduced};
+  const coordinates = reduced.filter(path => path.length);
+  return coordinates.length ? {type: 'MultiLineString', coordinates} : null;
 }

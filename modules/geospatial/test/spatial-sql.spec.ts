@@ -734,3 +734,36 @@ test('native XYZ and constructed XYZM points expose their ordinates', () => {
   expect([...result.getChild('m')!]).toEqual([null, null]);
   expect([...result.getChild('nested')!]).toEqual([8, null]);
 });
+
+test('repeated-point removal preserves empty multipart line members', () => {
+  const g = vectorFromArray(
+    [
+      writeWKB({
+        type: 'MultiLineString',
+        coordinates: [
+          [],
+          [
+            [0, 0],
+            [0, 0],
+            [1, 1]
+          ],
+          []
+        ]
+      })
+    ],
+    new Binary()
+  );
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select('SELECT ST_RemoveRepeatedPoints(g) AS reduced FROM features', table);
+  expect(geometryAt(result, 'reduced', 0)).toEqual({
+    type: 'MultiLineString',
+    coordinates: [
+      [],
+      [
+        [0, 0],
+        [1, 1]
+      ],
+      []
+    ]
+  });
+});
