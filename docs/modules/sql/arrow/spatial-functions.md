@@ -51,6 +51,7 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | Function | Accepted input | Result |
 | --- | --- | --- |
 | `ST_X(point)` | Point | X coordinate. Empty input yields null. |
+| `ST_Z(point)`, `ST_M(point)` | Point of any dimension | Elevation or measure. A missing ordinate or empty Point yields null. |
 | `ST_Y(point)` | Point | Y coordinate. Empty input yields null. |
 | `ST_StartPoint(line)` | LineString | First vertex. Empty input yields null. |
 | `ST_EndPoint(line)` | LineString | Last vertex. Empty input yields null. |
@@ -58,6 +59,8 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_Covers(polygon, point)` | Polygon or MultiPolygon, then Point | Boolean. Boundary points are included. Points inside a hole are excluded. |
 | `ST_Within(point, polygon)` | Point, then Polygon or MultiPolygon | Interior only. Empty input yields false. |
 | `ST_CoveredBy(point, polygon)` | Point, then Polygon or MultiPolygon | Interior or boundary. Empty input yields false. |
+| `ST_PointN(line, n)` | 2D LineString and signed integer position | WKB Point. Positions start at 1, or at -1 from the end. Zero and out-of-range positions yield null. |
+| `ST_MakeEnvelope(xmin, ymin, xmax, ymax)` | Four numeric bounds | Closed 2D WKB Polygon with unknown CRS. |
 | `ST_DWithin(a, b, distance)` | Two 2D Points and a nonnegative numeric radius | Boolean. Includes points exactly at the radius, in planar coordinate units. Empty points yield false. |
 | `ST_Distance(a, b)` | Two Points | Float64 Cartesian distance in coordinate units. Empty points yield null. |
 | `ST_Azimuth(a, b)` | Two Points | Float64 radians clockwise from positive Y in `[0, 2π)`. Coincident and empty points yield null. |
