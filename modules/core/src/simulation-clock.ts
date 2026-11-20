@@ -125,15 +125,14 @@ function getSplitErrorBound(time: number, tickInterval: number): number {
  * The clock is time-scale-free: simulated time is a number of seconds from an epoch that
  * the caller chooses.
  *
- * Tick boundaries: the clock keeps a bound on the rounding error of its remainder. Each
- * advance adds `7u(|t| + tickInterval)`, where `u = 2^-53` and `t` is the time that the advance
- * splits into ticks; `seek` sets the bound to `7u(|t| + tickInterval)` for the time after
- * `startTime`. A remainder within this bound below `tickInterval` is on the next tick
- * boundary. The snap window is at most `tickInterval / 2`, so a time exactly on a tick stays
- * on that tick, also when the bound is larger than a tick at a large time. Thus 1 advance of
- * 300 ms and 3 advances of 100 ms with a 0.1 s tick both give 3 ticks and `alpha` 0, while
- * 299.999 ms stays on tick 2. When each advance is at most one tick, the bound after 1e9
- * advances is less than `1.6e-6 * tickInterval`.
+ * Tick boundaries: each split of a time `t` into ticks, in an advance or a seek, sets the
+ * bound on the rounding error of the remainder to `7u(|t| + tickInterval)`, where `u = 2^-53`.
+ * The snap window of an advance is the bound of the last split plus the bound of its own split.
+ * A remainder within this window below `tickInterval` is on the next tick boundary. The snap
+ * window is at most `tickInterval / 2`, so a time exactly on a tick stays on that tick, also
+ * when the bound is larger than a tick at a large time. Thus 1 advance of 300 ms and 3 advances
+ * of 100 ms with a 0.1 s tick both give 3 ticks and `alpha` 0, while 299.999 ms stays on tick 2.
+ * The bound does not grow with the number of advances.
  */
 export class SimulationClock {
   /** Fixed tick interval, in simulated seconds. */
@@ -153,8 +152,12 @@ export class SimulationClock {
   /** Simulated seconds after the tick `tickIndex`, in [0, `tickInterval`). */
   private remainder = 0;
   /**
-   * Bound on the rounding error that `remainder` carries, in seconds. Each advance adds the
-   * bound of its own split; `seek` sets it to the bound of the seek.
+   * Bound on the rounding error that the last split put into `remainder`, in seconds: the
+   * {@link getSplitErrorBound} of that split. The lag policy keeps the old remainder and its bound.
+   * The bound is valid because a split from an exact remainder makes only the rounded operations
+   * that `ROUNDING_TERMS` counts. Thus the window of the next advance, this bound plus its own,
+   * bounds the error of the last two splits from the remainder before them, and does not grow
+   * with the number of advances.
    */
   private remainderErrorBound = 0;
   /** Remainder that {@link SimulationClock.splitTicks} returns with the tick count. */
@@ -222,8 +225,8 @@ export class SimulationClock {
     }
     // Tick arithmetic stays in integers; only the sub-tick remainder is fractional.
     const total = this.remainder + delta;
-    let errorBound = this.remainderErrorBound + getSplitErrorBound(total, this.tickInterval);
-    const passedTicks = this.splitTicks(total, errorBound);
+    let errorBound = getSplitErrorBound(total, this.tickInterval);
+    const passedTicks = this.splitTicks(total, this.remainderErrorBound + errorBound);
     let remainder = this.splitRemainder;
     let ticks = passedTicks;
     let skippedTicks = 0;
