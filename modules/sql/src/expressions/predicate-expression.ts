@@ -96,7 +96,6 @@ function convert(predicate: ColumnarPredicate): Expression {
     } as Expression;
   const property = predicate.args[0] as ColumnarPredicateProperty;
   const path = typeof property.property === 'string' ? [property.property] : property.property;
-  if (path.length !== 1) throw new Error('Expression normalization requires top-level columns');
   let left = {type: 'Identifier', name: path[0]} as Expression;
   const call = (name: string, args: Expression[]) =>
     ({type: 'CallExpression', callee: {type: 'Identifier', name}, arguments: args}) as Expression;
