@@ -249,12 +249,7 @@ function compileArrowQuery(
           new Table(inputSchema, [batch]),
           Int32Array.from(indexes)
         );
-        selected = makeQueryBatch(
-          inputSchema,
-          gathered.batches[0]!.data.children,
-          indexes.length,
-          metadata
-        );
+        selected = gathered.batches[0];
       }
     } else {
       const start = Math.min(skip, batch.numRows);
