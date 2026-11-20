@@ -18,7 +18,6 @@ const removed = [
   "@math.gl/core/vec4",
   "@math.gl/core/local-frame",
   "@math.gl/core/spheroid",
-  "@math.gl/core/types",
   "@math.gl/dggs/a5",
   "@math.gl/dggs/geohash",
   "@math.gl/dggs/h3",
@@ -26,7 +25,6 @@ const removed = [
   "@math.gl/dggs/quadkey",
   "@math.gl/dggs/s2",
   "@math.gl/dggs/expressions",
-  "@math.gl/earth/geoid",
   "@math.gl/earth/sun/planets",
   "@math.gl/earth/sun/astronomy",
   "@math.gl/earth/timezone/lookup",
@@ -35,7 +33,6 @@ const removed = [
   "@math.gl/geometry/utils",
   "@math.gl/geometry/curves",
   "@math.gl/geometry/polygon",
-  "@math.gl/geometry/spatial-index",
   "@math.gl/geometry/utils/interpolate-packed-attributes",
   "@math.gl/geometry/culling/oriented-box-2d",
   "@math.gl/geometry/culling/queries",
@@ -95,6 +92,10 @@ for (const subpath of ['sql', 'math', 'color', 'arrow/worker', 'arrow/worker-ent
   assert.throws(() => require.resolve('@math.gl/sql/' + subpath), {code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'});
 }
 const roots = {
+  '@math.gl/core/types': ['isTypedArray','isFloat16Array'],
+  '@math.gl/earth/geoid': ['Geoid','parsePGM','createGeoidFromGrid'],
+  '@math.gl/geometry/spatial-index': ['BoxIndex','PointIndex','TriangleBVH'],
+  '@math.gl/geometry/processing': ['computeVertexNormals','octDecode'],
   '@math.gl/core/matrix': ['Vector3','Matrix4'],
   '@math.gl/core/color': ['compileResolvedScale','createColorLUTSampler'],
   '@math.gl/core/arrow': ['IndexedArrowTable','hydrateArrowTable','parseWKB','parseWKT','makeGeoArrowColumnFromArrowVector','GeoArrowBuilder','prepareGeoArrowTransfer'],

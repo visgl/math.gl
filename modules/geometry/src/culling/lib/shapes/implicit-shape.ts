@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Matrix4, Vector3} from '@math.gl/core';
+import {Matrix4, Vector3} from '@math.gl/core/matrix';
 import type {CullingResult} from '../../constants';
 import {AxisAlignedBoundingBox} from '../bounding-volumes/axis-aligned-bounding-box';
 import {BoundingSphere} from '../bounding-volumes/bounding-sphere';

@@ -6,7 +6,7 @@ import {
   composeAttributeProvenance,
   interpolatePackedAttributes,
   qualifySurfaceTransition
-} from '@math.gl/geometry';
+} from '@math.gl/geometry/processing';
 
 const source = {
   positions: new Float64Array([-1, -1, 1, -1, 1, 1, -1, 1]),

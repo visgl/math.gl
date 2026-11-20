@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import type {Bounds, Bounds2D, Bounds3D, NumericArray} from '@math.gl/core';
+import type {Bounds, Bounds2D, Bounds3D, NumericArray} from '@math.gl/core/matrix';
 
 type ReadonlyBounds = readonly [ArrayLike<number>, ArrayLike<number>];
 function dimension(bounds: ReadonlyBounds): number {

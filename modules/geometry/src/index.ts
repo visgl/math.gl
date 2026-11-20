@@ -13,6 +13,7 @@ export type {
 export {HingeTree} from './lib/hinge-tree';
 export type {HingePanel} from './lib/hinge-tree';
 
+/** @deprecated Import from `@math.gl/geometry/processing`. */
 export {unpackIndexedGeometry} from './lib/geometry-utils';
 
 export {BoxGeometry, CubeGeometry} from './geometries/box-geometry';
@@ -50,6 +51,7 @@ export type {
   TorusGeometryProps,
   LatheGeometryProps
 } from './parametric';
+/** @deprecated Import geometry processing helpers from `@math.gl/geometry/processing`. */
 export {
   isGeometry,
   makeAttributeIterator,
@@ -116,9 +118,10 @@ export {
   cutPolylineByGrid,
   cutPolylineByMercatorBounds,
   cutPolygonByMercatorBounds,
-  subdividePolyline,
-  subdivideTriangleMesh
+  subdividePolyline
 } from './polygon';
+/** @deprecated Import from `@math.gl/geometry/processing`. */
+export {subdivideTriangleMesh} from './polygon';
 export type {
   EarcutOptions,
   PolygonWinding,
@@ -181,7 +184,9 @@ export type {
   SegmentClosestPoints,
   SegmentTriangleClosestPoints
 } from './culling/queries';
+/** @deprecated Import spatial index classes from `@math.gl/geometry/spatial-index`. */
 export {BoxIndex, PointIndex, TriangleBVH} from './spatial-index';
+/** @deprecated Import spatial index types from `@math.gl/geometry/spatial-index`. */
 export type {
   BoxIndexOptions,
   NearestIndexOptions,
@@ -210,8 +215,11 @@ export type {
   ClippedTriangleMesh
 } from './polygon/clip-triangle-mesh';
 
+/** @deprecated Import from `@math.gl/geometry/processing`. */
 export {composeAttributeProvenance} from './utils/compose-attribute-provenance';
+/** @deprecated Import from `@math.gl/geometry/processing`. */
 export {qualifySurfaceTransition} from './utils/qualify-surface-transition';
+/** @deprecated Import from `@math.gl/geometry/processing`. */
 export type {SurfaceTransitionQualification} from './utils/qualify-surface-transition';
 
 export {
@@ -255,11 +263,15 @@ export type {
   CurveFrames
 } from './curves';
 
+/** @deprecated Import from `@math.gl/geometry/processing`. */
 export {projectBounds} from './utils/project-bounds';
+/** @deprecated Import from `@math.gl/geometry/processing`. */
 export type {
   ProjectionSourceBounds,
   ProjectBoundsOptions,
   ProjectedBoundsResult
 } from './utils/project-bounds';
+/** @deprecated Import from `@math.gl/geometry/processing`. */
 export {projectTextureCoordinates} from './utils/project-texture-coordinates';
+/** @deprecated Import from `@math.gl/geometry/processing`. */
 export type {ProjectTextureCoordinatesOptions} from './utils/project-texture-coordinates';

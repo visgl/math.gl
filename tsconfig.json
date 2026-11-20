@@ -31,6 +31,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": false,
     "paths": {
+      "@math.gl/earth/geoid": [
+        "./modules/earth/src/geoid/index.ts"
+      ],
       "test/*": [
         "./test/*"
       ],
@@ -40,11 +43,20 @@
       "@math.gl/core/color": [
         "./modules/core/src/color/index.ts"
       ],
+      "@math.gl/core/types": [
+        "./modules/core/src/types.ts"
+      ],
       "@math.gl/core/matrix": [
         "./modules/core/src/matrix.ts"
       ],
       "@math.gl/core/utf8": [
         "./modules/core/src/utf8.ts"
+      ],
+      "@math.gl/geometry/processing": [
+        "./modules/geometry/src/processing.ts"
+      ],
+      "@math.gl/geometry/spatial-index": [
+        "./modules/geometry/src/spatial-index/index.ts"
       ],
       "@math.gl/geometry/arrow": [
         "./modules/geometry/src/arrow/index.ts"

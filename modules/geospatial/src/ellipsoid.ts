@@ -8,9 +8,13 @@
 // See ../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
 /* eslint-disable */
-import {Vector3, assert, _MathUtils, NumericArray, config} from '@math.gl/core';
-import type {SpheroidParameters} from '@math.gl/core';
-import {spheroidToCartesian, cartesianToSpheroid, type SpheroidGeometry} from '@math.gl/core';
+import {Vector3, assert, _MathUtils, NumericArray, config} from '@math.gl/core/matrix';
+import type {SpheroidParameters} from '@math.gl/core/matrix';
+import {
+  spheroidToCartesian,
+  cartesianToSpheroid,
+  type SpheroidGeometry
+} from '@math.gl/core/matrix';
 
 import {WGS84_RADIUS_X, WGS84_RADIUS_Y, WGS84_RADIUS_Z} from './constants';
 import {

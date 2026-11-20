@@ -7,7 +7,7 @@ Use `Matrix4` to combine translation, rotation, and scale. Use a quaternion when
 Points include translation; directions do not:
 
 ```js
-import {Matrix4, Vector3} from '@math.gl/core';
+import {Matrix4, Vector3} from '@math.gl/core/matrix';
 
 const matrix = new Matrix4().translate([10, 0, 0]);
 const point = matrix.transformAsPoint([1, 2, 3]); // [11, 2, 3]

@@ -5,7 +5,7 @@
 `Bounds` is a type-only union of [Bounds2D](./bounds2d.md) and [Bounds3D](./bounds3d.md). Each uses `[minimum, maximum]` coordinates.
 
 ```typescript
-import type {Bounds} from '@math.gl/core';
+import type {Bounds} from '@math.gl/core/types';
 
 const bounds: Bounds = [[0, 0], [10, 20]];
 ```

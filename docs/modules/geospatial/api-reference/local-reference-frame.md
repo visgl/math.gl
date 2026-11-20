@@ -5,7 +5,7 @@ snapshots its origin, signed axes, and geodetic basis. It does not retain mutabl
 infer a CRS, or convert datums. Available from `@math.gl/geospatial` and the package root.
 
 ```typescript
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 import {Ellipsoid, LocalReferenceFrame} from '@math.gl/geospatial';
 
 const origin = Ellipsoid.WGS84.cartographicToCartesian([-122.4, 37.8, 100]);

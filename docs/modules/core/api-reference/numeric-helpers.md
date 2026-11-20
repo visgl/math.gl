@@ -34,7 +34,7 @@ These helpers are separate functions so importing a vector class alone does not
 retain their code. Pass a vector instance as the output to mutate it explicitly.
 
 ```js
-import {Vector3, vectorReflect, vectorClampLength} from '@math.gl/core';
+import {Vector3, vectorReflect, vectorClampLength} from '@math.gl/core/matrix';
 
 const reflected = vectorReflect(new Float64Array(3), [1, -2, 0], [0, 3, 0]);
 // [1, 2, 0]; a non-unit normal is accepted.

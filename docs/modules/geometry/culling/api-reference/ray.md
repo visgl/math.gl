@@ -9,7 +9,7 @@ A ray that extends infinitely from an origin in one direction.
 ## Usage
 
 ```js
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 import {Plane, Ray} from '@math.gl/geometry/culling';
 
 const ray = new Ray(new Vector3(0, 0, 0), new Vector3(1, 0, 0));

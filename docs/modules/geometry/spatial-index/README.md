@@ -1,4 +1,4 @@
-# @math.gl/geometry (POC)
+# @math.gl/geometry/spatial-index 🧪
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -16,7 +16,7 @@ counts as overlap, distances are Euclidean input-coordinate units, and ties sele
 ## Usage
 
 ```ts
-import {BoxIndex, PointIndex, TriangleBVH} from '@math.gl/geometry';
+import {BoxIndex, PointIndex, TriangleBVH} from '@math.gl/geometry/spatial-index';
 
 const boxes = new BoxIndex({dimension: 2, bounds: [0, 0, 1, 1, 4, 4, 5, 5]});
 boxes.search([0, 0], [2, 2]); // [0]
@@ -199,7 +199,6 @@ For background on closest-pair formulations, see Geometric Tools'
 and [segment-distance analysis](https://www.geometrictools.com/Documentation/DistanceLine3Line3.pdf).
 
 The ray and triangle geometry kernels are reused from `@math.gl/geometry/culling`.
-`@math.gl/geometry` provides BoxIndex and PointIndex without the triangle code.
 
 For terrain picking, keep physical heights and validity masks in the caller (for
 example loaders.gl height grids). The BVH indexes displayed geometry; it does not

@@ -13,6 +13,8 @@ geocentric coordinate reference systems. Use it for map coordinates, in-place
 coordinate buffers, explicit datum transformations and coordinate propagation
 between epochs.
 
+For backend-independent interfaces, see [`@math.gl/geospatial/projection/types`](./types.md).
+
 Numerical accuracy is evaluated against **native PROJ**. The pinned proj4js
 reference serves compatibility tests and benchmarks. The independent references
 qualify specific configurations and coordinate domains; they do not establish

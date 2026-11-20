@@ -1,12 +1,6 @@
 # @math.gl/earth
 
-Earth models, sunlight, astronomy, and timezones, available as named exports from the package root.
-
-## Usage
-
-```typescript
-import {Geoid, getSunPosition, getMoonPosition} from '@math.gl/earth';
-```
+Earth models, sunlight, astronomy, time zones, and ocean calculations. Import each API from its feature subpath.
 
 ## Features
 
@@ -18,16 +12,14 @@ import {Geoid, getSunPosition, getMoonPosition} from '@math.gl/earth';
 | Seawater and underwater acoustics | ✅ | Optional `/ocean` entry point: TEOS-10 subset, classic sound-speed and absorption equations. |
 | Automatic dataset fetching | ❌ | Applications control data loading and ownership. |
 
-## API
+## Entry points
 
-| Topic | Root exports |
+| Import | Description |
 | --- | --- |
-| [Geoid](./geoid/README.md) | `Geoid`, `parsePGM`, `createGeoidFromGrid` |
-| [Sun](./sun/README.md) | Solar and lunar positions, daylight, sky lighting, and observer utilities |
-| [Timezone](./timezone/README.md) | Geographic timezone lookup and local calendar calculations |
+| [`@math.gl/earth/geoid`](./geoid/README.md) | Parse geoid grids and compute height offsets. |
+| [`@math.gl/earth/sun`](./sun/README.md) | Solar and lunar positions, daylight, observer geometry, and sky lighting. |
+| [`@math.gl/earth/sun/stars`](./sun/api-reference/stars.md) | Star catalog and galactic calculations. |
+| [`@math.gl/earth/timezone`](./timezone/README.md) | Geographic timezone lookup and local calendar calculations. |
+| [`@math.gl/earth/ocean`](./ocean/README.md) | Seawater state, underwater sound speed, and absorption. |
 
-The root also exports `geoid`, `sun`, and `timezone` namespaces. The `/sun` and `/timezone` entry points provide focused imports. Star-catalog data is available separately from [`@math.gl/earth/sun/stars`](./sun/api-reference/stars.md).
-
-The optional [`@math.gl/earth/ocean`](./ocean/README.md) entry point evaluates seawater state, sound speed and sound absorption without datasets. Import it explicitly; the root does not export it.
-
-Load optional geoid grids and timezone geometry explicitly; importing the root does not automatically fetch these datasets.
+Load optional geoid grids and timezone geometry explicitly when your application needs them.

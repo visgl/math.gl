@@ -2,7 +2,7 @@
 hide_table_of_contents: true
 ---
 
-# Modules
+# Packages
 
 import ModuleCatalog from '@site/src/components/module-catalog';
 
