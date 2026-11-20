@@ -11,7 +11,7 @@ import {compileArrowExpression} from './compiler';
 import {mapArrowExpressionChildren} from './create-arrow-columns';
 import {walkArrowFunctions} from './registry';
 import type {BoundRelationAggregate} from './relational-query';
-import type {AggregateFunction, ArrowFunctionPackage} from './types';
+import type {AggregateFunction, ArrowFunctionPackage, ArrowExpressionValue} from './types';
 
 /** Built-in SQL reductions remain available without registration. */
 const operations = new Set<ArrowAggregate['operation']>([
@@ -94,7 +94,11 @@ export function bindSQLAggregate(
   const {outputField, createAccumulator, metadata} = call.custom!.bind({
     arguments: args.map(arg => arg.outputField)
   });
-  const validate = createValueValidator(outputField.type);
+  const type = outputField.type;
+  const tuple = DataType.isFixedSizeList(type);
+  if (tuple && !DataType.isFloat(type.valueType))
+    throw new Error('Aggregate tuple results require floating-point elements');
+  const validate = tuple ? undefined : createValueValidator(type);
   return {
     outputField,
     metadata,
@@ -114,7 +118,18 @@ export function bindSQLAggregate(
         throw new Error(
           `Arrow SQL aggregate ${call.custom!.name} returned null for a non-nullable field`
         );
-      validate(value);
+      if (tuple) {
+        if (
+          value !== null &&
+          (!Array.isArray(value) ||
+            value.length !== type.listSize ||
+            !value.every(component => typeof component === 'number'))
+        )
+          throw new Error(`Invalid aggregate result for ${type}`);
+      } else {
+        if (Array.isArray(value)) throw new Error(`Invalid aggregate result for ${type}`);
+        validate!(value as ArrowExpressionValue);
+      }
       return value;
     }
   };

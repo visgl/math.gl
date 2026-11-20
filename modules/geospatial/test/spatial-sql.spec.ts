@@ -358,3 +358,21 @@ test('constructs XY, XYZ and XYZM points from nullable numeric coordinates', () 
     ).toBe('geoarrow.wkb');
   }
 });
+
+test('ST_Extent combines groups across batches and ignores empty and null rows', () => {
+  const g = wkb('LINESTRING(-4 8,3 5)', null, 'POINT(7 -2)', 'POLYGON EMPTY');
+  const k = vectorFromArray([1, 2, 1, 2], new Int32());
+  const source = new Table(new Schema([geometryField('g', g), new Field('k', k.type, false)]), {
+    g,
+    k
+  });
+  const table = source.slice(0, 2).concat(source.slice(2));
+  const result = select(
+    'SELECT k, ST_Extent(g) AS bounds FROM features GROUP BY k ORDER BY k',
+    table
+  );
+  expect(Array.from(result.getChild('bounds')!.get(0))).toEqual([-4, -2, 7, 8]);
+  expect(result.getChild('bounds')!.get(1)).toBeNull();
+  const empty = select('SELECT ST_Extent(g) AS bounds FROM features WHERE k = 3', table);
+  expect(empty.getChild('bounds')!.get(0)).toBeNull();
+});

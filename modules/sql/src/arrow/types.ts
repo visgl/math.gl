@@ -74,7 +74,7 @@ export interface AggregateAccumulator {
   /** Combines an independent partial accumulator when supported. */
   merge?(partial: AggregateAccumulator): void;
   /** Returns the result, including the declared empty or null-only behavior. */
-  finalize(): ArrowExpressionValue;
+  finalize(): ArrowExpressionValue | readonly number[];
 }
 
 /** A reduction that binds its schema and creates independent group state. */
