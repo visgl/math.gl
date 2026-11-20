@@ -203,7 +203,8 @@ and copy utilities are exported from `@math.gl/sql/expressions`, without an Arro
 The Arrow executor accepts Date literals for supported Date32 and microsecond timestamp fields,
 and byte-array literals for binary fields. Date32 compares UTC calendar days, so a non-midnight
 Date literal matches the stored day in comparisons and membership. Microsecond timestamps
-compare instants. A string property containing dots is one literal field name.
+compare instants. Use an array such as `['item', 'value']` to read a nested struct field. A missing nested member
+is null, and a string with dots remains one literal field name.
 Portable comparisons and membership preserve exact ordering and equality between bigint and number
 operands. Numeric comparisons reject NaN and infinity in portable predicates.
 

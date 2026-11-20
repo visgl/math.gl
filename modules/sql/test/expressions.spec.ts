@@ -8,6 +8,7 @@ import {expect, test, vi} from 'vitest';
 import {
   Binary,
   Bool,
+  Struct,
   DateDay,
   Field,
   Float32,
@@ -293,6 +294,29 @@ test('portable predicates bind Date and binary literals with null propagation', 
     options
   );
   expect([...binaryPredicate.evaluate(input)]).toEqual([true, false, null]);
+});
+
+test('portable predicates resolve nested struct paths and missing members as null', () => {
+  const type = new Struct([new Field('value', new Int32())]);
+  const input = batch({item: vectorFromArray([{value: 1}, {value: 2}, null], type)});
+  const options = {inputSchema: input.schema};
+  expect([
+    ...compileArrowPredicate({op: '>', args: [{property: ['item', 'value']}, 1]}, options).evaluate(
+      input
+    )
+  ]).toEqual([false, true, null]);
+  expect([
+    ...compileArrowPredicate(
+      {op: 'isNull', args: [{property: ['item', 'missing']}]},
+      options
+    ).evaluate(input)
+  ]).toEqual([true, true, true]);
+  expect([
+    ...compileArrowPredicate(
+      {op: '=', args: [{property: ['item', 'missing']}, 1]},
+      options
+    ).evaluate(input)
+  ]).toEqual([null, null, null]);
 });
 
 test('integer bounds and exact argument types are checked before truncation', () => {

@@ -13,7 +13,7 @@ import {
   type ColumnarPredicateParameterValues
 } from './columnar-predicate';
 
-/** Normalizes bound or parameterized top-level predicates to the shared expression AST. */
+/** Normalizes bound or parameterized portable predicates to the shared expression AST. */
 export function columnarPredicateToExpression(
   predicate: ParameterizedColumnarPredicate,
   options: {parameters?: ColumnarPredicateParameterValues} = {}
@@ -50,16 +50,19 @@ export function columnarPredicateToExpression(
       const property = node.args[0];
       if (
         typeof property.property !== 'string' &&
-        (!Array.isArray(property.property) || property.property.length !== 1)
+        (!Array.isArray(property.property) ||
+          !property.property.length ||
+          property.property.length > 64)
       )
-        throw new Error('Expression normalization requires top-level columns');
+        throw new Error('Invalid portable predicate column path');
       const casts = property.casts;
       if (casts !== undefined && (!Array.isArray(casts) || casts.length > 64))
         throw new Error('Invalid columnar predicate casts');
       const literals = node.op === 'in' ? node.args[1].length : node.op === 'isNull' ? 0 : 1;
       if (literals > 4096) throw new Error('Predicate membership exceeds node limit');
       // The test and column contribute two nodes; each cast adds a call and a target literal.
-      expressionNodes += 2 + 2 * (casts?.length ?? 0) + literals;
+      const segments = Array.isArray(property.property) ? property.property.length : 1;
+      expressionNodes += 2 + 3 * (segments - 1) + 2 * (casts?.length ?? 0) + literals;
     }
     if (expressionNodes > MAXIMUM_EXPRESSION_NODES)
       throw new Error('Predicate exceeds normalized AST node limit');
@@ -97,6 +100,9 @@ function convert(predicate: ColumnarPredicate): Expression {
   let left = {type: 'Identifier', name: path[0]} as Expression;
   const call = (name: string, args: Expression[]) =>
     ({type: 'CallExpression', callee: {type: 'Identifier', name}, arguments: args}) as Expression;
+  for (const segment of path.slice(1)) {
+    left = call('STRUCT_EXTRACT', [left, {type: 'Literal', value: segment} as Expression]);
+  }
   for (const type of property.casts ?? [])
     left = call('cast', [
       left,
