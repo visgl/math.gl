@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {DataType, type Table} from 'apache-arrow';
-import {unnestArrowColumn} from './unnest-arrow-column';
+import type {Table} from 'apache-arrow';
 import {getExpressionColumns, type Expression} from '../expressions';
 import {
   parseSQLSelectCompound,
@@ -20,7 +19,12 @@ import {
   prepareArrowColumn
 } from './create-arrow-columns';
 import {parseSQLExpression} from '../parser/parse-sql-expression';
-import type {AggregateFunction, ArrowFunctionPackage, PreparedScalarFunction} from './types';
+import type {
+  AggregateFunction,
+  ArrowFunctionPackage,
+  PreparedScalarFunction,
+  TableFunction
+} from './types';
 import {groupArrowTable, type BoundRelationAggregate} from './relational-query';
 import {
   bindSQLAggregate,
@@ -28,11 +32,17 @@ import {
   getSQLAggregateFunctions,
   rejectSQLAggregates
 } from './sql-aggregate-functions';
+import {
+  getSQLTableFunctions,
+  joinLateralTable,
+  validateSQLTableResult
+} from './sql-table-function-packages';
 
 /** Metadata emitted by declarations in a nested package. */
 type PackageMetadata<F, Depth extends readonly unknown[] = []> = F extends
   | PreparedScalarFunction<infer M>
   | AggregateFunction<infer M>
+  | TableFunction<infer M>
   ? M
   : Depth['length'] extends 12
     ? unknown
@@ -50,13 +60,12 @@ export type ArrowSQLMetadataResult<M> = {
 
 type Execution = Pick<ArrowTableQuery, 'signal' | 'functions'>;
 
-/** A synchronous SQL source that derives an Arrow table from one catalog table. */
+/** A synchronous catalog-table transform. Prefer a flat TableFunction for schema binding. */
 export type ArrowSQLTableFunction = (input: Table) => Table;
 
-/** Controls relational SQL execution and its function registries. */
+/** Supported registrations and parser options for relational Arrow SQL. */
 export type ArrowSQLQueryOptions = Execution &
   SQLSelectStatementOptions & {
-    /** Case-insensitive names usable in table positions as NAME(input_table). */
     tableFunctions?: Readonly<Record<string, ArrowSQLTableFunction>>;
   };
 
@@ -87,19 +96,13 @@ function executeSQL(
 ): ArrowSQLMetadataResult<unknown> {
   const {inputs, orderBy, offset, limit} = parseSQLSelectCompound(sql, options);
   const execution = {signal: options.signal, functions: options.functions};
-  const tableFunctions = options.tableFunctions ?? {};
-  /** Resolves a catalog binding or invokes its registered table source. */
-  const resolveTable = ({name, inputTable}: SQLTableBinding) => {
-    if (inputTable === undefined) return getTable(tables, name);
-    const key = Object.keys(tableFunctions).find(key => key.toUpperCase() === name.toUpperCase());
-    if (key === undefined) throw new Error(`Unknown Arrow SQL table function: ${name}`);
-    execution.signal?.throwIfAborted();
-    return tableFunctions[key]!(getTable(tables, inputTable));
-  };
   const operations = getProjectionOperations(options.functions);
   const aggregateFunctions = getSQLAggregateFunctions(execution.functions);
+  const tableFunctions = getSQLTableFunctions(execution.functions);
+  const resolveTable = (binding: SQLTableBinding) =>
+    resolveSQLTable(binding, tables, tableFunctions, options.tableFunctions, execution.signal);
   const results = inputs.map(input =>
-    executeSelect(input, resolveTable, execution, operations, aggregateFunctions)
+    executeSelect(input, resolveTable, execution, operations, aggregateFunctions, tableFunctions)
   );
   const [first, ...rest] = results.map(result => result.table) as [Table, ...Table[]];
   // Plan the final order against the projected names, including SELECT aliases.
@@ -146,12 +149,15 @@ function planOrder(orderBy?: readonly SQLSort[]) {
 
 function executeSelect(
   statement: SQLSelectStatement,
-  resolveTable: (binding: SQLTableBinding) => Table,
+  resolveTable: (binding: SQLTableBinding) => ArrowSQLMetadataResult<unknown>,
   execution: Execution,
   operations: ReturnType<typeof getProjectionOperations>,
-  aggregateFunctions: ReturnType<typeof getSQLAggregateFunctions>
+  aggregateFunctions: ReturnType<typeof getSQLAggregateFunctions>,
+  tableFunctions: ReturnType<typeof getSQLTableFunctions>
 ): ArrowSQLMetadataResult<unknown> {
-  let source = resolveTable(statement.from);
+  const left = resolveTable(statement.from);
+  let source = left.table;
+  const relationMetadata = new Map(Object.entries(left.columnMetadata));
   const leftAlias = statement.from.alias ?? statement.from.name;
   const [right] = statement.joins;
   let join: ArrowTableQuery['join'];
@@ -160,31 +166,41 @@ function executeSelect(
   if (right?.unnest) {
     if (statement.joins.length !== 1)
       throw new Error('UNNEST currently supports one expansion per SELECT');
-    const {expression, columns, ordinality} = right.unnest;
+    const {expression, columns, ordinality, functionName = 'UNNEST'} = right.unnest;
     const column = qualifiedColumn(expression);
     if (!column || (column.qualifier && column.qualifier !== leftAlias))
-      throw new Error('UNNEST requires a column of its parent table');
+      throw new Error(`${functionName} requires a column of its parent table`);
     const field = source.schema.fields.find(field => field.name === column.name);
-    if (!field) throw new Error(`Unknown UNNEST column: ${column.name}`);
-    const map = DataType.isMap(field.type);
-    if (!map && !DataType.isList(field.type) && !DataType.isFixedSizeList(field.type))
-      throw new Error('SQL UNNEST requires List, FixedSizeList or Map');
-    if (columns.length !== (map ? 2 : 1) + (ordinality ? 1 : 0))
-      throw new Error('UNNEST column alias count does not match its output');
+    if (!field) throw new Error(`Unknown ${functionName} column: ${column.name}`);
+    const descriptor = tableFunctions.get(functionName.toUpperCase());
+    if (!descriptor?.bindLateral)
+      throw new Error(`Unknown Arrow SQL lateral table function: ${functionName}`);
     rightAlias = right.table.alias!;
     if (rightAlias === leftAlias) throw new Error('Duplicate Arrow SQL table alias');
-    source = unnestArrowColumn(source, column.name, {
-      valueColumn: rightAlias + '.' + columns[map ? 1 : 0],
-      keyColumn: map ? rightAlias + '.' + columns[0] : undefined,
-      ordinalColumn: ordinality ? rightAlias + '.' + columns[map ? 2 : 1] : undefined,
-      outer: right.type === 'left',
-      signal: execution.signal
+    const bound = descriptor.bindLateral({
+      inputSchema: source.schema,
+      argument: field,
+      ordinality
     });
+    source = joinLateralTable(
+      source,
+      bound,
+      rightAlias,
+      columns,
+      right.type === 'left',
+      execution.signal
+    );
+    bound.outputSchema.fields.forEach((field, index) =>
+      relationMetadata.set(rightAlias + '.' + columns[index], bound.columnMetadata?.[field.name])
+    );
   } else if (right) {
     if (statement.joins.length > 1 || right.type !== 'inner')
       throw new Error('Arrow SQL supports one INNER JOIN per SELECT');
     rightAlias = right.table.alias ?? right.table.name;
-    rightTable = resolveTable(right.table);
+    const resolved = resolveTable(right.table);
+    rightTable = resolved.table;
+    for (const [name, metadata] of Object.entries(resolved.columnMetadata))
+      relationMetadata.set(rightAlias + '.' + name, metadata);
     if (leftAlias === rightAlias) throw new Error('Duplicate Arrow SQL table alias');
     const {on} = right;
     if (on.type !== 'BinaryExpression' || on.operator !== '==')
@@ -283,8 +299,18 @@ function executeSelect(
     where: statement.where && {expression: bind(statement.where)}
   };
   const columnMetadata: Record<string, readonly unknown[]> = Object.create(null);
+  /** Attaches inherited table metadata only to direct field projections. */
+  const result = (table: Table): ArrowSQLMetadataResult<unknown> => {
+    table.schema.fields.forEach(({name}, index) => {
+      const item = select?.[index];
+      const from = !item ? name : 'column' in item ? item.column : undefined;
+      const metadata = from && relationMetadata.get(from);
+      if (metadata?.length) columnMetadata[name] = [...metadata, ...(columnMetadata[name] ?? [])];
+    });
+    return {table, columnMetadata};
+  };
   if (!grouped && (!operations.length || !select)) {
-    return {table: queryArrowTable(source, {...query, select}), columnMetadata};
+    return result(queryArrowTable(source, {...query, select}));
   }
   let input = queryArrowTable(source, query);
   const custom = new Map<string, BoundRelationAggregate & {metadata?: unknown}>();
@@ -331,7 +357,34 @@ function executeSelect(
       if (entry !== undefined) columnMetadata[field.name] = [entry];
     });
   }
-  return {table, columnMetadata};
+  return result(table);
+}
+
+/** Resolves a catalog table or a registered standalone table function. */
+function resolveSQLTable(
+  binding: SQLTableBinding,
+  tables: ReadonlyMap<string, Table>,
+  functions: ReturnType<typeof getSQLTableFunctions>,
+  legacy: Readonly<Record<string, ArrowSQLTableFunction>> = {},
+  signal?: AbortSignal
+): ArrowSQLMetadataResult<unknown> {
+  if (binding.inputTable === undefined)
+    return {table: getTable(tables, binding.name), columnMetadata: {}};
+  const input = getTable(tables, binding.inputTable);
+  const name = binding.name.toUpperCase();
+  const descriptor = functions.get(name);
+  const legacyKey = Object.keys(legacy).find(key => key.toUpperCase() === name);
+  signal?.throwIfAborted();
+  if (descriptor?.bind) {
+    if (legacyKey !== undefined) throw new Error(`Duplicate Arrow SQL table function: ${name}`);
+    const bound = descriptor.bind(input.schema);
+    const table = bound.evaluate(input, {signal});
+    signal?.throwIfAborted();
+    validateSQLTableResult(table, bound.outputSchema);
+    return {table, columnMetadata: bound.columnMetadata ?? {}};
+  }
+  if (legacyKey !== undefined) return {table: legacy[legacyKey]!(input), columnMetadata: {}};
+  throw new Error(`Unknown Arrow SQL table function: ${binding.name}`);
 }
 
 function getTable(tables: ReadonlyMap<string, Table>, name: string): Table {

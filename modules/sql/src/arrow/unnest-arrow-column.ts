@@ -20,6 +20,30 @@ export type UnnestArrowColumnOptions = {
   signal?: AbortSignal;
 };
 
+/** Derives the exposed child fields without reading input rows. */
+export function getUnnestFields(type: DataType, options: UnnestArrowColumnOptions): Field[] {
+  const map = DataType.isMap(type);
+  const list = DataType.isList(type) || DataType.isFixedSizeList(type);
+  const struct = DataType.isStruct(type);
+  if (!list && !map && !struct) throw new Error('UNNEST requires a list, map, or struct column');
+  const children = map ? type.children[0]!.type.children : type.children;
+  const value = children[map ? 1 : 0];
+  if (!value) throw new Error('UNNEST requires a declared child type');
+  return [
+    value.clone({name: options.valueColumn, nullable: true}),
+    ...(options.keyColumn
+      ? [
+          new Field(
+            options.keyColumn,
+            list ? new Int32() : map ? children[0]!.type : new Utf8(),
+            true
+          )
+        ]
+      : []),
+    ...(options.ordinalColumn ? [new Field(options.ordinalColumn, new Int32(), true)] : [])
+  ];
+}
+
 /**
  * Expands a List, FixedSizeList, Map, or homogeneous Struct column.
  * Parent columns and metadata are retained. Lists preserve element order, maps
@@ -31,6 +55,32 @@ export function unnestArrowColumn(
   column: string,
   options: UnnestArrowColumnOptions
 ): Table {
+  const result = expandArrowColumn(table, column, options);
+  const fields = [...table.schema.fields, ...result.table.schema.fields];
+  if (new Set(fields.map(field => field.name)).size !== fields.length)
+    throw new Error('Duplicate UNNEST output name');
+  const schema = new Schema(fields, table.schema.metadata);
+  if (!result.parentRows.length) return new Table(schema, []);
+  const parents = takeArrowTableRows(table, result.parentRows);
+  return new Table(
+    schema,
+    Object.fromEntries(
+      fields.map((field, index) => [
+        field.name,
+        index < table.numCols
+          ? parents.getChildAt(index)!
+          : result.table.getChildAt(index - table.numCols)!
+      ])
+    )
+  );
+}
+
+/** Returns physical children and their parent positions for a lateral join. */
+export function expandArrowColumn(
+  table: Table,
+  column: string,
+  options: UnnestArrowColumnOptions
+): {table: Table; parentRows: Int32Array} {
   const input = table.getChild(column);
   if (!input) throw new Error(`Unknown nested column: ${column}`);
   const type = input.type;
@@ -52,16 +102,7 @@ export function unnestArrowColumn(
     throw new Error('UNNEST struct fields must share one type');
   }
   const keyType = list ? new Int32() : map ? children[0]!.type : new Utf8();
-  const fields = [
-    ...table.schema.fields,
-    valueField.clone({name: options.valueColumn, nullable: true}),
-    ...(options.keyColumn ? [new Field(options.keyColumn, keyType, true)] : []),
-    ...(options.ordinalColumn ? [new Field(options.ordinalColumn, new Int32(), true)] : [])
-  ];
-  if (new Set(fields.map(field => field.name)).size !== fields.length) {
-    throw new Error('Duplicate UNNEST output name');
-  }
-  const schema = new Schema(fields, table.schema.metadata);
+  const schema = new Schema(getUnnestFields(type, options));
   const parentRows: number[] = [];
   /** Physical child slices preserve timestamps, dictionaries and nested values. */
   const values: Vector[] = [];
@@ -130,16 +171,18 @@ export function unnestArrowColumn(
         );
     }
   }
-  if (!parentRows.length) return new Table(schema, []);
-  const parents = takeArrowTableRows(table, Int32Array.from(parentRows));
-  return new Table(schema, {
-    ...Object.fromEntries(
-      table.schema.fields.map(field => [field.name, parents.getChild(field.name)!])
-    ),
-    [options.valueColumn]: new Vector(values.flatMap(value => value.data)),
-    ...(options.keyColumn ? {[options.keyColumn]: new Vector(keys.flatMap(key => key.data))} : {}),
-    ...(options.ordinalColumn
-      ? {[options.ordinalColumn]: vectorFromArray(positions, new Int32())}
-      : {})
-  });
+  return {
+    parentRows: Int32Array.from(parentRows),
+    table: parentRows.length
+      ? new Table(schema, {
+          [options.valueColumn]: new Vector(values.flatMap(value => value.data)),
+          ...(options.keyColumn
+            ? {[options.keyColumn]: new Vector(keys.flatMap(key => key.data))}
+            : {}),
+          ...(options.ordinalColumn
+            ? {[options.ordinalColumn]: vectorFromArray(positions, new Int32())}
+            : {})
+        })
+      : new Table(schema, [])
+  };
 }
