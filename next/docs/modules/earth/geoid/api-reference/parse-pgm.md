@@ -2,7 +2,7 @@
 
 ![From-v3.4](https://img.shields.io/badge/From-v3.4-blue.svg?style=flat-square)
 
-Parse header of "Earth Gravity Model" \*.pgm file.
+Parse a GeographicLib geoid PGM file into a `Geoid`. The parser requires one complete 16-bit raster matching the declared dimensions and finite offset and scale metadata. The scale must be positive.
 
 ## Functions[​](#functions "Direct link to Functions")
 
