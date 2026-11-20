@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {DataType, DateUnit, Precision, type Vector, type Data} from 'apache-arrow';
+import {DataType, DateUnit, Int32, Precision, type Vector, type Data} from 'apache-arrow';
 import {float16Values, requireFloat16} from './float16';
 import {ExpressionEvaluationError} from '../expressions';
 import type {ArrowExpressionValue} from './types';
@@ -27,6 +27,8 @@ export function typeKey(type: DataType): string {
     const unit = ['s', 'ms', 'us', 'ns'][type.unit];
     return `timestamp_${unit}:${type.timezone ?? ''}`;
   }
+  if (DataType.isTime(type)) return 'time_' + type.unit;
+  if (DataType.isDuration(type)) return 'duration_' + type.unit;
   if (DataType.isBinary(type)) return 'binary';
   if (DataType.isFixedSizeBinary(type)) return `fixedsizebinary:${type.byteWidth}`;
   if (DataType.isNull(type)) return 'null';
@@ -149,7 +151,13 @@ export function createValueValidator(inputType: DataType): (value: ArrowExpressi
         throw new ExpressionEvaluationError('overflow', 'Invalid Date32 epoch day');
     };
   }
-  if (key === 'date64' || DataType.isTimestamp(type)) {
+  if (DataType.isTime(type) && type.bitWidth === 32) return createValueValidator(new Int32());
+  if (
+    key === 'date64' ||
+    DataType.isTimestamp(type) ||
+    DataType.isTime(type) ||
+    DataType.isDuration(type)
+  ) {
     return value => {
       if (value === null) return;
       if (typeof value !== 'bigint' || value !== BigInt.asIntN(64, value))

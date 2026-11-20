@@ -206,6 +206,7 @@ Date literal matches the stored day in comparisons and membership. DateMilliseco
 compare instants. A string property containing dots is one literal field name.
 Portable comparisons and membership preserve exact ordering and equality between bigint and number
 operands. Numeric comparisons reject NaN and infinity in portable predicates.
+Time-of-day and duration predicates compare numeric bounds in the column’s physical unit.
 
 SQL parsing, source pushdown and result-row selection remain the query engine's responsibility.
 Only true predicate results select rows; false and null results do not. Computed SELECT functions

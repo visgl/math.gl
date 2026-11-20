@@ -12,6 +12,9 @@ import {
   Bool,
   DateDay,
   DateMillisecond,
+  DurationMillisecond,
+  TimeMicrosecond,
+  TimeSecond,
   TimestampSecond,
   TimestampMillisecond,
   TimestampNanosecond,
@@ -337,6 +340,30 @@ test.each([
     expect(() => values('cast(when, "utf8")', input)).toThrow('Temporal CAST requires');
   }
 );
+
+test('portable time and duration predicates compare physical values exactly', () => {
+  const input = batch({
+    seconds: vectorFromArray([1, 2, null], new TimeSecond()),
+    micros: vectorFromArray([1n, 2n, null], new TimeMicrosecond()),
+    duration: vectorFromArray(
+      [9007199254740992n, 9007199254740993n, null],
+      new DurationMillisecond()
+    )
+  });
+  const options = {inputSchema: input.schema};
+  expect([
+    ...compileArrowPredicate({op: '>', args: [{property: 'seconds'}, 1.5]}, options).evaluate(input)
+  ]).toEqual([false, true, null]);
+  expect([
+    ...compileArrowPredicate({op: '>', args: [{property: 'micros'}, 1.5]}, options).evaluate(input)
+  ]).toEqual([false, true, null]);
+  expect([
+    ...compileArrowPredicate(
+      {op: '>', args: [{property: 'duration'}, 9007199254740992]},
+      options
+    ).evaluate(input)
+  ]).toEqual([false, true, null]);
+});
 
 test('integer bounds and exact argument types are checked before truncation', () => {
   const input = batch({x: vectorFromArray([127], new Int8())});
