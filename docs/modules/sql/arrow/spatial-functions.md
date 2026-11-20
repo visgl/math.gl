@@ -73,6 +73,8 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_LineInterpolatePoint(line, fraction)` | 2D LineString and fraction in [0, 1] | GeoArrow WKB Point at the given fraction of route length. |
 | `ST_LineLocatePoint(line, point)` | 2D LineString and Point | Fraction of route length at the nearest point on the route. |
 | `ST_LineSubstring(line, start, end)` | 2D LineString and ordered fractions in [0, 1] | WKB LineString including intermediate vertices, or Point for equal fractions or a zero-length route. Empty lines yield null. |
+| `ST_RemoveRepeatedPoints(line [, tolerance])` | 2D LineString or MultiLineString | WKB line with consecutive duplicates removed. A positive tolerance also removes nearby vertices. Retains route endpoints. |
+| `ST_Simplify(line, tolerance)` | 2D LineString or MultiLineString | WKB line simplified in planar coordinate units. Drops collapsed components and returns null if none survive. |
 | `ST_Length(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar line length. Empty and non-linear inputs yield zero. |
 | `ST_PointOnSurface(polygon)` | Polygon or MultiPolygon | GeoArrow WKB Point for label placement inside a valid polygon. Empty inputs yield an empty Point. |
 | `ST_Centroid(geometry)` | Point, LineString, Polygon, and their multi-types | GeoArrow WKB. Points have equal weight, lines are weighted by segment length, and polygons are weighted by area. Empty inputs yield an empty Point. |
