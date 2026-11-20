@@ -8,7 +8,7 @@ import type {
   GeoArrowCoordinateMapper,
   GeoArrowDenseUnion,
   GeoArrowEncoding,
-  GeoArrowGeometryValue,
+  GeoArrowDecodedGeometry,
   GeoArrowList,
   GeoArrowOffsets,
   GeoArrowValidity
@@ -79,15 +79,19 @@ export function visitGeoArrowCoordinates(
   }
 }
 
-/** Returns a zero-copy logical slice of a column, preserving chunk boundaries. */
-export function sliceGeoArrowColumn(
+/**
+ * Borrows the half-open row range [start, end), preserving its chunk and union layout.
+ * Omitted bounds select the entire column. Negative indices count from the end.
+ * Coordinate, offset, validity and union buffers stay shared with the source.
+ */
+export function getGeoArrowColumnView(
   column: GeoArrowColumn,
-  begin = 0,
-  end = getGeoArrowRowCount(column)
+  start = 0,
+  end?: number
 ): GeoArrowColumn {
   const rowCount = getGeoArrowRowCount(column);
-  const first = normalizeSliceIndex(begin, rowCount);
-  const last = Math.max(first, normalizeSliceIndex(end, rowCount));
+  const first = normalizeSliceIndex(start, rowCount);
+  const last = Math.max(first, normalizeSliceIndex(end ?? rowCount, rowCount));
   if (first === 0 && last === rowCount) return column;
 
   const chunks: GeoArrowArray[] = [];
@@ -220,11 +224,11 @@ export function getGeoArrowTransferList(column: GeoArrowColumn): ArrayBuffer[] {
  */
 export function materializeGeoArrowRows(
   column: GeoArrowColumn
-): Array<GeoArrowGeometryValue | null> {
+): Array<GeoArrowDecodedGeometry | null> {
   if (column.encoding === 'geoarrow.wkb' || column.encoding === 'geoarrow.wkt') {
     throw new Error('Serialized GeoArrow columns must be decoded before materialization');
   }
-  const rows: Array<GeoArrowGeometryValue | null> = [];
+  const rows: Array<GeoArrowDecodedGeometry | null> = [];
   for (const chunk of column.chunks) {
     for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
       rows.push(materializeGeometryRow(chunk, rowIndex, column.encoding));
@@ -238,7 +242,7 @@ export function materializeGeometryRow(
   array: GeoArrowArray,
   rowIndex: number,
   encoding: GeoArrowEncoding
-): GeoArrowGeometryValue | null {
+): GeoArrowDecodedGeometry | null {
   if (!isGeoArrowValueValid(array.validity, rowIndex)) return null;
   if (encoding === 'geoarrow.geometry') {
     if (array.kind !== 'dense-union') return null;
@@ -247,7 +251,7 @@ export function materializeGeometryRow(
   if (encoding === 'geoarrow.geometrycollection') {
     if (array.kind !== 'list') return null;
     const [first, last] = getListRange(array, rowIndex);
-    const geometries: GeoArrowGeometryValue[] = [];
+    const geometries: GeoArrowDecodedGeometry[] = [];
     for (let index = first; index < last; index++) {
       if (array.child.kind !== 'dense-union') continue;
       const geometry = materializeUnionRow(array.child, index);
@@ -265,7 +269,7 @@ export function materializeGeometryRow(
     geometryType === 'Point' || geometryType === 'MultiPoint'
   );
   if (!coordinates) return null;
-  return {type: geometryType, coordinates} as GeoArrowGeometryValue;
+  return {type: geometryType, coordinates} as GeoArrowDecodedGeometry;
 }
 
 /** Returns a safe numeric offset. */
@@ -420,7 +424,7 @@ function readPrimitive(array: GeoArrowArray, index: number): number {
 function materializeUnionRow(
   union: GeoArrowDenseUnion,
   rowIndex: number
-): GeoArrowGeometryValue | null {
+): GeoArrowDecodedGeometry | null {
   if (!isGeoArrowValueValid(union.validity, rowIndex)) return null;
   const physicalIndex = (union.offset || 0) + rowIndex;
   const typeId = union.typeIds[physicalIndex];
@@ -903,6 +907,6 @@ function normalizeSliceIndex(index: number, length: number): number {
 }
 
 /** Returns a concrete encoding for a geometry value. */
-export function getEncodingForGeometryValue(geometry: GeoArrowGeometryValue): GeoArrowEncoding {
+export function getEncodingForGeometryValue(geometry: GeoArrowDecodedGeometry): GeoArrowEncoding {
   return getGeoArrowEncodingForGeometry(geometry.type);
 }

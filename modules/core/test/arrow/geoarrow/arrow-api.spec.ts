@@ -23,7 +23,9 @@ import {
   makeGeoArrowColumnFromGeometryRows,
   materializeGeoArrowRows,
   concatenateGeoArrowColumns,
-  encodeGeoArrowWKB
+  encodeGeoArrowWKB,
+  getGeoArrowColumnView,
+  type GeoArrowDecodedGeometry
 } from '../../../src/arrow-integration/geoarrow-utils';
 
 /** Adds canonical GeoArrow extension metadata to an Arrow field. */
@@ -123,6 +125,80 @@ test('GeoArrow borrows sliced and chunked point buffers with correct null bit of
     rowCount: 3,
     nullCount: 1
   });
+});
+
+/** Checks the backing storage and addressed byte ranges throughout a physical tree. */
+function expectBorrowedArrowData(actual: arrow.Data, expected: arrow.Data): void {
+  expect(actual.length).toBe(expected.length);
+  if (expected.nullBitmap?.length) {
+    expect(actual.offset).toBe(expected.offset);
+    expect(actual.nullBitmap).toBe(expected.nullBitmap);
+  }
+  for (const key of ['typeIds', 'valueOffsets', 'values'] as const) {
+    const source = expected[key];
+    if (!source) continue;
+    const view = actual[key];
+    expect(view.buffer).toBe(source.buffer);
+    expect(view.byteOffset).toBe(source.byteOffset);
+    // Arrow slices dense-union offsets with the extra terminal entry used by lists.
+    // A dense union addresses exactly one child offset per row.
+    const expectedByteLength =
+      key === 'valueOffsets' && arrow.DataType.isDenseUnion(expected.type)
+        ? expected.length * Int32Array.BYTES_PER_ELEMENT
+        : source.byteLength;
+    expect(view.byteLength).toBe(expectedByteLength);
+  }
+  expect(actual.children).toHaveLength(expected.children.length);
+  for (const [index, child] of expected.children.entries()) {
+    expectBorrowedArrowData(actual.children[index], child);
+  }
+}
+
+test.each(['interleaved', 'separated'] as const)(
+  'column views round-trip mixed chunks with borrowed %s storage',
+  coordinateLayout => {
+    const rows: (GeoArrowDecodedGeometry | null)[] = [
+      {type: 'MultiPoint', coordinates: [[1, 2, 3]]},
+      null,
+      {type: 'MultiPoint', coordinates: []},
+      {type: 'GeometryCollection', geometries: [{type: 'Point', coordinates: [7, 8, 9]}]}
+    ];
+    const source = makeArrowVectorFromGeoArrowColumn(
+      makeGeoArrowColumnFromGeometryRows(rows, {
+        encoding: 'geoarrow.geometry',
+        coordinateLayout,
+        dimension: 'xym'
+      })
+    );
+    const vector = source.concat(source);
+    const field = makeField(vector.type, 'geoarrow.geometry');
+    const sourceColumn = makeGeoArrowColumnFromArrowVector(vector, {field, dimension: 'xym'});
+    const view = getGeoArrowColumnView(sourceColumn, 1, 7);
+    const roundTrip = makeArrowVectorFromGeoArrowColumn(view);
+    const expected = vector.slice(1, 7);
+    expect(roundTrip.data).toHaveLength(2);
+    expect(view.metadata).toBe(sourceColumn.metadata);
+    expect(view.encoding).toBe('geoarrow.geometry');
+    expect(view.dimension).toBe('xym');
+    expect(view.coordinateLayout).toBe(coordinateLayout);
+    expect(materializeGeoArrowRows(view)).toEqual([...rows, ...rows].slice(1, 7));
+    expect(Array.from(roundTrip, (_, i) => roundTrip.isValid(i))).toEqual(
+      Array.from(expected, (_, i) => expected.isValid(i))
+    );
+    for (const [index, chunk] of expected.data.entries()) {
+      expectBorrowedArrowData(roundTrip.data[index], chunk);
+    }
+  }
+);
+
+test('borrows non-byte-aligned validity when rewrapping a column range', () => {
+  const vector = makePoints();
+  const column = makeGeoArrowColumnFromArrowVector(vector);
+  const view = getGeoArrowColumnView(column, 1, 3);
+  const roundTrip = makeArrowVectorFromGeoArrowColumn(view);
+  expectBorrowedArrowData(roundTrip.data[0], vector.slice(1, 3).data[0]);
+  expect(roundTrip.get(0)).toBeNull();
+  expect(Array.from(roundTrip.get(1))).toEqual([3, 4]);
 });
 
 test('GeoArrow preserves XYM when adapting and mapping without modifying input', () => {

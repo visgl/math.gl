@@ -10,7 +10,7 @@ import type {
   GeoArrowCoordinateLayout,
   GeoArrowDenseUnionChild,
   GeoArrowDimension,
-  GeoArrowGeometryValue,
+  GeoArrowDecodedGeometry,
   GeoArrowSerialized
 } from './types';
 import {getGeoArrowDimensionSize, mergeGeoArrowDimensions} from './types';
@@ -1160,18 +1160,18 @@ function encodingFromName(name: string): import('./types').GeoArrowEncoding {
 }
 
 function normalizeRowsToDimension(
-  rows: readonly (GeoArrowGeometryValue | null)[],
+  rows: readonly (GeoArrowDecodedGeometry | null)[],
   dimension: GeoArrowDimension
-): Array<GeoArrowGeometryValue | null> {
+): Array<GeoArrowDecodedGeometry | null> {
   const size = getGeoArrowDimensionSize(dimension);
-  const normalizeGeometry = (geometry: GeoArrowGeometryValue): GeoArrowGeometryValue => {
+  const normalizeGeometry = (geometry: GeoArrowDecodedGeometry): GeoArrowDecodedGeometry => {
     if (geometry.type === 'GeometryCollection') {
       return {...geometry, geometries: geometry.geometries.map(normalizeGeometry)};
     }
     return {
       ...geometry,
       coordinates: normalizeCoordinateNesting(geometry.coordinates, size)
-    } as GeoArrowGeometryValue;
+    } as GeoArrowDecodedGeometry;
   };
   return rows.map(row => (row ? normalizeGeometry(row) : null));
 }
@@ -1188,9 +1188,9 @@ function normalizeCoordinateNesting(value: readonly unknown[], size: number): un
 
 function decodeSerializedRows(
   column: GeoArrowColumn,
-  decoder: (bytes: Uint8Array) => GeoArrowGeometryValue
-): Array<GeoArrowGeometryValue | null> {
-  const rows: Array<GeoArrowGeometryValue | null> = [];
+  decoder: (bytes: Uint8Array) => GeoArrowDecodedGeometry
+): Array<GeoArrowDecodedGeometry | null> {
+  const rows: Array<GeoArrowDecodedGeometry | null> = [];
   for (const chunk of column.chunks) {
     if (chunk.kind !== 'serialized') throw new Error('Serialized column contains native storage');
     for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {

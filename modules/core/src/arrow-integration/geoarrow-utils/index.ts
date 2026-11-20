@@ -15,7 +15,7 @@ export type {
   GeoArrowDimension,
   GeoArrowEncoding,
   GeoArrowFixedSizeList,
-  GeoArrowGeometryValue,
+  GeoArrowDecodedGeometry,
   GeoArrowList,
   GeoArrowNumericArray,
   GeoArrowOffsets,
@@ -48,7 +48,7 @@ export {
   isGeoArrowValueValid,
   materializeGeoArrowRows,
   sliceGeoArrowArray,
-  sliceGeoArrowColumn,
+  getGeoArrowColumnView,
   validateGeoArrowColumn,
   visitGeoArrowCoordinates
 } from './layout';

@@ -14,8 +14,8 @@ import {
   mapGeoArrowCoordinatesInto,
   normalizeGeoArrowUnion,
   rewindGeoArrow,
-  sliceGeoArrowColumn,
-  type GeoArrowGeometryValue
+  getGeoArrowColumnView,
+  type GeoArrowDecodedGeometry
 } from '../../../src/arrow-integration/geoarrow-utils';
 import {tessellateGeoArrowPolygons} from '@math.gl/geometry/arrow';
 import {materializeGeoArrowRows} from '../../../src/arrow-integration/geoarrow-utils/layout';
@@ -112,12 +112,12 @@ test('coordinate mapping attributes every nested coordinate to its logical row',
     coordinate[1]
   ]);
   const rows = materializeGeoArrowRows(mapped);
-  expect((rows[0] as Extract<GeoArrowGeometryValue, {type: 'Polygon'}>).coordinates[1][0][0]).toBe(
-    0
-  );
-  expect((rows[1] as Extract<GeoArrowGeometryValue, {type: 'Polygon'}>).coordinates[0][0][0]).toBe(
-    110
-  );
+  expect(
+    (rows[0] as Extract<GeoArrowDecodedGeometry, {type: 'Polygon'}>).coordinates[1][0][0]
+  ).toBe(0);
+  expect(
+    (rows[1] as Extract<GeoArrowDecodedGeometry, {type: 'Polygon'}>).coordinates[0][0][0]
+  ).toBe(110);
 });
 
 test('conversion round trips preserve geometry values', () => {
@@ -167,7 +167,7 @@ test('dense-union demotion gathers sliced children directly and promotes single 
     ],
     {dimension: 'xyz', offsetType: 'int64'}
   );
-  const sliced = sliceGeoArrowColumn(source, 1, 4);
+  const sliced = getGeoArrowColumnView(source, 1, 4);
   const converted = convertGeoArrowColumn(sliced, {
     encoding: 'geoarrow.multipoint',
     offsetType: 'preserve'
@@ -192,8 +192,8 @@ test('dense-union demotion gathers sliced children directly and promotes single 
 test('dense-union demotion replays every nested topology from separated coordinates', () => {
   const cases: Array<{
     target: 'geoarrow.multilinestring' | 'geoarrow.multipolygon';
-    rows: GeoArrowGeometryValue[];
-    expected: GeoArrowGeometryValue[];
+    rows: GeoArrowDecodedGeometry[];
+    expected: GeoArrowDecodedGeometry[];
   }> = [
     {
       target: 'geoarrow.multilinestring',
@@ -358,7 +358,7 @@ test('dimension conversion recurses through nested geometry collections', () => 
 });
 
 test('dimension inference recurses through nested geometry collections', () => {
-  const geometry: GeoArrowGeometryValue = {
+  const geometry: GeoArrowDecodedGeometry = {
     type: 'GeometryCollection',
     geometries: [
       {
@@ -373,7 +373,7 @@ test('dimension inference recurses through nested geometry collections', () => {
 });
 
 test('winding normalization changes only rings with the wrong orientation', () => {
-  const polygon: GeoArrowGeometryValue = {
+  const polygon: GeoArrowDecodedGeometry = {
     type: 'Polygon',
     coordinates: [
       [
@@ -395,7 +395,7 @@ test('winding normalization changes only rings with the wrong orientation', () =
   const source = makeGeoArrowColumnFromGeometryRows([polygon]);
   const rewound = rewindGeoArrow(source, {outer: 'counter-clockwise'});
   const row = materializeGeoArrowRows(rewound)[0] as Extract<
-    GeoArrowGeometryValue,
+    GeoArrowDecodedGeometry,
     {type: 'Polygon'}
   >;
   expect(signedArea(row.coordinates[0])).toBeGreaterThan(0);
@@ -442,7 +442,7 @@ test('polygon tessellation returns exact positions, source rows and indices', ()
 });
 
 test('ported tessellation fixtures preserve holes and normalize separated ZM storage', () => {
-  const polygon: GeoArrowGeometryValue = {
+  const polygon: GeoArrowDecodedGeometry = {
     type: 'Polygon',
     coordinates: [
       [
@@ -639,7 +639,7 @@ test('union normalization and conversion reject incompatible output families', (
 });
 
 test('rewinding handles multipolygons and nested collections', () => {
-  const polygon = (clockwise: boolean): Extract<GeoArrowGeometryValue, {type: 'Polygon'}> => ({
+  const polygon = (clockwise: boolean): Extract<GeoArrowDecodedGeometry, {type: 'Polygon'}> => ({
     type: 'Polygon',
     coordinates: [
       clockwise

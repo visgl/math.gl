@@ -319,7 +319,7 @@ function makeGeoArrowArrayFromArrowData(data: arrow.Data): GeoArrowArray {
 
 /** Preserves a sliced validity bitmap with its logical bit offset. */
 function makeGeoArrowValidity(data: arrow.Data): GeoArrowValidity | undefined {
-  if (data.nullCount === 0 || !data.nullBitmap || data.nullBitmap.length === 0) return undefined;
+  if (!data.nullBitmap || data.nullBitmap.length === 0) return undefined;
   return {values: data.nullBitmap, bitOffset: data.offset};
 }
 
@@ -329,17 +329,26 @@ function makeArrowDataFromGeoArrowArray(
   dimension: GeoArrowDimension,
   coordinateLayout: GeoArrowCoordinateLayout | null
 ): arrow.Data {
-  const validity = makeCompactValidity(array.validity, array.length);
+  // Arrow buffers are already sliced to their logical ranges below. Data.offset
+  // addresses validity independently of those value and list-offset buffers.
+  const validity = array.validity?.values;
+  const validityOffset = array.validity?.bitOffset ?? 0;
   const nullCount = validity ? -1 : 0;
   const validityBuffers = validity ? {[arrow.BufferType.VALIDITY]: validity} : {};
 
   switch (array.kind) {
     case 'primitive': {
       const values = makePackedPrimitiveValues(array);
-      return new arrow.Data(getArrowTypeForValues(values), 0, array.length, nullCount, {
-        ...validityBuffers,
-        [arrow.BufferType.DATA]: values
-      });
+      return new arrow.Data(
+        getArrowTypeForValues(values),
+        validityOffset,
+        array.length,
+        nullCount,
+        {
+          ...validityBuffers,
+          [arrow.BufferType.DATA]: values
+        }
+      );
     }
     case 'fixed-size-list': {
       const child = makeArrowDataFromGeoArrowArray(array.child, dimension, coordinateLayout);
@@ -352,7 +361,9 @@ function makeArrowDataFromGeoArrowArray(
         array.size,
         new arrow.Field(dimension, slicedChild.type, true)
       );
-      return new arrow.Data(type, 0, array.length, nullCount, validityBuffers, [slicedChild]);
+      return new arrow.Data(type, validityOffset, array.length, nullCount, validityBuffers, [
+        slicedChild
+      ]);
     }
     case 'list': {
       const child = makeArrowDataFromGeoArrowArray(array.child, dimension, coordinateLayout);
@@ -364,7 +375,7 @@ function makeArrowDataFromGeoArrowArray(
           : new arrow.List(field);
       return new arrow.Data(
         type,
-        0,
+        validityOffset,
         array.length,
         nullCount,
         {...validityBuffers, [arrow.BufferType.OFFSET]: offsets},
@@ -385,7 +396,7 @@ function makeArrowDataFromGeoArrowArray(
       }
       return new arrow.Data(
         new arrow.Struct(fields),
-        0,
+        validityOffset,
         array.length,
         nullCount,
         validityBuffers,
@@ -407,7 +418,7 @@ function makeArrowDataFromGeoArrowArray(
         );
         return Reflect.construct(arrow.Data, [
           type,
-          0,
+          validityOffset,
           array.length,
           nullCount,
           {...validityBuffers, [arrow.BufferType.DATA]: viewBytes},
@@ -418,7 +429,7 @@ function makeArrowDataFromGeoArrowArray(
       }
       const offsets = makeArrowOffsets(array.offsets, array.offset, array.length, array.offsetBase);
       const type = getSerializedArrowType(array.encoding, offsets);
-      return new arrow.Data(type, 0, array.length, nullCount, {
+      return new arrow.Data(type, validityOffset, array.length, nullCount, {
         ...validityBuffers,
         [arrow.BufferType.OFFSET]: offsets,
         [arrow.BufferType.DATA]: array.values
@@ -435,7 +446,10 @@ function makeArrowDenseUnionData(
 ): arrow.Data {
   const offset = array.offset ?? 0;
   const sourceTypeIds = array.typeIds.subarray(offset, offset + array.length);
-  const typeIds = sourceTypeIds;
+  const typeIds =
+    sourceTypeIds instanceof Int8Array
+      ? sourceTypeIds
+      : new Int8Array(sourceTypeIds.buffer, sourceTypeIds.byteOffset, sourceTypeIds.length);
   const valueOffsets = array.valueOffsets.subarray(offset, offset + array.length);
   const children = array.children.map(child =>
     makeArrowDataFromGeoArrowArray(
@@ -479,11 +493,16 @@ function makeArrowDenseUnionData(
   );
   if (new Set(canonicalIds).size !== canonicalIds.length)
     throw new Error('GeoArrow union contains duplicate geometry families and dimensions.');
-  const canonicalTypeIds = Int8Array.from(typeIds, sourceId => {
-    const childIndex = array.children.findIndex(child => child.typeId === sourceId);
-    if (childIndex < 0) throw new Error(`Unknown GeoArrow union type ID ${sourceId}`);
-    return canonicalIds[childIndex]!;
-  });
+  const hasCanonicalTypeIds = array.children.every(
+    (child, index) => child.typeId === canonicalIds[index]
+  );
+  const canonicalTypeIds = hasCanonicalTypeIds
+    ? typeIds
+    : Int8Array.from(typeIds, sourceId => {
+        const childIndex = array.children.findIndex(child => child.typeId === sourceId);
+        if (childIndex < 0) throw new Error(`Unknown GeoArrow union type ID ${sourceId}`);
+        return canonicalIds[childIndex]!;
+      });
   const type = new arrow.DenseUnion(Int32Array.from(canonicalIds), fields);
   return new arrow.Data(
     type,
@@ -550,25 +569,6 @@ function makeArrowOffsets(
     }
   }
   return normalized;
-}
-
-/** Packs a validity bitmap when Arrow requires its first row at bit zero. */
-function makeCompactValidity(
-  validity: GeoArrowValidity | undefined,
-  length: number
-): Uint8Array | undefined {
-  if (!validity) return undefined;
-  const bitOffset = validity.bitOffset ?? 0;
-  if (bitOffset === 0 && validity.values.length === Math.ceil(length / 8)) {
-    return validity.values;
-  }
-  const values = new Uint8Array(Math.ceil(length / 8));
-  let nullCount = 0;
-  for (let index = 0; index < length; index++) {
-    if (isGeoArrowValueValid(validity, index)) values[index >> 3] |= 1 << (index & 7);
-    else nullCount++;
-  }
-  return nullCount > 0 ? values : undefined;
 }
 
 /** Reads one validity bit at its logical row offset. */

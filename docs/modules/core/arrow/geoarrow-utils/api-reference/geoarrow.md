@@ -21,7 +21,7 @@ descriptor types:
 - `GeoArrowValidity`
 
 Related semantic types include `GeoArrowEncoding`, `GeoArrowDimension`,
-`GeoArrowCoordinateLayout`, `GeoArrowGeometryValue`, and `GeoArrowBounds`.
+`GeoArrowCoordinateLayout`, `GeoArrowDecodedGeometry`, and `GeoArrowBounds`.
 
 #### `mergeGeoArrowDimensions(left, right)`
 
@@ -48,9 +48,11 @@ Visits native coordinate tuples in logical row order. The callback receives `(co
 rowIndex)`. The returned callback value is ignored; use `mapGeoArrowCoordinates` to allocate mapped
 output.
 
-#### `sliceGeoArrowColumn(column, begin?, end?)`
+#### `getGeoArrowColumnView(column, start?, end?)`
 
-Returns a zero-copy logical slice while preserving chunk boundaries. A full slice returns `column`.
+Borrows the half-open range `[start, end)` while retaining chunk boundaries and the source
+encoding. Bounds default to the start and end of the column. Negative bounds count backwards
+from the end. A view of the full range returns `column`.
 
 #### `sliceGeoArrowArray(array, begin, end)`
 
@@ -71,7 +73,7 @@ zero native vertices until decoded with the `/wkb` bridge.
 
 These native-geometry APIs create only JavaScript descriptors and reference lists: no new typed
 arrays, subarray views, coordinate copies, rebased offsets, or expanded feature IDs. Existing
-`sliceGeoArrowColumn` and `sliceGeoArrowArray` also retain the original typed-array objects.
+`getGeoArrowColumnView` and `sliceGeoArrowArray` also retain the original typed-array objects.
 Use valid descriptors; call `validateGeoArrowColumn` separately for untrusted physical input.
 
 Storage is borrowed, not immutable: callers must not mutate, recycle, or transfer/detach buffers

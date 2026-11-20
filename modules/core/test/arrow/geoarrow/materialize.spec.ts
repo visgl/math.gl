@@ -11,7 +11,7 @@ import {
   encodeGeoArrowWKT,
   makeGeoArrowColumnFromGeometryRows,
   materializeGeoArrowRows,
-  sliceGeoArrowColumn,
+  getGeoArrowColumnView,
   type GeoArrowColumn
 } from '../../../src/arrow-integration/geoarrow-utils';
 
@@ -33,8 +33,8 @@ test.each(['interleaved', 'separated'] as const)(
       ],
       {encoding: 'geoarrow.linestring', coordinateLayout}
     );
-    const first = sliceGeoArrowColumn(source, 1, 3);
-    const last = sliceGeoArrowColumn(source, 3, 4);
+    const first = getGeoArrowColumnView(source, 1, 3);
+    const last = getGeoArrowColumnView(source, 3, 4);
     const column = {...source, chunks: [...first.chunks, ...last.chunks]};
     expect(materializeGeoArrowRows(column)).toEqual([
       null,
@@ -115,7 +115,7 @@ test.each(['interleaved', 'separated'] as const)(
       {type: 'Point', coordinates: []},
       null
     ]);
-    expect(materializeGeoArrowRows(sliceGeoArrowColumn(column, 1, 3))).toEqual([
+    expect(materializeGeoArrowRows(getGeoArrowColumnView(column, 1, 3))).toEqual([
       {type: 'Point', coordinates: []},
       null
     ]);

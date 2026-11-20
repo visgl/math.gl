@@ -8,7 +8,7 @@ import {
   getGeometryColumnsFromSchema, makeGeoArrowColumnFromArrowVector,
   makeArrowVectorFromGeoArrowColumn, getGeoArrowVectorBounds as getGeoArrowBounds, mapGeoArrowVectorCoordinates as mapGeoArrowCoordinates
 } from '@math.gl/core/arrow';
-import {materializeGeoArrowRows, makeGeoArrowColumnFromGeometryRows, sliceGeoArrowColumn} from '@math.gl/core/arrow';
+import {materializeGeoArrowRows, makeGeoArrowColumnFromGeometryRows, getGeoArrowColumnView} from '@math.gl/core/arrow';
 
 /** Checks borrowing, nulls, slices, semantic metadata, mapping, and newer runtime storage. */
 export function checkGeoArrowConformance() {
@@ -46,7 +46,7 @@ export function checkGeoArrowConformance() {
     const values = [Uint8Array.from({length: 32}, (_, index) => index), null, new Uint8Array([1, 2, 3])];
     const view = arrow.vectorFromArray(values, new optionalTypes.BinaryView());
     const column = makeGeoArrowColumnFromArrowVector(view);
-    assert.deepEqual(makeArrowVectorFromGeoArrowColumn(sliceGeoArrowColumn(column, 1, 3)).toArray(), values.slice(1));
+    assert.deepEqual(makeArrowVectorFromGeoArrowColumn(getGeoArrowColumnView(column, 1, 3)).toArray(), values.slice(1));
     assert.deepEqual(makeArrowVectorFromGeoArrowColumn(makeGeoArrowColumnFromArrowVector(view.slice(1, 3))).toArray(), values.slice(1));
   }
   if (optionalTypes.Utf8View) {
@@ -54,7 +54,7 @@ export function checkGeoArrowConformance() {
     const view = arrow.vectorFromArray(values, new optionalTypes.Utf8View());
     const viewColumn = makeGeoArrowColumnFromArrowVector(view);
     assert.deepEqual(makeArrowVectorFromGeoArrowColumn(viewColumn).toArray(), values);
-    assert.deepEqual(makeArrowVectorFromGeoArrowColumn(sliceGeoArrowColumn(viewColumn, 1, 3)).toArray(), values.slice(1));
+    assert.deepEqual(makeArrowVectorFromGeoArrowColumn(getGeoArrowColumnView(viewColumn, 1, 3)).toArray(), values.slice(1));
     assert.deepEqual(makeArrowVectorFromGeoArrowColumn(makeGeoArrowColumnFromArrowVector(view.slice(1,3))).toArray(), values.slice(1));
   }
 }

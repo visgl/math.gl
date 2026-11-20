@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {earcut} from '../polygon/earcut';
-import type {GeoArrowColumn, GeoArrowGeometryValue} from '@math.gl/core/arrow';
+import type {GeoArrowColumn, GeoArrowDecodedGeometry} from '@math.gl/core/arrow';
 import {getGeoArrowDimensionSize} from '@math.gl/core/arrow';
 import {materializeGeoArrowRows} from '@math.gl/core/arrow';
 import {assertGeoArrowResourceLimits, type GeoArrowResourceLimitOptions} from '@math.gl/core/arrow';
@@ -101,7 +101,7 @@ export function tessellateGeoArrowPolygons(
 }
 
 function visitPolygons(
-  geometry: GeoArrowGeometryValue,
+  geometry: GeoArrowDecodedGeometry,
   visitor: (polygon: readonly (readonly (readonly number[])[])[]) => void
 ): void {
   switch (geometry.type) {

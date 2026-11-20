@@ -11,14 +11,14 @@ import {
   iterateGeoArrowBatches,
   makeGeoArrowColumnFromGeometryRows,
   materializeGeoArrowRows,
-  sliceGeoArrowColumn,
+  getGeoArrowColumnView,
   validateGeoArrowColumn,
   type GeoArrowColumn,
   type GeoArrowDenseUnion,
-  type GeoArrowGeometryValue
+  type GeoArrowDecodedGeometry
 } from '../../../src/arrow-integration/geoarrow-utils';
 
-const geometries: GeoArrowGeometryValue[] = [
+const geometries: GeoArrowDecodedGeometry[] = [
   {type: 'Point', coordinates: [1, 2]},
   {
     type: 'LineString',
@@ -106,7 +106,7 @@ test.each(['xy', 'xyz', 'xym', 'xyzm'] as const)(
       ],
       {dimension, coordinateLayout: 'separated', offsetType: 'int64'}
     );
-    const sliced = sliceGeoArrowColumn(source, 1);
+    const sliced = getGeoArrowColumnView(source, 1);
     const nullView = getGeoArrowRowView(sliced, 0);
     const emptyView = getGeoArrowRowView(sliced, 1);
     expect(materializeGeoArrowRows(nullView.column)).toEqual([null]);
@@ -132,7 +132,7 @@ test('batch iteration preserves empty chunks, sliced ranges, metadata and row ma
   const column = {
     ...source,
     metadata,
-    chunks: [empty, ...sliceGeoArrowColumn(source, 1).chunks, empty, ...source.chunks]
+    chunks: [empty, ...getGeoArrowColumnView(source, 1).chunks, empty, ...source.chunks]
   };
   const batches = Array.from(iterateGeoArrowBatches(column));
   expect(batches.map(batch => batch.rowOffset)).toEqual([0, 0, 2, 2]);
@@ -177,7 +177,7 @@ test('row views dispatch sliced unions by type ID and retain child dimensions', 
     ]
   };
   const column: GeoArrowColumn = {...polygon, encoding: 'geoarrow.geometry', chunks: [union]};
-  const sliced = sliceGeoArrowColumn(column, 1);
+  const sliced = getGeoArrowColumnView(column, 1);
   const view = getGeoArrowRowView(sliced, 0);
   expect(view.column.encoding).toBe('geoarrow.point');
   expect(view.column.dimension).toBe('xym');
@@ -195,7 +195,7 @@ test('row views dispatch sliced unions by type ID and retain child dimensions', 
 });
 
 test('union views preserve collections, nulls and empties without regrouping children', () => {
-  const rows: Array<GeoArrowGeometryValue | null> = [
+  const rows: Array<GeoArrowDecodedGeometry | null> = [
     ...geometries,
     null,
     {type: 'Point', coordinates: []},
@@ -224,7 +224,7 @@ test.each([1, 99])('parent-null union rows preserve unused dispatch for type ID 
   };
   const source: GeoArrowColumn = {...empty, encoding: 'geoarrow.geometry', chunks: [union]};
   expect(validateGeoArrowColumn(source).valid).toBe(true);
-  const view = getGeoArrowRowView(sliceGeoArrowColumn(source, 1), 0);
+  const view = getGeoArrowRowView(getGeoArrowColumnView(source, 1), 0);
   expect(view.column.encoding).toBe('geoarrow.geometry');
   expect(validateGeoArrowColumn(view.column).valid).toBe(true);
   expect(materializeGeoArrowRows(view.column)).toEqual([null]);
@@ -290,7 +290,7 @@ test('wrapping, nested slicing, row selection and assembly create no typed array
     const constructorSpies = typedArrayConstructors.map(name => vi.spyOn(globalThis, name));
     const batches = Array.from(iterateGeoArrowBatches(source));
     const column = concatenateGeoArrowColumns(batches.map(batch => batch.column));
-    const sliced = sliceGeoArrowColumn(sliceGeoArrowColumn(column, 1), 1, 3);
+    const sliced = getGeoArrowColumnView(getGeoArrowColumnView(column, 1), 1, 3);
     getGeoArrowRowView(sliced, 0);
     for (const spy of constructorSpies) expect(spy).not.toHaveBeenCalled();
     expect(subarraySpy).not.toHaveBeenCalled();
