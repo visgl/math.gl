@@ -13,14 +13,14 @@ import {
   makeGeoArrowColumnFromGeometryRows,
   type GeoArrowColumn,
   type GeoArrowDimension,
-  type GeoArrowGeometryValue
+  type GeoArrowDecodedGeometry
 } from '../../../src/arrow-integration/geoarrow-utils';
 import {materializeGeoArrowRows} from '../../../src/arrow-integration/geoarrow-utils/layout';
 
 test('column codecs preserve nulls, declared dimensions and metadata', () => {
   for (const dimension of ['xy', 'xyz', 'xym', 'xyzm'] as GeoArrowDimension[]) {
     const size = dimension === 'xy' ? 2 : dimension === 'xyzm' ? 4 : 3;
-    const point: GeoArrowGeometryValue = {
+    const point: GeoArrowDecodedGeometry = {
       type: 'Point',
       coordinates: Array.from({length: size}, (_, index) => index + 1)
     };
@@ -104,7 +104,7 @@ test('serialized mixed-dimension collections normalize to the declared column di
         ? decodeGeoArrowWKB(serialized, {dimension: 'preserve'})
         : decodeGeoArrowWKT(serialized);
     const collection = materializeGeoArrowRows(decoded)[0] as Extract<
-      GeoArrowGeometryValue,
+      GeoArrowDecodedGeometry,
       {type: 'GeometryCollection'}
     >;
     expect(collection.geometries[0]).toEqual({type: 'Point', coordinates: [1, 2, 0, 0]});
@@ -232,7 +232,7 @@ test('WKB decoder preserves chunks and a stable mixed-union schema', () => {
 });
 
 test('WKB decoder builds nested GeometryCollections without materialized rows', () => {
-  const geometry: GeoArrowGeometryValue = {
+  const geometry: GeoArrowDecodedGeometry = {
     type: 'GeometryCollection',
     geometries: [
       {type: 'Point', coordinates: [1, 2, 0]},
@@ -278,7 +278,7 @@ test('WKB decoder builds nested GeometryCollections without materialized rows', 
 });
 
 test('WKB decoder builds mixed collection and multi-geometry children directly', () => {
-  const geometries: GeoArrowGeometryValue[] = [
+  const geometries: GeoArrowDecodedGeometry[] = [
     {
       type: 'GeometryCollection',
       geometries: [
@@ -341,7 +341,7 @@ test('WKB decoder builds mixed collection and multi-geometry children directly',
 });
 
 test('WKB decoder preserves null GeometryCollection rows in concrete storage', () => {
-  const geometry: GeoArrowGeometryValue = {
+  const geometry: GeoArrowDecodedGeometry = {
     type: 'GeometryCollection',
     geometries: [{type: 'Point', coordinates: [1, 2]}]
   };
@@ -352,13 +352,13 @@ test('WKB decoder preserves null GeometryCollection rows in concrete storage', (
 });
 
 test('WKB decoder builds an empty GeometryCollection without child schemas', () => {
-  const geometry: GeoArrowGeometryValue = {type: 'GeometryCollection', geometries: []};
+  const geometry: GeoArrowDecodedGeometry = {type: 'GeometryCollection', geometries: []};
   const decoded = decodeGeoArrowWKB(makeSerializedWKBRows([writeWKB(geometry, 'xy')]));
   expect(materializeGeoArrowRows(decoded)).toEqual([geometry]);
 });
 
 test('WKB decoder writes concrete families directly from visitor events', () => {
-  const geometries: GeoArrowGeometryValue[] = [
+  const geometries: GeoArrowDecodedGeometry[] = [
     {
       type: 'LineString',
       coordinates: [

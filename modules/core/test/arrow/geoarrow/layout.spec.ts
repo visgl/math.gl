@@ -13,12 +13,12 @@ import {
   inspectGeoArrowColumn,
   interleaveGeoArrowCoordinates,
   makeGeoArrowColumnFromGeometryRows,
-  sliceGeoArrowColumn,
+  getGeoArrowColumnView,
   validateGeoArrowColumn,
   type GeoArrowArray,
   type GeoArrowColumn,
   type GeoArrowDimension,
-  type GeoArrowGeometryValue
+  type GeoArrowDecodedGeometry
 } from '../../../src/arrow-integration/geoarrow-utils';
 import {prepareGeoArrowTransfer} from '../../../src/arrow-integration/geoarrow-utils/worker';
 import {
@@ -28,7 +28,7 @@ import {
   sliceGeoArrowArray
 } from '../../../src/arrow-integration/geoarrow-utils/layout';
 
-const concreteFixtures: GeoArrowGeometryValue[] = [
+const concreteFixtures: GeoArrowDecodedGeometry[] = [
   {type: 'Point', coordinates: [1, 2]},
   {
     type: 'LineString',
@@ -95,7 +95,7 @@ test('GeoArrowBuilder writes all concrete geometry families', () => {
 });
 
 test('GeoArrowBuilder measure and write passes have exact parity', () => {
-  const rows: Array<GeoArrowGeometryValue | null> = [
+  const rows: Array<GeoArrowDecodedGeometry | null> = [
     {
       type: 'Polygon',
       coordinates: [
@@ -281,7 +281,7 @@ test('identity conversion and full slices preserve descriptor and buffer identit
   const buffers = getGeoArrowTransferList(column);
   expect(convertGeoArrowColumn(column)).toBe(column);
   expect(interleaveGeoArrowCoordinates(column)).toBe(column);
-  expect(sliceGeoArrowColumn(column)).toBe(column);
+  expect(getGeoArrowColumnView(column)).toBe(column);
   expect(getGeoArrowTransferList(column)[0]).toBe(buffers[0]);
   const transfer = prepareGeoArrowTransfer(column);
   expect(transfer.column).toBe(column);
@@ -302,7 +302,7 @@ test('sliced validity bitmaps, chunks, nulls and empties are honored', () => {
     encoding: 'geoarrow.point'
   });
   const chunked: GeoArrowColumn = {...first, chunks: [...first.chunks, ...second.chunks]};
-  const sliced = sliceGeoArrowColumn(chunked, 1, 5);
+  const sliced = getGeoArrowColumnView(chunked, 1, 5);
   expect(inspectGeoArrowColumn(sliced)).toMatchObject({
     rowCount: 4,
     nullCount: 1,

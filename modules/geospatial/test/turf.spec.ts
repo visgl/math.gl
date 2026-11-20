@@ -8,7 +8,7 @@ import turfDistance from '@turf/distance';
 import turfBearing from '@turf/bearing';
 import turfCentroid from '@turf/centroid';
 import turfPointInPolygon from '@turf/boolean-point-in-polygon';
-import {makeGeoArrowColumnFromGeometryRows, sliceGeoArrowColumn} from '@math.gl/core/arrow';
+import {makeGeoArrowColumnFromGeometryRows, getGeoArrowColumnView} from '@math.gl/core/arrow';
 import {
   area,
   bbox,
@@ -84,7 +84,7 @@ test('polygons match Turf for area, centroid, bounds, and holes', () => {
 });
 
 test('slices, empty rows and unsupported types', () => {
-  const sliced = sliceGeoArrowColumn(column([point(0, 0), point(4, 5), point(9, 9)]), 1, 2);
+  const sliced = getGeoArrowColumnView(column([point(0, 0), point(4, 5), point(9, 9)]), 1, 2);
   expect([...bbox(sliced).values]).toEqual([4, 5, 4, 5]);
   expect(distance(sliced, sliced).values[0]).toBe(0);
   const empty = column([{type: 'LineString', coordinates: []}]);
@@ -114,7 +114,7 @@ test('chunked separated multipolygons and null bitmap slices', () => {
   const combined = {...first, chunks: [...first.chunks, ...second.chunks]};
   expect(area(combined).values[0]).toBeCloseTo(turfArea(multi), 2);
   expect(area(combined).validity[0]).toBe(5);
-  const sliced = sliceGeoArrowColumn(combined, 1, 3);
+  const sliced = getGeoArrowColumnView(combined, 1, 3);
   expect(area(sliced).validity[0]).toBe(2);
   expect([...booleanPointInPolygon(column([point(20.5, 0.5)]), sliced).values]).toEqual([0, 1]);
   expect(booleanPointInPolygon(column([point(20.5, 0.5)]), sliced).validity[0]).toBe(2);
@@ -328,7 +328,7 @@ test('native geometry conversion and decomposition preserve topology', async () 
     }
   ]);
   expect(api.booleanConcave(concave).values[0]).toBe(1);
-  expect(getGeoArrowRowCount(api.lineSegment(sliceGeoArrowColumn(input, 1, 2)))).toBe(0);
+  expect(getGeoArrowRowCount(api.lineSegment(getGeoArrowColumnView(input, 1, 2)))).toBe(0);
 });
 
 test('point-on-line tolerance works perpendicular to axis-aligned segments', async () => {
@@ -424,7 +424,7 @@ test('native boundary intersections and kinks preserve row alignment', async () 
     type: 'MultiPoint',
     coordinates: []
   });
-  const sliced = sliceGeoArrowColumn(column([a, a, a]), 1, 3);
+  const sliced = getGeoArrowColumnView(column([a, a, a]), 1, 3);
   expect(materializeGeoArrowRows(api.lineIntersect(sliced, column([b])))).toHaveLength(2);
 });
 
