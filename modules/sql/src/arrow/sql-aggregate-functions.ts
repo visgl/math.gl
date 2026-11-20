@@ -96,7 +96,9 @@ export function bindSQLAggregate(
       const field = table.schema.fields[index];
       if (
         field &&
-        (DataType.isList(field.type) ||
+        (field.metadata.has('ARROW:extension:name') ||
+          DataType.isLargeBinary(field.type) ||
+          DataType.isList(field.type) ||
           DataType.isStruct(field.type) ||
           DataType.isFixedSizeList(field.type))
       ) {

@@ -3,7 +3,16 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Binary, Field, Int32, Schema, Table, vectorFromArray, type Vector} from 'apache-arrow';
+import {
+  Binary,
+  LargeBinary,
+  Field,
+  Int32,
+  Schema,
+  Table,
+  vectorFromArray,
+  type Vector
+} from 'apache-arrow';
 import {
   makeArrowVectorFromGeoArrowColumn,
   makeGeoArrowColumnFromGeometryRows,
@@ -391,6 +400,13 @@ test('ST_Extent combines groups across batches and ignores empty and null rows',
   expect(result.getChild('bounds')!.get(1)).toBeNull();
   const empty = select('SELECT ST_Extent(g) AS bounds FROM features WHERE k = 3', table);
   expect(empty.getChild('bounds')!.get(0)).toBeNull();
+});
+
+test('ST_Extent accepts LargeBinary geometry columns', () => {
+  const g = vectorFromArray([writeWKB(parseWKT('POINT(2 3)')), null], new LargeBinary());
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select('SELECT ST_Extent(g) AS bounds FROM features', table);
+  expect(Array.from(result.getChild('bounds')!.get(0))).toEqual([2, 3, 2, 3]);
 });
 
 test('ST_Extent aggregates native polygon columns with nested Arrow storage', () => {
