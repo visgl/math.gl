@@ -625,6 +625,42 @@ test('component extraction retains M and force-2D removes it', () => {
   });
 });
 
+test('simplification preserves an empty multipart line with explicit empty members', () => {
+  const original = {type: 'MultiLineString' as const, coordinates: [[]]};
+  const g = vectorFromArray([writeWKB(original)], new Binary());
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  expect(
+    geometryAt(select('SELECT ST_Simplify(g,1) AS reduced FROM features', table), 'reduced', 0)
+  ).toEqual(original);
+});
+
+test('route reduction preserves endpoints and simplifies each line component independently', () => {
+  const g = wkb(
+    'LINESTRING(0 0,0 0,1 0,2 0,2 2,2 2.1)',
+    'MULTILINESTRING((0 0,1 0,2 0),(5 5,5 5))',
+    null
+  );
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    `SELECT ST_RemoveRepeatedPoints(g) AS exact, ST_RemoveRepeatedPoints(g,0.2) AS near,
+    ST_Simplify(g,0.2) AS reduced FROM features`,
+    table
+  );
+  expect(geometryAt(result, 'exact', 0)).toEqual(parseWKT('LINESTRING(0 0,1 0,2 0,2 2,2 2.1)'));
+  expect(geometryAt(result, 'near', 0)).toEqual(parseWKT('LINESTRING(0 0,1 0,2 0,2 2.1)'));
+  expect(geometryAt(result, 'reduced', 0)).toEqual(parseWKT('LINESTRING(0 0,2 0,2 2.1)'));
+  expect(geometryAt(result, 'reduced', 1)).toEqual(parseWKT('MULTILINESTRING((0 0,2 0))'));
+  expect(geometryAt(result, 'reduced', 2)).toBeNull();
+});
+
+test('simplifying an empty route preserves its geometry type', () => {
+  const g = wkb('LINESTRING EMPTY', 'MULTILINESTRING EMPTY');
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select('SELECT ST_Simplify(g,1) AS reduced FROM features', table);
+  expect(geometryAt(result, 'reduced', 0)).toEqual(parseWKT('LINESTRING EMPTY'));
+  expect(geometryAt(result, 'reduced', 1)).toEqual(parseWKT('MULTILINESTRING EMPTY'));
+});
+
 test('ST_Extent combines groups across batches and ignores empty and null rows', () => {
   const g = wkb('LINESTRING(-4 8,3 5)', null, 'POINT(7 -2)', 'POLYGON EMPTY');
   const k = vectorFromArray([1, 2, 1, 2], new Int32());
@@ -697,4 +733,37 @@ test('native XYZ and constructed XYZM points expose their ordinates', () => {
   expect([...result.getChild('z')!]).toEqual([8, null]);
   expect([...result.getChild('m')!]).toEqual([null, null]);
   expect([...result.getChild('nested')!]).toEqual([8, null]);
+});
+
+test('repeated-point removal preserves empty multipart line members', () => {
+  const g = vectorFromArray(
+    [
+      writeWKB({
+        type: 'MultiLineString',
+        coordinates: [
+          [],
+          [
+            [0, 0],
+            [0, 0],
+            [1, 1]
+          ],
+          []
+        ]
+      })
+    ],
+    new Binary()
+  );
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select('SELECT ST_RemoveRepeatedPoints(g) AS reduced FROM features', table);
+  expect(geometryAt(result, 'reduced', 0)).toEqual({
+    type: 'MultiLineString',
+    coordinates: [
+      [],
+      [
+        [0, 0],
+        [1, 1]
+      ],
+      []
+    ]
+  });
 });

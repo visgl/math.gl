@@ -42,6 +42,7 @@ import {lineLocatePoint, lineSubstring} from './linear-referencing';
 import {normalizeCRSIdentifier} from '../crs/crs-identifier';
 import {EPSG3857ToLngLat, EPSG4326ToEPSG3857} from '../web-mercator/mercator-meters';
 import {vertexCount, memberCount, geometryMember} from './geometry-inspection';
+import {reduceLineVertices} from './line-simplification';
 import {
   planarArea,
   planarBounds,
@@ -645,6 +646,37 @@ export const ST_SETSRID = /* @__PURE__ */ crsFunction('ST_SetSRID');
 /** Reprojects a planar geometry column between geographic and Web Mercator coordinates. */
 export const ST_TRANSFORM = /* @__PURE__ */ crsFunction('ST_Transform');
 
+/** Declares a geometry-valued line reduction with an optional default tolerance. */
+function lineReduction(name: string, mode: 'simplify' | 'removeRepeated'): ScalarFunction {
+  return {
+    kind: 'scalar',
+    name,
+    prototypes: [],
+    /** Binds the geometry and any supplied numeric tolerance. */
+    resolvePrototype(fields) {
+      const numericArguments = mode === 'removeRepeated' && fields.length === 1 ? 0 : 1;
+      return spatialFunction(
+        name,
+        [lineKinds],
+        new Binary(),
+        ([line], tolerance = 0) => {
+          const result = reduceLineVertices(line!, tolerance, mode);
+          return result ? writeWKB(result, 'xy') : null;
+        },
+        numericArguments
+      ).resolvePrototype!(fields);
+    }
+  };
+}
+
+/** Removes consecutive duplicate or nearby vertices. */
+export const ST_REMOVEREPEATEDPOINTS = /* @__PURE__ */ lineReduction(
+  'ST_RemoveRepeatedPoints',
+  'removeRepeated'
+);
+/** Reduces route vertices with Douglas-Peucker simplification. */
+export const ST_SIMPLIFY = /* @__PURE__ */ lineReduction('ST_Simplify', 'simplify');
+
 /** Returns clockwise azimuth from positive Y in radians. */
 export const ST_AZIMUTH = /* @__PURE__ */ spatialFunction(
   'ST_Azimuth',
@@ -841,6 +873,8 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_SRID,
     ST_SETSRID,
     ST_TRANSFORM,
+    ST_REMOVEREPEATEDPOINTS,
+    ST_SIMPLIFY,
     ST_AZIMUTH,
     ST_MAKEPOINT,
     ST_AREA,
