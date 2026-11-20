@@ -44,6 +44,7 @@ import {EPSG3857ToLngLat, EPSG4326ToEPSG3857} from '../web-mercator/mercator-met
 import {vertexCount, memberCount, geometryMember} from './geometry-inspection';
 import {reduceLineVertices} from './line-simplification';
 import {collectPair, makeLine} from './geometry-constructors';
+import {EPSG3857_HALF_CIRCUMFERENCE} from '../web-mercator/mercator-meters';
 import {
   planarArea,
   planarBounds,
@@ -276,6 +277,99 @@ export const ST_MAKEPOINT: ScalarFunction = {
             const coordinates = vectors.map(vector => Number(vector.get(row)));
             values[row] = writeWKB({type: 'Point', coordinates});
           }
+        }
+        return vectorFromArray(values, type);
+      }
+    };
+  }
+};
+
+/** Computes a closed XYZ tile polygon, clipping a fractional margin to the root extent. */
+function tileEnvelope(
+  zoom: number,
+  x: number,
+  y: number,
+  bounds: readonly number[],
+  margin: number
+): Uint8Array {
+  if (!Number.isInteger(zoom) || zoom < 0 || zoom > 31)
+    throw new Error('ST_TileEnvelope zoom must be an integer in [0,31]');
+  const count = 2 ** zoom;
+  if (![x, y].every(index => Number.isInteger(index) && index >= 0 && index < count))
+    throw new Error('ST_TileEnvelope tile index outside zoom level');
+  if (!Number.isFinite(margin) || margin < -0.5) throw new Error('Invalid ST_TileEnvelope margin');
+  const [west, south, east, north] = bounds as [number, number, number, number];
+  const width = (east - west) / count,
+    height = (north - south) / count;
+  if (!(width > 0 && height > 0 && Number.isFinite(width) && Number.isFinite(height)))
+    throw new Error('ST_TileEnvelope requires nondegenerate bounds');
+  const fullWidth = 1 + 2 * margin > count;
+  const left = fullWidth ? west : Math.max(west, west + (x - margin) * width);
+  const right = fullWidth ? east : Math.min(east, west + (x + 1 + margin) * width);
+  const bottom = Math.max(south, north - (y + 1 + margin) * height);
+  const top = Math.min(north, north - (y - margin) * height);
+  return writeWKB(
+    {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [left, bottom],
+          [left, top],
+          [right, top],
+          [right, bottom],
+          [left, bottom]
+        ]
+      ]
+    },
+    'xy'
+  );
+}
+
+/** Constructs an XYZ tile polygon in Web Mercator or a supplied root geometry's CRS. */
+export const ST_TILEENVELOPE: ScalarFunction = {
+  kind: 'scalar',
+  name: 'ST_TileEnvelope',
+  prototypes: [],
+  /** Binds numeric tile indices and the optional GeoArrow root extent. */
+  resolvePrototype(fields) {
+    if (fields.length < 3 || fields.length > 5) return undefined;
+    const custom = fields.length >= 4;
+    const root = fields[3];
+    if (custom) ST_ENVELOPE.resolvePrototype!([root]);
+    const args = fields.map((field, i) => {
+      if (i === 3) return field ?? new Field('bounds', new Binary(), true);
+      if (field && !DataType.isInt(field.type) && !DataType.isFloat(field.type))
+        throw new Error('ST_TileEnvelope requires numeric indices and margin');
+      return field ?? new Field('number', new Float64(), true);
+    });
+    const metadata = new Map([[EXTENSION_NAME, 'geoarrow.wkb']]);
+    const crs = custom
+      ? root?.metadata.get(EXTENSION_METADATA)
+      : '{"crs_type":"authority_code","crs":"EPSG:3857"}';
+    if (crs) metadata.set(EXTENSION_METADATA, crs);
+    const type = new Binary();
+    const r = EPSG3857_HALF_CIRCUMFERENCE;
+    const world = [-r, -r, r, r];
+    return {
+      arguments: args,
+      result: new Field('ST_TileEnvelope', type, true, metadata),
+      /** Computes bounds for active rows using the top-left XYZ origin. */
+      evaluate(vectors, {activeRows, length}) {
+        const values = new Array<Uint8Array | null>(length).fill(null);
+        const read = root
+          ? readGeometryValue(vectors[3]!, root, activeRows, planarGeometry)
+          : undefined;
+        for (let row = 0; row < length; row++) {
+          if (!activeRows[row]) continue;
+          const bounds = read ? planarBounds(read(row)) : world;
+          if (!bounds) throw new Error('ST_TileEnvelope requires nonempty bounds');
+          values[row] = tileEnvelope(
+            Number(vectors[0]!.get(row)),
+            Number(vectors[1]!.get(row)),
+            Number(vectors[2]!.get(row)),
+            bounds,
+            vectors[4] ? Number(vectors[4].get(row)) : 0
+          );
         }
         return vectorFromArray(values, type);
       }
@@ -909,6 +1003,7 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_SIMPLIFY,
     ST_AZIMUTH,
     ST_MAKEPOINT,
+    ST_TILEENVELOPE,
     ST_AREA,
     ST_LENGTH,
     ST_LINEINTERPOLATEPOINT,

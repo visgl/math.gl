@@ -69,6 +69,7 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_Transform(g, srid)` | 2D planar geometry and constant target EPSG code | Reprojects between 4326 (longitude, latitude) and 3857 (meters). Forward projection accepts the Web Mercator tile latitude range (about ±85.0511°). |
 | `ST_Azimuth(a, b)` | Two Points | Float64 radians clockwise from positive Y in `[0, 2π)`. Coincident and empty points yield null. |
 | `ST_MakePoint(x, y [, z [, m]])` | Integer or floating-point ordinates | GeoArrow WKB Point with XY, XYZ, or XYZM coordinates and unknown CRS. Use XY with the 2D predicates and measurements. |
+| `ST_TileEnvelope(z, x, y [, bounds [, margin]])` | XYZ indices (zoom 0–31), optional root geometry and fractional margin | WKB Polygon. Defaults to EPSG:3857. Custom root bounds supply the output CRS. Positive margins expand the tile and negative margins shrink it. |
 | `ST_Area(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar polygon area with holes subtracted. Empty and non-areal inputs yield zero. |
 | `ST_LineInterpolatePoint(line, fraction)` | 2D LineString and fraction in [0, 1] | GeoArrow WKB Point at the given fraction of route length. |
 | `ST_LineLocatePoint(line, point)` | 2D LineString and Point | Fraction of route length at the nearest point on the route. |
