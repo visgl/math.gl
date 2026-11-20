@@ -45,6 +45,7 @@ function onFrame(realMilliseconds) {
 | `rate` | `1` | Simulated seconds for each real second. Finite. |
 | `maxTicksPerAdvance` | `1000` | Maximum ticks that one advance reports as ticks to step. Positive safe integer. |
 | `catchUpPolicy` | `'skip'` | `'skip'` or `'lag'`. See [Large rates](#large-rates). |
+| `renderDelayTicks` | `0` | Ticks that the render time runs behind the simulated time. Non-negative safe integer. See [Render delay](#render-delay). |
 
 The constructor throws `RangeError` for an option that is not valid.
 
@@ -81,9 +82,21 @@ example a Unix time, to keep the precision of the fraction.
 Returns the integer index of the last tick at or before the current time. It is negative
 before `startTime`.
 
-#### `getTickAlpha()`
+#### `getTickAlpha()` and `getSecondsIntoTick()`
 
-Returns the fraction of the tick interval after tick `getTickIndex()`, in [0, 1).
+Both give the position of the clock inside the current tick:
+
+- `getTickAlpha()` returns the fraction of the tick, in [0, 1). It has no unit.
+- `getSecondsIntoTick()` returns the simulated seconds after the tick, in [0, `tickInterval`).
+
+They are equal only when `tickInterval` is 1. `interpolate` gives its callback `alpha`, and
+`evaluate` gives its callback seconds, so a callback cannot receive the wrong one.
+
+#### `getRenderTickIndex()` and `getRenderTime()`
+
+Return the render tick, `getTickIndex() - renderDelayTicks`, and the render time,
+`getTime() - renderDelayTicks * tickInterval`. The render tick has the same `alpha` and the
+same seconds into the tick as the current tick.
 
 #### `getTickTime(tickIndex)`
 
@@ -99,10 +112,31 @@ if `rate` is not finite.
 Moves the clock to a simulated time. You must then set the state at the new tick. It throws
 `RangeError` if `time` is not finite or is outside the safe tick range.
 
+#### `rebase()`
+
+Moves the epoch forward to the current tick. The tick index becomes 0, and `startTime`
+increases by the old tick index times `tickInterval`. `getTime()`, `alpha` and the seconds
+into the tick do not change, except for the rounding of one addition to `startTime`. Returns
+the number of ticks that the epoch moved. Decrease each tick index that you store by this
+count. Use it in long runs, so that tick indices and `getElapsedTime()` stay small.
+
+#### `evaluate(evaluator)`
+
+Calls `evaluator(getRenderTickIndex(), getSecondsIntoTick())` and returns its result. Use it
+when the motion between two ticks has an exact solution, for example a closed-form orbit, or
+an exact integrator that starts from the state at the tick. A straight-line blend of two tick
+states cuts the corners of curved motion, and its velocity jumps at each tick.
+
+```js
+const position = clock.evaluate((tickIndex, secondsIntoTick) =>
+  getOrbitPosition(tickIndex * clock.tickInterval + secondsIntoTick)
+);
+```
+
 #### `interpolate(previous, next, interpolator)`
 
 Calls `interpolator(previous, next, getTickAlpha())` and returns its result. `previous` is
-the state at tick `getTickIndex()` and `next` is the state at the tick after it. Use
+the state at tick `getRenderTickIndex()` and `next` is the state at the tick after it. Use
 `interpolateTickState` for numbers and vectors. Supply another function for other states,
 for example a quaternion slerp:
 
@@ -127,9 +161,17 @@ At a rate of one year per second and a tick of 1/60 s, one 16 ms frame passes ab
   and reports the rest of the time in `droppedTime`. The simulated time falls behind the
   rate. Use it when each tick must run, for example in a numeric integration.
 
+## Render delay
+
+With `renderDelayTicks` set to N, the renderer draws the time N ticks before the simulated
+time. The states of the N ticks after the render tick then exist before the renderer needs
+them, for example when a worker or a network sends them late. Use `interpolate` or
+`evaluate` with the render tick: they use `getRenderTickIndex()`.
+
 ## `interpolateTickState(previous, next, alpha, out?)`
 
-Linearly interpolates `previous + alpha * (next - previous)`. The states are both numbers,
+Linearly interpolates `previous + alpha * (next - previous)`. It is the fallback for states
+that have no exact solution between ticks. The states are both numbers,
 or both arrays or typed arrays with the same length. For arrays, the function writes to
 `out` if you supply it, else to a new array. `out` can be `previous` or `next`. It throws
 `RangeError` if `alpha` is not finite, if the lengths do not match, or if `out` is too short.

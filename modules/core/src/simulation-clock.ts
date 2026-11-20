@@ -33,6 +33,12 @@ export type SimulationClockOptions = {
   maxTicksPerAdvance?: number;
   /** Policy when one advance passes more than `maxTicksPerAdvance` ticks. Default `'skip'`. */
   catchUpPolicy?: SimulationClockCatchUpPolicy;
+  /**
+   * Number of ticks that the render time runs behind the simulated time. Non-negative safe
+   * integer. Default 0. A delay of N keeps the states of the N ticks after the render tick
+   * available, for example when they come from a worker or a network.
+   */
+  renderDelayTicks?: number;
 };
 
 /** Result of {@link SimulationClock.advance}. */
@@ -56,9 +62,10 @@ export type SimulationClockAdvance = {
 };
 
 /**
- * Interpolates between the states at two adjacent ticks.
- * @param previous State at tick `getTickIndex()`.
- * @param next State at tick `getTickIndex() + 1`.
+ * Interpolates between the states at two adjacent ticks. This is a fallback for states
+ * without an exact solution between ticks; see {@link TickStateEvaluator}.
+ * @param previous State at tick `getRenderTickIndex()`.
+ * @param next State at tick `getRenderTickIndex() + 1`.
  * @param alpha Fraction of the tick interval after `previous`, in [0, 1).
  * @returns The interpolated state.
  */
@@ -67,6 +74,16 @@ export type TickStateInterpolator<StateT> = (
   next: StateT,
   alpha: number
 ) => StateT;
+
+/**
+ * Evaluates the state of a model at a time inside a tick. Use it for the exact solution of
+ * the motion, for example a closed-form orbit or an exact integrator that starts from the
+ * state at the tick. It receives seconds, not the fraction `alpha`.
+ * @param tickIndex Index of the render tick.
+ * @param secondsIntoTick Simulated seconds after the render tick, in [0, `tickInterval`).
+ * @returns The state at `tickIndex * tickInterval + secondsIntoTick` after `startTime`.
+ */
+export type TickStateEvaluator<StateT> = (tickIndex: number, secondsIntoTick: number) => StateT;
 
 /** Default value of {@link SimulationClockOptions.maxTicksPerAdvance}. */
 const DEFAULT_MAX_TICKS_PER_ADVANCE = 1000;
@@ -85,14 +102,16 @@ const DEFAULT_MAX_TICKS_PER_ADVANCE = 1000;
 export class SimulationClock {
   /** Fixed tick interval, in simulated seconds. */
   readonly tickInterval: number;
-  /** Simulated time at tick 0, in seconds. */
-  readonly startTime: number;
+  /** Number of ticks that the render time runs behind the simulated time. */
+  readonly renderDelayTicks: number;
   /** Maximum number of ticks that one advance reports as ticks to step. */
   readonly maxTicksPerAdvance: number;
   /** Policy when one advance passes more than `maxTicksPerAdvance` ticks. */
   readonly catchUpPolicy: SimulationClockCatchUpPolicy;
   /** Simulated seconds for each real second. */
   private rate: number;
+  /** Simulated time at tick 0, in seconds. Only {@link SimulationClock.rebase} changes it. */
+  private epoch: number;
   /** Integer index of the last tick at or before the current time. */
   private tickIndex = 0;
   /** Simulated seconds after the tick `tickIndex`, in [0, `tickInterval`). */
@@ -109,7 +128,8 @@ export class SimulationClock {
       startTime = 0,
       rate = 1,
       maxTicksPerAdvance = DEFAULT_MAX_TICKS_PER_ADVANCE,
-      catchUpPolicy = 'skip'
+      catchUpPolicy = 'skip',
+      renderDelayTicks = 0
     } = options;
     if (!Number.isFinite(tickInterval) || tickInterval <= 0) {
       throw new RangeError('SimulationClock tickInterval must be finite and greater than 0');
@@ -123,8 +143,12 @@ export class SimulationClock {
     if (catchUpPolicy !== 'skip' && catchUpPolicy !== 'lag') {
       throw new RangeError("SimulationClock catchUpPolicy must be 'skip' or 'lag'");
     }
+    if (!Number.isSafeInteger(renderDelayTicks) || renderDelayTicks < 0) {
+      throw new RangeError('SimulationClock renderDelayTicks must be a non-negative safe integer');
+    }
     this.tickInterval = tickInterval;
-    this.startTime = startTime;
+    this.renderDelayTicks = renderDelayTicks;
+    this.epoch = startTime;
     this.maxTicksPerAdvance = maxTicksPerAdvance;
     this.catchUpPolicy = catchUpPolicy;
     this.rate = validateRate(rate);
@@ -189,11 +213,19 @@ export class SimulationClock {
   }
 
   /**
+   * Simulated time at tick 0, in seconds.
+   * @returns The start time. {@link SimulationClock.rebase} moves it forward.
+   */
+  get startTime(): number {
+    return this.epoch;
+  }
+
+  /**
    * Returns the current simulated time.
    * @returns `startTime + getElapsedTime()`, in seconds.
    */
   getTime(): number {
-    return this.startTime + this.getElapsedTime();
+    return this.epoch + this.getElapsedTime();
   }
 
   /**
@@ -213,7 +245,34 @@ export class SimulationClock {
   }
 
   /**
-   * Returns the fraction of the tick interval after tick `getTickIndex()`.
+   * Returns the index of the tick at or before the render time.
+   * @returns `getTickIndex() - renderDelayTicks`.
+   */
+  getRenderTickIndex(): number {
+    return this.tickIndex - this.renderDelayTicks;
+  }
+
+  /**
+   * Returns the render time: the simulated time `renderDelayTicks` ticks in the past.
+   * The render tick has the same `alpha` and the same seconds into the tick as the current tick.
+   * @returns `getTime() - renderDelayTicks * tickInterval`, in seconds.
+   */
+  getRenderTime(): number {
+    return this.epoch + (this.getRenderTickIndex() * this.tickInterval + this.remainder);
+  }
+
+  /**
+   * Returns the simulated seconds after the start of the current tick. This value is in
+   * seconds; {@link SimulationClock.getTickAlpha} is the same position as a fraction.
+   * @returns Seconds in [0, `tickInterval`).
+   */
+  getSecondsIntoTick(): number {
+    return this.remainder;
+  }
+
+  /**
+   * Returns the fraction of the tick interval after tick `getTickIndex()`. This value has no
+   * unit; {@link SimulationClock.getSecondsIntoTick} is the same position in seconds.
    * The remainder is less than `tickInterval`, and IEEE 754 division of a smaller positive
    * number by a larger one is less than 1, so no clamp is necessary.
    * @returns `alpha` in [0, 1).
@@ -228,7 +287,7 @@ export class SimulationClock {
    * @returns `startTime + tickIndex * tickInterval`, in seconds.
    */
   getTickTime(tickIndex: number): number {
-    return this.startTime + tickIndex * this.tickInterval;
+    return this.epoch + tickIndex * this.tickInterval;
   }
 
   /**
@@ -257,7 +316,7 @@ export class SimulationClock {
     if (!Number.isFinite(time)) {
       throw new RangeError('SimulationClock seek time must be finite');
     }
-    const elapsed = time - this.startTime;
+    const elapsed = time - this.epoch;
     let tickIndex = Math.floor(elapsed / this.tickInterval);
     if (!Number.isSafeInteger(tickIndex)) {
       throw new RangeError('SimulationClock seek time is outside the safe tick range');
@@ -276,9 +335,35 @@ export class SimulationClock {
   }
 
   /**
-   * Interpolates between the states at ticks `getTickIndex()` and `getTickIndex() + 1` at the current `alpha`.
-   * @param previous State at tick `getTickIndex()`.
-   * @param next State at tick `getTickIndex() + 1`.
+   * Moves the epoch forward to the current tick, so that the tick index becomes 0.
+   * `getTime()` does not change, except for the rounding of one addition to `startTime`.
+   * Use it in long runs, so that tick indices and `getElapsedTime()` stay small. Tick indices
+   * that the caller stores must then decrease by the returned count.
+   * @returns The number of ticks that the epoch moved. It is negative when the clock is before `startTime`.
+   */
+  rebase(): number {
+    const tickCount = this.tickIndex;
+    this.epoch += tickCount * this.tickInterval;
+    this.tickIndex = 0;
+    return tickCount;
+  }
+
+  /**
+   * Evaluates a model at the render time. Use it in place of {@link SimulationClock.interpolate}
+   * when the state between two ticks has an exact solution, for example a closed-form orbit.
+   * @param evaluator Function of the render tick index and the seconds into that tick.
+   * @returns The value that `evaluator` returns.
+   */
+  evaluate<StateT>(evaluator: TickStateEvaluator<StateT>): StateT {
+    return evaluator(this.getRenderTickIndex(), this.remainder);
+  }
+
+  /**
+   * Interpolates between the states at the render tick and the tick after it at the current
+   * `alpha`. A straight-line blend cuts the corners of curved motion; when the motion has an
+   * exact solution, use {@link SimulationClock.evaluate}.
+   * @param previous State at tick `getRenderTickIndex()`.
+   * @param next State at tick `getRenderTickIndex() + 1`.
    * @param interpolator Function that blends two states, for example {@link interpolateTickState} or a quaternion slerp.
    * @returns The value that `interpolator` returns.
    */

@@ -419,5 +419,6 @@ export type {
   SimulationClockOptions,
   SimulationClockAdvance,
   SimulationClockCatchUpPolicy,
+  TickStateEvaluator,
   TickStateInterpolator
 } from './simulation-clock';

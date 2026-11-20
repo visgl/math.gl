@@ -283,3 +283,107 @@ it('interpolateTickState blends numbers and vectors, and the clock accepts other
   expect(rotation[2]).toBeCloseTo(Math.sin(Math.PI / 8), 12);
   expect(rotation[3]).toBeCloseTo(Math.cos(Math.PI / 8), 12);
 });
+
+it('SimulationClock renders a fixed number of ticks behind the simulated time', () => {
+  for (const renderDelayTicks of [-1, 1.5, NaN, Infinity]) {
+    expect(() => new SimulationClock({tickInterval: 1, renderDelayTicks})).toThrow(RangeError);
+  }
+  const current = new SimulationClock({tickInterval: 0.5});
+  current.advance(1750);
+  expect(current.renderDelayTicks).toBe(0);
+  expect(current.getRenderTickIndex()).toBe(current.getTickIndex());
+  expect(current.getRenderTime()).toBe(current.getTime());
+
+  const delayed = new SimulationClock({tickInterval: 0.5, startTime: 10, renderDelayTicks: 2});
+  delayed.advance(1750);
+  expect(delayed.getTickIndex()).toBe(3);
+  expect(delayed.getRenderTickIndex()).toBe(1);
+  expect(delayed.getTime()).toBe(11.75);
+  expect(delayed.getRenderTime()).toBe(10.75);
+  expect(delayed.getTickAlpha()).toBe(0.5);
+
+  const calls: number[][] = [];
+  delayed.interpolate(0, 1, (previous, next, alpha) => {
+    calls.push([alpha]);
+    return previous + alpha * (next - previous);
+  });
+  delayed.evaluate((tickIndex, secondsIntoTick) => calls.push([tickIndex, secondsIntoTick]));
+  expect(calls).toEqual([[0.5], [1, 0.25]]);
+});
+
+it('SimulationClock keeps alpha and the seconds into a tick apart', () => {
+  // With a tick that is not 1 s, alpha and seconds differ, so a mix-up shows.
+  const clock = new SimulationClock({tickInterval: 0.5});
+  clock.advance(1100);
+  expect(clock.getTickIndex()).toBe(2);
+  expect(clock.getSecondsIntoTick()).toBeCloseTo(0.1, 14);
+  expect(clock.getTickAlpha()).toBeCloseTo(0.2, 14);
+  expect(clock.evaluate((_tickIndex, secondsIntoTick) => secondsIntoTick)).toBe(
+    clock.getSecondsIntoTick()
+  );
+  expect(clock.interpolate(0, 1, (_previous, _next, alpha) => alpha)).toBe(clock.getTickAlpha());
+  expect(clock.getTickTime(clock.getTickIndex()) + clock.getSecondsIntoTick()).toBeCloseTo(
+    clock.getTime(),
+    14
+  );
+});
+
+it('SimulationClock evaluates the exact motion between ticks, where a blend cuts the corner', () => {
+  // A unit circle, one turn in 8 ticks.
+  const tickInterval = 1;
+  const angularRate = (2 * Math.PI) / 8;
+  const positionAt = (time: number) => [Math.cos(angularRate * time), Math.sin(angularRate * time)];
+  const clock = new SimulationClock({tickInterval, renderDelayTicks: 1});
+  clock.advance(3500);
+  const renderTick = clock.getRenderTickIndex();
+  expect(renderTick).toBe(2);
+
+  const exact = clock.evaluate((tickIndex, secondsIntoTick) =>
+    positionAt(tickIndex * tickInterval + secondsIntoTick)
+  );
+  const expected = positionAt(clock.getRenderTime());
+  expect(exact[0]).toBeCloseTo(expected[0], 14);
+  expect(exact[1]).toBeCloseTo(expected[1], 14);
+  expect(Math.hypot(exact[0], exact[1])).toBeCloseTo(1, 14);
+
+  const blended = clock.interpolate(
+    positionAt(renderTick),
+    positionAt(renderTick + 1),
+    interpolateTickState
+  );
+  // The chord at mid-tick is inside the circle by 1 - cos(pi / 8).
+  expect(1 - Math.hypot(blended[0], blended[1])).toBeCloseTo(1 - Math.cos(Math.PI / 8), 12);
+});
+
+it('SimulationClock rebase moves the epoch and keeps the time', () => {
+  const tickInterval = 1 / 60;
+  const clock = new SimulationClock({tickInterval, startTime: 100, rate: 3600});
+  const twin = new SimulationClock({tickInterval, startTime: 100, rate: 3600});
+  clock.advance(1234);
+  twin.advance(1234);
+  const time = clock.getTime();
+  const alpha = clock.getTickAlpha();
+  const tickIndex = clock.getTickIndex();
+  expect(tickIndex).toBeGreaterThan(1000);
+
+  expect(clock.rebase()).toBe(tickIndex);
+  expect(clock.getTickIndex()).toBe(0);
+  expect(clock.startTime).toBe(100 + tickIndex * tickInterval);
+  expect(clock.getTickAlpha()).toBe(alpha);
+  expect(clock.getTime()).toBeCloseTo(time, 9);
+  expect(clock.getElapsedTime()).toBeLessThan(tickInterval);
+
+  for (let i = 0; i < 100; i++) {
+    clock.advance(16.7);
+    twin.advance(16.7);
+    expect(clock.getTickIndex() + tickIndex).toBe(twin.getTickIndex());
+    expect(clock.getTime()).toBeCloseTo(twin.getTime(), 9);
+  }
+
+  const before = new SimulationClock({tickInterval: 0.5});
+  before.seek(-2.25);
+  expect(before.rebase()).toBe(-5);
+  expect(before.startTime).toBe(-2.5);
+  expect(before.getTime()).toBe(-2.25);
+  expect(before.rebase()).toBe(0);
+});
