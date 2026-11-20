@@ -10,7 +10,7 @@
 Use `import type` for declarations that add no runtime code:
 
 ```typescript
-import type {NumericArray, NumberArray3, Bounds3D} from '@math.gl/core';
+import type {NumericArray, NumberArray3, Bounds3D} from '@math.gl/core/types';
 ```
 
 `NumberArray` covers JavaScript number arrays; `NumericArray` also includes numeric typed arrays. Sized variants describe fixed component counts. See [array types](./api-reference/array-types.md) and [bounds](./api-reference/bounds.md) for the contracts and runtime helpers.

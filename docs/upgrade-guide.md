@@ -119,7 +119,7 @@ Euler rotation orders are now represented directly by the `EulerRotationOrder` s
 Low-level `mat3`, `mat4`, `quat`, `vec2`, `vec3`, and `vec4` namespaces are named exports from `@math.gl/core`.
 
 ```js
-import {mat4, vec3} from '@math.gl/core';
+import {mat4, vec3} from '@math.gl/core/matrix';
 ```
 
 ### CRS and proj4 definitions
@@ -210,13 +210,13 @@ Experimental exports are now exported with a leading underscore (\_), instead of
 NOW: math.gl v2
 
 ```js
-import {_Euler as Euler} from '@math.gl/core';
+import {_Euler as Euler} from '@math.gl/core/matrix';
 ```
 
 BEFORE: math.gl v1.x
 
 ```js
-import {experimental} from '@math.gl/core';
+import {experimental} from '@math.gl/core/matrix';
 const {Euler} = experimental;
 ```
 
@@ -244,7 +244,7 @@ Install `@math.gl/core` in place of `@math.gl/arrow`, and `@math.gl/geospatial` 
 | `@math.gl/sql/arrow-scales` | `@math.gl/sql/scales` |
 | `@math.gl/geometry/color` | `@math.gl/core/color` (compatibility re-exports remain) |
 
-The focused `@math.gl/core/matrix` entry point shares constructor identity with the core root. `@math.gl/core/color` provides reusable colors, scales, palettes, and LUTs. SQL parsing, domain resolution, and Arrow scale evaluation remain together in `@math.gl/sql/scales`.
+Import vectors, matrices, and rotations from `@math.gl/core/matrix`. `@math.gl/core/color` provides reusable colors, scales, palettes, and LUTs. SQL parsing, domain resolution, and Arrow scale evaluation remain together in `@math.gl/sql/scales`.
 
 Applications importing `@math.gl/core/arrow` install the optional `apache-arrow >=17` peer. Matrix, color, and UTF-8 consumers can omit it. Descriptor kernels retain their names; Arrow vector operations use `getGeoArrowVectorBounds`, `getGeoArrowVectorRowBounds`, `getGeoArrowVectorVertexCount`, `mapGeoArrowVectorCoordinates`, and `rewindGeoArrowVector` to distinguish them from descriptor kernels.
 

@@ -7,8 +7,8 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See ../../../../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
-import {NumericArray, Vector3} from '@math.gl/core';
-import {mat4GetScaling} from '@math.gl/core';
+import {NumericArray, Vector3} from '@math.gl/core/matrix';
+import {mat4GetScaling} from '@math.gl/core/matrix';
 
 import type {CullingResult} from '../../constants';
 import {BoundingVolume} from './bounding-volume';

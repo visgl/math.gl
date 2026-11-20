@@ -1,4 +1,4 @@
-# Colors, scales, and LUTs
+# @math.gl/core/color
 
 `@math.gl/core/color` provides reusable color conversions, palettes, scale compilation, quantile sketches, and RGB lookup-table sampling. It operates on ordinary values and typed arrays and does not require Apache Arrow or a SQL runtime.
 

@@ -1,4 +1,4 @@
-# UTF-8 utilities
+# @math.gl/core/utf8
 
 `@math.gl/core/utf8` helps applications work efficiently with binary UTF-8 strings
 without materializing JavaScript strings.

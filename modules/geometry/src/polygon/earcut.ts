@@ -32,7 +32,7 @@
 
 /* eslint-disable */
 
-import type {NumericArray} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 import {DimIndex, Plane2D} from './polygon-utils';
 
 /** Controls the tradeoff between clipping speed and triangle layout. */

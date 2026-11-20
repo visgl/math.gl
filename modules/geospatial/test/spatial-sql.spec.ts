@@ -423,6 +423,299 @@ test('constructs XY, XYZ and XYZM points from nullable numeric coordinates', () 
   }
 });
 
+test('ST_Intersects includes touching features and excludes holes in either argument order', () => {
+  const region = 'POLYGON((0 0,8 0,8 8,0 8,0 0),(2 2,6 2,6 6,2 6,2 2))';
+  const fixtures: [string | null, string, boolean | null][] = [
+    ['POINT(1 1)', region, true],
+    ['POINT(5 5)', region, false],
+    ['POINT(2 4)', region, true],
+    ['LINESTRING(-2 3,10 3)', region, true],
+    ['LINESTRING(3 3,5 5)', region, false],
+    ['POLYGON((3 3,4 3,4 4,3 3))', region, false],
+    ['POLYGON((8 2,9 2,9 3,8 2))', region, true],
+    ['POLYGON((1 1,1.5 1,1.5 1.5,1 1))', region, true],
+    ['LINESTRING(0 0,4 4)', 'LINESTRING(0 4,4 0)', true],
+    ['LINESTRING(0 0,4 4)', 'LINESTRING(2 2,6 6)', true],
+    ['LINESTRING(0 0,4 4)', 'LINESTRING(1 2,4 5)', false],
+    ['MULTIPOINT((20 20),(1 1))', region, true],
+    ['GEOMETRYCOLLECTION(POINT(5 5),LINESTRING(3 3,4 4))', region, false],
+    ['POINT EMPTY', region, false],
+    [null, region, null]
+  ];
+  const a = wkb(...fixtures.map(row => row[0])),
+    b = wkb(...fixtures.map(row => row[1]));
+  const table = new Table(new Schema([geometryField('a', a), geometryField('b', b)]), {a, b});
+  const result = select(
+    'SELECT ST_Intersects(a,b) AS forward, ST_Intersects(b,a) AS backward FROM features',
+    table
+  );
+  for (const name of ['forward', 'backward'])
+    expect([...result.getChild(name)!]).toEqual(fixtures.map(row => row[2]));
+});
+
+test('a substring of a zero-length route has one distinct point', () => {
+  const route = wkb('LINESTRING(1 2,1 2)');
+  const table = new Table(new Schema([geometryField('route', route)]), {route});
+  const result = select('SELECT ST_LineSubstring(route,0,1) AS section FROM features', table);
+  expect(geometryAt(result, 'section', 0)).toEqual(parseWKT('POINT(1 2)'));
+});
+
+test('linear referencing uses segment lengths and includes bends in clipped routes', () => {
+  const line = wkb('LINESTRING(0 0,3 0,3 0,3 7)', 'LINESTRING EMPTY', null);
+  const point = wkb('POINT(5 3)', 'POINT(1 1)', 'POINT EMPTY');
+  const table = new Table(new Schema([geometryField('l', line), geometryField('p', point)]), {
+    l: line,
+    p: point
+  });
+  const result = select(
+    `SELECT ST_LineLocatePoint(l,p) AS f, ST_LineInterpolatePoint(l,0.6) AS marker,
+    ST_LineSubstring(l,0.1,0.8) AS section, ST_LineSubstring(l,0.3,0.3) AS bend FROM features`,
+    table
+  );
+  expect([...result.getChild('f')!]).toEqual([0.6, null, null]);
+  expect(geometryAt(result, 'marker', 0)).toEqual(parseWKT('POINT(3 3)'));
+  expect(geometryAt(result, 'section', 0)).toEqual(parseWKT('LINESTRING(1 0,3 0,3 5)'));
+  expect(geometryAt(result, 'bend', 0)).toEqual(parseWKT('POINT(3 0)'));
+  expect(geometryAt(result, 'section', 1)).toBeNull();
+  expect(geometryAt(result, 'marker', 1)).toEqual({type: 'Point', coordinates: [NaN, NaN]});
+  expect(() => select('SELECT ST_LineSubstring(l,0.8,0.2) FROM features', table)).toThrow(
+    /fractions/
+  );
+});
+
+test('projecting a collection preserves empty point members', () => {
+  const g = wkb('GEOMETRYCOLLECTION(POINT EMPTY,POINT(10 45))');
+  const table = new Table(new Schema([geometryField('g', g, 'wkb', {crs: 'EPSG:4326'})]), {g});
+  const result = geometryAt(
+    select('SELECT ST_Transform(g,3857) AS projected FROM features', table),
+    'projected',
+    0
+  );
+  expect(result?.type).toBe('GeometryCollection');
+  if (result?.type === 'GeometryCollection') {
+    expect(result.geometries[0]).toEqual({type: 'Point', coordinates: [NaN, NaN]});
+    expect(result.geometries[1]?.type).toBe('Point');
+  }
+});
+
+test('CRS assignment and reprojection bind output metadata for nested spatial SQL', () => {
+  const g = wkb('LINESTRING(0 0,10 45)', 'LINESTRING EMPTY', null);
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    `SELECT ST_SRID(g) AS unknown, ST_SetSRID(g,4326) AS labeled,
+    ST_Transform(ST_SetSRID(g,4326),3857) AS meters,
+    ST_SRID(ST_Transform(ST_SetSRID(g,4326),3857)) AS code FROM features`,
+    table
+  );
+  expect([...result.getChild('unknown')!]).toEqual([0, 0, null]);
+  expect([...result.getChild('code')!]).toEqual([3857, 3857, null]);
+  expect(geometryAt(result, 'labeled', 0)).toEqual(parseWKT('LINESTRING(0 0,10 45)'));
+  const projected = geometryAt(result, 'meters', 0);
+  expect(projected?.type).toBe('LineString');
+  if (projected?.type === 'LineString') {
+    expect(projected.coordinates[1]![0]).toBeCloseTo(1113194.90793, 4);
+    expect(projected.coordinates[1]![1]).toBeCloseTo(5621521.48619, 4);
+  }
+  expect(geometryAt(result, 'meters', 1)).toEqual(parseWKT('LINESTRING EMPTY'));
+  expect(() => select('SELECT ST_Transform(g,3857) FROM features', table)).toThrow(
+    /source and target/
+  );
+  expect(() => select('SELECT ST_SetSRID(g,ST_SRID(g)) FROM features', table)).toThrow(/constant/);
+});
+
+test('CRS metadata functions preserve spherical edges', () => {
+  const g = wkb('LINESTRING(0 0,10 45)');
+  const table = new Table(
+    new Schema([geometryField('g', g, 'wkb', {crs: 'EPSG:4326', edges: 'spherical'})]),
+    {g}
+  );
+  const result = select('SELECT ST_SRID(g) AS code, ST_SetSRID(g,0) AS shape FROM features', table);
+  expect([...result.getChild('code')!]).toEqual([4326]);
+  expect(JSON.parse(result.schema.fields[1]!.metadata.get('ARROW:extension:metadata')!)).toEqual({
+    edges: 'spherical'
+  });
+  expect(geometryAt(result, 'shape', 0)).toEqual(parseWKT('LINESTRING(0 0,10 45)'));
+  expect(() => select('SELECT ST_Transform(g,3857) FROM features', table)).toThrow(/planar/);
+});
+
+test('reads PROJJSON EPSG identifiers and preserves extension metadata across inverse transforms', () => {
+  const g = wkb('POINT(1113194.9079327357 5621521.486192066)');
+  const crs = {type: 'ProjectedCRS', id: {authority: 'EPSG', code: 3857}};
+  const table = new Table(
+    new Schema([geometryField('g', g, 'wkb', {crs, crs_type: 'projjson', edges: 'planar'})]),
+    {g}
+  );
+  const result = select(
+    `SELECT ST_SRID(g) AS srid, ST_Transform(g,4326) AS lonlat,
+    ST_SRID(ST_SetSRID(g,0)) AS cleared FROM features`,
+    table
+  );
+  expect(result.getChild('srid')!.get(0)).toBe(3857);
+  expect(result.getChild('cleared')!.get(0)).toBe(0);
+  const point = geometryAt(result, 'lonlat', 0);
+  expect(point?.type).toBe('Point');
+  if (point?.type === 'Point') {
+    expect(point.coordinates[0]).toBeCloseTo(10, 10);
+    expect(point.coordinates[1]).toBeCloseTo(45, 10);
+  }
+  expect(JSON.parse(result.schema.fields[1]!.metadata.get('ARROW:extension:metadata')!)).toEqual({
+    crs: 'EPSG:4326',
+    crs_type: 'authority_code',
+    edges: 'planar'
+  });
+});
+
+test('geometry inspection distinguishes nested components, vertices, empty geometries and nulls', () => {
+  const g = wkb(
+    'GEOMETRYCOLLECTION(MULTIPOINT((1 2),(4 5)),LINESTRING(0 0,1 0,2 0))',
+    'POLYGON((0 0,1 0,0 1,0 0))',
+    'POINT EMPTY',
+    null
+  );
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    `SELECT ST_NPoints(g) AS vertices, ST_NumGeometries(g) AS parts,
+    ST_IsEmpty(g) AS empty, ST_GeometryType(ST_GeometryN(g,2)) AS second FROM features`,
+    table
+  );
+  expect([...result.getChild('vertices')!]).toEqual([5, 4, 0, null]);
+  expect([...result.getChild('parts')!]).toEqual([2, 1, 0, null]);
+  expect([...result.getChild('empty')!]).toEqual([false, false, true, null]);
+  expect([...result.getChild('second')!]).toEqual(['ST_LineString', null, null, null]);
+});
+
+test('component extraction uses the selected WKB header and excludes empty atomic geometries', () => {
+  const child = writeWKB({type: 'Point', coordinates: [1, 2, 7]}, 'xym');
+  const bytes = Uint8Array.from([1, 7, 0, 0, 0, 1, 0, 0, 0, ...child]);
+  const g = vectorFromArray([bytes, writeWKB(parseWKT('POINT EMPTY'))], new Binary());
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select('SELECT ST_GeometryN(g,1) AS member FROM features', table);
+  expect(result.getChild('member')!.get(0)).toEqual(child);
+  expect(result.getChild('member')!.get(1)).toBeNull();
+});
+
+test('component extraction retains M and force-2D removes it', () => {
+  const g = vectorFromArray(
+    [
+      writeWKB(
+        {
+          type: 'MultiPoint',
+          coordinates: [
+            [1, 2, 7],
+            [3, 4, 8]
+          ]
+        },
+        'xym'
+      )
+    ],
+    new Binary()
+  );
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    'SELECT ST_GeometryN(g,2) AS part, ST_Force2D(ST_GeometryN(g,2)) AS xy FROM features',
+    table
+  );
+  expect(parseWKB(result.getChild('part')!.get(0))).toMatchObject({
+    dimension: 'xym',
+    geometry: {type: 'Point', coordinates: [3, 4, 8]}
+  });
+  expect(parseWKB(result.getChild('xy')!.get(0))).toMatchObject({
+    dimension: 'xy',
+    geometry: {type: 'Point', coordinates: [3, 4]}
+  });
+});
+
+test('simplification preserves an empty multipart line with explicit empty members', () => {
+  const original = {type: 'MultiLineString' as const, coordinates: [[]]};
+  const g = vectorFromArray([writeWKB(original)], new Binary());
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  expect(
+    geometryAt(select('SELECT ST_Simplify(g,1) AS reduced FROM features', table), 'reduced', 0)
+  ).toEqual(original);
+});
+
+test('route reduction preserves endpoints and simplifies each line component independently', () => {
+  const g = wkb(
+    'LINESTRING(0 0,0 0,1 0,2 0,2 2,2 2.1)',
+    'MULTILINESTRING((0 0,1 0,2 0),(5 5,5 5))',
+    null
+  );
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    `SELECT ST_RemoveRepeatedPoints(g) AS exact, ST_RemoveRepeatedPoints(g,0.2) AS near,
+    ST_Simplify(g,0.2) AS reduced FROM features`,
+    table
+  );
+  expect(geometryAt(result, 'exact', 0)).toEqual(parseWKT('LINESTRING(0 0,1 0,2 0,2 2,2 2.1)'));
+  expect(geometryAt(result, 'near', 0)).toEqual(parseWKT('LINESTRING(0 0,1 0,2 0,2 2.1)'));
+  expect(geometryAt(result, 'reduced', 0)).toEqual(parseWKT('LINESTRING(0 0,2 0,2 2.1)'));
+  expect(geometryAt(result, 'reduced', 1)).toEqual(parseWKT('MULTILINESTRING((0 0,2 0))'));
+  expect(geometryAt(result, 'reduced', 2)).toBeNull();
+});
+
+test('simplifying an empty route preserves its geometry type', () => {
+  const g = wkb('LINESTRING EMPTY', 'MULTILINESTRING EMPTY');
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select('SELECT ST_Simplify(g,1) AS reduced FROM features', table);
+  expect(geometryAt(result, 'reduced', 0)).toEqual(parseWKT('LINESTRING EMPTY'));
+  expect(geometryAt(result, 'reduced', 1)).toEqual(parseWKT('MULTILINESTRING EMPTY'));
+});
+
+test('spatial constructors preserve order, point duplicates and collection nesting', () => {
+  const a = wkb('POINT(1 2)', 'LINESTRING(0 0,1 2)', 'MULTIPOINT((0 0),(1 2))', null);
+  const b = wkb('POINT(1 2)', 'LINESTRING(1 2,1 2,3 4)', 'POINT(3 4)', 'POINT EMPTY');
+  const table = new Table(new Schema([geometryField('a', a), geometryField('b', b)]), {a, b});
+  const result = select(
+    'SELECT ST_MakeLine(a,b) AS route, ST_Collect(a,b) AS parts FROM features',
+    table
+  );
+  expect(geometryAt(result, 'route', 0)).toEqual(parseWKT('LINESTRING(1 2,1 2)'));
+  expect(geometryAt(result, 'route', 1)).toEqual(parseWKT('LINESTRING(0 0,1 2,1 2,3 4)'));
+  expect(geometryAt(result, 'route', 2)).toEqual(parseWKT('LINESTRING(0 0,1 2,3 4)'));
+  expect(geometryAt(result, 'parts', 0)).toEqual(parseWKT('MULTIPOINT((1 2),(1 2))'));
+  expect(geometryAt(result, 'parts', 1)?.type).toBe('MultiLineString');
+  expect(geometryAt(result, 'parts', 2)).toEqual(
+    parseWKT('GEOMETRYCOLLECTION(MULTIPOINT((0 0),(1 2)),POINT(3 4))')
+  );
+  expect(geometryAt(result, 'route', 3)).toBeNull();
+  expect(geometryAt(result, 'parts', 3)).toEqual({type: 'Point', coordinates: [NaN, NaN]});
+  const missing = select(
+    'SELECT ST_Collect(NULL,a) AS single, ST_Collect(NULL,NULL) AS neither FROM features',
+    table
+  );
+  expect(geometryAt(missing, 'single', 0)).toEqual(parseWKT('POINT(1 2)'));
+  expect(geometryAt(missing, 'neither', 0)).toBeNull();
+});
+
+test('XYZ tile polygons use top-left indexing, root CRS and clamped fractional margins', () => {
+  const g = wkb('LINESTRING(0 0,80 40)', null);
+  const table = new Table(new Schema([geometryField('g', g, 'wkb', {crs: 'EPSG:4326'})]), {g});
+  const result = select(
+    `SELECT ST_TileEnvelope(2,1,1) AS mercator,
+    ST_TileEnvelope(2,0,0,g,0.25) AS custom, ST_TileEnvelope(2,0,0,g,-0.25) AS inset FROM features`,
+    table
+  );
+  expect(geometryAt(result, 'mercator', 0)).toEqual(
+    parseWKT(
+      'POLYGON((-10018754.171394622 0,-10018754.171394622 10018754.171394622,0 10018754.171394622,0 0,-10018754.171394622 0))'
+    )
+  );
+  expect(geometryAt(result, 'custom', 0)).toEqual(
+    parseWKT('POLYGON((0 27.5,0 40,25 40,25 27.5,0 27.5))')
+  );
+  expect(geometryAt(result, 'inset', 0)).toEqual(
+    parseWKT('POLYGON((5 32.5,5 37.5,15 37.5,15 32.5,5 32.5))')
+  );
+  expect(geometryAt(result, 'custom', 1)).toBeNull();
+  expect(JSON.parse(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')!).crs).toBe(
+    'EPSG:3857'
+  );
+  expect(JSON.parse(result.schema.fields[1]!.metadata.get('ARROW:extension:metadata')!).crs).toBe(
+    'EPSG:4326'
+  );
+  expect(() => select('SELECT ST_TileEnvelope(1,2,0) FROM features', table)).toThrow(/index/);
+});
+
 test('ST_Extent combines groups across batches and ignores empty and null rows', () => {
   const g = wkb('LINESTRING(-4 8,3 5)', null, 'POINT(7 -2)', 'POLYGON EMPTY');
   const k = vectorFromArray([1, 2, 1, 2], new Int32());
@@ -495,4 +788,37 @@ test('native XYZ and constructed XYZM points expose their ordinates', () => {
   expect([...result.getChild('z')!]).toEqual([8, null]);
   expect([...result.getChild('m')!]).toEqual([null, null]);
   expect([...result.getChild('nested')!]).toEqual([8, null]);
+});
+
+test('repeated-point removal preserves empty multipart line members', () => {
+  const g = vectorFromArray(
+    [
+      writeWKB({
+        type: 'MultiLineString',
+        coordinates: [
+          [],
+          [
+            [0, 0],
+            [0, 0],
+            [1, 1]
+          ],
+          []
+        ]
+      })
+    ],
+    new Binary()
+  );
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select('SELECT ST_RemoveRepeatedPoints(g) AS reduced FROM features', table);
+  expect(geometryAt(result, 'reduced', 0)).toEqual({
+    type: 'MultiLineString',
+    coordinates: [
+      [],
+      [
+        [0, 0],
+        [1, 1]
+      ],
+      []
+    ]
+  });
 });

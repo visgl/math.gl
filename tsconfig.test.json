@@ -2,6 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "paths": {
+      "@math.gl/earth/geoid": [
+        "./modules/earth/src/geoid/index.ts"
+      ],
       "test/*": [
         "./test/*"
       ],
@@ -13,6 +16,12 @@
       ],
       "@math.gl/geometry": [
         "./modules/geometry/src/index.ts"
+      ],
+      "@math.gl/geometry/processing": [
+        "./modules/geometry/src/processing.ts"
+      ],
+      "@math.gl/geometry/spatial-index": [
+        "./modules/geometry/src/spatial-index/index.ts"
       ],
       "@math.gl/geometry/culling": [
         "./modules/geometry/src/culling/index.ts"
@@ -496,6 +505,9 @@
       ],
       "@math.gl/core/color": [
         "./modules/core/src/color/index.ts"
+      ],
+      "@math.gl/core/types": [
+        "./modules/core/src/types.ts"
       ],
       "@math.gl/core/matrix": [
         "./modules/core/src/matrix.ts"

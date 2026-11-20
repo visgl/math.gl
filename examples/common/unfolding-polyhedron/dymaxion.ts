@@ -6,7 +6,7 @@
 // Arrangement implementation credited upstream to Jason Davies, Enrico Spinielli,
 // and Philippe Riviere. Hinge geometry and rendering are independent of Nico's code.
 
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 import {center, cross, dot, subtract, type Polyhedron, type Vec3} from './polyhedra';
 
 /** The 24-piece AirOcean net: 20 icosahedron faces, with three faces split.

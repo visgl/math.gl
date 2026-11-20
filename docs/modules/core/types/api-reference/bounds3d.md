@@ -5,7 +5,7 @@
 `Bounds3D` describes an axis-aligned 3D extent as `[[minX, minY, minZ], [maxX, maxY, maxZ]]`.
 
 ```typescript
-import type {Bounds3D} from '@math.gl/core';
+import type {Bounds3D} from '@math.gl/core/types';
 
 const bounds: Bounds3D = [[0, 0, 0], [10, 20, 30]];
 ```

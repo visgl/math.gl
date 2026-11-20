@@ -328,6 +328,41 @@ test('converts independent geometry batches to one declared union schema', () =>
   }
 });
 
+test('reuses declared target storage for empty union children', () => {
+  const point = {type: 'Point', coordinates: [3, 4]} as const;
+  const pointColumn = GeoArrowBuilder.build([point], {encoding: 'geoarrow.point'});
+  const pointChild = {
+    encoding: 'geoarrow.point',
+    name: 'Point',
+    typeId: 1,
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    data: GeoArrowBuilder.build([], {encoding: 'geoarrow.point'}).chunks[0]
+  } as const;
+  const polygonChild = {
+    encoding: 'geoarrow.polygon',
+    name: 'Polygon',
+    typeId: 3,
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    data: GeoArrowBuilder.build([], {
+      encoding: 'geoarrow.polygon',
+      coordinateType: 'float32'
+    }).chunks[0]
+  } as const;
+  const source = convertGeoArrowColumn(pointColumn, {unionChildren: [pointChild, polygonChild]});
+  const targetPolygon = {
+    ...polygonChild,
+    data: GeoArrowBuilder.build([], {encoding: 'geoarrow.polygon'}).chunks[0]
+  };
+  const result = convertGeoArrowColumn(source, {unionChildren: [pointChild, targetPolygon]});
+  const chunk = result.chunks[0];
+  if (chunk.kind !== 'dense-union') throw new Error('Expected a dense union');
+  expect(chunk.children[0].data).toBe(pointColumn.chunks[0]);
+  expect(chunk.children[1]).toBe(targetPolygon);
+  expect(materializeGeoArrowRows(result)).toEqual([point]);
+});
+
 test('GeoArrow preserves XYM when adapting and mapping without modifying input', () => {
   const vector = makePoints('xym');
   const field = makeField(vector.type);

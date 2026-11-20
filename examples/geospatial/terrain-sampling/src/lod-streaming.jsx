@@ -4,7 +4,7 @@
 // biome-ignore lint/correctness/noUnusedImports: Standalone examples use the classic JSX transform.
 import React, {useMemo, useRef, useState} from 'react';
 import TerrainControls from './terrain-controls';
-import {updateTerrainMixedVertexTileHalos} from '@math.gl/geospatial';
+import {updateTerrainMixedVertexTileHalos} from '@math.gl/geospatial/terrain';
 import PacificReplay from './pacific-replay';
 import reference from './assets/sierra-reference.json';
 export function TerrainStreaming({controlsRoot}) {

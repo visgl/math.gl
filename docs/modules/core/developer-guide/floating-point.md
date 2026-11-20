@@ -5,7 +5,7 @@ Rounding can make mathematically equivalent calculations produce slightly differ
 ## Compare values
 
 ```js
-import {equals, exactEquals, Vector3} from '@math.gl/core';
+import {equals, exactEquals, Vector3} from '@math.gl/core/matrix';
 
 equals(0.1 + 0.2, 0.3); // true with the default tolerance
 exactEquals(0.1 + 0.2, 0.3); // false

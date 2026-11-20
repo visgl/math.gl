@@ -22,7 +22,12 @@ The root entry point also exports mesh utilities, curves, polygon operations, an
 and spatial indexes. Their reference pages are grouped by topic in the sidebar.
 `@math.gl/geometry/culling` is also available as a dedicated entry point for bounding volumes and queries.
 
-Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](./lighting/README.md). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
+## Lighting and color subpaths
+
+| Import path | Use it to |
+| --- | --- |
+| `@math.gl/geometry/lighting` | [Sample intensity, integrate luminous flux, and resample photometric profiles](./lighting/README.md#photometric-model). |
+| `@math.gl/geometry/color` | [Sample and apply color lookup tables](./lighting/README.md#numerical-color-luts). |
 
 ## Usage
 

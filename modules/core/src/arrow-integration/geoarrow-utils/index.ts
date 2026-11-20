@@ -16,6 +16,7 @@ export type {
   GeoArrowEncoding,
   GeoArrowFixedSizeList,
   GeoArrowDecodedGeometry,
+  GeoArrowGeometryValue,
   GeoArrowList,
   GeoArrowNumericArray,
   GeoArrowOffsets,

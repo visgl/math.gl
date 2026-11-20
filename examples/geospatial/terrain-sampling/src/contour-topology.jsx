@@ -4,7 +4,10 @@
 // biome-ignore lint/correctness/noUnusedImports: Standalone examples use the classic JSX transform.
 import React, {useMemo, useState} from 'react';
 import TerrainControls from './terrain-controls';
-import {stitchTerrainContours, simplifyTerrainContourPathsTopology} from '@math.gl/geospatial';
+import {
+  stitchTerrainContours,
+  simplifyTerrainContourPathsTopology
+} from '@math.gl/geospatial/terrain';
 
 /** Compare sampled and topology-preserving simplified heights along the edited center row. */
 export default function ContourTopology({field, controlsRoot}) {

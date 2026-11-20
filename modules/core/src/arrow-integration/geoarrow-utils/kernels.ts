@@ -407,6 +407,8 @@ function alignGeoArrowUnion(
       throw new Error(`GeoArrow union target does not declare ${encoding} ${dimension}.`);
     }
     const entry = target[targetIndex];
+    ids.set(child.typeId, entry.typeId);
+    if (child.data.length === 0) continue;
     if (
       children[targetIndex] !== entry ||
       (child.coordinateLayout ?? column.coordinateLayout) !== entry.coordinateLayout ||
@@ -417,7 +419,6 @@ function alignGeoArrowUnion(
       );
     }
     children[targetIndex] = {...entry, data: child.data};
-    ids.set(child.typeId, entry.typeId);
   }
   if ([...ids].every(([source, destination]) => source === destination)) {
     return {...array, children};

@@ -1,4 +1,4 @@
-# @math.gl/geometry/utils
+# @math.gl/geometry/processing
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From v4.2" />
@@ -15,8 +15,8 @@ depending on a WebGL or WebGPU runtime.
 ## Usage
 
 ```typescript
-import {computeVertexNormals, octDecode} from '@math.gl/geometry';
-import {Vector3} from '@math.gl/core';
+import {computeVertexNormals, octDecode} from '@math.gl/geometry/processing';
+import {Vector3} from '@math.gl/core/matrix';
 
 const normals = computeVertexNormals({
   topology: 'triangle-list',

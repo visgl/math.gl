@@ -409,7 +409,8 @@ html[data-theme='dark'] .openjs-logo-light {
   line-height: 1;
 }
 
-@media (min-width: 768px) {
+/* Match the Docusaurus breakpoint where search enters the toolbar layout. */
+@media (min-width: 997px) {
   .navbar__inner .navbar-badge {
     display: flex;
     align-items: center;
@@ -550,6 +551,10 @@ article:nth-child(3n) > .theme-doc-card-container { --card-accent: #62c8ae; }
 .theme-doc-card-description { white-space: normal; overflow: visible; text-overflow: clip; font-size: 0.95rem; }
 main:has(.theme-doc-card-container) > .container { max-width: none; }
 @media (max-width: 767px) { .theme-doc-card-container { min-height: 110px; padding: 20px; } }
+
+html:root {
+  --doc-sidebar-width: 328px;
+}
 
 /* Pages without a right-hand table of contents use the full content area. */
 @media (min-width: 997px) {

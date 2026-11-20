@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {Quaternion} from '@math.gl/core';
+import {Quaternion} from '@math.gl/core/matrix';
 
 const sub = (a, b) => a.map((v, i) => v - b[i]);
 const mix = (a, b, t) => a + (b - a) * t;

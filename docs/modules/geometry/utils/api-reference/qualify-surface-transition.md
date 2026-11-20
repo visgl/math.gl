@@ -1,7 +1,7 @@
 # qualifySurfaceTransition
 
 ```typescript
-import {qualifySurfaceTransition} from '@math.gl/geometry';
+import {qualifySurfaceTransition} from '@math.gl/geometry/processing';
 const report = qualifySurfaceTransition({positions: fromXYZ, indices}, toXYZ);
 ```
 

@@ -18,7 +18,7 @@ const modules = [
   ['Earth', 'earth', 'Connect locations with Earth models, daylight, and local time.', [
     ['Geoid', 'earth/geoid'], ['Sun', 'earth/sun'], ['Timezones', 'earth/timezone']
   ]],
-  ['DGGS 🧪', 'dggs', 'Explore discrete global grids and decode geographic cell boundaries.', [
+  ['DGGS', 'dggs', 'Explore discrete global grids and decode geographic cell boundaries.', [
     ['H3', 'dggs/api-reference/h3-decoder'], ['A5', 'dggs/api-reference/a5-decoder'], ['S2', 'dggs/api-reference/s2-decoder'], ['GeoHash', 'dggs/api-reference/geohash-decoder'], ['Quadkey', 'dggs/api-reference/quadkey-decoder'], ['Plus Code', 'dggs/api-reference/plus-code-decoder']
   ]],
   ['SQL 🧪', 'sql', 'Query native Arrow tables with SQL, compute columns, and aggregate record batches.', [

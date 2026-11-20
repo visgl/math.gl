@@ -9,15 +9,15 @@ the output of `subdivideTriangleMesh` or `subdivideGlobeMesh`. The helper does n
 renderer, GPU API, or polygon module at runtime. It returns a fresh `Uint8Array` with the same
 record stride and never modifies its input.
 
-Use the dedicated `@math.gl/geometry` subpath for a standalone
+Use the dedicated `@math.gl/geometry/processing` subpath for a standalone
 import with no runtime dependencies. The root package also exports the helper and its types for
 convenience; its existing geometry-processing dependencies are unchanged.
 
 ## Example
 
 ```ts
-import {interpolatePackedAttributes} from '@math.gl/geometry';
-import {subdivideTriangleMesh} from '@math.gl/geometry';
+import {interpolatePackedAttributes} from '@math.gl/geometry/processing';
+import {subdivideTriangleMesh} from '@math.gl/geometry/processing';
 
 // Two Float32 UV components per source vertex, expressed as a byte view.
 const sourceUVs = new Float32Array([0, 0, 1, 0, 1, 1, 0, 1]);
@@ -47,7 +47,7 @@ const attributes = [
   },
   {type: 'uint16', size: 2, byteOffset: 8, interpolation: 'linear'},
   {type: 'uint8', size: 4, byteOffset: 12, interpolation: 'flat'}
-] satisfies import('@math.gl/geometry').PackedAttribute[];
+] satisfies import('@math.gl/geometry/processing').PackedAttribute[];
 ```
 
 ## API
@@ -106,7 +106,7 @@ flat conflicts and exhausted allocation limits throw `RangeError`. No partial ou
 
 #### `composeAttributeProvenance(parent, child, options?)`
 
-Import from `@math.gl/geometry`. Compose the triplet provenance returned by clipping or
+Import from `@math.gl/geometry/processing`. Compose the triplet provenance returned by clipping or
 subdivision: `parent` maps intermediate vertices to original records, and `child` maps final
 vertices to intermediate records. The result owns `Uint32Array sourceVertexIndices` and
 `Float64Array sourceVertexWeights`, with three slots per final vertex. Coincident contributor

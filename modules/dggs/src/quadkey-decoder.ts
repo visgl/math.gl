@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {type Bounds2D} from '@math.gl/core';
+import {type Bounds2D} from '@math.gl/core/matrix';
 import {
   withDGGSBoundaryOptions,
   type DGGSCell,

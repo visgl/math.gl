@@ -9,6 +9,8 @@ import {
   Field,
   FixedSizeList,
   Float64,
+  Int32,
+  Utf8,
   vectorFromArray,
   type Vector
 } from 'apache-arrow';
@@ -35,6 +37,14 @@ import {
   midpoint,
   type TurfBatchResult
 } from '../turf';
+import {planarIntersects} from './planar-intersects';
+import {lineLocatePoint, lineSubstring} from './linear-referencing';
+import {normalizeCRSIdentifier} from '../crs/crs-identifier';
+import {EPSG3857ToLngLat, EPSG4326ToEPSG3857} from '../web-mercator/mercator-meters';
+import {vertexCount, memberCount, geometryMember} from './geometry-inspection';
+import {reduceLineVertices} from './line-simplification';
+import {collectPair, makeLine} from './geometry-constructors';
+import {EPSG3857_HALF_CIRCUMFERENCE} from '../web-mercator/mercator-meters';
 import {
   planarArea,
   planarBounds,
@@ -68,27 +78,41 @@ const lineKinds = ['LineString', 'MultiLineString'] as const;
 const polygonKinds = ['Polygon', 'MultiPolygon'] as const;
 
 /** Supported Arrow result storage for a spatial function. */
-type SpatialResult = Float64 | Bool | Binary | FixedSizeList<Float64>;
+type SpatialResult = Int32 | Float64 | Bool | Binary | FixedSizeList<Float64> | Utf8;
 /** A nullable result value passed to the Arrow vector builder. */
-type SpatialValue = number | boolean | number[] | Uint8Array | null;
+type SpatialValue = string | number | boolean | number[] | Uint8Array | null;
+
+/** A decoded row with its semantic dimension for geometry-valued accessors. */
+type GeometryRow = WellKnownGeometry & {
+  dimension?: WellKnownDimension;
+  members?: readonly Uint8Array[];
+};
 
 /** Adapts an Arrow vector to a reader which decodes only active geometry rows. */
 function readGeometryValue<T>(
   vector: Vector,
   field: Field,
   active: Uint8Array,
-  value: (geometry: WellKnownGeometry, dimension: WellKnownDimension) => T
+  value: (
+    geometry: WellKnownGeometry,
+    dimension: WellKnownDimension,
+    members?: readonly Uint8Array[]
+  ) => T,
+  captureMembers = false
 ): (row: number) => T {
-  if (field.metadata.get(EXTENSION_NAME) === 'geoarrow.wkb') {
+  if (DataType.isBinary(field.type) || DataType.isLargeBinary(field.type)) {
     return row => {
-      const {geometry, dimension, srid} = parseWKB(vector.get(row) as Uint8Array);
+      const {geometry, dimension, srid, members} = parseWKB(vector.get(row) as Uint8Array, {
+        captureMembers
+      });
       if (srid)
         throw new Error('Use GeoArrow field metadata for CRS information instead of EWKB SRIDs');
       return value(
         geometry.type === 'Point' && geometry.coordinates.every(Number.isNaN)
           ? {type: 'Point', coordinates: []}
           : geometry,
-        dimension
+        dimension,
+        members
       );
     };
   }
@@ -122,8 +146,10 @@ function spatialFunction(
   name: string,
   signatures: readonly (readonly GeometryKind[])[],
   type: SpatialResult,
-  evaluate: (geometries: readonly WellKnownGeometry[], ...numbers: number[]) => SpatialValue,
-  numericArguments = 0
+  evaluate: (geometries: readonly GeometryRow[], ...numbers: number[]) => SpatialValue,
+  numericArguments = 0,
+  allDimensions = false,
+  skipNullGeometries = false
 ): ScalarFunction {
   return {
     kind: 'scalar',
@@ -149,11 +175,17 @@ function spatialFunction(
         ) {
           // WKB reveals its geometry kind and dimensionality per row.
         } else if (kinds.some(kind => encoding === 'geoarrow.' + kind.toLowerCase())) {
-          if (extension?.dimension !== 'xy') throw new Error(`${name} requires 2D geometry`);
+          if (!allDimensions && extension?.dimension !== 'xy')
+            throw new Error(`${name} requires 2D geometry`);
         } else {
           throw new Error(`${name} argument ${index + 1} requires GeoArrow ${kinds.join(' or ')}`);
         }
-        if (name.startsWith('ST_') && extension?.metadata['edges'] === 'spherical')
+        if (
+          name.startsWith('ST_') &&
+          name !== 'ST_SRID' &&
+          name !== 'ST_SetSRID' &&
+          extension?.metadata['edges'] === 'spherical'
+        )
           throw new Error(`${name} requires planar geometry`);
         return extension;
       });
@@ -169,7 +201,9 @@ function spatialFunction(
       const metadata = new Map<string, string>();
       if (DataType.isBinary(type)) {
         metadata.set(EXTENSION_NAME, 'geoarrow.wkb');
-        const inputMetadata = geometryFields[0]?.metadata.get(EXTENSION_METADATA);
+        const inputMetadata = geometryFields
+          .find(field => field?.metadata.has(EXTENSION_METADATA))
+          ?.metadata.get(EXTENSION_METADATA);
         if (inputMetadata) metadata.set(EXTENSION_METADATA, inputMetadata);
       }
       const arguments_ = [
@@ -178,6 +212,7 @@ function spatialFunction(
       ];
       return {
         arguments: arguments_,
+        nullHandling: skipNullGeometries ? 'call' : 'propagate',
         result: new Field(name, type, true, metadata),
         /** Evaluates active rows and retains their positions in the output batch. */
         evaluate(vectors, {activeRows, length: rowCount}) {
@@ -185,19 +220,29 @@ function spatialFunction(
           const readers = vectors
             .slice(0, signatures.length)
             .map((vector, index) =>
-              readGeometryValue(vector, arguments_[index]!, activeRows, planarGeometry)
+              readGeometryValue<GeometryRow>(
+                vector,
+                arguments_[index]!,
+                activeRows,
+                allDimensions
+                  ? (g, dimension, members) => ({...g, dimension, members})
+                  : planarGeometry,
+                name === 'ST_GeometryN'
+              )
             );
           const values = new Array<SpatialValue>(rowCount).fill(null);
           for (let row = 0; row < rowCount; row++) {
             if (!activeRows[row]) continue;
-            const geometries = readers.map((read, index) => {
-              const geometry = read(row);
+            const geometries: WellKnownGeometry[] = [];
+            for (let index = 0; index < readers.length; index++) {
+              if (skipNullGeometries && !vectors[index]!.isValid(row)) continue;
+              const geometry = readers[index]!(row);
               if (!signatures[index]!.includes(geometry.type))
                 throw new Error(
                   `${name} argument ${index + 1} does not support ${geometry.type} at row ${row}`
                 );
-              return geometry;
-            });
+              geometries.push(geometry);
+            }
             values[row] = evaluate(geometries, ...numbers.map(vector => Number(vector.get(row))));
           }
           return vectorFromArray(values, type);
@@ -232,6 +277,99 @@ export const ST_MAKEPOINT: ScalarFunction = {
             const coordinates = vectors.map(vector => Number(vector.get(row)));
             values[row] = writeWKB({type: 'Point', coordinates});
           }
+        }
+        return vectorFromArray(values, type);
+      }
+    };
+  }
+};
+
+/** Computes a closed XYZ tile polygon, clipping a fractional margin to the root extent. */
+function tileEnvelope(
+  zoom: number,
+  x: number,
+  y: number,
+  bounds: readonly number[],
+  margin: number
+): Uint8Array {
+  if (!Number.isInteger(zoom) || zoom < 0 || zoom > 31)
+    throw new Error('ST_TileEnvelope zoom must be an integer in [0,31]');
+  const count = 2 ** zoom;
+  if (![x, y].every(index => Number.isInteger(index) && index >= 0 && index < count))
+    throw new Error('ST_TileEnvelope tile index outside zoom level');
+  if (!Number.isFinite(margin) || margin < -0.5) throw new Error('Invalid ST_TileEnvelope margin');
+  const [west, south, east, north] = bounds as [number, number, number, number];
+  const width = (east - west) / count,
+    height = (north - south) / count;
+  if (!(width > 0 && height > 0 && Number.isFinite(width) && Number.isFinite(height)))
+    throw new Error('ST_TileEnvelope requires nondegenerate bounds');
+  const fullWidth = 1 + 2 * margin > count;
+  const left = fullWidth ? west : Math.max(west, west + (x - margin) * width);
+  const right = fullWidth ? east : Math.min(east, west + (x + 1 + margin) * width);
+  const bottom = Math.max(south, north - (y + 1 + margin) * height);
+  const top = Math.min(north, north - (y - margin) * height);
+  return writeWKB(
+    {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [left, bottom],
+          [left, top],
+          [right, top],
+          [right, bottom],
+          [left, bottom]
+        ]
+      ]
+    },
+    'xy'
+  );
+}
+
+/** Constructs an XYZ tile polygon in Web Mercator or a supplied root geometry's CRS. */
+export const ST_TILEENVELOPE: ScalarFunction = {
+  kind: 'scalar',
+  name: 'ST_TileEnvelope',
+  prototypes: [],
+  /** Binds numeric tile indices and the optional GeoArrow root extent. */
+  resolvePrototype(fields) {
+    if (fields.length < 3 || fields.length > 5) return undefined;
+    const custom = fields.length >= 4;
+    const root = fields[3];
+    if (custom) ST_ENVELOPE.resolvePrototype!([root]);
+    const args = fields.map((field, i) => {
+      if (i === 3) return field ?? new Field('bounds', new Binary(), true);
+      if (field && !DataType.isInt(field.type) && !DataType.isFloat(field.type))
+        throw new Error('ST_TileEnvelope requires numeric indices and margin');
+      return field ?? new Field('number', new Float64(), true);
+    });
+    const metadata = new Map([[EXTENSION_NAME, 'geoarrow.wkb']]);
+    const crs = custom
+      ? root?.metadata.get(EXTENSION_METADATA)
+      : '{"crs_type":"authority_code","crs":"EPSG:3857"}';
+    if (crs) metadata.set(EXTENSION_METADATA, crs);
+    const type = new Binary();
+    const r = EPSG3857_HALF_CIRCUMFERENCE;
+    const world = [-r, -r, r, r];
+    return {
+      arguments: args,
+      result: new Field('ST_TileEnvelope', type, true, metadata),
+      /** Computes bounds for active rows using the top-left XYZ origin. */
+      evaluate(vectors, {activeRows, length}) {
+        const values = new Array<Uint8Array | null>(length).fill(null);
+        const read = root
+          ? readGeometryValue(vectors[3]!, root, activeRows, planarGeometry)
+          : undefined;
+        for (let row = 0; row < length; row++) {
+          if (!activeRows[row]) continue;
+          const bounds = read ? planarBounds(read(row)) : world;
+          if (!bounds) throw new Error('ST_TileEnvelope requires nonempty bounds');
+          values[row] = tileEnvelope(
+            Number(vectors[0]!.get(row)),
+            Number(vectors[1]!.get(row)),
+            Number(vectors[2]!.get(row)),
+            bounds,
+            vectors[4] ? Number(vectors[4].get(row)) : 0
+          );
         }
         return vectorFromArray(values, type);
       }
@@ -451,6 +589,195 @@ export const ST_DWITHIN = /* @__PURE__ */ spatialFunction(
   1
 );
 
+/** Tests whether two planar geometries share any point, including their boundaries. */
+export const ST_INTERSECTS = /* @__PURE__ */ spatialFunction(
+  'ST_Intersects',
+  [
+    [...geometryTypes, 'GeometryCollection'],
+    [...geometryTypes, 'GeometryCollection']
+  ],
+  /* @__PURE__ */ new Bool(),
+  ([a, b]) => planarIntersects(a!, b!)
+);
+
+/** Interpolates a point at a fraction of the planar length. */
+export const ST_LINEINTERPOLATEPOINT = /* @__PURE__ */ spatialFunction(
+  'ST_LineInterpolatePoint',
+  [['LineString']],
+  /* @__PURE__ */ new Binary(),
+  ([line], fraction) =>
+    writeWKB(lineSubstring(line!, fraction!, fraction!) ?? {type: 'Point', coordinates: []}, 'xy'),
+  1
+);
+
+/** Locates the closest point along a route, measured as a fraction of total length. */
+export const ST_LINELOCATEPOINT = /* @__PURE__ */ spatialFunction(
+  'ST_LineLocatePoint',
+  [['LineString'], pointKinds],
+  /* @__PURE__ */ new Float64(),
+  ([line, point]) => lineLocatePoint(line!, point!)
+);
+
+/** Extracts a route section between two inclusive fractions of the planar length. */
+export const ST_LINESUBSTRING = /* @__PURE__ */ spatialFunction(
+  'ST_LineSubstring',
+  [['LineString']],
+  /* @__PURE__ */ new Binary(),
+  ([line], start, end) => {
+    const result = lineSubstring(line!, start!, end!);
+    return result ? writeWKB(result, 'xy') : null;
+  },
+  2
+);
+
+/** Extracts an EPSG code from a GeoArrow authority identifier or a PROJJSON root ID. */
+function geometrySRID(crs: unknown): number {
+  let identifier = typeof crs === 'string' ? normalizeCRSIdentifier(crs) : '';
+  if (crs && typeof crs === 'object' && 'id' in crs) {
+    const id = crs.id;
+    if (
+      id &&
+      typeof id === 'object' &&
+      'authority' in id &&
+      'code' in id &&
+      id.authority === 'EPSG'
+    )
+      identifier = 'EPSG:' + String(id.code);
+  }
+  return /^EPSG:\d+$/.test(identifier) ? Number(identifier.slice(5)) : 0;
+}
+
+/** Applies a planar coordinate conversion throughout a multipart or collection geometry. */
+function projectGeometry(
+  geometry: WellKnownGeometry,
+  project: (p: readonly number[]) => number[]
+): WellKnownGeometry {
+  const path = (points: readonly (readonly number[])[]) => points.map(project);
+  switch (geometry.type) {
+    case 'Point':
+      return {
+        type: 'Point',
+        coordinates:
+          geometry.coordinates.length && !geometry.coordinates.every(Number.isNaN)
+            ? project(geometry.coordinates)
+            : []
+      };
+    case 'MultiPoint':
+      return {
+        type: 'MultiPoint',
+        coordinates: geometry.coordinates.map(p =>
+          !p.length || p.every(Number.isNaN) ? p : project(p)
+        )
+      };
+    case 'LineString':
+      return {type: 'LineString', coordinates: path(geometry.coordinates)};
+    case 'MultiLineString':
+    case 'Polygon':
+      return {type: geometry.type, coordinates: geometry.coordinates.map(path)};
+    case 'MultiPolygon':
+      return {type: 'MultiPolygon', coordinates: geometry.coordinates.map(poly => poly.map(path))};
+    case 'GeometryCollection':
+      return {
+        type: 'GeometryCollection',
+        geometries: geometry.geometries.map(child => projectGeometry(child, project))
+      };
+  }
+}
+
+/** Binds a single output CRS for the entire Arrow field, including empty batches. */
+function crsFunction(name: 'ST_SRID' | 'ST_SetSRID' | 'ST_Transform'): ScalarFunction {
+  const read = name === 'ST_SRID';
+  return {
+    kind: 'scalar',
+    name,
+    prototypes: [],
+    /** Resolves the source from field metadata and the target from the SQL literal. */
+    resolvePrototype(fields, literals) {
+      if (fields.length !== (read ? 1 : 2)) return undefined;
+      const metadata = fields[0] && getGeoArrowFieldInfo(fields[0])?.metadata;
+      const source = geometrySRID(metadata?.['crs']);
+      const target = literals?.[1] ?? 0;
+      if (
+        !read &&
+        (literals?.[1] === undefined ||
+          !Number.isSafeInteger(target) ||
+          target < 0 ||
+          target > 998999)
+      )
+        throw new Error(name + ' requires a constant integer SRID between 0 and 998999');
+      if (
+        name === 'ST_Transform' &&
+        (![4326, 3857].includes(source) || ![4326, 3857].includes(target))
+      )
+        throw new Error('ST_Transform supports EPSG:4326 and EPSG:3857 source and target CRS');
+      const implementation = spatialFunction(
+        name,
+        [[...geometryTypes, 'GeometryCollection']],
+        read ? new Int32() : new Binary(),
+        ([geometry]) => {
+          if (read) return source;
+          const output =
+            name === 'ST_Transform' && source !== target
+              ? projectGeometry(geometry!, p =>
+                  target === 3857
+                    ? EPSG4326ToEPSG3857([...p], {clampLatitude: false})
+                    : EPSG3857ToLngLat([...p])
+                )
+              : geometry!;
+          return writeWKB(output, 'xy');
+        },
+        read ? 0 : 1
+      ).resolvePrototype!(fields)!;
+      if (!read) {
+        const crsMetadata = {...metadata};
+        delete crsMetadata['crs_type'];
+        delete crsMetadata['crs'];
+        if (target) Object.assign(crsMetadata, {crs_type: 'authority_code', crs: 'EPSG:' + target});
+        implementation.result.metadata.set(EXTENSION_METADATA, JSON.stringify(crsMetadata));
+      }
+      return implementation;
+    }
+  };
+}
+
+/** Returns the field EPSG code, or zero for an unidentified CRS. */
+export const ST_SRID = /* @__PURE__ */ crsFunction('ST_SRID');
+/** Assigns a CRS to a geometry column, preserving its coordinate values. */
+export const ST_SETSRID = /* @__PURE__ */ crsFunction('ST_SetSRID');
+/** Reprojects a planar geometry column between geographic and Web Mercator coordinates. */
+export const ST_TRANSFORM = /* @__PURE__ */ crsFunction('ST_Transform');
+
+/** Declares a geometry-valued line reduction with an optional default tolerance. */
+function lineReduction(name: string, mode: 'simplify' | 'removeRepeated'): ScalarFunction {
+  return {
+    kind: 'scalar',
+    name,
+    prototypes: [],
+    /** Binds the geometry and any supplied numeric tolerance. */
+    resolvePrototype(fields) {
+      const numericArguments = mode === 'removeRepeated' && fields.length === 1 ? 0 : 1;
+      return spatialFunction(
+        name,
+        [lineKinds],
+        new Binary(),
+        ([line], tolerance = 0) => {
+          const result = reduceLineVertices(line!, tolerance, mode);
+          return result ? writeWKB(result, 'xy') : null;
+        },
+        numericArguments
+      ).resolvePrototype!(fields);
+    }
+  };
+}
+
+/** Removes consecutive duplicate or nearby vertices. */
+export const ST_REMOVEREPEATEDPOINTS = /* @__PURE__ */ lineReduction(
+  'ST_RemoveRepeatedPoints',
+  'removeRepeated'
+);
+/** Reduces route vertices with Douglas-Peucker simplification. */
+export const ST_SIMPLIFY = /* @__PURE__ */ lineReduction('ST_Simplify', 'simplify');
+
 /** Returns clockwise azimuth from positive Y in radians. */
 export const ST_AZIMUTH = /* @__PURE__ */ spatialFunction(
   'ST_Azimuth',
@@ -490,6 +817,97 @@ export const ST_CENTROID = /* @__PURE__ */ spatialFunction(
   [geometryTypes],
   /* @__PURE__ */ new Binary(),
   ([geometry]) => writeWKB(planarCentroid(geometry!), 'xy')
+);
+
+/** Inspection functions also accept WKB geometry collections. */
+const inspectionKinds = [[...geometryTypes, 'GeometryCollection']] as const;
+
+/** Vertex count including polygon ring closures. */
+export const ST_NPOINTS = /* @__PURE__ */ spatialFunction(
+  'ST_NPoints',
+  inspectionKinds,
+  /* @__PURE__ */ new Int32(),
+  ([g]) => vertexCount(g!),
+  0,
+  true
+);
+
+/** Number of top-level components, or zero for empty geometry. */
+export const ST_NUMGEOMETRIES = /* @__PURE__ */ spatialFunction(
+  'ST_NumGeometries',
+  inspectionKinds,
+  /* @__PURE__ */ new Int32(),
+  ([g]) => memberCount(g!),
+  0,
+  true
+);
+
+/** Whether the geometry contains no vertices. */
+export const ST_ISEMPTY = /* @__PURE__ */ spatialFunction(
+  'ST_IsEmpty',
+  inspectionKinds,
+  /* @__PURE__ */ new Bool(),
+  ([g]) => !vertexCount(g!),
+  0,
+  true
+);
+
+/** Geometry type name with the ST_ prefix. */
+export const ST_GEOMETRYTYPE = /* @__PURE__ */ spatialFunction(
+  'ST_GeometryType',
+  inspectionKinds,
+  /* @__PURE__ */ new Utf8(),
+  ([g]) => 'ST_' + g!.type,
+  0,
+  true
+);
+
+/** WKB geometry containing only XY ordinates. */
+export const ST_FORCE2D = /* @__PURE__ */ spatialFunction(
+  'ST_Force2D',
+  inspectionKinds,
+  /* @__PURE__ */ new Binary(),
+  ([g]) => writeWKB(g!, 'xy'),
+  0,
+  true
+);
+
+/** One-based component as WKB with the input dimension. */
+export const ST_GEOMETRYN = /* @__PURE__ */ spatialFunction(
+  'ST_GeometryN',
+  inspectionKinds,
+  /* @__PURE__ */ new Binary(),
+  ([g], position) => {
+    const part = geometryMember(g!, position!);
+    return part ? (g!.members?.[position! - 1] ?? writeWKB(part, g!.dimension ?? 'xy')) : null;
+  },
+  1,
+  true
+);
+
+/** Connects two point, multipoint or line inputs in their given order. */
+export const ST_MAKELINE = /* @__PURE__ */ spatialFunction(
+  'ST_MakeLine',
+  [
+    ['Point', 'MultiPoint', 'LineString'],
+    ['Point', 'MultiPoint', 'LineString']
+  ],
+  /* @__PURE__ */ new Binary(),
+  geometries => writeWKB(makeLine(geometries), 'xy')
+);
+
+/** Collects two geometries without dissolving or flattening them. */
+export const ST_COLLECT = /* @__PURE__ */ spatialFunction(
+  'ST_Collect',
+  [
+    [...geometryTypes, 'GeometryCollection'],
+    [...geometryTypes, 'GeometryCollection']
+  ],
+  /* @__PURE__ */ new Binary(),
+  ([a, b]) => (a ? writeWKB(b ? collectPair(a, b) : a, 'xy') : null),
+  0,
+  false,
+  true
 );
 
 /** Returns an interior label point for a planar polygonal surface. */
@@ -577,12 +995,30 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_MAKEENVELOPE,
     ST_DISTANCE,
     ST_DWITHIN,
+    ST_INTERSECTS,
+    ST_SRID,
+    ST_SETSRID,
+    ST_TRANSFORM,
+    ST_REMOVEREPEATEDPOINTS,
+    ST_SIMPLIFY,
     ST_AZIMUTH,
     ST_MAKEPOINT,
+    ST_TILEENVELOPE,
     ST_AREA,
     ST_LENGTH,
+    ST_LINEINTERPOLATEPOINT,
+    ST_LINELOCATEPOINT,
+    ST_LINESUBSTRING,
     ST_POINTONSURFACE,
     ST_CENTROID,
+    ST_NPOINTS,
+    ST_NUMGEOMETRIES,
+    ST_ISEMPTY,
+    ST_GEOMETRYTYPE,
+    ST_FORCE2D,
+    ST_GEOMETRYN,
+    ST_MAKELINE,
+    ST_COLLECT,
     ST_ENVELOPE,
     ST_EXTENT
   ]);
