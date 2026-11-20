@@ -22,18 +22,18 @@ const match = findDGGSCellColumn(['name', 's2_token', 'value']);
 // {columnName: 's2_token', decoder: S2Decoder}
 ```
 
-## Package subpaths
+## Decoders
 
-Import from `@math.gl/dggs` for shared types, the decoder registry, or column detection. If your application knows the grid system in advance, import the decoder from its subpath so the other decoders stay out of your bundle.
+Import individual decoders, shared types, the decoder registry, and column detection from `@math.gl/dggs`.
 
-| Import path | Decoder | Cell identifier | Classification |
-| --- | --- | --- | --- |
-| `@math.gl/dggs/a5` | [`A5Decoder`](./api-reference/a5-decoder.md) | Hexadecimal string or `bigint` | DGGS |
-| `@math.gl/dggs/geohash` | [`GeohashDecoder`](./api-reference/geohash-decoder.md) | String | DGGS-like geocode |
-| `@math.gl/dggs/h3` | [`H3Decoder`](./api-reference/h3-decoder.md) | Hexadecimal string or `bigint` | DGGS |
-| `@math.gl/dggs/plus-code` | [`PlusCodeDecoder`](./api-reference/plus-code-decoder.md) | Full string code | DGGS-like geocode |
-| `@math.gl/dggs/quadkey` | [`QuadkeyDecoder`](./api-reference/quadkey-decoder.md) | String | DGGS-like tile hierarchy |
-| `@math.gl/dggs/s2` | [`S2Decoder`](./api-reference/s2-decoder.md) | Token string or `bigint` | DGGS |
+| Decoder | Cell identifier | Classification |
+| --- | --- | --- |
+| [`A5Decoder`](./api-reference/a5-decoder.md) | Hexadecimal string or `bigint` | DGGS |
+| [`GeohashDecoder`](./api-reference/geohash-decoder.md) | String | DGGS-like geocode |
+| [`H3Decoder`](./api-reference/h3-decoder.md) | Hexadecimal string or `bigint` | DGGS |
+| [`PlusCodeDecoder`](./api-reference/plus-code-decoder.md) | Full string code | DGGS-like geocode |
+| [`QuadkeyDecoder`](./api-reference/quadkey-decoder.md) | String | DGGS-like tile hierarchy |
+| [`S2Decoder`](./api-reference/s2-decoder.md) | Token string or `bigint` | DGGS |
 
 Only full Plus Codes can be decoded without more context. Short Plus Codes are intentionally unsupported because recovering one requires a reference location.
 
