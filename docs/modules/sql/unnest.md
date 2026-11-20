@@ -8,7 +8,7 @@ row with the parent columns repeated. Use it through `queryArrowSQL` from
 
 ```ts
 import {Field, Int32, List, Table, vectorFromArray} from 'apache-arrow';
-import {queryArrowSQL} from '@math.gl/sql';
+import {queryArrowSQL} from '@math.gl/sql/query';
 
 const observations = new Table({
   station: vectorFromArray(['A', 'B', 'C']),

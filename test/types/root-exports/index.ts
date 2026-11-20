@@ -147,3 +147,5 @@ const typeChecks: [
   TerrainContourBoundaryDiagnostics?
 ] = [];
 void typeChecks;
+
+export {queryArrowTable, type ArrowTableQuery} from '@math.gl/sql/query';

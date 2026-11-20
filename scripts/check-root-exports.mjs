@@ -100,6 +100,7 @@ const roots = {
   '@math.gl/geospatial/web-mercator': ['WebMercatorViewport'],
   '@math.gl/core': ['spheroidToCartesian','createLocalFrameBasis','mat4GetScaling','vec3Normalize','mat4'],
   '@math.gl/sql': ['queryArrowSQL','queryArrowTable','queryArrowTableInBatches','queryArrowAggregateSnapshots','compileArrowAggregates','replaceArrowColumns'],
+  '@math.gl/sql/query': ['queryArrowSQL','queryArrowTable','queryArrowTableInBatches','queryArrowAggregateSnapshots','compileArrowAggregates','replaceArrowColumns'],
   '@math.gl/sql/expressions': ['parse','evaluate','compile','parseExpressionString','ExpressionFunctionRegistry'],
   '@math.gl/dggs': ['getGeohashBounds','DGGS_FUNCTION_LIBRARY'],
   '@math.gl/dggs/a5': ['A5Decoder'],

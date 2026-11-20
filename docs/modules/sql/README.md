@@ -38,7 +38,7 @@ Worker bootstrap entry points `@math.gl/sql/worker-entry.js` and
 
 ```ts
 import {tableFromArrays} from 'apache-arrow';
-import {queryArrowSQL} from '@math.gl/sql';
+import {queryArrowSQL} from '@math.gl/sql/query';
 
 const orders = tableFromArrays({
   category: ['books', 'games', 'books'],
@@ -103,7 +103,7 @@ with CROSS or LEFT joins, output aliases and optional ordinality.
 Function declarations are explicit and local to a query. Import only the functions you need:
 
 ```ts
-import {queryArrowSQL} from '@math.gl/sql';
+import {queryArrowSQL} from '@math.gl/sql/query';
 import {SQRT} from '@math.gl/sql/math-functions';
 
 const roots = queryArrowSQL(

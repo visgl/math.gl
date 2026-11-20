@@ -13,7 +13,7 @@ has native GeoArrow columns can go straight into the query.
 import {Binary, Field, Schema, Table, vectorFromArray} from 'apache-arrow';
 import {parseWKT, writeWKB} from '@math.gl/core/arrow';
 import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
-import {queryArrowSQL} from '@math.gl/sql';
+import {queryArrowSQL} from '@math.gl/sql/query';
 
 const extension = new Map([['ARROW:extension:name', 'geoarrow.wkb']]);
 const binary = new Binary();
