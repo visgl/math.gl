@@ -145,7 +145,9 @@ function expectBorrowedArrowData(actual: arrow.Data, expected: arrow.Data): void
     const expectedByteLength =
       key === 'valueOffsets' && arrow.DataType.isDenseUnion(expected.type)
         ? expected.length * Int32Array.BYTES_PER_ELEMENT
-        : source.byteLength;
+        : key === 'values' && arrow.DataType.isFloat(expected.type)
+          ? expected.length * expected.stride * Float64Array.BYTES_PER_ELEMENT
+          : source.byteLength;
     expect(view.byteLength).toBe(expectedByteLength);
   }
   expect(actual.children).toHaveLength(expected.children.length);
@@ -199,6 +201,73 @@ test('borrows non-byte-aligned validity when rewrapping a column range', () => {
   expectBorrowedArrowData(roundTrip.data[0], vector.slice(1, 3).data[0]);
   expect(roundTrip.get(0)).toBeNull();
   expect(Array.from(roundTrip.get(1))).toEqual([3, 4]);
+});
+
+test.each([
+  [
+    'geoarrow.linestring',
+    arrow.vectorFromArray(
+      [
+        [[0, 0]],
+        null,
+        [
+          [3, 4],
+          [5, 6]
+        ]
+      ],
+      new arrow.List(
+        new arrow.Field(
+          'vertices',
+          new arrow.FixedSizeList(2, new arrow.Field('xy', new arrow.Float64()))
+        )
+      )
+    )
+  ],
+  [
+    'geoarrow.point',
+    arrow.vectorFromArray(
+      [{x: 0, y: 0}, null, {x: 3, y: 4}],
+      new arrow.Struct([
+        new arrow.Field('x', new arrow.Float64()),
+        new arrow.Field('y', new arrow.Float64())
+      ])
+    )
+  ],
+  [
+    'geoarrow.wkb',
+    arrow.vectorFromArray([new Uint8Array([1]), null, new Uint8Array([2, 3])], new arrow.Binary())
+  ],
+  ['geoarrow.wkt', arrow.vectorFromArray(['POINT (0 0)', null, 'POINT (3 4)'], new arrow.Utf8())]
+] as const)('reads %s after borrowing a non-byte-aligned validity range', (encoding, vector) => {
+  const column = makeGeoArrowColumnFromArrowVector(vector, {encoding});
+  const roundTrip = makeArrowVectorFromGeoArrowColumn(getGeoArrowColumnView(column, 1, 3));
+  expectBorrowedArrowData(roundTrip.data[0], vector.slice(1, 3).data[0]);
+  expect(roundTrip.get(0)).toBeNull();
+  expect(JSON.stringify(roundTrip.get(1))).toBe(JSON.stringify(vector.get(2)));
+  const ipc = arrow.tableToIPC(new arrow.Table({geometry: roundTrip}));
+  const restored = arrow.tableFromIPC(ipc).getChild('geometry')!;
+  expect(restored.get(0)).toBeNull();
+  expect(JSON.stringify(restored.get(1))).toBe(JSON.stringify(vector.get(2)));
+});
+
+test('normalizes unsigned union IDs without sign-extending them', () => {
+  const geometry = {type: 'Point', coordinates: [1, 2]} as const;
+  const source = makeGeoArrowColumnFromGeometryRows([geometry], {encoding: 'geoarrow.geometry'});
+  const union = source.chunks[0];
+  if (union.kind !== 'dense-union') throw new Error('Expected a dense union');
+  const unsignedColumn = {
+    ...source,
+    chunks: [
+      {
+        ...union,
+        typeIds: new Uint8Array([200]),
+        children: union.children.map(child => ({...child, typeId: 200}))
+      }
+    ]
+  };
+  const result = makeArrowVectorFromGeoArrowColumn(unsignedColumn);
+  expect(result.data[0].typeIds[0]).toBe(1);
+  expect(materializeGeoArrowRows(makeGeoArrowColumnFromArrowVector(result))).toEqual([geometry]);
 });
 
 test('GeoArrow preserves XYM when adapting and mapping without modifying input', () => {

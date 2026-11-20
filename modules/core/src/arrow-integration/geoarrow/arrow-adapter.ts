@@ -445,11 +445,7 @@ function makeArrowDenseUnionData(
   coordinateLayout: GeoArrowCoordinateLayout | null
 ): arrow.Data {
   const offset = array.offset ?? 0;
-  const sourceTypeIds = array.typeIds.subarray(offset, offset + array.length);
-  const typeIds =
-    sourceTypeIds instanceof Int8Array
-      ? sourceTypeIds
-      : new Int8Array(sourceTypeIds.buffer, sourceTypeIds.byteOffset, sourceTypeIds.length);
+  const typeIds = array.typeIds.subarray(offset, offset + array.length);
   const valueOffsets = array.valueOffsets.subarray(offset, offset + array.length);
   const children = array.children.map(child =>
     makeArrowDataFromGeoArrowArray(
@@ -497,7 +493,7 @@ function makeArrowDenseUnionData(
     (child, index) => child.typeId === canonicalIds[index]
   );
   const canonicalTypeIds = hasCanonicalTypeIds
-    ? typeIds
+    ? new Int8Array(typeIds.buffer, typeIds.byteOffset, typeIds.length)
     : Int8Array.from(typeIds, sourceId => {
         const childIndex = array.children.findIndex(child => child.typeId === sourceId);
         if (childIndex < 0) throw new Error(`Unknown GeoArrow union type ID ${sourceId}`);
