@@ -11,7 +11,7 @@ import {Binary, Field, Schema, Table, vectorFromArray} from 'apache-arrow';
 
 import {parseWKT, writeWKB} from '@math.gl/core/arrow';
 
-import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/turf/expressions';
+import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
 
 import {queryArrowSQL} from '@math.gl/sql';
 

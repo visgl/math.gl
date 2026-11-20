@@ -190,7 +190,7 @@ import {tableFromArrays} from 'apache-arrow';
 
 import {queryArrowSQLWithMetadata} from '@math.gl/sql';
 
-import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/turf/expressions';
+import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
 
 import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 
