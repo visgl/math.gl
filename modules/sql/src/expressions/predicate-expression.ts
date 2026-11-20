@@ -104,7 +104,7 @@ function convert(predicate: ColumnarPredicate): Expression {
     ]);
   const literal = (value: unknown): Expression => {
     if (value instanceof Date || value instanceof Uint8Array)
-      throw new Error('Date and binary predicate literals require explicit backend conversion');
+      return {type: 'Literal', value} as Expression;
     if (
       ['int64', 'uint64'].includes(property.casts?.at(-1) ?? '') &&
       typeof value === 'number' &&
