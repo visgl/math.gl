@@ -668,64 +668,354 @@ function getAdvanceBound(clock: SimulationClock, milliseconds: number): number {
   return 7 * (Number.EPSILON / 2) * (Math.abs(total) + clock.tickInterval);
 }
 
-it('SimulationClock keeps the snap window bounded over a long run at a year per second', () => {
-  // Review regression: each advance added its bound to the bound of the remainder, and no snap,
-  // seek or rebase removed it. At 4e-10 s for each frame at a year per second, 1e-6 s before a
-  // tick moved to the next tick after about 40 s of frames. Now each split sets the bound to its
-  // own bound, about 4.1e-10 s for a frame of 5.3e5 s, and the next advance adds its own bound.
-  const tickInterval = 1 / 60;
-  const random = createRandom(5);
-  const clock = new SimulationClock({tickInterval, rate: YEAR});
+it('SimulationClock clears the bound on a tick boundary over a long run at a year per second', () => {
+  // Review regression: the bound only grew, and no snap cleared it. At 4e-10 s for each frame
+  // at a year per second, 1e-6 s before a tick moved to the next tick after about 40 s of
+  // frames. A 16 ms frame at a year per second is exactly 5049216 ticks of 0.1 s, so each frame
+  // ends on a tick boundary, and the bound goes back to 0.
+  const tickInterval = 0.1;
+  const clock = new SimulationClock({tickInterval, rate: YEAR, maxTicksPerAdvance: 1e7});
   for (let i = 1; i <= 20000; i++) {
-    clock.advance(16 + random());
-    if (i % 2000 !== 0) continue;
-    for (const [factor, ticks] of [
-      [1.5, 1],
-      [1 / 1.5, 2]
-    ]) {
-      clock.setRate(YEAR);
-      const frame = 16 + random();
-      const bound = getAdvanceBound(clock, frame);
-      clock.advance(frame);
-      const tickIndex = clock.getTickIndex();
-      // At rate 1 the probe adds a bound of about 3e-17 s. A gap of 1.5 bounds before the
-      // boundary is outside the window, and a gap of 1 / 1.5 bound is inside it.
-      const label = `advance ${i}, ${factor} bounds`;
-      expect(advanceToBeforeBoundary(clock, factor * bound), label).toBe(ticks);
-      expect(clock.getTickIndex()).toBe(tickIndex + ticks);
-      if (ticks === 2) expect(clock.getSecondsIntoTick()).toBe(0);
-      else expect(clock.getSecondsIntoTick()).toBeGreaterThan(tickInterval - 2 * bound);
-    }
+    expect(clock.advance(16).ticks).toBe(5049216);
+    expect(clock.getSecondsIntoTick()).toBe(0);
+    expect(getStoredBound(clock)).toBe(0);
   }
+  expect(advanceToBeforeBoundary(clock, 1e-6)).toBe(1);
+  expect(clock.getSecondsIntoTick()).toBeGreaterThan(tickInterval - 2e-6);
 
-  // A snap to a remainder of 0 also sets the bound of its split: 35 ms at a year per second is
-  // exactly 157788 ticks of 7 s.
+  // A snap to a remainder of 0 also clears the bound: 35 ms at a year per second is exactly
+  // 157788 ticks of 7 s. A gap of 1.5 bounds of that frame is then outside the window.
   const snapped = new SimulationClock({tickInterval: 7, rate: YEAR, maxTicksPerAdvance: 1e6});
   const bound = getAdvanceBound(snapped, 35);
   expect(snapped.advance(35).ticks).toBe(157788);
   expect(snapped.getSecondsIntoTick()).toBe(0);
-  expect(advanceToBeforeBoundary(snapped, bound / 1.5)).toBe(2);
-  expect(snapped.getSecondsIntoTick()).toBe(0);
+  expect(getStoredBound(snapped)).toBe(0);
+  expect(advanceToBeforeBoundary(snapped, 1.5 * bound)).toBe(1);
+  expect(snapped.getSecondsIntoTick()).toBeGreaterThan(0);
+});
+
+it('SimulationClock adds the bounds of the advances between tick boundaries', () => {
+  // Frames of 16 to 17 ms at a year per second do not end on a tick boundary. The error of the
+  // remainder grows with each frame, so the window grows: a gap of 1.5 windows stays before
+  // the boundary, and a gap of 1 / 1.5 window is on the boundary.
+  const tickInterval = 1 / 60;
+  const random = createRandom(5);
+  for (const [factor, ticks] of [
+    [1.5, 1],
+    [1 / 1.5, 2]
+  ]) {
+    const clock = new SimulationClock({tickInterval, rate: YEAR, maxTicksPerAdvance: 1e8});
+    let sum = 0;
+    for (let i = 0; i < 2000; i++) {
+      const frame = 16 + random();
+      sum += getAdvanceBound(clock, frame);
+      clock.advance(frame);
+    }
+    // The bound is the sum of the bounds of the splits, about 8e-7 s after 2000 frames.
+    expect(getStoredBound(clock)).toBeCloseTo(sum, 20);
+    expect(sum).toBeGreaterThan(5e-7);
+    // At rate 1 the probe adds a bound of about 3e-17 s.
+    const gap = factor * (getStoredBound(clock) + 1e-16);
+    expect(advanceToBeforeBoundary(clock, gap), `${factor} windows`).toBe(ticks);
+    if (ticks === 2) expect(clock.getSecondsIntoTick()).toBe(0);
+    else expect(clock.getSecondsIntoTick()).toBeGreaterThan(tickInterval - 2 * gap);
+  }
 
   // The lag policy keeps the old remainder, so it keeps the old bound, here 0 at tick 0.
   const lag = new SimulationClock({tickInterval, rate: YEAR, catchUpPolicy: 'lag'});
   const lagBound = getAdvanceBound(lag, 16);
   expect(lag.advance(16).ticks).toBe(1000);
+  expect(getStoredBound(lag)).toBe(0);
   expect(advanceToBeforeBoundary(lag, lagBound / 2)).toBe(1);
   expect(lag.getSecondsIntoTick()).toBeGreaterThan(0);
 });
 
-it('SimulationClock keeps the bound of a seek for one advance, also after a rebase', () => {
-  // The bound of seek(1e9) is 7u(1e9 + 0.1) = 7.8e-7 s. It is a real error of the remainder,
-  // so the next advance counts it, also after a rebase: a rebase does not change the remainder.
+it('SimulationClock keeps the bound of a seek until a tick boundary, also after a rebase', () => {
+  // The bound of seek(1e9) is 7u(1e9 + 0.1) + u * 1e9 = 8.9e-7 s. It is a real error of the
+  // remainder, so the next advance counts it, also after a rebase: a rebase does not change the
+  // remainder. The snap to the boundary clears it.
   for (const rebase of [false, true]) {
     const clock = new SimulationClock({tickInterval: 0.1});
     clock.seek(1e9 + 0.05);
     if (rebase) expect(clock.rebase()).toBe(1e10);
     expect(advanceToBeforeBoundary(clock, 1e-7)).toBe(2);
     expect(clock.getSecondsIntoTick()).toBe(0);
-    // The advance after it has only the small bounds of two advances at rate 1.
+    // The advance after the snap has only its own small bound at rate 1.
     expect(advanceToBeforeBoundary(clock, 1e-7)).toBe(1);
     expect(clock.getSecondsIntoTick()).toBeCloseTo(0.1 - 1e-7, 12);
   }
+});
+
+/** Greatest common divisor of two non-negative integers. */
+function gcd(a: bigint, b: bigint): bigint {
+  while (b !== 0n) [a, b] = [b, a % b];
+  return a;
+}
+
+/**
+ * Returns a reduced rational number.
+ * @param numerator Integer numerator.
+ * @param denominator Non-zero integer denominator.
+ * @returns The reduced rational with a positive denominator.
+ */
+function reduce(numerator: bigint, denominator: bigint): Rational {
+  const sign = denominator < 0n ? -1n : 1n;
+  const divisor = gcd(numerator < 0n ? -numerator : numerator, denominator * sign) || 1n;
+  return {numerator: (sign * numerator) / divisor, denominator: (sign * denominator) / divisor};
+}
+
+/** Returns `a + b`. */
+function add(a: Rational, b: Rational): Rational {
+  return reduce(
+    a.numerator * b.denominator + b.numerator * a.denominator,
+    a.denominator * b.denominator
+  );
+}
+
+/** Returns `a * b`. */
+function multiply(a: Rational, b: Rational): Rational {
+  return reduce(a.numerator * b.numerator, a.denominator * b.denominator);
+}
+
+/** Returns `a - b`. */
+function subtract(a: Rational, b: Rational): Rational {
+  return add(a, multiply(b, rational(-1)));
+}
+
+/** Returns `|a|`. */
+function absolute(a: Rational): Rational {
+  return a.numerator < 0n ? multiply(a, rational(-1)) : a;
+}
+
+/** Returns `floor(a / b)` for a positive `b`. */
+function floorDivide(a: Rational, b: Rational): bigint {
+  const numerator = a.numerator * b.denominator;
+  const denominator = a.denominator * b.numerator;
+  const quotient = numerator / denominator;
+  return numerator < 0n && quotient * denominator !== numerator ? quotient - 1n : quotient;
+}
+
+/** Returns true if `a <= b`. */
+function isAtMost(a: Rational, b: Rational): boolean {
+  return a.numerator * b.denominator <= b.numerator * a.denominator;
+}
+
+/**
+ * Returns the exact value of a finite float64.
+ * @param value Finite number.
+ * @returns The rational number that `value` stores.
+ */
+function exactValue(value: number): Rational {
+  let scaled = value;
+  let denominator = 1n;
+  while (!Number.isInteger(scaled)) {
+    scaled *= 2;
+    denominator *= 2n;
+  }
+  return reduce(BigInt(scaled), denominator);
+}
+
+/** A nominal real time interval of an advance: the caller passes the rounded `input`. */
+type NominalMilliseconds = {input: number; exact: Rational};
+
+/** A nominal simulated time of a seek: the caller passes the rounded `input`. */
+type NominalTime = {input: number; exact: Rational};
+
+/**
+ * Returns a nominal value and the float64 that a caller passes for it.
+ * @param numerator Integer numerator.
+ * @param denominator Positive integer denominator.
+ * @returns The value as a float64 input and as an exact rational.
+ */
+function nominal(numerator: number, denominator = 1): NominalMilliseconds & NominalTime {
+  return {input: numerator / denominator, exact: rational(numerator, denominator)};
+}
+
+/** Returns the stored bound on the rounding error of the remainder of a clock. */
+function getStoredBound(clock: SimulationClock): number {
+  // The bound is private state. The test reads it to check that it covers the exact error.
+  return (clock as unknown as {remainderErrorBound: number}).remainderErrorBound;
+}
+
+/**
+ * Follows a clock in exact rational arithmetic, with the nominal tick interval and the nominal
+ * inputs. After each step it checks that the tick index is the exact tick and that the stored
+ * bound covers the exact error of the remainder.
+ */
+class ExactClockModel {
+  /** Exact simulated time after the nominal epoch, in seconds. */
+  private elapsed = rational(0);
+  /** Exact nominal epoch: the start time plus the ticks that the rebases moved, in seconds. */
+  private epoch: Rational;
+  /** Smallest distance from a tick boundary of an exact time that is not on a boundary. */
+  minimumDistance = Infinity;
+  /** Largest stored bound. */
+  maximumBound = 0;
+  /** Number of steps that ended exactly on a tick boundary. */
+  boundaries = 0;
+
+  constructor(
+    readonly clock: SimulationClock,
+    readonly tickInterval: Rational,
+    private rate: number,
+    startTime: Rational = rational(0)
+  ) {
+    this.epoch = startTime;
+  }
+
+  advance(milliseconds: NominalMilliseconds, label: string): void {
+    const delta = multiply(multiply(milliseconds.exact, rational(1, 1000)), exactValue(this.rate));
+    const result = this.clock.advance(milliseconds.input);
+    if (this.clock.catchUpPolicy === 'lag' && result.droppedTime !== 0) {
+      // Lag: the clock keeps its remainder and moves the reported ticks only.
+      this.elapsed = add(this.elapsed, multiply(rational(result.ticks), this.tickInterval));
+    } else {
+      this.elapsed = add(this.elapsed, delta);
+    }
+    this.check(label);
+  }
+
+  seek(time: NominalTime, label: string): void {
+    this.clock.seek(time.input);
+    this.elapsed = subtract(time.exact, this.epoch);
+    this.check(label);
+  }
+
+  setRate(rate: number): void {
+    this.rate = rate;
+    this.clock.setRate(rate);
+  }
+
+  rebase(label: string): void {
+    const ticks = this.clock.rebase();
+    const moved = multiply(rational(ticks), this.tickInterval);
+    this.epoch = add(this.epoch, moved);
+    this.elapsed = subtract(this.elapsed, moved);
+    this.check(label);
+  }
+
+  private check(label: string): void {
+    const tick = floorDivide(this.elapsed, this.tickInterval);
+    const exactRemainder = subtract(this.elapsed, multiply(rational(tick), this.tickInterval));
+    const clockElapsed = add(
+      multiply(rational(this.clock.getTickIndex()), this.tickInterval),
+      exactValue(this.clock.getSecondsIntoTick())
+    );
+    const error = absolute(subtract(clockElapsed, this.elapsed));
+    const bound = getStoredBound(this.clock);
+    this.maximumBound = Math.max(this.maximumBound, bound);
+    if (exactRemainder.numerator === 0n) {
+      this.boundaries++;
+    } else {
+      const above = Number(exactRemainder.numerator) / Number(exactRemainder.denominator);
+      const interval = Number(this.tickInterval.numerator) / Number(this.tickInterval.denominator);
+      this.minimumDistance = Math.min(this.minimumDistance, above, interval - above);
+    }
+    const errorText = (Number(error.numerator) / Number(error.denominator)).toExponential(3);
+    expect(this.clock.getTickIndex(), `${label}: tick index`).toBe(Number(tick));
+    expect(
+      isAtMost(error, exactValue(bound)),
+      `${label}: error ${errorText} > bound ${bound}`
+    ).toBe(true);
+  }
+}
+
+it('SimulationClock keeps the error of a seek until the remainder is exact', () => {
+  // Review regression: each split stored only its own bound, so one small advance after a seek
+  // dropped the error of the seek. 1e6 + 0.35 s + 10 ms + 40 ms is nominally tick 10000004, but
+  // the remainder of the seek is 2.3e-11 s low, more than the bounds of the two advances. The
+  // split then gave tick 10000003 and alpha 1 - 2.3e-10.
+  const clock = new SimulationClock({tickInterval: 0.1});
+  clock.seek(1e6 + 0.35);
+  expect(clock.advance(10).ticks).toBe(0);
+  expect(clock.advance(40).ticks).toBe(1);
+  expect(clock.getTickIndex()).toBe(10000004);
+  expect(clock.getTickAlpha()).toBe(0);
+
+  // The same steps in exact arithmetic: the stored bound covers the error after each step.
+  const model = new ExactClockModel(new SimulationClock({tickInterval: 0.1}), rational(1, 10), 1);
+  model.seek(nominal(20000007, 20), 'seek');
+  model.advance(nominal(10), 'advance 10 ms');
+  model.advance(nominal(40), 'advance 40 ms');
+});
+
+it('SimulationClock matches exact tick arithmetic over mixed seeks, rates and advances', () => {
+  const milliseconds = [1, 7, 10, 16, 33, 40, 50, 100, 250, 1000].map(ms => nominal(ms));
+  milliseconds.push(nominal(1000, 60));
+  const rates = [1, 2, 3, 0.5, -1, -3, 60, 1000, YEAR, -YEAR];
+  const seeks = [
+    nominal(0),
+    nominal(41, 20),
+    nominal(20000001, 20),
+    nominal(10000000003, 10),
+    nominal(-1000001, 2),
+    nominal(123456789, 1000),
+    nominal(70000000007, 20)
+  ];
+  const intervals: [number, Rational][] = [
+    [0.1, rational(1, 10)],
+    [1 / 60, rational(1, 60)],
+    [7, rational(7)]
+  ];
+  for (const [tickInterval, exactInterval] of intervals) {
+    for (const catchUpPolicy of ['skip', 'lag'] as const) {
+      const random = createRandom(41);
+      const clock = new SimulationClock({tickInterval, catchUpPolicy, maxTicksPerAdvance: 1e7});
+      const model = new ExactClockModel(clock, exactInterval, 1);
+      for (let i = 0; i < 3000; i++) {
+        const pick = random();
+        const label = `${tickInterval} ${catchUpPolicy} step ${i}`;
+        if (pick < 0.02) {
+          model.seek(seeks[Math.floor(random() * seeks.length)], `${label} seek`);
+        } else if (pick < 0.11) {
+          model.setRate(rates[Math.floor(random() * rates.length)]);
+        } else if (pick < 0.11) {
+          model.rebase(`${label} rebase`);
+        } else {
+          model.advance(milliseconds[Math.floor(random() * milliseconds.length)], label);
+        }
+      }
+      // The run is free of ambiguity: every exact time off a boundary is far outside the bound.
+      expect(model.minimumDistance).toBeGreaterThan(4 * model.maximumBound);
+      expect(model.boundaries).toBeGreaterThan(10);
+    }
+  }
+});
+
+it('SimulationClock counts the rounding of the time and of the epoch in a seek', () => {
+  // With startTime 1e9, seek(1e9 + 0.3) is nominally tick 3. The input rounds to 4.8e-8 s below
+  // 1e9 + 0.3, much more than the bound 7u(0.3 + 0.1) of the split. The rounding of the input
+  // time counts, so the split snaps to tick 3.
+  const late = new SimulationClock({tickInterval: 0.1, startTime: 1e9});
+  late.seek(1e9 + 0.3);
+  expect(late.getTickIndex()).toBe(3);
+  expect(late.getTickAlpha()).toBe(0);
+
+  // Both inputs round: just above 2^30, 2^30 + 0.08 and 2^30 + 0.38 round in opposite
+  // directions, and the elapsed time is 1.9e-7 s above 0.3 s, more than u * startTime.
+  const binade = nominal(107374182408, 100);
+  const rounded = new ExactClockModel(
+    new SimulationClock({tickInterval: 0.1, startTime: binade.input}),
+    rational(1, 10),
+    1,
+    binade.exact
+  );
+  rounded.seek(nominal(107374182438, 100), 'seek 2^30 + 0.38');
+
+  // After a rebase, the epoch carries the rounding of the moved ticks. Each seek near the new
+  // epoch, and the advances after it, stay on the exact ticks.
+  const startTime = nominal(5000001, 5);
+  const model = new SimulationClock({tickInterval: 0.1, startTime: startTime.input});
+  const exact = new ExactClockModel(model, rational(1, 10), 1, startTime.exact);
+  exact.seek(nominal(20000000001, 20), 'seek');
+  exact.rebase('rebase');
+  for (const [numerator, denominator] of [
+    [20000000003, 20],
+    [10000000007, 10],
+    [100000000037, 100]
+  ]) {
+    exact.seek(nominal(numerator, denominator), `seek ${numerator} / ${denominator}`);
+    for (let i = 0; i < 20; i++) exact.advance(nominal(5), `advance ${i}`);
+  }
+  expect(exact.boundaries).toBeGreaterThan(2);
 });

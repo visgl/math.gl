@@ -155,30 +155,46 @@ Most tick intervals, such as 0.1 s or 1/60 s, are not exact in binary. Thus `0.3
 `2.9999999999999996`, and a plain floor division puts 300 ms on tick 2 with `alpha` near 1,
 while 3 advances of 100 ms reach tick 3. The clock uses this policy:
 
-- The clock keeps a bound on the rounding error of its remainder. Each split of a time `t`
-  into ticks, in an advance or a `seek`, sets the bound to `7u(|t| + tickInterval)` seconds,
-  where `u = 2^-53` is the unit roundoff of float64. For a `seek`, `t` is the time after
-  `startTime`.
+- The clock keeps a bound on the rounding error of its remainder, relative to the nominal
+  time of the inputs. Each split of a time `t` into ticks adds `7u(|t| + tickInterval)`
+  seconds to the error, where `u = 2^-53` is the unit roundoff of float64. The error of the
+  old remainder stays in the new remainder, so the bound of an advance is the old bound plus
+  the bound of its own split.
 - The factor 7 counts the rounded operations of one split: 1 rounding of `realMilliseconds`
   by the caller, 2 in `realMilliseconds / 1000 * rate`, 1 in the sum with the remainder, 1 in
   `tickIndex * tickInterval`, and 1 for the difference between `tickInterval` and the nominal
   interval that it rounds. Each term is at most `u(|t| + tickInterval)` or
   `2u(|t| + tickInterval)`, and their sum is at most `7u(|t| + tickInterval)`.
-- The snap window of an advance is the bound of the last split plus the bound of its own split.
-  A remainder within this window below `tickInterval` is on the next tick boundary. The clock
-  counts that tick, and sets `alpha` and the seconds into the tick to 0.
-- The window is a valid bound on the rounding error of the last two splits, from the remainder
-  before them. The clock takes that older remainder as exact, so the window does not carry the
-  errors of earlier splits.
+- The snap window of an advance is this bound. A remainder within the window below
+  `tickInterval` is on the next tick boundary. The clock counts that tick, and sets `alpha`
+  and the seconds into the tick to 0.
+- On a tick boundary, after a snap or when the remainder is exactly 0, the clock takes the
+  time as exact and sets the bound to 0.
+- A `seek` sets the bound to `7u(|t| + tickInterval) + u|time|` plus the bound on the error of
+  `startTime`, where `t` is the time after `startTime`. The term `u|time|` counts the rounding
+  of the input time. The error of `startTime` is `u|startTime|`, and each `rebase` adds
+  `4u(|startTime| + |ticks * tickInterval|)` for the moved ticks. These terms are large when
+  `time` and `startTime` are large and close: with `startTime: 1e9`, `seek(1e9 + 0.3)` is
+  4.8e-8 s below the nominal time, and the clock puts it on tick 3.
 - The snap window is the bound, but at most `tickInterval / 2`. At a large time the bound can
-  be larger than a tick: with `tickInterval: 1`, the bound for `seek(2e15)` is 1.55 s. The cap
+  be larger than a tick: with `tickInterval: 1`, the bound for `seek(2e15)` is 1.78 s. The cap
   keeps a remainder of 0 outside the window, so a time exactly on a tick stays on that tick,
   and a snap never moves the time by more than half a tick.
 
 So 1 advance of 300 ms and 3 advances of 100 ms both give 3 ticks and `alpha` 0. An advance
-of 299.999 ms stays on tick 2. The bound does not grow with the number of advances. At a
-rate of one year per second, the window after a 16 ms frame is about 4e-10 s at any time in
-the run. A `rebase` does not change the remainder, so it does not change the bound.
+of 299.999 ms stays on tick 2.
+
+The bound grows only between tick boundaries. An advance that ends with a remainder of 0 sets
+it to 0. For example, each 16 ms frame at one year per second is exactly 5049216 ticks of
+0.1 s, and the bound stays at 0 over 20000 frames. When the error at a boundary is positive,
+the remainder is a little more than 0, and the bound stays. In a run that does not
+come to a boundary, the true error can grow with each advance, for example by the difference
+between `tickInterval` and the nominal interval at each tick, so the bound grows too. Each
+advance adds at most `7u(|delta| + 2 * tickInterval)`, so the bound is near the bound of a
+`seek` over the same simulated time. At a rate of one year per second with a tick of 1/60 s,
+it grows by about 4e-10 s for each 16 ms frame, and a time 1e-6 s before a tick is on the
+boundary after about 2500 frames. A `rebase` does not change the remainder, so it does not
+change this bound.
 
 ## Large rates
 
