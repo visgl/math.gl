@@ -67,6 +67,22 @@ test('PostGIS point-in-polygon signatures distinguish hole boundaries from inter
   expect([...result.getChild('covered')!]).toEqual([true, true, false, true, false, null]);
 });
 
+test('queries route vertices and constructs viewport polygons', () => {
+  const route = wkb(...Array(6).fill('LINESTRING(0 0,2 3,4 5)'));
+  const n = vectorFromArray([1, -2, 0, 4, -4, null], new Int32());
+  const table = new Table(
+    new Schema([geometryField('route', route), new Field('n', n.type, true)]),
+    {route, n}
+  );
+  const result = select(
+    `SELECT ST_Y(ST_PointN(route, n)) AS y, ST_MakeEnvelope(0, 1, n, 4) AS box FROM features`,
+    table
+  );
+  expect([...result.getChild('y')!]).toEqual([0, 3, null, null, null, null]);
+  expect(geometryAt(result, 'box', 0)).toEqual(parseWKT('POLYGON((0 1,0 4,1 4,1 1,0 1))'));
+  expect(geometryAt(result, 'box', 5)).toBeNull();
+});
+
 test('filters point pairs with inclusive per-row planar radii', () => {
   const p = wkb('POINT(3 4)', 'POINT(3 4)', 'POINT(0 0)', 'POINT EMPTY', null, 'POINT(1 0)');
   const origin = wkb(...Array(6).fill('POINT(0 0)'));
@@ -391,4 +407,37 @@ test('ST_Extent aggregates native polygon columns with nested Arrow storage', ()
     table.slice(0, 1).concat(table.slice(1))
   );
   expect(Array.from(result.getChild('bounds')!.get(0))).toEqual([-4, 0, 6, 8]);
+});
+
+test('extracts Z and M independently for dimensional points', () => {
+  const p = vectorFromArray(
+    ['xy', 'xyz', 'xym', 'xyzm'].map(dimension =>
+      writeWKB(
+        {type: 'Point', coordinates: [2, 3, 4, 5]},
+        dimension as 'xy' | 'xyz' | 'xym' | 'xyzm'
+      )
+    ),
+    new Binary()
+  );
+  const table = new Table(new Schema([geometryField('p', p)]), {p});
+  const result = select('SELECT ST_X(p) AS x, ST_Z(p) AS z, ST_M(p) AS m FROM features', table);
+  expect([...result.getChild('x')!]).toEqual([2, 2, 2, 2]);
+  expect([...result.getChild('z')!]).toEqual([null, 4, null, 4]);
+  expect([...result.getChild('m')!]).toEqual([null, null, 4, 5]);
+});
+
+test('native XYZ and constructed XYZM points expose their ordinates', () => {
+  const native = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows([{type: 'Point', coordinates: [3, 4, 8]}, null], {
+      dimension: 'xyz'
+    })
+  );
+  const table = new Table(new Schema([geometryField('p', native, 'point')]), {p: native});
+  const result = select(
+    'SELECT ST_Z(p) AS z, ST_M(p) AS m, ST_M(ST_MakePoint(1, 2, 3, ST_Z(p))) AS nested FROM features',
+    table
+  );
+  expect([...result.getChild('z')!]).toEqual([8, null]);
+  expect([...result.getChild('m')!]).toEqual([null, null]);
+  expect([...result.getChild('nested')!]).toEqual([8, null]);
 });

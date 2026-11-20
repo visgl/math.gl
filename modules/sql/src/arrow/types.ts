@@ -94,12 +94,75 @@ export type AggregateFunction<M = never> = Readonly<{
   };
 }>;
 
+/** Schema and output metadata common to standalone and correlated table functions. */
+type TableFunctionOutput<M> = Readonly<{
+  /** Schema declared before reading rows. */
+  outputSchema: Schema;
+  /** Typed metadata keyed by the names in the output schema. */
+  columnMetadata?: Readonly<Record<string, readonly M[]>>;
+}>;
+
+/** A relation produced by a table function with one catalog table argument. */
+export type BoundTableFunction<M> = TableFunctionOutput<M> &
+  Readonly<{
+    /** Transforms the input into the declared relation. Honor the signal during long evaluations. */
+    evaluate(input: Table, options: {signal?: AbortSignal}): Table;
+  }>;
+
+/** A correlated relation indexed by the original parent row positions. */
+export type BoundLateralTableFunction<M> = TableFunctionOutput<M> &
+  Readonly<{
+    /** Expands parent rows into the declared relation. Honor the signal during long evaluations. */
+    evaluate(
+      input: Table,
+      options: {signal?: AbortSignal}
+    ): {
+      /** Output relation whose rows correspond positionally to entries in parentRows. */
+      table: Table;
+      /** One zero-based input row index per output row, in nondecreasing order. */
+      parentRows: Int32Array;
+    };
+  }>;
+
+/** A named relation-producing function. Implement either or both binding modes. */
+export type TableFunction<M = never> = Readonly<{
+  /** SQL execution kind for a relation-producing function. */
+  kind: 'table';
+  /** SQL call name. */
+  name: string;
+}> &
+  (
+    | Readonly<{
+        /** Declares the output and evaluator for a catalog table argument. */
+        bind(inputSchema: Schema): BoundTableFunction<M>;
+        /** Optionally declares an evaluator for a correlated column argument. */
+        bindLateral?: LateralTableBinder<M>;
+      }>
+    | Readonly<{
+        /** This function only accepts a correlated column argument. */
+        bind?: never;
+        /** Declares the output and evaluator for a correlated column argument. */
+        bindLateral: LateralTableBinder<M>;
+      }>
+  );
+
+/** Binds one correlated column against the parent schema. */
+export type LateralTableBinder<M> = (context: {
+  /** Schema of the relation that provides each parent row. */
+  inputSchema: Schema;
+  /** Field referenced by the correlated argument. */
+  argument: Field;
+  /** Whether the SQL call declared WITH ORDINALITY. */
+  ordinality: boolean;
+}) => BoundLateralTableFunction<M>;
+
 /** A function or a reusable package of functions. */
 export type ArrowFunctionPackage =
   | ArrowTableFunction
   | ScalarFunction
   | PreparedScalarFunction<unknown>
   | AggregateFunction<unknown>
+  | TableFunction<unknown>
   | readonly ArrowFunctionPackage[];
 
 /** Schema binding shared by predicate and expression compilation. */
