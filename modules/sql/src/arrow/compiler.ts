@@ -329,6 +329,49 @@ function vectorReader(vector: Vector): Prepared {
   };
 }
 
+/** Interleaves matching, non-null float columns without per-row scalar reads. */
+function interleaveFloatColumns(
+  type: FixedSizeList,
+  values: Prepared[],
+  active: Mask
+): Vector | undefined {
+  const component = type.children[0]!.type;
+  if (!DataType.isFloat(component) || component.precision === Precision.HALF) {
+    return undefined;
+  }
+  const ArrayType = component.precision === Precision.SINGLE ? Float32Array : Float64Array;
+  const inputs: (Float32Array | Float64Array)[] = [];
+  for (const value of values) {
+    const vector = value.vector;
+    const data = vector?.data[0];
+    if (
+      vector?.data.length !== 1 ||
+      !data ||
+      data.nullCount !== 0 ||
+      data.length !== active.length ||
+      !(data.values instanceof ArrayType)
+    ) {
+      return undefined;
+    }
+    // Arrow slices already offset primitive value views. Data.offset applies to validity.
+    inputs.push(data.values);
+  }
+  if (active.includes(0)) {
+    return undefined;
+  }
+
+  const width = inputs.length;
+  const output = new ArrayType(active.length * width);
+  for (let column = 0; column < width; column++) {
+    const input = inputs[column]!;
+    for (let row = 0; row < active.length; row++) {
+      output[row * width + column] = input[row]!;
+    }
+  }
+  const child = makeData({type: component, length: output.length, data: output});
+  return makeVector(makeData({type, length: active.length, child, nullCount: 0}));
+}
+
 /** Obtains UTF-8 bytes, encoding only values returned by scalar functions. */
 function bytes(value: Prepared, row: number): Range | null {
   if (value.bytes) return value.bytes(row);
@@ -1400,6 +1443,9 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
       type,
       arguments_.some(value => value.field.nullable)
     );
+    const plainColumns = ast.arguments.every(
+      (argument: Expression) => argument.type === 'Identifier'
+    );
     return {
       field,
       hasKernel: true,
@@ -1413,6 +1459,12 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
             arguments_.some(argument => argument.hasKernel)
           )
         );
+        if (plainColumns && !context.failed) {
+          const packed = interleaveFloatColumns(type, values, active);
+          if (packed) {
+            return vectorReader(packed);
+          }
+        }
         const vector = nullTupleVector(type, active.length),
           data = vector.data[0]!,
           output =
