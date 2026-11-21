@@ -13,7 +13,7 @@ The curves module provides renderer-independent parametric curves for 2D and 3D 
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {CatmullRomCurve, CurveArcLength} from '@math.gl/geometry';
+import {CatmullRomCurve, CurveArcLength} from '@math.gl/geometry/curves';
 
 
 

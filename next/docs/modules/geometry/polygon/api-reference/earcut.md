@@ -5,7 +5,7 @@
 Computes a triangulation of a polygon using the [earcut library](https://github.com/mapbox/earcut).
 
 ```
-import {earcut} from '@math.gl/geometry';
+import {earcut} from '@math.gl/geometry/polygon';
 
 
 
@@ -56,7 +56,7 @@ When the leftmost vertex of a hole is also a vertex of the outer ring or of a ho
 ## Choosing a triangulation strategy[​](#choosing-a-triangulation-strategy "Direct link to Choosing a triangulation strategy")
 
 ```
-import {earcut, type EarcutOptions} from '@math.gl/geometry';
+import {earcut, type EarcutOptions} from '@math.gl/geometry/polygon';
 
 
 

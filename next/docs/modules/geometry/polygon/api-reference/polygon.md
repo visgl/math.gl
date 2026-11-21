@@ -9,7 +9,7 @@ Implements the [Shoelace formula](https://en.wikipedia.org/wiki/Shoelace_formula
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {Polygon} from '@math.gl/geometry';
+import {Polygon} from '@math.gl/geometry/polygon';
 ```
 
 ## Methods[​](#methods "Direct link to Methods")

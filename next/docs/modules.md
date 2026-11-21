@@ -9,7 +9,7 @@ Choose a module for your application. Each overview introduces its capabilities,
 
   [Vectors, matrices, quaternions, and the foundations of 3D math.](https://visgl.github.io/math.gl/next/docs/modules/core.md)
 
-  [Transforms](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/transformations.md) · [Types](https://visgl.github.io/math.gl/next/docs/modules/core/types.md) · [Arrow / GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/core/arrow.md) · [UTF-8](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/utf8.md)
+  [Transforms](https://visgl.github.io/math.gl/next/docs/modules/core/developer-guide/transformations.md) · [Types](https://visgl.github.io/math.gl/next/docs/modules/core/types.md) · [Arrow / GeoArrow](https://visgl.github.io/math.gl/next/docs/modules/core/arrow.md) · [UTF-8](https://visgl.github.io/math.gl/next/docs/modules/core/utf8.md)
 
   [Explore module →](https://visgl.github.io/math.gl/next/docs/modules/core.md)
 * ## [Geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry.md)
@@ -41,7 +41,7 @@ Choose a module for your application. Each overview introduces its capabilities,
 
   [Explore discrete global grids and decode geographic cell boundaries.](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)
 
-  [H3](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/h3-decoder.md) · [A5](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/a5-decoder.md) · [S2](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/s2-decoder.md) · [GeoHash](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/geohash-decoder.md) · [Quadkey](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/quadkey-decoder.md) · [Plus Code](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/plus-code-decoder.md)
+  [H3](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/h3.md) · [A5](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/a5.md) · [S2](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/s2.md) · [GeoHash](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/geohash.md) · [Quadkey](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/quadkey.md) · [Plus Code](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/plus-code.md)
 
   [Explore module →](https://visgl.github.io/math.gl/next/docs/modules/dggs.md)
 * ## [SQL 🧪](https://visgl.github.io/math.gl/next/docs/modules/sql.md)
@@ -49,7 +49,7 @@ Choose a module for your application. Each overview introduces its capabilities,
 
   [Query native Arrow tables with SQL, compute columns, and aggregate record batches.](https://visgl.github.io/math.gl/next/docs/modules/sql.md)
 
-  [Queries](https://visgl.github.io/math.gl/next/docs/modules/sql/queries.md) · [SQL parser](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md) · [Arrow expressions](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow.md) · [Workers](https://visgl.github.io/math.gl/next/docs/modules/sql/workers.md)
+  [Queries](https://visgl.github.io/math.gl/next/docs/modules/sql/query.md) · [SQL parser](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md) · [Arrow expressions](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow.md) · [Workers](https://visgl.github.io/math.gl/next/docs/modules/sql/worker.md)
 
   [Explore module →](https://visgl.github.io/math.gl/next/docs/modules/sql.md)
 * ## [Tasks](https://visgl.github.io/math.gl/next/docs/modules/tasks.md)

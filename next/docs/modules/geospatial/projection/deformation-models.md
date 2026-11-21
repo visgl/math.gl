@@ -7,11 +7,11 @@ The current profile supports a time-invariant, bilinearly interpolated east, nor
 ## Prepare a model[​](#prepare-a-model "Direct link to Prepare a model")
 
 ```
-import {createVelocityGrid} from '@math.gl/geospatial/projection/grids/velocity';
+import {createVelocityGrid} from '@math.gl/geospatial/projection-grids-velocity';
 
-import {createDeformationModel} from '@math.gl/geospatial/projection/deformation';
+import {createDeformationModel} from '@math.gl/geospatial/projection-deformation';
 
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
 
 
 
@@ -99,7 +99,7 @@ Sharing does not change geospatial's Cartesian-gradient normal choice at height,
 `loadVelocityGeoTIFFGrid` prepares numeric rasters after the application has fetched and decoded them. It accepts a structural geotiff.js object or plain decoded `VelocityGridGeoTIFFData`, compatible with loaders.gl raster data:
 
 ```
-import {loadVelocityGeoTIFFGrid} from '@math.gl/geospatial/projection/grids/velocity-geotiff';
+import {loadVelocityGeoTIFFGrid} from '@math.gl/geospatial/projection-grids-velocity-geotiff';
 
 
 

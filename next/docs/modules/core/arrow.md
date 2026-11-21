@@ -58,7 +58,7 @@ Apache Arrow is an **optional peer dependency**, supporting version 17 and newer
 | Import                                                                                                               | Purpose                                                     | Apache Arrow required |
 | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | --------------------- |
 | `@math.gl/core/arrow`                                                                                                | Arrow table/vector views, schemas, copying, and transport   | Yes, 17+              |
-| [`@math.gl/core/utf8`](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/utf8.md)            | Byte-oriented string comparison and scalar parsing          | No                    |
+| [`@math.gl/core/utf8`](https://visgl.github.io/math.gl/next/docs/modules/core/utf8.md)                  | Byte-oriented string comparison and scalar parsing          | No                    |
 | [`@math.gl/core/arrow`](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/geoarrow.md)       | Arrow-native GeoArrow adapters and processing               | Yes, 17+              |
 | [`@math.gl/core/arrow`](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/geoarrow-utils.md) | Physical descriptors, geometry kernels, codecs, and streams | Yes, 17+              |
 | [`@math.gl/core/arrow`](https://visgl.github.io/math.gl/next/docs/modules/core/arrow/wkb.md)            | WKB/EWKB and WKT parsing, writing, and traversal            | Yes, 17+              |

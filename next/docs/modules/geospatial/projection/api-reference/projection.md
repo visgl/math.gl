@@ -4,7 +4,7 @@
 
 `Projection` is the backend-independent type for a coordinate transformation between one source and target CRS. Create instances through a [ProjectionEngine](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md). It is a type, not a constructor.
 
-See [`@math.gl/geospatial/projection/types`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/types.md) for the import and usage example.
+See [`@math.gl/geospatial/projection-types`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection-types.md) for the import and usage example.
 
 ## Coordinate methods[​](#coordinate-methods "Direct link to Coordinate methods")
 

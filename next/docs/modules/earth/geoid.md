@@ -11,7 +11,7 @@ The `@math.gl/earth` module evaluates geoid heights from Earth gravity model gri
 ```
 import { parsePGM } from "@math.gl/earth/geoid";
 
-import gridUrl from "@math.gl/earth/geoid/geoid-egm96-hi.pgm?url";
+import gridUrl from "@math.gl/earth/geoid-geoid-egm96-hi.pgm?url";
 
 
 
@@ -57,14 +57,14 @@ The geoid approximates an equipotential surface near mean sea level. Its height 
 
 | Package export                             | Grid                     | Size    |
 | ------------------------------------------ | ------------------------ | ------- |
-| `@math.gl/earth/geoid/geoid-egm96-low.pgm` | 1° preview, 360 × 181    | 130 KB  |
-| `@math.gl/earth/geoid/geoid-egm96-hi.pgm`  | 15′ original, 1440 × 721 | 2.08 MB |
+| `@math.gl/earth/geoid-geoid-egm96-low.pgm` | 1° preview, 360 × 181    | 130 KB  |
+| `@math.gl/earth/geoid-geoid-egm96-hi.pgm`  | 15′ original, 1440 × 721 | 2.08 MB |
 
 Data remain separate from the JavaScript entry point. The low grid is downsampled for visualization; use the high grid for height conversion. The original grid's interpolation error estimates do not apply to the preview.
 
 With a bundler supporting asset URL imports (such as Vite):
 
-In Node.js, resolve the asset with `import.meta.resolve('@math.gl/earth/geoid/geoid-egm96-hi.pgm')` and read it using `readFile` from `node:fs/promises`. Other GeographicLib PGM grids can also be passed to `parsePGM`.
+In Node.js, resolve the asset with `import.meta.resolve('@math.gl/earth/geoid-geoid-egm96-hi.pgm')` and read it using `readFile` from `node:fs/promises`. Other GeographicLib PGM grids can also be passed to `parsePGM`.
 
 ## Decoded grid input[​](#decoded-grid-input "Direct link to Decoded grid input")
 

@@ -13,7 +13,7 @@ Each interval checks quarter, midpoint and three-quarter points against its chor
 This is a sampled error estimate, not a certified global bound for arbitrary oscillatory curves. `maxSampledError` describes accepted/output intervals and must not be interpreted as the maximum distance over all parameters.
 
 ```
-import {QuadraticBezierCurve, sampleCurveAdaptive} from '@math.gl/geometry';
+import {QuadraticBezierCurve, sampleCurveAdaptive} from '@math.gl/geometry/curves';
 
 
 

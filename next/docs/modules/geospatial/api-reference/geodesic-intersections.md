@@ -1,7 +1,7 @@
 # GeodesicIntersections
 
 ```
-import {GeodesicIntersections, type GeodesicIntersectionPath} from '@math.gl/geospatial';
+import {GeodesicIntersections, type GeodesicIntersectionPath} from '@math.gl/geospatial/geodesics';
 
 const g = new GeodesicIntersections({semiMajorAxis: 6378137, semiMinorAxis: 6356752.314245179});
 

@@ -1,4 +1,4 @@
-# Terrain
+# @math.gl/geospatial/terrain
 
 Experimental CPU terrain data and algorithms, usable in Node.js, browser workers, and rendering applications. The initial implementation provides affine height fields and regular meshes in local Cartesian coordinates. Coordinates and heights use meters; the surface is Z-up.
 

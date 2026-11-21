@@ -1,4 +1,4 @@
-# Maps 🧪
+# @math.gl/geospatial/maps
 
 `@math.gl/geospatial/maps` owns spherical map descriptions, chart layouts, seams, insets and rendering preparation. CRS conversion remains in `@math.gl/geospatial/projection`.
 
@@ -36,7 +36,7 @@ The engine has no built-in catalogue. Supply the presets that your application u
 ```
 import {MapEngine} from '@math.gl/geospatial/maps';
 
-import {albersUsaMapPreset} from '@math.gl/geospatial/maps/presets';
+import {albersUsaMapPreset} from '@math.gl/geospatial/maps-presets';
 
 
 
@@ -68,7 +68,7 @@ Supply `geometry: mapGeometry` or `transitions: mapTransitions` in engine option
 Raster preparation is independent of polygon support:
 
 ```
-import {prepareMapSurface} from '@math.gl/geospatial/maps/surfaces';
+import {prepareMapSurface} from '@math.gl/geospatial/maps-surfaces';
 
 const surface = prepareMapSurface(map, {maxAngularStep: 1});
 ```
@@ -102,7 +102,7 @@ import {
 
 
 
-import {withMapGeometry} from '@math.gl/geospatial/maps/geometry';
+import {withMapGeometry} from '@math.gl/geospatial/maps-geometry';
 
 
 

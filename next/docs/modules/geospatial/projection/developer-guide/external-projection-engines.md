@@ -89,7 +89,7 @@ An engine must return the full `PreparedProjection` interface, including synchro
 point-projection.ts
 
 ```
-import type {PreparedProjection} from '@math.gl/geospatial/projection/types';
+import type {PreparedProjection} from '@math.gl/geospatial/projection-types';
 
 
 
@@ -255,7 +255,7 @@ proj4-engine.ts
 ```
 import proj4 from 'proj4';
 
-import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection/types';
+import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection-types';
 
 import {pointProjection} from './point-projection';
 
@@ -323,7 +323,7 @@ d3-engine.ts
 ```
 import {geoMercator, type GeoProjection} from 'd3-geo';
 
-import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection/types';
+import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection-types';
 
 import {pointProjection} from './point-projection';
 

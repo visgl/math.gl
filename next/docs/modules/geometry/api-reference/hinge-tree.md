@@ -7,7 +7,7 @@
 Evaluates rigid panels connected by hinges, independently of mesh generation and rendering. A panel can be a polygon, a collection of triangles, or any other rigid object. A forest can contain multiple roots. Loops, collisions, physical forces, and bending are not modeled.
 
 ```
-import {HingeTree} from '@math.gl/geometry';
+import {HingeTree} from '@math.gl/geometry/primitives';
 
 import {Matrix4} from '@math.gl/core/matrix';
 

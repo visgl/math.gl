@@ -4,28 +4,30 @@
 
 Use this guide to upgrade from a stable math.gl 4.x release to 5.0. See [What’s New](https://visgl.github.io/math.gl/next/docs/whats-new.md#v50) for new capabilities.
 
-### Canonical projection paths[​](#canonical-projection-paths "Direct link to Canonical projection paths")
-
-Use `@math.gl/geospatial/projection` and its focused `/core`, `/projections/<id>`, `/parsers/<format>`, and `/grids/<format>` subpaths. The duplicate `/projection/experimental` and `/projection/native` trees have been removed. For example, replace `@math.gl/geospatial/projection/native/core` with `@math.gl/geospatial/projection/core`. Lazy projection descriptors remain under `@math.gl/geospatial/projection/projections/lazy`.
-
-Use `@math.gl/core/arrow` without `/index`. Private implementation files are not package entry points; package-internal tests should import them relatively.
-
-Relative source imports also omit `/index`. Native build output resolves directory entry points and adds `.js` extensions during compilation.
-
 ### Package imports[​](#package-imports "Direct link to Package imports")
 
-| 4.x package                                                          | 5.0 import                       |
-| -------------------------------------------------------------------- | -------------------------------- |
-| `math.gl`                                                            | `@math.gl/core`                  |
-| `@math.gl/types`                                                     | `@math.gl/core`                  |
-| `@math.gl/polygon`                                                   | `@math.gl/geometry`              |
-| `@math.gl/culling`                                                   | `@math.gl/geometry/culling`      |
-| `@math.gl/proj4`                                                     | `@math.gl/geospatial/projection` |
-| `@math.gl/geoid`                                                     | `@math.gl/earth`                 |
-| `@math.gl/sun`                                                       | `@math.gl/earth/sun`             |
-| `@math.gl/dggs-s2`, `@math.gl/dggs-geohash`, `@math.gl/dggs-quadkey` | `@math.gl/dggs`                  |
+Install packages by their npm names and import APIs from their feature subpaths. The `@math.gl/tasks` package keeps its root import.
 
-Update the dependency and import together. When the 5.0 import contains a subpath, install its package root. See the API changes below for changes to named exports and calls.
+| 4.x import                                                           | 5.0 import                                                           |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `@math.gl/core` or `math.gl` for vectors and matrices                | `@math.gl/core/matrix`                                               |
+| `@math.gl/types` or `@math.gl/core` for shared types and guards      | `@math.gl/core/types`                                                |
+| `@math.gl/polygon`                                                   | `@math.gl/geometry/polygon`                                          |
+| `@math.gl/culling`                                                   | `@math.gl/geometry/culling`                                          |
+| `@math.gl/geospatial` for `Ellipsoid`                                | `@math.gl/geospatial/ellipsoid`                                      |
+| `@math.gl/geospatial` for local reference frames                     | `@math.gl/geospatial/coordinates`                                    |
+| `@math.gl/geospatial` for region bounding boxes                      | `@math.gl/geospatial/globe`                                          |
+| `@math.gl/web-mercator` or `viewport-mercator-project`               | `@math.gl/geospatial/web-mercator`                                   |
+| `@math.gl/proj4`                                                     | `@math.gl/geospatial/projection`                                     |
+| `@math.gl/geoid`                                                     | `@math.gl/earth/geoid`                                               |
+| `@math.gl/sun`                                                       | `@math.gl/earth/sun`                                                 |
+| `@math.gl/dggs-s2`, `@math.gl/dggs-geohash`, `@math.gl/dggs-quadkey` | `@math.gl/dggs/s2`, `@math.gl/dggs/geohash`, `@math.gl/dggs/quadkey` |
+
+### Upgrading from a 5.0 prerelease[​](#upgrading-from-a-50-prerelease "Direct link to Upgrading from a 5.0 prerelease")
+
+Split root imports across the [package entry points](https://visgl.github.io/math.gl/next/docs.md#npm-packages). For example, import `queryArrowSQL` from `@math.gl/sql/query`, `SphereGeometry` from `@math.gl/geometry/primitives`, and `DGGS_DECODERS` from `@math.gl/dggs/decoders`. For Earth namespace imports, use `import * as sun from '@math.gl/earth/sun'` and apply the same pattern to geoid and timezone.
+
+Replace slashes within an exported subpath with hyphens. For example, `@math.gl/geospatial/projection/types` becomes `@math.gl/geospatial/projection-types`, `@math.gl/geospatial/maps/presets` becomes `@math.gl/geospatial/maps-presets`, and `@math.gl/earth/sun/stars` becomes `@math.gl/earth/sun-stars`. Use the [projection entry point index](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/entry-points.md) and [kernel index](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/kernels.md) for exact names.
 
 ### Expressions and SQL package[​](#expressions-and-sql-package "Direct link to Expressions and SQL package")
 
@@ -48,14 +50,14 @@ Install [`@math.gl/sql`](https://visgl.github.io/math.gl/next/docs/modules/sql.m
 
 ### Ellipsoid frame and oriented bounding box operations[​](#ellipsoid-frame-and-oriented-bounding-box-operations "Direct link to Ellipsoid frame and oriented bounding box operations")
 
-Import ellipsoid frame helpers from `@math.gl/geospatial` and oriented bounding box helpers from `@math.gl/geometry/culling`.
+Import ellipsoid frame helpers from `@math.gl/geospatial/coordinates` and oriented bounding box helpers from `@math.gl/geometry/culling`.
 
-| Removed API                                                      | Replacement                                                                             |
-| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `ellipsoid.eastNorthUpToFixedFrame(origin, result)`              | `eastNorthUpToFixedFrame(ellipsoid, origin, result)` from `@math.gl/geospatial`         |
-| `ellipsoid.localFrameToFixedFrame(a, b, c, origin, result)`      | `localFrameToFixedFrame(ellipsoid, a, b, c, origin, result)` from `@math.gl/geospatial` |
-| `box.quaternion`                                                 | `getOrientedBoundingBoxQuaternion(box)`                                                 |
-| `box.fromCenterHalfSizeQuaternion(center, halfSize, quaternion)` | `makeOrientedBoundingBoxFromQuaternion(center, halfSize, quaternion, box)`              |
+| Removed API                                                      | Replacement                                                                                         |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `ellipsoid.eastNorthUpToFixedFrame(origin, result)`              | `eastNorthUpToFixedFrame(ellipsoid, origin, result)` from `@math.gl/geospatial/coordinates`         |
+| `ellipsoid.localFrameToFixedFrame(a, b, c, origin, result)`      | `localFrameToFixedFrame(ellipsoid, a, b, c, origin, result)` from `@math.gl/geospatial/coordinates` |
+| `box.quaternion`                                                 | `getOrientedBoundingBoxQuaternion(box)`                                                             |
+| `box.fromCenterHalfSizeQuaternion(center, halfSize, quaternion)` | `makeOrientedBoundingBoxFromQuaternion(center, halfSize, quaternion, box)`                          |
 
 Frame functions preserve the original matrix conventions and return a new `Matrix4` when the result is omitted.
 
@@ -68,7 +70,7 @@ Frame functions preserve the original matrix conventions and return a new `Matri
 ### Rotation and coordinate conversions[​](#rotation-and-coordinate-conversions "Direct link to Rotation and coordinate conversions")
 
 * Replace `euler.getQuaternion()` and `euler.toQuaternion()` with `quaternion.fromEuler(euler)` or `new Quaternion().fromEuler(euler)`.
-* Replace `quaternion.transformVector4(vector, result)` with `result.copy(vector).transformByQuaternion(quaternion)` for `Vector4` results, or `transformQuat(result, vector, quaternion)` from `@math.gl/core` for arrays.
+* Replace `quaternion.transformVector4(vector, result)` with `result.copy(vector).transformByQuaternion(quaternion)` for `Vector4` results, or `transformQuat(result, vector, quaternion)` from `@math.gl/core/matrix` for arrays.
 * Replace `quaternion.slerp({start, target, ratio})` with `quaternion.slerp(start, target, ratio)`.
 * `SphericalCoordinates` conversions use `Vector3Like`. `toVector3()` returns an array by default; pass a result argument to reuse a vector or typed array.
 
@@ -101,7 +103,7 @@ Euler rotation orders are now represented directly by the `EulerRotationOrder` s
 
 ### Low-level function imports[​](#low-level-function-imports "Direct link to Low-level function imports")
 
-Low-level `mat3`, `mat4`, `quat`, `vec2`, `vec3`, and `vec4` namespaces are named exports from `@math.gl/core`.
+Low-level `mat3`, `mat4`, `quat`, `vec2`, `vec3`, and `vec4` namespaces are named exports from `@math.gl/core/matrix`.
 
 ```
 import {mat4, vec3} from '@math.gl/core/matrix';
@@ -129,7 +131,7 @@ Replace `@math.gl/geospatial/discontinuous` and map exports from `@math.gl/geosp
 
 ### GeoArrow descriptors[​](#geoarrow-descriptors "Direct link to GeoArrow descriptors")
 
-Import physical descriptor helpers from `@math.gl/core/arrow` in place of `@math.gl/core/arrow`. The corresponding root exports remain available.
+Import physical descriptor helpers from `@math.gl/core/arrow` in place of `@math.gl/core/arrow`.
 
 ### DGGS packages[​](#dggs-packages "Direct link to DGGS packages")
 

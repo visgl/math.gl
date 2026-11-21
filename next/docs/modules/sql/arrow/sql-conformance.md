@@ -54,7 +54,7 @@ Domain, conversion, overflow, and division-by-zero errors are eligible for TRY. 
 
 ## Worker execution[​](#worker-execution "Direct link to Worker execution")
 
-Send the parsed AST as the `expression` initialization value using the [whole-table worker API](https://visgl.github.io/math.gl/next/docs/modules/sql/workers.md#worker-execution). Register functions in the worker module:
+Send the parsed AST as the `expression` initialization value using the [whole-table worker API](https://visgl.github.io/math.gl/next/docs/modules/sql/worker.md#worker-execution). Register functions in the worker module:
 
 ```
 import {initializeTaskWorker} from '@math.gl/tasks';

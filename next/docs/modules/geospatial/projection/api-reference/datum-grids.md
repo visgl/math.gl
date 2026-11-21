@@ -45,9 +45,9 @@ For supported horizontal GeoTIFF grids, `loadGeoTIFFGrid(decodedTIFF)` prepares 
 Register a prepared `VerticalGrid` under the name used by `+geoidgrids`. A source grid converts gravity-related height **H** to ellipsoidal height **h** using **h = H + N**; a destination grid applies **H = h - N**. The supplied offsets **N** are geoid undulations in metres. Source conversion runs before the horizontal datum transformation; destination conversion runs after it. Each grid is sampled in its own CRS's horizontal datum, at Greenwich longitude and geographic latitude. These are explicit stages following [PROJ's vertical-grid convention](https://proj.org/en/stable/operations/transformations/vgridshift.html).
 
 ```
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
 
-import { parseGTXGrid } from "@math.gl/geospatial/projection/grids/gtx";
+import { parseGTXGrid } from "@math.gl/geospatial/projection-grids-gtx";
 
 
 
@@ -79,7 +79,7 @@ Choose a model whose horizontal datum, vertical datum, tide convention and area 
 For an already loaded `@math.gl/earth` model, use the structural adapter:
 
 ```
-import { createGeoidGrid } from "@math.gl/geospatial/projection/grids/vertical";
+import { createGeoidGrid } from "@math.gl/geospatial/projection-grids-vertical";
 
 
 
@@ -103,9 +103,9 @@ This API supports explicit vertical-grid transformations. Compound/vertical WKT 
 The reader also accepts a plain `VerticalGridGeoTIFFData` dataset, structurally compatible with loaders.gl's `GeoTIFFRasterLoader` output. Pass the decoded dataset directly to `loadVerticalGeoTIFFGrid(dataset)`. It preserves original band indices, so band zero must be included. Image order, unscaled samples, per-image/per-band GDAL metadata, GeoKeys, nodata and geometry tags have the same validation as the geotiff.js input. No runtime dependency on loaders.gl is added.
 
 ```
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
 
-import { loadVerticalGeoTIFFGrid } from "@math.gl/geospatial/projection/grids/vertical-geotiff";
+import { loadVerticalGeoTIFFGrid } from "@math.gl/geospatial/projection-grids-vertical-geotiff";
 
 import { fromArrayBuffer } from "geotiff"; // separately installed, application-owned decoder
 

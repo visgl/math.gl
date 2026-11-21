@@ -6,7 +6,7 @@ Compile a `MapDescription` into spherical chart projection, layout, picking, and
 
 ## Explicit capabilities[​](#explicit-capabilities "Direct link to Explicit capabilities")
 
-Supply `presets: [albersUsaMapPreset]` (or another preset) from `@math.gl/geospatial/maps/presets`. Omitted definitions fail with a missing-preset error. The `mapPresets` array is an explicit full-catalogue choice used by the catalogue examples below; focused applications should import individual presets.
+Supply `presets: [albersUsaMapPreset]` (or another preset) from `@math.gl/geospatial/maps-presets`. Omitted definitions fail with a missing-preset error. The `mapPresets` array is an explicit full-catalogue choice used by the catalogue examples below; focused applications should import individual presets.
 
 `geometry: mapGeometry` from `/maps/geometry` enables polygon and feature methods. `transitions: mapTransitions` from `/maps/transitions` enables `createTransitionTo`. Neither is installed globally. Pass the same capabilities when restoring a prepared map. Raster preparation is a standalone `prepareMapSurface(map, options)` function from `/maps/surfaces` and does not require polygon support.
 

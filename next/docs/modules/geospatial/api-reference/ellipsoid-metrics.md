@@ -3,7 +3,7 @@
 Metrics and auxiliary latitudes for a sphere or an oblate/prolate ellipsoid of revolution. This separate class keeps new geometry out of Cartesian-only bundles.
 
 ```
-import {EllipsoidMetrics} from '@math.gl/geospatial';
+import {EllipsoidMetrics} from '@math.gl/geospatial/ellipsoid';
 
 
 

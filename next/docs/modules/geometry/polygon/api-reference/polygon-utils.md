@@ -7,7 +7,7 @@ A set of polygon-related utility functions. Utility functions are available for 
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {getPolygonWindingDirection} from '@math.gl/geometry';
+import {getPolygonWindingDirection} from '@math.gl/geometry/polygon';
 ```
 
 ## Types[​](#types "Direct link to Types")

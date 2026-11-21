@@ -7,7 +7,7 @@ An orthographic map can show an ellipsoid from any direction. Its visible surfac
 ## Orthographic visibility[​](#orthographic-visibility "Direct link to Orthographic visibility")
 
 ```
-import {createOrthographicCutAtlas} from '@math.gl/geospatial';
+import {createOrthographicCutAtlas} from '@math.gl/geospatial/geographic-cuts';
 
 
 
@@ -41,7 +41,7 @@ This is parallel-ray **surface** visibility. It does not compute perspective cam
 Each boundary is a circle in **unit surface-normal space**: `dot(normalized(boundary.normal), surfaceNormal) = offset`. The offset defaults to zero. On an ellipsoid, its surface image is generally a curved geographic boundary. Orthographic horizons have offset zero; parallels are another special case. These are geodetic normals, not geocentric directions.
 
 ```
-import {GeographicCutAtlas} from '@math.gl/geospatial';
+import {GeographicCutAtlas} from '@math.gl/geospatial/geographic-cuts';
 
 
 
@@ -71,7 +71,7 @@ This finite circle-boundary graph supports user-defined regional cells and facet
 ## A faceted-map consumer[​](#a-faceted-map-consumer "Direct link to A faceted-map consumer")
 
 ```
-import {createOctahedralCutAtlas} from '@math.gl/geospatial';
+import {createOctahedralCutAtlas} from '@math.gl/geospatial/geographic-cuts';
 
 
 

@@ -19,7 +19,7 @@ Create a tangent plane for a cartographic coordinate
 ```
 import {Plane} from '@math.gl/geometry/culling';
 
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
 const point = [-72.0, 40.0, 0];
 

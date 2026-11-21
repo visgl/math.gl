@@ -5,7 +5,7 @@
 Subdivides a polyline by intersecting with a uniform grid.
 
 ```
-import {cutPolylineByGrid} from '@math.gl/geometry';
+import {cutPolylineByGrid} from '@math.gl/geometry/polygon';
 
 
 

@@ -2,7 +2,7 @@
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
-The configurable math.gl projection engine used by the full, configurable and lazy engines; see the [supported definitions and operations](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md). Import it from `@math.gl/geospatial/projection` or the isolated `@math.gl/geospatial/projection/core` entry point. The package has no proj4js runtime dependency. Install `proj4` separately when its upstream behavior is required.
+The configurable math.gl projection engine used by the full, configurable and lazy engines; see the [supported definitions and operations](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/support.md). Import it from `@math.gl/geospatial/projection` or the isolated `@math.gl/geospatial/projection-core` entry point. The package has no proj4js runtime dependency. Install `proj4` separately when its upstream behavior is required.
 
 ```
 import { ProjectionTransform, mercator } from "@math.gl/geospatial/projection";
@@ -32,9 +32,9 @@ See the [engine guide](https://visgl.github.io/math.gl/next/docs/modules/geospat
 
 ## Isolated entry points[​](#isolated-entry-points "Direct link to Isolated entry points")
 
-Use `@math.gl/geospatial/projection/core` for the class, normalization, capability checks and shared contracts. Import a plugin from `@math.gl/geospatial/projection/projections/<id>` using its canonical PROJ name, for example `merc`, `utm`, `etmerc`, `geocent` or `ob_tran`. Export names are identical to the barrel's names. Geographic coordinates need no plugin or `longlat` subpath; the internal `gauss` helper is not public.
+Use `@math.gl/geospatial/projection-core` for the class, normalization, capability checks and shared contracts. Import a plugin from `@math.gl/geospatial/projection/projections/<id>` using its canonical PROJ name, for example `merc`, `utm`, `etmerc`, `geocent` or `ob_tran`. Export names are identical to the barrel's names. Geographic coordinates need no plugin or `longlat` subpath; the internal `gauss` helper is not public.
 
-The optional regional `datumCatalog` plugin is available from `@math.gl/geospatial/projection/datums`. Its runtime export stays outside the root and `/core` entry points.
+The optional regional `datumCatalog` plugin is available from `@math.gl/geospatial/projection-datums`. Its runtime export stays outside the root and `/core` entry points.
 
 Readers are available from `parsers/wkt`, `parsers/projjson`, `grids/ntv2`, `grids/geotiff`, `grids/gtx`, `grids/vertical` and `grids/vertical-geotiff`, with the package name prefix. All subpaths support ESM, CommonJS and TypeScript. ESM code splitting is required for browser lazy downloads; CommonJS subpaths select APIs but do not promise shared bundles. See the [lazy-loading guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#load-less-used-projections-on-demand).
 
@@ -55,7 +55,7 @@ import type {
 
   DatumCatalogPlugin,
 
-} from "@math.gl/geospatial/projection/core";
+} from "@math.gl/geospatial/projection-core";
 
 
 
@@ -419,7 +419,7 @@ Custom prepared grids can similarly provide `shiftInPlace(point, inverse): boole
 
 ### Whole-buffer plugin hooks[​](#whole-buffer-plugin-hooks "Direct link to Whole-buffer plugin hooks")
 
-Advanced plugins can implement optional `createForwardFlat(context)` and `createInverseFlat(context)` methods on `ProjectionImplementation`. They receive a frozen `ProjectionFlatContext` with `inputScale` and `outputScale`, and return a synchronous `ProjectionFlatOperation` or `undefined` to decline specialization. These types are exported from `@math.gl/geospatial/projection/core`. Factories run once per direction at construction; operations receive the entire view and stride, after the engine validates both.
+Advanced plugins can implement optional `createForwardFlat(context)` and `createInverseFlat(context)` methods on `ProjectionImplementation`. They receive a frozen `ProjectionFlatContext` with `inputScale` and `outputScale`, and return a synchronous `ProjectionFlatOperation` or `undefined` to decline specialization. These types are exported from `@math.gl/geospatial/projection-core`. Factories run once per direction at construction; operations receive the entire view and stride, after the engine validates both.
 
 A custom operation must multiply input XY by `inputScale`, apply the forward/inverse equations, then divide XY by `outputScale`. It must enforce the geographic domain and finite XYZ contract, preserve Z/trailing ordinates, check Float32 representability before writing, and leave the failing and subsequent records untouched. Scratch belongs to each call; retaining it or the buffer breaks reentrancy. Use the ordinary mutable hooks unless you need and can uphold this whole-buffer contract. Built-in factories decline when a decorator replaces their corresponding mutable hook, preserving custom behavior.
 
@@ -435,7 +435,7 @@ See [descriptor loading and cache behavior](https://visgl.github.io/math.gl/next
 
 Mercator equations follow the [PROJ Mercator documentation](https://proj.org/en/stable/operations/projections/merc.html). Kernel headers identify direct ports of proj4js 2.22.0; original adapters and equation implementations are identified separately. Distributed notices include the upstream MIT license and Equal Earth's retained Apache-2.0 license.
 
-For the built-in descriptor catalogue, use `LazyProjectionEngine` from `@math.gl/geospatial/projection/projections/lazy`. Create a transform with `createProjection()` or prepare a synchronous transform with `createProjectionAsync()`. Readers, aliases and grids remain explicit engine options. See the [engine reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md).
+For the built-in descriptor catalogue, use `LazyProjectionEngine` from `@math.gl/geospatial/projection-projections-lazy`. Create a transform with `createProjection()` or prepare a synchronous transform with `createProjectionAsync()`. Readers, aliases and grids remain explicit engine options. See the [engine reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md).
 
 See [Attributions](https://visgl.github.io/math.gl/next/docs/references-and-credits.md) for the project-wide source inventory and acknowledgments.
 
@@ -445,11 +445,11 @@ All math.gl projection engine variants accept `verticalGrids?: VerticalGridColle
 
 #### parseGTXGrid[​](#parsegtxgrid "Direct link to parseGTXGrid")
 
-Is exported from `@math.gl/geospatial/projection/grids/gtx`. `createVerticalGrid`, `createGeoidGrid` and `VerticalGridOptions` are exported from `@math.gl/geospatial/projection/grids/vertical`. The public root and compatibility experimental/native entry points also export these helpers; `/core` exports only the contract and engine. See [height conversion](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#convert-geoid-heights) for loading, units, axes, fallback, coverage, datum ordering and the limits of this explicit subset.
+Is exported from `@math.gl/geospatial/projection-grids-gtx`. `createVerticalGrid`, `createGeoidGrid` and `VerticalGridOptions` are exported from `@math.gl/geospatial/projection-grids-vertical`. The public root and compatibility experimental/native entry points also export these helpers; `/core` exports only the contract and engine. See [height conversion](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#convert-geoid-heights) for loading, units, axes, fallback, coverage, datum ordering and the limits of this explicit subset.
 
 ### loadVerticalGeoTIFFGrid[​](#loadverticalgeotiffgrid "Direct link to loadVerticalGeoTIFFGrid")
 
-`loadVerticalGeoTIFFGrid(tiff: VerticalGridGeoTIFF): Promise<VerticalGrid>` prepares an owned geoid snapshot from a caller-decoded TIFF. Import it and its structural types `VerticalGridGeoTIFF` / `VerticalGridGeoTIFFImage` from `@math.gl/geospatial/projection/grids/vertical-geotiff`. The root and experimental/native compatibility entry points also export it. Metadata may be synchronous (geotiff.js v2) or asynchronous (v3); numeric sample arrays must be raw, without decoder-applied scale/offset.
+`loadVerticalGeoTIFFGrid(tiff: VerticalGridGeoTIFF): Promise<VerticalGrid>` prepares an owned geoid snapshot from a caller-decoded TIFF. Import it and its structural types `VerticalGridGeoTIFF` / `VerticalGridGeoTIFFImage` from `@math.gl/geospatial/projection-grids-vertical-geotiff`. The root and experimental/native compatibility entry points also export it. Metadata may be synchronous (geotiff.js v2) or asynchronous (v3); numeric sample arrays must be raw, without decoder-applied scale/offset.
 
 The accepted metadata, geometry, nesting, coverage and units are specified in the [vertical GeoTIFF guide](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#vertical-geotiff-geoid-models). The result plugs into `verticalGrids` on all math.gl projection engine variants. This function neither loads files nor selects a vertical datum operation automatically.
 

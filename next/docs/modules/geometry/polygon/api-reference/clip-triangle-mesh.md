@@ -3,7 +3,9 @@
 `clipTriangleMesh` is exported from `@math.gl/geometry` and its existing polygon entry. It intersects an already projected indexed triangle mesh with disjoint convex target-plane regions, preserving triangle winding and returning provenance for attribute interpolation. It does not project coordinates, repair spherical topology or infer antimeridian edge paths.
 
 ```
-import {clipTriangleMesh, interpolatePackedAttributes} from '@math.gl/geometry';
+import {clipTriangleMesh} from '@math.gl/geometry/polygon';
+
+import {interpolatePackedAttributes} from '@math.gl/geometry/processing';
 
 
 

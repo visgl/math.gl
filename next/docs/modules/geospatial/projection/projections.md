@@ -21,9 +21,9 @@ Use this page to choose a family and find its import. The [engine API](https://v
 The tables below give the **ID** used in both the PROJ string (`+proj=<id>`) and public import path (`@math.gl/geospatial/projection/projections/<id>`), followed by the named export. Geographic coordinates are built into `/core`.
 
 ```
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
 
-import { albersEqualArea } from "@math.gl/geospatial/projection/projections/aea";
+import { albersEqualArea } from "@math.gl/geospatial/projection-projections-aea";
 
 
 
@@ -180,11 +180,11 @@ Polygon support currently requires each input polygon to fit in an open hemisphe
 The oblique factory lets an application choose a rotated world map without a global algorithm registry:
 
 ```
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
 
-import { obliqueTransformation } from "@math.gl/geospatial/projection/projections/ob_tran";
+import { obliqueTransformation } from "@math.gl/geospatial/projection-projections-ob_tran";
 
-import { mollweide } from "@math.gl/geospatial/projection/projections/moll";
+import { mollweide } from "@math.gl/geospatial/projection-projections-moll";
 
 
 

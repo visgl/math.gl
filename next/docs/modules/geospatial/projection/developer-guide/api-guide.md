@@ -27,7 +27,7 @@ These names describe different kinds of API. `Projection`, `PreparedProjection`,
 
 Use [`SpatialReference`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/spatial-reference.md) at an ingestion boundary. It records what a dataset actually declares, including the distinction between an absent CRS and an explicitly unknown one. Its `coordinateOrder` describes stored coordinates independently of the CRS definition's authoritative axis order. `CRSReference` is the nested declaration, including its definition and provenance.
 
-Resolution serves another purpose. `normalizeCRS()` from `@math.gl/geospatial/projection/core` produces a `NormalizedCRS`: resolved parameters, ellipsoid and datum information, angular and linear conversion factors, and axis conventions used by the engine. Use it when integrating low-level APIs, such as constructing `ProjectionAnalysis`. Ordinary application code can let the engine resolve definitions during construction. Normalization alone does not load algorithms or prove that a coordinate is convertible.
+Resolution serves another purpose. `normalizeCRS()` from `@math.gl/geospatial/projection-core` produces a `NormalizedCRS`: resolved parameters, ellipsoid and datum information, angular and linear conversion factors, and axis conventions used by the engine. Use it when integrating low-level APIs, such as constructing `ProjectionAnalysis`. Ordinary application code can let the engine resolve definitions during construction. Normalization alone does not load algorithms or prove that a coordinate is convertible.
 
 `CRSMetadata` is the serializable resolved view exposed by a descriptor. Keep the original `SpatialReference` alongside it when provenance, unresolved states or epochs matter: resolved metadata cannot replace that source record. A `CRSDescriptor` also contains functions and should be prepared again in each runtime rather than serialized as an executable object.
 
@@ -66,9 +66,9 @@ Use a transform when conversion is all you need. For explicitly ordered operatio
 Use [`ProjectionPipeline`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/operation-pipelines.md) for an explicit recipe, such as height correction in a particular horizontal frame followed by a datum shift and map projection. A CRS-pair transform derives supported stages from definitions; a pipeline lets the application state each stage and its order. It is typed composition, not a parser for arbitrary PROJ pipeline strings.
 
 ```
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
 
-import {universalTransverseMercator} from '@math.gl/geospatial/projection/projections/utm';
+import {universalTransverseMercator} from '@math.gl/geospatial/projection-projections-utm';
 
 
 
@@ -111,7 +111,7 @@ Eager pipelines have synchronous ordinary methods. Descriptor-backed pipelines r
 [`OperationCatalog`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/operation-selection.md), from `/operations`, filters application-reviewed `CoordinateOperation<T>` records. Use it when several regional, accuracy-limited or epoch-limited operations could convert a CRS pair. The payload can be a prepared transform, pipeline, configuration or factory; selection never invokes it. This example wraps the pipeline above and explicitly permits its unknown accuracy:
 
 ```
-import {OperationCatalog} from '@math.gl/geospatial/projection/operations';
+import {OperationCatalog} from '@math.gl/geospatial/projection-operations';
 
 
 
@@ -153,7 +153,7 @@ Use `project`/`unproject` for independently owned result arrays. Use `projectTo`
 Use [`ProjectionBuffer`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/bulk-layouts.md) from `/bulk` when input and output differ, records have padding, coordinates occupy separate columns, or work is chunked. It captures a layout around a `BulkProjection` with synchronous reusable-output methods. This continues the prepared transform from the first example:
 
 ```
-import {ProjectionBuffer} from '@math.gl/geospatial/projection/bulk';
+import {ProjectionBuffer} from '@math.gl/geospatial/projection-bulk';
 
 
 
@@ -189,9 +189,9 @@ Grids supply data to transforms and pipelines. They neither choose an operation 
 GeoTIFF adapters consume separately decoded data and import no TIFF decoder. NTv2/GTX readers consume file bytes. `createGeoidGrid` adapts a prepared `@math.gl/earth` model; `createVerticalGrid` snapshots regular metre offsets. Match the horizontal datum, vertical reference, tide convention and coverage to the operation. The application owns fetching, decoding, data terms and caching.
 
 ```
-import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
+import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
 
-import {createVerticalGrid} from '@math.gl/geospatial/projection/grids/vertical';
+import {createVerticalGrid} from '@math.gl/geospatial/projection-grids-vertical';
 
 
 
@@ -225,9 +225,9 @@ Use a kinematic `helmert` step for a reference-frame change **at an observation 
 Use [`createDeformationModel`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/deformation-models.md) from `/deformation` to propagate with a time-invariant ENU velocity field. `createVelocityGrid` accepts setup coordinates in degrees and explicit `m/year` or `mm/year` values; its sampler returns metres/year. `DeformationModel.forward`/`inverse` mutate a `ProjectionPoint` in ECEF metres, both using the original source/target epoch pair. The following continues the pipeline imports above:
 
 ```
-import {createVelocityGrid} from '@math.gl/geospatial/projection/grids/velocity';
+import {createVelocityGrid} from '@math.gl/geospatial/projection-grids-velocity';
 
-import {createDeformationModel} from '@math.gl/geospatial/projection/deformation';
+import {createDeformationModel} from '@math.gl/geospatial/projection-deformation';
 
 
 
@@ -259,7 +259,7 @@ This synthetic field illustrates wiring only. Supply a reviewed model, matching 
 Use [`createTemporalDeformationModel`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/temporal-models.md) from `/temporal` when steady velocity is insufficient. It returns the same `DeformationModel` contract for the same step:
 
 ```
-import {createTemporalDeformationModel} from '@math.gl/geospatial/projection/temporal';
+import {createTemporalDeformationModel} from '@math.gl/geospatial/projection-temporal';
 
 
 
@@ -287,7 +287,7 @@ Observation epoch, frame reference epoch and model validity interval are separat
 `CRSEngine` extends the engine contract with `getCRS()`. The full, configurable and lazy general engines implement it; a specialized pair-only engine need not. A descriptor combines one resolved target CRS with prepared converters and rendering conventions. It saves applications from assembling these pieces independently.
 
 ```
-import {lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
+import {lazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
 
 
 
@@ -323,11 +323,11 @@ For example, EPSG:3857 at 60° latitude has rendering factors of approximately `
 [`ProjectionAnalysis`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-analysis.md) answers a mathematical question about a **single projection**, rather than a complete CRS-pair operation:
 
 ```
-import {normalizeCRS} from '@math.gl/geospatial/projection/core';
+import {normalizeCRS} from '@math.gl/geospatial/projection-core';
 
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 
-import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection/analysis';
+import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection-analysis';
 
 
 

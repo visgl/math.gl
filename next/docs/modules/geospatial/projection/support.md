@@ -7,9 +7,9 @@
 The default `ProjectionTransform`, `LazyProjectionEngine`, and `normalizeCRS` recognize WGS84 and NAD83 as named datums. Register regional definitions explicitly:
 
 ```
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
 
-import { datumCatalog } from "@math.gl/geospatial/projection/datums";
+import { datumCatalog } from "@math.gl/geospatial/projection-datums";
 
 
 

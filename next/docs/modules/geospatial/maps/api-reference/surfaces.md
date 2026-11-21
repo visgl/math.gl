@@ -1,6 +1,6 @@
 # Prepared surfaces and transitions 🧪
 
-Import raster builders from `@math.gl/geospatial/maps/surfaces` and transition builders from `@math.gl/geospatial/maps/transitions`. These experimental APIs are also named exports of `/maps`. They have no DOM, deck.gl, texture-loading, or animation-clock dependency.
+Import raster builders from `@math.gl/geospatial/maps-surfaces` and transition builders from `@math.gl/geospatial/maps-transitions`. These experimental APIs are also named exports of `/maps`. They have no DOM, deck.gl, texture-loading, or animation-clock dependency.
 
 | Operation                         | Responsibility                                                            |
 | --------------------------------- | ------------------------------------------------------------------------- |
@@ -49,7 +49,7 @@ Whole-world geographic UVs retain a continuous longitude bank and may exceed U=1
 Undefined, throwing, or nonfinite projection samples are excluded. This does not discover a projection's domain, infer cuts, or replace chart clipping. Use `prepareMapSurface` for multi-chart and inset maps.
 
 ```
-import {prepareMapSurface} from '@math.gl/geospatial/maps/surfaces';
+import {prepareMapSurface} from '@math.gl/geospatial/maps-surfaces';
 
 import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';
 

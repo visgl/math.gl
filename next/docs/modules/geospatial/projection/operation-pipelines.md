@@ -5,9 +5,9 @@
 `ProjectionPipeline` composes a known coordinate operation from typed steps. Use it when you need to choose the order of projection, datum and height operations yourself. For ordinary CRS-to-CRS conversion, use [Projection or ProjectionTransform](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md). A pipeline does not find an EPSG operation or select grids automatically.
 
 ```
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
 
-import {universalTransverseMercator} from '@math.gl/geospatial/projection/projections/utm';
+import {universalTransverseMercator} from '@math.gl/geospatial/projection-projections-utm';
 
 
 
@@ -167,7 +167,7 @@ Stacks are independent for X/Y/Z, nested, and local to a coordinate call. The fl
 Register `obliqueTransformation` with its child algorithm and state its output explicitly. Geographic output accepts degrees or radians; projected output is metres. The `o_proj` parameter must match the registered child:
 
 ```
-import {obliqueTransformation} from '@math.gl/geospatial/projection/projections/ob_tran';
+import {obliqueTransformation} from '@math.gl/geospatial/projection-projections-ob_tran';
 
 
 
@@ -233,7 +233,7 @@ Place a destination height grid after the datum conversion and before the destin
 Use the same descriptors and shared implementation cache as `ProjectionTransform`. Construction starts no imports; only projection names used by steps are preloaded.
 
 ```
-import {lazyUniversalTransverseMercator} from '@math.gl/geospatial/projection/projections/lazy/utm';
+import {lazyUniversalTransverseMercator} from '@math.gl/geospatial/projection-projections-lazy-utm';
 
 
 

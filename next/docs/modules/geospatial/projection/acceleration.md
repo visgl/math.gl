@@ -34,9 +34,9 @@ Keep an engine prepared inside a module worker and preload its dependencies once
 ```
 // projection-worker.ts
 
-import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
+import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
 
-import {universalTransverseMercator} from '@math.gl/geospatial/projection/projections/utm';
+import {universalTransverseMercator} from '@math.gl/geospatial/projection-projections-utm';
 
 const projection = new ProjectionTransform({
 

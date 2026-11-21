@@ -11,7 +11,7 @@ Loading <!-- -->RingGeometry<!-- -->…
 A solid annulus centered at the origin, with height along Y. Partial sweeps form ring segments closed by planar end faces. Inner and outer walls use smooth radial normals; the top, bottom and segment ends have separate flat normals.
 
 ```
-import {RingGeometry} from '@math.gl/geometry';
+import {RingGeometry} from '@math.gl/geometry/primitives';
 
 
 

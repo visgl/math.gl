@@ -3,21 +3,7 @@
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
 ```
-import {
-
-  Curve,
-
-  LineCurve,
-
-  QuadraticBezierCurve,
-
-  CubicBezierCurve,
-
-  HermiteCurve,
-
-  CatmullRomCurve
-
-} from '@math.gl/geometry';
+import {Curve, LineCurve, QuadraticBezierCurve, CubicBezierCurve, HermiteCurve, CatmullRomCurve} from '@math.gl/geometry/curves';
 ```
 
 ## Constructors[​](#constructors "Direct link to Constructors")

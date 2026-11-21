@@ -3,7 +3,7 @@
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
 ```
-import {getGeographicTile, getGeographicTileBounds, getGeographicTileRanges} from '@math.gl/geospatial';
+import {getGeographicTile, getGeographicTileBounds, getGeographicTileRanges} from '@math.gl/geospatial/tiles';
 
 
 
@@ -41,7 +41,7 @@ Construction takes constant space and time, including level 30. Callers decide w
 Convert degree bounds and heights to a geodetic region before creating an OBB:
 
 ```
-import {makeOBBFromRegion} from '@math.gl/geospatial';
+import {makeOBBFromRegion} from '@math.gl/geospatial/globe';
 
 const [west, south, east, north] = getGeographicTileBounds(tile);
 

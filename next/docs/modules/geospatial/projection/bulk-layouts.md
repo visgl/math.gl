@@ -7,11 +7,11 @@ Use `ProjectionBuffer` when coordinates live in separate input/output arrays, in
 For contiguous coordinates that can be overwritten, the existing [`projectFlat`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-transform.md#flat-typed-arrays-in-place) remains the shortest path and can use whole-buffer projection kernels.
 
 ```
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
 
-import { mercator } from "@math.gl/geospatial/projection/projections/merc";
+import { mercator } from "@math.gl/geospatial/projection-projections-merc";
 
-import { ProjectionBuffer } from "@math.gl/geospatial/projection/bulk";
+import { ProjectionBuffer } from "@math.gl/geospatial/projection-bulk";
 
 
 

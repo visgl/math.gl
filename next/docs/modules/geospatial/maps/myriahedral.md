@@ -9,7 +9,7 @@ import {createMyriahedralMap} from '@math.gl/geospatial/maps';
 
 
 
-import {withMapGeometry} from '@math.gl/geospatial/maps/geometry';
+import {withMapGeometry} from '@math.gl/geospatial/maps-geometry';
 
 
 

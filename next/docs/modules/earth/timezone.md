@@ -127,15 +127,15 @@ Local clock fields alone do not uniquely identify an instant. Offset changes can
 
 Approximate timezone polygons, including oceans, are available as separate assets:
 
-* `@math.gl/earth/timezone/timezone-geometry-low.json`
-* `@math.gl/earth/timezone/timezone-geometry-hi.json`
-* `@math.gl/earth/timezone/timezone-geometry-low.parquet`
-* `@math.gl/earth/timezone/timezone-geometry-hi.parquet`
+* `@math.gl/earth/timezone-timezone-geometry-low.json`
+* `@math.gl/earth/timezone-timezone-geometry-hi.json`
+* `@math.gl/earth/timezone-timezone-geometry-low.parquet`
+* `@math.gl/earth/timezone-timezone-geometry-hi.parquet`
 
 JSON assets are standard GeoJSON FeatureCollections; each feature contains a MultiPolygon and `properties.tzid`. Low uses a 20 km simplification interval (\~142 KB gzip), high uses 1 km (\~1.33 MB gzip). Both retain 444 identifiers from Timezone Boundary Builder 2026d's comprehensive with-oceans dataset.
 
 ```
-import geometry from '@math.gl/earth/timezone/timezone-geometry-low.json' with {type: 'json'};
+import geometry from '@math.gl/earth/timezone-timezone-geometry-low.json' with {type: 'json'};
 
 import {getTimezoneOffset} from '@math.gl/earth/timezone';
 
@@ -149,9 +149,9 @@ const offsetMinutes = getTimezoneOffset(geometry.features[0].properties.tzid, in
 For Vite, load assets by URL instead of including geometry in JavaScript:
 
 ```
-import geometryUrl from '@math.gl/earth/timezone/timezone-geometry-low.json?url';
+import geometryUrl from '@math.gl/earth/timezone-timezone-geometry-low.json?url';
 
-import parquetUrl from '@math.gl/earth/timezone/timezone-geometry-hi.parquet?url';
+import parquetUrl from '@math.gl/earth/timezone-timezone-geometry-hi.parquet?url';
 
 
 
@@ -160,7 +160,7 @@ const geometry = await fetch(geometryUrl).then(response => response.json());
 // Pass parquetUrl to a GeoParquet-capable loader, or fetch its binary contents.
 ```
 
-Parquet subpaths resolve to binary assets, not JavaScript modules; a plain import is not automatically a URL. Use your bundler's asset mechanism or, in Node.js, `import.meta.resolve('@math.gl/earth/timezone/timezone-geometry-hi.parquet')` to obtain its file URL. GeoParquet 1.1 contains `tzid` strings and WKB `geometry` with OGC<!-- -->:CRS84<!-- --> coordinates. Geometry contains no date-specific rules or offsets. These assets are never imported by the root, lookup, or temporal entry points.
+Parquet subpaths resolve to binary assets, not JavaScript modules; a plain import is not automatically a URL. Use your bundler's asset mechanism or, in Node.js, `import.meta.resolve('@math.gl/earth/timezone-timezone-geometry-hi.parquet')` to obtain its file URL. GeoParquet 1.1 contains `tzid` strings and WKB `geometry` with OGC<!-- -->:CRS84<!-- --> coordinates. Geometry contains no date-specific rules or offsets. These assets are never imported by the root, lookup, or temporal entry points.
 
 See the [deck.gl 9.4 globe example](https://visgl.github.io/math.gl/next/examples/timezone-globe) for a date slider, offset colors, and local-time hover details. Boundaries are approximate; IANA does not define geographic polygons. Individual identifiers may require a newer runtime timezone database.
 

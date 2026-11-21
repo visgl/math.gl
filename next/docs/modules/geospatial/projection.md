@@ -8,7 +8,7 @@
 
 `@math.gl/geospatial/projection` converts coordinates between geographic, projected and geocentric coordinate reference systems. Use it for map coordinates, in-place coordinate buffers, explicit datum transformations and coordinate propagation between epochs.
 
-For backend-independent interfaces, see [`@math.gl/geospatial/projection/types`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/types.md).
+For backend-independent interfaces, see [`@math.gl/geospatial/projection-types`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection-types.md).
 
 Numerical accuracy is evaluated against **native PROJ**. The pinned proj4js reference serves compatibility tests and benchmarks. The independent references qualify specific configurations and coordinate domains; they do not establish complete modern PROJ equivalence. See [independent validation](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/independent-validation.md) and the [modern PROJ audit](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/modern-proj-audit.md) for coverage and remaining gaps.
 
@@ -112,7 +112,7 @@ The [CRS and projection API guide](https://visgl.github.io/math.gl/next/docs/mod
 | `OperationCatalog` (`/operations`)                                                                                                                                 | You need to select among application-reviewed transformations                |
 | [`createCRSDescriptor`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs/api-reference/crs-descriptor.md) (`@math.gl/geospatial/crs`) | You have external converters and explicit CRS metadata/rendering policy      |
 
-The package root exports the full and configurable engines and the default `projectionEngine`. `Projection` and `ProjectionEngine` are type contracts, available from `/types`. `/core` contains the engine without the catalogue. `/projections/<id>` contains an individual algorithm; `/projections/lazy/<id>` contains its deferred descriptor. Readers, grids, pipelines, operation selection and deformation models have optional subpaths. See the [entry-point reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#public-subpaths).
+The `@math.gl/geospatial/projection` entry point exports the full and configurable engines and the default `projectionEngine`. `Projection` and `ProjectionEngine` are type contracts, available from [`@math.gl/geospatial/projection-types`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection-types.md). Import `@math.gl/geospatial/projection-core` for the engine without the catalogue. The [kernel index](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/kernels.md) lists individual algorithms and lazy descriptors. Readers, grids, pipelines, operation selection and deformation models have optional subpaths. See the [entry-point reference](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/projection-engine.md#public-subpaths).
 
 [`@math.gl/geospatial/crs`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/crs.md) provides CRS definitions, syntax readers and spatial reference metadata. This module executes supported coordinate operations. Reading a CRS definition successfully does not establish that its coordinates can be transformed: use `checkProjectionCompatibility` with the same plugins and readers as construction, then verify your coordinate domain and grid coverage.
 

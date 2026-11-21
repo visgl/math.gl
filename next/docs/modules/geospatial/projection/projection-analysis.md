@@ -2,14 +2,14 @@
 
 ![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
 
-The optional `@math.gl/geospatial/projection/analysis` entry evaluates a single map projection inside an explicit application domain. It provides scales, convergence, distortion and coordinate derivatives without importing projection algorithms. Supply the same projection plugin and geometry used by your map.
+The optional `@math.gl/geospatial/projection-analysis` entry evaluates a single map projection inside an explicit application domain. It provides scales, convergence, distortion and coordinate derivatives without importing projection algorithms. Supply the same projection plugin and geometry used by your map.
 
 ```
-import {normalizeCRS} from '@math.gl/geospatial/projection/core';
+import {normalizeCRS} from '@math.gl/geospatial/projection-core';
 
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 
-import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection/analysis';
+import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection-analysis';
 
 
 
@@ -112,16 +112,16 @@ The optional entry stays outside the root and `/core` bundles. Its independent c
 
 ## Complete CRS transform analysis[​](#complete-crs-transform-analysis "Direct link to Complete CRS transform analysis")
 
-The optional `@math.gl/geospatial/projection/analysis/transform` entry exports `createProjectionTransformAnalysis`. It prepares a geographic-anchor-to-source transform and the requested source-to-target transform, then reuses the same numerical differentiation and factor calculations. Unlike single-kernel analysis, the sampled coordinates execute datum, prime-meridian, axis, unit, grid and vertical stages supported by the selected engine options.
+The optional `@math.gl/geospatial/projection-analysis-transform` entry exports `createProjectionTransformAnalysis`. It prepares a geographic-anchor-to-source transform and the requested source-to-target transform, then reuses the same numerical differentiation and factor calculations. Unlike single-kernel analysis, the sampled coordinates execute datum, prime-meridian, axis, unit, grid and vertical stages supported by the selected engine options.
 
 ```
-import {createProjectionTransformAnalysis} from '@math.gl/geospatial/projection/analysis/transform';
+import {createProjectionTransformAnalysis} from '@math.gl/geospatial/projection-analysis-transform';
 
-import {createProjectionFactors} from '@math.gl/geospatial/projection/analysis';
+import {createProjectionFactors} from '@math.gl/geospatial/projection-analysis';
 
-import {universalTransverseMercator} from '@math.gl/geospatial/projection/projections/utm';
+import {universalTransverseMercator} from '@math.gl/geospatial/projection-projections-utm';
 
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 
 
 

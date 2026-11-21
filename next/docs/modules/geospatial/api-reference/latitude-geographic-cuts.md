@@ -5,7 +5,7 @@ A map can accept only part of a geographic shape. A finite Mercator map needs a 
 The optional `@math.gl/geospatial` entry clips declared linear, ellipsoidal geodesic or rhumb edges to a closed latitude band and a configurable 360-degree longitude chart. It preserves original curve intervals, holes and components, and labels the generated parallel and meridian boundaries explicitly. It adds no runtime dependencies. For oblique ellipsoidal horizons and finite shared circle-boundary graphs, use the [geographic atlas](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/geographic-atlas.md). Those capabilities remain separate from this latitude-band API.
 
 ```
-import {clipGeographicPolygon, subdivideGeographicCutRing} from '@math.gl/geospatial';
+import {clipGeographicPolygon, subdivideGeographicCutRing} from '@math.gl/geospatial/geographic-cuts';
 
 
 

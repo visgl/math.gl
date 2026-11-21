@@ -4,16 +4,16 @@
 
 Two coordinate reference systems can have several transformations between them. A regional grid may be more accurate than a global approximation, but only within its reviewed coverage and epoch range. `OperationCatalog` helps an application choose among **operations it has supplied and reviewed**.
 
-Import it from `@math.gl/geospatial/projection/operations`. It is a separate, optional entry point: ordinary projections, pipelines and the package root do not include it. A retained browser ESM selector measures 6.3 KiB minified / 2.2 KiB gzip (Node 24.14.0, esbuild, ES2020, gzip level 9); catalogue data and operation payloads are separate application costs. Existing import sizes are unchanged. Selection reads metadata and returns a payload. It does not create a projection, preload an algorithm, fetch a grid or execute a transformation.
+Import it from `@math.gl/geospatial/projection-operations`. It is a separate, optional entry point: ordinary projections, pipelines and the package root do not include it. A retained browser ESM selector measures 6.3 KiB minified / 2.2 KiB gzip (Node 24.14.0, esbuild, ES2020, gzip level 9); catalogue data and operation payloads are separate application costs. Existing import sizes are unchanged. Selection reads metadata and returns a payload. It does not create a projection, preload an algorithm, fetch a grid or execute a transformation.
 
 ## Start with a reviewed operation[​](#start-with-a-reviewed-operation "Direct link to Start with a reviewed operation")
 
 This runnable example selects a simple units conversion. The identifiers and metadata are authored for the example; they are not an EPSG database record or a claim about a real datum transformation.
 
 ```
-import {OperationCatalog} from '@math.gl/geospatial/projection/operations';
+import {OperationCatalog} from '@math.gl/geospatial/projection-operations';
 
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
 
 
 

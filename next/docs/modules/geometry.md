@@ -12,19 +12,24 @@ The `@math.gl/geometry` module provides renderer-independent CPU mesh data and p
 
 All generated meshes use `triangle-list` topology and expose `POSITION`, `NORMAL` and `TEXCOORD_0` typed-array attributes. Index buffers automatically use 32-bit values when a mesh has more than 65,535 vertices.
 
-The root entry point also exports mesh utilities, curves, polygon operations, analytic queries, and spatial indexes. Their reference pages are grouped by topic in the sidebar. `@math.gl/geometry/culling` is also available as a dedicated entry point for bounding volumes and queries.
+## Entry points[​](#entry-points "Direct link to Entry points")
 
-## Lighting and color subpaths[​](#lighting-and-color-subpaths "Direct link to Lighting and color subpaths")
-
-| Import path                  | Use it to                                                                                                                                                                              |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@math.gl/geometry/lighting` | [Sample intensity, integrate luminous flux, and resample photometric profiles](https://visgl.github.io/math.gl/next/docs/modules/geometry/lighting.md#photometric-model). |
-| `@math.gl/geometry/color`    | [Sample and apply color lookup tables](https://visgl.github.io/math.gl/next/docs/modules/geometry/lighting.md#numerical-color-luts).                                      |
+| Import path                                                                                                                           | Use it to                                                |
+| ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| [`@math.gl/geometry/primitives`](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/primitives.md) | Generate primitive and parametric meshes.                |
+| [`@math.gl/geometry/curves`](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves.md)                       | Represent and sample curves.                             |
+| [`@math.gl/geometry/polygon`](https://visgl.github.io/math.gl/next/docs/modules/geometry/polygon.md)                     | Clip, triangulate, and subdivide polygons and polylines. |
+| [`@math.gl/geometry/culling`](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling.md)                     | Query analytic shapes, bounding volumes, and rays.       |
+| [`@math.gl/geometry/processing`](https://visgl.github.io/math.gl/next/docs/modules/geometry/processing.md)               | Process meshes, indices, and attributes.                 |
+| [`@math.gl/geometry/spatial-index`](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md)         | Index points, boxes, and triangles.                      |
+| [`@math.gl/geometry/arrow`](https://visgl.github.io/math.gl/next/docs/modules/geometry/entry-points/arrow.md)            | Tessellate GeoArrow polygons.                            |
+| [`@math.gl/geometry/lighting`](https://visgl.github.io/math.gl/next/docs/modules/geometry/entry-points/lighting.md)      | Sample photometric profiles.                             |
+| [`@math.gl/geometry/color`](https://visgl.github.io/math.gl/next/docs/modules/geometry/entry-points/color.md)            | Sample and apply color lookup tables.                    |
 
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {SphereGeometry} from '@math.gl/geometry';
+import {SphereGeometry} from '@math.gl/geometry/primitives';
 
 
 
@@ -44,9 +49,9 @@ Pass these CPU buffers to the renderer of your choice. The module does not creat
 | Primitive mesh tessellation                     | ✅      | [Boxes, capsules, cylinders, planes, spheres and convenience shapes](#api) produce renderer-independent indexed buffers.                                                                                       |
 | Parametric surfaces, lathes and tori            | ✅      | [ParametricGeometry, TorusGeometry and LatheGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/parametric.md) sample explicit surface functions.                  |
 | Normals, UVs and index-width selection          | ✅      | Primitive POSITION/NORMAL/TEXCOORD\_0 attributes and automatic Uint32 promotion for large meshes.                                                                                                              |
-| Projected bounds                                | ✅      | [Sample edges and interiors](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/project-bounds.md) with an explicit approximate/conservative qualification.           |
-| Projected texture coordinates                   | ✅      | [Prepare image UVs](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils/api-reference/project-texture-coordinates.md) from packed CPU positions without a rendering dependency.      |
-| Mesh processing                                 | ✅      | [Transform, merge, and weld indexed meshes](https://visgl.github.io/math.gl/next/docs/modules/geometry/utils.md).                                                                                 |
+| Projected bounds                                | ✅      | [Sample edges and interiors](https://visgl.github.io/math.gl/next/docs/modules/geometry/processing/api-reference/project-bounds.md) with an explicit approximate/conservative qualification.      |
+| Projected texture coordinates                   | ✅      | [Prepare image UVs](https://visgl.github.io/math.gl/next/docs/modules/geometry/processing/api-reference/project-texture-coordinates.md) from packed CPU positions without a rendering dependency. |
+| Mesh processing                                 | ✅      | [Transform, merge, and weld indexed meshes](https://visgl.github.io/math.gl/next/docs/modules/geometry/processing.md).                                                                            |
 | Curve evaluation                                | ✅      | [Sample Cartesian curves and compute transport frames](https://visgl.github.io/math.gl/next/docs/modules/geometry/curves.md).                                                                     |
 | Rigid articulated panel forests                 | ✅      | Experimental [HingeTree](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/hinge-tree.md) evaluates hinge transforms with reusable matrix output.                          |
 | Analytic queries                                | ✅      | [Bounding volumes, rays, and shapes](https://visgl.github.io/math.gl/next/docs/modules/geometry/culling.md) for Euclidean containment and intersection.                                           |
@@ -86,10 +91,10 @@ An infinite glTF plane cannot be tessellated, so `PlaneGeometry` requires finite
 * [IcoSphereGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/ico-sphere-geometry.md)
 * [PrismGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/prism-geometry.md)
 * [RingGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/ring-geometry.md)
-* [Geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/geometry.md)
+* [Geometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/primitives.md)
 
 ## Parametric surfaces[​](#parametric-surfaces "Direct link to Parametric surfaces")
 
-[ParametricGeometry, TorusGeometry, and LatheGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/parametric.md) provide sampled surface generators from the root entry point, with an interactive gallery.
+[ParametricGeometry, TorusGeometry, and LatheGeometry](https://visgl.github.io/math.gl/next/docs/modules/geometry/api-reference/parametric.md) provide sampled surface generators from `@math.gl/geometry/primitives`, with an interactive gallery.
 
 The experimental `HingeTree` evaluates rigid panels connected by hinges. See the [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/geometry/unfolding-polyhedron).

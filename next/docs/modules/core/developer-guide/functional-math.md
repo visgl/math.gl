@@ -4,7 +4,7 @@ The class and functional APIs share array-compatible storage, but expose differe
 
 ## Imports and output ownership[​](#imports-and-output-ownership "Direct link to Imports and output ownership")
 
-Import namespaces or individual operations from the package root:
+Import namespaces or individual operations from `@math.gl/core/matrix`:
 
 ```
 import {Matrix4, mat4, mat4FromRotationTranslationScale} from '@math.gl/core/matrix';

@@ -9,7 +9,7 @@ Native engine constructors optionally accept `resolver: CRSResolver` from `@math
 `ProjectionEngine` is a reusable factory interface for a specific CRS pair. Native implementations manage projection plugins, CRS readers, aliases and grids; external adapters need not use that internal architecture. Prepared point and buffer transforms are synchronous, including transforms returned by asynchronous initialization. An async-only backend uses the separate batch preparation recipe rather than returning Promises from synchronous methods.
 
 ```
-import type { ProjectionEngine } from "@math.gl/geospatial/projection/types";
+import type { ProjectionEngine } from "@math.gl/geospatial/projection-types";
 
 import { projectionEngine } from "@math.gl/geospatial/projection";
 
@@ -29,9 +29,9 @@ utm.project([12, 55]);
 The `/types` entry exports only types. An `import type` adds no runtime code to a bundle. The default `projectionEngine` includes the built-in projection catalogue, compatibility readers and named datum catalogue. For selective imports, configure your own engine:
 
 ```
-import { createProjectionEngine } from "@math.gl/geospatial/projection/core";
+import { createProjectionEngine } from "@math.gl/geospatial/projection-core";
 
-import { mercator } from "@math.gl/geospatial/projection/projections/merc";
+import { mercator } from "@math.gl/geospatial/projection-projections-merc";
 
 
 
@@ -43,11 +43,11 @@ const projection = engine.createProjection({ to: "EPSG:3857" });
 | Engine                         | Capabilities                                                                 | Import                                            |
 | ------------------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------- |
 | `FullProjectionEngine`         | Built-in algorithms, WKT/PROJJSON compatibility readers and named datums     | `@math.gl/geospatial/projection`                  |
-| `ConfigurableProjectionEngine` | Explicit plugins, readers, aliases and grids                                 | `@math.gl/geospatial/projection/core`             |
-| `LazyProjectionEngine`         | Built-in algorithm descriptors; readers and datum catalogues remain explicit | `@math.gl/geospatial/projection/projections/lazy` |
-| `WebMercatorProjectionEngine`  | Only WGS84 / EPSG:4326 and EPSG:3857; no readers or datum machinery          | `@math.gl/geospatial/projection/web-mercator`     |
+| `ConfigurableProjectionEngine` | Explicit plugins, readers, aliases and grids                                 | `@math.gl/geospatial/projection-core`             |
+| `LazyProjectionEngine`         | Built-in algorithm descriptors; readers and datum catalogues remain explicit | `@math.gl/geospatial/projection-projections-lazy` |
+| `WebMercatorProjectionEngine`  | Only WGS84 / EPSG:4326 and EPSG:3857; no readers or datum machinery          | `@math.gl/geospatial/projection-web-mercator`     |
 
-All implement this interface. The eager catalogue is available as `projectionEngine`; the lazy catalogue as `lazyProjectionEngine`. Both lazy exports are available from `@math.gl/geospatial/projection/projections/lazy`.
+All implement this interface. The eager catalogue is available as `projectionEngine`; the lazy catalogue as `lazyProjectionEngine`. Both lazy exports are available from `@math.gl/geospatial/projection-projections-lazy`.
 
 ## Engine configuration[​](#engine-configuration "Direct link to Engine configuration")
 
@@ -68,7 +68,7 @@ Loads only the algorithms required by the CRS pair and returns a synchronous pro
 ## Lazy creation and warm-up[​](#lazy-creation-and-warm-up "Direct link to Lazy creation and warm-up")
 
 ```
-import { LazyProjectionEngine } from "@math.gl/geospatial/projection/projections/lazy";
+import { LazyProjectionEngine } from "@math.gl/geospatial/projection-projections-lazy";
 
 
 
@@ -90,7 +90,7 @@ const utm = ready.project([12, 55]); // synchronous
 ## Minimal Web Mercator backend[​](#minimal-web-mercator-backend "Direct link to Minimal Web Mercator backend")
 
 ```
-import { WebMercatorProjectionEngine } from "@math.gl/geospatial/projection/web-mercator";
+import { WebMercatorProjectionEngine } from "@math.gl/geospatial/projection-web-mercator";
 
 
 

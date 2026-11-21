@@ -5,9 +5,9 @@
 `@math.gl/geospatial` provides geometry, extent queries and level selection for rectangular tile grids, including coalesced row bands, in any coordinate system. The subpath has no runtime dependencies; its types and functions are also exported from `@math.gl/geospatial`, alongside geographic tile queries.
 
 ```
-import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix, validateTileMatrixSet, resolveTileIndex} from '@math.gl/geospatial';
+import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix, validateTileMatrixSet, resolveTileIndex} from '@math.gl/geospatial/tiles';
 
-import type {TileMatrix, TileMatrixSet} from '@math.gl/geospatial';
+import type {TileMatrix, TileMatrixSet} from '@math.gl/geospatial/tiles';
 
 
 

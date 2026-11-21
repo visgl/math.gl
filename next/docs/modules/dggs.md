@@ -15,7 +15,7 @@ const polygon = GeohashDecoder.cellToBoundary(geohashId);
 ```
 
 ```
-import {findDGGSCellColumn} from '@math.gl/dggs';
+import {findDGGSCellColumn} from '@math.gl/dggs/decoders';
 
 
 
@@ -28,14 +28,15 @@ const match = findDGGSCellColumn(['name', 's2_token', 'value']);
 
 Import from `@math.gl/dggs` for shared types, the decoder registry, or column detection. If the grid is known in advance, use its decoder subpath.
 
-| Import path               | Decoder                                                                                                                     | Cell identifier                | Classification           |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------------------------ |
-| `@math.gl/dggs/a5`        | [`A5Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/a5-decoder.md)              | Hexadecimal string or `bigint` | DGGS                     |
-| `@math.gl/dggs/geohash`   | [`GeohashDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/geohash-decoder.md)    | String                         | DGGS-like geocode        |
-| `@math.gl/dggs/h3`        | [`H3Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/h3-decoder.md)              | Hexadecimal string or `bigint` | DGGS                     |
-| `@math.gl/dggs/plus-code` | [`PlusCodeDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/plus-code-decoder.md) | Full string code               | DGGS-like geocode        |
-| `@math.gl/dggs/quadkey`   | [`QuadkeyDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/quadkey-decoder.md)    | String                         | DGGS-like tile hierarchy |
-| `@math.gl/dggs/s2`        | [`S2Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/s2-decoder.md)              | Token string or `bigint`       | DGGS                     |
+| Import path               | Decoder                                                                                                             | Cell identifier                | Classification           |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------------------------ |
+| `@math.gl/dggs/decoders`  | [Shared decoder API](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/decoders.md) | Varies by grid                 | Registry                 |
+| `@math.gl/dggs/a5`        | [`A5Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/a5.md)              | Hexadecimal string or `bigint` | DGGS                     |
+| `@math.gl/dggs/geohash`   | [`GeohashDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/geohash.md)    | String                         | DGGS-like geocode        |
+| `@math.gl/dggs/h3`        | [`H3Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/h3.md)              | Hexadecimal string or `bigint` | DGGS                     |
+| `@math.gl/dggs/plus-code` | [`PlusCodeDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/plus-code.md) | Full string code               | DGGS-like geocode        |
+| `@math.gl/dggs/quadkey`   | [`QuadkeyDecoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/quadkey.md)    | String                         | DGGS-like tile hierarchy |
+| `@math.gl/dggs/s2`        | [`S2Decoder`](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/s2.md)              | Token string or `bigint`       | DGGS                     |
 
 Only full Plus Codes can be decoded without more context. Short Plus Codes are intentionally unsupported because recovering one requires a reference location.
 
@@ -47,16 +48,16 @@ S2 cells are identified by a 64 bit index. The three most significant bits enco
 
 ## Features[​](#features "Direct link to Features")
 
-| Feature                                         | Support | Notes                                                                                                                                                                                           |
-| ----------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Multi-grid cell centers and boundaries          | ✅      | [A5](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/a5-decoder.md), GeoHash, H3, Quadkey, S2 and full Plus Code decoders share a compact geometry interface. |
-| String and supported numeric identifiers        | ✅      | Decoder-specific contracts distinguish strings, tokens and BigInt identifiers; numeric support is not uniform across grids.                                                                     |
-| Column-name discovery and decoder registry      | ✅      | Conventional column detection and [DGGSDecoder](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/dggs-decoder.md) integrate with visualization adapters.       |
-| Parent/child and neighbor traversal             | ❌      | The common decoder API does not expose the native grids’ full hierarchy or neighborhood operations.                                                                                             |
-| Polygon fills, covering and compaction          | ❌      | Use full H3/S2/A5 or other native grid APIs for covering, compaction and grid-specific topology.                                                                                                |
-| Uniform cell metrics and analytical aggregation | ❌      | No shared area/distance/aggregation engine is provided across all grid systems.                                                                                                                 |
-| Short Plus Code recovery                        | ❌      | Short codes require a reference location; only full codes are decoded.                                                                                                                          |
-| OGC API - DGGS services                         | ❌      | This is a geometry-decoding library, not a service/protocol implementation or a full DGGS abstraction.                                                                                          |
+| Feature                                         | Support | Notes                                                                                                                                                                                   |
+| ----------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Multi-grid cell centers and boundaries          | ✅      | [A5](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/a5.md), GeoHash, H3, Quadkey, S2 and full Plus Code decoders share a compact geometry interface. |
+| String and supported numeric identifiers        | ✅      | Decoder-specific contracts distinguish strings, tokens and BigInt identifiers; numeric support is not uniform across grids.                                                             |
+| Column-name discovery and decoder registry      | ✅      | Conventional column detection and [DGGSDecoder](https://visgl.github.io/math.gl/next/docs/modules/dggs/api-reference/decoders.md) integrate with visualization adapters.   |
+| Parent/child and neighbor traversal             | ❌      | The common decoder API does not expose the native grids’ full hierarchy or neighborhood operations.                                                                                     |
+| Polygon fills, covering and compaction          | ❌      | Use full H3/S2/A5 or other native grid APIs for covering, compaction and grid-specific topology.                                                                                        |
+| Uniform cell metrics and analytical aggregation | ❌      | No shared area/distance/aggregation engine is provided across all grid systems.                                                                                                         |
+| Short Plus Code recovery                        | ❌      | Short codes require a reference location; only full codes are decoded.                                                                                                                  |
+| OGC API - DGGS services                         | ❌      | This is a geometry-decoding library, not a service/protocol implementation or a full DGGS abstraction.                                                                                  |
 
 ## Installation[​](#installation "Direct link to Installation")
 

@@ -1,11 +1,13 @@
 # LocalReferenceFrame
 
-A reusable rigid frame at a fixed Cartesian origin on a sphere or oblate spheroid. The class snapshots its origin, signed axes, and geodetic basis. It does not retain mutable ellipsoid state, infer a CRS, or convert datums. Available from `@math.gl/geospatial` and the package root.
+A reusable rigid frame at a fixed Cartesian origin on a sphere or oblate spheroid. The class snapshots its origin, signed axes, and geodetic basis. It does not retain mutable ellipsoid state, infer a CRS, or convert datums. Import it from `@math.gl/geospatial/coordinates`.
 
 ```
 import {Vector3} from '@math.gl/core/matrix';
 
-import {Ellipsoid, LocalReferenceFrame} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+
+import {LocalReferenceFrame} from '@math.gl/geospatial/coordinates';
 
 
 

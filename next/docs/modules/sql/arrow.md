@@ -1,6 +1,6 @@
-# Arrow expressions
+# @math.gl/sql/arrow
 
-`@math.gl/sql/arrow` evaluates schema-bound expressions directly over Arrow batches. Use it for WHERE predicates, derived columns and typed application functions. It reuses the parser from `@math.gl/sql/expressions`. For SQL text use [the parser](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md); for complete queries use [the query engine](https://visgl.github.io/math.gl/next/docs/modules/sql/queries.md).
+`@math.gl/sql/arrow` evaluates schema-bound expressions directly over Arrow batches. Use it for WHERE predicates, derived columns and typed application functions. It reuses the parser from `@math.gl/sql/expressions`. For SQL text use [the parser](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md); for complete queries use [the query engine](https://visgl.github.io/math.gl/next/docs/modules/sql/query.md).
 
 ```
 import {compileArrowExpression, compileArrowPredicate} from '@math.gl/sql/arrow';

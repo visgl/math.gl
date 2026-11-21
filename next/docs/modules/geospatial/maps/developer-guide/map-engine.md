@@ -9,11 +9,11 @@ Use this API for **maps with geographic coverage and layout**. Use [`ProjectionE
 ## Start with a description[​](#start-with-a-description "Direct link to Start with a description")
 
 ```
-import {albersUsaMapPreset} from '@math.gl/geospatial/maps/presets';
+import {albersUsaMapPreset} from '@math.gl/geospatial/maps-presets';
 
-import {mapGeometry} from '@math.gl/geospatial/maps/geometry';
+import {mapGeometry} from '@math.gl/geospatial/maps-geometry';
 
-import {mapTransitions} from '@math.gl/geospatial/maps/transitions';
+import {mapTransitions} from '@math.gl/geospatial/maps-transitions';
 
 import {MapEngine, type MapDescription} from '@math.gl/geospatial/maps';
 
@@ -114,11 +114,11 @@ The scale pair measures longitude and latitude coordinate radians, not ground di
 ## Use the same geometry on a globe or hinged surface[​](#use-the-same-geometry-on-a-globe-or-hinged-surface "Direct link to Use the same geometry on a globe or hinged surface")
 
 ```
-import {myriahedralMapPreset} from '@math.gl/geospatial/maps/presets';
+import {myriahedralMapPreset} from '@math.gl/geospatial/maps-presets';
 
-import {mapGeometry} from '@math.gl/geospatial/maps/geometry';
+import {mapGeometry} from '@math.gl/geospatial/maps-geometry';
 
-import {mapTransitions} from '@math.gl/geospatial/maps/transitions';
+import {mapTransitions} from '@math.gl/geospatial/maps-transitions';
 
 const panels = new MapEngine({
 
@@ -166,11 +166,11 @@ The initial planner is conservative: reusing the same engine is `direct`; differ
 Land masks and projection functions are runtime dependencies, not JSON:
 
 ```
-import {myriahedralMapPreset} from '@math.gl/geospatial/maps/presets';
+import {myriahedralMapPreset} from '@math.gl/geospatial/maps-presets';
 
-import {mapGeometry} from '@math.gl/geospatial/maps/geometry';
+import {mapGeometry} from '@math.gl/geospatial/maps-geometry';
 
-import {mapTransitions} from '@math.gl/geospatial/maps/transitions';
+import {mapTransitions} from '@math.gl/geospatial/maps-transitions';
 
 const oceanCuts = new MapEngine({
 

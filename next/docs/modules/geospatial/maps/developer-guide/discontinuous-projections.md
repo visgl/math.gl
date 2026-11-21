@@ -185,7 +185,7 @@ Edges represent minor great-circle arcs. Supply intermediate vertices for a rhum
 ## Clip polygons, then triangulate each piece[​](#clip-polygons-then-triangulate-each-piece "Direct link to Clip polygons, then triangulate each piece")
 
 ```
-import {withMapGeometry} from '@math.gl/geospatial/maps/geometry';
+import {withMapGeometry} from '@math.gl/geospatial/maps-geometry';
 
 
 

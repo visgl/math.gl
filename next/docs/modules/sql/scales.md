@@ -1,4 +1,4 @@
-# Portable visualization scale descriptors (experimental)
+# @math.gl/sql/scales
 
 Compare ramps and class breaks in the [color scale gallery](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/gallery.md).
 
@@ -82,7 +82,7 @@ To evaluate batches using statistics collected during a scan, call `bindArrowSca
 
 ## Backend conformance fixtures[​](#backend-conformance-fixtures "Direct link to Backend conformance fixtures")
 
-The optional `@math.gl/sql/scales/conformance` entry exports `SCALE_CONFORMANCE_CASES`, `ScaleConformanceCase`, and `ScaleConformanceSample`. Each JSON-serializable case supplies a resolved descriptor, input/expected-output samples, and an absolute per-component tolerance. Expected values are specified independently of the evaluator under test.
+The optional `@math.gl/sql/scales-conformance` entry exports `SCALE_CONFORMANCE_CASES`, `ScaleConformanceCase`, and `ScaleConformanceSample`. Each JSON-serializable case supplies a resolved descriptor, input/expected-output samples, and an absolute per-component tolerance. Expected values are specified independently of the evaluator under test.
 
 Use the same cases for a CPU, worker, or GPU implementation. A backend that supports only a subset should explicitly select and report supported case IDs; unsupported cases must not silently fall back to a different scale. Numeric results compare by absolute error; nulls and color arity compare exactly. NaN must fail a numeric comparison. The corpus covers extrapolation, log-domain rejection, linear-sRGB interpolation, null/under/over colors, quantile boundaries after repeated-break removal, and extended linear HDR channels.
 

@@ -1,4 +1,4 @@
-# Arrow color functions
+# @math.gl/sql/color-functions
 
 `@math.gl/sql/color-functions` exports named `ArrowTableFunction` declarations for schema-bound expressions. Pass the declarations you use through `functions` on `queryArrowSQL`, `queryArrowTable`, or the Arrow compiler. All color configuration is supplied as function arguments.
 
@@ -55,4 +55,4 @@ The built-in palettes are `viridis` (five sampled anchors), `grayscale` (black/w
 
 Color kernels write Arrow child buffers directly and preserve row count, chunk order and masks. Dictionary-encoded bin/category literals share one list payload. Row-dependent lists require reading and validating each row's configuration. Compound color expressions currently allocate intermediate vectors and small temporary color values; scalar fusion does not apply to tuple results.
 
-Importing individual declarations allows unused functions to tree-shake. The color entry point does not import the expression compiler. Register declarations in a worker's local expression task to use identical kernels there. Use `queryArrowSQL` from the package root to execute color functions in SELECT expressions; pass the same declarations in its `functions` option.
+Importing individual declarations allows unused functions to tree-shake. The color entry point does not import the expression compiler. Register declarations in a worker's local expression task to use identical kernels there. Use `queryArrowSQL` from `@math.gl/sql/query` to execute color functions in SELECT expressions; pass the same declarations in its `functions` option.

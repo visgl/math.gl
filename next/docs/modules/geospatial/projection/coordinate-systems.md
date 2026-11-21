@@ -67,11 +67,11 @@ Web Mercator (`EPSG:3857`) uses spherical projection equations with the WGS84 se
 [`Ellipsoid`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/ellipsoid.md) supports surface geometry, local frames and three independent radii. Projection CRS definitions use the sphere/oblate-spheroid subset. Both modules share `SpheroidParameters`, a type-only contract for the two axes in metres. They also share the low-level [spheroid conversions](https://visgl.github.io/math.gl/next/docs/modules/core/api-reference/spheroid.md) for forward conversion and the qualified sphere/oblate surface/exterior inverse. Geospatial retains its three-radius and interior geometry paths.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
-import { normalizeCRS, ProjectionTransform } from "@math.gl/geospatial/projection/core";
+import { normalizeCRS, ProjectionTransform } from "@math.gl/geospatial/projection-core";
 
-import { geocentric } from "@math.gl/geospatial/projection/projections/geocent";
+import { geocentric } from "@math.gl/geospatial/projection-projections-geocent";
 
 
 
@@ -136,7 +136,7 @@ For example, a base translation of 1 meter at epoch 2000 with a rate of 0.01 met
 The API uses **decimal years**, not Unix timestamps or JavaScript milliseconds. Supply a scalar epoch or one Float32/Float64 epoch per flat record. The fourth coordinate component remains M, a measure; it is never interpreted as time.
 
 ```
-import { ProjectionPipeline } from "@math.gl/geospatial/projection/pipeline";
+import { ProjectionPipeline } from "@math.gl/geospatial/projection-pipeline";
 
 
 

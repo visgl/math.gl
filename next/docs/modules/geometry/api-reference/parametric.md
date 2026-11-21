@@ -9,7 +9,7 @@ Loading <!-- -->Parametric geometry lab<!-- -->…
 ⛶
 
 ```
-import {TorusGeometry, LatheGeometry, ParametricGeometry} from '@math.gl/geometry';
+import {TorusGeometry, LatheGeometry, ParametricGeometry} from '@math.gl/geometry/primitives';
 
 const ring = new TorusGeometry({majorRadius: 2, minorRadius: 0.5});
 

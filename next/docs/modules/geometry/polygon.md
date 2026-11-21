@@ -9,7 +9,7 @@
 ## Usage[​](#usage "Direct link to Usage")
 
 ```
-import {earcut} from '@math.gl/geometry';
+import {earcut} from '@math.gl/geometry/polygon';
 
 
 

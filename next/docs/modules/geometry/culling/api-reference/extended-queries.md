@@ -75,7 +75,7 @@ Builds an orthographic matrix from `left`, `right`, `bottom`, and `top`, with fi
 ```
 import {mat4PerspectiveProjection} from '@math.gl/core/matrix';
 
-import {CullingVolume} from '@math.gl/geometry';
+import {CullingVolume} from '@math.gl/geometry/culling';
 
 
 

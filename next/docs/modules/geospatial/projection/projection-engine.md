@@ -22,7 +22,7 @@ Engines hold reusable configuration and create independent transforms for each C
 mercator-projection.ts
 
 ```
-import type { ProjectionEngine } from "@math.gl/geospatial/projection/types";
+import type { ProjectionEngine } from "@math.gl/geospatial/projection-types";
 
 import { ConfigurableProjectionEngine, mercator } from "@math.gl/geospatial/projection";
 
@@ -45,7 +45,7 @@ const geographic = projection.unproject(projected);
 const reusableEngine: ProjectionEngine = engine;
 ```
 
-`FullProjectionEngine` supplies the built-in eager catalogue and CRS readers; `LazyProjectionEngine` supplies descriptors whose algorithms load on demand. The package also exports a ready-made `projectionEngine` instance. `lazyProjectionEngine` is available from `@math.gl/geospatial/projection/projections/lazy`. All three concrete engines implement the same [factory interface](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md).
+`FullProjectionEngine` supplies the built-in eager catalogue and CRS readers; `LazyProjectionEngine` supplies descriptors whose algorithms load on demand. The package also exports a ready-made `projectionEngine` instance. `lazyProjectionEngine` is available from `@math.gl/geospatial/projection-projections-lazy`. All three concrete engines implement the same [factory interface](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/api-reference/projection-engine.md).
 
 Reuse the instance for each CRS pair. Construction resolves definitions, validates parameters, and prepares the transformation; coordinate calls are synchronous. `project` and `unproject` return new arrays. The input definitions are not mutated.
 
@@ -82,7 +82,7 @@ Geographic coordinates are built into the core. Projected algorithms, including 
 General engines expose asynchronous `getCRS(definition, options?)`. Retrieval resolves metadata and loads only the registered algorithms needed for the requested converter pairs. WGS84 is always included; `converters` requests additional source CRS strings. All returned conversion functions are synchronous:
 
 ```
-import {lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
+import {lazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
 
 
 
@@ -240,9 +240,9 @@ Composition is explicit too. `obliqueTransformation(mollweide)` creates a rotate
 `ProjectionTransform`, `LazyProjectionEngine`, and `normalizeCRS` include only WGS84 and NAD83 and their existing aliases. Projection algorithms and datums are independent: WGS84 → Web Mercator or WGS84 UTM needs no regional datum catalogue. Converting coordinates in another named datum requires explicit per-instance registration:
 
 ```
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
 
-import { datumCatalog } from "@math.gl/geospatial/projection/datums";
+import { datumCatalog } from "@math.gl/geospatial/projection-datums";
 
 
 
@@ -264,7 +264,7 @@ This changes the configurable engine's default supported inputs. WKT/PROJJSON re
 ## Minimal Web Mercator[​](#minimal-web-mercator "Direct link to Minimal Web Mercator")
 
 ```
-import {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection/web-mercator';
+import {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection-web-mercator';
 
 
 
@@ -329,7 +329,7 @@ Omit `--measure` to enforce the checked-in size limits. Package checks also veri
 For automatic selection, use `LazyProjectionEngine`. It supplies all built-in projection descriptors and imports only the algorithms needed by the source and destination CRS:
 
 ```
-import { lazyProjectionEngine } from "@math.gl/geospatial/projection/projections/lazy";
+import { lazyProjectionEngine } from "@math.gl/geospatial/projection-projections-lazy";
 
 
 
@@ -353,11 +353,11 @@ Import lightweight descriptors and pass them in the same `projections` list as e
 projection-descriptor.ts
 
 ```
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
 
-import { mercator } from "@math.gl/geospatial/projection/projections/merc";
+import { mercator } from "@math.gl/geospatial/projection-projections-merc";
 
-import { lazyUniversalTransverseMercator } from "@math.gl/geospatial/projection/projections/lazy/utm";
+import { lazyUniversalTransverseMercator } from "@math.gl/geospatial/projection-projections-lazy-utm";
 
 
 
@@ -405,15 +405,15 @@ Every named projection has a descriptor at `projections/lazy/<id>` (for example,
 Optional WKT interpretation can also be deferred. The adapter uses isolated `@math.gl/geospatial/crs` syntax entry points so its parser stays on the lazy side:
 
 ```
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
 
-import { mercator } from "@math.gl/geospatial/projection/projections/merc";
+import { mercator } from "@math.gl/geospatial/projection-projections-merc";
 
 
 
 export async function loadMercatorWKT(to: string) {
 
-  const { wktCRSParser } = await import("@math.gl/geospatial/projection/parsers/wkt");
+  const { wktCRSParser } = await import("@math.gl/geospatial/projection-parsers-wkt");
 
   return new ProjectionTransform({
 
@@ -575,9 +575,9 @@ For supported horizontal GeoTIFF grids, `loadGeoTIFFGrid(decodedTIFF)` prepares 
 Register a prepared `VerticalGrid` under the name used by `+geoidgrids`. A source grid converts gravity-related height **H** to ellipsoidal height **h** using **h = H + N**; a destination grid applies **H = h - N**. The supplied offsets **N** are geoid undulations in metres. Source conversion runs before the horizontal datum transformation; destination conversion runs after it. Each grid is sampled in its own CRS's horizontal datum, at Greenwich longitude and geographic latitude. These are explicit stages following [PROJ's vertical-grid convention](https://proj.org/en/stable/operations/transformations/vgridshift.html).
 
 ```
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
 
-import { parseGTXGrid } from "@math.gl/geospatial/projection/grids/gtx";
+import { parseGTXGrid } from "@math.gl/geospatial/projection-grids-gtx";
 
 
 
@@ -609,7 +609,7 @@ Choose a model whose horizontal datum, vertical datum, tide convention and area 
 For an already loaded `@math.gl/earth` model, use the structural adapter:
 
 ```
-import { createGeoidGrid } from "@math.gl/geospatial/projection/grids/vertical";
+import { createGeoidGrid } from "@math.gl/geospatial/projection-grids-vertical";
 
 
 
@@ -633,9 +633,9 @@ This is the explicit vertical-grid subset (tranches 12A/12B1). Compound/vertical
 The reader also accepts a plain `VerticalGridGeoTIFFData` dataset, structurally compatible with loaders.gl's `GeoTIFFRasterLoader` output. Pass the decoded dataset directly to `loadVerticalGeoTIFFGrid(dataset)`. It preserves original band indices, so band zero must be included. Image order, unscaled samples, per-image/per-band GDAL metadata, GeoKeys, nodata and geometry tags have the same validation as the geotiff.js input. No runtime dependency on loaders.gl is added.
 
 ```
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
 
-import { loadVerticalGeoTIFFGrid } from "@math.gl/geospatial/projection/grids/vertical-geotiff";
+import { loadVerticalGeoTIFFGrid } from "@math.gl/geospatial/projection-grids-vertical-geotiff";
 
 import { fromArrayBuffer } from "geotiff"; // separately installed, application-owned decoder
 

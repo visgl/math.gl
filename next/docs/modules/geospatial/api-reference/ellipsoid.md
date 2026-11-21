@@ -19,7 +19,7 @@ Surface projection selects a qualified nearest point rather than a radial approx
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
 const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
 
@@ -29,7 +29,7 @@ const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPo
 Determine the Cartographic representation of a Cartesian position on a WGS84 ellipsoid.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
 const cartesianPosition = [17832.12, 83234.52, 952313.73];
 
@@ -39,7 +39,9 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```
-import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+
+import {eastNorthUpToFixedFrame} from '@math.gl/geospatial/coordinates';
 
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 
@@ -53,9 +55,9 @@ See the [accuracy and GeographicLib coverage audit](https://visgl.github.io/math
 `@math.gl/geospatial/projection` uses spheres and oblate spheroids: its X/Y equatorial radii are equal. `Ellipsoid` also supports three independent radii. The adapters exchange only the common geometry; they do not transfer a datum, axis order, units or epoch.
 
 ```
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
-import {normalizeCRS} from '@math.gl/geospatial/projection/core';
+import {normalizeCRS} from '@math.gl/geospatial/projection-core';
 
 
 

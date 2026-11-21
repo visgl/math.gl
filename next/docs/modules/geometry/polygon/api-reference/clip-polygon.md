@@ -5,7 +5,7 @@
 Clips a polygon with a bounding box.
 
 ```
-import {clipPolygon} from '@math.gl/geometry';
+import {clipPolygon} from '@math.gl/geometry/polygon';
 
 
 

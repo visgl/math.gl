@@ -1,4 +1,4 @@
-# Portable expressions
+# @math.gl/sql/expressions
 
 Use `@math.gl/sql/expressions` to parse and evaluate expressions against JavaScript objects. This entry point works without Apache Arrow. For SQL text, use [the parser](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md); for table execution, start with [SQL queries](https://visgl.github.io/math.gl/next/docs/modules/sql.md).
 
@@ -43,7 +43,7 @@ import {
 
 } from '@math.gl/sql/expressions';
 
-import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial';
+import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial/expressions';
 
 
 

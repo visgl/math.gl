@@ -5,7 +5,7 @@
 Clips a polyline with a bounding box.
 
 ```
-import {clipPolyline} from '@math.gl/geometry';
+import {clipPolyline} from '@math.gl/geometry/polygon';
 
 
 
