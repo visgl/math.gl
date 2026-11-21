@@ -331,6 +331,10 @@ jobs:
       - build
       - plan
   examples:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [solar-showcase, remaining]
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     needs:
@@ -392,11 +396,13 @@ jobs:
       - name: Test example Node and browser workflows
         timeout-minutes: 12
         env:
+          MATHGL_EXAMPLE_SHARD: ${{ matrix.shard }}
           MATHGL_EXAMPLE_MATRIX: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'full' || 'sampled' }}
           MATHGL_SOLAR_BROWSER_PROFILE: ${{ needs.plan.outputs.solar-full == 'false' && 'smoke' || 'full' }}
         run: yarn test-examples
 
       - name: Check regressions from landed example reviews
+        if: matrix.shard == 'remaining'
         timeout-minutes: 2
         run: node scripts/check-landed-review-examples.mjs
   coverage:
