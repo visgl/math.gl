@@ -2335,3 +2335,28 @@ The lab includes **Concave**, **Island with lake**, and **Lake with island**
 scenarios in local, antimeridian and polar charts. Island regions have distinct
 colors. Run `node scripts/benchmark-terrain-cutouts.mjs --polygons` after building
 to compare incremental and monolithic Pacific/Sierra cuts with region-ID parity.
+
+### Regional watershed conditioning
+
+Use `createTerrainRegionalWatersheds` to condition aligned cell tiles and
+accumulate upstream cell counts through tile seams. Provide a bounded regional
+window and confirmed outlets as row-major cell indices.
+
+```ts
+import {createTerrainRegionalWatersheds} from '@math.gl/geospatial/terrain';
+
+const basin = createTerrainRegionalWatersheds(
+  [{column: 0, row: 0, field: west}, {column: west.width, row: 0, field: east}],
+  {width: west.width + east.width, height: west.height, origin: west.origin, outlets: [0]}
+);
+const contributingCells = basin.contributingCells[0];
+```
+
+Tiles must share an affine lattice and height reference, have matching diagonals,
+and have origins exactly translated by their integer offsets. They may not overlap.
+Coverage distinguishes absent tiles (0), known nodata (1) and valid cells (2).
+Both absent and nodata cells block modeled flow. The window exterior is closed,
+and `touchesUnknown` marks valid face-connected components bordering absent
+coverage. Counts and spill elevations describe the known window and can change
+when gaps fill or outlets change. Memory scales with the full window area,
+including gaps, and is bounded by `maxCells`.
