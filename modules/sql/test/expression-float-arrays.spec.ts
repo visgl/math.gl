@@ -7,11 +7,15 @@ import {expect, test} from 'vitest';
 import {parseSQLExpression} from '@math.gl/sql/parser';
 import {compileArrowExpression} from '../src/arrow';
 
+/** Compiles and evaluates an ARRAY expression against the fixture table. */
+
 function evaluate(sql: string, table: Table): Vector {
   return compileArrowExpression(parseSQLExpression(sql), {
     inputSchema: table.schema
   }).evaluateTable(table);
 }
+
+/** Reads fixed-size lists as JavaScript arrays while preserving null rows. */
 
 function decode(vector: Vector): (number[] | null)[] {
   return Array.from(vector, row => (row === null ? null : Array.from(row)));
