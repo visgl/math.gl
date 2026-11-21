@@ -689,37 +689,37 @@
           },
           {
             "type": "doc",
-            "id": "modules/dggs/api-reference/dggs-decoder",
+            "id": "modules/dggs/api-reference/decoders",
             "label": "@math.gl/dggs/decoders"
           },
           {
             "type": "doc",
-            "id": "modules/dggs/api-reference/a5-decoder",
+            "id": "modules/dggs/api-reference/a5",
             "label": "@math.gl/dggs/a5"
           },
           {
             "type": "doc",
-            "id": "modules/dggs/api-reference/geohash-decoder",
+            "id": "modules/dggs/api-reference/geohash",
             "label": "@math.gl/dggs/geohash"
           },
           {
             "type": "doc",
-            "id": "modules/dggs/api-reference/h3-decoder",
+            "id": "modules/dggs/api-reference/h3",
             "label": "@math.gl/dggs/h3"
           },
           {
             "type": "doc",
-            "id": "modules/dggs/api-reference/plus-code-decoder",
+            "id": "modules/dggs/api-reference/plus-code",
             "label": "@math.gl/dggs/plus-code"
           },
           {
             "type": "doc",
-            "id": "modules/dggs/api-reference/quadkey-decoder",
+            "id": "modules/dggs/api-reference/quadkey",
             "label": "@math.gl/dggs/quadkey"
           },
           {
             "type": "doc",
-            "id": "modules/dggs/api-reference/s2-decoder",
+            "id": "modules/dggs/api-reference/s2",
             "label": "@math.gl/dggs/s2"
           }
         ],

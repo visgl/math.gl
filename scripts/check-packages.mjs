@@ -65,6 +65,10 @@ function documentedEntries(node, paths = new Set()) {
       assert.equal(title, node.label, page.pathname + ' must match its sidebar label');
       paths.add(node.label);
     }
+    if (node.label?.startsWith('@math.gl/dggs/')) {
+      assert.equal(id.split('/').at(-1), node.label.split('/').at(-1),
+        page.pathname + ' must match its package subpath');
+    }
     for (const [, entry] of contents.matchAll(/`(@math\.gl\/[\w./-]+)`/g)) {
       paths.add(entry);
     }

@@ -19,7 +19,7 @@ const modules = [
     ['Geoid', 'earth/geoid'], ['Sun', 'earth/sun'], ['Timezones', 'earth/timezone']
   ]],
   ['DGGS', 'dggs', 'Explore discrete global grids and decode geographic cell boundaries.', [
-    ['H3', 'dggs/api-reference/h3-decoder'], ['A5', 'dggs/api-reference/a5-decoder'], ['S2', 'dggs/api-reference/s2-decoder'], ['GeoHash', 'dggs/api-reference/geohash-decoder'], ['Quadkey', 'dggs/api-reference/quadkey-decoder'], ['Plus Code', 'dggs/api-reference/plus-code-decoder']
+    ['H3', 'dggs/api-reference/h3'], ['A5', 'dggs/api-reference/a5'], ['S2', 'dggs/api-reference/s2'], ['GeoHash', 'dggs/api-reference/geohash'], ['Quadkey', 'dggs/api-reference/quadkey'], ['Plus Code', 'dggs/api-reference/plus-code']
   ]],
   ['SQL 🧪', 'sql', 'Query native Arrow tables with SQL, compute columns, and aggregate record batches.', [
     ['Queries', 'sql/queries'], ['SQL parser', 'sql/parser'], ['Arrow expressions', 'sql/arrow'], ['Workers', 'sql/workers']
