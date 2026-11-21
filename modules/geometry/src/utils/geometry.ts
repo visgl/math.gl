@@ -13,7 +13,20 @@ import type {
  * field takes precedence when legacy `values` is also supplied.
  */
 export type GeometryAttribute = Pick<CanonicalGeometryAttribute, 'size'> &
-  ({value: TypedArray; values?: TypedArray} | {value?: undefined; values: TypedArray});
+  (
+    | {
+        /** Canonical number-backed attribute data. */
+        value: TypedArray;
+        /** Optional legacy data. Readers use the canonical field when both are present. */
+        values?: TypedArray;
+      }
+    | {
+        /** Omitted by legacy inputs that store data in `values`. */
+        value?: undefined;
+        /** Number-backed attribute data in legacy storage. */
+        values: TypedArray;
+      }
+  );
 
 /** Minimal geometry shape understood by the geometry utilities. */
 export type GeometryInput = {
