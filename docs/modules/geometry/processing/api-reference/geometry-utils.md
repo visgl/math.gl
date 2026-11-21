@@ -7,7 +7,13 @@
 ## Geometry types
 
 `GeometryInput` is the minimal indexed or non-indexed geometry shape accepted by this module.
-Attributes may store typed arrays in either `value` or legacy `values` fields.
+Store number-backed typed arrays in `value`. The utility input also accepts the legacy
+`values` field. If both fields are present, `value` takes precedence.
+
+#### `isGeometry(value)`
+
+Checks topology, attribute storage, and optional index storage. Each operation checks
+the attributes and element counts it needs.
 
 ## Primitive iteration
 

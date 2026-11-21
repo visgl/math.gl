@@ -205,6 +205,28 @@ assert.equal('subdivideGlobeMesh' in await import('@math.gl/geometry/primitives'
 assert.equal(typeof (await import('@math.gl/geospatial/globe')).subdivideGlobeMesh, 'function');
 console.log(`${entrypoints} ESM/CommonJS entrypoints and all published assets/declarations passed across the supported packages.`);
 
+// Consumers can mix aggregate and focused entry points in the same CommonJS process.
+const projection = require('@math.gl/geospatial/projection');
+const projectionCore = require('@math.gl/geospatial/projection-core');
+for (const name of ['ProjectionTransform', 'ConfigurableProjectionEngine', 'TypeScriptCRSError']) {
+  assert.equal(projection[name], projectionCore[name], name);
+}
+assert(projection.projectionEngine.createProjection({to: 'EPSG:3857'}) instanceof projectionCore.ProjectionTransform);
+
+const maps = require('@math.gl/geospatial/maps');
+const transitions = require('@math.gl/geospatial/maps-transitions');
+assert.equal(maps.MapTransition, transitions.MapTransition);
+assert.equal(maps.mapTransitions.MapTransition, transitions.MapTransition);
+
+const globe = require('@math.gl/geospatial/globe');
+const cuts = require('@math.gl/geospatial/geographic-cuts');
+assert.equal(globe.GeographicSeamError, cuts.GeographicSeamError);
+assert.throws(() => cuts.clipGeographicPolyline([0, 0, 1], {}), globe.GeographicSeamError);
+
+const expressions = require('@math.gl/sql/expressions');
+const arrow = require('@math.gl/sql/arrow');
+assert.equal(expressions.ExpressionEvaluationError, arrow.ExpressionEvaluationError);
+
 await import('./check-terrain-package.mjs');
 await import('./check-root-exports.mjs');
 await import('./qualify-terrain-dem.mjs');

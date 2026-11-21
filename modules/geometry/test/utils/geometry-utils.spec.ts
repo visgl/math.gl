@@ -256,6 +256,27 @@ test('geometry utility validation covers non-indexed normals and iterator guards
   expect(() => [...makeAttributeIterator(new Float32Array([1, 2, 3]), 2)]).toThrow(/divisible/);
 });
 
+test('geometry guard rejects invalid attribute and index storage', () => {
+  const values = new Float32Array([0, 0, 0]);
+  const mesh = {topology: 'point-list', attributes: {POSITION: {value: values, size: 3}}};
+  expect(isGeometry(mesh)).toBe(true);
+  expect(isGeometry({...mesh, attributes: {positions: {values}}})).toBe(true);
+  expect(isGeometry({...mesh, indices: {values: new Uint16Array([0])}})).toBe(true);
+  for (const invalid of [
+    null,
+    {},
+    {value: [0, 0, 0]},
+    {value: new DataView(new ArrayBuffer(12))},
+    {value: new BigInt64Array(3)},
+    {value: values, size: 0},
+    {value: 'invalid', values}
+  ]) {
+    expect(isGeometry({...mesh, attributes: {POSITION: invalid}})).toBe(false);
+    expect(isGeometry({...mesh, indices: invalid})).toBe(false);
+  }
+  expect(getAttributeValues({value: values, values: new Float32Array(3)})).toBe(values);
+});
+
 test('geometry attribute helpers distinguish supported legacy shapes', () => {
   expect(isGeometry(null)).toBe(false);
   expect(isGeometry({topology: 'triangle-fan', attributes: {}})).toBe(true);
