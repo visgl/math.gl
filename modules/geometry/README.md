@@ -24,7 +24,7 @@ The experimental `HingeTree` evaluates rigid panels connected by hinges. See the
 [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and
 [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/geometry/unfolding-polyhedron).
 
-Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](https://math.gl/docs/modules/geometry/lighting). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
+Optional `@math.gl/geometry/lighting` and `@math.gl/core/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](https://math.gl/docs/modules/geometry/lighting). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
 
 `projectBounds` samples a prepared nonlinear transform over a finite box. Its result distinguishes approximate fitting from an enclosure conditional on caller-qualified Lipschitz bounds. See the [API reference](https://math.gl/docs/modules/geometry/utils/api-reference/project-bounds).
 Generate detached float64 UVs for CPU positions with `projectTextureCoordinates`, an explicit image rectangle and a prepared synchronous transform. It does not infer projection seams, clip domains or allocate GPU resources. See the [API reference](https://math.gl/docs/modules/geometry/utils/api-reference/project-texture-coordinates).
