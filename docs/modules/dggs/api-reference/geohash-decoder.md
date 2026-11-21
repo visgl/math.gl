@@ -1,4 +1,4 @@
-### `GeohashDecoder`
+# @math.gl/dggs/geohash
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v4.0-blue.svg?style=flat-square" alt="From-v4.0" />
@@ -7,7 +7,7 @@
 
 > The GeoHash functions in math.gl are currently focused on **decoding** Geohash encoded data, not encoding it.
 
-## Decoder
+## `GeohashDecoder`
 
 `GeohashDecoder` implements the [DGGSDecoder](./dggs-decoder) API:
 

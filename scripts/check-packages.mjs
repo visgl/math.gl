@@ -59,8 +59,13 @@ function documentedEntries(node, paths = new Set()) {
   if (id) {
     const page = ['.md', '.mdx'].map(ext => new URL('docs/' + id + ext, root)).find(existsSync);
     assert.ok(page, 'Missing sidebar document ' + id);
-    if (node.label?.startsWith('@math.gl/')) paths.add(node.label);
-    for (const [, entry] of readFileSync(page, 'utf8').matchAll(/`(@math\.gl\/[\w./-]+)`/g)) {
+    const contents = readFileSync(page, 'utf8');
+    if (node.label?.startsWith('@math.gl/') && node.label.split('/').length === 3) {
+      const title = contents.match(/^title: "([^"]+)"$/m)?.[1] ?? contents.match(/^# (.+)$/m)?.[1];
+      assert.equal(title, node.label, page.pathname + ' must match its sidebar label');
+      paths.add(node.label);
+    }
+    for (const [, entry] of contents.matchAll(/`(@math\.gl\/[\w./-]+)`/g)) {
       paths.add(entry);
     }
   }
