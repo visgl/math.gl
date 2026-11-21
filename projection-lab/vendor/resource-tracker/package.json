@@ -1,0 +1,48 @@
+{
+  "name": "resource-tracker",
+  "version": "0.0.1",
+  "description": "A squint port of tech.resource.",
+  "keywords": [
+    "resource-management",
+    "cleanup",
+    "raii",
+    "gc",
+    "dispose",
+    "finalizationregistry",
+    "tech.resource",
+    "squint"
+  ],
+  "homepage": "https://github.com/willcohen/resource-tracker",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/willcohen/resource-tracker.git"
+  },
+  "bugs": "https://github.com/willcohen/resource-tracker/issues",
+  "main": "resource.mjs",
+  "exports": {
+    ".": "./resource.mjs"
+  },
+  "author": "Will Cohen",
+  "license": "EPL-1.0",
+  "files": [
+    "resource.mjs",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "dependencies": {
+    "squint-cljs": "^0.14.202"
+  },
+  "scripts": {
+    "build": "npx squint compile resource.cljs",
+    "build:test:cljc": "cd test/cljc && npx squint compile resource_test.cljc",
+    "prepare": "npm run build",
+    "test": "npm run test:parity:cljs",
+    "test:parity:clj": "clojure -M:test",
+    "test:parity:cljs": "npm run build && npm run build:test:cljc && node --expose-gc test/cljc/resource_test.mjs",
+    "test:parity": "npm run test:parity:clj && npm run test:parity:cljs"
+  }
+}

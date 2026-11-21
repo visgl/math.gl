@@ -1,0 +1,261 @@
+# Spatial Reference
+
+![From v4.2](https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square)
+
+`@math.gl/geospatial/crs` provides a format-neutral descriptor for reporting how a dataset's coordinates are referenced. It preserves discovery state and representation without performing a transformation.
+
+For concepts, examples, and integration guidance, see the [Coordinate Reference Systems developer guide](https://visgl.github.io/math.gl/docs/modules/geospatial/crs/developer-guide/coordinate-reference-systems.md).
+
+## `SpatialReference`[​](#spatialreference "Direct link to spatialreference")
+
+```
+type SpatialReference = Readonly<{
+
+  crs: CRSReference;
+
+  vertical?: CRSReference;
+
+  coordinateEpoch?: number;
+
+  coordinateFrame: 'geographic' | 'geocentric' | 'projected' | 'local' | 'unknown';
+
+  coordinateOrder: readonly string[];
+
+  units?: readonly string[];
+
+}>;
+```
+
+`crs` is the primary horizontal or compound CRS. `vertical` is available when a source declares a separate vertical CRS. `coordinateOrder` describes the source array layout and is independent of the authoritative axis order in the CRS definition.
+
+## `CRSReference`[​](#crsreference "Direct link to crsreference")
+
+`CRSReference` is a discriminated union of `KnownCRSReference` and `UnresolvedCRSReference`.
+
+A known reference has an explicit or specification-defaulted definition:
+
+```
+type KnownCRSReference = Readonly<{
+
+  state: 'explicit' | 'default';
+
+  definition: ReadonlyCRSDefinition;
+
+  representation: SpatialReferenceRepresentation;
+
+  provenance: SpatialReferenceProvenance;
+
+  alternatives?: readonly SpatialReferenceAlternative[];
+
+}>;
+```
+
+An unresolved reference distinguishes explicitly unknown from absent metadata:
+
+```
+type UnresolvedCRSReference = Readonly<{
+
+  state: 'unknown' | 'absent';
+
+  provenance: SpatialReferenceProvenance;
+
+}>;
+```
+
+#### `createSpatialReference()`[​](#createspatialreference "Direct link to createspatialreference")
+
+Creates an immutable descriptor, supplying normalized defaults for omitted fields.
+
+```
+createSpatialReference(options?: CreateSpatialReferenceOptions): SpatialReference
+```
+
+PROJJSON definitions and descriptor-owned arrays are cloned and recursively frozen. A non-finite coordinate epoch throws. The function does not parse or resolve CRS definitions.
+
+```
+const spatialReference = createSpatialReference({
+
+  crs: {
+
+    state: 'default',
+
+    definition: 'OGC:CRS84',
+
+    representation: 'identifier',
+
+    provenance: 'format-default'
+
+  },
+
+  coordinateFrame: 'geographic',
+
+  coordinateOrder: ['x', 'y'],
+
+  units: ['degree', 'degree']
+
+});
+```
+
+#### `inferCRSRepresentation()`[​](#infercrsrepresentation "Direct link to infercrsrepresentation")
+
+Classifies a `CRSDefinition` using conservative syntax checks.
+
+```
+inferCRSRepresentation(definition: ReadonlyCRSDefinition): SpatialReferenceRepresentation
+```
+
+It recognizes PROJJSON objects, common WKT roots, PROJ strings with a `proj` parameter, authority-like identifiers, OGC URNs, and URLs. Other strings are returned as `opaque`. It does not validate syntax, resolve an identifier, or establish semantic equivalence.
+
+#### `normalizeCRSIdentifier()`[​](#normalizecrsidentifier "Direct link to normalizecrsidentifier")
+
+Changes known spellings of one authority CRS identifier to the form `AUTHORITY:CODE`.
+
+```
+normalizeCRSIdentifier(identifier: CRSIdentifier): CRSIdentifier
+```
+
+Use this function to compare identifiers that have different spellings. For example, a tile matrix set can give `http://www.opengis.net/def/crs/EPSG/0/32619`, and a view can give `EPSG:32619`.
+
+| Input                                         | Result       |
+| --------------------------------------------- | ------------ |
+| `epsg:32619`                                  | `EPSG:32619` |
+| `urn:ogc:def:crs:EPSG::32619`                 | `EPSG:32619` |
+| `http://www.opengis.net/def/crs/EPSG/0/32619` | `EPSG:32619` |
+| `CRS:84`, `urn:ogc:def:crs:OGC:1.3:CRS84`     | `OGC:CRS84`  |
+| `urn:ogc:def:crs:EPSG:6.6:4326`               | unchanged    |
+| `WGS84`, WKT, PROJ strings                    | unchanged    |
+
+Rules:
+
+* The known authority prefixes EPSG, OGC, ESRI and IAU accept case-insensitive input aliases. Known OGC codes CRS84, CRS83, CRS27 and CRS84h use their registered spelling; other authority and code spellings are preserved. This convenience does not imply that registry identifiers are generally case-insensitive.
+
+* The function changes the WMS 1.3 codes `CRS:84`, `CRS:83` and `CRS:27` to `OGC:CRS84`, `OGC:CRS83` and `OGC:CRS27`.
+
+* The function removes a URN or URI version only in these cases:
+
+  <!-- -->
+
+  * The version is empty.
+  * The version is `0`.
+  * The version is `1.3` and the code is OGC `CRS84`, `CRS83` or `CRS27`. The OGC register publishes these three codes only at version 1.3.
+
+* The function returns all other versioned identifiers unchanged. Thus a versioned identifier does not compare equal to an unversioned identifier.
+
+* The function returns unknown strings unchanged.
+
+The function does not make different registry entries equal. `EPSG:4326` and `OGC:CRS84` stay different, because their axis orders are different. `EPSG:900913` stays different from `EPSG:3857`. The function does not resolve definitions. It does not make datums equal, and it does not change axis order.
+
+For example, `http://www.opengis.net/def/crs/OGC/0/CRS84h` becomes `OGC:CRS84h`, while `OGC:CustomCase` keeps its code spelling.
+
+Keep the original identifier of the source in the metadata. Use the result only to compare identifiers.
+
+## Representation values[​](#representation-values "Direct link to Representation values")
+
+`SpatialReferenceRepresentation` is one of:
+
+* `identifier`
+* `wkt`
+* `proj-string`
+* `projjson`
+* `opaque`
+
+For a defaulted reference, `representation` describes the normalized definition selected by the adapter. The `default` state and `format-default` provenance record that the source did not serialize that value.
+
+## State values[​](#state-values "Direct link to State values")
+
+`SpatialReferenceState` is one of:
+
+* `explicit`
+* `default`
+* `unknown`
+* `absent`
+
+Only `explicit` and `default` references contain a definition. Narrow on `state` before accessing `definition`, `representation`, or `alternatives`.
+
+`ReadonlyCRSDefinition` is a serialized string or a deeply readonly PROJJSON object. Mutable PROJJSON inputs remain assignable to this type, while descriptors returned by `createSpatialReference()` prevent both top-level and nested mutation at compile time and runtime.
+
+## Provenance values[​](#provenance-values "Direct link to Provenance values")
+
+`SpatialReferenceProvenance` is one of:
+
+* `metadata`
+* `format-default`
+* `caller-override`
+* `legacy-assumption`
+* `unknown`
+
+## Coordinate-frame values[​](#coordinate-frame-values "Direct link to Coordinate-frame values")
+
+`SpatialReferenceCoordinateFrame` is one of:
+
+* `geographic`
+* `geocentric`
+* `projected`
+* `local`
+* `unknown`
+
+The frame describes stored coordinates. It is intentionally broader than PROJJSON CRS types so a loader can report local coordinate systems that do not have a conventional CRS definition.
+
+## Schema and field metadata[​](#schema-and-field-metadata "Direct link to Schema and field metadata")
+
+`SPATIAL_REFERENCE_METADATA_KEY` is `vis.gl:spatial_reference`. Its value is a JSON-serialized `SpatialReference` describing **current coordinate values**, not just their original source CRS. The convention works with Apache Arrow schema and field metadata without importing Arrow. Format-specific metadata can separately preserve original definitions and source provenance.
+
+* Schema metadata supplies a default for coordinate fields identified by the consumer. It does not label every numeric field as a coordinate.
+* Field metadata overrides the entire schema descriptor. An explicit `unknown` or `absent` field reference blocks inheritance. A missing key allows inheritance.
+* Coordinate order describes stored components, regardless of the CRS's authoritative axis order.
+* Reprojection must update the descriptor. Selection and renaming can preserve it. Arbitrary coordinate calculations must not inherit a reference unless their coordinate meaning is known.
+* GeoArrow geometry fields use their standard extension metadata as the authority. Adapters must handle that metadata before these helpers and reject conflicting declarations; these helpers do not inspect GeoArrow extensions or determine CRS equivalence.
+
+```
+import {
+
+  createSpatialReference,
+
+  setSpatialReferenceMetadata,
+
+  resolveSpatialReferenceMetadata
+
+} from '@math.gl/geospatial/crs';
+
+
+
+const schemaMetadata = setSpatialReferenceMetadata(undefined, createSpatialReference({
+
+  crs: {
+
+    state: 'explicit',
+
+    definition: 'EPSG:4326',
+
+    representation: 'identifier',
+
+    provenance: 'metadata'
+
+  },
+
+  coordinateFrame: 'geographic',
+
+  coordinateOrder: ['longitude', 'latitude'],
+
+  units: ['degree', 'degree']
+
+}));
+
+// Pass this map to an Arrow Schema. Resolve metadata for a selected coordinate field:
+
+const reference = resolveSpatialReferenceMetadata(schemaMetadata, positionField.metadata);
+```
+
+#### `setSpatialReferenceMetadata(metadata, spatialReference)`[​](#setspatialreferencemetadatametadata-spatialreference "Direct link to setspatialreferencemetadatametadata-spatialreference")
+
+Returns a new `Map<string, string>` with the serialized descriptor, preserving unrelated entries. Accepts `ReadonlyMap<string, string> | undefined` and a `SpatialReference`. Does not modify the input map or descriptor. Replaces any existing value at `SPATIAL_REFERENCE_METADATA_KEY`.
+
+#### `getSpatialReferenceMetadata(metadata)`[​](#getspatialreferencemetadatametadata "Direct link to getspatialreferencemetadatametadata")
+
+Accepts `ReadonlyMap<string, string> | undefined`. Returns a deeply immutable `SpatialReference`, or `undefined` if the key is missing. Malformed JSON and invalid descriptor envelopes throw.
+
+#### `resolveSpatialReferenceMetadata(schemaMetadata, fieldMetadata?)`[​](#resolvespatialreferencemetadataschemametadata-fieldmetadata "Direct link to resolvespatialreferencemetadataschemametadata-fieldmetadata")
+
+Accepts metadata maps and returns the field declaration when present, otherwise the schema reference. Returns `undefined` when neither declares a reference. Invalid field metadata throws rather than falling back to the schema.
+
+The helpers validate states, representations, component arrays, and finite coordinate epochs. They do not validate WKT, PROJ strings, or the full PROJJSON schema, resolve identifiers, infer missing CRSs, or load a projection engine. In streaming data, producers must keep declarations consistent with each batch's coordinate values; these helpers do not reconcile batches.

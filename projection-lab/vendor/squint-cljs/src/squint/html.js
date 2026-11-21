@@ -1,0 +1,108 @@
+import * as squint_core from './core.js';
+
+class Html {
+  constructor(s) {
+    // if (typeof(s) !== 'string')
+    //   throw Error(`Object not a string: ${s.constructor}`);
+    this.s = s;
+  }
+  toString() {
+    return this.s.toString();
+  }
+}
+
+export function html([s]) {
+  return new Html(s);
+}
+
+function escapeHTML(text) {
+  const map = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&apos;"
+  };
+  return text.toString().replace(/[&<>"']/g, m => map[m]);
+}
+
+function safe(x) {
+  if (x instanceof Html) return x;
+  if (squint_core.string_QMARK_(x)) {
+    return escapeHTML(x);
+  }
+  return escapeHTML(x.toString());
+}
+
+export function css(v, props) {
+  v = Object.assign(props, v);
+  let ret = "";
+  if (v == null) return ret;
+  let first = true;
+  for (const kv of Object.entries(v)) {
+    if (!first) ret += ' ';
+    ret += kv[0];
+    ret += ":";
+    ret += kv[1];
+    ret += ';';
+    first = false;
+  }
+  return ret;
+}
+
+export function attr(v) {
+  if (v == null) return '';
+  if (typeof(v) === 'object') {
+    return css({}, v);
+  } else
+  {
+    return v;
+  }
+}
+
+function toHTML(v, unsafe) {
+  if (v == null) return '';
+  if (v instanceof Html) return v;
+  if (typeof(v) === 'string') return unsafe ? v : safe(v);
+  if (v[Symbol.iterator]) {
+    return [...v].map((x) => toHTML(x, unsafe)).join("");
+  }
+  return unsafe? v.toString() : safe(v.toString());
+}
+
+export function attrs(v, props) {
+  v = Object.assign(props, v);
+  let ret = "";
+  if (v == null) return ret;
+  let first = true;
+  for (const kv of Object.entries(v)) {
+    if (!first) {
+      ret += ' ';
+    }
+    ret += kv[0];
+    ret += "=";
+    ret += '"';
+    const v1 = attr(kv[1]);
+    ret += escapeHTML(v1);
+    ret += '"';
+    first = false;
+  }
+  return new Html(ret);
+}
+
+function tag_(strs, vals, unsafe) {
+  let out = strs[0];
+  for (let i = 0; i < vals.length; i++) {
+    out += toHTML(vals[i], unsafe);
+    out += strs[i+1];
+  }
+  return new Html(out);
+}
+
+export function tag(strs, ...vals) {
+  return tag_(strs, vals, false);
+}
+
+export function unsafe_tag(strs, ...vals) {
+  return tag_(strs, vals, true);
+}

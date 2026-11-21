@@ -1,0 +1,64 @@
+# @math.gl/geometry/curves
+
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
+
+<!-- -->
+
+Loading <!-- -->Curve flight lab<!-- -->…
+
+⛶
+
+The curves module provides renderer-independent parametric curves for 2D and 3D Cartesian coordinates. Use it for camera paths, trajectories, interpolation, and sampled line geometry.
+
+## Usage[​](#usage "Direct link to Usage")
+
+```
+import {CatmullRomCurve, CurveArcLength} from '@math.gl/geometry/curves';
+
+
+
+const path = new CatmullRomCurve([
+
+  [0, 0, 0],
+
+  [1, 2, 0],
+
+  [4, 2, 1],
+
+  [6, 0, 1]
+
+]);
+
+const traversal = new CurveArcLength(path, 2048);
+
+const position = traversal.getPointAt(0.5);
+
+const tangent = path.getTangent(traversal.getParameterAt(0.5));
+
+const vertices = traversal.getSpacedPoints(128); // flat Float64Array, 129 xyz points
+```
+
+* [Curve classes](https://visgl.github.io/math.gl/docs/modules/geometry/curves/api-reference/curves.md): line, quadratic/cubic Bézier, Hermite, and Catmull–Rom.
+* [CurveArcLength](https://visgl.github.io/math.gl/docs/modules/geometry/curves/api-reference/curve-arc-length.md): reusable length approximation and distance sampling.
+
+Control points may be arrays, math.gl vectors, or numeric typed arrays. Every point in a curve must have the same dimension (2 or 3) and finite coordinates. Built-in curves copy their control data during construction and expose no control-point mutation API. All calculations use JavaScript numbers; generated flat buffers use Float64Array. Point, derivative, and tangent methods accept caller-owned output arrays or typed arrays.
+
+Coordinates are Euclidean and lengths use the input units. Project geographic positions into an appropriate Cartesian frame first; interpolating raw longitude/latitude does not produce a geodesic or handle antimeridian crossings. Arithmetic remains subject to floating-point overflow and rounding.
+
+This first version focuses on curve evaluation and traversal. Moving frames, swept meshes, NURBS, and geodesic interpolation are outside its current API.
+
+## Features[​](#features "Direct link to Features")
+
+| Feature                                      | Support | Notes                                                                                                                                                                                                     |
+| -------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Line, Bézier, Hermite and Catmull–Rom curves | ✅      | [Curve classes](https://visgl.github.io/math.gl/docs/modules/geometry/curves/api-reference/curves.md) support finite 2D/3D control points and copied construction data.                           |
+| Derivatives and unit tangents                | ✅      | Point, derivative and tangent evaluation accept caller-owned output storage.                                                                                                                              |
+| Arc-length traversal and spaced sampling     | ✅      | [CurveArcLength](https://visgl.github.io/math.gl/docs/modules/geometry/curves/api-reference/curve-arc-length.md) caches a sampled length approximation and maps distance fractions to parameters. |
+| Certified continuous arc-length/error bounds | ❌      | Arc length is numerically approximated; the sampling table does not certify a continuous error envelope.                                                                                                  |
+| Rational curves and NURBS                    | ❌      | The public API has no rational weights, knot vectors, or NURBS surface/curve evaluator.                                                                                                                   |
+| Moving frames and swept meshes               | ❌      | Frenet/parallel-transport frames and sweep/extrusion generation are outside the current curve API.                                                                                                        |
+| Geodesic interpolation and seam handling     | ❌      | These curves operate in Cartesian coordinates. Use [geospatial paths](https://visgl.github.io/math.gl/docs/modules/geospatial/api-reference/geodesic-path.md) for surface routes.                 |
+
+## Adaptive sampling and frames[​](#adaptive-sampling-and-frames "Direct link to Adaptive sampling and frames")
+
+[Adaptive sampling and transport frames](https://visgl.github.io/math.gl/docs/modules/geometry/curves/api-reference/sampling-and-frames.md) add bounded-work chord-error sampling and polyline frames, including repeated-point and closed-loop conventions.

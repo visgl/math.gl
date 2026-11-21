@@ -1,0 +1,23 @@
+# @math.gl/geospatial/projection-types
+
+![From v5.0](https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square)
+
+[`Projection`](https://visgl.github.io/math.gl/docs/modules/geospatial/projection/api-reference/projection.md) describes a transformation between a source and target CRS. Create one through a [`ProjectionEngine`](https://visgl.github.io/math.gl/docs/modules/geospatial/projection/api-reference/projection-engine.md).
+
+```
+import type { Projection, ProjectionEngine } from "@math.gl/geospatial/projection-types";
+
+import { projectionEngine } from "@math.gl/geospatial/projection";
+
+
+
+const engine: ProjectionEngine = projectionEngine;
+
+const projection: Projection = engine.createProjection({ to: "EPSG:3857" });
+
+const meters = await projection.project([12, 55]);
+
+const longitudeLatitude = await projection.unproject(meters);
+```
+
+The `/types` entry point exports only types, so `import type` adds no runtime code. Applications can accept this contract without depending on a particular engine.

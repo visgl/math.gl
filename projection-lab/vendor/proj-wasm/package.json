@@ -1,0 +1,43 @@
+{
+  "name": "proj-wasm",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "This project provides a native (or transpiled) version of PROJ for the JS ecosystem.",
+  "homepage": "https://github.com/willcohen/clj-proj",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/willcohen/clj-proj.git"
+  },
+  "bugs": {
+    "url": "https://github.com/willcohen/clj-proj/issues"
+  },
+  "main": "dist/proj.mjs",
+  "exports": {
+    ".": "./dist/proj.mjs",
+    "./proj-handler": "./dist/proj-handler.mjs"
+  },
+  "files": [
+    "dist/proj.mjs",
+    "dist/proj-handler.mjs",
+    "dist/proj-handler-overrides.mjs",
+    "dist/proj-emscripten.js",
+    "dist/proj-emscripten.wasm",
+    "dist/proj.db",
+    "dist/proj.ini",
+    "dist/THIRD-PARTY-NOTICES.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node esbuild.config.mjs"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "ffi-wasm": "0.0.3",
+    "resource-tracker": "^0.0.1",
+    "squint-cljs": "^0.14.210"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.0"
+  }
+}
