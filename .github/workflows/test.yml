@@ -467,6 +467,8 @@ jobs:
         run: yarn vitest run --project headless modules/tasks/test/worker-utils/browser.spec.ts
 
       - name: Run headless tests with coverage
+        env:
+          VITE_MATHGL_COVERAGE_FIXTURES: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'full' || 'compact' }}
         run: yarn test-coverage
 
       - name: Upload coverage to Coveralls
