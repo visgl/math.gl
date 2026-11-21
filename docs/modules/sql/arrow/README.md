@@ -1,4 +1,4 @@
-# Arrow expressions
+# @math.gl/sql/arrow
 
 `@math.gl/sql/arrow` evaluates schema-bound expressions directly over Arrow batches. Use it
 for WHERE predicates, derived columns and typed application functions. It reuses the parser from

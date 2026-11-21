@@ -1,25 +1,25 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import core = require('@math.gl/core');
-import geo = require('@math.gl/geospatial');
-import root = require('@math.gl/geospatial');
+import core = require('@math.gl/core/matrix');
+import geo = require('@math.gl/geospatial/ellipsoid');
+import frames = require('@math.gl/geospatial/coordinates');
 const {Vector2, Vector3, Matrix4, Quaternion} = core;
-const {Ellipsoid, LocalReferenceFrame, EllipsoidTangentPlane} = geo;
+const {Ellipsoid, EllipsoidTangentPlane} = geo;
+const {LocalReferenceFrame} = frames;
 type Vector2 = core.Vector2;
 type Vector3 = core.Vector3;
 type Matrix4 = core.Matrix4;
 type Quaternion = core.Quaternion;
-type LocalReferenceFrameOptions = geo.LocalReferenceFrameOptions;
-type HeadingPitchRoll = geo.HeadingPitchRoll;
+type LocalReferenceFrameOptions = frames.LocalReferenceFrameOptions;
+type HeadingPitchRoll = frames.HeadingPitchRoll;
 type TangentPlaneProjection = geo.TangentPlaneProjection;
 type TangentPlaneProjectionMode = geo.TangentPlaneProjectionMode;
-type RootFrame = root.LocalReferenceFrame;
 const options: LocalReferenceFrameOptions = {
   ellipsoid: Ellipsoid.WGS84,
   axes: ['north', 'east', 'down'] as const
 };
-const frame: RootFrame = new LocalReferenceFrame(new Float64Array([6378137, 0, 0]), options);
+const frame: frames.LocalReferenceFrame = new LocalReferenceFrame(new Float64Array([6378137, 0, 0]), options);
 const v: Vector3 = frame.localToFixedPoint(new Float32Array([1, 2, 3]), new Vector3());
 frame.fixedToLocalPoint(v, v);
 frame.localToFixedVector(v, v);
@@ -59,7 +59,7 @@ frame.fixedToLocalVectorsFlat(batch, batch);
 // @ts-expect-error Packed frame outputs require Float64 storage.
 frame.localToFixedPointsFlat(batch, new Float32Array(3));
 
-import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial';
+import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial/coordinates';
 import {getOrientedBoundingBoxQuaternion, makeOrientedBoundingBoxFromQuaternion} from '@math.gl/geometry/culling';
 const enu: Matrix4 = eastNorthUpToFixedFrame(Ellipsoid.WGS84, [6378137, 0, 0]);
 const reused: number[] = localFrameToFixedFrame(Ellipsoid.WGS84, 'north', 'east', 'down', [6378137, 0, 0], []);

@@ -13,7 +13,7 @@ side has a constant outward normal, and the top and bottom use separate flat
 normals. Unlike a low-resolution cylinder, its side edges remain sharp.
 
 ```typescript
-import {PrismGeometry} from '@math.gl/geometry';
+import {PrismGeometry} from '@math.gl/geometry/primitives';
 
 const hexagon = new PrismGeometry({radius: 0.6, height: 1.5, sides: 6});
 ```

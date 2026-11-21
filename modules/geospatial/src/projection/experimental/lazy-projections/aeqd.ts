@@ -8,5 +8,5 @@ export const lazyAzimuthalEquidistant: ProjectionDescriptor =
   /* @__PURE__ */ createProjectionDescriptor(
     {name: 'aeqd', aliases: ['Azimuthal_Equidistant']},
     async () =>
-      (await import('@math.gl/geospatial/projection/projections/aeqd')).azimuthalEquidistant
+      (await import('@math.gl/geospatial/projection-projections-aeqd')).azimuthalEquidistant
   );

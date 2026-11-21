@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original exact-input Decimal/analytic C8 matrix; native LocalCartesian controls share the documented pole/domain limits.
-import {Vector3, Matrix4, config} from '@math.gl/core';
-import {Ellipsoid, LocalReferenceFrame, EllipsoidTangentPlane} from '@math.gl/geospatial';
-import type {LocalFrameAxis} from '@math.gl/core';
+import {Vector3, Matrix4, config} from '@math.gl/core/matrix';
+import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial/ellipsoid';
+import {LocalReferenceFrame} from '@math.gl/geospatial/coordinates';
+import type {LocalFrameAxis} from '@math.gl/core/matrix';
 import reference from './c8-reference.json';
 export const provenance = reference.provenance;
 export const ANGULAR_BUDGET = (1e-9 * Math.PI) / 180;

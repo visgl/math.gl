@@ -5,7 +5,12 @@ import ExamplePanel from '../../../common/example-panel';
 import React, {useEffect, useMemo, useRef} from 'react';
 import {Matrix4, toRadians} from '@math.gl/core/matrix';
 import {OrbitControls} from '@luma.gl/engine';
-import {CatmullRomCurve, CubicBezierCurve, HermiteCurve, CurveArcLength} from '@math.gl/geometry';
+import {
+  CatmullRomCurve,
+  CubicBezierCurve,
+  HermiteCurve,
+  CurveArcLength
+} from '@math.gl/geometry/curves';
 import './styles.css';
 
 const CAMERA = {distance: 19, yaw: 0.65, pitch: 0.45};

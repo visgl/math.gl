@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
 import {normalizeViewportProps} from '../../../src/web-mercator';
-import {config, equals} from '@math.gl/core';
+import {config, equals} from '@math.gl/core/matrix';
 
 const NORMALIZATION_TEST_CASES = [
   [

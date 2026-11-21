@@ -9,8 +9,8 @@
 import {test, expect} from 'vitest';
 import {toNested} from './utils';
 
-import {configure, equals} from '@math.gl/core';
-import {Polygon} from '@math.gl/geometry';
+import {configure, equals} from '@math.gl/core/matrix';
+import {Polygon} from '@math.gl/geometry/polygon';
 
 const TEST_CASES = [
   {

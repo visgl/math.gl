@@ -79,7 +79,7 @@ import {
   queryArrowTableInBatches,
   type ArrowTableQuery,
   type ArrowStreamingQuery
-} from '@math.gl/sql';
+} from '@math.gl/sql/query';
 import {SQRT} from '@math.gl/sql/math-functions';
 import {COLOR_RGB} from '@math.gl/sql/color-functions';
 
@@ -94,7 +94,7 @@ const streamingQuery: ArrowStreamingQuery = {...tableQuery, emitEmptyBatches: tr
 queryArrowTableInBatches(orders.batches, orders.schema, streamingQuery);
 
 import {parseSQLScaleAST, parseSQLScaleExpression, type ParsedSQLScale} from '@math.gl/sql/scales';
-import {SCALE_CONFORMANCE_CASES, type ScaleConformanceCase} from '@math.gl/sql/scales/conformance';
+import {SCALE_CONFORMANCE_CASES, type ScaleConformanceCase} from '@math.gl/sql/scales-conformance';
 
 const parsedScale: ParsedSQLScale = parseSQLScaleAST(
   parseSQLExpression('SCALE_LINEAR(quantity, DOMAIN(0, 10), RANGE(0, 1))')

@@ -49,6 +49,25 @@ for (const filename of trackedFiles) {
   }
 }
 
+const sidebar = JSON.parse(readFileSync(new URL('docs/table-of-contents.json', root), 'utf8'));
+const packagesSection = sidebar.find(section => section.label === 'Packages');
+assert.ok(packagesSection, 'The docs sidebar must have a Packages section');
+
+/** Collect labels and exact import paths documented under a package's sidebar section. */
+function documentedEntries(node, paths = new Set()) {
+  const id = typeof node === 'string' ? node : node.id || node.link?.id;
+  if (id) {
+    const page = ['.md', '.mdx'].map(ext => new URL('docs/' + id + ext, root)).find(existsSync);
+    assert.ok(page, 'Missing sidebar document ' + id);
+    if (node.label?.startsWith('@math.gl/')) paths.add(node.label);
+    for (const [, entry] of readFileSync(page, 'utf8').matchAll(/`(@math\.gl\/[\w./-]+)`/g)) {
+      paths.add(entry);
+    }
+  }
+  for (const child of node.items || []) documentedEntries(child, paths);
+  return paths;
+}
+
 const packageNames = new Set(expected.map(name => '@math.gl/' + name));
 let entrypoints = 0;
 for (const name of expected) {
@@ -64,9 +83,23 @@ for (const name of expected) {
   if (name === 'core') {
     assert(Object.keys(manifest.dependencies || {}).every(dependency => dependency.startsWith('@math.gl/')), 'Core must not introduce external runtime dependencies');
   }
+  assert.equal(Object.hasOwn(manifest.exports, '.'), name === 'tasks', manifest.name);
+  if (name !== 'tasks') {
+    for (const field of ['main', 'module', 'types', 'typings']) {
+      assert(!Object.hasOwn(manifest, field), `${manifest.name}: legacy root entry ${field}`);
+    }
+    await assert.rejects(import(manifest.name), {code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'});
+  }
+  const packageSection = packagesSection.items.find(section => section.label.split(' ')[0] === manifest.name);
+  assert.ok(packageSection, 'Missing sidebar package ' + manifest.name);
+  const documented = documentedEntries(packageSection);
   for (const [subpath, entry] of Object.entries(manifest.exports)) {
     assert(!/\/(?:index|unbundled)$/.test(subpath), `Redundant public entrypoint: ${manifest.name}${subpath.slice(1)}`);
-    assert(!/^\.\/projection\/(?:experimental|native)(?:\/|$)/.test(subpath), `Use canonical projection paths: ${subpath}`);
+    assert(subpath === '.' || /^\.\/[^/]+$/.test(subpath), `Nested entry point: ${manifest.name}${subpath.slice(1)}`);
+    if (subpath !== '.') {
+      const name = manifest.name + subpath.slice(1);
+      assert(documented.has(name), `Missing sidebar documentation for ${name}`);
+    }
     const targets = typeof entry === 'string' ? [entry] : Object.values(entry);
     for (const target of targets) {
       assert(existsSync(new URL(target, directory)), `Missing published target: ${manifest.name}${subpath.slice(1)} ${target}`);
@@ -75,7 +108,7 @@ for (const name of expected) {
     const specifier = manifest.name + (subpath === '.' ? '' : subpath.slice(1));
     const imported = await import(specifier);
     const required = require(specifier);
-    if (specifier === '@math.gl/sql') {
+    if (specifier === '@math.gl/sql/query') {
       for (const [sql, arrow] of [[imported, await import('apache-arrow')], [required, require('apache-arrow')]]) {
         const orders = arrow.tableFromArrays({
           category: ['books', 'games', 'books'], quantity: new Int32Array([2, 1, 3])
@@ -120,7 +153,7 @@ for (const name of expected) {
       }
       assert.equal(imported.isExpressionEvaluationError(new required.ExpressionEvaluationError('domain','cross-bundle')), true);
     }
-    if (specifier === '@math.gl/core') {
+    if (specifier === '@math.gl/core/matrix') {
       assert.equal('parseSQLQuery' in imported, false);
       assert.equal('parseSQLQuery' in required, false);
     }
@@ -159,8 +192,8 @@ for (const name of expected) {
 for (const packageName of ['@math.gl/core', '@math.gl/geometry', '@math.gl/geospatial', '@math.gl/earth']) {
   console.log(`${packageName}: implementation owned by the grouped package`);
 }
-assert.equal('subdivideGlobeMesh' in await import('@math.gl/geometry'), false);
-assert.equal(typeof (await import('@math.gl/geospatial')).subdivideGlobeMesh, 'function');
+assert.equal('subdivideGlobeMesh' in await import('@math.gl/geometry/primitives'), false);
+assert.equal(typeof (await import('@math.gl/geospatial/globe')).subdivideGlobeMesh, 'function');
 console.log(`${entrypoints} ESM/CommonJS entrypoints and all published assets/declarations passed across the supported packages.`);
 
 await import('./check-terrain-package.mjs');

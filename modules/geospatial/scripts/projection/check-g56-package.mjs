@@ -12,9 +12,9 @@ import {gzipSync} from 'node:zlib';
 import ts from 'typescript';
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
 const manifest = JSON.parse(readFileSync(join(root, 'modules/geospatial/package.json')));
-const entry = manifest.exports['.'];
-const esm = await import('@math.gl/geospatial');
-const cjs = createRequire(import.meta.url)('@math.gl/geospatial');
+const entry = manifest.exports['./geodesics'];
+const esm = await import('@math.gl/geospatial/geodesics');
+const cjs = createRequire(import.meta.url)('@math.gl/geospatial/geodesics');
 for (const api of [esm, cjs]) {
   const axes = {semiMajorAxis:1,semiMinorAxis:1};
   assert(Math.abs(new api.EllipsoidRhumb(axes).inverse(0,0,0,90).s12-Math.PI/2)<1e-14);
@@ -22,11 +22,11 @@ for (const api of [esm, cjs]) {
   assert(new api.GeodesicIntersections(axes).segments([0,-20],[0,20],[-20,0],[20,0]).status==='intersection');
   assert.throws(()=>new api.EllipsoidRhumb(axes).inverse(90,0,0,0),api.RhumbDomainError);
 }
-assert(entry.types.endsWith('/index.d.ts'));
+assert(entry.types.endsWith('/geodesics.d.ts'));
 const measured = {};
 for (const symbol of ['EllipsoidRhumb', 'RhumbPolygon', 'GeodesicIntersections']) {
   const result = await build({
-    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial';`, resolveDir: root},
+    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial/geodesics';`, resolveDir: root},
     bundle: true,
     platform: 'browser',
     format: 'esm',
@@ -49,7 +49,7 @@ try {
   const file = join(temp, 'types.ts');
   writeFileSync(
     file,
-    `import {EllipsoidRhumb, RhumbPolygon, GeodesicIntersections, type RhumbResult, type SegmentIntersection} from '@math.gl/geospatial';
+    `import {EllipsoidRhumb, RhumbPolygon, GeodesicIntersections, type RhumbResult, type SegmentIntersection} from '@math.gl/geospatial/geodesics';
 const axes={semiMajorAxis:1,semiMinorAxis:1};
 const result:RhumbResult=new EllipsoidRhumb(axes).line(0,0,90,{area:true}).position(1);
 const area:number|undefined=new RhumbPolygon(axes).addPoint(30,0).addPoint(30,0,{longitudeTurns:1}).compute().area;

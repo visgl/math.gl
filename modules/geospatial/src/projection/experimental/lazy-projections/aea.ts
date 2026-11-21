@@ -7,7 +7,7 @@ import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyAlbersEqualArea: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'aea', aliases: ['Albers_Conic_Equal_Area', 'Albers_Equal_Area', 'Albers']},
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/aea');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-aea');
     return projectionModule.albersEqualArea;
   }
 );

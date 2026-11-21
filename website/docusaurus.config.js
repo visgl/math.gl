@@ -85,7 +85,7 @@ const npmIndex = navbarItems.findIndex(item => item.value?.includes('class="navb
 navbarItems.splice(npmIndex + 1, 0, githubItem);
 
 // Resolve CRS entry points from source: website deployments do not build package dist files.
-// Keep the root alias exact so it does not shadow the public subpaths.
+// Match published imports exactly so pinned dependencies can resolve older entry points.
 const webpackPlugin = config.plugins.find(
   plugin =>
     Array.isArray(plugin) && plugin[0] === '@vis.gl/docusaurus-website/plugin-webpack-config'
@@ -171,6 +171,7 @@ module.exports = config;
 
 // Exact aliases also apply to imports from deck.gl, luma.gl, and loaders.gl.
 for (const [name, source] of Object.entries(getMathGlSourceAliases())) {
+  delete aliases[name.split('/').slice(0, 2).join('/')];
   delete aliases[name];
   aliases[name + '$'] = source;
 }

@@ -8,5 +8,5 @@ export const lazyLambertAzimuthalEqualArea: ProjectionDescriptor =
   /* @__PURE__ */ createProjectionDescriptor(
     {name: 'laea', aliases: ['Lambert Azimuthal Equal Area', 'Lambert_Azimuthal_Equal_Area']},
     async () =>
-      (await import('@math.gl/geospatial/projection/projections/laea')).lambertAzimuthalEqualArea
+      (await import('@math.gl/geospatial/projection-projections-laea')).lambertAzimuthalEqualArea
   );

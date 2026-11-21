@@ -12,9 +12,9 @@ import {gzipSync} from 'node:zlib';
 import ts from 'typescript';
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
 const manifest = JSON.parse(readFileSync(join(root, 'modules/geospatial/package.json')));
-const entry = manifest.exports['.'];
-const esm = await import('@math.gl/geospatial');
-const cjs = createRequire(import.meta.url)('@math.gl/geospatial');
+const entry = manifest.exports['./geodesics'];
+const esm = await import('@math.gl/geospatial/geodesics');
+const cjs = createRequire(import.meta.url)('@math.gl/geospatial/geodesics');
 for (const api of [esm,cjs]) {
   const g=new api.GeodesicIntersections({semiMajorAxis:1,semiMinorAxis:1.01});
   const a={latitude:0,longitude:0,azimuth:90};
@@ -24,11 +24,11 @@ for (const api of [esm,cjs]) {
   assert.equal(g.segments([0,-20],[0,20],[20,30],[30,30]).status,'disjoint');
   assert.equal(typeof api.GeodesicPath,'function');
 }
-assert(entry.types.endsWith('/index.d.ts'));
+assert(entry.types.endsWith('/geodesics.d.ts'));
 const measured = {};
 for (const symbol of ['Ellipsoid', 'EllipsoidGeodesic', 'GeodesicIntersections']) {
   const result = await build({
-    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial';`, resolveDir: root},
+    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial/geodesics';`, resolveDir: root},
     bundle: true,
     platform: 'browser',
     format: 'esm',
@@ -50,7 +50,7 @@ try {
   const file = join(temp, 'types.ts');
   writeFileSync(
     file,
-    `import {GeodesicIntersections, GeodesicPath, type GeodesicIntersectionPath, type IntersectionPoint} from '@math.gl/geospatial';
+    `import {GeodesicIntersections, GeodesicPath, type GeodesicIntersectionPath, type IntersectionPoint} from '@math.gl/geospatial/geodesics';
 const axes={semiMajorAxis:1,semiMinorAxis:1.01};
 const g=new GeodesicIntersections(axes);
 const a:GeodesicIntersectionPath={latitude:0,longitude:0,azimuth:90};

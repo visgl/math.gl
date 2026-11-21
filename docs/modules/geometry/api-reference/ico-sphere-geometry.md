@@ -11,7 +11,7 @@ import GeometryViewer from '@site/src/components/geometry-viewer';
 A sphere built by subdividing an icosahedron. Positive `radius` defaults to `0.5`, and non-negative integer `iterations` defaults to `0`. Each iteration subdivides each triangle into four.
 
 ```typescript
-import {IcoSphereGeometry} from '@math.gl/geometry';
+import {IcoSphereGeometry} from '@math.gl/geometry/primitives';
 
 const geometry = new IcoSphereGeometry({radius: 0.75, iterations: 2});
 ```

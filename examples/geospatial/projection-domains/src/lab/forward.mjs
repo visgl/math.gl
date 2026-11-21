@@ -1,11 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {
-  subdivideTriangleMesh,
-  clipTriangleMesh,
-  interpolatePackedAttributes
-} from '@math.gl/geometry';
+import {subdivideTriangleMesh, interpolatePackedAttributes} from '@math.gl/geometry/processing';
+import {clipTriangleMesh} from '@math.gl/geometry/polygon';
 import {seedDomain} from '../warp/prepare.mjs';
 /** Qualified continuous source-grid counterpart, using the existing public utility.
  * The pixel grid is affine in the source CRS; target errors use a declared display scale. */

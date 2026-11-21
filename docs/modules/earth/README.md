@@ -18,7 +18,7 @@ Earth models, sunlight, astronomy, time zones, and ocean calculations. Import ea
 | --- | --- |
 | [`@math.gl/earth/geoid`](./geoid/README.md) | Parse geoid grids and compute height offsets. |
 | [`@math.gl/earth/sun`](./sun/README.md) | Solar and lunar positions, daylight, observer geometry, and sky lighting. |
-| [`@math.gl/earth/sun/stars`](./sun/api-reference/stars.md) | Star catalog and galactic calculations. |
+| [`@math.gl/earth/sun-stars`](./sun/api-reference/stars.md) | Star catalog and galactic calculations. |
 | [`@math.gl/earth/timezone`](./timezone/README.md) | Geographic timezone lookup and local calendar calculations. |
 | [`@math.gl/earth/ocean`](./ocean/README.md) | Seawater state, underwater sound speed, and absorption. |
 

@@ -7,7 +7,7 @@ import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyVanDerGrinten: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'vandg', aliases: ['Van_der_Grinten_I', 'VanDerGrinten', 'Van_der_Grinten']},
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/vandg');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-vandg');
     return projectionModule.vanDerGrinten;
   }
 );

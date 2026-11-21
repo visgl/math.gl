@@ -5,35 +5,40 @@
 Use this guide to upgrade from a stable math.gl 4.x release to 5.0. See
 [What’s New](./whats-new.md#v50) for new capabilities.
 
-### Canonical projection paths
-
-Use `@math.gl/geospatial/projection` and its focused `/core`, `/projections/<id>`,
-`/parsers/<format>`, and `/grids/<format>` subpaths. The duplicate
-`/projection/experimental` and `/projection/native` trees have been removed.
-For example, replace `@math.gl/geospatial/projection/native/core` with
-`@math.gl/geospatial/projection/core`. Lazy projection descriptors remain under
-`@math.gl/geospatial/projection/projections/lazy`.
-
-Use `@math.gl/core/arrow` without `/index`. Private implementation files
-are not package entry points; package-internal tests should import them relatively.
-
-Relative source imports also omit `/index`. Native build output resolves directory entry points and adds `.js` extensions during compilation.
-
 ### Package imports
 
-| 4.x package | 5.0 import |
-| --- | --- |
-| `math.gl` | `@math.gl/core` |
-| `@math.gl/types` | `@math.gl/core` |
-| `@math.gl/polygon` | `@math.gl/geometry` |
-| `@math.gl/culling` | `@math.gl/geometry/culling` |
-| `@math.gl/proj4` | `@math.gl/geospatial/projection` |
-| `@math.gl/geoid` | `@math.gl/earth` |
-| `@math.gl/sun` | `@math.gl/earth/sun` |
-| `@math.gl/dggs-s2`, `@math.gl/dggs-geohash`, `@math.gl/dggs-quadkey` | `@math.gl/dggs` |
+Install packages by their npm names and import APIs from their feature subpaths. The
+`@math.gl/tasks` package keeps its root import.
 
-Update the dependency and import together. When the 5.0 import contains a subpath,
-install its package root. See the API changes below for changes to named exports and calls.
+| 4.x import | 5.0 import |
+| --- | --- |
+| `@math.gl/core` or `math.gl` for vectors and matrices | `@math.gl/core/matrix` |
+| `@math.gl/types` or `@math.gl/core` for shared types and guards | `@math.gl/core/types` |
+| `@math.gl/polygon` | `@math.gl/geometry/polygon` |
+| `@math.gl/culling` | `@math.gl/geometry/culling` |
+| `@math.gl/geospatial` for `Ellipsoid` | `@math.gl/geospatial/ellipsoid` |
+| `@math.gl/geospatial` for local reference frames | `@math.gl/geospatial/coordinates` |
+| `@math.gl/geospatial` for region bounding boxes | `@math.gl/geospatial/globe` |
+| `@math.gl/web-mercator` or `viewport-mercator-project` | `@math.gl/geospatial/web-mercator` |
+| `@math.gl/proj4` | `@math.gl/geospatial/projection` |
+| `@math.gl/geoid` | `@math.gl/earth/geoid` |
+| `@math.gl/sun` | `@math.gl/earth/sun` |
+| `@math.gl/dggs-s2`, `@math.gl/dggs-geohash`, `@math.gl/dggs-quadkey` | `@math.gl/dggs/s2`, `@math.gl/dggs/geohash`, `@math.gl/dggs/quadkey` |
+
+### Upgrading from a 5.0 prerelease
+
+Split root imports across the [package entry points](./README.md#npm-packages). For
+example, import `queryArrowSQL` from `@math.gl/sql/query`, `SphereGeometry` from
+`@math.gl/geometry/primitives`, and `DGGS_DECODERS` from `@math.gl/dggs/decoders`.
+For Earth namespace imports, use `import * as sun from '@math.gl/earth/sun'` and
+apply the same pattern to geoid and timezone.
+
+Replace slashes within an exported subpath with hyphens. For example,
+`@math.gl/geospatial/projection/types` becomes `@math.gl/geospatial/projection-types`,
+`@math.gl/geospatial/maps/presets` becomes `@math.gl/geospatial/maps-presets`, and
+`@math.gl/earth/sun/stars` becomes `@math.gl/earth/sun-stars`. Use the
+[projection entry point index](./modules/geospatial/projection/entry-points.md)
+and [kernel index](./modules/geospatial/projection/kernels.md) for exact names.
 
 ### Expressions and SQL package
 
@@ -144,7 +149,7 @@ Supply presets explicitly, import geometry and transitions as needed, and use
 ### GeoArrow descriptors
 
 Import physical descriptor helpers from `@math.gl/core/arrow` in place
-of `@math.gl/core/arrow`. The corresponding root exports remain available.
+of `@math.gl/core/arrow`.
 
 ### DGGS packages
 

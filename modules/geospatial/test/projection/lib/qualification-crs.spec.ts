@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original independent PROJ tests of the proj4js-inspired CRS/datum API.
 import {expect, test} from 'vitest';
-import {datumCatalog} from '@math.gl/geospatial/projection/datums';
+import {datumCatalog} from '@math.gl/geospatial/projection-datums';
 import {unshiftedStructuredDatums} from '../fixtures/unshifted-structured-datums';
 import * as native from '@math.gl/geospatial/projection';
 import structured from '../fixtures/structured-proj-reference.json';

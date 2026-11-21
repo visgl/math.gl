@@ -7,7 +7,7 @@
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
 import {test, expect} from 'vitest';
-import {toRadians} from '@math.gl/core';
+import {toRadians} from '@math.gl/core/matrix';
 import {
   isWGS84,
   fromCartographicToRadians,

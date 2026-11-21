@@ -1,4 +1,4 @@
-# @math.gl/geospatial/projection/types
+# @math.gl/geospatial/projection-types
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -8,7 +8,7 @@
 Create one through a [`ProjectionEngine`](./api-reference/projection-engine.md).
 
 ```typescript
-import type { Projection, ProjectionEngine } from "@math.gl/geospatial/projection/types";
+import type { Projection, ProjectionEngine } from "@math.gl/geospatial/projection-types";
 import { projectionEngine } from "@math.gl/geospatial/projection";
 
 const engine: ProjectionEngine = projectionEngine;

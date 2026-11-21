@@ -9,7 +9,7 @@
 /* eslint-disable */
 import {test, expect} from 'vitest';
 
-import {Vector3, Matrix4, equals} from '@math.gl/core';
+import {Vector3, Matrix4, equals} from '@math.gl/core/matrix';
 import {BoundingSphere, Plane} from '@math.gl/geometry/culling';
 
 // const positionsRadius = 1.0;

@@ -10,7 +10,7 @@ import {
   getSoundSpeedDelGrosso,
   getSoundSpeedMackenzie
 } from '@math.gl/earth/ocean';
-import {CHEN_MILLERO_IPTS68, evaluateChenMillero} from '@math.gl/earth/ocean/sound-speed';
+import {CHEN_MILLERO_IPTS68, evaluateChenMillero} from '../../src/ocean/sound-speed';
 import reference from './data/acoustic-reference.json';
 
 // Controls: `modules/earth/scripts/ocean/generate-acoustic-reference.py`, an independent

@@ -1,4 +1,4 @@
-# DGGSDecoder
+# @math.gl/dggs/decoders
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -81,7 +81,7 @@ This standalone export applies the same policy to readonly longitude/latitude
 pairs from any decoder. It returns fresh pairs without mutating the input.
 
 ```typescript
-import {unwrapDGGSBoundary} from '@math.gl/dggs';
+import {unwrapDGGSBoundary} from '@math.gl/dggs/decoders';
 
 unwrapDGGSBoundary([[179, 10], [-179, 10]]);
 // [[179, 10], [181, 10]]
@@ -101,7 +101,7 @@ seam, computes geodesic edges, nor performs renderer tessellation.
 For example, a decoder adapter can opt into this policy for `GlobalGridLayer`:
 
 ```typescript
-import {H3Decoder} from '@math.gl/dggs';
+import {H3Decoder} from '@math.gl/dggs/h3';
 import {GlobalGridLayer} from '@deck.gl-community/geo-layers';
 
 const globalGrid = {

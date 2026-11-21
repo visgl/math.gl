@@ -11,7 +11,7 @@ import GeometryViewer from '@site/src/components/geometry-viewer';
 A general tapered primitive with independent radii, caps and axis. `topRadius` and `bottomRadius` default to zero: supply at least one positive radius. `height` defaults to `1`, both cap flags to `false`, `nradial` to `10`, `nvertical` to `1`, and `verticalAxis` to y.
 
 ```typescript
-import {TruncatedConeGeometry} from '@math.gl/geometry';
+import {TruncatedConeGeometry} from '@math.gl/geometry/primitives';
 
 const geometry = new TruncatedConeGeometry({height: 1.5, bottomRadius: 0.7, topRadius: 0.3, topCap: true, bottomCap: true});
 ```

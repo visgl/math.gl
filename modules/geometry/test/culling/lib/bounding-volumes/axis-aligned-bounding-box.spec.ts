@@ -8,7 +8,7 @@ import {
   makeAxisAlignedBoundingBoxFromPoints,
   Plane
 } from '@math.gl/geometry/culling';
-import {Vector3, Matrix4} from '@math.gl/core';
+import {Vector3, Matrix4} from '@math.gl/core/matrix';
 
 const positions = [
   new Vector3(3, -1, -3),

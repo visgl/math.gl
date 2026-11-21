@@ -13,7 +13,7 @@ A regional grid may be more accurate than a global approximation, but only withi
 its reviewed coverage and epoch range. `OperationCatalog` helps an application
 choose among **operations it has supplied and reviewed**.
 
-Import it from `@math.gl/geospatial/projection/operations`. It is a separate, optional entry
+Import it from `@math.gl/geospatial/projection-operations`. It is a separate, optional entry
 point: ordinary projections, pipelines and the package root do not include it.
 A retained browser ESM selector measures 6.3 KiB minified / 2.2 KiB gzip
 (Node 24.14.0, esbuild, ES2020, gzip level 9); catalogue data and operation payloads
@@ -28,8 +28,8 @@ metadata are authored for the example; they are not an EPSG database record or a
 claim about a real datum transformation.
 
 ```typescript
-import {OperationCatalog} from '@math.gl/geospatial/projection/operations';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
+import {OperationCatalog} from '@math.gl/geospatial/projection-operations';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
 
 const catalog = new OperationCatalog([
   {

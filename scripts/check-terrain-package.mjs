@@ -47,13 +47,11 @@ if (mesh.error.maxSampleError !== 0 || mesh.indices.length !== 6) throw new Erro
   // Prepared polygon descriptors must interoperate across bundled entry points/module formats.
   const polygonInterop = join(directory, 'cutout-polygons-interop.mjs');
   writeFileSync(polygonInterop, `
-import * as root from '@math.gl/geospatial';
 import * as terrain from '@math.gl/geospatial/terrain';
 import {createRequire} from 'node:module';
 const require = createRequire(import.meta.url);
-const rootCjs = require('@math.gl/geospatial');
 const terrainCjs = require('@math.gl/geospatial/terrain');
-for (const [prepare, split] of [[root, terrainCjs], [rootCjs, terrain], [terrainCjs, rootCjs]]) {
+for (const [prepare, split] of [[terrain, terrainCjs], [terrainCjs, terrain]]) {
   const shape = prepare.prepareTerrainCutoutPolygons([{outer:[[0,0],[2,0],[2,1],[1,1],[1,2],[0,2]]}]);
   const result = split.splitTerrainMesh({positions:Float64Array.of(0,0,0,2,0,0,2,2,0,0,2,0),indices:Uint32Array.of(0,1,2,0,2,3)},shape);
   if (!result.patch.indices.length || !result.remainder.indices.length) throw new Error('Invalid mixed-entry polygon cut');

@@ -18,5 +18,5 @@ export const lazyLambertConformalConic: ProjectionDescriptor =
       ]
     },
     async () =>
-      (await import('@math.gl/geospatial/projection/projections/lcc')).lambertConformalConic
+      (await import('@math.gl/geospatial/projection-projections-lcc')).lambertConformalConic
   );

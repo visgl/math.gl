@@ -6,7 +6,7 @@ Infinite and partially infinite planes are represented analytically by `PlaneSha
 `@math.gl/geometry/culling`; `PlaneGeometry` requires finite `sizeX` and `sizeZ` values.
 
 ```ts
-import {CapsuleGeometry} from '@math.gl/geometry';
+import {CapsuleGeometry} from '@math.gl/geometry/primitives';
 
 const capsule = new CapsuleGeometry({height: 2, radiusBottom: 0.5, radiusTop: 0.25});
 ```
@@ -52,7 +52,7 @@ cubic Hermite curves, and open or closed Catmull–Rom splines. Includes analyti
 unit tangents, flat Float64 sampling, and reusable approximate arc-length tables.
 
 ```ts
-import {CubicBezierCurve, CurveArcLength} from '@math.gl/geometry';
+import {CubicBezierCurve, CurveArcLength} from '@math.gl/geometry/curves';
 
 const curve = new CubicBezierCurve([0, 0, 0], [1, 2, 0], [3, 2, 1], [4, 0, 1]);
 const point = curve.getPoint(0.5);

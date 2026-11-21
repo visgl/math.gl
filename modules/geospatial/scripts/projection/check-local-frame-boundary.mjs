@@ -22,12 +22,12 @@ const baselineCommit = values['baseline-ref']
   : undefined;
 const directory = mkdtempSync(join(tmpdir(), 'math-gl-local-frame-graphs-'));
 const fixtures = {
-  numericLeaf: "export {createLocalFrameBasis, eastNorthUpBasis, eastNorthUpBasisFromDirections, localToFixed, fixedToLocal, localFrameToMatrix} from '@math.gl/core';",
-  deformation: "export {createDeformationModel} from '@math.gl/geospatial/projection/deformation';",
-  coreRoot: "export {Vector3} from '@math.gl/core';",
-  projectionCore: "export {ProjectionTransform} from '@math.gl/geospatial/projection/core';",
-  projectionPipeline: "export {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';",
-  geospatialEllipsoid: "export {Ellipsoid} from '@math.gl/geospatial';"
+  numericLeaf: "export {createLocalFrameBasis, eastNorthUpBasis, eastNorthUpBasisFromDirections, localToFixed, fixedToLocal, localFrameToMatrix} from '@math.gl/core/matrix';",
+  deformation: "export {createDeformationModel} from '@math.gl/geospatial/projection-deformation';",
+  coreRoot: "export {Vector3} from '@math.gl/core/matrix';",
+  projectionCore: "export {ProjectionTransform} from '@math.gl/geospatial/projection-core';",
+  projectionPipeline: "export {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';",
+  geospatialEllipsoid: "export {Ellipsoid} from '@math.gl/geospatial/ellipsoid';"
 };
 const rows = [];
 try {

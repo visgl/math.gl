@@ -11,7 +11,7 @@ import GeometryViewer from '@site/src/components/geometry-viewer';
 A box centered at the origin. `size` specifies positive total X, Y and Z lengths (default `[1, 1, 1]`).
 
 ```typescript
-import {BoxGeometry} from '@math.gl/geometry';
+import {BoxGeometry} from '@math.gl/geometry/primitives';
 
 const geometry = new BoxGeometry({size: [1.5, 1, 0.75]});
 ```

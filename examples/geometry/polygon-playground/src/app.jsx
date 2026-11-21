@@ -10,7 +10,7 @@ import {
   ModifyMode,
   DrawPolygonMode
 } from '@deck.gl-community/editable-layers';
-import {earcut, getPolygonSignedArea, getPolygonWindingDirection} from '@math.gl/geometry';
+import {earcut, getPolygonSignedArea, getPolygonWindingDirection} from '@math.gl/geometry/polygon';
 import './styles.css';
 
 const initial = [

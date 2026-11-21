@@ -4,7 +4,8 @@
 
 import {DateDay, Field, Float64, TimestampMicrosecond, tableFromArrays} from 'apache-arrow';
 import {expect, test} from 'vitest';
-import {queryArrowSQL, queryArrowSQLWithMetadata, type AggregateFunction} from '@math.gl/sql';
+import {queryArrowSQL, queryArrowSQLWithMetadata} from '@math.gl/sql/query';
+import {type AggregateFunction} from '@math.gl/sql/arrow';
 import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 
 const SPREAD = {

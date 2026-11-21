@@ -3,7 +3,11 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {createTerrainDrainage, getTerrainCellMetrics, HeightField} from '@math.gl/geospatial';
+import {
+  createTerrainDrainage,
+  getTerrainCellMetrics,
+  HeightField
+} from '@math.gl/geospatial/terrain';
 
 /** A small cell-registered raster, with optional affine steps. */
 function raster(heights: number[], columnStep = [1, 0], rowStep = [0, 1]) {

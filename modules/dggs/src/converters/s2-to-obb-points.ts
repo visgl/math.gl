@@ -7,7 +7,7 @@ import {getS2Region} from './s2-to-region';
 import {getS2IndexFromToken} from '../s2-geometry/s2-token';
 
 // import {OrientedBoundingBox, makeOrientedBoundingBoxFromPoints} from '@math.gl/geometry/culling';
-// import {Ellipsoid} from '@math.gl/geospatial';
+// import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
 export type S2HeightInfo = {
   minimumHeight: number;

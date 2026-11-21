@@ -11,5 +11,5 @@ export const lazyEquidistantCylindrical: ProjectionDescriptor =
       aliases: ['Equirectangular', 'Equidistant_Cylindrical', 'Equidistant_Cylindrical_Spherical']
     },
     async () =>
-      (await import('@math.gl/geospatial/projection/projections/eqc')).equidistantCylindrical
+      (await import('@math.gl/geospatial/projection-projections-eqc')).equidistantCylindrical
   );

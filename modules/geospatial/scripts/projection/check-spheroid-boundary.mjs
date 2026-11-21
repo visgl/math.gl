@@ -22,15 +22,15 @@ const baselineCommit = values['baseline-ref']
   : undefined;
 const directory = mkdtempSync(join(tmpdir(), 'math-gl-spheroid-graphs-'));
 const fixtures = {
-  temporalModel: "export * from '@math.gl/geospatial/projection/temporal';",
-  staticModel: "export {createDeformationModel} from '@math.gl/geospatial/projection/deformation';",
-  projectionBulk: "export * from '@math.gl/geospatial/projection/bulk';",
-  projectionAnalysis: "export * from '@math.gl/geospatial/projection/analysis';",
-  numericLeaf: "export {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core';",
-  coreRoot: "export {Vector3} from '@math.gl/core';",
-  projectionCore: "export {ProjectionTransform} from '@math.gl/geospatial/projection/core';",
-  projectionPipeline: "export {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';",
-  geospatialEllipsoid: "export {Ellipsoid} from '@math.gl/geospatial';"
+  temporalModel: "export * from '@math.gl/geospatial/projection-temporal';",
+  staticModel: "export {createDeformationModel} from '@math.gl/geospatial/projection-deformation';",
+  projectionBulk: "export * from '@math.gl/geospatial/projection-bulk';",
+  projectionAnalysis: "export * from '@math.gl/geospatial/projection-analysis';",
+  numericLeaf: "export {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core/matrix';",
+  coreRoot: "export {Vector3} from '@math.gl/core/matrix';",
+  projectionCore: "export {ProjectionTransform} from '@math.gl/geospatial/projection-core';",
+  projectionPipeline: "export {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';",
+  geospatialEllipsoid: "export {Ellipsoid} from '@math.gl/geospatial/ellipsoid';"
 };
 const rows = [];
 try {

@@ -7,7 +7,7 @@ import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyGeocentric: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'geocent', aliases: ['Geocentric', 'geocentric', 'Geocent']},
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/geocent');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-geocent');
     return projectionModule.geocentric;
   }
 );

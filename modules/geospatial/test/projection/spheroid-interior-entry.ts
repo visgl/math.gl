@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original qualification against authored Decimal references; no external models.
-import {config} from '@math.gl/core';
-import {cartesianToSpheroid} from '@math.gl/core';
-import {Ellipsoid} from '@math.gl/geospatial';
-import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
-import {geocentric} from '@math.gl/geospatial/projection/projections/geocent';
+import {config} from '@math.gl/core/matrix';
+import {cartesianToSpheroid} from '@math.gl/core/matrix';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
+import {geocentric} from '@math.gl/geospatial/projection-projections-geocent';
 import fixtures from './fixtures/interior-reference.json';
 import cuspFixtures from './fixtures/nearest-cusp-reference.json';
 

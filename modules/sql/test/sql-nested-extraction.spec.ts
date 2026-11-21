@@ -14,7 +14,7 @@ import {
   vectorFromArray
 } from 'apache-arrow';
 import {expect, test} from 'vitest';
-import {queryArrowSQL, queryArrowTable} from '@math.gl/sql';
+import {queryArrowSQL, queryArrowTable} from '@math.gl/sql/query';
 import {compileArrowExpression} from '@math.gl/sql/arrow';
 import {parseSQLExpression, parseSQLQuery} from '@math.gl/sql/parser';
 

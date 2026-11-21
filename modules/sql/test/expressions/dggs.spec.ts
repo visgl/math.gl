@@ -9,7 +9,7 @@ import {
   GEOHASH_FUNCTION_LIBRARY,
   QUADKEY_FUNCTION_LIBRARY,
   S2_FUNCTION_LIBRARY
-} from '@math.gl/dggs';
+} from '@math.gl/dggs/decoders';
 
 test('@math.gl/dggs function tables', () => {
   const registry = new ExpressionFunctionRegistry([DGGS_FUNCTION_LIBRARY]);

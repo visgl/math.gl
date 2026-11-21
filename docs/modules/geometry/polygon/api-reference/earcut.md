@@ -7,7 +7,7 @@
 Computes a triangulation of a polygon using the [earcut library](https://github.com/mapbox/earcut).
 
 ```js
-import {earcut} from '@math.gl/geometry';
+import {earcut} from '@math.gl/geometry/polygon';
 
 earcut([10, 0, 0, 50, 60, 60, 70, 10]);
 // returns [1, 0, 3, 1, 3, 2]
@@ -67,7 +67,7 @@ touch at a vertex are common in clipped vector tiles.
 ## Choosing a triangulation strategy
 
 ```ts
-import {earcut, type EarcutOptions} from '@math.gl/geometry';
+import {earcut, type EarcutOptions} from '@math.gl/geometry/polygon';
 
 const options: EarcutOptions = {triangulation: 'balanced'};
 const indices = earcut(positions, holeIndices, 2, undefined, 'xy', options);

@@ -7,7 +7,7 @@ Global grid encodings identify cells rather than individual coordinates. Use `@m
 Choose a decoder for the encoding used by your data:
 
 ```js
-import {GeohashDecoder} from '@math.gl/dggs';
+import {GeohashDecoder} from '@math.gl/dggs/geohash';
 
 const center = GeohashDecoder.cellToLngLat('9q8yy');
 const boundary = GeohashDecoder.cellToBoundary('9q8yy');
@@ -26,7 +26,7 @@ Use the [decoder reference](../api-reference/dggs-decoder.md) for winding, ring 
 ## Detect a cell column
 
 ```js
-import {findDGGSCellColumn} from '@math.gl/dggs';
+import {findDGGSCellColumn} from '@math.gl/dggs/decoders';
 
 const match = findDGGSCellColumn(['name', 's2_token', 'value']);
 // {columnName: 's2_token', decoder: S2Decoder}

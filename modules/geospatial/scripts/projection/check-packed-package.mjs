@@ -79,8 +79,8 @@ try {
   assert(!('./discontinuous' in packageManifest.exports));
   assert(!('./projection/crs-descriptor' in packageManifest.exports));
   const subpaths = Object.keys(packageManifest.exports)
-    .filter(path => path.startsWith('./projection/'))
-    .map(path => '.' + path.slice('./projection'.length));
+    .filter(path => path.startsWith('./projection-'))
+    .map(path => path.slice('./projection'.length));
   // Enumerate the manifest so every newly supported subpath must work in a real tarball.
   for (const path of Object.keys(packageManifest.exports)) {
     assert(!/^\.\/projection\/(?:native|experimental)(?:\/|$)/.test(path), `Redundant projection entrypoint: ${path}`);
@@ -88,24 +88,24 @@ try {
   // CJS descriptors must keep their package imports deferred, too.
   const packedRoot = join(temporary, 'node_modules/@math.gl/geospatial');
   for (const [path, entry] of Object.entries(packageManifest.exports)) {
-    if (!path.startsWith('./projection/projections/lazy/')) continue;
+    if (!path.startsWith('./projection-projections-lazy-')) continue;
     const cjs = readFileSync(join(packedRoot, entry.require), 'utf8');
     assert(
-      cjs.includes('import("@math.gl/geospatial/projection/projections/'),
+      cjs.includes('import("@math.gl/geospatial/projection-projections-'),
       path + ' must retain a dynamic import'
     );
     assert(!cjs.includes('function clenshaw'), path + ' must not inline a projection kernel');
   }
   const entrySmoke = `
     const {compile} = await load('@math.gl/sql/expressions');
-    const {GEOSPATIAL_FUNCTION_LIBRARY} = await load('@math.gl/geospatial');
+    const {GEOSPATIAL_FUNCTION_LIBRARY} = await load('@math.gl/geospatial/expressions');
     const toRadians = compile('toRadians(angle)', {libraries: [GEOSPATIAL_FUNCTION_LIBRARY]});
     assert.equal(toRadians({angle: 180}), Math.PI);
     const maps = await load('@math.gl/geospatial/maps');
-    const presets = await load('@math.gl/geospatial/maps/presets');
-    const geometry = await load('@math.gl/geospatial/maps/geometry');
-    const surfaces = await load('@math.gl/geospatial/maps/surfaces');
-    const transitions = await load('@math.gl/geospatial/maps/transitions');
+    const presets = await load('@math.gl/geospatial/maps-presets');
+    const geometry = await load('@math.gl/geospatial/maps-geometry');
+    const surfaces = await load('@math.gl/geospatial/maps-surfaces');
+    const transitions = await load('@math.gl/geospatial/maps-transitions');
     assert.equal(typeof transitions.prepareMapTransitionMeshAsync, 'function');
     const description = {version:1,id:'usa',definition:{type:'albers-usa'}};
     const map = new maps.MapEngine(description,{presets:[presets.albersUsaMapPreset]});
@@ -128,30 +128,30 @@ try {
     assert.equal(stable.mercator, api.mercator);
     const subpaths = ${JSON.stringify(subpaths)};
     const optionalEntries = {
-      './web-mercator': ['WebMercatorProjectionEngine'],
-      './temporal': ['createTemporalDeformationModel'],
-      './datums': ['datumCatalog'],
-      './bulk': ['ProjectionBuffer'],
-      './operations': ['OperationCatalog'],
-      './analysis': ['ProjectionAnalysis', 'createProjectionJacobian', 'createProjectionFactors'],
-      './analysis/transform': ['createProjectionTransformAnalysis'],
-      './deformation': ['createDeformationModel'],
-      './grids/velocity': ['createVelocityGrid'],
-      './grids/velocity-geotiff': ['loadVelocityGeoTIFFGrid']
+      '-web-mercator': ['WebMercatorProjectionEngine'],
+      '-temporal': ['createTemporalDeformationModel'],
+      '-datums': ['datumCatalog'],
+      '-bulk': ['ProjectionBuffer'],
+      '-operations': ['OperationCatalog'],
+      '-analysis': ['ProjectionAnalysis', 'createProjectionJacobian', 'createProjectionFactors'],
+      '-analysis-transform': ['createProjectionTransformAnalysis'],
+      '-deformation': ['createDeformationModel'],
+      '-grids-velocity': ['createVelocityGrid'],
+      '-grids-velocity-geotiff': ['loadVelocityGeoTIFFGrid']
     };
     for (const names of Object.values(optionalEntries)) for (const name of names)
       assert(!(name in api), name + ' must remain outside the root');
     for (const subpath of subpaths) {
-      const entry = await load('@math.gl/geospatial/projection' + subpath.slice(1));
-      if (subpath === './types') assert.equal(Object.keys(entry).length, 0);
+      const entry = await load('@math.gl/geospatial/projection' + subpath);
+      if (subpath === '-types') assert.equal(Object.keys(entry).length, 0);
       else assert(Object.keys(entry).length > 0, subpath);
       if (optionalEntries[subpath]) {
         assert.deepEqual(Object.keys(entry).sort(), optionalEntries[subpath].slice().sort());
-        for (const name of optionalEntries[subpath]) assert.equal(typeof entry[name], subpath === './datums' ? 'object' : 'function');
+        for (const name of optionalEntries[subpath]) assert.equal(typeof entry[name], subpath === '-datums' ? 'object' : 'function');
         continue;
       }
       for (const [name, value] of Object.entries(entry)) {
-        if (subpath.startsWith('./projections/lazy')) {
+        if (subpath.startsWith('-projections-lazy')) {
           if (typeof value === 'function') assert(['lazyObliqueTransformation', 'LazyProjectionEngine'].includes(name));
           else if (name === 'lazyProjectionEngine') assert.equal(typeof value.createProjectionAsync, 'function');
           else { assert.equal(typeof value.preload, 'function'); assert.equal((await value.preload()).name, value.name); }
@@ -162,14 +162,14 @@ try {
         if (value && typeof value === 'object' && 'create' in value) assert.equal(value.name, api[name].name);
       }
     }
-    const lazyEntry = await load('@math.gl/geospatial/projection/projections/lazy');
+    const lazyEntry = await load('@math.gl/geospatial/projection-projections-lazy');
     assert(!('LazyProjection' in lazyEntry));
     const {LazyProjectionEngine, lazyProjectionEngine} = lazyEntry;
     const automatic = lazyProjectionEngine.createProjection({to: 'EPSG:32631'});
     assert(Math.abs((await automatic.project([3, 0]))[0] - 500000) < 1e-7);
     assert(Math.abs(automatic.projectSync([3, 0])[0] - 500000) < 1e-7);
-    const core = await load('@math.gl/geospatial/projection/core');
-    const {datumCatalog} = await load('@math.gl/geospatial/projection/datums');
+    const core = await load('@math.gl/geospatial/projection-core');
+    const {datumCatalog} = await load('@math.gl/geospatial/projection-datums');
     const regional = '+proj=longlat +datum=OSGB36';
     assert.throws(() => new core.ProjectionTransform({from:regional}), /datumCatalogs/);
     assert.equal(core.checkProjectionCompatibility(regional).status, 'unsupported');
@@ -180,7 +180,7 @@ try {
     assert.equal(core.checkProjectionCompatibility(regional,{datumCatalogs:[datumCatalog]}).status,'supported');
     const regionalLazy = await new LazyProjectionEngine({datumCatalogs:[datumCatalog]}).createProjectionAsync({from:regional,to:'EPSG:3857'});
     assert(Number.isFinite(regionalLazy.project([-2,52])[0]));
-    const {spheroidToCartesian, cartesianToSpheroid} = await load('@math.gl/core');
+    const {spheroidToCartesian, cartesianToSpheroid} = await load('@math.gl/core/matrix');
     const numericOutput = {x:0,y:0,z:3};
     const numericGeometry = {semiMajorAxis:10,semiMinorAxis:5,eccentricitySquared:.75};
     assert(spheroidToCartesian(numericOutput,numericGeometry));
@@ -189,7 +189,7 @@ try {
     assert.deepEqual(numericOutput,{x:0,y:0,z:3});
     assert(!cartesianToSpheroid({x:0,y:0,z:0},numericGeometry,numericOutput));
     assert.deepEqual(numericOutput,{x:0,y:0,z:3});
-    const frames = await load('@math.gl/core');
+    const frames = await load('@math.gl/core/matrix');
     const basis = frames.createLocalFrameBasis();
     assert(frames.eastNorthUpBasis(0,0,basis));
     const velocityPoint = {x:1,y:2,z:3};
@@ -202,7 +202,8 @@ try {
     assert(frames.localFrameToMatrix(basis,{x:10,y:0,z:0},'north','east','down',frameMatrix));
     [0,0,1,0,0,1,0,0,-1,0,0,0,10,0,0,1].forEach((v,i)=>assert(Math.abs(frameMatrix[i]-v)<1e-15));
     assert(!frames.eastNorthUpBasis(0,Infinity,basis));
-    const {Ellipsoid, eastNorthUpToFixedFrame} = await load('@math.gl/geospatial');
+    const {Ellipsoid} = await load('@math.gl/geospatial/ellipsoid');
+    const {eastNorthUpToFixedFrame} = await load('@math.gl/geospatial/coordinates');
     const equatorialFrame = eastNorthUpToFixedFrame(new Ellipsoid(10,10,5),[10,0,0],[]);
     [0,1,0,0,0,0,1,0,1,0,0,0,10,0,0,1].forEach((v,i)=>assert(Math.abs(equatorialFrame[i]-v)<1e-15));
     const shape = Ellipsoid.fromSpheroid(core.normalizeCRS('EPSG:4326').ellipsoid);
@@ -228,10 +229,10 @@ try {
     assert(!('TypeScriptProjection' in core));
     assert(!('checkTypeScriptCRSCompatibility' in core));
     assert.deepEqual(new core.ProjectionTransform({}).project([12, 55, 123, 8]), [12, 55, 123, 8]);
-    const {createTemporalDeformationModel} = await load('@math.gl/geospatial/projection/temporal');
+    const {createTemporalDeformationModel} = await load('@math.gl/geospatial/projection-temporal');
     const temporalModel=createTemporalDeformationModel({epochRange:[2000,2030],ellipsoid:{semiMajorAxis:10,flattening:0},components:[{id:'event',units:'m',timeFunction:{type:'step',epoch:2015},field:{sample(lon,lat,p){p.x=0;p.y=0;p.z=.1;return true;}}}]});
     const temporalPoint={x:10,y:0,z:0};temporalModel.forward(temporalPoint,2010,2020);assert(Math.abs(temporalPoint.x-10.1)<1e-14);temporalModel.inverse(temporalPoint,2010,2020);assert(Math.abs(temporalPoint.x-10)<1e-8);
-    const {ProjectionBuffer} = await load('@math.gl/geospatial/projection/bulk');
+    const {ProjectionBuffer} = await load('@math.gl/geospatial/projection-bulk');
     const bufferProjection = new core.ProjectionTransform({to:'EPSG:3857',projections:[api.mercator]});
     const bufferInput = new Float64Array([3,40,12,7,4,50,20,9]);
     const bufferOutput = new Float32Array(8);
@@ -242,13 +243,13 @@ try {
     const bufferColumnOutput = bufferColumns.map(()=>new Float32Array(2));
     assert.equal(buffers.projectColumnsTo(bufferColumns,bufferColumnOutput),bufferColumnOutput);
     for(let i=0;i<4;i++) for(let j=0;j<2;j++) assert.equal(bufferColumnOutput[i][j],bufferOutput[j*4+i]);
-    const {ProjectionAnalysis, createProjectionFactors, createProjectionJacobian} = await load('@math.gl/geospatial/projection/analysis');
+    const {ProjectionAnalysis, createProjectionFactors, createProjectionJacobian} = await load('@math.gl/geospatial/projection-analysis');
     const inspected = new ProjectionAnalysis({projection: api.mercator, context: {semiMajorAxis:10,eccentricitySquared:0,parameters:{}}, domain:{west:-1,east:1,south:-1,north:1}});
     const factors = createProjectionFactors(), jacobian = createProjectionJacobian();
     assert(inspected.factors(0,0,factors)); assert(inspected.jacobian(0,0,jacobian));
     assert(Math.abs(factors.meridionalScale - 1) < 1e-10);
     assert(Math.abs(jacobian.dxDLongitude - 10) < 1e-10);
-    const {OperationCatalog} = await load('@math.gl/geospatial/projection/operations');
+    const {OperationCatalog} = await load('@math.gl/geospatial/projection-operations');
     const createOperation = () => new core.ProjectionTransform({});
     const selection = new OperationCatalog([{
       id:'authored',sourceCRS:'app:source',targetCRS:'app:target',area:[-180,-90,180,90],
@@ -261,7 +262,7 @@ try {
     const chosen = selection.select({...selectionRequest,availableGrids:[{id:'local',revision:'1'}]});
     assert.equal(chosen.operation, createOperation);
     assert.deepEqual(chosen.operation().project([12,55,100,8]), [12,55,100,8]);
-    const {ProjectionPipeline} = await load('@math.gl/geospatial/projection/pipeline');
+    const {ProjectionPipeline} = await load('@math.gl/geospatial/projection-pipeline');
     const pipeline = new ProjectionPipeline({input: {space: 'geographic', units: ['deg', 'deg', 'm']}, steps: [
       {type: 'unitconvert', xy: {from: 'deg', to: 'rad'}}, {type: 'projection', name: 'merc', parameters: {a: '6378137', b: '6378137'}}
     ], projections: [api.mercator]});
@@ -369,15 +370,15 @@ try {
         }
     }
 
-    const {obliqueTransformation} = await load('@math.gl/geospatial/projection/projections/ob_tran');
+    const {obliqueTransformation} = await load('@math.gl/geospatial/projection-projections-ob_tran');
     const rotated = new ProjectionPipeline({input: {space: 'geographic', units: ['rad', 'rad', 'm']}, projections: [obliqueTransformation('longlat')], steps: [
       {type: 'projection', name: 'ob_tran', parameters: {o_proj: 'longlat', o_lat_p: '45', o_lon_p: '-90'}, output: {space: 'geographic', unit: 'rad'}}
     ]});
     const rotatedPoint = [0.2, 0.7, 123, 8];
     rotated.unproject(rotated.project(rotatedPoint)).forEach((value, index) => assert(Math.abs(value - rotatedPoint[index]) < 1e-12));
 
-    const {parseGTXGrid} = await load('@math.gl/geospatial/projection/grids/gtx');
-    const {createVerticalGrid} = await load('@math.gl/geospatial/projection/grids/vertical');
+    const {parseGTXGrid} = await load('@math.gl/geospatial/projection-grids-gtx');
+    const {createVerticalGrid} = await load('@math.gl/geospatial/projection-grids-vertical');
     const local = createVerticalGrid({origin: [0, 0], step: [1, 1], size: [2, 2], offsets: [10, 20, 30, 40]});
     const height = new core.ProjectionTransform({from: '+proj=longlat +datum=WGS84 +geoidgrids=local', verticalGrids: {local}});
     assert.deepEqual(height.project([0, 0, 100, 7]), [0, 0, 110, 7]);
@@ -389,7 +390,7 @@ try {
     data.setInt32(32, 2); data.setInt32(36, 2);
     for (let i = 0; i < 4; i++) data.setFloat32(40 + i * 4, 25);
     assert.equal(parseGTXGrid(gtx).getOffset(0, 0), 25);
-    const {loadVerticalGeoTIFFGrid} = await load('@math.gl/geospatial/projection/grids/vertical-geotiff');
+    const {loadVerticalGeoTIFFGrid} = await load('@math.gl/geospatial/projection-grids-vertical-geotiff');
     const tiffGrid = await loadVerticalGeoTIFFGrid({getImageCount: async () => 1, getImage: async () => ({
       getWidth: () => 2, getHeight: () => 2,
       getGeoKeys: () => ({GTModelTypeGeoKey: 2, GTRasterTypeGeoKey: 2}),
@@ -399,28 +400,28 @@ try {
     })});
     assert.equal(tiffGrid.getOffset(0, 0), 15);
     assert.deepEqual(new core.ProjectionTransform({from: '+proj=longlat +geoidgrids=tiff', verticalGrids: {tiff: tiffGrid}}).project([0, 0, 100, 7]), [0, 0, 115, 7]);
-    const {createVelocityGrid} = await load('@math.gl/geospatial/projection/grids/velocity');
-    const {createDeformationModel} = await load('@math.gl/geospatial/projection/deformation');
+    const {createVelocityGrid} = await load('@math.gl/geospatial/projection-grids-velocity');
+    const {createDeformationModel} = await load('@math.gl/geospatial/projection-deformation');
     const velocityGrid = createVelocityGrid({origin: [-1, -1], step: [2, 2], size: [2, 2], units: 'm/year', east: [1,1,1,1], north: [2,2,2,2], up: [3,3,3,3]});
     const deformation = createDeformationModel({grid: velocityGrid, epochRange: [2000,2030]});
     const propagation = new ProjectionPipeline({input: {space: 'geocentric', units: ['m','m','m']}, steps: [{type:'deformation', model:deformation, sourceEpoch:2010, targetEpoch:2020}]});
     assert.deepEqual(propagation.project([6378137,0,0,7]), [6378167,10,20,7]);
     const restored = propagation.unproject([6378167,10,20,7]);
     assert(Math.hypot(restored[0]-6378137,restored[1],restored[2]) < 1e-8);
-    const {loadVelocityGeoTIFFGrid} = await load('@math.gl/geospatial/projection/grids/velocity-geotiff');
+    const {loadVelocityGeoTIFFGrid} = await load('@math.gl/geospatial/projection-grids-velocity-geotiff');
     const decodedVelocity = await loadVelocityGeoTIFFGrid({images:[{width:2,height:2,bands:[0,1,2].map(index => ({index,data:new Float32Array(4).fill(index+1),metadata:{DESCRIPTION:['east_velocity','north_velocity','up_velocity'][index],UNITTYPE:'mm/year'}})),geoKeys:{GTModelTypeGeoKey:2,GTRasterTypeGeoKey:2},metadata:{TYPE:'VELOCITY'},noData:null,fileDirectory:{ModelPixelScale:[2,2,0],ModelTiepoint:[0,0,0,-1,1,0]}}]});
     const sampled = {x:0,y:0,z:0};
     assert(decodedVelocity.sample(0,0,sampled));
     assert.deepEqual(sampled,{x:0.001,y:0.002,z:0.003});
-    const descriptors = await load('@math.gl/geospatial/projection/projections/lazy/utm');
+    const descriptors = await load('@math.gl/geospatial/projection-projections-lazy-utm');
     const lazy = new core.ProjectionTransform({to: 'EPSG:32631', projections: [descriptors.lazyUniversalTransverseMercator]});
     await descriptors.lazyUniversalTransverseMercator.preload();
     assert(Math.abs(lazy.projectSync([3, 0])[0] - 500000) < 1e-7);
     assert(Math.abs((await lazy.project([3, 0]))[0] - 500000) < 1e-7);
-    const {universalTransverseMercator} = await load('@math.gl/geospatial/projection/projections/utm');
+    const {universalTransverseMercator} = await load('@math.gl/geospatial/projection-projections-utm');
     const utm = new core.ProjectionTransform({to: 'EPSG:32631', projections: [universalTransverseMercator]});
     assert(Math.abs(utm.project([3, 0])[0] - 500000) < 1e-7);
-    const {wktCRSParser} = await load('@math.gl/geospatial/projection/parsers/wkt');
+    const {wktCRSParser} = await load('@math.gl/geospatial/projection-parsers-wkt');
     const unsupported = 'PROJCS["Unsupported",GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]],PROJECTION["Unimplemented"],UNIT["metre",1]]';
     assert.equal(core.checkProjectionCompatibility(unsupported, {parsers: [wktCRSParser]}).reason, 'missing-transform-stage');
     assert.throws(() => core.normalizeCRS(unsupported, {parsers: [wktCRSParser]}), error =>
@@ -482,15 +483,15 @@ try {
   writeFileSync(
     join(temporary, 'consumer.ts'),
     `
-    ${subpaths.map((path, index) => 'import * as entry' + index + " from '@math.gl/geospatial/projection" + path.slice(1) + "';\nvoid entry" + index + ';').join('\n')}
+    ${subpaths.map((path, index) => 'import * as entry' + index + " from '@math.gl/geospatial/projection" + path + "';\nvoid entry" + index + ';').join('\n')}
     import {MapEngine as TypedMapEngine} from '@math.gl/geospatial/maps';
-    import {albersUsaMapPreset as typedPreset} from '@math.gl/geospatial/maps/presets';
-    import {mapGeometry as typedGeometry} from '@math.gl/geospatial/maps/geometry';
-    import {prepareMapSurface as typedSurface} from '@math.gl/geospatial/maps/surfaces';
-    import {mapTransitions as typedTransitions} from '@math.gl/geospatial/maps/transitions';
+    import {albersUsaMapPreset as typedPreset} from '@math.gl/geospatial/maps-presets';
+    import {mapGeometry as typedGeometry} from '@math.gl/geospatial/maps-geometry';
+    import {prepareMapSurface as typedSurface} from '@math.gl/geospatial/maps-surfaces';
+    import {mapTransitions as typedTransitions} from '@math.gl/geospatial/maps-transitions';
     const typedMap = new TypedMapEngine({version:1,id:'usa',definition:{type:'albers-usa'}},{presets:[typedPreset],geometry:typedGeometry,transitions:typedTransitions});
     typedSurface(typedMap);
-    import {createLocalFrameBasis, eastNorthUpBasis, eastNorthUpBasisFromDirections, localToFixed, fixedToLocal, localFrameToMatrix, type LocalFrameBasis, type LocalFramePoint, type LocalFrameAxis} from '@math.gl/core';
+    import {createLocalFrameBasis, eastNorthUpBasis, eastNorthUpBasisFromDirections, localToFixed, fixedToLocal, localFrameToMatrix, type LocalFrameBasis, type LocalFramePoint, type LocalFrameAxis} from '@math.gl/core/matrix';
     const basis: LocalFrameBasis = createLocalFrameBasis();
     const framePoint: LocalFramePoint = {x:1,y:2,z:3};
     const axis: LocalFrameAxis = 'east';
@@ -502,16 +503,16 @@ try {
     eastNorthUpBasis(0,0);
     // @ts-expect-error Axes are named signed local directions.
     localFrameToMatrix(basis,framePoint,'x','y','z',[]);
-    import {spheroidToCartesian, cartesianToSpheroid, type SpheroidPoint, type SpheroidGeometry} from '@math.gl/core';
+    import {spheroidToCartesian, cartesianToSpheroid, type SpheroidPoint, type SpheroidGeometry} from '@math.gl/core/matrix';
     const numericPoint: SpheroidPoint = {x:0,y:0,z:0};
     const numericGeometry: SpheroidGeometry = {semiMajorAxis:10,semiMinorAxis:5,eccentricitySquared:.75};
     const forwardStatus: boolean = spheroidToCartesian(numericPoint,numericGeometry);
     const inverseStatus: boolean = cartesianToSpheroid(numericPoint,numericGeometry);
     void forwardStatus; void inverseStatus;
-    import {Ellipsoid, type SpheroidParameters as GeospatialSpheroid} from '@math.gl/geospatial';
-    import type {SpheroidParameters as TypesSpheroid} from '@math.gl/core';
-    import type {SpheroidParameters as CoreSpheroid} from '@math.gl/core';
-    import {normalizeCRS, type SpheroidParameters as ProjectionSpheroid} from '@math.gl/geospatial/projection/core';
+    import {Ellipsoid, type SpheroidParameters as GeospatialSpheroid} from '@math.gl/geospatial/ellipsoid';
+    import type {SpheroidParameters as TypesSpheroid} from '@math.gl/core/types';
+    import type {SpheroidParameters as CoreSpheroid} from '@math.gl/core/types';
+    import {normalizeCRS, type SpheroidParameters as ProjectionSpheroid} from '@math.gl/geospatial/projection-core';
     const shape = Ellipsoid.fromSpheroid(normalizeCRS('EPSG:4326').ellipsoid);
     const axes: GeospatialSpheroid = shape.toSpheroid();
     const sharedAxes: TypesSpheroid = axes;
@@ -526,25 +527,25 @@ try {
     Ellipsoid.fromSpheroid({a: '6378137', b: '6356752'});
     // @ts-expect-error The axes are numeric metres.
     Ellipsoid.fromSpheroid({semiMajorAxis: '6378137', semiMinorAxis: 6356752});
-    import {LazyProjectionEngine, lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
-    import type {CreateProjectionOptions} from '@math.gl/geospatial/projection/types';
+    import {LazyProjectionEngine, lazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
+    import type {CreateProjectionOptions} from '@math.gl/geospatial/projection-types';
     const lazyOptions: CreateProjectionOptions = {to: 'EPSG:32631'};
     const automatic = lazyProjectionEngine.createProjection(lazyOptions);
     const automaticResult: Promise<number[]> = automatic.project([3, 0]);
     const automaticFlat: Promise<Float32Array> = automatic.projectFlat(new Float32Array([3, 0]));
-    import {createTemporalDeformationModel, type TemporalFunction, type DeformationField, type TemporalDeformationOptions} from '@math.gl/geospatial/projection/temporal';
+    import {createTemporalDeformationModel, type TemporalFunction, type DeformationField, type TemporalDeformationOptions} from '@math.gl/geospatial/projection-temporal';
     const timeLaw:TemporalFunction={type:'exponential',epoch:2015,timeConstantYears:2};
     const temporalField:DeformationField={sample(lon,lat,p){p.x=0;p.y=0;p.z=1;return true;}};
     const temporalOptions:TemporalDeformationOptions={epochRange:[2000,2030],components:[{id:'relaxation',units:'m',timeFunction:timeLaw,field:temporalField}]};
     const temporalModel=createTemporalDeformationModel(temporalOptions);temporalModel.forward({x:6378137,y:0,z:0},2010,2020);
-    import {ProjectionBuffer, type BulkProjection, type ProjectionBufferOptions} from '@math.gl/geospatial/projection/bulk';
+    import {ProjectionBuffer, type BulkProjection, type ProjectionBufferOptions} from '@math.gl/geospatial/projection-bulk';
     const bufferTransform: BulkProjection = automatic;
     const bufferOptions: ProjectionBufferOptions = {projection:bufferTransform,dimension:4,inputStride:6,outputStride:7};
     const bufferProjection = new ProjectionBuffer(bufferOptions);
     const separateResult:Float32Array = bufferProjection.projectFlatTo(new Float64Array(6),new Float32Array(7),1,0,new Float64Array([2020]));
     const columnOutputs = [new Float32Array(1),new Float64Array(1),new Float64Array(1),new Float64Array(1)] as const;
     const columnResult:typeof columnOutputs = bufferProjection.unprojectColumnsTo(columnOutputs,columnOutputs,1,0,2020);
-    import {ProjectionAnalysis, createProjectionFactors, createProjectionJacobian, type ProjectionAnalysisOptions, type ProjectionDomain, type ProjectionFactors, type ProjectionJacobian} from '@math.gl/geospatial/projection/analysis';
+    import {ProjectionAnalysis, createProjectionFactors, createProjectionJacobian, type ProjectionAnalysisOptions, type ProjectionDomain, type ProjectionFactors, type ProjectionJacobian} from '@math.gl/geospatial/projection-analysis';
     const analysisDomain: ProjectionDomain = {west:-1,east:1,south:-1,north:1};
     const analysisOptions: ProjectionAnalysisOptions = {projection:mercator,context:{semiMajorAxis:10,eccentricitySquared:0,parameters:{}},domain:analysisDomain};
     const inspected = new ProjectionAnalysis(analysisOptions);
@@ -554,9 +555,9 @@ try {
     inspected.factors(0,0);
     // @ts-expect-error Analysis requires an explicit application domain.
     new ProjectionAnalysis({projection:mercator,context:analysisOptions.context});
-    import {ProjectionTransform, checkProjectionCompatibility, type ProjectionPoint, type ProjectionTransformOptions, type ProjectionTransformCreateOptions, type ProjectionCompatibility} from '@math.gl/geospatial/projection/core';
-    import {datumCatalog, type DatumCatalogPlugin, type DatumDefinition} from '@math.gl/geospatial/projection/datums';
-    import type {DatumCatalogPlugin as CoreDatumCatalog, DatumDefinition as CoreDatumDefinition} from '@math.gl/geospatial/projection/core';
+    import {ProjectionTransform, checkProjectionCompatibility, type ProjectionPoint, type ProjectionTransformOptions, type ProjectionTransformCreateOptions, type ProjectionCompatibility} from '@math.gl/geospatial/projection-core';
+    import {datumCatalog, type DatumCatalogPlugin, type DatumDefinition} from '@math.gl/geospatial/projection-datums';
+    import type {DatumCatalogPlugin as CoreDatumCatalog, DatumDefinition as CoreDatumDefinition} from '@math.gl/geospatial/projection-core';
     import type {DatumCatalogPlugin as RootDatumCatalog} from '@math.gl/geospatial/projection';
     const customDatum: DatumDefinition = {ellipse:'airy',towgs84:'1,2,3'};
     const coreDatum: CoreDatumDefinition = customDatum;
@@ -567,7 +568,7 @@ try {
     const createOptions: ProjectionTransformCreateOptions = engineOptions;
     const configured: ProjectionTransform = new ProjectionTransform(engineOptions);
     const capability: ProjectionCompatibility = checkProjectionCompatibility('EPSG:4326');
-    import type {ProjectionCoordinate, ProjectionOutput} from '@math.gl/geospatial/projection/core';
+    import type {ProjectionCoordinate, ProjectionOutput} from '@math.gl/geospatial/projection-core';
     const resultInput: ProjectionCoordinate = new Float64Array([1, 2, 3, 8]);
     const outputStorage: ProjectionOutput = [0, 0, 0, 0];
     const typedResult: Float32Array = configured.projectTo(resultInput, new Float32Array(4));
@@ -581,12 +582,12 @@ try {
     const eagerEngine: number[] = new ProjectionTransform({}).project([0, 0]);
     const createdEngine: Promise<ProjectionTransform> = ProjectionTransform.create(createOptions);
 
-    import type {OperationCRSMetadata,OperationModel} from '@math.gl/geospatial/projection/operations';
+    import type {OperationCRSMetadata,OperationModel} from '@math.gl/geospatial/projection-operations';
     const dynamicMetadata:OperationCRSMetadata={horizontalCRS:'app:horizontal',verticalCRS:'app:height',referenceFrame:'app:frame',frameKind:'dynamic',frameEpoch:2010};
     const reviewedModel:OperationModel={id:'authored',revision:'1',license:'MIT',termsReference:'fixture terms'};
     import {OperationCatalog, type CoordinateOperation, type OperationArea, type OperationEpochRange,
       type OperationGrid, type OperationProvenance, type OperationSelectionRequest,
-      type OperationSelection, type OperationRejection, type OperationRejectionReason} from '@math.gl/geospatial/projection/operations';
+      type OperationSelection, type OperationRejection, type OperationRejectionReason} from '@math.gl/geospatial/projection-operations';
     const selectionArea: OperationArea = [-180,-90,180,90];
     const selectionEpoch: OperationEpochRange = [2000,2030];
     const selectionGrid: OperationGrid = {id:'local',revision:'1'};
@@ -608,23 +609,23 @@ try {
     // @ts-expect-error reviewed metadata cannot be mutated
     selectedDefinition.epochRange = null;
     import {FullProjectionEngine, projectionEngine, parseNTv2Grid, type NTv2GridOptions} from '@math.gl/geospatial/projection';
-    import {createDeformationModel, type DeformationModel, type DeformationModelOptions} from '@math.gl/geospatial/projection/deformation';
-    import {createVelocityGrid, type VelocityGrid, type VelocityGridOptions} from '@math.gl/geospatial/projection/grids/velocity';
-    import {loadVelocityGeoTIFFGrid, type VelocityGridGeoTIFFData, type VelocityGridGeoTIFF} from '@math.gl/geospatial/projection/grids/velocity-geotiff';
+    import {createDeformationModel, type DeformationModel, type DeformationModelOptions} from '@math.gl/geospatial/projection-deformation';
+    import {createVelocityGrid, type VelocityGrid, type VelocityGridOptions} from '@math.gl/geospatial/projection-grids-velocity';
+    import {loadVelocityGeoTIFFGrid, type VelocityGridGeoTIFFData, type VelocityGridGeoTIFF} from '@math.gl/geospatial/projection-grids-velocity-geotiff';
     const velocityOptions: VelocityGridOptions = {origin:[0,0],step:[1,1],size:[2,2],units:'mm/year',east:[1,1,1,1],north:[2,2,2,2],up:[3,3,3,3]};
     const velocity: VelocityGrid = createVelocityGrid(velocityOptions);
     const modelOptions: DeformationModelOptions = {grid:velocity,epochRange:[2000,2030]};
     const deformation: DeformationModel = createDeformationModel(modelOptions);
-    const step: import('@math.gl/geospatial/projection/pipeline').PipelineStep = {type:'deformation',model:deformation,sourceEpoch:'coordinate',targetEpoch:2020};
+    const step: import('@math.gl/geospatial/projection-pipeline').PipelineStep = {type:'deformation',model:deformation,sourceEpoch:'coordinate',targetEpoch:2020};
     const deferredVelocity: Promise<VelocityGrid> = loadVelocityGeoTIFFGrid({images:[]} satisfies VelocityGridGeoTIFFData);
     const tiffVelocity: VelocityGridGeoTIFF = {getImageCount:async()=>0,getImage:async()=>geoTIFFImage};
     loadVelocityGeoTIFFGrid(tiffVelocity);
     // @ts-expect-error dimensional units must be explicit
     createVelocityGrid({...velocityOptions,units:'m'});
     // @ts-expect-error epochs cannot be omitted
-    const missingEpoch: import('@math.gl/geospatial/projection/pipeline').PipelineStep = {type:'deformation',model:deformation,targetEpoch:2020};
-    import {parseGTXGrid} from '@math.gl/geospatial/projection/grids/gtx';
-    import {loadVerticalGeoTIFFGrid, type VerticalGridGeoTIFF, type VerticalGridGeoTIFFImage} from '@math.gl/geospatial/projection/grids/vertical-geotiff';
+    const missingEpoch: import('@math.gl/geospatial/projection-pipeline').PipelineStep = {type:'deformation',model:deformation,targetEpoch:2020};
+    import {parseGTXGrid} from '@math.gl/geospatial/projection-grids-gtx';
+    import {loadVerticalGeoTIFFGrid, type VerticalGridGeoTIFF, type VerticalGridGeoTIFFImage} from '@math.gl/geospatial/projection-grids-vertical-geotiff';
     const geoTIFFImage: VerticalGridGeoTIFFImage = {
       getWidth: () => 2, getHeight: () => 2,
       getGeoKeys: () => ({GTModelTypeGeoKey: 2, GTRasterTypeGeoKey: 2}),
@@ -633,9 +634,9 @@ try {
       readRasters: async options => [new Float32Array(4)]
     };
     const geoTIFF: VerticalGridGeoTIFF = {getImageCount: async () => 1, getImage: async () => geoTIFFImage};
-    const loadedGeoTIFF: Promise<import('@math.gl/geospatial/projection/core').VerticalGrid> = loadVerticalGeoTIFFGrid(geoTIFF);
-    import {createGeoidGrid, createVerticalGrid, type VerticalGridOptions} from '@math.gl/geospatial/projection/grids/vertical';
-    import type {VerticalGridCollection} from '@math.gl/geospatial/projection/core';
+    const loadedGeoTIFF: Promise<import('@math.gl/geospatial/projection-core').VerticalGrid> = loadVerticalGeoTIFFGrid(geoTIFF);
+    import {createGeoidGrid, createVerticalGrid, type VerticalGridOptions} from '@math.gl/geospatial/projection-grids-vertical';
+    import type {VerticalGridCollection} from '@math.gl/geospatial/projection-core';
     const verticalOptions: VerticalGridOptions = {origin: [0, 0], step: [1, 1], size: [2, 2], offsets: [1, 2, 3, 4]};
     const verticalGrids: VerticalGridCollection = {local: createVerticalGrid(verticalOptions), geoid: createGeoidGrid({getHeight: () => 1})};
     const heightOptions: ProjectionTransformOptions = {from: '+proj=longlat +geoidgrids=local', verticalGrids};
@@ -646,7 +647,7 @@ try {
     const gridOptions: NTv2GridOptions = {includeErrorFields: false};
     projectionEngine.createProjection(options);
     new FullProjectionEngine({datumGrids: {local: parseNTv2Grid(new ArrayBuffer(0), gridOptions)}});
-    import {lazyUniversalTransverseMercator} from '@math.gl/geospatial/projection/projections/lazy/utm';
+    import {lazyUniversalTransverseMercator} from '@math.gl/geospatial/projection-projections-lazy-utm';
     const lazy = new ProjectionTransform({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});
     const asyncResult: Promise<number[]> = lazy.project([3, 0]);
     const asyncTypedResult: Promise<Float64Array> = lazy.projectTo(resultInput, new Float64Array(4));
@@ -655,7 +656,7 @@ try {
     const asyncBuffer: Promise<Float64Array> = lazy.projectFlat(new Float64Array([3, 0]));
     const mixed = new ProjectionTransform({to: 'EPSG:32631', projections: [mercator, lazyUniversalTransverseMercator]});
     const mixedResult: Promise<number[]> = mixed.project([3, 0]);
-    import {ProjectionPipeline, type PipelineStep, type ProjectionPipelineOptions, type PipelineProjectionOutput, type PipelineHelmertRates, type PipelineEpochs} from '@math.gl/geospatial/projection/pipeline';
+    import {ProjectionPipeline, type PipelineStep, type ProjectionPipelineOptions, type PipelineProjectionOutput, type PipelineHelmertRates, type PipelineEpochs} from '@math.gl/geospatial/projection-pipeline';
     const pipelineOptions: ProjectionPipelineOptions = {input: {space: 'geographic', units: ['deg', 'deg', 'm']}, steps: [{type: 'unitconvert', xy: {from: 'deg', to: 'rad'}}]};
     const rotationOutput: PipelineProjectionOutput = {space: 'geographic', unit: 'rad'};
     const stackSteps: PipelineStep[] = [{type: 'push', components: [3]}, {type: 'pop', components: [3]}];
@@ -678,8 +679,8 @@ try {
     const pipelineScalar: number[] = pipeline.project([0, 0]);
     const reusablePipeline: Float32Array = pipeline.projectTo(resultInput, new Float32Array(4));
     const epochResult: Float64Array = moving.projectToSync(resultInput, new Float64Array(4), 2020);
-    const pipelineCoordinate: import('@math.gl/geospatial/projection/pipeline').ProjectionCoordinate = resultInput;
-    const pipelineResult: import('@math.gl/geospatial/projection/pipeline').ProjectionOutput = outputStorage;
+    const pipelineCoordinate: import('@math.gl/geospatial/projection-pipeline').ProjectionCoordinate = resultInput;
+    const pipelineResult: import('@math.gl/geospatial/projection-pipeline').ProjectionOutput = outputStorage;
     const pipelineFlat: Float32Array = pipeline.projectFlat(new Float32Array([0, 0]));
     const deferredPipeline = new ProjectionPipeline({...pipelineOptions, projections: [lazyUniversalTransverseMercator]});
     const deferredScalar: Promise<number[]> = deferredPipeline.project([0, 0]);
@@ -694,7 +695,7 @@ try {
     const unknownUnits: PipelineStep = {type: 'unitconvert', xy: {from: 'degree', to: 'rad'}};
     // @ts-expect-error Observation epoch is supplied separately, not in a step.
     const dynamicStep: PipelineStep = {type: 'helmert', translation: [0, 0, 0], epoch: 2020};
-    import {mercator} from '@math.gl/geospatial/projection/projections/merc';
+    import {mercator} from '@math.gl/geospatial/projection-projections-merc';
     import {getCRSSignature, linearUnits, type CRSMetadata, type CRSUnit} from '@math.gl/geospatial/crs';
     const metadataUnit: CRSUnit = linearUnits.ft;
     const signature: (metadata: CRSMetadata) => string = getCRSSignature;

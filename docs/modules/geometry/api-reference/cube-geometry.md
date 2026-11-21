@@ -11,7 +11,7 @@ import GeometryViewer from '@site/src/components/geometry-viewer';
 An equal-sided box centered at the origin. `size` is a positive total side length (default `1`).
 
 ```typescript
-import {CubeGeometry} from '@math.gl/geometry';
+import {CubeGeometry} from '@math.gl/geometry/primitives';
 
 const geometry = new CubeGeometry({size: 1});
 ```

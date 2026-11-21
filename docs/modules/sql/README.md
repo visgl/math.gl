@@ -20,7 +20,7 @@ points can be used without Arrow; it is an optional peer dependency for those us
 
 | Import path | Use it to |
 | --- | --- |
-| `@math.gl/sql` | Run [queries over Arrow tables](queries.md), compute columns, or aggregate record batches. |
+| `@math.gl/sql/query` | Run [queries over Arrow tables](queries.md), compute columns, or aggregate record batches. |
 | `@math.gl/sql/parser` | [Parse SQL](parser/README.md) into expressions, predicates, or queries without executing it. |
 | `@math.gl/sql/expressions` | [Evaluate portable expressions](expressions.md) against JavaScript objects. |
 | `@math.gl/sql/arrow` | [Compile expressions and predicates](arrow/README.md) against an Arrow schema for reuse across batches. |
@@ -32,7 +32,7 @@ points can be used without Arrow; it is an optional peer dependency for those us
 Worker bootstrap entry points `@math.gl/sql/worker-entry.js` and
 `@math.gl/sql/query-worker-entry.js` start their respective worker runtimes. See
 [Workers](workers.md) for setup. The test-only entry point
-`@math.gl/sql/scales/conformance` provides shared fixture cases for scale implementations.
+`@math.gl/sql/scales-conformance` provides shared fixture cases for scale implementations.
 
 ## Run a query
 

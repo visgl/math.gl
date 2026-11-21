@@ -15,7 +15,7 @@ export const lazyStereographic: ProjectionDescriptor = /* @__PURE__ */ createPro
     ]
   },
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/stere');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-stere');
     return projectionModule.stereographic;
   }
 );

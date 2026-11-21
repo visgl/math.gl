@@ -19,7 +19,7 @@ export const lazyObliqueMercator: ProjectionDescriptor = /* @__PURE__ */ createP
     ]
   },
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/omerc');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-omerc');
     return projectionModule.obliqueMercator;
   }
 );

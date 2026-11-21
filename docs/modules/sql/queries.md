@@ -1,4 +1,4 @@
-# Query execution
+# @math.gl/sql/query
 
 Use the functions exported by `@math.gl/sql` to query native Arrow tables and record batches.
 Start with the [SQL quick start](README.md), then use this page for structured queries and streaming.
@@ -173,7 +173,7 @@ convert the exact sum and count to Float64 before dividing.
 
 A running aggregate may change when a batch arrives. If you use it to compute another output
 such as a row's share of the total, wait for the final result or recompute that output when its
-aggregate changes. This API produces scalar results through Arrow expressions. For SQL aggregate calls, use `queryArrowSQL` from the package root.
+aggregate changes. This API produces scalar results through Arrow expressions. For SQL aggregate calls, use `queryArrowSQL` from `@math.gl/sql/query`.
 
 ### Grouped accumulators
 
@@ -232,7 +232,7 @@ existing vectors and receives a mask for the rows it should evaluate.
 
 ```ts
 import {Field, Float64, vectorFromArray} from 'apache-arrow';
-import type {ScalarFunction} from '@math.gl/sql';
+import type {ScalarFunction} from '@math.gl/sql/arrow';
 
 const float = new Float64();
 
@@ -289,7 +289,7 @@ A flat declaration can bind an aggregate against its Arrow argument fields:
 
 ```ts
 import {Field, Float64} from 'apache-arrow';
-import type {AggregateFunction} from '@math.gl/sql';
+import type {AggregateFunction} from '@math.gl/sql/arrow';
 
 const SUM_SQUARES = {
   kind: 'aggregate',
@@ -326,7 +326,7 @@ schema during binding and evaluate against that input. The SQL engine validates
 the returned schema.
 
 ```ts
-import type {TableFunction} from '@math.gl/sql';
+import type {TableFunction} from '@math.gl/sql/arrow';
 
 const COPY_ROWS = {
   kind: 'table',

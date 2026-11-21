@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {QuadkeyDecoder, quadkeyToWorldBounds} from '@math.gl/dggs';
+import {QuadkeyDecoder, quadkeyToWorldBounds} from '@math.gl/dggs/quadkey';
 
 const TEST_DATA = [
   {

@@ -1,7 +1,12 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {S2Decoder, getS2ChildIndex, getS2IndexFromCell, getS2TokenFromIndex} from '@math.gl/dggs';
+import {
+  S2Decoder,
+  getS2ChildIndex,
+  getS2IndexFromCell,
+  getS2TokenFromIndex
+} from '@math.gl/dggs/s2';
 import {lonLatToCell, polygonToCells as a5PolygonToCells, uncompact, u64ToHex} from 'a5-js';
 import {latLngToCell, polygonToCellsExperimental, POLYGON_TO_CELLS_FLAGS} from 'h3-js';
 import OpenLocationCodePackage from 'open-location-code';

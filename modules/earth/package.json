@@ -19,15 +19,7 @@
     "type": "git",
     "url": "https://github.com/visgl/math.gl.git"
   },
-  "types": "dist/index.d.ts",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
     "./geoid": {
       "types": "./dist/geoid/index.d.ts",
       "import": "./dist/geoid/index.js",
@@ -48,13 +40,13 @@
       "import": "./dist/ocean/index.js",
       "require": "./dist/ocean/index.cjs"
     },
-    "./geoid/geoid-egm96-low.pgm": "./data/geoid/geoid-egm96-low.pgm",
-    "./geoid/geoid-egm96-hi.pgm": "./data/geoid/geoid-egm96-hi.pgm",
-    "./timezone/timezone-geometry-low.json": "./data/timezone/timezone-geometry-low.json",
-    "./timezone/timezone-geometry-low.parquet": "./data/timezone/timezone-geometry-low.parquet",
-    "./timezone/timezone-geometry-hi.json": "./data/timezone/timezone-geometry-hi.json",
-    "./timezone/timezone-geometry-hi.parquet": "./data/timezone/timezone-geometry-hi.parquet",
-    "./sun/stars": {
+    "./geoid-geoid-egm96-low.pgm": "./data/geoid/geoid-egm96-low.pgm",
+    "./geoid-geoid-egm96-hi.pgm": "./data/geoid/geoid-egm96-hi.pgm",
+    "./timezone-timezone-geometry-low.json": "./data/timezone/timezone-geometry-low.json",
+    "./timezone-timezone-geometry-low.parquet": "./data/timezone/timezone-geometry-low.parquet",
+    "./timezone-timezone-geometry-hi.json": "./data/timezone/timezone-geometry-hi.json",
+    "./timezone-timezone-geometry-hi.parquet": "./data/timezone/timezone-geometry-hi.parquet",
+    "./sun-stars": {
       "types": "./dist/sun/stars.d.ts",
       "import": "./dist/sun/stars.js",
       "require": "./dist/sun/stars.cjs"

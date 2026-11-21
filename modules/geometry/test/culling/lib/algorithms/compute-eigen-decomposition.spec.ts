@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
 
-import {Matrix3} from '@math.gl/core';
+import {Matrix3} from '@math.gl/core/matrix';
 import {computeEigenDecomposition} from '@math.gl/geometry/culling';
 
 test('computeEigenDecomposition#throws without a matrix', () => {

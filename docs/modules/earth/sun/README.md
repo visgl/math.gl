@@ -1,5 +1,5 @@
 ---
-title: Overview
+title: "@math.gl/earth/sun"
 sidebar_label: Overview
 ---
 
@@ -48,7 +48,7 @@ npm install @math.gl/earth
 
 The named Sun, Moon, sky, planet and star functions are exported from
 `@math.gl/earth` and `@math.gl/earth/sun`. The data catalog remains
-available from `@math.gl/earth/sun/stars`. `astronomy-engine` is a declared
+available from `@math.gl/earth/sun-stars`. `astronomy-engine` is a declared
 runtime dependency; bundlers can remove it for unrelated named imports.
 
 ## Coordinates and units

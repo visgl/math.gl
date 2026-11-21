@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import type {DatumCatalogPlugin} from '@math.gl/geospatial/projection/core';
+import type {DatumCatalogPlugin} from '@math.gl/geospatial/projection-core';
 import names from './unshifted-structured-datum-names.json';
 
 // Historical equation-only fixtures used these unmatched datum labels with an

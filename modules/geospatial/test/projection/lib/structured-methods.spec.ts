@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Authored method-normalization regressions against the proj4js 2.22.0 reference.
 import {expect, test, vi} from 'vitest';
-import {datumCatalog} from '@math.gl/geospatial/projection/datums';
+import {datumCatalog} from '@math.gl/geospatial/projection-datums';
 import {unshiftedStructuredDatums} from '../fixtures/unshifted-structured-datums';
 import proj4 from 'proj4';
 import type {PROJJSONCRSByType} from '@math.gl/geospatial/crs';

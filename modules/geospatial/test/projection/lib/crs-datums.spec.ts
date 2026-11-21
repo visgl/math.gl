@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {datumCatalog} from '@math.gl/geospatial/projection/datums';
+import {datumCatalog} from '@math.gl/geospatial/projection-datums';
 import {unshiftedStructuredDatums} from '../fixtures/unshifted-structured-datums';
 import proj4 from 'proj4';
 import {

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {subdivideGlobeMesh} from '@math.gl/geospatial';
+import {subdivideGlobeMesh} from '@math.gl/geospatial/globe';
 
 const mesh = {
   positions: [170, -20, 190, -20, 190, 20, 170, 20],

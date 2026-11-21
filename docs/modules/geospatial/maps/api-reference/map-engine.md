@@ -14,7 +14,7 @@ The API is experimental and may change before stabilization.
 ## Explicit capabilities
 
 Supply `presets: [albersUsaMapPreset]` (or another preset) from
-`@math.gl/geospatial/maps/presets`. Omitted definitions fail with a missing-preset error.
+`@math.gl/geospatial/maps-presets`. Omitted definitions fail with a missing-preset error.
 The `mapPresets` array is an explicit full-catalogue choice used by the catalogue
 examples below; focused applications should import individual presets.
 

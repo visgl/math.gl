@@ -1,7 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {clipTriangleMesh, interpolatePackedAttributes} from '@math.gl/geometry';
+import {clipTriangleMesh} from '@math.gl/geometry/polygon';
+import {interpolatePackedAttributes} from '@math.gl/geometry/processing';
 import {unwrapPeriodicPath} from './unwrap-path.mjs';
 import {prepareInverse} from './prepare.mjs';
 

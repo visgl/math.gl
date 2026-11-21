@@ -14,7 +14,7 @@ import {
   makeVector,
   vectorFromArray
 } from 'apache-arrow';
-import {isFloat16Array, NativeFloat16ArrayConstructor} from '@math.gl/core';
+import {isFloat16Array, NativeFloat16ArrayConstructor} from '@math.gl/core/types';
 import {parseSQLExpression, parseSQLPredicate, parseSQLQuery} from '@math.gl/sql/parser';
 import {
   ExpressionEvaluationError,

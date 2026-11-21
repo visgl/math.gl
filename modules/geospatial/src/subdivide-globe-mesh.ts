@@ -4,12 +4,12 @@
 // SPDX-FileComment: Original adapter over math.gl subdivision and spheroid kernels. Motivation only: https://github.com/keplergl/kepler.gl/pull/3548 (closed, unmerged). No implementation copied.
 
 import {spheroidToCartesian} from '@math.gl/core/matrix';
+import {subdivideTriangleMesh} from '@math.gl/geometry/processing';
 import {
-  subdivideTriangleMesh,
   type TriangleMesh,
   type SubdivideTriangleMeshOptions,
   type SubdividedTriangleMesh
-} from '@math.gl/geometry';
+} from '@math.gl/geometry/polygon';
 
 /** Preserve the refinement discriminant when removing the globe adapter's fixed transform. */
 type GlobeSubdivisionOptions<Options> = Options extends unknown

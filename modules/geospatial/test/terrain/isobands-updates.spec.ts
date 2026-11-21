@@ -13,7 +13,7 @@ import {
   createTerrainGradientPyramid,
   updateTerrainMixedVertexTileHalos,
   updateTerrainMixedGradientGrids
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 function field(
   width = 3,
   height = 3,

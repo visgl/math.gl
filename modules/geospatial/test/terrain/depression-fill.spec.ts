@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {fillTerrainDepressions, HeightField} from '@math.gl/geospatial';
+import {fillTerrainDepressions, HeightField} from '@math.gl/geospatial/terrain';
 import sierra from './fixtures/sierra-nodata-streaming.json';
 
 /** Find first outlet connectivity by scanning all source elevation thresholds. */

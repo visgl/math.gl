@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Independent Decimal/Newton references, original authored model stress and time-contract tests.
 import {expect, test} from 'vitest';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import {createDeformationModel} from '@math.gl/geospatial/projection/deformation';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import {createDeformationModel} from '@math.gl/geospatial/projection-deformation';
 import {
   reference,
   stressModel,

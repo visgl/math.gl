@@ -9,7 +9,7 @@
 /* eslint-disable */
 import {test, expect, describe} from 'vitest';
 
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 import {
   CullingVolume,
   BoundingSphere,

@@ -6,7 +6,7 @@
 /* eslint-disable max-statements */
 import {test, expect} from 'vitest';
 
-import {configure, Vector4, Matrix4, Matrix3, Quaternion, equals} from '@math.gl/core';
+import {configure, Vector4, Matrix4, Matrix3, Quaternion, equals} from '@math.gl/core/matrix';
 
 test('Vector4#import', () => {
   expect(typeof Vector4).toBe('function');

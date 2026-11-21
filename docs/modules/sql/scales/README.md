@@ -1,4 +1,4 @@
-# Portable visualization scale descriptors (experimental)
+# @math.gl/sql/scales
 
 Compare ramps and class breaks in the [color scale gallery](gallery.mdx).
 
@@ -91,7 +91,7 @@ To evaluate batches using statistics collected during a scan, call
 
 ## Backend conformance fixtures
 
-The optional `@math.gl/sql/scales/conformance` entry exports
+The optional `@math.gl/sql/scales-conformance` entry exports
 `SCALE_CONFORMANCE_CASES`, `ScaleConformanceCase`, and `ScaleConformanceSample`.
 Each JSON-serializable case supplies a resolved descriptor, input/expected-output
 samples, and an absolute per-component tolerance. Expected values are specified

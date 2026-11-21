@@ -3,11 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import ExamplePanel from '../../../common/example-panel';
 import React, {useMemo, useState} from 'react';
-import {
-  getGeographicTileRanges,
-  getGeographicTileBounds,
-  splitGlobeBounds
-} from '@math.gl/geospatial';
+import {getGeographicTileRanges, getGeographicTileBounds} from '@math.gl/geospatial/tiles';
+import {splitGlobeBounds} from '@math.gl/geospatial/globe';
 import './app.css';
 import './styles.css';
 

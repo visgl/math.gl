@@ -18,21 +18,24 @@ All generated meshes use `triangle-list` topology and expose `POSITION`, `NORMAL
 `TEXCOORD_0` typed-array attributes. Index buffers automatically use 32-bit values when a mesh has
 more than 65,535 vertices.
 
-The root entry point also exports mesh utilities, curves, polygon operations, analytic queries,
-and spatial indexes. Their reference pages are grouped by topic in the sidebar.
-`@math.gl/geometry/culling` is also available as a dedicated entry point for bounding volumes and queries.
-
-## Lighting and color subpaths
+## Entry points
 
 | Import path | Use it to |
 | --- | --- |
-| `@math.gl/geometry/lighting` | [Sample intensity, integrate luminous flux, and resample photometric profiles](./lighting/README.md#photometric-model). |
-| `@math.gl/geometry/color` | [Sample and apply color lookup tables](./lighting/README.md#numerical-color-luts). |
+| [`@math.gl/geometry/primitives`](./api-reference/geometry.md) | Generate primitive and parametric meshes. |
+| [`@math.gl/geometry/curves`](./curves/README.md) | Represent and sample curves. |
+| [`@math.gl/geometry/polygon`](./polygon/README.md) | Clip, triangulate, and subdivide polygons and polylines. |
+| [`@math.gl/geometry/culling`](./culling/README.md) | Query analytic shapes, bounding volumes, and rays. |
+| [`@math.gl/geometry/processing`](./utils/README.md) | Process meshes, indices, and attributes. |
+| [`@math.gl/geometry/spatial-index`](./spatial-index/README.md) | Index points, boxes, and triangles. |
+| [`@math.gl/geometry/arrow`](./entry-points/arrow.md) | Tessellate GeoArrow polygons. |
+| [`@math.gl/geometry/lighting`](./entry-points/lighting.md) | Sample photometric profiles. |
+| [`@math.gl/geometry/color`](./entry-points/color.md) | Sample and apply color lookup tables. |
 
 ## Usage
 
 ```js
-import {SphereGeometry} from '@math.gl/geometry';
+import {SphereGeometry} from '@math.gl/geometry/primitives';
 
 const geometry = new SphereGeometry({radius: 1});
 const positions = geometry.attributes.POSITION.value;
@@ -100,7 +103,7 @@ planes are required.
 ## Parametric surfaces
 
 [ParametricGeometry, TorusGeometry, and LatheGeometry](./api-reference/parametric.md)
-provide sampled surface generators from the root entry point, with an interactive gallery.
+provide sampled surface generators from `@math.gl/geometry/primitives`, with an interactive gallery.
 
 The experimental `HingeTree` evaluates rigid panels connected by hinges. See the
 [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and

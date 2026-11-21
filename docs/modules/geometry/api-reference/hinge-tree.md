@@ -12,7 +12,7 @@ A panel can be a polygon, a collection of triangles, or any other rigid object. 
 contain multiple roots. Loops, collisions, physical forces, and bending are not modeled.
 
 ```typescript
-import {HingeTree} from '@math.gl/geometry';
+import {HingeTree} from '@math.gl/geometry/primitives';
 import {Matrix4} from '@math.gl/core/matrix';
 
 const tree = new HingeTree([

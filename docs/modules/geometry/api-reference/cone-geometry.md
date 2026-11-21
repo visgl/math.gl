@@ -11,7 +11,7 @@ import GeometryViewer from '@site/src/components/geometry-viewer';
 A cone with a zero-radius top and its point at +Y by default. `radius` defaults to `0.5`, `height` to `1`, `topCap` to `false` and `bottomCap` to `true`. `nradial` and `nvertical` default to `10` and `1`. `verticalAxis` may be x, y or z (default y).
 
 ```typescript
-import {ConeGeometry} from '@math.gl/geometry';
+import {ConeGeometry} from '@math.gl/geometry/primitives';
 
 const geometry = new ConeGeometry({height: 1.5, radius: 0.6});
 ```

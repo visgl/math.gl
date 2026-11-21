@@ -7,7 +7,7 @@ import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyEckertVI: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'eck6', aliases: ['Eckert_VI']},
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/eck6');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-eck6');
     return projectionModule.eckertVI;
   }
 );

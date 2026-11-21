@@ -17,7 +17,7 @@ import {
   type TerrainCutoutPiece,
   type TerrainCutoutPolygon,
   type TerrainCutoutRegion
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 /** Analytical plane on a four-by-four square. */
 const plane = {

@@ -8,7 +8,7 @@ npm install @math.gl/sql apache-arrow
 
 ```ts
 import {tableFromArrays} from 'apache-arrow';
-import {queryArrowSQL} from '@math.gl/sql';
+import {queryArrowSQL} from '@math.gl/sql/query';
 
 const orders = tableFromArrays({quantity: new Int32Array([2, 1, 3])});
 const result = queryArrowSQL(

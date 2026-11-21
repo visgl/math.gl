@@ -230,9 +230,9 @@ assert(
 
 // Optional pipelines must not retain projection kernels, readers or the CRS engine.
 for (const entry of [
-  "export {OperationCatalog} from '@math.gl/geospatial/projection/operations';",
-  "export {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';",
-  "export {ProjectionTransform} from '@math.gl/geospatial/projection/core';"
+  "export {OperationCatalog} from '@math.gl/geospatial/projection-operations';",
+  "export {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';",
+  "export {ProjectionTransform} from '@math.gl/geospatial/projection-core';"
 ]) {
   const result = await build({
     stdin: {contents: entry, resolveDir: packageRoot},

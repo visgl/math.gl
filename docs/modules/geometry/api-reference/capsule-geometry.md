@@ -11,7 +11,7 @@ import GeometryViewer from '@site/src/components/geometry-viewer';
 The convex hull of endpoint spheres on the Y axis. `height` is the positive distance between sphere centers (default `1`). `radiusBottom` and `radiusTop` default to `0.5`; at least one must be positive. `nradial`, `ncap` and `nvertical` control tessellation (defaults `10`, `5` and `1`).
 
 ```typescript
-import {CapsuleGeometry} from '@math.gl/geometry';
+import {CapsuleGeometry} from '@math.gl/geometry/primitives';
 
 const geometry = new CapsuleGeometry({height: 1, radiusBottom: 0.4, radiusTop: 0.4});
 ```

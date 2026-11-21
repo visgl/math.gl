@@ -33,7 +33,7 @@ The other functions state their domain below.
 Returns Reference Salinity SR in g/kg: `SR = (35.16504 / 35) × SP`. Practical Salinity is
 from 0 to 42. GSW: `gsw_SR_from_SP`.
 
-#### `getAbsoluteSalinity(practicalSalinity, absoluteSalinityAnomaly = 0)`
+#### `getAbsoluteSalinity(practicalSalinity, absoluteSalinityAnomaly = 0)` {#getabsolutesalinity}
 
 Returns Absolute Salinity `SA = SR + δSA` in g/kg. `absoluteSalinityAnomaly` (δSA) is in
 g/kg, from −1 to 1. GSW: `gsw_SA_from_SP`.
@@ -60,7 +60,7 @@ divides the potential enthalpy by c_p0 = 3991.86795711963 J/(kg K).
 Returns in-situ density in kg/m³ from the 75-term polynomial for specific volume
 (Roquet et al. 2015). GSW: `gsw_rho`. Domain: the funnel above.
 
-#### `getSeawaterSoundSpeed(absoluteSalinity, conservativeTemperature, seaPressure)`
+#### `getSeawaterSoundSpeed(absoluteSalinity, conservativeTemperature, seaPressure)` {#getseawatersoundspeed}
 
 Returns the speed of sound in m/s from the 75-term polynomial. GSW: `gsw_sound_speed`.
 Domain: the funnel above.

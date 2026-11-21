@@ -6,7 +6,7 @@ import {test, expect} from 'vitest';
 import {MapboxTransform} from './mapbox-transform';
 import {WebMercatorViewport} from '../../../../src/web-mercator';
 import {toLowPrecision} from '../../utils/test-utils';
-import {equals, config} from '@math.gl/core';
+import {equals, config} from '@math.gl/core/matrix';
 
 import VIEWPORT_PROPS from '../../utils/sample-viewports';
 

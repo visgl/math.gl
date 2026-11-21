@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {EllipsoidGeodesicExact, GeodesicPolygonExact} from '@math.gl/geospatial';
+import {EllipsoidGeodesicExact, GeodesicPolygonExact} from '@math.gl/geospatial/geodesics';
 import {qualifyExactArea} from './exact-area-qualification';
 for (const row of qualifyExactArea())
   test(`Exact area ${row.mode} ${row.id}`, () =>

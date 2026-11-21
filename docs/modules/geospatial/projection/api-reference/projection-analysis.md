@@ -8,12 +8,12 @@ slug: /modules/geospatial/projection/projection-analysis
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>
 
-The optional `@math.gl/geospatial/projection/analysis` entry evaluates a single map projection inside an explicit application domain. It provides scales, convergence, distortion and coordinate derivatives without importing projection algorithms. Supply the same projection plugin and geometry used by your map.
+The optional `@math.gl/geospatial/projection-analysis` entry evaluates a single map projection inside an explicit application domain. It provides scales, convergence, distortion and coordinate derivatives without importing projection algorithms. Supply the same projection plugin and geometry used by your map.
 
 ```typescript
-import {normalizeCRS} from '@math.gl/geospatial/projection/core';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
-import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection/analysis';
+import {normalizeCRS} from '@math.gl/geospatial/projection-core';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
+import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection-analysis';
 
 const crs = normalizeCRS('+proj=merc +ellps=WGS84');
 const analysis = new ProjectionAnalysis({
@@ -106,17 +106,17 @@ The optional entry stays outside the root and `/core` bundles. Its independent c
 
 ## Complete CRS transform analysis
 
-The optional `@math.gl/geospatial/projection/analysis/transform` entry exports
+The optional `@math.gl/geospatial/projection-analysis-transform` entry exports
 `createProjectionTransformAnalysis`. It prepares a geographic-anchor-to-source transform and
 the requested source-to-target transform, then reuses the same numerical differentiation and
 factor calculations. Unlike single-kernel analysis, the sampled coordinates execute datum,
 prime-meridian, axis, unit, grid and vertical stages supported by the selected engine options.
 
 ```typescript
-import {createProjectionTransformAnalysis} from '@math.gl/geospatial/projection/analysis/transform';
-import {createProjectionFactors} from '@math.gl/geospatial/projection/analysis';
-import {universalTransverseMercator} from '@math.gl/geospatial/projection/projections/utm';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
+import {createProjectionTransformAnalysis} from '@math.gl/geospatial/projection-analysis-transform';
+import {createProjectionFactors} from '@math.gl/geospatial/projection-analysis';
+import {universalTransverseMercator} from '@math.gl/geospatial/projection-projections-utm';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 
 const analysis = await createProjectionTransformAnalysis({
   from: 'EPSG:32610',

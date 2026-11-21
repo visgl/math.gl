@@ -8,5 +8,5 @@ export const lazyUniversalTransverseMercator: ProjectionDescriptor =
   /* @__PURE__ */ createProjectionDescriptor(
     {name: 'utm', aliases: ['Universal Transverse Mercator System']},
     async () =>
-      (await import('@math.gl/geospatial/projection/projections/utm')).universalTransverseMercator
+      (await import('@math.gl/geospatial/projection-projections-utm')).universalTransverseMercator
   );

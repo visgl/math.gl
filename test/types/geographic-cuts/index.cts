@@ -1,8 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {clipGeographicPolygon, clipGeographicPolyline, subdivideGeographicCutRing,
- type GeographicClipOptions, type GeographicCutEdge} from '@math.gl/geospatial';
+import {clipGeographicPolygon, clipGeographicPolyline, subdivideGeographicCutRing, type GeographicClipOptions, type GeographicCutEdge} from '@math.gl/geospatial/geographic-cuts';
 const options: GeographicClipOptions = {edgeModel:'geodesic', latitudeRange:[0,90]};
 const input = [{positions: [-40,-40,40,-40,40,40,-40,40]}];
 const polygon = clipGeographicPolygon(input, options);

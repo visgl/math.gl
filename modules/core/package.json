@@ -27,15 +27,7 @@
     "type": "git",
     "url": "https://github.com/visgl/math.gl.git"
   },
-  "types": "dist/index.d.ts",
-  "main": "dist/matrix.cjs",
-  "module": "dist/index.js",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/matrix.cjs"
-    },
     "./types": {
       "types": "./dist/types.d.ts",
       "import": "./dist/types.js",

@@ -249,7 +249,7 @@ regions; a point tangent produces no zero-length line part.
 ## Clip polygons, then triangulate each piece
 
 ```typescript
-import {withMapGeometry} from '@math.gl/geospatial/maps/geometry';
+import {withMapGeometry} from '@math.gl/geospatial/maps-geometry';
 
 const pieces = withMapGeometry(world).projectPolygon([
   [[-70, 20], [-50, 20], [-50, 40], [-70, 40]],

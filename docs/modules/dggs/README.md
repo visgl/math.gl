@@ -16,7 +16,7 @@ const polygon = GeohashDecoder.cellToBoundary(geohashId);
 ```
 
 ```js
-import {findDGGSCellColumn} from '@math.gl/dggs';
+import {findDGGSCellColumn} from '@math.gl/dggs/decoders';
 
 const match = findDGGSCellColumn(['name', 's2_token', 'value']);
 // {columnName: 's2_token', decoder: S2Decoder}
@@ -28,6 +28,7 @@ Import from `@math.gl/dggs` for shared types, the decoder registry, or column de
 
 | Import path | Decoder | Cell identifier | Classification |
 | --- | --- | --- | --- |
+| `@math.gl/dggs/decoders` | [Shared decoder API](./api-reference/dggs-decoder.md) | Varies by grid | Registry |
 | `@math.gl/dggs/a5` | [`A5Decoder`](./api-reference/a5-decoder.md) | Hexadecimal string or `bigint` | DGGS |
 | `@math.gl/dggs/geohash` | [`GeohashDecoder`](./api-reference/geohash-decoder.md) | String | DGGS-like geocode |
 | `@math.gl/dggs/h3` | [`H3Decoder`](./api-reference/h3-decoder.md) | Hexadecimal string or `bigint` | DGGS |

@@ -80,7 +80,7 @@ export type {
 export {getSkySnapshot, createSkyContext} from './sun/astronomy';
 /** @deprecated Import from `@math.gl/earth/sun`. */
 export type {SkyTimeScales, SkySnapshotOptions} from './sun/astronomy';
-/** @deprecated Import from `@math.gl/earth/sun/stars`. */
+/** @deprecated Import from `@math.gl/earth/sun-stars`. */
 export {
   getStarPosition,
   getStarPositions,
@@ -91,7 +91,7 @@ export {
   createMilkyWayBackground,
   getStarLayerData
 } from './sun/stars';
-/** @deprecated Import from `@math.gl/earth/sun/stars`. */
+/** @deprecated Import from `@math.gl/earth/sun-stars`. */
 export type {
   StarRecord,
   StarPosition,
