@@ -21,6 +21,7 @@ const tileSize = Number(
   process.argv.find(arg => arg.startsWith('--tile-size='))?.split('=')[1] ?? 8
 );
 if (![2, 4, 8].includes(tileSize)) throw new RangeError('tile-size must be 2, 4 or 8');
+/** Footprint height in sample cells, independent of tile size. */
 const rows = Number(
   process.argv.find(arg => arg.startsWith('--rows='))?.split('=')[1] ?? 32
 );

@@ -120,7 +120,8 @@ export function updateTerrainTileCutouts(
     splitTerrainMesh({positions: new Float64Array(), indices: new Uint32Array()}, polygon, limits);
   const entries = new Map<string, Entry>();
   const rebuilt: string[] = [];
-  const dirty = new Set<Entry>();
+  /** Rebuilt entries keyed to their position in resident order. */
+  const dirty = new Map<Entry, number>();
   let boundaryCount = 0;
   for (const resident of residents) {
     if (
@@ -149,7 +150,7 @@ export function updateTerrainTileCutouts(
       }
       entry = {resident: {...resident}, split, displayed: split, bounds, edges};
       rebuilt.push(resident.id);
-      dirty.add(entry);
+      dirty.set(entry, entries.size);
     }
     boundaryCount += entry.edges.length;
     if (boundaryCount > limits.maxBoundaryEdges)
@@ -157,13 +158,13 @@ export function updateTerrainTileCutouts(
     entries.set(resident.id, entry);
   }
   const values = [...entries.values()];
+  /** Total possible pairs, including pairs already validated by the cache. */
   const pairCount = (values.length * (values.length - 1)) / 2;
   if (pairCount > limits.maxPairChecks) throw new RangeError('Terrain cutout pair budget exceeded');
   // Cached pairs were checked when their current revisions first coexisted.
-  const order = new Map(values.map((entry, index) => [entry, index]));
-  for (const a of dirty)
+  for (const [a, index] of dirty)
     for (const b of values) {
-      if (a === b || (dirty.has(b) && order.get(b)! < order.get(a)!)) continue;
+      if (a === b || (dirty.get(b) ?? Infinity) < index) continue;
       if (
         a.bounds[2] < b.bounds[0] ||
         b.bounds[2] < a.bounds[0] ||
