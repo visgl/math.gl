@@ -40,6 +40,10 @@ Replace slashes within an exported subpath with hyphens. For example,
 [projection entry point index](./modules/geospatial/projection/entry-points.md)
 and [kernel index](./modules/geospatial/projection/kernels.md) for exact names.
 
+For Turf and PostGIS-style SQL function registration, replace
+`@math.gl/geospatial/turf-expressions` with `@math.gl/geospatial/turf-functions`
+and `@math.gl/geospatial/st-functions` as needed.
+
 ### Expressions and SQL package
 
 Install [`@math.gl/sql`](./modules/sql/README.md) to query Arrow tables, parse SQL, or
@@ -247,7 +251,7 @@ Install `@math.gl/core` in place of `@math.gl/arrow`, and `@math.gl/geospatial` 
 | `@math.gl/arrow/utf8` | `@math.gl/core/utf8` |
 | `@math.gl/web-mercator` | `@math.gl/geospatial/web-mercator` |
 | `@math.gl/sql/arrow-scales` | `@math.gl/sql/scales` |
-| `@math.gl/geometry/color` | `@math.gl/core/color` (compatibility re-exports remain) |
+| `@math.gl/geometry/color` | `@math.gl/core/color` |
 
 Import vectors, matrices, and rotations from `@math.gl/core/matrix`. `@math.gl/core/color` provides reusable colors, scales, palettes, and LUTs. SQL parsing, domain resolution, and Arrow scale evaluation remain together in `@math.gl/sql/scales`.
 

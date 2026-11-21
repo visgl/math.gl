@@ -295,11 +295,6 @@
             "type": "doc",
             "id": "modules/geometry/entry-points/lighting",
             "label": "@math.gl/geometry/lighting"
-          },
-          {
-            "type": "doc",
-            "id": "modules/geometry/entry-points/color",
-            "label": "@math.gl/geometry/color"
           }
         ],
         "link": {
@@ -590,11 +585,6 @@
             "type": "doc",
             "id": "modules/geospatial/entry-points/turf-functions",
             "label": "@math.gl/geospatial/turf-functions"
-          },
-          {
-            "type": "doc",
-            "id": "modules/geospatial/entry-points/turf-expressions",
-            "label": "@math.gl/geospatial/turf-expressions"
           },
           {
             "type": "doc",
