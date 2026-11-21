@@ -8,5 +8,5 @@ export const lazySwissObliqueMercator: ProjectionDescriptor =
   /* @__PURE__ */ createProjectionDescriptor(
     {name: 'somerc', aliases: []},
     async () =>
-      (await import('@math.gl/geospatial/projection/projections/somerc')).swissObliqueMercator
+      (await import('@math.gl/geospatial/projection-projections-somerc')).swissObliqueMercator
   );

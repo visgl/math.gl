@@ -10,7 +10,7 @@
 /* eslint-disable quotes, no-var */
 import {assert, expect, test} from 'vitest';
 
-import {Vector4, Matrix4} from '@math.gl/core';
+import {Vector4, Matrix4} from '@math.gl/core/matrix';
 import {x, y, z, w, eps} from './constants';
 
 // INSTANCING

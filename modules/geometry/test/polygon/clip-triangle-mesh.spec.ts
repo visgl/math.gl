@@ -3,8 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {clipTriangleMesh, earcut, interpolatePackedAttributes} from '@math.gl/geometry';
-import type {MeshClipRegion, ClipTriangleMeshOptions} from '@math.gl/geometry';
+import {clipTriangleMesh, earcut} from '@math.gl/geometry/polygon';
+import {interpolatePackedAttributes} from '@math.gl/geometry/processing';
+import type {MeshClipRegion, ClipTriangleMeshOptions} from '@math.gl/geometry/polygon';
 const square: MeshClipRegion = [
   [0, 0],
   [1, 0],

@@ -5,8 +5,8 @@ package subpath exports; importing `@math.gl/earth` does not load any grid.
 
 | Export | Grid | Purpose |
 | --- | --- | --- |
-| `@math.gl/earth/geoid/geoid-egm96-low.pgm` | 360 × 181, 1° | Small visualization preview |
-| `@math.gl/earth/geoid/geoid-egm96-hi.pgm` | 1440 × 721, 15′ | Original GeographicLib EGM96 grid |
+| `@math.gl/earth/geoid-geoid-egm96-low.pgm` | 360 × 181, 1° | Small visualization preview |
+| `@math.gl/earth/geoid-geoid-egm96-hi.pgm` | 1440 × 721, 15′ | Original GeographicLib EGM96 grid |
 
 The low grid takes every fourth row and column from the original grid. It retains
 exact node values but does not retain the original interpolation error bounds.

@@ -4,7 +4,7 @@
 import ExamplePanel from '../../../common/example-panel';
 import React, {useMemo, useState} from 'react';
 import {Matrix4} from '@math.gl/core/matrix';
-import {Geometry, SphereGeometry} from '@math.gl/geometry';
+import {Geometry, SphereGeometry} from '@math.gl/geometry/primitives';
 import {
   unpackIndexedGeometry,
   transformGeometry,

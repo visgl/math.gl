@@ -1,12 +1,12 @@
 ---
-title: Stars
+title: "@math.gl/earth/sun-stars"
 sidebar_label: Stars
 ---
 
 {/* SPDX-License-Identifier: MIT */}
 {/* SPDX-FileCopyrightText: Copyright (c) vis.gl contributors */}
 
-# Stars
+# @math.gl/earth/sun-stars
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -15,7 +15,7 @@ sidebar_label: Stars
 `@math.gl/earth/sun` is an optional entry point with 7,000 real bright-star sources and proper motion. It has no Astronomy Engine dependency. Bundlers can exclude unused catalog data from selective named imports.
 
 ```typescript
-import {STAR_CATALOG} from '@math.gl/earth/sun/stars';
+import {STAR_CATALOG} from '@math.gl/earth/sun-stars';
 import {getStarPositions, createMilkyWayBackground} from '@math.gl/earth/sun';
 import {getStarfieldRotation} from '@math.gl/earth/sun';
 
@@ -132,7 +132,7 @@ const starLayer = new ScatterplotLayer({
 // For local/equatorial positions, use CARTESIAN with a suitable sky/OrbitView.
 ```
 
-The shell distance is a rendering choice, independent of physical stellar distance. Use `skyRotationToGlobe(rotation, observer)` for a custom globe-space sky shader; do not feed globe-space directions back to the ENU position adapter. Depth, exposure and sky visibility remain rendering decisions. For cubemaps, sample J2000 directions with the transpose of the rendering rotation, just as in [getStarfieldRotation](./get-starfield-rotation.md).
+The shell distance is a rendering choice, independent of physical stellar distance. Use `skyRotationToGlobe(rotation, observer)` for a custom globe-space sky shader; do not feed globe-space directions back to the ENU position adapter. Depth, exposure and sky visibility remain rendering decisions. For cubemaps, sample J2000 directions with the transpose of the rendering rotation, just as in [getStarfieldRotation](./sun/api-reference/get-starfield-rotation.md).
 
 ## Milky Way background
 

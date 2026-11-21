@@ -7,7 +7,7 @@
 Finds the point inside a polygon that is farthest from its outline. This point is the "pole of inaccessibility". Use it to place a label or an icon on a polygon. The centroid is not a good substitute, because the centroid of a concave polygon or a polygon with a hole can be outside the polygon.
 
 ```ts
-import {getPoleOfInaccessibility} from '@math.gl/geometry';
+import {getPoleOfInaccessibility} from '@math.gl/geometry/polygon';
 
 getPoleOfInaccessibility(
   [

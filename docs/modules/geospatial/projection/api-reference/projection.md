@@ -8,7 +8,7 @@
 one source and target CRS. Create instances through a [ProjectionEngine](./projection-engine.md).
 It is a type, not a constructor.
 
-See [`@math.gl/geospatial/projection/types`](../types.md) for the import and usage example.
+See [`@math.gl/geospatial/projection-types`](../../projection-types.md) for the import and usage example.
 
 ## Coordinate methods
 

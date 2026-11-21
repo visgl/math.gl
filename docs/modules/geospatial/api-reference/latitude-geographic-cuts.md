@@ -14,7 +14,7 @@ It adds no runtime dependencies. For oblique ellipsoidal horizons and finite sha
 this latitude-band API.
 
 ```ts
-import {clipGeographicPolygon, subdivideGeographicCutRing} from '@math.gl/geospatial';
+import {clipGeographicPolygon, subdivideGeographicCutRing} from '@math.gl/geospatial/geographic-cuts';
 
 const inputs = [{positions: [-60, -20, 60, -20, 60, 60, -60, 60]}];
 const options = {

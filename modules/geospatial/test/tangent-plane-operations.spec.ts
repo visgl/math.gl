@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Vector2, Vector3} from '@math.gl/core';
-import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial';
+import {Vector2, Vector3} from '@math.gl/core/matrix';
+import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial/ellipsoid';
 
 function close(actual: ArrayLike<number>, expected: ArrayLike<number>, digits = 10): void {
   for (let i = 0; i < expected.length; i++) expect(actual[i]).toBeCloseTo(expected[i], digits);

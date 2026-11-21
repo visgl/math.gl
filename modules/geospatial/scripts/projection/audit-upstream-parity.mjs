@@ -13,7 +13,7 @@ import {parseArgs} from 'node:util';
 import ts from 'typescript';
 import proj4 from 'proj4';
 import * as native from '@math.gl/geospatial/projection';
-import {datumCatalog} from '@math.gl/geospatial/projection/datums';
+import {datumCatalog} from '@math.gl/geospatial/projection-datums';
 
 const {values} = parseArgs({
   options: {

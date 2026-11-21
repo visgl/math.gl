@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
 import {WebMercatorViewport} from '../../../src/web-mercator';
-import {config, equals} from '@math.gl/core';
+import {config, equals} from '@math.gl/core/matrix';
 
 const viewportProps = {
   latitude: 37.75,

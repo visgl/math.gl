@@ -3,11 +3,11 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original lifecycle, unit-state and ownership tests for typed pipeline extensions.
 import {expect, test} from 'vitest';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import type {PipelineStep, PipelineProjectionOutput} from '@math.gl/geospatial/projection/pipeline';
-import {createProjectionDescriptor} from '@math.gl/geospatial/projection/core';
-import {obliqueTransformation} from '@math.gl/geospatial/projection/projections/ob_tran';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import type {PipelineStep, PipelineProjectionOutput} from '@math.gl/geospatial/projection-pipeline';
+import {createProjectionDescriptor} from '@math.gl/geospatial/projection-core';
+import {obliqueTransformation} from '@math.gl/geospatial/projection-projections-ob_tran';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 
 const geo = {space: 'geographic', units: ['rad', 'rad', 'm']} as const;
 const xyz = {space: 'geocentric', units: ['m', 'm', 'm']} as const;

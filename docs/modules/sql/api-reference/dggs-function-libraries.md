@@ -9,7 +9,7 @@ Import optional Discrete Global Grid System function tables from `@math.gl/dggs`
 
 ```ts
 import {ExpressionFunctionRegistry, compile} from '@math.gl/sql/expressions';
-import {DGGS_FUNCTION_LIBRARY} from '@math.gl/dggs';
+import {DGGS_FUNCTION_LIBRARY} from '@math.gl/dggs/decoders';
 
 const registry = new ExpressionFunctionRegistry([DGGS_FUNCTION_LIBRARY]);
 const evaluate = compile('getGeohashBoundary(hash)', {registry});

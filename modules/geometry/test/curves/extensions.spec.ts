@@ -7,7 +7,7 @@ import {
   QuadraticBezierCurve,
   sampleCurveAdaptive,
   computeParallelTransportFrames
-} from '@math.gl/geometry';
+} from '@math.gl/geometry/curves';
 
 it('adaptive sampling preserves endpoints, refines bends and reports exhausted budgets', () => {
   const line = new LineCurve([0, 0], [10, 0]);

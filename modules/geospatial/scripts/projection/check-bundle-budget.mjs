@@ -9,16 +9,16 @@ import {gzipSync} from 'node:zlib';
 import {build} from 'esbuild';
 
 const fixtures = {
-  webMercatorEngine: "export {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection/web-mercator';",
-  temporalModel: "export * from '@math.gl/geospatial/projection/temporal';",
-  projectionBulk: "export * from '@math.gl/geospatial/projection/bulk';",
-  projectionAnalysis: "export * from '@math.gl/geospatial/projection/analysis';",
-  core: "export {ProjectionTransform} from '@math.gl/geospatial/projection/core';",
+  webMercatorEngine: "export {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection-web-mercator';",
+  temporalModel: "export * from '@math.gl/geospatial/projection-temporal';",
+  projectionBulk: "export * from '@math.gl/geospatial/projection-bulk';",
+  projectionAnalysis: "export * from '@math.gl/geospatial/projection-analysis';",
+  core: "export {ProjectionTransform} from '@math.gl/geospatial/projection-core';",
   rootEngine: "export {ProjectionTransform} from '@math.gl/geospatial/projection';",
   coreWithDatumCatalog:
-    "import {ProjectionTransform} from '@math.gl/geospatial/projection/core'; import {datumCatalog} from '@math.gl/geospatial/projection/datums'; export const create = from => new ProjectionTransform({from, datumCatalogs: [datumCatalog]});",
+    "import {ProjectionTransform} from '@math.gl/geospatial/projection-core'; import {datumCatalog} from '@math.gl/geospatial/projection-datums'; export const create = from => new ProjectionTransform({from, datumCatalogs: [datumCatalog]});",
   mercatorWithDatumCatalog:
-    "import {ProjectionTransform} from '@math.gl/geospatial/projection/core'; import {mercator} from '@math.gl/geospatial/projection/projections/merc'; import {datumCatalog} from '@math.gl/geospatial/projection/datums'; export const create = from => new ProjectionTransform({from, to: 'EPSG:3857', projections: [mercator], datumCatalogs: [datumCatalog]});",
+    "import {ProjectionTransform} from '@math.gl/geospatial/projection-core'; import {mercator} from '@math.gl/geospatial/projection-projections-merc'; import {datumCatalog} from '@math.gl/geospatial/projection-datums'; export const create = from => new ProjectionTransform({from, to: 'EPSG:3857', projections: [mercator], datumCatalogs: [datumCatalog]});",
   mercator:
     "import {ProjectionTransform, mercator} from '@math.gl/geospatial/projection'; export const create = () => new ProjectionTransform({to: 'EPSG:3857', projections: [mercator]});",
   utm: "import {ProjectionTransform, universalTransverseMercator} from '@math.gl/geospatial/projection'; export const create = () => new ProjectionTransform({to: 'EPSG:32631', projections: [universalTransverseMercator]});",
@@ -31,15 +31,15 @@ const fixtures = {
   mercatorWithGeoTIFFAdapter:
     "import {ProjectionTransform, mercator} from '@math.gl/geospatial/projection'; export {loadGeoTIFFGrid} from '@math.gl/geospatial/projection'; export const create = (from, datumGrids) => new ProjectionTransform({from, to: 'EPSG:3857', projections: [mercator], datumGrids});",
   mercatorWithGTX:
-    "import {ProjectionTransform, mercator} from '@math.gl/geospatial/projection'; export {parseGTXGrid} from '@math.gl/geospatial/projection/grids/gtx'; export const create = (from, verticalGrids) => new ProjectionTransform({from, to: 'EPSG:3857', projections: [mercator], verticalGrids});",
+    "import {ProjectionTransform, mercator} from '@math.gl/geospatial/projection'; export {parseGTXGrid} from '@math.gl/geospatial/projection-grids-gtx'; export const create = (from, verticalGrids) => new ProjectionTransform({from, to: 'EPSG:3857', projections: [mercator], verticalGrids});",
   mercatorWithVerticalGeoTIFF:
-    "import {ProjectionTransform, mercator} from '@math.gl/geospatial/projection'; export {loadVerticalGeoTIFFGrid} from '@math.gl/geospatial/projection/grids/vertical-geotiff'; export const create = (from, verticalGrids) => new ProjectionTransform({from, to: 'EPSG:3857', projections: [mercator], verticalGrids});",
+    "import {ProjectionTransform, mercator} from '@math.gl/geospatial/projection'; export {loadVerticalGeoTIFFGrid} from '@math.gl/geospatial/projection-grids-vertical-geotiff'; export const create = (from, verticalGrids) => new ProjectionTransform({from, to: 'EPSG:3857', projections: [mercator], verticalGrids});",
   deformationModel:
-    "export {createDeformationModel} from '@math.gl/geospatial/projection/deformation'; export {createVelocityGrid} from '@math.gl/geospatial/projection/grids/velocity';",
+    "export {createDeformationModel} from '@math.gl/geospatial/projection-deformation'; export {createVelocityGrid} from '@math.gl/geospatial/projection-grids-velocity';",
   deformationWithGeoTIFF:
-    "export {createDeformationModel} from '@math.gl/geospatial/projection/deformation'; export {loadVelocityGeoTIFFGrid} from '@math.gl/geospatial/projection/grids/velocity-geotiff';",
-  operationCatalog: "export {OperationCatalog} from '@math.gl/geospatial/projection/operations';",
-  operationPipeline: "export {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';",
+    "export {createDeformationModel} from '@math.gl/geospatial/projection-deformation'; export {loadVelocityGeoTIFFGrid} from '@math.gl/geospatial/projection-grids-velocity-geotiff';",
+  operationCatalog: "export {OperationCatalog} from '@math.gl/geospatial/projection-operations';",
+  operationPipeline: "export {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';",
   typescriptWrapper: "export {FullProjectionEngine} from '@math.gl/geospatial/projection';",
   allNativeExports: "export * from '@math.gl/geospatial/projection';"
 };

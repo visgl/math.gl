@@ -8,7 +8,7 @@
 
 import {test, expect} from 'vitest';
 
-import {Vector3, equals} from '@math.gl/core';
+import {Vector3, equals} from '@math.gl/core/matrix';
 import {Ray} from '@math.gl/geometry/culling';
 
 test('Ray#constructor uses zero-vector defaults', () => {

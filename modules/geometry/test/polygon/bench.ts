@@ -13,7 +13,7 @@ import {
   getPolygonSignedArea,
   Polygon,
   modifyPolygonWindingDirection
-} from '@math.gl/geometry';
+} from '@math.gl/geometry/polygon';
 import {toNested} from './utils';
 
 const polygonSmall = [0, 0, 1, 1, 0, 2, -1, 1, -1.25, 0.5, 0, 0];

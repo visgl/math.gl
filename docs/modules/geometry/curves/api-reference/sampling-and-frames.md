@@ -22,7 +22,7 @@ oscillatory curves. `maxSampledError` describes accepted/output intervals and mu
 not be interpreted as the maximum distance over all parameters.
 
 ```js
-import {QuadraticBezierCurve, sampleCurveAdaptive} from '@math.gl/geometry';
+import {QuadraticBezierCurve, sampleCurveAdaptive} from '@math.gl/geometry/curves';
 
 const curve = new QuadraticBezierCurve([0, 0], [1, 2], [2, 0]);
 const samples = sampleCurveAdaptive(curve, {tolerance: 0.001, maxPoints: 4096});

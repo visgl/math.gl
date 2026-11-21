@@ -1,9 +1,9 @@
-# Arrow expressions
+# @math.gl/sql/arrow
 
 `@math.gl/sql/arrow` evaluates schema-bound expressions directly over Arrow batches. Use it
 for WHERE predicates, derived columns and typed application functions. It reuses the parser from
 `@math.gl/sql/expressions`. For SQL text use [the parser](../parser/README.md);
-for complete queries use [the query engine](../queries.md).
+for complete queries use [the query engine](../query.md).
 
 ```ts
 import {compileArrowExpression, compileArrowPredicate} from '@math.gl/sql/arrow';

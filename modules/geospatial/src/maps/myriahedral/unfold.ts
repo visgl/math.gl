@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Matrix4} from '@math.gl/core/matrix';
-import {HingeTree, type HingePanel} from '@math.gl/geometry';
+import {HingeTree, type HingePanel} from '@math.gl/geometry/primitives';
 import {
   center,
   cross,

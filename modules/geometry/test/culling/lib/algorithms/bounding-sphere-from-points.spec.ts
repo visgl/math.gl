@@ -8,7 +8,8 @@
 
 import {test, expect} from 'vitest';
 
-import {NumericArray, Vector3, equals} from '@math.gl/core';
+import {NumericArray} from '@math.gl/core/types';
+import {Vector3, equals} from '@math.gl/core/matrix';
 import {makeBoundingSphereFromPoints} from '@math.gl/geometry/culling';
 
 function getPositions(center: Readonly<NumericArray>) {

@@ -10,9 +10,9 @@ import {
 import {
   ProjectionTransform as CoreEngine,
   createProjectionDescriptor
-} from '@math.gl/geospatial/projection/core';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
-import {lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
+} from '@math.gl/geospatial/projection-core';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
+import {lazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
 
 test('ProjectionTransform supports the ready-to-use wrappers and subclassing', () => {
   expect(ProjectionTransform.name).toBe('ProjectionTransform');

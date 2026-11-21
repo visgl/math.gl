@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Display paths preserve all available samples; map seams split, never truncate, a trail.
-import {cutPolylineByMercatorBounds} from '@math.gl/geometry';
+import {cutPolylineByMercatorBounds} from '@math.gl/geometry/polygon';
 import {transformMesh} from './geometry.js';
 function mesh(length) {
   return {

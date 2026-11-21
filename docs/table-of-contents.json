@@ -160,8 +160,16 @@
               }
             ]
           },
-          "modules/core/arrow/utf8/README",
-          {"type": "doc", "id": "modules/core/color", "label": "@math.gl/core/color"}
+          {
+            "type": "doc",
+            "id": "modules/core/utf8/README",
+            "label": "@math.gl/core/utf8"
+          },
+          {
+            "type": "doc",
+            "id": "modules/core/color",
+            "label": "@math.gl/core/color"
+          }
         ],
         "link": {
           "type": "doc",
@@ -197,7 +205,7 @@
             ],
             "link": {
               "type": "doc",
-              "id": "modules/geometry/api-reference/geometry"
+              "id": "modules/geometry/api-reference/primitives"
             }
           },
           {
@@ -263,17 +271,36 @@
             "type": "category",
             "label": "@math.gl/geometry/processing",
             "items": [
-              "modules/geometry/utils/api-reference/geometry-utils",
-              "modules/geometry/utils/api-reference/mesh-processing",
-              "modules/geometry/utils/api-reference/interpolate-packed-attributes",
-              "modules/geometry/utils/api-reference/qualify-surface-transition"
+              "modules/geometry/processing/api-reference/geometry-utils",
+              "modules/geometry/processing/api-reference/mesh-processing",
+              "modules/geometry/processing/api-reference/interpolate-packed-attributes",
+              "modules/geometry/processing/api-reference/qualify-surface-transition"
             ],
             "link": {
               "type": "doc",
-              "id": "modules/geometry/utils/README"
+              "id": "modules/geometry/processing/README"
             }
           },
-          "modules/geometry/spatial-index/README"
+          {
+            "type": "doc",
+            "id": "modules/geometry/spatial-index/README",
+            "label": "@math.gl/geometry/spatial-index"
+          },
+          {
+            "type": "doc",
+            "id": "modules/geometry/entry-points/arrow",
+            "label": "@math.gl/geometry/arrow"
+          },
+          {
+            "type": "doc",
+            "id": "modules/geometry/entry-points/lighting",
+            "label": "@math.gl/geometry/lighting"
+          },
+          {
+            "type": "doc",
+            "id": "modules/geometry/entry-points/color",
+            "label": "@math.gl/geometry/color"
+          }
         ],
         "link": {
           "type": "doc",
@@ -338,7 +365,6 @@
                 "id": "modules/geospatial/crs/developer-guide/raster-mesh-preparation",
                 "label": "Projecting Raster Meshes"
               },
-              "modules/geospatial/terrain/README",
               {
                 "type": "category",
                 "label": "Maps",
@@ -363,20 +389,24 @@
           },
           {
             "type": "category",
-            "label": "Ellipsoids",
+            "label": "@math.gl/geospatial/ellipsoid",
             "items": [
+              "modules/geospatial/api-reference/ellipsoid",
               "modules/geospatial/api-reference/ellipsoid-metrics",
-              "modules/geospatial/api-reference/triaxial-geometry"
+              "modules/geospatial/api-reference/triaxial-geometry",
+              "modules/geospatial/api-reference/ellipsoid-tangent-plane",
+              "modules/geospatial/api-reference/ellipsoid-geodesic"
             ],
             "link": {
               "type": "doc",
-              "id": "modules/geospatial/api-reference/ellipsoid"
+              "id": "modules/geospatial/entry-points/ellipsoid"
             }
           },
           {
             "type": "category",
-            "label": "Geodesics",
+            "label": "@math.gl/geospatial/geodesics",
             "items": [
+              "modules/geospatial/api-reference/geodesic-path",
               "modules/geospatial/api-reference/geodesic-polygon",
               "modules/geospatial/api-reference/ellipsoid-rhumb",
               "modules/geospatial/api-reference/geodesic-intersections",
@@ -389,58 +419,61 @@
             ],
             "link": {
               "type": "doc",
-              "id": "modules/geospatial/api-reference/geodesic-path"
+              "id": "modules/geospatial/entry-points/geodesics"
             }
           },
           {
             "type": "category",
-            "label": "Globe geometry",
+            "label": "@math.gl/geospatial/globe",
             "items": [
+              "modules/geospatial/api-reference/globe-queries",
               "modules/geospatial/api-reference/subdivide-globe-mesh",
               "modules/geospatial/api-reference/make-obb-from-region",
               "modules/geospatial/api-reference/lng-lat-rectangle"
             ],
             "link": {
               "type": "doc",
-              "id": "modules/geospatial/api-reference/globe-queries"
+              "id": "modules/geospatial/entry-points/globe"
             }
           },
           {
             "type": "category",
-            "label": "Map seams",
+            "label": "@math.gl/geospatial/geographic-cuts",
             "items": [
+              "modules/geospatial/api-reference/geographic-seams",
               "modules/geospatial/api-reference/latitude-geographic-cuts",
               "modules/geospatial/api-reference/geographic-atlas",
               "modules/geospatial/api-reference/global-geographic-cuts"
             ],
             "link": {
               "type": "doc",
-              "id": "modules/geospatial/api-reference/geographic-seams"
+              "id": "modules/geospatial/entry-points/geographic-cuts"
             }
           },
           {
             "type": "category",
-            "label": "Tiles",
+            "label": "@math.gl/geospatial/tiles",
             "items": [
+              "modules/geospatial/api-reference/geographic-tiles",
               "modules/geospatial/api-reference/tile-matrix"
             ],
             "link": {
               "type": "doc",
-              "id": "modules/geospatial/api-reference/geographic-tiles"
+              "id": "modules/geospatial/entry-points/tiles"
             }
           },
           {
             "type": "category",
-            "label": "Coordinates and frames",
+            "label": "@math.gl/geospatial/coordinates",
             "items": [
-              "modules/geospatial/api-reference/ellipsoid-tangent-plane",
+              "modules/geospatial/api-reference/coordinate-utilities",
               "modules/geospatial/api-reference/local-reference-frame",
               "modules/geospatial/api-reference/local-frame-qualification",
               "modules/geospatial/api-reference/helpers"
             ],
             "link": {
               "type": "doc",
-              "id": "modules/geospatial/api-reference/coordinate-utilities"
+              "id": "modules/geospatial/entry-points/coordinates"
             }
           },
           {
@@ -449,7 +482,12 @@
             "items": [
               "modules/geospatial/crs/api-reference/spatial-reference",
               "modules/geospatial/crs/api-reference/resolver",
-              "modules/geospatial/crs/api-reference/crs-descriptor"
+              "modules/geospatial/crs/api-reference/crs-descriptor",
+              {
+                "type": "doc",
+                "id": "modules/geospatial/crs/schema",
+                "label": "Schema"
+              }
             ],
             "link": {
               "type": "doc",
@@ -460,14 +498,23 @@
             "type": "category",
             "label": "@math.gl/geospatial/projection",
             "items": [
-              "modules/geospatial/projection/types",
               "modules/geospatial/projection/api-reference/projection",
               "modules/geospatial/projection/api-reference/projection-engine",
               "modules/geospatial/projection/api-reference/projection-transform",
               "modules/geospatial/projection/api-reference/projection-pipeline",
               "modules/geospatial/projection/api-reference/operation-catalog",
               "modules/geospatial/projection/api-reference/projection-analysis",
-              "modules/geospatial/projection/api-reference/projection-buffer"
+              "modules/geospatial/projection/api-reference/projection-buffer",
+              {
+                "type": "doc",
+                "id": "modules/geospatial/projection/kernels",
+                "label": "Kernels"
+              },
+              {
+                "type": "doc",
+                "id": "modules/geospatial/projection/entry-points",
+                "label": "Entry points"
+              }
             ],
             "link": {
               "type": "doc",
@@ -475,12 +522,22 @@
             }
           },
           {
+            "type": "doc",
+            "id": "modules/geospatial/projection-types",
+            "label": "@math.gl/geospatial/projection-types"
+          },
+          {
             "type": "category",
             "label": "@math.gl/geospatial/maps",
             "items": [
               "modules/geospatial/maps/api-reference/map-engine",
               "modules/geospatial/maps/api-reference/surfaces",
-              "modules/geospatial/maps/api-reference/elastic"
+              "modules/geospatial/maps/api-reference/elastic",
+              {
+                "type": "doc",
+                "id": "modules/geospatial/maps/entry-points",
+                "label": "Entry points"
+              }
             ],
             "link": {
               "type": "doc",
@@ -503,6 +560,46 @@
               "type": "doc",
               "id": "modules/geospatial/web-mercator/README"
             }
+          },
+          {
+            "type": "doc",
+            "id": "modules/geospatial/entry-points/tasks",
+            "label": "@math.gl/geospatial/tasks"
+          },
+          {
+            "type": "doc",
+            "id": "modules/geospatial/terrain/README",
+            "label": "@math.gl/geospatial/terrain"
+          },
+          {
+            "type": "doc",
+            "id": "modules/geospatial/entry-points/elastic",
+            "label": "@math.gl/geospatial/elastic"
+          },
+          {
+            "type": "doc",
+            "id": "modules/geospatial/entry-points/turf",
+            "label": "@math.gl/geospatial/turf"
+          },
+          {
+            "type": "doc",
+            "id": "modules/geospatial/entry-points/st-functions",
+            "label": "@math.gl/geospatial/st-functions"
+          },
+          {
+            "type": "doc",
+            "id": "modules/geospatial/entry-points/turf-functions",
+            "label": "@math.gl/geospatial/turf-functions"
+          },
+          {
+            "type": "doc",
+            "id": "modules/geospatial/entry-points/turf-expressions",
+            "label": "@math.gl/geospatial/turf-expressions"
+          },
+          {
+            "type": "doc",
+            "id": "modules/geospatial/entry-points/expressions",
+            "label": "@math.gl/geospatial/expressions"
           }
         ],
         "link": {
@@ -540,13 +637,17 @@
               "modules/earth/sun/api-reference/get-sun-terminator",
               "modules/earth/sun/api-reference/moon",
               "modules/earth/sun/api-reference/get-planet-sky-info",
-              "modules/earth/sun/api-reference/stars",
               "modules/earth/sun/api-reference/sky"
             ],
             "link": {
               "type": "doc",
               "id": "modules/earth/sun/README"
             }
+          },
+          {
+            "type": "doc",
+            "id": "modules/earth/sun-stars",
+            "label": "@math.gl/earth/sun-stars"
           },
           {
             "type": "category",
@@ -587,21 +688,39 @@
             "label": "Guide"
           },
           {
-            "type": "category",
-            "label": "@math.gl/dggs",
-            "items": [
-              "modules/dggs/api-reference/dggs-decoder",
-              "modules/dggs/api-reference/a5-decoder",
-              "modules/dggs/api-reference/geohash-decoder",
-              "modules/dggs/api-reference/h3-decoder",
-              "modules/dggs/api-reference/plus-code-decoder",
-              "modules/dggs/api-reference/quadkey-decoder",
-              "modules/dggs/api-reference/s2-decoder"
-            ],
-            "link": {
-              "type": "doc",
-              "id": "modules/dggs/README"
-            }
+            "type": "doc",
+            "id": "modules/dggs/api-reference/decoders",
+            "label": "@math.gl/dggs/decoders"
+          },
+          {
+            "type": "doc",
+            "id": "modules/dggs/api-reference/a5",
+            "label": "@math.gl/dggs/a5"
+          },
+          {
+            "type": "doc",
+            "id": "modules/dggs/api-reference/geohash",
+            "label": "@math.gl/dggs/geohash"
+          },
+          {
+            "type": "doc",
+            "id": "modules/dggs/api-reference/h3",
+            "label": "@math.gl/dggs/h3"
+          },
+          {
+            "type": "doc",
+            "id": "modules/dggs/api-reference/plus-code",
+            "label": "@math.gl/dggs/plus-code"
+          },
+          {
+            "type": "doc",
+            "id": "modules/dggs/api-reference/quadkey",
+            "label": "@math.gl/dggs/quadkey"
+          },
+          {
+            "type": "doc",
+            "id": "modules/dggs/api-reference/s2",
+            "label": "@math.gl/dggs/s2"
           }
         ],
         "link": {
@@ -617,27 +736,88 @@
           "id": "modules/sql/README"
         },
         "items": [
-          "modules/sql/queries",
-          "modules/sql/unnest",
-          "modules/sql/workers",
-          "modules/sql/parser/README",
-          "modules/sql/arrow/README",
-          "modules/sql/arrow/spatial-functions",
-          "modules/sql/arrow/sql-conformance",
-          "modules/sql/math-functions/README",
-          "modules/sql/color-functions/README",
-          "modules/sql/scales/README",
-          "modules/sql/scales/gallery",
-          "modules/sql/scales/SQL",
-          "modules/sql/scales/bivariate",
-          "modules/sql/scales/numeric",
-
-          "modules/sql/expressions",
-          "modules/sql/api-reference/expression-eval",
-          "modules/sql/api-reference/function-registry",
-          "modules/sql/api-reference/dggs-function-libraries",
-          "modules/sql/api-reference/parse-expression-string",
-          "modules/sql/portable-ast"
+          {
+            "type": "category",
+            "label": "@math.gl/sql/query",
+            "link": {
+              "type": "doc",
+              "id": "modules/sql/query"
+            },
+            "items": [
+              "modules/sql/unnest"
+            ]
+          },
+          {
+            "type": "category",
+            "label": "@math.gl/sql/parser",
+            "link": {
+              "type": "doc",
+              "id": "modules/sql/parser/README"
+            },
+            "items": [
+              "modules/sql/api-reference/parse-expression-string"
+            ]
+          },
+          {
+            "type": "category",
+            "label": "@math.gl/sql/expressions",
+            "link": {
+              "type": "doc",
+              "id": "modules/sql/expressions"
+            },
+            "items": [
+              "modules/sql/api-reference/expression-eval",
+              "modules/sql/api-reference/function-registry",
+              "modules/sql/api-reference/dggs-function-libraries",
+              "modules/sql/portable-ast"
+            ]
+          },
+          {
+            "type": "category",
+            "label": "@math.gl/sql/arrow",
+            "link": {
+              "type": "doc",
+              "id": "modules/sql/arrow/README"
+            },
+            "items": [
+              "modules/sql/arrow/spatial-functions",
+              "modules/sql/arrow/sql-conformance"
+            ]
+          },
+          {
+            "type": "doc",
+            "id": "modules/sql/worker",
+            "label": "@math.gl/sql/worker"
+          },
+          {
+            "type": "doc",
+            "id": "modules/sql/math-functions/README",
+            "label": "@math.gl/sql/math-functions"
+          },
+          {
+            "type": "doc",
+            "id": "modules/sql/color-functions/README",
+            "label": "@math.gl/sql/color-functions"
+          },
+          {
+            "type": "category",
+            "label": "@math.gl/sql/scales",
+            "link": {
+              "type": "doc",
+              "id": "modules/sql/scales/README"
+            },
+            "items": [
+              "modules/sql/scales/gallery",
+              "modules/sql/scales/SQL",
+              "modules/sql/scales/bivariate",
+              "modules/sql/scales/numeric"
+            ]
+          },
+          {
+            "type": "doc",
+            "id": "modules/sql/entry-points/scales-conformance",
+            "label": "@math.gl/sql/scales-conformance"
+          }
         ]
       },
       {

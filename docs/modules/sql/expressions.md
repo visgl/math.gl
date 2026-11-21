@@ -1,4 +1,4 @@
-# Portable expressions
+# @math.gl/sql/expressions
 
 Use `@math.gl/sql/expressions` to parse and evaluate expressions against JavaScript objects.
 This entry point works without Apache Arrow. For SQL text, use [the parser](parser/README.md);
@@ -33,7 +33,7 @@ import {
   BASIC_MATH_FUNCTION_LIBRARY,
   compile
 } from '@math.gl/sql/expressions';
-import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial';
+import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial/expressions';
 
 const fn = compile('cartographicToCartesian([toRadians(longitude), toRadians(latitude), 0])', {
   libraries: [BASIC_MATH_FUNCTION_LIBRARY, GEOSPATIAL_FUNCTION_LIBRARY]

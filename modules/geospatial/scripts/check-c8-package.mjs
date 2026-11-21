@@ -16,8 +16,7 @@ const root=fileURLToPath(new URL('../../../',import.meta.url)),require=createReq
 const base='b9db6472e72b22ffb52b1c37c97745e68478728a';
 for(const format of ['esm','cjs']){
  const load=format==='esm'?p=>import(p):p=>require(p);
- const api=await load('@math.gl/geospatial'),full=await load('@math.gl/geospatial');
- assert.equal(typeof full.LocalReferenceFrame,'function');assert.equal(typeof full.EllipsoidTangentPlane,'function');
+ const api = {...await load('@math.gl/geospatial/ellipsoid'), ...await load('@math.gl/geospatial/coordinates')};
  const e=new api.Ellipsoid(10,10,10),frame=new api.LocalReferenceFrame([10,0,0],{ellipsoid:e});
  assert.deepEqual(Array.from(frame.localToFixedVector([1,2,3])),[3,1,2]);
  const copy=frame.localToFixedMatrix;copy.fill(0);assert.deepEqual(Array.from(frame.localToFixedPoint([1,2,3])),[13,1,2]);
@@ -36,10 +35,13 @@ try {
  execFileSync(process.execPath,[require.resolve('typescript/bin/tsc'),'--project',join(directory,'tsconfig.json')],{stdio:'inherit'});
  const rows=[];
  for(const symbol of ['LocalReferenceFrame','EllipsoidTangentPlane','Ellipsoid','EllipsoidGeodesic','GeodesicPath']) {
-  const entry=join(directory,symbol+'.ts');writeFileSync(entry,`export {${symbol}} from '@math.gl/geospatial';`);
+  const entry=join(directory,symbol+'.ts');
+  const subpath = symbol === 'LocalReferenceFrame' ? 'coordinates' :
+    symbol === 'EllipsoidGeodesic' || symbol === 'GeodesicPath' ? 'geodesics' : 'ellipsoid';
   const sizes=[],graphs=[];
   for(const [index,ref] of [base,undefined].entries()) {
    const file=join(directory,symbol+'-'+index+'.mjs');
+   writeFileSync(entry,`export {${symbol}} from '@math.gl/geospatial${ref ? '' : '/' + subpath}';`);
    const build=await bundleRuntime(root,relative(root,entry),file,ref);
    const {code}=await transform(readFileSync(file,'utf8'),{minify:true,target:'es2020',legalComments:'none'});
    sizes.push({minified:Buffer.byteLength(code),gzip:gzipSync(code,{level:9}).length});

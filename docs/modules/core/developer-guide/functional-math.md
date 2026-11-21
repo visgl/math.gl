@@ -6,7 +6,7 @@ is absent from a class or when callers own the output buffers.
 
 ## Imports and output ownership
 
-Import namespaces or individual operations from the package root:
+Import namespaces or individual operations from `@math.gl/core/matrix`:
 
 ```js
 import {Matrix4, mat4, mat4FromRotationTranslationScale} from '@math.gl/core/matrix';

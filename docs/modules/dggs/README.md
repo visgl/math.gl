@@ -16,7 +16,7 @@ const polygon = GeohashDecoder.cellToBoundary(geohashId);
 ```
 
 ```js
-import {findDGGSCellColumn} from '@math.gl/dggs';
+import {findDGGSCellColumn} from '@math.gl/dggs/decoders';
 
 const match = findDGGSCellColumn(['name', 's2_token', 'value']);
 // {columnName: 's2_token', decoder: S2Decoder}
@@ -28,12 +28,13 @@ Import from `@math.gl/dggs` for shared types, the decoder registry, or column de
 
 | Import path | Decoder | Cell identifier | Classification |
 | --- | --- | --- | --- |
-| `@math.gl/dggs/a5` | [`A5Decoder`](./api-reference/a5-decoder.md) | Hexadecimal string or `bigint` | DGGS |
-| `@math.gl/dggs/geohash` | [`GeohashDecoder`](./api-reference/geohash-decoder.md) | String | DGGS-like geocode |
-| `@math.gl/dggs/h3` | [`H3Decoder`](./api-reference/h3-decoder.md) | Hexadecimal string or `bigint` | DGGS |
-| `@math.gl/dggs/plus-code` | [`PlusCodeDecoder`](./api-reference/plus-code-decoder.md) | Full string code | DGGS-like geocode |
-| `@math.gl/dggs/quadkey` | [`QuadkeyDecoder`](./api-reference/quadkey-decoder.md) | String | DGGS-like tile hierarchy |
-| `@math.gl/dggs/s2` | [`S2Decoder`](./api-reference/s2-decoder.md) | Token string or `bigint` | DGGS |
+| `@math.gl/dggs/decoders` | [Shared decoder API](./api-reference/decoders.md) | Varies by grid | Registry |
+| `@math.gl/dggs/a5` | [`A5Decoder`](./api-reference/a5.md) | Hexadecimal string or `bigint` | DGGS |
+| `@math.gl/dggs/geohash` | [`GeohashDecoder`](./api-reference/geohash.md) | String | DGGS-like geocode |
+| `@math.gl/dggs/h3` | [`H3Decoder`](./api-reference/h3.md) | Hexadecimal string or `bigint` | DGGS |
+| `@math.gl/dggs/plus-code` | [`PlusCodeDecoder`](./api-reference/plus-code.md) | Full string code | DGGS-like geocode |
+| `@math.gl/dggs/quadkey` | [`QuadkeyDecoder`](./api-reference/quadkey.md) | String | DGGS-like tile hierarchy |
+| `@math.gl/dggs/s2` | [`S2Decoder`](./api-reference/s2.md) | Token string or `bigint` | DGGS |
 
 Only full Plus Codes can be decoded without more context. Short Plus Codes are intentionally unsupported because recovering one requires a reference location.
 
@@ -52,9 +53,9 @@ token**.
 
 | Feature | Support | Notes |
 | --- | --- | --- |
-| Multi-grid cell centers and boundaries | ✅ | [A5](./api-reference/a5-decoder.md), GeoHash, H3, Quadkey, S2 and full Plus Code decoders share a compact geometry interface. |
+| Multi-grid cell centers and boundaries | ✅ | [A5](./api-reference/a5.md), GeoHash, H3, Quadkey, S2 and full Plus Code decoders share a compact geometry interface. |
 | String and supported numeric identifiers | ✅ | Decoder-specific contracts distinguish strings, tokens and BigInt identifiers; numeric support is not uniform across grids. |
-| Column-name discovery and decoder registry | ✅ | Conventional column detection and [DGGSDecoder](./api-reference/dggs-decoder.md) integrate with visualization adapters. |
+| Column-name discovery and decoder registry | ✅ | Conventional column detection and [DGGSDecoder](./api-reference/decoders.md) integrate with visualization adapters. |
 | Parent/child and neighbor traversal | ❌ | The common decoder API does not expose the native grids’ full hierarchy or neighborhood operations. |
 | Polygon fills, covering and compaction | ❌ | Use full H3/S2/A5 or other native grid APIs for covering, compaction and grid-specific topology. |
 | Uniform cell metrics and analytical aggregation | ❌ | No shared area/distance/aggregation engine is provided across all grid systems. |

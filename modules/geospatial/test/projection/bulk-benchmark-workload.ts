@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original end-to-end layout benchmarks with reusable comparison storage.
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import {ProjectionBuffer} from '@math.gl/geospatial/projection/bulk';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import {ProjectionBuffer} from '@math.gl/geospatial/projection-bulk';
 import {
   PIPELINE_SCENARIOS,
   qualifyBenchmarkPipeline,

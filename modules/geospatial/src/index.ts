@@ -3,6 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 export * from './entries/ellipsoid';
+export * from './geodesics';
+export * from './coordinates';
 export * from './globe';
 export * from './tiles';
 

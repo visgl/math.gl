@@ -8,7 +8,7 @@ export const lazyTiltedPerspective: ProjectionDescriptor =
   /* @__PURE__ */ createProjectionDescriptor(
     {name: 'tpers', aliases: ['Tilted_Perspective']},
     async () => {
-      const projectionModule = await import('@math.gl/geospatial/projection/projections/tpers');
+      const projectionModule = await import('@math.gl/geospatial/projection-projections-tpers');
       return projectionModule.tiltedPerspective;
     }
   );

@@ -5,7 +5,7 @@
 
 /* eslint-disable max-statements, max-depth */
 import {test, expect} from 'vitest';
-import {SphericalCoordinates, Vector3, equals} from '@math.gl/core';
+import {SphericalCoordinates, Vector3, equals} from '@math.gl/core/matrix';
 
 const REPRESENTATION_TEST_CASES = [
   {

@@ -2,16 +2,14 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {GeodesicPath, EllipsoidGeodesic} from '@math.gl/geospatial';
-import type {GeodesicPathOptions} from '@math.gl/geospatial';
-import {subdivideGeodesicPolyline} from '@math.gl/geospatial';
-import type {SubdivideGeodesicPolylineOptions} from '@math.gl/geospatial';
-import {
-  GeodesicPath as RootPath,
-  subdivideGeodesicPolyline as rootSubdivide
-} from '@math.gl/geospatial';
-import {subdividePolyline} from '@math.gl/geometry';
-import type {PolylineEdgeSampler} from '@math.gl/geometry';
+import {GeodesicPath, EllipsoidGeodesic} from '@math.gl/geospatial/geodesics';
+import type {GeodesicPathOptions} from '@math.gl/geospatial/geodesics';
+import {subdivideGeodesicPolyline} from '@math.gl/geospatial/globe';
+import type {SubdivideGeodesicPolylineOptions} from '@math.gl/geospatial/globe';
+import {GeodesicPath as RootPath} from '@math.gl/geospatial/geodesics';
+import {subdivideGeodesicPolyline as rootSubdivide} from '@math.gl/geospatial/globe';
+import {subdividePolyline} from '@math.gl/geometry/polygon';
+import type {PolylineEdgeSampler} from '@math.gl/geometry/polygon';
 
 const options: GeodesicPathOptions = {
   geodesic: new EllipsoidGeodesic({semiMajorAxis: 10, semiMinorAxis: 10})

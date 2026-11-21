@@ -3,8 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original analytic large-vector and spherical-horizon controls.
 import {expect, test} from 'vitest';
-import {Vector3} from '@math.gl/core';
-import {Ellipsoid, EllipsoidTangentPlane, LocalReferenceFrame} from '@math.gl/geospatial';
+import {Vector3} from '@math.gl/core/matrix';
+import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial/ellipsoid';
+import {LocalReferenceFrame} from '@math.gl/geospatial/coordinates';
 
 test('C8 radial lift retains representable surface points at extreme finite tangent coordinates', () => {
   for (const radius of [1e-60, 1, 1e60]) {

@@ -7,7 +7,7 @@ Global grid encodings identify cells rather than individual coordinates. Use `@m
 Choose a decoder for the encoding used by your data:
 
 ```js
-import {GeohashDecoder} from '@math.gl/dggs';
+import {GeohashDecoder} from '@math.gl/dggs/geohash';
 
 const center = GeohashDecoder.cellToLngLat('9q8yy');
 const boundary = GeohashDecoder.cellToBoundary('9q8yy');
@@ -21,12 +21,12 @@ All bundled decoders expose the same small geometry contract. Supported encoding
 | `cellToBoundary()` | Boundary coordinates suitable for a polygon |
 | `cellToBoundaryFlat()` | Boundary coordinates in a flat numeric array |
 
-Use the [decoder reference](../api-reference/dggs-decoder.md) for winding, ring closure, bounds, and identifier validation. For cells crossing the antimeridian, its unwrapping option produces continuous longitudes; select the representation expected by your renderer.
+Use the [decoder reference](../api-reference/decoders.md) for winding, ring closure, bounds, and identifier validation. For cells crossing the antimeridian, its unwrapping option produces continuous longitudes; select the representation expected by your renderer.
 
 ## Detect a cell column
 
 ```js
-import {findDGGSCellColumn} from '@math.gl/dggs';
+import {findDGGSCellColumn} from '@math.gl/dggs/decoders';
 
 const match = findDGGSCellColumn(['name', 's2_token', 'value']);
 // {columnName: 's2_token', decoder: S2Decoder}

@@ -21,7 +21,7 @@ for geodesics, rhumb lines, chords, ellipsoids, reference systems, and projectio
 Determine the Cartesian representation of a Cartographic position on a WGS84 ellipsoid.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 const cartographicPosition = [21, 78, 5000]; // [longitude, latitude, height]
 const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPosition);
 ```
@@ -29,7 +29,7 @@ const cartesianPosition = Ellipsoid.WGS84.cartographicToCartesian(cartographicPo
 Determine the Cartographic representation of a Cartesian position on a WGS84 ellipsoid.
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 const cartesianPosition = [17832.12, 83234.52, 952313.73];
 const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPosition);
 ```
@@ -37,7 +37,8 @@ const cartographicPosition = Ellipsoid.WGS84.cartesianToCartographic(cartesianPo
 Get the transform from a local east-north-up frame at a point on the WGS84 ellipsoid to Earth's fixed frame.
 
 ```js
-import {Ellipsoid, eastNorthUpToFixedFrame} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {eastNorthUpToFixedFrame} from '@math.gl/geospatial/coordinates';
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
 const transformMatrix = eastNorthUpToFixedFrame(Ellipsoid.WGS84, cartesianOrigin);
 ```
@@ -74,11 +75,17 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 
 | Import | APIs |
 | --- | --- |
-| `@math.gl/geospatial` | [Ellipsoid](./api-reference/ellipsoid.md), [tangent planes](./api-reference/ellipsoid-tangent-plane.md), [surface geodesics](./api-reference/ellipsoid-geodesic.md), [geodesic paths](./api-reference/geodesic-path.md), [rhumb paths](./api-reference/rhumb-path.md), and [WGS84 helpers](./api-reference/helpers.md) |
-| `@math.gl/geospatial` | [Geographic rectangles](./api-reference/lng-lat-rectangle.md), [region bounding boxes](./api-reference/make-obb-from-region.md), [visibility queries](./api-reference/globe-queries.md), [mesh subdivision](./api-reference/subdivide-globe-mesh.md), [rhumb subdivision](./api-reference/rhumb-path.md), and [geographic seams](./api-reference/geographic-seams.md) |
-| `@math.gl/geospatial` | [Oblique ellipsoidal visibility and shared cut graphs](./api-reference/geographic-atlas.md) |
-| `@math.gl/geospatial` | [Ellipsoidal/rhumb latitude-domain clipping and adaptive projection](./api-reference/latitude-geographic-cuts.md) |
-| `@math.gl/geospatial` | [Geographic tile queries](./api-reference/geographic-tiles.md) and [tile-matrix utilities](./api-reference/tile-matrix.md) |
+| [`@math.gl/geospatial/ellipsoid`](./api-reference/ellipsoid.md) | Reference ellipsoids, metrics, and tangent planes. |
+| [`@math.gl/geospatial/geodesics`](./api-reference/geodesic-path.md) | Geodesics, rhumb lines, and distance and area calculations. |
+| [`@math.gl/geospatial/coordinates`](./api-reference/coordinate-utilities.md) | Coordinate formats, grid systems, and local reference frames. |
+| [`@math.gl/geospatial/globe`](./api-reference/globe-queries.md) | Globe visibility, bounding regions, and mesh subdivision. |
+| [`@math.gl/geospatial/geographic-cuts`](./api-reference/geographic-atlas.md) | Geographic seams, clipping, and chart boundaries. |
+| [`@math.gl/geospatial/tiles`](./api-reference/geographic-tiles.md) | Geographic tiles and tile matrices. |
+| [`@math.gl/geospatial/crs`](./crs/README.md) | Coordinate reference system definitions and resolution. |
+| [`@math.gl/geospatial/projection`](./projection/README.md) | Coordinate transformations and projection engine APIs. |
+| [`@math.gl/geospatial/maps`](./maps/README.md) | Map projections, surfaces, and transitions. |
+| [`@math.gl/geospatial/terrain`](./terrain/README.md) | Terrain sampling, mesh generation, and surface analysis. |
+| [`@math.gl/geospatial/web-mercator`](./web-mercator/README.md) | Spherical Web Mercator viewport and coordinate utilities. |
 | `@math.gl/geospatial/st-functions` | [PostGIS-style functions for Arrow SQL](../sql/arrow/spatial-functions.md) |
 | `@math.gl/geospatial/turf-functions` | [Turf function declarations and the Arrow SQL adapter](../sql/arrow/README.md#turf-functions) |
 | `@math.gl/geospatial/tasks` | [Map preparation and coordinate projection tasks](../tasks/developer-guide/task-runner.md) |

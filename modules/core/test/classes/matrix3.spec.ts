@@ -5,7 +5,7 @@
 
 /* eslint-disable max-statements */
 import {test, expect} from 'vitest';
-import {Matrix3, config, equals} from '@math.gl/core';
+import {Matrix3, config, equals} from '@math.gl/core/matrix';
 
 config.EPSILON = 1e-6;
 

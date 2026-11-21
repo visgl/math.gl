@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Vector2, Vector3, Vector4} from '@math.gl/core';
+import {Vector2, Vector3, Vector4} from '@math.gl/core/matrix';
 import {
   type GeometryInput,
   computeVertexNormals,
@@ -25,7 +25,7 @@ import {
   octPack,
   octUnpack,
   zigZagDeltaDecode
-} from '@math.gl/geometry';
+} from '@math.gl/geometry/processing';
 import {expect, test} from 'vitest';
 import {
   getAttributeValues,

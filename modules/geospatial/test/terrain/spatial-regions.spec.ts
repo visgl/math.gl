@@ -14,7 +14,7 @@ import {
   updateTerrainGradientPyramidRegions,
   simplifyTerrainContourPathsTopology,
   stitchTerrainContours
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 const field = (
   heights = Float64Array.from({length: 81}, (_, i) => Math.sin(i % 9) + Math.cos(Math.floor(i / 9)))
 ) => new HeightField({width: 9, height: 9, heights});
@@ -119,7 +119,7 @@ test('indexed topology handles thousands of separated components within a bounde
 });
 
 test('indexed isobands handle thousands of separated conforming patches', async () => {
-  const {createTerrainIsobands} = await import('@math.gl/geospatial');
+  const {createTerrainIsobands} = await import('@math.gl/geospatial/terrain');
   const fields = Array.from(
     {length: 2000},
     (_, i) =>
@@ -172,7 +172,7 @@ test('odd hierarchy edges, metadata resets and work admission remain correct', (
 });
 
 test('range pruning never hides conflicting shared heights', async () => {
-  const {createTerrainIsobands} = await import('@math.gl/geospatial');
+  const {createTerrainIsobands} = await import('@math.gl/geospatial/terrain');
   const make = (x: number, h: number) =>
     new HeightField({width: 2, height: 2, origin: [x, 0], heights: new Float64Array(4).fill(h)});
   expect(() => createTerrainIsobands([make(0, 1), make(1, 10)], [0, 2])).toThrow(/shared heights/);
@@ -236,7 +236,7 @@ test('mesh initialization and configuration resets do not charge unused dirty co
 });
 
 test('returned decimal mesh regions remain qualified by the public error measurer', async () => {
-  const {measureTerrainMeshError} = await import('@math.gl/geospatial');
+  const {measureTerrainMeshError} = await import('@math.gl/geospatial/terrain');
   const f = new HeightField({
     width: 17,
     height: 5,

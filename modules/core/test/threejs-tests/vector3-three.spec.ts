@@ -11,7 +11,7 @@
 /* eslint-disable quotes, no-var */
 import {assert, expect, test} from 'vitest';
 
-import {Vector3, Vector4, Matrix3, Matrix4, Quaternion, Euler} from '@math.gl/core';
+import {Vector3, Vector4, Matrix3, Matrix4, Quaternion, Euler} from '@math.gl/core/matrix';
 import {x, y, z, w, eps} from './constants';
 
 // INSTANCING

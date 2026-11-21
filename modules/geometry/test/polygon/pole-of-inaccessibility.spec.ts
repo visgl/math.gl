@@ -3,7 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {describe, expect, it} from 'vitest';
-import {DEFAULT_POLE_SEARCH_SEGMENT_TESTS, getPoleOfInaccessibility} from '@math.gl/geometry';
+import {
+  DEFAULT_POLE_SEARCH_SEGMENT_TESTS,
+  getPoleOfInaccessibility
+} from '@math.gl/geometry/polygon';
 
 function square(size: number): number[][][] {
   return [

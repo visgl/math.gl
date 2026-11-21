@@ -5,13 +5,13 @@ import {expect, test} from 'vitest';
 import {
   createProjectionEngine,
   createProjectionDescriptor
-} from '@math.gl/geospatial/projection/core';
+} from '@math.gl/geospatial/projection-core';
 import {
   mercator,
   universalTransverseMercator,
   projectionEngine
 } from '@math.gl/geospatial/projection';
-import type {ProjectionEngine} from '@math.gl/geospatial/projection/types';
+import type {ProjectionEngine} from '@math.gl/geospatial/projection-types';
 
 test('one engine creates independent CRS pairs and has no coordinate methods', async () => {
   const engine: ProjectionEngine = projectionEngine;
@@ -88,7 +88,7 @@ test('all concrete engines implement the shared contract and lazy engines offer 
   expect(oblique.project([12, 55]).every(Number.isFinite)).toBe(true);
 });
 
-import {LazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
+import {LazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
 
 test('full engine retains defaults for omitted registration options', () => {
   const engine = new FullProjectionEngine({

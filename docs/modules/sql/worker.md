@@ -1,4 +1,4 @@
-# Workers
+# @math.gl/sql/worker
 
 Use `@math.gl/sql/worker` to run structured queries or compiled expressions off the calling thread.
 Load data into native Arrow tables before creating a worker session. SQL text execution with

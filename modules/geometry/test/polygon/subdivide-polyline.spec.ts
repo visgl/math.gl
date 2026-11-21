@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {subdividePolyline} from '@math.gl/geometry';
+import {subdividePolyline} from '@math.gl/geometry/polygon';
 
 const identity = (position: readonly number[]) => position;
 

@@ -3,10 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original analytic sphere/normal anchors and boundary qualification. No external model or conversion code is copied.
 import {expect, test} from 'vitest';
-import {config, Vector3} from '@math.gl/core';
-import {Ellipsoid} from '@math.gl/geospatial';
-import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
-import {geocentric} from '@math.gl/geospatial/projection/projections/geocent';
+import {config, Vector3} from '@math.gl/core/matrix';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
+import {geocentric} from '@math.gl/geospatial/projection-projections-geocent';
 
 function sphere(radius: number) {
   const crs = `+R=${radius} +proj=`;

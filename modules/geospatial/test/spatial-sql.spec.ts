@@ -20,7 +20,7 @@ import {
   parseWKT,
   writeWKB
 } from '@math.gl/core/arrow';
-import {queryArrowSQL} from '@math.gl/sql';
+import {queryArrowSQL} from '@math.gl/sql/query';
 import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
 import {TURF_FUNCTIONS} from '@math.gl/geospatial/turf-functions';
 

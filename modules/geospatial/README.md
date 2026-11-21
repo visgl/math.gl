@@ -111,12 +111,12 @@ const spatialReference = createSpatialReference({
 ```
 
 The official PROJJSON v0.7 JSON Schema is vendored unchanged under its MIT license and exported as
-`@math.gl/geospatial/crs/projjson.schema.json`. It is the source of truth for the checked-in generated
+`@math.gl/geospatial/crs-projjson.schema.json`. It is the source of truth for the checked-in generated
 TypeScript declarations. Its runtime APIs parse, encode,
 and validate serialization syntax and identify already-resolved metadata. They do not perform registry lookup, semantic equivalence,
 coordinate transformation, or general conversion between WKT, PROJ, and PROJJSON.
 
-The `ProjectionTransform` in `@math.gl/geospatial/projection/core` directly accepts
+The `ProjectionTransform` in `@math.gl/geospatial/projection-core` directly accepts
 these readonly definitions, `CRSReference`, and `SpatialReference` descriptors. Its optional
 WKT/PROJJSON adapters use this package's types and parsers; execution support is checked
 by `checkProjectionCompatibility`. Unknown/absent metadata remains unresolved.
@@ -151,10 +151,10 @@ The v5 alpha package was renamed from `@math.gl/proj4`. Create transforms throug
 `projectionEngine.createProjection({from, to})` instead of the former `Proj4Projection`
 constructor. The `/classic` wrapper is removed.
 
-The runtime-free `@math.gl/geospatial/projection/types` entry exports the `ProjectionEngine` factory
+The runtime-free `@math.gl/geospatial/projection-types` entry exports the `ProjectionEngine` factory
 and `Projection` transform contracts. Concrete engines are `FullProjectionEngine`,
 `ConfigurableProjectionEngine`, `LazyProjectionEngine` and the minimal
-`WebMercatorProjectionEngine` (`@math.gl/geospatial/projection/web-mercator`).
+`WebMercatorProjectionEngine` (`@math.gl/geospatial/projection-web-mercator`).
 
 ```typescript
 import {projectionEngine} from '@math.gl/geospatial/projection';
@@ -163,8 +163,8 @@ const projection = projectionEngine.createProjection({to: 'EPSG:3857'});
 const meters = projection.project([12, 55]);
 ```
 
-For selective bundles, use `ProjectionTransform` from `@math.gl/geospatial/projection/core` with
-explicit projection plugins. `lazyProjectionEngine` from `@math.gl/geospatial/projection/projections/lazy`
+For selective bundles, use `ProjectionTransform` from `@math.gl/geospatial/projection-core` with
+explicit projection plugins. `lazyProjectionEngine` from `@math.gl/geospatial/projection-projections-lazy`
 creates transforms that load algorithms on demand. The engine supports
 geocentric/Helmert transforms and prepared horizontal datum grids. `projectFlat` and `unprojectFlat` transform interleaved
 Float32/Float64 buffers without temporary coordinate arrays in the built-in pipeline.

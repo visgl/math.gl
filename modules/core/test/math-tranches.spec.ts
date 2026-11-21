@@ -26,7 +26,7 @@ import {
   mat4OrthographicProjection,
   mat4FrustumProjection,
   getProjectionDepthRange
-} from '@math.gl/core';
+} from '@math.gl/core/matrix';
 
 const close = (a: ArrayLike<number>, b: ArrayLike<number>, digits = 10) => {
   expect(a.length).toBe(b.length);

@@ -11,9 +11,6 @@
     "type": "git",
     "url": "https://github.com/visgl/math.gl.git"
   },
-  "types": "dist/index.d.ts",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
   "files": [
     "dist",
     "src",
@@ -23,11 +20,6 @@
     "THIRD-PARTY-NOTICES.md"
   ],
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
     "./query": {
       "types": "./dist/query.d.ts",
       "import": "./dist/query.js",
@@ -38,7 +30,7 @@
       "import": "./dist/scales/index.js",
       "require": "./dist/scales/index.cjs"
     },
-    "./scales/conformance": {
+    "./scales-conformance": {
       "types": "./dist/scales/conformance.d.ts",
       "import": "./dist/scales/conformance.js",
       "require": "./dist/scales/conformance.cjs"

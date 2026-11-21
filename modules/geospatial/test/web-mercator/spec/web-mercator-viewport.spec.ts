@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
 import {WebMercatorViewport} from '../../../src/web-mercator';
-import {equals, config} from '@math.gl/core';
+import {equals, config} from '@math.gl/core/matrix';
 
 import VIEWPORT_PROPS from '../utils/sample-viewports';
 

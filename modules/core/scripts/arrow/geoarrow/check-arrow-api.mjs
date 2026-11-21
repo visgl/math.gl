@@ -58,7 +58,7 @@ try {
     import {createRequire} from 'node:module';
     const require = createRequire(import.meta.url);
     assert.throws(() => require.resolve('apache-arrow'), {code:'MODULE_NOT_FOUND'});
-    for (const subpath of ['', '/matrix', '/color', '/utf8']) {
+    for (const subpath of ['/types', '/matrix', '/color', '/utf8']) {
       await import('@math.gl/core' + subpath);
       require('@math.gl/core' + subpath);
     }
@@ -74,7 +74,7 @@ try {
     'void [new Vector3(), compileResolvedScale, createColorLUTSampler, parseUTF8Number];'
   ].join('\n'));
   execFileSync(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), typeConsumer, '--noEmit', '--module', 'nodenext', '--moduleResolution', 'nodenext', '--target', 'esnext', '--lib', 'esnext,dom', '--strict'], {cwd: consumer, stdio: 'inherit'});
-  console.log('Core root/matrix/color/utf8 ESM/CommonJS consumers work with Arrow absent');
+  console.log('Core types/matrix/color/utf8 ESM/CommonJS consumers work with Arrow absent');
 } finally {
   rmSync(directory, {recursive:true,force:true});
 }

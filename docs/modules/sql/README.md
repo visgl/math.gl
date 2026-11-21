@@ -20,19 +20,19 @@ points can be used without Arrow; it is an optional peer dependency for those us
 
 | Import path | Use it to |
 | --- | --- |
-| `@math.gl/sql` | Run [queries over Arrow tables](queries.md), compute columns, or aggregate record batches. |
+| `@math.gl/sql/query` | Run [queries over Arrow tables](query.md), compute columns, or aggregate record batches. |
 | `@math.gl/sql/parser` | [Parse SQL](parser/README.md) into expressions, predicates, or queries without executing it. |
 | `@math.gl/sql/expressions` | [Evaluate portable expressions](expressions.md) against JavaScript objects. |
 | `@math.gl/sql/arrow` | [Compile expressions and predicates](arrow/README.md) against an Arrow schema for reuse across batches. |
-| `@math.gl/sql/worker` | Run structured queries and expressions [off the calling thread](workers.md). |
+| `@math.gl/sql/worker` | Run structured queries and expressions [off the calling thread](worker.md). |
 | `@math.gl/sql/math-functions` | Register [numeric SQL functions](math-functions/README.md) such as `SIN` and `SQRT`. |
 | `@math.gl/sql/color-functions` | Register [color functions](color-functions/README.md) for construction, conversion, and mapping. |
 | `@math.gl/sql/scales` | [Parse scale expressions, resolve domains, and evaluate scales](scales/README.md) on Arrow columns. |
 
 Worker bootstrap entry points `@math.gl/sql/worker-entry.js` and
 `@math.gl/sql/query-worker-entry.js` start their respective worker runtimes. See
-[Workers](workers.md) for setup. The test-only entry point
-`@math.gl/sql/scales/conformance` provides shared fixture cases for scale implementations.
+[Workers](worker.md) for setup. The test-only entry point
+`@math.gl/sql/scales-conformance` provides shared fixture cases for scale implementations.
 
 ## Run a query
 
@@ -70,7 +70,7 @@ The optional third argument accepts:
 | `parseParameter` | A callback from a named SQL parameter to an expression AST; see [relational parsing](parser/README.md#relational-select). |
 
 Direct column projections can share input buffers. Filtering, sorting, joins, and computed
-columns may allocate results. See [query execution](queries.md) for structured queries,
+columns may allocate results. See [query execution](query.md) for structured queries,
 record-batch streaming, and progressive aggregates.
 
 ## Supported SQL
@@ -81,7 +81,7 @@ This table describes the SQL that `queryArrowSQL` executes.
 | --- | --- |
 | Projection and filtering | Columns, aliases, computed expressions, and Boolean `WHERE` expressions. |
 | Joins | One inner equality join per SELECT; qualify both join keys with table names or aliases. |
-| Table functions | Standalone `FROM function(...)` and correlated `CROSS JOIN LATERAL` or `LEFT JOIN LATERAL … ON TRUE`. See [table functions](queries.md#table-function-declarations). |
+| Table functions | Standalone `FROM function(...)` and correlated `CROSS JOIN LATERAL` or `LEFT JOIN LATERAL … ON TRUE`. See [table functions](query.md#table-function-declarations). |
 | Aggregation | Column-based `GROUP BY` and top-level aggregate calls such as `SUM(quantity)` and `COUNT(*)`. |
 | Sorting | `ORDER BY` output columns or aliases; stable ordering with nulls last by default. |
 | Pagination | Nonnegative integer `OFFSET` and `LIMIT`. |
@@ -113,7 +113,7 @@ const roots = queryArrowSQL(
 );
 ```
 
-See [function packages and column metadata](queries.md#function-packages-and-column-metadata)
+See [function packages and column metadata](query.md#function-packages-and-column-metadata)
 to write scalar, aggregate, and table functions. For functions supplied by other math.gl
 packages, see [spatial SQL](arrow/spatial-functions.md) and
 [DGGS function libraries](api-reference/dggs-function-libraries.md).
@@ -124,7 +124,7 @@ packages, see [spatial SQL](arrow/spatial-functions.md) and
 - Use `queryArrowTable` when the application already has structured query options.
 - Use `queryArrowTableInBatches` for streaming projection, filtering, and pagination.
 - Use `queryArrowAggregateSnapshots` for provisional and final aggregate tables.
-- Use a [worker session](workers.md) for structured queries off the calling thread.
+- Use a [worker session](worker.md) for structured queries off the calling thread.
 
 Streaming queries do not make joins, sorting, or arbitrary relational SQL incremental.
 The synchronous engine checks cancellation during execution, but a worker is needed to keep

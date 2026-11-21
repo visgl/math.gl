@@ -9,7 +9,7 @@ import {
   CullingVolume,
   Plane
 } from '@math.gl/geometry/culling';
-import {Geometry, BoxGeometry, SphereGeometry} from '@math.gl/geometry';
+import {Geometry, BoxGeometry, SphereGeometry} from '@math.gl/geometry/primitives';
 
 export const initial = {
   type: 'sphere',

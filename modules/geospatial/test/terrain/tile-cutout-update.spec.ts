@@ -13,7 +13,7 @@ import {
   type TerrainCutoutPiece,
   type TerrainTileCutoutUpdate,
   type TerrainTileCutoutCache
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 /** Fractional oblique cuts exercise opposite-direction seam intersections. */
 const ring = [

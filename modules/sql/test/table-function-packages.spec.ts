@@ -4,7 +4,8 @@
 
 import {Field, Float64, Schema, Table, tableFromArrays, vectorFromArray} from 'apache-arrow';
 import {expect, test} from 'vitest';
-import {queryArrowSQL, queryArrowSQLWithMetadata, type TableFunction} from '@math.gl/sql';
+import {queryArrowSQL, queryArrowSQLWithMetadata} from '@math.gl/sql/query';
+import {type TableFunction} from '@math.gl/sql/arrow';
 
 const IDENTITY = {
   kind: 'table',

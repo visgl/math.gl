@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {performance} from 'node:perf_hooks';
-import {subdivideTriangleMesh} from '@math.gl/geometry';
+import {subdivideTriangleMesh} from '@math.gl/geometry/processing';
 
 // Run after yarn build. Timings are descriptive, never test assertions.
 // These policies perform different work and do not offer equal accuracy guarantees.

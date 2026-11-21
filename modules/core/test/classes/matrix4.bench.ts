@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileCopyrightText: Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 
-import {configure, Vector4, Matrix4} from '@math.gl/core';
-import {mat4} from '@math.gl/core';
+import {configure, Vector4, Matrix4} from '@math.gl/core/matrix';
+import {mat4} from '@math.gl/core/matrix';
 
 /*
 class CesiumMatrix4 {

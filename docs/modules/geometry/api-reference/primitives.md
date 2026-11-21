@@ -1,4 +1,4 @@
-# Geometry
+# @math.gl/geometry/primitives
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From v4.2" />
@@ -13,7 +13,7 @@ its `geometry` property, or a primitive constructor name and options through `ge
 and `geometryProps`.
 
 ```typescript
-import {Geometry} from '@math.gl/geometry';
+import {Geometry} from '@math.gl/geometry/primitives';
 
 const geometry = new Geometry({
   topology: 'triangle-list',

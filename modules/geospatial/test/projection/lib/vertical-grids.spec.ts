@@ -12,9 +12,9 @@ import {
   geocentric,
   projJSONCRSParser
 } from '@math.gl/geospatial/projection';
-import {LazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
-import {parseGTXGrid} from '@math.gl/geospatial/projection/grids/gtx';
-import {createGeoidGrid, createVerticalGrid} from '@math.gl/geospatial/projection/grids/vertical';
+import {LazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
+import {parseGTXGrid} from '@math.gl/geospatial/projection-grids-gtx';
+import {createGeoidGrid, createVerticalGrid} from '@math.gl/geospatial/projection-grids-vertical';
 import inputs from '../fixtures/vertical-grid-cases.json';
 import reference from '../fixtures/vertical-grid-reference.json';
 

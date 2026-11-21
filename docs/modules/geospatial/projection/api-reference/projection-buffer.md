@@ -17,9 +17,9 @@ For contiguous coordinates that can be overwritten, the existing
 the shortest path and can use whole-buffer projection kernels.
 
 ```typescript
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { mercator } from "@math.gl/geospatial/projection/projections/merc";
-import { ProjectionBuffer } from "@math.gl/geospatial/projection/bulk";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { mercator } from "@math.gl/geospatial/projection-projections-merc";
+import { ProjectionBuffer } from "@math.gl/geospatial/projection-bulk";
 
 const projection = new ProjectionTransform({
   to: "EPSG:3857",

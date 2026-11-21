@@ -3,10 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
 import {MapEngine, type MapDescription} from '@math.gl/geospatial/maps';
-import {albersUsaMapPreset, h3MapPreset} from '@math.gl/geospatial/maps/presets';
-import {mapGeometry} from '@math.gl/geospatial/maps/geometry';
-import {prepareMapSurface} from '@math.gl/geospatial/maps/surfaces';
-import {mapTransitions} from '@math.gl/geospatial/maps/transitions';
+import {albersUsaMapPreset, h3MapPreset} from '@math.gl/geospatial/maps-presets';
+import {mapGeometry} from '@math.gl/geospatial/maps-geometry';
+import {prepareMapSurface} from '@math.gl/geospatial/maps-surfaces';
+import {mapTransitions} from '@math.gl/geospatial/maps-transitions';
 const description: MapDescription = {version: 1, id: 'usa', definition: {type: 'albers-usa'}};
 const ring = [
   [-120, 30],

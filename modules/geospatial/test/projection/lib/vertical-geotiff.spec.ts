@@ -4,9 +4,9 @@
 // Original format and integration tests; numeric expectations are from PROJ 9.5.1.
 import {beforeAll, expect, test} from 'vitest';
 import {fromArrayBuffer} from 'geotiff';
-import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
-import {loadVerticalGeoTIFFGrid} from '@math.gl/geospatial/projection/grids/vertical-geotiff';
-import type {VerticalGridGeoTIFFImage} from '@math.gl/geospatial/projection/grids/vertical-geotiff';
+import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
+import {loadVerticalGeoTIFFGrid} from '@math.gl/geospatial/projection-grids-vertical-geotiff';
+import type {VerticalGridGeoTIFFImage} from '@math.gl/geospatial/projection-grids-vertical-geotiff';
 import reference from '../fixtures/vertical-geotiff-reference.json';
 import inputs from '../fixtures/vertical-geotiff-cases.json';
 

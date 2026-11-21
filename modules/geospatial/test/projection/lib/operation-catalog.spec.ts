@@ -3,13 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original authored operation metadata, eligibility oracle and pipeline integration tests; no external database or model data.
 import {expect, test, vi} from 'vitest';
-import {OperationCatalog} from '@math.gl/geospatial/projection/operations';
+import {OperationCatalog} from '@math.gl/geospatial/projection-operations';
 import type {
   CoordinateOperation,
   OperationArea,
   OperationSelectionRequest
-} from '@math.gl/geospatial/projection/operations';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
+} from '@math.gl/geospatial/projection-operations';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
 
 const world: OperationArea = [-180, -90, 180, 90];
 const request: OperationSelectionRequest = {

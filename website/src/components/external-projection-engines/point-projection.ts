@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import type {PreparedProjection} from '@math.gl/geospatial/projection/types';
+import type {PreparedProjection} from '@math.gl/geospatial/projection-types';
 
 type Buffer = Float32Array | Float64Array;
 type Coordinate = readonly number[] | Buffer;

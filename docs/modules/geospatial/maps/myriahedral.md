@@ -14,7 +14,7 @@ and the [interactive example](./myriahedral-maps.md).
 ```typescript
 import {createMyriahedralMap} from '@math.gl/geospatial/maps';
 
-import {withMapGeometry} from '@math.gl/geospatial/maps/geometry';
+import {withMapGeometry} from '@math.gl/geospatial/maps-geometry';
 
 const map = withMapGeometry(createMyriahedralMap({preset: 'polyconic', columns: 48}));
 const point = map.projectPoint([-73.98, 40.75]);

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {projectionEngine} from '@math.gl/geospatial/projection';
-import type {CRSBounds} from '@math.gl/geospatial/projection/types';
+import type {CRSBounds} from '@math.gl/geospatial/projection-types';
 import {
   createSpatialReference,
   inferCRSRepresentation,
@@ -146,7 +146,7 @@ import type {
   ProjectionEngine,
   Projection,
   PreparedProjection
-} from '@math.gl/geospatial/projection/types';
+} from '@math.gl/geospatial/projection-types';
 import {ConfigurableProjectionEngine, FullProjectionEngine} from '@math.gl/geospatial/projection';
 const projectionEngines: ProjectionEngine[] = [
   new ConfigurableProjectionEngine(),
@@ -164,9 +164,9 @@ new ProjectionEngine();
 // @ts-expect-error Engines configure algorithms, not a specific CRS pair.
 new ConfigurableProjectionEngine({to: 'EPSG:3857'});
 
-import {LazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
+import {LazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
 
-import {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection/web-mercator';
+import {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection-web-mercator';
 const minimalEngine: ProjectionEngine = new WebMercatorProjectionEngine();
 const minimalProjection: Projection = minimalEngine.createProjection({
   to: 'EPSG:3857'
@@ -230,8 +230,8 @@ import type {
   CRSDescriptor as ProjectionCRSDescriptor,
   ProjectionCoordinate,
   ProjectionOutput
-} from '@math.gl/geospatial/projection/types';
-import {createCRSDescriptor as createRootCRSDescriptor} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/projection-types';
+import {createCRSDescriptor as createRootCRSDescriptor} from '@math.gl/geospatial/crs';
 const projectionDescriptor: ProjectionCRSDescriptor = externalDescriptor;
 const crsDescriptor: CRSDescriptor = projectionDescriptor;
 declare const crsCoordinate: CRSCoordinate;

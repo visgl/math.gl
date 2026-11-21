@@ -18,7 +18,7 @@ const budgets = JSON.parse(
 const measurements = {};
 const scenarios = {
   catalogue: {
-    imports: "import {lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';",
+    imports: "import {lazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';",
     load: "return lazyProjectionEngine.createProjection({to: 'EPSG:32631'});",
     deferred: '/experimental/kernels/etmerc.js',
     expected: [500000, 0],
@@ -26,20 +26,20 @@ const scenarios = {
   },
   utm: {
     imports:
-      "import {lazyUniversalTransverseMercator} from '@math.gl/geospatial/projection/projections/lazy/utm';",
+      "import {lazyUniversalTransverseMercator} from '@math.gl/geospatial/projection-projections-lazy-utm';",
     load: "return new ProjectionTransform({to: 'EPSG:32631', projections: [lazyUniversalTransverseMercator]});",
     deferred: '/experimental/kernels/etmerc.js',
     expected: [500000, 0],
     point: [3, 0]
   },
   wkt: {
-    load: `const {wktCRSParser} = await import('@math.gl/geospatial/projection/parsers/wkt'); return new ProjectionTransform({to: 'GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]]', parsers: [wktCRSParser]});`,
+    load: `const {wktCRSParser} = await import('@math.gl/geospatial/projection-parsers-wkt'); return new ProjectionTransform({to: 'GEOGCS["WGS84",DATUM["WGS_1984",SPHEROID["WGS84",6378137,298.257223563]],UNIT["degree",0.017453292519943295]]', parsers: [wktCRSParser]});`,
     deferred: '/experimental/crs/wkt.js',
     expected: [3, 0],
     point: [3, 0]
   },
   rotated: {
-    load: "const [{obliqueTransformation}, {mollweide}] = await Promise.all([import('@math.gl/geospatial/projection/projections/ob_tran'), import('@math.gl/geospatial/projection/projections/moll')]); return new ProjectionTransform({to: '+proj=ob_tran +o_lat_p=45 +o_lon_p=0', projections: [obliqueTransformation(mollweide)]});",
+    load: "const [{obliqueTransformation}, {mollweide}] = await Promise.all([import('@math.gl/geospatial/projection-projections-ob_tran'), import('@math.gl/geospatial/projection-projections-moll')]); return new ProjectionTransform({to: '+proj=ob_tran +o_lat_p=45 +o_lon_p=0', projections: [obliqueTransformation(mollweide)]});",
     deferred: '/experimental/kernels/moll.js',
     point: [3, 30]
   }
@@ -48,8 +48,8 @@ try {
   for (const [name, scenario] of Object.entries(scenarios)) {
     const result = await build({
       stdin: {
-        contents: `import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
+        contents: `import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 ${scenario.imports || ''}
 export const eager = new ProjectionTransform({to: 'EPSG:3857', projections: [mercator]});
 export async function load() {${scenario.load}}`,

@@ -4,12 +4,12 @@
 // Original contracts/analytic tests; real grid references come from native PROJ.
 import {beforeAll, expect, test} from 'vitest';
 import {fromArrayBuffer} from 'geotiff';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import type {PipelineStep} from '@math.gl/geospatial/projection/pipeline';
-import {createDeformationModel} from '@math.gl/geospatial/projection/deformation';
-import {createVelocityGrid} from '@math.gl/geospatial/projection/grids/velocity';
-import type {VelocityGrid} from '@math.gl/geospatial/projection/grids/velocity';
-import {loadVelocityGeoTIFFGrid} from '@math.gl/geospatial/projection/grids/velocity-geotiff';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import type {PipelineStep} from '@math.gl/geospatial/projection-pipeline';
+import {createDeformationModel} from '@math.gl/geospatial/projection-deformation';
+import {createVelocityGrid} from '@math.gl/geospatial/projection-grids-velocity';
+import type {VelocityGrid} from '@math.gl/geospatial/projection-grids-velocity';
+import {loadVelocityGeoTIFFGrid} from '@math.gl/geospatial/projection-grids-velocity-geotiff';
 import inputs from '../fixtures/deformation-cases.json';
 import reference from '../fixtures/deformation-reference.json';
 import {qualifyDeformationCase} from '../deformation-workload';

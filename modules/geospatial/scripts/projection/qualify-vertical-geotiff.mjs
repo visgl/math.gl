@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Test-only decoder and authored fixtures; loaded after browser timing samples finish.
 import {fromArrayBuffer} from 'geotiff';
-import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
-import {loadVerticalGeoTIFFGrid} from '@math.gl/geospatial/projection/grids/vertical-geotiff';
+import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
+import {loadVerticalGeoTIFFGrid} from '@math.gl/geospatial/projection-grids-vertical-geotiff';
 import reference from '../../test/projection/fixtures/vertical-geotiff-reference.json';
 function close(actual, expected) {
   for (let i = 0; i < expected.length; i++)

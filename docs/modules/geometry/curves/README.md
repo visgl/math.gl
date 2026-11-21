@@ -14,7 +14,7 @@ coordinates. Use it for camera paths, trajectories, interpolation, and sampled l
 ## Usage
 
 ```ts
-import {CatmullRomCurve, CurveArcLength} from '@math.gl/geometry';
+import {CatmullRomCurve, CurveArcLength} from '@math.gl/geometry/curves';
 
 const path = new CatmullRomCurve([
   [0, 0, 0],

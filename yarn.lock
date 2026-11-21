@@ -4894,7 +4894,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/core@workspace:*, @math.gl/core@workspace:modules/core":
+"@math.gl/core@npm:5.0.0-beta.10":
+  version: 5.0.0-beta.10
+  resolution: "@math.gl/core@npm:5.0.0-beta.10"
+  checksum: 10c0/e0cd80e6e798d0dd625031537623e303db6642c2998e66f2c06bc8fc31ffd647e560221f254f267f446f0f236991069c2472be333093aec92f464cee0fd5d3a5
+  languageName: node
+  linkType: hard
+
+"@math.gl/core@npm:5.0.0-beta.11":
+  version: 5.0.0-beta.11
+  resolution: "@math.gl/core@npm:5.0.0-beta.11"
+  checksum: 10c0/f5b045b4eee6a3a19ae5dcdcdd74fabfead1cb8ec00ac058c6bcd6fc397ed79ec222e141647ec5b2e46d2acc65b004b3a9b3456cc43304c5f93dd521c6deceef
+  languageName: node
+  linkType: hard
+
+"@math.gl/core@npm:5.0.0-beta.8":
+  version: 5.0.0-beta.8
+  resolution: "@math.gl/core@npm:5.0.0-beta.8"
+  checksum: 10c0/5a1b37d91beae6528d1332ce80dd2274bcb4445a7b0d32045bd9b9478a8197b4d2123e5f9727fdd1aca5403ecb62eab19647aa68298feac155147703487cfd82
+  languageName: node
+  linkType: hard
+
+"@math.gl/core@npm:5.0.0-rc.2, @math.gl/core@workspace:*, @math.gl/core@workspace:modules/core":
   version: 0.0.0-use.local
   resolution: "@math.gl/core@workspace:modules/core"
   dependencies:
@@ -4907,6 +4928,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@math.gl/dggs@npm:5.0.0-beta.8":
+  version: 5.0.0-beta.8
+  resolution: "@math.gl/dggs@npm:5.0.0-beta.8"
+  dependencies:
+    "@math.gl/core": "npm:5.0.0-beta.8"
+    a5-js: "npm:^0.10.0"
+    h3-js: "npm:^4.5.0"
+    open-location-code: "npm:^1.0.3"
+  checksum: 10c0/6380d3020c751f5ce976e0d75a00a542b3020f02581cea9951e2d69b2e6276d4b75e04cb8edd4e5371deabb6ea89be6878825ea566562510284f4f52b5bc532f
+  languageName: node
+  linkType: hard
+
 "@math.gl/dggs@workspace:*, @math.gl/dggs@workspace:modules/dggs":
   version: 0.0.0-use.local
   resolution: "@math.gl/dggs@workspace:modules/dggs"
@@ -4918,6 +4951,16 @@ __metadata:
     s2-geometry: "npm:^1.2.10"
   languageName: unknown
   linkType: soft
+
+"@math.gl/earth@npm:5.0.0-beta.8":
+  version: 5.0.0-beta.8
+  resolution: "@math.gl/earth@npm:5.0.0-beta.8"
+  dependencies:
+    "@math.gl/core": "npm:5.0.0-beta.8"
+    astronomy-engine: "npm:2.1.19"
+  checksum: 10c0/214b0ee7335351df4b07b93490eea3b55049fc18858be7f9759828af72889cbb89f49c93609dda00a9e4b429378ce339aeb305a9cae43c4af0be2cae1a586d2c
+  languageName: node
+  linkType: hard
 
 "@math.gl/earth@workspace:*, @math.gl/earth@workspace:modules/earth":
   version: 0.0.0-use.local
@@ -4945,6 +4988,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@math.gl/geometry@npm:5.0.0-beta.10":
+  version: 5.0.0-beta.10
+  resolution: "@math.gl/geometry@npm:5.0.0-beta.10"
+  dependencies:
+    "@math.gl/core": "npm:5.0.0-beta.10"
+  checksum: 10c0/b7251c0ad27d560402fe2d75376f57c85fcf6a8dce446a6e63ae58b92f1e6d7cc118c9186a4e76a847a14342f952f0c7359268fc587d791e8124dcbca3d60739
+  languageName: node
+  linkType: hard
+
+"@math.gl/geometry@npm:5.0.0-beta.11":
+  version: 5.0.0-beta.11
+  resolution: "@math.gl/geometry@npm:5.0.0-beta.11"
+  dependencies:
+    "@math.gl/core": "npm:5.0.0-beta.11"
+  checksum: 10c0/6904e4894b7cdaf65b5afadb41866b13076f942926151c59e15134c5b45574f5ebf4ff91d9ff4ec86b35eec42d2e64b150d251ac02853dd2a4a04ed8e0b9cbdf
+  languageName: node
+  linkType: hard
+
 "@math.gl/geometry@npm:5.0.0-beta.8":
   version: 5.0.0-beta.8
   resolution: "@math.gl/geometry@npm:5.0.0-beta.8"
@@ -4954,7 +5015,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@math.gl/geometry@workspace:*, @math.gl/geometry@workspace:modules/geometry":
+"@math.gl/geometry@npm:5.0.0-rc.2, @math.gl/geometry@workspace:*, @math.gl/geometry@workspace:modules/geometry":
   version: 0.0.0-use.local
   resolution: "@math.gl/geometry@workspace:modules/geometry"
   dependencies:
@@ -4967,7 +5028,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/geospatial@workspace:*, @math.gl/geospatial@workspace:modules/geospatial":
+"@math.gl/geospatial@npm:5.0.0-beta.8":
+  version: 5.0.0-beta.8
+  resolution: "@math.gl/geospatial@npm:5.0.0-beta.8"
+  dependencies:
+    "@mapbox/martini": "npm:0.2.0"
+    "@math.gl/arrow": "npm:5.0.0-beta.8"
+    "@math.gl/core": "npm:5.0.0-beta.8"
+    "@math.gl/expressions": "npm:5.0.0-beta.8"
+    "@math.gl/geometry": "npm:5.0.0-beta.8"
+    "@math.gl/tasks": "npm:5.0.0-beta.8"
+    "@math.gl/web-mercator": "npm:5.0.0-beta.8"
+    polygon-clipping: "npm:0.15.7"
+  checksum: 10c0/e77b993708a979cce7ddc65b3e0720d559fcb2968e3b2e8954bf61898ec815e84b96f3d52ff7736e07738ac668b5b28f5e01ff666bd2d13cae8edcd99f01828d
+  languageName: node
+  linkType: hard
+
+"@math.gl/geospatial@npm:~5.0.0-beta.8, @math.gl/geospatial@workspace:*, @math.gl/geospatial@workspace:modules/geospatial":
   version: 0.0.0-use.local
   resolution: "@math.gl/geospatial@workspace:modules/geospatial"
   dependencies:
@@ -4993,7 +5070,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@math.gl/sql@workspace:*, @math.gl/sql@workspace:modules/sql":
+"@math.gl/sql@npm:5.0.0-rc.2, @math.gl/sql@workspace:*, @math.gl/sql@workspace:modules/sql":
   version: 0.0.0-use.local
   resolution: "@math.gl/sql@workspace:modules/sql"
   dependencies:
@@ -14766,7 +14843,13 @@ __metadata:
     "@citation-js/core": "npm:^0.9.0"
     "@citation-js/plugin-bibtex": "npm:^0.9.0"
     "@deck.gl/core": "npm:10.0.0-alpha.1"
-    "@math.gl/sql": "npm:5.0.0-rc.2"
+    "@math.gl/core": "workspace:*"
+    "@math.gl/dggs": "workspace:*"
+    "@math.gl/earth": "workspace:*"
+    "@math.gl/geometry": "workspace:*"
+    "@math.gl/geospatial": "workspace:*"
+    "@math.gl/sql": "workspace:*"
+    "@math.gl/tasks": "workspace:*"
     "@turf/destination": "npm:^7.4.0"
     "@types/node": "npm:^22.20.1"
     "@vis.gl/dev-tools": "npm:^2.0.0-beta.2"
