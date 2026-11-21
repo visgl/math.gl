@@ -39,7 +39,9 @@ if (shard && !['solar-showcase', 'remaining'].includes(shard))
 function matches(path) {
   const example = examplePath(path);
   // Keep each project's builds, type checks and tests on the same runner.
-  const owner = /^(earth\/sun-terminator|showcase)\//.test(example) ? 'solar-showcase' : 'remaining';
+  const owner = /^(earth\/sun-terminator|showcase)\//.test(example)
+    ? 'solar-showcase'
+    : 'remaining';
   return example.includes(filter) && (!shard || owner === shard);
 }
 const sharedChecks = shard !== 'solar-showcase' ? [join(directory, 'check-boundaries.js')] : [];
@@ -90,7 +92,8 @@ if (list) {
       .join('\n')
   );
 } else {
-  for (const check of sharedChecks) await run('Example import boundaries', process.execPath, [check]);
+  for (const check of sharedChecks)
+    await run('Example import boundaries', process.execPath, [check]);
   // Preserve application build coverage when CI selects only Node workflows.
   const nodeProjects = new Set(
     nodeTests
