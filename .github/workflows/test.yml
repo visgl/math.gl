@@ -331,10 +331,6 @@ jobs:
       - build
       - plan
   examples:
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [solar-showcase, remaining]
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     needs:
@@ -396,13 +392,12 @@ jobs:
       - name: Test example Node and browser workflows
         timeout-minutes: 12
         env:
-          MATHGL_EXAMPLE_SHARD: ${{ matrix.shard }}
+          MATHGL_EXAMPLE_SHARD: remaining
           MATHGL_EXAMPLE_MATRIX: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'full' || 'sampled' }}
           MATHGL_SOLAR_BROWSER_PROFILE: ${{ needs.plan.outputs.solar-full == 'false' && 'smoke' || 'full' }}
         run: yarn test-examples
 
       - name: Check regressions from landed example reviews
-        if: matrix.shard == 'remaining'
         timeout-minutes: 2
         run: node scripts/check-landed-review-examples.mjs
   coverage:
@@ -759,6 +754,15 @@ jobs:
         timeout-minutes: 2
         run: node modules/geospatial/scripts/projection/benchmark-workers.mjs --browser ${{ matrix.browser }} --points 1000,100000 --samples 3 --output /tmp/projection-worker-evaluation-${{ matrix.browser }}.json
         if: needs.plan.outputs.full == 'true'
+
+      - name: Test solar and showcase examples
+        if: matrix.browser == 'chromium'
+        timeout-minutes: 12
+        env:
+          MATHGL_EXAMPLE_SHARD: solar-showcase
+          MATHGL_EXAMPLE_MATRIX: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'full' || 'sampled' }}
+          MATHGL_SOLAR_BROWSER_PROFILE: ${{ needs.plan.outputs.solar-full == 'false' && 'smoke' || 'full' }}
+        run: yarn test-examples
 
       - name: Upload browser qualification measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
