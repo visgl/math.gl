@@ -40,11 +40,6 @@
       "import": "./dist/lighting/index.js",
       "require": "./dist/lighting/index.cjs"
     },
-    "./color": {
-      "types": "./dist/color/index.d.ts",
-      "import": "./dist/color/index.js",
-      "require": "./dist/color/index.cjs"
-    },
     "./arrow": {
       "types": "./dist/arrow/index.d.ts",
       "import": "./dist/arrow/index.js",

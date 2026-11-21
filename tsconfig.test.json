@@ -527,9 +527,6 @@
       "@math.gl/geometry/lighting": [
         "./modules/geometry/src/lighting/index.ts"
       ],
-      "@math.gl/geometry/color": [
-        "./modules/geometry/src/color/index.ts"
-      ],
       "@math.gl/geometry/primitives": [
         "./modules/geometry/src/primitives.ts"
       ],
@@ -553,9 +550,6 @@
       ],
       "@math.gl/geospatial/turf-functions": [
         "./modules/geospatial/src/turf-functions.ts"
-      ],
-      "@math.gl/geospatial/turf-expressions": [
-        "./modules/geospatial/src/turf-expressions.ts"
       ],
       "@math.gl/geospatial/maps-presets": [
         "./modules/geospatial/src/maps/presets.ts"

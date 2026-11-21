@@ -30,7 +30,6 @@ more than 65,535 vertices.
 | [`@math.gl/geometry/spatial-index`](./spatial-index/README.md) | Index points, boxes, and triangles. |
 | [`@math.gl/geometry/arrow`](./entry-points/arrow.md) | Tessellate GeoArrow polygons. |
 | [`@math.gl/geometry/lighting`](./entry-points/lighting.md) | Sample photometric profiles. |
-| [`@math.gl/geometry/color`](./entry-points/color.md) | Sample and apply color lookup tables. |
 
 ## Usage
 
