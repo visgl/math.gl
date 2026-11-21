@@ -188,7 +188,7 @@ for (const name of expected) {
         assert.deepEqual([...grid.data], [6, 6]);
       }
     }
-    if (specifier === '@math.gl/geometry/color') {
+    if (specifier === '@math.gl/core/color') {
       for (const colors of [imported, required]) {
         const lut = {dimension: 1, size: 2, data: Float32Array.of(0, 0, 0, 1, 1, 1), domainMinimum: [0, 0, 0], domainMaximum: [1, 1, 1]};
         assert.deepEqual(colors.createColorLUTSampler(lut)(0.25, 0.5, 0.75), [0.25, 0.5, 0.75]);
