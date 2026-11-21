@@ -11,7 +11,7 @@ Use the dedicated `@math.gl/geometry/processing` subpath for a standalone import
 ```
 import {interpolatePackedAttributes} from '@math.gl/geometry/processing';
 
-import {subdivideTriangleMesh} from '@math.gl/geometry/processing';
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
 
 
 

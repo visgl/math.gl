@@ -39,7 +39,7 @@ Triangulate the polygon in its source coordinate space, then refine that mesh. T
 ```
 import {earcut} from '@math.gl/geometry/polygon';
 
-import {subdivideTriangleMesh} from '@math.gl/geometry/processing';
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
 
 
 
