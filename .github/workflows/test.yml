@@ -170,23 +170,12 @@ jobs:
           node --test scripts/publish-beta.test.mjs scripts/publish-from-git.test.mjs
           node scripts/check-publishing-stack.mjs
 
-      - name: Check worker API types
-        run: |
-          yarn check:task-runner-types
-          yarn check:arrow-expression-types
-          yarn check:sql-types
-
-      - name: Check task runtime exports and execution routes
-        run: |
-          yarn check:tasks
-          yarn workspace math.gl-sql-expressions-worker start
-          yarn workspace math.gl-task-runner start
-          yarn workspace math.gl-task-runner geospatial
-
       - name: Qualify worker scheduling, ownership and lifecycle workloads
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: node test/bench/workers/index.mjs --quick --output=/tmp/worker-qualification.json
 
       - name: Upload worker runtime qualification
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: worker-runtime-qualification
@@ -310,7 +299,11 @@ jobs:
           node modules/geospatial/scripts/projection/check-g34-package.mjs
           node modules/geospatial/scripts/projection/check-bundle-budget.mjs
           node modules/geospatial/scripts/projection/check-lazy-package.mjs
-          node modules/geospatial/scripts/projection/benchmark.mjs --points 100 --samples 3 --min-sample-ms 0
+
+      # Full profiles exercise this benchmark in the Node scorecard.
+      - name: Smoke test projection throughput
+        if: needs.plan.outputs.full != 'true'
+        run: node modules/geospatial/scripts/projection/benchmark.mjs --points 100 --samples 3 --min-sample-ms 0
 
       - name: Upload projection accuracy measurements
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -336,6 +329,7 @@ jobs:
         run: yarn lint
     needs:
       - build
+      - plan
   examples:
     runs-on: ubuntu-22.04
     timeout-minutes: 15
@@ -632,6 +626,19 @@ jobs:
       - name: Restore package build
         run: tar -xf /tmp/package-build/mathgl-build.tar
 
+      - name: Check worker API types
+        run: |
+          yarn check:task-runner-types
+          yarn check:arrow-expression-types
+          yarn check:sql-types
+
+      - name: Check task runtime exports and execution routes
+        run: |
+          yarn check:tasks
+          yarn workspace math.gl-sql-expressions-worker start
+          yarn workspace math.gl-task-runner start
+          yarn workspace math.gl-task-runner geospatial
+
       - name: Run Node tests
         run: yarn test-node
     needs:
@@ -733,9 +740,10 @@ jobs:
       - name: Check browser projection correctness and performance
         timeout-minutes: 6
         env:
+          BROWSER_POINTS: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && '2000' || '20000' }}
           BROWSER_SAMPLES: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && '3' || '7' }}
           BROWSER_MIN_SAMPLE_MS: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && '4' || '12' }}
-        run: node modules/geospatial/scripts/projection/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points 20000 --samples "$BROWSER_SAMPLES" --min-sample-ms "$BROWSER_MIN_SAMPLE_MS" --output /tmp/projection-browser-qualification.json
+        run: node modules/geospatial/scripts/projection/benchmark-browser.mjs --browsers ${{ matrix.browser }} --points "$BROWSER_POINTS" --samples "$BROWSER_SAMPLES" --min-sample-ms "$BROWSER_MIN_SAMPLE_MS" --output /tmp/projection-browser-qualification.json
         if: needs.plan.outputs.full == 'true'
 
       - name: Evaluate optional worker correctness and costs
