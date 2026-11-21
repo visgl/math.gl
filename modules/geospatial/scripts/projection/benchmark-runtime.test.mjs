@@ -65,6 +65,28 @@ test('package aliases resolve public and private sources in current and historic
       assert.equal(result.grid, baseline ? 13 : 16);
       assert.equal(result.frame, baseline ? 14 : 15);
     }
+
+    // Before consolidation, the same flattened imports resolve from the standalone package.
+    rmSync(join(root, 'modules/geospatial/src/projection/index.ts'));
+    write('modules/projection/package.json', JSON.stringify({
+      exports: {
+        './core': {import: './dist/core.js'},
+        './parsers/wkt': {import: './dist/wkt.js'}
+      }
+    }));
+    write('modules/projection/src/core.ts', 'export const core = 18;');
+    write('modules/projection/src/wkt.ts', 'export const wkt = 19;');
+    git('add', '-A', '--', 'modules');
+    git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', 'commit', '--quiet', '-m', 'standalone projection fixture');
+    write('benchmark/entry.ts', [
+      "export {core} from '@math.gl/geospatial/projection-core';",
+      "export {wkt} from '@math.gl/geospatial/projection-parsers-wkt';"
+    ].join('\n'));
+    const standalone = join(root, 'standalone.mjs');
+    await bundleRuntime(root, 'benchmark/entry.ts', standalone, git('rev-parse', 'HEAD'));
+    const result = await import(pathToFileURL(standalone).href);
+    assert.equal(result.core, 18);
+    assert.equal(result.wkt, 19);
   } finally {
     rmSync(root, {recursive: true, force: true});
   }

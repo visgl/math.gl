@@ -116,8 +116,9 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit, platfo
           if (baselineCommit && !consolidated) {
             for (const [old, [group, leaf]] of Object.entries(moved)) {
               const prefix = '@math.gl/' + group + '/' + leaf;
-              if (specifier === prefix || specifier.startsWith(prefix + '/')) {
-                specifier = '@math.gl/' + old + specifier.slice(prefix.length);
+              if (specifier === prefix || specifier.startsWith(prefix + '/') || specifier.startsWith(prefix + '-')) {
+                const suffix = specifier.slice(prefix.length).replace(/^-/, '/');
+                specifier = '@math.gl/' + old + suffix;
                 break;
               }
             }
