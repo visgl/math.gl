@@ -24,7 +24,6 @@ All generated meshes use `triangle-list` topology and expose `POSITION`, `NORMAL
 | [`@math.gl/geometry/spatial-index`](https://visgl.github.io/math.gl/next/docs/modules/geometry/spatial-index.md)         | Index points, boxes, and triangles.                      |
 | [`@math.gl/geometry/arrow`](https://visgl.github.io/math.gl/next/docs/modules/geometry/entry-points/arrow.md)            | Tessellate GeoArrow polygons.                            |
 | [`@math.gl/geometry/lighting`](https://visgl.github.io/math.gl/next/docs/modules/geometry/entry-points/lighting.md)      | Sample photometric profiles.                             |
-| [`@math.gl/geometry/color`](https://visgl.github.io/math.gl/next/docs/modules/geometry/entry-points/color.md)            | Sample and apply color lookup tables.                    |
 
 ## Usage[​](#usage "Direct link to Usage")
 

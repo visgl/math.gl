@@ -3,7 +3,7 @@
 | Import path                  | Use it to                                                                                                   |
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `@math.gl/geometry/lighting` | [Sample angular intensity, integrate luminous flux, and resample photometric profiles](#photometric-model). |
-| `@math.gl/geometry/color`    | [Sample color lookup tables and apply them to RGB or RGBA buffers](#numerical-color-luts).                  |
+| `@math.gl/core/color`        | [Sample color lookup tables and apply them to RGB or RGBA buffers](#numerical-color-luts).                  |
 
 Both entry points operate on numerical tables and return CPU data. Supply measurements or lookup tables from your application or a reader such as loaders.gl.
 
@@ -118,9 +118,9 @@ Defaults are 181 vertical samples and 360 horizontal rows. Vertical count must b
 `ColorLUT` is independent of Cube, 3dl, image layouts or any other encoding. It contains `dimension` (1 or 3), `size`, interleaved Float32 RGB `data`, three-channel `domainMinimum`/`domainMaximum`, and optional normalized Float64 `inputGrid` knots. Three-dimensional storage is red-fastest: `3 * (red + size * (green + size * blue))`. Knots must increase strictly from 0 through 1; domain spans must be finite and positive.
 
 ```
-import {createColorLUTSampler, applyColorLUT} from '@math.gl/geometry/color';
+import {createColorLUTSampler, applyColorLUT} from '@math.gl/core/color';
 
-import type {ColorLUT} from '@math.gl/geometry/color';
+import type {ColorLUT} from '@math.gl/core/color';
 
 
 

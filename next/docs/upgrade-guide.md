@@ -29,6 +29,8 @@ Split root imports across the [package entry points](https://visgl.github.io/mat
 
 Replace slashes within an exported subpath with hyphens. For example, `@math.gl/geospatial/projection/types` becomes `@math.gl/geospatial/projection-types`, `@math.gl/geospatial/maps/presets` becomes `@math.gl/geospatial/maps-presets`, and `@math.gl/earth/sun/stars` becomes `@math.gl/earth/sun-stars`. Use the [projection entry point index](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/entry-points.md) and [kernel index](https://visgl.github.io/math.gl/next/docs/modules/geospatial/projection/kernels.md) for exact names.
 
+For Turf and PostGIS-style SQL function registration, replace `@math.gl/geospatial/turf-expressions` with `@math.gl/geospatial/turf-functions` and `@math.gl/geospatial/st-functions` as needed.
+
 ### Expressions and SQL package[​](#expressions-and-sql-package "Direct link to Expressions and SQL package")
 
 Install [`@math.gl/sql`](https://visgl.github.io/math.gl/next/docs/modules/sql.md) to query Arrow tables, parse SQL, or evaluate expressions in 5.0. Install Apache Arrow 17 or later for execution.
@@ -221,13 +223,13 @@ Rotation extraction now rejects singular, sheared, non-finite and projective mat
 
 Install `@math.gl/core` in place of `@math.gl/arrow`, and `@math.gl/geospatial` in place of `@math.gl/web-mercator`. Tasks and DGGS remain separate packages.
 
-| Previous import                                          | Current import                                          |
-| -------------------------------------------------------- | ------------------------------------------------------- |
-| `@math.gl/arrow`, `/geoarrow`, `/geoarrow-utils`, `/wkb` | `@math.gl/core/arrow`                                   |
-| `@math.gl/arrow/utf8`                                    | `@math.gl/core/utf8`                                    |
-| `@math.gl/web-mercator`                                  | `@math.gl/geospatial/web-mercator`                      |
-| `@math.gl/sql/arrow-scales`                              | `@math.gl/sql/scales`                                   |
-| `@math.gl/geometry/color`                                | `@math.gl/core/color` (compatibility re-exports remain) |
+| Previous import                                          | Current import                     |
+| -------------------------------------------------------- | ---------------------------------- |
+| `@math.gl/arrow`, `/geoarrow`, `/geoarrow-utils`, `/wkb` | `@math.gl/core/arrow`              |
+| `@math.gl/arrow/utf8`                                    | `@math.gl/core/utf8`               |
+| `@math.gl/web-mercator`                                  | `@math.gl/geospatial/web-mercator` |
+| `@math.gl/sql/arrow-scales`                              | `@math.gl/sql/scales`              |
+| `@math.gl/geometry/color`                                | `@math.gl/core/color`              |
 
 Import vectors, matrices, and rotations from `@math.gl/core/matrix`. `@math.gl/core/color` provides reusable colors, scales, palettes, and LUTs. SQL parsing, domain resolution, and Arrow scale evaluation remain together in `@math.gl/sql/scales`.
 
