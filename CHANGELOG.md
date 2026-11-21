@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v5.0.0
+
+- Consolidate math.gl into seven packages with focused entry points for coordinate systems, projections, global grids, terrain, geometry, Earth science, SQL and worker tasks.
+- Add Arrow-native spatial SQL, composable visualization scales, GeoArrow geometry views, and portable predicates for nested and temporal columns.
+- Flatten package subpaths, retire duplicate color and spatial SQL entry points, and share constructors across CommonJS entry points (#666, #667, #669, #671, #672).
+- Validate geometry attribute and index contracts and accelerate SQL array construction from float columns (#668, #670).
+- See [What’s New](docs/whats-new.md) and the [Upgrade Guide](docs/upgrade-guide.md) for how to move from v4.
+
 ## v5.0.0-rc.2
 
 - Expose a focused SQL query entry point (#658).

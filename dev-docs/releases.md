@@ -46,7 +46,9 @@ retrying. Do not rerun the version bump blindly: Lerna may already have created 
 local release commit and tag. Keep the existing version while recovering a
 partially completed release.
 
-Stable releases continue to use `yarn run publish-prod`.
+For a stable release, land the version and changelog prep first. On the current
+release branch tip, create the annotated stable tag locally and run
+`yarn run publish-prod` to validate and push that tag.
 
 ## Resuming a partially published release
 

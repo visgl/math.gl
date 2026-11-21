@@ -26,6 +26,7 @@ export function publishBeta({
   root,
   dryRun = false,
   prepared = false,
+  stable = false,
   rc = false,
   run = execFileSync,
   read = readFileSync
@@ -33,9 +34,11 @@ export function publishBeta({
   const git = (...args) => run('git', args, {cwd: root, encoding: 'utf8'}).trim();
   const current = JSON.parse(read(resolve(root, 'lerna.json'), 'utf8')).version;
   if (prepared && rc) throw new Error('--prepared takes the prerelease version from lerna.json');
+  if (stable && !prepared) throw new Error('Stable releases require a prepared version');
   const version = prepared ? current : rc ? nextRcVersion(current) : nextBetaVersion(current);
-  if (!/^\d+\.\d+\.\d+-(beta|rc)\.\d+$/.test(version)) {
-    throw new Error(`Expected a beta or rc version, got ${version}`);
+  const versionPattern = stable ? /^\d+\.\d+\.\d+$/ : /^\d+\.\d+\.\d+-(beta|rc)\.\d+$/;
+  if (!versionPattern.test(version)) {
+    throw new Error(`Unexpected release version ${version}`);
   }
   const tag = `v${version}`;
   const changelog = read(resolve(root, 'CHANGELOG.md'), 'utf8');
@@ -99,13 +102,14 @@ export function publishBeta({
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const args = process.argv.slice(2);
-    if (args.some((arg) => !['--dry-run', '--prepared', '--rc'].includes(arg)))
+    if (args.some((arg) => !['--dry-run', '--prepared', '--rc', '--stable'].includes(arg)))
       throw new Error('Usage: yarn publish-beta [--dry-run] [--rc | --prepared]');
     const result = publishBeta({
       root: fileURLToPath(new URL('../', import.meta.url)),
       dryRun: args.includes('--dry-run'),
       prepared: args.includes('--prepared'),
-      rc: args.includes('--rc')
+      rc: args.includes('--rc'),
+      stable: args.includes('--stable')
     });
     console.log(JSON.stringify(result, null, 2));
   } catch (error) {
