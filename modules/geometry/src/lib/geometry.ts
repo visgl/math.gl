@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {TypedArray} from '@math.gl/core/matrix';
+import {isTypedArray, type TypedArray} from '@math.gl/core/types';
 
 export type PrimitiveTopology =
   | 'point-list'
@@ -100,10 +100,6 @@ function normalizeAttribute(input: GeometryAttributeInput): GeometryAttribute {
     throw new Error('Geometry attribute length must be divisible by its size');
   }
   return attribute;
-}
-
-function isTypedArray(value: unknown): value is TypedArray {
-  return ArrayBuffer.isView(value) && !(value instanceof DataView);
 }
 
 function validateIndices(

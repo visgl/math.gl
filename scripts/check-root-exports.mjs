@@ -188,6 +188,11 @@ for (const path of removed) {
     (path.startsWith('@math.gl/arrow/') && error.code === 'MODULE_NOT_FOUND'), path);
 }
 
+for (const path of ['@math.gl/geometry/color', '@math.gl/geospatial/turf-expressions']) {
+  assert.throws(() => require.resolve(path), {code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'});
+  await assert.rejects(import(path), {code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'});
+}
+
 for (const subpath of ['sql', 'math', 'color', 'arrow/worker', 'arrow/worker-entry.js', 'arrow/query-worker-entry.js']) {
   assert.throws(() => require.resolve('@math.gl/sql/' + subpath), {code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'});
 }
@@ -243,11 +248,6 @@ const entryPoints = {
   ],
   "@math.gl/geospatial/turf-functions": [
     "TURF_DISTANCE",
-    "TURF_FUNCTIONS",
-    "createTurfArrowFunction"
-  ],
-  "@math.gl/geospatial/turf-expressions": [
-    "POSTGIS_SPATIAL_FUNCTIONS",
     "TURF_FUNCTIONS",
     "createTurfArrowFunction"
   ],

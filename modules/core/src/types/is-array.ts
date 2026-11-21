@@ -11,12 +11,11 @@ export function isUint16Array(value: unknown): value is Uint16Array {
 }
 
 /**
- * Check is an array is a typed array
- * @param value value to be tested
- * @returns input with type narrowed to TypedArray, or null
+ * Tests for a number-backed typed array, including arrays from other realms.
  */
 export function isTypedArray(value: unknown): value is TypedArray {
-  return ArrayBuffer.isView(value) && !(value instanceof DataView);
+  const name = getTypedArrayName(value);
+  return name !== undefined && name !== 'BigInt64Array' && name !== 'BigUint64Array';
 }
 
 /**
