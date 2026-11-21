@@ -20,8 +20,10 @@ test('package aliases resolve public and private sources in current and historic
   const git = (...args) => execFileSync('git', args, {cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']}).trim();
   try {
     write('modules/geospatial/src/projection/index.ts', 'export {};');
-    write('modules/geospatial/package.json', JSON.stringify({exports: {'.': {import: './dist/index.js'}}}));
-    write('modules/geospatial/src/index.ts', 'export const publicValue = 12;');
+    const exports = {'.': {import: './dist/index.js'}, './projection/grids/gtx': {import: './dist/grid.js'}};
+    write('modules/geospatial/package.json', JSON.stringify({exports}));
+    write('modules/geospatial/src/grid.ts', 'export const grid = 13;');
+    write('modules/geospatial/src/index.ts', 'export const publicValue = 12; export const frame = 14;');
     write('modules/geospatial/src/geographic-seams.ts', "export {value} from './geographic-seams/edge.js';");
     write('modules/geospatial/src/geographic-seams/edge.ts', 'export const value = 42;');
     write('modules/geospatial/src/geographic-seams/index.ts', 'export const value = -1;');
@@ -30,11 +32,25 @@ test('package aliases resolve public and private sources in current and historic
     write('modules/geospatial/node_modules/fixture-dependency/index.js', 'export const dependency = 8;');
     write('modules/geospatial/src/removed-directory/inner.ts', 'export const inner = 9;');
     write('modules/geospatial/src/removed-directory/index.ts', "import {dependency} from 'fixture-dependency'; import {inner} from './inner'; export const removed = dependency + inner;");
-    write('benchmark/entry.ts', "export {value} from '@math.gl/geospatial/geographic-seams'; export {other} from '@math.gl/geospatial/directory-only'; export {publicValue} from '@math.gl/geospatial'; export {removed} from '@math.gl/geospatial/removed-directory';");
     git('init', '--quiet');
     git('add', '.');
     git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', 'commit', '--quiet', '-m', 'fixture');
     const ref = git('rev-parse', 'HEAD');
+    write('modules/geospatial/package.json', JSON.stringify({exports: {
+      '.': exports['.'],
+      './projection-grids-gtx': exports['./projection/grids/gtx'],
+      './coordinates': {import: './dist/coordinates.js'}
+    }}));
+    write('modules/geospatial/src/coordinates.ts', 'export const frame = 15;');
+    write('modules/geospatial/src/grid.ts', 'export const grid = 16;');
+    write('benchmark/entry.ts', [
+      "export {value} from '@math.gl/geospatial/geographic-seams';",
+      "export {other} from '@math.gl/geospatial/directory-only';",
+      "export {publicValue} from '@math.gl/geospatial';",
+      "export {removed} from '@math.gl/geospatial/removed-directory';",
+      "export {grid} from '@math.gl/geospatial/projection-grids-gtx';",
+      "export {frame} from '@math.gl/geospatial/coordinates';"
+    ].join('\n'));
     // The historical bundle must ignore later working-tree changes.
     write('modules/geospatial/src/geographic-seams/edge.ts', 'export const value = 99;');
     for (const baseline of [undefined, ref]) {
@@ -46,6 +62,8 @@ test('package aliases resolve public and private sources in current and historic
       assert.equal(result.other, 7);
       assert.equal(result.publicValue, 12);
       assert.equal(result.removed, 17);
+      assert.equal(result.grid, baseline ? 13 : 16);
+      assert.equal(result.frame, baseline ? 14 : 15);
     }
   } finally {
     rmSync(root, {recursive: true, force: true});
