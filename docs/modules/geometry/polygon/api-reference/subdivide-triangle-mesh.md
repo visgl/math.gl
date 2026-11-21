@@ -32,7 +32,7 @@ Triangulate the polygon in its source coordinate space, then refine that mesh. T
 
 ```ts
 import {earcut} from '@math.gl/geometry/polygon';
-import {subdivideTriangleMesh} from '@math.gl/geometry/processing';
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
 
 const positions = [
   0, 0, 4, 0, 4, 4, 0, 4, // exterior

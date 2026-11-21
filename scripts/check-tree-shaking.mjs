@@ -86,8 +86,8 @@ const probes = [
   {symbol:'vec3Normalize', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
   {symbol:'getGeohashBounds', packages:['@math.gl/dggs/geohash'], forbidden:[/h3-js/, /a5-js/, /open-location-code/, /s2-geometry/], budget:2500},
   {symbol:'getClosestPointsSegmentTriangle', packages:['@math.gl/geometry/culling'], forbidden:[/parametric/, /spatial-index/, /terrain/, /earcut/], budget:5000},
-  {symbol:'getStarColor', packages:['@math.gl/earth/sun'], forbidden:[/astronomy-engine/, /bright-stars/], budget:700},
-  {symbol:'getGalacticAcceleration', packages:['@math.gl/earth/sun'], forbidden:[/astronomy-engine/, /bright-stars/], budget:1200},
+  {symbol:'getStarColor', packages:['@math.gl/earth/sun-stars'], forbidden:[/astronomy-engine/, /bright-stars/], budget:700},
+  {symbol:'getGalacticAcceleration', packages:['@math.gl/earth/sun-stars'], forbidden:[/astronomy-engine/, /bright-stars/], budget:1200},
   {symbol:'getTimezoneOffset', packages:['@math.gl/earth/timezone'], forbidden:[/astronomy-engine/, /tz-lookup/, /bright-stars/], budget:1500},
   {symbol:'parseWKB', packages:['@math.gl/core/arrow'], forbidden:[/martini/, /delatin/, /surface\./, /geometry\//, /geospatial\//, /tasks\//, /apache-arrow/], budget:4500},
   {

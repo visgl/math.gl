@@ -11,7 +11,7 @@ sidebar_label: Overview
   <img src="https://img.shields.io/badge/From-v3.1-blue.svg?style=flat-square" alt="From v3.1" />
 </p>
 
-`@math.gl/earth/sun` provides solar and lunar lighting, planetary sky information, bright-star data and shared sky/rendering coordinates.
+`@math.gl/earth/sun` provides solar and lunar lighting, planetary sky information and shared sky/rendering coordinates.
 
 ## Usage
 
@@ -46,10 +46,10 @@ npm install @math.gl/earth
 
 ## Entry points
 
-The named Sun, Moon, sky, planet and star functions are exported from
-`@math.gl/earth` and `@math.gl/earth/sun`. The data catalog remains
-available from `@math.gl/earth/sun-stars`. `astronomy-engine` is a declared
-runtime dependency; bundlers can remove it for unrelated named imports.
+Use `@math.gl/earth/sun` for Sun, Moon, sky, and planet calculations.
+Use [`@math.gl/earth/sun-stars`](../sun-stars.md) for the bright-star catalog,
+star positions, star colors, and galactic utilities. Bundlers can omit
+`astronomy-engine` when the selected functions do not use it.
 
 ## Coordinates and units
 

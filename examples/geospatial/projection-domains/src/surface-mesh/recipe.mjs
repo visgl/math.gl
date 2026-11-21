@@ -1,8 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
 import {
-  subdivideTriangleMesh,
   composeAttributeProvenance,
   interpolatePackedAttributes,
   qualifySurfaceTransition

@@ -5,7 +5,7 @@ import {
   getFloat16ArrayConstructor,
   isFloat16Array,
   isFloat16ArrayConstructor
-} from '@math.gl/core/matrix';
+} from '@math.gl/core/types';
 
 /** Requires decoded native binary16 arithmetic rather than treating Uint16 storage as numbers. */
 export function requireFloat16(): void {
