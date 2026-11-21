@@ -188,7 +188,8 @@ const signature = NUMERIC_FUNCTION_DEFINITIONS.SIN.prototypes[0];
 void [names, normalized, signature, new ExpressionEvaluationError('domain', 'invalid value')];
 
 import {createArrowColumns, type ArrowProjectionOperation} from '@math.gl/sql/arrow';
-import {scaleProjectionOperation, type ResolvedScale} from '@math.gl/sql/scales';
+import {scaleProjectionOperation} from '@math.gl/sql/scales';
+import {type ResolvedScale} from '@math.gl/core/color';
 import {parseSQLExpression} from '@math.gl/sql/parser';
 declare const source: import('apache-arrow').Table;
 declare const tag: ArrowProjectionOperation<{kind: 'tag'; label: string}>;

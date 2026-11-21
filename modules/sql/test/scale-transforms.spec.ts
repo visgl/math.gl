@@ -4,11 +4,8 @@
 
 import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
-import {
-  compileArrowScale,
-  compileArrowScaleExpression,
-  parseSQLScaleExpression
-} from '@math.gl/sql/scales';
+import {compileArrowScale, compileArrowScaleExpression} from '@math.gl/sql/scales';
+import {parseSQLScaleExpression} from '@math.gl/sql/parser';
 
 test('SQL symlog preserves zero and both signs and retains the configured constant', () => {
   const input = tableFromArrays({value: [-100, -10, 0, 10, 100]});

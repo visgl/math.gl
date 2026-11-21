@@ -8,8 +8,8 @@ import {createArrowColumns, type ArrowProjectionOperation} from '@math.gl/sql/ar
 import type {Expression} from '../src/expressions';
 import {ABS} from '../src/math-functions';
 import {parseSQLExpression} from '../src/parser/parse-sql-expression';
-import {parseSQLScaleExpression} from '../src/scales';
-import {compileResolvedScale, resolvePalette} from '../src/scales';
+import {parseSQLScaleExpression} from '@math.gl/sql/parser';
+import {compileResolvedScale, resolvePalette} from '@math.gl/core/color';
 import {
   bindArrowScale,
   compileArrowScale,
