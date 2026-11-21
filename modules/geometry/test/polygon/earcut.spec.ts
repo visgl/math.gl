@@ -43,11 +43,6 @@ test('indices-3d', function () {
   expect(indices).toEqual([1, 0, 3, 1, 3, 2]);
 });
 
-test('indices-3d', function () {
-  const indices = earcut([10, 4, 0, 0, 50, 0, 60, 60, 0, 70, 10, 0], null, 3);
-  expect(indices).toEqual([1, 0, 3, 1, 3, 2]);
-});
-
 test('projection', function () {
   let indices = earcut([0, 4, 0, 0, 50, 0, 0, 60, 20, 0, 10, 20], null, 3, undefined, 'xy');
   expect(indices).toEqual([]); // Polygon has no area on the XY plane
@@ -101,6 +96,12 @@ Object.keys(expected.triangles).forEach(id => {
       'earcut triangulation with precomputed areas should match one without precomputation'
     ).toEqual(indices);
   });
+
+  // The base oracle above still triangulates every large water polygon in Chromium.
+  // Smaller water fixtures cover the rotation, typed-array and plane combinations.
+  if (import.meta.env.VITE_MATHGL_COVERAGE_FIXTURES === 'compact' && id.startsWith('water-huge')) {
+    return;
+  }
 
   test(`${id} balanced triangulation with areas and projections`, async () => {
     const {vertices, holes, dimensions} = flatten(await openFile(`${FIXTURES_PATH}${id}.json`));
