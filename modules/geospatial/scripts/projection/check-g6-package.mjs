@@ -28,7 +28,7 @@ assert(entry.types.endsWith('/geodesics.d.ts'));
 const measured = {};
 for (const symbol of ['Ellipsoid', 'EllipsoidGeodesic', 'GeodesicIntersections']) {
   const result = await build({
-    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial/geodesics';`, resolveDir: root},
+    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial/${symbol === 'Ellipsoid' ? 'ellipsoid' : 'geodesics'}';`, resolveDir: root},
     bundle: true,
     platform: 'browser',
     format: 'esm',

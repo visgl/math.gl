@@ -250,7 +250,7 @@ for (const entry of [
       .map(([path]) => path)
   );
   assert(!retained.some(path => /node_modules\/proj4\//.test(path)));
-  if (entry.includes('/operations')) {
+  if (entry.includes('/projection-operations')) {
     assert(retained.every(path => path.endsWith('/operations.js')), 'Operation selection must retain only metadata selection code');
   } else {
     assert(!retained.some(path => path.endsWith('/operations.js')), 'Operation selection must remain optional');
@@ -263,7 +263,7 @@ for (const entry of [
   assert(!retained.some(path => /experimental\/crs\/(wkt|projjson)\.js$/.test(path)));
   assert(
     !retained.some(path =>
-      entry.includes('/core')
+      entry.includes('/projection-core')
         ? path.endsWith('/projection-pipeline.js') ||
           path.endsWith('/exact-helmert.js') ||
           path.endsWith('/kinematic-helmert.js')

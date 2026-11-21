@@ -67,13 +67,13 @@ evaluate expressions in 5.0. Install Apache Arrow 17 or later for execution.
 
 ### Ellipsoid frame and oriented bounding box operations
 
-Import ellipsoid frame helpers from `@math.gl/geospatial` and oriented bounding box helpers
+Import ellipsoid frame helpers from `@math.gl/geospatial/coordinates` and oriented bounding box helpers
 from `@math.gl/geometry/culling`.
 
 | Removed API | Replacement |
 | --- | --- |
-| `ellipsoid.eastNorthUpToFixedFrame(origin, result)` | `eastNorthUpToFixedFrame(ellipsoid, origin, result)` from `@math.gl/geospatial` |
-| `ellipsoid.localFrameToFixedFrame(a, b, c, origin, result)` | `localFrameToFixedFrame(ellipsoid, a, b, c, origin, result)` from `@math.gl/geospatial` |
+| `ellipsoid.eastNorthUpToFixedFrame(origin, result)` | `eastNorthUpToFixedFrame(ellipsoid, origin, result)` from `@math.gl/geospatial/coordinates` |
+| `ellipsoid.localFrameToFixedFrame(a, b, c, origin, result)` | `localFrameToFixedFrame(ellipsoid, a, b, c, origin, result)` from `@math.gl/geospatial/coordinates` |
 | `box.quaternion` | `getOrientedBoundingBoxQuaternion(box)` |
 | `box.fromCenterHalfSizeQuaternion(center, halfSize, quaternion)` | `makeOrientedBoundingBoxFromQuaternion(center, halfSize, quaternion, box)` |
 
@@ -88,7 +88,7 @@ Frame functions preserve the original matrix conventions and return a new `Matri
 ### Rotation and coordinate conversions
 
 - Replace `euler.getQuaternion()` and `euler.toQuaternion()` with `quaternion.fromEuler(euler)` or `new Quaternion().fromEuler(euler)`.
-- Replace `quaternion.transformVector4(vector, result)` with `result.copy(vector).transformByQuaternion(quaternion)` for `Vector4` results, or `transformQuat(result, vector, quaternion)` from `@math.gl/core` for arrays.
+- Replace `quaternion.transformVector4(vector, result)` with `result.copy(vector).transformByQuaternion(quaternion)` for `Vector4` results, or `transformQuat(result, vector, quaternion)` from `@math.gl/core/matrix` for arrays.
 - Replace `quaternion.slerp({start, target, ratio})` with `quaternion.slerp(start, target, ratio)`.
 - `SphericalCoordinates` conversions use `Vector3Like`. `toVector3()` returns an array by default; pass a result argument to reuse a vector or typed array.
 
@@ -121,7 +121,7 @@ Euler rotation orders are now represented directly by the `EulerRotationOrder` s
 
 ### Low-level function imports
 
-Low-level `mat3`, `mat4`, `quat`, `vec2`, `vec3`, and `vec4` namespaces are named exports from `@math.gl/core`.
+Low-level `mat3`, `mat4`, `quat`, `vec2`, `vec3`, and `vec4` namespaces are named exports from `@math.gl/core/matrix`.
 
 ```js
 import {mat4, vec3} from '@math.gl/core/matrix';

@@ -131,9 +131,10 @@ together, and when to use each.
 | [`createCRSDescriptor`](../crs/api-reference/crs-descriptor.md) (`@math.gl/geospatial/crs`) | You have external converters and explicit CRS metadata/rendering policy |
 
 The `@math.gl/geospatial/projection` entry point exports the full and configurable engines and the default `projectionEngine`.
-`Projection` and `ProjectionEngine` are type contracts, available from `/types`. `/core`
-contains the engine without the catalogue. `/projections/<id>` contains an
-individual algorithm; `/projections/lazy/<id>` contains its deferred descriptor.
+`Projection` and `ProjectionEngine` are type contracts, available from
+[`@math.gl/geospatial/projection-types`](./types.md). Import
+`@math.gl/geospatial/projection-core` for the engine without the catalogue.
+The [kernel index](./kernels.md) lists individual algorithms and lazy descriptors.
 Readers, grids, pipelines, operation selection and deformation models have optional subpaths. See the
 [entry-point reference](./developer-guide/projection-engine.md#public-subpaths).
 
