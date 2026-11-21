@@ -16,13 +16,18 @@ import {
 
 // Interleave incremental and monolithic cuts on the same deterministic edit prefix.
 const results = [];
-// Keep the source footprint fixed while varying the resident partition size.
+// Vary the partition size or grow the footprint with tile geometry fixed.
 const tileSize = Number(
   process.argv.find(arg => arg.startsWith('--tile-size='))?.split('=')[1] ?? 8
 );
 if (![2, 4, 8].includes(tileSize)) throw new RangeError('tile-size must be 2, 4 or 8');
+const rows = Number(
+  process.argv.find(arg => arg.startsWith('--rows='))?.split('=')[1] ?? 32
+);
+if (![16, 32, 64, 128].includes(rows) || (64 * rows) / tileSize ** 2 > 512)
+  throw new RangeError('rows must be 16, 32, 64 or 128, with up to 512 residents');
 const columns = 64 / tileSize;
-const residentCount = columns * (32 / tileSize);
+const residentCount = columns * (rows / tileSize);
 const vertexWidth = tileSize + 1;
 const evictionId = String(residentCount - 1);
 const limits = {maxTiles: 512, maxPairChecks: 131072};
@@ -144,7 +149,8 @@ for (const name of ['pacific', 'sierra-nodata']) {
       else
         reference = splitTerrainMeshTiles(
           active.map(t => t.mesh),
-          polygon
+          polygon,
+          {maxWork: 64_000_000}
         );
       if (step >= 5) (mode === 'incremental' ? incremental : full).push(performance.now() - start);
     }
@@ -165,6 +171,7 @@ for (const name of ['pacific', 'sierra-nodata']) {
     inputTriangles,
     residents: residentCount,
     tileSize,
+    rows,
     measuredUpdates: 20,
     rebuiltTiles: rebuilt,
     fullRebuildParity: true,

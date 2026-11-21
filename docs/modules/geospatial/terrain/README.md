@@ -2208,8 +2208,9 @@ a polygon expressed in the new frame.
 
 Work consists of clipping changed tiles, validating changed adjacent pairs,
 a resident-pair broad phase, and reconciling cached exposed-edge summaries.
-Unchanged triangles are not rescanned or reclipped. The broad phase is currently
-quadratic in resident count; `maxPairChecks` bounds it. `maxTiles` and
+Unchanged triangles are not rescanned or reclipped. The broad phase checks pairs incident to rebuilt tiles. With N residents and K
+rebuilt tiles, it performs at most K × N iterations. Cold updates can still be
+quadratic. `maxPairChecks` caps the total possible resident pairs. `maxTiles` and
 `maxBoundaryEdges` bound resident reconciliation. `maxWork`, `maxVertices` and
 `maxTriangles` apply separately to each tile clip and each adjacent-pair check;
 they are not aggregate per-update limits. This is not an incremental skirt cache:
