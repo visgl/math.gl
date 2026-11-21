@@ -28,7 +28,8 @@ execFileSync(process.execPath, ['--input-type=module', '-e', `
   for (const load of [specifier => import(specifier), specifier => require(specifier)]) {
     const {compile} = await load('@math.gl/sql/expressions');
     assert.equal(compile('value * 2')({value: 5}), 10);
-    const {parseSQLQuery} = await load('@math.gl/sql/parser');
+    const {parseSQLQuery, parseSQLScaleExpression} = await load('@math.gl/sql/parser');
+    assert.equal(parseSQLScaleExpression('SCALE_LINEAR(v, DOMAIN(0, 10), RANGE(0, 1))').scale.type, 'linear');
     assert.deepEqual(parseSQLQuery('SHOW SOURCES'), {command: 'showSources'});
   }
 `], {cwd: root, stdio: 'inherit'});
@@ -165,6 +166,13 @@ for (const name of expected) {
     if (specifier === '@math.gl/core/matrix') {
       assert.equal('parseSQLQuery' in imported, false);
       assert.equal('parseSQLQuery' in required, false);
+    }
+    if (specifier === '@math.gl/sql/scales') {
+      for (const scales of [imported, required]) {
+        assert.equal(typeof scales.compileArrowScale, 'function');
+        assert.equal('parseSQLScaleExpression' in scales, false);
+        assert.equal('compileResolvedScale' in scales, false);
+      }
     }
     if (specifier === '@math.gl/sql/parser') {
       for (const sql of [imported, required]) {

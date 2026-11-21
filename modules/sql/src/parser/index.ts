@@ -15,6 +15,8 @@ export type {
 } from './query-types';
 
 export {parseSQLExpression} from './parse-sql-expression';
+export {parseSQLScaleExpression, parseSQLScaleAST} from '../scales/parse-sql-scale';
+export type {ParsedSQLScale} from '../scales/parse-sql-scale';
 
 export {SQLParseError} from './sql-parse-error';
 export {parseSQLSelectStatement, parseSQLSelectCompound} from './parse-sql-statement';

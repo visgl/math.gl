@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {compileResolvedScale, resolvePalette} from '@math.gl/sql/scales';
+import {compileResolvedScale, resolvePalette} from '@math.gl/core/color';
 import {
   convertScaleColor,
   decodeSRGB,

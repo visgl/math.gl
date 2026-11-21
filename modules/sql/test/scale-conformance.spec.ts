@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {compileResolvedScale} from '../src/scales';
+import {compileResolvedScale} from '@math.gl/core/color';
 import {SCALE_CONFORMANCE_CASES} from '../src/scales/conformance';
 
 for (const fixture of SCALE_CONFORMANCE_CASES) {
