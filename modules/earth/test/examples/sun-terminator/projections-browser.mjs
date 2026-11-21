@@ -25,7 +25,11 @@ try {
   const ids = await select.locator('option').evaluateAll((options) => options.map((o) => o.value));
   assert.equal(ids.length, 41);
   await page.emulateMedia({reducedMotion: 'reduce'});
-  for (const id of process.env.GESTURES_ONLY ? [] : ids) {
+  // Sample globe, planar, interrupted, inset and polyhedral rendering on CI changes.
+  const renderIds = process.env.MATHGL_EXAMPLE_MATRIX === 'sampled'
+    ? ['globe', 'map', 'robin', 'isinu', 'albers-usa', 'h3']
+    : ids;
+  for (const id of process.env.GESTURES_ONLY ? [] : renderIds) {
     await select.selectOption(id);
     await page.waitForTimeout(100);
     assert.equal(await select.inputValue(), id);
