@@ -6,7 +6,7 @@ import {expect, test} from 'vitest';
 import {interpolatePackedAttributes} from '@math.gl/geometry/processing';
 import type {PackedAttribute, PackedAttributeType} from '@math.gl/geometry/processing';
 import {interpolatePackedAttributes as rootInterpolation} from '@math.gl/geometry/processing';
-import {subdivideTriangleMesh} from '@math.gl/geometry/processing';
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
 
 const midpoint = {sourceVertexIndices: [0, 1, 0], sourceVertexWeights: [0.5, 0.5, 0]};
 const identity = {sourceVertexIndices: [0, 0, 0], sourceVertexWeights: [1, 0, 0]};

@@ -306,8 +306,7 @@ const entryPoints = {
   ],
   "@math.gl/earth/sun": [
     "getPlanetSkyInfo",
-    "getSkySnapshot",
-    "getStarPosition"
+    "getSkySnapshot"
   ],
   "@math.gl/earth/timezone": [
     "getStartOfDay",
@@ -385,6 +384,17 @@ for (const load of [specifier => import(specifier), specifier => require(specifi
   ];
   for (const [index, [path, symbol]] of entries.entries()) {
     assert.equal(DGGS_DECODERS[index], (await load('@math.gl/dggs/' + path))[symbol]);
+  }
+}
+for (const load of [specifier => import(specifier), specifier => require(specifier)]) {
+  const entries = [
+    ['@math.gl/core/types', '@math.gl/core/matrix', 'isFloat16Array'],
+    ['@math.gl/geometry/polygon', '@math.gl/geometry/processing', 'subdivideTriangleMesh'],
+    ['@math.gl/earth/sun-stars', '@math.gl/earth/sun', 'getStarPosition']
+  ];
+  for (const [owner, previousPath, symbol] of entries) {
+    assert.equal(typeof (await load(owner))[symbol], 'function');
+    assert.equal(symbol in await load(previousPath), false);
   }
 }
 assert.equal(typeof (await import('@math.gl/earth/sun-stars')).STAR_CATALOG, 'object');

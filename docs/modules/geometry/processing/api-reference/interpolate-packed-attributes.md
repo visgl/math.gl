@@ -17,7 +17,7 @@ convenience; its existing geometry-processing dependencies are unchanged.
 
 ```ts
 import {interpolatePackedAttributes} from '@math.gl/geometry/processing';
-import {subdivideTriangleMesh} from '@math.gl/geometry/processing';
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
 
 // Two Float32 UV components per source vertex, expressed as a byte view.
 const sourceUVs = new Float32Array([0, 0, 1, 0, 1, 1, 0, 1]);

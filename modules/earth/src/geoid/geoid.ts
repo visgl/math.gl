@@ -20,7 +20,7 @@
  * * https://geographiclib.sourceforge.io/
  **********************************************************************/
 
-import {isUint16Array} from '@math.gl/core/matrix';
+import {isUint16Array} from '@math.gl/core/types';
 
 const c0_ = 240;
 

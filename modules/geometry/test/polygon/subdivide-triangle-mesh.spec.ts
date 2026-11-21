@@ -4,7 +4,7 @@
 
 import {test, expect, vi} from 'vitest';
 import {earcut} from '@math.gl/geometry/polygon';
-import {subdivideTriangleMesh} from '@math.gl/geometry/processing';
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
 import type {SubdividedTriangleMesh} from '@math.gl/geometry/polygon';
 
 const quad = {positions: [0, 0, 1, 0, 1, 1, 0, 1], indices: [0, 1, 2, 0, 2, 3]};
