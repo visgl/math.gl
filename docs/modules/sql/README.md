@@ -27,7 +27,7 @@ points can be used without Arrow; it is an optional peer dependency for those us
 | `@math.gl/sql/worker` | Run structured queries and expressions [off the calling thread](worker.md). |
 | `@math.gl/sql/math-functions` | Register [numeric SQL functions](math-functions/README.md) such as `SIN` and `SQRT`. |
 | `@math.gl/sql/color-functions` | Register [color functions](color-functions/README.md) for construction, conversion, and mapping. |
-| `@math.gl/sql/scales` | [Parse scale expressions, resolve domains, and evaluate scales](scales/README.md) on Arrow columns. |
+| `@math.gl/sql/scales` | [Resolve domains and evaluate scales](scales/README.md) on Arrow columns. |
 
 Worker bootstrap entry points `@math.gl/sql/worker-entry.js` and
 `@math.gl/sql/query-worker-entry.js` start their respective worker runtimes. See

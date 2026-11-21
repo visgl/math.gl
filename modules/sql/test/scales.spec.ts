@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {createResolvedScale, validateScaleSpec, type ScaleSpec} from '../src/scales';
+import {createResolvedScale, validateScaleSpec, type ScaleSpec} from '@math.gl/core/color';
 
 test('portable data-derived scale specification is JSON serializable', () => {
   const spec: ScaleSpec = {

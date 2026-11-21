@@ -5,7 +5,7 @@
 import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
 import {createStreamingDomainAccumulator} from '@math.gl/sql/scales';
-import {ScaleQuantileSketch} from '@math.gl/sql/scales';
+import {ScaleQuantileSketch} from '@math.gl/core/color';
 
 test('streaming min/max, symmetric, percentile and category snapshots', () => {
   const table = tableFromArrays({

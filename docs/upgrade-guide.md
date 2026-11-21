@@ -261,7 +261,7 @@ Install `@math.gl/core` in place of `@math.gl/arrow`, and `@math.gl/geospatial` 
 | `@math.gl/sql/arrow-scales` | `@math.gl/sql/scales` |
 | `@math.gl/geometry/color` | `@math.gl/core/color` |
 
-Import vectors, matrices, and rotations from `@math.gl/core/matrix`. `@math.gl/core/color` provides reusable colors, scales, palettes, and LUTs. SQL parsing, domain resolution, and Arrow scale evaluation remain together in `@math.gl/sql/scales`.
+Import vectors, matrices, and rotations from `@math.gl/core/matrix`. `@math.gl/core/color` provides reusable colors, scales, palettes, and LUTs. Import `parseSQLScaleExpression`, `parseSQLScaleAST`, and `ParsedSQLScale` from `@math.gl/sql/parser`. Use `@math.gl/sql/scales` for Arrow domain resolution and evaluation. If you imported reusable scale helpers or types from `@math.gl/sql/scales`, switch those imports to `@math.gl/core/color`.
 
 Applications importing `@math.gl/core/arrow` install the optional `apache-arrow >=17` peer. Matrix, color, and UTF-8 consumers can omit it. Descriptor kernels retain their names; Arrow vector operations use `getGeoArrowVectorBounds`, `getGeoArrowVectorRowBounds`, `getGeoArrowVectorVertexCount`, `mapGeoArrowVectorCoordinates`, and `rewindGeoArrowVector` to distinguish them from descriptor kernels.
 

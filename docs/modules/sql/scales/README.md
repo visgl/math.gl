@@ -3,8 +3,8 @@
 Compare ramps and class breaks in the [color scale gallery](gallery.mdx).
 
 Use `@math.gl/core/color` for portable scale specifications and samplers.
-For SQL parsing, Arrow domain resolution, and column evaluation, use
-`@math.gl/sql/scales`.
+Parse scale expressions with [`@math.gl/sql/parser`](../parser/README.md). Use
+`@math.gl/sql/scales` to resolve domains and evaluate scales on Arrow columns.
 
 ```ts
 import {validateScaleSpec, compileResolvedScale} from '@math.gl/core/color';
@@ -56,7 +56,7 @@ It resolves the domain from your table, binds the input expression, and returns 
 sampler and an evaluator for Arrow tables and record batches.
 
 ```ts
-import {parseSQLScaleExpression} from '@math.gl/sql/scales';
+import {parseSQLScaleExpression} from '@math.gl/sql/parser';
 import {compileArrowScale} from '@math.gl/sql/scales';
 
 const parsed = parseSQLScaleExpression(

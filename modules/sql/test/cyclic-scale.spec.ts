@@ -4,11 +4,8 @@
 
 import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
-import {
-  compileArrowScale,
-  compileArrowScaleExpression,
-  parseSQLScaleExpression
-} from '@math.gl/sql/scales';
+import {compileArrowScale, compileArrowScaleExpression} from '@math.gl/sql/scales';
+import {parseSQLScaleExpression} from '@math.gl/sql/parser';
 
 test('cyclic scales wrap the period in both directions and interpolate across the seam', () => {
   const input = tableFromArrays({heading: [15, 375, -345, 285, null]});

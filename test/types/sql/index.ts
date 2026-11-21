@@ -93,7 +93,7 @@ queryArrowTable(orders, tableQuery);
 const streamingQuery: ArrowStreamingQuery = {...tableQuery, emitEmptyBatches: true};
 queryArrowTableInBatches(orders.batches, orders.schema, streamingQuery);
 
-import {parseSQLScaleAST, parseSQLScaleExpression, type ParsedSQLScale} from '@math.gl/sql/scales';
+import {parseSQLScaleAST, parseSQLScaleExpression, type ParsedSQLScale} from '@math.gl/sql/parser';
 import {SCALE_CONFORMANCE_CASES, type ScaleConformanceCase} from '@math.gl/sql/scales-conformance';
 
 const parsedScale: ParsedSQLScale = parseSQLScaleAST(

@@ -26,7 +26,7 @@ import {
   SQLParseError,
   type SQLParameters
 } from '../src/parser';
-import {parseSQLScaleExpression} from '../src/scales';
+import {parseSQLScaleExpression} from '@math.gl/sql/parser';
 import {compileArrowExpression, type ArrowTableFunction} from '../src/arrow';
 import {compileArrowScale} from '../src/scales/arrow-scales';
 import {queryArrowSQL} from '../src/arrow/query-arrow-sql';
