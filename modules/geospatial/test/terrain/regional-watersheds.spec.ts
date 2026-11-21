@@ -1,3 +1,7 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+
 import {expect, test} from 'vitest';
 import sierra from './fixtures/sierra-nodata-streaming.json';
 import {HeightField} from '../../src/terrain/height-field';
