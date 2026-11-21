@@ -44,6 +44,14 @@ For Turf and PostGIS-style SQL function registration, replace
 `@math.gl/geospatial/turf-expressions` with `@math.gl/geospatial/turf-functions`
 and `@math.gl/geospatial/st-functions` as needed.
 
+Use the focused entry points for these APIs:
+
+| API | Import from |
+| --- | --- |
+| Float16 constructors and guards, and `isUint16Array` | `@math.gl/core/types` |
+| `subdivideTriangleMesh` | `@math.gl/geometry/polygon` |
+| Star positions, star colors, and galactic utilities | `@math.gl/earth/sun-stars` |
+
 ### Expressions and SQL package
 
 Install [`@math.gl/sql`](./modules/sql/README.md) to query Arrow tables, parse SQL, or
