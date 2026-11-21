@@ -17,7 +17,9 @@ This example uses `compileArrowScales` to evaluate all three mappings. Each desc
 ```
 import {tableFromArrays} from 'apache-arrow';
 
-import {compileArrowScales, parseSQLScaleExpression} from '@math.gl/sql/scales';
+import {compileArrowScales} from '@math.gl/sql/scales';
+
+import {parseSQLScaleExpression} from '@math.gl/sql/parser';
 
 
 

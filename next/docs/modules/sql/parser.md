@@ -1,6 +1,6 @@
 # @math.gl/sql/parser
 
-Import `@math.gl/sql/parser` to parse supported SQL statements into portable query and predicate objects. The parser works without Apache Arrow. To execute SQL over native Arrow tables, use [`queryArrowSQL`](https://visgl.github.io/math.gl/next/docs/modules/sql.md) from `@math.gl/sql/query`.
+Import `@math.gl/sql/parser` to parse supported SQL statements into portable query and predicate objects. The parser works without Apache Arrow. To execute SQL over native Arrow tables, use [`queryArrowSQL`](https://visgl.github.io/math.gl/next/docs/modules/sql.md) from `@math.gl/sql/query`. Use [`parseSQLScaleExpression` or `parseSQLScaleAST`](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/SQL.md) to turn SQL scale expressions into validated scale specifications.
 
 ## Submodule features[​](#submodule-features "Direct link to Submodule features")
 

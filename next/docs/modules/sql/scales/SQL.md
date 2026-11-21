@@ -1,9 +1,9 @@
 # SQL scale specifications (experimental)
 
-Import `parseSQLScaleExpression` from `@math.gl/sql/scales`. It parses one **row-preserving** scale expression using the existing bounded SQL expression parser, then validates scale/domain/range semantics into a serializable `ScaleSpec`. It does **not** evaluate scale statistics or colors.
+Import `parseSQLScaleExpression` from `@math.gl/sql/parser`. It parses one **row-preserving** scale expression using the existing bounded SQL expression parser, then validates scale/domain/range semantics into a serializable `ScaleSpec`. It does **not** evaluate scale statistics or colors.
 
 ```
-import {parseSQLScaleExpression} from '@math.gl/sql/scales';
+import {parseSQLScaleExpression} from '@math.gl/sql/parser';
 
 
 
@@ -80,9 +80,7 @@ Tracker: <https://github.com/visgl/deck.gl/issues/11147>
 Use `parseSQLScaleAST(expression)` when a query planner already has an expression from `parseSQLExpression` or a SELECT projection. It applies the same scale validation as the text entry point without converting the AST back to SQL.
 
 ```
-import {parseSQLSelectStatement} from '@math.gl/sql/parser';
-
-import {parseSQLScaleAST} from '@math.gl/sql/scales';
+import {parseSQLScaleAST, parseSQLSelectStatement} from '@math.gl/sql/parser';
 
 
 

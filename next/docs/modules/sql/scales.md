@@ -2,7 +2,7 @@
 
 Compare ramps and class breaks in the [color scale gallery](https://visgl.github.io/math.gl/next/docs/modules/sql/scales/gallery.md).
 
-Use `@math.gl/core/color` for portable scale specifications and samplers. For SQL parsing, Arrow domain resolution, and column evaluation, use `@math.gl/sql/scales`.
+Use `@math.gl/core/color` for portable scale specifications and samplers. Parse scale expressions with [`@math.gl/sql/parser`](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md). Use `@math.gl/sql/scales` to resolve domains and evaluate scales on Arrow columns.
 
 ```
 import {validateScaleSpec, compileResolvedScale} from '@math.gl/core/color';
@@ -51,7 +51,7 @@ See [numeric scales and legends](https://visgl.github.io/math.gl/next/docs/modul
 Install Apache Arrow and import `compileArrowScale` from `@math.gl/sql/scales`. It resolves the domain from your table, binds the input expression, and returns a sampler and an evaluator for Arrow tables and record batches.
 
 ```
-import {parseSQLScaleExpression} from '@math.gl/sql/scales';
+import {parseSQLScaleExpression} from '@math.gl/sql/parser';
 
 import {compileArrowScale} from '@math.gl/sql/scales';
 

@@ -23,7 +23,7 @@ Apache Arrow 17 or later is required for execution. The `/parser` and `/expressi
 | `@math.gl/sql/worker`          | Run structured queries and expressions [off the calling thread](https://visgl.github.io/math.gl/next/docs/modules/sql/worker.md).                      |
 | `@math.gl/sql/math-functions`  | Register [numeric SQL functions](https://visgl.github.io/math.gl/next/docs/modules/sql/math-functions.md) such as `SIN` and `SQRT`.                    |
 | `@math.gl/sql/color-functions` | Register [color functions](https://visgl.github.io/math.gl/next/docs/modules/sql/color-functions.md) for construction, conversion, and mapping.        |
-| `@math.gl/sql/scales`          | [Parse scale expressions, resolve domains, and evaluate scales](https://visgl.github.io/math.gl/next/docs/modules/sql/scales.md) on Arrow columns.     |
+| `@math.gl/sql/scales`          | [Resolve domains and evaluate scales](https://visgl.github.io/math.gl/next/docs/modules/sql/scales.md) on Arrow columns.                               |
 
 Worker bootstrap entry points `@math.gl/sql/worker-entry.js` and `@math.gl/sql/query-worker-entry.js` start their respective worker runtimes. See [Workers](https://visgl.github.io/math.gl/next/docs/modules/sql/worker.md) for setup. The test-only entry point `@math.gl/sql/scales-conformance` provides shared fixture cases for scale implementations.
 

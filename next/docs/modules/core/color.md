@@ -20,4 +20,4 @@ import {
 
 `createColorLUTSampler` creates an RGB sampler for a `ColorLUT`; `applyColorLUT` applies it to interleaved RGB or RGBA floating-point arrays. Sampling uses the authored domain and preserves signed/HDR results. RGBA application preserves alpha at float32 precision.
 
-For SQL expressions, data-derived domains, Arrow column output, and batch evaluation, use [`@math.gl/sql/scales`](https://visgl.github.io/math.gl/next/docs/modules/sql/scales.md).
+Parse SQL scale expressions with [`@math.gl/sql/parser`](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md). For data-derived domains and Arrow column evaluation, use [`@math.gl/sql/scales`](https://visgl.github.io/math.gl/next/docs/modules/sql/scales.md).
