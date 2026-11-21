@@ -65,7 +65,7 @@ const movedGuides = {
   "developer-guide/performance": "developer-guide#reuse-results-in-repeated-work",
   "developer-guide/bundling": "developer-guide#keep-application-bundles-small",
   "developer-guide/working-with-ai": "developer-guide#work-with-an-ai-coding-agent",
-  "developer-guide/root-exports-migration": "upgrade-guide#migrating-to-root-exports",
+  "developer-guide/root-exports-migration": "upgrade-guide#package-imports",
   "bibliography": "references-and-credits",
   "developer-guide/external-frameworks": "modules/core#interoperability",
   "developer-guide/math/transformations": "modules/core/developer-guide/transformations",
