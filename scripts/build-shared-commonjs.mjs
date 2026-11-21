@@ -44,6 +44,7 @@ async function buildPackage(name, files) {
     sourcesContent: false,
     plugins: [{
       name: 'shared-commonjs-constructors',
+      /** Resolve shared imports relative to the CommonJS file that will require them. */
       setup(builder) {
         builder.onResolve({filter: /^\.\.?\//}, ({path, resolveDir}) => {
           const target = shared.get(resolve(resolveDir, path));
