@@ -120,6 +120,8 @@ export function updateTerrainTileCutouts(
     splitTerrainMesh({positions: new Float64Array(), indices: new Uint32Array()}, polygon, limits);
   const entries = new Map<string, Entry>();
   const rebuilt: string[] = [];
+  /** Rebuilt entries keyed to their position in resident order. */
+  const dirty = new Map<Entry, number>();
   let boundaryCount = 0;
   for (const resident of residents) {
     if (
@@ -148,6 +150,7 @@ export function updateTerrainTileCutouts(
       }
       entry = {resident: {...resident}, split, displayed: split, bounds, edges};
       rebuilt.push(resident.id);
+      dirty.set(entry, entries.size);
     }
     boundaryCount += entry.edges.length;
     if (boundaryCount > limits.maxBoundaryEdges)
@@ -155,24 +158,18 @@ export function updateTerrainTileCutouts(
     entries.set(resident.id, entry);
   }
   const values = [...entries.values()];
-  let pairs = 0;
-  for (let i = 0; i < values.length; i++)
-    for (let j = i + 1; j < values.length; j++) {
-      if (++pairs > limits.maxPairChecks)
-        throw new RangeError('Terrain cutout pair budget exceeded');
-      const a = values[i],
-        b = values[j];
+  /** Total possible pairs, including pairs already validated by the cache. */
+  const pairCount = (values.length * (values.length - 1)) / 2;
+  if (pairCount > limits.maxPairChecks) throw new RangeError('Terrain cutout pair budget exceeded');
+  // Cached pairs were checked when their current revisions first coexisted.
+  for (const [a, index] of dirty)
+    for (const b of values) {
+      if (a === b || (dirty.get(b) ?? Infinity) < index) continue;
       if (
         a.bounds[2] < b.bounds[0] ||
         b.bounds[2] < a.bounds[0] ||
         a.bounds[3] < b.bounds[1] ||
         b.bounds[3] < a.bounds[1]
-      )
-        continue;
-      if (
-        compatible &&
-        prior.entries.get(a.resident.id) === a &&
-        prior.entries.get(b.resident.id) === b
       )
         continue;
       const combined = assembleTerrainCutoutTiles([a.resident.mesh, b.resident.mesh], limits);
