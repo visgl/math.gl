@@ -19,5 +19,5 @@ npm install @math.gl/core
 | [`@math.gl/core/types`](./types/README.md) | Numeric array and bounds types, runtime guards, and Float16 detection. |
 | [`@math.gl/core/matrix`](./matrix.md) | Vectors, matrices, coordinate conversions, and transforms. |
 | [`@math.gl/core/color`](./color.md) | Color scales, palettes, and lookup tables. |
-| [`@math.gl/core/utf8`](./arrow/utf8/README.md) | Performant UTF-8 processing without JavaScript strings |
+| [`@math.gl/core/utf8`](./utf8/README.md) | Performant UTF-8 processing without JavaScript strings |
 | [`@math.gl/core/arrow`](./arrow/README.md) | Arrow tables and vectors, GeoArrow, and WKB. Install the `apache-arrow` peer dependency to use this entry point. |

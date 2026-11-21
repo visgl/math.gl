@@ -63,11 +63,11 @@ function documentedEntries(node, paths = new Set()) {
     if (node.label?.startsWith('@math.gl/') && node.label.split('/').length === 3) {
       const title = contents.match(/^title: "([^"]+)"$/m)?.[1] ?? contents.match(/^# (.+)$/m)?.[1];
       assert.equal(title, node.label, page.pathname + ' must match its sidebar label');
+      const segments = id.split('/');
+      const file = segments.pop();
+      const name = file === 'README' ? segments.pop() : file;
+      assert.equal(name, node.label.split('/').at(-1), page.pathname + ' must match its package subpath');
       paths.add(node.label);
-    }
-    if (node.label?.startsWith('@math.gl/dggs/')) {
-      assert.equal(id.split('/').at(-1), node.label.split('/').at(-1),
-        page.pathname + ' must match its package subpath');
     }
     for (const [, entry] of contents.matchAll(/`(@math\.gl\/[\w./-]+)`/g)) {
       paths.add(entry);

@@ -162,7 +162,7 @@
           },
           {
             "type": "doc",
-            "id": "modules/core/arrow/utf8/README",
+            "id": "modules/core/utf8/README",
             "label": "@math.gl/core/utf8"
           },
           {
@@ -205,7 +205,7 @@
             ],
             "link": {
               "type": "doc",
-              "id": "modules/geometry/api-reference/geometry"
+              "id": "modules/geometry/api-reference/primitives"
             }
           },
           {
@@ -271,14 +271,14 @@
             "type": "category",
             "label": "@math.gl/geometry/processing",
             "items": [
-              "modules/geometry/utils/api-reference/geometry-utils",
-              "modules/geometry/utils/api-reference/mesh-processing",
-              "modules/geometry/utils/api-reference/interpolate-packed-attributes",
-              "modules/geometry/utils/api-reference/qualify-surface-transition"
+              "modules/geometry/processing/api-reference/geometry-utils",
+              "modules/geometry/processing/api-reference/mesh-processing",
+              "modules/geometry/processing/api-reference/interpolate-packed-attributes",
+              "modules/geometry/processing/api-reference/qualify-surface-transition"
             ],
             "link": {
               "type": "doc",
-              "id": "modules/geometry/utils/README"
+              "id": "modules/geometry/processing/README"
             }
           },
           {
@@ -523,7 +523,7 @@
           },
           {
             "type": "doc",
-            "id": "modules/geospatial/projection/types",
+            "id": "modules/geospatial/projection-types",
             "label": "@math.gl/geospatial/projection-types"
           },
           {
@@ -646,7 +646,7 @@
           },
           {
             "type": "doc",
-            "id": "modules/earth/sun/api-reference/stars",
+            "id": "modules/earth/sun-stars",
             "label": "@math.gl/earth/sun-stars"
           },
           {
@@ -741,7 +741,7 @@
             "label": "@math.gl/sql/query",
             "link": {
               "type": "doc",
-              "id": "modules/sql/queries"
+              "id": "modules/sql/query"
             },
             "items": [
               "modules/sql/unnest"
@@ -786,7 +786,7 @@
           },
           {
             "type": "doc",
-            "id": "modules/sql/workers",
+            "id": "modules/sql/worker",
             "label": "@math.gl/sql/worker"
           },
           {

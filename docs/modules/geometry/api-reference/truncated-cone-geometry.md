@@ -18,4 +18,4 @@ const geometry = new TruncatedConeGeometry({height: 1.5, bottomRadius: 0.7, topR
 
 All primitives also accept `id` and additional `attributes`. Generated meshes expose
 `POSITION`, `NORMAL` and `TEXCOORD_0` attributes, triangle-list topology, and typed indices.
-See [Geometry](./geometry.md) for the mesh container API.
+See [Geometry](./primitives.md) for the mesh container API.

@@ -18,4 +18,4 @@ const geometry = new SphereGeometry({radius: 0.75, nlat: 16, nlong: 24});
 
 All primitives also accept `id` and additional `attributes`. Generated meshes expose
 `POSITION`, `NORMAL` and `TEXCOORD_0` attributes, triangle-list topology, and typed indices.
-See [Geometry](./geometry.md) for the mesh container API.
+See [Geometry](./primitives.md) for the mesh container API.

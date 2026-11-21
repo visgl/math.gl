@@ -1,6 +1,6 @@
 # @math.gl/sql/query
 
-Use the functions exported by `@math.gl/sql` to query native Arrow tables and record batches.
+Use the functions exported by `@math.gl/sql/query` to query native Arrow tables and record batches.
 Start with the [SQL quick start](README.md), then use this page for structured queries and streaming.
 
 ## Query an Arrow table
@@ -83,7 +83,7 @@ const trips = queryArrowSQL(
 `expandTripDictionary` is an application function that resolves the segment
 references and returns the assembled trip rows.
 
-For worker execution, see [Workers](workers.md).
+For worker execution, see [Workers](worker.md).
 
 ### Querying a stream of record batches
 

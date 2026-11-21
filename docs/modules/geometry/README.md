@@ -22,11 +22,11 @@ more than 65,535 vertices.
 
 | Import path | Use it to |
 | --- | --- |
-| [`@math.gl/geometry/primitives`](./api-reference/geometry.md) | Generate primitive and parametric meshes. |
+| [`@math.gl/geometry/primitives`](./api-reference/primitives.md) | Generate primitive and parametric meshes. |
 | [`@math.gl/geometry/curves`](./curves/README.md) | Represent and sample curves. |
 | [`@math.gl/geometry/polygon`](./polygon/README.md) | Clip, triangulate, and subdivide polygons and polylines. |
 | [`@math.gl/geometry/culling`](./culling/README.md) | Query analytic shapes, bounding volumes, and rays. |
-| [`@math.gl/geometry/processing`](./utils/README.md) | Process meshes, indices, and attributes. |
+| [`@math.gl/geometry/processing`](./processing/README.md) | Process meshes, indices, and attributes. |
 | [`@math.gl/geometry/spatial-index`](./spatial-index/README.md) | Index points, boxes, and triangles. |
 | [`@math.gl/geometry/arrow`](./entry-points/arrow.md) | Tessellate GeoArrow polygons. |
 | [`@math.gl/geometry/lighting`](./entry-points/lighting.md) | Sample photometric profiles. |
@@ -51,9 +51,9 @@ Pass these CPU buffers to the renderer of your choice. The module does not creat
 | Primitive mesh tessellation | ✅ | [Boxes, capsules, cylinders, planes, spheres and convenience shapes](#api) produce renderer-independent indexed buffers. |
 | Parametric surfaces, lathes and tori | ✅ | [ParametricGeometry, TorusGeometry and LatheGeometry](./api-reference/parametric.md) sample explicit surface functions. |
 | Normals, UVs and index-width selection | ✅ | Primitive POSITION/NORMAL/TEXCOORD_0 attributes and automatic Uint32 promotion for large meshes. |
-| Projected bounds | ✅ | [Sample edges and interiors](./utils/api-reference/project-bounds.md) with an explicit approximate/conservative qualification. |
-| Projected texture coordinates | ✅ | [Prepare image UVs](./utils/api-reference/project-texture-coordinates.md) from packed CPU positions without a rendering dependency. |
-| Mesh processing | ✅ | [Transform, merge, and weld indexed meshes](./utils/README.md). |
+| Projected bounds | ✅ | [Sample edges and interiors](./processing/api-reference/project-bounds.md) with an explicit approximate/conservative qualification. |
+| Projected texture coordinates | ✅ | [Prepare image UVs](./processing/api-reference/project-texture-coordinates.md) from packed CPU positions without a rendering dependency. |
+| Mesh processing | ✅ | [Transform, merge, and weld indexed meshes](./processing/README.md). |
 | Curve evaluation | ✅ | [Sample Cartesian curves and compute transport frames](./curves/README.md). |
 | Rigid articulated panel forests | ✅ | Experimental [HingeTree](./api-reference/hinge-tree.md) evaluates hinge transforms with reusable matrix output. |
 | Analytic queries | ✅ | [Bounding volumes, rays, and shapes](./culling/README.md) for Euclidean containment and intersection. |
@@ -98,7 +98,7 @@ planes are required.
 - [IcoSphereGeometry](./api-reference/ico-sphere-geometry.md)
 - [PrismGeometry](./api-reference/prism-geometry.md)
 - [RingGeometry](./api-reference/ring-geometry.md)
-- [Geometry](./api-reference/geometry.md)
+- [Geometry](./api-reference/primitives.md)
 
 ## Parametric surfaces
 

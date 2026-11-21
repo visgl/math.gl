@@ -32,7 +32,7 @@ const sunDir = getSunDirection(Date.now(), latitude, longitude);
 | Planetary positions and appearance | ✅ | [Planet sky information](./api-reference/get-planet-sky-info.md), disk/phase/magnitude and lunar/Galilean orientation/event helpers. |
 | Shared observer, horizon and visibility search | ✅ | [Sky APIs](./api-reference/sky.md) accept terrain horizons and explicit atmosphere settings; searches retain sampling/refinement limits. |
 | UT1/TT, reusable contexts and snapshots | ✅ | Explicit time scales and bounded reusable contexts support batch sky evaluation. |
-| Bright-star catalog and motion | ✅ | [Stars](./api-reference/stars.md) include optional catalog data, proper motion, distance-aware motion and explicitly illustrative Galactic backgrounds/orbits. |
+| Bright-star catalog and motion | ✅ | [Stars](../sun-stars.md) include optional catalog data, proper motion, distance-aware motion and explicitly illustrative Galactic backgrounds/orbits. |
 | Shared atmospheric visibility for stars | ◐ | Catalog/rendering data exist; the shared contrast/daylight/atmosphere integration remains [tranche 5 work](https://github.com/visgl/math.gl/blob/master/dev-docs/sun-roadmap.md). |
 | Observationally calibrated visibility and event guarantees | ◐ | Models and bounded searches exist; grazing/short events and observational uncertainty require broader independent qualification. |
 | Published accuracy/performance tier budgets | ❌ | Timing controls and benchmarks exist; formal tier-wide numerical/date/performance budgets remain [tranche 6 work](https://github.com/visgl/math.gl/blob/master/dev-docs/sun-roadmap.md). |
@@ -88,6 +88,6 @@ The solar position calculation is a fork of [Volodymyr Agafonkin](https://github
 
 The adapted lunar code and numeric reference samples use SunCalc 1.9.0 under BSD-2-Clause. The full notice is shipped in `LICENSE-SUNCALC`, and SPDX comments record the original owner and provenance. Original moonlight and star-field calculations use math.gl’s MIT license.
 
-The [star catalog](./api-reference/stars.md) contains 7,000 bright stars, projected proper motions, distance-aware motion and brightness where measurements exist, an illustrative Galactic orbit model, and a procedural Milky Way background. Numeric Julian epochs support long animations independently of the observer’s rendering date.
+The [star catalog](../sun-stars.md) contains 7,000 bright stars, projected proper motions, distance-aware motion and brightness where measurements exist, an illustrative Galactic orbit model, and a procedural Milky Way background. Numeric Julian epochs support long animations independently of the observer’s rendering date.
 
 See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

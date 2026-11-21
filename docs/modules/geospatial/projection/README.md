@@ -13,7 +13,7 @@ geocentric coordinate reference systems. Use it for map coordinates, in-place
 coordinate buffers, explicit datum transformations and coordinate propagation
 between epochs.
 
-For backend-independent interfaces, see [`@math.gl/geospatial/projection-types`](./types.md).
+For backend-independent interfaces, see [`@math.gl/geospatial/projection-types`](../projection-types.md).
 
 Numerical accuracy is evaluated against **native PROJ**. The pinned proj4js
 reference serves compatibility tests and benchmarks. The independent references
@@ -132,7 +132,7 @@ together, and when to use each.
 
 The `@math.gl/geospatial/projection` entry point exports the full and configurable engines and the default `projectionEngine`.
 `Projection` and `ProjectionEngine` are type contracts, available from
-[`@math.gl/geospatial/projection-types`](./types.md). Import
+[`@math.gl/geospatial/projection-types`](../projection-types.md). Import
 `@math.gl/geospatial/projection-core` for the engine without the catalogue.
 The [kernel index](./kernels.md) lists individual algorithms and lazy descriptors.
 Readers, grids, pipelines, operation selection and deformation models have optional subpaths. See the

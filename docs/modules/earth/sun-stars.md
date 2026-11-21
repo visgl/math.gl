@@ -132,7 +132,7 @@ const starLayer = new ScatterplotLayer({
 // For local/equatorial positions, use CARTESIAN with a suitable sky/OrbitView.
 ```
 
-The shell distance is a rendering choice, independent of physical stellar distance. Use `skyRotationToGlobe(rotation, observer)` for a custom globe-space sky shader; do not feed globe-space directions back to the ENU position adapter. Depth, exposure and sky visibility remain rendering decisions. For cubemaps, sample J2000 directions with the transpose of the rendering rotation, just as in [getStarfieldRotation](./get-starfield-rotation.md).
+The shell distance is a rendering choice, independent of physical stellar distance. Use `skyRotationToGlobe(rotation, observer)` for a custom globe-space sky shader; do not feed globe-space directions back to the ENU position adapter. Depth, exposure and sky visibility remain rendering decisions. For cubemaps, sample J2000 directions with the transpose of the rendering rotation, just as in [getStarfieldRotation](./sun/api-reference/get-starfield-rotation.md).
 
 ## Milky Way background
 
