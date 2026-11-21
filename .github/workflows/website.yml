@@ -119,5 +119,5 @@ jobs:
           clean: true
           force: false
           clean-exclude: |
-            next
-            .nojekyll
+            /next/***
+            /.nojekyll
