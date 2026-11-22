@@ -26,15 +26,29 @@ function nativePolygonResult(encoding: NativeSpatialResult['encoding']): NativeS
   return {encoding, type: build([]).type, build};
 }
 
+/** Eight unit directions per quadrant with exact cardinal axes. */
+const unitCircle = /* @__PURE__ */ Array.from({length: 32}, (_, index) => {
+  const angle = ((index % 8) * Math.PI) / 16;
+  const x = Math.cos(angle);
+  const y = Math.sin(angle);
+  switch (index >>> 3) {
+    case 0:
+      return [x, y];
+    case 1:
+      return [-y, x];
+    case 2:
+      return [-x, -y];
+    default:
+      return [y, -x];
+  }
+});
+
 /** Returns a circle approximation with PostGIS's default eight segments per quadrant. */
 function bufferPoint(point: WellKnownGeometry, radius: number): WellKnownGeometry {
   if (!Number.isFinite(radius)) throw new Error('ST_Buffer requires a finite radius');
   const location = pointCoordinates(point);
   if (!location || radius <= 0) return {type: 'Polygon', coordinates: []};
-  const ring = Array.from({length: 32}, (_, index) => {
-    const angle = (index * Math.PI) / 16;
-    return [location[0]! + radius * Math.cos(angle), location[1]! + radius * Math.sin(angle)];
-  });
+  const ring = unitCircle.map(([x, y]) => [location[0]! + radius * x!, location[1]! + radius * y!]);
   if (ring.some(point => !point.every(Number.isFinite))) {
     throw new Error('ST_Buffer produced a nonfinite coordinate');
   }

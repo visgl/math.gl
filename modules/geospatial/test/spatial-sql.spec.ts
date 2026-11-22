@@ -1358,3 +1358,14 @@ test('streams a chain of native geometry kernels without reading ahead', async (
   expect(second.getChild('geom')!.isValid(0)).toBe(false);
   expect((await batches.next()).done).toBe(true);
 });
+
+test('point buffers chain through overlays at exact cardinal tangencies', () => {
+  const p = wkb('POINT(2 0)', 'POINT(14 0)');
+  const table = new Table(new Schema([geometryField('p', p)]), {p});
+  const result = select(
+    'SELECT ST_Area(ST_Intersection(ST_Buffer(p,2),ST_MakeEnvelope(0,0,12,12))) AS area FROM features',
+    table
+  );
+  expect(result.getChild('area')!.get(0)).toBeCloseTo(32 * Math.sin(Math.PI / 16));
+  expect(result.getChild('area')!.get(1)).toBe(0);
+});
