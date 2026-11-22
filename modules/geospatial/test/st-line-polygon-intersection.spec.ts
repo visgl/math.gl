@@ -5,10 +5,12 @@
 import {
   GeoArrowBuilder,
   makeArrowVectorFromGeoArrowColumn,
-  parseWKB,
+  makeGeoArrowColumnFromArrowVector,
+  materializeGeoArrowRows,
   parseWKT,
   writeWKB
 } from '@math.gl/core/arrow';
+import {ST_LENGTH} from '@math.gl/geospatial/st-functions';
 import {ST_INTERSECTION} from '@math.gl/geospatial/st-overlay-functions';
 import {queryArrowTableInBatches} from '@math.gl/sql/query';
 import {Binary, Field, Schema, Table, vectorFromArray} from 'apache-arrow';
@@ -24,6 +26,7 @@ test('streams polygon clipping with holes, boundary lines, isolated contacts and
     ['MULTILINESTRING((-1 -1,0 0))', 'POINT(0 0)'],
     ['MULTILINESTRING((2 2,3 3,4 3))', 'LINESTRING(2 2,3 3,4 3)'],
     ['MULTILINESTRING((4.5 5,5.5 5))', 'GEOMETRYCOLLECTION EMPTY'],
+    ['MULTILINESTRING((2 5,3 5,2 5))', 'LINESTRING(2 5,3 5,2 5)'],
     [null, null]
   ] as const;
   const route = makeArrowVectorFromGeoArrowColumn(
@@ -50,18 +53,31 @@ test('streams polygon clipping with holes, boundary lines, isolated contacts and
   const table = new Table(schema, {route, zone});
   const batches = [...table.slice(0, 3).batches, ...table.slice(3).batches];
   const actual = [];
+  const lengths = [];
+  let physicalType: string | undefined;
   for await (const batch of queryArrowTableInBatches(batches, schema, {
     select: [
       {expression: 'ST_Intersection(route,zone)', as: 'forward'},
-      {expression: 'ST_Intersection(zone,route)', as: 'backward'}
+      {expression: 'ST_Intersection(zone,route)', as: 'backward'},
+      {expression: 'ST_Length(ST_Intersection(route,zone))', as: 'length'}
     ],
-    functions: [ST_INTERSECTION]
+    functions: [ST_INTERSECTION, ST_LENGTH]
   })) {
-    expect(batch.schema.fields[0]!.metadata.get('ARROW:extension:name')).toBe('geoarrow.wkb');
-    expect([...batch.getChild('forward')!]).toEqual([...batch.getChild('backward')!]);
-    actual.push(
-      ...Array.from(batch.getChild('forward')!, value => value && parseWKB(value).geometry)
+    const field = batch.schema.fields[0]!;
+    expect(field.metadata.get('ARROW:extension:name')).toBe('geoarrow.geometry');
+    physicalType ??= field.type.toString();
+    expect(field.type.toString()).toBe(physicalType);
+    const forward = materializeGeoArrowRows(
+      makeGeoArrowColumnFromArrowVector(batch.getChild('forward')!, {field})
     );
+    expect(forward).toEqual(
+      materializeGeoArrowRows(
+        makeGeoArrowColumnFromArrowVector(batch.getChild('backward')!, {field})
+      )
+    );
+    actual.push(...forward);
+    lengths.push(...batch.getChild('length')!);
   }
   expect(actual).toEqual(fixtures.map(([, value]) => value && parseWKT(value)));
+  expect(lengths).toEqual([8, 10, 0, 1 + Math.SQRT2, 0, 2, null]);
 });

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {writeWKB, type WellKnownGeometry} from '@math.gl/core/arrow';
-import {Binary} from 'apache-arrow';
+import type {WellKnownGeometry} from '@math.gl/core/arrow';
+import {lineIntersectionResult} from './spatial-line-intersection-result';
 import {intersectLinePolygon} from './spatial-line-polygon-intersection';
 import type {AggregateFunction, ScalarFunction} from '@math.gl/sql/arrow';
 import polygonClipping from 'polygon-clipping';
@@ -200,21 +200,22 @@ function withFirstInputMetadata(spatial: ScalarFunction): ScalarFunction {
 /** Binds polygon overlays or mixed-dimensional line clipping from the Arrow schema. */
 function intersection(): ScalarFunction {
   const polygons = polygonOverlay('ST_Intersection', polygonClipping.intersection);
+  const output = lineIntersectionResult();
   const linearFirst = spatialFunction(
     'ST_Intersection',
     [lineKinds, polygonKinds],
-    new Binary(),
-    ([line, area]) => writeWKB(intersectLinePolygon(line!, area!), 'xy')
+    output,
+    ([line, area]) => intersectLinePolygon(line!, area!)
   );
   const linearSecond = spatialFunction(
     'ST_Intersection',
     [polygonKinds, lineKinds],
-    new Binary(),
-    ([area, line]) => writeWKB(intersectLinePolygon(line!, area!), 'xy')
+    output,
+    ([area, line]) => intersectLinePolygon(line!, area!)
   );
   return withFirstInputMetadata({
     ...polygons,
-    /** A specialized line argument selects mixed-dimensional WKB output before evaluation. */
+    /** A specialized line argument selects a mixed native GeoArrow result before evaluation. */
     resolvePrototype(fields) {
       const a = fields[0]?.metadata.get(EXTENSION_NAME);
       const b = fields[1]?.metadata.get(EXTENSION_NAME);
