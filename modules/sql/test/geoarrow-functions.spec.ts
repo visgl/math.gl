@@ -6,6 +6,7 @@ import {
   Binary,
   DataType,
   Field,
+  Int32,
   LargeBinary,
   Schema,
   Table,
@@ -241,4 +242,23 @@ test('an emitted empty union batch has complete children for IPC', async () => {
   const empty = tableFromIPC(tableToIPC(new Table(batches[0]!.schema, batches)));
   expect(empty.numRows).toBe(0);
   expect(DataType.isDenseUnion(empty.schema.fields[0]!.type)).toBe(true);
+});
+
+test('CASE selects compatible dense union buffers and supplies a typed null for an omitted ELSE', () => {
+  const input = geometryTable(wkb('POINT (1 2)', 'LINESTRING (1 2, 3 4)', null));
+  const table = new Table(
+    new Schema([...input.schema.fields, new Field('id', new Int32(), false)]),
+    {geometry: input.getChild('geometry')!, id: vectorFromArray([0, 1, 2], new Int32())}
+  );
+  const selected = select(
+    table,
+    `CASE WHEN id = 0 THEN GEOARROW_TO_UNION(geometry)
+          WHEN id = 1 THEN GEOARROW_TO_UNION(geometry) END`
+  );
+  const rows = materializeGeoArrowRows(
+    makeGeoArrowColumnFromArrowVector(selected.getChild('result')!, {
+      field: selected.schema.fields[0]
+    })
+  );
+  expect(rows).toEqual([parseWKT('POINT (1 2)'), parseWKT('LINESTRING (1 2, 3 4)'), null]);
 });

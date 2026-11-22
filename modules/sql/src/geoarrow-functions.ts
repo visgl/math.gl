@@ -55,6 +55,7 @@ export function createGeoArrowConversionFunctions(
         ? 'GEOARROW_TO_UNION'
         : `GEOARROW_TO_${encoding.slice(9).toUpperCase()}`,
     prototypes: [],
+    /** Binds the GeoArrow output schema and conversion to the input field. */
     resolvePrototype(fields) {
       const source = fields[0];
       if (fields.length !== 1 || !source) return undefined;
@@ -140,6 +141,7 @@ export function createGeoArrowConversionFunctions(
         arguments: [source],
         result: new Field('geometry', type, source.nullable, metadata),
         nullHandling: 'call',
+        /** Converts the current batch, skipping rows outside the expression mask. */
         evaluate([vector], {activeRows}) {
           return evaluateVectorSpans(vector!, type, activeRows, convert);
         }
@@ -150,15 +152,18 @@ export function createGeoArrowConversionFunctions(
 
 /** Builds the same child schema for every batch with the bound input type. */
 function makeUnionSchema(dimension?: GeoArrowDimension) {
-  const unionChildren: GeoArrowDenseUnionChild[] = families.flatMap(encoding =>
-    (dimension ? [dimension] : dimensions).map(childDimension => ({
-      name: encoding.slice('geoarrow.'.length),
-      encoding,
-      dimension: childDimension,
-      coordinateLayout: 'interleaved',
-      typeId: unionTypeId(encoding, childDimension),
-      data: emptyGeometry(encoding, childDimension).chunks[0]
-    }))
+  const childDimensions: readonly GeoArrowDimension[] = dimension ? [dimension] : dimensions;
+  const unionChildren = families.flatMap(encoding =>
+    childDimensions.map(
+      (childDimension): GeoArrowDenseUnionChild => ({
+        name: encoding.slice('geoarrow.'.length),
+        encoding,
+        dimension: childDimension,
+        coordinateLayout: 'interleaved',
+        typeId: unionTypeId(encoding, childDimension),
+        data: emptyGeometry(encoding, childDimension).chunks[0]
+      })
+    )
   );
   const emptyUnion = makeArrowVectorFromGeoArrowColumn({
     encoding: 'geoarrow.geometry',

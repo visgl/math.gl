@@ -36,7 +36,7 @@ import {bindCast} from './cast';
 import {compileUTF8Like} from './like';
 import {float16Values, roundFloat16} from './float16';
 import {physicalKey, extensionKey} from './signature';
-import {evaluateVectorSpans, nullVectorData} from './vector-mask';
+import {evaluateVectorSpans, nullVectorData, selectUnionVectors} from './vector-mask';
 import {ExpressionEvaluationError, isExpressionEvaluationError} from '../expressions';
 import {createFunctionLookup} from './registry';
 import {
@@ -473,8 +473,8 @@ function bindNode(
     const index = options.inputSchema.fields.findIndex(field => field.name === ast.name);
     if (index < 0) throw new Error(`Unknown Arrow expression field: ${ast.name}`);
     const source = options.inputSchema.fields[index]!;
-    const tuple = isTupleType(source.type);
-    if (!vectorInput && !tuple) typeKey(source.type);
+    const vectorOnly = isTupleType(source.type) || DataType.isDenseUnion(source.type);
+    if (!vectorInput && !vectorOnly) typeKey(source.type);
     return {
       field: new Field(
         source.name,
@@ -485,7 +485,7 @@ function bindNode(
       hasKernel: false,
       prepare: batch => {
         const vector = batch.getChildAt(index)!;
-        return vectorInput || tuple ? vectorReader(vector) : sourceReader(vector);
+        return vectorInput || vectorOnly ? vectorReader(vector) : sourceReader(vector);
       }
     };
   }
@@ -553,12 +553,12 @@ function bindNode(
           )
       };
     }
-    if (value === null && isNestedType(type))
+    if (value === null && isVectorResult(type))
       return {
         field: new Field('literal', type, true),
         hasKernel: false,
         prepare: (_batch, active) =>
-          vectorReader(vectorFromArray(Array(active.length).fill(null), type))
+          vectorReader(makeVector(nullVectorData(type, active.length)))
       };
     const fractionalTimestampSecond =
       date &&
@@ -627,7 +627,7 @@ function bindNode(
     }
     const tuple = isTupleType(yes.field.type);
     const list = DataType.isList(yes.field.type);
-    const nested = isNestedType(yes.field.type);
+    const nested = isVectorResult(yes.field.type);
     if (nested) {
       if (physicalKey(yes.field.type) !== physicalKey(no.field.type))
         throw new Error('Arrow expression operand types must match');
@@ -676,6 +676,11 @@ function bindNode(
           validateTupleVector(b.vector!, no.field, noMask);
           return vectorReader(
             selectTupleVectors(field.type, a.vector!, b.vector!, yesMask, validActive)
+          );
+        }
+        if (DataType.isDenseUnion(field.type)) {
+          return vectorReader(
+            selectUnionVectors(field.type, a.vector!, b.vector!, selected!, active, context.failed)
           );
         }
         if (nested) {

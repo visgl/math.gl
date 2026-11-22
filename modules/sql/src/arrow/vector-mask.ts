@@ -38,14 +38,41 @@ export function evaluateVectorSpans(
   evaluate: (span: Vector) => Vector
 ): Vector {
   if (!active.includes(0)) return evaluate(input);
+  return vectorSpans(type, active.length, row => (active[row] ? input : undefined), evaluate);
+}
+
+/** Selects union rows from either branch, preserving the selected child buffers. */
+export function selectUnionVectors(
+  type: DataType,
+  yes: Vector,
+  no: Vector,
+  selected: Uint8Array,
+  active: Uint8Array,
+  failed?: Uint8Array
+): Vector {
+  return vectorSpans(
+    type,
+    active.length,
+    row => (active[row] && !failed?.[row] ? (selected[row] ? yes : no) : undefined),
+    span => span
+  );
+}
+
+/** Combines contiguous spans from a vector callback, using typed nulls for gaps. */
+function vectorSpans(
+  type: DataType,
+  length: number,
+  sourceAt: (row: number) => Vector | undefined,
+  evaluate: (span: Vector) => Vector
+): Vector {
   const chunks: Data[] = [];
-  for (let start = 0; start < active.length; ) {
-    const valid = Boolean(active[start]);
+  for (let start = 0; start < length; ) {
+    const source = sourceAt(start);
     let end = start + 1;
-    while (end < active.length && Boolean(active[end]) === valid) end++;
-    if (valid) chunks.push(...evaluate(input.slice(start, end)).data);
+    while (end < length && sourceAt(end) === source) end++;
+    if (source) chunks.push(...evaluate(source.slice(start, end)).data);
     else chunks.push(nullVectorData(type, end - start));
     start = end;
   }
-  return new Vector(chunks);
+  return new Vector(chunks.length ? chunks : [nullVectorData(type, 0)]);
 }
