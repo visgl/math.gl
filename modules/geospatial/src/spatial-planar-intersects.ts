@@ -49,7 +49,7 @@ function inBounds(p: Position, a: Position, b: Position): boolean {
 }
 
 /** Detects proper crossings, coincident intervals and endpoint contact. */
-function segmentsMeet(a: Position, b: Position, c: Position, d: Position): boolean {
+export function segmentsMeet(a: Position, b: Position, c: Position, d: Position): boolean {
   const cSide = side(a, b, c),
     dSide = side(a, b, d);
   const aSide = side(c, d, a),
