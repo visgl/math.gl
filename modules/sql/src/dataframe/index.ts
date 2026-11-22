@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Table} from 'apache-arrow';
+import {Schema, Struct, Table} from 'apache-arrow';
 import {
+  createRecordBatchWithMetadata,
   getGeoArrowFieldInfo,
+  getRecordBatchMetadata,
   getGeoArrowVectorBounds,
   getGeoArrowVectorRowBounds,
+  mapGeoArrowVectorCoordinates,
   type GeoArrowBounds
 } from '@math.gl/core/arrow';
 import {
@@ -100,6 +103,24 @@ export type GeoDataFrameViewportOptions = {
   wrapLongitude?: boolean;
 };
 
+/** Options for a synchronous horizontal CRS transformation. */
+export type GeoDataFrameCRSOptions = {
+  /** Projection engine with the source and target definitions available synchronously. */
+  engine: {
+    /** Prepares a transform in GeoArrow XY axis order. */
+    createProjection(options?: {
+      from?: string | object;
+      to?: string | object;
+      enforceAxis?: boolean;
+    }): {
+      /** Projects horizontal coordinates synchronously. */
+      projectSync(coordinate: readonly number[]): readonly number[];
+    };
+  };
+  /** Source CRS identifier, WKT, or PROJJSON. Defaults to the field's CRS metadata. */
+  from?: string | object;
+};
+
 /** Cached row envelopes per immutable source table and active field. */
 const rowBoundsByTable = new WeakMap<Table, Map<string, readonly (GeoArrowBounds | null)[]>>();
 
@@ -188,6 +209,84 @@ export class GeoDataFrame extends DataFrame {
     return table === this.table
       ? this
       : new GeoDataFrame(table, {geometry: this.geometry.field.name});
+  }
+
+  /**
+   * Reprojects the active native GeoArrow field to an authority code such as EPSG:4326.
+   * Transforms XY while preserving additional ordinates and sharing other field buffers.
+   */
+  toCRS(to: string, {engine, from}: GeoDataFrameCRSOptions): GeoDataFrame {
+    if (!/^[A-Za-z][A-Za-z0-9_-]*:[A-Za-z0-9_.-]+$/.test(to)) {
+      throw new Error('GeoDataFrame target CRS must be an authority code');
+    }
+    const {field, vector} = this.geometry;
+    const {metadata} = getGeoArrowFieldInfo(field)!;
+    const source = from ?? metadata['crs'];
+    if (
+      !(typeof source === 'string'
+        ? source.trim()
+        : source && typeof source === 'object' && !Array.isArray(source))
+    ) {
+      throw new Error('GeoDataFrame requires source CRS metadata or an explicit from option');
+    }
+    if (source === to && metadata['crs'] === to && metadata['crs_type'] === 'authority_code') {
+      return this;
+    }
+    if (metadata['edges'] === 'spherical') {
+      throw new Error('GeoDataFrame.toCRS requires planar GeoArrow edges');
+    }
+    const transform = engine.createProjection({
+      from: source as string | object,
+      to,
+      enforceAxis: false
+    });
+    const projected = mapGeoArrowVectorCoordinates(
+      vector,
+      (coordinate, row) => {
+        const [x, y] = transform.projectSync(coordinate.slice(0, 2));
+        if (!Number.isFinite(x) || !Number.isFinite(y)) {
+          throw new Error(`Non-finite projected coordinates in GeoArrow row ${row}`);
+        }
+        return [x!, y!, ...coordinate.slice(2)];
+      },
+      {field}
+    );
+
+    const sourceSchema = this.table.schema;
+    const index = sourceSchema.fields.indexOf(field);
+    const fieldMetadata = new Map(field.metadata);
+    fieldMetadata.set(
+      'ARROW:extension:metadata',
+      JSON.stringify({
+        ...metadata,
+        crs: to,
+        crs_type: 'authority_code'
+      })
+    );
+    const fields = [...sourceSchema.fields];
+    fields[index] = field.clone({metadata: fieldMetadata});
+    const schema = new Schema(
+      fields,
+      sourceSchema.metadata,
+      undefined,
+      sourceSchema.metadataVersion
+    );
+    const struct = new Struct(fields);
+    const batches = this.table.batches.map((batch, batchIndex) => {
+      const data = batch.data;
+      const children = [...data.children];
+      children[index] = projected.data[batchIndex]!;
+      const output = data.clone(
+        struct,
+        data.offset,
+        data.length,
+        data.nullCount,
+        data.buffers,
+        children
+      );
+      return createRecordBatchWithMetadata(schema, output, getRecordBatchMetadata(batch));
+    });
+    return this.withTable(new Table(schema, batches));
   }
 
   /**

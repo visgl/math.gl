@@ -14812,6 +14812,7 @@ __metadata:
     "@luma.gl/core": "npm:10.0.0-alpha.14"
     "@luma.gl/engine": "npm:10.0.0-alpha.14"
     "@luma.gl/shaders": "npm:10.0.0-alpha.14"
+    "@math.gl/geospatial": "workspace:*"
     "@math.gl/sql": "workspace:*"
     apache-arrow: "npm:17.0.0"
     vite: "npm:^8.3.6"

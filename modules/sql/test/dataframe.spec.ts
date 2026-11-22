@@ -15,6 +15,10 @@ import {
   vectorFromArray
 } from 'apache-arrow';
 import {DataFrame, GeoDataFrame} from '@math.gl/sql/dataframe';
+import {createProjectionEngine} from '@math.gl/geospatial/projection-core';
+import {projJSONCRSParser} from '@math.gl/geospatial/projection-parsers-projjson';
+import {wgs84GeographicCRS} from '@math.gl/geospatial/crs/test/projjson-fixtures';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 
 /** Two batches with two geometry fields and a non-geometry attribute. */
 function makeTable(): Table {
@@ -246,4 +250,95 @@ test('wrapped and full-world GeoArrow boxes intersect the corresponding periodic
   const options = {wrapLongitude: true};
   expect(frame.filterViewport([-175, 0, -174, 1], options)).toBe(frame);
   expect([...frame.filterViewport([0, 0, 1, 1], options).toArrow().getChild('id')!]).toEqual([2]);
+});
+
+test('toCRS reprojects an active geometry while retaining other fields and batch structure', () => {
+  const engine = createProjectionEngine({projections: [mercator]});
+  const table = makeTable();
+  const start = GeoDataFrame.fromArrow(table, {geometry: 'start'});
+  expect(start.filterViewport([-2, 1, 2, 9]).toArrow().numRows).toBe(2);
+  const projected = start.toCRS('EPSG:3857', {engine, from: 'EPSG:4326'});
+  expect(projected.filterViewport([-2, 1, 2, 9]).toArrow().numRows).toBe(0);
+  const roundTrip = projected.toCRS('EPSG:4326', {engine});
+  const actual = projected.toArrow();
+  const coordinates = projected.geometry.vector.get(0)!.toArray();
+  expect(coordinates[0]).toBeCloseTo(111319.490793, 5);
+  expect(coordinates[1]).toBeCloseTo(222684.208506, 5);
+  expect(roundTrip.geometry.totalBounds()![0]).toBeCloseTo(-1, 9);
+  expect(roundTrip.geometry.totalBounds()![3]).toBeCloseTo(8, 9);
+  expect(projected.geometry.vector.get(1)).toBeNull();
+  expect(actual.batches).toHaveLength(2);
+  expect(actual.schema.metadata).toBe(table.schema.metadata);
+  expect(actual.schema.fields[2]).toBe(table.schema.fields[2]);
+  for (const name of ['id', 'end']) {
+    expect(actual.getChild(name)!.data[1]).toBe(table.getChild(name)!.data[1]);
+  }
+  expect(JSON.parse(projected.geometry.field.metadata.get('ARROW:extension:metadata')!)).toEqual({
+    crs: 'EPSG:3857',
+    crs_type: 'authority_code',
+    edges: 'planar'
+  });
+  expect(start.geometry.totalBounds()).toEqual([-1, 2, 1, 8]);
+  expect(projected.toCRS('EPSG:3857', {engine})).toBe(projected);
+  expect(() => start.toCRS('EPSG:3857', {engine})).toThrow('source CRS');
+  expect(() => projected.toCRS('bogus', {engine})).toThrow('authority code');
+  expect(
+    start
+      .filterViewport([20, 20, 30, 30])
+      .toCRS('EPSG:3857', {
+        engine,
+        from: 'EPSG:4326'
+      })
+      .toArrow().numRows
+  ).toBe(0);
+});
+
+test('toCRS preserves extra ordinates and rejects non-finite transform results', () => {
+  const engine = createProjectionEngine({projections: [mercator]});
+  const type = new FixedSizeList(4, new Field('xyzm', new Float64()));
+  const field = new Field(
+    'point',
+    type,
+    true,
+    new Map([['ARROW:extension:name', 'geoarrow.point']])
+  );
+  const frame = GeoDataFrame.fromArrow(
+    new Table(new Schema([field]), {
+      point: vectorFromArray([[1, 2, 123, 456]], type)
+    })
+  );
+  const output = frame.toCRS('EPSG:3857', {engine, from: 'EPSG:4326'});
+  expect([...output.geometry.vector.get(0)!].slice(2)).toEqual([123, 456]);
+  const invalid = {createProjection: () => ({projectSync: () => [Infinity, 0]})};
+  expect(() => frame.toCRS('EPSG:3857', {engine: invalid, from: 'EPSG:4326'})).toThrow('row 0');
+});
+
+test('toCRS passes structured source metadata to the configured CRS parser', () => {
+  const engine = createProjectionEngine({projections: [mercator], parsers: [projJSONCRSParser]});
+  const type = new FixedSizeList(2, new Field('xy', new Float64()));
+  const metadata = new Map([
+    ['ARROW:extension:name', 'geoarrow.point'],
+    ['ARROW:extension:metadata', JSON.stringify({crs: wgs84GeographicCRS, crs_type: 'projjson'})]
+  ]);
+  const table = new Table(new Schema([new Field('point', type, true, metadata)]), {
+    point: vectorFromArray([[1, 2]], type)
+  });
+  const projected = GeoDataFrame.fromArrow(table).toCRS('EPSG:3857', {engine});
+  expect(projected.geometry.totalBounds()![0]).toBeCloseTo(111319.490793, 5);
+  const sphericalMetadata = new Map(metadata);
+  sphericalMetadata.set(
+    'ARROW:extension:metadata',
+    JSON.stringify({
+      crs: wgs84GeographicCRS,
+      crs_type: 'projjson',
+      edges: 'spherical'
+    })
+  );
+  const spherical = new Table(
+    new Schema([table.schema.fields[0].clone({metadata: sphericalMetadata})]),
+    {
+      point: table.getChild('point')!
+    }
+  );
+  expect(() => GeoDataFrame.fromArrow(spherical).toCRS('EPSG:3857', {engine})).toThrow('planar');
 });
