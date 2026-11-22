@@ -990,6 +990,19 @@ test('clips a native polygon without filling its hole and retains the CRS', () =
   );
 });
 
+test('clipping an unlabeled geometry cannot assign the bounds CRS', () => {
+  const g = wkb('POINT(1 1)');
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    `SELECT ST_ClipByBox2D(g,ST_SetSRID(ST_MakeEnvelope(0,0,2,2),3857)) AS clipped,
+    ST_SRID(ST_ClipByBox2D(g,ST_SetSRID(ST_MakeEnvelope(0,0,2,2),3857))) AS srid
+    FROM features`,
+    table
+  );
+  expect(geometryAt(result, 'clipped', 0)).toEqual(parseWKT('POINT(1 1)'));
+  expect(result.getChild('srid')!.get(0)).toBe(0);
+});
+
 test('box clipping excludes boundary-only points and returns disjoint polygon pieces', () => {
   const g = wkb(
     'MULTIPOINT((0 0),(-0.5 1),(3 3))',

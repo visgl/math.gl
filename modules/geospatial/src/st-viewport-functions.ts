@@ -3,11 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Binary, DataType, Field, Schema, Table, vectorFromArray} from 'apache-arrow';
-import type {TableFunction} from '@math.gl/sql/arrow';
+import type {ScalarFunction, TableFunction} from '@math.gl/sql/arrow';
 import {getGeoArrowFieldInfo, writeWKB} from '@math.gl/core/arrow';
 import {clipGeometryByBox} from './spatial-box-clipping';
 import {subdividePolygons} from './spatial-subdivision';
 import {
+  EXTENSION_METADATA,
   EXTENSION_NAME,
   geometryTypes,
   planarGeometry,
@@ -15,19 +16,35 @@ import {
   spatialFunction
 } from './spatial-sql';
 
+/** Binds the box clip while limiting output metadata to the geometry being clipped. */
+function makeClipFunction(): ScalarFunction {
+  const clip = spatialFunction(
+    'ST_ClipByBox2D',
+    [
+      [...geometryTypes, 'GeometryCollection'],
+      [...geometryTypes, 'GeometryCollection']
+    ],
+    new Binary(),
+    ([geometry, bounds]) => {
+      const clipped = clipGeometryByBox(geometry!, bounds!);
+      return clipped ? writeWKB(clipped, 'xy') : null;
+    }
+  );
+  return {
+    ...clip,
+    /** Clips in place in coordinate space, so the bounds cannot supply a missing CRS. */
+    resolvePrototype(fields) {
+      const prototype = clip.resolvePrototype!(fields);
+      if (!fields[0]?.metadata.has(EXTENSION_METADATA)) {
+        prototype?.result.metadata.delete(EXTENSION_METADATA);
+      }
+      return prototype;
+    }
+  };
+}
+
 /** Clips a geometry to the XY bounds of an envelope in the same coordinate system. */
-export const ST_CLIPBYBOX2D = /* @__PURE__ */ spatialFunction(
-  'ST_ClipByBox2D',
-  [
-    [...geometryTypes, 'GeometryCollection'],
-    [...geometryTypes, 'GeometryCollection']
-  ],
-  /* @__PURE__ */ new Binary(),
-  ([geometry, bounds]) => {
-    const clipped = clipGeometryByBox(geometry!, bounds!);
-    return clipped ? writeWKB(clipped, 'xy') : null;
-  }
-);
+export const ST_CLIPBYBOX2D = /* @__PURE__ */ makeClipFunction();
 
 /** Emits polygon subdivisions through a lateral Arrow SQL join using the default vertex cap. */
 export const ST_SUBDIVIDE: TableFunction = {
