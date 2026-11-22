@@ -58,7 +58,7 @@ type SpatialResult = Int32 | Float64 | Bool | Binary | FixedSizeList<Float64> | 
 /** Native geometry result storage and its row-aligned Arrow vector builder. */
 export type NativeSpatialResult = {
   /** Extension encoding declared on the bound result field. */
-  encoding: 'geoarrow.polygon' | 'geoarrow.multipolygon';
+  encoding: 'geoarrow.polygon' | 'geoarrow.multipolygon' | 'geoarrow.geometry';
   /** Fixed physical Arrow schema for all batches. */
   type: DataType;
   /** Packs decoded geometry rows into native coordinate buffers. */
@@ -67,7 +67,7 @@ export type NativeSpatialResult = {
 
 /** Declares a fixed native polygon layout, including for empty or all-null batches. */
 export function nativePolygonResult(
-  encoding: NativeSpatialResult['encoding']
+  encoding: Exclude<NativeSpatialResult['encoding'], 'geoarrow.geometry'>
 ): NativeSpatialResult {
   const options = {encoding, dimension: 'xy', coordinateLayout: 'interleaved'} as const;
   /** Packs the output rings into GeoArrow list offsets and interleaved XY coordinates. */
@@ -191,11 +191,7 @@ export function spatialFunction<Value extends SpatialValue | WellKnownGeometry>(
           (DataType.isBinary(field.type) || DataType.isLargeBinary(field.type))
         ) {
           // WKB reveals its geometry kind and dimensionality per row.
-        } else if (
-          'encoding' in output &&
-          encoding === 'geoarrow.geometry' &&
-          extension.dimension === 'xy'
-        ) {
+        } else if (encoding === 'geoarrow.geometry' && extension.dimension === 'xy') {
           // Native XY union rows are checked against the input signature during evaluation.
         } else if (kinds.some(kind => encoding === 'geoarrow.' + kind.toLowerCase())) {
           if (!allDimensions && extension?.dimension !== 'xy')

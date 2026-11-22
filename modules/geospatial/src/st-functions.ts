@@ -756,10 +756,10 @@ export const ST_AREA = /* @__PURE__ */ spatialFunction(
   ([geometry]) => planarArea(geometry!)
 );
 
-/** Returns planar linear length, or zero for non-linear input. */
+/** Returns the summed planar length of linear components. */
 export const ST_LENGTH = /* @__PURE__ */ spatialFunction(
   'ST_Length',
-  [geometryTypes],
+  [[...geometryTypes, 'GeometryCollection']],
   /* @__PURE__ */ new Float64(),
   ([geometry]) => planarLength(geometry!)
 );
