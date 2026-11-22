@@ -243,6 +243,8 @@ export class GeoDataFrame extends DataFrame {
     const projected = mapGeoArrowVectorCoordinates(
       vector,
       (coordinate, row) => {
+        // GeoArrow uses an all-NaN tuple for a valid empty point.
+        if (coordinate.every(Number.isNaN)) return coordinate;
         const [x, y] = transform.projectSync(coordinate.slice(0, 2));
         if (!Number.isFinite(x) || !Number.isFinite(y)) {
           throw new Error(`Non-finite projected coordinates in GeoArrow row ${row}`);

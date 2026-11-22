@@ -304,11 +304,18 @@ test('toCRS preserves extra ordinates and rejects non-finite transform results',
   );
   const frame = GeoDataFrame.fromArrow(
     new Table(new Schema([field]), {
-      point: vectorFromArray([[1, 2, 123, 456]], type)
+      point: vectorFromArray(
+        [
+          [1, 2, 123, 456],
+          [NaN, NaN, NaN, NaN]
+        ],
+        type
+      )
     })
   );
   const output = frame.toCRS('EPSG:3857', {engine, from: 'EPSG:4326'});
   expect([...output.geometry.vector.get(0)!].slice(2)).toEqual([123, 456]);
+  expect([...output.geometry.vector.get(1)!]).toEqual([NaN, NaN, NaN, NaN]);
   const invalid = {createProjection: () => ({projectSync: () => [Infinity, 0]})};
   expect(() => frame.toCRS('EPSG:3857', {engine: invalid, from: 'EPSG:4326'})).toThrow('row 0');
 });

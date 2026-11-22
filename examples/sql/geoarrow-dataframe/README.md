@@ -21,9 +21,9 @@ input, DataFrame reprojection at ingestion, and deck.gl rendering code.
 
 | Build | Workspace math.gl bytes | Total JavaScript bytes |
 | --- | ---: | ---: |
-| SQL processor | 413,938 | 1,603,249 |
-| DataFrame processor | 380,591 | 1,569,613 |
-| Combined | 413,938 | 1,603,439 |
+| SQL processor | 413,972 | 1,603,283 |
+| DataFrame processor | 380,625 | 1,569,647 |
+| Combined | 413,972 | 1,603,473 |
 
 For each workspace math.gl source file, the smaller byte contribution across
 the two standalone builds counts toward shared bytes, and the larger toward
