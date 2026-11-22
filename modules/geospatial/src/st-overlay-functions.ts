@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {WellKnownGeometry} from '@math.gl/core/arrow';
+import {writeWKB, type WellKnownGeometry} from '@math.gl/core/arrow';
+import {Binary} from 'apache-arrow';
+import {intersectLinePolygon} from './spatial-line-polygon-intersection';
 import type {AggregateFunction, ScalarFunction} from '@math.gl/sql/arrow';
 import polygonClipping from 'polygon-clipping';
 import {polygonSet} from './spatial-polygon-overlay';
@@ -177,6 +179,11 @@ function polygonOverlay(name: string, operation: typeof polygonClipping.intersec
       return {type: 'MultiPolygon', coordinates: operation(a, b)};
     }
   );
+  return withFirstInputMetadata(spatial);
+}
+
+/** Keeps overlay metadata tied to the first argument in either operand order. */
+function withFirstInputMetadata(spatial: ScalarFunction): ScalarFunction {
   return {
     ...spatial,
     /** Preserves the first input's metadata. Overlay does not assign a missing CRS. */
@@ -190,11 +197,38 @@ function polygonOverlay(name: string, operation: typeof polygonClipping.intersec
   };
 }
 
-/** Returns the shared polygon area as a native GeoArrow MultiPolygon. */
-export const ST_INTERSECTION = /* @__PURE__ */ polygonOverlay(
-  'ST_Intersection',
-  polygonClipping.intersection
-);
+/** Binds polygon overlays or mixed-dimensional line clipping from the Arrow schema. */
+function intersection(): ScalarFunction {
+  const polygons = polygonOverlay('ST_Intersection', polygonClipping.intersection);
+  const linearFirst = spatialFunction(
+    'ST_Intersection',
+    [lineKinds, polygonKinds],
+    new Binary(),
+    ([line, area]) => writeWKB(intersectLinePolygon(line!, area!), 'xy')
+  );
+  const linearSecond = spatialFunction(
+    'ST_Intersection',
+    [polygonKinds, lineKinds],
+    new Binary(),
+    ([area, line]) => writeWKB(intersectLinePolygon(line!, area!), 'xy')
+  );
+  return withFirstInputMetadata({
+    ...polygons,
+    /** A specialized line argument selects mixed-dimensional WKB output before evaluation. */
+    resolvePrototype(fields) {
+      const a = fields[0]?.metadata.get(EXTENSION_NAME);
+      const b = fields[1]?.metadata.get(EXTENSION_NAME);
+      if (a === 'geoarrow.linestring' || a === 'geoarrow.multilinestring')
+        return linearFirst.resolvePrototype!(fields);
+      if (b === 'geoarrow.linestring' || b === 'geoarrow.multilinestring')
+        return linearSecond.resolvePrototype!(fields);
+      return polygons.resolvePrototype!(fields);
+    }
+  });
+}
+
+/** Intersects two areal geometries or clips a native line by a polygon. */
+export const ST_INTERSECTION = /* @__PURE__ */ intersection();
 /** Returns the portion of the first polygonal geometry outside the second. */
 export const ST_DIFFERENCE = /* @__PURE__ */ polygonOverlay(
   'ST_Difference',

@@ -150,6 +150,7 @@ FROM features
 | `ST_Buffer(point, radius)` | Planar Point and finite radius | `geoarrow.polygon` with eight segments per quadrant. Empty points and nonpositive radii return empty polygons. |
 | `ST_Buffer(line, radius)` | Native planar LineString or MultiLineString and finite radius | `geoarrow.multipolygon` with round caps and joins. Empty lines and nonpositive radii return empty multipolygons. |
 | `ST_Intersection(a, b)` | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing shared area. Boundary-only contact returns an empty multipolygon. |
+| `ST_Intersection(line, area)` | Native planar LineString or MultiLineString paired with Polygon or MultiPolygon in either order | WKB containing the retained linework, isolated boundary contacts, or both. Disjoint inputs return an empty geometry collection. |
 | `ST_Difference(a, b)` | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing the portion of the first geometry outside the second. |
 | `ST_Union(a, b)` | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing the combined area of both inputs. |
 | `ST_SymDifference(a, b)` | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing the area covered by exactly one input. Identical inputs yield an empty multipolygon. |
@@ -161,13 +162,19 @@ convert it with `GEOARROW_TO_LINESTRING` or `GEOARROW_TO_MULTILINESTRING` from
 [`@math.gl/sql/geoarrow-functions`](../geoarrow-functions.md) so SQL can bind the
 native multipolygon result schema before reading any rows.
 
-Point buffers and binary overlays accept specialized native encodings, WKB,
+Point buffers and areal overlays accept specialized native encodings, WKB,
 or a native XY dense union (`geoarrow.geometry`) whose selected rows match the
 function signature.
 Outputs use interleaved XY coordinates and retain the first input's CRS
 metadata. Chained expressions pass native Arrow vectors between kernels.
 For streamed inputs, run the projection with `queryArrowTableInBatches`.
 Each output batch uses the same geometry schema, including all-null batches.
+
+For line clipping, use a native line column so SQL can bind the mixed result
+schema before reading rows. Convert WKB routes with `GEOARROW_TO_LINESTRING`
+or `GEOARROW_TO_MULTILINESTRING`. The polygon argument accepts a native column
+or WKB. Retained linework follows input component order, with isolated point
+contacts returned separately when the result contains both dimensions.
 
 ## Dissolve polygons by group
 
