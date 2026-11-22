@@ -132,6 +132,32 @@ a single hole-free polygon when the points span an area. Its ratio runs from
 Delaunay edge-length threshold and preserves all input sites. Equal-length
 edges can admit more than one valid hull.
 
+## Buffer points and compare polygon footprints
+
+Register `ST_BUFFER`, `ST_INTERSECTION`, and `ST_DIFFERENCE` from
+`@math.gl/geospatial/st-overlay-functions`. Use a projected CRS so the
+buffer radius is in the desired coordinate units.
+
+```sql
+SELECT id,
+       ST_Intersection(ST_Buffer(sensor, 250), parcels) AS covered,
+       ST_Difference(parcels, ST_Buffer(sensor, 250)) AS uncovered
+FROM features
+```
+
+| Function | Supported input | Native GeoArrow output |
+| --- | --- | --- |
+| `ST_Buffer(point, radius)` | Planar Point and finite radius | `geoarrow.polygon` with eight segments per quadrant. Empty points and nonpositive radii return empty polygons. |
+| `ST_Intersection(a, b)` | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing shared area. Boundary-only contact returns an empty multipolygon. |
+| `ST_Difference(a, b)` | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing the portion of the first geometry outside the second. |
+
+Inputs can use specialized native encodings, WKB, or a native XY dense union
+(`geoarrow.geometry`) whose selected rows match the function signature.
+Outputs use interleaved XY coordinates and retain the first input's CRS
+metadata. Chained expressions pass native Arrow vectors between kernels.
+For streamed inputs, run the projection with `queryArrowTableInBatches`.
+Each output batch uses the same geometry schema, including all-null batches.
+
 ## PostGIS geometry signatures
 
 These functions use 2D Cartesian coordinates. Use coordinates in a suitable
