@@ -27,6 +27,7 @@ points can be used without Arrow; it is an optional peer dependency for those us
 | `@math.gl/sql/arrow` | [Compile expressions and predicates](arrow/README.md) against an Arrow schema for reuse across batches. |
 | `@math.gl/sql/worker` | Run structured queries and expressions [off the calling thread](worker.md). |
 | `@math.gl/sql/math-functions` | Register [numeric SQL functions](math-functions/README.md) such as `SIN` and `SQRT`. |
+| `@math.gl/sql/geoarrow-functions` | Register [GeoArrow conversions](geoarrow-functions.md) for WKB, specialized native arrays, and dense unions. |
 | `@math.gl/sql/color-functions` | Register [color functions](color-functions/README.md) for construction, conversion, and mapping. |
 | `@math.gl/sql/scales` | [Resolve domains and evaluate scales](scales/README.md) on Arrow columns. |
 

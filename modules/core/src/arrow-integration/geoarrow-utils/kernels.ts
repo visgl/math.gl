@@ -14,7 +14,7 @@ import type {
   GeoArrowEncoding
 } from './types';
 import {getGeoArrowDimensionSize, getGeoArrowGeometryType} from './types';
-import type {GeoArrowBuilderEncoding} from './builder';
+import type {GeoArrowBuilderEncoding, GeoArrowBuilderOptions} from './builder';
 import {GeoArrowBuilder} from './builder';
 import {encodeGeoArrowWKB, encodeGeoArrowWKT} from './codecs';
 import {
@@ -321,6 +321,15 @@ export function convertGeoArrowColumn(
           chunks: serialized.chunks.map(chunk => convertArrayOffsets(chunk, requestedOffsetType))
         };
   }
+  if (column.encoding === 'geoarrow.geometry' && isConcreteEncoding(encoding)) {
+    return demoteDenseUnion(column, {
+      encoding,
+      dimension,
+      coordinateLayout: coordinateLayout || 'interleaved',
+      coordinateType: options.coordinateType === 'float32' ? 'float32' : 'float64',
+      offsetType: requestedOffsetType === 'preserve' ? currentOffsetType : requestedOffsetType
+    });
+  }
   const needsCoordinateMap =
     dimension !== column.dimension ||
     coordinateLayout !== column.coordinateLayout ||
@@ -358,7 +367,6 @@ export function convertGeoArrowColumn(
   if (encoding === 'geoarrow.geometry') return promoteToDenseUnion(offsetConverted);
   const promoted = promoteSingleFamily(offsetConverted, encoding, requestedOffsetType);
   if (promoted) return promoted;
-  if (column.encoding === 'geoarrow.geometry') return demoteDenseUnion(offsetConverted, encoding);
   throw new Error(`Rows cannot be represented as ${encoding}`);
 }
 
@@ -1004,15 +1012,12 @@ function promoteToDenseUnion(column: GeoArrowColumn): GeoArrowColumn {
   return {...column, encoding: 'geoarrow.geometry', chunks};
 }
 
-function demoteDenseUnion(column: GeoArrowColumn, encoding: GeoArrowEncoding): GeoArrowColumn {
-  if (encoding === 'geoarrow.geometry' || encoding === 'geoarrow.geometrycollection') return column;
-  if (!isConcreteEncoding(encoding)) throw new Error(`Rows cannot be represented as ${encoding}`);
-  const builderOptions = {
-    encoding,
-    dimension: column.dimension,
-    coordinateLayout: column.coordinateLayout || 'interleaved',
-    offsetType: getColumnOffsetType(column)
-  } as const;
+/** Replays the selected child rows directly into the final specialized storage. */
+function demoteDenseUnion(
+  column: GeoArrowColumn,
+  builderOptions: GeoArrowBuilderOptions
+): GeoArrowColumn {
+  const {encoding} = builderOptions;
   const chunks = column.chunks.map(chunk => {
     if (chunk.kind !== 'dense-union') throw new Error('Expected dense-union storage');
     const replay = (builder: GeoArrowBuilder): void => {
@@ -1054,7 +1059,13 @@ function demoteDenseUnion(column: GeoArrowColumn, encoding: GeoArrowEncoding): G
     replay(write);
     return write.finish().chunks[0];
   });
-  return {...column, encoding, coordinateLayout: builderOptions.coordinateLayout, chunks};
+  return {
+    ...column,
+    encoding,
+    dimension: builderOptions.dimension ?? column.dimension,
+    coordinateLayout: builderOptions.coordinateLayout ?? 'interleaved',
+    chunks
+  };
 }
 
 function replayPhysicalGeometryIntoBuilder(

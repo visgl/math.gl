@@ -254,6 +254,7 @@ const entryPoints = {
   "@math.gl/geospatial/web-mercator": [
     "WebMercatorViewport"
   ],
+  "@math.gl/sql/geoarrow-functions": ["createGeoArrowConversionFunctions"],
   "@math.gl/sql/query": [
     "compileArrowAggregates",
     "queryArrowAggregateSnapshots",
