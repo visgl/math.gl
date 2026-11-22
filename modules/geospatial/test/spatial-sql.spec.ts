@@ -887,3 +887,71 @@ test('native envelopes retain empty types and extent honors sliced and filtered 
   const extent = select('SELECT ST_Extent(g) AS box FROM features WHERE id < 4', sliced);
   expect(Array.from(extent.getChild('box')!.get(0))).toEqual([2, 3, 2, 8]);
 });
+
+test('snaps to the nearest route segment with argument-order and radius semantics', () => {
+  const l = wkb(
+    'LINESTRING(0 0,3 0,3 0,3 7)',
+    'LINESTRING(0 0,10 10)',
+    'LINESTRING(1 2,1 2)',
+    'LINESTRING EMPTY',
+    'LINESTRING(0 0,3 0,3 7)',
+    null
+  );
+  const p = wkb(
+    'POINT(5 3)',
+    'POINT(3 3)',
+    'POINT(4 6)',
+    'POINT(1 1)',
+    'POINT EMPTY',
+    'POINT(1 1)'
+  );
+  const table = new Table(new Schema([geometryField('l', l), geometryField('p', p)]), {l, p});
+  const result = select(
+    `SELECT ST_ClosestPoint(l,p) AS snap, ST_ClosestPoint(p,l) AS observation,
+    ST_ShortestLine(l,p) AS gap, ST_ShortestLine(p,l) AS reverse_gap,
+    ST_DWithin(l,p,2) AS nearby, ST_DWithin(p,l,0) AS on_route,
+    ST_LineLocatePoint(l,p) AS fraction FROM features`,
+    table
+  );
+  expect(geometryAt(result, 'snap', 0)).toEqual(parseWKT('POINT(3 3)'));
+  expect(geometryAt(result, 'observation', 0)).toEqual(parseWKT('POINT(5 3)'));
+  expect(geometryAt(result, 'gap', 0)).toEqual(parseWKT('LINESTRING(3 3,5 3)'));
+  expect(geometryAt(result, 'reverse_gap', 0)).toEqual(parseWKT('LINESTRING(5 3,3 3)'));
+  expect(geometryAt(result, 'gap', 1)).toEqual(parseWKT('LINESTRING(3 3,3 3)'));
+  expect(geometryAt(result, 'snap', 2)).toEqual(parseWKT('POINT(1 2)'));
+  for (const row of [3, 4, 5]) {
+    expect(geometryAt(result, 'snap', row)).toBeNull();
+    expect(geometryAt(result, 'gap', row)).toBeNull();
+  }
+  expect([...result.getChild('nearby')!]).toEqual([true, true, false, false, false, null]);
+  expect([...result.getChild('on_route')!]).toEqual([false, true, false, false, false, null]);
+  expect(result.getChild('fraction')!.get(0)).toBe(0.6);
+  expect(result.getChild('fraction')!.get(2)).toBe(0);
+  expect(() => select('SELECT ST_ShortestLine(l,l) FROM features', table)).toThrow(/Point/);
+});
+
+test('snaps native GeoArrow points to endpoints and resolves ties in route order', () => {
+  const l = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows([
+      parseWKT('LINESTRING(0 0,4 0,4 4)'),
+      parseWKT('LINESTRING(0 0,4 0)')
+    ])
+  );
+  const p = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows([parseWKT('POINT(2 2)'), parseWKT('POINT(6 1)')])
+  );
+  const metadata = {crs: 'EPSG:3857', crs_type: 'authority_code'};
+  const table = new Table(
+    new Schema([
+      geometryField('l', l, 'linestring', metadata),
+      geometryField('p', p, 'point', metadata)
+    ]),
+    {l, p}
+  );
+  const result = select('SELECT ST_ClosestPoint(l,p) AS snap FROM features', table);
+  expect(geometryAt(result, 'snap', 0)).toEqual(parseWKT('POINT(2 0)'));
+  expect(geometryAt(result, 'snap', 1)).toEqual(parseWKT('POINT(4 0)'));
+  expect(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')).toBe(
+    JSON.stringify(metadata)
+  );
+});
