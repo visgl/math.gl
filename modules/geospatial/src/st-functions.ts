@@ -26,6 +26,7 @@ import {
   type WellKnownGeometry
 } from '@math.gl/core/arrow';
 import {planarIntersects} from './spatial-planar-intersects';
+import {linesWithinDistance, pointWithinPolygonDistance} from './spatial-dwithin';
 import {lineLocatePoint, lineSubstring, projectPointToLine} from './linear-referencing';
 import {addMeasure, locateAlong, locateBetween, measuredDimension} from './measure-referencing';
 import {normalizeCRSIdentifier} from './crs/crs-identifier';
@@ -408,18 +409,65 @@ export const ST_SHORTESTLINE = /* @__PURE__ */ spatialFunction(
   }
 );
 
+/** Geometry kinds accepted by the supported proximity pairings. */
+const proximityKinds = [...pointKinds, ...lineKinds, ...polygonKinds];
+
+/** Dispatches to the exact planar kernel for the two input geometry types. */
+function withinDistance(a: WellKnownGeometry, b: WellKnownGeometry, radius: number): boolean {
+  if (radius < 0) throw new Error('ST_DWithin distance must be nonnegative');
+  if (Number.isNaN(radius)) return false;
+  if (a.type === 'Point' && (b.type === 'Polygon' || b.type === 'MultiPolygon'))
+    return pointWithinPolygonDistance(a, b, radius);
+  if (b.type === 'Point' && (a.type === 'Polygon' || a.type === 'MultiPolygon'))
+    return pointWithinPolygonDistance(b, a, radius);
+  if (
+    (a.type === 'LineString' || a.type === 'MultiLineString') &&
+    (b.type === 'LineString' || b.type === 'MultiLineString')
+  )
+    return linesWithinDistance(a, b, radius);
+  if (
+    (a.type === 'Point' && (b.type === 'Point' || b.type === 'LineString')) ||
+    (b.type === 'Point' && a.type === 'LineString')
+  ) {
+    const pair = closestPair(a, b);
+    return pair !== null && pair.distance <= radius;
+  }
+  throw new Error(`ST_DWithin does not support ${a.type} and ${b.type}`);
+}
+
+/** Binds supported combinations when both input encodings identify their geometry kinds. */
+function makeDWithin(): ScalarFunction {
+  const spatial = spatialFunction(
+    'ST_DWithin',
+    [proximityKinds, proximityKinds],
+    new Bool(),
+    ([a, b], radius) => withinDistance(a!, b!, radius!),
+    1
+  );
+  return {
+    ...spatial,
+    /** Checks concrete native pairs at binding; WKB pairs are checked per row. */
+    resolvePrototype(fields) {
+      const result = spatial.resolvePrototype!(fields);
+      const a = fields[0]?.metadata.get(EXTENSION_NAME);
+      const b = fields[1]?.metadata.get(EXTENSION_NAME);
+      if (result && a && b && a !== 'geoarrow.wkb' && b !== 'geoarrow.wkb') {
+        /** Identifies either concrete native line encoding. */
+        const linear = (encoding: string) =>
+          encoding === 'geoarrow.linestring' || encoding === 'geoarrow.multilinestring';
+        const pointPair =
+          (a === 'geoarrow.point' && b !== 'geoarrow.multilinestring') ||
+          (b === 'geoarrow.point' && a !== 'geoarrow.multilinestring');
+        if (!pointPair && !(linear(a) && linear(b)))
+          throw new Error(`ST_DWithin does not support ${a} and ${b}`);
+      }
+      return result;
+    }
+  };
+}
+
 /** Tests an inclusive planar radius in the coordinate units of the geometries. */
-export const ST_DWITHIN = /* @__PURE__ */ spatialFunction(
-  'ST_DWithin',
-  [routePointKinds, routePointKinds],
-  /* @__PURE__ */ new Bool(),
-  ([a, b], radius) => {
-    if (radius! < 0) throw new Error('ST_DWithin distance must be nonnegative');
-    const pair = closestPair(a!, b!);
-    return pair !== null && pair.distance <= radius!;
-  },
-  1
-);
+export const ST_DWITHIN = /* @__PURE__ */ makeDWithin();
 
 /** Tests whether two planar geometries share any point, including their boundaries. */
 export const ST_INTERSECTS = /* @__PURE__ */ spatialFunction(

@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
+import {distanceToPlanarSegment} from './spatial-planar';
 
 /** One vertex in planar XY coordinates. */
 type Position = readonly number[];
@@ -25,19 +26,6 @@ function removeRepeated(path: Path, tolerance: number): Path {
   return kept;
 }
 
-/** Measures the distance to a finite segment, including its endpoints. */
-function distanceToSegment(p: Position, a: Position, b: Position): number {
-  const dx = b[0]! - a[0]!,
-    dy = b[1]! - a[1]!;
-  const length = Math.hypot(dx, dy);
-  const px = p[0]! - a[0]!,
-    py = p[1]! - a[1]!;
-  const t = length
-    ? Math.max(0, Math.min(1, (px * (dx / length) + py * (dy / length)) / length))
-    : 0;
-  return Math.hypot(px - t * dx, py - t * dy);
-}
-
 /** Iterative Douglas-Peucker simplification of a single planar line. */
 export function simplifyLine(path: Path, tolerance: number): Path {
   if (!path.length) return path;
@@ -51,7 +39,7 @@ export function simplifyLine(path: Path, tolerance: number): Path {
     let split = start,
       maximum = tolerance;
     for (let i = start + 1; i < end; i++) {
-      const distance = distanceToSegment(path[i]!, path[start]!, path[end]!);
+      const distance = distanceToPlanarSegment(path[i]!, path[start]!, path[end]!);
       if (distance > maximum) {
         maximum = distance;
         split = i;
