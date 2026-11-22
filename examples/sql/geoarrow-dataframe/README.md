@@ -4,7 +4,10 @@ Run `yarn workspace math.gl-geoarrow-dataframe start` from the repository root.
 The map draws a deterministic 20,000-row GeoArrow point table using deck.gl
 binary position attributes. The input points are stored in EPSG:3857 meters
 on both sides of the antimeridian. The app uses `GeoDataFrame.toCRS` once to
-prepare EPSG:4326 coordinates for deck.gl and shows the reprojection time. Pan or zoom
+prepare EPSG:4326 coordinates for deck.gl. It joins the points to two polygons,
+one on each side of the antimeridian, using `sjoin` and `ST_WITHIN`.
+The joined region controls the point color and appears when you click a point.
+The app shows the time for reprojection and the join. Pan or zoom
 to update the viewport, change the minimum score, switch processing APIs,
 or click a point to see its stable ID. The DataFrame processor reuses cached
 geometry envelopes across viewport changes. The SQL processor tests the same
@@ -17,17 +20,18 @@ Run `yarn workspace math.gl-geoarrow-dataframe measure`. The script bundles
 the same browser app three times with esbuild and production minification.
 The SQL and DataFrame variants each use a single viewport and attribute
 processor. The combined build includes both. All three builds share projected
-input, DataFrame reprojection at ingestion, and deck.gl rendering code.
+input, DataFrame reprojection and region assignment at ingestion, and
+deck.gl rendering code.
 
 | Build | Workspace math.gl bytes | Total JavaScript bytes |
 | --- | ---: | ---: |
-| SQL processor | 413,972 | 1,603,283 |
-| DataFrame processor | 380,625 | 1,569,647 |
-| Combined | 413,972 | 1,603,473 |
+| SQL processor | 452,056 | 1,646,283 |
+| DataFrame processor | 417,951 | 1,611,881 |
+| Combined | 452,056 | 1,646,473 |
 
 For each workspace math.gl source file, the smaller byte contribution across
 the two standalone builds counts toward shared bytes, and the larger toward
-the union. The resulting **91.9% overlap** exceeds 90% for this workload. With
+the union. The resulting **92.5% overlap** exceeds 90% for this workload. With
 DataFrame already used at ingestion, adding the DataFrame processing mode
 adds **0 workspace math.gl bytes** and 190 bytes of total JavaScript.
 

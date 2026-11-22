@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {writeWKB} from '@math.gl/core/arrow';
 import {expect, test} from 'vitest';
 import {
+  Binary,
   Field,
   FixedSizeList,
   Float64,
@@ -18,6 +20,7 @@ import {DataFrame, GeoDataFrame} from '@math.gl/sql/dataframe';
 import {createProjectionEngine} from '@math.gl/geospatial/projection-core';
 import {projJSONCRSParser} from '@math.gl/geospatial/projection-parsers-projjson';
 import {wgs84GeographicCRS} from '@math.gl/geospatial/crs/test/projjson-fixtures';
+import {ST_COVEREDBY, ST_WITHIN} from '@math.gl/geospatial/st-functions';
 import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 
 /** Two batches with two geometry fields and a non-geometry attribute. */
@@ -348,4 +351,78 @@ test('toCRS passes structured source metadata to the configured CRS parser', () 
     }
   );
   expect(() => GeoDataFrame.fromArrow(spherical).toCRS('EPSG:3857', {engine})).toThrow('planar');
+});
+
+test('sjoin refines indexed candidates, preserves pair order, and retains both field schemas', () => {
+  const points = makeTable();
+  const frame = GeoDataFrame.fromArrow(points, {geometry: 'end'});
+  const xy = new FixedSizeList(2, new Field('xy', new Float64()));
+  const polygon = new List(new Field('rings', new List(new Field('vertices', xy))));
+  const field = new Field(
+    'geometry',
+    polygon,
+    true,
+    new Map([['ARROW:extension:name', 'geoarrow.polygon']])
+  );
+  const outer = [
+    [2, 3],
+    [7, 3],
+    [7, 9],
+    [2, 9],
+    [2, 3]
+  ];
+  const hole = [
+    [4, 5],
+    [4, 7],
+    [6, 7],
+    [6, 5],
+    [4, 5]
+  ];
+  const schema = new Schema([new Field('id', new Int32()), field]);
+  const regions = new Table(schema, {
+    id: vectorFromArray([10, 20, 30], new Int32()),
+    geometry: vectorFromArray([[outer, hole], [outer], null], polygon)
+  });
+  const right = GeoDataFrame.fromArrow(regions);
+  const within = frame.sjoin(right, {predicate: ST_WITHIN});
+  expect([...within.toArrow().getChild('id')!]).toEqual([1, 1, 2]);
+  expect([...within.toArrow().getChild('right.id')!]).toEqual([10, 20, 20]);
+  expect(within.geometry.field).toBe(frame.geometry.field);
+  expect(within.toArrow().schema.metadata).toBe(points.schema.metadata);
+  expect(within.setGeometry('right.geometry').geometry.field.metadata).toEqual(field.metadata);
+  const covered = frame.sjoin(right, {predicate: ST_COVEREDBY, rightPrefix: 'region_'});
+  expect([...covered.toArrow().getChild('id')!]).toEqual([1, 1, 2, 3, 3]);
+  expect([...covered.toArrow().getChild('region_id')!]).toEqual([10, 20, 20, 10, 20]);
+  const empty = frame.filterViewport([20, 20, 30, 30]).sjoin(right, {predicate: ST_WITHIN});
+  expect(empty.toArrow().numRows).toBe(0);
+  expect(empty.geometry.field.name).toBe('end');
+  expect(() => frame.sjoin(right, {predicate: ST_WITHIN, rightPrefix: ''})).toThrow('Duplicate');
+  expect(() =>
+    frame.sjoin(right, {
+      predicate: {...ST_WITHIN, name: 'ST_Disjoint'}
+    })
+  ).toThrow('Unsupported');
+  expect(() =>
+    frame.sjoin(right, {
+      predicate: {...ST_WITHIN, resolvePrototype: () => undefined}
+    })
+  ).toThrow('Cannot bind');
+  expect(() => right.sjoin(frame, {predicate: ST_WITHIN})).toThrow('requires GeoArrow Point');
+  expect(() => frame.sjoin(right, {predicate: ST_WITHIN, signal: AbortSignal.abort()})).toThrow();
+});
+
+test('sjoin rejects serialized WKB before consulting native row bounds', () => {
+  const field = new Field(
+    'geometry',
+    new Binary(),
+    true,
+    new Map([['ARROW:extension:name', 'geoarrow.wkb']])
+  );
+  const table = new Table(new Schema([field]), {
+    geometry: vectorFromArray([writeWKB({type: 'Point', coordinates: [3, 4]})], field.type)
+  });
+  const serialized = GeoDataFrame.fromArrow(table);
+  const native = GeoDataFrame.fromArrow(makeTable(), {geometry: 'end'});
+  expect(() => serialized.sjoin(native, {predicate: ST_WITHIN})).toThrow('native GeoArrow');
+  expect(() => native.sjoin(serialized, {predicate: ST_WITHIN})).toThrow('native GeoArrow');
 });

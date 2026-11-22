@@ -62,13 +62,7 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
   const right = join.table;
   const {vector: leftKey} = getScalarColumn(left, join.left);
   const {vector: rightKey} = getScalarColumn(right, join.right);
-  const fields = [
-    ...left.schema.fields,
-    ...right.schema.fields.map(field => field.clone({name: join.rightPrefix + field.name}))
-  ];
-  if (new Set(fields.map(field => field.name)).size !== fields.length)
-    throw new Error('Duplicate Arrow join output name');
-  const schema = new Schema(fields, left.schema.metadata, undefined, left.schema.metadataVersion);
+  const schema = makeArrowJoinSchema(left, right, join.rightPrefix);
 
   const rightRows = new Map<ArrowExpressionValue, number[]>();
   for (let row = 0; row < right.numRows; row++) {
@@ -89,6 +83,28 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
       rightIndexes.push(match);
     }
   }
+  return gatherArrowJoin(left, right, leftIndexes, rightIndexes, schema);
+}
+
+/** Builds the relational join schema and validates right prefix collisions. */
+export function makeArrowJoinSchema(left: Table, right: Table, rightPrefix: string): Schema {
+  const fields = [
+    ...left.schema.fields,
+    ...right.schema.fields.map(field => field.clone({name: rightPrefix + field.name}))
+  ];
+  if (new Set(fields.map(field => field.name)).size !== fields.length)
+    throw new Error('Duplicate Arrow join output name');
+  return new Schema(fields, left.schema.metadata, undefined, left.schema.metadataVersion);
+}
+
+/** Materializes aligned row pairs with the relational join's output schema. */
+export function gatherArrowJoin(
+  left: Table,
+  right: Table,
+  leftIndexes: readonly number[],
+  rightIndexes: readonly number[],
+  schema: Schema
+): Table {
   if (!leftIndexes.length) return new Table(schema, []);
 
   const tables = [
@@ -100,7 +116,7 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
   );
   return new Table(
     schema,
-    Object.fromEntries(fields.map((field, index) => [field.name, columns[index]!]))
+    Object.fromEntries(schema.fields.map((field, index) => [field.name, columns[index]!]))
   );
 }
 
