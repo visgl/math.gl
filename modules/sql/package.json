@@ -66,6 +66,11 @@
       "types": "./dist/color-functions/index.d.ts",
       "import": "./dist/color-functions/index.js",
       "require": "./dist/color-functions/index.cjs"
+    },
+    "./dataframe": {
+      "types": "./dist/dataframe/index.d.ts",
+      "import": "./dist/dataframe/index.js",
+      "require": "./dist/dataframe/index.cjs"
     }
   },
   "sideEffects": [

@@ -21,6 +21,7 @@ points can be used without Arrow; it is an optional peer dependency for those us
 | Import path | Use it to |
 | --- | --- |
 | `@math.gl/sql/query` | Run [queries over Arrow tables](query.md), compute columns, or aggregate record batches. |
+| `@math.gl/sql/dataframe` | Wrap Arrow tables with the experimental DataFrame API and select an active GeoArrow field. |
 | `@math.gl/sql/parser` | [Parse SQL](parser/README.md) into expressions, predicates, or queries without executing it. |
 | `@math.gl/sql/expressions` | [Evaluate portable expressions](expressions.md) against JavaScript objects. |
 | `@math.gl/sql/arrow` | [Compile expressions and predicates](arrow/README.md) against an Arrow schema for reuse across batches. |
@@ -130,3 +131,21 @@ Streaming queries do not make joins, sorting, or arbitrary relational SQL increm
 The synchronous engine checks cancellation during execution, but a worker is needed to keep
 long-running work off the UI thread. Registered functions run application code; evaluation
 is not a security sandbox.
+
+## Work with an Arrow data frame
+
+```ts
+import {GeoDataFrame} from '@math.gl/sql/dataframe';
+
+const parcels = GeoDataFrame.fromArrow(table, {geometry: 'boundary'});
+const bounds = parcels.geometry.totalBounds();
+const labels = parcels.select('parcel_id', 'label_point').toArrow();
+```
+
+`DataFrame.fromArrow(table)` wraps any Arrow table. `GeoDataFrame.fromArrow`
+infers the active field when the schema has exactly one GeoArrow field.
+Use `setGeometry(name)` to create a frame with a different active field on
+the same table. Null and empty geometries contribute no coordinates to
+`totalBounds()`, which returns null when the active vector has no coordinates.
+`select(...names)` returns a plain frame with the requested columns and
+shares their buffers. `toArrow()` returns the wrapped table.

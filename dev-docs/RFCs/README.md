@@ -17,6 +17,7 @@ Writeups of directions in major areas of interest
 | --- | --- | --- |
 | [Core package consolidation](./core-package-consolidation-rfc.md) | Draft | Move Arrow into core, retain tasks separately, move Web Mercator into geospatial, and organize flat core subpaths |
 | [TaskRunner API](./task-runner-rfc.md) | Draft / prototype | Typed tasks, atomic and streaming execution, and automatic or explicit state lifetimes |
+| [Arrow DataFrame and GeoDataFrame](./arrow-dataframe-rfc.md) | Draft / prototype | Arrow table operations and active geometry backed by shared SQL and GeoArrow kernels |
 
 ## v3.0 RFCs
 
