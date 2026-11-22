@@ -59,6 +59,39 @@ FROM observations
 The radius is in the projected CRS's coordinate units. For a route with equally
 close candidates, the first along the route is selected.
 
+## Clip features to a tile or viewport
+
+Register `ST_CLIPBYBOX2D` from `@math.gl/geospatial/st-viewport-functions`.
+Use the XY bounds of a geometry as the clipping rectangle. For example, if
+`geom` is in EPSG:3857, clip it to a Web Mercator tile for a local Arrow-backed
+tile layer. Use `ST_MakeEnvelope` with viewport bounds for an untiled layer.
+
+```sql
+SELECT id, ST_ClipByBox2D(geom, ST_TileEnvelope(11, 327, 791)) AS geom
+FROM features
+```
+
+Clipping can change a LineString or Polygon into its multipart type when the
+rectangle leaves disjoint pieces. Features outside the box produce an empty
+GeometryCollection. Features that lie only on the boundary are excluded. Keep the original feature ID for picking.
+
+## Subdivide large polygons for rendering
+
+Register `ST_SUBDIVIDE` from `@math.gl/geospatial/st-viewport-functions` in the query's
+`functions` list. The lateral table function accepts a polygon or multipolygon
+column and returns one WKB Polygon per part, with at most 256 vertices including
+ring closures. The input CRS and parent feature ID are available on each part.
+
+```sql
+SELECT f.id, p.geometry
+FROM features AS f
+CROSS JOIN LATERAL ST_Subdivide(f.geom) AS p(geometry)
+```
+
+Null and empty geometries emit zero parts. Use `LEFT JOIN LATERAL ... ON TRUE`
+to retain those parent rows. The SQL signature takes one column and uses the
+default vertex limit.
+
 ## PostGIS geometry signatures
 
 These functions use 2D Cartesian coordinates. Use coordinates in a suitable
@@ -88,6 +121,7 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_Transform(g, srid)` | 2D planar geometry and constant target EPSG code | Reprojects between 4326 (longitude, latitude) and 3857 (meters). Forward projection accepts the Web Mercator tile latitude range (about ±85.0511°). |
 | `ST_Azimuth(a, b)` | Two Points | Float64 radians clockwise from positive Y in `[0, 2π)`. Coincident and empty points yield null. |
 | `ST_MakePoint(x, y [, z [, m]])` | Integer or floating-point ordinates | GeoArrow WKB Point with XY, XYZ, or XYZM coordinates and unknown CRS. Use XY with the 2D predicates and measurements. |
+| `ST_ClipByBox2D(geometry, bounds)` | 2D geometry and a geometry whose XY extent supplies the clipping rectangle | Clipped WKB, with the input CRS. Excludes boundary-only points and line segments. Empty bounds yield null. |
 | `ST_TileEnvelope(z, x, y [, bounds [, margin]])` | XYZ indices (zoom 0–31), optional root geometry and fractional margin | WKB Polygon. Defaults to EPSG:3857. Custom root bounds supply the output CRS. Positive margins expand the tile and negative margins shrink it. |
 | `ST_Area(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar polygon area with holes subtracted. Empty and non-areal inputs yield zero. |
 | `ST_LineInterpolatePoint(line, fraction)` | 2D LineString and fraction in [0, 1] | GeoArrow WKB Point at the given fraction of route length. |

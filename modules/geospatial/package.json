@@ -562,6 +562,11 @@
       "import": "./dist/turf.js",
       "require": "./dist/turf.cjs"
     },
+    "./st-viewport-functions": {
+      "types": "./dist/st-viewport-functions.d.ts",
+      "import": "./dist/st-viewport-functions.js",
+      "require": "./dist/st-viewport-functions.cjs"
+    },
     "./st-functions": {
       "types": "./dist/st-functions.d.ts",
       "import": "./dist/st-functions.js",
