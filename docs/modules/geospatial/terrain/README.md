@@ -1933,7 +1933,12 @@ is 0.00001. Use a well-conditioned Cartesian frame.
 The **Rotating collider replay** in Terrain Sampling shows the two-patch seam,
 a grazing orbit and an axis-aligned box starting pose. The independent
 `rotating-round-contacts.json` fixture gives analytical plane contact times
-and exercises shared edges, grazing and exhausted work.
+and exercises shared edges, grazing and exhausted work. An additional
+analytical orbit places first contact at an independently indexed 2:1 seam
+and checks the impact interval and terrain witness in both patch orders.
+The cases include a missing strip under the low point of the orbit, a
+near-clearance miss, and a shallow crossing that reports `incomplete`
+when the subdivision tolerance cannot certify a hit.
 
 The CPU parity fixture in
 `modules/geospatial/test/terrain/fixtures/rotational-sweep-parity.json`
