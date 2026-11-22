@@ -26,7 +26,7 @@ import {
   type WellKnownGeometry
 } from '@math.gl/core/arrow';
 import {planarIntersects} from './spatial-planar-intersects';
-import {lineLocatePoint, lineSubstring} from './linear-referencing';
+import {lineLocatePoint, lineSubstring, projectPointToLine} from './linear-referencing';
 import {normalizeCRSIdentifier} from './crs/crs-identifier';
 import {EPSG3857ToLngLat, EPSG4326ToEPSG3857} from './web-mercator/mercator-meters';
 import {vertexCount, memberCount, geometryMember} from './geometry-inspection';
@@ -359,16 +359,61 @@ export const ST_DISTANCE = /* @__PURE__ */ spatialFunction(
   }
 );
 
-/** Tests an inclusive planar radius in the coordinate units of two points. */
+/** Geometry arguments supported by the route-snapping functions. */
+const routePointKinds = ['Point', 'LineString'] as const;
+
+/** Returns the closest pair in argument order for point/point and point/line inputs. */
+function closestPair(a: WellKnownGeometry, b: WellKnownGeometry) {
+  if (a.type === 'LineString' && b.type === 'LineString') {
+    throw new Error('Route snapping requires at least one Point');
+  }
+  if (a.type === 'LineString' || b.type === 'LineString') {
+    const lineFirst = a.type === 'LineString';
+    const point = lineFirst ? b : a;
+    const xy = pointCoordinates(point);
+    const projection = projectPointToLine(lineFirst ? a : b, point);
+    if (!xy || !projection) return null;
+    const {coordinate, distance} = projection;
+    return {start: lineFirst ? coordinate : xy, end: lineFirst ? xy : coordinate, distance};
+  }
+  const start = pointCoordinates(a);
+  const end = pointCoordinates(b);
+  return start && end
+    ? {start, end, distance: Math.hypot(end[0]! - start[0]!, end[1]! - start[1]!)}
+    : null;
+}
+
+/** Returns the closest point on the first geometry as GeoArrow WKB. */
+export const ST_CLOSESTPOINT = /* @__PURE__ */ spatialFunction(
+  'ST_ClosestPoint',
+  [routePointKinds, routePointKinds],
+  /* @__PURE__ */ new Binary(),
+  ([a, b]) => {
+    const pair = closestPair(a!, b!);
+    return pair ? writeWKB({type: 'Point', coordinates: pair.start}, 'xy') : null;
+  }
+);
+
+/** Returns the shortest segment from the first geometry to the second as GeoArrow WKB. */
+export const ST_SHORTESTLINE = /* @__PURE__ */ spatialFunction(
+  'ST_ShortestLine',
+  [routePointKinds, routePointKinds],
+  /* @__PURE__ */ new Binary(),
+  ([a, b]) => {
+    const pair = closestPair(a!, b!);
+    return pair ? writeWKB({type: 'LineString', coordinates: [pair.start, pair.end]}, 'xy') : null;
+  }
+);
+
+/** Tests an inclusive planar radius in the coordinate units of the geometries. */
 export const ST_DWITHIN = /* @__PURE__ */ spatialFunction(
   'ST_DWithin',
-  [pointKinds, pointKinds],
+  [routePointKinds, routePointKinds],
   /* @__PURE__ */ new Bool(),
   ([a, b], radius) => {
     if (radius! < 0) throw new Error('ST_DWithin distance must be nonnegative');
-    const p = pointCoordinates(a!);
-    const q = pointCoordinates(b!);
-    return Boolean(p && q && Math.hypot(q[0]! - p[0]!, q[1]! - p[1]!) <= radius!);
+    const pair = closestPair(a!, b!);
+    return pair !== null && pair.distance <= radius!;
   },
   1
 );
@@ -823,6 +868,8 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_MAKEENVELOPE,
     ST_DISTANCE,
     ST_DWITHIN,
+    ST_CLOSESTPOINT,
+    ST_SHORTESTLINE,
     ST_INTERSECTS,
     ST_SRID,
     ST_SETSRID,
