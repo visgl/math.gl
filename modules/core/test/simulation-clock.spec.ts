@@ -962,18 +962,27 @@ it('SimulationClock matches exact tick arithmetic over mixed seeks, rates and ad
       const random = createRandom(41);
       const clock = new SimulationClock({tickInterval, catchUpPolicy, maxTicksPerAdvance: 1e7});
       const model = new ExactClockModel(clock, exactInterval, 1);
+      const counts = {seek: 0, setRate: 0, rebase: 0, advance: 0};
       for (let i = 0; i < 3000; i++) {
         const pick = random();
         const label = `${tickInterval} ${catchUpPolicy} step ${i}`;
         if (pick < 0.02) {
+          counts.seek++;
           model.seek(seeks[Math.floor(random() * seeks.length)], `${label} seek`);
         } else if (pick < 0.11) {
+          counts.setRate++;
           model.setRate(rates[Math.floor(random() * rates.length)]);
-        } else if (pick < 0.11) {
+        } else if (pick < 0.14) {
+          counts.rebase++;
           model.rebase(`${label} rebase`);
         } else {
+          counts.advance++;
           model.advance(milliseconds[Math.floor(random() * milliseconds.length)], label);
         }
+      }
+      // Every operation runs, so the walk interleaves each of them with the others.
+      for (const [operation, count] of Object.entries(counts)) {
+        expect(count, `${tickInterval} ${catchUpPolicy} ${operation} count`).toBeGreaterThan(0);
       }
       // The run is free of ambiguity: every exact time off a boundary is far outside the bound.
       expect(model.minimumDistance).toBeGreaterThan(4 * model.maximumBound);
