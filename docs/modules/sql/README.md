@@ -218,8 +218,8 @@ in the new coordinate space on first use.
 
 ### Join by spatial predicate
 
-Use `sjoin` to match the active geometry of two frames in the same coordinate
-system. For example, attach region attributes to points inside region polygons.
+Use `sjoin` to match the active native GeoArrow geometry of two frames in the
+same coordinate system. Convert WKB or WKT columns to native GeoArrow first. For example, attach region attributes to points inside region polygons.
 
 ```ts
 import {ST_WITHIN} from '@math.gl/geospatial/st-functions';

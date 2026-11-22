@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {DataType, type Field, type Table} from 'apache-arrow';
-import {takeArrowTableRows, type GeoArrowBounds} from '@math.gl/core/arrow';
+import {getGeoArrowFieldInfo, takeArrowTableRows, type GeoArrowBounds} from '@math.gl/core/arrow';
 import {BoxIndex} from '@math.gl/geometry/spatial-index';
 import {gatherArrowJoin, makeArrowJoinSchema} from '../arrow/relational-query';
 import type {ScalarFunction} from '../arrow/types';
@@ -20,9 +20,12 @@ export type GeoDataFrameSpatialJoinOptions = {
 
 /** A table and the envelopes of its active geometry, indexed by source row. */
 type SpatialJoinInput = {
+  /** Arrow input in source row order. */
   table: Table;
+  /** Active geometry field used to bind the spatial predicate. */
   field: Field;
-  bounds: readonly (GeoArrowBounds | null)[];
+  /** Returns cached envelopes aligned with table rows. Null indicates no usable envelope. */
+  bounds(): readonly (GeoArrowBounds | null)[];
 };
 
 /** Predicates whose true results require overlapping planar envelopes. */
@@ -41,6 +44,12 @@ export function spatialJoin(
   {predicate, rightPrefix = 'right.', signal}: GeoDataFrameSpatialJoinOptions
 ): Table {
   signal?.throwIfAborted();
+  for (const {field} of [left, right]) {
+    const encoding = getGeoArrowFieldInfo(field)!.encoding;
+    if (encoding === 'geoarrow.wkb' || encoding === 'geoarrow.wkt') {
+      throw new Error('GeoDataFrame.sjoin requires native GeoArrow geometry');
+    }
+  }
   if (!predicates.has(predicate.name.toUpperCase())) {
     throw new Error(`Unsupported GeoDataFrame spatial join predicate: ${predicate.name}`);
   }
@@ -53,7 +62,7 @@ export function spatialJoin(
   const schema = makeArrowJoinSchema(left.table, right.table, rightPrefix);
   const packed: number[] = [];
   const rightRows: number[] = [];
-  right.bounds.forEach((bounds, row) => {
+  right.bounds().forEach((bounds, row) => {
     if (!bounds) return;
     packed.push(...bounds);
     rightRows.push(row);
@@ -85,7 +94,7 @@ export function spatialJoin(
     rightCandidates.length = 0;
   }
 
-  left.bounds.forEach((bounds, row) => {
+  left.bounds().forEach((bounds, row) => {
     signal?.throwIfAborted();
     if (!bounds) return;
     for (const candidate of index.search([bounds[0], bounds[1]], [bounds[2], bounds[3]])) {

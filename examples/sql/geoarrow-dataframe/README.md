@@ -25,13 +25,13 @@ deck.gl rendering code.
 
 | Build | Workspace math.gl bytes | Total JavaScript bytes |
 | --- | ---: | ---: |
-| SQL processor | 450,704 | 1,644,677 |
-| DataFrame processor | 417,779 | 1,611,459 |
-| Combined | 450,704 | 1,644,867 |
+| SQL processor | 452,056 | 1,646,283 |
+| DataFrame processor | 417,951 | 1,611,881 |
+| Combined | 452,056 | 1,646,473 |
 
 For each workspace math.gl source file, the smaller byte contribution across
 the two standalone builds counts toward shared bytes, and the larger toward
-the union. The resulting **92.7% overlap** exceeds 90% for this workload. With
+the union. The resulting **92.5% overlap** exceeds 90% for this workload. With
 DataFrame already used at ingestion, adding the DataFrame processing mode
 adds **0 workspace math.gl bytes** and 190 bytes of total JavaScript.
 

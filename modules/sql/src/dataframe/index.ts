@@ -219,8 +219,8 @@ export class GeoDataFrame extends DataFrame {
     options.signal?.throwIfAborted();
     return this.withTable(
       spatialJoin(
-        {table: this.table, field: this.geometry.field, bounds: this.getCachedRowBounds()},
-        {table: right.table, field: right.geometry.field, bounds: right.getCachedRowBounds()},
+        {table: this.table, field: this.geometry.field, bounds: () => this.getCachedRowBounds()},
+        {table: right.table, field: right.geometry.field, bounds: () => right.getCachedRowBounds()},
         options
       )
     );

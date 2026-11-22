@@ -90,7 +90,7 @@ function makeRegions() {
   ]);
   return GeoDataFrame.fromArrow(
     new Table(schema, {
-      name: vectorFromArray(['East of 180°W', 'West of 180°E'], new Utf8()),
+      name: vectorFromArray(['West of antimeridian', 'East of antimeridian'], new Utf8()),
       boundary: vectorFromArray(boundaries, polygon)
     })
   );
@@ -161,17 +161,15 @@ function update() {
         id: `points-${index}`,
         data: {
           length: batch.numRows,
+          ids,
+          regions,
           attributes: {getPosition: {value: positions, size: 2}}
         },
         getRadius: (_, {index: row}) => radii.get(row),
         getFillColor: (_, {index: row}) =>
-          regions.get(row) === 'East of 180°W' ? [91, 220, 196, 170] : [251, 174, 102, 180],
+          regions.get(row) === 'West of antimeridian' ? [91, 220, 196, 170] : [251, 174, 102, 180],
         radiusMinPixels: 1,
-        pickable: true,
-        onClick: info => {
-          if (info.index >= 0)
-            result.textContent = `Point ${ids.get(info.index)} · ${regions.get(info.index)}`;
-        }
+        pickable: true
       });
     })
   });
@@ -179,3 +177,14 @@ function update() {
 
 minimum.addEventListener('input', scheduleUpdate);
 processor.addEventListener('change', scheduleUpdate);
+
+/** Looks up the joined row from the picked point's binary layer data. */
+async function pickRegion(event) {
+  if (!deck.isInitialized) return;
+  const info = await deck.pickObjectAsync({x: event.offsetX, y: event.offsetY, radius: 4});
+  if (!info?.layer || info.index < 0) return;
+  const {ids, regions} = info.layer.props.data;
+  result.textContent = `Point ${ids.get(info.index)} · ${regions.get(info.index)}`;
+}
+
+document.querySelector('#map').addEventListener('click', pickRegion);

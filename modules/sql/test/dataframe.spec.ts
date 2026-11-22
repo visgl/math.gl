@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {writeWKB} from '@math.gl/core/arrow';
 import {expect, test} from 'vitest';
 import {
+  Binary,
   Field,
   FixedSizeList,
   Float64,
@@ -407,4 +409,20 @@ test('sjoin refines indexed candidates, preserves pair order, and retains both f
   ).toThrow('Cannot bind');
   expect(() => right.sjoin(frame, {predicate: ST_WITHIN})).toThrow('requires GeoArrow Point');
   expect(() => frame.sjoin(right, {predicate: ST_WITHIN, signal: AbortSignal.abort()})).toThrow();
+});
+
+test('sjoin rejects serialized WKB before consulting native row bounds', () => {
+  const field = new Field(
+    'geometry',
+    new Binary(),
+    true,
+    new Map([['ARROW:extension:name', 'geoarrow.wkb']])
+  );
+  const table = new Table(new Schema([field]), {
+    geometry: vectorFromArray([writeWKB({type: 'Point', coordinates: [3, 4]})], field.type)
+  });
+  const serialized = GeoDataFrame.fromArrow(table);
+  const native = GeoDataFrame.fromArrow(makeTable(), {geometry: 'end'});
+  expect(() => serialized.sjoin(native, {predicate: ST_WITHIN})).toThrow('native GeoArrow');
+  expect(() => native.sjoin(serialized, {predicate: ST_WITHIN})).toThrow('native GeoArrow');
 });
