@@ -163,6 +163,23 @@ For a route corridor, pass a native `geoarrow.linestring` or `geoarrow.multiline
 
 Point buffers and binary overlays accept specialized native encodings, WKB, or a native XY dense union (`geoarrow.geometry`) whose selected rows match the function signature. Outputs use interleaved XY coordinates and retain the first input's CRS metadata. Chained expressions pass native Arrow vectors between kernels. For streamed inputs, run the projection with `queryArrowTableInBatches`. Each output batch uses the same geometry schema, including all-null batches.
 
+## Dissolve polygons by group[​](#dissolve-polygons-by-group "Direct link to Dissolve polygons by group")
+
+Register `ST_UNION_AGGREGATE` and `ST_UNARYUNION` from `@math.gl/geospatial/st-overlay-functions`. Register `ST_UNION` alongside `ST_UNION_AGGREGATE` to use both SQL arities in the same query.
+
+```
+SELECT district, ST_Union(parcel) AS footprint
+
+FROM parcels
+
+GROUP BY district
+```
+
+* `ST_Union(geometry)` dissolves planar Polygon and MultiPolygon rows within each group. It ignores nulls and returns null for a group with no non-null inputs. A group containing only empty geometries returns an empty multipolygon.
+* `ST_UnaryUnion(geometry)` dissolves overlapping components within each row. Null rows remain null.
+
+Both functions return interleaved XY `geoarrow.multipolygon` and preserve the input CRS metadata. Grouped SQL uses the table query engine. Each group reduces one batch at a time and compacts partial unions as it reads rows.
+
 ## PostGIS geometry signatures[​](#postgis-geometry-signatures "Direct link to PostGIS geometry signatures")
 
 These functions use 2D Cartesian coordinates. Use coordinates in a suitable projected CRS when you need linear units such as meters. Area uses the square of the coordinate unit. Transform inputs to a common CRS before running a query.
