@@ -2,9 +2,12 @@
 
 Run `yarn workspace math.gl-geoarrow-dataframe start` from the repository root.
 The map draws a deterministic 20,000-row GeoArrow point table using deck.gl
-binary position attributes. Change the minimum score, switch processing APIs,
-or click a point to see its stable ID. The elapsed time shown is for CPU
-processing, including filtering and radius projection.
+binary position attributes. The points straddle the antimeridian. Pan or zoom
+to update the viewport, change the minimum score, switch processing APIs,
+or click a point to see its stable ID. The DataFrame processor reuses cached
+geometry envelopes across viewport changes. The SQL processor tests the same
+point bounds with a longitude predicate. The elapsed time shown is for CPU
+processing, including viewport and score filtering and radius projection.
 
 ## Bundle measurement
 
@@ -16,15 +19,15 @@ rendering code.
 
 | Build | Workspace math.gl bytes | Total JavaScript bytes |
 | --- | ---: | ---: |
-| SQL only | 381,042 | 1,558,330 |
-| DataFrame only | 365,031 | 1,553,269 |
-| Combined | 395,417 | 1,583,932 |
+| SQL only | 385,146 | 1,562,903 |
+| DataFrame only | 368,094 | 1,556,646 |
+| Combined | 401,441 | 1,590,477 |
 
 For each workspace math.gl source file, the smaller byte contribution across
 the two standalone builds counts toward shared bytes, and the larger toward
-the union. The resulting **88.7% overlap** is 1.3 percentage points short of
-90%. Of the DataFrame-only workspace math.gl bytes, **96.1%** are shared with
-SQL. Adding DataFrame to the SQL app adds **14,375 workspace math.gl bytes**.
+the union. The resulting **87.6% overlap** is 2.4 percentage points short of
+90%. Of the DataFrame-only workspace math.gl bytes, **95.6%** are shared with
+SQL. Adding DataFrame to the SQL app adds **16,295 workspace math.gl bytes**.
 
 The percentages estimate source-module overlap from esbuild's emitted-byte
 attribution. They vary with tree shaking and minification. The math.gl totals
