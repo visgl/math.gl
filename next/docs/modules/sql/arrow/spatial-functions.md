@@ -150,15 +150,18 @@ SELECT id,
 FROM features
 ```
 
-| Function                   | Supported input                | Native GeoArrow output                                                                                                  |
-| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `ST_Buffer(point, radius)` | Planar Point and finite radius | `geoarrow.polygon` with eight segments per quadrant. Empty points and nonpositive radii return empty polygons.          |
-| `ST_Intersection(a, b)`    | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing shared area. Boundary-only contact returns an empty multipolygon.                    |
-| `ST_Difference(a, b)`      | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing the portion of the first geometry outside the second.                                |
-| `ST_Union(a, b)`           | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing the combined area of both inputs.                                                    |
-| `ST_SymDifference(a, b)`   | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing the area covered by exactly one input. Identical inputs yield an empty multipolygon. |
+| Function                   | Supported input                                               | Native GeoArrow output                                                                                                  |
+| -------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `ST_Buffer(point, radius)` | Planar Point and finite radius                                | `geoarrow.polygon` with eight segments per quadrant. Empty points and nonpositive radii return empty polygons.          |
+| `ST_Buffer(line, radius)`  | Native planar LineString or MultiLineString and finite radius | `geoarrow.multipolygon` with round caps and joins. Empty lines and nonpositive radii return empty multipolygons.        |
+| `ST_Intersection(a, b)`    | Planar Polygon or MultiPolygon                                | `geoarrow.multipolygon` containing shared area. Boundary-only contact returns an empty multipolygon.                    |
+| `ST_Difference(a, b)`      | Planar Polygon or MultiPolygon                                | `geoarrow.multipolygon` containing the portion of the first geometry outside the second.                                |
+| `ST_Union(a, b)`           | Planar Polygon or MultiPolygon                                | `geoarrow.multipolygon` containing the combined area of both inputs.                                                    |
+| `ST_SymDifference(a, b)`   | Planar Polygon or MultiPolygon                                | `geoarrow.multipolygon` containing the area covered by exactly one input. Identical inputs yield an empty multipolygon. |
 
-Inputs can use specialized native encodings, WKB, or a native XY dense union (`geoarrow.geometry`) whose selected rows match the function signature. Outputs use interleaved XY coordinates and retain the first input's CRS metadata. Chained expressions pass native Arrow vectors between kernels. For streamed inputs, run the projection with `queryArrowTableInBatches`. Each output batch uses the same geometry schema, including all-null batches.
+For a route corridor, pass a native `geoarrow.linestring` or `geoarrow.multilinestring` column to `ST_Buffer(route, radius)`. The result uses the input CRS and can feed `ST_Intersection` or `ST_Area` in the same batch. For a WKB route column, first convert it with `GEOARROW_TO_LINESTRING` or `GEOARROW_TO_MULTILINESTRING` from [`@math.gl/sql/geoarrow-functions`](https://visgl.github.io/math.gl/next/docs/modules/sql/geoarrow-functions.md) so SQL can bind the native multipolygon result schema before reading any rows.
+
+Point buffers and binary overlays accept specialized native encodings, WKB, or a native XY dense union (`geoarrow.geometry`) whose selected rows match the function signature. Outputs use interleaved XY coordinates and retain the first input's CRS metadata. Chained expressions pass native Arrow vectors between kernels. For streamed inputs, run the projection with `queryArrowTableInBatches`. Each output batch uses the same geometry schema, including all-null batches.
 
 ## PostGIS geometry signatures[​](#postgis-geometry-signatures "Direct link to PostGIS geometry signatures")
 
