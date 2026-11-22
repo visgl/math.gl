@@ -36,7 +36,7 @@ function isPresentPoint(position: Position): boolean {
 }
 
 /** Iterates position sequences in a supported geometry, retaining path boundaries. */
-function visitPaths(geometry: WellKnownGeometry, visit: (path: Path) => void): void {
+export function visitPaths(geometry: WellKnownGeometry, visit: (path: Path) => void): void {
   switch (geometry.type) {
     case 'Point':
       if (isPresentPoint(geometry.coordinates)) visit([geometry.coordinates]);
