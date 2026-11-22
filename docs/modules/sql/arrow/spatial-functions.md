@@ -169,6 +169,28 @@ metadata. Chained expressions pass native Arrow vectors between kernels.
 For streamed inputs, run the projection with `queryArrowTableInBatches`.
 Each output batch uses the same geometry schema, including all-null batches.
 
+## Dissolve polygons by group
+
+Register `ST_UNION_AGGREGATE` and `ST_UNARYUNION` from
+`@math.gl/geospatial/st-overlay-functions`. Register `ST_UNION` alongside
+`ST_UNION_AGGREGATE` to use both SQL arities in the same query.
+
+```sql
+SELECT district, ST_Union(parcel) AS footprint
+FROM parcels
+GROUP BY district
+```
+
+- `ST_Union(geometry)` dissolves planar Polygon and MultiPolygon rows within
+  each group. It ignores nulls and returns null for a group with no non-null
+  inputs. A group containing only empty geometries returns an empty multipolygon.
+- `ST_UnaryUnion(geometry)` dissolves overlapping components within each row.
+  Null rows remain null.
+
+Both functions return interleaved XY `geoarrow.multipolygon` and preserve
+the input CRS metadata. Grouped SQL uses the table query engine. Each group
+reduces one batch at a time and compacts partial unions as it reads rows.
+
 ## PostGIS geometry signatures
 
 These functions use 2D Cartesian coordinates. Use coordinates in a suitable

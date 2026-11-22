@@ -11,7 +11,12 @@ import {compileArrowExpression} from './compiler';
 import {mapArrowExpressionChildren} from './create-arrow-columns';
 import {walkArrowFunctions} from './registry';
 import type {BoundRelationAggregate} from './relational-query';
-import type {AggregateFunction, ArrowFunctionPackage, ArrowExpressionValue} from './types';
+import type {
+  AggregateFunction,
+  ArrowAggregateValue,
+  ArrowFunctionPackage,
+  ArrowExpressionValue
+} from './types';
 
 /** Built-in SQL reductions remain available without registration. */
 const operations = new Set<ArrowAggregate['operation']>([
@@ -58,9 +63,13 @@ export function getSQLAggregateCall(
     return undefined;
   const name = String(node.callee['name']).toUpperCase() as ArrowAggregate['operation'];
   const builtin = operations.has(name) ? name : undefined;
-  const custom = functions.get(name);
-  if (!builtin && !custom) return undefined;
   const args = node.arguments as readonly (Expression & {sqlWildcard?: boolean})[];
+  const registered = functions.get(name);
+  const custom =
+    registered?.argumentCount === undefined || registered.argumentCount === args.length
+      ? registered
+      : undefined;
+  if (!builtin && !custom) return undefined;
   if (builtin && args.length !== 1) throw new Error(`Arrow SQL ${name} requires one argument`);
   if (args.some(arg => arg.sqlWildcard) && (builtin !== 'COUNT' || args.length !== 1))
     throw new Error(`Arrow SQL ${name} does not accept *`);
@@ -79,6 +88,29 @@ export function rejectSQLAggregates(
     rejectSQLAggregates(child, functions, context);
     return child;
   });
+}
+
+/** Validates nested aggregate list values before Arrow materializes their buffers. */
+function aggregateValidator(type: DataType): (value: ArrowAggregateValue) => void {
+  if (DataType.isList(type) || DataType.isFixedSizeList(type)) {
+    const size = DataType.isFixedSizeList(type) ? type.listSize : undefined;
+    const validate = aggregateValidator(type.valueType);
+    return value => {
+      if (value === null) return;
+      if (!Array.isArray(value) || (size !== undefined && value.length !== size))
+        throw new Error(`Invalid aggregate result for ${type}`);
+      for (const item of value) {
+        if (item === null && !type.valueField.nullable)
+          throw new Error(`Invalid aggregate result for ${type}`);
+        validate(item);
+      }
+    };
+  }
+  const validate = createValueValidator(type);
+  return value => {
+    if (Array.isArray(value)) throw new Error(`Invalid aggregate result for ${type}`);
+    validate(value as ArrowExpressionValue);
+  };
 }
 
 /** Binds a custom aggregate once and uses a separate accumulator for each evaluated group. */
@@ -114,7 +146,7 @@ export function bindSQLAggregate(
   const tuple = DataType.isFixedSizeList(type);
   if (tuple && !DataType.isFloat(type.valueType))
     throw new Error('Aggregate tuple results require floating-point elements');
-  const validate = tuple ? undefined : createValueValidator(type);
+  const validate = tuple ? undefined : aggregateValidator(type);
   return {
     outputField,
     metadata,
@@ -143,8 +175,7 @@ export function bindSQLAggregate(
         )
           throw new Error(`Invalid aggregate result for ${type}`);
       } else {
-        if (Array.isArray(value)) throw new Error(`Invalid aggregate result for ${type}`);
-        validate!(value as ArrowExpressionValue);
+        validate!(value);
       }
       return value;
     }
