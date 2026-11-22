@@ -20,11 +20,12 @@ assert.ok(packages.size > 20, 'Expected the complete vis.gl dependency graph');
  * Their old imports resolve through their own dependency tree.
  */
 const publishedVersions = new Map([
-  ['@math.gl/core', ['5.0.0-beta.8', '5.0.0-beta.10', '5.0.0-beta.11']],
+  ['@math.gl/core', ['5.0.0-beta.8', '5.0.0-beta.10', '5.0.0-beta.11', '5.0.0']],
   ['@math.gl/dggs', ['5.0.0-beta.8']],
   ['@math.gl/earth', ['5.0.0-beta.8']],
-  ['@math.gl/geospatial', ['5.0.0-beta.8']],
-  ['@math.gl/geometry', ['5.0.0-beta.8', '5.0.0-beta.10', '5.0.0-beta.11']],
+  ['@math.gl/geospatial', ['5.0.0-beta.8', '5.0.0']],
+  ['@math.gl/geometry', ['5.0.0-beta.8', '5.0.0-beta.10', '5.0.0-beta.11', '5.0.0']],
+  ['@math.gl/sql', ['5.0.0']],
   ['@math.gl/expressions', ['5.0.0-beta.10']],
   ['@math.gl/arrow', ['5.0.0-beta.11']],
   ['@math.gl/web-mercator', ['5.0.0-beta.8']]

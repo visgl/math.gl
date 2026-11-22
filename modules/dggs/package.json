@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0",
+  "version": "5.1.0-alpha.0",
   "keywords": [
     "javascript",
     "math",
@@ -69,7 +69,7 @@
     "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0",
+    "@math.gl/core": "5.1.0-alpha.0",
     "a5-js": "^0.10.0",
     "h3-js": "^4.5.0",
     "open-location-code": "^1.0.3"
