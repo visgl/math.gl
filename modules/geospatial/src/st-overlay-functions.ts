@@ -7,9 +7,12 @@ import {
   makeArrowVectorFromGeoArrowColumn,
   type WellKnownGeometry
 } from '@math.gl/core/arrow';
+import type {ScalarFunction} from '@math.gl/sql/arrow';
 import polygonClipping from 'polygon-clipping';
 import {
   EXTENSION_METADATA,
+  EXTENSION_NAME,
+  lineKinds,
   pointCoordinates,
   pointKinds,
   polygonKinds,
@@ -43,27 +46,134 @@ const unitCircle = /* @__PURE__ */ Array.from({length: 32}, (_, index) => {
   }
 });
 
-/** Returns a circle approximation with PostGIS's default eight segments per quadrant. */
-function bufferPoint(point: WellKnownGeometry, radius: number): WellKnownGeometry {
+/** Bounds the number of pieces passed to one polygon union. */
+const corridorUnionFanout = 64;
+
+/** Checks the radius for point and line buffers. */
+function checkBufferRadius(radius: number): void {
   if (!Number.isFinite(radius)) throw new Error('ST_Buffer requires a finite radius');
-  const location = pointCoordinates(point);
-  if (!location || radius <= 0) return {type: 'Polygon', coordinates: []};
-  const ring = unitCircle.map(([x, y]) => [location[0]! + radius * x!, location[1]! + radius * y!]);
+}
+
+/** Checks a generated ring before passing it to the polygon kernel. */
+function checkedRing(ring: polygonClipping.Ring): polygonClipping.Ring {
   if (ring.some(point => !point.every(Number.isFinite))) {
     throw new Error('ST_Buffer produced a nonfinite coordinate');
   }
-  ring.push(ring[0]!);
-  return {type: 'Polygon', coordinates: [ring]};
+  return ring;
 }
 
-/** Buffers a planar point into a native GeoArrow Polygon. */
-export const ST_BUFFER = /* @__PURE__ */ spatialFunction(
+/** Returns a circle approximation with eight segments per quadrant. */
+function circleRing(x: number, y: number, radius: number): polygonClipping.Ring {
+  const ring: polygonClipping.Ring = unitCircle.map(([dx, dy]) => [
+    x + radius * dx!,
+    y + radius * dy!
+  ]);
+  ring.push(ring[0]!);
+  return checkedRing(ring);
+}
+
+/** Buffers a point without changing its established output schema. */
+function bufferPoint(point: WellKnownGeometry, radius: number): WellKnownGeometry {
+  checkBufferRadius(radius);
+  const location = pointCoordinates(point);
+  if (!location || radius <= 0) return {type: 'Polygon', coordinates: []};
+  return {type: 'Polygon', coordinates: [circleRing(location[0]!, location[1]!, radius)]};
+}
+
+/** Unions a bounded group of pieces at a time, then combines groups at each level. */
+function unionCorridorPieces(pieces: polygonClipping.MultiPolygon[]): polygonClipping.MultiPolygon {
+  if (!pieces.length) return [];
+  while (pieces.length > 1) {
+    const groups: polygonClipping.MultiPolygon[] = [];
+    for (let first = 0; first < pieces.length; first += corridorUnionFanout) {
+      groups.push(
+        polygonClipping.union(
+          pieces[first]!,
+          ...pieces.slice(first + 1, first + corridorUnionFanout)
+        )
+      );
+    }
+    pieces = groups;
+  }
+  return pieces[0]!;
+}
+
+/** Buffers line segments with rectangles and adds disks for round joins and caps. */
+function bufferLine(geometry: WellKnownGeometry, radius: number): WellKnownGeometry {
+  checkBufferRadius(radius);
+  if (radius <= 0) return {type: 'MultiPolygon', coordinates: []};
+  const lines =
+    geometry.type === 'MultiLineString'
+      ? geometry.coordinates
+      : geometry.type === 'LineString'
+        ? [geometry.coordinates]
+        : [];
+  const pieces: polygonClipping.MultiPolygon[] = [];
+  for (const line of lines) {
+    let previous: readonly number[] | undefined;
+    for (const coordinate of line) {
+      const [x, y] = coordinate as polygonClipping.Pair;
+      if (previous && x === previous[0] && y === previous[1]) continue;
+      pieces.push([[circleRing(x, y, radius)]]);
+      if (previous) {
+        const x0 = previous[0]!;
+        const y0 = previous[1]!;
+        const dx = x - x0;
+        const dy = y - y0;
+        const length = Math.hypot(dx, dy);
+        if (!Number.isFinite(length))
+          throw new Error('ST_Buffer produced a nonfinite segment length');
+        const nx = (-dy / length) * radius;
+        const ny = (dx / length) * radius;
+        pieces.push([
+          [
+            checkedRing([
+              [x0 + nx, y0 + ny],
+              [x + nx, y + ny],
+              [x - nx, y - ny],
+              [x0 - nx, y0 - ny],
+              [x0 + nx, y0 + ny]
+            ])
+          ]
+        ]);
+      }
+      previous = coordinate;
+    }
+  }
+  return {type: 'MultiPolygon', coordinates: unionCorridorPieces(pieces)};
+}
+
+/** Implements the existing planar point overload. */
+const pointBuffer = /* @__PURE__ */ spatialFunction(
   'ST_Buffer',
   [pointKinds],
   /* @__PURE__ */ nativePolygonResult('geoarrow.polygon'),
   ([geometry], radius) => bufferPoint(geometry!, radius!),
   1
 );
+
+/** Implements native planar line and multiline buffers with multipart output. */
+const lineBuffer = /* @__PURE__ */ spatialFunction(
+  'ST_Buffer',
+  [lineKinds],
+  /* @__PURE__ */ nativePolygonResult('geoarrow.multipolygon'),
+  ([geometry], radius) => bufferLine(geometry!, radius!),
+  1
+);
+
+/** Buffers planar points and native lines with round caps and joins. */
+export const ST_BUFFER: ScalarFunction = {
+  ...pointBuffer,
+  /** Selects the result schema from the input column's GeoArrow encoding. */
+  resolvePrototype(fields) {
+    const encoding = fields[0]?.metadata.get(EXTENSION_NAME);
+    const buffer =
+      encoding === 'geoarrow.linestring' || encoding === 'geoarrow.multilinestring'
+        ? lineBuffer
+        : pointBuffer;
+    return buffer.resolvePrototype!(fields);
+  }
+};
 
 /** Converts native polygon rings to the existing polygon overlay kernel's input. */
 function polygonSet(geometry: WellKnownGeometry): polygonClipping.MultiPolygon {
