@@ -585,6 +585,9 @@
         "./modules/geospatial/src/expressions.ts"
       ],
       "@math.gl/sql/dataframe": ["./modules/sql/src/dataframe/index.ts"],
+      "@math.gl/sql/geoarrow-functions": [
+        "./modules/sql/src/geoarrow-functions.ts"
+      ],
       "@math.gl/sql/query": [
         "./modules/sql/src/query.ts"
       ],
