@@ -149,3 +149,20 @@ the same table. Null and empty geometries contribute no coordinates to
 `totalBounds()`, which returns null when the active vector has no coordinates.
 `select(...names)` returns a plain frame with the requested columns and
 shares their buffers. `toArrow()` returns the wrapped table.
+
+Use `filter(predicate, options)` to keep rows where a SQL expression is true.
+Use `withColumns({name: expression}, options)` to add or replace attributes.
+Both methods take named SQL parameters through `options.parameters`.
+
+```ts
+const visible = parcels
+  .filter('population >= :minimum', {parameters: {minimum: 1000}})
+  .withColumns({radius: 'population * 0.01'})
+  .toArrow();
+```
+
+Every expression in a `withColumns` call reads the same input table. Existing
+columns keep their slots and new columns are appended. A GeoDataFrame retains its
+active geometry through both operations and rejects attempts to overwrite it.
+Unchanged columns share buffers where batch layout permits. Filters that gather
+scattered rows may allocate new buffers.
