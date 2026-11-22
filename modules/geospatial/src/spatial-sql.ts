@@ -16,7 +16,9 @@ import {
 } from 'apache-arrow';
 import type {ScalarFunction} from '@math.gl/sql/arrow';
 import {
+  GeoArrowBuilder,
   getGeoArrowFieldInfo,
+  makeArrowVectorFromGeoArrowColumn,
   isGeoArrowValueValid,
   makeGeoArrowColumnFromArrowVector,
   makeGeoArrowColumnFromGeometryRows,
@@ -62,6 +64,17 @@ export type NativeSpatialResult = {
   /** Packs decoded geometry rows into native coordinate buffers. */
   build: (rows: readonly (WellKnownGeometry | null)[]) => Vector;
 };
+
+/** Declares a fixed native polygon layout, including for empty or all-null batches. */
+export function nativePolygonResult(
+  encoding: NativeSpatialResult['encoding']
+): NativeSpatialResult {
+  const options = {encoding, dimension: 'xy', coordinateLayout: 'interleaved'} as const;
+  /** Packs the output rings into GeoArrow list offsets and interleaved XY coordinates. */
+  const build: NativeSpatialResult['build'] = rows =>
+    makeArrowVectorFromGeoArrowColumn(GeoArrowBuilder.build(rows, options));
+  return {encoding, type: build([]).type, build};
+}
 
 /** A nullable result value passed to the Arrow vector builder. */
 type SpatialValue = string | number | boolean | number[] | Uint8Array | null;

@@ -39,7 +39,7 @@ function distanceToSegment(p: Position, a: Position, b: Position): number {
 }
 
 /** Iterative Douglas-Peucker simplification of a single planar line. */
-function simplify(path: Path, tolerance: number): Path {
+export function simplifyLine(path: Path, tolerance: number): Path {
   if (!path.length) return path;
   const last = path.length - 1;
   const kept = new Uint8Array(path.length);
@@ -82,7 +82,7 @@ export function reduceLineVertices(
       (geometry.type === 'MultiLineString' && geometry.coordinates.every(path => !path.length)))
   )
     return geometry;
-  const reduce = mode === 'simplify' ? simplify : removeRepeated;
+  const reduce = mode === 'simplify' ? simplifyLine : removeRepeated;
   if (geometry.type === 'LineString') {
     const coordinates = reduce(geometry.coordinates, tolerance);
     return coordinates.length || mode === 'removeRepeated'

@@ -32,6 +32,7 @@ import {normalizeCRSIdentifier} from './crs/crs-identifier';
 import {EPSG3857ToLngLat, EPSG4326ToEPSG3857} from './web-mercator/mercator-meters';
 import {vertexCount, memberCount, geometryMember} from './geometry-inspection';
 import {reduceLineVertices} from './line-simplification';
+import {simplifyPolygonTopology} from './polygon-simplification';
 import {collectPair, makeLine} from './geometry-constructors';
 import {EPSG3857_HALF_CIRCUMFERENCE} from './web-mercator/mercator-meters';
 import {
@@ -49,6 +50,7 @@ import {
   EXTENSION_NAME,
   geometryTypes,
   lineKinds,
+  nativePolygonResult,
   planarGeometry,
   pointCoordinates,
   pointInPolygon,
@@ -647,6 +649,31 @@ export const ST_REMOVEREPEATEDPOINTS = /* @__PURE__ */ lineReduction(
 /** Reduces route vertices with Douglas-Peucker simplification. */
 export const ST_SIMPLIFY = /* @__PURE__ */ lineReduction('ST_Simplify', 'simplify');
 
+/** Simplifies polygon boundaries while retaining shells, holes, and component topology. */
+export const ST_SIMPLIFYPRESERVETOPOLOGY: ScalarFunction = {
+  kind: 'scalar',
+  name: 'ST_SimplifyPreserveTopology',
+  prototypes: [],
+  /** Preserves specialized native storage where the input schema identifies its family. */
+  resolvePrototype(fields) {
+    const encoding = fields[0]?.metadata.get(EXTENSION_NAME);
+    const native = encoding === 'geoarrow.polygon' || encoding === 'geoarrow.multipolygon';
+    return spatialFunction(
+      'ST_SimplifyPreserveTopology',
+      [polygonKinds],
+      native ? nativePolygonResult(encoding) : new Binary(),
+      ([geometry], tolerance) => {
+        const result = simplifyPolygonTopology(
+          geometry as Extract<WellKnownGeometry, {type: 'Polygon' | 'MultiPolygon'}>,
+          tolerance!
+        );
+        return native ? result : writeWKB(result, 'xy');
+      },
+      1
+    ).resolvePrototype!(fields);
+  }
+};
+
 /** Returns clockwise azimuth from positive Y in radians. */
 export const ST_AZIMUTH = /* @__PURE__ */ spatialFunction(
   'ST_Azimuth',
@@ -916,6 +943,7 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_TRANSFORM,
     ST_REMOVEREPEATEDPOINTS,
     ST_SIMPLIFY,
+    ST_SIMPLIFYPRESERVETOPOLOGY,
     ST_AZIMUTH,
     ST_MAKEPOINT,
     ST_TILEENVELOPE,
