@@ -2361,3 +2361,18 @@ and `touchesUnknown` marks valid face-connected components bordering absent
 coverage. Counts and spill elevations describe the known window and can change
 when gaps fill or outlets change. Memory scales with the full window area,
 including gaps, and is bounded by `maxCells`.
+
+The Terrain Sampling example's **Sierra watershed explorer** uses a pinned
+48 × 32 DEM window with selectable confirmed outlets and an evictable interior
+tile. Switch between contributing area, fill depth, and coverage. Counts are
+conditional on the selected outlets and resident tiles. Area uses the
+determinant of the projected sample lattice.
+
+Run `node scripts/benchmark-terrain-watersheds.mjs` after building to measure
+the effect of a growing absent area with the resident Sierra tiles fixed. The
+replay checks that spill heights, receiver links, outlet labels, and
+contributions agree on the unchanged resident domain. In a local Node 24
+run, a 48 × 32 window retained 35,328 bytes in result buffers and took 0.35 ms
+median. A 1024 × 1024 window retained 24,117,248 bytes and took 36.12 ms
+median. The retained buffer totals exclude temporary workspace and runtime
+object overhead.
