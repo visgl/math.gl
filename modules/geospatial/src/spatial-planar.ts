@@ -4,6 +4,23 @@
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
 
+/** Measures the distance to a finite segment, including its endpoints. */
+export function distanceToPlanarSegment(
+  p: readonly number[],
+  a: readonly number[],
+  b: readonly number[]
+): number {
+  const dx = b[0]! - a[0]!,
+    dy = b[1]! - a[1]!;
+  const length = Math.hypot(dx, dy);
+  const px = p[0]! - a[0]!,
+    py = p[1]! - a[1]!;
+  const t = length
+    ? Math.max(0, Math.min(1, (px * (dx / length) + py * (dy / length)) / length))
+    : 0;
+  return Math.hypot(px - t * dx, py - t * dy);
+}
+
 /** A position in the input coordinate system. */
 type Position = readonly number[];
 /** The positions of an open or closed path. */
