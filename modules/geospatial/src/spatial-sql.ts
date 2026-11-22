@@ -53,6 +53,16 @@ export const polygonKinds = ['Polygon', 'MultiPolygon'] as const;
 
 /** Supported Arrow result storage for a spatial function. */
 type SpatialResult = Int32 | Float64 | Bool | Binary | FixedSizeList<Float64> | Utf8;
+/** Native geometry result storage and its row-aligned Arrow vector builder. */
+export type NativeSpatialResult = {
+  /** Extension encoding declared on the bound result field. */
+  encoding: 'geoarrow.polygon' | 'geoarrow.multipolygon';
+  /** Fixed physical Arrow schema for all batches. */
+  type: DataType;
+  /** Packs decoded geometry rows into native coordinate buffers. */
+  build: (rows: readonly (WellKnownGeometry | null)[]) => Vector;
+};
+
 /** A nullable result value passed to the Arrow vector builder. */
 type SpatialValue = string | number | boolean | number[] | Uint8Array | null;
 
@@ -135,15 +145,16 @@ export function planarGeometry(
 }
 
 /** Declares a row-preserving spatial overload using the input columns' GeoArrow types. */
-export function spatialFunction(
+export function spatialFunction<Value extends SpatialValue | WellKnownGeometry>(
   name: string,
   signatures: readonly (readonly GeometryKind[])[],
-  type: SpatialResult,
-  evaluate: (geometries: readonly GeometryRow[], ...numbers: number[]) => SpatialValue,
+  output: SpatialResult | NativeSpatialResult,
+  evaluate: (geometries: readonly GeometryRow[], ...numbers: number[]) => Value,
   numericArguments = 0,
   allDimensions = false,
   skipNullGeometries = false
 ): ScalarFunction {
+  const type = 'encoding' in output ? output.type : output;
   return {
     kind: 'scalar',
     name,
@@ -167,6 +178,12 @@ export function spatialFunction(
           (DataType.isBinary(field.type) || DataType.isLargeBinary(field.type))
         ) {
           // WKB reveals its geometry kind and dimensionality per row.
+        } else if (
+          'encoding' in output &&
+          encoding === 'geoarrow.geometry' &&
+          extension.dimension === 'xy'
+        ) {
+          // Native XY union rows are checked against the input signature during evaluation.
         } else if (kinds.some(kind => encoding === 'geoarrow.' + kind.toLowerCase())) {
           if (!allDimensions && extension?.dimension !== 'xy')
             throw new Error(`${name} requires 2D geometry`);
@@ -192,8 +209,8 @@ export function spatialFunction(
         throw new Error(`${name} requires arguments in the same CRS`);
       }
       const metadata = new Map<string, string>();
-      if (DataType.isBinary(type)) {
-        metadata.set(EXTENSION_NAME, 'geoarrow.wkb');
+      if ('encoding' in output || DataType.isBinary(type)) {
+        metadata.set(EXTENSION_NAME, 'encoding' in output ? output.encoding : 'geoarrow.wkb');
         const inputMetadata = geometryFields
           .find(field => field?.metadata.has(EXTENSION_METADATA))
           ?.metadata.get(EXTENSION_METADATA);
@@ -223,7 +240,7 @@ export function spatialFunction(
                 name === 'ST_GeometryN'
               )
             );
-          const values = new Array<SpatialValue>(rowCount).fill(null);
+          const values = new Array<Value | null>(rowCount).fill(null);
           for (let row = 0; row < rowCount; row++) {
             if (!activeRows[row]) continue;
             const geometries: WellKnownGeometry[] = [];
@@ -238,7 +255,9 @@ export function spatialFunction(
             }
             values[row] = evaluate(geometries, ...numbers.map(vector => Number(vector.get(row))));
           }
-          return vectorFromArray(values, type);
+          return 'encoding' in output
+            ? output.build(values as (WellKnownGeometry | null)[])
+            : vectorFromArray(values as SpatialValue[], output);
         }
       };
     }
