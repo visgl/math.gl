@@ -16,9 +16,9 @@ import {
   Matrix4,
   toRadians,
   _MathUtils,
-  NumericArray,
   equals
-} from '@math.gl/core';
+} from '@math.gl/core/matrix';
+import {NumericArray} from '@math.gl/core/types';
 import {
   getOrientedBoundingBoxQuaternion,
   makeOrientedBoundingBoxFromQuaternion,

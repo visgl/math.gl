@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original tests of batch commit, intermediate validation and independent workload anchors.
 import {beforeAll, expect, test} from 'vitest';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import type {PipelineStep} from '@math.gl/geospatial/projection/pipeline';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import type {PipelineStep} from '@math.gl/geospatial/projection-pipeline';
 import type {BenchmarkOptions} from '../live-bench-types';
 import {
   PIPELINE_SCENARIOS,

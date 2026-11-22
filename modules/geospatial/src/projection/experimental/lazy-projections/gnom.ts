@@ -7,7 +7,7 @@ import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyGnomonic: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'gnom', aliases: []},
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/gnom');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-gnom');
     return projectionModule.gnomonic;
   }
 );

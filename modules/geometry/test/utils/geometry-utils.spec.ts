@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Vector2, Vector3, Vector4} from '@math.gl/core';
+import {Vector2, Vector3, Vector4} from '@math.gl/core/matrix';
 import {
   type GeometryInput,
   computeVertexNormals,
@@ -25,7 +25,7 @@ import {
   octPack,
   octUnpack,
   zigZagDeltaDecode
-} from '@math.gl/geometry';
+} from '@math.gl/geometry/processing';
 import {expect, test} from 'vitest';
 import {
   getAttributeValues,
@@ -254,6 +254,27 @@ test('geometry utility validation covers non-indexed normals and iterator guards
   ).toThrow(/at least three/);
   expect(() => [...makeAttributeIterator(new Float32Array([1]), 0)]).toThrow(/positive integer/);
   expect(() => [...makeAttributeIterator(new Float32Array([1, 2, 3]), 2)]).toThrow(/divisible/);
+});
+
+test('geometry guard rejects invalid attribute and index storage', () => {
+  const values = new Float32Array([0, 0, 0]);
+  const mesh = {topology: 'point-list', attributes: {POSITION: {value: values, size: 3}}};
+  expect(isGeometry(mesh)).toBe(true);
+  expect(isGeometry({...mesh, attributes: {positions: {values}}})).toBe(true);
+  expect(isGeometry({...mesh, indices: {values: new Uint16Array([0])}})).toBe(true);
+  for (const invalid of [
+    null,
+    {},
+    {value: [0, 0, 0]},
+    {value: new DataView(new ArrayBuffer(12))},
+    {value: new BigInt64Array(3)},
+    {value: values, size: 0},
+    {value: 'invalid', values}
+  ]) {
+    expect(isGeometry({...mesh, attributes: {POSITION: invalid}})).toBe(false);
+    expect(isGeometry({...mesh, indices: invalid})).toBe(false);
+  }
+  expect(getAttributeValues({value: values, values: new Float32Array(3)})).toBe(values);
 });
 
 test('geometry attribute helpers distinguish supported legacy shapes', () => {

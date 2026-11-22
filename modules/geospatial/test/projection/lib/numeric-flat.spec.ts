@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original unit/axis batch rounding, permutation, epoch and commit contract tests.
 import {expect, test} from 'vitest';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import type {PipelineStep, PipelineUnit} from '@math.gl/geospatial/projection/pipeline';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import type {PipelineStep, PipelineUnit} from '@math.gl/geospatial/projection-pipeline';
 
 const xyz = {space: 'geocentric', units: ['m', 'm', 'm']} as const;
 const permutations = [

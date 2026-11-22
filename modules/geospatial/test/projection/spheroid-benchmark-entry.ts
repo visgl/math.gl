@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original matched sphere/ellipsoid workload with analytic normal anchors and reusable scalar outputs.
-import {config} from '@math.gl/core';
-import {Ellipsoid} from '@math.gl/geospatial';
-import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
-import {geocentric} from '@math.gl/geospatial/projection/projections/geocent';
+import {config} from '@math.gl/core/matrix';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
+import {geocentric} from '@math.gl/geospatial/projection-projections-geocent';
 export {measureWorkload} from './benchmark-workload';
 export const shapes = [
   {id: 'WGS84', a: 6378137, b: 6356752.314245179},

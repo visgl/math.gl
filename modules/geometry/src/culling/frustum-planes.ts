@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {getProjectionDepthRange, type ProjectionDepthOptions} from '@math.gl/core';
+import {getProjectionDepthRange, type ProjectionDepthOptions} from '@math.gl/core/matrix';
 import {Plane} from './lib/plane';
 
 /** Inward planes: left, right, bottom, top, near, far. An infinite far plane is omitted. */

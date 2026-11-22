@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {subdivideTriangleMesh} from '@math.gl/geometry';
-import type {SubdividedTriangleMesh, SubdivideTriangleMeshOptions} from '@math.gl/geometry';
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
+import type {SubdividedTriangleMesh, SubdivideTriangleMeshOptions} from '@math.gl/geometry/polygon';
 
 // Pins the exact output and the transform call count of representative refinements.
 // The digests were captured from the implementation that sampled every face in every round.

@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-beta.12",
+  "version": "5.1.0-alpha.0",
   "keywords": [
     "geometry",
     "gltf",
@@ -19,34 +19,46 @@
     "type": "git",
     "url": "https://github.com/visgl/math.gl.git"
   },
-  "types": "dist/index.d.ts",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
     "./culling": {
       "types": "./dist/culling/index.d.ts",
       "import": "./dist/culling/index.js",
       "require": "./dist/culling/index.cjs"
+    },
+    "./processing": {
+      "types": "./dist/processing.d.ts",
+      "import": "./dist/processing.js",
+      "require": "./dist/processing.cjs"
+    },
+    "./spatial-index": {
+      "types": "./dist/spatial-index/index.d.ts",
+      "import": "./dist/spatial-index/index.js",
+      "require": "./dist/spatial-index/index.cjs"
     },
     "./lighting": {
       "types": "./dist/lighting/index.d.ts",
       "import": "./dist/lighting/index.js",
       "require": "./dist/lighting/index.cjs"
     },
-    "./color": {
-      "types": "./dist/color/index.d.ts",
-      "import": "./dist/color/index.js",
-      "require": "./dist/color/index.cjs"
-    },
     "./arrow": {
       "types": "./dist/arrow/index.d.ts",
       "import": "./dist/arrow/index.js",
       "require": "./dist/arrow/index.cjs"
+    },
+    "./primitives": {
+      "types": "./dist/primitives.d.ts",
+      "import": "./dist/primitives.js",
+      "require": "./dist/primitives.cjs"
+    },
+    "./curves": {
+      "types": "./dist/curves/index.d.ts",
+      "import": "./dist/curves/index.js",
+      "require": "./dist/curves/index.cjs"
+    },
+    "./polygon": {
+      "types": "./dist/polygon/index.d.ts",
+      "import": "./dist/polygon/index.js",
+      "require": "./dist/polygon/index.cjs"
     }
   },
   "files": [
@@ -58,7 +70,7 @@
     "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-beta.12"
+    "@math.gl/core": "5.1.0-alpha.0"
   },
   "sideEffects": false,
   "peerDependencies": {

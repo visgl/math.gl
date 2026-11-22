@@ -6,7 +6,7 @@
 import {bitCode, intersect, BoundingBox} from './lineclip';
 import {getPointAtIndex, copy, push} from './utils';
 
-import type {NumericArray} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 
 export type Polygon = {
   positions: Readonly<NumericArray>;

@@ -33,7 +33,18 @@ function examplePath(path) {
     ? [parts[1], ...parts.slice(4)].join('/')
     : relative(directory, path).split(sep).join('/');
 }
-const matches = path => examplePath(path).includes(filter);
+const shard = process.env.MATHGL_EXAMPLE_SHARD;
+if (shard && !['solar-showcase', 'remaining'].includes(shard))
+  throw new Error(`Unknown example shard: ${shard}`);
+function matches(path) {
+  const example = examplePath(path);
+  // Keep each project's builds, type checks and tests on the same runner.
+  const owner = /^(earth\/sun-terminator|showcase)\//.test(example)
+    ? 'solar-showcase'
+    : 'remaining';
+  return example.includes(filter) && (!shard || owner === shard);
+}
+const sharedChecks = shard !== 'solar-showcase' ? [join(directory, 'check-boundaries.js')] : [];
 const nodeTests =
   mode === 'browser'
     ? []
@@ -76,14 +87,13 @@ async function build(project) {
 if (list) {
   // biome-ignore lint/suspicious/noConsole: List the discovered checks without executing them.
   console.log(
-    [join(directory, 'check-boundaries.js'), ...typeConfigs, ...nodeTests, ...browserTests]
+    [...sharedChecks, ...typeConfigs, ...nodeTests, ...browserTests]
       .map(path => relative(root, path))
       .join('\n')
   );
 } else {
-  await run('Example import boundaries', process.execPath, [
-    join(directory, 'check-boundaries.js')
-  ]);
+  for (const check of sharedChecks)
+    await run('Example import boundaries', process.execPath, [check]);
   // Preserve application build coverage when CI selects only Node workflows.
   const nodeProjects = new Set(
     nodeTests

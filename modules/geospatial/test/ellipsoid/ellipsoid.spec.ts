@@ -9,8 +9,8 @@
 
 /* eslint-disable */
 import {test, expect} from 'vitest';
-import {Vector3, toDegrees, _MathUtils, equals} from '@math.gl/core';
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Vector3, toDegrees, _MathUtils, equals} from '@math.gl/core/matrix';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
 const radii = new Vector3(1.0, 2.0, 3.0);
 const radiiSquared = new Vector3(radii).multiply(radii);

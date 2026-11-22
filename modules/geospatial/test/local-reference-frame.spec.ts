@@ -3,8 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Matrix4, Quaternion, Vector3, config} from '@math.gl/core';
-import {Ellipsoid, LocalReferenceFrame} from '@math.gl/geospatial';
+import {Matrix4, Quaternion, Vector3, config} from '@math.gl/core/matrix';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {LocalReferenceFrame} from '@math.gl/geospatial/coordinates';
 
 function close(actual: ArrayLike<number>, expected: ArrayLike<number>, digits = 10): void {
   expect(actual.length).toBe(expected.length);

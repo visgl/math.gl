@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original reusable-output workload with no per-record views or result arrays.
-import type {ProjectionOutput} from '@math.gl/geospatial/projection/core';
-import type {PipelineEpochs} from '@math.gl/geospatial/projection/pipeline';
+import type {ProjectionOutput} from '@math.gl/geospatial/projection-core';
+import type {PipelineEpochs} from '@math.gl/geospatial/projection-pipeline';
 import type {BenchmarkOptions} from './live-bench-types';
 
 type Operation = (point: number[], output: ProjectionOutput, epoch?: number) => ProjectionOutput;

@@ -19,9 +19,9 @@ and does not convert datums or model ellipsoidal Earth geometry.
 ## Start with a description
 
 ```typescript
-import {albersUsaMapPreset} from '@math.gl/geospatial/maps/presets';
-import {mapGeometry} from '@math.gl/geospatial/maps/geometry';
-import {mapTransitions} from '@math.gl/geospatial/maps/transitions';
+import {albersUsaMapPreset} from '@math.gl/geospatial/maps-presets';
+import {mapGeometry} from '@math.gl/geospatial/maps-geometry';
+import {mapTransitions} from '@math.gl/geospatial/maps-transitions';
 import {MapEngine, type MapDescription} from '@math.gl/geospatial/maps';
 
 const description: MapDescription = {
@@ -120,9 +120,9 @@ reveal Hawaii if the source data never resolved it.
 ## Use the same geometry on a globe or hinged surface
 
 ```typescript
-import {myriahedralMapPreset} from '@math.gl/geospatial/maps/presets';
-import {mapGeometry} from '@math.gl/geospatial/maps/geometry';
-import {mapTransitions} from '@math.gl/geospatial/maps/transitions';
+import {myriahedralMapPreset} from '@math.gl/geospatial/maps-presets';
+import {mapGeometry} from '@math.gl/geospatial/maps-geometry';
+import {mapTransitions} from '@math.gl/geospatial/maps-transitions';
 const panels = new MapEngine({
   version: 1,
   id: 'polyconic',
@@ -175,9 +175,9 @@ interpolation is free of folds or overlaps.
 Land masks and projection functions are runtime dependencies, not JSON:
 
 ```typescript
-import {myriahedralMapPreset} from '@math.gl/geospatial/maps/presets';
-import {mapGeometry} from '@math.gl/geospatial/maps/geometry';
-import {mapTransitions} from '@math.gl/geospatial/maps/transitions';
+import {myriahedralMapPreset} from '@math.gl/geospatial/maps-presets';
+import {mapGeometry} from '@math.gl/geospatial/maps-geometry';
+import {mapTransitions} from '@math.gl/geospatial/maps-transitions';
 const oceanCuts = new MapEngine({
   version: 1,
   id: 'ocean-cuts',

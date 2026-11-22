@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {Matrix4, Vector3, toRadians} from '@math.gl/core';
+import {Matrix4, Vector3, toRadians} from '@math.gl/core/matrix';
 import {
   BoundingSphere,
   AxisAlignedBoundingBox,
@@ -9,7 +9,7 @@ import {
   CullingVolume,
   Plane
 } from '@math.gl/geometry/culling';
-import {Geometry, BoxGeometry, SphereGeometry} from '@math.gl/geometry';
+import {Geometry, BoxGeometry, SphereGeometry} from '@math.gl/geometry/primitives';
 
 export const initial = {
   type: 'sphere',

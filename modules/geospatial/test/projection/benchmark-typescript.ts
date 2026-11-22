@@ -6,7 +6,7 @@ import {
   projectionEngine,
   parseNTv2Grid
 } from '@math.gl/geospatial/projection';
-import type {PreparedProjection} from '@math.gl/geospatial/projection/types';
+import type {PreparedProjection} from '@math.gl/geospatial/projection-types';
 import {benchmarkGrid} from './benchmark-grid';
 import type {BenchmarkScenario} from './live-bench-types';
 let gridEngine: FullProjectionEngine | undefined;

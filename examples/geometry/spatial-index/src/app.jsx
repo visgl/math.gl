@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import ExamplePanel from '../../../common/example-panel';
 import React, {useEffect, useMemo, useRef} from 'react';
-import {BoxIndex, PointIndex} from '@math.gl/geometry';
+import {BoxIndex, PointIndex} from '@math.gl/geometry/spatial-index';
 import './app.css';
 const records = Array.from({length: 1200}, (_, i) => {
   const x = (((i * 7919) % 997) / 997) * 180 - 90,

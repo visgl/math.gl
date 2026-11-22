@@ -3,9 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import type {NumericArray} from '@math.gl/core';
-import {equals} from '@math.gl/core';
-import {cutPolylineByGrid, cutPolygonByGrid} from '@math.gl/geometry';
+import type {NumericArray} from '@math.gl/core/types';
+import {equals} from '@math.gl/core/matrix';
+import {cutPolylineByGrid, cutPolygonByGrid} from '@math.gl/geometry/polygon';
 
 import {flatten} from './lineclip.spec';
 

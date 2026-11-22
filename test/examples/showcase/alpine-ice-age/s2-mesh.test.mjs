@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { S2Decoder } from "@math.gl/dggs";
+import {S2Decoder} from '@math.gl/dggs/s2';
 import { createS2MyriahedralMesh } from "../../../../examples/showcase/alpine-ice-age/src/dggs-mesh.js";
 import { discontinuousGrid } from "../../../../examples/showcase/alpine-ice-age/src/discontinuous-views.js";
 

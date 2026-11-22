@@ -112,3 +112,24 @@ export type {
   SubdivideGeographicCutRingOptions,
   SubdividedGeographicCutRing
 } from './geographic-seams/subdivide-cut';
+
+export {
+  createOrthographicCutAtlas,
+  createOctahedralCutGraph,
+  createOctahedralCutAtlas,
+  GeographicCutAtlas
+} from './geographic-atlas';
+export type {
+  AtlasSubdivisionOptions,
+  SubdividedAtlasRing,
+  SubdividedAtlasPolyline,
+  GeographicAtlasOptions,
+  GeographicAtlasBoundary,
+  GeographicAtlasChart,
+  GeographicCutGraph,
+  GeographicAtlasSource,
+  GeographicAtlasEdge,
+  GeographicAtlasRing,
+  GeographicAtlasPolygon,
+  GeographicAtlasPolyline
+} from './geographic-atlas';

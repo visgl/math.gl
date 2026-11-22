@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {createProjectionEngine} from '@math.gl/geospatial/projection/core';
-import {geocentric} from '@math.gl/geospatial/projection/projections/geocent';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
+import {createProjectionEngine} from '@math.gl/geospatial/projection-core';
+import {geocentric} from '@math.gl/geospatial/projection-projections-geocent';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 
 export const RADIUS = 6378137;
 const RADIANS = Math.PI / 180;

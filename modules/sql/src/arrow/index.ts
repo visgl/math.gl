@@ -11,6 +11,7 @@ export type {
   ArrowExpressionValue,
   ArrowTableFunction,
   AggregateAccumulator,
+  ArrowAggregateValue,
   AggregateFunction,
   TableFunction,
   BoundTableFunction,

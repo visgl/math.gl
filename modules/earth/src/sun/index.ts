@@ -67,22 +67,3 @@ export type {
 } from './planets';
 export {getSkySnapshot, createSkyContext} from './astronomy';
 export type {SkyTimeScales, SkySnapshotOptions} from './astronomy';
-export {
-  getStarPosition,
-  getStarPositions,
-  getStarColor,
-  getGalacticAcceleration,
-  getGalacticPotential,
-  integrateGalacticOrbit,
-  createMilkyWayBackground,
-  getStarLayerData
-} from './stars';
-export type {
-  StarRecord,
-  StarPosition,
-  StarPositionOptions,
-  MilkyWayBackground,
-  MilkyWaySample,
-  StarLayerOptions,
-  StarLayerDatum
-} from './stars';

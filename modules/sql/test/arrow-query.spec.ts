@@ -4,7 +4,7 @@
 
 import {Float64, Int32, Int64, Table, Utf8, vectorFromArray} from 'apache-arrow';
 import {expect, test} from 'vitest';
-import {queryArrowTable, queryArrowTableInBatches, queryArrowSQL} from '@math.gl/sql';
+import {queryArrowTable, queryArrowTableInBatches, queryArrowSQL} from '@math.gl/sql/query';
 import {parseSQLQuery} from '@math.gl/sql/parser';
 
 /** Parses the SELECT requests used by these tests. */

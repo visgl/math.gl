@@ -11,6 +11,6 @@ export const lazyQuadrilateralizedSphericalCube: ProjectionDescriptor =
       aliases: ['Quadrilateralized Spherical Cube', 'Quadrilateralized_Spherical_Cube']
     },
     async () =>
-      (await import('@math.gl/geospatial/projection/projections/qsc'))
+      (await import('@math.gl/geospatial/projection-projections-qsc'))
         .quadrilateralizedSphericalCube
   );

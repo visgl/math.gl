@@ -4,12 +4,8 @@
 
 import {Field, Float64, tableFromArrays, vectorFromArray} from 'apache-arrow';
 import {expect, expectTypeOf, test} from 'vitest';
-import {
-  queryArrowSQL,
-  queryArrowSQLWithMetadata,
-  type PreparedScalarFunction,
-  type ScalarFunction
-} from '@math.gl/sql';
+import {queryArrowSQL, queryArrowSQLWithMetadata} from '@math.gl/sql/query';
+import {type PreparedScalarFunction, type ScalarFunction} from '@math.gl/sql/arrow';
 import {ABS} from '@math.gl/sql/math-functions';
 import {VISUALIZATION_FUNCTIONS, type ScaleProjectionMetadata} from '@math.gl/sql/scales';
 
@@ -55,7 +51,7 @@ test('duplicate prepared names and cyclic packages fail at registration', () => 
   expect(() =>
     queryArrowSQL('SELECT value FROM data', tables, {functions: [BINS, [BINS]]})
   ).toThrow('Duplicate Arrow prepared function');
-  const cyclic: import('@math.gl/sql').ArrowFunctionPackage[] = [];
+  const cyclic: import('@math.gl/sql/arrow').ArrowFunctionPackage[] = [];
   cyclic.push(cyclic);
   expect(() => queryArrowSQL('SELECT value FROM data', tables, {functions: cyclic})).toThrow(
     'Cyclic Arrow function package'

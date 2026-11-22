@@ -7,7 +7,7 @@
 // Spectral Rayleigh/Angstrom approximation: Preetham et al. (1999),
 // https://doi.org/10.1145/311535.311545
 // Henyey-Greenstein phase function: https://www.pbr-book.org/3ed-2018/Volume_Scattering/Phase_Functions
-import {smoothstep as coreSmoothstep} from '@math.gl/core';
+import {smoothstep as coreSmoothstep} from '@math.gl/core/matrix';
 import {getHenyeyGreensteinPhaseFunction} from './atmosphere-optics';
 import {getCloudSunSpectrum} from './cloud-spectral';
 import {validateRange} from './celestial';

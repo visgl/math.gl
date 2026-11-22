@@ -8,14 +8,14 @@ import {
   GeoArrowBuilder,
   makeGeoArrowColumnFromGeometryRows,
   streamGeoArrow,
-  sliceGeoArrowColumn
+  getGeoArrowColumnView
 } from '../../../src/arrow-integration/geoarrow-utils';
 import {tessellateGeoArrowStream} from '@math.gl/geometry/arrow';
 import type {
-  GeoArrowGeometryValue,
+  GeoArrowDecodedGeometry,
   GeoArrowGeometryStream
 } from '../../../src/arrow-integration/geoarrow-utils';
-const polygon: GeoArrowGeometryValue = {
+const polygon: GeoArrowDecodedGeometry = {
   type: 'Polygon',
   coordinates: [
     [
@@ -34,7 +34,7 @@ const polygon: GeoArrowGeometryValue = {
     ]
   ]
 };
-const seam: GeoArrowGeometryValue = {
+const seam: GeoArrowDecodedGeometry = {
   type: 'Polygon',
   coordinates: [
     [
@@ -60,7 +60,7 @@ test('physical streams retain chunked/sliced null row identities and omit closin
     encoding: 'geoarrow.polygon',
     dimension: 'xy'
   });
-  const sliced = sliceGeoArrowColumn(column, 1, 3);
+  const sliced = getGeoArrowColumnView(column, 1, 3);
   const rows: number[] = [],
     events: unknown[] = [];
   streamGeoArrow(sliced, sink(events), {
@@ -77,7 +77,7 @@ test('physical streams retain chunked/sliced null row identities and omit closin
   );
 });
 test('streams traverse separated, mixed and collection geometry without materialization', () => {
-  const values: GeoArrowGeometryValue[] = [
+  const values: GeoArrowDecodedGeometry[] = [
     {
       type: 'GeometryCollection',
       geometries: [
@@ -99,7 +99,9 @@ test('streams traverse separated, mixed and collection geometry without material
         },
         {
           type: 'MultiPolygon',
-          coordinates: [(polygon as Extract<GeoArrowGeometryValue, {type: 'Polygon'}>).coordinates]
+          coordinates: [
+            (polygon as Extract<GeoArrowDecodedGeometry, {type: 'Polygon'}>).coordinates
+          ]
         }
       ]
     }

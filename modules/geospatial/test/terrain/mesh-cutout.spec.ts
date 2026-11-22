@@ -8,7 +8,7 @@ import {
   createTerrainSkirt,
   splitTerrainMesh,
   TerrainSurface
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 const plane = {
   positions: Float64Array.of(0, 0, 0, 4, 0, 4, 4, 4, 12, 0, 4, 8),

@@ -15,8 +15,8 @@ import type {
   ProjectionOutput,
   ProjectionPlugin,
   ProjectionPoint
-} from '@math.gl/geospatial/projection/core';
-import {lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
+} from '@math.gl/geospatial/projection-core';
+import {lazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
 import {pipelineOptions} from '../pipeline-workload';
 import {kinematicOptions} from '../kinematic-workload';
 import inputs from '../fixtures/operation-pipeline-cases.json';

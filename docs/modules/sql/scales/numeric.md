@@ -21,7 +21,8 @@ description carries the data units and the units the layer expects.
 
 ```ts
 import {tableFromArrays} from 'apache-arrow';
-import {compileArrowScales, parseSQLScaleExpression} from '@math.gl/sql/scales';
+import {compileArrowScales} from '@math.gl/sql/scales';
+import {parseSQLScaleExpression} from '@math.gl/sql/parser';
 
 const input = tableFromArrays({
   height: [0, 50, 100],

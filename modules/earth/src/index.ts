@@ -2,13 +2,19 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+/** @deprecated Import from `@math.gl/earth/geoid`. */
 export * as geoid from './geoid';
+/** @deprecated Import from `@math.gl/earth/sun`. */
 export * as sun from './sun';
+/** @deprecated Import from `@math.gl/earth/timezone`. */
 export * as timezone from './timezone';
 
 // Public named exports. Implementations remain in independently tree-shakable files.
+/** @deprecated Import from `@math.gl/earth/geoid`. */
 export {parsePGM, Geoid, createGeoidFromGrid} from './geoid';
+/** @deprecated Import from `@math.gl/earth/geoid`. */
 export type {GeoidGridProps} from './geoid';
+/** @deprecated Import from `@math.gl/earth/sun`. */
 export {
   getMoonPosition,
   getMoonDirection,
@@ -43,6 +49,7 @@ export {
   getApproximateErfcx,
   getChapmanGrazingIncidenceFunction
 } from './sun';
+/** @deprecated Import from `@math.gl/earth/sun`. */
 export type {
   MoonPosition,
   MoonIllumination,
@@ -60,7 +67,9 @@ export type {
   CloudLighting,
   CloudLightingOptions
 } from './sun';
+/** @deprecated Import from `@math.gl/earth/sun`. */
 export {getPlanetSkyInfo, getPlanetVisibility, getPlanetVisibilityTimes} from './sun/planets';
+/** @deprecated Import from `@math.gl/earth/sun`. */
 export type {
   PlanetName,
   GalileanMoonName,
@@ -72,8 +81,11 @@ export type {
   PlanetVisibilityTimesOptions,
   PlanetVisibilityInterval
 } from './sun/planets';
+/** @deprecated Import from `@math.gl/earth/sun`. */
 export {getSkySnapshot, createSkyContext} from './sun/astronomy';
+/** @deprecated Import from `@math.gl/earth/sun`. */
 export type {SkyTimeScales, SkySnapshotOptions} from './sun/astronomy';
+/** @deprecated Import from `@math.gl/earth/sun-stars`. */
 export {
   getStarPosition,
   getStarPositions,
@@ -84,6 +96,7 @@ export {
   createMilkyWayBackground,
   getStarLayerData
 } from './sun/stars';
+/** @deprecated Import from `@math.gl/earth/sun-stars`. */
 export type {
   StarRecord,
   StarPosition,
@@ -93,6 +106,7 @@ export type {
   StarLayerOptions,
   StarLayerDatum
 } from './sun/stars';
+/** @deprecated Import from `@math.gl/earth/timezone`. */
 export {
   getTimezoneOffset,
   lookupTimezoneAsync,
@@ -100,13 +114,19 @@ export {
   getTimezoneLabel,
   isTimezoneSupported
 } from './timezone';
+/** @deprecated Import from `@math.gl/earth/timezone`. */
 export type {LocalDateTime} from './timezone';
+/** @deprecated Import from `@math.gl/earth/timezone`. */
 export {lookupTimezone} from './timezone/lookup';
+/** @deprecated Import from `@math.gl/earth/timezone`. */
 export {getStartOfDay, localDateTimeToInstant, getTimezoneTransitions} from './timezone/temporal';
+/** @deprecated Import from `@math.gl/earth/timezone`. */
 export type {
   LocalDateTimeInput,
   LocalDateTimeOptions,
   TimezoneTransition
 } from './timezone/temporal';
+/** @deprecated Import from `@math.gl/earth/sun`. */
 export {getSunTerminator} from './sun/terminator';
+/** @deprecated Import from `@math.gl/earth/sun`. */
 export type {SunTerminator, SunTerminatorOptions} from './sun/terminator';

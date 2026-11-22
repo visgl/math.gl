@@ -4,7 +4,7 @@
 // SPDX-FileComment: Original shared scalar/bulk scratch lifetime and recursive stack isolation tests.
 import {expect, test} from 'vitest';
 import {ProjectionTransform, ProjectionPipeline} from '@math.gl/geospatial/projection';
-import type {ProjectionPoint, ProjectionPlugin} from '@math.gl/geospatial/projection/core';
+import type {ProjectionPoint, ProjectionPlugin} from '@math.gl/geospatial/projection-core';
 
 for (const kind of ['engine', 'pipeline']) {
   test('bulk scratch lifetime across scalar/bulk recursion and failure: ' + kind, () => {

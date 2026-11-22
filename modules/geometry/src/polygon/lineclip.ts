@@ -29,7 +29,7 @@
 /* eslint-disable max-statements, max-depth, complexity */
 
 import {push, copy, getPointAtIndex} from './utils';
-import type {NumericArray} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 
 export type BoundingBox = [number, number, number, number];
 

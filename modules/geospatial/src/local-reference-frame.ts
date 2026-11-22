@@ -3,10 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original geodetic frame and pose composition over math.gl local-frame kernels.
 
-import {Matrix4, Quaternion, Vector3, config} from '@math.gl/core';
-import {createLocalFrameBasis, eastNorthUpBasis, localFrameToMatrix} from '@math.gl/core';
-import type {LocalFrameAxis} from '@math.gl/core';
-import type {NumericArray} from '@math.gl/core';
+import {Matrix4, Quaternion, Vector3, config} from '@math.gl/core/matrix';
+import {createLocalFrameBasis, eastNorthUpBasis, localFrameToMatrix} from '@math.gl/core/matrix';
+import type {LocalFrameAxis} from '@math.gl/core/matrix';
+import type {NumericArray} from '@math.gl/core/matrix';
 import {Ellipsoid} from './ellipsoid';
 
 export type LocalReferenceFrameOptions = {

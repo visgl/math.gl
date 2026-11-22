@@ -73,7 +73,29 @@ export function sampleHeight(heights, longitude, latitude, width = 721, height =
 }
 
 /**
+ * Temperature (°C), Practical Salinity and depth (m) domain of
+ * `getSoundAbsorptionFrancoisGarrison`, from its TSDoc. The TEOS-10 sound-speed chain accepts
+ * wider values, for example the salinity above 40 of the Red Sea and the Persian Gulf.
+ * A test pins these bounds against the function.
+ */
+export const FRANCOIS_GARRISON_DOMAIN = {
+  temperature: [-2, 30],
+  salinity: [0, 40],
+  depth: [0, 10000]
+};
+
+/** True when a level is inside {@link FRANCOIS_GARRISON_DOMAIN}. */
+export function isInAbsorptionDomain(level) {
+  return Object.entries(FRANCOIS_GARRISON_DOMAIN).every(
+    ([name, [min, max]]) => level[name] >= min && level[name] <= max
+  );
+}
+
+/**
  * Sound speed and absorption from the sea surface to the seafloor.
+ * A level outside {@link FRANCOIS_GARRISON_DOMAIN} keeps its sound speed and has
+ * `absorption: null`. The vertical loss sums only the intervals with absorption at both ends,
+ * so it is partial when a level has no absorption, and null when no interval has it.
  * @param {{depths: number[], temperature: number[], practicalSalinity: number[]}} profile
  *   In-situ temperature (°C, ITS-90) and Practical Salinity at depths in meters.
  * @param {{latitude: number, seafloorDepth: number, frequency: number}} options
@@ -104,12 +126,14 @@ export function computeSoundProfile(profile, {latitude, seafloorDepth, frequency
       depth,
       seaPressure,
       soundSpeed: getSeawaterSoundSpeed(absoluteSalinity, conservativeTemperature, seaPressure),
-      absorption: getSoundAbsorptionFrancoisGarrison({
-        frequency,
-        temperature: insituTemperature,
-        salinity,
-        depth
-      })
+      absorption: isInAbsorptionDomain({temperature: insituTemperature, salinity, depth})
+        ? getSoundAbsorptionFrancoisGarrison({
+            frequency,
+            temperature: insituTemperature,
+            salinity,
+            depth
+          })
+        : null
     };
   });
   const minimum = levels.reduce((best, level) =>
@@ -117,9 +141,20 @@ export function computeSoundProfile(profile, {latitude, seafloorDepth, frequency
   );
   // One-way vertical absorption loss, trapezoidal over depth (dB/km × km).
   let verticalLoss = 0;
-  for (let i = 1; i < levels.length; i++)
-    verticalLoss +=
-      ((levels[i].absorption + levels[i - 1].absorption) / 2) *
-      ((levels[i].depth - levels[i - 1].depth) / 1000);
-  return {levels, minimum, verticalLoss, truncated: seafloorDepth > depths.at(-1)};
+  let intervals = 0;
+  for (let i = 1; i < levels.length; i++) {
+    const [upper, lower] = [levels[i - 1].absorption, levels[i].absorption];
+    if (upper === null || lower === null) continue;
+    verticalLoss += ((upper + lower) / 2) * ((levels[i].depth - levels[i - 1].depth) / 1000);
+    intervals++;
+  }
+  const levelsWithoutAbsorption = levels.filter(level => level.absorption === null).length;
+  if (levelsWithoutAbsorption && !intervals) verticalLoss = null;
+  return {
+    levels,
+    minimum,
+    verticalLoss,
+    levelsWithoutAbsorption,
+    truncated: seafloorDepth > depths.at(-1)
+  };
 }

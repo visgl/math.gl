@@ -7,7 +7,7 @@ import {Bool, Field, Float64, Schema, Table, Int32, vectorFromArray} from 'apach
 import {compileArrowExpression} from '@math.gl/sql/arrow';
 import {makeArrowVectorFromGeoArrowColumn} from '@math.gl/core/arrow';
 import {makeGeoArrowColumnFromGeometryRows} from '@math.gl/core/arrow';
-import {createTurfArrowFunction} from '../src/turf/expressions';
+import {createTurfArrowFunction} from '../src/turf-functions';
 import {area, distance, booleanPointInPolygon, bbox} from '../src/turf';
 
 const polygon = {

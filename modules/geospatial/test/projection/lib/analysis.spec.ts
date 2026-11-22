@@ -7,11 +7,11 @@ import {
   ProjectionAnalysis,
   createProjectionFactors,
   createProjectionJacobian
-} from '@math.gl/geospatial/projection/analysis';
-import type {ProjectionFactors} from '@math.gl/geospatial/projection/analysis';
-import {normalizeCRS} from '@math.gl/geospatial/projection/core';
+} from '@math.gl/geospatial/projection-analysis';
+import type {ProjectionFactors} from '@math.gl/geospatial/projection-analysis';
+import {normalizeCRS} from '@math.gl/geospatial/projection-core';
 import * as catalogue from '@math.gl/geospatial/projection';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 import reference from '../fixtures/factors-reference.json';
 const rad = Math.PI / 180;
 const domain = {west: -Math.PI, east: Math.PI, south: -80 * rad, north: 80 * rad};

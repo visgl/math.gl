@@ -6,7 +6,7 @@ import {
   makeOrientedBoundingBoxFromPoints,
   makeAxisAlignedBoundingBoxFromPoints
 } from '@math.gl/geometry/culling';
-import {Vector3, equals} from '@math.gl/core';
+import {Vector3, equals} from '@math.gl/core/matrix';
 
 const testPoints = [
   [1, 0, 0],

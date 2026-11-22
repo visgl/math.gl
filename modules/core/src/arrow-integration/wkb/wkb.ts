@@ -10,6 +10,8 @@ import {inspectWKBHeader} from './wkb-reader';
 export type WKBParseOptions = Readonly<{
   /** Maximum recursive geometry nesting. Defaults to 64. */
   maximumDepth?: number;
+  /** Return byte views of the direct members, preserving their original WKB headers. */
+  captureMembers?: boolean;
   /** Maximum total declared child elements. Defaults to 100 million. */
   maximumElements?: number;
 }>;
@@ -18,6 +20,8 @@ export type WKBParseOptions = Readonly<{
 export type WKBParseResult = Readonly<{
   geometry: WellKnownGeometry;
   byteLength: number;
+  /** Direct collection members when captureMembers was requested. */
+  members?: readonly Uint8Array[];
   dimension: WellKnownDimension;
   /** EWKB SRID when the root header carries one. */
   srid?: number;
@@ -34,6 +38,7 @@ type WKBReadState = {
   maximumDepth: number;
   maximumElements: number;
   elementCount: number;
+  memberEnds?: number[];
 };
 
 /** Parses exactly one little- or big-endian ISO WKB or EWKB geometry. */
@@ -41,12 +46,20 @@ export function parseWKB(bytes: Uint8Array, options: WKBParseOptions = {}): WKBP
   const state: WKBReadState = {
     maximumDepth: validateLimit(options.maximumDepth, 64, 'maximumDepth'),
     maximumElements: validateLimit(options.maximumElements, 100_000_000, 'maximumElements'),
+    memberEnds: options.captureMembers ? [] : undefined,
     elementCount: 0
   };
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const result = readWKBGeometry(view, 0, state, 0);
   if (result.offset !== bytes.byteLength) throw new Error('WKB contains trailing bytes');
   return {
+    ...(state.memberEnds?.length
+      ? {
+          members: state.memberEnds
+            .slice(1)
+            .map((end, i) => bytes.subarray(state.memberEnds![i], end))
+        }
+      : {}),
     geometry: result.geometry,
     byteLength: result.offset,
     dimension: result.dimension,
@@ -115,10 +128,13 @@ function readWKBGeometry(
     case 'MultiPolygon':
     case 'GeometryCollection': {
       const children: WellKnownGeometry[] = [];
-      for (let index = 0, count = readCount(); index < count; index++) {
+      const count = readCount();
+      if (depth === 0) state.memberEnds?.push(offset);
+      for (let index = 0; index < count; index++) {
         const child = readWKBGeometry(view, offset, state, depth + 1);
         children.push(child.geometry);
         offset = child.offset;
+        if (depth === 0) state.memberEnds?.push(offset);
       }
       if (geometryType === 'MultiPoint') {
         geometry = {

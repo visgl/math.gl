@@ -6,13 +6,13 @@ import {FullProjectionEngine, projectionEngine} from '@math.gl/geospatial/projec
 import {
   createProjectionEngine,
   createProjectionDescriptor
-} from '@math.gl/geospatial/projection/core';
+} from '@math.gl/geospatial/projection-core';
 import {
   LazyProjectionEngine,
   lazyProjectionEngine
-} from '@math.gl/geospatial/projection/projections/lazy';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
-import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection/analysis';
+} from '@math.gl/geospatial/projection-projections-lazy';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
+import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection-analysis';
 import {createSpatialReference, getCRSSignature} from '@math.gl/geospatial/crs';
 import {geographicJSON} from '../fixtures/crs-datums';
 
@@ -335,7 +335,7 @@ test('generic normalization returns source coordinates using the target working 
 });
 
 test('converter requests are captured, deduplicated and load only requested algorithms', async () => {
-  const {equalEarth} = await import('@math.gl/geospatial/projection/projections/eqearth');
+  const {equalEarth} = await import('@math.gl/geospatial/projection-projections-eqearth');
   let mercImports = 0,
     equalEarthImports = 0;
   const engine = createProjectionEngine({

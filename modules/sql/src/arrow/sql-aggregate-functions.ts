@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {Table} from 'apache-arrow';
+import type {RecordBatch, Table} from 'apache-arrow';
 import {DataType} from 'apache-arrow';
 import type {Expression} from '../expressions';
 import type {ArrowAggregate} from './aggregates';
@@ -11,7 +11,12 @@ import {compileArrowExpression} from './compiler';
 import {mapArrowExpressionChildren} from './create-arrow-columns';
 import {walkArrowFunctions} from './registry';
 import type {BoundRelationAggregate} from './relational-query';
-import type {AggregateFunction, ArrowFunctionPackage} from './types';
+import type {
+  AggregateFunction,
+  ArrowAggregateValue,
+  ArrowFunctionPackage,
+  ArrowExpressionValue
+} from './types';
 
 /** Built-in SQL reductions remain available without registration. */
 const operations = new Set<ArrowAggregate['operation']>([
@@ -58,9 +63,13 @@ export function getSQLAggregateCall(
     return undefined;
   const name = String(node.callee['name']).toUpperCase() as ArrowAggregate['operation'];
   const builtin = operations.has(name) ? name : undefined;
-  const custom = functions.get(name);
-  if (!builtin && !custom) return undefined;
   const args = node.arguments as readonly (Expression & {sqlWildcard?: boolean})[];
+  const registered = functions.get(name);
+  const custom =
+    registered?.argumentCount === undefined || registered.argumentCount === args.length
+      ? registered
+      : undefined;
+  if (!builtin && !custom) return undefined;
   if (builtin && args.length !== 1) throw new Error(`Arrow SQL ${name} requires one argument`);
   if (args.some(arg => arg.sqlWildcard) && (builtin !== 'COUNT' || args.length !== 1))
     throw new Error(`Arrow SQL ${name} does not accept *`);
@@ -81,6 +90,29 @@ export function rejectSQLAggregates(
   });
 }
 
+/** Validates nested aggregate list values before Arrow materializes their buffers. */
+function aggregateValidator(type: DataType): (value: ArrowAggregateValue) => void {
+  if (DataType.isList(type) || DataType.isFixedSizeList(type)) {
+    const size = DataType.isFixedSizeList(type) ? type.listSize : undefined;
+    const validate = aggregateValidator(type.valueType);
+    return value => {
+      if (value === null) return;
+      if (!Array.isArray(value) || (size !== undefined && value.length !== size))
+        throw new Error(`Invalid aggregate result for ${type}`);
+      for (const item of value) {
+        if (item === null && !type.valueField.nullable)
+          throw new Error(`Invalid aggregate result for ${type}`);
+        validate(item);
+      }
+    };
+  }
+  const validate = createValueValidator(type);
+  return value => {
+    if (Array.isArray(value)) throw new Error(`Invalid aggregate result for ${type}`);
+    validate(value as ArrowExpressionValue);
+  };
+}
+
 /** Binds a custom aggregate once and uses a separate accumulator for each evaluated group. */
 export function bindSQLAggregate(
   call: AggregateCall,
@@ -88,13 +120,33 @@ export function bindSQLAggregate(
   functions?: readonly ArrowFunctionPackage[],
   signal?: AbortSignal
 ): BoundRelationAggregate & {metadata?: unknown} {
-  const args = call.arguments.map(expression =>
-    compileArrowExpression(expression, {inputSchema: table.schema, functions})
-  );
+  const args = call.arguments.map(expression => {
+    // An aggregate consumes vectors. Pass nested source columns through with their
+    // physical layout and extension metadata, just as a spatial scalar kernel does.
+    if (expression.type === 'Identifier') {
+      const index = table.schema.fields.findIndex(field => field.name === expression.name);
+      const field = table.schema.fields[index];
+      if (
+        field &&
+        (field.metadata.has('ARROW:extension:name') ||
+          DataType.isLargeBinary(field.type) ||
+          DataType.isList(field.type) ||
+          DataType.isStruct(field.type) ||
+          DataType.isFixedSizeList(field.type))
+      ) {
+        return {outputField: field, evaluate: (batch: RecordBatch) => batch.getChildAt(index)!};
+      }
+    }
+    return compileArrowExpression(expression, {inputSchema: table.schema, functions});
+  });
   const {outputField, createAccumulator, metadata} = call.custom!.bind({
     arguments: args.map(arg => arg.outputField)
   });
-  const validate = createValueValidator(outputField.type);
+  const type = outputField.type;
+  const tuple = DataType.isFixedSizeList(type);
+  if (tuple && !DataType.isFloat(type.valueType))
+    throw new Error('Aggregate tuple results require floating-point elements');
+  const validate = tuple ? undefined : aggregateValidator(type);
   return {
     outputField,
     metadata,
@@ -114,7 +166,17 @@ export function bindSQLAggregate(
         throw new Error(
           `Arrow SQL aggregate ${call.custom!.name} returned null for a non-nullable field`
         );
-      validate(value);
+      if (tuple) {
+        if (
+          value !== null &&
+          (!Array.isArray(value) ||
+            value.length !== type.listSize ||
+            !value.every(component => typeof component === 'number'))
+        )
+          throw new Error(`Invalid aggregate result for ${type}`);
+      } else {
+        validate!(value);
+      }
       return value;
     }
   };

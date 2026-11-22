@@ -8,7 +8,7 @@ import {
   fillTerrainDepressions,
   getTerrainCellMetrics,
   HeightField
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 test('merges branches and labels multiple outlets independently of cell order', () => {
   const receiver = Int32Array.of(3, 0, 0, -1, -2, 6, -1, 5);

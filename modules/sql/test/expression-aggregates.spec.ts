@@ -14,7 +14,7 @@ import {
   Utf8,
   vectorFromArray
 } from 'apache-arrow';
-import {compileArrowAggregates} from '@math.gl/sql';
+import {compileArrowAggregates} from '@math.gl/sql/query';
 
 test('scalar aggregate partials merge across slices, with a count-weighted average', async () => {
   const table = new Table({

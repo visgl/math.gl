@@ -11,7 +11,7 @@ import Example from '@site/src/components/polygon-playground';
 ## Usage
 
 ```js
-import {earcut} from '@math.gl/geometry';
+import {earcut} from '@math.gl/geometry/polygon';
 
 const positions = [0, 0, 1, 0, 1, 1, 0, 1];
 const indices = earcut(positions, [], 2); // Two triangles

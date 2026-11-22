@@ -1,6 +1,6 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import * as math from '@math.gl/core';
+import * as math from '@math.gl/core/matrix';
 
 console.log(math); // eslint-disable-line

@@ -47,7 +47,9 @@ export type ArrowTableFunction = Readonly<{
   prototypes: readonly ArrowTableFunctionPrototype[];
   /** Resolves a schema-dependent overload from inferred arguments. Undefined fields need context. */
   resolvePrototype?(
-    fields: readonly (Field | undefined)[]
+    fields: readonly (Field | undefined)[],
+    /** Numeric literals known at bind time, indexed by argument position. */
+    numericLiterals?: readonly (number | undefined)[]
   ): ArrowTableFunctionPrototype | undefined;
 }>;
 
@@ -67,6 +69,9 @@ export type PreparedScalarFunction<M> = Pick<ArrowProjectionOperation<M>, 'prepa
   readonly name: string;
 };
 
+/** Scalar or nested list value returned by a grouped aggregate. */
+export type ArrowAggregateValue = ArrowExpressionValue | readonly ArrowAggregateValue[];
+
 /** Independent state for one aggregate call in one group. */
 export interface AggregateAccumulator {
   /** Adds an input batch. A zero-argument aggregate receives its row count here. */
@@ -74,7 +79,7 @@ export interface AggregateAccumulator {
   /** Combines an independent partial accumulator when supported. */
   merge?(partial: AggregateAccumulator): void;
   /** Returns the result, including the declared empty or null-only behavior. */
-  finalize(): ArrowExpressionValue;
+  finalize(): ArrowAggregateValue;
 }
 
 /** A reduction that binds its schema and creates independent group state. */
@@ -83,6 +88,8 @@ export type AggregateFunction<M = never> = Readonly<{
   kind: 'aggregate';
   /** SQL call name. */
   name: string;
+  /** Restricts recognition to this argument count when the SQL name also has a scalar overload. */
+  argumentCount?: number;
   /** Binds the evaluated argument fields once per query. */
   bind(context: {arguments: readonly Field[]}): {
     /** Arrow field produced by each group. */

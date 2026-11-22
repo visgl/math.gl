@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original qualification workload; numeric expectations are independent PROJ results.
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import type {ProjectionPipelineOptions} from '@math.gl/geospatial/projection/pipeline';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import type {ProjectionPipelineOptions} from '@math.gl/geospatial/projection-pipeline';
 import {obliqueTransformation, mollweide} from '@math.gl/geospatial/projection';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
-import {universalTransverseMercator} from '@math.gl/geospatial/projection/projections/utm';
-import {parseNTv2Grid} from '@math.gl/geospatial/projection/grids/ntv2';
-import {parseGTXGrid} from '@math.gl/geospatial/projection/grids/gtx';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
+import {universalTransverseMercator} from '@math.gl/geospatial/projection-projections-utm';
+import {parseNTv2Grid} from '@math.gl/geospatial/projection-grids-ntv2';
+import {parseGTXGrid} from '@math.gl/geospatial/projection-grids-gtx';
 import inputs from './fixtures/operation-pipeline-cases.json';
 import reference from './fixtures/operation-pipeline-reference.json';
 import verticalReference from './fixtures/vertical-grid-reference.json';

@@ -3,13 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {ProjectionTransform, createProjectionDescriptor} from '@math.gl/geospatial/projection/core';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
-import {equidistantCylindrical} from '@math.gl/geospatial/projection/projections/eqc';
+import {ProjectionTransform, createProjectionDescriptor} from '@math.gl/geospatial/projection-core';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
+import {equidistantCylindrical} from '@math.gl/geospatial/projection-projections-eqc';
 import type {
   Projection,
   ProjectionTransformDescription
-} from '@math.gl/geospatial/projection/types';
+} from '@math.gl/geospatial/projection-types';
 
 const projections = [mercator, equidistantCylindrical];
 

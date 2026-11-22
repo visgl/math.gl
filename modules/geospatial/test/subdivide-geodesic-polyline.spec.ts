@@ -3,9 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {subdivideGeodesicPolyline} from '@math.gl/geospatial';
-import {Ellipsoid, EllipsoidGeodesic, GeodesicPath} from '@math.gl/geospatial';
-import {subdividePolyline} from '@math.gl/geometry';
+import {subdivideGeodesicPolyline} from '@math.gl/geospatial/globe';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {EllipsoidGeodesic, GeodesicPath} from '@math.gl/geospatial/geodesics';
+import {subdividePolyline} from '@math.gl/geometry/polygon';
 
 const radius = 1000;
 const geodesic = new EllipsoidGeodesic({semiMajorAxis: radius, semiMinorAxis: radius});

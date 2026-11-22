@@ -43,15 +43,15 @@ assert.equal(tiles.getTileRanges(variable, [100, 190, 180, 200])[0].columnStep, 
   await writeFile(
     join(temporaryDirectory, 'consumer.mjs'),
     `import assert from 'node:assert/strict';
-import * as tiles from '@math.gl/geospatial';
-import * as combinedTiles from '@math.gl/geospatial';
+import * as tiles from '@math.gl/geospatial/tiles';
+import * as combinedTiles from '@math.gl/geospatial/tiles';
 ${assertions}`
   );
   await writeFile(
     join(temporaryDirectory, 'consumer.cjs'),
     `const assert = require('node:assert/strict');
-const tiles = require('@math.gl/geospatial');
-const combinedTiles = require('@math.gl/geospatial');
+const tiles = require('@math.gl/geospatial/tiles');
+const combinedTiles = require('@math.gl/geospatial/tiles');
 ${assertions}`
   );
   for (const filename of ['consumer.mjs', 'consumer.cjs']) {
@@ -60,8 +60,8 @@ ${assertions}`
   await writeFile(
     join(temporaryDirectory, 'consumer.ts'),
     `
-import {getTileBounds, getTileIndex, getTileRange, getTileRanges, selectTileMatrix, validateTileMatrixSet, validateTileMatrixLimits, resolveTileIndex} from '@math.gl/geospatial';
-import type {TileMatrix, TileMatrixSet, TileMatrixBounds, TileMatrixLimits, VariableMatrixWidth, TileMatrixRowRange, TileMatrixSetLimits} from '@math.gl/geospatial';
+import {getTileBounds, getTileIndex, getTileRange, getTileRanges, selectTileMatrix, validateTileMatrixSet, validateTileMatrixLimits, resolveTileIndex} from '@math.gl/geospatial/tiles';
+import type {TileMatrix, TileMatrixSet, TileMatrixBounds, TileMatrixLimits, VariableMatrixWidth, TileMatrixRowRange, TileMatrixSetLimits} from '@math.gl/geospatial/tiles';
 const matrix: TileMatrix = {id: '0', resolution: 1, resolutionY: 2, origin: [0, 0],
   cornerOfOrigin: 'topLeft', tileSize: [256, 256], matrixSize: [2, 2]};
 const matrixSet: TileMatrixSet = {crs: 'local', matrices: [matrix]};
@@ -109,7 +109,7 @@ matrix.resolution = 2;
   );
   const bundle = await build({
     stdin: {
-      contents: "export {getTileBounds} from '@math.gl/geospatial';",
+      contents: "export {getTileBounds} from '@math.gl/geospatial/tiles';",
       resolveDir: temporaryDirectory
     },
     bundle: true,

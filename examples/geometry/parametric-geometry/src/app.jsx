@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import ExamplePanel from '../../../common/example-panel';
 import React, {useEffect, useMemo, useState} from 'react';
-import {TorusGeometry, LatheGeometry, ParametricGeometry} from '@math.gl/geometry';
-import {Geometry} from '@math.gl/geometry';
+import {TorusGeometry, LatheGeometry, ParametricGeometry} from '@math.gl/geometry/primitives';
+import {Geometry} from '@math.gl/geometry/primitives';
 import Mesh from '../../../common/geometry-viewer';
 import './shared/geometry-processing/styles.css';
 import './styles.css';

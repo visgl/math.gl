@@ -3,12 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original reviewed compound/dynamic metadata, model revision and irregular coverage tests.
 import {expect, test} from 'vitest';
-import {OperationCatalog} from '@math.gl/geospatial/projection/operations';
+import {OperationCatalog} from '@math.gl/geospatial/projection-operations';
 import type {
   CoordinateOperation,
   OperationSelectionRequest,
   OperationCRSMetadata
-} from '@math.gl/geospatial/projection/operations';
+} from '@math.gl/geospatial/projection-operations';
 const source: OperationCRSMetadata = {
   horizontalCRS: 'app:horizontal',
   verticalCRS: 'app:height',

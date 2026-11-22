@@ -7,7 +7,7 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See ../../../../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
-import {Matrix3, _MathUtils} from '@math.gl/core';
+import {Matrix3, _MathUtils} from '@math.gl/core/matrix';
 
 const scratchMatrix = new Matrix3();
 const scratchUnitary = new Matrix3();

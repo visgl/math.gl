@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
 import {Bench} from 'probe.gl/bench';
-import {config, configure} from '@math.gl/core';
+import {config, configure} from '@math.gl/core/matrix';
 import {coreBench} from './bench';
 
 test('core benchmark cases initialize and execute with valid fixtures', async () => {

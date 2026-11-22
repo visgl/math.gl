@@ -13,14 +13,14 @@ import {
   getGalacticPotential,
   integrateGalacticOrbit,
   createMilkyWayBackground
-} from '@math.gl/earth/sun/stars';
+} from '@math.gl/earth/sun-stars';
 import {
   equatorialToGalactic,
   galacticToEquatorial,
   KMS_TO_PC_PER_YEAR
 } from '@math.gl/earth/sun/star-galactic';
 import {getStarfieldRotation, getSkyGlobePosition} from '@math.gl/earth/sun';
-import type {StarRecord} from '@math.gl/earth/sun/stars';
+import type {StarRecord} from '@math.gl/earth/sun-stars';
 
 const base: StarRecord = {
   id: 1,

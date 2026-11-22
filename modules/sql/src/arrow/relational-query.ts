@@ -7,6 +7,8 @@ import {
   Field,
   Float64,
   Int64,
+  makeData,
+  makeVector,
   Schema,
   Table,
   vectorFromArray,
@@ -17,7 +19,7 @@ import {compileArrowAggregates, type ArrowAggregate} from './aggregates';
 import {compareUTF8} from '@math.gl/core/utf8';
 import {ColumnReader, valueType} from './buffers';
 import {compileArrowExpression, writeArrowExpressionValues} from './compiler';
-import type {ArrowExpressionOptions, ArrowExpressionValue} from './types';
+import type {ArrowAggregateValue, ArrowExpressionOptions, ArrowExpressionValue} from './types';
 
 /** A stable ordering key resolved against the source or grouped result. */
 export type ArrowQueryOrder = {
@@ -60,13 +62,7 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
   const right = join.table;
   const {vector: leftKey} = getScalarColumn(left, join.left);
   const {vector: rightKey} = getScalarColumn(right, join.right);
-  const fields = [
-    ...left.schema.fields,
-    ...right.schema.fields.map(field => field.clone({name: join.rightPrefix + field.name}))
-  ];
-  if (new Set(fields.map(field => field.name)).size !== fields.length)
-    throw new Error('Duplicate Arrow join output name');
-  const schema = new Schema(fields, left.schema.metadata, undefined, left.schema.metadataVersion);
+  const schema = makeArrowJoinSchema(left, right, join.rightPrefix);
 
   const rightRows = new Map<ArrowExpressionValue, number[]>();
   for (let row = 0; row < right.numRows; row++) {
@@ -87,6 +83,28 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
       rightIndexes.push(match);
     }
   }
+  return gatherArrowJoin(left, right, leftIndexes, rightIndexes, schema);
+}
+
+/** Builds the relational join schema and validates right prefix collisions. */
+export function makeArrowJoinSchema(left: Table, right: Table, rightPrefix: string): Schema {
+  const fields = [
+    ...left.schema.fields,
+    ...right.schema.fields.map(field => field.clone({name: rightPrefix + field.name}))
+  ];
+  if (new Set(fields.map(field => field.name)).size !== fields.length)
+    throw new Error('Duplicate Arrow join output name');
+  return new Schema(fields, left.schema.metadata, undefined, left.schema.metadataVersion);
+}
+
+/** Materializes aligned row pairs with the relational join's output schema. */
+export function gatherArrowJoin(
+  left: Table,
+  right: Table,
+  leftIndexes: readonly number[],
+  rightIndexes: readonly number[],
+  schema: Schema
+): Table {
   if (!leftIndexes.length) return new Table(schema, []);
 
   const tables = [
@@ -98,7 +116,7 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
   );
   return new Table(
     schema,
-    Object.fromEntries(fields.map((field, index) => [field.name, columns[index]!]))
+    Object.fromEntries(schema.fields.map((field, index) => [field.name, columns[index]!]))
   );
 }
 
@@ -157,8 +175,41 @@ export type BoundRelationAggregate = {
   /** Arrow field shared by all groups of this aggregate call. */
   readonly outputField: Field;
   /** Reduces one group's rows to a value in the field's physical units. */
-  evaluate(table: Table): ArrowExpressionValue;
+  evaluate(table: Table): ArrowAggregateValue;
 };
+
+/** Materializes an aggregate list without reinterpreting its scalar leaves as JS values. */
+function writeAggregateList(field: Field, values: readonly ArrowAggregateValue[]): Vector {
+  const {type} = field;
+  if (!DataType.isList(type) && !DataType.isFixedSizeList(type)) {
+    const active = Uint8Array.from(values, value => Number(value !== null));
+    return writeArrowExpressionValues(field, active, row => values[row] as ArrowExpressionValue);
+  }
+  const length = values.length;
+  const bitmap = new Uint8Array(Math.ceil(length / 8));
+  const offsets = DataType.isList(type) ? new Int32Array(length + 1) : undefined;
+  const children: ArrowAggregateValue[] = [];
+  const size = DataType.isFixedSizeList(type) ? type.listSize : 0;
+  let nullCount = 0;
+  for (let row = 0; row < length; row++) {
+    const value = values[row] as readonly ArrowAggregateValue[] | null;
+    if (value) {
+      bitmap[row >> 3]! |= 1 << (row & 7);
+      for (const item of value) children.push(item);
+    } else {
+      nullCount++;
+      for (let column = 0; column < size; column++) children.push(null);
+    }
+    if (offsets) offsets[row + 1] = children.length;
+  }
+  if (offsets && children.length > 0x7fffffff)
+    throw new Error('Aggregate list exceeds 32-bit Arrow offset capacity');
+  const child = writeAggregateList(type.valueField, children).data[0]!;
+  const data = {length, nullCount, nullBitmap: bitmap, child};
+  return DataType.isList(type)
+    ? makeVector(makeData({type, ...data, valueOffsets: offsets!}))
+    : makeVector(makeData({type, ...data}));
+}
 
 /** Groups by scalar source columns and evaluates the shared Arrow aggregate kernels. */
 export function groupArrowTable(
@@ -211,11 +262,17 @@ export function groupArrowTable(
     ...fields.map(field => selected.getChild(field.name)!),
     ...aggregateFields.map(field => {
       if (custom.has(field.name)) {
-        return writeArrowExpressionValues(
-          field,
-          new Uint8Array(results.length).fill(1),
-          row => results[row]![field.name]!
-        );
+        if (DataType.isList(field.type))
+          return writeAggregateList(
+            field,
+            results.map(result => result[field.name]!)
+          );
+        if (!DataType.isFixedSizeList(field.type))
+          return writeArrowExpressionValues(
+            field,
+            new Uint8Array(results.length).fill(1),
+            row => results[row]![field.name]!
+          );
       }
       return vectorFromArray(
         results.map(result => result[field.name]),

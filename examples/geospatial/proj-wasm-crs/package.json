@@ -1,7 +1,7 @@
 {
   "name": "math.gl-proj-wasm-crs",
   "private": true,
-  "version": "1.0.0",
+  "version": "5.1.0-alpha.0",
   "type": "module",
   "license": "MIT",
   "scripts": {

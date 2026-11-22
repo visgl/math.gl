@@ -27,7 +27,7 @@
 Accepts a scalar or component factors. Concrete classes can override arithmetic semantics; for example, matrix scaling composes a geometric scale transform.
 
 ```js
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 
 const original = new Vector3(1, 2, 3);
 const scaled = original.clone().scale([1, 1, 0]); // [1, 2, 0]

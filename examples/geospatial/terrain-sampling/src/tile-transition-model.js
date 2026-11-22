@@ -10,7 +10,7 @@ import {
   createTerrainMesh,
   createTerrainMixedVertexTileHalos,
   createTerrainGradientGrid
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 function sample(field, x, y) {
   if (!field) return undefined;

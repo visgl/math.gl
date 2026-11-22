@@ -38,8 +38,8 @@ public import path (`@math.gl/geospatial/projection/projections/<id>`), followed
 export. Geographic coordinates are built into `/core`.
 
 ```typescript
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { albersEqualArea } from "@math.gl/geospatial/projection/projections/aea";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { albersEqualArea } from "@math.gl/geospatial/projection-projections-aea";
 
 const regionalAreas = new ProjectionTransform({
   to: "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +datum=WGS84",
@@ -228,9 +228,9 @@ The oblique factory lets an application choose a rotated world map without a glo
 algorithm registry:
 
 ```typescript
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { obliqueTransformation } from "@math.gl/geospatial/projection/projections/ob_tran";
-import { mollweide } from "@math.gl/geospatial/projection/projections/moll";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { obliqueTransformation } from "@math.gl/geospatial/projection-projections-ob_tran";
+import { mollweide } from "@math.gl/geospatial/projection-projections-moll";
 
 const rotated = new ProjectionTransform({
   to: "+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=-90 +R=6371000 +datum=none",

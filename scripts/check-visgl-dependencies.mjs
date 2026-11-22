@@ -15,45 +15,40 @@ for (const [, name, locator] of lock.matchAll(/^  resolution: "((?:@(?:deck\.gl(
   packages.set(name, versions);
 }
 assert.ok(packages.size > 20, 'Expected the complete vis.gl dependency graph');
-/** Geometry package name shared by workspace and pinned loader imports. */
-const geometryPackage = '@math.gl/geometry';
-/** Yarn locator for the workspace geometry package. */
-const geometryWorkspace = 'workspace:modules/geometry';
-/** Yarn locator for the published geometry dependency of the pinned loader. */
-const tilesGeometryVersion = 'npm:5.0.0-beta.8';
-// Pinned loaders.gl releases still consume the published package under its former name.
-/** Published expressions version used only by external dependencies. */
-const publishedExpressionsVersion = 'npm:5.0.0-beta.10';
-/** Retired packages still consumed by pinned external loaders and deck.gl releases. */
-const publishedLegacyPackages = new Map([
-  ['@math.gl/arrow', 'npm:5.0.0-beta.11'],
-  ['@math.gl/web-mercator', 'npm:5.0.0-beta.8']
+/**
+ * Published versions consumed by pinned deck.gl, luma.gl and loaders.gl packages.
+ * Their old imports resolve through their own dependency tree.
+ */
+const publishedVersions = new Map([
+  ['@math.gl/core', ['5.0.0-beta.8', '5.0.0-beta.10', '5.0.0-beta.11', '5.0.0']],
+  ['@math.gl/dggs', ['5.0.0-beta.8']],
+  ['@math.gl/earth', ['5.0.0-beta.8']],
+  ['@math.gl/geospatial', ['5.0.0-beta.8', '5.0.0']],
+  ['@math.gl/geometry', ['5.0.0-beta.8', '5.0.0-beta.10', '5.0.0-beta.11', '5.0.0']],
+  ['@math.gl/sql', ['5.0.0']],
+  ['@math.gl/expressions', ['5.0.0-beta.10']],
+  ['@math.gl/arrow', ['5.0.0-beta.11']],
+  ['@math.gl/web-mercator', ['5.0.0-beta.8']]
 ]);
+const workspacePackages = new Set(['core', 'dggs', 'earth', 'geospatial', 'geometry', 'sql', 'tasks']);
 for (const [name, versions] of packages) {
-  if (name === '@math.gl/expressions') {
-    assert.deepEqual(versions, new Set([publishedExpressionsVersion]));
+  if (!name.startsWith('@math.gl/')) {
+    assert.equal(versions.size, 1, `${name} has multiple resolutions: ${[...versions]}`);
     continue;
   }
-  if (publishedLegacyPackages.has(name)) {
-    assert.deepEqual(versions, new Set([publishedLegacyPackages.get(name)]));
-    continue;
-  }
-  if (name === geometryPackage) {
-    assert.deepEqual(versions, new Set([geometryWorkspace, tilesGeometryVersion]));
-    continue;
-  }
-  assert.equal(versions.size, 1, `${name} has multiple resolutions: ${[...versions]}`);
-  if (name.startsWith('@math.gl/')) {
-    assert.match([...versions][0], /^workspace:modules\//, `${name} must use this repository`);
-  }
+  const module = name.split('/')[1];
+  const expected = (publishedVersions.get(name) || []).map(version => 'npm:' + version);
+  if (workspacePackages.has(module)) expected.push('workspace:modules/' + module);
+  assert.deepEqual(versions, new Set(expected), `${name} has unexpected resolutions`);
 }
 const root = fileURLToPath(new URL('../', import.meta.url));
-/** The only install path that may contain the published geometry package. */
-const tilesGeometryPath = resolve(
-  root,
-  'node_modules/@loaders.gl/tiles-3d/node_modules/@math.gl/geometry'
-);
-assert.ok(existsSync(tilesGeometryPath), 'Expected the pinned 3D Tiles geometry dependency');
+for (const name of workspacePackages) {
+  assert.equal(
+    realpathSync(resolve(root, 'node_modules/@math.gl', name)),
+    realpathSync(resolve(root, 'modules', name)),
+    `Root @math.gl/${name} must resolve to the workspace`
+  );
+}
 const visited = new Set();
 /** Verifies installed package locations and versions recursively. */
 function checkInstall(directory) {
@@ -73,16 +68,11 @@ function checkInstall(directory) {
       assert.ok(resolutions, packageRoot + ' is not in the lockfile');
     }
     if (resolutions) {
-      let [locator] = resolutions;
-      if (pkg.name === geometryPackage) {
-        locator = packageRoot === tilesGeometryPath ? tilesGeometryVersion : geometryWorkspace;
-      }
-      if (locator.startsWith('workspace:')) {
-        assert.equal(realpathSync(packageRoot), realpathSync(resolve(root, locator.slice(10))),
-          pkg.name + ' must resolve to the workspace');
-      } else {
-        assert.equal('npm:' + pkg.version, locator, packageRoot + ' has a stale installed version');
-      }
+      const installedLocator = [...resolutions].find(locator =>
+        locator.startsWith('workspace:') &&
+        realpathSync(packageRoot) === realpathSync(resolve(root, locator.slice('workspace:'.length)))
+      ) || 'npm:' + pkg.version;
+      assert(resolutions.has(installedLocator), packageRoot + ' has a stale installed version');
     }
     checkInstall(resolve(packageRoot, 'node_modules'));
   }
@@ -98,4 +88,4 @@ for (const group of ['modules', 'dev-modules', 'examples']) {
   }
 }
 checkInstall(resolve(root, 'website/node_modules'));
-console.log(`Verified ${packages.size} vis.gl packages: workspace math.gl with pinned published dependencies for 3D Tiles, legacy expressions, and retired Arrow/Web Mercator dependencies.`);
+console.log(`Verified ${packages.size} vis.gl packages and pinned legacy dependencies.`);

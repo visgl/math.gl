@@ -21,7 +21,7 @@ descriptor types:
 - `GeoArrowValidity`
 
 Related semantic types include `GeoArrowEncoding`, `GeoArrowDimension`,
-`GeoArrowCoordinateLayout`, `GeoArrowGeometryValue`, and `GeoArrowBounds`.
+`GeoArrowCoordinateLayout`, `GeoArrowDecodedGeometry`, and `GeoArrowBounds`.
 
 #### `mergeGeoArrowDimensions(left, right)`
 
@@ -48,9 +48,11 @@ Visits native coordinate tuples in logical row order. The callback receives `(co
 rowIndex)`. The returned callback value is ignored; use `mapGeoArrowCoordinates` to allocate mapped
 output.
 
-#### `sliceGeoArrowColumn(column, begin?, end?)`
+#### `getGeoArrowColumnView(column, start?, end?)`
 
-Returns a zero-copy logical slice while preserving chunk boundaries. A full slice returns `column`.
+Borrows the half-open range `[start, end)` while retaining chunk boundaries and the source
+encoding. Bounds default to the start and end of the column. Negative bounds count backwards
+from the end. A view of the full range returns `column`.
 
 #### `sliceGeoArrowArray(array, begin, end)`
 
@@ -71,7 +73,7 @@ zero native vertices until decoded with the `/wkb` bridge.
 
 These native-geometry APIs create only JavaScript descriptors and reference lists: no new typed
 arrays, subarray views, coordinate copies, rebased offsets, or expanded feature IDs. Existing
-`sliceGeoArrowColumn` and `sliceGeoArrowArray` also retain the original typed-array objects.
+`getGeoArrowColumnView` and `sliceGeoArrowArray` also retain the original typed-array objects.
 Use valid descriptors; call `validateGeoArrowColumn` separately for untrusted physical input.
 
 Storage is borrowed, not immutable: callers must not mutate, recycle, or transfer/detach buffers
@@ -169,10 +171,16 @@ non-coordinate columns are returned unchanged.
 Converts native geometry family, semantic dimension, coordinate layout, coordinate type, or offset
 width. Options are `encoding`, `dimension`, `coordinateLayout` (`preserve`, `interleaved`, or
 `separated`), `coordinateType` (`preserve`, `float32`, or `float64`), and `offsetType`
-(`preserve`, `int32`, or `int64`). Use `/wkb` for serialized targets. Semantic ordinates map by
-name, so M is not reinterpreted as Z.
+(`preserve`, `int32`, or `int64`). Semantic ordinates map by name, preserving the distinction
+between M and Z. Requests for `geoarrow.wkb` or `geoarrow.wkt` encode native geometry as
+variable-width values. Decode serialized input before changing its encoding.
 
-#### `normalizeGeoArrowUnion(column)`
+For a dense-union stream, set `unionChildren` to ordered, empty `GeoArrowDenseUnionChild`
+descriptors. Populated children are matched by encoding and dimension and must match the target's
+physical layout after any requested conversions. Missing families reuse the target's empty children.
+The result borrows compatible geometry and rewrites selectors only when their type IDs change.
+
+#### `sortGeoArrowUnionChildren(column)`
 
 Sorts dense-union child descriptors by type ID. Dispatch and child buffers are retained. Non-union
 columns and already normalized unions are identity operations.
@@ -291,10 +299,9 @@ Encodes native GeoArrow descriptors into WKB chunks.
 
 Encodes native GeoArrow descriptors into WKT chunks.
 
-Import these functions from `@math.gl/core/arrow`. They encode native descriptors into
-variable-width serialized descriptors using an exact measure/write pass per source chunk. WKB
-encoding traverses physical descriptors directly, retains chunk boundaries, and represents
-dense-union child nulls in the serialized validity bitmap. A column already in the requested
+Import these functions from `@math.gl/core/arrow`. Both encoders traverse physical descriptors
+directly, retain chunk boundaries, and represent dense-union child nulls in the serialized validity
+bitmap. WKT uses the semantic dimension of each native union row. A column already in the requested
 encoding is returned unchanged.
 
 Individual geometry parsing and formatting live in `@math.gl/core/arrow`. GeoArrow's four codec functions

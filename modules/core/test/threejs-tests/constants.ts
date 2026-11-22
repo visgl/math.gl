@@ -5,7 +5,7 @@
 
 // @author bhouston / http://exocortex.com
 
-import {Vector2, Vector3} from '@math.gl/core';
+import {Vector2, Vector3} from '@math.gl/core/matrix';
 
 export const x = 2;
 export const y = 3;

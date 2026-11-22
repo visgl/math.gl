@@ -17,8 +17,8 @@ The default `ProjectionTransform`, `LazyProjectionEngine`, and `normalizeCRS` re
 WGS84 and NAD83 as named datums. Register regional definitions explicitly:
 
 ```typescript
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { datumCatalog } from "@math.gl/geospatial/projection/datums";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { datumCatalog } from "@math.gl/geospatial/projection-datums";
 
 const projection = new ProjectionTransform({
   from: "+proj=longlat +datum=nad27",

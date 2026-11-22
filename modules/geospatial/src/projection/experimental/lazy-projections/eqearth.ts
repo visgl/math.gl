@@ -7,7 +7,7 @@ import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyEqualEarth: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'eqearth', aliases: ['Equal Earth', 'Equal_Earth']},
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/eqearth');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-eqearth');
     return projectionModule.equalEarth;
   }
 );

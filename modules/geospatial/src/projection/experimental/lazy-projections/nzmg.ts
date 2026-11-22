@@ -8,7 +8,7 @@ export const lazyNewZealandMapGrid: ProjectionDescriptor =
   /* @__PURE__ */ createProjectionDescriptor(
     {name: 'nzmg', aliases: ['New_Zealand_Map_Grid']},
     async () => {
-      const projectionModule = await import('@math.gl/geospatial/projection/projections/nzmg');
+      const projectionModule = await import('@math.gl/geospatial/projection-projections-nzmg');
       return projectionModule.newZealandMapGrid;
     }
   );

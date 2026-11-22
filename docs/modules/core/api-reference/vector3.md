@@ -9,7 +9,7 @@
 ## Usage
 
 ```js
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 const vector = new Vector3(1, 1, 1);
 ```
 

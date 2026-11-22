@@ -9,7 +9,6 @@ import {
   getHenyeyGreensteinPhaseFunction,
   getRayleighPhaseFunction
 } from '@math.gl/earth/sun';
-import * as earth from '@math.gl/earth';
 
 // exp(x^2) erfc(x) to 20 digits, from mpmath 1.3 at 30 digits:
 // mp.nstr(mp.exp(mp.mpf(x)**2) * mp.erfc(mp.mpf(x)), 20).
@@ -267,9 +266,4 @@ describe('getChapmanGrazingIncidenceFunction', () => {
     expect(() => getChapmanGrazingIncidenceFunction(100, -1)).toThrow(/tangent radius/);
     expect(() => getChapmanGrazingIncidenceFunction(797, -0.9999999)).toThrow(/tangent radius/);
   });
-});
-
-test('the root entry exports the atmosphere optics', () => {
-  expect(earth.getHenyeyGreensteinPhaseFunction).toBe(getHenyeyGreensteinPhaseFunction);
-  expect(earth.getChapmanGrazingIncidenceFunction).toBe(getChapmanGrazingIncidenceFunction);
 });

@@ -11,7 +11,11 @@ import {
   type SQLSort,
   type SQLTableBinding
 } from '../parser/parse-sql-statement';
-import {executeArrowProjection, queryArrowTable, type ArrowTableQuery} from './query-arrow-table';
+import {
+  executeArrowProjection,
+  executeArrowTableQuery as queryArrowTable,
+  type ArrowTableQuery
+} from './query-arrow-table';
 import type {ArrowAggregate} from './aggregates';
 import {
   getProjectionOperations,

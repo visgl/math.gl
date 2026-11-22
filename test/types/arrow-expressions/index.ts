@@ -13,7 +13,7 @@ import {
   vectorFromArray
 } from 'apache-arrow';
 import {type ParameterizedColumnarPredicate} from '@math.gl/sql/expressions';
-import {compileArrowAggregates} from '@math.gl/sql';
+import {compileArrowAggregates} from '@math.gl/sql/query';
 import {
   type ArrowTableFunction,
   type ArrowTableFunctionType,
@@ -97,7 +97,7 @@ async function workerTypes() {
 }
 void workerTypes;
 
-import {createTurfArrowFunction} from '@math.gl/geospatial/turf/expressions';
+import {createTurfArrowFunction} from '@math.gl/geospatial/turf-functions';
 import {distance, booleanPointInPolygon} from '@math.gl/geospatial/turf';
 declare const geometryField: Field;
 createTurfArrowFunction({
@@ -188,7 +188,8 @@ const signature = NUMERIC_FUNCTION_DEFINITIONS.SIN.prototypes[0];
 void [names, normalized, signature, new ExpressionEvaluationError('domain', 'invalid value')];
 
 import {createArrowColumns, type ArrowProjectionOperation} from '@math.gl/sql/arrow';
-import {scaleProjectionOperation, type ResolvedScale} from '@math.gl/sql/scales';
+import {scaleProjectionOperation} from '@math.gl/sql/scales';
+import {type ResolvedScale} from '@math.gl/core/color';
 import {parseSQLExpression} from '@math.gl/sql/parser';
 declare const source: import('apache-arrow').Table;
 declare const tag: ArrowProjectionOperation<{kind: 'tag'; label: string}>;
@@ -210,7 +211,8 @@ for (const entry of mixed.columnMetadata.color) {
   else entry.label.toUpperCase();
 }
 
-import {queryArrowSQLWithMetadata, type ScalarFunction} from '@math.gl/sql';
+import {queryArrowSQLWithMetadata} from '@math.gl/sql/query';
+import {type ScalarFunction} from '@math.gl/sql/arrow';
 import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 declare const tagFunction: ScalarFunction<{kind: 'tag'; label: string}>;
 const taggedQuery = queryArrowSQLWithMetadata(
@@ -225,7 +227,7 @@ for (const entry of taggedQuery.columnMetadata['value'] ?? []) {
   else entry.label.toUpperCase();
 }
 
-import type {AggregateFunction} from '@math.gl/sql';
+import type {AggregateFunction} from '@math.gl/sql/arrow';
 declare const summaryFunction: AggregateFunction<{kind: 'summary'; unit: string}>;
 const summaries = queryArrowSQLWithMetadata(
   'SELECT summary(value) AS total FROM input',
@@ -239,7 +241,7 @@ for (const item of summaries.columnMetadata['total'] ?? []) {
   else item.scale.sample(1);
 }
 
-import type {TableFunction} from '@math.gl/sql';
+import type {TableFunction} from '@math.gl/sql/arrow';
 declare const sourceFunction: TableFunction<{kind: 'source'; id: string}>;
 const taggedSource = queryArrowSQLWithMetadata(
   'SELECT value FROM source(input)',

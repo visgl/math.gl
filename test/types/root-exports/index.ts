@@ -2,10 +2,19 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {mat4, mat4GetScaling, vec3Normalize, createLocalFrameBasis} from '@math.gl/core';
-import {getGeohashBounds} from '@math.gl/dggs';
-import {TriangleBVH, getClosestPointsSegmentTriangle, type GeometryInput} from '@math.gl/geometry';
-import {getSkySnapshot, getStartOfDay, type SkySnapshotOptions} from '@math.gl/earth';
+import {mat4, mat4GetScaling, vec3Normalize, createLocalFrameBasis} from '@math.gl/core/matrix';
+import {getGeohashBounds} from '@math.gl/dggs/geohash';
+import {A5Decoder} from '@math.gl/dggs/a5';
+import {GeohashDecoder} from '@math.gl/dggs/geohash';
+import {H3Decoder} from '@math.gl/dggs/h3';
+import {PlusCodeDecoder} from '@math.gl/dggs/plus-code';
+import {QuadkeyDecoder} from '@math.gl/dggs/quadkey';
+import {S2Decoder} from '@math.gl/dggs/s2';
+import {TriangleBVH} from '@math.gl/geometry/spatial-index';
+import {getClosestPointsSegmentTriangle} from '@math.gl/geometry/culling';
+import {type GeometryInput} from '@math.gl/geometry/processing';
+import {getSkySnapshot, type SkySnapshotOptions} from '@math.gl/earth/sun';
+import {getStartOfDay} from '@math.gl/earth/timezone';
 import {
   createTerrainMesh,
   weldTerrainContourTiles,
@@ -38,10 +47,10 @@ import {
   createTerrainMixedVertexTileHalos,
   createTerrainVertexTileHalos,
   createTerrainFilteredPyramid,
-  createCRSResolver,
   type TerrainGridMesh,
   type TerrainMixedSurface
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
+import {createCRSResolver} from '@math.gl/geospatial/crs';
 import {parseWKB} from '@math.gl/core/arrow';
 import {
   createTerrainMesh as terrainMesh,
@@ -61,17 +70,22 @@ import {
 } from '@math.gl/geospatial/terrain';
 import {prepareGeoArrowTransfer} from '@math.gl/core/arrow';
 import {createCRSResolver as crsResolver} from '@math.gl/geospatial/crs';
-import {STAR_CATALOG} from '@math.gl/earth/sun/stars';
+import {STAR_CATALOG} from '@math.gl/earth/sun-stars';
 // @ts-expect-error The old terrain leaf is not a published API.
 import {createTerrainMesh as removedMesh} from '@math.gl/geospatial/terrain/mesh';
-// @ts-expect-error The old geometry leaf is not a published API.
-import {TriangleBVH as removedBVH} from '@math.gl/geometry/spatial-index';
+import {TriangleBVH as spatialIndexBVH} from '@math.gl/geometry/spatial-index';
 void [
   mat4,
   mat4GetScaling,
   vec3Normalize,
   createLocalFrameBasis,
   getGeohashBounds,
+  A5Decoder,
+  GeohashDecoder,
+  H3Decoder,
+  PlusCodeDecoder,
+  QuadkeyDecoder,
+  S2Decoder,
   TriangleBVH,
   getClosestPointsSegmentTriangle,
   getSkySnapshot,
@@ -118,7 +132,7 @@ void [
   crsResolver,
   STAR_CATALOG,
   removedMesh,
-  removedBVH
+  spatialIndexBVH
 ];
 const typeChecks: [
   GeometryInput?,
@@ -136,3 +150,5 @@ const typeChecks: [
   TerrainContourBoundaryDiagnostics?
 ] = [];
 void typeChecks;
+
+export {queryArrowTable, type ArrowTableQuery} from '@math.gl/sql/query';

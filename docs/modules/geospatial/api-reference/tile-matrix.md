@@ -9,8 +9,8 @@ rectangular tile grids, including coalesced row bands, in any coordinate system.
 its types and functions are also exported from `@math.gl/geospatial`, alongside geographic tile queries.
 
 ```typescript
-import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix, validateTileMatrixSet, resolveTileIndex} from '@math.gl/geospatial';
-import type {TileMatrix, TileMatrixSet} from '@math.gl/geospatial';
+import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix, validateTileMatrixSet, resolveTileIndex} from '@math.gl/geospatial/tiles';
+import type {TileMatrix, TileMatrixSet} from '@math.gl/geospatial/tiles';
 
 const matrix: TileMatrix = {
   id: '2m', resolution: 2, origin: [200000, 4600000],

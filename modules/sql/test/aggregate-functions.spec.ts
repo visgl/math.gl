@@ -2,9 +2,18 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {DateDay, Field, Float64, TimestampMicrosecond, tableFromArrays} from 'apache-arrow';
+import {
+  DateDay,
+  Field,
+  FixedSizeList,
+  Float64,
+  List,
+  TimestampMicrosecond,
+  tableFromArrays
+} from 'apache-arrow';
 import {expect, test} from 'vitest';
-import {queryArrowSQL, queryArrowSQLWithMetadata, type AggregateFunction} from '@math.gl/sql';
+import {queryArrowSQL, queryArrowSQLWithMetadata} from '@math.gl/sql/query';
+import {type AggregateFunction} from '@math.gl/sql/arrow';
 import {VISUALIZATION_FUNCTIONS} from '@math.gl/sql/scales';
 
 const SPREAD = {
@@ -104,4 +113,42 @@ test('custom aggregate output preserves Arrow date days and timestamp microsecon
   );
   expect(result.getChild('day')!.data[0]!.values[0]).toBe(1);
   expect(result.getChild('tick')!.data[0]!.values[0]).toBe(1234n);
+});
+
+test('custom nested aggregate results retain temporal units and list validity', () => {
+  const DAYS = {
+    kind: 'aggregate',
+    name: 'DAYS',
+    bind() {
+      const tuple = new FixedSizeList(2, new Field('day', new DateDay(), true));
+      return {
+        outputField: new Field('days', new List(new Field('tuple', tuple, true)), false),
+        createAccumulator: () => ({update() {}, finalize: () => [[1, null], null]})
+      };
+    }
+  } satisfies AggregateFunction;
+  const TICKS = {
+    kind: 'aggregate',
+    name: 'TICKS',
+    bind() {
+      return {
+        outputField: new Field(
+          'ticks',
+          new List(new Field('tick', new TimestampMicrosecond())),
+          false
+        ),
+        createAccumulator: () => ({update() {}, finalize: () => [1234n]})
+      };
+    }
+  } satisfies AggregateFunction;
+  const result = queryArrowSQL(
+    'SELECT DAYS() AS days, TICKS() AS ticks FROM data',
+    new Map([['data', tableFromArrays({x: [1]})]]),
+    {functions: [DAYS, TICKS]}
+  );
+  const [day] = result.getChild('days')!.data[0]!.children;
+  expect(day!.children[0]!.values[0]).toBe(1);
+  expect(day!.children[0]!.getValid(1)).toBe(false);
+  expect(day!.getValid(1)).toBe(false);
+  expect(result.getChild('ticks')!.data[0]!.children[0]!.values[0]).toBe(1234n);
 });

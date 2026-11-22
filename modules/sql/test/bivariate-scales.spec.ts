@@ -4,7 +4,8 @@
 
 import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
-import {compileArrowBivariateScale, compileBivariateColorScale} from '@math.gl/sql/scales';
+import {compileArrowBivariateScale} from '@math.gl/sql/scales';
+import {compileBivariateColorScale} from '@math.gl/core/color';
 
 const spec = {
   xDomain: [0, 100],

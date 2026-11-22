@@ -3,12 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
 import {projectionEngine, projJSONCRSParser} from '@math.gl/geospatial/projection';
-import {lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
+import {lazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
 import {geographicJSON, projectedJSON, projectedWKT2} from '../fixtures/crs-datums';
 import inputs from '../fixtures/native-proj-cases.json';
 import {sphericalExtremum} from '@math.gl/geospatial/projection/experimental/rendering-profile/spherical-rendering-domain';
-import {createProjectionEngine} from '@math.gl/geospatial/projection/core';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
+import {createProjectionEngine} from '@math.gl/geospatial/projection-core';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 import {equalAreaAzimuthalBounds} from '@math.gl/geospatial/projection/experimental/rendering-profile/azimuthal-rendering-bounds';
 import {kernelParameters} from '@math.gl/geospatial/projection/experimental/kernel';
 import {

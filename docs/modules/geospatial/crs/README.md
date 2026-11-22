@@ -178,7 +178,7 @@ Resolution supplies definitions; execution support remains engine-specific.
   registry entry to `AUTHORITY:CODE`. Use the result to compare identifiers.
 
 The official MIT-licensed schema is vendored unchanged and can be imported or resolved through
-`@math.gl/geospatial/crs/projjson.schema.json`. It is the PROJJSON runtime validation source of truth. The
+`@math.gl/geospatial/crs-projjson.schema.json`. It is the PROJJSON runtime validation source of truth. The
 package does not add a second Zod schema. It also does not perform coordinate transformations,
 authority-registry lookup, semantic CRS comparison, or WKT/PROJ-to-PROJJSON conversion.
 

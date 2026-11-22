@@ -8,12 +8,15 @@ import type {
   GeoArrowColumn,
   GeoArrowCoordinateLayout,
   GeoArrowCoordinateMapper,
+  GeoArrowDenseUnion,
+  GeoArrowDenseUnionChild,
   GeoArrowDimension,
   GeoArrowEncoding
 } from './types';
 import {getGeoArrowDimensionSize, getGeoArrowGeometryType} from './types';
-import type {GeoArrowBuilderEncoding} from './builder';
+import type {GeoArrowBuilderEncoding, GeoArrowBuilderOptions} from './builder';
 import {GeoArrowBuilder} from './builder';
+import {encodeGeoArrowWKB, encodeGeoArrowWKT} from './codecs';
 import {
   getGeoArrowRowCount,
   getGeoArrowVertexCount,
@@ -39,13 +42,15 @@ export type MapGeoArrowCoordinatesOptions = Readonly<{
   limits?: GeoArrowResourceLimitOptions;
 }>;
 
-/** Conversion options for native physical layouts. */
+/** Conversion options for native or serialized geometry columns. */
 export type ConvertGeoArrowColumnOptions = Readonly<{
   encoding?: GeoArrowEncoding | 'native';
   dimension?: GeoArrowDimension;
   coordinateLayout?: GeoArrowCoordinateLayout | 'preserve';
   coordinateType?: 'preserve' | 'float32' | 'float64';
   offsetType?: 'preserve' | 'int32' | 'int64';
+  /** Ordered empty child descriptors defining the same dense-union schema for every chunk. */
+  unionChildren?: readonly GeoArrowDenseUnionChild[];
   limits?: GeoArrowResourceLimitOptions;
 }>;
 
@@ -233,14 +238,19 @@ export function mapGeoArrowCoordinatesInto(
 /** Converts separated native coordinates to interleaved tuples. Identity is returned unchanged. */
 export function interleaveGeoArrowCoordinates(column: GeoArrowColumn): GeoArrowColumn {
   if (column.coordinateLayout === 'interleaved') return column;
-  if (!column.coordinateLayout) return column;
+  if (
+    !column.coordinateLayout &&
+    column.encoding !== 'geoarrow.geometry' &&
+    column.encoding !== 'geoarrow.geometrycollection'
+  )
+    return column;
   return mapGeoArrowCoordinates(column, coordinate => coordinate, {
     coordinateLayout: 'interleaved'
   });
 }
 
 /** Normalizes dense-union children by ascending type ID without changing dispatch buffers. */
-export function normalizeGeoArrowUnion(column: GeoArrowColumn): GeoArrowColumn {
+export function sortGeoArrowUnionChildren(column: GeoArrowColumn): GeoArrowColumn {
   if (column.encoding !== 'geoarrow.geometry') return column;
   let changed = false;
   const chunks = column.chunks.map(chunk => {
@@ -260,7 +270,14 @@ export function convertGeoArrowColumn(
   options: ConvertGeoArrowColumnOptions = {}
 ): GeoArrowColumn {
   const encoding =
-    options.encoding === 'native' || !options.encoding ? column.encoding : options.encoding;
+    options.encoding === 'native' || !options.encoding
+      ? options.unionChildren
+        ? 'geoarrow.geometry'
+        : column.encoding
+      : options.encoding;
+  if (options.unionChildren && encoding !== 'geoarrow.geometry') {
+    throw new Error('GeoArrow union children require the geoarrow.geometry output encoding.');
+  }
   const dimension = options.dimension || column.dimension;
   const coordinateLayout =
     options.coordinateLayout === 'preserve' || !options.coordinateLayout
@@ -269,6 +286,7 @@ export function convertGeoArrowColumn(
   const requestedOffsetType = options.offsetType || 'preserve';
   const currentOffsetType = getColumnOffsetType(column);
   if (
+    !options.unionChildren &&
     encoding === column.encoding &&
     dimension === column.dimension &&
     coordinateLayout === column.coordinateLayout &&
@@ -277,10 +295,41 @@ export function convertGeoArrowColumn(
   ) {
     return column;
   }
-  if (encoding === 'geoarrow.wkb' || encoding === 'geoarrow.wkt') {
-    throw new Error('Use encodeGeoArrowWKB or encodeGeoArrowWKT for serialized output');
-  }
   assertGeoArrowResourceLimits(column, options.limits);
+  if (
+    column.encoding !== encoding &&
+    (column.encoding === 'geoarrow.wkb' || column.encoding === 'geoarrow.wkt')
+  ) {
+    throw new Error('Decode serialized GeoArrow before changing its encoding.');
+  }
+  if (encoding === 'geoarrow.wkb' || encoding === 'geoarrow.wkt') {
+    if (
+      options.dimension ||
+      (options.coordinateLayout && options.coordinateLayout !== 'preserve') ||
+      (options.coordinateType && options.coordinateType !== 'preserve')
+    ) {
+      throw new Error(
+        'Convert coordinate layout or dimensions before encoding serialized GeoArrow.'
+      );
+    }
+    const serialized =
+      encoding === 'geoarrow.wkb' ? encodeGeoArrowWKB(column) : encodeGeoArrowWKT(column);
+    return requestedOffsetType === 'preserve'
+      ? serialized
+      : {
+          ...serialized,
+          chunks: serialized.chunks.map(chunk => convertArrayOffsets(chunk, requestedOffsetType))
+        };
+  }
+  if (column.encoding === 'geoarrow.geometry' && isConcreteEncoding(encoding)) {
+    return demoteDenseUnion(column, {
+      encoding,
+      dimension,
+      coordinateLayout: coordinateLayout || 'interleaved',
+      coordinateType: options.coordinateType === 'float32' ? 'float32' : 'float64',
+      offsetType: requestedOffsetType === 'preserve' ? currentOffsetType : requestedOffsetType
+    });
+  }
   const needsCoordinateMap =
     dimension !== column.dimension ||
     coordinateLayout !== column.coordinateLayout ||
@@ -290,8 +339,9 @@ export function convertGeoArrowColumn(
         column,
         coordinate => coordinate,
         {
-          dimension,
-          coordinateLayout: coordinateLayout || undefined,
+          dimension: options.dimension,
+          coordinateLayout:
+            options.coordinateLayout === 'preserve' ? undefined : options.coordinateLayout,
           coordinateType: options.coordinateType,
           limits: options.limits
         },
@@ -305,12 +355,143 @@ export function convertGeoArrowColumn(
           ...mapped,
           chunks: mapped.chunks.map(chunk => convertArrayOffsets(chunk, requestedOffsetType))
         };
+  if (options.unionChildren) {
+    checkGeoArrowUnionChildren(options.unionChildren);
+    const union = promoteToDenseUnion(offsetConverted);
+    return {
+      ...union,
+      chunks: union.chunks.map(chunk => alignGeoArrowUnion(chunk, union, options.unionChildren!))
+    };
+  }
   if (encoding === column.encoding) return offsetConverted;
   if (encoding === 'geoarrow.geometry') return promoteToDenseUnion(offsetConverted);
   const promoted = promoteSingleFamily(offsetConverted, encoding, requestedOffsetType);
   if (promoted) return promoted;
-  if (column.encoding === 'geoarrow.geometry') return demoteDenseUnion(offsetConverted, encoding);
   throw new Error(`Rows cannot be represented as ${encoding}`);
+}
+
+/** Checks that the declared target has unique, typed, empty children. */
+function checkGeoArrowUnionChildren(children: readonly GeoArrowDenseUnionChild[]): void {
+  const ids = new Set<number>();
+  const families = new Set<string>();
+  if (!children.length) throw new Error('Declare at least one GeoArrow union child.');
+  for (const child of children) {
+    const family = `${child.encoding}/${child.dimension}`;
+    if (
+      child.data.length !== 0 ||
+      !child.encoding ||
+      !child.dimension ||
+      !child.coordinateLayout ||
+      !Number.isInteger(child.typeId) ||
+      child.typeId < 0 ||
+      child.typeId > 127 ||
+      ids.has(child.typeId) ||
+      families.has(family)
+    ) {
+      throw new Error('GeoArrow union targets require unique typed empty geometry children.');
+    }
+    ids.add(child.typeId);
+    families.add(family);
+  }
+}
+
+/** Aligns the child schema while preserving child offsets and compatible geometry buffers. */
+function alignGeoArrowUnion(
+  array: GeoArrowArray,
+  column: GeoArrowColumn,
+  target: readonly GeoArrowDenseUnionChild[]
+): GeoArrowDenseUnion {
+  if (array.kind !== 'dense-union') throw new Error('Expected dense-union storage.');
+  const children = [...target];
+  const ids = new Map<number, number>();
+  for (const child of array.children) {
+    const encoding = child.encoding || getEncodingFromChildName(child.name);
+    const dimension = child.dimension ?? column.dimension;
+    const targetIndex = target.findIndex(
+      entry => entry.encoding === encoding && entry.dimension === dimension
+    );
+    if (targetIndex < 0) {
+      if (child.data.length === 0) continue;
+      throw new Error(`GeoArrow union target does not declare ${encoding} ${dimension}.`);
+    }
+    const entry = target[targetIndex];
+    ids.set(child.typeId, entry.typeId);
+    if (child.data.length === 0) continue;
+    if (
+      children[targetIndex] !== entry ||
+      (child.coordinateLayout ?? column.coordinateLayout) !== entry.coordinateLayout ||
+      !sameGeoArrowStorage(child.data, entry.data)
+    ) {
+      throw new Error(
+        `GeoArrow union child storage does not match the target for ${encoding} ${dimension}.`
+      );
+    }
+    children[targetIndex] = {...entry, data: child.data};
+  }
+  if ([...ids].every(([source, destination]) => source === destination)) {
+    return {...array, children};
+  }
+  const offset = array.offset ?? 0;
+  const typeIds = array.typeIds.slice();
+  for (let index = offset; index < offset + array.length; index++) {
+    const typeId = ids.get(array.typeIds[index]);
+    if (typeId === undefined) {
+      if (!isGeoArrowValueValid(array.validity, index - offset)) continue;
+      throw new Error(`Unknown GeoArrow union type ID ${array.typeIds[index]}`);
+    }
+    typeIds[index] = typeId;
+  }
+  return {...array, children, typeIds};
+}
+
+/** Compares physical child types independently of row counts and buffer identity. */
+function sameGeoArrowStorage(array: GeoArrowArray, target: GeoArrowArray): boolean {
+  switch (array.kind) {
+    case 'primitive':
+      return target.kind === 'primitive' && array.values.constructor === target.values.constructor;
+    case 'fixed-size-list':
+      return (
+        target.kind === 'fixed-size-list' &&
+        array.size === target.size &&
+        sameGeoArrowStorage(array.child, target.child)
+      );
+    case 'list':
+      return (
+        target.kind === 'list' &&
+        array.offsets.constructor === target.offsets.constructor &&
+        sameGeoArrowStorage(array.child, target.child)
+      );
+    case 'struct': {
+      if (target.kind !== 'struct') return false;
+      const fields = Object.keys(array.children);
+      const targetFields = Object.keys(target.children);
+      return (
+        fields.length === targetFields.length &&
+        fields.every(
+          (name, index) =>
+            name === targetFields[index] &&
+            sameGeoArrowStorage(array.children[name], target.children[name])
+        )
+      );
+    }
+    case 'dense-union':
+      return (
+        target.kind === 'dense-union' &&
+        array.children.length === target.children.length &&
+        array.children.every((child, index) => {
+          const entry = target.children[index];
+          return (
+            child.name === entry.name &&
+            child.typeId === entry.typeId &&
+            child.encoding === entry.encoding &&
+            child.dimension === entry.dimension &&
+            sameGeoArrowStorage(child.data, entry.data)
+          );
+        })
+      );
+    default:
+      return false;
+  }
 }
 
 /** Wraps a concrete family in one list level without copying its coordinate/topology buffers. */
@@ -831,15 +1012,12 @@ function promoteToDenseUnion(column: GeoArrowColumn): GeoArrowColumn {
   return {...column, encoding: 'geoarrow.geometry', chunks};
 }
 
-function demoteDenseUnion(column: GeoArrowColumn, encoding: GeoArrowEncoding): GeoArrowColumn {
-  if (encoding === 'geoarrow.geometry' || encoding === 'geoarrow.geometrycollection') return column;
-  if (!isConcreteEncoding(encoding)) throw new Error(`Rows cannot be represented as ${encoding}`);
-  const builderOptions = {
-    encoding,
-    dimension: column.dimension,
-    coordinateLayout: column.coordinateLayout || 'interleaved',
-    offsetType: getColumnOffsetType(column)
-  } as const;
+/** Replays the selected child rows directly into the final specialized storage. */
+function demoteDenseUnion(
+  column: GeoArrowColumn,
+  builderOptions: GeoArrowBuilderOptions
+): GeoArrowColumn {
+  const {encoding} = builderOptions;
   const chunks = column.chunks.map(chunk => {
     if (chunk.kind !== 'dense-union') throw new Error('Expected dense-union storage');
     const replay = (builder: GeoArrowBuilder): void => {
@@ -881,7 +1059,13 @@ function demoteDenseUnion(column: GeoArrowColumn, encoding: GeoArrowEncoding): G
     replay(write);
     return write.finish().chunks[0];
   });
-  return {...column, encoding, coordinateLayout: builderOptions.coordinateLayout, chunks};
+  return {
+    ...column,
+    encoding,
+    dimension: builderOptions.dimension ?? column.dimension,
+    coordinateLayout: builderOptions.coordinateLayout ?? 'interleaved',
+    chunks
+  };
 }
 
 function replayPhysicalGeometryIntoBuilder(
