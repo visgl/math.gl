@@ -192,9 +192,10 @@ export class SurfaceLayer extends SolidPolygonLayer {
         float diffuse=.52+.58*max(dot(normal,light),0.);
         if(tectonicSurface.earlyEarth>.5) {
           vec3 p=normalize(geographicPosition);
-          float broad, rock, relief;
-          vec3 emission;
-          earlyEarthSurface(p,tectonicSurface.earlyLava,broad,rock,relief,emission);
+          float broad, rock;
+          float relief=0.;
+          vec3 crustNormal, emission;
+          earlyEarthSurface(p,tectonicSurface.earlyLava,broad,rock,crustNormal,emission);
           // Localized strikes, molten pools and cooling crater rings. The age-based
           // clock is deterministic: scrubbing reproduces a pose, Stop freezes it.
           for(int i=0;i<4;i++) {
@@ -215,7 +216,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
           vec3 sun=normalize(vec3(.16,-.84,.52));
           float solarAngle=dot(p,sun);
           float day=smoothstep(-.035,.025,solarAngle);
-          vec3 rockyNormal=tectonicReliefNormal(p,p,relief);
+          vec3 rockyNormal=normalize(crustNormal+tectonicReliefNormal(p,p,relief)-p);
           float illumination=.008+day*(.13+2.4*max(dot(rockyNormal,sun),0.));
           vec3 basalt=mix(vec3(.018,.032,.052),vec3(.22,.34,.45),rock);
           float floodLevel=mix(.65,.43,smoothstep(0.,.3,tectonicSurface.earlyLava));
