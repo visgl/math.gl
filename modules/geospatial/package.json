@@ -567,6 +567,11 @@
       "import": "./dist/st-hull-functions.js",
       "require": "./dist/st-hull-functions.cjs"
     },
+    "./st-overlay-functions": {
+      "types": "./dist/st-overlay-functions.d.ts",
+      "import": "./dist/st-overlay-functions.js",
+      "require": "./dist/st-overlay-functions.cjs"
+    },
     "./st-viewport-functions": {
       "types": "./dist/st-viewport-functions.d.ts",
       "import": "./dist/st-viewport-functions.js",

@@ -16,9 +16,9 @@ rendering code.
 
 | Build | Workspace math.gl bytes | Total JavaScript bytes |
 | --- | ---: | ---: |
-| SQL only | 380,697 | 1,557,954 |
-| DataFrame only | 364,686 | 1,552,893 |
-| Combined | 395,072 | 1,583,556 |
+| SQL only | 381,042 | 1,558,301 |
+| DataFrame only | 365,031 | 1,553,240 |
+| Combined | 395,417 | 1,583,903 |
 
 For each workspace math.gl source file, the smaller byte contribution across
 the two standalone builds counts toward shared bytes, and the larger toward
