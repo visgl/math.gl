@@ -48,6 +48,7 @@ for (const [width, height] of [
   [1024, 1024]
 ]) {
   const times = [];
+  /** Translate fixture indices to the larger row stride and preserve negative sentinels. */
   const mapIndex = index =>
     index < 0 ? index : Math.floor(index / fixture.width) * width + (index % fixture.width);
   let result;
