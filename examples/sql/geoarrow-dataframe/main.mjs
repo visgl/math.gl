@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Deck} from '@deck.gl/core';
+import {Deck, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {Field, FixedSizeList, Float64, Int32, Schema, Table, vectorFromArray} from 'apache-arrow';
 import {processors} from './processors.mjs';
@@ -23,7 +23,13 @@ function makePoints() {
       new Int32()
     ),
     geometry: vectorFromArray(
-      ids.map(id => [-122.515 + (id % 160) * 0.0011, 37.69 + Math.floor(id / 160) * 0.0011]),
+      ids.map(id => {
+        const longitude = 179.91255 + (id % 160) * 0.0011;
+        return [
+          longitude >= 180 ? longitude - 360 : longitude,
+          -16.07 + Math.floor(id / 160) * 0.0011
+        ];
+      }),
       point
     )
   });
@@ -37,17 +43,36 @@ for (const name of Object.keys(processors)) {
   processor.add(new Option(name));
 }
 
+let updatePending = false;
+
+/** Coalesces camera changes and reads the viewport after deck.gl applies the view state. */
+function scheduleUpdate() {
+  if (updatePending) return;
+  updatePending = true;
+  requestAnimationFrame(() => {
+    updatePending = false;
+    if (deck.isInitialized) update();
+  });
+}
+
 const deck = new Deck({
   canvas: 'map',
+  views: new MapView({repeat: true}),
   controller: true,
-  initialViewState: {longitude: -122.43, latitude: 37.76, zoom: 11}
+  initialViewState: {longitude: 180, latitude: -16, zoom: 10, minZoom: 1},
+  onLoad: scheduleUpdate,
+  onResize: scheduleUpdate,
+  onViewStateChange: scheduleUpdate
 });
 
 /** Uploads the retained GeoArrow coordinate buffers using deck.gl binary attributes. */
 function update() {
+  const viewport = deck.getViewports()[0];
+  if (!viewport) return;
+  const bounds = viewport.getBounds();
   const parameters = {minimum: Number(minimum.value)};
   const start = performance.now();
-  const table = processors[processor.value](input, parameters);
+  const table = processors[processor.value](input, parameters, bounds);
   const elapsed = performance.now() - start;
   result.textContent = `${table.numRows.toLocaleString()} points · ${elapsed.toFixed(1)} ms processing`;
   deck.setProps({
@@ -76,6 +101,5 @@ function update() {
   });
 }
 
-minimum.addEventListener('input', update);
-processor.addEventListener('change', update);
-update();
+minimum.addEventListener('input', scheduleUpdate);
+processor.addEventListener('change', scheduleUpdate);
