@@ -13,12 +13,7 @@ import {
   Utf8,
   vectorFromArray
 } from 'apache-arrow';
-import type {
-  AggregateFunction,
-  ArrowTableFunction,
-  ScalarFunction,
-  TableFunction
-} from '@math.gl/sql/arrow';
+import type {AggregateFunction, ArrowTableFunction, ScalarFunction} from '@math.gl/sql/arrow';
 import {
   getGeoArrowFieldInfo,
   getGeoArrowBounds,
