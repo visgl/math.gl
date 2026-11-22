@@ -20,12 +20,15 @@ Each specialized function accepts its own family. A Multi function also accepts
 the corresponding single geometry. A row from another family raises an error.
 Specialized results use the input's dimension for specialized input and XY for
 WKB or union input. Pass `{dimension: 'xyz'}` (or `'xy'`, `'xym'`, `'xyzm'`) to
-the factory to set the specialized result dimension explicitly. An output drops
-ordinates outside its target dimension and fills missing ordinates with zero.
+the factory to set the dimension of new native outputs explicitly. An output
+drops ordinates outside its target dimension and fills missing ordinates with zero.
 
-A new dense union has a stable schema with children for all six families in
-XY, XYZ, XYM, and XYZM. It preserves each row's dimension. Existing unions
-pass through with their schema and buffers. Geometry collections in native
+A new dense union has a stable schema with children for all six families.
+It uses the dimension of a specialized input or the explicit dimension from
+the factory. For WKB without an explicit dimension, the union includes XY,
+XYZ, XYM, and XYZM children and preserves each row's dimension. Use
+`{dimension: 'xy'}` to produce a union that planar spatial SQL functions can
+consume directly. Existing unions pass through with their schema and buffers. Geometry collections in native
 columns or unions can be serialized to WKB. Creating new native union children
 for collections is outside the supported conversion set.
 

@@ -39,7 +39,7 @@ export function evaluateVectorSpans(
 ): Vector {
   if (!active.includes(0)) return evaluate(input);
   const chunks: Data[] = [];
-  for (let start = 0; start < active.length;) {
+  for (let start = 0; start < active.length; ) {
     const valid = Boolean(active[start]);
     let end = start + 1;
     while (end < active.length && Boolean(active[end]) === valid) end++;

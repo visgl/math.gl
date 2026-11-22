@@ -2,15 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {
-  Binary,
-  DataType,
-  Field,
-  Precision,
-  Vector,
-  vectorFromArray,
-  type Data
-} from 'apache-arrow';
+import {Binary, DataType, Field, Precision, Vector, vectorFromArray, type Data} from 'apache-arrow';
 import {
   GeoArrowBuilder,
   convertGeoArrowColumn,
@@ -42,9 +34,9 @@ const dimensions = ['xy', 'xyz', 'xym', 'xyzm'] as const;
 /** SQL conversion targets. */
 type Target = GeoArrowBuilderEncoding | 'geoarrow.wkb' | 'geoarrow.geometry';
 
-/** Controls the physical dimension of specialized outputs. */
+/** Controls the physical dimension of new native outputs. */
 export type GeoArrowConversionOptions = Readonly<{
-  /** Defaults to the specialized input dimension, or XY for WKB and dense unions. */
+  /** Overrides the dimension of new native results. Existing unions retain their schema. */
   dimension?: GeoArrowDimension;
 }>;
 
@@ -53,30 +45,7 @@ export function createGeoArrowConversionFunctions(
   options: GeoArrowConversionOptions = {}
 ): readonly ScalarFunction[] {
   const {dimension} = options;
-  const unionChildren: GeoArrowDenseUnionChild[] = families.flatMap(encoding =>
-    dimensions.map(childDimension => ({
-      name: encoding.slice('geoarrow.'.length),
-      encoding,
-      dimension: childDimension,
-      coordinateLayout: 'interleaved',
-      typeId: unionTypeId(encoding, childDimension),
-      data: emptyGeometry(encoding, childDimension).chunks[0]
-    }))
-  );
-  const emptyUnion = makeArrowVectorFromGeoArrowColumn({
-    encoding: 'geoarrow.geometry',
-    dimension: 'xy',
-    coordinateLayout: 'interleaved',
-    chunks: [
-      {
-        kind: 'dense-union',
-        length: 0,
-        typeIds: new Int8Array(0),
-        valueOffsets: new Int32Array(0),
-        children: unionChildren
-      }
-    ]
-  });
+  const unionSchemas = new Map<GeoArrowDimension | undefined, ReturnType<typeof makeUnionSchema>>();
   const targets: readonly Target[] = ['geoarrow.wkb', ...families, 'geoarrow.geometry'];
 
   return targets.map(encoding => ({
@@ -100,12 +69,18 @@ export function createGeoArrowConversionFunctions(
         (encoding === 'geoarrow.wkb'
           ? DataType.isBinary(source.type)
           : encoding === 'geoarrow.geometry' || outputDimension === info.dimension);
+      const unionDimension = dimension ?? info.dimension ?? undefined;
+      let union = unionSchemas.get(unionDimension);
+      if (encoding === 'geoarrow.geometry' && !identity && !union) {
+        union = makeUnionSchema(unionDimension);
+        unionSchemas.set(unionDimension, union);
+      }
       const type = identity
         ? source.type
         : encoding === 'geoarrow.wkb'
           ? new Binary()
           : encoding === 'geoarrow.geometry'
-            ? emptyUnion.type
+            ? union!.type
             : makeArrowVectorFromGeoArrowColumn(emptyGeometry(encoding, outputDimension)).type;
       const coordinateType =
         info.encoding !== 'geoarrow.wkb' && !hasFloat64Coordinates(source.type)
@@ -144,18 +119,19 @@ export function createGeoArrowConversionFunctions(
           info.encoding === 'geoarrow.wkb'
             ? decodeGeoArrowWKB(column, {
                 encoding,
-                dimension: encoding === 'geoarrow.geometry' ? 'infer' : outputDimension
+                dimension:
+                  encoding === 'geoarrow.geometry' ? (unionDimension ?? 'infer') : outputDimension
               })
             : column;
         if (info.encoding === 'geoarrow.wkb' && encoding !== 'geoarrow.geometry')
           return makeArrowVectorFromGeoArrowColumn(native);
         const target = convertGeoArrowColumn(native, {
           encoding,
-          dimension: encoding === 'geoarrow.geometry' ? undefined : outputDimension,
+          dimension: encoding === 'geoarrow.geometry' ? unionDimension : outputDimension,
           coordinateLayout: 'interleaved',
           coordinateType,
           offsetType: 'int32',
-          unionChildren: encoding === 'geoarrow.geometry' ? unionChildren : undefined
+          unionChildren: encoding === 'geoarrow.geometry' ? union?.children : undefined
         });
         return makeArrowVectorFromGeoArrowColumn(target);
       };
@@ -170,6 +146,35 @@ export function createGeoArrowConversionFunctions(
       };
     }
   }));
+}
+
+/** Builds the same child schema for every batch with the bound input type. */
+function makeUnionSchema(dimension?: GeoArrowDimension) {
+  const unionChildren: GeoArrowDenseUnionChild[] = families.flatMap(encoding =>
+    (dimension ? [dimension] : dimensions).map(childDimension => ({
+      name: encoding.slice('geoarrow.'.length),
+      encoding,
+      dimension: childDimension,
+      coordinateLayout: 'interleaved',
+      typeId: unionTypeId(encoding, childDimension),
+      data: emptyGeometry(encoding, childDimension).chunks[0]
+    }))
+  );
+  const emptyUnion = makeArrowVectorFromGeoArrowColumn({
+    encoding: 'geoarrow.geometry',
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    chunks: [
+      {
+        kind: 'dense-union',
+        length: 0,
+        typeIds: new Int8Array(0),
+        valueOffsets: new Int32Array(0),
+        children: unionChildren
+      }
+    ]
+  });
+  return {children: unionChildren, type: emptyUnion.type};
 }
 
 /** Constructs a typed, zero-row native column for schema binding. */

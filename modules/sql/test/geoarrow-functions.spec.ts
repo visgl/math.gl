@@ -25,6 +25,8 @@ import {
   writeWKB
 } from '@math.gl/core/arrow';
 import {compileArrowExpression} from '@math.gl/sql/arrow';
+import {parse} from '@math.gl/sql/expressions';
+import {ST_BUFFER} from '@math.gl/geospatial/st-overlay-functions';
 import {createGeoArrowConversionFunctions} from '@math.gl/sql/geoarrow-functions';
 import {queryArrowSQL, queryArrowTableInBatches} from '@math.gl/sql/query';
 
@@ -89,9 +91,7 @@ test.each([
 
 test('reuses WKB buffers, native coordinates, list offsets and existing union selectors', () => {
   const bytes = wkb('POINT (3 4)', null).slice(1);
-  const wkbResult = select(geometryTable(bytes), 'GEOARROW_TO_WKB(geometry)').getChild(
-    'result'
-  )!;
+  const wkbResult = select(geometryTable(bytes), 'GEOARROW_TO_WKB(geometry)').getChild('result')!;
   expect(wkbResult.data[0]!.values.buffer).toBe(bytes.data[0]!.values.buffer);
   expect(wkbResult.data[0]!.nullBitmap.buffer).toBe(bytes.data[0]!.nullBitmap.buffer);
 
@@ -106,7 +106,7 @@ test('reuses WKB buffers, native coordinates, list offsets and existing union se
     'GEOARROW_TO_UNION(geometry)'
   ).getChild('result')!;
   const [data] = wrapped.data;
-  const line = data.children[4]!;
+  const line = data.children[1]!;
   expect(line.valueOffsets.buffer).toBe(vector.data[0]!.valueOffsets.buffer);
   expect(line.children[0]!.children[0]!.values.buffer).toBe(
     vector.data[0]!.children[0]!.children[0]!.values.buffer
@@ -201,7 +201,44 @@ test('supports explicit XYZ dimensions, LargeBinary, and single-to-multi promoti
   const narrowed = select(input, 'GEOARROW_TO_WKB(geometry)').getChild('result')!;
   expect(DataType.isBinary(narrowed.type)).toBe(true);
   expect(narrowed.data[0]!.values.buffer).toBe(bytes.data[0]!.values.buffer);
-  expect(() => select(input, 'GEOARROW_TO_POLYGON(geometry)')).toThrow(
-    /cannot be represented/i
+  expect(() => select(input, 'GEOARROW_TO_POLYGON(geometry)')).toThrow(/cannot be represented/i);
+});
+
+test('native and explicit XY unions feed a planar ST function', () => {
+  const input = geometryTable(wkb('POINT (1 2)', null));
+  const packages = [functions[0]!, ST_BUFFER];
+  const native = queryArrowSQL(
+    'SELECT ST_Buffer(GEOARROW_TO_UNION(GEOARROW_TO_POINT(geometry)), 1) AS result FROM features',
+    new Map([['features', input]]),
+    {functions: packages}
   );
+  const xy = queryArrowSQL(
+    'SELECT ST_Buffer(GEOARROW_TO_UNION(geometry), 1) AS result FROM features',
+    new Map([['features', input]]),
+    {functions: [createGeoArrowConversionFunctions({dimension: 'xy'}), ST_BUFFER]}
+  );
+  /** Reads the native footprint rows for a geometry comparison. */
+  const rows = (table: Table) =>
+    materializeGeoArrowRows(
+      makeGeoArrowColumnFromArrowVector(table.getChild('result')!, {field: table.schema.fields[0]})
+    );
+  expect(rows(native)).toEqual(rows(xy));
+  expect(native.getChild('result')!.isValid(0)).toBe(true);
+  expect(native.getChild('result')!.isValid(1)).toBe(false);
+});
+
+test('an emitted empty union batch has complete children for IPC', async () => {
+  const input = geometryTable(wkb('POINT (1 2)'));
+  const batches = [];
+  for await (const batch of queryArrowTableInBatches(input.batches, input.schema, {
+    where: {expression: parse('1 == 0')},
+    select: [{expression: 'GEOARROW_TO_UNION(geometry)', as: 'result'}],
+    emitEmptyBatches: true,
+    functions
+  }))
+    batches.push(batch);
+  expect(batches).toHaveLength(1);
+  const empty = tableFromIPC(tableToIPC(new Table(batches[0]!.schema, batches)));
+  expect(empty.numRows).toBe(0);
+  expect(DataType.isDenseUnion(empty.schema.fields[0]!.type)).toBe(true);
 });
