@@ -588,7 +588,7 @@ type Rational = {numerator: bigint; denominator: bigint};
  * @param denominator Positive integer denominator.
  * @returns The rational number.
  */
-function rational(numerator: number, denominator = 1): Rational {
+function rational(numerator: number | bigint, denominator: number | bigint = 1): Rational {
   return {numerator: BigInt(numerator), denominator: BigInt(denominator)};
 }
 
