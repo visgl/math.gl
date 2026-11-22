@@ -14,17 +14,18 @@ Apache Arrow 17 or later is required for execution. The `/parser` and `/expressi
 
 ## Package entry points[​](#package-entry-points "Direct link to Package entry points")
 
-| Import path                    | Use it to                                                                                                                                                           |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@math.gl/sql/query`           | Run [queries over Arrow tables](https://visgl.github.io/math.gl/next/docs/modules/sql/query.md), compute columns, or aggregate record batches.         |
-| `@math.gl/sql/dataframe`       | Wrap Arrow tables with the experimental DataFrame API and select an active GeoArrow field.                                                                          |
-| `@math.gl/sql/parser`          | [Parse SQL](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md) into expressions, predicates, or queries without executing it.            |
-| `@math.gl/sql/expressions`     | [Evaluate portable expressions](https://visgl.github.io/math.gl/next/docs/modules/sql/expressions.md) against JavaScript objects.                      |
-| `@math.gl/sql/arrow`           | [Compile expressions and predicates](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow.md) against an Arrow schema for reuse across batches. |
-| `@math.gl/sql/worker`          | Run structured queries and expressions [off the calling thread](https://visgl.github.io/math.gl/next/docs/modules/sql/worker.md).                      |
-| `@math.gl/sql/math-functions`  | Register [numeric SQL functions](https://visgl.github.io/math.gl/next/docs/modules/sql/math-functions.md) such as `SIN` and `SQRT`.                    |
-| `@math.gl/sql/color-functions` | Register [color functions](https://visgl.github.io/math.gl/next/docs/modules/sql/color-functions.md) for construction, conversion, and mapping.        |
-| `@math.gl/sql/scales`          | [Resolve domains and evaluate scales](https://visgl.github.io/math.gl/next/docs/modules/sql/scales.md) on Arrow columns.                               |
+| Import path                       | Use it to                                                                                                                                                                       |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@math.gl/sql/query`              | Run [queries over Arrow tables](https://visgl.github.io/math.gl/next/docs/modules/sql/query.md), compute columns, or aggregate record batches.                     |
+| `@math.gl/sql/dataframe`          | Wrap Arrow tables with the experimental DataFrame API and select an active GeoArrow field.                                                                                      |
+| `@math.gl/sql/parser`             | [Parse SQL](https://visgl.github.io/math.gl/next/docs/modules/sql/parser.md) into expressions, predicates, or queries without executing it.                        |
+| `@math.gl/sql/expressions`        | [Evaluate portable expressions](https://visgl.github.io/math.gl/next/docs/modules/sql/expressions.md) against JavaScript objects.                                  |
+| `@math.gl/sql/arrow`              | [Compile expressions and predicates](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow.md) against an Arrow schema for reuse across batches.             |
+| `@math.gl/sql/worker`             | Run structured queries and expressions [off the calling thread](https://visgl.github.io/math.gl/next/docs/modules/sql/worker.md).                                  |
+| `@math.gl/sql/math-functions`     | Register [numeric SQL functions](https://visgl.github.io/math.gl/next/docs/modules/sql/math-functions.md) such as `SIN` and `SQRT`.                                |
+| `@math.gl/sql/geoarrow-functions` | Register [GeoArrow conversions](https://visgl.github.io/math.gl/next/docs/modules/sql/geoarrow-functions.md) for WKB, specialized native arrays, and dense unions. |
+| `@math.gl/sql/color-functions`    | Register [color functions](https://visgl.github.io/math.gl/next/docs/modules/sql/color-functions.md) for construction, conversion, and mapping.                    |
+| `@math.gl/sql/scales`             | [Resolve domains and evaluate scales](https://visgl.github.io/math.gl/next/docs/modules/sql/scales.md) on Arrow columns.                                           |
 
 Worker bootstrap entry points `@math.gl/sql/worker-entry.js` and `@math.gl/sql/query-worker-entry.js` start their respective worker runtimes. See [Workers](https://visgl.github.io/math.gl/next/docs/modules/sql/worker.md) for setup. The test-only entry point `@math.gl/sql/scales-conformance` provides shared fixture cases for scale implementations.
 
