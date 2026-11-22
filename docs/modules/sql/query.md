@@ -314,6 +314,10 @@ const SUM_SQUARES = {
 } satisfies AggregateFunction;
 ```
 
+Custom aggregates can return nested arrays for Arrow List result fields.
+Set `argumentCount` when an aggregate shares its SQL name with a scalar
+function of a different arity.
+
 Register this declaration through `functions` and use `SUM_SQUARES(value)` in a
 projection. The query creates one accumulator per group. The accumulator defines
 null handling and the result for an empty input. An aggregate can also emit

@@ -17,7 +17,7 @@ import {compileArrowAggregates, type ArrowAggregate} from './aggregates';
 import {compareUTF8} from '@math.gl/core/utf8';
 import {ColumnReader, valueType} from './buffers';
 import {compileArrowExpression, writeArrowExpressionValues} from './compiler';
-import type {ArrowExpressionOptions, ArrowExpressionValue} from './types';
+import type {ArrowAggregateValue, ArrowExpressionOptions, ArrowExpressionValue} from './types';
 
 /** A stable ordering key resolved against the source or grouped result. */
 export type ArrowQueryOrder = {
@@ -157,7 +157,7 @@ export type BoundRelationAggregate = {
   /** Arrow field shared by all groups of this aggregate call. */
   readonly outputField: Field;
   /** Reduces one group's rows to a value in the field's physical units. */
-  evaluate(table: Table): ArrowExpressionValue | readonly number[];
+  evaluate(table: Table): ArrowAggregateValue;
 };
 
 /** Groups by scalar source columns and evaluates the shared Arrow aggregate kernels. */
@@ -210,7 +210,11 @@ export function groupArrowTable(
   const columns = [
     ...fields.map(field => selected.getChild(field.name)!),
     ...aggregateFields.map(field => {
-      if (custom.has(field.name) && !DataType.isFixedSizeList(field.type)) {
+      if (
+        custom.has(field.name) &&
+        !DataType.isFixedSizeList(field.type) &&
+        !DataType.isList(field.type)
+      ) {
         return writeArrowExpressionValues(
           field,
           new Uint8Array(results.length).fill(1),
