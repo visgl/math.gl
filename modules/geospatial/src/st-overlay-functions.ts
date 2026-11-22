@@ -2,32 +2,19 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {
-  GeoArrowBuilder,
-  makeArrowVectorFromGeoArrowColumn,
-  type WellKnownGeometry
-} from '@math.gl/core/arrow';
+import type {WellKnownGeometry} from '@math.gl/core/arrow';
 import type {ScalarFunction} from '@math.gl/sql/arrow';
 import polygonClipping from 'polygon-clipping';
 import {
   EXTENSION_METADATA,
   EXTENSION_NAME,
   lineKinds,
+  nativePolygonResult,
   pointCoordinates,
   pointKinds,
   polygonKinds,
-  spatialFunction,
-  type NativeSpatialResult
+  spatialFunction
 } from './spatial-sql';
-
-/** Declares a fixed native polygon layout, including for empty or all-null batches. */
-function nativePolygonResult(encoding: NativeSpatialResult['encoding']): NativeSpatialResult {
-  const options = {encoding, dimension: 'xy', coordinateLayout: 'interleaved'} as const;
-  /** Packs the output rings into GeoArrow list offsets and interleaved XY coordinates. */
-  const build: NativeSpatialResult['build'] = rows =>
-    makeArrowVectorFromGeoArrowColumn(GeoArrowBuilder.build(rows, options));
-  return {encoding, type: build([]).type, build};
-}
 
 /** Eight unit directions per quadrant with exact cardinal axes. */
 const unitCircle = /* @__PURE__ */ Array.from({length: 32}, (_, index) => {
