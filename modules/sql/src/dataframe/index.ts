@@ -22,12 +22,14 @@ export class DataFrame {
 
   /** Selects columns in the requested order and shares their Arrow buffers. */
   select(...columns: string[]): DataFrame {
-    for (const name of columns) {
-      if (!this.table.schema.fields.some(field => field.name === name)) {
+    const indices = columns.map(name => {
+      const index = this.table.schema.fields.findIndex(field => field.name === name);
+      if (index === -1) {
         throw new Error(`Unknown column "${name}"`);
       }
-    }
-    return new DataFrame(this.table.select(columns));
+      return index;
+    });
+    return new DataFrame(this.table.selectAt(indices));
   }
 }
 
