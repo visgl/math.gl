@@ -733,14 +733,7 @@ export function createSTTransform(engine: SpatialSQLProjectionEngine): ScalarFun
         prototype.result.metadata.set(EXTENSION_METADATA, metadata);
         return prototype;
       }
-      if (
-        !(
-          DataType.isList(field.type) ||
-          DataType.isFixedSizeList(field.type) ||
-          DataType.isStruct(field.type)
-        ) ||
-        !geometryTypes.some(kind => 'geoarrow.' + kind.toLowerCase() === info.encoding)
-      )
+      if (!geometryTypes.some(kind => 'geoarrow.' + kind.toLowerCase() === info.encoding))
         throw new Error('ST_Transform requires WKB or a specialized native GeoArrow encoding');
       const outputMetadata = new Map(field.metadata);
       outputMetadata.set(EXTENSION_METADATA, metadata);
