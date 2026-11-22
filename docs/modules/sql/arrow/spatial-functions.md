@@ -178,6 +178,29 @@ contacts returned separately when the result contains both dimensions.
 Clipping preserves route traversal. Repeated or overlapping segments contribute
 to length each time the route travels them.
 
+## Transform with a projection engine
+
+Register `createSTTransform(engine)` from `@math.gl/geospatial/st-functions` to
+use CRS definitions available synchronously in a projection engine. The result
+retains specialized native GeoArrow layouts and additional ordinates. WKB
+input is supported for planar XY geometries and produces WKB.
+
+```ts
+import {projectionEngine} from '@math.gl/geospatial/projection';
+import {createSTTransform} from '@math.gl/geospatial/st-functions';
+import {queryArrowSQL} from '@math.gl/sql/query';
+
+const projected = queryArrowSQL(
+  'SELECT ST_Transform(geometry, 32631) AS utm FROM features',
+  tables,
+  {functions: [createSTTransform(projectionEngine)]}
+);
+```
+
+Supply the source CRS in the GeoArrow field metadata and a constant target
+EPSG code in SQL. To register the rest of `POSTGIS_SPATIAL_FUNCTIONS` alongside
+this overload, omit `ST_TRANSFORM` from that list.
+
 ## PostGIS geometry signatures
 
 These functions use 2D Cartesian coordinates. Use coordinates in a suitable

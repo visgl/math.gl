@@ -7,6 +7,7 @@ import {
   Bool,
   Precision,
   DataType,
+  Type,
   DateUnit,
   TimeUnit,
   Field,
@@ -677,7 +678,7 @@ function bindNode(
             selectTupleVectors(field.type, a.vector!, b.vector!, yesMask, validActive)
           );
         }
-        if (DataType.isDenseUnion(field.type)) {
+        if (DataType.isDenseUnion(field.type) || isLargeList(field.type)) {
           return vectorReader(
             selectUnionVectors(field.type, a.vector!, b.vector!, selected!, active, context.failed)
           );
@@ -1270,9 +1271,14 @@ function isNestedType(type: DataType): boolean {
   return DataType.isStruct(type) || DataType.isList(type) || DataType.isFixedSizeList(type);
 }
 
+/** Identifies 64-bit list storage when the installed Arrow runtime provides it. */
+function isLargeList(type: DataType): boolean {
+  return type.typeId === Type['LargeList' as keyof typeof Type];
+}
+
 /** Identifies result types that require a vector kernel. */
 function isVectorResult(type: DataType): boolean {
-  return isNestedType(type) || DataType.isDenseUnion(type);
+  return isNestedType(type) || DataType.isDenseUnion(type) || isLargeList(type);
 }
 
 /** Converts nested Arrow values to builder inputs while preserving scalar values. */
@@ -1290,7 +1296,8 @@ function nestedValue(value: any, type: DataType): unknown {
 /** Masks nested results without coercing their child types. */
 function nestedVector(vector: Vector, type: DataType, active: Mask): Vector {
   if (!active.some((valid, row) => !valid && vector.isValid(row))) return vector;
-  if (DataType.isDenseUnion(type)) return evaluateVectorSpans(vector, type, active, span => span);
+  if (DataType.isDenseUnion(type) || isLargeList(type))
+    return evaluateVectorSpans(vector, type, active, span => span);
   return vectorFromArray(
     Array.from(active, (valid, row) => (valid ? nestedValue(vector.get(row), type) : null)),
     type

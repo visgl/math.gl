@@ -16,6 +16,7 @@ import {
 import type {AggregateFunction, ArrowTableFunction, ScalarFunction} from '@math.gl/sql/arrow';
 import {
   getGeoArrowFieldInfo,
+  mapGeoArrowVectorCoordinates,
   getGeoArrowBounds,
   getGeoArrowRowBounds,
   getGeoArrowColumnView,
@@ -664,6 +665,90 @@ function crsFunction(name: 'ST_SRID' | 'ST_SetSRID' | 'ST_Transform'): ScalarFun
         implementation.result.metadata.set(EXTENSION_METADATA, JSON.stringify(crsMetadata));
       }
       return implementation;
+    }
+  };
+}
+
+/** A synchronous projection engine with the requested CRS definitions available. */
+export type SpatialSQLProjectionEngine = {
+  /** Prepares a transform in GeoArrow XY axis order. */
+  createProjection(options: {from: string | object; to: string; enforceAxis: false}): {
+    /** Projects one horizontal coordinate. */
+    projectSync(coordinate: readonly number[]): readonly number[];
+  };
+};
+
+/** Creates an ST_Transform overload backed by a supplied CRS projection engine. */
+export function createSTTransform(engine: SpatialSQLProjectionEngine): ScalarFunction {
+  return {
+    kind: 'scalar',
+    name: 'ST_Transform',
+    prototypes: [],
+    /** Resolves one source and target CRS for the entire projection. */
+    resolvePrototype(fields, literals) {
+      if (fields.length !== 2 || !fields[0]) return undefined;
+      const field = fields[0];
+      const target = literals?.[1];
+      if (target === undefined || !Number.isSafeInteger(target) || target <= 0 || target > 998999)
+        throw new Error('ST_Transform requires a constant positive integer EPSG code');
+      const info = getGeoArrowFieldInfo(field);
+      if (!info) throw new Error('ST_Transform requires a GeoArrow geometry column');
+      if (info.metadata['edges'] === 'spherical')
+        throw new Error('ST_Transform requires planar geometry');
+      const source = info.metadata['crs'];
+      if (
+        !(typeof source === 'string'
+          ? source.trim()
+          : source && typeof source === 'object' && !Array.isArray(source))
+      )
+        throw new Error('ST_Transform requires source CRS metadata');
+      const to = 'EPSG:' + target;
+      const transform = engine.createProjection({
+        from: source as string | object,
+        to,
+        enforceAxis: false
+      });
+      const metadata = JSON.stringify({...info.metadata, crs: to, crs_type: 'authority_code'});
+      const targetField = fields[1] ?? new Field('srid', new Int32(), false);
+      if (!DataType.isInt(targetField.type) && !DataType.isFloat(targetField.type))
+        throw new Error('ST_Transform requires a numeric SRID');
+
+      /** Projects XY and retains additional ordinates, including the empty-point sentinel. */
+      const project = (coordinate: readonly number[]): number[] => {
+        if (coordinate.every(Number.isNaN)) return [...coordinate];
+        const [x, y] = transform.projectSync([coordinate[0]!, coordinate[1]!]);
+        if (!Number.isFinite(x) || !Number.isFinite(y))
+          throw new Error('ST_Transform produced nonfinite coordinates');
+        return [x!, y!, ...coordinate.slice(2)];
+      };
+
+      if (info.encoding === 'geoarrow.wkb') {
+        const prototype = spatialFunction(
+          'ST_Transform',
+          [[...geometryTypes, 'GeometryCollection']],
+          new Binary(),
+          ([geometry]) => writeWKB(projectGeometry(geometry!, project), 'xy'),
+          1
+        ).resolvePrototype!(fields)!;
+        prototype.result.metadata.set(EXTENSION_METADATA, metadata);
+        return prototype;
+      }
+      if (!geometryTypes.some(kind => 'geoarrow.' + kind.toLowerCase() === info.encoding))
+        throw new Error('ST_Transform requires WKB or a specialized native GeoArrow encoding');
+      const outputMetadata = new Map(field.metadata);
+      outputMetadata.set(EXTENSION_METADATA, metadata);
+      return {
+        arguments: [field, targetField],
+        result: new Field('ST_Transform', field.type, field.nullable, outputMetadata),
+        /** Maps native coordinate buffers directly, retaining topology and null rows. */
+        evaluate([vector], {activeRows}) {
+          return mapGeoArrowVectorCoordinates(
+            vector!,
+            (coordinate, row) => (activeRows[row] ? project(coordinate) : coordinate),
+            {field}
+          );
+        }
+      };
     }
   };
 }
