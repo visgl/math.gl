@@ -1111,3 +1111,10 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_ENVELOPE,
     ST_EXTENT
   ]);
+
+export {
+  ST_GEODESICDISTANCE,
+  ST_GEODESICLENGTH,
+  ST_GEODESICDWITHIN,
+  GEODESIC_SPATIAL_FUNCTIONS
+} from './st-geodesic-functions';
