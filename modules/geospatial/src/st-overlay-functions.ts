@@ -5,6 +5,7 @@
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
 import type {AggregateFunction, ScalarFunction} from '@math.gl/sql/arrow';
 import polygonClipping from 'polygon-clipping';
+import {polygonSet} from './spatial-polygon-overlay';
 import {
   EXTENSION_METADATA,
   EXTENSION_NAME,
@@ -163,30 +164,6 @@ export const ST_BUFFER: ScalarFunction = {
     return buffer.resolvePrototype!(fields);
   }
 };
-
-/** Converts native polygon rings to the existing polygon overlay kernel's input. */
-function polygonSet(geometry: WellKnownGeometry): polygonClipping.MultiPolygon {
-  const polygons =
-    geometry.type === 'Polygon'
-      ? [geometry.coordinates]
-      : geometry.type === 'MultiPolygon'
-        ? geometry.coordinates
-        : undefined;
-  if (!polygons) throw new Error('Polygon overlay requires Polygon or MultiPolygon input');
-  return polygons
-    .filter(polygon => polygon[0]?.length)
-    .map(polygon =>
-      polygon
-        .filter(ring => ring.length)
-        .map(ring =>
-          ring.map(([x, y]) => {
-            if (!Number.isFinite(x) || !Number.isFinite(y))
-              throw new Error('Polygon overlay requires finite coordinates');
-            return [x!, y!];
-          })
-        )
-    );
-}
 
 /** Creates a row-preserving areal overlay with the first geometry's metadata. */
 function polygonOverlay(name: string, operation: typeof polygonClipping.intersection) {

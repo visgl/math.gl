@@ -215,6 +215,7 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_ShortestLine(a, b)` | Two 2D Points or a Point and LineString in either order | Two-vertex WKB LineString from the first geometry to the second. Intersecting inputs produce coincident endpoints. Empty inputs yield null. |
 | `ST_Distance(a, b)` | Two Points | Float64 Cartesian distance in coordinate units. Empty points yield null. |
 | `ST_Intersects(a, b)` | Two planar geometries, including multi-types and WKB collections | True for shared interiors, edges, or vertices. Empty geometries yield false. |
+| `ST_Touches(a, b)` | Planar Point, LineString, Polygon, or their multi-types | True when the inputs share a point and their interiors are disjoint. Point and MultiPoint pairs return false. Empty geometries yield false. |
 | `ST_SRID(g)` | 2D geometry | EPSG code from field metadata, or zero for an unidentified CRS. |
 | `ST_SetSRID(g, srid)` | 2D geometry and constant integer | GeoArrow WKB with the assigned EPSG identifier and original coordinates. Zero clears the CRS. |
 | `ST_Transform(g, srid)` | 2D planar geometry and constant target EPSG code | Reprojects between 4326 (longitude, latitude) and 3857 (meters). Forward projection accepts the Web Mercator tile latitude range (about ±85.0511°). |
