@@ -21,7 +21,7 @@ import {
   writeWKB
 } from '@math.gl/core/arrow';
 import {queryArrowSQL} from '@math.gl/sql/query';
-import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
+import {POSTGIS_SPATIAL_FUNCTIONS, ST_SUBDIVIDE} from '@math.gl/geospatial/st-functions';
 import {TURF_FUNCTIONS} from '@math.gl/geospatial/turf-functions';
 
 /** Marks a native or WKB vector with the extension and optional CRS used by SQL binding. */
@@ -954,4 +954,92 @@ test('snaps native GeoArrow points to endpoints and resolves ties in route order
   expect(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')).toBe(
     JSON.stringify(metadata)
   );
+});
+
+test('clips a route into separate fragments and keeps row positions', () => {
+  const g = wkb('LINESTRING(-1 1,3 1,3 2,-1 2)', 'LINESTRING(-1 -1,0 0)', null);
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    'SELECT ST_ClipByBox2D(g,ST_MakeEnvelope(0,0,2,3)) AS clipped FROM features',
+    table
+  );
+  expect(geometryAt(result, 'clipped', 0)).toEqual(
+    parseWKT('MULTILINESTRING((0 1,2 1),(2 2,0 2))')
+  );
+  expect(geometryAt(result, 'clipped', 1)).toEqual(parseWKT('GEOMETRYCOLLECTION EMPTY'));
+  expect(geometryAt(result, 'clipped', 2)).toBeNull();
+});
+
+test('clips a native polygon without filling its hole and retains the CRS', () => {
+  const polygon = parseWKT('POLYGON((-1 -1,5 -1,5 5,-1 5,-1 -1),(1 1,1 2,2 2,2 1,1 1))');
+  const g = makeArrowVectorFromGeoArrowColumn(makeGeoArrowColumnFromGeometryRows([polygon]));
+  const metadata = {crs_type: 'authority_code', crs: 'EPSG:3857'};
+  const table = new Table(new Schema([geometryField('g', g, 'polygon', metadata)]), {g});
+  const result = select(
+    `SELECT ST_ClipByBox2D(g,ST_TileEnvelope(0,0,0,ST_SetSRID(ST_MakeEnvelope(0,0,3,3),3857))) AS clipped,
+    ST_Area(ST_ClipByBox2D(g,ST_MakeEnvelope(0,0,3,3))) AS area FROM features`,
+    table
+  );
+  const clipped = geometryAt(result, 'clipped', 0);
+  expect(clipped?.type).toBe('Polygon');
+  if (clipped?.type === 'Polygon') expect(clipped.coordinates).toHaveLength(2);
+  expect(result.getChild('area')!.get(0)).toBe(8);
+  expect(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')).toBe(
+    JSON.stringify(metadata)
+  );
+});
+
+test('box clipping excludes boundary-only points and returns disjoint polygon pieces', () => {
+  const g = wkb(
+    'MULTIPOINT((0 0),(-0.5 1),(3 3))',
+    'POLYGON((-2 -1,2 -1,2 4,-2 4,-2 3,1 3,1 0,-2 0,-2 -1))',
+    'POLYGON EMPTY'
+  );
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    'SELECT ST_ClipByBox2D(g,ST_MakeEnvelope(-1,-1,0,4)) AS clipped FROM features',
+    table
+  );
+  expect(geometryAt(result, 'clipped', 0)).toEqual(parseWKT('POINT(-0.5 1)'));
+  expect(geometryAt(result, 'clipped', 1)?.type).toBe('MultiPolygon');
+  expect(geometryAt(result, 'clipped', 2)).toEqual(parseWKT('POLYGON EMPTY'));
+});
+
+test('subdivides large polygons through a lateral join with a shared vertex cap', () => {
+  const ring = Array.from({length: 320}, (_, i) => {
+    const angle = (i * Math.PI) / 160;
+    return [10 * Math.cos(angle), 10 * Math.sin(angle)];
+  });
+  ring.push(ring[0]!);
+  const polygon = {type: 'Polygon', coordinates: [ring]} as const;
+  const g = vectorFromArray(
+    [writeWKB(polygon), null, writeWKB(parseWKT('POLYGON EMPTY'))],
+    new Binary()
+  );
+  const id = vectorFromArray([10, 11, 12], new Int32());
+  const metadata = {crs: 'EPSG:3857', crs_type: 'authority_code'};
+  const table = new Table(
+    new Schema([geometryField('g', g, 'wkb', metadata), new Field('id', id.type)]),
+    {g, id}
+  );
+  const result = queryArrowSQL(
+    `SELECT id, p.geom AS geom, ST_NPoints(p.geom) AS vertices, ST_Area(p.geom) AS area
+    FROM features AS f LEFT JOIN LATERAL ST_Subdivide(f.g) AS p(geom) ON TRUE`,
+    new Map([['features', table]]),
+    {functions: [POSTGIS_SPATIAL_FUNCTIONS, ST_SUBDIVIDE]}
+  );
+  const ids = [...result.getChild('id')!];
+  const pieces = ids.filter(id => id === 10).length;
+  expect(pieces).toBeGreaterThan(1);
+  expect(ids.slice(pieces)).toEqual([11, 12]);
+  expect([...result.getChild('vertices')!].slice(0, pieces).every(n => n <= 256)).toBe(true);
+  expect([...result.getChild('geom')!].slice(pieces)).toEqual([null, null]);
+  expect(result.schema.fields[1]!.metadata.get('ARROW:extension:metadata')).toBe(
+    JSON.stringify(metadata)
+  );
+  const totalArea = [...result.getChild('area')!].slice(0, pieces).reduce((a, b) => a + b, 0);
+  const sourceArea = select('SELECT ST_Area(g) AS area FROM features', table)
+    .getChild('area')!
+    .get(0);
+  expect(totalArea).toBeCloseTo(sourceArea, 9);
 });
