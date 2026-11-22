@@ -30,7 +30,7 @@ try {
   assert(themedBorders.light.every(color=>color==='rgb(66, 98, 119)'));
 
   const headers = page.locator('.terrain-groups > .example-panel header button');
-  assert.equal(await headers.count(), 10);
+  assert.equal(await headers.count(), 11);
   assert.deepEqual(await headers.first().evaluate(el=>{const s=getComputedStyle(el);return [s.fontSize,s.paddingTop,s.paddingBottom];}),['14px','8px','8px']);
   assert.equal(await page.locator('.terrain-groups').evaluate(el=>getComputedStyle(el).gap),'2px');
   async function openGroup(title) {
@@ -209,6 +209,15 @@ try {
     assert.match(await page.getByTestId('cutout-cache-status').innerText(), /0 tiles rebuilt/);
     await page.getByLabel('Resident tiles').selectOption('Both tiles');
   }
+
+  await openGroup('Sierra watershed explorer');
+  assert.equal(await page.getByRole('img', {name: 'Sierra watershed map'}).count(), 1);
+  assert.match(await page.getByTestId('watershed-coverage').innerText(), /^0 missing cells/);
+  await page.getByLabel('Remove interior tile').check();
+  assert.match(await page.getByTestId('watershed-coverage').innerText(), /^64 missing cells/);
+  await page.getByLabel('Watershed outlets').selectOption('First outlet');
+  await page.getByLabel('Watershed display').selectOption('Coverage');
+  assert.equal(await page.getByRole('img', {name: 'Sierra watershed map'}).locator('circle').count(), 1);
 
   await openGroup('Streaming replay');
   const replayLayout=await page.getByRole('img',{name:'Resident and rebuilt terrain tiles',exact:true}).evaluate(svg=>{
