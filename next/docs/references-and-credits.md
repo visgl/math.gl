@@ -86,7 +86,7 @@ For new adapted code, retain the upstream copyright and full license, record the
 
 <!-- -->
 
-Download the shared [BibTeX bibliography](https://visgl.github.io/math.gl/next/assets/files/references-1292348881a67f20bb4a97b5beb5bb6b.bib) or [CSL-JSON metadata](https://visgl.github.io/math.gl/next/assets/files/references-3a0560bc52e2a801aa45fafa438420f8.json).
+Download the shared [BibTeX bibliography](https://visgl.github.io/math.gl/next/assets/files/references-e22e1b480586ccf9f3602fb30abc830e.bib) or [CSL-JSON metadata](https://visgl.github.io/math.gl/next/assets/files/references-c66e89bd3c61dacf4b0991860ec28efc.json).
 
 Academic sources cited throughout the documentation.
 
@@ -108,6 +108,14 @@ Original single-author preprint cited for the projection equations.
 
 Xianzhi Cao, Alan S. Collins, Sergei Pisarevsky, Nicolas Flament, Sanzhong Li, Derrick Hasterok, R. Dietmar Müller (2024). **Earth’s tectonic and plate boundary evolution over 1.8 billion years**. Geoscience Frontiers, 15, (6), 101922. [DOI](https://doi.org/10.1016/j.gsf.2024.101922)
 
+### Chapman (1931)[​](#chapman1931 "Direct link to Chapman (1931)")
+
+S. Chapman (1931). **The absorption and dissociative or ionizing effect of monochromatic radiation in an atmosphere on a rotating earth part II. Grazing incidence**. Proceedings of the Physical Society, 43, (5), 483-501. [DOI](https://doi.org/10.1088/0959-5309/43/5/302)
+
+### Cornette & Shanks (1992)[​](#cornette1992 "Direct link to Cornette & Shanks (1992)")
+
+William M. Cornette, Joseph G. Shanks (1992). **Physically reasonable analytic expression for the single-scattering phase function**. Applied Optics, 31, (16), 3152. [DOI](https://doi.org/10.1364/ao.31.003152)
+
 ### Crumey (2014)[​](#crumey2014 "Direct link to Crumey (2014)")
 
 Andrew Crumey (2014). **Human contrast threshold and astronomical visibility**. Monthly Notices of the Royal Astronomical Society, 442, (3), 2600-2619. [DOI](https://doi.org/10.1093/mnras/stu992) · [Source](https://arxiv.org/abs/1405.4209)
@@ -123,6 +131,10 @@ S. Gottschalk, M. C. Lin, D. Manocha (1996). **OBBTree: a hierarchical structure
 ### Gowan et al. (2021)[​](#gowan2021 "Direct link to Gowan et al. (2021)")
 
 Evan J. Gowan, Xu Zhang, Sara Khosravi, Alessio Rovere, Paolo Stocchi, Anna L. C. Hughes, Richard Gyllencreutz, Jan Mangerud, John-Inge Svendsen, Gerrit Lohmann (2021). **A new global ice sheet reconstruction for the past 80 000 years**. Nature Communications, 12, (1). [DOI](https://doi.org/10.1038/s41467-021-21469-w)
+
+### Henyey & Greenstein (1941)[​](#henyey1941 "Direct link to Henyey & Greenstein (1941)")
+
+L. G. Henyey, J. L. Greenstein (1941). **Diffuse radiation in the Galaxy**. The Astrophysical Journal, 93, 70. [DOI](https://doi.org/10.1086/144246)
 
 ### Hosek & Wilkie (2012)[​](#hosek2012 "Direct link to Hosek & Wilkie (2012)")
 
@@ -189,6 +201,10 @@ Matthew A. Petroff (2021). **A Square Equal-Area Map Projection with Low Angular
 ### Preetham et al. (1999)[​](#preetham1999 "Direct link to Preetham et al. (1999)")
 
 A. J. Preetham, Peter Shirley, Brian Smits (1999). **A practical analytic model for daylight**. Proceedings of the 26th annual conference on Computer graphics and interactive techniques - SIGGRAPH ’99, 91-100. [DOI](https://doi.org/10.1145/311535.311545)
+
+### Ren & MacKenzie (2007)[​](#ren2007 "Direct link to Ren & MacKenzie (2007)")
+
+C. Ren, A. R. MacKenzie (2007). **Closed-form approximations to the error and complementary error functions and their applications in atmospheric science**. Atmospheric Science Letters, 8, (3), 70-73. [DOI](https://doi.org/10.1002/asl.154)
 
 ### Schönrich et al. (2010)[​](#schoenrich2010 "Direct link to Schönrich et al. (2010)")
 
