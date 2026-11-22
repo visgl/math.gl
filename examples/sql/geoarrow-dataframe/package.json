@@ -1,0 +1,23 @@
+{
+  "name": "math.gl-geoarrow-dataframe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "vite --config ../../vite.config.local.mjs",
+    "build": "vite build --config ../../vite.config.local.mjs",
+    "measure": "node measure.mjs"
+  },
+  "dependencies": {
+    "@deck.gl/core": "10.0.0-alpha.1",
+    "@deck.gl/layers": "10.0.0-alpha.1",
+    "@luma.gl/core": "10.0.0-alpha.14",
+    "@luma.gl/engine": "10.0.0-alpha.14",
+    "@luma.gl/shaders": "10.0.0-alpha.14",
+    "@math.gl/sql": "workspace:*",
+    "apache-arrow": "17.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1",
+    "vite": "^8.3.6"
+  }
+}

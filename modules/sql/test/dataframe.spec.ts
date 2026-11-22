@@ -74,3 +74,41 @@ test('DataFrame selects fields in order and shares geometry and attribute buffer
   expect(GeoDataFrame.fromArrow(output).geometry.field.name).toBe('end');
   expect(() => DataFrame.fromArrow(table).select('missing')).toThrow('Unknown column');
 });
+
+test('GeoDataFrame filters across batches and retains active geometry, metadata, and row order', () => {
+  const table = makeTable();
+  const frame = GeoDataFrame.fromArrow(table, {geometry: 'end'});
+  const filtered = frame.filter('id <> :excluded', {parameters: {excluded: 2}});
+  expect(filtered.geometry.field.name).toBe('end');
+  expect(filtered.geometry.totalBounds()).toEqual([3, 4, 7, 8]);
+  expect([...filtered.toArrow().getChild('id')!]).toEqual([1, 3]);
+  expect(filtered.toArrow().schema).toBe(table.schema);
+  expect(filtered.toArrow().getChild('end')!.data[1]).toBe(table.getChild('end')!.data[1]);
+  expect(frame.filter('id < 0').geometry.totalBounds()).toBeNull();
+});
+
+test('withColumns evaluates simultaneous expressions and shares unchanged geometry chunks', () => {
+  const table = makeTable();
+  const frame = GeoDataFrame.fromArrow(table, {geometry: 'start'});
+  const output = frame.withColumns(
+    {id: 'id + :step', doubled: 'id * 2'},
+    {
+      parameters: {step: 10}
+    }
+  );
+  expect(output.geometry.field).toBe(frame.geometry.field);
+  expect(output.toArrow().schema.metadata).toBe(table.schema.metadata);
+  expect(output.toArrow().schema.fields.map(field => field.name)).toEqual([
+    'id',
+    'start',
+    'end',
+    'doubled'
+  ]);
+  expect([...output.toArrow().getChild('id')!]).toEqual([11, 12, 13]);
+  expect([...output.toArrow().getChild('doubled')!]).toEqual([2, 4, 6]);
+  output.geometry.vector.data.forEach((chunk, index) => {
+    expect(chunk).toBe(frame.geometry.vector.data[index]);
+  });
+  expect(frame.withColumns({})).toBe(frame);
+  expect(() => frame.withColumns({start: 'id'})).toThrow('active geometry');
+});
