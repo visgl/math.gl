@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original deck.gl material adapter. Imports luma.gl waterMaterial; no upstream shader code is copied.
+import {earlyEarthSurfaceGLSL} from './early-earth-surface.js';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {waterMaterial} from '@luma.gl/shaders';
 import {thermalPulse} from './planetary-history.js';
@@ -170,13 +171,17 @@ export class SurfaceLayer extends SolidPolygonLayer {
           float footprint=length(fwidth(p))*frequency;
           return mix(tectonicIceNoise(p*frequency),.5,smoothstep(.35,1.2,footprint));
         }
-        vec3 tectonicSurfaceNormal(vec3 normal,float height) {
-          vec3 dx=dFdx(surfacePosition),dy=dFdy(surfacePosition);
+        vec3 tectonicReliefNormal(vec3 normal,vec3 position,float height) {
+          vec3 dx=dFdx(position),dy=dFdy(position);
           vec3 across=cross(dy,normal),along=cross(normal,dx);
           float determinant=dot(dx,across);
           vec3 gradient=sign(determinant)*(dFdx(height)*across+dFdy(height)*along);
           return normalize(abs(determinant)*normal-gradient+normal*1e-12);
-        }`,
+        }
+        vec3 tectonicSurfaceNormal(vec3 normal,float height) {
+          return tectonicReliefNormal(normal,surfacePosition,height);
+        }
+        ${earlyEarthSurfaceGLSL}`,
         'fs:DECKGL_FILTER_COLOR': `
         vec3 reference=normalize(referencePosition);
         vec2 uv=vec2(atan(reference.y,reference.x)/6.28318530718+.5,
@@ -186,18 +191,10 @@ export class SurfaceLayer extends SolidPolygonLayer {
         vec3 light=normalize(vec3(.5,.55,1.));
         float diffuse=.52+.58*max(dot(normal,light),0.);
         if(tectonicSurface.earlyEarth>.5) {
-          // Original procedural art. Sphere-space noise follows camera rotation and
-          // every projection; neither these lakes nor impact sites are observations.
           vec3 p=normalize(geographicPosition);
-          float broad=.7*tectonicIceDetail(p,5.)+.3*tectonicIceDetail(p,13.);
-          float rock=.6*tectonicIceDetail(p,22.)+.3*tectonicIceDetail(p,65.)+.1*tectonicIceDetail(p,160.);
-          float relief=.003*rock;
-          float lakes=smoothstep(.59,.73,broad);
-          float cracks=1.-smoothstep(.007,.022,abs(tectonicIceDetail(p,40.)-.5));
-          float lava=tectonicSurface.earlyLava*(lakes+.1*cracks*lakes);
-          float flow=.65+.35*tectonicIceDetail(p+vec3(0.,0.,tectonicSurface.earlyImpactTime*.008),85.);
-          vec3 emission=lava*mix(vec3(.7,.025,.001),vec3(4.,1.4,.12),lakes*flow);
-          emission+=tectonicSurface.earlyLava*smoothstep(.52,.64,broad)*vec3(.14,.016,.001);
+          float broad, rock, relief;
+          vec3 emission;
+          earlyEarthSurface(p,tectonicSurface.earlyLava,broad,rock,relief,emission);
           // Localized strikes, molten pools and cooling crater rings. The age-based
           // clock is deterministic: scrubbing reproduces a pose, Stop freezes it.
           for(int i=0;i<4;i++) {
@@ -215,13 +212,17 @@ export class SurfaceLayer extends SolidPolygonLayer {
               +core*exp(-elapsed*.85)*vec3(1.7,.18,.004)
               +ring*exp(-elapsed*2.)*vec3(1.4,.3,.012));
           }
-          vec3 rockyNormal=tectonicSurfaceNormal(normal,relief);
-          float illumination=.18+.95*max(dot(rockyNormal,light),0.);
-          vec3 basalt=mix(vec3(.027,.025,.024),vec3(.14,.125,.11),rock);
-          float seaLevel=mix(.20,.65,tectonicSurface.earlyWater);
+          vec3 sun=normalize(vec3(.16,-.84,.52));
+          float solarAngle=dot(p,sun);
+          float day=smoothstep(-.035,.025,solarAngle);
+          vec3 rockyNormal=tectonicReliefNormal(p,p,relief);
+          float illumination=.008+day*(.13+2.4*max(dot(rockyNormal,sun),0.));
+          vec3 basalt=mix(vec3(.018,.032,.052),vec3(.22,.34,.45),rock);
+          float floodLevel=mix(.65,.43,smoothstep(0.,.3,tectonicSurface.earlyLava));
+          float seaLevel=mix(.20,floodLevel,tectonicSurface.earlyWater);
           float sea=tectonicSurface.earlyWater*(1.-smoothstep(seaLevel-.07,seaLevel+.07,broad));
           vec3 oceanColor=water_getColorMapped(surfacePosition+vec3(0.,0.,4.),
-            surfacePosition,p,normal,uv).rgb;
+            surfacePosition,p,normal,uv).rgb*(.06+.94*day);
           // Synthetic tidal shallows carry muted ochre/teal microbial mats.
           float shore=1.-smoothstep(.025,.085,abs(broad-seaLevel));
           float mats=shore*tectonicSurface.microbialLife*smoothstep(.3,.65,rock);
@@ -234,12 +235,12 @@ export class SurfaceLayer extends SolidPolygonLayer {
             +tectonicSurface.earlyTheia*vec3(18.,12.,4.);
           color.rgb=vec3(1.)-exp(-radiance);
           float rim=pow(1.-max(normal.z,0.),5.)*tectonicSurface.globeWeight;
-          color.rgb+=vec3(.055,.025,.012)*rim;
+          color.rgb+=vec3(.12,.19,.29)*rim*smoothstep(-.08,.55,solarAngle);
           // Drifting steam in geographic sphere space, with falling rain streaks.
           vec3 drift=p+vec3(0.,tectonicSurface.earlyImpactTime*.035,0.);
           float cloud=tectonicIceDetail(drift,7.);
           float vapor=tectonicSurface.earlySteam*(.35+.5*cloud);
-          vec3 steamColor=vec3(.57,.60,.63)*(.5+.5*max(dot(normal,light),0.));
+          vec3 steamColor=vec3(.57,.60,.63)*(.015+.985*day);
           color.rgb=mix(color.rgb,steamColor,vapor);
           vec2 rainUV=vec2(atan(p.y,p.x)*85.,asin(clamp(p.z,-1.,1.))*30.);
           float lane=step(.94,fract(sin(floor(rainUV.x)*127.1)*43758.5));
