@@ -183,6 +183,32 @@ GROUP BY district
 
 Both functions return interleaved XY `geoarrow.multipolygon` and preserve the input CRS metadata. Grouped SQL uses the table query engine. Each group reduces one batch at a time and compacts partial unions as it reads rows.
 
+## Transform with a projection engine[​](#transform-with-a-projection-engine "Direct link to Transform with a projection engine")
+
+Register `createSTTransform(engine)` from `@math.gl/geospatial/st-functions` to use CRS definitions available synchronously in a projection engine. The result retains specialized native GeoArrow layouts and additional ordinates. WKB input is supported for planar XY geometries and produces WKB.
+
+```
+import {projectionEngine} from '@math.gl/geospatial/projection';
+
+import {createSTTransform} from '@math.gl/geospatial/st-functions';
+
+import {queryArrowSQL} from '@math.gl/sql/query';
+
+
+
+const projected = queryArrowSQL(
+
+  'SELECT ST_Transform(geometry, 32631) AS utm FROM features',
+
+  tables,
+
+  {functions: [createSTTransform(projectionEngine)]}
+
+);
+```
+
+Supply the source CRS in the GeoArrow field metadata and a constant target EPSG code in SQL. To register the rest of `POSTGIS_SPATIAL_FUNCTIONS` alongside this overload, omit `ST_TRANSFORM` from that list.
+
 ## PostGIS geometry signatures[​](#postgis-geometry-signatures "Direct link to PostGIS geometry signatures")
 
 These functions use 2D Cartesian coordinates. Use coordinates in a suitable projected CRS when you need linear units such as meters. Area uses the square of the coordinate unit. Transform inputs to a common CRS before running a query.
