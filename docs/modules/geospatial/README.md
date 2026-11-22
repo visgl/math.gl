@@ -87,6 +87,7 @@ Attribution: From <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#/
 | [`@math.gl/geospatial/terrain`](./terrain/README.md) | Terrain sampling, mesh generation, and surface analysis. |
 | [`@math.gl/geospatial/web-mercator`](./web-mercator/README.md) | Spherical Web Mercator viewport and coordinate utilities. |
 | `@math.gl/geospatial/st-functions` | [PostGIS-style functions for Arrow SQL](../sql/arrow/spatial-functions.md) |
+| `@math.gl/geospatial/st-viewport-functions` | [Geometry clipping and subdivision for Arrow SQL](../sql/arrow/spatial-functions.md#clip-features-to-a-tile-or-viewport) |
 | `@math.gl/geospatial/turf-functions` | [Turf function declarations and the Arrow SQL adapter](../sql/arrow/README.md#turf-functions) |
 | `@math.gl/geospatial/tasks` | [Map preparation and coordinate projection tasks](../tasks/developer-guide/task-runner.md) |
 

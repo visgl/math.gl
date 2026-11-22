@@ -21,7 +21,8 @@ import {
   writeWKB
 } from '@math.gl/core/arrow';
 import {queryArrowSQL} from '@math.gl/sql/query';
-import {POSTGIS_SPATIAL_FUNCTIONS, ST_SUBDIVIDE} from '@math.gl/geospatial/st-functions';
+import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
+import {ST_CLIPBYBOX2D, ST_SUBDIVIDE} from '@math.gl/geospatial/st-viewport-functions';
 import {TURF_FUNCTIONS} from '@math.gl/geospatial/turf-functions';
 
 /** Marks a native or WKB vector with the extension and optional CRS used by SQL binding. */
@@ -42,7 +43,7 @@ function wkb(...wkts: (string | null)[]) {
 /** Executes a spatial SELECT over a single Arrow table. */
 function select(sql: string, table: Table): Table {
   return queryArrowSQL(sql, new Map([['features', table]]), {
-    functions: [...POSTGIS_SPATIAL_FUNCTIONS, ...TURF_FUNCTIONS]
+    functions: [...POSTGIS_SPATIAL_FUNCTIONS, ...TURF_FUNCTIONS, ST_CLIPBYBOX2D]
   });
 }
 

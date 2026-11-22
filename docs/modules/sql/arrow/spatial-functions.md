@@ -61,6 +61,7 @@ close candidates, the first along the route is selected.
 
 ## Clip features to a tile or viewport
 
+Register `ST_CLIPBYBOX2D` from `@math.gl/geospatial/st-viewport-functions`.
 Use the XY bounds of a geometry as the clipping rectangle. For example, if
 `geom` is in EPSG:3857, clip it to a Web Mercator tile for a local Arrow-backed
 tile layer. Use `ST_MakeEnvelope` with viewport bounds for an untiled layer.
@@ -76,7 +77,7 @@ GeometryCollection. Features that lie only on the boundary are excluded. Keep th
 
 ## Subdivide large polygons for rendering
 
-Register `ST_SUBDIVIDE` from `@math.gl/geospatial/st-functions` in the query's
+Register `ST_SUBDIVIDE` from `@math.gl/geospatial/st-viewport-functions` in the query's
 `functions` list. The lateral table function accepts a polygon or multipolygon
 column and returns one WKB Polygon per part, with at most 256 vertices including
 ring closures. The input CRS and parent feature ID are available on each part.
