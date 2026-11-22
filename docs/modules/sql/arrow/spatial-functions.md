@@ -92,6 +92,26 @@ Null and empty geometries emit zero parts. Use `LEFT JOIN LATERAL ... ON TRUE`
 to retain those parent rows. The SQL signature takes one column and uses the
 default vertex limit.
 
+## Play back measured routes
+
+Store one measure (M) per route vertex. For recorded trips, use the original
+vertex timestamps relative to a common origin. To animate a route with no
+timestamps, use `ST_AddMeasure(route, 0, duration)` to synthesize values
+proportional to distance along the route.
+
+```sql
+SELECT id,
+       ST_LocateAlong(measured_route, 30) AS marker,
+       ST_LocateBetween(measured_route, 20, 30) AS trail
+FROM trips
+```
+
+Render the point results as markers and the line components as a trail. To feed
+a deck.gl `TripsLayer`, decode the measured source path and pass its XY or XYZ
+coordinates and the M values as separate path and timestamp arrays. A route can
+visit the same measure more than once. These functions retain separate hits
+and preserve route direction when clipping, even if measures decrease.
+
 ## PostGIS geometry signatures
 
 These functions use 2D Cartesian coordinates. Use coordinates in a suitable
@@ -126,6 +146,9 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_Area(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar polygon area with holes subtracted. Empty and non-areal inputs yield zero. |
 | `ST_LineInterpolatePoint(line, fraction)` | 2D LineString and fraction in [0, 1] | GeoArrow WKB Point at the given fraction of route length. |
 | `ST_LineLocatePoint(line, point)` | 2D LineString and Point | Fraction of route length at the nearest point on the route. |
+| `ST_AddMeasure(line, start, end)` | LineString or MultiLineString and two finite measures | WKB with M interpolated by accumulated XY length. Keeps Z and overwrites existing M. |
+| `ST_LocateAlong(line, measure)` | Measured LineString or MultiLineString | WKB MultiPoint with every match, preserving M and Z. A segment constant at the requested measure contributes its midpoint. |
+| `ST_LocateBetween(line, start, end)` | Measured LineString or MultiLineString | WKB MultiLineString or GeometryCollection with the portions in the inclusive interval. Reversed bounds are normalized. |
 | `ST_LineSubstring(line, start, end)` | 2D LineString and ordered fractions in [0, 1] | WKB LineString including intermediate vertices, or Point for equal fractions or a zero-length route. Empty lines yield null. |
 | `ST_RemoveRepeatedPoints(line [, tolerance])` | 2D LineString or MultiLineString | WKB line with consecutive duplicates removed. A positive tolerance also removes nearby vertices. Retains route endpoints. |
 | `ST_Simplify(line, tolerance)` | 2D LineString or MultiLineString | WKB line simplified in planar coordinate units. Drops collapsed components and returns null if none survive. |

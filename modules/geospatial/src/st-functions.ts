@@ -27,6 +27,7 @@ import {
 } from '@math.gl/core/arrow';
 import {planarIntersects} from './spatial-planar-intersects';
 import {lineLocatePoint, lineSubstring, projectPointToLine} from './linear-referencing';
+import {addMeasure, locateAlong, locateBetween, measuredDimension} from './measure-referencing';
 import {normalizeCRSIdentifier} from './crs/crs-identifier';
 import {EPSG3857ToLngLat, EPSG4326ToEPSG3857} from './web-mercator/mercator-meters';
 import {vertexCount, memberCount, geometryMember} from './geometry-inspection';
@@ -459,6 +460,45 @@ export const ST_LINESUBSTRING = /* @__PURE__ */ spatialFunction(
   2
 );
 
+/** Interpolates a new M ordinate by cumulative XY length while retaining Z. */
+export const ST_ADDMEASURE = /* @__PURE__ */ spatialFunction(
+  'ST_AddMeasure',
+  [lineKinds],
+  /* @__PURE__ */ new Binary(),
+  ([line], start, end) => {
+    const result = addMeasure(line!, line!.dimension!, start!, end!);
+    return writeWKB(result.geometry, result.dimension);
+  },
+  2,
+  true
+);
+
+/** Returns the points on a measured route that match the requested measure. */
+export const ST_LOCATEALONG = /* @__PURE__ */ spatialFunction(
+  'ST_LocateAlong',
+  [lineKinds],
+  /* @__PURE__ */ new Binary(),
+  ([line], measure) => {
+    const dimension = measuredDimension(line!.dimension!);
+    return writeWKB(locateAlong(line!, dimension, measure!), dimension);
+  },
+  1,
+  true
+);
+
+/** Returns the portions of a measured route within an inclusive measure interval. */
+export const ST_LOCATEBETWEEN = /* @__PURE__ */ spatialFunction(
+  'ST_LocateBetween',
+  [lineKinds],
+  /* @__PURE__ */ new Binary(),
+  ([line], start, end) => {
+    const dimension = measuredDimension(line!.dimension!);
+    return writeWKB(locateBetween(line!, dimension, start!, end!), dimension);
+  },
+  2,
+  true
+);
+
 /** Extracts an EPSG code from a GeoArrow authority identifier or a PROJJSON root ID. */
 function geometrySRID(crs: unknown): number {
   let identifier = typeof crs === 'string' ? normalizeCRSIdentifier(crs) : '';
@@ -884,6 +924,9 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_LINEINTERPOLATEPOINT,
     ST_LINELOCATEPOINT,
     ST_LINESUBSTRING,
+    ST_ADDMEASURE,
+    ST_LOCATEALONG,
+    ST_LOCATEBETWEEN,
     ST_POINTONSURFACE,
     ST_CENTROID,
     ST_NPOINTS,
