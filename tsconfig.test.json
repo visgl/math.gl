@@ -584,6 +584,7 @@
       "@math.gl/geospatial/expressions": [
         "./modules/geospatial/src/expressions.ts"
       ],
+      "@math.gl/sql/dataframe": ["./modules/sql/src/dataframe/index.ts"],
       "@math.gl/sql/query": [
         "./modules/sql/src/query.ts"
       ],
