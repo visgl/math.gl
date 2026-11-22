@@ -85,7 +85,7 @@ function lineBoundary(components: readonly Path[]): ReadonlyMap<string, Position
 }
 
 /** Finds shared endpoints, including an endpoint lying in the other segment's interior. */
-function endpointContacts(a: Edge, b: Edge): Position[] {
+export function endpointContacts(a: Edge, b: Edge): Position[] {
   const contacts: Position[] = [];
   for (const [endpoints, other] of [
     [a, b],
@@ -139,7 +139,7 @@ function insideArea(point: Position, areas: readonly (readonly Path[])[]): boole
 }
 
 /** Finds a segment parameter on its axis with the least relative rounding error. */
-function parameter(point: Position, [a, b]: Edge): number {
+export function parameter(point: Position, [a, b]: Edge): number {
   const dx = b[0]! - a[0]!;
   const dy = b[1]! - a[1]!;
   return Math.abs(dx) >= Math.abs(dy) ? (point[0]! - a[0]!) / dx : (point[1]! - a[1]!) / dy;
