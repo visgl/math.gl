@@ -11,7 +11,10 @@ import {validateRange} from './celestial';
 
 /** The constant `a` of the Ren & MacKenzie (2007) approximation of erfcx. */
 const REN_MACKENZIE_CONSTANT = 2.911;
+/** √π, used by the erfcx approximation. */
 const SQRT_PI = Math.sqrt(Math.PI);
+/** √(π / 2), kept apart from the radius under the square root so that large radii cannot overflow. */
+const SQRT_HALF_PI = Math.sqrt(Math.PI / 2);
 
 /**
  * Returns the Rayleigh phase function, per steradian: 3 (1 + μ²) / (16 π), where μ is the
@@ -153,7 +156,7 @@ export function getChapmanGrazingIncidenceFunction(
     throw new RangeError('The tangent radius x sin z must be 1 scale height or greater');
   }
   return (
-    2 * Math.sqrt((Math.PI / 2) * tangentRadius) * Math.exp(radiusInScaleHeights - tangentRadius) -
+    2 * SQRT_HALF_PI * Math.sqrt(tangentRadius) * Math.exp(radiusInScaleHeights - tangentRadius) -
     upwardChapman(radiusInScaleHeights, -cosineOfZenithAngle)
   );
 }
@@ -161,7 +164,8 @@ export function getChapmanGrazingIncidenceFunction(
 /** The asymptotic Chapman function for cos z ≥ 0. */
 function upwardChapman(radiusInScaleHeights: number, cosineOfZenithAngle: number): number {
   return (
-    Math.sqrt((Math.PI / 2) * radiusInScaleHeights) *
+    SQRT_HALF_PI *
+    Math.sqrt(radiusInScaleHeights) *
     getApproximateErfcx(Math.sqrt(radiusInScaleHeights / 2) * cosineOfZenithAngle)
   );
 }

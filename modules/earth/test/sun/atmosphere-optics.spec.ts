@@ -241,6 +241,9 @@ describe('getChapmanGrazingIncidenceFunction', () => {
     // Vertical: 1 - O(1 / x), as documented.
     expect(getChapmanGrazingIncidenceFunction(797, 1)).toBeCloseTo(0.9988, 4);
     expect(getChapmanGrazingIncidenceFunction(1e6, 0.5)).toBeCloseTo(2, 2);
+    // The prefactor must not overflow at the upper bound of the radius.
+    expect(getChapmanGrazingIncidenceFunction(Number.MAX_VALUE, 1)).toBeCloseTo(1, 6);
+    expect(getChapmanGrazingIncidenceFunction(Number.MAX_VALUE, 0.5)).toBeCloseTo(2, 6);
     // Continuous through the horizontal.
     expect(getChapmanGrazingIncidenceFunction(797, -1e-9)).toBeCloseTo(
       getChapmanGrazingIncidenceFunction(797, 1e-9),
