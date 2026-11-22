@@ -112,6 +112,26 @@ coordinates and the M values as separate path and timestamp arrays. A route can
 visit the same measure more than once. These functions retain separate hits
 and preserve route direction when clipping, even if measures decrease.
 
+## Build footprints from point clouds
+
+Register `ST_CONVEXHULL` and `ST_CONCAVEHULL` from
+`@math.gl/geospatial/st-hull-functions`. Supply one planar MultiPoint per
+cloud, with a stable feature ID for deck.gl picking.
+
+```sql
+SELECT id,
+       ST_ConvexHull(points) AS convex,
+       ST_ConcaveHull(points, 0.2) AS footprint
+FROM clouds
+```
+
+Use the Polygon output as a fill or an extrusion in a `GeoJsonLayer`.
+Handle degenerate clouds as Point or LineString results. The concave hull is
+a single hole-free polygon when the points span an area. Its ratio runs from
+0 for the tightest supported hull to 1 for the convex hull. It uses a
+Delaunay edge-length threshold and preserves all input sites. Equal-length
+edges can admit more than one valid hull.
+
 ## PostGIS geometry signatures
 
 These functions use 2D Cartesian coordinates. Use coordinates in a suitable

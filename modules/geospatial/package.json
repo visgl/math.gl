@@ -562,6 +562,11 @@
       "import": "./dist/turf.js",
       "require": "./dist/turf.cjs"
     },
+    "./st-hull-functions": {
+      "types": "./dist/st-hull-functions.d.ts",
+      "import": "./dist/st-hull-functions.js",
+      "require": "./dist/st-hull-functions.cjs"
+    },
     "./st-viewport-functions": {
       "types": "./dist/st-viewport-functions.d.ts",
       "import": "./dist/st-viewport-functions.js",
