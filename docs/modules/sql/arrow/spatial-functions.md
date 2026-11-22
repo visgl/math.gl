@@ -188,7 +188,7 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_CoveredBy(point, polygon)` | Point, then Polygon or MultiPolygon | Interior or boundary. Empty input yields false. |
 | `ST_PointN(line, n)` | 2D LineString and signed integer position | WKB Point. Positions start at 1, or at -1 from the end. Zero and out-of-range positions yield null. |
 | `ST_MakeEnvelope(xmin, ymin, xmax, ymax)` | Four numeric bounds | Closed 2D WKB Polygon with unknown CRS. |
-| `ST_DWithin(a, b, distance)` | Two 2D Points or a Point and LineString in either order, plus a nonnegative radius | Boolean. Includes geometries exactly at the radius, in planar coordinate units. Empty inputs yield false. |
+| `ST_DWithin(a, b, distance)` | Two Points, Point and LineString, Point and Polygon or MultiPolygon, or two linear geometries (LineString or MultiLineString), in either order, with a nonnegative radius | Boolean. Includes geometries exactly at the radius, in planar coordinate units. Interior points and boundary contact have zero distance. For points in holes, distance is measured to the nearest boundary. Empty inputs yield false. |
 | `ST_ClosestPoint(a, b)` | Two 2D Points or a Point and LineString in either order | WKB Point on the first geometry nearest to the second. Empty inputs yield null. |
 | `ST_ShortestLine(a, b)` | Two 2D Points or a Point and LineString in either order | Two-vertex WKB LineString from the first geometry to the second. Intersecting inputs produce coincident endpoints. Empty inputs yield null. |
 | `ST_Distance(a, b)` | Two Points | Float64 Cartesian distance in coordinate units. Empty points yield null. |
