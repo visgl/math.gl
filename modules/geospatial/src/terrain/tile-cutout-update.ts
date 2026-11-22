@@ -175,33 +175,42 @@ export function updateTerrainTileCutouts(
       const combined = assembleTerrainCutoutTiles([a.resident.mesh, b.resident.mesh], limits);
       validateTerrainCutoutTopology(combined.mesh, combined.remainingWork);
     }
-  const boundaries = new Map<string, {edge: Boundary; paired: boolean}>();
-  const cutKeys = new Map<string, number>();
+  /** Unpaired edge, polygon ID for a cut pair, or null for a same-side pair. */
+  const boundaries = new Map<string, Boundary | number | null>();
   for (let tile = 0; tile < values.length; tile++)
     for (const edge of values[tile].edges) {
       const other = boundaries.get(edge.key);
-      if (!other) {
-        boundaries.set(edge.key, {edge, paired: false});
+      if (other === undefined) {
+        boundaries.set(edge.key, edge);
         continue;
       }
-      if (other.paired || other.edge.start !== edge.end || other.edge.end !== edge.start)
+      if (
+        typeof other !== 'object' ||
+        other === null ||
+        other.start !== edge.end ||
+        other.end !== edge.start
+      )
         throw new RangeError('Nonconforming terrain cutout tile boundary');
-      other.paired = true;
-      if (other.edge.side !== edge.side) {
-        cutKeys.set(edge.key, edge.side === 0 ? edge.polygon : other.edge.polygon);
-      }
+      boundaries.set(
+        edge.key,
+        other.side === edge.side ? null : edge.side === 0 ? edge.polygon : other.polygon
+      );
     }
   const tiles = new Map<string, TerrainCutout>();
   const changed: string[] = [];
+  /** Scratch endpoints, copied only when a displayed boundary changes. */
+  const cuts: [number[], number[]] = [[], []];
+  /** Scratch polygon IDs aligned with the scratch endpoints. */
+  const polygons: [number[], number[]] = [[], []];
   for (let i = 0; i < values.length; i++) {
     const entry = values[i];
     const old = prior?.entries.get(entry.resident.id);
     // Emit in cached tile-local order, independent of resident visitation order.
-    const cuts: [number[], number[]] = [[], []];
-    const polygons: [number[], number[]] = [[], []];
+    cuts[0].length = cuts[1].length = 0;
+    polygons[0].length = polygons[1].length = 0;
     for (const edge of entry.edges) {
-      const polygonIndex = cutKeys.get(edge.key);
-      if (polygonIndex !== undefined) {
+      const polygonIndex = boundaries.get(edge.key);
+      if (typeof polygonIndex === 'number') {
         cuts[edge.side].push(edge.a, edge.b);
         polygons[edge.side].push(polygonIndex);
       }
