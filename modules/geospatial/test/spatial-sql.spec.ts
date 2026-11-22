@@ -1195,7 +1195,15 @@ test('erodes a native point-cloud hull without losing sites or CRS metadata', ()
   expect(result.getChild('tight_area')!.get(0)).toBeLessThan(36);
   const hull = geometryAt(result, 'hull', 0)!;
   expect(hull.type).toBe('Polygon');
-  if (hull.type === 'Polygon') expect(hull.coordinates).toHaveLength(1);
+  if (hull.type === 'Polygon') {
+    expect(hull.coordinates).toHaveLength(1);
+    const ring = hull.coordinates[0]!;
+    const signedArea = ring.slice(1).reduce((sum, point, i) => {
+      const previous = ring[i]!;
+      return sum + previous[0]! * point[1]! - point[0]! * previous[1]!;
+    }, 0);
+    expect(signedArea).toBeGreaterThan(0);
+  }
   expect(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')).toBe(
     JSON.stringify(metadata)
   );

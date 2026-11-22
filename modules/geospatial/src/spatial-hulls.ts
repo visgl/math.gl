@@ -29,6 +29,7 @@ function buildChain(sites: readonly Site[]): Site[] {
     while (chain.length > 1) {
       const a = chain[chain.length - 2]!;
       const b = chain[chain.length - 1]!;
+      // robust-predicates returns a negative value for a Cartesian counterclockwise turn.
       if (orient2d(...a, ...b, ...point) < 0) break;
       chain.pop();
     }
