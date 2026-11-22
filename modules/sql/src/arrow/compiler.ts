@@ -557,8 +557,7 @@ function bindNode(
       return {
         field: new Field('literal', type, true),
         hasKernel: false,
-        prepare: (_batch, active) =>
-          vectorReader(makeVector(nullVectorData(type, active.length)))
+        prepare: (_batch, active) => vectorReader(makeVector(nullVectorData(type, active.length)))
       };
     const fractionalTimestampSecond =
       date &&
@@ -1291,8 +1290,7 @@ function nestedValue(value: any, type: DataType): unknown {
 /** Masks nested results without coercing their child types. */
 function nestedVector(vector: Vector, type: DataType, active: Mask): Vector {
   if (!active.some((valid, row) => !valid && vector.isValid(row))) return vector;
-  if (DataType.isDenseUnion(type))
-    return evaluateVectorSpans(vector, type, active, span => span);
+  if (DataType.isDenseUnion(type)) return evaluateVectorSpans(vector, type, active, span => span);
   return vectorFromArray(
     Array.from(active, (valid, row) => (valid ? nestedValue(vector.get(row), type) : null)),
     type
