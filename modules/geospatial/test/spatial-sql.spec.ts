@@ -21,6 +21,7 @@ import {
   writeWKB
 } from '@math.gl/core/arrow';
 import {queryArrowSQL} from '@math.gl/sql/query';
+import {ST_CONCAVEHULL, ST_CONVEXHULL} from '@math.gl/geospatial/st-hull-functions';
 import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
 import {ST_CLIPBYBOX2D, ST_SUBDIVIDE} from '@math.gl/geospatial/st-viewport-functions';
 import {TURF_FUNCTIONS} from '@math.gl/geospatial/turf-functions';
@@ -43,7 +44,13 @@ function wkb(...wkts: (string | null)[]) {
 /** Executes a spatial SELECT over a single Arrow table. */
 function select(sql: string, table: Table): Table {
   return queryArrowSQL(sql, new Map([['features', table]]), {
-    functions: [...POSTGIS_SPATIAL_FUNCTIONS, ...TURF_FUNCTIONS, ST_CLIPBYBOX2D]
+    functions: [
+      ...POSTGIS_SPATIAL_FUNCTIONS,
+      ...TURF_FUNCTIONS,
+      ST_CLIPBYBOX2D,
+      ST_CONVEXHULL,
+      ST_CONCAVEHULL
+    ]
   });
 }
 
@@ -1138,4 +1145,73 @@ test('locate along retains separate visits to the same coordinates and measure',
   const table = new Table(new Schema([geometryField('route', route)]), {route});
   const result = select('SELECT ST_LocateAlong(route,1) AS visits FROM features', table);
   expect(geometryAt(result, 'visits', 0)).toEqual(parseWKT('MULTIPOINT M ((1 0 1),(1 0 1))'));
+});
+
+test('computes convex hulls for collections, degenerate point clouds, and null rows', () => {
+  const g = wkb(
+    'GEOMETRYCOLLECTION(LINESTRING(0 0,4 0,4 4),MULTIPOINT((0 4),(2 2)))',
+    'MULTIPOINT((2 2),(1 1),(3 3),(2 2))',
+    'MULTIPOINT((2 1),(2 1))',
+    'MULTIPOINT EMPTY',
+    null
+  );
+  const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select('SELECT ST_ConvexHull(g) AS footprint FROM features', table);
+  expect(geometryAt(result, 'footprint', 0)).toEqual(parseWKT('POLYGON((0 0,4 0,4 4,0 4,0 0))'));
+  expect(geometryAt(result, 'footprint', 1)).toEqual(parseWKT('LINESTRING(1 1,3 3)'));
+  expect(geometryAt(result, 'footprint', 2)).toEqual(parseWKT('POINT(2 1)'));
+  expect(geometryAt(result, 'footprint', 3)).toEqual(parseWKT('GEOMETRYCOLLECTION EMPTY'));
+  expect(geometryAt(result, 'footprint', 4)).toBeNull();
+});
+
+test('erodes a native point-cloud hull without losing sites or CRS metadata', () => {
+  const coordinates = [
+    [0, 0],
+    [6, 0],
+    [6, 6],
+    [0, 6],
+    [2, 1],
+    [4, 1],
+    [1, 3],
+    [5, 3],
+    [1, 5],
+    [5, 5],
+    [2, 1]
+  ];
+  const g = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows([{type: 'MultiPoint', coordinates}])
+  );
+  const metadata = {crs: 'EPSG:3857', crs_type: 'authority_code'};
+  const table = new Table(new Schema([geometryField('g', g, 'multipoint', metadata)]), {g});
+  const result = select(
+    `SELECT ST_ConcaveHull(g,0) AS hull,
+      ST_Area(ST_ConcaveHull(g,0)) AS tight_area,
+      ST_Area(ST_ConcaveHull(g,1)) AS convex_area,
+      ST_ConvexHull(g) AS convex, ST_ConcaveHull(g,1) AS maximum FROM features`,
+    table
+  );
+  expect(geometryAt(result, 'maximum', 0)).toEqual(geometryAt(result, 'convex', 0));
+  expect(result.getChild('convex_area')!.get(0)).toBe(36);
+  expect(result.getChild('tight_area')!.get(0)).toBeLessThan(36);
+  const hull = geometryAt(result, 'hull', 0)!;
+  expect(hull.type).toBe('Polygon');
+  if (hull.type === 'Polygon') expect(hull.coordinates).toHaveLength(1);
+  expect(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')).toBe(
+    JSON.stringify(metadata)
+  );
+  const footprint = vectorFromArray(
+    coordinates.map(() => writeWKB(hull, 'xy')),
+    new Binary()
+  );
+  const site = vectorFromArray(
+    coordinates.map(coordinates => writeWKB({type: 'Point', coordinates}, 'xy')),
+    new Binary()
+  );
+  const containment = new Table(
+    new Schema([geometryField('footprint', footprint), geometryField('site', site)]),
+    {footprint, site}
+  );
+  const covers = select('SELECT ST_Covers(footprint,site) AS covered FROM features', containment);
+  expect([...covers.getChild('covered')!]).toEqual(coordinates.map(() => true));
+  expect(() => select('SELECT ST_ConcaveHull(g,1.1) FROM features', table)).toThrow(/ratio/);
 });
