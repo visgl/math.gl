@@ -26,6 +26,7 @@ import {
   type WellKnownGeometry
 } from '@math.gl/core/arrow';
 import {planarIntersects} from './spatial-planar-intersects';
+import {planarTouches} from './spatial-touches';
 import {linesWithinDistance, pointWithinPolygonDistance} from './spatial-dwithin';
 import {lineLocatePoint, lineSubstring, projectPointToLine} from './linear-referencing';
 import {addMeasure, locateAlong, locateBetween, measuredDimension} from './measure-referencing';
@@ -478,6 +479,14 @@ export const ST_INTERSECTS = /* @__PURE__ */ spatialFunction(
   ],
   /* @__PURE__ */ new Bool(),
   ([a, b]) => planarIntersects(a!, b!)
+);
+
+/** Tests boundary contact while excluding intersections between geometry interiors. */
+export const ST_TOUCHES = /* @__PURE__ */ spatialFunction(
+  'ST_Touches',
+  [geometryTypes, geometryTypes],
+  /* @__PURE__ */ new Bool(),
+  ([a, b]) => planarTouches(a!, b!)
 );
 
 /** Interpolates a point at a fraction of the planar length. */
@@ -986,6 +995,7 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_CLOSESTPOINT,
     ST_SHORTESTLINE,
     ST_INTERSECTS,
+    ST_TOUCHES,
     ST_SRID,
     ST_SETSRID,
     ST_TRANSFORM,
