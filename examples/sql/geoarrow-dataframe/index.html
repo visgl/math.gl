@@ -1,0 +1,25 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: MIT -->
+<!-- SPDX-FileCopyrightText: Copyright (c) vis.gl contributors -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GeoArrow DataFrame</title>
+    <style>
+      body { margin: 0; height: 100dvh; background: #091524; color: #ecf7ff; font: 15px system-ui, sans-serif; }
+      canvas { width: 100%; height: 100%; }
+      aside { position: absolute; z-index: 1; top: 16px; left: 16px; padding: 16px; background: #15263b; border-radius: 8px; }
+      label, output { display: block; margin-block: 8px; }
+    </style>
+  </head>
+  <body>
+    <aside>
+      <label>Processor <select id="processor"></select></label>
+      <label>Minimum score <input id="minimum" type="range" min="0" max="99" value="50"></label>
+      <output id="result" aria-live="polite"></output>
+    </aside>
+    <canvas id="map" aria-label="GeoArrow points around San Francisco"></canvas>
+    <script type="module" src="./main.mjs"></script>
+  </body>
+</html>
