@@ -42,7 +42,12 @@ export {
   skyDirectionToGlobe,
   getSkyGlobePosition,
   skyRotationToGlobe,
-  getCloudLighting
+  getCloudLighting,
+  getRayleighPhaseFunction,
+  getHenyeyGreensteinPhaseFunction,
+  getCornetteShanksPhaseFunction,
+  getApproximateErfcx,
+  getChapmanGrazingIncidenceFunction
 } from './sun';
 /** @deprecated Import from `@math.gl/earth/sun`. */
 export type {
