@@ -5,7 +5,7 @@
   "scripts": {
     "start": "vite --config ../../vite.config.local.mjs",
     "build": "vite build --config ../../vite.config.local.mjs",
-    "measure": "node measure.mjs"
+    "measure": "node ../../../scripts/measure-geoarrow-dataframe.mjs"
   },
   "dependencies": {
     "@deck.gl/core": "10.0.0-alpha.1",
@@ -17,7 +17,6 @@
     "apache-arrow": "17.0.0"
   },
   "devDependencies": {
-    "esbuild": "^0.28.1",
     "vite": "^8.3.6"
   }
 }

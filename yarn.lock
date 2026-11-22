@@ -14749,7 +14749,6 @@ __metadata:
     "@luma.gl/shaders": "npm:10.0.0-alpha.14"
     "@math.gl/sql": "workspace:*"
     apache-arrow: "npm:17.0.0"
-    esbuild: "npm:^0.28.1"
     vite: "npm:^8.3.6"
   languageName: unknown
   linkType: soft

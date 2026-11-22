@@ -7,8 +7,8 @@ import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {build} from 'esbuild';
 
-const root = fileURLToPath(new URL('../../../', import.meta.url));
-const alias = createRequire(import.meta.url)('../../../scripts/math-gl-source-aliases.cjs')();
+const root = fileURLToPath(new URL('../', import.meta.url));
+const alias = createRequire(import.meta.url)('./math-gl-source-aliases.cjs')();
 
 /** Measures minified bytes contributed by each workspace math.gl module. */
 async function measure(mode) {
