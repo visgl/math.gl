@@ -13,6 +13,7 @@ import GeographicLod from './geographic-lod';
 import BreaklineAuthoring from './breakline-authoring';
 import TrailPlanner from './trail-planner';
 import CutoutLab from './cutout-lab';
+import WatershedLab from './watershed-lab';
 import ColliderReplay from './collider-replay';
 import './styles.css';
 
@@ -26,6 +27,7 @@ const groups = [
   {id: 'trail', title: 'Trail planner', Component: TrailPlanner},
   {id: 'breaklines', title: 'Breakline authoring', Component: BreaklineAuthoring},
   {id: 'cutouts', title: 'Terrain cutouts', Component: CutoutLab},
+  {id: 'watersheds', title: 'Sierra watershed explorer', Component: WatershedLab},
   {id: 'streaming', title: 'Streaming replay', Component: TerrainStreaming}
 ];
 
