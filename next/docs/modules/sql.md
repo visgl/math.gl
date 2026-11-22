@@ -181,3 +181,23 @@ const visible = parcels.filterViewport([175, -20, -175, -10], {
 Bounds are `[minX, minY, maxX, maxY]` in the field's stored coordinates. Filtering uses inclusive two-dimensional envelope intersection. Null and empty geometries are skipped, and the result retains source order and active geometry. Planar coordinates are the default. Set `wrapLongitude` for geographic longitude in degrees. Both `[175, -20, -175, -10]` and `[175, -20, 185, -10]` cover the same seam-crossing window. A longitude span of at least 360 degrees covers all longitudes. Each row appears at most once.
 
 The cached envelopes use the coordinate ranges as stored. When a geometry crosses the antimeridian, split it at the seam or store it with continuous longitudes to get a tight envelope.
+
+### Reproject an active geometry[​](#reproject-an-active-geometry "Direct link to Reproject an active geometry")
+
+Use `toCRS` before filtering or displaying a table in a different coordinate reference system. Pass a synchronous projection engine configured for the source and target CRSs. The target is an authority code, such as `EPSG:4326`.
+
+```
+import {createProjectionEngine} from '@math.gl/geospatial/projection-core';
+
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
+
+
+
+const engine = createProjectionEngine({projections: [mercator]});
+
+const geographic = parcels.toCRS('EPSG:4326', {engine});
+```
+
+The source comes from the active field's GeoArrow CRS metadata. Use `from` to supply the source explicitly. Configure the engine's WKT or PROJJSON parser when the source uses one of those representations.
+
+The method transforms XY vertices of native GeoArrow geometries with planar edges and preserves Z and M values. Lines and polygons retain their vertex topology. Nulls, row order, batches, and the other columns are preserved. The output field declares the target CRS, and its viewport cache is populated in the new coordinate space on first use.
