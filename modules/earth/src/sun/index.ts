@@ -40,6 +40,13 @@ export {
   skyRotationToGlobe
 } from './sky-globe';
 export {getCloudLighting} from './cloud-lighting';
+export {
+  getRayleighPhaseFunction,
+  getHenyeyGreensteinPhaseFunction,
+  getCornetteShanksPhaseFunction,
+  getApproximateErfcx,
+  getChapmanGrazingIncidenceFunction
+} from './atmosphere-optics';
 export type {CloudLighting, CloudLightingOptions} from './cloud-lighting';
 
 export {getSunTerminator} from './terminator';

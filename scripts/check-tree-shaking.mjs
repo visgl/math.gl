@@ -89,6 +89,11 @@ const probes = [
   {symbol:'getClosestPointsSegmentTriangle', packages:['@math.gl/geometry/culling'], forbidden:[/parametric/, /spatial-index/, /terrain/, /earcut/], budget:5000},
   {symbol:'getStarColor', packages:['@math.gl/earth/sun-stars'], forbidden:[/astronomy-engine/, /bright-stars/], budget:700},
   {symbol:'getGalacticAcceleration', packages:['@math.gl/earth/sun-stars'], forbidden:[/astronomy-engine/, /bright-stars/], budget:1200},
+  {symbol:'getRayleighPhaseFunction', packages:['@math.gl/earth/sun'], forbidden:[/astronomy-engine/, /bright-stars/, /cloud-lighting/, /sky-brightness/], budget:350},
+  {symbol:'getHenyeyGreensteinPhaseFunction', packages:['@math.gl/earth/sun'], forbidden:[/astronomy-engine/, /bright-stars/, /cloud-lighting/, /sky-brightness/], budget:550},
+  {symbol:'getCornetteShanksPhaseFunction', packages:['@math.gl/earth/sun'], forbidden:[/astronomy-engine/, /bright-stars/, /cloud-lighting/, /sky-brightness/], budget:600},
+  {symbol:'getApproximateErfcx', packages:['@math.gl/earth/sun'], forbidden:[/astronomy-engine/, /bright-stars/, /cloud-lighting/, /sky-brightness/], budget:300},
+  {symbol:'getChapmanGrazingIncidenceFunction', packages:['@math.gl/earth/sun'], forbidden:[/astronomy-engine/, /bright-stars/, /cloud-lighting/, /sky-brightness/], budget:800},
   {symbol:'getTimezoneOffset', packages:['@math.gl/earth/timezone'], forbidden:[/astronomy-engine/, /tz-lookup/, /bright-stars/], budget:1500},
   {symbol:'parseWKB', packages:['@math.gl/core/arrow'], forbidden:[/martini/, /delatin/, /surface\./, /geometry\//, /geospatial\//, /tasks\//, /apache-arrow/], budget:4500},
   {
