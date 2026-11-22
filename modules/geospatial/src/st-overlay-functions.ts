@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
-import type {ScalarFunction} from '@math.gl/sql/arrow';
+import type {AggregateFunction, ScalarFunction} from '@math.gl/sql/arrow';
 import {lineIntersectionResult} from './spatial-line-intersection-result';
 import {intersectLinePolygon} from './spatial-line-polygon-intersection';
 import polygonClipping from 'polygon-clipping';
@@ -13,9 +13,11 @@ import {
   EXTENSION_NAME,
   lineKinds,
   nativePolygonResult,
+  planarGeometry,
   pointCoordinates,
   pointKinds,
   polygonKinds,
+  readGeometryValue,
   spatialFunction
 } from './spatial-sql';
 
@@ -37,7 +39,7 @@ const unitCircle = /* @__PURE__ */ Array.from({length: 32}, (_, index) => {
 });
 
 /** Bounds the number of pieces passed to one polygon union. */
-const corridorUnionFanout = 64;
+const polygonUnionFanout = 64;
 
 /** Checks the radius for point and line buffers. */
 function checkBufferRadius(radius: number): void {
@@ -71,15 +73,15 @@ function bufferPoint(point: WellKnownGeometry, radius: number): WellKnownGeometr
 }
 
 /** Unions a bounded group of pieces at a time, then combines groups at each level. */
-function unionCorridorPieces(pieces: polygonClipping.MultiPolygon[]): polygonClipping.MultiPolygon {
+function unionPolygonPieces(pieces: polygonClipping.MultiPolygon[]): polygonClipping.MultiPolygon {
   if (!pieces.length) return [];
   while (pieces.length > 1) {
     const groups: polygonClipping.MultiPolygon[] = [];
-    for (let first = 0; first < pieces.length; first += corridorUnionFanout) {
+    for (let first = 0; first < pieces.length; first += polygonUnionFanout) {
       groups.push(
         polygonClipping.union(
           pieces[first]!,
-          ...pieces.slice(first + 1, first + corridorUnionFanout)
+          ...pieces.slice(first + 1, first + polygonUnionFanout)
         )
       );
     }
@@ -130,7 +132,7 @@ function bufferLine(geometry: WellKnownGeometry, radius: number): WellKnownGeome
       previous = coordinate;
     }
   }
-  return {type: 'MultiPolygon', coordinates: unionCorridorPieces(pieces)};
+  return {type: 'MultiPolygon', coordinates: unionPolygonPieces(pieces)};
 }
 
 /** Implements the existing planar point overload. */
@@ -242,3 +244,70 @@ export const ST_SYMDIFFERENCE = /* @__PURE__ */ polygonOverlay(
   'ST_SymDifference',
   polygonClipping.xor
 );
+
+/** Dissolves the components of a polygonal geometry into native GeoArrow storage. */
+export const ST_UNARYUNION = /* @__PURE__ */ spatialFunction(
+  'ST_UnaryUnion',
+  [polygonKinds],
+  /* @__PURE__ */ nativePolygonResult('geoarrow.multipolygon'),
+  ([geometry]): WellKnownGeometry => ({
+    type: 'MultiPolygon',
+    coordinates: polygonClipping.union(polygonSet(geometry!))
+  })
+);
+
+/** Dissolves polygonal rows per group, ignoring nulls and retaining the input CRS. */
+export const ST_UNION_AGGREGATE: AggregateFunction = {
+  kind: 'aggregate',
+  name: 'ST_Union',
+  argumentCount: 1,
+  /** Binds one polygonal input and declares the native multipolygon output. */
+  bind({arguments: fields}) {
+    const prototype = ST_UNARYUNION.resolvePrototype!(fields);
+    if (!prototype) throw new Error('Aggregate ST_Union requires one polygonal geometry column');
+    const field = prototype.arguments[0]!;
+    return {
+      outputField: prototype.result.clone({name: 'ST_Union'}),
+      /** Keeps bounded groups of partial unions at increasing input sizes. */
+      createAccumulator() {
+        const levels: polygonClipping.MultiPolygon[][] = [];
+        let seen = false;
+
+        /** Compacts a full level before accumulating further inputs. */
+        function add(polygon: polygonClipping.MultiPolygon) {
+          for (let level = 0; ; level++) {
+            levels[level] ??= [];
+            const pieces = levels[level]!;
+            pieces.push(polygon);
+            if (pieces.length < polygonUnionFanout) return;
+            polygon = unionPolygonPieces(pieces);
+            pieces.length = 0;
+          }
+        }
+
+        return {
+          /** Reduces the non-null polygonal rows of one input batch. */
+          update([vector], {length, signal}) {
+            const active = Uint8Array.from({length}, (_, row) => Number(vector!.isValid(row)));
+            const read = readGeometryValue(vector!, field, active, planarGeometry);
+            for (let row = 0; row < length; row++) {
+              if ((row & 255) === 0) signal?.throwIfAborted();
+              if (!active[row]) continue;
+              seen = true;
+              const pieces = polygonSet(read(row));
+              if (pieces.length) add(pieces);
+            }
+          },
+          /** Combines partial unions and distinguishes all-empty from all-null groups. */
+          finalize() {
+            if (!seen) return null;
+            const pieces = levels.flat();
+            return pieces.length === 1
+              ? polygonClipping.union(pieces[0]!)
+              : unionPolygonPieces(pieces);
+          }
+        };
+      }
+    };
+  }
+};
