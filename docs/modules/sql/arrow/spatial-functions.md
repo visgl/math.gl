@@ -42,6 +42,23 @@ distance of 1. The center column is GeoArrow WKB, so it works as input to anothe
 registered spatial function or an Arrow geometry consumer. Use
 `{functions: [ST_AREA]}` when the application only needs area.
 
+## Snap an observation to a route
+
+For a table with a planar `route` LineString and an `observation` Point, use the
+closest point as a marker and the shortest line as the gap to the route. The
+fraction from `ST_LineLocatePoint` can drive a highlight along the same route.
+
+```sql
+SELECT ST_ClosestPoint(route, observation) AS snapped,
+       ST_ShortestLine(observation, route) AS gap,
+       ST_LineLocatePoint(route, observation) AS route_fraction,
+       ST_DWithin(route, observation, 20) AS on_route
+FROM observations
+```
+
+The radius is in the projected CRS's coordinate units. For a route with equally
+close candidates, the first along the route is selected.
+
 ## PostGIS geometry signatures
 
 These functions use 2D Cartesian coordinates. Use coordinates in a suitable
@@ -61,7 +78,9 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_CoveredBy(point, polygon)` | Point, then Polygon or MultiPolygon | Interior or boundary. Empty input yields false. |
 | `ST_PointN(line, n)` | 2D LineString and signed integer position | WKB Point. Positions start at 1, or at -1 from the end. Zero and out-of-range positions yield null. |
 | `ST_MakeEnvelope(xmin, ymin, xmax, ymax)` | Four numeric bounds | Closed 2D WKB Polygon with unknown CRS. |
-| `ST_DWithin(a, b, distance)` | Two 2D Points and a nonnegative numeric radius | Boolean. Includes points exactly at the radius, in planar coordinate units. Empty points yield false. |
+| `ST_DWithin(a, b, distance)` | Two 2D Points or a Point and LineString in either order, plus a nonnegative radius | Boolean. Includes geometries exactly at the radius, in planar coordinate units. Empty inputs yield false. |
+| `ST_ClosestPoint(a, b)` | Two 2D Points or a Point and LineString in either order | WKB Point on the first geometry nearest to the second. Empty inputs yield null. |
+| `ST_ShortestLine(a, b)` | Two 2D Points or a Point and LineString in either order | Two-vertex WKB LineString from the first geometry to the second. Intersecting inputs produce coincident endpoints. Empty inputs yield null. |
 | `ST_Distance(a, b)` | Two Points | Float64 Cartesian distance in coordinate units. Empty points yield null. |
 | `ST_Intersects(a, b)` | Two planar geometries, including multi-types and WKB collections | True for shared interiors, edges, or vertices. Empty geometries yield false. |
 | `ST_SRID(g)` | 2D geometry | EPSG code from field metadata, or zero for an unidentified CRS. |
