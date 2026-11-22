@@ -209,6 +209,7 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_LineSubstring(line, start, end)` | 2D LineString and ordered fractions in [0, 1] | WKB LineString including intermediate vertices, or Point for equal fractions or a zero-length route. Empty lines yield null. |
 | `ST_RemoveRepeatedPoints(line [, tolerance])` | 2D LineString or MultiLineString | WKB line with consecutive duplicates removed. A positive tolerance also removes nearby vertices. Retains route endpoints. |
 | `ST_Simplify(line, tolerance)` | 2D LineString or MultiLineString | WKB line simplified in planar coordinate units. Drops collapsed components and returns null if none survive. |
+| `ST_SimplifyPreserveTopology(geometry, tolerance)` | 2D Polygon or MultiPolygon, finite nonnegative tolerance | Simplifies boundaries in planar coordinate units, retaining shell and hole counts, winding, component boundaries, and nesting. Native Polygon and MultiPolygon inputs keep their respective native encodings. WKB inputs return WKB. |
 | `ST_Length(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar line length. Empty and non-linear inputs yield zero. |
 | `ST_PointOnSurface(polygon)` | Polygon or MultiPolygon | GeoArrow WKB Point for label placement inside a valid polygon. Empty inputs yield an empty Point. |
 | `ST_Centroid(geometry)` | Point, LineString, Polygon, and their multi-types | GeoArrow WKB. Points have equal weight, lines are weighted by segment length, and polygons are weighted by area. Empty inputs yield an empty Point. |
@@ -221,6 +222,11 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_MakeLine(a, b)` | Two 2D Point, MultiPoint or LineString inputs | WKB LineString in argument order. An incoming line shares its first vertex with a coincident previous endpoint. |
 | `ST_Collect(a, b)` | Two 2D geometries | WKB MultiPoint, MultiLineString or MultiPolygon for matching atomic types. Mixed and multipart inputs form a GeometryCollection retaining both members. |
 | `ST_Envelope(geometry)` | Point, LineString, Polygon, and their multi-types, or a WKB GeometryCollection | GeoArrow WKB Point, LineString, or Polygon according to the extent. An empty input keeps its geometry type. |
+
+`ST_SimplifyPreserveTopology` keeps individual rings that would collapse or
+reverse winding. It retains the input geometry when the candidate would change
+nesting or introduce boundary contact, and when input boundaries already touch.
+Use a projected CRS for a tolerance in meters.
 
 `ST_Extent(geometry)` is an aggregate. It returns the planar box of all nonempty geometries in each group as a four-element Float64 list `[xmin, ymin, xmax, ymax]`. An empty or null-only group yields null.
 
