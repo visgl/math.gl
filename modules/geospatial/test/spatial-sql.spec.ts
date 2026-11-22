@@ -1057,3 +1057,75 @@ test('subdivides large polygons through a lateral join with a shared vertex cap'
     .get(0);
   expect(totalArea).toBeCloseTo(sourceArea, 9);
 });
+
+test('adds measures by XY distance across parts, preserving Z and replacing M', () => {
+  const source = parseWKT(
+    'MULTILINESTRING ZM ((1 0 4 99,2 0 5 98,4 0 6 97),(11 0 7 96,14 0 8 95))'
+  );
+  const route = vectorFromArray([writeWKB(source, 'xyzm'), null], new Binary());
+  const metadata = {crs: 'EPSG:3857', crs_type: 'authority_code'};
+  const table = new Table(new Schema([geometryField('route', route, 'wkb', metadata)]), {route});
+  const result = select('SELECT ST_AddMeasure(route,10,70) AS measured FROM features', table);
+  const measured = parseWKB(result.getChild('measured')!.get(0));
+  expect(measured.dimension).toBe('xyzm');
+  expect(measured.geometry).toEqual(
+    parseWKT('MULTILINESTRING ZM ((1 0 4 10,2 0 5 20,4 0 6 40),(11 0 7 40,14 0 8 70))')
+  );
+  expect(result.getChild('measured')!.get(1)).toBeNull();
+  expect(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')).toBe(
+    JSON.stringify(metadata)
+  );
+});
+
+test('locates measures in native XYM route segments with peaks and plateaus', () => {
+  const route = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows(
+      [parseWKT('LINESTRING M (0 0 0,4 0 4,8 0 0,10 0 0)'), null],
+      {dimension: 'xym', coordinateLayout: 'separated'}
+    )
+  );
+  const table = new Table(new Schema([geometryField('route', route, 'linestring')]), {route});
+  const result = select(
+    `SELECT ST_LocateAlong(route,2) AS markers, ST_LocateAlong(route,0) AS plateau,
+       ST_LocateAlong(route,4) AS shared, ST_LocateBetween(route,3,1) AS clips,
+       ST_LocateBetween(route,4,4) AS peak, ST_LocateAlong(route,7) AS missing FROM features`,
+    table
+  );
+  expect(geometryAt(result, 'markers', 0)).toEqual(parseWKT('MULTIPOINT M ((2 0 2),(6 0 2))'));
+  expect(geometryAt(result, 'plateau', 0)).toEqual(
+    parseWKT('MULTIPOINT M ((0 0 0),(8 0 0),(9 0 0))')
+  );
+  expect(geometryAt(result, 'shared', 0)).toEqual(parseWKT('MULTIPOINT M ((4 0 4))'));
+  expect(geometryAt(result, 'clips', 0)).toEqual(
+    parseWKT('MULTILINESTRING M ((1 0 1,3 0 3),(5 0 3,7 0 1))')
+  );
+  expect(geometryAt(result, 'peak', 0)).toEqual(parseWKT('GEOMETRYCOLLECTION M (POINT M(4 0 4))'));
+  expect(geometryAt(result, 'missing', 0)).toEqual(parseWKT('MULTIPOINT M EMPTY'));
+  expect(geometryAt(result, 'clips', 1)).toBeNull();
+});
+
+test('preserves measured Z in clipped segments and rejects a missing M ordinate', () => {
+  const route = wkb('LINESTRING(0 0,3 0,3 4)', 'LINESTRING EMPTY');
+  const measured = vectorFromArray(
+    [
+      writeWKB(parseWKT('LINESTRING ZM (0 0 2 0,3 0 8 3,3 4 12 7)'), 'xyzm'),
+      writeWKB(parseWKT('LINESTRING ZM EMPTY'), 'xyzm')
+    ],
+    new Binary()
+  );
+  const table = new Table(
+    new Schema([geometryField('route', route), geometryField('measured', measured)]),
+    {route, measured}
+  );
+  const result = select(
+    `SELECT ST_LocateBetween(measured,1,5) AS clip,
+      ST_LocateAlong(ST_AddMeasure(route,0,7),5) AS marker FROM features`,
+    table
+  );
+  expect(geometryAt(result, 'clip', 0)).toEqual(
+    parseWKT('MULTILINESTRING ZM ((1 0 4 1,3 0 8 3,3 2 10 5))')
+  );
+  expect(geometryAt(result, 'clip', 1)).toEqual(parseWKT('MULTILINESTRING ZM EMPTY'));
+  expect(geometryAt(result, 'marker', 0)?.type).toBe('MultiPoint');
+  expect(() => select('SELECT ST_LocateAlong(route,2) FROM features', table)).toThrow(/measure/);
+});
