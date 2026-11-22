@@ -124,6 +124,8 @@ export function planarArea(geometry: WellKnownGeometry): number {
 
 /** Computes planar line length in coordinate units. */
 export function planarLength(geometry: WellKnownGeometry): number {
+  if (geometry.type === 'GeometryCollection')
+    return geometry.geometries.reduce((sum, part) => sum + planarLength(part), 0);
   if (geometry.type !== 'LineString' && geometry.type !== 'MultiLineString') return 0;
   let length = 0;
   visitPaths(geometry, path => {
