@@ -1,6 +1,6 @@
 {
   "name": "math.gl-sql-expressions-worker",
-  "version": "1.0.0",
+  "version": "5.1.0-alpha.0",
   "private": true,
   "type": "module",
   "license": "MIT",
