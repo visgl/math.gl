@@ -106,6 +106,25 @@ export function executeArrowTableQuery(
   return executeArrowProjection(source, query, undefined, bindPredicate);
 }
 
+/** Selects increasing, unique batch-relative row indices and borrows contiguous runs. */
+export function selectArrowBatchRows(
+  batch: RecordBatch,
+  indexes: readonly number[],
+  schema: Schema
+): RecordBatch | undefined {
+  if (!indexes.length) return undefined;
+  if (indexes.length === batch.numRows) return batch;
+  const start = indexes[0]!;
+  if (indexes[indexes.length - 1]! - start + 1 === indexes.length) {
+    return createRecordBatchWithMetadata(
+      batch.schema,
+      batch.data.slice(start, indexes.length),
+      getRecordBatchMetadata(batch)
+    );
+  }
+  return takeArrowTableRows(new Table(schema, [batch]), Int32Array.from(indexes)).batches[0];
+}
+
 /** Executes an already filtered input, optionally binding prepared projection calls. */
 export function executeArrowProjection(
   source: Table,
@@ -234,23 +253,7 @@ function compileArrowQuery(
         if (skip > 0) skip--;
         else indexes.push(row);
       }
-      if (indexes.length === batch.numRows) selected = batch;
-      else if (
-        indexes.length &&
-        indexes[indexes.length - 1]! - indexes[0]! + 1 === indexes.length
-      ) {
-        selected = createRecordBatchWithMetadata(
-          batch.schema,
-          batch.data.slice(indexes[0]!, indexes.length),
-          metadata
-        );
-      } else if (indexes.length) {
-        const gathered = takeArrowTableRows(
-          new Table(inputSchema, [batch]),
-          Int32Array.from(indexes)
-        );
-        selected = gathered.batches[0];
-      }
+      selected = selectArrowBatchRows(batch, indexes, inputSchema);
     } else {
       const start = Math.min(skip, batch.numRows);
       skip -= start;

@@ -166,3 +166,27 @@ columns keep their slots and new columns are appended. A GeoDataFrame retains it
 active geometry through both operations and rejects attempts to overwrite it.
 Unchanged columns share buffers where batch layout permits. Filters that gather
 scattered rows may allocate new buffers.
+
+### Filter by viewport
+
+Keep the source frame and call `filterViewport` on it as the camera moves.
+The first query computes row envelopes for the active field. Later queries
+reuse that cache for the same Arrow table and field.
+
+```ts
+const visible = parcels.filterViewport([175, -20, -175, -10], {
+  wrapLongitude: true
+});
+```
+
+Bounds are `[minX, minY, maxX, maxY]` in the field's stored coordinates.
+Filtering uses inclusive two-dimensional envelope intersection. Null and empty
+geometries are skipped, and the result retains source order and active geometry.
+Planar coordinates are the default. Set `wrapLongitude` for geographic
+longitude in degrees. Both `[175, -20, -175, -10]` and
+`[175, -20, 185, -10]` cover the same seam-crossing window. A longitude span
+of at least 360 degrees covers all longitudes. Each row appears at most once.
+
+The cached envelopes use the coordinate ranges as stored. When a geometry
+crosses the antimeridian, split it at the seam or store it with continuous
+longitudes to get a tight envelope.

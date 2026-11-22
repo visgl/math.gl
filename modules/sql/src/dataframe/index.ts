@@ -2,9 +2,18 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {Table} from 'apache-arrow';
-import {getGeoArrowFieldInfo, getGeoArrowVectorBounds} from '@math.gl/core/arrow';
-import {executeArrowProjection, type ArrowBatchQuery} from '../arrow/query-arrow-table';
+import {Table} from 'apache-arrow';
+import {
+  getGeoArrowFieldInfo,
+  getGeoArrowVectorBounds,
+  getGeoArrowVectorRowBounds,
+  type GeoArrowBounds
+} from '@math.gl/core/arrow';
+import {
+  executeArrowProjection,
+  selectArrowBatchRows,
+  type ArrowBatchQuery
+} from '../arrow/query-arrow-table';
 import {parseSQLExpression} from '../parser/parse-sql-expression';
 import type {SQLParameterOptions} from '../parser/sql-parameters';
 
@@ -85,6 +94,46 @@ export type GeoDataFrameOptions = {
   geometry?: string;
 };
 
+/** Options for intersecting the active geometry's row envelopes with a viewport. */
+export type GeoDataFrameViewportOptions = {
+  /** Interpret x as longitude in degrees and repeat envelopes every 360 degrees. */
+  wrapLongitude?: boolean;
+};
+
+/** Cached row envelopes per immutable source table and active field. */
+const rowBoundsByTable = new WeakMap<Table, Map<string, readonly (GeoArrowBounds | null)[]>>();
+
+/** Maps a longitude difference to [0, 360). */
+function wrapLongitudeDelta(delta: number): number {
+  const remainder = delta % 360;
+  return remainder < 0 ? remainder + 360 : remainder;
+}
+
+/** Compiles inclusive envelope intersection for a planar or repeating longitude domain. */
+function makeViewportIntersection(
+  [west, south, east, north]: GeoArrowBounds,
+  wrapLongitude: boolean
+): (row: GeoArrowBounds) => boolean {
+  if (
+    ![west, south, east, north].every(Number.isFinite) ||
+    south > north ||
+    (!wrapLongitude && west > east)
+  ) {
+    throw new Error('Invalid GeoDataFrame viewport bounds');
+  }
+  const delta = east - west;
+  const width = Math.abs(delta) >= 360 ? 360 : wrapLongitudeDelta(delta);
+  return ([xmin, ymin, xmax, ymax]) => {
+    if (ymax < south || ymin > north) return false;
+    if (!wrapLongitude) return xmin <= east && xmax >= west;
+    const span = xmax - xmin;
+    if (width === 360 || Math.abs(span) >= 360) return true;
+    const start = wrapLongitudeDelta((xmin % 360) - (west % 360));
+    const rowWidth = span < 0 ? wrapLongitudeDelta(span) : span;
+    return start <= width || start + rowWidth >= 360;
+  };
+}
+
 /** Experimental Arrow data frame with a validated active GeoArrow field. */
 export class GeoDataFrame extends DataFrame {
   /** Active geometry with its Arrow field metadata and vector. */
@@ -139,6 +188,50 @@ export class GeoDataFrame extends DataFrame {
     return table === this.table
       ? this
       : new GeoDataFrame(table, {geometry: this.geometry.field.name});
+  }
+
+  /**
+   * Keeps rows whose active geometry envelopes intersect the viewport, including contact
+   * at its edges. Bounds are [minX, minY, maxX, maxY] in the geometry's stored coordinates.
+   * With longitude wrapping enabled, a west value greater than east crosses the seam.
+   */
+  filterViewport(
+    bounds: GeoArrowBounds,
+    {wrapLongitude = false}: GeoDataFrameViewportOptions = {}
+  ): GeoDataFrame {
+    const intersects = makeViewportIntersection(bounds, wrapLongitude);
+    const rowBounds = this.getCachedRowBounds();
+    let offset = 0;
+    const batches = this.table.batches.flatMap(batch => {
+      const indexes: number[] = [];
+      for (let row = 0; row < batch.numRows; row++) {
+        const extent = rowBounds[offset + row];
+        if (extent && intersects(extent)) indexes.push(row);
+      }
+      offset += batch.numRows;
+      const selected = selectArrowBatchRows(batch, indexes, this.table.schema);
+      return selected ? [selected] : [];
+    });
+    const unchanged =
+      batches.length === this.table.batches.length &&
+      batches.every((batch, index) => batch === this.table.batches[index]);
+    return unchanged ? this : this.withTable(new Table(this.table.schema, batches));
+  }
+
+  /** Computes row envelopes once for each source table and geometry field. */
+  private getCachedRowBounds(): readonly (GeoArrowBounds | null)[] {
+    const {field, vector} = this.geometry;
+    let columns = rowBoundsByTable.get(this.table);
+    if (!columns) {
+      columns = new Map();
+      rowBoundsByTable.set(this.table, columns);
+    }
+    let bounds = columns.get(field.name);
+    if (!bounds) {
+      bounds = getGeoArrowVectorRowBounds(vector, {field});
+      columns.set(field.name, bounds);
+    }
+    return bounds;
   }
 
   /** Returns a frame with a different active geometry and the same Arrow table. */
