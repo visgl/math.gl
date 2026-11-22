@@ -355,3 +355,85 @@ Sun-altitude slider. The SVG shapes are original and illustrative; the generated
 page has no external runtime or artwork dependencies.
 
 See [Attributions](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
+## Atmosphere optics
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
+Scalar building blocks for single-scattering atmosphere renderers: phase functions, an
+approximate scaled complementary error function and the Chapman grazing-incidence function. The
+functions are pure, take numbers and return numbers, and throw `RangeError` outside their
+domains. `getCloudLighting` uses `getHenyeyGreensteinPhaseFunction` for its `phaseFunction`.
+
+```typescript
+import {
+  getRayleighPhaseFunction,
+  getHenyeyGreensteinPhaseFunction,
+  getChapmanGrazingIncidenceFunction
+} from '@math.gl/earth/sun';
+
+const mu = Math.cos(scatteringAngle);
+const phase = 0.9 * getRayleighPhaseFunction(mu) + 0.1 * getHenyeyGreensteinPhaseFunction(mu, 0.8);
+
+// Optical depth along a ray from a sample 2 km up, for an 8 km scale height on the Earth.
+const radiusInScaleHeights = (6371000 + 2000) / 8000;
+const column = getChapmanGrazingIncidenceFunction(radiusInScaleHeights, Math.cos(zenithAngle));
+const opticalDepth = verticalOpticalDepthAtSeaLevel * Math.exp(-2000 / 8000) * column;
+```
+
+#### `getRayleighPhaseFunction(cosineOfScatteringAngle)`
+
+Returns 3 (1 + μ²) / (16 π) per steradian. μ is from −1 to 1, and 1 is forward scattering. The
+depolarization of the air is not modeled.
+
+#### `getHenyeyGreensteinPhaseFunction(cosineOfScatteringAngle, asymmetryParameter)`
+
+Returns (1 − g²) / (4 π (1 + g² − 2 g μ)^(3/2)) per steradian. g is strictly between −1 and 1,
+and its mean cosine is g. The denominator is evaluated in a form that keeps full precision at the
+forward and backward peaks when |g| is near 1.
+
+#### `getCornetteShanksPhaseFunction(cosineOfScatteringAngle, asymmetryParameter)`
+
+Returns 3 (1 − g²) (1 + μ²) / (8 π (2 + g²) (1 + g² − 2 g μ)^(3/2)) per steradian. At g = 0 it is
+the Rayleigh phase function. Its mean cosine is 3 g (4 + g²) / (5 (2 + g²)), not g.
+
+Each phase function integrates to 1 over the sphere.
+
+#### `getApproximateErfcx(argument)`
+
+Returns an approximation of exp(x²) erfc(x) for x ≥ 0: a / ((a − 1) √π x + √(π x² + a²)) with
+a = 2.911. It is exact at 0 and has the correct asymptote 1 / (√π x). Its largest relative error
+is 0.331 %, near x = 1.75, measured against 30-digit values. It is not a full-precision erfcx.
+
+#### `getChapmanGrazingIncidenceFunction(radiusInScaleHeights, cosineOfZenithAngle)`
+
+Returns Ch(x, z): the column of an exponential atmosphere along a ray to infinity, divided by the
+vertical column from the same point. x is the radius of the start point in scale heights, 1 or
+greater. For cos z ≥ 0, Ch = √(π x / 2) erfcx(√(x / 2) cos z). For cos z < 0, the ray goes down
+to the tangent radius x₀ = x sin z and up again, and Ch = 2 √(π x₀ / 2) exp(x − x₀) − Ch(x, π − z).
+Multiply by exp(−h), with h the height above a reference radius in scale heights, to get the
+column relative to the vertical column above that radius.
+
+Domain and limits:
+
+- The relative error is below 1 % for x ≥ 100 and below 0.5 % for x ≥ 300, for cos z from −0.15
+  to 1, against numeric quadrature. For cos z < 0 the same bounds hold with x₀ in place of x, and
+  x₀ < 1 throws `RangeError`. For a vertical ray the exact value is 1; the asymptotic form gives
+  1 − O(1 / x), for example 0.9988 at x = 797. The Earth (H = 8 km) is x ≈ 800 and Mars (H = 11.1 km) is
+  x ≈ 306. Below x = 100 the error grows as 1 / x.
+- The function counts the column as if the body were not there. When x₀ is less than the surface
+  radius in scale heights, the ray hits the surface: test for that before using the result.
+- For cos z < 0 the result overflows when x − x₀ exceeds about 700.
+- The atmosphere is spherical and exponential with one scale height. Refraction is not modeled.
+
+### References
+
+- [Bruneton & Neyret (2008), Precomputed Atmospheric Scattering](https://ebruneton.github.io/precomputed_atmospheric_scattering/ "cite:bruneton2008"): the Rayleigh phase function.
+- [Henyey & Greenstein (1941), Diffuse radiation in the Galaxy](http://dx.doi.org/10.1086/144246 "cite:henyey1941").
+- [Cornette & Shanks (1992), Physically reasonable analytic expression for the single-scattering phase function](http://dx.doi.org/10.1364/AO.31.003152 "cite:cornette1992").
+- [Ren & MacKenzie (2007), Closed-form approximations to the error and complementary error functions](http://dx.doi.org/10.1002/asl.154 "cite:ren2007"): the erfcx approximation and its use in the Chapman function.
+- [Chapman (1931), Grazing incidence](http://dx.doi.org/10.1088/0959-5309/43/5/302 "cite:chapman1931"): the grazing-incidence function.
+
+All code is independently written from the published equations.
