@@ -1317,6 +1317,9 @@ test('accepts native XY dense-union inputs and keeps inactive or null rows out o
   const buffers = select('SELECT ST_Buffer(g,1) AS footprint FROM features WHERE id < 2', table);
   expect(buffers.getChild('footprint')!.isValid(0)).toBe(true);
   expect(buffers.getChild('footprint')!.isValid(1)).toBe(false);
+  const sliced = select('SELECT ST_Buffer(g,1) AS footprint FROM features', table.slice(1, 2));
+  expect(sliced.numRows).toBe(1);
+  expect(sliced.getChild('footprint')!.isValid(0)).toBe(false);
   const overlaps = select(
     'SELECT ST_Area(ST_Intersection(g,ST_MakeEnvelope(0,0,1,1))) AS area FROM features WHERE id = 2',
     table

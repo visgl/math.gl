@@ -66,7 +66,11 @@ export class ColumnReader {
   isValid(row: number): boolean {
     const [data, index] = this.chunk(row);
     if (DataType.isNull(data.type)) return false;
-    if (DataType.isUnion(data.type)) return data.getValid(index);
+    if (DataType.isUnion(data.type)) {
+      // GeoArrow union nulls belong to the selected child, not the parent bitmap.
+      const child = data.children[data.type.typeIdToChildIndex[data.typeIds[index]!]!];
+      return Boolean(child && !DataType.isNull(child.type) && data.getValid(index));
+    }
     const bit = data.offset + index;
     if (data.nullCount && !(data.nullBitmap[bit >> 3]! & (1 << (bit & 7)))) return false;
     return (
