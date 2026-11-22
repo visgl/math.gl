@@ -19,6 +19,9 @@ import {
 } from '../arrow/query-arrow-table';
 import {parseSQLExpression} from '../parser/parse-sql-expression';
 import type {SQLParameterOptions} from '../parser/sql-parameters';
+import {spatialJoin, type GeoDataFrameSpatialJoinOptions} from './spatial-join';
+
+export type {GeoDataFrameSpatialJoinOptions} from './spatial-join';
 
 /** SQL expression bindings and Arrow execution options for frame operations. */
 export type DataFrameQueryOptions = SQLParameterOptions &
@@ -209,6 +212,18 @@ export class GeoDataFrame extends DataFrame {
     return table === this.table
       ? this
       : new GeoDataFrame(table, {geometry: this.geometry.field.name});
+  }
+
+  /** Inner spatial join that keeps the left active geometry and prefixes right columns. */
+  sjoin(right: GeoDataFrame, options: GeoDataFrameSpatialJoinOptions): GeoDataFrame {
+    options.signal?.throwIfAborted();
+    return this.withTable(
+      spatialJoin(
+        {table: this.table, field: this.geometry.field, bounds: this.getCachedRowBounds()},
+        {table: right.table, field: right.geometry.field, bounds: right.getCachedRowBounds()},
+        options
+      )
+    );
   }
 
   /**

@@ -4,9 +4,20 @@
 
 import {Deck, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {Field, FixedSizeList, Float64, Int32, Schema, Table, vectorFromArray} from 'apache-arrow';
+import {
+  Field,
+  FixedSizeList,
+  Float64,
+  Int32,
+  List,
+  Schema,
+  Table,
+  Utf8,
+  vectorFromArray
+} from 'apache-arrow';
 import {createProjectionEngine} from '@math.gl/geospatial/projection-core';
 import {mercator} from '@math.gl/geospatial/projection-projections-merc';
+import {ST_WITHIN} from '@math.gl/geospatial/st-functions';
 import {GeoDataFrame} from '@math.gl/sql/dataframe';
 import {processors} from './processors.mjs';
 
@@ -49,12 +60,55 @@ function makeProjectedPoints() {
   });
 }
 
+/** Defines adjacent demonstration regions as planar polygons split at the seam. */
+function makeRegions() {
+  const xy = new FixedSizeList(2, new Field('xy', new Float64()));
+  const polygon = new List(new Field('rings', new List(new Field('vertices', xy))));
+  const schema = new Schema([
+    new Field('name', new Utf8()),
+    new Field(
+      'boundary',
+      polygon,
+      true,
+      new Map([
+        ['ARROW:extension:name', 'geoarrow.polygon'],
+        ['ARROW:extension:metadata', JSON.stringify({crs: 'EPSG:4326', crs_type: 'authority_code'})]
+      ])
+    )
+  ]);
+  const boundaries = [
+    [179.9, 180],
+    [-180, -179.9]
+  ].map(([west, east]) => [
+    [
+      [west, -16.08],
+      [east, -16.08],
+      [east, -15.92],
+      [west, -15.92],
+      [west, -16.08]
+    ]
+  ]);
+  return GeoDataFrame.fromArrow(
+    new Table(schema, {
+      name: vectorFromArray(['East of 180°W', 'West of 180°E'], new Utf8()),
+      boundary: vectorFromArray(boundaries, polygon)
+    })
+  );
+}
+
 const source = GeoDataFrame.fromArrow(makeProjectedPoints());
 const startReprojection = performance.now();
-const input = source.toCRS('EPSG:4326', {engine}).toArrow();
+const geographic = source.toCRS('EPSG:4326', {engine});
 const reprojection = document.querySelector('#reprojection');
 reprojection.textContent =
   'EPSG:3857 → EPSG:4326 · ' + (performance.now() - startReprojection).toFixed(1) + ' ms';
+const startJoin = performance.now();
+const input = geographic
+  .sjoin(makeRegions(), {predicate: ST_WITHIN, rightPrefix: 'region_'})
+  .select('id', 'score', 'geometry', 'region_name')
+  .toArrow();
+document.querySelector('#spatial-join').textContent =
+  'Point-in-polygon join · ' + (performance.now() - startJoin).toFixed(1) + ' ms';
 const minimum = document.querySelector('#minimum');
 const processor = document.querySelector('#processor');
 const result = document.querySelector('#result');
@@ -102,6 +156,7 @@ function update() {
       const positions = values.subarray(0, batch.numRows * 2);
       const ids = batch.getChild('id');
       const radii = batch.getChild('radius');
+      const regions = batch.getChild('region_name');
       return new ScatterplotLayer({
         id: `points-${index}`,
         data: {
@@ -109,11 +164,13 @@ function update() {
           attributes: {getPosition: {value: positions, size: 2}}
         },
         getRadius: (_, {index: row}) => radii.get(row),
-        getFillColor: [91, 220, 196, 170],
+        getFillColor: (_, {index: row}) =>
+          regions.get(row) === 'East of 180°W' ? [91, 220, 196, 170] : [251, 174, 102, 180],
         radiusMinPixels: 1,
         pickable: true,
         onClick: info => {
-          if (info.index >= 0) result.textContent = `Point ${ids.get(info.index)}`;
+          if (info.index >= 0)
+            result.textContent = `Point ${ids.get(info.index)} · ${regions.get(info.index)}`;
         }
       });
     })

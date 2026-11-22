@@ -144,3 +144,10 @@ const projectedFrame: GeoDataFrame = GeoDataFrame.fromArrow(geoArrowTable).toCRS
   engine: createProjectionEngine()
 });
 void projectedFrame;
+
+import {ST_WITHIN} from '@math.gl/geospatial/st-functions';
+const joinedFrame: GeoDataFrame = projectedFrame.sjoin(GeoDataFrame.fromArrow(geoArrowTable), {
+  predicate: ST_WITHIN,
+  rightPrefix: 'region_'
+});
+void joinedFrame;
