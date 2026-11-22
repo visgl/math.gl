@@ -26,7 +26,13 @@ import {queryArrowSQL, queryArrowTableInBatches} from '@math.gl/sql/query';
 import {parseSQLQuery} from '@math.gl/sql/parser';
 import {ST_CONCAVEHULL, ST_CONVEXHULL} from '@math.gl/geospatial/st-hull-functions';
 import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
-import {ST_BUFFER, ST_DIFFERENCE, ST_INTERSECTION} from '@math.gl/geospatial/st-overlay-functions';
+import {
+  ST_BUFFER,
+  ST_DIFFERENCE,
+  ST_INTERSECTION,
+  ST_SYMDIFFERENCE,
+  ST_UNION
+} from '@math.gl/geospatial/st-overlay-functions';
 import {ST_CLIPBYBOX2D, ST_SUBDIVIDE} from '@math.gl/geospatial/st-viewport-functions';
 import {TURF_FUNCTIONS} from '@math.gl/geospatial/turf-functions';
 
@@ -56,7 +62,9 @@ function select(sql: string, table: Table): Table {
       ST_CONCAVEHULL,
       ST_BUFFER,
       ST_DIFFERENCE,
-      ST_INTERSECTION
+      ST_INTERSECTION,
+      ST_SYMDIFFERENCE,
+      ST_UNION
     ]
   });
 }
@@ -1371,4 +1379,61 @@ test('point buffers chain through overlays at exact cardinal tangencies', () => 
   );
   expect(result.getChild('area')!.get(0)).toBeCloseTo(32 * Math.sin(Math.PI / 16));
   expect(result.getChild('area')!.get(1)).toBe(0);
+});
+
+test('streams binary polygon unions and symmetric differences with native multipolygon output', async () => {
+  const a = wkb(
+    'POLYGON((0 0,4 0,4 4,0 4,0 0))',
+    'POLYGON EMPTY',
+    'POLYGON((0 0,4 0,4 4,0 4,0 0))',
+    null
+  );
+  const b = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows([
+      parseWKT('MULTIPOLYGON(((2 0,6 0,6 4,2 4,2 0)))'),
+      parseWKT('MULTIPOLYGON(((2 0,6 0,6 4,2 4,2 0)))'),
+      parseWKT('MULTIPOLYGON EMPTY'),
+      parseWKT('MULTIPOLYGON EMPTY')
+    ])
+  );
+  const table = new Table(
+    new Schema([
+      geometryField('a', a, 'wkb', {crs: 'OGC:CRS84'}),
+      geometryField('b', b, 'multipolygon')
+    ]),
+    {a, b}
+  );
+  let reads = 0;
+  /** Provides one row per input batch so empty and null cases bind the same schema. */
+  function* source() {
+    for (let row = 0; row < table.numRows; row++) {
+      reads++;
+      yield table.slice(row, row + 1).batches[0]!;
+    }
+  }
+  const plan = parseSQLQuery(
+    `SELECT ST_Union(a,b) AS combined, ST_SymDifference(a,b) AS changed,
+      ST_Area(ST_Union(a,b)) AS total, ST_Area(ST_SymDifference(a,b)) AS change
+      FROM features`
+  );
+  if ('command' in plan) throw new Error('Expected a SELECT');
+  const output = [];
+  for await (const batch of queryArrowTableInBatches(source(), table.schema, {
+    ...plan,
+    functions: [POSTGIS_SPATIAL_FUNCTIONS, ST_UNION, ST_SYMDIFFERENCE]
+  })) {
+    expect(reads).toBe(output.length + 1);
+    for (const field of batch.schema.fields.slice(0, 2)) {
+      expect(field.metadata.get('ARROW:extension:name')).toBe('geoarrow.multipolygon');
+      expect(field.metadata.get('ARROW:extension:metadata')).toBe('{"crs":"OGC:CRS84"}');
+      expect(field.type.toString()).toBe(batch.schema.fields[0]!.type.toString());
+    }
+    output.push(batch);
+  }
+  expect(output.map(batch => batch.getChild('total')!.get(0))).toEqual([24, 16, 16, null]);
+  expect(output.map(batch => batch.getChild('change')!.get(0))).toEqual([16, 16, 16, null]);
+  expect(output[0]!.getChild('changed')!.get(0).length).toBe(2);
+
+  const identical = select('SELECT ST_SymDifference(b,b) AS changed FROM features', table);
+  expect(identical.getChild('changed')!.get(0).length).toBe(0);
 });
