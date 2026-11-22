@@ -201,3 +201,25 @@ const geographic = parcels.toCRS('EPSG:4326', {engine});
 The source comes from the active field's GeoArrow CRS metadata. Use `from` to supply the source explicitly. Configure the engine's WKT or PROJJSON parser when the source uses one of those representations.
 
 The method transforms XY vertices of native GeoArrow geometries with planar edges and preserves Z and M values. Lines and polygons retain their vertex topology. Nulls, row order, batches, and the other columns are preserved. The output field declares the target CRS, and its viewport cache is populated in the new coordinate space on first use.
+
+### Join by spatial predicate[​](#join-by-spatial-predicate "Direct link to Join by spatial predicate")
+
+Use `sjoin` to match the active native GeoArrow geometry of two frames in the same coordinate system. Convert WKB or WKT columns to native GeoArrow first. For example, attach region attributes to points inside region polygons.
+
+```
+import {ST_WITHIN} from '@math.gl/geospatial/st-functions';
+
+
+
+const matched = points.sjoin(regions, {
+
+  predicate: ST_WITHIN,
+
+  rightPrefix: 'region_'
+
+});
+```
+
+This is an inner join. Each matching pair produces one row in left input order and then right input order. Overlapping polygons can yield multiple rows for the same point. The result keeps the left active geometry and prefixes all right fields, including the right geometry. Use `select` to keep the columns needed by a layer.
+
+The join searches a box index over the right frame's cached envelopes and checks candidate pairs with the bound spatial SQL predicate. Supported predicates are `ST_WITHIN`, `ST_CONTAINS`, `ST_COVEREDBY`, `ST_COVERS`, and `ST_INTERSECTS`, with the geometry signatures and boundary semantics of each SQL function. For example, use `ST_COVEREDBY` to include points on polygon boundaries. These predicates operate on planar coordinates. Split geometries at the antimeridian before joining across the seam.
