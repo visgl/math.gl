@@ -75,19 +75,15 @@ function anyEdge(
   return false;
 }
 
-/** Uses even-odd crossings across shell and holes, including all boundary points. */
-function meetsPoint(point: Position, geometry: Primitive): boolean {
-  if (!Number.isFinite(point[0]) || !Number.isFinite(point[1])) return false;
-  if (geometry.type === 'Point')
-    return point[0] === geometry.coordinates[0] && point[1] === geometry.coordinates[1];
-  if (geometry.type === 'LineString')
-    return anyEdge(
-      geometry.coordinates,
-      false,
-      (a, b) => inBounds(point, a, b) && !side(a, b, point)
-    );
+/** Tests whether a point is on a segment, including either endpoint. */
+export function pointOnSegment(point: Position, a: Position, b: Position): boolean {
+  return inBounds(point, a, b) && side(a, b, point) === 0;
+}
+
+/** Classifies a point as outside (-1), on the boundary (0), or inside (1). */
+export function locatePointInPolygon(point: Position, rings: readonly Path[]): -1 | 0 | 1 {
   let inside = false;
-  for (const ring of geometry.coordinates) {
+  for (const ring of rings) {
     if (
       anyEdge(ring, true, (a, b) => {
         const orientation = side(a, b, point);
@@ -97,9 +93,19 @@ function meetsPoint(point: Position, geometry: Primitive): boolean {
         return false;
       })
     )
-      return true;
+      return 0;
   }
-  return inside;
+  return inside ? 1 : -1;
+}
+
+/** Tests a finite point against an atomic geometry, including boundaries. */
+function meetsPoint(point: Position, geometry: Primitive): boolean {
+  if (!Number.isFinite(point[0]) || !Number.isFinite(point[1])) return false;
+  if (geometry.type === 'Point')
+    return point[0] === geometry.coordinates[0] && point[1] === geometry.coordinates[1];
+  if (geometry.type === 'LineString')
+    return anyEdge(geometry.coordinates, false, (a, b) => pointOnSegment(point, a, b));
+  return locatePointInPolygon(point, geometry.coordinates) >= 0;
 }
 
 /** Tests boundary intersection and full containment of individual components. */
