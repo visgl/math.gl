@@ -97,7 +97,7 @@ function polygonOverlay(name: string, operation: typeof polygonClipping.intersec
     ([left, right]): WellKnownGeometry => {
       const a = polygonSet(left!);
       const b = polygonSet(right!);
-      return {type: 'MultiPolygon', coordinates: a.length ? operation(a, b) : []};
+      return {type: 'MultiPolygon', coordinates: operation(a, b)};
     }
   );
   return {
@@ -122,4 +122,13 @@ export const ST_INTERSECTION = /* @__PURE__ */ polygonOverlay(
 export const ST_DIFFERENCE = /* @__PURE__ */ polygonOverlay(
   'ST_Difference',
   polygonClipping.difference
+);
+
+/** Returns the combined polygon area as a native GeoArrow MultiPolygon. */
+export const ST_UNION = /* @__PURE__ */ polygonOverlay('ST_Union', polygonClipping.union);
+
+/** Returns the area covered by exactly one input as a native GeoArrow MultiPolygon. */
+export const ST_SYMDIFFERENCE = /* @__PURE__ */ polygonOverlay(
+  'ST_SymDifference',
+  polygonClipping.xor
 );
