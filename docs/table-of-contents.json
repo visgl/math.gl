@@ -786,6 +786,11 @@
           },
           {
             "type": "doc",
+            "id": "modules/sql/geoarrow-functions",
+            "label": "@math.gl/sql/geoarrow-functions"
+          },
+          {
+            "type": "doc",
             "id": "modules/sql/color-functions/README",
             "label": "@math.gl/sql/color-functions"
           },

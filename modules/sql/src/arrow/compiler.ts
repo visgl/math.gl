@@ -36,6 +36,7 @@ import {bindCast} from './cast';
 import {compileUTF8Like} from './like';
 import {float16Values, roundFloat16} from './float16';
 import {physicalKey, extensionKey} from './signature';
+import {evaluateVectorSpans, nullVectorData, selectUnionVectors} from './vector-mask';
 import {ExpressionEvaluationError, isExpressionEvaluationError} from '../expressions';
 import {createFunctionLookup} from './registry';
 import {
@@ -135,7 +136,7 @@ export function compileArrowExpression(
     const prepared = root.prepare(batch, active, {});
     const result = isTupleType(root.field.type)
       ? maskTupleVector(prepared.vector!, active)
-      : isNestedType(root.field.type)
+      : isVectorResult(root.field.type)
         ? nestedVector(prepared.vector!, root.field.type, active)
         : prepared.vector &&
             (root.constant ||
@@ -162,8 +163,8 @@ export function compileArrowExpression(
         ? new Vector(chunks)
         : isTupleType(root.field.type)
           ? nullTupleVector(root.field.type, 0)
-          : isNestedType(root.field.type)
-            ? vectorFromArray([], root.field.type)
+          : isVectorResult(root.field.type)
+            ? makeVector(nullVectorData(root.field.type, 0))
             : output(root.field, new Uint8Array(0), () => null);
     }
   });
@@ -472,8 +473,8 @@ function bindNode(
     const index = options.inputSchema.fields.findIndex(field => field.name === ast.name);
     if (index < 0) throw new Error(`Unknown Arrow expression field: ${ast.name}`);
     const source = options.inputSchema.fields[index]!;
-    const tuple = isTupleType(source.type);
-    if (!vectorInput && !tuple) typeKey(source.type);
+    const vectorOnly = isTupleType(source.type) || DataType.isDenseUnion(source.type);
+    if (!vectorInput && !vectorOnly) typeKey(source.type);
     return {
       field: new Field(
         source.name,
@@ -484,7 +485,7 @@ function bindNode(
       hasKernel: false,
       prepare: batch => {
         const vector = batch.getChildAt(index)!;
-        return vectorInput || tuple ? vectorReader(vector) : sourceReader(vector);
+        return vectorInput || vectorOnly ? vectorReader(vector) : sourceReader(vector);
       }
     };
   }
@@ -552,12 +553,11 @@ function bindNode(
           )
       };
     }
-    if (value === null && isNestedType(type))
+    if (value === null && isVectorResult(type))
       return {
         field: new Field('literal', type, true),
         hasKernel: false,
-        prepare: (_batch, active) =>
-          vectorReader(vectorFromArray(Array(active.length).fill(null), type))
+        prepare: (_batch, active) => vectorReader(makeVector(nullVectorData(type, active.length)))
       };
     const fractionalTimestampSecond =
       date &&
@@ -626,7 +626,7 @@ function bindNode(
     }
     const tuple = isTupleType(yes.field.type);
     const list = DataType.isList(yes.field.type);
-    const nested = isNestedType(yes.field.type);
+    const nested = isVectorResult(yes.field.type);
     if (nested) {
       if (physicalKey(yes.field.type) !== physicalKey(no.field.type))
         throw new Error('Arrow expression operand types must match');
@@ -675,6 +675,11 @@ function bindNode(
           validateTupleVector(b.vector!, no.field, noMask);
           return vectorReader(
             selectTupleVectors(field.type, a.vector!, b.vector!, yesMask, validActive)
+          );
+        }
+        if (DataType.isDenseUnion(field.type)) {
+          return vectorReader(
+            selectUnionVectors(field.type, a.vector!, b.vector!, selected!, active, context.failed)
           );
         }
         if (nested) {
@@ -1265,6 +1270,11 @@ function isNestedType(type: DataType): boolean {
   return DataType.isStruct(type) || DataType.isList(type) || DataType.isFixedSizeList(type);
 }
 
+/** Identifies result types that require a vector kernel. */
+function isVectorResult(type: DataType): boolean {
+  return isNestedType(type) || DataType.isDenseUnion(type);
+}
+
 /** Converts nested Arrow values to builder inputs while preserving scalar values. */
 function nestedValue(value: any, type: DataType): unknown {
   if (value == null) return null;
@@ -1280,6 +1290,7 @@ function nestedValue(value: any, type: DataType): unknown {
 /** Masks nested results without coercing their child types. */
 function nestedVector(vector: Vector, type: DataType, active: Mask): Vector {
   if (!active.some((valid, row) => !valid && vector.isValid(row))) return vector;
+  if (DataType.isDenseUnion(type)) return evaluateVectorSpans(vector, type, active, span => span);
   return vectorFromArray(
     Array.from(active, (valid, row) => (valid ? nestedValue(vector.get(row), type) : null)),
     type
@@ -1789,7 +1800,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
   const evaluateVector = declaration.evaluateScalar ? undefined : declaration.evaluate;
   const result = declaration.result;
   const tuple = isTupleType(result.type);
-  const nested = isNestedType(result.type);
+  const nested = isVectorResult(result.type);
   if (nested && declaration.evaluateScalar) {
     throw new Error('Nested results require a vector-only function');
   }
@@ -1867,12 +1878,22 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
             }
             return vectorReader(nestedVector(vector, result.type, mask));
           }
+          if (
+            DataType.isBinary(result.type) &&
+            DataType.isBinary(vector.type) &&
+            !mask.includes(0)
+          ) {
+            if (!result.nullable && vector.nullCount) {
+              throw new Error(`Function ${name} returned null for a non-nullable result`);
+            }
+            return vectorReader(vector);
+          }
           kernel = sourceReader(vector);
         }
       }
       if (tuple) return vectorReader(nullTupleVector(result.type, active.length));
       if (nested) {
-        return vectorReader(vectorFromArray(new Array(active.length).fill(null), result.type));
+        return vectorReader(makeVector(nullVectorData(result.type, active.length)));
       }
       return {
         get: row => {

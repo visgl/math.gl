@@ -25,6 +25,7 @@ import type {
 import type {TableQuery} from '../parser/query-types';
 import {compileArrowArray, compileArrowExpression} from './compiler';
 import {compileArrowPredicate} from './predicate';
+import {nullVectorData} from './vector-mask';
 import type {ArrowAggregate} from './aggregates';
 import {
   groupArrowTable,
@@ -270,7 +271,11 @@ function compileArrowQuery(
     }
     if (!selected?.numRows) {
       if (emitEmpty) {
-        const children = schema.fields.map(field => makeData({type: field.type, nullCount: 0}));
+        const children = schema.fields.map(field =>
+          DataType.isDenseUnion(field.type)
+            ? nullVectorData(field.type, 0)
+            : makeData({type: field.type, nullCount: 0})
+        );
         yield makeQueryBatch(schema, children, 0, metadata);
       }
       return;
