@@ -7,6 +7,8 @@ import {
   Field,
   Float64,
   Int64,
+  makeData,
+  makeVector,
   Schema,
   Table,
   vectorFromArray,
@@ -160,6 +162,39 @@ export type BoundRelationAggregate = {
   evaluate(table: Table): ArrowAggregateValue;
 };
 
+/** Materializes an aggregate list without reinterpreting its scalar leaves as JS values. */
+function writeAggregateList(field: Field, values: readonly ArrowAggregateValue[]): Vector {
+  const {type} = field;
+  if (!DataType.isList(type) && !DataType.isFixedSizeList(type)) {
+    const active = Uint8Array.from(values, value => Number(value !== null));
+    return writeArrowExpressionValues(field, active, row => values[row] as ArrowExpressionValue);
+  }
+  const length = values.length;
+  const bitmap = new Uint8Array(Math.ceil(length / 8));
+  const offsets = DataType.isList(type) ? new Int32Array(length + 1) : undefined;
+  const children: ArrowAggregateValue[] = [];
+  const size = DataType.isFixedSizeList(type) ? type.listSize : 0;
+  let nullCount = 0;
+  for (let row = 0; row < length; row++) {
+    const value = values[row] as readonly ArrowAggregateValue[] | null;
+    if (value) {
+      bitmap[row >> 3]! |= 1 << (row & 7);
+      for (const item of value) children.push(item);
+    } else {
+      nullCount++;
+      for (let column = 0; column < size; column++) children.push(null);
+    }
+    if (offsets) offsets[row + 1] = children.length;
+  }
+  if (offsets && children.length > 0x7fffffff)
+    throw new Error('Aggregate list exceeds 32-bit Arrow offset capacity');
+  const child = writeAggregateList(type.valueField, children).data[0]!;
+  const data = {length, nullCount, nullBitmap: bitmap, child};
+  return DataType.isList(type)
+    ? makeVector(makeData({type, ...data, valueOffsets: offsets!}))
+    : makeVector(makeData({type, ...data}));
+}
+
 /** Groups by scalar source columns and evaluates the shared Arrow aggregate kernels. */
 export function groupArrowTable(
   table: Table,
@@ -210,16 +245,18 @@ export function groupArrowTable(
   const columns = [
     ...fields.map(field => selected.getChild(field.name)!),
     ...aggregateFields.map(field => {
-      if (
-        custom.has(field.name) &&
-        !DataType.isFixedSizeList(field.type) &&
-        !DataType.isList(field.type)
-      ) {
-        return writeArrowExpressionValues(
-          field,
-          new Uint8Array(results.length).fill(1),
-          row => results[row]![field.name]!
-        );
+      if (custom.has(field.name)) {
+        if (DataType.isList(field.type))
+          return writeAggregateList(
+            field,
+            results.map(result => result[field.name]!)
+          );
+        if (!DataType.isFixedSizeList(field.type))
+          return writeArrowExpressionValues(
+            field,
+            new Uint8Array(results.length).fill(1),
+            row => results[row]![field.name]!
+          );
       }
       return vectorFromArray(
         results.map(result => result[field.name]),
