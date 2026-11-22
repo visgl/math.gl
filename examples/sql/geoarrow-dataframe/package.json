@@ -13,6 +13,7 @@
     "@luma.gl/core": "10.0.0-alpha.14",
     "@luma.gl/engine": "10.0.0-alpha.14",
     "@luma.gl/shaders": "10.0.0-alpha.14",
+    "@math.gl/geospatial": "workspace:*",
     "@math.gl/sql": "workspace:*",
     "apache-arrow": "17.0.0"
   },

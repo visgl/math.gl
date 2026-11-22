@@ -135,3 +135,12 @@ parseSQLExpression('fn(:values, :text)', {parameters: {values: numericArray, tex
 // @ts-expect-error UTF-8 requires byte storage, not a JavaScript string.
 const invalidBinary: SQLBinaryParameter = {type: 'utf8', value: 'text'};
 void invalidBinary;
+
+import type {Table} from 'apache-arrow';
+import {GeoDataFrame} from '@math.gl/sql/dataframe';
+import {createProjectionEngine} from '@math.gl/geospatial/projection-core';
+declare const geoArrowTable: Table;
+const projectedFrame: GeoDataFrame = GeoDataFrame.fromArrow(geoArrowTable).toCRS('EPSG:3857', {
+  engine: createProjectionEngine()
+});
+void projectedFrame;
