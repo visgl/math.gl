@@ -4,6 +4,13 @@
 
 import type {Table} from 'apache-arrow';
 import {getGeoArrowFieldInfo, getGeoArrowVectorBounds} from '@math.gl/core/arrow';
+import {executeArrowProjection, type ArrowBatchQuery} from '../arrow/query-arrow-table';
+import {parseSQLExpression} from '../parser/parse-sql-expression';
+import type {SQLParameterOptions} from '../parser/sql-parameters';
+
+/** SQL expression bindings and Arrow execution options for frame operations. */
+export type DataFrameQueryOptions = SQLParameterOptions &
+  Pick<ArrowBatchQuery, 'functions' | 'signal'>;
 
 /** Experimental immutable wrapper around an Arrow table. */
 export class DataFrame {
@@ -18,6 +25,45 @@ export class DataFrame {
   /** Returns the underlying Arrow table. */
   toArrow(): Table {
     return this.table;
+  }
+
+  /** Keeps rows for which the SQL expression evaluates to true, in source order. */
+  filter(predicate: string, options: DataFrameQueryOptions = {}): DataFrame {
+    const where = {expression: parseSQLExpression(predicate, options)};
+    return new DataFrame(
+      executeArrowProjection(this.table, {
+        where,
+        functions: options.functions,
+        signal: options.signal
+      })
+    );
+  }
+
+  /** Adds or replaces columns. Every expression reads the original input table. */
+  withColumns(
+    expressions: Readonly<Record<string, string>>,
+    options: DataFrameQueryOptions = {}
+  ): DataFrame {
+    options.signal?.throwIfAborted();
+    const fields = this.table.schema.fields;
+    const pending = new Map(Object.entries(expressions));
+    if (!pending.size) return this;
+    const select: NonNullable<ArrowBatchQuery['select']>[number][] = fields.map(({name}) => {
+      const expression = pending.get(name);
+      if (expression === undefined) return name;
+      pending.delete(name);
+      return {as: name, expression: parseSQLExpression(expression, options)};
+    });
+    for (const [name, expression] of pending) {
+      select.push({as: name, expression: parseSQLExpression(expression, options)});
+    }
+    return new DataFrame(
+      executeArrowProjection(this.table, {
+        select,
+        functions: options.functions,
+        signal: options.signal
+      })
+    );
   }
 
   /** Selects columns in the requested order and shares their Arrow buffers. */
@@ -70,6 +116,29 @@ export class GeoDataFrame extends DataFrame {
   /** Wraps an Arrow table and chooses its active geometry. */
   static override fromArrow(table: Table, options?: GeoDataFrameOptions): GeoDataFrame {
     return new GeoDataFrame(table, options);
+  }
+
+  /** Filters rows and retains the active geometry field. */
+  override filter(predicate: string, options?: DataFrameQueryOptions): GeoDataFrame {
+    return this.withTable(super.filter(predicate, options).toArrow());
+  }
+
+  /** Derives attributes and retains the active geometry field. */
+  override withColumns(
+    expressions: Readonly<Record<string, string>>,
+    options?: DataFrameQueryOptions
+  ): GeoDataFrame {
+    if (Object.prototype.hasOwnProperty.call(expressions, this.geometry.field.name)) {
+      throw new Error('Cannot replace the active geometry with a SQL expression');
+    }
+    return this.withTable(super.withColumns(expressions, options).toArrow());
+  }
+
+  /** Rebinds the active geometry after a table operation. */
+  private withTable(table: Table): GeoDataFrame {
+    return table === this.table
+      ? this
+      : new GeoDataFrame(table, {geometry: this.geometry.field.name});
   }
 
   /** Returns a frame with a different active geometry and the same Arrow table. */
