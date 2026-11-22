@@ -138,7 +138,7 @@ Use the Polygon output as a fill or an extrusion in a `GeoJsonLayer`. Handle deg
 
 ## Buffer points and compare polygon footprints[​](#buffer-points-and-compare-polygon-footprints "Direct link to Buffer points and compare polygon footprints")
 
-Register `ST_BUFFER`, `ST_INTERSECTION`, and `ST_DIFFERENCE` from `@math.gl/geospatial/st-overlay-functions`. Use a projected CRS so the buffer radius is in the desired coordinate units.
+Register `ST_BUFFER`, `ST_INTERSECTION`, `ST_DIFFERENCE`, `ST_UNION`, and `ST_SYMDIFFERENCE` from `@math.gl/geospatial/st-overlay-functions`. Use a projected CRS so the buffer radius is in the desired coordinate units.
 
 ```
 SELECT id,
@@ -150,11 +150,13 @@ SELECT id,
 FROM features
 ```
 
-| Function                   | Supported input                | Native GeoArrow output                                                                                         |
-| -------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `ST_Buffer(point, radius)` | Planar Point and finite radius | `geoarrow.polygon` with eight segments per quadrant. Empty points and nonpositive radii return empty polygons. |
-| `ST_Intersection(a, b)`    | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing shared area. Boundary-only contact returns an empty multipolygon.           |
-| `ST_Difference(a, b)`      | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing the portion of the first geometry outside the second.                       |
+| Function                   | Supported input                | Native GeoArrow output                                                                                                  |
+| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `ST_Buffer(point, radius)` | Planar Point and finite radius | `geoarrow.polygon` with eight segments per quadrant. Empty points and nonpositive radii return empty polygons.          |
+| `ST_Intersection(a, b)`    | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing shared area. Boundary-only contact returns an empty multipolygon.                    |
+| `ST_Difference(a, b)`      | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing the portion of the first geometry outside the second.                                |
+| `ST_Union(a, b)`           | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing the combined area of both inputs.                                                    |
+| `ST_SymDifference(a, b)`   | Planar Polygon or MultiPolygon | `geoarrow.multipolygon` containing the area covered by exactly one input. Identical inputs yield an empty multipolygon. |
 
 Inputs can use specialized native encodings, WKB, or a native XY dense union (`geoarrow.geometry`) whose selected rows match the function signature. Outputs use interleaved XY coordinates and retain the first input's CRS metadata. Chained expressions pass native Arrow vectors between kernels. For streamed inputs, run the projection with `queryArrowTableInBatches`. Each output batch uses the same geometry schema, including all-null batches.
 
