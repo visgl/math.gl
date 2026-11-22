@@ -61,8 +61,11 @@ export function lineSubstring(
 
 /** Nearest route coordinate, gap, and fraction of the total planar length. */
 type LineProjection = {
+  /** Snapped XY coordinate in the route's coordinate system. */
   coordinate: readonly number[];
+  /** Cartesian distance from the observation in coordinate units. */
   distance: number;
+  /** Fraction in [0, 1] along the route, or zero for a zero-length route. */
   fraction: number;
 };
 
