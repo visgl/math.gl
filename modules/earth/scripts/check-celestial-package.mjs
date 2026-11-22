@@ -26,6 +26,10 @@ const frame = new celestial.CelestialFrameTransform([1,0,0,0,1,0,0,0,1], {
   rotationRate:[0,1,0,-1,0,0,0,0,0]
 });
 assert.deepEqual(frame.transformState({position:[2,0,0],velocity:[0,0,0]}).velocity,[0,2,0]);
+const mars = celestial.getBodyFixedFrame('mars', new celestial.JulianDate(2451545, 0, 'TT'));
+assert.equal(mars.to, 'IAU_MARS');
+assert.equal(celestial.getBodyRadii('moon').equatorialRadius, 1737400);
+assert.throws(() => celestial.getApproximatePlanetPosition('mars', epoch), RangeError);
 `;
   await writeFile(join(directory, 'consumer.mjs'), `import assert from 'node:assert/strict';
 import * as celestial from '@math.gl/earth/celestial';\n${assertions}`);

@@ -45,6 +45,9 @@ second back to Unix time requires application policy. Validating a historically 
 physically correct offset remains the caller's responsibility, particularly before
 1972. The class supports a wider numeric domain than any included physical model.
 
+For rotation models, radii and approximate positions of the Sun, the planets and the
+Moon, see [Solar-system bodies](./solar-system-bodies.md).
+
 For a complete mapping of dates, clock times, timestamps, durations and calendar
 intervals, see [Arrow JS temporal mapping](./arrow-time-mapping.md).
 
