@@ -25,6 +25,11 @@
       "import": "./dist/query.js",
       "require": "./dist/query.cjs"
     },
+    "./geoarrow-functions": {
+      "types": "./dist/geoarrow-functions.d.ts",
+      "import": "./dist/geoarrow-functions.js",
+      "require": "./dist/geoarrow-functions.cjs"
+    },
     "./scales": {
       "types": "./dist/scales/index.d.ts",
       "import": "./dist/scales/index.js",

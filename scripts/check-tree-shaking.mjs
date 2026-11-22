@@ -15,7 +15,7 @@ const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
   {symbol: "createArrowColumns", packages: ["@math.gl/sql/arrow"], forbidden: [/sql\/(src|dist)\/scales\//], budget: 307000},
   // SQL text uses expression WHERE clauses; it does not need the portable predicate normalizer.
-  {symbol:'queryArrowSQL', packages:['@math.gl/sql/query'], forbidden:[/predicate-expression/,/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/loaders.gl/,/geospatial\//], budget:316100},
+  {symbol:'queryArrowSQL', packages:['@math.gl/sql/query'], forbidden:[/predicate-expression/,/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/geoarrow-functions\./,/loaders.gl/,/geospatial\//], budget:316100},
 
   ...['sweepTerrainRotatingCapsule', 'sweepTerrainRotatingSphere'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial/terrain'],
@@ -71,6 +71,7 @@ const probes = [
   {symbol:'NUMERIC_FUNCTION_DEFINITIONS', packages:['@math.gl/sql/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:5000},
   {symbol:'SIN',packages:['@math.gl/sql/math-functions'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:210000},
   {symbol:'COLOR_RGB',packages:['@math.gl/sql/color-functions'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:250000},
+  {symbol:'createGeoArrowConversionFunctions',packages:['@math.gl/sql/geoarrow-functions'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/,/geospatial\//],budget:283500},
   {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf-functions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
   {symbol: 'ST_AREA', packages: ['@math.gl/geospatial/st-functions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
 
