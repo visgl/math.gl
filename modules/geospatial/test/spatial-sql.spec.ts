@@ -1129,3 +1129,13 @@ test('preserves measured Z in clipped segments and rejects a missing M ordinate'
   expect(geometryAt(result, 'marker', 0)?.type).toBe('MultiPoint');
   expect(() => select('SELECT ST_LocateAlong(route,2) FROM features', table)).toThrow(/measure/);
 });
+
+test('locate along retains separate visits to the same coordinates and measure', () => {
+  const route = vectorFromArray(
+    [writeWKB(parseWKT('LINESTRING M (0 0 0,2 0 2,0 0 0)'), 'xym')],
+    new Binary()
+  );
+  const table = new Table(new Schema([geometryField('route', route)]), {route});
+  const result = select('SELECT ST_LocateAlong(route,1) AS visits FROM features', table);
+  expect(geometryAt(result, 'visits', 0)).toEqual(parseWKT('MULTIPOINT M ((1 0 1),(1 0 1))'));
+});

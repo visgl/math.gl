@@ -100,16 +100,21 @@ export function locateAlong(
   const index = dimension.indexOf('m');
   const coordinates: Position[] = [];
   for (const path of pathsOf(geometry)) {
-    let previous: Position | undefined;
+    let previousEndsAtVertex = false;
     for (let i = 1; i < path.length; i++) {
       const a = path[i - 1]!;
       const b = path[i]!;
       const from = measureAt(a, index);
       const to = measureAt(b, index);
-      if (measure < Math.min(from, to) || measure > Math.max(from, to)) continue;
-      const point = atMeasure(a, b, index, measure);
-      if (!previous || !samePosition(previous, point)) coordinates.push(point);
-      previous = point;
+      if (measure < Math.min(from, to) || measure > Math.max(from, to)) {
+        previousEndsAtVertex = false;
+        continue;
+      }
+      const startsAtVertex = from !== to && measure === from;
+      if (!previousEndsAtVertex || !startsAtVertex) {
+        coordinates.push(atMeasure(a, b, index, measure));
+      }
+      previousEndsAtVertex = from !== to && measure === to;
     }
   }
   return {type: 'MultiPoint', coordinates};
