@@ -5,16 +5,30 @@
 import {Deck, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {Field, FixedSizeList, Float64, Int32, Schema, Table, vectorFromArray} from 'apache-arrow';
+import {createProjectionEngine} from '@math.gl/geospatial/projection-core';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
+import {GeoDataFrame} from '@math.gl/sql/dataframe';
 import {processors} from './processors.mjs';
 
-/** Builds a deterministic native GeoArrow point fixture with stable IDs. */
-function makePoints() {
+const engine = createProjectionEngine({projections: [mercator]});
+
+/** Builds a deterministic native GeoArrow point fixture in Web Mercator meters. */
+function makeProjectedPoints() {
+  const project = engine.createProjection({from: 'EPSG:4326', to: 'EPSG:3857'});
   const ids = Array.from({length: 20000}, (_, index) => index);
   const point = new FixedSizeList(2, new Field('xy', new Float64()));
   const schema = new Schema([
     new Field('id', new Int32()),
     new Field('score', new Int32()),
-    new Field('geometry', point, true, new Map([['ARROW:extension:name', 'geoarrow.point']]))
+    new Field(
+      'geometry',
+      point,
+      true,
+      new Map([
+        ['ARROW:extension:name', 'geoarrow.point'],
+        ['ARROW:extension:metadata', JSON.stringify({crs: 'EPSG:3857', crs_type: 'authority_code'})]
+      ])
+    )
   ]);
   return new Table(schema, {
     id: vectorFromArray(ids, new Int32()),
@@ -25,17 +39,22 @@ function makePoints() {
     geometry: vectorFromArray(
       ids.map(id => {
         const longitude = 179.91255 + (id % 160) * 0.0011;
-        return [
+        return project.projectSync([
           longitude >= 180 ? longitude - 360 : longitude,
           -16.07 + Math.floor(id / 160) * 0.0011
-        ];
+        ]);
       }),
       point
     )
   });
 }
 
-const input = makePoints();
+const source = GeoDataFrame.fromArrow(makeProjectedPoints());
+const startReprojection = performance.now();
+const input = source.toCRS('EPSG:4326', {engine}).toArrow();
+const reprojection = document.querySelector('#reprojection');
+reprojection.textContent =
+  'EPSG:3857 → EPSG:4326 · ' + (performance.now() - startReprojection).toFixed(1) + ' ms';
 const minimum = document.querySelector('#minimum');
 const processor = document.querySelector('#processor');
 const result = document.querySelector('#result');
