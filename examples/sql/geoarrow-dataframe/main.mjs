@@ -52,7 +52,10 @@ function update() {
   result.textContent = `${table.numRows.toLocaleString()} points · ${elapsed.toFixed(1)} ms processing`;
   deck.setProps({
     layers: table.batches.map((batch, index) => {
-      const positions = batch.getChild('geometry').data[0].children[0].values;
+      // Arrow slices the fixed-size-list child values view to its logical start.
+      // Limit the borrowed view to the batch length, since backing buffers can be padded.
+      const {values} = batch.getChild('geometry').data[0].children[0];
+      const positions = values.subarray(0, batch.numRows * 2);
       const ids = batch.getChild('id');
       const radii = batch.getChild('radius');
       return new ScatterplotLayer({

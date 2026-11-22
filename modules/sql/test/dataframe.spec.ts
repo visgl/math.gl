@@ -112,3 +112,15 @@ test('withColumns evaluates simultaneous expressions and shares unchanged geomet
   expect(frame.withColumns({})).toBe(frame);
   expect(() => frame.withColumns({start: 'id'})).toThrow('active geometry');
 });
+
+test('contiguous filtering keeps the binary point view aligned with row IDs', () => {
+  const table = makeTable();
+  const frame = GeoDataFrame.fromArrow(table, {geometry: 'end'});
+  const filtered = frame.filter('id = 2');
+  const coordinates = filtered.geometry.vector.data[0].children[0];
+  const positions = coordinates.values.subarray(0, 2);
+  expect(coordinates.offset).toBeGreaterThan(0);
+  expect(positions.buffer).toBe(frame.geometry.vector.data[0].children[0].values.buffer);
+  expect([...positions]).toEqual([5, 6]);
+  expect(filtered.toArrow().getChild('id')!.get(0)).toBe(2);
+});
