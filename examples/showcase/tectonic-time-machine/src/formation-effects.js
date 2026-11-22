@@ -12,7 +12,13 @@ class CelestialBodyLayer extends ScatterplotLayer {
       ...shaders,
       inject: {
         ...shaders.inject,
-        'fs:DECKGL_FILTER_COLOR': `
+        'wgsl:fs:DECKGL_FILTER_COLOR': `
+        let n = vec3<f32>(geometry.uv, sqrt(max(0.0, 1.0 - dot(geometry.uv, geometry.uv))));
+        let light = 0.16 + 0.84 * max(dot(n, normalize(vec3<f32>(-0.5, 0.6, 1.0))), 0.0);
+        let detail = 0.92 + 0.08 * sin(geometry.uv.x * 47.0) * sin(geometry.uv.y * 39.0);
+        *color = vec4<f32>((*color).rgb * light * detail, (*color).a);
+      `,
+        'glsl:fs:DECKGL_FILTER_COLOR': `
         vec3 n=vec3(geometry.uv,sqrt(max(0.,1.-dot(geometry.uv,geometry.uv))));
         float light=.16+.84*max(dot(n,normalize(vec3(-.5,.6,1.))),0.);
         float texture=.92+.08*sin(geometry.uv.x*47.)*sin(geometry.uv.y*39.);
