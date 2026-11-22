@@ -1279,7 +1279,7 @@ function nestedValue(value: any, type: DataType): unknown {
 
 /** Masks nested results without coercing their child types. */
 function nestedVector(vector: Vector, type: DataType, active: Mask): Vector {
-  if (!active.includes(0)) return vector;
+  if (!active.some((valid, row) => !valid && vector.isValid(row))) return vector;
   return vectorFromArray(
     Array.from(active, (valid, row) => (valid ? nestedValue(vector.get(row), type) : null)),
     type
@@ -1789,12 +1789,13 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
   const evaluateVector = declaration.evaluateScalar ? undefined : declaration.evaluate;
   const result = declaration.result;
   const tuple = isTupleType(result.type);
-  if (tuple && declaration.evaluateScalar)
-    throw new Error('Fixed-size list results require a vector-only function');
+  const nested = isNestedType(result.type);
+  if (nested && declaration.evaluateScalar) {
+    throw new Error('Nested results require a vector-only function');
+  }
   if (declaration.evaluateScalar) for (const argument of arguments_) typeKey(argument.field.type);
-  if (!tuple) typeKey(result.type);
-  const validate = tuple ? undefined : createValueValidator(result.type);
-  const round = tuple ? undefined : roundToType(result.type);
+  const validate = nested ? undefined : createValueValidator(result.type);
+  const round = nested ? undefined : roundToType(result.type);
   const field = new Field(
     result.name,
     valueType(result.type),
@@ -1851,7 +1852,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
           });
           if (
             vector.length !== active.length ||
-            (tuple
+            (nested
               ? physicalKey(vector.type) !== physicalKey(result.type)
               : typeKey(vector.type) !== typeKey(result.type))
           )
@@ -1860,11 +1861,19 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
             validateTupleVector(vector, result, mask);
             return vectorReader(maskTupleVector(vector, mask));
           }
+          if (nested) {
+            if (!result.nullable && mask.some((valid, row) => valid && !vector.isValid(row))) {
+              throw new Error(`Function ${name} returned null for a non-nullable result`);
+            }
+            return vectorReader(nestedVector(vector, result.type, mask));
+          }
           kernel = sourceReader(vector);
         }
       }
-      if (isTupleType(result.type))
-        return vectorReader(nullTupleVector(result.type, active.length));
+      if (tuple) return vectorReader(nullTupleVector(result.type, active.length));
+      if (nested) {
+        return vectorReader(vectorFromArray(new Array(active.length).fill(null), result.type));
+      }
       return {
         get: row => {
           let value: ArrowExpressionValue;

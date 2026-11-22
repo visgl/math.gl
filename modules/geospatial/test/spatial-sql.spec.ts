@@ -15,14 +15,18 @@ import {
 } from 'apache-arrow';
 import {
   makeArrowVectorFromGeoArrowColumn,
+  makeGeoArrowColumnFromArrowVector,
+  materializeGeoArrowRows,
   makeGeoArrowColumnFromGeometryRows,
   parseWKB,
   parseWKT,
   writeWKB
 } from '@math.gl/core/arrow';
-import {queryArrowSQL} from '@math.gl/sql/query';
+import {queryArrowSQL, queryArrowTableInBatches} from '@math.gl/sql/query';
+import {parseSQLQuery} from '@math.gl/sql/parser';
 import {ST_CONCAVEHULL, ST_CONVEXHULL} from '@math.gl/geospatial/st-hull-functions';
 import {POSTGIS_SPATIAL_FUNCTIONS} from '@math.gl/geospatial/st-functions';
+import {ST_BUFFER, ST_DIFFERENCE, ST_INTERSECTION} from '@math.gl/geospatial/st-overlay-functions';
 import {ST_CLIPBYBOX2D, ST_SUBDIVIDE} from '@math.gl/geospatial/st-viewport-functions';
 import {TURF_FUNCTIONS} from '@math.gl/geospatial/turf-functions';
 
@@ -49,7 +53,10 @@ function select(sql: string, table: Table): Table {
       ...TURF_FUNCTIONS,
       ST_CLIPBYBOX2D,
       ST_CONVEXHULL,
-      ST_CONCAVEHULL
+      ST_CONCAVEHULL,
+      ST_BUFFER,
+      ST_DIFFERENCE,
+      ST_INTERSECTION
     ]
   });
 }
@@ -1222,4 +1229,132 @@ test('erodes a native point-cloud hull without losing sites or CRS metadata', ()
   const covers = select('SELECT ST_Covers(footprint,site) AS covered FROM features', containment);
   expect([...covers.getChild('covered')!]).toEqual(coordinates.map(() => true));
   expect(() => select('SELECT ST_ConcaveHull(g,1.1) FROM features', table)).toThrow(/ratio/);
+});
+
+test('point buffers emit native polygons and feed other spatial functions directly', () => {
+  const p = wkb('POINT(0 0)', 'POINT(2 2)', 'POINT EMPTY', null);
+  const radius = vectorFromArray([2, -1, 1, 2], new Int32());
+  const metadata = {crs: 'EPSG:3857', crs_type: 'authority_code'};
+  const table = new Table(
+    new Schema([geometryField('p', p, 'wkb', metadata), new Field('radius', radius.type)]),
+    {p, radius}
+  );
+  const result = select(
+    `SELECT ST_Buffer(p,radius) AS buffer, ST_NPoints(ST_Buffer(p,radius)) AS vertices,
+       ST_Area(ST_Buffer(p,radius)) AS area FROM features`,
+    table
+  );
+  const field = result.schema.fields[0]!;
+  expect(field.metadata.get('ARROW:extension:name')).toBe('geoarrow.polygon');
+  expect(field.metadata.get('ARROW:extension:metadata')).toBe(JSON.stringify(metadata));
+  const column = makeGeoArrowColumnFromArrowVector(result.getChild('buffer')!, {field});
+  expect(column.coordinateLayout).toBe('interleaved');
+  const rows = materializeGeoArrowRows(column);
+  expect(rows[0]?.type).toBe('Polygon');
+  expect(rows.slice(1)).toEqual([
+    {type: 'Polygon', coordinates: []},
+    {type: 'Polygon', coordinates: []},
+    null
+  ]);
+  expect([...result.getChild('vertices')!]).toEqual([33, 0, 0, null]);
+  expect(result.getChild('area')!.get(0)).toBeCloseTo(64 * Math.sin(Math.PI / 16));
+});
+
+test('areal overlays emit native multipolygons and preserve split pieces, holes, and nulls', () => {
+  const a = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows([
+      parseWKT('POLYGON((0 0,6 0,6 4,0 4,0 0))'),
+      parseWKT('POLYGON((0 0,6 0,6 4,0 4,0 0))'),
+      parseWKT('POLYGON((0 0,6 0,6 4,0 4,0 0))'),
+      null
+    ])
+  );
+  const b = wkb(
+    'POLYGON((2 -1,4 -1,4 5,2 5,2 -1))',
+    'POLYGON((1 1,3 1,3 3,1 3,1 1))',
+    'POLYGON((6 0,8 0,8 4,6 4,6 0))',
+    'POLYGON EMPTY'
+  );
+  const table = new Table(new Schema([geometryField('a', a, 'polygon'), geometryField('b', b)]), {
+    a,
+    b
+  });
+  const result = select(
+    `SELECT ST_Difference(a,b) AS remaining, ST_Intersection(a,b) AS shared,
+      ST_Area(ST_Difference(a,b)) AS area, ST_Area(ST_Intersection(a,b)) AS overlap
+      FROM features`,
+    table
+  );
+  const fields = result.schema.fields;
+  expect(fields[0]!.metadata.get('ARROW:extension:name')).toBe('geoarrow.multipolygon');
+  expect(fields[1]!.metadata.get('ARROW:extension:name')).toBe('geoarrow.multipolygon');
+  const remaining = materializeGeoArrowRows(
+    makeGeoArrowColumnFromArrowVector(result.getChild('remaining')!, {field: fields[0]!})
+  );
+  expect(remaining[0]?.type === 'MultiPolygon' && remaining[0].coordinates).toHaveLength(2);
+  expect(remaining[1]?.type === 'MultiPolygon' && remaining[1].coordinates[0]).toHaveLength(2);
+  expect([...result.getChild('area')!]).toEqual([16, 20, 24, null]);
+  expect([...result.getChild('overlap')!]).toEqual([8, 4, 0, null]);
+  const empty = select('SELECT ST_Intersection(a,b) AS g FROM features WHERE 1 = 0', table);
+  expect(empty.numRows).toBe(0);
+  expect(empty.schema.fields[0]!.metadata.get('ARROW:extension:name')).toBe(
+    'geoarrow.multipolygon'
+  );
+});
+
+test('accepts native XY dense-union inputs and keeps inactive or null rows out of kernels', () => {
+  const g = makeArrowVectorFromGeoArrowColumn(
+    makeGeoArrowColumnFromGeometryRows(
+      [parseWKT('POINT(1 1)'), null, parseWKT('POLYGON((0 0,2 0,2 2,0 2,0 0))')],
+      {encoding: 'geoarrow.geometry', dimension: 'xy'}
+    )
+  );
+  const id = vectorFromArray([0, 1, 2], new Int32());
+  const table = new Table(
+    new Schema([geometryField('g', g, 'geometry'), new Field('id', id.type)]),
+    {g, id}
+  );
+  const buffers = select('SELECT ST_Buffer(g,1) AS footprint FROM features WHERE id < 2', table);
+  expect(buffers.getChild('footprint')!.isValid(0)).toBe(true);
+  expect(buffers.getChild('footprint')!.isValid(1)).toBe(false);
+  const overlaps = select(
+    'SELECT ST_Area(ST_Intersection(g,ST_MakeEnvelope(0,0,1,1))) AS area FROM features WHERE id = 2',
+    table
+  );
+  expect(overlaps.getChild('area')!.get(0)).toBe(1);
+  expect(() => select('SELECT ST_Buffer(g,1) FROM features', table)).toThrow(
+    /does not support Polygon/
+  );
+});
+
+test('streams a chain of native geometry kernels without reading ahead', async () => {
+  const p = wkb('POINT(0 0)', null);
+  const table = new Table(new Schema([geometryField('p', p)]), {p});
+  let reads = 0;
+  /** Supplies two batches on demand with the same input schema. */
+  function* source() {
+    for (let row = 0; row < 2; row++) {
+      reads++;
+      yield table.slice(row, row + 1).batches[0]!;
+    }
+  }
+  const plan = parseSQLQuery(
+    'SELECT ST_Intersection(ST_Buffer(p,2),ST_MakeEnvelope(-1,-1,1,1)) AS geom, ST_Area(ST_Intersection(ST_Buffer(p,2),ST_MakeEnvelope(-1,-1,1,1))) AS area FROM features'
+  );
+  if ('command' in plan) throw new Error('Expected a SELECT');
+  const batches = queryArrowTableInBatches(source(), table.schema, {
+    ...plan,
+    functions: [POSTGIS_SPATIAL_FUNCTIONS, ST_BUFFER, ST_INTERSECTION]
+  })[Symbol.asyncIterator]();
+  const first = (await batches.next()).value!;
+  expect(reads).toBe(1);
+  expect(first.schema.fields[0]!.metadata.get('ARROW:extension:name')).toBe(
+    'geoarrow.multipolygon'
+  );
+  expect(first.getChild('area')!.get(0)).toBe(4);
+  const second = (await batches.next()).value!;
+  expect(reads).toBe(2);
+  expect(second.schema.fields[0]!.type.toString()).toBe(first.schema.fields[0]!.type.toString());
+  expect(second.getChild('geom')!.isValid(0)).toBe(false);
+  expect((await batches.next()).done).toBe(true);
 });
