@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v5.0.1
+
+- Add Arrow DataFrame and GeoDataFrame operations for SQL, viewport filtering, CRS transforms, and spatial joins.
+- Expand spatial SQL with route snapping and playback, clipping, hulls, buffers, overlays, topology-preserving simplification, and WGS84 geodesic measurements.
+- Add Arrow SQL LEFT JOIN, binary and date grouping, and date ordering. Speed up grouping, sorting, and UNNEST.
+- Preserve valid CRS metadata in spatial SQL output and support conversions between GeoArrow encodings.
+- Add regional terrain watershed analysis, accelerate terrain cutout reconciliation, and expose atmosphere optics functions.
+
 ## v5.0.0
 
 - Consolidate math.gl into seven packages with focused entry points for coordinate systems, projections, global grids, terrain, geometry, Earth science, SQL and worker tasks.
