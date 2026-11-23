@@ -3,8 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
-import {locatePointInPolygon, pointOnSegment, segmentsMeet} from './spatial-planar-intersects';
-import {endpointContacts, parameter} from './spatial-touches';
+import {
+  endpointContacts,
+  locatePointInPolygon,
+  pointOnSegment,
+  segmentsMeet
+} from './spatial-planar-intersects';
+import {parameter} from './spatial-touches';
 
 /** One XY position. */
 type Position = readonly number[];

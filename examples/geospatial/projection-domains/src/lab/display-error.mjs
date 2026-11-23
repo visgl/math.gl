@@ -6,6 +6,11 @@
 export function inspectDisplayError(mesh, chart, {pixelsPerUnit = [180, 90]} = {}) {
   if (pixelsPerUnit.length !== 2 || !pixelsPerUnit.every(v => Number.isFinite(v) && v > 0))
     throw new RangeError('Invalid display scale');
+  // Measure the anisotropic residual in a common coordinate scale, then convert
+  // the maximum to pixels. A uniform camera zoom changes only the final scale.
+  const scale = Math.max(pixelsPerUnit[0], pixelsPerUnit[1]);
+  const scaleX = pixelsPerUnit[0] / scale;
+  const scaleY = pixelsPerUnit[1] / scale;
   let maximumDisplayError = 0,
     maximumTextureError = 0,
     samples = 0;
@@ -31,17 +36,22 @@ export function inspectDisplayError(mesh, chart, {pixelsPerUnit = [180, 90]} = {
         throw new RangeError('Invalid display qualification sample');
       maximumDisplayError = Math.max(
         maximumDisplayError,
-        Math.hypot(...target.map((v, k) => (v - exactTarget[k]) * pixelsPerUnit[k]))
+        Math.hypot((target[0] - exactTarget[0]) * scaleX, (target[1] - exactTarget[1]) * scaleY)
       );
       maximumTextureError = Math.max(
         maximumTextureError,
-        Math.hypot(...pixel.map((v, k) => v - exactPixel[k]))
+        Math.hypot(pixel[0] - exactPixel[0], pixel[1] - exactPixel[1])
       );
       samples++;
     }
   }
   if (!samples) throw new RangeError('Empty display qualification mesh');
-  return {maximumDisplayError, maximumTextureError, samples, pixelsPerUnit: [...pixelsPerUnit]};
+  return {
+    maximumDisplayError: maximumDisplayError * scale,
+    maximumTextureError,
+    samples,
+    pixelsPerUnit: [...pixelsPerUnit]
+  };
 }
 
 /** Each strategy retains its own internal refinement units; publication requires

@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
-import {orient2d} from 'robust-predicates';
+import {projectPointToPolyline, visitPolylineSpan} from '@math.gl/geometry/polygon';
 
 /** Ordered planar XY coordinates of a route. */
 
@@ -48,72 +48,31 @@ export function lineSubstring(
   const total = distances[distances.length - 1]!;
   const from = start * total,
     to = end * total;
-  const first = coordinateAt(path, distances, from);
-  if (from === to) return {type: 'Point', coordinates: first};
-  const coordinates = [first];
-  for (let i = 1; i < path.length - 1; i++) {
-    if (distances[i]! > from && distances[i]! < to && distances[i] !== distances[i - 1])
-      coordinates.push(path[i]!);
-  }
-  coordinates.push(coordinateAt(path, distances, to));
+  if (from === to) return {type: 'Point', coordinates: coordinateAt(path, distances, from)};
+  const coordinates: number[][] = [];
+  let startSegment = 0;
+  while (distances[startSegment + 1]! <= from) startSegment++;
+  let endSegment = startSegment;
+  while (distances[endSegment + 1]! < to) endSegment++;
+  visitPolylineSpan(
+    (vertex, ordinate) => path[vertex]![ordinate]!,
+    startSegment,
+    (from - distances[startSegment]!) / (distances[startSegment + 1]! - distances[startSegment]!),
+    endSegment,
+    (to - distances[endSegment]!) / (distances[endSegment + 1]! - distances[endSegment]!),
+    (x, y, vertex) => {
+      if (vertex === undefined || distances[vertex] !== distances[vertex - 1])
+        coordinates.push([x, y]);
+    }
+  );
   return {type: 'LineString', coordinates};
 }
 
-/** Nearest route coordinate, gap, and fraction of the total planar length. */
-type LineProjection = {
-  /** Snapped XY coordinate in the route's coordinate system. */
-  coordinate: readonly number[];
-  /** Cartesian distance from the observation in coordinate units. */
-  distance: number;
-  /** Fraction in [0, 1] along the route, or zero for a zero-length route. */
-  fraction: number;
-};
-
-/** Projects a point onto the nearest route segment, taking the first candidate on ties. */
-export function projectPointToLine(
-  line: WellKnownGeometry,
-  point: WellKnownGeometry
-): LineProjection | null {
-  if (
-    line.type !== 'LineString' ||
-    !line.coordinates.length ||
-    point.type !== 'Point' ||
-    !Number.isFinite(point.coordinates[0]) ||
-    !Number.isFinite(point.coordinates[1])
-  )
-    return null;
-  const path = line.coordinates;
-  const x = point.coordinates[0]!;
-  const y = point.coordinates[1]!;
-  let coordinate = path[0]!;
-  let nearest = Math.hypot(x - coordinate[0]!, y - coordinate[1]!);
-  let total = 0;
-  let position = 0;
-  for (let i = 1; i < path.length; i++) {
-    const a = path[i - 1]!;
-    const b = path[i]!;
-    const dx = b[0]! - a[0]!;
-    const dy = b[1]! - a[1]!;
-    const length = Math.hypot(dx, dy);
-    if (!length) continue;
-    const ux = dx / length;
-    const uy = dy / length;
-    const along = Math.max(0, Math.min(length, (x - a[0]!) * ux + (y - a[1]!) * uy));
-    let px = along === length ? b[0]! : a[0]! + along * ux;
-    let py = along === length ? b[1]! : a[1]! + along * uy;
-    if (along > 0 && along < length && orient2d(a[0]!, a[1]!, b[0]!, b[1]!, x, y) === 0) {
-      px = x;
-      py = y;
-    }
-    const distance = Math.hypot(x - px, y - py);
-    if (distance < nearest) {
-      nearest = distance;
-      coordinate = [px, py];
-      position = total + along;
-    }
-    total += length;
-  }
-  return {coordinate, distance: nearest, fraction: total ? position / total : 0};
+/** Projects a SQL point onto a planar route after checking geometry kinds. */
+export function projectPointToLine(line: WellKnownGeometry, point: WellKnownGeometry) {
+  return line.type === 'LineString' && point.type === 'Point'
+    ? projectPointToPolyline(line.coordinates, point.coordinates)
+    : null;
 }
 
 /** Returns the fraction of the route length at the projected point. */

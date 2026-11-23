@@ -460,6 +460,17 @@
           },
           {
             "type": "category",
+            "label": "@math.gl/geospatial/line-network",
+            "items": [
+              "modules/geospatial/api-reference/line-network"
+            ],
+            "link": {
+              "type": "doc",
+              "id": "modules/geospatial/entry-points/line-network"
+            }
+          },
+          {
+            "type": "category",
             "label": "@math.gl/geospatial/coordinates",
             "items": [
               "modules/geospatial/api-reference/coordinate-utilities",

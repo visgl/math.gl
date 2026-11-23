@@ -5048,6 +5048,7 @@ __metadata:
   resolution: "@math.gl/geometry@workspace:modules/geometry"
   dependencies:
     "@math.gl/core": "npm:5.1.0-alpha.0"
+    robust-predicates: "npm:^3.0.2"
   peerDependencies:
     apache-arrow: ">=17.0.0"
   peerDependenciesMeta:
@@ -5107,6 +5108,7 @@ __metadata:
     "@turf/boolean-point-in-polygon": "npm:^7.2.0"
     "@turf/centroid": "npm:^7.2.0"
     "@turf/distance": "npm:^7.2.0"
+    "@turf/nearest-point-on-line": "npm:^7.2.0"
     cdt2d: "npm:1.0.0"
     polygon-clipping: "npm:0.15.7"
     proj4: "npm:2.22.0"

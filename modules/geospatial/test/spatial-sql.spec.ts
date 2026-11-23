@@ -14,6 +14,7 @@ import {
   type Vector
 } from 'apache-arrow';
 import {
+  getGeoArrowFieldInfo,
   makeArrowVectorFromGeoArrowColumn,
   makeGeoArrowColumnFromArrowVector,
   materializeGeoArrowRows,
@@ -71,8 +72,15 @@ function select(sql: string, table: Table): Table {
 
 /** Decodes a result geometry for assertions independent of physical Arrow storage. */
 function geometryAt(table: Table, name: string, row: number) {
-  const bytes = table.getChild(name)!.get(row);
-  return bytes ? parseWKB(bytes).geometry : null;
+  const field = table.schema.fields.find(field => field.name === name)!;
+  const vector = table.getChild(name)!;
+  if (getGeoArrowFieldInfo(field)?.encoding === 'geoarrow.wkb') {
+    const bytes = vector.get(row);
+    return bytes ? parseWKB(bytes).geometry : null;
+  }
+  return materializeGeoArrowRows(
+    makeGeoArrowColumnFromArrowVector(vector.slice(row, row + 1), {field})
+  )[0];
 }
 
 test('PostGIS point-in-polygon signatures distinguish hole boundaries from interiors across batches', () => {
@@ -149,8 +157,9 @@ test('label points lie inside concave, holed and multipart surfaces', () => {
     table
   );
   expect([...result.getChild('inside')!]).toEqual([true, true, true, false, null]);
+  expect(getGeoArrowFieldInfo(result.schema.fields[1]!)?.encoding).toBe('geoarrow.point');
   expect(geometryAt(result, 'anchor', 2)).toEqual({type: 'Point', coordinates: [15, 2]});
-  expect(geometryAt(result, 'anchor', 3)).toEqual({type: 'Point', coordinates: [NaN, NaN]});
+  expect(geometryAt(result, 'anchor', 3)).toEqual({type: 'Point', coordinates: []});
 });
 
 test('planar measurements and weighted centroids agree with PostGIS geometry fixture values', () => {
@@ -162,9 +171,19 @@ test('planar measurements and weighted centroids agree with PostGIS geometry fix
     'POINT EMPTY',
     null
   );
-  const table = new Table(new Schema([geometryField('shape', shape, 'wkb', {crs: 'EPSG:3857'})]), {
-    shape
-  });
+  const table = new Table(
+    new Schema([
+      geometryField('shape', shape, 'wkb', {
+        crs: 'EPSG:3857',
+        crs_type: 'authority_code',
+        geometry_types: ['Polygon'],
+        bbox: [0, 0, 8, 8]
+      })
+    ]),
+    {
+      shape
+    }
+  );
   const result = select(
     `SELECT ST_Area(shape) AS area, ST_Length(shape) AS length,
     ST_Centroid(shape) AS center, ST_Envelope(shape) AS extent FROM features`,
@@ -204,7 +223,7 @@ test('planar measurements and weighted centroids agree with PostGIS geometry fix
   });
   expect(result.schema.fields[2]!.metadata.get('ARROW:extension:name')).toBe('geoarrow.wkb');
   expect(result.schema.fields[2]!.metadata.get('ARROW:extension:metadata')).toBe(
-    '{"crs":"EPSG:3857"}'
+    '{"crs":"EPSG:3857","crs_type":"authority_code"}'
   );
 });
 
@@ -436,14 +455,13 @@ test('constructs XY, XYZ and XYZM points from nullable numeric coordinates', () 
     xyz: [3, 4, 5],
     xyzm: [3, 4, 5, 6]
   })) {
-    expect(parseWKB(result.getChild(name)!.get(0))).toMatchObject({
-      dimension: name,
-      geometry: {type: 'Point', coordinates}
+    const field = result.schema.fields.find(field => field.name === name)!;
+    expect(getGeoArrowFieldInfo(field)).toMatchObject({
+      encoding: 'geoarrow.point',
+      dimension: name
     });
+    expect(geometryAt(result, name, 0)).toEqual({type: 'Point', coordinates});
     expect(result.getChild(name)!.get(1)).toBeNull();
-    expect(
-      result.schema.fields.find(field => field.name === name)!.metadata.get('ARROW:extension:name')
-    ).toBe('geoarrow.wkb');
   }
 });
 
@@ -936,6 +954,8 @@ test('snaps to the nearest route segment with argument-order and radius semantic
     ST_LineLocatePoint(l,p) AS fraction FROM features`,
     table
   );
+  expect(getGeoArrowFieldInfo(result.schema.fields[0]!)?.encoding).toBe('geoarrow.point');
+  expect(getGeoArrowFieldInfo(result.schema.fields[2]!)?.encoding).toBe('geoarrow.linestring');
   expect(geometryAt(result, 'snap', 0)).toEqual(parseWKT('POINT(3 3)'));
   expect(geometryAt(result, 'observation', 0)).toEqual(parseWKT('POINT(5 3)'));
   expect(geometryAt(result, 'gap', 0)).toEqual(parseWKT('LINESTRING(3 3,5 3)'));
@@ -971,7 +991,20 @@ test('snaps native GeoArrow points to endpoints and resolves ties in route order
     ]),
     {l, p}
   );
-  const result = select('SELECT ST_ClosestPoint(l,p) AS snap FROM features', table);
+  const batched = new Table(table.schema, [
+    ...table.slice(0, 1).batches,
+    ...table.slice(1).batches
+  ]);
+  const result = select(
+    `SELECT ST_ClosestPoint(l,p) AS snap,
+            ST_LineLocatePoint(l, ST_ClosestPoint(l,p)) AS fraction,
+            ST_Length(ST_ShortestLine(l, ST_MakePoint(ST_X(p), ST_Y(p)))) AS gap
+     FROM features`,
+    batched
+  );
+  expect(result.batches.map(batch => batch.numRows)).toEqual([1, 1]);
+  expect([...result.getChild('fraction')!]).toEqual([0.25, 1]);
+  expect([...result.getChild('gap')!]).toEqual([2, Math.sqrt(5)]);
   expect(geometryAt(result, 'snap', 0)).toEqual(parseWKT('POINT(2 0)'));
   expect(geometryAt(result, 'snap', 1)).toEqual(parseWKT('POINT(4 0)'));
   expect(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')).toBe(
@@ -1007,14 +1040,30 @@ test('clips a native polygon without filling its hole and retains the CRS', () =
   expect(clipped?.type).toBe('Polygon');
   if (clipped?.type === 'Polygon') expect(clipped.coordinates).toHaveLength(2);
   expect(result.getChild('area')!.get(0)).toBe(8);
-  expect(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')).toBe(
-    JSON.stringify(metadata)
+  expect(JSON.parse(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')!)).toEqual(
+    metadata
   );
 });
 
 test('clipping an unlabeled geometry cannot assign the bounds CRS', () => {
   const g = wkb('POINT(1 1)');
   const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    `SELECT ST_ClipByBox2D(g,ST_SetSRID(ST_MakeEnvelope(0,0,2,2),3857)) AS clipped,
+    ST_SRID(ST_ClipByBox2D(g,ST_SetSRID(ST_MakeEnvelope(0,0,2,2),3857))) AS srid
+    FROM features`,
+    table
+  );
+  expect(geometryAt(result, 'clipped', 0)).toEqual(parseWKT('POINT(1 1)'));
+  expect(result.getChild('srid')!.get(0)).toBe(0);
+});
+
+test('clipping geometry with bounds metadata but no CRS cannot inherit the envelope CRS', () => {
+  const g = wkb('POINT(1 1)');
+  const table = new Table(
+    new Schema([geometryField('g', g, 'wkb', {geometry_types: ['Point'], bbox: [1, 1, 1, 1]})]),
+    {g}
+  );
   const result = select(
     `SELECT ST_ClipByBox2D(g,ST_SetSRID(ST_MakeEnvelope(0,0,2,2),3857)) AS clipped,
     ST_SRID(ST_ClipByBox2D(g,ST_SetSRID(ST_MakeEnvelope(0,0,2,2),3857))) AS srid
@@ -1436,4 +1485,67 @@ test('streams binary polygon unions and symmetric differences with native multip
 
   const identical = select('SELECT ST_SymDifference(b,b) AS changed FROM features', table);
   expect(identical.getChild('changed')!.get(0).length).toBe(0);
+});
+
+test('line merge crosses only degree-two endpoints and chains native results across batches', () => {
+  const geometries = [
+    parseWKT('MULTILINESTRING((0 0,4 0),(8 0,4 0))'),
+    parseWKT('MULTILINESTRING((0 0,4 0),(4 0,8 0),(4 0,4 4))'),
+    parseWKT('MULTILINESTRING((0 0,1 0),(1 0,1 1),(1 1,0 0))'),
+    parseWKT('MULTILINESTRING((0 0,4 0),(4.000001 0,8 0))'),
+    parseWKT('MULTILINESTRING EMPTY'),
+    null
+  ];
+  const g = makeArrowVectorFromGeoArrowColumn(makeGeoArrowColumnFromGeometryRows(geometries));
+  const table = new Table(new Schema([geometryField('g', g, 'multilinestring')]), {g});
+  const batched = new Table(table.schema, [
+    ...table.slice(0, 1).batches,
+    ...table.slice(1).batches
+  ]);
+  const result = select(
+    `SELECT ST_LineMerge(g) AS merged,
+            ST_Segmentize(ST_LineMerge(g), 3) AS route FROM features`,
+    batched
+  );
+  expect(result.batches.map(batch => batch.numRows)).toEqual([1, 5]);
+  expect(getGeoArrowFieldInfo(result.schema.fields[0]!)?.encoding).toBe('geoarrow.geometry');
+  expect(geometryAt(result, 'merged', 0)).toEqual(parseWKT('LINESTRING(0 0,4 0,8 0)'));
+  expect(geometryAt(result, 'route', 0)).toEqual(parseWKT('LINESTRING(0 0,2 0,4 0,6 0,8 0)'));
+  expect(geometryAt(result, 'merged', 1)).toEqual(geometries[1]);
+  expect(geometryAt(result, 'merged', 2)).toEqual(parseWKT('LINESTRING(0 0,1 0,1 1,0 0)'));
+  expect(geometryAt(result, 'merged', 3)).toEqual(geometries[3]);
+  expect(geometryAt(result, 'merged', 4)).toEqual(geometries[4]);
+  expect(geometryAt(result, 'route', 5)).toBeNull();
+});
+
+test('densifies native planar routes evenly, preserving their CRS and specialized encoding', () => {
+  const coordinates = wkb('LINESTRING(0 0,0 1,0 9)');
+  const decoded = [parseWKT('MULTILINESTRING((0 0,0 1,0 9),(1 10,1 18))')];
+  const route = makeArrowVectorFromGeoArrowColumn(makeGeoArrowColumnFromGeometryRows(decoded));
+  const crs = {crs: 'EPSG:3857'};
+  const table = new Table(
+    new Schema([
+      geometryField('route', route, 'multilinestring', crs),
+      geometryField('wkb', coordinates)
+    ]),
+    {route, wkb: coordinates}
+  );
+  const result = select(
+    'SELECT ST_Segmentize(route,5) AS native, ST_Segmentize(wkb,5) AS converted FROM features',
+    table
+  );
+  expect(getGeoArrowFieldInfo(result.schema.fields[0]!)).toMatchObject({
+    encoding: 'geoarrow.multilinestring',
+    metadata: crs
+  });
+  expect(geometryAt(result, 'native', 0)).toEqual(
+    parseWKT('MULTILINESTRING((0 0,0 1,0 5,0 9),(1 10,1 14,1 18))')
+  );
+  expect(geometryAt(result, 'converted', 0)).toEqual(parseWKT('LINESTRING(0 0,0 1,0 5,0 9)'));
+  expect(() => select('SELECT ST_Segmentize(route,0) FROM features', table)).toThrow(
+    /finite positive maximum segment length/
+  );
+  expect(() => select('SELECT ST_Segmentize(route,0.0000001) FROM features', table)).toThrow(
+    /would add more than/
+  );
 });

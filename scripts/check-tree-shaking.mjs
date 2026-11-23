@@ -14,8 +14,8 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
   {symbol: "createArrowColumns", packages: ["@math.gl/sql/arrow"], forbidden: [/sql\/(src|dist)\/scales\//], budget: 307000},
-  // SQL text uses expression WHERE clauses; it does not need the portable predicate normalizer.
-  {symbol:'queryArrowSQL', packages:['@math.gl/sql/query'], forbidden:[/predicate-expression/,/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/geoarrow-functions\./,/loaders.gl/,/geospatial\//], budget:319350},
+  // SQL text includes indexed spatial joins and excludes the portable predicate normalizer.
+  {symbol:'queryArrowSQL', packages:['@math.gl/sql/query'], forbidden:[/predicate-expression/,/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/geoarrow-functions\./,/loaders.gl/,/geospatial\//], budget:356000},
 
   ...['sweepTerrainRotatingCapsule', 'sweepTerrainRotatingSphere'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial/terrain'],
@@ -86,6 +86,14 @@ const probes = [
   {symbol:'spheroidToCartesian', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
   {symbol:'vec3Normalize', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
   {symbol:'SimulationClock', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec[234]/, /sample-track/, /gl-matrix/, /\/sql\//], budget:3600},
+  // Line networks: the builder and the route helpers load without each other, SQL, loaders.gl or turf.
+  {symbol: 'buildLineNetwork', packages: ['@math.gl/geospatial/line-network'],
+    forbidden: [/\/sql\//, /loaders\.gl/, /@turf\//, /line-network-routes/], budget: 11850},
+  ...[['buildLineNetworkAdjacency', 480], ['getRouteEdges', 640], ['getRouteGeometry', 1100], ['getEdgeGeometry', 850], ['createLineNetworkWeights', 580]]
+    .map(([symbol, budget]) => ({
+      symbol, packages: ['@math.gl/geospatial/line-network'],
+      forbidden: [/\/sql\//, /loaders\.gl/, /@turf\//, /build-line-network/], budget
+    })),
   {symbol:'getGeohashBounds', packages:['@math.gl/dggs/geohash'], forbidden:[/h3-js/, /a5-js/, /open-location-code/, /s2-geometry/], budget:2500},
   {symbol:'getClosestPointsSegmentTriangle', packages:['@math.gl/geometry/culling'], forbidden:[/parametric/, /spatial-index/, /terrain/, /earcut/], budget:5000},
   {symbol:'getStarColor', packages:['@math.gl/earth/sun-stars'], forbidden:[/astronomy-engine/, /bright-stars/], budget:700},

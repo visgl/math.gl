@@ -47,3 +47,20 @@ export type {
   ClipTriangleMeshOptions,
   ClippedTriangleMesh
 } from './clip-triangle-mesh';
+export {visitPolylineSpan} from './visit-polyline-span';
+
+export {
+  endpointContacts,
+  locatePointInPolygon,
+  pointOnSegment,
+  segmentsMeet
+} from './planar-predicates';
+export {getPolygonValidityReason} from './polygon-validity';
+export {projectPointToPolyline, type PolylineProjection} from './project-point-to-polyline';
+
+export {mergePolylinePaths} from './merge-polyline-paths';
+export {
+  segmentizePolylinePaths,
+  type PolylineSegment,
+  type PolylineSegmentFactory
+} from './segmentize-polyline-paths';
