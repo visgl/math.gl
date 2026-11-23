@@ -11,7 +11,7 @@ export type LineNetworkFixedSizeList = {
 };
 
 /**
- * Flat binary lines, in the shape of a loaders.gl binary line geometry.
+ * Flat line paths stored as interleaved positions and vertex offsets.
  * Positions are longitude and latitude in degrees. Values after the first two of each
  * position (Z, M) are ignored.
  */

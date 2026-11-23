@@ -32,8 +32,8 @@ const path = route && getRouteGeometry(network, lines, route, source);
 
 ## Input
 
-The input has the shape of a loaders.gl binary line geometry. Positions are longitude
-and latitude in degrees.
+The input is a flat collection of line paths. Positions are longitude and latitude
+in degrees.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -41,28 +41,34 @@ and latitude in degrees.
 | `pathIndices` | `{value, size}` | First vertex of each path, followed by the total vertex count (`pathCount + 1` values). |
 | `pathRows` | `ArrayLike<number>` (optional) | Source table row of each path. Defaults to the path index. |
 
-A path with fewer than two vertices gives no edge. math.gl does not depend on
-loaders.gl. To build the input from a column of WKB values, convert each row with
-loaders.gl (`convertWKBToBinaryGeometry` from `@loaders.gl/core/geoarrow`, loaders.gl 5) and concatenate the paths:
+A path with fewer than two vertices gives no edge. To prepare WKB rows, use the
+[math.gl WKB reader](../../core/arrow/wkb/api-reference/wkb.md) to write XY
+coordinates and path offsets directly.
 
 ```typescript
-import {convertWKBToBinaryGeometry} from '@loaders.gl/core/geoarrow';
+import {inspectWKBHeader, visitWKB} from '@math.gl/core/arrow';
 
-function readLines(wkbRows: ArrayBuffer[]) {
+function readLines(wkbRows: readonly (Uint8Array | ArrayBuffer | null)[]) {
   const positions: number[] = [];
   const pathIndices: number[] = [0];
   const pathRows: number[] = [];
   wkbRows.forEach((wkb, row) => {
-    const geometry = convertWKBToBinaryGeometry(wkb);
-    if (geometry.type !== 'LineString') return;
-    const {value, size} = geometry.positions;
-    const indices = geometry.pathIndices.value;
-    const base = positions.length / 2;
-    for (let i = 0; i < value.length; i += size) positions.push(value[i], value[i + 1]);
-    for (let p = 1; p < indices.length; p++) {
-      pathIndices.push(base + indices[p]);
-      pathRows.push(row);
-    }
+    if (!wkb) return;
+    const {geometryType} = inspectWKBHeader(wkb);
+    if (geometryType !== 'LineString' && geometryType !== 'MultiLineString') return;
+    let pathEnd = positions.length / 2;
+    visitWKB(wkb, {
+      geometry(header, count) {
+        if (header.geometryType === 'LineString') {
+          pathEnd += count ?? 0;
+          pathIndices.push(pathEnd);
+          pathRows.push(row);
+        }
+      },
+      coordinate(x, y) {
+        positions.push(x, y);
+      }
+    });
   });
   return {
     positions: {value: new Float64Array(positions), size: 2},
@@ -72,10 +78,9 @@ function readLines(wkbRows: ArrayBuffer[]) {
 }
 ```
 
-A binary line feature collection (for example the `lines` of
-`convertGeojsonToBinaryFeatureCollection`) has
-`positions` and `pathIndices` already. Its `featureIds` column has one value for each
-vertex. Take the value at the first vertex of each path to get `pathRows`.
+The reader handles LineString and MultiLineString rows without materializing
+geometry objects. If you already have flat binary lines, pass their interleaved
+positions and path offsets directly.
 
 ## Usage
 
