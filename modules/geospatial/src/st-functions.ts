@@ -53,7 +53,8 @@ import {
   EXTENSION_NAME,
   geometryTypes,
   lineKinds,
-  nativePolygonResult,
+  nativeGeometryResult,
+  nativePointVector,
   planarGeometry,
   pointCoordinates,
   pointInPolygon,
@@ -69,7 +70,7 @@ export const ST_MAKEPOINT: ScalarFunction = {
   kind: 'scalar',
   name: 'ST_MakePoint',
   prototypes: [],
-  /** Binds two to four numeric ordinate fields and declares a WKB result. */
+  /** Binds two to four numeric ordinates to a native GeoArrow point. */
   resolvePrototype(fields) {
     if (fields.length < 2 || fields.length > 4) return undefined;
     const arguments_ = fields.map(field => {
@@ -77,20 +78,29 @@ export const ST_MAKEPOINT: ScalarFunction = {
         throw new Error('ST_MakePoint requires numeric coordinates');
       return field ?? new Field('coordinate', new Float64(), true);
     });
-    const type = new Binary();
+    const dimension = fields.length === 2 ? 'xy' : fields.length === 3 ? 'xyz' : 'xyzm';
+    const coordinateType = new Float64();
+    const size = fields.length;
+    const type = new FixedSizeList(size, new Field(dimension, coordinateType, true));
     return {
       arguments: arguments_,
-      result: new Field('ST_MakePoint', type, true, new Map([[EXTENSION_NAME, 'geoarrow.wkb']])),
-      /** Writes one point per active row, retaining nulls in all other rows. */
+      result: new Field('ST_MakePoint', type, true, new Map([[EXTENSION_NAME, 'geoarrow.point']])),
+      /** Writes active rows directly to the interleaved coordinate buffer. */
       evaluate(vectors, {activeRows, length}) {
-        const values = new Array<Uint8Array | null>(length).fill(null);
+        const data = new Float64Array(length * size);
+        const nullBitmap = new Uint8Array(Math.ceil(length / 8));
+        let nullCount = 0;
         for (let row = 0; row < length; row++) {
-          if (activeRows[row]) {
-            const coordinates = vectors.map(vector => Number(vector.get(row)));
-            values[row] = writeWKB({type: 'Point', coordinates});
+          if (!activeRows[row]) {
+            nullCount++;
+            continue;
+          }
+          nullBitmap[row >> 3]! |= 1 << (row & 7);
+          for (let coordinate = 0; coordinate < size; coordinate++) {
+            data[row * size + coordinate] = Number(vectors[coordinate]!.get(row));
           }
         }
-        return vectorFromArray(values, type);
+        return nativePointVector(type, data, nullBitmap, nullCount);
       }
     };
   }
@@ -389,25 +399,25 @@ function closestPair(a: WellKnownGeometry, b: WellKnownGeometry) {
     : null;
 }
 
-/** Returns the closest point on the first geometry as GeoArrow WKB. */
+/** Returns the closest point on the first geometry as a native GeoArrow point. */
 export const ST_CLOSESTPOINT = /* @__PURE__ */ spatialFunction(
   'ST_ClosestPoint',
   [routePointKinds, routePointKinds],
-  /* @__PURE__ */ new Binary(),
+  /* @__PURE__ */ nativeGeometryResult('geoarrow.point'),
   ([a, b]) => {
     const pair = closestPair(a!, b!);
-    return pair ? writeWKB({type: 'Point', coordinates: pair.start}, 'xy') : null;
+    return pair ? {type: 'Point', coordinates: pair.start} : null;
   }
 );
 
-/** Returns the shortest segment from the first geometry to the second as GeoArrow WKB. */
+/** Returns the shortest segment from the first geometry to the second as a native GeoArrow line. */
 export const ST_SHORTESTLINE = /* @__PURE__ */ spatialFunction(
   'ST_ShortestLine',
   [routePointKinds, routePointKinds],
-  /* @__PURE__ */ new Binary(),
+  /* @__PURE__ */ nativeGeometryResult('geoarrow.linestring'),
   ([a, b]) => {
     const pair = closestPair(a!, b!);
-    return pair ? writeWKB({type: 'LineString', coordinates: [pair.start, pair.end]}, 'xy') : null;
+    return pair ? {type: 'LineString', coordinates: [pair.start, pair.end]} : null;
   }
 );
 
@@ -803,7 +813,7 @@ export const ST_SIMPLIFYPRESERVETOPOLOGY: ScalarFunction = {
     return spatialFunction(
       'ST_SimplifyPreserveTopology',
       [polygonKinds],
-      native ? nativePolygonResult(encoding) : new Binary(),
+      native ? nativeGeometryResult(encoding) : new Binary(),
       ([geometry], tolerance) => {
         const result = simplifyPolygonTopology(
           geometry as Extract<WellKnownGeometry, {type: 'Polygon' | 'MultiPolygon'}>,
@@ -952,8 +962,8 @@ export const ST_COLLECT = /* @__PURE__ */ spatialFunction(
 export const ST_POINTONSURFACE = /* @__PURE__ */ spatialFunction(
   'ST_PointOnSurface',
   [polygonKinds],
-  /* @__PURE__ */ new Binary(),
-  ([polygon]) => writeWKB(planarPolygonPointOnSurface(polygon!), 'xy')
+  /* @__PURE__ */ nativeGeometryResult('geoarrow.point'),
+  ([polygon]) => planarPolygonPointOnSurface(polygon!)
 );
 
 /** Binds the WKB fallback and native row-bounds implementation. */

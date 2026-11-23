@@ -13,7 +13,7 @@ import {
 } from '@math.gl/core/arrow';
 import type {TableFunction} from '@math.gl/sql/arrow';
 import {simplifyCoverage} from './coverage-simplification';
-import {nativePolygonResult} from './spatial-sql';
+import {nativeGeometryResult} from './spatial-sql';
 
 /** Settings for a whole-relation coverage simplification. */
 export type CoverageSimplifyOptions = {
@@ -48,7 +48,7 @@ export function createSTCoverageSimplify({
         throw new Error(
           'ST_CoverageSimplify requires a native planar XY Polygon or MultiPolygon column'
         );
-      const output = nativePolygonResult(encoding);
+      const output = nativeGeometryResult(encoding);
       const fields = inputSchema.fields.slice();
       fields[index] = field.clone({type: output.type});
       const outputSchema = new Schema(
