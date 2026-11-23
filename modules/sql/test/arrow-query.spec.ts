@@ -6,12 +6,19 @@ import {
   Binary,
   DateDay,
   DateMillisecond,
+  Dictionary,
+  Field,
   FixedSizeBinary,
   Float64,
   Int32,
   Int64,
+  RecordBatch,
+  Schema,
   Table,
   Utf8,
+  tableFromArrays,
+  tableFromIPC,
+  tableToIPC,
   vectorFromArray
 } from 'apache-arrow';
 import {expect, test} from 'vitest';
@@ -350,4 +357,63 @@ test('orders and groups Arrow dates without decoding their payloads', () => {
     expect([...grouped.getChild('day')!]).toEqual([0, secondDate, null]);
     expect([...grouped.getChild('count')!]).toEqual([2n, 1n, 1n]);
   }
+});
+test('LEFT OUTER JOIN retains unmatched and null keys and preserves matched duplicates', () => {
+  const roads = new Table({id: vectorFromArray([2, null, 1, 3], new Int32())});
+  const incidents = new Table({
+    id: vectorFromArray([2, null, 2], new Int32()),
+    count: vectorFromArray([10, 20, 30], new Int32()),
+    label: vectorFromArray(['a', 'b', 'c'], new Dictionary(new Utf8(), new Int32(), 11))
+  });
+  const sql =
+    'SELECT r.id, i.count AS incidents, i.label AS label FROM roads r LEFT OUTER JOIN incidents i ON r.id = i.id';
+  for (const [right, expected] of [
+    [incidents, [10, 30, null, null, null]],
+    [incidents.slice(0, 0), [null, null, null, null]]
+  ] as const) {
+    const result = queryArrowSQL(
+      sql,
+      new Map<string, Table>([
+        ['roads', roads],
+        ['incidents', right]
+      ])
+    );
+    expect([...result.getChild('incidents')!]).toEqual(expected);
+    expect(result.schema.fields[1]?.nullable).toBe(true);
+    expect(String(result.schema.fields[1]?.type)).toBe('Int32');
+    const labels = right.numRows ? ['a', 'c', null, null, null] : [null, null, null, null];
+    expect([...result.getChild('label')!]).toEqual(labels);
+    expect(result.getChild('label')!.type).toStrictEqual(incidents.getChild('label')!.type);
+    expect([...tableFromIPC(tableToIPC(result)).getChild('label')!]).toEqual(labels);
+  }
+});
+
+test('structured LEFT JOIN gathers alternating matches in one batch', () => {
+  const left = tableFromArrays({id: Int32Array.from({length: 4000}, (_, index) => index + 1)});
+  const keys = Int32Array.from({length: 2000}, (_, index) => (index + 1) * 2);
+  const right = tableFromArrays({key: keys});
+  const schema = new Schema([new Field('key', new Int32(), false)]);
+  const requiredRight = new Table(
+    schema,
+    right.batches.map(batch => new RecordBatch(schema, batch.data))
+  );
+  expect(requiredRight.schema.fields[0]?.nullable).toBe(false);
+
+  const result = queryArrowTable(left, {
+    join: {type: 'left', table: requiredRight, left: 'id', right: 'key', rightPrefix: 'right.'}
+  });
+  expect(result.batches).toHaveLength(1);
+  expect(result.schema.fields[1]?.nullable).toBe(true);
+  expect(result.getChild('right.key')!.nullCount).toBe(2000);
+  expect([...result.getChild('right.key')!.slice(0, 4)]).toEqual([null, 2, null, 4]);
+});
+
+test('structured LEFT JOIN rejects incompatible key types even on an empty lookup', () => {
+  const left = tableFromArrays({id: Int32Array.of(1)});
+  const right = new Table({id: vectorFromArray([], new Utf8())});
+  expect(() =>
+    queryArrowTable(left, {
+      join: {type: 'left', table: right, left: 'id', right: 'id', rightPrefix: 'right.'}
+    })
+  ).toThrow(/Incompatible Arrow JOIN key types/);
 });

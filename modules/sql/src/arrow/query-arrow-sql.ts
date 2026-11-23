@@ -198,8 +198,8 @@ function executeSelect(
       relationMetadata.set(rightAlias + '.' + columns[index], bound.columnMetadata?.[field.name])
     );
   } else if (right) {
-    if (statement.joins.length > 1 || right.type !== 'inner')
-      throw new Error('Arrow SQL supports one INNER JOIN per SELECT');
+    if (statement.joins.length > 1 || (right.type !== 'inner' && right.type !== 'left'))
+      throw new Error('Arrow SQL supports one INNER or LEFT JOIN per SELECT');
     rightAlias = right.table.alias ?? right.table.name;
     const resolved = resolveTable(right.table);
     rightTable = resolved.table;
@@ -214,6 +214,7 @@ function executeSelect(
     const rightColumn = sides.find(column => column?.qualifier === rightAlias);
     if (!left || !rightColumn) throw new Error('Qualify both Arrow SQL JOIN keys');
     join = {
+      type: right.type,
       table: rightTable,
       left: left.name,
       right: rightColumn.name,

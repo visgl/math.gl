@@ -44,7 +44,7 @@ const totals = queryArrowTable(orders, {
 ```
 
 `union` appends schema-compatible tables in input order, retaining duplicates.
-`join` performs an inner equi-join. Null keys do not match, and duplicate keys produce
+`join` defaults to an inner equi-join. Set `join.type` to `'left'` to keep unmatched left rows, including rows with null keys. Right output fields are nullable and unmatched rows carry nulls in those fields. Null keys do not match, and duplicate keys produce
 all matching pairs. Right column names use the specified prefix. The executor applies
 `WHERE` after combining the inputs, then groups and aggregates before sorting and
 pagination. Sort keys reference input or grouped columns before SELECT aliases.
@@ -52,9 +52,9 @@ Sorting is stable, and nulls sort last by default. Counts and sums of integer co
 use Arrow Int64. Supply these relational operations through query options.
 
 Use `queryArrowSQL(sql, tables)` to run relational SQL directly against a map of named
-Arrow tables. It supports one inner equality join per SELECT, column-based grouping,
+Arrow tables. It supports one `INNER JOIN` or `LEFT JOIN` on an equality condition per SELECT, column-based grouping,
 top-level aggregate calls, ordering by output columns, and UNION ALL with matching
-output schemas. Trailing ORDER BY, OFFSET, and LIMIT apply to the combined result.
+output schemas. Use inner or left joins for table lookups. Trailing ORDER BY, OFFSET, and LIMIT apply to the combined result.
 
 ```ts
 import {queryArrowSQL} from '@math.gl/sql/query';
