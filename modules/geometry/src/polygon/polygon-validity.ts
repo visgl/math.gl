@@ -2,16 +2,14 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {WellKnownGeometry} from '@math.gl/core/arrow';
-import {anyOverlap, type Bounded} from './spatial-bounds-sweep';
-import {locateMidpointInPolygon} from './spatial-exact-midpoint';
-import {planarBounds} from './spatial-planar';
+import {anyBoundsOverlap, type Bounded} from '../utils/bounds-overlap';
+import {locateMidpointInPolygon} from './exact-midpoint';
 import {
   endpointContacts,
   locatePointInPolygon,
   pointOnSegment,
   segmentsMeet
-} from './spatial-planar-intersects';
+} from './planar-predicates';
 
 /** One coordinate, compared in XY. */
 type Position = readonly number[];
@@ -115,7 +113,7 @@ function recordContact(edge: Edge, point: Position, key: string): void {
 /** Checks crossing and overlapping boundaries, retaining legal single-point contacts. */
 function checkBoundaries(edges: Edge[], contacts: Contacts): string | undefined {
   let reason: string | undefined;
-  anyOverlap(edges, (a, b) => {
+  anyBoundsOverlap(edges, (a, b) => {
     const sameRing = a.ring === b.ring;
     const gap = Math.abs(a.index - b.index);
     const adjacent = sameRing && (gap === 1 || gap === a.ring.points.length - 2);
@@ -203,11 +201,10 @@ function hasContactCycle(ringCount: number, contacts: Contacts): boolean {
   return false;
 }
 
-/** Validates the XY topology of a Polygon or MultiPolygon. */
-export function polygonValidityReason(geometry: WellKnownGeometry): string | undefined {
-  if (geometry.type !== 'Polygon' && geometry.type !== 'MultiPolygon')
-    throw new Error('Expected polygonal geometry');
-  const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
+/** Returns the first XY topology diagnostic for polygon components, or undefined if valid. */
+export function getPolygonValidityReason(
+  polygons: readonly (readonly Ring[])[]
+): string | undefined {
   const edges: Edge[] = [];
   const components: Component[] = [];
   let ringCount = 0;
@@ -216,7 +213,13 @@ export function polygonValidityReason(geometry: WellKnownGeometry): string | und
     for (const input of polygon) {
       const points = normalizeRing(input);
       if (typeof points === 'string') return points;
-      const bounds = planarBounds({type: 'LineString', coordinates: points})!;
+      const bounds = [Infinity, Infinity, -Infinity, -Infinity];
+      for (const point of points) {
+        bounds[0] = Math.min(bounds[0]!, point[0]!);
+        bounds[1] = Math.min(bounds[1]!, point[1]!);
+        bounds[2] = Math.max(bounds[2]!, point[0]!);
+        bounds[3] = Math.max(bounds[3]!, point[1]!);
+      }
       const ring: RingInfo = {id: ringCount++, component: components.length, points, bounds};
       rings.push(ring);
       addEdges(ring, edges);
@@ -233,12 +236,17 @@ export function polygonValidityReason(geometry: WellKnownGeometry): string | und
     for (const hole of holes) {
       if (hasLocation(hole, [shell.points], -1)) return 'Hole lies outside shell';
     }
-    if (anyOverlap(holes, (a, b) => hasLocation(a, [b.points], 1) || hasLocation(b, [a.points], 1)))
+    if (
+      anyBoundsOverlap(
+        holes,
+        (a, b) => hasLocation(a, [b.points], 1) || hasLocation(b, [a.points], 1)
+      )
+    )
       return 'Holes overlap or are nested';
   }
   if (hasContactCycle(ringCount, contacts)) return 'Interior is disconnected';
   if (
-    anyOverlap(
+    anyBoundsOverlap(
       components,
       (a, b) => hasLocation(a.shell, b.paths, 1) || hasLocation(b.shell, a.paths, 1)
     )

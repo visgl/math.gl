@@ -24,7 +24,7 @@ function intervalDensity(items: readonly Bounded[], axis: number): number {
 }
 
 /** Visits overlapping bounding boxes along the axis with fewer expected candidates. */
-export function anyOverlap<T extends Bounded>(
+export function anyBoundsOverlap<T extends Bounded>(
   items: T[],
   reject: (a: T, b: T) => boolean
 ): boolean {

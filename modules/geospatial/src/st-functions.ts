@@ -26,22 +26,17 @@ import {
   writeWKB,
   type WellKnownGeometry
 } from '@math.gl/core/arrow';
+import {getPolygonValidityReason} from '@math.gl/geometry/polygon';
 import {planarIntersects} from './spatial-planar-intersects';
 import {planarTouches} from './spatial-touches';
 import {linesWithinDistance, pointWithinPolygonDistance} from './spatial-dwithin';
-import {
-  mergeRoute,
-  planarRouteSegment,
-  routeEditingFunction,
-  segmentizeFunction
-} from './route-editing';
+import {mergeRoute, routeEditingFunction, segmentizeFunction} from './route-editing';
 import {lineLocatePoint, lineSubstring, projectPointToLine} from './linear-referencing';
 import {addMeasure, locateAlong, locateBetween, measuredDimension} from './measure-referencing';
 import {normalizeCRSIdentifier} from './crs/crs-identifier';
 import {EPSG3857ToLngLat, EPSG4326ToEPSG3857} from './web-mercator/mercator-meters';
 import {vertexCount, memberCount, geometryMember} from './geometry-inspection';
 import {reduceLineVertices} from './line-simplification';
-import {polygonValidityReason} from './polygon-validity';
 import {simplifyPolygonTopology} from './polygon-simplification';
 import {collectPair, makeLine} from './geometry-constructors';
 import {EPSG3857_HALF_CIRCUMFERENCE} from './web-mercator/mercator-meters';
@@ -511,10 +506,7 @@ export const ST_TOUCHES = /* @__PURE__ */ spatialFunction(
 export const ST_LINEMERGE = /* @__PURE__ */ routeEditingFunction('ST_LineMerge', false, mergeRoute);
 
 /** Splits planar segments evenly to meet the maximum length in CRS units. */
-export const ST_SEGMENTIZE = /* @__PURE__ */ segmentizeFunction(
-  'ST_Segmentize',
-  planarRouteSegment
-);
+export const ST_SEGMENTIZE = /* @__PURE__ */ segmentizeFunction('ST_Segmentize');
 
 /** Interpolates a point at a fraction of the planar length. */
 export const ST_LINEINTERPOLATEPOINT = /* @__PURE__ */ spatialFunction(
@@ -973,6 +965,13 @@ export const ST_COLLECT = /* @__PURE__ */ spatialFunction(
   false,
   true
 );
+
+/** Adapts a SQL polygon value to the coordinate-space validity kernel. */
+function polygonValidityReason(geometry: WellKnownGeometry): string | undefined {
+  if (geometry.type === 'Polygon') return getPolygonValidityReason([geometry.coordinates]);
+  if (geometry.type === 'MultiPolygon') return getPolygonValidityReason(geometry.coordinates);
+  throw new Error('Expected polygonal geometry');
+}
 
 /** Checks Polygon or MultiPolygon validity in XY. */
 export const ST_ISVALID = /* @__PURE__ */ spatialFunction(

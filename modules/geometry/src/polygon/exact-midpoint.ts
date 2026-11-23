@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {locatePointInPolygon} from './spatial-planar-intersects';
+import {locatePointInPolygon} from './planar-predicates';
 
 /** A finite planar position. */
 type Position = readonly number[];

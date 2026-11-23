@@ -5048,6 +5048,7 @@ __metadata:
   resolution: "@math.gl/geometry@workspace:modules/geometry"
   dependencies:
     "@math.gl/core": "npm:5.1.0-alpha.0"
+    robust-predicates: "npm:^3.0.2"
   peerDependencies:
     apache-arrow: ">=17.0.0"
   peerDependenciesMeta:
