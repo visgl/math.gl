@@ -165,7 +165,8 @@ export function spatialFunction<Value extends SpatialValue | WellKnownGeometry>(
   evaluate: (geometries: readonly GeometryRow[], ...numbers: number[]) => Value,
   numericArguments = 0,
   allDimensions = false,
-  skipNullGeometries = false
+  skipNullGeometries = false,
+  validateCRS?: (crs: unknown, name: string) => void
 ): ScalarFunction {
   const type = 'encoding' in output ? output.type : output;
   return {
@@ -199,7 +200,9 @@ export function spatialFunction<Value extends SpatialValue | WellKnownGeometry>(
         } else {
           throw new Error(`${name} argument ${index + 1} requires GeoArrow ${kinds.join(' or ')}`);
         }
+        validateCRS?.(extension?.metadata['crs'], name);
         if (
+          !validateCRS &&
           name.startsWith('ST_') &&
           name !== 'ST_SRID' &&
           name !== 'ST_SetSRID' &&
@@ -212,6 +215,7 @@ export function spatialFunction<Value extends SpatialValue | WellKnownGeometry>(
         .map(extension => extension?.metadata['crs'])
         .filter(crs => crs !== undefined && crs !== null);
       if (
+        !validateCRS &&
         name.startsWith('ST_') &&
         crsValues.some(crs => JSON.stringify(crs) !== JSON.stringify(crsValues[0]))
       ) {
