@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v5.0.2
+
+- Add spatial SQL polygon dissolve, shared-boundary simplification, and validity diagnostics (#703, #722, #730).
+- Add route merging and densification, geodesic proximity for point sets and routes, and native GeoArrow results for route and label functions (#721, #727–#729).
+- Plan indexed spatial joins and avoid fragmented Arrow outputs across lookup batches (#720, #726).
+- Share planar topology kernels and build line networks from flat binary lines (#723, #731).
+- Add a cooling Earth orbital shot and WebGPU HDR surfaces to Tectonic Time Machine, and stabilize camera-scaled projection checks (#707, #710, #732).
+
 ## v5.0.1
 
 - Add Arrow DataFrame and GeoDataFrame operations for SQL, viewport filtering, CRS transforms, and spatial joins.
