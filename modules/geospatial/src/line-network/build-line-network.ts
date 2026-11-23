@@ -535,9 +535,11 @@ export function buildLineNetwork(
       }
     }
     const cellSize = Math.max(junctionTolerance, segmentCount ? lengthSum / segmentCount : 0, 1);
-    const index = new SegmentIndex(lines, cellSize, minLatitude, maxLatitude);
+    // No segment means no latitude range, and nothing to join or to cross.
+    const index =
+      segmentCount > 0 ? new SegmentIndex(lines, cellSize, minLatitude, maxLatitude) : null;
 
-    if (clusterGap && dangling > 0) {
+    if (index && clusterGap && dangling > 0) {
       joinDanglingEnds(lines, vertexCluster, clusterUses, isEndpointCluster, index, {
         junctionTolerance,
         distance,
@@ -547,7 +549,7 @@ export function buildLineNetwork(
         unions
       });
     }
-    if (crossings) {
+    if (index && crossings) {
       splitCrossings(lines, vertexCluster, index, snappedCount, splits, crossingPositions);
     }
   }
@@ -616,7 +618,12 @@ export function buildLineNetwork(
     }
   }
 
-  const maxEdges = (split ? Math.max(vertexCount - pathCount, 0) : pathCount) + splits.count;
+  // Count path by path: an empty path (a repeated offset) has no segment, not -1.
+  let maxEdges = splits.count;
+  for (let path = 0; path < pathCount; path++) {
+    const pathVertices = pathIndices[path + 1] - pathIndices[path];
+    if (pathVertices > 1) maxEdges += split ? pathVertices - 1 : 1;
+  }
   const edges = new EdgeColumns(maxEdges, Boolean(options.edgeWeight));
   for (let path = 0; path < pathCount; path++) {
     const first = pathIndices[path];

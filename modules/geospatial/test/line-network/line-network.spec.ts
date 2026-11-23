@@ -37,6 +37,39 @@ function point(lon: number, lat: number) {
 }
 
 describe('buildLineNetwork', () => {
+  it('sizes split edges correctly when some paths are empty', () => {
+    // Empty paths (repeated offsets) and a one-vertex path give no edge, but must not shrink the edge storage.
+    const lines = makeLines(
+      [],
+      [0, 0, 0.001, 0, 0.002, 0],
+      [],
+      [0.001, 0.001],
+      [],
+      [0.001, -0.001, 0.001, 0]
+    );
+    const network = buildLineNetwork(lines, {splitAtSharedVertices: true});
+    expect(network.edgeCount).toBe(3);
+    expect(network.edgeSource.length).toBeGreaterThanOrEqual(network.edgeCount);
+    expect(Array.from(network.edgePath.subarray(0, network.edgeCount))).toEqual([1, 1, 5]);
+    for (let e = 0; e < network.edgeCount; e++) {
+      expect(network.edgeLength[e]).toBeGreaterThan(0);
+    }
+  });
+
+  it('accepts empty input with every option on', () => {
+    const empty = makeLines();
+    const onlyEmptyPaths = makeLines([], []);
+    for (const lines of [empty, onlyEmptyPaths]) {
+      const network = buildLineNetwork(lines, {
+        splitAtSharedVertices: true,
+        splitAtCrossings: true,
+        junctionTolerance: 10
+      });
+      expect(network.nodeCount).toBe(0);
+      expect(network.edgeCount).toBe(0);
+    }
+  });
+
   it('joins lines that share an endpoint into one node', () => {
     // Junctions off, so the test sees the snap alone (a junction would also join these ends).
     const net = buildLineNetwork(
