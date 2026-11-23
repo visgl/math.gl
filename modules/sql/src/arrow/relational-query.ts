@@ -102,21 +102,7 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
       rightIndexes.push(match);
     }
   }
-  const rightInput =
-    !right.numRows && rightIndexes.length
-      ? right.concat(
-          new Table(
-            right.schema,
-            Object.fromEntries(
-              right.schema.fields.map(field => [
-                field.name,
-                makeVector(nullVectorData(field.type, 1))
-              ])
-            )
-          )
-        )
-      : right;
-  return gatherArrowJoin(left, rightInput, leftIndexes, rightIndexes, schema);
+  return gatherArrowJoin(left, right, leftIndexes, rightIndexes, schema);
 }
 
 /** Builds the relational join schema and validates right prefix collisions. */
@@ -147,9 +133,23 @@ export function gatherArrowJoin(
 ): Table {
   if (!leftIndexes.length) return new Table(schema, []);
 
+  const rightInput =
+    !right.numRows && rightIndexes.length
+      ? right.concat(
+          new Table(
+            right.schema,
+            Object.fromEntries(
+              right.schema.fields.map(field => [
+                field.name,
+                makeVector(nullVectorData(field.type, 1))
+              ])
+            )
+          )
+        )
+      : right;
   const tables = [
     takeArrowTableRows(left, Int32Array.from(leftIndexes)),
-    takeArrowTableRows(right, Int32Array.from(rightIndexes))
+    takeArrowTableRows(rightInput, Int32Array.from(rightIndexes))
   ];
   const columns = tables.flatMap(table =>
     table.schema.fields.map((_, index) => table.getChildAt(index)!)

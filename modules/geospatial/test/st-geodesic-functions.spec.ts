@@ -211,3 +211,33 @@ test('densifies a WGS84 route across the antimeridian with equal ellipsoidal ste
   expect(result.getChild('meters')!.get(0)).toBeCloseTo(222638.9815865, 5);
   expect(missing).toBeNull();
 });
+
+test('measures minimum distance between native multipoints and WKB point sets', () => {
+  const encoding = 'geoarrow.multipoint';
+  const vector = makeArrowVectorFromGeoArrowColumn(
+    GeoArrowBuilder.build(
+      [
+        parseWKT('MULTIPOINT((0 0),(179 0))'),
+        parseWKT('MULTIPOINT EMPTY'),
+        null,
+        parseWKT('MULTIPOINT((40 0),(45 0))')
+      ],
+      {encoding}
+    )
+  );
+  const other = wkb(['MULTIPOINT((-179 0),(-10 0))', 'POINT(0 0)', 'POINT(1 0)', 'POINT(45 0)']);
+  const schema = new Schema([field('a', vector, encoding), field('b', other, 'geoarrow.wkb')]);
+  const table = new Table(schema, {a: vector, b: other});
+  const result = queryArrowSQL(
+    `SELECT ST_GeodesicDistance(a,b) AS ab, ST_GeodesicDistance(b,a) AS ba,
+      ST_GeodesicDWithin(a,b,222639) AS near, ST_GeodesicDWithin(b,a,0) AS coincident
+      FROM features`,
+    new Map([['features', table]]),
+    {functions}
+  );
+  expect(result.getChild('ab')!.get(0)).toBeCloseTo(222638.9815865, 5);
+  expect([...result.getChild('ab')!]).toEqual([...result.getChild('ba')!]);
+  expect([...result.getChild('ab')!].slice(1)).toEqual([null, null, 0]);
+  expect([...result.getChild('near')!]).toEqual([true, false, null, true]);
+  expect([...result.getChild('coincident')!]).toEqual([false, false, null, true]);
+});
