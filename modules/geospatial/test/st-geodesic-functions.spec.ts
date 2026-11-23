@@ -4,7 +4,10 @@
 
 import {
   GeoArrowBuilder,
+  getGeoArrowFieldInfo,
   makeArrowVectorFromGeoArrowColumn,
+  makeGeoArrowColumnFromArrowVector,
+  materializeGeoArrowRows,
   parseWKT,
   writeWKB
 } from '@math.gl/core/arrow';
@@ -113,4 +116,98 @@ test('sums native multiline segments without counting gaps, and rejects projecte
       {functions}
     )
   ).toThrow(/requires WGS84 CRS metadata/);
+});
+
+test('streams point-to-route proximity across the antimeridian and preserves empty and null rows', async () => {
+  const encoding = 'geoarrow.multilinestring';
+  const route = makeArrowVectorFromGeoArrowColumn(
+    GeoArrowBuilder.build(
+      [
+        parseWKT('MULTILINESTRING((179 0,-179 0),(30 0,31 0))'),
+        parseWKT('MULTILINESTRING((179 0,-179 0))'),
+        parseWKT('MULTILINESTRING EMPTY'),
+        null,
+        parseWKT('MULTILINESTRING((179 0,179 0),(-179 0,-179 0))')
+      ],
+      {encoding}
+    )
+  );
+  const point = wkb(['POINT(180 1)', 'POINT(179.3 0)', 'POINT(0 0)', 'POINT(0 0)', 'POINT(180 0)']);
+  const schema = new Schema([field('route', route, encoding), field('p', point, 'geoarrow.wkb')]);
+  const table = new Table(schema, {route, p: point});
+  const batches = [...table.slice(0, 2).batches, ...table.slice(2).batches];
+  const distances = [];
+  const near = [];
+  const onRoute = [];
+  for await (const batch of queryArrowTableInBatches(batches, schema, {
+    select: [
+      {expression: 'ST_GeodesicDistance(route,p)', as: 'meters'},
+      {expression: 'ST_GeodesicDWithin(p,route,110575)', as: 'near'},
+      {expression: 'ST_GeodesicDWithin(route,p,0)', as: 'on_route'}
+    ],
+    functions
+  })) {
+    distances.push(...batch.getChild('meters')!);
+    near.push(...batch.getChild('near')!);
+    onRoute.push(...batch.getChild('on_route')!);
+  }
+  expect(distances[0]).toBeCloseTo(110574.3885578, 5);
+  expect(distances[1]).toBeCloseTo(0, 6);
+  expect(distances.slice(2, 4)).toEqual([null, null]);
+  expect(distances[4]).toBeCloseTo(111319.4907933, 5);
+  expect(near).toEqual([true, true, false, null, false]);
+  expect(onRoute).toEqual([false, true, false, null, false]);
+});
+
+test('minimizes distance on finite segments at the pole, an endpoint, and a long geodesic', () => {
+  const route = wkb(['LINESTRING(0 89,180 89)', 'LINESTRING(0 0,1 0)', 'LINESTRING(150 0,-150 0)']);
+  const point = wkb(['POINT(36 90)', 'POINT(2 0)', 'POINT(-163 1)']);
+  const schema = new Schema([
+    field('route', route, 'geoarrow.wkb'),
+    field('p', point, 'geoarrow.wkb')
+  ]);
+  const tables = new Map([['routes', new Table(schema, {route, p: point})]]);
+  const result = queryArrowSQL(
+    `SELECT ST_GeodesicDistance(p,route) AS distance,
+            ST_GeodesicDWithin(p,route,ST_GeodesicDistance(route,p)) AS inclusive
+     FROM routes`,
+    tables,
+    {functions}
+  );
+  expect(result.getChild('distance')!.get(0)).toBeCloseTo(0, 6);
+  expect(result.getChild('distance')!.get(1)).toBeCloseTo(111319.4907933, 5);
+  expect(result.getChild('distance')!.get(2)).toBeCloseTo(110574.3885578, 5);
+  expect([...result.getChild('inclusive')!]).toEqual([true, true, true]);
+  expect(() =>
+    queryArrowSQL('SELECT ST_GeodesicDistance(route,route) FROM routes', tables, {functions})
+  ).toThrow(/requires at least one Point/);
+});
+
+test('densifies a WGS84 route across the antimeridian with equal ellipsoidal steps', () => {
+  const encoding = 'geoarrow.linestring';
+  const g = makeArrowVectorFromGeoArrowColumn(
+    GeoArrowBuilder.build([parseWKT('LINESTRING(179 0,-179 0)'), null], {encoding})
+  );
+  const schema = new Schema([field('g', g, encoding)]);
+  const result = queryArrowSQL(
+    `SELECT ST_GeodesicSegmentize(g,100000) AS route,
+            ST_GeodesicLength(ST_GeodesicSegmentize(g,100000)) AS meters FROM features`,
+    new Map([['features', new Table(schema, {g})]]),
+    {functions}
+  );
+  const routeField = result.schema.fields[0]!;
+  expect(getGeoArrowFieldInfo(routeField)).toMatchObject({
+    encoding,
+    metadata: {crs: 'OGC:CRS84', edges: 'spherical'}
+  });
+  const output = makeGeoArrowColumnFromArrowVector(result.getChild('route')!, {field: routeField});
+  const [line, missing] = materializeGeoArrowRows(output);
+  if (line?.type !== 'LineString') throw new Error('Expected a native line');
+  expect(line.coordinates).toHaveLength(4);
+  expect(line.coordinates[0]).toEqual([179, 0]);
+  expect(line.coordinates[1]![0]).toBeCloseTo(179 + 2 / 3, 10);
+  expect(line.coordinates[2]![0]).toBeCloseTo(-179 - 2 / 3, 10);
+  expect(line.coordinates[3]).toEqual([-179, 0]);
+  expect(result.getChild('meters')!.get(0)).toBeCloseTo(222638.9815865, 5);
+  expect(missing).toBeNull();
 });

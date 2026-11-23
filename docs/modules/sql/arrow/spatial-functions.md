@@ -59,6 +59,32 @@ FROM observations
 The radius is in the projected CRS's coordinate units. For a route with equally
 close candidates, the first along the route is selected.
 
+The snapped point and the gap segment use native GeoArrow coordinates. Feed them
+into another spatial function in the same batch, or use the columns to prepare
+deck.gl marker and path layers. Use `GEOARROW_TO_WKB` from the
+[GeoArrow conversion package](../geoarrow-functions.md) when exporting WKB.
+
+## Stitch and densify routes
+
+Use `ST_LineMerge(route)` to assemble XY line parts that share exact endpoints.
+It merges through junctions with two incident paths and leaves branches as
+separate line parts. A connected chain is a LineString. Multiple chains and
+empty multipart inputs are MultiLineStrings.
+
+Use `ST_Segmentize(route, max_length)` to split long segments into equal pieces
+in the input CRS units. Existing vertices and component boundaries are
+preserved. The maximum must be finite and positive. Each call can insert up to
+1,000,000 vertices per row.
+
+```sql
+SELECT id, ST_Segmentize(ST_LineMerge(segments), 50) AS route
+FROM roads
+```
+
+Inputs can use native XY GeoArrow or WKB. When the result family is known from
+the input field, output uses specialized native GeoArrow. Calls with variable
+LineString or MultiLineString results use a dense GeoArrow union.
+
 ## Clip features to a tile or viewport
 
 Register `ST_CLIPBYBOX2D` from `@math.gl/geospatial/st-viewport-functions`.
@@ -178,6 +204,22 @@ contacts returned separately when the result contains both dimensions.
 Clipping preserves route traversal. Repeated or overlapping segments contribute
 to length each time the route travels them.
 
+## Validate polygon imports
+
+`ST_IsValid(geometry)` checks Polygon and MultiPolygon topology in XY, with
+native GeoArrow or WKB inputs. Use `ST_IsValidReason(geometry)` to retrieve the
+first diagnostic, such as an unclosed ring, a self-intersection, a hole outside
+its shell, disconnected interior, or overlapping polygon components.
+
+```sql
+SELECT id, ST_IsValidReason(geometry) AS reason
+FROM parcels
+WHERE NOT ST_IsValid(geometry)
+```
+
+Empty polygons are valid. Both functions propagate nulls and evaluate per record
+batch. `ST_IsValidReason` returns `Valid Geometry` when the topology passes.
+
 ## Dissolve polygons by group
 
 Register `ST_UNION_AGGREGATE` and `ST_UNARYUNION` from
@@ -234,12 +276,40 @@ ignored.
 
 | SQL function | Inputs | Result |
 | --- | --- | --- |
-| `ST_GeodesicDistance(a, b)` | Two points | Shortest distance in meters. Empty points yield null. |
+| `ST_GeodesicDistance(a, b)` | Two points, or a Point and a LineString or MultiLineString in either order | Shortest distance in meters. Empty inputs yield null. |
 | `ST_GeodesicLength(route)` | LineString or MultiLineString | Sum of segment lengths in meters. Empty lines yield zero. |
-| `ST_GeodesicDWithin(a, b, radius)` | Two points and a finite nonnegative radius in meters | True when distance is at most the radius. Empty points yield false. |
+| `ST_GeodesicSegmentize(route, max_length)` | XY LineString or MultiLineString and a finite positive maximum length in meters | Native line geometry with equal-length subdivisions along the WGS84 ellipsoid. |
+| `ST_GeodesicDWithin(a, b, radius)` | Same geometry pairs as `ST_GeodesicDistance` and a finite nonnegative radius in meters | True when distance is at most the radius. Empty inputs yield false. |
 
-Null arguments propagate. Use `queryArrowTableInBatches` to evaluate these
-functions on streamed record batches.
+Point-to-route proximity measures to the interiors as well as the endpoints
+of the route's geodesic segments. MultiLineString parts are searched independently.
+The point-to-route threshold comparison allows 0.1 micrometers for
+numerical error. Null arguments propagate. Use `queryArrowTableInBatches` to
+evaluate these functions on streamed record batches.
+
+```sql
+SELECT id, ST_GeodesicDistance(observation, route) AS meters
+FROM observations
+WHERE ST_GeodesicDWithin(observation, route, 25)
+```
+
+## Simplify shared boundaries in a polygon coverage
+
+Register `createSTCoverageSimplify({geometry: 'footprint', tolerance: 2})`
+from `@math.gl/geospatial/st-functions`, then query the entire native XY coverage.
+
+```sql
+SELECT id, footprint
+FROM ST_CoverageSimplify(parcels)
+```
+
+The table function simplifies shared borders across record batches while
+preserving the outer boundary, row order, CRS, nulls, and Polygon or
+MultiPolygon encoding. Supply a valid coverage with matching vertices on
+both sides of shared edges. Tolerance is in the source coordinate units.
+This implementation removes eligible shared vertices in one pass and skips
+edits that could meet another boundary or interfere with an accepted edit.
+It evaluates the whole relation before returning the output batches.
 
 ## PostGIS geometry signatures
 
@@ -261,8 +331,8 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_PointN(line, n)` | 2D LineString and signed integer position | WKB Point. Positions start at 1, or at -1 from the end. Zero and out-of-range positions yield null. |
 | `ST_MakeEnvelope(xmin, ymin, xmax, ymax)` | Four numeric bounds | Closed 2D WKB Polygon with unknown CRS. |
 | `ST_DWithin(a, b, distance)` | Two Points, Point and LineString, Point and Polygon or MultiPolygon, or two linear geometries (LineString or MultiLineString), in either order, with a nonnegative radius | Boolean. Includes geometries exactly at the radius, in planar coordinate units. Interior points and boundary contact have zero distance. For points in holes, distance is measured to the nearest boundary. Empty inputs yield false. |
-| `ST_ClosestPoint(a, b)` | Two 2D Points or a Point and LineString in either order | WKB Point on the first geometry nearest to the second. Empty inputs yield null. |
-| `ST_ShortestLine(a, b)` | Two 2D Points or a Point and LineString in either order | Two-vertex WKB LineString from the first geometry to the second. Intersecting inputs produce coincident endpoints. Empty inputs yield null. |
+| `ST_ClosestPoint(a, b)` | Two 2D Points or a Point and LineString in either order | Native `geoarrow.point` on the first geometry nearest to the second. Empty inputs yield null. |
+| `ST_ShortestLine(a, b)` | Two 2D Points or a Point and LineString in either order | Two-vertex native `geoarrow.linestring` from the first geometry to the second. Intersecting inputs produce coincident endpoints. Empty inputs yield null. |
 | `ST_Distance(a, b)` | Two Points | Float64 Cartesian distance in coordinate units. Empty points yield null. |
 | `ST_Intersects(a, b)` | Two planar geometries, including multi-types and WKB collections | True for shared interiors, edges, or vertices. Empty geometries yield false. |
 | `ST_Touches(a, b)` | Planar Point, LineString, Polygon, or their multi-types | True when the inputs share a point and their interiors are disjoint. Point and MultiPoint pairs return false. Empty geometries yield false. |
@@ -270,7 +340,7 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_SetSRID(g, srid)` | 2D geometry and constant integer | GeoArrow WKB with the assigned EPSG identifier and original coordinates. Zero clears the CRS. |
 | `ST_Transform(g, srid)` | 2D planar geometry and constant target EPSG code | Reprojects between 4326 (longitude, latitude) and 3857 (meters). Forward projection accepts the Web Mercator tile latitude range (about ±85.0511°). |
 | `ST_Azimuth(a, b)` | Two Points | Float64 radians clockwise from positive Y in `[0, 2π)`. Coincident and empty points yield null. |
-| `ST_MakePoint(x, y [, z [, m]])` | Integer or floating-point ordinates | GeoArrow WKB Point with XY, XYZ, or XYZM coordinates and unknown CRS. Use XY with the 2D predicates and measurements. |
+| `ST_MakePoint(x, y [, z [, m]])` | Integer or floating-point ordinates | Native interleaved `geoarrow.point` with XY, XYZ, or XYZM coordinates and unknown CRS. Use XY with the 2D predicates and measurements. |
 | `ST_ClipByBox2D(geometry, bounds)` | 2D geometry and a geometry whose XY extent supplies the clipping rectangle | Clipped WKB, with the input CRS. Excludes boundary-only points and line segments. Empty bounds yield null. |
 | `ST_TileEnvelope(z, x, y [, bounds [, margin]])` | XYZ indices (zoom 0–31), optional root geometry and fractional margin | WKB Polygon. Defaults to EPSG:3857. Custom root bounds supply the output CRS. Positive margins expand the tile and negative margins shrink it. |
 | `ST_Area(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar polygon area with holes subtracted. Empty and non-areal inputs yield zero. |
@@ -284,7 +354,7 @@ the coordinate unit. Transform inputs to a common CRS before running a query.
 | `ST_Simplify(line, tolerance)` | 2D LineString or MultiLineString | WKB line simplified in planar coordinate units. Drops collapsed components and returns null if none survive. |
 | `ST_SimplifyPreserveTopology(geometry, tolerance)` | 2D Polygon or MultiPolygon, finite nonnegative tolerance | Simplifies boundaries in planar coordinate units, retaining shell and hole counts, winding, component boundaries, and nesting. Native Polygon and MultiPolygon inputs keep their respective native encodings. WKB inputs return WKB. |
 | `ST_Length(geometry)` | Point, LineString, Polygon, and their multi-types | Float64 planar line length. Empty and non-linear inputs yield zero. |
-| `ST_PointOnSurface(polygon)` | Polygon or MultiPolygon | GeoArrow WKB Point for label placement inside a valid polygon. Empty inputs yield an empty Point. |
+| `ST_PointOnSurface(polygon)` | Polygon or MultiPolygon | Native `geoarrow.point` for label placement inside a valid polygon. Empty inputs yield an empty Point. |
 | `ST_Centroid(geometry)` | Point, LineString, Polygon, and their multi-types | GeoArrow WKB. Points have equal weight, lines are weighted by segment length, and polygons are weighted by area. Empty inputs yield an empty Point. |
 | `ST_NPoints(g)` | Native geometry or WKB, including dimensional points and WKB collections | Vertex count including polygon ring closures. |
 | `ST_NumGeometries(g)` | Native geometry or WKB, including dimensional points and WKB collections | Number of top-level components, or zero for empty geometry. |

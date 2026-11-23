@@ -12,7 +12,7 @@ import {
   EXTENSION_METADATA,
   EXTENSION_NAME,
   lineKinds,
-  nativePolygonResult,
+  nativeGeometryResult,
   planarGeometry,
   pointCoordinates,
   pointKinds,
@@ -139,7 +139,7 @@ function bufferLine(geometry: WellKnownGeometry, radius: number): WellKnownGeome
 const pointBuffer = /* @__PURE__ */ spatialFunction(
   'ST_Buffer',
   [pointKinds],
-  /* @__PURE__ */ nativePolygonResult('geoarrow.polygon'),
+  /* @__PURE__ */ nativeGeometryResult('geoarrow.polygon'),
   ([geometry], radius) => bufferPoint(geometry!, radius!),
   1
 );
@@ -148,7 +148,7 @@ const pointBuffer = /* @__PURE__ */ spatialFunction(
 const lineBuffer = /* @__PURE__ */ spatialFunction(
   'ST_Buffer',
   [lineKinds],
-  /* @__PURE__ */ nativePolygonResult('geoarrow.multipolygon'),
+  /* @__PURE__ */ nativeGeometryResult('geoarrow.multipolygon'),
   ([geometry], radius) => bufferLine(geometry!, radius!),
   1
 );
@@ -172,7 +172,7 @@ function polygonOverlay(name: string, operation: typeof polygonClipping.intersec
   const spatial = spatialFunction(
     name,
     [polygonKinds, polygonKinds],
-    nativePolygonResult('geoarrow.multipolygon'),
+    nativeGeometryResult('geoarrow.multipolygon'),
     ([left, right]): WellKnownGeometry => {
       const a = polygonSet(left!);
       const b = polygonSet(right!);
@@ -249,7 +249,7 @@ export const ST_SYMDIFFERENCE = /* @__PURE__ */ polygonOverlay(
 export const ST_UNARYUNION = /* @__PURE__ */ spatialFunction(
   'ST_UnaryUnion',
   [polygonKinds],
-  /* @__PURE__ */ nativePolygonResult('geoarrow.multipolygon'),
+  /* @__PURE__ */ nativeGeometryResult('geoarrow.multipolygon'),
   ([geometry]): WellKnownGeometry => ({
     type: 'MultiPolygon',
     coordinates: polygonClipping.union(polygonSet(geometry!))

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original example rendering adapter. All map transformations use the math.gl engine.
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {PathLayer, ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';
@@ -176,7 +177,15 @@ export function mountScene(
       onTimeChange,
       onPlayingChange
     });
+  const webgpu = new URLSearchParams(window.location.search).get('renderer') === 'webgpu';
   const deck = new Deck({
+    deviceProps: webgpu
+      ? {
+          type: 'webgpu',
+          adapters: [webgpuAdapter],
+          createCanvasContext: {colorFormat: 'rgba16float', toneMapping: 'extended'}
+        }
+      : undefined,
     canvas,
     parent: root,
     views: new OrthographicView({
@@ -192,6 +201,7 @@ export function mountScene(
     onError,
     getCursor: () => (mode === 'globe' ? 'grab' : 'move')
   });
+  let orbitalFraming = false;
   function configure() {
     viewportRevision++;
     const width = root.clientWidth || 800,
@@ -229,8 +239,8 @@ export function mountScene(
         far: 10000
       }),
       initialViewState: {
-        target: [0, 0, 0],
-        zoom: Math.log2(radius),
+        target: orbitalFraming ? [0.42, -0.35, 0] : [0, 0, 0],
+        zoom: Math.log2(radius * (orbitalFraming ? 2.75 : 1)),
         minZoom: Math.log2(radius) - 2,
         maxZoom: Math.log2(radius) + 5
       }
@@ -293,6 +303,10 @@ export function mountScene(
   function render(time, force = false) {
     lastTime = time;
     const early = isEarlyEarth(time, plateMaxAge);
+    if (orbitalFraming && !early) {
+      orbitalFraming = false;
+      configure();
+    }
     const earlyMix = earlyEarthBlend(time, plateMaxAge);
     const now = performance.now();
     if (!force && now - lastRender < 50) return;
@@ -724,6 +738,21 @@ export function mountScene(
       }
     });
   return {
+    frameCoolingEarth() {
+      mode = 'globe';
+      weights = {globe: 1};
+      transition = null;
+      hideTooltip();
+      // Reset deck.gl’s comparison baseline so the same preset can be reapplied.
+      deck.setProps({initialViewState: null});
+      longitude = -20;
+      latitude = 0;
+      followCamera = false;
+      guidedCamera = false;
+      orbitalFraming = true;
+      configure();
+      render(lastTime, true);
+    },
     setModel(value) {
       model = value;
       tracker.setModel(value);
@@ -748,6 +777,7 @@ export function mountScene(
         const now = performance.now();
         currentWeights(now);
         mode = options.view;
+        if (mode !== 'globe') orbitalFraming = false;
         transition = {from: {...weights}, to: mode, start: now};
         configure();
         if (!animation) animation = requestAnimationFrame(animate);

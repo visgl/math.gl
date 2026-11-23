@@ -7,9 +7,11 @@ import {
   DataType,
   Field,
   Float64,
+  FixedSizeList,
+  makeData,
+  makeVector,
   vectorFromArray,
   type Bool,
-  type FixedSizeList,
   type Int32,
   type Utf8,
   type Vector
@@ -58,19 +60,66 @@ type SpatialResult = Int32 | Float64 | Bool | Binary | FixedSizeList<Float64> | 
 /** Native geometry result storage and its row-aligned Arrow vector builder. */
 export type NativeSpatialResult = {
   /** Extension encoding declared on the bound result field. */
-  encoding: 'geoarrow.polygon' | 'geoarrow.multipolygon' | 'geoarrow.geometry';
+  encoding:
+    | 'geoarrow.point'
+    | 'geoarrow.linestring'
+    | 'geoarrow.multilinestring'
+    | 'geoarrow.polygon'
+    | 'geoarrow.multipolygon'
+    | 'geoarrow.geometry';
   /** Fixed physical Arrow schema for all batches. */
   type: DataType;
   /** Packs decoded geometry rows into native coordinate buffers. */
   build: (rows: readonly (WellKnownGeometry | null)[]) => Vector;
 };
 
-/** Declares a fixed native polygon layout, including for empty or all-null batches. */
-export function nativePolygonResult(
+/** Wraps already-packed point coordinates and row validity without copying either buffer. */
+export function nativePointVector(
+  type: FixedSizeList<Float64>,
+  data: Float64Array,
+  nullBitmap: Uint8Array,
+  nullCount: number
+): Vector {
+  const child = makeData({type: type.valueType, data, length: data.length});
+  return makeVector(
+    makeData({type, length: data.length / type.listSize, nullCount, nullBitmap, child})
+  );
+}
+
+/** Declares interleaved XY point storage and packs each output row once. */
+function nativeXYPointResult(): NativeSpatialResult {
+  const type = new FixedSizeList(2, new Field('xy', new Float64(), true));
+  return {
+    encoding: 'geoarrow.point',
+    type,
+    /** Writes empty points as NaN coordinates and uses a bitmap for null rows. */
+    build(rows) {
+      const values = new Float64Array(rows.length * 2);
+      const validity = new Uint8Array(Math.ceil(rows.length / 8));
+      let nullCount = 0;
+      for (let row = 0; row < rows.length; row++) {
+        const point = rows[row];
+        if (!point) {
+          nullCount++;
+          continue;
+        }
+        if (point.type !== 'Point') throw new Error('Expected a Point result');
+        validity[row >> 3]! |= 1 << (row & 7);
+        values[2 * row] = point.coordinates[0] ?? NaN;
+        values[2 * row + 1] = point.coordinates[1] ?? NaN;
+      }
+      return nativePointVector(type, values, validity, nullCount);
+    }
+  };
+}
+
+/** Declares a fixed native interleaved XY layout, including for empty or all-null batches. */
+export function nativeGeometryResult(
   encoding: Exclude<NativeSpatialResult['encoding'], 'geoarrow.geometry'>
 ): NativeSpatialResult {
+  if (encoding === 'geoarrow.point') return nativeXYPointResult();
   const options = {encoding, dimension: 'xy', coordinateLayout: 'interleaved'} as const;
-  /** Packs the output rings into GeoArrow list offsets and interleaved XY coordinates. */
+  /** Packs the output into native coordinate buffers. */
   const build: NativeSpatialResult['build'] = rows =>
     makeArrowVectorFromGeoArrowColumn(GeoArrowBuilder.build(rows, options));
   return {encoding, type: build([]).type, build};

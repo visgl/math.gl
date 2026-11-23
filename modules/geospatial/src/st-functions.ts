@@ -29,12 +29,19 @@ import {
 import {planarIntersects} from './spatial-planar-intersects';
 import {planarTouches} from './spatial-touches';
 import {linesWithinDistance, pointWithinPolygonDistance} from './spatial-dwithin';
+import {
+  mergeRoute,
+  planarRouteSegment,
+  routeEditingFunction,
+  segmentizeFunction
+} from './route-editing';
 import {lineLocatePoint, lineSubstring, projectPointToLine} from './linear-referencing';
 import {addMeasure, locateAlong, locateBetween, measuredDimension} from './measure-referencing';
 import {normalizeCRSIdentifier} from './crs/crs-identifier';
 import {EPSG3857ToLngLat, EPSG4326ToEPSG3857} from './web-mercator/mercator-meters';
 import {vertexCount, memberCount, geometryMember} from './geometry-inspection';
 import {reduceLineVertices} from './line-simplification';
+import {polygonValidityReason} from './polygon-validity';
 import {simplifyPolygonTopology} from './polygon-simplification';
 import {collectPair, makeLine} from './geometry-constructors';
 import {EPSG3857_HALF_CIRCUMFERENCE} from './web-mercator/mercator-meters';
@@ -53,7 +60,8 @@ import {
   EXTENSION_NAME,
   geometryTypes,
   lineKinds,
-  nativePolygonResult,
+  nativeGeometryResult,
+  nativePointVector,
   planarGeometry,
   pointCoordinates,
   pointInPolygon,
@@ -69,7 +77,7 @@ export const ST_MAKEPOINT: ScalarFunction = {
   kind: 'scalar',
   name: 'ST_MakePoint',
   prototypes: [],
-  /** Binds two to four numeric ordinate fields and declares a WKB result. */
+  /** Binds two to four numeric ordinates to a native GeoArrow point. */
   resolvePrototype(fields) {
     if (fields.length < 2 || fields.length > 4) return undefined;
     const arguments_ = fields.map(field => {
@@ -77,20 +85,29 @@ export const ST_MAKEPOINT: ScalarFunction = {
         throw new Error('ST_MakePoint requires numeric coordinates');
       return field ?? new Field('coordinate', new Float64(), true);
     });
-    const type = new Binary();
+    const dimension = fields.length === 2 ? 'xy' : fields.length === 3 ? 'xyz' : 'xyzm';
+    const coordinateType = new Float64();
+    const size = fields.length;
+    const type = new FixedSizeList(size, new Field(dimension, coordinateType, true));
     return {
       arguments: arguments_,
-      result: new Field('ST_MakePoint', type, true, new Map([[EXTENSION_NAME, 'geoarrow.wkb']])),
-      /** Writes one point per active row, retaining nulls in all other rows. */
+      result: new Field('ST_MakePoint', type, true, new Map([[EXTENSION_NAME, 'geoarrow.point']])),
+      /** Writes active rows directly to the interleaved coordinate buffer. */
       evaluate(vectors, {activeRows, length}) {
-        const values = new Array<Uint8Array | null>(length).fill(null);
+        const data = new Float64Array(length * size);
+        const nullBitmap = new Uint8Array(Math.ceil(length / 8));
+        let nullCount = 0;
         for (let row = 0; row < length; row++) {
-          if (activeRows[row]) {
-            const coordinates = vectors.map(vector => Number(vector.get(row)));
-            values[row] = writeWKB({type: 'Point', coordinates});
+          if (!activeRows[row]) {
+            nullCount++;
+            continue;
+          }
+          nullBitmap[row >> 3]! |= 1 << (row & 7);
+          for (let coordinate = 0; coordinate < size; coordinate++) {
+            data[row * size + coordinate] = Number(vectors[coordinate]!.get(row));
           }
         }
-        return vectorFromArray(values, type);
+        return nativePointVector(type, data, nullBitmap, nullCount);
       }
     };
   }
@@ -389,25 +406,25 @@ function closestPair(a: WellKnownGeometry, b: WellKnownGeometry) {
     : null;
 }
 
-/** Returns the closest point on the first geometry as GeoArrow WKB. */
+/** Returns the closest point on the first geometry as a native GeoArrow point. */
 export const ST_CLOSESTPOINT = /* @__PURE__ */ spatialFunction(
   'ST_ClosestPoint',
   [routePointKinds, routePointKinds],
-  /* @__PURE__ */ new Binary(),
+  /* @__PURE__ */ nativeGeometryResult('geoarrow.point'),
   ([a, b]) => {
     const pair = closestPair(a!, b!);
-    return pair ? writeWKB({type: 'Point', coordinates: pair.start}, 'xy') : null;
+    return pair ? {type: 'Point', coordinates: pair.start} : null;
   }
 );
 
-/** Returns the shortest segment from the first geometry to the second as GeoArrow WKB. */
+/** Returns the shortest segment from the first geometry to the second as a native GeoArrow line. */
 export const ST_SHORTESTLINE = /* @__PURE__ */ spatialFunction(
   'ST_ShortestLine',
   [routePointKinds, routePointKinds],
-  /* @__PURE__ */ new Binary(),
+  /* @__PURE__ */ nativeGeometryResult('geoarrow.linestring'),
   ([a, b]) => {
     const pair = closestPair(a!, b!);
-    return pair ? writeWKB({type: 'LineString', coordinates: [pair.start, pair.end]}, 'xy') : null;
+    return pair ? {type: 'LineString', coordinates: [pair.start, pair.end]} : null;
   }
 );
 
@@ -488,6 +505,15 @@ export const ST_TOUCHES = /* @__PURE__ */ spatialFunction(
   [geometryTypes, geometryTypes],
   /* @__PURE__ */ new Bool(),
   ([a, b]) => planarTouches(a!, b!)
+);
+
+/** Joins planar line components through exact degree-two endpoints. */
+export const ST_LINEMERGE = /* @__PURE__ */ routeEditingFunction('ST_LineMerge', false, mergeRoute);
+
+/** Splits planar segments evenly to meet the maximum length in CRS units. */
+export const ST_SEGMENTIZE = /* @__PURE__ */ segmentizeFunction(
+  'ST_Segmentize',
+  planarRouteSegment
 );
 
 /** Interpolates a point at a fraction of the planar length. */
@@ -803,7 +829,7 @@ export const ST_SIMPLIFYPRESERVETOPOLOGY: ScalarFunction = {
     return spatialFunction(
       'ST_SimplifyPreserveTopology',
       [polygonKinds],
-      native ? nativePolygonResult(encoding) : new Binary(),
+      native ? nativeGeometryResult(encoding) : new Binary(),
       ([geometry], tolerance) => {
         const result = simplifyPolygonTopology(
           geometry as Extract<WellKnownGeometry, {type: 'Polygon' | 'MultiPolygon'}>,
@@ -948,12 +974,32 @@ export const ST_COLLECT = /* @__PURE__ */ spatialFunction(
   true
 );
 
+/** Checks Polygon or MultiPolygon validity in XY. */
+export const ST_ISVALID = /* @__PURE__ */ spatialFunction(
+  'ST_IsValid',
+  [polygonKinds],
+  /* @__PURE__ */ new Bool(),
+  ([polygon]) => polygonValidityReason(polygon!) === undefined,
+  0,
+  true
+);
+
+/** Returns the first XY polygon validity diagnostic, or Valid Geometry. */
+export const ST_ISVALIDREASON = /* @__PURE__ */ spatialFunction(
+  'ST_IsValidReason',
+  [polygonKinds],
+  /* @__PURE__ */ new Utf8(),
+  ([polygon]) => polygonValidityReason(polygon!) ?? 'Valid Geometry',
+  0,
+  true
+);
+
 /** Returns an interior label point for a planar polygonal surface. */
 export const ST_POINTONSURFACE = /* @__PURE__ */ spatialFunction(
   'ST_PointOnSurface',
   [polygonKinds],
-  /* @__PURE__ */ new Binary(),
-  ([polygon]) => writeWKB(planarPolygonPointOnSurface(polygon!), 'xy')
+  /* @__PURE__ */ nativeGeometryResult('geoarrow.point'),
+  ([polygon]) => planarPolygonPointOnSurface(polygon!)
 );
 
 /** Binds the WKB fallback and native row-bounds implementation. */
@@ -1092,6 +1138,8 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_TILEENVELOPE,
     ST_AREA,
     ST_LENGTH,
+    ST_LINEMERGE,
+    ST_SEGMENTIZE,
     ST_LINEINTERPOLATEPOINT,
     ST_LINELOCATEPOINT,
     ST_LINESUBSTRING,
@@ -1099,6 +1147,8 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_LOCATEALONG,
     ST_LOCATEBETWEEN,
     ST_POINTONSURFACE,
+    ST_ISVALID,
+    ST_ISVALIDREASON,
     ST_CENTROID,
     ST_NPOINTS,
     ST_NUMGEOMETRIES,
@@ -1116,5 +1166,7 @@ export {
   ST_GEODESICDISTANCE,
   ST_GEODESICLENGTH,
   ST_GEODESICDWITHIN,
+  ST_GEODESICSEGMENTIZE,
   GEODESIC_SPATIAL_FUNCTIONS
 } from './st-geodesic-functions';
+export {createSTCoverageSimplify, type CoverageSimplifyOptions} from './st-coverage-functions';
