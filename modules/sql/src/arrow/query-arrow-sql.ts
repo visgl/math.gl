@@ -30,6 +30,7 @@ import type {
   TableFunction
 } from './types';
 import {groupArrowTable, type BoundRelationAggregate} from './relational-query';
+import {spatialJoinCall, spatialJoinRadius, sqlSpatialJoin} from './sql-spatial-join';
 import {
   bindSQLAggregate,
   getSQLAggregateCall,
@@ -207,19 +208,45 @@ function executeSelect(
       relationMetadata.set(rightAlias + '.' + name, metadata);
     if (leftAlias === rightAlias) throw new Error('Duplicate Arrow SQL table alias');
     const {on} = right;
-    if (on.type !== 'BinaryExpression' || on.operator !== '==')
-      throw new Error('Arrow SQL JOIN requires equality between two columns');
-    const sides = [on.left, on.right].map(node => qualifiedColumn(node as Expression));
+    const spatial = spatialJoinCall(on);
+    if (!spatial && (on.type !== 'BinaryExpression' || on.operator !== '=='))
+      throw new Error(
+        'Arrow SQL JOIN requires equality between two columns or a supported spatial predicate'
+      );
+    const operands = spatial ?? [
+      (on as {left: Expression}).left,
+      (on as {right: Expression}).right
+    ];
+    const sides = operands.slice(0, 2).map(qualifiedColumn);
     const left = sides.find(column => column?.qualifier === leftAlias);
     const rightColumn = sides.find(column => column?.qualifier === rightAlias);
     if (!left || !rightColumn) throw new Error('Qualify both Arrow SQL JOIN keys');
-    join = {
-      type: right.type,
-      table: rightTable,
-      left: left.name,
-      right: rightColumn.name,
-      rightPrefix: rightAlias + '.'
-    };
+    const rightPrefix = rightAlias + '.';
+    if (spatial) {
+      const predicate = bindColumns(on, column =>
+        column.qualifier === rightAlias ? rightPrefix + column.name : column.name
+      );
+      source = sqlSpatialJoin(
+        source,
+        rightTable,
+        left.name,
+        rightColumn.name,
+        rightPrefix,
+        predicate,
+        spatialJoinRadius(spatial[2]),
+        right.type === 'left',
+        execution.functions,
+        execution.signal
+      );
+    } else {
+      join = {
+        type: right.type,
+        table: rightTable,
+        left: left.name,
+        right: rightColumn.name,
+        rightPrefix
+      };
+    }
   }
 
   const bind = (node: Expression): Expression =>
