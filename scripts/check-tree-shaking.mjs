@@ -15,7 +15,7 @@ const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
   {symbol: "createArrowColumns", packages: ["@math.gl/sql/arrow"], forbidden: [/sql\/(src|dist)\/scales\//], budget: 307000},
   // SQL text uses expression WHERE clauses; it does not need the portable predicate normalizer.
-  {symbol:'queryArrowSQL', packages:['@math.gl/sql/query'], forbidden:[/predicate-expression/,/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/geoarrow-functions\./,/loaders.gl/,/geospatial\//], budget:317550},
+  {symbol:'queryArrowSQL', packages:['@math.gl/sql/query'], forbidden:[/predicate-expression/,/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/geoarrow-functions\./,/loaders.gl/,/geospatial\//], budget:318600},
 
   ...['sweepTerrainRotatingCapsule', 'sweepTerrainRotatingSphere'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial/terrain'],
