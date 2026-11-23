@@ -123,7 +123,13 @@ export function getRouteEdges(
 
 /** Number of points in the geometry of an edge. The first and last can be split points. */
 export function getEdgePointCount(network: LineNetwork, edge: number): number {
-  return network.edgeVertexEnd[edge] - network.edgeVertexStart[edge] + 1;
+  const vertices = network.edgeVertexEnd[edge] - network.edgeVertexStart[edge] + 1;
+  return Math.max(
+    1,
+    vertices -
+      Number(network.edgeStartFraction[edge] === 1) -
+      Number(network.edgeEndFraction[edge] === 0)
+  );
 }
 
 /**
@@ -186,12 +192,21 @@ function visitEdge(
   visit: (x: number, y: number) => void
 ): void {
   const {value, size} = lines.positions;
+  const startFraction = network.edgeStartFraction[edge];
+  const endFraction = network.edgeEndFraction[edge];
+  const firstSegment = network.edgeVertexStart[edge] + Number(startFraction === 1);
+  const lastSegment = network.edgeVertexEnd[edge] - 1 - Number(endFraction === 0);
+  // A split coincident with a vertex is represented on its interior-facing segment.
+  if (firstSegment > lastSegment) {
+    visit(value[size * firstSegment], value[size * firstSegment + 1]);
+    return;
+  }
   visitPolylineSpan(
     (vertex, ordinate) => value[size * vertex + ordinate],
-    network.edgeVertexStart[edge],
-    network.edgeStartFraction[edge],
-    network.edgeVertexEnd[edge] - 1,
-    network.edgeEndFraction[edge],
+    firstSegment,
+    startFraction === 1 ? 0 : startFraction,
+    lastSegment,
+    endFraction === 0 ? 1 : endFraction,
     visit,
     reverse
   );

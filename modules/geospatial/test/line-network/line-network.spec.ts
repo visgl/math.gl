@@ -778,6 +778,17 @@ describe('route reconstruction', () => {
     ).toEqual(new Uint32Array([0]));
   });
 
+  it('emits an existing T-junction vertex once when reconstructing either direction', () => {
+    const gap = 10 * ONE_METRE;
+    const lines = makeLines([0, 0, 0.001, 0, 0.002, 0], [0.001, gap, 0.001, 0.001]);
+    const net = buildLineNetwork(lines, {junctionTolerance: 20});
+    expect([...getEdgeGeometry(net, lines, 0)]).toEqual([0, 0, 0.001, 0]);
+    expect([...getEdgeGeometry(net, lines, 1)]).toEqual([0.001, 0, 0.002, 0]);
+    expect([...getRouteGeometry(net, lines, [1, 0], net.edgeTarget[1])]).toEqual([
+      0.002, 0, 0.001, 0, 0, 0
+    ]);
+  });
+
   it('writes edge geometry into a caller array at an offset', () => {
     const input = makeLines([0, 0, 0.001, 0, 0.002, 0.001]);
     const net = buildLineNetwork(input);
