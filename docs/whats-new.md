@@ -1,5 +1,9 @@
 # What's New
 
+## v5.1 (in development)[​](#v51-in-development "Direct link to v5.1 (in development)")
+
+* **Line networks.** [`@math.gl/geospatial/line-network`](https://visgl.github.io/math.gl/docs/modules/geospatial/api-reference/line-network.md) builds a graph from longitude, latitude lines in typed-array columns. It snaps endpoints, joins dangling ends to nearby lines (T-junctions), and can split lines at shared vertices and at crossings. Helpers build a CSR adjacency and turn a predecessor array into route edges and route geometry. Uses include road, river, rail, utility and track-line networks.
+
 ## v5.0[​](#v50 "Direct link to v5.0")
 
 math.gl 5 expands the library from vectors and matrices to coordinate transformations, global grids, geometry processing, and Earth science. Related APIs are grouped into seven packages with focused imports. See the [Upgrade Guide](https://visgl.github.io/math.gl/docs/upgrade-guide.md) when moving an application from v4.

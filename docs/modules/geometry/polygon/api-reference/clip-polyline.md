@@ -41,3 +41,9 @@ Returns:
 An array of polylines that are parts of the original polyline and contained by the given bounding box. Each polyline is represented by a positions array that uses the same vertex size as the input.
 
 If the input polyline is entirely outside of the bounding box, an empty array will be returned.
+
+## visitPolylineSpan[​](#visitpolylinespan "Direct link to visitPolylineSpan")
+
+`visitPolylineSpan(read, firstSegment, firstFraction, lastSegment, lastFraction, visit, reverse?)` visits an XY interval along an existing polyline. Each segment index identifies the first vertex of that segment. Fractions are between zero and one. Supply the span boundaries in path order and pass `true` for reverse traversal.
+
+`read(vertex, ordinate)` reads an X or Y value. This supports flat interleaved storage, separate coordinate columns, and arrays of coordinate tuples. `visit(x, y, vertex?)` receives the interpolated endpoints and intermediate vertices. Only intermediate vertices carry their original index. If a boundary equals an intermediate vertex, the visitor receives both events. The callback can write into a caller-managed buffer.
