@@ -64,6 +64,27 @@ into another spatial function in the same batch, or use the columns to prepare
 deck.gl marker and path layers. Use `GEOARROW_TO_WKB` from the
 [GeoArrow conversion package](../geoarrow-functions.md) when exporting WKB.
 
+## Stitch and densify routes
+
+Use `ST_LineMerge(route)` to assemble XY line parts that share exact endpoints.
+It merges through junctions with two incident paths and leaves branches as
+separate line parts. A connected chain is a LineString. Multiple chains and
+empty multipart inputs are MultiLineStrings.
+
+Use `ST_Segmentize(route, max_length)` to split long segments into equal pieces
+in the input CRS units. Existing vertices and component boundaries are
+preserved. The maximum must be finite and positive. Each call can insert up to
+1,000,000 vertices per row.
+
+```sql
+SELECT id, ST_Segmentize(ST_LineMerge(segments), 50) AS route
+FROM roads
+```
+
+Inputs can use native XY GeoArrow or WKB. When the result family is known from
+the input field, output uses specialized native GeoArrow. Calls with variable
+LineString or MultiLineString results use a dense GeoArrow union.
+
 ## Clip features to a tile or viewport
 
 Register `ST_CLIPBYBOX2D` from `@math.gl/geospatial/st-viewport-functions`.
@@ -241,6 +262,7 @@ ignored.
 | --- | --- | --- |
 | `ST_GeodesicDistance(a, b)` | Two points, or a Point and a LineString or MultiLineString in either order | Shortest distance in meters. Empty inputs yield null. |
 | `ST_GeodesicLength(route)` | LineString or MultiLineString | Sum of segment lengths in meters. Empty lines yield zero. |
+| `ST_GeodesicSegmentize(route, max_length)` | XY LineString or MultiLineString and a finite positive maximum length in meters | Native line geometry with equal-length subdivisions along the WGS84 ellipsoid. |
 | `ST_GeodesicDWithin(a, b, radius)` | Same geometry pairs as `ST_GeodesicDistance` and a finite nonnegative radius in meters | True when distance is at most the radius. Empty inputs yield false. |
 
 Point-to-route proximity measures to the interiors as well as the endpoints

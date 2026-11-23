@@ -63,6 +63,7 @@ export type NativeSpatialResult = {
   encoding:
     | 'geoarrow.point'
     | 'geoarrow.linestring'
+    | 'geoarrow.multilinestring'
     | 'geoarrow.polygon'
     | 'geoarrow.multipolygon'
     | 'geoarrow.geometry';
