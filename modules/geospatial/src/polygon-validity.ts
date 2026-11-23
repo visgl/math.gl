@@ -4,6 +4,7 @@
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
 import {anyOverlap, type Bounded} from './spatial-bounds-sweep';
+import {locateMidpointInPolygon} from './spatial-exact-midpoint';
 import {planarBounds} from './spatial-planar';
 import {
   endpointContacts,
@@ -172,10 +173,7 @@ function hasLocation(ring: RingInfo, target: readonly Ring[], location: -1 | 1):
     for (const next of [...cuts, b]) {
       if (
         !samePoint(previous, next) &&
-        locatePointInPolygon(
-          [previous[0]! / 2 + next[0]! / 2, previous[1]! / 2 + next[1]! / 2],
-          target
-        ) === location
+        locateMidpointInPolygon(previous, next, target) === location
       )
         return true;
       previous = next;

@@ -160,3 +160,38 @@ test('validates only XY and diagnoses invalid XY coordinates in native dimension
     'Invalid coordinate[Infinity 3]'
   ]);
 });
+
+test('rejects nested multipart interiors even when world-space midpoints are between doubles', () => {
+  const offset = 1e16;
+  const polygon = {
+    type: 'MultiPolygon',
+    coordinates: [
+      [
+        [
+          [0, 0],
+          [4, 0],
+          [4, 4],
+          [0, 4],
+          [0, 0]
+        ]
+      ],
+      [
+        [
+          [0, 2],
+          [2, 4],
+          [4, 2],
+          [2, 0],
+          [0, 2]
+        ]
+      ]
+    ].map(part => part.map(ring => ring.map(([x, y]) => [x! + offset, y! + offset])))
+  } as const;
+  const encoding = 'geoarrow.multipolygon';
+  const g = makeArrowVectorFromGeoArrowColumn(GeoArrowBuilder.build([polygon], {encoding}));
+  const result = queryArrowSQL(
+    'SELECT ST_IsValidReason(g) AS reason FROM features',
+    new Map([['features', new Table(schemaFor(g, encoding), {g})]]),
+    {functions}
+  );
+  expect(result.getChild('reason')!.get(0)).toBe('Polygon components overlap or are nested');
+});
