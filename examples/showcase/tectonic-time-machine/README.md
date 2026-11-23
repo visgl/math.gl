@@ -10,6 +10,10 @@ yarn workspace math.gl-tectonic-time-machine build
 node --test test/examples/showcase/tectonic-time-machine/*.test.mjs
 ```
 
+Append `?renderer=webgpu` to try the WGSL renderer, then select **Cooling Earth orbit**.
+The WebGPU canvas requests `rgba16float` with extended tone mapping. On an accepted
+HDR canvas, the lava shader writes values above SDR white. The default URL uses WebGL.
+
 ## Data and scope
 
 Original MIT example code; no upstream implementation or geological model dataset is
