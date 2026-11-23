@@ -426,3 +426,62 @@ test('sjoin rejects serialized WKB before consulting native row bounds', () => {
   expect(() => serialized.sjoin(native, {predicate: ST_WITHIN})).toThrow('native GeoArrow');
   expect(() => native.sjoin(serialized, {predicate: ST_WITHIN})).toThrow('native GeoArrow');
 });
+
+test('sjoin gathers alternating polygon chunks while preserving geometry metadata', () => {
+  const xy = new FixedSizeList(2, new Field('xy', new Float64()));
+  const pointField = new Field(
+    'geometry',
+    xy,
+    false,
+    new Map([['ARROW:extension:name', 'geoarrow.point']])
+  );
+  const points = new Table(new Schema([new Field('id', new Int32()), pointField]), {
+    id: vectorFromArray([0, 1, 2, 3], new Int32()),
+    geometry: vectorFromArray(
+      [
+        [0, 0],
+        [10, 0],
+        [0, 0],
+        [10, 0]
+      ],
+      xy
+    )
+  });
+  const polygon = new List(new Field('rings', new List(new Field('vertices', xy))));
+  const polygonField = new Field(
+    'geometry',
+    polygon,
+    false,
+    new Map([['ARROW:extension:name', 'geoarrow.polygon']])
+  );
+  const schema = new Schema([new Field('region', new Int32()), polygonField]);
+  const region = (x: number) =>
+    new Table(schema, {
+      region: vectorFromArray([x], new Int32()),
+      geometry: vectorFromArray(
+        [
+          [
+            [
+              [x - 1, -1],
+              [x + 1, -1],
+              [x + 1, 1],
+              [x - 1, 1],
+              [x - 1, -1]
+            ]
+          ]
+        ],
+        polygon
+      )
+    });
+  const result = GeoDataFrame.fromArrow(points)
+    .sjoin(GeoDataFrame.fromArrow(region(0).concat(region(10))), {predicate: ST_WITHIN})
+    .toArrow();
+  expect([...result.getChild('id')!]).toEqual([0, 1, 2, 3]);
+  expect([...result.getChild('right.region')!]).toEqual([0, 10, 0, 10]);
+  expect(result.batches).toHaveLength(1);
+  expect(result.schema.fields[1]!.metadata).toEqual(pointField.metadata);
+  expect(result.schema.fields[3]!.metadata).toEqual(polygonField.metadata);
+  expect(result.getChild('right.geometry')!.get(1)!.get(0)!.get(0)!.toArray()).toEqual(
+    Float64Array.of(9, -1)
+  );
+});
