@@ -306,6 +306,7 @@ A lightweight SQL query engine for Apache Arrow tables. Query tables already in 
 - [@math.gl/sql/color-functions](https://visgl.github.io/math.gl/docs/modules/sql/color-functions.md): @math.gl/sql/color-functions exports named ArrowTableFunction declarations for schema-bound expressions.
 - [@math.gl/sql/scales-conformance](https://visgl.github.io/math.gl/docs/modules/sql/entry-points/scales-conformance.md): Run checks for declared scale semantics when implementing a scale consumer. See the scales reference.
 - [@math.gl/sql/expressions](https://visgl.github.io/math.gl/docs/modules/sql/expressions.md): Use @math.gl/sql/expressions to parse and evaluate expressions against JavaScript objects.
+- [@math.gl/sql/geoarrow-functions](https://visgl.github.io/math.gl/docs/modules/sql/geoarrow-functions.md): Register createGeoArrowConversionFunctions() to convert geometry columns between
 - [@math.gl/sql/math-functions](https://visgl.github.io/math.gl/docs/modules/sql/math-functions.md): Optional SQL-style numeric function declarations for Arrow expressions.
 - [@math.gl/sql/parser](https://visgl.github.io/math.gl/docs/modules/sql/parser.md): Import @math.gl/sql/parser to parse supported SQL statements into portable query and
 - [Portable expression AST](https://visgl.github.io/math.gl/docs/modules/sql/portable-ast.md): @math.gl/sql/expressions provides a shared expression AST for independently implemented

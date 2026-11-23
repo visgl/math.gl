@@ -1046,7 +1046,7 @@ For luma.gl, convert collider dimensions and axis conventions into the terrain f
 
 `sweepTerrainRotatingCapsule(surface, start, end, radius, motion, options)` takes the initial capsule-axis endpoints in the Cartesian terrain frame. `sweepTerrainRotatingSphere(surface, center, radius, motion, options)` uses coincident endpoints. An off-pivot sphere center follows the prescribed rotation and translation. Both functions are independently importable from `@math.gl/geospatial` and `@math.gl/geospatial/terrain`. A hit gives a first-impact interval and an axis/triangle witness within the capsule radius at its upper endpoint. The capsule-axis displacement bounds clearance changes throughout each interval. Unresolved tangencies and exhausted budgets return `incomplete`. The budget counts pose probes and terrain index work, and the default fraction tolerance is 0.00001. Use a well-conditioned Cartesian frame.
 
-The **Rotating collider replay** in Terrain Sampling shows the two-patch seam, a grazing orbit and an axis-aligned box starting pose. The independent `rotating-round-contacts.json` fixture gives analytical plane contact times and exercises shared edges, grazing and exhausted work.
+The **Rotating collider replay** in Terrain Sampling shows the two-patch seam, a grazing orbit and an axis-aligned box starting pose. The independent `rotating-round-contacts.json` fixture gives analytical plane contact times and exercises shared edges, grazing and exhausted work. An additional analytical orbit places first contact at an independently indexed 2:1 seam and checks the impact interval and terrain witness in both patch orders. The cases include a missing strip under the low point of the orbit, a near-clearance miss, and a shallow crossing that reports `incomplete` when the subdivision tolerance cannot certify a hit.
 
 The CPU parity fixture in `modules/geospatial/test/terrain/fixtures/rotational-sweep-parity.json` retains elevations and nodata from pinned Pacific and Sierra windows on a synthetic unit-spaced Cartesian grid. The CPU test packs and unpacks the height field before triangulating. This gives downstream parity tests the same vertex registration, diagonal, validity, and quantized elevations.
 
@@ -1272,7 +1272,7 @@ for (const id of result.changed) {
 
 Adjacent source meshes must be conforming, including mixed-level edge spans. Reconcile them using the existing stitchers before updating the cut. The cache validates new/changed adjacent source pairs and rejects overlap, hanging nodes and inconsistent heights. Independent clipping uses canonical intersection arithmetic, then pairs exact XYZ boundary edges. No tolerance-based snapping or nodata filling occurs. Existing missing-domain boundaries get no paired walls. Polygon or option changes invalidate all clips; failed updates leave the old cache intact. Changing frames requires new mesh objects or revisions as well as a polygon expressed in the new frame.
 
-Work consists of clipping changed tiles, validating changed adjacent pairs, a resident-pair broad phase, and reconciling cached exposed-edge summaries. Unchanged triangles are not rescanned or reclipped. The broad phase is currently quadratic in resident count; `maxPairChecks` bounds it. `maxTiles` and `maxBoundaryEdges` bound resident reconciliation. `maxWork`, `maxVertices` and `maxTriangles` apply separately to each tile clip and each adjacent-pair check; they are not aggregate per-update limits. This is not an incremental skirt cache: callers may rebuild skirts for `changed` tiles only.
+Work consists of clipping changed tiles, validating changed adjacent pairs, a resident-pair broad phase, and reconciling cached exposed-edge summaries. Unchanged triangles are not rescanned or reclipped. The broad phase checks pairs incident to rebuilt tiles. With N residents and K rebuilt tiles, it performs at most K × N iterations. Cold updates can still be quadratic. `maxPairChecks` caps the total possible resident pairs. `maxTiles` and `maxBoundaryEdges` bound resident reconciliation. `maxWork`, `maxVertices` and `maxTriangles` apply separately to each tile clip and each adjacent-pair check; they are not aggregate per-update limits. This is not an incremental skirt cache: callers may rebuild skirts for `changed` tiles only.
 
 The cutout lab reports rebuilt tiles and changed outputs while switching resident sets. Run `node scripts/benchmark-terrain-cutouts.mjs` after `yarn build` for an interleaved Pacific/Sierra comparison against monolithic full rebuilds. It checks exact triangle geometry and cut edges, plus coverage area, after every edit/arrival/eviction step. See the [qualification report](https://github.com/visgl/math.gl/blob/master/dev-docs/terrain-cutout-qualification.md).
 
@@ -1365,3 +1365,29 @@ Both pieces expose `polygonIndices`, one entry per output triangle. Patch values
 Partitioning splits triangles along shared polygon supporting lines and classifies the resulting cells. Artificial subdivisions cancel within each piece, so they never become cut skirts. Holes remain in the remainder; original nodata or missing-tile boundaries receive no paired wall unless terrain exists on both sides. No tiny positive-area fragments are silently dropped: unrepresentable fragments are rejected under the existing mesh contract.
 
 Preparation defaults to 2048 total ring edges and four million bounded operations (`maxEdges`, `maxWork`). Split-time work/vertex/triangle limits are separate and remain necessary: arrangements can grow quadratically with polygon edge count. Complex coastline data may require preprocessing and a deliberate work budget. The lab includes **Concave**, **Island with lake**, and **Lake with island** scenarios in local, antimeridian and polar charts. Island regions have distinct colors. Run `node scripts/benchmark-terrain-cutouts.mjs --polygons` after building to compare incremental and monolithic Pacific/Sierra cuts with region-ID parity.
+
+### Regional watershed conditioning[​](#regional-watershed-conditioning "Direct link to Regional watershed conditioning")
+
+Use `createTerrainRegionalWatersheds` to condition aligned cell tiles and accumulate upstream cell counts through tile seams. Provide a bounded regional window and confirmed outlets as row-major cell indices.
+
+```
+import {createTerrainRegionalWatersheds} from '@math.gl/geospatial/terrain';
+
+
+
+const basin = createTerrainRegionalWatersheds(
+
+  [{column: 0, row: 0, field: west}, {column: west.width, row: 0, field: east}],
+
+  {width: west.width + east.width, height: west.height, origin: west.origin, outlets: [0]}
+
+);
+
+const contributingCells = basin.contributingCells[0];
+```
+
+Tiles must share an affine lattice and height reference, have matching diagonals, and have origins exactly translated by their integer offsets. They may not overlap. Coverage distinguishes absent tiles (0), known nodata (1) and valid cells (2). Both absent and nodata cells block modeled flow. The window exterior is closed, and `touchesUnknown` marks valid face-connected components bordering absent coverage. Counts and spill elevations describe the known window and can change when gaps fill or outlets change. Memory scales with the full window area, including gaps, and is bounded by `maxCells`.
+
+The Terrain Sampling example's **Sierra watershed explorer** uses a pinned 48 × 32 DEM window with selectable confirmed outlets and an evictable interior tile. Switch between contributing area, fill depth, and coverage. Counts are conditional on the selected outlets and resident tiles. Area uses the determinant of the projected sample lattice.
+
+Run `node scripts/benchmark-terrain-watersheds.mjs` after building to measure the effect of a growing absent area with the resident Sierra tiles fixed. The replay checks that spill heights, receiver links, outlet labels, and contributions agree on the unchanged resident domain. In a local Node 24 run, a 48 × 32 window retained 35,328 bytes in result buffers and took 0.35 ms median. A 1024 × 1024 window retained 24,117,248 bytes and took 36.12 ms median. The retained buffer totals exclude temporary workspace and runtime object overhead.
