@@ -1,6 +1,6 @@
 {
   "name": "@math.gl/sql",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "Lightweight SQL query engine for Apache Arrow tables",
   "license": "MIT",
   "type": "module",
@@ -85,9 +85,9 @@
     "./src/arrow/query-worker-entry.ts"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.1",
-    "@math.gl/geometry": "5.0.1",
-    "@math.gl/tasks": "5.0.1"
+    "@math.gl/core": "5.0.2",
+    "@math.gl/geometry": "5.0.2",
+    "@math.gl/tasks": "5.0.2"
   },
   "peerDependencies": {
     "apache-arrow": ">=17.0.0"
