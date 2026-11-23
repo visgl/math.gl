@@ -47,3 +47,4 @@ export type {
   ClipTriangleMeshOptions,
   ClippedTriangleMesh
 } from './clip-triangle-mesh';
+export {visitPolylineSpan} from './visit-polyline-span';

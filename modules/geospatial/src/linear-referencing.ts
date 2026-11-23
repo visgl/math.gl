@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
+import {visitPolylineSpan} from '@math.gl/geometry/polygon';
 import {orient2d} from 'robust-predicates';
 
 /** Ordered planar XY coordinates of a route. */
@@ -48,14 +49,23 @@ export function lineSubstring(
   const total = distances[distances.length - 1]!;
   const from = start * total,
     to = end * total;
-  const first = coordinateAt(path, distances, from);
-  if (from === to) return {type: 'Point', coordinates: first};
-  const coordinates = [first];
-  for (let i = 1; i < path.length - 1; i++) {
-    if (distances[i]! > from && distances[i]! < to && distances[i] !== distances[i - 1])
-      coordinates.push(path[i]!);
-  }
-  coordinates.push(coordinateAt(path, distances, to));
+  if (from === to) return {type: 'Point', coordinates: coordinateAt(path, distances, from)};
+  const coordinates: number[][] = [];
+  let startSegment = 0;
+  while (distances[startSegment + 1]! <= from) startSegment++;
+  let endSegment = startSegment;
+  while (distances[endSegment + 1]! < to) endSegment++;
+  visitPolylineSpan(
+    (vertex, ordinate) => path[vertex]![ordinate]!,
+    startSegment,
+    (from - distances[startSegment]!) / (distances[startSegment + 1]! - distances[startSegment]!),
+    endSegment,
+    (to - distances[endSegment]!) / (distances[endSegment + 1]! - distances[endSegment]!),
+    (x, y, vertex) => {
+      if (vertex === undefined || distances[vertex] !== distances[vertex - 1])
+        coordinates.push([x, y]);
+    }
+  );
   return {type: 'LineString', coordinates};
 }
 
