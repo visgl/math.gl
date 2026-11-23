@@ -80,6 +80,20 @@ The radius is in the projected CRS's coordinate units. For a route with equally 
 
 The snapped point and the gap segment use native GeoArrow coordinates. Feed them into another spatial function in the same batch, or use the columns to prepare deck.gl marker and path layers. Use `GEOARROW_TO_WKB` from the [GeoArrow conversion package](https://visgl.github.io/math.gl/next/docs/modules/sql/geoarrow-functions.md) when exporting WKB.
 
+## Stitch and densify routes[​](#stitch-and-densify-routes "Direct link to Stitch and densify routes")
+
+Use `ST_LineMerge(route)` to assemble XY line parts that share exact endpoints. It merges through junctions with two incident paths and leaves branches as separate line parts. A connected chain is a LineString. Multiple chains and empty multipart inputs are MultiLineStrings.
+
+Use `ST_Segmentize(route, max_length)` to split long segments into equal pieces in the input CRS units. Existing vertices and component boundaries are preserved. The maximum must be finite and positive. Each call can insert up to 1,000,000 vertices per row.
+
+```
+SELECT id, ST_Segmentize(ST_LineMerge(segments), 50) AS route
+
+FROM roads
+```
+
+Inputs can use native XY GeoArrow or WKB. When the result family is known from the input field, output uses specialized native GeoArrow. Calls with variable LineString or MultiLineString results use a dense GeoArrow union.
+
 ## Clip features to a tile or viewport[​](#clip-features-to-a-tile-or-viewport "Direct link to Clip features to a tile or viewport")
 
 Register `ST_CLIPBYBOX2D` from `@math.gl/geospatial/st-viewport-functions`. Use the XY bounds of a geometry as the clipping rectangle. For example, if `geom` is in EPSG:3857, clip it to a Web Mercator tile for a local Arrow-backed tile layer. Use `ST_MakeEnvelope` with viewport bounds for an untiled layer.
@@ -215,11 +229,12 @@ Supply the source CRS in the GeoArrow field metadata and a constant target EPSG 
 
 Register `GEODESIC_SPATIAL_FUNCTIONS` from `@math.gl/geospatial/st-functions`. These row-wise functions accept native GeoArrow or WKB with an explicit WGS84 CRS (`EPSG:4326` or `OGC:CRS84`). Coordinates are longitude and latitude in degrees, in that order. Measures use the WGS84 ellipsoid and the shortest geodesic between vertices, including across the antimeridian. Z and M are ignored.
 
-| SQL function                       | Inputs                                                                                 | Result                                                              |
-| ---------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `ST_GeodesicDistance(a, b)`        | Two points, or a Point and a LineString or MultiLineString in either order             | Shortest distance in meters. Empty inputs yield null.               |
-| `ST_GeodesicLength(route)`         | LineString or MultiLineString                                                          | Sum of segment lengths in meters. Empty lines yield zero.           |
-| `ST_GeodesicDWithin(a, b, radius)` | Same geometry pairs as `ST_GeodesicDistance` and a finite nonnegative radius in meters | True when distance is at most the radius. Empty inputs yield false. |
+| SQL function                               | Inputs                                                                                 | Result                                                                         |
+| ------------------------------------------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `ST_GeodesicDistance(a, b)`                | Two points, or a Point and a LineString or MultiLineString in either order             | Shortest distance in meters. Empty inputs yield null.                          |
+| `ST_GeodesicLength(route)`                 | LineString or MultiLineString                                                          | Sum of segment lengths in meters. Empty lines yield zero.                      |
+| `ST_GeodesicSegmentize(route, max_length)` | XY LineString or MultiLineString and a finite positive maximum length in meters        | Native line geometry with equal-length subdivisions along the WGS84 ellipsoid. |
+| `ST_GeodesicDWithin(a, b, radius)`         | Same geometry pairs as `ST_GeodesicDistance` and a finite nonnegative radius in meters | True when distance is at most the radius. Empty inputs yield false.            |
 
 Point-to-route proximity measures to the interiors as well as the endpoints of the route's geodesic segments. MultiLineString parts are searched independently. The point-to-route threshold comparison allows 0.1 micrometers for numerical error. Null arguments propagate. Use `queryArrowTableInBatches` to evaluate these functions on streamed record batches.
 
