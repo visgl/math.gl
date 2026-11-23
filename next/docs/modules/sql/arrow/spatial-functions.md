@@ -215,13 +215,21 @@ Supply the source CRS in the GeoArrow field metadata and a constant target EPSG 
 
 Register `GEODESIC_SPATIAL_FUNCTIONS` from `@math.gl/geospatial/st-functions`. These row-wise functions accept native GeoArrow or WKB with an explicit WGS84 CRS (`EPSG:4326` or `OGC:CRS84`). Coordinates are longitude and latitude in degrees, in that order. Measures use the WGS84 ellipsoid and the shortest geodesic between vertices, including across the antimeridian. Z and M are ignored.
 
-| SQL function                       | Inputs                                               | Result                                                              |
-| ---------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------- |
-| `ST_GeodesicDistance(a, b)`        | Two points                                           | Shortest distance in meters. Empty points yield null.               |
-| `ST_GeodesicLength(route)`         | LineString or MultiLineString                        | Sum of segment lengths in meters. Empty lines yield zero.           |
-| `ST_GeodesicDWithin(a, b, radius)` | Two points and a finite nonnegative radius in meters | True when distance is at most the radius. Empty points yield false. |
+| SQL function                       | Inputs                                                                                 | Result                                                              |
+| ---------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `ST_GeodesicDistance(a, b)`        | Two points, or a Point and a LineString or MultiLineString in either order             | Shortest distance in meters. Empty inputs yield null.               |
+| `ST_GeodesicLength(route)`         | LineString or MultiLineString                                                          | Sum of segment lengths in meters. Empty lines yield zero.           |
+| `ST_GeodesicDWithin(a, b, radius)` | Same geometry pairs as `ST_GeodesicDistance` and a finite nonnegative radius in meters | True when distance is at most the radius. Empty inputs yield false. |
 
-Null arguments propagate. Use `queryArrowTableInBatches` to evaluate these functions on streamed record batches.
+Point-to-route proximity measures to the interiors as well as the endpoints of the route's geodesic segments. MultiLineString parts are searched independently. The point-to-route threshold comparison allows 0.1 micrometers for numerical error. Null arguments propagate. Use `queryArrowTableInBatches` to evaluate these functions on streamed record batches.
+
+```
+SELECT id, ST_GeodesicDistance(observation, route) AS meters
+
+FROM observations
+
+WHERE ST_GeodesicDWithin(observation, route, 25)
+```
 
 ## Simplify shared boundaries in a polygon coverage[​](#simplify-shared-boundaries-in-a-polygon-coverage "Direct link to Simplify shared boundaries in a polygon coverage")
 
