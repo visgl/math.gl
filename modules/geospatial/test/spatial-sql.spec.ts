@@ -162,9 +162,19 @@ test('planar measurements and weighted centroids agree with PostGIS geometry fix
     'POINT EMPTY',
     null
   );
-  const table = new Table(new Schema([geometryField('shape', shape, 'wkb', {crs: 'EPSG:3857'})]), {
-    shape
-  });
+  const table = new Table(
+    new Schema([
+      geometryField('shape', shape, 'wkb', {
+        crs: 'EPSG:3857',
+        crs_type: 'authority_code',
+        geometry_types: ['Polygon'],
+        bbox: [0, 0, 8, 8]
+      })
+    ]),
+    {
+      shape
+    }
+  );
   const result = select(
     `SELECT ST_Area(shape) AS area, ST_Length(shape) AS length,
     ST_Centroid(shape) AS center, ST_Envelope(shape) AS extent FROM features`,
@@ -204,7 +214,7 @@ test('planar measurements and weighted centroids agree with PostGIS geometry fix
   });
   expect(result.schema.fields[2]!.metadata.get('ARROW:extension:name')).toBe('geoarrow.wkb');
   expect(result.schema.fields[2]!.metadata.get('ARROW:extension:metadata')).toBe(
-    '{"crs":"EPSG:3857"}'
+    '{"crs":"EPSG:3857","crs_type":"authority_code"}'
   );
 });
 
@@ -1007,8 +1017,8 @@ test('clips a native polygon without filling its hole and retains the CRS', () =
   expect(clipped?.type).toBe('Polygon');
   if (clipped?.type === 'Polygon') expect(clipped.coordinates).toHaveLength(2);
   expect(result.getChild('area')!.get(0)).toBe(8);
-  expect(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')).toBe(
-    JSON.stringify(metadata)
+  expect(JSON.parse(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')!)).toEqual(
+    metadata
   );
 });
 
