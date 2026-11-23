@@ -29,6 +29,12 @@ import {
 import {planarIntersects} from './spatial-planar-intersects';
 import {planarTouches} from './spatial-touches';
 import {linesWithinDistance, pointWithinPolygonDistance} from './spatial-dwithin';
+import {
+  mergeRoute,
+  planarRouteSegment,
+  routeEditingFunction,
+  segmentizeFunction
+} from './route-editing';
 import {lineLocatePoint, lineSubstring, projectPointToLine} from './linear-referencing';
 import {addMeasure, locateAlong, locateBetween, measuredDimension} from './measure-referencing';
 import {normalizeCRSIdentifier} from './crs/crs-identifier';
@@ -498,6 +504,15 @@ export const ST_TOUCHES = /* @__PURE__ */ spatialFunction(
   [geometryTypes, geometryTypes],
   /* @__PURE__ */ new Bool(),
   ([a, b]) => planarTouches(a!, b!)
+);
+
+/** Joins planar line components through exact degree-two endpoints. */
+export const ST_LINEMERGE = /* @__PURE__ */ routeEditingFunction('ST_LineMerge', false, mergeRoute);
+
+/** Splits planar segments evenly to meet the maximum length in CRS units. */
+export const ST_SEGMENTIZE = /* @__PURE__ */ segmentizeFunction(
+  'ST_Segmentize',
+  planarRouteSegment
 );
 
 /** Interpolates a point at a fraction of the planar length. */
@@ -1102,6 +1117,8 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_TILEENVELOPE,
     ST_AREA,
     ST_LENGTH,
+    ST_LINEMERGE,
+    ST_SEGMENTIZE,
     ST_LINEINTERPOLATEPOINT,
     ST_LINELOCATEPOINT,
     ST_LINESUBSTRING,
@@ -1126,6 +1143,7 @@ export {
   ST_GEODESICDISTANCE,
   ST_GEODESICLENGTH,
   ST_GEODESICDWITHIN,
+  ST_GEODESICSEGMENTIZE,
   GEODESIC_SPATIAL_FUNCTIONS
 } from './st-geodesic-functions';
 export {createSTCoverageSimplify, type CoverageSimplifyOptions} from './st-coverage-functions';
