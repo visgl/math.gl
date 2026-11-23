@@ -156,9 +156,9 @@ test('streams point-to-route proximity across the antimeridian and preserves emp
   expect(onRoute).toEqual([false, true, false, null, false]);
 });
 
-test('uses the finite ellipsoidal segment for a polar route and for a nearest endpoint', () => {
-  const route = wkb(['LINESTRING(0 89,180 89)', 'LINESTRING(0 0,1 0)']);
-  const point = wkb(['POINT(36 90)', 'POINT(2 0)']);
+test('minimizes distance on finite segments at the pole, an endpoint, and a long geodesic', () => {
+  const route = wkb(['LINESTRING(0 89,180 89)', 'LINESTRING(0 0,1 0)', 'LINESTRING(150 0,-150 0)']);
+  const point = wkb(['POINT(36 90)', 'POINT(2 0)', 'POINT(-163 1)']);
   const schema = new Schema([
     field('route', route, 'geoarrow.wkb'),
     field('p', point, 'geoarrow.wkb')
@@ -173,7 +173,8 @@ test('uses the finite ellipsoidal segment for a polar route and for a nearest en
   );
   expect(result.getChild('distance')!.get(0)).toBeCloseTo(0, 6);
   expect(result.getChild('distance')!.get(1)).toBeCloseTo(111319.4907933, 5);
-  expect([...result.getChild('inclusive')!]).toEqual([true, true]);
+  expect(result.getChild('distance')!.get(2)).toBeCloseTo(110574.3885578, 5);
+  expect([...result.getChild('inclusive')!]).toEqual([true, true, true]);
   expect(() =>
     queryArrowSQL('SELECT ST_GeodesicDistance(route,route) FROM routes', tables, {functions})
   ).toThrow(/requires at least one Point/);
