@@ -188,9 +188,9 @@ fn shadeTectonicSurface(
     }
     let sun = normalize(vec3<f32>(0.16,-0.84,0.52));
     let solarAngle = dot(p,sun);
-    let day = smoothstep(-0.035,0.025,solarAngle);
+    let day = mix(1.0,smoothstep(-0.035,0.025,solarAngle),tectonicSurface.globeWeight);
     let rockyNormal = normalize(crustNormal+tectonicReliefNormal(p,p,relief)-p);
-    let illumination = 0.008+day*(0.13+2.4*max(dot(rockyNormal,sun),0.0));
+    let illumination = mix(0.9,0.008+day*(0.13+2.4*max(dot(rockyNormal,sun),0.0)),tectonicSurface.globeWeight);
     let basalt = mix(vec3<f32>(0.018,0.032,0.052),vec3<f32>(0.22,0.34,0.45),rock);
     let floodLevel = mix(0.65,0.43,smoothstep(0.0,0.3,tectonicSurface.earlyLava));
     let seaLevel = mix(0.20,floodLevel,tectonicSurface.earlyWater);
@@ -219,7 +219,7 @@ fn shadeTectonicSurface(
     let rainUV = vec2<f32>(atan2(p.y,p.x)*85.0,asin(clamp(p.z,-1.0,1.0))*30.0);
     let lane = step(0.94,fract(sin(floor(rainUV.x)*127.1)*43758.5));
     let streak = pow(max(0.0,sin(rainUV.y+tectonicSurface.earlyImpactTime*25.0)),18.0);
-    color=vec4<f32>(color.rgb+vec3<f32>(0.22,0.30,0.36)*lane*streak*tectonicSurface.earlyRain,color.a);
+    color=vec4<f32>(color.rgb+vec3<f32>(0.22,0.30,0.36)*lane*streak*tectonicSurface.earlyRain*(0.015+0.985*day),color.a);
     color=vec4<f32>(color.rgb,tectonicSurface.earlyOpacity);
   }else if(tectonicSurface.isWater>0.5){
     let water = water_getColorMapped(surfacePosition+vec3<f32>(0.0,0.0,4.0),
