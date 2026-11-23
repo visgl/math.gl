@@ -746,6 +746,32 @@ describe('route reconstruction', () => {
   });
 });
 
+describe('coincident network vertices', () => {
+  it('snaps repeated endpoints when a millimetre grid exceeds the int32 key range', () => {
+    const graph = buildLineNetwork(makeLines([45, 45, 45.001, 45], [45.001, 45, 45.002, 45]), {
+      snapTolerance: 0.001,
+      junctionTolerance: 0
+    });
+    expect(graph.nodeCount).toBe(3);
+    expect(graph.edgeTarget[0]).toBe(graph.edgeSource[1]);
+  });
+
+  it('uses one node at a crossing shared by three directed paths', () => {
+    const graph = buildLineNetwork(makeLines([-1, 0, 1, 0], [0, -1, 0, 1], [-1, -1, 1, 1]), {
+      splitAtCrossings: true,
+      directed: true,
+      junctionTolerance: 0
+    });
+    expect(graph.nodeCount).toBe(7);
+    expect(graph.edgeCount).toBe(6);
+    const crossing = graph.edgeTarget[0];
+    for (let edge = 0; edge < graph.edgeCount; edge += 2) {
+      expect(graph.edgeTarget[edge]).toBe(crossing);
+      expect(graph.edgeSource[edge + 1]).toBe(crossing);
+    }
+  });
+});
+
 describe('dijkstra oracle', () => {
   it('matches a brute-force Bellman-Ford oracle on a random weighted graph', () => {
     const nodeCount = 400;

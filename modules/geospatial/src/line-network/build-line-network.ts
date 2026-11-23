@@ -220,8 +220,8 @@ class PointSnapper {
       this.slotKeys,
       this.slotHeads,
       this.slotMask,
-      this.getColumn(lon, cellY),
-      cellY,
+      this.getColumn(lon, cellY) | 0,
+      cellY | 0,
       true
     );
     this.nextInCell[cluster] = this.slotHeads[slot];
@@ -238,7 +238,16 @@ class PointSnapper {
 
   /** First cluster of a cell within the tolerance of the point, or EMPTY. */
   private findInCell(cellX: number, cellY: number, lon: number, lat: number): number {
-    const slot = findCellSlot(this.slotKeys, this.slotHeads, this.slotMask, cellX, cellY, false);
+    // Fold large grid keys the same way on insertion and lookup. The distance check
+    // below rejects candidates from other cells that fold to the same key.
+    const slot = findCellSlot(
+      this.slotKeys,
+      this.slotHeads,
+      this.slotMask,
+      cellX | 0,
+      cellY | 0,
+      false
+    );
     if (slot === EMPTY) return EMPTY;
     const cosLat = Math.cos(lat * DEGREES_TO_RADIANS);
     for (let c = this.slotHeads[slot]; c !== EMPTY; c = this.nextInCell[c]) {
@@ -562,10 +571,57 @@ export function buildLineNetwork(
     while (parent[x] !== x) x = parent[x] = parent[parent[x]];
     return x;
   };
-  for (let i = 0; i < unions.length; i += 2) {
-    const a = find(unions[i]);
-    const b = find(unions[i + 1]);
+  const join = (first: number, second: number): void => {
+    const a = find(first);
+    const b = find(second);
     if (a !== b) parent[Math.max(a, b)] = Math.min(a, b);
+  };
+  for (let i = 0; i < unions.length; i += 2) join(unions[i], unions[i + 1]);
+
+  // Cut points inside segments, grouped by segment and sorted by fraction.
+  const splitOffsets = splits.count ? new Uint32Array(vertexCount + 1) : null;
+  const splitFraction = new Float64Array(splits.count);
+  const splitNode = new Int32Array(splits.count);
+  if (splitOffsets) {
+    for (let k = 0; k < splits.count; k++) splitOffsets[splits.vertex[k] + 1]++;
+    for (let v = 0; v < vertexCount; v++) splitOffsets[v + 1] += splitOffsets[v];
+    const cursor = splitOffsets.slice(0, vertexCount);
+    for (let k = 0; k < splits.count; k++) {
+      const at = cursor[splits.vertex[k]]++;
+      // Insertion sort inside the bucket of the segment.
+      let i = at;
+      const start = splitOffsets[splits.vertex[k]];
+      while (i > start && splitFraction[i - 1] > splits.fraction[k]) {
+        splitFraction[i] = splitFraction[i - 1];
+        splitNode[i] = splitNode[i - 1];
+        i--;
+      }
+      splitFraction[i] = splits.fraction[k];
+      splitNode[i] = splits.cluster[k];
+    }
+  }
+
+  if (splitOffsets) {
+    // Every pair of crossing segments contributes a cut. Join coincident cuts on
+    // each segment before assigning node IDs, including three-way intersections.
+    for (let v = 0; v < vertexCount; v++) {
+      const first = splitOffsets[v];
+      const end = splitOffsets[v + 1];
+      if (end - first < 2) continue;
+      const span = Math.max(
+        Math.abs(positions[size * v + size] - positions[size * v]),
+        Math.abs(positions[size * v + size + 1] - positions[size * v + 1])
+      );
+      let representative = first;
+      for (let k = first + 1; k < end; k++) {
+        if ((splitFraction[k] - splitFraction[representative]) * span > 1e-12) {
+          representative = k;
+          continue;
+        }
+        join(splitNode[representative], splitNode[k]);
+        splitFraction[k] = splitFraction[representative];
+      }
+    }
   }
   const isNode = new Uint8Array(clusterCount);
   for (let c = 0; c < snappedCount; c++) if (isSnappedNode(c)) isNode[find(c)] = 1;
@@ -595,28 +651,7 @@ export function buildLineNetwork(
     }
   }
 
-  // Cut points inside segments, grouped by segment and sorted by fraction.
-  const splitOffsets = splits.count ? new Uint32Array(vertexCount + 1) : null;
-  const splitFraction = new Float64Array(splits.count);
-  const splitNode = new Int32Array(splits.count);
-  if (splitOffsets) {
-    for (let k = 0; k < splits.count; k++) splitOffsets[splits.vertex[k] + 1]++;
-    for (let v = 0; v < vertexCount; v++) splitOffsets[v + 1] += splitOffsets[v];
-    const cursor = splitOffsets.slice(0, vertexCount);
-    for (let k = 0; k < splits.count; k++) {
-      const at = cursor[splits.vertex[k]]++;
-      // Insertion sort inside the bucket of the segment.
-      let i = at;
-      const start = splitOffsets[splits.vertex[k]];
-      while (i > start && splitFraction[i - 1] > splits.fraction[k]) {
-        splitFraction[i] = splitFraction[i - 1];
-        splitNode[i] = splitNode[i - 1];
-        i--;
-      }
-      splitFraction[i] = splits.fraction[k];
-      splitNode[i] = clusterNode[splits.cluster[k]];
-    }
-  }
+  for (let k = 0; k < splitNode.length; k++) splitNode[k] = clusterNode[splitNode[k]];
 
   // Count path by path: an empty path (a repeated offset) has no segment, not -1.
   let maxEdges = splits.count;
