@@ -14,6 +14,7 @@ import {
   type Vector
 } from 'apache-arrow';
 import {
+  getGeoArrowFieldInfo,
   makeArrowVectorFromGeoArrowColumn,
   makeGeoArrowColumnFromArrowVector,
   materializeGeoArrowRows,
@@ -71,8 +72,15 @@ function select(sql: string, table: Table): Table {
 
 /** Decodes a result geometry for assertions independent of physical Arrow storage. */
 function geometryAt(table: Table, name: string, row: number) {
-  const bytes = table.getChild(name)!.get(row);
-  return bytes ? parseWKB(bytes).geometry : null;
+  const field = table.schema.fields.find(field => field.name === name)!;
+  const vector = table.getChild(name)!;
+  if (getGeoArrowFieldInfo(field)?.encoding === 'geoarrow.wkb') {
+    const bytes = vector.get(row);
+    return bytes ? parseWKB(bytes).geometry : null;
+  }
+  return materializeGeoArrowRows(
+    makeGeoArrowColumnFromArrowVector(vector.slice(row, row + 1), {field})
+  )[0];
 }
 
 test('PostGIS point-in-polygon signatures distinguish hole boundaries from interiors across batches', () => {
@@ -149,8 +157,9 @@ test('label points lie inside concave, holed and multipart surfaces', () => {
     table
   );
   expect([...result.getChild('inside')!]).toEqual([true, true, true, false, null]);
+  expect(getGeoArrowFieldInfo(result.schema.fields[1]!)?.encoding).toBe('geoarrow.point');
   expect(geometryAt(result, 'anchor', 2)).toEqual({type: 'Point', coordinates: [15, 2]});
-  expect(geometryAt(result, 'anchor', 3)).toEqual({type: 'Point', coordinates: [NaN, NaN]});
+  expect(geometryAt(result, 'anchor', 3)).toEqual({type: 'Point', coordinates: []});
 });
 
 test('planar measurements and weighted centroids agree with PostGIS geometry fixture values', () => {
@@ -446,14 +455,13 @@ test('constructs XY, XYZ and XYZM points from nullable numeric coordinates', () 
     xyz: [3, 4, 5],
     xyzm: [3, 4, 5, 6]
   })) {
-    expect(parseWKB(result.getChild(name)!.get(0))).toMatchObject({
-      dimension: name,
-      geometry: {type: 'Point', coordinates}
+    const field = result.schema.fields.find(field => field.name === name)!;
+    expect(getGeoArrowFieldInfo(field)).toMatchObject({
+      encoding: 'geoarrow.point',
+      dimension: name
     });
+    expect(geometryAt(result, name, 0)).toEqual({type: 'Point', coordinates});
     expect(result.getChild(name)!.get(1)).toBeNull();
-    expect(
-      result.schema.fields.find(field => field.name === name)!.metadata.get('ARROW:extension:name')
-    ).toBe('geoarrow.wkb');
   }
 });
 
@@ -946,6 +954,8 @@ test('snaps to the nearest route segment with argument-order and radius semantic
     ST_LineLocatePoint(l,p) AS fraction FROM features`,
     table
   );
+  expect(getGeoArrowFieldInfo(result.schema.fields[0]!)?.encoding).toBe('geoarrow.point');
+  expect(getGeoArrowFieldInfo(result.schema.fields[2]!)?.encoding).toBe('geoarrow.linestring');
   expect(geometryAt(result, 'snap', 0)).toEqual(parseWKT('POINT(3 3)'));
   expect(geometryAt(result, 'observation', 0)).toEqual(parseWKT('POINT(5 3)'));
   expect(geometryAt(result, 'gap', 0)).toEqual(parseWKT('LINESTRING(3 3,5 3)'));
@@ -981,7 +991,20 @@ test('snaps native GeoArrow points to endpoints and resolves ties in route order
     ]),
     {l, p}
   );
-  const result = select('SELECT ST_ClosestPoint(l,p) AS snap FROM features', table);
+  const batched = new Table(table.schema, [
+    ...table.slice(0, 1).batches,
+    ...table.slice(1).batches
+  ]);
+  const result = select(
+    `SELECT ST_ClosestPoint(l,p) AS snap,
+            ST_LineLocatePoint(l, ST_ClosestPoint(l,p)) AS fraction,
+            ST_Length(ST_ShortestLine(l, ST_MakePoint(ST_X(p), ST_Y(p)))) AS gap
+     FROM features`,
+    batched
+  );
+  expect(result.batches.map(batch => batch.numRows)).toEqual([1, 1]);
+  expect([...result.getChild('fraction')!]).toEqual([0.25, 1]);
+  expect([...result.getChild('gap')!]).toEqual([2, Math.sqrt(5)]);
   expect(geometryAt(result, 'snap', 0)).toEqual(parseWKT('POINT(2 0)'));
   expect(geometryAt(result, 'snap', 1)).toEqual(parseWKT('POINT(4 0)'));
   expect(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')).toBe(
