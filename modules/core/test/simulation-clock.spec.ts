@@ -390,6 +390,27 @@ it('SimulationClock rebase moves the epoch and keeps the time', () => {
   expect(before.rebase()).toBe(0);
 });
 
+it.each([
+  ['paused', 0],
+  ['between ticks', 1]
+])('SimulationClock keeps the seek snap window after repeated rebases while %s', (_state, rate) => {
+  const startTime = 2 ** 40;
+  const clock = new SimulationClock({tickInterval: 1, startTime, rate});
+  const epochErrorBound = clock['epochErrorBound'];
+
+  // At this epoch, 1024 additions of 4u|epoch| inflate the snap window to half a tick.
+  for (let frame = 0; frame < 1024; frame++) {
+    clock.advance(0.5);
+    expect(clock.rebase()).toBe(0);
+  }
+  expect(clock.startTime).toBe(startTime);
+  expect.soft(clock['epochErrorBound']).toBe(epochErrorBound);
+
+  clock.seek(startTime + 1.5);
+  expect(clock.getTickIndex()).toBe(1);
+  expect(clock.getTickAlpha()).toBe(0.5);
+});
+
 /**
  * Advances a clock through a list of real-time pieces and sums the reported ticks.
  * @param clock Clock to advance.

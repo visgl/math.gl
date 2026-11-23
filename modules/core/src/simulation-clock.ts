@@ -160,7 +160,7 @@ export class SimulationClock {
   private epoch: number;
   /**
    * Bound on the rounding error of `epoch`, in seconds: `u|startTime|` for the input, and
-   * `4u(|epoch| + |tickCount * tickInterval|)` for each {@link SimulationClock.rebase}.
+   * `4u(|epoch| + |tickCount * tickInterval|)` when {@link SimulationClock.rebase} moves the epoch.
    */
   private epochErrorBound: number;
   /** Integer index of the last tick at or before the current time. */
@@ -440,6 +440,9 @@ export class SimulationClock {
    */
   rebase(): number {
     const tickCount = this.tickIndex;
+    if (tickCount === 0) {
+      return 0;
+    }
     const moved = tickCount * this.tickInterval;
     // 3 terms of at most u(|epoch| + |moved|): the product, the sum, and the difference between
     // `tickInterval` and the nominal tick interval. The factor 4 covers the terms in u^2.
