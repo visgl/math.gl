@@ -204,6 +204,45 @@ contacts returned separately when the result contains both dimensions.
 Clipping preserves route traversal. Repeated or overlapping segments contribute
 to length each time the route travels them.
 
+
+## Validate polygon imports
+
+`ST_IsValid(geometry)` checks Polygon and MultiPolygon topology in XY, with
+native GeoArrow or WKB inputs. Use `ST_IsValidReason(geometry)` to retrieve the
+first diagnostic, such as an unclosed ring, a self-intersection, a hole outside
+its shell, disconnected interior, or overlapping polygon components.
+
+```sql
+SELECT id, ST_IsValidReason(geometry) AS reason
+FROM parcels
+WHERE NOT ST_IsValid(geometry)
+```
+
+Empty polygons are valid. Both functions propagate nulls and evaluate per record
+batch. `ST_IsValidReason` returns `Valid Geometry` when the topology passes.
+
+## Dissolve polygons by group
+
+Register `ST_UNION_AGGREGATE` and `ST_UNARYUNION` from
+`@math.gl/geospatial/st-overlay-functions`. Register `ST_UNION` alongside
+`ST_UNION_AGGREGATE` to use both SQL arities in the same query.
+
+```sql
+SELECT district, ST_Union(parcel) AS footprint
+FROM parcels
+GROUP BY district
+```
+
+- `ST_Union(geometry)` dissolves planar Polygon and MultiPolygon rows within
+  each group. It ignores nulls and returns null for a group with no non-null
+  inputs. A group containing only empty geometries returns an empty multipolygon.
+- `ST_UnaryUnion(geometry)` dissolves overlapping components within each row.
+  Null rows remain null.
+
+Both functions return interleaved XY `geoarrow.multipolygon` and preserve
+the input CRS metadata. Grouped SQL uses the table query engine. Each group
+reduces one batch at a time and compacts partial unions as it reads rows.
+
 ## Transform with a projection engine
 
 Register `createSTTransform(engine)` from `@math.gl/geospatial/st-functions` to
