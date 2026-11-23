@@ -141,7 +141,7 @@ export function orderArrowTable(
       utf8: DataType.isUtf8(valueType(field.type))
     };
   });
-  const indexes = Array.from({length: table.numRows}, (_, index) => index);
+  const indexes = Int32Array.from({length: table.numRows}, (_, index) => index);
   indexes.sort((left, right) => {
     signal?.throwIfAborted();
     for (const {reader, utf8, direction, nulls} of keys) {
@@ -166,7 +166,7 @@ export function orderArrowTable(
   });
   return takeArrowTableRows(
     table,
-    Int32Array.from(indexes.slice(offset, limit === undefined ? undefined : offset + limit))
+    indexes.subarray(offset, limit === undefined ? undefined : offset + limit)
   );
 }
 
