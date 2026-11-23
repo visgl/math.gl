@@ -217,12 +217,21 @@ ignored.
 
 | SQL function | Inputs | Result |
 | --- | --- | --- |
-| `ST_GeodesicDistance(a, b)` | Two points | Shortest distance in meters. Empty points yield null. |
+| `ST_GeodesicDistance(a, b)` | Two points, or a Point and a LineString or MultiLineString in either order | Shortest distance in meters. Empty inputs yield null. |
 | `ST_GeodesicLength(route)` | LineString or MultiLineString | Sum of segment lengths in meters. Empty lines yield zero. |
-| `ST_GeodesicDWithin(a, b, radius)` | Two points and a finite nonnegative radius in meters | True when distance is at most the radius. Empty points yield false. |
+| `ST_GeodesicDWithin(a, b, radius)` | Same geometry pairs as `ST_GeodesicDistance` and a finite nonnegative radius in meters | True when distance is at most the radius. Empty inputs yield false. |
 
-Null arguments propagate. Use `queryArrowTableInBatches` to evaluate these
-functions on streamed record batches.
+Point-to-route proximity measures to the interiors as well as the endpoints
+of the route's geodesic segments. MultiLineString parts are searched independently.
+The point-to-route threshold comparison allows 0.1 micrometers for
+numerical error. Null arguments propagate. Use `queryArrowTableInBatches` to
+evaluate these functions on streamed record batches.
+
+```sql
+SELECT id, ST_GeodesicDistance(observation, route) AS meters
+FROM observations
+WHERE ST_GeodesicDWithin(observation, route, 25)
+```
 
 ## Dissolve polygons by group
 
