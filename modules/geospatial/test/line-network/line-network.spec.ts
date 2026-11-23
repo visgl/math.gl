@@ -367,6 +367,7 @@ describe('T-junctions', () => {
     // Reference: every end (none is within 0.01 m of another) against every other segment.
     let splitCount = 0;
     let gapSum = 0;
+    const endpointJoins = new Map<number, number>();
     for (let p = 0; p < paths.length; p++) {
       for (let end = 0; end < 2; end++) {
         const lon = paths[p][2 * end];
@@ -374,6 +375,7 @@ describe('T-junctions', () => {
         const k = 111_195.08 * Math.cos((lat * Math.PI) / 180);
         let best = Infinity;
         let bestT = 0;
+        let bestPath = -1;
         for (let q = 0; q < paths.length; q++) {
           if (q === p) continue;
           const ax = (paths[q][0] - lon) * k;
@@ -385,11 +387,19 @@ describe('T-junctions', () => {
           if (d < best) {
             best = d;
             bestT = t;
+            bestPath = q;
           }
         }
         if (best <= TOLERANCE) {
-          gapSum += best;
-          if (bestT > 0 && bestT < 1) splitCount++;
+          if (bestT > 0 && bestT < 1) {
+            splitCount++;
+            gapSum += best;
+          } else {
+            const source = 2 * p + end;
+            const target = 2 * bestPath + bestT;
+            if (endpointJoins.get(target) !== source) gapSum += best;
+            endpointJoins.set(source, target);
+          }
         }
       }
     }
@@ -820,6 +830,30 @@ describe('coincident network vertices', () => {
       expect(graph.edgeTarget[edge]).toBe(crossing);
       expect(graph.edgeSource[edge + 1]).toBe(crossing);
     }
+  });
+});
+
+describe('junction gap accounting', () => {
+  it('charges a reciprocal join once across two dangling endpoints', () => {
+    const gap = 10 * ONE_METRE;
+    const lines = makeLines([-0.002, 0, 0, 0], [gap, 0, 0.002, 0]);
+    const net = buildLineNetwork(lines, {junctionTolerance: 20});
+    expect(net.edgeCount).toBe(2);
+    expect(net.edgeTarget[0]).toBe(net.edgeSource[1]);
+    expect(net.edgeLength[0]! + net.edgeLength[1]!).toBeCloseTo(
+      haversineDistance(-0.002, 0, 0.002, 0),
+      8
+    );
+  });
+
+  it('keeps a short snapped loop from creating two dangling splits', () => {
+    const gap = 10 * ONE_METRE;
+    const end = 0.001 + 0.5 * ONE_METRE;
+    const lines = makeLines([0, 0, 0.002, 0], [0.001, gap, end, gap]);
+    const net = buildLineNetwork(lines, {snapTolerance: 1, junctionTolerance: 20});
+    expect(net.edgeCount).toBe(2);
+    expect(net.edgeSource[1]).toBe(net.edgeTarget[1]);
+    expect(net.edgeLength[1]).toBeCloseTo(haversineDistance(0.001, gap, end, gap), 8);
   });
 });
 

@@ -850,11 +850,12 @@ function joinDanglingEnds(
   const {value: positions, size} = lines.positions;
   const pathIndices = lines.pathIndices.value;
   const pathCount = pathIndices.length - 1;
+  const joinedEndpoint = new Int32Array(clusterUses.length).fill(EMPTY);
   const limitSquared = out.junctionTolerance * out.junctionTolerance;
   for (let path = 0; path < pathCount; path++) {
     const first = pathIndices[path];
     const last = pathIndices[path + 1] - 1;
-    if (last <= first) continue;
+    if (last <= first || vertexCluster[first] === vertexCluster[last]) continue;
     for (let end = 0; end < 2; end++) {
       const v = end === 0 ? first : last;
       const cluster = vertexCluster[v];
@@ -904,6 +905,17 @@ function joinDanglingEnds(
       }
       if (bestSegment === EMPTY || bestSquared > limitSquared) continue;
       const s = bestSegment;
+      // The nearest point is a vertex that is already a node: join that node.
+      const atVertex = bestFraction === 0 ? s : bestFraction === 1 ? s + 1 : -1;
+      const target = atVertex >= 0 ? vertexCluster[atVertex] : EMPTY;
+      if (target !== EMPTY && out.isSnappedNode(target)) {
+        // A reciprocal target has already charged this physical gap.
+        if (joinedEndpoint[target] === cluster) continue;
+        joinedEndpoint[cluster] = target;
+        out.unions.push(cluster, target);
+      } else {
+        out.splits.push(s, bestFraction, cluster);
+      }
       out.clusterGap[cluster] = out.distance(
         lon,
         lat,
@@ -911,14 +923,6 @@ function joinDanglingEnds(
         positions[size * s + 1] +
           bestFraction * (positions[size * s + size + 1] - positions[size * s + 1])
       );
-      // The nearest point is a vertex that is already a node: join that node.
-      const atVertex = bestFraction === 0 ? s : bestFraction === 1 ? s + 1 : -1;
-      const target = atVertex >= 0 ? vertexCluster[atVertex] : EMPTY;
-      if (target !== EMPTY && out.isSnappedNode(target)) {
-        out.unions.push(cluster, target);
-      } else {
-        out.splits.push(s, bestFraction, cluster);
-      }
     }
   }
 }
