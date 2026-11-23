@@ -224,15 +224,10 @@ export function spatialFunction<Value extends SpatialValue | WellKnownGeometry>(
       const metadata = new Map<string, string>();
       if ('encoding' in output || DataType.isBinary(type)) {
         metadata.set(EXTENSION_NAME, 'encoding' in output ? output.encoding : 'geoarrow.wkb');
-        const edges = extensions.find(extension => extension?.metadata['edges'] !== undefined)
-          ?.metadata['edges'];
-        const crsSource = extensions.find(extension =>
-          crsValues.length
-            ? extension?.metadata['crs'] != null
-            : extension?.metadata['crs'] === null
-        );
-        const crs = crsSource?.metadata['crs'];
-        const crsType = crsSource?.metadata['crs_type'];
+        const inputMetadata = extensions[0]?.metadata;
+        const crs = inputMetadata?.['crs'];
+        const crsType = crs === undefined ? undefined : inputMetadata?.['crs_type'];
+        const edges = inputMetadata?.['edges'];
         if (crs !== undefined || edges !== undefined) {
           metadata.set(EXTENSION_METADATA, JSON.stringify({crs, crs_type: crsType, edges}));
         }

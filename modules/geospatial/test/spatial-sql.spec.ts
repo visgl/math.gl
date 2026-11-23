@@ -1035,6 +1035,22 @@ test('clipping an unlabeled geometry cannot assign the bounds CRS', () => {
   expect(result.getChild('srid')!.get(0)).toBe(0);
 });
 
+test('clipping geometry with bounds metadata but no CRS cannot inherit the envelope CRS', () => {
+  const g = wkb('POINT(1 1)');
+  const table = new Table(
+    new Schema([geometryField('g', g, 'wkb', {geometry_types: ['Point'], bbox: [1, 1, 1, 1]})]),
+    {g}
+  );
+  const result = select(
+    `SELECT ST_ClipByBox2D(g,ST_SetSRID(ST_MakeEnvelope(0,0,2,2),3857)) AS clipped,
+    ST_SRID(ST_ClipByBox2D(g,ST_SetSRID(ST_MakeEnvelope(0,0,2,2),3857))) AS srid
+    FROM features`,
+    table
+  );
+  expect(geometryAt(result, 'clipped', 0)).toEqual(parseWKT('POINT(1 1)'));
+  expect(result.getChild('srid')!.get(0)).toBe(0);
+});
+
 test('box clipping excludes boundary-only points and returns disjoint polygon pieces', () => {
   const g = wkb(
     'MULTIPOINT((0 0),(-0.5 1),(3 3))',
