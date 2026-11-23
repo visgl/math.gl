@@ -27,6 +27,7 @@ import {
 import {expect, test} from 'vitest';
 import {queryArrowTable, queryArrowTableInBatches, queryArrowSQL} from '@math.gl/sql/query';
 import {parseSQLQuery} from '@math.gl/sql/parser';
+import {groupArrowTable} from '../src/arrow/relational-query';
 
 /** Parses the SELECT requests used by these tests. */
 function select(sql: string) {
@@ -389,6 +390,23 @@ test('orders and groups timestamp keys at full nanosecond precision', () => {
   });
   expect(grouped.getChild('instant')!.type.toString()).toBe(type.toString());
   expect([...grouped.getChild('count')!]).toEqual([2n, 1n, 1n]);
+
+  const custom = groupArrowTable(
+    table,
+    ['instant'],
+    {},
+    {inputSchema: table.schema},
+    new Map([
+      [
+        'rows',
+        {
+          outputField: new Field('rows', new Int32(), false),
+          evaluate: group => group.numRows
+        }
+      ]
+    ])
+  );
+  expect([...custom.getChild('rows')!]).toEqual([1, 1, 2]);
 });
 
 test('LEFT OUTER JOIN retains unmatched and null keys and preserves matched duplicates', () => {
