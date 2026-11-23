@@ -16,13 +16,19 @@ import {
 
 // Interleave incremental and monolithic cuts on the same deterministic edit prefix.
 const results = [];
-// Keep the source footprint fixed while varying the resident partition size.
+// Vary the partition size or grow the footprint with tile geometry fixed.
 const tileSize = Number(
   process.argv.find(arg => arg.startsWith('--tile-size='))?.split('=')[1] ?? 8
 );
 if (![2, 4, 8].includes(tileSize)) throw new RangeError('tile-size must be 2, 4 or 8');
+/** Footprint height in sample cells, independent of tile size. */
+const rows = Number(
+  process.argv.find(arg => arg.startsWith('--rows='))?.split('=')[1] ?? 32
+);
+if (![16, 32, 64, 128].includes(rows) || (64 * rows) / tileSize ** 2 > 512)
+  throw new RangeError('rows must be 16, 32, 64 or 128, with up to 512 residents');
 const columns = 64 / tileSize;
-const residentCount = columns * (32 / tileSize);
+const residentCount = columns * (rows / tileSize);
 const vertexWidth = tileSize + 1;
 const evictionId = String(residentCount - 1);
 const limits = {maxTiles: 512, maxPairChecks: 131072};
@@ -127,7 +133,7 @@ for (const name of ['pacific', 'sierra-nodata']) {
     t => t.id !== evictionId && t.mesh.indices.includes((tileSize / 2) * vertexWidth + tileSize / 2)
   );
   assert(editable.length > 0);
-  let cache = updateTerrainTileCutouts(residents, polygon, undefined, limits).cache;
+  let previous = updateTerrainTileCutouts(residents, polygon, undefined, limits);
   const incremental = [],
     full = [];
   let rebuilt = 0;
@@ -140,11 +146,12 @@ for (const name of ['pacific', 'sierra-nodata']) {
     let update, reference;
     for (const mode of step % 2 ? ['full', 'incremental'] : ['incremental', 'full']) {
       const start = performance.now();
-      if (mode === 'incremental') update = updateTerrainTileCutouts(active, polygon, cache, limits);
+      if (mode === 'incremental') update = updateTerrainTileCutouts(active, polygon, previous.cache, limits);
       else
         reference = splitTerrainMeshTiles(
           active.map(t => t.mesh),
-          polygon
+          polygon,
+          {maxWork: 64_000_000}
         );
       if (step >= 5) (mode === 'incremental' ? incremental : full).push(performance.now() - start);
     }
@@ -155,7 +162,27 @@ for (const name of ['pacific', 'sierra-nodata']) {
       assert(Math.abs(pieces.reduce((sum, p) => sum + area(p), 0) - area(reference[side])) < 1e-9);
     }
     if (step >= 5) rebuilt += update.rebuilt.length;
-    cache = update.cache;
+    // Validate reuse outside the timed stages, including seam-only changes.
+    for (const [id, tile] of update.tiles) {
+      const old = previous.tiles.get(id);
+      if (!old || update.rebuilt.includes(id)) continue;
+      let sameBoundary = true;
+      for (const side of ['patch', 'remainder']) {
+        assert.equal(tile[side].positions, old[side].positions);
+        assert.equal(tile[side].indices, old[side].indices);
+        const before = old[side];
+        const after = tile[side];
+        const same =
+          before.cutEdges.length === after.cutEdges.length &&
+          before.cutEdges.every((value, i) => value === after.cutEdges[i]) &&
+          before.cutPolygonIndices.every((value, i) => value === after.cutPolygonIndices[i]);
+        if (same) assert.equal(after, before);
+        else sameBoundary = false;
+      }
+      if (sameBoundary) assert.equal(tile, old);
+      assert.equal(update.changed.includes(id), !sameBoundary);
+    }
+    previous = update;
   }
   results.push({
     dataset: name,
@@ -165,6 +192,7 @@ for (const name of ['pacific', 'sierra-nodata']) {
     inputTriangles,
     residents: residentCount,
     tileSize,
+    rows,
     measuredUpdates: 20,
     rebuiltTiles: rebuilt,
     fullRebuildParity: true,

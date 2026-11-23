@@ -2,17 +2,11 @@
 
 Grouped import paths for Earth and astronomy utilities:
 
-- `@math.gl/earth`
+- `@math.gl/earth/geoid`
 - `@math.gl/earth/sun`
+- `@math.gl/earth/sun-stars`
 - `@math.gl/earth/timezone`
-
-The root entry exports each module as a namespace:
-
-```ts
-import {geoid, sun, timezone} from '@math.gl/earth';
-```
-
-Existing `@math.gl/earth`, `@math.gl/earth/sun`, and `@math.gl/earth/timezone` imports remain available.
+- `@math.gl/earth/ocean`
 
 ## Sources and credits
 
@@ -31,8 +25,8 @@ See the [grid factory documentation](https://github.com/visgl/math.gl/blob/maste
 
 ### Optional EGM96 grids
 
-Import `@math.gl/earth/geoid/geoid-egm96-low.pgm` (1° preview, 130 KB) or
-`@math.gl/earth/geoid/geoid-egm96-hi.pgm` (15′ original, 2.08 MB) as an asset URL, fetch
+Import `@math.gl/earth/geoid-geoid-egm96-low.pgm` (1° preview, 130 KB) or
+`@math.gl/earth/geoid-geoid-egm96-hi.pgm` (15′ original, 2.08 MB) as an asset URL, fetch
 the bytes, and pass them to `parsePGM(bytes, {cubic: true})`. In Node, resolve the
 asset with `import.meta.resolve` and read it using `node:fs/promises`.
 
@@ -66,7 +60,7 @@ Capabilities have separate dependency boundaries:
 
 - `@math.gl/earth/timezone`: offsets, local calendar fields, timezone labels, runtime identifier support, and lazy geographic lookup. These utilities use native `Intl`.
 - `@math.gl/earth/timezone`: synchronous approximate geographic lookup with the compact boundary table.
-- `@math.gl/earth/timezone`: local-day boundaries, local-time conversion, and offset transitions. This entry point uses a vendored copy of `@js-temporal/polyfill` 0.5.1 (including JSBI) for Temporal algorithms across supported browsers and Node versions. It does not modify globals. Its vendored compatibility implementation is isolated from root and lookup consumers; it still uses runtime timezone rules.
+- `@math.gl/earth/timezone`: local-day boundaries, local-time conversion, and offset transitions. This entry point uses a vendored copy of `@js-temporal/polyfill` 0.5.1 (including JSBI) for Temporal algorithms across supported browsers and Node versions. It does not modify globals. Its vendored compatibility implementation is isolated from geographic lookup; it still uses runtime timezone rules.
 
 The package does not ship an `Intl` polyfill or a separate date-specific timezone-rule database.
 
@@ -88,7 +82,7 @@ const local = getLocalDateTime(timezone, instant); // year/month/day and clock f
 const label = new Intl.DateTimeFormat('en', {timeZone: timezone, dateStyle: 'full'}).format(instant);
 ```
 
-The root offset utility uses native `Intl.DateTimeFormat`, without importing the geographic table. The asynchronous lookup loads that table on first use and reuses the loaded module. Bundlers with dynamic-import code splitting can put lookup data in a separate chunk; downloading it is deferred, not eliminated. Importing only the offset utility allows tree shaking to remove lookup entirely.
+The offset utility uses native `Intl.DateTimeFormat`, without importing the geographic table. The asynchronous lookup loads that table on first use and reuses the loaded module. Bundlers with dynamic-import code splitting can put lookup data in a separate chunk; downloading it is deferred, not eliminated. Importing only the offset utility allows tree shaking to remove lookup entirely.
 
 For synchronous lookup, import the dedicated entry point:
 
@@ -131,10 +125,10 @@ Local clock fields alone do not uniquely identify an instant. Offset changes can
 
 Approximate timezone polygons, including oceans, are available as separate assets:
 
-- `@math.gl/earth/timezone/timezone-geometry-low.json`
-- `@math.gl/earth/timezone/timezone-geometry-hi.json`
-- `@math.gl/earth/timezone/timezone-geometry-low.parquet`
-- `@math.gl/earth/timezone/timezone-geometry-hi.parquet`
+- `@math.gl/earth/timezone-timezone-geometry-low.json`
+- `@math.gl/earth/timezone-timezone-geometry-hi.json`
+- `@math.gl/earth/timezone-timezone-geometry-low.parquet`
+- `@math.gl/earth/timezone-timezone-geometry-hi.parquet`
 
 JSON assets are standard GeoJSON FeatureCollections; each feature contains a
 MultiPolygon and `properties.tzid`. Low uses a 20 km simplification interval
@@ -142,7 +136,7 @@ MultiPolygon and `properties.tzid`. Low uses a 20 km simplification interval
 Timezone Boundary Builder 2026d's comprehensive with-oceans dataset.
 
 ```js
-import geometry from '@math.gl/earth/timezone/timezone-geometry-low.json' with {type: 'json'};
+import geometry from '@math.gl/earth/timezone-timezone-geometry-low.json' with {type: 'json'};
 import {getTimezoneOffset} from '@math.gl/earth/timezone';
 
 const instant = Date.parse('2026-07-15T12:00:00Z');
@@ -152,8 +146,8 @@ const offsetMinutes = getTimezoneOffset(geometry.features[0].properties.tzid, in
 For Vite, load assets by URL instead of including geometry in JavaScript:
 
 ```js
-import geometryUrl from '@math.gl/earth/timezone/timezone-geometry-low.json?url';
-import parquetUrl from '@math.gl/earth/timezone/timezone-geometry-hi.parquet?url';
+import geometryUrl from '@math.gl/earth/timezone-timezone-geometry-low.json?url';
+import parquetUrl from '@math.gl/earth/timezone-timezone-geometry-hi.parquet?url';
 
 const geometry = await fetch(geometryUrl).then(response => response.json());
 // Pass parquetUrl to a GeoParquet-capable loader, or fetch its binary contents.
@@ -161,7 +155,7 @@ const geometry = await fetch(geometryUrl).then(response => response.json());
 
 Parquet subpaths resolve to binary assets, not JavaScript modules; a plain import
 is not automatically a URL. Use your bundler's asset mechanism or, in Node.js,
-`import.meta.resolve('@math.gl/earth/timezone/timezone-geometry-hi.parquet')` to obtain
+`import.meta.resolve('@math.gl/earth/timezone-timezone-geometry-hi.parquet')` to obtain
 its file URL. GeoParquet 1.1 contains `tzid` strings and WKB `geometry` with
 OGC:CRS84 coordinates. Geometry contains no date-specific rules or offsets.
 These assets are never imported by the root, lookup, or temporal entry points.

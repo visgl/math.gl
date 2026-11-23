@@ -6,9 +6,9 @@ import {test, expect} from 'vitest';
 import {
   EllipsoidOccluder,
   getGlobeHorizonBounds,
-  splitGlobeBounds,
-  Ellipsoid
-} from '@math.gl/geospatial';
+  splitGlobeBounds
+} from '@math.gl/geospatial/globe';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 
 const sphere = new EllipsoidOccluder([1, 1, 1]);
 

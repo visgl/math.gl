@@ -2,26 +2,26 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "paths": {
+      "@math.gl/earth/geoid": [
+        "./modules/earth/src/geoid/index.ts"
+      ],
       "test/*": [
         "./test/*"
-      ],
-      "@math.gl/core": [
-        "./modules/core/src/index.ts"
       ],
       "@math.gl/core/test/*": [
         "./modules/core/test/*"
       ],
-      "@math.gl/geometry": [
-        "./modules/geometry/src/index.ts"
+      "@math.gl/geometry/processing": [
+        "./modules/geometry/src/processing.ts"
+      ],
+      "@math.gl/geometry/spatial-index": [
+        "./modules/geometry/src/spatial-index/index.ts"
       ],
       "@math.gl/geometry/culling": [
         "./modules/geometry/src/culling/index.ts"
       ],
       "@math.gl/geometry/test/*": [
         "./modules/geometry/test/*"
-      ],
-      "@math.gl/geospatial": [
-        "./modules/geospatial/src/index.ts"
       ],
       "@math.gl/geospatial/crs": [
         "./modules/geospatial/src/crs/index.ts"
@@ -38,293 +38,290 @@
       "@math.gl/core/arrow": [
         "./modules/core/src/arrow.ts"
       ],
-      "@math.gl/geospatial/crs/projjson.schema.json": [
+      "@math.gl/geospatial/crs-projjson.schema.json": [
         "./modules/geospatial/src/crs/projjson.schema.json"
       ],
-      "@math.gl/geospatial/projection/datums": [
+      "@math.gl/geospatial/projection-datums": [
         "./modules/geospatial/src/projection/datums.ts"
       ],
-      "@math.gl/geospatial/projection/core": [
+      "@math.gl/geospatial/projection-core": [
         "./modules/geospatial/src/projection/experimental/core.ts"
       ],
-      "@math.gl/geospatial/projection/projections/merc": [
+      "@math.gl/geospatial/projection-projections-merc": [
         "./modules/geospatial/src/projection/experimental/entries/projections/merc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/eqc": [
+      "@math.gl/geospatial/projection-projections-eqc": [
         "./modules/geospatial/src/projection/experimental/entries/projections/eqc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lcc": [
+      "@math.gl/geospatial/projection-projections-lcc": [
         "./modules/geospatial/src/projection/experimental/entries/projections/lcc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/aea": [
+      "@math.gl/geospatial/projection-projections-aea": [
         "./modules/geospatial/src/projection/experimental/entries/projections/aea.ts"
       ],
-      "@math.gl/geospatial/projection/projections/eqdc": [
+      "@math.gl/geospatial/projection-projections-eqdc": [
         "./modules/geospatial/src/projection/experimental/entries/projections/eqdc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/laea": [
+      "@math.gl/geospatial/projection-projections-laea": [
         "./modules/geospatial/src/projection/experimental/entries/projections/laea.ts"
       ],
-      "@math.gl/geospatial/projection/projections/stere": [
+      "@math.gl/geospatial/projection-projections-stere": [
         "./modules/geospatial/src/projection/experimental/entries/projections/stere.ts"
       ],
-      "@math.gl/geospatial/projection/projections/sterea": [
+      "@math.gl/geospatial/projection-projections-sterea": [
         "./modules/geospatial/src/projection/experimental/entries/projections/sterea.ts"
       ],
-      "@math.gl/geospatial/projection/projections/aeqd": [
+      "@math.gl/geospatial/projection-projections-aeqd": [
         "./modules/geospatial/src/projection/experimental/entries/projections/aeqd.ts"
       ],
-      "@math.gl/geospatial/projection/projections/tmerc": [
+      "@math.gl/geospatial/projection-projections-tmerc": [
         "./modules/geospatial/src/projection/experimental/entries/projections/tmerc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/etmerc": [
+      "@math.gl/geospatial/projection-projections-etmerc": [
         "./modules/geospatial/src/projection/experimental/entries/projections/etmerc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/utm": [
+      "@math.gl/geospatial/projection-projections-utm": [
         "./modules/geospatial/src/projection/experimental/entries/projections/utm.ts"
       ],
-      "@math.gl/geospatial/projection/projections/geocent": [
+      "@math.gl/geospatial/projection-projections-geocent": [
         "./modules/geospatial/src/projection/experimental/entries/projections/geocent.ts"
       ],
-      "@math.gl/geospatial/projection/projections/bonne": [
+      "@math.gl/geospatial/projection-projections-bonne": [
         "./modules/geospatial/src/projection/experimental/entries/projections/bonne.ts"
       ],
-      "@math.gl/geospatial/projection/projections/cass": [
+      "@math.gl/geospatial/projection-projections-cass": [
         "./modules/geospatial/src/projection/experimental/entries/projections/cass.ts"
       ],
-      "@math.gl/geospatial/projection/projections/cea": [
+      "@math.gl/geospatial/projection-projections-cea": [
         "./modules/geospatial/src/projection/experimental/entries/projections/cea.ts"
       ],
-      "@math.gl/geospatial/projection/projections/eck6": [
+      "@math.gl/geospatial/projection-projections-eck6": [
         "./modules/geospatial/src/projection/experimental/entries/projections/eck6.ts"
       ],
-      "@math.gl/geospatial/projection/projections/eqearth": [
+      "@math.gl/geospatial/projection-projections-eqearth": [
         "./modules/geospatial/src/projection/experimental/entries/projections/eqearth.ts"
       ],
-      "@math.gl/geospatial/projection/projections/equi": [
+      "@math.gl/geospatial/projection-projections-equi": [
         "./modules/geospatial/src/projection/experimental/entries/projections/equi.ts"
       ],
-      "@math.gl/geospatial/projection/projections/geos": [
+      "@math.gl/geospatial/projection-projections-geos": [
         "./modules/geospatial/src/projection/experimental/entries/projections/geos.ts"
       ],
-      "@math.gl/geospatial/projection/projections/gnom": [
+      "@math.gl/geospatial/projection-projections-gnom": [
         "./modules/geospatial/src/projection/experimental/entries/projections/gnom.ts"
       ],
-      "@math.gl/geospatial/projection/projections/gstmerc": [
+      "@math.gl/geospatial/projection-projections-gstmerc": [
         "./modules/geospatial/src/projection/experimental/entries/projections/gstmerc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/krovak": [
+      "@math.gl/geospatial/projection-projections-krovak": [
         "./modules/geospatial/src/projection/experimental/entries/projections/krovak.ts"
       ],
-      "@math.gl/geospatial/projection/projections/mill": [
+      "@math.gl/geospatial/projection-projections-mill": [
         "./modules/geospatial/src/projection/experimental/entries/projections/mill.ts"
       ],
-      "@math.gl/geospatial/projection/projections/moll": [
+      "@math.gl/geospatial/projection-projections-moll": [
         "./modules/geospatial/src/projection/experimental/entries/projections/moll.ts"
       ],
-      "@math.gl/geospatial/projection/projections/nzmg": [
+      "@math.gl/geospatial/projection-projections-nzmg": [
         "./modules/geospatial/src/projection/experimental/entries/projections/nzmg.ts"
       ],
-      "@math.gl/geospatial/projection/projections/omerc": [
+      "@math.gl/geospatial/projection-projections-omerc": [
         "./modules/geospatial/src/projection/experimental/entries/projections/omerc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/ortho": [
+      "@math.gl/geospatial/projection-projections-ortho": [
         "./modules/geospatial/src/projection/experimental/entries/projections/ortho.ts"
       ],
-      "@math.gl/geospatial/projection/projections/poly": [
+      "@math.gl/geospatial/projection-projections-poly": [
         "./modules/geospatial/src/projection/experimental/entries/projections/poly.ts"
       ],
-      "@math.gl/geospatial/projection/projections/qsc": [
+      "@math.gl/geospatial/projection-projections-qsc": [
         "./modules/geospatial/src/projection/experimental/entries/projections/qsc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/robin": [
+      "@math.gl/geospatial/projection-projections-robin": [
         "./modules/geospatial/src/projection/experimental/entries/projections/robin.ts"
       ],
-      "@math.gl/geospatial/projection/projections/sinu": [
+      "@math.gl/geospatial/projection-projections-sinu": [
         "./modules/geospatial/src/projection/experimental/entries/projections/sinu.ts"
       ],
-      "@math.gl/geospatial/projection/projections/somerc": [
+      "@math.gl/geospatial/projection-projections-somerc": [
         "./modules/geospatial/src/projection/experimental/entries/projections/somerc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/tpers": [
+      "@math.gl/geospatial/projection-projections-tpers": [
         "./modules/geospatial/src/projection/experimental/entries/projections/tpers.ts"
       ],
-      "@math.gl/geospatial/projection/projections/vandg": [
+      "@math.gl/geospatial/projection-projections-vandg": [
         "./modules/geospatial/src/projection/experimental/entries/projections/vandg.ts"
       ],
-      "@math.gl/geospatial/projection/projections/ob_tran": [
+      "@math.gl/geospatial/projection-projections-ob_tran": [
         "./modules/geospatial/src/projection/experimental/entries/projections/ob_tran.ts"
       ],
-      "@math.gl/geospatial/projection/parsers/wkt": [
+      "@math.gl/geospatial/projection-parsers-wkt": [
         "./modules/geospatial/src/projection/experimental/crs/wkt.ts"
       ],
-      "@math.gl/geospatial/projection/parsers/projjson": [
+      "@math.gl/geospatial/projection-parsers-projjson": [
         "./modules/geospatial/src/projection/experimental/crs/projjson.ts"
       ],
-      "@math.gl/geospatial/projection/grids/ntv2": [
+      "@math.gl/geospatial/projection-grids-ntv2": [
         "./modules/geospatial/src/projection/experimental/grids/ntv2.ts"
       ],
-      "@math.gl/geospatial/projection/grids/geotiff": [
+      "@math.gl/geospatial/projection-grids-geotiff": [
         "./modules/geospatial/src/projection/experimental/grids/geotiff.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/merc": [
+      "@math.gl/geospatial/projection-projections-lazy-merc": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/merc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/eqc": [
+      "@math.gl/geospatial/projection-projections-lazy-eqc": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/eqc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/lcc": [
+      "@math.gl/geospatial/projection-projections-lazy-lcc": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/lcc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/aea": [
+      "@math.gl/geospatial/projection-projections-lazy-aea": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/aea.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/eqdc": [
+      "@math.gl/geospatial/projection-projections-lazy-eqdc": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/eqdc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/laea": [
+      "@math.gl/geospatial/projection-projections-lazy-laea": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/laea.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/stere": [
+      "@math.gl/geospatial/projection-projections-lazy-stere": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/stere.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/sterea": [
+      "@math.gl/geospatial/projection-projections-lazy-sterea": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/sterea.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/aeqd": [
+      "@math.gl/geospatial/projection-projections-lazy-aeqd": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/aeqd.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/tmerc": [
+      "@math.gl/geospatial/projection-projections-lazy-tmerc": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/tmerc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/etmerc": [
+      "@math.gl/geospatial/projection-projections-lazy-etmerc": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/etmerc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/utm": [
+      "@math.gl/geospatial/projection-projections-lazy-utm": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/utm.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/geocent": [
+      "@math.gl/geospatial/projection-projections-lazy-geocent": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/geocent.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/bonne": [
+      "@math.gl/geospatial/projection-projections-lazy-bonne": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/bonne.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/cass": [
+      "@math.gl/geospatial/projection-projections-lazy-cass": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/cass.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/cea": [
+      "@math.gl/geospatial/projection-projections-lazy-cea": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/cea.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/eck6": [
+      "@math.gl/geospatial/projection-projections-lazy-eck6": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/eck6.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/eqearth": [
+      "@math.gl/geospatial/projection-projections-lazy-eqearth": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/eqearth.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/equi": [
+      "@math.gl/geospatial/projection-projections-lazy-equi": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/equi.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/geos": [
+      "@math.gl/geospatial/projection-projections-lazy-geos": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/geos.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/gnom": [
+      "@math.gl/geospatial/projection-projections-lazy-gnom": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/gnom.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/gstmerc": [
+      "@math.gl/geospatial/projection-projections-lazy-gstmerc": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/gstmerc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/krovak": [
+      "@math.gl/geospatial/projection-projections-lazy-krovak": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/krovak.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/mill": [
+      "@math.gl/geospatial/projection-projections-lazy-mill": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/mill.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/moll": [
+      "@math.gl/geospatial/projection-projections-lazy-moll": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/moll.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/nzmg": [
+      "@math.gl/geospatial/projection-projections-lazy-nzmg": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/nzmg.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/omerc": [
+      "@math.gl/geospatial/projection-projections-lazy-omerc": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/omerc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/ortho": [
+      "@math.gl/geospatial/projection-projections-lazy-ortho": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/ortho.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/poly": [
+      "@math.gl/geospatial/projection-projections-lazy-poly": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/poly.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/qsc": [
+      "@math.gl/geospatial/projection-projections-lazy-qsc": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/qsc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/robin": [
+      "@math.gl/geospatial/projection-projections-lazy-robin": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/robin.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/sinu": [
+      "@math.gl/geospatial/projection-projections-lazy-sinu": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/sinu.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/somerc": [
+      "@math.gl/geospatial/projection-projections-lazy-somerc": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/somerc.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/tpers": [
+      "@math.gl/geospatial/projection-projections-lazy-tpers": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/tpers.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/vandg": [
+      "@math.gl/geospatial/projection-projections-lazy-vandg": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/vandg.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy": [
+      "@math.gl/geospatial/projection-projections-lazy": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/index.ts"
       ],
-      "@math.gl/geospatial/projection/projections/lazy/ob_tran": [
+      "@math.gl/geospatial/projection-projections-lazy-ob_tran": [
         "./modules/geospatial/src/projection/experimental/lazy-projections/ob_tran.ts"
       ],
-      "@math.gl/geospatial/projection/grids/vertical": [
+      "@math.gl/geospatial/projection-grids-vertical": [
         "./modules/geospatial/src/projection/experimental/grids/vertical.ts"
       ],
-      "@math.gl/geospatial/projection/grids/gtx": [
+      "@math.gl/geospatial/projection-grids-gtx": [
         "./modules/geospatial/src/projection/experimental/grids/gtx.ts"
       ],
-      "@math.gl/geospatial/projection/grids/vertical-geotiff": [
+      "@math.gl/geospatial/projection-grids-vertical-geotiff": [
         "./modules/geospatial/src/projection/experimental/grids/vertical-geotiff.ts"
       ],
-      "@math.gl/geospatial/projection/pipeline": [
+      "@math.gl/geospatial/projection-pipeline": [
         "./modules/geospatial/src/projection/pipeline.ts"
       ],
-      "@math.gl/geospatial/projection/deformation": [
+      "@math.gl/geospatial/projection-deformation": [
         "./modules/geospatial/src/projection/deformation.ts"
       ],
-      "@math.gl/geospatial/projection/grids/velocity": [
+      "@math.gl/geospatial/projection-grids-velocity": [
         "./modules/geospatial/src/projection/grids/velocity.ts"
       ],
-      "@math.gl/geospatial/projection/grids/velocity-geotiff": [
+      "@math.gl/geospatial/projection-grids-velocity-geotiff": [
         "./modules/geospatial/src/projection/experimental/grids/velocity-geotiff.ts"
       ],
-      "@math.gl/geospatial/projection/operations": [
+      "@math.gl/geospatial/projection-operations": [
         "./modules/geospatial/src/projection/operations.ts"
       ],
-      "@math.gl/geospatial/projection/analysis": [
+      "@math.gl/geospatial/projection-analysis": [
         "./modules/geospatial/src/projection/analysis.ts"
       ],
-      "@math.gl/geospatial/projection/bulk": [
+      "@math.gl/geospatial/projection-bulk": [
         "./modules/geospatial/src/projection/bulk.ts"
       ],
-      "@math.gl/geospatial/projection/temporal": [
+      "@math.gl/geospatial/projection-temporal": [
         "./modules/geospatial/src/projection/temporal.ts"
       ],
-      "@math.gl/geospatial/projection/types": [
+      "@math.gl/geospatial/projection-types": [
         "./modules/geospatial/src/projection/types.ts"
       ],
-      "@math.gl/geospatial/projection/web-mercator": [
+      "@math.gl/geospatial/projection-web-mercator": [
         "./modules/geospatial/src/projection/web-mercator.ts"
       ],
-      "@math.gl/geospatial/projection/analysis/transform": [
+      "@math.gl/geospatial/projection-analysis-transform": [
         "./modules/geospatial/src/projection/transform-analysis.ts"
       ],
       "@math.gl/geospatial/test/*": [
         "./modules/geospatial/test/*"
-      ],
-      "@math.gl/earth": [
-        "./modules/earth/src/index.ts"
       ],
       "@math.gl/earth/sun": [
         "./modules/earth/src/sun/index.ts"
@@ -332,32 +329,29 @@
       "@math.gl/earth/timezone": [
         "./modules/earth/src/timezone/index.ts"
       ],
-      "@math.gl/earth/geoid/geoid-egm96-low.pgm": [
+      "@math.gl/earth/geoid-geoid-egm96-low.pgm": [
         "./modules/earth/data/geoid/geoid-egm96-low.pgm"
       ],
-      "@math.gl/earth/geoid/geoid-egm96-hi.pgm": [
+      "@math.gl/earth/geoid-geoid-egm96-hi.pgm": [
         "./modules/earth/data/geoid/geoid-egm96-hi.pgm"
       ],
-      "@math.gl/earth/sun/stars": [
+      "@math.gl/earth/sun-stars": [
         "./modules/earth/src/sun/stars.ts"
       ],
-      "@math.gl/earth/timezone/timezone-geometry-low.json": [
+      "@math.gl/earth/timezone-timezone-geometry-low.json": [
         "./modules/earth/data/timezone/timezone-geometry-low.json"
       ],
-      "@math.gl/earth/timezone/timezone-geometry-low.parquet": [
+      "@math.gl/earth/timezone-timezone-geometry-low.parquet": [
         "./modules/earth/data/timezone/timezone-geometry-low.parquet"
       ],
-      "@math.gl/earth/timezone/timezone-geometry-hi.json": [
+      "@math.gl/earth/timezone-timezone-geometry-hi.json": [
         "./modules/earth/data/timezone/timezone-geometry-hi.json"
       ],
-      "@math.gl/earth/timezone/timezone-geometry-hi.parquet": [
+      "@math.gl/earth/timezone-timezone-geometry-hi.parquet": [
         "./modules/earth/data/timezone/timezone-geometry-hi.parquet"
       ],
       "@math.gl/earth/test/*": [
         "./modules/earth/test/*"
-      ],
-      "@math.gl/dggs": [
-        "./modules/dggs/src/index.ts"
       ],
       "@math.gl/dggs/test/*": [
         "./modules/dggs/test/*"
@@ -467,9 +461,6 @@
       "@math.gl/tasks/test/*": [
         "./modules/tasks/test/*"
       ],
-      "@math.gl/sql": [
-        "./modules/sql/src/index.ts"
-      ],
       "@math.gl/sql/parser": [
         "./modules/sql/src/parser/index.ts"
       ],
@@ -497,6 +488,9 @@
       "@math.gl/core/color": [
         "./modules/core/src/color/index.ts"
       ],
+      "@math.gl/core/types": [
+        "./modules/core/src/types.ts"
+      ],
       "@math.gl/core/matrix": [
         "./modules/core/src/matrix.ts"
       ],
@@ -505,6 +499,106 @@
       ],
       "@math.gl/geometry/arrow": [
         "./modules/geometry/src/arrow/index.ts"
+      ],
+      "@math.gl/dggs/a5": [
+        "./modules/dggs/src/a5.ts"
+      ],
+      "@math.gl/dggs/geohash": [
+        "./modules/dggs/src/geohash.ts"
+      ],
+      "@math.gl/dggs/h3": [
+        "./modules/dggs/src/h3.ts"
+      ],
+      "@math.gl/dggs/plus-code": [
+        "./modules/dggs/src/plus-code.ts"
+      ],
+      "@math.gl/dggs/quadkey": [
+        "./modules/dggs/src/quadkey.ts"
+      ],
+      "@math.gl/dggs/s2": [
+        "./modules/dggs/src/s2.ts"
+      ],
+      "@math.gl/dggs/decoders": [
+        "./modules/dggs/src/decoders.ts"
+      ],
+      "@math.gl/earth/ocean": [
+        "./modules/earth/src/ocean/index.ts"
+      ],
+      "@math.gl/geometry/lighting": [
+        "./modules/geometry/src/lighting/index.ts"
+      ],
+      "@math.gl/geometry/primitives": [
+        "./modules/geometry/src/primitives.ts"
+      ],
+      "@math.gl/geometry/curves": [
+        "./modules/geometry/src/curves/index.ts"
+      ],
+      "@math.gl/geometry/polygon": [
+        "./modules/geometry/src/polygon/index.ts"
+      ],
+      "@math.gl/geospatial/tasks": [
+        "./modules/geospatial/src/tasks/index.ts"
+      ],
+      "@math.gl/geospatial/elastic": [
+        "./modules/geospatial/src/elastic.ts"
+      ],
+      "@math.gl/geospatial/turf": [
+        "./modules/geospatial/src/turf.ts"
+      ],
+      "@math.gl/geospatial/st-functions": [
+        "./modules/geospatial/src/st-functions.ts"
+      ],
+      "@math.gl/geospatial/turf-functions": [
+        "./modules/geospatial/src/turf-functions.ts"
+      ],
+      "@math.gl/geospatial/maps-presets": [
+        "./modules/geospatial/src/maps/presets.ts"
+      ],
+      "@math.gl/geospatial/maps-geometry": [
+        "./modules/geospatial/src/maps/geometry.ts"
+      ],
+      "@math.gl/geospatial/maps-transitions": [
+        "./modules/geospatial/src/maps/transitions.ts"
+      ],
+      "@math.gl/geospatial/maps-surfaces": [
+        "./modules/geospatial/src/maps/surfaces.ts"
+      ],
+      "@math.gl/geospatial/ellipsoid": [
+        "./modules/geospatial/src/entries/ellipsoid.ts"
+      ],
+      "@math.gl/geospatial/geodesics": [
+        "./modules/geospatial/src/geodesics.ts"
+      ],
+      "@math.gl/geospatial/globe": [
+        "./modules/geospatial/src/globe.ts"
+      ],
+      "@math.gl/geospatial/tiles": [
+        "./modules/geospatial/src/tiles.ts"
+      ],
+      "@math.gl/geospatial/coordinates": [
+        "./modules/geospatial/src/coordinates.ts"
+      ],
+      "@math.gl/geospatial/geographic-cuts": [
+        "./modules/geospatial/src/geographic-cuts.ts"
+      ],
+      "@math.gl/geospatial/expressions": [
+        "./modules/geospatial/src/expressions.ts"
+      ],
+      "@math.gl/sql/dataframe": ["./modules/sql/src/dataframe/index.ts"],
+      "@math.gl/sql/geoarrow-functions": [
+        "./modules/sql/src/geoarrow-functions.ts"
+      ],
+      "@math.gl/sql/query": [
+        "./modules/sql/src/query.ts"
+      ],
+      "@math.gl/sql/scales-conformance": [
+        "./modules/sql/src/scales/conformance.ts"
+      ],
+      "@math.gl/sql/worker-entry.js": [
+        "./modules/sql/src/arrow/worker-entry.ts"
+      ],
+      "@math.gl/sql/query-worker-entry.js": [
+        "./modules/sql/src/arrow/query-worker-entry.ts"
       ]
     }
   }

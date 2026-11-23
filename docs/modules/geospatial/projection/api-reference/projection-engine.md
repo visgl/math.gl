@@ -22,7 +22,7 @@ returned by asynchronous initialization. An async-only backend uses the separate
 recipe rather than returning Promises from synchronous methods.
 
 ```ts
-import type { ProjectionEngine } from "@math.gl/geospatial/projection/types";
+import type { ProjectionEngine } from "@math.gl/geospatial/projection-types";
 import { projectionEngine } from "@math.gl/geospatial/projection";
 
 const engine: ProjectionEngine = projectionEngine;
@@ -37,8 +37,8 @@ The default `projectionEngine` includes the built-in projection catalogue, compa
 readers and named datum catalogue. For selective imports, configure your own engine:
 
 ```ts
-import { createProjectionEngine } from "@math.gl/geospatial/projection/core";
-import { mercator } from "@math.gl/geospatial/projection/projections/merc";
+import { createProjectionEngine } from "@math.gl/geospatial/projection-core";
+import { mercator } from "@math.gl/geospatial/projection-projections-merc";
 
 const engine = createProjectionEngine({ projections: [mercator] });
 const projection = engine.createProjection({ to: "EPSG:3857" });
@@ -47,13 +47,13 @@ const projection = engine.createProjection({ to: "EPSG:3857" });
 | Engine                         | Capabilities                                                                 | Import                                 |
 | ------------------------------ | ---------------------------------------------------------------------------- | -------------------------------------- |
 | `FullProjectionEngine`         | Built-in algorithms, WKT/PROJJSON compatibility readers and named datums     | `@math.gl/geospatial/projection`                  |
-| `ConfigurableProjectionEngine` | Explicit plugins, readers, aliases and grids                                 | `@math.gl/geospatial/projection/core`             |
-| `LazyProjectionEngine`         | Built-in algorithm descriptors; readers and datum catalogues remain explicit | `@math.gl/geospatial/projection/projections/lazy` |
-| `WebMercatorProjectionEngine`  | Only WGS84 / EPSG:4326 and EPSG:3857; no readers or datum machinery          | `@math.gl/geospatial/projection/web-mercator`     |
+| `ConfigurableProjectionEngine` | Explicit plugins, readers, aliases and grids                                 | `@math.gl/geospatial/projection-core`             |
+| `LazyProjectionEngine`         | Built-in algorithm descriptors; readers and datum catalogues remain explicit | `@math.gl/geospatial/projection-projections-lazy` |
+| `WebMercatorProjectionEngine`  | Only WGS84 / EPSG:4326 and EPSG:3857; no readers or datum machinery          | `@math.gl/geospatial/projection-web-mercator`     |
 
 All implement this interface. The eager catalogue is available as `projectionEngine`;
 the lazy catalogue as `lazyProjectionEngine`. Both lazy exports are available
-from `@math.gl/geospatial/projection/projections/lazy`.
+from `@math.gl/geospatial/projection-projections-lazy`.
 
 ## Engine configuration
 
@@ -85,7 +85,7 @@ instance. Unrelated registered descriptors remain unloaded. Rejected loads can b
 ## Lazy creation and warm-up
 
 ```ts
-import { LazyProjectionEngine } from "@math.gl/geospatial/projection/projections/lazy";
+import { LazyProjectionEngine } from "@math.gl/geospatial/projection-projections-lazy";
 
 const engine = new LazyProjectionEngine();
 const deferred = engine.createProjection({ to: "EPSG:3857" }); // synchronous; no loading
@@ -99,7 +99,7 @@ const utm = ready.project([12, 55]); // synchronous
 ## Minimal Web Mercator backend
 
 ```typescript
-import { WebMercatorProjectionEngine } from "@math.gl/geospatial/projection/web-mercator";
+import { WebMercatorProjectionEngine } from "@math.gl/geospatial/projection-web-mercator";
 
 const engine = new WebMercatorProjectionEngine();
 const projection = engine.createProjection({ to: "EPSG:3857" });

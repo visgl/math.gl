@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original kinematic bulk Helmert arithmetic, ownership, epoch, failure and recursive-use tests. Independent PROJ anchors are maintained in the pipeline qualification fixtures.
 import {expect, test} from 'vitest';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import type {PipelineStep} from '@math.gl/geospatial/projection/pipeline';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import type {PipelineStep} from '@math.gl/geospatial/projection-pipeline';
 
 const input = {space: 'geocentric', units: ['m', 'm', 'm']} as const;
 type HelmertStep = Extract<PipelineStep, {type: 'helmert'}>;

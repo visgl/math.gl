@@ -15,7 +15,7 @@ import {
 } from 'apache-arrow';
 import * as math from '../src/math-functions';
 import {compileArrowExpression, ExpressionEvaluationError} from '../src/arrow';
-import {NativeFloat16ArrayConstructor} from '@math.gl/core';
+import {NativeFloat16ArrayConstructor} from '@math.gl/core/types';
 
 const functions = Object.values(math);
 function evaluate(expression: string, values: (number | bigint | null)[], type = new Float64()) {

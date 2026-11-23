@@ -6,7 +6,20 @@ import {scalarFunction} from './utils/scalar-function';
 
 import {expect, test, vi} from 'vitest';
 import {
+  makeData,
+  makeVector,
+  Binary,
   Bool,
+  Struct,
+  DateDay,
+  DateMillisecond,
+  DurationMillisecond,
+  TimeMicrosecond,
+  TimeSecond,
+  TimestampSecond,
+  TimestampMillisecond,
+  TimestampNanosecond,
+  TimestampMicrosecond,
   Field,
   Float32,
   Null,
@@ -204,6 +217,178 @@ test('portable predicates compile through shared Arrow kernels and bind paramete
       {inputSchema: input.schema}
     )
   ).toThrow('requires a value');
+});
+
+test('portable predicates compare mixed numeric representations without rounding', () => {
+  const input = batch({x: vectorFromArray([1n, 2n, 9007199254740993n, null], new Int64())});
+  const options = {inputSchema: input.schema};
+  expect([
+    ...compileArrowPredicate({op: '>', args: [{property: 'x'}, 1.5]}, options).evaluate(input)
+  ]).toEqual([false, true, true, null]);
+  expect([
+    ...compileArrowPredicate(
+      {op: 'in', args: [{property: 'x'}, [2, 9007199254740992]]},
+      options
+    ).evaluate(input)
+  ]).toEqual([false, true, false, null]);
+
+  const floats = batch({x: vectorFromArray([9007199254740992, null], new Float64())});
+  expect([
+    ...compileArrowPredicate(
+      {op: '<', args: [{property: 'x'}, 9007199254740993n]},
+      {inputSchema: floats.schema}
+    ).evaluate(floats)
+  ]).toEqual([true, null]);
+});
+
+test('portable predicates retain fractional literals for Int32 and Float32', () => {
+  const integers = batch({x: vectorFromArray([1, 2, null], new Int32())});
+  const integerOptions = {inputSchema: integers.schema};
+  expect([
+    ...compileArrowPredicate({op: '>', args: [{property: 'x'}, 1.5]}, integerOptions).evaluate(
+      integers
+    )
+  ]).toEqual([false, true, null]);
+  expect([
+    ...compileArrowPredicate(
+      {op: 'in', args: [{property: 'x'}, [1.5, 2]]},
+      integerOptions
+    ).evaluate(integers)
+  ]).toEqual([false, true, null]);
+
+  const floats = batch({x: vectorFromArray([0.1, null], new Float32())});
+  const floatOptions = {inputSchema: floats.schema};
+  expect([
+    ...compileArrowPredicate({op: '=', args: [{property: 'x'}, 0.1]}, floatOptions).evaluate(floats)
+  ]).toEqual([false, null]);
+  expect([
+    ...compileArrowPredicate({op: 'in', args: [{property: 'x'}, [0.1]]}, floatOptions).evaluate(
+      floats
+    )
+  ]).toEqual([false, null]);
+  expect(values('x == 0.1', floats)).toEqual([true, null]);
+});
+
+test('portable predicates reject non-finite operands while expressions retain IEEE behavior', () => {
+  const input = batch({x: vectorFromArray([Infinity, NaN], new Float64())});
+  const options = {inputSchema: input.schema};
+  expect(values('x > 1', input)).toEqual([true, false]);
+  expect(() =>
+    compileArrowPredicate({op: '>', args: [{property: 'x'}, 1]}, options).evaluate(input)
+  ).toThrow('non-finite');
+  expect(() =>
+    compileArrowPredicate({op: 'in', args: [{property: 'x'}, [1]]}, options).evaluate(input)
+  ).toThrow('non-finite');
+});
+
+test('portable predicates bind Date and binary literals with null propagation', () => {
+  const input = batch({
+    day: vectorFromArray([Date.UTC(2026, 0, 1), Date.UTC(2026, 0, 2), null], new DateDay()),
+    bytes: vectorFromArray([Uint8Array.of(1, 2), Uint8Array.of(1, 3), null], new Binary())
+  });
+  const options = {inputSchema: input.schema, parameters: {day: new Date('2026-01-02')}};
+  const datePredicate = compileArrowPredicate(
+    {op: '=', args: [{property: 'day'}, {parameter: 'day'}]},
+    options
+  );
+  expect([...datePredicate.evaluate(input)]).toEqual([false, true, null]);
+  const noon = new Date('2026-01-02T12:00:00Z');
+  expect([
+    ...compileArrowPredicate({op: '=', args: [{property: 'day'}, noon]}, options).evaluate(input)
+  ]).toEqual([false, true, null]);
+  expect([
+    ...compileArrowPredicate({op: 'in', args: [{property: 'day'}, [noon]]}, options).evaluate(input)
+  ]).toEqual([false, true, null]);
+  const binaryPredicate = compileArrowPredicate(
+    {op: '<', args: [{property: 'bytes'}, Uint8Array.of(1, 3)]},
+    options
+  );
+  expect([...binaryPredicate.evaluate(input)]).toEqual([true, false, null]);
+});
+
+test('portable predicates resolve nested struct paths and missing members as null', () => {
+  const type = new Struct([new Field('value', new Int32())]);
+  const input = batch({item: vectorFromArray([{value: 1}, {value: 2}, null], type)});
+  const options = {inputSchema: input.schema};
+  expect([
+    ...compileArrowPredicate({op: '>', args: [{property: ['item', 'value']}, 1]}, options).evaluate(
+      input
+    )
+  ]).toEqual([false, true, null]);
+  expect([
+    ...compileArrowPredicate(
+      {op: 'isNull', args: [{property: ['item', 'missing']}]},
+      options
+    ).evaluate(input)
+  ]).toEqual([true, true, true]);
+  expect([
+    ...compileArrowPredicate(
+      {op: '=', args: [{property: ['item', 'missing']}, 1]},
+      options
+    ).evaluate(input)
+  ]).toEqual([null, null, null]);
+});
+
+test.each([
+  [new DateMillisecond(), 1000n, 2000n],
+  [new TimestampSecond(), 1n, 2n],
+  [new TimestampMillisecond(), 1000n, 2000n],
+  [new TimestampMicrosecond(), 1000000n, 2000000n],
+  [new TimestampNanosecond(), 1000000000n, 2000000000n]
+] as const)(
+  'portable Date predicates bind to Arrow %s without truncating the bound',
+  (type, first, second) => {
+    const input = batch({
+      when: makeVector(
+        makeData({
+          type,
+          length: 3,
+          data: BigInt64Array.of(first, second, 0n),
+          nullCount: 1,
+          nullBitmap: Uint8Array.of(3)
+        })
+      )
+    });
+    const options = {inputSchema: input.schema};
+    const bound = new Date(1500);
+    expect([
+      ...compileArrowPredicate({op: '>', args: [{property: 'when'}, bound]}, options).evaluate(
+        input
+      )
+    ]).toEqual([false, true, null]);
+    expect([
+      ...compileArrowPredicate({op: 'in', args: [{property: 'when'}, [bound]]}, options).evaluate(
+        input
+      )
+    ]).toEqual([false, false, null]);
+    expect(() => values('cast(when, "utf8")', input)).toThrow('Temporal CAST requires');
+  }
+);
+
+test('portable time and duration predicates compare physical values exactly', () => {
+  const input = batch({
+    seconds: vectorFromArray([1, 2, null], new TimeSecond()),
+    micros: vectorFromArray([1n, 2n, null], new TimeMicrosecond()),
+    duration: vectorFromArray(
+      [9007199254740992n, 9007199254740993n, null],
+      new DurationMillisecond()
+    )
+  });
+  const options = {inputSchema: input.schema};
+  expect([
+    ...compileArrowPredicate({op: '>', args: [{property: 'seconds'}, 1.5]}, options).evaluate(input)
+  ]).toEqual([false, true, null]);
+  expect([
+    ...compileArrowPredicate({op: '>', args: [{property: 'micros'}, 1.5]}, options).evaluate(input)
+  ]).toEqual([false, true, null]);
+  expect([
+    ...compileArrowPredicate(
+      {op: '>', args: [{property: 'duration'}, 9007199254740992]},
+      options
+    ).evaluate(input)
+  ]).toEqual([false, true, null]);
+  for (const column of ['seconds', 'micros', 'duration'])
+    expect(() => values(`cast(${column}, "utf8")`, input)).toThrow('Temporal CAST requires');
 });
 
 test('integer bounds and exact argument types are checked before truncation', () => {

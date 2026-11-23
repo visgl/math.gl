@@ -11,7 +11,7 @@
 // - It has not been fully adapted to math.gl conventions
 // - Documentation has not been ported
 
-import {Vector3, Vector2, Matrix4, assert, NumericArray} from '@math.gl/core';
+import {Vector3, Vector2, Matrix4, assert, NumericArray} from '@math.gl/core/matrix';
 import {CullingVolume} from './culling-volume';
 import {Plane} from './plane';
 

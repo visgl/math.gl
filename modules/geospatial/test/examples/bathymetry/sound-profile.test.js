@@ -8,10 +8,13 @@ import {
   getAbsoluteSalinity,
   getConservativeTemperature,
   getSeaPressureFromHeight,
-  getSeawaterSoundSpeed
+  getSeawaterSoundSpeed,
+  getSoundAbsorptionFrancoisGarrison
 } from '@math.gl/earth/ocean';
 import {
+  FRANCOIS_GARRISON_DOMAIN,
   computeSoundProfile,
+  isInAbsorptionDomain,
   pickSeaLevelPoint,
   sampleHeight
 } from '../../../../../examples/geospatial/bathymetry/src/sound-profile.js';
@@ -222,4 +225,66 @@ test('the WOA23 loader fetches the pinned manifest and gunzips the preview', asy
   } finally {
     globalThis.fetch = original;
   }
+});
+
+test('the absorption domain matches getSoundAbsorptionFrancoisGarrison at each bound', () => {
+  const inside = {frequency: 12000, temperature: 10, salinity: 35, depth: 100};
+  for (const [name, bounds] of Object.entries(FRANCOIS_GARRISON_DOMAIN)) {
+    for (const [bound, outward] of [
+      [bounds[0], -1e-6],
+      [bounds[1], 1e-6]
+    ]) {
+      const edge = {...inside, [name]: bound};
+      const outside = {...inside, [name]: bound + outward};
+      assert.ok(Number.isFinite(getSoundAbsorptionFrancoisGarrison(edge)), `${name} ${bound}`);
+      assert.equal(isInAbsorptionDomain(edge), true, `${name} ${bound}`);
+      assert.throws(() => getSoundAbsorptionFrancoisGarrison(outside), RangeError);
+      assert.equal(isInAbsorptionDomain(outside), false, `${name} ${bound + outward}`);
+    }
+  }
+});
+
+// Red Sea-like: warm, salty surface water and a salty layer at 500 m.
+const redSea = {
+  depths: [0, 10, 20, 50, 100, 200, 500, 1000],
+  temperature: [31, 30.4, 29.5, 27, 24, 22, 21.7, 21.5],
+  practicalSalinity: [40.5, 40.2, 39.9, 39.8, 39.9, 39.95, 40.3, 39.9]
+};
+
+test('levels outside the absorption domain keep their sound speed and have no absorption', () => {
+  const result = computeSoundProfile(redSea, {latitude: 20, seafloorDepth: 1000, frequency: 12000});
+  assert.equal(result.levels.length, redSea.depths.length);
+  assert.ok(result.levels.every(level => Number.isFinite(level.soundSpeed)));
+  assert.deepEqual(
+    result.levels.flatMap((level, i) => (level.absorption === null ? [i] : [])),
+    [0, 1, 6]
+  );
+  assert.equal(result.levelsWithoutAbsorption, 3);
+  // The intervals next to levels 0, 1 and 6 (0-20 m and 200-1000 m) do not count.
+  const [, , a20, a50, a100, a200] = result.levels.map(level => level.absorption);
+  const expected = ((a20 + a50) / 2) * 0.03 + ((a50 + a100) / 2) * 0.05 + ((a100 + a200) / 2) * 0.1;
+  assert.ok(Math.abs(result.verticalLoss - expected) < 1e-12, `${result.verticalLoss}`);
+  const markup = createSoundProfileMarkup(result, {
+    longitude: 38,
+    latitude: 20,
+    seafloorDepth: 1000,
+    frequency: 12000
+  });
+  assert.match(markup, /no value at the surface/);
+  assert.match(markup, /partial/);
+  assert.match(markup, /outside the Francois–Garrison range at 3 levels/);
+});
+
+test('a profile with no absorption interval has no vertical loss', () => {
+  const salty = {depths: [0, 10], temperature: [31, 31], practicalSalinity: [41, 41]};
+  const result = computeSoundProfile(salty, {latitude: 20, seafloorDepth: 10, frequency: 12000});
+  assert.equal(result.verticalLoss, null);
+  const markup = createSoundProfileMarkup(result, {
+    longitude: 50,
+    latitude: 26,
+    seafloorDepth: 10,
+    frequency: 12000
+  });
+  assert.match(markup, /One-way vertical loss: no value/);
+  assert.match(markup, /at 2 levels/);
 });

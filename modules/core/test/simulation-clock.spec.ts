@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, it} from 'vitest';
-import {SimulationClock, interpolateTickState, quat} from '@math.gl/core';
-import type {SimulationClockAdvance} from '@math.gl/core';
+import {SimulationClock, interpolateTickState, quat} from '@math.gl/core/matrix';
+import type {SimulationClockAdvance} from '@math.gl/core/matrix';
 
 const YEAR = 365.25 * 86400;
 

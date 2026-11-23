@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {Ellipsoid, LocalReferenceFrame} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {LocalReferenceFrame} from '@math.gl/geospatial/coordinates';
 import {qualifyFrameBatches, frameBatchMethods} from './frame-batch-qualification';
 for (const row of qualifyFrameBatches())
   test(`G7 independent packed frame ${row.id}`, () => {

@@ -6,7 +6,7 @@ Infinite and partially infinite planes are represented analytically by `PlaneSha
 `@math.gl/geometry/culling`; `PlaneGeometry` requires finite `sizeX` and `sizeZ` values.
 
 ```ts
-import {CapsuleGeometry} from '@math.gl/geometry';
+import {CapsuleGeometry} from '@math.gl/geometry/primitives';
 
 const capsule = new CapsuleGeometry({height: 2, radiusBottom: 0.5, radiusTop: 0.25});
 ```
@@ -24,7 +24,7 @@ The experimental `HingeTree` evaluates rigid panels connected by hinges. See the
 [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and
 [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/geometry/unfolding-polyhedron).
 
-Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](https://math.gl/docs/modules/geometry/lighting). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
+Optional `@math.gl/geometry/lighting` and `@math.gl/core/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](https://math.gl/docs/modules/geometry/lighting). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
 
 `projectBounds` samples a prepared nonlinear transform over a finite box. Its result distinguishes approximate fitting from an enclosure conditional on caller-qualified Lipschitz bounds. See the [API reference](https://math.gl/docs/modules/geometry/utils/api-reference/project-bounds).
 Generate detached float64 UVs for CPU positions with `projectTextureCoordinates`, an explicit image rectangle and a prepared synchronous transform. It does not infer projection seams, clip domains or allocate GPU resources. See the [API reference](https://math.gl/docs/modules/geometry/utils/api-reference/project-texture-coordinates).
@@ -52,7 +52,7 @@ cubic Hermite curves, and open or closed Catmull–Rom splines. Includes analyti
 unit tangents, flat Float64 sampling, and reusable approximate arc-length tables.
 
 ```ts
-import {CubicBezierCurve, CurveArcLength} from '@math.gl/geometry';
+import {CubicBezierCurve, CurveArcLength} from '@math.gl/geometry/curves';
 
 const curve = new CubicBezierCurve([0, 0, 0], [1, 2, 0], [3, 2, 1], [4, 0, 1]);
 const point = curve.getPoint(0.5);

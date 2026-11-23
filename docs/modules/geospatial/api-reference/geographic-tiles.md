@@ -5,7 +5,7 @@
 </p>
 
 ```typescript
-import {getGeographicTile, getGeographicTileBounds, getGeographicTileRanges} from '@math.gl/geospatial';
+import {getGeographicTile, getGeographicTileBounds, getGeographicTileRanges} from '@math.gl/geospatial/tiles';
 
 getGeographicTile(175, 20, 3); // {x: 7, y: 3, level: 3}
 getGeographicTileBounds({x: 7, y: 3, level: 3}); // [135, 0, 180, 22.5]
@@ -57,7 +57,7 @@ requests, manage streaming, or implement geographic-distance nearest queries.
 Convert degree bounds and heights to a geodetic region before creating an OBB:
 
 ```typescript
-import {makeOBBFromRegion} from '@math.gl/geospatial';
+import {makeOBBFromRegion} from '@math.gl/geospatial/globe';
 const [west, south, east, north] = getGeographicTileBounds(tile);
 const radians = Math.PI / 180;
 const box = makeOBBFromRegion([

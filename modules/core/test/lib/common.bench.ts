@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileCopyrightText: Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 
-import {Vector3, toRadians, radians} from '@math.gl/core';
-import {isArray} from '@math.gl/core';
+import {Vector3, toRadians, radians} from '@math.gl/core/matrix';
+import {isArray} from '@math.gl/core/matrix';
 
 const classicArray = [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const float32Array = new Float32Array([1, 0, 0]);

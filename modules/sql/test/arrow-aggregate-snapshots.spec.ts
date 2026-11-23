@@ -4,7 +4,7 @@
 
 import {Dictionary, Int8, Int32, Table, Utf8, vectorFromArray} from 'apache-arrow';
 import {expect, test} from 'vitest';
-import {queryArrowAggregateSnapshots} from '@math.gl/sql';
+import {queryArrowAggregateSnapshots} from '@math.gl/sql/query';
 
 test('grouped snapshots retain null keys and remain independent as later batches arrive', async () => {
   const first = new Table({

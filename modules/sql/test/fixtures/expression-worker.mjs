@@ -5,7 +5,7 @@ import {SQRT} from '@math.gl/sql/math-functions';
 import {COLOR_RGB, COLOR_TO_RGBA8} from '@math.gl/sql/color-functions';
 import {initializeTaskWorker} from '@math.gl/tasks';
 import {createArrowExpressionTask} from '@math.gl/sql/worker';
-import {createTurfArrowFunction} from '@math.gl/geospatial/turf/expressions';
+import {createTurfArrowFunction} from '@math.gl/geospatial/turf-functions';
 import {distance} from '@math.gl/geospatial/turf';
 import {Field, FixedSizeList, Float64, Float32, Int32, List, vectorFromArray} from 'apache-arrow';
 const point = new Field('point', new FixedSizeList(2, new Field('xy', new Float64(), true)), true,

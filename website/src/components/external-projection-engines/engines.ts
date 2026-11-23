@@ -10,7 +10,7 @@ import {
   geoStereographic
 } from 'd3-geo';
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
-import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection/types';
+import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection-types';
 import {pointProjection} from './point-projection';
 
 export type Backend = 'math.gl' | 'proj4js' | 'D3';

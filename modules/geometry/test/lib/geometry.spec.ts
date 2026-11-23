@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Geometry, unpackIndexedGeometry} from '@math.gl/geometry';
+import {Geometry} from '@math.gl/geometry/primitives';
+import {unpackIndexedGeometry} from '@math.gl/geometry/processing';
 
 test('Geometry normalizes typed arrays and calculates indexed draw counts', () => {
   const geometry = new Geometry({

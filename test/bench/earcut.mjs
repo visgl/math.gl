@@ -137,7 +137,7 @@ async function compile(contents) {
     write: false,
     platform: 'node',
     format: 'esm',
-    alias: {'@math.gl/core': resolve(root, 'modules/core/src/index.ts')}
+    alias: {'@math.gl/core/matrix': resolve(root, 'modules/core/src/matrix.ts')}
   });
   const module = await import(
     `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString('base64')}`

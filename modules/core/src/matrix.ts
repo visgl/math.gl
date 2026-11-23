@@ -83,13 +83,6 @@ export {
 export type {LocalFramePoint, LocalFrameAxis, LocalFrameBasis} from './local-frame';
 export {spheroidToCartesian, cartesianToSpheroid} from './spheroid';
 export type {SpheroidGeometry, SpheroidPoint} from './spheroid';
-export {
-  isUint16Array,
-  NativeFloat16ArrayConstructor,
-  getFloat16ArrayConstructor,
-  isFloat16ArrayConstructor,
-  isFloat16Array
-} from './types';
 export type {
   BigTypedArray,
   BigTypedArrayConstructor,

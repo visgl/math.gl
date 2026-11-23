@@ -4,10 +4,18 @@
 // SPDX-FileCopyrightText: Copyright (c) 2017 Uber Technologies, Inc.
 
 import {test, expect} from 'vitest';
-import {Vector2, Vector3, Pose, _MathUtils} from '@math.gl/core';
-import {config, configure, isArray, clone, equals, exactEquals, formatValue} from '@math.gl/core';
-import {toRadians, toDegrees} from '@math.gl/core';
-import {radians, degrees, safeMod, normalizeAngle, clamp, lerp} from '@math.gl/core';
+import {Vector2, Vector3, Pose, _MathUtils} from '@math.gl/core/matrix';
+import {
+  config,
+  configure,
+  isArray,
+  clone,
+  equals,
+  exactEquals,
+  formatValue
+} from '@math.gl/core/matrix';
+import {toRadians, toDegrees} from '@math.gl/core/matrix';
+import {radians, degrees, safeMod, normalizeAngle, clamp, lerp} from '@math.gl/core/matrix';
 
 test('math.gl#tests', () => {
   expect(0, '0 and 0 compares equally').toBe(0);

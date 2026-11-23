@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {unnestArrowColumn} from '../src/arrow/unnest-arrow-column';
+import {expandArrowColumn, unnestArrowColumn} from '../src/arrow/unnest-arrow-column';
 import {expect, test} from 'vitest';
 import {
   Field,
   Float64,
+  FixedSizeList,
   Int32,
   List,
   Map_,
@@ -209,4 +210,33 @@ test('UNNEST orders qualified child outputs and retains sliced internal struct v
   }).slice(1);
   const result = unnestArrowColumn(structs, 'items', {valueColumn: 'value'});
   expect(Array.from(result.getChild('value')!)).toEqual([9]);
+});
+
+test('expands contiguous list children with one data run per input batch', () => {
+  const rows = Array.from({length: 128}, (_, row) => [row, null, row + 1]);
+  const batch = new Table({items: vectorFromArray(rows, new List(new Field('item', new Int32())))});
+  const input = batch.slice(1).concat(batch.slice(0, 2));
+  const result = expandArrowColumn(input, 'items', {
+    valueColumn: 'value',
+    keyColumn: 'key',
+    ordinalColumn: 'ordinal'
+  });
+  expect(result.table.batches).toHaveLength(2);
+  expect([...result.table.getChild('value')!.slice(0, 6)]).toEqual([1, null, 2, 2, null, 3]);
+  expect([...result.table.getChild('key')!.slice(0, 6)]).toEqual([1, 2, 3, 1, 2, 3]);
+  expect([...result.table.getChild('ordinal')!]).toEqual([...result.table.getChild('key')!]);
+  expect([...result.parentRows.slice(0, 6)]).toEqual([0, 0, 0, 1, 1, 1]);
+});
+
+test('expands the child ranges of sliced fixed-size lists and skips null parents', () => {
+  const items = vectorFromArray(
+    [[8, 9], null, [2, 3], [4, 5]],
+    new FixedSizeList(2, new Field('item', new Int32()))
+  );
+  const table = new Table({items}).slice(1);
+  for (const outer of [false, true]) {
+    const result = expandArrowColumn(table, 'items', {valueColumn: 'value', outer});
+    expect([...result.table.getChild('value')!]).toEqual(outer ? [null, 2, 3, 4, 5] : [2, 3, 4, 5]);
+    expect([...result.parentRows]).toEqual(outer ? [0, 1, 1, 2, 2] : [1, 1, 2, 2]);
+  }
 });

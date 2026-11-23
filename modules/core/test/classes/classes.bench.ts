@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileCopyrightText: Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 
-import {configure, Vector2, Vector3, Vector4, Matrix3, Matrix4} from '@math.gl/core';
+import {configure, Vector2, Vector3, Vector4, Matrix3, Matrix4} from '@math.gl/core/matrix';
 
 configure({debug: false});
 

@@ -2,14 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original shared equal-output G7/C8 workload, independent of historical/candidate implementation sources.
-import {
-  EllipsoidGeodesic,
-  EllipsoidRhumb,
-  Ellipsoid,
-  LocalReferenceFrame,
-  EllipsoidTangentPlane
-} from '@math.gl/geospatial';
-import {Vector2, Vector3, Matrix4, Quaternion} from '@math.gl/core';
+import {EllipsoidGeodesic, EllipsoidRhumb} from '@math.gl/geospatial/geodesics';
+import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial/ellipsoid';
+import {LocalReferenceFrame} from '@math.gl/geospatial/coordinates';
+import {Vector2, Vector3, Matrix4, Quaternion} from '@math.gl/core/matrix';
 import workload from './g7-workload.json';
 import reference from './g7-reference.json';
 import c8 from './c8-reference.json';

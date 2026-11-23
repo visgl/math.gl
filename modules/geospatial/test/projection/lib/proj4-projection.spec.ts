@@ -7,7 +7,7 @@
 
 /* eslint-disable */
 import {test, expect} from 'vitest';
-import {equals} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
 import {Proj4Projection} from '../helpers/proj4-reference';
 import {wgs84GeographicCRS} from '@math.gl/geospatial/crs/test/projjson-fixtures';
 

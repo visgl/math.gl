@@ -1,17 +1,19 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {Vector2, Vector3, Matrix4, Quaternion} from '@math.gl/core';
+import {Vector2, Vector3, Matrix4, Quaternion} from '@math.gl/core/matrix';
 import {
   Ellipsoid,
-  LocalReferenceFrame,
   EllipsoidTangentPlane,
-  type LocalReferenceFrameOptions,
-  type HeadingPitchRoll,
   type TangentPlaneProjection,
   type TangentPlaneProjectionMode
-} from '@math.gl/geospatial';
-import {LocalReferenceFrame as RootFrame} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/ellipsoid';
+import {
+  LocalReferenceFrame,
+  type LocalReferenceFrameOptions,
+  type HeadingPitchRoll
+} from '@math.gl/geospatial/coordinates';
+import {LocalReferenceFrame as RootFrame} from '@math.gl/geospatial/coordinates';
 const options: LocalReferenceFrameOptions = {
   ellipsoid: Ellipsoid.WGS84,
   axes: ['north', 'east', 'down'] as const
@@ -56,7 +58,7 @@ frame.fixedToLocalVectorsFlat(batch, batch);
 // @ts-expect-error Packed frame outputs require Float64 storage.
 frame.localToFixedPointsFlat(batch, new Float32Array(3));
 
-import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial';
+import {eastNorthUpToFixedFrame, localFrameToFixedFrame} from '@math.gl/geospatial/coordinates';
 import {
   getOrientedBoundingBoxQuaternion,
   makeOrientedBoundingBoxFromQuaternion

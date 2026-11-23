@@ -9,14 +9,14 @@ import {
   compileAsync,
   type ExpressionFunctionLibrary
 } from '@math.gl/sql/expressions';
-import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial';
+import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial/expressions';
 /* The repository ESLint resolver does not understand package export subpaths. */
 /* eslint-disable import/no-unresolved */
 import {
   GEOHASH_FUNCTION_LIBRARY,
   QUADKEY_FUNCTION_LIBRARY,
   S2_FUNCTION_LIBRARY
-} from '@math.gl/dggs';
+} from '@math.gl/dggs/decoders';
 /* eslint-enable import/no-unresolved */
 import {EXPRESSION_SAMPLES, type ExpressionSample, type LibraryId} from './samples';
 import {BLUE_MARBLE_WORLD_URL, BLUE_MARBLE_CREDIT_URL} from '../../../common/blue-marble.js';

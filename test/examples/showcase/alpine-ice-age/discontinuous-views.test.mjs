@@ -21,10 +21,17 @@ test("geographic field sampling wraps at the date line and stays within polar ro
     assert(Math.abs(sampleField(field, sample) - (latitude + 90)) < 1e-9);
   }
 });
-for (const view of Object.keys(DISCONTINUOUS_VIEWS)) {
+const sampled = process.env.MATHGL_EXAMPLE_MATRIX === "sampled";
+// Exercise the shared catalogue path with continuous, interrupted and cut layouts.
+const catalogueSample = ["projection:mollweide", "projection:interrupted-sinusoidal", "projection:guyou"];
+const views = Object.keys(DISCONTINUOUS_VIEWS).filter(view =>
+  !sampled || !view.startsWith("projection:") || catalogueSample.includes(view)
+);
+for (const view of views) {
   test(`${view}: cached geometry and graticules remain local to each region`, () => {
-    const grid = discontinuousGrid(view, 5);
-    assert.equal(discontinuousGrid(view, 5), grid);
+    const step = sampled ? 10 : 5;
+    const grid = discontinuousGrid(view, step);
+    assert.equal(discontinuousGrid(view, step), grid);
     assert(grid.indices.length > 0);
     assert(grid.positions.every(Number.isFinite));
     for (let i = 0; i < grid.indices.length; i += 3) {
@@ -36,7 +43,8 @@ for (const view of Object.keys(DISCONTINUOUS_VIEWS)) {
     // Region lookup scans every panel; sample across the full grid for dense H3 nets.
     const stride = Math.max(1, Math.floor(grid.sources.length / 2000));
     for (let i = 0; i < grid.sources.length; i += stride) {
-      assert(grid.map.findRegions(grid.sources[i]).includes(grid.regionIds[i]), `${view}: ${grid.sources[i]} in ${grid.regionIds[i]}, owners ${grid.map.findRegions(grid.sources[i])}`);
+      const owners = grid.map.findRegions(grid.sources[i]);
+      assert(owners.includes(grid.regionIds[i]), `${view}: ${grid.sources[i]} in ${grid.regionIds[i]}, owners ${owners}`);
     }
     for (const part of grid.lines) {
       assert(part.coordinates.length > 1);

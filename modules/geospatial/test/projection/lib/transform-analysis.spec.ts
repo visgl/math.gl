@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {createProjectionTransformAnalysis} from '@math.gl/geospatial/projection/analysis/transform';
+import {createProjectionTransformAnalysis} from '@math.gl/geospatial/projection-analysis-transform';
 import {
   createProjectionJacobian,
   createProjectionFactors
-} from '@math.gl/geospatial/projection/analysis';
-import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
+} from '@math.gl/geospatial/projection-analysis';
+import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 
 const domain = {west: -1, east: 1, south: -1, north: 1};
 const projections = [mercator];

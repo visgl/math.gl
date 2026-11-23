@@ -63,7 +63,7 @@ and unexpected callback failures remain fatal.
 ## Worker execution
 
 Send the parsed AST as the `expression` initialization value using the
-[whole-table worker API](../workers.md#worker-execution). Register functions in the worker module:
+[whole-table worker API](../worker.md#worker-execution). Register functions in the worker module:
 
 ```ts
 import {initializeTaskWorker} from '@math.gl/tasks';

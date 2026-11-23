@@ -1,8 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import exactAPI = require('@math.gl/geospatial');
-import triaxialAPI = require('@math.gl/geospatial');
+import exactAPI = require('@math.gl/geospatial/geodesics');
+import triaxialAPI = require('@math.gl/geospatial/ellipsoid');
 const {EllipsoidGeodesicExact} = exactAPI;
 const {TriaxialEllipsoid} = triaxialAPI;
 type ExactGeodesicOptions = exactAPI.ExactGeodesicOptions;

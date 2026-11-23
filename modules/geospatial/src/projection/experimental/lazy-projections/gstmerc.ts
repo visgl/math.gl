@@ -8,6 +8,6 @@ export const lazyGaussSchreiberTransverseMercator: ProjectionDescriptor =
   /* @__PURE__ */ createProjectionDescriptor(
     {name: 'gstmerc', aliases: ['gstmerg']},
     async () =>
-      (await import('@math.gl/geospatial/projection/projections/gstmerc'))
+      (await import('@math.gl/geospatial/projection-projections-gstmerc'))
         .gaussSchreiberTransverseMercator
   );

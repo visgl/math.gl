@@ -120,6 +120,8 @@ export function updateTerrainTileCutouts(
     splitTerrainMesh({positions: new Float64Array(), indices: new Uint32Array()}, polygon, limits);
   const entries = new Map<string, Entry>();
   const rebuilt: string[] = [];
+  /** Rebuilt entries keyed to their position in resident order. */
+  const dirty = new Map<Entry, number>();
   let boundaryCount = 0;
   for (const resident of residents) {
     if (
@@ -148,6 +150,7 @@ export function updateTerrainTileCutouts(
       }
       entry = {resident: {...resident}, split, displayed: split, bounds, edges};
       rebuilt.push(resident.id);
+      dirty.set(entry, entries.size);
     }
     boundaryCount += entry.edges.length;
     if (boundaryCount > limits.maxBoundaryEdges)
@@ -155,13 +158,13 @@ export function updateTerrainTileCutouts(
     entries.set(resident.id, entry);
   }
   const values = [...entries.values()];
-  let pairs = 0;
-  for (let i = 0; i < values.length; i++)
-    for (let j = i + 1; j < values.length; j++) {
-      if (++pairs > limits.maxPairChecks)
-        throw new RangeError('Terrain cutout pair budget exceeded');
-      const a = values[i],
-        b = values[j];
+  /** Total possible pairs, including pairs already validated by the cache. */
+  const pairCount = (values.length * (values.length - 1)) / 2;
+  if (pairCount > limits.maxPairChecks) throw new RangeError('Terrain cutout pair budget exceeded');
+  // Cached pairs were checked when their current revisions first coexisted.
+  for (const [a, index] of dirty)
+    for (const b of values) {
+      if (a === b || (dirty.get(b) ?? Infinity) < index) continue;
       if (
         a.bounds[2] < b.bounds[0] ||
         b.bounds[2] < a.bounds[0] ||
@@ -169,42 +172,45 @@ export function updateTerrainTileCutouts(
         b.bounds[3] < a.bounds[1]
       )
         continue;
-      if (
-        compatible &&
-        prior.entries.get(a.resident.id) === a &&
-        prior.entries.get(b.resident.id) === b
-      )
-        continue;
       const combined = assembleTerrainCutoutTiles([a.resident.mesh, b.resident.mesh], limits);
       validateTerrainCutoutTopology(combined.mesh, combined.remainingWork);
     }
-  const boundaries = new Map<string, {edge: Boundary; paired: boolean}>();
-  const cutKeys = new Map<string, number>();
+  /** Unpaired edge, polygon ID for a cut pair, or null for a same-side pair. */
+  const boundaries = new Map<string, Boundary | number | null>();
   for (let tile = 0; tile < values.length; tile++)
     for (const edge of values[tile].edges) {
       const other = boundaries.get(edge.key);
-      if (!other) {
-        boundaries.set(edge.key, {edge, paired: false});
+      if (other === undefined) {
+        boundaries.set(edge.key, edge);
         continue;
       }
-      if (other.paired || other.edge.start !== edge.end || other.edge.end !== edge.start)
+      if (
+        typeof other !== 'object' ||
+        other === null ||
+        other.start !== edge.end ||
+        other.end !== edge.start
+      )
         throw new RangeError('Nonconforming terrain cutout tile boundary');
-      other.paired = true;
-      if (other.edge.side !== edge.side) {
-        cutKeys.set(edge.key, edge.side === 0 ? edge.polygon : other.edge.polygon);
-      }
+      boundaries.set(
+        edge.key,
+        other.side === edge.side ? null : edge.side === 0 ? edge.polygon : other.polygon
+      );
     }
   const tiles = new Map<string, TerrainCutout>();
   const changed: string[] = [];
+  /** Scratch endpoints, copied only when a displayed boundary changes. */
+  const cuts: [number[], number[]] = [[], []];
+  /** Scratch polygon IDs aligned with the scratch endpoints. */
+  const polygons: [number[], number[]] = [[], []];
   for (let i = 0; i < values.length; i++) {
     const entry = values[i];
     const old = prior?.entries.get(entry.resident.id);
     // Emit in cached tile-local order, independent of resident visitation order.
-    const cuts: [number[], number[]] = [[], []];
-    const polygons: [number[], number[]] = [[], []];
+    cuts[0].length = cuts[1].length = 0;
+    polygons[0].length = polygons[1].length = 0;
     for (const edge of entry.edges) {
-      const polygonIndex = cutKeys.get(edge.key);
-      if (polygonIndex !== undefined) {
+      const polygonIndex = boundaries.get(edge.key);
+      if (typeof polygonIndex === 'number') {
         cuts[edge.side].push(edge.a, edge.b);
         polygons[edge.side].push(polygonIndex);
       }

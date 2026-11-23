@@ -2,12 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, it} from 'vitest';
-import {
-  Matrix4,
-  mat4PerspectiveProjection,
-  mat4OrthographicProjection,
-  type Bounds2D
-} from '@math.gl/core';
+import {Matrix4, mat4PerspectiveProjection, mat4OrthographicProjection} from '@math.gl/core/matrix';
+import {type Bounds2D} from '@math.gl/core/types';
 import {
   AxisAlignedBoundingBox,
   BoundingSphere,
@@ -39,8 +35,8 @@ import {
   intersectPlaneSegment,
   triangleIntersectsBounds,
   Ray
-} from '@math.gl/geometry';
-import {Vector3} from '@math.gl/core';
+} from '@math.gl/geometry/culling';
+import {Vector3} from '@math.gl/core/matrix';
 const close = (a: ArrayLike<number>, b: ArrayLike<number>, digits = 10) => {
   expect(a.length).toBe(b.length);
   for (let i = 0; i < a.length; i++) expect(a[i]).toBeCloseTo(b[i], digits);

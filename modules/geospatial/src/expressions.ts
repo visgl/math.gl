@@ -6,7 +6,7 @@
 import {eastNorthUpToFixedFrame} from './ellipsoid-transforms';
 import {Ellipsoid} from './ellipsoid';
 import {isWGS84} from './type-utils';
-import {toDegrees, toRadians} from '@math.gl/core';
+import {toDegrees, toRadians} from '@math.gl/core/matrix';
 import type {ExpressionFunctionLibrary} from '@math.gl/sql/expressions';
 
 /** WGS84 ellipsoid helpers available to the expression evaluator. */

@@ -15,7 +15,7 @@ export const lazyKrovak: ProjectionDescriptor = /* @__PURE__ */ createProjection
     ]
   },
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/krovak');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-krovak');
     return projectionModule.krovak;
   }
 );

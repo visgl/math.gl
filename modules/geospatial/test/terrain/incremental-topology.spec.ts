@@ -9,7 +9,7 @@ import {
   simplifyTerrainContourPathsTopology,
   stitchTerrainContours,
   type TerrainMixedVertexTile
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 function tile(column: number, spacing = 1): TerrainMixedVertexTile {
   return {
     column,

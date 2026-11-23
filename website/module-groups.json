@@ -8,7 +8,7 @@
       "core/types",
       "sql",
       "core/arrow",
-      "core/arrow/utf8",
+      "core/utf8",
       "core/arrow/geoarrow",
       "core/arrow/geoarrow-utils",
       "core/arrow/wkb"
@@ -21,7 +21,7 @@
     "modules": [
       "geometry/curves",
       "geometry",
-      "geometry/utils",
+      "geometry/processing",
       "geometry/culling",
       "geometry/polygon",
       "geometry/spatial-index"

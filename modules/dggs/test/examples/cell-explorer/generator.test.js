@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {DGGS_DECODERS} from '@math.gl/dggs';
+import {DGGS_DECODERS} from '@math.gl/dggs/decoders';
 import {getResolution, hexToU64} from 'a5-js';
 import {
   GRID_LEVELS,

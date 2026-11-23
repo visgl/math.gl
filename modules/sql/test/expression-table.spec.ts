@@ -21,7 +21,7 @@ import {
   vectorFromArray
 } from 'apache-arrow';
 import {compileArrowExpression, compileArrowFunction, compileArrowPredicate} from '../src/arrow';
-import {replaceArrowColumns} from '@math.gl/sql';
+import {replaceArrowColumns} from '@math.gl/sql/query';
 
 function table() {
   return new Table({

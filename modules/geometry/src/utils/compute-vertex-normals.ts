@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 import type {GeometryInput} from './geometry';
 import {getAttributeValues, getPositionAttribute} from './geometry';
 import {makePrimitiveIterator} from './primitive-iterator';

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Independent PROJ fixtures, exercised in the same engines as browser benchmarks.
-import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection/analysis';
+import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection-analysis';
 import factorsReference from '../../test/projection/fixtures/factors-reference.json';
 import {nativeForwardExpectation} from '../../test/projection/native-forward-reference';
 export {qualifyAccuracy} from '../../test/projection/accuracy-workload';

@@ -26,8 +26,9 @@ data paths remain available.
 2. Add the exact `## v<version>` heading and notes to `CHANGELOG.md`, commit them,
    and preview the target with `yarn run publish-beta --dry-run`. This preview
    does not create commits, tags, or publishes, and can run on a prep branch.
+   For an RC, preview with `yarn run publish-beta --rc --dry-run`.
 3. From the clean permitted branch, run `yarn run publish-beta` and confirm the
-   version in Lerna's prompt. The command updates workspace versions and exact
+   version in Lerna's prompt. For an RC, run `yarn run publish-beta --rc`. The command updates workspace versions and exact
    internal dependencies, creates the release commit/tag, and atomically pushes
    the branch and that tag. It does not publish directly to npm.
    If branch protection requires landing the version bump as a PR, fetch the
@@ -45,7 +46,9 @@ retrying. Do not rerun the version bump blindly: Lerna may already have created 
 local release commit and tag. Keep the existing version while recovering a
 partially completed release.
 
-Stable releases continue to use `yarn run publish-prod`.
+For a stable release, land the version and changelog prep first. On the current
+release branch tip, create the annotated stable tag locally and run
+`yarn run publish-prod` to validate and push that tag.
 
 ## Resuming a partially published release
 

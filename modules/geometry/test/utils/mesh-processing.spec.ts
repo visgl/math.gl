@@ -2,16 +2,16 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
+import {LatheGeometry} from '@math.gl/geometry/primitives';
 import {
-  LatheGeometry,
   computeVertexNormals,
   transformGeometry,
   mergeGeometries,
   weldGeometry,
   getDegenerateTriangles
-} from '@math.gl/geometry';
-import type {GeometryInput} from '@math.gl/geometry';
+} from '@math.gl/geometry/processing';
+import type {GeometryInput} from '@math.gl/geometry/processing';
 test('mesh utilities accept topology from geometry generators', () => {
   const geometry = new LatheGeometry({
     points: [

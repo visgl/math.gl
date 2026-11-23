@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {getGeographicTileBounds, type GeographicTile} from '@math.gl/geospatial';
+import {getGeographicTileBounds, type GeographicTile} from '@math.gl/geospatial/tiles';
 import {
   createTerrainLodMorph,
   createTerrainMesh,

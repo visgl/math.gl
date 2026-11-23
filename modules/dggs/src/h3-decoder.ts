@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {cellToBoundary, cellToLatLng} from 'h3-js';
-import {type Bounds2D} from '@math.gl/core';
+import {type Bounds2D} from '@math.gl/core/matrix';
 import {
   withDGGSBoundaryOptions,
   type DGGSCell,

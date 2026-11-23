@@ -6,7 +6,7 @@ import {expect, test} from 'vitest';
 import {HeightField, TerrainSampleStatus as Status} from '@math.gl/geospatial/terrain';
 import {GeographicHeightField} from '@math.gl/geospatial/terrain';
 import {TiledHeightField, type TerrainTile} from '@math.gl/geospatial/terrain';
-import type {TileMatrix} from '@math.gl/geospatial';
+import type {TileMatrix} from '@math.gl/geospatial/tiles';
 
 const fine: TileMatrix = {
   id: 'fine',

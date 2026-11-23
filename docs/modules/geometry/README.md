@@ -18,16 +18,23 @@ All generated meshes use `triangle-list` topology and expose `POSITION`, `NORMAL
 `TEXCOORD_0` typed-array attributes. Index buffers automatically use 32-bit values when a mesh has
 more than 65,535 vertices.
 
-The root entry point also exports mesh utilities, curves, polygon operations, analytic queries,
-and spatial indexes. Their reference pages are grouped by topic in the sidebar.
-`@math.gl/geometry/culling` is also available as a dedicated entry point for bounding volumes and queries.
+## Entry points
 
-Optional `@math.gl/geometry/lighting` and `@math.gl/geometry/color` subpaths provide renderer-independent photometric and color LUT calculations. See the [lighting and color guide](./lighting/README.md). These CPU graphics utilities return numbers and typed arrays; file parsing remains in loaders.gl.
+| Import path | Use it to |
+| --- | --- |
+| [`@math.gl/geometry/primitives`](./api-reference/primitives.md) | Generate primitive and parametric meshes. |
+| [`@math.gl/geometry/curves`](./curves/README.md) | Represent and sample curves. |
+| [`@math.gl/geometry/polygon`](./polygon/README.md) | Clip, triangulate, and subdivide polygons and polylines. |
+| [`@math.gl/geometry/culling`](./culling/README.md) | Query analytic shapes, bounding volumes, and rays. |
+| [`@math.gl/geometry/processing`](./processing/README.md) | Process meshes, indices, and attributes. |
+| [`@math.gl/geometry/spatial-index`](./spatial-index/README.md) | Index points, boxes, and triangles. |
+| [`@math.gl/geometry/arrow`](./entry-points/arrow.md) | Tessellate GeoArrow polygons. |
+| [`@math.gl/geometry/lighting`](./entry-points/lighting.md) | Sample photometric profiles. |
 
 ## Usage
 
 ```js
-import {SphereGeometry} from '@math.gl/geometry';
+import {SphereGeometry} from '@math.gl/geometry/primitives';
 
 const geometry = new SphereGeometry({radius: 1});
 const positions = geometry.attributes.POSITION.value;
@@ -43,9 +50,9 @@ Pass these CPU buffers to the renderer of your choice. The module does not creat
 | Primitive mesh tessellation | ✅ | [Boxes, capsules, cylinders, planes, spheres and convenience shapes](#api) produce renderer-independent indexed buffers. |
 | Parametric surfaces, lathes and tori | ✅ | [ParametricGeometry, TorusGeometry and LatheGeometry](./api-reference/parametric.md) sample explicit surface functions. |
 | Normals, UVs and index-width selection | ✅ | Primitive POSITION/NORMAL/TEXCOORD_0 attributes and automatic Uint32 promotion for large meshes. |
-| Projected bounds | ✅ | [Sample edges and interiors](./utils/api-reference/project-bounds.md) with an explicit approximate/conservative qualification. |
-| Projected texture coordinates | ✅ | [Prepare image UVs](./utils/api-reference/project-texture-coordinates.md) from packed CPU positions without a rendering dependency. |
-| Mesh processing | ✅ | [Transform, merge, and weld indexed meshes](./utils/README.md). |
+| Projected bounds | ✅ | [Sample edges and interiors](./processing/api-reference/project-bounds.md) with an explicit approximate/conservative qualification. |
+| Projected texture coordinates | ✅ | [Prepare image UVs](./processing/api-reference/project-texture-coordinates.md) from packed CPU positions without a rendering dependency. |
+| Mesh processing | ✅ | [Transform, merge, and weld indexed meshes](./processing/README.md). |
 | Curve evaluation | ✅ | [Sample Cartesian curves and compute transport frames](./curves/README.md). |
 | Rigid articulated panel forests | ✅ | Experimental [HingeTree](./api-reference/hinge-tree.md) evaluates hinge transforms with reusable matrix output. |
 | Analytic queries | ✅ | [Bounding volumes, rays, and shapes](./culling/README.md) for Euclidean containment and intersection. |
@@ -90,12 +97,12 @@ planes are required.
 - [IcoSphereGeometry](./api-reference/ico-sphere-geometry.md)
 - [PrismGeometry](./api-reference/prism-geometry.md)
 - [RingGeometry](./api-reference/ring-geometry.md)
-- [Geometry](./api-reference/geometry.md)
+- [Geometry](./api-reference/primitives.md)
 
 ## Parametric surfaces
 
 [ParametricGeometry, TorusGeometry, and LatheGeometry](./api-reference/parametric.md)
-provide sampled surface generators from the root entry point, with an interactive gallery.
+provide sampled surface generators from `@math.gl/geometry/primitives`, with an interactive gallery.
 
 The experimental `HingeTree` evaluates rigid panels connected by hinges. See the
 [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and

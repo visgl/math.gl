@@ -75,7 +75,7 @@ Object.assign(githubItem, {
   className: 'navbar-badge',
   position: 'right',
   type: 'html',
-  value: '<a class="navbar__link navbar-github-stars" href="https://github.com/visgl/math.gl" target="_blank" rel="noopener noreferrer" aria-label="math.gl on GitHub — view repository and star count"><svg class="navbar-github-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297C5.37.297 0 5.67 0 12.297c0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.043-1.61-4.043-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.838 1.237 1.838 1.237 1.07 1.835 2.807 1.305 3.492.998.108-.776.418-1.305.762-1.605-2.665-.3-5.467-1.334-5.467-5.931 0-1.31.467-2.381 1.236-3.221-.124-.303-.536-1.524.118-3.176 0 0 1.008-.322 3.301 1.23a11.52 11.52 0 0 1 3.003-.404c1.018.005 2.042.138 3.003.404 2.291-1.552 3.297-1.23 3.297-1.23.656 1.652.244 2.873.12 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.628-5.479 5.925.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg><span>GitHub</span><img src="https://img.shields.io/github/stars/visgl/math.gl?style=social" alt="GitHub stars" width="90" height="20" /></a>'
+  value: '<a class="navbar__link navbar-github-stars" href="https://github.com/visgl/math.gl" target="_blank" rel="noopener noreferrer" aria-label="math.gl on GitHub — view repository and star count"><svg class="navbar-github-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297C5.37.297 0 5.67 0 12.297c0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.043-1.61-4.043-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.838 1.237 1.838 1.237 1.07 1.835 2.807 1.305 3.492.998.108-.776.418-1.305.762-1.605-2.665-.3-5.467-1.334-5.467-5.931 0-1.31.467-2.381 1.236-3.221-.124-.303-.536-1.524.118-3.176 0 0 1.008-.322 3.301 1.23a11.52 11.52 0 0 1 3.003-.404c1.018.005 2.042.138 3.003.404 2.291-1.552 3.297-1.23 3.297-1.23.656 1.652.244 2.873.12 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.628-5.479 5.925.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg><span>GitHub</span><img src="https://img.shields.io/github/stars/visgl/math.gl?style=flat-square&amp;label=%E2%98%85&amp;logo=github&amp;logoColor=white&amp;color=24292f&amp;labelColor=24292f" alt="GitHub stars" width="90" height="20" /></a>'
 });
 delete githubItem.href;
 delete githubItem.label;
@@ -85,7 +85,7 @@ const npmIndex = navbarItems.findIndex(item => item.value?.includes('class="navb
 navbarItems.splice(npmIndex + 1, 0, githubItem);
 
 // Resolve CRS entry points from source: website deployments do not build package dist files.
-// Keep the root alias exact so it does not shadow the public subpaths.
+// Match published imports exactly so pinned dependencies can resolve older entry points.
 const webpackPlugin = config.plugins.find(
   plugin =>
     Array.isArray(plugin) && plugin[0] === '@vis.gl/docusaurus-website/plugin-webpack-config'
@@ -171,6 +171,7 @@ module.exports = config;
 
 // Exact aliases also apply to imports from deck.gl, luma.gl, and loaders.gl.
 for (const [name, source] of Object.entries(getMathGlSourceAliases())) {
+  delete aliases[name.split('/').slice(0, 2).join('/')];
   delete aliases[name];
   aliases[name + '$'] = source;
 }

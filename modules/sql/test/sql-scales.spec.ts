@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {compileResolvedScale, parseSQLScaleExpression, parseSQLScaleAST} from '../src/scales';
+import {compileResolvedScale} from '@math.gl/core/color';
+import {parseSQLScaleExpression, parseSQLScaleAST} from '@math.gl/sql/parser';
 import {parseSQLExpression, parseSQLSelectStatement} from '../src/parser';
 import type {Expression} from '../src/expressions';
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 /* eslint-disable camelcase */
-import {vec2} from '@math.gl/core';
+import {vec2} from '@math.gl/core/matrix';
 import type {WebMercatorViewport} from './web-mercator-viewport';
 import {worldToLngLat} from './web-mercator-utils';
 import {transformVector} from './math-utils';

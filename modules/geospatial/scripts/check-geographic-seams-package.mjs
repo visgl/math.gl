@@ -23,10 +23,8 @@ assert.equal(reference.provenance.projReferenceSHA256,await hash('modules/geospa
 assert.equal(reference.rhumb.length,100);assert.equal(reference.geodesic.length,180);
 for(const format of ['esm','cjs']) {
   const load=format==='esm'?name=>import(name):name=>require(name);
-  const {RhumbPath,EllipsoidRhumb}=await load('@math.gl/geospatial');
-  const {splitGeographicPolygon,splitGeographicPolyline,subdivideRhumbPolyline}=await load('@math.gl/geospatial');
-  const full=await load('@math.gl/geospatial');
-  for(const name of ['RhumbPath','splitGeographicPolygon','splitGeographicPolyline','subdivideRhumbPolyline']) assert.equal(typeof full[name],'function');
+  const {RhumbPath, EllipsoidRhumb}=await load('@math.gl/geospatial/geodesics');
+  const {splitGeographicPolygon, splitGeographicPolyline, subdivideRhumbPolyline}=await load('@math.gl/geospatial/globe');
   const rhumb=new EllipsoidRhumb({semiMajorAxis:1,semiMinorAxis:1});
   assert(Math.abs(new RhumbPath([-180,30],[180,30],{rhumb,longitudeMode:'unrolled'}).sample(.5)[0])<2e-12);
   assert.equal(splitGeographicPolyline([170,0,-170,0],{edgeModel:'rhumb',rhumb}).length,2);
@@ -48,8 +46,8 @@ const measured={};
 for(const [name,entry,symbol,expression,budget] of [
   ['generic','modules/geometry/src/polygon/index.ts','subdividePolyline','subdividePolyline([], {transform:p=>p,tolerance:1})',null],
   ['ellipsoid','modules/geospatial/src/entries/ellipsoid.ts','Ellipsoid','Ellipsoid.WGS84.cartographicToCartesian([0,0,0])',null],
-  ['geodesic','modules/geospatial/src/entries/ellipsoid.ts','GeodesicPath','new GeodesicPath([0,0],[1,1]).sample(.5)',null],
-  ['rhumb','modules/geospatial/src/entries/ellipsoid.ts','RhumbPath','new RhumbPath([0,0],[1,1]).sample(.5)',[32000,12000]],
+  ['geodesic','modules/geospatial/src/geodesics.ts','GeodesicPath','new GeodesicPath([0,0],[1,1]).sample(.5)',null],
+  ['rhumb','modules/geospatial/src/geodesics.ts','RhumbPath','new RhumbPath([0,0],[1,1]).sample(.5)',[32000,12000]],
   ['adaptive-rhumb','modules/geospatial/src/globe.ts','subdivideRhumbPolyline','subdivideRhumbPolyline([], {transform:p=>p,tolerance:1})',[40000,15000]],
   ['seam-line','modules/geospatial/src/globe.ts','splitGeographicPolyline',"splitGeographicPolyline([], {edgeModel:'linear'})",[56000,20000]],
   ['seam-polygon','modules/geospatial/src/globe.ts','splitGeographicPolygon',"splitGeographicPolygon([], {edgeModel:'linear'})",[68000,24000]]

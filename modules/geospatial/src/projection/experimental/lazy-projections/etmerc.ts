@@ -8,5 +8,5 @@ export const lazyExtendedTransverseMercator: ProjectionDescriptor =
   /* @__PURE__ */ createProjectionDescriptor(
     {name: 'etmerc', aliases: ['Extended_Transverse_Mercator', 'Extended Transverse Mercator']},
     async () =>
-      (await import('@math.gl/geospatial/projection/projections/etmerc')).extendedTransverseMercator
+      (await import('@math.gl/geospatial/projection-projections-etmerc')).extendedTransverseMercator
   );

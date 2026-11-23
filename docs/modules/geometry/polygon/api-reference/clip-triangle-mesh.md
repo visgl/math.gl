@@ -6,7 +6,8 @@ regions, preserving triangle winding and returning provenance for attribute inte
 It does not project coordinates, repair spherical topology or infer antimeridian edge paths.
 
 ```ts
-import {clipTriangleMesh, interpolatePackedAttributes} from '@math.gl/geometry';
+import {clipTriangleMesh} from '@math.gl/geometry/polygon';
+import {interpolatePackedAttributes} from '@math.gl/geometry/processing';
 
 const clipped = clipTriangleMesh(mesh, {
   regions: [[[-180, -90], [180, -90], [180, 90], [-180, 90]]],

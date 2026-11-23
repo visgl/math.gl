@@ -10,7 +10,7 @@ import {
   updateTerrainPersistentBounds,
   updateTerrainPersistentGradients,
   getTerrainHierarchyNode
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 import mountain from './fixtures/sierra-streaming.json';
 import coastal from './fixtures/pacific-streaming.json';
 import missing from './fixtures/sierra-nodata-streaming.json';

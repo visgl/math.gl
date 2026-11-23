@@ -1,6 +1,6 @@
 {
   "name": "math.gl-expression-playground",
-  "version": "4.2.0-alpha.5",
+  "version": "5.1.0-alpha.0",
   "license": "MIT",
   "private": true,
   "type": "module",

@@ -6,7 +6,7 @@
 // Air mass: Kasten & Young (1989), https://doi.org/10.1364/AO.28.004735
 // Visibility context only (not a reproduction of its model): Tousey & Koomen (1953),
 // https://doi.org/10.1364/JOSA.43.000177
-import {smoothstep as coreSmoothstep} from '@math.gl/core';
+import {smoothstep as coreSmoothstep} from '@math.gl/core/matrix';
 import {validateRange} from './celestial';
 import {getSkyLuminance, getSkyTransmission} from './sky-brightness';
 import type {SkyAtmosphereOptions} from './sky-brightness';

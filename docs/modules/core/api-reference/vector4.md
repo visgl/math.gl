@@ -11,7 +11,7 @@ Use `Matrix4.transform(vector4, result)` for a full homogeneous transform. `Vect
 ## Usage
 
 ```js
-import {Vector4} from '@math.gl/core';
+import {Vector4} from '@math.gl/core/matrix';
 const vector = new Vector4(1, 1, 1, 0);
 const point = new Vector4(0, 0, 0, 1);
 ```

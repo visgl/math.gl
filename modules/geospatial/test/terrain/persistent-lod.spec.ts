@@ -13,7 +13,7 @@ import {
   createTerrainLodMorph,
   evaluateTerrainLodMorph,
   TerrainMorphStatus
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 const make = (h: Float64Array, width = 17, height = 17) =>
   new HeightField({width, height, heights: h});
 test('persistent bounds and weighted gradients match flat hierarchies and retain untouched blocks', () => {

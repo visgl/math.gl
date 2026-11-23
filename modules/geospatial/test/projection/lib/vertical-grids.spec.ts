@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original fixtures; independent PROJ 9.5.1 pipelines supply numeric expectations.
 import {expect, test} from 'vitest';
-import {parsePGM} from '@math.gl/earth';
+import {parsePGM} from '@math.gl/earth/geoid';
 import {wgs84Egm2008CompoundCRS} from '@math.gl/geospatial/crs/test/projjson-fixtures';
 import {
   FullProjectionEngine,
@@ -12,9 +12,9 @@ import {
   geocentric,
   projJSONCRSParser
 } from '@math.gl/geospatial/projection';
-import {LazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
-import {parseGTXGrid} from '@math.gl/geospatial/projection/grids/gtx';
-import {createGeoidGrid, createVerticalGrid} from '@math.gl/geospatial/projection/grids/vertical';
+import {LazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
+import {parseGTXGrid} from '@math.gl/geospatial/projection-grids-gtx';
+import {createGeoidGrid, createVerticalGrid} from '@math.gl/geospatial/projection-grids-vertical';
 import inputs from '../fixtures/vertical-grid-cases.json';
 import reference from '../fixtures/vertical-grid-reference.json';
 

@@ -11,7 +11,7 @@ Stores quaternion components as `[x, y, z, w]`. Use unit quaternions for rotatio
 ## Usage
 
 ```js
-import {Quaternion} from '@math.gl/core';
+import {Quaternion} from '@math.gl/core/matrix';
 ```
 
 ## Members

@@ -9,7 +9,7 @@ It uses the same bilinear or cubic interpolation as `parsePGM`, without requirin
 Arrow or a Parquet decoder in `@math.gl/earth`.
 
 ```typescript
-import {createGeoidFromGrid} from '@math.gl/earth';
+import {createGeoidFromGrid} from '@math.gl/earth/geoid';
 
 // Decode Parquet in the application, then extract the complete raw_value column.
 const geoid = createGeoidFromGrid({

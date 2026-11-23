@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test, vi} from 'vitest';
-import {createProjectionEngine} from '@math.gl/geospatial/projection/core';
+import {createProjectionEngine} from '@math.gl/geospatial/projection-core';
 import {projJSONCRSParser} from '@math.gl/geospatial/projection';
-import {transverseMercator} from '@math.gl/geospatial/projection/projections/tmerc';
+import {transverseMercator} from '@math.gl/geospatial/projection-projections-tmerc';
 import {
   resolveRenderingProfile,
   combineRenderingProfiles

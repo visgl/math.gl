@@ -14,7 +14,7 @@ const {values} = parseArgs({
 const samples = Number(values.samples);
 assert(Number.isSafeInteger(samples) && samples >= 3 && samples <= 30);
 const entries = {
-  'native-selected': `const [{ProjectionTransform},{mercator}]=await Promise.all([import('@math.gl/geospatial/projection/core'),import('@math.gl/geospatial/projection/projections/merc')]);const create=()=>new ProjectionTransform({to:'EPSG:3857',projections:[mercator]});`,
+  'native-selected': `const [{ProjectionTransform},{mercator}]=await Promise.all([import('@math.gl/geospatial/projection-core'),import('@math.gl/geospatial/projection-projections-merc')]);const create=()=>new ProjectionTransform({to:'EPSG:3857',projections:[mercator]});`,
   'native-barrel': `const {ProjectionTransform,mercator}=await import('@math.gl/geospatial/projection');const create=()=>new ProjectionTransform({to:'EPSG:3857',projections:[mercator]});`,
   proj4: `const {default:proj4}=await import('proj4');const create=()=>{const p=proj4('WGS84','EPSG:3857');return {project:p.forward};};`,
   projection: `const {projectionEngine}=await import('@math.gl/geospatial/projection');const create=()=>projectionEngine.createProjection({to:'EPSG:3857'});`

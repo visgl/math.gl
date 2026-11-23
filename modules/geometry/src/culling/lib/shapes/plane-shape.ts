@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 import type {CullingResult} from '../../constants';
 import {ImplicitShapeBase, type ImplicitShape, type LocalRayIntersection} from './implicit-shape';
 import type {AxisAlignedBoundingBox} from '../bounding-volumes/axis-aligned-bounding-box';

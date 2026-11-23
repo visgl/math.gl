@@ -1,12 +1,9 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {
-  subdivideTriangleMesh,
-  clipTriangleMesh,
-  interpolatePackedAttributes,
-  earcut
-} from '@math.gl/geometry';
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
+import {interpolatePackedAttributes} from '@math.gl/geometry/processing';
+import {clipTriangleMesh, earcut} from '@math.gl/geometry/polygon';
 import {createCRSProjectionDomain} from '@math.gl/geospatial/crs';
 
 // Example policy, not a universal raster reprojection API. Each input patch must

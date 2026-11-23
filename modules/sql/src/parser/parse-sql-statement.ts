@@ -21,7 +21,13 @@ export type SQLTableBinding = Readonly<{
 export type SQLJoin = Readonly<{
   type: 'inner' | 'left' | 'semi' | 'anti' | 'cross';
   /** Experimental lateral collection expansion. */
-  unnest?: Readonly<{expression: Expression; columns: readonly string[]; ordinality: boolean}>;
+  unnest?: Readonly<{
+    expression: Expression;
+    columns: readonly string[];
+    ordinality: boolean;
+    /** Registered lateral function name. Omitted for SQL UNNEST. */
+    functionName?: string;
+  }>;
   table: SQLTableBinding;
   on: Expression;
 }>;
@@ -97,7 +103,10 @@ function readSelect(reader: RelationalQueryReader): SQLSelectStatement {
   const from = readTable(reader);
   const joins: SQLJoin[] = [];
   for (let type = readJoinType(reader); type; type = readJoinType(reader)) {
-    if (reader.takeKeyword('UNNEST')) {
+    const isUnnest = reader.takeKeyword('UNNEST');
+    const lateral = !isUnnest && reader.takeKeyword('LATERAL');
+    if (isUnnest || lateral) {
+      const functionName = lateral ? reader.identifier() : undefined;
       reader.expectSymbol('(');
       const expression = reader.selectionExpression();
       reader.expectSymbol(')');
@@ -116,7 +125,7 @@ function readSelect(reader: RelationalQueryReader): SQLSelectStatement {
         type,
         table: {name: alias, alias},
         on: {type: 'Literal', value: true},
-        unnest: {expression, columns, ordinality}
+        unnest: {expression, columns, ordinality, ...(functionName && {functionName})}
       });
       continue;
     }

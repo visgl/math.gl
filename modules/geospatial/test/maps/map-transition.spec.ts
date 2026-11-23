@@ -96,26 +96,6 @@ test('regional coverage routes through globe and invalid parameters fail', () =>
   ).toThrow();
 });
 
-test('whole-world octants can be prepared across both Elastic cut layouts', () => {
-  const transition = maps[0].createTransitionTo(maps[1]);
-  for (let lon = -180; lon < 180; lon += 90)
-    for (const ring of [
-      [
-        [lon, 0],
-        [lon + 90, 0],
-        [lon + 45, 90]
-      ],
-      [
-        [lon + 90, 0],
-        [lon, 0],
-        [lon + 45, -90]
-      ]
-    ])
-      expect(transition.preparePolygon([ring as [number, number][]]).parts.length).toBeGreaterThan(
-        0
-      );
-});
-
 test('globe route crossfades coverage on the sphere without jumping at the midpoint', () => {
   const transition = maps[0].createTransitionTo(maps[1], {strategy: 'via-globe'});
   const geometry = transition.prepareLine([
@@ -231,11 +211,14 @@ for (const target of polygonRefinementTargets) {
           [lon, 0],
           [lon + 45, -90]
         ]
-      ])
-        for (const part of transition.preparePolygon([ring as [number, number][]]).parts)
+      ]) {
+        const {parts} = transition.preparePolygon([ring as [number, number][]]);
+        expect(parts.length).toBeGreaterThan(0);
+        for (const part of parts)
           sum +=
             area(part.sourceCoordinates[0]) -
             part.sourceCoordinates.slice(1).reduce((s, r) => s + area(r), 0);
+      }
     expect(sum, target.description.id).toBeCloseTo(360 * 180, 5);
   });
 }
@@ -329,8 +312,9 @@ for (const projection of WORLD_PROJECTIONS) {
     expect(transition.strategy).toBe('direct');
     expect(target.createTransitionTo(world).strategy).toBe('direct');
     // Include poles, both antimeridian limits, equator and internal chart boundaries.
-    for (let lon = -180; lon <= 180; lon += 10) {
-      for (let lat = -90; lat <= 90; lat += 10) {
+    const step = import.meta.env.VITE_MATHGL_COVERAGE_FIXTURES === 'compact' ? 30 : 10;
+    for (let lon = -180; lon <= 180; lon += step) {
+      for (let lat = -90; lat <= 90; lat += step) {
         const point: [number, number] = [lon, lat];
         const a = world.projectPoint(point),
           b = target.projectPoint(point);

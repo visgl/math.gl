@@ -14,8 +14,8 @@ For ordinary CRS-to-CRS conversion, use [Projection or ProjectionTransform](../d
 A pipeline does not find an EPSG operation or select grids automatically.
 
 ```typescript
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import {universalTransverseMercator} from '@math.gl/geospatial/projection/projections/utm';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import {universalTransverseMercator} from '@math.gl/geospatial/projection-projections-utm';
 
 const pipeline = new ProjectionPipeline({
   input: {space: 'geographic', units: ['deg', 'deg', 'm']},
@@ -196,7 +196,7 @@ explicitly. Geographic output accepts degrees or radians; projected output is me
 The `o_proj` parameter must match the registered child:
 
 ```typescript
-import {obliqueTransformation} from '@math.gl/geospatial/projection/projections/ob_tran';
+import {obliqueTransformation} from '@math.gl/geospatial/projection-projections-ob_tran';
 
 const rotated = new ProjectionPipeline({
   input: {space: 'geographic', units: ['rad', 'rad', 'm']},
@@ -250,7 +250,7 @@ Use the same descriptors and shared implementation cache as `ProjectionTransform
 Construction starts no imports; only projection names used by steps are preloaded.
 
 ```typescript
-import {lazyUniversalTransverseMercator} from '@math.gl/geospatial/projection/projections/lazy/utm';
+import {lazyUniversalTransverseMercator} from '@math.gl/geospatial/projection-projections-lazy-utm';
 
 const lazy = new ProjectionPipeline({
   input: {space: 'geographic', units: ['deg', 'deg', 'm']},

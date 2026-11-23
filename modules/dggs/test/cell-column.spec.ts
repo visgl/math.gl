@@ -3,15 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {
-  A5Decoder,
-  findDGGSCellColumn,
-  GeohashDecoder,
-  H3Decoder,
-  PlusCodeDecoder,
-  QuadkeyDecoder,
-  S2Decoder
-} from '@math.gl/dggs';
+import {A5Decoder} from '@math.gl/dggs/a5';
+import {findDGGSCellColumn} from '@math.gl/dggs/decoders';
+import {GeohashDecoder} from '@math.gl/dggs/geohash';
+import {H3Decoder} from '@math.gl/dggs/h3';
+import {PlusCodeDecoder} from '@math.gl/dggs/plus-code';
+import {QuadkeyDecoder} from '@math.gl/dggs/quadkey';
+import {S2Decoder} from '@math.gl/dggs/s2';
 
 test('findDGGSCellColumn detects conventional cell columns', () => {
   expect(findDGGSCellColumn(['count', 'geohash'])).toEqual({

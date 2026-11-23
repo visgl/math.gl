@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {DataType, DateUnit, Precision, TimeUnit, type Vector, type Data} from 'apache-arrow';
+import {DataType, DateUnit, Int32, Precision, type Vector, type Data} from 'apache-arrow';
 import {float16Values, requireFloat16} from './float16';
 import {ExpressionEvaluationError} from '../expressions';
 import type {ArrowExpressionValue} from './types';
@@ -22,9 +22,13 @@ export function typeKey(type: DataType): string {
   }
   if (DataType.isBool(type)) return 'bool';
   if (DataType.isUtf8(type)) return 'utf8';
-  if (DataType.isDate(type) && type.unit === DateUnit.DAY) return 'date32';
-  if (DataType.isTimestamp(type) && type.unit === TimeUnit.MICROSECOND)
-    return `timestamp_us:${type.timezone ?? ''}`;
+  if (DataType.isDate(type)) return type.unit === DateUnit.DAY ? 'date32' : 'date64';
+  if (DataType.isTimestamp(type)) {
+    const unit = ['s', 'ms', 'us', 'ns'][type.unit];
+    return `timestamp_${unit}:${type.timezone ?? ''}`;
+  }
+  if (DataType.isTime(type)) return 'time_' + type.unit;
+  if (DataType.isDuration(type)) return 'duration_' + type.unit;
   if (DataType.isBinary(type)) return 'binary';
   if (DataType.isFixedSizeBinary(type)) return `fixedsizebinary:${type.byteWidth}`;
   if (DataType.isNull(type)) return 'null';
@@ -34,6 +38,7 @@ export function typeKey(type: DataType): string {
 /** Reader over Arrow chunks; slices already adjust numeric buffers and string offsets. */
 export class ColumnReader {
   private readonly ends: number[] = [];
+  private chunkIndex = 0;
   private readonly location: [Data, number] = [null!, 0];
   private readonly range: [Uint8Array, number, number] = [null!, 0, 0];
   private readonly half = new Map<Data, Float16Array>();
@@ -52,8 +57,17 @@ export class ColumnReader {
   }
   /** Locates a chunk without constructing row objects. */
   private chunk(row: number): [Data, number] {
-    let index = 0;
-    while (row >= this.ends[index]!) index++;
+    let index = this.chunkIndex;
+    if (row >= this.ends[index]! || (index > 0 && row < this.ends[index - 1]!)) {
+      let low = 0;
+      let high = this.ends.length - 1;
+      while (low < high) {
+        const middle = (low + high) >>> 1;
+        if (row < this.ends[middle]!) high = middle;
+        else low = middle + 1;
+      }
+      this.chunkIndex = index = low;
+    }
     this.location[0] = this.vector.data[index]!;
     this.location[1] = row - (index ? this.ends[index - 1]! : 0);
     return this.location;
@@ -62,6 +76,11 @@ export class ColumnReader {
   isValid(row: number): boolean {
     const [data, index] = this.chunk(row);
     if (DataType.isNull(data.type)) return false;
+    if (DataType.isUnion(data.type)) {
+      // GeoArrow union nulls belong to the selected child, not the parent bitmap.
+      const child = data.children[data.type.typeIdToChildIndex[data.typeIds[index]!]!];
+      return Boolean(child && !DataType.isNull(child.type) && data.getValid(index));
+    }
     const bit = data.offset + index;
     if (data.nullCount && !(data.nullBitmap[bit >> 3]! & (1 << (bit & 7)))) return false;
     return (
@@ -147,11 +166,17 @@ export function createValueValidator(inputType: DataType): (value: ArrowExpressi
         throw new ExpressionEvaluationError('overflow', 'Invalid Date32 epoch day');
     };
   }
-  if (key.startsWith('timestamp_us:')) {
+  if (DataType.isTime(type) && type.bitWidth === 32) return createValueValidator(new Int32());
+  if (
+    key === 'date64' ||
+    DataType.isTimestamp(type) ||
+    DataType.isTime(type) ||
+    DataType.isDuration(type)
+  ) {
     return value => {
       if (value === null) return;
       if (typeof value !== 'bigint' || value !== BigInt.asIntN(64, value))
-        throw new ExpressionEvaluationError('overflow', 'Invalid timestamp epoch microseconds');
+        throw new ExpressionEvaluationError('overflow', 'Invalid temporal epoch value');
     };
   }
   if (DataType.isBinary(type) || DataType.isFixedSizeBinary(type)) {

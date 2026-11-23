@@ -6,7 +6,7 @@ between two ticks, so a renderer can interpolate between tick states.
 Import `SimulationClock` and `interpolateTickState` from `@math.gl/core`.
 
 ```js
-import {SimulationClock, interpolateTickState} from '@math.gl/core';
+import {SimulationClock, interpolateTickState} from '@math.gl/core/matrix';
 
 const clock = new SimulationClock({tickInterval: 1 / 30, rate: 86400});
 let previous = getState(clock.getTickIndex());
@@ -142,7 +142,7 @@ the state at tick `getRenderTickIndex()` and `next` is the state at the tick aft
 for example a quaternion slerp:
 
 ```js
-import {quat} from '@math.gl/core';
+import {quat} from '@math.gl/core/matrix';
 
 const rotation = clock.interpolate(previousRotation, nextRotation, (a, b, alpha) =>
   quat.slerp([0, 0, 0, 1], a, b, alpha)

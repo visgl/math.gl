@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Extracted Cesium-derived OBB quaternion operations; see ../../../../LICENSE for attribution.
 
-import {Matrix3, Quaternion, Vector3} from '@math.gl/core';
+import {Matrix3, Quaternion, Vector3} from '@math.gl/core/matrix';
 import {OrientedBoundingBox} from '../bounding-volumes/oriented-bounding-box';
 
 /**

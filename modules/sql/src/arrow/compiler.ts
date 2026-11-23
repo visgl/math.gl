@@ -7,6 +7,9 @@ import {
   Bool,
   Precision,
   DataType,
+  Type,
+  DateUnit,
+  TimeUnit,
   Field,
   Float64,
   Float32,
@@ -34,6 +37,7 @@ import {bindCast} from './cast';
 import {compileUTF8Like} from './like';
 import {float16Values, roundFloat16} from './float16';
 import {physicalKey, extensionKey} from './signature';
+import {evaluateVectorSpans, nullVectorData, selectUnionVectors} from './vector-mask';
 import {ExpressionEvaluationError, isExpressionEvaluationError} from '../expressions';
 import {createFunctionLookup} from './registry';
 import {
@@ -55,6 +59,8 @@ import type {
 } from './types';
 
 type BindingOptions = ArrowExpressionOptions & {
+  /** Use portable comparisons for values originating in a columnar predicate. */
+  portablePredicate?: boolean;
   functionLookup: ReadonlyMap<string, ArrowTableFunction>;
 };
 
@@ -80,7 +86,8 @@ const bool = new Bool();
 /** Compiles a core expression AST against a fixed Arrow schema. */
 export function compileArrowExpression(
   expression: ArrowExpression,
-  options: ArrowExpressionOptions
+  options: ArrowExpressionOptions,
+  portablePredicate = false
 ): CompiledArrowExpression {
   const fields = [...options.inputSchema.fields];
   if (new Set(fields.map(field => field.name)).size !== fields.length)
@@ -89,6 +96,7 @@ export function compileArrowExpression(
   validateExpressionAST(ast);
   const root = bind(ast, {
     ...options,
+    portablePredicate,
     functionLookup: createFunctionLookup(options.functions)
   });
   const keys = fields.map(field => ({
@@ -129,7 +137,7 @@ export function compileArrowExpression(
     const prepared = root.prepare(batch, active, {});
     const result = isTupleType(root.field.type)
       ? maskTupleVector(prepared.vector!, active)
-      : isNestedType(root.field.type)
+      : isVectorResult(root.field.type)
         ? nestedVector(prepared.vector!, root.field.type, active)
         : prepared.vector &&
             (root.constant ||
@@ -156,8 +164,8 @@ export function compileArrowExpression(
         ? new Vector(chunks)
         : isTupleType(root.field.type)
           ? nullTupleVector(root.field.type, 0)
-          : isNestedType(root.field.type)
-            ? vectorFromArray([], root.field.type)
+          : isVectorResult(root.field.type)
+            ? makeVector(nullVectorData(root.field.type, 0))
             : output(root.field, new Uint8Array(0), () => null);
     }
   });
@@ -323,6 +331,49 @@ function vectorReader(vector: Vector): Prepared {
   };
 }
 
+/** Interleaves matching, non-null float columns without per-row scalar reads. */
+function interleaveFloatColumns(
+  type: FixedSizeList,
+  values: Prepared[],
+  active: Mask
+): Vector | undefined {
+  const component = type.children[0]!.type;
+  if (!DataType.isFloat(component) || component.precision === Precision.HALF) {
+    return undefined;
+  }
+  const ArrayType = component.precision === Precision.SINGLE ? Float32Array : Float64Array;
+  const inputs: (Float32Array | Float64Array)[] = [];
+  for (const value of values) {
+    const vector = value.vector;
+    const data = vector?.data[0];
+    if (
+      vector?.data.length !== 1 ||
+      !data ||
+      data.nullCount !== 0 ||
+      data.length !== active.length ||
+      !(data.values instanceof ArrayType)
+    ) {
+      return undefined;
+    }
+    // Arrow slices already offset primitive value views. Data.offset applies to validity.
+    inputs.push(data.values);
+  }
+  if (active.includes(0)) {
+    return undefined;
+  }
+
+  const width = inputs.length;
+  const output = new ArrayType(active.length * width);
+  for (let column = 0; column < width; column++) {
+    const input = inputs[column]!;
+    for (let row = 0; row < active.length; row++) {
+      output[row * width + column] = input[row]!;
+    }
+  }
+  const child = makeData({type: component, length: output.length, data: output});
+  return makeVector(makeData({type, length: active.length, child, nullCount: 0}));
+}
+
 /** Obtains UTF-8 bytes, encoding only values returned by scalar functions. */
 function bytes(value: Prepared, row: number): Range | null {
   if (value.bytes) return value.bytes(row);
@@ -381,6 +432,24 @@ function prepareInput(
   return sourceReader(output(field, mask, prepared.get));
 }
 
+/** Converts a Date literal to the receiving Arrow temporal unit. */
+function bindDateLiteral(date: Date, type: DataType | undefined): number | bigint {
+  const milliseconds = date.getTime();
+  if (type && DataType.isDate(type))
+    return type.unit === DateUnit.DAY ? Math.floor(milliseconds / 86400000) : BigInt(milliseconds);
+  if (type && DataType.isTimestamp(type)) {
+    switch (type.unit) {
+      case TimeUnit.SECOND:
+        return milliseconds % 1000 === 0 ? BigInt(milliseconds / 1000) : milliseconds / 1000;
+      case TimeUnit.MILLISECOND:
+        return BigInt(milliseconds);
+      case TimeUnit.NANOSECOND:
+        return BigInt(milliseconds) * 1000000n;
+    }
+  }
+  return BigInt(milliseconds) * 1000n;
+}
+
 /** Binds supported syntax to fused per-row operations and explicit vector boundaries. */
 function bindNode(
   ast: any,
@@ -405,8 +474,8 @@ function bindNode(
     const index = options.inputSchema.fields.findIndex(field => field.name === ast.name);
     if (index < 0) throw new Error(`Unknown Arrow expression field: ${ast.name}`);
     const source = options.inputSchema.fields[index]!;
-    const tuple = isTupleType(source.type);
-    if (!vectorInput && !tuple) typeKey(source.type);
+    const vectorOnly = isTupleType(source.type) || DataType.isDenseUnion(source.type);
+    if (!vectorInput && !vectorOnly) typeKey(source.type);
     return {
       field: new Field(
         source.name,
@@ -417,23 +486,28 @@ function bindNode(
       hasKernel: false,
       prepare: batch => {
         const vector = batch.getChildAt(index)!;
-        return vectorInput || tuple ? vectorReader(vector) : sourceReader(vector);
+        return vectorInput || vectorOnly ? vectorReader(vector) : sourceReader(vector);
       }
     };
   }
   if (ast.type === 'Literal') {
     if (vectorInput && expected && DataType.isDictionary(expected))
       throw new Error('Dictionary function arguments require a dictionary-encoded source column');
-    // Dates enter as immutable parameter snapshots; physical Arrow storage uses days
-    // or microseconds, chosen once from the receiving schema.
     const date = ast.value instanceof Date ? ast.value : undefined;
-    let value: ArrowExpressionValue = date
-      ? expected && DataType.isDate(expected)
-        ? Math.floor(date.getTime() / 86400000)
-        : BigInt(date.getTime()) * 1000n
-      : ast.value;
+    let value: ArrowExpressionValue = date ? bindDateLiteral(date, expected) : ast.value;
     if (value instanceof Uint8Array) value = new Uint8Array(value);
+    // Portable numeric literals keep their input representation until comparison.
+    const portableNumber =
+      options.portablePredicate &&
+      expected &&
+      (DataType.isInt(expected) ||
+        DataType.isFloat(expected) ||
+        DataType.isTime(expected) ||
+        DataType.isDuration(expected)) &&
+      (typeof value === 'number' || typeof value === 'bigint');
+
     if (
+      !portableNumber &&
       expected &&
       DataType.isInt(expected) &&
       expected.bitWidth === 64 &&
@@ -480,15 +554,19 @@ function bindNode(
           )
       };
     }
-    if (value === null && isNestedType(type))
+    if (value === null && isVectorResult(type))
       return {
         field: new Field('literal', type, true),
         hasKernel: false,
-        prepare: (_batch, active) =>
-          vectorReader(vectorFromArray(Array(active.length).fill(null), type))
+        prepare: (_batch, active) => vectorReader(makeVector(nullVectorData(type, active.length)))
       };
-    validateValue(value, type);
-    const rounded = roundToType(type)(value);
+    const fractionalTimestampSecond =
+      date &&
+      DataType.isTimestamp(type) &&
+      type.unit === TimeUnit.SECOND &&
+      typeof value === 'number';
+    if (!portableNumber && !fractionalTimestampSecond) validateValue(value, type);
+    const rounded = portableNumber ? value : roundToType(type)(value);
     if (typeof value === 'number' && Number.isFinite(value) && !Number.isFinite(rounded))
       throw new Error(`Numeric literal overflow for ${type}`);
     // A tagged UTF-8 parameter supplies physical bytes. Check the optional annotation
@@ -549,7 +627,7 @@ function bindNode(
     }
     const tuple = isTupleType(yes.field.type);
     const list = DataType.isList(yes.field.type);
-    const nested = isNestedType(yes.field.type);
+    const nested = isVectorResult(yes.field.type);
     if (nested) {
       if (physicalKey(yes.field.type) !== physicalKey(no.field.type))
         throw new Error('Arrow expression operand types must match');
@@ -598,6 +676,11 @@ function bindNode(
           validateTupleVector(b.vector!, no.field, noMask);
           return vectorReader(
             selectTupleVectors(field.type, a.vector!, b.vector!, yesMask, validActive)
+          );
+        }
+        if (DataType.isDenseUnion(field.type) || isLargeList(field.type)) {
+          return vectorReader(
+            selectUnionVectors(field.type, a.vector!, b.vector!, selected!, active, context.failed)
           );
         }
         if (nested) {
@@ -670,15 +753,22 @@ function requireNumeric(node: Node): void {
 function bindBinary(ast: any, options: BindingOptions): Node {
   const op = ast.operator,
     logical = op === '&&' || op === '||';
-  let left = bind(ast.left, options, logical ? bool : undefined),
+  const comparison = ['==', '===', '!=', '!==', '<', '<=', '>', '>='].includes(op);
+  const portableComparison = comparison && options.portablePredicate;
+  let left = bind(ast.left, options, logical ? bool : undefined);
+  if (portableComparison && DataType.isNull(left.field.type)) return makeUnknownPredicate();
+  let right: Node;
+  if (portableComparison && ast.right.type === 'Literal') {
+    right = bind(ast.right, options, left.field.type);
+  } else {
     right = bind(ast.right, options, logical ? bool : undefined);
-  if (!logical) {
-    if (isContextualLiteral(ast.left) && !DataType.isNull(right.field.type))
-      left = bind(ast.left, options, right.field.type);
-    if (isContextualLiteral(ast.right)) right = bind(ast.right, options, left.field.type);
+    if (!logical) {
+      if (isContextualLiteral(ast.left) && !DataType.isNull(right.field.type))
+        left = bind(ast.left, options, right.field.type);
+      if (isContextualLiteral(ast.right)) right = bind(ast.right, options, left.field.type);
+    }
   }
   sameType(left, right);
-  const comparison = ['==', '===', '!=', '!==', '<', '<=', '>', '>='].includes(op);
   if (logical) requireType(left, 'bool');
   else if (!comparison) {
     if (!['+', '-', '*', '/', '%'].includes(op))
@@ -742,7 +832,14 @@ function bindBinary(ast: any, options: BindingOptions): Node {
             y = b.get(row) as any;
           if (x === null || y === null) return null;
           if (binary) return compare(op, compareUTF8(x, 0, x.length, y, 0, y.length), 0);
-          if (comparison) return compare(op, x, y);
+          if (comparison) {
+            if (portableComparison) {
+              const left = portableMembershipKey(x);
+              const right = portableMembershipKey(y);
+              return compare(op, left, right);
+            }
+            return compare(op, x, y);
+          }
           if ((op === '/' || op === '%') && (y === 0 || y === 0n))
             throw new ExpressionEvaluationError('divisionByZero', 'Division by zero');
           const result =
@@ -766,6 +863,17 @@ function bindBinary(ast: any, options: BindingOptions): Node {
       };
     }
   };
+}
+
+/** Gives integers the same predicate key without rounding large integers to Number. */
+function portableMembershipKey(value: ArrowExpressionValue): ArrowExpressionValue {
+  if (typeof value !== 'number') return value;
+  if (!Number.isFinite(value))
+    throw new ExpressionEvaluationError(
+      'domain',
+      'Arrow predicate cannot compare non-finite numbers'
+    );
+  return Number.isInteger(value) ? BigInt(value) : value;
 }
 
 /** Primitive comparisons preserve IEEE NaN behavior. */
@@ -955,13 +1063,18 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
   )
     throw new Error('IN requires a value and 1 to 4096 scalar literals');
   const argument = bind(arguments_[0], options);
+  if (options.portablePredicate && DataType.isNull(argument.field.type))
+    return makeUnknownPredicate();
   const utf8 = typeKey(argument.field.type) === 'utf8';
   const binary =
     DataType.isBinary(argument.field.type) || DataType.isFixedSizeBinary(argument.field.type);
   const literals = arguments_.slice(1).map(value => bind(value, options, argument.field.type));
   // Every membership item is a scalar literal: convert and index once at compilation.
   const prepared = literals.map(value => value.constant!);
-  const values = new Set(prepared.map(value => value.get(0)));
+  const key = options.portablePredicate
+    ? portableMembershipKey
+    : (value: ArrowExpressionValue) => value;
+  const values = new Set(prepared.map(value => key(value.get(0))));
   const ranges: Range[] = utf8
     ? prepared.map(value => bytes(value, 0)).filter((range): range is Range => range !== null)
     : binary
@@ -994,7 +1107,8 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
           } else {
             const value = source.get(row);
             if (value === null) return null;
-            if (!Number.isNaN(value) && values.has(value)) return true;
+            if ((options.portablePredicate || !Number.isNaN(value)) && values.has(key(value)))
+              return true;
           }
           return values.has(null) ? null : false;
         }
@@ -1157,6 +1271,16 @@ function isNestedType(type: DataType): boolean {
   return DataType.isStruct(type) || DataType.isList(type) || DataType.isFixedSizeList(type);
 }
 
+/** Identifies 64-bit list storage when the installed Arrow runtime provides it. */
+function isLargeList(type: DataType): boolean {
+  return type.typeId === Type['LargeList' as keyof typeof Type];
+}
+
+/** Identifies result types that require a vector kernel. */
+function isVectorResult(type: DataType): boolean {
+  return isNestedType(type) || DataType.isDenseUnion(type) || isLargeList(type);
+}
+
 /** Converts nested Arrow values to builder inputs while preserving scalar values. */
 function nestedValue(value: any, type: DataType): unknown {
   if (value == null) return null;
@@ -1171,11 +1295,31 @@ function nestedValue(value: any, type: DataType): unknown {
 
 /** Masks nested results without coercing their child types. */
 function nestedVector(vector: Vector, type: DataType, active: Mask): Vector {
-  if (!active.includes(0)) return vector;
+  if (!active.some((valid, row) => !valid && vector.isValid(row))) return vector;
+  if (DataType.isDenseUnion(type) || isLargeList(type))
+    return evaluateVectorSpans(vector, type, active, span => span);
   return vectorFromArray(
     Array.from(active, (valid, row) => (valid ? nestedValue(vector.get(row), type) : null)),
     type
   );
+}
+
+/** Returns a nullable Boolean expression for a comparison against a missing field. */
+function makeUnknownPredicate(): Node {
+  return {
+    field: new Field('predicate', bool, true),
+    hasKernel: false,
+    prepare: () => ({get: () => null})
+  };
+}
+
+/** Represents a missing portable property with an Arrow Null type. */
+function makeMissingProperty(): Node {
+  return {
+    field: new Field('missing', new Null(), true),
+    hasKernel: false,
+    prepare: () => ({get: () => null, isNull: () => true})
+  };
 }
 
 /** Binds list indexing and named struct access against the input Arrow types. */
@@ -1203,11 +1347,17 @@ function bindNestedExtract(
     )
       throw new Error('LIST_EXTRACT requires an integer index');
   } else {
-    if (!DataType.isStruct(inputType)) throw new Error('STRUCT_EXTRACT requires an Arrow Struct');
+    if (!DataType.isStruct(inputType)) {
+      if (options.portablePredicate) return makeMissingProperty();
+      throw new Error('STRUCT_EXTRACT requires an Arrow Struct');
+    }
     if (selector.type !== 'Literal' || typeof selector.value !== 'string')
       throw new Error('STRUCT_EXTRACT requires a literal field name');
     const field = inputType.children.find(candidate => candidate.name === selector.value);
-    if (!field) throw new Error(`Unknown Arrow struct field: ${selector.value}`);
+    if (!field) {
+      if (options.portablePredicate) return makeMissingProperty();
+      throw new Error(`Unknown Arrow struct field: ${selector.value}`);
+    }
     child = field;
   }
   const field = new Field(child.name, valueType(child.type), true, child.metadata);
@@ -1311,6 +1461,9 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
       type,
       arguments_.some(value => value.field.nullable)
     );
+    const plainColumns = ast.arguments.every(
+      (argument: Expression) => argument.type === 'Identifier'
+    );
     return {
       field,
       hasKernel: true,
@@ -1324,6 +1477,12 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
             arguments_.some(argument => argument.hasKernel)
           )
         );
+        if (plainColumns && !context.failed) {
+          const packed = interleaveFloatColumns(type, values, active);
+          if (packed) {
+            return vectorReader(packed);
+          }
+        }
         const vector = nullTupleVector(type, active.length),
           data = vector.data[0]!,
           output =
@@ -1536,7 +1695,10 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
           !containsContextualArray(argument)
           ? bind(argument, options, undefined, true).field
           : undefined;
-      })
+      }),
+      ast.arguments.map((arg: Expression) =>
+        arg.type === 'Literal' && typeof arg.value === 'number' ? arg.value : undefined
+      )
     );
   for (let index = 0; index <= group.prototypes.length; index++) {
     const prototype = group.prototypes[index] ?? (candidates.length ? undefined : resolve());
@@ -1645,12 +1807,13 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
   const evaluateVector = declaration.evaluateScalar ? undefined : declaration.evaluate;
   const result = declaration.result;
   const tuple = isTupleType(result.type);
-  if (tuple && declaration.evaluateScalar)
-    throw new Error('Fixed-size list results require a vector-only function');
+  const nested = isVectorResult(result.type);
+  if (nested && declaration.evaluateScalar) {
+    throw new Error('Nested results require a vector-only function');
+  }
   if (declaration.evaluateScalar) for (const argument of arguments_) typeKey(argument.field.type);
-  if (!tuple) typeKey(result.type);
-  const validate = tuple ? undefined : createValueValidator(result.type);
-  const round = tuple ? undefined : roundToType(result.type);
+  const validate = nested ? undefined : createValueValidator(result.type);
+  const round = nested ? undefined : roundToType(result.type);
   const field = new Field(
     result.name,
     valueType(result.type),
@@ -1707,7 +1870,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
           });
           if (
             vector.length !== active.length ||
-            (tuple
+            (nested
               ? physicalKey(vector.type) !== physicalKey(result.type)
               : typeKey(vector.type) !== typeKey(result.type))
           )
@@ -1716,11 +1879,29 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
             validateTupleVector(vector, result, mask);
             return vectorReader(maskTupleVector(vector, mask));
           }
+          if (nested) {
+            if (!result.nullable && mask.some((valid, row) => valid && !vector.isValid(row))) {
+              throw new Error(`Function ${name} returned null for a non-nullable result`);
+            }
+            return vectorReader(nestedVector(vector, result.type, mask));
+          }
+          if (
+            DataType.isBinary(result.type) &&
+            DataType.isBinary(vector.type) &&
+            !mask.includes(0)
+          ) {
+            if (!result.nullable && vector.nullCount) {
+              throw new Error(`Function ${name} returned null for a non-nullable result`);
+            }
+            return vectorReader(vector);
+          }
           kernel = sourceReader(vector);
         }
       }
-      if (isTupleType(result.type))
-        return vectorReader(nullTupleVector(result.type, active.length));
+      if (tuple) return vectorReader(nullTupleVector(result.type, active.length));
+      if (nested) {
+        return vectorReader(makeVector(nullVectorData(result.type, active.length)));
+      }
       return {
         get: row => {
           let value: ArrowExpressionValue;
@@ -1801,3 +1982,6 @@ function needsArgumentContext(ast: any): boolean {
       (needsArgumentContext(ast.consequent) || needsArgumentContext(ast.alternate)))
   );
 }
+
+// Shared by the grouped relation executor, with the same physical value contract.
+export {output as writeArrowExpressionValues};

@@ -5,12 +5,12 @@ import {
   EllipsoidGeodesicExact,
   GeodesicPolygonExact,
   type ExactGeodesicOptions
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/geodesics';
 import {
   TriaxialEllipsoid,
   type TriaxialCoordinates,
   type CartesianGeodesicState
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/ellipsoid';
 const options: ExactGeodesicOptions = {unrollLongitude: true};
 const exact = new EllipsoidGeodesicExact({semiMajorAxis: 1, semiMinorAxis: 2});
 const solved = exact.inverse(20, 30, -40, 160, options);

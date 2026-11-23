@@ -39,7 +39,7 @@ between an absent CRS and an explicitly unknown one. Its `coordinateOrder` descr
 stored coordinates independently of the CRS definition's authoritative axis order.
 `CRSReference` is the nested declaration, including its definition and provenance.
 
-Resolution serves another purpose. `normalizeCRS()` from `@math.gl/geospatial/projection/core`
+Resolution serves another purpose. `normalizeCRS()` from `@math.gl/geospatial/projection-core`
 produces a `NormalizedCRS`: resolved parameters, ellipsoid and datum information,
 angular and linear conversion factors, and axis conventions used by the engine.
 Use it when integrating low-level APIs, such as constructing `ProjectionAnalysis`.
@@ -91,8 +91,8 @@ definitions; a pipeline lets the application state each stage and its order. It 
 typed composition, not a parser for arbitrary PROJ pipeline strings.
 
 ```typescript
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import {universalTransverseMercator} from '@math.gl/geospatial/projection/projections/utm';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import {universalTransverseMercator} from '@math.gl/geospatial/projection-projections-utm';
 
 const pipeline = new ProjectionPipeline({
   input: {space: 'geographic', units: ['deg', 'deg', 'm']},
@@ -134,7 +134,7 @@ be a prepared transform, pipeline, configuration or factory; selection never inv
 This example wraps the pipeline above and explicitly permits its unknown accuracy:
 
 ```typescript
-import {OperationCatalog} from '@math.gl/geospatial/projection/operations';
+import {OperationCatalog} from '@math.gl/geospatial/projection-operations';
 
 const catalog = new OperationCatalog([{
   id: 'example-utm31',
@@ -177,7 +177,7 @@ is chunked. It captures a layout around a `BulkProjection` with synchronous reus
 methods. This continues the prepared transform from the first example:
 
 ```typescript
-import {ProjectionBuffer} from '@math.gl/geospatial/projection/bulk';
+import {ProjectionBuffer} from '@math.gl/geospatial/projection-bulk';
 
 const pointOutput = new Float64Array(3);
 transform.projectToSync([12, 55, 100], pointOutput);
@@ -218,8 +218,8 @@ vertical reference, tide convention and coverage to the operation. The applicati
 owns fetching, decoding, data terms and caching.
 
 ```typescript
-import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
-import {createVerticalGrid} from '@math.gl/geospatial/projection/grids/vertical';
+import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
+import {createVerticalGrid} from '@math.gl/geospatial/projection-grids-vertical';
 
 // Synthetic constant undulation, not a surveyed geoid model.
 const local = createVerticalGrid({
@@ -256,8 +256,8 @@ in degrees and explicit `m/year` or `mm/year` values; its sampler returns metres
 the original source/target epoch pair. The following continues the pipeline imports above:
 
 ```typescript
-import {createVelocityGrid} from '@math.gl/geospatial/projection/grids/velocity';
-import {createDeformationModel} from '@math.gl/geospatial/projection/deformation';
+import {createVelocityGrid} from '@math.gl/geospatial/projection-grids-velocity';
+import {createDeformationModel} from '@math.gl/geospatial/projection-deformation';
 
 const velocity = createVelocityGrid({
   origin: [-1, -1], step: [2, 2], size: [2, 2], units: 'mm/year',
@@ -283,7 +283,7 @@ Use [`createTemporalDeformationModel`](../temporal-models.md) from `/temporal` w
 velocity is insufficient. It returns the same `DeformationModel` contract for the same step:
 
 ```typescript
-import {createTemporalDeformationModel} from '@math.gl/geospatial/projection/temporal';
+import {createTemporalDeformationModel} from '@math.gl/geospatial/projection-temporal';
 
 const temporalModel = createTemporalDeformationModel({
   epochRange: [2000, 2030],
@@ -315,7 +315,7 @@ A descriptor combines one resolved target CRS with prepared converters and rende
 conventions. It saves applications from assembling these pieces independently.
 
 ```typescript
-import {lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
+import {lazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
 
 const target = await lazyProjectionEngine.getCRS('EPSG:3857');
 const converter = target.converter.WGS84;
@@ -363,9 +363,9 @@ Do not multiply that altitude by the rendering Z factor to interpret its physica
 question about a **single projection**, rather than a complete CRS-pair operation:
 
 ```typescript
-import {normalizeCRS} from '@math.gl/geospatial/projection/core';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
-import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection/analysis';
+import {normalizeCRS} from '@math.gl/geospatial/projection-core';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
+import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection-analysis';
 
 const crs = normalizeCRS('+proj=merc +ellps=WGS84');
 const analysis = new ProjectionAnalysis({

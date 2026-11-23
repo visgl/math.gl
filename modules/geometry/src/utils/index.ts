@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-export type {TypedArray, TypedArrayConstructor} from '@math.gl/core';
+export type {TypedArray, TypedArrayConstructor} from '@math.gl/core/types';
 
 export type {GeometryInput, GeometryAttribute} from './geometry';
 export {isGeometry} from './geometry';

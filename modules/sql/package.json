@@ -1,6 +1,6 @@
 {
   "name": "@math.gl/sql",
-  "version": "5.0.0-beta.12",
+  "version": "5.1.0-alpha.0",
   "description": "Lightweight SQL query engine for Apache Arrow tables",
   "license": "MIT",
   "type": "module",
@@ -11,9 +11,6 @@
     "type": "git",
     "url": "https://github.com/visgl/math.gl.git"
   },
-  "types": "dist/index.d.ts",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
   "files": [
     "dist",
     "src",
@@ -23,17 +20,22 @@
     "THIRD-PARTY-NOTICES.md"
   ],
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+    "./query": {
+      "types": "./dist/query.d.ts",
+      "import": "./dist/query.js",
+      "require": "./dist/query.cjs"
+    },
+    "./geoarrow-functions": {
+      "types": "./dist/geoarrow-functions.d.ts",
+      "import": "./dist/geoarrow-functions.js",
+      "require": "./dist/geoarrow-functions.cjs"
     },
     "./scales": {
       "types": "./dist/scales/index.d.ts",
       "import": "./dist/scales/index.js",
       "require": "./dist/scales/index.cjs"
     },
-    "./scales/conformance": {
+    "./scales-conformance": {
       "types": "./dist/scales/conformance.d.ts",
       "import": "./dist/scales/conformance.js",
       "require": "./dist/scales/conformance.cjs"
@@ -69,6 +71,11 @@
       "types": "./dist/color-functions/index.d.ts",
       "import": "./dist/color-functions/index.js",
       "require": "./dist/color-functions/index.cjs"
+    },
+    "./dataframe": {
+      "types": "./dist/dataframe/index.d.ts",
+      "import": "./dist/dataframe/index.js",
+      "require": "./dist/dataframe/index.cjs"
     }
   },
   "sideEffects": [
@@ -78,9 +85,9 @@
     "./src/arrow/query-worker-entry.ts"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-beta.12",
-    "@math.gl/geometry": "5.0.0-beta.12",
-    "@math.gl/tasks": "5.0.0-beta.12"
+    "@math.gl/core": "5.1.0-alpha.0",
+    "@math.gl/geometry": "5.1.0-alpha.0",
+    "@math.gl/tasks": "5.1.0-alpha.0"
   },
   "peerDependencies": {
     "apache-arrow": ">=17.0.0"

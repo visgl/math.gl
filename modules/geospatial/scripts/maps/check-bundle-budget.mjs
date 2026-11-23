@@ -9,15 +9,15 @@ import {build} from 'esbuild';
 const fixtures = {
   engine: "export {MapEngine} from '@math.gl/geospatial/maps';",
   albersPoints:
-    "import {MapEngine} from '@math.gl/geospatial/maps'; import {albersUsaMapPreset} from '@math.gl/geospatial/maps/presets'; export const map = new MapEngine({version:1,id:'usa',definition:{type:'albers-usa'}},{presets:[albersUsaMapPreset]});",
+    "import {MapEngine} from '@math.gl/geospatial/maps'; import {albersUsaMapPreset} from '@math.gl/geospatial/maps-presets'; export const map = new MapEngine({version:1,id:'usa',definition:{type:'albers-usa'}},{presets:[albersUsaMapPreset]});",
   albersGeometry:
-    "import {MapEngine} from '@math.gl/geospatial/maps'; import {albersUsaMapPreset} from '@math.gl/geospatial/maps/presets'; import {mapGeometry} from '@math.gl/geospatial/maps/geometry'; export const map = new MapEngine({version:1,id:'usa',definition:{type:'albers-usa'}},{presets:[albersUsaMapPreset],geometry:mapGeometry});",
+    "import {MapEngine} from '@math.gl/geospatial/maps'; import {albersUsaMapPreset} from '@math.gl/geospatial/maps-presets'; import {mapGeometry} from '@math.gl/geospatial/maps-geometry'; export const map = new MapEngine({version:1,id:'usa',definition:{type:'albers-usa'}},{presets:[albersUsaMapPreset],geometry:mapGeometry});",
   rasterSurface:
-    "export {prepareMapSurface,prepareProjectionSurface} from '@math.gl/geospatial/maps/surfaces';",
+    "export {prepareMapSurface,prepareProjectionSurface} from '@math.gl/geospatial/maps-surfaces';",
   surfaceTransition:
-    "export {prepareMapTransitionMeshAsync} from '@math.gl/geospatial/maps/transitions';",
-  featureTransition: "export {mapTransitions} from '@math.gl/geospatial/maps/transitions';",
-  fullCatalogue: "export {mapPresets} from '@math.gl/geospatial/maps/presets';"
+    "export {prepareMapTransitionMeshAsync} from '@math.gl/geospatial/maps-transitions';",
+  featureTransition: "export {mapTransitions} from '@math.gl/geospatial/maps-transitions';",
+  fullCatalogue: "export {mapPresets} from '@math.gl/geospatial/maps-presets';"
 };
 export async function checkMapBundleBudget(measure = false) {
   const limits = measure

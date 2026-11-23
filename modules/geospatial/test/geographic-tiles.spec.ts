@@ -6,7 +6,7 @@ import {
   getGeographicTile,
   getGeographicTileBounds,
   getGeographicTileRanges
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/tiles';
 
 test('geographic tile bounds and point ownership', () => {
   expect(getGeographicTileBounds({x: 0, y: 0, level: 0})).toEqual([-180, -90, 180, 90]);

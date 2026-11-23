@@ -22,3 +22,8 @@ export {
   parseMGRSZone
 } from './coordinates/mgrs';
 export type {MGRSCoordinate, MGRSZone} from './coordinates/mgrs';
+
+export {LocalReferenceFrame} from './local-reference-frame';
+export type {LocalReferenceFrameOptions, HeadingPitchRoll} from './local-reference-frame';
+export {eastNorthUpToFixedFrame, localFrameToFixedFrame} from './ellipsoid-transforms';
+export type {AxisDirection} from './ellipsoid-transforms';

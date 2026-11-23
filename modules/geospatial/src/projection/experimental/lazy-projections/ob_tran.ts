@@ -16,7 +16,7 @@ export function lazyObliqueTransformation(
     },
     async () => {
       const [{obliqueTransformation}, child] = await Promise.all([
-        import('@math.gl/geospatial/projection/projections/ob_tran'),
+        import('@math.gl/geospatial/projection-projections-ob_tran'),
         typeof wrapped === 'string' || 'create' in wrapped ? wrapped : wrapped.preload()
       ]);
       return obliqueTransformation(child);

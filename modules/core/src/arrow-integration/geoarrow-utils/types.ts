@@ -2,20 +2,20 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {TypedArray} from '@math.gl/core';
-/** Minimal tagged geometry shape used only by compatibility builders.
- *
- * The physical GeoArrow APIs never create these values. Keeping the structural type here avoids
- * making the descriptor package depend on the WKB format package.
- */
-export type GeoArrowGeometryValue =
+import type {TypedArray} from '../../types';
+
+/** Standalone decoded geometry expressed as tagged JavaScript coordinate arrays. */
+export type GeoArrowDecodedGeometry =
   | {type: 'Point'; coordinates: readonly number[]}
   | {type: 'LineString'; coordinates: readonly (readonly number[])[]}
   | {type: 'Polygon'; coordinates: readonly (readonly (readonly number[])[])[]}
   | {type: 'MultiPoint'; coordinates: readonly (readonly number[])[]}
   | {type: 'MultiLineString'; coordinates: readonly (readonly (readonly number[])[])[]}
   | {type: 'MultiPolygon'; coordinates: readonly (readonly (readonly (readonly number[])[])[])[]}
-  | {type: 'GeometryCollection'; geometries: readonly GeoArrowGeometryValue[]};
+  | {type: 'GeometryCollection'; geometries: readonly GeoArrowDecodedGeometry[]};
+
+/** @deprecated Use GeoArrowDecodedGeometry. */
+export type GeoArrowGeometryValue = GeoArrowDecodedGeometry;
 
 /** GeoArrow concrete, mixed, bounding-box, and serialized encodings. */
 export type GeoArrowEncoding =
@@ -202,7 +202,9 @@ export function mergeGeoArrowDimensions(
  * Three ordinates are interpreted as XYZ; callers with XYM data should supply that semantic
  * dimension explicitly instead of inferring it from tuple length.
  */
-export function inferGeoArrowGeometryDimension(geometry: GeoArrowGeometryValue): GeoArrowDimension {
+export function inferGeoArrowGeometryDimension(
+  geometry: GeoArrowDecodedGeometry
+): GeoArrowDimension {
   if (geometry.type === 'GeometryCollection') {
     return geometry.geometries.reduce(
       (dimension, child) =>
@@ -230,7 +232,7 @@ function inferCoordinateDimensions(coordinates: readonly unknown[]): GeoArrowDim
 /** Returns the concrete geometry family associated with an encoding. */
 export function getGeoArrowGeometryType(
   encoding: GeoArrowEncoding
-): Exclude<GeoArrowGeometryValue['type'], 'GeometryCollection'> | 'GeometryCollection' | null {
+): Exclude<GeoArrowDecodedGeometry['type'], 'GeometryCollection'> | 'GeometryCollection' | null {
   switch (encoding) {
     case 'geoarrow.point':
       return 'Point';
@@ -253,7 +255,7 @@ export function getGeoArrowGeometryType(
 
 /** Returns the canonical concrete encoding for a materialized geometry family. */
 export function getGeoArrowEncodingForGeometry(
-  type: GeoArrowGeometryValue['type']
+  type: GeoArrowDecodedGeometry['type']
 ): GeoArrowEncoding {
   return `geoarrow.${type.toLowerCase()}` as GeoArrowEncoding;
 }

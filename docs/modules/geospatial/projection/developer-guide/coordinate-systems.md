@@ -90,9 +90,9 @@ and the qualified sphere/oblate surface/exterior inverse. Geospatial retains its
 three-radius and interior geometry paths.
 
 ```ts
-import {Ellipsoid} from '@math.gl/geospatial';
-import { normalizeCRS, ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { geocentric } from "@math.gl/geospatial/projection/projections/geocent";
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import { normalizeCRS, ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { geocentric } from "@math.gl/geospatial/projection-projections-geocent";
 
 const normalized = normalizeCRS("+proj=longlat +ellps=GRS80");
 const shape = Ellipsoid.fromSpheroid(normalized.ellipsoid);
@@ -192,7 +192,7 @@ Supply a scalar epoch or one Float32/Float64 epoch per flat record. The fourth
 coordinate component remains M, a measure; it is never interpreted as time.
 
 ```typescript
-import { ProjectionPipeline } from "@math.gl/geospatial/projection/pipeline";
+import { ProjectionPipeline } from "@math.gl/geospatial/projection-pipeline";
 
 // Illustrative coefficients, not an authoritative datum transformation.
 const movingFrame = new ProjectionPipeline({

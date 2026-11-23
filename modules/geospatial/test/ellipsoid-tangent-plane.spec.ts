@@ -5,8 +5,8 @@
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
 import {test, expect} from 'vitest';
-import {Vector2, Vector3, _MathUtils, equals} from '@math.gl/core';
-import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial';
+import {Vector2, Vector3, _MathUtils, equals} from '@math.gl/core/matrix';
+import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial/ellipsoid';
 
 test('EllipsoidTangentPlane constructs an east-north-up frame', () => {
   const surfacePoint = Ellipsoid.WGS84.cartographicToCartesian([0, 0, 0]);

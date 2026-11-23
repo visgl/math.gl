@@ -2,12 +2,18 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original independent and full GeographicLib C++ qualification; no upstream implementation imported.
-import {config} from '@math.gl/core';
-import {cartesianToSpheroid, spheroidToCartesian} from '@math.gl/core';
-import {createLocalFrameBasis, eastNorthUpBasis, fixedToLocal, localToFixed} from '@math.gl/core';
-import {Ellipsoid, EllipsoidGeodesic} from '@math.gl/geospatial';
-import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
-import {gnomonic} from '@math.gl/geospatial/projection/projections/gnom';
+import {config} from '@math.gl/core/matrix';
+import {cartesianToSpheroid, spheroidToCartesian} from '@math.gl/core/matrix';
+import {
+  createLocalFrameBasis,
+  eastNorthUpBasis,
+  fixedToLocal,
+  localToFixed
+} from '@math.gl/core/matrix';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {EllipsoidGeodesic} from '@math.gl/geospatial/geodesics';
+import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
+import {gnomonic} from '@math.gl/geospatial/projection-projections-gnom';
 import reference from './fixtures/ellipsoid-p0-reference.json';
 
 export const provenance = reference.provenance;

@@ -5,8 +5,8 @@ rendering, run it in a worker. `TaskRunner` gives you a way to send data to that
 worker and await a result without managing worker messages yourself.
 
 You need two things: a task that describes the work and a runner that executes it.
-This guide starts with a task already provided by math.gl. You can create your
-own tasks later.
+The examples use the generic runner from `@math.gl/tasks` and a projection task
+implemented by `@math.gl/geospatial`. You can define your own task using the same runner.
 
 ## Install
 
@@ -16,7 +16,7 @@ Install the runner and the geospatial module used in these examples:
 npm install @math.gl/tasks @math.gl/geospatial
 ```
 
-Other tasks can use `@math.gl/tasks` on its own.
+Install only `@math.gl/tasks` when defining your own tasks with no geospatial imports.
 
 ## Running a task
 

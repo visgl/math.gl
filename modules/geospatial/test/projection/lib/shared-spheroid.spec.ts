@@ -4,14 +4,14 @@
 // SPDX-FileComment: Independently authored normal-support/cardinal anchors; no third-party reference implementation or model data.
 import {expect, test} from 'vitest';
 import p0Reference from '../fixtures/ellipsoid-p0-reference.json';
-import {config} from '@math.gl/core';
+import {config} from '@math.gl/core/matrix';
 import {
   spheroidToCartesian as forwardKernel,
   cartesianToSpheroid as inverseKernel
-} from '@math.gl/core';
-import {Ellipsoid} from '@math.gl/geospatial';
-import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
-import {geocentric} from '@math.gl/geospatial/projection/projections/geocent';
+} from '@math.gl/core/matrix';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
+import {geocentric} from '@math.gl/geospatial/projection-projections-geocent';
 
 // Adapt authored array anchors to the low-level point contract, outside benchmarks.
 function spheroidToCartesian(

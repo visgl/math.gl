@@ -14,56 +14,56 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
   {symbol: "createArrowColumns", packages: ["@math.gl/sql/arrow"], forbidden: [/sql\/(src|dist)\/scales\//], budget: 307000},
-  // Nested function packages and prepared SQL columns bring the query consumer to approximately 310 KB.
-  {symbol:'queryArrowSQL', packages:['@math.gl/sql'], forbidden:[/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/loaders.gl/,/geospatial\//], budget:310500},
+  // SQL text uses expression WHERE clauses; it does not need the portable predicate normalizer.
+  {symbol:'queryArrowSQL', packages:['@math.gl/sql/query'], forbidden:[/predicate-expression/,/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/geoarrow-functions\./,/loaders.gl/,/geospatial\//], budget:319350},
 
   ...['sweepTerrainRotatingCapsule', 'sweepTerrainRotatingSphere'].map(symbol => ({
-    symbol, packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    symbol, packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/sweep-cylinder/, /sweep-polytope/, /sweep-rotation/, /terrain\/surface\./, /triangle-bvh/],
     budget: 6000
   })),
-  {symbol: 'sweepTerrainRotatingBox', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'sweepTerrainRotatingBox', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/sweep-cylinder/, /sweep-capsule/, /terrain\/surface\./, /triangle-bvh/], budget: 8500},
-  {symbol: 'sweepTerrainSphere', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'sweepTerrainSphere', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /terrain\/surface\./, /triangle-bvh/, /mesh-stitch/], budget: 3300},
-  {symbol: 'sweepTerrainCapsule', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'sweepTerrainCapsule', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /terrain\/surface\./, /triangle-bvh/, /mesh-stitch/], budget: 3900},
-  {symbol: 'sweepTerrainBox', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'sweepTerrainBox', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/sweep-cylinder/, /terrain\/surface\./, /triangle-bvh/], budget: 5500},
-  {symbol: 'sweepTerrainCylinder', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'sweepTerrainCylinder', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/sweep-sphere/, /sweep-capsule/, /terrain\/surface\./, /triangle-bvh/], budget: 7000},
-  {symbol: 'certifyTerrainMeshCoverage', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'certifyTerrainMeshCoverage', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /mesh-data\./, /continuous-mesh-error/, /cdt2d/, /martini/, /delatin/], budget: 6500},
-  {symbol: 'updateTerrainValidDomainMeshRegions', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'updateTerrainValidDomainMeshRegions', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/martini/, /delatin/, /breakline-mesh/, /continuous-mesh-error/], budget: 45000},
 
-  {symbol: 'splitTerrainBreaklines', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'splitTerrainBreaklines', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/cdt2d/, /breakline-mesh/, /valid-domain-mesh/, /height-field\./], budget: 5000},
 
-  {symbol: 'getGeographicTerrainNeighbor', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'getGeographicTerrainNeighbor', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /geographic-seam\./, /lod-select/, /mesh-stitch/], budget: 2500},
-  {symbol: 'measureGeographicTerrainSeam', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'measureGeographicTerrainSeam', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /geographic\./, /lod-select/, /mesh-stitch/], budget: 5000},
-  {symbol: 'boundTerrainLodScreenError', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'boundTerrainLodScreenError', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/lod-select/, /height-field\./, /mesh-stitch/, /geographic-lod-seams/], budget: 4500},
-  {symbol: 'selectTerrainLod', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'selectTerrainLod', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /mesh-stitch/, /geographic-seam/], budget: 5000},
-  {symbol: 'discoverGeographicTerrainPoles', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'discoverGeographicTerrainPoles', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /lod-seams/, /lod-stitch/, /mesh-stitch/], budget: 2500},
-  {symbol: 'discoverGeographicTerrainLodSeams', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'discoverGeographicTerrainLodSeams', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /lod-stitch/, /mesh-stitch/, /lod-select/], budget: 4500},
-  {symbol: 'stitchTerrainLodCut', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'stitchTerrainLodCut', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /lod-select/, /lod-coordinate/, /geographic-seam/], budget: 17000},
 
-  {symbol: 'boundTerrainMeshError', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'boundTerrainMeshError', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/cdt2d/, /martini/, /delatin/, /height-field\./, /mesh-data\./], budget: 9000},
 
-  {symbol: 'createBreaklineTerrainMesh', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'createBreaklineTerrainMesh', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/martini/, /delatin/, /\/surface\./], budget: 45000},
 
-  {symbol: 'createTerrainMesh', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'createTerrainMesh', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/mesh-coverage/, /continuous-mesh-error/, /cdt2d/, /valid-domain-mesh/, /martini/, /delatin/], budget: 10000},
-  {symbol: 'createValidDomainTerrainMesh', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'createValidDomainTerrainMesh', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/martini/, /delatin/, /\/surface\./, /breakline-mesh/], budget: 45000},
 
   {symbol:'getExpressionColumns', packages:['@math.gl/sql/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:4000},
@@ -71,8 +71,9 @@ const probes = [
   {symbol:'NUMERIC_FUNCTION_DEFINITIONS', packages:['@math.gl/sql/expressions'], forbidden:[/apache-arrow/,/arrow\//,/vendor\/jsep\/runtime/], budget:5000},
   {symbol:'SIN',packages:['@math.gl/sql/math-functions'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:210000},
   {symbol:'COLOR_RGB',packages:['@math.gl/sql/color-functions'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/],budget:250000},
-  {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
-  {symbol: 'ST_AREA', packages: ['@math.gl/geospatial/turf/expressions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
+  {symbol:'createGeoArrowConversionFunctions',packages:['@math.gl/sql/geoarrow-functions'],forbidden:[/arrow\/(compiler|predicate)/,/loaders.gl/,/geospatial\//],budget:283500},
+  {symbol: 'createTurfArrowFunction', packages: ['@math.gl/geospatial/turf-functions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
+  {symbol: 'ST_AREA', packages: ['@math.gl/geospatial/st-functions'], forbidden: [/\/src\/turf\.ts$/, /\/dist\/turf\.js$/, /arrow\/(compiler|predicate)/], budget: 240000},
 
   // Measured with explicit numeric, dictionary, binary and temporal CAST targets and SQL pattern operators.
   // Named scalar/binary parameter binding and expression IN syntax are part of each parser.
@@ -82,30 +83,35 @@ const probes = [
   {symbol: 'parseSQLQuery', packages: ['@math.gl/sql/parser'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 28750},
 
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/sql/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
-  {symbol:'spheroidToCartesian', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
-  {symbol:'vec3Normalize', packages:['@math.gl/core'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
-  {symbol:'SimulationClock', packages:['@math.gl/core'], forbidden:[/mat4/, /vec[234]/, /sample-track/, /gl-matrix/, /\/sql\//], budget:3500},
-  {symbol:'getGeohashBounds', packages:['@math.gl/dggs'], forbidden:[/h3-js/, /a5-js/, /open-location-code/, /s2-geometry/], budget:2500},
-  {symbol:'getClosestPointsSegmentTriangle', packages:['@math.gl/geometry'], forbidden:[/parametric/, /spatial-index/, /terrain/, /earcut/], budget:5000},
-  {symbol:'getStarColor', packages:['@math.gl/earth'], forbidden:[/astronomy-engine/, /bright-stars/], budget:700},
-  {symbol:'getGalacticAcceleration', packages:['@math.gl/earth'], forbidden:[/astronomy-engine/, /bright-stars/], budget:1200},
-  {symbol:'getTimezoneOffset', packages:['@math.gl/earth'], forbidden:[/astronomy-engine/, /tz-lookup/, /bright-stars/], budget:1500},
+  {symbol:'spheroidToCartesian', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
+  {symbol:'vec3Normalize', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
+  {symbol:'SimulationClock', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec[234]/, /sample-track/, /gl-matrix/, /\/sql\//], budget:3500},
+  {symbol:'getGeohashBounds', packages:['@math.gl/dggs/geohash'], forbidden:[/h3-js/, /a5-js/, /open-location-code/, /s2-geometry/], budget:2500},
+  {symbol:'getClosestPointsSegmentTriangle', packages:['@math.gl/geometry/culling'], forbidden:[/parametric/, /spatial-index/, /terrain/, /earcut/], budget:5000},
+  {symbol:'getStarColor', packages:['@math.gl/earth/sun-stars'], forbidden:[/astronomy-engine/, /bright-stars/], budget:700},
+  {symbol:'getGalacticAcceleration', packages:['@math.gl/earth/sun-stars'], forbidden:[/astronomy-engine/, /bright-stars/], budget:1200},
+  {symbol:'getRayleighPhaseFunction', packages:['@math.gl/earth/sun'], forbidden:[/astronomy-engine/, /bright-stars/, /cloud-lighting/, /sky-brightness/], budget:350},
+  {symbol:'getHenyeyGreensteinPhaseFunction', packages:['@math.gl/earth/sun'], forbidden:[/astronomy-engine/, /bright-stars/, /cloud-lighting/, /sky-brightness/], budget:550},
+  {symbol:'getCornetteShanksPhaseFunction', packages:['@math.gl/earth/sun'], forbidden:[/astronomy-engine/, /bright-stars/, /cloud-lighting/, /sky-brightness/], budget:600},
+  {symbol:'getApproximateErfcx', packages:['@math.gl/earth/sun'], forbidden:[/astronomy-engine/, /bright-stars/, /cloud-lighting/, /sky-brightness/], budget:300},
+  {symbol:'getChapmanGrazingIncidenceFunction', packages:['@math.gl/earth/sun'], forbidden:[/astronomy-engine/, /bright-stars/, /cloud-lighting/, /sky-brightness/], budget:800},
+  {symbol:'getTimezoneOffset', packages:['@math.gl/earth/timezone'], forbidden:[/astronomy-engine/, /tz-lookup/, /bright-stars/], budget:1500},
   {symbol:'parseWKB', packages:['@math.gl/core/arrow'], forbidden:[/martini/, /delatin/, /surface\./, /geometry\//, /geospatial\//, /tasks\//, /apache-arrow/], budget:4500},
   {
     symbol: 'createCRSDescriptor',
-    packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/crs'],
     forbidden: [/\/projection\//, /\/crs\/(wkt|proj-string|projjson|resolver)/, /proj-wasm/, /proj4/, /\/core\//],
     budget: 8000
   },
   {
     symbol: 'createSpatialReference',
-    packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/crs'],
     forbidden: [/\/resolver\./, /\/projection\//, /\/wkt-crs\./],
     budget: 6000
   },
   {
     symbol: 'createCRSResolver',
-    packages: ['@math.gl/geospatial/crs', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/crs'],
     forbidden: [/\/projection\//, /\/wkt-crs\./, /proj-wasm/, /\/core\//],
     budget: 8000
   },
@@ -117,24 +123,24 @@ const probes = [
   },
   {
     symbol: 'createTerrainSkirt',
-    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/projection\//, /\/height-field\./, /\/surface\./, /martini/, /delatin/],
     budget: 5000
   },
   ...['splitTerrainMesh', 'splitTerrainMeshTiles', 'updateTerrainTileCutouts', 'createTerrainCutoutSkirts'].map(symbol => ({
-    symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    symbol, packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /surface\./, /triangle-bvh/, /delatin/, /martini/, /cutout-polygons\./,
       symbol !== 'createTerrainCutoutSkirts' ? /mesh-skirts\./ : /mesh-cutout\./],
     budget: symbol === 'updateTerrainTileCutouts' ? 15000 : 10000
   })),
   {
     symbol: 'prepareTerrainCutoutPolygons',
-    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /surface\./, /mesh-cutout\./, /mesh-skirts\./, /delatin/, /martini/, /\/projection\//],
     budget: 6500
   },
   ...['createGeographicTerrainCutoutFrame', 'projectGeographicTerrainCutout', 'unprojectGeographicTerrainCutout'].map(symbol => ({
-    symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    symbol, packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /surface\./, /triangle-bvh/, /delatin/, /martini/, /mesh-cutout\./, /mesh-skirts\./, /\/projection\//],
     budget: 4000
   })),
@@ -181,59 +187,64 @@ const probes = [
   })),
   {
     symbol: 'weldTerrainContourTiles',
-    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/contours\./, /\/contour-paths\./],
     budget: 8000
   },
   {
     symbol: 'weldTerrainMixedContourTiles',
-    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/contours\./, /\/contour-paths\./],
     budget: 8000
   },
   {
     symbol: 'diagnoseTerrainContourBoundaries',
-    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/contours\./, /\/contour-tile-weld\./, /\/contour-paths\./],
     budget: 6000
   },
   {
     symbol: 'stitchTerrainContourTiles',
-    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/contours\./],
     budget: 12000
   },
   {
     symbol: 'createTerrainGradientPyramid',
-    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/derivatives\./, /\/filtered-pyramid\./],
     budget: 4000
   },
   {
     symbol: 'getTerrainProfileVisibility',
-    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/profile\./, /\/profile-measure\./],
     budget: 3500
   },
-  {symbol: 'createTerrainRegionalViewshed', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+  {symbol: 'createTerrainRegionalViewshed', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /profile-horizon/, /profile-viewshed/, /mixed-halo/, /triangle-bvh/], budget: 5500},
   ...['getTerrainCellMetrics', 'createTerrainDrainage'].map(symbol => ({
-    symbol, packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    symbol, packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/height-field\./, /triangle-bvh/, /martini/, /delatin/],
     budget: symbol === 'getTerrainCellMetrics' ? 900 : 3500
   })),
   {
-    symbol: 'fillTerrainDepressions', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    symbol: 'fillTerrainDepressions', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/hydrology\./, /triangle-bvh/, /martini/, /delatin/],
     budget: 11000
   },
   {
-    symbol: 'accumulateTerrainWatersheds', packages: ['@math.gl/geospatial', '@math.gl/geospatial/terrain'],
+    symbol: 'accumulateTerrainWatersheds', packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/depression-fill\./, /hydrology\./, /height-field\./, /triangle-bvh/],
     budget: 2000
   },
+  {
+    symbol: 'createTerrainRegionalWatersheds', packages: ['@math.gl/geospatial/terrain'],
+    forbidden: [/mesh-cutout/, /triangle-bvh/, /martini/, /delatin/, /regional-viewshed/],
+    budget: 14000
+  },
   ...['getTerrainProfileHorizon', 'getTerrainProfileViewshed'].map(symbol => ({
-    symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    symbol, packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/profile\./, /\/profile-measure\./, /\/profile-visibility\./],
     budget: 4000
   })),
@@ -246,59 +257,59 @@ const probes = [
       ...['vertex-tiles', 'mesh-stitch', 'tiled', 'mesh'].filter(name => name !== entry).map(name => new RegExp(`/terrain/${name}\\.`))]
   })),
   ...['updateTerrainMixedVertexTileHalos', 'updateTerrainMixedGradientGrids', 'simplifyTerrainContourPathsTopology'].map(symbol => ({
-    symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    symbol, packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/mesh\./],
     budget: 22000
   })),
   ...['createTerrainIsobands', 'updateTerrainMeshes', 'updateTerrainBounds', 'updateTerrainGradientPyramids'].map(symbol => ({
-    symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    symbol, packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/contour-topology\./],
     budget: 16000
   })),
   ...['updateTerrainMeshRegions','updateTerrainMartiniMeshRegions','updateTerrainDelatinMeshRegions','updateTerrainBoundsRegions','updateTerrainGradientPyramidRegions'].map(symbol => ({
-    symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    symbol, packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./,
       ...(symbol === 'updateTerrainMartiniMeshRegions' ? [] : [/martini/]),
       ...(symbol === 'updateTerrainDelatinMeshRegions' ? [] : [/delatin/])],
     budget: 32000
   })),
   ...['updateTerrainPersistentBounds','updateTerrainPersistentGradients','getTerrainHierarchyNode','createTerrainLodMorph','evaluateTerrainLodMorph'].map(symbol => ({
-    symbol, packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    symbol, packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/mesh\./,
       ...(symbol==='evaluateTerrainLodMorph'||symbol==='getTerrainHierarchyNode' ? [/\/height-field\./, /\/bounds\./, /\/gradient-pyramid\./] : [])],
     budget: symbol==='evaluateTerrainLodMorph'||symbol==='getTerrainHierarchyNode'?4000:16000
   })),
   ...['coordinateTerrainLodMorphs','createTerrainMixedIsobands'].map(symbol=>({
-    symbol,packages:['@math.gl/geospatial/terrain','@math.gl/geospatial'],
+    symbol,packages:['@math.gl/geospatial/terrain'],
     forbidden:[/\/geometry\//,/\/core\//,/\/surface\./,/martini/,/delatin/,/\/mesh-stitch\./],budget:24000
   })),
   {
     symbol: 'createTerrainMixedVertexTileHalos',
-    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/derivatives\./, /\/vertex-halos\./],
     budget: 16000
   },
   {
     symbol: 'createTerrainVertexTileHalos',
-    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/derivatives\./],
     budget: 8000
   },
   {
     symbol: 'getTerrainVertexHaloAffectedTiles',
-    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/vertex-halos\./, /\/vertex-tiles\./],
     budget: 2500
   },
   {
     symbol: 'updateTerrainVertexTileHalos',
-    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/derivatives\./],
     budget: 10000
   },
   {
     symbol: 'createTerrainFilteredPyramid',
-    packages: ['@math.gl/geospatial/terrain', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/terrain'],
     forbidden: [/\/geometry\//, /\/core\//, /\/surface\./, /martini/, /delatin/, /\/height-field\./, /\/bounds\./],
     budget: 3500
   },
@@ -316,7 +327,7 @@ const probes = [
   },
   {
     symbol: 'Ellipsoid',
-    packages: ['@math.gl/geospatial', '@math.gl/geospatial'],
+    packages: ['@math.gl/geospatial/ellipsoid'],
     forbidden: [/\/geometry\//, /\/classes\/matrix[34]\./, /\/local-frame\./,
       /\/ellipsoid-transform/, /\/vendor\//, /\/src\/projection\//, /\/dist\/projection\//],
     budget: 24000

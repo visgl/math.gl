@@ -9,7 +9,7 @@ import {
   createTerrainMixedIsobands,
   createTerrainIsobands,
   type TerrainMixedVertexTile
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 function tile(column: number, row: number, spacing: number): TerrainMixedVertexTile {
   return {
     column,

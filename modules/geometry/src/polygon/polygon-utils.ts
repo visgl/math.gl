@@ -4,8 +4,8 @@
 
 /* eslint-disable max-statements, max-depth, complexity, no-unused-expressions */
 
-import {equals} from '@math.gl/core';
-import type {NumericArray} from '@math.gl/core';
+import {equals} from '@math.gl/core/matrix';
+import type {NumericArray} from '@math.gl/core/matrix';
 
 /** Direction in which a polygon's vertices are ordered. */
 export type WindingDirection = 'clockwise' | 'counter-clockwise' | 'none';

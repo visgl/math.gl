@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original authored spatial velocity field and independent-reference qualification, not model data from an external authority.
-import {OperationCatalog} from '@math.gl/geospatial/projection/operations';
-import {createDeformationModel} from '@math.gl/geospatial/projection/deformation';
-import type {DeformationModel} from '@math.gl/geospatial/projection/deformation';
-import type {VelocityGrid} from '@math.gl/geospatial/projection/grids/velocity';
+import {OperationCatalog} from '@math.gl/geospatial/projection-operations';
+import {createDeformationModel} from '@math.gl/geospatial/projection-deformation';
+import type {DeformationModel} from '@math.gl/geospatial/projection-deformation';
+import type {VelocityGrid} from '@math.gl/geospatial/projection-grids-velocity';
 import reference from './fixtures/deformation-stress-reference.json';
 export {reference};
 export type DeformationStressCase = (typeof reference.cases)[number];

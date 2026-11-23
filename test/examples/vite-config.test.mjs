@@ -30,15 +30,15 @@ test('local Vite config resolves application and dependency imports to workspace
       try {
         const resolve = (name, importer = join(example, 'src/app.jsx')) =>
           server.environments.client.pluginContainer.resolveId(name, importer);
-        for (const name of ['@math.gl/core', '@math.gl/geospatial/terrain', '@math.gl/geometry/culling']) {
+        for (const name of ['@math.gl/core/matrix', '@math.gl/geospatial/terrain', '@math.gl/geometry/culling']) {
           const result = await resolve(name);
           assert.ok(result?.id.includes(local ? '/src/' : '/dist/'), `${name}: ${result?.id}`);
         }
         if (local) {
-          const asset = await resolve('@math.gl/earth/timezone/timezone-geometry-low.json?url');
+          const asset = await resolve('@math.gl/earth/timezone-timezone-geometry-low.json?url');
           assert.ok(asset?.id.includes('/modules/earth/data/timezone/'));
           const dependency = await resolve('@math.gl/core', join(root, 'node_modules/@deck.gl/core/dist/index.js'));
-          assert.ok(dependency?.id.includes('/modules/core/src/'), dependency?.id);
+          assert.ok(dependency?.id.includes('/node_modules/') && !dependency.id.includes('/modules/core/src/'), dependency?.id);
         }
       } finally {
         await server.close();

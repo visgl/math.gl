@@ -5,7 +5,7 @@
 </p>
 
 The configurable math.gl projection engine used by the full, configurable and lazy engines; see the [supported definitions and operations](../developer-guide/support.md).
-Import it from `@math.gl/geospatial/projection` or the isolated `@math.gl/geospatial/projection/core` entry point.
+Import it from `@math.gl/geospatial/projection` or the isolated `@math.gl/geospatial/projection-core` entry point.
 The package has no proj4js runtime dependency. Install `proj4` separately when
 its upstream behavior is required.
 
@@ -32,13 +32,13 @@ size comparisons, and application integration.
 
 ## Isolated entry points
 
-Use `@math.gl/geospatial/projection/core` for the class, normalization, capability checks
+Use `@math.gl/geospatial/projection-core` for the class, normalization, capability checks
 and shared contracts. Import a plugin from `@math.gl/geospatial/projection/projections/<id>`
 using its canonical PROJ name, for example `merc`, `utm`, `etmerc`, `geocent` or
 `ob_tran`. Export names are identical to the barrel's names. Geographic coordinates
 need no plugin or `longlat` subpath; the internal `gauss` helper is not public.
 
-The optional regional `datumCatalog` plugin is available from `@math.gl/geospatial/projection/datums`.
+The optional regional `datumCatalog` plugin is available from `@math.gl/geospatial/projection-datums`.
 Its runtime export stays outside the root and `/core` entry points.
 
 Readers are available from `parsers/wkt`, `parsers/projjson`,
@@ -71,7 +71,7 @@ Unknown datum names throw a `missing-transform-stage` error with registration gu
 import type {
   DatumDefinition,
   DatumCatalogPlugin,
-} from "@math.gl/geospatial/projection/core";
+} from "@math.gl/geospatial/projection-core";
 
 const local: DatumDefinition = { ellipse: "airy", towgs84: "1,2,3" };
 const catalog: DatumCatalogPlugin = {
@@ -551,7 +551,7 @@ Advanced plugins can implement optional `createForwardFlat(context)` and
 `createInverseFlat(context)` methods on `ProjectionImplementation`. They receive a frozen
 `ProjectionFlatContext` with `inputScale` and `outputScale`, and return a synchronous
 `ProjectionFlatOperation` or `undefined` to decline specialization. These types are
-exported from `@math.gl/geospatial/projection/core`. Factories run once per direction at construction;
+exported from `@math.gl/geospatial/projection-core`. Factories run once per direction at construction;
 operations receive the entire view and stride, after the engine validates both.
 
 A custom operation must multiply input XY by `inputScale`, apply the forward/inverse
@@ -586,7 +586,7 @@ implementations are identified separately. Distributed notices include the upstr
 MIT license and Equal Earth's retained Apache-2.0 license.
 
 For the built-in descriptor catalogue, use `LazyProjectionEngine` from
-`@math.gl/geospatial/projection/projections/lazy`. Create a transform with `createProjection()`
+`@math.gl/geospatial/projection-projections-lazy`. Create a transform with `createProjection()`
 or prepare a synchronous transform with `createProjectionAsync()`. Readers, aliases
 and grids remain explicit engine options. See the [engine reference](./projection-engine.md).
 
@@ -602,9 +602,9 @@ and reference their names with `+geoidgrids`; scalar and flat transforms then re
 
 #### parseGTXGrid
 
-Is exported from `@math.gl/geospatial/projection/grids/gtx`.
+Is exported from `@math.gl/geospatial/projection-grids-gtx`.
 `createVerticalGrid`, `createGeoidGrid` and `VerticalGridOptions` are exported from
-`@math.gl/geospatial/projection/grids/vertical`. The public root and compatibility experimental/native
+`@math.gl/geospatial/projection-grids-vertical`. The public root and compatibility experimental/native
 entry points also export these helpers; `/core` exports only the contract and engine.
 See [height conversion](../developer-guide/projection-engine.md#convert-geoid-heights) for loading,
 units, axes, fallback, coverage, datum ordering and the limits of this explicit subset.
@@ -614,7 +614,7 @@ units, axes, fallback, coverage, datum ordering and the limits of this explicit 
 `loadVerticalGeoTIFFGrid(tiff: VerticalGridGeoTIFF): Promise<VerticalGrid>` prepares an
 owned geoid snapshot from a caller-decoded TIFF. Import it and its structural types
 `VerticalGridGeoTIFF` / `VerticalGridGeoTIFFImage` from
-`@math.gl/geospatial/projection/grids/vertical-geotiff`. The root and experimental/native compatibility
+`@math.gl/geospatial/projection-grids-vertical-geotiff`. The root and experimental/native compatibility
 entry points also export it. Metadata may be synchronous (geotiff.js v2) or asynchronous
 (v3); numeric sample arrays must be raw, without decoder-applied scale/offset.
 

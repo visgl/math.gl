@@ -7,7 +7,7 @@ import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyGeostationary: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'geos', aliases: ['Geostationary Satellite View', 'Geostationary_Satellite']},
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/geos');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-geos');
     return projectionModule.geostationary;
   }
 );
