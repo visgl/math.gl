@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileCopyrightText: Copyright (c) 2015 - 2017 Uber Technologies, Inc.
 
-import {Vector4} from '@math.gl/core';
+import {Vector4} from '@math.gl/core/matrix';
 
 const array = [0, 0, 0, 0];
 const float32Array = new Float32Array([0, 0, 0, 0]);

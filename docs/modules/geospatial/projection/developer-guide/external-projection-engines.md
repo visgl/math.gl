@@ -114,7 +114,7 @@ than silently treating height as a horizontal coordinate. It allocates temporary
 arrays, so it is a starting point for integration, not an optimized batch backend.
 
 ```typescript title="point-projection.ts"
-import type {PreparedProjection} from '@math.gl/geospatial/projection/types';
+import type {PreparedProjection} from '@math.gl/geospatial/projection-types';
 
 type Buffer = Float32Array | Float64Array;
 type Coordinate = readonly number[] | Buffer;
@@ -204,7 +204,7 @@ and any required datum grids with proj4 before creating a transform.
 
 ```typescript title="proj4-engine.ts"
 import proj4 from 'proj4';
-import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection/types';
+import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection-types';
 import {pointProjection} from './point-projection';
 
 export class Proj4Engine implements ProjectionEngine {
@@ -250,7 +250,7 @@ example supports only WGS84 longitude/latitude input and requires an inverse.
 
 ```typescript title="d3-engine.ts"
 import {geoMercator, type GeoProjection} from 'd3-geo';
-import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection/types';
+import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection-types';
 import {pointProjection} from './point-projection';
 
 export class D3Engine implements ProjectionEngine {

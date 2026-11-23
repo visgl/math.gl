@@ -82,8 +82,8 @@ Builds an asymmetric perspective matrix from the near-plane `left`, `right`, `bo
 Builds an orthographic matrix from `left`, `right`, `bottom`, and `top`, with finite `near` and `far`.
 
 ```js
-import {mat4PerspectiveProjection} from '@math.gl/core';
-import {CullingVolume} from '@math.gl/geometry';
+import {mat4PerspectiveProjection} from '@math.gl/core/matrix';
+import {CullingVolume} from '@math.gl/geometry/culling';
 
 const options = {
   fovy: Math.PI / 3, aspect: 1.5, near: 0.1, far: Infinity,

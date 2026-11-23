@@ -29,7 +29,10 @@ standard depth down to the seafloor it calls these `@math.gl/earth/ocean` functi
 The chart marks the depth of minimum sound speed. At low and middle latitudes this
 is the deep sound channel axis. Near the poles the minimum is at the surface. The
 panel also gives the absorption at 12, 100 or 400 kHz, and the one-way vertical
-absorption loss from the surface to the seafloor. Clicks between the globe and the
+absorption loss from the surface to the seafloor. The Francois–Garrison equation
+accepts salinity 0 to 40 and temperature -2 to 30 °C. A level outside this range,
+for example in the Red Sea or the Persian Gulf, keeps its sound speed but has no
+absorption, and the vertical loss omits the intervals next to it. Clicks between the globe and the
 map (a partial morph) do not select a point.
 
 **Profile data.** The profiles come from the NOAA NCEI World Ocean Atlas 2023

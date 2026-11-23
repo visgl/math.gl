@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import ExamplePanel from '../../../common/example-panel';
 import React, {useMemo, useState} from 'react';
-import * as primitives from '@math.gl/geometry';
+import * as primitives from '@math.gl/geometry/primitives';
 import Mesh from '../../../common/geometry-viewer';
 
 export const presets = {

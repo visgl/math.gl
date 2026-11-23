@@ -12,9 +12,10 @@ import {gzipSync} from 'node:zlib';
 import ts from 'typescript';
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
 const manifest = JSON.parse(readFileSync(join(root, 'modules/geospatial/package.json')));
-const entry = manifest.exports['.'];
-const esm = await import('@math.gl/geospatial');
-const cjs = createRequire(import.meta.url)('@math.gl/geospatial');
+const entry = manifest.exports['./geodesics'];
+const require = createRequire(import.meta.url);
+const esm = {...await import('@math.gl/geospatial/ellipsoid'), ...await import('@math.gl/geospatial/geodesics')};
+const cjs = {...require('@math.gl/geospatial/ellipsoid'), ...require('@math.gl/geospatial/geodesics')};
 for (const api of [esm, cjs]) {
   const m = new api.EllipsoidMetrics({semiMajorAxis: 1, semiMinorAxis: 1});
   assert(Math.abs(m.surfaceArea - 4 * Math.PI) < 1e-13);
@@ -23,11 +24,11 @@ for (const api of [esm, cjs]) {
     Math.abs(p.addPoint(0, 0).addPoint(0, 90).addPoint(90, 0).compute().area - Math.PI / 2) < 1e-14
   );
 }
-assert(entry.types.endsWith('/index.d.ts'));
+assert(entry.types.endsWith('/geodesics.d.ts'));
 const measured = {};
 for (const symbol of ['Ellipsoid', 'EllipsoidMetrics', 'EllipsoidGeodesic', 'GeodesicPolygon']) {
   const result = await build({
-    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial';`, resolveDir: root},
+    stdin: {contents: `export {${symbol}} from '@math.gl/geospatial/${symbol.startsWith('Ellipsoid') && symbol !== 'EllipsoidGeodesic' ? 'ellipsoid' : 'geodesics'}';`, resolveDir: root},
     bundle: true,
     platform: 'browser',
     format: 'esm',
@@ -54,7 +55,8 @@ try {
   const file = join(temp, 'types.ts');
   writeFileSync(
     file,
-    `import {EllipsoidMetrics, GeodesicPolygon, EllipsoidGeodesic, type AuxiliaryLatitude, type GeodesicPolygonResult} from '@math.gl/geospatial';
+    `import {EllipsoidMetrics, type AuxiliaryLatitude} from '@math.gl/geospatial/ellipsoid';
+import {GeodesicPolygon, EllipsoidGeodesic, type GeodesicPolygonResult} from '@math.gl/geospatial/geodesics';
 const axes={semiMajorAxis:1,semiMinorAxis:1};
 const kind:AuxiliaryLatitude='isometric';
 const lat:number=new EllipsoidMetrics(axes).latitudeFromAuxiliary(Infinity,kind);

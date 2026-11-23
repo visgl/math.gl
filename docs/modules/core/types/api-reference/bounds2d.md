@@ -5,7 +5,7 @@
 `Bounds2D` describes an axis-aligned 2D extent as `[[minX, minY], [maxX, maxY]]`.
 
 ```typescript
-import type {Bounds2D} from '@math.gl/core';
+import type {Bounds2D} from '@math.gl/core/types';
 
 const bounds: Bounds2D = [[0, 0], [10, 20]];
 ```

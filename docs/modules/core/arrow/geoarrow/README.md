@@ -1,36 +1,141 @@
-# Arrow-backed GeoArrow
+# GeoArrow in math.gl
 
 <img src={require('./images/geoarrow-logo.png').default} alt="GeoArrow" width="128" />
 
-`@math.gl/core/arrow` connects real Apache Arrow JS fields and vectors to
-math.gl's columnar geometry operations. It reads GeoArrow extension metadata and
-adapts physical buffers to the Arrow-independent kernels in
-[`@math.gl/core/arrow`](../geoarrow-utils/README.md).
+Use `@math.gl/core/arrow` to work with geometry columns from Apache Arrow feature tables.
+You can inspect one geometry, pass a range of rows to another consumer, or run a kernel
+such as bounds calculation directly on the column. In native layouts, a geometry view borrows
+coordinate buffers, offsets, and validity from the source.
 
-## Usage
+## Start with a feature table
+
+A GeoArrow feature table is an Arrow `Table` or `RecordBatch` with a geometry field and one row
+per feature. IDs and properties live in sibling columns. Many polygons and rings can belong to
+one row, so use the source row index to look up attributes.
 
 ```typescript
-import * as arrow from 'apache-arrow';
+import type {Table} from 'apache-arrow';
 import {
-  getGeometryColumnsFromSchema,
+  getGeoArrowColumnView,
+  getGeoArrowRowView,
+  iterateGeoArrowBatches,
   makeGeoArrowColumnFromArrowVector,
-  getGeoArrowVectorBounds
+  materializeGeoArrowRows
 } from '@math.gl/core/arrow';
 
-const vector = arrow.vectorFromArray(
-  [[1, 2], null, [3, 4]],
-  new arrow.FixedSizeList(2, new arrow.Field('xy', new arrow.Float64()))
-);
-const field = new arrow.Field('geometry', vector.type, true, new Map([
-  ['ARROW:extension:name', 'geoarrow.point'],
-  ['ARROW:extension:metadata', JSON.stringify({edges: 'planar'})]
-]));
-const arrowTable = new arrow.Table(new arrow.Schema([field]), {geometry: vector});
+function inspectFeatures(table: Table, rowIndex: number) {
+  const field = table.schema.fields.find(field => field.name === 'geometry');
+  const vector = table.getChild('geometry');
+  if (!field || !vector) throw new Error('Missing geometry column');
 
-getGeometryColumnsFromSchema(arrowTable.schema).get('geometry')?.encoding; // 'geoarrow.point'
-getGeoArrowBounds(vector, {field}); // [1, 2, 3, 4]
-const column = makeGeoArrowColumnFromArrowVector(vector, {field});
+  const column = makeGeoArrowColumnFromArrowVector(vector, {field});
+  const row = getGeoArrowRowView(column, rowIndex);
+  const featureId = table.getChild('id')?.get(row.rowIndex);
+
+  // Borrow five rows starting at rowIndex, clamped at the end of the column.
+  const range = getGeoArrowColumnView(column, rowIndex, rowIndex + 5);
+  const batches = iterateGeoArrowBatches(range);
+
+  // Decode just the selected geometry for JavaScript code that needs coordinates.
+  const [geometry] = materializeGeoArrowRows(row.column);
+  return {featureId, geometry, batches};
+}
 ```
+
+For streamed records, adapt each incoming batch independently and track its row base when
+looking up source features. The batch iterator reports offsets relative to the column you
+pass to it. In the example, add `rowIndex` to a batch's `rowOffset` to recover its start in
+the original table.
+
+## Choose the view that matches the task
+
+| Task | API | Result |
+| --- | --- | --- |
+| Keep a column for bounds, traversal or conversion | `makeGeoArrowColumnFromArrowVector(vector, {field})` | A `GeoArrowColumn` with semantic metadata and physical chunks. |
+| Inspect a single native geometry | `getGeoArrowRowView(column, i)` | A `GeoArrowRowView` with the original row and chunk indices. A mixed union row resolves to its concrete child. |
+| Pass a row range onward in the source layout | `getGeoArrowColumnView(column, start, end)` | A column view over `[start, end)`. A one-row range of a mixed column retains the dense union, including its selectors and child buffers. |
+| Consume existing physical chunks | `iterateGeoArrowBatches(column)` | A lazy sequence of `GeoArrowBatchView` objects with chunk indices and logical row offsets. |
+| Read nested JavaScript coordinate arrays | `materializeGeoArrowRows(column)` | Decoded `GeoArrowDecodedGeometry` values and nulls. A decoded GeometryCollection has a `geometries` array. |
+
+Homogeneous columns store one geometry family. A mixed `geoarrow.geometry` column uses a dense
+union. Its type ID identifies the geometry child and its offset locates the row in that child.
+A MultiPolygon or GeometryCollection still occupies one feature row. Null rows and empty
+geometries keep their distinct meanings.
+
+## What borrows and what allocates
+
+Row, range, and batch views allocate small JavaScript descriptors and share their source storage.
+Range views use chunk lengths and advance offsets without scanning features or vertices.
+Keep the backing storage alive and avoid mutating or transferring it while views are in use.
+
+When wrapping a view back into an Arrow vector, canonical dense-union selectors and compatible
+coordinate and offset layouts share backing buffers. A sliced validity bitmap can also be reused
+at its original bit offset. Converting noncanonical union IDs, packing strided coordinates, or
+normalizing an offset base can allocate. Preserve the geometry field's extension metadata when
+constructing a new Arrow field or schema.
+
+| Consumer operation | Work involved |
+| --- | --- |
+| Read positions and path or ring boundaries | Borrow coordinate and list-offset buffers when the consumer supports their layout, width and base. |
+| Request interleaved positions from separate coordinate arrays | Pack the requested coordinates into a new layout. |
+| Build flat polygon starts or per-vertex picking IDs | Compose nested offsets or expand the source-row mapping when the consumer needs these arrays. |
+| Draw polygon fills | Run tessellation if matching triangle indices are unavailable. Outlines can use ring offsets. |
+| Read WKB/WKT as native coordinates | Decode serialized geometries before using native row views or coordinate kernels. |
+
+These are CPU-side borrowing rules. GPU uploads and renderer-specific attributes depend on
+the consuming application.
+
+## Convert geometry for another consumer
+
+Use `convertGeoArrowColumn` to choose the output layout and encoding.
+
+| Goal | Options | Work involved |
+| --- | --- | --- |
+| Keep the geometry encoding and interleave coordinates | `{coordinateLayout: 'interleaved'}` | Pack separate ordinates where the layout changes. |
+| Send mixed geometries as native Arrow across batches | `{encoding: 'geoarrow.geometry', coordinateLayout: 'interleaved', unionChildren}` | Reuse compatible geometry storage. Create or remap selectors when needed. |
+| Send geometry to a WKB consumer | `{encoding: 'geoarrow.wkb'}` | Encode bytes per source chunk. Every batch uses a binary field. |
+
+For a stream, declare the ordered target children once. A point-only batch and a polygon-only
+batch then expose the same union type even though each batch contains an empty child. This
+example uses XY and interleaved Float64 storage for both children.
+
+```typescript
+import {convertGeoArrowColumn, GeoArrowBuilder} from '@math.gl/core/arrow';
+import type {GeoArrowDenseUnionChild} from '@math.gl/core/arrow';
+
+const unionChildren: readonly GeoArrowDenseUnionChild[] = [
+  {
+    encoding: 'geoarrow.point',
+    name: 'Point',
+    typeId: 1,
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    data: GeoArrowBuilder.build([], {encoding: 'geoarrow.point'}).chunks[0]
+  },
+  {
+    encoding: 'geoarrow.polygon',
+    name: 'Polygon',
+    typeId: 3,
+    dimension: 'xy',
+    coordinateLayout: 'interleaved',
+    data: GeoArrowBuilder.build([], {encoding: 'geoarrow.polygon'}).chunks[0]
+  }
+];
+
+const geometry = convertGeoArrowColumn(batchGeometry, {
+  encoding: 'geoarrow.geometry',
+  coordinateLayout: 'interleaved',
+  unionChildren
+});
+```
+
+Populate the target with every family and dimension you expect in the stream. An undeclared
+populated child or physical mismatch raises an error. Choose the desired coordinate precision and
+offset width explicitly when inputs vary. Keep each GeometryCollection child's nested union layout
+consistent with its target descriptor. `sortGeoArrowUnionChildren` only orders existing children
+by ID within a chunk. Use `unionChildren` when the schema must match across chunks.
+
+## Geometry field metadata
 
 GeoArrow `edges: 'planar' | 'spherical'` metadata is preserved on the descriptor's
 semantic envelope as well as in its metadata. Other declared edge modes are rejected;

@@ -4,7 +4,7 @@
 import {expect, test} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
 import {parseSQLExpression} from '@math.gl/sql/parser';
-import {queryArrowSQL} from '@math.gl/sql';
+import {queryArrowSQL} from '@math.gl/sql/query';
 import {compileArrowExpression} from '@math.gl/sql/arrow';
 
 /** Evaluates SQL against nullable UTF-8 columns. */

@@ -67,14 +67,14 @@ try {
   const source = `
     import assert from 'node:assert/strict';
     import {createRequire} from 'node:module';
-    import {Vector3} from '@math.gl/core';
+    import {Vector3} from '@math.gl/core/matrix';
     import {parseUTF8Number} from '@math.gl/core/utf8';
     const require = createRequire(import.meta.url);
     assert.throws(() => require.resolve('apache-arrow'), {code: 'MODULE_NOT_FOUND'});
     assert.equal(new Vector3(1, 2, 3).length, 3);
     assert.equal(require('@math.gl/core/utf8').parseUTF8Number(new Uint8Array([49]), 0, 1), 1);
     assert.equal(parseUTF8Number(new Uint8Array([49]), 0, 1), 1);
-    assert.equal(new (require('@math.gl/core').Vector3)(1, 2, 3).length, 3);
+    assert.equal(new (require('@math.gl/core/matrix').Vector3)(1, 2, 3).length, 3);
     await assert.rejects(import('@math.gl/core/arrow'), {code: 'ERR_MODULE_NOT_FOUND'});
     assert.throws(() => require('@math.gl/core/arrow'), {code: 'MODULE_NOT_FOUND'});
   `;

@@ -25,7 +25,7 @@ import {
   splitFloat64Array,
   subtractOrigin,
   subtractOriginFromMatrix4
-} from '@math.gl/core';
+} from '@math.gl/core/matrix';
 
 const positions = new Float64Array([4462401221997.05, 229825307562.78, -107360971771.64]);
 getFloat32Spacing(positions[0]); // 524288: float32 values near Neptune are 524 km apart.

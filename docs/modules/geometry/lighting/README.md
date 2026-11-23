@@ -1,9 +1,12 @@
-# Lighting and color calculations
+# Lighting and color subpaths
 
-`@math.gl/geometry/lighting` and `@math.gl/geometry/color` provide opt-in CPU calculations
-on numerical tables. They have no parser, image codec, renderer or new dependency.
-The core root does not re-export them. Applications can use measurements from any
-source that conforms to the models below.
+| Import path | Use it to |
+| --- | --- |
+| `@math.gl/geometry/lighting` | [Sample angular intensity, integrate luminous flux, and resample photometric profiles](#photometric-model). |
+| `@math.gl/core/color` | [Sample color lookup tables and apply them to RGB or RGBA buffers](#numerical-color-luts). |
+
+Both entry points operate on numerical tables and return CPU data. Supply measurements
+or lookup tables from your application or a reader such as loaders.gl.
 
 ## Usage
 
@@ -121,8 +124,8 @@ Three-dimensional storage is red-fastest: `3 * (red + size * (green + size * blu
 Knots must increase strictly from 0 through 1; domain spans must be finite and positive.
 
 ```typescript
-import {createColorLUTSampler, applyColorLUT} from '@math.gl/geometry/color';
-import type {ColorLUT} from '@math.gl/geometry/color';
+import {createColorLUTSampler, applyColorLUT} from '@math.gl/core/color';
+import type {ColorLUT} from '@math.gl/core/color';
 
 const lut: ColorLUT = {
   dimension: 1,

@@ -3,10 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original explicit-epoch contracts, ownership and independent reference tests.
 import {expect, test} from 'vitest';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import type {PipelineStep, PipelineEpochs} from '@math.gl/geospatial/projection/pipeline';
-import {createProjectionDescriptor} from '@math.gl/geospatial/projection/core';
-import {universalTransverseMercator} from '@math.gl/geospatial/projection/projections/utm';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import type {PipelineStep, PipelineEpochs} from '@math.gl/geospatial/projection-pipeline';
+import {createProjectionDescriptor} from '@math.gl/geospatial/projection-core';
+import {universalTransverseMercator} from '@math.gl/geospatial/projection-projections-utm';
 import inputs from '../fixtures/kinematic-pipeline-cases.json';
 import {kinematicOptions, qualifyKinematicCase} from '../kinematic-workload';
 

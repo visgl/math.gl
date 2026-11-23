@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {projectBounds} from '@math.gl/geometry';
+import {projectBounds} from '@math.gl/geometry/processing';
 
 const identity = (source: readonly number[]) => source;
 

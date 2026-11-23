@@ -1,8 +1,9 @@
-# @math.gl/sql/parser 🧪
+# @math.gl/sql/parser
 
 Import `@math.gl/sql/parser` to parse supported SQL statements into portable query and
 predicate objects. The parser works without Apache Arrow. To execute SQL over native Arrow tables,
-use [`queryArrowSQL`](../README.md) from the package root.
+use [`queryArrowSQL`](../README.md) from `@math.gl/sql/query`.
+Use [`parseSQLScaleExpression` or `parseSQLScaleAST`](../scales/SQL.md) to turn SQL scale expressions into validated scale specifications.
 
 ## Submodule features
 

@@ -7,7 +7,7 @@ import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyEquirectangular: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'equi', aliases: []},
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/equi');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-equi');
     return projectionModule.equirectangular;
   }
 );

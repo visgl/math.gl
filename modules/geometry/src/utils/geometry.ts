@@ -2,18 +2,31 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {TypedArray} from '@math.gl/core';
-import type {PrimitiveTopology} from '../lib/geometry';
+import {isTypedArray, type TypedArray} from '@math.gl/core/types';
+import type {
+  GeometryAttribute as CanonicalGeometryAttribute,
+  PrimitiveTopology
+} from '../lib/geometry';
 
-/** A typed geometry attribute with either loaders.gl-style `value` or legacy `values` storage. */
-export type GeometryAttribute = {
-  /** Attribute data in canonical storage. */
-  value?: TypedArray;
-  /** Alternate field for attribute data. */
-  values?: TypedArray;
-  /** Number of components per element. */
-  size?: number;
-};
+/**
+ * Geometry attributes accepted by processing utilities. The canonical `value`
+ * field takes precedence when legacy `values` is also supplied.
+ */
+export type GeometryAttribute = Pick<CanonicalGeometryAttribute, 'size'> &
+  (
+    | {
+        /** Canonical number-backed attribute data. */
+        value: TypedArray;
+        /** Optional legacy data. Readers use the canonical field when both are present. */
+        values?: TypedArray;
+      }
+    | {
+        /** Omitted by legacy inputs that store data in `values`. */
+        value?: undefined;
+        /** Number-backed attribute data in legacy storage. */
+        values: TypedArray;
+      }
+  );
 
 /** Minimal geometry shape understood by the geometry utilities. */
 export type GeometryInput = {
@@ -25,17 +38,22 @@ export type GeometryInput = {
   attributes: Record<string, GeometryAttribute>;
 };
 
-/** Returns whether a value has the minimal geometry shape. */
+/**
+ * Checks topology and attribute storage, including optional indices.
+ * Individual operations validate their required attributes and element counts.
+ */
 export function isGeometry(value: unknown): value is GeometryInput {
   if (!value || typeof value !== 'object') {
     return false;
   }
-  const {topology, attributes} = value as Partial<GeometryInput>;
+  const {topology, attributes, indices} = value as Partial<GeometryInput>;
   if (
     !attributes ||
     typeof attributes !== 'object' ||
     Array.isArray(attributes) ||
-    ArrayBuffer.isView(attributes)
+    ArrayBuffer.isView(attributes) ||
+    !Object.values(attributes).every(isGeometryAttribute) ||
+    (indices !== undefined && !isTypedArray(indices) && !isGeometryAttribute(indices))
   ) {
     return false;
   }
@@ -53,16 +71,23 @@ export function isGeometry(value: unknown): value is GeometryInput {
   }
 }
 
+/** Checks attribute storage and optional element size without modifying the input. */
+function isGeometryAttribute(attribute: unknown): attribute is GeometryAttribute {
+  if (!attribute || typeof attribute !== 'object') return false;
+  const {value, values, size} = attribute as Partial<GeometryAttribute>;
+  return (
+    (value === undefined || isTypedArray(value)) &&
+    (values === undefined || isTypedArray(values)) &&
+    isTypedArray(value ?? values) &&
+    (size === undefined || (Number.isInteger(size) && size > 0))
+  );
+}
+
 /** Returns the typed array stored in a geometry attribute. */
-export function getAttributeValues(attribute: GeometryAttribute | TypedArray): TypedArray {
-  if (ArrayBuffer.isView(attribute)) {
-    return attribute as TypedArray;
-  }
-  const values = attribute.value || attribute.values;
-  if (!values) {
-    throw new Error('Geometry attribute does not contain typed-array values');
-  }
-  return values;
+export function getAttributeValues(attribute: unknown): TypedArray {
+  if (isTypedArray(attribute)) return attribute;
+  if (isGeometryAttribute(attribute)) return attribute.value ?? attribute.values;
+  throw new TypeError('Geometry attribute does not contain valid typed-array values');
 }
 
 /** Returns a geometry's position attribute. */

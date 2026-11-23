@@ -91,13 +91,6 @@ export {
   subtractOriginFromMatrix4
 } from './float-precision';
 export type {SubtractOriginOptions} from './float-precision';
-export {
-  isUint16Array,
-  NativeFloat16ArrayConstructor,
-  getFloat16ArrayConstructor,
-  isFloat16ArrayConstructor,
-  isFloat16Array
-} from './types';
 export type {
   BigTypedArray,
   BigTypedArrayConstructor,

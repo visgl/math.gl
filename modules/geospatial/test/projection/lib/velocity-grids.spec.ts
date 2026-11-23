@@ -3,13 +3,13 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original synthetic grid and format contract tests; no third-party model data.
 import {expect, test} from 'vitest';
-import {createVelocityGrid} from '@math.gl/geospatial/projection/grids/velocity';
-import type {VelocityGridOptions} from '@math.gl/geospatial/projection/grids/velocity';
-import {loadVelocityGeoTIFFGrid} from '@math.gl/geospatial/projection/grids/velocity-geotiff';
+import {createVelocityGrid} from '@math.gl/geospatial/projection-grids-velocity';
+import type {VelocityGridOptions} from '@math.gl/geospatial/projection-grids-velocity';
+import {loadVelocityGeoTIFFGrid} from '@math.gl/geospatial/projection-grids-velocity-geotiff';
 import type {
   VelocityGridGeoTIFFImage,
   VelocityGridGeoTIFFData
-} from '@math.gl/geospatial/projection/grids/velocity-geotiff';
+} from '@math.gl/geospatial/projection-grids-velocity-geotiff';
 const rad = Math.PI / 180;
 const options: VelocityGridOptions = {
   origin: [179, 40],

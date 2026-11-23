@@ -23,6 +23,14 @@ const moved = {
   timezone: ['earth', 'timezone']
 };
 
+// New focused imports used by paired workloads were part of these historical roots.
+const historicalRootImports = new Set([
+  '@math.gl/core/matrix',
+  '@math.gl/geospatial/coordinates',
+  '@math.gl/geospatial/ellipsoid',
+  '@math.gl/geospatial/geodesics'
+]);
+
 export async function bundleRuntime(root, entry, outfile, baselineCommit, platform = 'browser') {
   const cache = new Map();
   // Reject Git tree objects: an extensionless import may name both a source
@@ -108,8 +116,9 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit, platfo
           if (baselineCommit && !consolidated) {
             for (const [old, [group, leaf]] of Object.entries(moved)) {
               const prefix = '@math.gl/' + group + '/' + leaf;
-              if (specifier === prefix || specifier.startsWith(prefix + '/')) {
-                specifier = '@math.gl/' + old + specifier.slice(prefix.length);
+              if (specifier === prefix || specifier.startsWith(prefix + '/') || specifier.startsWith(prefix + '-')) {
+                const suffix = specifier.slice(prefix.length).replace(/^-/, '/');
+                specifier = '@math.gl/' + old + suffix;
                 break;
               }
             }
@@ -119,7 +128,17 @@ export async function bundleRuntime(root, entry, outfile, baselineCommit, platfo
           const manifestPath = 'modules/' + module + '/package.json';
           const metadata = JSON.parse(baselineCommit
             ? git(historicalPath(manifestPath)) : readFileSync(join(root, manifestPath), 'utf8'));
-          const exported = metadata.exports[parts.length > 2 ? './' + parts.slice(2).join('/') : '.'];
+          const exportKey = parts.length > 2 ? './' + parts.slice(2).join('/') : '.';
+          const exports = metadata.exports || {};
+          let exported = exports[exportKey];
+          if (baselineCommit && !exported) {
+            // The comparison workload uses current names with the baseline's source files.
+            const historicalKey = Object.keys(exports).find(key =>
+              key.slice(0, 2) + key.slice(2).replaceAll('/', '-') === exportKey
+            );
+            if (historicalKey) exported = exports[historicalKey];
+            else if (historicalRootImports.has(specifier)) exported = exports['.'];
+          }
           // Private test aliases name source files without widening published package exports.
           if (!exported) return resolveSource(join(root, 'modules', module, 'src', ...parts.slice(2)));
           const target = typeof exported === 'string' ? exported : exported.import;

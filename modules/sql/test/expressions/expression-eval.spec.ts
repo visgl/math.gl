@@ -15,7 +15,7 @@ import {
   parse,
   parseExpressionString
 } from '@math.gl/sql/expressions';
-import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial';
+import {GEOSPATIAL_FUNCTION_LIBRARY} from '@math.gl/geospatial/expressions';
 import {get} from '../../src/expressions/get';
 
 test('@math.gl/sql/expressions#evaluate', () => {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Paired, alternating before/after measurements without changing the working tree.
-import {parseNTv2Grid} from '@math.gl/geospatial/projection/grids/ntv2';
+import {parseNTv2Grid} from '@math.gl/geospatial/projection-grids-ntv2';
 import {bundleRuntime} from './benchmark-runtime.mjs';
 import {execFileSync} from 'node:child_process';
 import {mkdtempSync, rmSync, writeFileSync} from 'node:fs';

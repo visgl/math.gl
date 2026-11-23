@@ -417,11 +417,51 @@ export function lerp(out, a, b, t) {
  * @returns {vec3} out
  */
 export function slerp(out, a, b, t) {
-  const angle = Math.acos(Math.min(Math.max(dot(a, b), -1), 1));
+  const d = dot(a, b);
+  const angle = Math.acos(Math.min(Math.max(d, -1), 1));
   const sinTotal = Math.sin(angle);
 
-  const ratioA = Math.sin((1 - t) * angle) / sinTotal;
-  const ratioB = Math.sin(t * angle) / sinTotal;
+  if (sinTotal <= glMatrix.EPSILON && d < 0) {
+    // a and b point in (nearly) opposite directions, where dividing by sinTotal blows up and a
+    // linear blend would pass through zero. Rotate a towards b around a x b instead, or around
+    // any axis perpendicular to a when they are exactly opposite.
+    // read a first, so that out can be a
+    const ax = a[0];
+    const ay = a[1];
+    const az = a[2];
+    let nx = a[1] * b[2] - a[2] * b[1];
+    let ny = a[2] * b[0] - a[0] * b[2];
+    let nz = a[0] * b[1] - a[1] * b[0];
+    let len = Math.hypot(nx, ny, nz);
+    const theta = Math.atan2(len, d);
+    if (len === 0) {
+      // a x [1, 0, 0], or a x [0, 1, 0] when a is close to the x axis
+      if (Math.abs(a[0]) < 0.9) {
+        nx = 0;
+        ny = a[2];
+        nz = -a[1];
+      } else {
+        nx = -a[2];
+        ny = 0;
+        nz = a[0];
+      }
+      len = Math.hypot(nx, ny, nz);
+    }
+    nx /= len;
+    ny /= len;
+    nz /= len;
+    // n x a is perpendicular to a, on the side of b
+    const c = Math.cos(t * theta);
+    const s = Math.sin(t * theta);
+    out[0] = c * ax + s * (ny * az - nz * ay);
+    out[1] = c * ay + s * (nz * ax - nx * az);
+    out[2] = c * az + s * (nx * ay - ny * ax);
+    return out;
+  }
+
+  // (Nearly) the same direction: the angle is 0 and so is sinTotal, so interpolate linearly
+  const ratioA = sinTotal > glMatrix.EPSILON ? Math.sin((1 - t) * angle) / sinTotal : 1 - t;
+  const ratioB = sinTotal > glMatrix.EPSILON ? Math.sin(t * angle) / sinTotal : t;
   out[0] = ratioA * a[0] + ratioB * b[0];
   out[1] = ratioA * a[1] + ratioB * b[1];
   out[2] = ratioA * a[2] + ratioB * b[2];

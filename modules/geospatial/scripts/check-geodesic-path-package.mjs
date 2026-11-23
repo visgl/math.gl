@@ -22,12 +22,9 @@ assert.equal(fixture.cases.length, 180);
 
 for (const format of ['esm', 'cjs']) {
   const load = format === 'esm' ? name => import(name) : name => require(name);
-  const {GeodesicPath, EllipsoidGeodesic} = await load('@math.gl/geospatial');
-  const {subdivideGeodesicPolyline} = await load('@math.gl/geospatial');
-  const {subdividePolyline} = await load('@math.gl/geometry');
-  const packageRoot = await load('@math.gl/geospatial');
-  assert.equal(typeof packageRoot.GeodesicPath, 'function');
-  assert.equal(typeof packageRoot.subdivideGeodesicPolyline, 'function');
+  const {GeodesicPath, EllipsoidGeodesic} = await load('@math.gl/geospatial/geodesics');
+  const {subdivideGeodesicPolyline} = await load('@math.gl/geospatial/globe');
+  const {subdividePolyline} = await load('@math.gl/geometry/polygon');
   const geodesic = new EllipsoidGeodesic({semiMajorAxis: 10, semiMinorAxis: 10});
   const path = new GeodesicPath([170, 0, 10], [-170, 0, 30], {geodesic});
   assert.deepEqual(path.sample(0.5), [180, 0, 20]);
@@ -63,7 +60,7 @@ try {
 for (const [name, entry, expression] of [
   ['generic', 'modules/geometry/src/polygon/index.ts', 'subdividePolyline([], {transform: p => p, tolerance: 1})'],
   ['ellipsoid', 'modules/geospatial/src/entries/ellipsoid.ts', 'Ellipsoid.WGS84.cartographicToCartesian([0, 0, 0])'],
-  ['path', 'modules/geospatial/src/entries/ellipsoid.ts', 'new GeodesicPath([0, 0], [1, 1]).sample(0.5)'],
+  ['path', 'modules/geospatial/src/geodesics.ts', 'new GeodesicPath([0, 0], [1, 1]).sample(0.5)'],
   ['adaptive', 'modules/geospatial/src/globe.ts', 'subdivideGeodesicPolyline([], {transform: p => p, tolerance: 1})']
 ]) {
   const symbol = name === 'generic' ? 'subdividePolyline' : name === 'ellipsoid' ? 'Ellipsoid' : name === 'path' ? 'GeodesicPath' : 'subdivideGeodesicPolyline';

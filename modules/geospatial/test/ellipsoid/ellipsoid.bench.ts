@@ -7,9 +7,9 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
-import {eastNorthUpToFixedFrame} from '@math.gl/geospatial';
-import {Vector3, Matrix4} from '@math.gl/core';
-import {Ellipsoid} from '@math.gl/geospatial';
+import {eastNorthUpToFixedFrame} from '@math.gl/geospatial/coordinates';
+import {Vector3, Matrix4} from '@math.gl/core/matrix';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 // import {externalVector3ToArray, setExternalVector3} from '@math.gl/geospatial/type-utils';
 
 const ellipsoid = Ellipsoid.WGS84;

@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {Matrix4, Vector3, equals} from '@math.gl/core';
-import {Euler, Pose} from '@math.gl/core';
+import {Matrix4, Vector3, equals} from '@math.gl/core/matrix';
+import {Euler, Pose} from '@math.gl/core/matrix';
 
 const MATRIX_TEST_CASES = [
   {

@@ -11,7 +11,7 @@ import {
   createTerrainCutoutSkirts,
   TerrainSurface,
   type TerrainCutoutInput
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 const ring = [
   [0.25, 0.25],

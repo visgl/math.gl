@@ -6,9 +6,9 @@ import {describe, expect, test} from 'vitest';
 import {createCRSResolver, createCRSDictionaryProvider} from '@math.gl/geospatial/crs';
 import {createSpatialReference} from '@math.gl/geospatial/crs';
 import {FullProjectionEngine} from '@math.gl/geospatial/projection';
-import {ConfigurableProjectionEngine} from '@math.gl/geospatial/projection/core';
-import {LazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
+import {ConfigurableProjectionEngine} from '@math.gl/geospatial/projection-core';
+import {LazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 
 const geographic = '+proj=longlat +datum=WGS84';
 const projected = '+proj=merc +a=6378137 +b=6378137 +nadgrids=@null +units=m';

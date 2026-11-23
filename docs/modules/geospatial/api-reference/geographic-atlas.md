@@ -12,7 +12,7 @@ ellipsoidal geodesic or rhumb geometry. The optional entry adds no dependencies.
 ## Orthographic visibility
 
 ```ts
-import {createOrthographicCutAtlas} from '@math.gl/geospatial';
+import {createOrthographicCutAtlas} from '@math.gl/geospatial/geographic-cuts';
 
 const {atlas, project, right, up} = createOrthographicCutAtlas({
   edgeModel: 'geodesic',
@@ -46,7 +46,7 @@ curved geographic boundary. Orthographic horizons have offset zero; parallels ar
 another special case. These are geodetic normals, not geocentric directions.
 
 ```ts
-import {GeographicCutAtlas} from '@math.gl/geospatial';
+import {GeographicCutAtlas} from '@math.gl/geospatial/geographic-cuts';
 
 const atlas = new GeographicCutAtlas({
   boundaries: [{id: 'split', normal: [0, 1, 0]}],
@@ -84,7 +84,7 @@ fail explicitly rather than receiving a guessed topology.
 ## A faceted-map consumer
 
 ```ts
-import {createOctahedralCutAtlas} from '@math.gl/geospatial';
+import {createOctahedralCutAtlas} from '@math.gl/geospatial/geographic-cuts';
 
 const map = createOctahedralCutAtlas({edgeModel: 'geodesic'});
 const pieces = map.atlas.clipPolygon(inputs);

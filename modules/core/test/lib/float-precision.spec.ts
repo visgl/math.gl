@@ -9,7 +9,7 @@ import {
   splitFloat64Array,
   subtractOrigin,
   subtractOriginFromMatrix4
-} from '@math.gl/core';
+} from '@math.gl/core/matrix';
 
 /** Seeded uniform random numbers in [0, 1) (mulberry32), so that each run checks the same values. */
 function createRandom(seed: number): () => number {

@@ -3,16 +3,16 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original tests of explicit composition and independent PROJ pipeline fixtures.
 import {beforeAll, expect, test} from 'vitest';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
 import type {
   PipelineStep,
   ProjectionPipelineOptions
-} from '@math.gl/geospatial/projection/pipeline';
-import {createProjectionDescriptor} from '@math.gl/geospatial/projection/core';
+} from '@math.gl/geospatial/projection-pipeline';
+import {createProjectionDescriptor} from '@math.gl/geospatial/projection-core';
 import {obliqueTransformation} from '@math.gl/geospatial/projection';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
 import {makeNTv2} from '../fixtures/datum-grids';
-import {parseNTv2Grid} from '@math.gl/geospatial/projection/grids/ntv2';
+import {parseNTv2Grid} from '@math.gl/geospatial/projection-grids-ntv2';
 import inputs from '../fixtures/operation-pipeline-cases.json';
 import {qualifyPipelineCase} from '../pipeline-workload';
 

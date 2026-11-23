@@ -7,7 +7,7 @@ import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyRobinson: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'robin', aliases: ['Robinson']},
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/robin');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-robin');
     return projectionModule.robinson;
   }
 );

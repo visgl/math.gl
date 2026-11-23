@@ -16,7 +16,7 @@ export const lazyMercator: ProjectionDescriptor = /* @__PURE__ */ createProjecti
     ]
   },
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/merc');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-merc');
     return projectionModule.mercator;
   }
 );

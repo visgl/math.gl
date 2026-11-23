@@ -79,7 +79,7 @@ import {
   queryArrowTableInBatches,
   type ArrowTableQuery,
   type ArrowStreamingQuery
-} from '@math.gl/sql';
+} from '@math.gl/sql/query';
 import {SQRT} from '@math.gl/sql/math-functions';
 import {COLOR_RGB} from '@math.gl/sql/color-functions';
 
@@ -93,8 +93,8 @@ queryArrowTable(orders, tableQuery);
 const streamingQuery: ArrowStreamingQuery = {...tableQuery, emitEmptyBatches: true};
 queryArrowTableInBatches(orders.batches, orders.schema, streamingQuery);
 
-import {parseSQLScaleAST, parseSQLScaleExpression, type ParsedSQLScale} from '@math.gl/sql/scales';
-import {SCALE_CONFORMANCE_CASES, type ScaleConformanceCase} from '@math.gl/sql/scales/conformance';
+import {parseSQLScaleAST, parseSQLScaleExpression, type ParsedSQLScale} from '@math.gl/sql/parser';
+import {SCALE_CONFORMANCE_CASES, type ScaleConformanceCase} from '@math.gl/sql/scales-conformance';
 
 const parsedScale: ParsedSQLScale = parseSQLScaleAST(
   parseSQLExpression('SCALE_LINEAR(quantity, DOMAIN(0, 10), RANGE(0, 1))')
@@ -135,3 +135,19 @@ parseSQLExpression('fn(:values, :text)', {parameters: {values: numericArray, tex
 // @ts-expect-error UTF-8 requires byte storage, not a JavaScript string.
 const invalidBinary: SQLBinaryParameter = {type: 'utf8', value: 'text'};
 void invalidBinary;
+
+import type {Table} from 'apache-arrow';
+import {GeoDataFrame} from '@math.gl/sql/dataframe';
+import {createProjectionEngine} from '@math.gl/geospatial/projection-core';
+declare const geoArrowTable: Table;
+const projectedFrame: GeoDataFrame = GeoDataFrame.fromArrow(geoArrowTable).toCRS('EPSG:3857', {
+  engine: createProjectionEngine()
+});
+void projectedFrame;
+
+import {ST_WITHIN} from '@math.gl/geospatial/st-functions';
+const joinedFrame: GeoDataFrame = projectedFrame.sjoin(GeoDataFrame.fromArrow(geoArrowTable), {
+  predicate: ST_WITHIN,
+  rightPrefix: 'region_'
+});
+void joinedFrame;

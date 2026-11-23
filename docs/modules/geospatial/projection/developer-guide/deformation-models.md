@@ -17,9 +17,9 @@ validity interval appropriate to your data; a CRS code alone does not select the
 ## Prepare a model
 
 ```typescript
-import {createVelocityGrid} from '@math.gl/geospatial/projection/grids/velocity';
-import {createDeformationModel} from '@math.gl/geospatial/projection/deformation';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
+import {createVelocityGrid} from '@math.gl/geospatial/projection-grids-velocity';
+import {createDeformationModel} from '@math.gl/geospatial/projection-deformation';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
 
 const grid = createVelocityGrid({
   origin: [-1, -1], // Southwest node, longitude/latitude degrees.
@@ -113,7 +113,7 @@ and decoded them. It accepts a structural geotiff.js object or plain decoded
 `VelocityGridGeoTIFFData`, compatible with loaders.gl raster data:
 
 ```typescript
-import {loadVelocityGeoTIFFGrid} from '@math.gl/geospatial/projection/grids/velocity-geotiff';
+import {loadVelocityGeoTIFFGrid} from '@math.gl/geospatial/projection-grids-velocity-geotiff';
 
 const grid = await loadVelocityGeoTIFFGrid(decodedRasterData);
 const model = createDeformationModel({grid, epochRange: reviewedEpochRange});

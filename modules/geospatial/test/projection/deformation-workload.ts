@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Independent PROJ 9.5.1 qualification, shared by tests and browser benchmarks.
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import type {PipelineStep} from '@math.gl/geospatial/projection/pipeline';
-import {createDeformationModel} from '@math.gl/geospatial/projection/deformation';
-import type {VelocityGrid} from '@math.gl/geospatial/projection/grids/velocity';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import type {PipelineStep} from '@math.gl/geospatial/projection-pipeline';
+import {createDeformationModel} from '@math.gl/geospatial/projection-deformation';
+import type {VelocityGrid} from '@math.gl/geospatial/projection-grids-velocity';
 import inputs from './fixtures/deformation-cases.json';
 import reference from './fixtures/deformation-reference.json';
 function close(actual: ArrayLike<number>, expected: readonly number[], tolerance: number): void {

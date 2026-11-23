@@ -95,6 +95,20 @@ export function compileArrowAggregates<K extends string>(
   aggregates: Readonly<Record<K, ArrowAggregate>>,
   options: ArrowExpressionOptions
 ): CompiledArrowAggregates<K> {
+  return compileArrowAggregatePlan(aggregates, options);
+}
+
+/** Internal aggregate plan with the table query's multi-column reducer. */
+export function compileArrowAggregatePlan<K extends string>(
+  aggregates: Readonly<Record<K, ArrowAggregate>>,
+  options: ArrowExpressionOptions
+): CompiledArrowAggregates<K> & {
+  evaluateGroups(
+    table: Table,
+    keys: readonly string[],
+    signal?: AbortSignal
+  ): {representatives: number[]; values: Record<K, ArrowExpressionValue>[]};
+} {
   const groups: Group[] = [];
   const byExpression = new Map<ArrowExpression | undefined, Group>();
   const outputs = (Object.entries(aggregates) as [K, ArrowAggregate][]).map(([name, aggregate]) => {
@@ -208,6 +222,57 @@ export function compileArrowAggregates<K extends string>(
         }
       };
     },
+    evaluateGroups(table, keys, signal) {
+      const keyTree = new Map<ArrowExpressionValue, GroupKey>();
+      const binaryKeys = new Map<number, Uint8Array[]>();
+      const representatives: number[] = [];
+      const states: Map<Group, State>[] = [];
+      let offset = 0;
+      for (const batch of table.batches) {
+        const readers = keys.map(key => new ColumnReader(batch.getChild(key)!));
+        const indexByGroup = new Map<GroupKey, number>();
+        const groupStates: Map<Group, State>[] = [];
+        const indexByRow = new Uint32Array(batch.numRows);
+        const rowCounts: number[] = [];
+        for (let row = 0; row < batch.numRows; row++) {
+          if (row % 1024 === 0) signal?.throwIfAborted();
+          let children = keyTree;
+          let key: GroupKey | undefined;
+          for (const reader of readers) {
+            const raw = reader.get(row);
+            const value = raw instanceof Uint8Array ? internBinaryKey(binaryKeys, raw) : raw;
+            key = children.get(value);
+            if (!key) {
+              key = {children: new Map()};
+              children.set(value, key);
+            }
+            children = key.children;
+          }
+          if (!key!.states) {
+            key!.states = new Map(groups.map(group => [group, emptyState(group)]));
+            states.push(key!.states);
+            representatives.push(offset + row);
+          }
+          let index = indexByGroup.get(key!);
+          if (index === undefined) {
+            index = groupStates.length;
+            indexByGroup.set(key!, index);
+            groupStates.push(key!.states);
+            rowCounts.push(0);
+          }
+          indexByRow[row] = index;
+          rowCounts[index]!++;
+        }
+        for (const group of groups) {
+          const partials = summarize(group, batch, signal, {indexByRow, rowCounts});
+          for (const [index, target] of groupStates.entries())
+            mergeState(group, target.get(group)!, partials[index]!);
+        }
+        offset += batch.numRows;
+      }
+      signal?.throwIfAborted();
+      return {representatives, values: states.map(resultFor)};
+    },
     evaluate(input, evaluation) {
       evaluation?.signal?.throwIfAborted();
       const accumulator = createAccumulator();
@@ -229,9 +294,30 @@ function emptyState(group: Group): State {
   return {count: 0n, sum: group.integer ? 0n : 0, values: new Map()};
 }
 
+/** Hashes binary keys and checks byte equality before reusing their identity. */
+function internBinaryKey(buckets: Map<number, Uint8Array[]>, value: Uint8Array): Uint8Array {
+  let hash = 2166136261;
+  for (const byte of value) hash = Math.imul(hash ^ byte, 16777619);
+  const bucket = buckets.get(hash);
+  if (bucket) {
+    for (const candidate of bucket) {
+      if (!compareUTF8(candidate, 0, candidate.length, value, 0, value.length)) return candidate;
+    }
+    bucket.push(value);
+  } else {
+    buckets.set(hash, [value]);
+  }
+  return value;
+}
+
+/** Interned tuple prefix with state allocated only at a complete group key. */
+type GroupKey = {
+  children: Map<ArrowExpressionValue, GroupKey>;
+  states?: Map<Group, State>;
+};
+
 /** Dense batch-local group indices keep expression evaluation independent of group count. */
 type RowPartition = {
-  indexByKey: ReadonlyMap<ArrowExpressionValue, number>;
   indexByRow: Uint32Array;
   rowCounts: readonly number[];
 };
@@ -241,7 +327,7 @@ function partitionRows(
   expression: CompiledArrowExpression,
   batch: RecordBatch,
   signal?: AbortSignal
-): RowPartition {
+): RowPartition & {indexByKey: ReadonlyMap<ArrowExpressionValue, number>} {
   const reader = new ColumnReader(expression.evaluate(batch, {signal}));
   const indexByKey = new Map<ArrowExpressionValue, number>();
   const indexByRow = new Uint32Array(batch.numRows);
@@ -270,7 +356,7 @@ function summarize(
   signal?: AbortSignal,
   partition?: RowPartition
 ): State[] {
-  const states = Array.from({length: partition?.indexByKey.size ?? 1}, () => emptyState(group));
+  const states = Array.from({length: partition?.rowCounts.length ?? 1}, () => emptyState(group));
   if (!group.expression) {
     for (let index = 0; index < states.length; index++)
       states[index]!.count = BigInt(partition?.rowCounts[index] ?? batch.numRows);

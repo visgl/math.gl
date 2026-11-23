@@ -9,7 +9,7 @@ import type {
   GeoArrowDenseUnion,
   GeoArrowDimension,
   GeoArrowEncoding,
-  GeoArrowGeometryValue,
+  GeoArrowDecodedGeometry,
   GeoArrowOffsets,
   GeoArrowStruct
 } from './types';
@@ -104,7 +104,7 @@ export class GeoArrowBuilder {
   private partCount = 0;
   private ringCount = 0;
   private readonly eventStack: Array<{
-    type: GeoArrowGeometryValue['type'];
+    type: GeoArrowDecodedGeometry['type'];
     dimension: GeoArrowDimension;
     direct: boolean;
     rowIndex: number;
@@ -114,7 +114,7 @@ export class GeoArrowBuilder {
     polygons?: number[][][][];
     currentPolygon?: number[][][];
     currentRing?: number[][];
-    children?: GeoArrowGeometryValue[];
+    children?: GeoArrowDecodedGeometry[];
   }> = [];
 
   constructor(options: GeoArrowBuilderModeOptions) {
@@ -129,7 +129,7 @@ export class GeoArrowBuilder {
   }
 
   /** Appends one geometry row or null. */
-  append(geometry: GeoArrowGeometryValue | null | undefined): this {
+  append(geometry: GeoArrowDecodedGeometry | null | undefined): this {
     const rowIndex = this.length++;
     if (!geometry) {
       this.nullCount++;
@@ -249,7 +249,7 @@ export class GeoArrowBuilder {
 
   /** Builds a homogeneous column using an internal measure/write pair. */
   static build(
-    rows: readonly (GeoArrowGeometryValue | null | undefined)[],
+    rows: readonly (GeoArrowDecodedGeometry | null | undefined)[],
     options: GeoArrowBuilderOptions
   ): GeoArrowColumn {
     const measure = new GeoArrowBuilder({...options, mode: 'measure'});
@@ -321,7 +321,7 @@ export class GeoArrowBuilder {
 
   /** Begins an event-driven geometry. Events are accepted by both measure and write builders. */
   beginGeometry(
-    type: GeoArrowGeometryValue['type'],
+    type: GeoArrowDecodedGeometry['type'],
     dimension = this.dimension,
     _count?: number
   ): this {
@@ -449,7 +449,7 @@ export class GeoArrowBuilder {
       return this;
     }
     const coordinates = state.rings || [];
-    let geometry: GeoArrowGeometryValue;
+    let geometry: GeoArrowDecodedGeometry;
     switch (state.type) {
       case 'Point':
         geometry = {type: 'Point', coordinates: coordinates[0]?.[0] || []};
@@ -547,7 +547,7 @@ export function allocateGeoArrowBuilderTarget(
 
 /** Builds a concrete or dense-union column from materialized rows. */
 export function makeGeoArrowColumnFromGeometryRows(
-  rows: readonly (GeoArrowGeometryValue | null)[],
+  rows: readonly (GeoArrowDecodedGeometry | null)[],
   options: GeoArrowColumnFromRowsOptions = {}
 ): GeoArrowColumn {
   const geometryTypes = [...new Set(rows.filter(Boolean).map(row => row!.type))];
@@ -587,13 +587,16 @@ export function makeGeoArrowColumnFromGeometryRows(
 }
 
 function makeDenseUnionArray(
-  rows: readonly (GeoArrowGeometryValue | null)[],
+  rows: readonly (GeoArrowDecodedGeometry | null)[],
   options: GeoArrowColumnFromRowsOptions,
   dimension: GeoArrowDimension
 ): GeoArrowDenseUnion {
   const nonNullTypes = [...new Set(rows.filter(Boolean).map(row => row!.type))];
   const fallbackType = nonNullTypes[0] || 'Point';
-  const childRows = new Map<GeoArrowGeometryValue['type'], Array<GeoArrowGeometryValue | null>>();
+  const childRows = new Map<
+    GeoArrowDecodedGeometry['type'],
+    Array<GeoArrowDecodedGeometry | null>
+  >();
   for (const type of nonNullTypes.length ? nonNullTypes : [fallbackType]) childRows.set(type, []);
   const typeIds = new Int8Array(rows.length);
   const valueOffsets = new Int32Array(rows.length);
@@ -638,13 +641,13 @@ function makeDenseUnionArray(
 }
 
 function makeGeometryCollectionArray(
-  rows: readonly (GeoArrowGeometryValue | null)[],
+  rows: readonly (GeoArrowDecodedGeometry | null)[],
   options: GeoArrowColumnFromRowsOptions,
   dimension: GeoArrowDimension
 ): GeoArrowArray {
   const offsets = new Int32Array(rows.length + 1);
   const validity = new Uint8Array(Math.ceil(rows.length / 8));
-  const flattened: GeoArrowGeometryValue[] = [];
+  const flattened: GeoArrowDecodedGeometry[] = [];
   for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
     const row = rows[rowIndex];
     if (row?.type === 'GeometryCollection') {
@@ -806,7 +809,7 @@ function getBuilderDepth(encoding: GeoArrowBuilderEncoding): 0 | 1 | 2 | 3 {
 }
 
 function getGeometryTypeId(
-  type: GeoArrowGeometryValue['type'],
+  type: GeoArrowDecodedGeometry['type'],
   dimension: GeoArrowDimension = 'xy'
 ): number {
   const family = [
@@ -822,14 +825,14 @@ function getGeometryTypeId(
   return family < 0 || dimensionIndex < 0 ? 1 : family * 4 + dimensionIndex + 1;
 }
 
-function inferRowsDimension(rows: readonly (GeoArrowGeometryValue | null)[]): GeoArrowDimension {
+function inferRowsDimension(rows: readonly (GeoArrowDecodedGeometry | null)[]): GeoArrowDimension {
   let size = 2;
   const visit = (value: unknown): void => {
     if (!Array.isArray(value) || value.length === 0) return;
     if (typeof value[0] === 'number') size = Math.max(size, value.length);
     else for (const child of value) visit(child);
   };
-  const visitGeometry = (geometry: GeoArrowGeometryValue): void => {
+  const visitGeometry = (geometry: GeoArrowDecodedGeometry): void => {
     if (geometry.type === 'GeometryCollection') {
       for (const child of geometry.geometries) visitGeometry(child);
     } else {

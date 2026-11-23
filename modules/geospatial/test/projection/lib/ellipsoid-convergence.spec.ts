@@ -3,11 +3,11 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original cross-module qualification, using existing pinned PROJ cart fixtures and authored geometric anchors. No conversion kernel is copied or changed.
 import {expect, test} from 'vitest';
-import {config} from '@math.gl/core';
-import {Ellipsoid} from '@math.gl/geospatial';
-import {normalizeCRS, ProjectionTransform} from '@math.gl/geospatial/projection/core';
-import {geocentric} from '@math.gl/geospatial/projection/projections/geocent';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
+import {config} from '@math.gl/core/matrix';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {normalizeCRS, ProjectionTransform} from '@math.gl/geospatial/projection-core';
+import {geocentric} from '@math.gl/geospatial/projection-projections-geocent';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
 import references from '../fixtures/operation-pipeline-reference.json';
 
 function close(actual: ArrayLike<number>, expected: ArrayLike<number>, tolerance = 1e-5) {

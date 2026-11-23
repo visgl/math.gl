@@ -6,7 +6,7 @@
 // Fixture inputs and tolerance semantics adapted from proj4js 2.22.0 tests (MIT).
 // Copyright (c) 2014, proj4js authors. See ../../../PROJ4-LICENSE.md.
 import {expect, test} from 'vitest';
-import {datumCatalog} from '@math.gl/geospatial/projection/datums';
+import {datumCatalog} from '@math.gl/geospatial/projection-datums';
 import {unshiftedStructuredDatums} from '../fixtures/unshifted-structured-datums';
 import proj4 from 'proj4';
 import upstreamManifest from 'proj4/package.json';

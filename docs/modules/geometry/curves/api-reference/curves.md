@@ -5,14 +5,7 @@
 </p>
 
 ```ts
-import {
-  Curve,
-  LineCurve,
-  QuadraticBezierCurve,
-  CubicBezierCurve,
-  HermiteCurve,
-  CatmullRomCurve
-} from '@math.gl/geometry';
+import {Curve, LineCurve, QuadraticBezierCurve, CubicBezierCurve, HermiteCurve, CatmullRomCurve} from '@math.gl/geometry/curves';
 ```
 
 ## Constructors

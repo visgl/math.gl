@@ -31,11 +31,7 @@ barycentric ancestry across unrelated triangles. Triangle identities compose sep
 the two `sourceTriangleIndices` arrays.
 
 ```js
-import {
-  composeAttributeProvenance,
-  interpolatePackedAttributes,
-  qualifySurfaceTransition
-} from '@math.gl/geometry';
+import {composeAttributeProvenance, interpolatePackedAttributes, qualifySurfaceTransition} from '@math.gl/geometry/processing';
 
 const provenance = composeAttributeProvenance(firstStage, refined);
 const attributes = interpolatePackedAttributes(originalRecords, provenance, {

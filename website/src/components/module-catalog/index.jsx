@@ -7,7 +7,7 @@ import styles from "./styles.module.css";
 
 const modules = [
   ['Core', 'core', 'Vectors, matrices, quaternions, and the foundations of 3D math.', [
-    ['Transforms', 'core/developer-guide/transformations'], ['Types', 'core/types'], ['Arrow / GeoArrow', 'core/arrow'], ['UTF-8', 'core/arrow/utf8']
+    ['Transforms', 'core/developer-guide/transformations'], ['Types', 'core/types'], ['Arrow / GeoArrow', 'core/arrow'], ['UTF-8', 'core/utf8']
   ]],
   ['Geometry', 'geometry', 'Build, query, and process shapes from curves and polygons to 3D meshes.', [
     ['Curves', 'geometry/curves'], ['Polygons', 'geometry/polygon'], ['Culling', 'geometry/culling'], ['Spatial indexes', 'geometry/spatial-index']
@@ -18,11 +18,11 @@ const modules = [
   ['Earth', 'earth', 'Connect locations with Earth models, daylight, and local time.', [
     ['Geoid', 'earth/geoid'], ['Sun', 'earth/sun'], ['Timezones', 'earth/timezone']
   ]],
-  ['DGGS 🧪', 'dggs', 'Explore discrete global grids and decode geographic cell boundaries.', [
-    ['H3', 'dggs/api-reference/h3-decoder'], ['A5', 'dggs/api-reference/a5-decoder'], ['S2', 'dggs/api-reference/s2-decoder'], ['GeoHash', 'dggs/api-reference/geohash-decoder'], ['Quadkey', 'dggs/api-reference/quadkey-decoder'], ['Plus Code', 'dggs/api-reference/plus-code-decoder']
+  ['DGGS', 'dggs', 'Explore discrete global grids and decode geographic cell boundaries.', [
+    ['H3', 'dggs/api-reference/h3'], ['A5', 'dggs/api-reference/a5'], ['S2', 'dggs/api-reference/s2'], ['GeoHash', 'dggs/api-reference/geohash'], ['Quadkey', 'dggs/api-reference/quadkey'], ['Plus Code', 'dggs/api-reference/plus-code']
   ]],
   ['SQL 🧪', 'sql', 'Query native Arrow tables with SQL, compute columns, and aggregate record batches.', [
-    ['Queries', 'sql/queries'], ['SQL parser', 'sql/parser'], ['Arrow expressions', 'sql/arrow'], ['Workers', 'sql/workers']
+    ['Queries', 'sql/query'], ['SQL parser', 'sql/parser'], ['Arrow expressions', 'sql/arrow'], ['Workers', 'sql/worker']
   ]],
   ['Tasks', 'tasks', 'Schedule typed work locally and in browser or Node workers.', [
     ['Scheduling', 'tasks/developer-guide/execution'], ['Workers', 'tasks/developer-guide/custom-workers'], ['Streams', 'tasks/developer-guide/task-runner'], ['State', 'tasks/developer-guide/persistent-resources']

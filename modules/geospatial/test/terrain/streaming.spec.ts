@@ -10,7 +10,7 @@ import {
   unpackTerrainHeightField,
   TERRAIN_BUFFER_VERSION
 } from '@math.gl/geospatial/terrain';
-import type {TileMatrix} from '@math.gl/geospatial';
+import type {TileMatrix} from '@math.gl/geospatial/tiles';
 
 const matrix: TileMatrix = {
   id: 'fine',

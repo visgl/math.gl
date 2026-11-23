@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
-import {Vector3, toRadians, _MathUtils, equals} from '@math.gl/core';
-import {LngLatRectangle} from '@math.gl/geospatial';
+import {Vector3, toRadians, _MathUtils, equals} from '@math.gl/core/matrix';
+import {LngLatRectangle} from '@math.gl/geospatial/globe';
 
 test('LngLatRectangle stores its bounds and computes its center and width', () => {
   const rectangle = new LngLatRectangle(

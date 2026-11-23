@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {ParametricGeometry} from '@math.gl/geometry';
+import {ParametricGeometry} from '@math.gl/geometry/primitives';
 self.onmessage = ({data: {source, segments, amount}}) => {
   try {
     const sample = new Function(`"use strict"; return (${source});`)();

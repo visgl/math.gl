@@ -1,9 +1,9 @@
-# Arrow expressions
+# @math.gl/sql/arrow
 
 `@math.gl/sql/arrow` evaluates schema-bound expressions directly over Arrow batches. Use it
 for WHERE predicates, derived columns and typed application functions. It reuses the parser from
 `@math.gl/sql/expressions`. For SQL text use [the parser](../parser/README.md);
-for complete queries use [the query engine](../queries.md).
+for complete queries use [the query engine](../query.md).
 
 ```ts
 import {compileArrowExpression, compileArrowPredicate} from '@math.gl/sql/arrow';
@@ -200,8 +200,14 @@ rows; skipped positions are null even when `outputField` describes a non-nullabl
 The format-neutral `ColumnarPredicate` vocabulary and its parameter-binding, validation, column-path
 and copy utilities are exported from `@math.gl/sql/expressions`, without an Arrow dependency.
 `compileArrowPredicate` accepts comparisons, `in`, `isNull`, `and`, `or` and `not`, plus named parameters.
-Its v1 Arrow executor supports top-level primitive fields; nested paths, dates, binary values and other
-Arrow types fail explicitly. A string property containing dots is one literal field name.
+The Arrow executor accepts Date literals for Date32, DateMillisecond and all Arrow timestamp units,
+and byte-array literals for binary fields. Date32 compares UTC calendar days, so a non-midnight
+Date literal matches the stored day in comparisons and membership. DateMillisecond and timestamps
+compare instants. Use an array such as `['item', 'value']` to read a nested struct field. A missing
+nested member is null, and a string with dots remains one literal field name.
+Portable comparisons and membership preserve exact ordering and equality between bigint and number
+operands. Numeric comparisons reject NaN and infinity in portable predicates.
+Time-of-day and duration predicates compare numeric bounds in the column’s physical unit.
 
 SQL parsing, source pushdown and result-row selection remain the query engine's responsibility.
 Only true predicate results select rows; false and null results do not. Computed SELECT functions
@@ -239,14 +245,14 @@ cancellation. A single large batch or custom synchronous kernel cannot be interr
 Use the [spatial SQL function libraries](spatial-functions.md) to register
 PostGIS-aligned geometry functions or Turf functions for computed columns.
 
-`@math.gl/geospatial/turf/expressions` exports `createTurfArrowFunction({name, arguments, result, evaluate})`.
+`@math.gl/geospatial/turf-functions` exports `createTurfArrowFunction({name, arguments, result, evaluate})`.
 Pass the exact GeoArrow argument fields and a nullable Float64 or Bool result. Import only the Turf
 functions you use; the adapter itself imports no Turf implementations.
 
 ```ts
 import {Field, Float64} from 'apache-arrow';
 import {area, distance} from '@math.gl/geospatial/turf';
-import {createTurfArrowFunction} from '@math.gl/geospatial/turf/expressions';
+import {createTurfArrowFunction} from '@math.gl/geospatial/turf-functions';
 const functions = [
   createTurfArrowFunction({
     name: 'area',

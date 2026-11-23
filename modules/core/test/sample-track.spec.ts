@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, it} from 'vitest';
-import {SampleTrack, quat} from '@math.gl/core';
+import {SampleTrack, quat} from '@math.gl/core/matrix';
 
 it('sample tracks copy data, support irregular times and caller-owned outputs', () => {
   const times = [1, 2, 5],

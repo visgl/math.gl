@@ -7,7 +7,7 @@ import {
   lazyUniversalTransverseMercator,
   lazyCassiniSoldner
 } from '@math.gl/geospatial/projection/experimental/lazy-projections';
-import {lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
+import {lazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
 import cases from '../fixtures/native-proj-cases.json';
 
 test('automatic catalogue defers algorithms and loads only the requested projection', async () => {

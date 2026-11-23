@@ -13,7 +13,7 @@ side has a constant outward normal, and the top and bottom use separate flat
 normals. Unlike a low-resolution cylinder, its side edges remain sharp.
 
 ```typescript
-import {PrismGeometry} from '@math.gl/geometry';
+import {PrismGeometry} from '@math.gl/geometry/primitives';
 
 const hexagon = new PrismGeometry({radius: 0.6, height: 1.5, sides: 6});
 ```
@@ -28,4 +28,4 @@ const hexagon = new PrismGeometry({radius: 0.6, height: 1.5, sides: 6});
 Angles begin on +X and rotate toward −Z. The mesh is indexed with `triangle-list`
 topology and Float32 `POSITION`, `NORMAL` and `TEXCOORD_0` attributes. It accepts
 `id` and caller-supplied attribute overrides like the other primitives.
-See [Geometry](./geometry.md) for the CPU container API.
+See [Geometry](./primitives.md) for the CPU container API.

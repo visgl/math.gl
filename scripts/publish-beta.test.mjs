@@ -4,7 +4,7 @@
 
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {nextBetaVersion, publishBeta} from './publish-beta.mjs';
+import {nextBetaVersion, nextRcVersion, publishBeta} from './publish-beta.mjs';
 
 function fixture({
   branch = 'master',
@@ -104,4 +104,26 @@ test('refuses to publish an unlanded or mistagged prep', () => {
     assert.throws(() => publishBeta({...f, prepared: true}));
     assert.ok(f.calls.every((call) => call[1] !== 'push'));
   }
+});
+
+test('previews rc.1 from beta and increments subsequent candidates', () => {
+  assert.equal(nextRcVersion('5.0.0-rc.1'), '5.0.0-rc.2');
+  assert.throws(() => nextRcVersion('5.0.0'));
+  assert.throws(() => nextBetaVersion('5.0.0-rc.1'));
+  const f = fixture({version: '5.0.0-beta.12', changelog: '## v5.0.0-rc.1'});
+  const preview = publishBeta({...f, dryRun: true, rc: true});
+  assert.equal(preview.version, '5.0.0-rc.1');
+  assert.equal(preview.versionCommand[3], '5.0.0-rc.1');
+  assert.deepEqual(f.calls, []);
+});
+
+test('validates and pushes only the tag for a prepared release candidate', () => {
+  const f = fixture({version: '5.0.0-rc.1', changelog: '## v5.0.0-rc.1'});
+  assert.equal(publishBeta({...f, prepared: true, dryRun: true}).versionCommand, null);
+  assert.deepEqual(f.calls, []);
+  assert.deepEqual(publishBeta({...f, prepared: true}), {version: '5.0.0-rc.1'});
+  assert.deepEqual(f.calls.slice(-2), [
+    [process.execPath, 'scripts/publish-from-git.mjs', '--check', '--tag', 'v5.0.0-rc.1'],
+    ['git', 'push', 'origin', 'refs/tags/v5.0.0-rc.1']
+  ]);
 });

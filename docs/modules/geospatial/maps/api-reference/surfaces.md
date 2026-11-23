@@ -1,7 +1,7 @@
 # Prepared surfaces and transitions 🧪
 
-Import raster builders from `@math.gl/geospatial/maps/surfaces` and transition
-builders from `@math.gl/geospatial/maps/transitions`. These experimental APIs are
+Import raster builders from `@math.gl/geospatial/maps-surfaces` and transition
+builders from `@math.gl/geospatial/maps-transitions`. These experimental APIs are
 also named exports of `/maps`.
 They have no DOM, deck.gl, texture-loading, or animation-clock dependency.
 
@@ -80,7 +80,7 @@ discover a projection's domain, infer cuts, or replace chart clipping. Use
 `prepareMapSurface` for multi-chart and inset maps.
 
 ```ts
-import {prepareMapSurface} from '@math.gl/geospatial/maps/surfaces';
+import {prepareMapSurface} from '@math.gl/geospatial/maps-surfaces';
 import {mapPresets, mapGeometry, mapTransitions} from '@math.gl/geospatial/maps';
 import {MapEngine, prepareProjectionSurface} from '@math.gl/geospatial/maps';
 import {projectionEngine} from '@math.gl/geospatial/projection';

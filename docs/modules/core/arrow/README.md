@@ -54,7 +54,7 @@ Your application supplies one compatible Arrow installation. The combined `@math
 | Import | Purpose | Apache Arrow required |
 | --- | --- | --- |
 | `@math.gl/core/arrow` | Arrow table/vector views, schemas, copying, and transport | Yes, 17+ |
-| [`@math.gl/core/utf8`](./utf8/README.md) | Byte-oriented string comparison and scalar parsing | No |
+| [`@math.gl/core/utf8`](../utf8/README.md) | Byte-oriented string comparison and scalar parsing | No |
 | [`@math.gl/core/arrow`](./geoarrow/README.md) | Arrow-native GeoArrow adapters and processing | Yes, 17+ |
 | [`@math.gl/core/arrow`](./geoarrow-utils/README.md) | Physical descriptors, geometry kernels, codecs, and streams | Yes, 17+ |
 | [`@math.gl/core/arrow`](./wkb/README.md) | WKB/EWKB and WKT parsing, writing, and traversal | Yes, 17+ |

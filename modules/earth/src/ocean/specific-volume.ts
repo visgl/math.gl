@@ -135,6 +135,11 @@ export function evaluateSpecificVolume(
   return {specificVolume, specificVolumeZeta};
 }
 
+/**
+ * Cache of the seven standard-ocean coefficients a_0 … a_6 that
+ * `getStandardOceanSpecificVolumeCoefficients` returns. It is `null` until the first call
+ * computes the coefficients; they do not change after that.
+ */
 let standardOceanProfile: number[] | null = null;
 
 /**

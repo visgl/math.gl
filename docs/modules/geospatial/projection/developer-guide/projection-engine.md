@@ -33,7 +33,7 @@ Engines hold reusable configuration and create independent transforms for each C
 `ProjectionEngine` is an interface imported from the type-only entry:
 
 ```typescript title="mercator-projection.ts"
-import type { ProjectionEngine } from "@math.gl/geospatial/projection/types";
+import type { ProjectionEngine } from "@math.gl/geospatial/projection-types";
 import { ConfigurableProjectionEngine, mercator } from "@math.gl/geospatial/projection";
 
 const engine = new ConfigurableProjectionEngine({ projections: [mercator] });
@@ -49,7 +49,7 @@ const reusableEngine: ProjectionEngine = engine;
 `FullProjectionEngine` supplies the built-in eager catalogue and CRS readers;
 `LazyProjectionEngine` supplies descriptors whose algorithms load on demand.
 The package also exports a ready-made `projectionEngine` instance. `lazyProjectionEngine` is available from
-`@math.gl/geospatial/projection/projections/lazy`. All three concrete engines implement the same
+`@math.gl/geospatial/projection-projections-lazy`. All three concrete engines implement the same
 [factory interface](../api-reference/projection-engine.md).
 
 Reuse the instance for each CRS pair. Construction resolves definitions, validates
@@ -85,7 +85,7 @@ metadata and loads only the registered algorithms needed for the requested conve
 WGS84 is always included; `converters` requests additional source CRS strings. All returned conversion functions are synchronous:
 
 ```typescript
-import {lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
+import {lazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
 
 const crs = await lazyProjectionEngine.getCRS('+proj=eqearth +ellps=WGS84');
 const position = crs.converter.WGS84.from([12, 55, 100]);
@@ -346,8 +346,8 @@ WGS84 → Web Mercator or WGS84 UTM needs no regional datum catalogue. Convertin
 coordinates in another named datum requires explicit per-instance registration:
 
 ```typescript
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { datumCatalog } from "@math.gl/geospatial/projection/datums";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { datumCatalog } from "@math.gl/geospatial/projection-datums";
 
 const projection = new ProjectionTransform({
   from: "+proj=longlat +datum=OSGB36",
@@ -374,7 +374,7 @@ retains its historical ellipsoid-only handling of unmatched structured datum lab
 ## Minimal Web Mercator
 
 ```typescript
-import {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection/web-mercator';
+import {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection-web-mercator';
 
 const engine = new WebMercatorProjectionEngine();
 const projection = engine.createProjection({to: 'EPSG:3857'});
@@ -482,7 +482,7 @@ For automatic selection, use `LazyProjectionEngine`. It supplies all built-in pr
 descriptors and imports only the algorithms needed by the source and destination CRS:
 
 ```typescript
-import { lazyProjectionEngine } from "@math.gl/geospatial/projection/projections/lazy";
+import { lazyProjectionEngine } from "@math.gl/geospatial/projection-projections-lazy";
 
 const projection = lazyProjectionEngine.createProjection({ to: "EPSG:32631" });
 const xy = await projection.project([3, 45]);
@@ -509,9 +509,9 @@ implementations. The first coordinate operation selects the required source and
 destination algorithms and loads them internally:
 
 ```typescript title="projection-descriptor.ts"
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { mercator } from "@math.gl/geospatial/projection/projections/merc";
-import { lazyUniversalTransverseMercator } from "@math.gl/geospatial/projection/projections/lazy/utm";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { mercator } from "@math.gl/geospatial/projection-projections-merc";
+import { lazyUniversalTransverseMercator } from "@math.gl/geospatial/projection-projections-lazy-utm";
 
 export const webMercator = new ProjectionTransform({
   to: "EPSG:3857",
@@ -561,11 +561,11 @@ Optional WKT interpretation can also be deferred. The adapter uses isolated
 `@math.gl/geospatial/crs` syntax entry points so its parser stays on the lazy side:
 
 ```typescript
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { mercator } from "@math.gl/geospatial/projection/projections/merc";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { mercator } from "@math.gl/geospatial/projection-projections-merc";
 
 export async function loadMercatorWKT(to: string) {
-  const { wktCRSParser } = await import("@math.gl/geospatial/projection/parsers/wkt");
+  const { wktCRSParser } = await import("@math.gl/geospatial/projection-parsers-wkt");
   return new ProjectionTransform({
     to,
     projections: [mercator],
@@ -736,8 +736,8 @@ Greenwich longitude and geographic latitude. These are explicit stages following
 [PROJ's vertical-grid convention](https://proj.org/en/stable/operations/transformations/vgridshift.html).
 
 ```typescript
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { parseGTXGrid } from "@math.gl/geospatial/projection/grids/gtx";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { parseGTXGrid } from "@math.gl/geospatial/projection-grids-gtx";
 
 const response = await fetch("/grids/local.gtx");
 if (!response.ok) throw new Error("Could not load vertical grid");
@@ -764,7 +764,7 @@ model is imported implicitly. The optional readers can themselves be dynamically
 For an already loaded `@math.gl/earth` model, use the structural adapter:
 
 ```typescript
-import { createGeoidGrid } from "@math.gl/geospatial/projection/grids/vertical";
+import { createGeoidGrid } from "@math.gl/geospatial/projection-grids-vertical";
 
 // geoid is a previously prepared @math.gl/earth Geoid instance.
 const verticalGrids = { local: createGeoidGrid(geoid) };
@@ -816,8 +816,8 @@ GDAL metadata, GeoKeys, nodata and geometry tags have the same validation as the
 geotiff.js input. No runtime dependency on loaders.gl is added.
 
 ```typescript
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { loadVerticalGeoTIFFGrid } from "@math.gl/geospatial/projection/grids/vertical-geotiff";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { loadVerticalGeoTIFFGrid } from "@math.gl/geospatial/projection-grids-vertical-geotiff";
 import { fromArrayBuffer } from "geotiff"; // separately installed, application-owned decoder
 
 const response = await fetch("/grids/local-geoid.tif");

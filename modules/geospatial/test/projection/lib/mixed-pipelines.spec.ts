@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original mixed-stage arithmetic, intermediate validation, ownership, epoch and recursion tests. Benchmark anchors independently compose pinned PROJ results with an authored unit/axis oracle.
 import {expect, test} from 'vitest';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import type {PipelineStep} from '@math.gl/geospatial/projection/pipeline';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import type {PipelineStep} from '@math.gl/geospatial/projection-pipeline';
 const input = {space: 'geocentric', units: ['m', 'm', 'm']} as const;
 type Helmert = Extract<PipelineStep, {type: 'helmert'}>;
 function pipeline(steps: PipelineStep[], general = false) {

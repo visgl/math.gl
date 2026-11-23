@@ -1,12 +1,12 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
 import {
-  subdivideTriangleMesh,
   composeAttributeProvenance,
   interpolatePackedAttributes,
   qualifySurfaceTransition
-} from '@math.gl/geometry';
+} from '@math.gl/geometry/processing';
 
 const source = {
   positions: new Float64Array([-1, -1, 1, -1, 1, 1, -1, 1]),

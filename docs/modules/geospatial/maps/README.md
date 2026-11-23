@@ -1,4 +1,4 @@
-# Maps 🧪
+# @math.gl/geospatial/maps
 
 `@math.gl/geospatial/maps` owns spherical map descriptions, chart layouts, seams,
 insets and rendering preparation. CRS conversion remains in
@@ -55,7 +55,7 @@ never register global state.
 
 ```ts
 import {MapEngine} from '@math.gl/geospatial/maps';
-import {albersUsaMapPreset} from '@math.gl/geospatial/maps/presets';
+import {albersUsaMapPreset} from '@math.gl/geospatial/maps-presets';
 
 const map = new MapEngine(
   {version: 1, id: 'usa', definition: {type: 'albers-usa'}},
@@ -91,7 +91,7 @@ use clipping to compile sampled domains; selecting that preset retains its compi
 Raster preparation is independent of polygon support:
 
 ```ts
-import {prepareMapSurface} from '@math.gl/geospatial/maps/surfaces';
+import {prepareMapSurface} from '@math.gl/geospatial/maps-surfaces';
 const surface = prepareMapSurface(map, {maxAngularStep: 1});
 ```
 
@@ -130,7 +130,7 @@ import {
   createInterruptedSinusoidalMap
 } from '@math.gl/geospatial/maps';
 
-import {withMapGeometry} from '@math.gl/geospatial/maps/geometry';
+import {withMapGeometry} from '@math.gl/geospatial/maps-geometry';
 
 const map = withMapGeometry(createInterruptedSinusoidalMap());
 const point = map.projectPoint([-90, 30]); // {regionId, position: [x, y]}

@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {vec4} from '@math.gl/core';
+import {vec4} from '@math.gl/core/matrix';
 
 // Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
 export function createMat4(): number[] {

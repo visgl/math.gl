@@ -7,7 +7,7 @@ import {
   createTerrainGradientGrid,
   createTerrainSlopeAspectGrid,
   createTerrainIsobands
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 import sierra from './fixtures/sierra-reference.json';
 import pacific from './fixtures/pacific-reference.json';
 import nodata from './fixtures/sierra-nodata-reference.json';

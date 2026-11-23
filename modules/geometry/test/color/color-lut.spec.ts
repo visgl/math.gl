@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
-import {applyColorLUT, createColorLUTSampler} from '../../src/color';
-import type {ColorLUT} from '../../src/color';
+import {applyColorLUT, createColorLUTSampler} from '@math.gl/core/color';
+import type {ColorLUT} from '@math.gl/core/color';
 
 /** Builds an asymmetric affine 3D transform to expose axis-order and interpolation errors. */
 function createAffineLUT(size = 2): ColorLUT {

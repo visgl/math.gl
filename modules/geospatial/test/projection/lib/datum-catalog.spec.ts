@@ -10,8 +10,8 @@ import {
   createProjectionDescriptor,
   type DatumCatalogPlugin,
   type DatumDefinition
-} from '@math.gl/geospatial/projection/core';
-import {datumCatalog} from '@math.gl/geospatial/projection/datums';
+} from '@math.gl/geospatial/projection-core';
+import {datumCatalog} from '@math.gl/geospatial/projection-datums';
 import {
   projectionEngine,
   mercator,
@@ -21,7 +21,7 @@ import {
 import {
   lazyProjectionEngine,
   LazyProjectionEngine
-} from '@math.gl/geospatial/projection/projections/lazy';
+} from '@math.gl/geospatial/projection-projections-lazy';
 import {geographicJSON} from '../fixtures/crs-datums';
 
 const regional = '+proj=longlat +datum=OSGB36';

@@ -8,5 +8,5 @@ export const lazyCylindricalEqualArea: ProjectionDescriptor =
   /* @__PURE__ */ createProjectionDescriptor(
     {name: 'cea', aliases: []},
     async () =>
-      (await import('@math.gl/geospatial/projection/projections/cea')).cylindricalEqualArea
+      (await import('@math.gl/geospatial/projection-projections-cea')).cylindricalEqualArea
   );

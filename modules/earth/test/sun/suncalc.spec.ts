@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {test, expect} from 'vitest';
 import {getSunPosition, getSunDirection} from '@math.gl/earth/sun/suncalc';
-import {equals, config} from '@math.gl/core';
-import {vec3} from '@math.gl/core';
+import {equals, config} from '@math.gl/core/matrix';
+import {vec3} from '@math.gl/core/matrix';
 
 test('Sunlight#azimuth and altitude', () => {
   const MS_IN_AN_HOUR = 3.6e6;

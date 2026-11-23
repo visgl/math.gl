@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original synthetic model qualification against independent native PROJ references.
 import {fromArrayBuffer} from 'geotiff';
-import {loadVelocityGeoTIFFGrid} from '@math.gl/geospatial/projection/grids/velocity-geotiff';
+import {loadVelocityGeoTIFFGrid} from '@math.gl/geospatial/projection-grids-velocity-geotiff';
 import {qualifyDeformations} from '../../test/projection/deformation-workload';
 export async function qualifyDeformation() {
   const response = await fetch('/deformation/linear-enu.tif');

@@ -6,7 +6,7 @@ import React, {useMemo, useState} from 'react';
 import {_GlobeView} from '@deck.gl/core';
 import {DeckGL} from '@deck.gl/react';
 import {TileLayer} from '@deck.gl/geo-layers';
-import {DGGS_DECODERS} from '@math.gl/dggs';
+import {DGGS_DECODERS} from '@math.gl/dggs/decoders';
 import {PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import ExamplePanel from '../../../common/example-panel';
 import {getGridLevel, generateCells} from './generator';

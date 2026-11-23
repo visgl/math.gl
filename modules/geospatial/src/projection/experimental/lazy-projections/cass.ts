@@ -7,7 +7,7 @@ import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyCassiniSoldner: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'cass', aliases: ['Cassini', 'Cassini_Soldner']},
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/cass');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-cass');
     return projectionModule.cassiniSoldner;
   }
 );

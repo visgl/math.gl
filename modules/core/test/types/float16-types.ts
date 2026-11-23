@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {NumericArray, TypedArray, TypedArrayConstructor} from '@math.gl/core';
+import type {NumericArray, TypedArray, TypedArrayConstructor} from '@math.gl/core/types';
 
 declare const float16Array: Float16Array;
 declare const float16ArrayConstructor: Float16ArrayConstructor;

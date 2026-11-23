@@ -52,7 +52,7 @@ export type {ProjectionDescriptor} from './projection-descriptor';
 
 export type {ProjectionCoordinate, ProjectionOutput} from './scalar-output';
 
-export type {SpheroidParameters} from '@math.gl/core';
+export type {SpheroidParameters} from '@math.gl/core/types';
 
 export {
   ConfigurableProjectionEngine,

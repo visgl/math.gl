@@ -4,7 +4,7 @@
 
 import {expect, test, vi} from 'vitest';
 import {lngLatToWorld} from '@math.gl/geospatial/web-mercator';
-import {projectTextureCoordinates} from '@math.gl/geometry';
+import {projectTextureCoordinates} from '@math.gl/geometry/processing';
 
 const bounds = [10, 20, 30, 60] as const;
 const identity = (position: readonly number[]) => position;

@@ -7,7 +7,7 @@ import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyOrthographic: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'ortho', aliases: []},
   async () => {
-    const projectionModule = await import('@math.gl/geospatial/projection/projections/ortho');
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-ortho');
     return projectionModule.orthographic;
   }
 );

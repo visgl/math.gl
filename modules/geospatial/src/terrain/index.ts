@@ -326,3 +326,10 @@ export type {
   TerrainCutoutPolygonSet,
   TerrainCutoutRegion
 } from './cutout-region';
+
+export {
+  createTerrainRegionalWatersheds,
+  type TerrainWatershedTile,
+  type TerrainRegionalWatershedOptions,
+  type TerrainRegionalWatersheds
+} from './regional-watersheds';

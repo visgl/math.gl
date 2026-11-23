@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original qualification workload using independent PROJ spatial/time expectations.
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import type {ProjectionPipelineOptions} from '@math.gl/geospatial/projection/pipeline';
-import {universalTransverseMercator} from '@math.gl/geospatial/projection/projections/utm';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import type {ProjectionPipelineOptions} from '@math.gl/geospatial/projection-pipeline';
+import {universalTransverseMercator} from '@math.gl/geospatial/projection-projections-utm';
 import inputs from './fixtures/kinematic-pipeline-cases.json';
 import reference from './fixtures/kinematic-pipeline-reference.json';
 

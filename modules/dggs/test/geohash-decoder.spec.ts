@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {GeohashDecoder} from '@math.gl/dggs';
+import {GeohashDecoder} from '@math.gl/dggs/geohash';
 
 const TEST_DATA = [
   {

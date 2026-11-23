@@ -60,8 +60,8 @@ normally and keep its lifetime under application control.
 
 ```typescript
 // projection-worker.ts
-import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
-import {universalTransverseMercator} from '@math.gl/geospatial/projection/projections/utm';
+import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
+import {universalTransverseMercator} from '@math.gl/geospatial/projection-projections-utm';
 const projection = new ProjectionTransform({
   to: 'EPSG:32631', projections: [universalTransverseMercator]
 });

@@ -5,6 +5,8 @@
 import {expect, test} from 'vitest';
 import * as arrow from 'apache-arrow';
 import {
+  createRecordBatchWithMetadata,
+  getRecordBatchMetadata,
   IndexedArrowVector,
   IndexedArrowTable,
   MappedArrowTable,
@@ -947,6 +949,36 @@ test('Indexed Arrow materialization preserves raw nanosecond precision and compa
   expect(selected.batches).toHaveLength(1);
   expect(selected.getChild('union')!.data[0]!.children[0]!.values.byteLength).toBe(15);
   expect(Array.from(selected.getChild('union')!)).toEqual(['small', 'small', 'small']);
+});
+
+test('Indexed Arrow gathering keeps metadata with each source run', () => {
+  const source = arrow.tableFromArrays({value: Int32Array.of(10, 11, 20, 21)});
+  const data = source.batches[0]!.data;
+  const schema = new arrow.Schema(source.schema.fields, new Map([['origin', 'table']]));
+  const first = createRecordBatchWithMetadata(
+    schema,
+    data.slice(0, 2),
+    new Map([['batch', 'first']])
+  );
+  const second = createRecordBatchWithMetadata(
+    schema,
+    data.slice(2, 2),
+    new Map([['batch', 'second']])
+  );
+
+  const gathered = new IndexedArrowTable(
+    new arrow.Table(schema, [first, second]),
+    [2, 0, 3, 1]
+  ).materializeArrowTable();
+
+  expect([...gathered.getChild('value')!]).toEqual([20, 10, 21, 11]);
+  expect(gathered.schema.metadata.get('origin')).toBe('table');
+  expect(gathered.batches.map(batch => getRecordBatchMetadata(batch)?.get('batch'))).toEqual([
+    'second',
+    'first',
+    'second',
+    'first'
+  ]);
 });
 
 test('Indexed Arrow gathering preserves sliced bitmaps, maps, lists, nulls and shared dictionaries', () => {

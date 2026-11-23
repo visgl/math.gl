@@ -10,7 +10,7 @@ positions into local coordinates near a point on the ellipsoid.
 ## Usage
 
 ```js
-import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial';
+import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial/ellipsoid';
 
 const origin = Ellipsoid.WGS84.cartographicToCartesian([-122.4, 37.8, 0]);
 const tangentPlane = new EllipsoidTangentPlane(origin);

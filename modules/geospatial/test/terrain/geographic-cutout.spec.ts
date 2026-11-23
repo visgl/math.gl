@@ -10,7 +10,7 @@ import {
   splitTerrainMesh,
   updateTerrainTileCutouts,
   createTerrainCutoutSkirts
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 /** Independent Cartesian basis projection of a unit globe. */
 function oracle(lon: number, lat: number, center: readonly [number, number], radius: number) {

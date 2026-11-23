@@ -9,7 +9,7 @@
 /* eslint-disable */
 import {test, expect} from 'vitest';
 
-import {_MathUtils, Vector3, Matrix4, equals} from '@math.gl/core';
+import {_MathUtils, Vector3, Matrix4, equals} from '@math.gl/core/matrix';
 import {Plane, Ray} from '@math.gl/geometry/culling';
 
 const UNIT_X = [1, 0, 0];

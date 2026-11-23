@@ -16,7 +16,7 @@ import type {
   ProjectionPlugin,
   ProjectionFlatContext,
   ProjectionTransformOptions
-} from '@math.gl/geospatial/projection/core';
+} from '@math.gl/geospatial/projection-core';
 import {commonProjectionCases} from '../fixtures/common-projections';
 
 const plugins = [

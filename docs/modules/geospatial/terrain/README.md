@@ -1,4 +1,4 @@
-# Terrain
+# @math.gl/geospatial/terrain
 
 Experimental CPU terrain data and algorithms, usable in Node.js, browser workers,
 and rendering applications. The initial implementation provides affine height
@@ -1933,7 +1933,12 @@ is 0.00001. Use a well-conditioned Cartesian frame.
 The **Rotating collider replay** in Terrain Sampling shows the two-patch seam,
 a grazing orbit and an axis-aligned box starting pose. The independent
 `rotating-round-contacts.json` fixture gives analytical plane contact times
-and exercises shared edges, grazing and exhausted work.
+and exercises shared edges, grazing and exhausted work. An additional
+analytical orbit places first contact at an independently indexed 2:1 seam
+and checks the impact interval and terrain witness in both patch orders.
+The cases include a missing strip under the low point of the orbit, a
+near-clearance miss, and a shallow crossing that reports `incomplete`
+when the subdivision tolerance cannot certify a hit.
 
 The CPU parity fixture in
 `modules/geospatial/test/terrain/fixtures/rotational-sweep-parity.json`
@@ -1997,7 +2002,7 @@ each entry of `terminal`. Multiply `contributingCells[index]` by `cellArea`
 to get projected contributing area, including the cell itself.
 
 ```ts
-import {createTerrainDrainage, HeightField} from '@math.gl/geospatial';
+import {createTerrainDrainage, HeightField} from '@math.gl/geospatial/terrain';
 
 const field = new HeightField({
   width: 3,
@@ -2037,7 +2042,7 @@ heights across flats and terminates at the supplied outlets. A receiver of
 nodata, distinguishable through the returned field's validity mask.
 
 ```ts
-import {fillTerrainDepressions, HeightField} from '@math.gl/geospatial';
+import {fillTerrainDepressions, HeightField} from '@math.gl/geospatial/terrain';
 
 const basin = new HeightField({
   width: 3,
@@ -2064,7 +2069,7 @@ a repeated endpoint. Both ring windings are supported. For concave rings, holes
 and disjoint polygon regions, prepare an immutable polygon set as described below.
 
 ```ts
-import {createTerrainCutoutSkirts, splitTerrainMesh} from '@math.gl/geospatial';
+import {createTerrainCutoutSkirts, splitTerrainMesh} from '@math.gl/geospatial/terrain';
 
 const cut = splitTerrainMesh(mesh, [[10, 10], [30, 10], [30, 25], [10, 25]]);
 const raised = createTerrainCutoutSkirts(cut, {
@@ -2108,7 +2113,7 @@ import {
   accumulateTerrainWatersheds,
   fillTerrainDepressions,
   getTerrainCellMetrics
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 // field is a cell-registered HeightField. outlet is a valid row-major index.
 const {receiver} = fillTerrainDepressions(field, {outlets: [outlet]});
@@ -2133,7 +2138,7 @@ A cut coinciding with a tile seam receives paired walls only where both the
 patch and remainder actually exist. Missing tiles and nodata remain uncovered.
 
 ```ts
-import {splitTerrainMeshTiles, createTerrainCutoutSkirts} from '@math.gl/geospatial';
+import {splitTerrainMeshTiles, createTerrainCutoutSkirts} from '@math.gl/geospatial/terrain';
 
 // All positions and the polygon use one local Cartesian coordinate frame.
 const cut = splitTerrainMeshTiles(residentMeshes, polygon);
@@ -2174,7 +2179,7 @@ common local frame, and a nonnegative integer revision. Increment the revision
 Treat returned arrays and cached inputs as read-only within a revision.
 
 ```ts
-import {updateTerrainTileCutouts, createTerrainCutoutSkirts} from '@math.gl/geospatial';
+import {updateTerrainTileCutouts, createTerrainCutoutSkirts} from '@math.gl/geospatial/terrain';
 
 let result = updateTerrainTileCutouts(residents, polygon);
 // Edit only an interior sample, or reconcile changed seam profiles first.
@@ -2208,8 +2213,9 @@ a polygon expressed in the new frame.
 
 Work consists of clipping changed tiles, validating changed adjacent pairs,
 a resident-pair broad phase, and reconciling cached exposed-edge summaries.
-Unchanged triangles are not rescanned or reclipped. The broad phase is currently
-quadratic in resident count; `maxPairChecks` bounds it. `maxTiles` and
+Unchanged triangles are not rescanned or reclipped. The broad phase checks pairs incident to rebuilt tiles. With N residents and K
+rebuilt tiles, it performs at most K × N iterations. Cold updates can still be
+quadratic. `maxPairChecks` caps the total possible resident pairs. `maxTiles` and
 `maxBoundaryEdges` bound resident reconciliation. `maxWork`, `maxVertices` and
 `maxTriangles` apply separately to each tile clip and each adjacent-pair check;
 they are not aggregate per-update limits. This is not an incremental skirt cache:
@@ -2235,7 +2241,7 @@ same small floating-point allowance at the inclusive cap boundary.
 import {
   createGeographicTerrainCutoutFrame, projectGeographicTerrainCutout,
   unprojectGeographicTerrainCutout, splitTerrainMesh
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 const frame = createGeographicTerrainCutoutFrame({center: [180, 0]});
 const positions = projectGeographicTerrainCutout(longitudeLatitudeHeight, frame);
@@ -2281,7 +2287,7 @@ pulling in polygon validation or winding classification.
 import {
   prepareTerrainCutoutPolygons, splitTerrainMesh, updateTerrainTileCutouts,
   createTerrainCutoutSkirts
-} from '@math.gl/geospatial';
+} from '@math.gl/geospatial/terrain';
 
 const region = prepareTerrainCutoutPolygons([
   {outer: islandBoundary, holes: [lakeBoundary]},
@@ -2335,3 +2341,43 @@ The lab includes **Concave**, **Island with lake**, and **Lake with island**
 scenarios in local, antimeridian and polar charts. Island regions have distinct
 colors. Run `node scripts/benchmark-terrain-cutouts.mjs --polygons` after building
 to compare incremental and monolithic Pacific/Sierra cuts with region-ID parity.
+
+### Regional watershed conditioning
+
+Use `createTerrainRegionalWatersheds` to condition aligned cell tiles and
+accumulate upstream cell counts through tile seams. Provide a bounded regional
+window and confirmed outlets as row-major cell indices.
+
+```ts
+import {createTerrainRegionalWatersheds} from '@math.gl/geospatial/terrain';
+
+const basin = createTerrainRegionalWatersheds(
+  [{column: 0, row: 0, field: west}, {column: west.width, row: 0, field: east}],
+  {width: west.width + east.width, height: west.height, origin: west.origin, outlets: [0]}
+);
+const contributingCells = basin.contributingCells[0];
+```
+
+Tiles must share an affine lattice and height reference, have matching diagonals,
+and have origins exactly translated by their integer offsets. They may not overlap.
+Coverage distinguishes absent tiles (0), known nodata (1) and valid cells (2).
+Both absent and nodata cells block modeled flow. The window exterior is closed,
+and `touchesUnknown` marks valid face-connected components bordering absent
+coverage. Counts and spill elevations describe the known window and can change
+when gaps fill or outlets change. Memory scales with the full window area,
+including gaps, and is bounded by `maxCells`.
+
+The Terrain Sampling example's **Sierra watershed explorer** uses a pinned
+48 × 32 DEM window with selectable confirmed outlets and an evictable interior
+tile. Switch between contributing area, fill depth, and coverage. Counts are
+conditional on the selected outlets and resident tiles. Area uses the
+determinant of the projected sample lattice.
+
+Run `node scripts/benchmark-terrain-watersheds.mjs` after building to measure
+the effect of a growing absent area with the resident Sierra tiles fixed. The
+replay checks that spill heights, receiver links, outlet labels, and
+contributions agree on the unchanged resident domain. In a local Node 24
+run, a 48 × 32 window retained 35,328 bytes in result buffers and took 0.35 ms
+median. A 1024 × 1024 window retained 24,117,248 bytes and took 36.12 ms
+median. The retained buffer totals exclude temporary workspace and runtime
+object overhead.

@@ -11,7 +11,7 @@ Choose coordinates that fit the operation you need. Core provides Cartesian vect
 ## Convert spherical coordinates
 
 ```js
-import {SphericalCoordinates, Vector3} from '@math.gl/core';
+import {SphericalCoordinates, Vector3} from '@math.gl/core/matrix';
 
 const spherical = new SphericalCoordinates({radius: 1, phi: Math.PI / 2, theta: Math.PI / 2});
 const cartesian = spherical.toVector3(); // Returns a plain array

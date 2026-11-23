@@ -11,7 +11,7 @@
 import {test, expect} from 'vitest';
 
 import {_PerspectiveOffCenterFrustum as PerspectiveOffCenterFrustum} from '@math.gl/geometry/culling';
-import {Vector2, Vector3, Vector4, Matrix4, _MathUtils, equals} from '@math.gl/core';
+import {Vector2, Vector3, Vector4, Matrix4, _MathUtils, equals} from '@math.gl/core/matrix';
 
 const VECTOR3_UNIT_Y = Object.freeze(new Vector3(0, 1, 0));
 const VECTOR3_UNIT_Z = Object.freeze(new Vector3(0, 0, 1));

@@ -48,8 +48,8 @@ Greenwich longitude and geographic latitude. These are explicit stages following
 [PROJ's vertical-grid convention](https://proj.org/en/stable/operations/transformations/vgridshift.html).
 
 ```typescript
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { parseGTXGrid } from "@math.gl/geospatial/projection/grids/gtx";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { parseGTXGrid } from "@math.gl/geospatial/projection-grids-gtx";
 
 const response = await fetch("/grids/local.gtx");
 if (!response.ok) throw new Error("Could not load vertical grid");
@@ -76,7 +76,7 @@ model is imported implicitly. The optional readers can themselves be dynamically
 For an already loaded `@math.gl/earth` model, use the structural adapter:
 
 ```typescript
-import { createGeoidGrid } from "@math.gl/geospatial/projection/grids/vertical";
+import { createGeoidGrid } from "@math.gl/geospatial/projection-grids-vertical";
 
 // geoid is a previously prepared @math.gl/earth Geoid instance.
 const verticalGrids = { local: createGeoidGrid(geoid) };
@@ -128,8 +128,8 @@ GDAL metadata, GeoKeys, nodata and geometry tags have the same validation as the
 geotiff.js input. No runtime dependency on loaders.gl is added.
 
 ```typescript
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { loadVerticalGeoTIFFGrid } from "@math.gl/geospatial/projection/grids/vertical-geotiff";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { loadVerticalGeoTIFFGrid } from "@math.gl/geospatial/projection-grids-vertical-geotiff";
 import { fromArrayBuffer } from "geotiff"; // separately installed, application-owned decoder
 
 const response = await fetch("/grids/local-geoid.tif");

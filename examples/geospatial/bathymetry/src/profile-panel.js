@@ -12,7 +12,7 @@ const WIDTH = 260,
 
 /** SVG chart and summary for one sound-speed profile; depth increases downward. */
 export function createSoundProfileMarkup(result, {longitude, latitude, seafloorDepth, frequency}) {
-  const {levels, minimum, verticalLoss, truncated} = result;
+  const {levels, minimum, verticalLoss, levelsWithoutAbsorption, truncated} = result;
   const speeds = levels.map(level => level.soundSpeed);
   const low = Math.floor(Math.min(...speeds) - 2),
     high = Math.ceil(Math.max(...speeds) + 2);
@@ -24,6 +24,16 @@ export function createSoundProfileMarkup(result, {longitude, latitude, seafloorD
   );
   const kHz = `${frequency / 1000} kHz`;
   const surface = levels[0];
+  /** Absorption of one level, or a gap outside the Francois–Garrison range. */
+  const absorption = level =>
+    level.absorption === null ? 'no value' : `${level.absorption.toFixed(3)} dB/km`;
+  const loss =
+    verticalLoss === null
+      ? 'One-way vertical loss: no value.'
+      : `One-way vertical loss to ${Math.round(bottom)} m: ${verticalLoss.toFixed(1)} dB${levelsWithoutAbsorption ? ', partial: it omits the intervals without absorption' : ''}.`;
+  const gaps = levelsWithoutAbsorption
+    ? `<p data-role="absorption-domain">Absorption is outside the Francois–Garrison range at ${levelsWithoutAbsorption} ${levelsWithoutAbsorption === 1 ? 'level' : 'levels'}.</p>`
+    : '';
   const channel =
     minimum.depth > 0 && minimum.depth < bottom
       ? `Minimum ${minimum.soundSpeed.toFixed(1)} m/s at ${Math.round(minimum.depth)} m: the deep sound channel axis.`
@@ -41,7 +51,8 @@ export function createSoundProfileMarkup(result, {longitude, latitude, seafloorD
     <circle data-role="minimum-marker" class="minimum" cx="${x(minimum.soundSpeed)}" cy="${y(minimum.depth)}" r="4"/>
   </svg>
   <p data-role="minimum">${channel}</p>
-  <p data-role="absorption">Absorption at ${kHz}: ${surface.absorption.toFixed(3)} dB/km at the surface, ${levels.at(-1).absorption.toFixed(3)} dB/km at ${Math.round(bottom)} m. One-way vertical loss to ${Math.round(bottom)} m: ${verticalLoss.toFixed(1)} dB.</p>
+  <p data-role="absorption">Absorption at ${kHz}: ${absorption(surface)} at the surface, ${absorption(levels.at(-1))} at ${Math.round(bottom)} m. ${loss}</p>
+  ${gaps}
   ${truncated ? '<p>The profile data end above this seafloor.</p>' : ''}`;
 }
 

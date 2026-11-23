@@ -1,7 +1,8 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {earcut, interpolatePackedAttributes} from '@math.gl/geometry';
+import {earcut} from '@math.gl/geometry/polygon';
+import {interpolatePackedAttributes} from '@math.gl/geometry/processing';
 import {createCRSProjectionDomain} from '@math.gl/geospatial/crs';
 import {runWarpSync, WarpError} from './refine.mjs';
 

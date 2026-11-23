@@ -9,7 +9,7 @@ import {
   isS2IndexValid,
   isS2TokenValid,
   S2Decoder
-} from '@math.gl/dggs';
+} from '@math.gl/dggs/s2';
 
 test('S2Decoder#cellToLngLat', () => {
   const s2Token = '8085873c';

@@ -24,7 +24,7 @@ const second: OrientedBox2D = {
 const overlaps = intersectOrientedBoxes2D(first, second);
 ```
 
-The dedicated subpath has no runtime dependencies. The package root also exports the function
+The dedicated subpath has no runtime dependencies.
 and type for convenience; existing root-package dependencies are unchanged.
 
 ## Box representation
