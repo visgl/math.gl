@@ -199,6 +199,8 @@ function validateWGS84(crs: unknown, name: string): void {
     throw new Error(`${name} requires WGS84 CRS metadata (EPSG:4326 or OGC:CRS84)`);
 }
 
+/** Geometry kinds accepted by point-to-point and point-to-route proximity. */
+
 const proximityKinds = [...pointKinds, ...lineKinds];
 
 /** Returns WGS84 point-to-point or point-to-route distance in meters. */
