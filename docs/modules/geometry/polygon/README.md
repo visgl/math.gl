@@ -24,6 +24,7 @@ const indices = earcut(positions, [], 2); // Two triangles
 | Winding, signed area and ring traversal | ✅ | [Polygon utilities](./api-reference/polygon-utils.md) define planar winding and area conventions. |
 | Polygon triangulation with holes | ✅ | [earcut](./api-reference/earcut.md) consumes flat positions and explicit hole offsets. |
 | Polyline/polygon clipping and grid cuts | ✅ | [Clipping](./api-reference/clip-polygon.md) and grid/Mercator helpers split geometry at supported boundaries. |
+| Planar path editing and polygon validity | ✅ | [Planar line and polygon operations](./api-reference/planar-topology.md) cover merging, densification, nearest-segment projection, and validation. |
 | Projection-aware edge subdivision | ✅ | [subdividePolyline](./api-reference/subdivide-polyline.md) uses target-space tolerances and retains original-edge attribution. |
 | Conforming triangle-mesh refinement | ✅ | [subdivideTriangleMesh](./api-reference/subdivide-triangle-mesh.md) shares edge subdivisions and returns interpolation provenance. |
 | Projected triangle-mesh clipping | ✅ | [clipTriangleMesh](./api-reference/clip-triangle-mesh.md) supports disjoint convex target-plane regions, periodic copies and original-vertex weights; prepare geographic topology separately. |
