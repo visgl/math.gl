@@ -3,9 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
-import type {AggregateFunction, ScalarFunction} from '@math.gl/sql/arrow';
 import {lineIntersectionResult} from './spatial-line-intersection-result';
 import {intersectLinePolygon} from './spatial-line-polygon-intersection';
+import type {AggregateFunction, ScalarFunction} from '@math.gl/sql/arrow';
 import polygonClipping from 'polygon-clipping';
 import {polygonSet} from './spatial-polygon-overlay';
 import {
