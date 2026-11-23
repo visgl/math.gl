@@ -207,6 +207,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [Globe intersection and occlusion](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/globe-queries.md): {/ SPDX-License-Identifier: MIT /}
 - [Helpers](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/helpers.md): Helper functions for geospatial.
 - [Ellipsoidal and rhumb latitude cuts](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/latitude-geographic-cuts.md): A map can accept only part of a geographic shape. A finite Mercator map needs a
+- [Line networks](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/line-network.md): buildLineNetwork turns line geometry into a graph. Nodes are the points where lines
 - [LngLatRectangle](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/lng-lat-rectangle.md): A longitude-latitude rectangle on an ellipsoid. Angular values are stored in radians.
 - [Local-frame qualification and GeographicLib benchmark baselines](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/local-frame-qualification.md): The C8 increment qualifies a bounded profile of LocalReferenceFrame, poses,
 - [LocalReferenceFrame](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/local-reference-frame.md): A reusable rigid frame at a fixed Cartesian origin on a sphere or oblate spheroid. The class
@@ -231,6 +232,7 @@ The @math.gl/geometry module provides renderer-independent CPU mesh data and pri
 - [@math.gl/geospatial/geodesics](https://visgl.github.io/math.gl/next/docs/modules/geospatial/entry-points/geodesics.md): Measure and sample geodesics and rhumb lines on an ellipsoid. Start with Geodesics.
 - [@math.gl/geospatial/geographic-cuts](https://visgl.github.io/math.gl/next/docs/modules/geospatial/entry-points/geographic-cuts.md): Split and clip geographic geometry along longitude seams, latitude limits, and chart boundaries. Start with Map seams.
 - [@math.gl/geospatial/globe](https://visgl.github.io/math.gl/next/docs/modules/geospatial/entry-points/globe.md): Compute globe visibility, bounding regions, and mesh subdivision. Start with Globe geometry.
+- [@math.gl/geospatial/line-network](https://visgl.github.io/math.gl/next/docs/modules/geospatial/entry-points/line-network.md): Build a graph from longitude, latitude line geometry, and turn shortest-path results back
 - [@math.gl/geospatial/st-functions](https://visgl.github.io/math.gl/next/docs/modules/geospatial/entry-points/st-functions.md): Register PostGIS-style functions such as ST_AREA in Arrow SQL. See spatial functions.
 - [@math.gl/geospatial/tasks](https://visgl.github.io/math.gl/next/docs/modules/geospatial/entry-points/tasks.md): Run geospatial operations in workers using the task runner.
 - [@math.gl/geospatial/tiles](https://visgl.github.io/math.gl/next/docs/modules/geospatial/entry-points/tiles.md): Locate geographic tiles and validate tile matrix sets. Start with Tiles.
@@ -365,6 +367,6 @@ Upgrading to v5.0
 
 ### whats-new
 
-v5.0
+v5.1 (in development)
 
-- [What's New](https://visgl.github.io/math.gl/next/docs/whats-new.md): v5.0
+- [What's New](https://visgl.github.io/math.gl/next/docs/whats-new.md): v5.1 (in development)
