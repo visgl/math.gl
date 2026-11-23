@@ -4,7 +4,7 @@
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
 import {orient2d} from 'robust-predicates';
-import {anyOverlap, type Bounded} from './spatial-bounds-sweep';
+import {anyBoundsOverlap, type Bounded} from '@math.gl/geometry/processing';
 import {simplifyLine} from './line-simplification';
 import {planarBounds} from './spatial-planar';
 import {planarIntersects, segmentsMeet} from './spatial-planar-intersects';
@@ -74,7 +74,7 @@ function separatedBoundaries(rings: readonly Ring[]): boolean {
       });
     }
   }
-  return !anyOverlap(edges, (a, b) => {
+  return !anyBoundsOverlap(edges, (a, b) => {
     if (a.ring === b.ring) {
       const gap = Math.abs(a.index - b.index);
       if (gap === 1 || gap === a.ring.length - 2) return false;
@@ -98,7 +98,7 @@ function preservesNesting(before: Ring[], after: Ring[]): boolean {
     simplified: after[index]!,
     bounds: planarBounds({type: 'LineString', coordinates: original})!
   }));
-  return !anyOverlap(
+  return !anyBoundsOverlap(
     rings,
     (a, b) =>
       contains(a.original, b.original) !== contains(a.simplified, b.simplified) ||

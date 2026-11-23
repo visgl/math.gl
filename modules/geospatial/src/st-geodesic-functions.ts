@@ -8,7 +8,8 @@ import {WGS84_RADIUS_X, WGS84_RADIUS_Z} from './constants';
 import {normalizeCRSIdentifier} from './crs/crs-identifier';
 import {EllipsoidGeodesic, type GeodesicLine} from './ellipsoid-geodesic';
 import {lineKinds, pointKinds, spatialFunction} from './spatial-sql';
-import {segmentizeFunction, type RouteSegment} from './route-editing';
+import type {PolylineSegment} from '@math.gl/geometry/polygon';
+import {segmentizeFunction} from './route-editing';
 
 /** Ellipsoidal kernel with axes expressed in meters, initialized when first used. */
 let kernel: EllipsoidGeodesic | undefined;
@@ -247,7 +248,7 @@ export const ST_GEODESICDWITHIN = /* @__PURE__ */ spatialFunction(
 );
 
 /** Measures a WGS84 segment and creates its geodesic line only if it needs a split. */
-function ellipsoidalRouteSegment(a: readonly number[], b: readonly number[]): RouteSegment {
+function ellipsoidalRouteSegment(a: readonly number[], b: readonly number[]): PolylineSegment {
   const solver = getKernel();
   const {s12: length, azi1} = solver.inverse(a[1]!, a[0]!, b[1]!, b[0]!);
   let line: GeodesicLine | undefined;
