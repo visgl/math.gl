@@ -12,6 +12,7 @@ typed array, so a graph of a million segments needs no per-feature objects.
 import {
   buildLineNetwork,
   buildLineNetworkAdjacency,
+  createLineNetworkWeights,
   getRouteEdges,
   getRouteGeometry
 } from '@math.gl/geospatial/line-network';
@@ -25,8 +26,9 @@ const network = buildLineNetwork(lines, {snapTolerance: 1, junctionTolerance: 15
 // the second line ends 10 m from the first, so the first line splits there.
 
 const adjacency = buildLineNetworkAdjacency(network);
-// Run a shortest-path search on the adjacency and network.edgeWeight, then:
-const route = getRouteEdges(adjacency, network.edgeWeight, predecessors, source, target);
+const edgeWeight = createLineNetworkWeights(network);
+// Run a shortest-path search on the adjacency and edgeWeight, then:
+const route = getRouteEdges(adjacency, edgeWeight, predecessors, source, target);
 const path = route && getRouteGeometry(network, lines, route, source);
 ```
 
@@ -129,15 +131,10 @@ antimeridian.
 | `junctionTolerance` | `snapTolerance` | Metres. A dangling end joins the nearest other path within this distance. `0` turns T-junctions off. |
 | `splitAtSharedVertices` | `false` | Also split paths at interior vertices that another vertex shares. |
 | `splitAtCrossings` | `false` | Add a node where two segments cross with no shared vertex. This also joins lines that cross with no connection, such as a bridge over a road or a pipe over a cable. |
-| `directed` | `false` | Edges are one-way, in path direction. `buildLineNetworkAdjacency` then lists each edge from its source only. |
-| `distance` | `haversineDistance` | `(lon1, lat1, lon2, lat2) => metres`. Measures edge lengths and junction gaps. The snap and junction searches always use the local metric frame. |
-| `pathWeightFactors` | — | One factor for each path. The weight of an edge is its length times the factor of its path. |
-| `edgeWeight` | — | `(pathIndex, startFraction, endFraction, lengthMetres) => weight`. Returns the weight of each edge. The fractions give where the edge starts and ends along its path, as fractions of the path length (gaps excluded). Replaces `pathWeightFactors`; give one or the other. |
+| `measureDistance` | Mean-radius spherical distance | `(lon1, lat1, lon2, lat2) => metres`. Measures edge lengths and junction gaps. Snapping uses the local metric frame. |
+| `includePathFractions` | `false` | Retain path-length fractions for custom routing weights. |
 
-Edges always run in path direction: `edgeSource` is at the start of the piece of
-path. Weights must be zero or positive. `+Infinity` marks an edge that a route cannot
-use. The builder calls `distance` and `edgeWeight` with numbers only and keeps no
-objects in its loops.
+Edges run in path direction. `edgeSource` is at the start of the edge.
 
 The default distance is the haversine distance on a sphere of radius 6,371,008.8 m (the
 mean Earth radius), the same as `@turf/distance`. For WGS84 ellipsoid lengths, pass a
@@ -148,7 +145,7 @@ import {EllipsoidGeodesic} from '@math.gl/geospatial/geodesics';
 
 const geodesic = new EllipsoidGeodesic({semiMajorAxis: 6378137, semiMinorAxis: 6356752.314245179});
 const network = buildLineNetwork(lines, {
-  distance: (lon1, lat1, lon2, lat2) => geodesic.inverse(lat1, lon1, lat2, lon2).s12
+  measureDistance: (lon1, lat1, lon2, lat2) => geodesic.inverse(lat1, lon1, lat2, lon2).s12
 });
 ```
 
@@ -160,36 +157,41 @@ default.
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `directed` | `boolean` | The `directed` option. |
 | `nodeCount`, `edgeCount` | `number` | Graph size. |
 | `nodePositions` | `Float64Array` | Longitude, latitude of each node. A snapped node has the position of its first vertex. |
 | `edgeSource`, `edgeTarget` | `Uint32Array` | End nodes of each edge, in path direction. |
 | `edgeLength` | `Float64Array` | Metres, with the gap of a joined dangling end. |
-| `edgeWeight` | `Float32Array` | Routing weight. The length unless a weight option is given. |
+| `edgePathStartFraction`, `edgePathEndFraction` | Optional `Float64Array` | Fractions along the full original path, excluding gaps. Set `includePathFractions` to retain them. |
 | `edgePath` | `Uint32Array` | Path of each edge. |
 | `edgeRow` | `Uint32Array` | Source row of each edge (`pathRows`, or the path index). |
 | `edgeVertexStart`, `edgeVertexEnd` | `Uint32Array` | Vertex range of each edge in `positions`, inclusive. |
 | `edgeStartFraction`, `edgeEndFraction` | `Float64Array` | Where the edge starts on its first segment and ends on its last segment. 0 and 1 unless a junction or a crossing split the segment. |
 
-`edgeWeight` is a `Float32Array` because GPU shortest-path kernels, such as the luma.gl
-graph algorithms, take 32-bit weights. A CPU search that adds in 32 bits
-(`Math.fround`) then finds the same distances bit for bit. The relative precision is
-about 6e-8, which is 0.6 mm on a 10 km edge. Use `edgeLength` for measurements.
+#### `createLineNetworkWeights(network, options?)`
+
+Returns a `Float32Array` indexed by edge ID. The default cost is physical edge
+length. Set `pathWeightFactors` to scale each source path by a factor, or
+`edgeWeight(pathIndex, startFraction, endFraction, lengthMetres)` to compute
+custom costs. Custom callbacks require `includePathFractions` when building
+the network. A weight must be zero or positive. Use `edgeLength` for Float64
+measurements.
 
 #### `buildLineNetworkAdjacency(network, {directed?})`
 
 Builds a compressed sparse row adjacency: `offsets` (`nodeCount + 1` values),
 `neighbors` and `edges` (one slot for each edge end). An undirected adjacency lists each
-edge from both nodes. A directed adjacency lists it from its source only. The default
-is `network.directed`.
+edge from both nodes. A directed adjacency lists it from its source only. The default is undirected.
 
-#### `getRouteEdges(adjacency, edgeWeight, predecessors, source, target)`
+#### `getRouteEdges(adjacency, edgeWeight, predecessors, source, target, options?)`
 
 Walks a predecessor array (one node for each node, `NO_PREDECESSOR` = `0xffffffff` for
 the source and unreachable nodes) from `target` back to `source`. It returns the edges
 in travel order, an empty array when `target` is `source`, or `null` when `target` is
 unreachable. Between two nodes it takes the edge of lowest weight, as a shortest-path
-search does.
+search does. Pass `options.predecessorEdges` to use the solver’s selected edge
+IDs, including parallel edges, and `options.unreachable` to override the sentinel.
+Omit the weights by passing `undefined` when the solver supplies edge IDs or
+when all edges have equal cost.
 
 #### `getRouteGeometry(network, lines, route, source)`
 
@@ -203,10 +205,6 @@ step to the split point.
 Write the longitude, latitude points of one edge, in path direction, into `target`
 from value index `offset`. Without `target`, a new array of
 `2 * getEdgePointCount(network, edge)` values is returned.
-
-#### `haversineDistance(lon1, lat1, lon2, lat2)`
-
-Great-circle distance in metres on the mean Earth sphere.
 
 ## Examples
 
@@ -264,8 +262,9 @@ const rivers = buildLineNetwork(
     positions: {value: new Float64Array(positions), size: 2},
     pathIndices: {value: new Uint32Array(pathIndices), size: 1}
   },
-  {directed: true, snapTolerance: cellSize / 10, junctionTolerance: 0}
+  {snapTolerance: cellSize / 10, junctionTolerance: 0}
 );
+const downstream = buildLineNetworkAdjacency(rivers, {directed: true});
 ```
 
 The cells share exact centers, so a small snap tolerance joins them, and T-junctions
@@ -278,7 +277,8 @@ Use travel time as the weight. With one speed for each line, divide by the speed
 
 ```typescript
 const secondsPerMetre = Float64Array.from(speedsInMetresPerSecond, speed => 1 / speed);
-const rail = buildLineNetwork(lines, {pathWeightFactors: secondsPerMetre});
+const rail = buildLineNetwork(lines);
+const railWeights = createLineNetworkWeights(rail, {pathWeightFactors: secondsPerMetre});
 ```
 
 Stations on a line are usually vertices of the line. Use `splitAtSharedVertices` so
@@ -319,8 +319,8 @@ The `edgeWeight` callback gets the position of each edge along its path. Sample 
 elevation profile of the path at those fractions and add a cost for the climb:
 
 ```typescript
-const trails = buildLineNetwork(lines, {
-  junctionTolerance: 20,
+const trails = buildLineNetwork(lines, {junctionTolerance: 20, includePathFractions: true});
+const trailWeights = createLineNetworkWeights(trails, {
   edgeWeight: (path, startFraction, endFraction, length) => {
     const climb = Math.max(0, elevationAt(path, endFraction) - elevationAt(path, startFraction));
     return length + 8 * climb;

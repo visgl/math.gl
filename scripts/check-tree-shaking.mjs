@@ -88,7 +88,7 @@ const probes = [
   // Line networks: the builder and the route helpers load without each other, SQL, loaders.gl or turf.
   {symbol: 'buildLineNetwork', packages: ['@math.gl/geospatial/line-network'],
     forbidden: [/\/sql\//, /loaders\.gl/, /@turf\//, /line-network-routes/], budget: 11850},
-  ...[['buildLineNetworkAdjacency', 480], ['getRouteEdges', 470], ['getRouteGeometry', 790], ['getEdgeGeometry', 555]]
+  ...[['buildLineNetworkAdjacency', 480], ['getRouteEdges', 640], ['getRouteGeometry', 905], ['getEdgeGeometry', 685], ['createLineNetworkWeights', 580]]
     .map(([symbol, budget]) => ({
       symbol, packages: ['@math.gl/geospatial/line-network'],
       forbidden: [/\/sql\//, /loaders\.gl/, /@turf\//, /build-line-network/], budget

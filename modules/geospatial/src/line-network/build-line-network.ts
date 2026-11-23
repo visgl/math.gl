@@ -63,20 +63,14 @@ export type BuildLineNetworkOptions = {
    * This also joins lines that cross with no connection, such as a bridge over a road.
    */
   splitAtCrossings?: boolean;
-  /** Edges follow the path direction and adjacency is one-way. Default false. */
-  directed?: boolean;
-  /** Measures edge lengths and junction gaps. Default `haversineDistance`. */
-  distance?: LineNetworkDistance;
-  /** Multiplies the length of every edge of a path to give its weight. One value for each path. */
-  pathWeightFactors?: ArrayLike<number>;
-  /** Returns the weight of each edge. Replaces the length times `pathWeightFactors`. */
-  edgeWeight?: LineNetworkEdgeWeight;
+  /** Metric for edge lengths and junction gaps. Defaults to mean-radius spherical distance. */
+  measureDistance?: LineNetworkDistance;
+  /** Retain per-edge fractions along the original path for custom routing weights. */
+  includePathFractions?: boolean;
 };
 
 /** A graph built from lines. Every column is a typed array. */
 export type LineNetwork = {
-  /** True when the edges are one-way, in path direction. */
-  directed: boolean;
   /** Number of nodes. */
   nodeCount: number;
   /** Number of edges. */
@@ -89,8 +83,10 @@ export type LineNetwork = {
   edgeTarget: Uint32Array;
   /** Length of each edge in metres, with the gap of a joined dangling end. */
   edgeLength: Float64Array;
-  /** Routing weight of each edge. The length unless a weight option is given. */
-  edgeWeight: Float32Array;
+  /** Start fraction along the original path length, excluding junction gaps. */
+  edgePathStartFraction?: Float64Array;
+  /** End fraction along the original path length, excluding junction gaps. */
+  edgePathEndFraction?: Float64Array;
   /** Path that each edge comes from. */
   edgePath: Uint32Array;
   /** Source table row of each edge (`pathRows` of its path, or the path index). */
@@ -408,7 +404,7 @@ class SplitList {
 }
 
 /** Checks the input and returns the path count. */
-function validateLines(lines: LineNetworkLines, options: BuildLineNetworkOptions): number {
+function validateLines(lines: LineNetworkLines): number {
   const {positions, pathIndices, pathRows} = lines;
   if (!(Number.isInteger(positions.size) && positions.size >= 2)) {
     throw new RangeError('buildLineNetwork: positions.size must be an integer of 2 or more');
@@ -425,12 +421,6 @@ function validateLines(lines: LineNetworkLines, options: BuildLineNetworkOptions
   }
   if (pathRows && pathRows.length < pathCount) {
     throw new RangeError('buildLineNetwork: pathRows needs one value for each path');
-  }
-  if (options.pathWeightFactors && options.pathWeightFactors.length < pathCount) {
-    throw new RangeError('buildLineNetwork: pathWeightFactors needs one value for each path');
-  }
-  if (options.pathWeightFactors && options.edgeWeight) {
-    throw new Error('buildLineNetwork: use pathWeightFactors or edgeWeight, not both');
   }
   return pathCount;
 }
@@ -457,10 +447,10 @@ export function buildLineNetwork(
   if (!(junctionTolerance >= 0 && junctionTolerance < Infinity)) {
     throw new RangeError('buildLineNetwork: junctionTolerance must be zero or positive and finite');
   }
-  const pathCount = validateLines(lines, options);
+  const pathCount = validateLines(lines);
   const split = Boolean(options.splitAtSharedVertices);
   const crossings = Boolean(options.splitAtCrossings);
-  const distance = options.distance ?? haversineDistance;
+  const distance = options.measureDistance ?? haversineDistance;
   const {value: positions, size} = lines.positions;
   const pathIndices = lines.pathIndices.value;
   const vertexCount = pathCount > 0 ? pathIndices[pathCount] : 0;
@@ -659,7 +649,7 @@ export function buildLineNetwork(
     const pathVertices = pathIndices[path + 1] - pathIndices[path];
     if (pathVertices > 1) maxEdges += split ? pathVertices - 1 : 1;
   }
-  const edges = new EdgeColumns(maxEdges, Boolean(options.edgeWeight));
+  const edges = new EdgeColumns(maxEdges, Boolean(options.includePathFractions));
   for (let path = 0; path < pathCount; path++) {
     const first = pathIndices[path];
     const last = pathIndices[path + 1] - 1;
@@ -725,9 +715,9 @@ export function buildLineNetwork(
       length = 0;
       edgeAlong = pathAlong;
     }
-    edges.setWeights(firstEdge, pathAlong, options, path);
+    edges.normalizeAlong(firstEdge, pathAlong);
   }
-  return edges.toNetwork(Boolean(options.directed), nodeCount, nodePositions);
+  return edges.toNetwork(nodeCount, nodePositions);
 }
 
 /** Edge columns sized for the most edges that a build can make. */
@@ -740,8 +730,6 @@ class EdgeColumns {
   readonly target: Uint32Array;
   /** Length in metres. */
   readonly length: Float64Array;
-  /** Routing weight. */
-  readonly weight: Float32Array;
   /** Path index. */
   readonly path: Uint32Array;
   /** Source row. */
@@ -754,17 +742,16 @@ class EdgeColumns {
   readonly startFraction: Float64Array;
   /** Fraction of the last segment where the edge ends. */
   readonly endFraction: Float64Array;
-  /** Metres along the path where each edge starts (only with an edge weight callback). */
+  /** Metres along the path where each edge starts (when path fractions are requested). */
   readonly alongStart: Float64Array | null;
-  /** Metres along the path where each edge ends (only with an edge weight callback). */
+  /** Metres along the path where each edge ends (when path fractions are requested). */
   readonly alongEnd: Float64Array | null;
 
-  /** Allocates the columns. `withAlong` keeps the along-path positions for the weight callback. */
+  /** Allocates the columns. `withAlong` keeps the along-path positions for routing weights. */
   constructor(maxEdges: number, withAlong: boolean) {
     this.source = new Uint32Array(maxEdges);
     this.target = new Uint32Array(maxEdges);
     this.length = new Float64Array(maxEdges);
-    this.weight = new Float32Array(maxEdges);
     this.path = new Uint32Array(maxEdges);
     this.row = new Uint32Array(maxEdges);
     this.vertexStart = new Uint32Array(maxEdges);
@@ -806,44 +793,31 @@ class EdgeColumns {
     this.alongEnd[this.count - 1] = end;
   }
 
-  /** Sets the weights of the edges of one path, from `firstEdge` to the last edge written. */
-  setWeights(
-    firstEdge: number,
-    pathLength: number,
-    options: BuildLineNetworkOptions,
-    path: number
-  ): void {
-    const {edgeWeight, pathWeightFactors} = options;
-    const factor = pathWeightFactors ? pathWeightFactors[path] : 1;
-    for (let e = firstEdge; e < this.count; e++) {
-      let weight: number;
-      if (edgeWeight && this.alongStart && this.alongEnd) {
-        // Divide (not multiply by the inverse), so an edge that ends at the path end gives 1.
-        const startFraction = pathLength > 0 ? this.alongStart[e] / pathLength : 0;
-        const endFraction = pathLength > 0 ? this.alongEnd[e] / pathLength : 0;
-        weight = edgeWeight(path, startFraction, endFraction, this.length[e]);
-      } else {
-        weight = this.length[e] * factor;
-      }
-      if (!(weight >= 0)) {
-        throw new RangeError('buildLineNetwork: edge weights must be zero or positive');
-      }
-      this.weight[e] = weight;
+  /** Converts retained distances to fractions after the full path has been measured. */
+  normalizeAlong(firstEdge: number, pathLength: number): void {
+    if (!this.alongStart || !this.alongEnd || pathLength === 0) return;
+    for (let edge = firstEdge; edge < this.count; edge++) {
+      this.alongStart[edge] /= pathLength;
+      this.alongEnd[edge] /= pathLength;
     }
   }
 
   /** Returns the network with columns trimmed to the edge count. */
-  toNetwork(directed: boolean, nodeCount: number, nodePositions: Float64Array): LineNetwork {
+  toNetwork(nodeCount: number, nodePositions: Float64Array): LineNetwork {
     const n = this.count;
     return {
-      directed,
       nodeCount,
       edgeCount: n,
       nodePositions,
       edgeSource: this.source.slice(0, n),
       edgeTarget: this.target.slice(0, n),
       edgeLength: this.length.slice(0, n),
-      edgeWeight: this.weight.slice(0, n),
+      ...(this.alongStart && this.alongEnd
+        ? {
+            edgePathStartFraction: this.alongStart.slice(0, n),
+            edgePathEndFraction: this.alongEnd.slice(0, n)
+          }
+        : {}),
       edgePath: this.path.slice(0, n),
       edgeRow: this.row.slice(0, n),
       edgeVertexStart: this.vertexStart.slice(0, n),

@@ -13,11 +13,13 @@ import {
   getEdgePointCount,
   getRouteEdges,
   getRouteGeometry,
-  haversineDistance,
+  createLineNetworkWeights,
   type LineNetwork,
   type LineNetworkLines
 } from '@math.gl/geospatial/line-network';
 import {ONE_METRE, dijkstra, makeGridLines, makeLines, makeRandom} from './line-network-fixtures';
+
+import {haversineDistance} from '../../src/line-network/build-line-network';
 
 /** Sorted undirected edge keys. */
 function getEdgeSet(net: LineNetwork): string[] {
@@ -146,13 +148,13 @@ describe('buildLineNetwork', () => {
     const net = buildLineNetwork(makeLines([0, 0, 0.001, 0], [1, 1, 1.001, 1]));
     expect(net.nodeCount).toBe(4);
     const adjacency = buildLineNetworkAdjacency(net);
-    const result = dijkstra(adjacency, net.edgeWeight, net.edgeSource[0]);
+    const result = dijkstra(adjacency, createLineNetworkWeights(net), net.edgeSource[0]);
     expect(result.distances[net.edgeSource[1]]).toBe(Infinity);
     expect(result.predecessors[net.edgeTarget[1]]).toBe(NO_PREDECESSOR);
     expect(
       getRouteEdges(
         adjacency,
-        net.edgeWeight,
+        createLineNetworkWeights(net),
         result.predecessors,
         net.edgeSource[0],
         net.edgeTarget[1]
@@ -214,7 +216,9 @@ describe('buildLineNetwork', () => {
     expect(() =>
       buildLineNetwork({...input, positions: {value: Float64Array.of(0, 0, 0, 91), size: 2}})
     ).toThrow(/positions/);
-    expect(() => buildLineNetwork(input, {pathWeightFactors: []})).toThrow(/pathWeightFactors/);
+    expect(() =>
+      createLineNetworkWeights(buildLineNetwork(input), {pathWeightFactors: []})
+    ).toThrow(/weights/);
   });
 });
 
@@ -416,7 +420,8 @@ describe('T-junctions', () => {
     const reach = (net: LineNetwork) => {
       const from = net.edgeTarget[net.edgeCount - 2];
       const to = net.edgeTarget[net.edgeCount - 1];
-      return dijkstra(buildLineNetworkAdjacency(net), net.edgeWeight, from).distances[to];
+      return dijkstra(buildLineNetworkAdjacency(net), createLineNetworkWeights(net), from)
+        .distances[to];
     };
     expect(reach(before)).toBe(Infinity);
     const expected =
@@ -520,15 +525,9 @@ describe('directed networks', () => {
   const flow = () => makeLines([0, 0, 0.002, 0], [0.001, 0.001, 0.001, 5 * ONE_METRE]);
 
   it('keeps path direction and lists each edge one way', () => {
-    const net = buildLineNetwork(flow(), {directed: true, junctionTolerance: 10});
-    expect(net.directed).toBe(true);
+    const net = buildLineNetwork(flow(), {junctionTolerance: 10});
     expect(net.edgeCount).toBe(3);
-    const undirected = buildLineNetwork(flow(), {junctionTolerance: 10});
-    expect(undirected.directed).toBe(false);
-    expect(Array.from(net.edgeSource)).toEqual(Array.from(undirected.edgeSource));
-    expect(Array.from(net.edgeTarget)).toEqual(Array.from(undirected.edgeTarget));
-
-    const adjacency = buildLineNetworkAdjacency(net);
+    const adjacency = buildLineNetworkAdjacency(net, {directed: true});
     expect(adjacency.directed).toBe(true);
     expect(adjacency.edges.length).toBe(3);
     expect(buildLineNetworkAdjacency(net, {directed: false}).edges.length).toBe(6);
@@ -542,21 +541,29 @@ describe('directed networks', () => {
 
   it('routes downstream and not upstream', () => {
     const input = flow();
-    const net = buildLineNetwork(input, {directed: true, junctionTolerance: 10});
-    const adjacency = buildLineNetworkAdjacency(net);
+    const net = buildLineNetwork(input, {junctionTolerance: 10});
+    const adjacency = buildLineNetworkAdjacency(net, {directed: true});
     const branchTop = net.edgeSource[2];
     const mouth = net.edgeTarget[1];
     const west = net.edgeSource[0];
-    const down = dijkstra(adjacency, net.edgeWeight, branchTop);
+    const down = dijkstra(adjacency, createLineNetworkWeights(net), branchTop);
     expect(down.distances[mouth]).toBeLessThan(Infinity);
     expect(down.distances[west]).toBe(Infinity);
-    const route = getRouteEdges(adjacency, net.edgeWeight, down.predecessors, branchTop, mouth)!;
+    const route = getRouteEdges(
+      adjacency,
+      createLineNetworkWeights(net),
+      down.predecessors,
+      branchTop,
+      mouth
+    )!;
     expect(Array.from(route)).toEqual([2, 1]);
     const geometry = getRouteGeometry(net, input, route, branchTop);
     expect(Array.from(geometry)).toEqual([0.001, 0.001, 0.001, 5 * ONE_METRE, 0.001, 0, 0.002, 0]);
-    const up = dijkstra(adjacency, net.edgeWeight, mouth);
+    const up = dijkstra(adjacency, createLineNetworkWeights(net), mouth);
     expect(up.distances[branchTop]).toBe(Infinity);
-    expect(getRouteEdges(adjacency, net.edgeWeight, up.predecessors, mouth, branchTop)).toBeNull();
+    expect(
+      getRouteEdges(adjacency, createLineNetworkWeights(net), up.predecessors, mouth, branchTop)
+    ).toBeNull();
   });
 });
 
@@ -566,20 +573,23 @@ describe('edge weights', () => {
 
   it('uses the length as the default weight', () => {
     const net = buildLineNetwork(tee(), {junctionTolerance: 20});
-    expect(Array.from(net.edgeWeight)).toEqual(Array.from(net.edgeLength, Math.fround));
+    expect(Array.from(createLineNetworkWeights(net))).toEqual(
+      Array.from(net.edgeLength, Math.fround)
+    );
   });
 
   it('multiplies the length by the factor of its path', () => {
-    const net = buildLineNetwork(tee(), {junctionTolerance: 20, pathWeightFactors: [2, 0.5]});
-    expect(net.edgeWeight[0]).toBe(Math.fround(net.edgeLength[0] * 2));
-    expect(net.edgeWeight[1]).toBe(Math.fround(net.edgeLength[1] * 2));
-    expect(net.edgeWeight[2]).toBe(Math.fround(net.edgeLength[2] * 0.5));
+    const net = buildLineNetwork(tee(), {junctionTolerance: 20});
+    const weights = createLineNetworkWeights(net, {pathWeightFactors: [2, 0.5]});
+    expect(weights[0]).toBe(Math.fround(net.edgeLength[0] * 2));
+    expect(weights[1]).toBe(Math.fround(net.edgeLength[1] * 2));
+    expect(weights[2]).toBe(Math.fround(net.edgeLength[2] * 0.5));
   });
 
   it('calls the weight callback with the path, the fractions along it and the length', () => {
     const calls: number[][] = [];
-    const net = buildLineNetwork(tee(), {
-      junctionTolerance: 20,
+    const net = buildLineNetwork(tee(), {junctionTolerance: 20, includePathFractions: true});
+    const weights = createLineNetworkWeights(net, {
       edgeWeight: (path, startFraction, endFraction, length) => {
         calls.push([path, startFraction, endFraction, length]);
         return path * 1000 + endFraction * 100;
@@ -594,7 +604,7 @@ describe('edge weights', () => {
     // The dangling edge covers its whole path; the gap counts in the length, not the fractions.
     expect([calls[2][1], calls[2][2]]).toEqual([0, 1]);
     for (let e = 0; e < 3; e++) expect(calls[e][3]).toBe(net.edgeLength[e]);
-    expect(Array.from(net.edgeWeight)).toEqual([50, 100, 1100].map(value => Math.fround(value)));
+    expect(Array.from(weights)).toEqual([50, 100, 1100].map(value => Math.fround(value)));
   });
 
   it('gives fractions by length on paths with several vertices', () => {
@@ -605,8 +615,8 @@ describe('edge weights', () => {
       [3 * unit, -unit, 3 * unit, 0, 3 * unit, unit]
     );
     const fractions: number[] = [];
-    buildLineNetwork(input, {
-      splitAtSharedVertices: true,
+    const net = buildLineNetwork(input, {splitAtSharedVertices: true, includePathFractions: true});
+    createLineNetworkWeights(net, {
       edgeWeight: (path, startFraction, endFraction) => {
         if (path === 0) fractions.push(startFraction, endFraction);
         return 1;
@@ -622,26 +632,26 @@ describe('edge weights', () => {
   it('changes the route when the weights change', () => {
     // Two parallel lines between the same ends: the shorter one wins until its factor is high.
     const input = makeLines([0, 0, 0.001, 0], [0, 0, 0, 0.0005, 0.001, 0.0005, 0.001, 0]);
+    const net = buildLineNetwork(input);
     const route = (factors?: number[]) => {
-      const net = buildLineNetwork(input, {pathWeightFactors: factors});
+      const weights = createLineNetworkWeights(net, {pathWeightFactors: factors});
       const adjacency = buildLineNetworkAdjacency(net);
       const source = net.edgeSource[0];
       const target = net.edgeTarget[0];
-      const result = dijkstra(adjacency, net.edgeWeight, source);
-      return Array.from(
-        getRouteEdges(adjacency, net.edgeWeight, result.predecessors, source, target)!
-      );
+      const result = dijkstra(adjacency, weights, source);
+      return Array.from(getRouteEdges(adjacency, weights, result.predecessors, source, target)!);
     };
     expect(route()).toEqual([0]);
     expect(route([3, 1])).toEqual([1]);
   });
 
   it('rejects negative weights and two weight options', () => {
-    expect(() => buildLineNetwork(tee(), {edgeWeight: () => -1})).toThrow(/weights/);
-    expect(() => buildLineNetwork(tee(), {edgeWeight: () => NaN})).toThrow(/weights/);
-    expect(() => buildLineNetwork(tee(), {edgeWeight: () => 1, pathWeightFactors: [1, 1]})).toThrow(
-      /not both/
-    );
+    const net = buildLineNetwork(tee(), {includePathFractions: true});
+    expect(() => createLineNetworkWeights(net, {edgeWeight: () => -1})).toThrow(/weights/);
+    expect(() => createLineNetworkWeights(net, {edgeWeight: () => NaN})).toThrow(/weights/);
+    expect(() =>
+      createLineNetworkWeights(net, {edgeWeight: () => 1, pathWeightFactors: [1, 1]})
+    ).toThrow(/not both/);
   });
 });
 
@@ -665,7 +675,7 @@ describe('distance', () => {
     // Twice the haversine distance: every length and the gap double.
     const net = buildLineNetwork(input, {
       junctionTolerance: 20,
-      distance: (lon1, lat1, lon2, lat2) => {
+      measureDistance: (lon1, lat1, lon2, lat2) => {
         calls.push(lon1);
         return 2 * haversineDistance(lon1, lat1, lon2, lat2);
       }
@@ -693,16 +703,30 @@ describe('route reconstruction', () => {
     const adjacency = buildLineNetworkAdjacency(net);
     const a = net.edgeSource[1];
     const b = net.edgeTarget[2];
-    const result = dijkstra(adjacency, net.edgeWeight, a);
-    const edges = getRouteEdges(adjacency, net.edgeWeight, result.predecessors, a, b)!;
+    const result = dijkstra(adjacency, createLineNetworkWeights(net), a);
+    const edges = getRouteEdges(
+      adjacency,
+      createLineNetworkWeights(net),
+      result.predecessors,
+      a,
+      b
+    )!;
     expect(Array.from(edges, e => net.edgeRow[e])).toEqual([1, 2]);
     expect(result.distances[b]).toBeCloseTo(net.edgeLength[1] + net.edgeLength[2], 1);
     expect(
-      Array.from(getRouteEdges(adjacency, net.edgeWeight, result.predecessors, a, a)!)
+      Array.from(
+        getRouteEdges(adjacency, createLineNetworkWeights(net), result.predecessors, a, a)!
+      )
     ).toEqual([]);
     // Reverse direction: route b -> a walks the same edges backwards.
-    const back = dijkstra(adjacency, net.edgeWeight, b);
-    const backEdges = getRouteEdges(adjacency, net.edgeWeight, back.predecessors, b, a)!;
+    const back = dijkstra(adjacency, createLineNetworkWeights(net), b);
+    const backEdges = getRouteEdges(
+      adjacency,
+      createLineNetworkWeights(net),
+      back.predecessors,
+      b,
+      a
+    )!;
     const path = getRouteGeometry(net, input, backEdges, b);
     expect(Array.from(path)).toEqual([0.001, 0.001, 0.001, 0, 0, 0]);
   });
@@ -716,8 +740,14 @@ describe('route reconstruction', () => {
     const east = net.edgeTarget[1];
     const top = net.edgeTarget[2];
     const route = (from: number, to: number) => {
-      const result = dijkstra(adjacency, net.edgeWeight, from);
-      const edges = getRouteEdges(adjacency, net.edgeWeight, result.predecessors, from, to)!;
+      const result = dijkstra(adjacency, createLineNetworkWeights(net), from);
+      const edges = getRouteEdges(
+        adjacency,
+        createLineNetworkWeights(net),
+        result.predecessors,
+        from,
+        to
+      )!;
       return Array.from(getRouteGeometry(net, input, edges, from));
     };
     expect(route(west, top)).toEqual([0, 0, 0.001, 0, 0.001, gap, 0.001, 0.001]);
@@ -731,10 +761,21 @@ describe('route reconstruction', () => {
     const adjacency = buildLineNetworkAdjacency(net);
     const s = net.edgeSource[0];
     const t = net.edgeTarget[0];
-    const result = dijkstra(adjacency, net.edgeWeight, s);
+    const result = dijkstra(adjacency, createLineNetworkWeights(net), s);
     expect(
-      Array.from(getRouteEdges(adjacency, net.edgeWeight, result.predecessors, s, t)!)
+      Array.from(
+        getRouteEdges(adjacency, createLineNetworkWeights(net), result.predecessors, s, t)!
+      )
     ).toEqual([1]);
+    const selected = new Int32Array(net.nodeCount).fill(-1);
+    selected[t] = 0;
+    const predecessors = Int32Array.from(result.predecessors);
+    expect(
+      getRouteEdges(adjacency, undefined, predecessors, s, t, {
+        unreachable: -1,
+        predecessorEdges: selected
+      })
+    ).toEqual(new Uint32Array([0]));
   });
 
   it('writes edge geometry into a caller array at an offset', () => {
@@ -759,7 +800,6 @@ describe('coincident network vertices', () => {
   it('uses one node at a crossing shared by three directed paths', () => {
     const graph = buildLineNetwork(makeLines([-1, 0, 1, 0], [0, -1, 0, 1], [-1, -1, 1, 1]), {
       splitAtCrossings: true,
-      directed: true,
       junctionTolerance: 0
     });
     expect(graph.nodeCount).toBe(7);

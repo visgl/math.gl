@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {visitPolylineSpan} from '@math.gl/geometry/polygon';
 import type {LineNetwork, LineNetworkLines} from './build-line-network';
 
 /** Predecessor of a source node or an unreachable node (the luma.gl shortest-path sentinel). */
@@ -21,7 +22,7 @@ export type LineNetworkAdjacency = {
 
 /** Options of `buildLineNetworkAdjacency`. */
 export type LineNetworkAdjacencyOptions = {
-  /** List each edge from its source only. Default: `network.directed`. */
+  /** List each edge from its source only. Default: false. */
   directed?: boolean;
 };
 
@@ -30,10 +31,10 @@ export type LineNetworkAdjacencyOptions = {
  * directed adjacency lists it from its source node only. Slots of a node keep edge order.
  */
 export function buildLineNetworkAdjacency(
-  network: LineNetwork,
+  network: Pick<LineNetwork, 'nodeCount' | 'edgeCount' | 'edgeSource' | 'edgeTarget'>,
   options: LineNetworkAdjacencyOptions = {}
 ): LineNetworkAdjacency {
-  const directed = options.directed ?? network.directed;
+  const directed = options.directed ?? false;
   const {nodeCount, edgeCount, edgeSource, edgeTarget} = network;
   const offsets = new Uint32Array(nodeCount + 1);
   for (let e = 0; e < edgeCount; e++) {
@@ -57,6 +58,14 @@ export function buildLineNetworkAdjacency(
   return {directed, offsets, neighbors, edges};
 }
 
+/** Optional predecessor conventions supplied by the solver. */
+export type RoutePredecessorOptions = {
+  /** Sentinel for unreachable nodes. Defaults to the luma.gl sentinel. */
+  unreachable?: number;
+  /** Selected incoming edge ID per node, in the adjacency's edge numbering. */
+  predecessorEdges?: ArrayLike<number>;
+};
+
 /**
  * Walks a predecessor array from `target` back to `source`. Returns the edges in travel order,
  * an empty array when the target is the source, or null when the target is unreachable.
@@ -65,27 +74,42 @@ export function buildLineNetworkAdjacency(
  */
 export function getRouteEdges(
   adjacency: LineNetworkAdjacency,
-  edgeWeight: ArrayLike<number>,
+  edgeWeight: ArrayLike<number> | undefined,
   predecessors: ArrayLike<number>,
   source: number,
-  target: number
+  target: number,
+  options: RoutePredecessorOptions = {}
 ): Uint32Array | null {
+  const unreachable = options.unreachable ?? NO_PREDECESSOR;
   if (target === source) return new Uint32Array(0);
-  if (predecessors[target] === NO_PREDECESSOR) return null;
+  if (predecessors[target] === unreachable) return null;
   const route: number[] = [];
+  const selectedEdges = options.predecessorEdges;
   let node = target;
   while (node !== source) {
     const previous = predecessors[node];
-    if (previous === NO_PREDECESSOR || route.length > predecessors.length) return null;
+    if (
+      !Number.isInteger(previous) ||
+      previous === unreachable ||
+      previous < 0 ||
+      previous >= predecessors.length ||
+      route.length >= predecessors.length
+    )
+      return null;
     let best = NO_PREDECESSOR;
     // The slots of the predecessor list its out-edges in both a directed and an undirected adjacency.
     for (let slot = adjacency.offsets[previous]; slot < adjacency.offsets[previous + 1]; slot++) {
       if (adjacency.neighbors[slot] !== node) continue;
       const edge = adjacency.edges[slot];
+      if (selectedEdges) {
+        if (edge !== selectedEdges[node]) continue;
+        best = edge;
+        break;
+      }
       if (
         best === NO_PREDECESSOR ||
-        edgeWeight[edge] < edgeWeight[best] ||
-        (edgeWeight[edge] === edgeWeight[best] && edge < best)
+        (edgeWeight?.[edge] ?? 1) < (edgeWeight?.[best] ?? 1) ||
+        ((edgeWeight?.[edge] ?? 1) === (edgeWeight?.[best] ?? 1) && edge < best)
       ) {
         best = edge;
       }
@@ -114,8 +138,10 @@ export function getEdgeGeometry(
   target: Float64Array = new Float64Array(2 * getEdgePointCount(network, edge)),
   offset: number = 0
 ): Float64Array {
-  const count = getEdgePointCount(network, edge);
-  for (let k = 0; k < count; k++) writeEdgePoint(network, lines, edge, k, target, offset + 2 * k);
+  visitEdge(network, lines, edge, false, (x, y) => {
+    target[offset++] = x;
+    target[offset++] = y;
+  });
   return target;
 }
 
@@ -137,48 +163,36 @@ export function getRouteGeometry(
   let node = source;
   for (let i = 0; i < route.length; i++) {
     const e = route[i];
-    const count = getEdgePointCount(network, e);
     const forward = network.edgeSource[e] === node;
-    for (let k = 0; k < count; k++) {
-      writeEdgePoint(network, lines, e, forward ? k : count - 1 - k, path, at);
-      const repeated = at > 0 && path[at] === path[at - 2] && path[at + 1] === path[at - 1];
-      if (!(k === 0 && repeated)) at += 2;
-    }
+    let first = true;
+    visitEdge(network, lines, e, !forward, (x, y) => {
+      if (!(first && at > 0 && x === path[at - 2] && y === path[at - 1])) {
+        path[at++] = x;
+        path[at++] = y;
+      }
+      first = false;
+    });
     node = forward ? network.edgeTarget[e] : network.edgeSource[e];
   }
-  return path.slice(0, at);
+  return at === path.length ? path : path.slice(0, at);
 }
 
-/** Writes point `k` of the edge geometry into `target` at value index `at`. */
-function writeEdgePoint(
+/** Visits one edge span in travel order. */
+function visitEdge(
   network: LineNetwork,
   lines: LineNetworkLines,
   edge: number,
-  k: number,
-  target: Float64Array,
-  at: number
+  reverse: boolean,
+  visit: (x: number, y: number) => void
 ): void {
-  const {value: positions, size} = lines.positions;
-  const start = network.edgeVertexStart[edge];
-  const end = network.edgeVertexEnd[edge];
-  let a = start + k;
-  let fraction = 0;
-  if (k === 0) {
-    fraction = network.edgeStartFraction[edge];
-  } else if (start + k === end) {
-    a = end - 1;
-    fraction = network.edgeEndFraction[edge];
-  }
-  const lon = positions[size * a];
-  const lat = positions[size * a + 1];
-  if (fraction === 0) {
-    target[at] = lon;
-    target[at + 1] = lat;
-  } else if (fraction === 1) {
-    target[at] = positions[size * a + size];
-    target[at + 1] = positions[size * a + size + 1];
-  } else {
-    target[at] = lon + fraction * (positions[size * a + size] - lon);
-    target[at + 1] = lat + fraction * (positions[size * a + size + 1] - lat);
-  }
+  const {value, size} = lines.positions;
+  visitPolylineSpan(
+    (vertex, ordinate) => value[size * vertex + ordinate],
+    network.edgeVertexStart[edge],
+    network.edgeStartFraction[edge],
+    network.edgeVertexEnd[edge] - 1,
+    network.edgeEndFraction[edge],
+    visit,
+    reverse
+  );
 }
