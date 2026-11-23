@@ -192,6 +192,18 @@ const projected = queryArrowSQL(
 
 Supply the source CRS in the GeoArrow field metadata and a constant target EPSG code in SQL. To register the rest of `POSTGIS_SPATIAL_FUNCTIONS` alongside this overload, omit `ST_TRANSFORM` from that list.
 
+## Measure geodesic distances in meters[​](#measure-geodesic-distances-in-meters "Direct link to Measure geodesic distances in meters")
+
+Register `GEODESIC_SPATIAL_FUNCTIONS` from `@math.gl/geospatial/st-functions`. These row-wise functions accept native GeoArrow or WKB with an explicit WGS84 CRS (`EPSG:4326` or `OGC:CRS84`). Coordinates are longitude and latitude in degrees, in that order. Measures use the WGS84 ellipsoid and the shortest geodesic between vertices, including across the antimeridian. Z and M are ignored.
+
+| SQL function                       | Inputs                                               | Result                                                              |
+| ---------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------- |
+| `ST_GeodesicDistance(a, b)`        | Two points                                           | Shortest distance in meters. Empty points yield null.               |
+| `ST_GeodesicLength(route)`         | LineString or MultiLineString                        | Sum of segment lengths in meters. Empty lines yield zero.           |
+| `ST_GeodesicDWithin(a, b, radius)` | Two points and a finite nonnegative radius in meters | True when distance is at most the radius. Empty points yield false. |
+
+Null arguments propagate. Use `queryArrowTableInBatches` to evaluate these functions on streamed record batches.
+
 ## PostGIS geometry signatures[​](#postgis-geometry-signatures "Direct link to PostGIS geometry signatures")
 
 These functions use 2D Cartesian coordinates. Use coordinates in a suitable projected CRS when you need linear units such as meters. Area uses the square of the coordinate unit. Transform inputs to a common CRS before running a query.
