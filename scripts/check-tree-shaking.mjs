@@ -85,6 +85,14 @@ const probes = [
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/sql/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
   {symbol:'spheroidToCartesian', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
   {symbol:'vec3Normalize', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
+  // Line networks: the builder and the route helpers load without each other, SQL, loaders.gl or turf.
+  {symbol: 'buildLineNetwork', packages: ['@math.gl/geospatial/line-network'],
+    forbidden: [/\/sql\//, /loaders\.gl/, /@turf\//, /line-network-routes/], budget: 11850},
+  ...[['buildLineNetworkAdjacency', 480], ['getRouteEdges', 640], ['getRouteGeometry', 1100], ['getEdgeGeometry', 850], ['createLineNetworkWeights', 580]]
+    .map(([symbol, budget]) => ({
+      symbol, packages: ['@math.gl/geospatial/line-network'],
+      forbidden: [/\/sql\//, /loaders\.gl/, /@turf\//, /build-line-network/], budget
+    })),
   {symbol:'getGeohashBounds', packages:['@math.gl/dggs/geohash'], forbidden:[/h3-js/, /a5-js/, /open-location-code/, /s2-geometry/], budget:2500},
   {symbol:'getClosestPointsSegmentTriangle', packages:['@math.gl/geometry/culling'], forbidden:[/parametric/, /spatial-index/, /terrain/, /earcut/], budget:5000},
   {symbol:'getStarColor', packages:['@math.gl/earth/sun-stars'], forbidden:[/astronomy-engine/, /bright-stars/], budget:700},
