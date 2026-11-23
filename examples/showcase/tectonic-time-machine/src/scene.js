@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original example rendering adapter. All map transformations use the math.gl engine.
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {PathLayer, ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 import {_TimelineWidget as TimelineWidget} from '@deck.gl/widgets';
@@ -176,7 +177,15 @@ export function mountScene(
       onTimeChange,
       onPlayingChange
     });
+  const webgpu = new URLSearchParams(window.location.search).get('renderer') === 'webgpu';
   const deck = new Deck({
+    deviceProps: webgpu
+      ? {
+          type: 'webgpu',
+          adapters: [webgpuAdapter],
+          createCanvasContext: {colorFormat: 'rgba16float', toneMapping: 'extended'}
+        }
+      : undefined,
     canvas,
     parent: root,
     views: new OrthographicView({
