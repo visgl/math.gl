@@ -4,8 +4,7 @@
 
 import {DataType, type Field, type Table} from 'apache-arrow';
 import {getGeoArrowFieldInfo, takeArrowTableRows, type GeoArrowBounds} from '@math.gl/core/arrow';
-import {BoxIndex} from '@math.gl/geometry/spatial-index';
-import {gatherArrowJoin, makeArrowJoinSchema} from '../arrow/relational-query';
+import {indexedSpatialJoin} from '../arrow/spatial-join';
 import type {ScalarFunction} from '../arrow/types';
 
 /** Supported options for an inner spatial join. */
@@ -58,51 +57,15 @@ export function spatialJoin(
     throw new Error(`Cannot bind spatial join predicate ${predicate.name} to the active fields`);
   }
 
-  const {evaluate} = match;
-  const schema = makeArrowJoinSchema(left.table, right.table, rightPrefix);
-  const packed: number[] = [];
-  const rightRows: number[] = [];
-  right.bounds().forEach((bounds, row) => {
-    if (!bounds) return;
-    packed.push(...bounds);
-    rightRows.push(row);
-  });
-  const index = new BoxIndex({dimension: 2, bounds: packed});
   const leftGeometry = left.table.selectAt([left.table.schema.fields.indexOf(left.field)]);
   const rightGeometry = right.table.selectAt([right.table.schema.fields.indexOf(right.field)]);
-  const leftMatches: number[] = [];
-  const rightMatches: number[] = [];
-  const leftCandidates: number[] = [];
-  const rightCandidates: number[] = [];
-
-  /** Evaluates exact predicates on a bounded batch of candidate geometry pairs. */
-  function flush(): void {
-    const length = leftCandidates.length;
-    if (!length) return;
-    signal?.throwIfAborted();
-    const vectors = [
-      takeArrowTableRows(leftGeometry, Int32Array.from(leftCandidates)).getChildAt(0)!,
-      takeArrowTableRows(rightGeometry, Int32Array.from(rightCandidates)).getChildAt(0)!
-    ];
-    const mask = evaluate(vectors, {length, activeRows: new Uint8Array(length).fill(1)});
-    for (let i = 0; i < length; i++) {
-      if (mask.get(i) !== true) continue;
-      leftMatches.push(leftCandidates[i]!);
-      rightMatches.push(rightCandidates[i]!);
-    }
-    leftCandidates.length = 0;
-    rightCandidates.length = 0;
-  }
-
-  left.bounds().forEach((bounds, row) => {
-    signal?.throwIfAborted();
-    if (!bounds) return;
-    for (const candidate of index.search([bounds[0], bounds[1]], [bounds[2], bounds[3]])) {
-      leftCandidates.push(row);
-      rightCandidates.push(rightRows[candidate]!);
-      if (leftCandidates.length === 4096) flush();
-    }
-  });
-  flush();
-  return gatherArrowJoin(left.table, right.table, leftMatches, rightMatches, schema);
+  return indexedSpatialJoin(left, right, {rightPrefix, signal}, (leftRows, rightRows) =>
+    match.evaluate(
+      [
+        takeArrowTableRows(leftGeometry, Int32Array.from(leftRows)).getChildAt(0)!,
+        takeArrowTableRows(rightGeometry, Int32Array.from(rightRows)).getChildAt(0)!
+      ],
+      {length: leftRows.length, activeRows: new Uint8Array(leftRows.length).fill(1)}
+    )
+  );
 }
