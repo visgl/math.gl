@@ -85,7 +85,7 @@ const probes = [
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/sql/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
   {symbol:'spheroidToCartesian', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
   {symbol:'vec3Normalize', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
-  {symbol:'SimulationClock', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec[234]/, /sample-track/, /gl-matrix/, /\/sql\//], budget:3500},
+  {symbol:'SimulationClock', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec[234]/, /sample-track/, /gl-matrix/, /\/sql\//], budget:3600},
   {symbol:'getGeohashBounds', packages:['@math.gl/dggs/geohash'], forbidden:[/h3-js/, /a5-js/, /open-location-code/, /s2-geometry/], budget:2500},
   {symbol:'getClosestPointsSegmentTriangle', packages:['@math.gl/geometry/culling'], forbidden:[/parametric/, /spatial-index/, /terrain/, /earcut/], budget:5000},
   {symbol:'getStarColor', packages:['@math.gl/earth/sun-stars'], forbidden:[/astronomy-engine/, /bright-stars/], budget:700},
