@@ -204,7 +204,6 @@ contacts returned separately when the result contains both dimensions.
 Clipping preserves route traversal. Repeated or overlapping segments contribute
 to length each time the route travels them.
 
-
 ## Validate polygon imports
 
 `ST_IsValid(geometry)` checks Polygon and MultiPolygon topology in XY, with
@@ -294,28 +293,6 @@ SELECT id, ST_GeodesicDistance(observation, route) AS meters
 FROM observations
 WHERE ST_GeodesicDWithin(observation, route, 25)
 ```
-
-## Dissolve polygons by group
-
-Register `ST_UNION_AGGREGATE` and `ST_UNARYUNION` from
-`@math.gl/geospatial/st-overlay-functions`. Register `ST_UNION` alongside
-`ST_UNION_AGGREGATE` to use both SQL arities in the same query.
-
-```sql
-SELECT district, ST_Union(parcel) AS footprint
-FROM parcels
-GROUP BY district
-```
-
-- `ST_Union(geometry)` dissolves planar Polygon and MultiPolygon rows within
-  each group. It ignores nulls and returns null for a group with no non-null
-  inputs. A group containing only empty geometries returns an empty multipolygon.
-- `ST_UnaryUnion(geometry)` dissolves overlapping components within each row.
-  Null rows remain null.
-
-Both functions return interleaved XY `geoarrow.multipolygon` and preserve
-the input CRS metadata. Grouped SQL uses the table query engine. Each group
-reduces one batch at a time and compacts partial unions as it reads rows.
 
 ## Simplify shared boundaries in a polygon coverage
 
