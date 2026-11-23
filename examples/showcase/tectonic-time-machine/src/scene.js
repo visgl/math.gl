@@ -730,6 +730,12 @@ export function mountScene(
     });
   return {
     frameCoolingEarth() {
+      mode = 'globe';
+      weights = {globe: 1};
+      transition = null;
+      hideTooltip();
+      // Reset deck.gl’s comparison baseline so the same preset can be reapplied.
+      deck.setProps({initialViewState: null});
       longitude = -20;
       latitude = 0;
       followCamera = false;

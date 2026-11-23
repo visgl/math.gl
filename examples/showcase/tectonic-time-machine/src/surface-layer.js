@@ -215,9 +215,9 @@ export class SurfaceLayer extends SolidPolygonLayer {
           }
           vec3 sun=normalize(vec3(.16,-.84,.52));
           float solarAngle=dot(p,sun);
-          float day=smoothstep(-.035,.025,solarAngle);
+          float day=mix(1.,smoothstep(-.035,.025,solarAngle),tectonicSurface.globeWeight);
           vec3 rockyNormal=normalize(crustNormal+tectonicReliefNormal(p,p,relief)-p);
-          float illumination=.008+day*(.13+2.4*max(dot(rockyNormal,sun),0.));
+          float illumination=mix(.9,.008+day*(.13+2.4*max(dot(rockyNormal,sun),0.)),tectonicSurface.globeWeight);
           vec3 basalt=mix(vec3(.018,.032,.052),vec3(.22,.34,.45),rock);
           float floodLevel=mix(.65,.43,smoothstep(0.,.3,tectonicSurface.earlyLava));
           float seaLevel=mix(.20,floodLevel,tectonicSurface.earlyWater);
