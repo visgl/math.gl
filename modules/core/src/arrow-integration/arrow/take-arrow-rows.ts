@@ -24,7 +24,10 @@ type ArrowRowRun = {
   indexes: number[];
 };
 
-/** Materializes selected physical rows without decoding union tags or scalar values, retaining each source batch’s metadata. */
+/**
+ * Materializes selected physical rows, retaining each source batch's metadata.
+ * Negative indices insert null rows. The source must supply a batch to determine their layout.
+ */
 export function takeArrowTableRows<T extends arrow.TypeMap>(
   arrowTable: arrow.Table<T>,
   indexes: Int32Array
@@ -33,12 +36,19 @@ export function takeArrowTableRows<T extends arrow.TypeMap>(
   for (const batch of arrowTable.batches)
     offsets.push(offsets[offsets.length - 1]! + batch.numRows);
   const runs: ArrowRowRun[] = [];
+  const firstRow = indexes[0]! < 0 ? (indexes.find(index => index >= 0) ?? 0) : indexes[0]!;
   for (const index of indexes) {
+    const previousRun = runs[runs.length - 1];
+    if (index < 0 && previousRun) {
+      previousRun.indexes.push(-1);
+      continue;
+    }
+    const sourceRow = index < 0 ? firstRow : index;
     let lower = 0;
     let upper = arrowTable.batches.length - 1;
     while (lower < upper) {
       const middle = Math.floor((lower + upper) / 2);
-      if (index >= offsets[middle + 1]!) lower = middle + 1;
+      if (sourceRow >= offsets[middle + 1]!) lower = middle + 1;
       else upper = middle;
     }
     let run = runs[runs.length - 1];
@@ -46,7 +56,7 @@ export function takeArrowTableRows<T extends arrow.TypeMap>(
       run = {batchIndex: lower, indexes: []};
       runs.push(run);
     }
-    run.indexes.push(index - offsets[lower]!);
+    run.indexes.push(index < 0 ? -1 : index - offsets[lower]!);
   }
   const context: TakeArrowContext = {dictionaries: new WeakMap(), variadicBuffers: new WeakMap()};
   const batches = runs.map(run => {
@@ -93,7 +103,7 @@ function takeArrowDataRows(
     const childIndexes: number[] = [];
     for (const index of indexes) {
       for (let coordinate = 0; coordinate < type.listSize; coordinate++)
-        childIndexes.push(index * type.listSize + coordinate);
+        childIndexes.push(index < 0 ? -1 : index * type.listSize + coordinate);
     }
     return createArrowData(type, 0, indexes.length, nullCount, buffers, [
       takeArrowDataRows(data.children[0]!, childIndexes, context)
@@ -104,7 +114,7 @@ function takeArrowDataRows(
     const childIndexes: number[] = [];
     const vector = new arrow.Vector([data]);
     indexes.forEach((index, outputIndex) => {
-      if (vector.isValid(index)) {
+      if (index >= 0 && vector.isValid(index)) {
         const begin = Number(data.valueOffsets[index]);
         const end = Number(data.valueOffsets[index + 1]);
         for (let childIndex = begin; childIndex < end; childIndex++) childIndexes.push(childIndex);
@@ -120,7 +130,7 @@ function takeArrowDataRows(
     const values = new Uint8Array(Math.ceil(indexes.length / 8));
     indexes.forEach((index, outputIndex) => {
       const bitIndex = data.offset + index;
-      if (data.values[bitIndex >> 3]! & (1 << (bitIndex & 7)))
+      if (index >= 0 && data.values[bitIndex >> 3]! & (1 << (bitIndex & 7)))
         values[outputIndex >> 3]! |= 1 << (outputIndex & 7);
     });
     buffers[arrow.BufferType.DATA] = values;
@@ -130,8 +140,8 @@ function takeArrowDataRows(
     const vector = new arrow.Vector([data]);
     let length = 0;
     indexes.forEach((index, outputIndex) => {
-      const begin = vector.isValid(index) ? Number(data.valueOffsets[index]) : 0;
-      const end = vector.isValid(index) ? Number(data.valueOffsets[index + 1]) : 0;
+      const begin = index >= 0 && vector.isValid(index) ? Number(data.valueOffsets[index]) : 0;
+      const end = index >= 0 && vector.isValid(index) ? Number(data.valueOffsets[index + 1]) : 0;
       ranges.push([begin, end]);
       length += end - begin;
       setArrowOffset(offsets, outputIndex + 1, length);
@@ -146,8 +156,10 @@ function takeArrowDataRows(
     buffers[arrow.BufferType.DATA] = values;
   } else {
     // Copy raw fixed-width storage: this preserves nanoseconds, decimal words and float bits.
-    const values = new type.ArrayType(indexes.length * data.stride);
+    const storageType = arrow.DataType.isDictionary(type) ? type.indices : type;
+    const values = new storageType.ArrayType(indexes.length * data.stride);
     indexes.forEach((index, outputIndex) => {
+      if (index < 0) return;
       values.set(
         data.values.subarray(index * data.stride, (index + 1) * data.stride),
         outputIndex * data.stride
@@ -197,12 +209,12 @@ function takeArrowUnionRows(
   const offsets = dense ? new Int32Array(indexes.length) : undefined;
   const childIndexes = data.children.map(() => [] as number[]);
   indexes.forEach((index, outputIndex) => {
-    const typeId = data.typeIds[index]!;
+    const typeId = index < 0 ? type.typeIds[0]! : data.typeIds[index]!;
     typeIds[outputIndex] = typeId;
     if (dense) {
       const selected = childIndexes[type.typeIdToChildIndex[typeId]!]!;
       offsets![outputIndex] = selected.length;
-      selected.push(data.valueOffsets[index]!);
+      selected.push(index < 0 ? -1 : data.valueOffsets[index]!);
     }
   });
   const children = data.children.map((child, childIndex) =>
@@ -227,7 +239,7 @@ function takeArrowValidity(
   const bitmap = new Uint8Array(Math.ceil(indexes.length / 8));
   let nullCount = 0;
   indexes.forEach((index, outputIndex) => {
-    if (vector.isValid(index)) bitmap[outputIndex >> 3]! |= 1 << (outputIndex & 7);
+    if (index >= 0 && vector.isValid(index)) bitmap[outputIndex >> 3]! |= 1 << (outputIndex & 7);
     else nullCount++;
   });
   return {bitmap: nullCount ? bitmap : undefined, nullCount};
