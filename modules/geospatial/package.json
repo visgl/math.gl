@@ -632,6 +632,11 @@
       "import": "./dist/tiles.js",
       "require": "./dist/tiles.cjs"
     },
+    "./line-network": {
+      "types": "./dist/line-network.d.ts",
+      "import": "./dist/line-network.js",
+      "require": "./dist/line-network.cjs"
+    },
     "./coordinates": {
       "types": "./dist/coordinates.d.ts",
       "import": "./dist/coordinates.js",
@@ -678,6 +683,7 @@
     "@turf/boolean-point-in-polygon": "^7.2.0",
     "@turf/centroid": "^7.2.0",
     "@turf/distance": "^7.2.0",
+    "@turf/nearest-point-on-line": "^7.2.0",
     "proj4": "2.22.0"
   },
   "sideEffects": false,
