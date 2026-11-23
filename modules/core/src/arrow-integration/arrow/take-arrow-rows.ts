@@ -37,7 +37,7 @@ export function takeArrowTableRows<T extends arrow.TypeMap>(
   for (const batch of arrowTable.batches)
     offsets.push(offsets[offsets.length - 1]! + batch.numRows);
   const runs: ArrowRowRun[] = [];
-  const firstRow = indexes[0]! < 0 ? (indexes.find(index => index >= 0) ?? 0) : indexes[0]!;
+  const firstRow = indexes.find(index => index >= 0) ?? 0;
   for (const index of indexes) {
     const previousRun = runs[runs.length - 1];
     if (index < 0 && previousRun) {
@@ -62,20 +62,23 @@ export function takeArrowTableRows<T extends arrow.TypeMap>(
   const context: TakeArrowContext = {dictionaries: new WeakMap(), variadicBuffers: new WeakMap()};
   // Avoid one output batch per row when selection repeatedly crosses compatible chunks.
   const sources = [...new Set(runs.map(run => run.batch))];
-  const sourceBatches = sources.map(index => arrowTable.batches[index]!);
-  const metadata = sourceBatches[0] && getRecordBatchMetadata(sourceBatches[0]);
+  const sourceSlots: number[] = [];
+  const sourceBatches = sources.map((source, slot) => {
+    sourceSlots[source] = slot;
+    return arrowTable.batches[source]!;
+  });
   const coalesce =
     runs.length > sources.length &&
     sourceBatches.every(batch => {
+      const metadata = getRecordBatchMetadata(sourceBatches[0]!);
       const other = getRecordBatchMetadata(batch);
       return other === metadata || !(other?.size || metadata?.size);
     }) &&
     canGatherArrowChunks(sourceBatches.map(batch => batch.data));
-  const sourceMap = new Map(sources.map((source, index) => [source, index]));
   const batches = (coalesce ? [runs] : runs.map(run => [run])).map(group => {
     const chunks = coalesce ? sourceBatches : [arrowTable.batches[group[0]!.batch]!];
     const rows = group.flatMap(run =>
-      run.rows.map((index): ArrowChunkRow => [coalesce ? sourceMap.get(run.batch)! : 0, index])
+      run.rows.map((index): ArrowChunkRow => [coalesce ? sourceSlots[run.batch]! : 0, index])
     );
     const data = gatherArrowChunks(
       chunks.map(batch => batch.data),

@@ -15,7 +15,10 @@ import {
   RecordBatch,
   Schema,
   Table,
+  TimestampNanosecond,
   Utf8,
+  makeData,
+  makeVector,
   tableFromArrays,
   tableFromIPC,
   tableToIPC,
@@ -24,6 +27,7 @@ import {
 import {expect, test} from 'vitest';
 import {queryArrowTable, queryArrowTableInBatches, queryArrowSQL} from '@math.gl/sql/query';
 import {parseSQLQuery} from '@math.gl/sql/parser';
+import {groupArrowTable} from '../src/arrow/relational-query';
 
 /** Parses the SELECT requests used by these tests. */
 function select(sql: string) {
@@ -358,6 +362,53 @@ test('orders and groups Arrow dates without decoding their payloads', () => {
     expect([...grouped.getChild('count')!]).toEqual([2n, 1n, 1n]);
   }
 });
+test('orders and groups timestamp keys at full nanosecond precision', () => {
+  const type = new TimestampNanosecond('UTC');
+  const first = 1_700_000_000_000_000_000n;
+  const second = first + 1n;
+  const table = new Table({
+    instant: makeVector(
+      makeData({
+        type,
+        data: BigInt64Array.of(second, 0n, first, first),
+        nullBitmap: Uint8Array.of(0b1101),
+        nullCount: 1
+      })
+    ),
+    id: vectorFromArray([1, 2, 3, 4], new Int32())
+  });
+  const ordered = queryArrowTable(table, {
+    orderBy: [{column: 'instant', nulls: 'first'}],
+    select: ['id']
+  });
+  expect([...ordered.getChild('id')!]).toEqual([2, 3, 4, 1]);
+
+  const grouped = queryArrowTable(table, {
+    groupBy: ['instant'],
+    orderBy: [{column: 'instant', nulls: 'last'}],
+    aggregates: {count: {operation: 'COUNT'}}
+  });
+  expect(grouped.getChild('instant')!.type.toString()).toBe(type.toString());
+  expect([...grouped.getChild('count')!]).toEqual([2n, 1n, 1n]);
+
+  const custom = groupArrowTable(
+    table,
+    ['instant'],
+    {},
+    {inputSchema: table.schema},
+    new Map([
+      [
+        'rows',
+        {
+          outputField: new Field('rows', new Int32(), false),
+          evaluate: group => group.numRows
+        }
+      ]
+    ])
+  );
+  expect([...custom.getChild('rows')!]).toEqual([1, 1, 2]);
+});
+
 test('LEFT OUTER JOIN retains unmatched and null keys and preserves matched duplicates', () => {
   const roads = new Table({id: vectorFromArray([2, null, 1, 3], new Int32())});
   const incidents = new Table({
