@@ -114,3 +114,67 @@ test('sums native multiline segments without counting gaps, and rejects projecte
     )
   ).toThrow(/requires WGS84 CRS metadata/);
 });
+
+test('streams point-to-route proximity across the antimeridian and preserves empty and null rows', async () => {
+  const encoding = 'geoarrow.multilinestring';
+  const route = makeArrowVectorFromGeoArrowColumn(
+    GeoArrowBuilder.build(
+      [
+        parseWKT('MULTILINESTRING((179 0,-179 0),(30 0,31 0))'),
+        parseWKT('MULTILINESTRING((179 0,-179 0))'),
+        parseWKT('MULTILINESTRING EMPTY'),
+        null,
+        parseWKT('MULTILINESTRING((179 0,179 0),(-179 0,-179 0))')
+      ],
+      {encoding}
+    )
+  );
+  const point = wkb(['POINT(180 1)', 'POINT(179.3 0)', 'POINT(0 0)', 'POINT(0 0)', 'POINT(180 0)']);
+  const schema = new Schema([field('route', route, encoding), field('p', point, 'geoarrow.wkb')]);
+  const table = new Table(schema, {route, p: point});
+  const batches = [...table.slice(0, 2).batches, ...table.slice(2).batches];
+  const distances = [];
+  const near = [];
+  const onRoute = [];
+  for await (const batch of queryArrowTableInBatches(batches, schema, {
+    select: [
+      {expression: 'ST_GeodesicDistance(route,p)', as: 'meters'},
+      {expression: 'ST_GeodesicDWithin(p,route,110575)', as: 'near'},
+      {expression: 'ST_GeodesicDWithin(route,p,0)', as: 'on_route'}
+    ],
+    functions
+  })) {
+    distances.push(...batch.getChild('meters')!);
+    near.push(...batch.getChild('near')!);
+    onRoute.push(...batch.getChild('on_route')!);
+  }
+  expect(distances[0]).toBeCloseTo(110574.3885578, 5);
+  expect(distances[1]).toBeCloseTo(0, 6);
+  expect(distances.slice(2, 4)).toEqual([null, null]);
+  expect(distances[4]).toBeCloseTo(111319.4907933, 5);
+  expect(near).toEqual([true, true, false, null, false]);
+  expect(onRoute).toEqual([false, true, false, null, false]);
+});
+
+test('uses the finite ellipsoidal segment for a polar route and for a nearest endpoint', () => {
+  const route = wkb(['LINESTRING(0 89,180 89)', 'LINESTRING(0 0,1 0)']);
+  const point = wkb(['POINT(36 90)', 'POINT(2 0)']);
+  const schema = new Schema([
+    field('route', route, 'geoarrow.wkb'),
+    field('p', point, 'geoarrow.wkb')
+  ]);
+  const tables = new Map([['routes', new Table(schema, {route, p: point})]]);
+  const result = queryArrowSQL(
+    `SELECT ST_GeodesicDistance(p,route) AS distance,
+            ST_GeodesicDWithin(p,route,ST_GeodesicDistance(route,p)) AS inclusive
+     FROM routes`,
+    tables,
+    {functions}
+  );
+  expect(result.getChild('distance')!.get(0)).toBeCloseTo(0, 6);
+  expect(result.getChild('distance')!.get(1)).toBeCloseTo(111319.4907933, 5);
+  expect([...result.getChild('inclusive')!]).toEqual([true, true]);
+  expect(() =>
+    queryArrowSQL('SELECT ST_GeodesicDistance(route,route) FROM routes', tables, {functions})
+  ).toThrow(/requires at least one Point/);
+});
