@@ -201,8 +201,8 @@ const roads = buildLineNetwork(lines, {
 });
 ```
 
-Give one-way streets their own paths and build a directed network, or keep the network
-undirected and give closed directions an infinite weight with `edgeWeight`.
+Build a directed network for one-way streets. Give each allowed direction its own
+path, including both directions for two-way streets.
 
 ### River and drainage networks
 
@@ -310,7 +310,9 @@ direction.
 
 math.gl does not run the search. Feed `edgeSource`, `edgeTarget` and `edgeWeight` to a
 GPU shortest-path kernel, such as the luma.gl graph algorithms, or to a CPU Dijkstra on
-`buildLineNetworkAdjacency`. Both return a predecessor array for `getRouteEdges` and
+`buildLineNetworkAdjacency`. luma.gl requires finite weights. Before upload, apply
+the same filter to all three GPU edge columns to remove edges with infinite
+weight. Both search paths return a predecessor array for `getRouteEdges` and
 `getRouteGeometry`. The route geometry can go straight to a path layer.
 
 ## Limits
