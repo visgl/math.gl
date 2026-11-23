@@ -28,7 +28,6 @@ import {
   type WellKnownDimension,
   type WellKnownGeometry
 } from '@math.gl/core/arrow';
-import {normalizeCRSIdentifier} from './crs/crs-identifier';
 import {booleanPointInPolygon, type TurfBatchResult} from './turf';
 
 /** Field metadata key for the GeoArrow encoding. */
@@ -158,23 +157,6 @@ export function planarGeometry(
   return geometry;
 }
 
-/** Recognizes the WGS84 geographic identifiers in GeoArrow field metadata. */
-function isWGS84(crs: unknown): boolean {
-  if (typeof crs === 'string') {
-    const identifier = normalizeCRSIdentifier(crs);
-    return identifier === 'EPSG:4326' || identifier === 'OGC:CRS84';
-  }
-  if (!crs || typeof crs !== 'object' || !('id' in crs)) return false;
-  const {id} = crs;
-  return Boolean(
-    id &&
-      typeof id === 'object' &&
-      'authority' in id &&
-      'code' in id &&
-      isWGS84(String(id.authority) + ':' + String(id.code))
-  );
-}
-
 /** Declares a row-preserving spatial overload using the input columns' GeoArrow types. */
 export function spatialFunction<Value extends SpatialValue | WellKnownGeometry>(
   name: string,
@@ -184,7 +166,7 @@ export function spatialFunction<Value extends SpatialValue | WellKnownGeometry>(
   numericArguments = 0,
   allDimensions = false,
   skipNullGeometries = false,
-  coordinateSystem: 'planar' | 'wgs84' = 'planar'
+  validateCRS?: (crs: unknown, name: string) => void
 ): ScalarFunction {
   const type = 'encoding' in output ? output.type : output;
   return {
@@ -218,10 +200,9 @@ export function spatialFunction<Value extends SpatialValue | WellKnownGeometry>(
         } else {
           throw new Error(`${name} argument ${index + 1} requires GeoArrow ${kinds.join(' or ')}`);
         }
-        if (coordinateSystem === 'wgs84' && !isWGS84(extension?.metadata['crs']))
-          throw new Error(`${name} requires WGS84 CRS metadata (EPSG:4326 or OGC:CRS84)`);
+        validateCRS?.(extension?.metadata['crs'], name);
         if (
-          coordinateSystem === 'planar' &&
+          !validateCRS &&
           name.startsWith('ST_') &&
           name !== 'ST_SRID' &&
           name !== 'ST_SetSRID' &&
@@ -234,7 +215,7 @@ export function spatialFunction<Value extends SpatialValue | WellKnownGeometry>(
         .map(extension => extension?.metadata['crs'])
         .filter(crs => crs !== undefined && crs !== null);
       if (
-        coordinateSystem === 'planar' &&
+        !validateCRS &&
         name.startsWith('ST_') &&
         crsValues.some(crs => JSON.stringify(crs) !== JSON.stringify(crsValues[0]))
       ) {

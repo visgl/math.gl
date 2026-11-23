@@ -5,6 +5,7 @@
 import {Bool, Float64} from 'apache-arrow';
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
 import {WGS84_RADIUS_X, WGS84_RADIUS_Z} from './constants';
+import {normalizeCRSIdentifier} from './crs/crs-identifier';
 import {EllipsoidGeodesic} from './ellipsoid-geodesic';
 import {lineKinds, pointKinds, spatialFunction} from './spatial-sql';
 
@@ -48,6 +49,29 @@ function lineLength(geometry: WellKnownGeometry): number {
   return length;
 }
 
+/** Recognizes the WGS84 geographic identifiers in GeoArrow field metadata. */
+function isWGS84(crs: unknown): boolean {
+  if (typeof crs === 'string') {
+    const identifier = normalizeCRSIdentifier(crs);
+    return identifier === 'EPSG:4326' || identifier === 'OGC:CRS84';
+  }
+  if (!crs || typeof crs !== 'object' || !('id' in crs)) return false;
+  const {id} = crs;
+  return Boolean(
+    id &&
+      typeof id === 'object' &&
+      'authority' in id &&
+      'code' in id &&
+      isWGS84(String(id.authority) + ':' + String(id.code))
+  );
+}
+
+/** Validates the CRS only when a geodesic function is bound. */
+function validateWGS84(crs: unknown, name: string): void {
+  if (!isWGS84(crs))
+    throw new Error(`${name} requires WGS84 CRS metadata (EPSG:4326 or OGC:CRS84)`);
+}
+
 /** Returns WGS84 point-to-point distance in meters. */
 export const ST_GEODESICDISTANCE = /* @__PURE__ */ spatialFunction(
   'ST_GeodesicDistance',
@@ -57,7 +81,7 @@ export const ST_GEODESICDISTANCE = /* @__PURE__ */ spatialFunction(
   0,
   true,
   false,
-  'wgs84'
+  validateWGS84
 );
 
 /** Sums WGS84 geodesic segment lengths in meters. */
@@ -69,7 +93,7 @@ export const ST_GEODESICLENGTH = /* @__PURE__ */ spatialFunction(
   0,
   true,
   false,
-  'wgs84'
+  validateWGS84
 );
 
 /** Checks an inclusive WGS84 point-to-point proximity threshold in meters. */
@@ -86,7 +110,7 @@ export const ST_GEODESICDWITHIN = /* @__PURE__ */ spatialFunction(
   1,
   true,
   false,
-  'wgs84'
+  validateWGS84
 );
 
 /** Opt-in SQL package for ellipsoidal distance, length, and proximity. */
