@@ -1118,3 +1118,4 @@ export {
   ST_GEODESICDWITHIN,
   GEODESIC_SPATIAL_FUNCTIONS
 } from './st-geodesic-functions';
+export {createSTCoverageSimplify, type CoverageSimplifyOptions} from './st-coverage-functions';
