@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // Original deck.gl material adapter. Imports luma.gl waterMaterial; no upstream shader code is copied.
+import {surfaceWGSL, addSurfaceVaryings} from './surface-layer-wgsl.js';
 import {earlyEarthSurfaceGLSL} from './early-earth-surface.js';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {waterMaterial} from '@luma.gl/shaders';
@@ -34,9 +35,11 @@ const block = `layout(std140) uniform tectonicSurfaceUniforms {
   float earlyTheia;
   float earlyOpacity;
   float earlyPulse;
+  float hdr;
 } tectonicSurface;`;
 const surface = {
   name: 'tectonicSurface',
+  source: surfaceWGSL,
   vs: block,
   fs:
     block +
@@ -68,9 +71,24 @@ const surface = {
     earlyImpactTime: 'f32',
     earlyTheia: 'f32',
     earlyOpacity: 'f32',
-    earlyPulse: 'f32'
+    earlyPulse: 'f32',
+    hdr: 'f32'
   }
 };
+function createElevationTexture(device, width, height, elevation) {
+  // Integer sampling preserves the float bits without requiring float32-filterable on WebGPU.
+  const webgpu = device.type === 'webgpu';
+  return device.createTexture({
+    width,
+    height,
+    data: webgpu
+      ? new Uint32Array(elevation.buffer, elevation.byteOffset, elevation.length)
+      : elevation,
+    format: webgpu ? 'r32uint' : 'r32float',
+    sampler: {minFilter: 'nearest', magFilter: 'nearest'}
+  });
+}
+
 const UNIT_SIZE = new Float32Array([1, 1]);
 const LIGHTS = [
   {type: 'ambient', color: [170, 196, 222], intensity: 0.65},
@@ -121,13 +139,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
     this.setState({
       elevationTextures: new Map(),
       elevationFrames: [null, null],
-      elevationFallback: context.device.createTexture({
-        width: 1,
-        height: 1,
-        data: new Float32Array(1),
-        format: 'r32float',
-        sampler: {minFilter: 'nearest', magFilter: 'nearest'}
-      }),
+      elevationFallback: createElevationTexture(context.device, 1, 1, new Float32Array(1)),
       fallbackTexture: context.device.createTexture({
         width: 1,
         height: 1,
@@ -138,6 +150,13 @@ export class SurfaceLayer extends SolidPolygonLayer {
   }
   getShaders(type) {
     const shaders = super.getShaders(type);
+    if (this.context.device.type === 'webgpu') {
+      return {
+        ...shaders,
+        source: addSurfaceVaryings(shaders.source),
+        modules: [...shaders.modules, waterMaterial, surface]
+      };
+    }
     return {
       ...shaders,
       modules: [...shaders.modules, waterMaterial, surface],
@@ -377,13 +396,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
       if (frame && !textures.has(frame))
         textures.set(
           frame,
-          this.context.device.createTexture({
-            width: frame.width,
-            height: frame.height,
-            data: frame.elevation,
-            format: 'r32float',
-            sampler: {minFilter: 'nearest', magFilter: 'nearest'}
-          })
+          createElevationTexture(this.context.device, frame.width, frame.height, frame.elevation)
         );
     }
     for (const [frame, texture] of textures) {
@@ -392,8 +405,12 @@ export class SurfaceLayer extends SolidPolygonLayer {
         textures.delete(frame);
       }
     }
+    const canvasContext = this.context.device.getDefaultCanvasContext();
+    const hdr =
+      canvasContext.colorFormat === 'rgba16float' && canvasContext.toneMapping === 'extended';
     this.setShaderModuleProps({
       tectonicSurface: {
+        hdr: hdr ? 1 : 0,
         isWater: surfaceType === 'ocean' ? 1 : 0,
         globeWeight,
         iceCoverage,
