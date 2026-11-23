@@ -374,18 +374,18 @@ test('orders and groups timestamp keys at full nanosecond precision', () => {
         nullCount: 1
       })
     ),
-    id: Int32Array.of(1, 2, 3, 4)
+    id: vectorFromArray([1, 2, 3, 4], new Int32())
   });
   const ordered = queryArrowTable(table, {
-    orderBy: [{ column: 'instant', nulls: 'first' }],
+    orderBy: [{column: 'instant', nulls: 'first'}],
     select: ['id']
   });
   expect([...ordered.getChild('id')!]).toEqual([2, 3, 4, 1]);
 
   const grouped = queryArrowTable(table, {
     groupBy: ['instant'],
-    orderBy: [{ column: 'instant', nulls: 'last' }],
-    aggregates: { count: { operation: 'COUNT' } }
+    orderBy: [{column: 'instant', nulls: 'last'}],
+    aggregates: {count: {operation: 'COUNT'}}
   });
   expect(grouped.getChild('instant')!.type.toString()).toBe(type.toString());
   expect([...grouped.getChild('count')!]).toEqual([2n, 1n, 1n]);
