@@ -54,7 +54,7 @@ const totals = queryArrowTable(orders, {
 
 `union` appends schema-compatible tables in input order, retaining duplicates. `join` defaults to an inner equi-join. Set `join.type` to `'left'` to keep unmatched left rows, including rows with null keys. Right output fields are nullable and unmatched rows carry nulls in those fields. Null keys do not match, and duplicate keys produce all matching pairs. Right column names use the specified prefix. The executor applies `WHERE` after combining the inputs, then groups and aggregates before sorting and pagination. Sort keys reference input or grouped columns before SELECT aliases. Sorting is stable, and nulls sort last by default. Counts and sums of integer columns use Arrow Int64. Supply these relational operations through query options.
 
-Use `queryArrowSQL(sql, tables)` to run relational SQL directly against a map of named Arrow tables. It supports one `INNER JOIN` or `LEFT JOIN` on an equality condition per SELECT, column-based grouping, top-level aggregate calls, ordering by output columns, and UNION ALL with matching output schemas. Use inner or left joins for table lookups. Trailing ORDER BY, OFFSET, and LIMIT apply to the combined result. Arrow timestamp columns can be used as ordering and grouping keys. Comparisons retain the precision of the stored timestamp unit.
+Use `queryArrowSQL(sql, tables)` to run relational SQL directly against a map of named Arrow tables. Each SELECT supports one `INNER JOIN` or `LEFT JOIN` with an equality condition or indexed spatial predicate. SQL also supports column-based grouping, top-level aggregate calls, ordering by output columns, and UNION ALL with matching output schemas. Trailing ORDER BY, OFFSET, and LIMIT apply to the combined result. Arrow timestamp columns can be used as ordering and grouping keys. Comparisons retain the precision of the stored timestamp unit.
 
 ```
 import {queryArrowSQL} from '@math.gl/sql/query';
@@ -69,6 +69,20 @@ const totals = queryArrowSQL(
 
 );
 ```
+
+### Indexed spatial joins[​](#indexed-spatial-joins "Direct link to Indexed spatial joins")
+
+Register `ST_INTERSECTS`, `ST_CONTAINS`, or `ST_DWITHIN` from `@math.gl/geospatial/st-functions` and use that function directly in the `ON` clause. Qualify one geometry column from each table and use planar GeoArrow inputs with compatible CRS metadata. Native GeoArrow and WKB columns are accepted where supported by the registered predicate.
+
+```
+SELECT p.id AS observation, z.id AS zone
+
+FROM observations p
+
+LEFT JOIN zones z ON ST_Contains(z.geometry, p.geometry)
+```
+
+The join indexes right-side envelopes and evaluates the exact predicate only for candidate pairs. `ST_DWithin` expands the search by a constant, finite, nonnegative radius in the input coordinate units. A bound numeric parameter can supply that radius. Results preserve left row order and then right row order. A left join emits null right fields for each left row with no match.
 
 #### Table functions[​](#table-functions "Direct link to Table functions")
 
