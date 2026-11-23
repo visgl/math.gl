@@ -575,6 +575,9 @@
       "@math.gl/geospatial/tiles": [
         "./modules/geospatial/src/tiles.ts"
       ],
+      "@math.gl/geospatial/line-network": [
+        "./modules/geospatial/src/line-network.ts"
+      ],
       "@math.gl/geospatial/coordinates": [
         "./modules/geospatial/src/coordinates.ts"
       ],
