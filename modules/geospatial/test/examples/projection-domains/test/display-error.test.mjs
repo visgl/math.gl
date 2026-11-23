@@ -14,14 +14,55 @@ test('both polar strategies pass the same anisotropic display and texture gates 
     const q=mesh.diagnostics.qualification;assert(q.maximumDisplayError<=1);assert(q.maximumTextureError<=2);assert(q.samples>0);
   }
 });
-test('display residual responds to camera scaling and qualification rejects exhausted budgets',async()=>{
-  const chart=createCharts('antarctica','orthographic')[0],mesh=prepareInverse(chart,{tolerance:4});
-  const a=inspectDisplayError(mesh,chart,{pixelsPerUnit:[180,90]}),b=inspectDisplayError(mesh,chart,{pixelsPerUnit:[360,180]});
-  assert(Math.abs(b.maximumDisplayError-2*a.maximumDisplayError)<1e-10);
-  assert.equal(a.maximumTextureError,b.maximumTextureError);
-  await assert.rejects(qualifyDisplayMesh(()=>mesh,chart,{displayTolerance:1e-10,maxAttempts:1}),/budget/);
-  const controller=new AbortController();controller.abort(new Error('cancelled'));
-  await assert.rejects(qualifyDisplayMesh(()=>mesh,chart,{signal:controller.signal}),/cancelled/);
+// The chart bends the triangle's source coordinates in Y. Barycentric interpolation
+// of the projected vertices incurs a residual of x - x² at each probe.
+const displayFixture = {
+  mesh: {
+    positions: new Float64Array([0, 0, 1, 1, 0, 1]),
+    uv: new Float64Array([0, 0, 1, 0, 0, 1]),
+    indices: new Uint32Array([0, 1, 2])
+  },
+  chart: {
+    width: 1,
+    height: 1,
+    forward: ([x, y]) => [x, y + x * x],
+    inverse: ([x, y]) => [x, y - x * x]
+  }
+};
+
+test('doubling camera scale doubles display residual and preserves texture residual', () => {
+  const {mesh, chart} = displayFixture;
+  const a = inspectDisplayError(mesh, chart, {pixelsPerUnit: [180, 90]});
+  const b = inspectDisplayError(mesh, chart, {pixelsPerUnit: [360, 180]});
+  assert.equal(a.samples, 3);
+  assert.equal(b.samples, a.samples);
+  assert(Math.abs(a.maximumDisplayError - 18.9) < 1e-12);
+  assert(Math.abs(b.maximumDisplayError - 2 * a.maximumDisplayError) < 1e-12);
+  assert(Math.abs(a.maximumTextureError - 0.21) < 1e-12);
+  assert.equal(a.maximumTextureError, b.maximumTextureError);
+});
+
+test('camera scaling also preserves the residual on a prepared polar mesh', () => {
+  const chart = createCharts('antarctica', 'orthographic')[0];
+  const mesh = prepareInverse(chart, {tolerance: 4});
+  const a = inspectDisplayError(mesh, chart, {pixelsPerUnit: [180, 90]});
+  const b = inspectDisplayError(mesh, chart, {pixelsPerUnit: [360, 180]});
+  assert(Math.abs(b.maximumDisplayError - 2 * a.maximumDisplayError) < 1e-10);
+  assert.equal(a.maximumTextureError, b.maximumTextureError);
+});
+
+test('display qualification rejects exhausted budgets and cancellation', async () => {
+  const {mesh, chart} = displayFixture;
+  await assert.rejects(
+    qualifyDisplayMesh(() => mesh, chart, {displayTolerance: 1, maxAttempts: 1}),
+    /budget/
+  );
+  const controller = new AbortController();
+  controller.abort(new Error('cancelled'));
+  await assert.rejects(
+    qualifyDisplayMesh(() => mesh, chart, {signal: controller.signal}),
+    /cancelled/
+  );
 });
 
 import {prepareJob} from '../../../../../../examples/geospatial/projection-domains/src/lab/job.mjs';
