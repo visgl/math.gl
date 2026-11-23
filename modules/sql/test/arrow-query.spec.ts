@@ -4,6 +4,8 @@
 
 import {
   Binary,
+  DateDay,
+  DateMillisecond,
   FixedSizeBinary,
   Float64,
   Int32,
@@ -322,5 +324,28 @@ test('groups binary keys by contents across chunks and distinguishes empty keys 
     expect(result.getChild('key')!.type.toString()).toBe(type.toString());
     expect([...result.getChild('key')!]).toEqual([Uint8Array.of(255, 0), secondKey, null]);
     expect([...result.getChild('count')!]).toEqual([2n, 2n, 2n]);
+  }
+});
+test('orders and groups Arrow dates without decoding their payloads', () => {
+  for (const type of [new DateDay(), new DateMillisecond()]) {
+    const first = new Date('2024-01-01');
+    const second = new Date('2024-01-02');
+    const table = new Table({
+      day: vectorFromArray([second, null, first, first], type),
+      id: vectorFromArray([1, 2, 3, 4], new Int32())
+    });
+    const result = queryArrowTable(table, {
+      orderBy: [{column: 'day', nulls: 'first'}],
+      select: ['id']
+    });
+    expect([...result.getChild('id')!]).toEqual([2, 3, 4, 1]);
+
+    const grouped = queryArrowTable(table, {
+      groupBy: ['day'],
+      orderBy: [{column: 'day', nulls: 'last'}],
+      aggregates: {count: {operation: 'COUNT'}}
+    });
+    expect(grouped.getChild('day')!.type.toString()).toBe(type.toString());
+    expect([...grouped.getChild('count')!]).toEqual([2n, 1n, 1n]);
   }
 });
