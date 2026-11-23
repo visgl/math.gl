@@ -241,6 +241,24 @@ ignored.
 Null arguments propagate. Use `queryArrowTableInBatches` to evaluate these
 functions on streamed record batches.
 
+## Simplify shared boundaries in a polygon coverage
+
+Register `createSTCoverageSimplify({geometry: 'footprint', tolerance: 2})`
+from `@math.gl/geospatial/st-functions`, then query the entire native XY coverage.
+
+```sql
+SELECT id, footprint
+FROM ST_CoverageSimplify(parcels)
+```
+
+The table function simplifies shared borders across record batches while
+preserving the outer boundary, row order, CRS, nulls, and Polygon or
+MultiPolygon encoding. Supply a valid coverage with matching vertices on
+both sides of shared edges. Tolerance is in the source coordinate units.
+This implementation removes eligible shared vertices in one pass and skips
+edits that could meet another boundary or interfere with an accepted edit.
+It evaluates the whole relation before returning the output batches.
+
 ## PostGIS geometry signatures
 
 These functions use 2D Cartesian coordinates. Use coordinates in a suitable
