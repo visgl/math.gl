@@ -4,7 +4,10 @@
 
 import {
   GeoArrowBuilder,
+  getGeoArrowFieldInfo,
   makeArrowVectorFromGeoArrowColumn,
+  makeGeoArrowColumnFromArrowVector,
+  materializeGeoArrowRows,
   parseWKT,
   writeWKB
 } from '@math.gl/core/arrow';
@@ -178,4 +181,33 @@ test('minimizes distance on finite segments at the pole, an endpoint, and a long
   expect(() =>
     queryArrowSQL('SELECT ST_GeodesicDistance(route,route) FROM routes', tables, {functions})
   ).toThrow(/requires at least one Point/);
+});
+
+test('densifies a WGS84 route across the antimeridian with equal ellipsoidal steps', () => {
+  const encoding = 'geoarrow.linestring';
+  const g = makeArrowVectorFromGeoArrowColumn(
+    GeoArrowBuilder.build([parseWKT('LINESTRING(179 0,-179 0)'), null], {encoding})
+  );
+  const schema = new Schema([field('g', g, encoding)]);
+  const result = queryArrowSQL(
+    `SELECT ST_GeodesicSegmentize(g,100000) AS route,
+            ST_GeodesicLength(ST_GeodesicSegmentize(g,100000)) AS meters FROM features`,
+    new Map([['features', new Table(schema, {g})]]),
+    {functions}
+  );
+  const routeField = result.schema.fields[0]!;
+  expect(getGeoArrowFieldInfo(routeField)).toMatchObject({
+    encoding,
+    metadata: {crs: 'OGC:CRS84', edges: 'spherical'}
+  });
+  const output = makeGeoArrowColumnFromArrowVector(result.getChild('route')!, {field: routeField});
+  const [line, missing] = materializeGeoArrowRows(output);
+  if (line?.type !== 'LineString') throw new Error('Expected a native line');
+  expect(line.coordinates).toHaveLength(4);
+  expect(line.coordinates[0]).toEqual([179, 0]);
+  expect(line.coordinates[1]![0]).toBeCloseTo(179 + 2 / 3, 10);
+  expect(line.coordinates[2]![0]).toBeCloseTo(-179 - 2 / 3, 10);
+  expect(line.coordinates[3]).toEqual([-179, 0]);
+  expect(result.getChild('meters')!.get(0)).toBeCloseTo(222638.9815865, 5);
+  expect(missing).toBeNull();
 });
