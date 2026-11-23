@@ -17,6 +17,7 @@ import {
 import {takeArrowTableRows, validateArrowTableSchema} from '@math.gl/core/arrow';
 import {compileArrowAggregatePlan, type ArrowAggregate} from './aggregates';
 import {compareUTF8} from '@math.gl/core/utf8';
+import {nullVectorData} from './vector-mask';
 import {ColumnReader, valueType} from './buffers';
 import {compileArrowExpression, writeArrowExpressionValues} from './compiler';
 import type {ArrowAggregateValue, ArrowExpressionOptions, ArrowExpressionValue} from './types';
@@ -31,8 +32,10 @@ export type ArrowQueryOrder = {
   nulls?: 'first' | 'last';
 };
 
-/** An inner equi-join with a prefix for right-side output names. */
+/** An inner or left equi-join with a prefix for right-side output names. */
 export type ArrowQueryJoin = {
+  /** Join type. Defaults to inner. */
+  type?: 'inner' | 'left';
   /** Native Arrow right input. */
   table: Table;
   /** Left key column. */
@@ -60,9 +63,20 @@ export function unionArrowTables(source: Table, inputs: readonly Table[]): Table
 /** Gathers matching row pairs in left row order and then right row order. */
 export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: AbortSignal): Table {
   const right = join.table;
-  const {vector: leftKey} = getScalarColumn(left, join.left);
-  const {vector: rightKey} = getScalarColumn(right, join.right);
-  const schema = makeArrowJoinSchema(left, right, join.rightPrefix);
+  const {field: leftField, vector: leftKey} = getScalarColumn(left, join.left);
+  const {field: rightField, vector: rightKey} = getScalarColumn(right, join.right);
+  const leftType = valueType(leftField.type);
+  const rightType = valueType(rightField.type);
+  if (
+    leftType.typeId !== rightType.typeId &&
+    !DataType.isNull(leftType) &&
+    !DataType.isNull(rightType) &&
+    !(numericJoinKey(leftType) && numericJoinKey(rightType))
+  ) {
+    throw new Error(`Incompatible Arrow JOIN key types: ${leftType} and ${rightType}`);
+  }
+  const retainUnmatched = join.type === 'left';
+  const schema = makeArrowJoinSchema(left, right, join.rightPrefix, retainUnmatched);
 
   const rightRows = new Map<ArrowExpressionValue, number[]>();
   for (let row = 0; row < right.numRows; row++) {
@@ -78,19 +92,45 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
   for (let row = 0; row < left.numRows; row++) {
     signal?.throwIfAborted();
     const key = normalizeJoinKey(leftKey!.get(row));
-    for (const match of rightRows.get(key) ?? []) {
+    const matches = rightRows.get(key);
+    if (retainUnmatched && !matches) {
+      leftIndexes.push(row);
+      rightIndexes.push(-1);
+    }
+    for (const match of matches ?? []) {
       leftIndexes.push(row);
       rightIndexes.push(match);
     }
   }
-  return gatherArrowJoin(left, right, leftIndexes, rightIndexes, schema);
+  const rightInput =
+    !right.numRows && rightIndexes.length
+      ? right.concat(
+          new Table(
+            right.schema,
+            Object.fromEntries(
+              right.schema.fields.map(field => [
+                field.name,
+                makeVector(nullVectorData(field.type, 1))
+              ])
+            )
+          )
+        )
+      : right;
+  return gatherArrowJoin(left, rightInput, leftIndexes, rightIndexes, schema);
 }
 
 /** Builds the relational join schema and validates right prefix collisions. */
-export function makeArrowJoinSchema(left: Table, right: Table, rightPrefix: string): Schema {
+export function makeArrowJoinSchema(
+  left: Table,
+  right: Table,
+  rightPrefix: string,
+  nullableRight = false
+): Schema {
   const fields = [
     ...left.schema.fields,
-    ...right.schema.fields.map(field => field.clone({name: rightPrefix + field.name}))
+    ...right.schema.fields.map(field =>
+      field.clone({name: rightPrefix + field.name, nullable: nullableRight || field.nullable})
+    )
   ];
   if (new Set(fields.map(field => field.name)).size !== fields.length)
     throw new Error('Duplicate Arrow join output name');
@@ -118,6 +158,11 @@ export function gatherArrowJoin(
     schema,
     Object.fromEntries(schema.fields.map((field, index) => [field.name, columns[index]!]))
   );
+}
+
+/** Integer and floating-point fields share a numeric join key domain. */
+function numericJoinKey(type: DataType): boolean {
+  return DataType.isInt(type) || DataType.isFloat(type);
 }
 
 /** Canonicalizes numeric keys without narrowing 64-bit integers to Number. */
