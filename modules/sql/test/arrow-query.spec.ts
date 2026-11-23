@@ -282,3 +282,20 @@ test('reduces compound groups across chunks in first-seen order', () => {
   expect([...result.getChild('count')!]).toEqual([2n, 2n, 2n]);
   expect([...result.getChild('sum')!]).toEqual([10n, 1n, 3n]);
 });
+test('sorts across sliced chunks and preserves stable ties through pagination', () => {
+  const chunks = Array.from({length: 32}, (_, index) => {
+    const table = new Table({
+      key: vectorFromArray([99, index % 3, null], new Int32()),
+      id: vectorFromArray([-1, index, index + 32], new Int32())
+    });
+    return table.slice(1);
+  });
+  const input = chunks[0]!.concat(...chunks.slice(1));
+  const result = queryArrowTable(input, {
+    select: ['id'],
+    orderBy: [{column: 'key', direction: 'desc', nulls: 'last'}],
+    offset: 8,
+    limit: 5
+  });
+  expect([...result.getChild('id')!]).toEqual([26, 29, 1, 4, 7]);
+});
