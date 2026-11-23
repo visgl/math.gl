@@ -5,6 +5,7 @@
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
 import polygonClipping from 'polygon-clipping';
 import {
+  endpointContacts,
   locatePointInPolygon,
   planarIntersects,
   pointOnSegment,
@@ -82,21 +83,6 @@ function lineBoundary(components: readonly Path[]): ReadonlyMap<string, Position
     }
   }
   return boundary;
-}
-
-/** Finds shared endpoints, including an endpoint lying in the other segment's interior. */
-export function endpointContacts(a: Edge, b: Edge): Position[] {
-  const contacts: Position[] = [];
-  for (const [endpoints, other] of [
-    [a, b],
-    [b, a]
-  ] as const) {
-    for (const point of endpoints) {
-      if (pointOnSegment(point, ...other) && !contacts.some(value => samePoint(value, point)))
-        contacts.push(point);
-    }
-  }
-  return contacts;
 }
 
 /** Tests whether any odd endpoint is also on both segments of a proper crossing. */
