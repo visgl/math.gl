@@ -38,6 +38,7 @@ export function typeKey(type: DataType): string {
 /** Reader over Arrow chunks; slices already adjust numeric buffers and string offsets. */
 export class ColumnReader {
   private readonly ends: number[] = [];
+  private chunkIndex = 0;
   private readonly location: [Data, number] = [null!, 0];
   private readonly range: [Uint8Array, number, number] = [null!, 0, 0];
   private readonly half = new Map<Data, Float16Array>();
@@ -56,8 +57,17 @@ export class ColumnReader {
   }
   /** Locates a chunk without constructing row objects. */
   private chunk(row: number): [Data, number] {
-    let index = 0;
-    while (row >= this.ends[index]!) index++;
+    let index = this.chunkIndex;
+    if (row >= this.ends[index]! || (index > 0 && row < this.ends[index - 1]!)) {
+      let low = 0;
+      let high = this.ends.length - 1;
+      while (low < high) {
+        const middle = (low + high) >>> 1;
+        if (row < this.ends[middle]!) high = middle;
+        else low = middle + 1;
+      }
+      this.chunkIndex = index = low;
+    }
     this.location[0] = this.vector.data[index]!;
     this.location[1] = row - (index ? this.ends[index - 1]! : 0);
     return this.location;
