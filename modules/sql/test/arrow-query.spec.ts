@@ -24,9 +24,9 @@ import {
   tableToIPC,
   vectorFromArray
 } from 'apache-arrow';
-import { expect, test } from 'vitest';
-import { queryArrowTable, queryArrowTableInBatches, queryArrowSQL } from '@math.gl/sql/query';
-import { parseSQLQuery } from '@math.gl/sql/parser';
+import {expect, test} from 'vitest';
+import {queryArrowTable, queryArrowTableInBatches, queryArrowSQL} from '@math.gl/sql/query';
+import {parseSQLQuery} from '@math.gl/sql/parser';
 
 /** Parses the SELECT requests used by these tests. */
 function select(sql: string) {
@@ -45,47 +45,47 @@ test('SELECT preserves column order and aliases and applies WHERE before computi
     source,
     select('SELECT x AS id, x + y AS sum, x AS original FROM input WHERE x >= 2 LIMIT 3')
   );
-  expect(result.schema.fields.map((field) => field.name)).toEqual(['id', 'sum', 'original']);
+  expect(result.schema.fields.map(field => field.name)).toEqual(['id', 'sum', 'original']);
   expect(Array.from(result.getChild('id')!)).toEqual([2, 3, 2]);
   expect(Array.from(result.getChild('sum')!)).toEqual([null, 11, null]);
   expect(Array.from(result.getChild('original')!)).toEqual([2, 3, 2]);
 });
 
 test('projection shares source buffers and empty results retain their schema', () => {
-  const source = new Table({ x: vectorFromArray([1, 2], new Float64()) });
-  const projected = queryArrowTable(source, { select: [{ column: 'x', as: 'value' }] });
+  const source = new Table({x: vectorFromArray([1, 2], new Float64())});
+  const projected = queryArrowTable(source, {select: [{column: 'x', as: 'value'}]});
   expect(projected.getChild('value')!.data[0]).toBe(source.getChild('x')!.data[0]);
-  expect(queryArrowTable(source, { select: [], limit: 1 }).numRows).toBe(1);
+  expect(queryArrowTable(source, {select: [], limit: 1}).numRows).toBe(1);
   const empty = queryArrowTable(source, select('SELECT x + 1 AS value WHERE x > 5'));
   expect(empty.numRows).toBe(0);
-  expect(empty.schema.fields.map((field) => field.name)).toEqual(['value']);
-  expect(queryArrowTable(source, { limit: 0 }).schema).toBe(source.schema);
-  expect(() => queryArrowTable(source, { select: ['x', { column: 'x', as: 'x' }] })).toThrow(
+  expect(empty.schema.fields.map(field => field.name)).toEqual(['value']);
+  expect(queryArrowTable(source, {limit: 0}).schema).toBe(source.schema);
+  expect(() => queryArrowTable(source, {select: ['x', {column: 'x', as: 'x'}]})).toThrow(
     /duplicate/
   );
 });
 
 test('projection and sparse filtering preserve batch metadata through the runtime API', () => {
-  const source = new Table({ x: vectorFromArray([3, 0, 4], new Int32()) });
+  const source = new Table({x: vectorFromArray([3, 0, 4], new Int32())});
   const metadata = new Map([['partition', 'first']]);
   const batch = source.batches[0]!;
   const nativeMetadata = Reflect.get(batch, 'metadata') as Map<string, string> | undefined;
   if (nativeMetadata) nativeMetadata.set('partition', 'first');
-  else Object.assign(batch, { metadata });
+  else Object.assign(batch, {metadata});
 
   const result = queryArrowTable(source, select('SELECT x AS value WHERE x > 0'));
   expect(Array.from(result.getChild('value')!)).toEqual([3, 4]);
   expect(Reflect.get(result.batches[0], 'metadata')).toBe(nativeMetadata ?? metadata);
   expect(Object.hasOwn(result.batches[0]!, 'metadata')).toBe(!nativeMetadata);
-  const paginated = queryArrowTable(source, { offset: 1, limit: 1 });
+  const paginated = queryArrowTable(source, {offset: 1, limit: 1});
   expect(Array.from(paginated.getChild('x')!)).toEqual([0]);
   expect(Reflect.get(paginated.batches[0], 'metadata')).toBe(nativeMetadata ?? metadata);
 });
 
 test('unaliased computed columns get distinct names without displacing explicit aliases', () => {
-  const source = new Table({ x: vectorFromArray([1], new Float64()) });
+  const source = new Table({x: vectorFromArray([1], new Float64())});
   const result = queryArrowTable(source, select('SELECT x + 1, x - 1, x AS expression_1'));
-  expect(result.schema.fields.map((field) => field.name)).toEqual([
+  expect(result.schema.fields.map(field => field.name)).toEqual([
     'expression_1_',
     'expression_2',
     'expression_1'
@@ -103,18 +103,18 @@ test('filters and groups UNION ALL inputs before stable ordering and pagination'
     union: [source.slice(1, 3)],
     where: select('SELECT * WHERE id >= 2').where,
     groupBy: ['group'],
-    aggregates: { total: { operation: 'SUM', expression: 'id' }, count: { operation: 'COUNT' } },
-    orderBy: [{ column: 'total', direction: 'desc' }],
+    aggregates: {total: {operation: 'SUM', expression: 'id'}, count: {operation: 'COUNT'}},
+    orderBy: [{column: 'total', direction: 'desc'}],
     select: ['group', 'total', 'count'],
     limit: 1
   });
   expect(Array.from(result.getChild('group')!)).toEqual([2]);
   expect(Array.from(result.getChild('total')!)).toEqual([6]);
   expect(Array.from(result.getChild('count')!)).toEqual([2n]);
-  expect(() => queryArrowTable(source, { union: [source.select(['id'])] })).toThrow(/UNION ALL/);
+  expect(() => queryArrowTable(source, {union: [source.select(['id'])]})).toThrow(/UNION ALL/);
 
   const empty = queryArrowTable(source.slice(0, 0), {
-    aggregates: { count: { operation: 'COUNT' }, sum: { operation: 'SUM', expression: 'id' } }
+    aggregates: {count: {operation: 'COUNT'}, sum: {operation: 'SUM', expression: 'id'}}
   });
   expect(Array.from(empty.getChild('count')!)).toEqual([0n]);
   expect(Array.from(empty.getChild('sum')!)).toEqual([null]);
@@ -130,18 +130,15 @@ test('inner join preserves duplicate matches, excludes null keys, and exposes ri
     value: vectorFromArray([50, 60, 70, 80], new Float64())
   });
   const query = {
-    join: { table: right, left: 'id', right: 'id', rightPrefix: 'right.' },
-    select: ['value', { column: 'right.value', as: 'matched' }]
+    join: {table: right, left: 'id', right: 'id', rightPrefix: 'right.'},
+    select: ['value', {column: 'right.value', as: 'matched'}]
   };
   const result = queryArrowTable(left, query);
   expect(Array.from(result.getChild('value')!)).toEqual([10, 10, 30, 40, 40]);
   expect(Array.from(result.getChild('matched')!)).toEqual([50, 70, 80, 50, 70]);
-  const empty = queryArrowTable(left, {
-    ...query,
-    join: { ...query.join, table: right.slice(0, 0) }
-  });
+  const empty = queryArrowTable(left, {...query, join: {...query.join, table: right.slice(0, 0)}});
   expect(empty.numRows).toBe(0);
-  expect(empty.schema.fields.map((field) => field.name)).toEqual(['value', 'matched']);
+  expect(empty.schema.fields.map(field => field.name)).toEqual(['value', 'matched']);
 });
 
 test('sorts by multiple keys with stable ties and explicit null placement', () => {
@@ -152,7 +149,7 @@ test('sorts by multiple keys with stable ties and explicit null placement', () =
   });
   const result = queryArrowTable(source, {
     select: ['index'],
-    orderBy: [{ column: 'key', direction: 'desc', nulls: 'first' }, { column: 'tie' }],
+    orderBy: [{column: 'key', direction: 'desc', nulls: 'first'}, {column: 'tie'}],
     offset: 1,
     limit: 3
   });
@@ -160,17 +157,17 @@ test('sorts by multiple keys with stable ties and explicit null placement', () =
 });
 
 test('join compares narrow and wide integer keys without rounding the wide key', () => {
-  const left = new Table({ id: vectorFromArray([1, 2], new Int32()) });
-  const right = new Table({ id: vectorFromArray([1n, 9007199254740993n], new Int64()) });
-  const join = { table: right, left: 'id', right: 'id', rightPrefix: 'right.' };
-  expect(Array.from(queryArrowTable(left, { join }).getChild('right.id')!)).toEqual([1n]);
-  const rounded = new Table({ id: vectorFromArray([9007199254740992], new Float64()) });
-  expect(queryArrowTable(rounded, { join }).numRows).toBe(0);
+  const left = new Table({id: vectorFromArray([1, 2], new Int32())});
+  const right = new Table({id: vectorFromArray([1n, 9007199254740993n], new Int64())});
+  const join = {table: right, left: 'id', right: 'id', rightPrefix: 'right.'};
+  expect(Array.from(queryArrowTable(left, {join}).getChild('right.id')!)).toEqual([1n]);
+  const rounded = new Table({id: vectorFromArray([9007199254740992], new Float64())});
+  expect(queryArrowTable(rounded, {join}).numRows).toBe(0);
 });
 
 test('sort orders supplementary characters by UTF-8, as WHERE does', () => {
-  const source = new Table({ key: vectorFromArray(['😀', null, '\uE000'], new Utf8()) });
-  const result = queryArrowTable(source, { orderBy: [{ column: 'key' }] });
+  const source = new Table({key: vectorFromArray(['😀', null, '\uE000'], new Utf8())});
+  const result = queryArrowTable(source, {orderBy: [{column: 'key'}]});
   expect(Array.from(result.getChild('key')!)).toEqual(['\uE000', '😀', null]);
 });
 
@@ -197,7 +194,7 @@ test('plans a qualified join, grouped aggregates and ordering by output alias fr
 });
 
 test('executes UNION ALL branches before applying global ordering and pagination', () => {
-  const source = new Table({ id: vectorFromArray([1, 2, 3], new Int32()) });
+  const source = new Table({id: vectorFromArray([1, 2, 3], new Int32())});
   const result = queryArrowSQL(
     'SELECT id AS result FROM input WHERE id < 3 UNION ALL SELECT id AS other FROM input ' +
       'WHERE id > 1 ORDER BY result DESC LIMIT 2',
@@ -207,8 +204,8 @@ test('executes UNION ALL branches before applying global ordering and pagination
 });
 
 test('streaming query matches the table plan and closes the input at its global limit', async () => {
-  const first = new Table({ x: vectorFromArray([0, 1, 2], new Int32()) });
-  const second = new Table({ x: vectorFromArray([3, 0, 4, 5], new Int32()) });
+  const first = new Table({x: vectorFromArray([0, 1, 2], new Int32())});
+  const second = new Table({x: vectorFromArray([3, 0, 4, 5], new Int32())});
   const source = first.concat(second);
   const query = select('SELECT x AS value WHERE x > 0 LIMIT 3 OFFSET 1');
   let pulls = 0;
@@ -224,7 +221,7 @@ test('streaming query matches the table plan and closes the input at its global 
     }
   }
   const result = await Array.fromAsync(queryArrowTableInBatches(batches(), source.schema, query));
-  expect(result.flatMap((batch) => Array.from(batch.getChild('value')!))).toEqual(
+  expect(result.flatMap(batch => Array.from(batch.getChild('value')!))).toEqual(
     Array.from(queryArrowTable(source, query).getChild('value')!)
   );
   expect(pulls).toBe(2);
@@ -232,30 +229,30 @@ test('streaming query matches the table plan and closes the input at its global 
 });
 
 test('streaming LIMIT 0 leaves input unopened and schema mismatches fail before output', async () => {
-  const source = new Table({ x: vectorFromArray([1], new Int32()) });
+  const source = new Table({x: vectorFromArray([1], new Int32())});
   let opened = false;
   function* batches() {
     opened = true;
     yield* source.batches;
   }
   expect(
-    await Array.fromAsync(queryArrowTableInBatches(batches(), source.schema, { limit: 0 }))
+    await Array.fromAsync(queryArrowTableInBatches(batches(), source.schema, {limit: 0}))
   ).toEqual([]);
   expect(opened).toBe(false);
-  const compatible = new Table({ x: vectorFromArray([2], new Int32()) });
+  const compatible = new Table({x: vectorFromArray([2], new Int32())});
   expect(compatible.schema).not.toBe(source.schema);
   const matching = await Array.fromAsync(
     queryArrowTableInBatches(compatible.batches, source.schema)
   );
   expect(matching[0]?.getChild('x')?.get(0)).toBe(2);
-  const incompatible = new Table({ y: vectorFromArray([2], new Int32()) });
+  const incompatible = new Table({y: vectorFromArray([2], new Int32())});
   await expect(
     Array.fromAsync(queryArrowTableInBatches(incompatible.batches, source.schema))
   ).rejects.toThrow(/input schema/);
 });
 
 test('contiguous filtered matches share source values', () => {
-  const source = new Table({ x: vectorFromArray([0, 1, 2, 0], new Int32()) });
+  const source = new Table({x: vectorFromArray([0, 1, 2, 0], new Int32())});
   const result = queryArrowTable(source, select('SELECT x WHERE x > 0'));
   expect(Array.from(result.getChild('x')!)).toEqual([1, 2]);
   expect(result.getChild('x')!.data[0]!.values.buffer).toBe(
@@ -264,19 +261,19 @@ test('contiguous filtered matches share source values', () => {
 });
 
 test('streaming queries can emit projected empty batches with source batch metadata', async () => {
-  const source = new Table({ x: vectorFromArray([0, 2], new Int32()) });
+  const source = new Table({x: vectorFromArray([0, 2], new Int32())});
   const rejected = source.batches[0]!.slice(0, 1);
   const accepted = source.batches[0]!.slice(1);
   const metadata = Reflect.get(rejected, 'metadata') ?? new Map<string, string>();
   metadata.set('partition', 'rejected');
-  if (!Reflect.get(rejected, 'metadata')) Object.assign(rejected, { metadata });
+  if (!Reflect.get(rejected, 'metadata')) Object.assign(rejected, {metadata});
   const query = select('SELECT x AS value WHERE x > 0 LIMIT 1');
   const input = [rejected, accepted];
   const output = await Array.fromAsync(
-    queryArrowTableInBatches(input, source.schema, { ...query, emitEmptyBatches: true })
+    queryArrowTableInBatches(input, source.schema, {...query, emitEmptyBatches: true})
   );
-  expect(output.map((batch) => batch.numRows)).toEqual([0, 1]);
-  expect(output[0]!.schema.fields.map((field) => field.name)).toEqual(['value']);
+  expect(output.map(batch => batch.numRows)).toEqual([0, 1]);
+  expect(output[0]!.schema.fields.map(field => field.name)).toEqual(['value']);
   expect(Reflect.get(output[0]!, 'metadata')?.get('partition')).toBe('rejected');
   expect(output[1]!.getChild('value')?.get(0)).toBe(2);
   expect(await Array.fromAsync(queryArrowTableInBatches(input, source.schema, query))).toHaveLength(
@@ -297,8 +294,8 @@ test('reduces compound groups across chunks in first-seen order', () => {
   const result = queryArrowTable(input, {
     groupBy: ['key', 'group'],
     aggregates: {
-      count: { operation: 'COUNT' },
-      sum: { operation: 'SUM', expression: 'amount' }
+      count: {operation: 'COUNT'},
+      sum: {operation: 'SUM', expression: 'amount'}
     }
   });
   expect([...result.getChild('key')!]).toEqual(['a', 'a', null]);
@@ -307,7 +304,7 @@ test('reduces compound groups across chunks in first-seen order', () => {
   expect([...result.getChild('sum')!]).toEqual([10n, 1n, 3n]);
 });
 test('sorts across sliced chunks and preserves stable ties through pagination', () => {
-  const chunks = Array.from({ length: 32 }, (_, index) => {
+  const chunks = Array.from({length: 32}, (_, index) => {
     const table = new Table({
       key: vectorFromArray([99, index % 3, null], new Int32()),
       id: vectorFromArray([-1, index, index + 32], new Int32())
@@ -317,7 +314,7 @@ test('sorts across sliced chunks and preserves stable ties through pagination', 
   const input = chunks[0]!.concat(...chunks.slice(1));
   const result = queryArrowTable(input, {
     select: ['id'],
-    orderBy: [{ column: 'key', direction: 'desc', nulls: 'last' }],
+    orderBy: [{column: 'key', direction: 'desc', nulls: 'last'}],
     offset: 8,
     limit: 5
   });
@@ -326,14 +323,13 @@ test('sorts across sliced chunks and preserves stable ties through pagination', 
 test('groups binary keys by contents across chunks and distinguishes empty keys from nulls', () => {
   for (const type of [new Binary(), new FixedSizeBinary(2)]) {
     const secondKey = type instanceof FixedSizeBinary ? Uint8Array.of(254, 0) : new Uint8Array();
-    const batch = (bytes: (Uint8Array | null)[]) =>
-      new Table({ key: vectorFromArray(bytes, type) });
+    const batch = (bytes: (Uint8Array | null)[]) => new Table({key: vectorFromArray(bytes, type)});
     const input = batch([Uint8Array.of(255, 0), secondKey, null]).concat(
       batch([Uint8Array.of(255, 0), Uint8Array.from(secondKey), null])
     );
     const result = queryArrowTable(input, {
       groupBy: ['key'],
-      aggregates: { count: { operation: 'COUNT' } }
+      aggregates: {count: {operation: 'COUNT'}}
     });
     expect(result.getChild('key')!.type.toString()).toBe(type.toString());
     expect([...result.getChild('key')!]).toEqual([Uint8Array.of(255, 0), secondKey, null]);
@@ -349,15 +345,15 @@ test('orders and groups Arrow dates without decoding their payloads', () => {
       id: vectorFromArray([1, 2, 3, 4], new Int32())
     });
     const result = queryArrowTable(table, {
-      orderBy: [{ column: 'day', nulls: 'first' }],
+      orderBy: [{column: 'day', nulls: 'first'}],
       select: ['id']
     });
     expect([...result.getChild('id')!]).toEqual([2, 3, 4, 1]);
 
     const grouped = queryArrowTable(table, {
       groupBy: ['day'],
-      orderBy: [{ column: 'day', nulls: 'last' }],
-      aggregates: { count: { operation: 'COUNT' } }
+      orderBy: [{column: 'day', nulls: 'last'}],
+      aggregates: {count: {operation: 'COUNT'}}
     });
     expect(grouped.getChild('day')!.type.toString()).toBe(type.toString());
     const secondDate = type instanceof DateDay ? 49 * 86_400_000 : 2 ** 32;
@@ -396,7 +392,7 @@ test('orders and groups timestamp keys at full nanosecond precision', () => {
 });
 
 test('LEFT OUTER JOIN retains unmatched and null keys and preserves matched duplicates', () => {
-  const roads = new Table({ id: vectorFromArray([2, null, 1, 3], new Int32()) });
+  const roads = new Table({id: vectorFromArray([2, null, 1, 3], new Int32())});
   const incidents = new Table({
     id: vectorFromArray([2, null, 2], new Int32()),
     count: vectorFromArray([10, 20, 30], new Int32()),
@@ -426,18 +422,18 @@ test('LEFT OUTER JOIN retains unmatched and null keys and preserves matched dupl
 });
 
 test('structured LEFT JOIN gathers alternating matches in one batch', () => {
-  const left = tableFromArrays({ id: Int32Array.from({ length: 4000 }, (_, index) => index + 1) });
-  const keys = Int32Array.from({ length: 2000 }, (_, index) => (index + 1) * 2);
-  const right = tableFromArrays({ key: keys });
+  const left = tableFromArrays({id: Int32Array.from({length: 4000}, (_, index) => index + 1)});
+  const keys = Int32Array.from({length: 2000}, (_, index) => (index + 1) * 2);
+  const right = tableFromArrays({key: keys});
   const schema = new Schema([new Field('key', new Int32(), false)]);
   const requiredRight = new Table(
     schema,
-    right.batches.map((batch) => new RecordBatch(schema, batch.data))
+    right.batches.map(batch => new RecordBatch(schema, batch.data))
   );
   expect(requiredRight.schema.fields[0]?.nullable).toBe(false);
 
   const result = queryArrowTable(left, {
-    join: { type: 'left', table: requiredRight, left: 'id', right: 'key', rightPrefix: 'right.' }
+    join: {type: 'left', table: requiredRight, left: 'id', right: 'key', rightPrefix: 'right.'}
   });
   expect(result.batches).toHaveLength(1);
   expect(result.schema.fields[1]?.nullable).toBe(true);
@@ -446,11 +442,11 @@ test('structured LEFT JOIN gathers alternating matches in one batch', () => {
 });
 
 test('structured LEFT JOIN rejects incompatible key types even on an empty lookup', () => {
-  const left = tableFromArrays({ id: Int32Array.of(1) });
-  const right = new Table({ id: vectorFromArray([], new Utf8()) });
+  const left = tableFromArrays({id: Int32Array.of(1)});
+  const right = new Table({id: vectorFromArray([], new Utf8())});
   expect(() =>
     queryArrowTable(left, {
-      join: { type: 'left', table: right, left: 'id', right: 'id', rightPrefix: 'right.' }
+      join: {type: 'left', table: right, left: 'id', right: 'id', rightPrefix: 'right.'}
     })
   ).toThrow(/Incompatible Arrow JOIN key types/);
 });

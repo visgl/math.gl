@@ -13,13 +13,13 @@ import {
   vectorFromArray,
   type Vector
 } from 'apache-arrow';
-import { takeArrowTableRows, validateArrowTableSchema } from '@math.gl/core/arrow';
-import { compileArrowAggregatePlan, type ArrowAggregate } from './aggregates';
-import { compareUTF8 } from '@math.gl/core/utf8';
-import { nullVectorData } from './vector-mask';
-import { ColumnReader, valueType } from './buffers';
-import { compileArrowExpression, writeArrowExpressionValues } from './compiler';
-import type { ArrowExpressionOptions, ArrowExpressionValue } from './types';
+import {takeArrowTableRows, validateArrowTableSchema} from '@math.gl/core/arrow';
+import {compileArrowAggregatePlan, type ArrowAggregate} from './aggregates';
+import {compareUTF8} from '@math.gl/core/utf8';
+import {nullVectorData} from './vector-mask';
+import {ColumnReader, valueType} from './buffers';
+import {compileArrowExpression, writeArrowExpressionValues} from './compiler';
+import type {ArrowExpressionOptions, ArrowExpressionValue} from './types';
 
 /** A stable ordering key resolved against the source or grouped result. */
 export type ArrowQueryOrder = {
@@ -55,15 +55,15 @@ export function unionArrowTables(source: Table, inputs: readonly Table[]): Table
   }
   return new Table(
     source.schema,
-    [source, ...inputs].flatMap((table) => table.batches)
+    [source, ...inputs].flatMap(table => table.batches)
   );
 }
 
 /** Gathers matching row pairs in left row order and then right row order. */
 export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: AbortSignal): Table {
   const right = join.table;
-  const { field: leftField, vector: leftKey } = getScalarColumn(left, join.left);
-  const { field: rightField, vector: rightKey } = getScalarColumn(right, join.right);
+  const {field: leftField, vector: leftKey} = getScalarColumn(left, join.left);
+  const {field: rightField, vector: rightKey} = getScalarColumn(right, join.right);
   const leftType = valueType(leftField.type);
   const rightType = valueType(rightField.type);
   if (
@@ -107,7 +107,7 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
           new Table(
             right.schema,
             Object.fromEntries(
-              right.schema.fields.map((field) => [
+              right.schema.fields.map(field => [
                 field.name,
                 makeVector(nullVectorData(field.type, 1))
               ])
@@ -127,11 +127,11 @@ export function makeArrowJoinSchema(
 ): Schema {
   const fields = [
     ...left.schema.fields,
-    ...right.schema.fields.map((field) =>
-      field.clone({ name: rightPrefix + field.name, nullable: nullableRight || field.nullable })
+    ...right.schema.fields.map(field =>
+      field.clone({name: rightPrefix + field.name, nullable: nullableRight || field.nullable})
     )
   ];
-  if (new Set(fields.map((field) => field.name)).size !== fields.length)
+  if (new Set(fields.map(field => field.name)).size !== fields.length)
     throw new Error('Duplicate Arrow join output name');
   return new Schema(fields, left.schema.metadata, undefined, left.schema.metadataVersion);
 }
@@ -150,7 +150,7 @@ export function gatherArrowJoin(
     takeArrowTableRows(left, Int32Array.from(leftIndexes)),
     takeArrowTableRows(right, Int32Array.from(rightIndexes))
   ];
-  const columns = tables.flatMap((table) =>
+  const columns = tables.flatMap(table =>
     table.schema.fields.map((_, index) => table.getChildAt(index)!)
   );
   return new Table(
@@ -177,18 +177,18 @@ export function orderArrowTable(
   limit: number | undefined,
   signal?: AbortSignal
 ): Table {
-  const keys = orderBy.map((key) => {
-    const { field, vector } = getScalarColumn(table, key.column, 'order');
+  const keys = orderBy.map(key => {
+    const {field, vector} = getScalarColumn(table, key.column, 'order');
     return {
       ...key,
       reader: vector && new ColumnReader(vector),
       utf8: DataType.isUtf8(valueType(field.type))
     };
   });
-  const indexes = Int32Array.from({ length: table.numRows }, (_, index) => index);
+  const indexes = Int32Array.from({length: table.numRows}, (_, index) => index);
   indexes.sort((left, right) => {
     signal?.throwIfAborted();
-    for (const { reader, utf8, direction, nulls } of keys) {
+    for (const {reader, utf8, direction, nulls} of keys) {
       const leftValid = reader!.isValid(left);
       const rightValid = reader!.isValid(right);
       if (!leftValid || !rightValid) {
@@ -227,39 +227,39 @@ export function groupArrowTable(
   table: Table,
   groupBy: readonly string[],
   aggregates: Readonly<Record<string, ArrowAggregate>>,
-  options: ArrowExpressionOptions & { signal?: AbortSignal },
+  options: ArrowExpressionOptions & {signal?: AbortSignal},
   custom: ReadonlyMap<string, BoundRelationAggregate> = new Map()
 ): Table {
-  const keys = groupBy.map((name) => getScalarColumn(table, name, 'group'));
-  const fields = keys.map(({ field }) => field);
+  const keys = groupBy.map(name => getScalarColumn(table, name, 'group'));
+  const fields = keys.map(({field}) => field);
   const definitions = Object.entries(aggregates);
   const names = [...groupBy, ...definitions.map(([name]) => name), ...custom.keys()];
   if (new Set(names).size !== names.length) throw new Error('Duplicate Arrow grouping output name');
 
   const compiled = compileArrowAggregatePlan(aggregates, options);
-  const { representatives, values: results } =
+  const {representatives, values: results} =
     groupBy.length && !custom.size
       ? compiled.evaluateGroups(table, groupBy, options.signal)
       : evaluateCustomGroups(table, keys, groupBy.length, compiled, custom, options);
   const selected = takeArrowTableRows(table.select([...groupBy]), Int32Array.from(representatives));
   const aggregateFields = [
     ...getArrowAggregateFields(aggregates, options),
-    ...Array.from(custom, ([name, aggregate]) => aggregate.outputField.clone({ name }))
+    ...Array.from(custom, ([name, aggregate]) => aggregate.outputField.clone({name}))
   ];
   const schema = new Schema([...fields, ...aggregateFields], table.schema.metadata);
   if (!results.length) return new Table(schema, []);
   const columns = [
-    ...fields.map((field) => selected.getChild(field.name)!),
-    ...aggregateFields.map((field) => {
+    ...fields.map(field => selected.getChild(field.name)!),
+    ...aggregateFields.map(field => {
       if (custom.has(field.name) && !DataType.isFixedSizeList(field.type)) {
         return writeArrowExpressionValues(
           field,
           new Uint8Array(results.length).fill(1),
-          (row) => results[row]![field.name]!
+          row => results[row]![field.name]!
         );
       }
       return vectorFromArray(
-        results.map((result) => result[field.name]),
+        results.map(result => result[field.name]),
         field.type
       );
     })
@@ -270,18 +270,18 @@ export function groupArrowTable(
 /** Custom reducers receive per-group tables through the table function API. */
 function evaluateCustomGroups(
   table: Table,
-  keys: readonly { vector: Vector | null }[],
+  keys: readonly {vector: Vector | null}[],
   keyCount: number,
   compiled: ReturnType<typeof compileArrowAggregatePlan>,
   custom: ReadonlyMap<string, BoundRelationAggregate>,
-  options: ArrowExpressionOptions & { signal?: AbortSignal }
+  options: ArrowExpressionOptions & {signal?: AbortSignal}
 ) {
   const groups = new Map<string, number[]>();
   if (!keyCount) groups.set('[]', []);
   for (let row = 0; keyCount && row < table.numRows; row++) {
     options.signal?.throwIfAborted();
     const key = JSON.stringify(
-      keys.map(({ vector }) => {
+      keys.map(({vector}) => {
         const value = vector!.get(row);
         return [typeof value, String(value)];
       })
@@ -292,16 +292,16 @@ function evaluateCustomGroups(
   }
 
   const rows = [...groups.values()];
-  const representatives = rows.flatMap((indexes) => (indexes.length ? [indexes[0]!] : []));
-  const values = rows.map((indexes) => {
+  const representatives = rows.flatMap(indexes => (indexes.length ? [indexes[0]!] : []));
+  const values = rows.map(indexes => {
     const input = keyCount ? takeArrowTableRows(table, Int32Array.from(indexes)) : table;
     const output = compiled.evaluate(input, options);
     for (const [name, aggregate] of custom) {
-      Object.defineProperty(output, name, { value: aggregate.evaluate(input) });
+      Object.defineProperty(output, name, {value: aggregate.evaluate(input)});
     }
     return output;
   });
-  return { representatives, values };
+  return {representatives, values};
 }
 
 /** Derives output fields consistently for materialized and incremental aggregates. */
@@ -331,8 +331,8 @@ function getScalarColumn(
   table: Table,
   name: string,
   operation: 'join' | 'order' | 'group' = 'join'
-): { field: Field; vector: Vector | null } {
-  const field = table.schema.fields.find((field) => field.name === name);
+): {field: Field; vector: Vector | null} {
+  const field = table.schema.fields.find(field => field.name === name);
   if (!field) throw new Error(`Arrow query column not found: ${name}`);
   const type = valueType(field.type);
   if (
@@ -348,5 +348,5 @@ function getScalarColumn(
   ) {
     throw new Error(`Unsupported Arrow relational key type: ${type}`);
   }
-  return { field, vector: table.getChild(name) };
+  return {field, vector: table.getChild(name)};
 }
