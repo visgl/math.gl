@@ -55,6 +55,7 @@ Use `queryArrowSQL(sql, tables)` to run relational SQL directly against a map of
 Arrow tables. It supports one `INNER JOIN` or `LEFT JOIN` on an equality condition per SELECT, column-based grouping,
 top-level aggregate calls, ordering by output columns, and UNION ALL with matching
 output schemas. Use inner or left joins for table lookups. Trailing ORDER BY, OFFSET, and LIMIT apply to the combined result.
+Arrow timestamp columns can be used as ordering and grouping keys. Comparisons retain the precision of the stored timestamp unit.
 
 ```ts
 import {queryArrowSQL} from '@math.gl/sql/query';
