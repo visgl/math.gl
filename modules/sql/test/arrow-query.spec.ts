@@ -259,3 +259,26 @@ test('streaming queries can emit projected empty batches with source batch metad
     1
   );
 });
+
+test('reduces compound groups across chunks in first-seen order', () => {
+  const chunk = (keys: (string | null)[], groups: number[], values: (number | null)[]) =>
+    new Table({
+      key: vectorFromArray(keys, new Utf8()),
+      group: vectorFromArray(groups, new Int32()),
+      amount: vectorFromArray(values, new Int32())
+    });
+  const input = chunk(['a', 'a', null], [2, 1, 1], [4, 1, null]).concat(
+    chunk(['a', null, 'a'], [2, 1, 1], [6, 3, null])
+  );
+  const result = queryArrowTable(input, {
+    groupBy: ['key', 'group'],
+    aggregates: {
+      count: {operation: 'COUNT'},
+      sum: {operation: 'SUM', expression: 'amount'}
+    }
+  });
+  expect([...result.getChild('key')!]).toEqual(['a', 'a', null]);
+  expect([...result.getChild('group')!]).toEqual([2, 1, 1]);
+  expect([...result.getChild('count')!]).toEqual([2n, 2n, 2n]);
+  expect([...result.getChild('sum')!]).toEqual([10n, 1n, 3n]);
+});

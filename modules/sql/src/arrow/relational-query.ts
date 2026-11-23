@@ -15,7 +15,7 @@ import {
   type Vector
 } from 'apache-arrow';
 import {takeArrowTableRows, validateArrowTableSchema} from '@math.gl/core/arrow';
-import {compileArrowAggregates, type ArrowAggregate} from './aggregates';
+import {compileArrowAggregatePlan, type ArrowAggregate} from './aggregates';
 import {compareUTF8} from '@math.gl/core/utf8';
 import {ColumnReader, valueType} from './buffers';
 import {compileArrowExpression, writeArrowExpressionValues} from './compiler';
@@ -225,33 +225,12 @@ export function groupArrowTable(
   const names = [...groupBy, ...definitions.map(([name]) => name), ...custom.keys()];
   if (new Set(names).size !== names.length) throw new Error('Duplicate Arrow grouping output name');
 
-  const compiled = compileArrowAggregates(aggregates, options);
-  const groups = new Map<string, number[]>();
-  if (!groupBy.length) groups.set('[]', []);
-  for (let row = 0; groupBy.length && row < table.numRows; row++) {
-    options.signal?.throwIfAborted();
-    const key = JSON.stringify(
-      keys.map(({vector}) => {
-        const value = vector!.get(row);
-        return [typeof value, String(value)];
-      })
-    );
-    const rows = groups.get(key);
-    if (rows) rows.push(row);
-    else groups.set(key, [row]);
-  }
-
-  const rows = [...groups.values()];
-  const representatives = rows.flatMap(indexes => (indexes.length ? [indexes[0]!] : []));
-  const selected = takeArrowTableRows(table, Int32Array.from(representatives));
-  const results = rows.map(indexes => {
-    const input = groupBy.length ? takeArrowTableRows(table, Int32Array.from(indexes)) : table;
-    const output = compiled.evaluate(input, options);
-    for (const [name, aggregate] of custom) {
-      Object.defineProperty(output, name, {value: aggregate.evaluate(input)});
-    }
-    return output;
-  });
+  const compiled = compileArrowAggregatePlan(aggregates, options);
+  const {representatives, values: results} =
+    groupBy.length && !custom.size
+      ? compiled.evaluateGroups(table, groupBy, options.signal)
+      : evaluateCustomGroups(table, keys, groupBy.length, compiled, custom, options);
+  const selected = takeArrowTableRows(table.select([...groupBy]), Int32Array.from(representatives));
   const aggregateFields = [
     ...getArrowAggregateFields(aggregates, options),
     ...Array.from(custom, ([name, aggregate]) => aggregate.outputField.clone({name}))
@@ -281,6 +260,43 @@ export function groupArrowTable(
     })
   ];
   return new Table(schema, Object.fromEntries(names.map((name, index) => [name, columns[index]!])));
+}
+
+/** Custom reducers receive per-group tables through the table function API. */
+function evaluateCustomGroups(
+  table: Table,
+  keys: readonly {vector: Vector | null}[],
+  keyCount: number,
+  compiled: ReturnType<typeof compileArrowAggregatePlan>,
+  custom: ReadonlyMap<string, BoundRelationAggregate>,
+  options: ArrowExpressionOptions & {signal?: AbortSignal}
+) {
+  const groups = new Map<string, number[]>();
+  if (!keyCount) groups.set('[]', []);
+  for (let row = 0; keyCount && row < table.numRows; row++) {
+    options.signal?.throwIfAborted();
+    const key = JSON.stringify(
+      keys.map(({vector}) => {
+        const value = vector!.get(row);
+        return [typeof value, String(value)];
+      })
+    );
+    const rows = groups.get(key);
+    if (rows) rows.push(row);
+    else groups.set(key, [row]);
+  }
+
+  const rows = [...groups.values()];
+  const representatives = rows.flatMap(indexes => (indexes.length ? [indexes[0]!] : []));
+  const values = rows.map(indexes => {
+    const input = keyCount ? takeArrowTableRows(table, Int32Array.from(indexes)) : table;
+    const output = compiled.evaluate(input, options);
+    for (const [name, aggregate] of custom) {
+      Object.defineProperty(output, name, {value: aggregate.evaluate(input)});
+    }
+    return output;
+  });
+  return {representatives, values};
 }
 
 /** Derives output fields consistently for materialized and incremental aggregates. */
