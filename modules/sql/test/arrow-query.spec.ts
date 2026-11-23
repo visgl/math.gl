@@ -328,8 +328,8 @@ test('groups binary keys by contents across chunks and distinguishes empty keys 
 });
 test('orders and groups Arrow dates without decoding their payloads', () => {
   for (const type of [new DateDay(), new DateMillisecond()]) {
-    const first = new Date('2024-01-01');
-    const second = new Date('2024-01-02');
+    const first = new Date(0);
+    const second = new Date(2 ** 32);
     const table = new Table({
       day: vectorFromArray([second, null, first, first], type),
       id: vectorFromArray([1, 2, 3, 4], new Int32())
@@ -346,6 +346,8 @@ test('orders and groups Arrow dates without decoding their payloads', () => {
       aggregates: {count: {operation: 'COUNT'}}
     });
     expect(grouped.getChild('day')!.type.toString()).toBe(type.toString());
+    const secondDate = type instanceof DateDay ? 49 * 86_400_000 : 2 ** 32;
+    expect([...grouped.getChild('day')!]).toEqual([0, secondDate, null]);
     expect([...grouped.getChild('count')!]).toEqual([2n, 1n, 1n]);
   }
 });
