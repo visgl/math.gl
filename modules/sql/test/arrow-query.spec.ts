@@ -417,3 +417,42 @@ test('structured LEFT JOIN rejects incompatible key types even on an empty looku
     })
   ).toThrow(/Incompatible Arrow JOIN key types/);
 });
+
+test('equijoin gathers alternating real lookup chunks without fragmenting output', () => {
+  const count = 4000;
+  const left = tableFromArrays({id: Int32Array.from({length: count}, (_, id) => id)});
+  const half = (parity: number) =>
+    tableFromArrays({
+      key: Int32Array.from({length: count / 2}, (_, i) => i * 2 + parity),
+      value: Float32Array.from({length: count / 2}, (_, i) => (i * 2 + parity) * 3 + 1)
+    });
+  const right = half(0).concat(half(1));
+  expect(right.batches).toHaveLength(2);
+  const result = queryArrowTable(left, {
+    join: {table: right, left: 'id', right: 'key', rightPrefix: 'right.'}
+  });
+  expect(result.numRows).toBe(count);
+  expect([...result.getChild('id')!]).toEqual(Array.from({length: count}, (_, i) => i));
+  expect([...result.getChild('right.key')!]).toEqual(Array.from({length: count}, (_, i) => i));
+  expect([...result.getChild('right.value')!]).toEqual(
+    Array.from({length: count}, (_, i) => i * 3 + 1)
+  );
+  expect(String(result.getChild('right.key')!.type)).toBe('Int32');
+  expect(String(result.getChild('right.value')!.type)).toBe('Float32');
+  expect(result.batches.length).toBeLessThanOrEqual(2);
+});
+
+test('LEFT JOIN gathers two real chunks together with missing lookup rows', () => {
+  const left = tableFromArrays({id: Int32Array.of(-1, 0, 1, 2, 3, 4)});
+  const right = tableFromArrays({key: Int32Array.of(0, 2), value: Int16Array.of(10, 12)}).concat(
+    tableFromArrays({key: Int32Array.of(1, 3), value: Int16Array.of(11, 13)})
+  );
+  const result = queryArrowTable(left, {
+    join: {type: 'left', table: right, left: 'id', right: 'key', rightPrefix: 'right.'}
+  });
+  expect(result.batches).toHaveLength(1);
+  expect([...result.getChild('id')!]).toEqual([-1, 0, 1, 2, 3, 4]);
+  expect([...result.getChild('right.value')!]).toEqual([null, 10, 11, 12, 13, null]);
+  expect(String(result.getChild('right.value')!.type)).toBe('Int16');
+  expect(result.schema.fields[2]!.nullable).toBe(true);
+});
