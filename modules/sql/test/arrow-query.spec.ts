@@ -2,7 +2,16 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Float64, Int32, Int64, Table, Utf8, vectorFromArray} from 'apache-arrow';
+import {
+  Binary,
+  FixedSizeBinary,
+  Float64,
+  Int32,
+  Int64,
+  Table,
+  Utf8,
+  vectorFromArray
+} from 'apache-arrow';
 import {expect, test} from 'vitest';
 import {queryArrowTable, queryArrowTableInBatches, queryArrowSQL} from '@math.gl/sql/query';
 import {parseSQLQuery} from '@math.gl/sql/parser';
@@ -298,4 +307,20 @@ test('sorts across sliced chunks and preserves stable ties through pagination', 
     limit: 5
   });
   expect([...result.getChild('id')!]).toEqual([26, 29, 1, 4, 7]);
+});
+test('groups binary keys by contents across chunks and distinguishes empty keys from nulls', () => {
+  for (const type of [new Binary(), new FixedSizeBinary(2)]) {
+    const secondKey = type instanceof FixedSizeBinary ? Uint8Array.of(254, 0) : new Uint8Array();
+    const batch = (bytes: (Uint8Array | null)[]) => new Table({key: vectorFromArray(bytes, type)});
+    const input = batch([Uint8Array.of(255, 0), secondKey, null]).concat(
+      batch([Uint8Array.of(255, 0), Uint8Array.from(secondKey), null])
+    );
+    const result = queryArrowTable(input, {
+      groupBy: ['key'],
+      aggregates: {count: {operation: 'COUNT'}}
+    });
+    expect(result.getChild('key')!.type.toString()).toBe(type.toString());
+    expect([...result.getChild('key')!]).toEqual([Uint8Array.of(255, 0), secondKey, null]);
+    expect([...result.getChild('count')!]).toEqual([2n, 2n, 2n]);
+  }
 });
