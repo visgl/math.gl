@@ -276,13 +276,14 @@ function evaluateCustomGroups(
   custom: ReadonlyMap<string, BoundRelationAggregate>,
   options: ArrowExpressionOptions & {signal?: AbortSignal}
 ) {
+  const readers = keys.map(({vector}) => new ColumnReader(vector!));
   const groups = new Map<string, number[]>();
   if (!keyCount) groups.set('[]', []);
   for (let row = 0; keyCount && row < table.numRows; row++) {
     options.signal?.throwIfAborted();
     const key = JSON.stringify(
-      keys.map(({vector}) => {
-        const value = vector!.get(row);
+      readers.map(reader => {
+        const value = reader.get(row);
         return [typeof value, String(value)];
       })
     );
@@ -342,7 +343,7 @@ function getScalarColumn(
       DataType.isInt(type) ||
       DataType.isFloat(type) ||
       DataType.isUtf8(type) ||
-      (operation !== 'join' && DataType.isDate(type)) ||
+      (operation !== 'join' && (DataType.isDate(type) || DataType.isTimestamp(type))) ||
       (operation === 'group' && (DataType.isBinary(type) || DataType.isFixedSizeBinary(type)))
     )
   ) {
