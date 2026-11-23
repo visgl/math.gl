@@ -80,6 +80,27 @@ export function pointOnSegment(point: Position, a: Position, b: Position): boole
   return inBounds(point, a, b) && side(a, b, point) === 0;
 }
 
+/** Finds shared endpoints, including an endpoint lying in the other segment's interior. */
+export function endpointContacts(
+  a: readonly [Position, Position],
+  b: readonly [Position, Position]
+): Position[] {
+  const contacts: Position[] = [];
+  for (const [endpoints, other] of [
+    [a, b],
+    [b, a]
+  ] as const) {
+    for (const point of endpoints) {
+      if (
+        pointOnSegment(point, ...other) &&
+        !contacts.some(value => value[0] === point[0] && value[1] === point[1])
+      )
+        contacts.push(point);
+    }
+  }
+  return contacts;
+}
+
 /** Classifies a point as outside (-1), on the boundary (0), or inside (1). */
 export function locatePointInPolygon(point: Position, rings: readonly Path[]): -1 | 0 | 1 {
   let inside = false;

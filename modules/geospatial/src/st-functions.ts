@@ -35,6 +35,7 @@ import {normalizeCRSIdentifier} from './crs/crs-identifier';
 import {EPSG3857ToLngLat, EPSG4326ToEPSG3857} from './web-mercator/mercator-meters';
 import {vertexCount, memberCount, geometryMember} from './geometry-inspection';
 import {reduceLineVertices} from './line-simplification';
+import {polygonValidityReason} from './polygon-validity';
 import {simplifyPolygonTopology} from './polygon-simplification';
 import {collectPair, makeLine} from './geometry-constructors';
 import {EPSG3857_HALF_CIRCUMFERENCE} from './web-mercator/mercator-meters';
@@ -958,6 +959,26 @@ export const ST_COLLECT = /* @__PURE__ */ spatialFunction(
   true
 );
 
+/** Checks Polygon or MultiPolygon validity in XY. */
+export const ST_ISVALID = /* @__PURE__ */ spatialFunction(
+  'ST_IsValid',
+  [polygonKinds],
+  /* @__PURE__ */ new Bool(),
+  ([polygon]) => polygonValidityReason(polygon!) === undefined,
+  0,
+  true
+);
+
+/** Returns the first XY polygon validity diagnostic, or Valid Geometry. */
+export const ST_ISVALIDREASON = /* @__PURE__ */ spatialFunction(
+  'ST_IsValidReason',
+  [polygonKinds],
+  /* @__PURE__ */ new Utf8(),
+  ([polygon]) => polygonValidityReason(polygon!) ?? 'Valid Geometry',
+  0,
+  true
+);
+
 /** Returns an interior label point for a planar polygonal surface. */
 export const ST_POINTONSURFACE = /* @__PURE__ */ spatialFunction(
   'ST_PointOnSurface',
@@ -1109,6 +1130,8 @@ export const POSTGIS_SPATIAL_FUNCTIONS: readonly (ArrowTableFunction | Aggregate
     ST_LOCATEALONG,
     ST_LOCATEBETWEEN,
     ST_POINTONSURFACE,
+    ST_ISVALID,
+    ST_ISVALIDREASON,
     ST_CENTROID,
     ST_NPOINTS,
     ST_NUMGEOMETRIES,
