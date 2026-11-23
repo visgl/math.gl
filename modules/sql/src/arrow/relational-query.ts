@@ -219,7 +219,7 @@ export function groupArrowTable(
   options: ArrowExpressionOptions & {signal?: AbortSignal},
   custom: ReadonlyMap<string, BoundRelationAggregate> = new Map()
 ): Table {
-  const keys = groupBy.map(name => getScalarColumn(table, name));
+  const keys = groupBy.map(name => getScalarColumn(table, name, true));
   const fields = keys.map(({field}) => field);
   const definitions = Object.entries(aggregates);
   const names = [...groupBy, ...definitions.map(([name]) => name), ...custom.keys()];
@@ -322,7 +322,11 @@ export function getArrowAggregateFields(
 }
 
 /** Validates scalar key types consistently even when there are no rows. */
-function getScalarColumn(table: Table, name: string): {field: Field; vector: Vector | null} {
+function getScalarColumn(
+  table: Table,
+  name: string,
+  allowBinary = false
+): {field: Field; vector: Vector | null} {
   const field = table.schema.fields.find(field => field.name === name);
   if (!field) throw new Error(`Arrow query column not found: ${name}`);
   const type = valueType(field.type);
@@ -332,7 +336,8 @@ function getScalarColumn(table: Table, name: string): {field: Field; vector: Vec
       DataType.isBool(type) ||
       DataType.isInt(type) ||
       DataType.isFloat(type) ||
-      DataType.isUtf8(type)
+      DataType.isUtf8(type) ||
+      (allowBinary && (DataType.isBinary(type) || DataType.isFixedSizeBinary(type)))
     )
   ) {
     throw new Error(`Unsupported Arrow relational key type: ${type}`);

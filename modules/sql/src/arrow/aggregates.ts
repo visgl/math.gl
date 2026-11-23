@@ -224,6 +224,7 @@ export function compileArrowAggregatePlan<K extends string>(
     },
     evaluateGroups(table, keys, signal) {
       const keyTree = new Map<ArrowExpressionValue, GroupKey>();
+      const binaryKeys = new Map<number, Uint8Array[]>();
       const representatives: number[] = [];
       const states: Map<Group, State>[] = [];
       let offset = 0;
@@ -238,7 +239,8 @@ export function compileArrowAggregatePlan<K extends string>(
           let children = keyTree;
           let key: GroupKey | undefined;
           for (const reader of readers) {
-            const value = reader.get(row);
+            const raw = reader.get(row);
+            const value = raw instanceof Uint8Array ? internBinaryKey(binaryKeys, raw) : raw;
             key = children.get(value);
             if (!key) {
               key = {children: new Map()};
@@ -290,6 +292,22 @@ export function compileArrowAggregatePlan<K extends string>(
 
 function emptyState(group: Group): State {
   return {count: 0n, sum: group.integer ? 0n : 0, values: new Map()};
+}
+
+/** Hashes binary keys and checks byte equality before reusing their identity. */
+function internBinaryKey(buckets: Map<number, Uint8Array[]>, value: Uint8Array): Uint8Array {
+  let hash = 2166136261;
+  for (const byte of value) hash = Math.imul(hash ^ byte, 16777619);
+  const bucket = buckets.get(hash);
+  if (bucket) {
+    for (const candidate of bucket) {
+      if (!compareUTF8(candidate, 0, candidate.length, value, 0, value.length)) return candidate;
+    }
+    bucket.push(value);
+  } else {
+    buckets.set(hash, [value]);
+  }
+  return value;
 }
 
 /** Interned tuple prefix with state allocated only at a complete group key. */
