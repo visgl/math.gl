@@ -17,3 +17,5 @@ export {projectTextureCoordinates} from './utils/project-texture-coordinates';
 export type {ProjectTextureCoordinatesOptions} from './utils/project-texture-coordinates';
 
 export type {GeometryAttribute as UtilityGeometryAttribute} from './utils/geometry';
+
+export {anyBoundsOverlap, type Bounded} from './utils/bounds-overlap';

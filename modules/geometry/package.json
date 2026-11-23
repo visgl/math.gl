@@ -70,7 +70,8 @@
     "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.1"
+    "@math.gl/core": "5.0.1",
+    "robust-predicates": "^3.0.2"
   },
   "sideEffects": false,
   "peerDependencies": {
