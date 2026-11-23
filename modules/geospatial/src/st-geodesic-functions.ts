@@ -8,6 +8,7 @@ import {WGS84_RADIUS_X, WGS84_RADIUS_Z} from './constants';
 import {normalizeCRSIdentifier} from './crs/crs-identifier';
 import {EllipsoidGeodesic, type GeodesicLine} from './ellipsoid-geodesic';
 import {lineKinds, pointKinds, spatialFunction} from './spatial-sql';
+import {segmentizeFunction, type RouteSegment} from './route-editing';
 
 /** Ellipsoidal kernel with axes expressed in meters, initialized when first used. */
 let kernel: EllipsoidGeodesic | undefined;
@@ -245,9 +246,33 @@ export const ST_GEODESICDWITHIN = /* @__PURE__ */ spatialFunction(
   validateWGS84
 );
 
+/** Measures a WGS84 segment and creates its geodesic line only if it needs a split. */
+function ellipsoidalRouteSegment(a: readonly number[], b: readonly number[]): RouteSegment {
+  const solver = getKernel();
+  const {s12: length, azi1} = solver.inverse(a[1]!, a[0]!, b[1]!, b[0]!);
+  let line: GeodesicLine | undefined;
+  return {
+    length,
+    /** Samples the geodesic at a fraction of its total length. */
+    interpolate(fraction) {
+      line ??= solver.line(a[1]!, a[0]!, azi1);
+      const {lon2, lat2} = line.position(length * fraction);
+      return [lon2, lat2];
+    }
+  };
+}
+
+/** Densifies WGS84 routes with equal-length geodesic steps bounded in meters. */
+export const ST_GEODESICSEGMENTIZE = /* @__PURE__ */ segmentizeFunction(
+  'ST_GeodesicSegmentize',
+  ellipsoidalRouteSegment,
+  validateWGS84
+);
+
 /** Opt-in SQL package for ellipsoidal distance, length, and proximity. */
 export const GEODESIC_SPATIAL_FUNCTIONS = /* @__PURE__ */ Object.freeze([
   ST_GEODESICDISTANCE,
   ST_GEODESICLENGTH,
-  ST_GEODESICDWITHIN
+  ST_GEODESICDWITHIN,
+  ST_GEODESICSEGMENTIZE
 ]);

@@ -1486,3 +1486,66 @@ test('streams binary polygon unions and symmetric differences with native multip
   const identical = select('SELECT ST_SymDifference(b,b) AS changed FROM features', table);
   expect(identical.getChild('changed')!.get(0).length).toBe(0);
 });
+
+test('line merge crosses only degree-two endpoints and chains native results across batches', () => {
+  const geometries = [
+    parseWKT('MULTILINESTRING((0 0,4 0),(8 0,4 0))'),
+    parseWKT('MULTILINESTRING((0 0,4 0),(4 0,8 0),(4 0,4 4))'),
+    parseWKT('MULTILINESTRING((0 0,1 0),(1 0,1 1),(1 1,0 0))'),
+    parseWKT('MULTILINESTRING((0 0,4 0),(4.000001 0,8 0))'),
+    parseWKT('MULTILINESTRING EMPTY'),
+    null
+  ];
+  const g = makeArrowVectorFromGeoArrowColumn(makeGeoArrowColumnFromGeometryRows(geometries));
+  const table = new Table(new Schema([geometryField('g', g, 'multilinestring')]), {g});
+  const batched = new Table(table.schema, [
+    ...table.slice(0, 1).batches,
+    ...table.slice(1).batches
+  ]);
+  const result = select(
+    `SELECT ST_LineMerge(g) AS merged,
+            ST_Segmentize(ST_LineMerge(g), 3) AS route FROM features`,
+    batched
+  );
+  expect(result.batches.map(batch => batch.numRows)).toEqual([1, 5]);
+  expect(getGeoArrowFieldInfo(result.schema.fields[0]!)?.encoding).toBe('geoarrow.geometry');
+  expect(geometryAt(result, 'merged', 0)).toEqual(parseWKT('LINESTRING(0 0,4 0,8 0)'));
+  expect(geometryAt(result, 'route', 0)).toEqual(parseWKT('LINESTRING(0 0,2 0,4 0,6 0,8 0)'));
+  expect(geometryAt(result, 'merged', 1)).toEqual(geometries[1]);
+  expect(geometryAt(result, 'merged', 2)).toEqual(parseWKT('LINESTRING(0 0,1 0,1 1,0 0)'));
+  expect(geometryAt(result, 'merged', 3)).toEqual(geometries[3]);
+  expect(geometryAt(result, 'merged', 4)).toEqual(geometries[4]);
+  expect(geometryAt(result, 'route', 5)).toBeNull();
+});
+
+test('densifies native planar routes evenly, preserving their CRS and specialized encoding', () => {
+  const coordinates = wkb('LINESTRING(0 0,0 1,0 9)');
+  const decoded = [parseWKT('MULTILINESTRING((0 0,0 1,0 9),(1 10,1 18))')];
+  const route = makeArrowVectorFromGeoArrowColumn(makeGeoArrowColumnFromGeometryRows(decoded));
+  const crs = {crs: 'EPSG:3857'};
+  const table = new Table(
+    new Schema([
+      geometryField('route', route, 'multilinestring', crs),
+      geometryField('wkb', coordinates)
+    ]),
+    {route, wkb: coordinates}
+  );
+  const result = select(
+    'SELECT ST_Segmentize(route,5) AS native, ST_Segmentize(wkb,5) AS converted FROM features',
+    table
+  );
+  expect(getGeoArrowFieldInfo(result.schema.fields[0]!)).toMatchObject({
+    encoding: 'geoarrow.multilinestring',
+    metadata: crs
+  });
+  expect(geometryAt(result, 'native', 0)).toEqual(
+    parseWKT('MULTILINESTRING((0 0,0 1,0 5,0 9),(1 10,1 14,1 18))')
+  );
+  expect(geometryAt(result, 'converted', 0)).toEqual(parseWKT('LINESTRING(0 0,0 1,0 5,0 9)'));
+  expect(() => select('SELECT ST_Segmentize(route,0) FROM features', table)).toThrow(
+    /finite positive maximum segment length/
+  );
+  expect(() => select('SELECT ST_Segmentize(route,0.0000001) FROM features', table)).toThrow(
+    /would add more than/
+  );
+});
