@@ -7,7 +7,7 @@ import type {WellKnownGeometry} from '@math.gl/core/arrow';
 import {WGS84_RADIUS_X, WGS84_RADIUS_Z} from './constants';
 import {normalizeCRSIdentifier} from './crs/crs-identifier';
 import {EllipsoidGeodesic, type GeodesicLine} from './ellipsoid-geodesic';
-import {lineKinds, pointKinds, spatialFunction} from './spatial-sql';
+import {lineKinds, spatialFunction} from './spatial-sql';
 import type {PolylineSegment} from '@math.gl/geometry/polygon';
 import {segmentizeFunction} from './route-editing';
 
@@ -31,6 +31,38 @@ function meters(a: readonly number[], b: readonly number[]): number {
 /** Tests the coordinate representation of an empty point. */
 function emptyPoint(coordinate: readonly number[]): boolean {
   return !coordinate.length || coordinate.every(Number.isNaN);
+}
+
+/** Point families supported by the geodesic distance predicates. */
+const pointSetKinds = ['Point', 'MultiPoint'] as const;
+
+/** Returns the points in one geometry without copying its coordinate buffers. */
+function pointSet(geometry: WellKnownGeometry): readonly (readonly number[])[] {
+  if (geometry.type === 'Point') return [geometry.coordinates];
+  if (geometry.type === 'MultiPoint') return geometry.coordinates;
+  throw new Error('Expected Point or MultiPoint');
+}
+
+/** Finds the minimum pair distance, stopping once a requested threshold is reached. */
+function pointSetDistance(a: WellKnownGeometry, b: WellKnownGeometry, stopAt = 0): number | null {
+  const left = pointSet(a);
+  const points = pointSet(b);
+  const right = points.some(emptyPoint) ? points.filter(point => !emptyPoint(point)) : points;
+  let minimum = Infinity;
+  for (const x of left) {
+    if (emptyPoint(x)) continue;
+    for (const y of right) {
+      const distance = meters(x, y);
+      if (distance <= stopAt) return distance;
+      minimum = Math.min(minimum, distance);
+    }
+  }
+  return minimum === Infinity ? null : minimum;
+}
+
+/** Narrows the geometry to a point or MultiPoint. */
+function isPointSet(geometry: WellKnownGeometry): boolean {
+  return geometry.type === 'Point' || geometry.type === 'MultiPoint';
 }
 
 /** Linear paths, with no implicit connecting segment between parts. */
@@ -168,13 +200,15 @@ function proximityDistance(
   b: WellKnownGeometry,
   threshold = -1
 ): number | null {
+  if (isPointSet(a) && isPointSet(b)) {
+    return pointSetDistance(a, b, Math.max(0, threshold));
+  }
   const point = a.type === 'Point' ? a : b;
   if (point.type !== 'Point') throw new Error('Geodesic proximity requires at least one Point');
   const other = a.type === 'Point' ? b : a;
   if (emptyPoint(point.coordinates)) return null;
-  if (other.type === 'Point') {
-    return emptyPoint(other.coordinates) ? null : meters(point.coordinates, other.coordinates);
-  }
+  if (other.type !== 'LineString' && other.type !== 'MultiLineString')
+    throw new Error('Expected a Point or MultiPoint pair, or a Point paired with a route');
   return routeDistance(other, point.coordinates, threshold);
 }
 
@@ -203,9 +237,9 @@ function validateWGS84(crs: unknown, name: string): void {
 
 /** Geometry kinds accepted by point-to-point and point-to-route proximity. */
 
-const proximityKinds = [...pointKinds, ...lineKinds];
+const proximityKinds = [...pointSetKinds, ...lineKinds];
 
-/** Returns WGS84 point-to-point or point-to-route distance in meters. */
+/** Returns WGS84 point-set or point-to-route distance in meters. */
 export const ST_GEODESICDISTANCE = /* @__PURE__ */ spatialFunction(
   'ST_GeodesicDistance',
   [proximityKinds, proximityKinds],
@@ -229,7 +263,7 @@ export const ST_GEODESICLENGTH = /* @__PURE__ */ spatialFunction(
   validateWGS84
 );
 
-/** Checks an inclusive WGS84 point-to-point or point-to-route threshold in meters. */
+/** Checks an inclusive WGS84 point-set or point-to-route threshold in meters. */
 export const ST_GEODESICDWITHIN = /* @__PURE__ */ spatialFunction(
   'ST_GeodesicDWithin',
   [proximityKinds, proximityKinds],
@@ -237,7 +271,7 @@ export const ST_GEODESICDWITHIN = /* @__PURE__ */ spatialFunction(
   ([a, b], radius) => {
     if (!Number.isFinite(radius) || radius! < 0)
       throw new Error('ST_GeodesicDWithin requires a finite nonnegative radius in meters');
-    const limit = a!.type === 'Point' && b!.type === 'Point' ? radius! : radius! + SEARCH_TOLERANCE;
+    const limit = isPointSet(a!) && isPointSet(b!) ? radius! : radius! + SEARCH_TOLERANCE;
     const distance = proximityDistance(a!, b!, limit);
     return distance !== null && distance <= limit;
   },

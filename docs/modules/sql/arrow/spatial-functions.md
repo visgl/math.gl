@@ -277,12 +277,13 @@ ignored.
 
 | SQL function | Inputs | Result |
 | --- | --- | --- |
-| `ST_GeodesicDistance(a, b)` | Two points, or a Point and a LineString or MultiLineString in either order | Shortest distance in meters. Empty inputs yield null. |
+| `ST_GeodesicDistance(a, b)` | Point or MultiPoint for each input, or a Point and a LineString or MultiLineString in either order | Shortest distance in meters. Empty inputs yield null. |
 | `ST_GeodesicLength(route)` | LineString or MultiLineString | Sum of segment lengths in meters. Empty lines yield zero. |
 | `ST_GeodesicSegmentize(route, max_length)` | XY LineString or MultiLineString and a finite positive maximum length in meters | Native line geometry with equal-length subdivisions along the WGS84 ellipsoid. |
 | `ST_GeodesicDWithin(a, b, radius)` | Same geometry pairs as `ST_GeodesicDistance` and a finite nonnegative radius in meters | True when distance is at most the radius. Empty inputs yield false. |
 
-Point-to-route proximity measures to the interiors as well as the endpoints
+For Point and MultiPoint pairs, the distance is the minimum across all component
+point pairs. Point-to-route proximity measures to the interiors as well as the endpoints
 of the route's geodesic segments. MultiLineString parts are searched independently.
 The point-to-route threshold comparison allows 0.1 micrometers for
 numerical error. Null arguments propagate. Use `queryArrowTableInBatches` to
