@@ -246,7 +246,7 @@ export class SurfaceLayer extends SolidPolygonLayer {
           vec2 rainUV=vec2(atan(p.y,p.x)*85.,asin(clamp(p.z,-1.,1.))*30.);
           float lane=step(.94,fract(sin(floor(rainUV.x)*127.1)*43758.5));
           float streak=pow(max(0.,sin(rainUV.y+tectonicSurface.earlyImpactTime*25.)),18.);
-          color.rgb+=vec3(.22,.30,.36)*lane*streak*tectonicSurface.earlyRain;
+          color.rgb+=vec3(.22,.30,.36)*lane*streak*tectonicSurface.earlyRain*(.015+.985*day);
           color.a=tectonicSurface.earlyOpacity;
         }else if(tectonicSurface.isWater>.5){
           vec4 water=water_getColorMapped(surfacePosition+vec3(0.,0.,4.),
