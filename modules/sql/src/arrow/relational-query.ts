@@ -134,7 +134,7 @@ export function orderArrowTable(
   signal?: AbortSignal
 ): Table {
   const keys = orderBy.map(key => {
-    const {field, vector} = getScalarColumn(table, key.column);
+    const {field, vector} = getScalarColumn(table, key.column, 'order');
     return {
       ...key,
       reader: vector && new ColumnReader(vector),
@@ -219,7 +219,7 @@ export function groupArrowTable(
   options: ArrowExpressionOptions & {signal?: AbortSignal},
   custom: ReadonlyMap<string, BoundRelationAggregate> = new Map()
 ): Table {
-  const keys = groupBy.map(name => getScalarColumn(table, name, true));
+  const keys = groupBy.map(name => getScalarColumn(table, name, 'group'));
   const fields = keys.map(({field}) => field);
   const definitions = Object.entries(aggregates);
   const names = [...groupBy, ...definitions.map(([name]) => name), ...custom.keys()];
@@ -325,7 +325,7 @@ export function getArrowAggregateFields(
 function getScalarColumn(
   table: Table,
   name: string,
-  allowBinary = false
+  operation: 'join' | 'order' | 'group' = 'join'
 ): {field: Field; vector: Vector | null} {
   const field = table.schema.fields.find(field => field.name === name);
   if (!field) throw new Error(`Arrow query column not found: ${name}`);
@@ -337,7 +337,8 @@ function getScalarColumn(
       DataType.isInt(type) ||
       DataType.isFloat(type) ||
       DataType.isUtf8(type) ||
-      (allowBinary && (DataType.isBinary(type) || DataType.isFixedSizeBinary(type)))
+      (operation !== 'join' && DataType.isDate(type)) ||
+      (operation === 'group' && (DataType.isBinary(type) || DataType.isFixedSizeBinary(type)))
     )
   ) {
     throw new Error(`Unsupported Arrow relational key type: ${type}`);
