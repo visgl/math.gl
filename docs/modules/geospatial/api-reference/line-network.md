@@ -41,46 +41,67 @@ in degrees.
 | `pathIndices` | `{value, size}` | First vertex of each path, followed by the total vertex count (`pathCount + 1` values). |
 | `pathRows` | `ArrayLike<number>` (optional) | Source table row of each path. Defaults to the path index. |
 
-A path with fewer than two vertices gives no edge. To prepare WKB rows, use the
-[math.gl WKB reader](../../core/arrow/wkb/api-reference/wkb.md) to write XY
-coordinates and path offsets directly.
+A path with fewer than two vertices gives no edge. The
+[math.gl WKB reader](../../core/arrow/wkb/api-reference/wkb.md) can count line
+paths and vertices, then write directly into the final typed arrays.
 
 ```typescript
-import {inspectWKBHeader, visitWKB} from '@math.gl/core/arrow';
+import {inspectWKBHeader, visitWKB, type WKBVisitor} from '@math.gl/core/arrow';
 
 function readLines(wkbRows: readonly (Uint8Array | ArrayBuffer | null)[]) {
-  const positions: number[] = [];
-  const pathIndices: number[] = [0];
-  const pathRows: number[] = [];
-  wkbRows.forEach((wkb, row) => {
-    if (!wkb) return;
-    const {geometryType} = inspectWKBHeader(wkb);
-    if (geometryType !== 'LineString' && geometryType !== 'MultiLineString') return;
-    let pathEnd = positions.length / 2;
-    visitWKB(wkb, {
-      geometry(header, count) {
-        if (header.geometryType === 'LineString') {
-          pathEnd += count ?? 0;
-          pathIndices.push(pathEnd);
-          pathRows.push(row);
-        }
-      },
-      coordinate(x, y) {
-        positions.push(x, y);
+  let row = 0;
+  function visitLines(visitor: WKBVisitor) {
+    for (row = 0; row < wkbRows.length; row++) {
+      const wkb = wkbRows[row];
+      if (!wkb) continue;
+      const {geometryType} = inspectWKBHeader(wkb);
+      if (geometryType === 'LineString' || geometryType === 'MultiLineString') {
+        visitWKB(wkb, visitor);
       }
-    });
+    }
+  }
+
+  let vertexCount = 0;
+  let pathCount = 0;
+  visitLines({
+    geometry(header, count) {
+      if (header.geometryType === 'LineString') {
+        vertexCount += count ?? 0;
+        pathCount++;
+      }
+    }
   });
+
+  const positions = new Float64Array(2 * vertexCount);
+  const pathIndices = new Uint32Array(pathCount + 1);
+  const pathRows = new Uint32Array(pathCount);
+  let vertex = 0;
+  let path = 0;
+  visitLines({
+    geometry(header, count) {
+      if (header.geometryType === 'LineString') {
+        pathIndices[path + 1] = pathIndices[path] + (count ?? 0);
+        pathRows[path++] = row;
+      }
+    },
+    coordinate(x, y) {
+      positions[2 * vertex] = x;
+      positions[2 * vertex + 1] = y;
+      vertex++;
+    }
+  });
+
   return {
-    positions: {value: new Float64Array(positions), size: 2},
-    pathIndices: {value: new Uint32Array(pathIndices), size: 1},
-    pathRows: new Uint32Array(pathRows)
+    positions: {value: positions, size: 2},
+    pathIndices: {value: pathIndices, size: 1},
+    pathRows
   };
 }
 ```
 
-The reader handles LineString and MultiLineString rows without materializing
-geometry objects. If you already have flat binary lines, pass their interleaved
-positions and path offsets directly.
+The count pass skips ordinate decoding. The write pass reads XY directly into
+interleaved storage, retaining the original row for each multipart path. If you
+already have flat binary lines, pass their coordinates and offsets directly.
 
 ## Usage
 
