@@ -162,9 +162,19 @@ test('planar measurements and weighted centroids agree with PostGIS geometry fix
     'POINT EMPTY',
     null
   );
-  const table = new Table(new Schema([geometryField('shape', shape, 'wkb', {crs: 'EPSG:3857'})]), {
-    shape
-  });
+  const table = new Table(
+    new Schema([
+      geometryField('shape', shape, 'wkb', {
+        crs: 'EPSG:3857',
+        crs_type: 'authority_code',
+        geometry_types: ['Polygon'],
+        bbox: [0, 0, 8, 8]
+      })
+    ]),
+    {
+      shape
+    }
+  );
   const result = select(
     `SELECT ST_Area(shape) AS area, ST_Length(shape) AS length,
     ST_Centroid(shape) AS center, ST_Envelope(shape) AS extent FROM features`,
@@ -204,7 +214,7 @@ test('planar measurements and weighted centroids agree with PostGIS geometry fix
   });
   expect(result.schema.fields[2]!.metadata.get('ARROW:extension:name')).toBe('geoarrow.wkb');
   expect(result.schema.fields[2]!.metadata.get('ARROW:extension:metadata')).toBe(
-    '{"crs":"EPSG:3857"}'
+    '{"crs":"EPSG:3857","crs_type":"authority_code"}'
   );
 });
 
@@ -1007,14 +1017,30 @@ test('clips a native polygon without filling its hole and retains the CRS', () =
   expect(clipped?.type).toBe('Polygon');
   if (clipped?.type === 'Polygon') expect(clipped.coordinates).toHaveLength(2);
   expect(result.getChild('area')!.get(0)).toBe(8);
-  expect(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')).toBe(
-    JSON.stringify(metadata)
+  expect(JSON.parse(result.schema.fields[0]!.metadata.get('ARROW:extension:metadata')!)).toEqual(
+    metadata
   );
 });
 
 test('clipping an unlabeled geometry cannot assign the bounds CRS', () => {
   const g = wkb('POINT(1 1)');
   const table = new Table(new Schema([geometryField('g', g)]), {g});
+  const result = select(
+    `SELECT ST_ClipByBox2D(g,ST_SetSRID(ST_MakeEnvelope(0,0,2,2),3857)) AS clipped,
+    ST_SRID(ST_ClipByBox2D(g,ST_SetSRID(ST_MakeEnvelope(0,0,2,2),3857))) AS srid
+    FROM features`,
+    table
+  );
+  expect(geometryAt(result, 'clipped', 0)).toEqual(parseWKT('POINT(1 1)'));
+  expect(result.getChild('srid')!.get(0)).toBe(0);
+});
+
+test('clipping geometry with bounds metadata but no CRS cannot inherit the envelope CRS', () => {
+  const g = wkb('POINT(1 1)');
+  const table = new Table(
+    new Schema([geometryField('g', g, 'wkb', {geometry_types: ['Point'], bbox: [1, 1, 1, 1]})]),
+    {g}
+  );
   const result = select(
     `SELECT ST_ClipByBox2D(g,ST_SetSRID(ST_MakeEnvelope(0,0,2,2),3857)) AS clipped,
     ST_SRID(ST_ClipByBox2D(g,ST_SetSRID(ST_MakeEnvelope(0,0,2,2),3857))) AS srid
