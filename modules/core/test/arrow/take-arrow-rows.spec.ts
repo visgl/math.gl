@@ -104,3 +104,21 @@ test('single-chunk typed nulls retain valid record containers', () => {
   expect(result.get(0)!.value).toBeNull();
   expect(result.get(1)!.value).toBe(7);
 });
+
+test('multi-chunk gather treats independently created empty metadata maps as compatible', () => {
+  const table = arrow.tableFromArrays({value: Int32Array.of(10, 11, 20, 21)});
+  const source = new arrow.Table(
+    table.schema,
+    [0, 2].map(offset =>
+      createRecordBatchWithMetadata(
+        table.schema,
+        table.batches[0]!.data.slice(offset, 2),
+        new Map()
+      )
+    )
+  );
+  const result = takeArrowTableRows(source, Int32Array.of(0, 2, 1, 3));
+  expect(result.batches).toHaveLength(1);
+  expect([...result.getChild('value')!]).toEqual([10, 20, 11, 21]);
+  expect(getRecordBatchMetadata(result.batches[0]!)?.size).toBe(0);
+});

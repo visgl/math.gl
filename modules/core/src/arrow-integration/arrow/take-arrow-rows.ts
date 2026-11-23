@@ -63,11 +63,13 @@ export function takeArrowTableRows<T extends arrow.TypeMap>(
   // Avoid one output batch per row when selection repeatedly crosses compatible chunks.
   const sources = [...new Set(runs.map(run => run.batch))];
   const sourceBatches = sources.map(index => arrowTable.batches[index]!);
+  const metadata = sourceBatches[0] && getRecordBatchMetadata(sourceBatches[0]);
   const coalesce =
     runs.length > sources.length &&
-    sourceBatches.every(
-      batch => getRecordBatchMetadata(batch) === getRecordBatchMetadata(sourceBatches[0]!)
-    ) &&
+    sourceBatches.every(batch => {
+      const other = getRecordBatchMetadata(batch);
+      return other === metadata || !(other?.size || metadata?.size);
+    }) &&
     canGatherArrowChunks(sourceBatches.map(batch => batch.data));
   const sourceMap = new Map(sources.map((source, index) => [source, index]));
   const batches = (coalesce ? [runs] : runs.map(run => [run])).map(group => {
@@ -154,10 +156,8 @@ function canGatherArrowChunks(chunks: readonly arrow.Data[]): boolean {
   // IPC types through Duration use the physical layouts below. Newer view layouts
   // keep their chunk-local buffer references and stay on the source-run fallback.
   return (
-    (typeId === arrow.Type.Dictionary ||
-      (typeId >= arrow.Type.Null &&
-        typeId <= arrow.Type.Duration &&
-        typeId !== arrow.Type.Union)) &&
+    typeId <= arrow.Type.Duration &&
+    typeId !== arrow.Type.Union &&
     chunks.every(data => data.dictionary === first.dictionary) &&
     first.children.every((_, index) =>
       canGatherArrowChunks(chunks.map(data => data.children[index]!))
@@ -229,8 +229,8 @@ function gatherArrowChunks(
     } else {
       const values = new Uint8Array(length);
       rows.forEach(([source, index], output) => {
-        if (index < 0 || !chunks[source]!.getValid(index)) return;
         const data = chunks[source]!;
+        if (index < 0 || !data.getValid(index)) return;
         values.set(
           data.values.subarray(
             Number(data.valueOffsets[index]),
