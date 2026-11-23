@@ -39,6 +39,8 @@ test('multi-chunk gather preserves sliced physical storage, nested values and ty
   const chunks = source.slice(1, 2).concat(source.slice(2, 4));
   const result = takeArrowTableRows(chunks, Int32Array.of(-1, 0, 2, 0, 1, 2));
   expect(result.batches).toHaveLength(1);
+  expect(result.batches[0]!.data.nullCount).toBe(0);
+  expect(result.get(0)).not.toBeNull();
   expect(result.schema).toBe(chunks.schema);
   expect([...result.getChild('dictionary')!]).toEqual([null, 'b', 'd', 'b', 'c', 'd']);
   expect([...result.getChild('text')!]).toEqual([null, null, 'dddd', null, 'ccc', 'dddd']);
@@ -93,4 +95,12 @@ test('multi-chunk gather keeps distinct dictionaries on the source-run fallback'
   expect(data[0]!.dictionary).toBe(data[2]!.dictionary);
   expect(data[1]!.dictionary).toBe(data[3]!.dictionary);
   expect(data[0]!.dictionary).not.toBe(data[1]!.dictionary);
+});
+
+test('single-chunk typed nulls retain valid record containers', () => {
+  const source = arrow.tableFromArrays({value: Int32Array.of(7)});
+  const result = takeArrowTableRows(source, Int32Array.of(-1, 0));
+  expect(result.batches[0]!.data.nullCount).toBe(0);
+  expect(result.get(0)!.value).toBeNull();
+  expect(result.get(1)!.value).toBe(7);
 });

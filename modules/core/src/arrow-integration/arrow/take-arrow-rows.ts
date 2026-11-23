@@ -19,9 +19,9 @@ type TakeArrowContext = {
 /** One consecutive output run using the same source record batch. */
 type ArrowRowRun = {
   /** Source batch index. */
-  source: number;
+  batch: number;
   /** Source rows local to that batch, in output order. */
-  indexes: number[];
+  rows: number[];
 };
 
 /**
@@ -41,7 +41,7 @@ export function takeArrowTableRows<T extends arrow.TypeMap>(
   for (const index of indexes) {
     const previousRun = runs[runs.length - 1];
     if (index < 0 && previousRun) {
-      previousRun.indexes.push(-1);
+      previousRun.rows.push(-1);
       continue;
     }
     const sourceRow = index < 0 ? firstRow : index;
@@ -53,15 +53,15 @@ export function takeArrowTableRows<T extends arrow.TypeMap>(
       else upper = middle;
     }
     let run = runs[runs.length - 1];
-    if (!run || run.source !== lower) {
-      run = {source: lower, indexes: []};
+    if (!run || run.batch !== lower) {
+      run = {batch: lower, rows: []};
       runs.push(run);
     }
-    run.indexes.push(index < 0 ? -1 : index - offsets[lower]!);
+    run.rows.push(index < 0 ? -1 : index - offsets[lower]!);
   }
   const context: TakeArrowContext = {dictionaries: new WeakMap(), variadicBuffers: new WeakMap()};
   // Avoid one output batch per row when selection repeatedly crosses compatible chunks.
-  const sources = [...new Set(runs.map(run => run.source))];
+  const sources = [...new Set(runs.map(run => run.batch))];
   const sourceBatches = sources.map(index => arrowTable.batches[index]!);
   const coalesce =
     runs.length > sources.length &&
@@ -71,9 +71,9 @@ export function takeArrowTableRows<T extends arrow.TypeMap>(
     canGatherArrowChunks(sourceBatches.map(batch => batch.data));
   const sourceMap = new Map(sources.map((source, index) => [source, index]));
   const batches = (coalesce ? [runs] : runs.map(run => [run])).map(group => {
-    const chunks = coalesce ? sourceBatches : [arrowTable.batches[group[0]!.source]!];
+    const chunks = coalesce ? sourceBatches : [arrowTable.batches[group[0]!.batch]!];
     const rows = group.flatMap(run =>
-      run.indexes.map((index): ArrowChunkRow => [coalesce ? sourceMap.get(run.source)! : 0, index])
+      run.rows.map((index): ArrowChunkRow => [coalesce ? sourceMap.get(run.batch)! : 0, index])
     );
     const data = gatherArrowChunks(
       chunks.map(batch => batch.data),
@@ -82,7 +82,7 @@ export function takeArrowTableRows<T extends arrow.TypeMap>(
     );
     return createRecordBatchWithMetadata(
       arrowTable.schema,
-      data as arrow.Data<arrow.Struct<T>>,
+      data.clone(data.type, 0, data.length, 0) as arrow.Data<arrow.Struct<T>>,
       getRecordBatchMetadata(chunks[0]!)
     );
   });
@@ -150,14 +150,14 @@ type ArrowChunkRow = readonly [source: number, index: number];
 /** Requires identical dictionaries and excludes layouts with chunk-local buffer references. */
 function canGatherArrowChunks(chunks: readonly arrow.Data[]): boolean {
   const first = chunks[0]!;
-  const {typeId} = first.type;
+  const typeId = first.type.typeId;
   // IPC types through Duration use the physical layouts below. Newer view layouts
   // keep their chunk-local buffer references and stay on the source-run fallback.
-  const supported =
-    typeId === arrow.Type.Dictionary ||
-    (typeId >= arrow.Type.Null && typeId <= arrow.Type.Duration && typeId !== arrow.Type.Union);
   return (
-    supported &&
+    (typeId === arrow.Type.Dictionary ||
+      (typeId >= arrow.Type.Null &&
+        typeId <= arrow.Type.Duration &&
+        typeId !== arrow.Type.Union)) &&
     chunks.every(data => data.dictionary === first.dictionary) &&
     first.children.every((_, index) =>
       canGatherArrowChunks(chunks.map(data => data.children[index]!))
@@ -179,11 +179,10 @@ function gatherArrowChunks(
       rows.map(row => row[1]),
       context
     );
-  const vectors = chunks.map(data => new arrow.Vector([data]));
   const bitmap = new Uint8Array(Math.ceil(rows.length / 8));
   let nullCount = 0;
   rows.forEach(([source, index], output) => {
-    if (index >= 0 && vectors[source]!.isValid(index)) bitmap[output >> 3]! |= 1 << (output & 7);
+    if (index >= 0 && chunks[source]!.getValid(index)) bitmap[output >> 3]! |= 1 << (output & 7);
     else nullCount++;
   });
   const buffers: Partial<Buffers<arrow.DataType>> = {
@@ -206,7 +205,7 @@ function gatherArrowChunks(
     let length = 0;
     rows.forEach(([source, index], output) => {
       const data = chunks[source]!;
-      const valid = index >= 0 && vectors[source]!.isValid(index);
+      const valid = index >= 0 && chunks[source]!.getValid(index);
       const begin =
         fixed !== undefined ? index * fixed : valid ? Number(data.valueOffsets[index]) : 0;
       const end =
@@ -230,7 +229,7 @@ function gatherArrowChunks(
     } else {
       const values = new Uint8Array(length);
       rows.forEach(([source, index], output) => {
-        if (index < 0 || !vectors[source]!.isValid(index)) return;
+        if (index < 0 || !chunks[source]!.getValid(index)) return;
         const data = chunks[source]!;
         values.set(
           data.values.subarray(
