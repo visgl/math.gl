@@ -16,7 +16,7 @@ export type LineNetworkBenchmarkCase = {
 /** The cases: the default build, interior-vertex splits, and crossings (which build the segment index). */
 export const LINE_NETWORK_BENCHMARK_CASES: LineNetworkBenchmarkCase[] = [
   {name: 'default (snap 1 m, junctions 1 m)', options: {snapTolerance: 1}},
-  {name: 'splitAtInteriorVertices', options: {snapTolerance: 1, splitAtInteriorVertices: true}},
+  {name: 'splitAtSharedVertices', options: {snapTolerance: 1, splitAtSharedVertices: true}},
   {name: 'splitAtCrossings', options: {snapTolerance: 1, splitAtCrossings: true}}
 ];
 

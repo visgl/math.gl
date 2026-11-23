@@ -43,8 +43,7 @@ and latitude in degrees.
 
 A path with fewer than two vertices gives no edge. math.gl does not depend on
 loaders.gl. To build the input from a column of WKB values, convert each row with
-loaders.gl (`@loaders.gl/core/geoarrow` in loaders.gl 5, `@loaders.gl/gis` in
-loaders.gl 4) and concatenate the paths:
+loaders.gl (`convertWKBToBinaryGeometry` from `@loaders.gl/core/geoarrow`, loaders.gl 5) and concatenate the paths:
 
 ```typescript
 import {convertWKBToBinaryGeometry} from '@loaders.gl/core/geoarrow';
@@ -85,7 +84,7 @@ vertex. Take the value at the first vertex of each path to get `pathRows`.
 Builds the graph.
 
 1. **Snap.** Path endpoints closer than `snapTolerance` metres join into one node. With
-   `splitAtInteriorVertices`, interior vertices snap too, and a path splits at an interior
+   `splitAtSharedVertices`, interior vertices snap too, and a path splits at an interior
    vertex that another vertex shares.
 2. **T-junctions.** A dangling end is an endpoint that no other vertex shares. It joins the
    nearest point on another path within `junctionTolerance` metres. That path splits
@@ -102,7 +101,7 @@ antimeridian.
 | --- | --- | --- |
 | `snapTolerance` | `1` | Metres. Vertices closer than this join into one node. Must be positive. |
 | `junctionTolerance` | `snapTolerance` | Metres. A dangling end joins the nearest other path within this distance. `0` turns T-junctions off. |
-| `splitAtInteriorVertices` | `false` | Also split paths at interior vertices that another vertex shares. |
+| `splitAtSharedVertices` | `false` | Also split paths at interior vertices that another vertex shares. |
 | `splitAtCrossings` | `false` | Add a node where two segments cross with no shared vertex. This also joins lines that cross with no connection, such as a bridge over a road or a pipe over a cable. |
 | `directed` | `false` | Edges are one-way, in path direction. `buildLineNetworkAdjacency` then lists each edge from its source only. |
 | `distance` | `haversineDistance` | `(lon1, lat1, lon2, lat2) => metres`. Measures edge lengths and junction gaps. The snap and junction searches always use the local metric frame. |
@@ -198,7 +197,7 @@ bridge over a road.
 const roads = buildLineNetwork(lines, {
   snapTolerance: 5,
   junctionTolerance: 50,
-  splitAtInteriorVertices: true
+  splitAtSharedVertices: true
 });
 ```
 
@@ -256,7 +255,7 @@ const secondsPerMetre = Float64Array.from(speedsInMetresPerSecond, speed => 1 / 
 const rail = buildLineNetwork(lines, {pathWeightFactors: secondsPerMetre});
 ```
 
-Stations on a line are usually vertices of the line. Use `splitAtInteriorVertices` so
+Stations on a line are usually vertices of the line. Use `splitAtSharedVertices` so
 that lines that share a station connect there.
 
 ### Utility networks
@@ -269,7 +268,7 @@ connectivity of the data, and a dangling end is a finding, not a gap to close.
 const utility = buildLineNetwork(lines, {
   snapTolerance: 0.01,
   junctionTolerance: 0,
-  splitAtInteriorVertices: true
+  splitAtSharedVertices: true
 });
 // Nodes of degree 1 are open ends. Connected components show isolated parts.
 ```

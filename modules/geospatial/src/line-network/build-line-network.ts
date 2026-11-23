@@ -57,7 +57,7 @@ export type BuildLineNetworkOptions = {
    */
   junctionTolerance?: number;
   /** Also split paths at interior vertices that another vertex shares. Default false. */
-  splitAtInteriorVertices?: boolean;
+  splitAtSharedVertices?: boolean;
   /**
    * Add a node where two segments cross with no shared vertex, and split both. Default false.
    * This also joins lines that cross with no connection, such as a bridge over a road.
@@ -430,7 +430,7 @@ function validateLines(lines: LineNetworkLines, options: BuildLineNetworkOptions
  * Builds a graph from line geometry.
  *
  * Every path with two or more vertices gives one edge between the nodes of its snapped
- * endpoints. `splitAtInteriorVertices` also cuts paths at interior vertices that another
+ * endpoints. `splitAtSharedVertices` also cuts paths at interior vertices that another
  * vertex shares. T-junctions (`junctionTolerance`, on by default) join dangling ends to the
  * interior of nearby paths. `splitAtCrossings` (off by default) adds a node where two segments
  * cross. Paths with fewer than two vertices are skipped. Snapping does not handle the
@@ -449,7 +449,7 @@ export function buildLineNetwork(
     throw new RangeError('buildLineNetwork: junctionTolerance must be zero or positive and finite');
   }
   const pathCount = validateLines(lines, options);
-  const split = Boolean(options.splitAtInteriorVertices);
+  const split = Boolean(options.splitAtSharedVertices);
   const crossings = Boolean(options.splitAtCrossings);
   const distance = options.distance ?? haversineDistance;
   const {value: positions, size} = lines.positions;

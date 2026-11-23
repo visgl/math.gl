@@ -87,7 +87,7 @@ describe('buildLineNetwork', () => {
     const plain = buildLineNetwork(input, {junctionTolerance: 0});
     expect(plain.edgeCount).toBe(2);
     expect(plain.nodeCount).toBe(4);
-    const split = buildLineNetwork(input, {splitAtInteriorVertices: true});
+    const split = buildLineNetwork(input, {splitAtSharedVertices: true});
     expect(split.edgeCount).toBe(3);
     expect(split.nodeCount).toBe(4);
     expect(Array.from(split.edgeRow)).toEqual([0, 0, 1]);
@@ -100,7 +100,7 @@ describe('buildLineNetwork', () => {
 
   it('does not split at interior vertices that no other line touches', () => {
     const net = buildLineNetwork(makeLines([0, 0, 0.001, 0, 0.002, 0.001]), {
-      splitAtInteriorVertices: true
+      splitAtSharedVertices: true
     });
     expect(net.edgeCount).toBe(1);
     expect(net.edgeLength[0]).toBeCloseTo(
@@ -147,8 +147,8 @@ describe('buildLineNetwork', () => {
         size: 3
       }
     };
-    const a = buildLineNetwork(xy, {splitAtInteriorVertices: true});
-    const b = buildLineNetwork(xyz, {splitAtInteriorVertices: true});
+    const a = buildLineNetwork(xy, {splitAtSharedVertices: true});
+    const b = buildLineNetwork(xyz, {splitAtSharedVertices: true});
     expect(Array.from(b.nodePositions)).toEqual(Array.from(a.nodePositions));
     expect(Array.from(b.edgeLength)).toEqual(Array.from(a.edgeLength));
     // Endpoint mode (the default) reads the same nodes.
@@ -377,7 +377,7 @@ describe('T-junctions', () => {
       [-77.6162 + east(326), lat - 2 * ONE_METRE, -77.6162 + east(326), lat - 0.01],
       [-77.6162 + east(1019 + 1050), lat + 17 * ONE_METRE, -77.6162 + east(2069), lat + 0.02]
     );
-    const options = {snapTolerance: 50, splitAtInteriorVertices: true};
+    const options = {snapTolerance: 50, splitAtSharedVertices: true};
     const before = buildLineNetwork(input, {...options, junctionTolerance: 0});
     const after = buildLineNetwork(input, options);
     const reach = (net: LineNetwork) => {
@@ -573,7 +573,7 @@ describe('edge weights', () => {
     );
     const fractions: number[] = [];
     buildLineNetwork(input, {
-      splitAtInteriorVertices: true,
+      splitAtSharedVertices: true,
       edgeWeight: (path, startFraction, endFraction) => {
         if (path === 0) fractions.push(startFraction, endFraction);
         return 1;
