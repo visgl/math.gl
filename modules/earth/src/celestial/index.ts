@@ -21,6 +21,13 @@ export {
   getBodyGravitationalParameter
 } from './solar-system-body';
 export type {SolarSystemBody, BodyRadii} from './solar-system-body';
+export {
+  ATMOSPHERE_WAVELENGTHS,
+  BODIES_WITH_ATMOSPHERE,
+  getBodyAtmosphere,
+  getRayleighCrossSection
+} from './body-atmosphere';
+export type {AtmosphereGas, AtmosphereRGB, BodyAtmosphere} from './body-atmosphere';
 export {getBodyRotationElements, getBodyFixedFrame} from './body-rotation';
 export type {BodyRotationElements} from './body-rotation';
 export {getApproximatePlanetPosition} from './planet-elements';

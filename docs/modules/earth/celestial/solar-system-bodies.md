@@ -116,6 +116,71 @@ Returns the planetocentric `{longitude, latitude}` of the subsolar point in degr
 positive in (−180, 180]. The terminator is the great circle 90 degrees from this point, without
 refraction.
 
+## Atmospheres
+
+### getBodyAtmosphere(body)
+
+Returns the single-scattering atmosphere parameters of a body, or `null` for the Sun, Mercury and
+the Moon. Mercury and the Moon have only a surface-bounded exosphere. `BODIES_WITH_ATMOSPHERE`
+lists the bodies that have parameters: Venus, the Earth, Mars and the four giant planets.
+
+```ts
+import {getBodyAtmosphere} from '@math.gl/earth/celestial';
+
+const mars = getBodyAtmosphere('mars');
+// Vertical Mie optical depth at 550 nm: 0.5.
+const tau = mars.mieExtinction[1] * mars.mieScaleHeight;
+```
+
+The model is a spherical shell from `baseRadius` to `topRadius` (metres) with two exponential
+profiles: gas (Rayleigh) and aerosols (Mie). Each coefficient is the value at the base, in m⁻¹,
+for the wavelengths `ATMOSPHERE_WAVELENGTHS` (680, 550 and 440 nm). At height h above the base,
+the coefficient is the base value times exp(−h / H). Use the phase and Chapman functions of
+[`@math.gl/earth/sun`](../sun/api-reference/sun.md) (`getRayleighPhaseFunction`,
+`getHenyeyGreensteinPhaseFunction`, `getChapmanGrazingIncidenceFunction`) with these parameters.
+
+| Field | Unit | Meaning |
+| --- | --- | --- |
+| `baseAltitude`, `topAltitude` | m | Base and top of the shell above the equatorial radius of `getBodyRadii` |
+| `baseRadius`, `topRadius` | m | Equatorial radius plus the altitudes |
+| `rayleighScaleHeight`, `mieScaleHeight` | m | Scale heights H of the gas and the aerosols |
+| `rayleighScattering` | m⁻¹, RGB | Gas scattering at the base |
+| `mieScattering`, `mieExtinction` | m⁻¹, RGB | Aerosol scattering and extinction at the base; zero when there is no aerosol data |
+| `mieAsymmetry` | 1 | Henyey-Greenstein g of the aerosols |
+| `cloudDeck` | | `{albedo}` of an opaque deck at the base (Venus), or `null` |
+| `references` | | The sources of the values |
+
+| Body | Base | Top | Gas | Aerosols |
+| --- | --- | --- | --- | --- |
+| Venus | cloud tops, 70 km (VIRA, 3700 Pa, 230 K) | 110 km | 96.5 % CO2, H = 5.08 km | upper haze, τ = 0.3, H = 4 km, g = 0.7 |
+| Earth | surface | 60 km | Bruneton (2017) constants, H = 8 km | τ = 0.0053, H = 1.2 km, g = 0.8 |
+| Mars | surface (636 Pa, 214 K) | 80 km | 95.1 % CO2, H = 11.0 km | dust, τ = 0.5, H = 11.0 km, g = 0.65 |
+| Jupiter to Neptune | 1-bar level (the IAU radius) | 8 H | H2 and He at 1 bar, H of the fact sheet | none |
+
+The Earth has the demo constants of Bruneton (2017), which many renderers use. Its Rayleigh
+coefficient at 550 nm is about 18 % above the value of dry air at 15 °C and 101325 Pa. For the
+other bodies, the Rayleigh coefficient is the number density p / (k T) times the cross-section
+of `getRayleighCrossSection`.
+
+Limits:
+
+- The values are typical. They are not a model of seasons, weather or dust storms.
+- Ozone absorption (Earth) and methane absorption (Uranus, Neptune) are not modeled. Methane is
+  also left out of the Rayleigh sum.
+- The tops of the shells are model choices, at about 7 to 8 gas scale heights.
+- The cloud-deck albedo of Venus is a visual approximation near the Bond albedo 0.77, not a
+  measured spectrum.
+
+### getRayleighCrossSection(gas, wavelength)
+
+Returns the Rayleigh cross-section of one molecule in m²:
+σ = 24 π³ / (λ⁴ Nₛ²) ((nₛ² − 1) / (nₛ² + 2))² F (Bodhaine et al. 1999, eq. 2). `gas` is `'air'`,
+`'carbon-dioxide'`, `'hydrogen'` or `'helium'`. `wavelength` is in metres, from 0.4e−6 to
+0.8e−6. The refractivities are those of Ciddor (1996), Bideau-Mehu et al. (1973), Peck & Huang
+(1977) and Mansfield & Peck (1969). The King factor F of air is that of Bates (1984), mixed as
+Bodhaine et al. (1999) mix it. F is 1.15 for CO2 and 1 for H2 and He. For air at 550 nm the
+result is 4.51e−31 m².
+
 ## Qualification
 
 `modules/earth/scripts/celestial/generate-body-reference.py` writes the stored controls. It uses
@@ -148,3 +213,29 @@ The angle gates come from binary64: W reaches 3e7 degrees for Jupiter in 2100.
   161:105, doi:10.3847/1538-3881/abd414.
 - E. M. Standish and J. G. Williams, "Approximate Positions of the Planets", JPL Solar System
   Dynamics, https://ssd.jpl.nasa.gov/planets/approx_pos.html.
+- D. R. Bates (1984), "Rayleigh scattering by air", Planet. Space Sci. 32, 785-790,
+  doi:10.1016/0032-0633(84)90102-8.
+- A. Bideau-Mehu et al. (1973), "Interferometric determination of the refractive index of carbon
+  dioxide in the ultraviolet region", Opt. Commun. 9, 432-434, doi:10.1016/0030-4018(73)90289-7.
+- B. A. Bodhaine et al. (1999), "On Rayleigh optical depth calculations", J. Atmos. Oceanic
+  Technol. 16, 1854-1861, doi:10.1175/1520-0426(1999)016<1854:ORODC>2.0.CO;2.
+- E. Bruneton (2017), "Precomputed Atmospheric Scattering: a New Implementation",
+  https://github.com/ebruneton/precomputed_atmospheric_scattering.
+- P. E. Ciddor (1996), "Refractive index of air: new equations for the visible and near
+  infrared", Appl. Opt. 35, 1566, doi:10.1364/AO.35.001566.
+- M. T. Lemmon et al. (2015), "Dust aerosol, clouds, and the atmospheric optical depth record over
+  5 Mars years of the Mars Exploration Rover mission", Icarus 251, 96-111,
+  doi:10.1016/j.icarus.2014.03.029.
+- C. R. Mansfield and E. R. Peck (1969), "Dispersion of helium", J. Opt. Soc. Am. 59, 199,
+  doi:10.1364/JOSA.59.000199.
+- NASA GSFC Planetary Fact Sheets, https://nssdc.gsfc.nasa.gov/planetary/factsheet/.
+- E. R. Peck and S. Huang (1977), "Refractivity and dispersion of hydrogen in the visible and near
+  infrared", J. Opt. Soc. Am. 67, 1550, doi:10.1364/JOSA.67.001550.
+- A. Seiff et al. (1985), "Models of the structure of the atmosphere of Venus from the surface to
+  100 kilometers altitude", Adv. Space Res. 5(11), 3-58, doi:10.1016/0273-1177(85)90197-8.
+- V. Wilquet et al. (2009), "Preliminary characterization of the upper haze by SPICAV/SOIR solar
+  occultation in UV to mid-IR onboard Venus Express", J. Geophys. Res. 114, E00B42,
+  doi:10.1029/2008JE003186.
+- M. J. Wolff et al. (2009), "Wavelength dependence of dust aerosol single scattering albedo as
+  observed by the Compact Reconnaissance Imaging Spectrometer", J. Geophys. Res. 114, E00D04,
+  doi:10.1029/2009JE003350.
