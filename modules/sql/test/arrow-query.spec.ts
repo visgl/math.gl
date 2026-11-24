@@ -9,9 +9,12 @@ import {
   Dictionary,
   Field,
   FixedSizeBinary,
+  Float16,
   Float64,
   Int32,
   Int64,
+  LargeBinary,
+  LargeUtf8,
   RecordBatch,
   Schema,
   Table,
@@ -506,4 +509,59 @@ test('LEFT JOIN gathers two real chunks together with missing lookup rows', () =
   expect([...result.getChild('right.value')!]).toEqual([null, 10, 11, 12, 13, null]);
   expect(String(result.getChild('right.value')!.type)).toBe('Int16');
   expect(result.schema.fields[2]!.nullable).toBe(true);
+});
+
+test('portable predicates read Float16 storage, including sliced chunks', () => {
+  const values = makeVector(
+    makeData({type: new Float16(), length: 4, data: Uint16Array.of(0, 0x3c00, 0xc000, 0x4000)})
+  );
+  const table = new Table({value: values, id: vectorFromArray([0, 1, 2, 3], new Int32())}).slice(1);
+  const result = queryArrowTable(table, {
+    where: {op: '>', args: [{property: 'value'}, 1]},
+    select: ['id']
+  });
+  expect([...result.getChild('id')!]).toEqual([3]);
+});
+
+test('portable predicates compare strings and bytes with wide offsets', () => {
+  const table = new Table({
+    text: vectorFromArray(['skip', 'ést', null, 'test'], new LargeUtf8()),
+    bytes: vectorFromArray(
+      [Uint8Array.of(0), Uint8Array.of(2), null, Uint8Array.of(3)],
+      new LargeBinary()
+    ),
+    id: vectorFromArray([0, 1, 2, 3], new Int32())
+  }).slice(1);
+  const result = queryArrowTable(table, {
+    where: {
+      op: 'and',
+      args: [
+        {op: '=', args: [{property: 'text'}, 'ést']},
+        {op: 'in', args: [{property: 'bytes'}, [Uint8Array.of(2)]]}
+      ]
+    },
+    select: ['id']
+  });
+  expect([...result.getChild('id')!]).toEqual([1]);
+});
+
+test('portable predicates compare fixed-size binary values with literals of any width', () => {
+  const table = new Table({
+    bytes: vectorFromArray(
+      [Uint8Array.of(1, 2), Uint8Array.of(2, 1), null],
+      new FixedSizeBinary(2)
+    ),
+    id: vectorFromArray([0, 1, 2], new Int32())
+  });
+  const result = queryArrowTable(table, {
+    where: {
+      op: 'and',
+      args: [
+        {op: '<>', args: [{property: 'bytes'}, Uint8Array.of(1)]},
+        {op: 'in', args: [{property: 'bytes'}, [Uint8Array.of(1), Uint8Array.of(2, 1)]]}
+      ]
+    },
+    select: ['id']
+  });
+  expect([...result.getChild('id')!]).toEqual([1]);
 });
