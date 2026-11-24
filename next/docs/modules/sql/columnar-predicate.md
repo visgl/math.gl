@@ -29,3 +29,5 @@ const columns = getColumnarPredicateColumns(predicate); // ['height']
 
 const bound = bindColumnarPredicateParameters(predicate, {minimum: 100});
 ```
+
+`compileColumnarPredicate(bound, resolveColumn)` resolves each column path to a row accessor and returns a reusable predicate function. Keep a row only when the result is `true`. A `null` result represents SQL UNKNOWN, including comparisons with null or missing values. Bind parameters first and supply logical values, such as `Date` objects for dates. Use the typed Arrow executor for explicit casts.
