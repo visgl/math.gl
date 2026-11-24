@@ -69,9 +69,13 @@ try {
     import {createRequire} from 'node:module';
     import {Vector3} from '@math.gl/core/matrix';
     import {parseUTF8Number} from '@math.gl/core/utf8';
+    import {parseTWKB, writeTWKB} from '@math.gl/core/twkb';
     const require = createRequire(import.meta.url);
     assert.throws(() => require.resolve('apache-arrow'), {code: 'MODULE_NOT_FOUND'});
     assert.equal(new Vector3(1, 2, 3).length, 3);
+    const point = {type: 'Point', coordinates: [1, 2]};
+    assert.deepEqual(parseTWKB(writeTWKB(point)).geometry, point);
+    assert.deepEqual(require('@math.gl/core/twkb').parseTWKB(writeTWKB(point)).geometry, point);
     assert.equal(require('@math.gl/core/utf8').parseUTF8Number(new Uint8Array([49]), 0, 1), 1);
     assert.equal(parseUTF8Number(new Uint8Array([49]), 0, 1), 1);
     assert.equal(new (require('@math.gl/core/matrix').Vector3)(1, 2, 3).length, 3);
