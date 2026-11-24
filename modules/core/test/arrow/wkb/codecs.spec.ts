@@ -258,3 +258,22 @@ test.each(['xy', 'xyz', 'xym', 'xyzm'] as const)(
     expect(() => parseWKT('LINESTRING (EMPTY, 1 2)')).toThrow();
   }
 );
+
+test('WKT parses a root EWKT SRID without attaching it to collection children', () => {
+  const text = ' srid = 4326 ; GEOMETRYCOLLECTION (POINT (1 2))';
+  const result = parseWKTWithMetadata(text);
+  expect(result.srid).toBe(4326);
+  expect(result.children?.[0]).not.toHaveProperty('srid');
+  expect(parseWKT(text)).toEqual(result.geometry);
+  expect(parseWKTWithMetadata('SRID=0;POINT EMPTY').srid).toBe(0);
+  expect(() => parseWKT('SRID=4294967296;POINT EMPTY')).toThrow(/SRID/);
+  expect(() => parseWKT('SRID=4326 POINT EMPTY')).toThrow();
+});
+
+test('WKT enforces the configured collection nesting limit', () => {
+  const text = 'GEOMETRYCOLLECTION (GEOMETRYCOLLECTION (POINT EMPTY))';
+  expect(parseWKT(text, {maximumDepth: 2}).type).toBe('GeometryCollection');
+  expect(() => parseWKTWithMetadata(text, {maximumDepth: 1})).toThrow(/maximumDepth exceeded/);
+  expect(parseWKT('POINT (1 2)', {maximumDepth: 0}).type).toBe('Point');
+  expect(() => parseWKT(text, {maximumDepth: -1})).toThrow(/non-negative safe integer/);
+});

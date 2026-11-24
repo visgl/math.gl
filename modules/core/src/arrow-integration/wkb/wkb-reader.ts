@@ -39,8 +39,8 @@ export type WKBTraversalOptions = Readonly<{
 export type WKBVisitor = Readonly<{
   /** Called at the start of each geometry. `count` is points, rings, or child geometries. */
   geometry?: (header: WKBHeader, count: number | undefined, depth: number) => void;
-  /** Called at the start of each polygon ring. */
-  ring?: (pointCount: number, ringIndex: number, depth: number) => void;
+  /** Called for each polygon ring. The offset of its coordinate payload is relative to the input view. */
+  ring?: (pointCount: number, ringIndex: number, depth: number, byteOffset: number) => void;
   /**
    * Called for each coordinate without allocating a coordinate array.
    * Missing Z or M ordinates are passed as `undefined`.
@@ -231,7 +231,7 @@ function visitGeometry(
       for (let ringIndex = 0; ringIndex < ringCount; ringIndex++) {
         const pointCount = readCount(view, byteOffset, header.littleEndian, state);
         byteOffset += 4;
-        state.visitor.ring?.(pointCount, ringIndex, depth);
+        state.visitor.ring?.(pointCount, ringIndex, depth, byteOffset);
         byteOffset = visitCoordinateSequence(view, byteOffset, pointCount, header, state, depth);
       }
       break;
@@ -268,6 +268,11 @@ function visitCoordinateSequence(
   state: TraversalState,
   depth: number
 ): number {
+  if (!state.visitor.coordinate) {
+    const byteLength = pointCount * getWellKnownDimensionSize(header.dimension) * 8;
+    assertRemaining(view, byteOffset, byteLength);
+    return byteOffset + byteLength;
+  }
   for (let pointIndex = 0; pointIndex < pointCount; pointIndex++) {
     byteOffset = visitCoordinate(view, byteOffset, header, state.visitor, depth);
   }
