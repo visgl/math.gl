@@ -323,6 +323,20 @@ describe('gl-matrix compatibility API', () => {
     expect(mat4.ortho).toBe(mat4.orthoNO);
   });
 
+  test('quat.getAngle gives 0 instead of NaN for a unit quaternion and itself', () => {
+    for (const values of [
+      [1, 2, 3, 1],
+      [1, 2, 3, 0.3],
+      [1, 2, 1, 4],
+      [1, 2, 1, -5]
+    ]) {
+      // quat.create() stores 32-bit floats, so the angle is only close to 0
+      const q = quat.normalize(quat.create(), values);
+      expect(quat.getAngle(q, q)).toBeLessThan(1e-3);
+      expect(quat.getAngle(q, quat.scale(quat.create(), q, -1))).toBeLessThan(1e-3);
+    }
+  });
+
   test('quat covers axis-angle, interpolation, logarithms, and shortest rotations', () => {
     const out = quat.create();
     const q = quat.setAxisAngle(quat.create(), [0, 0, 1], Math.PI / 2);
