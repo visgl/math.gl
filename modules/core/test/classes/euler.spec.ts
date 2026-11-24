@@ -97,24 +97,37 @@ test('Euler#fromQuaternion supports every rotation order', () => {
   }
 });
 
+// Index of the angle that each order extracts first (the middle rotation), which locks at +-90 degrees.
+const MIDDLE_ANGLE: Record<string, number> = {xyz: 1, yxz: 0, zxy: 0, zyx: 1, yzx: 2, xzy: 2};
+
 test('Euler covers singular rotation matrices and invalid input paths', () => {
-  const singularComponents: Record<string, number> = {
-    xyz: 8,
-    yxz: 9,
-    zxy: 6,
-    zyx: 2,
-    yzx: 1,
-    xzy: 4
-  };
-  for (const [order, index] of Object.entries(singularComponents)) {
-    const matrix = Matrix4.IDENTITY.slice();
-    matrix[index] = 1;
-    expect(new Euler().fromRotationMatrix(matrix, order as never).order).toBe(order);
+  for (const [order, middle] of Object.entries(MIDDLE_ANGLE)) {
+    for (const sign of [1, -1]) {
+      const angles = [0.3, -1.1, 0.7];
+      angles[middle] = (sign * Math.PI) / 2;
+      const source = new Euler(angles[0], angles[1], angles[2], order as never);
+      const result = new Euler().fromRotationMatrix(source.getRotationMatrix(), order as never);
+      expect(result.order).toBe(order);
+      expect(result[middle]).toBe((sign * Math.PI) / 2);
+      expect(equals(result.getRotationMatrix(), source.getRotationMatrix())).toBe(true);
+    }
   }
   expect(() => new Euler().fromRotationMatrix(Matrix4.IDENTITY, 'invalid' as never)).toThrow(
     /Unknown Euler angle order/
   );
   expect(() => new Euler().fromObject({})).toThrow(/not implemented/);
+});
+
+test('Euler#fromRotationMatrix keeps rotations close to gimbal lock', () => {
+  for (const [order, middle] of Object.entries(MIDDLE_ANGLE)) {
+    for (const offset of [1e-3, 1e-4, 1e-6]) {
+      const angles = [0.3, -1.1, 0.7];
+      angles[middle] = Math.PI / 2 - offset;
+      const source = new Euler(angles[0], angles[1], angles[2], order as never);
+      const result = new Euler().fromRotationMatrix(source.getRotationMatrix(), order as never);
+      expect(equals(result.getRotationMatrix(), source.getRotationMatrix())).toBe(true);
+    }
+  }
 });
 
 test('Euler.fromQuaternion', () => {
