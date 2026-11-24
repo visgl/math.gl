@@ -17,7 +17,7 @@ export {
   isFixedSizeListArrowType,
   isNumericArrowType
 } from './arrow-column-utils';
-export {takeArrowTableRows} from './take-arrow-rows';
+export {selectArrowBatchRows, takeArrowTableRows} from './take-arrow-rows';
 
 export {getRecordBatchMetadata, createRecordBatchWithMetadata} from './arrow-record-batch';
 export {projectArrowTable, type ArrowColumnSelection} from './project-arrow-table';

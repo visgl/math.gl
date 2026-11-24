@@ -16,7 +16,7 @@ import {
   getRecordBatchMetadata,
   createRecordBatchWithMetadata,
   validateArrowTableSchema,
-  takeArrowTableRows
+  selectArrowBatchRows
 } from '@math.gl/core/arrow';
 import type {
   ColumnarPredicateParameterValues,
@@ -105,25 +105,6 @@ export function executeArrowTableQuery(
   }
 
   return executeArrowProjection(source, query, undefined, bindPredicate);
-}
-
-/** Selects increasing, unique batch-relative row indices and borrows contiguous runs. */
-export function selectArrowBatchRows(
-  batch: RecordBatch,
-  indexes: readonly number[],
-  schema: Schema
-): RecordBatch | undefined {
-  if (!indexes.length) return undefined;
-  if (indexes.length === batch.numRows) return batch;
-  const start = indexes[0]!;
-  if (indexes[indexes.length - 1]! - start + 1 === indexes.length) {
-    return createRecordBatchWithMetadata(
-      batch.schema,
-      batch.data.slice(start, indexes.length),
-      getRecordBatchMetadata(batch)
-    );
-  }
-  return takeArrowTableRows(new Table(schema, [batch]), Int32Array.from(indexes)).batches[0];
 }
 
 /** Executes an already filtered input, optionally binding prepared projection calls. */
