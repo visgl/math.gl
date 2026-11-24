@@ -106,6 +106,23 @@ test('WKT native classification infers unmarked input dimensions for an explicit
   ]);
 });
 
+test('WKT explicit dimensions pad collection members with missing inherited ordinates', () => {
+  const serialized = makeSerializedFixture(
+    'geoarrow.wkt',
+    'utf8',
+    new TextEncoder().encode('GEOMETRYCOLLECTION M (POINT (1 2), POINT (3 4 7))')
+  );
+  expect(materializeGeoArrowRows(decodeGeoArrowWKT(serialized, {dimension: 'xyzm'}))).toEqual([
+    {
+      type: 'GeometryCollection',
+      geometries: [
+        {type: 'Point', coordinates: [1, 2, 0, 0]},
+        {type: 'Point', coordinates: [3, 4, 0, 7]}
+      ]
+    }
+  ]);
+});
+
 test('WKT mixed decoding seeds the same union children in each chunk', () => {
   const left = encodeGeoArrowWKT(
     makeGeoArrowColumnFromGeometryRows([{type: 'Point', coordinates: [1, 2]}, null])

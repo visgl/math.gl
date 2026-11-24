@@ -983,7 +983,10 @@ export function decodeGeoArrowWKT(
     offsetType: options.offsetType
   };
   const requestedEncoding = options.encoding ?? 'native';
-  const parseOptions = {inferDimensions: options.dimension !== undefined};
+  const parseOptions = {
+    inferDimensions: options.dimension !== undefined,
+    allowMissingInheritedOrdinates: true
+  };
   const familiesByDepth: Set<GeoArrowDecodedGeometry['type']>[] = [];
   if (
     requestedEncoding === 'native' ||
