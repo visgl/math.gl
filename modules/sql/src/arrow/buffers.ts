@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {DataType, DateUnit, Int32, Precision, type Vector, type Data} from 'apache-arrow';
-import {float16Values, requireFloat16} from './float16';
+import {getFloat16ArrayConstructor, isFloat16ArrayConstructor} from '@math.gl/core/types';
+import {float16Values} from './float16';
 import {ExpressionEvaluationError} from '../expressions';
 import type {ArrowExpressionValue} from './types';
 
@@ -16,12 +17,9 @@ export function valueType(type: DataType): DataType {
 export function typeKey(type: DataType): string {
   type = valueType(type);
   if (DataType.isInt(type)) return `${type.isSigned ? 'i' : 'u'}${type.bitWidth}`;
-  if (DataType.isFloat(type)) {
-    if (type.precision === Precision.HALF) requireFloat16();
-    return `f${type.precision}`;
-  }
+  if (DataType.isFloat(type)) return `f${type.precision}`;
   if (DataType.isBool(type)) return 'bool';
-  if (DataType.isUtf8(type)) return 'utf8';
+  if (DataType.isUtf8(type) || DataType.isLargeUtf8(type)) return 'utf8';
   if (DataType.isDate(type)) return type.unit === DateUnit.DAY ? 'date32' : 'date64';
   if (DataType.isTimestamp(type)) {
     const unit = ['s', 'ms', 'us', 'ns'][type.unit];
@@ -29,10 +27,15 @@ export function typeKey(type: DataType): string {
   }
   if (DataType.isTime(type)) return 'time_' + type.unit;
   if (DataType.isDuration(type)) return 'duration_' + type.unit;
-  if (DataType.isBinary(type)) return 'binary';
+  if (isVariableBinary(type)) return 'binary';
   if (DataType.isFixedSizeBinary(type)) return `fixedsizebinary:${type.byteWidth}`;
   if (DataType.isNull(type)) return 'null';
   throw new Error(`Unsupported Arrow expression type: ${type}`);
+}
+
+/** Identifies variable-width byte strings with either offset width. */
+export function isVariableBinary(type: DataType): boolean {
+  return DataType.isBinary(type) || DataType.isLargeBinary(type);
 }
 
 /** Reader over Arrow chunks; slices already adjust numeric buffers and string offsets. */
@@ -41,7 +44,7 @@ export class ColumnReader {
   private chunkIndex = 0;
   private readonly location: [Data, number] = [null!, 0];
   private readonly range: [Uint8Array, number, number] = [null!, 0, 0];
-  private readonly half = new Map<Data, Float16Array>();
+  private readonly half = new Map<Data, Float16Array | null>();
   private readonly dictionaries = new Map<Data, ColumnReader>();
   private readonly decoder = new TextDecoder();
   constructor(readonly vector: Vector) {
@@ -50,7 +53,12 @@ export class ColumnReader {
       end += data.length;
       this.ends.push(end);
       if (DataType.isFloat(data.type) && data.type.precision === Precision.HALF)
-        this.half.set(data, float16Values(data.values as Uint16Array));
+        this.half.set(
+          data,
+          isFloat16ArrayConstructor(getFloat16ArrayConstructor())
+            ? float16Values(data.values as Uint16Array)
+            : null
+        );
       if (DataType.isDictionary(data.type))
         this.dictionaries.set(data, new ColumnReader(data.dictionary!));
     }
@@ -94,12 +102,15 @@ export class ColumnReader {
     const [data, index] = this.chunk(row);
     if (DataType.isDictionary(data.type))
       return this.dictionaries.get(data)!.get(Number(data.values[index]));
-    if (DataType.isUtf8(data.type))
+    if (DataType.isUtf8(data.type) || DataType.isLargeUtf8(data.type))
       return this.decoder.decode(
-        data.values.subarray(data.valueOffsets[index], data.valueOffsets[index + 1])
+        data.values.subarray(Number(data.valueOffsets[index]), Number(data.valueOffsets[index + 1]))
       );
-    if (DataType.isBinary(data.type))
-      return data.values.subarray(data.valueOffsets[index], data.valueOffsets[index + 1]);
+    if (isVariableBinary(data.type))
+      return data.values.subarray(
+        Number(data.valueOffsets[index]),
+        Number(data.valueOffsets[index + 1])
+      );
     if (DataType.isFixedSizeBinary(data.type))
       return data.values.subarray(data.stride * index, data.stride * (index + 1));
     if (DataType.isBool(data.type)) {
@@ -107,9 +118,9 @@ export class ColumnReader {
       return Boolean(data.values[bit >> 3]! & (1 << (bit & 7)));
     }
     // Temporal values use their physical units so microseconds never pass through Number.
-    return this.half.has(data)
-      ? this.half.get(data)![index]!
-      : (data.values[index] as number | bigint);
+    const half = this.half.get(data);
+    if (half !== undefined) return half ? half[index]! : this.vector.get(row);
+    return data.values[index] as number | bigint;
   }
   /** Resolves UTF-8 buffers, including dictionary values, without decoding. */
   utf8(row: number): [Uint8Array, number, number] {
@@ -179,7 +190,7 @@ export function createValueValidator(inputType: DataType): (value: ArrowExpressi
         throw new ExpressionEvaluationError('overflow', 'Invalid temporal epoch value');
     };
   }
-  if (DataType.isBinary(type) || DataType.isFixedSizeBinary(type)) {
+  if (isVariableBinary(type) || DataType.isFixedSizeBinary(type)) {
     return value => {
       if (value === null) return;
       if (

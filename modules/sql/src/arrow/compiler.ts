@@ -32,7 +32,14 @@ import {
 } from 'apache-arrow';
 import {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from '@math.gl/core/utf8';
 import {parse, validateExpressionAST, type Expression} from '../expressions';
-import {ColumnReader, typeKey, valueType, validateValue, createValueValidator} from './buffers';
+import {
+  ColumnReader,
+  typeKey,
+  isVariableBinary,
+  valueType,
+  validateValue,
+  createValueValidator
+} from './buffers';
 import {bindCast} from './cast';
 import {compileUTF8Like} from './like';
 import {float16Values, roundFloat16} from './float16';
@@ -227,7 +234,7 @@ function output(
 ): Vector {
   const type = valueType(field.type);
   const validate = createValueValidator(type);
-  if (DataType.isUtf8(type) || DataType.isBinary(type) || DataType.isFixedSizeBinary(type)) {
+  if (typeKey(type) === 'utf8' || isVariableBinary(type) || DataType.isFixedSizeBinary(type)) {
     const values: ArrowExpressionValue[] = new Array(active.length).fill(null);
     for (let row = 0; row < active.length; row++)
       if (active[row]) {
@@ -565,7 +572,10 @@ function bindNode(
       DataType.isTimestamp(type) &&
       type.unit === TimeUnit.SECOND &&
       typeof value === 'number';
-    if (!portableNumber && !fractionalTimestampSecond) validateValue(value, type);
+    const portableBinary =
+      options.portablePredicate && DataType.isFixedSizeBinary(type) && value instanceof Uint8Array;
+    if (!portableNumber && !portableBinary && !fractionalTimestampSecond)
+      validateValue(value, type);
     const rounded = portableNumber ? value : roundToType(type)(value);
     if (typeof value === 'number' && Number.isFinite(value) && !Number.isFinite(rounded))
       throw new Error(`Numeric literal overflow for ${type}`);
@@ -777,10 +787,10 @@ function bindBinary(ast: any, options: BindingOptions): Node {
   }
   const type = left.field.type,
     utf8 = typeKey(type) === 'utf8',
-    binary = DataType.isBinary(type) || DataType.isFixedSizeBinary(type),
+    binary = isVariableBinary(type) || DataType.isFixedSizeBinary(type),
     integer = DataType.isInt(type);
   const validate = createValueValidator(type);
-  const round = roundToType(type);
+  const round = comparison ? undefined : roundToType(type);
   const field = new Field(
     'expression',
     logical || comparison ? bool : type,
@@ -855,7 +865,7 @@ function bindBinary(ast: any, options: BindingOptions): Node {
                       : x / y
                     : x % y;
           validate(result);
-          const rounded = round(result);
+          const rounded = round!(result);
           if (!integer && Number.isFinite(x) && Number.isFinite(y) && !Number.isFinite(rounded))
             throw new ExpressionEvaluationError('overflow', 'Floating expression overflow');
           return rounded;
@@ -1067,7 +1077,7 @@ function bindMembership(arguments_: any[], options: BindingOptions): Node {
     return makeUnknownPredicate();
   const utf8 = typeKey(argument.field.type) === 'utf8';
   const binary =
-    DataType.isBinary(argument.field.type) || DataType.isFixedSizeBinary(argument.field.type);
+    isVariableBinary(argument.field.type) || DataType.isFixedSizeBinary(argument.field.type);
   const literals = arguments_.slice(1).map(value => bind(value, options, argument.field.type));
   // Every membership item is a scalar literal: convert and index once at compilation.
   const prepared = literals.map(value => value.constant!);
