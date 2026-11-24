@@ -98,3 +98,7 @@ const projected = projectArrowTable(arrowTable, [
 ### Column inspection[​](#column-inspection "Direct link to Column inspection")
 
 Use `isArrowTable(value)` and `isArrowRecordBatch(value)` to narrow an unknown value to an Apache Arrow `Table` or `RecordBatch`. Both guards recognize native Arrow values from different package copies. `findArrowColumn(table, ['feature', 'position'])` looks up a nested column and returns `null` if the path is missing. Pass a single segment to look up a literal field name that contains a dot. `isNumericArrowType` and `isFixedSizeListArrowType` inspect schema types without reading column values.
+
+### WKT header inspection[​](#wkt-header-inspection "Direct link to WKT header inspection")
+
+Use `inspectWKTHeader(text)` to read the root geometry type, declared Z/M dimension, and optional EWKT SRID. It returns `null` for unrecognized headers and does not parse coordinates or infer the dimensions of unmarked tuples.
