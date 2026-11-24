@@ -23,6 +23,7 @@ points can be used without Arrow; it is an optional peer dependency for those us
 | `@math.gl/sql/query` | Run [queries over Arrow tables](query.md), compute columns, or aggregate record batches. |
 | `@math.gl/sql/dataframe` | Wrap Arrow tables with the experimental DataFrame API and select an active GeoArrow field. |
 | `@math.gl/sql/parser` | [Parse SQL](parser/README.md) into expressions, predicates, or queries without executing it. |
+| `@math.gl/sql/columnar-predicate` | [Validate and bind portable predicates](columnar-predicate.md) without parsing or execution. |
 | `@math.gl/sql/expressions` | [Evaluate portable expressions](expressions.md) against JavaScript objects. |
 | `@math.gl/sql/arrow` | [Compile expressions and predicates](arrow/README.md) against an Arrow schema for reuse across batches. |
 | `@math.gl/sql/worker` | Run structured queries and expressions [off the calling thread](worker.md). |
