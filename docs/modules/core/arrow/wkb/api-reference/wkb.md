@@ -37,7 +37,8 @@ traversing the coordinate payload.
 #### `visitWKB(bytes, visitor, options?)`
 
 Traverses geometry, ring, and optional scalar-coordinate events without allocating geometry or
-coordinate objects. When `visitor.coordinate` is omitted, coordinate payloads are bounds-checked
+coordinate objects. The fourth argument to the ring callback is the coordinate payload byte
+offset relative to the start of the supplied buffer or view. When `visitor.coordinate` is omitted, coordinate payloads are bounds-checked
 and skipped without decoding their Float64 ordinates. This is the fast path for structural
 classification and vertex counting.
 

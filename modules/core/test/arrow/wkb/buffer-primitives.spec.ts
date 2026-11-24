@@ -71,6 +71,29 @@ test('visitWKB traverses nested mixed-endian geometry without row objects', () =
   expect(coordinates).toEqual([1, 2, 3, 4]);
 });
 
+test('visitWKB exposes ring coordinate offsets relative to the input view', () => {
+  const polygon = writePolygonWithBuilder({dimension: 'xyzm', byteOrder: 'big-endian'});
+  const padded = new Uint8Array(12 + polygon.length);
+  const input = padded.subarray(3);
+  const view = new DataView(input.buffer, input.byteOffset, input.byteLength);
+  view.setUint8(0, 1);
+  view.setUint32(1, 6, true);
+  view.setUint32(5, 1, true);
+  input.set(polygon, 9);
+
+  const rings: number[][] = [];
+  expect(
+    visitWKB(input, {
+      ring: (pointCount, ringIndex, depth, byteOffset) => {
+        rings.push([pointCount, ringIndex, depth, byteOffset]);
+      }
+    })
+  ).toBe(input.length);
+  expect(rings).toEqual([[5, 0, 1, 22]]);
+  expect(view.getFloat64(rings[0][3] + 16, false)).toBe(10);
+  expect(() => visitWKB(input.subarray(0, -1), {})).toThrow(/Unexpected end of WKB/);
+});
+
 test('scanWKB combines family counts, nesting, rings, coordinates, and XYZM bounds', () => {
   const polygon = writePolygonWithBuilder({dimension: 'xyzm'});
   expect(scanWKB(polygon)).toMatchObject({
