@@ -10,13 +10,10 @@ import {
   getGeoArrowVectorBounds,
   getGeoArrowVectorRowBounds,
   mapGeoArrowVectorCoordinates,
+  selectArrowBatchRows,
   type GeoArrowBounds
 } from '@math.gl/core/arrow';
-import {
-  executeArrowProjection,
-  selectArrowBatchRows,
-  type ArrowBatchQuery
-} from '../arrow/query-arrow-table';
+import {executeArrowProjection, type ArrowBatchQuery} from '../arrow/query-arrow-table';
 import {parseSQLExpression} from '../parser/parse-sql-expression';
 import type {SQLParameterOptions} from '../parser/sql-parameters';
 import {spatialJoin, type GeoDataFrameSpatialJoinOptions} from './spatial-join';
