@@ -65,6 +65,7 @@ The core package provides vectors, matrices, and rotations for 3D math, plus uti
 - [Core Guide](https://visgl.github.io/math.gl/docs/modules/core/guide.md): Guides and background for Core.
 - [Preliminaries](https://visgl.github.io/math.gl/docs/modules/core/guide/preliminaries.md): Mathematical foundations for working with transformations and 3D coordinates.
 - [@math.gl/core/matrix](https://visgl.github.io/math.gl/docs/modules/core/matrix.md): This entry point exposes the foundational core math API, including vectors, matrices, quaternions, Euler rotations, poses, coordinate conversions, numeric types, and utilities.
+- [@math.gl/core/twkb](https://visgl.github.io/math.gl/docs/modules/core/twkb.md): Import parseTWKB and writeTWKB from @math.gl/core/twkb. This entry point works without
 - [@math.gl/core/types](https://visgl.github.io/math.gl/docs/modules/core/types.md): @math.gl/core provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
 - [Array Types](https://visgl.github.io/math.gl/docs/modules/core/types/api-reference/array-types.md): math.gl provides a number of numeric array types.
 - [Bounds](https://visgl.github.io/math.gl/docs/modules/core/types/api-reference/bounds.md): Bounds is a type-only union of Bounds2D and Bounds3D. Each uses [minimum, maximum] coordinates.
@@ -307,6 +308,7 @@ A lightweight SQL query engine for Apache Arrow tables. Query tables already in 
 - [Spatial SQL functions](https://visgl.github.io/math.gl/docs/modules/sql/arrow/spatial-functions.md): Register spatial functions to calculate new columns from GeoArrow geometry. The same
 - [SQL expressions in Arrow](https://visgl.github.io/math.gl/docs/modules/sql/arrow/sql-conformance.md): Parse SQL with @math.gl/sql/parser, then bind the returned AST to an
 - [@math.gl/sql/color-functions](https://visgl.github.io/math.gl/docs/modules/sql/color-functions.md): @math.gl/sql/color-functions exports named ArrowTableFunction declarations for schema-bound expressions.
+- [@math.gl/sql/columnar-predicate](https://visgl.github.io/math.gl/docs/modules/sql/columnar-predicate.md): Use this entry point when a source or planner works with portable predicate trees.
 - [@math.gl/sql/scales-conformance](https://visgl.github.io/math.gl/docs/modules/sql/entry-points/scales-conformance.md): Run checks for declared scale semantics when implementing a scale consumer. See the scales reference.
 - [@math.gl/sql/expressions](https://visgl.github.io/math.gl/docs/modules/sql/expressions.md): Use @math.gl/sql/expressions to parse and evaluate expressions against JavaScript objects.
 - [@math.gl/sql/geoarrow-functions](https://visgl.github.io/math.gl/docs/modules/sql/geoarrow-functions.md): Register createGeoArrowConversionFunctions() to convert geometry columns between

@@ -217,3 +217,7 @@ nameColumn?.at(-1); // 'alpha'
 
 nameColumn?.slice(1).toArray(); // ['alpha']
 ```
+
+## Record batch row selection[​](#record-batch-row-selection "Direct link to Record batch row selection")
+
+Use `selectArrowBatchRows(batch, indexes)` from `@math.gl/core/arrow` to select in-range, increasing, unique row indices from one batch. Contiguous selections borrow the original buffers. Sparse selections gather the physical rows. Both paths retain batch metadata. An empty selection returns `undefined`.

@@ -19,6 +19,7 @@ Apache Arrow 17 or later is required for execution. The `/parser` and `/expressi
 | `@math.gl/sql/query`              | Run [queries over Arrow tables](https://visgl.github.io/math.gl/docs/modules/sql/query.md), compute columns, or aggregate record batches.                     |
 | `@math.gl/sql/dataframe`          | Wrap Arrow tables with the experimental DataFrame API and select an active GeoArrow field.                                                                            |
 | `@math.gl/sql/parser`             | [Parse SQL](https://visgl.github.io/math.gl/docs/modules/sql/parser.md) into expressions, predicates, or queries without executing it.                        |
+| `@math.gl/sql/columnar-predicate` | [Validate and bind portable predicates](https://visgl.github.io/math.gl/docs/modules/sql/columnar-predicate.md) without parsing or execution.                 |
 | `@math.gl/sql/expressions`        | [Evaluate portable expressions](https://visgl.github.io/math.gl/docs/modules/sql/expressions.md) against JavaScript objects.                                  |
 | `@math.gl/sql/arrow`              | [Compile expressions and predicates](https://visgl.github.io/math.gl/docs/modules/sql/arrow.md) against an Arrow schema for reuse across batches.             |
 | `@math.gl/sql/worker`             | Run structured queries and expressions [off the calling thread](https://visgl.github.io/math.gl/docs/modules/sql/worker.md).                                  |
