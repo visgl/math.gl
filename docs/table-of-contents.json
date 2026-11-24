@@ -162,6 +162,11 @@
           },
           {
             "type": "doc",
+            "id": "modules/core/twkb/README",
+            "label": "@math.gl/core/twkb"
+          },
+          {
+            "type": "doc",
             "id": "modules/core/utf8/README",
             "label": "@math.gl/core/utf8"
           },
