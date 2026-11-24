@@ -307,6 +307,7 @@ A lightweight SQL query engine for Apache Arrow tables. Query tables already in 
 - [Spatial SQL functions](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow/spatial-functions.md): Register spatial functions to calculate new columns from GeoArrow geometry. The same
 - [SQL expressions in Arrow](https://visgl.github.io/math.gl/next/docs/modules/sql/arrow/sql-conformance.md): Parse SQL with @math.gl/sql/parser, then bind the returned AST to an
 - [@math.gl/sql/color-functions](https://visgl.github.io/math.gl/next/docs/modules/sql/color-functions.md): @math.gl/sql/color-functions exports named ArrowTableFunction declarations for schema-bound expressions.
+- [@math.gl/sql/columnar-predicate](https://visgl.github.io/math.gl/next/docs/modules/sql/columnar-predicate.md): Use this entry point when a source or planner works with portable predicate trees.
 - [@math.gl/sql/scales-conformance](https://visgl.github.io/math.gl/next/docs/modules/sql/entry-points/scales-conformance.md): Run checks for declared scale semantics when implementing a scale consumer. See the scales reference.
 - [@math.gl/sql/expressions](https://visgl.github.io/math.gl/next/docs/modules/sql/expressions.md): Use @math.gl/sql/expressions to parse and evaluate expressions against JavaScript objects.
 - [@math.gl/sql/geoarrow-functions](https://visgl.github.io/math.gl/next/docs/modules/sql/geoarrow-functions.md): Register createGeoArrowConversionFunctions() to convert geometry columns between
