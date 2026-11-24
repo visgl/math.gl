@@ -3,7 +3,7 @@
 A fixed-tick time base for animated scenes. The clock converts real milliseconds to
 simulated seconds at a rate. It reports the ticks to step and the fraction `alpha`
 between two ticks, so a renderer can interpolate between tick states.
-Import `SimulationClock` and `interpolateTickState` from `@math.gl/core`.
+Import `SimulationClock` and `interpolateTickState` from `@math.gl/core/matrix`.
 
 ```js
 import {SimulationClock, interpolateTickState} from '@math.gl/core/matrix';
