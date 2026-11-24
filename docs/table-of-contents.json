@@ -175,7 +175,8 @@
         "items": [
           "modules/earth/celestial/README",
           "modules/earth/celestial/arrow-time-mapping",
-          "modules/earth/celestial/solar-system-bodies"
+          "modules/earth/celestial/solar-system-bodies",
+          "modules/earth/celestial/eclipses"
         ]
       },
       {
