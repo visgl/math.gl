@@ -52,7 +52,8 @@ export function parseWKB(bytes: Uint8Array, options: WKBParseOptions = {}): WKBP
     maximumDepth: validateLimit(options.maximumDepth, 64, 'maximumDepth'),
     maximumElements: validateLimit(options.maximumElements, 100_000_000, 'maximumElements'),
     memberEnds: options.captureMembers ? [] : undefined,
-    elementCount: 0
+    elementCount: 0,
+    normalizeEmptyPoints: options.normalizeEmptyPoints ?? false
   };
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const result = readWKBGeometry(view, 0, state, 0);

@@ -157,7 +157,9 @@ class WKTParser {
       return;
     }
     const infer = options.inferDimensions && !hasExplicitDimension && inheritedDimension === 'xy';
-    let coordinateSize = infer ? undefined : getWellKnownDimensionSize(dimension);
+    let coordinateSize: number | undefined = infer
+      ? undefined
+      : getWellKnownDimensionSize(dimension);
     this.parseCoordinateNesting(
       coordinateDepth,
       coordinateSize ?? null,
