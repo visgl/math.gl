@@ -77,6 +77,24 @@ CRS metadata is retained opaquely; interpretation, projection, and geographic ca
 
 The table views are read-only APIs, not deeply immutable snapshots. Treat their backing tables, index arrays, and maps as immutable while views are in use. Transport payloads are a math.gl protocol, not loaders.gl table wrappers.
 
+### Column projection[​](#column-projection "Direct link to Column projection")
+
+Use `projectArrowTable(table, selections)` to select and reorder top-level columns, with optional aliases. The returned table shares the original column buffers and retains field, schema, and batch metadata. Passing an empty selection keeps the original row count.
+
+```
+import {projectArrowTable} from '@math.gl/core/arrow';
+
+
+
+const projected = projectArrowTable(arrowTable, [
+
+  {column: 'score', as: 'value'},
+
+  'name'
+
+]);
+```
+
 ### Column inspection[​](#column-inspection "Direct link to Column inspection")
 
 Use `isArrowTable(value)` and `isArrowRecordBatch(value)` to narrow an unknown value to an Apache Arrow `Table` or `RecordBatch`. Both guards recognize native Arrow values from different package copies. `findArrowColumn(table, ['feature', 'position'])` looks up a nested column and returns `null` if the path is missing. Pass a single segment to look up a literal field name that contains a dot. `isNumericArrowType` and `isFixedSizeListArrowType` inspect schema types without reading column values.
