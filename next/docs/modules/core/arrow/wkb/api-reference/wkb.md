@@ -31,7 +31,7 @@ Reads endian order, geometry family, semantic dimension, dialect, and optional E
 
 #### `visitWKB(bytes, visitor, options?)`[​](#visitwkbbytes-visitor-options "Direct link to visitwkbbytes-visitor-options")
 
-Traverses geometry, ring, and optional scalar-coordinate events without allocating geometry or coordinate objects. When `visitor.coordinate` is omitted, coordinate payloads are bounds-checked and skipped without decoding their Float64 ordinates. This is the fast path for structural classification and vertex counting.
+Traverses geometry, ring, and optional scalar-coordinate events without allocating geometry or coordinate objects. The fourth argument to the ring callback is the coordinate payload byte offset relative to the start of the supplied buffer or view. When `visitor.coordinate` is omitted, coordinate payloads are bounds-checked and skipped without decoding their Float64 ordinates. This is the fast path for structural classification and vertex counting.
 
 #### `parseWKB(bytes, options?)`[​](#parsewkbbytes-options "Direct link to parsewkbbytes-options")
 
@@ -50,9 +50,13 @@ Writes deterministic little-endian ISO WKB. Dimension defaults to tuple inferenc
 
 ## Text[​](#text "Direct link to Text")
 
-#### `parseWKT(text)`[​](#parsewkttext "Direct link to parsewkttext")
+#### `parseWKT(text, options?)`[​](#parsewkttext-options "Direct link to parsewkttext-options")
 
-Parses all geometry families, Z/M/ZM tokens, nested collections, both MultiPoint spellings, empty geometry, decimal values, and exponent notation. Every non-whitespace input character must belong to a token.
+Parses all geometry families, Z/M/ZM tokens, nested collections, both MultiPoint spellings, empty geometry, decimal values, and exponent notation. Every non-whitespace input character must belong to a token. The optional EWKT prefix, such as `SRID=4326;`, is accepted. Set `inferDimensions` to infer unmarked coordinate dimensions. `maximumDepth` limits the number of enclosing collections and defaults to 64. A value of zero permits only root geometries.
+
+#### `parseWKTWithMetadata(text, options?)`[​](#parsewktwithmetadatatext-options "Direct link to parsewktwithmetadatatext-options")
+
+Uses the same options and returns the geometry, its semantic dimension, metadata for collection children, and the root `srid` when the EWKT prefix declares one.
 
 #### `formatWKT(geometry, dimension?)`[​](#formatwktgeometry-dimension "Direct link to formatwktgeometry-dimension")
 
