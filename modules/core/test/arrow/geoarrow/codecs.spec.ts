@@ -84,6 +84,17 @@ test('WKT decoding preserves chunks and honors explicit native storage', () => {
   );
 });
 
+test('WKT explicit dimensions preserve the distinction between Z and M', () => {
+  const serialized = makeSerializedFixture(
+    'geoarrow.wkt',
+    'utf8',
+    new TextEncoder().encode('POINT M (1 2 7)')
+  );
+  expect(materializeGeoArrowRows(decodeGeoArrowWKT(serialized, {dimension: 'xyzm'}))).toEqual([
+    {type: 'Point', coordinates: [1, 2, 0, 7]}
+  ]);
+});
+
 test('WKT mixed decoding seeds the same union children in each chunk', () => {
   const left = encodeGeoArrowWKT(
     makeGeoArrowColumnFromGeometryRows([{type: 'Point', coordinates: [1, 2]}, null])

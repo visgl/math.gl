@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {inspectWKBHeader, parseWKT, visitWKB} from '../wkb';
-import type {WKBHeader, WKBTraversalOptions} from '../wkb';
+import {inspectWKBHeader, parseWKT, parseWKTWithMetadata, visitWKB} from '../wkb';
+import type {WKBHeader, WKBTraversalOptions, WKTParseResult} from '../wkb';
 import {WKBBuilder} from '../wkb';
 import type {
   GeoArrowArray,
@@ -1011,7 +1011,13 @@ export function decodeGeoArrowWKT(
 
   const size = getGeoArrowDimensionSize(dimension);
   const chunks = column.chunks.map(chunk => {
-    const rows = Array.from(readWKTChunk(chunk), row => row && normalizeWKTGeometry(row, size));
+    const rows = Array.from(
+      options.dimension
+        ? readWKTChunk(chunk, text =>
+            remapWKTGeometry(parseWKTWithMetadata(text, {inferDimensions: true}), dimension)
+          )
+        : readWKTChunk(chunk, text => normalizeWKTGeometry(parseWKT(text), size))
+    );
     if (encoding === 'geoarrow.geometry' || encoding === 'geoarrow.geometrycollection') {
       return makeGeoArrowMixedGeometryChunk(
         rows,
@@ -1027,11 +1033,14 @@ export function decodeGeoArrowWKT(
 }
 
 /** Reads logical rows from one serialized chunk, honoring validity and slice offsets. */
-function* readWKTChunk(chunk: GeoArrowArray): Iterable<GeoArrowDecodedGeometry | null> {
+function* readWKTChunk(
+  chunk: GeoArrowArray,
+  decode: (text: string) => GeoArrowDecodedGeometry = parseWKT
+): Iterable<GeoArrowDecodedGeometry | null> {
   if (chunk.kind !== 'serialized') throw new Error('Serialized column contains native storage');
   for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
     yield isGeoArrowValueValid(chunk.validity, rowIndex)
-      ? parseWKT(textDecoder.decode(getSerializedBytes(chunk, rowIndex)))
+      ? decode(textDecoder.decode(getSerializedBytes(chunk, rowIndex)))
       : null;
   }
 }
@@ -1343,7 +1352,28 @@ function encodingFromName(name: string): import('./types').GeoArrowEncoding {
   return `geoarrow.${name.toLowerCase()}` as import('./types').GeoArrowEncoding;
 }
 
-/** Pads or truncates WKT coordinate tuples to the requested output width. */
+/** Remaps coordinates by semantic axis, including each collection member's dimension. */
+function remapWKTGeometry(
+  result: WKTParseResult,
+  dimension: GeoArrowDimension
+): GeoArrowDecodedGeometry {
+  const {geometry, dimension: sourceDimension, children} = result;
+  if (geometry.type === 'GeometryCollection') {
+    return {
+      type: geometry.type,
+      geometries: (children ?? []).map(child => remapWKTGeometry(child, dimension))
+    };
+  }
+  return mapWKTCoordinates(geometry, coordinate =>
+    Array.from(
+      dimension,
+      axis =>
+        coordinate[sourceDimension.indexOf(axis)] ?? (coordinate.every(Number.isNaN) ? NaN : 0)
+    )
+  );
+}
+
+/** Pads or truncates WKT coordinate tuples to the declared column width. */
 function normalizeWKTGeometry(
   geometry: GeoArrowDecodedGeometry,
   size: number
@@ -1354,20 +1384,30 @@ function normalizeWKTGeometry(
       geometries: geometry.geometries.map(child => normalizeWKTGeometry(child, size))
     };
   }
+  return mapWKTCoordinates(geometry, coordinate =>
+    Array.from({length: size}, (_, index) => coordinate[index] ?? 0)
+  );
+}
+
+/** Maps the coordinate tuples of a concrete WKT geometry. */
+function mapWKTCoordinates(
+  geometry: Exclude<GeoArrowDecodedGeometry, {type: 'GeometryCollection'}>,
+  mapCoordinate: (coordinate: readonly number[]) => number[]
+): GeoArrowDecodedGeometry {
   return {
     ...geometry,
-    coordinates: normalizeCoordinateNesting(geometry.coordinates, size)
+    coordinates: mapWKTCoordinateNesting(geometry.coordinates, mapCoordinate)
   } as GeoArrowDecodedGeometry;
 }
 
-function normalizeCoordinateNesting(value: readonly unknown[], size: number): unknown {
+/** Visits coordinate tuples while preserving their nesting and empty lists. */
+function mapWKTCoordinateNesting(
+  value: readonly unknown[],
+  mapCoordinate: (coordinate: readonly number[]) => number[]
+): unknown {
   if (value.length === 0) return [];
-  if (typeof value[0] === 'number') {
-    const coordinate = (value as readonly number[]).slice(0, size);
-    while (coordinate.length < size) coordinate.push(0);
-    return coordinate;
-  }
-  return value.map(child => normalizeCoordinateNesting(child as readonly unknown[], size));
+  if (typeof value[0] === 'number') return mapCoordinate(value as readonly number[]);
+  return value.map(child => mapWKTCoordinateNesting(child as readonly unknown[], mapCoordinate));
 }
 
 function getSerializedBytes(array: GeoArrowSerialized, rowIndex: number): Uint8Array {

@@ -266,6 +266,7 @@ across chunks. Invalid WKT and mismatches with an explicit concrete family throw
 `dimension`, `coordinateLayout`, `coordinateType`, and `offsetType`. By default,
 the decoder chooses the encoding from the column's geometry families and uses the
 declared dimension, interleaved Float64 coordinates, and Int32 list offsets.
+An explicit dimension maps Z and M by axis and fills absent ordinates with zero.
 Dense-union indexes retain their Arrow-defined Int32 width.
 
 ```ts
