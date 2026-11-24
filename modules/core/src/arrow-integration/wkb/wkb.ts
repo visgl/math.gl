@@ -13,6 +13,8 @@ export type WKBParseOptions = Readonly<{
   maximumDepth?: number;
   /** Return byte views of the direct members, preserving their original WKB headers. */
   captureMembers?: boolean;
+  /** Reads all-NaN point tuples as empty coordinates. Defaults to false. */
+  normalizeEmptyPoints?: boolean;
   /** Maximum total declared child elements. Defaults to 100 million. */
   maximumElements?: number;
 }>;
@@ -40,6 +42,8 @@ type WKBReadState = {
   maximumElements: number;
   elementCount: number;
   memberEnds?: number[];
+  /** Normalizes empty points while decoding. */
+  normalizeEmptyPoints: boolean;
 };
 
 /** Parses exactly one little- or big-endian ISO WKB or EWKB geometry. */
@@ -127,9 +131,15 @@ function readWKBGeometry(
 
   let geometry: WellKnownGeometry;
   switch (geometryType) {
-    case 'Point':
-      geometry = {type: 'Point', coordinates: readCoordinate()};
+    case 'Point': {
+      const coordinates = readCoordinate();
+      geometry = {
+        type: 'Point',
+        coordinates:
+          state.normalizeEmptyPoints && coordinates.every(Number.isNaN) ? [] : coordinates
+      };
       break;
+    }
     case 'LineString':
       geometry = {type: 'LineString', coordinates: readCoordinates()};
       break;

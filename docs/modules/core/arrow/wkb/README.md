@@ -53,3 +53,12 @@ one dimension to the whole collection.
 const geometry = parseWKTWithMetadata('GEOMETRYCOLLECTION (POINT Z (1 2 3), POINT (4 5))');
 const bytes = writeWKB(geometry);
 ```
+
+### WKT vertex counts and WKB empty points
+
+Use `countWKTVertices(text, {maximumVertices})` for a grammar-checked count without
+building coordinate arrays. The optional limit stops scanning at the first
+vertex above the budget. The scanner accepts up to 64 nested collection levels.
+
+Set `normalizeEmptyPoints: true` in `parseWKB` options to return an empty
+coordinate array for an all-NaN point tuple, including inside collections.

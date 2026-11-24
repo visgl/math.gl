@@ -4,6 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {
+  countWKTVertices,
   inspectWKBHeader,
   parseWKB,
   parseWKTWithMetadata,
@@ -406,4 +407,50 @@ test('writes nested WKT collection members with their own WKB dimensions', () =>
     'xy',
     'xy'
   ]);
+});
+
+test('counts WKT vertices through nested collections, respecting empties and limits', () => {
+  const text =
+    'GEOMETRYCOLLECTION (MULTIPOINT (EMPTY, (0 1), 2 3), LINESTRING Z (0 0 0, 1 1 1), POINT EMPTY)';
+  expect(countWKTVertices(text)).toBe(4);
+  expect(countWKTVertices(text, {maximumVertices: 4})).toBe(4);
+  expect(() => countWKTVertices(text, {maximumVertices: 3})).toThrow(/exceeds maximumVertices/);
+  expect(countWKTVertices('LINESTRING (0 0 0, 1 1 1)', {inferDimensions: true})).toBe(2);
+  expect(() => countWKTVertices('LINESTRING (0 0 0, 1 1)', {inferDimensions: true})).toThrow(
+    /inconsistent coordinate dimensions/
+  );
+});
+
+test('normalizes only all-NaN WKB points when requested, including collection members', () => {
+  const bytes = writeWKB(
+    {
+      type: 'GeometryCollection',
+      geometries: [
+        {type: 'Point', coordinates: []},
+        {type: 'MultiPoint', coordinates: [[], [1, NaN], [2, 3]]}
+      ]
+    },
+    'xy'
+  );
+  expect(parseWKB(bytes).geometry).toEqual({
+    type: 'GeometryCollection',
+    geometries: [
+      {type: 'Point', coordinates: [NaN, NaN]},
+      {
+        type: 'MultiPoint',
+        coordinates: [
+          [NaN, NaN],
+          [1, NaN],
+          [2, 3]
+        ]
+      }
+    ]
+  });
+  expect(parseWKB(bytes, {normalizeEmptyPoints: true}).geometry).toEqual({
+    type: 'GeometryCollection',
+    geometries: [
+      {type: 'Point', coordinates: []},
+      {type: 'MultiPoint', coordinates: [[], [1, NaN], [2, 3]]}
+    ]
+  });
 });
