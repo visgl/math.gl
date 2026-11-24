@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v5.0.3
+
+- Fix Euler angle extraction near gimbal lock and quaternion angle calculation for equal rotations (#734, #735).
+- Expose lightweight SQL columnar predicates and support more Arrow storage types in portable predicates (#737, #738).
+- Add planar Delaunay triangulation to geometry processing (#736).
+
 ## v5.0.2
 
 - Add spatial SQL polygon dissolve, shared-boundary simplification, and validity diagnostics (#703, #722, #730).

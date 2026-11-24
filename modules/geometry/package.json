@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.2",
+  "version": "5.0.3",
   "keywords": [
     "geometry",
     "gltf",
@@ -70,7 +70,7 @@
     "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.2",
+    "@math.gl/core": "5.0.3",
     "cdt2d": "1.0.0",
     "robust-predicates": "^3.0.2"
   },
