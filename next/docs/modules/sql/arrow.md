@@ -354,3 +354,5 @@ SELECT EPOCH_MS(CAST(observed_at AS TIMESTAMP WITH TIME ZONE)) AS time
 ```
 
 Temporal casts accept ISO date/time text. Explicit offsets are normalized to UTC. Timezone-free timestamps use their stored epoch without applying the host timezone. Non-ISO source strings still need normalization by the loader or application.
+
+Portable predicates can compare `LargeUtf8` and `LargeBinary` directly through their Arrow offsets. Binary comparisons and membership use the complete byte sequence, including when a literal and a `FixedSizeBinary` column have different widths. Float16 predicates can read stored values on runtimes without native `Float16Array`; arithmetic that writes Float16 still requires native support.
