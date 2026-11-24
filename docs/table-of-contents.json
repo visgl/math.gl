@@ -760,6 +760,11 @@
             ]
           },
           {
+            "type": "doc",
+            "label": "@math.gl/sql/columnar-predicate",
+            "id": "modules/sql/columnar-predicate"
+          },
+          {
             "type": "category",
             "label": "@math.gl/sql/expressions",
             "link": {
