@@ -41,6 +41,138 @@ test('column codecs preserve nulls, declared dimensions and metadata', () => {
   }
 });
 
+test('WKT decoding preserves chunks and honors explicit native storage', () => {
+  const source = makeGeoArrowColumnFromGeometryRows([
+    {
+      type: 'LineString',
+      coordinates: [
+        [1, 2],
+        [3, 4]
+      ]
+    },
+    null
+  ]);
+  const serialized = encodeGeoArrowWKT(source);
+  const decoded = decodeGeoArrowWKT(
+    {...serialized, chunks: [...serialized.chunks, ...serialized.chunks]},
+    {
+      encoding: 'geoarrow.linestring',
+      coordinateLayout: 'separated',
+      coordinateType: 'float32',
+      offsetType: 'int64'
+    }
+  );
+  expect(decoded.coordinateLayout).toBe('separated');
+  expect(decoded.chunks.map(chunk => chunk.length)).toEqual([2, 2]);
+  expect(decoded.chunks[0]).toMatchObject({
+    kind: 'list',
+    offsets: new BigInt64Array([0n, 2n, 2n]),
+    child: {
+      kind: 'struct',
+      children: {
+        x: {values: new Float32Array([1, 3])},
+        y: {values: new Float32Array([2, 4])}
+      }
+    }
+  });
+  expect(materializeGeoArrowRows(decoded)).toEqual([
+    ...materializeGeoArrowRows(source),
+    ...materializeGeoArrowRows(source)
+  ]);
+  expect(() => decodeGeoArrowWKT(serialized, {encoding: 'geoarrow.point'})).toThrow(
+    /cannot append LineString/
+  );
+});
+
+test('WKT explicit dimensions preserve the distinction between Z and M', () => {
+  const serialized = makeSerializedFixture(
+    'geoarrow.wkt',
+    'utf8',
+    new TextEncoder().encode('POINT M (1 2 7)')
+  );
+  expect(materializeGeoArrowRows(decodeGeoArrowWKT(serialized, {dimension: 'xyzm'}))).toEqual([
+    {type: 'Point', coordinates: [1, 2, 0, 7]}
+  ]);
+});
+
+test('WKT native classification infers unmarked input dimensions for an explicit output', () => {
+  const serialized = makeSerializedFixture(
+    'geoarrow.wkt',
+    'utf8',
+    new TextEncoder().encode('POINT (1 2 7)')
+  );
+  expect(materializeGeoArrowRows(decodeGeoArrowWKT(serialized, {dimension: 'xyzm'}))).toEqual([
+    {type: 'Point', coordinates: [1, 2, 7, 0]}
+  ]);
+});
+
+test('WKT explicit dimensions pad collection members with missing inherited ordinates', () => {
+  const serialized = makeSerializedFixture(
+    'geoarrow.wkt',
+    'utf8',
+    new TextEncoder().encode('GEOMETRYCOLLECTION M (POINT (1 2), POINT (3 4 7))')
+  );
+  expect(materializeGeoArrowRows(decodeGeoArrowWKT(serialized, {dimension: 'xyzm'}))).toEqual([
+    {
+      type: 'GeometryCollection',
+      geometries: [
+        {type: 'Point', coordinates: [1, 2, 0, 0]},
+        {type: 'Point', coordinates: [3, 4, 0, 7]}
+      ]
+    }
+  ]);
+});
+
+test('WKT mixed decoding seeds the same union children in each chunk', () => {
+  const left = encodeGeoArrowWKT(
+    makeGeoArrowColumnFromGeometryRows([{type: 'Point', coordinates: [1, 2]}, null])
+  );
+  const right = encodeGeoArrowWKT(
+    makeGeoArrowColumnFromGeometryRows([
+      {
+        type: 'GeometryCollection',
+        geometries: [
+          {
+            type: 'LineString',
+            coordinates: [
+              [3, 4],
+              [5, 6]
+            ]
+          }
+        ]
+      }
+    ])
+  );
+  const result = decodeGeoArrowWKT({...left, chunks: [...left.chunks, ...right.chunks]});
+  expect(result.encoding).toBe('geoarrow.geometry');
+  expect(result.chunks.map(chunk => chunk.length)).toEqual([2, 1]);
+  for (const chunk of result.chunks) {
+    expect(chunk).toMatchObject({
+      kind: 'dense-union',
+      children: [
+        {name: 'Point'},
+        {name: 'GeometryCollection', data: {child: {children: [{name: 'LineString'}]}}}
+      ]
+    });
+  }
+  expect(materializeGeoArrowRows(result)).toEqual([
+    {type: 'Point', coordinates: [1, 2]},
+    null,
+    {
+      type: 'GeometryCollection',
+      geometries: [
+        {
+          type: 'LineString',
+          coordinates: [
+            [3, 4],
+            [5, 6]
+          ]
+        }
+      ]
+    }
+  ]);
+});
+
 test('native WKT keeps per-row dimensions, sliced offsets, and nulls', () => {
   const point = writeWKB({type: 'Point', coordinates: [1, 2]}, 'xy');
   const line = writeWKB(

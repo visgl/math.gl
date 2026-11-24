@@ -256,9 +256,29 @@ values. Set `encoding: 'geoarrow.geometry'` to force a dense union for homogeneo
 
 Decodes serialized WKB chunks into native GeoArrow descriptors.
 
-#### `decodeGeoArrowWKT(column)`
+#### `decodeGeoArrowWKT(column, options?)`
 
-Decodes serialized WKT chunks into native GeoArrow descriptors.
+Decodes each serialized WKT chunk into one native GeoArrow chunk, including empty
+and all-null chunks. Mixed-family and collection output use stable union children
+across chunks. Invalid WKT and mismatches with an explicit concrete family throw.
+
+`DecodeGeoArrowWKTOptions` accepts a native geometry `encoding`, output
+`dimension`, `coordinateLayout`, `coordinateType`, and `offsetType`. By default,
+the decoder chooses the encoding from the column's geometry families and uses the
+declared dimension, interleaved Float64 coordinates, and Int32 list offsets.
+An explicit dimension maps Z and M by axis and fills absent ordinates with zero.
+Dense-union indexes retain their Arrow-defined Int32 width.
+
+```ts
+import {decodeGeoArrowWKT} from '@math.gl/core/arrow';
+
+const lines = decodeGeoArrowWKT(wktColumn, {
+  encoding: 'geoarrow.linestring',
+  coordinateLayout: 'separated',
+  coordinateType: 'float32',
+  offsetType: 'int64'
+});
+```
 
 Import these functions from `@math.gl/core/arrow`. They decode serialized chunks into native
 descriptors while preserving nulls, metadata, CRS, edge semantics, and source chunking. WKB accepts

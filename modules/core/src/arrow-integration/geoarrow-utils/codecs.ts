@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {inspectWKBHeader, parseWKT, visitWKB} from '../wkb';
-import type {WKBHeader, WKBTraversalOptions} from '../wkb';
+import {inspectWKBHeader, parseWKT, parseWKTWithMetadata, visitWKB} from '../wkb';
+import type {WKBHeader, WKBTraversalOptions, WKTParseResult} from '../wkb';
 import {WKBBuilder} from '../wkb';
 import type {
   GeoArrowArray,
@@ -17,7 +17,7 @@ import type {
 } from './types';
 import {getGeoArrowDimensionSize, getGeoArrowGeometryType, mergeGeoArrowDimensions} from './types';
 import type {GeoArrowBuilderEncoding} from './builder';
-import {GeoArrowBuilder, makeGeoArrowColumnFromGeometryRows} from './builder';
+import {GeoArrowBuilder, makeGeoArrowMixedGeometryChunk} from './builder';
 import {
   getEncodingFromChildName,
   getGeoArrowOffset,
@@ -41,6 +41,24 @@ export type DecodeGeoArrowWKBOptions = Readonly<{
   coordinateType?: 'float32' | 'float64';
   offsetType?: 'int32' | 'int64';
   traversal?: WKBTraversalOptions;
+}>;
+
+/** Physical output controls for decoding a WKT column. */
+export type DecodeGeoArrowWKTOptions = Readonly<{
+  /** Defaults to selecting a native encoding based on the input geometry families. */
+  encoding?:
+    | Exclude<GeoArrowBuilderEncoding, 'geoarrow.box'>
+    | 'geoarrow.geometry'
+    | 'geoarrow.geometrycollection'
+    | 'native';
+  /** Overrides the column's declared coordinate dimension. */
+  dimension?: GeoArrowDimension;
+  /** Defaults to interleaved coordinates. */
+  coordinateLayout?: GeoArrowCoordinateLayout;
+  /** Defaults to Float64 coordinate storage. */
+  coordinateType?: 'float32' | 'float64';
+  /** Defaults to Int32 list offsets. Dense-union indexes are always Int32. */
+  offsetType?: 'int32' | 'int64';
 }>;
 
 type WKBChunkClassification = {
@@ -950,17 +968,100 @@ function isPhysicalGeometryRowValid(
   );
 }
 
-/** Decodes a GeoArrow WKT column into native physical geometry buffers. */
-export function decodeGeoArrowWKT(column: GeoArrowColumn): GeoArrowColumn {
+/** Decodes each serialized WKT chunk into native GeoArrow buffers. */
+export function decodeGeoArrowWKT(
+  column: GeoArrowColumn,
+  options: DecodeGeoArrowWKTOptions = {}
+): GeoArrowColumn {
   if (column.encoding !== 'geoarrow.wkt') throw new Error('Expected a geoarrow.wkt column');
-  const rows = normalizeRowsToDimension(
-    decodeSerializedRows(column, bytes => parseWKT(textDecoder.decode(bytes))),
-    column.dimension
-  );
-  return copyMetadata(
-    column,
-    makeGeoArrowColumnFromGeometryRows(rows, {dimension: column.dimension})
-  );
+  const dimension = options.dimension ?? column.dimension;
+  const coordinateLayout = options.coordinateLayout ?? 'interleaved';
+  const builderOptions = {
+    dimension,
+    coordinateLayout,
+    coordinateType: options.coordinateType,
+    offsetType: options.offsetType
+  };
+  const requestedEncoding = options.encoding ?? 'native';
+  const parseOptions = {
+    inferDimensions: options.dimension !== undefined,
+    allowMissingInheritedOrdinates: true
+  };
+  const familiesByDepth: Set<GeoArrowDecodedGeometry['type']>[] = [];
+  if (
+    requestedEncoding === 'native' ||
+    requestedEncoding === 'geoarrow.geometry' ||
+    requestedEncoding === 'geoarrow.geometrycollection'
+  ) {
+    for (const chunk of column.chunks) {
+      for (const row of readWKTChunk(chunk, text => parseWKT(text, parseOptions))) {
+        if (row) collectWKTGeometryFamilies(row, familiesByDepth, 0);
+      }
+    }
+  }
+  const families = familiesByDepth[0] ?? new Set<GeoArrowDecodedGeometry['type']>();
+  const encoding =
+    requestedEncoding === 'native'
+      ? families.size === 0
+        ? 'geoarrow.point'
+        : resolveDecodeEncoding('native', new Set([...families].map(getGeometryFamilyIndex)))
+      : requestedEncoding;
+  if (
+    encoding === 'geoarrow.geometrycollection' &&
+    [...families].some(family => family !== 'GeometryCollection')
+  ) {
+    throw new Error('WKT rows cannot be represented as geoarrow.geometrycollection');
+  }
+
+  const size = getGeoArrowDimensionSize(dimension);
+  const chunks = column.chunks.map(chunk => {
+    const rows = Array.from(
+      options.dimension
+        ? readWKTChunk(chunk, text =>
+            remapWKTGeometry(parseWKTWithMetadata(text, parseOptions), dimension)
+          )
+        : readWKTChunk(chunk, text => normalizeWKTGeometry(parseWKT(text), size))
+    );
+    if (encoding === 'geoarrow.geometry' || encoding === 'geoarrow.geometrycollection') {
+      return makeGeoArrowMixedGeometryChunk(
+        rows,
+        encoding,
+        builderOptions,
+        dimension,
+        familiesByDepth
+      );
+    }
+    return GeoArrowBuilder.build(rows, {...builderOptions, encoding}).chunks[0]!;
+  });
+  return copyMetadata(column, {encoding, dimension, coordinateLayout, chunks});
+}
+
+/** Reads logical rows from one serialized chunk, honoring validity and slice offsets. */
+function* readWKTChunk(
+  chunk: GeoArrowArray,
+  decode: (text: string) => GeoArrowDecodedGeometry
+): Iterable<GeoArrowDecodedGeometry | null> {
+  if (chunk.kind !== 'serialized') throw new Error('Serialized column contains native storage');
+  for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
+    yield isGeoArrowValueValid(chunk.validity, rowIndex)
+      ? decode(textDecoder.decode(getSerializedBytes(chunk, rowIndex)))
+      : null;
+  }
+}
+
+/** Records the union child families needed at each collection depth across all chunks. */
+function collectWKTGeometryFamilies(
+  geometry: GeoArrowDecodedGeometry,
+  familiesByDepth: Set<GeoArrowDecodedGeometry['type']>[],
+  depth: number
+): void {
+  familiesByDepth[depth] ??= new Set();
+  familiesByDepth[depth].add(geometry.type);
+  if (geometry.type === 'GeometryCollection') {
+    for (const child of geometry.geometries) {
+      collectWKTGeometryFamilies(child, familiesByDepth, depth + 1);
+    }
+  }
 }
 
 /** Encodes a native GeoArrow column as variable-width UTF-8 WKT. */
@@ -1255,49 +1356,62 @@ function encodingFromName(name: string): import('./types').GeoArrowEncoding {
   return `geoarrow.${name.toLowerCase()}` as import('./types').GeoArrowEncoding;
 }
 
-function normalizeRowsToDimension(
-  rows: readonly (GeoArrowDecodedGeometry | null)[],
+/** Remaps coordinates by semantic axis, including each collection member's dimension. */
+function remapWKTGeometry(
+  result: WKTParseResult,
   dimension: GeoArrowDimension
-): Array<GeoArrowDecodedGeometry | null> {
-  const size = getGeoArrowDimensionSize(dimension);
-  const normalizeGeometry = (geometry: GeoArrowDecodedGeometry): GeoArrowDecodedGeometry => {
-    if (geometry.type === 'GeometryCollection') {
-      return {...geometry, geometries: geometry.geometries.map(normalizeGeometry)};
-    }
+): GeoArrowDecodedGeometry {
+  const {geometry, dimension: sourceDimension, children} = result;
+  if (geometry.type === 'GeometryCollection') {
+    return {
+      type: geometry.type,
+      geometries: (children ?? []).map(child => remapWKTGeometry(child, dimension))
+    };
+  }
+  return mapWKTCoordinates(geometry, coordinate =>
+    Array.from(
+      dimension,
+      axis =>
+        coordinate[sourceDimension.indexOf(axis)] ?? (coordinate.every(Number.isNaN) ? NaN : 0)
+    )
+  );
+}
+
+/** Pads or truncates WKT coordinate tuples to the declared column width. */
+function normalizeWKTGeometry(
+  geometry: GeoArrowDecodedGeometry,
+  size: number
+): GeoArrowDecodedGeometry {
+  if (geometry.type === 'GeometryCollection') {
     return {
       ...geometry,
-      coordinates: normalizeCoordinateNesting(geometry.coordinates, size)
-    } as GeoArrowDecodedGeometry;
-  };
-  return rows.map(row => (row ? normalizeGeometry(row) : null));
+      geometries: geometry.geometries.map(child => normalizeWKTGeometry(child, size))
+    };
+  }
+  return mapWKTCoordinates(geometry, coordinate =>
+    Array.from({length: size}, (_, index) => coordinate[index] ?? 0)
+  );
 }
 
-function normalizeCoordinateNesting(value: readonly unknown[], size: number): unknown {
+/** Maps the coordinate tuples of a concrete WKT geometry. */
+function mapWKTCoordinates(
+  geometry: Exclude<GeoArrowDecodedGeometry, {type: 'GeometryCollection'}>,
+  mapCoordinate: (coordinate: readonly number[]) => number[]
+): GeoArrowDecodedGeometry {
+  return {
+    ...geometry,
+    coordinates: mapWKTCoordinateNesting(geometry.coordinates, mapCoordinate)
+  } as GeoArrowDecodedGeometry;
+}
+
+/** Visits coordinate tuples while preserving their nesting and empty lists. */
+function mapWKTCoordinateNesting(
+  value: readonly unknown[],
+  mapCoordinate: (coordinate: readonly number[]) => number[]
+): unknown {
   if (value.length === 0) return [];
-  if (typeof value[0] === 'number') {
-    const coordinate = (value as readonly number[]).slice(0, size);
-    while (coordinate.length < size) coordinate.push(0);
-    return coordinate;
-  }
-  return value.map(child => normalizeCoordinateNesting(child as readonly unknown[], size));
-}
-
-function decodeSerializedRows(
-  column: GeoArrowColumn,
-  decoder: (bytes: Uint8Array) => GeoArrowDecodedGeometry
-): Array<GeoArrowDecodedGeometry | null> {
-  const rows: Array<GeoArrowDecodedGeometry | null> = [];
-  for (const chunk of column.chunks) {
-    if (chunk.kind !== 'serialized') throw new Error('Serialized column contains native storage');
-    for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
-      if (!isGeoArrowValueValid(chunk.validity, rowIndex)) {
-        rows.push(null);
-        continue;
-      }
-      rows.push(decoder(getSerializedBytes(chunk, rowIndex)));
-    }
-  }
-  return rows;
+  if (typeof value[0] === 'number') return mapCoordinate(value as readonly number[]);
+  return value.map(child => mapWKTCoordinateNesting(child as readonly unknown[], mapCoordinate));
 }
 
 function getSerializedBytes(array: GeoArrowSerialized, rowIndex: number): Uint8Array {
