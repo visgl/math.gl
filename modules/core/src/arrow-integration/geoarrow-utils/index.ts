@@ -94,7 +94,7 @@ export {
   encodeGeoArrowWKT,
   getGeoArrowWKBVertexCount
 } from './codecs';
-export type {DecodeGeoArrowWKBOptions} from './codecs';
+export type {DecodeGeoArrowWKBOptions, DecodeGeoArrowWKTOptions} from './codecs';
 
 // Public named exports. Implementations remain in independently tree-shakable files.
 export {prepareGeoArrowTransfer} from './worker';
