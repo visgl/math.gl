@@ -20,3 +20,4 @@ export {
 export {takeArrowTableRows} from './take-arrow-rows';
 
 export {getRecordBatchMetadata, createRecordBatchWithMetadata} from './arrow-record-batch';
+export {projectArrowTable, type ArrowColumnSelection} from './project-arrow-table';
