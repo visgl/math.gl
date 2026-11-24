@@ -586,12 +586,30 @@ export function makeGeoArrowColumnFromGeometryRows(
   };
 }
 
+/** Builds a mixed or collection chunk against the same family sets as its sibling chunks. */
+export function makeGeoArrowMixedGeometryChunk(
+  rows: readonly (GeoArrowDecodedGeometry | null)[],
+  encoding: 'geoarrow.geometry' | 'geoarrow.geometrycollection',
+  options: GeoArrowColumnFromRowsOptions,
+  dimension: GeoArrowDimension,
+  familiesByDepth: readonly ReadonlySet<GeoArrowDecodedGeometry['type']>[]
+): GeoArrowArray {
+  return encoding === 'geoarrow.geometry'
+    ? makeDenseUnionArray(rows, options, dimension, familiesByDepth)
+    : makeGeometryCollectionArray(rows, options, dimension, familiesByDepth);
+}
+
+/** Builds a dense union with stable children when a column-wide shape is supplied. */
 function makeDenseUnionArray(
   rows: readonly (GeoArrowDecodedGeometry | null)[],
   options: GeoArrowColumnFromRowsOptions,
-  dimension: GeoArrowDimension
+  dimension: GeoArrowDimension,
+  familiesByDepth?: readonly ReadonlySet<GeoArrowDecodedGeometry['type']>[],
+  depth = 0
 ): GeoArrowDenseUnion {
-  const nonNullTypes = [...new Set(rows.filter(Boolean).map(row => row!.type))];
+  const nonNullTypes = [
+    ...(familiesByDepth?.[depth] ?? new Set(rows.filter(Boolean).map(row => row!.type)))
+  ];
   const fallbackType = nonNullTypes[0] || 'Point';
   const childRows = new Map<
     GeoArrowDecodedGeometry['type'],
@@ -616,7 +634,7 @@ function makeDenseUnionArray(
     .map(([type, values]) => {
       const data =
         type === 'GeometryCollection'
-          ? makeGeometryCollectionArray(values, options, dimension)
+          ? makeGeometryCollectionArray(values, options, dimension, familiesByDepth, depth)
           : GeoArrowBuilder.build(values, {
               ...options,
               dimension,
@@ -640,27 +658,34 @@ function makeDenseUnionArray(
   };
 }
 
+/** Builds list storage for collections and a dense union for their members. */
 function makeGeometryCollectionArray(
   rows: readonly (GeoArrowDecodedGeometry | null)[],
   options: GeoArrowColumnFromRowsOptions,
-  dimension: GeoArrowDimension
+  dimension: GeoArrowDimension,
+  familiesByDepth?: readonly ReadonlySet<GeoArrowDecodedGeometry['type']>[],
+  depth = 0
 ): GeoArrowArray {
-  const offsets = new Int32Array(rows.length + 1);
+  const offsets =
+    options.offsetType === 'int64'
+      ? new BigInt64Array(rows.length + 1)
+      : new Int32Array(rows.length + 1);
   const validity = new Uint8Array(Math.ceil(rows.length / 8));
   const flattened: GeoArrowDecodedGeometry[] = [];
   for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
     const row = rows[rowIndex];
     if (row?.type === 'GeometryCollection') {
-      flattened.push(...row.geometries);
+      for (const child of row.geometries) flattened.push(child);
       setValidityBit(validity, rowIndex);
     }
-    offsets[rowIndex + 1] = flattened.length;
+    if (offsets instanceof BigInt64Array) offsets[rowIndex + 1] = BigInt(flattened.length);
+    else offsets[rowIndex + 1] = flattened.length;
   }
   return {
     kind: 'list',
     length: rows.length,
     offsets,
-    child: makeDenseUnionArray(flattened, options, dimension),
+    child: makeDenseUnionArray(flattened, options, dimension, familiesByDepth, depth + 1),
     validity: {values: validity}
   };
 }

@@ -9,6 +9,8 @@ import {getWellKnownDimensionSize, inferWellKnownGeometryDimension} from './type
 export type WKTParseOptions = Readonly<{
   /** Infer unmarked coordinate dimensions for legacy WKT such as POINT (1 2 3). */
   inferDimensions?: boolean;
+  /** Allow unmarked collection children to omit inherited trailing ordinates in metadata parsing. */
+  allowMissingInheritedOrdinates?: boolean;
   /** Maximum number of enclosing collections. Defaults to 64. */
   maximumDepth?: number;
 }>;
@@ -250,7 +252,10 @@ class WKTParser {
     if (inferDimension) {
       const inferredSize = inferCoordinateSize(coordinateValues);
       if (inferredSize !== null) dimension = getDimensionForSize(inferredSize);
-    } else if (hasExplicitDimension || validateInheritedDimensions) {
+    } else if (
+      hasExplicitDimension ||
+      (validateInheritedDimensions && !options.allowMissingInheritedOrdinates)
+    ) {
       assertCoordinateSize(coordinateValues, dimensionSize);
     }
     return {geometry: makeGeometry(type, coordinates), dimension};
