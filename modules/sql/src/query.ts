@@ -12,6 +12,8 @@ export {
 export {
   queryArrowTable,
   queryArrowTableInBatches,
+  prepareArrowProjection,
+  type PreparedArrowProjection,
   type ArrowBatchQuery,
   type ArrowStreamingQuery,
   type ArrowTableQuery
