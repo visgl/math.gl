@@ -76,6 +76,22 @@ The table views are read-only APIs, not deeply immutable snapshots. Treat their
 backing tables, index arrays, and maps as immutable while views are in use.
 Transport payloads are a math.gl protocol, not loaders.gl table wrappers.
 
+### Column projection
+
+Use `projectArrowTable(table, selections)` to select and reorder top-level
+columns, with optional aliases. The returned table shares the original column
+buffers and retains field, schema, and batch metadata. Passing an empty
+selection keeps the original row count.
+
+```typescript
+import {projectArrowTable} from '@math.gl/core/arrow';
+
+const projected = projectArrowTable(arrowTable, [
+  {column: 'score', as: 'value'},
+  'name'
+]);
+```
+
 ### Column inspection
 
 Use `isArrowTable(value)` and `isArrowRecordBatch(value)` to narrow an unknown

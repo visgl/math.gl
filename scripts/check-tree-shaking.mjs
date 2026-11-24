@@ -14,6 +14,12 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
   {
+    symbol: 'projectArrowTable',
+    packages: ['@math.gl/core/arrow'],
+    forbidden: [/@math\.gl\/sql/, /sql\/(src|dist)\//, /arrow-integration\/geoarrow-utils\//, /vendor\/jsep/],
+    budget: 240000
+  },
+  {
     symbol: 'bindColumnarPredicateParameters',
     packages: ['@math.gl/sql/columnar-predicate'],
     forbidden: [/apache-arrow/, /vendor\/jsep/, /predicate-expression/, /expressions\/ast\./],
