@@ -107,7 +107,9 @@ export function getAxisAngle(out_axis, q) {
 export function getAngle(a, b) {
   const dotproduct = dot(a, b);
 
-  return Math.acos(2 * dotproduct * dotproduct - 1);
+  // rounding can make the dot product of two unit quaternions slightly larger than 1 in magnitude
+  // (e.g. a quaternion with itself), which would give NaN
+  return Math.acos(Math.min(2 * dotproduct * dotproduct - 1, 1));
 }
 
 /**
