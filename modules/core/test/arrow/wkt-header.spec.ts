@@ -23,5 +23,7 @@ test.each([
   'POINT',
   'POINTLESS (1 2)',
   'POINT M EMPTYISH',
+  'POINT ZEMPTY',
+  'POINT ZMEMPTY',
   'SRID=x; POINT EMPTY'
 ])('rejects an unrecognized header: %s', text => expect(inspectWKTHeader(text)).toBeNull());

@@ -26,7 +26,7 @@ const GEOMETRY_TYPES: Readonly<Record<string, WellKnownGeometry['type']>> = {
 };
 
 /** Recognizes the header without scanning or tokenizing coordinates. */
-const WKT_HEADER = /^\s*(?:SRID\s*=\s*(\d+)\s*;\s*)?([a-z]+)(?:\s+(ZM|Z|M))?\s*(?=\(|EMPTY\b)/i;
+const WKT_HEADER = /^\s*(?:SRID\s*=\s*(\d+)\s*;\s*)?([a-z]+)(?:\s+(ZM|Z|M)\b)?\s*(?=\(|EMPTY\b)/i;
 
 /** Reads a WKT header without validating the coordinate payload or inferring dimensions. */
 export function inspectWKTHeader(text: string): WKTHeader | null {
