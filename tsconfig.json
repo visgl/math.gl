@@ -70,6 +70,9 @@
       "@math.gl/core/utf8": [
         "./modules/core/src/utf8.ts"
       ],
+      "@math.gl/geometry/polygon": [
+        "./modules/geometry/src/polygon/index.ts"
+      ],
       "@math.gl/geometry/processing": [
         "./modules/geometry/src/processing.ts"
       ],

@@ -810,6 +810,20 @@ export default function TectonicTimeMachine() {
           </div>
         </div>
         <div className="tectonic-milestones">
+          <button
+            disabled={Boolean(renderError)}
+            onClick={() => {
+              setView('globe');
+              setCycleViews(false);
+              setFollowCamera(false);
+              setGuidedCamera(false);
+              seek(-4330);
+              scene.current?.frameCoolingEarth();
+            }}
+          >
+            Cooling Earth orbit
+            <small>4330 Ma ago</small>
+          </button>
           {timelineMilestones(scenario, source.maxAge).map(({time: value, name: label}) => (
             <button
               key={value}

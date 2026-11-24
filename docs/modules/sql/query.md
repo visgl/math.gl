@@ -52,9 +52,12 @@ Sorting is stable, and nulls sort last by default. Counts and sums of integer co
 use Arrow Int64. Supply these relational operations through query options.
 
 Use `queryArrowSQL(sql, tables)` to run relational SQL directly against a map of named
-Arrow tables. It supports one `INNER JOIN` or `LEFT JOIN` on an equality condition per SELECT, column-based grouping,
+Arrow tables. Each SELECT supports one `INNER JOIN` or `LEFT JOIN` with an equality
+condition or indexed spatial predicate. SQL also supports column-based grouping,
 top-level aggregate calls, ordering by output columns, and UNION ALL with matching
-output schemas. Use inner or left joins for table lookups. Trailing ORDER BY, OFFSET, and LIMIT apply to the combined result.
+output schemas. Trailing ORDER BY, OFFSET, and LIMIT apply to the combined result.
+Arrow timestamp columns can be used as ordering and grouping keys. Comparisons
+retain the precision of the stored timestamp unit.
 
 ```ts
 import {queryArrowSQL} from '@math.gl/sql/query';
@@ -64,6 +67,26 @@ const totals = queryArrowSQL(
   new Map([['orders', orders]])
 );
 ```
+
+### Indexed spatial joins
+
+Register `ST_INTERSECTS`, `ST_CONTAINS`, or `ST_DWITHIN` from
+`@math.gl/geospatial/st-functions` and use that function directly in the
+`ON` clause. Qualify one geometry column from each table and use planar
+GeoArrow inputs with compatible CRS metadata. Native GeoArrow and WKB
+columns are accepted where supported by the registered predicate.
+
+```sql
+SELECT p.id AS observation, z.id AS zone
+FROM observations p
+LEFT JOIN zones z ON ST_Contains(z.geometry, p.geometry)
+```
+
+The join indexes right-side envelopes and evaluates the exact predicate only
+for candidate pairs. `ST_DWithin` expands the search by a constant, finite,
+nonnegative radius in the input coordinate units. A bound numeric parameter
+can supply that radius. Results preserve left row order and then right row
+order. A left join emits null right fields for each left row with no match.
 
 #### Table functions
 
