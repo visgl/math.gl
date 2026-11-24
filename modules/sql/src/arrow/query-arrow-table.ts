@@ -22,7 +22,7 @@ import type {
   ColumnarPredicateParameterValues,
   ParameterizedColumnarPredicate
 } from '../expressions';
-import type {TableQuery} from '../parser/query-types';
+import type {TableQuery, TableSelection} from '../parser/query-types';
 import {compileArrowArray, compileArrowExpression} from './compiler';
 import {compileArrowPredicate} from './predicate';
 import {nullVectorData} from './vector-mask';
@@ -105,6 +105,51 @@ export function executeArrowTableQuery(
   }
 
   return executeArrowProjection(source, query, undefined, bindPredicate);
+}
+
+/** A reusable SELECT projection bound to one Arrow input schema. */
+export interface PreparedArrowProjection {
+  /** Output fields in selection order, available before any rows arrive. */
+  readonly schema: Schema;
+  /** Projects one batch, preserving batch metadata and sharing uncomputed buffers. */
+  projectBatch(batch: RecordBatch): RecordBatch[];
+  /** Projects all batches of a schema-compatible table. */
+  projectTable(table: Table): Table;
+}
+
+/** Prepares plain, computed, and fixed-size array projections for compatible Arrow inputs. */
+export function prepareArrowProjection(
+  inputSchema: Schema,
+  select: readonly TableSelection[],
+  options: Pick<ArrowBatchQuery, 'functions' | 'signal'> = {}
+): PreparedArrowProjection {
+  const plan = compileArrowQuery(inputSchema, {...options, select});
+  return {
+    schema: plan.schema,
+    projectBatch(batch) {
+      options.signal?.throwIfAborted();
+      if (batch.schema !== inputSchema) {
+        validateArrowTableSchema(new Table(batch.schema, []), inputSchema, {
+          rejectExtraFields: true,
+          schemaName: 'projection input schema'
+        });
+      }
+      return Array.from(plan.execute(batch, true));
+    },
+    projectTable(table) {
+      options.signal?.throwIfAborted();
+      if (table.schema !== inputSchema) {
+        validateArrowTableSchema(table, inputSchema, {
+          rejectExtraFields: true,
+          schemaName: 'projection input schema'
+        });
+      }
+      return new Table(
+        plan.schema,
+        table.batches.flatMap(batch => Array.from(plan.execute(batch, true)))
+      );
+    }
+  };
 }
 
 /** Executes an already filtered input, optionally binding prepared projection calls. */

@@ -28,7 +28,14 @@ import {
   vectorFromArray
 } from 'apache-arrow';
 import {expect, test} from 'vitest';
-import {queryArrowTable, queryArrowTableInBatches, queryArrowSQL} from '@math.gl/sql/query';
+import {getProjectionColumns} from '@math.gl/sql/expressions';
+import type {TableSelection} from '@math.gl/sql/parser';
+import {
+  prepareArrowProjection,
+  queryArrowTable,
+  queryArrowTableInBatches,
+  queryArrowSQL
+} from '@math.gl/sql/query';
 import {parseSQLQuery} from '@math.gl/sql/parser';
 import {groupArrowTable} from '../src/arrow/relational-query';
 
@@ -38,6 +45,39 @@ function select(sql: string) {
   if ('command' in query) throw new Error('Expected SELECT');
   return query;
 }
+
+test('prepared projections reuse bindings and share uncomputed Arrow buffers', () => {
+  const source = new Table({
+    x: vectorFromArray([1, 2, 3], new Float64()),
+    y: vectorFromArray([5, 6, 7], new Float64())
+  });
+  const selections = select('SELECT y AS original, x + y AS sum FROM input').select!;
+  const plan = prepareArrowProjection(source.schema, selections);
+  expect(plan.schema.fields.map(field => field.name)).toEqual(['original', 'sum']);
+  expect(getProjectionColumns(selections)).toEqual(['y', 'x']);
+  const first = plan.projectTable(source.slice(0, 1));
+  const [second] = plan.projectBatch(source.batches[0]!.slice(1));
+  expect(Array.from(first.getChild('sum')!)).toEqual([6]);
+  expect(Array.from(second.getChild('sum')!)).toEqual([8, 10]);
+  expect(second.getChild('original')!.data[0]!.values.buffer).toBe(
+    source.getChild('y')!.data[0]!.values.buffer
+  );
+  expect(plan.projectTable(new Table(source.schema)).schema).toBe(plan.schema);
+  const incompatible = new Table({x: vectorFromArray([0], new Float64())});
+  expect(() => plan.projectBatch(incompatible.batches[0]!)).toThrow(/projection input schema/);
+});
+
+test('projection dependencies handle plain, aliased, and packed ARRAY columns', () => {
+  const selections: TableSelection[] = [
+    'id',
+    {column: 'id', as: 'key'},
+    {array: ['x', 'y'], as: 'position'}
+  ];
+  expect(getProjectionColumns(selections)).toEqual(['id', 'x', 'y']);
+  expect(() => getProjectionColumns([{column: 'x', array: ['y'], as: 'invalid'}])).toThrow(
+    /Unsupported SQL projection field/
+  );
+});
 
 test('SELECT preserves column order and aliases and applies WHERE before computing and limiting', () => {
   const batch = new Table({
