@@ -45,6 +45,11 @@
       "import": "./dist/parser/index.js",
       "require": "./dist/parser/index.cjs"
     },
+    "./columnar-predicate": {
+      "types": "./dist/expressions/columnar-predicate.d.ts",
+      "import": "./dist/expressions/columnar-predicate.js",
+      "require": "./dist/expressions/columnar-predicate.cjs"
+    },
     "./expressions": {
       "types": "./dist/expressions/index.d.ts",
       "import": "./dist/expressions/index.js",

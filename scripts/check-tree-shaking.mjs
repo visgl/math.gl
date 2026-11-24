@@ -13,6 +13,12 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  {
+    symbol: 'bindColumnarPredicateParameters',
+    packages: ['@math.gl/sql/columnar-predicate'],
+    forbidden: [/apache-arrow/, /vendor\/jsep/, /predicate-expression/, /expressions\/ast\./],
+    budget: 4000
+  },
   {symbol: "createArrowColumns", packages: ["@math.gl/sql/arrow"], forbidden: [/sql\/(src|dist)\/scales\//], budget: 307000},
   // SQL text includes indexed spatial joins and excludes the portable predicate normalizer.
   {symbol:'queryArrowSQL', packages:['@math.gl/sql/query'], forbidden:[/predicate-expression/,/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/geoarrow-functions\./,/loaders.gl/,/geospatial\//], budget:356000},
