@@ -63,14 +63,19 @@ function mergeTypeMetadata<T extends arrow.DataType>(
       );
       dictionaries.set(next.id, values);
     }
-    return new arrow.Dictionary(values, next.indices, next.id, next.isOrdered) as T;
+    return cloneArrowType(next, 'dictionary', values);
   }
   if (!next.children?.length) return next;
   const children = next.children.map((field, index) =>
     mergeFieldMetadata(previous?.children?.[index], field, dictionaries)
   );
-  return Object.create(Object.getPrototypeOf(next), {
-    ...Object.getOwnPropertyDescriptors(next),
-    children: {value: children, enumerable: true, writable: true, configurable: true}
+  return cloneArrowType(next, 'children', children);
+}
+
+/** Copies a native type instance with one updated metadata-bearing property. */
+function cloneArrowType<T extends arrow.DataType>(type: T, property: string, value: unknown): T {
+  return Object.create(Object.getPrototypeOf(type), {
+    ...Object.getOwnPropertyDescriptors(type),
+    [property]: {value, enumerable: true, writable: true, configurable: true}
   }) as T;
 }
