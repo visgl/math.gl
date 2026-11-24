@@ -130,6 +130,21 @@ test('Euler#fromRotationMatrix keeps rotations close to gimbal lock', () => {
   }
 });
 
+test('Euler#fromQuaternion normalizes Float32Array inputs near gimbal lock', () => {
+  // Float32Array.of() truncates to float32 precision, leaving the quaternion
+  // slightly off unit length. Without double-precision renormalization the
+  // coupled outer-rotation error reaches ~0.985; with it the error is <1e-7.
+  const q = Float32Array.of(
+    0.45553070306777954,
+    -0.45553070306777954,
+    -0.5408250689506531,
+    0.5408250689506531
+  );
+  const source = new Euler(0.3, -1.1, -Math.PI / 2, 'yzx');
+  const result = new Euler().fromQuaternion(q, 'yzx');
+  expect(equals(result.getRotationMatrix(), source.getRotationMatrix())).toBe(true);
+});
+
 test('Euler.fromQuaternion', () => {
   // transformMatrix result from https://www.wolframalpha.com/input/?i=quaternion:
   const testCases = [

@@ -49,7 +49,15 @@ export class Euler extends MathArray {
   }
 
   fromQuaternion(quaternion: Readonly<NumericArray>, order: EulerRotationOrder = this.order): this {
-    const matrix = mat4_fromQuat(new Array<number>(16), quaternion);
+    // Re-normalize in float64 before building the rotation matrix. Float32Array
+    // inputs may be slightly off unit length, which amplifies error near gimbal lock.
+    const x = quaternion[0];
+    const y = quaternion[1];
+    const z = quaternion[2];
+    const w = quaternion[3];
+    const len = Math.sqrt(x * x + y * y + z * z + w * w);
+    const q: number[] = [x / len, y / len, z / len, w / len];
+    const matrix = mat4_fromQuat(new Array<number>(16), q);
     return this.fromRotationMatrix(matrix, order);
   }
 
