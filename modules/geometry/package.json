@@ -71,6 +71,7 @@
   ],
   "dependencies": {
     "@math.gl/core": "5.0.2",
+    "cdt2d": "1.0.0",
     "robust-predicates": "^3.0.2"
   },
   "sideEffects": false,
