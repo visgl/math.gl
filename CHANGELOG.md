@@ -5,6 +5,9 @@
 - Fix Euler angle extraction near gimbal lock and quaternion angle calculation for equal rotations (#734, #735).
 - Expose lightweight SQL columnar predicates and support more Arrow storage types in portable predicates (#737, #738).
 - Add planar Delaunay triangulation to geometry processing (#736).
+- Add zero-copy Arrow column projection, preserve Arrow batch and schema metadata, and expose compiled portable predicates and reusable Arrow SELECT projections (#740–#742, #744, #749).
+- Inspect WKT headers, preserve WKB member dimensions, expose WKB ring offsets, and decode WKT into native GeoArrow chunks with configurable storage (#743, #745, #746, #750).
+- Add a standalone TWKB codec under `@math.gl/core/twkb` (#747).
 
 ## v5.0.2
 
