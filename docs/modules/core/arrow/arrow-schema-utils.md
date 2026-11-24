@@ -102,3 +102,10 @@ renamedTable.schema.fields.map((field) => field.name);
 - Every mapped name must have a field definition in the target schema.
 - Unmapped fields, including extra trailing input fields, retain their definitions.
 - Table metadata is retained. Column values are not copied.
+
+## Schema metadata snapshots
+
+`snapshotArrowSchema(schema)` copies the schema and nested field metadata maps.
+Use `mergeArrowSchemas(previous, next)` to combine metadata from successive,
+structurally compatible schemas. Values from `next` take precedence for matching
+keys. Nested fields and dictionary value types retain their Arrow layout.
