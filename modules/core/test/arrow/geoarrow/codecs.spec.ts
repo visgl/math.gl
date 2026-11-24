@@ -95,6 +95,17 @@ test('WKT explicit dimensions preserve the distinction between Z and M', () => {
   ]);
 });
 
+test('WKT native classification infers unmarked input dimensions for an explicit output', () => {
+  const serialized = makeSerializedFixture(
+    'geoarrow.wkt',
+    'utf8',
+    new TextEncoder().encode('POINT (1 2 7)')
+  );
+  expect(materializeGeoArrowRows(decodeGeoArrowWKT(serialized, {dimension: 'xyzm'}))).toEqual([
+    {type: 'Point', coordinates: [1, 2, 7, 0]}
+  ]);
+});
+
 test('WKT mixed decoding seeds the same union children in each chunk', () => {
   const left = encodeGeoArrowWKT(
     makeGeoArrowColumnFromGeometryRows([{type: 'Point', coordinates: [1, 2]}, null])

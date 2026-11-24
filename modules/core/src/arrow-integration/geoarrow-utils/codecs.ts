@@ -983,6 +983,7 @@ export function decodeGeoArrowWKT(
     offsetType: options.offsetType
   };
   const requestedEncoding = options.encoding ?? 'native';
+  const parseOptions = {inferDimensions: options.dimension !== undefined};
   const familiesByDepth: Set<GeoArrowDecodedGeometry['type']>[] = [];
   if (
     requestedEncoding === 'native' ||
@@ -990,7 +991,7 @@ export function decodeGeoArrowWKT(
     requestedEncoding === 'geoarrow.geometrycollection'
   ) {
     for (const chunk of column.chunks) {
-      for (const row of readWKTChunk(chunk)) {
+      for (const row of readWKTChunk(chunk, text => parseWKT(text, parseOptions))) {
         if (row) collectWKTGeometryFamilies(row, familiesByDepth, 0);
       }
     }
@@ -1014,7 +1015,7 @@ export function decodeGeoArrowWKT(
     const rows = Array.from(
       options.dimension
         ? readWKTChunk(chunk, text =>
-            remapWKTGeometry(parseWKTWithMetadata(text, {inferDimensions: true}), dimension)
+            remapWKTGeometry(parseWKTWithMetadata(text, parseOptions), dimension)
           )
         : readWKTChunk(chunk, text => normalizeWKTGeometry(parseWKT(text), size))
     );
@@ -1035,7 +1036,7 @@ export function decodeGeoArrowWKT(
 /** Reads logical rows from one serialized chunk, honoring validity and slice offsets. */
 function* readWKTChunk(
   chunk: GeoArrowArray,
-  decode: (text: string) => GeoArrowDecodedGeometry = parseWKT
+  decode: (text: string) => GeoArrowDecodedGeometry
 ): Iterable<GeoArrowDecodedGeometry | null> {
   if (chunk.kind !== 'serialized') throw new Error('Serialized column contains native storage');
   for (let rowIndex = 0; rowIndex < chunk.length; rowIndex++) {
