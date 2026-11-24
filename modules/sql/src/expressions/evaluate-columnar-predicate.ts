@@ -128,7 +128,9 @@ function isNumeric(value: ColumnarPredicateValue): value is number | bigint {
 /** Checks membership compatibility without rejecting other candidate types. */
 function comparable(left: ColumnarPredicateValue, right: ColumnarPredicateValue): boolean {
   if (isNumeric(left) && isNumeric(right)) return true;
-  if (left instanceof Date || right instanceof Date) return left instanceof Date && right instanceof Date;
+  if (left instanceof Date || right instanceof Date) {
+    return left instanceof Date && right instanceof Date;
+  }
   if (left instanceof Uint8Array || right instanceof Uint8Array) {
     return left instanceof Uint8Array && right instanceof Uint8Array;
   }
