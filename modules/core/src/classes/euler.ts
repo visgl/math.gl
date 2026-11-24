@@ -9,7 +9,6 @@ import {MathArray} from './base/math-array';
 import {NumericArray} from '../types';
 import type {EulerRotationOrder} from './euler-types';
 
-import {clamp} from '../lib/common';
 import {checkNumber} from '../lib/validators';
 import {fromQuat as mat4_fromQuat} from '../gl-matrix/mat4';
 
@@ -17,7 +16,9 @@ export type {EulerLike, EulerRotationOrder} from './euler-types';
 
 // Internal constants
 const ERR_UNKNOWN_ORDER = 'Unknown Euler angle order';
-const ALMOST_ONE = 0.99999;
+// Below this cosine of the middle angle, the outer angles can't be told apart (gimbal lock), so one
+// of them is set to 0. Near sqrt(Number.EPSILON), both ways of extracting them lose about as much.
+const GIMBAL_LOCK_COSINE = 1e-8;
 
 /** Maps each numeric array order index to its rotation order string. */
 const ROTATION_ORDERS = ['zyx', 'yxz', 'xzy', 'zxy', 'yzx', 'xyz'] as const;
@@ -48,7 +49,16 @@ export class Euler extends MathArray {
   }
 
   fromQuaternion(quaternion: Readonly<NumericArray>, order: EulerRotationOrder = this.order): this {
-    const matrix = mat4_fromQuat(new Array<number>(16), quaternion);
+    // Re-normalize in float64 before building the rotation matrix. Float32Array
+    // inputs may be slightly off unit length, which amplifies error near gimbal lock.
+    const x = quaternion[0];
+    const y = quaternion[1];
+    const z = quaternion[2];
+    const w = quaternion[3];
+    const len = Math.sqrt(x * x + y * y + z * z + w * w);
+    // A zero-length quaternion maps to the identity rotation, as in Quaternion.normalize().
+    const q: number[] = len > 0 ? [x / len, y / len, z / len, w / len] : [0, 0, 0, 1];
+    const matrix = mat4_fromQuat(new Array<number>(16), q);
     return this.fromRotationMatrix(matrix, order);
   }
 
@@ -267,11 +277,15 @@ export class Euler extends MathArray {
     const m31 = m[2],
       m32 = m[6],
       m33 = m[10];
+    // The middle angle comes from atan2 of its sine and its cosine, which keeps full precision
+    // close to +-90 degrees, where asin of the sine alone loses it.
+    let cosine: number;
     const orderIndex = order ? checkOrder(order) : this[3];
     switch (getOrder(orderIndex)) {
       case 'xyz':
-        this[1] = Math.asin(clamp(m13, -1, 1));
-        if (Math.abs(m13) < ALMOST_ONE) {
+        cosine = Math.hypot(m11, m12);
+        this[1] = Math.atan2(m13, cosine);
+        if (cosine > GIMBAL_LOCK_COSINE) {
           this[0] = Math.atan2(-m23, m33);
           this[2] = Math.atan2(-m12, m11);
         } else {
@@ -280,8 +294,9 @@ export class Euler extends MathArray {
         }
         break;
       case 'yxz':
-        this[0] = Math.asin(-clamp(m23, -1, 1));
-        if (Math.abs(m23) < ALMOST_ONE) {
+        cosine = Math.hypot(m13, m33);
+        this[0] = Math.atan2(-m23, cosine);
+        if (cosine > GIMBAL_LOCK_COSINE) {
           this[1] = Math.atan2(m13, m33);
           this[2] = Math.atan2(m21, m22);
         } else {
@@ -290,8 +305,9 @@ export class Euler extends MathArray {
         }
         break;
       case 'zxy':
-        this[0] = Math.asin(clamp(m32, -1, 1));
-        if (Math.abs(m32) < ALMOST_ONE) {
+        cosine = Math.hypot(m31, m33);
+        this[0] = Math.atan2(m32, cosine);
+        if (cosine > GIMBAL_LOCK_COSINE) {
           this[1] = Math.atan2(-m31, m33);
           this[2] = Math.atan2(-m12, m22);
         } else {
@@ -300,8 +316,9 @@ export class Euler extends MathArray {
         }
         break;
       case 'zyx':
-        this[1] = Math.asin(-clamp(m31, -1, 1));
-        if (Math.abs(m31) < ALMOST_ONE) {
+        cosine = Math.hypot(m32, m33);
+        this[1] = Math.atan2(-m31, cosine);
+        if (cosine > GIMBAL_LOCK_COSINE) {
           this[0] = Math.atan2(m32, m33);
           this[2] = Math.atan2(m21, m11);
         } else {
@@ -310,8 +327,9 @@ export class Euler extends MathArray {
         }
         break;
       case 'yzx':
-        this[2] = Math.asin(clamp(m21, -1, 1));
-        if (Math.abs(m21) < ALMOST_ONE) {
+        cosine = Math.hypot(m22, m23);
+        this[2] = Math.atan2(m21, cosine);
+        if (cosine > GIMBAL_LOCK_COSINE) {
           this[0] = Math.atan2(-m23, m22);
           this[1] = Math.atan2(-m31, m11);
         } else {
@@ -320,8 +338,9 @@ export class Euler extends MathArray {
         }
         break;
       case 'xzy':
-        this[2] = Math.asin(-clamp(m12, -1, 1));
-        if (Math.abs(m12) < ALMOST_ONE) {
+        cosine = Math.hypot(m11, m13);
+        this[2] = Math.atan2(-m12, cosine);
+        if (cosine > GIMBAL_LOCK_COSINE) {
           this[0] = Math.atan2(m32, m22);
           this[1] = Math.atan2(m13, m11);
         } else {
