@@ -38,6 +38,14 @@ function parseWKTText(
   options: WKTParseOptions,
   validateInheritedDimensions: boolean
 ): WKTParseResult {
+  const {parser, srid} = createWKTParser(text, options);
+  const result = parser.parseGeometry('xy', options, validateInheritedDimensions);
+  parser.assertComplete();
+  return srid === undefined ? result : {...result, srid};
+}
+
+/** Validates the nesting limit and reads the EWKT prefix shared by both WKT entry points. */
+function createWKTParser(text: string, options: WKTParseOptions) {
   const maximumDepth = options.maximumDepth ?? 64;
   if (!Number.isSafeInteger(maximumDepth) || maximumDepth < 0) {
     throw new Error('WKT maximumDepth must be a non-negative safe integer');
@@ -48,9 +56,32 @@ function parseWKTText(
     throw new Error('WKT SRID must be an unsigned 32-bit integer');
   }
   const parser = new WKTParser(prefix ? text.slice(prefix[0].length) : text, maximumDepth);
-  const result = parser.parseGeometry('xy', options, validateInheritedDimensions);
+  return {parser, srid};
+}
+
+/** Options for counting WKT vertices without materializing geometry. */
+export type WKTScanOptions = WKTParseOptions &
+  Readonly<{
+    /** Stops scanning as soon as this number of vertices is exceeded. */
+    maximumVertices?: number;
+  }>;
+
+/** Counts validated WKT coordinate tuples without building geometry or coordinate arrays. */
+export function countWKTVertices(text: string, options: WKTScanOptions = {}): number {
+  const maximumVertices = options.maximumVertices ?? Infinity;
+  if (
+    maximumVertices !== Infinity &&
+    (!Number.isSafeInteger(maximumVertices) || maximumVertices < 0)
+  ) {
+    throw new Error('WKT maximumVertices must be a non-negative safe integer');
+  }
+  const {parser} = createWKTParser(text, options);
+  let count = 0;
+  parser.scanGeometry('xy', options, () => {
+    if (++count > maximumVertices) throw new Error('WKT vertex count exceeds maximumVertices');
+  });
   parser.assertComplete();
-  return srid === undefined ? result : {...result, srid};
+  return count;
 }
 
 /** Formats one geometry as WKT using an explicit or tuple-inferred semantic dimension. */
@@ -106,15 +137,69 @@ function isWKTParseResult(value: WellKnownGeometry | WKTParseResult): value is W
 }
 
 class WKTParser {
-  private readonly tokens: string[];
-  private index = 0;
+  /** Sticky grammar with only one token of lookahead. */
+  private readonly tokenPattern =
+    /[A-Za-z_]+|[(),]|[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?/gy;
+  /** Offset immediately after the most recently read token. */
+  private offset = 0;
+  /** Buffered unread token, or an empty string at end of input. */
+  private lookahead?: string;
 
-  /** Tokenizes the geometry body and stores its nesting limit. */
+  /** Initializes the cursor over the geometry body with its nesting limit. */
   constructor(
-    text: string,
+    private readonly text: string,
     private readonly maximumDepth: number
-  ) {
-    this.tokens = tokenizeWKT(text);
+  ) {}
+
+  /** Reads a type and its optional dimension marker. */
+  private readHeader(inheritedDimension: WellKnownDimension) {
+    const type = this.takeWord().toUpperCase();
+    const token = this.peek().toUpperCase();
+    const hasExplicitDimension = token === 'Z' || token === 'M' || token === 'ZM';
+    if (hasExplicitDimension) this.take();
+    const dimension: WellKnownDimension =
+      token === 'Z' ? 'xyz' : token === 'M' ? 'xym' : token === 'ZM' ? 'xyzm' : inheritedDimension;
+    return {type, dimension, hasExplicitDimension};
+  }
+
+  /** Visits vertex tuples without retaining their ordinates. */
+  scanGeometry(
+    inheritedDimension: WellKnownDimension,
+    options: WKTParseOptions,
+    visitVertex: () => void,
+    depth = 0
+  ): void {
+    if (depth > this.maximumDepth) throw new Error('WKT maximumDepth exceeded');
+    const {type, dimension, hasExplicitDimension} = this.readHeader(inheritedDimension);
+    const coordinateDepth = type === 'GEOMETRYCOLLECTION' ? null : getWKTDepth(type);
+    if (this.peek().toUpperCase() === 'EMPTY') {
+      this.take();
+      return;
+    }
+    if (coordinateDepth === null) {
+      this.expect('(');
+      if (this.peek() !== ')') {
+        do this.scanGeometry(dimension, options, visitVertex, depth + 1);
+        while (this.takeIf(','));
+      }
+      this.expect(')');
+      return;
+    }
+    const infer = options.inferDimensions && !hasExplicitDimension && inheritedDimension === 'xy';
+    let coordinateSize: number | undefined = infer
+      ? undefined
+      : getWellKnownDimensionSize(dimension);
+    this.parseCoordinateNesting(
+      coordinateDepth,
+      coordinateSize ?? null,
+      type === 'MULTIPOINT',
+      size => {
+        coordinateSize ??= size;
+        if (size !== coordinateSize)
+          throw new Error('WKT geometry contains inconsistent coordinate dimensions');
+        visitVertex();
+      }
+    );
   }
 
   /** Parses one geometry and checks depth before descending into its children. */
@@ -125,14 +210,12 @@ class WKTParser {
     depth = 0
   ): WKTParseResult {
     if (depth > this.maximumDepth) throw new Error('WKT maximumDepth exceeded');
-    const type = this.takeWord().toUpperCase();
-    let dimension = inheritedDimension;
-    let hasExplicitDimension = false;
-    if (['Z', 'M', 'ZM'].includes(this.peek().toUpperCase())) {
-      const token = this.take().toUpperCase();
-      dimension = token === 'Z' ? 'xyz' : token === 'M' ? 'xym' : 'xyzm';
-      hasExplicitDimension = true;
-    }
+    const {
+      type,
+      dimension: declaredDimension,
+      hasExplicitDimension
+    } = this.readHeader(inheritedDimension);
+    let dimension = declaredDimension;
     const dimensionSize = getWellKnownDimensionSize(dimension);
     if (this.peek().toUpperCase() === 'EMPTY') {
       this.take();
@@ -174,30 +257,38 @@ class WKTParser {
   }
 
   assertComplete(): void {
-    if (this.index !== this.tokens.length) throw new Error(`Unexpected WKT token ${this.peek()}`);
+    if (this.peek()) throw new Error(`Unexpected WKT token ${this.peek()}`);
   }
 
   private parseCoordinateNesting(
     depth: number,
     dimensionSize: number | null,
-    allowEmptyPoints = false
+    allowEmptyPoints = false,
+    visitCoordinate?: (size: number) => void
   ): unknown {
     this.expect('(');
     if (depth === 0) {
-      const coordinate = this.readCoordinate(dimensionSize);
+      const coordinate = this.readCoordinate(dimensionSize, visitCoordinate);
       this.expect(')');
       return coordinate;
     }
-    const values: unknown[] = [];
+    const values: unknown[] | undefined = visitCoordinate ? undefined : [];
     if (this.peek() !== ')') {
       do {
         if (allowEmptyPoints && depth === 1 && this.peek().toUpperCase() === 'EMPTY') {
           this.take();
-          values.push([]);
+          values?.push([]);
         } else if (depth === 1 && this.peek() !== '(') {
-          values.push(this.readCoordinate(dimensionSize));
+          const coordinate = this.readCoordinate(dimensionSize, visitCoordinate);
+          values?.push(coordinate);
         } else {
-          values.push(this.parseCoordinateNesting(depth - 1, dimensionSize));
+          const child = this.parseCoordinateNesting(
+            depth - 1,
+            dimensionSize,
+            false,
+            visitCoordinate
+          );
+          values?.push(child);
         }
       } while (this.takeIf(','));
     }
@@ -205,26 +296,48 @@ class WKTParser {
     return values;
   }
 
-  private readCoordinate(dimensionSize: number | null): number[] {
-    const values: number[] = [];
-    while (
-      (dimensionSize === null || values.length < dimensionSize) &&
-      isNumberToken(this.peek())
-    ) {
-      values.push(Number(this.take()));
+  /** Consumes one tuple, retaining ordinates only when parsing geometry. */
+  private readCoordinate(
+    dimensionSize: number | null,
+    visit?: (size: number) => void
+  ): number[] | undefined {
+    const values: number[] | undefined = visit ? undefined : [];
+    let size = 0;
+    while ((dimensionSize === null || size < dimensionSize) && isNumberToken(this.peek())) {
+      const token = this.take();
+      values?.push(Number(token));
+      size++;
     }
-    if (values.length < 2) throw new Error('WKT coordinate requires at least two numbers');
-    if (values.length > 4) throw new Error('WKT coordinates cannot contain more than four numbers');
+    if (size < 2) throw new Error('WKT coordinate requires at least two numbers');
+    if (size > 4) throw new Error('WKT coordinates cannot contain more than four numbers');
+    visit?.(size);
     return values;
   }
 
   private peek(): string {
-    return this.tokens[this.index] || '';
+    if (this.lookahead !== undefined) return this.lookahead;
+    while (this.offset < this.text.length && /\s/.test(this.text[this.offset]!)) this.offset++;
+    if (this.offset === this.text.length) {
+      this.lookahead = '';
+      return this.lookahead;
+    }
+    this.tokenPattern.lastIndex = this.offset;
+    const match = this.tokenPattern.exec(this.text);
+    if (!match) {
+      throw new Error(
+        `Unexpected WKT character ${JSON.stringify(this.text[this.offset])} at ${this.offset}`
+      );
+    }
+    this.offset = this.tokenPattern.lastIndex;
+    this.lookahead = match[0];
+    return this.lookahead;
   }
 
   private take(): string {
-    if (this.index >= this.tokens.length) throw new Error('Unexpected end of WKT');
-    return this.tokens[this.index++];
+    const token = this.peek();
+    if (!token) throw new Error('Unexpected end of WKT');
+    this.lookahead = undefined;
+    return token;
   }
 
   private takeWord(): string {
@@ -235,7 +348,7 @@ class WKTParser {
 
   private takeIf(token: string): boolean {
     if (this.peek() !== token) return false;
-    this.index++;
+    this.take();
     return true;
   }
 
@@ -283,24 +396,6 @@ function getDimensionForSize(size: number): WellKnownDimension {
     default:
       throw new Error('Unsupported WKT coordinate dimension ' + size);
   }
-}
-
-function tokenizeWKT(text: string): string[] {
-  const tokens: string[] = [];
-  const tokenPattern = /[A-Za-z_]+|[(),]|[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?/gy;
-  let index = 0;
-  while (index < text.length) {
-    while (index < text.length && /\s/.test(text[index])) index++;
-    if (index === text.length) break;
-    tokenPattern.lastIndex = index;
-    const match = tokenPattern.exec(text);
-    if (!match) {
-      throw new Error(`Unexpected WKT character ${JSON.stringify(text[index])} at ${index}`);
-    }
-    tokens.push(match[0]);
-    index = tokenPattern.lastIndex;
-  }
-  return tokens;
 }
 
 function formatCoordinateNesting(

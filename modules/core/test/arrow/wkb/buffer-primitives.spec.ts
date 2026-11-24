@@ -4,8 +4,10 @@
 
 import {expect, test} from 'vitest';
 import {
+  countWKTVertices,
   inspectWKBHeader,
   parseWKB,
+  parseWKTWithMetadata,
   scanWKB,
   visitWKB,
   WKBBuilder,
@@ -409,4 +411,75 @@ test('Every WKB array offset is validated before writing, including null rows', 
     expect(() => WKBBuilder.writeGeometryArray(writers, new Int32Array(offsets), values)).toThrow();
     expect(values.every(value => value === 0xaa)).toBe(true);
   }
+});
+
+test('writes nested WKT collection members with their own WKB dimensions', () => {
+  const parsed = parseWKTWithMetadata(
+    'GEOMETRYCOLLECTION (POINT Z (1 2 3), GEOMETRYCOLLECTION (POINT M (4 5 6), POINT (7 8)))'
+  );
+  const bytes = writeWKB(parsed);
+  const result = parseWKB(bytes, {captureMembers: true});
+  expect(result.geometry).toEqual(parsed.geometry);
+  expect(result.dimension).toBe('xy');
+  expect(result.members?.map(member => inspectWKBHeader(member).dimension)).toEqual(['xyz', 'xy']);
+  const nested = parseWKB(result.members![1]!, {captureMembers: true});
+  expect(nested.members?.map(member => inspectWKBHeader(member).dimension)).toEqual(['xym', 'xy']);
+
+  const overridden = parseWKB(writeWKB(parsed, 'xy'), {captureMembers: true});
+  expect(overridden.members?.map(member => inspectWKBHeader(member).dimension)).toEqual([
+    'xy',
+    'xy'
+  ]);
+});
+
+test('counts WKT vertices through nested collections, respecting empties and limits', () => {
+  const text =
+    'GEOMETRYCOLLECTION (MULTIPOINT (EMPTY, (0 1), 2 3), LINESTRING Z (0 0 0, 1 1 1), POINT EMPTY)';
+  expect(countWKTVertices(text)).toBe(4);
+  expect(countWKTVertices(text, {maximumVertices: 4})).toBe(4);
+  expect(() => countWKTVertices(text, {maximumVertices: 3})).toThrow(/exceeds maximumVertices/);
+  expect(countWKTVertices('LINESTRING (0 0 0, 1 1 1)', {inferDimensions: true})).toBe(2);
+  expect(() => countWKTVertices('LINESTRING (0 0 0, 1 1)', {inferDimensions: true})).toThrow(
+    /inconsistent coordinate dimensions/
+  );
+});
+
+test('normalizes only all-NaN WKB points when requested, including collection members', () => {
+  const bytes = writeWKB(
+    {
+      type: 'GeometryCollection',
+      geometries: [
+        {type: 'Point', coordinates: []},
+        {type: 'MultiPoint', coordinates: [[], [1, NaN], [2, 3]]}
+      ]
+    },
+    'xy'
+  );
+  expect(parseWKB(bytes).geometry).toEqual({
+    type: 'GeometryCollection',
+    geometries: [
+      {type: 'Point', coordinates: [NaN, NaN]},
+      {
+        type: 'MultiPoint',
+        coordinates: [
+          [NaN, NaN],
+          [1, NaN],
+          [2, 3]
+        ]
+      }
+    ]
+  });
+  expect(parseWKB(bytes, {normalizeEmptyPoints: true}).geometry).toEqual({
+    type: 'GeometryCollection',
+    geometries: [
+      {type: 'Point', coordinates: []},
+      {type: 'MultiPoint', coordinates: [[], [1, NaN], [2, 3]]}
+    ]
+  });
+});
+
+test('countWKTVertices accepts EWKT and respects the collection nesting limit', () => {
+  const text = 'SRID=4326;GEOMETRYCOLLECTION (POINT (1 2))';
+  expect(countWKTVertices(text, {maximumDepth: 1})).toBe(1);
+  expect(() => countWKTVertices(text, {maximumDepth: 0})).toThrow(/maximumDepth exceeded/);
 });
