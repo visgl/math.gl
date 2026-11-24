@@ -42,3 +42,14 @@ guidance.
 | Curved geometries, TINs and polyhedral surfaces | ❌ | The public WellKnownGeometry union covers the standard linear geometry families, not these extended SQL/MM types. |
 | Incremental streaming of a single geometry | ❌ | Codecs process individual complete values synchronously; [GeoArrow](../geoarrow-utils/README.md) handles column/chunk envelopes. |
 | Topology validation and CRS transformation | ❌ | Syntax decoding does not validate polygon topology, repair geometry, or transform coordinates. |
+
+### Mixed-dimension collections
+
+Pass a `parseWKTWithMetadata` result to `writeWKB` to retain each collection
+member's declared coordinate dimension. An explicit second argument applies
+one dimension to the whole collection.
+
+```typescript
+const geometry = parseWKTWithMetadata('GEOMETRYCOLLECTION (POINT Z (1 2 3), POINT (4 5))');
+const bytes = writeWKB(geometry);
+```

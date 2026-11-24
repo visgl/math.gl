@@ -6,6 +6,7 @@ import {expect, test} from 'vitest';
 import {
   inspectWKBHeader,
   parseWKB,
+  parseWKTWithMetadata,
   scanWKB,
   visitWKB,
   WKBBuilder,
@@ -386,4 +387,23 @@ test('Every WKB array offset is validated before writing, including null rows', 
     expect(() => WKBBuilder.writeGeometryArray(writers, new Int32Array(offsets), values)).toThrow();
     expect(values.every(value => value === 0xaa)).toBe(true);
   }
+});
+
+test('writes nested WKT collection members with their own WKB dimensions', () => {
+  const parsed = parseWKTWithMetadata(
+    'GEOMETRYCOLLECTION (POINT Z (1 2 3), GEOMETRYCOLLECTION (POINT M (4 5 6), POINT (7 8)))'
+  );
+  const bytes = writeWKB(parsed);
+  const result = parseWKB(bytes, {captureMembers: true});
+  expect(result.geometry).toEqual(parsed.geometry);
+  expect(result.dimension).toBe('xy');
+  expect(result.members?.map(member => inspectWKBHeader(member).dimension)).toEqual(['xyz', 'xy']);
+  const nested = parseWKB(result.members![1]!, {captureMembers: true});
+  expect(nested.members?.map(member => inspectWKBHeader(member).dimension)).toEqual(['xym', 'xy']);
+
+  const overridden = parseWKB(writeWKB(parsed, 'xy'), {captureMembers: true});
+  expect(overridden.members?.map(member => inspectWKBHeader(member).dimension)).toEqual([
+    'xy',
+    'xy'
+  ]);
 });

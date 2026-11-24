@@ -5,6 +5,7 @@
 import type {WellKnownDimension, WellKnownGeometry} from './types';
 import {getWellKnownDimensionSize, inferWellKnownGeometryDimension} from './types';
 import {inspectWKBHeader} from './wkb-reader';
+import type {WKTParseResult} from './wkt';
 
 /** Defensive limits applied before WKB allocates geometry arrays. */
 export type WKBParseOptions = Readonly<{
@@ -67,13 +68,25 @@ export function parseWKB(bytes: Uint8Array, options: WKBParseOptions = {}): WKBP
   };
 }
 
-/** Writes one geometry as little-endian ISO WKB. */
+/**
+ * Writes one geometry as little-endian ISO WKB. A parsed WKT result supplies
+ * dimensions for each collection member. An explicit dimension overrides them.
+ */
 export function writeWKB(
-  geometry: WellKnownGeometry,
-  dimension: WellKnownDimension = inferWellKnownGeometryDimension(geometry)
+  input: WellKnownGeometry | WKTParseResult,
+  dimension?: WellKnownDimension
 ): Uint8Array {
   const bytes: number[] = [];
-  writeWKBGeometry(bytes, geometry, dimension);
+  if ('geometry' in input) {
+    writeWKBGeometry(
+      bytes,
+      input.geometry,
+      dimension ?? input.dimension,
+      dimension === undefined ? input.children : undefined
+    );
+  } else {
+    writeWKBGeometry(bytes, input, dimension ?? inferWellKnownGeometryDimension(input));
+  }
   return Uint8Array.from(bytes);
 }
 
@@ -163,7 +176,8 @@ function readWKBGeometry(
 function writeWKBGeometry(
   bytes: number[],
   geometry: WellKnownGeometry,
-  dimension: WellKnownDimension
+  dimension: WellKnownDimension,
+  children?: readonly WKTParseResult[]
 ): void {
   bytes.push(1);
   const size = getWellKnownDimensionSize(dimension);
@@ -210,7 +224,13 @@ function writeWKBGeometry(
       break;
     case 'GeometryCollection':
       writeUint32(bytes, geometry.geometries.length);
-      for (const child of geometry.geometries) writeWKBGeometry(bytes, child, dimension);
+      if (children && children.length !== geometry.geometries.length) {
+        throw new Error('WKB collection metadata must match its geometry members');
+      }
+      for (const [index, child] of geometry.geometries.entries()) {
+        const metadata = children?.[index];
+        writeWKBGeometry(bytes, child, metadata?.dimension ?? dimension, metadata?.children);
+      }
       break;
   }
 }
