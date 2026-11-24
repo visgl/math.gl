@@ -104,6 +104,28 @@ const trips = queryArrowSQL(
 
 For worker execution, see [Workers](https://visgl.github.io/math.gl/next/docs/modules/sql/worker.md).
 
+### Preparing a projection for multiple inputs[​](#preparing-a-projection-for-multiple-inputs "Direct link to Preparing a projection for multiple inputs")
+
+Use `getProjectionColumns` from `@math.gl/sql/expressions` to identify the source columns required by a SELECT list before opening the data source. Use `prepareArrowProjection` from `@math.gl/sql/query` to bind that SELECT list to the source schema once and inspect the output schema before reading any batches.
+
+```
+import {getProjectionColumns} from '@math.gl/sql/expressions';
+
+import {prepareArrowProjection} from '@math.gl/sql/query';
+
+
+
+const selections = [{column: 'temperature', as: 'value'}];
+
+const dependencies = getProjectionColumns(selections); // ['temperature']
+
+const projection = prepareArrowProjection(inputSchema, selections);
+
+const output = projection.projectTable(inputTable);
+```
+
+`projection.projectBatch(batch)` returns the output batches for a single input batch. Computed vectors can introduce additional chunk boundaries. Uncomputed columns share the input buffers.
+
 ### Querying a stream of record batches[​](#querying-a-stream-of-record-batches "Direct link to Querying a stream of record batches")
 
 `queryArrowTableInBatches(batches, schema, query)` applies the same schema-bound WHERE and SELECT as `queryArrowTable` to an iterable or async iterable of Arrow record batches. OFFSET and LIMIT apply across the stream, and reaching the limit closes the input iterator. Call `queryArrowTableInBatches(batches, query)` to infer the schema from the first batch. In this mode, empty input produces no batches and schema-dependent validation starts when the first batch arrives. Pass the schema explicitly to validate the query even when the input is empty. Grouping, sorting, joins and unions use the table engine.
