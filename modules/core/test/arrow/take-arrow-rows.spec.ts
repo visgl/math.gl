@@ -7,6 +7,7 @@ import {expect, test} from 'vitest';
 import {
   createRecordBatchWithMetadata,
   getRecordBatchMetadata,
+  selectArrowBatchRows,
   takeArrowTableRows
 } from '../../src/arrow-integration/arrow';
 
@@ -121,4 +122,26 @@ test('multi-chunk gather treats independently created empty metadata maps as com
   expect(result.batches).toHaveLength(1);
   expect([...result.getChild('value')!]).toEqual([10, 20, 11, 21]);
   expect(getRecordBatchMetadata(result.batches[0]!)?.size).toBe(0);
+});
+
+test('selectArrowBatchRows borrows contiguous storage and preserves batch metadata', () => {
+  const table = arrow.tableFromArrays({value: Int32Array.of(10, 20, 30, 40)});
+  const source = table.batches[0]!;
+  const metadata = new Map([['batch', 'source']]);
+  const batch = createRecordBatchWithMetadata(source.schema, source.data, metadata);
+
+  expect(selectArrowBatchRows(batch, [])).toBeUndefined();
+  expect(selectArrowBatchRows(batch, [0, 1, 2, 3])).toBe(batch);
+
+  const contiguous = selectArrowBatchRows(batch, [1, 2])!;
+  const contiguousColumn = contiguous.getChild('value')!;
+  expect([...contiguousColumn]).toEqual([20, 30]);
+  expect(contiguousColumn.data[0]!.values.buffer).toBe(
+    batch.getChild('value')!.data[0]!.values.buffer
+  );
+  expect(getRecordBatchMetadata(contiguous)).toEqual(metadata);
+
+  const sparse = selectArrowBatchRows(batch, Int32Array.of(0, 3))!;
+  expect([...sparse.getChild('value')!]).toEqual([10, 40]);
+  expect(getRecordBatchMetadata(sparse)).toEqual(metadata);
 });
