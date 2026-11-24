@@ -13,6 +13,12 @@ import {bundleRuntime} from '../modules/geospatial/scripts/projection/benchmark-
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'mathgl-tree-shaking-'));
 const probes = [
+  ...['parseTWKB', 'writeTWKB'].map(symbol => ({
+    symbol,
+    packages: ['@math.gl/core/twkb'],
+    forbidden: [/apache-arrow/, /arrow-integration/, /\/sql\//, /\/tasks\//],
+    budget: 3200
+  })),
   {
     symbol: 'projectArrowTable',
     packages: ['@math.gl/core/arrow'],
