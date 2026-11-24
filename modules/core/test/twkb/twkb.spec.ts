@@ -14,6 +14,20 @@ test('TWKB reads and writes spec-derived point bytes with independent M precisio
   expect(parseTWKB(padded.subarray(1, -1))).toEqual({geometry, dimension: 'xym'});
 });
 
+test('TWKB interoperates with the published PostGIS linestring example', () => {
+  // https://postgis.net/docs/ST_AsTWKB.html
+  const bytes = Uint8Array.of(2, 0, 2, 2, 2, 8, 8);
+  const geometry = {
+    type: 'LineString',
+    coordinates: [
+      [1, 1],
+      [5, 5]
+    ]
+  } as const;
+  expect(parseTWKB(bytes)).toEqual({geometry, dimension: 'xy'});
+  expect(writeTWKB(geometry, {precision: 0})).toEqual(bytes);
+});
+
 test('TWKB preserves deltas beyond 32 bits and per-child dimensions', () => {
   const geometry: WellKnownGeometry = {
     type: 'GeometryCollection',
