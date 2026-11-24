@@ -94,6 +94,33 @@ export function takeArrowTableRows<T extends arrow.TypeMap>(
   return new arrow.Table(arrowTable.schema, batches);
 }
 
+/**
+ * Selects rows from one batch and preserves its metadata.
+ * Indices must be in range, increasing, and unique. Contiguous selections
+ * borrow source buffers, and empty selections return undefined.
+ * An explicit schema must be equivalent to the batch schema.
+ */
+export function selectArrowBatchRows<T extends arrow.TypeMap>(
+  batch: arrow.RecordBatch<T>,
+  indexes: readonly number[] | Int32Array,
+  schema: arrow.Schema<T> = batch.schema
+): arrow.RecordBatch<T> | undefined {
+  if (!indexes.length) return undefined;
+  if (indexes.length === batch.numRows) return batch;
+  const start = indexes[0]!;
+  if (indexes[indexes.length - 1]! - start + 1 === indexes.length) {
+    return createRecordBatchWithMetadata(
+      batch.schema,
+      batch.data.slice(start, indexes.length),
+      getRecordBatchMetadata(batch)
+    );
+  }
+  return takeArrowTableRows(
+    new arrow.Table(schema, [batch]),
+    indexes instanceof Int32Array ? indexes : Int32Array.from(indexes)
+  ).batches[0];
+}
+
 /** Preserves dense/sparse union tags while gathering the corresponding child rows. */
 function takeArrowUnionRows(
   data: arrow.Data,
