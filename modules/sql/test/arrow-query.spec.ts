@@ -298,7 +298,7 @@ test('inferred streaming queries validate later schemas and close input on query
   closed = false;
   await expect(
     Array.fromAsync(queryArrowTableInBatches(batches(), {select: ['missing']}))
-  ).rejects.toThrow(/projection column not found/);
+  ).rejects.toThrow(/Arrow query column not found/);
   expect(closed).toBe(true);
 });
 
