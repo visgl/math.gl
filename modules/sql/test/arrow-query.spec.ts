@@ -52,7 +52,8 @@ test('prepared projections reuse bindings and share uncomputed Arrow buffers', (
     y: vectorFromArray([5, 6, 7], new Float64())
   });
   const selections = select('SELECT y AS original, x + y AS sum FROM input').select!;
-  const plan = prepareArrowProjection(source.schema, selections);
+  const options = {signal: new AbortController().signal, limit: 1, offset: 1};
+  const plan = prepareArrowProjection(source.schema, selections, options);
   expect(plan.schema.fields.map(field => field.name)).toEqual(['original', 'sum']);
   expect(getProjectionColumns(selections)).toEqual(['y', 'x']);
   const first = plan.projectTable(source.slice(0, 1));

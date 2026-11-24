@@ -121,13 +121,13 @@ export interface PreparedArrowProjection {
 export function prepareArrowProjection(
   inputSchema: Schema,
   select: readonly TableSelection[],
-  options: Pick<ArrowBatchQuery, 'functions' | 'signal'> = {}
+  {functions, signal}: Pick<ArrowBatchQuery, 'functions' | 'signal'> = {}
 ): PreparedArrowProjection {
-  const plan = compileArrowQuery(inputSchema, {...options, select});
+  const plan = compileArrowQuery(inputSchema, {functions, signal, select});
   return {
     schema: plan.schema,
     projectBatch(batch) {
-      options.signal?.throwIfAborted();
+      signal?.throwIfAborted();
       if (batch.schema !== inputSchema) {
         validateArrowTableSchema(new Table(batch.schema, []), inputSchema, {
           rejectExtraFields: true,
@@ -137,7 +137,7 @@ export function prepareArrowProjection(
       return Array.from(plan.execute(batch, true));
     },
     projectTable(table) {
-      options.signal?.throwIfAborted();
+      signal?.throwIfAborted();
       if (table.schema !== inputSchema) {
         validateArrowTableSchema(table, inputSchema, {
           rejectExtraFields: true,
