@@ -62,7 +62,9 @@ export function compileColumnarPredicate(
         const value = read(rowIndex);
         return value == null
           ? null
-          : candidates.some(candidate => compareValues(value, candidate) === 0);
+          : candidates.some(
+              candidate => comparable(value, candidate) && compareValues(value, candidate) === 0
+            );
       };
     }
     default: {
@@ -121,4 +123,14 @@ function compareValues(left: ColumnarPredicateValue, right: ColumnarPredicateVal
 /** Identifies a number or exact integer in the portable numeric domain. */
 function isNumeric(value: ColumnarPredicateValue): value is number | bigint {
   return typeof value === 'number' || typeof value === 'bigint';
+}
+
+/** Checks membership compatibility without rejecting other candidate types. */
+function comparable(left: ColumnarPredicateValue, right: ColumnarPredicateValue): boolean {
+  if (isNumeric(left) && isNumeric(right)) return true;
+  if (left instanceof Date || right instanceof Date) return left instanceof Date && right instanceof Date;
+  if (left instanceof Uint8Array || right instanceof Uint8Array) {
+    return left instanceof Uint8Array && right instanceof Uint8Array;
+  }
+  return typeof left === typeof right;
 }

@@ -52,3 +52,11 @@ test('rejects casts and non-finite numeric comparisons', () => {
   );
   expect(() => predicate(0)).toThrow(/non-finite/);
 });
+
+test('matches mixed-type IN candidates independently of list order', () => {
+  const predicate = compileColumnarPredicate(
+    {op: 'in', args: [{property: 'value'}, ['1', Uint8Array.of(1), 1n]]},
+    () => index => [1, new Date(0), null][index]
+  );
+  expect([0, 1, 2].map(predicate)).toEqual([true, false, null]);
+});
