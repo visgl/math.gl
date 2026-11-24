@@ -282,7 +282,10 @@ class WKTParser {
   private peek(): string {
     if (this.lookahead !== undefined) return this.lookahead;
     while (this.offset < this.text.length && /\s/.test(this.text[this.offset]!)) this.offset++;
-    if (this.offset === this.text.length) return (this.lookahead = '');
+    if (this.offset === this.text.length) {
+      this.lookahead = '';
+      return this.lookahead;
+    }
     this.tokenPattern.lastIndex = this.offset;
     const match = this.tokenPattern.exec(this.text);
     if (!match) {
@@ -291,7 +294,8 @@ class WKTParser {
       );
     }
     this.offset = this.tokenPattern.lastIndex;
-    return (this.lookahead = match[0]);
+    this.lookahead = match[0];
+    return this.lookahead;
   }
 
   private take(): string {
