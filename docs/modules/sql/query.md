@@ -113,13 +113,16 @@ For worker execution, see [Workers](worker.md).
 `queryArrowTableInBatches(batches, schema, query)` applies the same schema-bound
 WHERE and SELECT as `queryArrowTable` to an iterable or async iterable of
 Arrow record batches. OFFSET and LIMIT apply across the stream, and reaching
-the limit closes the input iterator. Supply the schema up front, including
-for empty inputs. Grouping, sorting, joins and unions use the table engine.
+the limit closes the input iterator. Call `queryArrowTableInBatches(batches, query)`
+to infer the schema from the first batch. In this mode, empty input produces no
+batches and schema-dependent validation starts when the first batch arrives.
+Pass the schema explicitly to validate the query even when the input is empty.
+Grouping, sorting, joins and unions use the table engine.
 
 ```ts
 import {queryArrowTableInBatches} from '@math.gl/sql/query';
 
-for await (const batch of queryArrowTableInBatches(inputBatches, schema, {
+for await (const batch of queryArrowTableInBatches(inputBatches, {
   select: [{column: 'value', as: 'measurement'}],
   limit: 1000
 })) {
