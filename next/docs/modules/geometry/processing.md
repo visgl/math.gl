@@ -71,3 +71,15 @@ npm install @math.gl/geometry
 * Coordinate helpers: `emod`
 
 The initial API is based on the geometry utilities previously maintained in `@loaders.gl/math`.
+
+### Planar Delaunay triangulation[​](#planar-delaunay-triangulation "Direct link to Planar Delaunay triangulation")
+
+`triangulateDelaunay(points)` returns triples of indices into an array of finite XY coordinate pairs. It uses the first index for coincident points and returns an empty array for collinear inputs and inputs with fewer than three distinct points. Triangle order and the diagonal chosen for cocircular points are unspecified. Supply coordinates in the plane where distances should be measured.
+
+```
+import {triangulateDelaunay} from '@math.gl/geometry/processing';
+
+
+
+const triangles = triangulateDelaunay([[0, 0], [3, 0], [0, 4], [1, 1]]);
+```
