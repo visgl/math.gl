@@ -97,6 +97,15 @@ test('Euler#fromQuaternion supports every rotation order', () => {
   }
 });
 
+test('Euler#fromQuaternion maps a zero-length quaternion to the identity rotation', () => {
+  for (const order of ['xyz', 'yxz', 'zxy', 'zyx', 'yzx', 'xzy'] as const) {
+    const result = new Euler(1, 2, 3, order).fromQuaternion([0, 0, 0, 0]);
+    expect(result.order).toBe(order);
+    // -0 and 0 both mean no rotation, so compare with == rather than toEqual
+    expect(result.toArray().every(angle => angle === 0)).toBe(true);
+  }
+});
+
 // Index of the angle that each order extracts first (the middle rotation), which locks at +-90 degrees.
 const MIDDLE_ANGLE: Record<string, number> = {xyz: 1, yxz: 0, zxy: 0, zyx: 1, yzx: 2, xzy: 2};
 

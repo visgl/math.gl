@@ -56,7 +56,8 @@ export class Euler extends MathArray {
     const z = quaternion[2];
     const w = quaternion[3];
     const len = Math.sqrt(x * x + y * y + z * z + w * w);
-    const q: number[] = [x / len, y / len, z / len, w / len];
+    // A zero-length quaternion maps to the identity rotation, as in Quaternion.normalize().
+    const q: number[] = len > 0 ? [x / len, y / len, z / len, w / len] : [0, 0, 0, 1];
     const matrix = mat4_fromQuat(new Array<number>(16), q);
     return this.fromRotationMatrix(matrix, order);
   }
