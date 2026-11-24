@@ -9,6 +9,8 @@ import {getWellKnownDimensionSize, inferWellKnownGeometryDimension} from './type
 export type WKTParseOptions = Readonly<{
   /** Infer unmarked coordinate dimensions for legacy WKT such as POINT (1 2 3). */
   inferDimensions?: boolean;
+  /** Maximum number of enclosing collections. Defaults to 64. */
+  maximumDepth?: number;
 }>;
 
 /** One parsed WKT geometry and its semantic dimension, including collection children. */
@@ -16,22 +18,45 @@ export type WKTParseResult = Readonly<{
   geometry: WellKnownGeometry;
   dimension: WellKnownDimension;
   children?: readonly WKTParseResult[];
+  /** Root EWKT SRID, when the input declares one. */
+  srid?: number;
 }>;
 
 /** Parses one WKT geometry, including Z/M/ZM, collections, alternate MultiPoint, and empties. */
 export function parseWKT(text: string, options?: WKTParseOptions): WellKnownGeometry {
-  const parser = new WKTParser(text);
-  const result = parser.parseGeometry('xy', options ?? {}, false);
-  parser.assertComplete();
-  return result.geometry;
+  return parseWKTText(text, options ?? {}, false).geometry;
 }
 
-/** Parses WKT while preserving each geometry's declared or inferred semantic dimension. */
+/** Parses WKT while preserving geometry dimensions and the optional root EWKT SRID. */
 export function parseWKTWithMetadata(text: string, options: WKTParseOptions = {}): WKTParseResult {
-  const parser = new WKTParser(text);
-  const result = parser.parseGeometry('xy', options, true);
+  return parseWKTText(text, options, true);
+}
+
+/** Reads the optional EWKT prefix and parses exactly one geometry. */
+function parseWKTText(
+  text: string,
+  options: WKTParseOptions,
+  validateInheritedDimensions: boolean
+): WKTParseResult {
+  const {parser, srid} = createWKTParser(text, options);
+  const result = parser.parseGeometry('xy', options, validateInheritedDimensions);
   parser.assertComplete();
-  return result;
+  return srid === undefined ? result : {...result, srid};
+}
+
+/** Validates the nesting limit and reads the EWKT prefix shared by both WKT entry points. */
+function createWKTParser(text: string, options: WKTParseOptions) {
+  const maximumDepth = options.maximumDepth ?? 64;
+  if (!Number.isSafeInteger(maximumDepth) || maximumDepth < 0) {
+    throw new Error('WKT maximumDepth must be a non-negative safe integer');
+  }
+  const prefix = /^\s*SRID\s*=\s*(\d+)\s*;/i.exec(text);
+  const srid = prefix ? Number(prefix[1]) : undefined;
+  if (srid !== undefined && (!Number.isSafeInteger(srid) || srid > 0xffffffff)) {
+    throw new Error('WKT SRID must be an unsigned 32-bit integer');
+  }
+  const parser = new WKTParser(prefix ? text.slice(prefix[0].length) : text, maximumDepth);
+  return {parser, srid};
 }
 
 /** Options for counting WKT vertices without materializing geometry. */
@@ -50,7 +75,7 @@ export function countWKTVertices(text: string, options: WKTScanOptions = {}): nu
   ) {
     throw new Error('WKT maximumVertices must be a non-negative safe integer');
   }
-  const parser = new WKTParser(text);
+  const {parser} = createWKTParser(text, options);
   let count = 0;
   parser.scanGeometry('xy', options, () => {
     if (++count > maximumVertices) throw new Error('WKT vertex count exceeds maximumVertices');
@@ -120,7 +145,11 @@ class WKTParser {
   /** Buffered unread token, or an empty string at end of input. */
   private lookahead?: string;
 
-  constructor(private readonly text: string) {}
+  /** Initializes the cursor over the geometry body with its nesting limit. */
+  constructor(
+    private readonly text: string,
+    private readonly maximumDepth: number
+  ) {}
 
   /** Reads a type and its optional dimension marker. */
   private readHeader(inheritedDimension: WellKnownDimension) {
@@ -140,7 +169,7 @@ class WKTParser {
     visitVertex: () => void,
     depth = 0
   ): void {
-    if (depth > 64) throw new Error('WKT geometry nesting exceeds 64 levels');
+    if (depth > this.maximumDepth) throw new Error('WKT maximumDepth exceeded');
     const {type, dimension, hasExplicitDimension} = this.readHeader(inheritedDimension);
     const coordinateDepth = type === 'GEOMETRYCOLLECTION' ? null : getWKTDepth(type);
     if (this.peek().toUpperCase() === 'EMPTY') {
@@ -173,11 +202,14 @@ class WKTParser {
     );
   }
 
+  /** Parses one geometry and checks depth before descending into its children. */
   parseGeometry(
     inheritedDimension: WellKnownDimension,
     options: WKTParseOptions,
-    validateInheritedDimensions: boolean
+    validateInheritedDimensions: boolean,
+    depth = 0
   ): WKTParseResult {
+    if (depth > this.maximumDepth) throw new Error('WKT maximumDepth exceeded');
     const {
       type,
       dimension: declaredDimension,
@@ -193,8 +225,11 @@ class WKTParser {
       this.expect('(');
       const children: WKTParseResult[] = [];
       if (this.peek() !== ')') {
-        do children.push(this.parseGeometry(dimension, options, validateInheritedDimensions));
-        while (this.takeIf(','));
+        do {
+          children.push(
+            this.parseGeometry(dimension, options, validateInheritedDimensions, depth + 1)
+          );
+        } while (this.takeIf(','));
       }
       this.expect(')');
       return {
