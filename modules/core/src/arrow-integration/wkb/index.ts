@@ -36,3 +36,4 @@ export {WKBBuilder} from './wkb-builder';
 
 export type {WKTParseOptions, WKTParseResult} from './wkt';
 export {formatWKT, parseWKT, parseWKTWithMetadata} from './wkt';
+export {inspectWKTHeader, type WKTHeader} from './wkt-header';
