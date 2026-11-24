@@ -218,7 +218,7 @@ The angle gates come from binary64: W reaches 3e7 degrees for Jupiter in 2100.
 - A. Bideau-Mehu et al. (1973), "Interferometric determination of the refractive index of carbon
   dioxide in the ultraviolet region", Opt. Commun. 9, 432-434, doi:10.1016/0030-4018(73)90289-7.
 - B. A. Bodhaine et al. (1999), "On Rayleigh optical depth calculations", J. Atmos. Oceanic
-  Technol. 16, 1854-1861, doi:10.1175/1520-0426(1999)016<1854:ORODC>2.0.CO;2.
+  Technol. 16, 1854-1861, doi:`10.1175/1520-0426(1999)016<1854:ORODC>2.0.CO;2`.
 - E. Bruneton (2017), "Precomputed Atmospheric Scattering: a New Implementation",
   https://github.com/ebruneton/precomputed_atmospheric_scattering.
 - P. E. Ciddor (1996), "Refractive index of air: new equations for the visible and near
