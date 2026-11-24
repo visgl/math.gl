@@ -1,6 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import type {TableSelection} from '../parser/query-types';
 import type {Expression} from './expression-eval';
 
 // Includes the call and literal nodes around supported 4096-element arguments.
@@ -31,6 +32,38 @@ export function getExpressionColumns(
     },
     options
   );
+  return [...columns];
+}
+
+/** Collects the distinct input fields required by a SELECT list in first-reference order. */
+export function getProjectionColumns(selections: readonly TableSelection[]): string[] {
+  const columns = new Set<string>();
+  for (const selection of selections) {
+    if (typeof selection === 'string') {
+      columns.add(selection);
+      continue;
+    }
+    if (!selection || typeof selection !== 'object' || Array.isArray(selection)) {
+      throw new Error('Invalid SQL projection');
+    }
+    const keys = Object.keys(selection);
+    if ('array' in selection && keys.every(key => ['array', 'as', 'type'].includes(key))) {
+      if (
+        !Array.isArray(selection.array) ||
+        selection.array.some(column => typeof column !== 'string')
+      ) {
+        throw new Error('SQL ARRAY must specify source columns');
+      }
+      for (const column of selection.array) columns.add(column);
+    } else if ('expression' in selection && keys.every(key => ['expression', 'as'].includes(key))) {
+      for (const column of getExpressionColumns(selection.expression)) columns.add(column);
+    } else if ('column' in selection && keys.every(key => ['column', 'as'].includes(key))) {
+      if (typeof selection.column !== 'string') throw new Error('Invalid SQL projection column');
+      columns.add(selection.column);
+    } else {
+      throw new Error('Unsupported SQL projection field');
+    }
+  }
   return [...columns];
 }
 
