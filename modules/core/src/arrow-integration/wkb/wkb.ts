@@ -5,6 +5,7 @@
 import type {WellKnownDimension, WellKnownGeometry} from './types';
 import {getWellKnownDimensionSize, inferWellKnownGeometryDimension} from './types';
 import {inspectWKBHeader} from './wkb-reader';
+import type {WKTParseResult} from './wkt';
 
 /** Defensive limits applied before WKB allocates geometry arrays. */
 export type WKBParseOptions = Readonly<{
@@ -12,6 +13,8 @@ export type WKBParseOptions = Readonly<{
   maximumDepth?: number;
   /** Return byte views of the direct members, preserving their original WKB headers. */
   captureMembers?: boolean;
+  /** Reads all-NaN point tuples as empty coordinates. Defaults to false. */
+  normalizeEmptyPoints?: boolean;
   /** Maximum total declared child elements. Defaults to 100 million. */
   maximumElements?: number;
 }>;
@@ -39,6 +42,8 @@ type WKBReadState = {
   maximumElements: number;
   elementCount: number;
   memberEnds?: number[];
+  /** Normalizes empty points while decoding. */
+  normalizeEmptyPoints: boolean;
 };
 
 /** Parses exactly one little- or big-endian ISO WKB or EWKB geometry. */
@@ -47,7 +52,8 @@ export function parseWKB(bytes: Uint8Array, options: WKBParseOptions = {}): WKBP
     maximumDepth: validateLimit(options.maximumDepth, 64, 'maximumDepth'),
     maximumElements: validateLimit(options.maximumElements, 100_000_000, 'maximumElements'),
     memberEnds: options.captureMembers ? [] : undefined,
-    elementCount: 0
+    elementCount: 0,
+    normalizeEmptyPoints: options.normalizeEmptyPoints ?? false
   };
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const result = readWKBGeometry(view, 0, state, 0);
@@ -67,13 +73,25 @@ export function parseWKB(bytes: Uint8Array, options: WKBParseOptions = {}): WKBP
   };
 }
 
-/** Writes one geometry as little-endian ISO WKB. */
+/**
+ * Writes one geometry as little-endian ISO WKB. A parsed WKT result supplies
+ * dimensions for each collection member. An explicit dimension overrides them.
+ */
 export function writeWKB(
-  geometry: WellKnownGeometry,
-  dimension: WellKnownDimension = inferWellKnownGeometryDimension(geometry)
+  input: WellKnownGeometry | WKTParseResult,
+  dimension?: WellKnownDimension
 ): Uint8Array {
   const bytes: number[] = [];
-  writeWKBGeometry(bytes, geometry, dimension);
+  if ('geometry' in input) {
+    writeWKBGeometry(
+      bytes,
+      input.geometry,
+      dimension ?? input.dimension,
+      dimension === undefined ? input.children : undefined
+    );
+  } else {
+    writeWKBGeometry(bytes, input, dimension ?? inferWellKnownGeometryDimension(input));
+  }
   return Uint8Array.from(bytes);
 }
 
@@ -114,9 +132,15 @@ function readWKBGeometry(
 
   let geometry: WellKnownGeometry;
   switch (geometryType) {
-    case 'Point':
-      geometry = {type: 'Point', coordinates: readCoordinate()};
+    case 'Point': {
+      const coordinates = readCoordinate();
+      geometry = {
+        type: 'Point',
+        coordinates:
+          state.normalizeEmptyPoints && coordinates.every(Number.isNaN) ? [] : coordinates
+      };
       break;
+    }
     case 'LineString':
       geometry = {type: 'LineString', coordinates: readCoordinates()};
       break;
@@ -163,7 +187,8 @@ function readWKBGeometry(
 function writeWKBGeometry(
   bytes: number[],
   geometry: WellKnownGeometry,
-  dimension: WellKnownDimension
+  dimension: WellKnownDimension,
+  children?: readonly WKTParseResult[]
 ): void {
   bytes.push(1);
   const size = getWellKnownDimensionSize(dimension);
@@ -210,7 +235,13 @@ function writeWKBGeometry(
       break;
     case 'GeometryCollection':
       writeUint32(bytes, geometry.geometries.length);
-      for (const child of geometry.geometries) writeWKBGeometry(bytes, child, dimension);
+      if (children && children.length !== geometry.geometries.length) {
+        throw new Error('WKB collection metadata must match its geometry members');
+      }
+      for (const [index, child] of geometry.geometries.entries()) {
+        const metadata = children?.[index];
+        writeWKBGeometry(bytes, child, metadata?.dimension ?? dimension, metadata?.children);
+      }
       break;
   }
 }
