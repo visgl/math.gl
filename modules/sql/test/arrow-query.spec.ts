@@ -207,30 +207,37 @@ test('executes UNION ALL branches before applying global ordering and pagination
   expect(Array.from(result.getChild('result')!)).toEqual([3, 2]);
 });
 
-test('streaming query matches the table plan and closes the input at its global limit', async () => {
-  const first = new Table({x: vectorFromArray([0, 1, 2], new Int32())});
-  const second = new Table({x: vectorFromArray([3, 0, 4, 5], new Int32())});
-  const source = first.concat(second);
-  const query = select('SELECT x AS value WHERE x > 0 LIMIT 3 OFFSET 1');
-  let pulls = 0;
-  let closed = false;
-  async function* batches() {
-    try {
-      for (const batch of [...source.batches, ...source.batches]) {
-        pulls++;
-        yield batch;
+test.each(['explicit', 'inferred'])(
+  'streaming query with %s schema matches the table plan and closes input at its global limit',
+  async schemaMode => {
+    const first = new Table({x: vectorFromArray([0, 1, 2], new Int32())});
+    const second = new Table({x: vectorFromArray([3, 0, 4, 5], new Int32())});
+    const source = first.concat(second);
+    const query = select('SELECT x AS value WHERE x > 0 LIMIT 3 OFFSET 1');
+    let pulls = 0;
+    let closed = false;
+    async function* batches() {
+      try {
+        for (const batch of [...source.batches, ...source.batches]) {
+          pulls++;
+          yield batch;
+        }
+      } finally {
+        closed = true;
       }
-    } finally {
-      closed = true;
     }
+    const output =
+      schemaMode === 'explicit'
+        ? queryArrowTableInBatches(batches(), source.schema, query)
+        : queryArrowTableInBatches(batches(), query);
+    const result = await Array.fromAsync(output);
+    expect(result.flatMap(batch => Array.from(batch.getChild('value')!))).toEqual(
+      Array.from(queryArrowTable(source, query).getChild('value')!)
+    );
+    expect(pulls).toBe(2);
+    expect(closed).toBe(true);
   }
-  const result = await Array.fromAsync(queryArrowTableInBatches(batches(), source.schema, query));
-  expect(result.flatMap(batch => Array.from(batch.getChild('value')!))).toEqual(
-    Array.from(queryArrowTable(source, query).getChild('value')!)
-  );
-  expect(pulls).toBe(2);
-  expect(closed).toBe(true);
-});
+);
 
 test('streaming LIMIT 0 leaves input unopened and schema mismatches fail before output', async () => {
   const source = new Table({x: vectorFromArray([1], new Int32())});
@@ -253,6 +260,46 @@ test('streaming LIMIT 0 leaves input unopened and schema mismatches fail before 
   await expect(
     Array.fromAsync(queryArrowTableInBatches(incompatible.batches, source.schema))
   ).rejects.toThrow(/input schema/);
+});
+
+test('inferred streaming queries handle empty inputs and avoid opening a canceled input', async () => {
+  const source = new Table({x: vectorFromArray([1], new Int32())});
+  let opened = false;
+  function* batches() {
+    opened = true;
+    yield* source.batches;
+  }
+  expect(await Array.fromAsync(queryArrowTableInBatches([]))).toEqual([]);
+  expect(await Array.fromAsync(queryArrowTableInBatches(batches(), {limit: 0}))).toEqual([]);
+  const controller = new AbortController();
+  controller.abort();
+  await expect(
+    Array.fromAsync(queryArrowTableInBatches(batches(), {signal: controller.signal}))
+  ).rejects.toHaveProperty('name', 'AbortError');
+  expect(opened).toBe(false);
+});
+
+test('inferred streaming queries validate later schemas and close input on query errors', async () => {
+  const first = new Table({x: vectorFromArray([1], new Int32())});
+  const second = new Table({y: vectorFromArray([2], new Int32())});
+  let closed = false;
+  function* batches() {
+    try {
+      yield* first.batches;
+      yield* second.batches;
+    } finally {
+      closed = true;
+    }
+  }
+  await expect(Array.fromAsync(queryArrowTableInBatches(batches()))).rejects.toThrow(
+    /input schema/
+  );
+  expect(closed).toBe(true);
+  closed = false;
+  await expect(
+    Array.fromAsync(queryArrowTableInBatches(batches(), {select: ['missing']}))
+  ).rejects.toThrow(/projection column not found/);
+  expect(closed).toBe(true);
 });
 
 test('contiguous filtered matches share source values', () => {

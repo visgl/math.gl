@@ -123,18 +123,38 @@ export function executeArrowProjection(
   return new Table(plan.schema, result);
 }
 
-/** Streams a linear Arrow query with global pagination and source backpressure. */
-export async function* queryArrowTableInBatches(
+/** Streams a linear Arrow query using the supplied schema, even for empty input. */
+export function queryArrowTableInBatches(
   input: AsyncIterable<RecordBatch> | Iterable<RecordBatch>,
   inputSchema: Schema,
-  query: ArrowStreamingQuery = {}
+  query?: ArrowStreamingQuery
+): AsyncIterable<RecordBatch>;
+
+/** Streams a linear Arrow query using the first batch's schema. */
+export function queryArrowTableInBatches(
+  input: AsyncIterable<RecordBatch> | Iterable<RecordBatch>,
+  query?: ArrowStreamingQuery
+): AsyncIterable<RecordBatch>;
+
+/** Compiles against the explicit or inferred schema and preserves input backpressure. */
+export async function* queryArrowTableInBatches(
+  input: AsyncIterable<RecordBatch> | Iterable<RecordBatch>,
+  schemaOrQuery: Schema | ArrowStreamingQuery = {},
+  explicitQuery: ArrowStreamingQuery = {}
 ): AsyncIterable<RecordBatch> {
+  const hasExplicitSchema = 'fields' in schemaOrQuery;
+  let inputSchema = hasExplicitSchema ? schemaOrQuery : undefined;
+  const query = hasExplicitSchema ? explicitQuery : schemaOrQuery;
   query.signal?.throwIfAborted();
   validatePagination(query.offset ?? 0, query.limit);
-  const plan = compileArrowQuery(inputSchema, query, undefined, compileArrowPredicate);
-  if (plan.done()) return;
+  let plan = inputSchema
+    ? compileArrowQuery(inputSchema, query, undefined, compileArrowPredicate)
+    : undefined;
+  if (plan?.done() || query.limit === 0) return;
   for await (const batch of input) {
     query.signal?.throwIfAborted();
+    inputSchema ??= batch.schema;
+    plan ??= compileArrowQuery(inputSchema, query, undefined, compileArrowPredicate);
     if (batch.schema !== inputSchema) {
       validateArrowTableSchema(new Table(batch.schema, []), inputSchema, {
         rejectExtraFields: true,
