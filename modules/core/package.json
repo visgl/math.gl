@@ -48,6 +48,11 @@
       "import": "./dist/utf8.js",
       "require": "./dist/utf8.cjs"
     },
+    "./twkb": {
+      "types": "./dist/twkb.d.ts",
+      "import": "./dist/twkb.js",
+      "require": "./dist/twkb.cjs"
+    },
     "./arrow": {
       "types": "./dist/arrow.d.ts",
       "import": "./dist/arrow.js",

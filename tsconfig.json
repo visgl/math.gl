@@ -67,6 +67,9 @@
       "@math.gl/core/matrix": [
         "./modules/core/src/matrix.ts"
       ],
+      "@math.gl/core/twkb": [
+        "./modules/core/src/twkb.ts"
+      ],
       "@math.gl/core/utf8": [
         "./modules/core/src/utf8.ts"
       ],
