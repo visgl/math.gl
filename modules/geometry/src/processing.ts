@@ -19,3 +19,4 @@ export type {ProjectTextureCoordinatesOptions} from './utils/project-texture-coo
 export type {GeometryAttribute as UtilityGeometryAttribute} from './utils/geometry';
 
 export {anyBoundsOverlap, type Bounded} from './utils/bounds-overlap';
+export {triangulateDelaunay} from './utils/triangulate-delaunay';
