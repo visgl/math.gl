@@ -25,7 +25,12 @@ export * from './columnar-predicate';
 
 export {isColumnarScalarType, COLUMNAR_SCALAR_TYPES, type ColumnarScalarType} from './scalar-type';
 
-export {validateExpressionAST, getExpressionColumns, type ExpressionASTOptions} from './ast';
+export {
+  validateExpressionAST,
+  getExpressionColumns,
+  getProjectionColumns,
+  type ExpressionASTOptions
+} from './ast';
 export {columnarPredicateToExpression} from './predicate-expression';
 export {
   ExpressionEvaluationError,

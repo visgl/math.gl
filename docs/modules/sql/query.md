@@ -108,6 +108,27 @@ references and returns the assembled trip rows.
 
 For worker execution, see [Workers](worker.md).
 
+### Preparing a projection for multiple inputs
+
+Use `getProjectionColumns` from `@math.gl/sql/expressions` to identify the source
+columns required by a SELECT list before opening the data source. Use
+`prepareArrowProjection` from `@math.gl/sql/query` to bind that SELECT list to
+the source schema once and inspect the output schema before reading any batches.
+
+```ts
+import {getProjectionColumns} from '@math.gl/sql/expressions';
+import {prepareArrowProjection} from '@math.gl/sql/query';
+
+const selections = [{column: 'temperature', as: 'value'}];
+const dependencies = getProjectionColumns(selections); // ['temperature']
+const projection = prepareArrowProjection(inputSchema, selections);
+const output = projection.projectTable(inputTable);
+```
+
+`projection.projectBatch(batch)` returns the output batches for a single input
+batch. Computed vectors can introduce additional chunk boundaries. Uncomputed
+columns share the input buffers.
+
 ### Querying a stream of record batches
 
 `queryArrowTableInBatches(batches, schema, query)` applies the same schema-bound
