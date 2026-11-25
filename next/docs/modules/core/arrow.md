@@ -102,3 +102,25 @@ Use `isArrowTable(value)` and `isArrowRecordBatch(value)` to narrow an unknown v
 ### WKT header inspection[​](#wkt-header-inspection "Direct link to WKT header inspection")
 
 Use `inspectWKTHeader(text)` to read the root geometry type, declared Z/M dimension, and optional EWKT SRID. It returns `null` for unrecognized headers and does not parse coordinates or infer the dimensions of unmarked tuples.
+
+### Reading UTF-8 without decoding[​](#reading-utf-8-without-decoding "Direct link to Reading UTF-8 without decoding")
+
+`createArrowUtf8Reader(vector)` reads Utf8, LargeUtf8 and dictionary-encoded text across chunk boundaries. A null value or invalid row index returns `null`. An empty string returns a range with equal start and end offsets. The reader reuses its result tuple. Destructure it before reading another row.
+
+```
+import {createArrowUtf8Reader} from '@math.gl/core/arrow';
+
+
+
+const readLabel = createArrowUtf8Reader(labels);
+
+const range = readLabel(0);
+
+if (range) {
+
+  const [bytes, start, end] = range;
+
+  console.log(bytes.subarray(start, end));
+
+}
+```
