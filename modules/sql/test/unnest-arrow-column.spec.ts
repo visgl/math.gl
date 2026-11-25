@@ -240,3 +240,34 @@ test('expands the child ranges of sliced fixed-size lists and skips null parents
     expect([...result.parentRows]).toEqual(outer ? [0, 1, 1, 2, 2] : [1, 1, 2, 2]);
   }
 });
+
+test('SQL UNNEST joins expanded keys to a lookup table', () => {
+  const parents = tableFromArrays({
+    items: vectorFromArray([[2, 1, 3], [], null], new List(new Field('item', new Int32(), true)))
+  });
+  const lookup = tableFromArrays({id: Int32Array.of(1, 2), label: ['one', 'two']});
+  const tables = new Map([
+    ['parents', parents],
+    ['lookup', lookup]
+  ]);
+  const sql = (join: string) => `SELECT u.id AS id, l.label AS label
+    FROM parents p CROSS JOIN UNNEST(p.items) AS u(id)
+    ${join} lookup l ON u.id = l.id`;
+  expect(
+    queryArrowSQL(sql('JOIN'), tables)
+      .toArray()
+      .map(row => row.toJSON())
+  ).toEqual([
+    {id: 2, label: 'two'},
+    {id: 1, label: 'one'}
+  ]);
+  expect(
+    queryArrowSQL(sql('LEFT JOIN'), tables)
+      .toArray()
+      .map(row => row.toJSON())
+  ).toEqual([
+    {id: 2, label: 'two'},
+    {id: 1, label: 'one'},
+    {id: 3, label: null}
+  ]);
+});
