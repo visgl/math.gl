@@ -64,3 +64,11 @@ export {
   type PolylineSegment,
   type PolylineSegmentFactory
 } from './segmentize-polyline-paths';
+
+export {
+  polygonOverlay,
+  type OverlayPosition,
+  type OverlayRing,
+  type OverlayPolygon,
+  type OverlayMultiPolygon
+} from './polygon-overlay';

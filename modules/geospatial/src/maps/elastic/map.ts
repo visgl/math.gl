@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import polygonClipping from 'polygon-clipping';
+import {polygonOverlay as polygonClipping} from '@math.gl/geometry/polygon';
 import {createKernelMap} from '../world-map';
 import {geographic, coordinates, unit, add, angle, RAD, type Position} from '../math';
 import type {

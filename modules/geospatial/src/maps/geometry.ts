@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import polygonClipping from 'polygon-clipping';
+import {polygonOverlay as polygonClipping} from '@math.gl/geometry/polygon';
 import {projectSphericalPolygon} from './global-polygons';
 import {prepareMapFeatures} from './prepare-features';
 /** Explicit polygon clipping and prepared-feature support. */

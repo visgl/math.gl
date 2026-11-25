@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type polygonClipping from 'polygon-clipping';
+import type {polygonOverlay as polygonClipping} from '@math.gl/geometry/polygon';
 import {
   add,
   angle,

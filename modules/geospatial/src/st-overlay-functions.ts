@@ -6,7 +6,12 @@ import type {WellKnownGeometry} from '@math.gl/core/arrow';
 import {lineIntersectionResult} from './spatial-line-intersection-result';
 import {intersectLinePolygon} from './spatial-line-polygon-intersection';
 import type {AggregateFunction, ScalarFunction} from '@math.gl/sql/arrow';
-import polygonClipping from 'polygon-clipping';
+import {
+  polygonOverlay as polygonClipping,
+  type OverlayPosition,
+  type OverlayRing,
+  type OverlayMultiPolygon
+} from '@math.gl/geometry/polygon';
 import {polygonSet} from './spatial-polygon-overlay';
 import {
   EXTENSION_METADATA,
@@ -47,7 +52,7 @@ function checkBufferRadius(radius: number): void {
 }
 
 /** Checks a generated ring before passing it to the polygon kernel. */
-function checkedRing(ring: polygonClipping.Ring): polygonClipping.Ring {
+function checkedRing(ring: OverlayRing): OverlayRing {
   if (ring.some(point => !point.every(Number.isFinite))) {
     throw new Error('ST_Buffer produced a nonfinite coordinate');
   }
@@ -55,11 +60,8 @@ function checkedRing(ring: polygonClipping.Ring): polygonClipping.Ring {
 }
 
 /** Returns a circle approximation with eight segments per quadrant. */
-function circleRing(x: number, y: number, radius: number): polygonClipping.Ring {
-  const ring: polygonClipping.Ring = unitCircle.map(([dx, dy]) => [
-    x + radius * dx!,
-    y + radius * dy!
-  ]);
+function circleRing(x: number, y: number, radius: number): OverlayRing {
+  const ring: OverlayRing = unitCircle.map(([dx, dy]) => [x + radius * dx!, y + radius * dy!]);
   ring.push(ring[0]!);
   return checkedRing(ring);
 }
@@ -73,10 +75,10 @@ function bufferPoint(point: WellKnownGeometry, radius: number): WellKnownGeometr
 }
 
 /** Unions a bounded group of pieces at a time, then combines groups at each level. */
-function unionPolygonPieces(pieces: polygonClipping.MultiPolygon[]): polygonClipping.MultiPolygon {
+function unionPolygonPieces(pieces: OverlayMultiPolygon[]): OverlayMultiPolygon {
   if (!pieces.length) return [];
   while (pieces.length > 1) {
-    const groups: polygonClipping.MultiPolygon[] = [];
+    const groups: OverlayMultiPolygon[] = [];
     for (let first = 0; first < pieces.length; first += polygonUnionFanout) {
       groups.push(
         polygonClipping.union(
@@ -100,11 +102,11 @@ function bufferLine(geometry: WellKnownGeometry, radius: number): WellKnownGeome
       : geometry.type === 'LineString'
         ? [geometry.coordinates]
         : [];
-  const pieces: polygonClipping.MultiPolygon[] = [];
+  const pieces: OverlayMultiPolygon[] = [];
   for (const line of lines) {
     let previous: readonly number[] | undefined;
     for (const coordinate of line) {
-      const [x, y] = coordinate as polygonClipping.Pair;
+      const [x, y] = coordinate as OverlayPosition;
       if (previous && x === previous[0] && y === previous[1]) continue;
       pieces.push([[circleRing(x, y, radius)]]);
       if (previous) {
@@ -270,11 +272,11 @@ export const ST_UNION_AGGREGATE: AggregateFunction = {
       outputField: prototype.result.clone({name: 'ST_Union'}),
       /** Keeps bounded groups of partial unions at increasing input sizes. */
       createAccumulator() {
-        const levels: polygonClipping.MultiPolygon[][] = [];
+        const levels: OverlayMultiPolygon[][] = [];
         let seen = false;
 
         /** Compacts a full level before accumulating further inputs. */
-        function add(polygon: polygonClipping.MultiPolygon) {
+        function add(polygon: OverlayMultiPolygon) {
           for (let level = 0; ; level++) {
             levels[level] ??= [];
             const pieces = levels[level]!;

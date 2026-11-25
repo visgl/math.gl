@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original octant atlas and provenance adapter around the existing ISC d3-geo spherical clipper; its license is retained in spherical-clip/D3-GEO-LICENSE.txt.
-import polygonClipping from 'polygon-clipping';
+import {polygonOverlay as polygonClipping} from '@math.gl/geometry/polygon';
 import clipCircle from './spherical-clip/clip-circle.js';
 import {
   basis,

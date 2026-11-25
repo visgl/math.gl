@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
-import polygonClipping from 'polygon-clipping';
+import {polygonOverlay as polygonClipping} from '@math.gl/geometry/polygon';
 import {
   endpointContacts,
   locatePointInPolygon,
