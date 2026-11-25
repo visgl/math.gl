@@ -1,3 +1,9 @@
+<!--
+SPDX-License-Identifier: MIT
+SPDX-FileCopyrightText: Copyright (c) 2018 Mike Fogel
+SPDX-FileCopyrightText: Copyright (c) 2016 Alexander Milevski
+-->
+
 The MIT License (MIT)
 
 Copyright (c) 2018 Mike Fogel <mike@fogel.ca> - covers everything not specially attributed to others below.

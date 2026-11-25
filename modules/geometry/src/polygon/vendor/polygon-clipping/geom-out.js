@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) 2018 Mike Fogel
+// SPDX-FileCopyrightText: Copyright (c) 2016 Alexander Milevski
+
 import { compareVectorAngles } from "./vector.js"
 import SweepEvent from "./sweep-event.js"
 
