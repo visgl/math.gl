@@ -283,11 +283,17 @@ export class SQLExpressionReader {
         throw this.error('Unsupported ARRAY cast type');
       }
       const array =
-        argument.type === 'ArrayExpression' ? this.call('array', argument.elements) : argument;
+        argument.type === 'ArrayExpression'
+          ? this.call('array', argument.elements as Expression[])
+          : argument;
+      const constructor =
+        array.type === 'CallExpression' && array.callee.type === 'Identifier'
+          ? array.callee['name']
+          : undefined;
       if (
         array.type === 'CallExpression' &&
-        array.callee.type === 'Identifier' &&
-        /^array(?:_(?:float(?:16|32|64)|uint8))?$/.test(array.callee.name)
+        typeof constructor === 'string' &&
+        /^array(?:_(?:float(?:16|32|64)|uint8))?$/.test(constructor)
       ) {
         if (size !== array.arguments.length) {
           throw this.error('ARRAY cast length must match the number of components');
@@ -295,13 +301,10 @@ export class SQLExpressionReader {
         if (inferred) {
           return array;
         }
-        if (
-          array.callee.name !== 'array' &&
-          (type === 'uint8' || array.callee.name === 'array_uint8')
-        ) {
+        if (constructor !== 'array' && (type === 'uint8' || constructor === 'array_uint8')) {
           throw this.error('Chained UINT8 array casts are not supported');
         }
-        return this.call(`array_${type}`, array.arguments);
+        return this.call(`array_${type}`, array.arguments as Expression[]);
       }
       return this.call('cast_array', [
         argument,

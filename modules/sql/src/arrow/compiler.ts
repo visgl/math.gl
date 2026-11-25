@@ -1467,13 +1467,17 @@ function bindArrayCast(args: readonly Expression[], options: BindingOptions): No
                 'ARRAY cast length does not match list width'
               );
             }
-            let valid = true;
-            for (let index = 0; index < width; index++) {
-              const value = values.get(start + index) as number | bigint | null;
-              if (value === null) {
-                valid = false;
-                break;
+            if (child.nullable) {
+              let valid = true;
+              for (let index = start; index < end && valid; index++) {
+                valid = values.isValid(index);
               }
+              if (!valid) {
+                continue;
+              }
+            }
+            for (let index = 0; index < width; index++) {
+              const value = values.get(start + index) as number | bigint;
               const offset = row * width + index;
               const numeric = Number(value);
               output[offset] =
@@ -1490,9 +1494,7 @@ function bindArrayCast(args: readonly Expression[], options: BindingOptions): No
                 throw new ExpressionEvaluationError('overflow', 'ARRAY cast overflow');
               }
             }
-            if (valid) {
-              data.setValid(row, true);
-            }
+            data.setValid(row, true);
           } catch (error) {
             if (!context.failed || !isExpressionEvaluationError(error)) {
               throw error;

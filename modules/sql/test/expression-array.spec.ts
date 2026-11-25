@@ -120,3 +120,19 @@ test('array casts reject mismatched widths and retain exact wide integers', () =
   const result = queryArrowSQL('SELECT TRY(items::ARRAY[1]) AS tuple FROM source', catalogs);
   expect(decode(result.getChild('tuple')!)).toEqual([[value], null]);
 });
+
+test('a null component takes precedence over overflow regardless of position', () => {
+  const items = vectorFromArray(
+    [
+      [1e100, null],
+      [null, 1e100]
+    ],
+    new List(new Field('item', new Float64(), true))
+  );
+  const source = new Table({items});
+  const result = queryArrowSQL(
+    'SELECT items::FLOAT32[2] AS tuple FROM source',
+    new Map([['source', source]])
+  );
+  expect(decode(result.getChild('tuple')!)).toEqual([null, null]);
+});
