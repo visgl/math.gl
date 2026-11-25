@@ -215,7 +215,7 @@ parameters, and projection scales affect the envelope.
 
 PROJJSON `bbox` and WKT2 `USAGE[BBOX[...]]` supply geographic area-of-use coverage.
 Declared coverage replaces the default geographic/projected rendering extent, allowing
-applications to frame a region beyond defaults such as a UTM zone. The outer CRS's coverage
+applications to frame a specific region. The outer CRS's coverage
 takes precedence over a BoundCRS source or an extracted CompoundCRS component; component
 coverage is inherited when the outer CRS has none. Coverage that reaches unprojectable
 coordinates is clipped using the projection's finite rendering policy, including
@@ -240,8 +240,7 @@ Without declared coverage, built-in algorithms use these rendering policies:
 | Mercator, including Web Mercator | One world, latitude ±85.051129° |
 | Global cylindrical/pseudocylindrical, Bonne, Albers, equidistant conic | One world including the poles |
 | Lambert conformal conic | One world, stopping at 60° in the hemisphere opposite the cone |
-| Transverse Mercator | Central meridian ±30°, both polar limits |
-| UTM | The six-degree zone, 0–84°N or 80°S–0° |
+| Transverse Mercator and UTM | Central meridian ±30°, both polar limits |
 | Cassini, polyconic | Central meridian ±30°; polyconic avoids its latitude branch boundary |
 | Gauss-Schreiber transverse Mercator | Central meridian ±30°, latitude ±60° |
 | Swiss/Hotine oblique Mercator | Longitude/latitude ±10° around the effective origin |
