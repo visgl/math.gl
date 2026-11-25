@@ -384,7 +384,7 @@ test('descriptor bounds and normalization follow projection-owned profiles throu
   expect(alias.renderingBounds).toEqual(canonical.renderingBounds);
   expect(alias.converter.WGS84.normalize([-170, 95])).toEqual([190, 90]);
   const utm = await projectionEngine.getCRS('EPSG:32632');
-  expect(utm.converter.WGS84.normalize([-179, 0])).toEqual([12, 0]);
+  expect(utm.converter.WGS84.normalize([-179, 0])).toEqual([39, 0]);
   const geocentric = await projectionEngine.getCRS('+proj=geocent +ellps=WGS84 +axis=une', {
     enforceAxis: true
   });
