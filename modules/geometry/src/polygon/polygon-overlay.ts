@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import overlay from './vendor/polygon-clipping/index';
+import operation from './vendor/polygon-clipping/operation';
 
 /** Planar XY coordinate. */
 export type OverlayPosition = [number, number];
@@ -12,20 +12,25 @@ export type OverlayRing = OverlayPosition[];
 export type OverlayPolygon = OverlayRing[];
 /** Disjoint polygon components. */
 export type OverlayMultiPolygon = OverlayPolygon[];
-/** Computes the polygonal area of a Boolean operation on planar inputs. */
-type OverlayOperation = (
-  subject: OverlayPolygon | OverlayMultiPolygon,
-  ...others: (OverlayPolygon | OverlayMultiPolygon)[]
-) => OverlayMultiPolygon;
+/** A polygon or a collection of polygons. */
+type Operand = OverlayPolygon | OverlayMultiPolygon;
 
-/** Boolean operations returning multipolygons, including the empty result. */
-export const polygonOverlay: {
-  /** Area covered by at least one operand. */
-  union: OverlayOperation;
-  /** Area covered by every operand. */
-  intersection: OverlayOperation;
-  /** Subject area outside all other operands. */
-  difference: OverlayOperation;
-  /** Area covered by an odd number of operands. */
-  xor: OverlayOperation;
-} = overlay;
+/** Returns the area shared by all operands. */
+export function intersectPolygons(subject: Operand, ...others: Operand[]): OverlayMultiPolygon {
+  return operation.run('intersection', subject, others);
+}
+
+/** Returns the area covered by any operand. */
+export function unionPolygons(subject: Operand, ...others: Operand[]): OverlayMultiPolygon {
+  return operation.run('union', subject, others);
+}
+
+/** Subtracts all other operands from the subject. */
+export function subtractPolygons(subject: Operand, ...others: Operand[]): OverlayMultiPolygon {
+  return operation.run('difference', subject, others);
+}
+
+/** Returns the area covered by an odd number of operands. */
+export function xorPolygons(subject: Operand, ...others: Operand[]): OverlayMultiPolygon {
+  return operation.run('xor', subject, others);
+}

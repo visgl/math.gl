@@ -5,7 +5,7 @@
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
 import {clipPolyline} from '@math.gl/geometry/polygon';
 import {
-  polygonOverlay as polygonClipping,
+  intersectPolygons,
   type OverlayPolygon,
   type OverlayMultiPolygon
 } from '@math.gl/geometry/polygon';
@@ -73,7 +73,7 @@ export function clipPolygons(
       [minX, minY]
     ]
   ];
-  return polygonClipping.intersection(subject, rectangle);
+  return intersectPolygons(subject, rectangle);
 }
 
 /** Individual geometry types emitted by rectangle clipping. */

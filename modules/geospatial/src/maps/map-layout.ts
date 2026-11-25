@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {polygonOverlay as polygonClipping} from '@math.gl/geometry/polygon';
+import type {mapGeometry} from './geometry';
 import {
   add,
   angle,
@@ -107,11 +107,11 @@ const EPS = 1e-10;
  */
 export class DiscontinuousMap {
   /** Supplied explicitly by mapGeometry/withMapGeometry. */
-  private clipping?: typeof polygonClipping;
-  get polygonClipping(): typeof polygonClipping | undefined {
+  private clipping?: (typeof mapGeometry)['polygonClipping'];
+  get polygonClipping(): (typeof mapGeometry)['polygonClipping'] | undefined {
     return this.clipping;
   }
-  set polygonClipping(value: typeof polygonClipping | undefined) {
+  set polygonClipping(value: (typeof mapGeometry)['polygonClipping'] | undefined) {
     this.clipping = value;
   }
   readonly regions: readonly MapRegion[];
@@ -370,7 +370,9 @@ export class DiscontinuousMap {
     rings: readonly (readonly GeographicPosition[])[],
     options: MapSamplingOptions & {chartCenter?: GeographicPosition} = {}
   ): MapPolygon[] {
-    if (!this.polygonClipping) throw new Error('Map geometry support was not supplied');
+    const clipping = this.polygonClipping;
+    if (!clipping) throw new Error('Map geometry support was not supplied');
+    const {intersection: intersectPolygons, difference: subtractPolygons} = clipping;
     const settings = sampling(options);
     if (!rings.length) return [];
     const vectors = rings.map(ring => {
@@ -461,8 +463,8 @@ export class DiscontinuousMap {
       const polygons = convex
         ? [[[...clip, clip[0]]]]
         : convexOuter
-          ? this.polygonClipping!.difference([clip], ...planar.slice(1).map(ring => [ring]))
-          : this.polygonClipping!.intersection(planar, [clip]);
+          ? subtractPolygons([clip], ...planar.slice(1).map(ring => [ring]))
+          : intersectPolygons(planar, [clip]);
       for (const polygon of polygons) {
         if (relativeArea(polygon[0]) <= inputArea * 1024 * Number.EPSILON) continue;
         const output: MapPolygon = {

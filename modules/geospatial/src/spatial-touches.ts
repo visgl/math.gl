@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
-import {polygonOverlay as polygonClipping} from '@math.gl/geometry/polygon';
+import {intersectPolygons} from '@math.gl/geometry/polygon';
 import {
   endpointContacts,
   locatePointInPolygon,
@@ -200,5 +200,5 @@ export function planarTouches(a: WellKnownGeometry, b: WellKnownGeometry): boole
   if (isLinear(a) && isLinear(b)) return !lineInteriorsMeet(a, b);
   if (isLinear(a) && isAreal(b)) return !lineEntersArea(a, b);
   if (isAreal(a) && isLinear(b)) return !lineEntersArea(b, a);
-  return !polygonClipping.intersection(polygonSet(a), polygonSet(b)).length;
+  return !intersectPolygons(polygonSet(a), polygonSet(b)).length;
 }

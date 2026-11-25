@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original octant atlas and provenance adapter around the existing ISC d3-geo spherical clipper; its license is retained in spherical-clip/D3-GEO-LICENSE.txt.
-import {polygonOverlay as polygonClipping} from '@math.gl/geometry/polygon';
+import {intersectPolygons, unionPolygons, subtractPolygons} from '@math.gl/geometry/polygon';
 import clipCircle from './spherical-clip/clip-circle.js';
 import {
   basis,
@@ -206,12 +206,8 @@ export function cutSphericalPolygon(
         }
         if (!outer.length) continue;
         const merged =
-          outer.length === 1
-            ? [outer]
-            : polygonClipping.union([outer[0]], ...outer.slice(1).map(r => [r]));
-        const filled = holes.length
-          ? polygonClipping.difference(merged, ...holes.map(r => [r]))
-          : merged;
+          outer.length === 1 ? [outer] : unionPolygons([outer[0]], ...outer.slice(1).map(r => [r]));
+        const filled = holes.length ? subtractPolygons(merged, ...holes.map(r => [r])) : merged;
         const mask = (
           [
             [sx, 0, 0],
@@ -219,7 +215,7 @@ export function cutSphericalPolygon(
             [0, 0, sz]
           ] as Vector[]
         ).map(p => [dot(x, p) / dot(center, p), dot(y, p) / dot(center, p)] as Position);
-        const polygons = polygonClipping.intersection(filled, [mask]);
+        const polygons = intersectPolygons(filled, [mask]);
         for (const polygon of polygons) {
           let vectors = polygon.map(r =>
             r.map(([a, b]) => unit([0, 1, 2].map(i => center[i] + a * x[i] + b * y[i]) as Vector))

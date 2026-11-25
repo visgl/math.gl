@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {polygonOverlay as polygonClipping} from '@math.gl/geometry/polygon';
+import {intersectPolygons, unionPolygons, subtractPolygons} from '@math.gl/geometry/polygon';
 import type {MapEngine, MapPosition3D} from './map-engine';
 import type {GeographicPosition, MapSamplingOptions, MapRegion} from './map-layout';
 import {geographic, type Position} from './math';
@@ -276,7 +276,7 @@ export class MapTransition {
         for (const b of last) {
           const target = this.target.regions.find(r => r.id === b.regionId)!;
           const right = geographicRings(b.sourceCoordinates, center);
-          for (const rings of polygonClipping.intersection(left, right)) {
+          for (const rings of intersectPolygons(left, right)) {
             const coordinates = rings as Position[][];
             parts.push({
               kind: 'polygon',
@@ -338,8 +338,8 @@ function fullCoverage(map: MapEngine): boolean {
     let completeSections = true;
     const domains = d.data.sections.map(s => {
       const domain = s.complement
-        ? polygonClipping.difference(world, [s.boundary as Position[]])
-        : polygonClipping.intersection(world, [s.boundary as Position[]]);
+        ? subtractPolygons(world, [s.boundary as Position[]])
+        : intersectPolygons(world, [s.boundary as Position[]]);
       // Include only cells with four defined corners. Merge contiguous row runs
       // before clipping to avoid treating interpolation holes as valid coverage.
       const runs: Position[][][] = [];
@@ -368,18 +368,16 @@ function fullCoverage(map: MapEngine): boolean {
           }
         }
       }
-      const valid = runs.length ? polygonClipping.union(runs[0], ...runs.slice(1)) : [];
-      if (!valid.length || polygonClipping.difference(domain, valid).length)
-        completeSections = false;
-      return valid.length ? polygonClipping.intersection(domain, valid) : [];
+      const valid = runs.length ? unionPolygons(runs[0], ...runs.slice(1)) : [];
+      if (!valid.length || subtractPolygons(domain, valid).length) completeSections = false;
+      return valid.length ? intersectPolygons(domain, valid) : [];
     });
     // Multiple placements of the same geography need a correspondence policy,
     // not a Cartesian product of charts. Keep those maps on the globe route.
     const overlaps = domains.some((domain, i) =>
-      domains.slice(i + 1).some(other => polygonClipping.intersection(domain, other).length > 0)
+      domains.slice(i + 1).some(other => intersectPolygons(domain, other).length > 0)
     );
-    covered =
-      completeSections && !overlaps && polygonClipping.difference(world, ...domains).length === 0;
+    covered = completeSections && !overlaps && subtractPolygons(world, ...domains).length === 0;
   } else if (d.type === 'world') {
     covered =
       directWorldProjections.has(d.projection) && Object.keys(d.parameters ?? {}).length === 0;

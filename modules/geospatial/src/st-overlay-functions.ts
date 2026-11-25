@@ -7,7 +7,10 @@ import {lineIntersectionResult} from './spatial-line-intersection-result';
 import {intersectLinePolygon} from './spatial-line-polygon-intersection';
 import type {AggregateFunction, ScalarFunction} from '@math.gl/sql/arrow';
 import {
-  polygonOverlay as polygonClipping,
+  intersectPolygons,
+  unionPolygons,
+  subtractPolygons,
+  xorPolygons,
   type OverlayPosition,
   type OverlayRing,
   type OverlayMultiPolygon
@@ -81,10 +84,7 @@ function unionPolygonPieces(pieces: OverlayMultiPolygon[]): OverlayMultiPolygon 
     const groups: OverlayMultiPolygon[] = [];
     for (let first = 0; first < pieces.length; first += polygonUnionFanout) {
       groups.push(
-        polygonClipping.union(
-          pieces[first]!,
-          ...pieces.slice(first + 1, first + polygonUnionFanout)
-        )
+        unionPolygons(pieces[first]!, ...pieces.slice(first + 1, first + polygonUnionFanout))
       );
     }
     pieces = groups;
@@ -170,7 +170,7 @@ export const ST_BUFFER: ScalarFunction = {
 };
 
 /** Creates a row-preserving areal overlay with the first geometry's metadata. */
-function polygonOverlay(name: string, operation: typeof polygonClipping.intersection) {
+function polygonOverlay(name: string, operation: typeof intersectPolygons) {
   const spatial = spatialFunction(
     name,
     [polygonKinds, polygonKinds],
@@ -201,7 +201,7 @@ function withFirstInputMetadata(spatial: ScalarFunction): ScalarFunction {
 
 /** Binds polygon overlays or mixed-dimensional line clipping from the Arrow schema. */
 function intersection(): ScalarFunction {
-  const polygons = polygonOverlay('ST_Intersection', polygonClipping.intersection);
+  const polygons = polygonOverlay('ST_Intersection', intersectPolygons);
   const output = lineIntersectionResult();
   const linearFirst = spatialFunction(
     'ST_Intersection',
@@ -233,19 +233,13 @@ function intersection(): ScalarFunction {
 /** Intersects two areal geometries or clips a native line by a polygon. */
 export const ST_INTERSECTION = /* @__PURE__ */ intersection();
 /** Returns the portion of the first polygonal geometry outside the second. */
-export const ST_DIFFERENCE = /* @__PURE__ */ polygonOverlay(
-  'ST_Difference',
-  polygonClipping.difference
-);
+export const ST_DIFFERENCE = /* @__PURE__ */ polygonOverlay('ST_Difference', subtractPolygons);
 
 /** Returns the combined polygon area as a native GeoArrow MultiPolygon. */
-export const ST_UNION = /* @__PURE__ */ polygonOverlay('ST_Union', polygonClipping.union);
+export const ST_UNION = /* @__PURE__ */ polygonOverlay('ST_Union', unionPolygons);
 
 /** Returns the area covered by exactly one input as a native GeoArrow MultiPolygon. */
-export const ST_SYMDIFFERENCE = /* @__PURE__ */ polygonOverlay(
-  'ST_SymDifference',
-  polygonClipping.xor
-);
+export const ST_SYMDIFFERENCE = /* @__PURE__ */ polygonOverlay('ST_SymDifference', xorPolygons);
 
 /** Dissolves the components of a polygonal geometry into native GeoArrow storage. */
 export const ST_UNARYUNION = /* @__PURE__ */ spatialFunction(
@@ -254,7 +248,7 @@ export const ST_UNARYUNION = /* @__PURE__ */ spatialFunction(
   /* @__PURE__ */ nativeGeometryResult('geoarrow.multipolygon'),
   ([geometry]): WellKnownGeometry => ({
     type: 'MultiPolygon',
-    coordinates: polygonClipping.union(polygonSet(geometry!))
+    coordinates: unionPolygons(polygonSet(geometry!))
   })
 );
 
@@ -304,9 +298,7 @@ export const ST_UNION_AGGREGATE: AggregateFunction = {
           finalize() {
             if (!seen) return null;
             const pieces = levels.flat();
-            return pieces.length === 1
-              ? polygonClipping.union(pieces[0]!)
-              : unionPolygonPieces(pieces);
+            return pieces.length === 1 ? unionPolygons(pieces[0]!) : unionPolygonPieces(pieces);
           }
         };
       }

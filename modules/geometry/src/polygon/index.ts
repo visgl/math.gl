@@ -66,7 +66,10 @@ export {
 } from './segmentize-polyline-paths';
 
 export {
-  polygonOverlay,
+  intersectPolygons,
+  unionPolygons,
+  subtractPolygons,
+  xorPolygons,
   type OverlayPosition,
   type OverlayRing,
   type OverlayPolygon,
