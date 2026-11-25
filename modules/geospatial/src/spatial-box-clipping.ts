@@ -4,7 +4,11 @@
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
 import {clipPolyline} from '@math.gl/geometry/polygon';
-import polygonClipping from 'polygon-clipping';
+import {
+  intersectPolygons,
+  type OverlayPolygon,
+  type OverlayMultiPolygon
+} from '@math.gl/geometry/polygon';
 import {vertexCount} from './geometry-inspection';
 import {planarBounds} from './spatial-planar';
 
@@ -55,12 +59,12 @@ function clipPath(path: readonly (readonly number[])[], box: Box): number[][][] 
 export function clipPolygons(
   polygons: readonly (readonly (readonly (readonly number[])[])[])[],
   [minX, minY, maxX, maxY]: Box
-): polygonClipping.MultiPolygon {
-  const subject: polygonClipping.MultiPolygon = polygons
+): OverlayMultiPolygon {
+  const subject: OverlayMultiPolygon = polygons
     .filter(polygon => polygon[0]?.length)
     .map(rings => rings.filter(ring => ring.length).map(ring => ring.map(([x, y]) => [x!, y!])));
   if (!subject.length) return [];
-  const rectangle: polygonClipping.Polygon = [
+  const rectangle: OverlayPolygon = [
     [
       [minX, minY],
       [maxX, minY],
@@ -69,7 +73,7 @@ export function clipPolygons(
       [minX, minY]
     ]
   ];
-  return polygonClipping.intersection(subject, rectangle);
+  return intersectPolygons(subject, rectangle);
 }
 
 /** Individual geometry types emitted by rectangle clipping. */

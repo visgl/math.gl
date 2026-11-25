@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import polygonClipping from 'polygon-clipping';
+import {intersectPolygons, subtractPolygons} from '@math.gl/geometry/polygon';
 import {createKernelMap} from '../world-map';
 import {geographic, coordinates, unit, add, angle, RAD, type Position} from '../math';
 import type {
@@ -25,7 +25,9 @@ import {tracePolygonConstraints, composePolygonEdge} from '../polygon-constraint
 const kernel = Object.assign((x: number, y: number) => [x, y], {
   invert: (x: number, y: number) => [x, y]
 });
-const splitter = Object.assign(createKernelMap({kernel, radius: 1 / RAD}), {polygonClipping});
+const splitter = Object.assign(createKernelMap({kernel, radius: 1 / RAD}), {
+  polygonClipping: {intersection: intersectPolygons, difference: subtractPolygons}
+});
 type Chart = {
   region: MapRegion;
   domain: Polygons;
@@ -81,8 +83,8 @@ class ElasticMap implements MapSurface {
       const world = rectangle(-180, -90, 180, 90);
       const domain = (
         section.complement
-          ? polygonClipping.difference(world, [boundary])
-          : polygonClipping.intersection(world, [boundary])
+          ? subtractPolygons(world, [boundary])
+          : intersectPolygons(world, [boundary])
       ) as Polygons;
       for (const base of splitter.regions) {
         const [lon, lat] = base.interior,
@@ -90,7 +92,7 @@ class ElasticMap implements MapSurface {
           e = lon + 45,
           s = lat < 0 ? -90 : 0,
           n = lat < 0 ? 0 : 90;
-        const clipped = polygonClipping.intersection(domain, rectangle(w, s, e, n)) as Polygons;
+        const clipped = intersectPolygons(domain, rectangle(w, s, e, n)) as Polygons;
         if (!clipped.length) continue;
         const id = `${section.id}/${base.id}`;
         const owns = indexDomain(clipped);
@@ -379,7 +381,7 @@ class ElasticMap implements MapSurface {
           prepared.push(points);
           preparedEdges.push(edges);
         });
-        const clipped = polygonClipping.intersection(
+        const clipped = intersectPolygons(
           snapPolygon(prepared),
           c.domain.map(snapPolygon)
         ) as Polygons;

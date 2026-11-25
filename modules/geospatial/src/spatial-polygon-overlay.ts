@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {WellKnownGeometry} from '@math.gl/core/arrow';
-import type {MultiPolygon} from 'polygon-clipping';
+import type {OverlayMultiPolygon as MultiPolygon} from '@math.gl/geometry/polygon';
 
 /** Converts native polygon rings to the existing polygon overlay kernel's input. */
 export function polygonSet(geometry: WellKnownGeometry): MultiPolygon {
