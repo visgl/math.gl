@@ -22,3 +22,4 @@ export {selectArrowBatchRows, takeArrowTableRows} from './take-arrow-rows';
 export {getRecordBatchMetadata, createRecordBatchWithMetadata} from './arrow-record-batch';
 export {projectArrowTable, type ArrowColumnSelection} from './project-arrow-table';
 export {mergeArrowSchemas, snapshotArrowSchema} from './arrow-schema-metadata';
+export {createArrowUtf8Reader, type ArrowUtf8Range} from './arrow-utf8-reader';
