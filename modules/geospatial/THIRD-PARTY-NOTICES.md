@@ -17,7 +17,7 @@ latest available upstream releases.
 | Ricky Reusser / scijs | Adaptive Simpson integration used by the hyperelliptical kernel, via d3-geo-projection; [MIT license](./src/maps/world-kernels/INTEGRATE-LICENSE.txt). |
 | d3-geo-polygon contributors | AirOcean topology/rotation; ISC, [AirOcean notice](./src/maps/AIR-OCEAN-LICENSE.txt). |
 
-Polygon overlay uses the MIT-licensed implementation in [geometry](../geometry/THIRD-PARTY-NOTICES.md). The opt-in terrain/martini entry uses separately installed
+Polygon overlay uses the MIT-licensed implementation in [geometry](https://github.com/visgl/math.gl/blob/master/modules/geometry/THIRD-PARTY-NOTICES.md). The opt-in terrain/martini entry uses separately installed
 `@mapbox/martini` 0.2.0 by Vladimir Agafonkin / Mapbox under its ISC package license;
 the backend source is not vendored or copied.
 
