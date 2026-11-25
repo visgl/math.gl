@@ -51,7 +51,7 @@ try {
   // Unbundled root imports evaluate the declared runtime dependencies. The math.gl
   // packages above remain actual tarballs; copy the installed external dependencies.
   symlinkSync(join(root, 'node_modules/cdt2d'), join(temporary, 'node_modules/cdt2d'), 'dir');
-  for (const name of ['@mapbox/martini', 'polygon-clipping', 'robust-predicates', 'splaytree']) {
+  for (const name of ['@mapbox/martini', 'robust-predicates', 'splaytree']) {
     const destination = join(temporary, 'node_modules', name);
     mkdirSync(join(destination, '..'), {recursive:true});
     cpSync(join(root, 'node_modules', name), destination, {recursive:true});
