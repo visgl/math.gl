@@ -6,7 +6,15 @@ import type {WellKnownGeometry} from '@math.gl/core/arrow';
 import {lineIntersectionResult} from './spatial-line-intersection-result';
 import {intersectLinePolygon} from './spatial-line-polygon-intersection';
 import type {AggregateFunction, ScalarFunction} from '@math.gl/sql/arrow';
-import polygonClipping from 'polygon-clipping';
+import {
+  intersectPolygons,
+  unionPolygons,
+  subtractPolygons,
+  xorPolygons,
+  type OverlayPosition,
+  type OverlayRing,
+  type OverlayMultiPolygon
+} from '@math.gl/geometry/polygon';
 import {polygonSet} from './spatial-polygon-overlay';
 import {
   EXTENSION_METADATA,
@@ -47,7 +55,7 @@ function checkBufferRadius(radius: number): void {
 }
 
 /** Checks a generated ring before passing it to the polygon kernel. */
-function checkedRing(ring: polygonClipping.Ring): polygonClipping.Ring {
+function checkedRing(ring: OverlayRing): OverlayRing {
   if (ring.some(point => !point.every(Number.isFinite))) {
     throw new Error('ST_Buffer produced a nonfinite coordinate');
   }
@@ -55,11 +63,8 @@ function checkedRing(ring: polygonClipping.Ring): polygonClipping.Ring {
 }
 
 /** Returns a circle approximation with eight segments per quadrant. */
-function circleRing(x: number, y: number, radius: number): polygonClipping.Ring {
-  const ring: polygonClipping.Ring = unitCircle.map(([dx, dy]) => [
-    x + radius * dx!,
-    y + radius * dy!
-  ]);
+function circleRing(x: number, y: number, radius: number): OverlayRing {
+  const ring: OverlayRing = unitCircle.map(([dx, dy]) => [x + radius * dx!, y + radius * dy!]);
   ring.push(ring[0]!);
   return checkedRing(ring);
 }
@@ -73,16 +78,13 @@ function bufferPoint(point: WellKnownGeometry, radius: number): WellKnownGeometr
 }
 
 /** Unions a bounded group of pieces at a time, then combines groups at each level. */
-function unionPolygonPieces(pieces: polygonClipping.MultiPolygon[]): polygonClipping.MultiPolygon {
+function unionPolygonPieces(pieces: OverlayMultiPolygon[]): OverlayMultiPolygon {
   if (!pieces.length) return [];
   while (pieces.length > 1) {
-    const groups: polygonClipping.MultiPolygon[] = [];
+    const groups: OverlayMultiPolygon[] = [];
     for (let first = 0; first < pieces.length; first += polygonUnionFanout) {
       groups.push(
-        polygonClipping.union(
-          pieces[first]!,
-          ...pieces.slice(first + 1, first + polygonUnionFanout)
-        )
+        unionPolygons(pieces[first]!, ...pieces.slice(first + 1, first + polygonUnionFanout))
       );
     }
     pieces = groups;
@@ -100,11 +102,11 @@ function bufferLine(geometry: WellKnownGeometry, radius: number): WellKnownGeome
       : geometry.type === 'LineString'
         ? [geometry.coordinates]
         : [];
-  const pieces: polygonClipping.MultiPolygon[] = [];
+  const pieces: OverlayMultiPolygon[] = [];
   for (const line of lines) {
     let previous: readonly number[] | undefined;
     for (const coordinate of line) {
-      const [x, y] = coordinate as polygonClipping.Pair;
+      const [x, y] = coordinate as OverlayPosition;
       if (previous && x === previous[0] && y === previous[1]) continue;
       pieces.push([[circleRing(x, y, radius)]]);
       if (previous) {
@@ -168,7 +170,7 @@ export const ST_BUFFER: ScalarFunction = {
 };
 
 /** Creates a row-preserving areal overlay with the first geometry's metadata. */
-function polygonOverlay(name: string, operation: typeof polygonClipping.intersection) {
+function polygonOverlay(name: string, operation: typeof intersectPolygons) {
   const spatial = spatialFunction(
     name,
     [polygonKinds, polygonKinds],
@@ -199,7 +201,7 @@ function withFirstInputMetadata(spatial: ScalarFunction): ScalarFunction {
 
 /** Binds polygon overlays or mixed-dimensional line clipping from the Arrow schema. */
 function intersection(): ScalarFunction {
-  const polygons = polygonOverlay('ST_Intersection', polygonClipping.intersection);
+  const polygons = polygonOverlay('ST_Intersection', intersectPolygons);
   const output = lineIntersectionResult();
   const linearFirst = spatialFunction(
     'ST_Intersection',
@@ -231,19 +233,13 @@ function intersection(): ScalarFunction {
 /** Intersects two areal geometries or clips a native line by a polygon. */
 export const ST_INTERSECTION = /* @__PURE__ */ intersection();
 /** Returns the portion of the first polygonal geometry outside the second. */
-export const ST_DIFFERENCE = /* @__PURE__ */ polygonOverlay(
-  'ST_Difference',
-  polygonClipping.difference
-);
+export const ST_DIFFERENCE = /* @__PURE__ */ polygonOverlay('ST_Difference', subtractPolygons);
 
 /** Returns the combined polygon area as a native GeoArrow MultiPolygon. */
-export const ST_UNION = /* @__PURE__ */ polygonOverlay('ST_Union', polygonClipping.union);
+export const ST_UNION = /* @__PURE__ */ polygonOverlay('ST_Union', unionPolygons);
 
 /** Returns the area covered by exactly one input as a native GeoArrow MultiPolygon. */
-export const ST_SYMDIFFERENCE = /* @__PURE__ */ polygonOverlay(
-  'ST_SymDifference',
-  polygonClipping.xor
-);
+export const ST_SYMDIFFERENCE = /* @__PURE__ */ polygonOverlay('ST_SymDifference', xorPolygons);
 
 /** Dissolves the components of a polygonal geometry into native GeoArrow storage. */
 export const ST_UNARYUNION = /* @__PURE__ */ spatialFunction(
@@ -252,7 +248,7 @@ export const ST_UNARYUNION = /* @__PURE__ */ spatialFunction(
   /* @__PURE__ */ nativeGeometryResult('geoarrow.multipolygon'),
   ([geometry]): WellKnownGeometry => ({
     type: 'MultiPolygon',
-    coordinates: polygonClipping.union(polygonSet(geometry!))
+    coordinates: unionPolygons(polygonSet(geometry!))
   })
 );
 
@@ -270,11 +266,11 @@ export const ST_UNION_AGGREGATE: AggregateFunction = {
       outputField: prototype.result.clone({name: 'ST_Union'}),
       /** Keeps bounded groups of partial unions at increasing input sizes. */
       createAccumulator() {
-        const levels: polygonClipping.MultiPolygon[][] = [];
+        const levels: OverlayMultiPolygon[][] = [];
         let seen = false;
 
         /** Compacts a full level before accumulating further inputs. */
-        function add(polygon: polygonClipping.MultiPolygon) {
+        function add(polygon: OverlayMultiPolygon) {
           for (let level = 0; ; level++) {
             levels[level] ??= [];
             const pieces = levels[level]!;
@@ -302,9 +298,7 @@ export const ST_UNION_AGGREGATE: AggregateFunction = {
           finalize() {
             if (!seen) return null;
             const pieces = levels.flat();
-            return pieces.length === 1
-              ? polygonClipping.union(pieces[0]!)
-              : unionPolygonPieces(pieces);
+            return pieces.length === 1 ? unionPolygons(pieces[0]!) : unionPolygonPieces(pieces);
           }
         };
       }

@@ -215,8 +215,10 @@ export class MercatorMap extends DiscontinuousMap {
         [-x, -y]
       ]
     ];
-    return super.projectPolygon(rings, options).flatMap(part =>
-      this.polygonClipping!.intersection(part.coordinates, box).map(polygon => {
+    const parts = super.projectPolygon(rings, options);
+    const {intersection: intersectPolygons} = this.polygonClipping!;
+    return parts.flatMap(part =>
+      intersectPolygons(part.coordinates, box).map(polygon => {
         const traced = tracePolygonConstraints(
           part.coordinates,
           polygon,

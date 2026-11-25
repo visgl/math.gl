@@ -62,3 +62,16 @@ Concave domains and holes can be supplied as triangulated regions. See the
 [clipping API reference](./api-reference/clip-triangle-mesh.md).
 
 See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
+## Polygon overlay
+
+`unionPolygons`, `intersectPolygons`, `subtractPolygons`, and `xorPolygons` compute planar Boolean operations. Each operand is a polygon (an exterior XY ring followed by holes) or
+a multipolygon. Each operation accepts one or more operands and returns a
+multipolygon. An empty result is `[]`. Inputs use a shared Cartesian coordinate system.
+
+```ts
+import {intersectPolygons, subtractPolygons} from '@math.gl/geometry/polygon';
+
+const visible = intersectPolygons(footprints, viewportPolygon);
+const outside = subtractPolygons(footprints, viewportPolygon);
+```

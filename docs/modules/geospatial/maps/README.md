@@ -469,7 +469,7 @@ degenerate rings, nonfinite coordinates, and antipodal edges.
 
 Convex single rings use direct half-space clipping. Tangent numerical slivers
 smaller than 64 machine epsilons relative to the source chart area are omitted.
-Concave rings and holes use the MIT-licensed `polygon-clipping` library for planar reconstruction.
+Concave rings and holes use polygon overlay functions from `@math.gl/geometry/polygon` for planar reconstruction.
 Simple exteriors with contained holes are the intended input; the boolean kernel
 uses nonzero winding for self-intersections and clips holes extending outside the
 exterior. Rings with zero signed chart area are rejected using their own translated,
