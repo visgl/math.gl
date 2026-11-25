@@ -55,21 +55,22 @@ test('lazy retrieval includes rendering profiles for every projection algorithm'
   }
 });
 
-test('UTM bounds describe a zone while conversion remains available outside it', async () => {
-  const north = await projectionEngine.getCRS('EPSG:32618');
-  expect(north.renderingBounds[0][0]).toBeCloseTo(166021.44308054, 3);
-  expect(north.renderingBounds[1][0]).toBeCloseTo(833978.55691946, 3);
-  expect(north.renderingBounds[0][1]).toBeCloseTo(0, 3);
-  expect(north.converter.WGS84.normalize([-100, -10])).toEqual([-78, 0]);
-  const point = [-80, 40, 123];
-  const restored = north.converter.WGS84.to(north.converter.WGS84.from(point));
-  expect(restored[0]).toBeCloseTo(point[0], 7);
-  expect(restored[1]).toBeCloseTo(point[1], 7);
-  const south = await projectionEngine.getCRS('EPSG:32718');
-  const normalized = south.converter.WGS84.normalize([-75, 10]);
-  expect(normalized[0]).toBeCloseTo(-75, 12);
-  expect(normalized[1]).toBe(0);
-  expect(south.renderingBounds[1][1]).toBeCloseTo(10000000, 3);
+test('UTM renders across zone edges and the equator like transverse Mercator', async () => {
+  for (const south of [false, true]) {
+    const utm = await projectionEngine.getCRS(south ? 'EPSG:32726' : 'EPSG:32626');
+    const tmerc = await projectionEngine.getCRS(
+      `+proj=tmerc +datum=WGS84 +lon_0=-27 +k_0=0.9996 +x_0=500000 +y_0=${south ? 10000000 : 0}`
+    );
+    expect(utm.renderingBounds).toEqual(tmerc.renderingBounds);
+    for (const position of [
+      [-31, 1],
+      [-23, -1]
+    ]) {
+      const normalized = utm.converter.WGS84.normalize(position);
+      expect(normalized).toEqual(position);
+      expect(utm.converter.WGS84.from(normalized)).toEqual(tmerc.converter.WGS84.from(position));
+    }
+  }
 });
 
 test('PROJJSON coverage narrows the rendering target without restricting conversion', async () => {
@@ -218,7 +219,7 @@ test.each(['bound', 'compound'] as const)(
   }
 );
 
-test('explicit coverage expands the default UTM rendering domain', async () => {
+test('explicit coverage sets the UTM rendering domain', async () => {
   const bbox = {west_longitude: 0, south_latitude: -10, east_longitude: 10, north_latitude: 85};
   const descriptor = await projectionEngine.getCRS({...projectedJSON, bbox});
   expect(descriptor.converter.WGS84.normalize([9, -5])).toEqual([9, -5]);
