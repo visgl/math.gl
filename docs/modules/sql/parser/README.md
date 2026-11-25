@@ -119,8 +119,14 @@ retain their exact case. Use `POWER(x, y)` and `MOD(x, y)`; SQL does not accept 
 `ARRAY[x + 1, SIN(angle), 0]` has a fixed width known at compilation. Arrow evaluation
 infers the widest floating component type; integer-only arrays use Float64. Explicit casts
 such as `ARRAY[x, y]::REAL[2]` select Float16/32/64 precision and check finite overflow.
+
+Cast an existing numeric Arrow list with `coordinates::ARRAY[3]` to preserve
+its component type, or use `coordinates::FLOAT32[3]` to set component precision.
+The result is an Arrow FixedSizeList. Every non-null list must already have the
+specified width. A null list or a null component produces a null tuple.
+
 Any null component produces a null tuple with zero-filled numeric padding. Variable-length
-result lists are deferred. SQL parsing and Arrow evaluation remain separate optional imports.
+result lists are unsupported. SQL parsing and Arrow evaluation remain separate optional imports.
 
 ## Parameters and validation
 

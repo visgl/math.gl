@@ -273,25 +273,44 @@ export class SQLExpressionReader {
       this.position += width[0].length;
       this.token();
       this.symbol(']');
+      const size = Number(width[0]);
+      if (!Number.isInteger(size) || size < 1 || size > 4096) {
+        throw this.error('ARRAY cast length must be between 1 and 4096');
+      }
+      const inferred = match[0].toUpperCase() === 'ARRAY';
+      const type = inferred ? 'array' : sqlCastType(match[0], this.source, start);
+      if (!['array', 'float16', 'float32', 'float64', 'uint8'].includes(type)) {
+        throw this.error('Unsupported ARRAY cast type');
+      }
       const array =
         argument.type === 'ArrayExpression'
-          ? {type: 'CallExpression', callee: {name: 'array'}, arguments: argument.elements}
-          : (argument as any);
+          ? this.call('array', argument.elements as Expression[])
+          : argument;
+      const constructor =
+        array.type === 'CallExpression' && array.callee.type === 'Identifier'
+          ? array.callee['name']
+          : undefined;
       if (
-        array.type !== 'CallExpression' ||
-        !/^array(?:_(?:float(?:16|32|64)|uint8))?$/.test(array.callee.name) ||
-        Number(width[0]) !== array.arguments.length
-      )
-        throw this.error('ARRAY cast length must match the number of components');
-      const type = sqlCastType(match[0], this.source, start);
-      if (!['float16', 'float32', 'float64', 'uint8'].includes(type))
-        throw this.error('Unsupported ARRAY cast type');
-      if (
-        array.callee.name !== 'array' &&
-        (type === 'uint8' || array.callee.name === 'array_uint8')
-      )
-        throw this.error('Chained UINT8 array casts are not supported');
-      return this.call(`array_${type}`, array.arguments);
+        array.type === 'CallExpression' &&
+        typeof constructor === 'string' &&
+        /^array(?:_(?:float(?:16|32|64)|uint8))?$/.test(constructor)
+      ) {
+        if (size !== array.arguments.length) {
+          throw this.error('ARRAY cast length must match the number of components');
+        }
+        if (inferred) {
+          return array;
+        }
+        if (constructor !== 'array' && (type === 'uint8' || constructor === 'array_uint8')) {
+          throw this.error('Chained UINT8 array casts are not supported');
+        }
+        return this.call(`array_${type}`, array.arguments as Expression[]);
+      }
+      return this.call('cast_array', [
+        argument,
+        this.node({type: 'Literal', value: size, raw: width[0]}),
+        this.node({type: 'Literal', value: type, raw: JSON.stringify(type)})
+      ]);
     }
     const name = match[0].toLowerCase();
     let target: string;

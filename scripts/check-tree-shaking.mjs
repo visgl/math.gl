@@ -33,7 +33,8 @@ const probes = [
   },
   {symbol: "createArrowColumns", packages: ["@math.gl/sql/arrow"], forbidden: [/sql\/(src|dist)\/scales\//], budget: 307000},
   // SQL text includes indexed spatial joins and excludes the portable predicate normalizer.
-  {symbol:'queryArrowSQL', packages:['@math.gl/sql/query'], forbidden:[/predicate-expression/,/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/geoarrow-functions\./,/loaders.gl/,/geospatial\//], budget:356000},
+  // Fixed-width casts add a list kernel and validation to the relational SQL entry point.
+  {symbol:'queryArrowSQL', packages:['@math.gl/sql/query'], forbidden:[/predicate-expression/,/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/geoarrow-functions\./,/loaders.gl/,/geospatial\//], budget:359000},
 
   ...['sweepTerrainRotatingCapsule', 'sweepTerrainRotatingSphere'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial/terrain'],
@@ -95,10 +96,10 @@ const probes = [
 
   // Measured with explicit numeric, dictionary, binary and temporal CAST targets and SQL pattern operators.
   // Named scalar/binary parameter binding and expression IN syntax are part of each parser.
-  // Published consumers with snapshot binding measure 17,588 / approximately 19,702 with UNNEST / 28,441 bytes; keep dependency exclusions intact.
-  {symbol: 'parseSQLSelect', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 17850},
-  {symbol: 'parseSQLSelectStatement', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 20100},
-  {symbol: 'parseSQLQuery', packages: ['@math.gl/sql/parser'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 28750},
+  // Published consumers with fixed-width list casts measure 17,927 / 20,428 / 28,797 bytes.
+  {symbol: 'parseSQLSelect', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 17950},
+  {symbol: 'parseSQLSelectStatement', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 20450},
+  {symbol: 'parseSQLQuery', packages: ['@math.gl/sql/parser'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 28850},
 
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/sql/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
   {symbol:'spheroidToCartesian', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
