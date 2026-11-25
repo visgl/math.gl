@@ -1397,6 +1397,118 @@ function bindNestedExtract(
   };
 }
 
+/** Converts a numeric list to an exact-width tuple, retaining component precision by default. */
+function bindArrayCast(args: readonly Expression[], options: BindingOptions): Node {
+  const [, widthArg, typeArg] = args;
+  if (args.length !== 3 || widthArg?.type !== 'Literal' || typeArg?.type !== 'Literal') {
+    throw new Error('ARRAY cast requires a list, a width and a component type');
+  }
+  const width = widthArg.value;
+  if (typeof width !== 'number' || !Number.isInteger(width) || width < 1 || width > 4096) {
+    throw new Error('ARRAY cast length must be between 1 and 4096');
+  }
+  const argument = bind(args[0], options, undefined, true);
+  const list = argument.field.type;
+  if (!DataType.isList(list) && !DataType.isFixedSizeList(list)) {
+    throw new Error('ARRAY cast requires an Arrow List or FixedSizeList');
+  }
+  const child = list.children[0]!;
+  if (!DataType.isInt(child.type) && !DataType.isFloat(child.type)) {
+    throw new Error('ARRAY cast requires numeric components');
+  }
+  const target = typeArg.value;
+  const component =
+    target === 'array'
+      ? child.type
+      : target === 'float16'
+        ? new Float16()
+        : target === 'float32'
+          ? new Float32()
+          : target === 'float64'
+            ? new Float64()
+            : target === 'uint8'
+              ? new Uint8()
+              : undefined;
+  if (!component) {
+    throw new Error('Unsupported ARRAY cast type');
+  }
+  const type = new FixedSizeList(width, new Field(child.name, component, false));
+  const zero = DataType.isInt(component) && component.bitWidth === 64 ? 0n : 0;
+  return {
+    field: new Field('array', type, argument.field.nullable || child.nullable),
+    hasKernel: true,
+    prepare(batch, active, context) {
+      const input = argument.prepare(batch, active, context).vector!;
+      const result = nullTupleVector(type, active.length);
+      const data = result.data[0]!;
+      const storage = data.children[0]!.values;
+      const output =
+        DataType.isFloat(component) && component.precision === Precision.HALF
+          ? float16Values(storage as Uint16Array)
+          : storage;
+      let row = 0;
+      for (const chunk of input.data) {
+        const children = new Vector([chunk.children[0]!]);
+        const values = new ColumnReader(children);
+        for (let local = 0; local < chunk.length; local++, row++) {
+          if (!active[row] || context.failed?.[row] || !chunk.getValid(local)) {
+            continue;
+          }
+          const start = DataType.isFixedSizeList(list)
+            ? local * list.listSize
+            : chunk.valueOffsets[local]!;
+          const end = DataType.isFixedSizeList(list)
+            ? start + list.listSize
+            : chunk.valueOffsets[local + 1]!;
+          try {
+            if (end - start !== width) {
+              throw new ExpressionEvaluationError(
+                'domain',
+                'ARRAY cast length does not match list width'
+              );
+            }
+            let valid = true;
+            for (let index = 0; index < width; index++) {
+              const value = values.get(start + index) as number | bigint | null;
+              if (value === null) {
+                valid = false;
+                break;
+              }
+              const offset = row * width + index;
+              const numeric = Number(value);
+              output[offset] =
+                target === 'array'
+                  ? value
+                  : target === 'uint8'
+                    ? convertByte(numeric, false)
+                    : numeric;
+              if (
+                target !== 'array' &&
+                Number.isFinite(numeric) &&
+                !Number.isFinite(output[offset])
+              ) {
+                throw new ExpressionEvaluationError('overflow', 'ARRAY cast overflow');
+              }
+            }
+            if (valid) {
+              data.setValid(row, true);
+            }
+          } catch (error) {
+            if (!context.failed || !isExpressionEvaluationError(error)) {
+              throw error;
+            }
+            context.failed[row] = 1;
+          }
+          if (!data.getValid(row)) {
+            output.fill(zero, row * width, (row + 1) * width);
+          }
+        }
+      }
+      return vectorReader(result);
+    }
+  };
+}
+
 /** Binds built-ins and custom functions, materializing arguments only for vector kernels. */
 function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node {
   if (ast.callee.type !== 'Identifier')
@@ -1438,6 +1550,7 @@ function bindCall(ast: any, options: BindingOptions, expected?: DataType): Node 
   }
   if (name === 'LIST_EXTRACT' || name === 'STRUCT_EXTRACT')
     return bindNestedExtract(name, ast.arguments, options);
+  if (name === 'cast_array') return bindArrayCast(ast.arguments, options);
   if (name === 'PACK_UNORM8') return bindPackUnorm8(ast.arguments, options);
   if (['array', 'array_float16', 'array_float32', 'array_float64', 'array_uint8'].includes(name)) {
     if (!ast.arguments.length || ast.arguments.length > 4096)
