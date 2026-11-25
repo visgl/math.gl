@@ -164,14 +164,18 @@ function executeSelect(
   let source = left.table;
   const relationMetadata = new Map(Object.entries(left.columnMetadata));
   const leftAlias = statement.from.alias ?? statement.from.name;
-  const [right] = statement.joins;
+  const [first, second] = statement.joins;
+  const lateral = first?.unnest ? first : undefined;
+  const right = lateral ? second : first;
+  const lateralAlias = lateral?.table.alias;
+  if (statement.joins.length > (lateral ? 2 : 1) || right?.unnest) {
+    throw new Error('Arrow SQL supports one lateral expansion followed by one JOIN');
+  }
   let join: ArrowTableQuery['join'];
   let rightAlias: string | undefined;
   let rightTable: Table | undefined;
-  if (right?.unnest) {
-    if (statement.joins.length !== 1)
-      throw new Error('UNNEST currently supports one expansion per SELECT');
-    const {expression, columns, ordinality, functionName = 'UNNEST'} = right.unnest;
+  if (lateral?.unnest && lateralAlias) {
+    const {expression, columns, ordinality, functionName = 'UNNEST'} = lateral.unnest;
     const column = qualifiedColumn(expression);
     if (!column || (column.qualifier && column.qualifier !== leftAlias))
       throw new Error(`${functionName} requires a column of its parent table`);
@@ -180,8 +184,7 @@ function executeSelect(
     const descriptor = tableFunctions.get(functionName.toUpperCase());
     if (!descriptor?.bindLateral)
       throw new Error(`Unknown Arrow SQL lateral table function: ${functionName}`);
-    rightAlias = right.table.alias!;
-    if (rightAlias === leftAlias) throw new Error('Duplicate Arrow SQL table alias');
+    if (lateralAlias === leftAlias) throw new Error('Duplicate Arrow SQL table alias');
     const bound = descriptor.bindLateral({
       inputSchema: source.schema,
       argument: field,
@@ -190,23 +193,26 @@ function executeSelect(
     source = joinLateralTable(
       source,
       bound,
-      rightAlias,
+      lateralAlias,
       columns,
-      right.type === 'left',
+      lateral.type === 'left',
       execution.signal
     );
     bound.outputSchema.fields.forEach((field, index) =>
-      relationMetadata.set(rightAlias + '.' + columns[index], bound.columnMetadata?.[field.name])
+      relationMetadata.set(lateralAlias + '.' + columns[index], bound.columnMetadata?.[field.name])
     );
-  } else if (right) {
-    if (statement.joins.length > 1 || (right.type !== 'inner' && right.type !== 'left'))
+  }
+  if (right) {
+    if (right.type !== 'inner' && right.type !== 'left')
       throw new Error('Arrow SQL supports one INNER or LEFT JOIN per SELECT');
     rightAlias = right.table.alias ?? right.table.name;
     const resolved = resolveTable(right.table);
     rightTable = resolved.table;
     for (const [name, metadata] of Object.entries(resolved.columnMetadata))
       relationMetadata.set(rightAlias + '.' + name, metadata);
-    if (leftAlias === rightAlias) throw new Error('Duplicate Arrow SQL table alias');
+    if (leftAlias === rightAlias || lateralAlias === rightAlias) {
+      throw new Error('Duplicate Arrow SQL table alias');
+    }
     const {on} = right;
     const spatial = spatialJoinCall(on);
     if (!spatial && (on.type !== 'BinaryExpression' || on.operator !== '=='))
@@ -218,18 +224,25 @@ function executeSelect(
       (on as {right: Expression}).right
     ];
     const sides = operands.slice(0, 2).map(qualifiedColumn);
-    const left = sides.find(column => column?.qualifier === leftAlias);
+    const left = sides.find(
+      column =>
+        column &&
+        (column.qualifier === leftAlias || (lateralAlias && column.qualifier === lateralAlias))
+    );
     const rightColumn = sides.find(column => column?.qualifier === rightAlias);
     if (!left || !rightColumn) throw new Error('Qualify both Arrow SQL JOIN keys');
+    const leftKey = left.qualifier === lateralAlias ? lateralAlias + '.' + left.name : left.name;
     const rightPrefix = rightAlias + '.';
     if (spatial) {
       const predicate = bindColumns(on, column =>
-        column.qualifier === rightAlias ? rightPrefix + column.name : column.name
+        column.qualifier === rightAlias || (lateralAlias && column.qualifier === lateralAlias)
+          ? column.qualifier + '.' + column.name
+          : column.name
       );
       source = sqlSpatialJoin(
         source,
         rightTable,
-        left.name,
+        leftKey,
         rightColumn.name,
         rightPrefix,
         predicate,
@@ -242,7 +255,7 @@ function executeSelect(
       join = {
         type: right.type,
         table: rightTable,
-        left: left.name,
+        left: leftKey,
         right: rightColumn.name,
         rightPrefix
       };
@@ -252,7 +265,10 @@ function executeSelect(
   const bind = (node: Expression): Expression =>
     bindColumns(node, column => {
       if (column.qualifier === leftAlias) return column.name;
-      if (column.qualifier && column.qualifier === rightAlias)
+      if (
+        column.qualifier &&
+        (column.qualifier === rightAlias || column.qualifier === lateralAlias)
+      )
         return column.qualifier + '.' + column.name;
       if (column.qualifier) {
         if (
