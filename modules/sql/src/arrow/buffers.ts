@@ -4,6 +4,7 @@
 
 import {DataType, DateUnit, Int32, Precision, type Vector, type Data} from 'apache-arrow';
 import {getFloat16ArrayConstructor, isFloat16ArrayConstructor} from '@math.gl/core/types';
+import {createArrowUtf8Reader} from '@math.gl/core/arrow';
 import {float16Values} from './float16';
 import {ExpressionEvaluationError} from '../expressions';
 import type {ArrowExpressionValue} from './types';
@@ -43,7 +44,8 @@ export class ColumnReader {
   private readonly ends: number[] = [];
   private chunkIndex = 0;
   private readonly location: [Data, number] = [null!, 0];
-  private readonly range: [Uint8Array, number, number] = [null!, 0, 0];
+  /** Created on the first UTF-8 read. */
+  private readUtf8?: ReturnType<typeof createArrowUtf8Reader>;
   private readonly half = new Map<Data, Float16Array | null>();
   private readonly dictionaries = new Map<Data, ColumnReader>();
   private readonly decoder = new TextDecoder();
@@ -124,13 +126,8 @@ export class ColumnReader {
   }
   /** Resolves UTF-8 buffers, including dictionary values, without decoding. */
   utf8(row: number): [Uint8Array, number, number] {
-    const [data, index] = this.chunk(row);
-    if (DataType.isDictionary(data.type))
-      return this.dictionaries.get(data)!.utf8(Number(data.values[index]));
-    this.range[0] = data.values as Uint8Array;
-    this.range[1] = Number(data.valueOffsets[index]);
-    this.range[2] = Number(data.valueOffsets[index + 1]);
-    return this.range;
+    this.readUtf8 ??= createArrowUtf8Reader(this.vector);
+    return this.readUtf8(row)!;
   }
 }
 
