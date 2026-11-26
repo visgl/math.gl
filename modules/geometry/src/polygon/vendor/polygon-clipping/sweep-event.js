@@ -5,8 +5,10 @@
 import Segment from "./segment.js"
 import { cosineOfAngle, sineOfAngle } from "./vector.js"
 
+/** One endpoint of a segment in the clipping sweep. */
 export default class SweepEvent {
   // for ordering sweep events in the sweep event queue
+  /** Orders endpoint events at their sweep coordinates and links coincident points. */
   static compare(a, b) {
     // favor event with a point that the sweep line hits first
     const ptCmp = SweepEvent.comparePoints(a.point, b.point)
@@ -24,6 +26,7 @@ export default class SweepEvent {
   }
 
   // for ordering points in sweep line order
+  /** Orders points by x and then y. */
   static comparePoints(aPt, bPt) {
     if (aPt.x < bPt.x) return -1
     if (aPt.x > bPt.x) return 1
@@ -35,6 +38,7 @@ export default class SweepEvent {
   }
 
   // Warning: 'point' input will be modified and re-used (for performance)
+  /** Registers the endpoint with the point it belongs to. */
   constructor(point, isLeft) {
     if (point.events === undefined) point.events = [this]
     else point.events.push(this)
@@ -43,6 +47,7 @@ export default class SweepEvent {
     // this.segment, this.otherSE set by factory
   }
 
+  /** Combines the endpoint lists for coincident points. */
   link(other) {
     if (other.point === this.point) {
       throw new Error("Tried to link already linked events")
@@ -58,6 +63,7 @@ export default class SweepEvent {
 
   /* Do a pass over our linked events and check to see if any pair
    * of segments match, and should be consumed. */
+  /** Combines coincident segments that share both endpoints. */
   checkForConsuming() {
     // FIXME: The loops in this method run O(n^2) => no good.
     //        Maintain little ordered sweep event trees?
@@ -78,6 +84,7 @@ export default class SweepEvent {
     }
   }
 
+  /** Returns linked endpoints on unassigned segments selected for the result. */
   getAvailableLinkedEvents() {
     // point.events is always of length 2 or greater
     const events = []
@@ -100,6 +107,7 @@ export default class SweepEvent {
    * The comparator function has a compute cache such that it avoids
    * re-computing already-computed values.
    */
+  /** Builds an angular comparator for choosing the next result edge. */
   getLeftmostComparator(baseEvent) {
     const cache = new Map()
 

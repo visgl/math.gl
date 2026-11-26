@@ -5,9 +5,11 @@
 import { compareVectorAngles } from "./vector.js"
 import SweepEvent from "./sweep-event.js"
 
+/** A closed ring assembled from segments selected for the result. */
 export class RingOut {
   /* Given the segments from the sweep line pass, compute & return a series
    * of closed rings from all the segments marked to be part of the result */
+  /** Follows linked result segments to build the output rings. */
   static factory(allSegments) {
     const ringsOut = []
 
@@ -86,6 +88,7 @@ export class RingOut {
     return ringsOut
   }
 
+  /** Records the ordered sweep events and links their segments to the ring. */
   constructor(events) {
     this.events = events
     for (let i = 0, iMax = events.length; i < iMax; i++) {
@@ -94,6 +97,7 @@ export class RingOut {
     this.poly = null
   }
 
+  /** Returns a closed coordinate ring with redundant collinear points removed. */
   getGeom() {
     // Remove superfluous points (ie extra points along a straight line),
     let prevPt = this.events[0].point
@@ -124,6 +128,7 @@ export class RingOut {
     return orderedPoints
   }
 
+  /** Determines exterior status from the enclosing ring hierarchy. */
   isExteriorRing() {
     if (this._isExteriorRing === undefined) {
       const enclosing = this.enclosingRing()
@@ -132,6 +137,7 @@ export class RingOut {
     return this._isExteriorRing
   }
 
+  /** Returns the cached ring enclosing this ring, when present. */
   enclosingRing() {
     if (this._enclosingRing === undefined) {
       this._enclosingRing = this._calcEnclosingRing()
@@ -140,6 +146,7 @@ export class RingOut {
   }
 
   /* Returns the ring that encloses this one, if any */
+  /** Finds the enclosing ring using preceding sweep segments. */
   _calcEnclosingRing() {
     // start with the ealier sweep line event so that the prevSeg
     // chain doesn't lead us inside of a loop of ours
@@ -177,18 +184,22 @@ export class RingOut {
   }
 }
 
+/** An output polygon with one exterior ring and any interior rings. */
 export class PolyOut {
+  /** Associates an exterior ring with the output polygon. */
   constructor(exteriorRing) {
     this.exteriorRing = exteriorRing
     exteriorRing.poly = this
     this.interiorRings = []
   }
 
+  /** Attaches a hole to this polygon. */
   addInterior(ring) {
     this.interiorRings.push(ring)
     ring.poly = this
   }
 
+  /** Serializes the exterior and surviving interior rings. */
   getGeom() {
     const geom = [this.exteriorRing.getGeom()]
     // exterior ring was all (within rounding error of angle calc) colinear points
@@ -203,12 +214,15 @@ export class PolyOut {
   }
 }
 
+/** The polygons assembled from all output rings. */
 export class MultiPolyOut {
+  /** Groups the output rings into polygons. */
   constructor(rings) {
     this.rings = rings
     this.polys = this._composePolys(rings)
   }
 
+  /** Returns the serialized polygons that have valid exterior rings. */
   getGeom() {
     const geom = []
     for (let i = 0, iMax = this.polys.length; i < iMax; i++) {
@@ -220,6 +234,7 @@ export class MultiPolyOut {
     return geom
   }
 
+  /** Groups each hole under its enclosing exterior ring. */
   _composePolys(rings) {
     const polys = []
     for (let i = 0, iMax = rings.length; i < iMax; i++) {

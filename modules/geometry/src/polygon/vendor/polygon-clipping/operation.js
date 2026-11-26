@@ -11,16 +11,20 @@ import SweepEvent from "./sweep-event.js"
 import SweepLine from "./sweep-line.js"
 
 // Limits on iterative processes to prevent infinite loops - usually caused by floating-point math round-off errors.
+/** Maximum queued sweep events allowed before aborting. */
 const POLYGON_CLIPPING_MAX_QUEUE_SIZE =
   (typeof process !== "undefined" &&
     process.env.POLYGON_CLIPPING_MAX_QUEUE_SIZE) ||
   1000000
+/** Maximum processed sweep segments allowed before aborting. */
 const POLYGON_CLIPPING_MAX_SWEEPLINE_SEGMENTS =
   (typeof process !== "undefined" &&
     process.env.POLYGON_CLIPPING_MAX_SWEEPLINE_SEGMENTS) ||
   1000000
 
+/** Coordinates normalization, sweep processing, and reconstruction for polygon clipping. */
 export class Operation {
+  /** Applies the requested overlay to the subject geometry and remaining operands. */
   run(type, geom, moreGeoms) {
     operation.type = type
     rounder.reset()
@@ -130,6 +134,7 @@ export class Operation {
 }
 
 // singleton available by import
+/** Shared operation state used by the sweep and result classifiers. */
 const operation = new Operation()
 
 export default operation

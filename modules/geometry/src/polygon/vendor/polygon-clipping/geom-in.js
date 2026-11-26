@@ -5,7 +5,9 @@
 import rounder from "./rounder.js"
 import Segment from "./segment.js"
 
+/** A normalized input ring represented as directed sweep segments. */
 export class RingIn {
+  /** Builds the ring segments and bounds from the input coordinates. */
   constructor(geomRing, poly, isExterior) {
     if (!Array.isArray(geomRing) || geomRing.length === 0) {
       throw new Error("Input geometry is not a valid Polygon or MultiPolygon")
@@ -52,6 +54,7 @@ export class RingIn {
     }
   }
 
+  /** Returns the endpoint events for this ring. */
   getSweepEvents() {
     const sweepEvents = []
     for (let i = 0, iMax = this.segments.length; i < iMax; i++) {
@@ -63,7 +66,9 @@ export class RingIn {
   }
 }
 
+/** An input polygon with an exterior ring and optional holes. */
 export class PolyIn {
+  /** Builds the polygon rings and their combined bounds. */
   constructor(geomPoly, multiPoly) {
     if (!Array.isArray(geomPoly)) {
       throw new Error("Input geometry is not a valid Polygon or MultiPolygon")
@@ -86,6 +91,7 @@ export class PolyIn {
     this.multiPoly = multiPoly
   }
 
+  /** Returns the sweep events for all rings in this polygon. */
   getSweepEvents() {
     const sweepEvents = this.exteriorRing.getSweepEvents()
     for (let i = 0, iMax = this.interiorRings.length; i < iMax; i++) {
@@ -98,7 +104,9 @@ export class PolyIn {
   }
 }
 
+/** A polygon or multipolygon participating in the clipping operation. */
 export class MultiPolyIn {
+  /** Normalizes polygon input and records whether it is the subject. */
   constructor(geom, isSubject) {
     if (!Array.isArray(geom)) {
       throw new Error("Input geometry is not a valid Polygon or MultiPolygon")
@@ -128,6 +136,7 @@ export class MultiPolyIn {
     this.isSubject = isSubject
   }
 
+  /** Returns the sweep events for all polygons in this input. */
   getSweepEvents() {
     const sweepEvents = []
     for (let i = 0, iMax = this.polys.length; i < iMax; i++) {

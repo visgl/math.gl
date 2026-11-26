@@ -18,16 +18,20 @@ import SplayTree from "splaytree"
  * stored in any data structures in the rest of this algorithm.
  */
 
+/** Rounds point ordinates using independent coordinate histories. */
 class PtRounder {
+  /** Starts with empty rounding histories. */
   constructor() {
     this.reset()
   }
 
+  /** Clears ordinates recorded during the previous overlay. */
   reset() {
     this.xRounder = new CoordRounder()
     this.yRounder = new CoordRounder()
   }
 
+  /** Returns a point snapped to nearby recorded ordinates. */
   round(x, y) {
     return {
       x: this.xRounder.round(x),
@@ -36,7 +40,9 @@ class PtRounder {
   }
 }
 
+/** Tracks ordinates in sorted order to reuse nearly equal values. */
 class CoordRounder {
+  /** Initializes the coordinate tree with zero. */
   constructor() {
     this.tree = new SplayTree()
     // preseed with 0 so we don't end up with values < Number.EPSILON
@@ -50,6 +56,7 @@ class CoordRounder {
   //       right). No - it wouldn't, because we snap intersections
   //       to endpoints (to establish independence from the segment
   //       angle for t-intersections).
+  /** Reuses an equivalent neighboring ordinate or records the supplied one. */
   round(coord) {
     const node = this.tree.add(coord)
 
@@ -70,6 +77,7 @@ class CoordRounder {
 }
 
 // singleton available by import
+/** Point rounder shared by the input and sweep stages. */
 const rounder = new PtRounder()
 
 export default rounder

@@ -8,14 +8,17 @@
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/EPSILON
  */
 
+/** Machine precision used to compare rounded coordinates. */
 let epsilon = Number.EPSILON
 
 // IE Polyfill
 if (epsilon === undefined) epsilon = Math.pow(2, -52)
 
+/** Squared machine precision used by the relative comparison. */
 const EPSILON_SQ = epsilon * epsilon
 
 /* FLP comparator */
+/** Compares floating-point values using the clipping tolerance. */
 export const cmp = (a, b) => {
   // check if they're both 0
   if (-epsilon < a && a < epsilon) {

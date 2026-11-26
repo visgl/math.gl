@@ -9,6 +9,7 @@
  *
  */
 
+/** Tests whether a point lies inside or on the boundary of a bounding box. */
 export const isInBbox = (bbox, point) => {
   return (
     bbox.ll.x <= point.x &&
@@ -21,6 +22,7 @@ export const isInBbox = (bbox, point) => {
 /* Returns either null, or a bbox (aka an ordered pair of points)
  * If there is only one point of overlap, a bbox with identical points
  * will be returned */
+/** Returns the shared bounds of two intersecting boxes. */
 export const getBboxOverlap = (b1, b2) => {
   // check if the bboxes overlap at all
   if (

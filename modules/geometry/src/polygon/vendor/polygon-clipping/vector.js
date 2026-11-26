@@ -5,12 +5,15 @@
 import { orient2d } from "robust-predicates"
 
 /* Cross Product of two vectors with first point at origin */
+/** Returns the signed two-dimensional cross product. */
 export const crossProduct = (a, b) => a.x * b.y - a.y * b.x
 
 /* Dot Product of two vectors with first point at origin */
+/** Returns the two-dimensional dot product. */
 export const dotProduct = (a, b) => a.x * b.x + a.y * b.y
 
 /* Comparator for two vectors with same starting point */
+/** Compares the orientation of two vectors sharing an origin. */
 export const compareVectorAngles = (basePt, endPt1, endPt2) => {
   const res = orient2d(
     basePt.x,
@@ -25,9 +28,11 @@ export const compareVectorAngles = (basePt, endPt1, endPt2) => {
   return 0
 }
 
+/** Returns the Euclidean length of a vector. */
 export const length = (v) => Math.sqrt(dotProduct(v, v))
 
 /* Get the sine of the angle from pShared -> pAngle to pShaed -> pBase */
+/** Returns the signed sine between rays from the shared point. */
 export const sineOfAngle = (pShared, pBase, pAngle) => {
   const vBase = { x: pBase.x - pShared.x, y: pBase.y - pShared.y }
   const vAngle = { x: pAngle.x - pShared.x, y: pAngle.y - pShared.y }
@@ -35,6 +40,7 @@ export const sineOfAngle = (pShared, pBase, pAngle) => {
 }
 
 /* Get the cosine of the angle from pShared -> pAngle to pShaed -> pBase */
+/** Returns the cosine between rays from the shared point. */
 export const cosineOfAngle = (pShared, pBase, pAngle) => {
   const vBase = { x: pBase.x - pShared.x, y: pBase.y - pShared.y }
   const vAngle = { x: pAngle.x - pShared.x, y: pAngle.y - pShared.y }
@@ -43,6 +49,7 @@ export const cosineOfAngle = (pShared, pBase, pAngle) => {
 
 /* Get the closest point on an line (defined by two points)
  * to another point. */
+/** Projects a point onto the line through two reference points. */
 export const closestPoint = (ptA1, ptA2, ptB) => {
   if (ptA1.x === ptA2.x) return { x: ptA1.x, y: ptB.y } // vertical vector
   if (ptA1.y === ptA2.y) return { x: ptB.x, y: ptA1.y } // horizontal vector
@@ -80,6 +87,7 @@ export const closestPoint = (ptA1, ptA2, ptB) => {
 /* Get the x coordinate where the given line (defined by a point and vector)
  * crosses the horizontal line with the given y coordiante.
  * In the case of parrallel lines (including overlapping ones) returns null. */
+/** Intersects a directed line with a horizontal line. */
 export const horizontalIntersection = (pt, v, y) => {
   if (v.y === 0) return null
   return { x: pt.x + (v.x / v.y) * (y - pt.y), y: y }
@@ -88,6 +96,7 @@ export const horizontalIntersection = (pt, v, y) => {
 /* Get the y coordinate where the given line (defined by a point and vector)
  * crosses the vertical line with the given x coordiante.
  * In the case of parrallel lines (including overlapping ones) returns null. */
+/** Intersects a directed line with a vertical line. */
 export const verticalIntersection = (pt, v, x) => {
   if (v.x === 0) return null
   return { x: x, y: pt.y + (v.y / v.x) * (x - pt.x) }
@@ -95,6 +104,7 @@ export const verticalIntersection = (pt, v, x) => {
 
 /* Get the intersection of two lines, each defined by a base point and a vector.
  * In the case of parrallel lines (including overlapping ones) returns null. */
+/** Returns the intersection of two nonparallel directed lines. */
 export const intersection = (pt1, v1, pt2, v2) => {
   // take some shortcuts for vertical and horizontal lines
   // this also ensures we don't calculate an intersection and then discover
@@ -126,6 +136,7 @@ export const intersection = (pt1, v1, pt2, v2) => {
 }
 
 /* Given a vector, return one that is perpendicular */
+/** Returns a vector rotated by a quarter turn. */
 export const perpendicular = (v) => {
   return { x: -v.y, y: v.x }
 }
