@@ -17,13 +17,16 @@ import SweepEvent from "./sweep-event.js"
  *        it sometimes does.)
  */
 
+/** Tracks active segments as the overlay sweep processes endpoint events. */
 export default class SweepLine {
+  /** Stores the event queue and initializes the ordered active segment tree. */
   constructor(queue, comparator = Segment.compare) {
     this.queue = queue
     this.tree = new SplayTree(comparator)
     this.segments = []
   }
 
+  /** Processes an endpoint event and returns any events created by splitting. */
   process(event) {
     const segment = event.segment
     const newEvents = []
@@ -164,6 +167,7 @@ export default class SweepLine {
 
   /* Safely split a segment that is currently in the datastructures
    * IE - a segment other than the one that is currently being processed. */
+  /** Removes a segment from the active tree while splitting and reindexes it afterward. */
   _splitSafely(seg, pt) {
     // Rounding errors can cause changes in ordering,
     // so remove afected segments and right sweep events before splitting

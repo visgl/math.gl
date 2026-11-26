@@ -10,8 +10,10 @@ import rounder from "./rounder.js"
 
 // Give segments unique ID's to get consistent sorting of
 // segments and sweep events when all else is identical
+/** Monotonic identifier used to break sweep-order ties. */
 let segmentId = 0
 
+/** A directed edge between two sweep events with input-ring winding data. */
 export default class Segment {
   /* This compare() function is for ordering segments in the sweep
    * line tree, and does so according to the following criteria:
@@ -26,6 +28,7 @@ export default class Segment {
    * or more of the segments are vertical) then the line to be considered
    * is directly on the right-more of the two left inputs.
    */
+  /** Orders segments by their relative vertical positions in the sweep. */
   static compare(a, b) {
     const alx = a.leftSE.point.x
     const blx = b.leftSE.point.x
@@ -137,6 +140,7 @@ export default class Segment {
 
   /* Warning: a reference to ringWindings input will be stored,
    *  and possibly will be later modified */
+  /** Links the endpoint events to this segment and records its ring windings. */
   constructor(leftSE, rightSE, rings, windings) {
     this.id = ++segmentId
     this.leftSE = leftSE
@@ -151,6 +155,7 @@ export default class Segment {
     // this.ringOut, this.consumedBy, this.prev
   }
 
+  /** Builds a segment from two ring points and determines its winding direction. */
   static fromRing(pt1, pt2, ring) {
     let leftPt, rightPt, winding
 
@@ -175,6 +180,7 @@ export default class Segment {
   }
 
   /* When a segment is split, the rightSE is replaced with a new sweep event */
+  /** Updates the right endpoint event and restores its event links. */
   replaceRightSE(newRightSE) {
     this.rightSE = newRightSE
     this.rightSE.segment = this
@@ -182,6 +188,7 @@ export default class Segment {
     this.leftSE.otherSE = this.rightSE
   }
 
+  /** Returns the axis-aligned bounds of the two endpoints. */
   bbox() {
     const y1 = this.leftSE.point.y
     const y2 = this.rightSE.point.y
@@ -192,6 +199,7 @@ export default class Segment {
   }
 
   /* A vector from the left point to the right */
+  /** Returns the displacement from the left endpoint to the right endpoint. */
   vector() {
     return {
       x: this.rightSE.point.x - this.leftSE.point.x,
@@ -199,6 +207,7 @@ export default class Segment {
     }
   }
 
+  /** Tests whether the point is either endpoint of this segment. */
   isAnEndpoint(pt) {
     return (
       (pt.x === this.leftSE.point.x && pt.y === this.leftSE.point.y) ||
@@ -219,6 +228,7 @@ export default class Segment {
    *   0: point is colinear to segment
    *  -1: point lies below the segment (to the right of vertical)
    */
+  /** Classifies a point as above, below, or on the segment. */
   comparePoint(point) {
     if (this.isAnEndpoint(point)) return 0
 
@@ -261,6 +271,7 @@ export default class Segment {
    * If no non-trivial intersection exists, return null
    * Else, return null.
    */
+  /** Finds a segment intersection that can require splitting. */
   getIntersection(other) {
     // If bboxes don't overlap, there can't be any intersections
     const tBbox = this.bbox()
@@ -350,6 +361,7 @@ export default class Segment {
    *
    * Warning: input array of points is modified
    */
+  /** Splits at an interior point and returns the newly created sweep events. */
   split(point) {
     const newEvents = []
     const alreadyLinked = point.events !== undefined
@@ -391,6 +403,7 @@ export default class Segment {
   }
 
   /* Swap which event is left and right */
+  /** Reverses the endpoints and flips each input-ring winding. */
   swapEvents() {
     const tmpEvt = this.rightSE
     this.rightSE = this.leftSE
@@ -404,6 +417,7 @@ export default class Segment {
 
   /* Consume another segment. We take their rings under our wing
    * and mark them as consumed. Use for perfectly overlapping segments */
+  /** Merges another overlapping segment into its surviving representative. */
   consume(other) {
     let consumer = this
     let consumee = other
@@ -446,6 +460,7 @@ export default class Segment {
   }
 
   /* The first segment previous segment chain that is in the result */
+  /** Finds and caches the nearest preceding segment in the output. */
   prevInResult() {
     if (this._prevInResult !== undefined) return this._prevInResult
     if (!this.prev) this._prevInResult = null
@@ -454,6 +469,7 @@ export default class Segment {
     return this._prevInResult
   }
 
+  /** Returns the ring and polygon state immediately before crossing this segment. */
   beforeState() {
     if (this._beforeState !== undefined) return this._beforeState
     if (!this.prev)
@@ -469,6 +485,7 @@ export default class Segment {
     return this._beforeState
   }
 
+  /** Computes the active rings and polygons after crossing this segment. */
   afterState() {
     if (this._afterState !== undefined) return this._afterState
 
@@ -519,6 +536,7 @@ export default class Segment {
   }
 
   /* Is this segment part of the final result? */
+  /** Tests whether this segment separates inside and outside for the active operation. */
   isInResult() {
     // if we've been consumed, we're not in the result
     if (this.consumedBy) return false
