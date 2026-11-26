@@ -110,7 +110,9 @@ CROSS JOIN UNNEST(parent.column) WITH ORDINALITY AS alias(value, position)
 LEFT JOIN UNNEST(parent.column) AS alias(value) ON TRUE
 ```
 
-For maps, insert the key alias before the value alias. A left join requires `ON TRUE`. Other ON predicates, computed collection arguments, standalone UNNEST in FROM, multiple expansions, and combining expansion with another join in the same SELECT are currently unsupported and rejected. Register a query result as a named table to perform a subsequent join in another query.
+For maps, insert the key alias before the value alias. A left join requires `ON TRUE` on the expansion itself. A single `INNER JOIN` or `LEFT JOIN` may follow the expansion in the same SELECT. Qualify the lookup key with the expansion alias, as in `JOIN counties c ON f.destination = c.id`.
+
+Computed collection arguments, standalone UNNEST in FROM, and multiple expansions in the same SELECT are unsupported.
 
 Expansion currently materializes a complete Arrow table before filtering and pagination. Parent columns are repeated, so a large collection can produce a large result even with LIMIT. Cancellation uses the query's `signal` option. Child types and field metadata are retained. Output names must be unique, including names formed from the expansion alias and output column names.
 
