@@ -56,6 +56,8 @@ export function compareUTF8(
  *
  * Supports decimal numbers with optional sign, fractional component, exponent, and surrounding
  * ASCII whitespace. Returns `undefined` when the range is not a strict decimal number.
+ * Results are correctly rounded, matching `Number()`: numbers with more than 15 significant digits
+ * or a large exponent are converted from their ASCII text.
  *
  * @param bytes - UTF-8 byte buffer.
  * @param firstByte - Inclusive start byte offset.
@@ -78,6 +80,7 @@ export function parseUTF8Number(
   if (start >= end) {
     return undefined;
   }
+  const numberStart = start;
 
   let sign = 1;
   const signByte = bytes[start]!;
@@ -134,7 +137,18 @@ export function parseUTF8Number(
     return undefined;
   }
 
-  return sign * applyDecimalScale(value, exponentSign * exponent - fractionDigitCount);
+  const decimalScale = exponentSign * exponent - fractionDigitCount;
+  // With at most 15 digits the mantissa is an exact integer, and 10 ** 22 is the largest exact
+  // power of ten, so one multiplication or division rounds correctly. Longer mantissas or scales
+  // would round twice, so let the engine parse the validated ASCII text instead.
+  if (value === 0 || (digitCount <= 15 && Math.abs(decimalScale) <= 22)) {
+    return sign * applyDecimalScale(value, decimalScale);
+  }
+  let text = '';
+  for (let index = numberStart; index < end; index++) {
+    text += String.fromCharCode(bytes[index]!);
+  }
+  return Number(text);
 }
 
 /**
@@ -304,10 +318,6 @@ function applyDecimalScale(value: number, decimalScale: number): number {
   }
   if (decimalScale >= 0) {
     return value * Math.pow(10, decimalScale);
-  }
-  if (decimalScale < -308) {
-    // Split the scale so a representable subnormal result does not require 10 ** 309.
-    return (value / 1e308) * Math.pow(10, decimalScale + 308);
   }
   return value / Math.pow(10, -decimalScale);
 }

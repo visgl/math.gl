@@ -87,6 +87,39 @@ test('UTF8Utils#parseUTF8Number', () => {
     /Invalid UTF-8 byte range/
   );
 });
+test('UTF8Utils#parseUTF8Number rounds like Number', () => {
+  const encoder = new TextEncoder();
+  for (const text of [
+    '0.44918278882938156',
+    '0.27835938162714335',
+    '3.0346060964756635e-7',
+    '1.9531543449859179e-1',
+    '1.23456789012345678',
+    '123456789012345678901234567890',
+    '-0.9224253036869203',
+    '1.7976931348623157e308',
+    '4.9406564584124654e-324',
+    '1e400',
+    '0.1e-1',
+    '12345.6789e-3'
+  ]) {
+    const bytes = encoder.encode(text);
+    expect(parseUTF8Number(bytes, 0, bytes.length), text).toBe(Number(text));
+  }
+
+  // Shortest round-trip strings of random doubles must parse back to the same double.
+  let seed = 1;
+  const random = () => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  for (let i = 0; i < 2000; i++) {
+    const value = random() * Math.pow(10, Math.floor(random() * 60) - 30);
+    const bytes = encoder.encode(String(value));
+    expect(parseUTF8Number(bytes, 0, bytes.length), String(value)).toBe(value);
+  }
+});
+
 test('UTF8Utils#parseUTF8BigInt', () => {
   const bytes = new Uint8Array([
     0x78, 0x7c, 0x2d, 0x34, 0x32, 0x7c, 0x20, 0x2b, 0x39, 0x30, 0x30, 0x37, 0x31, 0x39, 0x39, 0x32,
