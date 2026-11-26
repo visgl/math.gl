@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.3",
+  "version": "5.0.4",
   "keywords": [
     "webgl",
     "javascript",
@@ -84,6 +84,6 @@
     }
   },
   "dependencies": {
-    "@math.gl/tasks": "5.0.3"
+    "@math.gl/tasks": "5.0.4"
   }
 }
