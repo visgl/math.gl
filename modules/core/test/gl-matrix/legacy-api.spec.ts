@@ -323,6 +323,47 @@ describe('gl-matrix compatibility API', () => {
     expect(mat4.ortho).toBe(mat4.orthoNO);
   });
 
+  test('mat4.lookAt and mat4.targetTo stay valid when up is parallel to the line of sight', () => {
+    const cases: [number[], number[], number[]][] = [
+      [
+        [0, 10, 0],
+        [0, 0, 0],
+        [0, 1, 0]
+      ],
+      [
+        [0, -10, 0],
+        [0, 0, 0],
+        [0, 1, 0]
+      ],
+      [
+        [1, 2, 3],
+        [1, 2, -7],
+        [0, 0, 1]
+      ],
+      [
+        [1, 2, 3],
+        [1, 2, 13],
+        [0, 0, 2]
+      ]
+    ];
+    for (const [eye, center, up] of cases) {
+      // a target a tiny step off the line of sight gives the expected limit
+      const nearCenter = [center[0], center[1], center[2] - 1e-6];
+      if (up[0] === 0 && up[1] === 0) {
+        nearCenter[0] -= 1e-6;
+        nearCenter[2] = center[2];
+      }
+      for (const fn of [mat4.lookAt, mat4.targetTo]) {
+        const m = fn(new Array(16), eye, center, up);
+        const near = fn(new Array(16), eye, nearCenter, up);
+        expectArray(m, near, 4);
+        // the rotation part is orthonormal
+        const rotation = mat3.fromMat4(mat3.create(), m);
+        expect(mat3.determinant(rotation)).toBeCloseTo(1, 5);
+      }
+    }
+  });
+
   test('quat.getAngle gives 0 instead of NaN for a unit quaternion and itself', () => {
     for (const values of [
       [1, 2, 3, 1],

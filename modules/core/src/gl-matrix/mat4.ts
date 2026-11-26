@@ -1692,6 +1692,15 @@ export function orthoZO(out, left, right, bottom, top, near, far) {
 }
 
 /**
+ * Returns the x axis for a look-at basis whose up vector is parallel to the line of sight:
+ * up crossed with the z axis, or with the x axis when up points along z. This is the limit
+ * of a target a tiny step off that line, so looking straight up or down stays a valid rotation.
+ */
+function parallelUpXAxis(upx, upy, upz) {
+  return upx || upy ? [upy, -upx, 0] : [0, upz, -upy];
+}
+
+/**
  * Generates a look-at matrix with the given eye position, focal point, and up axis.
  * If you want a matrix that actually makes an object look at another object, you should use targetTo instead.
  *
@@ -1743,6 +1752,11 @@ export function lookAt(out, eye, center, up) {
   x1 = upz * z0 - upx * z2;
   x2 = upx * z1 - upy * z0;
   len = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
+  if (!len) {
+    // up is parallel to the line of sight
+    [x0, x1, x2] = parallelUpXAxis(upx, upy, upz);
+    len = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
+  }
   if (!len) {
     x0 = 0;
     x1 = 0;
@@ -1824,6 +1838,11 @@ export function targetTo(out, eye, target, up) {
   let x2 = upx * z1 - upy * z0;
 
   len = x0 * x0 + x1 * x1 + x2 * x2;
+  if (len === 0 && z0 * z0 + z1 * z1 + z2 * z2 > 0) {
+    // up is parallel to the line of sight
+    [x0, x1, x2] = parallelUpXAxis(upx, upy, upz);
+    len = x0 * x0 + x1 * x1 + x2 * x2;
+  }
   if (len > 0) {
     len = 1 / Math.sqrt(len);
     x0 *= len;
