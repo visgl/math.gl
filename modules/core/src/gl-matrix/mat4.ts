@@ -1743,14 +1743,17 @@ export function lookAt(out, eye, center, up) {
   z1 = eyey - centery;
   z2 = eyez - centerz;
 
+  // Cross up with the sightline before normalizing it: normalizing first turns an exactly
+  // parallel up into a tiny nonzero cross product that would be normalized into a wrong axis.
+  x0 = upy * z2 - upz * z1;
+  x1 = upz * z0 - upx * z2;
+  x2 = upx * z1 - upy * z0;
+
   len = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
   z0 *= len;
   z1 *= len;
   z2 *= len;
 
-  x0 = upy * z2 - upz * z1;
-  x1 = upz * z0 - upx * z2;
-  x2 = upx * z1 - upy * z0;
   len = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
   if (!len) {
     // up is parallel to the line of sight
@@ -1825,6 +1828,11 @@ export function targetTo(out, eye, target, up) {
   let z1 = eyey - target[1];
   let z2 = eyez - target[2];
 
+  // Cross up with the sightline before normalizing it, so an exactly parallel up gives zero.
+  let x0 = upy * z2 - upz * z1;
+  let x1 = upz * z0 - upx * z2;
+  let x2 = upx * z1 - upy * z0;
+
   let len = z0 * z0 + z1 * z1 + z2 * z2;
   if (len > 0) {
     len = 1 / Math.sqrt(len);
@@ -1832,10 +1840,6 @@ export function targetTo(out, eye, target, up) {
     z1 *= len;
     z2 *= len;
   }
-
-  let x0 = upy * z2 - upz * z1;
-  let x1 = upz * z0 - upx * z2;
-  let x2 = upx * z1 - upy * z0;
 
   len = x0 * x0 + x1 * x1 + x2 * x2;
   if (len === 0 && z0 * z0 + z1 * z1 + z2 * z2 > 0) {

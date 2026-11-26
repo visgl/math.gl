@@ -364,6 +364,25 @@ describe('gl-matrix compatibility API', () => {
     }
   });
 
+  test('mat4.lookAt and mat4.targetTo stay valid when up is exactly parallel to a non-axis-aligned line of sight', () => {
+    for (const [eye, up] of [
+      [
+        [5, 6, 9],
+        [5, 6, 9]
+      ],
+      [
+        [-1, 2, -3],
+        [2, -4, 6]
+      ]
+    ]) {
+      for (const fn of [mat4.lookAt, mat4.targetTo]) {
+        const m = fn(new Array(16), eye, [0, 0, 0], up);
+        const rotation = mat3.fromMat4(mat3.create(), m);
+        expect(mat3.determinant(rotation)).toBeCloseTo(1, 5);
+      }
+    }
+  });
+
   test('quat.getAngle gives 0 instead of NaN for a unit quaternion and itself', () => {
     for (const values of [
       [1, 2, 3, 1],
