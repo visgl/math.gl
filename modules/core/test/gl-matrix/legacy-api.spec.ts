@@ -383,6 +383,16 @@ describe('gl-matrix compatibility API', () => {
     }
   });
 
+  test('mat4.lookAt and mat4.targetTo stay valid for extreme-magnitude eye and up vectors', () => {
+    // Crossing up with the raw sightline can overflow for 1e80-scale inputs; the fix uses
+    // the raw cross only to detect parallelism, then crosses with the normalized sightline.
+    for (const fn of [mat4.lookAt, mat4.targetTo]) {
+      const m = fn(new Array(16), [1e80, 0, 0], [0, 0, 0], [0, 1e80, 0]);
+      const rotation = mat3.fromMat4(mat3.create(), m);
+      expect(mat3.determinant(rotation)).toBeCloseTo(1, 5);
+    }
+  });
+
   test('quat.getAngle gives 0 instead of NaN for a unit quaternion and itself', () => {
     for (const values of [
       [1, 2, 3, 1],
