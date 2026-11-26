@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v5.0.4
+
+- Support lookup joins after Arrow SQL `UNNEST` and cast Arrow lists to fixed-size arrays (#754, #756).
+- Infer streaming Arrow query schemas from the first batch and expose zero-copy Arrow UTF-8 row reads (#751, #758).
+- Add general polygon overlay operations to geometry (#759).
+- Preserve UTM positions across zone edges (#757).
+
 ## v5.0.3
 
 - Fix Euler angle extraction near gimbal lock and quaternion angle calculation for equal rotations (#734, #735).
