@@ -1,4 +1,4 @@
-# Eclipses
+# 🧪 Experimental eclipse geometry
 
 Pure functions for the light that reaches a point when a body hides all or part of the Sun. They
 give umbra, penumbra and antumbra without a shadow map, and the shadow of a ring system. They
@@ -13,7 +13,7 @@ const fraction = getSunVisibleFraction(point, sun, 695700, {center: moon, radius
 // 0: total eclipse. 1: no eclipse.
 ```
 
-## getDiscVisibleFraction(occluderRadius, separation)
+## 🧪 getDiscVisibleFraction(occluderRadius, separation)
 
 Returns the visible fraction of a uniform light disc of radius 1 when an opaque disc of radius r
 has its center at distance d from the center of the light disc. Both lengths are in units of the
@@ -33,7 +33,7 @@ A = acos((d² + 1 − r²) / (2d)) + r² acos((d² + r² − 1) / (2dr)) − ½ 
 The discs are flat. On the sky this is the small-angle limit. For the Sun seen from the Earth
 (0.27 degrees) the relative error is of the order of 1e−5. Limb darkening is not modeled.
 
-## getSunVisibleFraction(point, sunCenter, sunRadius, occluder)
+## 🧪 getSunVisibleFraction(point, sunCenter, sunRadius, occluder)
 
 Returns the visible fraction of the solar disc at `point`. `occluder` is
 `{center, radius, polarScale?}`. All positions and radii use one frame and one length unit.
@@ -55,7 +55,7 @@ the light time of the Sun (499 s) moves the shadow by about 38 km.
 For a lunar eclipse, give the Earth a larger radius for its atmosphere. The NASA eclipse
 catalogs use Danjon's rule, the Earth's radius times 1.01.
 
-## getRingTransmission(point, sunCenter, bands)
+## 🧪 getRingTransmission(point, sunCenter, bands)
 
 Returns exp(−τ / |μ|) along the ray from `point` toward the center of the Sun. τ is the normal
 optical depth of the band that the ray crosses, and μ is the sine of the elevation of the Sun
