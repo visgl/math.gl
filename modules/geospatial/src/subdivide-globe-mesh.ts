@@ -3,9 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original adapter over math.gl subdivision and spheroid kernels. Motivation only: https://github.com/keplergl/kepler.gl/pull/3548 (closed, unmerged). No implementation copied.
 
-import {spheroidToCartesian} from '@math.gl/core/spheroid';
+import {spheroidToCartesian} from '@math.gl/core/matrix';
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
 import {
-  subdivideTriangleMesh,
   type TriangleMesh,
   type SubdivideTriangleMeshOptions,
   type SubdividedTriangleMesh

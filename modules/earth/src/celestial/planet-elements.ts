@@ -23,6 +23,8 @@ export type ApproximatePlanetPositionOptions = {
    * The axes of the result. `'equatorial'` (the default) is the ICRF / J2000 equator; `'ecliptic'`
    * is the mean ecliptic and equinox of J2000.
    */
+  /** Select the short (1800–2050) or long JPL fit, or switch automatically by date. */
+  model?: 'auto' | 'short' | 'long';
   frame?: 'equatorial' | 'ecliptic';
 };
 
@@ -120,7 +122,12 @@ export function getApproximatePlanetPosition(
     throw new RangeError(`Unsupported frame ${String(frame)}`);
   }
   const days = getDaysSinceJ2000TT(tt, TABLE_2_DAYS[0], TABLE_2_DAYS[1]);
-  const table1 = days >= TABLE_1_DAYS[0] && days <= TABLE_1_DAYS[1];
+  const {model = 'auto'} = options;
+  const withinShortFit = days >= TABLE_1_DAYS[0] && days <= TABLE_1_DAYS[1];
+  if (!['auto', 'short', 'long'].includes(model) || (model === 'short' && !withinShortFit)) {
+    throw new RangeError('Unsupported planetary fit for this date');
+  }
+  const table1 = model !== 'long' && withinShortFit;
   const elements = (table1 ? TABLE_1 : TABLE_2A)[planet];
   const t = days / 36525;
   const [a, e, inclination, meanLongitude, perihelion, node] = elements

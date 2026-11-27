@@ -29,7 +29,7 @@ Example:
 Using with pure javascript `Array`
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 const cartographic = [longitudeDegrees, latitudeDegrees, heightMeters];
 const cartesian = Ellipsoid.WGS84.cartographicToCartesian(cartographic);
 ```
@@ -37,8 +37,8 @@ const cartesian = Ellipsoid.WGS84.cartographicToCartesian(cartographic);
 Using with math.gl `Vector3`:
 
 ```js
-import {Ellipsoid} from '@math.gl/geospatial';
-import {Vector3} from '@math.gl/core';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {Vector3} from '@math.gl/core/matrix';
 const cartographic = new Vector3(longitudeDegrees, latitudeDegrees, heightMeters);
 const cartesian = Ellipsoid.WGS84.cartographicToCartesian(cartographic);
 ```

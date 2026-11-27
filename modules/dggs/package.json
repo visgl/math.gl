@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.19",
+  "version": "5.1.0-alpha.0",
   "keywords": [
     "javascript",
     "math",
@@ -23,15 +23,7 @@
     "type": "git",
     "url": "https://github.com/visgl/math.gl.git"
   },
-  "types": "dist/index.d.ts",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
     "./a5": {
       "types": "./dist/a5.d.ts",
       "import": "./dist/a5.js",
@@ -62,24 +54,28 @@
       "import": "./dist/s2.js",
       "require": "./dist/s2.cjs"
     },
-    "./expressions": {
-      "types": "./dist/expressions.d.ts",
-      "import": "./dist/expressions.js",
-      "require": "./dist/expressions.cjs"
+    "./decoders": {
+      "types": "./dist/decoders.d.ts",
+      "import": "./dist/decoders.js",
+      "require": "./dist/decoders.cjs"
     }
   },
   "files": [
     "dist",
     "src",
-    "LICENSE"
+    "!src/**/README.md",
+    "./README.md",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-alpha.19",
+    "@math.gl/core": "5.1.0-alpha.0",
     "a5-js": "^0.10.0",
     "h3-js": "^4.5.0",
     "open-location-code": "^1.0.3"
   },
   "devDependencies": {
     "s2-geometry": "^1.2.10"
-  }
+  },
+  "sideEffects": false
 }

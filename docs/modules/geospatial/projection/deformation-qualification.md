@@ -44,9 +44,9 @@ references. Float32's rounded input is a different point: scalar/bulk comparison
 qualify rounding and ownership without claiming the Float64 accuracy allowance.
 
 ```sh
-python3 modules/geospatial/projection/scripts/generate-deformation-stress-reference.py --check
-node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs --output /tmp/deformation.json
-node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs --browser chromium --output /tmp/deformation-chromium.json
+python3 modules/geospatial/scripts/projection/generate-deformation-stress-reference.py --check
+node modules/geospatial/scripts/projection/qualify-deformation-stress.mjs --output /tmp/deformation.json
+node modules/geospatial/scripts/projection/qualify-deformation-stress.mjs --browser chromium --output /tmp/deformation-chromium.json
 ```
 
 The report records maximum errors, every case, reference/engine source hashes,
@@ -62,7 +62,7 @@ the same forward/inverse contract. References and models remain outside math.gl'
 package. The script is available from a repository checkout, not an npm subpath.
 
 ```sh
-node modules/geospatial/projection/scripts/qualify-deformation-stress.mjs \
+node modules/geospatial/scripts/projection/qualify-deformation-stress.mjs \
   --model /absolute/path/reviewed-model.mjs \
   --reference /absolute/path/independent-reference.json \
   --output /tmp/reviewed-model-qualification.json

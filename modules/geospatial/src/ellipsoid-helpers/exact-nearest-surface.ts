@@ -104,7 +104,7 @@ export function exactNearestSurface(
 /** Round a positive rational dyadic to a binary64 significand without converting
  * unbounded integers to Number first. Split the exponent for subnormal outputs.
  */
-function ratio(n: bigint, d: bigint, exponent: number): number {
+export function ratio(n: bigint, d: bigint, exponent: number): number {
   if (n === 0n) return 0;
   const shift = 52 - (n.toString(2).length - d.toString(2).length);
   const numerator = shift >= 0 ? n << BigInt(shift) : n;

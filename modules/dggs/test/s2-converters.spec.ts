@@ -3,10 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {getS2OrientedBoundingBoxCornerPoints} from '../src/converters/s2-to-obb-points';
-import {getS2Region} from '../src/converters/s2-to-region';
-import {getS2Cell} from '../src/s2-geometry/s2-geometry';
-import {S2Decoder} from '../src/s2-decoder';
+import {getS2OrientedBoundingBoxCornerPoints} from '@math.gl/dggs/converters/s2-to-obb-points';
+import {getS2Region} from '@math.gl/dggs/converters/s2-to-region';
+import {getS2Cell} from '@math.gl/dggs/s2-geometry/s2-geometry';
+import {S2Decoder} from '@math.gl/dggs/s2-decoder';
 
 test('S2 converters return height-aware corner points and geographic regions', () => {
   const token = '80858004';

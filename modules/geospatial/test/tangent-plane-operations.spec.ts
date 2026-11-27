@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Vector2, Vector3} from '@math.gl/core';
+import {Vector2, Vector3} from '@math.gl/core/matrix';
 import {Ellipsoid, EllipsoidTangentPlane} from '@math.gl/geospatial/ellipsoid';
 
 function close(actual: ArrayLike<number>, expected: ArrayLike<number>, digits = 10): void {
@@ -106,4 +106,19 @@ test('Batch projection permits disjoint views of a shared buffer', () => {
   const result = plane.projectPointsFlat(storage.subarray(0, 3), 'normal', storage.subarray(3));
   close(result.positions, [8, 0]);
   expect(Array.from(result.valid)).toEqual([1]);
+});
+
+test('Finite radial directions are invariant under overflow and subnormal scaling', () => {
+  for (const scale of [Number.MIN_VALUE, 1, 1.3e308])
+    close(plane.projectPointRadiallyOntoPlane([scale, scale, 0])!, [10, 0], 13);
+});
+
+test('Off-axis normal inversion retains tangent contacts but rejects real misses', () => {
+  const p = new EllipsoidTangentPlane([6, 8, 0], new Ellipsoid(10, 10, 10));
+  const local = p.projectPointToNearestOnPlane([-8, 6, 0]);
+  close(local, [10, 0], 13);
+  close(p.projectPointOntoEllipsoid(local, 'normal')!, [-8, 6, 0], 12);
+  const result = new Vector3(1, 2, 3);
+  expect(p.projectPointOntoEllipsoid([10 + 1e-9, 0], 'normal', result)).toBeUndefined();
+  close(result, [1, 2, 3]);
 });

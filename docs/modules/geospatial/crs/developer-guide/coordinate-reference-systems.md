@@ -17,7 +17,7 @@ operations.
   geocentric, or datum-grid transformation.
 - Use [`@math.gl/geospatial`](/docs/modules/geospatial) for ellipsoid, cartographic/ECEF, and local
   tangent-plane mathematics.
-- Use [`@math.gl/earth/geoid`](/docs/modules/earth/geoid) when an application supplies a geoid model for
+- Use [`@math.gl/earth`](/docs/modules/earth/geoid) when an application supplies a geoid model for
   ellipsoidal/orthometric height conversion.
 - Do not infer a transformation from the presence of metadata. A result is transformed only after
   its coordinates, bounds, origins, and other spatial values have actually been updated.
@@ -217,7 +217,7 @@ frozen, allowing it to be shared safely between loaders, caches, renderers, and 
 
 `SpatialReference.crs` is a discriminated union:
 
-| State | Meaning | Has a definition? |
+| State | Description | Has a definition? |
 | --- | --- | --- |
 | `explicit` | A usable definition was supplied directly | Yes |
 | `default` | A format or protocol specification establishes the definition | Yes |
@@ -318,7 +318,7 @@ h = H + N
 H = h - N
 ```
 
-The model must be sampled at the appropriate geographic position. `@math.gl/earth/geoid` parses and
+The model must be sampled at the appropriate geographic position. `@math.gl/earth` parses and
 interpolates application-supplied models; it does not download them. A geoid is not terrain, and it
 cannot resolve terrain-relative or scene-relative placement.
 

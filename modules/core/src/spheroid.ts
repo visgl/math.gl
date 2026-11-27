@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2014 Mike Adair, Richard Greenwood, Didier Richard, Stephen Irons, Olivier Terral and Calvin Metcalf (proj4js)
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Forward geocentric equations and Hannover inverse moved/adapted from math.gl projection's proj4js 2.22.0 datumUtils.js port. See ../PROJ4-LICENSE.md. Safeguarded nearest-footpoint inverse and numeric output commit are original math.gl code.
+// SPDX-FileComment: Forward geocentric equations and Hannover inverse moved/adapted from math.gl projection's proj4js 2.22.0 datumUtils.js port. See ../PROJ4-LICENSE.md. Safeguarded compensated nearest-footpoint inverse, thin-exterior/pole fixes and numeric output commit are original math.gl code, qualified with independent mathematics and offline GeographicLib 2.7 (Charles Karney, MIT).
 
 /** Numeric leaf: angles in radians, distances in axis units; no CRS, global config or scratch. */
 import type {SpheroidParameters} from './types';
@@ -22,7 +22,7 @@ export function spheroidToCartesian(
     height = point.z;
   const {semiMajorAxis: a, semiMinorAxis: b, eccentricitySquared: es} = geometry;
   const sin = Math.sin(latitude),
-    cos = Math.cos(latitude);
+    cos = Math.abs(latitude) === Math.PI / 2 ? 0 : Math.cos(latitude);
   // Use the axis ratio for very flat shapes: 1 - es*sin² loses polar precision.
   const ratio = b / a;
   const radius = es < 0.9 ? a / Math.sqrt(1 - es * sin * sin) : a / Math.hypot(cos, ratio * sin);
@@ -34,7 +34,7 @@ export function spheroidToCartesian(
 
 /**
  * Bounded inverse. Sphere is analytic; ordinary spheroids use the retained Hannover
- * iteration on exterior points. Interiors use a safeguarded nearest-footpoint solve.
+ * iteration on exterior points. Interiors and thin-shape exteriors share a safeguarded nearest-footpoint solve.
  * Equatorial interiors below the evolute cusp have two nearest normals: reject.
  * false leaves output untouched, including the center and unresolved binary64 cases.
  * Only exact poles canonicalize longitude; adapters may retain other conventions.
@@ -58,7 +58,7 @@ export function cartesianToSpheroid(
     vertical = z / b;
   if (horizontal * horizontal + vertical * vertical < 1 - 16 * EPSILON)
     return interiorInverse(x, y, z, p, a, b, result);
-  if (es >= 0.9) return exteriorInverse(longitude, z, p, a, b, result);
+  if (es >= 0.9) return interiorInverse(x, y, z, p, a, b, result);
   const ct = z / rr,
     st = p / rr;
   let rx = 1 / Math.sqrt(1 - es * (2 - es) * st * st);
@@ -78,10 +78,10 @@ export function cartesianToSpheroid(
     cos = nextCos;
     sin = nextSin;
   }
-  return exteriorInverse(longitude, z, p, a, b, result);
+  return interiorInverse(x, y, z, p, a, b, result);
 }
 
-/** Original nearest-normal solve in t = (lambda + b²)/a², avoiding interior cancellation.
+/** Original nearest-normal solve in t = (lambda + b²)/a², avoiding interior cancellation and thin-exterior residual loss.
  * The positive interval selects the globally nearest branch, rather than a stationary normal.
  */
 function interiorInverse(
@@ -142,7 +142,8 @@ function interiorInverse(
   }
   const weighted = Math.abs(vertical) * ratio;
   let lower = 0,
-    upper = ratio2;
+    upper = ratio2 + Math.hypot(horizontal, vertical * ratio);
+  if (!Number.isFinite(upper)) return false;
   // A lower bound near the short-axis singularity prevents thousands of bisections
   // for deep, nearly equatorial interiors. No subtraction of lambda and -b².
   let t = Math.max(weighted, horizontal - delta);
@@ -202,45 +203,6 @@ function productError(x: number, y: number, product: number): number {
     lx = x - hx,
     ly = y - hy;
   return hx * hy - product + hx * ly + lx * hy + lx * ly;
-}
-
-/** Original dimensionless Lagrange-multiplier solve, restricted to surface/exterior. */
-function exteriorInverse(
-  longitude: number,
-  z: number,
-  p: number,
-  a: number,
-  b: number,
-  result: SpheroidPoint
-): boolean {
-  const ratio = b / a,
-    ratio2 = ratio * ratio,
-    horizontal = p / a,
-    vertical = z / a;
-  const norm = Math.hypot(horizontal, z / b);
-  if (!Number.isFinite(norm) || norm < 1 - 8 * EPSILON || !(ratio2 > 0)) return false;
-  let lower = 0,
-    upper = Math.hypot(horizontal, vertical * ratio);
-  if (!Number.isFinite(upper)) return false;
-  let multiplier = norm <= 1 + 8 * EPSILON ? 0 : upper / 2;
-  for (let i = 0; i < 96; i++) {
-    const equatorial = 1 + multiplier,
-      polar = ratio2 + multiplier;
-    const u = horizontal / equatorial,
-      v = (vertical * ratio) / polar;
-    const length = Math.hypot(u, v);
-    const residual = length - 1;
-    if (Math.abs(residual) <= 4 * EPSILON) {
-      const latitude = Math.atan2(vertical / polar, horizontal / equatorial);
-      return commitNormal(result, longitude, latitude, p, z, a, ratio);
-    }
-    if (residual > 0) lower = multiplier;
-    else upper = multiplier;
-    const derivative = -((u * u) / equatorial + (v * v) / polar) / length;
-    const next = multiplier - residual / derivative;
-    multiplier = next > lower && next < upper ? next : (lower + upper) / 2;
-  }
-  return false;
 }
 
 /** Shared signed distance along the solved surface normal. */

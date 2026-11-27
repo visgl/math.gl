@@ -1,9 +1,100 @@
-# Wrap proj4 and D3 projections
+# Using external projection engines
 
-Applications can implement the [`ProjectionEngine`](../api-reference/projection-engine.md)
-interface around another library. This lets consumers accept a common factory while
-leaving coordinate conversion to proj4js or D3. These are application adapters;
-math.gl does not register or load these libraries for you.
+math.gl's general projection interface is **projection-engine agnostic**. The contract describes
+coordinate operations and their execution semantics; it does not require proj4js, native math.gl,
+or a particular projection catalogue. Adapters supply operations, while chart boundaries, validity
+domains and data/view cache policies remain explicit application or backend responsibilities.
+
+
+External libraries can provide CRS definitions, execute coordinate operations, or
+do both. Use the opt-in [`CRSResolver`](../../crs/api-reference/resolver.md) for
+definition lookup. Libraries with synchronous coordinate operations can also
+implement the [`ProjectionEngine`](../api-reference/projection-engine.md) interface.
+Applications written against math.gl's projection interfaces can still use external
+projection engines through these adapters. math.gl does not register or load external
+libraries for you, and they are not dependencies of published math.gl packages.
+
+## Integrate proj-wasm
+
+[proj-wasm](https://github.com/willcohen/clj-proj) provides PROJ through WebAssembly.
+The [runnable Node and browser example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/proj-wasm-crs)
+pins **0.1.0** and demonstrates two distinct uses of its public API.
+
+### Resolve definitions for native math.gl execution
+
+The example's `createProjWasmProvider` owns a PROJ context, disables network access,
+uses `projCreateFromDatabase` and `projAsProjjson`, and destroys each temporary PJ
+object. It records the package and EPSG database revision in lookup provenance.
+Its source is in `examples/geospatial/proj-wasm-crs/src/crs-resolution/provider.mjs`:
+
+```javascript
+import * as proj from 'proj-wasm';
+import {createCRSResolver} from '@math.gl/geospatial/crs';
+import {FullProjectionEngine} from '@math.gl/geospatial/projection';
+import {createProjWasmProvider} from './provider.mjs';
+
+await proj.init({workers: 1});
+let backend;
+try {
+  backend = await createProjWasmProvider(proj);
+  const resolver = createCRSResolver({providers: [backend.provider]});
+  const engine = new FullProjectionEngine({resolver});
+  const projection = await engine.createProjectionAsync({to: 'EPSG:8857'});
+  const xyz = projection.project([12, 55, 123]); // Native, synchronous Equal Earth.
+} finally {
+  try { await backend?.dispose(); }
+  finally { await proj.shutdown(); }
+}
+```
+
+Initialization and lookup are asynchronous. The prepared native transform then
+runs synchronously and retains math.gl's validation and dimensional conventions.
+Resolution expands the identifier catalogue, not the set of supported native
+operations: the example resolves compound `EPSG:7405` but verifies that strict
+native execution still rejects it. A resolved CRS does not establish that required
+datum grids, epoch handling or vertical operations are available.
+
+Keep the worker pool application-owned when sharing it. Dispose the provider only
+after preparation is complete, and create a fresh resolver if its catalogue or
+configuration changes. The example serves locked dependencies and adjacent WASM,
+worker and database assets locally; its browser smoke test rejects external requests.
+
+### Execute operations with proj-wasm itself
+
+proj-wasm 0.1.0's public worker API remains asynchronous after initialization.
+`createProjectionAsync()` in math.gl must return a **synchronous**
+`PreparedProjection`, so returning promises from its point or buffer methods
+would violate the contract. Use a separate asynchronous preprocessing step for
+direct PROJ execution.
+
+The runnable example calls `projCreateCrsToCrs`, normalizes authority axes with
+`projNormalizeForVisualization`, and awaits `projTransArray`. It compares this
+independent PROJ result with native math.gl for `EPSG:8857`, then releases both
+operations and their context. Input is explicitly longitude/latitude/ellipsoidal
+height; do not map an arbitrary fourth measure ordinate to PROJ's time ordinate.
+Network/grid acquisition and operation selection remain application policies.
+
+Node integration tests and a Chromium smoke test exercise the actual pinned
+package, including offline asset loading, inverse coordinates and unsupported CRS
+behavior. Provider unit tests cover lifecycle and failures. See the example README
+for build, test and serving commands.
+
+## Switch engines in the same application
+
+Applications written against math.gl's projection interfaces can still work with
+external projection engines using this recipe: adapt a backend to `ProjectionEngine`,
+return a synchronous `PreparedProjection`, and inject it into the application.
+The rendering code below is unchanged when you select math.gl, proj4js or D3.
+
+import ExternalProjectionEngines from '@site/src/components/external-projection-engines';
+
+<ExternalProjectionEngines />
+
+[Open the separate example page](/examples/external-projection-engines) for the recipe,
+source and limits. The comparison uses XY spherical Mercator with matching units
+and axes; it does not imply that all backend CRS or geometry capabilities coincide.
+
+## Synchronous adapters
 
 Install the backend you need:
 
@@ -23,7 +114,7 @@ than silently treating height as a horizontal coordinate. It allocates temporary
 arrays, so it is a starting point for integration, not an optimized batch backend.
 
 ```typescript title="point-projection.ts"
-import type {PreparedProjection} from '@math.gl/geospatial/projection/types';
+import type {PreparedProjection} from '@math.gl/geospatial/projection-types';
 
 type Buffer = Float32Array | Float64Array;
 type Coordinate = readonly number[] | Buffer;
@@ -113,7 +204,7 @@ and any required datum grids with proj4 before creating a transform.
 
 ```typescript title="proj4-engine.ts"
 import proj4 from 'proj4';
-import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection/types';
+import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection-types';
 import {pointProjection} from './point-projection';
 
 export class Proj4Engine implements ProjectionEngine {
@@ -159,7 +250,7 @@ example supports only WGS84 longitude/latitude input and requires an inverse.
 
 ```typescript title="d3-engine.ts"
 import {geoMercator, type GeoProjection} from 'd3-geo';
-import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection/types';
+import type {CreateProjectionOptions, ProjectionEngine} from '@math.gl/geospatial/projection-types';
 import {pointProjection} from './point-projection';
 
 export class D3Engine implements ProjectionEngine {
@@ -204,6 +295,28 @@ outside a projection's useful domain; validate the domain required by your app.
 
 ## Use either backend in application code
 
+Consumers that also need `CRSEngine.getCRS()` require metadata, rendering bounds,
+normalization and sizing policy in addition to a prepared transform. Use the
+optional [`createCRSDescriptor`](../../crs/api-reference/crs-descriptor.md) helper to
+assemble those backend-owned decisions without math.gl's native CRS normalizer.
+Import the builder and descriptor types from the existing CRS entry point:
+
+```typescript
+import {createCRSDescriptor, type CRSDescriptorOptions} from '@math.gl/geospatial/crs';
+```
+
+The helper adds no dependency on proj4js, D3 or proj-wasm. Applications install and
+own their chosen backend. Its tested proj4js example covers synchronous conversions
+and reusable outputs. Descriptor converters must be synchronous: preparing a
+backend asynchronously does not make an asynchronous point API usable as a converter.
+
+For **proj-wasm**, use its asynchronous API for definition resolution followed by
+native math.gl preparation, or for separate asynchronous coordinate preprocessing.
+Do not pass promise-returning operations to `createCRSDescriptor`; it rejects them.
+See the [builder's contracts and limitations](../../crs/api-reference/crs-descriptor.md).
+The builder supplies metadata and rendering policy plumbing; it does not adapt
+an async execution API into a synchronous one.
+
 Accept `ProjectionEngine` in consumers and select the backend at setup time. Use
 `createProjectionAsync()` when you want a ready synchronous `PreparedProjection`,
 including when the engine might use lazy math.gl algorithms. The method does not
@@ -213,3 +326,46 @@ The interface unifies method names, not projection semantics or capabilities.
 Keep the supported CRS pairs, units, axis conventions and dimensional limits of
 each adapter explicit. A new backend does not become a math.gl `ProjectionPlugin`;
 use a plugin instead when math.gl should own CRS parsing and datum operations.
+
+## Asynchronous proj-wasm batches before rendering
+
+Applications written against math.gl's projection interfaces can also use asynchronous external
+engines by separating preprocessing from synchronous rendering. The extended
+[proj-wasm example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/proj-wasm-crs)
+prepares one normalized operation, transforms bounded packed XYZ batches, retains source row IDs,
+and transfers the resulting buffers to a math.gl task worker. It exercises real proj-wasm in both
+Node and Chromium; proj-wasm remains a private example dependency.
+
+Its latest-view runner discards superseded results, while the processor serializes operation reuse,
+rejects partial failures and drains accepted work before disposal. Cancellation is cooperative rather
+than native-call preemption. Copying into and out of upstream WASM is separate from the explicitly
+verified transfer of completed buffers to the downstream task. Changed CRS/operation/grid state
+requires a new processor; source data and view revisions must still participate in result invalidation.
+
+This recipe does not put Promise-returning functions into `CRSDescriptor.converter`. An async-only
+engine produces prepared geometry before the renderer consumes it. It also does not infer spherical
+stream clipping or repair topology: combine it with explicit geometry preparation for lines, polygons
+and rasters. Its XYZ/time policy and ownership boundaries are documented in the example README.
+
+## Geometry streams and projection domains
+
+The [Projection domains example](/examples/projection-domains) combines native math.gl GeoArrow
+streaming and task workers with D3 clipping, interrupted lobes, and inverse-mapped synthetic rasters.
+It preserves source feature identity and illustrates why point conversion, validity domains and
+geometry topology are separate concerns. See its source for the explicit sampling limits.
+
+### Adaptive raster batches
+
+The [proj-wasm raster recipe](https://github.com/visgl/math.gl/blob/master/examples/geospatial/proj-wasm-crs/src/raster-preparation/run-example.mjs)
+drives adaptive raster refinement with real asynchronous PROJ sample batches. It reuses a normalized
+operation, bounds each frontier batch, checks cancellation around awaited calls, and transfers the
+completed mesh into an owned math.gl task worker. Node and Chromium validate coordinate agreement,
+texture error and buffer ownership. Native charts still supply target inverse branches and domain
+geometry; proj-wasm converts geographic samples into the ellipsoidal source raster CRS. This division
+is explicit: asynchronous point conversion alone does not provide chart clipping or topology repair.
+
+The separate [Antarctica and Fiji projection lab](/examples/raster-projection-lab) lets applications
+compare native math.gl with proj4js, D3 and real proj-wasm stages. It names each backend's role,
+preserves chart/source identity, demonstrates source-grid versus target-grid preparation where
+supported, and exports moving-center rebuild measurements. External engines and their WASM assets
+remain private example dependencies. Published math.gl packages acquire no hard engine dependency.

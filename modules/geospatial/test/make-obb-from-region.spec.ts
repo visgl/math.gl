@@ -5,9 +5,10 @@
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
 import {test, expect} from 'vitest';
-import {Matrix4, Vector3, toRadians} from '@math.gl/core';
+import {Matrix4, Vector3, toRadians} from '@math.gl/core/matrix';
 import {OrientedBoundingBox} from '@math.gl/geometry/culling';
-import {Ellipsoid, makeOBBFromRegion} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {makeOBBFromRegion} from '@math.gl/geospatial/globe';
 
 const TEST_REGIONS = [
   {

@@ -118,6 +118,8 @@ refraction.
 
 ## Atmospheres
 
+These rendering presets combine published reference conditions with derived optics and assumed aerosol properties. Pressure, temperature and gas fractions set the base number density. The RGB Rayleigh coefficients follow from those inputs and the gas cross sections. Treat the Mars per-channel dust albedo and asymmetry and the Venus upper-haze optical depth, scale height, asymmetry and albedo as rendering assumptions. Wolff and Wilquet supply observational context. The shell cutoff and Venus cloud color are also model choices.
+
 ### getBodyAtmosphere(body)
 
 Returns the single-scattering atmosphere parameters of a body, or `null` for the Sun, Mercury and
@@ -239,3 +241,5 @@ The angle gates come from binary64: W reaches 3e7 degrees for Jupiter in 2100.
 - M. J. Wolff et al. (2009), "Wavelength dependence of dust aerosol single scattering albedo as
   observed by the Compact Reconnaissance Imaging Spectrometer", J. Geophys. Res. 114, E00D04,
   doi:10.1029/2009JE003350.
+
+Use `{model: 'long'}` for continuous playback across 1800 or 2050. The default automatic switch between independent fits jumps about 5.9 and 3.9 million km respectively for Saturn. The short model rejects dates outside its interval.

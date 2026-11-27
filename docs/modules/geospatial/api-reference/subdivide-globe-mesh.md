@@ -79,5 +79,5 @@ The adapter is original MIT TypeScript with SPDX comments. It reuses math.gl's
 subdivision engine and optional spheroid kernel, retaining their own attribution.
 [Kepler #3548](https://github.com/keplergl/kepler.gl/pull/3548) is closed/unmerged
 research and provided motivation only; no proposed implementation code was copied.
-See the [globe example](https://github.com/visgl/math.gl/tree/master/examples/globe-primitives)
+See the [globe example](https://github.com/visgl/math.gl/tree/master/examples/geospatial/globe-primitives)
 for a non-Kepler consumer combining mesh geometry with occlusion and horizon bounds.

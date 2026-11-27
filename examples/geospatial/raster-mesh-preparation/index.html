@@ -1,0 +1,11 @@
+<!doctype html>
+<!-- math.gl
+SPDX-License-Identifier: MIT
+SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+-->
+<html lang="en"><head><meta charset="utf-8"><title>Raster mesh preparation</title>
+<style>body{font:16px system-ui;max-width:1000px;margin:2rem auto;background:#f6f8fb;color:#14263d}canvas{background:white;width:100%;border:1px solid #ccd4df}select,input{margin:1rem}output{display:block;margin:1rem 0}</style></head>
+<body><h1>Raster mesh preparation</h1><p>Source patches → target-space refinement → domain clipping → preserved texture coordinates.</p>
+<label>Fixture <select id="fixture"></select></label><label>Pixel tolerance <input id="tolerance" type="number" min="0.1" max="4" step="0.1" value="0.5"></label>
+<output aria-live="polite"></output><canvas width="960" height="580"></canvas>
+<p>Checkerboard UVs remain attached to the source raster. Interrupted charts and periodic copies retain separate vertices. This example uses explicit fixture-specific source cuts; it does not infer arbitrary raster topology.</p><script type="module" src="./app.mjs"></script></body></html>

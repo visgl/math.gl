@@ -4,13 +4,13 @@
 
 import {describe, expect, test} from 'vitest';
 
-import * as glMatrix from '../../src/gl-matrix/common';
-import * as mat3 from '../../src/gl-matrix/mat3';
-import * as mat4 from '../../src/gl-matrix/mat4';
-import * as quat from '../../src/gl-matrix/quat';
-import * as vec2 from '../../src/gl-matrix/vec2';
-import * as vec3 from '../../src/gl-matrix/vec3';
-import * as vec4 from '../../src/gl-matrix/vec4';
+import * as glMatrix from '@math.gl/core/gl-matrix/common';
+import * as mat3 from '@math.gl/core/gl-matrix/mat3';
+import * as mat4 from '@math.gl/core/gl-matrix/mat4';
+import * as quat from '@math.gl/core/gl-matrix/quat';
+import * as vec2 from '@math.gl/core/gl-matrix/vec2';
+import * as vec3 from '@math.gl/core/gl-matrix/vec3';
+import * as vec4 from '@math.gl/core/gl-matrix/vec4';
 
 function expectArray(actual: ArrayLike<number>, expected: number[], precision = 5): void {
   expect(actual.length).toBe(expected.length);
@@ -195,6 +195,23 @@ describe('gl-matrix compatibility API', () => {
     expect(vec4.length(vec4.random(o4, 2))).toBeCloseTo(2);
   });
 
+  test('vec3.slerp handles parallel and opposite vectors', () => {
+    expectArray(vec3.slerp(vec3.create(), [0, 0, 1], [0, 0, 1], 0.5), [0, 0, 1]);
+    for (const t of [0.25, 0.5, 0.75]) {
+      const result = vec3.slerp(vec3.create(), [1, 0, 0], [-1, 0, 0], t);
+      expect(vec3.length(result)).toBeCloseTo(1);
+      expect(result[0]).toBeCloseTo(Math.cos(t * Math.PI));
+    }
+    expectArray(vec3.slerp(vec3.create(), [1, 0, 0], [-1, 0, 0], 0), [1, 0, 0]);
+    expectArray(vec3.slerp(vec3.create(), [1, 0, 0], [-1, 0, 0], 1), [-1, 0, 0]);
+    expect(vec3.length(vec3.slerp(vec3.create(), [0, 0, 1], [0, 0, -1], 0.5))).toBeCloseTo(1);
+    // nearly opposite: turns towards the side b leans to
+    expectArray(vec3.slerp(vec3.create(), [1, 0, 0], [-1, 1e-9, 0], 0.5), [0, 1, 0]);
+    // in place
+    const inPlace = vec3.fromValues(1, 0, 0);
+    expectArray(vec3.slerp(inPlace, inPlace, [-1, 1e-9, 0], 0.5), [0, 1, 0]);
+  });
+
   test('mat3 covers construction, transforms, inversion, and arithmetic', () => {
     const a = mat3.fromValues(1, 2, 3, 0, 1, 4, 5, 6, 0);
     const b = mat3.fromValues(2, 0, 1, 1, 2, 0, 0, 1, 2);
@@ -304,6 +321,137 @@ describe('gl-matrix compatibility API', () => {
     expect(mat4.sub).toBe(mat4.subtract);
     expect(mat4.perspective).toBe(mat4.perspectiveNO);
     expect(mat4.ortho).toBe(mat4.orthoNO);
+  });
+
+  test('mat4.lookAt and mat4.targetTo stay valid when up is parallel to the line of sight', () => {
+    const cases: [number[], number[], number[]][] = [
+      [
+        [0, 10, 0],
+        [0, 0, 0],
+        [0, 1, 0]
+      ],
+      [
+        [0, -10, 0],
+        [0, 0, 0],
+        [0, 1, 0]
+      ],
+      [
+        [1, 2, 3],
+        [1, 2, -7],
+        [0, 0, 1]
+      ],
+      [
+        [1, 2, 3],
+        [1, 2, 13],
+        [0, 0, 2]
+      ]
+    ];
+    for (const [eye, center, up] of cases) {
+      // a target a tiny step off the line of sight gives the expected limit
+      const nearCenter = [center[0], center[1], center[2] - 1e-6];
+      if (up[0] === 0 && up[1] === 0) {
+        nearCenter[0] -= 1e-6;
+        nearCenter[2] = center[2];
+      }
+      for (const fn of [mat4.lookAt, mat4.targetTo]) {
+        const m = fn(new Array(16), eye, center, up);
+        const near = fn(new Array(16), eye, nearCenter, up);
+        expectArray(m, near, 4);
+        // the rotation part is orthonormal
+        const rotation = mat3.fromMat4(mat3.create(), m);
+        expect(mat3.determinant(rotation)).toBeCloseTo(1, 5);
+      }
+    }
+  });
+
+  test('mat4.lookAt and mat4.targetTo stay valid when up is exactly parallel to a non-axis-aligned line of sight', () => {
+    for (const [eye, up] of [
+      [
+        [5, 6, 9],
+        [5, 6, 9]
+      ],
+      [
+        [-1, 2, -3],
+        [2, -4, 6]
+      ]
+    ]) {
+      for (const fn of [mat4.lookAt, mat4.targetTo]) {
+        const m = fn(new Array(16), eye, [0, 0, 0], up);
+        const rotation = mat3.fromMat4(mat3.create(), m);
+        expect(mat3.determinant(rotation)).toBeCloseTo(1, 5);
+      }
+    }
+  });
+
+  test('mat4.lookAt and mat4.targetTo stay valid for extreme-magnitude eye and up vectors', () => {
+    // Crossing up with the raw sightline can overflow for 1e80-scale inputs; the fix uses
+    // the raw cross only to detect parallelism, then crosses with the normalized sightline.
+    for (const fn of [mat4.lookAt, mat4.targetTo]) {
+      const m = fn(new Array(16), [1e80, 0, 0], [0, 0, 0], [0, 1e80, 0]);
+      const rotation = mat3.fromMat4(mat3.create(), m);
+      expect(mat3.determinant(rotation)).toBeCloseTo(1, 5);
+    }
+  });
+
+  test('mat4.lookAt and mat4.targetTo stay valid for parallel up at extreme magnitudes', () => {
+    for (const [eye, up] of [
+      // nearly along z: the fallback must not pick a perpendicular that underflows
+      [
+        [1e-200, 0, 1],
+        [1e-200, 0, 1]
+      ],
+      // huge up: the fallback must not be scaled by up
+      [
+        [0, 0, 1],
+        [0, 0, 1e200]
+      ],
+      [
+        [0, 0, 1],
+        [0, 0, 1e-300]
+      ],
+      // non-parallel up whose cross with the sightline overflows or underflows
+      [
+        [0, 0, 1],
+        [1e200, 0, 1e200]
+      ],
+      [
+        [0, 0, 1],
+        [1e-200, 0, 1]
+      ]
+    ]) {
+      for (const fn of [mat4.lookAt, mat4.targetTo]) {
+        const m = fn(new Array(16), eye, [0, 0, 0], up);
+        const rotation = mat3.fromMat4(mat3.create(), m);
+        expect(mat3.determinant(rotation)).toBeCloseTo(1, 5);
+      }
+    }
+    // a scaled parallel up keeps the orientation of a unit one
+    for (const fn of [mat4.lookAt, mat4.targetTo]) {
+      expectArray(
+        fn(new Array(16), [0, 0, 1], [0, 0, 0], [0, 0, 1e200]),
+        fn(new Array(16), [0, 0, 1], [0, 0, 0], [0, 0, 1]),
+        12
+      );
+    }
+  });
+
+  test('mat4.targetTo keeps a zero x axis when eye and target coincide', () => {
+    const m = mat4.targetTo(new Array(16), [0, 0, 0], [0, 0, 0], [0, 1, 0]);
+    expect(m.slice(0, 3)).toEqual([0, 0, 0]);
+  });
+
+  test('quat.getAngle gives 0 instead of NaN for a unit quaternion and itself', () => {
+    for (const values of [
+      [1, 2, 3, 1],
+      [1, 2, 3, 0.3],
+      [1, 2, 1, 4],
+      [1, 2, 1, -5]
+    ]) {
+      // quat.create() stores 32-bit floats, so the angle is only close to 0
+      const q = quat.normalize(quat.create(), values);
+      expect(quat.getAngle(q, q)).toBeLessThan(1e-3);
+      expect(quat.getAngle(q, quat.scale(quat.create(), q, -1))).toBeLessThan(1e-3);
+    }
   });
 
   test('quat covers axis-angle, interpolation, logarithms, and shortest rotations', () => {

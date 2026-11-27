@@ -1,0 +1,42 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.sun-terminator {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #07121e;
+  color: #e7f1fa;
+  font: 14px/1.5 system-ui, sans-serif;
+}
+/* Deck owns only the map host; the panel is a sibling outside its widget container. */
+.sun-terminator .sun-view { position: absolute; inset: 0; }
+.sun-terminator canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sun-terminator .sun-panel {
+  position: absolute;
+  z-index: 1;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(300px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  overflow: hidden;
+}
+
+.sun-controls { font: 12px/1.45 system-ui, sans-serif; }
+.sun-controls .intro, .sun-controls [role='status'] { margin: 6px 0; color: var(--button-icon-idle); }
+.sun-controls .time-row { display: flex; align-items: center; gap: 6px; }
+.sun-controls .time-row label { flex: 1; min-width: 0; }
+.sun-controls output { flex: none; white-space: nowrap; color: var(--panel-accent-color); font-variant-numeric: tabular-nums; }
+.sun-controls .credits summary { cursor: pointer; }
+.sun-controls .credits p { margin-bottom: 0; }
+.sun-controls a { color: var(--panel-focus-color); }
+.sun-controls button[aria-pressed='true'] { color: var(--panel-accent-color); border-color: var(--panel-accent-color); }
+@media (max-width: 767px) {
+  .sun-terminator .sun-panel[data-compact-panel='true'] { max-height: 45%; }
+}

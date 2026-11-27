@@ -13,7 +13,7 @@ propagators, network access or an Arrow dependency.
 | C5: Qualified Earth orientation | UTC/leap data, TT/TAI/UT1 models, EOP provider, modern precession/nutation/polar motion | Future. Independent SOFA/reference vectors, declared accuracy/range, missing-data policy and reproducible data versions required. |
 | C6: Satellite boundary | Explicit TEME states, optional propagator adapters, topocentric position/velocity | Future. Reference SGP4 vectors, TEME-to-terrestrial convention and Earth rotation rate qualification required. |
 | C7: Precision astrometry | Catalog frame/epoch, proper motion, parallax, radial velocity, apparent position tiers | Future. Share current star APIs where contracts agree; avoid equating mean J2000 with ICRF. |
-| C8: Solar-system bodies | IAU WGCCRE 2015 rotation models and body-fixed frames, IAU 2015 radii, DE440 GM values, subsolar point, JPL approximate planet positions | Proposed in a stacked draft. CSPICE `pck00011.tpc` / `de440s.bsp` controls and declared gates. No kernels, ephemeris files or downloads at runtime. |
+| C8: Solar-system bodies | IAU WGCCRE 2015 rotation models and body-fixed frames, IAU 2015 radii, DE440 GM values, subsolar point, JPL approximate planet positions | Included through #629. See [tracker #764](https://github.com/visgl/math.gl/issues/764) for sequencing and qualification gates. CSPICE `pck00011.tpc` / `de440s.bsp` controls and declared gates. No kernels, ephemeris files or downloads at runtime. |
 
 C4/C5 support different needs: exact columnar interchange and physically meaningful
 scale conversion. Neither is replaced by storing a single floating-point Julian number.

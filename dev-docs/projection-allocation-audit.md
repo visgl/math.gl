@@ -60,7 +60,7 @@ implementations need separate heap profiling.
 ## Repeat the audit
 
 ```sh
-node modules/geospatial/projection/scripts/audit-allocations.mjs --check --output /tmp/projection-allocations.json
+node modules/geospatial/scripts/projection/audit-allocations.mjs --check --output /tmp/projection-allocations.json
 ```
 
 The TypeScript AST inventory records every object/array/regexp literal, `new`, closure

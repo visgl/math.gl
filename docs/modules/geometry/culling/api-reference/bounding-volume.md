@@ -57,7 +57,6 @@ var modelMatrix = Transforms.eastNorthUpToFixedFrame(positionOnEllipsoid);
 var boundingSphere = new BoundingSphere();
 var newBoundingSphere = BoundingSphere.transformWithoutScale(boundingSphere, modelMatrix);
 
-
 ### computePlaneDistances (sphere, position, direction, result)
 
 The distances calculated by the vector from the center of the bounding sphere to position projected onto direction plus/minus the radius of the bounding sphere.
@@ -75,3 +74,5 @@ If you imagine the infinite number of planes with normal direction, this compute
 ## Attribution
 
 This class was ported from [Cesium](https://github.com/AnalyticalGraphicsInc/cesium) under the Apache 2 License.
+
+See [Attributions](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

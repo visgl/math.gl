@@ -19,7 +19,10 @@
       "path": "../geometry"
     },
     {
-      "path": "../web-mercator"
+      "path": "../tasks"
+    },
+    {
+      "path": "../sql"
     }
   ]
 }

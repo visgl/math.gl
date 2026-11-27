@@ -13,7 +13,7 @@ ring segments closed by planar end faces. Inner and outer walls use smooth radia
 normals; the top, bottom and segment ends have separate flat normals.
 
 ```typescript
-import {RingGeometry} from '@math.gl/geometry';
+import {RingGeometry} from '@math.gl/geometry/primitives';
 
 const segment = new RingGeometry({
   innerRadius: 0.45, outerRadius: 0.9, height: 0.35,
@@ -21,7 +21,7 @@ const segment = new RingGeometry({
 });
 ```
 
-| Property | Default | Meaning |
+| Property | Default | Description |
 | --- | --- | --- |
 | `innerRadius` | `0.5` | Positive inner radius, smaller than the outer radius. |
 | `outerRadius` | `1` | Positive outer radius. |

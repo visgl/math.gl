@@ -51,8 +51,8 @@ The examples sidebar and timezone overview both render
 inline documentation frame enables interaction in fullscreen so globe controls do
 not capture page scrolling. Unmounting finalizes Deck and cancels data requests.
 
-The renderer and scoped styles are shared with `examples/timezone-globe`.
-`modules/earth/timezone/data` is a static directory; `useBaseUrl` supplies geometry URLs
+The renderer and scoped styles are shared with `examples/earth/timezone-globe`.
+`modules/earth/data/timezone` is a static directory; `useBaseUrl` supplies geometry URLs
 for both `/math.gl/` and `/math.gl/next/`. Low geometry loads initially, and high
 geometry is fetched when selected. The static directory also provides the data
 license and provenance manifest.
@@ -71,7 +71,7 @@ website's typography or navigation.
 
 The geoid overview and examples sidebar render `src/components/geoid-globe` using
 `src/components/live-globe`, the fullscreen frame shared with the timezone globe.
-The renderer and scoped styles are shared with `examples/geoid-globe`.
+The renderer and scoped styles are shared with `examples/earth/geoid-globe`.
 The geoid example fetches version-pinned EGM96 assets from deck.gl-data;
 `useBaseUrl` preserves deployment prefixes. The 1° preview loads first, and the
 original 15′ grid loads when selected. Hover heights use `getHeight` with the
@@ -79,7 +79,7 @@ selected interpolation; the colored texture uses the same fixed signed scale.
 
 ## Polygon and core playgrounds
 
-`examples/polygon-playground` and `examples/core-transforms` share their React
+`examples/geometry/polygon-playground` and `examples/core/core-transforms` share their React
 renderers with the website sidebar and module overviews. Each can run standalone
 with its workspace `start` script. Both use the lazy fullscreen documentation
 frame. The polygon example uses deck.gl-community editing in Cartesian coordinates
@@ -89,7 +89,7 @@ separate camera. Unmounting disposes controls, Deck, observers, and render loops
 
 ## Geometry viewer
 
-`src/components/geometry-viewer` embeds the shared `examples/geometry-viewer` renderer
+`src/components/geometry-viewer` embeds the shared `examples/geometry/geometry-viewer` renderer
 in the overview and each primitive reference page. Pass `geometry` for a CPU mesh,
 or `geometryType` and `geometryProps` for a primitive constructor and its options.
 The gallery offers all nine primitives. luma.gl `Model` renders depth-tested meshes
@@ -103,3 +103,15 @@ Its six inward-facing planes classify spheres and axis-aligned/oriented boxes wi
 `CullingVolume.computeVisibility`. The luma.gl observer camera is separate from the test
 frustum. The geometry renderer supports vertex colors and live mesh updates while retaining
 that camera; controls, models, buffers and devices are disposed on unmount.
+
+## Academic citations
+
+Maintain academic source metadata in `docs/references.bib`. Use a stable lowercase key such as `karney2013`, and cite it with `[cite](https://doi.org/10.1007/s00190-012-0578-z "cite:karney2013")` for a generated author–year label, or `[Algorithms for geodesics](https://doi.org/10.1007/s00190-012-0578-z "cite:karney2013")` for contextual link text. Use a real DOI or source URL as the link target so citations work in GitHub and other Markdown viewers; the link title identifies the bibliography key for the website. Preserve equation, section, version, and model-limit explanations beside the citation.
+
+Run `yarn citations:generate` after editing BibTeX, then `yarn check:citations`. Commit the generated bibliography section in `docs/references-and-credits.md` and `website/static/references.{bib,json}` alongside the source. Each citing page receives a deduplicated ordered References section; the shared bibliography also offers BibTeX and CSL-JSON downloads. Website builds and CI reject unknown citation keys, missing metadata, duplicate keys, malformed BibTeX, and stale generated output. Builds do not query external services.
+
+Verify titles, full author lists, publication years, and DOIs against the publisher or author publication. Keep accessible preprint links in `url`; identify intentionally cited drafts explicitly. A paper citation does not replace copied-code attribution or dataset license notices.
+
+### Citation indexing
+
+The bibliography improves attribution and discoverability; it does not guarantee academic citation counts. [Google Scholar](https://scholar.google.com/intl/en/scholar/inclusion.html) indexes scholarly articles and technical reports, not bare bibliographic listings. [Crossref Cited-by](https://www.crossref.org/services/cited-by) uses deposited references from registered works. For that goal, publish a substantive methods paper or technical report with the relevant bibliography through an appropriate scholarly venue or repository. Do not label documentation as a research article or insert metadata claiming authorship of the cited papers.

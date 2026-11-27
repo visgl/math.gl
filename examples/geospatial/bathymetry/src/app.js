@@ -1,0 +1,313 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {Deck, OrbitView, AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {mountInfoBox} from '../../../common/info-box.js';
+import {createGlobeMesh, getExaggeration} from './mesh.js';
+import {selectRefinement, createRefinementSource, sampleCoarsePosition} from './refinement.js';
+import {getMorphFocus, getMorphViewState} from './camera.js';
+import {computeSoundProfile, pickSeaLevelPoint, sampleHeight} from './sound-profile.js';
+import {loadWoa23ProfileSource} from './profile-sources.js';
+import {renderSoundProfile} from './profile-panel.js';
+import elevationUrl from '../assets/etopo1.bin?url';
+
+/** Mount a global relief globe with no water surface obscuring the seafloor. */
+/** `profileSource` replaces the WOA23 preview, for example with a synthetic source in tests. */
+export function mountBathymetry(root, {profileSource} = {}) {
+  root.innerHTML = `<canvas data-role="globe" aria-label="Interactive three dimensional ocean floor globe"></canvas>
+  <aside><h1>The ocean, uncovered</h1><p>Explore Earth's hidden ridges, trenches and continental shelves.</p>
+  <label>Destination <select data-role="destination"><option value="pacific">Pacific Ocean</option><option value="atlantic">Mid-Atlantic Ridge</option><option value="indian">Indian Ocean</option><option value="americas">The Americas</option></select></label>
+  <label>Globe → map <input data-role="morph" type="range" min="0" max="1" step="0.01" value="0"></label>
+  <label>Map projection <select data-role="projection"><option value="equirectangular">Equirectangular</option><option value="mercator">Mercator</option></select></label>
+  <label>Maximum exaggeration <input data-role="exaggeration" type="range" min="1" max="100" value="100"></label>
+  <output data-role="scale"></output>
+  <label>Zoom <input data-role="zoom" type="range" min="0" max="4" step="0.05" value="0"></label>
+  <label><input data-role="wireframe" type="checkbox" style="width:auto"> Show mesh</label>
+  <p data-role="detail" role="status">Global overview · zoom in for refinement</p>
+  <p data-role="status" role="status">Loading global relief…</p>
+  <div class="legend"></div><div class="legend-labels"><span>−11 km</span><span>−6 km</span><span>0 m</span></div>
+  <p>Drag to rotate · scroll to zoom. Depth and height fade from 100× to true scale as you zoom in. Colors always show real elevation.</p>
+  <p class="credits">NOAA NGDC <a href="https://coastwatch.pfeg.noaa.gov/erddap/info/etopo180/index.html" target="_blank" rel="noreferrer">ETOPO1</a> · Amante & Eakins (2009). Global 0.5° overview; zoom loads finer <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" target="_blank" rel="noreferrer">Mapzen / Tilezen terrain tiles</a> from AWS. Ocean source: ETOPO1 (1′); finer display samples are not new seabed measurements. Refined patch edges match the coarse mesh. Polar caps retain the overview. Spherical display, heights relative to mean sea level.</p></aside>
+  <aside class="sound-profile"><label>Absorption frequency <select data-role="frequency"><option value="12000">12 kHz</option><option value="100000">100 kHz</option><option value="400000">400 kHz</option></select></label>
+  <div data-role="profile" role="status"><p>Click the ocean on the globe or on the flat map to see the sound-speed profile down to the seafloor.</p></div>
+  <p class="credits" data-role="profile-source"></p></aside>`;
+  const disposePanel = mountInfoBox(root.querySelector('aside'), {
+    title: 'Bathymetry',
+    width: 300
+  });
+  const disposeProfilePanel = mountInfoBox(root.querySelector('aside.sound-profile'), {
+    title: 'Sound speed',
+    width: 300
+  });
+  const controls = role => root.querySelector(`[data-role="${role}"]`);
+  const abort = new AbortController();
+  let heights, frame, lastScale, lastMorph, lastProjection, mesh, detailMesh, detail;
+  let detailVersion = 0,
+    renderedVersion = -1,
+    detailTimer,
+    detailAbort,
+    desiredKey;
+  let focus = {longitude: -160, latitude: 12};
+  const loadRefinement = createRefinementSource();
+  let state = {
+    target: [0, 0, 0],
+    rotationX: 12,
+    rotationOrbit: 160,
+    zoom: 0,
+    minZoom: 0,
+    maxZoom: 4
+  };
+  const deck = new Deck({
+    canvas: root.querySelector('canvas'),
+    parent: root,
+    views: new OrbitView({controller: true, orbitAxis: 'Z', orthographic: true, fovy: 2}),
+    viewState: state,
+    effects: [
+      new LightingEffect({
+        ambient: new AmbientLight({intensity: 1.2}),
+        sun: new DirectionalLight({direction: [-3, -4, -2], intensity: 1.7})
+      })
+    ],
+    onClick: info => selectPoint(info.x, info.y),
+    onViewStateChange: ({viewState}) => {
+      state = viewState;
+      deck.setProps({viewState: state});
+      focus = getMorphFocus(state, Number(controls('morph').value), controls('projection').value);
+      schedule();
+      queueRefinement();
+    }
+  });
+  function render() {
+    frame = null;
+    const scale = getExaggeration(state.zoom, Number(controls('exaggeration').value));
+    controls('scale').textContent = `${scale.toFixed(1)}× vertical exaggeration`;
+    controls('zoom').value = state.zoom;
+    if (!heights) return;
+    const morph = Number(controls('morph').value),
+      projection = controls('projection').value;
+    if (
+      scale !== lastScale ||
+      morph !== lastMorph ||
+      projection !== lastProjection ||
+      renderedVersion !== detailVersion
+    ) {
+      mesh = createGlobeMesh(heights, scale, 721, 361, mesh, {
+        morph,
+        projection,
+        cutout: detail?.bounds
+      });
+      if (detail)
+        detailMesh = createGlobeMesh(detail.heights, scale, detail.size, detail.size, detailMesh, {
+          morph,
+          projection,
+          bounds: detail.bounds,
+          boundary: (lon, lat) => sampleCoarsePosition(mesh, lon, lat)
+        });
+      lastScale = scale;
+      lastMorph = morph;
+      lastProjection = projection;
+      renderedVersion = detailVersion;
+    }
+    deck.setProps({
+      layers: [mesh, detail ? detailMesh : null].filter(Boolean).map(
+        (geometry, index) =>
+          new SimpleMeshLayer({
+            id: `bathymetry-${index}`,
+            data: [{}],
+            mesh: geometry,
+            coordinateSystem: 'cartesian',
+            getPosition: [0, 0, 0],
+            getColor: [255, 255, 255],
+            wireframe: controls('wireframe').checked,
+            material: {
+              ambient: 0.6,
+              diffuse: 0.8,
+              shininess: 12,
+              specularColor: [20, 30, 40]
+            }
+          })
+      )
+    });
+  }
+  function schedule() {
+    if (!frame) frame = requestAnimationFrame(render);
+  }
+  controls('exaggeration').oninput = schedule;
+  controls('wireframe').onchange = schedule;
+  controls('zoom').oninput = event => {
+    state = {...state, zoom: Number(event.target.value)};
+    deck.setProps({viewState: state});
+    schedule();
+    queueRefinement();
+  };
+  controls('destination').onchange = event => {
+    const rotations = {
+      pacific: 160,
+      atlantic: 30,
+      indian: -80,
+      americas: 100
+    };
+    focus = {longitude: -rotations[event.target.value], latitude: 12};
+    controls('morph').value = 0;
+    state = {
+      ...state,
+      target: [0, 0, 0],
+      rotationOrbit: -focus.longitude,
+      rotationX: 12,
+      zoom: 0
+    };
+    deck.setProps({viewState: state});
+    schedule();
+    queueRefinement();
+  };
+  function updateMorph() {
+    state = getMorphViewState(
+      focus,
+      Number(controls('morph').value),
+      controls('projection').value,
+      state
+    );
+    deck.setProps({viewState: state});
+    schedule();
+    queueRefinement();
+  }
+  /** Geographic point of the last accepted click, or undefined before the first one. */
+  let selected;
+  /** Profile source: the caller's, or the WOA23 preview once it loads. */
+  const profileSourceReady = profileSource
+    ? Promise.resolve(profileSource)
+    : loadWoa23ProfileSource({signal: abort.signal});
+  profileSourceReady.then(
+    source => {
+      controls('profile-source').textContent =
+        `Profiles: ${source.name}. A climatology is a long-term mean, not a measured cast; not for navigation.`;
+    },
+    error => {
+      if (!abort.signal.aborted)
+        controls('profile-source').textContent = `Unable to load ocean profiles: ${error.message}`;
+    }
+  );
+  /** Select the sea-level point under a click at pixel (x, y) and show its profile. */
+  function selectPoint(x, y) {
+    const viewport = deck.getViewports()[0];
+    if (!viewport || !heights) return;
+    const point = pickSeaLevelPoint(
+      viewport,
+      x,
+      y,
+      Number(controls('morph').value),
+      controls('projection').value
+    );
+    if (!point) {
+      controls('profile').textContent =
+        'Set the globe → map slider fully to the globe or to the map, then click the ocean.';
+      return;
+    }
+    selected = point;
+    showProfile();
+  }
+  /** Show the profile of the selected point at the selected frequency, after the profile source loads. */
+  async function showProfile() {
+    if (!selected) return;
+    const request = selected;
+    const {longitude, latitude} = request;
+    let source;
+    try {
+      controls('profile').textContent = 'Loading ocean profiles…';
+      source = await profileSourceReady;
+    } catch (error) {
+      controls('profile').textContent = `Unable to load ocean profiles (${error.message}).`;
+      return;
+    }
+    if (request !== selected || abort.signal.aborted) return;
+    const seafloorDepth = -sampleHeight(heights, longitude, latitude);
+    const profile = seafloorDepth > 0 ? source.getProfile(longitude, latitude) : null;
+    if (!profile) {
+      controls('profile').textContent =
+        `${latitude.toFixed(2)}°, ${longitude.toFixed(2)}° is not ocean in the profile data. Click the ocean.`;
+      return;
+    }
+    const frequency = Number(controls('frequency').value);
+    try {
+      const result = computeSoundProfile(profile, {latitude, seafloorDepth, frequency});
+      renderSoundProfile(controls('profile'), result, {
+        longitude,
+        latitude,
+        seafloorDepth,
+        frequency
+      });
+    } catch (error) {
+      controls('profile').textContent = `No profile at this point (${error.message}).`;
+    }
+  }
+  controls('frequency').onchange = showProfile;
+  controls('projection').onchange = updateMorph;
+  controls('morph').oninput = updateMorph;
+  function queueRefinement() {
+    clearTimeout(detailTimer);
+    detailTimer = setTimeout(refine, 250);
+  }
+  async function refine() {
+    const request = selectRefinement(focus.longitude, focus.latitude, state.zoom);
+    if (!request) {
+      desiredKey = undefined;
+      detailAbort?.abort();
+      detail = undefined;
+      detailMesh = undefined;
+      detailVersion++;
+      controls('detail').textContent = 'Global overview · 30′ samples · zoom in for refinement';
+      schedule();
+      return;
+    }
+    if (request.key === desiredKey) return;
+    desiredKey = request.key;
+    detailAbort?.abort();
+    const controller = new AbortController();
+    detailAbort = controller;
+    controls('detail').textContent = `Loading finer relief · source zoom ${request.zoom}…`;
+    try {
+      const result = await loadRefinement(request, controller.signal);
+      if (controller.signal.aborted || abort.signal.aborted) return;
+      detail = result;
+      detailMesh = undefined;
+      detailVersion++;
+      const spacing = (60 * (result.bounds[2] - result.bounds[0])) / (result.size - 1);
+      controls('detail').textContent =
+        `Refined ${result.bounds[2] - result.bounds[0]}° region · ${spacing.toFixed(2)}′ mesh samples · source zoom ${result.zoom}`;
+      schedule();
+    } catch (error) {
+      if (!controller.signal.aborted && !abort.signal.aborted) {
+        desiredKey = undefined;
+        controls('detail').textContent =
+          `Refinement unavailable; retaining loaded relief (${error.message})`;
+      }
+    }
+  }
+  fetch(elevationUrl, {signal: abort.signal})
+    .then(async response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const buffer = await response.arrayBuffer();
+      if (abort.signal.aborted) return;
+      if (buffer.byteLength !== 721 * 361 * 2) throw new Error('Unexpected elevation data size');
+      const view = new DataView(buffer);
+      heights = Int16Array.from({length: 721 * 361}, (_, i) => view.getInt16(i * 2, true));
+      controls('status').textContent = 'Global relief · 260,281 elevation nodes · 0.5° spacing';
+      schedule();
+    })
+    .catch(error => {
+      if (!abort.signal.aborted)
+        controls('status').textContent = `Unable to load relief: ${error.message}`;
+    });
+  schedule();
+  return () => {
+    abort.abort();
+    detailAbort?.abort();
+    clearTimeout(detailTimer);
+    cancelAnimationFrame(frame);
+    deck.finalize();
+    disposePanel();
+    disposeProfilePanel();
+    root.replaceChildren();
+  };
+}

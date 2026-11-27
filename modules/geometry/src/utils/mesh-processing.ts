@@ -2,23 +2,30 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Matrix4} from '@math.gl/core';
-import type {TypedArray, TypedArrayConstructor} from '@math.gl/core/types';
-import {GL} from './constants';
-import {getAttributeValues, type Geometry, type GeometryAttribute} from './geometry';
+import {Matrix4} from '@math.gl/core/matrix';
+import type {TypedArray, TypedArrayConstructor} from '@math.gl/core/matrix';
+import {getAttributeValues, type GeometryInput, type GeometryAttribute} from './geometry';
 
+/** Geometry emitted by triangle mesh operations. */
+type TriangleGeometry = GeometryInput & {topology: 'triangle-list'};
+
+/** Validated, packed mesh buffers used internally by mesh operations. */
 type MeshData = {
+  /** Attributes with resolved buffers and element sizes. */
   attributes: Record<string, {value: TypedArray; size: number}>;
+  /** Semantic name of the position attribute. */
   position: string;
+  /** Number of vertices in each attribute buffer. */
   count: number;
+  /** Explicit triangle indices, including those generated for non-indexed input. */
   indices: Uint32Array;
 };
 
 /** Fresh, indexed triangle-list geometry. No input buffers are changed. */
 export function transformGeometry(
-  geometry: Geometry,
+  geometry: GeometryInput,
   matrix: Readonly<ArrayLike<number>>
-): Geometry {
+): TriangleGeometry {
   const mesh = readMesh(geometry);
   if (
     matrix.length !== 16 ||
@@ -99,11 +106,11 @@ export function transformGeometry(
   if (determinant < 0)
     for (let i = 0; i < indices.length; i += 3)
       [indices[i + 1], indices[i + 2]] = [indices[i + 2], indices[i + 1]];
-  return {mode: GL.TRIANGLES, attributes, indices};
+  return {topology: 'triangle-list', attributes, indices};
 }
 
 /** Concatenates compatible triangle meshes and offsets vertex indices. */
-export function mergeGeometries(geometries: readonly Geometry[]): Geometry {
+export function mergeGeometries(geometries: readonly GeometryInput[]): TriangleGeometry {
   if (!geometries.length) throw new RangeError('At least one geometry is required');
   const meshes = geometries.map(readMesh),
     first = meshes[0],
@@ -148,21 +155,26 @@ export function mergeGeometries(geometries: readonly Geometry[]): Geometry {
     for (const index of mesh.indices) indices[indexOffset++] = index + vertexOffset;
     vertexOffset += mesh.count;
   }
-  return {mode: GL.TRIANGLES, attributes, indices};
+  return {topology: 'triangle-list', attributes, indices};
 }
 
+/** Controls vertex matching during a weld. */
 export type WeldGeometryOptions = {
   /** Position quantization step; zero means exact matching. */ positionGridSize?: number;
 };
+/** Welded mesh and the mapping from its original vertices. */
 export type WeldGeometryResult = {
-  geometry: Geometry;
+  /** Welded triangle mesh. */
+  geometry: TriangleGeometry;
+  /** Welded vertex index for each original vertex. */
   vertexMap: Uint32Array;
+  /** Number of duplicate vertices removed. */
   removedVertices: number;
 };
 
 /** Welds full attribute tuples, preserving UV seams and hard normal edges. */
 export function weldGeometry(
-  geometry: Geometry,
+  geometry: GeometryInput,
   options: WeldGeometryOptions = {}
 ): WeldGeometryResult {
   const mesh = readMesh(geometry),
@@ -208,7 +220,7 @@ export function weldGeometry(
   }
   return {
     geometry: {
-      mode: GL.TRIANGLES,
+      topology: 'triangle-list',
       attributes,
       indices: Uint32Array.from(mesh.indices, index => vertexMap[index])
     },
@@ -218,7 +230,7 @@ export function weldGeometry(
 }
 
 /** Returns triangle numbers with area <= areaEpsilon, in original draw order. */
-export function getDegenerateTriangles(geometry: Geometry, areaEpsilon = 0): Uint32Array {
+export function getDegenerateTriangles(geometry: GeometryInput, areaEpsilon = 0): Uint32Array {
   if (!Number.isFinite(areaEpsilon) || areaEpsilon < 0)
     throw new RangeError('Area epsilon must be finite and nonnegative');
   const mesh = readMesh(geometry),
@@ -256,8 +268,9 @@ export function getDegenerateTriangles(geometry: Geometry, areaEpsilon = 0): Uin
   return Uint32Array.from(result);
 }
 
-function readMesh(geometry: Geometry): MeshData {
-  if (geometry.mode !== GL.TRIANGLES)
+/** Validates triangle connectivity and resolves the packed input buffers. */
+function readMesh(geometry: GeometryInput): MeshData {
+  if (geometry.topology !== 'triangle-list')
     throw new RangeError('Packed triangle-list geometry is required');
   const position = geometry.attributes['POSITION']
     ? 'POSITION'
@@ -363,7 +376,10 @@ function toDyadic(value: number): Dyadic {
   const exponentBits = (high >>> 20) & 0x7ff;
   const fraction = (BigInt(high & 0xfffff) << 32n) | BigInt(low);
   const n = exponentBits ? (1n << 52n) | fraction : fraction;
-  return {n: high >>> 31 ? -n : n, exponent: exponentBits ? exponentBits - 1075 : -1074};
+  return {
+    n: high >>> 31 ? -n : n,
+    exponent: exponentBits ? exponentBits - 1075 : -1074
+  };
 }
 function subtractDyadic(a: Dyadic, b: Dyadic): Dyadic {
   const exponent = Math.min(a.exponent, b.exponent);

@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "coordinateFrame": "Synthetic Cartesian meters; source elevations on a unit-spaced grid",
+  "diagonal": "00-11",
+  "cases": [
+    {
+      "name": "pacific",
+      "sourceSha256": "6fd1a4d21ee745862bb4cc630612716c8d67f457fced523093e7b744dbd0f816",
+      "pixelWindow": [
+        0,
+        0,
+        3,
+        3
+      ],
+      "heights": [
+        -108,
+        -105,
+        -102,
+        -111,
+        -108,
+        -105,
+        -114,
+        -111,
+        -107
+      ],
+      "heightOrigin": -113.9,
+      "sweep": {
+        "center": [
+          1,
+          0.25,
+          -100
+        ],
+        "halfExtents": [
+          0.125,
+          0.125,
+          0.25
+        ],
+        "translation": [
+          0,
+          0,
+          -12
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "expected": {
+          "status": "hit",
+          "fraction": 0.3958333333333333,
+          "fractionTolerance": 1e-07
+        }
+      }
+    },
+    {
+      "name": "sierra-nodata",
+      "sourceSha256": "cd6bb97ac25bda1c1b4f45bba3d0f9931fef2c805d85caa5a1c0a7f2f19a5a14",
+      "pixelWindow": [
+        0,
+        0,
+        3,
+        3
+      ],
+      "heights": [
+        null,
+        2622,
+        2665,
+        2627,
+        2696,
+        2752,
+        2742,
+        2728,
+        2793
+      ],
+      "heightOrigin": 2622.1,
+      "sweep": {
+        "center": [
+          0.25,
+          0.25,
+          2800
+        ],
+        "halfExtents": [
+          0.125,
+          0.125,
+          0.25
+        ],
+        "translation": [
+          0,
+          0,
+          -250
+        ],
+        "rotation": [
+          0,
+          0,
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        "expected": {
+          "status": "miss"
+        }
+      }
+    }
+  ]
+}

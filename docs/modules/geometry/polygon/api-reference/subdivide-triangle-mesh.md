@@ -31,7 +31,8 @@ Use this mode when the application has its own resolution policy, such as a sour
 Triangulate the polygon in its source coordinate space, then refine that mesh. This preserves the original triangles' source coverage and hole boundaries. For already triangulated loader output, pass its positions and indices directly.
 
 ```ts
-import {earcut, subdivideTriangleMesh} from '@math.gl/geometry/polygon';
+import {earcut} from '@math.gl/geometry/polygon';
+import {subdivideTriangleMesh} from '@math.gl/geometry/polygon';
 
 const positions = [
   0, 0, 4, 0, 4, 4, 0, 4, // exterior
@@ -101,7 +102,7 @@ Both count limits must be positive integers no greater than `2^32 - 1`. A render
 
 The result contains:
 
-| Field | Type | Meaning |
+| Field | Type | Description |
 | --- | --- | --- |
 | `sourcePositions` | `Float64Array` | Refined source positions. |
 | `positions` | `Float64Array` | Corresponding transformed positions. |
@@ -125,3 +126,32 @@ Source-edge mode validates transformed output vertices, but intentionally never 
 After building the repository, run `node test/bench/subdivision.mjs` for a deterministic small/coarse-quad comparison. It reports median elapsed time, output counts and transform calls for both policies. The source-edge policy deliberately does less work and provides a weaker accuracy contract; this is not an equal-accuracy comparison or a production rendering benchmark. Output provenance and typed-array formats are unchanged.
 
 See [subdividePolyline](./subdivide-polyline.md) for strokes and boundary-only processing. Boundary subdivision alone is insufficient when a filled polygon or image also needs its triangle interiors to deform.
+
+## Application error metrics
+
+The projection interface is **projection-engine agnostic**: synchronous transforms may come from
+native math.gl, proj4js, D3 adapters or another engine. Async-only engines use a separate batch
+preparation path. Engine choice does not supply chart topology or validity domains automatically.
+
+In transform-error mode, `errorMetric({source, exact, interpolated})` optionally replaces Euclidean
+target error. Arrays are fresh for each sample. Return a finite nonnegative value in `tolerance`
+units; invalid values reject the operation and exceptions propagate. Output coordinates and
+attribute provenance retain their original units. The option is forbidden in source-edge mode.
+
+```ts
+const result = subdivideTriangleMesh(mesh, {
+  transform, tolerance: 0.5, // screen pixels
+  errorMetric: ({exact, interpolated}) => {
+    const a = cameraProject(exact);
+    const b = cameraProject(interpolated);
+    return Math.hypot(a[0] - b[0], a[1] - b[1]);
+  }
+});
+```
+
+The application owns camera clipping, zoom, anisotropic scales and cache invalidation. Rebuild when
+that policy changes. A screen-space metric does not replace texture-error validation: inverse UVs
+can become ill-conditioned near poles or chart boundaries. Check both geometry and texture errors
+at independent probes. These remain sampled criteria, not continuous guarantees.
+
+Motivation: [warp-side feedback, section 3](https://github.com/mdsumner/sidebyside/blob/main/article/2026-10-13_custom-projections-deckgl.md#3-refinement-error-belongs-in-the-output-space).

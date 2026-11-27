@@ -13,6 +13,7 @@ import primeMeridians from './primemeridian-table';
 import {linearUnits} from '../../../crs/crs-metadata';
 import {TypeScriptCRSError, unsupportedStage} from './types';
 import type {CRSNormalizationOptions, Ellipsoid, NormalizedCRS, ParsedCRS} from './types';
+import type {ReadonlyCRSDefinition} from '../../../crs/spatial-reference';
 
 const ALIASES: Readonly<Record<string, string>> = {
   WGS84: '+proj=longlat +datum=WGS84',
@@ -84,13 +85,12 @@ export function parseAngle(text: string): number {
   throw new Error('Invalid angular parameter: ' + text);
 }
 
-export function normalizeCRS(
-  input: TypeScriptCRSInput,
+/** Expand local aliases and built-in identifiers without executing or parsing a projection. */
+export function resolveLocalCRSDefinition(
+  input: ReadonlyCRSDefinition,
   options: CRSNormalizationOptions = {}
-): NormalizedCRS {
-  const datums = getDatumDefinitions(options);
-  const resolved = resolveCRSInput(input, options);
-  let definition = resolved.definition;
+): ReadonlyCRSDefinition {
+  let definition = input;
   const aliases = options.aliases || {};
   const visited = new Set<string>();
   while (typeof definition === 'string' && (own(aliases, definition) || own(ALIASES, definition))) {
@@ -111,6 +111,16 @@ export function normalizeCRS(
         ' +k_0=0.994 +x_0=2000000 +y_0=2000000';
     }
   }
+  return definition;
+}
+
+export function normalizeCRS(
+  input: TypeScriptCRSInput,
+  options: CRSNormalizationOptions = {}
+): NormalizedCRS {
+  const datums = getDatumDefinitions(options);
+  const resolved = resolveCRSInput(input, options);
+  const definition = resolveLocalCRSDefinition(resolved.definition, options);
   let parsed: ParsedCRS;
   if (inferCRSRepresentation(definition) === 'proj-string' && typeof definition === 'string') {
     const parameters: Record<string, string | undefined> = Object.create(null);
@@ -126,7 +136,9 @@ export function normalizeCRS(
       const serialized = ['wkt', 'projjson'].includes(inferCRSRepresentation(definition));
       throw new TypeScriptCRSError(
         serialized ? 'missing-parser' : 'unknown-syntax',
-        'Unsupported CRS definition; register a WKT or PROJJSON parser for structured definitions'
+        inferCRSRepresentation(definition) === 'identifier'
+          ? 'Unsupported CRS definition: ' + definition + '; resolve it first'
+          : 'Unsupported CRS definition; register a WKT or PROJJSON parser for structured definitions'
       );
     }
     parsed = parser.parse(definition, options);

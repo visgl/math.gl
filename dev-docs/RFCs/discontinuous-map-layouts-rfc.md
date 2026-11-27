@@ -8,7 +8,7 @@
 The independent experimental `HingeTree` utility now lives in `@math.gl/geometry`.
 It snapshots parent/pivot/axis/rest-transform descriptors, validates rigid transforms
 and acyclic connectivity, and evaluates a forest into reusable Float64 matrix buffers.
-The `examples/unfolding-polyhedron` example constructs six unit squares directly
+The `examples/geometry/unfolding-polyhedron` example constructs six unit squares directly
 and folds them into a cube. Tests cover rigid motion, shared hinge endpoints,
 descendants, root placement, deep trees, and the flat/closed cube endpoints.
 No reference application code, shaders, or mesh assets were copied. The example
@@ -33,7 +33,7 @@ clipping, and motion collision handling remain future work.
 ## Recommendation
 
 Provide an experimental, renderer-independent `DiscontinuousMap` in the optional
-`@math.gl/geospatial/discontinuous` entry point. Its pipeline is:
+`@math.gl/geospatial/maps` entry point. Its pipeline is:
 
 **geographic geometry → spherical region clipping → local projection → placement → region-tagged parts**.
 
@@ -231,7 +231,7 @@ contract distinct from exact rigid-pose evaluation.
 | Area | Available | Remaining work |
 | --- | --- | --- |
 | `@math.gl/geospatial/projection` | Scalar forward/inverse kernels and CRS pipelines | Optional adapters with explicit inverse policy |
-| `@math.gl/geospatial/discontinuous` | Convex spherical regions, point/inverse lookup, seam-aware lines and polygons, AirOcean and interrupted sinusoidal | Global/complement polygons, curved seams, spatial acceleration, packed attribute provenance |
+| `@math.gl/geospatial/maps` | Convex spherical regions, point/inverse lookup, seam-aware lines and polygons, AirOcean and interrupted sinusoidal | Global/complement polygons, curved seams, spatial acceleration, packed attribute provenance |
 | `@math.gl/geometry/polygon` | Planar clipping, triangulation, adaptive subdivision | Integration with region-tagged projected geometry |
 | `@math.gl/geometry` | `HingeTree`, generated geometry | Reusable mesh topology and constrained cut selection |
 | Examples | Geographic cut weights, unfolding, original-surface texture sampling, coordinate hover picking | Renderer integration for projected vector data |
@@ -432,3 +432,173 @@ hardcoding U.S. region ordering. It draws metadata-derived inset frames and labe
 The Hawaii crop now includes all main islands, and a pinned public-domain Natural
 Earth modern reference overlay addresses the one-degree terrain grid's inability
 to resolve them. No reconstruction values or global statistics are changed.
+
+## Unified map description and engine (October 2026)
+
+The public names are **MapDescription** and **new MapEngine(description, options)**.
+A renderer should not choose separate projection, layout, picking, and animation
+implementations merely because a map has insets or hinges. Descriptions contain
+serializable map parameters; engines own compiled charts and cached layout.
+Runtime projection and land-mask callbacks are constructor dependencies, kept
+outside descriptions so JSON does not silently lose executable behavior.
+
+### Core contract
+
+`MapDescription` version 1 contains `id`, optional title/attribution/radius, and a
+discriminated `definition`. Built-ins expand to charts; custom charts identify
+projection bindings and supply spherical domains, placements, and presentation
+metadata. A chart's geographic domain, local projection, and final placement
+remain distinct. The reference surface is explicitly spherical longitude/latitude
+in degrees. Ellipsoidal CRS transformations remain `ProjectionEngine` work.
+
+`MapEngine` provides one point/line/polygon interface, inverse candidates, cached
+layout, viewport fitting, picking, per-chart sampling descriptors, and evaluated
+3D frames. Geometry retains both `regionId` and source coordinates. The renderer
+draws each piece independently and handles polygon tessellation, cameras, raster
+tile matrices, occlusion, textures, and interaction styling.
+
+Capabilities are derived, not caller assertions:
+
+- `hasCuts`: a shared edge is classified as cut.
+- `disjoint`: the sampled continuous-join graph has multiple components.
+- `hasInsets`: at least one chart carries inset metadata.
+- `hinged`: the compiled map has rigid panel motion.
+- `globe`: the engine's spherical reference supports a globe representation.
+
+These properties are independent. A myriahedral net has cuts but can remain
+connected. Composite masks may overlap, and overlapping ink does not imply a
+continuous join. Sampled seam classification is descriptive, not a mathematical
+proof for arbitrary callback projections.
+
+### Validation against four map families
+
+| Case | Chart/domain requirements | Layout and motion | Validation |
+| --- | --- | --- | --- |
+| Mercator | Antimeridian split, finite latitude coverage, internal continuous joins | One conventional map; analytic longitude/log-tangent coordinates | Known coordinates, inverse round trip, finite fit bounds, antimeridian line split, polar line/polygon clipping |
+| Goode homolosine | Two northern and four southern land-oriented lobes; split the wide Eurasian lobe into convex charts without adding a visible cut | Equatorial joins and separated polar lobes | Published lobe centers, continuous artificial join, discontinuous −40° meridian, inverse round trips |
+| Albers USA | Independent regional domains, coverage gaps, region-local Albers parameters | Main map plus seven insets; semantic scale, draw order, labels and frames | Fitted Honolulu, Guam, Puerto Rico and mainland picking; eight sampling footprints |
+| Myriahedral | Convex panels, shared topology, retained hinge tree, arbitrary panel cuts | Static net and rigid root-frame poses | Nonunit-radius flat endpoint, rigid edge lengths mid-animation, canonical globe radius, all geometry operations |
+
+Goode's land lobe parameters follow the
+[published D3 definition](https://github.com/d3/d3-geo-projection/blob/main/src/interrupted/homolosine.js).
+The earlier independent six-lobe homolosine factory remains unchanged. The new
+`goode` definition and `createGoodeMap` select the land-oriented layout; no exact
+PROJ or D3 numeric compatibility is promised.
+
+Mercator requires a special finite latitude band because a parallel is not a
+minor great-circle boundary. Its internal polar projection extension is
+continuous for sampling, then clipped away in the projected plane. Public point
+coverage excludes the poles rather than clamping them onto the visible map.
+The other current charts retain convex great-circle domains.
+
+### Frames and transition planning
+
+`evaluate({type: 'map'})` returns placed XY in the Z=0 plane.
+`evaluate({type: 'globe'})` uses the canonical spherical axes.
+`evaluate({type: 'hinge', amount})` evaluates rigid panel transforms once per
+frame; `projectPlacedPoint` applies them to already split geometry. It supports
+polygonal faces with collinear boundary subdivisions by finding a full affine
+basis. Flat endpoint coordinates include the description radius.
+
+A closed faceted surface and a smooth globe are different surfaces and coordinate
+frames. Returning from a hinged layout requires closing the hinges, aligning the
+root frame, and deforming facets onto the sphere. Camera interpolation is a
+renderer decision. The API does not disguise this as a single XY interpolation.
+
+`source.planTransitionTo(target)` returns strategy/reason, whether to re-split,
+coverage handling, and endpoint hinge flags. The initial policy is conservative:
+the same engine is direct; different engines route via the shared globe and fade
+unmatched coverage. Names and serialized descriptions do not prove runtime
+callback or topology equivalence. This version recommends a route but does not
+execute transitions, infer vertex correspondence, or guarantee overlap-free
+morphs. Future direct transitions need explicit compatibility evidence.
+
+### Insets and sampling
+
+Fitting applies one uniform transform to the complete layout, preserving inset
+scale and spacing. Sampling descriptors expose each chart's source boundary,
+fitted footprint, and local pixels per coordinate radian. A renderer selects LOD
+per chart using its own tile matrix, sampling distortion at multiple locations;
+one global tile zoom is insufficient for enlarged islands and reduced Alaska.
+Additional camera zoom must be applied to those estimates. Source dataset
+resolution remains an independent limit.
+
+### Migration and scope
+
+Albers USA now constructs one engine and uses its fit/pick methods. Ice Age
+Explorer uses a definition table instead of separate factories, gets layout
+through the engine, and delegates flat-to-posed panel transformations to frame
+evaluation. DGGS topology remains input data; animation and picking use the same
+engine as other myriahedral presets. The standalone myriahedral demo constructs
+the engine and passes its motion layout to the shared polyhedron renderer.
+
+Guide and reference pages document the core API with From v5.0 and Experimental
+badges. The existing static factories stay available. This iteration does not
+add arbitrary concave chart domains, global polygon clipping, direct topology
+morphing, renderer-specific LOD policies, or ellipsoidal references. Those are
+separate capabilities rather than hidden expectations of a map description.
+
+## Elastic sampled-map backend (implemented)
+
+`MapDefinition` now accepts `{type: 'elastic', data: ElasticMapData}`. The data is
+finite JSON (undefined interpolation nodes use null), and MapEngine snapshots it
+just like analytic definitions. The optional `@math.gl/geospatial/elastic` entrypoint
+holds the three published Elastic datasets. The default discontinuous entrypoint
+contains only the runtime and text importer; compilation performs no network I/O.
+
+The backend implements `MapSurface`, the structural rendering contract shared with
+`DiscontinuousMap`. It does not pretend that the section boundaries are convex or
+that deformed mesh edges are hinges. Geographic octants are convex envelopes for
+clipping and renderer bookkeeping. Each chart also retains its actual, possibly
+concave/complement, longitude/latitude coverage domain. Geometry first splits at
+spherical chart seams, then clips against these domains. Output vertices retain
+source coordinates for globe evaluation and transitions. True outlines drive layout.
+
+Bilinear forward evaluation is restricted to defined grid nodes. Inverse queries
+search bounded grid cells, solve their bilinear equations in locally normalized
+coordinates, validate residuals and domain ownership, and retain multiple branches.
+The published inverse hint table is not treated as an exact inverse. A conservative
+terrain-cell fast path requires an enclosing spherical cap to avoid all domain
+boundaries and undefined interpolation cells.
+
+This category supports loading optimized maps, not optimizing them. Future work
+includes alternative interpolation models, compressed/streamed dataset resources,
+unstructured Danseiji meshes, and asynchronous optimization. Those should preserve
+the shared geometry and picking contract without claiming interchangeability of
+the underlying interpolation rules. Accuracy and sampling limits are documented
+in the Elastic guide and reference.
+
+
+### Prepared Elastic transitions
+
+`MapEngine.createTransitionTo()` adds an explicit prepared-correspondence path.
+Complete Elastic datasets and a bounded set of finite global formulas can morph
+directly. Features are clipped against source and target cuts, with endpoint
+region IDs and shared geographic vertices retained in immutable prepared parts.
+Per-frame evaluation interpolates endpoints without re-clipping. Other pairs
+use source-to-globe, coverage crossfade, globe-to-target. The existing conservative
+transition planner remains unchanged. The renderer owns easing, camera fitting,
+depth ordering, cancellation and intermediate picking. Direct intermediate shapes
+can fold or overlap; this is not a distortion-preserving optimization solver.
+
+### Renderer-neutral feature preparation
+
+`MapEngine.prepareFeatures()` prepares static 2D GeoJSON-shaped feature arrays
+into a versioned, structured-cloneable payload. Float64 XY/geographic vertex
+buffers, Uint32 path/ring/polygon offsets and explicit feature/component/chart
+metadata allow a rendering library to consume split geometry without depending
+on MapEngine internals. Feature properties remain with the caller.
+
+Filled polygon rings and original polygon outlines are independent batches.
+Clipped fill rings necessarily include generated closing edges; outlines come
+from projecting the original source rings and therefore do not invent borders
+along cuts. This also avoids inferring edge provenance from floating-point
+coordinates. True source boundaries that coincide with cuts remain visible.
+
+This first contract deliberately does not claim full tessellator readiness:
+original-edge interpolation weights, dash distances, explicit fill-edge roles,
+interior refinement, animated surface topology and screen-space error control
+remain follow-up work. A deck.gl adapter should start with static 2D fills and
+paths, preserve original feature picking/accessors, and only then motivate a
+shared geometry-provider hook in core layers. No deck.gl dependency belongs in
+math.gl, and no existing core-layer behavior changes implicitly.

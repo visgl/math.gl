@@ -2,11 +2,16 @@
   {
     "id": "foundations",
     "label": "Foundations",
-    "description": "Vectors, matrices, shared numeric types and expression evaluation.",
+    "description": "Matrix math, colors, binary data, Arrow integration, and SQL queries.",
     "modules": [
       "core",
       "core/types",
-      "core/expressions"
+      "sql",
+      "core/arrow",
+      "core/utf8",
+      "core/arrow/geoarrow",
+      "core/arrow/geoarrow-utils",
+      "core/arrow/wkb"
     ]
   },
   {
@@ -16,7 +21,7 @@
     "modules": [
       "geometry/curves",
       "geometry",
-      "geometry/utils",
+      "geometry/processing",
       "geometry/culling",
       "geometry/polygon",
       "geometry/spatial-index"
@@ -30,9 +35,7 @@
       "geospatial",
       "geospatial/crs",
       "geospatial/projection",
-      "web-mercator",
-      "geospatial/geoarrow",
-      "geospatial/wkb"
+      "geospatial/web-mercator"
     ]
   },
   {
@@ -53,6 +56,14 @@
     "description": "A separate module for discrete global grid systems.",
     "modules": [
       "dggs"
+    ]
+  },
+  {
+    "id": "tasks",
+    "label": "Tasks",
+    "description": "Scheduling, typed operations, and worker execution.",
+    "modules": [
+      "tasks"
     ]
   }
 ]

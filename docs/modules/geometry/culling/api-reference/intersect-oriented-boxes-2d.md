@@ -9,8 +9,8 @@ scalar separating-axis query is useful for rotated screen-space labels and other
 collision checks. It does not require 3D bounding volumes, matrices or renderer objects.
 
 ```ts
-import {intersectOrientedBoxes2D} from '@math.gl/geometry/culling/oriented-box-2d';
-import type {OrientedBox2D} from '@math.gl/geometry/culling/oriented-box-2d';
+import {intersectOrientedBoxes2D} from '@math.gl/geometry/culling';
+import type {OrientedBox2D} from '@math.gl/geometry/culling';
 
 const angle = Math.PI / 4;
 const first: OrientedBox2D = {
@@ -24,7 +24,7 @@ const second: OrientedBox2D = {
 const overlaps = intersectOrientedBoxes2D(first, second);
 ```
 
-The dedicated subpath has no runtime dependencies. The package root also exports the function
+The dedicated subpath has no runtime dependencies.
 and type for convenience; existing root-package dependencies are unchanged.
 
 ## Box representation
@@ -32,7 +32,7 @@ and type for convenience; existing root-package dependencies are unchanged.
 `OrientedBox2D` is structural, not a class. Each field accepts a numeric array, typed array or
 math.gl vector with exactly two finite components:
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `center` | Rectangle center in a shared coordinate system. |
 | `halfSize` | Nonnegative half-width and half-height in that system's units. |

@@ -11,7 +11,7 @@ The returned box is expressed in ellipsoid-fixed Cartesian coordinates. Its orie
 ## Usage
 
 ```js
-import {toRadians} from '@math.gl/core';
+import {toRadians} from '@math.gl/core/matrix';
 import {makeOBBFromRegion} from '@math.gl/geospatial/globe';
 
 const region = [
@@ -28,7 +28,7 @@ const box = makeOBBFromRegion(region);
 
 ## Function
 
-### `makeOBBFromRegion(region, ellipsoid?, options?) : OrientedBoundingBox`
+#### `makeOBBFromRegion(region, ellipsoid?, options?) : OrientedBoundingBox`
 
 `region` is `[west, south, east, north, minimumHeight, maximumHeight]`. Longitudes and latitudes are in radians by default, matching the OGC 3D Tiles region definition. Heights use the ellipsoid's linear unit, normally meters. Use `options.units: 'degrees'` for degree input.
 

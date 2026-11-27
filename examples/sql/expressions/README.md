@@ -1,0 +1,18 @@
+# Expression Playground
+
+[![From v4.2](https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square)](https://math.gl/docs)
+[![Experimental](https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square)](https://math.gl/docs)
+
+Interactive examples for the experimental `@math.gl/core` module.
+
+Run the playground from the repository root:
+
+```bash
+yarn workspace math.gl-expression-playground start
+```
+
+Basemap imagery uses NASA Blue Marble via the public GIBS EPSG:4326 WMS service,
+configured in `examples/common/blue-marble.js`. No access token is required.
+
+Run `yarn start-local` inside the math.gl repository to use workspace source.
+Run `yarn start` to use package exports or `yarn build` for a production bundle.

@@ -10,6 +10,30 @@ lines, reduced length, scales, longitude unrolling and ellipsoidal gnomonic have
 native PROJ controls. Sphere/oblate Cartesian conversion has independent
 high-precision controls. Preserve these qualifications.
 
+The complementary [geospatial frames and paths roadmap](./geospatial-roadmap.md)
+tracks local frames, poses, tangent-plane operations and path integration.
+C1–C3 are merged in [PR #277](https://github.com/visgl/math.gl/pull/277),
+not yet recorded here as released; their sampled API/geometry evidence does not complete G0–G2.
+Rhumb algorithms remain owned by G5 here, and their subdivision integration is
+tracked separately by C4/C6.
+
+## Bounded P0 delivery — merged PR #278
+
+The [P0 completion matrix](../docs/modules/geospatial/projection/ellipsoid-p0-qualification.md)
+closes G0–G2 for existing APIs and explicit sampled domains in merged
+[PR #278](https://github.com/visgl/math.gl/pull/278). It pins full C++
+GeographicLib 2.7 (series and Exact), independently gates Cartesian mathematics,
+and records the complete public ownership/unit/boundary audit. The new matrix
+has 930 Decimal geometry rows (720 wider-domain cases and 210 exact-input anchor cases) and 2,550 native C++ rows; 3,478 rows are gates and
+two very-long-line Exact comparisons remain explicitly diagnostic. Existing
+PROJ, interior and cusp gates and accuracy/bundle budgets remain unchanged.
+
+No P0 blocker remains within this profile. Arbitrary finite-domain certification
+is not implied: wider flattening/path-length Exact algorithms are G8, triaxial
+geodesic scope is G9, and new buffer signatures/performance claims are G7.
+G3–G5 scalar APIs are now on master. Remaining implementation and integration
+work includes G7 and the remaining frames/paths qualification and wider domains.
+
 ## P0 — Existing correctness and defensible claims
 
 | Tranche | Deliverable | Acceptance criteria |
@@ -26,7 +50,28 @@ high-precision controls. Preserve these qualifications.
 | G4: Edge area and polygons | Geodesic `S12`; polygon/polyline accumulator with point/edge insertion, signed area/perimeter, previews and reset. | Compensated sums; independent sphere identities and ellipsoid references. Cover pole/dateline crossings, reversed winding, self-intersections, degeneracy, many tiny edges and multi-circuit paths. Define algebraic/unsigned area and complement conventions; use meaningful near-zero area budgets. |
 | G5: Rhumb geometry | Constant-bearing inverse/direct, reusable lines and rhumb polygon area. | GeographicLib controls plus independent meridian/parallel/sphere limits. Cover winding, near-east/west courses and pole approach; distinguish undefined/infinite cases from convergence failures. |
 | G6: Geodesic intersections | Closest/next/all searches and segment intersection semantics within an explicit support profile. | Independent residual and segment-membership checks plus GeographicLib comparisons. Cover tangencies, nearly parallel/coincident paths, antipodes and multiple crossings. Specify search bounds, deduplication and ambiguity; bound iteration. |
-| G7: Bulk APIs and performance | Reusable/batch operations with output buffers where benchmarks demonstrate value. | Paired benchmarks against pinned GeographicLib implementations at equal accuracy. Measure setup, throughput, allocations and bundle cost separately. Preserve scalar accuracy and alias contracts. Claim improvements only for measured operations/environments. |
+| G7: Bulk APIs and performance | Initial Node/native baselines are available; reusable/batch operations with output buffers where benchmarks demonstrate value. | Paired benchmarks against pinned GeographicLib implementations at equal accuracy. Measure setup, throughput, allocations and bundle cost separately. Preserve scalar accuracy and alias contracts. Claim improvements only for measured operations/environments. |
+
+## G3–G4 bounded delivery
+
+`EllipsoidMetrics` now supplies area, volume, meridian/curvature metrics and six
+auxiliary latitudes/inverses for 0.5 ≤ b/a ≤ 2. Optional geodesic `S12` and
+`GeodesicPolygon` supply compensated point/edge insertion, signed/unsigned
+algebraic area, open polylines, previews and reset. Original stable C4 differences
+fix tiny ellipsoidal-area cancellation also seen in native GeographicLib 2.7.
+
+The [G3–G4 matrix](../docs/modules/geospatial/projection/geographiclib-g34-qualification.md)
+records 810 sampled native/independent cases, explicit budgets, native Exact
+limitations, exact input conventions and remaining boundaries. This delivers the
+bounded G3/G4 scalar APIs, not arbitrary-flattening or all near-zero polygon
+certification. G5 now has rhumb inverse/direct/lines/polygons with independent integral and
+native controls. Merged [PR #287](https://github.com/visgl/math.gl/pull/287) adds capture-bound global closest/next searches and complete finite-ball
+ellipsoid intersections, including coincident continua and complete segment
+classification in the declared 0.99 ≤ b/a ≤ 1.01 profile. This global increment is on master; it does not certify arbitrary finite shapes or searches.
+See the [global G6 qualification](../docs/modules/geospatial/projection/geographiclib-g6-qualification.md) and the
+[G5–G6 qualification](../docs/modules/geospatial/projection/geographiclib-g56-qualification.md).
+The [landed-review audit](./landed-review-audit.md) records follow-up correctness fixes and separates pending integration from remaining implementation. G7 performance APIs and G8 wider-domain solvers
+remain separate. G0–G2 bounded completion is on master in PR #278. C6 rhumb adapters and the C5 meridian line/polygon profile are described in the [seam guide](../docs/modules/geospatial/api-reference/geographic-seams.md).
 
 ## P2 — Wider domains and specialized capabilities
 
@@ -39,9 +84,9 @@ high-precision controls. Preserve these qualifications.
 
 ## Sequence and common gates
 
-Start with G0–G2, then G3/G4, followed by G5/G6. G5 uses auxiliary
-latitudes and polygon accumulation infrastructure; G6 builds on existing reusable
-geodesic lines. G7 follows each scalar API's qualification. G8 needs qualified
+G0–G6 bounded increments are delivered. C6 now connects rhumbs to path sampling,
+and C5 adds a meridian line/polygon profile. Next, extend qualification and advance
+G7 where equal-accuracy benchmarks justify reusable/batch APIs. G8 needs qualified
 special-function primitives; G9 follows G1/G2 and a dedicated numerical design.
 P2 tranches are independently selectable, and G11 requires a product scope decision.
 
@@ -82,20 +127,96 @@ and qualification priorities without replacing those plans.
 
 | Tranche | Delivered increment | Remaining gate |
 | --- | --- | --- |
-| G0 | Existing native PROJ 9.9 geodesic corpus and independent 110-digit Cartesian oracle; operation/domain matrix below. | Full C++ GeographicLib comparison and broader conditioning/magnitude coverage before a complete SOTA claim. |
-| G1 | Original three-axis solver plus exact-dyadic recovery of unique boundary/near-cusp roots; 625 surface controls including 427 cusp inputs. Formerly diagnostic deep inverse cases retain their original budgets. | Broader extreme domains and bounded-solver limits still need qualification; no universal finite-input accuracy claim. |
-| G2 | Geometry vectors and derived caches frozen together; underflow-safe inverse normal/height; mutation, alias, invalid-input and ambiguity regressions. | Continue auditing all public result ownership, units and pole contracts; no claim of exhaustive completion. |
+| G0 | Full pinned C++ 2.7 series/Exact, ECEF, LocalCartesian, Gnomonic and triaxial Cartesian comparisons; independent Decimal forward/nearest mathematics; published worst cases/native limitations. | Closed for the [declared profile](../docs/modules/geospatial/projection/ellipsoid-p0-qualification.md). No universal finite-input/SOTA claim. |
+| G1 | Existing 625 surface controls plus 930 independent Decimal controls; compensated thin exteriors and accurate polar degree conversion; ambiguity/cusp policies retained. | Closed for sampled bounded domains; arbitrary extreme/Exact domains remain G8/G9. |
+| G2 | Complete existing-Ellipsoid contract table and regressions: snapshots, inputs/outputs, aliases/M, unit modes, nested setters, normals/rays, pole/center and invalid-input policies. | Closed for existing signatures. New typed-buffer API design and performance comparisons remain G7. |
 
 ### Current qualification matrix
 
 | Operation/domain | Comparator and metric | Support boundary |
 | --- | --- | --- |
 | Series geodesics, seven shapes near Earth-like flattening | 819 native PROJ 9.9 controls; distance/reduced length, scales, condition-aware endpoint/bearing displacement | Shared algorithm family; not an independent mathematical proof or arbitrary-flattening guarantee |
-| Sphere/oblate Cartesian inverse, including thin shapes and unique interiors | Exact binary64-input, 110-digit Decimal footpoint oracle; unit-normal angle and height | 134 inputs per leaf/projection/geospatial path; 1e-9 degree and max(1e-12, max radius * 2e-12) height ceilings |
+| Sphere/oblate Cartesian inverse, including thin shapes and unique interiors | Exact binary64-input, 110/180-digit Decimal footpoint oracle; unit-normal angle and height | 134 inputs per leaf/projection/geospatial path; 1e-9 degree and max(1e-12, max radius * 2e-12) height ceilings |
 | Prolate/triaxial Cartesian inverse | Same independent oracle and unchanged budgets | 64 sampled inputs, including deep interiors; additional unique cusp/boundary recovery qualified |
-| Three-axis nearest surface | Same independent footpoint oracle; coordinate and surface residual checks | 625 sampled inputs including 427 cusp controls; original absolute ceilings plus 2e-12 relative cusp-component checks; no universal finite-shape claim |
+| Three-axis nearest surface | Same independent footpoint oracle; coordinate and surface residual checks | Existing 625 inputs including 427 cusp controls, plus 930 independent controls; original ceilings retained; no universal finite-shape claim |
 | Ambiguous interiors | Analytic multiple-minimum constructions | Reject atomically instead of selecting arbitrary hemisphere/axis |
 | Geometry/cache ownership | Mutation and alias regressions | Frozen geometry snapshots; construct a new shape instead of mutating vectors |
 
 Preserve the existing MIT/Apache-2.0 Cesium notices and GeographicLib MIT notices.
 The new solver and controls are original MIT math.gl work, not an upstream port.
+
+## G7 initial baseline
+
+See [C8 qualification and G7 baselines](../docs/modules/geospatial/api-reference/local-frame-qualification.md).
+The initial workload gates 72 pinned native outputs before timing and compares
+solver setup, direct calls and reused geodesic/rhumb lines. Frame/pose cost uses
+historical math.gl sources with independent C8 controls. Raw samples and sampled
+heap estimates are diagnostic; no throughput threshold or new bulk API is implied.
+
+## C8/G7 follow-up
+
+The next bounded increment extends silhouette qualification with exact rational
+signs and 220-digit line/quadric controls, preserving the spherical contact
+convention. Measured packed local-frame point/vector transforms reuse Float64
+outputs, support exact in-place storage and fail atomically. See the expanded
+[qualification and benchmark profile](../docs/modules/geospatial/api-reference/local-frame-qualification.md).
+Existing numerical and selective bundle budgets remain unchanged; renderer C7,
+G8 Exact geodesics and G9 triaxial geodesics remain separate work.
+
+## G8/G9 bounded feature delivery
+
+`EllipsoidGeodesicExact` implements elliptic-integral direct/inverse/lines,
+reduced length/scales, winding and area of the full ellipsoid for `0.25 ≤ b/a ≤ 4`.
+It is explicitly selected through `@math.gl/geospatial/geodesic-exact`;
+arbitrary-length lines remain separate. The exact-area follow-up adds opt-in
+`S12` and `GeodesicPolygonExact` with the shared compensated accumulator. The existing series engine is unchanged.
+
+`TriaxialEllipsoid`, through `@math.gl/geospatial/triaxial`, adds geodetic,
+parametric and geocentric surface/direction conversions and Cartesian direct
+geodesics/reusable lines for minimum/maximum axis ratio at least `0.25`.
+It handles signed trajectories and equal-axis limits. Global triaxial inverse,
+Jacobi coordinate charts and conformal coordinates are not implemented by this
+direct-solver profile. Area-uniform surface sampling is delivered by the later
+G10/G9/G7 increment below.
+
+See the [2,105-row qualification](../docs/modules/geospatial/api-reference/geodesic-g89-qualification.md),
+including independent elliptic series, sphere/principal-plane/conservation checks,
+raw native limitations and unchanged accuracy/bundle gates. Both entries are
+optional and add no dependencies or runtime native/model downloads.
+
+Exact edge area/polygon controls and remaining cancellation boundaries are
+recorded in the [exact area qualification](../docs/modules/geospatial/api-reference/geodesic-exact-area-qualification.md).
+
+## G10 / G9 sampling / G7 packed-line increment
+
+The coordinate-utility audit found existing UTM/polar stereographic kernels and
+general CRS operations. The optional coordinates entry adds missing standard-zone
+policy, strict angle text and WGS84 MGRS cells through one-metre precision.
+Sub-metre and zone-only MGRS descriptors remain outside that profile.
+
+Triaxial surface sampling corrects the sphere-map area Jacobian with bounded
+rejection and an injectable random source. Independent Gauss-map quadrature tests
+the surface distribution. Packed geodesic/rhumb line samplers add reusable staging,
+atomic commits and result sinks, retaining all scalar/native accuracy gates.
+The recorded benchmark supports lower geodesic allocation estimates and an
+storage benefit, with a throughput tradeoff; rhumb timings are unstable and no universal
+allocation-free claim is made. Remaining G9 work includes coordinate charts and
+separately scoped inverse geodesics; G10 still has the wider GeographicLib text
+profiles and forced-zone facade ergonomics, with generic projection APIs retained.
+
+## G10 coordinate-profile follow-up
+
+The next increment adds explicit UTM/UPS zone/hemisphere selection and transfer,
+opt-in native-compatible extended grid envelopes, MGRS cells through micrometre
+text resolution, separate grid-zone descriptors, decimal-minute output and explicit
+longitude-first pairs. Extra MGRS digits expose projection roundoff and do not
+promise micrometre physical positioning accuracy. Arithmetic/scientific angle
+expressions and `INVALID` sentinels remain intentionally outside the strict text
+profile; arbitrary datum/projection selection remains owned by CRS APIs.
+
+G11 is detailed in the [optional Earth-model design](./earth-models-design.md):
+normal gravity first without coefficient files, extend the existing earth/geoid
+entry, then separately scoped harmonic gravity and magnetic fields with explicit
+model/data licenses and no implicit downloads. The [general geographic-cut scope](./general-geographic-cuts.md)
+explains what single-meridian seams cannot support and recommends one real
+projection-domain clipping consumer before arbitrary cut graphs.

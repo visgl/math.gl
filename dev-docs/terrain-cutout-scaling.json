@@ -1,0 +1,280 @@
+{
+  "runs": [
+    {
+      "preparationMs": 0.0009170000000011669,
+      "node": "v24.22.1",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "results": [
+        {
+          "dataset": "pacific",
+          "shape": "convex",
+          "sourceSha256": "6fd1a4d21ee745862bb4cc630612716c8d67f457fced523093e7b744dbd0f816",
+          "sourceOrigin": [
+            96,
+            96
+          ],
+          "inputTriangles": 4096,
+          "residents": 32,
+          "tileSize": 8,
+          "measuredUpdates": 20,
+          "rebuiltTiles": 24,
+          "fullRebuildParity": true,
+          "incrementalMedianMs": 5.060790999999995,
+          "incrementalP95Ms": 7.283667000000037,
+          "fullMedianMs": 17.87466699999993,
+          "fullP95Ms": 21.371333999999933
+        },
+        {
+          "dataset": "sierra-nodata",
+          "shape": "convex",
+          "sourceSha256": "cd6bb97ac25bda1c1b4f45bba3d0f9931fef2c805d85caa5a1c0a7f2f19a5a14",
+          "sourceOrigin": [
+            48,
+            80
+          ],
+          "inputTriangles": 3445,
+          "residents": 32,
+          "tileSize": 8,
+          "measuredUpdates": 20,
+          "rebuiltTiles": 24,
+          "fullRebuildParity": true,
+          "incrementalMedianMs": 2.7554999999999836,
+          "incrementalP95Ms": 3.4240409999999883,
+          "fullMedianMs": 13.976832999999942,
+          "fullP95Ms": 14.471458000000212
+        }
+      ]
+    },
+    {
+      "preparationMs": 0.0009589999999946031,
+      "node": "v24.22.1",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "results": [
+        {
+          "dataset": "pacific",
+          "shape": "convex",
+          "sourceSha256": "6fd1a4d21ee745862bb4cc630612716c8d67f457fced523093e7b744dbd0f816",
+          "sourceOrigin": [
+            96,
+            96
+          ],
+          "inputTriangles": 4096,
+          "residents": 128,
+          "tileSize": 4,
+          "measuredUpdates": 20,
+          "rebuiltTiles": 24,
+          "fullRebuildParity": true,
+          "incrementalMedianMs": 1.6527079999998477,
+          "incrementalP95Ms": 2.5655000000000427,
+          "fullMedianMs": 16.771792000000005,
+          "fullP95Ms": 20.359459000000015
+        },
+        {
+          "dataset": "sierra-nodata",
+          "shape": "convex",
+          "sourceSha256": "cd6bb97ac25bda1c1b4f45bba3d0f9931fef2c805d85caa5a1c0a7f2f19a5a14",
+          "sourceOrigin": [
+            48,
+            80
+          ],
+          "inputTriangles": 3445,
+          "residents": 128,
+          "tileSize": 4,
+          "measuredUpdates": 20,
+          "rebuiltTiles": 24,
+          "fullRebuildParity": true,
+          "incrementalMedianMs": 1.4630829999998696,
+          "incrementalP95Ms": 1.7272080000000187,
+          "fullMedianMs": 14.579124999999976,
+          "fullP95Ms": 16.13283299999989
+        }
+      ]
+    },
+    {
+      "preparationMs": 0.0010000000000047748,
+      "node": "v24.22.1",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "results": [
+        {
+          "dataset": "pacific",
+          "shape": "convex",
+          "sourceSha256": "6fd1a4d21ee745862bb4cc630612716c8d67f457fced523093e7b744dbd0f816",
+          "sourceOrigin": [
+            96,
+            96
+          ],
+          "inputTriangles": 4096,
+          "residents": 512,
+          "tileSize": 2,
+          "measuredUpdates": 20,
+          "rebuiltTiles": 24,
+          "fullRebuildParity": true,
+          "incrementalMedianMs": 1.7523330000000215,
+          "incrementalP95Ms": 2.0339170000000877,
+          "fullMedianMs": 16.712666000000013,
+          "fullP95Ms": 20.43433299999998
+        },
+        {
+          "dataset": "sierra-nodata",
+          "shape": "convex",
+          "sourceSha256": "cd6bb97ac25bda1c1b4f45bba3d0f9931fef2c805d85caa5a1c0a7f2f19a5a14",
+          "sourceOrigin": [
+            48,
+            80
+          ],
+          "inputTriangles": 3445,
+          "residents": 512,
+          "tileSize": 2,
+          "measuredUpdates": 20,
+          "rebuiltTiles": 24,
+          "fullRebuildParity": true,
+          "incrementalMedianMs": 1.366708000000017,
+          "incrementalP95Ms": 1.5104579999999714,
+          "fullMedianMs": 13.702082999999902,
+          "fullP95Ms": 15.293874999999844
+        }
+      ]
+    },
+    {
+      "preparationMs": 0.4047920000000005,
+      "node": "v24.22.1",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "results": [
+        {
+          "dataset": "pacific",
+          "shape": "concave-hole-island",
+          "sourceSha256": "6fd1a4d21ee745862bb4cc630612716c8d67f457fced523093e7b744dbd0f816",
+          "sourceOrigin": [
+            96,
+            96
+          ],
+          "inputTriangles": 4096,
+          "residents": 32,
+          "tileSize": 8,
+          "measuredUpdates": 20,
+          "rebuiltTiles": 24,
+          "fullRebuildParity": true,
+          "incrementalMedianMs": 16.944333000000142,
+          "incrementalP95Ms": 31.140457999999853,
+          "fullMedianMs": 79.10241700000006,
+          "fullP95Ms": 85.98062500000015
+        },
+        {
+          "dataset": "sierra-nodata",
+          "shape": "concave-hole-island",
+          "sourceSha256": "cd6bb97ac25bda1c1b4f45bba3d0f9931fef2c805d85caa5a1c0a7f2f19a5a14",
+          "sourceOrigin": [
+            48,
+            80
+          ],
+          "inputTriangles": 3445,
+          "residents": 32,
+          "tileSize": 8,
+          "measuredUpdates": 20,
+          "rebuiltTiles": 24,
+          "fullRebuildParity": true,
+          "incrementalMedianMs": 11.207957999999962,
+          "incrementalP95Ms": 14.714041999999608,
+          "fullMedianMs": 66.29887500000041,
+          "fullP95Ms": 72.47683400000005
+        }
+      ]
+    },
+    {
+      "preparationMs": 0.39750000000000796,
+      "node": "v24.22.1",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "results": [
+        {
+          "dataset": "pacific",
+          "shape": "concave-hole-island",
+          "sourceSha256": "6fd1a4d21ee745862bb4cc630612716c8d67f457fced523093e7b744dbd0f816",
+          "sourceOrigin": [
+            96,
+            96
+          ],
+          "inputTriangles": 4096,
+          "residents": 128,
+          "tileSize": 4,
+          "measuredUpdates": 20,
+          "rebuiltTiles": 24,
+          "fullRebuildParity": true,
+          "incrementalMedianMs": 5.245916000000307,
+          "incrementalP95Ms": 7.844665999999961,
+          "fullMedianMs": 78.25700000000006,
+          "fullP95Ms": 84.78541700000005
+        },
+        {
+          "dataset": "sierra-nodata",
+          "shape": "concave-hole-island",
+          "sourceSha256": "cd6bb97ac25bda1c1b4f45bba3d0f9931fef2c805d85caa5a1c0a7f2f19a5a14",
+          "sourceOrigin": [
+            48,
+            80
+          ],
+          "inputTriangles": 3445,
+          "residents": 128,
+          "tileSize": 4,
+          "measuredUpdates": 20,
+          "rebuiltTiles": 24,
+          "fullRebuildParity": true,
+          "incrementalMedianMs": 5.1915420000004815,
+          "incrementalP95Ms": 7.207583000000341,
+          "fullMedianMs": 67.66741699999966,
+          "fullP95Ms": 71.01654100000087
+        }
+      ]
+    },
+    {
+      "preparationMs": 0.40233300000001293,
+      "node": "v24.22.1",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "results": [
+        {
+          "dataset": "pacific",
+          "shape": "concave-hole-island",
+          "sourceSha256": "6fd1a4d21ee745862bb4cc630612716c8d67f457fced523093e7b744dbd0f816",
+          "sourceOrigin": [
+            96,
+            96
+          ],
+          "inputTriangles": 4096,
+          "residents": 512,
+          "tileSize": 2,
+          "measuredUpdates": 20,
+          "rebuiltTiles": 24,
+          "fullRebuildParity": true,
+          "incrementalMedianMs": 2.535041000000092,
+          "incrementalP95Ms": 3.2072910000001684,
+          "fullMedianMs": 75.05733399999963,
+          "fullP95Ms": 82.31400000000008
+        },
+        {
+          "dataset": "sierra-nodata",
+          "shape": "concave-hole-island",
+          "sourceSha256": "cd6bb97ac25bda1c1b4f45bba3d0f9931fef2c805d85caa5a1c0a7f2f19a5a14",
+          "sourceOrigin": [
+            48,
+            80
+          ],
+          "inputTriangles": 3445,
+          "residents": 512,
+          "tileSize": 2,
+          "measuredUpdates": 20,
+          "rebuiltTiles": 24,
+          "fullRebuildParity": true,
+          "incrementalMedianMs": 2.286250000000109,
+          "incrementalP95Ms": 3.016958000000159,
+          "fullMedianMs": 64.89174999999977,
+          "fullP95Ms": 73.55224999999973
+        }
+      ]
+    }
+  ]
+}

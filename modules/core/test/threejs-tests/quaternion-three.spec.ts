@@ -11,7 +11,7 @@
 // @ts-nocheck
 /* eslint-disable */
 import {test, expect} from 'vitest';
-import {Quaternion, Vector3, Vector4, Matrix4, Euler} from '@math.gl/core';
+import {Quaternion, Vector3, Vector4, Matrix4, Euler} from '@math.gl/core/matrix';
 import {x, y, z, w, eps} from './constants';
 
 const orders = ['xyz', 'yxz', 'zxy', 'zyx', 'yzx', 'xzy'];

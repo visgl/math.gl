@@ -1,0 +1,96 @@
+// loaders.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+
+import {assert} from '../env-utils/assert';
+
+const workerURLCache = new Map();
+
+/**
+ * Creates a loadable URL from worker source or URL
+ * that can be used to create `Worker` instances.
+ * Due to CORS issues it may be necessary to wrap a URL in a small importScripts
+ * @param props
+ * @param props.source Worker source
+ * @param props.url Worker URL
+ * @returns loadable url
+ */
+export function getLoadableWorkerURL(props: {
+  source?: string;
+  url?: string;
+  workerType?: 'classic' | 'module';
+}) {
+  assert((props.source && !props.url) || (!props.source && props.url)); // Either source or url must be defined
+
+  if (props.url && props.workerType === 'module') {
+    const baseUrl = globalThis.document?.baseURI ?? globalThis.location?.href;
+    if (!baseUrl) return props.url;
+    const resolved = new URL(props.url, baseUrl);
+    const origin = globalThis.location?.origin;
+    if (/^https?:$/.test(resolved.protocol) && resolved.origin !== origin) {
+      // Module imports preserve the remote module's own relative import resolution.
+      return getLoadableWorkerURLFromSource(`import ${JSON.stringify(resolved.href)};`);
+    }
+    return props.url;
+  }
+  let workerURL = workerURLCache.get(props.source || props.url);
+  if (!workerURL) {
+    // Differentiate worker urls from worker source code
+    if (props.url) {
+      workerURL = getLoadableWorkerURLFromURL(props.url);
+      workerURLCache.set(props.url, workerURL);
+    }
+
+    if (props.source) {
+      workerURL = getLoadableWorkerURLFromSource(props.source);
+      workerURLCache.set(props.source, workerURL);
+    }
+  }
+
+  assert(workerURL);
+  return workerURL;
+}
+
+/**
+ * Build a loadable worker URL from worker URL
+ * @param url
+ * @returns loadable URL
+ */
+function getLoadableWorkerURLFromURL(url: string): string {
+  // A local script url, we can use it to initialize a Worker directly
+  if (!url.startsWith('http')) {
+    return url;
+  }
+
+  // A remote script, we need to use `importScripts` to load from different origin
+  const workerSource = buildScriptSource(url);
+  return getLoadableWorkerURLFromSource(workerSource);
+}
+
+/**
+ * Build a loadable worker URL from worker source
+ * @param workerSource
+ * @returns loadable url
+ */
+function getLoadableWorkerURLFromSource(workerSource: string): string {
+  const blob = new Blob([workerSource], {type: 'application/javascript'});
+  return URL.createObjectURL(blob);
+}
+
+/**
+ * Per spec, worker cannot be initialized with a script from a different origin
+ * However a local worker script can still import scripts from other origins,
+ * so we simply build a wrapper script.
+ *
+ * @param workerUrl
+ * @returns source
+ */
+function buildScriptSource(workerUrl: string): string {
+  return `\
+try {
+  importScripts('${workerUrl}');
+} catch (error) {
+  console.error(error);
+  throw error;
+}`;
+}

@@ -4,10 +4,7 @@
 
 export type {TypedArray, TypedArrayConstructor} from '@math.gl/core/types';
 
-export {GL, GL_TYPE, GL_PRIMITIVE, GL_PRIMITIVE_MODE} from './constants';
-export {default as GLType} from './gl-type';
-
-export type {Geometry, GeometryAttribute} from './geometry';
+export type {GeometryInput, GeometryAttribute} from './geometry';
 export {isGeometry} from './geometry';
 
 export type {Primitive} from './primitive-iterator';
@@ -43,7 +40,10 @@ export {
   weldGeometry,
   getDegenerateTriangles
 } from './mesh-processing';
-export type {WeldGeometryOptions, WeldGeometryResult} from './mesh-processing';
+export type {
+  WeldGeometryOptions,
+  WeldGeometryResult
+} from './mesh-processing';
 
 export {interpolatePackedAttributes} from './interpolate-packed-attributes';
 export type {

@@ -11,6 +11,9 @@ export type {GeographicTile, GeographicTileRange} from './geographic-tiles';
 
 export {
   validateTileMatrix,
+  validateTileMatrixSet,
+  validateTileMatrixLimits,
+  resolveTileIndex,
   isTileIndexInRange,
   getTileBounds,
   getTileIndex,
@@ -22,6 +25,7 @@ export type {
   TileMatrix,
   TileMatrixSet,
   TileMatrixLimits,
+  TileMatrixSetLimits,
   TileMatrixBounds,
   VariableMatrixWidth,
   TileMatrixRowRange

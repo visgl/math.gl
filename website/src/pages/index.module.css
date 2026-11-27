@@ -6,6 +6,8 @@
 .heroBackground {
   position: absolute;
   inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(8, 17, 31, 0.94), rgba(8, 17, 31, 0.65) 40%, rgba(8, 17, 31, 0.08) 80%);
   background-size: cover;
   background-position: center right;
   background-repeat: no-repeat;
@@ -26,6 +28,8 @@
   position: relative;
   z-index: 1;
   max-width: 680px;
+  min-width: 0;
+  width: 100%;
 }
 
 .heroEyebrow {
@@ -361,7 +365,8 @@
 @media screen and (max-width: 520px) {
   .hero {
     min-height: 400px;
-    padding: 56px 22px;
+    align-items: flex-start;
+    padding: 28px 22px 72px;
   }
 
   .hero h1 {
@@ -373,9 +378,9 @@
   }
 
   .heroActions {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    flex-direction: row;
+    gap: 24px;
   }
 
   .heroCaption {
@@ -401,4 +406,55 @@
   .cardImage img {
     transition: none;
   }
+}
+
+/* The homepage is a single viewport; the catalog belongs to the docs layout. */
+.hero {
+  min-height: calc(100svh - var(--ifm-navbar-height));
+}
+.docCatalog {
+  margin: 40px 0;
+}
+.docCatalog .grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.docCatalog .card {
+  text-decoration: none;
+}
+@media (max-width: 520px) {
+  .docCatalog .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero {
+    align-items: flex-start;
+    padding: 18px 28px 20px;
+  }
+  .heroEyebrow {margin-bottom: 8px; font-size: 10px;}
+  .hero h1 {font-size: 34px; line-height: 1;}
+  .heroLead {margin-top: 12px; font-size: 14px; line-height: 1.4; max-width: 520px;}
+  .heroActions {margin-top: 14px;}
+}
+
+.cardImage.logoImage {
+  background: #f4f8fc;
+}
+.cardImage.fitImage img {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: contain;
+  padding: 12px 12px 34px;
+  transform: none;
+}
+.cardImage.fitImage::after {
+  inset: auto 0 0;
+  height: 28px;
+  background: #101a2b;
 }

@@ -7,6 +7,8 @@ import type {ProjectionPlugin} from './experimental/types';
 import type {ProjectionDescriptor} from './experimental/projection-descriptor';
 import type {ProjectionCoordinate, ProjectionOutput} from './experimental/scalar-output';
 import type {ProjectionArray} from './experimental/typescript-projection';
+import type {CRSResolver} from '../crs/resolver';
+import type {ProjectionTransformDescription} from './transform-description';
 
 type Registration = ProjectionPlugin | ProjectionDescriptor;
 
@@ -14,7 +16,10 @@ type Registration = ProjectionPlugin | ProjectionDescriptor;
 export type ProjectionEngineOptions<P extends Registration = ProjectionPlugin> = Omit<
   ProjectionTransformOptions<P>,
   'from' | 'to'
->;
+> & {
+  /** Optional authority lookup during asynchronous preparation; never used by sync calls. */
+  resolver?: CRSResolver;
+};
 
 /** CRS pair and behavior for an independent transform. */
 export type CreateProjectionOptions = Pick<
@@ -31,6 +36,8 @@ export interface ProjectionEngine {
 /** A CRS-pair transform. Sync methods never load algorithms; preload deferred transforms first. */
 export interface Projection {
   readonly lossy?: boolean;
+  /** Available after preparation when the backend can describe its resolved execution. */
+  readonly description?: ProjectionTransformDescription;
   preload(): Promise<unknown>;
   project(coordinate: readonly number[]): number[] | Promise<number[]>;
   unproject(coordinate: readonly number[]): number[] | Promise<number[]>;
@@ -77,3 +84,11 @@ export type {
   CRSRenderingScaleCallback,
   GetCRSOptions
 } from './experimental/types';
+
+export type {
+  ProjectionAlgorithmIdentity,
+  ProjectionCRSDescription,
+  ProjectionTransformStage,
+  ProjectionDirectionDescription,
+  ProjectionTransformDescription
+} from './transform-description';

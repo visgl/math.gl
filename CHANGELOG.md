@@ -1,6 +1,178 @@
 # CHANGELOG
 
-## Unreleased
+## v5.0.0
+
+- Consolidate math.gl into seven packages with focused entry points for coordinate systems, projections, global grids, terrain, geometry, Earth science, SQL and worker tasks.
+- Add Arrow-native spatial SQL, composable visualization scales, GeoArrow geometry views, and portable predicates for nested and temporal columns.
+- Flatten package subpaths, retire duplicate color and spatial SQL entry points, and share constructors across CommonJS entry points (#666, #667, #669, #671, #672).
+- Validate geometry attribute and index contracts and accelerate SQL array construction from float columns (#668, #670).
+- See [What’s New](docs/whats-new.md) and the [Upgrade Guide](docs/upgrade-guide.md) for how to move from v4.
+
+## v5.0.0-rc.2
+
+- Expose a focused SQL query entry point (#658).
+- Accept Date and binary Arrow predicate literals and preserve batch metadata when gathering Arrow rows (#657, #660).
+- Preserve mixed numeric Arrow predicate comparisons (#659).
+- Write WKT directly from native GeoArrow buffers (#661).
+- Reject incomplete geoid PGM rasters (#662).
+
+## v5.0.0-rc.1
+
+- Add spatial SQL functions for geometry construction and inspection, planar predicates, route linear referencing, SRID and Web Mercator transforms, and XYZ tile queries. Expose flat spatial SQL entry points and use native GeoArrow buffers (#616, #630–#635, #642–#649, #654).
+- Add SQL function packages for scalar, aggregate, standalone and lateral table functions, and support typed Arrow column metadata (#614, #615, #626–#628).
+- Add natural breaks, cyclic and bivariate coloring, power and symmetric-log transforms, nice bounds, units and legend guidance, plus an interactive scale gallery (#617, #618, #621–#625).
+- Add TEOS-10 seawater state and acoustics through `@math.gl/earth/ocean` and a sound-speed panel in the bathymetry example (#619, #620, #639).
+- Share zero-copy GeoArrow views and union schemas, and read semantic Z and M ordinates (#636, #650, #651).
+- Expose focused DGGS decoder subpaths, fix spherical interpolation for parallel and opposite vectors, and measure rendering scales on the CRS body (#612, #640, #653).
+- Organize the tectonics and ice age examples under Showcase (#609).
+
+## v5.0.0-beta.12
+
+- **Breaking:** Consolidate Arrow, GeoArrow and WKB integration into `@math.gl/core/arrow` and `@math.gl/geometry/arrow`, and move Web Mercator to `@math.gl/geospatial/web-mercator`. Organize core matrix, color and UTF-8 APIs and unify SQL scales under `@math.gl/sql/scales` (#608).
+
+- SQL: register PostGIS-aligned spatial functions and Turf operations to derive Arrow columns.
+- SQL: expand list and map columns through experimental SQL UNNEST with left joins and ordinality
+
+- feat(geometry): Add `EarcutOptions.triangulation` to choose upstream `fast` clipping or `balanced` clipping that reduces long triangle fans. Use the shared balanced strategy for projection-domain warp seeds.
+
+- fix(geometry): Port upstream Earcut touching-ring and bridge-healing fixes, indexed hole bridging, radix sorting, convex-ring acceleration, and iterative polygon splits. Preserve precomputed areas and projection planes. Triangle order and valid diagonal choices may change.
+- SQL: add `EPOCH_MS` for DATE and microsecond TIMESTAMP interoperability with JavaScript time values
+- SQL: compose Arrow scales inside conditional expressions with resolved legend metadata
+
+- feat(sql): Add fixed ordinal and threshold color mappings, computed quantile palettes, Arrow schema binding, and a parsed scale AST adapter with backend conformance fixtures (#589, #593, #595–#597).
+- feat(sql): Support named query parameters and binary inputs, immutable parameter snapshots, and query dependency comparison (#602, #604).
+- **Breaking:** Clean projection exports and align SQL entrypoint names (#603).
+- feat(terrain): Add conforming resident tile cutouts with paired skirts, incremental and geographic cutouts, concave polygons, holes and polygon IDs. Qualify cutout partition scaling through 512 residents (#583, #586, #588, #605).
+- fix(geometry): Bridge Earcut holes at a shared vertex and extract rotations from reflected bounding boxes (#594, #606).
+- ci: Synchronize mobile fullscreen checks with hydration and UI state, reuse example builds, and run full solar browser conformance on affected changes and nightly (#585, #587).
+
+## v5.0.0-beta.11
+
+- **Breaking:** Rename the standalone `@math.gl/expressions` package to `@math.gl/sql`. Update package dependencies and imports to the new name (#571).
+- feat(sql): Add Arrow string functions, nested-value extraction and CASE results, and an Arrow RecordBatch type guard. Preserve schemas in empty streaming batches (#550, #564, #569, #572, #579).
+- feat(sql): Add portable visualization scale descriptors and SQL syntax, Arrow domain resolution, compiled color scales, and incremental domains with bounded quantile sketches (#575, #576, #580, #581).
+- feat(sql): Convert scale palettes between sRGB, Display P3 and Rec.2020, and pack IEEE binary16 color components with ties-to-even rounding (#582).
+- feat(terrain): Add affine cell metrics, depression filling, watershed accumulation, and sampled regional viewsheds (#560, #566, #567, #570).
+- feat(terrain): Plan and split convex cutouts with paired skirts, certify geographic LOD screen-space error, and qualify terrain morphs across pole sectors (#557, #558, #573, #578).
+- feat(terrain): Extend rotating collider sweep coverage to boxes, hulls, capsules, and spheres. Improve worker edit allocation and timing (#549, #559, #561–#563, #565).
+- feat(geospatial): Add spatial reference metadata helpers (#577).
+- fix(geometry): Handle polygon cuts on rounded grid lines and reduce subdivision transform calls (#568, #574).
+- **Breaking:** Remove WebGL enums from geometry utilities and replace remaining TypeScript enums (#553, #554).
+- docs: Clarify API reference and TSDoc requirements, Euler rotation order, and numeric array layout (#555, #556).
+
+## v5.0.0-beta.10
+
+- feat(arrow): Share query execution across tables and streams, and emit progressive aggregate snapshots (#542, #543).
+- fix(arrow): Support getter-only RecordBatch metadata in queries (#540).
+- feat(terrain): Discover canonical same-level seams and stitch mixed-level geographic seams (#541, #544).
+- feat(terrain): Add continuous terrain sweeps for rigid-body collider shapes and describe polar incidence in resident cuts (#545, #547).
+- perf(terrain): Compare opportunistic worker edit batching with per-stage timing (#538).
+
+## v5.0.0-beta.9
+
+- feat(arrow): Add grouped aggregate accumulators, native Arrow SQL queries with relational operations, and worker-side query planning and retained tables (#514, #534, #535, #536).
+- fix(arrow): Preserve retained buffers during transfer (#530).
+- feat(expressions): Support explicit widths for SQL numeric casts (#529).
+- feat(terrain): Add nodata-aware adaptive meshes, preserve off-grid breaklines, qualify boundary fidelity and constrained coverage, and bound continuous vertical error (#516–#519, #521, #522, #527).
+- feat(terrain): Add geographic seam diagnostics and sparse LOD cuts. Qualify regional residency and edits on Pacific and Sierra data, narrow halo invalidation, and retain edited halos and prepared sources in workers (#520, #524, #528, #531–#533, #537).
+- examples: Upgrade to deck.gl 10, share math.gl source resolution, add a bathymetry globe with projection morphs and terrain refinement, and restore compact community panels (#515, #523, #526).
+
+## v5.0.0-beta.8
+
+- Restore `@math.gl/expressions` as a standalone package for portable expressions, SQL parsing and evaluation, and optional Arrow execution (#511).
+- feat(sql): Add relational SELECT parsing, OFFSET pagination, and compact diagnostics with source locations (#499, #500, #502).
+- feat(arrow): Add mergeable scalar aggregates and structural column inspection helpers (#498, #503).
+- feat(geometry): Add `getPoleOfInaccessibility` for polygon interior points (#507).
+- feat(core): Accept probe.gl loggers for operation diagnostics (#505).
+- fix(web-mercator): Center fitted bounds with padding and offset (#512).
+- fix(dggs): Remove arbitrary scaling from quadkey polygons (#510).
+- examples: Share deck.gl rendering across map and unfolding examples, update terrain and DGGS demos, and type shared coordinate and attribution controls (#490, #491, #496, #497, #501, #506, #508, #509).
+- build(deps): Update fast-xml-parser to 5.12.0 (#487).
+
+## v5.0.0-beta.7
+
+- feat(arrow): Replace named columns with expressions evaluated against the original table while preserving column order, batch slice offsets, and row validity (#493).
+- feat(arrow): Add schema-bound expressions, typed function prototypes, classified errors, and whole-table evaluation in workers with Turf adapters (#457, #460, #480).
+- feat(arrow, SQL): Add computed expressions, scalar casts, packed and fixed-size arrays, Float16 and Uint8 support, normalized packing, RGBA and color functions, and optional numeric functions (#474–#478, #481, #482, #492).
+- feat(expressions): Publish portable AST and numeric contracts, add an optional SQL parser entry point, and support row-level TRY recovery and lazy fallbacks (#467, #485, #488).
+- feat(geospatial): Coordinate terrain transitions and mixed-resolution isobands, and extract tree-shakeable map entry points with explicit presets and optional geometry (#458, #479).
+- fix(examples): Repair solar terminator daytime imagery and reuse shared projection surfaces and bitmap mesh adapters (#464, #472, #484, #486).
+- chore(website): Standardize example styling and validate example boundaries (#494).
+- docs: Clarify maps and projection responsibilities, and document SQL conformance and benchmark recovery (#483, #489).
+- build: Refresh patched release, HTTP, parsing, and website dependencies and prepare merge queue validation (#459, #462, #465, #466, #470).
+
+## v5.0.0-beta.6
+
+- feat(geometry): Add bounded nonlinear box projection with explicit sampled enclosures and conservative inflation under a supplied global Lipschitz contract (#456).
+- feat(geometry): Add engine-independent projected bitmap texture coordinates for packed CPU vertices, with explicit image bounds and texture origin (#455).
+- feat(terrain): Add mixed-resolution derivative halos, incremental mixed-tile updates, topology-safe contours and isobands, dirty-window mesh and hierarchy updates, and scalable topology queries (#450, #451, #452, #453).
+- feat(terrain): Add persistent terrain hierarchies, regional DEM and streaming qualification, and LOD morphs, with seam, contour, bands/update, and streaming explorer examples (#454).
+- docs(tasks): Reorganize TaskRunner guidance, worker and shared-memory documentation, and migration examples (#449).
+
+## v5.0.0-beta.5
+
+- **Breaking:** Extract `@math.gl/core/arrow` and `@math.gl/tasks` as standalone packages. Move Arrow/GeoArrow utilities, UTF-8, and WKB/WKT from core and geospatial to the Arrow package and its capability subpaths; move task execution from `@math.gl/core/tasks` to `@math.gl/tasks`. The former packages no longer forward these exports. See the [upgrade guide](docs/upgrade-guide.md) (#447, #448).
+- feat(arrow): Add optional Apache Arrow 17+ utilities and Arrow-backed GeoArrow operations, with layout, null, union, slice, buffer-ownership, and browser-bundle qualification (#447, #448).
+- feat(core, geometry): Add numeric helpers, projection helpers, sample tracks, extended bounds and geometric queries, adaptive curve sampling, and parallel-transport frames. Improve numerical stability for extreme scales, vector/quaternion normalization, and cubic tangents (#432).
+- feat(tasks): Support concurrent operations on initialized tasks and bidirectional worker services (#423).
+- feat(terrain): Add opt-in raster-footprint clamping and support-only bilinear nodata sampling with bounded grid-node roundoff handling; add mixed-resolution contour welding and a qualified terrain mesh lab (#426, #436).
+- feat(core): Restore the dedicated expressions entry point; add dependency-free UTF-8 utilities, now available at `@math.gl/core/utf8` (#429, #446, #448).
+- feat(geometry): Add photometric and color lookup-table calculations (#439).
+- feat(geospatial): Expose resolved projection metadata for matching external backends (#438).
+- chore(web-mercator): Remove the unpublished GlobeMercatorProjection class (#440).
+- fix(examples): Render the raster projection lab without lighting; correct mobile navigation, example fullscreen behavior, and compact controls (#442, #443).
+- chore(examples): Standardize example packages and restore the benchmark guide (#441).
+- docs: Reorganize module documentation, navigation, API references, and the developer guide; add security policy and usage guidance (#427, #430, #431, #433, #435, #437, #445).
+- build: Update all Vite dependencies to 8.3.6 (#434).
+
+## v5.0.0-beta.4
+
+- feat(tasks): Separate initialization ownership from per-call processing payloads and add typed dispatch for multi-operation tasks, with persistent-resource and migration guidance (#420, #421).
+- fix(tasks): Correct CommonJS task initialization in Node workers and support cross-origin module worker task URLs (#418, #419).
+- feat(terrain): Weld contour paths across vertex tiles, qualify cross-tile contour behavior, and expose boundary diagnostics (#422, #425).
+- feat(terrain): Add gradient pyramids and an interactive terrain analysis view (#424).
+
+## v5.0.0-beta.3
+
+- **Breaking:** Replace the legacy public worker/task API families with `TaskRunner`, typed task objects, and `initializeTaskWorker`. Remove top-level task functions, worker-utils exports, worker resource wrappers, and geospatial worker subpaths; use `@math.gl/geospatial/tasks` for provided tasks. Input copying is the default, explicit handles retain worker state, and advanced pool controls are no longer public. See [task migration](docs/modules/tasks/developer-guide/migration.md) (#411, #414).
+- feat(tasks): Add global code-only `preloadTasks`, nested preload hooks, synchronous `runTaskSync` execution, and detailed task capability guidance (#417).
+- fix(core): Discover MessageChannel ports in transfer lists and support copying worker output (#407, #409).
+- feat(terrain): Add sampled profile and horizon visibility, radial visibility, vertex tile halos and invalidation, incremental halos, and filtered raster pyramids (#412, #413, #415, #416).
+- feat(geospatial): Add reusable screen-ray unprojection (#410).
+- docs: Add shared BibTeX citations and bibliography validation (#390).
+- build: Upgrade to Vitest 5 and dev-tools beta.2, retain provenance while making trusted-publishing recovery and retries safe, and update joi (#405, #406, #408).
+
+## v5.0.0-beta.2
+
+- **Breaking:** Rename expression evaluation exports to avoid collisions at the core package root (#373).
+- feat(geospatial): Preserve optional source provenance through prepared paths, polygons, nonlinear and rigid cap cuts, Mercator/Elastic paths, wrappers, spherical atlases and surface composition (#391, #392, #396, #399, #400, #401).
+- feat(geospatial): Add normalizeCRSIdentifier, native batched angle/vertex-mean/parallel predicates, parameterized projection-domain adapters, and qualified full-world direct map transitions (#365, #379, #382, #387, #395).
+- feat(geometry): Support application-defined subdivision error metrics; port earcut optimizations and correct projected hashing (#376, #403).
+- fix(core): Preserve runtime worker imports in webpack and tree-shake unused task worker URLs from classic bundles (#371, #394).
+- feat(examples): Expand chart-aware raster preparation and qualification, asynchronous proj-wasm batches, persistent UV grids and invalidation, display-space error gates, polar/nodata fixtures, periodic shared boundaries, and affine registration checks (#367, #368, #378, #380, #381, #383, #384, #385, #386, #398).
+- feat(examples): Add projection-domain, Antarctica/Fiji, centered oblique Mercator, DGGS, terrain sampling and WKT/WKB workbenches, with optional NASA imagery (#366, #369, #370, #372, #374, #375, #397).
+- docs: Refresh the homepage, animated maps, v5 highlights, migration guidance, and engine-agnostic execution contracts (#377, #388, #389, #393).
+- ci: Split overloaded checks, run full qualification nightly, and skip paired performance comparisons for documentation-only PRs (#402, #404).
+
+## v5.0.0-beta.1
+
+- **Breaking:** Move tree-shakeable APIs to package and capability roots and remove superseded API subpaths. Projection catalogs and data paths remain. Earth now requires `astronomy-engine`; core exposes matrix/vector namespaces and prefixed individual operations. See the root-export migration guide.
+
+- feat(terrain): Add height fields, regular and adaptive MARTINI/Delatin meshes, tiled and incremental snapshots, accelerated contacts and clearance queries, gradients, profiles, contours, mixed-resolution seam reconciliation and skirts (#314, #315, #319, #323, #324, #329, #331, #334, #335, #337, #339).
+- feat(geospatial): Add an opt-in CRS definition resolver, coordinate utilities, triaxial sampling, packed line buffers, ellipsoidal visibility, shared cut atlases, latitude-domain cuts and TileMatrixSet validation (#312, #313, #317, #320, #327, #333, #336).
+- feat(earth): Add solar terminators, evolving early-Earth terrain and imagery, place journeys, guided cameras, and future comparisons (#266, #325, #328, #330, #332, #338).
+- build(deps): Update postcss-selector-parser (#316).
+- Release tooling now transitions alpha versions to beta.1 explicitly; subsequent prerelease runs increment the beta number. Trusted publishing continues to use npm's beta tag.
+
+- feat(crs): Add descriptor builders, explicit target-plane domains, opt-in execution identity, and external-engine/proj-wasm integration (#321, #326, #354, #361).
+- feat(geoarrow): Add native batched Turf measurements, transforms, rhumb operations and intersection kernels, geometry streams, and projection-worker examples (#347, #349, #353, #356, #357, #360).
+- feat(core): Add main-thread and pooled-worker tasks, module worker URLs, configurable WASM resources, batch preprocessing and transfer examples, and graceful worker-pool shutdown (#342, #350, #351, #358, #363).
+- feat(geometry): Clip triangle meshes with attribute provenance and document raster mesh refinement/domain clipping recipes (#355, #362).
+- feat(examples): Add zoom-driven globe/Mercator views, cached projection grids, module feature cards, standardized panels, module navigation, and embedded solar-terminator documentation (#344, #346, #348, #352, #359, #364).
+
+## v5.0.0-alpha.20
+
+- feat(geospatial): Add reusable geodesic path sampling and adaptive geodesic polyline subdivision with surface-distance limits, unrolled longitude and original-edge provenance; extend generic subdivision with constant-speed source-edge samplers.
 
 - feat(earth): Add optional celestial time and frame/state primitives, share approximate starfield rotations, and document Arrow temporal interoperability.
 
@@ -9,6 +181,15 @@
 - feat(geospatial): Add reusable local reference frames, geographic heading/pitch/roll poses and velocity-aligned orientations. Extend tangent planes with radial projection, radial/normal surface inversion and packed projection with validity masks; correct three-radius tangent basis orthogonality.
 
 - fix(projection): Implement ellipsoidal orthographic, correct Eckert VI and Equal Earth pole inverses, and repair conic, polyconic and LAEA pole boundaries. Audit unchanged definitions against native PROJ and distinguish numerical accuracy from proj4js compatibility.
+
+- feat(geospatial): Add the unified MapEngine API, renderer-neutral feature preparation, inset layouts, geographic picking, discontinuous maps, Elastic maps, and prepared projection transitions (#271, #272, #279, #286, #294, #296, #297, #300, #301, #305, #307).
+- feat(geometry): Add hinge trees and geography-aware unfolding maps, including reusable myriahedral presets (#268, #274, #275).
+- feat(geospatial): Add qualified ellipsoid metrics, rhumb paths, geographic seam topology, complete global ellipsoidal intersections, elliptic revolution geodesics, triaxial trajectories, exact geodesic edge areas and polygon accumulation (#278, #280, #281, #287, #298, #308, #310).
+- fix(geospatial): Qualify nearest surface points, local frames and grazing contacts; freeze geometry caches and add packed frame transforms, optional ellipsoid frames, OBB quaternion operations and GeographicLib baselines (#273, #302, #304, #309).
+- feat(geoarrow): Expose dimension inference utilities (#303).
+- feat(examples): Add animated DGGS myriahedral views, community controls, responsive map layouts and improved example structure (#276, #288, #289, #311).
+- fix: Resolve findings from landed PR reviews (#295).
+- build: Update Node to 24.22.1, parallelize CI, and update zod, fast-uri, body-parser and undici (#282, #285, #290, #291, #292, #299).
 
 ## v5.0.0-alpha.19
 
@@ -503,7 +684,7 @@
 - Refactor WebMercatorViewport (#145)
 - Clean up bounding volume classes and docs (#144)
 - Fix web mercator projection far plane at high pitch (#142)
-- Restore default export of @math.gl/web-mercator (#141)
+- Restore default export of @math.gl/geospatial/web-mercator (#141)
 
 ## v3.2.0-alpha.2 - Apr 12, 2020
 
@@ -546,7 +727,7 @@
 
 ## v3.1.0-alpha.1 - Nov 4, 2019
 
-- Rename viewport-mercator-project to @math.gl/web-mercator (#116)
+- Rename viewport-mercator-project to @math.gl/geospatial/web-mercator (#116)
 - [viewport-mercator-project] use zoom-independent world space (#118)
 - Add sun module (#114)
 - Port sun calculations from deck (#111)
@@ -741,3 +922,9 @@
 
 ### 1.0.0-alpha.1
 - Initial source code copy from luma.gl v4.1-alpha branch
+
+## Unreleased package consolidation
+
+- Consolidate Arrow, GeoArrow, and WKB integration in core/arrow; expose matrix, color, and UTF-8 core entry points. Apache Arrow remains an optional peer supplied by the application.
+- Move Web Mercator into geospatial/web-mercator; organize docs and examples under the owning packages.
+- Merge Arrow scale evaluation into sql/scales. Keep tasks and DGGS separate.

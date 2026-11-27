@@ -5,7 +5,7 @@
 // SPDX-FileComment: Generated BSC5 subset; retain LICENSE-BRIGHT-STARS.
 // Source: https://github.com/brettonw/YaleBrightStarCatalog/tree/abffb3b7223ae37e879b0a3ff5b49ad06aed5576
 // Input SHA-256: 28cb835cbd2d72ced9ef9d20d9b5d92f05f649dfd39a509b1cf82dbd3c5f2fb9
-// Regenerate with modules/earth/sun/scripts/generate-stars.mjs; do not edit.
+// Regenerate with modules/earth/scripts/sun/generate-stars.mjs; do not edit.
 import type {StarCatalogRow} from '../star-types';
 
 export const STAR_CATALOG_DATA: readonly StarCatalogRow[] = [

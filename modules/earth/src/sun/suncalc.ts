@@ -108,7 +108,7 @@ function getAltitude(hourAngle: number, latitudeInRadians: number, declination: 
 
 // https://www.aa.quae.nl/en/reken/zonpositie.html
 // "The Observer section"
-function getSiderealTime(dates: number, longitudeWestInRadians: number): number {
+export function getSiderealTime(dates: number, longitudeWestInRadians: number): number {
   return DEGREES_TO_RADIANS * (THETA0 + THETA1 * dates) - longitudeWestInRadians;
 }
 

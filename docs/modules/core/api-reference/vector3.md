@@ -6,11 +6,10 @@
 
 `Vector3` extends JavaScript `Array` through its core base classes.
 
-
 ## Usage
 
 ```js
-import {Vector3} from '@math.gl/core';
+import {Vector3} from '@math.gl/core/matrix';
 const vector = new Vector3(1, 1, 1);
 ```
 
@@ -76,7 +75,9 @@ Note that `Vector3` is a subclass of the built in JavaScript `Array` and can thu
 
 ### len()
 
-Returns the magnitude. `length` is the array component count.
+Returns the magnitude.
+
+`length` is the array component count.
 
 ### distance(vector)
 
@@ -164,3 +165,7 @@ Transform the vector's `x` and `y` values by the provided 2x2 matrix.
 ### transformByQuaternion(quaternion : Number[4]) : this
 
 Transform the vector by the provided `quaternion`.
+
+## Related functional operations
+
+The functional API also provides `vec3Slerp`, `vec3Bezier`, and `vec3Hermite`. See [functional math](../developer-guide/functional-math.md) for imports, output ownership, and limitations.

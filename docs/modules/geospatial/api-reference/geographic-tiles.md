@@ -5,8 +5,7 @@
 </p>
 
 ```typescript
-import {getGeographicTile, getGeographicTileBounds, getGeographicTileRanges}
-  from '@math.gl/geospatial/tiles';
+import {getGeographicTile, getGeographicTileBounds, getGeographicTileRanges} from '@math.gl/geospatial/tiles';
 
 getGeographicTile(175, 20, 3); // {x: 7, y: 3, level: 3}
 getGeographicTileBounds({x: 7, y: 3, level: 3}); // [135, 0, 180, 22.5]
@@ -21,20 +20,20 @@ increases southward from latitude 90. Levels are integers from 0 through 30.
 Coordinates and bounds are in degrees. This grid is not Web Mercator XYZ and does
 not claim compatibility with a particular tile protocol's root layout.
 
-## getGeographicTile(longitude, latitude, level)
+#### `getGeographicTile(longitude, latitude, level)`
 
 Returns `{x, y, level}` for a finite longitude in [-180, 180] and latitude in [-90, 90].
 Interior grid edges belong to the tile east or south of the edge. The outer east
 and south edges belong to the last column and row. Longitude -180 addresses the
 first column; +180 addresses the last. Longitudes are not implicitly normalized.
 
-## getGeographicTileBounds(tile)
+#### `getGeographicTileBounds(tile)`
 
 Returns `[west, south, east, north]`. Tile coordinates must be integers inside the
 level's grid. Bounds never cross the antimeridian and can feed geographic requests
 or conversion to Cartesian bounds using `makeOBBFromRegion`.
 
-## getGeographicTileRanges(bounds, level)
+#### `getGeographicTileRanges(bounds, level)`
 
 Returns at most two disjoint, inclusive integer ranges `{minX, maxX, minY, maxY}`
 sorted by minX. Input `[west, south, east, north]` uses the same degree bounds
@@ -58,7 +57,7 @@ requests, manage streaming, or implement geographic-distance nearest queries.
 Convert degree bounds and heights to a geodetic region before creating an OBB:
 
 ```typescript
-import {makeOBBFromRegion} from '@math.gl/geospatial';
+import {makeOBBFromRegion} from '@math.gl/geospatial/globe';
 const [west, south, east, north] = getGeographicTileBounds(tile);
 const radians = Math.PI / 180;
 const box = makeOBBFromRegion([
@@ -69,11 +68,10 @@ const box = makeOBBFromRegion([
 The height interval is application supplied. Index construction and storage belong
 in a spatial index; tile refinement and cache policy belong in the tile system.
 
-
 ## Explicit tile matrix grids
 
 For projected grids or service-defined origins, resolutions and tile dimensions, use
-[Tile matrix utilities](./tile-matrix.md) from `@math.gl/geospatial/tile-matrix`. They provide
+[Tile matrix utilities](./tile-matrix.md) from `@math.gl/geospatial`. They provide
 compact extent ranges and resolution-based matrix selection without assuming this geographic
 quadtree layout. Their far outer edges are excluded and queries do not wrap; the geographic
 helpers above retain their world-edge and antimeridian semantics.

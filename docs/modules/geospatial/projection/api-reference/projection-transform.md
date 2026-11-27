@@ -4,8 +4,8 @@
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>
 
-The configurable math.gl projection engine used by the full, configurable and lazy engines; see the [support and migration contract](../developer-guide/support.md).
-Import it from `@math.gl/geospatial/projection` or the isolated `@math.gl/geospatial/projection/core` entry point.
+The configurable math.gl projection engine used by the full, configurable and lazy engines; see the [supported definitions and operations](../developer-guide/support.md).
+Import it from `@math.gl/geospatial/projection` or the isolated `@math.gl/geospatial/projection-core` entry point.
 The package has no proj4js runtime dependency. Install `proj4` separately when
 its upstream behavior is required.
 
@@ -32,13 +32,13 @@ size comparisons, and application integration.
 
 ## Isolated entry points
 
-Use `@math.gl/geospatial/projection/core` for the class, normalization, capability checks
+Use `@math.gl/geospatial/projection-core` for the class, normalization, capability checks
 and shared contracts. Import a plugin from `@math.gl/geospatial/projection/projections/<id>`
 using its canonical PROJ name, for example `merc`, `utm`, `etmerc`, `geocent` or
 `ob_tran`. Export names are identical to the barrel's names. Geographic coordinates
 need no plugin or `longlat` subpath; the internal `gauss` helper is not public.
 
-The optional regional `datumCatalog` plugin is available from `@math.gl/geospatial/projection/datums`.
+The optional regional `datumCatalog` plugin is available from `@math.gl/geospatial/projection-datums`.
 Its runtime export stays outside the root and `/core` entry points.
 
 Readers are available from `parsers/wkt`, `parsers/projjson`,
@@ -71,7 +71,7 @@ Unknown datum names throw a `missing-transform-stage` error with registration gu
 import type {
   DatumDefinition,
   DatumCatalogPlugin,
-} from "@math.gl/geospatial/projection/core";
+} from "@math.gl/geospatial/projection-core";
 
 const local: DatumDefinition = { ellipse: "airy", towgs84: "1,2,3" };
 const catalog: DatumCatalogPlugin = {
@@ -155,17 +155,24 @@ axis names. Other UNKNOWN directions reject. Non-cardinal or non-polar axis-meri
 operations, vertical-first structured axes, derived CRSs, and time-dependent operations remain
 outside this subset. PROJ axis permutations support vertical-first ordering.
 
-`normalizeCRS(input, options)` produces an immutable execution model with distinct
+#### `normalizeCRS(input, options)`
+
+Produces an immutable execution model with distinct
 projection and datum ellipsoids, units, prime meridian, axes, and datum parameters.
 Normalization alone does not verify a projection plugin's parameter support.
-`checkProjectionCompatibility(input, options)` checks construction with the selected
+
+#### `checkProjectionCompatibility(input, options)`
+
+Checks construction with the selected
 readers/plugins and reports `supported`, `unsupported`, or `unknown`, with reasons
 `unknown-syntax`, `missing-parser`, `missing-plugin`, `missing-transform-stage`, or
 `invalid-definition`. It does not assess accuracy or a particular coordinate's domain.
 
 ## Methods and dimensions
 
-`project(coordinate)` transforms source to target; `unproject(coordinate)` reverses it.
+#### `project(coordinate)`
+
+Transforms source to target; `unproject(coordinate)` reverses it.
 Both are bound methods accepting readonly arrays and returning new arrays.
 
 Geographic x/y use degrees for PROJ definitions, or the angular units declared by
@@ -185,7 +192,9 @@ mode to compare the computed values. Geocentric units also apply consistently to
 
 ## Reusable scalar outputs
 
-`projectTo(coordinate, output)` and `unprojectTo(coordinate, output)` write a single
+#### `projectTo(coordinate, output)`
+
+And `unprojectTo(coordinate, output)` write a single
 coordinate into caller-owned storage and return that exact output object. Transforms created by the full, configurable and lazy engines expose these bound methods. Use them when a scalar
 loop should reuse its result instead of creating an array on each call:
 
@@ -227,7 +236,9 @@ avoid repeated scalar dispatch and validation.
 
 ## Flat typed arrays (in place)
 
-`projectFlat(coordinates, dimension = 2)` and
+#### `projectFlat(coordinates, dimension = 2)`
+
+And
 `unprojectFlat(coordinates, dimension = 2)` transform a `Float64Array` or
 `Float32Array` and return that same typed-array view. Records are interleaved:
 
@@ -380,7 +391,9 @@ PROJ/EPSG spellings of its fixed cone-axis co-latitude (`alpha=30.28813972222222
 or `30.28813975277778`, with 1e-10-degree rounding tolerance). Custom values reject
 instead of being silently ignored by the fixed kernel.
 
-`obliqueTransformation` is a factory with an explicit dependency:
+#### obliqueTransformation
+
+Is a factory with an explicit dependency:
 
 ```typescript
 import {
@@ -424,13 +437,17 @@ const projection = new ProjectionTransform({
 });
 ```
 
-`parseNTv2Grid(buffer, {includeErrorFields})` supports both byte orders and
+#### `parseNTv2Grid(buffer, {includeErrorFields})`
+
+Supports both byte orders and
 NTv2 SECONDS grids. The default reads 16-byte node records, including unused accuracy
 fields. Set `includeErrorFields: false` only for compact files with 8-byte records;
 it does not simply discard accuracy fields from a standard file. Invalid headers,
 dimensions, unsupported units and truncated data throw at preparation time.
 
-`loadGeoTIFFGrid(decodedTIFF)` asynchronously prepares a decoded geotiff.js v2/v3
+#### `loadGeoTIFFGrid(decodedTIFF)`
+
+Asynchronously prepares a decoded geotiff.js v2/v3
 object. Callers load the file or URL with their chosen GeoTIFF library and await the
 result before construction:
 
@@ -534,7 +551,7 @@ Advanced plugins can implement optional `createForwardFlat(context)` and
 `createInverseFlat(context)` methods on `ProjectionImplementation`. They receive a frozen
 `ProjectionFlatContext` with `inputScale` and `outputScale`, and return a synchronous
 `ProjectionFlatOperation` or `undefined` to decline specialization. These types are
-exported from `@math.gl/geospatial/projection/core`. Factories run once per direction at construction;
+exported from `@math.gl/geospatial/projection-core`. Factories run once per direction at construction;
 operations receive the entire view and stride, after the engine validates both.
 
 A custom operation must multiply input XY by `inputScale`, apply the forward/inverse
@@ -569,9 +586,11 @@ implementations are identified separately. Distributed notices include the upstr
 MIT license and Equal Earth's retained Apache-2.0 license.
 
 For the built-in descriptor catalogue, use `LazyProjectionEngine` from
-`@math.gl/geospatial/projection/projections/lazy`. Create a transform with `createProjection()`
+`@math.gl/geospatial/projection-projections-lazy`. Create a transform with `createProjection()`
 or prepare a synchronous transform with `createProjectionAsync()`. Readers, aliases
 and grids remain explicit engine options. See the [engine reference](./projection-engine.md).
+
+See [Attributions](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
 
 ## Vertical height grids
 
@@ -581,9 +600,11 @@ return geoid undulation in metres, or `undefined` outside coverage. Longitudes a
 referenced in the associated CRS's horizontal datum. Register implementations per instance
 and reference their names with `+geoidgrids`; scalar and flat transforms then require Z.
 
-`parseGTXGrid` is exported from `@math.gl/geospatial/projection/grids/gtx`.
+#### parseGTXGrid
+
+Is exported from `@math.gl/geospatial/projection-grids-gtx`.
 `createVerticalGrid`, `createGeoidGrid` and `VerticalGridOptions` are exported from
-`@math.gl/geospatial/projection/grids/vertical`. The public root and compatibility experimental/native
+`@math.gl/geospatial/projection-grids-vertical`. The public root and compatibility experimental/native
 entry points also export these helpers; `/core` exports only the contract and engine.
 See [height conversion](../developer-guide/projection-engine.md#convert-geoid-heights) for loading,
 units, axes, fallback, coverage, datum ordering and the limits of this explicit subset.
@@ -593,7 +614,7 @@ units, axes, fallback, coverage, datum ordering and the limits of this explicit 
 `loadVerticalGeoTIFFGrid(tiff: VerticalGridGeoTIFF): Promise<VerticalGrid>` prepares an
 owned geoid snapshot from a caller-decoded TIFF. Import it and its structural types
 `VerticalGridGeoTIFF` / `VerticalGridGeoTIFFImage` from
-`@math.gl/geospatial/projection/grids/vertical-geotiff`. The root and experimental/native compatibility
+`@math.gl/geospatial/projection-grids-vertical-geotiff`. The root and experimental/native compatibility
 entry points also export it. Metadata may be synchronous (geotiff.js v2) or asynchronous
 (v3); numeric sample arrays must be raw, without decoder-applied scale/offset.
 
@@ -601,3 +622,11 @@ The accepted metadata, geometry, nesting, coverage and units are specified in th
 [vertical GeoTIFF guide](../developer-guide/projection-engine.md#vertical-geotiff-geoid-models). The
 result plugs into `verticalGrids` on all math.gl projection engine variants. This function
 neither loads files nor selects a vertical datum operation automatically.
+
+## Transform metadata
+
+`description` exposes the optional backend-independent
+[resolved transform description](./projection.md#resolved-transform-description).
+Eager instances expose it immediately; deferred instances expose it only after preparation.
+Metadata is immutable and includes both execution directions. Algorithm names alone do
+not establish equivalence with a GPU or other backend.

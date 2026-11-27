@@ -11,7 +11,7 @@
 /* eslint-disable quotes, no-var */
 import {test, expect} from 'vitest';
 
-import {Matrix3, Matrix4} from '@math.gl/core';
+import {Matrix3, Matrix4} from '@math.gl/core/matrix';
 
 function matrixEquals3(a, b, tolerance) {
   tolerance = tolerance || 0.0001;

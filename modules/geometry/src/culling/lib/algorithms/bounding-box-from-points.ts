@@ -5,9 +5,9 @@
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
 // This file is derived from the Cesium math library under Apache 2 license
-// See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
+// See ../../../../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
-import {Vector3, Matrix3} from '@math.gl/core';
+import {Vector3, Matrix3} from '@math.gl/core/matrix';
 import {computeEigenDecomposition} from './compute-eigen-decomposition';
 import {OrientedBoundingBox} from '../bounding-volumes/oriented-bounding-box';
 import {AxisAlignedBoundingBox} from '../bounding-volumes/axis-aligned-bounding-box';

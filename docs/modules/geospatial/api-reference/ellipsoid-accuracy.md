@@ -68,6 +68,22 @@ ellipsoid to change shape. This tightens previously mutable nested vectors.
 Geodesic prolate support does not change the sphere/oblate-only `toSpheroid`
 contract used by projection and Cartesian conversion.
 
+## Completed P0 qualification
+
+The [full P0 operation/domain matrix](../projection/ellipsoid-p0-qualification.md)
+closes G0–G2 for the declared sampled support profile. It adds 930 independent
+180-digit geometry controls (including 210 stored anchor inputs) and 2,550 controls from full C++ GeographicLib 2.7,
+including elliptic-integral Exact comparisons. It also audits every existing
+Ellipsoid method's units, ownership and boundary policy. Native C++ thin-shape
+failures/discrepancies and beyond-four-circuit series limitations remain visible;
+mathematical expectations, not parity with an inaccurate comparator, gate fixes.
+
+Measured fixes cover compensated exterior normals, polar degree conversion,
+extreme-ray normals/radial projection, tiny-unit frame classification and nested
+result setters. No existing accuracy/bundle threshold is weakened and no package
+dependency is added. The roadmap now proceeds to G3/G4. Wider Exact and arbitrary
+finite-domain certification remain separate; this is not full feature parity.
+
 ## Capability coverage and remaining work
 
 | Capability | math.gl status |
@@ -79,11 +95,11 @@ contract used by projection and Cartesian conversion.
 | Prolate geodesics | Exposed; native controls at approximately -1/50 flattening |
 | Ellipsoidal gnomonic | Shared reduced-length/scale formulation; native projection controls |
 | Sphere/oblate ECEF and unique nearest-normal interiors | Shared kernel; independent high-precision mathematical controls |
-| Robust geodesic polygon area/perimeter and edge area | Not exposed or qualified; requires compensated accumulation, pole/dateline crossing and singularity tests |
+| Geodesic polygon area/perimeter and edge area | Exposed with compensated accumulation and bounded independent/native controls; see [G3–G4 qualification](../projection/geographiclib-g34-qualification.md) |
 | Exact geodesics for arbitrary flattening | Not implemented; sixth-order series is not an exact elliptic-integral solver |
 | General triaxial geodesics | Not implemented |
 | Certified nearest surface point on every triaxial/prolate interior | Sampled nearest solutions and unique cusp boundaries qualified; ambiguous minima reject; no universal finite-input certificate |
-| Rhumb lines and geodesic intersections | Not implemented |
+| Rhumb lines and geodesic intersections | Scalar rhumb inverse/direct/lines/polygons and bounded intersections are exposed; see [G5–G6 qualification](../projection/geographiclib-g56-qualification.md). Capture-bound global completeness is on master through [PR #287](https://github.com/visgl/math.gl/pull/287), within the [declared G6 profile](../projection/geographiclib-g6-qualification.md) |
 | Magnetic/gravity/geoid models | Outside the ellipsoid geometry API; not implied by geodesic parity |
 | Performance advantage over GeographicLib | No claim; shared implementation plus facade has not established an advantage |
 
@@ -98,8 +114,8 @@ Download `src/geodesic.c` and `src/geodesic.h` from PROJ tag `9.9.0` into a loca
 source directory, then run:
 
 ```sh
-python3 modules/geospatial/projection/scripts/generate-geodesic-qualification.py --source-dir /path/to/PROJ/src --check
-node modules/geospatial/projection/scripts/qualify-geodesics.mjs
+python3 modules/geospatial/scripts/projection/generate-geodesic-qualification.py --source-dir /path/to/PROJ/src --check
+node modules/geospatial/scripts/projection/qualify-geodesics.mjs
 ```
 
 The generator verifies both source SHA-256 hashes before compiling a temporary C
@@ -108,3 +124,5 @@ binary64 fixture and checks generator provenance. Test inputs and the driver are
 original math.gl work, not copied upstream test data. GeographicLib runtime SPDX
 credits and packaged MIT license remain intact. The oracle sources are used
 offline and are not included in the package.
+
+See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileCopyrightText: Copyright (c) 2017 Uber Technologies, Inc.
 
+import {rotateTowards as quatRotateTowards} from '../gl-matrix/quat';
 import {NumericArray} from '../types';
 import {MathArray} from './base/math-array';
 import {checkNumber} from '../lib/validators';
@@ -108,6 +109,10 @@ export class Quaternion extends MathArray {
   }
 
   /** Set a quat to the identity quaternion */
+  rotateTowards(target: Readonly<NumericArray>, step: number): this {
+    return quatRotateTowards(this, this, target, step);
+  }
+
   identity(): this {
     quat_identity(this);
     return this.check();
