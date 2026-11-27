@@ -62,7 +62,7 @@ npm install @math.gl/core
 
 ## Numeric helpers and sample tracks
 
-[Numeric helpers](./api-reference/numeric-helpers.md) cover vector projection/reflection, length controls, scalar damping and quaternion stepping. [SampleTrack](./api-reference/sample-track.md) evaluates timestamped scalar, vector and quaternion samples with reusable outputs.
+[Numeric helpers](./api-reference/numeric-helpers.md) cover vector projection/reflection, length controls, scalar damping and quaternion stepping. [SampleTrack](./api-reference/sample-track.md) evaluates timestamped scalar, vector and quaternion samples with reusable outputs. [SimulationClock](./api-reference/simulation-clock.md) is a fixed-tick time base with a variable rate and interpolation between ticks.
 
 ## Learn core math
 

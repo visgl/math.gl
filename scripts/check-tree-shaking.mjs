@@ -104,6 +104,7 @@ const probes = [
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/sql/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
   {symbol:'spheroidToCartesian', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
   {symbol:'vec3Normalize', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
+  {symbol:'SimulationClock', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec[234]/, /sample-track/, /gl-matrix/, /\/sql\//], budget:3600},
   // Line networks: the builder and the route helpers load without each other, SQL, loaders.gl or turf.
   {symbol: 'buildLineNetwork', packages: ['@math.gl/geospatial/line-network'],
     forbidden: [/\/sql\//, /loaders\.gl/, /@turf\//, /line-network-routes/], budget: 11850},

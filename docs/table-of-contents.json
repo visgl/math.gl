@@ -105,6 +105,7 @@
               "modules/core/api-reference/utilities",
               "modules/core/api-reference/numeric-helpers",
               "modules/core/api-reference/sample-track",
+              "modules/core/api-reference/simulation-clock",
               "modules/core/api-reference/vector",
               "modules/core/api-reference/vector2",
               "modules/core/api-reference/vector3",
