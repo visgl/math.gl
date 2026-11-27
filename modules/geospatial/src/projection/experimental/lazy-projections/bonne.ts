@@ -6,5 +6,8 @@ import {createProjectionDescriptor} from '../projection-descriptor';
 import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyBonne: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'bonne', aliases: ['Bonne (Werner lat_1=90)']},
-  async () => (await import('@math.gl/geospatial/projection/projections/bonne')).bonne
+  async () => {
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-bonne');
+    return projectionModule.bonne;
+  }
 );

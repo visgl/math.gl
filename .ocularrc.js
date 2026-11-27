@@ -5,7 +5,7 @@ import {resolve} from 'node:path';
 
 export default {
   lint: {
-    paths: ['dev-docs', 'docs', 'modules', 'test'], // 'examples', 'website'
+    paths: ['dev-docs', 'docs', 'examples', 'modules', 'test'], // 'website'
     extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx', 'd.ts', 'md']
   },
 
@@ -15,7 +15,6 @@ export default {
 
   entry: {
     bench: 'test/bench/node.ts',
-    'bench-browser': 'test/bench/browser.ts',
     size: [
       'test/size/core.js',
       'test/size/vector3.js',

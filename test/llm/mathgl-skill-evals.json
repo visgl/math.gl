@@ -38,7 +38,7 @@
       "Choose a suitable coordinate frame"
     ],
     "sources": [
-      "docs/modules/web-mercator/developer-guide/web-mercator-offset-accuracy.md"
+      "docs/modules/geospatial/web-mercator/developer-guide/web-mercator-coordinates.md"
     ]
   },
   {
@@ -69,6 +69,6 @@
       "Check geoid model and units",
       "Verify sign against a known point"
     ],
-    "sources": ["docs/modules/earth/geoid/README.md"]
+    "sources": ["docs/modules/earth/README.md"]
   }
 ]

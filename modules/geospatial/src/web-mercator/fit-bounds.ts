@@ -1,0 +1,132 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import {assert} from './assert';
+import {log2, clamp} from './math-utils';
+import {MAX_LATITUDE, lngLatToWorld, worldToLngLat} from './web-mercator-utils';
+
+/**
+ * Options for fitBounds
+ */
+export type FitBoundsOptions = {
+  /**  viewport width  */
+  width: number;
+  /**  viewport height  */
+  height: number;
+  /**  [[lon, lat], [lon, lat]]  */
+  bounds: [[number, number], [number, number]];
+  /**  The width/height of the bounded area will never be smaller than this. 0.01 would be about 1000 meters (degree is ~110KM)  */
+  minExtent?: number;
+  /**  The maximum zoom level to fit the bounds within. */
+  maxZoom?: number; // ~x4,000,000 => About 10 meter extents
+  /**
+   * padding - The amount of padding in pixels to add to the given bounds.
+   * Can also be an object with top, bottom, left and right properties defining the padding.
+   */
+  padding?: number | Padding;
+  /** Pixel offset from the padded center. Positive x moves right and positive y moves down. */
+  offset?: number[];
+};
+
+/**
+ * An object describing the padding to add to the bounds.
+ */
+export type Padding = {
+  /** Padding from top in pixels to add to the given bounds */
+  top: number;
+  /** Padding from bottom in pixels to add to the given bounds */
+  bottom: number;
+  /** Padding from left in pixels to add to the given bounds */
+  left: number;
+  /** Padding from right in pixels to add to the given bounds */
+  right: number;
+};
+
+type ViewportProps = {
+  longitude: number;
+  latitude: number;
+  zoom: number;
+};
+
+/**
+ * Returns map settings {latitude, longitude, zoom}
+ * that will contain the provided corners within the provided width.
+ *
+ * > _Note: Only supports non-perspective mode._
+ *
+ * @param options fit bounds parameters
+ * @returns - latitude, longitude and zoom
+ */
+export function fitBounds(options: FitBoundsOptions): ViewportProps {
+  const {
+    width,
+    height,
+    bounds,
+    minExtent = 0, // 0.01 would be about 1000 meters (degree is ~110KM)
+    maxZoom = 24, // ~x4,000,000 => About 10 meter extents
+    offset = [0, 0]
+  } = options;
+
+  const [[west, south], [east, north]] = bounds;
+  const padding = getPaddingObject(options.padding);
+
+  const nw = lngLatToWorld([west, clamp(north, -MAX_LATITUDE, MAX_LATITUDE)]);
+  const se = lngLatToWorld([east, clamp(south, -MAX_LATITUDE, MAX_LATITUDE)]);
+
+  // width/height on the Web Mercator plane
+  const size = [
+    Math.max(Math.abs(se[0] - nw[0]), minExtent),
+    Math.max(Math.abs(se[1] - nw[1]), minExtent)
+  ];
+
+  const targetSize = [
+    width - padding.left - padding.right - Math.abs(offset[0]) * 2,
+    height - padding.top - padding.bottom - Math.abs(offset[1]) * 2
+  ];
+
+  assert(targetSize[0] > 0 && targetSize[1] > 0);
+
+  // scale = screen pixels per unit on the Web Mercator plane
+  const scaleX = targetSize[0] / size[0];
+  const scaleY = targetSize[1] / size[1];
+
+  const zoom = Math.min(maxZoom, log2(Math.abs(Math.min(scaleX, scaleY))));
+  assert(Number.isFinite(zoom));
+
+  // Translate the viewport center by the inverse of the desired screen-space shift.
+  const scale = 2 ** zoom;
+  const shiftX = (padding.left - padding.right) / 2 + offset[0];
+  const shiftY = (padding.top - padding.bottom) / 2 + offset[1];
+  const centerLngLat = worldToLngLat([
+    (se[0] + nw[0]) / 2 - shiftX / scale,
+    (se[1] + nw[1]) / 2 + shiftY / scale
+  ]);
+
+  return {
+    longitude: centerLngLat[0],
+    latitude: centerLngLat[1],
+    zoom
+  };
+}
+
+// Helpers
+function getPaddingObject(padding: number | Padding = 0): Padding {
+  if (typeof padding === 'number') {
+    return {
+      top: padding,
+      bottom: padding,
+      left: padding,
+      right: padding
+    };
+  }
+
+  // Make sure all the required properties are set
+  assert(
+    Number.isFinite(padding.top) &&
+      Number.isFinite(padding.bottom) &&
+      Number.isFinite(padding.left) &&
+      Number.isFinite(padding.right)
+  );
+
+  return padding;
+}

@@ -18,5 +18,5 @@ export const lazyTransverseMercator: ProjectionDescriptor =
       ]
     },
     async () =>
-      (await import('@math.gl/geospatial/projection/projections/tmerc')).transverseMercator
+      (await import('@math.gl/geospatial/projection-projections-tmerc')).transverseMercator
   );

@@ -16,5 +16,5 @@ export const lazyObliqueStereographic: ProjectionDescriptor =
       ]
     },
     async () =>
-      (await import('@math.gl/geospatial/projection/projections/sterea')).obliqueStereographic
+      (await import('@math.gl/geospatial/projection-projections-sterea')).obliqueStereographic
   );

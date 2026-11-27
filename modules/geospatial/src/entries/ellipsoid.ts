@@ -6,13 +6,14 @@ export {Ellipsoid} from '../ellipsoid';
 export {EllipsoidTangentPlane} from '../ellipsoid-tangent-plane';
 export {isWGS84} from '../type-utils';
 export type {SpheroidParameters} from '@math.gl/core/types';
-export {EllipsoidGeodesic} from '../ellipsoid-geodesic';
-export type {
-  GeodesicResult,
-  GeodesicLine,
-  GeodesicParameters,
-  GeodesicOptions
-} from '../ellipsoid-geodesic';
-export {LocalReferenceFrame} from '../local-reference-frame';
-export type {LocalReferenceFrameOptions, HeadingPitchRoll} from '../local-reference-frame';
 export type {TangentPlaneProjectionMode, TangentPlaneProjection} from '../ellipsoid-tangent-plane';
+
+export {EllipsoidMetrics} from '../ellipsoid-metrics';
+export type {AuxiliaryLatitude} from '../ellipsoid-metrics';
+export {TriaxialEllipsoid} from '../triaxial';
+export type {
+  TriaxialCoordinates,
+  TriaxialParameters,
+  CartesianGeodesicState,
+  TriaxialGeodesicLine
+} from '../triaxial';

@@ -18,6 +18,7 @@ export type {
 } from './crs';
 export type {
   CreateSpatialReferenceOptions,
+  CRSInput,
   CRSReference,
   KnownCRSReference,
   ReadonlyCRSDefinition,
@@ -31,6 +32,7 @@ export type {
   UnresolvedCRSReference
 } from './spatial-reference';
 export {createSpatialReference, inferCRSRepresentation} from './spatial-reference';
+export {normalizeCRSIdentifier} from './crs-identifier';
 export type {
   EncodeWKTCRSOptions,
   ParseWKTCRSOptions,
@@ -63,3 +65,45 @@ export {
 export type {CRSMetadata, CRSUnit} from './crs-metadata';
 export {getCRSSignature} from './crs-metadata';
 export {linearUnits} from './units-table';
+
+// Public named exports. Implementations remain in independently tree-shakable files.
+export {createCRSDictionaryProvider, createCRSResolver, CRSResolutionError} from './resolver';
+export type {
+  CRSDefinitionProvider,
+  CRSLookup,
+  CRSResolution,
+  CRSResolverOptions,
+  CRSResolver
+} from './resolver';
+
+export {createCRSDescriptor} from './crs-descriptor';
+export type {CRSDescriptorOptions} from './crs-descriptor';
+export type {
+  CRSCoordinate,
+  CRSOutput,
+  CRSDescriptor,
+  CRSConversion,
+  CRSConverter,
+  CRSBounds,
+  CRSRenderingScale,
+  CRSRenderingScaleCallback
+} from './crs-descriptor-types';
+
+export {createCRSProjectionDomain} from './projection-domain';
+export type {
+  CRSProjectionDomainPoint,
+  CRSProjectionDomainRing,
+  CRSProjectionDomainPolygon,
+  CRSProjectionPeriod,
+  CRSProjectionDomain
+} from './projection-domain';
+
+export {createCRSExecutionIdentity, getCRSExecutionKey} from './execution-identity';
+export type {CRSExecutionIdentity} from './execution-identity';
+
+export {
+  SPATIAL_REFERENCE_METADATA_KEY,
+  getSpatialReferenceMetadata,
+  setSpatialReferenceMetadata,
+  resolveSpatialReferenceMetadata
+} from './spatial-reference-metadata';

@@ -6,8 +6,8 @@
 /* eslint-disable*/
 import {test, expect} from 'vitest';
 
-import {Euler, Matrix4, Quaternion, Vector3, equals} from '@math.gl/core';
-import type {EulerLike} from '@math.gl/core';
+import {Euler, Matrix4, Quaternion, Vector3, equals} from '@math.gl/core/matrix';
+import type {EulerLike} from '@math.gl/core/matrix';
 
 test('Quaternion#import', () => {
   expect(typeof Quaternion).toBe('function');

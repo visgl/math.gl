@@ -1,12 +1,12 @@
 {
   "name": "@math.gl/core",
-  "description": "Array-based 3D Math Classes optimized for WebGL applications",
+  "description": "Foundational matrix, color, UTF-8, and optional Arrow utilities",
   "license": "MIT",
   "type": "module",
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.19",
+  "version": "5.1.0-alpha.0",
   "keywords": [
     "webgl",
     "javascript",
@@ -27,73 +27,63 @@
     "type": "git",
     "url": "https://github.com/visgl/math.gl.git"
   },
-  "types": "dist/index.d.ts",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./mat3": {
-      "types": "./dist/mat3.d.ts",
-      "import": "./dist/mat3.js",
-      "require": "./dist/mat3.cjs"
-    },
-    "./mat4": {
-      "types": "./dist/mat4.d.ts",
-      "import": "./dist/mat4.js",
-      "require": "./dist/mat4.cjs"
-    },
-    "./quat": {
-      "types": "./dist/quat.d.ts",
-      "import": "./dist/quat.js",
-      "require": "./dist/quat.cjs"
-    },
-    "./vec2": {
-      "types": "./dist/vec2.d.ts",
-      "import": "./dist/vec2.js",
-      "require": "./dist/vec2.cjs"
-    },
-    "./vec3": {
-      "types": "./dist/vec3.d.ts",
-      "import": "./dist/vec3.js",
-      "require": "./dist/vec3.cjs"
-    },
-    "./vec4": {
-      "types": "./dist/vec4.d.ts",
-      "import": "./dist/vec4.js",
-      "require": "./dist/vec4.cjs"
-    },
-    "./local-frame": {
-      "types": "./dist/local-frame.d.ts",
-      "import": "./dist/local-frame.js",
-      "require": "./dist/local-frame.cjs"
-    },
-    "./spheroid": {
-      "types": "./dist/spheroid.d.ts",
-      "import": "./dist/spheroid.js",
-      "require": "./dist/spheroid.cjs"
-    },
     "./types": {
       "types": "./dist/types.d.ts",
       "import": "./dist/types.js",
       "require": "./dist/types.cjs"
     },
-    "./expressions": {
-      "types": "./dist/expressions/index.d.ts",
-      "import": "./dist/expressions/index.js",
-      "require": "./dist/expressions/index.cjs"
+    "./matrix": {
+      "types": "./dist/matrix.d.ts",
+      "import": "./dist/matrix.js",
+      "require": "./dist/matrix.cjs"
+    },
+    "./color": {
+      "types": "./dist/color/index.d.ts",
+      "import": "./dist/color/index.js",
+      "require": "./dist/color/index.cjs"
+    },
+    "./utf8": {
+      "types": "./dist/utf8.d.ts",
+      "import": "./dist/utf8.js",
+      "require": "./dist/utf8.cjs"
+    },
+    "./twkb": {
+      "types": "./dist/twkb.d.ts",
+      "import": "./dist/twkb.js",
+      "require": "./dist/twkb.cjs"
+    },
+    "./arrow": {
+      "types": "./dist/arrow.d.ts",
+      "import": "./dist/arrow.js",
+      "require": "./dist/arrow.cjs"
     }
   },
   "files": [
     "dist",
     "src",
+    "!src/**/README.md",
+    "./README.md",
     "PROJ4-LICENSE.md",
-    "LICENSE"
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md",
+    "ARROW-NOTICE.txt",
+    "APACHE-2.0-LICENSE.txt",
+    "arrow-LICENSE",
+    "arrow-THIRD-PARTY-NOTICES.md"
   ],
   "sideEffects": [
     "./src/lib/common.js"
-  ]
+  ],
+  "peerDependencies": {
+    "apache-arrow": ">=17.0.0"
+  },
+  "peerDependenciesMeta": {
+    "apache-arrow": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@math.gl/tasks": "5.1.0-alpha.0"
+  }
 }

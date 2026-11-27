@@ -1,0 +1,21 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.example-coordinate-tooltip {
+  position: absolute;
+  z-index: 10;
+  width: max-content;
+  max-width: min(300px, calc(100% - 16px));
+  padding: 7px 10px;
+  border: 1px solid #a5bdc8;
+  border-radius: 6px;
+  background: #fffffff5;
+  color: #193747;
+  box-shadow: 0 3px 12px #0002;
+  font: 12px/1.5 system-ui, sans-serif;
+  text-align: left;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+.example-coordinate-tooltip[hidden] { display: none !important; }

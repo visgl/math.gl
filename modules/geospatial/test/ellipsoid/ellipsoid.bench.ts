@@ -7,8 +7,9 @@
 // This file is derived from the Cesium math library under Apache 2 license
 // See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
 
-import {Vector3, Matrix4} from '@math.gl/core';
-import {Ellipsoid} from '@math.gl/geospatial';
+import {eastNorthUpToFixedFrame} from '@math.gl/geospatial/coordinates';
+import {Vector3, Matrix4} from '@math.gl/core/matrix';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 // import {externalVector3ToArray, setExternalVector3} from '@math.gl/geospatial/type-utils';
 
 const ellipsoid = Ellipsoid.WGS84;
@@ -35,10 +36,10 @@ export function ellipsoidBench(suite) {
       ellipsoid.cartesianToCartographic(spaceCartesian, resultVector)
     )
     .add('#eastNorthUpToFixedFrame()', () =>
-      Ellipsoid.WGS84.eastNorthUpToFixedFrame(origin, resultMatrix)
+      eastNorthUpToFixedFrame(Ellipsoid.WGS84, origin, resultMatrix)
     )
     // .add('#eastNorthUpToFixedFrame(Pole)', () =>
-    //   Ellipsoid.WGS84.eastNorthUpToFixedFrame(northPole, resultMatrix)
+    //   eastNorthUpToFixedFrame(Ellipsoid.WGS84, northPole, resultMatrix)
     // )
 
     // .add('#cartographicToCartesian(=>Object)', () =>

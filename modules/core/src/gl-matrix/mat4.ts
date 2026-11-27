@@ -1212,53 +1212,7 @@ export function getScaling(out, mat) {
  * @return {quat} out
  */
 export function getRotation(out, mat) {
-  const scaling = new glMatrix.ARRAY_TYPE(3);
-  getScaling(scaling, mat);
-
-  const is1 = 1 / scaling[0];
-  const is2 = 1 / scaling[1];
-  const is3 = 1 / scaling[2];
-
-  const sm11 = mat[0] * is1;
-  const sm12 = mat[1] * is2;
-  const sm13 = mat[2] * is3;
-  const sm21 = mat[4] * is1;
-  const sm22 = mat[5] * is2;
-  const sm23 = mat[6] * is3;
-  const sm31 = mat[8] * is1;
-  const sm32 = mat[9] * is2;
-  const sm33 = mat[10] * is3;
-
-  const trace = sm11 + sm22 + sm33;
-  let S = 0;
-
-  if (trace > 0) {
-    S = Math.sqrt(trace + 1.0) * 2;
-    out[3] = 0.25 * S;
-    out[0] = (sm23 - sm32) / S;
-    out[1] = (sm31 - sm13) / S;
-    out[2] = (sm12 - sm21) / S;
-  } else if (sm11 > sm22 && sm11 > sm33) {
-    S = Math.sqrt(1.0 + sm11 - sm22 - sm33) * 2;
-    out[3] = (sm23 - sm32) / S;
-    out[0] = 0.25 * S;
-    out[1] = (sm12 + sm21) / S;
-    out[2] = (sm31 + sm13) / S;
-  } else if (sm22 > sm33) {
-    S = Math.sqrt(1.0 + sm22 - sm11 - sm33) * 2;
-    out[3] = (sm31 - sm13) / S;
-    out[0] = (sm12 + sm21) / S;
-    out[1] = 0.25 * S;
-    out[2] = (sm23 + sm32) / S;
-  } else {
-    S = Math.sqrt(1.0 + sm33 - sm11 - sm22) * 2;
-    out[3] = (sm12 - sm21) / S;
-    out[0] = (sm31 + sm13) / S;
-    out[1] = (sm23 + sm32) / S;
-    out[2] = 0.25 * S;
-  }
-
-  return out;
+  return decompose(out, [], [], mat);
 }
 
 /**
@@ -1271,37 +1225,12 @@ export function getRotation(out, mat) {
  * @returns {quat} out_r
  */
 export function decompose(out_r, out_t, out_s, mat) {
-  out_t[0] = mat[12];
-  out_t[1] = mat[13];
-  out_t[2] = mat[14];
-
-  const m11 = mat[0];
-  const m12 = mat[1];
-  const m13 = mat[2];
-  const m21 = mat[4];
-  const m22 = mat[5];
-  const m23 = mat[6];
-  const m31 = mat[8];
-  const m32 = mat[9];
-  const m33 = mat[10];
-
-  out_s[0] = Math.sqrt(m11 * m11 + m12 * m12 + m13 * m13);
-  out_s[1] = Math.sqrt(m21 * m21 + m22 * m22 + m23 * m23);
-  out_s[2] = Math.sqrt(m31 * m31 + m32 * m32 + m33 * m33);
-
-  const is1 = 1 / out_s[0];
-  const is2 = 1 / out_s[1];
-  const is3 = 1 / out_s[2];
-
-  const sm11 = m11 * is1;
-  const sm12 = m12 * is2;
-  const sm13 = m13 * is3;
-  const sm21 = m21 * is1;
-  const sm22 = m22 * is2;
-  const sm23 = m23 * is3;
-  const sm31 = m31 * is1;
-  const sm32 = m32 * is2;
-  const sm33 = m33 * is3;
+  const {rotation, scale, translation} = affineComponents(mat);
+  const [sm11, sm12, sm13, sm21, sm22, sm23, sm31, sm32, sm33] = rotation;
+  for (let i = 0; i < 3; i++) {
+    out_t[i] = translation[i];
+    out_s[i] = scale[i];
+  }
 
   const trace = sm11 + sm22 + sm33;
   let S = 0;
@@ -1763,6 +1692,80 @@ export function orthoZO(out, left, right, bottom, top, near, far) {
 }
 
 /**
+ * Returns the unit x axis of a look-at basis, given up, the raw sightline (r0, r1, r2) and the
+ * normalized sightline (z0, z1, z2). Returns zeros for a zero sightline or a zero up vector.
+ * When up is parallel to the sightline, the axis is built from the normalized sightline and the
+ * coordinate axis least aligned with it, signed by the direction of up. For axis-aligned views
+ * this is the limit of a target a tiny step off the line of sight.
+ */
+function lookAtXAxis(out: number[], upx, upy, upz, r0, r1, r2, z0, z1, z2): number[] {
+  if ((!r0 && !r1 && !r2) || (!upx && !upy && !upz)) {
+    return normalizeAxis(out, 0, 0, 0);
+  }
+  // Test the raw sightline for exact parallelism: normalizing first can round an exactly
+  // parallel up into a tiny nonzero cross. NaN from overflow counts as not parallel here.
+  if (upy * r2 - upz * r1 !== 0 || upz * r0 - upx * r2 !== 0 || upx * r1 - upy * r0 !== 0) {
+    normalizeAxis(out, upy * z2 - upz * z1, upz * z0 - upx * z2, upx * z1 - upy * z0);
+    if (out[0] || out[1] || out[2]) {
+      return out;
+    }
+  }
+  // up is parallel to the line of sight. Take its sign from the largest sightline component,
+  // so the magnitude of up cannot overflow or underflow the result.
+  const a0 = Math.abs(z0);
+  const a1 = Math.abs(z1);
+  const a2 = Math.abs(z2);
+  const sign =
+    a0 >= a1 && a0 >= a2
+      ? Math.sign(upx) * Math.sign(z0)
+      : a1 >= a2
+        ? Math.sign(upy) * Math.sign(z1)
+        : Math.sign(upz) * Math.sign(z2);
+  if (a2 <= a0 && a2 <= a1) {
+    // z x (0, 0, 1)
+    return normalizeAxis(out, sign * z1, -sign * z0, 0);
+  }
+  if (a0 <= a1) {
+    // z x (1, 0, 0)
+    return normalizeAxis(out, 0, sign * z2, -sign * z1);
+  }
+  // z x (0, 1, 0)
+  return normalizeAxis(out, -sign * z2, 0, sign * z0);
+}
+
+/**
+ * Writes a normalized vector to out, rescaling first when its squared length underflows or
+ * overflows. Writes zeros for a zero or non-finite vector.
+ */
+function normalizeAxis(out: number[], x0: number, x1: number, x2: number): number[] {
+  let len = x0 * x0 + x1 * x1 + x2 * x2;
+  if (len === 0 || len === Infinity) {
+    const max = Math.max(Math.abs(x0), Math.abs(x1), Math.abs(x2));
+    if (!max || max === Infinity) {
+      len = 0;
+    } else {
+      x0 /= max;
+      x1 /= max;
+      x2 /= max;
+      len = x0 * x0 + x1 * x1 + x2 * x2;
+    }
+  }
+  if (len > 0) {
+    len = 1 / Math.sqrt(len);
+    out[0] = x0 * len;
+    out[1] = x1 * len;
+    out[2] = x2 * len;
+  } else {
+    out[0] = 0;
+    out[1] = 0;
+    out[2] = 0;
+  }
+  return out;
+}
+
+const lookAtAxis = [0, 0, 0];
+
+/**
  * Generates a look-at matrix with the given eye position, focal point, and up axis.
  * If you want a matrix that actually makes an object look at another object, you should use targetTo instead.
  *
@@ -1805,25 +1808,16 @@ export function lookAt(out, eye, center, up) {
   z1 = eyey - centery;
   z2 = eyez - centerz;
 
+  const r0 = z0;
+  const r1 = z1;
+  const r2 = z2;
+
   len = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
   z0 *= len;
   z1 *= len;
   z2 *= len;
 
-  x0 = upy * z2 - upz * z1;
-  x1 = upz * z0 - upx * z2;
-  x2 = upx * z1 - upy * z0;
-  len = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
-  if (!len) {
-    x0 = 0;
-    x1 = 0;
-    x2 = 0;
-  } else {
-    len = 1 / len;
-    x0 *= len;
-    x1 *= len;
-    x2 *= len;
-  }
+  [x0, x1, x2] = lookAtXAxis(lookAtAxis, upx, upy, upz, r0, r1, r2, z0, z1, z2);
 
   y0 = z1 * x2 - z2 * x1;
   y1 = z2 * x0 - z0 * x2;
@@ -1882,6 +1876,10 @@ export function targetTo(out, eye, target, up) {
   let z1 = eyey - target[1];
   let z2 = eyez - target[2];
 
+  const r0 = z0;
+  const r1 = z1;
+  const r2 = z2;
+
   let len = z0 * z0 + z1 * z1 + z2 * z2;
   if (len > 0) {
     len = 1 / Math.sqrt(len);
@@ -1890,17 +1888,7 @@ export function targetTo(out, eye, target, up) {
     z2 *= len;
   }
 
-  let x0 = upy * z2 - upz * z1;
-  let x1 = upz * z0 - upx * z2;
-  let x2 = upx * z1 - upy * z0;
-
-  len = x0 * x0 + x1 * x1 + x2 * x2;
-  if (len > 0) {
-    len = 1 / Math.sqrt(len);
-    x0 *= len;
-    x1 *= len;
-    x2 *= len;
-  }
+  const [x0, x1, x2] = lookAtXAxis(lookAtAxis, upx, upy, upz, r0, r1, r2, z0, z1, z2);
 
   out[0] = x0;
   out[1] = x1;
@@ -2172,3 +2160,51 @@ export const mul = multiply;
  * @function
  */
 export const sub = subtract;
+
+/** Extract a proper rotation and signed scale from finite, nonsingular, shear-free TRS. */
+export function affineComponents(matrix: ArrayLike<number>) {
+  if (
+    matrix.length !== 16 ||
+    Array.from(matrix).some(x => !Number.isFinite(x)) ||
+    matrix[3] !== 0 ||
+    matrix[7] !== 0 ||
+    matrix[11] !== 0 ||
+    matrix[15] !== 1
+  ) {
+    throw new RangeError('Expected a finite affine matrix');
+  }
+  const scale = [
+    Math.hypot(matrix[0], matrix[1], matrix[2]),
+    Math.hypot(matrix[4], matrix[5], matrix[6]),
+    Math.hypot(matrix[8], matrix[9], matrix[10])
+  ];
+  if (scale.some(x => x === 0 || !Number.isFinite(x))) throw new RangeError('Singular transform');
+  const rotation = Array.from(
+    {length: 9},
+    (_, i) => matrix[Math.floor(i / 3) * 4 + (i % 3)] / scale[Math.floor(i / 3)]
+  );
+  for (const [a, b] of [
+    [0, 3],
+    [0, 6],
+    [3, 6]
+  ]) {
+    if (
+      Math.abs(
+        rotation[a] * rotation[b] +
+          rotation[a + 1] * rotation[b + 1] +
+          rotation[a + 2] * rotation[b + 2]
+      ) > 1e-7
+    ) {
+      throw new RangeError('Sheared transforms do not have a TRS decomposition');
+    }
+  }
+  const determinant =
+    rotation[0] * (rotation[4] * rotation[8] - rotation[5] * rotation[7]) -
+    rotation[3] * (rotation[1] * rotation[8] - rotation[2] * rotation[7]) +
+    rotation[6] * (rotation[1] * rotation[5] - rotation[2] * rotation[4]);
+  if (determinant < 0) {
+    scale[0] = -scale[0];
+    for (let i = 0; i < 3; i++) rotation[i] = -rotation[i];
+  }
+  return {rotation, scale, translation: [matrix[12], matrix[13], matrix[14]]};
+}

@@ -3,10 +3,10 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original controls using independent Decimal references and analytic distance minima.
 import {expect, test} from 'vitest';
-import {Ellipsoid} from '@math.gl/geospatial';
-import {cartesianToSpheroid} from '@math.gl/core/spheroid';
-import fixtures from '../../projection/test/fixtures/interior-reference.json';
-import cuspFixtures from '../../projection/test/fixtures/nearest-cusp-reference.json';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {cartesianToSpheroid} from '@math.gl/core/matrix';
+import fixtures from '../projection/fixtures/interior-reference.json';
+import cuspFixtures from '../projection/fixtures/nearest-cusp-reference.json';
 
 for (const row of fixtures.cases) {
   test(`nearest surface: independent Decimal ${row.id}`, () => {

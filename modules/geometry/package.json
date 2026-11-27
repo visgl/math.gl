@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.0.0-alpha.19",
+  "version": "5.1.0-alpha.0",
   "keywords": [
     "geometry",
     "gltf",
@@ -19,24 +19,36 @@
     "type": "git",
     "url": "https://github.com/visgl/math.gl.git"
   },
-  "types": "dist/index.d.ts",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+    "./culling": {
+      "types": "./dist/culling/index.d.ts",
+      "import": "./dist/culling/index.js",
+      "require": "./dist/culling/index.cjs"
     },
-    "./parametric": {
-      "types": "./dist/parametric.d.ts",
-      "import": "./dist/parametric.js",
-      "require": "./dist/parametric.cjs"
+    "./processing": {
+      "types": "./dist/processing.d.ts",
+      "import": "./dist/processing.js",
+      "require": "./dist/processing.cjs"
     },
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "import": "./dist/utils/index.js",
-      "require": "./dist/utils/index.cjs"
+    "./spatial-index": {
+      "types": "./dist/spatial-index/index.d.ts",
+      "import": "./dist/spatial-index/index.js",
+      "require": "./dist/spatial-index/index.cjs"
+    },
+    "./lighting": {
+      "types": "./dist/lighting/index.d.ts",
+      "import": "./dist/lighting/index.js",
+      "require": "./dist/lighting/index.cjs"
+    },
+    "./arrow": {
+      "types": "./dist/arrow/index.d.ts",
+      "import": "./dist/arrow/index.js",
+      "require": "./dist/arrow/index.cjs"
+    },
+    "./primitives": {
+      "types": "./dist/primitives.d.ts",
+      "import": "./dist/primitives.js",
+      "require": "./dist/primitives.cjs"
     },
     "./curves": {
       "types": "./dist/curves/index.d.ts",
@@ -47,45 +59,29 @@
       "types": "./dist/polygon/index.d.ts",
       "import": "./dist/polygon/index.js",
       "require": "./dist/polygon/index.cjs"
-    },
-    "./culling": {
-      "types": "./dist/culling/index.d.ts",
-      "import": "./dist/culling/index.js",
-      "require": "./dist/culling/index.cjs"
-    },
-    "./spatial-index": {
-      "types": "./dist/spatial-index/index.d.ts",
-      "import": "./dist/spatial-index/index.js",
-      "require": "./dist/spatial-index/index.cjs"
-    },
-    "./utils/interpolate-packed-attributes": {
-      "types": "./dist/utils/interpolate-packed-attributes.d.ts",
-      "import": "./dist/utils/interpolate-packed-attributes.js",
-      "require": "./dist/utils/interpolate-packed-attributes.cjs"
-    },
-    "./culling/oriented-box-2d": {
-      "types": "./dist/culling/oriented-box-2d.d.ts",
-      "import": "./dist/culling/oriented-box-2d.js",
-      "require": "./dist/culling/oriented-box-2d.cjs"
-    },
-    "./culling/queries": {
-      "types": "./dist/culling/queries.d.ts",
-      "import": "./dist/culling/queries.js",
-      "require": "./dist/culling/queries.cjs"
-    },
-    "./spatial-index/boxes": {
-      "types": "./dist/spatial-index/box-index.d.ts",
-      "import": "./dist/spatial-index/box-index.js",
-      "require": "./dist/spatial-index/box-index.cjs"
     }
   },
   "files": [
     "dist",
     "src",
-    "LICENSE"
+    "!src/**/README.md",
+    "./README.md",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
   ],
   "dependencies": {
-    "@math.gl/core": "5.0.0-alpha.19"
+    "@math.gl/core": "5.1.0-alpha.0",
+    "cdt2d": "1.0.0",
+    "robust-predicates": "^3.0.2",
+    "splaytree": "^3.1.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "peerDependencies": {
+    "apache-arrow": ">=17.0.0"
+  },
+  "peerDependenciesMeta": {
+    "apache-arrow": {
+      "optional": true
+    }
+  }
 }

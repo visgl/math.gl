@@ -148,3 +148,5 @@ The angle gates come from binary64: W reaches 3e7 degrees for Jupiter in 2100.
   161:105, doi:10.3847/1538-3881/abd414.
 - E. M. Standish and J. G. Williams, "Approximate Positions of the Planets", JPL Solar System
   Dynamics, https://ssd.jpl.nasa.gov/planets/approx_pos.html.
+
+Use `{model: 'long'}` for continuous playback across 1800 or 2050. The default automatic switch between independent fits jumps about 5.9 and 3.9 million km respectively for Saturn. The short model rejects dates outside its interval.

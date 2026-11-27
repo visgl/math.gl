@@ -104,11 +104,11 @@ These corrections are original math.gl arithmetic around the existing attributed
 Use a separate pinned oracle environment with networking disabled by the scripts:
 
 ```sh
-python modules/geospatial/projection/scripts/generate-pole-precision.py
-node modules/geospatial/projection/scripts/audit-pole-precision.mjs
-node modules/geospatial/projection/scripts/audit-pole-boundaries.mjs modules/geospatial/projection/test/fixtures/pole-audit-findings.json
-node modules/geospatial/projection/scripts/generate-pole-review.mjs
-node modules/geospatial/projection/scripts/check-native-reference.mjs
+python modules/geospatial/scripts/projection/generate-pole-precision.py
+node modules/geospatial/scripts/projection/audit-pole-precision.mjs
+node modules/geospatial/scripts/projection/audit-pole-boundaries.mjs modules/geospatial/test/projection/fixtures/pole-audit-findings.json
+node modules/geospatial/scripts/projection/generate-pole-review.mjs
+node modules/geospatial/scripts/projection/check-native-reference.mjs
 ```
 
 Changing a review disposition or numerical baseline requires reviewing the independent evidence, not merely regenerating the file. The ordinary PROJ corpus, all 49 review evidence tests, and the high-precision forward/inverse gates remain separate checks.

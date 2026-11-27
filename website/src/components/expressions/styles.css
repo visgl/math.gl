@@ -1,0 +1,28 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+/* The website supplies its palette through the playground's own theme tokens. */
+.expression-playground[data-expression-theme] {
+  --expression-background: var(--ifm-background-surface-color);
+  --expression-text: var(--ifm-font-color-base);
+  --expression-muted: var(--ifm-color-emphasis-700);
+  --expression-border: var(--ifm-color-emphasis-300);
+  --expression-accent: var(--ifm-color-primary);
+  --expression-control-background: var(--ifm-background-surface-color);
+  --expression-surface: var(--ifm-color-emphasis-100);
+  --expression-hover: var(--ifm-color-emphasis-200);
+  --expression-active-background: var(--ifm-color-primary-contrast-background);
+  --expression-focus: var(--ifm-color-primary);
+  --expression-output-text: var(--ifm-font-color-base);
+  --expression-output-background: var(--ifm-color-emphasis-100);
+  --expression-error-text: var(--ifm-color-danger-contrast-foreground);
+  --expression-error-background: var(--ifm-color-danger-contrast-background);
+  --expression-error-border: var(--ifm-color-danger);
+  --expression-warning-text: var(--ifm-color-warning-contrast-foreground);
+  --expression-warning-background: var(--ifm-color-warning-contrast-background);
+  --expression-warning-border: var(--ifm-color-warning);
+  --expression-info-text: var(--ifm-color-info-contrast-foreground);
+  --expression-info-background: var(--ifm-color-info-contrast-background);
+  --expression-info-border: var(--ifm-color-info);
+}

@@ -4,14 +4,13 @@
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>
 
-`@math.gl/geospatial/tile-matrix` provides geometry, extent queries and level selection for
+`@math.gl/geospatial` provides geometry, extent queries and level selection for
 rectangular tile grids, including coalesced row bands, in any coordinate system. The subpath has no runtime dependencies;
-its types and functions are also exported from `@math.gl/geospatial/tiles`, alongside geographic tile queries.
+its types and functions are also exported from `@math.gl/geospatial`, alongside geographic tile queries.
 
 ```typescript
-import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix}
-  from '@math.gl/geospatial/tile-matrix';
-import type {TileMatrix, TileMatrixSet} from '@math.gl/geospatial/tile-matrix';
+import {getTileBounds, getTileIndex, getTileRange, selectTileMatrix, validateTileMatrixSet, resolveTileIndex} from '@math.gl/geospatial/tiles';
+import type {TileMatrix, TileMatrixSet} from '@math.gl/geospatial/tiles';
 
 const matrix: TileMatrix = {
   id: '2m', resolution: 2, origin: [200000, 4600000],
@@ -33,7 +32,7 @@ selectTileMatrix(matrixSet, 3)?.id; // '2m'
 
 `TileMatrix` and `TileMatrixSet` have readonly fields; inputs are never mutated.
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `id` | Opaque string identifier, independent of numeric zoom or array index. |
 | `resolution` | Positive finite X coordinate units per pixel. Also used for Y unless overridden. |
@@ -67,17 +66,68 @@ Both values are positive magnitudes. `cornerOfOrigin` determines row direction. 
 axis-aligned rectangular pixels, without rotation or skew. Optional coalescence bands multiply the horizontal footprint independently. Bounds, inverse
 indexing, range queries, and floating-point extent validation all use each axis's own resolution.
 
-## validateTileMatrix(matrix)
+#### `validateTileMatrix(matrix)`
 
 Throws `RangeError` for malformed geometry, nonfinite extents or tile spans too small to distinguish
 at the origin or far edge in floating-point coordinates. All geometry utilities validate the matrix.
 
-## getTileBounds(matrix, column, row)
+#### `validateTileMatrixSet(matrixSet, limits?)`
+
+Validates a complete set: a nonempty CRS string, an array of valid matrices and unique native IDs.
+The CRS is opaque; this does not establish that a projection engine supports it. Unordered levels
+and an empty matrix array are valid. Inputs are not sorted or mutated.
+
+Optional `TileMatrixSetLimits` is a readonly array of `TileMatrixLimits` rectangles with a
+`tileMatrix` identifier on each entry. IDs must be unique and refer to matrices in the set; every
+rectangle must fit its matrix. Omitted levels and an empty list describe no available coverage at
+those levels. Validation checks this structure; it does not query actual tile availability.
+
+```typescript
+validateTileMatrixSet(matrixSet, [{
+  tileMatrix: '2m', minTileColumn: 1, maxTileColumn: 3,
+  minTileRow: 0, maxTileRow: 2
+}]);
+```
+
+Malformed sets or coverage throw `RangeError`. Partial service metadata belongs in the adapter's
+own metadata representation until complete geometry is available.
+
+#### `validateTileMatrixLimits(matrix, limits)`
+
+Validates the matrix geometry and one inclusive base-grid coverage rectangle. Bounds must be
+nonnegative safe integers, minima must not exceed maxima, and maxima must fit matrix dimensions.
+An alias-only column interval is valid for a coalesced row; limits need not start on a canonical
+column. Malformed geometry or limits throw `RangeError`. Inputs are not mutated.
+
+#### `resolveTileIndex(matrix, column, row, limits?)`
+
+Resolves integer base-grid indices to `[canonicalColumn, row]`. Returns `null` for noninteger,
+nonfinite, outside-matrix or unavailable indices. Geometry and supplied limits are validated first,
+even when the queried indices are invalid. Rows retain their native numbering for both origin corners.
+
+For a coalesced row, a tile is available when **any alias** intersects the inclusive base-grid limits.
+The canonical column can precede `minTileColumn`, and the input itself need not be the covered alias.
+Regular rows retain their original column. This agrees with `getTileRanges` and avoids a
+bounds-to-range round trip for an integer request.
+
+```typescript
+const coalesced = {...matrix, matrixSize: [4, 3] as const, variableMatrixWidths: [
+  {coalesce: 2, minTileRow: 0, maxTileRow: 0}
+]};
+const limits = {minTileColumn: 1, maxTileColumn: 1, minTileRow: 0, maxTileRow: 0};
+resolveTileIndex(coalesced, 0, 0, limits); // [0, 0]
+resolveTileIndex(coalesced, 1, 0, limits); // [0, 0]
+```
+
+The function accepts tile indices; `getTileIndex` instead maps a coordinate to a containing tile. It does not
+wrap indices, interpret CRS identifiers, infer parents or fetch content.
+
+#### `getTileBounds(matrix, column, row)`
 
 Returns `TileMatrixBounds`, a readonly `[minX, minY, maxX, maxY]` tuple in matrix coordinates.
 Indices must be integers inside the matrix; out-of-range indices throw `RangeError`.
 
-## getTileIndex(matrix, coordinate)
+#### `getTileIndex(matrix, coordinate)`
 
 Returns `[column, row]`, or `null` for nonfinite coordinates or a point outside the matrix.
 Intervals are half-open in the direction of increasing column/row: the origin edge is included and
@@ -87,7 +137,7 @@ Indices never wrap or clamp.
 Lookup compares the same computed edges as `getTileBounds()`, preserving edge ownership with
 fractional resolutions. After validation, lookup takes logarithmic time in matrix dimensions plus a scan of declared row bands. Validation sorts a copy of the bands, using space proportional to their count.
 
-## getTileRange(matrix, bounds, limits?)
+#### `getTileRange(matrix, bounds, limits?)`
 
 For regular matrices, returns one compact, inclusive `TileMatrixLimits` rectangle, or `null` for no intersection. Matrices declaring coalescence require `getTileRanges` instead.
 The result has `minTileColumn`, `maxTileColumn`, `minTileRow` and `maxTileRow` fields. Queries are
@@ -104,16 +154,17 @@ outer edge is excluded. Fractional edges use the same arithmetic as bounds and p
 Query time is logarithmic in matrix dimensions, with constant space. Applications decide how to
 enumerate the returned rectangle; even a compact range can describe many tiles.
 
-## isTileIndexInRange(matrix, column, row, limits?)
+#### `isTileIndexInRange(matrix, column, row, limits?)`
 
 Checks integer indices and optional inclusive `TileMatrixLimits`. Malformed limits throw
 `RangeError`. Limits must fit inside matrix dimensions and describe a rectangular coverage subset.
-They do not guarantee that a tile exists on a server.
+They do not guarantee that a tile exists on a server. This predicate checks the supplied base index
+against limits literally. Use `resolveTileIndex` for alias-aware logical tile availability.
 
-## selectTileMatrix(matrixSet, targetResolution)
+#### `selectTileMatrix(matrixSet, targetResolution)`
 
 Selects the **coarsest matrix whose resolution is at or below the target**. If all matrices are
-coarser than the target, returns the finest available matrix. Returns `null` for an empty set.
+coarser than the target, returns the finest available matrix. Returns `null` for an empty set. Sets are checked with `validateTileMatrixSet`, including their CRS identifier.
 Equal-resolution ties retain the first matrix in the supplied array. The returned matrix is the
 original object, and the set is not sorted or mutated.
 
@@ -138,7 +189,6 @@ the world’s outer edges, unlike the explicit, nonwrapping, half-open matrix co
 [Globe horizon bounds](./globe-queries.md) produce geographic extents for visibility queries.
 [DGGS utilities](../../dggs/README.md) decode addresses for global grid systems such as S2, H3 and
 quadkeys. These are complementary to rectangular matrix geometry, rather than interchangeable APIs.
-
 
 ## Variable-width / coalesced rows
 
@@ -165,7 +215,7 @@ greater than one and divide matrix width exactly. Row endpoints must be safe int
 within matrix height. Invalid declarations throw `RangeError`; inputs are never sorted in place.
 `selectTileMatrix` continues to compare nominal uncoalesced resolution, independently of row.
 
-### getTileRanges(matrix, bounds, limits?)
+#### `getTileRanges(matrix, bounds, limits?)`
 
 Returns `TileMatrixRowRange[]`: exact inclusive bands with `columnStep`. Enumerate columns
 from `minTileColumn` to `maxTileColumn` using that step, and rows using step one. This avoids

@@ -5,7 +5,7 @@
 
 /* eslint-disable max-statements */
 import {test, expect} from 'vitest';
-import {Matrix3, config, equals} from '@math.gl/core';
+import {Matrix3, config, equals} from '@math.gl/core/matrix';
 
 config.EPSILON = 1e-6;
 
@@ -24,7 +24,6 @@ test('Matrix3#types', () => {
 test('Matrix3#construct and Array.isArray check', () => {
   const m = new Matrix3();
   expect(Array.isArray(m)).toBeTruthy();
-  expect(m.INDICES).toBeTruthy();
 });
 
 test('Matrix3#from', () => {

@@ -5,14 +5,14 @@
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
 // This file is derived from the Cesium math library under Apache 2 license
-// See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
+// See ../../../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
 // Note: This class is still an experimental export, mainly used by other test cases
 // - It has not been fully adapted to math.gl conventions
 // - Documentation has not been ported
 
-import {NumericArray} from '@math.gl/core/types';
-import {assert, Matrix4, Vector2} from '@math.gl/core';
+import {NumericArray} from '@math.gl/core/matrix';
+import {assert, Matrix4, Vector2} from '@math.gl/core/matrix';
 import {PerspectiveOffCenterFrustum} from './perspective-off-center-frustum';
 import {CullingVolume} from './culling-volume';
 

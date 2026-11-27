@@ -15,7 +15,7 @@ export type Bounds =
 
 /** Checks if a `Bounds` is a `Bounds2D` */
 export function isBounds2D(bounds: Bounds): bounds is Bounds2D {
-  return bounds.length === 2;
+  return bounds.length === 2 && bounds[0].length === 2 && bounds[1].length === 2;
 }
 
 /** Accepts 2D and 3D bounds and returns a 2D bound, truncating 3D dimension if necessary */

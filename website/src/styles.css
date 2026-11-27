@@ -115,6 +115,11 @@ html[data-theme='dark'] .theme-doc-sidebar-container {
 .menu__list {
   padding-bottom: 0.5rem;
 }
+/* Let documentation use the space beside the navigation sidebar. */
+main:has(.theme-doc-markdown) > .container {
+  max-width: none;
+}
+
 .theme-doc-markdown {
   font-size: 1.075rem;
   line-height: 1.72;
@@ -214,10 +219,6 @@ html[data-theme='dark'] .theme-doc-sidebar-container {
 .table-of-contents__link--active {
   color: var(--docs-accent-text);
 }
-.timezone-globe.timezone-globe,
-.geoid-globe.geoid-globe {
-  font-family: var(--ifm-font-family-base);
-}
 .timezone-globe h1,
 .geoid-globe h1 {
   font-family: var(--ifm-heading-font-family);
@@ -271,3 +272,313 @@ html[data-theme='dark'] .theme-doc-sidebar-container {
     backdrop-filter: none;
   }
 }
+
+.navbar-github-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.navbar-github-stars img {
+  height: 20px;
+  width: auto;
+  vertical-align: middle;
+}
+
+/* HTML navbar items need the same spacing as ordinary mobile menu links. */
+.navbar-sidebar .navbar-github-stars {
+  display: flex;
+  padding: var(--ifm-menu-link-padding-vertical) var(--ifm-menu-link-padding-horizontal);
+  color: var(--ifm-menu-color);
+  font-weight: var(--ifm-font-weight-semibold);
+  line-height: 1.5;
+  border-radius: 8px;
+}
+.navbar-sidebar .navbar-github-stars:hover {
+  background: var(--ifm-menu-color-background-hover);
+  color: var(--ifm-menu-color-active);
+  text-decoration: none;
+}
+.navbar-sidebar .navbar-github-stars img {
+  display: none;
+}
+
+/* Keep the drawer available until the documentation sidebar becomes visible. */
+@media (max-width: 996px) {
+  .navbar__toggle { min-width: 44px; min-height: 44px; }
+  .navbar__brand { flex-shrink: 0; }
+}
+
+.navbar__inner .navbar-github-stars > span {
+  display: none;
+}
+
+.navbar-github-icon {
+  display: none;
+  flex-shrink: 0;
+}
+.navbar-sidebar .navbar-github-icon {
+  display: block;
+}
+
+.foundation-attribution {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 32px 0;
+}
+.foundation-attribution > a {
+  flex-shrink: 0;
+  padding: 12px;
+  border-radius: 0;
+}
+.foundation-attribution img {
+  display: block;
+  height: auto;
+}
+.foundation-attribution p {
+  margin: 0;
+}
+@media (max-width: 480px) {
+  .foundation-attribution {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+
+.navbar-openjs {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 5px;
+}
+.navbar-openjs img {
+  display: block;
+  width: 86px;
+  height: auto;
+}
+.navbar-sidebar .navbar-openjs {
+  margin: var(--ifm-menu-link-padding-vertical) var(--ifm-menu-link-padding-horizontal);
+}
+
+html[data-theme='light'] .openjs-logo-dark,
+html[data-theme='dark'] .openjs-logo-light {
+  display: none;
+}
+
+.navbar-npm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.navbar-npm-downloads {
+  display: block;
+  height: 20px;
+  width: auto;
+}
+.navbar-npm-icon,
+.navbar-npm > span {
+  display: none;
+}
+.navbar-sidebar .navbar-npm {
+  display: flex;
+  padding: var(--ifm-menu-link-padding-vertical) var(--ifm-menu-link-padding-horizontal);
+  color: var(--ifm-menu-color);
+  font-weight: var(--ifm-font-weight-semibold);
+  line-height: 1.5;
+  border-radius: 8px;
+}
+.navbar-sidebar .navbar-npm:hover {
+  background: var(--ifm-menu-color-background-hover);
+  color: var(--ifm-menu-color-active);
+  text-decoration: none;
+}
+.navbar-sidebar .navbar-npm-downloads {
+  display: none;
+}
+.navbar-sidebar .navbar-npm-icon,
+.navbar-sidebar .navbar-npm > span {
+  display: block;
+}
+.navbar-npm-icon {
+  flex-shrink: 0;
+}
+
+.navbar__inner .navbar-github-stars {
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* Match the Docusaurus breakpoint where search enters the toolbar layout. */
+@media (min-width: 997px) {
+  .navbar__inner .navbar-badge {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+  }
+  .navbar__inner .navbar-badge > a {
+    display: flex;
+    align-items: center;
+    height: 20px;
+    line-height: 1;
+  }
+  .navbar__inner .navbar-badge img {
+    display: block;
+    height: 20px;
+    width: auto;
+    margin: 0;
+  }
+}
+
+.theme-doc-markdown .badges {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.theme-doc-markdown .badges a,
+.theme-doc-markdown .badges img {
+  display: block;
+  margin: 0;
+}
+.theme-doc-markdown .badges img {
+  height: 20px;
+  width: auto;
+}
+
+/* Compact footer: inline link groups instead of tall navigation columns. */
+.footer {
+  padding: 12px 24px 10px;
+  font-size: 0.85rem;
+}
+.footer .footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  margin-bottom: 8px;
+}
+.footer .footer__col {
+  flex: 0 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0;
+  padding: 0;
+}
+.footer .footer__title {
+  margin: 0;
+  font-size: 0.8rem;
+}
+.footer .footer__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 12px;
+  margin: 0;
+}
+.footer .footer__item {
+  margin: 0;
+}
+.footer .footer__link-item {
+  line-height: 1.6;
+}
+.footer .footer__copyright {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  opacity: 0.7;
+}
+@media (max-width: 520px) {
+  .footer {
+    padding: 12px 20px;
+  }
+}
+
+/* Keep foundation artwork square, including inside documentation image styles. */
+img.openjs-logo-light,
+img.openjs-logo-dark {
+  border-radius: 0;
+}
+
+/* Overview links should read as inviting destinations rather than file listings. */
+.theme-doc-card-container {
+  --card-accent: #65bde8;
+  position: relative;
+  min-height: 170px;
+  padding: 28px 30px;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 32%, var(--ifm-background-color));
+  border-radius: 20px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--card-accent) 12%, var(--ifm-background-color)), var(--ifm-background-surface-color));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+article:nth-child(3n + 2) > .theme-doc-card-container { --card-accent: #ae91e8; }
+article:nth-child(3n) > .theme-doc-card-container { --card-accent: #62c8ae; }
+.theme-doc-card-container:hover,
+.theme-doc-card-container:focus-visible {
+  border-color: var(--card-accent);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--card-accent) 14%, transparent);
+  transform: translateY(-3px);
+}
+.theme-doc-card-heading {
+  color: var(--ifm-heading-color);
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+.theme-doc-card-description {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.theme-doc-card-icon { margin-right: 0.65rem; }
+@media (max-width: 767px) {
+  .theme-doc-card-container { min-height: 140px; padding: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-doc-card-container { transition: none; }
+  .theme-doc-card-container:hover { transform: none; }
+}
+
+.theme-doc-markdown .badges.introduction-badges {
+  justify-content: center;
+  max-width: none;
+}
+
+/* Compact category previews: readable summaries, without file/folder decoration. */
+.theme-doc-card-container { min-height: 130px; padding: 22px 24px; border-radius: 12px; box-shadow: none; }
+.theme-doc-card-icon { display: none; }
+.theme-doc-card-heading { font-size: 1.15rem; white-space: normal; }
+.theme-doc-card-description { white-space: normal; overflow: visible; text-overflow: clip; font-size: 0.95rem; }
+main:has(.theme-doc-card-container) > .container { max-width: none; }
+@media (max-width: 767px) { .theme-doc-card-container { min-height: 110px; padding: 20px; } }
+
+html:root {
+  --doc-sidebar-width: 328px;
+}
+
+/* Pages without a right-hand table of contents use the full content area. */
+@media (min-width: 997px) {
+  main > .container > .row:not(:has(.theme-doc-toc-desktop)) > .col:first-child {
+    max-width: 100% !important;
+    flex-basis: 100%;
+  }
+}
+
+/* Keep feature, parameter, and reference tables compact and readable. */
+.markdown table {
+  font-size: 0.875rem;
+  line-height: 1.35;
+  margin-bottom: 1rem;
+}
+
+.markdown table :is(th, td) {
+  padding: 0.3rem 0.55rem;
+  vertical-align: top;
+}
+
+.markdown h2[id^='features'] + table :is(th, td):nth-child(2) {
+  white-space: nowrap;
+}
+
+/* Website typography enters examples through a host-neutral font token. */
+.math-playground { --example-font-family: var(--ifm-font-family-base); }

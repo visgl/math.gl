@@ -18,20 +18,23 @@ All generated meshes use `triangle-list` topology and expose `POSITION`, `NORMAL
 `TEXCOORD_0` typed-array attributes. Index buffers automatically use 32-bit values when a mesh has
 more than 65,535 vertices.
 
-The geometry group also provides `@math.gl/geometry/utils`, `/curves`, `/polygon`, `/culling`, and
-`/spatial-index` subpaths. The polygon module combines general tessellation and mesh refinement with
-geographic helpers such as Mercator clipping and globe subdivision.
+## Entry points
 
-## Installation
-
-```bash
-npm install @math.gl/geometry
-```
+| Import path | Use it to |
+| --- | --- |
+| [`@math.gl/geometry/primitives`](./api-reference/primitives.md) | Generate primitive and parametric meshes. |
+| [`@math.gl/geometry/curves`](./curves/README.md) | Represent and sample curves. |
+| [`@math.gl/geometry/polygon`](./polygon/README.md) | Clip, triangulate, and subdivide polygons and polylines. |
+| [`@math.gl/geometry/culling`](./culling/README.md) | Query analytic shapes, bounding volumes, and rays. |
+| [`@math.gl/geometry/processing`](./processing/README.md) | Process meshes, indices, and attributes. |
+| [`@math.gl/geometry/spatial-index`](./spatial-index/README.md) | Index points, boxes, and triangles. |
+| [`@math.gl/geometry/arrow`](./entry-points/arrow.md) | Tessellate GeoArrow polygons. |
+| [`@math.gl/geometry/lighting`](./entry-points/lighting.md) | Sample photometric profiles. |
 
 ## Usage
 
 ```js
-import {SphereGeometry} from '@math.gl/geometry';
+import {SphereGeometry} from '@math.gl/geometry/primitives';
 
 const geometry = new SphereGeometry({radius: 1});
 const positions = geometry.attributes.POSITION.value;
@@ -39,6 +42,32 @@ const indices = geometry.indices?.value;
 ```
 
 Pass these CPU buffers to the renderer of your choice. The module does not create GPU resources.
+
+## Features
+
+| Feature | Support | Notes |
+| --- | --- | --- |
+| Primitive mesh tessellation | ✅ | [Boxes, capsules, cylinders, planes, spheres and convenience shapes](#api) produce renderer-independent indexed buffers. |
+| Parametric surfaces, lathes and tori | ✅ | [ParametricGeometry, TorusGeometry and LatheGeometry](./api-reference/parametric.md) sample explicit surface functions. |
+| Normals, UVs and index-width selection | ✅ | Primitive POSITION/NORMAL/TEXCOORD_0 attributes and automatic Uint32 promotion for large meshes. |
+| Projected bounds | ✅ | [Sample edges and interiors](./processing/api-reference/project-bounds.md) with an explicit approximate/conservative qualification. |
+| Projected texture coordinates | ✅ | [Prepare image UVs](./processing/api-reference/project-texture-coordinates.md) from packed CPU positions without a rendering dependency. |
+| Mesh processing | ✅ | [Transform, merge, and weld indexed meshes](./processing/README.md). |
+| Curve evaluation | ✅ | [Sample Cartesian curves and compute transport frames](./curves/README.md). |
+| Rigid articulated panel forests | ✅ | Experimental [HingeTree](./api-reference/hinge-tree.md) evaluates hinge transforms with reusable matrix output. |
+| Analytic queries | ✅ | [Bounding volumes, rays, and shapes](./culling/README.md) for Euclidean containment and intersection. |
+| Polygon processing | ✅ | [Clip, triangulate, and subdivide polygons](./polygon/README.md). |
+| Spatial indexing | ✅ | [BoxIndex, PointIndex, and TriangleBVH](./spatial-index/README.md) accelerate repeated queries. |
+| General solid modeling and manifold repair | ❌ | No public 3D Boolean solid, arbitrary remeshing, or general manifold-repair engine. |
+| Deformable or constrained rigid-body simulation | ❌ | HingeTree has no closed-loop constraints, collisions, forces, or bending solver. |
+| Photometry and color LUTs | ✅ | Optional [lighting and color utilities](./lighting/README.md) sample angular intensity, integrate luminous flux and transform RGB/RGBA buffers. |
+| GPU resource allocation and rendering | ❌ | The module supplies CPU data; GPU buffers, materials, draw calls, and device lifetime belong to rendering libraries. |
+
+## Installation
+
+```bash
+npm install @math.gl/geometry
+```
 
 ## API
 
@@ -68,13 +97,13 @@ planes are required.
 - [IcoSphereGeometry](./api-reference/ico-sphere-geometry.md)
 - [PrismGeometry](./api-reference/prism-geometry.md)
 - [RingGeometry](./api-reference/ring-geometry.md)
-- [Geometry](./api-reference/geometry.md)
+- [Geometry](./api-reference/primitives.md)
 
 ## Parametric surfaces
 
-The optional [`@math.gl/geometry/parametric`](./api-reference/parametric.md) subpath
-provides torus, lathe and sampled surface generators, with an interactive gallery.
+[ParametricGeometry, TorusGeometry, and LatheGeometry](./api-reference/parametric.md)
+provide sampled surface generators from `@math.gl/geometry/primitives`, with an interactive gallery.
 
 The experimental `HingeTree` evaluates rigid panels connected by hinges. See the
 [HingeTree API](https://math.gl/docs/modules/geometry/api-reference/hinge-tree) and
-[unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/unfolding-polyhedron).
+[unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/geometry/unfolding-polyhedron).

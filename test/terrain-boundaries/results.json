@@ -1,0 +1,3198 @@
+{
+  "mathglRevision": "d4ae77f011d79a7c0e96c793f3eb068b761b6e4a",
+  "runtime": "v24.5.0",
+  "studyRevision": "d0767a5ef5f8e6281d39d89a98593589e25ca248",
+  "interpretation": "Unit sample-lattice XY; heights in metres. Surface errors and coverage are sampled estimates, not continuous certificates. Boundary height maxima use triangle-clipped intervals. The derived coast is a study scenario, not geographic ground truth.",
+  "results": [
+    {
+      "name": "step",
+      "tolerance": 0.25,
+      "algorithm": "regular",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 131072,
+      "tessellator": "regular",
+      "nodal": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": 0,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": 0,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 2.154418527988572,
+        "maxInteriorError": 1.7042829539425242,
+        "maxEdgeOnlyError": 2.154418527988572,
+        "worstProbe": {
+          "x": 48,
+          "y": 79.5,
+          "expectedZ": -4.531672648495526,
+          "edgeOnly": true
+        },
+        "rmsError": 0.06286074961060957,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 0,
+        "maxInteriorError": 0,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": 0,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 2.1868859524125988,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 1020,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 0.25,
+      "algorithm": "martini",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 6336,
+      "tessellator": "martini",
+      "nodal": {
+        "maxError": 0.1307649189207183,
+        "maxInteriorError": 0.12836382283959846,
+        "maxEdgeOnlyError": 0.1307649189207183,
+        "worstProbe": {
+          "x": 117,
+          "y": 245,
+          "expectedZ": 45.457943865510984,
+          "edgeOnly": true
+        },
+        "rmsError": 0.04423300672895725,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0.1307649189207183,
+        "maxInteriorError": 0.12836382283959846,
+        "maxEdgeOnlyError": 0.1307649189207183,
+        "worstProbe": {
+          "x": 117,
+          "y": 245,
+          "expectedZ": 45.457943865510984,
+          "edgeOnly": true
+        },
+        "rmsError": 0.04423300672895725,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 3.3995688068742,
+        "maxInteriorError": 2.7778603227878875,
+        "maxEdgeOnlyError": 3.3995688068742,
+        "worstProbe": {
+          "x": 159.5,
+          "y": 148.5,
+          "expectedZ": 64.30055662020968,
+          "edgeOnly": true
+        },
+        "rmsError": 0.1091774944575611,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 2.5065686385990773,
+        "maxInteriorError": 1.2532843192995458,
+        "maxEdgeOnlyError": 2.5065686385990773,
+        "worstProbe": {
+          "x": 235.5,
+          "y": 192.5,
+          "expectedZ": 51.37824368557704,
+          "edgeOnly": true
+        },
+        "rmsError": 0.0746165876605471,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 3.438451400030438,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 1196,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 0.25,
+      "algorithm": "delatin",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 2415,
+      "tessellator": "delatin",
+      "nodal": {
+        "maxError": 0.24981779379422164,
+        "maxInteriorError": 0.24907038885472232,
+        "maxEdgeOnlyError": 0.24981779379422164,
+        "worstProbe": {
+          "x": 141,
+          "y": 256,
+          "expectedZ": 34.65211257577273,
+          "edgeOnly": true
+        },
+        "rmsError": 0.09893994609595437,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0.24981779379422164,
+        "maxInteriorError": 0.24907038885472232,
+        "maxEdgeOnlyError": 0.24981779379422164,
+        "worstProbe": {
+          "x": 141,
+          "y": 256,
+          "expectedZ": 34.65211257577273,
+          "edgeOnly": true
+        },
+        "rmsError": 0.09893994609595437,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 2.4301805182260097,
+        "maxInteriorError": 2.0483933164798813,
+        "maxEdgeOnlyError": 2.4301805182260097,
+        "worstProbe": {
+          "x": 200.75,
+          "y": 172.25,
+          "expectedZ": 56.902515788381805,
+          "edgeOnly": true
+        },
+        "rmsError": 0.10859860353603851,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 1.9781561101509624,
+        "maxInteriorError": 1.8247293657609198,
+        "maxEdgeOnlyError": 1.9781561101509624,
+        "worstProbe": {
+          "x": 200.5,
+          "y": 172.5,
+          "expectedZ": 57.38647505253951,
+          "edgeOnly": true
+        },
+        "rmsError": 0.10634726708165321,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 2.810136681315754,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 678,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 0.25,
+      "algorithm": "constrained",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 2246,
+      "tessellator": "precomputed-cdtr",
+      "nodal": {
+        "maxError": 0.24981779379422875,
+        "maxInteriorError": 0.24894775123069657,
+        "maxEdgeOnlyError": 0.24981779379422875,
+        "worstProbe": {
+          "x": 141,
+          "y": 256,
+          "expectedZ": 34.65211257577273,
+          "edgeOnly": true
+        },
+        "rmsError": 0.0934508269076352,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0.24981779379422875,
+        "maxInteriorError": 0.24894775123069657,
+        "maxEdgeOnlyError": 0.24981779379422875,
+        "worstProbe": {
+          "x": 141,
+          "y": 256,
+          "expectedZ": 34.65211257577273,
+          "edgeOnly": true
+        },
+        "rmsError": 0.0934508269076352,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 0.2901667958865417,
+        "maxInteriorError": 0.28917577144896,
+        "maxEdgeOnlyError": 0.2901667958865417,
+        "worstProbe": {
+          "x": 0.5,
+          "y": 197.5,
+          "expectedZ": 40.05324051701359,
+          "edgeOnly": true
+        },
+        "rmsError": 0.09361952285252244,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 2.1587467989574236,
+        "maxInteriorError": 2.1587467989574236,
+        "maxEdgeOnlyError": 1.769145362397822,
+        "worstProbe": {
+          "x": 208,
+          "y": 176.5,
+          "expectedZ": 53.11539510595274,
+          "edgeOnly": false
+        },
+        "rmsError": 0.11225738487255128,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 5.551115123125783e-17,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 0,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 0.5,
+      "algorithm": "regular",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 131072,
+      "tessellator": "regular",
+      "nodal": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": 0,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": 0,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 2.154418527988572,
+        "maxInteriorError": 1.7042829539425242,
+        "maxEdgeOnlyError": 2.154418527988572,
+        "worstProbe": {
+          "x": 48,
+          "y": 79.5,
+          "expectedZ": -4.531672648495526,
+          "edgeOnly": true
+        },
+        "rmsError": 0.06286074961060957,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 0,
+        "maxInteriorError": 0,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": 0,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 2.1868859524125988,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 1020,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 0.5,
+      "algorithm": "martini",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 4614,
+      "tessellator": "martini",
+      "nodal": {
+        "maxError": 0.27464648614794074,
+        "maxInteriorError": 0.27464648614794074,
+        "maxEdgeOnlyError": 0.26584117999072987,
+        "worstProbe": {
+          "x": 252,
+          "y": 137,
+          "expectedZ": 2.730800679044613,
+          "edgeOnly": false
+        },
+        "rmsError": 0.10224673323719377,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0.27464648614794074,
+        "maxInteriorError": 0.27464648614794074,
+        "maxEdgeOnlyError": 0.26584117999072987,
+        "worstProbe": {
+          "x": 252,
+          "y": 137,
+          "expectedZ": 2.730800679044613,
+          "edgeOnly": false
+        },
+        "rmsError": 0.10224673323719377,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 3.3995688068742,
+        "maxInteriorError": 2.7778603227878875,
+        "maxEdgeOnlyError": 3.3995688068742,
+        "worstProbe": {
+          "x": 159.5,
+          "y": 148.5,
+          "expectedZ": 64.30055662020968,
+          "edgeOnly": true
+        },
+        "rmsError": 0.14294491401617596,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 2.5065686385990773,
+        "maxInteriorError": 1.2532843192995458,
+        "maxEdgeOnlyError": 2.5065686385990773,
+        "worstProbe": {
+          "x": 235.5,
+          "y": 192.5,
+          "expectedZ": 51.37824368557704,
+          "edgeOnly": true
+        },
+        "rmsError": 0.11825614056029926,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 3.438451400030438,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 1184,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 0.5,
+      "algorithm": "delatin",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 1360,
+      "tessellator": "delatin",
+      "nodal": {
+        "maxError": 0.4991341568574086,
+        "maxInteriorError": 0.4991341568574086,
+        "maxEdgeOnlyError": 0.49897375036227665,
+        "worstProbe": {
+          "x": 70,
+          "y": 187,
+          "expectedZ": 40.63747371079546,
+          "edgeOnly": false
+        },
+        "rmsError": 0.19561001801407477,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0.4991341568574086,
+        "maxInteriorError": 0.4991341568574086,
+        "maxEdgeOnlyError": 0.49897375036227665,
+        "worstProbe": {
+          "x": 70,
+          "y": 187,
+          "expectedZ": 40.63747371079546,
+          "edgeOnly": false
+        },
+        "rmsError": 0.19561001801407477,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 2.4301805182260097,
+        "maxInteriorError": 2.0483933164798813,
+        "maxEdgeOnlyError": 2.4301805182260097,
+        "worstProbe": {
+          "x": 200.75,
+          "y": 172.25,
+          "expectedZ": 56.902515788381805,
+          "edgeOnly": true
+        },
+        "rmsError": 0.19888013982914468,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 2.0662460183393065,
+        "maxInteriorError": 2.0662460183393065,
+        "maxEdgeOnlyError": 2.0566116240428265,
+        "worstProbe": {
+          "x": 47,
+          "y": 83.5,
+          "expectedZ": 31.414953928463653,
+          "edgeOnly": false
+        },
+        "rmsError": 0.20009054884544855,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 2.810136681315754,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 475,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 0.5,
+      "algorithm": "constrained",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 1335,
+      "tessellator": "precomputed-cdtr",
+      "nodal": {
+        "maxError": 0.4989737503622447,
+        "maxInteriorError": 0.4926030694706789,
+        "maxEdgeOnlyError": 0.4989737503622447,
+        "worstProbe": {
+          "x": 103,
+          "y": 0,
+          "expectedZ": 12.154454349682627,
+          "edgeOnly": true
+        },
+        "rmsError": 0.18111888185421715,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0.4989737503622447,
+        "maxInteriorError": 0.4926030694706789,
+        "maxEdgeOnlyError": 0.4989737503622447,
+        "worstProbe": {
+          "x": 103,
+          "y": 0,
+          "expectedZ": 12.154454349682627,
+          "edgeOnly": true
+        },
+        "rmsError": 0.18111888185421715,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 0.5008755267649114,
+        "maxInteriorError": 0.5008755267649114,
+        "maxEdgeOnlyError": 0.4995023726634287,
+        "worstProbe": {
+          "x": 103.5,
+          "y": 0.5,
+          "expectedZ": 11.925167431981322,
+          "edgeOnly": false
+        },
+        "rmsError": 0.18104225170829844,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 2.1587467989574236,
+        "maxInteriorError": 2.1587467989574236,
+        "maxEdgeOnlyError": 1.769145362397822,
+        "worstProbe": {
+          "x": 208,
+          "y": 176.5,
+          "expectedZ": 53.11539510595274,
+          "edgeOnly": false
+        },
+        "rmsError": 0.19106903512436457,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 5.551115123125783e-17,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 0,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 1,
+      "algorithm": "regular",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 131072,
+      "tessellator": "regular",
+      "nodal": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": 0,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": 0,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 2.154418527988572,
+        "maxInteriorError": 1.7042829539425242,
+        "maxEdgeOnlyError": 2.154418527988572,
+        "worstProbe": {
+          "x": 48,
+          "y": 79.5,
+          "expectedZ": -4.531672648495526,
+          "edgeOnly": true
+        },
+        "rmsError": 0.06286074961060957,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 0,
+        "maxInteriorError": 0,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": 0,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 2.1868859524125988,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 1020,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 1,
+      "algorithm": "martini",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 4188,
+      "tessellator": "martini",
+      "nodal": {
+        "maxError": 0.5026179437488985,
+        "maxInteriorError": 0.496841014313135,
+        "maxEdgeOnlyError": 0.5026179437488985,
+        "worstProbe": {
+          "x": 105,
+          "y": 41,
+          "expectedZ": 8.482144882481947,
+          "edgeOnly": true
+        },
+        "rmsError": 0.16491823110310952,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0.5026179437488985,
+        "maxInteriorError": 0.496841014313135,
+        "maxEdgeOnlyError": 0.5026179437488985,
+        "worstProbe": {
+          "x": 105,
+          "y": 41,
+          "expectedZ": 8.482144882481947,
+          "edgeOnly": true
+        },
+        "rmsError": 0.16491823110310952,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 3.3995688068742,
+        "maxInteriorError": 2.7778603227878875,
+        "maxEdgeOnlyError": 3.3995688068742,
+        "worstProbe": {
+          "x": 159.5,
+          "y": 148.5,
+          "expectedZ": 64.30055662020968,
+          "edgeOnly": true
+        },
+        "rmsError": 0.19270189705801924,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 2.5065686385990773,
+        "maxInteriorError": 1.3732715396526416,
+        "maxEdgeOnlyError": 2.5065686385990773,
+        "worstProbe": {
+          "x": 235.5,
+          "y": 192.5,
+          "expectedZ": 51.37824368557704,
+          "edgeOnly": true
+        },
+        "rmsError": 0.17475018343591323,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 3.438451400030438,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 1164,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 1,
+      "algorithm": "delatin",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 737,
+      "tessellator": "delatin",
+      "nodal": {
+        "maxError": 0.9994763573832373,
+        "maxInteriorError": 0.9944565638388276,
+        "maxEdgeOnlyError": 0.9994763573832373,
+        "worstProbe": {
+          "x": 240,
+          "y": 113,
+          "expectedZ": 8.258272151525585,
+          "edgeOnly": true
+        },
+        "rmsError": 0.39141256996651896,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0.9994763573832373,
+        "maxInteriorError": 0.9944565638388276,
+        "maxEdgeOnlyError": 0.9994763573832373,
+        "worstProbe": {
+          "x": 240,
+          "y": 113,
+          "expectedZ": 8.258272151525585,
+          "edgeOnly": true
+        },
+        "rmsError": 0.39141256996651896,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 2.4301805182260097,
+        "maxInteriorError": 2.0483933164798813,
+        "maxEdgeOnlyError": 2.4301805182260097,
+        "worstProbe": {
+          "x": 200.75,
+          "y": 172.25,
+          "expectedZ": 56.902515788381805,
+          "edgeOnly": true
+        },
+        "rmsError": 0.3924869596398457,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 2.266447918393691,
+        "maxInteriorError": 2.02274783889414,
+        "maxEdgeOnlyError": 2.266447918393691,
+        "worstProbe": {
+          "x": 152,
+          "y": 139.5,
+          "expectedZ": 25.461811919806472,
+          "edgeOnly": true
+        },
+        "rmsError": 0.39285626426046605,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 2.810136681315754,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 309,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 1,
+      "algorithm": "constrained",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 829,
+      "tessellator": "precomputed-cdtr",
+      "nodal": {
+        "maxError": 0.9893718803889087,
+        "maxInteriorError": 0.9893718803889087,
+        "maxEdgeOnlyError": 0.9644314998079473,
+        "worstProbe": {
+          "x": 225,
+          "y": 98,
+          "expectedZ": 14.183761711661457,
+          "edgeOnly": false
+        },
+        "rmsError": 0.36096920719502457,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0.9893718803889087,
+        "maxInteriorError": 0.9893718803889087,
+        "maxEdgeOnlyError": 0.9644314998079473,
+        "worstProbe": {
+          "x": 225,
+          "y": 98,
+          "expectedZ": 14.183761711661457,
+          "edgeOnly": false
+        },
+        "rmsError": 0.36096920719502457,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 1.0009338148321643,
+        "maxInteriorError": 1.0009338148321643,
+        "maxEdgeOnlyError": 0.9949018297667616,
+        "worstProbe": {
+          "x": 225.75,
+          "y": 97.5,
+          "expectedZ": 13.900147696686327,
+          "edgeOnly": false
+        },
+        "rmsError": 0.36093393425664416,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 2.1587642629586483,
+        "maxInteriorError": 2.1587642629586483,
+        "maxEdgeOnlyError": 1.769145362397822,
+        "worstProbe": {
+          "x": 208,
+          "y": 176.5,
+          "expectedZ": 53.11539510595274,
+          "edgeOnly": false
+        },
+        "rmsError": 0.36578197294965903,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 5.551115123125783e-17,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 0,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 2,
+      "algorithm": "regular",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 131072,
+      "tessellator": "regular",
+      "nodal": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": 0,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": 0,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 2.154418527988572,
+        "maxInteriorError": 1.7042829539425242,
+        "maxEdgeOnlyError": 2.154418527988572,
+        "worstProbe": {
+          "x": 48,
+          "y": 79.5,
+          "expectedZ": -4.531672648495526,
+          "edgeOnly": true
+        },
+        "rmsError": 0.06286074961060957,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 0,
+        "maxInteriorError": 0,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": 0,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 2.1868859524125988,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 1020,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 2,
+      "algorithm": "martini",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 3614,
+      "tessellator": "martini",
+      "nodal": {
+        "maxError": 1.368689858005503,
+        "maxInteriorError": 0.9030544518795409,
+        "maxEdgeOnlyError": 1.368689858005503,
+        "worstProbe": {
+          "x": 256,
+          "y": 205,
+          "expectedZ": 56.1685903706696,
+          "edgeOnly": true
+        },
+        "rmsError": 0.3539773242210067,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 1.368689858005503,
+        "maxInteriorError": 0.9030544518795409,
+        "maxEdgeOnlyError": 1.368689858005503,
+        "worstProbe": {
+          "x": 256,
+          "y": 205,
+          "expectedZ": 56.1685903706696,
+          "edgeOnly": true
+        },
+        "rmsError": 0.3539773242210067,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 3.3995688068742,
+        "maxInteriorError": 3.016505967865477,
+        "maxEdgeOnlyError": 3.3995688068742,
+        "worstProbe": {
+          "x": 159.5,
+          "y": 148.5,
+          "expectedZ": 64.30055662020968,
+          "edgeOnly": true
+        },
+        "rmsError": 0.368056768502787,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 2.5065686385990773,
+        "maxInteriorError": 1.7417444550973542,
+        "maxEdgeOnlyError": 2.5065686385990773,
+        "worstProbe": {
+          "x": 235.5,
+          "y": 192.5,
+          "expectedZ": 51.37824368557704,
+          "edgeOnly": true
+        },
+        "rmsError": 0.3581796534879267,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 3.438451400030438,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 1114,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 2,
+      "algorithm": "delatin",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 397,
+      "tessellator": "delatin",
+      "nodal": {
+        "maxError": 1.9962452930801664,
+        "maxInteriorError": 1.9690016727462538,
+        "maxEdgeOnlyError": 1.9962452930801664,
+        "worstProbe": {
+          "x": 224,
+          "y": 181,
+          "expectedZ": 12.532692543001028,
+          "edgeOnly": true
+        },
+        "rmsError": 0.6858230645031064,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 1.9962452930801664,
+        "maxInteriorError": 1.9690016727462538,
+        "maxEdgeOnlyError": 1.9962452930801664,
+        "worstProbe": {
+          "x": 224,
+          "y": 181,
+          "expectedZ": 12.532692543001028,
+          "edgeOnly": true
+        },
+        "rmsError": 0.6858230645031064,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 2.353184365420013,
+        "maxInteriorError": 2.3295542326739707,
+        "maxEdgeOnlyError": 2.353184365420013,
+        "worstProbe": {
+          "x": 243.25,
+          "y": 196.75,
+          "expectedZ": 51.800310802265486,
+          "edgeOnly": true
+        },
+        "rmsError": 0.6858511491802768,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 2.5964820319990523,
+        "maxInteriorError": 2.37039682406148,
+        "maxEdgeOnlyError": 2.5964820319990523,
+        "worstProbe": {
+          "x": 157,
+          "y": 142.5,
+          "expectedZ": 27.153835649265673,
+          "edgeOnly": true
+        },
+        "rmsError": 0.6847741269837021,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 2.502938607378894,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 189,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 2,
+      "algorithm": "constrained",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 576,
+      "tessellator": "precomputed-cdtr",
+      "nodal": {
+        "maxError": 1.9977623578550876,
+        "maxInteriorError": 1.9977623578550876,
+        "maxEdgeOnlyError": 1.9616515219343214,
+        "worstProbe": {
+          "x": 52,
+          "y": 247,
+          "expectedZ": 61.67015070152502,
+          "edgeOnly": false
+        },
+        "rmsError": 0.6924604465663157,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 1.9977623578550876,
+        "maxInteriorError": 1.9977623578550876,
+        "maxEdgeOnlyError": 1.9616515219343214,
+        "worstProbe": {
+          "x": 52,
+          "y": 247,
+          "expectedZ": 61.67015070152502,
+          "edgeOnly": false
+        },
+        "rmsError": 0.6924604465663157,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "analytical cliff",
+        "latticeSubdivisions": 4,
+        "maxError": 1.9984843513318538,
+        "maxInteriorError": 1.9984843513318538,
+        "maxEdgeOnlyError": 1.9723573950421383,
+        "worstProbe": {
+          "x": 51.75,
+          "y": 247,
+          "expectedZ": 61.635708077783086,
+          "edgeOnly": false
+        },
+        "rmsError": 0.6926147393541153,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 2.1587642629586483,
+        "maxInteriorError": 2.1587642629586483,
+        "maxEdgeOnlyError": 1.9705919551785769,
+        "worstProbe": {
+          "x": 208,
+          "y": 176.5,
+          "expectedZ": 53.11539510595274,
+          "edgeOnly": false
+        },
+        "rmsError": 0.6948874565967755,
+        "covered": 1050625,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 5.551115123125783e-17,
+        "totalLength": 591.2066756501774,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 0,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "square": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 65536,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 10,
+      "algorithm": "regular",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 131072,
+      "tessellator": "regular",
+      "nodal": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 27,
+          "y": 0,
+          "expectedZ": 85,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 29740,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": -108,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 83.5,
+        "maxInteriorError": 41.75,
+        "maxEdgeOnlyError": 83.5,
+        "worstProbe": {
+          "x": 68.5,
+          "y": 28.5,
+          "expectedZ": 137.5,
+          "edgeOnly": true
+        },
+        "rmsError": 6.656854703830399,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 0,
+        "maxInteriorError": 0,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 26.5,
+          "y": 0,
+          "expectedZ": 40,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 170.5,
+        "totalLength": 891.303069719825,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 1446,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "derived-coast": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 29891,
+          "missingArea": 0,
+          "excessArea": 35645,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 10,
+      "algorithm": "martini",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 68746,
+      "tessellator": "martini",
+      "nodal": {
+        "maxError": 6,
+        "maxInteriorError": 5.75,
+        "maxEdgeOnlyError": 6,
+        "worstProbe": {
+          "x": 256,
+          "y": 141,
+          "expectedZ": 6,
+          "edgeOnly": true
+        },
+        "rmsError": 0.9104108589411758,
+        "covered": 29740,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 7.375,
+        "maxInteriorError": 6.875,
+        "maxEdgeOnlyError": 7.375,
+        "worstProbe": {
+          "x": 69,
+          "y": 123,
+          "expectedZ": -136,
+          "edgeOnly": true
+        },
+        "rmsError": 1.365253486497425,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 83.5,
+        "maxInteriorError": 41.75,
+        "maxEdgeOnlyError": 83.5,
+        "worstProbe": {
+          "x": 68.5,
+          "y": 28.5,
+          "expectedZ": 137.5,
+          "edgeOnly": true
+        },
+        "rmsError": 6.6838667573621775,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 157,
+        "maxInteriorError": 78.5,
+        "maxEdgeOnlyError": 157,
+        "worstProbe": {
+          "x": 199.5,
+          "y": 34.5,
+          "expectedZ": 627.5,
+          "edgeOnly": true
+        },
+        "rmsError": 9.037830807544054,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 170.5,
+        "totalLength": 891.303069719825,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 1335,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "derived-coast": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 29891,
+          "missingArea": 0,
+          "excessArea": 35645,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 10,
+      "algorithm": "delatin",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 49453,
+      "tessellator": "delatin",
+      "nodal": {
+        "maxError": 10.000000000000014,
+        "maxInteriorError": 10.000000000000014,
+        "maxEdgeOnlyError": 10,
+        "worstProbe": {
+          "x": 138,
+          "y": 83,
+          "expectedZ": 95,
+          "edgeOnly": false
+        },
+        "rmsError": 2.624455632205417,
+        "covered": 29740,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 10.000000000000114,
+        "maxInteriorError": 10.000000000000114,
+        "maxEdgeOnlyError": 10,
+        "worstProbe": {
+          "x": 21,
+          "y": 120,
+          "expectedZ": -762,
+          "edgeOnly": false
+        },
+        "rmsError": 3.1024492892874105,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 83.5,
+        "maxInteriorError": 53.25,
+        "maxEdgeOnlyError": 83.5,
+        "worstProbe": {
+          "x": 68.5,
+          "y": 28.5,
+          "expectedZ": 137.5,
+          "edgeOnly": true
+        },
+        "rmsError": 7.15440730603529,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 164,
+        "maxInteriorError": 82,
+        "maxEdgeOnlyError": 164,
+        "worstProbe": {
+          "x": 178.5,
+          "y": 150.5,
+          "expectedZ": 196.5,
+          "edgeOnly": true
+        },
+        "rmsError": 8.870257041136163,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 170.5,
+        "totalLength": 891.303069719825,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 991,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "derived-coast": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 29891,
+          "missingArea": 0,
+          "excessArea": 35645,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 10,
+      "algorithm": "constrained",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 46592,
+      "tessellator": "precomputed-cdtr",
+      "nodal": {
+        "maxError": 10.000000000000014,
+        "maxInteriorError": 10.000000000000014,
+        "maxEdgeOnlyError": 10,
+        "worstProbe": {
+          "x": 223,
+          "y": 102,
+          "expectedZ": 115,
+          "edgeOnly": false
+        },
+        "rmsError": 2.2159686498634947,
+        "covered": 29740,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 103.33333333333334,
+        "maxInteriorError": 103.33333333333334,
+        "maxEdgeOnlyError": 101.5,
+        "worstProbe": {
+          "x": 186,
+          "y": 212,
+          "expectedZ": -80,
+          "edgeOnly": false
+        },
+        "rmsError": 3.9113160402676965,
+        "covered": 30133,
+        "uncovered": 35916,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 170.5,
+        "maxInteriorError": 110.5,
+        "maxEdgeOnlyError": 170.5,
+        "worstProbe": {
+          "x": 228,
+          "y": 231.5,
+          "expectedZ": 170.5,
+          "edgeOnly": true
+        },
+        "rmsError": 7.680515478523705,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 170.5,
+        "maxInteriorError": 110.5,
+        "maxEdgeOnlyError": 170.5,
+        "worstProbe": {
+          "x": 228,
+          "y": 231.5,
+          "expectedZ": 170.5,
+          "edgeOnly": true
+        },
+        "rmsError": 9.622838663881154,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 0,
+        "totalLength": 891.303069719825,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 0,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "derived-coast": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 29891,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 20,
+      "algorithm": "regular",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 131072,
+      "tessellator": "regular",
+      "nodal": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 27,
+          "y": 0,
+          "expectedZ": 85,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 29740,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": -108,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 83.5,
+        "maxInteriorError": 41.75,
+        "maxEdgeOnlyError": 83.5,
+        "worstProbe": {
+          "x": 68.5,
+          "y": 28.5,
+          "expectedZ": 137.5,
+          "edgeOnly": true
+        },
+        "rmsError": 6.656854703830399,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 0,
+        "maxInteriorError": 0,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 26.5,
+          "y": 0,
+          "expectedZ": 40,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 170.5,
+        "totalLength": 891.303069719825,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 1446,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "derived-coast": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 29891,
+          "missingArea": 0,
+          "excessArea": 35645,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 20,
+      "algorithm": "martini",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 58817,
+      "tessellator": "martini",
+      "nodal": {
+        "maxError": 10,
+        "maxInteriorError": 8.75,
+        "maxEdgeOnlyError": 10,
+        "worstProbe": {
+          "x": 201,
+          "y": 0,
+          "expectedZ": 594,
+          "edgeOnly": true
+        },
+        "rmsError": 2.189643008315932,
+        "covered": 29740,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 12,
+        "maxInteriorError": 12,
+        "maxEdgeOnlyError": 12,
+        "worstProbe": {
+          "x": 0,
+          "y": 185,
+          "expectedZ": -2928,
+          "edgeOnly": true
+        },
+        "rmsError": 2.5883416061730204,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 83.5,
+        "maxInteriorError": 41.75,
+        "maxEdgeOnlyError": 83.5,
+        "worstProbe": {
+          "x": 68.5,
+          "y": 28.5,
+          "expectedZ": 137.5,
+          "edgeOnly": true
+        },
+        "rmsError": 6.813197668474301,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 157,
+        "maxInteriorError": 78.5,
+        "maxEdgeOnlyError": 157,
+        "worstProbe": {
+          "x": 199.5,
+          "y": 34.5,
+          "expectedZ": 627.5,
+          "edgeOnly": true
+        },
+        "rmsError": 9.140168728866136,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 170.5,
+        "totalLength": 891.303069719825,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 1190,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "derived-coast": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 29891,
+          "missingArea": 0,
+          "excessArea": 35645,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 20,
+      "algorithm": "delatin",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 49453,
+      "tessellator": "delatin",
+      "nodal": {
+        "maxError": 10.000000000000014,
+        "maxInteriorError": 10.000000000000014,
+        "maxEdgeOnlyError": 10,
+        "worstProbe": {
+          "x": 138,
+          "y": 83,
+          "expectedZ": 95,
+          "edgeOnly": false
+        },
+        "rmsError": 2.624455632205417,
+        "covered": 29740,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 10.000000000000114,
+        "maxInteriorError": 10.000000000000114,
+        "maxEdgeOnlyError": 10,
+        "worstProbe": {
+          "x": 21,
+          "y": 120,
+          "expectedZ": -762,
+          "edgeOnly": false
+        },
+        "rmsError": 3.1024492892874105,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 83.5,
+        "maxInteriorError": 53.25,
+        "maxEdgeOnlyError": 83.5,
+        "worstProbe": {
+          "x": 68.5,
+          "y": 28.5,
+          "expectedZ": 137.5,
+          "edgeOnly": true
+        },
+        "rmsError": 7.15440730603529,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 164,
+        "maxInteriorError": 82,
+        "maxEdgeOnlyError": 164,
+        "worstProbe": {
+          "x": 178.5,
+          "y": 150.5,
+          "expectedZ": 196.5,
+          "edgeOnly": true
+        },
+        "rmsError": 8.870257041136163,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 170.5,
+        "totalLength": 891.303069719825,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 991,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "derived-coast": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 29891,
+          "missingArea": 0,
+          "excessArea": 35645,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 20,
+      "algorithm": "constrained",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 36580,
+      "tessellator": "precomputed-cdtr",
+      "nodal": {
+        "maxError": 20.00000000000003,
+        "maxInteriorError": 20.00000000000003,
+        "maxEdgeOnlyError": 20.000000000000007,
+        "worstProbe": {
+          "x": 158,
+          "y": 147,
+          "expectedZ": 128,
+          "edgeOnly": false
+        },
+        "rmsError": 5.834037703030109,
+        "covered": 29740,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 147,
+        "maxInteriorError": 147,
+        "maxEdgeOnlyError": 101.5,
+        "worstProbe": {
+          "x": 131,
+          "y": 82,
+          "expectedZ": -1,
+          "edgeOnly": false
+        },
+        "rmsError": 6.670032127851853,
+        "covered": 30133,
+        "uncovered": 35916,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 170.5,
+        "maxInteriorError": 147,
+        "maxEdgeOnlyError": 170.5,
+        "worstProbe": {
+          "x": 228,
+          "y": 231.5,
+          "expectedZ": 170.5,
+          "edgeOnly": true
+        },
+        "rmsError": 8.951733298045124,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 170.5,
+        "maxInteriorError": 147,
+        "maxEdgeOnlyError": 170.5,
+        "worstProbe": {
+          "x": 228,
+          "y": 231.5,
+          "expectedZ": 170.5,
+          "edgeOnly": true
+        },
+        "rmsError": 10.610806487890859,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 0,
+        "totalLength": 891.303069719825,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 0,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "derived-coast": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 29891,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 40,
+      "algorithm": "regular",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 131072,
+      "tessellator": "regular",
+      "nodal": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 27,
+          "y": 0,
+          "expectedZ": 85,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 29740,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 0,
+          "y": 0,
+          "expectedZ": -108,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 83.5,
+        "maxInteriorError": 41.75,
+        "maxEdgeOnlyError": 83.5,
+        "worstProbe": {
+          "x": 68.5,
+          "y": 28.5,
+          "expectedZ": 137.5,
+          "edgeOnly": true
+        },
+        "rmsError": 6.656854703830399,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 0,
+        "maxInteriorError": 0,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 26.5,
+          "y": 0,
+          "expectedZ": 40,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 170.5,
+        "totalLength": 891.303069719825,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 1446,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "derived-coast": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 29891,
+          "missingArea": 0,
+          "excessArea": 35645,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 40,
+      "algorithm": "martini",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 46868,
+      "tessellator": "martini",
+      "nodal": {
+        "maxError": 23.25,
+        "maxInteriorError": 19.5,
+        "maxEdgeOnlyError": 23.25,
+        "worstProbe": {
+          "x": 199,
+          "y": 84,
+          "expectedZ": 105,
+          "edgeOnly": true
+        },
+        "rmsError": 5.426266329492226,
+        "covered": 29740,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 26.5,
+        "maxInteriorError": 26.5,
+        "maxEdgeOnlyError": 25.75,
+        "worstProbe": {
+          "x": 10,
+          "y": 83,
+          "expectedZ": -771,
+          "edgeOnly": false
+        },
+        "rmsError": 5.320578436025967,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 83.5,
+        "maxInteriorError": 41.75,
+        "maxEdgeOnlyError": 83.5,
+        "worstProbe": {
+          "x": 68.5,
+          "y": 28.5,
+          "expectedZ": 137.5,
+          "edgeOnly": true
+        },
+        "rmsError": 7.583352015541018,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 157,
+        "maxInteriorError": 78.5,
+        "maxEdgeOnlyError": 157,
+        "worstProbe": {
+          "x": 199.5,
+          "y": 34.5,
+          "expectedZ": 627.5,
+          "edgeOnly": true
+        },
+        "rmsError": 9.756031507887947,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 170.5,
+        "totalLength": 891.303069719825,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 977,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "derived-coast": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 29891,
+          "missingArea": 0,
+          "excessArea": 35645,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 40,
+      "algorithm": "delatin",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 36155,
+      "tessellator": "delatin",
+      "nodal": {
+        "maxError": 20.000000000000057,
+        "maxInteriorError": 20,
+        "maxEdgeOnlyError": 20.000000000000057,
+        "worstProbe": {
+          "x": 82,
+          "y": 0,
+          "expectedZ": 407,
+          "edgeOnly": true
+        },
+        "rmsError": 6.497457752530771,
+        "covered": 29740,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 20.000000000000057,
+        "maxInteriorError": 20,
+        "maxEdgeOnlyError": 20.000000000000057,
+        "worstProbe": {
+          "x": 82,
+          "y": 0,
+          "expectedZ": 407,
+          "edgeOnly": true
+        },
+        "rmsError": 6.2048814521655835,
+        "covered": 66049,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 93.5,
+        "maxInteriorError": 70.125,
+        "maxEdgeOnlyError": 93.5,
+        "worstProbe": {
+          "x": 224,
+          "y": 90.5,
+          "expectedZ": 468.5,
+          "edgeOnly": true
+        },
+        "rmsError": 8.82316545883462,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 164,
+        "maxInteriorError": 82,
+        "maxEdgeOnlyError": 164,
+        "worstProbe": {
+          "x": 178.5,
+          "y": 150.5,
+          "expectedZ": 196.5,
+          "edgeOnly": true
+        },
+        "rmsError": 10.248596148812442,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 175.75,
+        "totalLength": 891.303069719825,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 758,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "derived-coast": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 29891,
+          "missingArea": 0,
+          "excessArea": 35645,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 40,
+      "algorithm": "constrained",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 23517,
+      "tessellator": "precomputed-cdtr",
+      "nodal": {
+        "maxError": 40,
+        "maxInteriorError": 40,
+        "maxEdgeOnlyError": 40,
+        "worstProbe": {
+          "x": 249,
+          "y": 0,
+          "expectedZ": 524,
+          "edgeOnly": true
+        },
+        "rmsError": 13.543429398323099,
+        "covered": 29740,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 147,
+        "maxInteriorError": 147,
+        "maxEdgeOnlyError": 101.5,
+        "worstProbe": {
+          "x": 131,
+          "y": 82,
+          "expectedZ": -1,
+          "edgeOnly": false
+        },
+        "rmsError": 13.873495256509749,
+        "covered": 30133,
+        "uncovered": 35916,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 170.5,
+        "maxInteriorError": 147,
+        "maxEdgeOnlyError": 170.5,
+        "worstProbe": {
+          "x": 228,
+          "y": 231.5,
+          "expectedZ": 170.5,
+          "edgeOnly": true
+        },
+        "rmsError": 13.145780332391112,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 170.5,
+        "maxInteriorError": 147,
+        "maxEdgeOnlyError": 170.5,
+        "worstProbe": {
+          "x": 228,
+          "y": 231.5,
+          "expectedZ": 170.5,
+          "edgeOnly": true
+        },
+        "rmsError": 14.223568713527724,
+        "covered": 479895,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 0,
+        "totalLength": 891.303069719825,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 0,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "derived-coast": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 29891,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "sierra",
+      "tolerance": 10,
+      "algorithm": "regular",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 119560,
+      "tessellator": "regular",
+      "nodal": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 1,
+          "y": 0,
+          "expectedZ": 2622,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 61308,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 1,
+          "y": 0,
+          "expectedZ": 2622,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 61308,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 127.25,
+        "maxInteriorError": 63.625,
+        "maxEdgeOnlyError": 127.25,
+        "worstProbe": {
+          "x": 6.5,
+          "y": 184.5,
+          "expectedZ": 2577.75,
+          "edgeOnly": true
+        },
+        "rmsError": 6.807653127603762,
+        "covered": 948992,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 0,
+        "maxInteriorError": 0,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 1,
+          "y": 0,
+          "expectedZ": 2622,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 948992,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 778.4545454545455,
+        "totalLength": 4832,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 0,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "four-corners": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 59312,
+          "missingArea": 0,
+          "excessArea": 585,
+          "overlapArea": 0
+        },
+        "triangles": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 59780,
+          "missingArea": 0,
+          "excessArea": 117,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "sierra",
+      "tolerance": 10,
+      "algorithm": "martini",
+      "status": "unsupported-nodata",
+      "reason": "Adaptive terrain requires complete source data; use a regular mesh for holes"
+    },
+    {
+      "name": "sierra",
+      "tolerance": 10,
+      "algorithm": "delatin",
+      "status": "unsupported-nodata",
+      "reason": "Delatin terrain requires complete source data; use a regular mesh for holes"
+    },
+    {
+      "name": "sierra",
+      "tolerance": 10,
+      "algorithm": "constrained",
+      "status": "measured",
+      "nodalToleranceSatisfied": false,
+      "triangles": 80310,
+      "tessellator": "precomputed-cdtr",
+      "nodal": {
+        "maxError": 778.4545454545455,
+        "maxInteriorError": 10,
+        "maxEdgeOnlyError": 778.4545454545455,
+        "worstProbe": {
+          "x": 95,
+          "y": 135,
+          "expectedZ": 2788,
+          "edgeOnly": true
+        },
+        "rmsError": 19.944088354269855,
+        "covered": 61308,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 778.4545454545455,
+        "maxInteriorError": 10,
+        "maxEdgeOnlyError": 778.4545454545455,
+        "worstProbe": {
+          "x": 95,
+          "y": 135,
+          "expectedZ": 2788,
+          "edgeOnly": true
+        },
+        "rmsError": 19.944088354269855,
+        "covered": 61308,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 633.4545454545455,
+        "maxInteriorError": 633.4545454545455,
+        "maxEdgeOnlyError": 595.5,
+        "worstProbe": {
+          "x": 94.75,
+          "y": 135,
+          "expectedZ": 2775,
+          "edgeOnly": false
+        },
+        "rmsError": 13.639641009785894,
+        "covered": 948992,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 633.4545454545455,
+        "maxInteriorError": 633.4545454545455,
+        "maxEdgeOnlyError": 595.5,
+        "worstProbe": {
+          "x": 94.75,
+          "y": 135,
+          "expectedZ": 2775,
+          "edgeOnly": false
+        },
+        "rmsError": 15.024650933809992,
+        "covered": 948992,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 768.7142857142858,
+        "totalLength": 4832,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 0,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "four-corners": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 59312,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        },
+        "triangles": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 59780,
+          "missingArea": 468,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "sierra",
+      "tolerance": 20,
+      "algorithm": "regular",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 119560,
+      "tessellator": "regular",
+      "nodal": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 1,
+          "y": 0,
+          "expectedZ": 2622,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 61308,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 1,
+          "y": 0,
+          "expectedZ": 2622,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 61308,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 127.25,
+        "maxInteriorError": 63.625,
+        "maxEdgeOnlyError": 127.25,
+        "worstProbe": {
+          "x": 6.5,
+          "y": 184.5,
+          "expectedZ": 2577.75,
+          "edgeOnly": true
+        },
+        "rmsError": 6.807653127603762,
+        "covered": 948992,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 0,
+        "maxInteriorError": 0,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 1,
+          "y": 0,
+          "expectedZ": 2622,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 948992,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 778.4545454545455,
+        "totalLength": 4832,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 0,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "four-corners": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 59312,
+          "missingArea": 0,
+          "excessArea": 585,
+          "overlapArea": 0
+        },
+        "triangles": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 59780,
+          "missingArea": 0,
+          "excessArea": 117,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "sierra",
+      "tolerance": 20,
+      "algorithm": "martini",
+      "status": "unsupported-nodata",
+      "reason": "Adaptive terrain requires complete source data; use a regular mesh for holes"
+    },
+    {
+      "name": "sierra",
+      "tolerance": 20,
+      "algorithm": "delatin",
+      "status": "unsupported-nodata",
+      "reason": "Delatin terrain requires complete source data; use a regular mesh for holes"
+    },
+    {
+      "name": "sierra",
+      "tolerance": 20,
+      "algorithm": "constrained",
+      "status": "measured",
+      "nodalToleranceSatisfied": false,
+      "triangles": 63025,
+      "tessellator": "precomputed-cdtr",
+      "nodal": {
+        "maxError": 778.4545454545455,
+        "maxInteriorError": 20,
+        "maxEdgeOnlyError": 778.4545454545455,
+        "worstProbe": {
+          "x": 95,
+          "y": 135,
+          "expectedZ": 2788,
+          "edgeOnly": true
+        },
+        "rmsError": 20.614720132569705,
+        "covered": 61308,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 778.4545454545455,
+        "maxInteriorError": 20,
+        "maxEdgeOnlyError": 778.4545454545455,
+        "worstProbe": {
+          "x": 95,
+          "y": 135,
+          "expectedZ": 2788,
+          "edgeOnly": true
+        },
+        "rmsError": 20.614720132569705,
+        "covered": 61308,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 633.4545454545455,
+        "maxInteriorError": 633.4545454545455,
+        "maxEdgeOnlyError": 595.5,
+        "worstProbe": {
+          "x": 94.75,
+          "y": 135,
+          "expectedZ": 2775,
+          "edgeOnly": false
+        },
+        "rmsError": 14.508157091390155,
+        "covered": 948992,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 633.4545454545455,
+        "maxInteriorError": 633.4545454545455,
+        "maxEdgeOnlyError": 595.5,
+        "worstProbe": {
+          "x": 94.75,
+          "y": 135,
+          "expectedZ": 2775,
+          "edgeOnly": false
+        },
+        "rmsError": 15.961146905473067,
+        "covered": 948992,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 768.7142857142858,
+        "totalLength": 4832,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 0,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "four-corners": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 59312,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        },
+        "triangles": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 59780,
+          "missingArea": 468,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "sierra",
+      "tolerance": 40,
+      "algorithm": "regular",
+      "status": "measured",
+      "nodalToleranceSatisfied": true,
+      "triangles": 119560,
+      "tessellator": "regular",
+      "nodal": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 1,
+          "y": 0,
+          "expectedZ": 2622,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 61308,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 0,
+        "maxInteriorError": null,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 1,
+          "y": 0,
+          "expectedZ": 2622,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 61308,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 127.25,
+        "maxInteriorError": 63.625,
+        "maxEdgeOnlyError": 127.25,
+        "worstProbe": {
+          "x": 6.5,
+          "y": 184.5,
+          "expectedZ": 2577.75,
+          "edgeOnly": true
+        },
+        "rmsError": 6.807653127603762,
+        "covered": 948992,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 0,
+        "maxInteriorError": 0,
+        "maxEdgeOnlyError": 0,
+        "worstProbe": {
+          "x": 1,
+          "y": 0,
+          "expectedZ": 2622,
+          "edgeOnly": true
+        },
+        "rmsError": 0,
+        "covered": 948992,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 778.4545454545455,
+        "totalLength": 4832,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 0,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "four-corners": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 59312,
+          "missingArea": 0,
+          "excessArea": 585,
+          "overlapArea": 0
+        },
+        "triangles": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 59780,
+          "missingArea": 0,
+          "excessArea": 117,
+          "overlapArea": 0
+        }
+      }
+    },
+    {
+      "name": "sierra",
+      "tolerance": 40,
+      "algorithm": "martini",
+      "status": "unsupported-nodata",
+      "reason": "Adaptive terrain requires complete source data; use a regular mesh for holes"
+    },
+    {
+      "name": "sierra",
+      "tolerance": 40,
+      "algorithm": "delatin",
+      "status": "unsupported-nodata",
+      "reason": "Delatin terrain requires complete source data; use a regular mesh for holes"
+    },
+    {
+      "name": "sierra",
+      "tolerance": 40,
+      "algorithm": "constrained",
+      "status": "measured",
+      "nodalToleranceSatisfied": false,
+      "triangles": 41311,
+      "tessellator": "precomputed-cdtr",
+      "nodal": {
+        "maxError": 778.4545454545455,
+        "maxInteriorError": 40,
+        "maxEdgeOnlyError": 778.4545454545455,
+        "worstProbe": {
+          "x": 95,
+          "y": 135,
+          "expectedZ": 2788,
+          "edgeOnly": true
+        },
+        "rmsError": 23.689497098037386,
+        "covered": 61308,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "allValidNodes": {
+        "maxError": 778.4545454545455,
+        "maxInteriorError": 40,
+        "maxEdgeOnlyError": 778.4545454545455,
+        "worstProbe": {
+          "x": 95,
+          "y": 135,
+          "expectedZ": 2788,
+          "edgeOnly": true
+        },
+        "rmsError": 23.689497098037386,
+        "covered": 61308,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "surface": {
+        "reference": "bilinear (four valid corners)",
+        "latticeSubdivisions": 4,
+        "maxError": 633.4545454545455,
+        "maxInteriorError": 633.4545454545455,
+        "maxEdgeOnlyError": 595.5,
+        "worstProbe": {
+          "x": 94.75,
+          "y": 135,
+          "expectedZ": 2775,
+          "edgeOnly": false
+        },
+        "rmsError": 17.817199138499582,
+        "covered": 948992,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "triangulatedSurface": {
+        "reference": "regular 00-11 triangles",
+        "latticeSubdivisions": 4,
+        "maxError": 633.4545454545455,
+        "maxInteriorError": 633.4545454545455,
+        "maxEdgeOnlyError": 595.5,
+        "worstProbe": {
+          "x": 94.75,
+          "y": 135,
+          "expectedZ": 2775,
+          "edgeOnly": false
+        },
+        "rmsError": 18.993296223672356,
+        "covered": 948992,
+        "uncovered": 0,
+        "overlappingProbes": 0
+      },
+      "boundary": {
+        "maxHeightError": 768.7142857142858,
+        "totalLength": 4832,
+        "uncoveredLength": 0,
+        "crossingTriangleCount": 0,
+        "uncoveredIntervalCount": 0
+      },
+      "coverage": {
+        "four-corners": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 59312,
+          "missingArea": 0,
+          "excessArea": 0,
+          "overlapArea": 0
+        },
+        "triangles": {
+          "method": "cell-center quadrature",
+          "subdivisions": 4,
+          "units": "sample-cell area",
+          "expectedArea": 59780,
+          "missingArea": 468,
+          "excessArea": 0,
+          "overlapArea": 0
+        }
+      }
+    }
+  ]
+}

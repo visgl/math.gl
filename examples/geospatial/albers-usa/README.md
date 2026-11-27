@@ -1,0 +1,48 @@
+# Albers USA
+
+A focused example of the experimental `@math.gl/geospatial/maps` API.
+It renders public-domain Natural Earth 1:10m U.S. state polygons through
+`new MapEngine({version: 1, id: 'usa', definition: {type: 'albers-usa', includeTerritories: true}})`,
+fits the complete layout with `map.fit`, and uses `map.pick` for region-aware
+coordinate inspection. Run with
+`yarn workspace math.gl-albers-usa start`.
+
+## Read the source
+
+Start with `src/map.js`: it constructs the `MapEngine`, projects the state polygons,
+and samples the optional graticule. It has no browser UI dependencies.
+
+- `src/main.js` wires the map, scene, and controls together and returns cleanup.
+- `src/scene.js` fits and draws SVG geometry, maps screen coordinates, and picks locations.
+- `src/controls.js` handles buttons, sliders, pointer gestures, and animation timing.
+- `src/view.js` contains the page markup; `src/style.css` controls presentation.
+
+The scene consumes plain layer and unfolding state. It never reads form controls.
+To reuse the rendering with a different UI, call its methods directly. Each mount
+owns its observers, event listeners, animation frame, and SVG clip identifiers.
+
+The **Globe** and **Unfolded** buttons at the slider's ends animate the projected
+feature vertices between geographic globe positions and their fitted inset
+positions. Drag the slider to inspect intermediate positions. A bundled public-domain Natural Earth 1:110m land layer provides
+global context on the globe. Reduced-motion preferences make these transitions instant.
+Inset label font sizes adapt to the fitted frame width.
+Mouse-wheel and the top-right zoom buttons apply to the entire composite; drag to pan.
+The undo button resets zoom and pan.
+The default map omits graticules and inset frames; both remain optional
+inspection overlays. Labels stay visible without frames.
+The three layer toggles float at the top-left. Hover over a mapped location to
+inspect coordinates in a tooltip; empty space shows no message.
+
+The Albers USA preset uses broad spherical masks and a 0.35 linear scale for
+Alaska. It is an illustrative composite, not a political clip or a reproduction
+of D3's exact `geoAlbersUsa` arrangement. The source file
+`assets/us-states.json` contains the 50 states and District of Columbia,
+selected without coordinate changes from [Natural Earth's 1:10m admin-1
+GeoJSON](https://github.com/nvkelso/natural-earth-vector/blob/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_10m_admin_1_states_provinces.geojson),
+plus Puerto Rico, the U.S. Virgin Islands, Guam, the Northern Mariana Islands,
+and American Samoa from the matching [admin-0 country
+GeoJSON](https://github.com/nvkelso/natural-earth-vector/blob/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_10m_admin_0_countries.geojson).
+Natural Earth data is [public domain](https://www.naturalearthdata.com/about/terms-of-use/).
+
+Run `yarn start-local` inside the math.gl repository to use workspace source.
+Run `yarn start` to use package exports or `yarn build` for a production bundle.

@@ -5,7 +5,7 @@
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms. Original math.gl follow-up replaces radial/Newton approximation with a safeguarded nearest-point solve; retained commit adapter derives from Cesium.
 
 /* eslint-disable */
-import {isArray} from '@math.gl/core';
+import {isArray} from '@math.gl/core/matrix';
 import type {Ellipsoid} from '../ellipsoid';
 
 import {nearestSurface} from './nearest-surface';

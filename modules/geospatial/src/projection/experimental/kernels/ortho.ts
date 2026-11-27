@@ -1,7 +1,7 @@
 // math.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-// SPDX-FileComment: Original orthographic equations using an ellipsoid surface and parallel ray intersection. Independently qualified against native PROJ. Independent corrections acknowledge PROJ 9.5.1 src/projections/ortho.cpp and OSGeo/PROJ #2361, #2844 and #2855; see ../../../../projection/PROJ-LICENSE.txt.
+// SPDX-FileComment: Original orthographic equations using an ellipsoid surface and parallel ray intersection. Independently qualified against native PROJ. Independent corrections acknowledge PROJ 9.5.1 src/projections/ortho.cpp and OSGeo/PROJ #2361, #2844 and #2855; see ../../../../PROJ-LICENSE.txt.
 import type {KernelParameters, Point} from '../kernel';
 import adjust_lon from '../common/adjust_lon';
 

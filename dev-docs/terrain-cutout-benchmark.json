@@ -1,0 +1,41 @@
+{
+  "node": "v24.5.0",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "results": [
+    {
+      "dataset": "pacific",
+      "sourceSha256": "6fd1a4d21ee745862bb4cc630612716c8d67f457fced523093e7b744dbd0f816",
+      "sourceOrigin": [
+        96,
+        96
+      ],
+      "inputTriangles": 4096,
+      "residents": 32,
+      "measuredUpdates": 20,
+      "rebuiltTiles": 24,
+      "fullRebuildParity": true,
+      "incrementalMedianMs": 4.315083999999956,
+      "incrementalP95Ms": 7.806750000000079,
+      "fullMedianMs": 18.74654099999998,
+      "fullP95Ms": 23.429959000000053
+    },
+    {
+      "dataset": "sierra-nodata",
+      "sourceSha256": "cd6bb97ac25bda1c1b4f45bba3d0f9931fef2c805d85caa5a1c0a7f2f19a5a14",
+      "sourceOrigin": [
+        48,
+        80
+      ],
+      "inputTriangles": 3445,
+      "residents": 32,
+      "measuredUpdates": 20,
+      "rebuiltTiles": 24,
+      "fullRebuildParity": true,
+      "incrementalMedianMs": 2.964915999999903,
+      "incrementalP95Ms": 3.5629160000000866,
+      "fullMedianMs": 13.899209000000155,
+      "fullP95Ms": 15.75850000000014
+    }
+  ]
+}

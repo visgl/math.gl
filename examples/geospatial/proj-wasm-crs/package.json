@@ -1,0 +1,28 @@
+{
+  "name": "math.gl-proj-wasm-crs",
+  "private": true,
+  "version": "5.1.0-alpha.0",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "build": "vite build --config ../../vite.config.local.mjs",
+    "start": "vite --config ../../vite.config.local.mjs",
+    "example": "node src/node.mjs",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@math.gl/core": "workspace:*",
+    "@math.gl/geometry": "workspace:*",
+    "@math.gl/geospatial": "workspace:*",
+    "@math.gl/tasks": "workspace:*",
+    "comlink": "^4.4.2",
+    "ffi-wasm": "0.0.3",
+    "proj-wasm": "0.1.0",
+    "resource-tracker": "^0.0.1",
+    "squint-cljs": "^0.14.210",
+    "worker-router": "npm:@wcohen/worker-router@^0.0.2"
+  },
+  "devDependencies": {
+    "vite": "^8.3.6"
+  }
+}

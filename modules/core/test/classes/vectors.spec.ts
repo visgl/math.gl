@@ -5,7 +5,7 @@
 
 /* eslint-disable max-statements */
 import {test, expect} from 'vitest';
-import {Vector2, Vector3, Vector4} from '@math.gl/core';
+import {Vector2, Vector3, Vector4} from '@math.gl/core/matrix';
 
 // FOR TAPE TESTING
 export {};

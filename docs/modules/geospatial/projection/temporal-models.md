@@ -2,7 +2,7 @@
 
 A coordinate can move between observation epochs because of a steady velocity,
 a changing rate, an event or relaxation after an event. The optional
-`@math.gl/geospatial/projection/temporal` entry supplies `createTemporalDeformationModel` for
+`@math.gl/geospatial/projection-temporal` entry supplies `createTemporalDeformationModel` for
 an explicit combination of these effects. Applications supply and review the
 spatial fields, ellipsoid, reference frame, data terms and validity interval.
 There are no bundled model datasets, inferred frame changes or implicit downloads.
@@ -14,9 +14,9 @@ This authored example produces 0.3 metres of eastward displacement from 2010 to
 The fields are examples, not an observed geodetic model.
 
 ```typescript
-import {createTemporalDeformationModel} from '@math.gl/geospatial/projection/temporal';
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import type {ProjectionPoint} from '@math.gl/geospatial/projection/core';
+import {createTemporalDeformationModel} from '@math.gl/geospatial/projection-temporal';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import type {ProjectionPoint} from '@math.gl/geospatial/projection-core';
 
 function eastField(amplitude: number) {
   return {
@@ -114,8 +114,8 @@ Float32 scalar/bulk agreement qualifies rounding, not this Float64 allowance.
 The same reference qualification runs in Node tests and three browser CI jobs.
 
 ```sh
-python3 modules/geospatial/projection/scripts/generate-temporal-reference.py --check
-yarn exec vitest run --project node modules/geospatial/projection/test/lib/temporal.spec.ts
+python3 modules/geospatial/scripts/projection/generate-temporal-reference.py --check
+yarn exec vitest run --project node modules/geospatial/test/projection/lib/temporal.spec.ts
 ```
 
 These are original synthetic fields and references, with no new third-party

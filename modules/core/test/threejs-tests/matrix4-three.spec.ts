@@ -10,7 +10,7 @@
 // @ts-nocheck
 /* eslint-disable */
 import {test, expect} from 'vitest';
-import {Matrix4, Vector3, Quaternion, Euler, toRadians} from '@math.gl/core';
+import {Matrix4, Vector3, Quaternion, Euler, toRadians} from '@math.gl/core/matrix';
 import {eps} from './constants';
 
 function matrixEquals4(a, b, tolerance) {

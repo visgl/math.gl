@@ -3,9 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 /* eslint-disable no-undef, no-console */
-import {isArray} from '@math.gl/core';
+import {isArray} from '@math.gl/core/matrix';
 import type {PolygonWinding, SegmentVisitorPoints, WindingDirection} from './polygon-utils';
-import type {NumericArray} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 
 import {
   getPolygonSignedArea,

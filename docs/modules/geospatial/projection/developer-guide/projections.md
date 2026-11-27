@@ -2,7 +2,7 @@
 slug: /modules/geospatial/projection/projections
 ---
 
-# Projection catalogue
+# Projection catalogue 🧪
 
 A projection chooses how a curved Earth becomes a flat map. The choice affects
 shape, area, distance and direction; no global flat map preserves all four.
@@ -38,8 +38,8 @@ public import path (`@math.gl/geospatial/projection/projections/<id>`), followed
 export. Geographic coordinates are built into `/core`.
 
 ```typescript
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { albersEqualArea } from "@math.gl/geospatial/projection/projections/aea";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { albersEqualArea } from "@math.gl/geospatial/projection-projections-aea";
 
 const regionalAreas = new ProjectionTransform({
   to: "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +datum=WGS84",
@@ -188,28 +188,26 @@ worldAreas.project([12, 55]);
 [Equal Earth](https://proj.org/en/stable/operations/projections/eqearth.html) is a
 useful starting point for area-preserving world maps. A projection converts points;
 it does not choose polygon seam splits or tessellation. Use
-[`@math.gl/geometry/polygon`](../../../geometry/polygon/api-reference/polygon.md) for the relevant geometric
+[`@math.gl/geometry`](../../../geometry/polygon/api-reference/polygon.md) for the relevant geometric
 operations. Cube-face selection and tiling likewise belong to the application.
 
 ### Discontinuous map layouts (experimental)
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
-  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" />
 </p>
 
-The separate [`@math.gl/geospatial/discontinuous` API](../../discontinuous/README.md)
+The separate [`@math.gl/geospatial/maps` API](../../maps/README.md)
 provides static region-aware point projection, inverse candidates, and seam-aware
-line and polygon projection. Presets include a 24-panel AirOcean arrangement
-with gnomonic face mapping; six-lobe interrupted sinusoidal, Mollweide, and Goode
-homolosine formulas; and an Albers USA composite with Alaska and Hawaii insets.
-The interrupted cuts and U.S. geographic masks are independent arrangements, not
-exact historical IGH or D3 clip-extent compatibility.
+line and polygon projection. Presets include AirOcean, land-oriented Goode, independent interrupted sinusoidal,
+Mollweide and homolosine layouts, Albers USA with optional territories, Peirce
+quincuncial, Berghaus star, and myriahedral layouts.
 
-Still unsupported as built-in presets: Butterfly, Collignon, Waterman polyhedral
-layouts, historical interrupted cut arrangements, and arbitrary curved clip
-boundaries. These require additional layouts or clipping support; a scalar
-projection kernel alone does not provide seam-aware geometry.
+See the [support table](../../maps/developer-guide/discontinuous-projections.md#supported-map-families)
+for implemented families, exact preset names, and remaining gaps. Historical
+cut arrangements and clipping semantics are not interchangeable: `goode` uses
+land-oriented lobes, while `interrupted-homolosine` uses independent cuts.
 
 Polygon support currently requires each input polygon to fit in an open hemisphere.
 AirOcean here is the cut arrangement, not the Gray-Fuller projection. These layouts
@@ -230,9 +228,9 @@ The oblique factory lets an application choose a rotated world map without a glo
 algorithm registry:
 
 ```typescript
-import { ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { obliqueTransformation } from "@math.gl/geospatial/projection/projections/ob_tran";
-import { mollweide } from "@math.gl/geospatial/projection/projections/moll";
+import { ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { obliqueTransformation } from "@math.gl/geospatial/projection-projections-ob_tran";
+import { mollweide } from "@math.gl/geospatial/projection-projections-moll";
 
 const rotated = new ProjectionTransform({
   to: "+proj=ob_tran +o_proj=moll +o_lat_p=45 +o_lon_p=-90 +R=6371000 +datum=none",

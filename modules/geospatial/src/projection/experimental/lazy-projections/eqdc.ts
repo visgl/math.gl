@@ -7,5 +7,8 @@ import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazyEquidistantConic: ProjectionDescriptor =
   /* @__PURE__ */ createProjectionDescriptor(
     {name: 'eqdc', aliases: ['Equidistant_Conic']},
-    async () => (await import('@math.gl/geospatial/projection/projections/eqdc')).equidistantConic
+    async () => {
+      const projectionModule = await import('@math.gl/geospatial/projection-projections-eqdc');
+      return projectionModule.equidistantConic;
+    }
   );

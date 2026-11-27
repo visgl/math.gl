@@ -6,7 +6,7 @@
 import {bitCode, intersect, BoundingBox} from './lineclip';
 import {getPointAtIndex, copy, push} from './utils';
 
-import type {NumericArray} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 
 export type Polygon = {
   positions: Readonly<NumericArray>;
@@ -130,6 +130,7 @@ export function cutPolygonByGrid(
     // Get the bounding box of the outer polygon
     getBoundingBox(pos, size, holes[0] || pos.length, bbox);
     cell = getGridCell(bbox[0], gridResolution, gridOffset, cell);
+    containPoint(cell, bbox[0], gridResolution);
     const code = bitCode(bbox[1], cell);
 
     if (code) {
@@ -256,6 +257,23 @@ function getGridCell(
   out[2] = left + gridResolution;
   out[3] = bottom + gridResolution;
   return out as BoundingBox;
+}
+
+/**
+ * Moves a cell by one step so that it contains `p` on its low edges and excludes it on its high edges.
+ * `getGridCell` divides by the grid resolution, and the rounded quotient can select a neighbor cell
+ * when `p` is on a cut line. Bisecting that cell again leaves one side empty.
+ */
+function containPoint(cell: number[], p: number[], gridResolution: number): void {
+  for (let axis = 0; axis < 2; axis++) {
+    if (p[axis] < cell[axis]) {
+      cell[axis + 2] = cell[axis];
+      cell[axis] -= gridResolution;
+    } else if (p[axis] >= cell[axis + 2]) {
+      cell[axis] = cell[axis + 2];
+      cell[axis + 2] += gridResolution;
+    }
+  }
 }
 
 function moveToNeighborCell(cell: number[], gridResolution: number, edge: number): void {

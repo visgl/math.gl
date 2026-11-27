@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {Euler, Matrix4, Quaternion, Pose, equals} from '@math.gl/core';
+import {Euler, Matrix4, Quaternion, Pose, equals} from '@math.gl/core/matrix';
 
 const DEGREE_TO_RADIANS = Math.PI / 180;
 
@@ -74,6 +74,15 @@ test('Euler#coverage', () => {
   euler.toVector3([0, 0, 0]);
 });
 
+test('Euler preserves the numeric rotation order in its array representation', () => {
+  const orders = ['zyx', 'yxz', 'xzy', 'zxy', 'yzx', 'xyz'] as const;
+  for (const [index, order] of orders.entries()) {
+    const euler = new Euler(1, 2, 3, order);
+    expect(euler.toArray4()).toEqual([1, 2, 3, index]);
+    expect(new Euler().copy([1, 2, 3, index]).order).toBe(order);
+  }
+});
+
 test('Euler#fromQuaternion supports every rotation order', () => {
   const angles = [30 * DEGREE_TO_RADIANS, 45 * DEGREE_TO_RADIANS, 60 * DEGREE_TO_RADIANS];
   const orders = ['xyz', 'yxz', 'zxy', 'zyx', 'yzx', 'xzy'] as const;
@@ -88,24 +97,61 @@ test('Euler#fromQuaternion supports every rotation order', () => {
   }
 });
 
+test('Euler#fromQuaternion maps a zero-length quaternion to the identity rotation', () => {
+  for (const order of ['xyz', 'yxz', 'zxy', 'zyx', 'yzx', 'xzy'] as const) {
+    const result = new Euler(1, 2, 3, order).fromQuaternion([0, 0, 0, 0]);
+    expect(result.order).toBe(order);
+    // -0 and 0 both mean no rotation, so compare with == rather than toEqual
+    expect(result.toArray().every(angle => angle === 0)).toBe(true);
+  }
+});
+
+// Index of the angle that each order extracts first (the middle rotation), which locks at +-90 degrees.
+const MIDDLE_ANGLE: Record<string, number> = {xyz: 1, yxz: 0, zxy: 0, zyx: 1, yzx: 2, xzy: 2};
+
 test('Euler covers singular rotation matrices and invalid input paths', () => {
-  const singularComponents: Record<string, number> = {
-    xyz: 8,
-    yxz: 9,
-    zxy: 6,
-    zyx: 2,
-    yzx: 1,
-    xzy: 4
-  };
-  for (const [order, index] of Object.entries(singularComponents)) {
-    const matrix = Matrix4.IDENTITY.slice();
-    matrix[index] = 1;
-    expect(new Euler().fromRotationMatrix(matrix, order as never).order).toBe(order);
+  for (const [order, middle] of Object.entries(MIDDLE_ANGLE)) {
+    for (const sign of [1, -1]) {
+      const angles = [0.3, -1.1, 0.7];
+      angles[middle] = (sign * Math.PI) / 2;
+      const source = new Euler(angles[0], angles[1], angles[2], order as never);
+      const result = new Euler().fromRotationMatrix(source.getRotationMatrix(), order as never);
+      expect(result.order).toBe(order);
+      expect(result[middle]).toBe((sign * Math.PI) / 2);
+      expect(equals(result.getRotationMatrix(), source.getRotationMatrix())).toBe(true);
+    }
   }
   expect(() => new Euler().fromRotationMatrix(Matrix4.IDENTITY, 'invalid' as never)).toThrow(
     /Unknown Euler angle order/
   );
   expect(() => new Euler().fromObject({})).toThrow(/not implemented/);
+});
+
+test('Euler#fromRotationMatrix keeps rotations close to gimbal lock', () => {
+  for (const [order, middle] of Object.entries(MIDDLE_ANGLE)) {
+    for (const offset of [1e-3, 1e-4, 1e-6]) {
+      const angles = [0.3, -1.1, 0.7];
+      angles[middle] = Math.PI / 2 - offset;
+      const source = new Euler(angles[0], angles[1], angles[2], order as never);
+      const result = new Euler().fromRotationMatrix(source.getRotationMatrix(), order as never);
+      expect(equals(result.getRotationMatrix(), source.getRotationMatrix())).toBe(true);
+    }
+  }
+});
+
+test('Euler#fromQuaternion normalizes Float32Array inputs near gimbal lock', () => {
+  // Float32Array.of() truncates to float32 precision, leaving the quaternion
+  // slightly off unit length. Without double-precision renormalization the
+  // coupled outer-rotation error reaches ~0.985; with it the error is <1e-7.
+  const q = Float32Array.of(
+    0.45553070306777954,
+    -0.45553070306777954,
+    -0.5408250689506531,
+    0.5408250689506531
+  );
+  const source = new Euler(0.3, -1.1, -Math.PI / 2, 'yzx');
+  const result = new Euler().fromQuaternion(q, 'yzx');
+  expect(equals(result.getRotationMatrix(), source.getRotationMatrix())).toBe(true);
 });
 
 test('Euler.fromQuaternion', () => {

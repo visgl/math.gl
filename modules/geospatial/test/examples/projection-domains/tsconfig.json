@@ -1,0 +1,12 @@
+{
+  "extends": "../../../../../examples/geospatial/projection-domains/tsconfig.json",
+  "include": [
+    "test/*.ts",
+    "../../../../../examples/geospatial/projection-domains/src/**/*.d.ts"
+  ],
+  "compilerOptions": {
+    "types": [
+      "node"
+    ]
+  }
+}

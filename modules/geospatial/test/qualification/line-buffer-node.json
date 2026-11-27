@@ -1,0 +1,129 @@
+{
+  "node": "v24.5.0",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "cpu": "Apple M2",
+  "sourceSHA256": "09836289b874b3408b07e0977549f0b43f3c79f96942eb967ed84b94b0617759",
+  "points": 2048,
+  "samples": 11,
+  "methodology": "Equal-output scalar-to-packed and prepared-buffer workloads. Preparation/reusable outputs excluded; 200ms warmup per implementation, rotating sample order, 30ms minimum samples. Spread above 0.2 is marked unstable; ratios do not establish portable speedups. All timing precedes V8 allocation profiling (4096-byte sampling). Internal kernel temporaries may allocate; staging/commit costs included.",
+  "rows": [
+    {
+      "operation": "geodesic",
+      "scalar": {
+        "medianNanoseconds": 6202.718139648456,
+        "p10": 2681.734741210945,
+        "p90": 24948.079589843685,
+        "spread": 3.5897721526799384,
+        "unstable": true,
+        "raw": [
+          14383.005615234368,
+          7707.885742187504,
+          2681.734741210945,
+          24948.079589843685,
+          3157.576873779298,
+          31380.004882812562,
+          6202.718139648456,
+          2722.353637695324,
+          8008.033752441384,
+          4001.861572265619,
+          1991.4194335937664
+        ]
+      },
+      "packed": {
+        "medianNanoseconds": 6002.302795410155,
+        "p10": 2254.7276611328134,
+        "p90": 19355.71289062499,
+        "spread": 2.849070733747216,
+        "unstable": true,
+        "raw": [
+          2254.7276611328134,
+          7129.325866699218,
+          5908.289581298825,
+          8258.290527343726,
+          19355.71289062499,
+          9708.669067382825,
+          1850.677490234376,
+          4879.069091796861,
+          23857.147216796882,
+          2633.3376464843795,
+          6002.302795410155
+        ]
+      },
+      "allocation": [
+        {
+          "implementation": "scalar",
+          "points": 10240,
+          "samples": 1780,
+          "sampledEstimatedBytesPerPoint": 715.92265625
+        },
+        {
+          "implementation": "packed",
+          "points": 10240,
+          "samples": 860,
+          "sampledEstimatedBytesPerPoint": 344.6734375
+        }
+      ],
+      "packedOverScalar": 0.9676891098827749
+    },
+    {
+      "operation": "rhumb",
+      "scalar": {
+        "medianNanoseconds": 544095.133789062,
+        "p10": 399429.38232421986,
+        "p90": 969798.2177734375,
+        "spread": 1.048288801035926,
+        "unstable": true,
+        "raw": [
+          969798.2177734375,
+          544095.133789062,
+          383204.2641601561,
+          472635.0097656251,
+          1289677.1645507829,
+          797863.8710937495,
+          445049.76416015654,
+          447338.7041015631,
+          399429.38232421986,
+          603092.6108398429,
+          582344.3603515627
+        ]
+      },
+      "packed": {
+        "medianNanoseconds": 526444.986816407,
+        "p10": 407954.63037109416,
+        "p90": 719005.3710937505,
+        "spread": 0.5908513681622968,
+        "unstable": true,
+        "raw": [
+          464327.20947265695,
+          526444.986816407,
+          657883.5649414057,
+          516581.0747070303,
+          765169.9829101552,
+          564200.8666992186,
+          407954.63037109416,
+          309031.7382812504,
+          490739.07470703125,
+          554954.7119140623,
+          719005.3710937505
+        ]
+      },
+      "allocation": [
+        {
+          "implementation": "scalar",
+          "points": 10240,
+          "samples": 289880,
+          "sampledEstimatedBytesPerPoint": 116491.07421875
+        },
+        {
+          "implementation": "packed",
+          "points": 10240,
+          "samples": 287853,
+          "sampledEstimatedBytesPerPoint": 115676.22734375
+        }
+      ],
+      "packedOverScalar": 0.9675605498440318
+    }
+  ],
+  "sourceRef": "6e83fbffa1788df81a0e9562879cdb935c07da64"
+}

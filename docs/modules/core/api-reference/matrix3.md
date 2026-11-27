@@ -9,7 +9,7 @@ A 3x3 matrix. Any arguments can be plain JavaScript arrays or other `math.gl` ob
 ## Usage
 
 ```js
-import {Matrix3} from '@math.gl/core';
+import {Matrix3} from '@math.gl/core/matrix';
 ```
 
 Copy a matrix to a `Matrix3` so that it can be manipulated (and mutated) with `Matrix3` methods:
@@ -175,3 +175,7 @@ Transform a two-, three-, or four-component input. For four components, transfor
 
 - All transforms are effectively "right multiplied" onto the matrix (meaning that during transform they will be applied in opposite order).
 - `Matrix3` is stored internally in column major format (per WebGL conventions). This only matters when you read out the matrix to use it with other software.
+
+## Related functional operations
+
+For inverse-transpose normal matrices, use `mat3NormalFromMat4` from `@math.gl/core`. See [functional math](../developer-guide/functional-math.md) for imports, output ownership, and limitations.

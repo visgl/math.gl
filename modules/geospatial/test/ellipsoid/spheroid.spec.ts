@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Original tests of geometry adapters; no upstream implementation or model data copied.
 import {expect, test} from 'vitest';
-import {Ellipsoid} from '@math.gl/geospatial';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
 import type {SpheroidParameters} from '@math.gl/core/types';
 
 test('Ellipsoid spheroid adapters snapshot axes without datum or derived parameters', () => {

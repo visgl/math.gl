@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {getTimezoneOffset, lookupTimezoneAsync} from '@math.gl/earth/timezone';
-import {lookupTimezone} from '@math.gl/earth/timezone/lookup';
+import {lookupTimezone} from '@math.gl/earth/timezone';
 
 const coordinates = [-74.006, 40.7128] as const;
 const zone: string = lookupTimezone(coordinates);
@@ -23,12 +23,12 @@ import {
   getStartOfDay,
   getTimezoneTransitions,
   localDateTimeToInstant
-} from '@math.gl/earth/timezone/temporal';
+} from '@math.gl/earth/timezone';
 import type {
   LocalDateTimeInput,
   LocalDateTimeOptions,
   TimezoneTransition
-} from '@math.gl/earth/timezone/temporal';
+} from '@math.gl/earth/timezone';
 
 const local: LocalDateTime = getLocalDateTime(zone, 0);
 const supported: boolean = isTimezoneSupported(zone);

@@ -14,8 +14,8 @@ For ordinary CRS-to-CRS conversion, use [Projection or ProjectionTransform](../d
 A pipeline does not find an EPSG operation or select grids automatically.
 
 ```typescript
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import {universalTransverseMercator} from '@math.gl/geospatial/projection/projections/utm';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import {universalTransverseMercator} from '@math.gl/geospatial/projection-projections-utm';
 
 const pipeline = new ProjectionPipeline({
   input: {space: 'geographic', units: ['deg', 'deg', 'm']},
@@ -196,7 +196,7 @@ explicitly. Geographic output accepts degrees or radians; projected output is me
 The `o_proj` parameter must match the registered child:
 
 ```typescript
-import {obliqueTransformation} from '@math.gl/geospatial/projection/projections/ob_tran';
+import {obliqueTransformation} from '@math.gl/geospatial/projection-projections-ob_tran';
 
 const rotated = new ProjectionPipeline({
   input: {space: 'geographic', units: ['rad', 'rad', 'm']},
@@ -250,7 +250,7 @@ Use the same descriptors and shared implementation cache as `ProjectionTransform
 Construction starts no imports; only projection names used by steps are preloaded.
 
 ```typescript
-import {lazyUniversalTransverseMercator} from '@math.gl/geospatial/projection/projections/lazy/utm';
+import {lazyUniversalTransverseMercator} from '@math.gl/geospatial/projection-projections-lazy-utm';
 
 const lazy = new ProjectionPipeline({
   input: {space: 'geographic', units: ['deg', 'deg', 'm']},
@@ -276,7 +276,9 @@ are rejected when the implementation is available.
 
 ## Reusable scalar outputs
 
-`projectTo(coordinate, output, epoch?)` and `unprojectTo(coordinate, output, epoch?)`
+#### `projectTo(coordinate, output, epoch?)`
+
+And `unprojectTo(coordinate, output, epoch?)`
 reuse a preallocated number array, `Float32Array` or `Float64Array` and return that exact
 output. Their bound `*Sync` counterparts never import and require preloaded implementations.
 Epochs stay explicit; M is never used as time:
@@ -344,7 +346,6 @@ EPSG operation lookup and dynamic CRS inference remain outside this profile.
 Use the optional [operation catalogue](./operation-catalog.md) to choose among
 application-reviewed pipelines before execution.
 
-
 ## Static Helmert batches
 
 For a direction with exactly one active static `helmert` step, `projectFlat` and
@@ -358,7 +359,6 @@ Mixed pipelines keep general execution. Single-stage time-dependent rates are al
 optimized as described below. See the
 [measurement guidance](../benchmarks.md#operation-pipelines-and-grids)
 to compare your operation chain in both directions.
-
 
 ## Kinematic Helmert batches
 

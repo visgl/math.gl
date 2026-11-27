@@ -1,4 +1,4 @@
-# Overview
+# @math.gl/geospatial/projection
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
@@ -13,11 +13,66 @@ geocentric coordinate reference systems. Use it for map coordinates, in-place
 coordinate buffers, explicit datum transformations and coordinate propagation
 between epochs.
 
+For backend-independent interfaces, see [`@math.gl/geospatial/projection-types`](../projection-types.md).
+
 Numerical accuracy is evaluated against **native PROJ**. The pinned proj4js
 reference serves compatibility tests and benchmarks. The independent references
 qualify specific configurations and coordinate domains; they do not establish
 complete modern PROJ equivalence. See [independent validation](independent-validation.md)
 and the [modern PROJ audit](modern-proj-audit.md) for coverage and remaining gaps.
+
+For definitions of surface models, paths, reference systems, and distortion properties,
+see [Geospatial terminology](../developer-guide/terminology.md).
+
+## Relationship to maps
+
+Use this subpath when coordinates must be expressed in a different CRS. Use
+[`@math.gl/geospatial/maps`](../maps/README.md) when a renderer needs chart
+coverage, interruptions, insets, picking or unfolding. Map layouts consume
+spherical longitude/latitude in degrees; they do not resolve source CRSs or
+perform datum/epoch operations.
+
+The subpaths are independent. Convert source data with projection APIs before
+feeding it to a map when necessary. For a textured ordinary projection,
+[`prepareProjectionSurface`](../maps/api-reference/surfaces.md) from
+`/maps/surfaces` samples a projection over an explicit geographic rectangle.
+Its placement in maps reflects its rendering responsibility, even when its
+coordinate transform comes from projection.
+
+See [choosing and combining the APIs](../maps/README.md#projection-and-maps-choosing-the-right-api)
+for a decision table and the complete data-to-renderer workflow.
+
+## Usage
+
+```typescript
+import { projectionEngine } from "@math.gl/geospatial/projection";
+
+const projection = projectionEngine.createProjection({
+  from: "EPSG:4326",
+  to: "EPSG:3857",
+});
+const meters = projection.project([12, 55]);
+const longitudeLatitude = projection.unproject(meters);
+
+const positions = new Float64Array([12, 55, 13, 56]);
+projection.projectFlat(positions, 2); // transforms the same buffer
+```
+
+## Features
+
+| Feature | Support | Notes |
+| --- | --- | --- |
+| Geographic, projected and geocentric transforms | ✅ | [Projection engines](./api-reference/projection-engine.md) and the [algorithm catalogue](./developer-guide/projections.md) support the documented definitions and parameters. |
+| Bulk buffers and reusable output storage | ✅ | [ProjectionBuffer](./api-reference/projection-buffer.md) supports strided/interleaved/column layouts and explicit ownership contracts. |
+| Explicit unit, axis and datum pipelines | ✅ | [ProjectionPipeline](./api-reference/projection-pipeline.md) composes supported stages in a declared order. |
+| Horizontal and vertical grid operations | ✅ | [Prepared datum/height grids](./api-reference/datum-grids.md), including supported NTv2 and decoded GeoTIFF inputs; data loading stays explicit. |
+| Coordinate epochs and deformation models | ✅ | [Temporal models](./temporal-models.md) and [deformation operations](./developer-guide/deformation-models.md) have model/coverage-specific contracts. |
+| Reviewed operation selection | ✅ | [OperationCatalog](./api-reference/operation-catalog.md) selects application-supplied operations by area, epoch, accuracy and grid metadata. |
+| Lazy/selective loading and worker execution | ✅ | [Entry-point choices](./developer-guide/projection-engine.md) and [persistent worker recipes](./acceleration.md) separate startup, transfer and warm execution costs. |
+| Complete modern PROJ numerical/parameter parity | ◐ | The [independent validation](./independent-validation.md) and [modern PROJ audit](./modern-proj-audit.md) report tested domains and retained findings. |
+| Unrestricted EPSG operation discovery | ❌ | No bundled complete authority/operation database or automatic remote-grid search; the application reviews catalogue entries. |
+| Arbitrary PROJ pipeline/compound-CRS execution | ◐ | Supported typed stages and reader profiles are implemented; unrestricted pipeline/compound semantics remain [bounded roadmap work](https://github.com/visgl/math.gl/blob/master/dev-docs/projection-roadmap.md). |
+| Built-in WASM/SIMD/GPU algorithm backends | ❌ | Worker acceleration and external-engine adapters exist; native accelerated math.gl kernels are not delivered by the acceleration probes. |
 
 ## Tectonic time machine
 
@@ -35,22 +90,6 @@ Choose a data source to visit Nuna (Columbia), Rodinia and Pangaea.
 
 See [external projection engines](./developer-guide/external-projection-engines.md)
 for proj4js and D3 adapter examples.
-
-## Quick start
-
-```typescript
-import { projectionEngine } from "@math.gl/geospatial/projection";
-
-const projection = projectionEngine.createProjection({
-  from: "EPSG:4326",
-  to: "EPSG:3857",
-});
-const meters = projection.project([12, 55]);
-const longitudeLatitude = projection.unproject(meters);
-
-const positions = new Float64Array([12, 55, 13, 56]);
-projection.projectFlat(positions, 2); // transforms the same buffer
-```
 
 ## Learn about projections
 
@@ -70,7 +109,7 @@ ellipsoid support. It includes examples for regional, global and polar maps.
 | [Temporal models](./temporal-models.md)                                | Combine velocities, acceleration, events and relaxation with explicit epochs                 |
 | [Optional acceleration](./acceleration.md)                             | Evaluate persistent workers, ownership and complete application costs                        |
 | [Deformation models](./developer-guide/deformation-models.md)          | Propagate coordinates between epochs with prepared velocity grids                            |
-| [Support and migration](./developer-guide/support.md)                  | Understand accepted definitions and differences from proj4js                                 |
+| [Supported definitions](./developer-guide/support.md)                  | Understand accepted definitions and differences from proj4js                                 |
 | [Performance and live benchmarks](./benchmarks.md)                     | Compare math.gl flat and scalar transforms with proj4js in your browser                      |
 | [Projection scorecard](./scorecard.md)                                 | Inspect source-matched accuracy, throughput, startup, allocation, memory and bundle evidence |
 | [Independent validation](./independent-validation.md)                  | Inspect numerical references and qualification limits                                        |
@@ -89,11 +128,13 @@ together, and when to use each.
 | `WebMercatorProjectionEngine` (`/web-mercator`)                      | You need only WGS84 and EPSG:3857 with a minimal bundle                      |
 | `ProjectionPipeline` (`/pipeline`)                                   | You need explicit operation order or coordinate epochs                       |
 | `OperationCatalog` (`/operations`)                                   | You need to select among application-reviewed transformations                |
+| [`createCRSDescriptor`](../crs/api-reference/crs-descriptor.md) (`@math.gl/geospatial/crs`) | You have external converters and explicit CRS metadata/rendering policy |
 
-The package root exports the full and configurable engines and the default `projectionEngine`.
-`Projection` and `ProjectionEngine` are type contracts, available from `/types`. `/core`
-contains the engine without the catalogue. `/projections/<id>` contains an
-individual algorithm; `/projections/lazy/<id>` contains its deferred descriptor.
+The `@math.gl/geospatial/projection` entry point exports the full and configurable engines and the default `projectionEngine`.
+`Projection` and `ProjectionEngine` are type contracts, available from
+[`@math.gl/geospatial/projection-types`](../projection-types.md). Import
+`@math.gl/geospatial/projection-core` for the engine without the catalogue.
+The [kernel index](./kernels.md) lists individual algorithms and lazy descriptors.
 Readers, grids, pipelines, operation selection and deformation models have optional subpaths. See the
 [entry-point reference](./developer-guide/projection-engine.md#public-subpaths).
 
@@ -124,14 +165,6 @@ definitions through aliases or pass an explicit PROJ string, WKT or supported
 PROJJSON object. A CRS identifier describes much more than a projection algorithm;
 check its datum, units, axes and area of use.
 
-## Migration from @math.gl/proj4
-
-The v5 alpha package is renamed to `@math.gl/geospatial/projection`. Update the dependency
-name and import prefix, and use `projectionEngine.createProjection({from, to})` instead of the removed
-`Proj4Projection` alias. The `/classic` wrapper and its proj4js-specific CRS helpers
-are removed. Applications needing proj4js behavior can install and import `proj4`
-directly. The math.gl package has no runtime dependency on proj4js.
-
 ## Attribution
 
 The math.gl projection engine is **derived from proj4js, with an independently
@@ -145,13 +178,13 @@ The plugin architecture, execution and loading system, bulk coordinate APIs and
 much of the newer pipeline and epoch functionality are original math.gl work.
 Source headers distinguish direct ports, adaptations and implementations inspired
 by upstream work. Distributed license files and
-[third-party notices](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/THIRD-PARTY-NOTICES.md)
+[third-party notices](https://github.com/visgl/math.gl/blob/master/modules/geospatial/THIRD-PARTY-NOTICES.md)
 retain the applicable upstream credits and terms. Engine source headers use
 `SPDX-License-Identifier` for licenses, `SPDX-FileCopyrightText` for copyright
 holders and `SPDX-FileComment` for provenance and modifications. Equal Earth
 retains its Apache-2.0 license and original authorship. Removing the proj4js runtime
 dependency does not remove attribution for derived code. The shared spheroid
-arithmetic in `@math.gl/core/spheroid` retains the existing proj4js MIT attribution
+arithmetic in `@math.gl/core` retains the existing proj4js MIT attribution
 and full notice in the core package. Geospatial's retained three-radius/interior
 kernels preserve their CesiumJS/Apache-2.0 provenance.
 
@@ -161,3 +194,5 @@ on the workload; numerical improvements and supported features are qualified
 individually. This is not a claim of unrestricted proj4js or PROJ parity. See the
 [parity audit](./parity-audit.md), [independent validation](./independent-validation.md)
 and [support profile](./developer-guide/support.md) for the measured scope and current limits.
+
+See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

@@ -1,0 +1,21 @@
+{
+  "name": "@deck.gl/map-layers",
+  "version": "5.1.0-alpha.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check": "tsc --project tsconfig.json"
+  },
+  "peerDependencies": {
+    "@deck.gl/core": "10.0.0-alpha.1",
+    "@deck.gl/layers": "10.0.0-alpha.1"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "extends": "../../../../examples/showcase/tectonic-time-machine/tsconfig.json",
+  "include": [
+    "../../../../examples/showcase/tectonic-time-machine/src/**/*"
+  ]
+}

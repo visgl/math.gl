@@ -7,7 +7,7 @@ import {
   JulianDate,
   getMeanSiderealAngle,
   getMeanEquatorialToLocalRotation
-} from '../celestial/index';
+} from '../celestial';
 import {validateObserver} from './celestial';
 
 export type StarfieldOptions = {

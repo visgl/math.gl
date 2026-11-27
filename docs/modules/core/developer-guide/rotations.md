@@ -16,7 +16,7 @@ Use `Euler` angles to specify an orientation, `Quaternion` to compose or interpo
 Convert Euler angles to a quaternion, then transform a vector directly or build a matrix:
 
 ```js
-import {Euler, Quaternion, Matrix4, Vector3} from '@math.gl/core';
+import {Euler, Quaternion, Matrix4, Vector3} from '@math.gl/core/matrix';
 
 const euler = new Euler(0, 0, Math.PI / 2, 'xyz');
 const rotation = new Quaternion().fromEuler(euler);

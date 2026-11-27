@@ -20,6 +20,7 @@
       "test/**/*.ts",
       "test/**/*.tsx",
       "examples/**/*.js",
+      "examples/**/*.mjs",
       "examples/**/*.jsx",
       "examples/**/*.ts",
       "examples/**/*.tsx",
@@ -68,6 +69,14 @@
     }
   },
   "overrides": [
+    {
+      "includes": ["examples/**/*.jsx", "examples/**/*.tsx"],
+      "javascript": {"jsxRuntime": "reactClassic"}
+    },
+    {
+      "includes": ["modules/geospatial/src/maps/world-kernels/*.js", "modules/geospatial/src/maps/world-kernels/*.ts", "modules/geospatial/src/maps/spherical-clip/*.js", "modules/geospatial/src/maps/spherical-clip/*.ts"],
+      "linter": {"rules": {"suspicious": {"noAssignInExpressions": "off"}}}
+    },
     {
       "includes": ["modules/core/test/threejs-tests/**"],
       "linter": {

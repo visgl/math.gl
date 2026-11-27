@@ -1,0 +1,36 @@
+{
+  "name": "math.gl-dggs-cell-explorer",
+  "version": "5.1.0-alpha.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --config ../../vite.config.local.mjs",
+    "build": "vite build --config ../../vite.config.local.mjs",
+    "start-local": "vite --config ../../vite.config.local.mjs"
+  },
+  "dependencies": {
+    "@deck.gl-community/panels": "10.0.0-alpha.1",
+    "@deck.gl/core": "10.0.0-alpha.1",
+    "@deck.gl/extensions": "10.0.0-alpha.1",
+    "@deck.gl/geo-layers": "10.0.0-alpha.1",
+    "@deck.gl/layers": "10.0.0-alpha.1",
+    "@deck.gl/mesh-layers": "10.0.0-alpha.1",
+    "@deck.gl/react": "10.0.0-alpha.1",
+    "@deck.gl/widgets": "10.0.0-alpha.1",
+    "@loaders.gl/core": "5.0.0-beta.8",
+    "@luma.gl/core": "10.0.0-alpha.14",
+    "@luma.gl/engine": "10.0.0-alpha.14",
+    "@luma.gl/shaders": "10.0.0-alpha.14",
+    "@math.gl/dggs": "workspace:*",
+    "a5-js": "^0.10.0",
+    "h3-js": "^4.5.0",
+    "open-location-code": "^1.0.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "s2-geometry": "^1.2.10"
+  },
+  "devDependencies": {
+    "vite": "^8.3.6"
+  }
+}

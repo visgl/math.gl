@@ -5,6 +5,7 @@
 
 import {NumericArray, NumericArray16} from '../types';
 import {Matrix} from './base/matrix';
+import {affineComponents} from '../gl-matrix/mat4';
 import type {Matrix3Like} from './matrix3';
 import {checkVector} from '../lib/validators';
 
@@ -31,26 +32,6 @@ import {
 import {transformMat4 as vec2_transformMat4} from '../gl-matrix/vec2';
 import {transformMat4 as vec3_transformMat4} from '../gl-matrix/vec3';
 import {transformMat4 as vec4_transformMat4} from '../gl-matrix/vec4';
-
-// eslint-disable-next-line no-shadow
-enum INDICES {
-  COL0ROW0 = 0,
-  COL0ROW1 = 1,
-  COL0ROW2 = 2,
-  COL0ROW3 = 3,
-  COL1ROW0 = 4,
-  COL1ROW1 = 5,
-  COL1ROW2 = 6,
-  COL1ROW3 = 7,
-  COL2ROW0 = 8,
-  COL2ROW1 = 9,
-  COL2ROW2 = 10,
-  COL2ROW3 = 11,
-  COL3ROW0 = 12,
-  COL3ROW1 = 13,
-  COL3ROW2 = 14,
-  COL3ROW3 = 15
-}
 
 const DEFAULT_FOVY = (45 * Math.PI) / 180;
 const DEFAULT_ASPECT = 1;
@@ -81,10 +62,6 @@ export class Matrix4 extends Matrix {
 
   get RANK(): number {
     return 4;
-  }
-
-  get INDICES(): typeof INDICES {
-    return INDICES;
   }
 
   constructor(array?: Readonly<NumericArray>) {
@@ -434,27 +411,11 @@ export class Matrix4 extends Matrix {
    * @returns self
    */
   getRotation(result?: NumericArray, scaleResult?: NumericArray): NumericArray {
-    result = result || [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0];
-    scaleResult = scaleResult || [-0, -0, -0];
-    const scale = this.getScale(scaleResult);
-    const inverseScale0 = 1 / scale[0];
-    const inverseScale1 = 1 / scale[1];
-    const inverseScale2 = 1 / scale[2];
-    result[0] = this[0] * inverseScale0;
-    result[1] = this[1] * inverseScale1;
-    result[2] = this[2] * inverseScale2;
-    result[3] = 0;
-    result[4] = this[4] * inverseScale0;
-    result[5] = this[5] * inverseScale1;
-    result[6] = this[6] * inverseScale2;
-    result[7] = 0;
-    result[8] = this[8] * inverseScale0;
-    result[9] = this[9] * inverseScale1;
-    result[10] = this[10] * inverseScale2;
-    result[11] = 0;
-    result[12] = 0;
-    result[13] = 0;
-    result[14] = 0;
+    const {rotation, scale} = affineComponents(this);
+    result = result || new Array(16);
+    if (scaleResult) for (let i = 0; i < 3; i++) scaleResult[i] = scale[i];
+    for (let i = 0; i < 16; i++) result[i] = 0;
+    for (let i = 0; i < 9; i++) result[Math.floor(i / 3) * 4 + (i % 3)] = rotation[i];
     result[15] = 1;
     return result;
   }
@@ -466,21 +427,10 @@ export class Matrix4 extends Matrix {
    * @returns self
    */
   getRotationMatrix3(result?: NumericArray, scaleResult?: NumericArray): NumericArray {
-    result = result || [-0, -0, -0, -0, -0, -0, -0, -0, -0];
-    scaleResult = scaleResult || [-0, -0, -0];
-    const scale = this.getScale(scaleResult);
-    const inverseScale0 = 1 / scale[0];
-    const inverseScale1 = 1 / scale[1];
-    const inverseScale2 = 1 / scale[2];
-    result[0] = this[0] * inverseScale0;
-    result[1] = this[1] * inverseScale1;
-    result[2] = this[2] * inverseScale2;
-    result[3] = this[4] * inverseScale0;
-    result[4] = this[5] * inverseScale1;
-    result[5] = this[6] * inverseScale2;
-    result[6] = this[8] * inverseScale0;
-    result[7] = this[9] * inverseScale1;
-    result[8] = this[10] * inverseScale2;
+    const {rotation, scale} = affineComponents(this);
+    result = result || new Array(9);
+    if (scaleResult) for (let i = 0; i < 3; i++) scaleResult[i] = scale[i];
+    for (let i = 0; i < 9; i++) result[i] = rotation[i];
     return result;
   }
 

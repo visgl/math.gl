@@ -5,7 +5,7 @@
 import {cutPolylineByGrid, cutPolygonByGrid} from './cut-by-grid';
 import {getPointAtIndex, push} from './utils';
 import type {Polygon} from './cut-by-grid';
-import type {NumericArray} from '@math.gl/core';
+import type {NumericArray} from '@math.gl/core/matrix';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection
 const DEFAULT_MAX_LATITUDE = 85.051129;

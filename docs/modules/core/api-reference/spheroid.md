@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>
 
-The optional `@math.gl/core/spheroid` entry provides low-level conversions between
+The optional `@math.gl/core` entry provides low-level conversions between
 longitude/latitude/ellipsoidal height and Cartesian XYZ for spheres and oblate
 spheroids. It is also used by geospatial and the projection engine. It imports no
 vector classes, global configuration, CRS definitions or model data.
@@ -15,7 +15,7 @@ For three-radius geometry, surface normals and local frames, use
 [`Ellipsoid`](../../geospatial/api-reference/ellipsoid.md).
 
 ```ts
-import {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core/spheroid';
+import {spheroidToCartesian, cartesianToSpheroid} from '@math.gl/core/matrix';
 
 const a = 6378137;
 const b = 6356752.314245179;
@@ -30,14 +30,14 @@ cartesianToSpheroid(point, shape);
 
 ## Functions
 
-### spheroidToCartesian(point, geometry, result = point)
+#### `spheroidToCartesian(point, geometry, result = point)`
 
 Reads longitude/latitude/height from `point.x/y/z` and writes Cartesian XYZ into
 `result.x/y/z`. Angles are in radians; axes, height and
 Cartesian coordinates use the same distance unit. Latitude is not wrapped or
 restricted by this low-level function; the CRS adapter enforces its own domain.
 
-### cartesianToSpheroid(point, geometry, result = point)
+#### `cartesianToSpheroid(point, geometry, result = point)`
 
 Reads Cartesian XYZ from `point.x/y/z` and writes longitude radians, latitude
 radians and ellipsoidal height into `result.x/y/z`. The sphere inverse is analytic. The ordinary oblate path retains
@@ -82,3 +82,5 @@ The forward geocentric equations and Hannover inverse retain the existing
 proj4js 2.22.0-derived arithmetic, MIT terms and SPDX attribution. The core
 package includes its full `PROJ4-LICENSE.md`. The safeguarded exterior/interior inverses and compensated arithmetic,
 reusable scratch adapters and independent anchors are original math.gl work.
+
+See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

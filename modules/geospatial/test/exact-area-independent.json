@@ -1,0 +1,494 @@
+{
+  "provenance": {
+    "precisionDigits": 120,
+    "generatorSHA256": "78bacc1ea95dcdcc4b988a19a1ca57c6182443b540fce9a834f2cb5fbab92155"
+  },
+  "rows": [
+    {
+      "mode": "lune",
+      "ratio": 0.25,
+      "degrees": 10,
+      "expected": 0.0988898571319944
+    },
+    {
+      "mode": "tiny",
+      "ratio": 0.25,
+      "degrees": 0.0001,
+      "expected": 9.519294368334643e-14
+    },
+    {
+      "mode": "edge",
+      "ratio": 0.25,
+      "distance": 1.7453292519943296e-06,
+      "expected": 7.615435494667715e-13
+    },
+    {
+      "mode": "tiny",
+      "ratio": 0.25,
+      "degrees": 1e-06,
+      "expected": 9.519294368334644e-18
+    },
+    {
+      "mode": "edge",
+      "ratio": 0.25,
+      "distance": 1.7453292519943295e-08,
+      "expected": 7.615435494667715e-17
+    },
+    {
+      "mode": "tiny",
+      "ratio": 0.25,
+      "degrees": 1e-07,
+      "expected": 9.519294368334644e-20
+    },
+    {
+      "mode": "edge",
+      "ratio": 0.25,
+      "distance": 1.7453292519943295e-09,
+      "expected": 7.615435494667715e-19
+    },
+    {
+      "mode": "lune",
+      "ratio": 0.5,
+      "degrees": 10,
+      "expected": 0.12044281532423683
+    },
+    {
+      "mode": "tiny",
+      "ratio": 0.5,
+      "degrees": 0.0001,
+      "expected": 3.8077177473338573e-13
+    },
+    {
+      "mode": "edge",
+      "ratio": 0.5,
+      "distance": 1.7453292519943296e-06,
+      "expected": 7.615435494667715e-13
+    },
+    {
+      "mode": "tiny",
+      "ratio": 0.5,
+      "degrees": 1e-06,
+      "expected": 3.8077177473338576e-17
+    },
+    {
+      "mode": "edge",
+      "ratio": 0.5,
+      "distance": 1.7453292519943295e-08,
+      "expected": 7.615435494667715e-17
+    },
+    {
+      "mode": "tiny",
+      "ratio": 0.5,
+      "degrees": 1e-07,
+      "expected": 3.8077177473338577e-19
+    },
+    {
+      "mode": "edge",
+      "ratio": 0.5,
+      "distance": 1.7453292519943295e-09,
+      "expected": 7.615435494667715e-19
+    },
+    {
+      "mode": "lune",
+      "ratio": 0.8,
+      "degrees": 10,
+      "expected": 0.15178753194204542
+    },
+    {
+      "mode": "tiny",
+      "ratio": 0.8,
+      "degrees": 0.0001,
+      "expected": 9.747757433174675e-13
+    },
+    {
+      "mode": "edge",
+      "ratio": 0.8,
+      "distance": 1.7453292519943296e-06,
+      "expected": 7.615435494667715e-13
+    },
+    {
+      "mode": "tiny",
+      "ratio": 0.8,
+      "degrees": 1e-06,
+      "expected": 9.747757433174676e-17
+    },
+    {
+      "mode": "edge",
+      "ratio": 0.8,
+      "distance": 1.7453292519943295e-08,
+      "expected": 7.615435494667715e-17
+    },
+    {
+      "mode": "tiny",
+      "ratio": 0.8,
+      "degrees": 1e-07,
+      "expected": 9.747757433174675e-19
+    },
+    {
+      "mode": "edge",
+      "ratio": 0.8,
+      "distance": 1.7453292519943295e-09,
+      "expected": 7.615435494667715e-19
+    },
+    {
+      "mode": "lune",
+      "ratio": 1.0,
+      "degrees": 10,
+      "expected": 0.17453292519943295
+    },
+    {
+      "mode": "tiny",
+      "ratio": 1.0,
+      "degrees": 0.0001,
+      "expected": 1.523087098933543e-12
+    },
+    {
+      "mode": "edge",
+      "ratio": 1.0,
+      "distance": 1.7453292519943296e-06,
+      "expected": 7.615435494667715e-13
+    },
+    {
+      "mode": "tiny",
+      "ratio": 1.0,
+      "degrees": 1e-06,
+      "expected": 1.523087098933543e-16
+    },
+    {
+      "mode": "edge",
+      "ratio": 1.0,
+      "distance": 1.7453292519943295e-08,
+      "expected": 7.615435494667715e-17
+    },
+    {
+      "mode": "tiny",
+      "ratio": 1.0,
+      "degrees": 1e-07,
+      "expected": 1.523087098933543e-18
+    },
+    {
+      "mode": "edge",
+      "ratio": 1.0,
+      "distance": 1.7453292519943295e-09,
+      "expected": 7.615435494667715e-19
+    },
+    {
+      "mode": "lune",
+      "ratio": 1.25,
+      "degrees": 10,
+      "expected": 0.20425826560676905
+    },
+    {
+      "mode": "tiny",
+      "ratio": 1.25,
+      "degrees": 0.0001,
+      "expected": 2.379823592083661e-12
+    },
+    {
+      "mode": "edge",
+      "ratio": 1.25,
+      "distance": 1.7453292519943296e-06,
+      "expected": 7.615435494667715e-13
+    },
+    {
+      "mode": "tiny",
+      "ratio": 1.25,
+      "degrees": 1e-06,
+      "expected": 2.379823592083661e-16
+    },
+    {
+      "mode": "edge",
+      "ratio": 1.25,
+      "distance": 1.7453292519943295e-08,
+      "expected": 7.615435494667715e-17
+    },
+    {
+      "mode": "tiny",
+      "ratio": 1.25,
+      "degrees": 1e-07,
+      "expected": 2.379823592083661e-18
+    },
+    {
+      "mode": "edge",
+      "ratio": 1.25,
+      "distance": 1.7453292519943295e-09,
+      "expected": 7.615435494667715e-19
+    },
+    {
+      "mode": "lune",
+      "ratio": 2.0,
+      "degrees": 10,
+      "expected": 0.298311601776163
+    },
+    {
+      "mode": "tiny",
+      "ratio": 2.0,
+      "degrees": 0.0001,
+      "expected": 6.092348395734172e-12
+    },
+    {
+      "mode": "edge",
+      "ratio": 2.0,
+      "distance": 1.7453292519943296e-06,
+      "expected": 7.615435494667715e-13
+    },
+    {
+      "mode": "tiny",
+      "ratio": 2.0,
+      "degrees": 1e-06,
+      "expected": 6.092348395734172e-16
+    },
+    {
+      "mode": "edge",
+      "ratio": 2.0,
+      "distance": 1.7453292519943295e-08,
+      "expected": 7.615435494667715e-17
+    },
+    {
+      "mode": "tiny",
+      "ratio": 2.0,
+      "degrees": 1e-07,
+      "expected": 6.092348395734172e-18
+    },
+    {
+      "mode": "edge",
+      "ratio": 2.0,
+      "distance": 1.7453292519943295e-09,
+      "expected": 7.615435494667715e-19
+    },
+    {
+      "mode": "lune",
+      "ratio": 4.0,
+      "degrees": 10,
+      "expected": 0.5624653120101702
+    },
+    {
+      "mode": "tiny",
+      "ratio": 4.0,
+      "degrees": 0.0001,
+      "expected": 2.4369393582936687e-11
+    },
+    {
+      "mode": "edge",
+      "ratio": 4.0,
+      "distance": 1.7453292519943296e-06,
+      "expected": 7.615435494667715e-13
+    },
+    {
+      "mode": "tiny",
+      "ratio": 4.0,
+      "degrees": 1e-06,
+      "expected": 2.436939358293669e-15
+    },
+    {
+      "mode": "edge",
+      "ratio": 4.0,
+      "distance": 1.7453292519943295e-08,
+      "expected": 7.615435494667715e-17
+    },
+    {
+      "mode": "tiny",
+      "ratio": 4.0,
+      "degrees": 1e-07,
+      "expected": 2.436939358293669e-17
+    },
+    {
+      "mode": "edge",
+      "ratio": 4.0,
+      "distance": 1.7453292519943295e-09,
+      "expected": 7.615435494667715e-19
+    },
+    {
+      "mode": "sphere",
+      "ratio": 1,
+      "degrees": 45.0,
+      "expected": 0.3398369094541219
+    },
+    {
+      "mode": "sphere",
+      "ratio": 1,
+      "degrees": 1.0,
+      "expected": 0.00015231644258028413
+    },
+    {
+      "mode": "sphere",
+      "ratio": 1,
+      "degrees": 0.0001,
+      "expected": 1.5230870989343162e-12
+    },
+    {
+      "mode": "sphere",
+      "ratio": 1,
+      "degrees": 1e-07,
+      "expected": 1.523087098933543e-18
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": -90,
+      "arc": -720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": -90,
+      "arc": -360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": -90,
+      "arc": 360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": -90,
+      "arc": 720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": 90,
+      "arc": -720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": 90,
+      "arc": -360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": 90,
+      "arc": 360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 0.25,
+      "latitude": 90,
+      "arc": 720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": -90,
+      "arc": -720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": -90,
+      "arc": -360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": -90,
+      "arc": 360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": -90,
+      "arc": 720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": 90,
+      "arc": -720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": 90,
+      "arc": -360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": 90,
+      "arc": 360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 1,
+      "latitude": 90,
+      "arc": 720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": -90,
+      "arc": -720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": -90,
+      "arc": -360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": -90,
+      "arc": 360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": -90,
+      "arc": 720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": 90,
+      "arc": -720,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": 90,
+      "arc": -360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": 90,
+      "arc": 360,
+      "expected": 0
+    },
+    {
+      "mode": "polar",
+      "ratio": 4,
+      "latitude": 90,
+      "arc": 720,
+      "expected": 0
+    }
+  ]
+}

@@ -5,72 +5,179 @@
     "id": "index"
   },
   {
-    "type": "doc",
-    "id": "benchmarks"
+    "type": "category",
+    "label": "Showcase",
+    "collapsed": false,
+    "items": [
+      {
+        "type": "doc",
+        "label": "Tectonic time machine",
+        "id": "tectonic-time-machine"
+      },
+      {
+        "type": "doc",
+        "label": "Glaciation Explorer",
+        "id": "alpine-ice-age"
+      }
+    ]
   },
   {
-    "type": "doc",
-    "label": "Expressions (experimental)",
-    "id": "expressions"
+    "type": "category",
+    "label": "@math.gl/core",
+    "collapsed": false,
+    "items": [
+      {
+        "type": "doc",
+        "label": "Core transforms",
+        "id": "core-transforms"
+      },
+      {
+        "type": "doc",
+        "label": "Expressions 🧪",
+        "id": "expressions"
+      }
+    ]
   },
   {
-    "type": "doc",
-    "label": "Timezone globe",
-    "id": "timezone-globe"
+    "type": "category",
+    "label": "@math.gl/dggs",
+    "collapsed": false,
+    "items": [
+      {
+        "type": "doc",
+        "label": "DGGS cell explorer",
+        "id": "dggs-cell-explorer"
+      }
+    ]
   },
   {
-    "type": "doc",
-    "label": "Geoid globe",
-    "id": "geoid-globe"
+    "type": "category",
+    "label": "@math.gl/geometry",
+    "collapsed": false,
+    "items": [
+      {
+        "type": "doc",
+        "label": "Curve flight lab",
+        "id": "curves"
+      },
+      {
+        "type": "doc",
+        "label": "Geometry viewer",
+        "id": "geometry-viewer"
+      },
+      {
+        "type": "doc",
+        "label": "Polygon playground",
+        "id": "polygon-playground"
+      },
+      {
+        "type": "doc",
+        "label": "Frustum culling",
+        "id": "culling-playground"
+      }
+    ]
   },
   {
-    "type": "doc",
-    "label": "Tectonic time machine",
-    "id": "tectonic-time-machine"
+    "type": "category",
+    "label": "@math.gl/geospatial",
+    "collapsed": false,
+    "items": [
+      {
+        "type": "doc",
+        "label": "WKT and WKB workbench",
+        "id": "wkb-workbench"
+      },
+      {
+        "type": "doc",
+        "label": "Albers USA inset map",
+        "id": "albers-usa"
+      },
+      {
+        "type": "doc",
+        "label": "Unfolding Earth",
+        "id": "unfolding-earth"
+      },
+      {
+        "type": "doc",
+        "label": "Myriahedral maps",
+        "id": "myriahedral-maps"
+      },
+      {
+        "type": "doc",
+        "label": "Quincuncial and star maps",
+        "id": "quincuncial-star"
+      },
+      {
+        "type": "doc",
+        "label": "Elastic maps",
+        "id": "elastic-maps"
+      },
+      {
+        "type": "doc",
+        "label": "Switch projection engines",
+        "id": "external-projection-engines"
+      },
+      {
+        "type": "doc",
+        "label": "Projection domains",
+        "id": "projection-domains"
+      },
+      {
+        "type": "doc",
+        "label": "Centered oblique Mercator",
+        "id": "centered-oblique-mercator"
+      },
+      {
+        "type": "doc",
+        "label": "Prepared surface provenance",
+        "id": "surface-mesh"
+      },
+      {
+        "type": "doc",
+        "label": "Raster coordinate frames",
+        "id": "raster-frame"
+      },
+      {
+        "type": "doc",
+        "label": "Antarctica and Fiji projection lab",
+        "id": "raster-projection-lab"
+      },
+      {
+        "type": "doc",
+        "id": "benchmarks"
+      },
+      {
+        "type": "doc",
+        "label": "Terrain sampling",
+        "id": "terrain-sampling"
+      },
+      {
+        "type": "doc",
+        "label": "Bathymetry globe",
+        "id": "bathymetry"
+      }
+    ]
   },
   {
-    "type": "doc",
-    "label": "Glaciation Explorer",
-    "id": "alpine-ice-age"
-  },
-  {
-    "type": "doc",
-    "label": "Albers USA inset map",
-    "id": "albers-usa"
-  },
-  {
-    "type": "doc",
-    "label": "Polygon playground",
-    "id": "polygon-playground"
-  },
-  {
-    "type": "doc",
-    "label": "Core transforms",
-    "id": "core-transforms"
-  },
-  {
-    "type": "doc",
-    "label": "Curve flight lab",
-    "id": "curves"
-  },
-  {
-    "type": "doc",
-    "label": "Geometry viewer",
-    "id": "geometry-viewer"
-  },
-  {
-    "type": "doc",
-    "label": "Unfolding Earth",
-    "id": "unfolding-earth"
-  },
-  {
-    "type": "doc",
-    "label": "Myriahedral maps",
-    "id": "myriahedral-maps"
-  },
-  {
-    "type": "doc",
-    "label": "Frustum culling",
-    "id": "culling-playground"
+    "type": "category",
+    "label": "@math.gl/earth",
+    "collapsed": false,
+    "items": [
+      {
+        "type": "doc",
+        "label": "Solar terminator",
+        "id": "sun-terminator"
+      },
+      {
+        "type": "doc",
+        "label": "Timezone globe",
+        "id": "timezone-globe"
+      },
+      {
+        "type": "doc",
+        "label": "Geoid globe",
+        "id": "geoid-globe"
+      }
+    ]
   }
 ]

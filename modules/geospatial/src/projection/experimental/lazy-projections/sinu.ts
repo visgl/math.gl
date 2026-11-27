@@ -6,5 +6,8 @@ import {createProjectionDescriptor} from '../projection-descriptor';
 import type {ProjectionDescriptor} from '../projection-descriptor';
 export const lazySinusoidal: ProjectionDescriptor = /* @__PURE__ */ createProjectionDescriptor(
   {name: 'sinu', aliases: ['Sinusoidal']},
-  async () => (await import('@math.gl/geospatial/projection/projections/sinu')).sinusoidal
+  async () => {
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-sinu');
+    return projectionModule.sinusoidal;
+  }
 );

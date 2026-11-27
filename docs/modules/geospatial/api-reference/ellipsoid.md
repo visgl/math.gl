@@ -45,8 +45,9 @@ Get the transform from a local east-north-up frame at a point on the WGS84 ellip
 
 ```js
 import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {eastNorthUpToFixedFrame} from '@math.gl/geospatial/coordinates';
 const cartesianOrigin = Ellipsoid.WGS84.cartographicToCartesian([21, 78, 0]);
-const transformMatrix = Ellipsoid.WGS84.eastNorthUpToFixedFrame(cartesianOrigin);
+const transformMatrix = eastNorthUpToFixedFrame(Ellipsoid.WGS84, cartesianOrigin);
 ```
 
 See the [accuracy and GeographicLib coverage audit](./ellipsoid-accuracy.md) for
@@ -60,7 +61,7 @@ only the common geometry; they do not transfer a datum, axis order, units or epo
 
 ```ts
 import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
-import {normalizeCRS} from '@math.gl/geospatial/projection/core';
+import {normalizeCRS} from '@math.gl/geospatial/projection-core';
 
 const crs = normalizeCRS('+proj=longlat +ellps=GRS80');
 const shape = Ellipsoid.fromSpheroid(crs.ellipsoid);
@@ -201,7 +202,9 @@ Returns
 
 - The modified result parameter, a new `Vector3` instance if none was provided, or `undefined` if the inverse is undefined or unsupported. A defined result contains `[longitude, latitude, height]`, with longitude and latitude in degrees and height in meters above the ellipsoid.
 
-### eastNorthUpToFixedFrame(origin : Number[3], result : Number[16]) : Matrix4 | Number[16]
+### eastNorthUpToFixedFrame(ellipsoid, origin : Number[3], result : Number[16]) : Matrix4 | Number[16]
+
+Standalone export from `@math.gl/geospatial` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
 
 Computes a 4x4 transformation matrix from a reference frame with an east-north-up axes centered at the provided origin to the provided ellipsoid's fixed reference frame.
 
@@ -222,7 +225,9 @@ Notes
 
 - Calls `localFrameToFixedFrame` with `east`, `north`, `up` axis.
 
-### localFrameToFixedFrame(String firstAxis, secondAxis : String, thirdAxis : String | null, origin : Number[3] \[, result : Number[16]]) : Matrix4 | Number[16]
+### localFrameToFixedFrame(ellipsoid, String firstAxis, secondAxis : String, thirdAxis : String | null, origin : Number[3] \[, result : Number[16]]) : Matrix4 | Number[16]
+
+Standalone export from `@math.gl/geospatial` and `@math.gl/geospatial`. Pass the ellipsoid as the first argument.
 
 Computes a 4x4 transformation matrix from a reference frame centered at the provided origin to the ellipsoid's fixed reference frame.
 
@@ -246,7 +251,7 @@ Supply a reusable `Matrix4` or `number[]` to avoid a new result per call.
 Up is the normalized Cartesian origin divided by squared radii. On the surface
 this is the surface normal; at height it can differ from the normal at the inverse
 geodetic position used by deformation. Sphere/oblate frames share the original
-[`@math.gl/core/local-frame`](../../core/api-reference/local-frame.md) basis and
+[`@math.gl/core`](../../core/api-reference/local-frame.md) basis and
 matrix functions while retaining this normal choice. Three-radius/prolate frames
 retain the historical geometry path. At Cartesian poles (|x| and |y| ≤ 1e-14), east
 is +Y and north/up use the sign of z. The historical center matrix is singular;
@@ -360,3 +365,36 @@ Notes:
 ## Attribution
 
 This class was ported from [Cesium](https://github.com/AnalyticalGraphicsInc/cesium) under the Apache 2 License.
+
+See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
+## P0 numeric and output contracts
+
+The [P0 qualification profile](../projection/ellipsoid-p0-qualification.md)
+details the supported samples and all public ownership, unit and boundary
+contracts. Constructor axes must be finite and nonnegative; default/zero shapes
+remain constructible but do not define a valid conversion surface. Normals and
+radial surface projection now return `undefined` for zero/nonfinite rays without
+modifying a supplied result. Forward conversion and normal/Z-axis intersection
+also reject invalid numeric inputs before output writes.
+
+Degree latitudes retain their complement near a pole, avoiding lost radians
+amplified by very flat shapes. Supplied result setters can invoke nested
+conversions without corrupting later output ordinates. The legacy local-frame
+pole neighborhood is bounded by shape scale in small units. These tighten
+previous failure/precision behavior; no runtime dependencies are added.
+
+## Metrics and geodesic areas
+
+Use the separate [EllipsoidMetrics](./ellipsoid-metrics.md) class for revolution
+ellipsoid metrics and auxiliary latitudes. [GeodesicPolygon](./geodesic-polygon.md)
+and optional `EllipsoidGeodesic` edge areas support compensated polygon geometry.
+These APIs use explicit degree units and retain the existing Cartesian API.
+
+[EllipsoidRhumb and RhumbPolygon](./ellipsoid-rhumb.md) provide constant-bearing
+paths and areas. [GeodesicIntersections](./geodesic-intersections.md) provides
+bounded searches with explicit completeness and segment statuses.
+
+[RhumbPath](./rhumb-path.md) adds surface-distance sampling over the existing
+rhumb solver. [Geographic seam splitters](./geographic-seams.md) preserve declared
+edge semantics, attributes, holes and source provenance in a periodic longitude chart.

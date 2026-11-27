@@ -2,7 +2,66 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-export * from './core';
+export {
+  ProjectionTransform,
+  checkProjectionCompatibility,
+  normalizeCRS,
+  TypeScriptCRSError,
+  createProjectionDescriptor,
+  preloadProjection,
+  getLoadedProjection,
+  ConfigurableProjectionEngine,
+  createProjectionEngine
+} from './core';
+export type {
+  ProjectionTransformOptions,
+  ProjectionTransformCreateOptions,
+  ProjectionCompatibility,
+  ProjectionArray,
+  ProjectionPoint,
+  ProjectionFlatContext,
+  ProjectionFlatOperation,
+  ProjectionContext,
+  ProjectionImplementation,
+  ProjectionRenderingProfile,
+  GeographicBounds,
+  ProjectionParameters,
+  ProjectionPlugin,
+  DatumDefinition,
+  DatumCatalogPlugin,
+  NormalizedCRS,
+  CRSParser,
+  ParsedCRS,
+  CRSNormalizationOptions,
+  CRSCompatibilityReason,
+  TypeScriptCRSInput,
+  DatumGrid,
+  DatumGridCollection,
+  VerticalGrid,
+  VerticalGridCollection,
+  ProjectionDescriptor,
+  ProjectionCoordinate,
+  ProjectionOutput,
+  SpheroidParameters,
+  CRSEngine,
+  CRSDescriptor,
+  CRSConversion,
+  CRSConverter,
+  CRSBounds,
+  CRSRenderingScale,
+  CRSRenderingScaleCallback,
+  GetCRSOptions,
+  ProjectionEngine,
+  ProjectionEngineOptions,
+  CreateProjectionOptions,
+  Projection,
+  PreparedProjection,
+  ProjectionAlgorithmIdentity,
+  ProjectionCRSDescription,
+  ProjectionTransformStage,
+  ProjectionDirectionDescription,
+  ProjectionTransformDescription
+} from './core';
 export {mercator} from './projections/mercator';
 export {equidistantCylindrical} from './projections/equidistant-cylindrical';
 export {lambertConformalConic} from './projections/lcc';
@@ -56,4 +115,14 @@ export type {
   VerticalGridGeoTIFFData
 } from './grids/vertical-geotiff';
 
-export * from './projection-pipeline';
+export {ProjectionPipeline} from './projection-pipeline';
+export type {
+  PipelineEpochs,
+  PipelineHelmertRates,
+  PipelineUnit,
+  PipelineCoordinateSystem,
+  PipelineEllipsoid,
+  PipelineProjectionOutput,
+  PipelineStep,
+  ProjectionPipelineOptions
+} from './projection-pipeline';

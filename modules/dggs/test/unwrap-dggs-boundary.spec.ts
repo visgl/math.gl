@@ -5,15 +5,13 @@
 import {expect, test} from 'vitest';
 import {latLngToCell} from 'h3-js';
 import {lonLatToCell} from 'a5-js';
-import {
-  A5Decoder,
-  H3Decoder,
-  S2Decoder,
-  GeohashDecoder,
-  QuadkeyDecoder,
-  PlusCodeDecoder,
-  unwrapDGGSBoundary
-} from '@math.gl/dggs';
+import {A5Decoder} from '@math.gl/dggs/a5';
+import {H3Decoder} from '@math.gl/dggs/h3';
+import {S2Decoder} from '@math.gl/dggs/s2';
+import {GeohashDecoder} from '@math.gl/dggs/geohash';
+import {QuadkeyDecoder} from '@math.gl/dggs/quadkey';
+import {PlusCodeDecoder} from '@math.gl/dggs/plus-code';
+import {unwrapDGGSBoundary} from '@math.gl/dggs/decoders';
 
 test('unwraps crossings in either direction without changing latitudes', () => {
   expect(

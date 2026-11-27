@@ -1,0 +1,63 @@
+// math.gl
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+import React from "react";
+import Link from "@docusaurus/Link";
+import styles from "./styles.module.css";
+
+const modules = [
+  ['Core', 'core', 'Vectors, matrices, quaternions, and the foundations of 3D math.', [
+    ['Transforms', 'core/developer-guide/transformations'], ['Types', 'core/types'], ['Arrow / GeoArrow', 'core/arrow'], ['UTF-8', 'core/utf8']
+  ]],
+  ['Geometry', 'geometry', 'Build, query, and process shapes from curves and polygons to 3D meshes.', [
+    ['Curves', 'geometry/curves'], ['Polygons', 'geometry/polygon'], ['Culling', 'geometry/culling'], ['Spatial indexes', 'geometry/spatial-index']
+  ]],
+  ['Geospatial', 'geospatial', 'Work with geographic coordinates, reference systems, and map projections.', [
+    ['CRS', 'geospatial/crs'], ['Projections', 'geospatial/projection'], ['Terrain', 'geospatial/terrain'], ['Web Mercator', 'geospatial/web-mercator']
+  ]],
+  ['Earth', 'earth', 'Connect locations with Earth models, daylight, and local time.', [
+    ['Geoid', 'earth/geoid'], ['Sun', 'earth/sun'], ['Timezones', 'earth/timezone']
+  ]],
+  ['DGGS', 'dggs', 'Explore discrete global grids and decode geographic cell boundaries.', [
+    ['H3', 'dggs/api-reference/h3'], ['A5', 'dggs/api-reference/a5'], ['S2', 'dggs/api-reference/s2'], ['GeoHash', 'dggs/api-reference/geohash'], ['Quadkey', 'dggs/api-reference/quadkey'], ['Plus Code', 'dggs/api-reference/plus-code']
+  ]],
+  ['SQL 🧪', 'sql', 'Query native Arrow tables with SQL, compute columns, and aggregate record batches.', [
+    ['Queries', 'sql/query'], ['SQL parser', 'sql/parser'], ['Arrow expressions', 'sql/arrow'], ['Workers', 'sql/worker']
+  ]],
+  ['Tasks', 'tasks', 'Schedule typed work locally and in browser or Node workers.', [
+    ['Scheduling', 'tasks/developer-guide/execution'], ['Workers', 'tasks/developer-guide/custom-workers'], ['Streams', 'tasks/developer-guide/task-runner'], ['State', 'tasks/developer-guide/persistent-resources']
+  ]]
+];
+
+export default function ModuleCatalog() {
+  return (
+    <>
+      <p>
+        Choose a module for your application. Each overview introduces its
+        capabilities, guides, and API.
+      </p>
+      <ul className={styles.grid}>
+        {modules.map(([name, id, description, capabilities]) => (
+          <li key={id} className={styles.card}>
+            <Link className={styles.primaryLink} to={`/docs/modules/${id}`}>
+              <h2>{name}</h2>
+              <code>@math.gl/{id}</code>
+              <p>{description}</p>
+            </Link>
+            <div className={styles.capabilities}>
+              {capabilities.map(([label, path], index) => (
+                <React.Fragment key={label}>
+                  {index > 0 && <span aria-hidden="true"> · </span>}
+                  <Link to={`/docs/modules/${path}`}>{label}</Link>
+                </React.Fragment>
+              ))}
+            </div>
+            <Link className={styles.action} to={`/docs/modules/${id}`}>
+              Explore module <span aria-hidden="true">→</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
