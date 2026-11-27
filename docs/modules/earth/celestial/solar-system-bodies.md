@@ -118,11 +118,11 @@ Returns the planetocentric `{longitude, latitude}` of the subsolar point in degr
 positive in (−180, 180]. The terminator is the great circle 90 degrees from this point, without
 refraction.
 
-## Atmospheres
+## 🧪 Experimental atmospheres
 
 These rendering presets combine published reference conditions with derived optics and assumed aerosol properties. Pressure, temperature and gas fractions set the base number density. The RGB Rayleigh coefficients follow from those inputs and the gas cross sections. Treat the Mars per-channel dust albedo and asymmetry and the Venus upper-haze optical depth, scale height, asymmetry and albedo as rendering assumptions. Wolff and Wilquet supply observational context. The shell cutoff and Venus cloud color are also model choices.
 
-### getBodyAtmosphere(body)
+### 🧪 getBodyAtmosphere(body)
 
 Returns the single-scattering atmosphere parameters of a body, or `null` for the Sun, Mercury and
 the Moon. Mercury and the Moon have only a surface-bounded exosphere. `BODIES_WITH_ATMOSPHERE`
@@ -175,7 +175,7 @@ Limits:
 - The cloud-deck albedo of Venus is a visual approximation near the Bond albedo 0.77, not a
   measured spectrum.
 
-### getRayleighCrossSection(gas, wavelength)
+### 🧪 getRayleighCrossSection(gas, wavelength)
 
 Returns the Rayleigh cross-section of one molecule in m²:
 σ = 24 π³ / (λ⁴ Nₛ²) ((nₛ² − 1) / (nₛ² + 2))² F (Bodhaine et al. 1999, eq. 2). `gas` is `'air'`,
