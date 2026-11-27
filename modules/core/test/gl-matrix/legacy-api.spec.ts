@@ -393,6 +393,53 @@ describe('gl-matrix compatibility API', () => {
     }
   });
 
+  test('mat4.lookAt and mat4.targetTo stay valid for parallel up at extreme magnitudes', () => {
+    for (const [eye, up] of [
+      // nearly along z: the fallback must not pick a perpendicular that underflows
+      [
+        [1e-200, 0, 1],
+        [1e-200, 0, 1]
+      ],
+      // huge up: the fallback must not be scaled by up
+      [
+        [0, 0, 1],
+        [0, 0, 1e200]
+      ],
+      [
+        [0, 0, 1],
+        [0, 0, 1e-300]
+      ],
+      // non-parallel up whose cross with the sightline overflows or underflows
+      [
+        [0, 0, 1],
+        [1e200, 0, 1e200]
+      ],
+      [
+        [0, 0, 1],
+        [1e-200, 0, 1]
+      ]
+    ]) {
+      for (const fn of [mat4.lookAt, mat4.targetTo]) {
+        const m = fn(new Array(16), eye, [0, 0, 0], up);
+        const rotation = mat3.fromMat4(mat3.create(), m);
+        expect(mat3.determinant(rotation)).toBeCloseTo(1, 5);
+      }
+    }
+    // a scaled parallel up keeps the orientation of a unit one
+    for (const fn of [mat4.lookAt, mat4.targetTo]) {
+      expectArray(
+        fn(new Array(16), [0, 0, 1], [0, 0, 0], [0, 0, 1e200]),
+        fn(new Array(16), [0, 0, 1], [0, 0, 0], [0, 0, 1]),
+        12
+      );
+    }
+  });
+
+  test('mat4.targetTo keeps a zero x axis when eye and target coincide', () => {
+    const m = mat4.targetTo(new Array(16), [0, 0, 0], [0, 0, 0], [0, 1, 0]);
+    expect(m.slice(0, 3)).toEqual([0, 0, 0]);
+  });
+
   test('quat.getAngle gives 0 instead of NaN for a unit quaternion and itself', () => {
     for (const values of [
       [1, 2, 3, 1],

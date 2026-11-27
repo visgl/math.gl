@@ -1692,13 +1692,78 @@ export function orthoZO(out, left, right, bottom, top, near, far) {
 }
 
 /**
- * Returns the x axis for a look-at basis whose up vector is parallel to the line of sight:
- * up crossed with the z axis, or with the x axis when up points along z. This is the limit
- * of a target a tiny step off that line, so looking straight up or down stays a valid rotation.
+ * Returns the unit x axis of a look-at basis, given up, the raw sightline (r0, r1, r2) and the
+ * normalized sightline (z0, z1, z2). Returns zeros for a zero sightline or a zero up vector.
+ * When up is parallel to the sightline, the axis is built from the normalized sightline and the
+ * coordinate axis least aligned with it, signed by the direction of up. For axis-aligned views
+ * this is the limit of a target a tiny step off the line of sight.
  */
-function parallelUpXAxis(upx, upy, upz) {
-  return upx || upy ? [upy, -upx, 0] : [0, upz, -upy];
+function lookAtXAxis(out: number[], upx, upy, upz, r0, r1, r2, z0, z1, z2): number[] {
+  if ((!r0 && !r1 && !r2) || (!upx && !upy && !upz)) {
+    return normalizeAxis(out, 0, 0, 0);
+  }
+  // Test the raw sightline for exact parallelism: normalizing first can round an exactly
+  // parallel up into a tiny nonzero cross. NaN from overflow counts as not parallel here.
+  if (upy * r2 - upz * r1 !== 0 || upz * r0 - upx * r2 !== 0 || upx * r1 - upy * r0 !== 0) {
+    normalizeAxis(out, upy * z2 - upz * z1, upz * z0 - upx * z2, upx * z1 - upy * z0);
+    if (out[0] || out[1] || out[2]) {
+      return out;
+    }
+  }
+  // up is parallel to the line of sight. Take its sign from the largest sightline component,
+  // so the magnitude of up cannot overflow or underflow the result.
+  const a0 = Math.abs(z0);
+  const a1 = Math.abs(z1);
+  const a2 = Math.abs(z2);
+  const sign =
+    a0 >= a1 && a0 >= a2
+      ? Math.sign(upx) * Math.sign(z0)
+      : a1 >= a2
+        ? Math.sign(upy) * Math.sign(z1)
+        : Math.sign(upz) * Math.sign(z2);
+  if (a2 <= a0 && a2 <= a1) {
+    // z x (0, 0, 1)
+    return normalizeAxis(out, sign * z1, -sign * z0, 0);
+  }
+  if (a0 <= a1) {
+    // z x (1, 0, 0)
+    return normalizeAxis(out, 0, sign * z2, -sign * z1);
+  }
+  // z x (0, 1, 0)
+  return normalizeAxis(out, -sign * z2, 0, sign * z0);
 }
+
+/**
+ * Writes a normalized vector to out, rescaling first when its squared length underflows or
+ * overflows. Writes zeros for a zero or non-finite vector.
+ */
+function normalizeAxis(out: number[], x0: number, x1: number, x2: number): number[] {
+  let len = x0 * x0 + x1 * x1 + x2 * x2;
+  if (len === 0 || len === Infinity) {
+    const max = Math.max(Math.abs(x0), Math.abs(x1), Math.abs(x2));
+    if (!max || max === Infinity) {
+      len = 0;
+    } else {
+      x0 /= max;
+      x1 /= max;
+      x2 /= max;
+      len = x0 * x0 + x1 * x1 + x2 * x2;
+    }
+  }
+  if (len > 0) {
+    len = 1 / Math.sqrt(len);
+    out[0] = x0 * len;
+    out[1] = x1 * len;
+    out[2] = x2 * len;
+  } else {
+    out[0] = 0;
+    out[1] = 0;
+    out[2] = 0;
+  }
+  return out;
+}
+
+const lookAtAxis = [0, 0, 0];
 
 /**
  * Generates a look-at matrix with the given eye position, focal point, and up axis.
@@ -1743,37 +1808,16 @@ export function lookAt(out, eye, center, up) {
   z1 = eyey - centery;
   z2 = eyez - centerz;
 
-  // Use the raw (un-normalized) sightline to detect exact parallelism. Normalizing first can
-  // round an exactly-parallel up into a tiny nonzero cross that maps to a wrong axis.
-  const parallelUpLookAt =
-    !(upy * z2 - upz * z1) && !(upz * z0 - upx * z2) && !(upx * z1 - upy * z0);
+  const r0 = z0;
+  const r1 = z1;
+  const r2 = z2;
 
   len = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
   z0 *= len;
   z1 *= len;
   z2 *= len;
 
-  if (parallelUpLookAt) {
-    // up is parallel to the line of sight
-    [x0, x1, x2] = parallelUpXAxis(upx, upy, upz);
-  } else {
-    // Cross with the normalized sightline so extreme-magnitude inputs do not overflow.
-    x0 = upy * z2 - upz * z1;
-    x1 = upz * z0 - upx * z2;
-    x2 = upx * z1 - upy * z0;
-  }
-
-  len = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
-  if (!len) {
-    x0 = 0;
-    x1 = 0;
-    x2 = 0;
-  } else {
-    len = 1 / len;
-    x0 *= len;
-    x1 *= len;
-    x2 *= len;
-  }
+  [x0, x1, x2] = lookAtXAxis(lookAtAxis, upx, upy, upz, r0, r1, r2, z0, z1, z2);
 
   y0 = z1 * x2 - z2 * x1;
   y1 = z2 * x0 - z0 * x2;
@@ -1832,10 +1876,9 @@ export function targetTo(out, eye, target, up) {
   let z1 = eyey - target[1];
   let z2 = eyez - target[2];
 
-  // Use the raw sightline to detect exact parallelism; normalizing first can round an
-  // exactly-parallel up into a tiny nonzero cross that maps to a wrong axis.
-  const parallelUpTargetTo =
-    !(upy * z2 - upz * z1) && !(upz * z0 - upx * z2) && !(upx * z1 - upy * z0);
+  const r0 = z0;
+  const r1 = z1;
+  const r2 = z2;
 
   let len = z0 * z0 + z1 * z1 + z2 * z2;
   if (len > 0) {
@@ -1845,26 +1888,7 @@ export function targetTo(out, eye, target, up) {
     z2 *= len;
   }
 
-  let x0: number;
-  let x1: number;
-  let x2: number;
-  if (parallelUpTargetTo) {
-    // up is parallel to the line of sight
-    [x0, x1, x2] = parallelUpXAxis(upx, upy, upz);
-  } else {
-    // Cross with the normalized sightline so extreme-magnitude inputs do not overflow.
-    x0 = upy * z2 - upz * z1;
-    x1 = upz * z0 - upx * z2;
-    x2 = upx * z1 - upy * z0;
-  }
-
-  len = x0 * x0 + x1 * x1 + x2 * x2;
-  if (len > 0) {
-    len = 1 / Math.sqrt(len);
-    x0 *= len;
-    x1 *= len;
-    x2 *= len;
-  }
+  const [x0, x1, x2] = lookAtXAxis(lookAtAxis, upx, upy, upz, r0, r1, r2, z0, z1, z2);
 
   out[0] = x0;
   out[1] = x1;
