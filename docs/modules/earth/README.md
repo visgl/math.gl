@@ -24,4 +24,4 @@ Earth models, sunlight, astronomy, time zones, and ocean calculations. Import ea
 
 Load optional geoid grids and timezone geometry explicitly when your application needs them.
 
-[Celestial time, frames and solar-system bodies](./celestial/README.md)
+[🧪 Experimental · `@math.gl/earth/celestial`](./celestial/README.md)

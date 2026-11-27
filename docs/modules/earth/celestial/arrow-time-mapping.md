@@ -1,5 +1,7 @@
 # Arrow JS temporal mapping
 
+**🧪 Experimental** — The `@math.gl/earth/celestial` subpath and all its exported functions, classes, constants, and types are experimental.
+
 This is a semantic mapping, not a claim that every JavaScript object supports every
 Arrow int64 value. Check range, precision and conversion policy separately. Getter behavior
 was checked against installed Arrow JS 21.2.0 and the current Arrow JS source on October 23, 2026.
