@@ -2,4 +2,10 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-export {compareUTF8, parseUTF8Number, parseUTF8BigInt, parseUTF8Boolean} from './utf8-utils';
+export {
+  compareUTF8,
+  parseUTF8Number,
+  parseUTF8NumberExact,
+  parseUTF8BigInt,
+  parseUTF8Boolean
+} from './utf8-utils';

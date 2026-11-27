@@ -7,7 +7,8 @@ import {
   compareUTF8,
   parseUTF8BigInt,
   parseUTF8Boolean,
-  parseUTF8Number
+  parseUTF8Number,
+  parseUTF8NumberExact
 } from '../../src/arrow-integration/utf8';
 test('UTF8Utils#compareUTF8', () => {
   const bytes = new Uint8Array([
@@ -87,7 +88,7 @@ test('UTF8Utils#parseUTF8Number', () => {
     /Invalid UTF-8 byte range/
   );
 });
-test('UTF8Utils#parseUTF8Number rounds like Number', () => {
+test('UTF8Utils#parseUTF8NumberExact rounds like Number', () => {
   const encoder = new TextEncoder();
   for (const text of [
     '0.44918278882938156',
@@ -101,10 +102,13 @@ test('UTF8Utils#parseUTF8Number rounds like Number', () => {
     '4.9406564584124654e-324',
     '1e400',
     '0.1e-1',
-    '12345.6789e-3'
+    '12345.6789e-3',
+    '0e400',
+    '  -1.5e-310 ',
+    '-0'
   ]) {
     const bytes = encoder.encode(text);
-    expect(parseUTF8Number(bytes, 0, bytes.length), text).toBe(Number(text));
+    expect(parseUTF8NumberExact(bytes, 0, bytes.length), text).toBe(Number(text));
   }
 
   // Shortest round-trip strings of random doubles must parse back to the same double.
@@ -116,8 +120,19 @@ test('UTF8Utils#parseUTF8Number rounds like Number', () => {
   for (let i = 0; i < 2000; i++) {
     const value = random() * Math.pow(10, Math.floor(random() * 60) - 30);
     const bytes = encoder.encode(String(value));
-    expect(parseUTF8Number(bytes, 0, bytes.length), String(value)).toBe(value);
+    expect(parseUTF8NumberExact(bytes, 0, bytes.length), String(value)).toBe(value);
   }
+
+  // The same grammar as parseUTF8Number, and the same result on its correctly rounded range.
+  for (const text of ['', ' ', '1e', '1,000', 'Infinity', '0x10', '+.25', '1.', '3.5e2', '-42']) {
+    const bytes = encoder.encode(text);
+    expect(parseUTF8NumberExact(bytes, 0, bytes.length), text).toBe(
+      parseUTF8Number(bytes, 0, bytes.length)
+    );
+  }
+  // The default parser keeps its arithmetic-only path.
+  const bytes = encoder.encode('0.44918278882938156');
+  expect(parseUTF8Number(bytes, 0, bytes.length)).toBe(0.4491827888293816);
 });
 
 test('UTF8Utils#parseUTF8BigInt', () => {

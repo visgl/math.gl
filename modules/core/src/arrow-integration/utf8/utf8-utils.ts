@@ -56,8 +56,6 @@ export function compareUTF8(
  *
  * Supports decimal numbers with optional sign, fractional component, exponent, and surrounding
  * ASCII whitespace. Returns `undefined` when the range is not a strict decimal number.
- * Results are correctly rounded, matching `Number()`: numbers with more than 15 significant digits
- * or a large exponent are converted from their ASCII text.
  *
  * @param bytes - UTF-8 byte buffer.
  * @param firstByte - Inclusive start byte offset.
@@ -65,12 +63,43 @@ export function compareUTF8(
  * @returns Parsed number, or `undefined` when parsing fails.
  * @throws RangeError if the byte range is invalid for the buffer.
  */
-// The parser is intentionally implemented inline to avoid string materialization while validating grammar.
-// eslint-disable-next-line max-statements, complexity
 export function parseUTF8Number(
   bytes: Uint8Array,
   firstByte: number,
   endByte: number
+): number | undefined {
+  return parseDecimal(bytes, firstByte, endByte, false);
+}
+
+/**
+ * Parses a UTF-8 encoded ASCII number with the same result as `Number()` on its text.
+ *
+ * Accepts the same grammar as {@link parseUTF8Number}. Numbers with at most 15 significant digits
+ * and a decimal scale within 10^22 take the same string-free path, which is already correctly
+ * rounded there. Longer mantissas and larger scales are converted from their ASCII text, which
+ * allocates a temporary string for that value.
+ *
+ * @param bytes - UTF-8 byte buffer.
+ * @param firstByte - Inclusive start byte offset.
+ * @param endByte - Exclusive end byte offset.
+ * @returns Parsed number, or `undefined` when parsing fails.
+ * @throws RangeError if the byte range is invalid for the buffer.
+ */
+export function parseUTF8NumberExact(
+  bytes: Uint8Array,
+  firstByte: number,
+  endByte: number
+): number | undefined {
+  return parseDecimal(bytes, firstByte, endByte, true);
+}
+
+// The parser is intentionally implemented inline to avoid string materialization while validating grammar.
+// eslint-disable-next-line max-statements, complexity
+function parseDecimal(
+  bytes: Uint8Array,
+  firstByte: number,
+  endByte: number,
+  exact: boolean
 ): number | undefined {
   checkByteRange(bytes, firstByte, endByte);
 
@@ -139,16 +168,16 @@ export function parseUTF8Number(
 
   const decimalScale = exponentSign * exponent - fractionDigitCount;
   // With at most 15 digits the mantissa is an exact integer, and 10 ** 22 is the largest exact
-  // power of ten, so one multiplication or division rounds correctly. Longer mantissas or scales
-  // would round twice, so let the engine parse the validated ASCII text instead.
-  if (value === 0 || (digitCount <= 15 && Math.abs(decimalScale) <= 22)) {
-    return sign * applyDecimalScale(value, decimalScale);
+  // power of ten, so one multiplication or division rounds correctly. Longer mantissas or larger
+  // scales round twice, so the exact variant lets the engine parse the validated text instead.
+  if (exact && (digitCount > 15 || Math.abs(decimalScale) > 22)) {
+    let text = '';
+    for (let index = numberStart; index < end; index++) {
+      text += String.fromCharCode(bytes[index]!);
+    }
+    return Number(text);
   }
-  let text = '';
-  for (let index = numberStart; index < end; index++) {
-    text += String.fromCharCode(bytes[index]!);
-  }
-  return Number(text);
+  return sign * applyDecimalScale(value, decimalScale);
 }
 
 /**
@@ -318,6 +347,10 @@ function applyDecimalScale(value: number, decimalScale: number): number {
   }
   if (decimalScale >= 0) {
     return value * Math.pow(10, decimalScale);
+  }
+  if (decimalScale < -308) {
+    // Split the scale so a representable subnormal result does not require 10 ** 309.
+    return (value / 1e308) * Math.pow(10, decimalScale + 308);
   }
   return value / Math.pow(10, -decimalScale);
 }

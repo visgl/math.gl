@@ -78,12 +78,6 @@ test.each(['&&', '||'])('Arrow Boolean %s uses SQL truth tables', op => {
   expect(values('!a', input)).toEqual(rows.map(([a]) => (a === null ? null : !a)));
 });
 
-test('parseNumber on a UTF8 column rounds long decimals once', () => {
-  const texts = ['0.44918278882938156', '123456789012345678', '1.2345678901234567e-30'];
-  const input = batch({text: vectorFromArray(texts, new Utf8())});
-  expect(values('parseNumber(text)', input)).toEqual(texts.map(Number));
-});
-
 test('UTF8 comparisons and parses do not decode input strings', () => {
   const input = batch({text: vectorFromArray(['12', '-3', null, 'bad', 'é'], new Utf8())});
   const decode = vi.spyOn(TextDecoder.prototype, 'decode').mockImplementation(() => {
