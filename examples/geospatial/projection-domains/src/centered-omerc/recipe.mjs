@@ -83,47 +83,50 @@ export function createCenteredObliqueMercator({
     [-18, 12],
     [-18, -12]
   ].map(([x, y]) => [lon + x, lat + y]);
-  const samplePath = points => {
-    const target = [];
+  const sampleSource = points => {
+    const samples = [];
     for (let i = 1; i < points.length; i++)
       for (let j = i === 1 ? 0 : 1; j <= 32; j++) {
-        const t = j / 32,
-          p = points[i - 1].map((v, k) => v + (points[i][k] - v) * t),
-          q = descriptor.converter.WGS84.from(p);
-        const back = descriptor.converter.WGS84.to(q),
-          dx = ((back[0] - p[0] + 540) % 360) - 180;
-        if (Math.hypot(dx, back[1] - p[1]) > 1e-7)
-          throw new RangeError('Unqualified inverse branch');
-        if (
-          target.length &&
-          Math.hypot(...q.slice(0, 2).map((v, k) => v - target.at(-1)[k])) > 300000
-        )
-          throw new RangeError('Unresolved output branch');
-        target.push(q.slice(0, 2));
+        const t = j / 32;
+        samples.push(points[i - 1].map((v, k) => v + (points[i][k] - v) * t));
       }
+    return samples;
+  };
+  const samplePath = points => {
+    const target = [];
+    for (const p of sampleSource(points)) {
+      const q = descriptor.converter.WGS84.from(p);
+      const back = descriptor.converter.WGS84.to(q),
+        dx = ((back[0] - p[0] + 540) % 360) - 180;
+      if (Math.hypot(dx, back[1] - p[1]) > 1e-7) throw new RangeError('Unqualified inverse branch');
+      if (
+        target.length &&
+        Math.hypot(...q.slice(0, 2).map((v, k) => v - target.at(-1)[k])) > 300000
+      )
+        throw new RangeError('Unresolved output branch');
+      target.push(q.slice(0, 2));
+    }
     return target;
   };
-  const graticule = [];
+  const sourceGraticule = [];
   for (let x = -15; x <= 15; x += 5)
-    graticule.push(
-      samplePath([
-        [lon + x, lat - 12],
-        [lon + x, lat + 12]
-      ])
-    );
+    sourceGraticule.push([
+      [lon + x, lat - 12],
+      [lon + x, lat + 12]
+    ]);
   for (let y = -10; y <= 10; y += 5)
-    graticule.push(
-      samplePath([
-        [lon - 18, lat + y],
-        [lon + 18, lat + y]
-      ])
-    );
+    sourceGraticule.push([
+      [lon - 18, lat + y],
+      [lon + 18, lat + y]
+    ]);
   return {
     descriptor,
     definition,
     key: getCRSExecutionKey(descriptor),
     patch: samplePath(patch),
-    graticule,
+    graticule: sourceGraticule.map(samplePath),
+    sourcePatch: sampleSource(patch),
+    sourceGraticule: sourceGraticule.map(sampleSource),
     samplePath
   };
 }
