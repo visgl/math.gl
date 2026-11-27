@@ -92,6 +92,10 @@ The core package provides vectors, matrices, and rotations for 3D math, plus uti
 Earth models, sunlight, astronomy, time zones, and ocean calculations. Import each API from its feature subpath.
 
 - [@math.gl/earth](https://visgl.github.io/math.gl/next/docs/modules/earth.md): Earth models, sunlight, astronomy, time zones, and ocean calculations. Import each API from its feature subpath.
+- [@math.gl/earth/celestial](https://visgl.github.io/math.gl/next/docs/modules/earth/celestial.md): 🧪 Experimental — The @math.gl/earth/celestial subpath and all its exported functions, classes, constants, and types are experimental.
+- [Arrow JS temporal mapping](https://visgl.github.io/math.gl/next/docs/modules/earth/celestial/arrow-time-mapping.md): 🧪 Experimental — The @math.gl/earth/celestial subpath and all its exported functions, classes, constants, and types are experimental.
+- [🧪 Experimental eclipse geometry](https://visgl.github.io/math.gl/next/docs/modules/earth/celestial/eclipses.md): Pure functions for the light that reaches a point when a body hides all or part of the Sun. They
+- [Solar-system bodies](https://visgl.github.io/math.gl/next/docs/modules/earth/celestial/solar-system-bodies.md): 🧪 Experimental — The @math.gl/earth/celestial subpath and all its exported functions, classes, constants, and types are experimental.
 - [@math.gl/earth/geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid.md): The @math.gl/earth module evaluates geoid heights from Earth gravity model grids.
 - [createGeoidFromGrid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/create-geoid-from-grid.md): Creates a Geoid from a complete global grid of decoded unsigned 16-bit samples.
 - [Geoid](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/geoid.md): class Geoid - "Gravity Height Model"

@@ -23,3 +23,5 @@ Earth models, sunlight, astronomy, time zones, and ocean calculations. Import ea
 | [`@math.gl/earth/ocean`](https://visgl.github.io/math.gl/next/docs/modules/earth/ocean.md)         | Seawater state, underwater sound speed, and absorption.                   |
 
 Load optional geoid grids and timezone geometry explicitly when your application needs them.
+
+[🧪 Experimental · `@math.gl/earth/celestial`](https://visgl.github.io/math.gl/next/docs/modules/earth/celestial.md)

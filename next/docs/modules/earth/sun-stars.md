@@ -191,6 +191,8 @@ The generator verifies input SHA-256 `28cb835cbd2d72ced9ef9d20d9b5d92f05f649dfd3
 
 For a standalone comparison demo after building the package, run `node modules/earth/scripts/sun/create-stars-demo.mjs /absolute/path/stars.html`. It shows the full equatorial sky beside a deck.gl GlobeView and includes a ±1 million-year slider. The catalog is bundled; the globe panel loads MIT-licensed deck.gl 9.1.9 from a CDN. Increase GlobeView’s `farZMultiplier` if the chosen star shell lies beyond the camera’s far clipping plane. `node modules/earth/scripts/sun/benchmark-stars.mjs` measures 7,000-source propagation and GlobeView data conversion.
 
+Starfield rotation accepts optional `ut1MinusUtc` and `ttMinusUtc` offsets in seconds.
+
 <!-- -->
 
 ## References
