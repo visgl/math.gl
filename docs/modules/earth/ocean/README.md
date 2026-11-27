@@ -6,7 +6,7 @@
 
 `@math.gl/earth/ocean` supplies seawater and underwater-acoustics equations for browser
 applications: Absolute Salinity, Conservative Temperature, density, freezing temperature,
-sound speed, pressure-to-height conversion and sound absorption.
+sound speed, pressure-to-height conversion, sound absorption and harmonic tide prediction.
 
 The entry point has no datasets, no runtime dependencies and no downloads. It does not
 initialize the geoid, timezone or astronomy modules. Import it explicitly:
@@ -43,7 +43,8 @@ const absorption = getSoundAbsorptionFrancoisGarrison({
 | [Sound absorption](./api-reference/sound.md#sound-absorption) | ✅ | Francois–Garrison, Ainslie–McColm. |
 | Absolute Salinity Anomaly atlas | ❌ | The caller supplies δSA. See [`getAbsoluteSalinity`](./api-reference/seawater.md#getabsolutesalinity). |
 | Sea ice, exact Gibbs-function sound speed | ❌ | Not in this subset. |
-| Tides, ray tracing | ❌ | Planned. See the [ocean roadmap](https://github.com/visgl/math.gl/blob/master/dev-docs/ocean-roadmap.md). |
+| [Harmonic tide prediction](./api-reference/tide.md) | ✅ | Height from caller-supplied harmonic constants; node factors and equilibrium arguments of Schureman (1958) with the NOAA conventions. |
+| Ray paths, wave spectra | ❌ | Planned. See the [ocean roadmap](https://github.com/visgl/math.gl/blob/master/dev-docs/ocean-roadmap.md). |
 
 ## Conventions
 
@@ -70,6 +71,8 @@ equation separately.
 - The classic equations match an independent 40-digit evaluation within 1e-9 m/s for sound
   speed and 1e-12 (relative) for absorption, and match the published check values at their
   printed precision.
+- Tide prediction matches one year of NOAA CO-OPS hourly predictions within 1.3 mm. See
+  [Tide prediction](./api-reference/tide.md#accuracy).
 
 This is not a navigation-grade depth source, an ocean model or a full GSW library.
 
@@ -77,6 +80,6 @@ This is not a navigation-grade depth source, an ocean model or a full GSW librar
 
 The code is original and MIT-licensed. It implements the published equations of the
 TEOS-10 manual (IOC, SCOR and IAPSO 2010), the IAPWS releases R13-08 and SR7-09, and
-Roquet et al. (2015). The GSW toolbox (TEOS-10/GSW-C) is used only offline, as a
+Roquet et al. (2015), and Schureman (1958) for tide prediction. The GSW toolbox (TEOS-10/GSW-C) is used only offline, as a
 comparator; its licence permits redistribution only without modification, so no GSW source
 is copied. See the [package notices](https://github.com/visgl/math.gl/blob/master/modules/earth/THIRD-PARTY-NOTICES.md).

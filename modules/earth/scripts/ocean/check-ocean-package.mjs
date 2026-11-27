@@ -54,13 +54,16 @@ try {
   });
 
   const budgets = [
-    // The full subpath: Gibbs function, 75-term polynomial and the classic equations.
-    {source: "export * from '@math.gl/earth/ocean';", bytes: 12000},
+    // The full subpath: Gibbs function, 75-term polynomial, the classic equations and tide
+    // prediction (about 11 300 bytes before tide prediction, which adds about 4400).
+    {source: "export * from '@math.gl/earth/ocean';", bytes: 16000},
     // A classic equation alone must not pull in the TEOS-10 tables.
     {source: "export {getSoundSpeedMackenzie} from '@math.gl/earth/ocean';", bytes: 600, forbidden: /gibbs-function|specific-volume/},
     {source: "export {getSoundAbsorptionFrancoisGarrison} from '@math.gl/earth/ocean';", bytes: 1000, forbidden: /gibbs-function|specific-volume/},
     // Density and sound speed need the 75-term polynomial, not the Gibbs function.
     {source: "export {getSeawaterSoundSpeed} from '@math.gl/earth/ocean';", bytes: 4000, forbidden: /gibbs-function/},
+    // Tide prediction is independent of the seawater state.
+    {source: "export {getTideHeight} from '@math.gl/earth/ocean';", bytes: 4600, forbidden: /gibbs-function|specific-volume|seawater-state|sound-/},
     // Control: Conservative Temperature must keep the Gibbs function, so the boundary checks can fail.
     {source: "export {getConservativeTemperature} from '@math.gl/earth/ocean';", bytes: 9000, required: /gibbs-function/}
   ];
