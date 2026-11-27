@@ -39,6 +39,31 @@ test('ocean#getTideHeight reproduces NOAA CO-OPS predictions for one year', () =
   expect(Math.sqrt(sumOfSquares / heights.length)).toBeLessThanOrEqual(0.0006);
 });
 
+test('ocean#getTideHeight uses 2200 just before 2201', () => {
+  const start = JulianDate.fromUnixMilliseconds(Date.UTC(2201, 0, 1), 0, 'UT1');
+  expect(getTideHeight(constituents, start.addSeconds(-1e-5))).toBeCloseTo(
+    getTideHeight(constituents, start.addSeconds(-1)),
+    3
+  );
+});
+
+test('ocean#getTideHeight rejects the start of 2201', () => {
+  const start = JulianDate.fromUnixMilliseconds(Date.UTC(2201, 0, 1), 0, 'UT1');
+  expect(() => getTideHeight(constituents, start)).toThrow(RangeError);
+});
+
+test('ocean#getTideHeight uses the calendar year on either side of the start of 2026', () => {
+  const start = hourlyDate(0);
+  expect(getTideHeight(constituents, start.addSeconds(-1e-5))).toBeCloseTo(
+    getTideHeight(constituents, start.addSeconds(-1)),
+    3
+  );
+  expect(getTideHeight(constituents, start.addSeconds(1e-5))).toBeCloseTo(
+    getTideHeight(constituents, start.addSeconds(1)),
+    3
+  );
+});
+
 test('ocean#tidal arguments give the speeds that NOAA lists', () => {
   // Speeds of T, s, h, p and p1 in degrees per mean solar hour, Schureman (1958), table 1.
   const elementSpeeds = [15, 0.54901653, 0.04106864, 0.00464183, 0.00000196];

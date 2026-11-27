@@ -212,6 +212,12 @@ function getYearStart(year: number): number {
   return dayNumber - 0.5;
 }
 
+/** Compares a split Julian date with midnight on 1 January. */
+function isBeforeYearStart(date: JulianDate, year: number): boolean {
+  const dayDifference = date.dayNumber - (getYearStart(year) - 0.5);
+  return dayDifference < 0 || (dayDifference === 0 && date.secondsOfDay < 43200);
+}
+
 function getDefinition(name: TidalConstituentName): ConstituentDefinition {
   const definition = Object.prototype.hasOwnProperty.call(TIDAL_CONSTITUENTS, name)
     ? TIDAL_CONSTITUENTS[name]
@@ -325,11 +331,11 @@ export function getTideHeight(
     throw new RangeError(`date must be in the UT1 time scale, got ${date.timeScale}`);
   }
   const datumOffset = checkFinite('datumOffset', options.datumOffset ?? 0);
+  // Estimate the calendar year, then check its boundaries using the split date.
   const julianDate = date.dayNumber + date.secondsOfDay / 86400;
-  // Calendar year of the instant: estimate, then correct across the year boundary.
   let year = Math.floor((julianDate - 1721059) / 365.2425);
-  if (getYearStart(year + 1) <= julianDate) year++;
-  if (getYearStart(year) > julianDate) year--;
+  if (!isBeforeYearStart(date, year + 1)) year++;
+  if (isBeforeYearStart(date, year)) year--;
   checkYear(year);
 
   const start = getYearStart(year);
