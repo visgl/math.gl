@@ -1,5 +1,7 @@
 # Solar-system bodies
 
+**🧪 Experimental** — The `@math.gl/earth/celestial` subpath and all its exported functions, classes, constants, and types are experimental.
+
 Rotation models, radii, gravitational parameters and approximate positions of the Sun, the
 planets and the Moon. The functions are pure. They include no ephemeris file, no kernel and no
 download. Each function takes a `JulianDate` in the TT scale.
@@ -27,13 +29,13 @@ const subsolar = getBodySubsolarPoint('mars', tt, [-x, -y, -z]);
 `SolarSystemBody` is `'sun'`, `'mercury'`, `'venus'`, `'earth'`, `'moon'`, `'mars'`,
 `'jupiter'`, `'saturn'`, `'uranus'` or `'neptune'`. `SOLAR_SYSTEM_BODIES` lists them.
 
-### getBodyRadii(body)
+### 🧪 getBodyRadii(body)
 
 Returns `{equatorialRadius, polarRadius}` in metres. The values are those of the IAU WGCCRE 2015
 report (Archinal et al. 2018, Tables 4 and 5) as NAIF `pck00011.tpc` gives them. The Earth values
 (6378136.6 m and 6356751.9 m) are the IAU values, not WGS84.
 
-### getBodyGravitationalParameter(body)
+### 🧪 getBodyGravitationalParameter(body)
 
 Returns GM in m³/s², without the satellites of the body. The source is NAIF `gm_de440.tpc`: the
 DE440 values (Park et al. 2021) for the Sun, Mercury, Venus, the Earth and the Moon, and the JPL
@@ -41,14 +43,14 @@ satellite ephemeris solutions for Mars to Neptune.
 
 ## Rotation
 
-### getBodyRotationElements(body, tt)
+### 🧪 getBodyRotationElements(body, tt)
 
 Returns `{poleRightAscension, poleDeclination, primeMeridian}` in degrees: α0 and δ0 of the north
 pole in the ICRF, and the angle W of the prime meridian. α0 and W are in [0, 360). The models are
 the IAU WGCCRE 2015 models, with the periodic terms of Mercury, the Moon, Mars, Jupiter and
 Neptune.
 
-### getBodyFixedFrame(body, tt)
+### 🧪 getBodyFixedFrame(body, tt)
 
 Returns a `CelestialFrameTransform` from `'ICRF'` to `'IAU_<BODY>'` (for example `'IAU_MARS'`).
 The rotation is `Rz(W) Rx(90° − δ0) Rz(90° + α0)`, where each factor rotates the frame. The rate
@@ -68,7 +70,7 @@ Limits:
 
 ## Approximate planet positions
 
-### getApproximatePlanetPosition(planet, tt, options?)
+### 🧪 getApproximatePlanetPosition(planet, tt, options?)
 
 Returns the heliocentric position of a planet in au, from the Keplerian elements of E. M. Standish
 and J. G. Williams ([JPL, "Approximate Positions of the Planets"](https://ssd.jpl.nasa.gov/planets/approx_pos.html)).
@@ -105,12 +107,12 @@ For the Moon, or for better accuracy, supply positions from an ephemeris of your
 
 ## Lighting
 
-### getBodySunDirection(body, tt, sunPosition)
+### 🧪 getBodySunDirection(body, tt, sunPosition)
 
 Returns the unit vector to the Sun in the body-fixed frame. `sunPosition` is the vector from the
 center of the body to the Sun in ICRF axes, in any unit, from any ephemeris.
 
-### getBodySubsolarPoint(body, tt, sunPosition)
+### 🧪 getBodySubsolarPoint(body, tt, sunPosition)
 
 Returns the planetocentric `{longitude, latitude}` of the subsolar point in degrees, longitude east
 positive in (−180, 180]. The terminator is the great circle 90 degrees from this point, without

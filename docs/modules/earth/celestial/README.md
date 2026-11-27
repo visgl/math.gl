@@ -1,5 +1,7 @@
 # @math.gl/earth/celestial
 
+**🧪 Experimental** — The `@math.gl/earth/celestial` subpath and all its exported functions, classes, constants, and types are experimental.
+
 Dependency-free time coordinates and rotation/state algebra for astronomical applications.
 This optional subpath shares the existing mean-frame starfield equations with `earth/sun`.
 It does not bundle a star catalog, ephemeris, Earth-orientation tables or satellite propagator.
@@ -14,7 +16,7 @@ const tt = JulianDate.fromUnixTicks(ticks, 'ns', ttMinusUtc, 'TT');
 const rotation = getMeanEquatorialToLocalRotation(ut1, tt, 37.8, -122.4);
 ```
 
-## JulianDate
+## 🧪 JulianDate
 
 An immutable, normalized pair of `dayNumber` (safe integer) and `secondsOfDay`
 (binary64 in [0, 86400)), with a declared `timeScale`: `'TAI'`, `'TT'` or `'UT1'`.
@@ -51,7 +53,7 @@ Moon, see [Solar-system bodies](./solar-system-bodies.md).
 For a complete mapping of dates, clock times, timestamps, durations and calendar
 intervals, see [Arrow JS temporal mapping](./arrow-time-mapping.md).
 
-## CelestialFrameTransform
+## 🧪 CelestialFrameTransform
 
 A rotation-only snapshot about a common origin. The constructor accepts a column-major
 3×3 proper rotation and `{from, to, epoch, rotationRate?}`. Frame names are required
@@ -74,11 +76,11 @@ appropriate rotation and derivative.
 
 ## Approximate mean-frame helpers
 
-- `getMeanSiderealAngle(ut1)` returns Greenwich mean sidereal angle, radians, using the
+- 🧪 `getMeanSiderealAngle(ut1)` returns Greenwich mean sidereal angle, radians, using the
   existing USNO-style polynomial. It requires a UT1 coordinate.
-- `getIAU1976Precession(tt)` returns the column-major mean equator/equinox J2000 to
+- 🧪 `getIAU1976Precession(tt)` returns the column-major mean equator/equinox J2000 to
   mean equator/equinox of date rotation. It requires TT.
-- `getMeanEquatorialToLocalRotation(ut1, tt, latitude, longitude, epoch = 'J2000')`
+- 🧪 `getMeanEquatorialToLocalRotation(ut1, tt, latitude, longitude, epoch = 'J2000')`
   composes that approximation into outward local east/north/up axes. Observer angles
   are degrees; longitude is east-positive. `'date'` skips precession. Both input
   coordinates must describe the same instant; the caller supplies their scale relation.
