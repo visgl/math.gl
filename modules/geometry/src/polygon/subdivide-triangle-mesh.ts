@@ -14,6 +14,7 @@ export type TriangleMesh = {
 type SubdivisionOptions = {
   /** Deterministic source-to-target conversion. Each invocation receives a fresh source array.
    * Null and nonfinite output reject the mesh; callback exceptions propagate unchanged.
+   * Rejection is sampled. A region that is narrower than the sample spacing can be missed.
    */
   transform: (position: readonly number[]) => ArrayLike<number> | null;
   /** Source dimension: 2 or 3. Default 2. */

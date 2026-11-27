@@ -308,6 +308,21 @@ test('interior probes find deformation that is zero along all triangle edges', (
   }
 });
 
+test.each([1e-3, 1e-9])(
+  'a rejected region still throws after the early maxEdgeLength split (radius %s)',
+  radius => {
+    const mesh = {positions: [0.02, 0, 1.02, 0, 0.04, 1], indices: [0, 1, 2]};
+    // The center child shares the original triangle's centroid.
+    expect(() =>
+      subdivideTriangleMesh(mesh, {
+        maxEdgeLength: 1.1,
+        tolerance: 0.01,
+        transform: p => (Math.hypot(p[0] - 0.36, p[1] - 1 / 3) < radius ? null : p)
+      })
+    ).toThrow(RangeError);
+  }
+);
+
 test('textured bitmap mesh remains conforming and reconstructs UVs from provenance', () => {
   const result = subdivideTriangleMesh(quad, {
     transform: p => [p[0], p[1], Math.sin(p[0] * 2)],
