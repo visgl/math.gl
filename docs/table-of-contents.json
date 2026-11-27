@@ -637,6 +637,12 @@
           },
           {
             "type": "category",
+            "label": "@math.gl/earth/celestial",
+            "link": {"type": "doc", "id": "modules/earth/celestial/README"},
+            "items": ["modules/earth/celestial/solar-system-bodies", "modules/earth/celestial/arrow-time-mapping", "modules/earth/celestial/eclipses"]
+          },
+          {
+            "type": "category",
             "label": "@math.gl/earth/sun",
             "items": [
               "modules/earth/sun/api-reference/sun",

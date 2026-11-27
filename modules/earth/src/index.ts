@@ -130,3 +130,6 @@ export type {
 export {getSunTerminator} from './sun/terminator';
 /** @deprecated Import from `@math.gl/earth/sun`. */
 export type {SunTerminator, SunTerminatorOptions} from './sun/terminator';
+
+/** Celestial time, frames and solar-system models. */
+export * as celestial from './celestial';
