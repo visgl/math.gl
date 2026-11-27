@@ -21,3 +21,5 @@ export {
   getSoundAbsorptionAinslieMcColm
 } from './sound-absorption';
 export type {SoundAbsorptionOptions, FrancoisGarrisonAbsorptionOptions} from './sound-absorption';
+export {getTideHeight, getTidalNodeFactor, getTidalEquilibriumArgument} from './tide';
+export type {TidalConstituent, TidalConstituentName, TideHeightOptions} from './tide';
