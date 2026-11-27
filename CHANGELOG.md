@@ -174,6 +174,8 @@
 
 - feat(geospatial): Add reusable geodesic path sampling and adaptive geodesic polyline subdivision with surface-distance limits, unrolled longitude and original-edge provenance; extend generic subdivision with constant-speed source-edge samplers.
 
+- feat(earth): Add eclipse geometry to `@math.gl/earth/celestial`: `getDiscVisibleFraction`, `getSunVisibleFraction` and `getRingTransmission`.
+
 - feat(earth): Add optional celestial time and frame/state primitives, share approximate starfield rotations, and document Arrow temporal interoperability.
 
 - feat(earth): Add `getBodyAtmosphere` to `@math.gl/earth/celestial`: cited single-scattering atmosphere parameters of Venus, the Earth, Mars and the giant planets, and `getRayleighCrossSection`.

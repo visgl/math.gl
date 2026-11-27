@@ -33,4 +33,6 @@ export type {BodyRotationElements} from './body-rotation';
 export {getApproximatePlanetPosition} from './planet-elements';
 export type {ApproximatePlanet, ApproximatePlanetPositionOptions} from './planet-elements';
 export {getBodySunDirection, getBodySubsolarPoint} from './body-lighting';
+export {getDiscVisibleFraction, getSunVisibleFraction, getRingTransmission} from './eclipse';
+export type {EclipseOccluder, RingOpticalDepthBand} from './eclipse';
 export type {BodySurfacePoint} from './body-lighting';
