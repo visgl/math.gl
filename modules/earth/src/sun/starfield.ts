@@ -3,11 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 // SPDX-FileComment: Compatibility adapter over original math.gl mean-frame helpers. UTC remains the default approximation to UT1/TT.
 
-import {
-  JulianDate,
-  getMeanSiderealAngle,
-  getMeanEquatorialToLocalRotation
-} from '../celestial';
+import {JulianDate, getMeanSiderealAngle, getMeanEquatorialToLocalRotation} from '../celestial';
 import {validateObserver} from './celestial';
 
 export type StarfieldOptions = {
