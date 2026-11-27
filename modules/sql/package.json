@@ -1,0 +1,105 @@
+{
+  "name": "@math.gl/sql",
+  "version": "5.1.0-alpha.0",
+  "description": "Lightweight SQL query engine for Apache Arrow tables",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/math.gl.git"
+  },
+  "files": [
+    "dist",
+    "src",
+    "!src/**/README.md",
+    "README.md",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "exports": {
+    "./query": {
+      "types": "./dist/query.d.ts",
+      "import": "./dist/query.js",
+      "require": "./dist/query.cjs"
+    },
+    "./geoarrow-functions": {
+      "types": "./dist/geoarrow-functions.d.ts",
+      "import": "./dist/geoarrow-functions.js",
+      "require": "./dist/geoarrow-functions.cjs"
+    },
+    "./scales": {
+      "types": "./dist/scales/index.d.ts",
+      "import": "./dist/scales/index.js",
+      "require": "./dist/scales/index.cjs"
+    },
+    "./scales-conformance": {
+      "types": "./dist/scales/conformance.d.ts",
+      "import": "./dist/scales/conformance.js",
+      "require": "./dist/scales/conformance.cjs"
+    },
+    "./parser": {
+      "types": "./dist/parser/index.d.ts",
+      "import": "./dist/parser/index.js",
+      "require": "./dist/parser/index.cjs"
+    },
+    "./columnar-predicate": {
+      "types": "./dist/columnar-predicate.d.ts",
+      "import": "./dist/columnar-predicate.js",
+      "require": "./dist/columnar-predicate.cjs"
+    },
+    "./expressions": {
+      "types": "./dist/expressions/index.d.ts",
+      "import": "./dist/expressions/index.js",
+      "require": "./dist/expressions/index.cjs"
+    },
+    "./arrow": {
+      "types": "./dist/arrow/index.d.ts",
+      "import": "./dist/arrow/index.js",
+      "require": "./dist/arrow/index.cjs"
+    },
+    "./worker": {
+      "types": "./dist/arrow/worker.d.ts",
+      "import": "./dist/arrow/worker.js",
+      "require": "./dist/arrow/worker.cjs"
+    },
+    "./worker-entry.js": "./dist/arrow/worker-entry.js",
+    "./query-worker-entry.js": "./dist/arrow/query-worker-entry.js",
+    "./math-functions": {
+      "types": "./dist/math-functions/index.d.ts",
+      "import": "./dist/math-functions/index.js",
+      "require": "./dist/math-functions/index.cjs"
+    },
+    "./color-functions": {
+      "types": "./dist/color-functions/index.d.ts",
+      "import": "./dist/color-functions/index.js",
+      "require": "./dist/color-functions/index.cjs"
+    },
+    "./dataframe": {
+      "types": "./dist/dataframe/index.d.ts",
+      "import": "./dist/dataframe/index.js",
+      "require": "./dist/dataframe/index.cjs"
+    }
+  },
+  "sideEffects": [
+    "./dist/arrow/worker-entry.js",
+    "./src/arrow/worker-entry.ts",
+    "./dist/arrow/query-worker-entry.js",
+    "./src/arrow/query-worker-entry.ts"
+  ],
+  "dependencies": {
+    "@math.gl/core": "5.1.0-alpha.0",
+    "@math.gl/geometry": "5.1.0-alpha.0",
+    "@math.gl/tasks": "5.1.0-alpha.0"
+  },
+  "peerDependencies": {
+    "apache-arrow": ">=17.0.0"
+  },
+  "peerDependenciesMeta": {
+    "apache-arrow": {
+      "optional": true
+    }
+  }
+}

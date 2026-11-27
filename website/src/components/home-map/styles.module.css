@@ -1,0 +1,47 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+.scene {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.scene canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.caption {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 8%;
+  text-align: center;
+  pointer-events: none;
+  z-index: 3;
+}
+.name {
+  display: inline-block;
+  color: #b5c8d1;
+  font-family: 'Source Sans 3 Variable', sans-serif;
+  font-size: clamp(24px, 3vw, 40px);
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-shadow: 0 2px 12px #08111f, 0 0 32px #08111f;
+  animation: reveal 5s ease both;
+}
+@keyframes reveal {
+  0% { opacity: 0; transform: translateY(6px); }
+  25%, 45% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: none; }
+}
+@media (max-width: 767px) {
+  .caption { bottom: max(7%, 24px); left: 16px; right: 16px; }
+  .name { font-size: clamp(26px, 7vw, 36px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .name { animation: none; }
+}

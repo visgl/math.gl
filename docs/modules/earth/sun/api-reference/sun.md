@@ -21,7 +21,7 @@ Solar position, direction, direct/diffuse sunlight and altitude-aware cloud illu
 
 Returns the approximate geometric solar position at an observer's location.
 
-| Parameter | Meaning |
+| Parameter | Description |
 | --- | --- |
 | `timestamp` | Unix milliseconds or a JavaScript `Date`. |
 | `latitude` | Geographic latitude in degrees, north positive. |
@@ -35,8 +35,7 @@ orbital approximation is intended for visualization; use [getSkySnapshot](./sky.
 for the optional consistent topocentric astronomy tier. Supply finite inputs and a
 valid date; this legacy function does not validate ranges.
 
-`getSun` was the original API name. Current releases export `getSunPosition`;
-import that name when updating older examples.
+The historical `get-sun.md` documentation filename did not correspond to a `getSun` export. Import `getSunPosition` for the Sun-position API.
 
 ```ts
 import {getSunPosition, getSunLight} from '@math.gl/earth/sun';
@@ -44,7 +43,6 @@ const position = getSunPosition(new Date('2026-10-07T18:00:00Z'), 37.7749, -122.
 const light = getSunLight(position.altitude);
 // position.altitude and position.azimuth are radians; light.color is linear RGB.
 ```
-
 
 ## getSunDirection
 
@@ -68,7 +66,6 @@ import {getSunDirection, reverseSkyDirection} from '@math.gl/earth/sun';
 const incomingDirection = getSunDirection(Date.now(), 37.7749, -122.4194);
 const diskDirection = reverseSkyDirection(incomingDirection);
 ```
-
 
 {/* SPDX-License-Identifier: MIT */}
 
@@ -170,12 +167,14 @@ instantaneous cloud shadows or a forecast of measured irradiance.
 
 ### References and licensing
 
+The sky model is described by [cite](https://cgg.mff.cuni.cz/projects/SkylightModelling/ "cite:hosek2012").
+
 - [Hošek and Wilkie, Adding a Solar Radiance Function to the Hošek Skylight Model (2013),
   and the 1.4a reference implementation](https://cgg.mff.cuni.cz/projects/SkylightModelling/).
   The upstream source and datasets are **BSD-3-Clause**, copyright © 2012–2013 Lukas Hosek
   and Alexander Wilkie. Derived tables and reference fixtures carry
   `SPDX-License-Identifier: BSD-3-Clause` and `SPDX-FileCopyrightText` comments plus the
-  full original notice. [LICENSE-HOSEK-WILKIE](https://github.com/visgl/math.gl/blob/master/modules/earth/sun/LICENSE-HOSEK-WILKIE)
+  full original notice. [LICENSE-HOSEK-WILKIE](https://github.com/visgl/math.gl/blob/master/modules/earth/LICENSE-HOSEK-WILKIE)
   is included in the npm package for source and binary redistribution.
 - [Wyman, Sloan and Shirley, Simple Analytic Approximations to the CIE XYZ Color Matching
   Functions (2013)](https://jcgt.org/published/0002/02/01/). The integration tool independently
@@ -194,7 +193,7 @@ Download the published `HosekWilkie_SkylightModel_C_Source.1.4a.zip` from the re
 then run with Node.js and `unzip`:
 
 ```bash
-node modules/earth/sun/scripts/generate-sunlight.mjs /path/to/HosekWilkie_SkylightModel_C_Source.1.4a.zip
+node modules/earth/scripts/sun/generate-sunlight.mjs /path/to/HosekWilkie_SkylightModel_C_Source.1.4a.zip
 ```
 
 The generator verifies the archive SHA-256 and parses its numeric coefficient arrays.
@@ -202,7 +201,6 @@ The model evaluation and spectral integration run entirely in JavaScript; no nat
 is compiled or executed. Generated fixtures use twice the tables' angular quadrature
 resolution and include off-grid altitude/turbidity cases. Runtime use requires no
 downloads or dependencies.
-
 
 {/* SPDX-License-Identifier: MIT */}
 {/* SPDX-FileCopyrightText: Copyright (c) vis.gl contributors */}
@@ -213,7 +211,9 @@ downloads or dependencies.
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>
 
-`getCloudLighting(sunAltitude, options?)` estimates incident sunlight, ambient skylight,
+#### `getCloudLighting(sunAltitude, options?)`
+
+Estimates incident sunlight, ambient skylight,
 and a cloud sample's single-scattered color. A spherical Earth lets elevated clouds
 remain sunlit after sunset at ground level and become sunlit before ground sunrise.
 Atmospheric extinction warms the incident sunlight; neutral cloud scattering preserves
@@ -250,7 +250,7 @@ not height above an elevated observer. For geographically distributed clouds,
 compute the Sun altitude separately at each sample's latitude/longitude. Solar
 parallax is neglected. Dawn and dusk use the same geometry; weather can differ.
 
-| Option | Default | Meaning |
+| Option | Default | Description |
 | --- | --- | --- |
 | `cloudAltitude` | 2000 | Meters MSL, [0, 50000] |
 | `pressure` | 1013.25 | Sea-level reference pressure in hPa, [0, 1100]; exponential density already accounts for height |
@@ -271,7 +271,7 @@ Invalid values throw `RangeError`, including when the cloud is Earth-shadowed.
 
 ### Results and renderer integration
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `direct` | Incident beam `{color, intensity}`, before scattering through the rendered segment; includes atmospheric extinction, solar disk visibility and `sunOpticalDepth` |
 | `diffuse` | Approximate hemispherical ambient irradiance `{color, intensity}`; independent of directional Sun occlusion |
@@ -342,14 +342,98 @@ All new code is independently written TypeScript under MIT, with SPDX provenance
 Published equations are referenced; no external implementation, C/C++ source,
 coefficient table, texture or paper text is redistributed.
 
-- [Bruneton & Neyret (2008), Precomputed Atmospheric Scattering](https://ebruneton.github.io/precomputed_atmospheric_scattering/): spherical atmosphere and integrated transmittance. This API does not implement that paper's precomputed multiple-scattering solution.
-- [Preetham, Shirley & Smits (1999), A Practical Analytic Model for Daylight](https://doi.org/10.1145/311535.311545): spectral Rayleigh and aerosol attenuation approximations.
+- [Bruneton & Neyret (2008), Precomputed Atmospheric Scattering](https://ebruneton.github.io/precomputed_atmospheric_scattering/ "cite:bruneton2008"): spherical atmosphere and integrated transmittance. This API does not implement that paper's precomputed multiple-scattering solution.
+- [Preetham, Shirley & Smits (1999), A Practical Analytic Model for Daylight](http://dx.doi.org/10.1145/311535.311545 "cite:preetham1999"): spectral Rayleigh and aerosol attenuation approximations.
 - [Wyman, Sloan & Shirley (2013), Simple Analytic Approximations to the CIE XYZ Color Matching Functions](https://jcgt.org/published/0002/02/01/): equation 4/table 1 fits, independently evaluated.
 - [PBRT, Phase Functions](https://www.pbr-book.org/3ed-2018/Volume_Scattering/Phase_Functions): Henyey–Greenstein angular scattering and direction conventions.
 - The shared ambient sky and existing diffuse tint retain the references and licenses documented in [sky lighting](./sky.md) and [sunlight](./sun.md#getsunlight).
 
 After building the package, generate a standalone dawn/dusk palette demo with
-`node modules/earth/sun/scripts/create-cloud-demo.mjs /absolute/path/clouds.html`.
+`node modules/earth/scripts/sun/create-cloud-demo.mjs /absolute/path/clouds.html`.
 It compares four cloud heights and three Sun-ray shadow depths through a shared
 Sun-altitude slider. The SVG shapes are original and illustrative; the generated
 page has no external runtime or artwork dependencies.
+
+See [Attributions](../../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
+## Atmosphere optics
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
+</p>
+
+Scalar building blocks for single-scattering atmosphere renderers: phase functions, an
+approximate scaled complementary error function and the Chapman grazing-incidence function. The
+functions are pure, take numbers and return numbers, and throw `RangeError` outside their
+domains. `getCloudLighting` uses `getHenyeyGreensteinPhaseFunction` for its `phaseFunction`.
+
+```typescript
+import {
+  getRayleighPhaseFunction,
+  getHenyeyGreensteinPhaseFunction,
+  getChapmanGrazingIncidenceFunction
+} from '@math.gl/earth/sun';
+
+const mu = Math.cos(scatteringAngle);
+const phase = 0.9 * getRayleighPhaseFunction(mu) + 0.1 * getHenyeyGreensteinPhaseFunction(mu, 0.8);
+
+// Optical depth along a ray from a sample 2 km up, for an 8 km scale height on the Earth.
+const radiusInScaleHeights = (6371000 + 2000) / 8000;
+const column = getChapmanGrazingIncidenceFunction(radiusInScaleHeights, Math.cos(zenithAngle));
+const opticalDepth = verticalOpticalDepthAtSeaLevel * Math.exp(-2000 / 8000) * column;
+```
+
+#### `getRayleighPhaseFunction(cosineOfScatteringAngle)`
+
+Returns 3 (1 + μ²) / (16 π) per steradian. μ is from −1 to 1, and 1 is forward scattering. The
+depolarization of the air is not modeled.
+
+#### `getHenyeyGreensteinPhaseFunction(cosineOfScatteringAngle, asymmetryParameter)`
+
+Returns (1 − g²) / (4 π (1 + g² − 2 g μ)^(3/2)) per steradian. g is strictly between −1 and 1,
+and its mean cosine is g. The denominator is evaluated in a form that keeps full precision at the
+forward and backward peaks when |g| is near 1.
+
+#### `getCornetteShanksPhaseFunction(cosineOfScatteringAngle, asymmetryParameter)`
+
+Returns 3 (1 − g²) (1 + μ²) / (8 π (2 + g²) (1 + g² − 2 g μ)^(3/2)) per steradian. At g = 0 it is
+the Rayleigh phase function. Its mean cosine is 3 g (4 + g²) / (5 (2 + g²)), not g.
+
+Each phase function integrates to 1 over the sphere.
+
+#### `getApproximateErfcx(argument)`
+
+Returns an approximation of exp(x²) erfc(x) for x ≥ 0: a / ((a − 1) √π x + √(π x² + a²)) with
+a = 2.911. It is exact at 0 and has the correct asymptote 1 / (√π x). Its largest relative error
+is 0.331 %, near x = 1.75, measured against 30-digit values. It is not a full-precision erfcx.
+
+#### `getChapmanGrazingIncidenceFunction(radiusInScaleHeights, cosineOfZenithAngle)`
+
+Returns Ch(x, z): the column of an exponential atmosphere along a ray to infinity, divided by the
+vertical column from the same point. x is the radius of the start point in scale heights, 1 or
+greater. For cos z ≥ 0, Ch = √(π x / 2) erfcx(√(x / 2) cos z). For cos z < 0, the ray goes down
+to the tangent radius x₀ = x sin z and up again, and Ch = 2 √(π x₀ / 2) exp(x − x₀) − Ch(x, π − z).
+Multiply by exp(−h), with h the height above a reference radius in scale heights, to get the
+column relative to the vertical column above that radius.
+
+Domain and limits:
+
+- The relative error is below 1 % for x ≥ 100 and below 0.5 % for x ≥ 300, for cos z from −0.15
+  to 1, against numeric quadrature. For cos z < 0 the same bounds hold with x₀ in place of x, and
+  x₀ < 1 throws `RangeError`. For a vertical ray the exact value is 1; the asymptotic form gives
+  1 − O(1 / x), for example 0.9988 at x = 797. The Earth (H = 8 km) is x ≈ 800 and Mars (H = 11.1 km) is
+  x ≈ 306. Below x = 100 the error grows as 1 / x.
+- The function counts the column as if the body were not there. When x₀ is less than the surface
+  radius in scale heights, the ray hits the surface: test for that before using the result.
+- For cos z < 0 the result overflows when x − x₀ exceeds about 700.
+- The atmosphere is spherical and exponential with one scale height. Refraction is not modeled.
+
+### References
+
+- [Bruneton & Neyret (2008), Precomputed Atmospheric Scattering](https://ebruneton.github.io/precomputed_atmospheric_scattering/ "cite:bruneton2008"): the Rayleigh phase function.
+- [Henyey & Greenstein (1941), Diffuse radiation in the Galaxy](http://dx.doi.org/10.1086/144246 "cite:henyey1941").
+- [Cornette & Shanks (1992), Physically reasonable analytic expression for the single-scattering phase function](http://dx.doi.org/10.1364/AO.31.003152 "cite:cornette1992").
+- [Ren & MacKenzie (2007), Closed-form approximations to the error and complementary error functions](http://dx.doi.org/10.1002/asl.154 "cite:ren2007"): the erfcx approximation and its use in the Chapman function.
+- [Chapman (1931), Grazing incidence](http://dx.doi.org/10.1088/0959-5309/43/5/302 "cite:chapman1931"): the grazing-incidence function.
+
+All code is independently written from the published equations.

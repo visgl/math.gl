@@ -1,5 +1,11 @@
 # Roadmap
 
+## Core math and geometry
+
+The [core math and geometry roadmap](./math-roadmap.md) separates existing APIs
+from the implementation status and follow-ups across six tranches: transform correctness, bounds/camera math, numeric
+conveniences, geometric queries, interpolation/curves, and optional domains.
+
 ## 3D Primitives
 
 - Add a submodule with the geometry primitives from luma.gl.
@@ -35,6 +41,15 @@ Three-radius/interior geometry retains separate contracts.
 The [GeographicLib SOTA tranche list](./geographiclib-roadmap.md) prioritizes
 remaining correctness/domain gaps (P0), core geometry capabilities (P1), and
 extended domains and optional models (P2).
+
+## Geospatial frames and paths
+
+The [tranched geospatial roadmap](./geospatial-roadmap.md) records the existing
+master baseline, C1–C3 merged in [PR #277](https://github.com/visgl/math.gl/pull/277),
+the C4 geodesic sampling/subdivision increment implemented in [PR #280](https://github.com/visgl/math.gl/pull/280),
+and the remaining seams, rhumb, precision and celestial-frame work.
+PR implementation, merge/release status and numerical qualification are tracked
+separately. C4 reuses the existing geodesic solver and adaptive engine; C5 seam processing follows it.
 
 ## Sun and sky
 

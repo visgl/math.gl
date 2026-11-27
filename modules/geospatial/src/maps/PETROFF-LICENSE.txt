@@ -1,0 +1,55 @@
+# Supplement to _A Square Equal-area Map Projection with Low Angular Distortion, Minimal Cusps, and Closed-form Solutions_
+
+This work serves as a supplement to the paper titled
+_A Square Equal-area Map Projection with Low Angular Distortion, Minimal Cusps, and Closed-form Solutions_.
+
+This archive contains the map projection implementations used in the analysis,
+the notebook used to perform the analysis, and the source files for the figures
+in the paper. It aims to be compatible with [Binder](https://mybinder.org/) for
+reproducibility.
+
+
+## Map Analysis
+
+The `map-projection-analysis.ipynb` notebook was used to perform the map
+projection analysis for the paper, using map projection implementations defined
+in the `collignon_quincuncial.py`, `gringorten.py`, and `new_projection.py`
+source files. The outputs of this notebook are in the `output` directory. The
+`input` directory contains the equirectangular-format source panorama used for
+one of the figures; the reproduced Haslam map data need to be downloaded from
+[LAMBDA](https://lambda.gsfc.nasa.gov/product/foreground/fg_2014_haslam_408_get.cfm)
+and placed in this directory.
+
+
+## Figure Sources
+
+The `figure-sources` directory contains the source files for the triangle
+drawings in the paper, which were constructed using
+[Asymptote](https://asymptote.sourceforge.io/). It also contains the source
+files for the world maps, which were drawn using [D3.js](https://d3js.org/);
+the SVG files were extracted using
+[SVG Crowbar 2](https://nytimes.github.io/svg-crowbar/). The components of the
+outline figure were constructed using Asymptote but then edited and assembled
+using Inkscape.
+
+
+## License
+
+This work is placed into the public domain via the
+[CC0 1.0 public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/)
+except for the `gringorten.py`, `surfacepaths.asy`, `peabody-library-stacks-pano.jpg`, and
+`new-projection-pano.png` files. The `gringorten.py` file is based on the
+Gringorten projection implementation in `d3-geo-projection`, which is licensed
+under a [3-Clause BSD License](https://github.com/d3/d3-geo-projection/blob/6b86866e19ba9959bb0ac115689ffac5ccf6d3db/LICENSE).
+The `surfacepaths.asy` file is from a [Stack Exchange post](https://tex.stackexchange.com/a/135438)
+by Charles Staats, which is licensed under a
+[CC BY-SA 3.0 license](https://creativecommons.org/licenses/by-sa/3.0/).
+The `peabody-library-stacks-pano.jpg` and `new-projection-pano.png` images are
+copyright Matthew Petroff and are licensed under a
+[CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
+
+
+## Credits
+
+This work was produced by Matthew A. Petroff
+([ORCID:0000-0002-4436-4215](https://orcid.org/0000-0002-4436-4215)).

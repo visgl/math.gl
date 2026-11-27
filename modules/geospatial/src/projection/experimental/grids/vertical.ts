@@ -81,7 +81,7 @@ export function createVerticalGrid(options: VerticalGridOptions): VerticalGrid {
   });
 }
 
-/** Adapt an already loaded @math.gl/earth/geoid Geoid without importing its implementation.
+/** Adapt an already loaded @math.gl/earth Geoid without importing its implementation.
  * The supplied model owns its data and interpolation choice; do not mutate it while in use.
  */
 export function createGeoidGrid(geoid: {

@@ -11,5 +11,9 @@
     "rootDir": "src",
     "outDir": "dist"
   },
-  "references": []
+  "references": [
+    {
+      "path": "../tasks"
+    }
+  ]
 }

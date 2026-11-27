@@ -235,3 +235,13 @@ test('celestial#body functions reject inputs outside their domain with RangeErro
   expect(() => getApproximatePlanetPosition('mars', tt(365243.001))).toThrow(RangeError);
   expect(() => getApproximatePlanetPosition('mars', tt(365243))).not.toThrow();
 });
+
+test('planetary fits can be pinned across the automatic switch', () => {
+  const epoch = new JulianDate(2451545 + 18263, 0, 'TT');
+  const position = (seconds: number, model: 'auto' | 'short' | 'long') =>
+    getApproximatePlanetPosition('saturn', epoch.addSeconds(seconds), {model});
+  expect(position(0, 'auto')).toEqual(position(0, 'short'));
+  expect(position(0, 'auto')).not.toEqual(position(0, 'long'));
+  expect(position(1, 'auto')).toEqual(position(1, 'long'));
+  expect(() => position(1, 'short')).toThrow(RangeError);
+});

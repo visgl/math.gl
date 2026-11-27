@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {projectionEngine} from '@math.gl/geospatial/projection';
-import type {CRSBounds} from '@math.gl/geospatial/projection/types';
+import type {CRSBounds} from '@math.gl/geospatial/projection-types';
 import {
   createSpatialReference,
   inferCRSRepresentation,
@@ -15,6 +15,27 @@ import {
 } from '@math.gl/geospatial/crs';
 
 const serialized: CRSDefinition = 'EPSG:4326';
+
+import {createCRSResolver, createCRSDictionaryProvider} from '@math.gl/geospatial/crs';
+import type {CRSInput} from '@math.gl/geospatial/crs';
+const resolver = createCRSResolver({
+  providers: [
+    createCRSDictionaryProvider({
+      'APP:geographic': '+proj=longlat +datum=WGS84'
+    })
+  ]
+});
+resolver.resolve('APP:geographic').then(result => {
+  const input: CRSInput = result.input;
+  // @ts-expect-error Resolution provenance is immutable.
+  result.lookups.push({identifier: 'x', provider: 'x'});
+  return input;
+});
+const resolvingEngine = new FullProjectionEngine({resolver});
+resolvingEngine.createProjectionAsync({to: 'APP:geographic'}).then(projection => {
+  const coordinate: number[] = projection.project([12, 55]);
+  return coordinate;
+});
 const geographic: PROJJSONCRSByType<'GeographicCRS'> = {
   type: 'GeographicCRS',
   name: 'WGS 84',
@@ -66,7 +87,7 @@ import {
   projJSONCRSParser,
   type TypeScriptCRSInput,
   type NormalizedCRS
-} from '@math.gl/geospatial/projection/experimental';
+} from '@math.gl/geospatial/projection';
 const nativeInput: TypeScriptCRSInput = spatialReference;
 new ProjectionTransform({
   from: nativeInput,
@@ -88,7 +109,7 @@ import {
   type DatumGrid,
   type DatumGridCollection,
   type DatumGridGeoTIFF
-} from '@math.gl/geospatial/projection/experimental';
+} from '@math.gl/geospatial/projection';
 const preparedGrid: DatumGrid = parseNTv2Grid(new ArrayBuffer(0), {
   includeErrorFields: false
 });
@@ -125,7 +146,7 @@ import type {
   ProjectionEngine,
   Projection,
   PreparedProjection
-} from '@math.gl/geospatial/projection/types';
+} from '@math.gl/geospatial/projection-types';
 import {ConfigurableProjectionEngine, FullProjectionEngine} from '@math.gl/geospatial/projection';
 const projectionEngines: ProjectionEngine[] = [
   new ConfigurableProjectionEngine(),
@@ -143,9 +164,9 @@ new ProjectionEngine();
 // @ts-expect-error Engines configure algorithms, not a specific CRS pair.
 new ConfigurableProjectionEngine({to: 'EPSG:3857'});
 
-import {LazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
+import {LazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
 
-import {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection/web-mercator';
+import {WebMercatorProjectionEngine} from '@math.gl/geospatial/projection-web-mercator';
 const minimalEngine: ProjectionEngine = new WebMercatorProjectionEngine();
 const minimalProjection: Projection = minimalEngine.createProjection({
   to: 'EPSG:3857'
@@ -173,3 +194,59 @@ const incompleteCorner: CRSBounds[0] = [0, 0];
 void angularUnit;
 void renderingBounds;
 void incompleteCorner;
+
+import {createCRSDescriptor, type CRSDescriptorOptions} from '@math.gl/geospatial/crs';
+import type {CRSMetadata} from '@math.gl/geospatial/crs';
+import type {CRSConverter, CRSDescriptor} from '@math.gl/geospatial/crs';
+declare const externalMetadata: CRSMetadata;
+declare const externalConverter: CRSConverter;
+const descriptorOptions: CRSDescriptorOptions = {
+  metadata: externalMetadata,
+  renderingBounds,
+  renderingScale: () => null,
+  converter: {WGS84: externalConverter}
+};
+const externalDescriptor: CRSDescriptor = createCRSDescriptor(descriptorOptions);
+const reused: Float64Array = externalDescriptor.converter.WGS84.from([1, 2], new Float64Array(2));
+const allocated: number[] = externalDescriptor.converter.WGS84.to([1, 2]);
+// @ts-expect-error A descriptor requires an explicitly prepared WGS84 converter.
+createCRSDescriptor({...descriptorOptions, converter: {}});
+// @ts-expect-error Scale callbacks must be synchronous.
+createCRSDescriptor({...descriptorOptions, renderingScale: async () => [1, 1, 1]});
+const asynchronousConverter: CRSConverter = {
+  ...externalConverter,
+  // @ts-expect-error Converters must be synchronous and support reusable output.
+  from: async () => [1, 2]
+};
+// @ts-expect-error Descriptor metadata is immutable.
+externalDescriptor.ellipsoid.semiMajorAxis = 1;
+void reused;
+void allocated;
+void asynchronousConverter;
+
+// CRS owns the shared contract; existing projection imports remain assignable.
+import type {CRSCoordinate, CRSOutput} from '@math.gl/geospatial/crs';
+import type {
+  CRSDescriptor as ProjectionCRSDescriptor,
+  ProjectionCoordinate,
+  ProjectionOutput
+} from '@math.gl/geospatial/projection-types';
+import {createCRSDescriptor as createRootCRSDescriptor} from '@math.gl/geospatial/crs';
+const projectionDescriptor: ProjectionCRSDescriptor = externalDescriptor;
+const crsDescriptor: CRSDescriptor = projectionDescriptor;
+declare const crsCoordinate: CRSCoordinate;
+declare const crsOutput: CRSOutput;
+const projectionCoordinate: ProjectionCoordinate = crsCoordinate;
+const projectionOutput: ProjectionOutput = crsOutput;
+const rootDescriptor: CRSDescriptor = createRootCRSDescriptor(descriptorOptions);
+void crsDescriptor;
+void projectionCoordinate;
+void projectionOutput;
+void rootDescriptor;
+
+// Shared rendering preparation must remain consumable with only ES libraries.
+import type {MapTransitionMeshAsyncOptions} from '@math.gl/geospatial/maps';
+const transitionOptions: MapTransitionMeshAsyncOptions = {
+  signal: {throwIfAborted() {}}
+};
+void transitionOptions;

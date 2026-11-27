@@ -2,11 +2,12 @@
 
 A reusable rigid frame at a fixed Cartesian origin on a sphere or oblate spheroid. The class
 snapshots its origin, signed axes, and geodetic basis. It does not retain mutable ellipsoid state,
-infer a CRS, or convert datums. Available from `@math.gl/geospatial/ellipsoid` and the package root.
+infer a CRS, or convert datums. Import it from `@math.gl/geospatial/coordinates`.
 
 ```typescript
-import {Vector3} from '@math.gl/core';
-import {Ellipsoid, LocalReferenceFrame} from '@math.gl/geospatial/ellipsoid';
+import {Vector3} from '@math.gl/core/matrix';
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import {LocalReferenceFrame} from '@math.gl/geospatial/coordinates';
 
 const origin = Ellipsoid.WGS84.cartographicToCartesian([-122.4, 37.8, 100]);
 const frame = new LocalReferenceFrame(origin);
@@ -34,12 +35,22 @@ continuous geographic heading at a pole. Triaxial/prolate ellipsoids are deliber
 
 ## Points, vectors and matrices
 
-| Method | Operation |
-| --- | --- |
-| `localToFixedPoint(point, result?)` | Rotate local XYZ and add fixed origin. |
-| `fixedToLocalPoint(point, result?)` | Subtract fixed origin, then apply inverse rotation. |
-| `localToFixedVector(vector, result?)` | Rotate without translation. |
-| `fixedToLocalVector(vector, result?)` | Apply inverse rotation without translation. |
+#### `localToFixedPoint(point, result?)`
+
+Rotate local XYZ and add fixed origin.
+
+#### `fixedToLocalPoint(point, result?)`
+
+Subtract fixed origin, then apply inverse rotation.
+
+#### `localToFixedVector(vector, result?)`
+
+Rotate without translation.
+
+#### `fixedToLocalVector(vector, result?)`
+
+Apply inverse rotation without translation.
+
 
 Inputs accept numeric arrays and typed arrays of length three. Optional results are `Vector3`
 instances; input and output may be the same vector. Successful methods return the supplied result
@@ -71,10 +82,18 @@ model +Y toward local +Z. This convention follows Cesium-style local XYZ composi
 a compass convention where heading zero necessarily means model-forward points north. Adapt a
 model's forward/up axes explicitly, or select NED axes as appropriate.
 
-- `headingPitchRollToFixedFrame(attitude, result?: Matrix4)` returns an affine pose with unit scale.
-- `headingPitchRollQuaternion(attitude, result?: Quaternion)` returns a normalized fixed-frame
+#### `headingPitchRollToFixedFrame(attitude, result?: Matrix4)`
+
+Returns an affine pose with unit scale.
+
+#### `headingPitchRollQuaternion(attitude, result?: Quaternion)`
+
+Returns a normalized fixed-frame
   orientation in `[x, y, z, w]` order; it contains no translation.
-- `fixedFrameToHeadingPitchRoll(pose)` accepts a finite 16-component affine matrix whose rotation
+
+#### `fixedFrameToHeadingPitchRoll(pose)`
+
+Accepts a finite 16-component affine matrix whose rotation
   is right-handed and orthonormal within `1e-6`. Translation is ignored. Scale, reflection and shear
   outside that tolerance are rejected.
 
@@ -85,7 +104,9 @@ continuous angles over time.
 
 ## Velocity-aligned orientation
 
-`velocityQuaternion(fixedVelocity, result?: Quaternion)` returns an orientation with model +X along
+#### `velocityQuaternion(fixedVelocity, result?: Quaternion)`
+
+Returns an orientation with model +X along
 normalized fixed-space velocity. Model +Z is the normalized projection of geodetic up perpendicular
 to velocity. The remaining axis completes a right-handed basis. Geographic up is used even when
 this frame's selected axes are NED.
@@ -95,3 +116,31 @@ unrepresentable speed, or nearly vertical motion (sine of the angle to up below 
 coordinates throw `RangeError`. The operation is stateless: applications must decide whether to
 hold the previous attitude, switch reference directions, or interpolate across singularities.
 It is not an inertial-to-fixed state-vector conversion and adds no rotating-frame velocity term.
+
+See the [C8 qualification and G7 baselines](./local-frame-qualification.md) for
+independent/native controls, numerical budgets, remaining domains and measured-cost methodology.
+
+## Packed points and vectors
+
+`localToFixedPointsFlat`, `fixedToLocalPointsFlat`, `localToFixedVectorsFlat` and
+`fixedToLocalVectorsFlat` accept packed XYZ numeric arrays. Point methods include
+the cached origin translation; vector methods rotate only. The result is a
+`Float64Array` of the same length. Pass a caller-owned result to reuse storage:
+
+```ts
+const xyz = new Float64Array([1, 2, 3, 4, 5, 6]);
+const fixed = frame.localToFixedPointsFlat(xyz);
+frame.fixedToLocalPointsFlat(fixed, fixed); // exact in-place storage
+```
+
+Input length must be a multiple of three, and supplied output must be Float64
+storage with exactly the same length. Empty input is valid. Exact input/output
+identity is supported; other overlapping buffer views are rejected. Disjoint
+views of one buffer are supported. Invalid inputs or an unrepresentable result
+throw `RangeError` before any caller-owned output is changed, including when a
+later record fails. Extreme finite coordinates retain the scalar scaled fallback.
+Inputs may use Float32 storage, but its prior quantization cannot be recovered.
+
+The packed path hoists the cached matrix coefficients and creates no per-point
+vectors. This is not a universal zero-allocation or throughput guarantee. See the
+[qualification and benchmark profile](./local-frame-qualification.md).

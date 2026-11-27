@@ -4,7 +4,7 @@
 
 Every named algorithm has independent forward and inverse references. This scorecard expands seeded scalar and Float64 XYZM qualification to **42 configurations, 11,160 points and 36 horizontal algorithms**. Geocentric conversion is covered separately by the three-dimensional PROJ corpus and the [nearest-normal qualification](./ellipsoid-qualification.md).
 
-Each rectangle below belongs to the exact parameter configuration in the [machine-readable report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/projection/test/fixtures/qualification/accuracy-domains.json). It is a tested region, not an inferred global validity domain. Regional formulae, approximate transverse Mercator, map seams, antipodes, projection knots and perspective visibility boundaries need their own qualified regions. The report retains the worst observed coordinate as well as every test ceiling. No rejected samples are silently removed.
+Each rectangle below belongs to the exact parameter configuration in the [machine-readable report](https://github.com/visgl/math.gl/blob/master/modules/geospatial/test/projection/fixtures/qualification/accuracy-domains.json). It is a tested region, not an inferred global validity domain. Regional formulae, approximate transverse Mercator, map seams, antipodes, projection knots and perspective visibility boundaries need their own qualified regions. The report retains the worst observed coordinate as well as every test ceiling. No rejected samples are silently removed.
 
 Forward maxima and ceilings are metres; inverse values are degrees. The identity geographic profile uses degrees in both directions. Ceilings are regression gates over these samples, not mathematical bounds at unsampled coordinates. Both directions start from independent PROJ values; roundtrip agreement is an additional check. The oracle remains pinned to pyproj 3.7.2 / PROJ 9.5.1 with networking disabled. The latest proj4js npm reference was rechecked on October 4, 2026: 2.22.0.
 
@@ -62,7 +62,7 @@ To enforce an application-qualified rectangle in both directions, use the option
 Regenerate with the pinned oracle environment, then run:
 
 ```sh
-python modules/geospatial/projection/scripts/generate-accuracy-reference.py
-node modules/geospatial/projection/scripts/check-accuracy-reference.mjs
-node modules/geospatial/projection/scripts/generate-accuracy-atlas.mjs
+python modules/geospatial/scripts/projection/generate-accuracy-reference.py
+node modules/geospatial/scripts/projection/check-accuracy-reference.mjs
+node modules/geospatial/scripts/projection/generate-accuracy-atlas.mjs
 ```

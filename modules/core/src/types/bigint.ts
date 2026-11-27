@@ -1,10 +1,28 @@
 // math.gl
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND Apache-2.0
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+// SPDX-FileCopyrightText: Copyright 2016-2019 The Apache Software Foundation
+// SPDX-FileComment: BigInt availability/fallback structure adapted from Apache Arrow JS util/compat.ts; compared with apache-arrow-4.0.0. See ../../ARROW-NOTICE.txt and ../../APACHE-2.0-LICENSE.txt. Modified to separate availability flags, share errors and narrow exports.
+
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 
 // BigInt compatibility layer
-// Inspired by ArrowJS (under Apache2 license)
-// https://github.com/apache/arrow/blob/master/js/src/util/compat.ts
+// Source comparison: https://github.com/apache/arrow/blob/apache-arrow-4.0.0/js/src/util/compat.ts
 // Requires tsconfig.json: target=esnext or (lib: esnext.bigint)
 // Requires eslint: env: {es2020: true}
 
@@ -48,7 +66,7 @@ const BigInt64ArrayCtor = (() => {
 })();
 
 const BigUint64ArrayCtor = (() => {
-  return BigUint64ArrayAvailable ? [BigUint64Array] : [BigInt64ArrayUnavailable];
+  return BigUint64ArrayAvailable ? BigUint64Array : BigInt64ArrayUnavailable;
 })();
 
 export {BigIntCtor as BigInt};

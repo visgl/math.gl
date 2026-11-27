@@ -1,0 +1,81 @@
+# Antarctica and Fiji projection lab
+
+Applications written against math.gl's projection interfaces can use external projection engines.
+This recipe keeps conversion, chart preparation and rendering separate: math.gl prepares meshes,
+optional engines supply conversions, and deck.gl renders the resulting buffers.
+
+import Link from '@docusaurus/Link';
+import Example from '@site/src/components/raster-projection-lab';
+
+<Example />
+
+The Antarctic raster uses a pixel grid in **ellipsoidal EPSG:3031** and contains the South
+Pole. **Earth imagery** is enabled by default: the NASA Blue Marble overview hosted in [deck.gl-data](https://github.com/visgl/deck.gl-data/tree/master/earth/nasa-blue-marble) is resampled
+into each source grid, including the rotated Antarctic and Fiji grids. Switch it off in the infobox
+to show the diagnostic checkerboard. Fiji uses a rotated geographic grid crossing 180°. UTM 60 and a complete world image provide
+additional seam fixtures. The Fiji and UTM views place the already-cut Pacific charts side by side
+around 180° for inspection; preparation coordinates and seam topology remain unchanged. The checkerboard reveals texture interpolation and coverage. The imagery is a low-resolution
+visual reference, not live or survey-grade data. Both textures use the same 256 × 256 source grid
+and UVs, so switching textures does not change geometry or the declared error policy.
+Imagery credit: [NASA Earth Observatory / GIBS](https://science.nasa.gov/earth/earth-observatory/blue-marble/).
+
+The left view refines target triangles against inverse error in source texels. The right view uses
+math.gl's source-grid subdivision against error at a declared display scale, where continuous source
+patches are supported. These are different criteria; timing differences are not an equal-accuracy
+performance comparison. A pole-to-line or interrupted source-grid case remains explicitly unsupported.
+The target-grid path preserves target area even when source UVs collapse at the pole.
+
+Native math.gl supplies chart ownership. proj4js and **proj-wasm** can supply the source-CRS transform;
+D3 can supply the spherical target projection while math.gl handles the ellipsoidal source conversion.
+The selectors state this division rather than imply that every engine implements every complete
+pipeline. D3's separate geometry-stream clipping recipe remains on the
+<Link to="/examples/projection-domains">Projection domains page</Link>.
+
+**Measure moving center** records five sequential orthographic rebuilds, including worker transport.
+Export the measurements to inspect preparation time, buffer sizes and geometry counts. It makes no
+frame-rate claim. Changing engine, source grid, target, center or tolerance rebuilds the mesh;
+superseded results cannot update the display. The example uses the shared collapsible infobox, owns its task workers, and releases its share of
+the optional WASM pool on unmount.
+
+The [source, qualification and limitations](https://github.com/visgl/math.gl/tree/master/examples/geospatial/projection-domains/src/warp)
+explain sampled domain boundaries, sampled image exclusion, error probes and bounded failure behavior.
+The fixed fixtures have independent PROJ coordinate and coverage checks. This is not generic domain
+clipping in deck.gl layers, a universal accuracy certificate, or a COG tile-selection implementation.
+
+See <Link to="/docs/modules/geospatial/projection/developer-guide/external-projection-engines">external projection engines</Link>
+and <Link to="/docs/modules/geospatial/crs/developer-guide/raster-mesh-preparation">source-grid raster preparation</Link>.
+
+**Compare UV-only updates** demonstrates geometry reuse for a qualified interior Antarctic
+orthographic patch. Select Antarctica and Orthographic first. The left view keeps one model,
+position buffer and index buffer while updating UVs; the right replaces the same target patch
+at the same texture-error policy. This comparison temporarily replaces the normal two strategies.
+Change a selector or texture control to restore the full fixture.
+
+The general projection interface is **projection-engine agnostic**: native, proj4js, D3 and
+proj-wasm adapters can supply the sample batches. The patch is restricted to centers between
+85°S and 90°S. Source coverage or sampled texture-error failures require rebuilding; the demo
+rejects the update instead of displaying a partial mesh. This does not establish reuse across
+moving horizons, interrupted-chart changes or arbitrary source footprints.
+
+Exported measurements separate operation creation, UV preparation, full preparation, submitted
+geometry/index bytes (including generated normal/color attributes) and CPU-side upload submission.
+Per-update bytes exclude initial persistent geometry, textures, instance attributes and uniforms. The demo orchestrates on the main thread (the
+backend may use workers); submission time is not GPU completion time or an FPS guarantee.
+
+The **Compare display error** control qualifies both strategies against the same
+independent display-pixel and source-texel probes at two anisotropic affine camera
+scales. It requires Antarctica, Orthographic and a backend supporting forward
+preparation. The report uses native chart conversions as its reference and bounded
+refinement retries; exhausted budgets reject. These are sampled qualifications at
+the recorded scales, not a continuous error bound or a guarantee after zooming.
+
+The optional **Native polar diagnostic** texture is generated directly on an
+EPSG:3031 grid, with two adjacent point-sampled tiles and transparent nodata near
+the pole. It is synthetic test data, not observed imagery or elevation. It is
+available for the Antarctic source and changes only texture data, preserving the
+prepared mesh and its error policy.
+
+**Exercise reuse limits** moves the fixed Antarctic patch through three centers.
+The last center leaves its qualified policy, so the example retires the patch and
+prepares a full inverse mesh. The exported report names the invalidation reason.
+This explicit fallback is not a generic horizon tracker or a frame-rate guarantee.

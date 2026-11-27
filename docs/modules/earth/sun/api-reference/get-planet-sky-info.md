@@ -14,16 +14,16 @@ sidebar_label: Planets
 Returns sky positions and disk geometry for Mercury, Venus, Mars, Jupiter, Saturn,
 Uranus and Neptune, plus Jupiter's Galilean moons: Io, Europa, Ganymede and Callisto.
 
-This optional entry point requires the MIT-licensed JavaScript package
-[Astronomy Engine](https://github.com/cosinekitty/astronomy/tree/v2.1.19/source/js).
-Install it explicitly; the main `@math.gl/earth/sun` entry point does not load it.
+The planetary APIs use the MIT-licensed JavaScript package
+[Astronomy Engine](https://github.com/cosinekitty/astronomy/tree/v2.1.19/source/js),
+a declared dependency of `@math.gl/earth`. Bundlers can exclude it from unrelated named imports.
 
 ```bash
-npm install @math.gl/earth astronomy-engine
+npm install @math.gl/earth
 ```
 
 ```typescript
-import {getPlanetSkyInfo} from '@math.gl/earth/sun/planets';
+import {getPlanetSkyInfo} from '@math.gl/earth/sun';
 
 const bodies = getPlanetSkyInfo(new Date(), 37.7749, -122.4194);
 for (const body of bodies) {
@@ -51,7 +51,7 @@ Earth, the Sun, Earth's Moon, dwarf planets and other satellites are not include
 
 ## Rendering data
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `name`, `parent` | Body name; `parent` is `'Jupiter'` for the moons and `null` for planets. |
 | `direction` | Outward observer-to-body unit vector in local east/north/up (ENU). |
@@ -79,14 +79,14 @@ the star-field's mean-frame approximation omits the nutation included here.
 
 For unresolved planets, visual magnitude provides relative point-source brightness:
 `10 ** (-0.4 * magnitude)`, on an arbitrary magnitude-zero scale. This is not solar
-or lunar light intensity. Use exposure and tone mapping in the renderer. Moon magnitudes now use an approximate Lambert phase law and NASA geometric
+or lunar light intensity. Use exposure and tone mapping in the renderer. Moon magnitudes use an approximate Lambert phase law and NASA geometric
 albedos, with eclipse and occultation attenuation reported separately. No RGB colors or surface textures are supplied.
 
 ## When planets become visible
 
 A planet rising above the horizon and becoming detectable against the twilight sky
 are separate events. Brighter planets can emerge earlier in dusk and remain visible
-later in dawn. Every planet now includes a current `visibility` estimate:
+later in dawn. Every planet includes a current `visibility` estimate:
 
 - `visible`: whether brightness, altitude and Sun separation meet the heuristic thresholds.
 - `fade`: a smooth 0–1 rendering blend around those thresholds, not a probability.
@@ -106,7 +106,7 @@ threshold while a magnitude +1 planet does not.
 The same options are accepted by `getPlanetVisibility`, `options.visibility` in
 `getPlanetSkyInfo`, and `getPlanetVisibilityTimes`:
 
-| Option | Default | Meaning |
+| Option | Default | Description |
 | --- | --- | --- |
 | `darkSkyLimitingMagnitude` | 6 | Faintest extincted magnitude at a fully dark sky; lower it for light pollution or poorer observing conditions. |
 | `extinction` | 0.2 | Visual magnitudes lost per air mass; range 0–5. |
@@ -117,10 +117,10 @@ The twilight curve uses **original illustrative anchors**, not a published fitte
 visibility algorithm: Sun altitude 0/-6/-12 degrees corresponds to limiting magnitude
 -4/+1/+4.5. The curve interpolates to the configured dark-sky limit at -18 degrees
 and is capped by that limit throughout. Atmospheric extinction uses the independently
-implemented [Kasten–Young air mass equation](https://doi.org/10.1364/AO.28.004735).
+implemented [Kasten–Young air mass equation](http://dx.doi.org/10.1364/AO.28.004735 "cite:kasten1989").
 
 This is an **uncalibrated rendering heuristic**, not a prediction of an individual's
-first sighting. The [Tousey–Koomen visibility study](https://doi.org/10.1364/JOSA.43.000177)
+first sighting. The [Tousey–Koomen visibility study](http://dx.doi.org/10.1364/JOSA.43.000177 "cite:tousey1953")
 provides context for the dependence on twilight, atmospheric transmission and eye
 sensitivity; its model and charts are not implemented or copied here. Sky brightness
 varies with direction, and haze, clouds, lunar glare, dark adaptation and eyesight
@@ -136,7 +136,7 @@ visibility interval with the default dark-sky limit; telescope detection is not 
 Use a separate event search when you need times, rather than doing this work every frame:
 
 ```typescript
-import {getPlanetVisibilityTimes} from '@math.gl/earth/sun/planets';
+import {getPlanetVisibilityTimes} from '@math.gl/earth/sun';
 
 const events = getPlanetVisibilityTimes(Date.now(), 37.7749, -122.4194, {
   durationHours: 24,
@@ -147,13 +147,15 @@ const firstWindow = venus?.visibleIntervals[0];
 if (firstWindow) console.log(new Date(firstWindow.start));
 ```
 
-`getPlanetVisibilityTimes(timestamp, latitude, longitude, options?)` returns seven
+#### `getPlanetVisibilityTimes(timestamp, latitude, longitude, options?)`
+
+Returns seven
 planet records. It searches **forward from the supplied instant**, rather than
 assuming local midnight. `durationHours` defaults to 24, must be greater than zero
 and cannot exceed 72. `elevation` uses the same meters and range as `getPlanetSkyInfo`.
 Both ends of the window must remain within the supported observation years.
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `name` | Planet name. Galilean moons are not included in this naked-eye event search. |
 | `riseTime`, `setTime` | Next conventional rise and set within the window, in Unix milliseconds; `null` if no corresponding event occurs. |
@@ -210,7 +212,7 @@ when simulated time and observer location are unchanged.
 - [Astronomy Engine 2.1.19 JavaScript API](https://github.com/cosinekitty/astronomy/tree/v2.1.19/source/js):
   planetary positions, Galilean satellite vectors, light-time solver, frame rotations
   and planetary photometry. Its [MIT license](https://github.com/cosinekitty/astronomy/blob/v2.1.19/LICENSE)
-  remains with the separately installed dependency. No upstream source is copied into
+  remains with the dependency. No upstream source is copied into
   math.gl, and no native compiler is required.
 - [JPL planetary physical parameters](https://ssd.jpl.nasa.gov/planets/phys_par.html)
   and [satellite physical parameters](https://ssd.jpl.nasa.gov/sats/phys_par/): mean radii
@@ -221,5 +223,4 @@ when simulated time and observer location are unchanged.
   reference positions. Fixture comments record the observer, coordinate frame and units.
 
 The adapter is original MIT-licensed TypeScript. SPDX comments identify its license,
-math.gl copyright and the referenced package/model. The optional peer dependency
-keeps ephemeris code separate from consumers using only the main sunlight/moon APIs.
+math.gl copyright and the referenced package/model. Selective bundles can exclude ephemeris code when it is not used.

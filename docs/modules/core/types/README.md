@@ -1,11 +1,12 @@
-# Overview
+# @math.gl/core/types
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v3.6-blue.svg?style=flat-square" alt="From v3.6" />
 </p>
 
-`@math.gl/core/types` provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
+`@math.gl/core` provides shared numeric array, bounds, and spheroid types, plus runtime array checks and Float16 support detection.
 
+## Usage
 Use `import type` for declarations that add no runtime code:
 
 ```typescript
@@ -14,6 +15,17 @@ import type {NumericArray, NumberArray3, Bounds3D} from '@math.gl/core/types';
 
 `NumberArray` covers JavaScript number arrays; `NumericArray` also includes numeric typed arrays. Sized variants describe fixed component counts. See [array types](./api-reference/array-types.md) and [bounds](./api-reference/bounds.md) for the contracts and runtime helpers.
 
+## Features
+
+| Feature | Support | Notes |
+| --- | --- | --- |
+| Number and typed-array declarations | ✅ | [NumericArray, TypedArray and constructor types](./api-reference/array-types.md), with BigInt typed arrays represented separately. |
+| Fixed-component array types | ✅ | Sized NumberArray/NumericArray variants cover commonly used vector, matrix, and bounds lengths. |
+| Runtime representation guards | ✅ | [Array and typed-array guards](./api-reference/array-types.md) include intrinsic, cross-realm Uint16 and Float16 checks. |
+| Half-float storage capability detection | ✅ | Native Float16Array detection and constructor selection; the Uint16 fallback stores encoded bits rather than decoded numeric values. |
+| Bounds and spheroid contracts | ✅ | [Bounds2D/3D](./api-reference/bounds.md) and SpheroidParameters describe geometry independently of renderers and CRS engines. |
+| Runtime enforcement of sized declarations | ❌ | Type declarations do not validate buffer length, coordinate units, or physical meaning at runtime. |
+| Bundled Float16 arithmetic polyfill | ❌ | The helpers select/detect storage. They do not supply numeric half-float array semantics when the runtime lacks them. |
 
 ## Installation
 

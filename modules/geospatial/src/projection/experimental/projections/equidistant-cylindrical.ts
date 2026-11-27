@@ -13,6 +13,7 @@ import {longitudeRange, envelope, scale, add} from '../rendering-profile/renderi
 /** Spherical equidistant cylindrical (the eqc formulation used by proj4js). */
 export const equidistantCylindrical: ProjectionPlugin = {
   name: 'eqc',
+  semantics: {id: '@math.gl/geospatial/eqc', version: 1},
   aliases: ['Equirectangular', 'Equidistant_Cylindrical', 'Equidistant_Cylindrical_Spherical'],
   parameters: ['lon_0', 'lat_0', 'lat_ts', 'x_0', 'y_0'],
   create({semiMajorAxis: a, parameters, primeMeridian = 0}) {

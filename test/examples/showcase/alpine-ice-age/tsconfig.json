@@ -1,0 +1,6 @@
+{
+  "extends": "../../../../examples/showcase/alpine-ice-age/tsconfig.json",
+  "include": [
+    "../../../../examples/showcase/alpine-ice-age/src/**/*"
+  ]
+}

@@ -7,6 +7,8 @@
 // Spectral Rayleigh/Angstrom approximation: Preetham et al. (1999),
 // https://doi.org/10.1145/311535.311545
 // Henyey-Greenstein phase function: https://www.pbr-book.org/3ed-2018/Volume_Scattering/Phase_Functions
+import {smoothstep as coreSmoothstep} from '@math.gl/core/matrix';
+import {getHenyeyGreensteinPhaseFunction} from './atmosphere-optics';
 import {getCloudSunSpectrum} from './cloud-spectral';
 import {validateRange} from './celestial';
 import {createSkyAtmosphere, getSkyLuminance} from './sky-brightness';
@@ -163,9 +165,7 @@ export function getCloudLighting(
       atmosphere.cloudCover;
     return skyIrradiance * tint;
   }) as [number, number, number];
-  const phaseFunction =
-    (1 - asymmetry * asymmetry) /
-    (4 * Math.PI * (1 + asymmetry * asymmetry - 2 * asymmetry * Math.cos(sunSeparation)) ** 1.5);
+  const phaseFunction = getHenyeyGreensteinPhaseFunction(Math.cos(sunSeparation), asymmetry);
   const opacity = -Math.expm1(-atmosphere.cloudOpticalDepth);
   const throughput = singleScatteringAlbedo * opacity * Math.exp(-viewOpticalDepth);
   // Ambient hemisphere replaced by an isotropic incident field, not HG integration.
@@ -193,6 +193,5 @@ function normalize(rgb: [number, number, number]): LightColor {
   };
 }
 function smoothstep(lower: number, upper: number, value: number): number {
-  const t = Math.max(0, Math.min(1, (value - lower) / (upper - lower)));
-  return t * t * (3 - 2 * t);
+  return coreSmoothstep(value, lower, upper);
 }

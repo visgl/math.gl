@@ -11,7 +11,11 @@ export {CullingVolume} from './lib/culling-volume';
 export {Plane} from './lib/plane';
 export {Ray} from './lib/ray';
 
-export type {ImplicitShape, RayIntersection} from './lib/shapes/implicit-shape';
+export type {
+  ImplicitShape,
+  ImplicitShape as Shape,
+  RayIntersection
+} from './lib/shapes/implicit-shape';
 export {BoxShape} from './lib/shapes/box-shape';
 export type {BoxShapeProps} from './lib/shapes/box-shape';
 export {CapsuleShape} from './lib/shapes/capsule-shape';
@@ -38,3 +42,52 @@ export type {QueryPoint, TriangleRayHit} from './queries';
 
 export {intersectOrientedBoxes2D} from './oriented-box-2d';
 export type {OrientedBox2D} from './oriented-box-2d';
+export {unprojectScreenRay} from './screen-ray';
+export type {ScreenRay, ScreenRayViewport} from './screen-ray';
+
+export {
+  getOrientedBoundingBoxQuaternion,
+  makeOrientedBoundingBoxFromQuaternion
+} from './lib/algorithms/oriented-bounding-box-quaternion';
+
+// Public named exports. Implementations remain in independently tree-shakable files.
+export {
+  validateQueryPoint,
+  validateQueryDistance,
+  normalizeQueryDirection,
+  getClosestPointsOnSegments,
+  getClosestPointsSegmentTriangle
+} from './queries';
+export type {SegmentClosestPoints, SegmentTriangleClosestPoints} from './queries';
+
+export {extractFrustumPlanes} from './frustum-planes';
+export {
+  createEmptyBounds,
+  isEmptyBounds,
+  boundsContainsPoint,
+  boundsContainsBounds,
+  boundsIntersect,
+  unionBounds,
+  intersectBounds,
+  expandBoundsByPoint,
+  expandBounds,
+  clampPointToBounds,
+  spheresIntersect,
+  boundsIntersectSphere
+} from './bounds';
+export {
+  getRayPoint,
+  getClosestPointOnRay,
+  distanceToRay,
+  getClosestPointsRaySegment,
+  transformRay,
+  getTriangleBarycentric,
+  getTriangleArea,
+  getTriangleNormal,
+  isTriangleFrontFacing,
+  triangleContainsPoint,
+  interpolateTriangleAttribute,
+  intersectPlaneSegment,
+  triangleIntersectsBounds
+} from './geometric-queries';
+export type {RaySegmentClosestPoints} from './geometric-queries';

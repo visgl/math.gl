@@ -1,377 +1,100 @@
 # What's New
 
-| Geoid heights | Timezones | Expression evaluation |
-| --- | --- | --- |
-| [![EGM96 geoid globe](./images/geoid-globe.jpg)](./modules/earth/geoid/README.md) | [![Timezone globe](./images/timezone-globe.jpg)](./modules/earth/timezone/README.md) | [![Expression playground](./images/expressions.jpg)](./modules/core/expressions/README.md) |
-| Primitive geometry | Polygon cutting | Vector and matrix transforms |
-| [![Geometry viewer](./images/geometry-viewer.jpg)](./modules/geometry/README.md) | [![Polygon playground](./images/polygon-playground.jpg)](./modules/geometry/polygon/README.md) | [![Core transforms](./images/core-transforms.jpg)](./modules/core/README.md) |
+## v5.1 (in development)
+
+- **Line networks.** [`@math.gl/geospatial/line-network`](./modules/geospatial/api-reference/line-network.md)
+  builds a graph from longitude, latitude lines in typed-array columns. It snaps endpoints,
+  joins dangling ends to nearby lines (T-junctions), and can split lines at shared vertices
+  and at crossings. Helpers build a CSR adjacency and turn a predecessor array into route
+  edges and route geometry. Uses include road, river, rail, utility and track-line networks.
 
 ## v5.0
 
-- `@math.gl/geometry` adds flat-sided `PrismGeometry` and solid `RingGeometry`, including
-  hexagonal prisms and capped annular segments. The optional parametric entry adds
-  rotated, capped segments to `TorusGeometry` while preserving its full-torus defaults.
+math.gl 5 expands the library from vectors and matrices to coordinate transformations,
+global grids, geometry processing, and Earth science. Related APIs are grouped into
+seven packages with focused imports. See the [Upgrade Guide](./upgrade-guide.md) when
+moving an application from v4.
 
+### Highlights
 
-Status: prerelease development. TypeScript consumers require TypeScript 6.0 or later; JavaScript still targets ES2020.
-
-**`@math.gl/dggs`** (NEW MODULE)
-
-- Adds [boundary unwrapping](./modules/dggs/api-reference/dggs-decoder.md) for continuous longitudes across the antimeridian.
-- Consolidates all lightweight DGGS functionality into a single module and removes the individual DGGS packages.
-- Exports DGGS decoder objects with an interchangeable API for encoded data.
-- Aligns the core decoder shape with deck.gl-community's `GlobalGridLayer` contract.
-- Provides `/a5`, `/geohash`, `/h3`, `/plus-code`, `/quadkey`, and `/s2` subpath exports from `@math.gl/dggs`.
-- Detects conventional cell-column names for all bundled decoders to power data-driven visualization layers.
-- Adds validated S2 token/index conversion, exact polar and antimeridian bounds, and face-aware spatial descendant addressing.
-
-**`@math.gl/core/types`**
-
-- Sized array types provide stronger guarantees for math class inputs and outputs.
-
-**`@math.gl/core`**
-
-- Euler rotation orders now use descriptive string literal types.
-- Added destination-owned `Matrix4.fromMatrix3()`, `Matrix3.fromMatrix4()`, and `Quaternion.fromEuler()` conversion helpers.
-- `Euler.fromQuaternion()` now supports all six rotation orders and preserves the destination's current order by default.
-- Removed the redundant `Euler.getQuaternion()` and `Euler.toQuaternion()` allocation helpers; use `Quaternion.fromEuler()` instead.
-- Removed deprecated class aliases, compatibility methods, scalar helpers, Euler constants, and root-level low-level namespaces. See the upgrade guide for replacements.
-- Added focused `/mat3`, `/mat4`, `/quat`, `/vec2`, `/vec3`, and `/vec4` subpath exports for opt-in low-level functions.
-- `SphericalCoordinates` now uses the structural `Vector3Like` type and direct calculations, avoiding runtime dependencies on `Vector3` and `vec3`.
-- Core named-import gzip fixtures are 6–62% smaller than v4.1; the full public-entry fixture is 37% smaller. See the bundling guide for methodology and measurements.
-
-**`@math.gl/core/expressions`** (NEW EXPERIMENTAL MODULE)
-
-- Promotes the expression parser previously embedded in `@deck.gl/json` to a documented experimental module.
-- Parses, evaluates, and compiles synchronous or asynchronous JavaScript-style expressions.
-- Provides configurable function libraries, including importable basic math and WGS84 geospatial libraries.
-- Adds isolated function registries and optional GeoHash, Quadkey, and S2 function tables.
-- Compiles restricted JSON-style accessor expressions with function calls disabled.
-- Includes an interactive expression playground with editable context and sample DGGS expressions.
-
-**`@math.gl/geospatial/crs`** (NEW MODULE)
-
-- Adds lightweight, proj4-independent TypeScript definitions for coordinate reference systems with no runtime dependencies.
-- Uses strict PROJJSON v0.7 as its semantic CRS object model and exports types generated from the official schema.
-- Exposes the vendored official PROJJSON v0.7 schema for runtime validation by applications.
-- Represents authority codes, PROJ strings, and WKT definitions as serialized strings.
-- Adds value-preserving WKT1/WKT2 syntax parsing, profile validation, and compact or pretty encoding.
-- Adds ordered PROJ definition and pipeline syntax parsing and encoding.
-- Adds immutable, format-neutral spatial-reference descriptors that preserve definition
-  representation, alternatives, provenance, coordinate epoch, frame, stored order, and explicit
-  default/unknown/absent state.
-- Adds a comprehensive CRS developer guide covering standards, serialization versus semantics,
-  axis order, dynamic and vertical CRS, transformation boundaries, and integration guidance.
-
-**`@math.gl/geospatial/wkb`** (NEW MODULE)
-
-- Adds dependency-free synchronous WKB, EWKB, and WKT codecs over plain geometry values.
-- Supports both endian orders, ISO and EWKB dimension headers, EWKB SRIDs, all geometry families,
-  nested collections, dimension tokens, MultiPoint variants, and empty geometry.
-- Enforces strict input coverage plus configurable WKB nesting and element-count limits.
-- Supports header-only and count-only visitor traversal that skips coordinate decoding when scalar
-  ordinate callbacks are not requested.
-- Provides the neutral format layer used by `@math.gl/geospatial/geoarrow` without depending on GeoArrow or
-  Apache Arrow.
-
-**`@math.gl/geospatial/geoarrow`** (NEW MODULE)
-
-- Defines borrowed physical descriptors for native, mixed, box, WKB, and WKT geometry columns
-  without requiring an Arrow runtime.
-- Traverses and validates interleaved or separated XY/XYZ/XYM/XYZM coordinates, Int32/Int64 list
-  offsets, sliced validity bitmaps, chunks, dense unions, and geometry collections.
-- Adds synchronous bounds, vertex-count, coordinate-map, layout-conversion, winding, and resource
-  limit kernels.
-- Adds a two-pass builder, WKB/WKT column adapters, Polygon/MultiPolygon tessellation, and an
-  optional worker transfer subpath.
-- Adds direct WKB dimension/family classification, serialized vertex counting, exact per-chunk
-  measure/write conversion, BinaryView access, stable mixed-union schemas, and Arrow-compatible
-  child-null dispatch without materialized geometry rows.
-- Moves reusable GeoArrow math out of loaders.gl and luma.gl prototypes while leaving runtime
-  adapters, worker scheduling, and GPU resources with their owning libraries.
-
-**`@math.gl/geospatial/projection`**
-
-- Renames `@math.gl/proj4` to `@math.gl/geospatial/projection`, with a pluggable math.gl projection engine, lazy algorithms, in-place buffers and explicit coordinate operations.
-- Removes the deprecated `Proj4Projection` alias and `/classic` wrapper. The package has no proj4js runtime dependency; comparisons and compatibility tests use a pinned development dependency.
-- Adds a [projection catalogue](./modules/geospatial/projection/developer-guide/projections.md) and a [guide to ellipsoids, datums, heights and epochs](./modules/geospatial/projection/developer-guide/coordinate-systems.md).
-- Adds optional CRS axis-order enforcement and NTv2 datum-grid registration.
-- Defines aliases for WGS84 UTM and UPS EPSG coordinate systems automatically.
-
-**`@math.gl/geospatial`**
-
-- The `tile-matrix` subpath adds validated variable-width/coalesced row bands, canonical OGC column aliases, row-aware bounds and point lookup, and compact `getTileRanges` queries. Regular-grid behavior is unchanged.
-- Adds `EllipsoidOccluder` ray intervals, altitude-aware occlusion, and limb ellipses, plus conservative globe horizon bounds across poles and the antimeridian.
-- Improves 3D Tiles support in loaders.gl with ellipsoid and bounding-volume helpers.
-- `makeOBBFromRegion()` - New function that creates a Cartesian oriented bounding box from a geospatial region.
-- `EllipsoidTangentPlane` - New helper class for doing math on the ellipsoid surface.
-
-**`@math.gl/geometry`** (NEW MODULE)
-
-- Adds renderer-independent `Geometry` typed-array storage and indexed-geometry unpacking.
-- Adds tessellators for glTF 2.1 draft shapes and common luma.gl primitives.
-
-**`@math.gl/geometry/culling`**
-
-- Adds analytic glTF 2.1 box, capsule, cylinder, plane, and sphere queries for clipping/culling, rays, transforms, and enclosing bounds.
-- Culling results now use descriptive string literal types.
-
-**`@math.gl/geometry/utils`** (NEW MODULE)
-
-- Promotes the renderer-independent geometry helpers previously maintained in `@loaders.gl/math`.
-- Adds typed geometry traversal, vertex-normal generation, component-type conversion, packed RGB565
-  colors, octahedral attribute compression, and typed-array utilities.
-
-**`@math.gl/geometry/polygon`**
-
-- Adds [`subdivideGlobeMesh`](./modules/geospatial/api-reference/subdivide-globe-mesh.md) in `@math.gl/geospatial/globe` for conforming globe subdivision with preserved attribute provenance.
-- Polygon winding directions now use descriptive string literal types.
-- Adds adaptive [triangle-mesh subdivision](./modules/geometry/polygon/api-reference/subdivide-triangle-mesh.md) with shared-edge refinement and attribute interpolation.
-- Adds adaptive [polyline subdivision](./modules/geometry/polygon/api-reference/subdivide-polyline.md) through application-supplied coordinate transforms.
-
-**`@math.gl/earth/timezone`** (NEW MODULE)
-
-- Adds geographic timezone lookup, local-calendar fields, and numeric UTC offsets using runtime timezone rules.
-- Provides an optional Temporal entry point for day boundaries, local-time conversion, and offset transitions.
-- Ships optional approximate timezone geometry for map and globe visualization.
-
-**`@math.gl/earth/sun`**
-
-- Adds Moon position and lighting, solar color and intensity, sky illumination, and approximate cloud lighting.
-- Provides optional planet ephemerides and shared sky snapshots through `astronomy-engine`.
-- Adds a bright-star catalogue, motion helpers, and globe rendering coordinates.
+- **Coordinate transformations.** The [projection engine](./modules/geospatial/projection/README.md)
+  supports a broad set of projections, datum grids, and coordinate operations.
+  [CRS tools](./modules/geospatial/crs/README.md) handle authority codes, WKT, PROJ, and PROJJSON.
+- **Global grids and terrain.** [DGGS](./modules/dggs/README.md) gives A5, GeoHash, H3,
+  Plus Codes, Quadkey, and S2 a common decoder API. [Terrain](./modules/geospatial/terrain/README.md)
+  adds tools for meshing elevation data and analyzing slopes, drainage, and visibility.
+- **Geometry and Arrow.** Read and write WKB and WKT, work with [GeoArrow buffers](./modules/core/arrow/README.md),
+  and use [polygon tools](./modules/geometry/polygon/README.md) to tessellate, clip, and refine meshes.
+- **SQL and visualization.** [SQL](./modules/sql/README.md) queries Apache Arrow tables,
+  computes spatial columns, and resolves visualization scales. [Core color tools](./modules/core/color.md)
+  provide reusable palettes, color conversions, scales, and lookup tables.
+- **Earth and sky.** [Earth](./modules/earth/README.md) adds Moon and star calculations,
+  timezone lookup, and seawater properties.
+- **Worker threads.** [Tasks](./modules/tasks/README.md) runs heavy computations on worker threads.
 
 ## v4.1
 
-Release Date: Sep 7, 2024.
-
-This minor release brings:
-
-- type improvements to support more rigorous typing of array lengths.
-- [SPDX](https://spdx.org/licenses/)-compliant license headers.
-
-**`@math.gl/core`**
-
-- `Vector2Like` - `Matrix4Like` - New types to specify numeric inputs of a specific length.
-
-**`@math.gl/core/types`**
-
-- `Bounds`, `Bounds2D` and `Bounds3D` - New types for expressing [bounds](./modules/core/types/api-reference/bounds) (extents).
-- `NumberArray2` - `NumberArray16` - New types to specify numeric arrays of a specific length.
-- `NumericArray2` - `NumericArray16` - New types to specify numeric arrays of a specific length.
-- `isTypedArray()`, `isNumericArray()` - These utilities now perform TypeScript type narrowing.
+Added more precise array and bounds types, and made the array guards narrow types in TypeScript.
 
 ## v4.0
 
-Release Date: Oct 14, 2023.
-
-This release brings:
-
-- ESM (ECMAScript module) compliant.
-- Node.js v16, v18, v20.
-- TypeScript v5
-- `gl-matrix` dependency removed.
-- New modules for working with DGGS (Discrete Global Grid System) math.
-
-**`@math.gl/dggs-geohash`** (NEW MODULE)
-
-- New module with lightweight math for the GeoHash DGGS (Discrete Global Grid System).
-
-**`@math.gl/dggs-quadkey`** (NEW MODULE)
-
-- New module with lightweight math for the quadkey DGGS (Discrete Global Grid System).
-
-**`@math.gl/dggs-s2`** (NEW MODULE)
-
-- New module that contains a lightweight implementation of the S2 DGGS (Discrete Global Grid System).
-
-**`@math.gl/core`**
-
-- `config` is now truly global (stored on `globalThis`).
-- `gl-matrix` dependency removed.
-
-**`@math.gl/core/types`**
-
-- New `isTypedArray()` and `isNumericArray()` utilities that check values and return properly restricted types to help write clean TypeScript code (e.g. avoids the `DataView` case when using `ArrayBuffer.isView()`).
+Added ES module support alongside CommonJS. Adapted numerical kernels replaced the
+`gl-matrix` dependency.
 
 ## v3.6
 
-Release Date: June 10, 2022
-
-Codebase has been fully converted to TypeScript. In general this means that users can expect
-the types exported from math.gl to be considerably improved, however in some function signatures
-are no longer supported. For details, consult the [upgrade guide](./upgrade-guide).
-
-**`@math.gl/core/types` (NEW)**
-
-- New module that exports a few TypeScript types that e.g. generalize handling of numeric arrays.
-
-**`@math.gl/geometry/polygon` (NEW)**
-
-- Includes earcut 2.2 (various bug fixes for edge cases)
-- The `earcut` utility supports a new argument `plane` to calculate tesselation on alternative projection planes.
+Converted the library to TypeScript and added shared numeric array types.
 
 ## v3.5
 
-Release Date: July 14, 2021
-
-**`@math.gl/web-mercator`**
-
-- `getBounds()` now supports an optional `fovy` parameter on the `WebMercatorViewport` object
-- `getProjectionMatrix()` and `getProjectionParameters()` now accept a `fovy` parameter
-
-**`@math.gl/geometry/polygon`**
-
-- Improve performance of `getPolygonSignedArea()` by 3x
-- Addition of `earcut()` method for triangulating polygons
-
-**`math.gl/culling`**
-
-- New TypeScript interface `BoundingVolume` with common operations for bounding volumes (`BoundingSphere`, `AxisAlignedBoundingBox`, `OrientedBoundingBox`).
-- `BoundingVolume.transform()` supported on all bounding volumes.
+Added field-of-view options for Web Mercator, polygon triangulation, and a common transform API for bounding volumes.
 
 ## v3.4
 
-Release Date: Jan 7, 2021
-
-**`@math.gl/earth/geoid`** - New module
-
-- Support for [geoid](https://en.wikipedia.org/wiki/Geoid)-based [earth gravity models](https://en.wikipedia.org/wiki/Earth_Gravitational_Model).
-- New `Geoid` class calculates the height offset (aka "undulation") from the pure ellipsoid for a given lng/lat (using spherical harmonics).
-- `Geoid` instances can be initialized with PGM-encoded earth gravity model coefficient files from standard sources.
-
-**`@math.gl/geometry/polygon`**
-
-- Support for flat arrays (e.g. polygons stored in typed arrays)
-- Support for calling polygon utilities directly on arrays, without a `Polygon` instance.
-- New function `modifyPolygonWindingDirection()` to modify polygon array winding direction in-place.
+Added geoid height models and support for polygon operations on flat arrays.
 
 ## v3.3
 
-Release Date: Oct 9, 2020
-
-**`@math.gl/proj4`** - New module
-
-- A new module supporting conversion between a wide range of geospatial coordinate reference systems specified e.g. using the OGC WKT-CRS specification.
+Added proj4-backed coordinate transformations.
 
 ## v3.2
 
-Release Date: July 18, 2020
-
-**TypeScript**
-
-- TypeScript type definitions (`.d.ts` files) are now exported for all math.gl modules.
-
-**`@math.gl/geometry/polygon`** - New module
-
-- A new module offering geospatial polygon clipping functions.
+Published TypeScript declarations for all packages and added polygon clipping.
 
 ## v3.1
 
-Release date: Dec 16, 2019
-
-### `@math.gl/web-mercator`
-
-- WebMercator projection support is now available through the new `@math.gl/web-mercator` npm sub-module.
-- The `@math.gl/web-mercator` module is an evolution of the now archived [`viewport-mercator-project`](https://github.com/uber-archive/viewport-mercator-project) repository.
+Brought Web Mercator viewport utilities into math.gl.
 
 ## v3.0
 
-Release date: Aug 8, 2019
-
-The 3.0 release brings support for geospatial math, culling, performance improvements, and some API consolidation.
-
-### `@math.gl/geospatial`
-
-A new module (developed in collaboration with the Cesium engineering team) providing WebGL-framework-independent geospatial math classes and algorithms:
-
-- New class `Ellipsoid` and constant `Ellipsoid.WGS84` for working with WSG84 coordinates
-
-### `@math.gl/geometry/culling`
-
-A new module (developed in collaboration with the Cesium engineering team) providing WebGL-framework-independent classesthat support geometric intersection calculations (primarily intended to support frustum culling operations):
-
-- New class `AxisAlignedBoundingBox`
-- New class `OrientedBoundingBox`
-- New class `BoundingSphere`
-- New class `CullingVolume`
-
-### `@math.gl/core`
-
-**Transform API Consolidation**
-
-The API for transformations (i.e. multiplying vectors with matrices or quaternions) has been extended and made more orthogonal:
-
-- The `transform*` methods are now available on all `Vector` classes, in addition to on the `Matrix` classes. Among other things, this enables transformations without using `Matrix` classes.
-- Naming consistency of transform methods across classes (`transform`, `transformAsPoint`, `transformAsVector`).
-- Alternative transform methods added to the `Vector` classes (`transformByMatrix3`, `transformByMatrix2`, `transformByMatrix2x3` and `transformByQuaternion`). Simplifies using the most efficient transformation for the job.
-
-**Matrix classes**
-
-- New methods `Matrix*.setColumn()` and `Matrix*.getColumn()`
-- New method `Matrix*.toString()`
-- Improved method: `Matrix4.frustum()` now supports infinite `far` plane (parity with `Matrix4.perspective`, which already supported this).
-
-**Utility Functions**
-
-- New: global functions `toRadians` and `toDegrees`
-- New: global function `exactEqual`
-
-**Performance Improvements** (and Website Benchmarks)
-
-A [benchmarking example](https://math.gl/examples/benchmarks) has been added to the website that makes it easy to assess the performance of the math.gl library on your own browser. The math.gl library has been carefully tuned based on these benchmarks and performance of the library has been significantly improved over version 2.x.
+Introduced ellipsoid math and bounding volumes for culling, and standardized vector and matrix transforms.
 
 ## v2.3
 
-Release date: Jan 29, 2019
-
-- New class: `Matrix3`
-- New: Add `scale` factor support to `Matrix3` and `Matrix4`
-- Support quaternion to euler conversion
-- Now uses the official `gl-matrix@3.0.0` package as dependency instead of forked gl-matrix packages.
+Added `Matrix3`, matrix scaling, and quaternion-to-Euler conversion.
 
 ## v2.2
 
-Release date: Sep 20, 2018
+Reduced bundle size and fixed typed-array detection.
 
-- Use `@babel/runtime` to reduce bundle size
-- `equals` function fix on arrays
+## v2.1
+
+Added support for reconstructing a serialized `Pose` and fixed column-major matrix element writes.
 
 ## v2.0
 
-Release date: June 25, 2018
-
-### New Naming Convention for Experimental Exports
-
-Experimental exports are now exported with a leading underscore (\_), instead of as members of the `experimental` namespace.
-
-The change was made to make it possible for tree-shaking bundlers to remove unused experimental exports from applications.
+Made experimental classes individually importable under underscore-prefixed names.
 
 ## v1.2
 
-Release date: May 4, 2018
-
-- New `lerp` utility
-- Experimental `Pose` class
+Added `lerp` and the experimental `Pose` class.
 
 ## v1.1
 
-Release date: April 16, 2018
-
-### Matrix4 Improvements
-
-**`Matrix4.orthographic()`** - To simplify switching between perspective and orthographic views, math.gl now offers an additional method for creating orthographic projection matrix, that takes the same parameters as `Matrix4.perspective()`, with the addition of one additional parameter, `focalDistance`. See [`Matrix4.orthographic`](/docs/modules/core/api-reference/matrix4)`({fovy, aspect, focalDistance, near, far})`
-
-### Bundle Size Reduction
-
-math.gl has been tuned to have approximately 20% smaller footprint when bundled in applications.
-
-### THREE.js Compatibility
-
-math.gl classes now pass large parts of the THREE.js test suite, which should make it easier to reuse code written for the THREE.js math library.
+Added `Matrix4.orthographic()`, improved THREE.js compatibility, and reduced bundle size.
 
 ## v1.0
 
-Release date: Jan 9, 2018
+Initial release of the vector and matrix library.
 
-Initial release.
+For release-by-release details, see the [changelog](https://github.com/visgl/math.gl/blob/master/CHANGELOG.md).

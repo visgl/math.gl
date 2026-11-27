@@ -1,0 +1,1173 @@
+{
+  "metadata": {
+    "date": "2026-10-25T12:31:19.129Z",
+    "baselineCommit": "00dd3e4b539a6c8559803eab273292536f5b1633",
+    "candidateCommit": "5618a981a1ab9a6ae263d0687d4695fc20d34bf1",
+    "bundleSHA256": [
+      "7ac6423446fa713b47cb387df92bb62721e2424a76b1117376f56c6748ad0a7f",
+      "576cd5b0c35c260e60dae79461bfcee5ad8006abd74b7868960721b050aeb4c7"
+    ],
+    "workloadSHA256": "1a8248670b78cf7e687f7e56ade6de6c59ad6d2d68e661b48ea4b6d6fb588cd5",
+    "node": "v24.5.0",
+    "v8": "13.6.233.10-node.21",
+    "cpu": "Apple M2",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "points": 4096,
+    "samples": 11,
+    "minCPUms": 8
+  },
+  "methodology": "Identical XYZ inputs, retained outputs and independent Decimal geometry at existing 2e-12 axis-normalized budgets. Setup and validation excluded; scalar source/result vectors reused and packed output reused. Warmup 100 batches; order rotates. Adaptive windows use process user+system CPU time to prevent scheduler pauses from shortening work; CPU includes runtime/GC/background threads and is diagnostic, not wall throughput. Wall time, raw samples and >20% spread flags retained. Allocation estimates follow all timing and cannot prove zero allocation. Informational only: no new speed gate, browser/native-bulk claim, or universal performance claim.",
+  "qualification": {
+    "rows": 405,
+    "maxBudgetUsage": 0.05312037506289995
+  },
+  "rows": [
+    {
+      "operation": "localToFixedPoint",
+      "measurements": [
+        {
+          "implementation": "historical scalar / reused vectors",
+          "maxBudgetUsage": 0.0000730089816678035,
+          "cpu": {
+            "medianNanoseconds": 89.385986328125,
+            "p10Nanoseconds": 85.47210693359375,
+            "p90Nanoseconds": 94.8028564453125,
+            "spread": 0.10438716285421645,
+            "unstable": false
+          },
+          "wall": {
+            "medianNanoseconds": 90.98052978515418,
+            "p10Nanoseconds": 86.21724700927716,
+            "p90Nanoseconds": 102.45545959472815,
+            "spread": 0.17848008385746594,
+            "unstable": false
+          },
+          "timingLimited": false,
+          "raw": [
+            {
+              "batches": 32,
+              "cpuMs": 11.926,
+              "wallMs": 12.546541000000161,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.717,
+              "wallMs": 12.1909169999999,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.467,
+              "wallMs": 11.655166999999892,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.39,
+              "wallMs": 11.555958000000146,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 13.2,
+              "wallMs": 15.033124999999927,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.106,
+              "wallMs": 11.266249999999673,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.203,
+              "wallMs": 11.300666999999976,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.716,
+              "wallMs": 11.924999999999727,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 12.252,
+              "wallMs": 13.429042000000209,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.469,
+              "wallMs": 11.75604199999998,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 12.426,
+              "wallMs": 12.834083000000192,
+              "checksum": 42792976351.47794
+            }
+          ]
+        },
+        {
+          "implementation": "candidate scalar / reused vectors",
+          "maxBudgetUsage": 0.0000730089816678035,
+          "cpu": {
+            "medianNanoseconds": 88.53912353515625,
+            "p10Nanoseconds": 85.845947265625,
+            "p90Nanoseconds": 92.7886962890625,
+            "spread": 0.07841447651874192,
+            "unstable": false
+          },
+          "wall": {
+            "medianNanoseconds": 91.1413803100572,
+            "p10Nanoseconds": 85.83863830566307,
+            "p90Nanoseconds": 98.9433898925772,
+            "spread": 0.14378487073964208,
+            "unstable": false
+          },
+          "timingLimited": false,
+          "raw": [
+            {
+              "batches": 32,
+              "cpuMs": 11.849,
+              "wallMs": 12.968707999999879,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.204,
+              "wallMs": 11.203040999999985,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.403,
+              "wallMs": 11.616207999999915,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.583,
+              "wallMs": 11.946082999999817,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.426,
+              "wallMs": 11.677584000000024,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.252,
+              "wallMs": 11.25104199999987,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.956,
+              "wallMs": 12.030583000000206,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.636,
+              "wallMs": 11.958666999999878,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 12.275,
+              "wallMs": 13.164792000000034,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.605,
+              "wallMs": 12.008624999999938,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 32,
+              "cpuMs": 12.162,
+              "wallMs": 11.928292000000056,
+              "checksum": 42792976351.47794
+            }
+          ]
+        },
+        {
+          "implementation": "candidate packed / reused output",
+          "maxBudgetUsage": 0.0000730089816678035,
+          "cpu": {
+            "medianNanoseconds": 16.111373901367188,
+            "p10Nanoseconds": 15.625,
+            "p90Nanoseconds": 16.416549682617188,
+            "spread": 0.04912986859239967,
+            "unstable": false
+          },
+          "wall": {
+            "medianNanoseconds": 16.372680664063047,
+            "p10Nanoseconds": 15.681823730468846,
+            "p90Nanoseconds": 16.83560943603526,
+            "spread": 0.07047017707362342,
+            "unstable": false
+          },
+          "timingLimited": false,
+          "raw": [
+            {
+              "batches": 128,
+              "cpuMs": 8.738,
+              "wallMs": 9.20616599999994,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.558,
+              "wallMs": 8.785499999999956,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.149,
+              "wallMs": 8.22179200000005,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.276,
+              "wallMs": 8.584000000000287,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.607,
+              "wallMs": 8.826708000000053,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.192,
+              "wallMs": 8.20962499999996,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.422,
+              "wallMs": 8.529166999999688,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.364,
+              "wallMs": 8.682166999999936,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.467,
+              "wallMs": 8.466416999999637,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.447,
+              "wallMs": 8.456166999999823,
+              "checksum": 42792976351.47794
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.476,
+              "wallMs": 8.777583999999933,
+              "checksum": 42792976351.47794
+            }
+          ]
+        }
+      ],
+      "packedOverCandidateScalarCPU": 0.18196897888841015,
+      "packedOverCandidateScalarWall": 0.17964047294833835
+    },
+    {
+      "operation": "fixedToLocalPoint",
+      "measurements": [
+        {
+          "implementation": "historical scalar / reused vectors",
+          "maxBudgetUsage": 0.000018252245416950875,
+          "cpu": {
+            "medianNanoseconds": 96.94671630859375,
+            "p10Nanoseconds": 88.76800537109375,
+            "p90Nanoseconds": 105.81207275390625,
+            "spread": 0.1758086094278744,
+            "unstable": false
+          },
+          "wall": {
+            "medianNanoseconds": 104.83455657958955,
+            "p10Nanoseconds": 90.93444061279016,
+            "p90Nanoseconds": 127.47924041748085,
+            "spread": 0.34859497666636463,
+            "unstable": true
+          },
+          "timingLimited": false,
+          "raw": [
+            {
+              "batches": 32,
+              "cpuMs": 11.986,
+              "wallMs": 12.238166999999976,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 12.66,
+              "wallMs": 13.052290999999968,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.635,
+              "wallMs": 11.918958999999631,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.661,
+              "wallMs": 11.948457999999846,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 13.869,
+              "wallMs": 16.350750000000062,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 13.114,
+              "wallMs": 13.74087499999996,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 13.486,
+              "wallMs": 14.942791999999827,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.301,
+              "wallMs": 11.300374999999804,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 17.188,
+              "wallMs": 22.035457999999835,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 12.707,
+              "wallMs": 16.70895900000005,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 13.568,
+              "wallMs": 14.873125000000073,
+              "checksum": -1384055.7289999998
+            }
+          ]
+        },
+        {
+          "implementation": "candidate scalar / reused vectors",
+          "maxBudgetUsage": 0.000018252245416950875,
+          "cpu": {
+            "medianNanoseconds": 92.0867919921875,
+            "p10Nanoseconds": 87.69989013671875,
+            "p90Nanoseconds": 95.0775146484375,
+            "spread": 0.08011599005799502,
+            "unstable": false
+          },
+          "wall": {
+            "medianNanoseconds": 99.1001129150397,
+            "p10Nanoseconds": 90.00110626220665,
+            "p90Nanoseconds": 121.7959747314458,
+            "spread": 0.320835845025701,
+            "unstable": true
+          },
+          "timingLimited": false,
+          "raw": [
+            {
+              "batches": 32,
+              "cpuMs": 11.268,
+              "wallMs": 11.330042000000049,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 12.153,
+              "wallMs": 13.387833000000228,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.498,
+              "wallMs": 11.796624999999949,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 12.272,
+              "wallMs": 13.048874999999953,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 12.462,
+              "wallMs": 15.964042000000063,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.813,
+              "wallMs": 12.907708000000184,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 16,
+              "cpuMs": 8.179,
+              "wallMs": 10.364666999999827,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.796,
+              "wallMs": 12.989250000000084,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 12.275,
+              "wallMs": 12.727250000000367,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 12.07,
+              "wallMs": 13.314666999999645,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.495,
+              "wallMs": 12.542959000000337,
+              "checksum": -1384055.7289999998
+            }
+          ]
+        },
+        {
+          "implementation": "candidate packed / reused output",
+          "maxBudgetUsage": 0.000018252245416950875,
+          "cpu": {
+            "medianNanoseconds": 15.735626220703125,
+            "p10Nanoseconds": 14.5111083984375,
+            "p90Nanoseconds": 16.30401611328125,
+            "spread": 0.11393939393939394,
+            "unstable": false
+          },
+          "wall": {
+            "medianNanoseconds": 16.309976577758707,
+            "p10Nanoseconds": 15.085736274719329,
+            "p90Nanoseconds": 22.77644538879395,
+            "spread": 0.4715340379189843,
+            "unstable": true
+          },
+          "timingLimited": false,
+          "raw": [
+            {
+              "batches": 256,
+              "cpuMs": 15.216,
+              "wallMs": 20.61979199999996,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 256,
+              "cpuMs": 17.096,
+              "wallMs": 26.200417000000016,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 256,
+              "cpuMs": 14.954,
+              "wallMs": 15.137707999999748,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.25,
+              "wallMs": 9.546792000000096,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.462,
+              "wallMs": 8.551124999999956,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 256,
+              "cpuMs": 15.589,
+              "wallMs": 16.562625000000025,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.523,
+              "wallMs": 9.321791999999732,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 256,
+              "cpuMs": 15.406,
+              "wallMs": 16.165915999999925,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 256,
+              "cpuMs": 17.105,
+              "wallMs": 23.882834000000003,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 256,
+              "cpuMs": 16.632,
+              "wallMs": 17.08637499999986,
+              "checksum": -1384055.7289999998
+            },
+            {
+              "batches": 256,
+              "cpuMs": 15.229,
+              "wallMs": 15.818541000000096,
+              "checksum": -1384055.7289999998
+            }
+          ]
+        }
+      ],
+      "packedOverCandidateScalarCPU": 0.17087821043910523,
+      "packedOverCandidateScalarWall": 0.16458080720595689
+    },
+    {
+      "operation": "localToFixedVector",
+      "measurements": [
+        {
+          "implementation": "historical scalar / reused vectors",
+          "maxBudgetUsage": 0.00003650449083390175,
+          "cpu": {
+            "medianNanoseconds": 77.81219482421875,
+            "p10Nanoseconds": 74.77569580078125,
+            "p90Nanoseconds": 99.44915771484375,
+            "spread": 0.31708991077556625,
+            "unstable": true
+          },
+          "wall": {
+            "medianNanoseconds": 82.2931900024415,
+            "p10Nanoseconds": 79.09329986572483,
+            "p90Nanoseconds": 113.60137176513393,
+            "spread": 0.41933083282329076,
+            "unstable": true
+          },
+          "timingLimited": false,
+          "raw": [
+            {
+              "batches": 32,
+              "cpuMs": 9.933,
+              "wallMs": 10.662041999999929,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.545,
+              "wallMs": 9.863832999999886,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 13.035,
+              "wallMs": 14.889958999999635,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 16,
+              "cpuMs": 8.348,
+              "wallMs": 8.449291999999787,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 10.804,
+              "wallMs": 12.456499999999778,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 10.129,
+              "wallMs": 10.516667000000325,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.814,
+              "wallMs": 10.366917000000285,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 10.485,
+              "wallMs": 10.83849999999984,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.801,
+              "wallMs": 10.558999999999742,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 10.199,
+              "wallMs": 10.786333000000013,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.63,
+              "wallMs": 11.760999999999513,
+              "checksum": -3641916.227000897
+            }
+          ]
+        },
+        {
+          "implementation": "candidate scalar / reused vectors",
+          "maxBudgetUsage": 0.00003650449083390175,
+          "cpu": {
+            "medianNanoseconds": 77.8656005859375,
+            "p10Nanoseconds": 72.5860595703125,
+            "p90Nanoseconds": 87.4481201171875,
+            "spread": 0.19086811679404272,
+            "unstable": false
+          },
+          "wall": {
+            "medianNanoseconds": 84.06925201416213,
+            "p10Nanoseconds": 74.25466918945314,
+            "p90Nanoseconds": 114.66281127929523,
+            "spread": 0.4806530464079187,
+            "unstable": true
+          },
+          "timingLimited": false,
+          "raw": [
+            {
+              "batches": 32,
+              "cpuMs": 10.468,
+              "wallMs": 12.054666999999881,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.462,
+              "wallMs": 15.029083999999784,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.87,
+              "wallMs": 11.660957999999937,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.534,
+              "wallMs": 10.250875000000178,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.514,
+              "wallMs": 9.732708000000002,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 10.095,
+              "wallMs": 11.281084000000192,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 10.408,
+              "wallMs": 10.900000000000091,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 10.206,
+              "wallMs": 11.019125000000258,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 10.389,
+              "wallMs": 10.651209000000563,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 12.524,
+              "wallMs": 15.720916999999645,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.412,
+              "wallMs": 9.689375000000837,
+              "checksum": -3641916.227000897
+            }
+          ]
+        },
+        {
+          "implementation": "candidate packed / reused output",
+          "maxBudgetUsage": 0.00003650449083390175,
+          "cpu": {
+            "medianNanoseconds": 16.651153564453125,
+            "p10Nanoseconds": 15.97023010253906,
+            "p90Nanoseconds": 19.037246704101562,
+            "spread": 0.18419243986254305,
+            "unstable": false
+          },
+          "wall": {
+            "medianNanoseconds": 17.502069473267387,
+            "p10Nanoseconds": 16.30687713623062,
+            "p90Nanoseconds": 23.075262069701882,
+            "spread": 0.3867191216335459,
+            "unstable": true
+          },
+          "timingLimited": false,
+          "raw": [
+            {
+              "batches": 128,
+              "cpuMs": 10.672,
+              "wallMs": 12.09808299999986,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.815,
+              "wallMs": 9.176125000000411,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.602,
+              "wallMs": 10.023333000000093,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.279,
+              "wallMs": 8.968917000000147,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 128,
+              "cpuMs": 9.981,
+              "wallMs": 11.052291999999852,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 128,
+              "cpuMs": 9.76,
+              "wallMs": 12.390792000000147,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.373,
+              "wallMs": 8.54950000000008,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.638,
+              "wallMs": 8.93920799999978,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 128,
+              "cpuMs": 9.064,
+              "wallMs": 10.04320800000005,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.533,
+              "wallMs": 9.130874999999833,
+              "checksum": -3641916.227000897
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.73,
+              "wallMs": 8.19958299999962,
+              "checksum": -3641916.227000897
+            }
+          ]
+        }
+      ],
+      "packedOverCandidateScalarCPU": 0.2138447971781305,
+      "packedOverCandidateScalarWall": 0.2081863351218948
+    },
+    {
+      "operation": "fixedToLocalVector",
+      "measurements": [
+        {
+          "implementation": "historical scalar / reused vectors",
+          "maxBudgetUsage": 0.000018252245416950875,
+          "cpu": {
+            "medianNanoseconds": 70.648193359375,
+            "p10Nanoseconds": 69.34356689453125,
+            "p90Nanoseconds": 79.32281494140625,
+            "spread": 0.14125269978401728,
+            "unstable": false
+          },
+          "wall": {
+            "medianNanoseconds": 73.20880889892523,
+            "p10Nanoseconds": 69.42367553711138,
+            "p90Nanoseconds": 93.56212615967141,
+            "spread": 0.32972057578325664,
+            "unstable": true
+          },
+          "timingLimited": false,
+          "raw": [
+            {
+              "batches": 32,
+              "cpuMs": 9.089,
+              "wallMs": 9.099500000000262,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.099,
+              "wallMs": 9.10295799999949,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.024,
+              "wallMs": 9.042083999999704,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.437,
+              "wallMs": 9.713667000000896,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.21,
+              "wallMs": 9.359999999999673,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.26,
+              "wallMs": 9.633374999999432,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.663,
+              "wallMs": 15.763500000000022,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.427,
+              "wallMs": 10.168292000000292,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.121,
+              "wallMs": 9.595624999999927,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.292,
+              "wallMs": 9.41095899999982,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 10.397,
+              "wallMs": 12.263375000000451,
+              "checksum": -1384055.7290004492
+            }
+          ]
+        },
+        {
+          "implementation": "candidate scalar / reused vectors",
+          "maxBudgetUsage": 0.000018252245416950875,
+          "cpu": {
+            "medianNanoseconds": 72.6470947265625,
+            "p10Nanoseconds": 70.2362060546875,
+            "p90Nanoseconds": 86.67755126953125,
+            "spread": 0.22631800042007982,
+            "unstable": true
+          },
+          "wall": {
+            "medianNanoseconds": 77.45329284668256,
+            "p10Nanoseconds": 70.3490524291972,
+            "p90Nanoseconds": 98.32699584960692,
+            "spread": 0.361223421137066,
+            "unstable": true
+          },
+          "timingLimited": false,
+          "raw": [
+            {
+              "batches": 32,
+              "cpuMs": 10.063,
+              "wallMs": 10.182792000000518,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.383,
+              "wallMs": 9.698958999999377,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.377,
+              "wallMs": 9.495624999999563,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.458,
+              "wallMs": 9.769792000000052,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.522,
+              "wallMs": 10.151958000000377,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 10.204,
+              "wallMs": 11.595833000000312,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 10.244,
+              "wallMs": 11.489125000000058,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 12.046,
+              "wallMs": 12.887915999999677,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.206,
+              "wallMs": 9.220790999999736,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 9.168,
+              "wallMs": 9.16808299999957,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 32,
+              "cpuMs": 11.361,
+              "wallMs": 13.633958000000348,
+              "checksum": -1384055.7290004492
+            }
+          ]
+        },
+        {
+          "implementation": "candidate packed / reused output",
+          "maxBudgetUsage": 0.000018252245416950875,
+          "cpu": {
+            "medianNanoseconds": 13.390541076660156,
+            "p10Nanoseconds": 12.903213500976562,
+            "p90Nanoseconds": 14.36614990234375,
+            "spread": 0.10925147781497044,
+            "unstable": false
+          },
+          "wall": {
+            "medianNanoseconds": 13.83284664154081,
+            "p10Nanoseconds": 13.100902557372853,
+            "p90Nanoseconds": 16.36489295959477,
+            "spread": 0.235959415065007,
+            "unstable": true
+          },
+          "timingLimited": false,
+          "raw": [
+            {
+              "batches": 256,
+              "cpuMs": 13.71,
+              "wallMs": 13.80225000000064,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 256,
+              "cpuMs": 13.613,
+              "wallMs": 13.737291999999798,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 256,
+              "cpuMs": 13.502,
+              "wallMs": 13.558083999999326,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 256,
+              "cpuMs": 14.152,
+              "wallMs": 15.67712500000016,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 256,
+              "cpuMs": 13.53,
+              "wallMs": 13.767917000000125,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 256,
+              "cpuMs": 14.22,
+              "wallMs": 14.504791000000296,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 256,
+              "cpuMs": 13.584,
+              "wallMs": 14.06262499999957,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 256,
+              "cpuMs": 14.345,
+              "wallMs": 14.548957999999402,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 256,
+              "cpuMs": 14.041,
+              "wallMs": 14.852041999999528,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 128,
+              "cpuMs": 8.62,
+              "wallMs": 10.684041000000434,
+              "checksum": -1384055.7290004492
+            },
+            {
+              "batches": 256,
+              "cpuMs": 15.064,
+              "wallMs": 17.159834000000046,
+              "checksum": -1384055.7290004492
+            }
+          ]
+        }
+      ],
+      "packedOverCandidateScalarCPU": 0.18432314639781558,
+      "packedOverCandidateScalarWall": 0.17859597872646535
+    }
+  ],
+  "allocations": [
+    {
+      "operation": "localToFixedPoint",
+      "implementation": "historical scalar / reused vectors",
+      "sampleCount": 0,
+      "sampledEstimatedBytesPerPoint": 0
+    },
+    {
+      "operation": "fixedToLocalPoint",
+      "implementation": "historical scalar / reused vectors",
+      "sampleCount": 5,
+      "sampledEstimatedBytesPerPoint": 0.653125
+    },
+    {
+      "operation": "localToFixedVector",
+      "implementation": "historical scalar / reused vectors",
+      "sampleCount": 4,
+      "sampledEstimatedBytesPerPoint": 0.3041015625
+    },
+    {
+      "operation": "fixedToLocalVector",
+      "implementation": "historical scalar / reused vectors",
+      "sampleCount": 0,
+      "sampledEstimatedBytesPerPoint": 0
+    },
+    {
+      "operation": "localToFixedPoint",
+      "implementation": "candidate scalar / reused vectors",
+      "sampleCount": 1,
+      "sampledEstimatedBytesPerPoint": 0.10078125
+    },
+    {
+      "operation": "fixedToLocalPoint",
+      "implementation": "candidate scalar / reused vectors",
+      "sampleCount": 1,
+      "sampledEstimatedBytesPerPoint": 0.1025390625
+    },
+    {
+      "operation": "localToFixedVector",
+      "implementation": "candidate scalar / reused vectors",
+      "sampleCount": 0,
+      "sampledEstimatedBytesPerPoint": 0
+    },
+    {
+      "operation": "fixedToLocalVector",
+      "implementation": "candidate scalar / reused vectors",
+      "sampleCount": 2,
+      "sampledEstimatedBytesPerPoint": 0.202734375
+    },
+    {
+      "operation": "localToFixedPoint",
+      "implementation": "candidate packed / reused output",
+      "sampleCount": 3,
+      "sampledEstimatedBytesPerPoint": 0.203125
+    },
+    {
+      "operation": "fixedToLocalPoint",
+      "implementation": "candidate packed / reused output",
+      "sampleCount": 1,
+      "sampledEstimatedBytesPerPoint": 0.10078125
+    },
+    {
+      "operation": "localToFixedVector",
+      "implementation": "candidate packed / reused output",
+      "sampleCount": 3,
+      "sampledEstimatedBytesPerPoint": 0.302734375
+    },
+    {
+      "operation": "fixedToLocalVector",
+      "implementation": "candidate packed / reused output",
+      "sampleCount": 2,
+      "sampledEstimatedBytesPerPoint": 0.2013671875
+    }
+  ]
+}

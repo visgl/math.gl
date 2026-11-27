@@ -1,5 +1,9 @@
+---
+hide_table_of_contents: true
+---
+
 # Examples
 
-import {ExamplesIndex} from '@vis.gl/docusaurus-website/components';
+import ExampleCatalog from '@site/src/components/example-catalog';
 
-<ExamplesIndex getThumbnail={item => item.docId === 'alpine-ice-age' ? '/images/examples/alpine-ice-age.png' : item.docId === 'tectonic-time-machine' ? '/images/examples/tectonic-time-machine.svg' : item.docId === 'benchmarks' ? '/images/math-hero.webp' : `/images/examples/${item.docId || item.label.toLowerCase()}.jpg`} />
+<ExampleCatalog />

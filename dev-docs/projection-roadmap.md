@@ -57,7 +57,7 @@ the math.gl projection engine must never silently fall back to proj4js.
 
 ### Tranche 0: implemented foundation
 
-- `@math.gl/geospatial/projection/experimental` exports `ProjectionEngine`, plugin types,
+- `@math.gl/geospatial/projection` exports `ProjectionEngine`, plugin types,
   `mercator`, and `equidistantCylindrical` without importing proj4js.
 - Plugins and aliases are supplied per instance. Geographic coordinates work without
   plugins; no global projection registry is populated as an import side effect.
@@ -80,7 +80,7 @@ Tranche 3 adds upstream's `identity` alias with explicit radian semantics.
 
 Implemented artifacts:
 
-- `modules/geospatial/projection/test/fixtures/parity-inventory.json`: all 38 upstream projection/helper
+- `modules/geospatial/test/projection/fixtures/parity-inventory.json`: all 38 upstream projection/helper
   modules and 31 CRS/API/transform features, with aliases, default-bundle membership,
   source hashes, fixture IDs, tests, gaps, and intentional differences.
 - `upstream-2.22.0.ts`: 24 tagged upstream coordinate fixtures with source lines and
@@ -671,19 +671,19 @@ the full upstream MIT notice. No new third-party source or model data is added.
 ## Validation commands
 
 ```sh
-yarn exec vitest run --project node modules/geospatial/projection/test
+yarn exec vitest run --project node modules/geospatial/test/projection
 yarn exec tsc --noEmit --project modules/geospatial/projection/tsconfig.json
 yarn exec ocular-build projection
-node modules/geospatial/projection/scripts/check-experimental-package.mjs
-node modules/geospatial/projection/scripts/check-parity-inventory.mjs
-node modules/geospatial/projection/scripts/check-packed-package.mjs
-python3 modules/geospatial/projection/scripts/generate-interior-reference.py --check
-node modules/geospatial/projection/scripts/qualify-interiors.mjs
-node modules/geospatial/projection/scripts/check-spheroid-allocations.mjs
-node modules/geospatial/projection/scripts/check-local-frame-allocations.mjs
-node modules/geospatial/projection/scripts/check-local-frame-boundary.mjs
-node modules/geospatial/projection/scripts/check-bundle-budget.mjs
-node modules/geospatial/projection/scripts/benchmark.mjs --allocations --output /tmp/proj4-benchmark.json
+node modules/geospatial/scripts/projection/check-experimental-package.mjs
+node modules/geospatial/scripts/projection/check-parity-inventory.mjs
+node modules/geospatial/scripts/projection/check-packed-package.mjs
+python3 modules/geospatial/scripts/projection/generate-interior-reference.py --check
+node modules/geospatial/scripts/projection/qualify-interiors.mjs
+node modules/geospatial/scripts/projection/check-spheroid-allocations.mjs
+node modules/geospatial/scripts/projection/check-local-frame-allocations.mjs
+node modules/geospatial/scripts/projection/check-local-frame-boundary.mjs
+node modules/geospatial/scripts/projection/check-bundle-budget.mjs
+node modules/geospatial/scripts/projection/benchmark.mjs --allocations --output /tmp/proj4-benchmark.json
 ```
 
 ## Deformation qualification follow-up: authored stress and application harness
@@ -705,4 +705,4 @@ temporal laws with independent references. See
 and [optional acceleration](../docs/modules/geospatial/projection/acceleration.md).
 S6–S8 add original code/reference generation only, with no new runtime dependencies
 or third-party datasets. S9 consolidates these results in the [published scorecard](../docs/modules/geospatial/projection/scorecard.md);
-[measurement limits and commands](../docs/modules/geospatial/projection/scorecard-methodology.md) preserve the bounded scope.
+[measurement limits and commands](../docs/modules/geospatial/projection/scorecard.md#reproduction) preserve the bounded scope.

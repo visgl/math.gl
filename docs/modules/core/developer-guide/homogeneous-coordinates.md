@@ -12,7 +12,7 @@ A four-component vector lets a 4×4 matrix represent translation and perspective
 A zero W is valid for a direction. It cannot be divided by W to recover a finite Cartesian point.
 
 ```js
-import {Matrix4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core/matrix';
 
 const matrix = new Matrix4().translate([10, 0, 0]);
 matrix.transform([1, 2, 3, 1]); // [11, 2, 3, 1]

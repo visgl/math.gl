@@ -39,7 +39,7 @@ between an absent CRS and an explicitly unknown one. Its `coordinateOrder` descr
 stored coordinates independently of the CRS definition's authoritative axis order.
 `CRSReference` is the nested declaration, including its definition and provenance.
 
-Resolution serves another purpose. `normalizeCRS()` from `@math.gl/geospatial/projection/core`
+Resolution serves another purpose. `normalizeCRS()` from `@math.gl/geospatial/projection-core`
 produces a `NormalizedCRS`: resolved parameters, ellipsoid and datum information,
 angular and linear conversion factors, and axis conventions used by the engine.
 Use it when integrating low-level APIs, such as constructing `ProjectionAnalysis`.
@@ -91,8 +91,8 @@ definitions; a pipeline lets the application state each stage and its order. It 
 typed composition, not a parser for arbitrary PROJ pipeline strings.
 
 ```typescript
-import {ProjectionPipeline} from '@math.gl/geospatial/projection/pipeline';
-import {universalTransverseMercator} from '@math.gl/geospatial/projection/projections/utm';
+import {ProjectionPipeline} from '@math.gl/geospatial/projection-pipeline';
+import {universalTransverseMercator} from '@math.gl/geospatial/projection-projections-utm';
 
 const pipeline = new ProjectionPipeline({
   input: {space: 'geographic', units: ['deg', 'deg', 'm']},
@@ -134,7 +134,7 @@ be a prepared transform, pipeline, configuration or factory; selection never inv
 This example wraps the pipeline above and explicitly permits its unknown accuracy:
 
 ```typescript
-import {OperationCatalog} from '@math.gl/geospatial/projection/operations';
+import {OperationCatalog} from '@math.gl/geospatial/projection-operations';
 
 const catalog = new OperationCatalog([{
   id: 'example-utm31',
@@ -177,7 +177,7 @@ is chunked. It captures a layout around a `BulkProjection` with synchronous reus
 methods. This continues the prepared transform from the first example:
 
 ```typescript
-import {ProjectionBuffer} from '@math.gl/geospatial/projection/bulk';
+import {ProjectionBuffer} from '@math.gl/geospatial/projection-bulk';
 
 const pointOutput = new Float64Array(3);
 transform.projectToSync([12, 55, 100], pointOutput);
@@ -212,14 +212,14 @@ to prepare data once, then register it under application-owned names.
 | ENU velocity | `createVelocityGrid` (`/grids/velocity`), `loadVelocityGeoTIFFGrid` (`/grids/velocity-geotiff`) → `VelocityGrid` | A deformation model, then a pipeline `deformation` step. |
 
 GeoTIFF adapters consume separately decoded data and import no TIFF decoder. NTv2/GTX
-readers consume file bytes. `createGeoidGrid` adapts a prepared `@math.gl/earth/geoid` model;
+readers consume file bytes. `createGeoidGrid` adapts a prepared `@math.gl/earth` model;
 `createVerticalGrid` snapshots regular metre offsets. Match the horizontal datum,
 vertical reference, tide convention and coverage to the operation. The application
 owns fetching, decoding, data terms and caching.
 
 ```typescript
-import {ProjectionTransform} from '@math.gl/geospatial/projection/core';
-import {createVerticalGrid} from '@math.gl/geospatial/projection/grids/vertical';
+import {ProjectionTransform} from '@math.gl/geospatial/projection-core';
+import {createVerticalGrid} from '@math.gl/geospatial/projection-grids-vertical';
 
 // Synthetic constant undulation, not a surveyed geoid model.
 const local = createVerticalGrid({
@@ -256,8 +256,8 @@ in degrees and explicit `m/year` or `mm/year` values; its sampler returns metres
 the original source/target epoch pair. The following continues the pipeline imports above:
 
 ```typescript
-import {createVelocityGrid} from '@math.gl/geospatial/projection/grids/velocity';
-import {createDeformationModel} from '@math.gl/geospatial/projection/deformation';
+import {createVelocityGrid} from '@math.gl/geospatial/projection-grids-velocity';
+import {createDeformationModel} from '@math.gl/geospatial/projection-deformation';
 
 const velocity = createVelocityGrid({
   origin: [-1, -1], step: [2, 2], size: [2, 2], units: 'mm/year',
@@ -283,7 +283,7 @@ Use [`createTemporalDeformationModel`](../temporal-models.md) from `/temporal` w
 velocity is insufficient. It returns the same `DeformationModel` contract for the same step:
 
 ```typescript
-import {createTemporalDeformationModel} from '@math.gl/geospatial/projection/temporal';
+import {createTemporalDeformationModel} from '@math.gl/geospatial/projection-temporal';
 
 const temporalModel = createTemporalDeformationModel({
   epochRange: [2000, 2030],
@@ -315,7 +315,7 @@ A descriptor combines one resolved target CRS with prepared converters and rende
 conventions. It saves applications from assembling these pieces independently.
 
 ```typescript
-import {lazyProjectionEngine} from '@math.gl/geospatial/projection/projections/lazy';
+import {lazyProjectionEngine} from '@math.gl/geospatial/projection-projections-lazy';
 
 const target = await lazyProjectionEngine.getCRS('EPSG:3857');
 const converter = target.converter.WGS84;
@@ -343,7 +343,11 @@ for options and loading behavior.
 units and axis order**. For geographic and projected CRSs, it samples the complete
 inverse transform to WGS84, retaining axis/unit adaptations and datum stages. Local
 lengths use WGS84 curvature radii, with ellipsoidal-height changes included in the axis
-lengths. The target projection may use a different ellipsoid or a sphere.
+lengths. An Earth target projection may use a different ellipsoid or a sphere.
+
+A CRS for another body, such as `+proj=eqc +R=1737400` for the Moon, has no datum
+stage to WGS84. Its local lengths use the curvature radii of its own ellipsoid or
+sphere. As in PROJ, a semi-major axis within 0.7% of 6375 km identifies Earth.
 
 For projected CRSs, the factor in the vertical component is instead an isotropic
 **rendering sizing convention**, derived from the square root of the inverse horizontal
@@ -359,9 +363,9 @@ Do not multiply that altitude by the rendering Z factor to interpret its physica
 question about a **single projection**, rather than a complete CRS-pair operation:
 
 ```typescript
-import {normalizeCRS} from '@math.gl/geospatial/projection/core';
-import {mercator} from '@math.gl/geospatial/projection/projections/merc';
-import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection/analysis';
+import {normalizeCRS} from '@math.gl/geospatial/projection-core';
+import {mercator} from '@math.gl/geospatial/projection-projections-merc';
+import {ProjectionAnalysis, createProjectionFactors} from '@math.gl/geospatial/projection-analysis';
 
 const crs = normalizeCRS('+proj=merc +ellps=WGS84');
 const analysis = new ProjectionAnalysis({
@@ -396,7 +400,7 @@ or numerically unresolved; invalid nonpositive computed scales raise an error.
 
 ## Keep coverage, rendering bounds and analysis domains distinct
 
-| Concept | Coordinates | Meaning |
+| Concept | Coordinates | Description |
 | --- | --- | --- |
 | `CRSMetadata.areaOfUse` | Greenwich longitude/latitude degrees | Geographic coverage declared by the CRS definition. |
 | `CRSDescriptor.renderingBounds` | Effective target coordinates | A finite XYZ envelope enclosing the selected rendering reference surface; consumers select axes from the effective axis order. It is neither an altitude range nor a conversion-validity test. |

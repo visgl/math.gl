@@ -107,7 +107,7 @@ median does not imply greater accuracy or a wider valid coordinate domain.
 
 The [projection scorecard](./scorecard.md) records a dated snapshot of accuracy,
 throughput, cold startup, allocation and memory evidence. Its
-[measurement methodology](./scorecard-methodology.md) explains source fingerprints,
+[measurement methodology](./scorecard.md) explains source fingerprints,
 raw samples and the limits of each metric. Check [independent validation](./independent-validation.md)
 when selecting an algorithm for a region or datum transformation.
 
@@ -117,7 +117,7 @@ Build the packages before measuring their published entry points:
 
 ```sh
 yarn build
-node modules/geospatial/projection/scripts/benchmark.mjs --points 50000 --samples 7 --allocations --output /tmp/proj4-benchmark.json
+node modules/geospatial/scripts/projection/benchmark.mjs --points 50000 --samples 7 --allocations --output /tmp/proj4-benchmark.json
 ```
 
 The standalone Node runner and browser qualification runner use the same workload as
@@ -136,19 +136,22 @@ order rotates, and output contributes to a checksum.
 Schema-version-2 JSON reports retain individual aggregate samples, per-buffer medians
 and p10/p90, repetition counts, seed, workload/source fingerprints and runtime metadata.
 Warmed constructor measurements are separate. Browser qualification additionally measures
-module loading and first use in fresh contexts. CI uploads browser artifacts and gates
-correctness and bundle sizes; it does not gate noisy speed ratios. Pull requests use 20,000 points, three samples and
-`--min-sample-ms 0`: all 792 workloads and independent references still run, but
-adaptive timing repetitions are disabled. These PR browser measurements are marked
-`timingLimited` and serve as correctness checks, not performance evidence. Pushes to
-master retain seven samples and a 12 ms calibration target for full browser reports.
-The separate paired Node performance comparison runs on every PR with 11 samples
-and a 4 ms calibration target; local runs retain the 12 ms default.
+module loading and first use in fresh contexts. Full browser timing and worker-cost
+reports run nightly and on manual workflow runs with seven samples and a 12 ms
+calibration target. PRs changing qualification tooling also exercise the complete matrix
+with 20,000 points, three samples and a 4 ms target. Ordinary PRs retain independent
+Chromium numerical qualification, the full Node/Chromium test suites and coverage;
+Firefox/WebKit qualification and the full timing workload matrix run in the next full
+profile. CI gates correctness and bundle sizes, not noisy speed ratios. See the
+[CI execution guide](https://github.com/visgl/math.gl/blob/master/dev-docs/ci.md) for scheduling and trigger details.
+The separate paired Node performance comparison uses 11 samples and a 4 ms calibration
+target on PRs; allowlisted documentation-only changes skip these comparisons. Local runs
+retain the 12 ms default.
 
 ### Compare a runtime change with its base
 
 ```sh
-node modules/geospatial/projection/scripts/benchmark-compare.mjs --baseline-ref origin/master --points 20000 --samples 11 --output /tmp/proj4-comparison.json
+node modules/geospatial/scripts/projection/benchmark-compare.mjs --baseline-ref origin/master --points 20000 --samples 11 --output /tmp/proj4-comparison.json
 ```
 
 The comparison compiles baseline runtime sources from Git and current sources with the
@@ -156,8 +159,14 @@ same bundler, package manifests and installed dependencies. It uses the current 
 workload for both versions, validates both against proj4js, and rotates baseline/candidate
 flat/scalar execution order. It covers XY and XYZM in both precisions and directions;
 constructor batches alternate separately. `--scenarios` accepts comma-separated scenario
-names to focus a run. On pull requests, CI measures nine representative scenarios against
-the actual base commit and uploads `projection-performance-comparison`. CI keeps all
+names to focus a run. On eligible pull requests, CI measures nine representative scenarios against
+the actual base commit. CI uploads two artifacts from parallel jobs:
+
+- `projection-performance-comparison-projection` contains the projection, grid preparation,
+  spheroid conversion, and local-frame comparison reports.
+- `projection-performance-comparison-pipeline` contains the pipeline comparison report.
+
+Each job measures baseline and candidate together on one runner. CI keeps all
 20,000 coordinates and 11 rotated samples, but uses `--min-sample-ms 4` to limit
 adaptive repetitions. Inspect the retained spread and `timingLimited` flags when
 interpreting these shorter measurements.
@@ -185,8 +194,8 @@ For explicit operation chains, measure the actual units, axes, grids and epoch
 behavior rather than an isolated projection kernel:
 
 ```sh
-node modules/geospatial/projection/scripts/benchmark-pipeline-compare.mjs --baseline-ref origin/master --output /tmp/projection-pipelines.json
-node --expose-gc modules/geospatial/projection/scripts/benchmark-grid-compare.mjs --baseline-ref origin/master --memory --output /tmp/projection-grids.json
+node modules/geospatial/scripts/projection/benchmark-pipeline-compare.mjs --baseline-ref origin/master --output /tmp/projection-pipelines.json
+node --expose-gc modules/geospatial/scripts/projection/benchmark-grid-compare.mjs --baseline-ref origin/master --memory --output /tmp/projection-grids.json
 ```
 
 Prepare grid readers and models outside warm coordinate timing, and measure that
@@ -221,6 +230,6 @@ The shared numerical derivative and its caller remain allocation-guarded. The an
 source-graph budget remains 4,900 minified / 1,800 gzip bytes; the published-package
 analysis gzip limit is 1,700 bytes. These are distinct builds. Optional projection kernels,
 grid readers, WKT syntax and regional datum data must still stay out of the corresponding
-initial graphs. The metadata-only `@math.gl/geospatial/crs/metadata` import prevents shared WKT
+initial graphs. The metadata-only `@math.gl/geospatial/crs` import prevents shared WKT
 syntax from being hoisted by split-bundle construction. No dependency exclusions or
 coverage thresholds are relaxed by this baseline update.

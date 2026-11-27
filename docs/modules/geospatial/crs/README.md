@@ -1,4 +1,4 @@
-# CRS Definitions
+# @math.gl/geospatial/crs
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v4.2-blue.svg?style=flat-square" alt="From v4.2" />
@@ -11,15 +11,10 @@ The [Coordinate Reference Systems developer guide](/docs/modules/geospatial/crs/
 explains CRS families, representations, coordinate epochs, axis order, vertical coordinates,
 transformation boundaries, and cross-library integration in depth.
 
-## Installation
+For definitions of surface models, paths, reference systems, and distortion properties,
+see [Geospatial terminology](../developer-guide/terminology.md).
 
-```bash
-npm install @math.gl/geospatial
-```
-
-## Definition model
-
-`CRSDefinition` accepts either a string serialization or a strict PROJJSON CRS object:
+## Usage
 
 ```ts
 import type {CRSDefinition, PROJJSONCRS} from '@math.gl/geospatial/crs';
@@ -41,6 +36,38 @@ const projjson: PROJJSONCRS = {
   }
 };
 ```
+
+## Features
+
+| Feature | Support | Notes |
+| --- | --- | --- |
+| Typed PROJJSON CRS definitions | ✅ | Strict PROJJSON v0.7 types describe geographic, projected, compound and other supported CRS object shapes. |
+| WKT1/WKT2 syntax round trips | ✅ | Ordered syntax ASTs preserve unknown nodes, delimiters, duplicates and numeric lexemes; optional profile validation is separate. |
+| PROJ strings and pipeline syntax | ✅ | Ordered syntax parsing/encoding retains steps and duplicate parameters; successful parsing does not execute an operation. |
+| Spatial-reference provenance and epochs | ✅ | [SpatialReference](./api-reference/spatial-reference.md) distinguishes explicit/default/unknown/missing CRS state and retains coordinate epochs. |
+| Prepared converter descriptors and target domains | ✅ | [createCRSDescriptor](./api-reference/crs-descriptor.md) assembles external converters and explicit rendering/domain policy. |
+| Asynchronous CRS resolution | ✅ | [Application-owned catalogues/providers](./api-reference/resolver.md) resolve definitions without a mandatory projection backend. |
+| Universal semantic conversion between serializations | ◐ | WKT/PROJ syntax models preserve syntax; they do not promise lossless universal conversion into canonical PROJJSON semantics. |
+| Bundled comprehensive authority database | ❌ | No complete built-in EPSG database or implicit catalogue/grid downloads. Applications supply resolution resources. |
+| Coordinate transformation execution | ❌ | Use a [projection engine](../projection/README.md) or an external converter; metadata/codec acceptance does not establish executable support. |
+
+## Prepared descriptors
+
+Use [`createCRSDescriptor`](./api-reference/crs-descriptor.md) from
+`@math.gl/geospatial/crs` to assemble metadata, prepared external converters and
+rendering policy without importing a projection engine. Descriptor and converter
+types are exported from the same entry point. The builder is also available from
+`@math.gl/geospatial`.
+
+## Installation
+
+```bash
+npm install @math.gl/geospatial
+```
+
+## Definition model
+
+`CRSDefinition` accepts either a string serialization or a strict PROJJSON CRS object:
 
 The string aliases (`CRSIdentifier`, `WKTCRSDefinition`, and `PROJStringDefinition`) document
 intent but are all structurally `string`. Call the appropriate parser when syntax needs to be
@@ -117,17 +144,19 @@ The descriptor can retain alternate source representations and a coordinate epoc
 definitions and descriptor-owned arrays are cloned and recursively frozen. See the
 [Spatial Reference API](/docs/modules/geospatial/crs/api-reference/spatial-reference).
 
-## Optional syntax entry points
+## Imports and bundle boundaries
 
-The root entry point remains available. Applications that split optional parsing code
-can instead import `parseWKTCRS` and related WKT APIs from `@math.gl/geospatial/crs/wkt`, PROJ
-string APIs from `@math.gl/geospatial/crs/proj-string`, and metadata helpers from
-`@math.gl/geospatial/crs/spatial-reference`. Each subpath includes ESM, CommonJS and declarations.
-Separate imports prevent a shared root barrel from pulling an otherwise deferred
-WKT parser into an eager bundle. Types can still be imported from the root with
-`import type`. Inspect the application's emitted chunks when combining import styles.
+Import syntax codecs, metadata helpers and the optional resolver as named exports
+from `@math.gl/geospatial/crs` or `@math.gl/geospatial`. Both entry points provide ESM, CommonJS and
+TypeScript declarations. Use `import type` for TypeScript-only APIs.
+Tree-shaking bundlers can remove unused codecs and resolution code. CommonJS and
+namespace imports can retain more code; inspect emitted bundles when size matters.
 
 ## API
+
+Optional [CRS resolution](./api-reference/resolver.md) accepts application-owned
+catalogues and asynchronous providers through `@math.gl/geospatial/crs`.
+Resolution supplies definitions; execution support remains engine-specific.
 
 - `CRSDefinition<T extends PROJJSONCRS = PROJJSONCRS>` — a string definition or PROJJSON object.
 - `PROJJSONCRS` — generated from the official v0.7 schema's `#/definitions/crs`.
@@ -145,8 +174,12 @@ WKT parser into an eager bundle. Types can still be imported from the root with
   PROJJSON definition.
 - `createSpatialReference` — constructs and freezes a descriptor.
 - `inferCRSRepresentation` — conservatively classifies a definition's runtime syntax.
+- `normalizeCRSIdentifier` — changes the authority, OGC URN and OGC URI spellings of one
+  registry entry to `AUTHORITY:CODE`. Use the result to compare identifiers.
 
 The official MIT-licensed schema is vendored unchanged and can be imported or resolved through
-`@math.gl/geospatial/crs/projjson.schema.json`. It is the PROJJSON runtime validation source of truth. The
+`@math.gl/geospatial/crs-projjson.schema.json`. It is the PROJJSON runtime validation source of truth. The
 package does not add a second Zod schema. It also does not perform coordinate transformations,
 authority-registry lookup, semantic CRS comparison, or WKT/PROJ-to-PROJJSON conversion.
+
+See [raster mesh preparation](./developer-guide/raster-mesh-preparation.md) for composing domain clipping, refinement and UV provenance.

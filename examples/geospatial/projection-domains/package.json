@@ -1,0 +1,43 @@
+{
+  "name": "math.gl-projection-domains",
+  "version": "5.1.0-alpha.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --config ../../vite.config.local.mjs",
+    "build": "tsc --noEmit && vite build --config ../../vite.config.local.mjs",
+    "benchmark": "node src/lab/benchmark.mjs",
+    "serve": "vite preview",
+    "start-local": "vite --config ../../vite.config.local.mjs"
+  },
+  "dependencies": {
+    "@deck.gl-community/panels": "10.0.0-alpha.1",
+    "@deck.gl/core": "10.0.0-alpha.1",
+    "@deck.gl/layers": "10.0.0-alpha.1",
+    "@deck.gl/mesh-layers": "10.0.0-alpha.1",
+    "@luma.gl/core": "10.0.0-alpha.14",
+    "@luma.gl/engine": "10.0.0-alpha.14",
+    "@luma.gl/shaders": "10.0.0-alpha.14",
+    "@math.gl/core": "workspace:*",
+    "@math.gl/geometry": "workspace:*",
+    "@math.gl/geospatial": "workspace:*",
+    "@math.gl/tasks": "workspace:*",
+    "apache-arrow": ">=17.0.0",
+    "comlink": "^4.4.2",
+    "d3-geo": "^3.1.1",
+    "d3-geo-polygon": "2.0.1",
+    "ffi-wasm": "0.0.3",
+    "proj-wasm": "0.1.0",
+    "proj4": "2.22.0",
+    "resource-tracker": "^0.0.1",
+    "squint-cljs": "^0.14.210",
+    "worker-router": "npm:@wcohen/worker-router@^0.0.2"
+  },
+  "devDependencies": {
+    "@types/d3-geo": "^3.1.0",
+    "@types/node": "^22.20.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.6"
+  }
+}

@@ -13,12 +13,12 @@ sidebar_label: Sky
 
 `getSkySnapshot` puts the Sun, Moon, seven planets, Galilean moons and a J2000
 star-field orientation into one consistent **geometric topocentric ENU frame**.
-Install the optional MIT-licensed `astronomy-engine` peer. The main entry point
-retains the lightweight SunCalc position APIs without importing that peer.
+The MIT-licensed `astronomy-engine` is a declared runtime dependency. Bundlers
+can remove it when selecting unrelated named exports.
 
 ```ts
 import {createSkyObserver} from '@math.gl/earth/sun';
-import {getSkySnapshot, createSkyContext} from '@math.gl/earth/sun/astronomy';
+import {getSkySnapshot, createSkyContext} from '@math.gl/earth/sun';
 
 const observer = createSkyObserver({latitude: 37.8, longitude: -122.4, elevation: 0});
 const sky = getSkySnapshot(Date.now(), observer, {
@@ -37,13 +37,15 @@ or JavaScript Dates; the planetary adapter supports 1900–2100.
 
 ## Moon brightness through the day
 
-`getMoonAppearance(moonAltitude, sunAltitude, options)` is available from the main
+#### `getMoonAppearance(moonAltitude, sunAltitude, options)`
+
+Is available from the main
 entry point. Required options are `phaseAngle` (0 full, PI new) and
 `sunSeparation` (Moon/Sun angle); optional `distance` defaults to 384400 km.
 Atmosphere options below, `observerFactor` (default 2), and `horizonAltitude`
 (default 0) configure conditions.
 
-| Result | Meaning |
+| Result | Description |
 | --- | --- |
 | `illuminance` | Direct lunar illuminance in lux, on a surface facing the Moon. |
 | `horizontalIlluminance` | Direct lux on a horizontal surface. |
@@ -68,17 +70,28 @@ brightening, eye adaptation history and lunar eclipses are not modeled.
 `cloudOpticalDepth` (default 10), `darkSkyLuminance` (cd/m², default 0.0002),
 and `lightPollutionLuminance` (cd/m², default 0).
 
-`getSkyLuminance(sunAltitude, viewAltitude, sunSeparation, atmosphere)` returns
+`getSkyLuminance(sunAltitude, viewAltitude, sunSeparation, atmosphere)`
+
+Returns
 cd/m². Its zenith V-band twilight fit follows Patat et al. for Sun altitudes −5°
 to −15°; pressure 743 hPa reproduces the published Paranal fit. It connects
 continuously to the configured night background by −18°. Daylight, directional
 glare, cloud reflection and horizon extrapolations are **original rendering
 approximations**, not calibrated extensions of the paper. Covered sky becomes more
-isotropic. `getSkyTransmission` gives V-band direct-beam transmission and
-`getSkyAirMass` uses Kasten–Young. Cloud cover represents averaged conditions,
+isotropic.
+
+`getSkyTransmission`
+
+Gives V-band direct-beam transmission.
+
+`getSkyAirMass`
+
+Uses the Kasten–Young air-mass model. Cloud cover represents averaged conditions,
 not the position of individual clouds.
 
-`getSkyLighting(sunAltitude, moonAltitude, options)` shares the atmosphere and
+#### `getSkyLighting(sunAltitude, moonAltitude, options)`
+
+Shares the atmosphere and
 requires `moonPhaseAngle` and `moonSunSeparation`, with optional `moonDistance`.
 It returns `sun.illuminance`, `moon.illuminance`, horizontal direct illuminances,
 and `diffuseSkyIlluminance` (including `diffuseMoonIlluminance`), all in lux. Diffuse solar/twilight/night illumination
@@ -92,13 +105,16 @@ turbidity mapping `1 + 20*AOD` (capped at 10) is approximate. These components
 are not a single energy-conserving radiative-transfer solver; ground reflection,
 cloud geometry and multiple scattering are not resolved.
 
-`getScatteredMoonLuminance(phaseAngle, moonAltitude, viewAltitude, separation,
-options)` returns scattered lunar cd/m² using Krisciunas–Schaefer. `distance` and
+`getScatteredMoonLuminance(phaseAngle, moonAltitude, viewAltitude, separation, options)`
+
+Returns scattered lunar cd/m² using Krisciunas–Schaefer. `distance` and
 an explicit V-band `extinction` in magnitudes/airmass may override defaults.
 The snapshot adds this directional lunar background to planet contrast estimates.
 Its cloud factor is an approximation; the underlying model is empirical clear sky.
 
-`getPlanetVisibility` accepts `model: 'contrast'` to use the Crumey point-source
+#### getPlanetVisibility
+
+Accepts `model: 'contrast'` to use the Crumey point-source
 threshold with directional luminance and shared extinction; daylight detection is
 then possible. `additionalSkyLuminance` adds a directional background in cd/m².
 The default `'legacy'` preserves previous twilight behavior. Snapshots select
@@ -187,14 +203,16 @@ UT1−UTC defaults to 0; absent TT−UTC uses Astronomy Engine's delta-T model.
 Explicit offsets survive light-travel iterations. No process-wide delta-T function
 is changed. No JPL kernel/provider is included.
 
-`createSkyContext(observer, options)` exposes `getSnapshot`, `getSnapshots`,
+#### `createSkyContext(observer, options)`
+
+Exposes `getSnapshot`, `getSnapshots`,
 `clearCache` and `getStatistics`. The observer/configuration are copied and an LRU
 cache holds at most `cacheSize` snapshots (default 32, 0 disables caching).
 Results are independent copies, so mutations cannot poison later calls.
-Run `node modules/earth/sun/scripts/benchmark-sky.mjs` after building to measure cold
+Run `node modules/earth/scripts/sun/benchmark-sky.mjs` after building to measure cold
 and cached throughput on your own hardware.
 Generate the local-sky/globe comparison demo with
-`node modules/earth/sun/scripts/create-sky-demo.mjs /absolute/path/sky.html`.
+`node modules/earth/scripts/sun/create-sky-demo.mjs /absolute/path/sky.html`.
 The standalone page uses the MIT deck.gl 9.1.9 CDN bundle; all ephemerides are
 precomputed locally and require no service at runtime.
 
@@ -217,31 +235,57 @@ const moonWindows = searchSkyVisibility(now, now + 86400000,
 
 ## Observer and direction helpers
 
-All helpers in this section are imported from `@math.gl/earth/sun` and are available
-from v5.0. Geographic coordinates are degrees; sky angles are radians.
+Import these helpers from `@math.gl/earth/sun`. Geographic coordinates are in
+degrees and sky angles are in radians.
 
-| API | Inputs and result |
-| --- | --- |
-| `createSkyObserver({latitude, longitude, elevation?})` | Frozen `{latitude, longitude, elevation}`. Latitude must be −90 to 90; finite longitude wraps into [−180, 180). Elevation defaults to 0 meters and must be −1000 to 100000. |
-| `getSkyDirection(altitude, azimuth)` | Outward unit ENU vector. Altitude must be −PI/2 to PI/2; finite azimuth is measured from south towards west. |
-| `reverseSkyDirection(direction)` | Negates a finite nonzero three-vector, preserving its magnitude. Converts outward body vectors to incoming light vectors and vice versa. |
-| `getSkyHorizonAltitude(azimuth, profile?)` | Interpolated terrain altitude in radians. The profile is an array of `{azimuth, altitude}` samples, sorted internally and interpolated periodically across 2PI. Empty means zero; one sample is constant. Duplicate azimuths modulo 2PI throw. |
+#### `createSkyObserver({latitude, longitude, elevation?})`
+
+Frozen `{latitude, longitude, elevation}`. Latitude must be −90 to 90; finite longitude wraps into [−180, 180). Elevation defaults to 0 meters and must be −1000 to 100000.
+
+#### `getSkyDirection(altitude, azimuth)`
+
+Outward unit ENU vector. Altitude must be −PI/2 to PI/2; finite azimuth is measured from south towards west.
+
+#### `reverseSkyDirection(direction)`
+
+Negates a finite nonzero three-vector, preserving its magnitude. Converts outward body vectors to incoming light vectors and vice versa.
+
+#### `getSkyHorizonAltitude(azimuth, profile?)`
+
+Interpolated terrain altitude in radians. The profile is an array of `{azimuth, altitude}` samples, sorted internally and interpolated periodically across 2PI. Empty means zero; one sample is constant. Duplicate azimuths modulo 2PI throw.
+
 
 Invalid helper inputs throw `RangeError`. A terrain profile does not change the
 orbital position; use it as a visibility threshold.
 
 ## Photometry helper reference
 
-These functions are exported by `@math.gl/earth/sun` from v5.0. Angles are radians.
+Import these functions from `@math.gl/earth/sun`. Angles are radians.
 
-| API | Inputs and result |
-| --- | --- |
-| `createSkyAtmosphere(options?)` | Frozen validated atmosphere with the defaults below. |
-| `getSkyAirMass(altitude)` | Relative optical path length, dimensionless. Altitude must be −PI/2 to PI/2; below-horizon values use the finite horizon value. This is not a visibility test. |
-| `getSkyTransmission(altitude, options?)` | Dimensionless V-band direct transmission using molecular/aerosol extinction and averaged cloud coverage. Below-horizon rays are not automatically zeroed. |
-| `getSkyLuminance(sunAltitude, viewAltitude, sunSeparation, options?)` | Directional background luminance in cd/m². Altitudes must be −PI/2 to PI/2, separation 0 to PI. |
-| `getSkyContrastThreshold(backgroundLuminance, solidAngle, observerFactor?)` | Dimensionless excess-contrast threshold for an extended source. Luminance is nonnegative cd/m², solid angle is positive steradians up to 4PI. Observer factor defaults to 2 and must be 1 to 100. |
-| `getScatteredMoonLuminance(phaseAngle, moonAltitude, viewAltitude, separation, options?)` | Scattered lunar cd/m². Phase is 0 for full Moon, PI for new. Separation is Moon-to-view angle, 0 to PI. Options combine the atmosphere with distance in km (default 384400) and optional V-band extinction in magnitudes/airmass (0 to 20). Returns zero for a fully hidden Moon, new Moon or view below the horizon. |
+#### `createSkyAtmosphere(options?)`
+
+Frozen validated atmosphere with the defaults below.
+
+#### `getSkyAirMass(altitude)`
+
+Relative optical path length, dimensionless. Altitude must be −PI/2 to PI/2; below-horizon values use the finite horizon value. This is not a visibility test.
+
+#### `getSkyTransmission(altitude, options?)`
+
+Dimensionless V-band direct transmission using molecular/aerosol extinction and averaged cloud coverage. Below-horizon rays are not automatically zeroed.
+
+#### `getSkyLuminance(sunAltitude, viewAltitude, sunSeparation, options?)`
+
+Directional background luminance in cd/m². Altitudes must be −PI/2 to PI/2, separation 0 to PI.
+
+#### `getSkyContrastThreshold(backgroundLuminance, solidAngle, observerFactor?)`
+
+Dimensionless excess-contrast threshold for an extended source. Luminance is nonnegative cd/m², solid angle is positive steradians up to 4PI. Observer factor defaults to 2 and must be 1 to 100.
+
+#### `getScatteredMoonLuminance(phaseAngle, moonAltitude, viewAltitude, separation, options?)`
+
+Scattered lunar cd/m². Phase is 0 for full Moon, PI for new. Separation is Moon-to-view angle, 0 to PI. Options combine the atmosphere with distance in km (default 384400) and optional V-band extinction in magnitudes/airmass (0 to 20). Returns zero for a fully hidden Moon, new Moon or view below the horizon.
+
 
 | Atmosphere option | Default | Accepted range and units |
 | --- | --- | --- |
@@ -258,24 +302,35 @@ undetectable against the daytime background.
 
 ## Globe helper reference
 
-Import these adapters from `@math.gl/earth/sun` (from v5.0). They use deck.gl's spherical
+Import these adapters from `@math.gl/earth/sun`. They use deck.gl's spherical
 Earth, not the WGS84 ellipsoid. `SKY_GLOBE_EARTH_RADIUS` is 6,370,972 meters.
 
-| API | Inputs and result |
-| --- | --- |
-| `getSkyGlobeRotation(observer)` | Column-major 3×3 rotation from observer-local ENU into globe axes: +X at 90°E, −Y at Greenwich and +Z at the north pole. |
-| `skyDirectionToGlobe(direction, observer)` | Rotated finite nonzero ENU three-vector. Magnitude and incoming/outgoing sense are preserved. |
-| `getSkyGlobePosition(direction, observer, distance)` | LNGLAT `[longitude, latitude, altitude]` in degrees/degrees/meters. The ray is normalized and placed a positive finite rendering distance in meters from the observer. This distance is independent of astronomical distance. |
-| `skyRotationToGlobe(rotation, observer)` | Converts each column of a finite column-major 3×3 ENU orientation into globe axes. |
+#### `getSkyGlobeRotation(observer)`
+
+Column-major 3×3 rotation from observer-local ENU into globe axes: +X at 90°E, −Y at Greenwich and +Z at the north pole.
+
+#### `skyDirectionToGlobe(direction, observer)`
+
+Rotated finite nonzero ENU three-vector. Magnitude and incoming/outgoing sense are preserved.
+
+#### `getSkyGlobePosition(direction, observer, distance)`
+
+LNGLAT `[longitude, latitude, altitude]` in degrees/degrees/meters. The ray is normalized and placed a positive finite rendering distance in meters from the observer. This distance is independent of astronomical distance.
+
+#### `skyRotationToGlobe(rotation, observer)`
+
+Converts each column of a finite column-major 3×3 ENU orientation into globe axes.
+
 
 Use outward rays for body positions and incoming rays for lighting. These helpers
 supply coordinates; layer depth, clipping and camera placement are renderer choices.
 
 ## Visibility search reference
 
-`searchSkyVisibility(start, end, visible, options?)` is exported from
-`@math.gl/earth/sun` from v5.0. Start/end are valid Dates or Unix milliseconds, with
-end strictly after start. The callback receives Unix milliseconds and must return
+#### `searchSkyVisibility(start, end, visible, options?)`
+
+Import this function from `@math.gl/earth/sun`. Supply valid Dates or Unix
+milliseconds, with `end` strictly after `start`. The callback receives Unix milliseconds and must return
 a boolean; a different return type throws `TypeError`.
 
 `sampleSeconds` defaults to 30 and must be 0.1–3600. `transitionSeconds`
@@ -295,17 +350,16 @@ All new adapters and equations are independently written TypeScript under MIT;
 SPDX comments identify source papers and API provenance. No C code, external
 source code, paper figures or paper prose are incorporated.
 
-- [Patat, Ugolnikov & Postylyakov (2006)](https://arxiv.org/abs/astro-ph/0604128): V-band twilight fit, Table 1.
-- [Crumey (2014)](https://arxiv.org/abs/1405.4209): photometric conversions and Blackwell point/extended-target contrast thresholds.
-- [Krisciunas & Schaefer (1991)](https://doi.org/10.1086/132921): lunar phase photometry and scattered moonlight.
-- [Kasten & Young (1989)](https://doi.org/10.1364/AO.28.004735): direct optical air mass.
+- [Patat, Ugolnikov & Postylyakov (2006)](https://arxiv.org/abs/astro-ph/0604128 "cite:patat2006"): V-band twilight fit, Table 1.
+- [Crumey (2014)](https://arxiv.org/abs/1405.4209 "cite:crumey2014"): photometric conversions and Blackwell point/extended-target contrast thresholds.
+- [Krisciunas & Schaefer (1991)](http://dx.doi.org/10.1086/132921 "cite:krisciunas1991"): lunar phase photometry and scattered moonlight.
+- [Kasten & Young (1989)](http://dx.doi.org/10.1364/AO.28.004735 "cite:kasten1989"): direct optical air mass.
 - [Astronomy Engine 2.1.19, MIT](https://github.com/cosinekitty/astronomy/tree/v2.1.19/source/js): optional ephemerides, libration and IAU axes.
 - [NASA Galilean facts](https://nssdc.gsfc.nasa.gov/planetary/factsheet/joviansatfact.html) and [ring dimensions](https://nssdc.gsfc.nasa.gov/planetary/factsheet/satringfact.html): numeric physical facts.
 - [deck.gl GlobeViewport, MIT](https://github.com/visgl/deck.gl/blob/master/modules/core/src/viewports/globe-viewport.ts): axis/scale compatibility reference; coordinate equations independently implemented.
 
 Existing Hošek–Wilkie BSD-3-Clause derived tables and SunCalc BSD-2-Clause
 notices remain shipped in `LICENSE-HOSEK-WILKIE` and `LICENSE-SUNCALC`.
-
 
 {/* SPDX-License-Identifier: MIT */}
 

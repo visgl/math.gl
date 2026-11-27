@@ -1,0 +1,25 @@
+{
+  "name": "math.gl-curves-example",
+  "version": "5.1.0-alpha.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --config ../../vite.config.local.mjs",
+    "build": "vite build --config ../../vite.config.local.mjs",
+    "start-local": "vite --config ../../vite.config.local.mjs"
+  },
+  "dependencies": {
+    "@deck.gl-community/panels": "10.0.0-alpha.1",
+    "@luma.gl/core": "10.0.0-alpha.14",
+    "@luma.gl/engine": "10.0.0-alpha.14",
+    "@luma.gl/shaders": "10.0.0-alpha.14",
+    "@math.gl/core": "workspace:*",
+    "@math.gl/geometry": "workspace:*",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "vite": "^8.3.6"
+  }
+}

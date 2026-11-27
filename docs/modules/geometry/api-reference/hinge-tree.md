@@ -1,8 +1,10 @@
-# HingeTree (experimental)
+# HingeTree 🧪
+
+import Example from '@site/src/components/unfolding-polyhedron';
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
-  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Experimental" />
+  <img src="https://img.shields.io/badge/Status-Experimental-orange.svg?style=flat-square" alt="Status: Experimental" />
 </p>
 
 Evaluates rigid panels connected by hinges, independently of mesh generation and rendering.
@@ -10,8 +12,8 @@ A panel can be a polygon, a collection of triangles, or any other rigid object. 
 contain multiple roots. Loops, collisions, physical forces, and bending are not modeled.
 
 ```typescript
-import {HingeTree} from '@math.gl/geometry';
-import {Matrix4} from '@math.gl/core';
+import {HingeTree} from '@math.gl/geometry/primitives';
+import {Matrix4} from '@math.gl/core/matrix';
 
 const tree = new HingeTree([
   {parent: -1},
@@ -27,6 +29,35 @@ tree.evaluate([0, Math.PI / 2], matrices);
 // The second panel's local-to-world matrix occupies matrices[16..31].
 ```
 
+## Unfolding Earth
+
+Explore rigid-panel unfolding with all five Platonic solids, subdivided
+icosahedra, and an Earth texture that stays attached as each panel moves.
+
+<Example inline height={820} />
+
+Use **Cuts** to compare the original geometric tree with **Ocean-preferred** cuts
+on the same mesh and seed, or choose the **Dymaxion · AirOcean** 24-panel preset.
+Drag to orbit, use **Play** to animate, or choose **Flat view** to inspect the net.
+Back faces are darkened; **Show edges** distinguishes hinges from cuts.
+
+Ocean preference minimizes sampled land crossings using Natural Earth land
+polygons. It cannot guarantee unbroken continents or an overlap-free net.
+The fixed AirOcean net has no panel overlaps; it reproduces the cut arrangement,
+not the Gray-Fuller projection. Its subdivision controls are disabled.
+
+Topology selection and rendering remain example-local. NASA Blue Marble imagery
+requires internet access; the bundled land mask and geometry work offline.
+
+[Source and instructions](https://github.com/visgl/math.gl/tree/master/examples/geometry/unfolding-polyhedron)
+· [Imagery terms](https://github.com/visgl/math.gl/blob/master/examples/geometry/unfolding-polyhedron/IMAGERY.md)
+· [Geography and AirOcean licenses](https://github.com/visgl/math.gl/blob/master/examples/geometry/unfolding-polyhedron/data/README.md)
+
+Hover over a panel to see its original longitude and latitude, including after
+unfolding. Picking follows the visible surface on either side of a cut and hides
+the tooltip over gaps. The coordinates use the same spherical mapping as the
+Earth texture; overlapping panels are resolved by depth.
+
 ## Constructor
 
 `new HingeTree(panels: readonly HingePanel[])`
@@ -35,7 +66,7 @@ Panel indices refer to their positions in the supplied array. Parents may appear
 children. Construction snapshots all supplied vectors and matrices, validates the graph, and
 prepares an iterative traversal. Empty forests are valid.
 
-| Field | Meaning |
+| Field | Description |
 | --- | --- |
 | `parent` | Parent panel index, or `-1` for a root |
 | `restTransform` | Column-major 4×4 child-local to parent-local transform at angle zero; identity by default |
@@ -76,10 +107,3 @@ per-panel matrix allocation. Angles and root placement are read before output is
 they may alias the output. Later evaluations do not alter previously returned buffers unless
 the same buffer is supplied again. Invalid inputs throw before output writes; overflow during
 composition throws and may leave partial output. Floating-point error accumulates in deep trees.
-
-See the [unfolding polyhedra example](https://github.com/visgl/math.gl/tree/master/examples/unfolding-polyhedron)
-for all five Platonic solids, subdivided icosahedra, automatic maximum-spanning-tree
-cut selection, and a simple Canvas renderer. The mesh/layout builder is experimental
-example code, separate from this API.
-
-Try the [interactive Unfolding Earth example](../unfolding-earth.md) inline in the docs.

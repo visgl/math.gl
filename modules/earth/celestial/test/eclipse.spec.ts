@@ -395,3 +395,9 @@ describe('celestial eclipses against NASA and DE441', () => {
     }
   });
 });
+
+test('a ring beyond the light source transmits all light', () => {
+  const bands = [{innerRadius: 0.5, outerRadius: 1.5, opticalDepth: 1}];
+  expect(getRingTransmission([1, 0, 2], [1, 0, 1], bands)).toBe(1);
+  expect(getRingTransmission([1, 0, 2], [1, 0, -1], bands)).toBeCloseTo(Math.exp(-1));
+});

@@ -73,8 +73,7 @@ export function getDiscVisibleFraction(occluderRadius: number, separation: numbe
  * the penumbra. An occluder that is farther away than the Sun hides nothing.
  *
  * An oblate occluder (`polarScale` > 1) becomes a sphere when z is multiplied by `polarScale`. The
- * function takes both directions in that scaled space, so only the width of the penumbra has a
- * small error. The frame must have its z axis along the polar axis of the occluder.
+ * function takes both directions in that scaled space, which approximates the projected solar disc. Contact accuracy depends on viewing geometry. The frame must have its z axis along the polar axis of the occluder.
  *
  * Positions are geometric. For a correct shadow, give the Sun and the occluder at the times when
  * the light that reaches the point passed them (light-time corrected, without aberration).
@@ -160,7 +159,7 @@ export function getRingTransmission(
     return 1;
   }
   const t = -point[2] / mu;
-  if (!(t > 0)) {
+  if (!(t > 0 && t < distance)) {
     return 1;
   }
   const radius = Math.hypot(

@@ -3,9 +3,9 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Matrix4} from '@math.gl/core';
-import {HingeTree, type HingePanel} from '@math.gl/geometry';
-import {tree as cube, corners} from '../../../../examples/unfolding-polyhedron/cube';
+import {Matrix4} from '@math.gl/core/matrix';
+import {HingeTree, type HingePanel} from '@math.gl/geometry/primitives';
+import {tree as cube, corners} from '../../../../examples/geometry/unfolding-polyhedron/src/cube';
 
 const joint: HingePanel = {parent: 0, pivot: [1, 0, 0], axis: [0, 0, 2]};
 function matrix(output: Float64Array, index: number): Matrix4 {

@@ -13,14 +13,21 @@ export type {
 export {HingeTree} from './lib/hinge-tree';
 export type {HingePanel} from './lib/hinge-tree';
 
+/** @deprecated Import from `@math.gl/geometry/processing`. */
 export {unpackIndexedGeometry} from './lib/geometry-utils';
 
 export {BoxGeometry, CubeGeometry} from './geometries/box-geometry';
-export type {BoxGeometryProps, CubeGeometryProps} from './geometries/box-geometry';
+export type {
+  BoxGeometryProps,
+  CubeGeometryProps
+} from './geometries/box-geometry';
 export {CapsuleGeometry} from './geometries/capsule-geometry';
 export type {CapsuleGeometryProps} from './geometries/capsule-geometry';
 export {CylinderGeometry, ConeGeometry} from './geometries/cylinder-geometry';
-export type {CylinderGeometryProps, ConeGeometryProps} from './geometries/cylinder-geometry';
+export type {
+  CylinderGeometryProps,
+  ConeGeometryProps
+} from './geometries/cylinder-geometry';
 export {PlaneGeometry} from './geometries/plane-geometry';
 export type {PlaneGeometryProps} from './geometries/plane-geometry';
 export {SphereGeometry} from './geometries/sphere-geometry';
@@ -35,3 +42,236 @@ export type {PrismGeometryProps} from './geometries/prism-geometry';
 
 export {RingGeometry} from './geometries/ring-geometry';
 export type {RingGeometryProps} from './geometries/ring-geometry';
+
+// Public named exports. Implementations remain in independently tree-shakable files.
+export {ParametricGeometry, TorusGeometry, LatheGeometry} from './parametric';
+export type {
+  ParametricGeometryProps,
+  SurfaceSampler,
+  TorusGeometryProps,
+  LatheGeometryProps
+} from './parametric';
+/** @deprecated Import geometry processing helpers from `@math.gl/geometry/processing`. */
+export {
+  isGeometry,
+  makeAttributeIterator,
+  makePrimitiveIterator,
+  computeVertexNormals,
+  encodeRGB565,
+  decodeRGB565,
+  concatTypedArrays,
+  octEncodeInRange,
+  octEncode,
+  octEncodeToVector4,
+  octDecodeInRange,
+  octDecode,
+  octDecodeFromVector4,
+  octPackFloat,
+  octEncodeFloat,
+  octDecodeFloat,
+  octPack,
+  octUnpack,
+  compressTextureCoordinates,
+  decompressTextureCoordinates,
+  zigZagDeltaDecode,
+  emod,
+  transformGeometry,
+  mergeGeometries,
+  weldGeometry,
+  getDegenerateTriangles,
+  interpolatePackedAttributes
+} from './utils';
+export type {
+  TypedArray,
+  TypedArrayConstructor,
+  Primitive,
+  WeldGeometryOptions,
+  WeldGeometryResult,
+  PackedAttributeType,
+  PackedAttributeInterpolation,
+  PackedAttribute,
+  AttributeInterpolationProvenance,
+  PackedAttributeInterpolationOptions
+} from './utils';
+export {
+  Curve,
+  LineCurve,
+  QuadraticBezierCurve,
+  CubicBezierCurve,
+  HermiteCurve,
+  CatmullRomCurve,
+  CurveArcLength
+} from './curves';
+export type {CurvePoint, CatmullRomCurveOptions} from './curves';
+export {
+  Polygon,
+  getPolygonSignedArea,
+  getPolygonWindingDirection,
+  forEachSegmentInPolygon,
+  modifyPolygonWindingDirection,
+  earcut,
+  clipPolygon,
+  clipPolyline,
+  getPoleOfInaccessibility,
+  DEFAULT_POLE_SEARCH_SEGMENT_TESTS,
+  cutPolygonByGrid,
+  cutPolylineByGrid,
+  cutPolylineByMercatorBounds,
+  cutPolygonByMercatorBounds,
+  subdividePolyline
+} from './polygon';
+/** @deprecated Import from `@math.gl/geometry/processing`. */
+export {subdivideTriangleMesh} from './polygon';
+export type {
+  EarcutOptions,
+  PolygonWinding,
+  WindingDirection,
+  PoleSearchBudget,
+  SubdividePolylineOptions,
+  SubdividedPolyline,
+  PolylineEdgeSampler,
+  TriangleMesh,
+  SubdivideTriangleMeshOptions,
+  SubdividedTriangleMesh
+} from './polygon';
+export {
+  AxisAlignedBoundingBox,
+  BoundingSphere,
+  OrientedBoundingBox,
+  CullingVolume,
+  Plane,
+  Ray,
+  BoxShape,
+  CapsuleShape,
+  CylinderShape,
+  PlaneShape,
+  SphereShape,
+  _PerspectiveOffCenterFrustum,
+  _PerspectiveFrustum,
+  makeBoundingSphereFromPoints,
+  makeAxisAlignedBoundingBoxFromPoints,
+  makeOrientedBoundingBoxFromPoints,
+  computeEigenDecomposition,
+  intersectRayBounds,
+  intersectRayTriangle,
+  getClosestPointOnTriangle,
+  intersectOrientedBoxes2D,
+  getOrientedBoundingBoxQuaternion,
+  makeOrientedBoundingBoxFromQuaternion
+} from './culling';
+export type {
+  CullingResult,
+  ImplicitShape,
+  Shape,
+  RayIntersection,
+  BoxShapeProps,
+  CapsuleShapeProps,
+  CylinderShapeProps,
+  PlaneShapeProps,
+  SphereShapeProps,
+  QueryPoint,
+  TriangleRayHit,
+  OrientedBox2D
+} from './culling';
+export {
+  validateQueryPoint,
+  validateQueryDistance,
+  normalizeQueryDirection,
+  getClosestPointsOnSegments,
+  getClosestPointsSegmentTriangle
+} from './culling/queries';
+export type {
+  SegmentClosestPoints,
+  SegmentTriangleClosestPoints
+} from './culling/queries';
+/** @deprecated Import spatial index classes from `@math.gl/geometry/spatial-index`. */
+export {BoxIndex, PointIndex, TriangleBVH} from './spatial-index';
+/** @deprecated Import spatial index types from `@math.gl/geometry/spatial-index`. */
+export type {
+  BoxIndexOptions,
+  NearestIndexOptions,
+  NearestIndexResult,
+  RayIndexOptions,
+  IndexQueryBudget,
+  IndexQueryResult,
+  SearchIndexOptions,
+  TriangleBVHOptions,
+  TriangleQueryResult,
+  TriangleRayResult,
+  TriangleRayOptions,
+  TriangleNearestOptions,
+  TriangleSegmentResult
+} from './spatial-index';
+
+export type {
+  GeometryInput,
+  GeometryAttribute as UtilityGeometryAttribute
+} from './utils/geometry';
+
+export {clipTriangleMesh} from './polygon/clip-triangle-mesh';
+export type {
+  MeshClipRegion,
+  ClipTriangleMeshOptions,
+  ClippedTriangleMesh
+} from './polygon/clip-triangle-mesh';
+
+/** @deprecated Import from `@math.gl/geometry/processing`. */
+export {composeAttributeProvenance} from './utils/compose-attribute-provenance';
+/** @deprecated Import from `@math.gl/geometry/processing`. */
+export {qualifySurfaceTransition} from './utils/qualify-surface-transition';
+/** @deprecated Import from `@math.gl/geometry/processing`. */
+export type {SurfaceTransitionQualification} from './utils/qualify-surface-transition';
+
+export {
+  extractFrustumPlanes,
+  createEmptyBounds,
+  isEmptyBounds,
+  boundsContainsPoint,
+  boundsContainsBounds,
+  boundsIntersect,
+  unionBounds,
+  intersectBounds,
+  expandBoundsByPoint,
+  expandBounds,
+  clampPointToBounds,
+  spheresIntersect,
+  boundsIntersectSphere
+} from './culling';
+export {
+  getRayPoint,
+  getClosestPointOnRay,
+  distanceToRay,
+  getClosestPointsRaySegment,
+  transformRay,
+  getTriangleBarycentric,
+  getTriangleArea,
+  getTriangleNormal,
+  isTriangleFrontFacing,
+  triangleContainsPoint,
+  interpolateTriangleAttribute,
+  intersectPlaneSegment,
+  triangleIntersectsBounds
+} from './culling/geometric-queries';
+export type {RaySegmentClosestPoints} from './culling/geometric-queries';
+export {
+  sampleCurveAdaptive,
+  computeParallelTransportFrames
+} from './curves';
+export type {
+  AdaptiveCurveOptions,
+  AdaptiveCurveSamples,
+  CurveFrames
+} from './curves';
+
+/** @deprecated Import from `@math.gl/geometry/processing`. */
+export {projectBounds} from './utils/project-bounds';
+/** @deprecated Import from `@math.gl/geometry/processing`. */
+export type {
+  ProjectionSourceBounds,
+  ProjectBoundsOptions,
+  ProjectedBoundsResult
+} from './utils/project-bounds';
+/** @deprecated Import from `@math.gl/geometry/processing`. */
+export {projectTextureCoordinates} from './utils/project-texture-coordinates';
+/** @deprecated Import from `@math.gl/geometry/processing`. */
+export type {ProjectTextureCoordinatesOptions} from './utils/project-texture-coordinates';

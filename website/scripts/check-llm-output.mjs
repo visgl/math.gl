@@ -115,9 +115,8 @@ if (llmsTxt.includes('/examples/')) {
 }
 
 const requiredIndexLinks = [
-  'docs/developer-guide/get-started.md',
-  'docs/modules/core/api-reference/vector3.md',
-  'docs/developer-guide/working-with-ai.md'
+  'docs/developer-guide.md',
+  'docs/modules/core/api-reference/vector3.md'
 ].map(relativePath => new URL(relativePath, websiteUrl).href);
 for (const link of requiredIndexLinks) {
   if (!llmsTxt.includes(link)) fail(`llms.txt is missing ${link}`);
@@ -125,8 +124,7 @@ for (const link of requiredIndexLinks) {
 const markdownFiles = findFiles(path.join(buildDirectory, 'docs'), '.md');
 if (markdownFiles.length < 50) fail('Documentation Markdown exports are incomplete');
 for (const relativePath of [
-  'docs/developer-guide/get-started.md',
-  'docs/developer-guide/working-with-ai.md'
+  'docs/developer-guide.md',
 ]) {
   requireFile(relativePath);
 }

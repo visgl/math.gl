@@ -17,10 +17,19 @@ export type BoxIndexOptions = {
   leafSize?: number;
 };
 export type NearestIndexResult = {index: number; distance: number};
+/** A work unit visits one BVH node or one leaf item, including its optional refinement. */
+export type IndexQueryBudget = {maxWork?: number};
+/** Incomplete results are provisional: null/empty does not establish absence. */
+export type IndexQueryResult<T> = {result: T; complete: boolean; work: number};
+export type SearchIndexOptions = IndexQueryBudget & {
+  filter?: (index: number) => boolean;
+  /** Maximum accepted rows retained; one further match establishes truncation. */
+  maxResults?: number;
+};
 export type NearestIndexOptions = {
   maxDistance?: number;
   filter?: (index: number) => boolean;
-  /** Exact geometry distance; must be at least the distance to its indexed box. null excludes it. */
+  /** Exact geometry distance, at least its box distance apart from roundoff. Values are never clamped; null excludes it. */
   distanceToItem?: (index: number) => number | null;
 };
 
@@ -118,7 +127,18 @@ export class BoxIndex {
 
   /** Closed-box overlap, including boundary contact. Sorted by original row index. */
   search(minimum: QueryPoint, maximum: QueryPoint): number[] {
+    return this.searchQuery(minimum, maximum).result;
+  }
+
+  /** Bounded closed-box overlap. Results are sorted even when incomplete. */
+  searchQuery(
+    minimum: QueryPoint,
+    maximum: QueryPoint,
+    options: SearchIndexOptions = {}
+  ): IndexQueryResult<number[]> {
     this.validateBounds(minimum, maximum);
+    const budget = new QueryBudget(options.maxWork);
+    const maxResults = validateLimit(options.maxResults);
     const result: number[] = [];
     const overlaps = (bounds: Float64Array, index: number): boolean => {
       const start = index * this.dimension * 2;
@@ -129,21 +149,54 @@ export class BoxIndex {
       return true;
     };
     const stack = this.size ? [0] : [];
-    while (stack.length) {
+    let complete = true;
+    search: while (stack.length) {
+      if (!budget.consume()) {
+        complete = false;
+        break;
+      }
       const node = stack.pop();
       if (!overlaps(this.nodeBounds, node)) continue;
       if (this.counts[node]) {
         for (let i = this.starts[node]; i < this.starts[node] + this.counts[node]; i++) {
-          if (overlaps(this.bounds, this.order[i])) result.push(this.order[i]);
+          if (!budget.consume()) {
+            complete = false;
+            break search;
+          }
+          const index = this.order[i];
+          if (overlaps(this.bounds, index) && (!options.filter || options.filter(index))) {
+            if (result.length === maxResults) {
+              complete = false;
+              break search;
+            }
+            result.push(index);
+          }
         }
       } else stack.push(this.children[node * 2], this.children[node * 2 + 1]);
     }
-    return result.sort((a, b) => a - b);
+    return {result: result.sort((a, b) => a - b), complete, work: budget.work};
   }
 
   /** Branch-and-bound nearest box, optionally refined against actual geometry. */
   nearest(point: QueryPoint, options: NearestIndexOptions = {}): NearestIndexResult | null {
-    validateQueryPoint(point, this.dimension);
+    return this.nearestQuery(point, {...options, maxWork: Infinity}).result;
+  }
+
+  nearestQuery(
+    point: QueryPoint,
+    options: NearestIndexOptions & IndexQueryBudget = {}
+  ): IndexQueryResult<NearestIndexResult | null> {
+    return this.nearestBoxQuery(point, point, options);
+  }
+
+  /** Nearest indexed box to a filled query box, optionally refined to enclosed geometry. */
+  nearestBoxQuery(
+    minimum: QueryPoint,
+    maximum: QueryPoint,
+    options: NearestIndexOptions & IndexQueryBudget = {}
+  ): IndexQueryResult<NearestIndexResult | null> {
+    this.validateBounds(minimum, maximum);
+    const budget = new QueryBudget(options.maxWork);
     let best = options.maxDistance ?? Infinity;
     validateQueryDistance(best);
     let result: NearestIndexResult | null = null;
@@ -152,25 +205,46 @@ export class BoxIndex {
       let x = 0,
         y = 0,
         z = 0;
-      x = Math.max(bounds[start] - point[0], 0, point[0] - bounds[start + this.dimension]);
-      y = Math.max(bounds[start + 1] - point[1], 0, point[1] - bounds[start + this.dimension + 1]);
+      x = Math.max(bounds[start] - maximum[0], 0, minimum[0] - bounds[start + this.dimension]);
+      y = Math.max(
+        bounds[start + 1] - maximum[1],
+        0,
+        minimum[1] - bounds[start + this.dimension + 1]
+      );
       if (this.dimension === 3)
-        z = Math.max(bounds[start + 2] - point[2], 0, point[2] - bounds[start + 5]);
+        z = Math.max(bounds[start + 2] - maximum[2], 0, minimum[2] - bounds[start + 5]);
       return Math.hypot(x, y, z);
     };
     const stack = this.size ? [0] : [];
-    while (stack.length) {
+    let complete = true;
+    search: while (stack.length) {
+      if (!budget.consume()) {
+        complete = false;
+        break;
+      }
       const node = stack.pop();
-      if (distance(this.nodeBounds, node) > best) continue;
+      const nodeDistance = distance(this.nodeBounds, node);
+      if (nodeDistance > best + getDistanceTolerance(nodeDistance, best)) continue;
       if (this.counts[node]) {
         for (let i = this.starts[node]; i < this.starts[node] + this.counts[node]; i++) {
+          if (!budget.consume()) {
+            complete = false;
+            break search;
+          }
           const index = this.order[i];
           const lower = distance(this.bounds, index);
-          if (lower > best || (options.filter && !options.filter(index))) continue;
+          if (
+            lower > best + getDistanceTolerance(lower, best) ||
+            (options.filter && !options.filter(index))
+          )
+            continue;
           const exact = options.distanceToItem ? options.distanceToItem(index) : lower;
           if (exact === null) continue;
           validateQueryDistance(exact);
-          if (exact < lower)
+          if (
+            exact < lower &&
+            (!Number.isFinite(lower) || lower - exact > getDistanceTolerance(lower, exact))
+          )
             throw new RangeError('Refinement distance cannot be below box distance');
           if (
             Number.isFinite(exact) &&
@@ -188,7 +262,7 @@ export class BoxIndex {
         else stack.push(a, b);
       }
     }
-    return result;
+    return {result, complete, work: budget.work};
   }
 
   /**
@@ -200,7 +274,16 @@ export class BoxIndex {
     direction: QueryPoint,
     options: RayIndexOptions = {}
   ): NearestIndexResult | null {
+    return this.intersectRayQuery(origin, direction, {...options, maxWork: Infinity}).result;
+  }
+
+  intersectRayQuery(
+    origin: QueryPoint,
+    direction: QueryPoint,
+    options: RayIndexOptions & IndexQueryBudget = {}
+  ): IndexQueryResult<NearestIndexResult | null> {
     validateQueryPoint(origin, this.dimension);
+    const budget = new QueryBudget(options.maxWork);
     const unit = normalizeQueryDirection(direction, this.dimension);
     let best = options.maxDistance ?? Infinity;
     validateQueryDistance(best);
@@ -212,25 +295,32 @@ export class BoxIndex {
         unit,
         bounds.subarray(offset, offset + this.dimension),
         bounds.subarray(offset + this.dimension, offset + this.dimension * 2),
-        best + getRayDistanceTolerance(best, best)
+        best + getDistanceTolerance(best, best)
       );
     };
-    const rootDistance = this.size ? getEntry(this.nodeBounds, 0) : null;
-    const stack = rootDistance === null ? [] : [{index: 0, distance: rootDistance}];
-    while (stack.length) {
+    // Defer the root bounds test until its visit, including for a zero work budget.
+    const stack = this.size ? [{index: 0, distance: 0}] : [];
+    let complete = true;
+    search: while (stack.length) {
+      if (!budget.consume()) {
+        complete = false;
+        break;
+      }
       const candidate = stack.pop();
-      if (
-        !candidate ||
-        candidate.distance > best + getRayDistanceTolerance(candidate.distance, best)
-      )
+      if (!candidate || candidate.distance > best + getDistanceTolerance(candidate.distance, best))
         continue;
       const node = candidate.index;
+      if (node === 0 && getEntry(this.nodeBounds, node) === null) continue;
       if (this.counts[node]) {
         for (
           let offset = this.starts[node];
           offset < this.starts[node] + this.counts[node];
           offset++
         ) {
+          if (!budget.consume()) {
+            complete = false;
+            break search;
+          }
           const index = this.order[offset];
           const lower = getEntry(this.bounds, index);
           if (lower === null || (options.filter && !options.filter(index))) continue;
@@ -239,7 +329,7 @@ export class BoxIndex {
           validateQueryDistance(exact);
           if (
             exact < lower &&
-            (!Number.isFinite(lower) || lower - exact > getRayDistanceTolerance(lower, exact))
+            (!Number.isFinite(lower) || lower - exact > getDistanceTolerance(lower, exact))
           )
             throw new RangeError('Refinement distance cannot be below box entry');
           if (
@@ -271,7 +361,7 @@ export class BoxIndex {
         else if (secondDistance !== null) stack.push({index: second, distance: secondDistance});
       }
     }
-    return result;
+    return {result, complete, work: budget.work};
   }
 
   /** Broad-phase ray candidates, sorted by entry distance then original row index. */
@@ -319,10 +409,29 @@ export class BoxIndex {
 }
 
 /** Relative, unit-independent allowance for independently rounded slab and geometry kernels. */
-function getRayDistanceTolerance(first: number, second: number): number {
+function getDistanceTolerance(first: number, second: number): number {
   return (
     8 * Math.max(Number.MIN_VALUE, Number.EPSILON * Math.max(Math.abs(first), Math.abs(second)))
   );
+}
+
+function validateLimit(value = Infinity): number {
+  if (value !== Infinity && (!Number.isSafeInteger(value) || value < 0))
+    throw new RangeError('Query limits must be nonnegative safe integers or Infinity');
+  return value;
+}
+
+class QueryBudget {
+  work = 0;
+  private readonly maximum: number;
+  constructor(maximum?: number) {
+    this.maximum = validateLimit(maximum);
+  }
+  consume(): boolean {
+    if (this.work === this.maximum) return false;
+    this.work++;
+    return true;
+  }
 }
 
 /** Points are zero-volume boxes: nearest gives exact Euclidean point distance. */

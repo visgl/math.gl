@@ -22,19 +22,6 @@ import {
 import {transformMat3 as vec2_transformMat3} from '../gl-matrix/vec2';
 import {transformMat3 as vec3_transformMat3} from '../gl-matrix/vec3';
 
-// eslint-disable-next-line no-shadow
-enum INDICES {
-  COL0ROW0 = 0,
-  COL0ROW1 = 1,
-  COL0ROW2 = 2,
-  COL1ROW0 = 3,
-  COL1ROW1 = 4,
-  COL1ROW2 = 5,
-  COL2ROW0 = 6,
-  COL2ROW1 = 7,
-  COL2ROW2 = 8
-}
-
 const IDENTITY_MATRIX = Object.freeze([1, 0, 0, 0, 1, 0, 0, 0, 1]);
 
 /** Helper type that captures array length for a 3x3 matrix */
@@ -59,10 +46,6 @@ export class Matrix3 extends Matrix {
 
   get RANK(): number {
     return 3;
-  }
-
-  get INDICES(): typeof INDICES {
-    return INDICES;
   }
 
   constructor(array?: Readonly<NumericArray>) {

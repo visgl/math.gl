@@ -6,7 +6,6 @@
 
 `Matrix` is the shared base for [Matrix3](./matrix3.md) and [Matrix4](./matrix4.md). It extends [MathArray](./math-array.md) and stores elements in column-major order.
 
-
 ## Elements and columns
 
 | Method | Behavior |
@@ -20,4 +19,6 @@ Array storage uses `column * rank + row` as the element index. Row/column access
 
 ## Formatting
 
-`toString()` displays values by row when `config.printRowMajor` is true, or in storage order otherwise. Display order does not change matrix storage or multiplication semantics.
+#### `toString()`
+
+Displays values by row when `config.printRowMajor` is true, or in storage order otherwise. Display order does not change matrix storage or multiplication semantics.

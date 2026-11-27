@@ -27,7 +27,7 @@ const {color, intensity} = getMoonLight(position.altitude, {
 });
 ```
 
-## getMoonPosition(timestamp, latitude, longitude)
+#### `getMoonPosition(timestamp, latitude, longitude)`
 
 `timestamp` is a `Date` or milliseconds since Unix epoch. Latitude and longitude are in
 degrees, north and east positive. Latitude must be in `[-90, 90]`; finite longitudes wrap.
@@ -50,13 +50,13 @@ visualization, not eclipse prediction or precision navigation. It omits higher-o
 lunar perturbations, observer height, Earth flattening, atmospheric refraction, and
 nutation. Use near modern dates (approximately 1900–2100); no precision guarantee is made.
 
-## getMoonDirection(timestamp, latitude, longitude)
+#### `getMoonDirection(timestamp, latitude, longitude)`
 
 Returns a unit **incoming light** direction in local east/north/up coordinates, using
 exactly the convention of `getSunDirection`: an overhead Moon gives `[0, 0, -1]`.
 Negate it to get the outward sky direction used to draw the Moon.
 
-## getMoonIllumination(timestamp)
+#### `getMoonIllumination(timestamp)`
 
 Returns geocentric lunar illumination geometry:
 
@@ -67,13 +67,13 @@ Returns geocentric lunar illumination geometry:
 
 `phase` and `phaseAngle` use different conventions. Pass **phaseAngle** to `getMoonLight`.
 
-## getMoonLight(altitude, options)
+#### `getMoonLight(altitude, options)`
 
 `altitude` is geometric elevation in radians, in `[-Math.PI / 2, Math.PI / 2]`.
 
 Options:
 
-| Option | Default | Meaning |
+| Option | Default | Description |
 | --- | --- | --- |
 | `phaseAngle` | `0` | Sun–Moon–Earth angle in `[0, Math.PI]`; default is full moon. |
 | `distance` | `384400` | Observer-to-Moon distance in km, at least 1737.4 km (lunar radius). |
@@ -109,7 +109,7 @@ All APIs reject invalid/nonfinite numeric inputs with `RangeError`.
 ## Daytime visibility and sky brightness
 
 The main entry point also exports `getMoonAppearance(moonAltitude, sunAltitude,
-options)` from v5.0. Unlike direct moonlight, apparent disk visibility depends on
+options)`. Unlike direct moonlight, apparent disk visibility depends on
 solar glare and the sky background. It returns physical lighting quantities plus
 `visible` and a smooth `fade` for rendering. See the complete
 [daytime Moon appearance reference](./sky.md#moon-brightness-through-the-day)
@@ -126,8 +126,8 @@ with an appearance predicate or a cached sky snapshot.
   ephemeris and illumination calculations. `moon.ts` and numeric reference fixtures carry
   **BSD-2-Clause** SPDX identifiers, Vladimir Agafonkin's original copyright, and source
   provenance. The full unchanged upstream notice is shipped in `LICENSE-SUNCALC`.
-- [Krisciunas and Schaefer (1991), A Model of the Brightness of Moonlight](https://doi.org/10.1086/132921).
-- [Kasten and Young (1989), Revised optical air mass tables and approximation formula](https://doi.org/10.1364/AO.28.004735).
+- [Krisciunas and Schaefer (1991), A Model of the Brightness of Moonlight](http://dx.doi.org/10.1086/132921 "cite:krisciunas1991").
+- [Kasten and Young (1989), Revised optical air mass tables and approximation formula](http://dx.doi.org/10.1364/AO.28.004735 "cite:kasten1989").
 - [USNO approximate sidereal time](https://aa.usno.navy.mil/faq/GAST).
 
 The moonlight and star-field code independently implements published mathematical equations;

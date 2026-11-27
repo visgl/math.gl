@@ -5,10 +5,10 @@
 // SPDX-FileComment: Derived from Cesium. See the repository LICENSE for upstream attribution and Apache-2.0 terms.
 
 // This file is derived from the Cesium math library under Apache 2 license
-// See LICENSE.md and https://github.com/AnalyticalGraphicsInc/cesium/blob/master/LICENSE.md
+// See ../../../../LICENSE for the retained Cesium notice and Apache-2.0 terms.
 
-import {NumericArray, Vector3} from '@math.gl/core';
-import * as mat4 from '@math.gl/core/mat4';
+import {NumericArray, Vector3} from '@math.gl/core/matrix';
+import {mat4GetScaling} from '@math.gl/core/matrix';
 
 import type {CullingResult} from '../../constants';
 import {BoundingVolume} from './bounding-volume';
@@ -115,7 +115,7 @@ export class BoundingSphere implements BoundingVolume {
    */
   transform(transform: readonly number[]): this {
     this.center.transform(transform);
-    const scale = mat4.getScaling(scratchVector, transform);
+    const scale = mat4GetScaling(scratchVector, transform);
     this.radius = Math.max(scale[0], Math.max(scale[1], scale[2])) * this.radius;
     return this;
   }

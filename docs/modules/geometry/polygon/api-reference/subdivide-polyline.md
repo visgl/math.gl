@@ -4,7 +4,7 @@
   <img src="https://img.shields.io/badge/From-v5.0-blue.svg?style=flat-square" alt="From v5.0" />
 </p>
 
-Subdivides straight source-coordinate edges until sampled error after a supplied transform is within a tolerance. Use it to approximate curved projected paths and polygon boundaries before rendering or triangulation.
+Subdivides source-coordinate edges until sampled error after a supplied transform is within a tolerance. Use it to approximate curved projected paths and polygon boundaries before rendering or triangulation.
 
 ```ts
 import {subdividePolyline} from '@math.gl/geometry/polygon';
@@ -42,10 +42,11 @@ const polarEdge = subdividePolyline([-45, 80, 45, 80], {
 | Option | Default | Description |
 | --- | --- | --- |
 | `transform` | Required | `(position: readonly number[]) => ArrayLike<number> \| null`. Maps source coordinates to target coordinates. Must return exactly `targetSize` finite components. Each invocation receives a fresh source array. Must be deterministic. |
+| `createEdgeSampler` | Omitted | `(start, end, segmentIndex) => PolylineEdgeSampler`. Constructs a constant-speed source curve once per original edge. Linear source interpolation remains the default. |
 | `tolerance` | Required | Positive, finite maximum sampled Euclidean deviation in target units. All target components participate. |
 | `size` | `2` | Source vertex dimension: `2` or `3`. |
 | `targetSize` | `size` | Target vertex dimension: `2` or `3`. |
-| `maxSegmentLength` | `Infinity` | Positive maximum Euclidean leaf-edge length in source units. Useful to force sampling even where error probes could miss curvature. All source components participate; callers must choose compatible axis units. |
+| `maxSegmentLength` | `Infinity` | Positive maximum leaf-edge length in source units, or custom sampler length units. Useful to force sampling even where error probes could miss curvature. The default metric includes all source components; custom samplers declare their own length units. |
 | `maxDepth` | `16` | Maximum bisection depth per input edge, from `0` through `30`. |
 | `maxVertices` | `65536` | Maximum vertex count across the complete output, including original vertices. Positive integer no greater than `2^32 - 1`. |
 
@@ -66,7 +67,29 @@ Each edge checks the source positions at fractions `1/4`, `1/2`, and `3/4`. For 
 
 This criterion also subdivides a straight target edge whose transform has nonlinear speed. It preserves the source parameterization used for interpolating other attributes. It is a sampled criterion, not a mathematical bound for arbitrary transforms. Highly oscillatory transforms can pass the probes while deviating elsewhere; use an appropriate source-length limit when the transform requires it.
 
-All source components interpolate linearly, including Z. Longitude/latitude inputs therefore describe straight edges in longitude/latitude coordinates. They do not acquire geodesic semantics. Convert or densify geodesic paths using the intended edge model before calling.
+Without `createEdgeSampler`, all source components interpolate linearly, including Z.
+Longitude/latitude inputs then describe straight edges in longitude/latitude coordinates.
+For ellipsoidal surface paths, use
+[subdivideGeodesicPolyline](../../../geospatial/api-reference/subdivide-geodesic-polyline.md).
+
+## Custom source edges
+
+The optional factory receives fresh copies of an original edge's start/end and its input edge
+index. It returns `{length, sample(fraction)}` (`PolylineEdgeSampler`, exported from the same
+entry point). `length` must be finite and nonnegative. The callback must return exactly `size`
+finite source coordinates, with fraction 0/1 matching the supplied endpoints exactly. Returned
+sample buffers are copied, so a sampler may reuse its own storage. Exceptions propagate unchanged.
+
+Each probe samples the **original** edge at its original parameter fraction, rather than
+constructing a new curve between recursive endpoints. Fractions are preserved for attribute
+interpolation. A custom sampler must use a constant-speed length parameter: a subinterval
+[a, b] has declared length `length * (b - a)`. `maxSegmentLength` uses that length, not a chord
+between source coordinates. The utility validates endpoint agreement and finite length/samples,
+but cannot prove the callback's metric or constant-speed claim.
+
+Transform callbacks still receive fresh arrays. Sampler endpoint conventions must already agree
+with the input, including longitude sheets; the geodesic adapter performs longitude unrolling
+before constructing its samplers. A singleton/empty input never invokes the factory.
 
 ## Domains, seams and rings
 

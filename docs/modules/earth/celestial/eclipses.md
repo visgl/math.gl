@@ -46,8 +46,7 @@ directions. The result is `getDiscVisibleFraction(r / s, θ / s)`.
 - A point inside the occluder gets 0.
 - `polarScale` is the equatorial radius divided by the polar radius of an oblate occluder. The
   polar axis is the z axis of the frame. The function multiplies z by `polarScale`, so that the
-  occluder becomes a sphere, and takes both directions in that space. The width of the penumbra
-  then has a small error.
+  occluder becomes a sphere, and takes both directions in that space. This approximates the projected solar disc. Accuracy near contact depends on flattening and viewing geometry.
 
 Use the positions of the Sun and the occluder at the times when the light that reaches the
 point passed them: light-time corrected, without aberration. For the Moon's shadow on the Earth,

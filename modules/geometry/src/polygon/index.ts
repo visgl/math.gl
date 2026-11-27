@@ -13,15 +13,26 @@ export {
 export type {PolygonWinding, WindingDirection} from './polygon-utils';
 
 export {earcut} from './earcut';
+export type {EarcutOptions} from './earcut';
 
 export {clipPolygon, clipPolyline} from './lineclip';
+
+export {
+  getPoleOfInaccessibility,
+  DEFAULT_POLE_SEARCH_SEGMENT_TESTS
+} from './pole-of-inaccessibility';
+export type {PoleSearchBudget} from './pole-of-inaccessibility';
 
 export {cutPolygonByGrid, cutPolylineByGrid} from './cut-by-grid';
 
 export {cutPolylineByMercatorBounds, cutPolygonByMercatorBounds} from './cut-by-mercator-bounds';
 
 export {subdividePolyline} from './subdivide-polyline';
-export type {SubdividePolylineOptions, SubdividedPolyline} from './subdivide-polyline';
+export type {
+  SubdividePolylineOptions,
+  SubdividedPolyline,
+  PolylineEdgeSampler
+} from './subdivide-polyline';
 
 export {subdivideTriangleMesh} from './subdivide-triangle-mesh';
 export type {
@@ -29,3 +40,38 @@ export type {
   SubdivideTriangleMeshOptions,
   SubdividedTriangleMesh
 } from './subdivide-triangle-mesh';
+
+export {clipTriangleMesh} from './clip-triangle-mesh';
+export type {
+  MeshClipRegion,
+  ClipTriangleMeshOptions,
+  ClippedTriangleMesh
+} from './clip-triangle-mesh';
+export {visitPolylineSpan} from './visit-polyline-span';
+
+export {
+  endpointContacts,
+  locatePointInPolygon,
+  pointOnSegment,
+  segmentsMeet
+} from './planar-predicates';
+export {getPolygonValidityReason} from './polygon-validity';
+export {projectPointToPolyline, type PolylineProjection} from './project-point-to-polyline';
+
+export {mergePolylinePaths} from './merge-polyline-paths';
+export {
+  segmentizePolylinePaths,
+  type PolylineSegment,
+  type PolylineSegmentFactory
+} from './segmentize-polyline-paths';
+
+export {
+  intersectPolygons,
+  unionPolygons,
+  subtractPolygons,
+  xorPolygons,
+  type OverlayPosition,
+  type OverlayRing,
+  type OverlayPolygon,
+  type OverlayMultiPolygon
+} from './polygon-overlay';

@@ -90,9 +90,9 @@ and the qualified sphere/oblate surface/exterior inverse. Geospatial retains its
 three-radius and interior geometry paths.
 
 ```ts
-import { Ellipsoid } from "@math.gl/geospatial";
-import { normalizeCRS, ProjectionTransform } from "@math.gl/geospatial/projection/core";
-import { geocentric } from "@math.gl/geospatial/projection/projections/geocent";
+import {Ellipsoid} from '@math.gl/geospatial/ellipsoid';
+import { normalizeCRS, ProjectionTransform } from "@math.gl/geospatial/projection-core";
+import { geocentric } from "@math.gl/geospatial/projection-projections-geocent";
 
 const normalized = normalizeCRS("+proj=longlat +ellps=GRS80");
 const shape = Ellipsoid.fromSpheroid(normalized.ellipsoid);
@@ -167,7 +167,7 @@ conversion uses registered geoid undulations in meters, with source and destinat
 height operations around the horizontal datum operation. Choose a model matching
 your datum and tide convention. See the
 [height conversion guide](../api-reference/datum-grids.md#convert-geoid-heights) for loading
-GTX or GeoTIFF grids and integrating `@math.gl/earth/geoid`.
+GTX or GeoTIFF grids and integrating `@math.gl/earth`.
 
 A separately declared vertical CRS in WKT, PROJJSON or metadata is not automatically
 executed. Explicit horizontal extraction discards that component; it does not
@@ -192,7 +192,7 @@ Supply a scalar epoch or one Float32/Float64 epoch per flat record. The fourth
 coordinate component remains M, a measure; it is never interpreted as time.
 
 ```typescript
-import { ProjectionPipeline } from "@math.gl/geospatial/projection/pipeline";
+import { ProjectionPipeline } from "@math.gl/geospatial/projection-pipeline";
 
 // Illustrative coefficients, not an authoritative datum transformation.
 const movingFrame = new ProjectionPipeline({

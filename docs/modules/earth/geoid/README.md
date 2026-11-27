@@ -1,12 +1,39 @@
-# Overview
+# @math.gl/earth/geoid
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v3.4-blue.svg?style=flat-square" alt="From v3.4" />
 </p>
 
-The `@math.gl/earth/geoid` module evaluates geoid heights from Earth gravity model grids.
+The `@math.gl/earth` module evaluates geoid heights from Earth gravity model grids.
 
 import GeoidGlobe from '@site/src/components/geoid-globe';
+
+## Usage
+
+```js
+import { parsePGM } from "@math.gl/earth/geoid";
+import gridUrl from "@math.gl/earth/geoid-geoid-egm96-hi.pgm?url";
+
+const response = await fetch(gridUrl);
+if (!response.ok) throw new Error(`Grid request failed: ${response.status}`);
+const geoid = parsePGM(new Uint8Array(await response.arrayBuffer()), {
+  cubic: true,
+});
+const N = geoid.getHeight(51.5, 0); // latitude, longitude; meters
+```
+
+## Features
+
+| Feature | Support | Notes |
+| --- | --- | --- |
+| GeographicLib PGM grid parsing | ✅ | [parsePGM](./api-reference/parse-pgm.md) decodes supported geoid grids without a renderer or Arrow runtime. |
+| Bilinear and cubic interpolation | ✅ | [Geoid](./api-reference/geoid.md) samples grid heights with the documented units, wrapping and interpolation behavior. |
+| Explicit ellipsoidal/orthometric height relation | ✅ | Geoid undulation N supports the model-specific relation h = H + N; applications select the correct datum/model. |
+| Decoded-grid construction | ✅ | [createGeoidFromGrid](./api-reference/create-geoid-from-grid.md) accepts raw Uint16 samples, dimensions, offset and scale. |
+| Optional EGM96 assets and other supplied grids | ✅ | Bundled low/high EGM96 grids are separate assets; other supported PGM grids can be supplied by the application. |
+| Automatic vertical-datum/epoch operation selection | ❌ | A grid sampler does not choose a valid vertical transformation, authority operation, epoch or source dataset. |
+| Gravity potential, acceleration and magnetic fields | ❌ | Grid undulation is implemented; coefficient-backed field synthesis remains separate [Earth-model scope](https://github.com/visgl/math.gl/blob/master/dev-docs/geographiclib-roadmap.md). |
+| Global uncertainty or tide-system propagation | ❌ | No general uncertainty propagation, tidal synthesis, or automatic tide-system reconciliation is provided by the grid API. |
 
 ## Geoid globe
 
@@ -26,8 +53,8 @@ elevation. Ellipsoidal height **h** and orthometric height **H** satisfy **h = H
 
 | Package export                       | Grid                     | Size    |
 | ------------------------------------ | ------------------------ | ------- |
-| `@math.gl/earth/geoid/geoid-egm96-low.pgm` | 1° preview, 360 × 181    | 130 KB  |
-| `@math.gl/earth/geoid/geoid-egm96-hi.pgm`  | 15′ original, 1440 × 721 | 2.08 MB |
+| `@math.gl/earth/geoid-geoid-egm96-low.pgm` | 1° preview, 360 × 181    | 130 KB  |
+| `@math.gl/earth/geoid-geoid-egm96-hi.pgm`  | 15′ original, 1440 × 721 | 2.08 MB |
 
 Data remain separate from the JavaScript entry point. The low grid is downsampled
 for visualization; use the high grid for height conversion. The original grid's
@@ -35,20 +62,8 @@ interpolation error estimates do not apply to the preview.
 
 With a bundler supporting asset URL imports (such as Vite):
 
-```js
-import { parsePGM } from "@math.gl/earth/geoid";
-import gridUrl from "@math.gl/earth/geoid/geoid-egm96-hi.pgm?url";
-
-const response = await fetch(gridUrl);
-if (!response.ok) throw new Error(`Grid request failed: ${response.status}`);
-const geoid = parsePGM(new Uint8Array(await response.arrayBuffer()), {
-  cubic: true,
-});
-const N = geoid.getHeight(51.5, 0); // latitude, longitude; meters
-```
-
 In Node.js, resolve the asset with
-`import.meta.resolve('@math.gl/earth/geoid/geoid-egm96-hi.pgm')` and read it using
+`import.meta.resolve('@math.gl/earth/geoid-geoid-egm96-hi.pgm')` and read it using
 `readFile` from `node:fs/promises`. Other GeographicLib PGM grids can also be passed
 to `parsePGM`.
 
@@ -66,3 +81,5 @@ includes provenance, generation instructions, and checksum metadata in `data/`.
 
 The JavaScript implementation is a port of selected GeographicLib 1.50.1 code,
 copyright Charles Karney, under the MIT license.
+
+See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.

@@ -6,13 +6,12 @@
 
 Stores four numeric components `[x, y, z, w]`. For homogeneous coordinates, W = 1 represents a point and W = 0 represents a direction under an affine transform.
 
-
 Use `Matrix4.transform(vector4, result)` for a full homogeneous transform. `Vector4.transform(matrix4)` has legacy point-transform behavior: it transforms XYZ with implicit W = 1 and leaves the stored W unchanged. See [homogeneous coordinates](../developer-guide/homogeneous-coordinates.md) for points, directions, and perspective division.
 
 ## Usage
 
 ```js
-import {Vector4} from '@math.gl/core';
+import {Vector4} from '@math.gl/core/matrix';
 const vector = new Vector4(1, 1, 1, 0);
 const point = new Vector4(0, 0, 0, 1);
 ```

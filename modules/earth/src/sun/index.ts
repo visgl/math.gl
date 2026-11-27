@@ -40,4 +40,30 @@ export {
   skyRotationToGlobe
 } from './sky-globe';
 export {getCloudLighting} from './cloud-lighting';
+export {
+  getRayleighPhaseFunction,
+  getHenyeyGreensteinPhaseFunction,
+  getCornetteShanksPhaseFunction,
+  getApproximateErfcx,
+  getChapmanGrazingIncidenceFunction
+} from './atmosphere-optics';
 export type {CloudLighting, CloudLightingOptions} from './cloud-lighting';
+
+export {getSunTerminator} from './terminator';
+export type {SunTerminator, SunTerminatorOptions} from './terminator';
+
+// Public named exports. Implementations remain in independently tree-shakable files.
+export {getPlanetSkyInfo, getPlanetVisibility, getPlanetVisibilityTimes} from './planets';
+export type {
+  PlanetName,
+  GalileanMoonName,
+  PlanetSkyOptions,
+  PlanetSkyBody,
+  PlanetVisibility,
+  PlanetVisibilityOptions,
+  PlanetVisibilityTimes,
+  PlanetVisibilityTimesOptions,
+  PlanetVisibilityInterval
+} from './planets';
+export {getSkySnapshot, createSkyContext} from './astronomy';
+export type {SkyTimeScales, SkySnapshotOptions} from './astronomy';

@@ -5,7 +5,7 @@ Rounding can make mathematically equivalent calculations produce slightly differ
 ## Compare values
 
 ```js
-import {equals, exactEquals, Vector3} from '@math.gl/core';
+import {equals, exactEquals, Vector3} from '@math.gl/core/matrix';
 
 equals(0.1 + 0.2, 0.3); // true with the default tolerance
 exactEquals(0.1 + 0.2, 0.3); // false
@@ -24,4 +24,4 @@ The default `config.EPSILON` is `1e-12`. Pass an explicit epsilon to `equals(a, 
 
 Core classes store JavaScript numbers. Writing results to `Float32Array` or `Float16Array` rounds them to that format's precision. Use `Float64Array` when large coordinates and small differences must be retained, or use a local origin before converting positions to a lower-precision rendering buffer.
 
-Changing `EPSILON` affects comparisons, not arithmetic accuracy. Formatting precision affects displayed strings, not stored coordinates. See [debugging](../../../developer-guide/debugging.md) and [array types](../types/api-reference/array-types.md).
+Changing `EPSILON` affects comparisons, not arithmetic accuracy. Formatting precision affects displayed strings, not stored coordinates. See [debugging](../../../developer-guide/README.md#catch-mistakes-during-development) and [array types](../types/api-reference/array-types.md).

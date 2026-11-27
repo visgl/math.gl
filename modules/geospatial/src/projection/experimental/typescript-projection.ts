@@ -27,6 +27,14 @@ import {createGeographicProfile} from './rendering-profile/geographic-rendering-
 import {compileVerticalGrid} from './vertical-datum';
 import type {DatumGridCollection, VerticalGridCollection} from './grids/types';
 
+import type {
+  ProjectionTransformDescription,
+  ProjectionDirectionDescription,
+  ProjectionTransformStage,
+  ProjectionAlgorithmIdentity
+} from '../transform-description';
+import {describeCRS, describeTransform} from './transform-description';
+
 type ProjectionRegistration = ProjectionPlugin | ProjectionDescriptor;
 type ProjectionResult<P, Result> =
   Extract<P, ProjectionDescriptor> extends never ? Result : Promise<Result>;
@@ -46,12 +54,14 @@ export type ProjectionTransformOptions<P extends ProjectionRegistration = Projec
 export type ProjectionTransformCreateOptions = ProjectionTransformOptions<ProjectionRegistration>;
 export type ProjectionArray = Float32Array | Float64Array;
 type CoordinateTransform = {
+  description: ProjectionDirectionDescription;
   flat?: ProjectionFlatOperation;
   run(point: ProjectionPoint): void;
   requiresInputZ: boolean;
   geocentricOutput: boolean;
 };
 type CompiledCRS = NormalizedCRS & {
+  algorithm?: ProjectionAlgorithmIdentity;
   implementation?: ProjectionImplementation;
   verticalGrid?: (longitude: number, latitude: number) => number;
 };
@@ -89,6 +99,11 @@ export class ProjectionTransform<P extends ProjectionRegistration = ProjectionPl
   }
   /** Effective target central meridian in native radians. @internal */
   readonly targetLongitudeOrigin: number = 0;
+  private readonly resolvedDescription?: ProjectionTransformDescription;
+  /** Deferred transforms expose metadata only once their implementations are prepared. */
+  get description(): ProjectionTransformDescription | undefined {
+    return this.deferred?.implementation?.description ?? this.resolvedDescription;
+  }
   readonly lossy: boolean;
   constructor(options: ProjectionTransformOptions<P> = {}) {
     const registrations = options.projections || [];
@@ -125,6 +140,12 @@ export class ProjectionTransform<P extends ProjectionRegistration = ProjectionPl
         unsupportedStage('Horizontal extraction cannot be combined with vertical grids');
       this.forwardTransform = compileTransform(from, to, Boolean(options.enforceAxis));
       this.inverseTransform = compileTransform(to, from, Boolean(options.enforceAxis));
+      this.resolvedDescription = describeTransform(
+        describeCRS(from),
+        describeCRS(to),
+        this.forwardTransform.description,
+        this.inverseTransform.description
+      );
     }
     this.project = this.project.bind(this);
     this.unproject = this.unproject.bind(this);
@@ -393,7 +414,8 @@ function compileCRS(
   const verticalGrid = compileVerticalGrid(crs.parameters['geoidgrids'], options.verticalGrids);
   if (verticalGrid && (crs.kind === 'geocentric' || crs.kind === 'identity' || crs.lossy))
     unsupportedStage('Vertical grids require a non-lossy geographic or projected CRS');
-  return {...crs, datum, implementation, verticalGrid};
+  const algorithm = plugin ? plugin.semantics : {id: '@math.gl/geospatial/' + crs.kind, version: 1};
+  return {...crs, datum, implementation, verticalGrid, algorithm};
 }
 
 function finite(point: ProjectionPoint): boolean {
@@ -466,13 +488,39 @@ function compileTransform(
     if (from.kind === 'projected' && to.kind === 'geographic')
       flat = from.implementation?.createInverseFlat?.(context);
   }
+  const requiresInputZ =
+    Boolean(from.verticalGrid || to.verticalGrid) ||
+    from.kind === 'geocentric' ||
+    /[ud]/.test(fromAxis.slice(0, 2)) ||
+    /[ud]/.test(toAxis.slice(0, 2));
+  const stages: ProjectionTransformStage[] = [];
+  if (inputAxis) stages.push('input-axis');
+  if (horizontalOnly) stages.push('discard-height');
+  if (inputScale !== 1) stages.push('input-scale');
+  if (source) stages.push('source-inverse');
+  if (inputVerticalScale !== 1) stages.push('input-height-scale');
+  stages.push('geographic-domain-check');
+  if (fromPrime) stages.push('source-prime-meridian');
+  if (from.verticalGrid) stages.push('source-vertical-grid');
+  if (datum) stages.push('datum');
+  if (to.verticalGrid) stages.push('target-vertical-grid');
+  if (toPrime) stages.push('target-prime-meridian');
+  if (longitudeWrap !== undefined) stages.push('longitude-wrap');
+  if (target) stages.push('target-forward');
+  if (outputScale !== 1) stages.push('output-scale');
+  if (outputVerticalScale !== 1) stages.push('output-height-scale');
+  if (horizontalOnly) stages.push('restore-height');
+  if (outputAxis) stages.push('output-axis');
   return {
+    description: Object.freeze({
+      inputAxis: fromAxis,
+      outputAxis: toAxis,
+      requiresInputZ,
+      geocentricOutput: to.kind === 'geocentric',
+      stages: Object.freeze(stages)
+    }),
     flat,
-    requiresInputZ:
-      Boolean(from.verticalGrid || to.verticalGrid) ||
-      from.kind === 'geocentric' ||
-      /[ud]/.test(fromAxis.slice(0, 2)) ||
-      /[ud]/.test(toAxis.slice(0, 2)),
+    requiresInputZ,
     geocentricOutput: to.kind === 'geocentric',
     run(point) {
       if (!finite(point))

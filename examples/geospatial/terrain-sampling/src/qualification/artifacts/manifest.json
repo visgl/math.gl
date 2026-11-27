@@ -1,0 +1,295 @@
+{
+  "studyRevision": "d0767a5ef5f8e6281d39d89a98593589e25ca248",
+  "cdtrRevision": "141fe36c084a6954f9bd05594ac809c1fbc8a302",
+  "sourceRevision": "7c31b41d48ff7ac20ccd28850d28ad495f60f4ed",
+  "cases": [
+    {
+      "name": "step",
+      "tolerance": 0.25,
+      "file": "step-0.25.json.gz",
+      "sha256": "0ecdd294f2ef82a2efc8f8ff3cdfec83560436baae7791034ff4da935d2d1e61",
+      "sourceFileSha256": null,
+      "source": {},
+      "versions": {
+        "R": "R version 4.5.3 (2026-03-11)",
+        "cdtr": "0.1.0.9000",
+        "terra": "1.9.50",
+        "jsonlite": "2.0.0",
+        "GDAL": "3.13.3"
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 0.5,
+      "file": "step-0.5.json.gz",
+      "sha256": "dc372a89898e3ec98da0a60ba0bea3b9255b236eb11e9a805b506edd00419dd9",
+      "sourceFileSha256": null,
+      "source": {},
+      "versions": {
+        "R": "R version 4.5.3 (2026-03-11)",
+        "cdtr": "0.1.0.9000",
+        "terra": "1.9.50",
+        "jsonlite": "2.0.0",
+        "GDAL": "3.13.3"
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 1,
+      "file": "step-1.json.gz",
+      "sha256": "81b54487f6b68e4c98590cc364b9be57d50e9e58837289a55b48d99eaccd332f",
+      "sourceFileSha256": null,
+      "source": {},
+      "versions": {
+        "R": "R version 4.5.3 (2026-03-11)",
+        "cdtr": "0.1.0.9000",
+        "terra": "1.9.50",
+        "jsonlite": "2.0.0",
+        "GDAL": "3.13.3"
+      }
+    },
+    {
+      "name": "step",
+      "tolerance": 2,
+      "file": "step-2.json.gz",
+      "sha256": "34783add3e9d691b4933b331f7388aaa2f9e8f3d8bac81134f5593a053bb8bc0",
+      "sourceFileSha256": null,
+      "source": {},
+      "versions": {
+        "R": "R version 4.5.3 (2026-03-11)",
+        "cdtr": "0.1.0.9000",
+        "terra": "1.9.50",
+        "jsonlite": "2.0.0",
+        "GDAL": "3.13.3"
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 10,
+      "file": "pacific-10.json.gz",
+      "sha256": "e6faa62b6ae4c60ae511e5d6b1ef4a7a84880e0965c9a5239899cd778bdb6a90",
+      "sourceFileSha256": "f414dfdc8545fd552cada4b09f2d19e2900e0367022f4573c802237716f98f79",
+      "source": {
+        "source": "https://s3.amazonaws.com/elevation-tiles-prod/geotiff/8/40/98.tif",
+        "sha256": "6fd1a4d21ee745862bb4cc630612716c8d67f457fced523093e7b744dbd0f816",
+        "gdalVersion": "3.9.3",
+        "rasterioVersion": "1.4.3",
+        "width": 257,
+        "height": 257,
+        "crs": "EPSG:3857",
+        "registration": "cell",
+        "heightReference": "unknown",
+        "origin": [
+          -13775786.985667605,
+          4696291.017841227
+        ],
+        "columnStep": [
+          609.1168635332384,
+          0
+        ],
+        "rowStep": [
+          0,
+          -609.116863533224
+        ],
+        "mask": "original source validity"
+      },
+      "versions": {
+        "R": "R version 4.5.3 (2026-03-11)",
+        "cdtr": "0.1.0.9000",
+        "terra": "1.9.50",
+        "jsonlite": "2.0.0",
+        "GDAL": "3.13.3"
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 20,
+      "file": "pacific-20.json.gz",
+      "sha256": "f11bc4bf91a8e9b9bc892c6d2ad46345db10ac32aab7e9c640cf65bfac5b126b",
+      "sourceFileSha256": "f414dfdc8545fd552cada4b09f2d19e2900e0367022f4573c802237716f98f79",
+      "source": {
+        "source": "https://s3.amazonaws.com/elevation-tiles-prod/geotiff/8/40/98.tif",
+        "sha256": "6fd1a4d21ee745862bb4cc630612716c8d67f457fced523093e7b744dbd0f816",
+        "gdalVersion": "3.9.3",
+        "rasterioVersion": "1.4.3",
+        "width": 257,
+        "height": 257,
+        "crs": "EPSG:3857",
+        "registration": "cell",
+        "heightReference": "unknown",
+        "origin": [
+          -13775786.985667605,
+          4696291.017841227
+        ],
+        "columnStep": [
+          609.1168635332384,
+          0
+        ],
+        "rowStep": [
+          0,
+          -609.116863533224
+        ],
+        "mask": "original source validity"
+      },
+      "versions": {
+        "R": "R version 4.5.3 (2026-03-11)",
+        "cdtr": "0.1.0.9000",
+        "terra": "1.9.50",
+        "jsonlite": "2.0.0",
+        "GDAL": "3.13.3"
+      }
+    },
+    {
+      "name": "pacific",
+      "tolerance": 40,
+      "file": "pacific-40.json.gz",
+      "sha256": "d572263c5e2ce6d2f205989bf1105dc4a2a0c964346bb1cd95b513b20607c265",
+      "sourceFileSha256": "f414dfdc8545fd552cada4b09f2d19e2900e0367022f4573c802237716f98f79",
+      "source": {
+        "source": "https://s3.amazonaws.com/elevation-tiles-prod/geotiff/8/40/98.tif",
+        "sha256": "6fd1a4d21ee745862bb4cc630612716c8d67f457fced523093e7b744dbd0f816",
+        "gdalVersion": "3.9.3",
+        "rasterioVersion": "1.4.3",
+        "width": 257,
+        "height": 257,
+        "crs": "EPSG:3857",
+        "registration": "cell",
+        "heightReference": "unknown",
+        "origin": [
+          -13775786.985667605,
+          4696291.017841227
+        ],
+        "columnStep": [
+          609.1168635332384,
+          0
+        ],
+        "rowStep": [
+          0,
+          -609.116863533224
+        ],
+        "mask": "original source validity"
+      },
+      "versions": {
+        "R": "R version 4.5.3 (2026-03-11)",
+        "cdtr": "0.1.0.9000",
+        "terra": "1.9.50",
+        "jsonlite": "2.0.0",
+        "GDAL": "3.13.3"
+      }
+    },
+    {
+      "name": "sierra",
+      "tolerance": 10,
+      "file": "sierra-10.json.gz",
+      "sha256": "e2ad20b5d6fd82425b1341f6ea9a9004e4d63e80a0acd82065f9b6634deeed10",
+      "sourceFileSha256": "7bca9b77c3e1a51972dc183062e8ce54af9fff8f2e0feb07131abd14127dc09e",
+      "source": {
+        "source": "https://s3.amazonaws.com/elevation-tiles-prod/geotiff/8/43/98.tif",
+        "sha256": "cd6bb97ac25bda1c1b4f45bba3d0f9931fef2c805d85caa5a1c0a7f2f19a5a14",
+        "gdalVersion": "3.9.3",
+        "rasterioVersion": "1.4.3",
+        "width": 257,
+        "height": 257,
+        "crs": "EPSG:3857",
+        "registration": "cell",
+        "heightReference": "unknown",
+        "origin": [
+          -13306157.883883482,
+          4696291.017841227
+        ],
+        "columnStep": [
+          609.1168635332311,
+          0
+        ],
+        "rowStep": [
+          0,
+          -609.116863533224
+        ],
+        "mask": "original source validity; manufactured rows/columns 96:161 and every 16th row/8th column"
+      },
+      "versions": {
+        "R": "R version 4.5.3 (2026-03-11)",
+        "cdtr": "0.1.0.9000",
+        "terra": "1.9.50",
+        "jsonlite": "2.0.0",
+        "GDAL": "3.13.3"
+      }
+    },
+    {
+      "name": "sierra",
+      "tolerance": 20,
+      "file": "sierra-20.json.gz",
+      "sha256": "3a06c2084d3d7a11334c4e18dfbeb35ffb54811a4ecc69065a837a8d42cd5e8b",
+      "sourceFileSha256": "7bca9b77c3e1a51972dc183062e8ce54af9fff8f2e0feb07131abd14127dc09e",
+      "source": {
+        "source": "https://s3.amazonaws.com/elevation-tiles-prod/geotiff/8/43/98.tif",
+        "sha256": "cd6bb97ac25bda1c1b4f45bba3d0f9931fef2c805d85caa5a1c0a7f2f19a5a14",
+        "gdalVersion": "3.9.3",
+        "rasterioVersion": "1.4.3",
+        "width": 257,
+        "height": 257,
+        "crs": "EPSG:3857",
+        "registration": "cell",
+        "heightReference": "unknown",
+        "origin": [
+          -13306157.883883482,
+          4696291.017841227
+        ],
+        "columnStep": [
+          609.1168635332311,
+          0
+        ],
+        "rowStep": [
+          0,
+          -609.116863533224
+        ],
+        "mask": "original source validity; manufactured rows/columns 96:161 and every 16th row/8th column"
+      },
+      "versions": {
+        "R": "R version 4.5.3 (2026-03-11)",
+        "cdtr": "0.1.0.9000",
+        "terra": "1.9.50",
+        "jsonlite": "2.0.0",
+        "GDAL": "3.13.3"
+      }
+    },
+    {
+      "name": "sierra",
+      "tolerance": 40,
+      "file": "sierra-40.json.gz",
+      "sha256": "a25b18f6c0b861311ae1048b2a7cd32e06e062972f89df0ee302c4a0c67cb260",
+      "sourceFileSha256": "7bca9b77c3e1a51972dc183062e8ce54af9fff8f2e0feb07131abd14127dc09e",
+      "source": {
+        "source": "https://s3.amazonaws.com/elevation-tiles-prod/geotiff/8/43/98.tif",
+        "sha256": "cd6bb97ac25bda1c1b4f45bba3d0f9931fef2c805d85caa5a1c0a7f2f19a5a14",
+        "gdalVersion": "3.9.3",
+        "rasterioVersion": "1.4.3",
+        "width": 257,
+        "height": 257,
+        "crs": "EPSG:3857",
+        "registration": "cell",
+        "heightReference": "unknown",
+        "origin": [
+          -13306157.883883482,
+          4696291.017841227
+        ],
+        "columnStep": [
+          609.1168635332311,
+          0
+        ],
+        "rowStep": [
+          0,
+          -609.116863533224
+        ],
+        "mask": "original source validity; manufactured rows/columns 96:161 and every 16th row/8th column"
+      },
+      "versions": {
+        "R": "R version 4.5.3 (2026-03-11)",
+        "cdtr": "0.1.0.9000",
+        "terra": "1.9.50",
+        "jsonlite": "2.0.0",
+        "GDAL": "3.13.3"
+      }
+    }
+  ]
+}

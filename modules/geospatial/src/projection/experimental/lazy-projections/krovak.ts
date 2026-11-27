@@ -14,5 +14,8 @@ export const lazyKrovak: ProjectionDescriptor = /* @__PURE__ */ createProjection
       'Krovak Modified (North Orientated)'
     ]
   },
-  async () => (await import('@math.gl/geospatial/projection/projections/krovak')).krovak
+  async () => {
+    const projectionModule = await import('@math.gl/geospatial/projection-projections-krovak');
+    return projectionModule.krovak;
+  }
 );

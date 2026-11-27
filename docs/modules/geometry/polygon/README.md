@@ -1,13 +1,36 @@
-# Overview
+# @math.gl/geometry/polygon
 
 <p class="badges">
   <img src="https://img.shields.io/badge/From-v3.2-blue.svg?style=flat-square" alt="From v3.2" />
 </p>
 
-`@math.gl/geometry/polygon` clips and splits polygons and polylines, computes winding and area, and adaptively subdivides geometry through coordinate transforms. Use it to prepare geometry before triangulation or rendering.
-
+`@math.gl/geometry` clips and splits polygons and polylines, computes winding and area, and adaptively subdivides geometry through coordinate transforms. Use it to prepare geometry before triangulation or rendering.
 
 import Example from '@site/src/components/polygon-playground';
+
+## Usage
+
+```js
+import {earcut} from '@math.gl/geometry/polygon';
+
+const positions = [0, 0, 1, 0, 1, 1, 0, 1];
+const indices = earcut(positions, [], 2); // Two triangles
+```
+
+## Features
+
+| Feature | Support | Notes |
+| --- | --- | --- |
+| Winding, signed area and ring traversal | ✅ | [Polygon utilities](./api-reference/polygon-utils.md) define planar winding and area conventions. |
+| Polygon triangulation with holes | ✅ | [earcut](./api-reference/earcut.md) consumes flat positions and explicit hole offsets. |
+| Polyline/polygon clipping and grid cuts | ✅ | [Clipping](./api-reference/clip-polygon.md) and grid/Mercator helpers split geometry at supported boundaries. |
+| Planar path editing and polygon validity | ✅ | [Planar line and polygon operations](./api-reference/planar-topology.md) cover merging, densification, nearest-segment projection, and validation. |
+| Projection-aware edge subdivision | ✅ | [subdividePolyline](./api-reference/subdivide-polyline.md) uses target-space tolerances and retains original-edge attribution. |
+| Conforming triangle-mesh refinement | ✅ | [subdivideTriangleMesh](./api-reference/subdivide-triangle-mesh.md) shares edge subdivisions and returns interpolation provenance. |
+| Projected triangle-mesh clipping | ✅ | [clipTriangleMesh](./api-reference/clip-triangle-mesh.md) supports disjoint convex target-plane regions, periodic copies and original-vertex weights; prepare geographic topology separately. |
+| Certified continuous projection-error bounds | ❌ | Adaptive sampling tests an approximation criterion; it does not prove a global continuous maximum error. |
+| General Boolean topology and invalid-ring repair | ❌ | Clipping/triangulation do not supply a full union/difference/topology-repair engine for arbitrary malformed polygons. |
+| Global geodesic and spherical polygon topology | ◐ | Use the separate [geospatial seam/atlas APIs](../../geospatial/api-reference/geographic-seams.md) for their explicit edge models and supported domains. |
 
 ## Polygon playground
 
@@ -21,15 +44,6 @@ import Example from '@site/src/components/polygon-playground';
 npm install @math.gl/geometry
 ```
 
-## Usage
-
-```js
-import {earcut} from '@math.gl/geometry/polygon';
-
-const positions = [0, 0, 1, 0, 1, 1, 0, 1];
-const indices = earcut(positions, [], 2); // Two triangles
-```
-
 ## Projection-aware subdivision
 
 `subdividePolyline` subdivides source edges through a supplied coordinate transform using a tolerance in target units. It returns source and target coordinates plus edge attribution for interpolating other data. See the [API reference](./api-reference/subdivide-polyline.md) for domains, limits, accuracy, and polygon-ring usage.
@@ -41,3 +55,23 @@ See [polygon utilities](./api-reference/polygon-utils.md) for winding and area c
 ## Attribution
 
 The `earcut` implementation derives from Mapbox's earcut library under the ISC license. Source headers and distributed notices retain the applicable attribution.
+
+`clipTriangleMesh` clips prepared target-plane triangles to disjoint convex regions, including
+periodic copies, and preserves original-vertex weights for UV and other attribute interpolation.
+Concave domains and holes can be supplied as triangulated regions. See the
+[clipping API reference](./api-reference/clip-triangle-mesh.md).
+
+See [Attributions](../../../references-and-credits.md) for the project-wide source inventory and acknowledgments.
+
+## Polygon overlay
+
+`unionPolygons`, `intersectPolygons`, `subtractPolygons`, and `xorPolygons` compute planar Boolean operations. Each operand is a polygon (an exterior XY ring followed by holes) or
+a multipolygon. Each operation accepts one or more operands and returns a
+multipolygon. An empty result is `[]`. Inputs use a shared Cartesian coordinate system.
+
+```ts
+import {intersectPolygons, subtractPolygons} from '@math.gl/geometry/polygon';
+
+const visible = intersectPolygons(footprints, viewportPolygon);
+const outside = subtractPolygons(footprints, viewportPolygon);
+```

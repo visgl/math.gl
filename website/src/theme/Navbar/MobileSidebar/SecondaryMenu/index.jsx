@@ -29,7 +29,6 @@ export default function DocumentationMobileMenu() {
           Site menu
         </button>
       </nav>
-      <p className="docs-mobile-navigation__heading">Browse documentation</p>
       {secondaryMenu.content}
     </>
   );

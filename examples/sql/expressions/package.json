@@ -1,0 +1,27 @@
+{
+  "name": "math.gl-expression-playground",
+  "version": "5.1.0-alpha.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "vite --config ../../vite.config.local.mjs",
+    "build": "tsc --noEmit && vite build --config ../../vite.config.local.mjs",
+    "serve": "vite preview",
+    "start-local": "vite --config ../../vite.config.local.mjs"
+  },
+  "dependencies": {
+    "@math.gl/core": "workspace:*",
+    "@math.gl/dggs": "workspace:*",
+    "@math.gl/geospatial": "workspace:*",
+    "@math.gl/sql": "workspace:*",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.6"
+  }
+}

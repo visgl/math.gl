@@ -1,0 +1,175 @@
+/* math.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+/* The example grid owns sizing; the community shell fills its column. */
+aside.example-panel.deck-widget-container {
+  min-width: 0;
+  padding: 0;
+  pointer-events: auto;
+}
+/* Let every shell layer shrink with the host; only the content body scrolls.
+ * Percentage limits avoid freezing an auto-height host at its initial empty size. */
+.example-panel > .deck-widget-box {
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 100% !important;
+  width: 100%;
+  max-width: 100% !important;
+}
+.example-panel > .deck-widget-box > section {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 100% !important;
+  overflow: hidden;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* A low-priority fallback leaves example-specific inset and caption limits intact. */
+:where(.example-panel.deck-widget-container) { max-height: 100%; }
+
+/* Let the common panel own chrome while each example positions its host. */
+.example-panel.deck-widget-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none;
+  backdrop-filter: none;
+  min-width: 0;
+}
+/* Scroll containers follow the panel theme even inside an oppositely themed page. */
+.example-panel,
+.example-panel [data-panel-theme-mode] {
+  scrollbar-color: var(--button-icon-idle, currentColor) var(--menu-background, transparent);
+}
+.example-panel:has([data-panel-theme-mode='dark']),
+.example-panel [data-panel-theme-mode='dark'] { color-scheme: dark; }
+.example-panel:has([data-panel-theme-mode='light']),
+.example-panel [data-panel-theme-mode='light'] { color-scheme: light; }
+
+/* Use the same themed range controls in both plain HTML and mounted panels. */
+.example-panel input[type='range'] {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 16px;
+  background: transparent;
+  cursor: pointer;
+}
+.example-panel input[type='range']::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--range-track-color);
+  border-radius: 1px;
+}
+.example-panel input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -6px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--panel-accent-color);
+}
+.example-panel input[type='range']::-moz-range-track {
+  height: 2px;
+  background: var(--range-track-color);
+  border-radius: 1px;
+}
+.example-panel input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--panel-accent-color);
+}
+.example-panel .example-info-content > :first-child { margin-top: 0; }
+.example-panel .example-info-content > :last-child { margin-bottom: 0; }
+.example-panel .example-info-content h1,
+.example-panel .example-info-content h2 { color: inherit; font-size: 1rem; }
+/* Keep the controls scrollable when the example constrains the panel height. */
+.example-panel > .deck-widget-box > section > div {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.example-panel > .deck-widget-box > section > header {
+  flex: none;
+  display: block;
+  margin: 0;
+}
+
+/* Panel controls remain easy to hit with a finger. */
+@media (pointer: coarse), (max-width: 996px) {
+  .example-panel button,
+  .example-panel select,
+  .example-panel input:not([type='checkbox']):not([type='radio']) {
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+  .example-panel input:not([type='range']), .example-panel select { font-size: 16px; }
+  .example-panel input[type='range'] { margin-top: 0; margin-bottom: 0; }
+}
+/* Reserve room for the canvas using the container's height, including short embeds. */
+aside.example-panel[data-compact-panel='true'] {
+  max-height: 45%;
+}
+/* Hosts already choose the panel placement. Keep its box in normal flow so
+ * collapsed controls reserve their own space beside or below the canvas. */
+.example-panel > .deck-widget-box {
+  position: relative !important;
+  inset: auto !important;
+}
+
+
+/* Keep labels beside their controls while letting long values shrink. */
+.example-panel .example-panel-content :is(label:has(> select, > input[type='range'], > input[type='date'], > input[type='time']), .example-control-row) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+  font-size: 12px;
+}
+.example-panel .example-panel-content :is(label, .example-control-row) > :is(select, input:not([type='checkbox'], [type='radio'])) {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  margin: 0;
+}
+.example-panel .example-panel-content :is(label > span:first-child, .example-control-row > label) {
+  flex: 0 0 76px;
+  margin: 0;
+  white-space: normal;
+}
+.example-panel .example-panel-content :is(select, button, input[type='date'], input[type='time']) {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: var(--panel-control-height);
+  padding: var(--panel-control-padding);
+  border: 1px solid var(--button-stroke);
+  border-radius: var(--panel-input-corner-radius);
+  background: var(--button-background);
+  color: var(--button-text);
+  font: inherit;
+  font-size: 12px;
+}
+.example-panel .example-panel-content :is(select, button):hover { background: var(--panel-hover-background); }
+.example-panel .example-panel-content :is(input, select, button, summary):focus-visible {
+  outline: 2px solid var(--panel-focus-color);
+  outline-offset: -2px;
+}
+@media (pointer: coarse), (max-width: 996px) {
+  .example-panel .example-panel-content :is(select, button, input[type='date'], input[type='time']) { min-height: 44px; }
+  .example-panel .example-panel-content :is(select, input:not([type='range'])) { font-size: 16px; }
+  .example-panel > .deck-widget-box > section > header > button { min-height: 44px; }
+}

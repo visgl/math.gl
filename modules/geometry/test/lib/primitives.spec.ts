@@ -21,7 +21,7 @@ import {
   SphereGeometry,
   TruncatedConeGeometry,
   type Geometry
-} from '@math.gl/geometry';
+} from '@math.gl/geometry/primitives';
 
 test('primitive tessellators emit standard finite attributes', () => {
   const geometries: Geometry[] = [

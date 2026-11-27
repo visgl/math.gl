@@ -31,20 +31,74 @@
     "noUnusedLocals": true,
     "noUnusedParameters": false,
     "paths": {
+      "@math.gl/earth/geoid": [
+        "./modules/earth/src/geoid/index.ts"
+      ],
+      "@math.gl/dggs/a5": [
+        "./modules/dggs/src/a5.ts"
+      ],
+      "@math.gl/dggs/geohash": [
+        "./modules/dggs/src/geohash.ts"
+      ],
+      "@math.gl/dggs/h3": [
+        "./modules/dggs/src/h3.ts"
+      ],
+      "@math.gl/dggs/plus-code": [
+        "./modules/dggs/src/plus-code.ts"
+      ],
+      "@math.gl/dggs/quadkey": [
+        "./modules/dggs/src/quadkey.ts"
+      ],
+      "@math.gl/dggs/s2": [
+        "./modules/dggs/src/s2.ts"
+      ],
       "test/*": [
         "./test/*"
+      ],
+      "@math.gl/core/arrow": [
+        "./modules/core/src/arrow.ts"
+      ],
+      "@math.gl/core/color": [
+        "./modules/core/src/color/index.ts"
+      ],
+      "@math.gl/core/types": [
+        "./modules/core/src/types.ts"
+      ],
+      "@math.gl/core/matrix": [
+        "./modules/core/src/matrix.ts"
+      ],
+      "@math.gl/core/twkb": [
+        "./modules/core/src/twkb.ts"
+      ],
+      "@math.gl/core/utf8": [
+        "./modules/core/src/utf8.ts"
+      ],
+      "@math.gl/geometry/polygon": [
+        "./modules/geometry/src/polygon/index.ts"
+      ],
+      "@math.gl/geometry/processing": [
+        "./modules/geometry/src/processing.ts"
+      ],
+      "@math.gl/geometry/spatial-index": [
+        "./modules/geometry/src/spatial-index/index.ts"
+      ],
+      "@math.gl/geometry/arrow": [
+        "./modules/geometry/src/arrow/index.ts"
+      ],
+      "@math.gl/sql/scales": [
+        "./modules/sql/src/scales/index.ts"
       ]
     },
     "plugins": [
       {
-        "transform": "@vis.gl/ts-plugins/ts-transform-append-extension",
+        "transform": "../../scripts/ts-transform-resolve-imports.cjs",
         "extensions": [
           ".js"
         ],
         "after": true
       },
       {
-        "transform": "@vis.gl/ts-plugins/ts-transform-append-extension",
+        "transform": "../../scripts/ts-transform-resolve-imports.cjs",
         "extensions": [
           ".js"
         ],
@@ -56,7 +110,7 @@
     "modules/*/src",
     "modules/*/test",
     "modules/*/*/test",
-    "examples/expressions"
+    "examples/sql/expressions"
   ],
   "exclude": [
     "node_modules",
