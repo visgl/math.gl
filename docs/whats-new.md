@@ -8,6 +8,11 @@
   and at crossings. Helpers build a CSR adjacency and turn a predecessor array into route
   edges and route geometry. Uses include road, river, rail, utility and track-line networks.
 
+- **CTD casts.** [`@math.gl/earth/ocean`](./modules/earth/ocean/api-reference/ctd.md) converts
+  conductivity to Practical Salinity (PSS-78 with the Hill low-salinity extension) and back. It
+  computes potential temperature, potential density and the buoyancy frequency squared N² of a
+  cast. Each function matches GSW-C within 1e-9.
+
 ## v5.0
 
 math.gl 5 expands the library from vectors and matrices to coordinate transformations,

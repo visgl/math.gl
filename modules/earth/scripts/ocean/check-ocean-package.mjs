@@ -54,9 +54,9 @@ try {
   });
 
   const budgets = [
-    // The full subpath: Gibbs function, 75-term polynomial, the classic equations and tide
-    // prediction (about 11 300 bytes before tide prediction, which adds about 4400).
-    {source: "export * from '@math.gl/earth/ocean';", bytes: 16000},
+    // The full subpath: Gibbs function, 75-term polynomial, the classic equations, tide
+    // prediction and the CTD functions (19 730 bytes measured with the CTD functions).
+    {source: "export * from '@math.gl/earth/ocean';", bytes: 21800},
     // A classic equation alone must not pull in the TEOS-10 tables.
     {source: "export {getSoundSpeedMackenzie} from '@math.gl/earth/ocean';", bytes: 600, forbidden: /gibbs-function|specific-volume/},
     {source: "export {getSoundAbsorptionFrancoisGarrison} from '@math.gl/earth/ocean';", bytes: 1000, forbidden: /gibbs-function|specific-volume/},
@@ -64,6 +64,8 @@ try {
     {source: "export {getSeawaterSoundSpeed} from '@math.gl/earth/ocean';", bytes: 4000, forbidden: /gibbs-function/},
     // Tide prediction is independent of the seawater state.
     {source: "export {getTideHeight} from '@math.gl/earth/ocean';", bytes: 4600, forbidden: /gibbs-function|specific-volume|seawater-state|sound-/},
+    // PSS-78 conductivity conversion is pure rational algebra and needs neither TEOS-10 table.
+    {source: "export {getPracticalSalinityFromConductivity} from '@math.gl/earth/ocean';", bytes: 1900, forbidden: /gibbs-function|specific-volume/},
     // Control: Conservative Temperature must keep the Gibbs function, so the boundary checks can fail.
     {source: "export {getConservativeTemperature} from '@math.gl/earth/ocean';", bytes: 9000, required: /gibbs-function/}
   ];
