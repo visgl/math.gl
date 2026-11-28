@@ -88,7 +88,7 @@ All input vertices, including unused vertices, are copied and transformed. Input
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `transform` | Required | Deterministic `(position: readonly number[]) => ArrayLike<number> \| null`. Each invocation receives a fresh array. Must return exactly `targetSize` finite components. |
+| `transform` | Required | Deterministic `(position: readonly number[]) => ArrayLike<number> \| null`. Each invocation receives a fresh array. Must return exactly `targetSize` finite components. Rejection is sampled. A region that is narrower than the sample spacing can be missed. |
 | `refinement` | `'transform-error'` | Sample transform error, or use `'source-edge'` to split only long source edges without error probes. |
 | `tolerance` | Required in transform-error mode | Positive finite sampled error tolerance, in target-coordinate units. All target components participate. Must be omitted in source-edge mode. |
 | `size` | `2` | Source dimension, `2` or `3`. |
