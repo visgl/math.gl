@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v5.0.5
+
+- Add celestial time, reference frames, solar system body data, and eclipse calculations (#284).
+- Add harmonic tide prediction, CTD conversions, and buoyancy frequency to `@math.gl/earth/ocean` (#765, #767).
+- Add `parseUTF8NumberExact` and keep `Matrix4.lookAt` valid when up is parallel to the line of sight (#761, #762).
+- Expand Arrow SQL relational support to align with GPU SQL (#768).
+- Use named exports in projection entry points and document how triangle subdivision samples transform rejection (#763, #766).
+
 ## v5.0.4
 
 - Support lookup joins after Arrow SQL `UNNEST` and cast Arrow lists to fixed-size arrays (#754, #756).
