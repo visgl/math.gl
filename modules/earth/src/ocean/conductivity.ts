@@ -86,9 +86,8 @@ function getPss78Salinity(x: number, factor: number): {value: number; slope: num
  * Returns the low-salinity correction ΔS, which the extension subtracts from PSS-78, and
  * its derivative dΔS/dx, with x = √Rt:
  * `ΔS = a0 / (1 + 1.5 X + X²) + b0 f / (1 + Y^½ + Y + Y^³⁄₂)`, X = 400 Rt, Y = 100 Rt.
- * The function uses this form for the extension of Hill et al. (1986). The TEOS-10 manual
- * (appendix E.2) names the extension, but it does not print the equation. Only the stored
- * GSW-C outputs confirm the denominator terms and the coefficients in this form.
+ * This is the correction of Hill et al. (1986), as their abstract prints it. a0, b0 and k
+ * are the PSS-78 constants.
  */
 function getHillCorrection(x: number, factor: number): {value: number; slope: number} {
   const x2 = x * x;
@@ -109,7 +108,7 @@ function getHillCorrection(x: number, factor: number): {value: number; slope: nu
  * The TEOS-10 manual (appendix E.2, the text after eq. (E.2.6)) says that the GSW form of the
  * extension is exactly PSS-78 for SP ≥ 2 and is continuous at SP = 2. The manual does not
  * print the modified equation. This multiplicative rescale meets that requirement. Only the
- * stored GSW-C outputs confirm the denominator terms and the rescale.
+ * stored GSW-C outputs confirm the rescale.
  */
 function getHillDenominator(factor: number): number {
   let x = Math.sqrt(HILL_LIMIT / 35);

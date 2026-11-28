@@ -151,10 +151,12 @@ The gates above are bounds on the evaluation error. They are not model uncertain
 The PSS-78 polynomials and coefficients are published in Unesco (1983) and in appendix E of
 the TEOS-10 manual, eqs. (E.1.1) to (E.2.6). The TEOS-10 equations are published.
 
-The TEOS-10 manual (appendix E.2) names the Hill et al. (1986) extension. It says that the
-GSW form is exactly PSS-78 for SP ≥ 2 and is continuous at SP = 2. The manual does not print
-the extension or the rescale at SP = 2. Only the stored GSW-C outputs confirm the
-denominator terms and the rescale.
+Hill et al. (1986) print the extension in their abstract: the two correction terms, with
+X = 400 Rt, Y = 100 Rt and the PSS-78 constants a0, b0 and k. The code uses that form.
+
+The TEOS-10 manual (appendix E.2) says that the GSW form of the extension is exactly PSS-78
+for SP ≥ 2 and is continuous at SP = 2. The manual does not print the rescale at SP = 2.
+Only the stored GSW-C outputs confirm the rescale.
 
 The code is an original implementation. It contains no GSW source.
 
