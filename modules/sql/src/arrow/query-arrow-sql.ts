@@ -106,8 +106,18 @@ function executeSQL(
   const tableFunctions = getSQLTableFunctions(execution.functions);
   const resolveTable = (binding: SQLTableBinding) =>
     resolveSQLTable(binding, tables, tableFunctions, options.tableFunctions, execution.signal);
+  /** Single SELECT ordering can reference source expressions before final projection. */
+  const localOrder = inputs.length === 1 && orderBy ? {orderBy, offset, limit} : undefined;
   const results = inputs.map(input =>
-    executeSelect(input, resolveTable, execution, operations, aggregateFunctions, tableFunctions)
+    executeSelect(
+      input,
+      resolveTable,
+      execution,
+      operations,
+      aggregateFunctions,
+      tableFunctions,
+      localOrder
+    )
   );
   const [first, ...rest] = results.map(result => result.table) as [Table, ...Table[]];
   // Plan the final order against the projected names, including SELECT aliases.
@@ -124,9 +134,9 @@ function executeSQL(
         signal: execution.signal
       });
     }),
-    orderBy: planOrder(orderBy),
-    offset,
-    limit
+    orderBy: rest.length ? planOrder(orderBy, first) : undefined,
+    offset: localOrder ? undefined : offset,
+    limit: localOrder ? undefined : limit
   });
   const columnMetadata: Record<string, readonly unknown[]> = Object.create(null);
   if (collectMetadata)
@@ -140,12 +150,17 @@ function executeSQL(
   return {table, columnMetadata: Object.freeze(columnMetadata)};
 }
 
-function planOrder(orderBy?: readonly SQLSort[]) {
+function planOrder(orderBy: readonly SQLSort[] | undefined, table: Table) {
   return orderBy?.map(({expression, direction, nulls}) => {
     /** Qualified projected output name, including UNNEST aliases. */
     const column = qualifiedColumn(expression);
     return {
-      column: column?.qualifier ? column.qualifier + '.' + column.name : requireColumn(expression),
+      column:
+        expression.type === 'Literal' && typeof expression.value === 'number'
+          ? selectPosition(table, expression.value)
+          : column?.qualifier
+            ? column.qualifier + '.' + column.name
+            : requireColumn(expression),
       direction,
       nulls
     };
@@ -158,7 +173,8 @@ function executeSelect(
   execution: Execution,
   operations: ReturnType<typeof getProjectionOperations>,
   aggregateFunctions: ReturnType<typeof getSQLAggregateFunctions>,
-  tableFunctions: ReturnType<typeof getSQLTableFunctions>
+  tableFunctions: ReturnType<typeof getSQLTableFunctions>,
+  ordering?: {orderBy: readonly SQLSort[]; offset?: number; limit?: number}
 ): ArrowSQLMetadataResult<unknown> {
   const left = resolveTable(statement.from);
   let source = left.table;
@@ -203,8 +219,7 @@ function executeSelect(
     );
   }
   if (right) {
-    if (right.type !== 'inner' && right.type !== 'left')
-      throw new Error('Arrow SQL supports one INNER or LEFT JOIN per SELECT');
+    if (right.type === 'cross') throw new Error('Arrow SQL CROSS JOIN requires a lateral input');
     rightAlias = right.table.alias ?? right.table.name;
     const resolved = resolveTable(right.table);
     rightTable = resolved.table;
@@ -223,17 +238,27 @@ function executeSelect(
       (on as {left: Expression}).left,
       (on as {right: Expression}).right
     ];
-    const sides = operands.slice(0, 2).map(qualifiedColumn);
+    /** Bind an unqualified ON operand only when exactly one side supplies the name. */
+    const sides = operands.slice(0, 2).map(operand => {
+      const column = qualifiedColumn(operand);
+      if (!column || column.qualifier) return column;
+      const onLeft = source.schema.fields.some(field => field.name === column.name);
+      const onRight = rightTable!.schema.fields.some(field => field.name === column.name);
+      if (onLeft === onRight) return undefined;
+      return {...column, qualifier: onLeft ? leftAlias : rightAlias};
+    });
     const left = sides.find(
       column =>
         column &&
         (column.qualifier === leftAlias || (lateralAlias && column.qualifier === lateralAlias))
     );
     const rightColumn = sides.find(column => column?.qualifier === rightAlias);
-    if (!left || !rightColumn) throw new Error('Qualify both Arrow SQL JOIN keys');
+    if (!left || !rightColumn) throw new Error('Qualify both Arrow SQL JOIN keys when ambiguous');
     const leftKey = left.qualifier === lateralAlias ? lateralAlias + '.' + left.name : left.name;
     const rightPrefix = rightAlias + '.';
     if (spatial) {
+      if (right.type === 'semi' || right.type === 'anti')
+        throw new Error('Arrow SQL spatial joins require INNER or LEFT JOIN');
       const predicate = bindColumns(on, column =>
         column.qualifier === rightAlias || (lateralAlias && column.qualifier === lateralAlias)
           ? column.qualifier + '.' + column.name
@@ -262,12 +287,14 @@ function executeSelect(
     }
   }
 
+  /** Existence joins expose only the left-side schema to subsequent clauses. */
+  const projectsRight = right?.type !== 'semi' && right?.type !== 'anti';
   const bind = (node: Expression): Expression =>
     bindColumns(node, column => {
       if (column.qualifier === leftAlias) return column.name;
       if (
         column.qualifier &&
-        (column.qualifier === rightAlias || column.qualifier === lateralAlias)
+        ((projectsRight && column.qualifier === rightAlias) || column.qualifier === lateralAlias)
       )
         return column.qualifier + '.' + column.name;
       if (column.qualifier) {
@@ -279,16 +306,13 @@ function executeSelect(
           return undefined;
         throw new Error(`Unknown Arrow SQL table alias: ${column.qualifier}`);
       }
-      const onRight = rightTable?.schema.fields.some(field => field.name === column.name);
+      const onRight =
+        projectsRight && rightTable?.schema.fields.some(field => field.name === column.name);
       if (!onRight) return column.name;
       if (source.schema.fields.some(field => field.name === column.name))
         throw new Error(`Ambiguous Arrow SQL column: ${column.name}`);
       return rightAlias + '.' + column.name;
     });
-  const groupBy = statement.groupBy?.map(expression => {
-    rejectSQLAggregates(expression, aggregateFunctions, 'GROUP BY');
-    return requireColumn(bind(expression));
-  });
   if (statement.where) rejectSQLAggregates(statement.where, aggregateFunctions, 'WHERE');
   const builtins = new Map<string, ArrowAggregate>();
   const customCalls = new Map<string, NonNullable<ReturnType<typeof getSQLAggregateCall>>>();
@@ -299,6 +323,43 @@ function executeSelect(
     if (selection.alias) names.add(selection.alias);
     for (const name of getExpressionColumns(bind(selection.expression))) names.add(name);
   }
+  /** Lowered computed keys, evaluated before grouping and removed from the final projection. */
+  const computedKeys = new Map<string, {expression: Expression; as: string}>();
+  /** Resolves GROUP BY positions and aliases against the original SELECT expressions. */
+  const resolvedGroupKeys = statement.groupBy?.map(expression => {
+    const selected =
+      expression.type === 'Literal' && typeof expression.value === 'number'
+        ? statement.select?.[expression.value - 1]
+        : expression.type === 'Identifier' &&
+            !source.schema.fields.some(field => field.name === expression.name) &&
+            !(
+              projectsRight &&
+              rightTable?.schema.fields.some(field => field.name === expression.name)
+            )
+          ? statement.select?.find(item => item.alias === expression.name)
+          : undefined;
+    if (expression.type === 'Literal' && typeof expression.value === 'number' && !selected)
+      throw new Error('Arrow SQL GROUP BY position must refer to a SELECT item');
+    const bound = bind(selected?.expression ?? expression);
+    rejectSQLAggregates(bound, aggregateFunctions, 'GROUP BY');
+    if (bound.type === 'Identifier') return bound.name;
+    const key = expressionKey(bound);
+    const existing = computedKeys.get(key);
+    if (existing) return existing.as;
+    const name = reserveInternalName(names, '__group_key');
+    computedKeys.set(key, {expression: bound, as: name});
+    return name;
+  });
+  /** Equivalent names, aliases, and positions define a single key. */
+  const groupBy = resolvedGroupKeys && [...new Set(resolvedGroupKeys)];
+  /** Replaces a matching expression with the materialized key after grouping. */
+  const rewriteGroupKeys = (node: Expression): Expression => {
+    if (!computedKeys.size) return node;
+    const key = computedKeys.get(expressionKey(node));
+    return key
+      ? {type: 'Identifier', name: key.as}
+      : mapArrowExpressionChildren(node, rewriteGroupKeys);
+  };
   let nextAggregate = 0;
   const rewrite = (node: Expression): Expression => {
     const call = getSQLAggregateCall(node, aggregateFunctions);
@@ -322,17 +383,86 @@ function executeSelect(
     }
     return {type: 'Identifier', name};
   };
-  const select = statement.select?.map(({expression, alias}, index) => {
+  /** Lowered projections before assigning default names to computed fields. */
+  const projections = statement.select?.map(({expression, alias}, index) => {
     const topLevel = getSQLAggregateCall(expression, aggregateFunctions);
-    const bound = rewrite(bind(expression));
-    if (bound.type === 'Identifier')
+    const original = bind(expression);
+    const bound = rewriteGroupKeys(rewrite(original));
+    if (bound.type === 'Identifier' && (topLevel || original.type === 'Identifier'))
       return {column: bound.name, as: alias ?? (topLevel ? `aggregate_${index + 1}` : undefined)};
     return {expression: bound, as: alias};
   });
+  /** Reserve explicitly named columns before naming any computed projections. */
+  const projectionNames = new Set<string>();
+  for (const item of projections ?? []) {
+    const name = item.as ?? ('column' in item ? item.column : undefined);
+    if (name !== undefined) projectionNames.add(name);
+  }
+  /** Assign the same default names as the Arrow projection binder before resolving ORDER BY. */
+  const select = projections?.map((item, index) =>
+    item.as === undefined && 'expression' in item
+      ? {...item, as: reserveInternalName(projectionNames, `expression_${index + 1}`)}
+      : item
+  );
+  for (const name of projectionNames) names.add(name);
+  /** Expands output aliases outside aggregate arguments in post-group clauses. */
+  function rewriteOutputReferences(node: Expression): Expression {
+    if (getSQLAggregateCall(node, aggregateFunctions)) return rewrite(bind(node));
+    if (node.type === 'CallExpression')
+      return {
+        ...node,
+        arguments: node.arguments.map(argument => rewriteOutputReferences(argument as Expression))
+      };
+    if (node.type === 'Identifier') {
+      /** SQL output aliases take precedence for unqualified references in this clause. */
+      const selection = select?.find(item => item.as === node.name);
+      if (selection)
+        return 'column' in selection
+          ? {type: 'Identifier', name: selection.column}
+          : selection.expression;
+      return bind(node);
+    }
+    if (qualifiedColumn(node)) return bind(node);
+    return mapArrowExpressionChildren(node, rewriteOutputReferences);
+  }
+  /** Post-group filtering resolves output aliases and binds hidden aggregate calls. */
+  const having = statement.having && rewriteGroupKeys(rewriteOutputReferences(statement.having));
+  /** Sort expressions that are not already exposed as projected names or positions. */
+  const sortKeys = ordering?.orderBy.map(
+    (sort): SQLSort & {column?: string; position?: number; bound?: Expression} => {
+      const {expression} = sort;
+      if (expression.type === 'Literal' && typeof expression.value === 'number')
+        return {...sort, position: expression.value};
+      const column = qualifiedColumn(expression);
+      const name =
+        column && (column.qualifier ? column.qualifier + '.' + column.name : column.name);
+      if (
+        name &&
+        select?.some(
+          item => item.as === name || (!item.as && 'column' in item && item.column === name)
+        )
+      )
+        return {...sort, column: name};
+      const bound = rewriteGroupKeys(rewriteOutputReferences(expression));
+      if (
+        !select &&
+        bound.type === 'Identifier' &&
+        !builtins.has(bound.name) &&
+        !customCalls.has(bound.name)
+      )
+        return {...sort, column: bound.name, bound};
+      return {...sort, column: reserveInternalName(names, '__sort_key'), bound};
+    }
+  );
   const grouped = Boolean(groupBy?.length || builtins.size || customCalls.size);
+  if (having && !grouped) throw new Error('Arrow SQL HAVING requires grouping or an aggregate');
   if (grouped) {
     const valid = new Set([...(groupBy ?? []), ...builtins.keys(), ...customCalls.keys()]);
-    for (const selection of select ?? []) {
+    for (const selection of [
+      ...(select ?? []),
+      ...(having ? [{expression: having}] : []),
+      ...(sortKeys?.flatMap(key => (key.bound ? [{expression: key.bound}] : [])) ?? [])
+    ]) {
       const references =
         'column' in selection ? [selection.column] : getExpressionColumns(selection.expression);
       const ungrouped = references.find(name => !valid.has(name));
@@ -357,12 +487,18 @@ function executeSelect(
     });
     return {table, columnMetadata};
   };
-  if (!grouped && (!operations.length || !select)) {
+  if (!grouped && !sortKeys?.length && (!operations.length || !select)) {
     return result(queryArrowTable(source, {...query, select}));
   }
   let input = queryArrowTable(source, query);
   const custom = new Map<string, BoundRelationAggregate & {metadata?: unknown}>();
   if (grouped) {
+    if (computedKeys.size) {
+      input = queryArrowTable(input, {
+        ...execution,
+        select: [...input.schema.fields.map(field => field.name), ...computedKeys.values()]
+      });
+    }
     for (const [name, call] of customCalls)
       custom.set(name, bindSQLAggregate(call, input, execution.functions, execution.signal));
     input = groupArrowTable(
@@ -375,10 +511,23 @@ function executeSelect(
       },
       custom
     );
+    if (having) input = queryArrowTable(input, {...execution, where: {expression: having}});
   }
-  const table = executeArrowProjection(
+  /** Working projections for hidden sort keys, stripped before publishing the result. */
+  const hidden =
+    sortKeys?.flatMap(key =>
+      key.bound && (key.bound.type !== 'Identifier' || key.column !== key.bound.name)
+        ? [{expression: key.bound, as: key.column}]
+        : []
+    ) ?? [];
+  /** SQL wildcard projects source fields ahead of any hidden sort expressions. */
+  const visible = select ?? (grouped ? (groupBy?.map(column => ({column})) ?? []) : undefined);
+  const output = hidden.length
+    ? [...(visible ?? input.schema.fields.map(field => ({column: field.name}))), ...hidden]
+    : visible;
+  let table = executeArrowProjection(
     input,
-    {select, ...execution},
+    {select: output, ...execution},
     operations.length || custom.size
       ? (expression, name) => {
           const result = prepareArrowColumn(
@@ -393,6 +542,21 @@ function executeSelect(
         }
       : undefined
   );
+  if (sortKeys?.length) {
+    const visibleCount = table.numCols - hidden.length;
+    table = queryArrowTable(table, {
+      ...execution,
+      offset: ordering?.offset,
+      limit: ordering?.limit,
+      orderBy: sortKeys.map(({column, position, direction, nulls}) => ({
+        column: position === undefined ? column! : selectPosition(table, position, visibleCount),
+        direction,
+        nulls
+      }))
+    });
+    if (hidden.length)
+      table = table.selectAt(Array.from({length: visibleCount}, (_, index) => index));
+  }
   if (custom.size) {
     table.schema.fields.forEach((field, index) => {
       const selection = select?.[index];
@@ -453,6 +617,32 @@ function qualifiedColumn(node: Expression): Column | undefined {
   )
     return {name: String(node.property['name']), qualifier: String(node.object['name'])};
   return undefined;
+}
+
+/** Resolves a one-based position in the visible SELECT output. */
+function selectPosition(table: Table, position: number, visibleCount = table.numCols): string {
+  if (!Number.isInteger(position) || position < 1 || position > visibleCount)
+    throw new Error('Arrow SQL ORDER BY position must refer to a SELECT item');
+  return table.schema.fields[position - 1]!.name;
+}
+
+/** Identifies equivalent bound SQL expressions independently of literal spelling. */
+function expressionKey(node: Expression): string {
+  return JSON.stringify(node, (name, value) => {
+    if (name === 'raw') return undefined;
+    if (typeof value === 'bigint') return {bigint: value.toString()};
+    if (typeof value === 'number' && (!Number.isFinite(value) || Object.is(value, -0)))
+      return {number: Object.is(value, -0) ? '-0' : String(value)};
+    return value;
+  });
+}
+
+/** Reserves a temporary column name without shadowing a source or SELECT field. */
+function reserveInternalName(names: Set<string>, prefix: string): string {
+  let name = prefix;
+  while (names.has(name)) name += '_';
+  names.add(name);
+  return name;
 }
 
 function requireColumn(node: Expression): string {
