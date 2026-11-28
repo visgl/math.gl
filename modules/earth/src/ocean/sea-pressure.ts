@@ -25,10 +25,19 @@ export type SeaPressureHeightOptions = {
 };
 
 /** Vertical gradient of gravity in the ocean, 1/m (TEOS-10 manual, section 3.32). */
-const GRAVITY_GRADIENT = 2.26e-7;
+export const GRAVITY_GRADIENT = 2.26e-7;
 
-/** Returns surface gravity, m/s², from the options or from the GSW formula. */
-function getSurfaceGravity(latitude: number, options: SeaPressureHeightOptions): number {
+/**
+ * Returns surface gravity, m/s², from the options or from the GSW formula
+ * `9.780327 (1 + (5.2792e-3 + 2.32e-5 sin²φ) sin²φ)`.
+ * @param latitude - Latitude φ, degrees, from -90 to 90.
+ * @param options - An optional `surfaceGravity` that replaces the formula.
+ * @throws {RangeError} When the latitude or the surface gravity is outside its domain.
+ */
+export function getSurfaceGravity(
+  latitude: number,
+  options: SeaPressureHeightOptions = {}
+): number {
   checkRange('latitude', latitude, -90, 90);
   if (options.surfaceGravity !== undefined) {
     return checkRange('surfaceGravity', options.surfaceGravity, 9.7, 9.9);

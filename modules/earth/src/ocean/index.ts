@@ -16,6 +16,8 @@ export {
 export {getPotentialTemperature, getPotentialDensity} from './potential-properties';
 export {getHeightFromSeaPressure, getSeaPressureFromHeight} from './sea-pressure';
 export type {SeaPressureHeightOptions} from './sea-pressure';
+export {getBuoyancyFrequencySquared} from './water-column';
+export type {BuoyancyFrequencySquared} from './water-column';
 export {
   getSoundSpeedChenMillero,
   getSoundSpeedDelGrosso,

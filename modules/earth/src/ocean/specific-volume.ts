@@ -105,10 +105,19 @@ export type SpecificVolume = {
   specificVolume: number;
   /** ∂v/∂ζ with ζ = p / 10^4 dbar, m³/kg. */
   specificVolumeZeta: number;
+  /** ∂v/∂SA at constant Θ and p, m³/kg per g/kg. The saline contraction coefficient is β = -v_SA / v. */
+  specificVolumeSalinity: number;
+  /** ∂v/∂Θ at constant SA and p, m³/kg per K. The thermal expansion coefficient is α = v_Θ / v. */
+  specificVolumeTemperature: number;
 };
 
 /**
- * Evaluates the 75-term specific-volume polynomial and its derivative with respect to pressure.
+ * Evaluates the 75-term specific-volume polynomial and its derivatives with respect to
+ * pressure, Absolute Salinity and Conservative Temperature.
+ *
+ * The derivatives come from term-by-term differentiation of `Σ v_ijk τ^i s^j ζ^k`, with
+ * dτ/dΘ = 1/40 and ds/dSA = SALINITY_FACTOR / (2 s) (TEOS-10 manual, appendix A.20, K;
+ * Roquet et al. 2015).
  * @param absoluteSalinity - Absolute Salinity SA, g/kg.
  * @param conservativeTemperature - Conservative Temperature Θ, °C.
  * @param seaPressure - Sea pressure p, dbar.
@@ -123,16 +132,26 @@ export function evaluateSpecificVolume(
   const zeta = seaPressure / 1e4;
   let specificVolume = 0;
   let specificVolumeZeta = 0;
+  // Sums of i v_ijk τ^(i-1) s^j ζ^k and j v_ijk τ^i s^(j-1) ζ^k.
+  let sumTau = 0;
+  let sumS = 0;
   for (let n = 0; n < SPECIFIC_VOLUME_TERMS.length; n += 4) {
+    const i = SPECIFIC_VOLUME_TERMS[n];
+    const j = SPECIFIC_VOLUME_TERMS[n + 1];
     const k = SPECIFIC_VOLUME_TERMS[n + 2];
-    const term =
-      SPECIFIC_VOLUME_TERMS[n + 3] *
-      tau ** SPECIFIC_VOLUME_TERMS[n] *
-      s ** SPECIFIC_VOLUME_TERMS[n + 1];
-    specificVolume += term * zeta ** k;
+    const coefficient = SPECIFIC_VOLUME_TERMS[n + 3];
+    const zetaPower = zeta ** k;
+    const term = coefficient * tau ** i * s ** j;
+    specificVolume += term * zetaPower;
     if (k >= 1) specificVolumeZeta += k * term * zeta ** (k - 1);
+    // Terms with exponent 0 have a zero derivative; skip them so that no power is negative.
+    if (i >= 1) sumTau += i * coefficient * tau ** (i - 1) * s ** j * zetaPower;
+    if (j >= 1) sumS += j * coefficient * tau ** i * s ** (j - 1) * zetaPower;
   }
-  return {specificVolume, specificVolumeZeta};
+  // s ≥ sqrt(SALINITY_OFFSET) > 0, so the division by s is safe at SA = 0.
+  const specificVolumeSalinity = (sumS * SALINITY_FACTOR) / (2 * s);
+  const specificVolumeTemperature = sumTau / 40;
+  return {specificVolume, specificVolumeZeta, specificVolumeSalinity, specificVolumeTemperature};
 }
 
 /**
