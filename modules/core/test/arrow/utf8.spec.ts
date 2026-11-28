@@ -7,7 +7,8 @@ import {
   compareUTF8,
   parseUTF8BigInt,
   parseUTF8Boolean,
-  parseUTF8Number
+  parseUTF8Number,
+  parseUTF8NumberExact
 } from '../../src/arrow-integration/utf8';
 test('UTF8Utils#compareUTF8', () => {
   const bytes = new Uint8Array([
@@ -87,6 +88,78 @@ test('UTF8Utils#parseUTF8Number', () => {
     /Invalid UTF-8 byte range/
   );
 });
+test('UTF8Utils#parseUTF8NumberExact rounds like Number', () => {
+  const encoder = new TextEncoder();
+  for (const text of [
+    '0.44918278882938156',
+    '0.27835938162714335',
+    '3.0346060964756635e-7',
+    '1.9531543449859179e-1',
+    '1.23456789012345678',
+    '123456789012345678901234567890',
+    '-0.9224253036869203',
+    '1.7976931348623157e308',
+    '4.9406564584124654e-324',
+    '1e400',
+    '0.1e-1',
+    '12345.6789e-3',
+    '0e400',
+    '  -1.5e-310 ',
+    '-0'
+  ]) {
+    const bytes = encoder.encode(text);
+    expect(parseUTF8NumberExact(bytes, 0, bytes.length), text).toBe(Number(text));
+  }
+
+  // Shortest round-trip strings of random doubles must parse back to the same double.
+  let seed = 1;
+  const random = () => {
+    seed = (seed * 16807) % 2147483647;
+    return seed / 2147483647;
+  };
+  for (let i = 0; i < 2000; i++) {
+    const value = random() * Math.pow(10, Math.floor(random() * 60) - 30);
+    const bytes = encoder.encode(String(value));
+    expect(parseUTF8NumberExact(bytes, 0, bytes.length), String(value)).toBe(value);
+  }
+
+  // The same grammar as parseUTF8Number, and the same result on its correctly rounded range.
+  for (const text of ['', ' ', '1e', '1,000', 'Infinity', '0x10', '+.25', '1.', '3.5e2', '-42']) {
+    const bytes = encoder.encode(text);
+    expect(parseUTF8NumberExact(bytes, 0, bytes.length), text).toBe(
+      parseUTF8Number(bytes, 0, bytes.length)
+    );
+  }
+  // The default parser keeps its arithmetic-only path.
+  const bytes = encoder.encode('0.44918278882938156');
+  expect(parseUTF8Number(bytes, 0, bytes.length)).toBe(0.4491827888293816);
+});
+
+test('UTF8Utils#parseUTF8NumberExact resolves rounding boundaries and long tails', () => {
+  const encoder = new TextEncoder();
+  // Midpoints between adjacent doubles, and decimal inputs on either side.
+  const halfMin = 5n ** 1075n;
+  const normalMidpoint = 0x20000000000001n * 5n ** 53n;
+  const overflowMidpoint = 0x3fffffffffffffn << 970n;
+  for (const [coefficient, scale] of [
+    [halfMin, -1075],
+    [normalMidpoint, -53],
+    [overflowMidpoint, 0]
+  ] as const) {
+    const farTail = coefficient * 10n ** 1200n;
+    for (const step of [-1n, 0n, 1n]) {
+      for (const sign of ['', '-']) {
+        const text = `${sign}${farTail + step}e${scale - 1200}`;
+        const bytes = encoder.encode(`prefix${text}suffix`);
+        expect(parseUTF8NumberExact(bytes, 6, 6 + text.length)).toBe(Number(text));
+      }
+    }
+  }
+  const text = `0.${'0'.repeat(1200)}718e1202`;
+  const bytes = encoder.encode(text);
+  expect(parseUTF8NumberExact(bytes, 0, bytes.length)).toBe(Number(text));
+});
+
 test('UTF8Utils#parseUTF8BigInt', () => {
   const bytes = new Uint8Array([
     0x78, 0x7c, 0x2d, 0x34, 0x32, 0x7c, 0x20, 0x2b, 0x39, 0x30, 0x30, 0x37, 0x31, 0x39, 0x39, 0x32,
@@ -110,6 +183,26 @@ test('UTF8Utils#parseUTF8BigInt', () => {
     'throws on invalid bigint byte ranges'
   ).toThrow(/Invalid UTF-8 byte range/);
 });
+test('UTF8Utils#parseUTF8BigInt preserves digits across chunk boundaries', () => {
+  const encoder = new TextEncoder();
+  for (const text of [
+    '+999999999999999',
+    '1000000000000000',
+    '-9223372036854775808',
+    '18446744073709551615',
+    '00000000000000000000000000000001',
+    '999999999999999000000000000000123456789012345678901234567890'
+  ]) {
+    const bytes = encoder.encode(`x ${text} y`);
+    expect(parseUTF8BigInt(bytes, 1, bytes.length - 1)).toBe(BigInt(text));
+  }
+  for (const index of [0, 14, 15, 29, 30]) {
+    const text = `${'1'.repeat(index)}_${'2'.repeat(33 - index)}`;
+    const bytes = encoder.encode(text);
+    expect(parseUTF8BigInt(bytes, 0, bytes.length)).toBeUndefined();
+  }
+});
+
 test('UTF8Utils#parseUTF8Boolean', () => {
   const bytes = new Uint8Array([
     0x78, 0x7c, 0x74, 0x72, 0x75, 0x65, 0x7c, 0x46, 0x41, 0x4c, 0x53, 0x45, 0x7c, 0x20, 0x54, 0x72,

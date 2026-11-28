@@ -113,6 +113,19 @@ number arithmetic. It is not a correctly rounded replacement for `Number()`:
 long mantissas can lose precision, and intermediate overflow or underflow can
 occur for extreme inputs even when the final mathematical value is representable.
 Use `parseUTF8BigInt` for exact base-10 integers.
+Use `parseUTF8NumberExact` when results must match `Number()`.
+
+### parseUTF8NumberExact
+
+```typescript
+parseUTF8NumberExact(bytes, firstByte, endByte): number | undefined
+```
+
+Accepts the same grammar and parameters as `parseUTF8Number`, and returns the same
+value as `Number()` on the text without creating a string. Inputs with at most 15
+mantissa digits and a decimal exponent between −22 and 22 use one multiply or
+divide. Other inputs use fixed-width integer arithmetic with cached powers of ten.
+When those bounds leave rounding ambiguous, the parser resolves it with `BigInt`.
 
 ### parseUTF8BigInt
 
