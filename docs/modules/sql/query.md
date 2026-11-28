@@ -52,10 +52,10 @@ Sorting is stable, and nulls sort last by default. Counts and sums of integer co
 use Arrow Int64. Supply these relational operations through query options.
 
 Use `queryArrowSQL(sql, tables)` to run relational SQL directly against a map of named
-Arrow tables. Each SELECT supports one `INNER JOIN` or `LEFT JOIN` with an equality
-condition or indexed spatial predicate. SQL also supports column-based grouping,
-top-level aggregate calls, ordering by output columns, and UNION ALL with matching
-output schemas. Trailing ORDER BY, OFFSET, and LIMIT apply to the combined result.
+Arrow tables. Each SELECT supports one `INNER`, `LEFT`, `SEMI`, or `ANTI JOIN` with an equality
+condition. INNER and LEFT also accept indexed spatial predicates. SQL supports
+grouped aggregation with HAVING, expression-based ordering, and UNION ALL with
+matching output schemas. Trailing ORDER BY, OFFSET, and LIMIT apply to the combined result.
 Arrow timestamp columns can be used as ordering and grouping keys. Comparisons
 retain the precision of the stored timestamp unit.
 
@@ -67,6 +67,55 @@ const totals = queryArrowSQL(
   new Map([['orders', orders]])
 );
 ```
+
+### Filter and sort grouped results
+
+`WHERE` selects input rows before aggregation. `HAVING` selects groups after aggregation.
+Only true predicates retain a group. False and null predicates both discard it.
+
+```sql
+SELECT FLOOR(amount) AS bucket, SUM(amount) AS total
+FROM orders
+WHERE amount IS NOT NULL
+GROUP BY bucket
+HAVING COUNT(*) >= 2 AND total > 100
+ORDER BY MAX(amount) DESC NULLS LAST, 1
+LIMIT 10 OFFSET 2
+```
+
+Register `FLOOR` from `@math.gl/sql/math-functions` in the query's `functions` option.
+The query groups by the computed bucket, filters groups with a hidden `COUNT(*)` and
+the projected `total`, then sorts by a hidden `MAX(amount)` and the first SELECT item.
+The returned table contains only `bucket` and `total`.
+
+- `GROUP BY` accepts a source column, a scalar expression, an unambiguous SELECT alias,
+  or a one-based position in an explicit SELECT list. A source column takes precedence
+  over a SELECT alias of the same name.
+- `HAVING` can use projected aliases, group keys, and aggregate calls. Without
+  `GROUP BY`, it can filter a global aggregate. Referencing a source column that is
+  neither grouped nor aggregated is an error.
+- `ORDER BY` accepts source or output expressions and one-based SELECT positions.
+  For grouped results, its source references must be grouped or aggregated.
+  Keys need not be projected. Ties retain input order and nulls sort last by default.
+  On `UNION ALL`, the trailing order refers to combined output column names or positions.
+- `OFFSET` and `LIMIT` apply last. Without `ORDER BY`, pagination uses result order.
+
+### Match or exclude rows with existence joins
+
+Use a `SEMI JOIN` to keep left rows that have a matching right key. Use an
+`ANTI JOIN` to keep the rest.
+
+```sql
+SELECT o.order_id, o.amount
+FROM orders AS o
+SEMI JOIN approved_accounts AS a ON o.account_id = a.account_id
+ORDER BY o.order_id
+```
+
+Both join types retain left row order before ordering and expose only left fields.
+Duplicate right keys do not multiply rows. Null keys do not match, so a left row with
+a null key is omitted by SEMI and retained by ANTI. Qualify the operands when a key
+name appears on both sides. INNER and LEFT continue to emit every matching row pair.
 
 ### Indexed spatial joins
 

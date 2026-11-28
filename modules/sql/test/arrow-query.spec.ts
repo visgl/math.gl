@@ -653,3 +653,103 @@ test('portable predicates compare fixed-size binary values with literals of any 
   });
   expect([...result.getChild('id')!]).toEqual([1]);
 });
+
+test('executes HAVING with a SELECT alias and an unprojected aggregate before pagination', () => {
+  const source = tableFromArrays({key: [1, 1, 2, 3, 3, 3, 4], amount: [4, 5, 20, 2, 2, 2, 1]});
+  const result = queryArrowSQL(
+    'SELECT key, SUM(amount) AS total FROM input GROUP BY key ' +
+      'HAVING total > 5 AND COUNT(*) > 1 ORDER BY total DESC LIMIT 1 OFFSET 1',
+    new Map([['input', source]])
+  );
+  expect(Array.from(result.getChild('key')!)).toEqual([3]);
+  expect(Array.from(result.getChild('total')!)).toEqual([6]);
+});
+
+test('preserves left order and schema for existence joins with duplicate and null keys', () => {
+  const left = tableFromArrays({key: [2, null, 1, 2, 4], row: [10, 11, 12, 13, 14]});
+  const right = tableFromArrays({lookup: [2, 2, null, 3]});
+  const tables = new Map([
+    ['input', left],
+    ['lookup', right]
+  ]);
+  for (const [kind, expected] of [
+    ['SEMI', [10, 13]],
+    ['ANTI', [11, 12, 14]]
+  ] as const) {
+    const result = queryArrowSQL(
+      `SELECT * FROM input l ${kind} JOIN lookup r ON key = lookup`,
+      tables
+    );
+    expect(result.schema.fields.map(field => field.name)).toEqual(['key', 'row']);
+    expect(Array.from(result.getChild('row')!)).toEqual(expected);
+  }
+});
+
+test('orders by hidden computed source keys, aliases, and SELECT positions', () => {
+  const source = tableFromArrays({id: [1, 2, 3, 4], score: [2, -2, 2, null]});
+  const result = queryArrowSQL(
+    'SELECT id AS visible FROM input ORDER BY score * score DESC NULLS LAST, 1 DESC LIMIT 2',
+    new Map([['input', source]])
+  );
+  expect(result.schema.fields.map(field => field.name)).toEqual(['visible']);
+  expect(Array.from(result.getChild('visible')!)).toEqual([3, 2]);
+});
+
+test('groups by computed keys, aliases, and positions and orders by hidden aggregates', () => {
+  const source = tableFromArrays({score: [2, 2, -2, -3, -3], weight: [1, 2, 7, 1, 2]});
+  const tables = new Map([['input', source]]);
+  for (const key of ['bucket', '1', 'score * score']) {
+    const result = queryArrowSQL(
+      `SELECT score * score AS bucket FROM input GROUP BY ${key} ORDER BY SUM(weight) DESC, 1`,
+      tables
+    );
+    expect(result.schema.fields.map(field => field.name)).toEqual(['bucket']);
+    expect(Array.from(result.getChild('bucket')!)).toEqual([4, 9]);
+  }
+});
+
+test('supports bigint parameters in projections and computed group keys', () => {
+  const source = tableFromArrays({units: makeVector(new BigInt64Array([1n, 1n, 3n]))});
+  const tables = new Map([['input', source]]);
+  const options = {parameters: {increment: 1n}};
+  const projected = queryArrowSQL('SELECT :increment AS value FROM input', tables, options);
+  expect(Array.from(projected.getChild('value')!)).toEqual([1n, 1n, 1n]);
+  const grouped = queryArrowSQL(
+    'SELECT units + :increment AS amount FROM input GROUP BY amount ORDER BY amount',
+    tables,
+    options
+  );
+  expect(Array.from(grouped.getChild('amount')!)).toEqual([2n, 4n]);
+});
+
+test('orders by generated projection names after resolving explicit name collisions', () => {
+  const source = tableFromArrays({score: [3, 1, 2]});
+  const tables = new Map([['input', source]]);
+  const result = queryArrowSQL(
+    'SELECT score + 1, score AS expression_1 FROM input ORDER BY expression_1_ DESC',
+    tables
+  );
+  expect(result.schema.fields.map(field => field.name)).toEqual(['expression_1_', 'expression_1']);
+  expect(Array.from(result.getChild('expression_1_')!)).toEqual([4, 3, 2]);
+});
+
+test('sorts a grouped wildcard by a hidden aggregate without publishing it', () => {
+  const source = tableFromArrays({key: [2, 1, 1, 3, 3, 3]});
+  const result = queryArrowSQL(
+    'SELECT * FROM input GROUP BY key ORDER BY COUNT(*) DESC',
+    new Map([['input', source]])
+  );
+  expect(result.schema.fields.map(field => field.name)).toEqual(['key']);
+  expect(Array.from(result.getChild('key')!)).toEqual([3, 1, 2]);
+});
+
+test('deduplicates group keys resolved from expressions, aliases, and positions', () => {
+  const source = tableFromArrays({score: [-1, 1, 2]});
+  const result = queryArrowSQL(
+    'SELECT score * score AS bucket, COUNT(*) AS count FROM input ' +
+      'GROUP BY bucket, 1, score * score ORDER BY bucket',
+    new Map([['input', source]])
+  );
+  expect(Array.from(result.getChild('bucket')!)).toEqual([1, 4]);
+  expect(Array.from(result.getChild('count')!)).toEqual([2n, 1n]);
+});
