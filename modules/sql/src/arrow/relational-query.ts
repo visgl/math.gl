@@ -32,10 +32,10 @@ export type ArrowQueryOrder = {
   nulls?: 'first' | 'last';
 };
 
-/** An inner or left equi-join with a prefix for right-side output names. */
+/** An equi-join with a prefix for any right-side output names. */
 export type ArrowQueryJoin = {
   /** Join type. Defaults to inner. */
-  type?: 'inner' | 'left';
+  type?: 'inner' | 'left' | 'semi' | 'anti';
   /** Native Arrow right input. */
   table: Table;
   /** Left key column. */
@@ -76,7 +76,8 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
     throw new Error(`Incompatible Arrow JOIN key types: ${leftType} and ${rightType}`);
   }
   const retainUnmatched = join.type === 'left';
-  const schema = makeArrowJoinSchema(left, right, join.rightPrefix, retainUnmatched);
+  /** Existence joins emit at most one row per left input and no right fields. */
+  const existence = join.type === 'semi' || join.type === 'anti';
 
   const rightRows = new Map<ArrowExpressionValue, number[]>();
   for (let row = 0; row < right.numRows; row++) {
@@ -93,6 +94,10 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
     signal?.throwIfAborted();
     const key = normalizeJoinKey(leftKey!.get(row));
     const matches = rightRows.get(key);
+    if (existence) {
+      if (Boolean(matches) === (join.type === 'semi')) leftIndexes.push(row);
+      continue;
+    }
     if (retainUnmatched && !matches) {
       leftIndexes.push(row);
       rightIndexes.push(-1);
@@ -102,7 +107,14 @@ export function joinArrowTables(left: Table, join: ArrowQueryJoin, signal?: Abor
       rightIndexes.push(match);
     }
   }
-  return gatherArrowJoin(left, right, leftIndexes, rightIndexes, schema);
+  if (existence) return takeArrowTableRows(left, Int32Array.from(leftIndexes));
+  return gatherArrowJoin(
+    left,
+    right,
+    leftIndexes,
+    rightIndexes,
+    makeArrowJoinSchema(left, right, join.rightPrefix, retainUnmatched)
+  );
 }
 
 /** Builds the relational join schema and validates right prefix collisions. */

@@ -47,6 +47,8 @@ export type SQLSelectStatement = Readonly<{
   joins: readonly SQLJoin[];
   where?: Expression;
   groupBy?: readonly Expression[];
+  /** Filters the grouped result before ordering and pagination. */
+  having?: Expression;
   orderBy?: readonly SQLSort[];
   limit?: number;
   offset?: number;
@@ -136,12 +138,15 @@ function readSelect(reader: RelationalQueryReader): SQLSelectStatement {
   }
   const where = reader.takeKeyword('WHERE') ? reader.selectionExpression() : undefined;
   const groupBy = readBy(reader, 'GROUP', () => reader.selectionExpression());
+  /** Optional post-aggregation predicate. */
+  const having = reader.takeKeyword('HAVING') ? reader.selectionExpression() : undefined;
   return {
     from,
     joins,
     ...(select ? {select} : {}),
     ...(where ? {where} : {}),
-    ...(groupBy ? {groupBy} : {})
+    ...(groupBy ? {groupBy} : {}),
+    ...(having ? {having} : {})
   };
 }
 
