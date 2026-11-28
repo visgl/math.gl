@@ -135,6 +135,31 @@ test('UTF8Utils#parseUTF8NumberExact rounds like Number', () => {
   expect(parseUTF8Number(bytes, 0, bytes.length)).toBe(0.4491827888293816);
 });
 
+test('UTF8Utils#parseUTF8NumberExact resolves rounding boundaries and long tails', () => {
+  const encoder = new TextEncoder();
+  // Midpoints between adjacent doubles, and decimal inputs on either side.
+  const halfMin = 5n ** 1075n;
+  const normalMidpoint = 0x20000000000001n * 5n ** 53n;
+  const overflowMidpoint = 0x3fffffffffffffn << 970n;
+  for (const [coefficient, scale] of [
+    [halfMin, -1075],
+    [normalMidpoint, -53],
+    [overflowMidpoint, 0]
+  ] as const) {
+    const farTail = coefficient * 10n ** 1200n;
+    for (const step of [-1n, 0n, 1n]) {
+      for (const sign of ['', '-']) {
+        const text = `${sign}${farTail + step}e${scale - 1200}`;
+        const bytes = encoder.encode(`prefix${text}suffix`);
+        expect(parseUTF8NumberExact(bytes, 6, 6 + text.length)).toBe(Number(text));
+      }
+    }
+  }
+  const text = `0.${'0'.repeat(1200)}718e1202`;
+  const bytes = encoder.encode(text);
+  expect(parseUTF8NumberExact(bytes, 0, bytes.length)).toBe(Number(text));
+});
+
 test('UTF8Utils#parseUTF8BigInt', () => {
   const bytes = new Uint8Array([
     0x78, 0x7c, 0x2d, 0x34, 0x32, 0x7c, 0x20, 0x2b, 0x39, 0x30, 0x30, 0x37, 0x31, 0x39, 0x39, 0x32,

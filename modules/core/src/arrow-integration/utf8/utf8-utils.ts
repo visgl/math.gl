@@ -2,6 +2,14 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
+import {decimalToBinary} from './decimal-to-binary';
+
+// Decimal powers through 10^22 are exactly representable as binary64.
+const EXACT_DECIMAL_POWERS = [
+  1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17,
+  1e18, 1e19, 1e20, 1e21, 1e22
+];
+
 /**
  * Compares two UTF-8 encoded byte ranges without materializing JavaScript strings.
  *
@@ -74,10 +82,8 @@ export function parseUTF8Number(
 /**
  * Parses a UTF-8 encoded ASCII number with the same result as `Number()` on its text.
  *
- * Accepts the same grammar as {@link parseUTF8Number}. Numbers with at most 15 significant digits
- * and a decimal scale within 10^22 take the same string-free path, which is already correctly
- * rounded there. Longer mantissas and larger scales are converted from their ASCII text, which
- * allocates a temporary string for that value.
+ * Accepts the same grammar as {@link parseUTF8Number}. Uses one multiply or divide for short
+ * decimals and rounds longer decimals directly from the bytes without materializing a string.
  *
  * @param bytes - UTF-8 byte buffer.
  * @param firstByte - Inclusive start byte offset.
@@ -109,7 +115,6 @@ function parseDecimal(
   if (start >= end) {
     return undefined;
   }
-  const numberStart = start;
 
   let sign = 1;
   const signByte = bytes[start]!;
@@ -118,6 +123,7 @@ function parseDecimal(
     start++;
   }
 
+  const mantissaStart = start;
   let value = 0;
   let digitCount = 0;
   let fractionDigitCount = 0;
@@ -141,6 +147,7 @@ function parseDecimal(
     return undefined;
   }
 
+  const mantissaEnd = start;
   let exponent = 0;
   let exponentSign = 1;
   if (start < end && (bytes[start]! === 0x65 || bytes[start]! === 0x45)) {
@@ -167,17 +174,13 @@ function parseDecimal(
   }
 
   const decimalScale = exponentSign * exponent - fractionDigitCount;
-  // With at most 15 digits the mantissa is an exact integer, and 10 ** 22 is the largest exact
-  // power of ten, so one multiplication or division rounds correctly. Longer mantissas or larger
-  // scales round twice, so the exact variant lets the engine parse the validated text instead.
-  if (exact && (digitCount > 15 || Math.abs(decimalScale) > 22)) {
-    let text = '';
-    for (let index = numberStart; index < end; index++) {
-      text += String.fromCharCode(bytes[index]!);
-    }
-    return Number(text);
+  if (!exact) return sign * applyDecimalScale(value, decimalScale);
+  // This path uses one correctly rounded operation on exact operands.
+  if (digitCount <= 15 && Math.abs(decimalScale) <= 22) {
+    const power = EXACT_DECIMAL_POWERS[Math.abs(decimalScale)]!;
+    return sign * (decimalScale < 0 ? value / power : value * power);
   }
-  return sign * applyDecimalScale(value, decimalScale);
+  return sign * decimalToBinary(bytes, mantissaStart, mantissaEnd, decimalScale);
 }
 
 /**
