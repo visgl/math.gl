@@ -326,7 +326,7 @@ function executeSelect(
   /** Lowered computed keys, evaluated before grouping and removed from the final projection. */
   const computedKeys = new Map<string, {expression: Expression; as: string}>();
   /** Resolves GROUP BY positions and aliases against the original SELECT expressions. */
-  const groupBy = statement.groupBy?.map(expression => {
+  const resolvedGroupKeys = statement.groupBy?.map(expression => {
     const selected =
       expression.type === 'Literal' && typeof expression.value === 'number'
         ? statement.select?.[expression.value - 1]
@@ -350,6 +350,8 @@ function executeSelect(
     computedKeys.set(key, {expression: bound, as: name});
     return name;
   });
+  /** Equivalent names, aliases, and positions define a single key. */
+  const groupBy = resolvedGroupKeys && [...new Set(resolvedGroupKeys)];
   /** Replaces a matching expression with the materialized key after grouping. */
   const rewriteGroupKeys = (node: Expression): Expression => {
     if (!computedKeys.size) return node;
@@ -442,7 +444,13 @@ function executeSelect(
       )
         return {...sort, column: name};
       const bound = rewriteGroupKeys(rewriteOutputReferences(expression));
-      if (!select && bound.type === 'Identifier') return {...sort, column: bound.name, bound};
+      if (
+        !select &&
+        bound.type === 'Identifier' &&
+        !builtins.has(bound.name) &&
+        !customCalls.has(bound.name)
+      )
+        return {...sort, column: bound.name, bound};
       return {...sort, column: reserveInternalName(names, '__sort_key'), bound};
     }
   );
@@ -508,7 +516,7 @@ function executeSelect(
   /** Working projections for hidden sort keys, stripped before publishing the result. */
   const hidden =
     sortKeys?.flatMap(key =>
-      key.bound && (select || key.bound.type !== 'Identifier')
+      key.bound && (key.bound.type !== 'Identifier' || key.column !== key.bound.name)
         ? [{expression: key.bound, as: key.column}]
         : []
     ) ?? [];

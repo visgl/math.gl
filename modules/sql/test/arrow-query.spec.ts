@@ -732,3 +732,24 @@ test('orders by generated projection names after resolving explicit name collisi
   expect(result.schema.fields.map(field => field.name)).toEqual(['expression_1_', 'expression_1']);
   expect(Array.from(result.getChild('expression_1_')!)).toEqual([4, 3, 2]);
 });
+
+test('sorts a grouped wildcard by a hidden aggregate without publishing it', () => {
+  const source = tableFromArrays({key: [2, 1, 1, 3, 3, 3]});
+  const result = queryArrowSQL(
+    'SELECT * FROM input GROUP BY key ORDER BY COUNT(*) DESC',
+    new Map([['input', source]])
+  );
+  expect(result.schema.fields.map(field => field.name)).toEqual(['key']);
+  expect(Array.from(result.getChild('key')!)).toEqual([3, 1, 2]);
+});
+
+test('deduplicates group keys resolved from expressions, aliases, and positions', () => {
+  const source = tableFromArrays({score: [-1, 1, 2]});
+  const result = queryArrowSQL(
+    'SELECT score * score AS bucket, COUNT(*) AS count FROM input ' +
+      'GROUP BY bucket, 1, score * score ORDER BY bucket',
+    new Map([['input', source]])
+  );
+  expect(Array.from(result.getChild('bucket')!)).toEqual([1, 4]);
+  expect(Array.from(result.getChild('count')!)).toEqual([2n, 1n]);
+});
