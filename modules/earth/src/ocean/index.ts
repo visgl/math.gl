@@ -13,6 +13,7 @@ export {
   getSeawaterSoundSpeed,
   getSeawaterFreezingTemperature
 } from './seawater-state';
+export {getPotentialTemperature, getPotentialDensity} from './potential-properties';
 export {getHeightFromSeaPressure, getSeaPressureFromHeight} from './sea-pressure';
 export type {SeaPressureHeightOptions} from './sea-pressure';
 export {

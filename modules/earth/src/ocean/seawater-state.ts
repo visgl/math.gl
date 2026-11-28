@@ -80,7 +80,7 @@ export function getFreezingConservativeTemperature(
  * The limits follow GSW `gsw_infunnel`, with two differences: the freezing limit uses the
  * polynomial freezing temperature, and Θ is also at most 40 °C below 500 dbar.
  */
-function checkFunnel(
+export function checkFunnel(
   absoluteSalinity: number,
   conservativeTemperature: number,
   seaPressure: number
