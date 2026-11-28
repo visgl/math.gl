@@ -26,13 +26,20 @@ GSW_C_COMMIT = 'db75c391137173a0e121166e787fcc15fc3c3e7f'
 GSW_C_VERSION = 'v3.06.16-0'
 OUTPUT = Path(__file__).resolve().parents[2] / 'test/ocean/data/seawater-reference.json'
 INVALID = 9e90
+# GSW_INVALID_VALUE of `gswteos-10.h`: the value that GSW-C functions return for no result.
+GSW_INVALID_VALUE = 9e15
+# Small conductivities (mS/cm) and temperatures (deg C) for sp_from_c edge controls at p = 0.
+# A cast that starts in air gives such values. GSW-C returns GSW_INVALID_VALUE where the
+# extended scale is below 0. The script stores those rows with the value null.
+SMALL_CONDUCTIVITIES = [1e-4, 5e-4, 1e-3, 2e-3]
+SMALL_CONDUCTIVITY_TEMPERATURES = [0, 20, 35]
 
 CAST_FIELDS = ['sp', 'sa', 't', 'p', 'ct', 'sr_from_sp', 'sa_from_sp', 'deltasa_from_sp',
                'ct_from_t', 'rho', 'sound_speed', 'z_from_p', 'p_from_z', 't_freezing_poly',
-               'c_from_sp', 'sp_from_c', 'pt_from_t', 'sigma0']
+               'c_from_sp', 'sp_from_c', 'pt_from_t', 'sigma0', 'alpha', 'beta']
 TOLERANCES = ['sr_from_sp', 'sa_from_sp', 'ct_from_t', 'rho', 'sound_speed', 'z_from_p',
               'p_from_z', 't_freezing_poly', 'c_from_sp', 'sp_from_c', 'pt_from_t', 'sigma0', 'n2',
-              'p_mid_n2']
+              'p_mid_n2', 'alpha', 'beta']
 # Edge functions that store fewer than four inputs. Other functions store four.
 INPUT_COUNTS = {'c_from_sp': 3, 'sp_from_c': 3, 'pt_from_t': 4, 'rho_ref': 3}
 
@@ -135,6 +142,11 @@ def evaluate_edges(gsw_c, rows):
         second = subprocess.run(
             [str(executable)], input='\n'.join('%s %r %r %r %r' % row for row in inverse) + '\n',
             capture_output=True, text=True, check=True).stdout.split()
+        small = [('sp_from_c', c, t, 0, 0) for c in SMALL_CONDUCTIVITIES
+                 for t in SMALL_CONDUCTIVITY_TEMPERATURES]
+        third = subprocess.run(
+            [str(executable)], input='\n'.join('%s %r %r %r %r' % row for row in small) + '\n',
+            capture_output=True, text=True, check=True).stdout.split()
     # Keep the O1 controls first, in their original order, then the O6a controls.
     new_kinds = ('c_from_sp', 'pt_from_t', 'rho_ref')
     rows_all = list(zip(rows, values))
@@ -142,10 +154,20 @@ def evaluate_edges(gsw_c, rows):
                + [(r, v) for r, v in zip(inverse, second) if r[0] == 'p_from_z']
                + [x for x in rows_all if x[0][0] in new_kinds]
                + [(r, v) for r, v in zip(inverse, second) if r[0] == 'sp_from_c'])
+    # A stored value must be a GSW-C result, not the driver sentinel or GSW_INVALID_VALUE.
+    for row, value in ordered:
+        assert abs(float(value)) < GSW_INVALID_VALUE, 'GSW-C gives no value for %r' % (row,)
     controls = []
     for (kind, a, b, c, d), value in ordered:
         controls.append({'function': kind, 'inputs': [a, b, c, d][:INPUT_COUNTS.get(kind, 4)],
                          'value': float(value)})
+    # Small-conductivity controls: null where GSW-C returns GSW_INVALID_VALUE.
+    for (kind, a, b, c, d), value in zip(small, third):
+        value = float(value)
+        assert abs(value) < GSW_INVALID_VALUE or value == GSW_INVALID_VALUE, \
+            'Unexpected GSW-C value %r for %r' % (value, (kind, a, b, c))
+        controls.append({'function': kind, 'inputs': [a, b, c],
+                         'value': value if value != GSW_INVALID_VALUE else None})
     return controls
 
 
@@ -185,7 +207,8 @@ def main():
             'version': GSW_C_VERSION,
             'checkData': 'gsw_check_data.h (GSW MATLAB 3.06.16 check values)',
             'note': 'Casts: stored GSW check values. Edges: unmodified GSW-C compiled offline.',
-            't_freezing_poly': 'GSW check values use saturation_fraction = 0.5.'
+            't_freezing_poly': 'GSW check values use saturation_fraction = 0.5.',
+            'invalid': 'An edge value of null: GSW-C returns GSW_INVALID_VALUE (no result).'
         },
         'tolerances': {name: read_define(header, name + '_ca') for name in TOLERANCES},
         'casts': casts,

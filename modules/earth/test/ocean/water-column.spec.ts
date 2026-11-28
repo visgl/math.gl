@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {expect, test} from 'vitest';
 import {getBuoyancyFrequencySquared} from '@math.gl/earth/ocean';
+import {evaluateSpecificVolumeDerivatives} from '../../src/ocean/specific-volume';
 import reference from './data/seawater-reference.json';
 
 // Controls: GSW-C 3.06.16, `gsw_check_data.h` (casts, gsw_Nsquared values and gates).
@@ -15,6 +16,21 @@ const tolerance = reference.tolerances;
 function maxError(actual: number[], expected: number[]): number {
   return Math.max(...actual.map((value, index) => Math.abs(value - expected[index])));
 }
+
+test('ocean#specific-volume derivatives match gsw_alpha and gsw_beta at the GSW check casts', () => {
+  const derivatives = casts.map(row => evaluateSpecificVolumeDerivatives(row.sa, row.ct, row.p));
+  // α = v_Θ / v and β = -v_SA / v.
+  const alphaError = maxError(
+    derivatives.map(d => d.specificVolumeTemperature / d.specificVolume),
+    casts.map(row => row.alpha)
+  );
+  const betaError = maxError(
+    derivatives.map(d => -d.specificVolumeSalinity / d.specificVolume),
+    casts.map(row => row.beta)
+  );
+  expect(alphaError).toBeLessThanOrEqual(tolerance.alpha);
+  expect(betaError).toBeLessThanOrEqual(tolerance.beta);
+});
 
 test('ocean#getBuoyancyFrequencySquared matches gsw_Nsquared on the three GSW check casts', () => {
   expect(reference.nsquared).toHaveLength(3);

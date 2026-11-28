@@ -40,7 +40,8 @@ test('ocean#PSS-78 matches GSW-C at the domain edges, including the Hill extensi
   const forward = reference.edges.filter(row => row.function === 'c_from_sp');
   const inverse = reference.edges.filter(row => row.function === 'sp_from_c');
   expect(forward.length).toBeGreaterThan(0);
-  expect(inverse.length).toBe(forward.length);
+  // One inverse control for each forward control, plus 12 small-conductivity controls.
+  expect(inverse.length).toBe(forward.length + 12);
   for (const {inputs, value} of forward) {
     const [sp, t, p] = inputs;
     const actual = getConductivityFromPracticalSalinity(sp, t, p);
@@ -50,10 +51,30 @@ test('ocean#PSS-78 matches GSW-C at the domain edges, including the Hill extensi
   }
   for (const {inputs, value} of inverse) {
     const [c, t, p] = inputs;
+    if (value === null) {
+      // GSW-C returns GSW_INVALID_VALUE: the extended scale is below 0.
+      expect(() => getPracticalSalinityFromConductivity(c, t, p), `sp_from_c(${inputs})`).toThrow(
+        RangeError
+      );
+      continue;
+    }
     const actual = getPracticalSalinityFromConductivity(c, t, p);
     expect(Math.abs(actual - value), `sp_from_c(${inputs})`).toBeLessThanOrEqual(
       tolerance.sp_from_c
     );
+  }
+});
+
+test('ocean#PSS-78 matches GSW-C at small conductivity', () => {
+  const small = reference.edges.filter(
+    row => row.function === 'sp_from_c' && row.inputs[0] <= 0.002 && row.inputs[2] === 0
+  );
+  expect(small.length).toBe(12);
+  expect(small.filter(row => row.value === null).length).toBeGreaterThan(0);
+  expect(small.filter(row => row.value !== null).length).toBeGreaterThan(0);
+  // C = 0 gives SP = 0 at every temperature.
+  for (const t of [-2, 0, 20, 35]) {
+    expect(getPracticalSalinityFromConductivity(0, t, 0)).toBe(0);
   }
 });
 

@@ -35,13 +35,27 @@ Follow these steps to process a raw cast:
 3. Convert in-situ temperature to Conservative Temperature Θ with `getConservativeTemperature`.
 4. Compute N² with `getBuoyancyFrequencySquared`.
 
-Every step throws `RangeError` for a non-finite value. Remove the levels that have a `NaN`
-value from the raw conductivity, temperature and pressure before step 1. Keep only the valid
-levels:
+Every step throws `RangeError` for a value outside its domain:
+
+- A non-finite value throws.
+- A negative conductivity or a negative sea pressure throws.
+- `getPracticalSalinityFromConductivity` throws when the extended scale gives SP below 0.
+  This occurs for C more than 0 and less than approximately 0.0007 to 0.0024 mS/cm.
+- `getAbsoluteSalinity` rejects SP below 0.
+
+A cast that starts in air has surface levels with C near 0. Sensor noise can make C or p
+slightly negative there. Remove these levels and the levels with a `NaN` value before step 1.
+Keep only the valid levels:
 
 ```typescript
-const valid = Array.from(seaPressure, (_, i) =>
-  [conductivity[i], temperature[i], seaPressure[i]].every(Number.isFinite)
+// A threshold above 0.0024 mS/cm, the largest C that gives SP below 0. Set it for your sensor.
+const minConductivity = 0.005;
+const valid = Array.from(
+  seaPressure,
+  (_, i) =>
+    [conductivity[i], temperature[i], seaPressure[i]].every(Number.isFinite) &&
+    conductivity[i] >= minConductivity &&
+    seaPressure[i] >= 0
 );
 const keep = (values: ArrayLike<number>) => Array.from(values).filter((_, i) => valid[i]);
 const [c, t, p] = [keep(conductivity), keep(temperature), keep(seaPressure)];
@@ -69,9 +83,10 @@ gap.
 Returns Practical Salinity SP (unitless, PSS-78) from conductivity in mS/cm, in-situ
 temperature in °C (ITS-90) and sea pressure in dbar. GSW: `gsw_SP_from_C`.
 
-For C below 0.005 mS/cm, the extension returns small negative values, down to about −2.5e-4.
-The function does not clamp them. Clamp them in your own code if you need non-negative
-values.
+C = 0 gives SP = 0. For C more than 0 and less than a limit, the extended scale is below 0,
+down to −2.64e-4. The limit is 0.0007 mS/cm at −2 °C and 0 dbar, and 0.0024 mS/cm at 35 °C
+and 10 000 dbar. GSW-C returns `GSW_INVALID_VALUE` there, so the function throws
+`RangeError`.
 
 Gate: 1.3e-10 against GSW-C 3.06.16.
 
@@ -81,6 +96,9 @@ Returns conductivity in mS/cm. It inverts `getPracticalSalinityFromConductivity`
 number of Newton steps. GSW: `gsw_C_from_SP`.
 
 Domain: SP from 0 to 42, temperature from −2 to 35 °C, sea pressure from 0 to 10 000 dbar.
+
+Near SP = 0 the extended scale has two roots. SP = 0 gives C = 0. An SP slightly more than 0
+gives the larger root, at C from 0.0007 to 0.0024 mS/cm. Both values return to SP.
 
 Gate: 6.2e-10 mS/cm.
 
@@ -130,9 +148,14 @@ The gates above are bounds on the evaluation error. They are not model uncertain
 
 ## Provenance
 
-The PSS-78 polynomials and the TEOS-10 equations are published. The tests compare the Hill
-denominator terms with GSW-C outputs. They also compare the rescale at SP = 2 that makes the
-two ranges continuous. The TEOS-10 manual requires continuity but does not print the factor.
+The PSS-78 polynomials and coefficients are published in Unesco (1983) and in appendix E of
+the TEOS-10 manual, eqs. (E.1.1) to (E.2.6). The TEOS-10 equations are published.
+
+The TEOS-10 manual (appendix E.2) names the Hill et al. (1986) extension. It says that the
+GSW form is exactly PSS-78 for SP ≥ 2 and is continuous at SP = 2. The manual does not print
+the extension or the rescale at SP = 2. Only the stored GSW-C outputs confirm the
+denominator terms and the rescale.
+
 The code is an original implementation. It contains no GSW source.
 
 ## References

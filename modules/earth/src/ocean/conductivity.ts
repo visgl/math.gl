@@ -86,8 +86,9 @@ function getPss78Salinity(x: number, factor: number): {value: number; slope: num
  * Returns the low-salinity correction ΔS, which the extension subtracts from PSS-78, and
  * its derivative dΔS/dx, with x = √Rt:
  * `ΔS = a0 / (1 + 1.5 X + X²) + b0 f / (1 + Y^½ + Y + Y^³⁄₂)`, X = 400 Rt, Y = 100 Rt.
- * This is the form of Hill et al. (1986). The coefficients and the denominator terms are
- * confirmed against the stored GSW-C outputs, not against the printed paper.
+ * The function uses this form for the extension of Hill et al. (1986). The TEOS-10 manual
+ * (appendix E.2) names the extension, but it does not print the equation. Only the stored
+ * GSW-C outputs confirm the denominator terms and the coefficients in this form.
  */
 function getHillCorrection(x: number, factor: number): {value: number; slope: number} {
   const x2 = x * x;
@@ -104,9 +105,11 @@ function getHillCorrection(x: number, factor: number): {value: number; slope: nu
 /**
  * Returns `2 - ΔS` at the √Rt where PSS-78 gives SP = 2. Division by this value scales the
  * Hill et al. extension so that it is 2 at that point, which makes SP continuous at 2.
- * The TEOS-10 manual (appendix E) requires the extension to equal PSS-78 at SP = 2, but
- * does not print the scale factor. This multiplicative rescale is the simplest form that
- * meets that requirement, and it agrees with the stored GSW-C outputs to 1e-15.
+ *
+ * The TEOS-10 manual (appendix E.2, the text after eq. (E.2.6)) says that the GSW form of the
+ * extension is exactly PSS-78 for SP ≥ 2 and is continuous at SP = 2. The manual does not
+ * print the modified equation. This multiplicative rescale meets that requirement. Only the
+ * stored GSW-C outputs confirm the denominator terms and the rescale.
  */
 function getHillDenominator(factor: number): number {
   let x = Math.sqrt(HILL_LIMIT / 35);
@@ -119,10 +122,8 @@ function getHillDenominator(factor: number): number {
 
 /**
  * Returns SP and dSP/dx from x = √Rt. Set `hillDenominator` to use the extension below
- * SP = 2: `SP = 2 (S_PSS78 - ΔS) / (2 - ΔS(SP = 2))`. The TEOS-10 manual (appendix E)
- * requires the extension to equal PSS-78 at SP = 2, but does not print the scale factor.
- * This multiplicative rescale is the simplest form that meets that requirement, and it
- * agrees with the stored GSW-C outputs to 1e-15.
+ * SP = 2: `SP = 2 (S_PSS78 - ΔS) / (2 - ΔS(SP = 2))`. See {@link getHillDenominator} for
+ * the continuity at SP = 2 and for the provenance of the rescale.
  */
 function getSalinityFromRatioRoot(
   x: number,
@@ -170,11 +171,12 @@ function checkPss78Domain(temperature: number, seaPressure: number): void {
  * @param conductivity - Conductivity C, mS/cm, finite and not negative.
  * @param temperature - In-situ temperature t, °C (ITS-90), from -2 to 35.
  * @param seaPressure - Sea pressure p, dbar, from 0 to 10000.
- * @returns Practical Salinity SP (PSS-78), unitless, to 42. For C below about 0.005 mS/cm
- * the extended scale gives values slightly below 0 (to about -2.5e-4). The function does
- * not clamp them.
+ * @returns Practical Salinity SP (PSS-78), unitless, from 0 to 42.
  * @throws {RangeError} When an input is not finite or is outside the domain, or when the
- * result is more than 42.
+ * result is more than 42 or less than 0. For C more than 0 and less than a limit from
+ * 0.0007 mS/cm (t = -2 °C, p = 0) to 0.0024 mS/cm (t = 35 °C, p = 10000 dbar), the
+ * extended scale is below 0, to -2.64e-4. At the stored controls in this range, GSW-C
+ * returns `GSW_INVALID_VALUE`, so this function throws. C = 0 gives SP = 0.
  */
 export function getPracticalSalinityFromConductivity(
   conductivity: number,
@@ -203,6 +205,12 @@ export function getPracticalSalinityFromConductivity(
       `conductivity ${conductivity} gives a Practical Salinity more than ${MAX_PRACTICAL_SALINITY}`
     );
   }
+  // Near C = 0 the extended scale is below 0. GSW-C returns no value there.
+  if (practicalSalinity < 0) {
+    throw new RangeError(
+      `conductivity ${conductivity} gives a Practical Salinity less than 0 on the extended scale`
+    );
+  }
   return practicalSalinity;
 }
 
@@ -219,7 +227,9 @@ export function getPracticalSalinityFromConductivity(
  * @param practicalSalinity - Practical Salinity SP (PSS-78), unitless, from 0 to 42.
  * @param temperature - In-situ temperature t, °C (ITS-90), from -2 to 35.
  * @param seaPressure - Sea pressure p, dbar, from 0 to 10000.
- * @returns Conductivity C, mS/cm.
+ * @returns Conductivity C, mS/cm. The extended scale has two roots near SP = 0: SP = 0 gives
+ * C = 0, but an SP just more than 0 gives the larger root, at C ≈ 0.0007 to 0.0024 mS/cm.
+ * Both values return to SP through {@link getPracticalSalinityFromConductivity}.
  * @throws {RangeError} When an input is not finite or is outside the domain.
  */
 export function getConductivityFromPracticalSalinity(
@@ -234,7 +244,7 @@ export function getConductivityFromPracticalSalinity(
   const factor = getTemperatureFactor(t68);
   const hillDenominator = practicalSalinity < HILL_LIMIT ? getHillDenominator(factor) : undefined;
 
-  // Near SP = 0 the extension dips below 0 (to between -2.0e-4 and -2.7e-4 at √Rt ≈ 0.003)
+  // Near SP = 0 the extension dips below 0 (to between -1.98e-4 and -2.64e-4 at √Rt ≈ 0.003)
   // and crosses 0 again at √Rt ≈ 0.005 to 0.006. A first estimate of at least √Rt = 0.01
   // starts Newton on the rising, convex side, so it cannot go into the dip.
   let x =
