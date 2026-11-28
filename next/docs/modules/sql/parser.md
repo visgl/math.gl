@@ -107,7 +107,7 @@ const statement = parseSQLSelectStatement(
 );
 ```
 
-The parser supports table aliases, qualified column references, INNER, LEFT, SEMI, and ANTI joins with ON conditions, GROUP BY, ORDER BY with optional null placement, LIMIT, OFFSET, and SQL line comments. Aggregate calls are expression nodes. COUNT(\*) is a call with a wildcard identifier argument marked `sqlWildcard: true`. The caller validates the supported join conditions and aggregate functions and binds parameters. Use `parseParameter` to supply an expression node for each named parameter.
+The parser supports table aliases, qualified column references, INNER, LEFT, SEMI, and ANTI joins with ON conditions, GROUP BY, HAVING, ORDER BY with optional null placement, LIMIT, OFFSET, and SQL line comments. Aggregate calls are expression nodes. COUNT(\*) is a call with a wildcard identifier argument marked `sqlWildcard: true`. The caller validates the supported join conditions and aggregate functions and binds parameters. Use `parseParameter` to supply an expression node for each named parameter.
 
 ## Expressions[​](#expressions "Direct link to Expressions")
 
