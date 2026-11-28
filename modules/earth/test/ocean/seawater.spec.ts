@@ -96,6 +96,10 @@ test('ocean#getHeightFromSeaPressure and getSeaPressureFromHeight match gsw_z_fr
 
 test('ocean#seawater functions match GSW-C at the edges of the declared domain', () => {
   for (const {function: name, inputs, value} of reference.edges) {
+    // The O6a controls (PSS-78, potential temperature, reference density) get their own tests.
+    if (['c_from_sp', 'sp_from_c', 'pt_from_t', 'rho_ref'].includes(name)) {
+      continue;
+    }
     const [a, b, c, d] = inputs;
     let actual: number;
     let gate: number;

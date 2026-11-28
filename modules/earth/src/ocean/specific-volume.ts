@@ -135,6 +135,58 @@ export function evaluateSpecificVolume(
   return {specificVolume, specificVolumeZeta};
 }
 
+/** Specific volume and its derivatives with respect to Absolute Salinity and Conservative Temperature. */
+export type SpecificVolumeDerivatives = {
+  /** Specific volume v, m³/kg. */
+  specificVolume: number;
+  /** ∂v/∂SA at constant Θ and p, m³/kg per g/kg. The saline contraction coefficient is β = -v_SA / v. */
+  specificVolumeSalinity: number;
+  /** ∂v/∂Θ at constant SA and p, m³/kg per K. The thermal expansion coefficient is α = v_Θ / v. */
+  specificVolumeTemperature: number;
+};
+
+/**
+ * Evaluates the 75-term specific-volume polynomial and its derivatives with respect to
+ * Absolute Salinity and Conservative Temperature, in one pass over the terms.
+ *
+ * The derivatives come from term-by-term differentiation of `Σ v_ijk τ^i s^j ζ^k`, with
+ * dτ/dΘ = 1/40 and ds/dSA = SALINITY_FACTOR / (2 s) (TEOS-10 manual, appendix A.30 and
+ * eqs. (K.1) to (K.3); Roquet et al. 2015). α and β are defined in eqs. (2.18.3), (2.19.3)
+ * and (K.4). It is separate from {@link evaluateSpecificVolume}, so that the density
+ * and sound-speed functions do not calculate derivatives that they do not use.
+ * @param absoluteSalinity - Absolute Salinity SA, g/kg.
+ * @param conservativeTemperature - Conservative Temperature Θ, °C.
+ * @param seaPressure - Sea pressure p, dbar.
+ */
+export function evaluateSpecificVolumeDerivatives(
+  absoluteSalinity: number,
+  conservativeTemperature: number,
+  seaPressure: number
+): SpecificVolumeDerivatives {
+  const s = Math.sqrt(SALINITY_FACTOR * absoluteSalinity + SALINITY_OFFSET);
+  const tau = conservativeTemperature / 40;
+  const zeta = seaPressure / 1e4;
+  let specificVolume = 0;
+  // Sums of i v_ijk τ^(i-1) s^j ζ^k and j v_ijk τ^i s^(j-1) ζ^k.
+  let sumTau = 0;
+  let sumS = 0;
+  for (let n = 0; n < SPECIFIC_VOLUME_TERMS.length; n += 4) {
+    const i = SPECIFIC_VOLUME_TERMS[n];
+    const j = SPECIFIC_VOLUME_TERMS[n + 1];
+    const coefficient = SPECIFIC_VOLUME_TERMS[n + 3] * zeta ** SPECIFIC_VOLUME_TERMS[n + 2];
+    specificVolume += coefficient * tau ** i * s ** j;
+    // Terms with exponent 0 have a zero derivative; skip them so that no power is negative.
+    if (i >= 1) sumTau += i * coefficient * tau ** (i - 1) * s ** j;
+    if (j >= 1) sumS += j * coefficient * tau ** i * s ** (j - 1);
+  }
+  // s ≥ sqrt(SALINITY_OFFSET) > 0, so the division by s is safe at SA = 0.
+  return {
+    specificVolume,
+    specificVolumeSalinity: (sumS * SALINITY_FACTOR) / (2 * s),
+    specificVolumeTemperature: sumTau / 40
+  };
+}
+
 /**
  * Cache of the seven standard-ocean coefficients a_0 … a_6 that
  * `getStandardOceanSpecificVolumeCoefficients` returns. It is `null` until the first call
