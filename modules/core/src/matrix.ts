@@ -83,6 +83,15 @@ export {
 export type {LocalFramePoint, LocalFrameAxis, LocalFrameBasis} from './local-frame';
 export {spheroidToCartesian, cartesianToSpheroid} from './spheroid';
 export type {SpheroidGeometry, SpheroidPoint} from './spheroid';
+export {
+  getFloat32Spacing,
+  splitFloat64,
+  splitFloat64Array,
+  subtractOrigin,
+  subtractOriginFromMatrix4,
+  getOriginShift
+} from './float-precision';
+export type {SubtractOriginOptions} from './float-precision';
 export type {
   BigTypedArray,
   BigTypedArrayConstructor,

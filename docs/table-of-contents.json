@@ -102,6 +102,7 @@
               "modules/core/api-reference/spherical-coordinates",
               "modules/core/api-reference/spheroid",
               "modules/core/api-reference/local-frame",
+              "modules/core/api-reference/float-precision",
               "modules/core/api-reference/utilities",
               "modules/core/api-reference/numeric-helpers",
               "modules/core/api-reference/sample-track",
