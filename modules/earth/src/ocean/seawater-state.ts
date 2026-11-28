@@ -140,7 +140,7 @@ export function getConservativeTemperature(
 /**
  * Returns the in-situ density of seawater from the 75-term polynomial for specific volume.
  *
- * Reference: Roquet et al. (2015); TEOS-10 manual, appendices A.20 and K. GSW counterpart: `gsw_rho`.
+ * Reference: Roquet et al. (2015); TEOS-10 manual, appendices A.30 and K. GSW counterpart: `gsw_rho`.
  * @param absoluteSalinity - Absolute Salinity SA, g/kg.
  * @param conservativeTemperature - Conservative Temperature Θ, °C (ITS-90).
  * @param seaPressure - Sea pressure p, dbar.

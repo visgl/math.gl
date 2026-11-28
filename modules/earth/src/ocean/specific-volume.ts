@@ -150,8 +150,9 @@ export type SpecificVolumeDerivatives = {
  * Absolute Salinity and Conservative Temperature, in one pass over the terms.
  *
  * The derivatives come from term-by-term differentiation of `Σ v_ijk τ^i s^j ζ^k`, with
- * dτ/dΘ = 1/40 and ds/dSA = SALINITY_FACTOR / (2 s) (TEOS-10 manual, appendix A.20, K;
- * Roquet et al. 2015). It is separate from {@link evaluateSpecificVolume}, so that the density
+ * dτ/dΘ = 1/40 and ds/dSA = SALINITY_FACTOR / (2 s) (TEOS-10 manual, appendix A.30 and
+ * eqs. (K.1) to (K.3); Roquet et al. 2015). α and β are defined in eqs. (2.18.3), (2.19.3)
+ * and (K.4). It is separate from {@link evaluateSpecificVolume}, so that the density
  * and sound-speed functions do not calculate derivatives that they do not use.
  * @param absoluteSalinity - Absolute Salinity SA, g/kg.
  * @param conservativeTemperature - Conservative Temperature Θ, °C.
