@@ -11,7 +11,7 @@
 - **CTD casts.** [`@math.gl/earth/ocean`](./modules/earth/ocean/api-reference/ctd.md) converts
   conductivity to Practical Salinity (PSS-78 with the Hill low-salinity extension) and back. It
   computes potential temperature, potential density and the buoyancy frequency squared N² of a
-  cast. Each function matches GSW-C within 1e-9.
+  cast. Each function matches GSW-C within the gates on the CTD page.
 
 ## v5.0
 

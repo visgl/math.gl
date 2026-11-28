@@ -15,8 +15,8 @@ has a pinned reference, stored controls and a declared error gate.
 | **O2: Classic sound speed** | Chen–Millero (UNESCO), Del Grosso, Mackenzie | Implemented. UNESCO and APL-UW check values; independent 40-digit evaluation; published agreement bands. |
 | **O3: Absorption** | Francois–Garrison 1982, Ainslie–McColm 1998 | Implemented. APL-UW TR 9407 Table 2 values; independent 40-digit evaluation. |
 | **O4: Harmonic tide prediction** | Height from caller-supplied constituents; astronomical arguments and node factors | **Done.** NOAA CO-OPS 2026 predictions for station 9414290 within 1.3 mm (gate 0.01 m). Uses the `JulianDate` of PR #284. |
-| **O6: CTD casts** | PSS-78 conductivity ↔ Practical Salinity, potential temperature, potential density, N² | **O6a in progress.** GSW-C 3.06.16 controls; gates between 1.3e-10 and 6.2e-10, and 1.6e-14 1/s² for N². |
 | **O5: Rays and waves (optional)** | Rays in a layered sound-speed profile; linear wave dispersion | Future. Analytic cases and an independent integrator. |
+| **O6: CTD casts** | PSS-78 conductivity ↔ Practical Salinity, potential temperature, potential density, N² | **O6a in progress.** GSW-C 3.06.16 controls; gates between 1.3e-10 and 6.2e-10, and 1.6e-14 1/s² for N². |
 
 ## Example
 

@@ -18,7 +18,9 @@ import {
 } from '@math.gl/earth/ocean';
 
 // `conductivity` (mS/cm), `temperature` (°C) and `seaPressure` (dbar) are arrays of one cast.
-const sp = Array.from(conductivity, (c, i) => getPracticalSalinityFromConductivity(c, temperature[i], seaPressure[i]));
+const sp = Array.from(conductivity, (c, i) =>
+  getPracticalSalinityFromConductivity(c, temperature[i], seaPressure[i])
+);
 const sa = sp.map(value => getAbsoluteSalinity(value));
 const ct = sa.map((value, i) => getConservativeTemperature(value, temperature[i], seaPressure[i]));
 const {buoyancyFrequencySquared, midPressure} = getBuoyancyFrequencySquared(sa, ct, seaPressure, 30);
@@ -33,14 +35,17 @@ Follow these steps to process a raw cast:
 3. Convert in-situ temperature to Conservative Temperature Θ with `getConservativeTemperature`.
 4. Compute N² with `getBuoyancyFrequencySquared`.
 
-Remove the levels that have a `NaN` value before step 4. The function throws `RangeError` for a
-non-finite value and names the index. A level with a `NaN` value is a gap in the cast. Keep
-only the valid levels:
+Every step throws `RangeError` for a non-finite value. Remove the levels that have a `NaN`
+value from the raw conductivity, temperature and pressure before step 1. Keep only the valid
+levels:
 
 ```typescript
-const valid = seaPressure.map((_, i) => [sa[i], ct[i], seaPressure[i]].every(Number.isFinite));
+const valid = Array.from(seaPressure, (_, i) =>
+  [conductivity[i], temperature[i], seaPressure[i]].every(Number.isFinite)
+);
 const keep = (values: ArrayLike<number>) => Array.from(values).filter((_, i) => valid[i]);
-const result = getBuoyancyFrequencySquared(keep(sa), keep(ct), keep(seaPressure), 30);
+const [c, t, p] = [keep(conductivity), keep(temperature), keep(seaPressure)];
+// Run steps 1 to 4 with c, t and p.
 ```
 
 N² between two levels that surround a gap is a mean over the gap. It is not a value for the
@@ -72,16 +77,19 @@ Gate: 1.3e-10 against GSW-C 3.06.16.
 
 #### `getConductivityFromPracticalSalinity(practicalSalinity, temperature, seaPressure)`
 
-Returns conductivity in mS/cm. It inverts the previous function with a fixed number of Newton
-steps. GSW: `gsw_C_from_SP`.
+Returns conductivity in mS/cm. It inverts `getPracticalSalinityFromConductivity` with a fixed
+number of Newton steps. GSW: `gsw_C_from_SP`.
+
+Domain: SP from 0 to 42, temperature from −2 to 35 °C, sea pressure from 0 to 10 000 dbar.
 
 Gate: 6.2e-10 mS/cm.
 
 #### `getPotentialTemperature(absoluteSalinity, temperature, seaPressure, referencePressure = 0)`
 
 Returns the potential temperature θ in °C: the temperature that a parcel has after an
-adiabatic move to the reference pressure. The domain is the funnel of
-[Seawater state](./seawater.md#domain). The reference pressure is from 0 to 10 000 dbar.
+adiabatic move to the reference pressure. The domain is the range check of
+`getConservativeTemperature`, not the funnel: SA from 0 to 42 g/kg, temperature from −3 to
+40 °C and sea pressure from 0 to 8000 dbar. The reference pressure is from 0 to 10 000 dbar.
 GSW: `gsw_pt_from_t`.
 
 Gate: 6.1e-10 °C.
@@ -111,26 +119,26 @@ Rules for the input:
 - A non-finite value throws `RangeError` that names the index.
 - Each level must be in the funnel.
 
-N² is negative where the water column is statically unstable.
+N² is negative where the water column is unstable.
 
 Gates: 1.6e-14 1/s² for N² and 2.3e-8 dbar for the mid-point pressure.
 
 ## Qualification
 
 The controls are the GSW check casts and edge controls from GSW-C 3.06.16, compiled offline.
-The gates above are the largest measured errors, and they are not model uncertainty.
+The gates above are bounds on the evaluation error. They are not model uncertainty.
 
 ## Provenance
 
-The PSS-78 polynomials and the TEOS-10 equations are published. The denominator terms of the
-Hill extension and the rescale that makes the two ranges continuous at SP = 2 are confirmed
-against GSW-C outputs. The TEOS-10 manual requires continuity but does not print the factor.
-The code is an original implementation. No GSW source is copied.
+The PSS-78 polynomials and the TEOS-10 equations are published. The tests compare the Hill
+denominator terms with GSW-C outputs. They also compare the rescale at SP = 2 that makes the
+two ranges continuous. The TEOS-10 manual requires continuity but does not print the factor.
+The code is an original implementation. It contains no GSW source.
 
 ## References
 
-- Unesco (1981). Background papers and supporting data on the Practical Salinity Scale 1978.
-  *Unesco Technical Papers in Marine Science* 37.
+- Unesco (1981). The Practical Salinity Scale 1978 and the International Equation of State of
+  Seawater 1980. *Unesco Technical Papers in Marine Science* 36.
 - Unesco (1983). Algorithms for computation of fundamental properties of seawater.
   *Unesco Technical Papers in Marine Science* 44.
 - Hill, Dauphinee and Woods (1986). The extension of the Practical Salinity Scale 1978 to low
