@@ -21,8 +21,8 @@ type CachedPower = {
 
 const powers: (CachedPower | undefined)[] = [];
 // The conversion is synchronous and invokes no user code while using these buffers.
-const mantissaLimbs = new Uint16Array(4);
-const product = new Uint16Array(11);
+const mantissaLimbs = /* @__PURE__ */ new Uint16Array(4);
+const product = /* @__PURE__ */ new Uint16Array(11);
 
 /** Converts a validated unsigned ASCII decimal mantissa and scale to binary64. */
 export function decimalToBinary(

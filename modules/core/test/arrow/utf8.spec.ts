@@ -183,6 +183,26 @@ test('UTF8Utils#parseUTF8BigInt', () => {
     'throws on invalid bigint byte ranges'
   ).toThrow(/Invalid UTF-8 byte range/);
 });
+test('UTF8Utils#parseUTF8BigInt preserves digits across chunk boundaries', () => {
+  const encoder = new TextEncoder();
+  for (const text of [
+    '+999999999999999',
+    '1000000000000000',
+    '-9223372036854775808',
+    '18446744073709551615',
+    '00000000000000000000000000000001',
+    '999999999999999000000000000000123456789012345678901234567890'
+  ]) {
+    const bytes = encoder.encode(`x ${text} y`);
+    expect(parseUTF8BigInt(bytes, 1, bytes.length - 1)).toBe(BigInt(text));
+  }
+  for (const index of [0, 14, 15, 29, 30]) {
+    const text = `${'1'.repeat(index)}_${'2'.repeat(33 - index)}`;
+    const bytes = encoder.encode(text);
+    expect(parseUTF8BigInt(bytes, 0, bytes.length)).toBeUndefined();
+  }
+});
+
 test('UTF8Utils#parseUTF8Boolean', () => {
   const bytes = new Uint8Array([
     0x78, 0x7c, 0x74, 0x72, 0x75, 0x65, 0x7c, 0x46, 0x41, 0x4c, 0x53, 0x45, 0x7c, 0x20, 0x54, 0x72,

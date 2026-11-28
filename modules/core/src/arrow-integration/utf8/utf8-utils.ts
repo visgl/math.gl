@@ -2,14 +2,6 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {decimalToBinary} from './decimal-to-binary';
-
-// Decimal powers through 10^22 are exactly representable as binary64.
-const EXACT_DECIMAL_POWERS = [
-  1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17,
-  1e18, 1e19, 1e20, 1e21, 1e22
-];
-
 /**
  * Compares two UTF-8 encoded byte ranges without materializing JavaScript strings.
  *
@@ -76,36 +68,25 @@ export function parseUTF8Number(
   firstByte: number,
   endByte: number
 ): number | undefined {
-  return parseDecimal(bytes, firstByte, endByte, false);
+  return parseDecimal(bytes, firstByte, endByte, applyDecimalScale);
 }
 
-/**
- * Parses a UTF-8 encoded ASCII number with the same result as `Number()` on its text.
- *
- * Accepts the same grammar as {@link parseUTF8Number}. Uses one multiply or divide for short
- * decimals and rounds longer decimals directly from the bytes without materializing a string.
- *
- * @param bytes - UTF-8 byte buffer.
- * @param firstByte - Inclusive start byte offset.
- * @param endByte - Exclusive end byte offset.
- * @returns Parsed number, or `undefined` when parsing fails.
- * @throws RangeError if the byte range is invalid for the buffer.
- */
-export function parseUTF8NumberExact(
+type ConvertDecimal = (
+  value: number,
+  scale: number,
+  digitCount: number,
   bytes: Uint8Array,
-  firstByte: number,
-  endByte: number
-): number | undefined {
-  return parseDecimal(bytes, firstByte, endByte, true);
-}
+  mantissaStart: number,
+  mantissaEnd: number
+) => number;
 
-// The parser is intentionally implemented inline to avoid string materialization while validating grammar.
+// A conversion callback lets each public parser reuse the scan without allocating a result object.
 // eslint-disable-next-line max-statements, complexity
-function parseDecimal(
+export function parseDecimal(
   bytes: Uint8Array,
   firstByte: number,
   endByte: number,
-  exact: boolean
+  convert: ConvertDecimal
 ): number | undefined {
   checkByteRange(bytes, firstByte, endByte);
 
@@ -174,13 +155,7 @@ function parseDecimal(
   }
 
   const decimalScale = exponentSign * exponent - fractionDigitCount;
-  if (!exact) return sign * applyDecimalScale(value, decimalScale);
-  // This path uses one correctly rounded operation on exact operands.
-  if (digitCount <= 15 && Math.abs(decimalScale) <= 22) {
-    const power = EXACT_DECIMAL_POWERS[Math.abs(decimalScale)]!;
-    return sign * (decimalScale < 0 ? value / power : value * power);
-  }
-  return sign * decimalToBinary(bytes, mantissaStart, mantissaEnd, decimalScale);
+  return sign * convert(value, decimalScale, digitCount, bytes, mantissaStart, mantissaEnd);
 }
 
 /**
@@ -209,10 +184,9 @@ export function parseUTF8BigInt(
     return undefined;
   }
 
-  let sign = 1n;
+  const negative = bytes[start] === 0x2d;
   const signByte = bytes[start]!;
   if (signByte === 0x2d || signByte === 0x2b) {
-    sign = signByte === 0x2d ? -1n : 1n;
     start++;
   }
 
@@ -220,17 +194,29 @@ export function parseUTF8BigInt(
     return undefined;
   }
 
+  // Each 15-digit chunk fits in a safe integer. Most integers need only one
+  // conversion to BigInt, while longer values retain all of their digits.
   let value = 0n;
-  while (start < end) {
-    const byte = bytes[start]!;
-    if (!isDigit(byte)) {
-      return undefined;
+  while (end - start > 15) {
+    const chunkEnd = start + 15;
+    let chunk = 0;
+    while (start < chunkEnd) {
+      const byte = bytes[start++]!;
+      if (!isDigit(byte)) return undefined;
+      chunk = chunk * 10 + byte - 0x30;
     }
-    value = value * 10n + BigInt(byte - 0x30);
-    start++;
+    value = value * 1000000000000000n + BigInt(chunk);
   }
 
-  return sign * value;
+  let tail = 0;
+  const tailDigits = end - start;
+  while (start < end) {
+    const byte = bytes[start++]!;
+    if (!isDigit(byte)) return undefined;
+    tail = tail * 10 + byte - 0x30;
+  }
+  const result = value === 0n ? BigInt(tail) : value * BigInt(10 ** tailDigits) + BigInt(tail);
+  return negative ? -result : result;
 }
 
 /**
