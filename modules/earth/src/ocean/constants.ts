@@ -31,3 +31,15 @@ export const MIN_TEMPERATURE = -3;
 
 /** Highest in-situ or Conservative Temperature, °C (ITS-90), of the oceanographic funnel. */
 export const MAX_TEMPERATURE = 40;
+
+/** Largest sea pressure, dbar, of the PSS-78 conductivity equations (Unesco 1983). */
+export const MAX_PSS78_PRESSURE = 10000;
+
+/** Lowest in-situ temperature, °C (ITS-90), of the PSS-78 conductivity equations (Unesco 1983). */
+export const MIN_PSS78_TEMPERATURE = -2;
+
+/** Highest in-situ temperature, °C (ITS-90), of the PSS-78 conductivity equations (Unesco 1983). */
+export const MAX_PSS78_TEMPERATURE = 35;
+
+/** Largest reference pressure, dbar, accepted by the potential-temperature function. */
+export const MAX_REFERENCE_PRESSURE = 10000;
