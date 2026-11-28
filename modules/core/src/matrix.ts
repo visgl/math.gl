@@ -88,7 +88,8 @@ export {
   splitFloat64,
   splitFloat64Array,
   subtractOrigin,
-  subtractOriginFromMatrix4
+  subtractOriginFromMatrix4,
+  getOriginShift
 } from './float-precision';
 export type {SubtractOriginOptions} from './float-precision';
 export type {

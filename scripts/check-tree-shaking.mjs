@@ -86,7 +86,7 @@ const probes = [
   {symbol:'spheroidToCartesian', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget:1000},
   {symbol:'vec3Normalize', packages:['@math.gl/core/matrix'], forbidden:[/mat4/, /vec2/, /expressions/, /\/sql\//], budget:500},
   // The float precision helpers are leaves: none of them pulls in the matrix or vector code.
-  ...['splitFloat64Array', 'subtractOrigin', 'subtractOriginFromMatrix4', 'getFloat32Spacing'].map(symbol => ({
+  ...['splitFloat64Array', 'subtractOrigin', 'subtractOriginFromMatrix4', 'getFloat32Spacing', 'getOriginShift'].map(symbol => ({
     symbol, packages: ['@math.gl/core/matrix'], forbidden: [/mat4/, /vec[234]/, /expressions/, /\/sql\//], budget: 1000
   })),
   // Line networks: the builder and the route helpers load without each other, SQL, loaders.gl or turf.

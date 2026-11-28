@@ -24,7 +24,8 @@ import {
   splitFloat64,
   splitFloat64Array,
   subtractOrigin,
-  subtractOriginFromMatrix4
+  subtractOriginFromMatrix4,
+  getOriginShift
 } from '@math.gl/core/matrix';
 
 const positions = new Float64Array([4462401221997.05, 229825307562.78, -107360971771.64]);
@@ -103,6 +104,37 @@ after the call. `out` can be `matrix`.
 A view matrix goes from world to eye. To use it with origin-relative positions, multiply it by
 `translation(origin)` on the right: `mat4.translate(out, view, origin)`.
 
+#### `getOriginShift(out, previousOrigin, nextOrigin, remainder): out`
+
+Converts an origin move into a float32 shift, and carries the part that float32 cannot hold
+into the next move. Use it only for float32 state that you cannot compute again from float64
+values, for example particle or trail positions that stay on the GPU. Subtract `out` from that
+state at each move.
+
+- `out`: storage for the shift, at least `nextOrigin.length` long. It can be one of the origins.
+- `previousOrigin`, `nextOrigin`: 1 to 4 finite components, the same number in each.
+- `remainder`: the carried part, in float64 (an array or a `Float64Array`, not a
+  `Float32Array`). Start with zeros, and keep the same array for all moves of one origin. The
+  function reads it and writes the new value into it.
+
+The function computes `delta = nextOrigin - previousOrigin + remainder` in float64, then sets
+`out = fround(delta)` and `remainder = delta - out`. After any number of moves, the sum of the
+shifts plus `remainder` equals the total move, apart from one float64 rounding per move.
+
+```typescript
+const remainder = [0, 0, 0];
+const shift = new Float32Array(3);
+getOriginShift(shift, previousOrigin, nextOrigin, remainder);
+// Upload `shift`; a shader or compute pass subtracts it from each stored position.
+```
+
+Example: 1000 moves of 1,000,000.3 m. `fround(1000000.3)` is 1,000,000.3125, so float32 shifts
+without the remainder are 12.5 m too far after the 1000 moves. With the remainder, the shifts
+are less than 0.04 m (half of one float32 spacing at 1e6) from the true total at every move.
+
+The update of the state (`state - out` in float32) still rounds once per move, by at most half
+of `getFloat32Spacing` of the result. Keep the state near the origin to keep that error small.
+
 ## Choosing an origin
 
 A function cannot know where the viewer is, so the origin is application state. A simple rule
@@ -112,4 +144,6 @@ For example, `getFloat32Spacing(8192) / 2` is 0.49 mm, so `d = 8 km` keeps metre
 better than 1 mm.
 
 After the origin moves, compute the positions and the matrices again from the float64 values.
-Do not add the origin change to float32 values: that adds a float32 rounding at each move.
+Do not add the origin change to float32 values: that adds a float32 rounding at each move. If
+the float32 values cannot be computed again, use `getOriginShift`, so that the shifts do not
+drift.

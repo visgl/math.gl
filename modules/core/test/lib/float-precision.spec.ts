@@ -8,7 +8,8 @@ import {
   splitFloat64,
   splitFloat64Array,
   subtractOrigin,
-  subtractOriginFromMatrix4
+  subtractOriginFromMatrix4,
+  getOriginShift
 } from '@math.gl/core/matrix';
 
 /** Seeded uniform random numbers in [0, 1) (mulberry32), so that each run checks the same values. */
@@ -371,4 +372,87 @@ test('subtractOriginFromMatrix4#throws RangeError for bad input', () => {
       expect(() => subtractOriginFromMatrix4([], identity, origin)).toThrow(RangeError);
     }
   }
+});
+
+test('getOriginShift#exact values', () => {
+  const remainder = [0, 0, 0];
+  const out = getOriginShift(
+    new Float32Array(3),
+    [0, 0, 0],
+    [16777217, 0.1, -1000000.3],
+    remainder
+  );
+  expect(Array.from(out)).toEqual([16777216, Math.fround(0.1), Math.fround(-1000000.3)]);
+  expect(remainder).toEqual([1, 0.1 - Math.fround(0.1), -1000000.3 - Math.fround(-1000000.3)]);
+  // shift + remainder is the move, exactly.
+  expect(out[0] + remainder[0]).toBe(16777217);
+  expect(out[1] + remainder[1]).toBe(0.1);
+  expect(out[2] + remainder[2]).toBe(-1000000.3);
+
+  // The next move of 1 adds the carried 1: the shift is 2, and nothing is left to carry.
+  getOriginShift(out, [16777217, 0.1, -1000000.3], [16777218, 0.1, -1000000.3], remainder);
+  expect(out[0]).toBe(2);
+  expect(remainder[0]).toBe(0);
+  // A component that does not move releases its carried part.
+  expect(out[1]).toBe(Math.fround(0.1 - Math.fround(0.1)));
+});
+
+test('getOriginShift#shifts do not drift over many moves', () => {
+  const step = 1000000.3; // fround(step) = 1000000.3125: 12.5 mm too far at each move.
+  const moves = 1000;
+  const remainder = [0];
+  const out = [0];
+  let sumOfShifts = 0;
+  let naiveSum = 0;
+  for (let k = 0; k < moves; k++) {
+    getOriginShift(out, [k * step], [(k + 1) * step], remainder);
+    expect(out[0]).toBe(Math.fround(out[0]));
+    sumOfShifts += out[0];
+    naiveSum += Math.fround(step);
+  }
+  const total = moves * step;
+  const error = Math.abs(sumOfShifts + remainder[0] - total);
+  const drift = Math.abs(sumOfShifts - total);
+  const naiveDrift = Math.abs(naiveSum - total);
+  // One float64 rounding of the origins per move, at the magnitude of the total.
+  expect(error).toBeLessThanOrEqual(moves * Number.EPSILON * total);
+  // The shifts alone are behind by less than half of the float32 spacing of one step.
+  expect(drift).toBeLessThanOrEqual(getFloat32Spacing(step) / 2 + error);
+  expect(naiveDrift).toBeCloseTo(12.5, 6);
+  expect(naiveDrift / drift).toBeGreaterThan(100);
+});
+
+test('getOriginShift#out can be an origin, and 1 to 4 components work', () => {
+  const previous = [1e9 + 0.25, 2, 3, 4];
+  const remainder = new Float64Array(4);
+  getOriginShift(previous, previous, [2e9 + 0.75, 3, 5, 8], remainder);
+  expect(previous).toEqual([Math.fround(1e9 + 0.5), 1, 2, 4]);
+  expect(remainder[0]).toBe(1e9 + 0.5 - Math.fround(1e9 + 0.5));
+
+  const next = [7.1];
+  const one = [0];
+  getOriginShift(next, [0], next, one);
+  expect(next[0]).toBe(Math.fround(7.1));
+  expect(next[0] + one[0]).toBe(7.1);
+});
+
+test('getOriginShift#throws RangeError and changes nothing for bad input', () => {
+  const out = [9, 9, 9];
+  const remainder = [0.5, 0.5, 0.5];
+  const check = (call: () => unknown) => {
+    expect(call).toThrow(RangeError);
+    expect(out).toEqual([9, 9, 9]);
+    expect(remainder).toEqual([0.5, 0.5, 0.5]);
+  };
+  check(() => getOriginShift(out, [], [], []));
+  check(() => getOriginShift(out, [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]));
+  check(() => getOriginShift(out, [0, 0], [0, 0, 0], remainder));
+  check(() => getOriginShift(out, [0, 0, 0], [0, 0, 0], [0, 0]));
+  check(() => getOriginShift([0, 0], [0, 0, 0], [0, 0, 0], remainder));
+  check(() => getOriginShift(out, [0, 0, 0], [0, 0, 0], new Float32Array(3)));
+  check(() => getOriginShift(out, [0, NaN, 0], [0, 0, 0], remainder));
+  check(() => getOriginShift(out, [0, 0, 0], [0, 0, Infinity], remainder));
+  check(() => getOriginShift(out, [0, 0, 0], [0, 0, 0], [0, NaN, 0]));
+  // The second component overflows float32; the first must not be written.
+  check(() => getOriginShift(out, [0, 0, 0], [1, 1e39, 0], remainder));
 });

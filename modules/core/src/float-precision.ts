@@ -217,3 +217,69 @@ export function subtractOriginFromMatrix4<T extends NumericArray>(
   }
   return out;
 }
+
+/**
+ * Converts an origin move into a float32 shift, and carries the part that float32 cannot hold
+ * into the next move.
+ *
+ * Use it for float32 state that you cannot compute again from float64 values after the origin
+ * moves, for example particle or trail positions that stay on the GPU. Subtract `out` from that
+ * state at each move. The function computes `delta = nextOrigin - previousOrigin + remainder` in
+ * float64, sets `out = fround(delta)`, and sets `remainder = delta - out`. That subtraction is
+ * exact. So, after any number of moves, the sum of all shifts plus `remainder` equals the total
+ * origin move, apart from one float64 rounding per move. Without the remainder, each move adds
+ * an error of up to half of `getFloat32Spacing(delta)`, and the errors add up.
+ *
+ * The state update itself (`state - out` in float32) still rounds once per move, by at most half
+ * of `getFloat32Spacing` of the result. Keep the state near the origin to keep that small.
+ *
+ * Start with a remainder of zeros. Keep the same remainder array for all moves of one origin.
+ *
+ * @param out - Storage for the shift, at least `nextOrigin.length` long. It can be the same
+ *   array as `previousOrigin` or `nextOrigin`.
+ * @param previousOrigin - The origin before the move, 1 to 4 finite components.
+ * @param nextOrigin - The origin after the move, with the same number of components.
+ * @param remainder - The carried part, with the same number of components, in float64. The
+ *   function reads it and writes the new value into it. A `Float32Array` is not accepted,
+ *   because it cannot hold the remainder.
+ * @returns `out`.
+ * @throws RangeError if a length is wrong, if an input value is not finite, if `remainder` is a
+ *   `Float32Array`, or if the shift is outside the float32 range. A thrown error leaves `out`
+ *   and `remainder` unchanged.
+ */
+export function getOriginShift<T extends NumericArray>(
+  out: T,
+  previousOrigin: ArrayLike<number>,
+  nextOrigin: ArrayLike<number>,
+  remainder: NumericArray
+): T {
+  const size = nextOrigin.length;
+  if (size < 1 || size > 4) {
+    throw new RangeError(`nextOrigin must have 1 to 4 components, got ${size}`);
+  }
+  if (previousOrigin.length !== size || remainder.length !== size) {
+    throw new RangeError(`previousOrigin and remainder must have ${size} components`);
+  }
+  if (out.length < size) {
+    throw new RangeError(`out must have at least ${size} elements`);
+  }
+  if (remainder instanceof Float32Array) {
+    throw new RangeError('remainder must hold float64 values: use an array or a Float64Array');
+  }
+  checkFinite(previousOrigin, 'previousOrigin');
+  checkFinite(nextOrigin, 'nextOrigin');
+  checkFinite(remainder, 'remainder');
+  // Compute every component first, so that an error leaves out and remainder unchanged, and so
+  // that out can be one of the origins.
+  const delta = [0, 0, 0, 0];
+  const shift = [0, 0, 0, 0];
+  for (let i = 0; i < size; i++) {
+    delta[i] = nextOrigin[i] - previousOrigin[i] + remainder[i];
+    shift[i] = roundToFloat32(delta[i], `shift[${i}]`);
+  }
+  for (let i = 0; i < size; i++) {
+    out[i] = shift[i];
+    remainder[i] = delta[i] - shift[i];
+  }
+  return out;
+}
