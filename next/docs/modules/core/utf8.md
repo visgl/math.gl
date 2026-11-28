@@ -107,7 +107,15 @@ Parses decimal numbers with an optional `+` or `-` sign, an optional decimal poi
 
 Rejects hexadecimal, literal `Infinity` and `NaN`, separators such as `1,000`, non-ASCII digits, and incomplete exponents such as `1e+`.
 
-This parser accumulates the mantissa and applies a decimal scale using JavaScript number arithmetic. It is not a correctly rounded replacement for `Number()`: long mantissas can lose precision, and intermediate overflow or underflow can occur for extreme inputs even when the final mathematical value is representable. Use `parseUTF8BigInt` for exact base-10 integers.
+This parser accumulates the mantissa and applies a decimal scale using JavaScript number arithmetic. It is not a correctly rounded replacement for `Number()`: long mantissas can lose precision, and intermediate overflow or underflow can occur for extreme inputs even when the final mathematical value is representable. Use `parseUTF8BigInt` for exact base-10 integers. Use `parseUTF8NumberExact` when results must match `Number()`.
+
+### parseUTF8NumberExact[​](#parseutf8numberexact "Direct link to parseUTF8NumberExact")
+
+```
+parseUTF8NumberExact(bytes, firstByte, endByte): number | undefined
+```
+
+Accepts the same grammar and parameters as `parseUTF8Number`, and returns the same value as `Number()` on the text without creating a string. Inputs with at most 15 mantissa digits and a decimal exponent between −22 and 22 use one multiply or divide. Other inputs use fixed-width integer arithmetic with cached powers of ten. When those bounds leave rounding ambiguous, the parser resolves it with `BigInt`.
 
 ### parseUTF8BigInt[​](#parseutf8bigint "Direct link to parseUTF8BigInt")
 
