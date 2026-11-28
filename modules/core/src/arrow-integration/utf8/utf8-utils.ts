@@ -63,12 +63,30 @@ export function compareUTF8(
  * @returns Parsed number, or `undefined` when parsing fails.
  * @throws RangeError if the byte range is invalid for the buffer.
  */
-// The parser is intentionally implemented inline to avoid string materialization while validating grammar.
-// eslint-disable-next-line max-statements, complexity
 export function parseUTF8Number(
   bytes: Uint8Array,
   firstByte: number,
   endByte: number
+): number | undefined {
+  return parseDecimal(bytes, firstByte, endByte);
+}
+
+type ConvertDecimal = (
+  value: number,
+  scale: number,
+  digitCount: number,
+  bytes: Uint8Array,
+  mantissaStart: number,
+  mantissaEnd: number
+) => number;
+
+// A conversion callback lets each public parser reuse the scan without allocating a result object.
+// eslint-disable-next-line max-statements, complexity
+export function parseDecimal(
+  bytes: Uint8Array,
+  firstByte: number,
+  endByte: number,
+  convert?: ConvertDecimal
 ): number | undefined {
   checkByteRange(bytes, firstByte, endByte);
 
@@ -86,6 +104,7 @@ export function parseUTF8Number(
     start++;
   }
 
+  const mantissaStart = start;
   let value = 0;
   let digitCount = 0;
   let fractionDigitCount = 0;
@@ -109,6 +128,7 @@ export function parseUTF8Number(
     return undefined;
   }
 
+  const mantissaEnd = start;
   let exponent = 0;
   let exponentSign = 1;
   if (start < end && (bytes[start]! === 0x65 || bytes[start]! === 0x45)) {
@@ -134,7 +154,9 @@ export function parseUTF8Number(
     return undefined;
   }
 
-  return sign * applyDecimalScale(value, exponentSign * exponent - fractionDigitCount);
+  const decimalScale = exponentSign * exponent - fractionDigitCount;
+  if (!convert) return sign * applyDecimalScale(value, decimalScale);
+  return sign * convert(value, decimalScale, digitCount, bytes, mantissaStart, mantissaEnd);
 }
 
 /**
@@ -163,10 +185,9 @@ export function parseUTF8BigInt(
     return undefined;
   }
 
-  let sign = 1n;
+  const negative = bytes[start] === 0x2d;
   const signByte = bytes[start]!;
   if (signByte === 0x2d || signByte === 0x2b) {
-    sign = signByte === 0x2d ? -1n : 1n;
     start++;
   }
 
@@ -174,17 +195,29 @@ export function parseUTF8BigInt(
     return undefined;
   }
 
+  // Each 15-digit chunk fits in a safe integer. Most integers need only one
+  // conversion to BigInt, while longer values retain all of their digits.
   let value = 0n;
-  while (start < end) {
-    const byte = bytes[start]!;
-    if (!isDigit(byte)) {
-      return undefined;
+  while (end - start > 15) {
+    const chunkEnd = start + 15;
+    let chunk = 0;
+    while (start < chunkEnd) {
+      const byte = bytes[start++]!;
+      if (!isDigit(byte)) return undefined;
+      chunk = chunk * 10 + byte - 0x30;
     }
-    value = value * 10n + BigInt(byte - 0x30);
-    start++;
+    value = value * 1000000000000000n + BigInt(chunk);
   }
 
-  return sign * value;
+  let tail = 0;
+  const tailDigits = end - start;
+  while (start < end) {
+    const byte = bytes[start++]!;
+    if (!isDigit(byte)) return undefined;
+    tail = tail * 10 + byte - 0x30;
+  }
+  const result = value === 0n ? BigInt(tail) : value * BigInt(10 ** tailDigits) + BigInt(tail);
+  return negative ? -result : result;
 }
 
 /**
