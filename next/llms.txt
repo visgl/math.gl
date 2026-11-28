@@ -102,6 +102,7 @@ Earth models, sunlight, astronomy, time zones, and ocean calculations. Import ea
 - [parsePGM](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/api-reference/parse-pgm.md): Parse a GeographicLib geoid PGM file into a Geoid. The parser requires one complete
 - [Earth Models and Geoid Heights](https://visgl.github.io/math.gl/next/docs/modules/earth/geoid/developer-guide/geospatial-models.md): Use a sphere or ellipsoid for coordinate geometry, and a geoid model when converting between ellipsoidal and orthometric heights.
 - [@math.gl/earth/ocean](https://visgl.github.io/math.gl/next/docs/modules/earth/ocean.md): @math.gl/earth/ocean supplies seawater and underwater-acoustics equations for browser
+- [CTD casts](https://visgl.github.io/math.gl/next/docs/modules/earth/ocean/api-reference/ctd.md): Functions for a conductivity, temperature and depth (CTD) cast. They convert conductivity to
 - [Seawater state](https://visgl.github.io/math.gl/next/docs/modules/earth/ocean/api-reference/seawater.md): A subset of TEOS-10, the international thermodynamic equation of seawater. Each function
 - [Sound speed and absorption](https://visgl.github.io/math.gl/next/docs/modules/earth/ocean/api-reference/sound.md): Classic equations that survey software uses. Use them to reproduce existing results. For
 - [Tide prediction](https://visgl.github.io/math.gl/next/docs/modules/earth/ocean/api-reference/tide.md): Harmonic tide prediction from the harmonic constants of a station. The caller supplies the

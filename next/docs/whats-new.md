@@ -4,6 +4,8 @@
 
 * **Line networks.** [`@math.gl/geospatial/line-network`](https://visgl.github.io/math.gl/next/docs/modules/geospatial/api-reference/line-network.md) builds a graph from longitude, latitude lines in typed-array columns. It snaps endpoints, joins dangling ends to nearby lines (T-junctions), and can split lines at shared vertices and at crossings. Helpers build a CSR adjacency and turn a predecessor array into route edges and route geometry. Uses include road, river, rail, utility and track-line networks.
 
+* **CTD casts.** [`@math.gl/earth/ocean`](https://visgl.github.io/math.gl/next/docs/modules/earth/ocean/api-reference/ctd.md) converts conductivity to Practical Salinity (PSS-78 with the Hill low-salinity extension) and back. It computes potential temperature, potential density and the buoyancy frequency squared N² of a cast. Each function matches GSW-C within the gates on the CTD page.
+
 ## v5.0[​](#v50 "Direct link to v5.0")
 
 math.gl 5 expands the library from vectors and matrices to coordinate transformations, global grids, geometry processing, and Earth science. Related APIs are grouped into seven packages with focused imports. See the [Upgrade Guide](https://visgl.github.io/math.gl/next/docs/upgrade-guide.md) when moving an application from v4.
