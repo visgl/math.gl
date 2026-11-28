@@ -5,11 +5,29 @@
 
 import {JulianDate} from './julian-date';
 
-export type CartesianState = {position: readonly number[]; velocity: readonly number[]};
-export type TransformedState = {position: number[]; velocity: number[]};
+/** Cartesian state expressed in the source frame of a transform. */
+export type CartesianState = {
+  /** Three source-frame position components in a consistent distance unit. */
+  position: readonly number[];
+  /** Three source-frame velocity components in that distance unit per second. */
+  velocity: readonly number[];
+};
+
+/** Cartesian state expressed in the target frame of a transform. */
+export type TransformedState = {
+  /** Three target-frame position components in the input distance unit. */
+  position: number[];
+  /** Three target-frame velocity components in the input distance unit per second. */
+  velocity: number[];
+};
+
+/** Identifies the frames, epoch, and optional derivative of a rotation snapshot. */
 export type CelestialFrameTransformOptions = {
+  /** Name of the source frame. */
   from: string;
+  /** Name of the target frame. */
   to: string;
+  /** Instant at which this rotation and derivative apply. */
   epoch: JulianDate;
   /** Column-major rotation derivative per second, in the same source/target bases. */
   rotationRate?: ArrayLike<number>;
@@ -19,12 +37,18 @@ export type CelestialFrameTransformOptions = {
  * frame equivalence is inferred. Epoch and scales belong to the model constructing it.
  */
 export class CelestialFrameTransform {
+  /** Name of the source frame. */
   readonly from: string;
+  /** Name of the target frame. */
   readonly to: string;
+  /** Instant at which this rotation and derivative apply. */
   readonly epoch: JulianDate;
+  /** Stored column-major rotation from source to target. */
   private readonly matrix: readonly number[];
+  /** Stored column-major rotation derivative per second, when supplied. */
   private readonly rate?: readonly number[];
 
+  /** Copies and validates the column-major source-to-target rotation and its options. */
   constructor(rotation: ArrayLike<number>, options: CelestialFrameTransformOptions) {
     if (!(options.epoch instanceof JulianDate))
       throw new RangeError('A frame snapshot requires an explicit Julian epoch');
@@ -71,13 +95,16 @@ export class CelestialFrameTransform {
     Object.freeze(this);
   }
 
+  /** Returns a copy of the column-major source-to-target rotation. */
   get rotation(): number[] {
     return this.matrix.slice();
   }
+  /** Returns a copy of the rotation derivative per second, when supplied. */
   get rotationRate(): number[] | undefined {
     return this.rate?.slice();
   }
 
+  /** Rotates three source-frame coordinates into the target frame in the same distance unit. */
   transformPosition(position: ArrayLike<number>): number[] {
     return multiplyVector(this.matrix, finiteArray(position, 3));
   }
@@ -100,6 +127,7 @@ export class CelestialFrameTransform {
     return {position: multiplyVector(this.matrix, position), velocity: outputVelocity};
   }
 
+  /** Returns the reverse frame transform at the same epoch. */
   inverse(): CelestialFrameTransform {
     // For a differentiable orthogonal R, inverse=transpose and its derivative=transpose(dR/dt).
     return new CelestialFrameTransform(transpose(this.matrix), {
@@ -133,17 +161,20 @@ export class CelestialFrameTransform {
   }
 }
 
+/** Copies an array-like value after checking its size and finite components. */
 function finiteArray(input: ArrayLike<number>, size: number): number[] {
   if (input.length !== size) throw new RangeError('Unexpected coordinate/matrix length');
   const output = Array.from(input);
   if (!output.every(Number.isFinite)) throw new RangeError('Expected finite coordinates/matrix');
   return output;
 }
+/** Applies a column-major three-by-three matrix to a Cartesian vector. */
 function multiplyVector(m: readonly number[], v: readonly number[]): number[] {
   const result = [0, 1, 2].map(row => m[row] * v[0] + m[row + 3] * v[1] + m[row + 6] * v[2]);
   if (!result.every(Number.isFinite)) throw new RangeError('Coordinate transformation overflow');
   return result;
 }
+/** Multiplies two column-major three-by-three matrices in the given order. */
 function multiplyMatrix(a: readonly number[], b: readonly number[]): number[] {
   const output = new Array<number>(9);
   for (let column = 0; column < 3; column++) {
@@ -154,6 +185,7 @@ function multiplyMatrix(a: readonly number[], b: readonly number[]): number[] {
   }
   return output;
 }
+/** Transposes a column-major three-by-three matrix. */
 function transpose(m: readonly number[]): number[] {
   return [m[0], m[3], m[6], m[1], m[4], m[7], m[2], m[5], m[8]];
 }
