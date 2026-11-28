@@ -83,9 +83,11 @@ function getPss78Salinity(x: number, factor: number): {value: number; slope: num
 }
 
 /**
- * Returns the Hill et al. (1986) correction ΔS, which the extension subtracts from PSS-78,
- * and its derivative dΔS/dx, with x = √Rt:
+ * Returns the low-salinity correction ΔS, which the extension subtracts from PSS-78, and
+ * its derivative dΔS/dx, with x = √Rt:
  * `ΔS = a0 / (1 + 1.5 X + X²) + b0 f / (1 + Y^½ + Y + Y^³⁄₂)`, X = 400 Rt, Y = 100 Rt.
+ * This is the form of Hill et al. (1986). The coefficients and the denominator terms are
+ * confirmed against the stored GSW-C outputs, not against the printed paper.
  */
 function getHillCorrection(x: number, factor: number): {value: number; slope: number} {
   const x2 = x * x;
@@ -102,6 +104,9 @@ function getHillCorrection(x: number, factor: number): {value: number; slope: nu
 /**
  * Returns `2 - ΔS` at the √Rt where PSS-78 gives SP = 2. Division by this value scales the
  * Hill et al. extension so that it is 2 at that point, which makes SP continuous at 2.
+ * The TEOS-10 manual (appendix E) requires the extension to equal PSS-78 at SP = 2, but
+ * does not print the scale factor. This multiplicative rescale is the simplest form that
+ * meets that requirement, and it agrees with the stored GSW-C outputs to 1e-15.
  */
 function getHillDenominator(factor: number): number {
   let x = Math.sqrt(HILL_LIMIT / 35);
@@ -114,7 +119,10 @@ function getHillDenominator(factor: number): number {
 
 /**
  * Returns SP and dSP/dx from x = √Rt. Set `hillDenominator` to use the extension below
- * SP = 2: `SP = 2 (S_PSS78 - ΔS) / (2 - ΔS(SP = 2))`.
+ * SP = 2: `SP = 2 (S_PSS78 - ΔS) / (2 - ΔS(SP = 2))`. The TEOS-10 manual (appendix E)
+ * requires the extension to equal PSS-78 at SP = 2, but does not print the scale factor.
+ * This multiplicative rescale is the simplest form that meets that requirement, and it
+ * agrees with the stored GSW-C outputs to 1e-15.
  */
 function getSalinityFromRatioRoot(
   x: number,
@@ -162,7 +170,9 @@ function checkPss78Domain(temperature: number, seaPressure: number): void {
  * @param conductivity - Conductivity C, mS/cm, finite and not negative.
  * @param temperature - In-situ temperature t, °C (ITS-90), from -2 to 35.
  * @param seaPressure - Sea pressure p, dbar, from 0 to 10000.
- * @returns Practical Salinity SP (PSS-78), unitless, from 0 to 42.
+ * @returns Practical Salinity SP (PSS-78), unitless, to 42. For C below about 0.005 mS/cm
+ * the extended scale gives values slightly below 0 (to about -2.5e-4). The function does
+ * not clamp them.
  * @throws {RangeError} When an input is not finite or is outside the domain, or when the
  * result is more than 42.
  */
