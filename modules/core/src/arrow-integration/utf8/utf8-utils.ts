@@ -68,7 +68,7 @@ export function parseUTF8Number(
   firstByte: number,
   endByte: number
 ): number | undefined {
-  return parseDecimal(bytes, firstByte, endByte, applyDecimalScale);
+  return parseDecimal(bytes, firstByte, endByte);
 }
 
 type ConvertDecimal = (
@@ -86,7 +86,7 @@ export function parseDecimal(
   bytes: Uint8Array,
   firstByte: number,
   endByte: number,
-  convert: ConvertDecimal
+  convert?: ConvertDecimal
 ): number | undefined {
   checkByteRange(bytes, firstByte, endByte);
 
@@ -155,6 +155,7 @@ export function parseDecimal(
   }
 
   const decimalScale = exponentSign * exponent - fractionDigitCount;
+  if (!convert) return sign * applyDecimalScale(value, decimalScale);
   return sign * convert(value, decimalScale, digitCount, bytes, mantissaStart, mantissaEnd);
 }
 
