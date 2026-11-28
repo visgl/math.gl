@@ -4,6 +4,10 @@
 
 export {getReferenceSalinity, getAbsoluteSalinity} from './salinity';
 export {
+  getPracticalSalinityFromConductivity,
+  getConductivityFromPracticalSalinity
+} from './conductivity';
+export {
   getConservativeTemperature,
   getSeawaterDensity,
   getSeawaterSoundSpeed,
