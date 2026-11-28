@@ -707,3 +707,28 @@ test('groups by computed keys, aliases, and positions and orders by hidden aggre
     expect(Array.from(result.getChild('bucket')!)).toEqual([4, 9]);
   }
 });
+
+test('supports bigint parameters in projections and computed group keys', () => {
+  const source = tableFromArrays({units: makeVector(new BigInt64Array([1n, 1n, 3n]))});
+  const tables = new Map([['input', source]]);
+  const options = {parameters: {increment: 1n}};
+  const projected = queryArrowSQL('SELECT :increment AS value FROM input', tables, options);
+  expect(Array.from(projected.getChild('value')!)).toEqual([1n, 1n, 1n]);
+  const grouped = queryArrowSQL(
+    'SELECT units + :increment AS amount FROM input GROUP BY amount ORDER BY amount',
+    tables,
+    options
+  );
+  expect(Array.from(grouped.getChild('amount')!)).toEqual([2n, 4n]);
+});
+
+test('orders by generated projection names after resolving explicit name collisions', () => {
+  const source = tableFromArrays({score: [3, 1, 2]});
+  const tables = new Map([['input', source]]);
+  const result = queryArrowSQL(
+    'SELECT score + 1, score AS expression_1 FROM input ORDER BY expression_1_ DESC',
+    tables
+  );
+  expect(result.schema.fields.map(field => field.name)).toEqual(['expression_1_', 'expression_1']);
+  expect(Array.from(result.getChild('expression_1_')!)).toEqual([4, 3, 2]);
+});

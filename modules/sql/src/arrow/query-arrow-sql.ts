@@ -352,6 +352,7 @@ function executeSelect(
   });
   /** Replaces a matching expression with the materialized key after grouping. */
   const rewriteGroupKeys = (node: Expression): Expression => {
+    if (!computedKeys.size) return node;
     const key = computedKeys.get(expressionKey(node));
     return key
       ? {type: 'Identifier', name: key.as}
@@ -380,23 +381,28 @@ function executeSelect(
     }
     return {type: 'Identifier', name};
   };
-  const select = statement.select?.map(({expression, alias}, index) => {
+  /** Lowered projections before assigning default names to computed fields. */
+  const projections = statement.select?.map(({expression, alias}, index) => {
     const topLevel = getSQLAggregateCall(expression, aggregateFunctions);
     const original = bind(expression);
     const bound = rewriteGroupKeys(rewrite(original));
-    if (bound.type === 'Identifier')
-      return {
-        column: bound.name,
-        as:
-          alias ??
-          (topLevel
-            ? `aggregate_${index + 1}`
-            : original.type !== 'Identifier'
-              ? `expression_${index + 1}`
-              : undefined)
-      };
+    if (bound.type === 'Identifier' && (topLevel || original.type === 'Identifier'))
+      return {column: bound.name, as: alias ?? (topLevel ? `aggregate_${index + 1}` : undefined)};
     return {expression: bound, as: alias};
   });
+  /** Reserve explicitly named columns before naming any computed projections. */
+  const projectionNames = new Set<string>();
+  for (const item of projections ?? []) {
+    const name = item.as ?? ('column' in item ? item.column : undefined);
+    if (name !== undefined) projectionNames.add(name);
+  }
+  /** Assign the same default names as the Arrow projection binder before resolving ORDER BY. */
+  const select = projections?.map((item, index) =>
+    item.as === undefined && 'expression' in item
+      ? {...item, as: reserveInternalName(projectionNames, `expression_${index + 1}`)}
+      : item
+  );
+  for (const name of projectionNames) names.add(name);
   /** Expands output aliases outside aggregate arguments in post-group clauses. */
   function rewriteOutputReferences(node: Expression): Expression {
     if (getSQLAggregateCall(node, aggregateFunctions)) return rewrite(bind(node));
@@ -614,7 +620,13 @@ function selectPosition(table: Table, position: number, visibleCount = table.num
 
 /** Identifies equivalent bound SQL expressions independently of literal spelling. */
 function expressionKey(node: Expression): string {
-  return JSON.stringify(node, (name, value) => (name === 'raw' ? undefined : value));
+  return JSON.stringify(node, (name, value) => {
+    if (name === 'raw') return undefined;
+    if (typeof value === 'bigint') return {bigint: value.toString()};
+    if (typeof value === 'number' && (!Number.isFinite(value) || Object.is(value, -0)))
+      return {number: Object.is(value, -0) ? '-0' : String(value)};
+    return value;
+  });
 }
 
 /** Reserves a temporary column name without shadowing a source or SELECT field. */
