@@ -666,6 +666,7 @@
             "label": "@math.gl/earth/ocean",
             "items": [
               "modules/earth/ocean/api-reference/seawater",
+              "modules/earth/ocean/api-reference/ctd",
               "modules/earth/ocean/api-reference/sound",
               "modules/earth/ocean/api-reference/tide"
             ],

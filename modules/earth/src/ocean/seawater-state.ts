@@ -80,7 +80,7 @@ export function getFreezingConservativeTemperature(
  * The limits follow GSW `gsw_infunnel`, with two differences: the freezing limit uses the
  * polynomial freezing temperature, and Θ is also at most 40 °C below 500 dbar.
  */
-function checkFunnel(
+export function checkFunnel(
   absoluteSalinity: number,
   conservativeTemperature: number,
   seaPressure: number
@@ -140,7 +140,7 @@ export function getConservativeTemperature(
 /**
  * Returns the in-situ density of seawater from the 75-term polynomial for specific volume.
  *
- * Reference: Roquet et al. (2015); TEOS-10 manual, appendices A.20 and K. GSW counterpart: `gsw_rho`.
+ * Reference: Roquet et al. (2015); TEOS-10 manual, appendices A.30 and K. GSW counterpart: `gsw_rho`.
  * @param absoluteSalinity - Absolute Salinity SA, g/kg.
  * @param conservativeTemperature - Conservative Temperature Θ, °C (ITS-90).
  * @param seaPressure - Sea pressure p, dbar.
