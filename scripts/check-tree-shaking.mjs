@@ -98,7 +98,8 @@ const probes = [
   // Named scalar/binary parameter binding and expression IN syntax are part of each parser.
   // Published consumers with fixed-width list casts measure 17,927 / 20,428 / 28,797 bytes.
   {symbol: 'parseSQLSelect', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 17950},
-  {symbol: 'parseSQLSelectStatement', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 20450},
+  // HAVING adds a predicate to the shared SELECT grammar.
+  {symbol: 'parseSQLSelectStatement', packages: ['@math.gl/sql/parser'], forbidden: [/parse-sql-predicate/, /sql-predicate-schema/, /bind-sql-predicate/, /apache-arrow/, /loaders.gl/, /zod/], budget: 20600},
   {symbol: 'parseSQLQuery', packages: ['@math.gl/sql/parser'], forbidden: [/apache-arrow/, /loaders.gl/, /zod/], budget: 28850},
 
   {symbol: 'bindColumnarPredicateParameters', packages: ['@math.gl/sql/expressions'], forbidden: [/apache-arrow/, /arrow\//], budget: 4000},
