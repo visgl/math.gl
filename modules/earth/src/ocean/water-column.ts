@@ -5,7 +5,7 @@
 import {PASCALS_PER_DECIBAR} from './constants';
 import {GRAVITY_GRADIENT, getHeightFromSeaPressure, getSurfaceGravity} from './sea-pressure';
 import {checkFunnel} from './seawater-state';
-import {evaluateSpecificVolume} from './specific-volume';
+import {evaluateSpecificVolumeDerivatives} from './specific-volume';
 
 /** Buoyancy frequency squared between adjacent levels of a cast. */
 export type BuoyancyFrequencySquared = {
@@ -86,8 +86,9 @@ export function getBuoyancyFrequencySquared(
     } catch (error) {
       throw new RangeError(`level at index ${index}: ${(error as Error).message}`);
     }
-    const height = getHeightFromSeaPressure(seaPressure[index], lat);
-    gravity[index] = getSurfaceGravity(lat) * (1 - GRAVITY_GRADIENT * height);
+    const surfaceGravity = getSurfaceGravity(lat);
+    const height = getHeightFromSeaPressure(seaPressure[index], lat, {surfaceGravity});
+    gravity[index] = surfaceGravity * (1 - GRAVITY_GRADIENT * height);
   }
 
   const buoyancyFrequencySquared = new Float64Array(levels - 1);
@@ -95,7 +96,7 @@ export function getBuoyancyFrequencySquared(
   for (let k = 0; k < levels - 1; k++) {
     const pMid = 0.5 * (seaPressure[k] + seaPressure[k + 1]);
     const {specificVolume, specificVolumeSalinity, specificVolumeTemperature} =
-      evaluateSpecificVolume(
+      evaluateSpecificVolumeDerivatives(
         0.5 * (absoluteSalinity[k] + absoluteSalinity[k + 1]),
         0.5 * (conservativeTemperature[k] + conservativeTemperature[k + 1]),
         pMid
