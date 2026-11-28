@@ -34,7 +34,7 @@ const probes = [
   {symbol: "createArrowColumns", packages: ["@math.gl/sql/arrow"], forbidden: [/sql\/(src|dist)\/scales\//], budget: 307000},
   // SQL text includes indexed spatial joins and excludes the portable predicate normalizer.
   // The SQL entry point includes fixed-width casts and relational clause binding.
-  {symbol:'queryArrowSQL', packages:['@math.gl/sql/query'], forbidden:[/predicate-expression/,/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/geoarrow-functions\./,/loaders.gl/,/geospatial\//], budget:363000},
+  {symbol:'queryArrowSQL', packages:['@math.gl/sql/query'], forbidden:[/parse-utf8-number-exact\./,/decimal-to-binary\./,/predicate-expression/,/arrow\/(query-worker|worker)/,/sql\/src\/(math|color)\//,/geoarrow-functions\./,/loaders.gl/,/geospatial\//], budget:363000},
 
   ...['sweepTerrainRotatingCapsule', 'sweepTerrainRotatingSphere'].map(symbol => ({
     symbol, packages: ['@math.gl/geospatial/terrain'],
