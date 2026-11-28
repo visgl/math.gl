@@ -62,6 +62,7 @@ export function getBuoyancyFrequencySquared(
   checkLength('seaPressure', seaPressure, levels);
   if (typeof latitude !== 'number') checkLength('latitude', latitude, levels);
 
+  // One pass checks each level in full, so that the error names the first bad level by index.
   const gravity = new Float64Array(levels);
   for (let index = 0; index < levels; index++) {
     const lat = typeof latitude === 'number' ? latitude : latitude[index];
@@ -78,9 +79,6 @@ export function getBuoyancyFrequencySquared(
         `seaPressure must increase strictly; index ${index} has ${seaPressure[index]} after ${seaPressure[index - 1]}`
       );
     }
-  }
-  for (let index = 0; index < levels; index++) {
-    const lat = typeof latitude === 'number' ? latitude : latitude[index];
     try {
       checkFunnel(absoluteSalinity[index], conservativeTemperature[index], seaPressure[index]);
     } catch (error) {

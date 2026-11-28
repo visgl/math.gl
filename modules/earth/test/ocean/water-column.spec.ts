@@ -78,4 +78,8 @@ test('ocean#getBuoyancyFrequencySquared validates the cast arrays', () => {
   expect(() => getBuoyancyFrequencySquared(sa, ct, p, [30, 91, 30])).toThrow(/index 1/);
   // A level outside the funnel.
   expect(() => getBuoyancyFrequencySquared(sa, [20, 15, 45], p, 30)).toThrow(RangeError);
+  // The first bad level by index: index 1 is outside the funnel, index 3 is out of order.
+  expect(() =>
+    getBuoyancyFrequencySquared([35, 35, 35, 35], [20, 45, 15, 10], [0, 10, 20, 15], 30)
+  ).toThrow(/index 1/);
 });
